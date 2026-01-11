@@ -1,11 +1,11 @@
 'use client';
 
-import * as React from 'react';
 import { cn } from '@zamp-platform/ui/utils';
-import { Button } from './button';
+import * as React from 'react';
 import { SvgSpriteLoader } from '../assets/SvgSpriteLoader';
+import { Button } from './button';
 import { SelectIcon } from './select';
-import { Tooltip, TooltipTrigger, TooltipProvider, TooltipContent } from './tooltip';
+import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from './tooltip';
 
 export interface SelectButtonOption {
   label?: string;
@@ -17,7 +17,7 @@ export interface SelectButtonOption {
 export interface SelectButtonProps {
   options: SelectButtonOption[];
   value?: string;
-  onValueChange?: (value: string) => void;
+  onValueChange?: (value: string) => void; // eslint-disable-line no-unused-vars
   className?: string;
   disabled?: boolean;
   size?: 'default' | 'large' | 'medium' | 'small' | 'xsmall' | 'xxsmall' | 'icon';
@@ -36,10 +36,7 @@ const SelectButton = React.forwardRef<HTMLDivElement, SelectButtonProps>(
     const [sliderStyle, setSliderStyle] = React.useState<React.CSSProperties>({});
 
     // Create refs for each option
-    const buttonRefs = React.useMemo(
-      () => options.map(() => React.createRef<HTMLButtonElement>()),
-      [options.length], // eslint-disable-line react-hooks/exhaustive-deps
-    );
+    const buttonRefs = React.useMemo(() => options.map(() => React.createRef<HTMLButtonElement>()), [options]);
 
     const handleSelect = React.useCallback(
       (optionValue: string) => {

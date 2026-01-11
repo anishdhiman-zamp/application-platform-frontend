@@ -3,15 +3,18 @@
 import { cn } from '@zamp-platform/ui/utils';
 import React, { useState } from 'react';
 
-import { Block, BLOCK_TYPE, BlockMessage, ButtonBlockType } from '../types/block.types';
+import { Block, BLOCK_TYPE, BlockMessage, ButtonBlockType, type TextContentBlock } from '../types/block.types';
 import { extractInitialValues } from './block.utils';
 import {
   AttachmentsBlock,
   ButtonBlock,
   MarkdownBlock,
+  OutputFilesBlock,
   PlainTextBlock,
   QuestionGroupBlock,
   SingleSelectBlock,
+  ThinkingBlock,
+  ToolCallBlock,
 } from './blocks';
 
 interface BlockRendererProps {
@@ -67,8 +70,35 @@ export const BlockRenderer: React.FC<BlockRendererProps> = ({
       case BLOCK_TYPE.PLAIN_TEXT:
         return <PlainTextBlock key={block?.id} payload={block?.payload} />;
 
+      case BLOCK_TYPE.THINKING:
+        return (
+          <ThinkingBlock
+            key={block?.id ?? `thinking-${block.order}-${block.start_timestamp}`}
+            payload={block?.payload}
+            is_complete={block?.is_complete}
+            start_timestamp={block?.start_timestamp}
+            stop_timestamp={block?.stop_timestamp}
+          />
+        );
+
+      case BLOCK_TYPE.TOOL_USE:
+        return (
+          <ToolCallBlock
+            key={block?.id ?? `tool-use-${block.order}-${block.start_timestamp}`}
+            payload={block?.payload}
+            is_complete={block?.is_complete}
+            name={block?.name}
+          />
+        );
+
       case BLOCK_TYPE.MARKDOWN:
-        return <MarkdownBlock key={block?.id} payload={block?.payload} />;
+      case BLOCK_TYPE.TEXT:
+        return (
+          <MarkdownBlock
+            key={block?.id ?? `text-${block?.order}-${(block as TextContentBlock)?.start_timestamp}`}
+            payload={block?.payload}
+          />
+        );
 
       case BLOCK_TYPE.SINGLE_SELECT:
         return (
@@ -105,6 +135,9 @@ export const BlockRenderer: React.FC<BlockRendererProps> = ({
 
       case BLOCK_TYPE.ATTACHMENTS:
         return <AttachmentsBlock key={block?.id} payload={block?.payload} />;
+
+      case BLOCK_TYPE.OUTPUT_FILES:
+        return <OutputFilesBlock key={block?.id} payload={block?.payload} conversationId={conversationId} />;
 
       default:
         return null;

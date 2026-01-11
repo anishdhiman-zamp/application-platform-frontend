@@ -13,6 +13,8 @@ import type {
   DatasetArtifactsRequestType,
   EmitActivityLogsRequestType,
   EmitHITLActionRequestType,
+  FilterConversationsRequestType,
+  FilterConversationsResponseType,
   KnowledgeBaseRequestType,
   KnowledgeBaseResponseType,
   ProcessActivityRunsRequestType,
@@ -112,6 +114,12 @@ const Processes = baseApi.injectEndpoints({
         body: payload,
       }),
     }),
+    filterConversations: builder.query<FilterConversationsResponseType, FilterConversationsRequestType>({
+      query: (params) => ({
+        url: API_ENDPOINTS.FILTER_CONVERSATIONS_V2_GET,
+        params,
+      }),
+    }),
   }),
 });
 
@@ -136,4 +144,6 @@ export const {
   useEmitHITLActionMutation,
   useGetKnowledgeBaseQuery,
   useUpdateArtifactMutation,
+  useFilterConversationsQuery,
+  useLazyFilterConversationsQuery,
 } = Processes;

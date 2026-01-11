@@ -19,6 +19,7 @@ import { FileMimeType } from 'modules/data/components/importDataset/importData.c
 import { FEEDBACK_STATUS, SCOPE_TYPE } from 'modules/feedback/feedback.constants';
 import Image from 'next/image';
 import { FEEDBACK_OPEN_ICON } from '@/constants/icons';
+import { getKnowledgeBasedRouteByProcessId } from '@/constants/routeConfig';
 import { store } from '@/store';
 import { FeedbackItemType } from '@/types/api/feedbacks.types';
 import { SignedUrlBodyType, SignedUrlResponseType } from '@/types/api/fileUpload.types';
@@ -321,10 +322,15 @@ export const createChatbotUrl = (feedback: FeedbackItemType) => {
 
   const commonParams = `${CHATBOT_LOCATION_PARAMS.CHATBOT_PROCESS_ID}=${annotationLocation?.data?.process_id}&${CHATBOT_LOCATION_PARAMS.CHATBOT_CONVERSATION_ID}=${conversationId}&${CHATBOT_LOCATION_PARAMS.CHATBOT_FEEDBACK_ID}=${feedbackId}`;
 
+  const activityRunId =
+    annotationLocation?.data && 'activity_run_id' in annotationLocation.data
+      ? (annotationLocation.data as { activity_run_id: string }).activity_run_id
+      : null;
+
   let url =
-    annotationLocation?.type === LocationType.PROCESS
+    annotationLocation?.type === LocationType.PROCESS || !activityRunId
       ? `/processes/${annotationLocation?.data?.process_id}?${commonParams}`
-      : `/processes/${annotationLocation?.data?.process_id}/activity-logs/${annotationLocation?.data?.activity_run_id}?${commonParams}&${CHATBOT_LOCATION_PARAMS.CHATBOT_ACTIVITY_RUN_ID}=${annotationLocation?.data?.activity_run_id}`;
+      : `/processes/${annotationLocation?.data?.process_id}/activity-logs/${activityRunId}?${commonParams}&${CHATBOT_LOCATION_PARAMS.CHATBOT_ACTIVITY_RUN_ID}=${activityRunId}`;
 
   switch (annotationLocation?.type) {
     case LocationType.DATASET_FIELD:
@@ -338,6 +344,9 @@ export const createChatbotUrl = (feedback: FeedbackItemType) => {
       break;
     case LocationType.PROCESS:
       url += `&${CHATBOT_LOCATION_PARAMS.CHATBOT_ANNOTATION_LOCATION_TYPE}=${LocationType.PROCESS}`;
+      break;
+    case LocationType.SOP:
+      url = getKnowledgeBasedRouteByProcessId(annotationLocation?.data?.process_id ?? '') + `?${commonParams}`;
       break;
   }
 
@@ -430,12 +439,13 @@ export const uploadFileToSignedUrl = async (uploadUrl: string, file: File, fileT
 export const createUserMessagePayload = (
   inputValue: string,
   resourceId: string,
+  resourceType: ResourceType,
   senderName: string,
   attachments?: MessageAttachmentType[],
 ): ChatMessage => {
   return {
     resource_id: resourceId,
-    resource_type: ResourceType.PROCESS,
+    resource_type: resourceType,
     message_content: {
       text: inputValue,
       text_type: 'plain_text',
@@ -621,15 +631,16 @@ export const isSubmitKeyPress = (event: React.KeyboardEvent): boolean => {
 export const createConversationPayload = (
   processId: string,
   activityRunId: string,
+  resourceType: ResourceType,
   messageText: string,
-  annotationLocation: LocationData,
   senderName: string,
   attachments?: MessageAttachmentType[],
   scope = ScopeType.ACTIVITY_RUN,
+  annotationLocation?: LocationData,
 ) => {
   return {
     resource_id: processId,
-    resource_type: ResourceType.PROCESS,
+    resource_type: resourceType,
     scope_type: scope,
     scope_id: scope === ScopeType.ACTIVITY_RUN ? activityRunId : processId,
     message_content: {
@@ -647,9 +658,11 @@ export const createConversationPayload = (
       ] as Block[],
       attachments: attachments && attachments.length > 0 ? attachments : undefined,
     },
-    annotation_data: {
-      location: annotationLocation,
-    },
+    ...(annotationLocation && {
+      annotation_data: {
+        location: annotationLocation,
+      },
+    }),
     sender_name: senderName,
   };
 };

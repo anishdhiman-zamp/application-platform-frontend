@@ -23,10 +23,13 @@ const useAudienceMembers = (args: { resourceType: ResourceType; resourceId: stri
     data: audiencesData,
     isLoading: isLoadingAudiencesData,
     error: errorAudiencesData,
-  } = useGetAudiencesByResourceIdQuery({
-    resourceRoute: resourceTypeRouteMap[args?.resourceType],
-    resourceId: args?.resourceType === ResourceType.ORGANIZATION ? organizationId : args?.resourceId,
-  });
+  } = useGetAudiencesByResourceIdQuery(
+    {
+      resourceRoute: resourceTypeRouteMap[args?.resourceType],
+      resourceId: args?.resourceType === ResourceType.ORGANIZATION ? organizationId : args?.resourceId,
+    },
+    { refetchOnMountOrArgChange: false },
+  );
 
   const loading = useMemo(() => {
     return Boolean(isLoadingAudiencesData || isLoadingAllTeamsData);

@@ -1,15 +1,12 @@
 import { FC, ReactElement } from 'react';
-import { SvgSpriteLoaderProps } from '@zamp-platform/ui/assets';
-import { SIZE_TYPES } from '@/types/common/components';
-import { defaultFnType } from '@/types/commonTypes';
-import { BUTTON_TYPES, ICON_POSITION_TYPES } from '@/types/components/button.type';
+import { Button, ButtonSize } from '@zamp-platform/ui';
+import { SvgSpriteLoader, SvgSpriteLoaderProps } from '@zamp-platform/ui/assets';
 import { cn } from '@/utils/common';
-import { Button } from 'components/common/button/Button';
 
 export interface OverlayFooterProps {
   bottomBar?: ReactElement;
-  onBack?: defaultFnType;
-  onNext?: defaultFnType;
+  onBack?: () => void;
+  onNext?: () => void;
   isNextButtonDisabled?: boolean;
   nextButtonClassName?: string;
   backButtonClassName?: string;
@@ -18,10 +15,10 @@ export interface OverlayFooterProps {
   isBackButtonLoading?: boolean;
   isNextButtonLoading?: boolean;
   nextButtonIconProps?: SvgSpriteLoaderProps;
-  nextButtonIconPosition?: ICON_POSITION_TYPES;
+  nextButtonIconPosition?: 'LEFT' | 'RIGHT';
   footerClassName?: string;
-  nextButtonSize?: SIZE_TYPES;
-  backButtonSize?: SIZE_TYPES;
+  nextButtonSize?: ButtonSize;
+  backButtonSize?: ButtonSize;
 }
 
 const OverlayFooter: FC<OverlayFooterProps> = ({
@@ -38,8 +35,8 @@ const OverlayFooter: FC<OverlayFooterProps> = ({
   nextButtonIconProps,
   nextButtonIconPosition,
   footerClassName = '',
-  nextButtonSize = SIZE_TYPES.SMALL,
-  backButtonSize = SIZE_TYPES.SMALL,
+  nextButtonSize = 'small',
+  backButtonSize = 'small',
 }) =>
   (bottomBar || onBack || onNext) && (
     <div className={cn('border-GRAY_400 flex items-center justify-end gap-3 border-t bg-white p-4', footerClassName)}>
@@ -49,9 +46,9 @@ const OverlayFooter: FC<OverlayFooterProps> = ({
         <>
           {!!onBack && (
             <Button
-              id='SIDE_DRAWER_BACK_BUTTON'
+              testId='SIDE_DRAWER_BACK_BUTTON'
               size={backButtonSize}
-              type={BUTTON_TYPES.SECONDARY}
+              variant='outline'
               className={backButtonClassName}
               onClick={onBack}
               isLoading={isBackButtonLoading}
@@ -61,14 +58,34 @@ const OverlayFooter: FC<OverlayFooterProps> = ({
           )}
           {!!onNext && (
             <Button
-              id='SIDE_DRAWER_NEXT_BUTTON'
+              testId='SIDE_DRAWER_NEXT_BUTTON'
               size={nextButtonSize}
               className={nextButtonClassName}
               onClick={onNext}
               isLoading={isNextButtonLoading}
               disabled={isNextButtonDisabled}
-              iconProps={nextButtonIconProps}
-              iconPosition={nextButtonIconPosition}
+              leadingIcon={
+                nextButtonIconPosition === 'LEFT' && nextButtonIconProps ? (
+                  <SvgSpriteLoader
+                    id={nextButtonIconProps.id}
+                    iconCategory={nextButtonIconProps.iconCategory}
+                    width={nextButtonIconProps.width ?? 14}
+                    height={nextButtonIconProps.height ?? 14}
+                    color={nextButtonIconProps.color}
+                  />
+                ) : undefined
+              }
+              trailingIcon={
+                nextButtonIconPosition !== 'LEFT' && nextButtonIconProps ? (
+                  <SvgSpriteLoader
+                    id={nextButtonIconProps.id}
+                    iconCategory={nextButtonIconProps.iconCategory}
+                    width={nextButtonIconProps.width ?? 14}
+                    height={nextButtonIconProps.height ?? 14}
+                    color={nextButtonIconProps.color}
+                  />
+                ) : undefined
+              }
             >
               {nextButtonTitle}
             </Button>

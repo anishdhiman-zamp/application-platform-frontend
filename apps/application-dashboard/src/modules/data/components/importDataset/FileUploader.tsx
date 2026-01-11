@@ -1,14 +1,12 @@
 import React, { DragEventHandler, FC, KeyboardEvent, useEffect, useMemo, useState } from 'react';
+import { Button } from '@zamp-platform/ui';
 import { SvgSpriteLoader } from '@zamp-platform/ui/assets';
 import { COLORS } from 'constants/colors';
 import { KEYBOARD_KEYS } from 'constants/shortcuts';
 import { FILE_IMPORT_STATUS_MSG } from 'modules/data/components/importDataset/importData.constants';
 import { FileUploaderPropsType } from 'modules/data/components/importDataset/importData.types';
-import { SIZE_TYPES } from 'types/common/components';
-import { BUTTON_TYPES } from 'types/components/button.type';
 import { cn } from 'utils/common';
 import { toast } from '@/components/common/toast/Toast';
-import { Button } from 'components/common/button/Button';
 
 const FileUploader: FC<FileUploaderPropsType> = ({
   isLoading,
@@ -85,13 +83,7 @@ const FileUploader: FC<FileUploaderPropsType> = ({
     return (
       <div key={indexKey} className='relative flex w-full flex-col items-center justify-center'>
         {showUploadButton && (
-          <Button
-            id='UPLOAD_FILE_BUTTON'
-            className='mt-4 h-fit'
-            size={SIZE_TYPES.SMALL}
-            type={BUTTON_TYPES.SECONDARY}
-            isLoading={false}
-          >
+          <Button testId='UPLOAD_FILE_BUTTON' className='mt-4 h-fit' size='small' variant='outline' isLoading={false}>
             Browse files
           </Button>
         )}

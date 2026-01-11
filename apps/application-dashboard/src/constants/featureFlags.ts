@@ -18,6 +18,8 @@ export enum FEATURE_FLAGS {
   ADMIN_PAGE = 'admin-page',
   FGAC = 'fgac',
   ENABLE_KNOWLEDGE_BASE = 'enable-knowledge-base',
+  SOP_CREATION = 'sop-creation',
   DISABLE_FEEDBACK = 'disable-feedback',
   DASHBOARD_DOWNTIME = 'dashboard-downtime-v2',
+  PACE_CHAT = 'pace-chat',
 }

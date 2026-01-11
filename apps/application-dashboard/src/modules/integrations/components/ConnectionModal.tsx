@@ -1,7 +1,7 @@
 'use client';
 
 import { type FC, useRef } from 'react';
-import { FormBuilder, type FormBuilderRef } from '@zamp-platform/form-builder';
+import { FormBuilder, type FormBuilderRef, type FormSchema } from '@zamp-platform/form-builder';
 import { Button, Dialog, DialogBody, DialogContent, DialogFooter } from '@zamp-platform/ui';
 import { ArrowRight } from 'lucide-react';
 import ConnectionGuidePanel from 'modules/integrations/components/ConnectionGuidePanel';
@@ -70,7 +70,7 @@ const ConnectionModal: FC<ConnectionModalProps> = ({ integration, isOpen, onClos
 
             {/* Form - Scrollable content */}
             <div ref={scrollContainerRef} className='flex-1 overflow-y-auto px-6 pb-6 [scrollbar-width:none]'>
-              <FormBuilder ref={formRef} schema={connectionSchema} onSubmit={handleFormSubmit} />
+              <FormBuilder ref={formRef} schema={connectionSchema as FormSchema} onSubmit={handleFormSubmit} />
             </div>
           </div>
 

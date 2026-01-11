@@ -20,7 +20,14 @@ export const useActivityNavigation = (processId: string) => {
   const filterContext = searchParams?.get('filterContext');
 
   const filters = useMemo(() => {
-    const decoded = filterContext ? JSON.parse(decodeURIComponent(filterContext)) : {};
+    let decoded = {};
+
+    try {
+      decoded = filterContext ? JSON.parse(decodeURIComponent(filterContext)) : {};
+    } catch (error) {
+      decoded = {};
+      captureException(error);
+    }
 
     return {
       ...decoded,
@@ -118,7 +125,7 @@ export const useActivityNavigation = (processId: string) => {
         processId,
         targetActivity.id,
         status || undefined,
-        encodeURIComponent(JSON.stringify(filters)),
+        encodeURIComponent(JSON.stringify(filters || {})),
         targetIndex,
         totalCount,
       );

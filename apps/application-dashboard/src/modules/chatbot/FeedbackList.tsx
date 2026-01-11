@@ -74,7 +74,7 @@ const FeedbackList: FC<FeedbackListProps> = ({
               <span>Chats on this field</span>
               <span>{items.length}</span>
             </div>
-            <div className='mt-2 mb-3 space-y-1.5'>
+            <div className='mt-2 mb-3 space-y-2.5'>
               {items?.map((item) => (
                 <FeedbackListCard
                   key={item?.conversation_id}

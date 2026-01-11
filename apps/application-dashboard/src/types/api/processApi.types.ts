@@ -1,3 +1,5 @@
+import { ConversationType } from '@zamp-platform/chat';
+import type { FormSchema } from '@zamp-platform/form-builder';
 import type { MapAny } from 'types/commonTypes';
 import type {
   ARTIFACT_TYPE,
@@ -19,6 +21,11 @@ export type ProcessActivityRunsRequestType = {
   query_config?: string;
 };
 
+export const enum ProcessStatus {
+  DRAFT = 'draft',
+  LIVE = 'live',
+}
+
 export type ProcessesResponseType = {
   id: string;
   display_name: string;
@@ -30,6 +37,7 @@ export type ProcessesResponseType = {
   created_at: string;
   updated_at: string;
   deleted_at: string;
+  status: ProcessStatus;
 };
 
 type MetadataType = {
@@ -189,6 +197,7 @@ export type CtasType = {
   cta_action_id: string;
   hitl_request_id: string;
   cta_value: string;
+  form_builder_config?: FormSchema;
   cta_config: {
     icon_identifier: string;
     variant: string;
@@ -295,7 +304,7 @@ export type EmitHITLActionRequestType = {
     submitted_by: string;
     responses: {
       action_id: string;
-      values: string[];
+      values: Array<string>;
       cta_component_type?: CTA_COMPONENT_TYPE;
     }[];
   };
@@ -332,4 +341,14 @@ export type UpdateArtifactRequestType = {
     artifact_type: ARTIFACT_TYPE;
     artifact_data: EmailUpdatePayloadType;
   };
+};
+
+export type FilterConversationsRequestType = {
+  resource_id: string;
+  resource_type: string;
+  annotation_types?: string;
+};
+
+export type FilterConversationsResponseType = {
+  conversations: ConversationType[];
 };

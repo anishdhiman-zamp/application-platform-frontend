@@ -13,6 +13,7 @@ export const enum ResourceType {
   PROCESS = 'process',
   DATASET = 'dataset',
   DOCUMENT = 'document',
+  ORGANIZATION = 'organization',
 }
 
 export const enum SenderType {
@@ -23,11 +24,13 @@ export const enum SenderType {
 export const enum AnnotationType {
   KB = 'KB',
   FEEDBACK = 'FEEDBACK',
+  PROCESS_SOP = 'PROCESS_SOP',
 }
 
 export const enum ScopeType {
   ACTIVITY_RUN = 'activity_run',
   PROCESS = 'process',
+  ORGANIZATION = 'organization',
 }
 
 export const enum LocationType {
@@ -35,6 +38,7 @@ export const enum LocationType {
   LOG = 'log',
   ACTIVITY_RUN = 'activity_run',
   PROCESS = 'process',
+  SOP = 'sop',
 }
 
 export interface CreateConversationPayloadType {
@@ -61,6 +65,9 @@ export const enum SSEEventType {
   ERROR = 'error',
   NEW_CHAT_MESSAGE = 'new_chat_message',
   CONVERSATION_UPDATED = 'conversation_updated',
+  MESSAGE_START = 'message_start',
+  MESSAGE_STOP = 'message_stop',
+  OUTPUT_FILES = 'output_files',
 }
 
 export const enum ChatMessageType {
@@ -162,7 +169,8 @@ export type LocationData =
   | ({ type: LocationType.DATASET_FIELD } & { data: DatasetFieldLocationData })
   | ({ type: LocationType.LOG } & { data: LogLocationData })
   | ({ type: LocationType.ACTIVITY_RUN } & { data: ActivityRunLocationData })
-  | ({ type: LocationType.PROCESS } & { data: ProcessLocationData });
+  | ({ type: LocationType.PROCESS } & { data: ProcessLocationData })
+  | ({ type: LocationType.SOP } & { data: ProcessLocationData });
 
 export interface AnnotationData {
   location: LocationData;
@@ -173,6 +181,7 @@ export interface CreateConversationPayloadTypeV2 {
   resource_type: ResourceType;
   scope_type: string;
   scope_id: string;
+  annotation_type?: AnnotationType;
   annotation_data?: AnnotationData;
   message_content: MessageContentType;
   sender_name?: string;
@@ -230,6 +239,7 @@ export interface GetConversationByIdRequestType {
   conversationId: string;
   resourceId?: string;
   resourceType?: ResourceType;
+  url?: string;
 }
 
 export interface GetFilesByIdsRequestType {
@@ -264,4 +274,106 @@ export interface GetFileDownloadUrlResponseType {
   file_upload_id: string;
   file_name: string;
   expiry: string;
+}
+
+export interface GetOutputFileDownloadRequestType {
+  conversationId: string;
+  filename: string;
+}
+
+/**
+ * File Upload API Types
+ */
+export interface SignedUrlResponseType {
+  file_name: string;
+  file_type: string;
+  file_upload_id: string;
+  key: string;
+  upload_url: string;
+}
+
+export interface SignedUrlBodyType {
+  path: string;
+  payload: {
+    file_name: string;
+    file_type: string;
+    organization_id: string;
+  };
+}
+
+/**
+ * Interaction API Types
+ */
+export interface DependentElementInteraction {
+  element_id: string;
+  payload: {
+    selected_option_id: string;
+  };
+}
+
+export interface MessageInteractionPayload {
+  is_clicked?: boolean;
+  dependent_elements_interactions?: DependentElementInteraction[];
+}
+
+export interface Interaction {
+  element_id: string;
+  payload: MessageInteractionPayload;
+}
+
+export interface PostInteractionPayloadType {
+  conversationId: string;
+  messageId: string;
+  params: {
+    resource_id: string;
+    resource_type: string;
+  };
+  body: {
+    interactions: Interaction[];
+  };
+}
+
+export interface PostInteractionResponseType {
+  success: boolean;
+  message_id: string;
+  conversation_id: string;
+  status_message: string;
+  message: {
+    id: string;
+    organization_id: string;
+    conversation_id: string;
+    sender_id: string;
+    sender_type: SenderType;
+    sender_name: string;
+    intent: string;
+    content: {
+      elements: Block[];
+    };
+    created_at: string;
+  };
+}
+
+export interface PostInteractionDisablePayloadType {
+  conversationId: string;
+  messageId: string;
+  params: {
+    resource_id: string;
+    resource_type: string;
+  };
+}
+
+/**
+ * Voice Agent / Speech-to-Text API Types
+ */
+export interface GenerateSpeechToTextAccessTokenRequest {
+  ttl_seconds?: number;
+}
+
+export interface GenerateSpeechToTextAccessTokenResponse {
+  access_token: string;
+  expires_in: number;
+}
+
+export interface StreamingState extends ChatMessage {
+  is_active: boolean;
 }

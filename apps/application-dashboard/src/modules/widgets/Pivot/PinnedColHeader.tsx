@@ -1,13 +1,10 @@
 import { FC, useState } from 'react';
-import { COLORS } from 'constants/colors';
 import { GROUP_COLLAPSE_ICON, GROUP_EXPAND_ICON } from 'constants/icons';
 import WidgetTitle from 'modules/widgets/components/widgetTitle';
 import Image from 'next/image';
 import { WIDGET_TYPES } from 'types/api/widgets.types';
-import { SIZE_TYPES } from 'types/common/components';
-import { defaultFnType, OptionsType } from 'types/commonTypes';
+import { defaultFnType, OptionsType, SIDE_OPTIONS } from 'types/commonTypes';
 import TooltipButton from 'components/common/button/TooltipButton';
-import { TooltipPositions } from 'components/common/tooltip';
 
 interface PinnedColHeaderPropsType {
   title: string;
@@ -63,9 +60,8 @@ const PinnedColHeader: FC<PinnedColHeaderPropsType> = ({
         id='collapse-expand-all-btn'
         onClick={toggleExpansion}
         tooltipBody={isExpanded ? 'Collapse All' : 'Expand All'}
-        tooltipColor={COLORS.BLACK}
-        buttonSize={SIZE_TYPES.XSMALL}
-        tooltipPosition={TooltipPositions.BOTTOM_RIGHT}
+        buttonSize='xsmall'
+        tooltipPosition={SIDE_OPTIONS.BOTTOM}
         className='!bg-BG_GRAY_2 rounded! p-1.5! text-xs!'
       >
         <Image alt='' src={isExpanded ? GROUP_COLLAPSE_ICON : GROUP_EXPAND_ICON} width={14} height={14} />

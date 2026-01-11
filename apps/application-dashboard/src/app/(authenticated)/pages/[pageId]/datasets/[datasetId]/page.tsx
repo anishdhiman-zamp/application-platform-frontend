@@ -1,10 +1,11 @@
-import React from 'react';
-import DatasetById from 'modules/data/Dataset';
+'use client';
+import dynamic from 'next/dynamic';
+import { useParams } from 'next/navigation';
 
-const Dataset = async ({ params }: { params: Promise<{ datasetId: string }> }) => {
-  const { datasetId } = await params;
+const DatasetById = dynamic(() => import('modules/data/Dataset'));
+
+export default function DatasetPage() {
+  const { datasetId } = useParams<{ datasetId: string }>() ?? { datasetId: '' };
 
   return <DatasetById id={datasetId} />;
-};
-
-export default Dataset;
+}
