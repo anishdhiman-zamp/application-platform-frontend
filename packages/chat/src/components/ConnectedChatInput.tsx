@@ -160,6 +160,64 @@ export const ConnectedChatInput: FC<ConnectedChatInputProps> = ({
     }
   };
 
+  const isFileTypeAccepted = useCallback(
+    (file: File): boolean => {
+      if (!acceptedFileTypes) return true;
+
+      const acceptedTypes = acceptedFileTypes.split(',').map((type) => type.trim().toLowerCase());
+      const fileExtension = `.${file.name.split('.').pop()?.toLowerCase()}`;
+      const fileMimeType = file.type.toLowerCase();
+
+      return acceptedTypes.some((acceptedType) => {
+        // Check if it's a MIME type match
+        if (acceptedType.includes('/')) {
+          return fileMimeType === acceptedType;
+        }
+        // Check if it's an extension match
+        return fileExtension === acceptedType;
+      });
+    },
+    [acceptedFileTypes],
+  );
+
+  const handlePaste = (e: React.ClipboardEvent<HTMLTextAreaElement>) => {
+    const files = e.clipboardData?.files;
+
+    if (files && files.length > 0) {
+      e.preventDefault();
+
+      const fileArray = Array.from(files);
+      const acceptedFiles = fileArray.filter(isFileTypeAccepted);
+      const rejectedFiles = fileArray.filter((file) => !isFileTypeAccepted(file));
+
+      if (rejectedFiles.length > 0) {
+        const rejectedExtensions = [...new Set(rejectedFiles.map((f) => `.${f.name.split('.').pop()?.toLowerCase()}`))];
+
+        let extensionsText: string;
+        if (rejectedExtensions.length === 1) {
+          extensionsText = rejectedExtensions[0];
+        } else if (rejectedExtensions.length === 2) {
+          extensionsText = `${rejectedExtensions[0]} and ${rejectedExtensions[1]}`;
+        } else {
+          const lastExtension = rejectedExtensions.pop();
+          extensionsText = `${rejectedExtensions.join(', ')}, and ${lastExtension}`;
+        }
+
+        toast.error(`${extensionsText} file type is not supported`);
+
+        if (acceptedFiles.length === 0) {
+          return;
+        }
+      }
+
+      // Create a DataTransfer to convert the array back to FileList
+      const dataTransfer = new DataTransfer();
+      acceptedFiles.forEach((file) => dataTransfer.items.add(file));
+
+      handleFileSelect(dataTransfer.files);
+    }
+  };
+
   const handleStartRecording = async () => {
     if (microphoneState === MicrophoneState.Error) {
       onMicrophoneError?.();
@@ -274,6 +332,7 @@ export const ConnectedChatInput: FC<ConnectedChatInputProps> = ({
                   value={value}
                   onChange={(e) => setValue(e.target.value)}
                   onKeyDown={isDisabled ? undefined : handleKeyDown}
+                  onPaste={isDisabled || disableAttachments ? undefined : handlePaste}
                   placeholder={placeholder}
                   className='f-13-450 placeholder:text-muted-foreground min-h-0 w-full resize-none overflow-y-auto border-none bg-transparent p-0 shadow-none outline-none'
                   style={{
@@ -317,7 +376,7 @@ export const ConnectedChatInput: FC<ConnectedChatInputProps> = ({
                   disabled={!value.trim() || isUploading || isDisabled}
                   size='icon'
                   aria-label='Send message'
-                  className='!size-5 rounded-full [&_svg]:size-3'
+                  className='!size-5 rounded-full !text-white [&_svg]:size-3'
                 >
                   <ArrowUp />
                 </Button>

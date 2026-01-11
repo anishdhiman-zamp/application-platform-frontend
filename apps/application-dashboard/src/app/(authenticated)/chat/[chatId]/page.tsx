@@ -16,6 +16,7 @@ import CommonWrapper from '@/components/commonWrapper';
 import { SkeletonTypes } from '@/components/commonWrapper/commonWrapper.types';
 import { useAppSelector } from '@/hooks/toolkit';
 import NewPaceAvatar from '@/modules/chatbot/NewPaceAvatar';
+import { ACCEPTED_FILE_TYPES } from '@/modules/macs';
 import { ChatMessagesSkeleton } from '@/modules/macs/components/loaders';
 import { useMacsContext } from '@/modules/macs/context/MacsContext';
 import type { RootState } from '@/store';
@@ -96,6 +97,7 @@ const ChatIdPage = () => {
           currentUserName={currentUserName}
           isDisabled={chat.isStreaming}
           placeholder="Do your life's best work with Pace"
+          acceptedFileTypes={ACCEPTED_FILE_TYPES}
         />
       </div>
     </div>

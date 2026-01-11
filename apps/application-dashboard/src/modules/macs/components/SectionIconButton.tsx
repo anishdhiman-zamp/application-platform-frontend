@@ -2,7 +2,7 @@
 
 import { Button } from '@zamp-platform/ui';
 import { cn } from '@zamp-platform/ui/utils';
-import { SECTION_ICONS } from 'modules/macs/constants';
+import { SECTION_ICONS } from '@/modules/macs/constants';
 import { useMacsContext } from '@/modules/macs/context/MacsContext';
 import { SectionType } from '@/modules/macs/types';
 
