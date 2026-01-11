@@ -16,7 +16,7 @@ import { useAppDispatch } from '@/hooks/toolkit';
 import useUpdateDatasetIds from '@/hooks/useUpdateDatasetIds';
 import { setNewFilterId } from '@/store/slices/sheet-filters';
 import { checkIsObjectEmpty } from '@/utils/common';
-import { LOCAL_STORAGE_KEYS } from '@/utils/localstorage';
+import { getFromLocalStorage, LOCAL_STORAGE_KEYS, setToLocalStorage } from '@/utils/localstorage';
 
 const useCreateEditFilter = () => {
   const timeoutRef = useRef<NodeJS.Timeout | null>(null);
@@ -58,14 +58,6 @@ const useCreateEditFilter = () => {
       refetchOnMountOrArgChange: false,
     },
   );
-
-  const createEditFilterFormDataLS = useMemo(() => {
-    if (typeof window !== 'undefined') {
-      const storedData = localStorage.getItem(LOCAL_STORAGE_KEYS.CREATE_EDIT_FILTER_FORM_DATA);
-
-      return JSON.parse(storedData || '{}');
-    }
-  }, [window]);
 
   const { isSubmitDisabled, tooltipText } = useMemo(() => {
     let isSubmitDisabled = false;
@@ -242,6 +234,9 @@ const useCreateEditFilter = () => {
 
   const saveToLocalStorage = useCallback(() => {
     if (!params?.sheetId || typeof window === 'undefined') return;
+    const createEditFilterFormDataLS = JSON.parse(
+      getFromLocalStorage(LOCAL_STORAGE_KEYS.CREATE_EDIT_FILTER_FORM_DATA) ?? '{}',
+    );
 
     const updatedData = {
       ...createEditFilterFormDataLS,
@@ -252,10 +247,16 @@ const useCreateEditFilter = () => {
       },
     };
 
-    localStorage.setItem(LOCAL_STORAGE_KEYS.CREATE_EDIT_FILTER_FORM_DATA, JSON.stringify(updatedData));
-  }, [formData, selectedFilters, filtersConfig, params?.sheetId, createEditFilterFormDataLS]);
+    const value = JSON.stringify(updatedData);
+
+    setToLocalStorage(LOCAL_STORAGE_KEYS.CREATE_EDIT_FILTER_FORM_DATA, value);
+  }, [formData, selectedFilters, filtersConfig, params?.sheetId]);
 
   const loadFromLocalStorage = useCallback(() => {
+    const createEditFilterFormDataLS = JSON.parse(
+      getFromLocalStorage(LOCAL_STORAGE_KEYS.CREATE_EDIT_FILTER_FORM_DATA) ?? '{}',
+    );
+
     const currentSheetData = createEditFilterFormDataLS?.[params?.sheetId as string];
 
     if (checkIsObjectEmpty(currentSheetData)) return;
@@ -269,7 +270,7 @@ const useCreateEditFilter = () => {
       type: filtersContextActions.SET_SELECTED_FILTERS,
       payload: { selectedFilters: currentSheetData?.selectedFilters },
     });
-  }, [setFormData, dispatch, createEditFilterFormDataLS, params?.sheetId]);
+  }, [setFormData, dispatch, params?.sheetId]);
 
   useEffect(setupEditFilterData, [filter]);
 

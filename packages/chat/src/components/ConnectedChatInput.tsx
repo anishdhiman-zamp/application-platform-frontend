@@ -221,6 +221,7 @@ export const ConnectedChatInput: FC<ConnectedChatInputProps> = ({
     <div
       className={cn('w-full', {
         'pt-1.5': attachments.length > 0,
+        'cursor-not-allowed opacity-50': isDisabled,
       })}
     >
       {/* Hidden file input */}
