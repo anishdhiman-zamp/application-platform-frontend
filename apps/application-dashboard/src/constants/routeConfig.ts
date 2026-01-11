@@ -21,7 +21,7 @@ export const ROUTES_PATH = {
   PROCESS_ID: '/processes/:processId',
   PROCESS_ACTIVITY_LOGS: '/processes/:processId/activity-logs/:activityId',
   POLICIES: '/settings#dual-admin',
-  TEAM: '/team',
+  PEOPLE: '/people',
   KNOWLEDGE_BASE: '/processes/:processId/knowledge-base',
   CREATE_KNOWLEDGE_BASE: '/processes/:processId/create-knowledgebase',
   WIDGET_CREATE: '/widgets/create',

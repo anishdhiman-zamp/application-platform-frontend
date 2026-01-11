@@ -22,4 +22,5 @@ export enum FEATURE_FLAGS {
   DISABLE_FEEDBACK = 'disable-feedback',
   DASHBOARD_DOWNTIME = 'dashboard-downtime-v2',
   PACE_CHAT = 'pace-chat',
+  ZAMP_INTERNAL = 'zamp-internal',
 }

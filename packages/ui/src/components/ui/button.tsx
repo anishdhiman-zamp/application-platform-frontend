@@ -80,10 +80,9 @@ export interface ButtonProps extends ButtonHTMLAttributes<HTMLButtonElement>, Va
   testId?: string;
 }
 
-function useDebounce<T extends (...args: Parameters<T>) => void>(
-  callback: T,
-  delay: number,
-): (...args: Parameters<T>) => void {
+/* eslint-disable no-unused-vars */
+function useDebounce<T extends (...args: any[]) => void>(callback: T, delay: number): (...args: Parameters<T>) => void {
+  /* eslint-enable no-unused-vars */
   const timeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   const callbackRef = useRef(callback);
 
