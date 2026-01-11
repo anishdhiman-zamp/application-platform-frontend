@@ -6,6 +6,7 @@ import { useRouter } from 'next/navigation';
 import { API_ENDPOINTS } from '@/apis/apiEndpoint.constants';
 import { ROUTES_PATH } from '@/constants/routeConfig';
 import { useAppSelector } from '@/hooks/toolkit';
+import { ACCEPTED_FILE_TYPES } from '@/modules/macs';
 import ChatHistory from '@/modules/macs/components/chat/ChatHistory';
 import ChatHome from '@/modules/macs/components/chat/ChatHome';
 import MacsTopbar from '@/modules/macs/components/MacsTopbar';
@@ -61,6 +62,7 @@ const ChatPage = () => {
             scopeId={organizationId}
             organizationId={organizationId}
             currentUserName={currentUserName}
+            acceptedFileTypes={ACCEPTED_FILE_TYPES}
             isDisabled={chat.isStreaming || chat.isCreatingConversationV2}
             placeholder="Do your life's best work with Pace"
             className={chat.isCreatingConversationV2 ? 'animate-pulse rounded-xl bg-gray-50' : ''}
