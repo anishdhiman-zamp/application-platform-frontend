@@ -15,7 +15,7 @@ import ShareDatasetPopup from 'modules/data/components/ShareDatasetPopup';
 import SharePagePopup from 'modules/page/SharePagePopup';
 import Image from 'next/image';
 import Link from 'next/link';
-import { useParams, usePathname } from 'next/navigation';
+import { useParams, usePathname, useRouter } from 'next/navigation';
 import { RootState } from 'store';
 import { useGetProcessesQuery } from '@/apis/pages';
 import TooltipV2 from '@/components/common/TooltipV2';
@@ -26,6 +26,8 @@ import DraftFeedbackButton from '@/modules/feedback/components/DraftFeedbackButt
 import FeedbackStatusButton from '@/modules/feedback/feedback-status/FeedbackStatusButton';
 import useIsFeedbackEnabled from '@/modules/feedback/useIsFeedbackEnabled';
 import ShareProcessPopup from '@/modules/process/common/ShareProcessPopup';
+import useIsDatasetCreationEnabled from '@/modules/process/hooks/useIsDatasetCreationEnabled';
+import { DatasetTabsTypes } from '@/modules/process/process.types';
 import { ProcessStatus } from '@/types/api/processApi.types';
 import { SIDE_OPTIONS } from '@/types/commonTypes';
 import BreadCrumb from 'components/layouts/dashboard-layout/components/BreadCrumb';
@@ -57,6 +59,7 @@ const Topbar = () => {
   });
 
   const pathname = usePathname();
+  const router = useRouter();
   const params = useParams<{ processId: string }>();
   const processId = params?.processId;
   const { isProcessLive } = useMemo(() => {
@@ -68,21 +71,18 @@ const Topbar = () => {
   const [isKnowledgeBaseEnabled, setIsKnowledgeBaseEnabled] = useState<boolean>(false);
   const { evaluate, ldClient } = useFeatureFlags();
   const isFeedbackEnabled = useIsFeedbackEnabled();
+  const isCreateDatasetEnabled = useIsDatasetCreationEnabled();
 
   useEffect(() => {
-    if (ldClient) {
-      evaluate(FEATURE_FLAGS.ENABLE_KNOWLEDGE_BASE)
-        .then((res: string[]) => {
-          if (res?.includes(processId ?? '')) {
-            setIsKnowledgeBaseEnabled(true);
-          } else {
-            setIsKnowledgeBaseEnabled(false);
-          }
-        })
-        .catch(() => {
-          setIsKnowledgeBaseEnabled(false);
-        });
-    }
+    if (!ldClient) return;
+
+    evaluate(FEATURE_FLAGS.ENABLE_KNOWLEDGE_BASE)
+      .then((res: string[]) => {
+        setIsKnowledgeBaseEnabled(res?.includes(processId ?? '') ?? false);
+      })
+      .catch(() => {
+        setIsKnowledgeBaseEnabled(false);
+      });
   }, [evaluate, ldClient, processId]);
 
   const renderRightSideActions = useMemo(() => {
@@ -128,8 +128,27 @@ const Topbar = () => {
       );
     }
 
+    if (pathname === ROUTES_PATH.DATA && isCreateDatasetEnabled) {
+      const handleCreateDataset = () => {
+        router.push(`${ROUTES_PATH.DATA}?tab=${DatasetTabsTypes.BLUEPRINT}`);
+      };
+
+      return (
+        <Button id='create-dataset-btn' size='small' variant='default' onClick={handleCreateDataset}>
+          Create dataset
+        </Button>
+      );
+    }
+
     return <ShareButton />;
-  }, [pathname, isKnowledgeBaseEnabled, processId, isFeedbackEnabled, openFeedbackConversations]);
+  }, [
+    pathname,
+    isKnowledgeBaseEnabled,
+    isCreateDatasetEnabled,
+    processId,
+    isFeedbackEnabled,
+    openFeedbackConversations,
+  ]);
 
   return (
     <motion.div

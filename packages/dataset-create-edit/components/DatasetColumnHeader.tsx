@@ -1,6 +1,7 @@
+import { cn } from '@zamp-platform/ui/utils';
 import React, { FC } from 'react';
-import { DATASET_COLUMN_HEADERS_LIST } from 'modules/process/process.constant';
-import { cn } from '@/utils/common';
+
+import { DATASET_COLUMN_HEADERS_LIST } from '../constants';
 
 const DatasetColumnHeader: FC = () => {
   return (
