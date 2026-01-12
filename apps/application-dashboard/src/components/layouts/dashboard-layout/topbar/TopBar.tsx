@@ -145,7 +145,7 @@ const Topbar = () => {
     >
       <div className='min-w-0 flex-1'>
         <Suspense>
-          <BreadCrumb isSidebarOpen={isSidebarOpen} />
+          <BreadCrumb />
         </Suspense>
       </div>
       <div className='-mi-6 flex-shrink-0'>

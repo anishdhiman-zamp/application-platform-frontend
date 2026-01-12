@@ -11,9 +11,7 @@ import { useLazyFilterConversationsQuery } from '@/apis/processes';
 import { KB_TOAST_MESSAGES } from '@/components/common/toast/toast.constants';
 import CommonWrapper from '@/components/commonWrapper';
 import { SkeletonTypes } from '@/components/commonWrapper/commonWrapper.types';
-import { useAppDispatch } from '@/hooks/toolkit';
 import { ChatMessagesSkeleton } from '@/modules/macs/components/loaders';
-import { closeSidebar, openSidebar } from '@/store/slices/layout-configs';
 import { FilterConversationsResponseType, ProcessStatus } from '@/types/api/processApi.types';
 
 // Dynamic imports for heavy components
@@ -35,7 +33,6 @@ const CreateKnowledgeBasePageHome: FC<CreateKnowledgeBasePageHomeProps> = ({
   processId,
   conversationId: initialConversationId,
 }) => {
-  const dispatch = useAppDispatch();
   const [conversationId, setConversationId] = useState<string | undefined>(initialConversationId);
   const [defaultMessage, setDefaultMessage] = useState<string>();
 
@@ -46,16 +43,6 @@ const CreateKnowledgeBasePageHome: FC<CreateKnowledgeBasePageHomeProps> = ({
     useLazyFilterConversationsQuery();
 
   const currentProcess = useMemo(() => processes?.find((process) => process.id === processId), [processes, processId]);
-
-  useEffect(() => {
-    setTimeout(() => {
-      dispatch(closeSidebar());
-    }, 300);
-
-    return () => {
-      dispatch(openSidebar());
-    };
-  }, [dispatch]);
 
   useEffect(() => {
     if (!conversationId) {
