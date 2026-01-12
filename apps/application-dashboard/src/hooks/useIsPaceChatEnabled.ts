@@ -1,10 +1,9 @@
 'use client';
 
 import { useEffect, useState } from 'react';
-import { useSelector } from 'react-redux';
 import { FEATURE_FLAGS } from '@/constants/featureFlags';
 import { useFeatureFlags } from '@/hooks/useFeatureFlags';
-import type { RootState } from '@/store';
+import { getFromLocalStorage, LOCAL_STORAGE_KEYS } from '@/utils/localstorage';
 
 /**
  * Hook to check if the pace-chat feature flag is enabled for the current organization
@@ -15,7 +14,7 @@ export const useIsPaceChatEnabled = () => {
   const [isPaceChatEnabled, setIsPaceChatEnabled] = useState(false);
   const [isLoading, setIsLoading] = useState(true);
 
-  const currentOrgId = useSelector((state: RootState) => state?.user?.user?.orgs?.[0]?.organization_id ?? '');
+  const currentOrgId = getFromLocalStorage(LOCAL_STORAGE_KEYS.XZAMP_ORGANIZATION_ID) ?? '';
 
   useEffect(() => {
     if (ldClient) {

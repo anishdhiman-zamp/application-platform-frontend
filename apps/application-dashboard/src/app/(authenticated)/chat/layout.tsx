@@ -11,6 +11,8 @@ import { MacsProvider } from '@/modules/macs/context/MacsContext';
 const ChatLayout = ({ children }: { children: ReactNode }) => {
   const { isPaceChatEnabled, isLoading } = useIsPaceChatEnabled();
 
+  console.log('isPaceChatEnabled', isPaceChatEnabled);
+
   if (isLoading) {
     return <ImageLoader imageSrc={ZAMP_LOGO_LOADER_SVG} width={140} height={140} />;
   }
