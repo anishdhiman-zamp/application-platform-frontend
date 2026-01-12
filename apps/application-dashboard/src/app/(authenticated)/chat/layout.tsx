@@ -31,7 +31,7 @@ const ChatLayout = ({ children }: ChatLayoutProps) => {
         <div className='flex min-h-0 flex-1 flex-col overflow-hidden'>
           <ChatNavbar />
           <main className='flex min-h-0 flex-1 px-2'>
-            <section className='border-GRAY_400 shadow-chat-section flex min-h-0 w-full flex-1 flex-col overflow-hidden rounded-t-xl border'>
+            <section className='border-GRAY_400 shadow-chat-section flex min-h-0 w-full flex-1 flex-col overflow-hidden rounded-t-xl border bg-white'>
               {children}
             </section>
           </main>

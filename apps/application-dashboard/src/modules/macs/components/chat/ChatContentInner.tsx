@@ -17,6 +17,7 @@ import ChatHistory from '@/modules/macs/components/chat/ChatHistory';
 import ChatHome from '@/modules/macs/components/chat/ChatHome';
 import ChatTopbar from '@/modules/macs/components/chat/ChatTopbar';
 import { ChatMessagesSkeleton } from '@/modules/macs/components/loaders';
+import { useChatDraftInput } from '@/modules/macs/hooks/useChatDraftInput';
 
 interface ChatContentInnerProps {
   organizationId: string;
@@ -37,6 +38,8 @@ const ChatContentInner = ({
   chatTitle,
   startNewChat,
 }: ChatContentInnerProps) => {
+  const { inputValue, setInputValue } = useChatDraftInput({ conversationId });
+
   const chat = useChat({
     resourceId: organizationId,
     resourceType: ResourceType.ORGANIZATION,
@@ -103,6 +106,8 @@ const ChatContentInner = ({
               currentUserName={currentUserName}
               isDisabled={chat.isStreaming}
               placeholder="Do your life's best work with Pace"
+              externalInputValue={inputValue}
+              setExternalInputValue={setInputValue}
             />
           </div>
         </div>
@@ -126,6 +131,8 @@ const ChatContentInner = ({
           isDisabled={chat.isStreaming || chat.isCreatingConversationV2}
           placeholder="Do your life's best work with Pace"
           className={chat.isCreatingConversationV2 ? 'animate-pulse rounded-xl bg-gray-50' : ''}
+          externalInputValue={inputValue}
+          setExternalInputValue={setInputValue}
         />
       </div>
       <ChatHistory onSelectConversation={setConversationId} />

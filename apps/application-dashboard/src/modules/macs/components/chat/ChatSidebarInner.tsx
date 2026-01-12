@@ -17,6 +17,7 @@ import { SkeletonTypes } from '@/components/commonWrapper/commonWrapper.types';
 import { useAppSelector } from '@/hooks/toolkit';
 import NewPaceAvatar from '@/modules/chatbot/NewPaceAvatar';
 import { ChatMessagesSkeleton } from '@/modules/macs/components/loaders';
+import { useChatDraftInput } from '@/modules/macs/hooks/useChatDraftInput';
 import type { RootState } from '@/store';
 
 interface ChatSidebarInnerProps {
@@ -38,6 +39,7 @@ const ChatSidebarInner: FC<ChatSidebarInnerProps> = ({
 }) => {
   const organizationId = useAppSelector((state: RootState) => state.user.user?.orgs?.[0]?.organization_id) ?? '';
   const currentUserName = useAppSelector((state: RootState) => state.user.user?.user_name) ?? '';
+  const { inputValue, setInputValue } = useChatDraftInput({ conversationId });
 
   const chat = useChat({
     resourceId: organizationId,
@@ -77,7 +79,7 @@ const ChatSidebarInner: FC<ChatSidebarInnerProps> = ({
     <div className='flex min-h-0 flex-1 flex-col overflow-hidden'>
       {isInConversation ? (
         <>
-          <ChatTopbar onStartNewChat={startNewChat} onClose={handleClose} title={chatTitle} className='border-none' />
+          <ChatTopbar onStartNewChat={startNewChat} onClose={handleClose} title={chatTitle} />
           <CommonWrapper
             isLoading={isLoadingConversation}
             isError={chat.isErrorConversationHistory}
@@ -117,6 +119,8 @@ const ChatSidebarInner: FC<ChatSidebarInnerProps> = ({
           isDisabled={chat.isStreaming || chat.isCreatingConversationV2}
           placeholder="Do your life's best work with Pace"
           className={chat.isCreatingConversationV2 ? 'animate-pulse rounded-xl bg-gray-50' : ''}
+          externalInputValue={inputValue}
+          setExternalInputValue={setInputValue}
         />
       </div>
     </div>

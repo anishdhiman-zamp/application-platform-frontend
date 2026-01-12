@@ -54,17 +54,11 @@ export const useChatSidebarState = ({ initialConversationId }: UseChatSidebarSta
     setChatTitle('');
     setConversationIdState(null);
     setChatKey((prev) => prev + 1);
-
     handleUpdateandDeleteConversationIdUrl();
   }, []);
 
   const handleClose = useCallback(() => {
     setIsChatSidebarOpen(false);
-    setChatTitle('');
-    setConversationIdState(null);
-    setChatKey((prev) => prev + 1);
-
-    handleUpdateandDeleteConversationIdUrl();
   }, [setIsChatSidebarOpen]);
 
   // Initialize conversation ID from URL on mount

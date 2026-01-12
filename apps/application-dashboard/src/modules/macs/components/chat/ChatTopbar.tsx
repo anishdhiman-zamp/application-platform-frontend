@@ -5,6 +5,7 @@ import { Button } from '@zamp-platform/ui';
 import { cn } from '@zamp-platform/ui/utils';
 import { AnimatePresence, motion } from 'framer-motion';
 import { Plus, X } from 'lucide-react';
+import { DEFAULT_CHAT_TITLE } from 'modules/macs/constants';
 
 interface ChatTopbarProps {
   className?: string;
@@ -25,16 +26,18 @@ const TITLE_TRANSITION = {
   ease: [0.4, 0, 0.2, 1] as const,
 };
 
-const ChatTopbar: FC<ChatTopbarProps> = ({ className, style, title = 'Untitled', onStartNewChat, onClose }) => {
+const ChatTopbar: FC<ChatTopbarProps> = ({ className, style, title, onStartNewChat, onClose }) => {
+  const displayTitle = title || DEFAULT_CHAT_TITLE;
+
   return (
     <div
       className={cn('border-GRAY_400 flex h-10 items-center justify-between gap-x-2 border-b p-3', className)}
       style={style}
     >
-      <div className='f-11-550 relative min-w-0 flex-1 overflow-hidden capitalize'>
+      <div className='f-11-550 relative min-w-0 flex-1 overflow-hidden first-letter:uppercase'>
         <AnimatePresence mode='wait'>
           <motion.span
-            key={title}
+            key={displayTitle}
             variants={TITLE_ANIMATION_VARIANTS}
             initial='initial'
             animate='animate'
@@ -42,7 +45,7 @@ const ChatTopbar: FC<ChatTopbarProps> = ({ className, style, title = 'Untitled',
             transition={TITLE_TRANSITION}
             className='block truncate'
           >
-            {title}
+            {displayTitle}
           </motion.span>
         </AnimatePresence>
       </div>

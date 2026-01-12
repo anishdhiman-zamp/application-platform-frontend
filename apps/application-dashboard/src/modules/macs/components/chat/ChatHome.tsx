@@ -7,7 +7,7 @@ import { getGreeting } from '@/modules/macs/macs.utils';
 
 const ChatHome = () => {
   const user = useAppSelector((state) => state.user.user);
-  const userName = user?.user_name?.split(' ')[0] || 'there';
+  const userName = user?.user_name?.split(' ')[0];
   const [greeting, setGreeting] = useState<string>('');
 
   useEffect(() => {
@@ -15,12 +15,14 @@ const ChatHome = () => {
     setGreeting(getGreeting());
   }, []);
 
+  const isReady = greeting && userName;
+
   return (
     <div className='mt-[116px] flex w-full flex-col items-center'>
       <div className='flex flex-col items-center gap-4'>
         <NewPaceIcons width={40} height={40} />
-        <h1 className='f-16-550 text-GRAY_1000'>
-          {greeting || 'Hello'}, {userName}!
+        <h1 className={`f-16-550 text-GRAY_1000 ${isReady ? 'animate-fade-in' : 'opacity-0'}`}>
+          {greeting || 'Hello'}, {userName || 'there'}
         </h1>
       </div>
     </div>
