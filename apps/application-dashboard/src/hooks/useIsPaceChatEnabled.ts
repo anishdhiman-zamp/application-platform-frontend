@@ -1,8 +1,10 @@
 'use client';
 
 import { useEffect, useState } from 'react';
+import { useAppSelector } from 'hooks/toolkit';
 import { FEATURE_FLAGS } from '@/constants/featureFlags';
 import { useFeatureFlags } from '@/hooks/useFeatureFlags';
+import { RootState } from '@/store';
 import { getFromLocalStorage, LOCAL_STORAGE_KEYS } from '@/utils/localstorage';
 
 /**
@@ -14,7 +16,9 @@ export const useIsPaceChatEnabled = () => {
   const [isPaceChatEnabled, setIsPaceChatEnabled] = useState(false);
   const [isLoading, setIsLoading] = useState(true);
 
-  const currentOrgId = getFromLocalStorage(LOCAL_STORAGE_KEYS.XZAMP_ORGANIZATION_ID) ?? '';
+  const orgIdFromRedux = useAppSelector((state: RootState) => state.user.user?.orgs?.[0]?.organization_id ?? '');
+  const orgIdFromLocalStorage = getFromLocalStorage(LOCAL_STORAGE_KEYS.XZAMP_ORGANIZATION_ID) ?? '';
+  const currentOrgId = orgIdFromLocalStorage || orgIdFromRedux;
 
   useEffect(() => {
     if (ldClient) {
