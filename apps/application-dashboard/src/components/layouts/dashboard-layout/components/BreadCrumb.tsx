@@ -25,11 +25,7 @@ import useUpdateBreadcrumb from '@/hooks/useUpdateBreadcrumb';
 import { MODULE_TYPE, SIDE_OPTIONS } from '@/types/commonTypes';
 import { MenuWrapper } from 'components/common/MenuWrapper';
 
-interface BreadCrumbProps {
-  isSidebarOpen: boolean;
-}
-
-const BreadCrumb: FC<BreadCrumbProps> = ({ isSidebarOpen }) => {
+const BreadCrumb: FC = () => {
   const router = useRouter();
   const menuRef = useRef<HTMLDivElement>(null);
   const searchParams = useSearchParams();
@@ -192,11 +188,7 @@ const BreadCrumb: FC<BreadCrumbProps> = ({ isSidebarOpen }) => {
   }, [lastBreadCrumb, params]);
 
   return (
-    <div
-      className={cn('bg-BACKGROUND_GRAY_1 z-1000 flex h-full items-center gap-2 transition-all', {
-        'pl-1': breadcrumbStack?.length <= 1 && isSidebarOpen,
-      })}
-    >
+    <div className='bg-BACKGROUND_GRAY_1 z-1000 flex h-full items-center gap-2 transition-all'>
       {breadcrumbStack?.length > 1 && (
         <SvgSpriteLoader
           id='arrow-left'

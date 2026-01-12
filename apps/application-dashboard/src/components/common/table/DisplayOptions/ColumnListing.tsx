@@ -1,6 +1,7 @@
 import { ChangeEvent, FC, MouseEvent, RefObject, useEffect, useMemo, useRef, useState } from 'react';
 import { Responsive, WidthProvider } from 'react-grid-layout';
-import { Button } from '@zamp-platform/ui';
+import { PREVIEW_DATASET_ID, useDatasetColumnContextOptional } from '@zamp-platform/dataset-create-edit';
+import { Button, Checkbox } from '@zamp-platform/ui';
 import { SvgSpriteLoader } from '@zamp-platform/ui/assets';
 import { ICON_SPRITE_TYPES } from '@zamp-platform/ui/types';
 import { Column } from 'ag-grid-community';
@@ -17,7 +18,6 @@ import useDisplayConfigUpdate from '@/hooks/useDisplayConfigUpdate';
 import { useResourceAccess } from '@/hooks/useResourceAccess';
 import { DATASET_ACCESS_PRIVILEGES } from '@/modules/shareResource/shareResource.types';
 import { ResourceType } from '@/types/api/policies.types';
-import { CheckBox } from 'components/common/Checkbox';
 import Input from 'components/common/input';
 import { MenuWrapper } from 'components/common/MenuWrapper';
 import { ColumnVisibility } from 'components/common/table/table.types';
@@ -40,24 +40,26 @@ const ColumnListing: FC<ColumnListingProps> = ({
   isSelfServe = false,
   position = POSITION.LEFT,
 }) => {
-  const [columns, setColumns] = useState<Column[]>([]);
-  const [searchTerm, setSearchTerm] = useState('');
-  const [columnsChecked, setColumnsChecked] = useState<ColumnVisibility[]>([]);
-  const [inputFocused, setInputFocused] = useState(false);
+  const isInitialMountRef = useRef(true);
   const columnRefs = useRef<(HTMLDivElement | null)[]>([]);
-  // State for grid layout
+  const [searchTerm, setSearchTerm] = useState('');
+  const [columns, setColumns] = useState<Column[]>([]);
+  const [inputFocused, setInputFocused] = useState(false);
   const [layout, setLayout] = useState<ResponsiveGridLayoutType[]>([]);
-
+  const [columnsChecked, setColumnsChecked] = useState<ColumnVisibility[]>([]);
+  const columnContext = useDatasetColumnContextOptional();
+  // Use context if available (for unified state management), else return undefined
+  const contextAvailable = !!columnContext;
+  const updateColumnVisibility = columnContext?.updateColumnVisibility;
+  const updateColumnOrder = columnContext?.updateColumnOrder;
+  const { handleDefaultOrderUpdate } = useDisplayConfigUpdate(tableRef, datasetId);
   const { checkUserPrivilege } = useResourceAccess({
     resourceType: ResourceType.DATASET,
     resourceId: datasetId,
   });
-
   const isCurrentUserAdmin = useMemo(() => {
     return checkUserPrivilege(DATASET_ACCESS_PRIVILEGES.ADMIN);
   }, [checkUserPrivilege]);
-
-  const { handleDefaultOrderUpdate } = useDisplayConfigUpdate(tableRef, datasetId);
 
   const { data: displayConfigData } = useGetDatasetDisplayConfigQuery(
     { datasetId },
@@ -70,11 +72,36 @@ const ColumnListing: FC<ColumnListingProps> = ({
 
   const handleCheckBoxClick = (column?: Column) => {
     if (!column) return;
-    tableRef?.current?.api?.setColumnsVisible([column.getColId()], !column.isVisible());
+    const colId = column.getColId();
+    const newVisibility = !column.isVisible();
 
+    tableRef?.current?.api?.setColumnsVisible([colId], newVisibility);
+
+    // Skip localStorage for preview datasets
+    if (datasetId === PREVIEW_DATASET_ID) {
+      setColumnsChecked((prev) =>
+        prev.map((col) => (col.colId === colId ? { ...col, isVisible: newVisibility } : col)),
+      );
+
+      return;
+    }
+
+    // Use context if available
+    if (contextAvailable && updateColumnVisibility) {
+      updateColumnVisibility({ [colId]: newVisibility });
+
+      // Update local state to reflect change
+      setColumnsChecked((prev) =>
+        prev.map((col) => (col.colId === colId ? { ...col, isVisible: newVisibility } : col)),
+      );
+
+      return;
+    }
+
+    // Fallback to localStorage
     const columnOrderingVisibility = getColumnOrderingVisibilityForCurrentDataset(datasetId).map((columnItem) => ({
       ...columnItem,
-      isVisible: columnItem.colId === column.getColId() ? !columnItem.isVisible : columnItem.isVisible,
+      isVisible: columnItem.colId === colId ? newVisibility : columnItem.isVisible,
     }));
 
     updateLocalStorage(columnOrderingVisibility, datasetId);
@@ -83,8 +110,14 @@ const ColumnListing: FC<ColumnListingProps> = ({
 
   const handleSearch = (e: ChangeEvent<HTMLInputElement>) => {
     const value = e.target.value;
-    const latestColumns =
-      tableRef?.current?.api?.getColumns()?.filter((column) => !column?.getColDef()?.suppressMovable) ?? [];
+
+    // For preview datasets, use displayed columns order; for real datasets, use getColumns()
+    const isPreviewDataset = datasetId === PREVIEW_DATASET_ID;
+    const allCols = isPreviewDataset
+      ? (tableRef?.current?.api?.getAllDisplayedColumns() ?? [])
+      : (tableRef?.current?.api?.getColumns() ?? []);
+
+    const latestColumns = allCols.filter((column) => !column?.getColDef()?.suppressMovable);
 
     setSearchTerm(value);
     if (value) {
@@ -108,10 +141,22 @@ const ColumnListing: FC<ColumnListingProps> = ({
   const onLayoutChange = (newLayout: any) => {
     if (inputFocused || searchTerm) return;
 
+    // Skip the first call on mount to prevent overwriting localStorage with default widths
+    if (isInitialMountRef.current) {
+      isInitialMountRef.current = false;
+      setLayout(newLayout);
+
+      return;
+    }
+
     setLayout(newLayout);
 
     // Get all columns and separate movable from non-movable
-    const allColumns = tableRef?.current?.api?.getColumns() ?? [];
+    // For preview datasets, use getAllDisplayedColumns() to maintain display order
+    const isPreviewDataset = datasetId === PREVIEW_DATASET_ID;
+    const allColumns = isPreviewDataset
+      ? (tableRef?.current?.api?.getAllDisplayedColumns() ?? [])
+      : (tableRef?.current?.api?.getColumns() ?? []);
     const nonMovableColumns = allColumns.filter((column) => column?.getColDef()?.suppressMovable);
     const movableColumns = allColumns.filter((column) => !column?.getColDef()?.suppressMovable);
 
@@ -128,7 +173,19 @@ const ColumnListing: FC<ColumnListingProps> = ({
     // Apply the new column order
     tableRef?.current?.api?.moveColumns(finalOrderedColumns, 0);
 
-    // Update storage with new ordering
+    // Skip storage updates for preview datasets
+    if (datasetId === PREVIEW_DATASET_ID) return;
+
+    const newColumnOrder = finalOrderedColumns.map((column) => column.getColId());
+
+    // Use context if available, otherwise fall back to localStorage
+    if (contextAvailable && updateColumnOrder) {
+      updateColumnOrder(newColumnOrder);
+
+      return;
+    }
+
+    // Fallback to localStorage
     const columnOrderingVisibility = finalOrderedColumns.map((column) => ({
       colId: column.getColId(),
       isVisible: column.isVisible(),
@@ -139,10 +196,37 @@ const ColumnListing: FC<ColumnListingProps> = ({
   };
 
   const handleSelectAll = (isSelectAll = true) => {
-    tableRef?.current?.api?.setColumnsVisible(
-      columns.map((column) => column.getColId()),
-      isSelectAll,
-    );
+    const columnIds = columns.map((column) => column.getColId());
+
+    tableRef?.current?.api?.setColumnsVisible(columnIds, isSelectAll);
+
+    // Skip localStorage for preview datasets
+    if (datasetId === PREVIEW_DATASET_ID) {
+      setColumnsChecked((prev) => prev.map((col) => ({ ...col, isVisible: isSelectAll })));
+
+      return;
+    }
+
+    // Use context if available
+    if (contextAvailable && updateColumnVisibility) {
+      const visibilityMap = columnIds.reduce(
+        (acc, colId) => {
+          acc[colId] = isSelectAll;
+
+          return acc;
+        },
+        {} as Record<string, boolean>,
+      );
+
+      updateColumnVisibility(visibilityMap);
+
+      // Update local state
+      setColumnsChecked((prev) => prev.map((col) => ({ ...col, isVisible: isSelectAll })));
+
+      return;
+    }
+
+    // Fallback to localStorage
     const columnOrderingVisibility = getColumnOrderingVisibilityForCurrentDataset(datasetId).map((columnItem) => ({
       ...columnItem,
       isVisible: isSelectAll,
@@ -169,24 +253,69 @@ const ColumnListing: FC<ColumnListingProps> = ({
     onLayoutChange(updatedLayout);
   };
 
-  useEffect(() => {
-    const allColumns = tableRef?.current?.api?.getColumns() ?? [];
-    // Only get movable columns for display
-    const movableColumns = allColumns.filter((column) => !column?.getColDef()?.suppressMovable);
+  const maxWidth = useMemo(() => {
+    if (columnRefs.current.length > 0) {
+      const widths = columnRefs.current.map((ref) => ref?.offsetWidth || 0);
+      const maxElementWidth = Math.max(...widths);
 
-    // Get stored ordering for movable columns
-    const storedOrdering = getColumnOrderingVisibilityForCurrentDataset(datasetId);
+      return Math.max(maxElementWidth + 50, 250); // Add padding and ensure minimum width
+    }
 
-    // Re-order movable columns based on stored ordering
-    const orderedMovableColumns: Column[] =
-      storedOrdering
-        ?.map((column) => movableColumns?.find((col) => col.getColId() === column.colId))
-        .filter((col): col is Column => col !== undefined) ?? [];
+    return 250;
+  }, [columns]);
 
-    const finalColumns = orderedMovableColumns?.length ? orderedMovableColumns : movableColumns;
+  const initializeColumnLayout = () => {
+    const isPreviewDataset = datasetId === PREVIEW_DATASET_ID;
 
+    // Get columns based on dataset type
+    const getMovableColumns = (): Column[] => {
+      if (isPreviewDataset) {
+        // For preview, get columns in their CURRENT DISPLAY ORDER from the grid
+        const displayedColumns = tableRef?.current?.api?.getAllDisplayedColumns() ?? [];
+
+        return displayedColumns.filter((column) => {
+          const colDef = column?.getColDef();
+
+          return !colDef?.suppressMovable && !colDef?.headerComponentParams?.metadata?.is_hidden;
+        });
+      }
+
+      // For real datasets, use getColumns() and apply stored ordering
+      const allColumns = tableRef?.current?.api?.getColumns() ?? [];
+
+      const movableColumns = allColumns.filter((column) => {
+        const colDef = column?.getColDef();
+
+        return !colDef?.suppressMovable && !colDef?.headerComponentParams?.metadata?.is_hidden;
+      });
+
+      // Get stored ordering for movable columns
+      const storedOrdering = getColumnOrderingVisibilityForCurrentDataset(datasetId);
+
+      const orderedMovableColumns: Column[] =
+        storedOrdering
+          ?.map((column) => movableColumns?.find((col) => col.getColId() === column.colId))
+          .filter((col): col is Column => col !== undefined) ?? [];
+
+      return orderedMovableColumns?.length ? orderedMovableColumns : movableColumns;
+    };
+
+    const finalColumns = getMovableColumns();
+
+    // Initialize layout based on column order
+    const initialLayout = finalColumns.map((column, index) => ({
+      i: column.getColId(),
+      x: 0,
+      y: index,
+      w: 1,
+      h: 1,
+    }));
+
+    setLayout(initialLayout);
+
+    // Apply search filter if active
     if (searchTerm) {
-      const filteredColumns = finalColumns?.filter(
+      const filteredColumns = finalColumns.filter(
         (column) =>
           column.getColId()?.toLowerCase().includes(searchTerm.toLowerCase()) ||
           column.getColDef()?.headerName?.toLowerCase().includes(searchTerm.toLowerCase()),
@@ -198,23 +327,16 @@ const ColumnListing: FC<ColumnListingProps> = ({
     }
 
     setColumnsChecked(
-      finalColumns?.map((column) => ({
-        colId: column?.getColId(),
-        isVisible: column?.isVisible(),
+      finalColumns.map((column) => ({
+        colId: column.getColId(),
+        isVisible: column.isVisible(),
       })),
     );
+  };
+
+  useEffect(() => {
+    initializeColumnLayout();
   }, []);
-
-  const maxWidth = useMemo(() => {
-    if (columnRefs.current.length > 0) {
-      const widths = columnRefs.current.map((ref) => ref?.offsetWidth || 0);
-      const maxElementWidth = Math.max(...widths);
-
-      return Math.max(maxElementWidth + 50, 250); // Add padding and ensure minimum width
-    }
-
-    return 250;
-  }, [columns]);
 
   return (
     <MenuWrapper
@@ -281,10 +403,9 @@ const ColumnListing: FC<ColumnListingProps> = ({
                 className='flex cursor-pointer items-center gap-2.5'
                 onClick={(e) => handleColumnClick(e, column)}
               >
-                <CheckBox
+                <Checkbox
                   checked={columnsChecked?.find((col) => col?.colId === column?.getColId())?.isVisible ?? false}
-                  onPress={(e) => handleColumnClick(e, column)}
-                  id={column?.getColId() ?? ''}
+                  onCheckedChange={() => handleCheckBoxClick(column)}
                 />
                 <div className='f-12-400 text-GRAY_1000 whitespace-nowrap select-none'>
                   {column?.getColDef()?.headerName}

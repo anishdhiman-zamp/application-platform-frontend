@@ -44,7 +44,7 @@ const PeopleTabs: FC<PeopleTabsPropsType> = ({
     if (!value) return;
 
     startTransition(() => {
-      router.replace(`${ROUTES_PATH.TEAM}?tab=${value}`);
+      router.replace(`${ROUTES_PATH.PEOPLE}?tab=${value}`);
     });
   };
 

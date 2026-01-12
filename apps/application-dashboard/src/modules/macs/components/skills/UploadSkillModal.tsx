@@ -21,8 +21,9 @@ const UploadSkillModal = ({ isOpen, onClose, skillId }: UploadSkillModalProps) =
 
   const isUpdateMode = !!skillId;
 
-  const [uploadSkill, { isLoading: isUploading }] = useUploadSkillMutation();
-  const [updateSkill, { isLoading: isUpdating }] = useUpdateSkillMutation();
+  const [uploadSkill, { isLoading: isUploading, isError: isUploadError, reset: resetUpload }] =
+    useUploadSkillMutation();
+  const [updateSkill, { isLoading: isUpdating, isError: isUpdateError, reset: resetUpdate }] = useUpdateSkillMutation();
 
   const isLoading = isUploading || isUpdating;
 
@@ -108,9 +109,7 @@ const UploadSkillModal = ({ isOpen, onClose, skillId }: UploadSkillModalProps) =
       handleClose();
     } catch (error) {
       toast.error(
-        (error as any)?.data?.message
-          ? (error as any)?.data?.message
-          : `Failed to ${isUpdateMode ? 'update' : 'upload'} skill. Please try again.`,
+        (error as any)?.data?.message || `Failed to ${isUpdateMode ? 'update' : 'upload'} skill. Please try again.`,
       );
     }
   };
@@ -139,6 +138,7 @@ const UploadSkillModal = ({ isOpen, onClose, skillId }: UploadSkillModalProps) =
                 'border-GRAY_400 flex min-h-[140px] cursor-pointer flex-col items-center justify-center rounded-lg border border-dashed transition-colors',
                 isDragOver && 'border-GRAY_600 bg-GRAY_50',
                 selectedFile && 'border-GREEN_500 bg-GREEN_50',
+                (isUploadError || isUpdateError) && 'border-RED_500 bg-RED_50',
               )}
               onClick={handleClick}
               onDrop={handleDrop}
@@ -155,7 +155,10 @@ const UploadSkillModal = ({ isOpen, onClose, skillId }: UploadSkillModalProps) =
             >
               {selectedFile ? (
                 <div className='flex flex-col items-center gap-2'>
-                  <FileText size={24} className='text-GREEN_600' />
+                  <FileText
+                    size={24}
+                    className={cn(isUploadError || isUpdateError ? 'text-RED_600' : 'text-GREEN_600')}
+                  />
                   <span className='f-14-500 text-GRAY_900'>{selectedFile.name}</span>
                   <Button
                     variant='link'
@@ -164,6 +167,8 @@ const UploadSkillModal = ({ isOpen, onClose, skillId }: UploadSkillModalProps) =
                     onClick={(e) => {
                       e.stopPropagation();
                       setSelectedFile(null);
+                      resetUpload();
+                      resetUpdate();
                     }}
                   >
                     Remove

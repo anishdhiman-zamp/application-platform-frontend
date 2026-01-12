@@ -4,11 +4,11 @@ import { useMemo, useState } from 'react';
 import { ResourceType } from '@zamp-platform/chat';
 import { Button, Input } from '@zamp-platform/ui';
 import { MessagesSquare, Search } from 'lucide-react';
-import ChatHistoryItem from 'modules/macs/components/chat/ChatHistoryItem';
 import { useGetConversationHistoryQuery } from '@/apis/macs';
 import CommonWrapper from '@/components/commonWrapper';
 import { SkeletonTypes } from '@/components/commonWrapper/commonWrapper.types';
 import { useAppSelector } from '@/hooks/toolkit';
+import ChatHistoryItem from '@/modules/macs/components/chat/ChatHistoryItem';
 import { ChatHistorySkeleton } from '@/modules/macs/components/loaders';
 import type { RootState } from '@/store';
 
@@ -52,16 +52,14 @@ const ChatHistory = ({ onSelectConversation }: ChatHistoryProps) => {
     <div className='mx-auto flex min-h-0 w-full flex-1 flex-col bg-white pt-4'>
       <div className='flex items-center justify-between p-3'>
         <p className='f-14-550 text-gray-1000'>Chat History</p>
-        {conversations.length > 0 && (
-          <Button
-            variant='ghost'
-            size='icon'
-            className='text-gray-1000 h-6 w-6 px-2 py-1'
-            onClick={() => setShowSearch(!showSearch)}
-          >
-            <Search size={12} />
-          </Button>
-        )}
+        <Button
+          variant='ghost'
+          size='icon'
+          className={`text-gray-1000 h-6 w-6 px-2 py-1 ${conversations.length === 0 ? 'invisible' : ''}`}
+          onClick={() => setShowSearch(!showSearch)}
+        >
+          <Search size={12} />
+        </Button>
       </div>
       {showSearch && (
         <div className='mt-4 px-3 pb-4'>
@@ -69,7 +67,7 @@ const ChatHistory = ({ onSelectConversation }: ChatHistoryProps) => {
             placeholder='Search'
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
-            className='h-8'
+            className='placeholder:f-14-400 h-8'
             autoFocus
           />
         </div>

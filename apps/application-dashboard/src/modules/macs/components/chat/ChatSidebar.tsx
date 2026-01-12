@@ -3,15 +3,18 @@
 import { FC } from 'react';
 import { cn } from '@zamp-platform/ui/utils';
 import { AnimatePresence, motion } from 'framer-motion';
+import { useSearchParams } from 'next/navigation';
 import ChatSidebarInner from '@/modules/macs/components/chat/ChatSidebarInner';
 import { useChatSidebarState } from '@/modules/macs/hooks/useChatSidebarState';
 
 interface ChatSidebarProps {
   className?: string;
-  initialConversationId: string | null;
 }
 
-const ChatSidebar: FC<ChatSidebarProps> = ({ className, initialConversationId }) => {
+const ChatSidebar: FC<ChatSidebarProps> = ({ className }) => {
+  const searchParams = useSearchParams();
+  const initialConversationId = searchParams?.get('s') ?? null;
+
   const {
     isChatSidebarOpen,
     chatTitle,

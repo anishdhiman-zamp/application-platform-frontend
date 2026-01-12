@@ -30,7 +30,7 @@ const SkillCard = ({ skill, onToggle, onUpdate, onDelete }: SkillCardProps) => {
           <h3 className='f-14-550 text-GRAY_1000'>{skill.name}</h3>
           <p className='f-13-400 text-GRAY_700 mt-1 line-clamp-2'>{skill.description}</p>
           <div className='mt-2 flex items-center gap-1.5'>
-            <span className='f-12-450 text-GRAY_600'>{findTimeDifference(skill.created_at)}</span>
+            <span className='f-12-450 text-GRAY_600'>{findTimeDifference(skill.updated_at)}</span>
           </div>
         </div>
 

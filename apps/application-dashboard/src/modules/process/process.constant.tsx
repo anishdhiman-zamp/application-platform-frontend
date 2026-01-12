@@ -1,6 +1,17 @@
-import { Calendar, Database, FileText, Hash, Image, Link, Mail, SquareMousePointer, Type } from 'lucide-react';
-import BluePrintDataset from 'modules/process/dataset-create-edit/components/BluePrintDataset';
-import PreviewDataset from 'modules/process/dataset-create-edit/components/PreviewDataset';
+import React from 'react';
+import {
+  Calendar,
+  Database,
+  FilePen,
+  FileText,
+  Hash,
+  Image,
+  Link,
+  Mail,
+  Sheet,
+  SquareMousePointer,
+  Type,
+} from 'lucide-react';
 import {
   ACTIVITY_RUN_STATUS,
   ARTIFACT_TYPE,
@@ -255,14 +266,9 @@ export const ACTIVITY_RUNS_TABLE_COLUMNS_HEADER_WIDTH: number[] = [28, 182, 786,
 export const N_A_VALUE = 'N/A';
 
 export const DATASET_PLAYGROUND_TABS_LIST = [
-  { label: 'Blueprint', value: DatasetTabsTypes.BLUEPRINT },
-  { label: 'Preview', value: DatasetTabsTypes.PREVIEW },
+  { label: 'Blueprint', value: DatasetTabsTypes.BLUEPRINT, icon: <FilePen size={12} /> },
+  { label: 'Preview', value: DatasetTabsTypes.PREVIEW, icon: <Sheet size={12} /> },
 ];
-
-export const TAB_CONTENT_MAPPING = {
-  [DatasetTabsTypes.BLUEPRINT]: <BluePrintDataset />,
-  [DatasetTabsTypes.PREVIEW]: <PreviewDataset />,
-};
 
 export const DATASET_COLUMN_HEADERS_LIST = [
   { label: 'Column Name', value: DatasetColumnHeaderTypes.COLUMN_NAME },

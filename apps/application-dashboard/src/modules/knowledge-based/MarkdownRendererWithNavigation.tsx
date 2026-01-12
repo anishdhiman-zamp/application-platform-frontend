@@ -4,7 +4,6 @@ import React, { useCallback, useEffect, useState } from 'react';
 import ReactMarkdown from 'react-markdown';
 import { captureException } from '@sentry/browser';
 import { toast } from '@zamp-platform/ui';
-import { useAppDispatch } from 'hooks/toolkit';
 import { useParams } from 'next/navigation';
 import rehypeSlug from 'rehype-slug';
 import remarkGfm from 'remark-gfm';
@@ -15,7 +14,6 @@ import CommonWrapper from '@/components/commonWrapper';
 import { SkeletonTypes } from '@/components/commonWrapper/commonWrapper.types';
 import { ZAMP_LOGO_LOADER_SVG } from '@/constants/icons';
 import KnowledgeBaseNavigation from '@/modules/knowledge-based/KnowledgeBaseNavigation';
-import { closeSidebar, openSidebar } from '@/store/slices/layout-configs';
 import { extractHeadersFromMarkdown, type HeaderItem } from '@/utils/markdownUtils';
 
 interface MarkdownRendererWithNavigationPropsType {
@@ -24,7 +22,6 @@ interface MarkdownRendererWithNavigationPropsType {
 }
 
 const MarkdownRendererWithNavigation = ({ hideNav = false, scrollRef }: MarkdownRendererWithNavigationPropsType) => {
-  const dispatch = useAppDispatch();
   const [markdownContent, setMarkdownContent] = useState<string>('');
   const [headers, setHeaders] = useState<HeaderItem[]>([]);
   const params = useParams();
@@ -71,14 +68,6 @@ const MarkdownRendererWithNavigation = ({ hideNav = false, scrollRef }: Markdown
   useEffect(() => {
     getMarkdownContent();
   }, [data, getMarkdownContent]);
-
-  useEffect(() => {
-    dispatch(closeSidebar());
-
-    return () => {
-      dispatch(openSidebar());
-    };
-  }, [dispatch]);
 
   const handleIntersection = useCallback(
     (entries: IntersectionObserverEntry[]) => {
