@@ -17,25 +17,26 @@ export const useIsPaceChatEnabled = () => {
   const [isLoading, setIsLoading] = useState(true);
 
   const orgIdFromRedux = useAppSelector((state: RootState) => state.user.user?.orgs?.[0]?.organization_id ?? '');
-  const orgIdFromLocalStorage = getFromLocalStorage(LOCAL_STORAGE_KEYS.XZAMP_ORGANIZATION_ID) ?? '';
-  const currentOrgId = orgIdFromLocalStorage || orgIdFromRedux;
 
   useEffect(() => {
-    if (ldClient) {
-      evaluate(FEATURE_FLAGS.PACE_CHAT)
-        .then((res: string[]) => {
-          const isEnabled = !res?.length || res.includes(currentOrgId);
+    const orgIdFromLocalStorage = getFromLocalStorage(LOCAL_STORAGE_KEYS.XZAMP_ORGANIZATION_ID) ?? '';
+    const currentOrgId = orgIdFromLocalStorage || orgIdFromRedux;
 
-          setIsPaceChatEnabled(isEnabled);
-        })
-        .catch(() => {
-          setIsPaceChatEnabled(false);
-        })
-        .finally(() => {
-          setIsLoading(false);
-        });
-    }
-  }, [evaluate, ldClient, currentOrgId]);
+    if (!ldClient || !currentOrgId) return;
+
+    evaluate(FEATURE_FLAGS.PACE_CHAT)
+      .then((res: string[]) => {
+        const isEnabled = !res?.length || res.includes(currentOrgId);
+
+        setIsPaceChatEnabled(isEnabled);
+      })
+      .catch(() => {
+        setIsPaceChatEnabled(false);
+      })
+      .finally(() => {
+        setIsLoading(false);
+      });
+  }, [evaluate, ldClient, orgIdFromRedux]);
 
   return { isPaceChatEnabled, isLoading };
 };
