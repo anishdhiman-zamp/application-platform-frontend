@@ -17,11 +17,10 @@ export const useIsPaceChatEnabled = () => {
   const [isLoading, setIsLoading] = useState(true);
 
   const orgIdFromRedux = useAppSelector((state: RootState) => state.user.user?.orgs?.[0]?.organization_id ?? '');
+  const orgIdFromLocalStorage = getFromLocalStorage(LOCAL_STORAGE_KEYS.XZAMP_ORGANIZATION_ID) ?? '';
+  const currentOrgId = orgIdFromLocalStorage || orgIdFromRedux;
 
   useEffect(() => {
-    const orgIdFromLocalStorage = getFromLocalStorage(LOCAL_STORAGE_KEYS.XZAMP_ORGANIZATION_ID) ?? '';
-    const currentOrgId = orgIdFromLocalStorage || orgIdFromRedux;
-
     if (!ldClient || !currentOrgId) return;
 
     evaluate(FEATURE_FLAGS.PACE_CHAT)
@@ -36,7 +35,7 @@ export const useIsPaceChatEnabled = () => {
       .finally(() => {
         setIsLoading(false);
       });
-  }, [evaluate, ldClient, orgIdFromRedux]);
+  }, [evaluate, ldClient, currentOrgId]);
 
   return { isPaceChatEnabled, isLoading };
 };
