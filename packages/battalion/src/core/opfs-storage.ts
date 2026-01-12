@@ -225,17 +225,11 @@ class OPFSStorageManager {
 
     const names: string[] = [];
     try {
-      // Use entries() which is more widely supported
-      const entries = (this.rootHandle as FileSystemDirectoryHandle & AsyncIterable<[string, FileSystemHandle]>)[
-        Symbol.asyncIterator
-      ]
-        ? this.rootHandle
-        : null;
-
-      if (entries) {
-        for await (const [name] of entries as AsyncIterable<[string, FileSystemHandle]>) {
-          names.push(name);
-        }
+      // FileSystemDirectoryHandle is iterable, but TypeScript types may not reflect this
+      // Cast through unknown to allow iteration
+      const entries = this.rootHandle as unknown as AsyncIterable<[string, FileSystemHandle]>;
+      for await (const [name] of entries) {
+        names.push(name);
       }
     } catch {
       // Fallback: try to iterate using values()
