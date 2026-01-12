@@ -60,9 +60,7 @@ const ChatContentInner = ({
     return chat.messages.length > 0 && chat.messages[chat.messages.length - 1]?.sender_type === SenderType.USER;
   }, [chat.messages]);
 
-  const isLoadingConversation = Boolean(
-    conversationId && ((chat.isLoadingConversationHistory && !hasMessages) || chat.isUninitializedConversationHistory),
-  );
+  const isLoadingConversation = Boolean(conversationId && chat.isLoadingConversationHistory && !hasMessages);
 
   const isInConversation = conversationId || chat.conversationId;
 
@@ -82,7 +80,7 @@ const ChatContentInner = ({
             isError={chat.isErrorConversationHistory}
             refetchFunction={chat.refetchConversationHistory}
             skeletonType={SkeletonTypes.CUSTOM}
-            loader={<ChatMessagesSkeleton />}
+            loader={<ChatMessagesSkeleton className='p-0' />}
             className='flex min-h-0 flex-1'
           >
             <MessageContainer

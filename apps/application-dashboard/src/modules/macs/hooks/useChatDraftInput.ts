@@ -1,10 +1,8 @@
 'use client';
 
 import { Dispatch, SetStateAction, useCallback, useEffect, useRef, useState } from 'react';
+import { DEBOUNCE_DELAY_MS, NEW_CONVERSATION_ID } from 'modules/macs/constants';
 import { getFromLocalStorage, LOCAL_STORAGE_KEYS, setToLocalStorage } from '@/utils/localstorage';
-
-const DEBOUNCE_DELAY_MS = 300;
-const NEW_CONVERSATION_ID = 'null_thread';
 
 interface ChatDraft {
   id: string;
@@ -21,29 +19,27 @@ interface UseChatDraftInputReturn {
   setInputValue: Dispatch<SetStateAction<string>>;
 }
 
-// get drafts from localStorage
 const getDraftsFromStorage = (): ChatDraft[] => {
-  const stored = getFromLocalStorage(LOCAL_STORAGE_KEYS.CHAT_DRAFTS);
+  const stored = getFromLocalStorage(LOCAL_STORAGE_KEYS.CONVERSATION_DRAFTS);
 
   if (!stored) return [];
   try {
     return JSON.parse(stored) as ChatDraft[];
   } catch {
+    setToLocalStorage(LOCAL_STORAGE_KEYS.CONVERSATION_DRAFTS, JSON.stringify([]));
+
     return [];
   }
 };
 
-// save drafts to localStorage
 const saveDraftsToStorage = (drafts: ChatDraft[]) => {
-  setToLocalStorage(LOCAL_STORAGE_KEYS.CHAT_DRAFTS, JSON.stringify(drafts));
+  setToLocalStorage(LOCAL_STORAGE_KEYS.CONVERSATION_DRAFTS, JSON.stringify(drafts));
 };
 
-// get draft by id
 const getDraftById = (drafts: ChatDraft[], id: string): ChatDraft | undefined => {
   return drafts.find((draft) => draft.id === id);
 };
 
-// upsert draft
 const upsertDraft = (drafts: ChatDraft[], id: string, content: string): ChatDraft[] => {
   const existingIndex = drafts.findIndex((draft) => draft.id === id);
   const newDraft: ChatDraft = { id, content, timestamp: Date.now() };
@@ -59,19 +55,22 @@ const upsertDraft = (drafts: ChatDraft[], id: string, content: string): ChatDraf
   return [...drafts, newDraft];
 };
 
-// remove draft
 const removeDraft = (drafts: ChatDraft[], id: string): ChatDraft[] => {
   return drafts.filter((draft) => draft.id !== id);
 };
 
 /**
  * Hook to manage chat input draft with local storage persistence.
- * Drafts are stored in a single 'chat_drafts' array and survive page refreshes.
+ * Drafts are stored in a single 'conversation_drafts' array and survive page refreshes.
  * localStorage writes are debounced for better performance.
  */
 export const useChatDraftInput = ({ conversationId }: UseChatDraftInputProps): UseChatDraftInputReturn => {
   const draftId = conversationId || NEW_CONVERSATION_ID;
+  const draftIdRef = useRef(draftId);
   const debounceTimerRef = useRef<NodeJS.Timeout | null>(null);
+  const messageSentFromNewChatRef = useRef(false);
+
+  draftIdRef.current = draftId;
 
   const [inputValue, setInputValueState] = useState(() => {
     const drafts = getDraftsFromStorage();
@@ -80,15 +79,21 @@ export const useChatDraftInput = ({ conversationId }: UseChatDraftInputProps): U
     return draft?.content || '';
   });
 
-  // Load draft when conversationId changes
   useEffect(() => {
+    if (messageSentFromNewChatRef.current && draftId !== NEW_CONVERSATION_ID) {
+      const drafts = getDraftsFromStorage();
+      const updatedDrafts = removeDraft(drafts, NEW_CONVERSATION_ID);
+
+      saveDraftsToStorage(updatedDrafts);
+      messageSentFromNewChatRef.current = false;
+    }
+
     const drafts = getDraftsFromStorage();
     const draft = getDraftById(drafts, draftId);
 
     setInputValueState(draft?.content || '');
   }, [draftId]);
 
-  // Cleanup debounce timer on unmount
   useEffect(() => {
     return () => {
       if (debounceTimerRef.current) {
@@ -97,36 +102,36 @@ export const useChatDraftInput = ({ conversationId }: UseChatDraftInputProps): U
     };
   }, []);
 
-  const setInputValue = useCallback(
-    (newValue: SetStateAction<string>) => {
-      setInputValueState((prev) => {
-        const nextValue = typeof newValue === 'function' ? newValue(prev) : newValue;
+  const setInputValue = useCallback((newValue: SetStateAction<string>) => {
+    setInputValueState((prev) => {
+      const nextValue = typeof newValue === 'function' ? newValue(prev) : newValue;
 
-        // Clear existing timer
-        if (debounceTimerRef.current) {
-          clearTimeout(debounceTimerRef.current);
+      if (debounceTimerRef.current) {
+        clearTimeout(debounceTimerRef.current);
+      }
+
+      if (!nextValue && draftIdRef.current === NEW_CONVERSATION_ID && prev) {
+        messageSentFromNewChatRef.current = true;
+      }
+
+      debounceTimerRef.current = setTimeout(() => {
+        const currentDraftId = draftIdRef.current;
+        const drafts = getDraftsFromStorage();
+
+        if (nextValue) {
+          const updatedDrafts = upsertDraft(drafts, currentDraftId, nextValue);
+
+          saveDraftsToStorage(updatedDrafts);
+        } else {
+          const updatedDrafts = removeDraft(drafts, currentDraftId);
+
+          saveDraftsToStorage(updatedDrafts);
         }
+      }, DEBOUNCE_DELAY_MS);
 
-        // Debounce localStorage write
-        debounceTimerRef.current = setTimeout(() => {
-          const drafts = getDraftsFromStorage();
-
-          if (nextValue) {
-            const updatedDrafts = upsertDraft(drafts, draftId, nextValue);
-
-            saveDraftsToStorage(updatedDrafts);
-          } else {
-            const updatedDrafts = removeDraft(drafts, draftId);
-
-            saveDraftsToStorage(updatedDrafts);
-          }
-        }, DEBOUNCE_DELAY_MS);
-
-        return nextValue;
-      });
-    },
-    [draftId],
-  );
+      return nextValue;
+    });
+  }, []);
 
   return {
     inputValue,
