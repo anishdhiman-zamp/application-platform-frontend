@@ -1,4 +1,5 @@
 import { FC, KeyboardEvent, RefObject, useCallback, useEffect, useMemo, useRef, useState } from 'react';
+import { useDatasetColumnContextOptional } from '@zamp-platform/dataset-create-edit';
 import { Button, Input } from '@zamp-platform/ui';
 import { SvgSpriteLoader } from '@zamp-platform/ui/assets';
 import { DATE_FORMATS, formatRelativeWithCustomLocale } from '@zamp-platform/utils';
@@ -9,6 +10,7 @@ import { PIVOT_HEADER_BG } from 'constants/icons';
 import { format } from 'date-fns';
 import AddTag from 'modules/data/AddTag';
 import { getColumnOrderingVisibilityForCurrentDataset, updateLocalStorage } from 'modules/data/data.utils';
+import { DatasetColumnHeaderTypes } from 'modules/process/process.types';
 import Image from 'next/image';
 import { DatasetFilterConfigMetadataType, DatasetUpdateResponseType } from 'types/api/dataset.types';
 import { MapAny } from 'types/commonTypes';
@@ -26,6 +28,7 @@ import {
   DateFormatOptions,
   DisplayTypeNonApplicableFilterTypes,
   DisplayTypeOptions,
+  UI_COLUMN_RESIZED,
 } from 'components/common/table/CustomHeader/customHeader.constants';
 import { CustomHeaderMenuOptionTypes } from 'components/common/table/CustomHeader/customHeader.types';
 import { TABLE_COPIES } from 'components/common/table/table.constants';
@@ -69,25 +72,23 @@ const CustomHeader: FC<CustomHeaderProps> = ({
   dateFormat,
   isSelfServe,
 }) => {
-  const { colId, colDef } = column;
-
   const menuRef = useRef<HTMLDivElement>(null);
-
+  const lastResizedTimeRef = useRef<number | null>(null); // Track last resize time
+  const { colId, colDef } = column;
   const { handleAliasUpdate, handleDateFormatUpdate, handleTypeUpdate } = useDisplayConfigUpdate(tableRef, datasetId);
-
+  const columnContext = useDatasetColumnContextOptional(); // Use context if available (for unified state management)
   const {
     state: { selectedFilters },
   } = useFiltersContextStore();
-
+  const [isTypeOpen, setIsTypeOpen] = useState(false);
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const [isAddTagOpen, setIsAddTagOpen] = useState(false);
   const [isFilterOpen, setIsFilterOpen] = useState(false);
   const [isDateFormatOpen, setIsDateFormatOpen] = useState(false);
-  const [isTypeOpen, setIsTypeOpen] = useState(false);
   const [headerName, setHeaderName] = useState(colDef?.headerName ?? colId);
   const [menuPosition, setMenuPosition] = useState<{ top: number; left: number }>({ top: 0, left: 0 });
-  const lastResizedTimeRef = useRef<number | null>(null); // Track last resize time
-
+  const contextHandleColumnChange = columnContext?.handleColumnChange;
+  const contextHandleColumnWidthChange = columnContext?.handleColumnWidthChange;
   const filtersCount = selectedFilters ? Object.keys(selectedFilters)?.length : 0;
   const isTagColumn = metadata?.custom_type === CUSTOM_COLUMNS_TYPE.TAG;
   const sortState = tableRef?.current?.api?.getColumn(colId)?.getSort();
@@ -229,21 +230,48 @@ const CustomHeader: FC<CustomHeaderProps> = ({
   const handleColumnResizing = useCallback(
     (event: ColumnResizedEvent) => {
       if (event.column?.getId() !== colId) return;
+
+      // Only save widths from user interactions, not grid internal changes, which prevents AG-Grid from overwriting user resizes with default widths
+      if (event.source !== UI_COLUMN_RESIZED) {
+        return;
+      }
+
+      // Only update when resize is finished (not during drag)
+      if (!event.finished) {
+        return;
+      }
+
+      const newWidth = event.column?.getActualWidth();
+
+      if (!newWidth) return;
+
+      // Update localStorage directly for persistence
+      // We DON'T update context here to avoid triggering re-renders that reset AG Grid widths
+      // Context will read widths from localStorage when needed (e.g., on reorder or reload)
       const columnOrderingVisibility = getColumnOrderingVisibilityForCurrentDataset(datasetId);
       const columnOrderingVisibilityIndex = columnOrderingVisibility.findIndex((column) => column.colId === colId);
 
-      columnOrderingVisibility[columnOrderingVisibilityIndex].width = event.column?.getActualWidth();
-      updateLocalStorage(columnOrderingVisibility, datasetId);
-      lastResizedTimeRef.current = Date.now(); // Update the timestamp
+      if (columnOrderingVisibilityIndex !== -1) {
+        columnOrderingVisibility[columnOrderingVisibilityIndex].width = newWidth;
+        updateLocalStorage(columnOrderingVisibility, datasetId);
+      }
+
+      lastResizedTimeRef.current = Date.now();
     },
-    [colId],
+    [colId, datasetId, contextHandleColumnWidthChange],
   );
 
   const handleHeaderNameBlur = () => {
     const updatedHeaderName = headerName?.trim();
 
     if (updatedHeaderName === colDef?.headerName || !updatedHeaderName) return;
-    handleAliasUpdate?.({ columnId: colId, value: updatedHeaderName });
+
+    // Use context if available, otherwise fallback to regular flow
+    if (contextHandleColumnChange) {
+      contextHandleColumnChange(colId, DatasetColumnHeaderTypes.COLUMN_NAME, updatedHeaderName);
+    } else {
+      handleAliasUpdate?.({ columnId: colId, value: updatedHeaderName });
+    }
   };
 
   const handleHeaderNameKeyDown = (e: KeyboardEvent<HTMLInputElement>) => {

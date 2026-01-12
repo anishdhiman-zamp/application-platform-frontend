@@ -44,6 +44,7 @@
     "@zamp-platform/api": "*",
     "@zamp-platform/chat": "*",
     "@zamp-platform/config": "*",
+    "@zamp-platform/dataset-create-edit": "*",
     "@zamp-platform/form-builder": "*",
     "@zamp-platform/svg-loader": "*",
     "@zamp-platform/tanstack-table": "*",

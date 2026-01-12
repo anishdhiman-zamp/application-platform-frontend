@@ -1,7 +1,9 @@
-import React from 'react';
 import { useSortable } from '@dnd-kit/sortable';
 import { CSS } from '@dnd-kit/utilities';
-import { ColumnDataType, DatasetColumnHeaderTypes } from 'modules/process/process.types';
+import React from 'react';
+
+import type { ColumnDataType } from '../components/DatasetColumDetails';
+import { DatasetColumnHeaderTypes } from '../constants';
 
 interface UseDatasetColumnDetailsProps {
   columnData: ColumnDataType;
@@ -36,6 +38,7 @@ export const useDatasetColumnDetails = ({ columnData, onChange }: UseDatasetColu
     listeners,
     setNodeRef,
     style,
+    isDragging,
     handleNameChange,
     handleTypeChange,
     handleRequiredChange,

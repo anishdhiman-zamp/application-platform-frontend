@@ -18,12 +18,19 @@ import {
   format,
   isValid,
 } from 'date-fns';
-import { COLUMN_TYPE_WIDTH_MAP, COLUMN_WIDTHS, CustomColumnsMapping } from 'modules/data/data.constants';
+import {
+  COLUMN_TYPE_WIDTH_MAP,
+  COLUMN_WIDTHS,
+  CustomColumnsMapping,
+  NEW_COLUMN_PREFIX,
+} from 'modules/data/data.constants';
 import {
   ColumnOrderingVisibilityType,
   type DatasetTabType,
   type DatasetUrlDataType,
   FormatColumnsParamsType,
+  FrontendColumnConfig,
+  ItemWithId,
 } from 'modules/data/data.types';
 import { N_A_VALUE } from 'modules/process/process.constant';
 import { DatasetFilterConfigResponseType, DatasetType, RuleFilters, ValueFormatType } from 'types/api/dataset.types';
@@ -143,6 +150,12 @@ export const formatColumns: (params: FormatColumnsParamsType) => ColDef[] = ({
       ? column.metadata?.config?.value_format
       : [column.metadata?.config?.value_format];
 
+    const finalWidth = columnWidth > 0 ? columnWidth : COLUMN_WIDTHS.BASE;
+    const calculatedMinWidth = getColumnMinWidth(
+      columnNameLength,
+      column?.metadata?.custom_type as CUSTOM_COLUMNS_TYPE,
+    );
+
     let formattedColumn: ColDef = {
       field: column?.column,
       hide: column?.metadata?.is_hidden,
@@ -167,12 +180,14 @@ export const formatColumns: (params: FormatColumnsParamsType) => ColDef[] = ({
         column?.metadata?.custom_type === CUSTOM_COLUMNS_TYPE.ACTIVITY_STATUS
           ? ''
           : snakeCaseToSentenceCase(column?.alias || column?.column),
-      minWidth: getColumnMinWidth(columnNameLength, column?.metadata?.custom_type as CUSTOM_COLUMNS_TYPE),
+      minWidth: calculatedMinWidth,
       maxWidth:
         column?.metadata?.custom_type === CUSTOM_COLUMNS_TYPE.ACTIVITY_STATUS
           ? COLUMN_WIDTHS.ACTIVITY_STATUS
           : undefined,
-      initialWidth: columnWidth > 0 ? columnWidth : COLUMN_WIDTHS.BASE,
+      // Use initialWidth instead of width - AG Grid only applies initialWidth when column is CREATED
+      initialWidth: finalWidth,
+      flex: 0, // Set flex to 0 to override defaultColDef's flex:1
     };
 
     formattedColumn.cellRenderer = wrapLink
@@ -248,6 +263,7 @@ export const formatColumns: (params: FormatColumnsParamsType) => ColDef[] = ({
       };
     }
 
+    // Only exclude columns that are explicitly hidden, don't filter by suppressMovable here
     if (!column?.metadata?.is_hidden) {
       columns.push(formattedColumn);
     }
@@ -482,40 +498,49 @@ export const getUpdatedColumnOrderingVisibility = (
   // Create a map of existing column configurations for quick lookup
   const existingColumnsMap = new Map(currentColumnOrderingVisibility.map((col) => [col.colId, col]));
 
-  // First, preserve the order of existing columns
+  // First, preserve the order of existing columns (will be filtered later to remove hidden ones)
   const updatedColumnOrderingVisibility: ColumnOrderingVisibilityType[] = currentColumnOrderingVisibility.map(
     (existingCol) => {
       const matchingFilterConfig = filterConfig.find((fc) => fc.column === existingCol.colId);
 
       if (matchingFilterConfig) {
-        const isExplicitlyHidden = matchingFilterConfig.metadata?.is_hidden === true;
-
         return {
           ...existingCol,
-          isVisible: isExplicitlyHidden ? false : existingCol.isVisible,
+          isVisible: existingCol.isVisible, // Preserve user's visibility preference
         };
       }
 
+      // Column no longer exists in filterConfig (could be FE-only or removed), preserve all properties for FE-only columns
       return {
+        ...existingCol,
         colId: existingCol?.colId ?? '',
-        isVisible: false,
         width: existingCol?.width ?? 0,
       };
     },
   );
 
-  // Then add any new columns that weren't in the current configuration
+  // exclude columns with is_hidden=true, they should NEVER appear in localStorage
   filterConfig.forEach((column) => {
-    if (!existingColumnsMap.has(column.column)) {
+    if (!existingColumnsMap.has(column.column) && !column.metadata?.is_hidden) {
       updatedColumnOrderingVisibility.push({
         colId: column.column,
-        isVisible: column.metadata?.is_hidden !== true,
+        isVisible: true, // If it's not hidden, it should be visible by default
         width: 0,
       });
     }
   });
 
-  return updatedColumnOrderingVisibility;
+  // Filter out hidden columns, Preserve FE-only columns (new columns not yet in backend)
+  return updatedColumnOrderingVisibility.filter((col) => {
+    const matchingFilterConfig = filterConfig.find((fc) => fc.column === col.colId);
+
+    if (!matchingFilterConfig) {
+      return col.colId.startsWith(NEW_COLUMN_PREFIX.COL_); // Keep FE-only columns
+    }
+
+    // For backend columns, keep only if NOT hidden
+    return !matchingFilterConfig.metadata?.is_hidden;
+  });
 };
 
 export const syncFilterConfigHiddenColumnsInLocalStorage = (
@@ -1167,4 +1192,129 @@ export const prepareExportQuery = (
   };
 
   return JSON.stringify(finalQuery);
+};
+
+/**
+ * Merges backend columns with frontend-only columns from localStorage.
+ * Frontend-only columns are columns that exist in localStorage but not in the backend response.
+ * This handles the hybrid approach where users can add columns in the UI before saving to backend.
+ *
+ * @param backendColumns - Column definitions from the backend API
+ * @param storedConfig - Column configuration from localStorage
+ * @param frontendColumnConfig - Configuration for creating frontend-only columns
+ * @returns Merged and ordered column definitions
+ */
+export const mergeBackendAndFrontendColumns = (
+  backendColumns: ColDef[],
+  storedConfig: ColumnOrderingVisibilityType[] | null,
+  frontendColumnConfig: FrontendColumnConfig,
+): ColDef[] => {
+  if (!storedConfig || storedConfig.length === 0) {
+    return backendColumns;
+  }
+
+  const { datasetId, handleSuccessfulUpdate, tableRef } = frontendColumnConfig;
+
+  const storedColIds = storedConfig.map((c) => c.colId);
+  const backendColIds = backendColumns.map((col) => col.field).filter(Boolean) as string[];
+
+  // Find columns that exist in localStorage but not in backend (frontend-only)
+  const frontendOnlyColIds = storedColIds.filter((colId) => !backendColIds.includes(colId));
+
+  // Create ColDefs for frontend-only columns
+  const frontendOnlyColDefs: ColDef[] = frontendOnlyColIds
+    .map((colId) => {
+      const stored = storedConfig.find((c) => c.colId === colId);
+
+      if (!stored) return null;
+
+      return {
+        field: colId,
+        headerName: stored.columnName || colId,
+        editable: true,
+        hide: !stored.isVisible,
+        initialWidth: stored.width || 150,
+        minWidth: 100,
+        filter: 'agTextColumnFilter',
+        headerComponentParams: {
+          metadata: {
+            is_editable: true,
+            is_hidden: false,
+          },
+          datasetId,
+          options: [],
+          handleSuccessfulUpdate,
+          tableRef,
+          filterType: 'text' as FilterType,
+          handleRulesListingSideDrawerOpen: () => {},
+          isSelfServe: true,
+        },
+      } as ColDef;
+    })
+    .filter(Boolean) as ColDef[];
+
+  // Merge backend + frontend-only columns into a map for O(1) lookup
+  const allColumnsMap = new Map<string, ColDef>();
+
+  backendColumns.forEach((col) => {
+    if (col.field) {
+      allColumnsMap.set(col.field, col);
+    }
+  });
+  frontendOnlyColDefs.forEach((col) => {
+    if (col.field) {
+      allColumnsMap.set(col.field, col);
+    }
+  });
+
+  // Build final array in localStorage order
+  const orderedColumns = storedColIds
+    .map((colId) => allColumnsMap.get(colId))
+    .filter((col): col is ColDef => col !== undefined);
+
+  // Add any backend columns not in localStorage (safety fallback)
+  backendColumns.forEach((col) => {
+    if (col.field && !storedColIds.includes(col.field)) {
+      orderedColumns.push(col);
+    }
+  });
+
+  return orderedColumns.length > 0 ? orderedColumns : backendColumns;
+};
+
+/**
+ * Merges backend items with frontend-only items from localStorage in the correct order.
+ * This is a generic utility that works with any item type that has an 'id' field.
+ *
+ * @param backendItems - Items from the backend API
+ * @param frontendOnlyItems - Items that exist only in frontend (from localStorage)
+ * @param storedOrder - Array of item IDs in the desired order (from localStorage)
+ * @returns Merged and ordered items
+ */
+export const mergeAndOrderItems = <T extends ItemWithId>(
+  backendItems: T[],
+  frontendOnlyItems: T[],
+  storedOrder: string[],
+): T[] => {
+  if (storedOrder.length === 0) {
+    return backendItems;
+  }
+
+  // Build a map of all items for O(1) lookup
+  const allItemsMap = new Map<string, T>();
+
+  backendItems.forEach((item) => allItemsMap.set(item.id, item));
+  frontendOnlyItems.forEach((item) => allItemsMap.set(item.id, item));
+
+  // Build final array in localStorage order
+  const orderedItems = storedOrder.map((id) => allItemsMap.get(id)).filter((item): item is T => item !== undefined);
+
+  // Add any backend items not in localStorage (safety fallback)
+  backendItems.forEach((item) => {
+    if (!storedOrder.includes(item.id)) {
+      orderedItems.push(item);
+    }
+  });
+
+  return orderedItems.length > 0 ? orderedItems : backendItems;
 };
