@@ -27,7 +27,7 @@ export const useLogout = () => {
 
   const handleLogout = useCallback(async () => {
     if (fullPath && fullPath !== '/') {
-      const domain = ENVIRONMENT === ENVIRONMENT_TYPES.PRODUCTION ? 'zamp.ai' : 'zamp.dev';
+      const domain = ENVIRONMENT === ENVIRONMENT_TYPES.PRODUCTION ? '.zamp.ai' : '.zamp.dev';
 
       setCookie(PREV_ROUTE_COOKIE, encodeURIComponent(fullPath), undefined, domain);
     }
