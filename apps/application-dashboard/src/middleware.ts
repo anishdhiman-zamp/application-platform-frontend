@@ -1,4 +1,4 @@
-import { DEVICE_TYPES } from 'constants/common.constants';
+import { DEVICE_TYPES, ENVIRONMENT, ENVIRONMENT_TYPES } from 'constants/common.constants';
 import { ROUTES_PATH } from 'constants/routeConfig';
 import { NextRequest, NextResponse, userAgent } from 'next/server';
 import {
@@ -44,7 +44,9 @@ const handleUnauthenticatedRoutes = (request: NextRequest) => {
   if (![ROUTES_PATH.HOME, ROUTES_PATH.LOGIN].includes(pathname)) {
     const fullRoute = pathname + (request.nextUrl.search || '');
 
-    setServerSideUserCookie(response, PREV_ROUTE_COOKIE, fullRoute, COOKIE_MAX_AGE);
+    const domain = ENVIRONMENT === ENVIRONMENT_TYPES.PRODUCTION ? 'zamp.ai' : 'zamp.dev';
+
+    setServerSideUserCookie(response, PREV_ROUTE_COOKIE, fullRoute, COOKIE_MAX_AGE, domain);
   }
 
   return response;
@@ -69,7 +71,9 @@ const handleAuthenticatedRoutes = async (request: NextRequest) => {
     if (prevRoute) {
       const response = NextResponse.redirect(new URL(prevRoute, request.url));
 
-      clearServerSideCookie(response, PREV_ROUTE_COOKIE);
+      const domain = ENVIRONMENT === ENVIRONMENT_TYPES.PRODUCTION ? 'zamp.ai' : 'zamp.dev';
+
+      clearServerSideCookie(response, PREV_ROUTE_COOKIE, domain);
 
       return response;
     }

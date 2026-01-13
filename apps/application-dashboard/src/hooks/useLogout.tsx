@@ -3,6 +3,7 @@
 import { useCallback, useMemo } from 'react';
 import { useInitiateLogoutFlowQuery, useLazyLogoutQuery, useLazyWhoAmIQuery } from 'apis/auth';
 import { usePathname, useRouter, useSearchParams } from 'next/navigation';
+import { ENVIRONMENT, ENVIRONMENT_TYPES } from '@/constants/common.constants';
 import { ROUTES_PATH } from '@/constants/routeConfig';
 import { clearCookie, PREV_ROUTE_COOKIE, setCookie, USER_SESSION_COOKIE } from '@/utils/cookie';
 import { resetPostHog } from '@/utils/postHog';
@@ -26,7 +27,9 @@ export const useLogout = () => {
 
   const handleLogout = useCallback(async () => {
     if (fullPath && fullPath !== '/') {
-      setCookie(PREV_ROUTE_COOKIE, encodeURIComponent(fullPath));
+      const domain = ENVIRONMENT === ENVIRONMENT_TYPES.PRODUCTION ? 'zamp.ai' : 'zamp.dev';
+
+      setCookie(PREV_ROUTE_COOKIE, encodeURIComponent(fullPath), undefined, domain);
     }
 
     // Clear USER_SESSION_COOKIE on client side
