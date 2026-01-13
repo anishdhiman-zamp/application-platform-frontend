@@ -35,6 +35,7 @@ export enum POSITION {
 
 export const ALLOWED_EMAIL_DOMAINS = ['zamp.ai', 'zamp.finance'];
 export const ENVIRONMENT = process.env.NEXT_PUBLIC_ENVIRONMENT || 'production';
+
 export const ORG_COLORS = ['bg-red-200', 'bg-orange-200', 'bg-green-300', 'bg-blue-300', 'bg-blue-200'];
 
 export enum STORAGE_TYPES {

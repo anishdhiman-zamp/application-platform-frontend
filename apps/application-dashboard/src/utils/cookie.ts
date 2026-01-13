@@ -13,9 +13,11 @@ export const SESSION_COOKIE_NAMES = {
   DEVELOPMENT: 'ory_kratos_session',
 };
 
-export const setCookie = (name: string, value: string, maxAge = COOKIE_MAX_AGE) => {
+export const setCookie = (name: string, value: string, maxAge = COOKIE_MAX_AGE, domain?: string) => {
   if (typeof document !== 'undefined') {
-    document.cookie = `${name}=${value}; path=/; max-age=${maxAge}; samesite=lax`;
+    const domainPart = domain ? `; domain=${domain}` : '';
+
+    document.cookie = `${name}=${value}; path=/; max-age=${maxAge}; samesite=lax${domainPart}`;
   }
 };
 
