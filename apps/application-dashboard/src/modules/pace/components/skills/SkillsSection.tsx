@@ -2,16 +2,14 @@
 
 import { useMemo, useState } from 'react';
 import { Button, Input, toast } from '@zamp-platform/ui';
-import { useDeleteSkillMutation, useListSkillsQuery, useUpdateSkillStatusMutation } from '@/apis/macs';
+import { useListSkillsQuery } from '@/apis/pace';
 import NewPaceIcons from '@/assets/Icons/NewPaceIcons';
 import CommonWrapper from '@/components/commonWrapper';
 import { SkeletonTypes } from '@/components/commonWrapper/commonWrapper.types';
-import { SkillCardSkeleton } from '@/modules/macs/components/loaders';
-import SkillCard from '@/modules/macs/components/skills/SkillCard';
-import SkillsHeader from '@/modules/macs/components/skills/SkillsHeader';
-import UploadSkillModal from '@/modules/macs/components/skills/UploadSkillModal';
-import { useChatSidebarContext } from '@/modules/macs/context/ChatSidebarContext';
-import { SkillStatus } from '@/types/api/skills.types';
+import { useChatSidebarContext } from '@/modules/pace/chatsidebar.context';
+import SkillCardSkeleton from '@/modules/pace/components/loaders/SkillCardSkeleton';
+import SkillCard from '@/modules/pace/components/skills/SkillCard';
+import UploadSkillModal from '@/modules/pace/components/skills/UploadSkillModal';
 
 const SkillsSection = () => {
   const [searchQuery, setSearchQuery] = useState('');
@@ -21,8 +19,6 @@ const SkillsSection = () => {
 
   const { isChatSidebarOpen, setIsChatSidebarOpen } = useChatSidebarContext();
   const { data, isLoading, isError, refetch } = useListSkillsQuery({});
-  const [updateSkillStatus] = useUpdateSkillStatusMutation();
-  const [deleteSkill] = useDeleteSkillMutation();
 
   const skills = data?.skills ?? [];
 
@@ -36,29 +32,9 @@ const SkillsSection = () => {
     );
   }, [skills, searchQuery]);
 
-  const handleToggle = async (id: string, enabled: boolean) => {
-    try {
-      await updateSkillStatus({
-        skillId: id,
-        status: enabled ? SkillStatus.ACTIVE : SkillStatus.DISABLED,
-      }).unwrap();
-    } catch {
-      toast.error('Failed to update skill status');
-    }
-  };
-
   const handleUpdate = (id: string) => {
     setSkillIdToUpdate(id);
     setIsUploadModalOpen(true);
-  };
-
-  const handleDelete = async (id: string) => {
-    try {
-      await deleteSkill({ skillId: id }).unwrap();
-      toast.success('Skill deleted successfully');
-    } catch {
-      toast.error('Failed to delete skill');
-    }
   };
 
   const handleCloseModal = () => {
@@ -86,9 +62,7 @@ const SkillsSection = () => {
   };
 
   return (
-    <div className='relative flex h-full flex-col items-center justify-start bg-white'>
-      <SkillsHeader />
-
+    <>
       <div className='flex w-full max-w-[700px] items-center justify-between gap-x-3 px-6 pb-4'>
         <Input
           placeholder='Search skills...'
@@ -109,7 +83,6 @@ const SkillsSection = () => {
           Upload skill
         </Button>
       </div>
-
       <div className='w-full max-w-[700px] flex-1 overflow-y-auto' style={{ scrollbarWidth: 'thin' }}>
         <CommonWrapper
           isLoading={isLoading || isRefetching}
@@ -128,20 +101,13 @@ const SkillsSection = () => {
           className='h-full w-full'
         >
           {filteredSkills.map((skill) => (
-            <SkillCard
-              key={skill.id}
-              skill={skill}
-              onToggle={handleToggle}
-              onUpdate={handleUpdate}
-              onDelete={handleDelete}
-            />
+            <SkillCard key={skill.id} skill={skill} onUpdate={handleUpdate} />
           ))}
         </CommonWrapper>
       </div>
-
-      <UploadSkillModal isOpen={isUploadModalOpen} onClose={handleCloseModal} skillId={skillIdToUpdate} />
-
-      {/* New Chat Button - Bottom Left */}
+      {isUploadModalOpen && (
+        <UploadSkillModal isOpen={isUploadModalOpen} onClose={handleCloseModal} skillId={skillIdToUpdate} />
+      )}
       {!isChatSidebarOpen && (
         <Button
           onClick={handleOpenChat}
@@ -153,7 +119,7 @@ const SkillsSection = () => {
           <NewPaceIcons />
         </Button>
       )}
-    </div>
+    </>
   );
 };
 

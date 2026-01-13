@@ -1,11 +1,10 @@
 'use client';
 
 import { useCallback, useEffect, useRef, useState } from 'react';
+import { CHAT_CONVERSATION_ID_PARAM } from 'modules/pace/pace.constants';
 import { ROUTES_PATH } from '@/constants/routeConfig';
 import { useAppSelector } from '@/hooks/toolkit';
 import type { RootState } from '@/store';
-
-const CONVERSATION_ID_PARAM = 'c';
 
 interface UseChatContentStateProps {
   initialConversationId: string | null;
@@ -20,23 +19,15 @@ export const useChatContentState = ({ initialConversationId }: UseChatContentSta
   const [chatKey, setChatKey] = useState(0);
   const isInitializedRef = useRef(false);
 
-  // Initialize from URL on mount
-  useEffect(() => {
-    if (!isInitializedRef.current && initialConversationId) {
-      setConversationIdState(initialConversationId);
-      isInitializedRef.current = true;
-    }
-  }, [initialConversationId]);
-
   const setConversationId = useCallback((id: string | null) => {
     setConversationIdState(id);
 
     const params = new URLSearchParams(window.location.search);
 
     if (id) {
-      params.set(CONVERSATION_ID_PARAM, id);
+      params.set(CHAT_CONVERSATION_ID_PARAM, id);
     } else {
-      params.delete(CONVERSATION_ID_PARAM);
+      params.delete(CHAT_CONVERSATION_ID_PARAM);
     }
     const newUrl = params.toString() ? `${ROUTES_PATH.CHAT}?${params.toString()}` : ROUTES_PATH.CHAT;
 
@@ -49,6 +40,14 @@ export const useChatContentState = ({ initialConversationId }: UseChatContentSta
     setChatKey((prev) => prev + 1);
     window.history.replaceState(null, '', ROUTES_PATH.CHAT);
   }, []);
+
+  // Initialize from URL on mount
+  useEffect(() => {
+    if (!isInitializedRef.current && initialConversationId) {
+      setConversationIdState(initialConversationId);
+      isInitializedRef.current = true;
+    }
+  }, [initialConversationId]);
 
   return {
     organizationId,

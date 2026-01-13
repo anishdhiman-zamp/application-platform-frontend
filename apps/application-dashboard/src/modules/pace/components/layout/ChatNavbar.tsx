@@ -5,7 +5,7 @@ import { cn } from '@zamp-platform/ui/utils';
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 import { ROUTES_PATH } from '@/constants/routeConfig';
-import { useChatSidebarContext } from '@/modules/macs/context/ChatSidebarContext';
+import { useChatSidebarContext } from '@/modules/pace/chatsidebar.context';
 
 const ChatNavbar = () => {
   const pathname = usePathname();

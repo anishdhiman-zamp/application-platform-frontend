@@ -1,4 +1,4 @@
-import ChatContent from '@/modules/macs/components/chat/ChatContent';
+import ChatContent from '@/modules/pace/components/chat/ChatContent';
 
 interface ChatPageProps {
   searchParams: Promise<{ c?: string }>;

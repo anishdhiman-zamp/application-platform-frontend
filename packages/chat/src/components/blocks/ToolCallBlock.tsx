@@ -1,7 +1,8 @@
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from '@zamp-platform/ui';
-import { CheckCircle, ChevronDown, Clock, Wrench } from 'lucide-react';
-import { AnimatePresence, motion } from 'motion/react';
-import React, { FC, useEffect, useRef, useState } from 'react';
+import { ChevronDown, Terminal } from 'lucide-react';
+import { FC, useEffect, useRef, useState } from 'react';
+
+import { snakeCaseToSentenceCase } from '@/utils/common';
 
 import type { ToolUseDisplayContent } from '../../types/block.types';
 import { formatJson } from '../block.utils';
@@ -50,43 +51,15 @@ export const ToolCallBlock: FC<ToolCallBlockProps> = ({ payload, is_complete = t
         >
           <div className='flex flex-1 items-center gap-3'>
             <div className='flex items-center gap-2'>
-              <Wrench className='text-GRAY_700 h-4 w-4' />
-              <span className='text-GRAY_900'>{toolName}</span>
+              <Terminal className='text-GRAY_700 h-4 w-4' strokeWidth={1.5} />
+              <span className='text-GRAY_900'>{snakeCaseToSentenceCase(toolName)}</span>
             </div>
-            <AnimatePresence mode='wait' initial={false}>
-              {!is_complete ? (
-                <span
-                  key='running'
-                  className='bg-GRAY_100 text-GRAY_900 f-12-450 inline-flex items-center gap-1.5 rounded-full px-2.5 py-0.5'
-                >
-                  <Clock className='text-GRAY_700 h-3.5 w-3.5' />
-                  Running
-                </span>
-              ) : (
-                <motion.span
-                  key='completed'
-                  className='f-12-450 inline-flex items-center gap-1.5 rounded-full px-2.5 py-0.5'
-                  initial={{ opacity: 0, scale: 0.9 }}
-                  animate={{ opacity: 1, scale: 1 }}
-                  transition={{ duration: 0.3, ease: 'easeOut' }}
-                >
-                  <motion.div
-                    initial={{ scale: 0, rotate: -180 }}
-                    animate={{ scale: 1, rotate: 0 }}
-                    transition={{ duration: 0.4, ease: 'easeOut', delay: 0.1 }}
-                  >
-                    <CheckCircle className='h-3.5 w-3.5 text-green-700' />
-                  </motion.div>
-                  Completed
-                </motion.span>
-              )}
-            </AnimatePresence>
           </div>
         </AccordionTrigger>
         <AccordionContent className='border-GRAY_100 border-t px-3 pt-3 pb-3'>
           {payload.display_content && (
             <div className='space-y-2'>
-              <span className='text-GRAY_700 f-11-500 tracking-wide uppercase'>Parameters</span>
+              <span className='text-GRAY_700 f-11-500 tracking-wide uppercase'>Input</span>
               <div className='border-GRAY_200 overflow-x-auto rounded-lg border bg-gray-50 p-3'>
                 <pre className='f-12-400 text-GRAY_700 break-all whitespace-pre-wrap'>
                   {formatJson(payload.display_content.json_block)}
@@ -96,7 +69,7 @@ export const ToolCallBlock: FC<ToolCallBlockProps> = ({ payload, is_complete = t
           )}
           {!payload.display_content && payload.partial_json && (
             <div className='space-y-2'>
-              <span className='text-GRAY_700 f-11-500 tracking-wide uppercase'>Parameters</span>
+              <span className='text-GRAY_700 f-11-500 tracking-wide uppercase'>Input</span>
               <div className='border-GRAY_200 overflow-x-auto rounded-lg border bg-gray-50 p-3'>
                 <pre className='f-12-400 text-GRAY_700 break-all whitespace-pre-wrap'>
                   {formatJson(payload.partial_json)}
@@ -106,7 +79,7 @@ export const ToolCallBlock: FC<ToolCallBlockProps> = ({ payload, is_complete = t
           )}
           {payload.input_json && (
             <div className='space-y-2'>
-              <span className='text-GRAY_700 f-11-500 tracking-wide uppercase'>Parameters</span>
+              <span className='text-GRAY_700 f-11-500 tracking-wide uppercase'>Input</span>
               <div className='border-GRAY_200 overflow-x-auto rounded-lg border bg-gray-50 p-3'>
                 <pre className='f-12-400 text-GRAY_700 break-all whitespace-pre-wrap'>
                   {formatJson(payload.input_json)}

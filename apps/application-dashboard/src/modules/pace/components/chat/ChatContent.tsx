@@ -1,7 +1,7 @@
 'use client';
 
-import ChatContentInner from '@/modules/macs/components/chat/ChatContentInner';
-import { useChatContentState } from '@/modules/macs/hooks/useChatContentState';
+import ChatContentInner from '@/modules/pace/components/chat/ChatContentInner';
+import { useChatContentState } from '@/modules/pace/hooks/useChatContentState';
 
 interface ChatContentProps {
   initialConversationId: string | null;

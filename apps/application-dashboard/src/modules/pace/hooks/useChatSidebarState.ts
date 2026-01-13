@@ -1,10 +1,9 @@
 'use client';
 
 import { useCallback, useEffect, useRef, useState } from 'react';
+import { SIDEBAR_CONVERSATION_ID_PARAM } from 'modules/pace/pace.constants';
 import { usePathname } from 'next/navigation';
-import { useChatSidebarContext } from '@/modules/macs/context/ChatSidebarContext';
-
-const SIDEBAR_CONVERSATION_ID_PARAM = 's';
+import { useChatSidebarContext } from '@/modules/pace/chatsidebar.context';
 
 interface UseChatSidebarStateProps {
   initialConversationId: string | null;

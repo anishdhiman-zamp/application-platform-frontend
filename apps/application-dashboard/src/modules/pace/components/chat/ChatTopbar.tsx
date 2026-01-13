@@ -4,8 +4,8 @@ import type { FC } from 'react';
 import { Button } from '@zamp-platform/ui';
 import { cn } from '@zamp-platform/ui/utils';
 import { AnimatePresence, motion } from 'framer-motion';
-import { Plus, X } from 'lucide-react';
-import { DEFAULT_CHAT_TITLE } from 'modules/macs/constants';
+import { Maximize2, Minimize2, Plus, X } from 'lucide-react';
+import { DEFAULT_CHAT_TITLE } from '@/modules/pace/pace.constants';
 
 interface ChatTopbarProps {
   className?: string;
@@ -13,6 +13,8 @@ interface ChatTopbarProps {
   title?: string;
   onStartNewChat: () => void;
   onClose?: () => void;
+  isExpanded?: boolean;
+  onToggleExpand?: () => void;
 }
 
 const TITLE_ANIMATION_VARIANTS = {
@@ -26,7 +28,15 @@ const TITLE_TRANSITION = {
   ease: [0.4, 0, 0.2, 1] as const,
 };
 
-const ChatTopbar: FC<ChatTopbarProps> = ({ className, style, title, onStartNewChat, onClose }) => {
+const ChatTopbar: FC<ChatTopbarProps> = ({
+  className,
+  style,
+  title,
+  onStartNewChat,
+  onClose,
+  isExpanded,
+  onToggleExpand,
+}) => {
   const displayTitle = title || DEFAULT_CHAT_TITLE;
 
   return (
@@ -39,7 +49,7 @@ const ChatTopbar: FC<ChatTopbarProps> = ({ className, style, title, onStartNewCh
           <motion.span
             key={displayTitle}
             variants={TITLE_ANIMATION_VARIANTS}
-            initial='initial'
+            initial={false}
             animate='animate'
             exit='exit'
             transition={TITLE_TRANSITION}
@@ -59,6 +69,17 @@ const ChatTopbar: FC<ChatTopbarProps> = ({ className, style, title, onStartNewCh
         >
           <Plus size={12} />
         </Button>
+        {onToggleExpand && (
+          <Button
+            variant='ghost'
+            size='icon'
+            className='h-6 w-6 p-2 text-gray-600 hover:text-gray-900'
+            onClick={onToggleExpand}
+            title={isExpanded ? 'Minimize chat' : 'Expand chat'}
+          >
+            {isExpanded ? <Minimize2 size={12} /> : <Maximize2 size={12} />}
+          </Button>
+        )}
         {onClose && (
           <Button
             variant='ghost'

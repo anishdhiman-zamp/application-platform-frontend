@@ -1,7 +1,7 @@
 'use client';
 
 import { Dispatch, SetStateAction, useCallback, useEffect, useRef, useState } from 'react';
-import { DEBOUNCE_DELAY_MS, NEW_CONVERSATION_ID } from 'modules/macs/constants';
+import { DEBOUNCE_DELAY_MS, NEW_CONVERSATION_ID } from '@/modules/pace/pace.constants';
 import { getFromLocalStorage, LOCAL_STORAGE_KEYS, setToLocalStorage } from '@/utils/localstorage';
 
 interface ChatDraft {
@@ -79,29 +79,6 @@ export const useChatDraftInput = ({ conversationId }: UseChatDraftInputProps): U
     return draft?.content || '';
   });
 
-  useEffect(() => {
-    if (messageSentFromNewChatRef.current && draftId !== NEW_CONVERSATION_ID) {
-      const drafts = getDraftsFromStorage();
-      const updatedDrafts = removeDraft(drafts, NEW_CONVERSATION_ID);
-
-      saveDraftsToStorage(updatedDrafts);
-      messageSentFromNewChatRef.current = false;
-    }
-
-    const drafts = getDraftsFromStorage();
-    const draft = getDraftById(drafts, draftId);
-
-    setInputValueState(draft?.content || '');
-  }, [draftId]);
-
-  useEffect(() => {
-    return () => {
-      if (debounceTimerRef.current) {
-        clearTimeout(debounceTimerRef.current);
-      }
-    };
-  }, []);
-
   const setInputValue = useCallback((newValue: SetStateAction<string>) => {
     setInputValueState((prev) => {
       const nextValue = typeof newValue === 'function' ? newValue(prev) : newValue;
@@ -131,6 +108,29 @@ export const useChatDraftInput = ({ conversationId }: UseChatDraftInputProps): U
 
       return nextValue;
     });
+  }, []);
+
+  useEffect(() => {
+    if (messageSentFromNewChatRef.current && draftId !== NEW_CONVERSATION_ID) {
+      const drafts = getDraftsFromStorage();
+      const updatedDrafts = removeDraft(drafts, NEW_CONVERSATION_ID);
+
+      saveDraftsToStorage(updatedDrafts);
+      messageSentFromNewChatRef.current = false;
+    }
+
+    const drafts = getDraftsFromStorage();
+    const draft = getDraftById(drafts, draftId);
+
+    setInputValueState(draft?.content || '');
+  }, [draftId]);
+
+  useEffect(() => {
+    return () => {
+      if (debounceTimerRef.current) {
+        clearTimeout(debounceTimerRef.current);
+      }
+    };
   }, []);
 
   return {

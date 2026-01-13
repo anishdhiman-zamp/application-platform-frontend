@@ -5,3 +5,7 @@ export const ACCEPTED_FILE_TYPES = `${INPUT_FILE_FORMATS.TXT},${INPUT_FILE_FORMA
 export const DEFAULT_CHAT_TITLE = 'Untitled';
 export const DEBOUNCE_DELAY_MS = 300;
 export const NEW_CONVERSATION_ID = 'null_thread';
+export const SIDEBAR_WIDTH = 400;
+
+export const SIDEBAR_CONVERSATION_ID_PARAM = 's';
+export const CHAT_CONVERSATION_ID_PARAM = 'c';

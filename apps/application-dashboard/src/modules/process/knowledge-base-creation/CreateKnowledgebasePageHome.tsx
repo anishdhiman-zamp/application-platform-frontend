@@ -11,7 +11,7 @@ import { useLazyFilterConversationsQuery } from '@/apis/processes';
 import { KB_TOAST_MESSAGES } from '@/components/common/toast/toast.constants';
 import CommonWrapper from '@/components/commonWrapper';
 import { SkeletonTypes } from '@/components/commonWrapper/commonWrapper.types';
-import { ChatMessagesSkeleton } from '@/modules/macs/components/loaders';
+import ChatMessagesSkeleton from '@/modules/pace/components/loaders/ChatMessagesSkeleton';
 import { FilterConversationsResponseType, ProcessStatus } from '@/types/api/processApi.types';
 
 // Dynamic imports for heavy components

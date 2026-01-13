@@ -13,11 +13,11 @@ import { API_ENDPOINTS } from '@/apis/apiEndpoint.constants';
 import CommonWrapper from '@/components/commonWrapper';
 import { SkeletonTypes } from '@/components/commonWrapper/commonWrapper.types';
 import NewPaceAvatar from '@/modules/chatbot/NewPaceAvatar';
-import ChatHistory from '@/modules/macs/components/chat/ChatHistory';
-import ChatHome from '@/modules/macs/components/chat/ChatHome';
-import ChatTopbar from '@/modules/macs/components/chat/ChatTopbar';
-import { ChatMessagesSkeleton } from '@/modules/macs/components/loaders';
-import { useChatDraftInput } from '@/modules/macs/hooks/useChatDraftInput';
+import ChatHistory from '@/modules/pace/components/chat/ChatHistory';
+import ChatHome from '@/modules/pace/components/chat/ChatHome';
+import ChatTopbar from '@/modules/pace/components/chat/ChatTopbar';
+import ChatMessagesSkeleton from '@/modules/pace/components/loaders/ChatMessagesSkeleton';
+import { useChatDraftInput } from '@/modules/pace/hooks/useChatDraftInput';
 
 interface ChatContentInnerProps {
   organizationId: string;
@@ -60,9 +60,8 @@ const ChatContentInner = ({
     return chat.messages.length > 0 && chat.messages[chat.messages.length - 1]?.sender_type === SenderType.USER;
   }, [chat.messages]);
 
-  const isLoadingConversation = Boolean(conversationId && chat.isLoadingConversationHistory && !hasMessages);
-
-  const isInConversation = conversationId || chat.conversationId;
+  const isLoadingConversation = Boolean(conversationId && chat.isLoadingConversationHistory) || !hasMessages;
+  const isInConversation = Boolean(conversationId || chat.conversationId || hasMessages);
 
   useEffect(() => {
     if (chat.conversationId && !conversationId) {
@@ -102,7 +101,7 @@ const ChatContentInner = ({
               scopeId={organizationId}
               organizationId={organizationId}
               currentUserName={currentUserName}
-              isDisabled={chat.isStreaming}
+              isDisabled={chat.isStreaming || chat.isCreatingConversationV2}
               placeholder="Do your life's best work with Pace"
               externalInputValue={inputValue}
               setExternalInputValue={setInputValue}
@@ -126,9 +125,7 @@ const ChatContentInner = ({
           scopeId={organizationId}
           organizationId={organizationId}
           currentUserName={currentUserName}
-          isDisabled={chat.isStreaming || chat.isCreatingConversationV2}
           placeholder="Do your life's best work with Pace"
-          className={chat.isCreatingConversationV2 ? 'animate-pulse rounded-xl bg-gray-50' : ''}
           externalInputValue={inputValue}
           setExternalInputValue={setInputValue}
         />

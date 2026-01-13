@@ -102,7 +102,7 @@ export const MessageContainer: FC<MessageContainerProps> = ({
 
   useEffect(() => {
     if (messages?.length > 0) {
-      scrollToBottom('smooth');
+      scrollToBottom('instant');
     }
   }, [messages?.length, scrollToBottom]);
 

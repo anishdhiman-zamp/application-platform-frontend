@@ -10,6 +10,7 @@ export const enum BLOCK_TYPE {
   ATTACHMENTS = 'attachments',
   TEXT = 'text',
   TOOL_USE = 'tool_use',
+  TOOL_RESULT = 'tool_result',
   THINKING = 'thinking',
   OUTPUT_FILES = 'output_files',
 }
