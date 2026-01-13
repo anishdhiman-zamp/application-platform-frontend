@@ -105,9 +105,7 @@ const SkillsSection = () => {
           ))}
         </CommonWrapper>
       </div>
-      {isUploadModalOpen && (
-        <UploadSkillModal isOpen={isUploadModalOpen} onClose={handleCloseModal} skillId={skillIdToUpdate} />
-      )}
+      <UploadSkillModal isOpen={isUploadModalOpen} onClose={handleCloseModal} skillId={skillIdToUpdate} />
       {!isChatSidebarOpen && (
         <Button
           onClick={handleOpenChat}

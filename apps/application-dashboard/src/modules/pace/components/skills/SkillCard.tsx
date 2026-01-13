@@ -10,10 +10,10 @@ import {
   toast,
 } from '@zamp-platform/ui';
 import { MoreHorizontal, RotateCw, Trash2 } from 'lucide-react';
-import { findTimeDifference } from 'modules/data/data.utils';
 import { useDeleteSkillMutation, useUpdateSkillStatusMutation } from '@/apis/pace';
 import type { Skill } from '@/types/api/skills.types';
 import { SkillStatus } from '@/types/api/skills.types';
+import { findTimeDifference } from '@/utils/common';
 
 interface SkillCardProps {
   skill: Skill;

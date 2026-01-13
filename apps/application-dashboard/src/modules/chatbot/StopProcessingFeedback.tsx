@@ -10,10 +10,9 @@ import {
   DialogHeader,
   DialogHeaderTitle,
 } from '@zamp-platform/ui';
-import { findTimeDifference } from 'modules/data/data.utils';
 import { RootState } from '@/store';
 import { defaultFnType } from '@/types/commonTypes';
-import { formatPlural } from '@/utils/common';
+import { findTimeDifference, formatPlural } from '@/utils/common';
 
 interface StopProcessingFeedbackProps {
   isOpen: boolean;
