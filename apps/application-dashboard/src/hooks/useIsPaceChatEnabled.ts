@@ -10,6 +10,7 @@ import { getFromLocalStorage, LOCAL_STORAGE_KEYS } from '@/utils/localstorage';
 /**
  * Hook to check if the pace-chat feature flag is enabled for the current organization
  * @returns {Object} An object containing isPaceChatEnabled and isLoading states
+ * isPaceChatEnabled: boolean - true if the pace-chat feature flag is enabled for the current organization
  */
 export const useIsPaceChatEnabled = () => {
   const { evaluate, ldClient } = useFeatureFlags();
