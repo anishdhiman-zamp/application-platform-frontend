@@ -26,7 +26,7 @@ const SkillCard = ({ skill, onUpdate }: SkillCardProps) => {
 
   const isEnabled = skill.status === SkillStatus.ACTIVE;
 
-  const handleToggle = async (enabled: boolean) => {
+  const onToggle = async (enabled: boolean) => {
     try {
       await updateSkillStatus({
         skillId: skill.id,
@@ -37,7 +37,7 @@ const SkillCard = ({ skill, onUpdate }: SkillCardProps) => {
     }
   };
 
-  const handleDelete = async () => {
+  const onDelete = async () => {
     try {
       await deleteSkill({ skillId: skill.id }).unwrap();
       toast.success('Skill deleted successfully');
@@ -73,14 +73,14 @@ const SkillCard = ({ skill, onUpdate }: SkillCardProps) => {
               </DropdownMenuItem>
               <DropdownMenuItem
                 className='hover:bg-GRAY_100 flex items-center gap-2 rounded-md text-red-600'
-                onClick={handleDelete}
+                onClick={onDelete}
               >
                 <Trash2 size={16} /> Delete
               </DropdownMenuItem>
             </DropdownMenuContent>
           </DropdownMenu>
 
-          <Switch checked={isEnabled} onCheckedChange={handleToggle} />
+          <Switch checked={isEnabled} onCheckedChange={onToggle} />
         </div>
       </div>
     </div>

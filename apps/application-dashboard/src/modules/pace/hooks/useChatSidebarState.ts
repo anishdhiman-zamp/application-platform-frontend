@@ -13,13 +13,14 @@ export const useChatSidebarState = ({ initialConversationId }: UseChatSidebarSta
   const { isChatSidebarOpen, setIsChatSidebarOpen } = useChatSidebarContext();
   const pathname = usePathname();
 
-  const [chatTitle, setChatTitle] = useState('');
-  const [conversationId, setConversationIdState] = useState<string | null>(initialConversationId);
-  const [chatKey, setChatKey] = useState(0);
   const isInitializedRef = useRef(false);
   const previousPathnameRef = useRef(pathname);
 
-  const handleUpdateandDeleteConversationIdUrl = useCallback(() => {
+  const [chatTitle, setChatTitle] = useState('');
+  const [conversationId, setConversationIdState] = useState<string | null>(initialConversationId);
+  const [chatKey, setChatKey] = useState(0);
+
+  const handleConversationIdUpdate = useCallback(() => {
     // Remove conversation ID from URL
     const params = new URLSearchParams(window.location.search);
 
@@ -53,7 +54,7 @@ export const useChatSidebarState = ({ initialConversationId }: UseChatSidebarSta
     setChatTitle('');
     setConversationIdState(null);
     setChatKey((prev) => prev + 1);
-    handleUpdateandDeleteConversationIdUrl();
+    handleConversationIdUpdate();
   }, []);
 
   const handleClose = useCallback(() => {

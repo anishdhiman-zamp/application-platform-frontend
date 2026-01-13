@@ -14,7 +14,7 @@ const ChatNavbar = () => {
   const isHomePage = pathname === ROUTES_PATH.CHAT;
   const isSkillsPage = pathname === ROUTES_PATH.CHAT_SKILLS;
 
-  const handleHomeClick = () => {
+  const onHomeClick = () => {
     setIsChatSidebarOpen(false);
     startNewChat();
   };
@@ -29,7 +29,7 @@ const ChatNavbar = () => {
         )}
         role='button'
         tabIndex={0}
-        onClick={handleHomeClick}
+        onClick={onHomeClick}
       >
         <HomeIcon size={14} />
       </Link>

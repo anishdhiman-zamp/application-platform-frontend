@@ -33,21 +33,21 @@ const SkillsSection = () => {
     );
   }, [skills, searchQuery]);
 
-  const handleUpdate = (id: string) => {
+  const onUpdate = (id: string) => {
     setSkillIdToUpdate(id);
     setIsUploadModalOpen(true);
   };
 
-  const handleCloseModal = () => {
+  const onCloseModal = () => {
     setIsUploadModalOpen(false);
     setSkillIdToUpdate(undefined);
   };
 
-  const handleSearchChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+  const onSearchChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     setSearchQuery(e.target.value);
   };
 
-  const handleRefetch = async () => {
+  const onRefetch = async () => {
     setIsRefetching(true);
     try {
       await refetch();
@@ -58,7 +58,7 @@ const SkillsSection = () => {
     }
   };
 
-  const handleOpenChat = () => {
+  const onOpenChat = () => {
     setIsChatSidebarOpen(true);
   };
 
@@ -68,7 +68,7 @@ const SkillsSection = () => {
         <Input
           placeholder='Search skills...'
           value={searchQuery}
-          onChange={handleSearchChange}
+          onChange={onSearchChange}
           className='border-GRAY_400 focus:border-GRAY_600 w-full focus:ring-3'
           size='small'
           aria-label='Search skills'
@@ -88,22 +88,22 @@ const SkillsSection = () => {
         <CommonWrapper
           isLoading={isLoading || isRefetching}
           isError={isError}
-          isNoData={!isLoading && !isRefetching && !isError && filteredSkills.length !== 0}
-          refetchFunction={handleRefetch}
+          isNoData={!isLoading && !isRefetching && !isError && filteredSkills.length === 0}
+          refetchFunction={onRefetch}
           skeletonType={SkeletonTypes.CUSTOM}
           loader={<SkillCardSkeleton />}
           noDataBanner={<SkillsEmptyState searchQuery={searchQuery} />}
           className='h-full w-full'
         >
           {filteredSkills.map((skill) => (
-            <SkillCard key={skill.id} skill={skill} onUpdate={handleUpdate} />
+            <SkillCard key={skill.id} skill={skill} onUpdate={onUpdate} />
           ))}
         </CommonWrapper>
       </div>
-      <UploadSkillModal isOpen={isUploadModalOpen} onClose={handleCloseModal} skillId={skillIdToUpdate} />
+      <UploadSkillModal isOpen={isUploadModalOpen} onClose={onCloseModal} skillId={skillIdToUpdate} />
       {!isChatSidebarOpen && (
         <Button
-          onClick={handleOpenChat}
+          onClick={onOpenChat}
           variant='secondary'
           size='icon'
           className='absolute bottom-3 left-3 h-14 w-14 rounded-full border-none transition-all [&_svg]:size-10'
