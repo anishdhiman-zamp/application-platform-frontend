@@ -18,13 +18,13 @@ interface ChatTopbarProps {
 }
 
 const TITLE_ANIMATION_VARIANTS = {
-  initial: { opacity: 0, y: 8, filter: 'blur(4px)' },
-  animate: { opacity: 1, y: 0, filter: 'blur(0px)' },
-  exit: { opacity: 0, y: -8, filter: 'blur(4px)' },
+  initial: { width: 0 },
+  animate: { width: 'auto' },
+  exit: { width: 0 },
 };
 
 const TITLE_TRANSITION = {
-  duration: 0.25,
+  duration: 0.5,
   ease: [0.4, 0, 0.2, 1] as const,
 };
 
@@ -49,11 +49,11 @@ const ChatTopbar: FC<ChatTopbarProps> = ({
           <motion.span
             key={displayTitle}
             variants={TITLE_ANIMATION_VARIANTS}
-            initial={false}
+            initial='initial'
             animate='animate'
             exit='exit'
             transition={TITLE_TRANSITION}
-            className='block truncate'
+            className='block overflow-hidden whitespace-nowrap'
           >
             {displayTitle}
           </motion.span>

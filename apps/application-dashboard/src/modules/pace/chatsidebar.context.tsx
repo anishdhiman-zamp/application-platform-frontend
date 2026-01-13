@@ -1,6 +1,6 @@
 'use client';
 
-import { createContext, type ReactNode, useCallback, useContext, useMemo, useState } from 'react';
+import { createContext, type ReactNode, useCallback, useContext, useMemo, useRef, useState } from 'react';
 
 interface ChatSidebarContextType {
   isChatSidebarOpen: boolean;
@@ -8,6 +8,8 @@ interface ChatSidebarContextType {
   isExpanded: boolean;
   toggleExpand: () => void;
   resetExpand: () => void;
+  registerStartNewChat: (callback: () => void) => void;
+  startNewChat: () => void;
 }
 
 const ChatSidebarContext = createContext<ChatSidebarContextType | null>(null);
@@ -15,6 +17,7 @@ const ChatSidebarContext = createContext<ChatSidebarContextType | null>(null);
 export const ChatSidebarProvider = ({ children }: { children: ReactNode }) => {
   const [isChatSidebarOpen, setIsChatSidebarOpen] = useState(false);
   const [isExpanded, setIsExpanded] = useState(false);
+  const startNewChatRef = useRef<(() => void) | null>(null);
 
   const toggleExpand = useCallback(() => {
     setIsExpanded((prev) => !prev);
@@ -24,6 +27,14 @@ export const ChatSidebarProvider = ({ children }: { children: ReactNode }) => {
     setIsExpanded(false);
   }, []);
 
+  const registerStartNewChat = useCallback((callback: () => void) => {
+    startNewChatRef.current = callback;
+  }, []);
+
+  const startNewChat = useCallback(() => {
+    startNewChatRef.current?.();
+  }, []);
+
   const value: ChatSidebarContextType = useMemo(
     () => ({
       isChatSidebarOpen,
@@ -31,8 +42,10 @@ export const ChatSidebarProvider = ({ children }: { children: ReactNode }) => {
       isExpanded,
       toggleExpand,
       resetExpand,
+      registerStartNewChat,
+      startNewChat,
     }),
-    [isChatSidebarOpen, isExpanded, toggleExpand, resetExpand],
+    [isChatSidebarOpen, isExpanded, toggleExpand, resetExpand, registerStartNewChat, startNewChat],
   );
 
   return <ChatSidebarContext.Provider value={value}>{children}</ChatSidebarContext.Provider>;

@@ -80,7 +80,7 @@ const ChatSidebarInner: FC<ChatSidebarInnerProps> = ({
       <ChatTopbar
         onStartNewChat={startNewChat}
         onClose={handleClose}
-        title={isInConversation ? chatTitle : "What's on your mind?"}
+        title={isInConversation ? chatTitle : 'New chat'}
         isExpanded={isExpanded}
         onToggleExpand={onToggleExpand}
       />

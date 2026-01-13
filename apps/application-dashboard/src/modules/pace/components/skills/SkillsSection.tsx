@@ -9,6 +9,7 @@ import { SkeletonTypes } from '@/components/commonWrapper/commonWrapper.types';
 import { useChatSidebarContext } from '@/modules/pace/chatsidebar.context';
 import SkillCardSkeleton from '@/modules/pace/components/loaders/SkillCardSkeleton';
 import SkillCard from '@/modules/pace/components/skills/SkillCard';
+import SkillsEmptyState from '@/modules/pace/components/skills/SkillsEmptyState';
 import UploadSkillModal from '@/modules/pace/components/skills/UploadSkillModal';
 
 const SkillsSection = () => {
@@ -87,17 +88,11 @@ const SkillsSection = () => {
         <CommonWrapper
           isLoading={isLoading || isRefetching}
           isError={isError}
-          isNoData={!isLoading && !isRefetching && !isError && filteredSkills.length === 0}
+          isNoData={!isLoading && !isRefetching && !isError && filteredSkills.length !== 0}
           refetchFunction={handleRefetch}
           skeletonType={SkeletonTypes.CUSTOM}
           loader={<SkillCardSkeleton />}
-          noDataBanner={
-            <div className='f-14-400 text-GRAY_600 flex h-full items-center justify-center text-center'>
-              {searchQuery
-                ? `No skills found matching "${searchQuery}"`
-                : 'No skills yet. Upload your first skill to get started.'}
-            </div>
-          }
+          noDataBanner={<SkillsEmptyState searchQuery={searchQuery} />}
           className='h-full w-full'
         >
           {filteredSkills.map((skill) => (

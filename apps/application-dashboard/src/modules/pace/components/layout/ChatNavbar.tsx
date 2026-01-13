@@ -9,13 +9,14 @@ import { useChatSidebarContext } from '@/modules/pace/chatsidebar.context';
 
 const ChatNavbar = () => {
   const pathname = usePathname();
-  const { setIsChatSidebarOpen } = useChatSidebarContext();
+  const { setIsChatSidebarOpen, startNewChat } = useChatSidebarContext();
 
   const isHomePage = pathname === ROUTES_PATH.CHAT;
   const isSkillsPage = pathname === ROUTES_PATH.CHAT_SKILLS;
 
   const handleHomeClick = () => {
     setIsChatSidebarOpen(false);
+    startNewChat();
   };
 
   return (
