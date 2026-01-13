@@ -1,9 +1,11 @@
-import { Brain } from 'lucide-react';
-import { SectionType } from '@/modules/macs/types';
 import { INPUT_FILE_FORMATS } from '@/types/common/mime';
 
-export const SECTION_ICONS: Record<SectionType, React.ComponentType<{ size?: number; className?: string }>> = {
-  [SectionType.Skills]: Brain,
-};
-
 export const ACCEPTED_FILE_TYPES = `${INPUT_FILE_FORMATS.TXT},${INPUT_FILE_FORMATS.PDF},${INPUT_FILE_FORMATS.DOCX},${INPUT_FILE_FORMATS.JPEG},${INPUT_FILE_FORMATS.JPG},${INPUT_FILE_FORMATS.PNG},${INPUT_FILE_FORMATS.BMP}`;
+
+export const DEFAULT_CHAT_TITLE = 'Untitled';
+export const DEBOUNCE_DELAY_MS = 300;
+export const NEW_CONVERSATION_ID = 'null_thread';
+export const SIDEBAR_WIDTH = 400;
+
+export const SIDEBAR_CONVERSATION_ID_PARAM = 's';
+export const CHAT_CONVERSATION_ID_PARAM = 'c';

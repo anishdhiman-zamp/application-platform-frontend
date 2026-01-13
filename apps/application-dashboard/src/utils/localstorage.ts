@@ -15,9 +15,10 @@ export enum LOCAL_STORAGE_KEYS {
   WIDGET_CREATION_FORM_DATA = 'WIDGET_CREATION_FORM_DATA',
   LAST_VISITED_SHEET_ID = 'LAST_VISITED_SHEET_ID',
   CREATE_EDIT_FILTER_FORM_DATA = 'CREATE_EDIT_FILTER_FORM_DATA',
+  CONVERSATION_DRAFTS = 'CONVERSATION_DRAFTS',
 }
 
-export const getFromLocalStorage = (key: string) => {
+export const getFromLocalStorage = (key: LOCAL_STORAGE_KEYS) => {
   if (typeof window === 'undefined') {
     return '';
   }

@@ -376,7 +376,7 @@ export const ConnectedChatInput: FC<ConnectedChatInputProps> = ({
                   disabled={!value.trim() || isUploading || isDisabled}
                   size='icon'
                   aria-label='Send message'
-                  className='!size-5 rounded-full !text-white [&_svg]:size-3'
+                  className='!size-5 rounded-full !text-white disabled:cursor-not-allowed disabled:opacity-50 [&_svg]:size-3'
                 >
                   <ArrowUp />
                 </Button>

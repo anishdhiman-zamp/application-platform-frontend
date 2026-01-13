@@ -68,6 +68,7 @@ export const enum SSEEventType {
   MESSAGE_START = 'message_start',
   MESSAGE_STOP = 'message_stop',
   OUTPUT_FILES = 'output_files',
+  TITLE_UPDATED = 'title_updated',
 }
 
 export const enum ChatMessageType {

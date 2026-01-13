@@ -76,6 +76,9 @@ export const useChat = (config: ChatConfig) => {
   // Ref to track the current conversation ID for use in callbacks without stale closures
   const conversationIdRef = useRef<string | null>(_conversationId);
 
+  // Track if conversation was created in this session (to skip fetching history for newly created conversations)
+  const isNewlyCreatedConversationRef = useRef<string | null>(null);
+
   const isStreaming = useMemo(() => {
     return config.enableStreaming ? (streamingState?.is_active ?? false) : false;
   }, [config.enableStreaming, streamingState?.is_active]);
@@ -85,6 +88,13 @@ export const useChat = (config: ChatConfig) => {
       setStreamingState(null);
     }
   }, [config.enableStreaming]);
+
+  // Skip fetching conversation history if this conversation was just created in this session (only for streaming mode)
+  const shouldSkipConversationFetch =
+    !config.resourceId ||
+    !config.resourceType ||
+    !config.conversationId ||
+    (config.enableStreaming && isNewlyCreatedConversationRef.current === config.conversationId);
 
   const {
     data: conversationHistory,
@@ -101,7 +111,7 @@ export const useChat = (config: ChatConfig) => {
       url: config.apiConfig?.getConversationById,
     },
     {
-      skip: !config.resourceId || !config.resourceType || !config.conversationId,
+      skip: shouldSkipConversationFetch,
       refetchOnMountOrArgChange: config.refetchConversationHistory,
     },
   );
@@ -120,6 +130,7 @@ export const useChat = (config: ChatConfig) => {
     ]);
     const response = await createConversationMutation(conversationPayload).unwrap();
     setConversationId(response.conversation_id);
+    isNewlyCreatedConversationRef.current = response.conversation_id;
     return response.conversation_id;
   };
 
@@ -152,9 +163,10 @@ export const useChat = (config: ChatConfig) => {
       url: config.apiConfig?.createConversation,
     }).unwrap();
     setConversationId(response.conversation_id);
+    isNewlyCreatedConversationRef.current = response.conversation_id;
 
     // Update header with title from response
-    if (response.title) {
+    if (response.title && !config.enableStreaming) {
       config.setHeader?.(response.title);
     }
 
@@ -164,6 +176,7 @@ export const useChat = (config: ChatConfig) => {
   const clearMessages = useCallback(() => {
     setMessages([]);
     setConversationId(null);
+    isNewlyCreatedConversationRef.current = null;
     if (config.enableStreaming) {
       setStreamingState(null);
     }
@@ -363,6 +376,12 @@ export const useChat = (config: ChatConfig) => {
           case SSEEventType.CONVERSATION_UPDATED:
             if (_conversationId) {
               dispatch(chatApi.util.invalidateTags([{ type: APITags.GET_CONVERSATION_BY_ID, id: _conversationId }]));
+            }
+            break;
+          case SSEEventType.TITLE_UPDATED:
+            if (config.enableStreaming) {
+              const title = data.payload?.title;
+              config.setHeader?.(title);
             }
             break;
           case SSEEventType.MESSAGE_START:

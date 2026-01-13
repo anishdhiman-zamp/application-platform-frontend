@@ -102,7 +102,9 @@ export const MessageContainer: FC<MessageContainerProps> = ({
 
   useEffect(() => {
     if (messages?.length > 0) {
-      scrollToBottom('smooth');
+      // Use instant scroll on first load, smooth scroll for subsequent updates
+      const behavior = isInitialScrollRef.current ? 'instant' : 'smooth';
+      scrollToBottom(behavior);
     }
   }, [messages?.length, scrollToBottom]);
 

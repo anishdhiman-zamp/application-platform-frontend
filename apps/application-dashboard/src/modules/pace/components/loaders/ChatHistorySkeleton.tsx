@@ -11,9 +11,8 @@ const ChatHistoryItemSkeleton = () => (
 
 const ChatHistorySkeleton = () => (
   <div className='w-full max-w-[700px]'>
-    <div className='f-11-550 text-GRAY_700 px-3 py-2'>Recent</div>
     <div className='space-y-0.5'>
-      {Array.from({ length: 5 }).map((_, index) => (
+      {Array.from({ length: 8 }).map((_, index) => (
         <ChatHistoryItemSkeleton key={index} />
       ))}
     </div>

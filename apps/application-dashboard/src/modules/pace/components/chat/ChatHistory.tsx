@@ -4,15 +4,19 @@ import { useMemo, useState } from 'react';
 import { ResourceType } from '@zamp-platform/chat';
 import { Button, Input } from '@zamp-platform/ui';
 import { MessagesSquare, Search } from 'lucide-react';
-import { useGetConversationHistoryQuery } from '@/apis/macs';
+import { useGetConversationHistoryQuery } from '@/apis/pace';
 import CommonWrapper from '@/components/commonWrapper';
 import { SkeletonTypes } from '@/components/commonWrapper/commonWrapper.types';
 import { useAppSelector } from '@/hooks/toolkit';
-import ChatHistoryItem from '@/modules/macs/components/chat/ChatHistoryItem';
-import { ChatHistorySkeleton } from '@/modules/macs/components/loaders';
+import ChatHistoryItem from '@/modules/pace/components/chat/ChatHistoryItem';
+import ChatHistorySkeleton from '@/modules/pace/components/loaders/ChatHistorySkeleton';
 import type { RootState } from '@/store';
 
-const ChatHistory = () => {
+interface ChatHistoryProps {
+  onSelectConversation: (id: string | null) => void;
+}
+
+const ChatHistory = ({ onSelectConversation }: ChatHistoryProps) => {
   const organizationId = useAppSelector((state: RootState) => state?.user?.user?.orgs?.[0]?.organization_id) ?? '';
   const [searchQuery, setSearchQuery] = useState('');
   const [showSearch, setShowSearch] = useState(false);
@@ -48,16 +52,14 @@ const ChatHistory = () => {
     <div className='mx-auto flex min-h-0 w-full flex-1 flex-col bg-white pt-4'>
       <div className='flex items-center justify-between p-3'>
         <p className='f-14-550 text-gray-1000'>Chat History</p>
-        {conversations.length > 0 && (
-          <Button
-            variant='ghost'
-            size='icon'
-            className='text-gray-1000 h-6 w-6 px-2 py-1'
-            onClick={() => setShowSearch(!showSearch)}
-          >
-            <Search size={12} />
-          </Button>
-        )}
+        <Button
+          variant='ghost'
+          size='icon'
+          className={`text-gray-1000 h-6 w-6 px-2 py-1 ${conversations.length === 0 ? 'invisible' : ''}`}
+          onClick={() => setShowSearch(!showSearch)}
+        >
+          <Search size={12} />
+        </Button>
       </div>
       {showSearch && (
         <div className='mt-4 px-3 pb-4'>
@@ -65,7 +67,7 @@ const ChatHistory = () => {
             placeholder='Search'
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
-            className='h-8'
+            className='placeholder:f-14-400 h-8'
             autoFocus
           />
         </div>
@@ -88,7 +90,7 @@ const ChatHistory = () => {
       >
         <div className='space-y-0.5'>
           {filteredConversations.map((conversation) => (
-            <ChatHistoryItem key={conversation?.id} conversation={conversation} />
+            <ChatHistoryItem key={conversation?.id} conversation={conversation} onSelect={onSelectConversation} />
           ))}
         </div>
       </CommonWrapper>

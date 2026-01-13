@@ -10,14 +10,7 @@ import {
   ValueFormatterParams,
 } from 'ag-grid-community';
 import type { AgGridReact } from 'ag-grid-react';
-import {
-  differenceInDays,
-  differenceInHours,
-  differenceInMinutes,
-  differenceInMonths,
-  format,
-  isValid,
-} from 'date-fns';
+import { format, isValid } from 'date-fns';
 import {
   COLUMN_TYPE_WIDTH_MAP,
   COLUMN_WIDTHS,
@@ -39,7 +32,7 @@ import { AggregationFunctionType, FilterModelType, FilterType, LogicalOperatorTy
 import {
   capitalizeWords,
   createDateObjectFromUTCString,
-  formatPlural,
+  findTimeDifference,
   getCommaSeparatedNumber,
   getTagColor,
   snakeCaseToSentenceCase,
@@ -60,37 +53,6 @@ import { CUSTOM_COLUMNS_TYPE, VALUE_FORMAT_TYPE } from 'components/common/table/
 import { getEncodedRequest } from 'components/common/table/table.utils';
 import { FILTER_TYPES } from 'components/filter/filter.types';
 import { AG_GRID_FILTER_TYPES, CONDITION_OPERATOR_TYPE } from 'components/filter/filters.constants';
-
-export const findTimeDifference = (updated_at: string): string => {
-  const currentTime = new Date();
-  const lastUpdatedTime = new Date(updated_at);
-
-  const differenceInMinutesValue = differenceInMinutes(currentTime, lastUpdatedTime);
-
-  if (differenceInMinutesValue < 60) {
-    if (differenceInMinutesValue === 0) {
-      return 'just now';
-    }
-
-    return `${formatPlural(differenceInMinutesValue, 'minute')} ago`;
-  }
-
-  const differenceInHoursValue = differenceInHours(currentTime, lastUpdatedTime);
-
-  if (differenceInHoursValue < 24) {
-    return `${formatPlural(differenceInHoursValue, 'hour')} ago`;
-  }
-
-  const differenceInDaysValue = differenceInDays(currentTime, lastUpdatedTime);
-
-  if (differenceInDaysValue < 30) {
-    return `${formatPlural(differenceInDaysValue, 'day')} ago`;
-  }
-
-  const differenceInMonthsValue = differenceInMonths(currentTime, lastUpdatedTime);
-
-  return `${formatPlural(differenceInMonthsValue, 'month')} ago`;
-};
 
 export const formatData = (data: DatasetType[]): DatasetType[] => {
   return data.map((item) => ({

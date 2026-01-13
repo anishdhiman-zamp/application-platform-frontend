@@ -3,7 +3,7 @@
 import { DragEvent, useCallback, useRef, useState } from 'react';
 import { Button, Dialog, DialogBody, DialogContent, DialogHeader, toast } from '@zamp-platform/ui';
 import { FileText, FolderUp } from 'lucide-react';
-import { useUpdateSkillMutation, useUploadSkillMutation } from '@/apis/macs';
+import { useUpdateSkillMutation, useUploadSkillMutation } from '@/apis/pace';
 import { cn } from '@/utils/common';
 
 interface UploadSkillModalProps {
