@@ -25,7 +25,7 @@ export function setServerSideUserCookie(
     sameSite: 'lax',
     maxAge: maxAge,
     path: '/',
-    ...(domain && { domain: `.${domain}` }),
+    ...(domain && { domain: domain }),
   });
 }
 
@@ -53,7 +53,7 @@ export function clearServerSideCookie(response: NextResponse, cookieId: string, 
     response.cookies.set(cookieId, '', {
       maxAge: 0,
       path: '/',
-      domain: `.${domain}`,
+      domain: domain,
     });
   }
 }
