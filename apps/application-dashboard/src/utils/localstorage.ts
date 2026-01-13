@@ -18,7 +18,7 @@ export enum LOCAL_STORAGE_KEYS {
   CONVERSATION_DRAFTS = 'CONVERSATION_DRAFTS',
 }
 
-export const getFromLocalStorage = (key: string) => {
+export const getFromLocalStorage = (key: LOCAL_STORAGE_KEYS) => {
   if (typeof window === 'undefined') {
     return '';
   }
@@ -26,7 +26,7 @@ export const getFromLocalStorage = (key: string) => {
   return window?.localStorage?.getItem(key);
 };
 
-export const setToLocalStorage = (key: string, value: string) => {
+export const setToLocalStorage = (key: LOCAL_STORAGE_KEYS, value: string) => {
   if (typeof window === 'undefined') {
     return;
   }
@@ -34,7 +34,7 @@ export const setToLocalStorage = (key: string, value: string) => {
   window.localStorage.setItem(key, value);
 };
 
-export const removeFromLocalStorage = (key: string) => {
+export const removeFromLocalStorage = (key: LOCAL_STORAGE_KEYS) => {
   if (typeof window === 'undefined') {
     return;
   }
