@@ -28,6 +28,10 @@ export interface UseSSEOptions {
    * @param errorInfo - Contains the error event and metadata about the error type.
    * Network connectivity errors (offline/disconnection) are flagged via `isNetworkError`.
    * You can use this flag to avoid sending network errors to Sentry.
+   *
+   * Note: If `errorReportDelayMs` is set, this callback is only called if the connection
+   * does not recover within the delay period. This helps avoid spurious error reports
+   * for transient network issues (VPN changes, route changes, etc.).
    */
   onError?: (errorInfo: SSEErrorInfo) => void;
   onOpen?: () => void;
@@ -40,6 +44,13 @@ export interface UseSSEOptions {
   };
   idleTimeoutMs?: number;
   autoConnect?: boolean;
+  /**
+   * Delay in milliseconds before reporting an error via onError callback.
+   * If the connection recovers (onopen fires) within this period, the error is not reported.
+   * This helps avoid spurious error reports for transient network issues like VPN changes.
+   * Default: 0 (no delay, errors reported immediately)
+   */
+  errorReportDelayMs?: number;
 }
 
 export interface SSEConnectionState {
@@ -60,6 +71,7 @@ export const useSSE = ({
   maxReconnectAttempts = 5,
   eventListeners = {},
   autoConnect = true,
+  errorReportDelayMs = 0,
 }: UseSSEOptions) => {
   const eventSourceRef = useRef<EventSource | null>(null);
   const reconnectTimeoutRef = useRef<number | null>(null);
@@ -68,6 +80,7 @@ export const useSSE = ({
   const lastMessageTimestamp = useRef<number>(Date.now());
   const reconnectAttemptsRef = useRef(0);
   const [isActive, setIsActive] = useState(autoConnect);
+  const pendingErrorTimeoutRef = useRef<number | null>(null);
 
   const [state, setState] = useState<SSEConnectionState>({
     isConnected: false,
@@ -96,6 +109,12 @@ export const useSSE = ({
       idleIntervalRef.current = null;
     }
 
+    // Clear any pending error timeout to prevent stale error reports
+    if (pendingErrorTimeoutRef.current) {
+      clearTimeout(pendingErrorTimeoutRef.current);
+      pendingErrorTimeoutRef.current = null;
+    }
+
     setState((prev) => ({ ...prev, isConnected: false, isConnecting: false }));
   }, [eventListeners]);
 
@@ -115,6 +134,13 @@ export const useSSE = ({
 
       eventSource.onopen = () => {
         console.log('SSE connection opened');
+
+        // Clear any pending error timeout - connection recovered successfully
+        if (pendingErrorTimeoutRef.current) {
+          clearTimeout(pendingErrorTimeoutRef.current);
+          pendingErrorTimeoutRef.current = null;
+        }
+
         setState((prev) => ({
           ...prev,
           isConnected: true,
@@ -128,17 +154,41 @@ export const useSSE = ({
 
       eventSource.onerror = (event) => {
         const isNetworkError = isNetworkConnectivityError();
+        const readyState = eventSource.readyState;
+
         console.error('SSE connection error', {
-          readyState: eventSource.readyState,
+          readyState,
           isNetworkError,
           isOnline: typeof navigator !== 'undefined' ? navigator.onLine : 'unknown',
         });
+
         setState((prev) => ({ ...prev, isConnected: false, isConnecting: false }));
-        onError?.({
+
+        const errorInfo: SSEErrorInfo = {
           event,
           isNetworkError,
-          readyState: eventSource.readyState,
-        });
+          readyState,
+        };
+
+        // If errorReportDelayMs is set, delay the error report to allow for reconnection.
+        // This helps avoid spurious error reports for transient network issues (VPN changes, etc.)
+        if (errorReportDelayMs > 0) {
+          // Clear any existing pending error timeout
+          if (pendingErrorTimeoutRef.current) {
+            clearTimeout(pendingErrorTimeoutRef.current);
+          }
+
+          pendingErrorTimeoutRef.current = window.setTimeout(() => {
+            pendingErrorTimeoutRef.current = null;
+            // Only report error if still not connected after the delay
+            if (!eventSourceRef.current || eventSourceRef.current.readyState !== EventSource.OPEN) {
+              onError?.(errorInfo);
+            }
+          }, errorReportDelayMs);
+        } else {
+          // No delay, report error immediately
+          onError?.(errorInfo);
+        }
       };
 
       eventSource.onmessage = (event) => {
@@ -180,6 +230,7 @@ export const useSSE = ({
     reconnectIntervalMs,
     maxReconnectAttempts,
     isActive,
+    errorReportDelayMs,
   ]);
 
   const connect = useCallback(

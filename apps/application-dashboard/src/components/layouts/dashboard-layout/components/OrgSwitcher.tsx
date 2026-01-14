@@ -8,6 +8,7 @@ import { getFromLocalStorage, LOCAL_STORAGE_KEYS, setToLocalStorage } from '@zam
 import { useRouter } from 'next/navigation';
 import { useGetBaseUrlQuery } from '@/apis/auth';
 import { useGetOrganizationsQuery } from '@/apis/people';
+import { useSSEContext } from '@/app/_providers/sse-provider';
 import DropdownToggle from '@/components/common/dropdown/DropdownToggle';
 import CommonWrapper from '@/components/commonWrapper';
 import { SkeletonTypes } from '@/components/commonWrapper/commonWrapper.types';
@@ -29,6 +30,7 @@ const OrgSwitcher: FC<OrgSwitcherProps> = ({ isSidebarOpen }) => {
   const { isOrgSwitchIsInProgress, user } = useAppSelector((state) => state.user);
   const router = useRouter();
   const dispatch = useAppDispatch();
+  const { disconnect: disconnectSSE } = useSSEContext();
 
   const [isOrgSwitcherMenuOpen, setIsOrgSwitcherMenuOpen] = useState(false);
   const [selectedOrg, setSelectedOrg] = useState<Organization>();
@@ -53,6 +55,10 @@ const OrgSwitcher: FC<OrgSwitcherProps> = ({ isSidebarOpen }) => {
 
   const handleOrgChange = (org: Organization) => {
     if (org.organization_id === selectedOrg?.organization_id) return;
+
+    // Disconnect SSE gracefully before org switch to prevent readyState 2 errors
+    // This avoids spurious errors when the page reloads during org switch
+    disconnectSSE();
 
     dispatch(setIsOrgSwitchIsInProgress(true));
 
