@@ -2,10 +2,34 @@
 
 import { useCallback, useEffect, useRef, useState } from 'react';
 
+/**
+ * Checks if the error is a network connectivity error (offline/disconnection).
+ * These errors should not be sent to Sentry as they are expected user-side issues.
+ */
+export const isNetworkConnectivityError = (): boolean => {
+  // Check if browser is offline
+  if (typeof navigator !== 'undefined' && !navigator.onLine) {
+    return true;
+  }
+  return false;
+};
+
+export interface SSEErrorInfo {
+  event: Event;
+  isNetworkError: boolean;
+  readyState: number;
+}
+
 export interface UseSSEOptions {
   url?: string;
   onMessage?: (event: MessageEvent) => void;
-  onError?: (error: Event) => void;
+  /**
+   * Called when an SSE error occurs.
+   * @param errorInfo - Contains the error event and metadata about the error type.
+   * Network connectivity errors (offline/disconnection) are flagged via `isNetworkError`.
+   * You can use this flag to avoid sending network errors to Sentry.
+   */
+  onError?: (errorInfo: SSEErrorInfo) => void;
   onOpen?: () => void;
   onClose?: () => void;
   withCredentials?: boolean;
@@ -103,9 +127,18 @@ export const useSSE = ({
       };
 
       eventSource.onerror = (event) => {
-        console.error('SSE connection error', { readyState: eventSource.readyState });
+        const isNetworkError = isNetworkConnectivityError();
+        console.error('SSE connection error', {
+          readyState: eventSource.readyState,
+          isNetworkError,
+          isOnline: typeof navigator !== 'undefined' ? navigator.onLine : 'unknown',
+        });
         setState((prev) => ({ ...prev, isConnected: false, isConnecting: false }));
-        onError?.(event);
+        onError?.({
+          event,
+          isNetworkError,
+          readyState: eventSource.readyState,
+        });
       };
 
       eventSource.onmessage = (event) => {
