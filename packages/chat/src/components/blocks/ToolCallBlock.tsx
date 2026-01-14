@@ -16,16 +16,14 @@ interface ToolCallBlockProps {
     display_content?: ToolUseDisplayContent;
     partial_json?: string;
     input_json?: string;
-    name?: string;
     tool_call_id?: string;
     display_name?: string;
   };
-  name?: string;
   is_complete: boolean;
   toolResult?: ToolResultContentBlock;
 }
-export const ToolCallBlock: FC<ToolCallBlockProps> = ({ payload, is_complete = true, name, toolResult }) => {
-  const toolName = payload?.display_name || payload?.name || name || 'Unknown';
+export const ToolCallBlock: FC<ToolCallBlockProps> = ({ payload, is_complete = true, toolResult }) => {
+  const toolName = payload?.display_name || 'Unknown';
   const wasCompleteRef = useRef(is_complete);
 
   const [accordionValue, setAccordionValue] = useState<string>(is_complete ? '' : 'tool-use');
@@ -54,7 +52,7 @@ export const ToolCallBlock: FC<ToolCallBlockProps> = ({ payload, is_complete = t
         >
           <div className='flex flex-1 items-center gap-3'>
             <div className='flex items-center gap-2'>
-              <Terminal className='text-GRAY_700 h-4 w-4' strokeWidth={1.5} />
+              <Terminal className='text-GRAY_700 h-4 w-4' />
               <span className='text-GRAY_900'>{snakeCaseToSentenceCase(toolName)}</span>
             </div>
             {toolResult && toolResult.payload?.is_error && (

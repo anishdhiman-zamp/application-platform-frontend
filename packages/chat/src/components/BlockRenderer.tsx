@@ -110,7 +110,6 @@ export const BlockRenderer: React.FC<BlockRendererProps> = ({
             key={block?.id ?? `tool-use-${block.order}-${block.start_timestamp}`}
             payload={block?.payload}
             is_complete={block?.is_complete}
-            name={block?.name}
             toolResult={toolResult}
           />
         );
