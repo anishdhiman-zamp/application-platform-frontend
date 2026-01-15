@@ -2,8 +2,8 @@ import { FC, useState } from 'react';
 import { type Editor } from '@tiptap/react';
 import { Button, DropdownMenu, DropdownMenuContent, DropdownMenuTrigger } from '@zamp-platform/ui';
 import { ChevronDown } from 'lucide-react';
-import Image from 'next/image';
 import TooltipV2 from '@/components/common/TooltipV2';
+import ImageKitImage from '@/components/ImageKitImage';
 import { COLORS } from '@/constants/colors';
 import { TEXT_BACKGROUND } from '@/constants/icons';
 
@@ -30,7 +30,13 @@ const TextAndBackgroundColor: FC<{ editor: Editor | null }> = ({ editor }) => {
       <TooltipV2 tooltipBody='Text and Background Color' asChildTrigger>
         <DropdownMenuTrigger asChild>
           <Button variant='ghost' size='xsmall' className='flex h-6 items-center gap-1 px-1 pb-[7px] !text-sm'>
-            <Image src={TEXT_BACKGROUND} alt='text-background' width={18} height={16} />
+            <ImageKitImage
+              src={TEXT_BACKGROUND}
+              width={18}
+              height={16}
+              alt='text-background'
+              className='min-h-4 min-w-4'
+            />
             <ChevronDown size={8} className='text-gray-700' />
           </Button>
         </DropdownMenuTrigger>
