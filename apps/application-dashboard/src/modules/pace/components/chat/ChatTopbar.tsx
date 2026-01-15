@@ -3,7 +3,7 @@
 import type { FC } from 'react';
 import { Button } from '@zamp-platform/ui';
 import { cn } from '@zamp-platform/ui/utils';
-import { AnimatePresence, motion } from 'framer-motion';
+import { AnimatePresence, easeInOut, motion } from 'framer-motion';
 import { Maximize2, Minimize2, Plus, X } from 'lucide-react';
 import { DEFAULT_CHAT_TITLE } from '@/modules/pace/pace.constants';
 
@@ -24,8 +24,8 @@ const TITLE_ANIMATION_VARIANTS = {
 };
 
 const TITLE_TRANSITION = {
-  duration: 0.5,
-  ease: [0.4, 0, 0.2, 1] as const,
+  duration: 0.8,
+  ease: easeInOut,
 };
 
 const ChatTopbar: FC<ChatTopbarProps> = ({

@@ -18,6 +18,8 @@ import type {
   KnowledgeBaseRequestType,
   KnowledgeBaseResponseType,
   ProcessActivityRunsRequestType,
+  ReprocessingEventsRequestType,
+  ReprocessingEventsResponseType,
   SignedUrlByArtifactIdRequestType,
   SignedUrlByArtifactIdResponseType,
   StatusSummaryItem,
@@ -120,6 +122,14 @@ const Processes = baseApi.injectEndpoints({
         params,
       }),
     }),
+    getReprocessingEvents: builder.query<ReprocessingEventsResponseType, ReprocessingEventsRequestType>({
+      query: ({ processId, activityRunId }) => ({
+        url: formRequestUrlWithParams(API_ENDPOINTS.ACTIVITY_REPROCESSING_EVENTS_GET, {
+          processId,
+          activityRunId,
+        }),
+      }),
+    }),
   }),
 });
 
@@ -146,4 +156,6 @@ export const {
   useUpdateArtifactMutation,
   useFilterConversationsQuery,
   useLazyFilterConversationsQuery,
+  useGetReprocessingEventsQuery,
+  useLazyGetReprocessingEventsQuery,
 } = Processes;

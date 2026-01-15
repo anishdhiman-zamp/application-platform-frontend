@@ -9,10 +9,14 @@ const ChatHistoryItemSkeleton = () => (
   </div>
 );
 
-const ChatHistorySkeleton = () => (
+interface ChatHistorySkeletonProps {
+  itemCount?: number;
+}
+
+const ChatHistorySkeleton = ({ itemCount = 20 }: ChatHistorySkeletonProps) => (
   <div className='w-full max-w-[700px]'>
     <div className='space-y-0.5'>
-      {Array.from({ length: 8 }).map((_, index) => (
+      {Array.from({ length: itemCount }).map((_, index) => (
         <ChatHistoryItemSkeleton key={index} />
       ))}
     </div>

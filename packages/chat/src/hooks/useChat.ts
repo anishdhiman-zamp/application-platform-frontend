@@ -192,34 +192,55 @@ export const useChat = (config: ChatConfig) => {
         switch (payload.type) {
           case StreamingContentBlockType.CONTENT_BLOCK_START: {
             const { index, content_block } = payload;
-            const blockType = content_block.type;
+            const blockType = content_block?.type;
 
-            const newBlock: Block =
-              blockType === BLOCK_TYPE.THINKING
-                ? {
-                    type: BLOCK_TYPE.THINKING,
-                    order: index,
-                    payload: { thinking: '' },
-                    start_timestamp: content_block.start_timestamp,
-                    is_complete: false,
-                  }
-                : blockType === BLOCK_TYPE.TEXT
-                  ? {
-                      type: BLOCK_TYPE.TEXT,
-                      order: index,
-                      payload: { text: '' },
-                      start_timestamp: content_block.start_timestamp,
-                      is_complete: false,
-                    }
-                  : {
-                      type: BLOCK_TYPE.TOOL_USE,
-                      order: index,
-                      id: content_block.id,
-                      name: content_block.name,
-                      payload: { partial_json: '' },
-                      start_timestamp: content_block.start_timestamp,
-                      is_complete: false,
-                    };
+            let newBlock: Block;
+
+            if (blockType === BLOCK_TYPE.THINKING) {
+              newBlock = {
+                type: BLOCK_TYPE.THINKING,
+                order: index,
+                payload: { thinking: '' },
+                start_timestamp: content_block?.start_timestamp,
+                is_complete: false,
+              };
+            } else if (blockType === BLOCK_TYPE.TEXT) {
+              newBlock = {
+                type: BLOCK_TYPE.TEXT,
+                order: index,
+                payload: { text: '' },
+                start_timestamp: content_block?.start_timestamp,
+                is_complete: false,
+              };
+            } else if (blockType === BLOCK_TYPE.TOOL_RESULT) {
+              const toolCallId = content_block?.tool_call_id || content_block?.id;
+              newBlock = {
+                type: BLOCK_TYPE.TOOL_RESULT,
+                order: index,
+                id: content_block.id,
+                payload: {
+                  content: '',
+                  is_error: false,
+                  tool_call_id: toolCallId,
+                },
+                start_timestamp: content_block?.start_timestamp,
+                is_complete: false,
+              };
+            } else {
+              newBlock = {
+                type: BLOCK_TYPE.TOOL_USE,
+                order: index,
+                id: content_block?.id,
+                name: content_block?.name,
+                payload: {
+                  partial_json: '',
+                  tool_call_id: content_block?.id,
+                  display_name: content_block?.display_name,
+                },
+                start_timestamp: content_block?.start_timestamp,
+                is_complete: false,
+              };
+            }
 
             setStreamingState((prev) => {
               // Validate that streaming state belongs to current conversation
@@ -268,6 +289,7 @@ export const useChat = (config: ChatConfig) => {
               }
 
               const existingBlocks = prev.message_content?.elements ?? [];
+
               const updatedBlocks = existingBlocks.map((block) => {
                 if (block.order !== index) return block;
 
@@ -301,6 +323,20 @@ export const useChat = (config: ChatConfig) => {
                           ...block.payload,
                           message: delta.message ?? block.payload.message,
                           display_content: delta.display_content ?? block.payload.display_content,
+                        },
+                      };
+                    }
+                    break;
+                  case StreamingContentBlockDeltaType.TOOL_RESULT_DELTA:
+                    // Update existing tool_result block with content
+                    if (block.type === BLOCK_TYPE.TOOL_RESULT) {
+                      return {
+                        ...block,
+                        payload: {
+                          ...block.payload,
+                          content: (block.payload.content || '') + delta.content,
+                          is_error: delta.is_error,
+                          tool_call_id: delta.tool_call_id ?? block.payload.tool_call_id,
                         },
                       };
                     }
