@@ -1,9 +1,17 @@
 'use client';
 
 import { cn } from '@zamp-platform/ui/utils';
-import React, { useState } from 'react';
+import React, { useMemo, useState } from 'react';
 
-import { Block, BLOCK_TYPE, BlockMessage, ButtonBlockType, type TextContentBlock } from '../types/block.types';
+import {
+  Block,
+  BLOCK_TYPE,
+  BlockMessage,
+  ButtonBlockType,
+  type TextContentBlock,
+  type ToolResultContentBlock,
+  type ToolUseContentBlock,
+} from '../types/block.types';
 import { extractInitialValues } from './block.utils';
 import {
   AttachmentsBlock,
@@ -45,6 +53,17 @@ export const BlockRenderer: React.FC<BlockRendererProps> = ({
       >,
   );
 
+  // Create a map of tool_call_id to tool_result blocks
+  const toolResultsMap = useMemo(() => {
+    const map = new Map<string, ToolResultContentBlock>();
+    message.block.forEach((block) => {
+      if (block.type === BLOCK_TYPE.TOOL_RESULT && block.payload.tool_call_id) {
+        map.set(block.payload.tool_call_id, block);
+      }
+    });
+    return map;
+  }, [message.block]);
+
   const handleElementChange = (
     blockId: string,
     selectedOption: { label: string; value: string; optionType: 'plain_text' | 'markdown' },
@@ -81,15 +100,25 @@ export const BlockRenderer: React.FC<BlockRendererProps> = ({
           />
         );
 
-      case BLOCK_TYPE.TOOL_USE:
+      case BLOCK_TYPE.TOOL_USE: {
+        const toolUseBlock = block as ToolUseContentBlock;
+        const toolCallId = toolUseBlock?.payload?.tool_call_id || toolUseBlock?.id;
+        const toolResult = toolCallId ? toolResultsMap.get(toolCallId) : undefined;
+
         return (
           <ToolCallBlock
             key={block?.id ?? `tool-use-${block.order}-${block.start_timestamp}`}
             payload={block?.payload}
             is_complete={block?.is_complete}
-            name={block?.name}
+            toolResult={toolResult}
           />
         );
+      }
+
+      case BLOCK_TYPE.TOOL_RESULT:
+        // Tool results are rendered with their corresponding tool use blocks
+        // Skip rendering them separately
+        return null;
 
       case BLOCK_TYPE.MARKDOWN:
       case BLOCK_TYPE.TEXT:
