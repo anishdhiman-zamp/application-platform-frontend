@@ -31,6 +31,11 @@ export enum ARTIFACT_TYPE {
   IMAGE = 'IMAGE',
 }
 
+export enum ACTIVITY_LOG_TYPE {
+  LOG = 'LOG',
+  REPROCESS = 'REPROCESS',
+}
+
 export enum LOG_STATUS {
   LOADING = 'INITIATED',
   MESSAGE_FROM_ADAM = 'MESSAGE_FROM_ADAM',
@@ -40,6 +45,7 @@ export enum LOG_STATUS {
   VOID = 'VOID',
   DONE = 'DONE',
   MESSAGE_FROM_USER = 'MESSAGE_FROM_HUMAN',
+  ARCHIVED = 'ARCHIVED',
 }
 
 export enum SENDER_TYPE {

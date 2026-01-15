@@ -226,7 +226,7 @@ describe('useSSE Hook', () => {
   });
 
   describe('error handling', () => {
-    it('should call onError when error occurs', async () => {
+    it('should call onError with SSEErrorInfo when error occurs', async () => {
       const mockOnError = jest.fn();
 
       renderHook(() =>
@@ -241,7 +241,47 @@ describe('useSSE Hook', () => {
         mockEventSource._simulateError();
       });
 
-      expect(mockOnError).toHaveBeenCalledWith(expect.any(Event));
+      expect(mockOnError).toHaveBeenCalledWith(
+        expect.objectContaining({
+          event: expect.any(Event),
+          isNetworkError: expect.any(Boolean),
+          readyState: expect.any(Number),
+        }),
+      );
+    });
+
+    it('should detect network connectivity errors when browser is offline', async () => {
+      const mockOnError = jest.fn();
+
+      // Mock navigator.onLine to return false (offline)
+      const originalOnLine = Object.getOwnPropertyDescriptor(Navigator.prototype, 'onLine');
+      Object.defineProperty(Navigator.prototype, 'onLine', {
+        get: () => false,
+        configurable: true,
+      });
+
+      renderHook(() =>
+        useSSE({
+          url: 'https://api.example.com/sse',
+          onError: mockOnError,
+        }),
+      );
+
+      await act(async () => {
+        jest.advanceTimersByTime(0);
+        mockEventSource._simulateError();
+      });
+
+      expect(mockOnError).toHaveBeenCalledWith(
+        expect.objectContaining({
+          isNetworkError: true,
+        }),
+      );
+
+      // Restore original navigator.onLine
+      if (originalOnLine) {
+        Object.defineProperty(Navigator.prototype, 'onLine', originalOnLine);
+      }
     });
 
     it('should handle initialization errors and attempt reconnection', async () => {
