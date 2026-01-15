@@ -191,8 +191,8 @@ const Activity = () => {
         id={RESIZABLE_PANEL_ID.LOGS}
         order={1}
         defaultSize={showSummary ? 70 : isExpanded ? 0 : 35}
-        minSize={isExpanded ? 0 : 30}
-        maxSize={isExpanded ? 0 : 70}
+        minSize={isExpanded ? 0 : 35}
+        maxSize={isExpanded ? 0 : 65}
         className={cn('transition-all duration-300 ease-in-out', {
           'transition-none!': isDragging,
         })}
@@ -231,8 +231,8 @@ const Activity = () => {
         id={showSummary ? RESIZABLE_PANEL_ID.SUMMARY : RESIZABLE_PANEL_ID.ARTIFACTS}
         order={2}
         defaultSize={showSummary ? 30 : isExpanded ? 100 : 65}
-        minSize={isExpanded ? 100 : 30}
-        maxSize={isExpanded ? 100 : 70}
+        minSize={isExpanded ? 100 : 35}
+        maxSize={isExpanded ? 100 : 65}
         className={cn('transition-all duration-300 ease-in-out', {
           'transition-none!': isDragging,
         })}
