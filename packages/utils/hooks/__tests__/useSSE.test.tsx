@@ -299,13 +299,7 @@ describe('useSSE Hook', () => {
         }),
       );
 
-      expect(consoleSpy).toHaveBeenCalledWith(
-        'Failed to initialize EventSource connection:',
-        expect.objectContaining({
-          error: expect.any(Error),
-          url: expect.any(String),
-        }),
-      );
+      expect(consoleSpy).toHaveBeenCalledWith('[SSE] failed to initialize EventSource', expect.any(Error));
 
       // Should attempt reconnection after interval
       act(() => {
@@ -338,23 +332,6 @@ describe('useSSE Hook', () => {
 
       expect(global.EventSource).toHaveBeenCalledTimes(2);
       consoleSpy.mockRestore();
-    });
-  });
-
-  describe('idle timeout handling', () => {
-    it('should handle idle timeout configuration', () => {
-      const mockOnMessage = jest.fn();
-
-      const { result } = renderHook(() =>
-        useSSE({
-          url: 'https://api.example.com/sse',
-          onMessage: mockOnMessage,
-          idleTimeoutMs: 5000,
-        }),
-      );
-
-      expect(result.current.close).toBeDefined();
-      expect(typeof result.current.close).toBe('function');
     });
   });
 
@@ -466,7 +443,6 @@ describe('useSSE Hook', () => {
           eventListeners: {
             custom: jest.fn(),
           },
-          idleTimeoutMs: 30000,
         }),
       );
 
