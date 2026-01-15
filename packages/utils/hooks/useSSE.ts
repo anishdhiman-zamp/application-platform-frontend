@@ -7,7 +7,6 @@ import { useCallback, useEffect, useRef, useState } from 'react';
  * These errors should not be sent to Sentry as they are expected user-side issues.
  */
 export const isNetworkConnectivityError = (): boolean => {
-  // Check if browser is offline
   if (typeof navigator !== 'undefined' && !navigator.onLine) {
     return true;
   }
@@ -18,21 +17,12 @@ export interface SSEErrorInfo {
   event: Event;
   isNetworkError: boolean;
   readyState: number;
+  isFinal?: boolean;
 }
 
 export interface UseSSEOptions {
   url?: string;
   onMessage?: (event: MessageEvent) => void;
-  /**
-   * Called when an SSE error occurs.
-   * @param errorInfo - Contains the error event and metadata about the error type.
-   * Network connectivity errors (offline/disconnection) are flagged via `isNetworkError`.
-   * You can use this flag to avoid sending network errors to Sentry.
-   *
-   * Note: If `errorReportDelayMs` is set, this callback is only called if the connection
-   * does not recover within the delay period. This helps avoid spurious error reports
-   * for transient network issues (VPN changes, route changes, etc.).
-   */
   onError?: (errorInfo: SSEErrorInfo) => void;
   onOpen?: () => void;
   onClose?: () => void;
@@ -42,14 +32,7 @@ export interface UseSSEOptions {
   eventListeners?: {
     [eventType: string]: (event: MessageEvent) => void;
   };
-  idleTimeoutMs?: number;
   autoConnect?: boolean;
-  /**
-   * Delay in milliseconds before reporting an error via onError callback.
-   * If the connection recovers (onopen fires) within this period, the error is not reported.
-   * This helps avoid spurious error reports for transient network issues like VPN changes.
-   * Default: 0 (no delay, errors reported immediately)
-   */
   errorReportDelayMs?: number;
 }
 
@@ -75,12 +58,11 @@ export const useSSE = ({
 }: UseSSEOptions) => {
   const eventSourceRef = useRef<EventSource | null>(null);
   const reconnectTimeoutRef = useRef<number | null>(null);
-  const [_url, setUrl] = useState<string | null>(url || null);
-  const idleIntervalRef = useRef<number | null>(null);
-  const lastMessageTimestamp = useRef<number>(Date.now());
   const reconnectAttemptsRef = useRef(0);
-  const [isActive, setIsActive] = useState(autoConnect);
   const pendingErrorTimeoutRef = useRef<number | null>(null);
+
+  const [_url, setUrl] = useState<string | null>(url || null);
+  const [isActive, setIsActive] = useState(autoConnect);
 
   const [state, setState] = useState<SSEConnectionState>({
     isConnected: false,
@@ -91,7 +73,7 @@ export const useSSE = ({
 
   const cleanup = useCallback(() => {
     if (eventSourceRef.current) {
-      console.log('SSE Connection closed');
+      console.log('[SSE] Connection closed');
       Object.entries(eventListeners).forEach(([type, handler]) => {
         eventSourceRef.current?.removeEventListener(type, handler);
       });
@@ -105,12 +87,6 @@ export const useSSE = ({
       reconnectTimeoutRef.current = null;
     }
 
-    if (idleIntervalRef.current) {
-      clearInterval(idleIntervalRef.current);
-      idleIntervalRef.current = null;
-    }
-
-    // Clear any pending error timeout to prevent stale error reports
     if (pendingErrorTimeoutRef.current) {
       clearTimeout(pendingErrorTimeoutRef.current);
       pendingErrorTimeoutRef.current = null;
@@ -121,10 +97,10 @@ export const useSSE = ({
 
   const initializeEventSource = useCallback(() => {
     if (!_url) {
-      throw new Error('URL is required');
+      throw new Error('[SSE] URL is required');
     }
     if (!isActive) {
-      throw new Error('SSE is not active');
+      throw new Error('[SSE] is not active');
     }
 
     setState((prev) => ({ ...prev, isConnecting: true, error: null }));
@@ -134,9 +110,8 @@ export const useSSE = ({
       eventSourceRef.current = eventSource;
 
       eventSource.onopen = () => {
-        console.log('SSE connection opened');
+        console.log('[SSE] Connection opened');
 
-        // Clear any pending error timeout - connection recovered successfully
         if (pendingErrorTimeoutRef.current) {
           clearTimeout(pendingErrorTimeoutRef.current);
           pendingErrorTimeoutRef.current = null;
@@ -157,7 +132,7 @@ export const useSSE = ({
         const isNetworkError = isNetworkConnectivityError();
         const readyState = eventSource.readyState;
 
-        console.error('SSE connection error', {
+        console.error('[SSE] Connection error', {
           readyState,
           isNetworkError,
           isOnline: typeof navigator !== 'undefined' ? navigator.onLine : 'unknown',
@@ -188,37 +163,30 @@ export const useSSE = ({
           }, errorReportDelayMs);
         } else {
           // No delay, report error immediately
+          console.error('[SSE] error reported immediately', errorInfo);
           onError?.(errorInfo);
         }
       };
 
       eventSource.onmessage = (event) => {
-        lastMessageTimestamp.current = Date.now();
         onMessage?.(event);
       };
 
       Object.entries(eventListeners).forEach(([type, handler]) => {
         eventSource.addEventListener(type, (event: MessageEvent) => {
-          lastMessageTimestamp.current = Date.now();
           handler(event);
         });
       });
     } catch (err) {
-      console.error('Failed to initialize EventSource connection:', { url: _url, error: err });
-      setState((prev) => ({ ...prev, error: 'Failed to initialize connection', isConnecting: false }));
+      console.error('[SSE] failed to initialize EventSource', err);
 
-      if (reconnectAttemptsRef.current < maxReconnectAttempts && isActive) {
-        reconnectAttemptsRef.current += 1;
-        setState((prev) => ({ ...prev, reconnectAttempts: reconnectAttemptsRef.current }));
+      setState((prev) => ({
+        ...prev,
+        isConnecting: false,
+        error: 'Failed to initialize connection',
+      }));
 
-        console.log(
-          `Attempting reconnection ${reconnectAttemptsRef.current}/${maxReconnectAttempts} in ${reconnectIntervalMs}ms`,
-        );
-
-        reconnectTimeoutRef.current = window.setTimeout(() => {
-          initializeEventSource();
-        }, reconnectIntervalMs);
-      }
+      scheduleReconnect();
     }
   }, [
     _url,
@@ -232,6 +200,48 @@ export const useSSE = ({
     isActive,
     errorReportDelayMs,
   ]);
+
+  const scheduleReconnect = useCallback(() => {
+    if (!isActive) {
+      console.info('[SSE] reconnect skipped, SSE not active');
+      return;
+    }
+
+    if (reconnectAttemptsRef.current >= maxReconnectAttempts) {
+      console.error('[SSE] max reconnect attempts reached, giving up', {
+        attempts: reconnectAttemptsRef.current,
+        maxReconnectAttempts,
+      });
+
+      const errorInfo: SSEErrorInfo = {
+        event: new Event('sse-final-error'),
+        isNetworkError: isNetworkConnectivityError(),
+        readyState: EventSource.CLOSED,
+        isFinal: true,
+      };
+
+      onError?.(errorInfo);
+      cleanup();
+      return;
+    }
+
+    reconnectAttemptsRef.current += 1;
+
+    console.warn('[SSE] scheduling reconnect', {
+      attempt: reconnectAttemptsRef.current,
+      maxReconnectAttempts,
+      delayMs: reconnectIntervalMs,
+    });
+
+    setState((prev) => ({
+      ...prev,
+      reconnectAttempts: reconnectAttemptsRef.current,
+    }));
+
+    reconnectTimeoutRef.current = window.setTimeout(() => {
+      initializeEventSource();
+    }, reconnectIntervalMs);
+  }, [cleanup, initializeEventSource, isActive, maxReconnectAttempts, onError, reconnectIntervalMs]);
 
   const connect = useCallback(
     (url?: string) => {
