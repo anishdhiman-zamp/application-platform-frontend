@@ -91,6 +91,7 @@ export const useSSE = ({
 
   const cleanup = useCallback(() => {
     if (eventSourceRef.current) {
+      console.log('SSE Connection closed');
       Object.entries(eventListeners).forEach(([type, handler]) => {
         eventSourceRef.current?.removeEventListener(type, handler);
       });
@@ -197,7 +198,6 @@ export const useSSE = ({
       };
 
       Object.entries(eventListeners).forEach(([type, handler]) => {
-        console.log(`Registering event listener for type "${type}"`);
         eventSource.addEventListener(type, (event: MessageEvent) => {
           lastMessageTimestamp.current = Date.now();
           handler(event);
