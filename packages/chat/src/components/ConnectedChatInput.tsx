@@ -46,6 +46,7 @@ export interface ConnectedChatInputProps {
   disableAttachments?: boolean;
   annotationType?: AnnotationType;
   defaultMessage?: string;
+  onConversationCreated?: (conversationId: string) => void;
 }
 
 export const ConnectedChatInput: FC<ConnectedChatInputProps> = ({
@@ -74,7 +75,8 @@ export const ConnectedChatInput: FC<ConnectedChatInputProps> = ({
   className,
   disableAttachments = false,
   defaultMessage,
-}) => {
+  onConversationCreated,
+}: ConnectedChatInputProps) => {
   const fileInputRef = useRef<HTMLInputElement>(null);
 
   // Use the app's baseApi for speech-to-text token fetching
@@ -96,7 +98,7 @@ export const ConnectedChatInput: FC<ConnectedChatInputProps> = ({
     onError: (error) => {
       captureException(error);
       onError?.(error);
-      toast.error('An error occurred');
+      toast.error(`${error instanceof Error ? error.message : 'An error occurred'}`);
     },
     onSuccess: (message) => {
       onSuccess?.(message);
@@ -126,6 +128,7 @@ export const ConnectedChatInput: FC<ConnectedChatInputProps> = ({
     adapter: chatInputAdapter,
     resourceType,
     annotationType,
+    onConversationCreated,
   });
 
   const {

@@ -41,6 +41,7 @@ const ChatHistory = ({ onSelectConversation }: ChatHistoryProps) => {
     },
     {
       skip: !organizationId,
+      refetchOnMountOrArgChange: false,
     },
   );
 

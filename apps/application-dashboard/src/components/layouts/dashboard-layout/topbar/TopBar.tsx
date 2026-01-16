@@ -92,7 +92,7 @@ const Topbar = () => {
       return (
         <div className='flex items-center gap-3'>
           {isFeedbackEnabled ? (
-            <TooltipV2 tooltipBody='knowledge base' side={SIDE_OPTIONS.BOTTOM} asChildTrigger>
+            <TooltipV2 tooltipBody='Knowledge Base' side={SIDE_OPTIONS.BOTTOM} asChildTrigger>
               <Link
                 prefetch
                 href={

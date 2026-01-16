@@ -1,10 +1,9 @@
 import { FC } from 'react';
 import { type Editor } from '@tiptap/react';
 import { Button, DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from '@zamp-platform/ui';
-import { SvgSpriteLoader } from '@zamp-platform/ui/assets';
+import { ChevronDown, Type } from 'lucide-react';
 import { FONT_SIZES } from 'modules/process/artifacts/components/email-artifact/EmailEditorArtifact/constants';
 import TooltipV2 from '@/components/common/TooltipV2';
-import { COLORS } from '@/constants/colors';
 
 const FontSizeSelector: FC<{ editor: Editor | null }> = ({ editor }) => {
   const handleFontSize = (fontSize: string) => {
@@ -16,8 +15,8 @@ const FontSizeSelector: FC<{ editor: Editor | null }> = ({ editor }) => {
       <TooltipV2 tooltipBody='Font Size' asChildTrigger>
         <DropdownMenuTrigger asChild>
           <Button variant='ghost' size='xsmall' className='flex h-6 items-center gap-1 px-1'>
-            <SvgSpriteLoader id='type-01' />
-            <SvgSpriteLoader id='chevron-down' color={COLORS.GRAY_700} size={8} />
+            <Type size={14} />
+            <ChevronDown size={8} className='text-gray-700' />
           </Button>
         </DropdownMenuTrigger>
       </TooltipV2>

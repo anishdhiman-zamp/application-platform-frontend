@@ -1,9 +1,11 @@
 import { FC, useState } from 'react';
 import { type Editor } from '@tiptap/react';
 import { Button, DropdownMenu, DropdownMenuContent, DropdownMenuTrigger } from '@zamp-platform/ui';
-import { SvgSpriteLoader } from '@zamp-platform/ui/assets';
+import { ChevronDown } from 'lucide-react';
 import TooltipV2 from '@/components/common/TooltipV2';
+import ImageKitImage from '@/components/ImageKitImage';
 import { COLORS } from '@/constants/colors';
+import { TEXT_BACKGROUND } from '@/constants/icons';
 
 const TextAndBackgroundColor: FC<{ editor: Editor | null }> = ({ editor }) => {
   const [textColor, setTextColor] = useState(COLORS.BLACK);
@@ -27,8 +29,15 @@ const TextAndBackgroundColor: FC<{ editor: Editor | null }> = ({ editor }) => {
     <DropdownMenu>
       <TooltipV2 tooltipBody='Text and Background Color' asChildTrigger>
         <DropdownMenuTrigger asChild>
-          <Button variant='ghost' size='xsmall' className='flex h-6 items-center gap-1 px-1 underline'>
-            A <SvgSpriteLoader id='chevron-down' color={COLORS.GRAY_700} size={8} />
+          <Button variant='ghost' size='xsmall' className='flex h-6 items-center gap-1 px-1 pb-[7px] !text-sm'>
+            <ImageKitImage
+              src={TEXT_BACKGROUND}
+              width={18}
+              height={16}
+              alt='text-background'
+              className='min-h-4 min-w-4'
+            />
+            <ChevronDown size={8} className='text-gray-700' />
           </Button>
         </DropdownMenuTrigger>
       </TooltipV2>

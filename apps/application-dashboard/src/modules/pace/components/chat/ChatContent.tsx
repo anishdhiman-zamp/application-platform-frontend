@@ -1,7 +1,7 @@
 'use client';
 
 import { useEffect } from 'react';
-import { useChatSidebarContext } from '@/modules/pace/chatsidebar.context';
+import { useChatContext } from '@/modules/pace/chat.context';
 import ChatContentInner from '@/modules/pace/components/chat/ChatContentInner';
 import { useChatContentState } from '@/modules/pace/hooks/useChatContentState';
 
@@ -10,7 +10,7 @@ interface ChatContentProps {
 }
 
 const ChatContent = ({ initialConversationId }: ChatContentProps) => {
-  const { registerStartNewChat } = useChatSidebarContext();
+  const { registerStartNewChat } = useChatContext();
   const {
     organizationId,
     currentUserName,

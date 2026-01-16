@@ -1,6 +1,6 @@
 'use client';
 
-import { useEffect, useMemo } from 'react';
+import { useCallback, useEffect, useMemo } from 'react';
 import {
   ConnectedChatInput,
   MessageContainer,
@@ -9,15 +9,19 @@ import {
   SenderType,
   useChat,
 } from '@zamp-platform/chat';
+import { ACCEPTED_FILE_TYPES } from 'modules/pace/pace.constants';
 import { API_ENDPOINTS } from '@/apis/apiEndpoint.constants';
 import CommonWrapper from '@/components/commonWrapper';
 import { SkeletonTypes } from '@/components/commonWrapper/commonWrapper.types';
+import { APITags } from '@/constants/api.constants';
+import { useAppDispatch } from '@/hooks/toolkit';
 import NewPaceAvatar from '@/modules/chatbot/NewPaceAvatar';
 import ChatHistory from '@/modules/pace/components/chat/ChatHistory';
 import ChatHome from '@/modules/pace/components/chat/ChatHome';
 import ChatTopbar from '@/modules/pace/components/chat/ChatTopbar';
 import ChatMessagesSkeleton from '@/modules/pace/components/loaders/ChatMessagesSkeleton';
 import { useChatDraftInput } from '@/modules/pace/hooks/useChatDraftInput';
+import { baseApi } from '@/services/baseApi';
 
 interface ChatContentInnerProps {
   organizationId: string;
@@ -38,7 +42,12 @@ const ChatContentInner = ({
   chatTitle,
   startNewChat,
 }: ChatContentInnerProps) => {
+  const dispatch = useAppDispatch();
   const { inputValue, setInputValue } = useChatDraftInput({ conversationId });
+
+  const handleConversationCreated = useCallback(() => {
+    dispatch(baseApi.util.invalidateTags([APITags.GET_CONVERSATION_HISTORY]));
+  }, [dispatch]);
 
   const chat = useChat({
     resourceId: organizationId,
@@ -105,6 +114,7 @@ const ChatContentInner = ({
               placeholder="Do your life's best work with Pace"
               externalInputValue={inputValue}
               setExternalInputValue={setInputValue}
+              acceptedFileTypes={ACCEPTED_FILE_TYPES}
             />
           </div>
         </div>
@@ -128,6 +138,8 @@ const ChatContentInner = ({
           placeholder="Do your life's best work with Pace"
           externalInputValue={inputValue}
           setExternalInputValue={setInputValue}
+          acceptedFileTypes={ACCEPTED_FILE_TYPES}
+          onConversationCreated={handleConversationCreated}
         />
       </div>
       <ChatHistory onSelectConversation={setConversationId} />

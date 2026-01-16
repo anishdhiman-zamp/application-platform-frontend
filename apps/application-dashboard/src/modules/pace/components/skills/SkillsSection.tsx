@@ -6,7 +6,7 @@ import { useListSkillsQuery } from '@/apis/pace';
 import NewPaceIcons from '@/assets/Icons/NewPaceIcons';
 import CommonWrapper from '@/components/commonWrapper';
 import { SkeletonTypes } from '@/components/commonWrapper/commonWrapper.types';
-import { useChatSidebarContext } from '@/modules/pace/chatsidebar.context';
+import { useChatContext } from '@/modules/pace/chat.context';
 import SkillCardSkeleton from '@/modules/pace/components/loaders/SkillCardSkeleton';
 import SkillCard from '@/modules/pace/components/skills/SkillCard';
 import SkillsEmptyState from '@/modules/pace/components/skills/SkillsEmptyState';
@@ -18,7 +18,7 @@ const SkillsSection = () => {
   const [isUploadModalOpen, setIsUploadModalOpen] = useState(false);
   const [skillIdToUpdate, setSkillIdToUpdate] = useState<string | undefined>(undefined);
 
-  const { isChatSidebarOpen, setIsChatSidebarOpen } = useChatSidebarContext();
+  const { isChatSidebarOpen, setIsChatSidebarOpen } = useChatContext();
   const { data, isLoading, isError, refetch } = useListSkillsQuery({});
 
   const skills = data?.skills ?? [];
