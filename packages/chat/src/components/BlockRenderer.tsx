@@ -9,6 +9,7 @@ import {
   BlockMessage,
   ButtonBlockType,
   type TextContentBlock,
+  type ThinkingContentBlock,
   type ToolResultContentBlock,
   type ToolUseContentBlock,
 } from '../types/block.types';
@@ -21,6 +22,7 @@ import {
   PlainTextBlock,
   QuestionGroupBlock,
   SingleSelectBlock,
+  StepsBlock,
   ThinkingBlock,
   ToolCallBlock,
 } from './blocks';
@@ -33,6 +35,11 @@ interface BlockRendererProps {
   containerClassName?: string;
   conversationId?: string;
   messageId?: string;
+}
+
+const enum BLOCK_GROUP_TYPE {
+  STEPS = 'steps',
+  SINGLE = 'single',
 }
 
 export const BlockRenderer: React.FC<BlockRendererProps> = ({
@@ -173,9 +180,53 @@ export const BlockRenderer: React.FC<BlockRendererProps> = ({
     }
   };
 
+  // Group consecutive thinking and tool_use blocks together
+  const groupedBlocks = useMemo(() => {
+    const sortedBlocks = [...message?.block]?.sort((a, b) => a?.order - b?.order);
+    const groups: Array<{ type: BLOCK_GROUP_TYPE; blocks: Block[] }> = [];
+
+    let currentStepsGroup: Block[] = [];
+
+    const isStepBlock = (block: Block) => block.type === BLOCK_TYPE.THINKING || block.type === BLOCK_TYPE.TOOL_USE;
+
+    for (const block of sortedBlocks) {
+      if (block.type === BLOCK_TYPE.TOOL_RESULT) {
+        continue;
+      }
+
+      if (isStepBlock(block)) {
+        currentStepsGroup.push(block);
+      } else {
+        if (currentStepsGroup.length > 0) {
+          groups.push({ type: BLOCK_GROUP_TYPE.STEPS, blocks: currentStepsGroup });
+          currentStepsGroup = [];
+        }
+        groups.push({ type: BLOCK_GROUP_TYPE.SINGLE, blocks: [block] });
+      }
+    }
+
+    if (currentStepsGroup.length > 0) {
+      groups.push({ type: BLOCK_GROUP_TYPE.STEPS, blocks: currentStepsGroup });
+    }
+
+    return groups;
+  }, [message.block]);
+
   return (
     <div className={cn('space-y-2', className)}>
-      {[...message?.block]?.sort((a, b) => a?.order - b?.order)?.map((block) => renderBlock(block))}
+      {groupedBlocks.map((group, groupIndex) => {
+        if (group.type === BLOCK_GROUP_TYPE.STEPS && group.blocks.length > 1) {
+          return (
+            <StepsBlock
+              key={`steps-group-${groupIndex}`}
+              blocks={group.blocks as (ThinkingContentBlock | ToolUseContentBlock)[]}
+              toolResultsMap={toolResultsMap}
+            />
+          );
+        }
+
+        return group.blocks.map((block) => renderBlock(block));
+      })}
     </div>
   );
 };

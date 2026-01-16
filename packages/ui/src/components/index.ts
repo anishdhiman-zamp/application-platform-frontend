@@ -30,6 +30,8 @@ export * from './ui/tooltip';
 export * from '../constants/constants';
 
 //Animated Icons
+export * from './ui/animated-dot';
+export * from './ui/animated-terminal-icon';
 export * from './ui/arrow-down';
 export * from './ui/book-text';
 export * from './ui/home';
