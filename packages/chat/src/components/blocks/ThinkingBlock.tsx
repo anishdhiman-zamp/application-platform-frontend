@@ -1,5 +1,5 @@
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from '@zamp-platform/ui';
-import React, { FC, useEffect, useRef, useState } from 'react';
+import React, { FC } from 'react';
 
 import { formatThinkingDuration } from '../block.utils';
 import { StatusLabel } from './StatusLabel';
@@ -21,24 +21,24 @@ export const ThinkingBlock: FC<ThinkingBlockProps> = ({
 }) => {
   const thinkingDuration = formatThinkingDuration(start_timestamp, stop_timestamp);
   const completedLabelWithDuration = thinkingDuration ? `Thought for ${thinkingDuration}` : 'Thought';
-  const wasCompleteRef = useRef(is_complete);
+  // const wasCompleteRef = useRef(is_complete);
 
-  const [accordionValue, setAccordionValue] = useState<string>(is_complete ? '' : 'thinking');
+  // const [accordionValue, setAccordionValue] = useState<string>(is_complete ? '' : 'thinking');
 
-  useEffect(() => {
-    // Auto-close accordion when is_complete transitions from false to true
-    if (is_complete && !wasCompleteRef.current) {
-      setAccordionValue('');
-    }
-    wasCompleteRef.current = is_complete;
-  }, [is_complete]);
+  // useEffect(() => {
+  //   // Auto-close accordion when is_complete transitions from false to true
+  //   if (is_complete && !wasCompleteRef.current) {
+  //     setAccordionValue('');
+  //   }
+  //   wasCompleteRef.current = is_complete;
+  // }, [is_complete]);
 
   return (
     <Accordion
       type='single'
       collapsible
-      value={accordionValue}
-      onValueChange={setAccordionValue}
+      // value={accordionValue}
+      // onValueChange={setAccordionValue}
       className='border-GRAY_100 w-full overflow-hidden rounded-lg border bg-white'
     >
       <AccordionItem value='thinking' className='border-none'>

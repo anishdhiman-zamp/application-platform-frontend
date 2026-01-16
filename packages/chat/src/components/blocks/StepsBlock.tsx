@@ -12,8 +12,6 @@ import {
 import { AlertCircle, ChevronDown } from 'lucide-react';
 import React, { FC, useState } from 'react';
 
-import { snakeCaseToSentenceCase } from '@/utils/common';
-
 import {
   BLOCK_TYPE,
   type ThinkingContentBlock,
@@ -35,7 +33,6 @@ export const StepsBlock: FC<StepsBlockProps> = ({ blocks, toolResultsMap }) => {
   const [accordionValue, setAccordionValue] = useState<string>('');
 
   const getStepIcon = (block: StepBlock) => {
-    // Treat undefined as complete, only false means not complete
     const isComplete = block.is_complete !== false;
 
     if (block.type === BLOCK_TYPE.THINKING) {
@@ -54,7 +51,6 @@ export const StepsBlock: FC<StepsBlockProps> = ({ blocks, toolResultsMap }) => {
       const thinkingBlock = block as ThinkingContentBlock;
       const thinkingDuration = formatThinkingDuration(thinkingBlock.start_timestamp, thinkingBlock.stop_timestamp);
       const completedLabel = thinkingDuration ? `Thought for ${thinkingDuration}` : 'Thought';
-      // Treat undefined as complete, only false means not complete
       const isComplete = block.is_complete !== false;
 
       return <StatusLabel isComplete={isComplete} loadingText='Thinking...' completedText={completedLabel} />;
@@ -65,15 +61,14 @@ export const StepsBlock: FC<StepsBlockProps> = ({ blocks, toolResultsMap }) => {
       const toolName = toolUseBlock.payload?.display_name || 'Unknown';
       const toolCallId = toolUseBlock.payload?.tool_call_id || toolUseBlock.id;
       const toolResult = toolCallId ? toolResultsMap.get(toolCallId) : undefined;
-      // Treat undefined as complete, only false means not complete
       const isComplete = toolUseBlock.is_complete !== false;
 
       return (
         <div className='flex flex-1 items-center gap-3'>
           {!isComplete ? (
-            <ShimmerText text={snakeCaseToSentenceCase(toolName)} autoAnimate={true} />
+            <ShimmerText text={toolName} autoAnimate={true} />
           ) : (
-            <span className='text-GRAY_900'>{snakeCaseToSentenceCase(toolName)}</span>
+            <span className='text-GRAY_900'>{toolName}</span>
           )}
           {toolResult && toolResult.payload?.is_error && (
             <div className='ml-auto flex items-center gap-1.5'>
@@ -103,7 +98,6 @@ export const StepsBlock: FC<StepsBlockProps> = ({ blocks, toolResultsMap }) => {
       const toolResult = toolCallId ? toolResultsMap.get(toolCallId) : undefined;
       const payload = toolUseBlock.payload;
 
-      // Determine the input content to display (priority: display_content > partial_json > input_json)
       const inputContent =
         payload?.display_content?.json_block ||
         (!payload?.display_content && payload?.partial_json) ||
@@ -136,7 +130,6 @@ export const StepsBlock: FC<StepsBlockProps> = ({ blocks, toolResultsMap }) => {
 
           return (
             <AccordionItem key={`step-${index}`} value={`step-${index}`} className='relative border-none'>
-              {/* Timeline line above the icon (connecting from previous item) */}
               {!isFirst && (
                 <div
                   className='bg-GRAY_500 pointer-events-none absolute top-0 left-[19.5px] h-[6px] w-px'
@@ -157,7 +150,6 @@ export const StepsBlock: FC<StepsBlockProps> = ({ blocks, toolResultsMap }) => {
                 {renderStepContent(block)}
               </AccordionContent>
 
-              {/* Timeline line below the icon (connecting to next item) */}
               {!isLast && (
                 <div
                   className='bg-GRAY_500 pointer-events-none absolute top-[26px] bottom-0 left-[19.5px] w-px'

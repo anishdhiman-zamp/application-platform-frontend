@@ -219,7 +219,6 @@ export const useChatInput = ({
       throw new Error('Failed to create conversation');
     }
 
-    setValue('');
     onConversationCreated?.(response.conversation_id);
   };
 
@@ -293,15 +292,17 @@ export const useChatInput = ({
   };
 
   const handleSubmit = () => {
+    if (value.trim()) {
+      setValue('');
+    }
+
     if (!firstMessage && !conversationId) {
       setFirstMessage(value);
       setHeader?.('Analysing...');
       // Don't clear input here - it will be cleared after createConversationV2 succeeds
       return;
     }
-    if (value.trim()) {
-      setValue('');
-    }
+
     handleSendMessage(value);
   };
 

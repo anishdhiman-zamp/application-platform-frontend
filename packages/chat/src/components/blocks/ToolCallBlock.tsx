@@ -1,8 +1,6 @@
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger, AnimatedTerminalIcon } from '@zamp-platform/ui';
 import { AlertCircle, ChevronDown } from 'lucide-react';
-import React, { FC, useEffect, useRef, useState } from 'react';
-
-import { snakeCaseToSentenceCase } from '@/utils/common';
+import React, { FC } from 'react';
 
 import type { ToolResultContentBlock, ToolUseDisplayContent } from '../../types/block.types';
 import { CodePreviewBlock } from './CodePreviewBlock';
@@ -23,17 +21,17 @@ interface ToolCallBlockProps {
 }
 export const ToolCallBlock: FC<ToolCallBlockProps> = ({ payload, is_complete = true, toolResult }) => {
   const toolName = payload?.display_name || 'Unknown';
-  const wasCompleteRef = useRef(is_complete);
+  // const wasCompleteRef = useRef(is_complete);
 
-  const [accordionValue, setAccordionValue] = useState<string>(is_complete ? '' : 'tool-use');
+  // const [accordionValue, setAccordionValue] = useState<string>(is_complete ? '' : 'tool-use');
 
-  useEffect(() => {
-    // Auto-close accordion when is_complete transitions from false to true
-    if (is_complete && !wasCompleteRef.current) {
-      setAccordionValue('');
-    }
-    wasCompleteRef.current = is_complete;
-  }, [is_complete]);
+  // useEffect(() => {
+  //   // Auto-close accordion when is_complete transitions from false to true
+  //   if (is_complete && !wasCompleteRef.current) {
+  //     setAccordionValue('');
+  //   }
+  //   wasCompleteRef.current = is_complete;
+  // }, [is_complete]);
 
   const inputContent =
     payload?.display_content?.json_block || (!payload?.display_content && payload?.partial_json) || payload?.input_json;
@@ -42,8 +40,8 @@ export const ToolCallBlock: FC<ToolCallBlockProps> = ({ payload, is_complete = t
     <Accordion
       type='single'
       collapsible
-      value={accordionValue}
-      onValueChange={setAccordionValue}
+      // value={accordionValue}
+      // onValueChange={setAccordionValue}
       className='border-GRAY_100 w-full overflow-hidden rounded-lg border bg-white'
     >
       <AccordionItem value='tool-use' className='border-none'>
@@ -55,7 +53,7 @@ export const ToolCallBlock: FC<ToolCallBlockProps> = ({ payload, is_complete = t
           <div className='flex flex-1 items-center gap-3'>
             <div className='flex items-center gap-2'>
               <AnimatedTerminalIcon showAnimation={!is_complete} size={12} />
-              <span className='text-GRAY_900'>{snakeCaseToSentenceCase(toolName)}</span>
+              <span className='text-GRAY_900'>{toolName}</span>
             </div>
             {toolResult && toolResult.payload?.is_error && (
               <div className='ml-auto flex items-center gap-1.5'>
@@ -64,7 +62,7 @@ export const ToolCallBlock: FC<ToolCallBlockProps> = ({ payload, is_complete = t
             )}
           </div>
         </AccordionTrigger>
-        <AccordionContent className='bg-GRAY_50 max-h-60 space-y-4 overflow-y-auto px-3 py-2 [scrollbar-width:thin]'>
+        <AccordionContent className='bg-GRAY_50 max-h-60 space-y-4 overflow-y-auto px-2 py-2 [scrollbar-width:thin]'>
           <CodePreviewBlock label='Input' content={inputContent} />
           {toolResult && (
             <CodePreviewBlock
