@@ -3,14 +3,14 @@
 import { useCallback, useEffect, useRef, useState } from 'react';
 import { SIDEBAR_CONVERSATION_ID_PARAM } from 'modules/pace/pace.constants';
 import { usePathname } from 'next/navigation';
-import { useChatSidebarContext } from '@/modules/pace/chatsidebar.context';
+import { useChatContext } from '@/modules/pace/chat.context';
 
 interface UseChatSidebarStateProps {
   initialConversationId: string | null;
 }
 
 export const useChatSidebarState = ({ initialConversationId }: UseChatSidebarStateProps) => {
-  const { isChatSidebarOpen, setIsChatSidebarOpen } = useChatSidebarContext();
+  const { isChatSidebarOpen, setIsChatSidebarOpen } = useChatContext();
   const pathname = usePathname();
 
   const isInitializedRef = useRef(false);

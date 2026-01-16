@@ -11,8 +11,8 @@ import {
 } from '../api';
 import { ResourceType } from '../types/chat.types';
 import { TranscriptionAdapter } from '../types/transcription.types';
-import { handleFileUploads } from '../utils/fileUpload';
-import { ChatInputAdapter, UploadedFile } from './useChatInput';
+import { handleFileUploads, MultipleFileUploadResult } from '../utils/fileUpload';
+import { ChatInputAdapter } from './useChatInput';
 
 /**
  * Configuration for creating chat adapters
@@ -83,7 +83,7 @@ export function useChatAdapters(config: ChatAdaptersConfig): ChatAdaptersResult 
   const [getSpeechToTextAccessToken] = useLazyGetSpeechToTextAccessTokenQuery({});
 
   const uploadFiles = useCallback(
-    async (files: FileList): Promise<UploadedFile[]> => {
+    async (files: FileList): Promise<MultipleFileUploadResult> => {
       return handleFileUploads(
         files,
         getSignedUrl,

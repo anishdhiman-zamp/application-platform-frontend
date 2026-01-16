@@ -1,6 +1,6 @@
 'use client';
 
-import { FC, useEffect, useMemo } from 'react';
+import { FC, useCallback, useEffect, useMemo } from 'react';
 import {
   ConnectedChatInput,
   MessageContainer,
@@ -10,15 +10,18 @@ import {
   useChat,
 } from '@zamp-platform/chat';
 import { cn } from '@zamp-platform/ui/utils';
+import { ACCEPTED_FILE_TYPES } from 'modules/pace/pace.constants';
 import { API_ENDPOINTS } from '@/apis/apiEndpoint.constants';
 import NewPaceIcons from '@/assets/Icons/NewPaceIcons';
 import CommonWrapper from '@/components/commonWrapper';
 import { SkeletonTypes } from '@/components/commonWrapper/commonWrapper.types';
-import { useAppSelector } from '@/hooks/toolkit';
+import { APITags } from '@/constants/api.constants';
+import { useAppDispatch, useAppSelector } from '@/hooks/toolkit';
 import NewPaceAvatar from '@/modules/chatbot/NewPaceAvatar';
 import ChatTopbar from '@/modules/pace/components/chat/ChatTopbar';
 import ChatMessagesSkeleton from '@/modules/pace/components/loaders/ChatMessagesSkeleton';
 import { useChatDraftInput } from '@/modules/pace/hooks/useChatDraftInput';
+import { baseApi } from '@/services/baseApi';
 import type { RootState } from '@/store';
 
 interface ChatSidebarInnerProps {
@@ -42,9 +45,14 @@ const ChatSidebarInner: FC<ChatSidebarInnerProps> = ({
   isExpanded,
   onToggleExpand,
 }) => {
+  const dispatch = useAppDispatch();
   const organizationId = useAppSelector((state: RootState) => state.user.user?.orgs?.[0]?.organization_id) ?? '';
   const currentUserName = useAppSelector((state: RootState) => state.user.user?.user_name) ?? '';
   const { inputValue, setInputValue } = useChatDraftInput({ conversationId });
+
+  const handleConversationCreated = useCallback(() => {
+    dispatch(baseApi.util.invalidateTags([APITags.GET_CONVERSATION_HISTORY]));
+  }, [dispatch]);
 
   const chat = useChat({
     resourceId: organizationId,
@@ -132,6 +140,8 @@ const ChatSidebarInner: FC<ChatSidebarInnerProps> = ({
             placeholder="Do your life's best work with Pace"
             externalInputValue={inputValue}
             setExternalInputValue={setInputValue}
+            acceptedFileTypes={ACCEPTED_FILE_TYPES}
+            onConversationCreated={handleConversationCreated}
           />
         </div>
       </div>

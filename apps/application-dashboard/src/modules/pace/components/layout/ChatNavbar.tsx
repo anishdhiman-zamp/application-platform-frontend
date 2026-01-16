@@ -5,11 +5,11 @@ import { cn } from '@zamp-platform/ui/utils';
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 import { ROUTES_PATH } from '@/constants/routeConfig';
-import { useChatSidebarContext } from '@/modules/pace/chatsidebar.context';
+import { useChatContext } from '@/modules/pace/chat.context';
 
 const ChatNavbar = () => {
   const pathname = usePathname();
-  const { setIsChatSidebarOpen, startNewChat } = useChatSidebarContext();
+  const { setIsChatSidebarOpen, startNewChat } = useChatContext();
 
   const isHomePage = pathname === ROUTES_PATH.CHAT;
   const isSkillsPage = pathname === ROUTES_PATH.CHAT_SKILLS;
