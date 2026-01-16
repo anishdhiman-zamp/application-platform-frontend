@@ -12,6 +12,7 @@ import {
   ScopeType,
   SenderType,
 } from '../types/chat.types';
+import { MultipleFileUploadResult } from '../utils/fileUpload';
 import { useChat } from './useChat';
 
 export interface UploadedFile {
@@ -30,7 +31,7 @@ export interface ChatInputAdapter {
   getCurrentUserName: () => string;
   getResourceId: () => string;
   getScopeId: () => string;
-  uploadFiles: (files: FileList) => Promise<UploadedFile[]>;
+  uploadFiles: (files: FileList) => Promise<MultipleFileUploadResult>;
   disableInteraction?: (params: {
     conversationId: string;
     messageId: string;
@@ -53,6 +54,7 @@ export interface UseChatInputProps {
   maxTextareaHeight?: number;
   resourceType?: ResourceType;
   annotationType?: AnnotationType;
+  onConversationCreated?: (conversationId: string) => void;
 }
 
 export interface UseChatInputReturn {
@@ -168,6 +170,7 @@ export const useChatInput = ({
   adapter,
   maxTextareaHeight = DEFAULT_MAX_TEXTAREA_HEIGHT,
   annotationType,
+  onConversationCreated,
 }: UseChatInputProps): UseChatInputReturn => {
   const currentUserName = adapter.getCurrentUserName();
   const resourceId = adapter.getResourceId();
@@ -216,8 +219,8 @@ export const useChatInput = ({
       throw new Error('Failed to create conversation');
     }
 
-    // Clear input only after conversation is successfully created
     setValue('');
+    onConversationCreated?.(response.conversation_id);
   };
 
   const handleFileSelect = async (files: FileList | null) => {
@@ -233,38 +236,56 @@ export const useChatInput = ({
     setIsUploading(true);
     setAttachments((prev) => [...prev, ...uploadingFiles]);
 
-    try {
-      const newAttachments = await adapter.uploadFiles(files);
+    const { successful, failed } = await adapter.uploadFiles(files);
 
+    const failedFileNames = new Set(failed.map((f) => f.file.name));
+
+    setAttachments((prev) => {
       const tempEntriesMap = new Map<string, number>();
 
-      setAttachments((prev) => {
-        prev.forEach((item, index) => {
-          if (item.file_id === '' && !tempEntriesMap.has(item.file_name)) {
-            tempEntriesMap.set(item.file_name, index);
-          }
-        });
-
-        const updated = [...prev];
-
-        newAttachments.forEach((newAttachment) => {
-          const index = tempEntriesMap.get(newAttachment.file_name);
-
-          if (index !== undefined) {
-            updated[index] = newAttachment;
-          } else {
-            updated.push(newAttachment);
-          }
-        });
-
-        return updated;
+      prev.forEach((item, index) => {
+        if (item.file_id === '' && !tempEntriesMap.has(item.file_name)) {
+          tempEntriesMap.set(item.file_name, index);
+        }
       });
-      adapter.onSuccess?.('Files uploaded successfully');
-    } catch (error) {
-      adapter.onError?.(error);
-    } finally {
-      setIsUploading(false);
+
+      const updated = prev.filter((att) => {
+        if (att.file_id !== '') return true;
+        if (failedFileNames.has(att.file_name)) return false;
+        return true;
+      });
+
+      const updatedTempEntriesMap = new Map<string, number>();
+      updated.forEach((item, index) => {
+        if (item.file_id === '' && !updatedTempEntriesMap.has(item.file_name)) {
+          updatedTempEntriesMap.set(item.file_name, index);
+        }
+      });
+
+      successful.forEach((newAttachment) => {
+        const index = updatedTempEntriesMap.get(newAttachment.file_name);
+
+        if (index !== undefined) {
+          updated[index] = newAttachment;
+        } else {
+          updated.push(newAttachment);
+        }
+      });
+
+      return updated;
+    });
+
+    if (!!successful?.length) {
+      adapter.onSuccess?.(
+        successful.length === 1 ? 'File uploaded successfully' : `${successful.length} files uploaded successfully`,
+      );
     }
+
+    if (!!failed?.length) {
+      adapter.onError?.(new Error(`${failed.length} file(s) failed to upload`));
+    }
+
+    setIsUploading(false);
   };
 
   const removeAttachment = (fileId: string) => {

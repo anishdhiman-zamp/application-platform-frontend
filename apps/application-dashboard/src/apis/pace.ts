@@ -22,6 +22,7 @@ const MACS = baseApi.injectEndpoints({
           limit,
         },
       }),
+      providesTags: [APITags.GET_CONVERSATION_HISTORY],
     }),
 
     // List Skills

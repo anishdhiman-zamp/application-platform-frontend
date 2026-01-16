@@ -6,7 +6,7 @@ import { notFound } from 'next/navigation';
 import ImageLoader from '@/components/common/loader/ImageLoader';
 import { ZAMP_LOGO_LOADER_SVG } from '@/constants/icons';
 import { useIsPaceChatEnabled } from '@/hooks/useIsPaceChatEnabled';
-import { ChatSidebarProvider, useChatSidebarContext } from '@/modules/pace/chatsidebar.context';
+import { ChatProvider, useChatContext } from '@/modules/pace/chat.context';
 import ChatNavbar from '@/modules/pace/components/layout/ChatNavbar';
 import ChatSidebar from '@/modules/pace/components/layout/ChatSidebar';
 
@@ -15,7 +15,7 @@ interface ChatLayoutProps {
 }
 
 const ChatLayoutContent = ({ children }: ChatLayoutProps) => {
-  const { isExpanded } = useChatSidebarContext();
+  const { isExpanded } = useChatContext();
 
   return (
     <div className='bg-BG_GRAY_1 flex h-full w-full overflow-hidden'>
@@ -44,9 +44,9 @@ const ChatLayout = ({ children }: ChatLayoutProps) => {
   }
 
   return (
-    <ChatSidebarProvider>
+    <ChatProvider>
       <ChatLayoutContent>{children}</ChatLayoutContent>
-    </ChatSidebarProvider>
+    </ChatProvider>
   );
 };
 

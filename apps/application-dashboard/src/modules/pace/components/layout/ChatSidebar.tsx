@@ -5,7 +5,7 @@ import { cn } from '@zamp-platform/ui/utils';
 import { AnimatePresence, motion } from 'framer-motion';
 import { SIDEBAR_CONVERSATION_ID_PARAM, SIDEBAR_WIDTH } from 'modules/pace/pace.constants';
 import { useSearchParams } from 'next/navigation';
-import { useChatSidebarContext } from '@/modules/pace/chatsidebar.context';
+import { useChatContext } from '@/modules/pace/chat.context';
 import ChatSidebarInner from '@/modules/pace/components/layout/ChatSidebarInner';
 import { useChatSidebarState } from '@/modules/pace/hooks/useChatSidebarState';
 
@@ -17,7 +17,7 @@ const ChatSidebar: FC<ChatSidebarProps> = ({ className }) => {
   const searchParams = useSearchParams();
   const initialConversationId = searchParams?.get(SIDEBAR_CONVERSATION_ID_PARAM) ?? null;
 
-  const { isExpanded, toggleExpand, resetExpand } = useChatSidebarContext();
+  const { isExpanded, toggleExpand, resetExpand } = useChatContext();
 
   const {
     isChatSidebarOpen,

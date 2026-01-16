@@ -6,7 +6,7 @@ import { useListSkillsQuery } from '@/apis/pace';
 import NewPaceIcons from '@/assets/Icons/NewPaceIcons';
 import CommonWrapper from '@/components/commonWrapper';
 import { SkeletonTypes } from '@/components/commonWrapper/commonWrapper.types';
-import { useChatSidebarContext } from '@/modules/pace/chatsidebar.context';
+import { useChatSidebarContext } from '@/modules/pace/chat.context';
 import SkillCardSkeleton from '@/modules/pace/components/loaders/SkillCardSkeleton';
 import SkillCard from '@/modules/pace/components/skills/SkillCard';
 import SkillsEmptyState from '@/modules/pace/components/skills/SkillsEmptyState';
