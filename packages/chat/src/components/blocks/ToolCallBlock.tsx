@@ -1,4 +1,11 @@
-import { Accordion, AccordionContent, AccordionItem, AccordionTrigger, AnimatedTerminalIcon } from '@zamp-platform/ui';
+import {
+  Accordion,
+  AccordionContent,
+  AccordionItem,
+  AccordionTrigger,
+  AnimatedTerminalIcon,
+  ShimmerText,
+} from '@zamp-platform/ui';
 import { AlertCircle } from 'lucide-react';
 import React, { FC } from 'react';
 
@@ -32,7 +39,11 @@ export const ToolCallBlock: FC<ToolCallBlockProps> = ({ payload, is_complete = t
           <div className='flex flex-1 items-center gap-3'>
             <div className='flex items-center gap-2'>
               <AnimatedTerminalIcon showAnimation={!is_complete} size={12} />
-              <span className='text-GRAY_900'>{toolName}</span>
+              {!is_complete ? (
+                <ShimmerText text={toolName} autoAnimate={true} />
+              ) : (
+                <span className='text-GRAY_900'>{toolName}</span>
+              )}
             </div>
             {toolResult && toolResult.payload?.is_error && (
               <div className='ml-auto flex items-center gap-1.5'>
