@@ -1,5 +1,5 @@
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger, AnimatedTerminalIcon } from '@zamp-platform/ui';
-import { AlertCircle, ChevronDown } from 'lucide-react';
+import { AlertCircle } from 'lucide-react';
 import React, { FC } from 'react';
 
 import type { ToolResultContentBlock, ToolUseDisplayContent } from '../../types/block.types';
@@ -21,35 +21,14 @@ interface ToolCallBlockProps {
 }
 export const ToolCallBlock: FC<ToolCallBlockProps> = ({ payload, is_complete = true, toolResult }) => {
   const toolName = payload?.display_name || 'Unknown';
-  // const wasCompleteRef = useRef(is_complete);
-
-  // const [accordionValue, setAccordionValue] = useState<string>(is_complete ? '' : 'tool-use');
-
-  // useEffect(() => {
-  //   // Auto-close accordion when is_complete transitions from false to true
-  //   if (is_complete && !wasCompleteRef.current) {
-  //     setAccordionValue('');
-  //   }
-  //   wasCompleteRef.current = is_complete;
-  // }, [is_complete]);
 
   const inputContent =
     payload?.display_content?.json_block || (!payload?.display_content && payload?.partial_json) || payload?.input_json;
 
   return (
-    <Accordion
-      type='single'
-      collapsible
-      // value={accordionValue}
-      // onValueChange={setAccordionValue}
-      className='border-GRAY_100 w-full overflow-hidden rounded-lg border bg-white'
-    >
+    <Accordion type='single' collapsible className='border-GRAY_100 w-full overflow-hidden rounded-lg border bg-white'>
       <AccordionItem value='tool-use' className='border-none'>
-        <AccordionTrigger
-          className='f-12-450 text-GRAY_900 w-full cursor-pointer gap-x-2 py-2 pr-2 pl-3 hover:bg-gray-50 [&[data-state=closed]>svg]:rotate-90 [&[data-state=open]>svg]:-rotate-90'
-          icon={ChevronDown}
-          iconRotation={180}
-        >
+        <AccordionTrigger className='f-12-450 text-GRAY_900 w-full cursor-pointer gap-x-2 py-2 pr-2 pl-3 hover:bg-gray-50 [&[data-state=closed]>svg]:rotate-90 [&[data-state=open]>svg]:-rotate-90'>
           <div className='flex flex-1 items-center gap-3'>
             <div className='flex items-center gap-2'>
               <AnimatedTerminalIcon showAnimation={!is_complete} size={12} />

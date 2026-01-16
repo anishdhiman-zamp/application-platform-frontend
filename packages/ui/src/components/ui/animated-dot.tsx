@@ -36,7 +36,7 @@ export const AnimatedDot: FC<AnimatedDotProps> = ({
   size = 8,
   className,
   activeColor = COLORS.BLUE_350,
-  completeColor = COLORS.GRAY_500,
+  completeColor = COLORS.GRAY_700,
 }) => {
   return (
     <motion.div

@@ -20,7 +20,7 @@ export const StatusLabel: FC<StatusLabelProps> = ({
   isComplete,
   loadingText,
   completedText,
-  className = 'f-12-450 text-GRAY_700 text-left',
+  className = 'f-12-450 text-GRAY_900 text-left',
 }) => {
   return (
     <AnimatePresence mode='wait' initial={false}>

@@ -21,26 +21,9 @@ export const ThinkingBlock: FC<ThinkingBlockProps> = ({
 }) => {
   const thinkingDuration = formatThinkingDuration(start_timestamp, stop_timestamp);
   const completedLabelWithDuration = thinkingDuration ? `Thought for ${thinkingDuration}` : 'Thought';
-  // const wasCompleteRef = useRef(is_complete);
-
-  // const [accordionValue, setAccordionValue] = useState<string>(is_complete ? '' : 'thinking');
-
-  // useEffect(() => {
-  //   // Auto-close accordion when is_complete transitions from false to true
-  //   if (is_complete && !wasCompleteRef.current) {
-  //     setAccordionValue('');
-  //   }
-  //   wasCompleteRef.current = is_complete;
-  // }, [is_complete]);
 
   return (
-    <Accordion
-      type='single'
-      collapsible
-      // value={accordionValue}
-      // onValueChange={setAccordionValue}
-      className='border-GRAY_100 w-full overflow-hidden rounded-lg border bg-white'
-    >
+    <Accordion type='single' collapsible className='border-GRAY_100 w-full overflow-hidden rounded-lg border bg-white'>
       <AccordionItem value='thinking' className='border-none'>
         <AccordionTrigger className='f-12-450 text-GRAY_900 w-full cursor-pointer gap-x-2 px-2 py-2 hover:bg-gray-50 [&[data-state=closed]>svg]:rotate-90 [&[data-state=open]>svg]:-rotate-90'>
           <div className='flex flex-1 flex-col gap-2'>

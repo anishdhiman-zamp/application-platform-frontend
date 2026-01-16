@@ -9,7 +9,7 @@ import {
   AnimatedTerminalIcon,
   ShimmerText,
 } from '@zamp-platform/ui';
-import { AlertCircle, ChevronDown } from 'lucide-react';
+import { AlertCircle } from 'lucide-react';
 import React, { FC, useState } from 'react';
 
 import {
@@ -36,7 +36,7 @@ export const StepsBlock: FC<StepsBlockProps> = ({ blocks, toolResultsMap }) => {
     const isComplete = block.is_complete !== false;
 
     if (block.type === BLOCK_TYPE.THINKING) {
-      return <AnimatedDot showAnimation={!isComplete} size={8} />;
+      return <AnimatedDot showAnimation={!isComplete} size={6} />;
     }
 
     if (block.type === BLOCK_TYPE.TOOL_USE) {
@@ -136,11 +136,7 @@ export const StepsBlock: FC<StepsBlockProps> = ({ blocks, toolResultsMap }) => {
                   style={{ zIndex: 0 }}
                 />
               )}
-              <AccordionTrigger
-                icon={ChevronDown}
-                iconRotation={180}
-                className='f-12-450 text-GRAY_900 w-full cursor-pointer gap-x-2 py-2 pr-2 pl-3 hover:bg-gray-50 hover:no-underline [&[data-state=closed]>svg]:rotate-0 [&[data-state=open]>svg]:rotate-180'
-              >
+              <AccordionTrigger className='f-12-450 text-GRAY_900 w-full cursor-pointer gap-x-2 py-2 pr-2 pl-3 hover:bg-gray-50 hover:no-underline [&[data-state=closed]>svg]:rotate-90 [&[data-state=open]>svg]:-rotate-90'>
                 <div className='z-10 flex flex-1 items-center gap-2'>
                   <div className='flex h-4 w-4 shrink-0 items-center justify-center'>{stepIcon}</div>
                   {renderStepTrigger(block)}
