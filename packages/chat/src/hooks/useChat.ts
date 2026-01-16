@@ -232,7 +232,11 @@ export const useChat = (config: ChatConfig) => {
                 order: index,
                 id: content_block?.id,
                 name: content_block?.name,
-                payload: { partial_json: '', tool_call_id: content_block?.id },
+                payload: {
+                  partial_json: '',
+                  tool_call_id: content_block?.id,
+                  display_name: content_block?.display_name,
+                },
                 start_timestamp: content_block?.start_timestamp,
                 is_complete: false,
               };

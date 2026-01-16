@@ -1,12 +1,11 @@
-import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from '@zamp-platform/ui';
-import { cn } from '@zamp-platform/ui/utils';
-import { AlertCircle, ChevronDown, Terminal } from 'lucide-react';
-import { FC, useEffect, useRef, useState } from 'react';
+import { Accordion, AccordionContent, AccordionItem, AccordionTrigger, AnimatedTerminalIcon } from '@zamp-platform/ui';
+import { AlertCircle, ChevronDown } from 'lucide-react';
+import React, { FC, useEffect, useRef, useState } from 'react';
 
 import { snakeCaseToSentenceCase } from '@/utils/common';
 
 import type { ToolResultContentBlock, ToolUseDisplayContent } from '../../types/block.types';
-import { formatJson } from '../block.utils';
+import { CodePreviewBlock } from './CodePreviewBlock';
 
 /**
  * Component to render a tool use content block with optional tool result using Accordion
@@ -16,16 +15,14 @@ interface ToolCallBlockProps {
     display_content?: ToolUseDisplayContent;
     partial_json?: string;
     input_json?: string;
-    name?: string;
     tool_call_id?: string;
     display_name?: string;
   };
-  name?: string;
   is_complete: boolean;
   toolResult?: ToolResultContentBlock;
 }
-export const ToolCallBlock: FC<ToolCallBlockProps> = ({ payload, is_complete = true, name, toolResult }) => {
-  const toolName = payload?.display_name || payload?.name || name || 'Unknown';
+export const ToolCallBlock: FC<ToolCallBlockProps> = ({ payload, is_complete = true, toolResult }) => {
+  const toolName = payload?.display_name || 'Unknown';
   const wasCompleteRef = useRef(is_complete);
 
   const [accordionValue, setAccordionValue] = useState<string>(is_complete ? '' : 'tool-use');
@@ -38,6 +35,9 @@ export const ToolCallBlock: FC<ToolCallBlockProps> = ({ payload, is_complete = t
     wasCompleteRef.current = is_complete;
   }, [is_complete]);
 
+  const inputContent =
+    payload?.display_content?.json_block || (!payload?.display_content && payload?.partial_json) || payload?.input_json;
+
   return (
     <Accordion
       type='single'
@@ -48,13 +48,13 @@ export const ToolCallBlock: FC<ToolCallBlockProps> = ({ payload, is_complete = t
     >
       <AccordionItem value='tool-use' className='border-none'>
         <AccordionTrigger
-          className='f-12-450 text-GRAY_900 w-full cursor-pointer gap-x-2 p-1.5 hover:no-underline [&[data-state=closed]>svg]:rotate-0 [&[data-state=open]>svg]:rotate-180'
+          className='f-12-450 text-GRAY_900 w-full cursor-pointer gap-x-2 py-2 pr-2 pl-3 hover:bg-gray-50 [&[data-state=closed]>svg]:rotate-90 [&[data-state=open]>svg]:-rotate-90'
           icon={ChevronDown}
           iconRotation={180}
         >
           <div className='flex flex-1 items-center gap-3'>
             <div className='flex items-center gap-2'>
-              <Terminal className='text-GRAY_700 h-4 w-4' strokeWidth={1.5} />
+              <AnimatedTerminalIcon showAnimation={!is_complete} size={12} />
               <span className='text-GRAY_900'>{snakeCaseToSentenceCase(toolName)}</span>
             </div>
             {toolResult && toolResult.payload?.is_error && (
@@ -64,56 +64,14 @@ export const ToolCallBlock: FC<ToolCallBlockProps> = ({ payload, is_complete = t
             )}
           </div>
         </AccordionTrigger>
-        <AccordionContent className='border-GRAY_100 space-y-4 border-t px-3 pt-3 pb-3'>
-          {payload?.display_content && (
-            <div className='space-y-2'>
-              <span className='text-GRAY_700 f-11-500 tracking-wide uppercase'>Input</span>
-              <div className='border-GRAY_200 overflow-x-auto rounded-lg border bg-gray-50 p-3'>
-                <pre className='f-12-400 text-GRAY_700 break-all whitespace-pre-wrap'>
-                  {formatJson(payload?.display_content?.json_block)}
-                </pre>
-              </div>
-            </div>
-          )}
-          {!payload?.display_content && payload?.partial_json && (
-            <div className='space-y-2'>
-              <span className='text-GRAY_700 f-11-500 tracking-wide uppercase'>Input</span>
-              <div className='border-GRAY_200 overflow-x-auto rounded-lg border bg-gray-50 p-3'>
-                <pre className='f-12-400 text-GRAY_700 break-all whitespace-pre-wrap'>
-                  {formatJson(payload?.partial_json)}
-                </pre>
-              </div>
-            </div>
-          )}
-          {payload?.input_json && (
-            <div className='space-y-2'>
-              <span className='text-GRAY_700 f-11-500 tracking-wide uppercase'>Input</span>
-              <div className='border-GRAY_200 overflow-x-auto rounded-lg border bg-gray-50 p-3'>
-                <pre className='f-12-400 text-GRAY_700 break-all whitespace-pre-wrap'>
-                  {formatJson(payload?.input_json)}
-                </pre>
-              </div>
-            </div>
-          )}
+        <AccordionContent className='bg-GRAY_50 max-h-60 space-y-4 overflow-y-auto px-3 py-2 [scrollbar-width:thin]'>
+          <CodePreviewBlock label='Input' content={inputContent} />
           {toolResult && (
-            <div className='space-y-2'>
-              <span className='text-GRAY_700 f-11-500 tracking-wide uppercase'>Output</span>
-              <div
-                className={cn(
-                  'overflow-x-auto rounded-lg border p-3',
-                  toolResult.payload?.is_error ? 'border-red-200 bg-red-50' : 'border-GRAY_200 bg-gray-50',
-                )}
-              >
-                <pre
-                  className={cn(
-                    'f-12-400 break-all whitespace-pre-wrap',
-                    toolResult.payload?.is_error ? 'text-red-700' : 'text-GRAY_700',
-                  )}
-                >
-                  {formatJson(toolResult.payload?.content)}
-                </pre>
-              </div>
-            </div>
+            <CodePreviewBlock
+              label='Output'
+              content={toolResult.payload?.content}
+              isError={toolResult.payload?.is_error}
+            />
           )}
         </AccordionContent>
       </AccordionItem>
