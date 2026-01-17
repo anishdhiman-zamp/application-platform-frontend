@@ -4,7 +4,6 @@ import { Toaster } from '@zamp-platform/ui';
 import { FAVICON } from 'constants/icons';
 import type { Metadata, Viewport } from 'next';
 import { Inter } from 'next/font/google';
-import GodModeGate from '@/components/GodModeGate';
 import NetworkStatus from '@/components/NetWorkStatus';
 import '@zamp-platform/ui/globals.css';
 import 'react-date-range/dist/styles.css';
@@ -42,7 +41,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
         <SpeedInsights />
         <NetworkStatus />
         <Toaster />
-        <GodModeGate>{children}</GodModeGate>
+        {children}
       </body>
     </html>
   );
