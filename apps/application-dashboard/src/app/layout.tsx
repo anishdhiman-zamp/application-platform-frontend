@@ -4,9 +4,8 @@ import { Toaster } from '@zamp-platform/ui';
 import { FAVICON } from 'constants/icons';
 import type { Metadata, Viewport } from 'next';
 import { Inter } from 'next/font/google';
+import GodModeGate from '@/components/GodModeGate';
 import NetworkStatus from '@/components/NetWorkStatus';
-import DashboardDowntime from '@/modules/cards/DashboardDowntime';
-import { getFromLocalStorage, LOCAL_STORAGE_KEYS } from '@/utils/localstorage';
 import '@zamp-platform/ui/globals.css';
 import 'react-date-range/dist/styles.css';
 import 'react-date-range/dist/theme/default.css';
@@ -36,20 +35,14 @@ export const viewport: Viewport = {
   initialScale: 1.0,
 };
 
-const isGodMode = getFromLocalStorage(LOCAL_STORAGE_KEYS.XZAMP_GOD_MODE);
-
 export default function RootLayout({ children }: { children: React.ReactNode }) {
-  if (!isGodMode) {
-    return <DashboardDowntime />;
-  }
-
   return (
     <html lang='en' className={inter.className}>
       <body className='light-mode bg-BACKGROUND_GRAY_1 h-screen antialiased'>
         <SpeedInsights />
         <NetworkStatus />
         <Toaster />
-        {children}
+        <GodModeGate>{children}</GodModeGate>
       </body>
     </html>
   );
