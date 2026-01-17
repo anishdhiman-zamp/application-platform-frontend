@@ -39,7 +39,7 @@ export const viewport: Viewport = {
 const isGodMode = getFromLocalStorage(LOCAL_STORAGE_KEYS.XZAMP_GOD_MODE);
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {
-  if (isGodMode) {
+  if (!isGodMode) {
     return <DashboardDowntime />;
   }
 
