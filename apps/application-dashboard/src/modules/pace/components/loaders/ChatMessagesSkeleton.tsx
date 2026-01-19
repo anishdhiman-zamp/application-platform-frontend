@@ -35,7 +35,7 @@ const ChatMessagesSkeleton: FC<ChatMessagesSkeletonProps> = ({ count = 1, classN
   return (
     <div className={cn('flex w-full flex-col px-3 py-4', className)}>
       {Array.from({ length: count }).map((_, index) => (
-        <div key={`chat-message-skeleton-${index}`} className='flex w-full flex-col gap-6 px-3 py-4'>
+        <div key={`chat-message-skeleton-${index}`} className='flex w-full flex-col gap-6'>
           <UserMessageSkeleton />
           <AssistantMessageSkeleton lines={4} />
           <UserMessageSkeleton />

@@ -126,7 +126,12 @@ const ChatSidebarInner: FC<ChatSidebarInnerProps> = ({
             </div>
           </div>
         )}
-        <div className={cn('border-GRAY_400 w-full flex-shrink-0 border-t p-3', isExpanded ? 'border-none pt-0' : '')}>
+        <div
+          className={cn(
+            'border-GRAY_400 w-full flex-shrink-0 border-t bg-[#fcfcfc] p-3',
+            isExpanded ? 'border-none pt-0' : '',
+          )}
+        >
           <ConnectedChatInput
             chat={chat}
             conversationId={chat.conversationId ?? ''}
@@ -141,6 +146,7 @@ const ChatSidebarInner: FC<ChatSidebarInnerProps> = ({
             externalInputValue={inputValue}
             setExternalInputValue={setInputValue}
             acceptedFileTypes={ACCEPTED_FILE_TYPES}
+            className='bg-white'
             onConversationCreated={handleConversationCreated}
           />
         </div>
