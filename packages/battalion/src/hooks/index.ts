@@ -17,7 +17,8 @@ import {
 } from '../types';
 
 export function useResource<T>(resourceName: ResourceName, options?: ResourceOptions): ResourceHookReturn<T> {
-  const queryClient = options?.queryClient || useQueryClient();
+  const defaultQueryClient = useQueryClient();
+  const queryClient = options?.queryClient || defaultQueryClient;
   const resource = getResourceRegistry().get(resourceName);
   const integration = transactionStore.getIntegration();
   const queryGraph = getQueryGraph();
