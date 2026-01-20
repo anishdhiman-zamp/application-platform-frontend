@@ -1,6 +1,7 @@
 'use client';
 
-import { Dispatch, SetStateAction, useCallback, useEffect, useRef, useState } from 'react';
+import { formatPlural } from '@zamp-platform/utils';
+import { Dispatch, SetStateAction, useCallback, useEffect, useMemo, useRef, useState } from 'react';
 
 import { ActionType, Block, BLOCK_TYPE, ButtonBlockType } from '../types/block.types';
 import {
@@ -55,6 +56,7 @@ export interface UseChatInputProps {
   resourceType?: ResourceType;
   annotationType?: AnnotationType;
   onConversationCreated?: (conversationId: string) => void;
+  isDisabled?: boolean;
 }
 
 export interface UseChatInputReturn {
@@ -69,6 +71,7 @@ export interface UseChatInputReturn {
   isUploading: boolean;
   firstMessage: string;
   setFirstMessage: Dispatch<SetStateAction<string>>;
+  isSubmitDisabled: boolean;
 }
 
 /**
@@ -171,6 +174,7 @@ export const useChatInput = ({
   maxTextareaHeight = DEFAULT_MAX_TEXTAREA_HEIGHT,
   annotationType,
   onConversationCreated,
+  isDisabled,
 }: UseChatInputProps): UseChatInputReturn => {
   const currentUserName = adapter.getCurrentUserName();
   const resourceId = adapter.getResourceId();
@@ -196,6 +200,8 @@ export const useChatInput = ({
   const [attachments, setAttachments] = useState<UploadedFile[]>([]);
   const [isUploading, setIsUploading] = useState(false);
   const [firstMessage, setFirstMessage] = useState('');
+
+  const isSubmitDisabled = useMemo(() => isDisabled || isUploading || !value.trim(), [isDisabled, isUploading, value]);
 
   const init = async () => {
     const payload = createConversationPayload(
@@ -274,14 +280,9 @@ export const useChatInput = ({
       return updated;
     });
 
-    if (!!successful?.length) {
-      adapter.onSuccess?.(
-        successful.length === 1 ? 'File uploaded successfully' : `${successful.length} files uploaded successfully`,
-      );
-    }
-
     if (!!failed?.length) {
-      adapter.onError?.(new Error(`${failed.length} file(s) failed to upload`));
+      const failedNames = failed.map((f) => f?.file?.name).join(', ');
+      adapter.onError?.(new Error(`Failed to upload ${formatPlural(failed.length, 'file')}: ${failedNames}`));
     }
 
     setIsUploading(false);
@@ -299,7 +300,6 @@ export const useChatInput = ({
     if (!firstMessage && !conversationId) {
       setFirstMessage(value);
       setHeader?.('Analysing...');
-      // Don't clear input here - it will be cleared after createConversationV2 succeeds
       return;
     }
 
@@ -352,7 +352,7 @@ export const useChatInput = ({
   };
 
   const handleKeyDown = (e: React.KeyboardEvent<HTMLTextAreaElement>) => {
-    if (e.key === KEYBOARD_KEY_ENTER && !e.shiftKey) {
+    if (e.key === KEYBOARD_KEY_ENTER && !e.shiftKey && !isSubmitDisabled) {
       e.preventDefault();
       handleSubmit();
     }
@@ -393,6 +393,7 @@ export const useChatInput = ({
     isUploading,
     firstMessage,
     setFirstMessage,
+    isSubmitDisabled,
   };
 };
 

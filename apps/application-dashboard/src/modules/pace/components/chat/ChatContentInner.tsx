@@ -82,25 +82,26 @@ const ChatContentInner = ({
     return (
       <>
         <ChatTopbar title={chatTitle || 'Untitled'} onStartNewChat={startNewChat} />
-        <div className='mx-auto flex min-h-0 w-full max-w-[700px] flex-1 flex-col overflow-hidden'>
+        <div className='relative flex min-h-0 w-full flex-1 flex-col overflow-x-hidden overflow-y-auto [scrollbar-width:none]'>
           <CommonWrapper
             isLoading={isLoadingConversation}
             isError={chat.isErrorConversationHistory}
             refetchFunction={chat.refetchConversationHistory}
             skeletonType={SkeletonTypes.CUSTOM}
-            loader={<ChatMessagesSkeleton className='p-0' />}
-            className='flex min-h-0 flex-1'
+            loader={<ChatMessagesSkeleton className='px-0' />}
+            className='mx-auto flex w-full max-w-[700px] flex-1 px-4'
           >
             <MessageContainer
               messages={chat.messages}
               isAnalysing={isAnalysing}
               streamingState={chat.streamingState}
-              className='px-3 [scrollbar-width:none]'
+              className='gap-4 px-0 [&]:overflow-visible'
               assistantAvatar={<NewPaceAvatar />}
               streamingEnabled
+              showTimestamp
             />
           </CommonWrapper>
-          <div className='mx-auto w-full flex-shrink-0 px-3 pb-3'>
+          <div className='sticky bottom-0 z-10 mx-auto w-full max-w-[700px] bg-white pb-3'>
             <ConnectedChatInput
               chat={chat}
               conversationId={conversationId ?? chat.conversationId ?? ''}

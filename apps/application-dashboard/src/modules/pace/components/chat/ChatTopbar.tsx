@@ -41,10 +41,10 @@ const ChatTopbar: FC<ChatTopbarProps> = ({
 
   return (
     <div
-      className={cn('border-GRAY_400 flex h-10 items-center justify-between gap-x-2 border-b p-3', className)}
+      className={cn('border-GRAY_400 flex items-center justify-between gap-x-2 border-b p-3', className)}
       style={style}
     >
-      <div className='f-11-550 relative min-w-0 flex-1 overflow-hidden first-letter:uppercase'>
+      <div className='f-13-500 relative min-w-0 flex-1 overflow-hidden first-letter:uppercase'>
         <AnimatePresence mode='wait'>
           <motion.span
             key={displayTitle}
@@ -59,36 +59,36 @@ const ChatTopbar: FC<ChatTopbarProps> = ({
           </motion.span>
         </AnimatePresence>
       </div>
-      <div className='flex items-center gap-1'>
+      <div className='flex items-center gap-1.5'>
         <Button
           variant='ghost'
           size='icon'
-          className='h-6 w-6 p-2 text-gray-600 hover:text-gray-900'
+          className='h-4 w-4 rounded text-gray-600 hover:text-gray-900'
           onClick={onStartNewChat}
           title='Start new chat'
         >
-          <Plus size={12} />
+          <Plus size={10} />
         </Button>
         {onToggleExpand && (
           <Button
             variant='ghost'
             size='icon'
-            className='h-6 w-6 p-2 text-gray-600 hover:text-gray-900'
+            className='h-4 w-4 rounded text-gray-600 hover:text-gray-900'
             onClick={onToggleExpand}
             title={isExpanded ? 'Minimize chat' : 'Expand chat'}
           >
-            {isExpanded ? <Minimize2 size={12} /> : <Maximize2 size={12} />}
+            {isExpanded ? <Minimize2 size={10} /> : <Maximize2 size={10} />}
           </Button>
         )}
         {onClose && (
           <Button
             variant='ghost'
             size='icon'
-            className='h-6 w-6 p-2 text-gray-600 hover:text-gray-900'
+            className='h-4 w-4 rounded text-gray-600 hover:text-gray-900'
             onClick={onClose}
             title='Close chat'
           >
-            <X size={12} />
+            <X size={10} />
           </Button>
         )}
       </div>

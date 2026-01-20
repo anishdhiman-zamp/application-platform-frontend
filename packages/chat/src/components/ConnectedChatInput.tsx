@@ -117,6 +117,7 @@ export const ConnectedChatInput: FC<ConnectedChatInputProps> = ({
     removeAttachment,
     isUploading,
     setFirstMessage,
+    isSubmitDisabled,
   } = useChatInput({
     chat,
     annotationLocation,
@@ -129,6 +130,7 @@ export const ConnectedChatInput: FC<ConnectedChatInputProps> = ({
     resourceType,
     annotationType,
     onConversationCreated,
+    isDisabled,
   });
 
   const {
@@ -328,7 +330,10 @@ export const ConnectedChatInput: FC<ConnectedChatInputProps> = ({
               </Button>
             </div>
           ) : (
-            <div className='shadow-side-drawer-inner rounded-xl border' onClick={handleContainerClick}>
+            <div
+              className='border-GRAY_400 focus-within:border-GRAY_600 rounded-xl border shadow-xs transition-all'
+              onClick={handleContainerClick}
+            >
               <div className='p-2.5'>
                 <Textarea
                   ref={textareaRef}
@@ -337,7 +342,7 @@ export const ConnectedChatInput: FC<ConnectedChatInputProps> = ({
                   onKeyDown={isDisabled ? undefined : handleKeyDown}
                   onPaste={isDisabled || disableAttachments ? undefined : handlePaste}
                   placeholder={placeholder}
-                  className='f-13-450 placeholder:text-muted-foreground min-h-0 w-full resize-none overflow-y-auto border-none bg-transparent p-0 shadow-none outline-none'
+                  className='f-13-450 placeholder:text-muted-foreground min-h-0 w-full resize-none overflow-y-auto border-none bg-transparent p-0 shadow-none outline-none [scrollbar-width:thin]'
                   style={{
                     height: '20px',
                     maxHeight: '200px',
@@ -376,7 +381,7 @@ export const ConnectedChatInput: FC<ConnectedChatInputProps> = ({
                 </div>
                 <Button
                   onClick={handleSubmit}
-                  disabled={!value.trim() || isUploading || isDisabled}
+                  disabled={isSubmitDisabled}
                   size='icon'
                   aria-label='Send message'
                   className='!size-5 rounded-full !text-white disabled:cursor-not-allowed disabled:opacity-50 [&_svg]:size-3'

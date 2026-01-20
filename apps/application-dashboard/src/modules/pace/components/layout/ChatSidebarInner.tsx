@@ -112,9 +112,10 @@ const ChatSidebarInner: FC<ChatSidebarInnerProps> = ({
                 messages={chat.messages}
                 isAnalysing={isAnalysing}
                 streamingState={chat.streamingState}
-                className='px-3 [scrollbar-width:none]'
+                className='gap-4 px-3 [scrollbar-width:none]'
                 assistantAvatar={<NewPaceAvatar />}
                 streamingEnabled
+                showTimestamp
               />
             </CommonWrapper>
           </>
@@ -126,7 +127,12 @@ const ChatSidebarInner: FC<ChatSidebarInnerProps> = ({
             </div>
           </div>
         )}
-        <div className={cn('border-GRAY_400 w-full flex-shrink-0 border-t p-3', isExpanded ? 'border-none pt-0' : '')}>
+        <div
+          className={cn(
+            'border-GRAY_400 w-full flex-shrink-0 border-t bg-[#fcfcfc] p-3',
+            isExpanded ? 'border-none pt-0' : '',
+          )}
+        >
           <ConnectedChatInput
             chat={chat}
             conversationId={chat.conversationId ?? ''}
@@ -141,6 +147,7 @@ const ChatSidebarInner: FC<ChatSidebarInnerProps> = ({
             externalInputValue={inputValue}
             setExternalInputValue={setInputValue}
             acceptedFileTypes={ACCEPTED_FILE_TYPES}
+            className='bg-white'
             onConversationCreated={handleConversationCreated}
           />
         </div>
