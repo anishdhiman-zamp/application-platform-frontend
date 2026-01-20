@@ -95,12 +95,13 @@ const ChatContentInner = ({
               messages={chat.messages}
               isAnalysing={isAnalysing}
               streamingState={chat.streamingState}
-              className='px-0 [&]:overflow-visible'
+              className='gap-4 px-0 [&]:overflow-visible'
               assistantAvatar={<NewPaceAvatar />}
               streamingEnabled
+              showTimestamp
             />
           </CommonWrapper>
-          <div className='sticky bottom-0 mx-auto w-full max-w-[700px] bg-white pb-3'>
+          <div className='sticky bottom-0 z-10 mx-auto w-full max-w-[700px] bg-white pb-3'>
             <ConnectedChatInput
               chat={chat}
               conversationId={conversationId ?? chat.conversationId ?? ''}

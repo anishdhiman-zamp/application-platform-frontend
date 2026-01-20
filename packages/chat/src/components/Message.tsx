@@ -20,6 +20,7 @@ export interface MessageProps extends Omit<SenderDetailsProps, 'message'> {
   messageId?: string;
   senderDetailsClassName?: string;
   showSenderDetails?: boolean;
+  showTimestamp?: boolean;
 }
 
 export const Message: FC<MessageProps> = ({
@@ -35,6 +36,7 @@ export const Message: FC<MessageProps> = ({
   userAvatar,
   senderDetailsClassName,
   showSenderDetails = true,
+  showTimestamp = false,
 }) => {
   const formattedTimestamp = useMemo(
     () => (message.timestamp ? formatChatTimestamp(message.timestamp) : ''),
@@ -66,15 +68,15 @@ export const Message: FC<MessageProps> = ({
         messageId={messageId || message?.id}
         isLoading={isLoading}
       />
-      {formattedTimestamp && (
+      {showTimestamp && formattedTimestamp && (
         <TooltipProvider delayDuration={100}>
           <Tooltip>
             <TooltipTrigger asChild>
-              <div className='text-GRAY_600 invisible w-fit cursor-default text-xs group-hover:visible'>
+              <div className='text-GRAY_600 f-10-450 invisible w-fit cursor-default group-hover:visible'>
                 {formattedTimestamp}
               </div>
             </TooltipTrigger>
-            <TooltipContent side='bottom' align='center' className='p-1.5 text-xs' sideOffset={12}>
+            <TooltipContent side='bottom' align='center' className='f-10-450 p-1.5' sideOffset={12}>
               <p>{tooltipTimestamp}</p>
             </TooltipContent>
           </Tooltip>

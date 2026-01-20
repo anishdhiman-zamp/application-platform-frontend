@@ -112,9 +112,10 @@ const ChatSidebarInner: FC<ChatSidebarInnerProps> = ({
                 messages={chat.messages}
                 isAnalysing={isAnalysing}
                 streamingState={chat.streamingState}
-                className='px-3 [scrollbar-width:none]'
+                className='gap-4 px-3 [scrollbar-width:none]'
                 assistantAvatar={<NewPaceAvatar />}
                 streamingEnabled
+                showTimestamp
               />
             </CommonWrapper>
           </>
