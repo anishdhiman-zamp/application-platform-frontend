@@ -18,10 +18,10 @@ import {
 import { cn } from '@zamp-platform/ui/utils';
 import { ThumbsDown } from 'lucide-react';
 import { FC, useState } from 'react';
+import { toast } from 'sonner';
 
 import { useSubmitChatFeedbackMutation } from '../api';
 import { ChatFeedbackCategory } from '../types/chat.types';
-
 export interface ChatFeedbackProps {
   messageId?: string;
   conversationId?: string;
@@ -79,8 +79,8 @@ const ChatFeedback: FC<ChatFeedbackProps> = ({ messageId, conversationId, classN
       setFeedbackGiven(true);
       setIsModalOpen(false);
       resetForm();
-    } catch (error) {
-      console.error('Failed to submit feedback:', error);
+    } catch {
+      toast.error('Failed to submit feedback');
     }
   };
 
