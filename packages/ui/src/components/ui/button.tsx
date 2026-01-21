@@ -204,11 +204,11 @@ function Button({
       ref={buttonRef}
       className={cn(
         buttonVariants({ variant, size, className }),
-        isLoading && 'hover:bg-primary/90 cursor-not-allowed',
+        isLoading && '!bg-primary/90 cursor-not-allowed',
         (leadingIcon || trailingIcon) && 'gap-1.5',
       )}
       style={{ minWidth: minWidth ? `${minWidth}px` : undefined, ...style }}
-      disabled={disabled}
+      disabled={disabled || isLoading}
       onClick={handleClick}
       data-testid={testId ? `btn-${testId}` : undefined}
       {...props}
