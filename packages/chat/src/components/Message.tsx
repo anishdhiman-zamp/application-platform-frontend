@@ -7,7 +7,7 @@ import { FC, useMemo } from 'react';
 import { ButtonBlockType } from '../types/block.types';
 import { ChatMessage, SenderType } from '../types/chat.types';
 import { BlockRenderer } from './BlockRenderer';
-import ChatFeedback, { FeedbackData } from './ChatFeedback';
+import ChatFeedback from './ChatFeedback';
 import CopyMessageButton from './CopyMessageButton';
 import MessageTimestamp from './MessageTimestamp';
 import SenderDetails, { SenderDetailsProps } from './SenderDetails';
@@ -25,7 +25,6 @@ export interface MessageProps extends Omit<SenderDetailsProps, 'message'> {
   showTimestamp?: boolean;
   showFeedback?: boolean;
   showCopy?: boolean;
-  onFeedbackSubmit?: (data: FeedbackData) => Promise<void> | void;
   feedbackDisabled?: boolean;
   isLastMessage?: boolean;
 }

@@ -22,18 +22,12 @@ import { toast } from 'sonner';
 
 import { useSubmitChatFeedbackMutation } from '../api';
 import { ChatFeedbackCategory } from '../types/chat.types';
+
 export interface ChatFeedbackProps {
   messageId?: string;
   conversationId?: string;
   className?: string;
   disabled?: boolean;
-}
-
-export interface FeedbackData {
-  messageId?: string;
-  conversationId?: string;
-  issueType: string;
-  details: string;
 }
 
 const ISSUE_TYPE_OPTIONS = [
