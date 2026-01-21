@@ -1,11 +1,11 @@
 import React, { FC } from 'react';
+import { Checkbox } from '@zamp-platform/ui';
 import { SvgSpriteLoader } from '@zamp-platform/ui/assets';
 import { ICON_SPRITE_TYPES } from '@zamp-platform/ui/types';
 import { COLORS } from 'constants/colors';
 import { MenuOptionProps } from 'types/common/components/dropdown/dropdown.types';
 import { defaultFn } from 'types/commonTypes';
 import { cn } from 'utils/common';
-import { CheckBox } from 'components/common/Checkbox';
 import { Radio } from 'components/common/Radio';
 
 const leadingIconClassBySize = 'w-6 h-6';
@@ -28,7 +28,6 @@ export const MenuOption: FC<MenuOptionProps> = ({
   onClick = defaultFn,
   labelOverrideClassName = 'f-16-400',
   checkboxClassName = 'pr-[33px] pl-[15px] h-12',
-  checkboxDisplayContainerClassName = 'top-[15px] left-[15px]',
   disabled = false,
   isRadio = false,
   radioWrapperStyle = '',
@@ -52,16 +51,7 @@ export const MenuOption: FC<MenuOptionProps> = ({
       />
     </div>
     <div className={wrapperClass} data-testid={`menu-option-wrapper-${innerProps.id}`}>
-      {isMulti && (
-        <CheckBox
-          checked={isSelected}
-          onPress={defaultFn}
-          id={innerProps.id}
-          className={checkboxClassName}
-          displayContainerClassName={checkboxDisplayContainerClassName}
-          disabled={disabled}
-        />
-      )}
+      {isMulti && <Checkbox checked={isSelected} className={checkboxClassName} disabled={disabled} />}
       {isRadio && (
         <Radio
           checked={isSelected}

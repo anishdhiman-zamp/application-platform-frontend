@@ -1,11 +1,9 @@
 'use client';
 
-import { useEffect, useMemo, useState } from 'react';
-import { useSelector } from 'react-redux';
+import { useMemo } from 'react';
 import { FEATURE_FLAGS } from '@/constants/featureFlags';
 import { SIDEBAR_ITEMS } from '@/constants/sidebar.constants';
-import { useFeatureFlags } from '@/hooks/useFeatureFlags';
-import { RootState } from '@/store';
+import { useIsPaceChatEnabled } from '@/hooks/useIsPaceChatEnabled';
 import type { NavigationItemSchema } from '@/types/config';
 
 /**
@@ -13,26 +11,7 @@ import type { NavigationItemSchema } from '@/types/config';
  * @returns {Object} An object containing the filtered sidebar items and a loading state
  */
 export const useFilteredSidebarItems = () => {
-  const { evaluate, ldClient } = useFeatureFlags();
-  const [isPaceChatEnabled, setIsPaceChatEnabled] = useState(false);
-  const [isLoading, setIsLoading] = useState(true);
-
-  const currentOrgId = useSelector((state: RootState) => state?.user?.user?.orgs?.[0]?.organization_id ?? '');
-
-  useEffect(() => {
-    if (ldClient) {
-      evaluate(FEATURE_FLAGS.PACE_CHAT)
-        .then((res: string[]) => {
-          setIsPaceChatEnabled(Boolean(res?.length && res.includes(currentOrgId)));
-        })
-        .catch(() => {
-          setIsPaceChatEnabled(false);
-        })
-        .finally(() => {
-          setIsLoading(false);
-        });
-    }
-  }, [evaluate, ldClient, currentOrgId]);
+  const { isPaceChatEnabled, isLoading } = useIsPaceChatEnabled();
 
   const filteredItems = useMemo<NavigationItemSchema[]>(() => {
     if (isLoading) {

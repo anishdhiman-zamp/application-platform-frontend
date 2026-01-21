@@ -80,12 +80,14 @@ const BodyAndFooter: FC<BodyAndFooterProps> = ({
         icon: 'bold-02',
         onClick: () => editor?.chain().focus().toggleBold().run(),
         tooltipBody: 'Bold',
+        iconSize: 14,
       },
       {
         id: '5',
         icon: 'italic-01',
         onClick: () => editor?.chain().focus().toggleItalic().run(),
         tooltipBody: 'Italic',
+        iconSize: 14,
       },
       {
         id: '6',
@@ -108,6 +110,7 @@ const BodyAndFooter: FC<BodyAndFooterProps> = ({
         onClick: () => editor?.chain().focus().toggleBulletList().run(),
         showDivider: true,
         tooltipBody: 'Bullet List',
+        iconSize: 14,
       },
       {
         id: '10',
@@ -115,12 +118,14 @@ const BodyAndFooter: FC<BodyAndFooterProps> = ({
         onClick: () => editor?.chain().focus().toggleStrike().run(),
         showDivider: true,
         tooltipBody: 'Strikethrough',
+        iconSize: 14,
       },
       {
         id: '11',
         icon: 'type-strikethrough-01',
         onClick: () => editor?.commands.unsetAllMarks(),
         tooltipBody: 'Remove Formatting',
+        iconSize: 14,
       },
     ],
     [editor],
@@ -140,7 +145,10 @@ const BodyAndFooter: FC<BodyAndFooterProps> = ({
       <div className={cn('relative h-[calc(100vh-376px)] overflow-hidden px-4 pt-0 pb-3', className)}>
         <div className='flex h-full flex-col justify-between overflow-y-auto [&::-webkit-scrollbar]:hidden'>
           <div className='mb-4'>
-            <EditorContent editor={editor} className={cn('prose w-full max-w-none', bodyClassName)} />
+            <EditorContent
+              editor={editor}
+              className={cn('prose f-14-400 text-gray-1000 w-full max-w-none', bodyClassName)}
+            />
           </div>
           {attachments?.length > 0 && (
             <div className='min-h-12'>
@@ -160,7 +168,7 @@ const BodyAndFooter: FC<BodyAndFooterProps> = ({
                 {config.component ?? (
                   <TooltipV2 tooltipBody={config?.tooltipBody} asChildTrigger>
                     <Button onClick={config?.onClick} variant='ghost' size='xsmall' className='h-6 px-1'>
-                      <SvgSpriteLoader id={config?.icon || ''} />
+                      <SvgSpriteLoader size={config?.iconSize || 16} id={config?.icon || ''} />
                     </Button>
                   </TooltipV2>
                 )}

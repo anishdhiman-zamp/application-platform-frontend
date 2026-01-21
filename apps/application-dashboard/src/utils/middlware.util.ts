@@ -12,13 +12,20 @@ type SessionCache = {
   cached_at: number;
 };
 
-export function setServerSideUserCookie(response: NextResponse, cookieId: string, value: string, maxAge: number): void {
+export function setServerSideUserCookie(
+  response: NextResponse,
+  cookieId: string,
+  value: string,
+  maxAge: number,
+  domain?: string,
+): void {
   response.cookies.set(cookieId, value, {
     httpOnly: false,
     secure: true,
     sameSite: 'lax',
     maxAge: maxAge,
     path: '/',
+    ...(domain && { domain: domain }),
   });
 }
 
@@ -34,8 +41,21 @@ export function getServerSideCookie(request: NextRequest, cookieName: string, pa
   }
 }
 
-export function clearServerSideCookie(response: NextResponse, cookieId: string): void {
-  response.cookies.delete(cookieId);
+export function clearServerSideCookie(response: NextResponse, cookieId: string, domain?: string): void {
+  // Clear without domain (for legacy cookies)
+  response.cookies.set(cookieId, '', {
+    maxAge: 0,
+    path: '/',
+  });
+
+  // Also clear with domain if specified (for domain-scoped cookies)
+  if (domain) {
+    response.cookies.set(cookieId, '', {
+      maxAge: 0,
+      path: '/',
+      domain: domain,
+    });
+  }
 }
 
 export async function getUserSession(

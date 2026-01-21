@@ -32,6 +32,7 @@ interface MessageContainerProps {
   className?: string;
   onScrollChange?: (isScrolled: boolean) => void;
   streamingEnabled?: boolean;
+  showTimestamp?: boolean;
 }
 
 export const MessageContainer: FC<MessageContainerProps> = ({
@@ -44,6 +45,7 @@ export const MessageContainer: FC<MessageContainerProps> = ({
   className,
   onScrollChange,
   streamingEnabled = false,
+  showTimestamp = false,
 }) => {
   const messagesContainerRef = useRef<HTMLDivElement>(null);
   const [showScrollButton, setShowScrollButton] = useState(false);
@@ -102,7 +104,9 @@ export const MessageContainer: FC<MessageContainerProps> = ({
 
   useEffect(() => {
     if (messages?.length > 0) {
-      scrollToBottom('smooth');
+      // Use instant scroll on first load, smooth scroll for subsequent updates
+      const behavior = isInitialScrollRef.current ? 'instant' : 'smooth';
+      scrollToBottom(behavior);
     }
   }, [messages?.length, scrollToBottom]);
 
@@ -135,6 +139,7 @@ export const MessageContainer: FC<MessageContainerProps> = ({
           onAction={handleAction}
           assistantName={assistantName}
           assistantAvatar={defaultAssistantAvatar}
+          showTimestamp={showTimestamp}
           userAvatar={(senderName) => (
             <Avatar
               name={senderName}

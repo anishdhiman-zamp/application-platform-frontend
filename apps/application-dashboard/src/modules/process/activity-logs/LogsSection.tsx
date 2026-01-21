@@ -2,7 +2,7 @@ import { type FC, useEffect, useRef } from 'react';
 import LogsList from 'modules/process/activity-logs/components/LogsList';
 import LogsSkeleton from 'modules/process/activity-logs/loader/LogsSkeleton';
 import type { HandleShowArtifactsProps } from 'modules/process/process.types';
-import { useGetActivityLogsQuery } from '@/apis/processes';
+import { useGetActivityLogsQuery, useGetReprocessingEventsQuery } from '@/apis/processes';
 import CommonWrapper from '@/components/commonWrapper';
 import { SkeletonTypes } from '@/components/commonWrapper/commonWrapper.types';
 
@@ -29,6 +29,23 @@ const LogsSection: FC<LogsSectionProps> = ({ handleShowArtifacts, processId, act
     },
   );
 
+  const {
+    data: reprocessingEvents,
+    isLoading: isLoadingReprocessingEvents,
+    isError: isErrorReprocessingEvents,
+    refetch: refetchReprocessingEvents,
+  } = useGetReprocessingEventsQuery(
+    { processId, activityRunId: activityId },
+    {
+      skip: !processId || !activityId,
+    },
+  );
+
+  const handleRefetch = () => {
+    if (isErrorLogs) refetchLogs();
+    if (isErrorReprocessingEvents) refetchReprocessingEvents();
+  };
+
   useEffect(() => {
     if (logs?.activity_logs?.length && containerRef.current) {
       containerRef.current.scrollTo({
@@ -40,13 +57,13 @@ const LogsSection: FC<LogsSectionProps> = ({ handleShowArtifacts, processId, act
 
   return (
     <CommonWrapper
-      isLoading={isLoadingLogs}
-      isError={isErrorLogs}
-      refetchFunction={refetchLogs}
+      isLoading={isLoadingLogs || isLoadingReprocessingEvents}
+      isError={isErrorLogs || isErrorReprocessingEvents}
+      refetchFunction={handleRefetch}
       skeletonType={SkeletonTypes.CUSTOM}
       loader={<LogsSkeleton />}
       errorCardStyle='flex-1'
-      className='h-full w-full flex-1 overflow-auto px-8 [-ms-overflow-style:none] [scrollbar-width:none] [&::-webkit-scrollbar]:hidden'
+      className='h-full w-full flex-1 overflow-auto [-ms-overflow-style:none] [scrollbar-width:none] [&::-webkit-scrollbar]:hidden'
     >
       <div
         ref={containerRef}
@@ -55,6 +72,7 @@ const LogsSection: FC<LogsSectionProps> = ({ handleShowArtifacts, processId, act
         {!!logs?.activity_logs?.length && (
           <LogsList
             logs={logs}
+            reprocessingEvents={reprocessingEvents}
             processId={processId}
             activityId={activityId}
             handleShowArtifacts={handleShowArtifacts}

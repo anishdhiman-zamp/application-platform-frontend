@@ -1,4 +1,4 @@
-import { FC, RefObject, useRef, useState } from 'react';
+import { FC, RefObject, useCallback, useRef, useState } from 'react';
 import { ColumnOrderState, Table, VisibilityState } from '@zamp-platform/tanstack-table';
 import { Button, DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from '@zamp-platform/ui';
 import { SvgSpriteLoader } from '@zamp-platform/ui/assets';
@@ -55,19 +55,14 @@ const DisplayOptions: FC<DisplayOptionsProps> = ({
   const [isOpen, setIsOpen] = useState(false);
   const [isColumnListingOpen, setIsColumnListingOpen] = useState(false);
   const [isGroupByOpen, setIsGroupByOpen] = useState(false);
-  // TODO: Implement fx later
-  // const [isCurrencyOpen, setIsCurrencyOpen] = useState(false);
-  // const [currency, setCurrency] = useState<string>('');
 
   useOnClickOutside(menuRef, () => {
     setIsOpen(false);
     setIsColumnListingOpen(false);
     setIsGroupByOpen(false);
-    // TODO: Implement fx later
-    // setIsCurrencyOpen(false);
   });
 
-  const handleClick = (id: DISPLAY_OPTIONS) => {
+  const handleClick = useCallback((id: DISPLAY_OPTIONS) => {
     setIsOpen(false);
     switch (id) {
       case DISPLAY_OPTIONS.COLUMNS:
@@ -81,7 +76,7 @@ const DisplayOptions: FC<DisplayOptionsProps> = ({
         // setIsCurrencyOpen(true);
         break;
     }
-  };
+  }, []);
 
   const handleCloseColumnListing = () => {
     setIsColumnListingOpen(false);

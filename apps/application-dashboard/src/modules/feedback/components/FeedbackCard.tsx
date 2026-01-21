@@ -1,8 +1,8 @@
 import { FC } from 'react';
 import { cn } from '@zamp-platform/ui/utils';
 import { Trash2 } from 'lucide-react';
-import { findTimeDifference } from 'modules/data/data.utils';
 import { FeedbackItemType } from '@/types/api/feedbacks.types';
+import { findTimeDifference } from '@/utils/common';
 
 interface FeedbackCardProps {
   feedback: FeedbackItemType;

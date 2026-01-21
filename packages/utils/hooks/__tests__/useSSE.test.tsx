@@ -226,7 +226,7 @@ describe('useSSE Hook', () => {
   });
 
   describe('error handling', () => {
-    it('should call onError when error occurs', async () => {
+    it('should call onError with SSEErrorInfo when error occurs', async () => {
       const mockOnError = jest.fn();
 
       renderHook(() =>
@@ -241,7 +241,47 @@ describe('useSSE Hook', () => {
         mockEventSource._simulateError();
       });
 
-      expect(mockOnError).toHaveBeenCalledWith(expect.any(Event));
+      expect(mockOnError).toHaveBeenCalledWith(
+        expect.objectContaining({
+          event: expect.any(Event),
+          isNetworkError: expect.any(Boolean),
+          readyState: expect.any(Number),
+        }),
+      );
+    });
+
+    it('should detect network connectivity errors when browser is offline', async () => {
+      const mockOnError = jest.fn();
+
+      // Mock navigator.onLine to return false (offline)
+      const originalOnLine = Object.getOwnPropertyDescriptor(Navigator.prototype, 'onLine');
+      Object.defineProperty(Navigator.prototype, 'onLine', {
+        get: () => false,
+        configurable: true,
+      });
+
+      renderHook(() =>
+        useSSE({
+          url: 'https://api.example.com/sse',
+          onError: mockOnError,
+        }),
+      );
+
+      await act(async () => {
+        jest.advanceTimersByTime(0);
+        mockEventSource._simulateError();
+      });
+
+      expect(mockOnError).toHaveBeenCalledWith(
+        expect.objectContaining({
+          isNetworkError: true,
+        }),
+      );
+
+      // Restore original navigator.onLine
+      if (originalOnLine) {
+        Object.defineProperty(Navigator.prototype, 'onLine', originalOnLine);
+      }
     });
 
     it('should handle initialization errors and attempt reconnection', async () => {
@@ -259,13 +299,7 @@ describe('useSSE Hook', () => {
         }),
       );
 
-      expect(consoleSpy).toHaveBeenCalledWith(
-        'Failed to initialize EventSource connection:',
-        expect.objectContaining({
-          error: expect.any(Error),
-          url: expect.any(String),
-        }),
-      );
+      expect(consoleSpy).toHaveBeenCalledWith('[SSE] failed to initialize EventSource', expect.any(Error));
 
       // Should attempt reconnection after interval
       act(() => {
@@ -298,23 +332,6 @@ describe('useSSE Hook', () => {
 
       expect(global.EventSource).toHaveBeenCalledTimes(2);
       consoleSpy.mockRestore();
-    });
-  });
-
-  describe('idle timeout handling', () => {
-    it('should handle idle timeout configuration', () => {
-      const mockOnMessage = jest.fn();
-
-      const { result } = renderHook(() =>
-        useSSE({
-          url: 'https://api.example.com/sse',
-          onMessage: mockOnMessage,
-          idleTimeoutMs: 5000,
-        }),
-      );
-
-      expect(result.current.close).toBeDefined();
-      expect(typeof result.current.close).toBe('function');
     });
   });
 
@@ -426,7 +443,6 @@ describe('useSSE Hook', () => {
           eventListeners: {
             custom: jest.fn(),
           },
-          idleTimeoutMs: 30000,
         }),
       );
 

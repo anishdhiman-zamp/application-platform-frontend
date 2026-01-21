@@ -110,6 +110,14 @@ export const processFileUpload = async (
 };
 
 /**
+ * Result type for multiple file uploads
+ */
+export interface MultipleFileUploadResult {
+  successful: UploadedFile[];
+  failed: { file: File; error: unknown }[];
+}
+
+/**
  * Processes multiple file uploads
  * @param files - FileList to upload
  * @param getSignedUrl - Function to get signed URL
@@ -117,7 +125,7 @@ export const processFileUpload = async (
  * @param organizationId - Organization ID for the upload
  * @param postUploadAck - Optional function to call after successful upload
  * @param getMimeType - Optional function to map file type to MIME type
- * @returns Promise with array of uploaded file metadata
+ * @returns Promise with object containing successful uploads and failed uploads
  */
 export const processMultipleFileUploads = async (
   files: FileList,
@@ -126,8 +134,9 @@ export const processMultipleFileUploads = async (
   organizationId: string,
   postUploadAck?: PostUploadAckFn,
   getMimeType?: (fileType: string) => string,
-): Promise<UploadedFile[]> => {
+): Promise<MultipleFileUploadResult> => {
   const uploadPromises: Promise<UploadedFile>[] = [];
+  const fileArray = Array.from(files);
 
   for (let i = 0; i < files.length; i++) {
     uploadPromises.push(
@@ -135,7 +144,20 @@ export const processMultipleFileUploads = async (
     );
   }
 
-  return Promise.all(uploadPromises);
+  const results = await Promise.allSettled(uploadPromises);
+
+  const successful: UploadedFile[] = [];
+  const failed: { file: File; error: unknown }[] = [];
+
+  results.forEach((result, index) => {
+    if (result.status === 'fulfilled') {
+      successful.push(result.value);
+    } else {
+      failed.push({ file: fileArray[index], error: result.reason });
+    }
+  });
+
+  return { successful, failed };
 };
 
 /**
@@ -188,7 +210,7 @@ export const wrapPostUploadAck = (
  * @param organizationId - Organization ID for the upload
  * @param postUploadAckMutation - Optional RTK Query mutation to call after successful upload
  * @param getMimeType - Optional function to map file type to MIME type
- * @returns Promise with array of uploaded file metadata
+ * @returns Promise with object containing successful uploads and failed uploads
  */
 export const handleFileUploads = async (
   files: FileList,
@@ -201,7 +223,7 @@ export const handleFileUploads = async (
     fileImportId: string;
   }) => Promise<{ data: void; error?: undefined } | { data?: undefined; error: unknown }>,
   getMimeType?: (fileType: string) => string,
-): Promise<UploadedFile[]> => {
+): Promise<MultipleFileUploadResult> => {
   const getSignedUrlWrapper = wrapGetSignedUrl(getSignedUrlMutation);
   const postUploadAckWrapper = postUploadAckMutation ? wrapPostUploadAck(postUploadAckMutation) : undefined;
 

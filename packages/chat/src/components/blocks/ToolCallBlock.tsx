@@ -1,118 +1,65 @@
-import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from '@zamp-platform/ui';
-import { CheckCircle, ChevronDown, Clock, Wrench } from 'lucide-react';
-import { AnimatePresence, motion } from 'motion/react';
-import React, { FC, useEffect, useRef, useState } from 'react';
+import {
+  Accordion,
+  AccordionContent,
+  AccordionItem,
+  AccordionTrigger,
+  AnimatedTerminalIcon,
+  ShimmerText,
+} from '@zamp-platform/ui';
+import { AlertCircle } from 'lucide-react';
+import React, { FC } from 'react';
 
-import type { ToolUseDisplayContent } from '../../types/block.types';
-import { formatJson } from '../block.utils';
+import type { ToolResultContentBlock, ToolUseDisplayContent } from '../../types/block.types';
+import { CodePreviewBlock } from './CodePreviewBlock';
 
 /**
- * Component to render a tool use content block using Accordion
+ * Component to render a tool use content block with optional tool result using Accordion
  */
 interface ToolCallBlockProps {
   payload: {
     display_content?: ToolUseDisplayContent;
     partial_json?: string;
     input_json?: string;
-    name?: string;
     tool_call_id?: string;
+    display_name?: string;
   };
-  name?: string;
   is_complete: boolean;
+  toolResult?: ToolResultContentBlock;
 }
-export const ToolCallBlock: FC<ToolCallBlockProps> = ({ payload, is_complete = true, name }) => {
-  const toolName = payload.name || name || 'Unknown';
-  const wasCompleteRef = useRef(is_complete);
+export const ToolCallBlock: FC<ToolCallBlockProps> = ({ payload, is_complete = true, toolResult }) => {
+  const toolName = payload?.display_name || 'Unknown';
 
-  const [accordionValue, setAccordionValue] = useState<string>(is_complete ? '' : 'tool-use');
-
-  useEffect(() => {
-    // Auto-close accordion when is_complete transitions from false to true
-    if (is_complete && !wasCompleteRef.current) {
-      setAccordionValue('');
-    }
-    wasCompleteRef.current = is_complete;
-  }, [is_complete]);
+  const inputContent =
+    payload?.display_content?.json_block || (!payload?.display_content && payload?.partial_json) || payload?.input_json;
 
   return (
-    <Accordion
-      type='single'
-      collapsible
-      value={accordionValue}
-      onValueChange={setAccordionValue}
-      className='border-GRAY_100 w-full overflow-hidden rounded-lg border bg-white'
-    >
+    <Accordion type='single' collapsible className='border-GRAY_100 w-full overflow-hidden rounded-lg border bg-white'>
       <AccordionItem value='tool-use' className='border-none'>
-        <AccordionTrigger
-          className='f-12-450 text-GRAY_900 w-full cursor-pointer gap-x-2 p-1.5 hover:no-underline [&[data-state=closed]>svg]:rotate-0 [&[data-state=open]>svg]:rotate-180'
-          icon={ChevronDown}
-          iconRotation={180}
-        >
+        <AccordionTrigger className='f-12-450 text-GRAY_900 w-full cursor-pointer gap-x-2 py-2 pr-2 pl-3 hover:bg-gray-50 [&[data-state=closed]>svg]:rotate-90 [&[data-state=open]>svg]:-rotate-90'>
           <div className='flex flex-1 items-center gap-3'>
             <div className='flex items-center gap-2'>
-              <Wrench className='text-GRAY_700 h-4 w-4' />
-              <span className='text-GRAY_900'>{toolName}</span>
-            </div>
-            <AnimatePresence mode='wait' initial={false}>
+              <AnimatedTerminalIcon showAnimation={!is_complete} size={12} />
               {!is_complete ? (
-                <span
-                  key='running'
-                  className='bg-GRAY_100 text-GRAY_900 f-12-450 inline-flex items-center gap-1.5 rounded-full px-2.5 py-0.5'
-                >
-                  <Clock className='text-GRAY_700 h-3.5 w-3.5' />
-                  Running
-                </span>
+                <ShimmerText text={toolName} autoAnimate={true} />
               ) : (
-                <motion.span
-                  key='completed'
-                  className='f-12-450 inline-flex items-center gap-1.5 rounded-full px-2.5 py-0.5'
-                  initial={{ opacity: 0, scale: 0.9 }}
-                  animate={{ opacity: 1, scale: 1 }}
-                  transition={{ duration: 0.3, ease: 'easeOut' }}
-                >
-                  <motion.div
-                    initial={{ scale: 0, rotate: -180 }}
-                    animate={{ scale: 1, rotate: 0 }}
-                    transition={{ duration: 0.4, ease: 'easeOut', delay: 0.1 }}
-                  >
-                    <CheckCircle className='h-3.5 w-3.5 text-green-700' />
-                  </motion.div>
-                  Completed
-                </motion.span>
+                <span className='text-GRAY_900'>{toolName}</span>
               )}
-            </AnimatePresence>
+            </div>
+            {toolResult && toolResult.payload?.is_error && (
+              <div className='ml-auto flex items-center gap-1.5'>
+                <AlertCircle className='h-3.5 w-3.5 text-red-500' />
+              </div>
+            )}
           </div>
         </AccordionTrigger>
-        <AccordionContent className='border-GRAY_100 border-t px-3 pt-3 pb-3'>
-          {payload.display_content && (
-            <div className='space-y-2'>
-              <span className='text-GRAY_700 f-11-500 tracking-wide uppercase'>Parameters</span>
-              <div className='border-GRAY_200 overflow-x-auto rounded-lg border bg-gray-50 p-3'>
-                <pre className='f-12-400 text-GRAY_700 break-all whitespace-pre-wrap'>
-                  {formatJson(payload.display_content.json_block)}
-                </pre>
-              </div>
-            </div>
-          )}
-          {!payload.display_content && payload.partial_json && (
-            <div className='space-y-2'>
-              <span className='text-GRAY_700 f-11-500 tracking-wide uppercase'>Parameters</span>
-              <div className='border-GRAY_200 overflow-x-auto rounded-lg border bg-gray-50 p-3'>
-                <pre className='f-12-400 text-GRAY_700 break-all whitespace-pre-wrap'>
-                  {formatJson(payload.partial_json)}
-                </pre>
-              </div>
-            </div>
-          )}
-          {payload.input_json && (
-            <div className='space-y-2'>
-              <span className='text-GRAY_700 f-11-500 tracking-wide uppercase'>Parameters</span>
-              <div className='border-GRAY_200 overflow-x-auto rounded-lg border bg-gray-50 p-3'>
-                <pre className='f-12-400 text-GRAY_700 break-all whitespace-pre-wrap'>
-                  {formatJson(payload.input_json)}
-                </pre>
-              </div>
-            </div>
+        <AccordionContent className='bg-GRAY_50 max-h-60 space-y-4 overflow-y-auto px-2 py-2 [scrollbar-width:thin]'>
+          <CodePreviewBlock label='Input' content={inputContent} />
+          {toolResult && (
+            <CodePreviewBlock
+              label='Output'
+              content={toolResult.payload?.content}
+              isError={toolResult.payload?.is_error}
+            />
           )}
         </AccordionContent>
       </AccordionItem>

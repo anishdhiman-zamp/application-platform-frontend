@@ -1,13 +1,13 @@
 import { type ForwardedRef, forwardRef, memo, useCallback, useImperativeHandle, useMemo, useState } from 'react';
 import ConditionalRevealAnimation from 'modules/process/activity-logs/components/ConditionalRevealAnimationWrapper';
 import CtaArtifactTag from 'modules/process/activity-logs/components/CtaArtifactTag';
-import CtaButton from 'modules/process/activity-logs/components/CtaButton';
 import { ARTIFACT_SHOW_CTA_TYPES, BUTTON_TYPE_CTA_COMPONENTS } from 'modules/process/process.constant';
 import { CTA_ACTION, CTA_COMPONENT_TYPE, type HandleShowArtifactsProps } from 'modules/process/process.types';
 import { buildHITLPayload, getCtaLoadingId, serializeFormData } from 'modules/process/process.utils';
 import { useEmitHITLActionMutation } from '@/apis/processes';
 import { toast } from '@/components/common/toast/Toast';
 import { useAppSelector } from '@/hooks/toolkit';
+import CtaButton from '@/modules/process/activity-logs/components/CtaButton';
 import type { CtasType } from '@/types/api/processApi.types';
 import type { defaultFnType } from '@/types/commonTypes';
 
@@ -23,11 +23,21 @@ interface LogCtaProps {
   activityId: string;
   isLastLog?: boolean;
   onSubmitForm?: defaultFnType;
+  disabled?: boolean;
 }
 
 // Main component
 const LogCtaComponent = (
-  { ctas, logGroupId, handleShowArtifacts, processId, activityId, isLastLog = false, onSubmitForm }: LogCtaProps,
+  {
+    ctas,
+    logGroupId,
+    handleShowArtifacts,
+    processId,
+    activityId,
+    isLastLog = false,
+    onSubmitForm,
+    disabled = false,
+  }: LogCtaProps,
   ref: ForwardedRef<LogCtaRef>,
 ) => {
   const userId = useAppSelector((state) => state.user.user?.user_id);
@@ -127,7 +137,12 @@ const LogCtaComponent = (
           isLastLog={isLastLog}
         >
           {artifactTypeCtas.map((cta) => (
-            <CtaArtifactTag key={cta.id} cta={cta} onShowArtifacts={() => handleArtifactClick(cta)} />
+            <CtaArtifactTag
+              key={cta.id}
+              cta={cta}
+              onShowArtifacts={() => handleArtifactClick(cta)}
+              disabled={disabled}
+            />
           ))}
         </ConditionalRevealAnimation>
       )}

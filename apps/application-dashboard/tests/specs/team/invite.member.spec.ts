@@ -19,7 +19,7 @@ test.describe('Invite New Member', () => {
 
     await test.step('Navigate to team page', async () => {
       console.log('Navigating to team page...');
-      await page.goto(`${baseUrl}/team`);
+      await page.goto(`${baseUrl}/people`);
 
       // Wait for page to be ready
       console.log('Waiting for invite button to be visible...');

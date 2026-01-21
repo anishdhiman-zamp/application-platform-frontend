@@ -1,11 +1,11 @@
 import { ChangeEvent, FC, ReactNode, useCallback, useEffect, useMemo, useRef, useState } from 'react';
+import { Checkbox } from '@zamp-platform/ui';
 import { SvgSpriteLoader } from '@zamp-platform/ui/assets';
 import { ICON_SPRITE_TYPES } from '@zamp-platform/ui/types';
 import { SIZE_TYPES } from 'types/common/components';
 import { defaultFnType, MapAny, OptionsType, SIDE_OPTIONS } from 'types/commonTypes';
 import { camelCaseToNormalText, cn, debounce } from 'utils/common';
 import TooltipV2 from '@/components/common/TooltipV2';
-import { CheckBox } from 'components/common/Checkbox';
 import Input from 'components/common/input';
 import { FILTER_TYPES, MultiSelectFilterValue } from 'components/filter/filter.types';
 import { getDisplayString, getValueString } from 'components/filter/filter.utils';
@@ -227,7 +227,7 @@ const MultiSelectFilter: FC<MultiSelectFilterProps> = ({
         >
           <div className='f-12-400 text-GRAY_1000'>Select All</div>
           <div className='min-w-[14px]'>
-            <CheckBox checked={isSelectAll} id='checkbox-1' />
+            <Checkbox checked={isSelectAll} />
           </div>
         </div>
       )}
@@ -262,11 +262,7 @@ const MultiSelectFilter: FC<MultiSelectFilterProps> = ({
                 }
               >
                 <div className='min-w-[14px]'>
-                  <CheckBox
-                    checked={selectedValues?.includes(getValueString(item))}
-                    id='checkbox-1'
-                    disabled={isNullOperator}
-                  />
+                  <Checkbox checked={selectedValues?.includes(getValueString(item))} disabled={isNullOperator} />
                 </div>
               </TooltipV2>
             </div>

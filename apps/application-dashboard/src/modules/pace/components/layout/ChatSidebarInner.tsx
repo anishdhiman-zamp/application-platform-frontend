@@ -1,0 +1,159 @@
+'use client';
+
+import { FC, useCallback, useEffect, useMemo } from 'react';
+import {
+  ConnectedChatInput,
+  MessageContainer,
+  ResourceType,
+  ScopeType,
+  SenderType,
+  useChat,
+} from '@zamp-platform/chat';
+import { cn } from '@zamp-platform/ui/utils';
+import { ACCEPTED_FILE_TYPES } from 'modules/pace/pace.constants';
+import { API_ENDPOINTS } from '@/apis/apiEndpoint.constants';
+import NewPaceIcons from '@/assets/Icons/NewPaceIcons';
+import CommonWrapper from '@/components/commonWrapper';
+import { SkeletonTypes } from '@/components/commonWrapper/commonWrapper.types';
+import { APITags } from '@/constants/api.constants';
+import { useAppDispatch, useAppSelector } from '@/hooks/toolkit';
+import NewPaceAvatar from '@/modules/chatbot/NewPaceAvatar';
+import ChatTopbar from '@/modules/pace/components/chat/ChatTopbar';
+import ChatMessagesSkeleton from '@/modules/pace/components/loaders/ChatMessagesSkeleton';
+import { useChatDraftInput } from '@/modules/pace/hooks/useChatDraftInput';
+import { baseApi } from '@/services/baseApi';
+import type { RootState } from '@/store';
+
+interface ChatSidebarInnerProps {
+  conversationId: string | null;
+  setConversationId: (id: string | null) => void;
+  setChatTitle: (title: string) => void;
+  startNewChat: () => void;
+  handleClose: () => void;
+  chatTitle: string;
+  isExpanded?: boolean;
+  onToggleExpand?: () => void;
+}
+
+const ChatSidebarInner: FC<ChatSidebarInnerProps> = ({
+  conversationId,
+  setConversationId,
+  setChatTitle,
+  startNewChat,
+  handleClose,
+  chatTitle,
+  isExpanded,
+  onToggleExpand,
+}) => {
+  const dispatch = useAppDispatch();
+  const organizationId = useAppSelector((state: RootState) => state.user.user?.orgs?.[0]?.organization_id) ?? '';
+  const currentUserName = useAppSelector((state: RootState) => state.user.user?.user_name) ?? '';
+  const { inputValue, setInputValue } = useChatDraftInput({ conversationId });
+
+  const handleConversationCreated = useCallback(() => {
+    dispatch(baseApi.util.invalidateTags([APITags.GET_CONVERSATION_HISTORY]));
+  }, [dispatch]);
+
+  const chat = useChat({
+    resourceId: organizationId,
+    resourceType: ResourceType.ORGANIZATION,
+    conversationId: conversationId ?? undefined,
+    enableStreaming: true,
+    apiConfig: {
+      sendMessage: API_ENDPOINTS.POST_MESSAGE_V3,
+      createConversation: API_ENDPOINTS.CREATE_CONVERSATION_V3,
+    },
+    setHeader: (header: string) => {
+      setChatTitle(header);
+    },
+  });
+
+  const hasMessages = useMemo(() => chat.messages.length > 0, [chat.messages]);
+
+  const isAnalysing = useMemo(() => {
+    return chat.messages.length > 0 && chat.messages[chat.messages.length - 1]?.sender_type === SenderType.USER;
+  }, [chat.messages]);
+
+  const isLoadingConversation = Boolean(conversationId && chat.isLoadingConversationHistory) || !hasMessages;
+  const isInConversation = Boolean(conversationId || chat.conversationId || hasMessages);
+
+  useEffect(() => {
+    if (chat.conversationId && chat.conversationId !== conversationId) {
+      setConversationId(chat.conversationId);
+    }
+  }, [chat.conversationId, conversationId, setConversationId]);
+
+  return (
+    <div className='flex min-h-0 flex-1 flex-col overflow-hidden'>
+      <ChatTopbar
+        onStartNewChat={startNewChat}
+        onClose={handleClose}
+        title={isInConversation ? chatTitle : 'New chat'}
+        isExpanded={isExpanded}
+        onToggleExpand={onToggleExpand}
+      />
+      <div
+        className={cn(
+          'mx-auto flex min-h-0 flex-1 flex-col overflow-hidden',
+          isExpanded ? 'w-full max-w-[700px]' : 'w-full',
+        )}
+      >
+        {isInConversation ? (
+          <>
+            <CommonWrapper
+              isLoading={isLoadingConversation}
+              isError={chat.isErrorConversationHistory}
+              refetchFunction={chat.refetchConversationHistory}
+              skeletonType={SkeletonTypes.CUSTOM}
+              loader={<ChatMessagesSkeleton />}
+              className='flex min-h-0 flex-1'
+            >
+              <MessageContainer
+                messages={chat.messages}
+                isAnalysing={isAnalysing}
+                streamingState={chat.streamingState}
+                className='gap-4 px-3 [scrollbar-width:none]'
+                assistantAvatar={<NewPaceAvatar />}
+                streamingEnabled
+                showTimestamp
+              />
+            </CommonWrapper>
+          </>
+        ) : (
+          <div className='flex flex-1 items-center justify-center'>
+            <div className='flex flex-col items-center gap-4'>
+              <NewPaceIcons width={40} height={40} />
+              <p className='f-13-400 text-GRAY_600'>Ask Pace anything</p>
+            </div>
+          </div>
+        )}
+        <div
+          className={cn(
+            'border-GRAY_400 w-full flex-shrink-0 border-t bg-[#fcfcfc] p-3',
+            isExpanded ? 'border-none pt-0' : '',
+          )}
+        >
+          <ConnectedChatInput
+            chat={chat}
+            conversationId={chat.conversationId ?? ''}
+            resourceType={ResourceType.ORGANIZATION}
+            resourceId={organizationId}
+            scope={ScopeType.ORGANIZATION}
+            scopeId={organizationId}
+            organizationId={organizationId}
+            currentUserName={currentUserName}
+            isDisabled={chat.isStreaming || chat.isCreatingConversationV2}
+            placeholder="Do your life's best work with Pace"
+            externalInputValue={inputValue}
+            setExternalInputValue={setInputValue}
+            acceptedFileTypes={ACCEPTED_FILE_TYPES}
+            className='bg-white'
+            onConversationCreated={handleConversationCreated}
+          />
+        </div>
+      </div>
+    </div>
+  );
+};
+
+export default ChatSidebarInner;
