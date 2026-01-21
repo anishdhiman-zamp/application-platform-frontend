@@ -56,6 +56,10 @@ const MultiSelectInput: FC<MultiSelectInputPropsType> = ({
   const containerRef = useRef<HTMLDivElement>(null);
   const dropdownOptionsRef = useRef<HTMLDivElement>(null);
   const optionRefs = useRef<(HTMLDivElement | null)[]>([]);
+  const inputArrayListRef = useRef(inputArrayList);
+
+  inputArrayListRef.current = inputArrayList;
+
   const inputPlaceholderText = inputArrayList?.length > 0 ? '' : placeholderText;
   const [isInputFocused, setIsInputFocused] = useState<boolean>(false);
   const [debouncedSearch, setDebouncedSearch] = useState<string>(search);
@@ -179,15 +183,14 @@ const MultiSelectInput: FC<MultiSelectInputPropsType> = ({
         return;
       }
 
-      setInputArrayList((prevItems) => {
-        const updatedItems = prevItems?.filter((_, i) => i !== index);
+      const currentItems = inputArrayListRef.current;
+      const updatedItems = currentItems?.filter((_, i) => i !== index);
 
-        if (setShowValidationError) {
-          setShowValidationError(updatedItems?.some((item) => !item.valid));
-        }
+      if (setShowValidationError) {
+        setShowValidationError(updatedItems?.some((item) => !item.valid));
+      }
 
-        return updatedItems;
-      });
+      setInputArrayList(updatedItems);
     },
     [setInputArrayList, setShowValidationError, onCustomDeleteFn],
   );

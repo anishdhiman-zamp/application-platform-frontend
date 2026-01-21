@@ -254,3 +254,14 @@ export const formatChatTimestampTooltip = (timestamp: string | Date): string => 
   const date = typeof timestamp === 'string' ? new Date(timestamp) : timestamp;
   return format(date, DATE_FORMATS.DD_MMM_YYYY_HHMM);
 };
+
+/**
+ * Ensures a timestamp string is treated as UTC by appending 'Z' if not present
+ * @param timestamp - ISO timestamp string
+ * @returns timestamp with 'Z' suffix for UTC
+ */
+export const formatTimestampToUTC = (timestamp: string): string => {
+  if (!timestamp) return timestamp;
+
+  return timestamp.endsWith('Z') ? timestamp : `${timestamp}Z`;
+};
