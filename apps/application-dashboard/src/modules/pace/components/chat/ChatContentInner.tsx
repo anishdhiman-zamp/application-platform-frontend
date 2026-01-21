@@ -99,6 +99,8 @@ const ChatContentInner = ({
               assistantAvatar={<NewPaceAvatar />}
               streamingEnabled
               showTimestamp
+              showFeedback
+              showCopy
             />
           </CommonWrapper>
           <div className='sticky bottom-0 z-10 mx-auto w-full max-w-[700px] bg-white pb-3'>

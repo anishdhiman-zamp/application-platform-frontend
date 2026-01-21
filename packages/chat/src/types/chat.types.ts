@@ -378,3 +378,32 @@ export interface GenerateSpeechToTextAccessTokenResponse {
 export interface StreamingState extends ChatMessage {
   is_active: boolean;
 }
+
+/**
+ * Chat Feedback API Types
+ */
+export const enum ChatFeedbackCategory {
+  UI_BUG = 'UI_BUG',
+  OVERACTIVE_REFUSAL = 'OVERACTIVE_REFUSAL',
+  DID_NOT_FOLLOW_REQUEST = 'DID_NOT_FOLLOW_REQUEST',
+  NOT_FACTUALLY_CORRECT = 'NOT_FACTUALLY_CORRECT',
+  INCOMPLETE_RESPONSE = 'INCOMPLETE_RESPONSE',
+  SHOULD_HAVE_SEARCHED_WEB = 'SHOULD_HAVE_SEARCHED_WEB',
+  MEMORY_NOT_APPLIED = 'MEMORY_NOT_APPLIED',
+  REPORT_CONTENT = 'REPORT_CONTENT',
+  OTHER = 'OTHER',
+}
+
+export interface SubmitChatFeedbackRequestType {
+  conversationId: string;
+  messageId: string;
+  body: {
+    category: ChatFeedbackCategory;
+    description: string;
+  };
+}
+
+export interface SubmitChatFeedbackResponseType {
+  success: boolean;
+  message: string;
+}
