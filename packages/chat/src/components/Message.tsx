@@ -2,7 +2,7 @@
 
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@zamp-platform/ui';
 import { cn } from '@zamp-platform/ui/utils';
-import { formatChatTimestamp, formatChatTimestampTooltip } from '@zamp-platform/utils';
+import { formatChatTimestamp, formatChatTimestampTooltip, formatTimestampToUTC } from '@zamp-platform/utils';
 import { FC, useMemo } from 'react';
 
 import { ButtonBlockType } from '../types/block.types';
@@ -39,12 +39,12 @@ export const Message: FC<MessageProps> = ({
   showTimestamp = false,
 }) => {
   const formattedTimestamp = useMemo(
-    () => (message.timestamp ? formatChatTimestamp(message.timestamp) : ''),
+    () => (message.timestamp ? formatChatTimestamp(formatTimestampToUTC(message.timestamp)) : ''),
     [message.timestamp],
   );
 
   const tooltipTimestamp = useMemo(
-    () => (message.timestamp ? formatChatTimestampTooltip(message.timestamp) : ''),
+    () => (message.timestamp ? formatChatTimestampTooltip(formatTimestampToUTC(message.timestamp)) : ''),
     [message.timestamp],
   );
 
