@@ -9,6 +9,7 @@ import {
 import { COLORS } from 'constants/colors';
 import { TEAM_MEMBERS_PRIVILEGES_LIST } from 'modules/team/people.constants';
 import { InviteMembersPopupPropsType, TEAM_MEMBERS_PRIVILEGES } from 'modules/team/people.types';
+import { extractEmailsFromSearchValue } from 'modules/team/people.utils';
 import { PERMISSION_MESSAGES, VALIDATION_ERROR_MESSAGES } from 'utils/accessPermission/accessPermission.constants';
 import { PERMISSION_TYPES } from 'utils/accessPermission/accessPermission.types';
 import { validateEmail } from 'utils/common';
@@ -151,11 +152,11 @@ const InviteMembersPopup: FC<InviteMembersPopupPropsType> = ({ isOpen, onClose, 
     const instanceRole = selectedRoleByInstance[id] || TEAM_MEMBERS_PRIVILEGES_LIST[0].value;
     const existingEmails = new Set(selectedItemsByInstance[id]?.map((item) => item.value) || []);
     const uniqueEntries = new Set<string>();
-    const splitUsingRegex = /[, ]+/;
 
-    const validatedEntries = value
-      .split(splitUsingRegex)
-      .map((email) => email?.trim())
+    // Extract emails from value (handles "Name <email>, Name2 <email2>" format)
+    const emails = extractEmailsFromSearchValue(value);
+
+    const validatedEntries = emails
       .filter(Boolean)
       .filter((email) => !existingEmails?.has(email) && !uniqueEntries?.has(email))
       .map((email) => {
@@ -212,11 +213,17 @@ const InviteMembersPopup: FC<InviteMembersPopupPropsType> = ({ isOpen, onClose, 
       const id = Number(idStr);
 
       if (search?.trim() !== '' && !selectedItemsByInstance[id]?.some((item) => item?.value === search)) {
-        const { isValid, message } = validateAndGetUserDetails(search);
+        // Extract emails from search value (handles "Name <email>" format)
+        const extractedEmails = extractEmailsFromSearchValue(search);
 
-        if (!isValid) {
-          hasInvalidEntry = true;
-          firstErrorMessage = message || '';
+        for (const email of extractedEmails) {
+          const { isValid, message } = validateAndGetUserDetails(email);
+
+          if (!isValid) {
+            hasInvalidEntry = true;
+            firstErrorMessage = message || '';
+            break;
+          }
         }
       }
     });
