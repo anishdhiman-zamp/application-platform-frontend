@@ -16,7 +16,12 @@ const createWrapper = () => {
 describe('Battalion Hooks', () => {
   beforeEach(() => {
     jest.clearAllMocks();
-    (fetch as jest.Mock).mockResolvedValue({ json: () => Promise.resolve([]) });
+    (fetch as jest.Mock).mockResolvedValue({
+      ok: true,
+      status: 200,
+      statusText: 'OK',
+      json: () => Promise.resolve([]),
+    });
     getResourceRegistry().clear();
     resetQueryGraph();
   });
