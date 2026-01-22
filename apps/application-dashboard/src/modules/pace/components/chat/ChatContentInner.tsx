@@ -9,6 +9,8 @@ import {
   SenderType,
   useChat,
 } from '@zamp-platform/chat';
+import { ArrowDownIcon, Button } from '@zamp-platform/ui';
+import { cn } from '@zamp-platform/ui/utils';
 import { ACCEPTED_FILE_TYPES } from 'modules/pace/pace.constants';
 import { API_ENDPOINTS } from '@/apis/apiEndpoint.constants';
 import CommonWrapper from '@/components/commonWrapper';
@@ -21,6 +23,7 @@ import ChatHome from '@/modules/pace/components/chat/ChatHome';
 import ChatTopbar from '@/modules/pace/components/chat/ChatTopbar';
 import ChatMessagesSkeleton from '@/modules/pace/components/loaders/ChatMessagesSkeleton';
 import { useChatDraftInput } from '@/modules/pace/hooks/useChatDraftInput';
+import { useChatScroll } from '@/modules/pace/hooks/useChatScroll';
 import { baseApi } from '@/services/baseApi';
 
 interface ChatContentInnerProps {
@@ -72,6 +75,12 @@ const ChatContentInner = ({
   const isLoadingConversation = Boolean(conversationId && chat.isLoadingConversationHistory) || !hasMessages;
   const isInConversation = Boolean(conversationId || chat.conversationId || hasMessages);
 
+  const { scrollContainerRef, showScrollButton, handleScroll, handleScrollToBottomClick } = useChatScroll({
+    messagesLength: chat.messages?.length ?? 0,
+    isLoading: isLoadingConversation,
+    streamingState: chat.streamingState,
+  });
+
   useEffect(() => {
     if (chat.conversationId && !conversationId) {
       setConversationId(chat.conversationId);
@@ -82,14 +91,18 @@ const ChatContentInner = ({
     return (
       <>
         <ChatTopbar title={chatTitle || 'Untitled'} onStartNewChat={startNewChat} />
-        <div className='relative flex min-h-0 w-full flex-1 flex-col overflow-x-hidden overflow-y-auto [scrollbar-width:none]'>
+        <div
+          ref={scrollContainerRef}
+          onScroll={handleScroll}
+          className='relative flex min-h-0 w-full flex-1 flex-col overflow-x-hidden overflow-y-auto [scrollbar-width:thin]'
+        >
           <CommonWrapper
             isLoading={isLoadingConversation}
             isError={chat.isErrorConversationHistory}
             refetchFunction={chat.refetchConversationHistory}
             skeletonType={SkeletonTypes.CUSTOM}
-            loader={<ChatMessagesSkeleton className='px-0' />}
-            className='mx-auto flex w-full max-w-[700px] flex-1 px-4'
+            loader={<ChatMessagesSkeleton className='px-0' alignUserRight hideSenderName />}
+            className='mx-auto flex w-full max-w-[700px] flex-1 flex-col px-4'
           >
             <MessageContainer
               messages={chat.messages}
@@ -97,11 +110,26 @@ const ChatContentInner = ({
               streamingState={chat.streamingState}
               className='gap-4 px-0 [&]:overflow-visible'
               assistantAvatar={<NewPaceAvatar />}
-              streamingEnabled
               showTimestamp
+              alignUserRight
+              hideSenderName
+              userAvatarClassName='h-5 min-h-5 w-5 min-w-5 f-11-500 rounded-[7.5px]'
             />
+            <div className='h-12 w-full bg-white' />
           </CommonWrapper>
           <div className='sticky bottom-0 z-10 mx-auto w-full max-w-[700px] bg-white pb-3'>
+            <Button
+              onClick={handleScrollToBottomClick}
+              variant='ghost'
+              className={cn(
+                'bg-gray-1000 hover:bg-gray-1000 absolute bottom-27 left-1/2 h-6 w-6 -translate-x-1/2 !rounded-full p-3',
+                'transition-all duration-200 ease-out',
+                showScrollButton ? 'translate-y-0 opacity-100' : 'pointer-events-none translate-y-2 opacity-0',
+              )}
+              aria-label='Scroll to bottom'
+            >
+              <ArrowDownIcon size={14} className='p-[2px] text-white' />
+            </Button>
             <ConnectedChatInput
               chat={chat}
               conversationId={conversationId ?? chat.conversationId ?? ''}

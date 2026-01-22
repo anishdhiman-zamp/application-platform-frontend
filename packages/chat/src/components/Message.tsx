@@ -6,7 +6,7 @@ import { formatChatTimestamp, formatChatTimestampTooltip, formatTimestampToUTC }
 import { FC, useMemo } from 'react';
 
 import { ButtonBlockType } from '../types/block.types';
-import { ChatMessage } from '../types/chat.types';
+import { ChatMessage, SenderType } from '../types/chat.types';
 import { BlockRenderer } from './BlockRenderer';
 import SenderDetails, { SenderDetailsProps } from './SenderDetails';
 
@@ -21,6 +21,7 @@ export interface MessageProps extends Omit<SenderDetailsProps, 'message'> {
   senderDetailsClassName?: string;
   showSenderDetails?: boolean;
   showTimestamp?: boolean;
+  alignUserRight?: boolean;
 }
 
 export const Message: FC<MessageProps> = ({
@@ -37,7 +38,14 @@ export const Message: FC<MessageProps> = ({
   senderDetailsClassName,
   showSenderDetails = true,
   showTimestamp = false,
+  alignUserRight = false,
+  hideSenderName = false,
 }) => {
+  const isUserMessage = message.sender_type === SenderType.USER;
+  const shouldAlignRight = alignUserRight && isUserMessage;
+
+  console.log('shouldAlignRight', shouldAlignRight);
+
   const formattedTimestamp = useMemo(
     () => (message.timestamp ? formatChatTimestamp(formatTimestampToUTC(message.timestamp)) : ''),
     [message.timestamp],
@@ -49,21 +57,22 @@ export const Message: FC<MessageProps> = ({
   );
 
   return (
-    <div className={cn('group space-y-2', containerClassName)}>
+    <div className={cn('group space-y-2', shouldAlignRight && 'flex flex-col items-end', containerClassName)}>
       {showSenderDetails && (
         <SenderDetails
           message={message}
           assistantName={assistantName}
           assistantAvatar={assistantAvatar}
+          hideSenderName={hideSenderName}
           userAvatar={userAvatar}
-          className={senderDetailsClassName}
+          className={cn(shouldAlignRight && 'flex-row-reverse', senderDetailsClassName)}
         />
       )}
 
       <BlockRenderer
         message={{ block: message?.message_content?.elements ?? [] }}
         onAction={onAction}
-        className={blockRendererClassName}
+        className={cn(shouldAlignRight && 'bg-GRAY_100 max-w-[80%] rounded-[10px] px-4 py-3', blockRendererClassName)}
         conversationId={conversationId || message?.conversation_id}
         messageId={messageId || message?.id}
         isLoading={isLoading}
@@ -72,7 +81,12 @@ export const Message: FC<MessageProps> = ({
         <TooltipProvider delayDuration={100}>
           <Tooltip>
             <TooltipTrigger asChild>
-              <div className='text-GRAY_600 f-10-450 invisible w-fit cursor-default group-hover:visible'>
+              <div
+                className={cn(
+                  'text-GRAY_600 f-10-450 invisible w-fit cursor-default group-hover:visible',
+                  shouldAlignRight && 'text-right',
+                )}
+              >
                 {formattedTimestamp}
               </div>
             </TooltipTrigger>

@@ -1,9 +1,9 @@
-import NewPaceIcons from '@/assets/Icons/NewPaceIcons';
+import Image from 'next/image';
 
 const NewPaceAvatar = () => {
   return (
-    <div className='flex h-4 min-h-4 w-4 min-w-4 items-center justify-center rounded-md [&_svg_path]:fill-blue-700'>
-      <NewPaceIcons height={16} width={16} />
+    <div className='grid h-5 min-h-5 w-5 min-w-5 place-items-center rounded-full'>
+      <Image src='/icons/pace/pace-new.svg' alt='Pace Avatar' height={20} width={20} />
     </div>
   );
 };
