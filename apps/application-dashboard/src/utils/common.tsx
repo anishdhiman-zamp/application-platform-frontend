@@ -621,5 +621,10 @@ export const findTimeDifference = (updated_at: string): string => {
 
   const differenceInMonthsValue = differenceInMonths(currentTime, lastUpdatedTime);
 
+  // If less than a full calendar month, still show days
+  if (differenceInMonthsValue === 0) {
+    return `${formatPlural(differenceInDaysValue, 'day')} ago`;
+  }
+
   return `${formatPlural(differenceInMonthsValue, 'month')} ago`;
 };

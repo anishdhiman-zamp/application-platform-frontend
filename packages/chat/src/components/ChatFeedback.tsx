@@ -154,7 +154,10 @@ const ChatFeedback: FC<ChatFeedbackProps> = ({ messageId, conversationId, classN
               />
             </div>
 
-            <div className='flex justify-end gap-3 pt-2'>
+            <div className='border-GRAY_400 flex justify-end gap-3 border-t pt-2'>
+              <Button variant='secondary' size='medium' onClick={handleCancel}>
+                Cancel
+              </Button>
               <Button
                 variant='default'
                 size='medium'
@@ -164,9 +167,6 @@ const ChatFeedback: FC<ChatFeedbackProps> = ({ messageId, conversationId, classN
                 className='disabled:text-white disabled:opacity-50'
               >
                 Submit
-              </Button>
-              <Button variant='secondary' size='medium' onClick={handleCancel}>
-                Cancel
               </Button>
             </div>
           </DialogBody>
