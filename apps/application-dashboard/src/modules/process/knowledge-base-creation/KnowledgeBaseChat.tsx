@@ -17,7 +17,7 @@ import { cn } from '@zamp-platform/ui/utils';
 import { CirclePlus, EllipsisVertical } from 'lucide-react';
 import useActionHub from '@/modules/chatbot/actionHub';
 import StopProcessingFeedback from '@/modules/chatbot/StopProcessingFeedback';
-import { ChatMessagesSkeleton } from '@/modules/macs/components/loaders';
+import ChatMessagesSkeleton from '@/modules/pace/components/loaders/ChatMessagesSkeleton';
 import { RootState } from '@/store';
 import { ProcessStatus } from '@/types/api/processApi.types';
 import { MapAny } from '@/types/commonTypes';

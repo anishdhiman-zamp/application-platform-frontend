@@ -1,6 +1,7 @@
 'use client';
 
-import { Dispatch, SetStateAction, useCallback, useEffect, useRef, useState } from 'react';
+import { formatPlural } from '@zamp-platform/utils';
+import { Dispatch, SetStateAction, useCallback, useEffect, useMemo, useRef, useState } from 'react';
 
 import { ActionType, Block, BLOCK_TYPE, ButtonBlockType } from '../types/block.types';
 import {
@@ -12,6 +13,7 @@ import {
   ScopeType,
   SenderType,
 } from '../types/chat.types';
+import { MultipleFileUploadResult } from '../utils/fileUpload';
 import { useChat } from './useChat';
 
 export interface UploadedFile {
@@ -30,7 +32,7 @@ export interface ChatInputAdapter {
   getCurrentUserName: () => string;
   getResourceId: () => string;
   getScopeId: () => string;
-  uploadFiles: (files: FileList) => Promise<UploadedFile[]>;
+  uploadFiles: (files: FileList) => Promise<MultipleFileUploadResult>;
   disableInteraction?: (params: {
     conversationId: string;
     messageId: string;
@@ -53,6 +55,8 @@ export interface UseChatInputProps {
   maxTextareaHeight?: number;
   resourceType?: ResourceType;
   annotationType?: AnnotationType;
+  onConversationCreated?: (conversationId: string) => void;
+  isDisabled?: boolean;
 }
 
 export interface UseChatInputReturn {
@@ -67,6 +71,7 @@ export interface UseChatInputReturn {
   isUploading: boolean;
   firstMessage: string;
   setFirstMessage: Dispatch<SetStateAction<string>>;
+  isSubmitDisabled: boolean;
 }
 
 /**
@@ -168,6 +173,8 @@ export const useChatInput = ({
   adapter,
   maxTextareaHeight = DEFAULT_MAX_TEXTAREA_HEIGHT,
   annotationType,
+  onConversationCreated,
+  isDisabled,
 }: UseChatInputProps): UseChatInputReturn => {
   const currentUserName = adapter.getCurrentUserName();
   const resourceId = adapter.getResourceId();
@@ -194,6 +201,8 @@ export const useChatInput = ({
   const [isUploading, setIsUploading] = useState(false);
   const [firstMessage, setFirstMessage] = useState('');
 
+  const isSubmitDisabled = useMemo(() => isDisabled || isUploading || !value.trim(), [isDisabled, isUploading, value]);
+
   const init = async () => {
     const payload = createConversationPayload(
       resourceId,
@@ -216,8 +225,7 @@ export const useChatInput = ({
       throw new Error('Failed to create conversation');
     }
 
-    // Clear input only after conversation is successfully created
-    setValue('');
+    onConversationCreated?.(response.conversation_id);
   };
 
   const handleFileSelect = async (files: FileList | null) => {
@@ -233,38 +241,51 @@ export const useChatInput = ({
     setIsUploading(true);
     setAttachments((prev) => [...prev, ...uploadingFiles]);
 
-    try {
-      const newAttachments = await adapter.uploadFiles(files);
+    const { successful, failed } = await adapter.uploadFiles(files);
 
+    const failedFileNames = new Set(failed.map((f) => f.file.name));
+
+    setAttachments((prev) => {
       const tempEntriesMap = new Map<string, number>();
 
-      setAttachments((prev) => {
-        prev.forEach((item, index) => {
-          if (item.file_id === '' && !tempEntriesMap.has(item.file_name)) {
-            tempEntriesMap.set(item.file_name, index);
-          }
-        });
-
-        const updated = [...prev];
-
-        newAttachments.forEach((newAttachment) => {
-          const index = tempEntriesMap.get(newAttachment.file_name);
-
-          if (index !== undefined) {
-            updated[index] = newAttachment;
-          } else {
-            updated.push(newAttachment);
-          }
-        });
-
-        return updated;
+      prev.forEach((item, index) => {
+        if (item.file_id === '' && !tempEntriesMap.has(item.file_name)) {
+          tempEntriesMap.set(item.file_name, index);
+        }
       });
-      adapter.onSuccess?.('Files uploaded successfully');
-    } catch (error) {
-      adapter.onError?.(error);
-    } finally {
-      setIsUploading(false);
+
+      const updated = prev.filter((att) => {
+        if (att.file_id !== '') return true;
+        if (failedFileNames.has(att.file_name)) return false;
+        return true;
+      });
+
+      const updatedTempEntriesMap = new Map<string, number>();
+      updated.forEach((item, index) => {
+        if (item.file_id === '' && !updatedTempEntriesMap.has(item.file_name)) {
+          updatedTempEntriesMap.set(item.file_name, index);
+        }
+      });
+
+      successful.forEach((newAttachment) => {
+        const index = updatedTempEntriesMap.get(newAttachment.file_name);
+
+        if (index !== undefined) {
+          updated[index] = newAttachment;
+        } else {
+          updated.push(newAttachment);
+        }
+      });
+
+      return updated;
+    });
+
+    if (!!failed?.length) {
+      const failedNames = failed.map((f) => f?.file?.name).join(', ');
+      adapter.onError?.(new Error(`Failed to upload ${formatPlural(failed.length, 'file')}: ${failedNames}`));
     }
+
+    setIsUploading(false);
   };
 
   const removeAttachment = (fileId: string) => {
@@ -272,15 +293,16 @@ export const useChatInput = ({
   };
 
   const handleSubmit = () => {
-    if (!firstMessage && !conversationId) {
-      setFirstMessage(value);
-      setHeader?.('Analysing...');
-      // Don't clear input here - it will be cleared after createConversationV2 succeeds
-      return;
-    }
     if (value.trim()) {
       setValue('');
     }
+
+    if (!firstMessage && !conversationId) {
+      setFirstMessage(value);
+      setHeader?.('Analysing...');
+      return;
+    }
+
     handleSendMessage(value);
   };
 
@@ -330,7 +352,7 @@ export const useChatInput = ({
   };
 
   const handleKeyDown = (e: React.KeyboardEvent<HTMLTextAreaElement>) => {
-    if (e.key === KEYBOARD_KEY_ENTER && !e.shiftKey) {
+    if (e.key === KEYBOARD_KEY_ENTER && !e.shiftKey && !isSubmitDisabled) {
       e.preventDefault();
       handleSubmit();
     }
@@ -344,10 +366,13 @@ export const useChatInput = ({
     // Reset height to calculate new height
     textarea.style.height = '20px';
 
-    const scrollHeight = textarea.scrollHeight;
-    const newHeight = Math.min(scrollHeight, maxTextareaHeight);
+    // Only expand if there's actual content
+    if (value.trim()) {
+      const scrollHeight = textarea.scrollHeight;
+      const newHeight = Math.min(scrollHeight, maxTextareaHeight);
 
-    textarea.style.height = `${newHeight}px`;
+      textarea.style.height = `${newHeight}px`;
+    }
   }, [value, maxTextareaHeight]);
 
   useEffect(() => {
@@ -368,6 +393,7 @@ export const useChatInput = ({
     isUploading,
     firstMessage,
     setFirstMessage,
+    isSubmitDisabled,
   };
 };
 

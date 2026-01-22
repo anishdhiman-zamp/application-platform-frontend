@@ -70,7 +70,7 @@ export function PagesAndProcessesProvider({ children }: PagesAndProcessesProvide
         pushToMostRelevantPage();
       } else {
         // Fallback navigation if no processes or pages
-        router.push(ROUTES_PATH.TEAM);
+        router.push(ROUTES_PATH.PEOPLE);
       }
     }
   }, [

@@ -352,3 +352,26 @@ export type FilterConversationsRequestType = {
 export type FilterConversationsResponseType = {
   conversations: ConversationType[];
 };
+
+export type ReprocessingEventsRequestType = {
+  processId: string;
+  activityRunId: string;
+};
+
+export interface ReprocessingEventType {
+  id: string;
+  organization_id: string;
+  activity_run_id: string;
+  process_id: string;
+  triggered_by_workflow_id: string;
+  triggered_by_workflow_run_id: string;
+  reprocess_type: string;
+  trigger_reference_id: string | null;
+  trigger_reference_type: string | null;
+  metadata: MapAny;
+  created_at: string;
+}
+
+export interface ReprocessingEventsResponseType {
+  reprocessing_events: ReprocessingEventType[];
+}

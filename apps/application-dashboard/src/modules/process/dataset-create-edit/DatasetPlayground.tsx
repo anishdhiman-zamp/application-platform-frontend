@@ -1,10 +1,22 @@
 import React, { FC, useState } from 'react';
+import {
+  BluePrintDataset,
+  DATASET_PLAYGROUND_TABS_LIST,
+  DatasetCreationProvider,
+  DatasetEditPreviewTab,
+  DatasetTabsTypes,
+  PreviewDataset,
+} from '@zamp-platform/dataset-create-edit';
 import { X } from 'lucide-react';
-import { DATASET_PLAYGROUND_TABS_LIST, TAB_CONTENT_MAPPING } from 'modules/process/process.constant';
 import CoinsStacked04 from '@/assets/Icons/CoinsStacked04';
 import { cn } from '@/utils/common';
 
-const DatasetPlayground: FC = () => {
+const TAB_CONTENT_COMPONENTS: Record<string, FC> = {
+  [DatasetTabsTypes.BLUEPRINT]: BluePrintDataset,
+  [DatasetTabsTypes.PREVIEW]: PreviewDataset,
+};
+
+const DatasetPlaygroundContent: FC = () => {
   const [selectedTab, setSelectedTab] = useState<string>(DATASET_PLAYGROUND_TABS_LIST[0].value);
 
   const handleTabSelect = (value: string) => {
@@ -19,29 +31,25 @@ const DatasetPlayground: FC = () => {
           <span className='f-13-500 text-GRAY_1000'> New Dataset</span>
         </div>
 
-        <div className='flex items-center gap-1'>
-          {DATASET_PLAYGROUND_TABS_LIST.map((tab) => (
-            <div
-              key={tab.value}
-              className={cn(
-                'f-13-450 text-GRAY_700 cursor-pointer bg-transparent p-0 px-2 py-1',
-                selectedTab === tab.value && 'text-GRAY_1000 bg-GRAY_100 rounded',
-              )}
-              onClick={() => handleTabSelect(tab.value)}
-            >
-              {tab.label}
-            </div>
-          ))}
-        </div>
+        <DatasetEditPreviewTab selectedTab={selectedTab as DatasetTabsTypes} handleTabSelect={handleTabSelect} />
         <X className='text-GRAY_700 h-4 w-4' />
       </div>
 
-      {Object.entries(TAB_CONTENT_MAPPING).map(([key, content]) => (
+      {Object.entries(TAB_CONTENT_COMPONENTS).map(([key, Component]) => (
         <div key={key} className={cn(selectedTab === key ? 'h-full flex-1 overflow-hidden' : 'hidden')}>
-          {content}
+          <Component />
         </div>
       ))}
     </div>
+  );
+};
+
+// Wrapper component that provides the context
+const DatasetPlayground: FC = () => {
+  return (
+    <DatasetCreationProvider>
+      <DatasetPlaygroundContent />
+    </DatasetCreationProvider>
   );
 };
 

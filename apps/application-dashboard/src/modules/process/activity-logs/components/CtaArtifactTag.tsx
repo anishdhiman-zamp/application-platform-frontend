@@ -6,9 +6,10 @@ import type { defaultFnType } from '@/types/commonTypes';
 interface CtaArtifactTagProps {
   cta: CtasType;
   onShowArtifacts: defaultFnType;
+  disabled?: boolean;
 }
 
-const CtaArtifactTag = memo(({ cta, onShowArtifacts }: CtaArtifactTagProps) => (
+const CtaArtifactTag = memo(({ cta, onShowArtifacts, disabled = false }: CtaArtifactTagProps) => (
   <ArtifactTag
     displayName={cta.display_name}
     artifactType={cta.artifact_type}
@@ -16,6 +17,7 @@ const CtaArtifactTag = memo(({ cta, onShowArtifacts }: CtaArtifactTagProps) => (
     ctaAction={cta.cta_action}
     onClick={onShowArtifacts}
     displayClassName='max-w-40'
+    disabled={disabled}
   />
 ));
 

@@ -20,7 +20,7 @@ const TextAlignmentSelector: FC<{ editor: Editor | null }> = ({ editor }) => {
       <TooltipV2 tooltipBody='Text Alignment' asChildTrigger>
         <DropdownMenuTrigger asChild>
           <Button variant='ghost' size='xsmall' className='flex h-6 items-center gap-1 px-1'>
-            <SvgSpriteLoader id={`align-${alignment}`} />
+            <SvgSpriteLoader size={17} id={`align-${alignment}`} />
             <SvgSpriteLoader id='chevron-down' color={COLORS.GRAY_700} size={8} />
           </Button>
         </DropdownMenuTrigger>

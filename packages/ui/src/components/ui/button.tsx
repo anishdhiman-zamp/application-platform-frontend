@@ -17,7 +17,7 @@ import {
 } from 'react';
 
 const buttonVariants = cva(
-  'cursor-pointer inline-flex items-center justify-center whitespace-nowrap rounded-md text-sm font-medium ring-offset-background transition-colors focus-visible:outline-hidden focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none [&_svg]:pointer-events-none [&_svg]:shrink-0',
+  'cursor-pointer  inline-flex items-center justify-center whitespace-nowrap rounded-md text-sm font-medium ring-offset-background transition-colors focus-visible:outline-hidden focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none [&_svg]:pointer-events-none [&_svg]:shrink-0 ',
   {
     variants: {
       variant: {
@@ -80,10 +80,9 @@ export interface ButtonProps extends ButtonHTMLAttributes<HTMLButtonElement>, Va
   testId?: string;
 }
 
-function useDebounce<T extends (...args: Parameters<T>) => void>(
-  callback: T,
-  delay: number,
-): (...args: Parameters<T>) => void {
+/* eslint-disable no-unused-vars */
+function useDebounce<T extends (...args: any[]) => void>(callback: T, delay: number): (...args: Parameters<T>) => void {
+  /* eslint-enable no-unused-vars */
   const timeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   const callbackRef = useRef(callback);
 

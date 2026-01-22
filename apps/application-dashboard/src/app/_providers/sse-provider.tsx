@@ -56,8 +56,19 @@ export const SSEProvider: React.FC<SSEProviderProps> = ({ children, sseEventBus 
       update: handleSSEEvent,
       message: handleSSEEvent,
     },
-    onError: (error) => {
-      captureException(error);
+    // Wait 10 seconds before reporting errors to allow for reconnection after network changes (VPN, etc.)
+    errorReportDelayMs: 10000,
+    onError: (errorInfo) => {
+      // Don't send network connectivity errors (offline/disconnection) to Sentry
+      // as these are expected user-side issues
+      if (!errorInfo.isNetworkError) {
+        captureException(new Error('SSE connection error'), {
+          extra: {
+            readyState: errorInfo.readyState,
+            isNetworkError: errorInfo.isNetworkError,
+          },
+        });
+      }
     },
   });
 

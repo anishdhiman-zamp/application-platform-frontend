@@ -3,11 +3,14 @@
 import { useCallback, useMemo } from 'react';
 import { useInitiateLogoutFlowQuery, useLazyLogoutQuery, useLazyWhoAmIQuery } from 'apis/auth';
 import { usePathname, useRouter, useSearchParams } from 'next/navigation';
+import { useSSEContext } from '@/app/_providers/sse-provider';
+import { ENVIRONMENT, ENVIRONMENT_TYPES } from '@/constants/common.constants';
 import { ROUTES_PATH } from '@/constants/routeConfig';
 import { clearCookie, PREV_ROUTE_COOKIE, setCookie, USER_SESSION_COOKIE } from '@/utils/cookie';
 import { resetPostHog } from '@/utils/postHog';
 
 export const useLogout = () => {
+  const { disconnect: disconnectSSE } = useSSEContext();
   const router = useRouter();
   const pathname = usePathname();
   const searchParams = useSearchParams();
@@ -25,8 +28,13 @@ export const useLogout = () => {
   }, [pathname, searchParams]);
 
   const handleLogout = useCallback(async () => {
+    // Disconnect SSE gracefully before logout to prevent readyState 2 errors
+    disconnectSSE();
+
     if (fullPath && fullPath !== '/') {
-      setCookie(PREV_ROUTE_COOKIE, encodeURIComponent(fullPath));
+      const domain = ENVIRONMENT === ENVIRONMENT_TYPES.PRODUCTION ? '.zamp.ai' : '.zamp.dev';
+
+      setCookie(PREV_ROUTE_COOKIE, encodeURIComponent(fullPath), undefined, domain);
     }
 
     // Clear USER_SESSION_COOKIE on client side
@@ -46,7 +54,7 @@ export const useLogout = () => {
       .catch(() => {
         refetchLogoutFlow();
       });
-  }, [logoutFlow, logOut, router, refetchLogoutFlow, fullPath]);
+  }, [logoutFlow, logOut, router, refetchLogoutFlow, fullPath, disconnectSSE]);
 
   return {
     logout: handleLogout,

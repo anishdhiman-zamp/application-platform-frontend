@@ -11,6 +11,9 @@ import {
   IServerSideDatasource,
   RowClickedEvent,
   RowDragEndEvent,
+  SizeColumnsToContentStrategy,
+  SizeColumnsToFitGridStrategy,
+  SizeColumnsToFitProvidedWidthStrategy,
   Theme,
 } from 'ag-grid-community';
 import { AgGridReact } from 'ag-grid-react';
@@ -51,6 +54,10 @@ export interface DatasetTableProps {
   shouldShowNA?: boolean;
   onCellClicked?: (event: CellClickedEvent) => void;
   useGetRowId?: boolean;
+  autoSizeStrategy?:
+    | SizeColumnsToFitGridStrategy
+    | SizeColumnsToFitProvidedWidthStrategy
+    | SizeColumnsToContentStrategy;
 }
 
 const DatasetTable: FC<DatasetTableProps> = ({
@@ -86,6 +93,7 @@ const DatasetTable: FC<DatasetTableProps> = ({
   shouldShowNA = false,
   onCellClicked,
   useGetRowId = false,
+  autoSizeStrategy,
 }) => {
   return (
     <div id='dataset-table' data-testid='dataset-table'>
@@ -122,6 +130,7 @@ const DatasetTable: FC<DatasetTableProps> = ({
         shouldShowNA={shouldShowNA}
         onCellClicked={onCellClicked}
         useGetRowId={useGetRowId}
+        autoSizeStrategy={autoSizeStrategy}
       />
     </div>
   );

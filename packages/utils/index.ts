@@ -6,4 +6,5 @@ export * from './event-bus';
 export * from './hooks/useSSE';
 export * from './hooks/useThrottle';
 export * from './localstorage';
+export * from './string';
 export * from './url';

@@ -48,17 +48,14 @@ export const StreamingMessage: FC<StreamingMessageProps> = ({
 
   return (
     <div className={cn('space-y-2', className)}>
-      <div className='space-y-2'>
-        <SenderDetails message={assistantMessage} assistantName={assistantName} assistantAvatar={assistantAvatar} />
-
-        <BlockRenderer
-          message={{ block: messageElements }}
-          className='border-none shadow-none'
-          conversationId={streamingState?.conversation_id}
-          messageId={streamingState?.id}
-          isLoading={false}
-        />
-      </div>
+      <SenderDetails message={assistantMessage} assistantName={assistantName} assistantAvatar={assistantAvatar} />
+      <BlockRenderer
+        message={{ block: messageElements }}
+        className='border-none shadow-none'
+        conversationId={streamingState?.conversation_id}
+        messageId={streamingState?.id}
+        isLoading={false}
+      />
     </div>
   );
 };

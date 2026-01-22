@@ -8,10 +8,8 @@ import CommonWrapper from '@/components/commonWrapper';
 import { SkeletonTypes } from '@/components/commonWrapper/commonWrapper.types';
 import { FEATURE_FLAGS } from '@/constants/featureFlags';
 import { ZAMP_LOGO_LOADER_SVG } from '@/constants/icons';
-import { useAppDispatch } from '@/hooks/toolkit';
 import { useFeatureFlags } from '@/hooks/useFeatureFlags';
 import MarkdownSkeleton from '@/modules/process/knowledge-base-creation/components/MarkdownSkeleton';
-import { closeSidebar, openSidebar } from '@/store/slices/layout-configs';
 import { ProcessStatus } from '@/types/api/processApi.types';
 import { cn } from '@/utils/common';
 
@@ -35,7 +33,6 @@ interface KnowledgeBaseV2PageHomeProps {
 }
 
 const KnowledgeBaseV2PageHome: FC<KnowledgeBaseV2PageHomeProps> = ({ processId, conversationId }) => {
-  const dispatch = useAppDispatch();
   const { evaluate, ldClient } = useFeatureFlags();
   const [isChatbotExpanded, setIsChatbotExpanded] = useState(false);
   const [defaultMessage, setDefaultMessage] = useState<string | undefined>(undefined);
@@ -50,16 +47,6 @@ const KnowledgeBaseV2PageHome: FC<KnowledgeBaseV2PageHomeProps> = ({ processId, 
     () => ![ProcessStatus.DRAFT, ProcessStatus.LIVE].includes(currentProcess?.status as ProcessStatus),
     [currentProcess],
   );
-
-  useEffect(() => {
-    setTimeout(() => {
-      dispatch(closeSidebar());
-    }, 300);
-
-    return () => {
-      dispatch(openSidebar());
-    };
-  }, [dispatch]);
 
   const handleChatSubmit = useCallback((message: string) => {
     if (message?.trim()) {
