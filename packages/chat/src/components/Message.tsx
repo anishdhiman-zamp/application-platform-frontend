@@ -1,6 +1,5 @@
 'use client';
 
-import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@zamp-platform/ui';
 import { cn } from '@zamp-platform/ui/utils';
 import { formatChatTimestamp, formatChatTimestampTooltip, formatTimestampToUTC } from '@zamp-platform/utils';
 import { FC, useMemo } from 'react';
@@ -8,6 +7,9 @@ import { FC, useMemo } from 'react';
 import { ButtonBlockType } from '../types/block.types';
 import { ChatMessage, SenderType } from '../types/chat.types';
 import { BlockRenderer } from './BlockRenderer';
+import ChatFeedback from './ChatFeedback';
+import CopyMessageButton from './CopyMessageButton';
+import MessageTimestamp from './MessageTimestamp';
 import SenderDetails, { SenderDetailsProps } from './SenderDetails';
 
 export interface MessageProps extends Omit<SenderDetailsProps, 'message'> {
@@ -21,6 +23,10 @@ export interface MessageProps extends Omit<SenderDetailsProps, 'message'> {
   senderDetailsClassName?: string;
   showSenderDetails?: boolean;
   showTimestamp?: boolean;
+  showFeedback?: boolean;
+  showCopy?: boolean;
+  feedbackDisabled?: boolean;
+  isLastMessage?: boolean;
   alignUserRight?: boolean;
 }
 
@@ -38,6 +44,10 @@ export const Message: FC<MessageProps> = ({
   senderDetailsClassName,
   showSenderDetails = true,
   showTimestamp = false,
+  showFeedback = false,
+  showCopy = false,
+  feedbackDisabled = false,
+  isLastMessage = false,
   alignUserRight = false,
   hideSenderName = false,
 }) => {
@@ -77,25 +87,25 @@ export const Message: FC<MessageProps> = ({
         messageId={messageId || message?.id}
         isLoading={isLoading}
       />
-      {showTimestamp && formattedTimestamp && (
-        <TooltipProvider delayDuration={100}>
-          <Tooltip>
-            <TooltipTrigger asChild>
-              <div
-                className={cn(
-                  'text-GRAY_600 f-10-450 invisible w-fit cursor-default group-hover:visible',
-                  shouldAlignRight && 'text-right',
-                )}
-              >
-                {formattedTimestamp}
-              </div>
-            </TooltipTrigger>
-            <TooltipContent side='bottom' align='center' className='f-10-450 p-1.5' sideOffset={12}>
-              <p>{tooltipTimestamp}</p>
-            </TooltipContent>
-          </Tooltip>
-        </TooltipProvider>
-      )}
+      <div
+        className={cn(
+          'mt-3 flex items-center gap-x-1.5',
+          isLastMessage ? 'visible' : 'invisible group-hover:visible',
+          shouldAlignRight && 'mt-0',
+        )}
+      >
+        {showCopy && <CopyMessageButton messageContent={message.message_content} />}
+        {showTimestamp && message.sender_type === SenderType.USER && (
+          <MessageTimestamp formattedTimestamp={formattedTimestamp} tooltipTimestamp={tooltipTimestamp} />
+        )}
+        {showFeedback && message.sender_type === SenderType.ASSISTANT && (
+          <ChatFeedback
+            messageId={messageId || message?.id}
+            conversationId={conversationId || message?.conversation_id}
+            disabled={feedbackDisabled || isLoading}
+          />
+        )}
+      </div>
     </div>
   );
 };

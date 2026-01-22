@@ -116,6 +116,8 @@ const ChatSidebarInner: FC<ChatSidebarInnerProps> = ({
                 className='gap-4 px-0 [scrollbar-width:none]'
                 assistantAvatar={<NewPaceAvatar />}
                 showTimestamp
+                showFeedback
+                showCopy
                 alignUserRight
                 hideSenderName
                 userAvatarClassName='h-5 min-h-5 w-5 min-w-5 f-11-500 rounded-[7.5px]'

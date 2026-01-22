@@ -31,6 +31,9 @@ interface MessageContainerProps {
   assistantAvatar?: ReactNode;
   className?: string;
   showTimestamp?: boolean;
+  showFeedback?: boolean;
+  feedbackDisabled?: boolean;
+  showCopy?: boolean;
   alignUserRight?: boolean;
   hideSenderName?: boolean;
   userAvatarClassName?: string;
@@ -45,6 +48,9 @@ export const MessageContainer: FC<MessageContainerProps> = ({
   assistantAvatar,
   className,
   showTimestamp = false,
+  showFeedback = false,
+  showCopy = false,
+  feedbackDisabled = false,
   alignUserRight = false,
   hideSenderName = false,
   userAvatarClassName,
@@ -92,6 +98,10 @@ export const MessageContainer: FC<MessageContainerProps> = ({
               )}
             />
           )}
+          showFeedback={showFeedback}
+          feedbackDisabled={feedbackDisabled}
+          showCopy={showCopy}
+          isLastMessage={index === messages.length - 1}
         />
       ))}
 
