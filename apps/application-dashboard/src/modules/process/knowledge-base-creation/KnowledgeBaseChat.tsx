@@ -143,10 +143,15 @@ const KnowledgeBaseChat: FC<KnowledgeBaseChatProps> = ({
           onClick={handleNewConversation}
         />
       </div>
-      <MessageContainer messages={chat?.messages || []} handleAction={handleAction} isAnalysing={isAnalysing} />
+      <MessageContainer
+        messages={chat?.messages || []}
+        handleAction={handleAction}
+        isAnalysing={isAnalysing}
+        className='overflow-y-auto [scrollbar-width:thin]'
+      />
       {(chat.isLoadingConversationHistory || isLoadingFilterConversations) && (
         <div className='flex h-full w-full justify-center'>
-          <ChatMessagesSkeleton count={2} className='px-0 py-0' />
+          <ChatMessagesSkeleton count={1} className='px-4 py-0' />
         </div>
       )}
       <div className='border-GRAY_400 w-full border-t p-3'>
