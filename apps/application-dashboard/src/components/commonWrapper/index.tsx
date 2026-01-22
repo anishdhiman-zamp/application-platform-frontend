@@ -28,6 +28,7 @@ const CommonWrapper: FC<CommonWrapperPropsTypes> = ({
   className = '',
   skeletonItemCount = 1,
   loader,
+  disableAnimation = false,
 }) => {
   const getSkeleton = () => {
     switch (skeletonType) {
@@ -100,7 +101,7 @@ const CommonWrapper: FC<CommonWrapperPropsTypes> = ({
     );
 
   return children ? (
-    <div key='main-body' className={cn('animate-opacity', className)}>
+    <div key='main-body' className={cn(!disableAnimation && 'animate-opacity', className)}>
       {children}
     </div>
   ) : null;

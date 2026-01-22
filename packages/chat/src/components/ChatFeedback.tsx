@@ -4,8 +4,8 @@ import {
   Button,
   Dialog,
   DialogBody,
-  DialogClose,
   DialogContent,
+  DialogFooter,
   DialogHeader,
   DialogHeaderTitle,
   Select,
@@ -119,57 +119,56 @@ const ChatFeedback: FC<ChatFeedbackProps> = ({ messageId, conversationId, classN
       <Dialog open={isModalOpen} onOpenChange={setIsModalOpen}>
         <DialogContent
           size='small'
-          className='max-h-[90vh] w-[500px] rounded-xl'
+          className='max-h-[90vh] w-[500px] gap-y-4 rounded-xl'
           title='Feedback'
           description='Submit feedback about this response'
+          showCloseButton
+          closeButtonClassName='top-8 right-5'
         >
-          <DialogHeader className='border-b-0 px-6 pt-6 pb-0'>
+          <DialogHeader className='border-b-0 px-5 pt-5'>
             <DialogHeaderTitle className='text-lg font-semibold'>Feedback</DialogHeaderTitle>
-            <DialogClose className='absolute top-4 right-4' />
           </DialogHeader>
 
-          <DialogBody className='space-y-4 px-6 py-4'>
+          <DialogBody className='flex flex-col gap-y-4 px-5'>
             <div className='space-y-2'>
-              <label className='text-GRAY_800 f-13-450 block'>What type of issue do you wish to report?</label>
+              <label className='text-GRAY_900 f-12-500 block'>What type of issue do you wish to report?</label>
               <Select
                 options={ISSUE_TYPE_OPTIONS}
                 placeholder='Select...'
                 value={issueType}
                 onValueChange={(value) => setIssueType(value as string)}
-                controlClassName='bg-GRAY_100 border-GRAY_400 h-8'
-                itemClassName='f-12-500'
+                controlClassName='bg-white border-GRAY_400 h-8'
+                itemClassName='f-12-450'
                 hideSearch
                 contentClassName='w-(--radix-popover-trigger-width)'
               />
             </div>
-
             <div className='space-y-2'>
-              <label className='text-GRAY_800 f-13-450 block'>Please provide details:</label>
+              <label className='text-GRAY_900 f-12-500 block'>Please provide details:</label>
               <Textarea
                 placeholder='What was unsatisfying about this response?'
                 value={details}
                 rows={3}
                 onChange={(e) => setDetails(e.target.value)}
-                className='bg-GRAY_100 border-GRAY_400 f-13-450 resize-none'
+                className='border-GRAY_400 f-12-450 resize-none bg-white'
               />
             </div>
-
-            <div className='border-GRAY_400 flex justify-end gap-3 border-t pt-2'>
-              <Button variant='secondary' size='medium' onClick={handleCancel}>
-                Cancel
-              </Button>
-              <Button
-                variant='default'
-                size='medium'
-                onClick={handleSubmit}
-                disabled={!isFormValid}
-                isLoading={isSubmitting}
-                className='disabled:text-white disabled:opacity-50'
-              >
-                Submit
-              </Button>
-            </div>
           </DialogBody>
+          <DialogFooter className='mt-2 flex justify-end gap-x-2.5 px-5 py-4'>
+            <Button variant='secondary' size='medium' onClick={handleCancel}>
+              Cancel
+            </Button>
+            <Button
+              variant='default'
+              size='medium'
+              onClick={handleSubmit}
+              disabled={!isFormValid}
+              isLoading={isSubmitting}
+              className='disabled:text-white disabled:opacity-50'
+            >
+              Submit
+            </Button>
+          </DialogFooter>
         </DialogContent>
       </Dialog>
     </>
