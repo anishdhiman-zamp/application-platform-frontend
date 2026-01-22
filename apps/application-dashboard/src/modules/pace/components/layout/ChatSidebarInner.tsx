@@ -116,6 +116,8 @@ const ChatSidebarInner: FC<ChatSidebarInnerProps> = ({
                 assistantAvatar={<NewPaceAvatar />}
                 streamingEnabled
                 showTimestamp
+                showFeedback
+                showCopy
               />
             </CommonWrapper>
           </>
