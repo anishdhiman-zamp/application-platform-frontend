@@ -14,6 +14,7 @@ import {
   GetFileDownloadUrlResponseType,
   GetFilesByIdsRequestType,
   GetFilesByIdsResponseType,
+  GetOutputFileDownloadRequestType,
   PostInteractionDisablePayloadType,
   PostInteractionPayloadType,
   PostInteractionResponseType,
@@ -21,6 +22,8 @@ import {
   PostMessageResponseType,
   SignedUrlBodyType,
   SignedUrlResponseType,
+  SubmitChatFeedbackRequestType,
+  SubmitChatFeedbackResponseType,
 } from '../types/chat.types';
 
 export enum APITags {
@@ -48,6 +51,8 @@ export const API_ENDPOINTS = {
   INTERACTION_POST: '/v2/conversations/{{conversationId}}/messages/{{messageId}}/interactions',
   INTERACTION_DISABLE_POST: '/v2/conversations/{{conversationId}}/messages/{{messageId}}/interactions/disable',
   SPEECH_TO_TEXT_ACCESS_TOKEN_GET: '/speech-to-text/generate-access-token',
+  GET_OUTPUT_FILE_DOWNLOAD: 'v3/conversations/{{conversationId}}/output-files/{{filename}}/download',
+  SUBMIT_CHAT_FEEDBACK: 'v3/conversations/{{conversationId}}/messages/{{messageId}}/chat-feedback',
 };
 
 const ConversationService = chatApi.injectEndpoints({
@@ -143,6 +148,18 @@ const ConversationService = chatApi.injectEndpoints({
         body,
       }),
     }),
+    getOutputFileDownload: builder.query<GetFileDownloadUrlResponseType, GetOutputFileDownloadRequestType>({
+      query: ({ conversationId, filename }) => ({
+        url: formRequestUrlWithParams(API_ENDPOINTS.GET_OUTPUT_FILE_DOWNLOAD, { conversationId, filename }),
+      }),
+    }),
+    submitChatFeedback: builder.mutation<SubmitChatFeedbackResponseType, SubmitChatFeedbackRequestType>({
+      query: ({ conversationId, messageId, body }) => ({
+        url: formRequestUrlWithParams(API_ENDPOINTS.SUBMIT_CHAT_FEEDBACK, { conversationId, messageId }),
+        method: REQUEST_TYPES.POST,
+        body,
+      }),
+    }),
   }),
 });
 
@@ -161,4 +178,6 @@ export const {
   usePostInteractionDisableMutation,
   useGetSpeechToTextAccessTokenQuery,
   useLazyGetSpeechToTextAccessTokenQuery,
+  useLazyGetOutputFileDownloadQuery,
+  useSubmitChatFeedbackMutation,
 } = ConversationService;

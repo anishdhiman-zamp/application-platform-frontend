@@ -3,6 +3,7 @@ import { LocationType } from '@zamp-platform/chat';
 import { FormBuilder, type FormBuilderRef } from '@zamp-platform/form-builder';
 import { DATE_FORMATS } from '@zamp-platform/utils';
 import { format } from 'date-fns';
+import { IterationCcw } from 'lucide-react';
 import ActionComment from 'modules/process/activity-logs/components/ActionComment';
 import LogCta, { type LogCtaRef } from 'modules/process/activity-logs/components/LogCta';
 import LogMessageAnimation from 'modules/process/activity-logs/components/LogMessageAnimation';
@@ -30,6 +31,7 @@ import 'modules/process/activity-logs/components/log-form.css';
 type LogProps = {
   isLastLogOfDate?: boolean;
   isLastLog?: boolean;
+  isNextItemReprocess?: boolean;
   data: ActivityLogsItemType;
   handleShowArtifacts: (props: HandleShowArtifactsProps) => void;
   isExpanded?: boolean;
@@ -40,6 +42,7 @@ type LogProps = {
 const Log: FC<LogProps> = ({
   isLastLogOfDate = false,
   isLastLog = false,
+  isNextItemReprocess = false,
   data,
   handleShowArtifacts,
   processId,
@@ -94,8 +97,8 @@ const Log: FC<LogProps> = ({
 
     return {
       status: status as LOG_STATUS,
-      fillColor: LOG_STATUS_ICON_COLOR_MAPPING[status as LOG_STATUS]?.fillColor,
-      strokeColor: LOG_STATUS_ICON_COLOR_MAPPING[status as LOG_STATUS]?.strokeColor,
+      fillColor: LOG_STATUS_ICON_COLOR_MAPPING[status as keyof typeof LOG_STATUS_ICON_COLOR_MAPPING]?.fillColor,
+      strokeColor: LOG_STATUS_ICON_COLOR_MAPPING[status as keyof typeof LOG_STATUS_ICON_COLOR_MAPPING]?.strokeColor,
     };
   }, [status, content_type, sender_type]);
 
@@ -174,17 +177,21 @@ const Log: FC<LogProps> = ({
               'pt-1.5': isFeedbackEnabled,
             })}
           >
-            <LogStatusIndicator
-              fillColor={statusIndicatorColor.fillColor}
-              strokeColor={statusIndicatorColor.strokeColor}
-              status={statusIndicatorColor.status}
-              shouldRotate={sender_type === SENDER_TYPE.SYSTEM && content_type === CONTENT_TYPE.MESSAGE_SECTION}
-              showBlueStrokeRef={showBlueStrokeRef}
-            />
+            {status === LOG_STATUS.ARCHIVED ? (
+              <IterationCcw size={12} className='rotate-180' />
+            ) : (
+              <LogStatusIndicator
+                fillColor={statusIndicatorColor.fillColor}
+                strokeColor={statusIndicatorColor.strokeColor}
+                status={statusIndicatorColor.status}
+                shouldRotate={sender_type === SENDER_TYPE.SYSTEM && content_type === CONTENT_TYPE.MESSAGE_SECTION}
+                showBlueStrokeRef={showBlueStrokeRef}
+              />
+            )}
           </motion.div>
           {/* Line */}
           <div className='relative h-full' id={`line-${lineHeight}`}>
-            {!isLastLogOfDate && (
+            {!isLastLogOfDate && !isNextItemReprocess && (
               <motion.div
                 className='absolute inset-0 flex origin-top flex-col items-center'
                 initial={LINE_BODY_LOGS_ANIMATION_SEQUENCE[0].initial}
@@ -263,6 +270,7 @@ const Log: FC<LogProps> = ({
               handleShowArtifacts={handleShowArtifacts}
               isLastLog={isLastLog}
               onSubmitForm={handleSubmitForm}
+              disabled={status === LOG_STATUS.ARCHIVED}
             />
           )}
           {action_comment?.comment && (

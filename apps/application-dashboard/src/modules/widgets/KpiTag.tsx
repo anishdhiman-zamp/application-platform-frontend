@@ -9,7 +9,7 @@ import WidgetOptions from 'modules/widgets/WidgetOptions';
 import { WIO_PRD_ORG_ID } from 'modules/widgets/widgets.constant';
 import { useParams } from 'next/navigation';
 import { RootState } from 'store';
-import { WIDGET_TYPES, WidgetInstanceType } from 'types/api/widgets.types';
+import { AGGREGATION_TYPES, WIDGET_TYPES, WidgetInstanceType } from 'types/api/widgets.types';
 import { cn, getCommaSeparatedNumber } from 'utils/common';
 import PermissionGuard from '@/components/hoc/PermissionGuard';
 import { useAppSelector } from '@/hooks/toolkit';
@@ -78,9 +78,10 @@ const KpiTag: FC<KpiTagProps> = ({
     const primaryValue = widgetDetails?.data_mappings?.mappings?.[0]?.fields?.primary_value?.[0];
     const key = primaryValue?.alias ?? primaryValue?.column;
     const data = widgetData?.result?.[0]?.data[0] as Record<string, any>;
+    const isCountAggregation = primaryValue?.aggregation === AGGREGATION_TYPES.COUNT;
 
     // Skip currency formatting for specific organization
-    const shouldSkipCurrencyFormatting = organizationId === WIO_PRD_ORG_ID;
+    const shouldSkipCurrencyFormatting = organizationId === WIO_PRD_ORG_ID || isCountAggregation;
 
     const currency =
       !shouldSkipCurrencyFormatting &&

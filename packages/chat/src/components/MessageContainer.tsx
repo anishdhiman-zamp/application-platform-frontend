@@ -32,6 +32,10 @@ interface MessageContainerProps {
   className?: string;
   onScrollChange?: (isScrolled: boolean) => void;
   streamingEnabled?: boolean;
+  showTimestamp?: boolean;
+  showFeedback?: boolean;
+  feedbackDisabled?: boolean;
+  showCopy?: boolean;
 }
 
 export const MessageContainer: FC<MessageContainerProps> = ({
@@ -44,6 +48,10 @@ export const MessageContainer: FC<MessageContainerProps> = ({
   className,
   onScrollChange,
   streamingEnabled = false,
+  showTimestamp = false,
+  showFeedback = false,
+  showCopy = false,
+  feedbackDisabled = false,
 }) => {
   const messagesContainerRef = useRef<HTMLDivElement>(null);
   const [showScrollButton, setShowScrollButton] = useState(false);
@@ -54,9 +62,17 @@ export const MessageContainer: FC<MessageContainerProps> = ({
     if (messagesContainerRef.current) {
       const { scrollTop, scrollHeight, clientHeight } = messagesContainerRef.current;
       const distanceFromBottom = scrollHeight - scrollTop - clientHeight;
-      return distanceFromBottom < 50;
+      return distanceFromBottom < 100;
     }
     return true;
+  }, []);
+
+  const checkIfContentOverflows = useCallback(() => {
+    if (messagesContainerRef.current) {
+      const { scrollHeight, clientHeight } = messagesContainerRef.current;
+      return scrollHeight > clientHeight;
+    }
+    return false;
   }, []);
 
   const handleScroll = useCallback(() => {
@@ -94,9 +110,27 @@ export const MessageContainer: FC<MessageContainerProps> = ({
 
   useEffect(() => {
     if (messages?.length > 0) {
-      scrollToBottom('smooth');
+      // Use instant scroll on first load, smooth scroll for subsequent updates
+      const behavior = isInitialScrollRef.current ? 'instant' : 'smooth';
+      scrollToBottom(behavior);
     }
   }, [messages?.length, scrollToBottom]);
+
+  // Check for content overflow on mount and when content changes
+  useEffect(() => {
+    // Use requestAnimationFrame to ensure DOM has been updated
+    const checkOverflow = () => {
+      if (messagesContainerRef.current && !isInitialScrollRef.current) {
+        const hasOverflow = checkIfContentOverflows();
+        const isAtBottom = checkIfScrolledToBottom();
+        setShowScrollButton(hasOverflow && !isAtBottom);
+      }
+    };
+
+    // Check after a short delay to allow for DOM updates
+    const timeoutId = setTimeout(checkOverflow, 100);
+    return () => clearTimeout(timeoutId);
+  }, [messages, streamingState, checkIfContentOverflows, checkIfScrolledToBottom]);
 
   return (
     <div
@@ -111,6 +145,7 @@ export const MessageContainer: FC<MessageContainerProps> = ({
           onAction={handleAction}
           assistantName={assistantName}
           assistantAvatar={defaultAssistantAvatar}
+          showTimestamp={showTimestamp}
           userAvatar={(senderName) => (
             <Avatar
               name={senderName}
@@ -118,10 +153,14 @@ export const MessageContainer: FC<MessageContainerProps> = ({
               className='f-10-500 text-gray-1000 flex h-4 min-h-4 w-4 min-w-4 items-center justify-center rounded-md'
             />
           )}
+          showFeedback={showFeedback}
+          feedbackDisabled={feedbackDisabled}
+          showCopy={showCopy}
+          isLastMessage={index === messages.length - 1}
         />
       ))}
 
-      {streamingState && !!streamingState.message_content?.content_blocks?.length && (
+      {streamingState && !!streamingState.message_content?.elements?.length && (
         <StreamingMessage
           streamingState={streamingState}
           assistantName={assistantName}
@@ -129,7 +168,7 @@ export const MessageContainer: FC<MessageContainerProps> = ({
         />
       )}
 
-      {streamingState && !!streamingState.message_content?.content_blocks?.length && (
+      {streamingState && !!streamingState.message_content?.elements?.length && (
         <div className='flex w-full items-center'>
           <div className='animate-opacity animate-spin'>
             <NewPaceIcons height={24} width={24} />
@@ -137,8 +176,7 @@ export const MessageContainer: FC<MessageContainerProps> = ({
         </div>
       )}
 
-      {(isAnalysing && !streamingState) ||
-      (streamingState && !streamingState.message_content?.content_blocks?.length) ? (
+      {(isAnalysing && !streamingState) || (streamingState && !streamingState.message_content?.elements?.length) ? (
         <div className='flex w-full items-center gap-1.5 text-gray-700'>
           {defaultAssistantAvatar}
           <ShimmerText text='Analysing...' autoAnimate={true} />
@@ -151,13 +189,13 @@ export const MessageContainer: FC<MessageContainerProps> = ({
           onClick={handleScrollToBottomClick}
           variant={'ghost'}
           className={cn(
-            'bg-GRAY_1000 hover:bg-GRAY_1000 sticky bottom-4 left-1/2 h-8 w-8 -translate-x-1/2 self-center !rounded-full p-0 p-4',
+            'bg-GRAY_1000 hover:bg-GRAY_1000 sticky bottom-1 left-1/2 h-6 w-6 -translate-x-1/2 self-center !rounded-full p-3',
             'transition-all duration-200 ease-out',
             showScrollButton ? 'translate-y-0 opacity-100' : 'pointer-events-none translate-y-2 opacity-0',
           )}
           aria-label='Scroll to bottom'
         >
-          <ArrowDownIcon size={20} className='text-white' />
+          <ArrowDownIcon size={14} className='p-[2px] text-white' />
         </Button>
       )}
     </div>

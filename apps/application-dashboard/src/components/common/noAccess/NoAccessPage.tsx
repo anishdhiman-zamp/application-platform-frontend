@@ -1,14 +1,12 @@
 import React, { FC } from 'react';
 import { useSelector } from 'react-redux';
+import { Button } from '@zamp-platform/ui';
 import { useInitiateLogoutFlowQuery, useLazyLogoutQuery } from 'apis/auth';
 import { ZAMP_ICON } from 'constants/icons';
 import { ROUTES_PATH } from 'constants/routeConfig';
 import Image from 'next/image';
 import { useRouter } from 'next/navigation';
 import { RootState } from 'store';
-import { SIZE_TYPES } from 'types/common/components';
-import { BUTTON_TYPES } from 'types/components/button.type';
-import { Button } from 'components/common/button/Button';
 import { NoAccessPagePropsType } from 'components/common/noAccess/noAcessPage.types';
 
 const NoAccessPage: FC<NoAccessPagePropsType> = ({ type }) => {
@@ -50,10 +48,10 @@ const NoAccessPage: FC<NoAccessPagePropsType> = ({ type }) => {
         <span className='f-13-600 text-GRAY_950 mt-1'>{user_email}</span>
       </div>
       <div className='mt-6 flex gap-2.5'>
-        <Button type={BUTTON_TYPES.SECONDARY} id='back-to-home' size={SIZE_TYPES.SMALL} onClick={handleHomeBtn}>
+        <Button variant='outline' testId='back-to-home' size='small' onClick={handleHomeBtn}>
           Back to Home
         </Button>
-        <Button type={BUTTON_TYPES.SECONDARY} id='logout' size={SIZE_TYPES.SMALL} onClick={handleLogout}>
+        <Button variant='outline' testId='logout' size='small' onClick={handleLogout}>
           Logout
         </Button>
       </div>

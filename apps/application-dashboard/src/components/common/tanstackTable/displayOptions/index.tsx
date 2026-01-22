@@ -1,7 +1,7 @@
 import { ChangeEvent, FC, MouseEvent, useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { Responsive, WidthProvider } from 'react-grid-layout';
 import { Column } from '@zamp-platform/tanstack-table';
-import { Button } from '@zamp-platform/ui';
+import { Button, Checkbox } from '@zamp-platform/ui';
 import { SvgSpriteLoader } from '@zamp-platform/ui/assets';
 import { ICON_SPRITE_TYPES } from '@zamp-platform/ui/types';
 import { DRAG_ICON } from 'constants/icons';
@@ -16,7 +16,6 @@ import useDisplayConfigUpdate from '@/hooks/useDisplayConfigUpdate';
 import { useResourceAccess } from '@/hooks/useResourceAccess';
 import { DATASET_ACCESS_PRIVILEGES } from '@/modules/shareResource/shareResource.types';
 import { ResourceType } from '@/types/api/policies.types';
-import { CheckBox } from 'components/common/Checkbox';
 import Input from 'components/common/input';
 import { MenuWrapper } from 'components/common/MenuWrapper';
 import { ColumnVisibility } from 'components/common/table/table.types';
@@ -326,10 +325,9 @@ const ColumnListingTk: FC<ColumnListingTkProps> = ({
                   className='flex cursor-pointer items-center gap-2.5'
                   onClick={(e) => handleColumnClick(e, column)}
                 >
-                  <CheckBox
+                  <Checkbox
                     checked={columnsChecked?.find((col) => col?.colId === column?.id)?.isVisible ?? false}
-                    onPress={(e) => handleColumnClick(e, column)}
-                    id={column?.id ?? ''}
+                    onCheckedChange={() => handleCheckBoxClick(column)}
                   />
                   <div className='f-12-400 text-GRAY_1000 whitespace-nowrap select-none'>
                     {typeof column?.columnDef?.header === 'string' ? column?.columnDef?.header : column?.id}

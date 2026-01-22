@@ -19,7 +19,14 @@ import {
   useSendMessageV2Mutation,
 } from '../api';
 import { getHistoryFormattedMessages } from '../components/block.utils';
-import { BLOCK_TYPE } from '../types/block.types';
+import {
+  type Block,
+  BLOCK_TYPE,
+  type OutputFilesBlockType,
+  type StreamEventPayload,
+  StreamingContentBlockDeltaType,
+  StreamingContentBlockType,
+} from '../types/block.types';
 import {
   ChatMessage,
   ChatMessageType,
@@ -28,11 +35,6 @@ import {
   ResourceType,
   SenderType,
   SSEEventType,
-  StreamEventPayload,
-  StreamingContentBlock,
-  StreamingContentBlockDeltaType,
-  StreamingContentBlockType,
-  StreamingContentType,
   StreamingState,
 } from '../types/chat.types';
 
@@ -74,6 +76,9 @@ export const useChat = (config: ChatConfig) => {
   // Ref to track the current conversation ID for use in callbacks without stale closures
   const conversationIdRef = useRef<string | null>(_conversationId);
 
+  // Track if conversation was created in this session (to skip fetching history for newly created conversations)
+  const isNewlyCreatedConversationRef = useRef<string | null>(null);
+
   const isStreaming = useMemo(() => {
     return config.enableStreaming ? (streamingState?.is_active ?? false) : false;
   }, [config.enableStreaming, streamingState?.is_active]);
@@ -83,6 +88,13 @@ export const useChat = (config: ChatConfig) => {
       setStreamingState(null);
     }
   }, [config.enableStreaming]);
+
+  // Skip fetching conversation history if this conversation was just created in this session (only for streaming mode)
+  const shouldSkipConversationFetch =
+    !config.resourceId ||
+    !config.resourceType ||
+    !config.conversationId ||
+    (config.enableStreaming && isNewlyCreatedConversationRef.current === config.conversationId);
 
   const {
     data: conversationHistory,
@@ -99,7 +111,7 @@ export const useChat = (config: ChatConfig) => {
       url: config.apiConfig?.getConversationById,
     },
     {
-      skip: !config.resourceId || !config.resourceType || !config.conversationId,
+      skip: shouldSkipConversationFetch,
       refetchOnMountOrArgChange: config.refetchConversationHistory,
     },
   );
@@ -118,6 +130,7 @@ export const useChat = (config: ChatConfig) => {
     ]);
     const response = await createConversationMutation(conversationPayload).unwrap();
     setConversationId(response.conversation_id);
+    isNewlyCreatedConversationRef.current = response.conversation_id;
     return response.conversation_id;
   };
 
@@ -150,9 +163,10 @@ export const useChat = (config: ChatConfig) => {
       url: config.apiConfig?.createConversation,
     }).unwrap();
     setConversationId(response.conversation_id);
+    isNewlyCreatedConversationRef.current = response.conversation_id;
 
     // Update header with title from response
-    if (response.title) {
+    if (response.title && !config.enableStreaming) {
       config.setHeader?.(response.title);
     }
 
@@ -162,6 +176,7 @@ export const useChat = (config: ChatConfig) => {
   const clearMessages = useCallback(() => {
     setMessages([]);
     setConversationId(null);
+    isNewlyCreatedConversationRef.current = null;
     if (config.enableStreaming) {
       setStreamingState(null);
     }
@@ -177,34 +192,55 @@ export const useChat = (config: ChatConfig) => {
         switch (payload.type) {
           case StreamingContentBlockType.CONTENT_BLOCK_START: {
             const { index, content_block } = payload;
-            const blockType = content_block.type;
+            const blockType = content_block?.type;
 
-            const newBlock: StreamingContentBlock =
-              blockType === StreamingContentType.THINKING
-                ? {
-                    type: StreamingContentType.THINKING,
-                    index,
-                    content: '',
-                    start_timestamp: content_block.start_timestamp,
-                    is_complete: false,
-                  }
-                : blockType === StreamingContentType.TEXT
-                  ? {
-                      type: StreamingContentType.TEXT,
-                      index,
-                      content: '',
-                      start_timestamp: content_block.start_timestamp,
-                      is_complete: false,
-                    }
-                  : {
-                      type: StreamingContentType.TOOL_USE,
-                      index,
-                      id: content_block.id,
-                      name: content_block.name,
-                      partial_json: '',
-                      start_timestamp: content_block.start_timestamp,
-                      is_complete: false,
-                    };
+            let newBlock: Block;
+
+            if (blockType === BLOCK_TYPE.THINKING) {
+              newBlock = {
+                type: BLOCK_TYPE.THINKING,
+                order: index,
+                payload: { thinking: '' },
+                start_timestamp: content_block?.start_timestamp,
+                is_complete: false,
+              };
+            } else if (blockType === BLOCK_TYPE.TEXT) {
+              newBlock = {
+                type: BLOCK_TYPE.TEXT,
+                order: index,
+                payload: { text: '' },
+                start_timestamp: content_block?.start_timestamp,
+                is_complete: false,
+              };
+            } else if (blockType === BLOCK_TYPE.TOOL_RESULT) {
+              const toolCallId = content_block?.tool_call_id || content_block?.id;
+              newBlock = {
+                type: BLOCK_TYPE.TOOL_RESULT,
+                order: index,
+                id: content_block.id,
+                payload: {
+                  content: '',
+                  is_error: false,
+                  tool_call_id: toolCallId,
+                },
+                start_timestamp: content_block?.start_timestamp,
+                is_complete: false,
+              };
+            } else {
+              newBlock = {
+                type: BLOCK_TYPE.TOOL_USE,
+                order: index,
+                id: content_block?.id,
+                name: content_block?.name,
+                payload: {
+                  partial_json: '',
+                  tool_call_id: content_block?.id,
+                  display_name: content_block?.display_name,
+                },
+                start_timestamp: content_block?.start_timestamp,
+                is_complete: false,
+              };
+            }
 
             setStreamingState((prev) => {
               // Validate that streaming state belongs to current conversation
@@ -219,7 +255,7 @@ export const useChat = (config: ChatConfig) => {
                   resource_id: config.resourceId || '',
                   conversation_id: conversationIdRef.current || undefined,
                   message_content: {
-                    content_blocks: [newBlock],
+                    elements: [newBlock],
                   },
                   message_type: ChatMessageType.SYSTEM,
                   sender_type: SenderType.ASSISTANT,
@@ -228,12 +264,12 @@ export const useChat = (config: ChatConfig) => {
                   is_active: true,
                 };
               }
-              const existingBlocks = prev.message_content?.content_blocks ?? [];
+              const existingBlocks = prev.message_content?.elements ?? [];
               return {
                 ...prev,
                 message_content: {
                   ...prev.message_content,
-                  content_blocks: [...existingBlocks, newBlock],
+                  elements: [...existingBlocks, newBlock],
                 },
               };
             });
@@ -252,32 +288,56 @@ export const useChat = (config: ChatConfig) => {
                 return null; // Clear stale streaming state from different conversation
               }
 
-              const existingBlocks = prev.message_content?.content_blocks ?? [];
+              const existingBlocks = prev.message_content?.elements ?? [];
+
               const updatedBlocks = existingBlocks.map((block) => {
-                if (block.index !== index) return block;
+                if (block.order !== index) return block;
 
                 switch (delta.type) {
                   case StreamingContentBlockDeltaType.THINKING_DELTA:
-                    if (block.type === StreamingContentType.THINKING) {
-                      return { ...block, content: block.content + delta.thinking };
+                    if (block.type === BLOCK_TYPE.THINKING) {
+                      return { ...block, payload: { thinking: (block.payload.thinking || '') + delta.thinking } };
                     }
                     break;
                   case StreamingContentBlockDeltaType.TEXT_DELTA:
-                    if (block.type === StreamingContentType.TEXT) {
-                      return { ...block, content: block.content + delta.text };
+                    if (block.type === BLOCK_TYPE.TEXT) {
+                      return { ...block, payload: { text: block.payload.text + delta.text } };
                     }
                     break;
                   case StreamingContentBlockDeltaType.INPUT_JSON_DELTA:
-                    if (block.type === StreamingContentType.TOOL_USE) {
-                      return { ...block, partial_json: (block.partial_json || '') + delta.partial_json };
+                    if (block.type === BLOCK_TYPE.TOOL_USE) {
+                      return {
+                        ...block,
+                        payload: {
+                          ...block.payload,
+                          partial_json: (block.payload.partial_json || '') + delta.partial_json,
+                        },
+                      };
                     }
                     break;
                   case StreamingContentBlockDeltaType.TOOL_USE_BLOCK_UPDATE_DELTA:
-                    if (block.type === StreamingContentType.TOOL_USE) {
+                    if (block.type === BLOCK_TYPE.TOOL_USE) {
                       return {
                         ...block,
-                        message: delta.message ?? block.message,
-                        display_content: delta.display_content ?? block.display_content,
+                        payload: {
+                          ...block.payload,
+                          message: delta.message ?? block.payload.message,
+                          display_content: delta.display_content ?? block.payload.display_content,
+                        },
+                      };
+                    }
+                    break;
+                  case StreamingContentBlockDeltaType.TOOL_RESULT_DELTA:
+                    // Update existing tool_result block with content
+                    if (block.type === BLOCK_TYPE.TOOL_RESULT) {
+                      return {
+                        ...block,
+                        payload: {
+                          ...block.payload,
+                          content: (block.payload.content || '') + delta.content,
+                          is_error: delta.is_error,
+                          tool_call_id: delta.tool_call_id ?? block.payload.tool_call_id,
+                        },
                       };
                     }
                     break;
@@ -289,7 +349,7 @@ export const useChat = (config: ChatConfig) => {
                 ...prev,
                 message_content: {
                   ...prev.message_content,
-                  content_blocks: updatedBlocks,
+                  elements: updatedBlocks,
                 },
               };
             });
@@ -307,9 +367,9 @@ export const useChat = (config: ChatConfig) => {
                 return null; // Clear stale streaming state from different conversation
               }
 
-              const existingBlocks = prev.message_content?.content_blocks ?? [];
+              const existingBlocks = prev.message_content?.elements ?? [];
               const updatedBlocks = existingBlocks.map((block) => {
-                if (block.index !== index) return block;
+                if (block.order !== index) return block;
                 return { ...block, is_complete: true, stop_timestamp: stop_timestamp };
               });
 
@@ -317,7 +377,7 @@ export const useChat = (config: ChatConfig) => {
                 ...prev,
                 message_content: {
                   ...prev.message_content,
-                  content_blocks: updatedBlocks,
+                  elements: updatedBlocks,
                 },
                 is_active: true,
               };
@@ -354,6 +414,12 @@ export const useChat = (config: ChatConfig) => {
               dispatch(chatApi.util.invalidateTags([{ type: APITags.GET_CONVERSATION_BY_ID, id: _conversationId }]));
             }
             break;
+          case SSEEventType.TITLE_UPDATED:
+            if (config.enableStreaming) {
+              const title = data.payload?.title;
+              config.setHeader?.(title);
+            }
+            break;
           case SSEEventType.MESSAGE_START:
             if (config.enableStreaming) {
               const message = data.payload.message;
@@ -370,7 +436,6 @@ export const useChat = (config: ChatConfig) => {
                 conversation_id: message.conversation_id,
                 id: message.id,
                 message_content: {
-                  content_blocks: [],
                   elements: [],
                 },
                 message_type: ChatMessageType.SYSTEM,
@@ -379,6 +444,38 @@ export const useChat = (config: ChatConfig) => {
                 timestamp: message.created_at || new Date().toISOString(),
                 metadata: {},
                 is_active: true,
+              });
+            }
+            break;
+          case SSEEventType.OUTPUT_FILES:
+            if (config.enableStreaming) {
+              const outputFilesPayload = data.payload.message;
+              const messageIdForOutputFiles = outputFilesPayload.id;
+
+              setStreamingState((prev) => {
+                if (!prev) return prev;
+
+                // Verify that the output files belong to the current streaming message
+                if (prev.id && prev.id !== messageIdForOutputFiles) {
+                  return prev;
+                }
+
+                const outputFilesBlock: OutputFilesBlockType = {
+                  id: `output-files-${messageIdForOutputFiles}`,
+                  type: BLOCK_TYPE.OUTPUT_FILES,
+                  order: (prev.message_content?.elements?.length || 0) + 1,
+                  payload: {
+                    output_files: outputFilesPayload.output_files,
+                  },
+                };
+
+                return {
+                  ...prev,
+                  message_content: {
+                    ...prev.message_content,
+                    elements: [...(prev.message_content?.elements || []), outputFilesBlock],
+                  },
+                };
               });
             }
             break;
@@ -391,7 +488,7 @@ export const useChat = (config: ChatConfig) => {
                 return null; // Clear stale streaming state without adding to messages
               }
 
-              if (prev.message_content?.content_blocks && prev.message_content.content_blocks.length > 0) {
+              if (prev.message_content?.elements && prev.message_content.elements.length > 0) {
                 const streamingMessagePayload: ChatMessage = {
                   resource_type: prev.resource_type,
                   resource_id: prev.resource_id,
@@ -403,14 +500,13 @@ export const useChat = (config: ChatConfig) => {
                   sender_type: prev.sender_type,
                   sender_name: prev.sender_name || 'assistant',
                   message_content: {
-                    content_blocks: prev.message_content.content_blocks,
+                    elements: prev.message_content.elements,
                   },
                 };
 
                 setMessages((messagePrev) => {
                   // Check if message with same id already exists to prevent duplicates from StrictMode
                   if (streamingMessagePayload.id && messagePrev.some((msg) => msg.id === streamingMessagePayload.id)) {
-                    console.log('found duplicate message', streamingMessagePayload.id);
                     return messagePrev;
                   }
                   return [...messagePrev, streamingMessagePayload];

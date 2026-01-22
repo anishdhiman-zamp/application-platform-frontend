@@ -18,6 +18,7 @@ interface ArtifactTagProps {
   displayClassName?: string;
   iconIdentifier?: string;
   ctaAction?: CTA_ACTION;
+  disabled?: boolean;
 }
 
 const ArtifactTag: FC<ArtifactTagProps> = ({
@@ -28,6 +29,7 @@ const ArtifactTag: FC<ArtifactTagProps> = ({
   displayClassName,
   iconIdentifier,
   ctaAction,
+  disabled = false,
 }) => {
   const isExternalLink = artifactType === ARTIFACT_TYPE.EXTERNAL_LINK;
   const isEmail = artifactType === ARTIFACT_TYPE.EMAIL;
@@ -58,9 +60,11 @@ const ArtifactTag: FC<ArtifactTagProps> = ({
     <Button
       variant='ghost'
       className={cn(
-        'bg-GRAY_100 flex h-6 cursor-pointer items-center justify-start gap-x-1.5 rounded px-2 py-1',
+        'bg-GRAY_100 flex h-6 items-center justify-start gap-x-1.5 rounded px-2 py-1',
         buttonClassName,
+        disabled && 'pointer-events-auto! cursor-not-allowed opacity-70',
       )}
+      disabled={disabled}
       onClick={onClick}
     >
       {renderIcon()}

@@ -15,10 +15,9 @@ import {
 } from '@zamp-platform/chat';
 import { cn } from '@zamp-platform/ui/utils';
 import { CirclePlus, EllipsisVertical } from 'lucide-react';
-import ImageLoader from '@/components/common/loader/ImageLoader';
-import { ZAMP_LOGO_LOADER_SVG } from '@/constants/icons';
 import useActionHub from '@/modules/chatbot/actionHub';
 import StopProcessingFeedback from '@/modules/chatbot/StopProcessingFeedback';
+import ChatMessagesSkeleton from '@/modules/pace/components/loaders/ChatMessagesSkeleton';
 import { RootState } from '@/store';
 import { ProcessStatus } from '@/types/api/processApi.types';
 import { MapAny } from '@/types/commonTypes';
@@ -146,9 +145,10 @@ const KnowledgeBaseChat: FC<KnowledgeBaseChatProps> = ({
       </div>
       <MessageContainer messages={chat?.messages || []} handleAction={handleAction} isAnalysing={isAnalysing} />
       {(chat.isLoadingConversationHistory || isLoadingFilterConversations) && (
-        <ImageLoader imageSrc={ZAMP_LOGO_LOADER_SVG} width={140} height={140} className='rounded-tl-xl' />
+        <div className='flex h-full w-full justify-center'>
+          <ChatMessagesSkeleton count={2} className='px-0 py-0' />
+        </div>
       )}
-
       <div className='border-GRAY_400 w-full border-t p-3'>
         <div className='flex flex-shrink-0'>
           <ConnectedChatInput

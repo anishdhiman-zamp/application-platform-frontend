@@ -1,9 +1,8 @@
 import React, { FC } from 'react';
+import { Button } from '@zamp-platform/ui';
+import { SvgSpriteLoader } from '@zamp-platform/ui/assets';
 import { useApprovePolicyMutation, useRejectPolicyMutation } from 'apis/people';
-import { SIZE_TYPES } from 'types/common/components';
-import { BUTTON_TYPES, ICON_POSITION_TYPES } from 'types/components/button.type';
 import { TOAST_MESSAGES } from '@/components/common/toast/toast.constants';
-import { Button } from 'components/common/button/Button';
 import { toast } from 'components/common/toast/Toast';
 
 type InvitationApprovalActionsProps = {
@@ -37,32 +36,24 @@ const InvitationApprovalActions: FC<InvitationApprovalActionsProps> = ({ approva
   return (
     <div className='flex space-x-2'>
       <Button
-        type={BUTTON_TYPES.SECONDARY}
-        size={SIZE_TYPES.XSMALL}
+        variant='outline'
+        size='xsmall'
         onClick={handleApprove}
         disabled={buttonDisabled}
-        iconProps={{
-          size: 16,
-          id: 'check',
-        }}
-        iconPosition={ICON_POSITION_TYPES.LEFT}
+        leadingIcon={<SvgSpriteLoader id='check' width={16} height={16} />}
         isLoading={isApprovePolicyLoading}
-        id='approve-button'
+        testId='approve-button'
       >
         Approve
       </Button>
       <Button
-        type={BUTTON_TYPES.SECONDARY}
-        size={SIZE_TYPES.XSMALL}
+        variant='outline'
+        size='xsmall'
         onClick={handleReject}
         disabled={buttonDisabled}
-        iconProps={{
-          size: 16,
-          id: 'x-close',
-        }}
-        iconPosition={ICON_POSITION_TYPES.LEFT}
+        leadingIcon={<SvgSpriteLoader id='x-close' width={16} height={16} />}
         isLoading={isRejectPolicyLoading}
-        id='reject-button'
+        testId='reject-button'
       >
         Reject
       </Button>

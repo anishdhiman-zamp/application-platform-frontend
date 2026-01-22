@@ -1,13 +1,16 @@
 'use client';
 
 import { cn } from '@zamp-platform/ui/utils';
-import { FC } from 'react';
+import { formatChatTimestamp, formatChatTimestampTooltip, formatTimestampToUTC } from '@zamp-platform/utils';
+import { FC, useMemo } from 'react';
 
 import { ButtonBlockType } from '../types/block.types';
-import { ChatMessage } from '../types/chat.types';
+import { ChatMessage, SenderType } from '../types/chat.types';
 import { BlockRenderer } from './BlockRenderer';
+import ChatFeedback from './ChatFeedback';
+import CopyMessageButton from './CopyMessageButton';
+import MessageTimestamp from './MessageTimestamp';
 import SenderDetails, { SenderDetailsProps } from './SenderDetails';
-import { ContentBlockRenderer } from './StreamingMessage';
 
 export interface MessageProps extends Omit<SenderDetailsProps, 'message'> {
   message: ChatMessage;
@@ -19,6 +22,11 @@ export interface MessageProps extends Omit<SenderDetailsProps, 'message'> {
   messageId?: string;
   senderDetailsClassName?: string;
   showSenderDetails?: boolean;
+  showTimestamp?: boolean;
+  showFeedback?: boolean;
+  showCopy?: boolean;
+  feedbackDisabled?: boolean;
+  isLastMessage?: boolean;
 }
 
 export const Message: FC<MessageProps> = ({
@@ -34,9 +42,24 @@ export const Message: FC<MessageProps> = ({
   userAvatar,
   senderDetailsClassName,
   showSenderDetails = true,
+  showTimestamp = false,
+  showFeedback = false,
+  showCopy = false,
+  feedbackDisabled = false,
+  isLastMessage = false,
 }) => {
+  const formattedTimestamp = useMemo(
+    () => (message.timestamp ? formatChatTimestamp(formatTimestampToUTC(message.timestamp)) : ''),
+    [message.timestamp],
+  );
+
+  const tooltipTimestamp = useMemo(
+    () => (message.timestamp ? formatChatTimestampTooltip(formatTimestampToUTC(message.timestamp)) : ''),
+    [message.timestamp],
+  );
+
   return (
-    <div className={cn('space-y-2', containerClassName)}>
+    <div className={cn('group space-y-2', containerClassName)}>
       {showSenderDetails && (
         <SenderDetails
           message={message}
@@ -46,20 +69,30 @@ export const Message: FC<MessageProps> = ({
           className={senderDetailsClassName}
         />
       )}
-      {/* Only render BlockRenderer if there are no content_blocks (streaming content) */}
-      {!message?.message_content?.content_blocks?.length && (
-        <BlockRenderer
-          message={{ block: message?.message_content?.elements ?? [] }}
-          onAction={onAction}
-          className={blockRendererClassName}
-          conversationId={conversationId || message?.conversation_id}
-          messageId={messageId || message?.id}
-          isLoading={isLoading}
-        />
-      )}
-      {message?.message_content?.content_blocks?.map((block) => (
-        <ContentBlockRenderer key={block.index} block={block} />
-      ))}
+
+      <BlockRenderer
+        message={{ block: message?.message_content?.elements ?? [] }}
+        onAction={onAction}
+        className={blockRendererClassName}
+        conversationId={conversationId || message?.conversation_id}
+        messageId={messageId || message?.id}
+        isLoading={isLoading}
+      />
+      <div
+        className={cn('mt-3 flex items-center gap-x-1', isLastMessage ? 'visible' : 'invisible group-hover:visible')}
+      >
+        {showCopy && <CopyMessageButton messageContent={message.message_content} />}
+        {showTimestamp && message.sender_type === SenderType.USER && (
+          <MessageTimestamp formattedTimestamp={formattedTimestamp} tooltipTimestamp={tooltipTimestamp} />
+        )}
+        {showFeedback && message.sender_type === SenderType.ASSISTANT && (
+          <ChatFeedback
+            messageId={messageId || message?.id}
+            conversationId={conversationId || message?.conversation_id}
+            disabled={feedbackDisabled || isLoading}
+          />
+        )}
+      </div>
     </div>
   );
 };

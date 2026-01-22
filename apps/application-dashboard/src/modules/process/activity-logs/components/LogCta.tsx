@@ -1,13 +1,13 @@
 import { type ForwardedRef, forwardRef, memo, useCallback, useImperativeHandle, useMemo, useState } from 'react';
 import ConditionalRevealAnimation from 'modules/process/activity-logs/components/ConditionalRevealAnimationWrapper';
 import CtaArtifactTag from 'modules/process/activity-logs/components/CtaArtifactTag';
-import CtaButton from 'modules/process/activity-logs/components/CtaButton';
 import { ARTIFACT_SHOW_CTA_TYPES, BUTTON_TYPE_CTA_COMPONENTS } from 'modules/process/process.constant';
 import { CTA_ACTION, CTA_COMPONENT_TYPE, type HandleShowArtifactsProps } from 'modules/process/process.types';
 import { buildHITLPayload, getCtaLoadingId, serializeFormData } from 'modules/process/process.utils';
 import { useEmitHITLActionMutation } from '@/apis/processes';
 import { toast } from '@/components/common/toast/Toast';
 import { useAppSelector } from '@/hooks/toolkit';
+import CtaButton from '@/modules/process/activity-logs/components/CtaButton';
 import type { CtasType } from '@/types/api/processApi.types';
 import type { defaultFnType } from '@/types/commonTypes';
 
@@ -23,16 +23,26 @@ interface LogCtaProps {
   activityId: string;
   isLastLog?: boolean;
   onSubmitForm?: defaultFnType;
+  disabled?: boolean;
 }
 
 // Main component
 const LogCtaComponent = (
-  { ctas, logGroupId, handleShowArtifacts, processId, activityId, isLastLog = false, onSubmitForm }: LogCtaProps,
+  {
+    ctas,
+    logGroupId,
+    handleShowArtifacts,
+    processId,
+    activityId,
+    isLastLog = false,
+    onSubmitForm,
+    disabled = false,
+  }: LogCtaProps,
   ref: ForwardedRef<LogCtaRef>,
 ) => {
   const userId = useAppSelector((state) => state.user.user?.user_id);
   const [ctaLoading, setCtaLoading] = useState<string[]>([]);
-  const [emitHITLAction, { isLoading }] = useEmitHITLActionMutation();
+  const [emitHITLAction, { isLoading, isSuccess }] = useEmitHITLActionMutation();
 
   const artifactTypeCtas = useMemo(
     () => ctas.filter((cta) => cta.cta_component_type === CTA_COMPONENT_TYPE.ARTIFACT),
@@ -55,7 +65,9 @@ const LogCtaComponent = (
 
       emitHITLAction({ processId, activityRunId: activityId, payload })
         .unwrap()
-        .then(() => setCtaLoading((prev) => prev.filter((id) => id !== loadingId)))
+        .then(() => {
+          setCtaLoading((prev) => prev.filter((id) => id !== loadingId));
+        })
         .catch((error) => {
           toast.error(error?.data?.message ?? 'Something went wrong');
           setCtaLoading((prev) => prev.filter((id) => id !== loadingId));
@@ -125,7 +137,12 @@ const LogCtaComponent = (
           isLastLog={isLastLog}
         >
           {artifactTypeCtas.map((cta) => (
-            <CtaArtifactTag key={cta.id} cta={cta} onShowArtifacts={() => handleArtifactClick(cta)} />
+            <CtaArtifactTag
+              key={cta.id}
+              cta={cta}
+              onShowArtifacts={() => handleArtifactClick(cta)}
+              disabled={disabled}
+            />
           ))}
         </ConditionalRevealAnimation>
       )}
@@ -145,6 +162,7 @@ const LogCtaComponent = (
                 isMultiple={isMultipleButtons}
                 isLoading={isLoading}
                 isCtaLoading={ctaLoading.includes(loadingId)}
+                isSuccess={isSuccess}
                 onClick={() => handleButtonClick(cta)}
               />
             );

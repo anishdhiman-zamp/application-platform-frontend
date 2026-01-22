@@ -21,5 +21,7 @@ export enum FEATURE_FLAGS {
   SOP_CREATION = 'sop-creation',
   DISABLE_FEEDBACK = 'disable-feedback',
   DASHBOARD_DOWNTIME = 'dashboard-downtime-v2',
-  MACS_CHAT = 'macs-chat',
+  DATASET_CREATION = 'dataset-creation',
+  PACE_CHAT = 'pace-chat',
+  ZAMP_INTERNAL = 'zamp-internal',
 }

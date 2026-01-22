@@ -1,17 +1,30 @@
 'use client';
 
 import { cn } from '@zamp-platform/ui/utils';
-import React, { useState } from 'react';
+import React, { useMemo, useState } from 'react';
 
-import { Block, BLOCK_TYPE, BlockMessage, ButtonBlockType } from '../types/block.types';
+import {
+  Block,
+  BLOCK_TYPE,
+  BlockMessage,
+  ButtonBlockType,
+  type TextContentBlock,
+  type ThinkingContentBlock,
+  type ToolResultContentBlock,
+  type ToolUseContentBlock,
+} from '../types/block.types';
 import { extractInitialValues } from './block.utils';
 import {
   AttachmentsBlock,
   ButtonBlock,
   MarkdownBlock,
+  OutputFilesBlock,
   PlainTextBlock,
   QuestionGroupBlock,
   SingleSelectBlock,
+  StepsBlock,
+  ThinkingBlock,
+  ToolCallBlock,
 } from './blocks';
 
 interface BlockRendererProps {
@@ -22,6 +35,11 @@ interface BlockRendererProps {
   containerClassName?: string;
   conversationId?: string;
   messageId?: string;
+}
+
+const enum BLOCK_GROUP_TYPE {
+  STEPS = 'steps',
+  SINGLE = 'single',
 }
 
 export const BlockRenderer: React.FC<BlockRendererProps> = ({
@@ -41,6 +59,17 @@ export const BlockRenderer: React.FC<BlockRendererProps> = ({
         { label: string; value: string; optionType: 'plain_text' | 'markdown' }
       >,
   );
+
+  // Create a map of tool_call_id to tool_result blocks
+  const toolResultsMap = useMemo(() => {
+    const map = new Map<string, ToolResultContentBlock>();
+    message.block.forEach((block) => {
+      if (block.type === BLOCK_TYPE.TOOL_RESULT && block.payload.tool_call_id) {
+        map.set(block.payload.tool_call_id, block);
+      }
+    });
+    return map;
+  }, [message.block]);
 
   const handleElementChange = (
     blockId: string,
@@ -67,8 +96,45 @@ export const BlockRenderer: React.FC<BlockRendererProps> = ({
       case BLOCK_TYPE.PLAIN_TEXT:
         return <PlainTextBlock key={block?.id} payload={block?.payload} />;
 
+      case BLOCK_TYPE.THINKING:
+        return (
+          <ThinkingBlock
+            key={block?.id ?? `thinking-${block.order}-${block.start_timestamp}`}
+            payload={block?.payload}
+            is_complete={block?.is_complete}
+            start_timestamp={block?.start_timestamp}
+            stop_timestamp={block?.stop_timestamp}
+          />
+        );
+
+      case BLOCK_TYPE.TOOL_USE: {
+        const toolUseBlock = block as ToolUseContentBlock;
+        const toolCallId = toolUseBlock?.payload?.tool_call_id || toolUseBlock?.id;
+        const toolResult = toolCallId ? toolResultsMap.get(toolCallId) : undefined;
+
+        return (
+          <ToolCallBlock
+            key={block?.id ?? `tool-use-${block.order}-${block.start_timestamp}`}
+            payload={block?.payload}
+            is_complete={block?.is_complete}
+            toolResult={toolResult}
+          />
+        );
+      }
+
+      case BLOCK_TYPE.TOOL_RESULT:
+        // Tool results are rendered with their corresponding tool use blocks
+        // Skip rendering them separately
+        return null;
+
       case BLOCK_TYPE.MARKDOWN:
-        return <MarkdownBlock key={block?.id} payload={block?.payload} />;
+      case BLOCK_TYPE.TEXT:
+        return (
+          <MarkdownBlock
+            key={block?.id ?? `text-${block?.order}-${(block as TextContentBlock)?.start_timestamp}`}
+            payload={block?.payload}
+          />
+        );
 
       case BLOCK_TYPE.SINGLE_SELECT:
         return (
@@ -106,14 +172,61 @@ export const BlockRenderer: React.FC<BlockRendererProps> = ({
       case BLOCK_TYPE.ATTACHMENTS:
         return <AttachmentsBlock key={block?.id} payload={block?.payload} />;
 
+      case BLOCK_TYPE.OUTPUT_FILES:
+        return <OutputFilesBlock key={block?.id} payload={block?.payload} conversationId={conversationId} />;
+
       default:
         return null;
     }
   };
 
+  // Group consecutive thinking and tool_use blocks together
+  const groupedBlocks = useMemo(() => {
+    const sortedBlocks = [...message?.block]?.sort((a, b) => a?.order - b?.order);
+    const groups: Array<{ type: BLOCK_GROUP_TYPE; blocks: Block[] }> = [];
+
+    let currentStepsGroup: Block[] = [];
+
+    const isStepBlock = (block: Block) => block.type === BLOCK_TYPE.THINKING || block.type === BLOCK_TYPE.TOOL_USE;
+
+    for (const block of sortedBlocks) {
+      if (block.type === BLOCK_TYPE.TOOL_RESULT) {
+        continue;
+      }
+
+      if (isStepBlock(block)) {
+        currentStepsGroup.push(block);
+      } else {
+        if (currentStepsGroup.length > 0) {
+          groups.push({ type: BLOCK_GROUP_TYPE.STEPS, blocks: currentStepsGroup });
+          currentStepsGroup = [];
+        }
+        groups.push({ type: BLOCK_GROUP_TYPE.SINGLE, blocks: [block] });
+      }
+    }
+
+    if (currentStepsGroup.length > 0) {
+      groups.push({ type: BLOCK_GROUP_TYPE.STEPS, blocks: currentStepsGroup });
+    }
+
+    return groups;
+  }, [message.block]);
+
   return (
     <div className={cn('space-y-2', className)}>
-      {[...message?.block]?.sort((a, b) => a?.order - b?.order)?.map((block) => renderBlock(block))}
+      {groupedBlocks.map((group, groupIndex) => {
+        if (group.type === BLOCK_GROUP_TYPE.STEPS && group.blocks.length > 1) {
+          return (
+            <StepsBlock
+              key={`steps-group-${groupIndex}`}
+              blocks={group.blocks as (ThinkingContentBlock | ToolUseContentBlock)[]}
+              toolResultsMap={toolResultsMap}
+            />
+          );
+        }
+
+        return group.blocks.map((block) => renderBlock(block));
+      })}
     </div>
   );
 };

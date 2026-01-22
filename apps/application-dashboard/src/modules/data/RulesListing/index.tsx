@@ -1,6 +1,15 @@
 import { ChangeEvent, FC, useEffect, useMemo, useState } from 'react';
 import { Responsive, WidthProvider } from 'react-grid-layout';
 import { captureException } from '@sentry/browser';
+import {
+  Button,
+  Dialog,
+  DialogBody,
+  DialogContent,
+  DialogFooter,
+  DialogHeader,
+  DialogHeaderTitle,
+} from '@zamp-platform/ui';
 import { SvgSpriteLoader } from '@zamp-platform/ui/assets';
 import { useGetRulesByDatasetColumnsQuery, useUpdateRulePriorityMutation } from 'apis/dataset';
 import { DRAG_ICON, ZAMP_LOGO_LOADER_SVG } from 'constants/icons';
@@ -11,13 +20,10 @@ import { searchRules } from 'modules/data/RulesListing/ruleListing.utils';
 import Image from 'next/image';
 import { SIZE_TYPES } from 'types/common/components';
 import { defaultFnType, MapAny } from 'types/commonTypes';
-import { BUTTON_TYPES, ICON_POSITION_TYPES } from 'types/components/button.type';
 import { OrderType } from 'types/components/table.type';
 import Input from '@/components/common/input';
 import ImageLoader from '@/components/common/loader/ImageLoader';
 import { TOAST_MESSAGES } from '@/components/common/toast/toast.constants';
-import { Button } from 'components/common/button/Button';
-import Popup from 'components/common/popup/Popup';
 import SideDrawer from 'components/common/SideDrawer/SideDrawer';
 import { toast } from 'components/common/toast/Toast';
 import CommonWrapper from 'components/commonWrapper';
@@ -228,14 +234,11 @@ const RulesListingSideDrawer: FC<RulesListingSideDrawerProps> = ({
             <div className='f-16-600'>{columnLabel}</div>
             {isApplyChangesEnabled && (
               <Button
-                type={BUTTON_TYPES.SECONDARY}
-                size={SIZE_TYPES.XSMALL}
+                variant='outline'
+                size='xsmall'
                 onClick={handleApplyChangePopupOpen}
-                id='apply-priority-changes'
-                iconProps={{
-                  id: 'check',
-                }}
-                iconPosition={ICON_POSITION_TYPES.LEFT}
+                testId='apply-priority-changes'
+                leadingIcon={<SvgSpriteLoader id='check' width={12} height={12} />}
               >
                 Apply Changes
               </Button>
@@ -305,38 +308,31 @@ const RulesListingSideDrawer: FC<RulesListingSideDrawerProps> = ({
           </ResponsiveGridLayout>
         </CommonWrapper>
       </div>
-      <Popup
-        isOpen={isApplyChangesPopupOpen}
-        onClose={handleApplyChangesPopupClose}
-        title='Apply Changes ?'
-        iconId='x-close'
-        className='border-GRAY_400 rounded-3.5 shadow-menu-list w-[344px] border-2 bg-white p-0!'
-        titleClassName='f-16-600 text-GRAY_950'
-        showIcon
-      >
-        <div className='f-13-400 text-GRAY_900 px-5 py-6'>
-          You&apos;ve updated the priority of rules. Do you want to apply these changes before leaving?
-        </div>
-        <div className='border-GRAY_400 flex justify-end gap-2 border-t px-5 py-4'>
-          <Button
-            type={BUTTON_TYPES.SECONDARY}
-            size={SIZE_TYPES.MEDIUM}
-            id='cancel-apply-changes'
-            onClick={handleDiscardChanges}
-          >
-            Discard
-          </Button>
-          <Button
-            type={BUTTON_TYPES.PRIMARY}
-            size={SIZE_TYPES.MEDIUM}
-            id='apply-changes'
-            onClick={handleApplyChanges}
-            isLoading={isUpdating}
-          >
-            Yes, Apply
-          </Button>
-        </div>
-      </Popup>
+      <Dialog open={isApplyChangesPopupOpen} onOpenChange={(open: boolean) => !open && handleApplyChangesPopupClose()}>
+        <DialogContent
+          className='max-h-fit w-[344px]'
+          showCloseButton
+          title='Apply Changes ?'
+          description='Dialog to apply rule priority changes'
+        >
+          <DialogHeader>
+            <DialogHeaderTitle>Apply Changes ?</DialogHeaderTitle>
+          </DialogHeader>
+          <DialogBody className='px-5 py-6'>
+            <div className='f-13-400 text-GRAY_900'>
+              You&apos;ve updated the priority of rules. Do you want to apply these changes before leaving?
+            </div>
+          </DialogBody>
+          <DialogFooter className='flex justify-end gap-2'>
+            <Button variant='outline' size='medium' testId='cancel-apply-changes' onClick={handleDiscardChanges}>
+              Discard
+            </Button>
+            <Button size='medium' testId='apply-changes' onClick={handleApplyChanges} isLoading={isUpdating}>
+              Yes, Apply
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
     </SideDrawer>
   );
 };

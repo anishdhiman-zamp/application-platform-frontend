@@ -26,7 +26,7 @@ const ActivityLinkWrapper = ({ children, data, node }: ActivityLinkWrapperProps)
         params?.processId as string,
         data?.id as string,
         data?.status as string,
-        encodeURIComponent(JSON.stringify(selectedFilters)),
+        encodeURIComponent(JSON.stringify(selectedFilters || {})),
         node?.rowIndex ?? -1,
         totalRows,
       )}

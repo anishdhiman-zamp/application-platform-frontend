@@ -11,7 +11,7 @@ describe('AutosizeTextarea', () => {
   beforeEach(() => {
     // Mock getComputedStyle with proper implementation
     Object.defineProperty(window, 'getComputedStyle', {
-      value: (element: HTMLElement) => ({
+      value: () => ({
         lineHeight: '20px',
         paddingTop: '8px',
         paddingBottom: '8px',

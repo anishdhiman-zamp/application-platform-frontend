@@ -1,5 +1,6 @@
 'use client';
 
+import * as React from 'react';
 import { cn } from '@zamp-platform/ui/utils';
 import type { Variants } from 'motion/react';
 import { motion, useAnimation } from 'motion/react';

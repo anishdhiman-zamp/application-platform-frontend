@@ -1,13 +1,9 @@
 import type { FC } from 'react';
+import { LucideProps } from 'lucide-react';
 
-interface NewPaceIconsProps {
-  width?: number;
-  height?: number;
-}
-
-const NewPaceIcons: FC<NewPaceIconsProps> = ({ width, height }) => {
+const NewPaceIcons: FC<LucideProps> = (props) => {
   return (
-    <svg width={width} height={height} viewBox='0 0 29 29' fill='none' xmlns='http://www.w3.org/2000/svg'>
+    <svg {...props} viewBox='0 0 29 29' fill='none' xmlns='http://www.w3.org/2000/svg'>
       <path
         d='M16.051 0.889516C16.27 0.889516 16.4476 0.711953 16.4476 0.492916C16.4476 0.273879 16.27 0.0963135 16.051 0.0963135C15.8319 0.0963135 15.6543 0.273879 15.6543 0.492916C15.6543 0.711953 15.8319 0.889516 16.051 0.889516Z'
         fill='#171717'
