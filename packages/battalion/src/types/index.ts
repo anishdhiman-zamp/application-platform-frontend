@@ -1,9 +1,39 @@
 import { QueryClient } from '@tanstack/react-query';
 import { z } from 'zod';
 
+import { TransactionResponse } from '../transactions/client';
+
 // Base types
 export type ResourceName = string;
 export type QueryKey = string[];
+
+// Storage type constant (per project conventions - avoid enums)
+export const STORAGE_TYPE = {
+  INDEXEDDB: 'indexeddb',
+  OPFS: 'opfs',
+} as const;
+
+export type StorageType = (typeof STORAGE_TYPE)[keyof typeof STORAGE_TYPE];
+
+// Default persist configuration values
+export const DEFAULT_PERSIST_CONFIG = {
+  storage: STORAGE_TYPE.INDEXEDDB,
+  maxAge: 24 * 60 * 60 * 1000, // 24 hours
+} as const;
+
+// Persist configuration
+export interface PersistConfig {
+  /**
+   * Storage type to use for persistence.
+   * @default 'indexeddb'
+   */
+  storage?: StorageType;
+  /**
+   * Max age for persisted data (ms).
+   * @default 24 * 60 * 60 * 1000 (24 hours)
+   */
+  maxAge?: number;
+}
 
 // Resource endpoints
 export interface ResourceEndpoints {
@@ -54,6 +84,11 @@ export interface TransactionConfig<T = unknown> {
     maxDelay?: number;
     backoffMultiplier?: number;
   };
+  onSuccess?: {
+    create?: (data: unknown) => void;
+    update?: (id: string, data: unknown) => void;
+    delete?: (id: string) => void;
+  };
   onRollback?: {
     create?: (data: unknown, error: Error) => void;
     update?: (id: string, data: unknown, error: Error) => void;
@@ -72,14 +107,6 @@ export interface LiveSyncConfig {
   strategy: 'polling' | 'sse';
   interval?: number;
   endpoint?: string;
-  /**
-   * Enable OPFS persistence for instant loading
-   */
-  persist?: boolean;
-  /**
-   * Max age for persisted data (ms)
-   */
-  persistMaxAge?: number;
 }
 
 // Cache configuration
@@ -100,7 +127,24 @@ export interface ResourceConfig<T extends z.ZodTypeAny> {
   dependsOn?: ResourceDependency[];
   transactions?: TransactionConfig<z.infer<T>>;
   liveSync?: LiveSyncConfig;
+  /**
+   * Enable persistence for instant loading on revisit.
+   * - `true` - Enable with defaults (IndexedDB, 24h maxAge)
+   * - `{ storage: 'opfs', maxAge: ... }` - Custom config
+   * - `undefined` - No persistence
+   */
+  persist?: boolean | PersistConfig;
   cache?: CacheConfig;
+  /**
+   * Transform the API response before storing in cache.
+   * Use this when the API returns a wrapper object (e.g., { items: [], total: 0 })
+   * and you need to extract the array.
+   *
+   * @example
+   * // API returns { processes: Process[], total_count: number }
+   * transformResponse: (response) => response.processes
+   */
+  transformResponse?: (response: unknown) => z.infer<T>[];
 }
 
 // Resource instance
@@ -115,7 +159,15 @@ export interface Resource<T = unknown> {
   dependsOn?: ResourceDependency[];
   transactions?: TransactionConfig<T>;
   liveSync?: LiveSyncConfig;
+  /**
+   * Persistence configuration for instant loading.
+   */
+  persist?: boolean | PersistConfig;
   cache?: CacheConfig;
+  /**
+   * Transform the API response before storing in cache.
+   */
+  transformResponse?: (response: unknown) => T[];
   api: {
     list: () => Promise<T[]>;
     get: (id: string) => Promise<T>;
@@ -140,6 +192,11 @@ export interface FailedTransaction {
   error: Error;
   timestamp: Date;
   resourceName: string;
+  /**
+   * Transaction API response details for failed transactions
+   * Only present when the error is a TransactionFailureError
+   */
+  transactionResponse?: TransactionResponse[];
 }
 
 // Transaction state

@@ -1,9 +1,10 @@
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { useCallback, useEffect, useMemo, useState } from 'react';
 
-import { getLiveSyncManager, LiveSyncConfig as LiveSyncManagerConfig } from '../core/live-sync';
+import { getLiveSyncManager } from '../core/live-sync';
 import { getQueryGraph } from '../core/query-graph';
 import { getResourceRegistry } from '../core/registry';
+import { TransactionFailureError } from '../transactions/client';
 import { transactionStore } from '../transactions/store';
 import {
   BatchOperation,
@@ -17,8 +18,7 @@ import {
 } from '../types';
 
 export function useResource<T>(resourceName: ResourceName, options?: ResourceOptions): ResourceHookReturn<T> {
-  const defaultQueryClient = useQueryClient();
-  const queryClient = options?.queryClient || defaultQueryClient;
+  const queryClient = options?.queryClient || useQueryClient();
   const resource = getResourceRegistry().get(resourceName);
   const integration = transactionStore.getIntegration();
   const queryGraph = getQueryGraph();
@@ -41,12 +41,12 @@ export function useResource<T>(resourceName: ResourceName, options?: ResourceOpt
   useEffect(() => {
     if (resource.liveSync?.enabled) {
       liveSyncManager.setQueryClient(queryClient);
-      liveSyncManager.subscribe(resourceName, resource.liveSync as LiveSyncManagerConfig, () => {
+      liveSyncManager.subscribe(resourceName, resource.liveSync, resource.persist, () => {
         setSyncState(liveSyncManager.getState(resourceName));
       });
       return () => liveSyncManager.unsubscribe(resourceName);
     }
-  }, [resourceName, resource.liveSync, queryClient, liveSyncManager]);
+  }, [resourceName, resource.liveSync, resource.persist, queryClient, liveSyncManager]);
 
   const optimisticConfig = useMemo(() => resource.transactions?.optimistic, [resource]);
 
@@ -77,6 +77,9 @@ export function useResource<T>(resourceName: ResourceName, options?: ResourceOpt
 
   const handleRollback = useCallback(
     (action: 'create' | 'update' | 'delete', data: unknown, id: string | undefined, error: Error) => {
+      // Extract transaction response details if error is TransactionFailureError
+      const transactionResponse = error instanceof TransactionFailureError ? error.failedTransactions : undefined;
+
       const failedTx: FailedTransaction = {
         id: id || `temp-${Date.now()}`,
         action,
@@ -84,7 +87,9 @@ export function useResource<T>(resourceName: ResourceName, options?: ResourceOpt
         error,
         timestamp: new Date(),
         resourceName,
+        transactionResponse,
       };
+
       setErrorState((prev) => ({
         lastError: error,
         failedTransactions: [...prev.failedTransactions, failedTx],
@@ -103,8 +108,9 @@ export function useResource<T>(resourceName: ResourceName, options?: ResourceOpt
   const createMutation = useMutation({
     mutationFn: async (data: Partial<T>) => {
       if (integration?.shouldUseTransactions(resourceName, 'create')) {
-        // Fire and forget - don't await response
-        integration.createTransactionRequest(resourceName, 'create', data);
+        // Await transaction request to check for failures
+        // This will throw TransactionFailureError if any transaction failed
+        await integration.createTransactionRequest(resourceName, 'create', data);
       }
       // Return optimistic item if getOptimisticItem is defined, otherwise partial data
       return getOptimisticItem ? getOptimisticItem(data) : ({ ...data, [idField]: `temp-${Date.now()}` } as T);
@@ -123,6 +129,9 @@ export function useResource<T>(resourceName: ResourceName, options?: ResourceOpt
       }
       return { previous };
     },
+    onSuccess: (data) => {
+      resource.transactions?.onSuccess?.create?.(data);
+    },
     onError: (err, newData, context) => {
       if (context?.previous) queryClient.setQueryData([resourceName], context.previous);
       handleRollback('create', newData, undefined, err);
@@ -132,7 +141,9 @@ export function useResource<T>(resourceName: ResourceName, options?: ResourceOpt
   const updateMutation = useMutation({
     mutationFn: async ({ id, data }: { id: string; data: Partial<T> }) => {
       if (integration?.shouldUseTransactions(resourceName, 'update')) {
-        integration.createTransactionRequest(resourceName, 'update', { [idField]: id, ...data });
+        // Await transaction request to check for failures
+        // This will throw TransactionFailureError if any transaction failed
+        await integration.createTransactionRequest(resourceName, 'update', { [idField]: id, ...data });
       }
       return { [idField]: id, ...data } as T;
     },
@@ -155,7 +166,9 @@ export function useResource<T>(resourceName: ResourceName, options?: ResourceOpt
   const deleteMutation = useMutation({
     mutationFn: async (id: string) => {
       if (integration?.shouldUseTransactions(resourceName, 'delete')) {
-        integration.createTransactionRequest(resourceName, 'delete', { [idField]: id });
+        // Await transaction request to check for failures
+        // This will throw TransactionFailureError if any transaction failed
+        await integration.createTransactionRequest(resourceName, 'delete', { [idField]: id });
       }
     },
     onMutate: async (id) => {

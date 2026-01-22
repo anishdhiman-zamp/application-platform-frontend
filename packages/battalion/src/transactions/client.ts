@@ -26,6 +26,24 @@ export interface TransactionResponse {
 }
 
 /**
+ * Custom error class for transaction failures
+ */
+export class TransactionFailureError extends Error {
+  constructor(
+    public requestId: string,
+    public failedTransactions: TransactionResponse[],
+    message?: string,
+  ) {
+    super(message || 'Transaction request completed but contains failed transactions');
+    this.name = 'TransactionFailureError';
+    // Maintains proper stack trace for where our error was thrown (only available on V8)
+    if (Error.captureStackTrace) {
+      Error.captureStackTrace(this, TransactionFailureError);
+    }
+  }
+}
+
+/**
  * Configuration for transaction client
  */
 export interface TransactionClientConfig {
@@ -103,8 +121,54 @@ export class TransactionClient {
   }
 
   /**
+   * Submit a transaction request and await the response
+   * Returns a promise that resolves with the response on success or rejects on failure
+   * Used when we need to check transaction status before proceeding
+   * Throws TransactionFailureError if transactions failed
+   */
+  async submitTransactionRequestAndAwait(payload: TransactionRequestPayload): Promise<TransactionRequestResponse> {
+    if (!isBrowser()) {
+      throw new Error('Transaction client can only be used in browser environment');
+    }
+
+    const { request_id } = payload;
+
+    // Store in IndexedDB first
+    await TransactionIndexedDB.storeRequest(request_id, payload);
+
+    // Make the request directly to get the response
+    const response = await this.makeRequest(payload);
+
+    if (!response.ok) {
+      // For non-OK responses, throw a generic error
+      throw new Error(`Transaction request failed with status ${response.status}`);
+    }
+
+    // Parse response body
+    const responseData = (await response.json()) as TransactionRequestResponse;
+
+    // Check if any transactions failed
+    if (responseData.transactions && responseData.transactions.length > 0) {
+      const failedTransactions = responseData.transactions.filter((txn) => txn.status === 'failed');
+
+      if (failedTransactions.length > 0) {
+        // Delete from IndexedDB since we got a response (even if failed)
+        await TransactionIndexedDB.deleteRequest(request_id);
+        // Throw error to trigger rollback
+        throw new TransactionFailureError(request_id, failedTransactions);
+      }
+    }
+
+    // Success - delete from IndexedDB
+    await TransactionIndexedDB.deleteRequest(request_id);
+
+    return responseData;
+  }
+
+  /**
    * Send a transaction request to the backend
    * Returns true on success, false on 5xx error (for retry)
+   * Throws TransactionFailureError if response is OK but transactions failed
    */
   private async sendTransactionRequest(requestId: string): Promise<boolean> {
     const storedRequest = await TransactionIndexedDB.getRequest(requestId);
@@ -118,6 +182,21 @@ export class TransactionClient {
       const response = await this.makeRequest(payload);
 
       if (response.ok) {
+        // Parse response body to check transaction status
+        const responseData = (await response.json()) as TransactionRequestResponse;
+
+        // Check if any transactions failed
+        if (responseData.transactions && responseData.transactions.length > 0) {
+          const failedTransactions = responseData.transactions.filter((txn) => txn.status === 'failed');
+
+          if (failedTransactions.length > 0) {
+            // Delete from IndexedDB since we got a response (even if failed)
+            await TransactionIndexedDB.deleteRequest(requestId);
+            // Throw error to trigger rollback
+            throw new TransactionFailureError(requestId, failedTransactions);
+          }
+        }
+
         // Success - delete from IndexedDB
         await TransactionIndexedDB.deleteRequest(requestId);
         return true;
@@ -152,6 +231,12 @@ export class TransactionClient {
 
       return false;
     } catch (error) {
+      // If it's a TransactionFailureError, don't retry - the transaction failed
+      if (error instanceof TransactionFailureError) {
+        // Re-throw to let the caller handle it
+        throw error;
+      }
+
       // Network error or other exception - treat as 5xx for retry purposes
       console.error(`Network error sending transaction request ${requestId}:`, error);
 
@@ -174,9 +259,10 @@ export class TransactionClient {
 
   /**
    * Make HTTP request to transaction API
+   * Wraps fetch with try-catch for better error handling and rollback support
    */
   private async makeRequest(payload: TransactionRequestPayload): Promise<Response> {
-    const url = `${this.config.baseUrl}/transaction-requests`;
+    const url = `${this.config.baseUrl}/transactions`;
     const headers: Record<string, string> = {
       'Content-Type': 'application/json',
       ...this.config.getAuthHeaders?.(),
@@ -187,12 +273,19 @@ export class TransactionClient {
       headers['X-Zamp-Organization-Id'] = orgId;
     }
 
-    return fetch(url, {
-      method: 'POST',
-      headers,
-      credentials: 'include',
-      body: JSON.stringify(payload),
-    });
+    try {
+      const response = await fetch(url, {
+        method: 'POST',
+        headers,
+        credentials: 'include',
+        body: JSON.stringify(payload),
+      });
+
+      return response;
+    } catch (error) {
+      console.error(`Transaction request ${payload.request_id} failed`, error);
+      throw error;
+    }
   }
 
   /**
@@ -228,7 +321,7 @@ export class TransactionClient {
    * Get status of a transaction request
    */
   async getTransactionStatus(requestId: string): Promise<TransactionRequestResponse | null> {
-    const url = `${this.config.baseUrl}/transaction-requests/${requestId}/summary`;
+    const url = `${this.config.baseUrl}/transactions/${requestId}`;
     const headers: Record<string, string> = {
       ...this.config.getAuthHeaders?.(),
     };

@@ -29,8 +29,6 @@ export interface Transaction {
   type: string;
   payload: Record<string, unknown>;
   client_timestamp?: string;
-  resource_type?: string;
-  resource_id?: string;
 }
 
 const DB_NAME = 'battalion-db';

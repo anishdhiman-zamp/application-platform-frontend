@@ -1,6 +1,6 @@
 import { getResourceRegistry } from '../core/registry';
 import { ResourceName } from '../types';
-import { TransactionClient } from './client';
+import { TransactionClient, TransactionRequestResponse } from './client';
 import { TransactionRequestPayload } from './indexeddb';
 
 function generateUUID(): string {
@@ -62,7 +62,7 @@ export class TransactionIntegration {
     action: 'create' | 'update' | 'delete',
     data: unknown,
     resourceId?: string,
-  ): Promise<string> {
+  ): Promise<TransactionRequestResponse> {
     const mapping = this.actionMap.get(`${resource}:${action}`);
     if (!mapping) {
       throw new Error(`No transaction mapping for ${resource}:${action}`);
@@ -87,8 +87,9 @@ export class TransactionIntegration {
       ],
     };
 
-    this.client.submitTransactionRequest(requestPayload);
-    return requestId;
+    // Submit and await response to check transaction status
+    // This will throw TransactionFailureError if any transaction failed
+    return await this.client.submitTransactionRequestAndAwait(requestPayload);
   }
 
   async createBatchTransactionRequest(

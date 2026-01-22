@@ -1,6 +1,5 @@
 // Core exports
 export { getLiveSyncManager, resetLiveSyncManager } from './core/live-sync';
-export { getOPFSStorage, resetOPFSStorage } from './core/opfs-storage';
 export { getQueryGraph, resetQueryGraph } from './core/query-graph';
 export { getResourceRegistry, resetResourceRegistry } from './core/registry';
 export { defineResource, getResource } from './core/resource';
@@ -23,6 +22,7 @@ export type {
   LiveSyncState,
   MetaState,
   OptimisticConfig,
+  PersistConfig,
   QueryKey,
   Resource,
   ResourceConfig,
@@ -32,12 +32,13 @@ export type {
   ResourceName,
   ResourceOptions,
   ResourceRegistry,
+  StorageType,
   TransactionConfig,
   TransactionState,
 } from './types';
 
+// Persistence constants
+export { DEFAULT_PERSIST_CONFIG, STORAGE_TYPE } from './types';
+
 // Client config type for custom configuration
 export type { TransactionClientConfig } from './transactions/client';
-
-// OPFS storage config type
-export type { OPFSStorageConfig } from './core/opfs-storage';

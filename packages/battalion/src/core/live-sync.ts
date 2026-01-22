@@ -1,26 +1,15 @@
 import { QueryClient } from '@tanstack/react-query';
+import { OPFSCache } from '@zamp-platform/utils';
 
-import { ResourceName } from '../types';
-import { getOPFSStorage, OPFSStorageManager } from './opfs-storage';
+import {
+  DEFAULT_PERSIST_CONFIG,
+  LiveSyncConfig,
+  PersistConfig,
+  ResourceName,
+  STORAGE_TYPE,
+  StorageType,
+} from '../types';
 import { getResourceRegistry } from './registry';
-
-/**
- * Live sync configuration for a resource
- */
-export interface LiveSyncConfig {
-  enabled: boolean;
-  strategy: 'polling' | 'sse';
-  interval?: number; // For polling (ms)
-  endpoint?: string; // For SSE
-  /**
-   * Enable OPFS persistence for instant loading
-   */
-  persist?: boolean;
-  /**
-   * Max age for persisted data (ms)
-   */
-  persistMaxAge?: number;
-}
 
 /**
  * Live sync state for a resource
@@ -40,30 +29,534 @@ export interface LiveSyncState {
 }
 
 /**
+ * Stored resource data with metadata
+ */
+interface StoredResourceData<T = unknown> {
+  resourceName: ResourceName;
+  data: T;
+  timestamp: number;
+  version: number;
+}
+
+/**
+ * Storage adapter interface for persistence
+ */
+interface StorageAdapter {
+  save<T>(resourceName: ResourceName, data: T): Promise<void>;
+  load<T>(resourceName: ResourceName): Promise<T | null>;
+  loadWithMetadata<T>(resourceName: ResourceName): Promise<StoredResourceData<T> | null>;
+  delete(resourceName: ResourceName): Promise<void>;
+  clear(): Promise<void>;
+}
+
+/**
+ * Resolved persist configuration
+ */
+interface ResolvedPersistConfig {
+  enabled: boolean;
+  storage: StorageType;
+  maxAge: number;
+}
+
+/**
+ * Resolve persist config from boolean | PersistConfig | undefined
+ */
+function resolvePersistConfig(persist: boolean | PersistConfig | undefined): ResolvedPersistConfig {
+  if (!persist) {
+    return { enabled: false, storage: STORAGE_TYPE.INDEXEDDB, maxAge: DEFAULT_PERSIST_CONFIG.maxAge };
+  }
+
+  if (persist === true) {
+    return {
+      enabled: true,
+      storage: DEFAULT_PERSIST_CONFIG.storage,
+      maxAge: DEFAULT_PERSIST_CONFIG.maxAge,
+    };
+  }
+
+  return {
+    enabled: true,
+    storage: persist.storage ?? DEFAULT_PERSIST_CONFIG.storage,
+    maxAge: persist.maxAge ?? DEFAULT_PERSIST_CONFIG.maxAge,
+  };
+}
+
+/**
+ * IndexedDB Storage Adapter with per-resource table storage
+ * Each resource gets its own object store (e.g., "pages", "process")
+ * Items are stored directly with itemId as key and data + timestamp as value
+ */
+class IndexedDBStorageAdapter implements StorageAdapter {
+  private dbName = 'battalion-cache';
+  private maxAge: number;
+  private dbPromise: Promise<IDBDatabase> | null = null;
+  private knownStores = new Set<string>(); // Cache of stores we know exist
+  private resourceRegistry = getResourceRegistry();
+
+  constructor(maxAge: number = DEFAULT_PERSIST_CONFIG.maxAge) {
+    this.maxAge = maxAge;
+  }
+
+  /**
+   * Get the store name for a resource
+   */
+  private getResourceStoreName(resourceName: ResourceName): string {
+    return resourceName;
+  }
+
+  /**
+   * Get current database version
+   */
+  private async getDBVersion(): Promise<number> {
+    return new Promise((resolve, reject) => {
+      const request = indexedDB.open(this.dbName);
+
+      request.onerror = () => reject(request.error);
+      request.onsuccess = () => {
+        const version = request.result.version || 1;
+        request.result.close();
+        resolve(version);
+      };
+      request.onupgradeneeded = () => resolve(1);
+    });
+  }
+
+  /**
+   * Ensure a resource store exists, creating it if needed
+   */
+  private async ensureResourceStore(resourceName: ResourceName): Promise<IDBDatabase> {
+    const storeName = this.getResourceStoreName(resourceName);
+
+    // If we know the store exists, just open the DB
+    if (this.knownStores.has(storeName)) {
+      return this.openDB();
+    }
+
+    // Open DB and check if store exists
+    const db = await this.openDB();
+    if (db.objectStoreNames.contains(storeName)) {
+      this.knownStores.add(storeName);
+      return db;
+    }
+
+    // Store doesn't exist - create it
+    db.close();
+    this.dbPromise = null;
+
+    const currentVersion = await this.getDBVersion();
+    const newVersion = currentVersion + 1;
+
+    return new Promise((resolve, reject) => {
+      const request = indexedDB.open(this.dbName, newVersion);
+
+      request.onerror = () => {
+        this.dbPromise = null;
+        reject(request.error);
+      };
+
+      request.onsuccess = () => {
+        this.knownStores.add(storeName);
+        resolve(request.result);
+      };
+
+      request.onupgradeneeded = (event) => {
+        const db = (event.target as IDBOpenDBRequest).result;
+        if (!db.objectStoreNames.contains(storeName)) {
+          const store = db.createObjectStore(storeName);
+          store.createIndex('timestamp', 'timestamp', { unique: false });
+        }
+      };
+    });
+  }
+
+  private async openDB(): Promise<IDBDatabase> {
+    if (this.dbPromise) return this.dbPromise;
+
+    const version = await this.getDBVersion();
+
+    this.dbPromise = new Promise((resolve, reject) => {
+      const request = indexedDB.open(this.dbName, version);
+
+      request.onerror = () => {
+        this.dbPromise = null;
+        reject(request.error);
+      };
+
+      request.onsuccess = () => {
+        const db = request.result;
+        // Track existing stores
+        for (let i = 0; i < db.objectStoreNames.length; i++) {
+          const name = db.objectStoreNames[i];
+          this.knownStores.add(name);
+        }
+        resolve(db);
+      };
+
+      request.onupgradeneeded = () => {
+        // No stores created here - they're created dynamically per resource
+      };
+    });
+
+    return this.dbPromise;
+  }
+
+  /**
+   * Extract item ID from an item using the resource's idField from transaction config
+   * Falls back to 'id' if not specified
+   */
+  private getItemId(resourceName: ResourceName, item: unknown, index: number): string {
+    const resource = this.resourceRegistry.get(resourceName);
+    const idField = resource?.transactions?.idField || 'id';
+
+    if (item && typeof item === 'object') {
+      const obj = item as Record<string, unknown>;
+      const idValue = obj[idField];
+      if (idValue !== undefined && idValue !== null) {
+        return String(idValue);
+      }
+    }
+    // Fallback to index-based ID
+    return `__index_${index}`;
+  }
+
+  async save<T>(resourceName: ResourceName, data: T): Promise<void> {
+    try {
+      const db = await this.ensureResourceStore(resourceName);
+      const storeName = this.getResourceStoreName(resourceName);
+      const timestamp = Date.now();
+
+      // Handle array data - store each item separately
+      if (Array.isArray(data)) {
+        const transaction = db.transaction([storeName], 'readwrite');
+        const resourceStore = transaction.objectStore(storeName);
+
+        // Clear existing items in the resource store
+        resourceStore.clear();
+
+        // Store each item with itemId as key, data + timestamp as value (no itemId in value)
+        for (let i = 0; i < data.length; i++) {
+          const item = data[i];
+          const itemId = this.getItemId(resourceName, item, i);
+          const storedItem = {
+            ...(item as Record<string, unknown>),
+            timestamp,
+          };
+          resourceStore.put(storedItem, itemId);
+        }
+
+        await new Promise<void>((resolve, reject) => {
+          transaction.oncomplete = () => resolve();
+          transaction.onerror = () => reject(transaction.error);
+        });
+      } else {
+        // Non-array data - store as single item with special key
+        const transaction = db.transaction([storeName], 'readwrite');
+        const resourceStore = transaction.objectStore(storeName);
+
+        // Clear existing items
+        resourceStore.clear();
+
+        // Store data with '__single__' as key, data + timestamp as value (no itemId in value)
+        const storedItem = {
+          ...(data as Record<string, unknown>),
+          timestamp,
+        };
+        resourceStore.put(storedItem, '__single__');
+
+        await new Promise<void>((resolve, reject) => {
+          transaction.oncomplete = () => resolve();
+          transaction.onerror = () => reject(transaction.error);
+        });
+      }
+    } catch (error) {
+      console.error(`[IndexedDB] Failed to save ${resourceName}:`, error);
+    }
+  }
+
+  async load<T>(resourceName: ResourceName): Promise<T | null> {
+    try {
+      const stored = await this.loadWithMetadata<T>(resourceName);
+      if (!stored) return null;
+
+      // Check if data is still fresh
+      if (Date.now() - stored.timestamp > this.maxAge) {
+        return null;
+      }
+
+      return stored.data;
+    } catch (error) {
+      console.error(`[IndexedDB] Failed to load ${resourceName}:`, error);
+      return null;
+    }
+  }
+
+  async loadWithMetadata<T>(resourceName: ResourceName): Promise<StoredResourceData<T> | null> {
+    try {
+      const db = await this.openDB();
+      const storeName = this.getResourceStoreName(resourceName);
+
+      // Check if resource store exists
+      if (!db.objectStoreNames.contains(storeName)) {
+        return null;
+      }
+
+      const transaction = db.transaction([storeName], 'readonly');
+      const resourceStore = transaction.objectStore(storeName);
+
+      // Get all keys first
+      const keys = await new Promise<string[]>((resolve, reject) => {
+        const request = resourceStore.getAllKeys();
+        request.onerror = () => reject(request.error);
+        request.onsuccess = () => {
+          const allKeys = request.result.map((key) => String(key));
+          resolve(allKeys);
+        };
+      });
+
+      if (keys.length === 0) return null;
+
+      // Check if single item
+      if (keys.length === 1 && keys[0] === '__single__') {
+        const item = await new Promise<Record<string, unknown> & { timestamp: number }>((resolve, reject) => {
+          const request = resourceStore.get('__single__');
+          request.onerror = () => reject(request.error);
+          request.onsuccess = () => resolve(request.result as Record<string, unknown> & { timestamp: number });
+        });
+
+        // Check freshness
+        if (Date.now() - item.timestamp > this.maxAge) {
+          return null;
+        }
+
+        // Remove timestamp from data
+        const { timestamp, ...data } = item;
+        return {
+          resourceName,
+          data: data as T,
+          timestamp,
+          version: 1,
+        };
+      }
+
+      // Load all items for array
+      const items = await Promise.all(
+        keys.map(
+          (key) =>
+            new Promise<Record<string, unknown> & { timestamp: number }>((resolve, reject) => {
+              const request = resourceStore.get(key);
+              request.onerror = () => reject(request.error);
+              request.onsuccess = () => resolve(request.result as Record<string, unknown> & { timestamp: number });
+            }),
+        ),
+      );
+
+      if (items.length === 0) return null;
+
+      // Check freshness using the first item's timestamp (all items have same timestamp)
+      const firstTimestamp = items[0].timestamp;
+      if (Date.now() - firstTimestamp > this.maxAge) {
+        return null;
+      }
+
+      // Remove timestamp from each item
+      // eslint-disable-next-line @typescript-eslint/no-unused-vars
+      const data = items.map(({ timestamp, ...item }) => item) as T;
+
+      return {
+        resourceName,
+        data,
+        timestamp: firstTimestamp,
+        version: 1,
+      };
+    } catch (error) {
+      console.error(`[IndexedDB] Failed to load ${resourceName}:`, error);
+      return null;
+    }
+  }
+
+  async delete(resourceName: ResourceName): Promise<void> {
+    try {
+      const db = await this.openDB();
+      const storeName = this.getResourceStoreName(resourceName);
+
+      // Check if resource store exists
+      if (!db.objectStoreNames.contains(storeName)) {
+        return;
+      }
+
+      const transaction = db.transaction([storeName], 'readwrite');
+      const resourceStore = transaction.objectStore(storeName);
+
+      // Clear all items in the resource store
+      resourceStore.clear();
+
+      await new Promise<void>((resolve, reject) => {
+        transaction.oncomplete = () => resolve();
+        transaction.onerror = () => reject(transaction.error);
+      });
+    } catch (error) {
+      console.error(`[IndexedDB] Failed to delete ${resourceName}:`, error);
+    }
+  }
+
+  async clear(): Promise<void> {
+    try {
+      const db = await this.openDB();
+      const storeNames = Array.from(db.objectStoreNames);
+
+      const transaction = db.transaction(storeNames, 'readwrite');
+
+      // Clear all resource stores
+      await Promise.all(
+        storeNames.map(
+          (storeName) =>
+            new Promise<void>((resolve, reject) => {
+              const store = transaction.objectStore(storeName);
+              const request = store.clear();
+              request.onerror = () => reject(request.error);
+              request.onsuccess = () => resolve();
+            }),
+        ),
+      );
+    } catch (error) {
+      console.error('[IndexedDB] Failed to clear cache:', error);
+    }
+  }
+}
+
+/**
+ * OPFS Storage Adapter using @zamp-platform/utils
+ */
+class OPFSStorageAdapter implements StorageAdapter {
+  private cache: ReturnType<typeof OPFSCache.createOPFSCache>;
+  private maxAge: number;
+  // Memory cache fallback for when OPFS is not available
+  private memoryCache = new Map<ResourceName, StoredResourceData>();
+
+  constructor(maxAge: number = DEFAULT_PERSIST_CONFIG.maxAge) {
+    this.maxAge = maxAge;
+    this.cache = OPFSCache.createOPFSCache({
+      directory: 'battalion-cache',
+    });
+  }
+
+  async save<T>(resourceName: ResourceName, data: T): Promise<void> {
+    const storedData: StoredResourceData<T> = {
+      resourceName,
+      data,
+      timestamp: Date.now(),
+      version: 1,
+    };
+
+    if (!OPFSCache.isOPFSAvailable()) {
+      // Fallback: store in memory cache if OPFS not available
+      this.memoryCache.set(resourceName, storedData as StoredResourceData);
+      return;
+    }
+
+    try {
+      await this.cache.set(resourceName, JSON.stringify(storedData));
+    } catch (error) {
+      console.error(`[OPFS] Failed to save ${resourceName}:`, error);
+    }
+  }
+
+  async load<T>(resourceName: ResourceName): Promise<T | null> {
+    const stored = await this.loadWithMetadata<T>(resourceName);
+    if (!stored) return null;
+
+    // Check if data is still fresh
+    if (Date.now() - stored.timestamp > this.maxAge) {
+      return null;
+    }
+
+    return stored.data;
+  }
+
+  async loadWithMetadata<T>(resourceName: ResourceName): Promise<StoredResourceData<T> | null> {
+    if (!OPFSCache.isOPFSAvailable()) {
+      // Fallback: load from memory cache
+      const cached = this.memoryCache.get(resourceName);
+      if (cached && Date.now() - cached.timestamp < this.maxAge) {
+        return cached as StoredResourceData<T>;
+      }
+      return null;
+    }
+
+    try {
+      const entry = await this.cache.get(resourceName);
+      if (!entry || !entry.content) return null;
+
+      // Check maxAge based on entry timestamp
+      if (Date.now() - entry.timestamp > this.maxAge) {
+        return null;
+      }
+
+      return JSON.parse(entry.content) as StoredResourceData<T>;
+    } catch (error) {
+      console.error(`[OPFS] Failed to load ${resourceName}:`, error);
+      return null;
+    }
+  }
+
+  async delete(resourceName: ResourceName): Promise<void> {
+    this.memoryCache.delete(resourceName);
+
+    if (!OPFSCache.isOPFSAvailable()) return;
+
+    try {
+      await this.cache.clear(resourceName);
+    } catch (error) {
+      console.error(`[OPFS] Failed to delete ${resourceName}:`, error);
+    }
+  }
+
+  async clear(): Promise<void> {
+    this.memoryCache.clear();
+
+    if (!OPFSCache.isOPFSAvailable()) return;
+
+    try {
+      await this.cache.clearAll();
+    } catch (error) {
+      console.error('[OPFS] Failed to clear cache:', error);
+    }
+  }
+}
+
+/**
+ * Get storage adapter based on storage type
+ */
+function getStorageAdapter(config: ResolvedPersistConfig): StorageAdapter {
+  if (config.storage === STORAGE_TYPE.OPFS) {
+    return new OPFSStorageAdapter(config.maxAge);
+  }
+  return new IndexedDBStorageAdapter(config.maxAge);
+}
+
+/**
  * Live sync subscription
  */
 interface LiveSyncSubscription {
   resourceName: ResourceName;
-  config: LiveSyncConfig;
+  liveSyncConfig: LiveSyncConfig;
+  persistConfig: ResolvedPersistConfig;
   state: LiveSyncState;
   intervalId?: ReturnType<typeof setInterval>;
   eventSource?: EventSource;
   onStateChange?: () => void;
+  subscriberCount: number;
+  storageAdapter?: StorageAdapter;
 }
 
 /**
  * Live Sync Manager
- * Manages polling and SSE connections for resources with OPFS persistence
+ * Manages polling and SSE connections for resources with configurable persistence
  */
 class LiveSyncManagerImpl {
   private subscriptions = new Map<ResourceName, LiveSyncSubscription>();
   private queryClient: QueryClient | null = null;
   private resourceRegistry = getResourceRegistry();
-  private opfsStorage: OPFSStorageManager;
-
-  constructor() {
-    this.opfsStorage = getOPFSStorage();
-  }
 
   /**
    * Set the query client for invalidation
@@ -75,15 +568,29 @@ class LiveSyncManagerImpl {
   /**
    * Subscribe to live updates for a resource
    */
-  subscribe(resourceName: ResourceName, config: LiveSyncConfig, onStateChange?: () => void): void {
-    // Don't re-subscribe if already subscribed
-    if (this.subscriptions.has(resourceName)) {
+  subscribe(
+    resourceName: ResourceName,
+    liveSyncConfig: LiveSyncConfig,
+    persist: boolean | PersistConfig | undefined,
+    onStateChange?: () => void,
+  ): void {
+    const existingSubscription = this.subscriptions.get(resourceName);
+
+    if (existingSubscription) {
+      // Increment subscriber count
+      existingSubscription.subscriberCount++;
+      // Update the callback (use the latest one)
+      existingSubscription.onStateChange = onStateChange;
       return;
     }
 
+    const persistConfig = resolvePersistConfig(persist);
+    const storageAdapter = persistConfig.enabled ? getStorageAdapter(persistConfig) : undefined;
+
     const subscription: LiveSyncSubscription = {
       resourceName,
-      config,
+      liveSyncConfig,
+      persistConfig,
       state: {
         isConnected: false,
         lastSyncAt: null,
@@ -91,13 +598,15 @@ class LiveSyncManagerImpl {
         isSyncing: false,
       },
       onStateChange,
+      subscriberCount: 1,
+      storageAdapter,
     };
 
     this.subscriptions.set(resourceName, subscription);
 
-    if (config.enabled) {
-      // First, try to load from OPFS cache for instant display
-      if (config.persist) {
+    if (liveSyncConfig.enabled) {
+      // First, try to load from cache for instant display
+      if (persistConfig.enabled && storageAdapter) {
         this.loadFromCache(subscription).then(() => {
           // Then start live sync in background
           this.startLiveSync(subscription);
@@ -109,11 +618,13 @@ class LiveSyncManagerImpl {
   }
 
   /**
-   * Load data from OPFS cache
+   * Load data from cache
    */
   private async loadFromCache(subscription: LiveSyncSubscription): Promise<void> {
+    if (!subscription.storageAdapter) return;
+
     try {
-      const cached = await this.opfsStorage.loadWithMetadata(subscription.resourceName);
+      const cached = await subscription.storageAdapter.loadWithMetadata(subscription.resourceName);
 
       if (cached && this.queryClient) {
         // Set cached data immediately for instant UI
@@ -133,9 +644,9 @@ class LiveSyncManagerImpl {
    * Start live sync based on strategy
    */
   private startLiveSync(subscription: LiveSyncSubscription): void {
-    if (subscription.config.strategy === 'polling') {
+    if (subscription.liveSyncConfig.strategy === 'polling') {
       this.startPolling(subscription);
-    } else if (subscription.config.strategy === 'sse') {
+    } else if (subscription.liveSyncConfig.strategy === 'sse') {
       this.startSSE(subscription);
     }
   }
@@ -147,8 +658,14 @@ class LiveSyncManagerImpl {
     const subscription = this.subscriptions.get(resourceName);
     if (!subscription) return;
 
-    this.stopSubscription(subscription);
-    this.subscriptions.delete(resourceName);
+    // Decrement subscriber count
+    subscription.subscriberCount--;
+
+    // Only delete and clean up if no more subscribers
+    if (subscription.subscriberCount <= 0) {
+      this.stopSubscription(subscription);
+      this.subscriptions.delete(resourceName);
+    }
   }
 
   /**
@@ -180,7 +697,7 @@ class LiveSyncManagerImpl {
    * Start polling for a subscription
    */
   private startPolling(subscription: LiveSyncSubscription): void {
-    const interval = subscription.config.interval || 30000; // Default 30 seconds
+    const interval = subscription.liveSyncConfig.interval || 30000; // Default 30 seconds
 
     // Fetch immediately (in background if we have cached data)
     this.fetchAndUpdate(subscription).catch(console.error);
@@ -198,7 +715,7 @@ class LiveSyncManagerImpl {
    * Start SSE connection for a subscription
    */
   private startSSE(subscription: LiveSyncSubscription): void {
-    const endpoint = subscription.config.endpoint;
+    const endpoint = subscription.liveSyncConfig.endpoint;
     if (!endpoint) {
       console.error(`SSE endpoint not configured for resource ${subscription.resourceName}`);
       return;
@@ -297,10 +814,10 @@ class LiveSyncManagerImpl {
       this.queryClient.setQueryData([subscription.resourceName], data);
     }
 
-    // Persist to OPFS if enabled
-    if (subscription.config.persist) {
+    // Persist to storage if enabled
+    if (subscription.persistConfig.enabled && subscription.storageAdapter) {
       try {
-        await this.opfsStorage.save(subscription.resourceName, data);
+        await subscription.storageAdapter.save(subscription.resourceName, data);
       } catch (error) {
         console.error(`[LiveSync] Failed to persist ${subscription.resourceName}:`, error);
       }
@@ -334,8 +851,8 @@ class LiveSyncManagerImpl {
   reconnectAll(): void {
     this.subscriptions.forEach((subscription) => {
       this.stopSubscription(subscription);
-      if (subscription.config.enabled) {
-        if (subscription.config.persist) {
+      if (subscription.liveSyncConfig.enabled) {
+        if (subscription.persistConfig.enabled && subscription.storageAdapter) {
           this.loadFromCache(subscription).then(() => {
             this.startLiveSync(subscription);
           });
@@ -367,14 +884,22 @@ class LiveSyncManagerImpl {
    * Clear persisted cache for a resource
    */
   async clearCache(resourceName: ResourceName): Promise<void> {
-    await this.opfsStorage.delete(resourceName);
+    const subscription = this.subscriptions.get(resourceName);
+    if (subscription?.storageAdapter) {
+      await subscription.storageAdapter.delete(resourceName);
+    }
   }
 
   /**
    * Clear all persisted caches
    */
   async clearAllCaches(): Promise<void> {
-    await this.opfsStorage.clear();
+    for (const subscription of this.subscriptions.values()) {
+      if (subscription.storageAdapter) {
+        await subscription.storageAdapter.clear();
+        break; // Only need to clear once since all adapters share the same storage
+      }
+    }
   }
 }
 

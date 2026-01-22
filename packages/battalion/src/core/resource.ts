@@ -1,4 +1,5 @@
 import { API_DOMAIN } from '@zamp-platform/api';
+import { getFromLocalStorage, LOCAL_STORAGE_KEYS } from '@zamp-platform/utils';
 import { z } from 'zod';
 
 import { CacheConfig, Resource, ResourceConfig, ResourceEndpoints } from '../types';
@@ -50,22 +51,32 @@ async function handleResponse(response: Response) {
   return response.json();
 }
 
-function createApiClient(endpoints: ResourceEndpoints) {
+function createApiClient(endpoints: ResourceEndpoints, transformResponse?: (response: unknown) => unknown[]) {
   return {
     list: async () => {
+      let result;
       if (typeof endpoints.list === 'string') {
         const response = await fetch(buildUrl(endpoints.list), {
           credentials: 'include',
+          headers: {
+            'X-Zamp-Organization-Id': getFromLocalStorage(LOCAL_STORAGE_KEYS.XZAMP_ORGANIZATION_ID),
+          },
         });
-        return handleResponse(response);
+        result = await handleResponse(response);
+      } else {
+        result = await endpoints.list?.(fetch);
       }
-      return endpoints.list?.(fetch);
+      // Apply transform if provided, otherwise return as-is
+      return transformResponse ? transformResponse(result) : result;
     },
     get: async (id: string) => {
       if (typeof endpoints.get === 'string') {
         const url = buildUrl(endpoints.get).replace(':id', id);
         const response = await fetch(url, {
           credentials: 'include',
+          headers: {
+            'X-Zamp-Organization-Id': getFromLocalStorage(LOCAL_STORAGE_KEYS.XZAMP_ORGANIZATION_ID),
+          },
         });
         return handleResponse(response);
       }
@@ -75,9 +86,12 @@ function createApiClient(endpoints: ResourceEndpoints) {
       if (typeof endpoints.create === 'string') {
         const response = await fetch(buildUrl(endpoints.create), {
           method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
           credentials: 'include',
           body: JSON.stringify(data),
+          headers: {
+            'Content-Type': 'application/json',
+            'X-Zamp-Organization-Id': getFromLocalStorage(LOCAL_STORAGE_KEYS.XZAMP_ORGANIZATION_ID),
+          },
         });
         return handleResponse(response);
       }
@@ -88,9 +102,12 @@ function createApiClient(endpoints: ResourceEndpoints) {
         const url = buildUrl(endpoints.update).replace(':id', id);
         const response = await fetch(url, {
           method: 'PUT',
-          headers: { 'Content-Type': 'application/json' },
           credentials: 'include',
           body: JSON.stringify(data),
+          headers: {
+            'Content-Type': 'application/json',
+            'X-Zamp-Organization-Id': getFromLocalStorage(LOCAL_STORAGE_KEYS.XZAMP_ORGANIZATION_ID),
+          },
         });
         return handleResponse(response);
       }
@@ -102,6 +119,9 @@ function createApiClient(endpoints: ResourceEndpoints) {
         const response = await fetch(url, {
           method: 'DELETE',
           credentials: 'include',
+          headers: {
+            'X-Zamp-Organization-Id': getFromLocalStorage(LOCAL_STORAGE_KEYS.XZAMP_ORGANIZATION_ID),
+          },
         });
         return handleResponse(response);
       }
@@ -111,7 +131,7 @@ function createApiClient(endpoints: ResourceEndpoints) {
 }
 
 export function defineResource<T extends z.ZodTypeAny>(config: ResourceConfig<T>): Resource {
-  const { name, schema, endpoints, relations = {} } = config;
+  const { name, schema, endpoints, relations = {}, transformResponse } = config;
 
   const transactionConfig = config.transactions
     ? {
@@ -131,8 +151,10 @@ export function defineResource<T extends z.ZodTypeAny>(config: ResourceConfig<T>
     dependsOn: config.dependsOn,
     transactions: transactionConfig,
     liveSync: config.liveSync,
+    persist: config.persist,
     cache: config.cache || DEFAULT_CACHE,
-    api: createApiClient(endpoints),
+    transformResponse,
+    api: createApiClient(endpoints, transformResponse),
   };
 
   getResourceRegistry().register(resource);
