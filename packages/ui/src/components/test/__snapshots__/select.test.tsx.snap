@@ -16,7 +16,7 @@ exports[`Select component matches snapshot for default select 1`] = `
       type="button"
     >
       <span
-        class="flex-1 truncate"
+        class="flex-1 truncate text-GRAY_500"
       >
         Snap
       </span>
@@ -57,7 +57,7 @@ exports[`Select component matches snapshot for select with custom className 1`] 
       type="button"
     >
       <span
-        class="flex-1 truncate"
+        class="flex-1 truncate text-GRAY_500"
       >
         Custom Class
       </span>
@@ -103,7 +103,7 @@ exports[`Select component matches snapshot for select with label 1`] = `
       type="button"
     >
       <span
-        class="flex-1 truncate"
+        class="flex-1 truncate text-GRAY_500"
       >
         Snap
       </span>
