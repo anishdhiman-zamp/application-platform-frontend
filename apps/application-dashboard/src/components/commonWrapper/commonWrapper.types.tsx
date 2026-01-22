@@ -35,6 +35,7 @@ export interface CommonWrapperPropsTypes {
   skeletonItemCount?: number;
   skeletonClassName?: string;
   loader?: ReactNode;
+  disableAnimation?: boolean;
 }
 
 export interface ErrorCardPropTypes {

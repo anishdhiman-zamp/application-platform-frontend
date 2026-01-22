@@ -103,6 +103,7 @@ const ChatContentInner = ({
             skeletonType={SkeletonTypes.CUSTOM}
             loader={<ChatMessagesSkeleton className='px-0' alignUserRight hideSenderName />}
             className='mx-auto flex w-full max-w-[700px] flex-1 flex-col px-4'
+            disableAnimation
           >
             <MessageContainer
               messages={chat.messages}

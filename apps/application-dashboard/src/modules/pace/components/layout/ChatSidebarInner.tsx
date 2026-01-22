@@ -108,6 +108,7 @@ const ChatSidebarInner: FC<ChatSidebarInnerProps> = ({
               skeletonType={SkeletonTypes.CUSTOM}
               loader={<ChatMessagesSkeleton className='px-0' />}
               className='mx-auto flex w-full flex-1 flex-col px-4'
+              disableAnimation
             >
               <MessageContainer
                 messages={chat.messages}
