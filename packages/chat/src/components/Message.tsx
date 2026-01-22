@@ -54,8 +54,6 @@ export const Message: FC<MessageProps> = ({
   const isUserMessage = message.sender_type === SenderType.USER;
   const shouldAlignRight = alignUserRight && isUserMessage;
 
-  console.log('shouldAlignRight', shouldAlignRight);
-
   const formattedTimestamp = useMemo(
     () => (message.timestamp ? formatChatTimestamp(formatTimestampToUTC(message.timestamp)) : ''),
     [message.timestamp],
