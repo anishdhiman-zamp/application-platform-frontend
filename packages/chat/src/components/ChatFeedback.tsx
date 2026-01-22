@@ -119,14 +119,14 @@ const ChatFeedback: FC<ChatFeedbackProps> = ({ messageId, conversationId, classN
       <Dialog open={isModalOpen} onOpenChange={setIsModalOpen}>
         <DialogContent
           size='small'
-          className='max-h-[90vh] w-[500px] gap-y-4 rounded-xl'
+          className='max-h-[90vh] w-[450px] gap-y-4 rounded-[14px]'
           title='Feedback'
           description='Submit feedback about this response'
           showCloseButton
-          closeButtonClassName='top-8 right-5'
+          closeButtonClassName='top-[23px] right-5'
         >
-          <DialogHeader className='border-b-0 px-5 pt-5'>
-            <DialogHeaderTitle className='text-lg font-semibold'>Feedback</DialogHeaderTitle>
+          <DialogHeader className='h-fit border-b-0 px-5 pt-5'>
+            <DialogHeaderTitle className='f-16-600 font-semibold'>Feedback</DialogHeaderTitle>
           </DialogHeader>
 
           <DialogBody className='flex flex-col gap-y-4 px-5'>
@@ -150,7 +150,7 @@ const ChatFeedback: FC<ChatFeedbackProps> = ({ messageId, conversationId, classN
                 value={details}
                 rows={3}
                 onChange={(e) => setDetails(e.target.value)}
-                className='border-GRAY_400 f-12-450 resize-none bg-white'
+                className='border-GRAY_400 f-12-450 placeholder:text-GRAY_500 resize-none bg-white'
               />
             </div>
           </DialogBody>
