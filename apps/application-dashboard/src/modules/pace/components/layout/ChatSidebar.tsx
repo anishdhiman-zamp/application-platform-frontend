@@ -5,7 +5,6 @@ import { cn } from '@zamp-platform/ui/utils';
 import { AnimatePresence, motion } from 'framer-motion';
 import { SIDEBAR_CONVERSATION_ID_PARAM, SIDEBAR_WIDTH } from 'modules/pace/pace.constants';
 import { useSearchParams } from 'next/navigation';
-import { useChatContext } from '@/modules/pace/chat.context';
 import ChatSidebarInner from '@/modules/pace/components/layout/ChatSidebarInner';
 import { useChatSidebarState } from '@/modules/pace/hooks/useChatSidebarState';
 
@@ -16,8 +15,6 @@ interface ChatSidebarProps {
 const ChatSidebar: FC<ChatSidebarProps> = ({ className }) => {
   const searchParams = useSearchParams();
   const initialConversationId = searchParams?.get(SIDEBAR_CONVERSATION_ID_PARAM) ?? null;
-
-  const { isExpanded, toggleExpand, resetExpand } = useChatContext();
 
   const {
     isChatSidebarOpen,
@@ -31,21 +28,19 @@ const ChatSidebar: FC<ChatSidebarProps> = ({ className }) => {
   } = useChatSidebarState({ initialConversationId });
 
   const handleCloseWithReset = useCallback(() => {
-    resetExpand();
     handleClose();
-  }, [resetExpand, handleClose]);
+  }, [handleClose]);
 
   return (
     <AnimatePresence>
       {isChatSidebarOpen && (
         <motion.div
           initial={{ width: 0, opacity: 0 }}
-          animate={{ width: isExpanded ? '100%' : SIDEBAR_WIDTH, opacity: 1 }}
+          animate={{ width: SIDEBAR_WIDTH, opacity: 1 }}
           exit={{ width: 0, opacity: 0 }}
           transition={{ duration: 0.2, ease: [0.4, 0, 0.2, 1] }}
           className={cn(
             'border-GRAY_400 flex h-full flex-shrink-0 flex-col overflow-hidden border-r bg-white',
-            isExpanded && 'absolute inset-0 z-50 border-r-0',
             className,
           )}
         >
@@ -57,8 +52,6 @@ const ChatSidebar: FC<ChatSidebarProps> = ({ className }) => {
             startNewChat={startNewChat}
             handleClose={handleCloseWithReset}
             chatTitle={chatTitle}
-            isExpanded={isExpanded}
-            onToggleExpand={toggleExpand}
           />
         </motion.div>
       )}
