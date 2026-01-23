@@ -10,7 +10,6 @@
     "test:coverage": "jest --coverage"
   },
   "dependencies": {
-    "@vercel/blob": "^1.1.1",
     "date-fns": "^2.30.0",
     "react": "^19.2.3"
   },

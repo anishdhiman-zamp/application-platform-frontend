@@ -5,7 +5,6 @@ const SkillsPage = () => {
   return (
     <div className='relative flex h-full flex-col items-center justify-start bg-white'>
       <SkillsHeader />
-
       <SkillsSection />
     </div>
   );

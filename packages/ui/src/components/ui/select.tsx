@@ -180,7 +180,12 @@ const Select = ({
           className={cn(value ? 'text-primary' : 'text-gray-700', selectVariants({ variant }), controlClassName)}
           data-testid={id ? `${id}-select-trigger` : 'select-trigger'}
         >
-          <span className='flex-1 truncate'>
+          <span
+            className={cn(
+              'flex-1 truncate',
+              !(selectedOption?.display_value || selectedOption?.label) && 'text-GRAY_500',
+            )}
+          >
             {selectedOption?.display_value || selectedOption?.label || placeholder}
           </span>
           <ChevronDown

@@ -42,8 +42,6 @@ export const DATE_FORMATS = {
   ddMMyyyy: 'dd/MM/yyyy',
   RELATIVE: 'relative',
   YYYYMMDD_SLASH: 'yyyy/MM/dd',
-  DD_MMM_YYYY_HHMM: 'd MMM yyyy, HH:mm',
-  DD_MMM_YYYY: 'd MMM yyyy',
 };
 
 export const VALID_DATE_FORMATS = Object.values(DATE_FORMATS);
@@ -218,50 +216,4 @@ export const CUSTOM_LOCALE = {
 
 export const formatRelativeWithCustomLocale = (date?: Date) => {
   return formatRelative(date ? date : new Date(), new Date(), { locale: CUSTOM_LOCALE });
-};
-
-/**
- * Formats a timestamp for chat messages based on how old it is:
- * - Today: shows time in 24h format (e.g., "16:47")
- * - Same year: shows day and month (e.g., "16 Jan")
- * - Older years: shows day, month and year (e.g., "16 Jan 2025")
- */
-export const formatChatTimestamp = (timestamp: string | Date): string => {
-  const date = typeof timestamp === 'string' ? new Date(timestamp) : timestamp;
-  const now = new Date();
-
-  const isToday =
-    date.getDate() === now.getDate() && date.getMonth() === now.getMonth() && date.getFullYear() === now.getFullYear();
-
-  const isSameYear = date.getFullYear() === now.getFullYear();
-
-  if (isToday) {
-    return format(date, DATE_FORMATS.HHMM);
-  }
-
-  if (isSameYear) {
-    return format(date, DATE_FORMATS.DD_MMM);
-  }
-
-  return format(date, DATE_FORMATS.DD_MMM_YYYY);
-};
-
-/**
- * Formats a timestamp for tooltip display showing full date and time
- * Format: "16 Jan 2025, 16:46"
- */
-export const formatChatTimestampTooltip = (timestamp: string | Date): string => {
-  const date = typeof timestamp === 'string' ? new Date(timestamp) : timestamp;
-  return format(date, DATE_FORMATS.DD_MMM_YYYY_HHMM);
-};
-
-/**
- * Ensures a timestamp string is treated as UTC by appending 'Z' if not present
- * @param timestamp - ISO timestamp string
- * @returns timestamp with 'Z' suffix for UTC
- */
-export const formatTimestampToUTC = (timestamp: string): string => {
-  if (!timestamp) return timestamp;
-
-  return timestamp.endsWith('Z') ? timestamp : `${timestamp}Z`;
 };

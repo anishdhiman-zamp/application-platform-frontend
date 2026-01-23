@@ -297,7 +297,12 @@ export const ConnectedChatInput: FC<ConnectedChatInputProps> = ({
         aria-label='File input'
         accept={acceptedFileTypes}
       />
-      <AttachmentsList attachments={attachments} removeAttachment={removeAttachment} isLoading={isUploading} />
+      <AttachmentsList
+        attachments={attachments}
+        removeAttachment={removeAttachment}
+        isLoading={isUploading}
+        className='mb-2'
+      />
       <div
         className={cn(shouldShowRecorder ? 'relative w-full rounded-xl border border-gray-600 p-1.5' : '', className)}
       >

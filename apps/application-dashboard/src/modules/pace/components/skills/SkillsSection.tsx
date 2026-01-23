@@ -94,6 +94,7 @@ const SkillsSection = () => {
           loader={<SkillCardSkeleton />}
           noDataBanner={<SkillsEmptyState searchQuery={searchQuery} />}
           className='h-full w-full'
+          disableAnimation
         >
           {filteredSkills.map((skill) => (
             <SkillCard key={skill.id} skill={skill} onUpdate={onUpdate} />

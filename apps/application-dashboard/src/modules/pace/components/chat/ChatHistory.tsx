@@ -23,6 +23,7 @@ const ChatHistory = ({ onSelectConversation }: ChatHistoryProps) => {
   const organizationId = useAppSelector((state: RootState) => state?.user?.user?.orgs?.[0]?.organization_id) ?? '';
   const [page, setPage] = useState(1);
   const [allConversations, setAllConversations] = useState<FeedbackItemType[]>([]);
+  const [totalCount, setTotalCount] = useState(0);
   const containerRef = useRef<HTMLDivElement>(null);
 
   const {
@@ -46,22 +47,22 @@ const ChatHistory = ({ onSelectConversation }: ChatHistoryProps) => {
   );
 
   const conversations = useMemo(() => conversationHistory?.conversations ?? [], [conversationHistory]);
-  const totalCount = useMemo(() => conversationHistory?.count ?? 0, [conversationHistory]);
   const displayConversations = useMemo(
     () => (allConversations.length > 0 ? allConversations : conversations),
     [allConversations, conversations],
   );
+  const hasMore = allConversations.length < totalCount;
 
   const fetchNextPage = useCallback(() => {
-    if (!isFetchingConversationHistory && displayConversations.length < totalCount) {
+    if (!isFetchingConversationHistory && hasMore) {
       setPage((prev) => prev + 1);
     }
-  }, [isFetchingConversationHistory, displayConversations.length, totalCount]);
+  }, [isFetchingConversationHistory, hasMore]);
 
   const { fetchMoreOnBottomReached } = useInfiniteScroll({
     fetchNextPage,
     isFetching: isFetchingConversationHistory,
-    totalFetched: displayConversations.length,
+    totalFetched: allConversations.length,
     totalRowCount: totalCount,
     hasDataSource: !!organizationId,
     threshold: 500,
@@ -74,27 +75,33 @@ const ChatHistory = ({ onSelectConversation }: ChatHistoryProps) => {
   const handleRefetch = useCallback(() => {
     setPage(1);
     setAllConversations([]);
+    setTotalCount(0);
     refetchConversationHistory();
   }, [refetchConversationHistory]);
 
   useEffect(() => {
-    if (conversations?.length > 0) {
-      if (page === 1) {
-        setAllConversations(conversations);
-      } else {
-        setAllConversations((prev) => {
-          const existingIds = new Set(prev.map((c) => c.id));
-          const newConversations = conversations.filter((c) => !existingIds.has(c.id));
+    if (conversationHistory?.count) {
+      setTotalCount(conversationHistory.count);
+    }
+  }, [conversationHistory?.count]);
 
-          return [...prev, ...newConversations];
-        });
-      }
+  useEffect(() => {
+    if (conversations.length > 0) {
+      setAllConversations((prev) => {
+        if (page === 1) {
+          return conversations;
+        }
+        const existingIds = new Set(prev.map((c) => c.id));
+        const newConversations = conversations.filter((c) => !existingIds.has(c.id));
+
+        return [...prev, ...newConversations];
+      });
     }
   }, [conversations, page]);
 
   return (
-    <div className='mx-auto flex min-h-0 w-full flex-1 flex-col bg-white pt-4'>
-      <div className='flex items-center justify-between p-3'>
+    <div className='mx-auto flex min-h-0 w-full flex-1 flex-col overflow-hidden bg-white pt-4'>
+      <div className='flex shrink-0 items-center justify-between p-3'>
         <p className='f-14-550 text-gray-1000'>Chat History</p>
       </div>
       <CommonWrapper
@@ -111,9 +118,10 @@ const ChatHistory = ({ onSelectConversation }: ChatHistoryProps) => {
             <p className='f-13-400 mt-1 text-gray-400'>Start a new chat to begin</p>
           </div>
         }
-        className='h-full w-full pb-4'
+        className='min-h-0 flex-1 pb-4'
+        disableAnimation
       >
-        <div ref={containerRef} className='h-full overflow-y-auto [scrollbar-width:none]' onScroll={handleScroll}>
+        <div ref={containerRef} className='h-full overflow-y-auto [scrollbar-width:thin]' onScroll={handleScroll}>
           <div className='space-y-0.5'>
             {displayConversations.map((conversation) => (
               <ChatHistoryItem key={conversation?.id} conversation={conversation} onSelect={onSelectConversation} />
