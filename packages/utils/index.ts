@@ -1,4 +1,3 @@
-export * from './blob';
 export * from './browser';
 export * from './cache';
 export * from './date';
