@@ -39,14 +39,14 @@ const UploadSkillModal = ({ isOpen, onClose, skillId, getSkillIdByName }: Upload
 
   const isLoading = isUploading || isUpdating || isReplacing;
 
-  const clearConflict = () => {
+  const clearConflict = useCallback(() => {
     setConflictingSkillName(null);
     setPendingFile(null);
     resetUpload();
     resetUpdate();
-  };
+  }, [resetUpload, resetUpdate]);
 
-  const validateFile = (file: File): boolean => {
+  const validateFile = useCallback((file: File): boolean => {
     const fileName = file.name.toLowerCase();
     const isValidType = ACCEPTED_SKILLFILE_TYPES.some((ext) => fileName.endsWith(ext));
 
@@ -57,31 +57,34 @@ const UploadSkillModal = ({ isOpen, onClose, skillId, getSkillIdByName }: Upload
     }
 
     return true;
-  };
+  }, []);
 
-  const handleSubmit = async (file: File) => {
-    try {
-      if (isUpdateMode && skillId) {
-        await updateSkill({ skillId, file }).unwrap();
-        toast.success('Skill updated successfully');
-      } else {
-        await uploadSkill({ file }).unwrap();
-        toast.success('Skill uploaded successfully');
-      }
-      handleClose();
-    } catch (error) {
-      const conflictName = getConflictingSkillName(error);
-      const errorMessage = (error as { data?: { message?: string } })?.data?.message;
+  const handleSubmit = useCallback(
+    async (file: File) => {
+      try {
+        if (isUpdateMode && skillId) {
+          await updateSkill({ skillId, file }).unwrap();
+          toast.success('Skill updated successfully');
+        } else {
+          await uploadSkill({ file }).unwrap();
+          toast.success('Skill uploaded successfully');
+        }
+        handleClose();
+      } catch (error) {
+        const conflictName = getConflictingSkillName(error);
+        const errorMessage = (error as { data?: { message?: string } })?.data?.message;
 
-      if (conflictName && !isUpdateMode) {
-        // Conflict error in upload mode - show replace confirmation
-        setConflictingSkillName(conflictName);
-        setPendingFile(file);
-      } else {
-        toast.error(errorMessage || `Failed to ${isUpdateMode ? 'update' : 'upload'} skill. Please try again.`);
+        if (conflictName && !isUpdateMode) {
+          // Conflict error in upload mode - show replace confirmation
+          setConflictingSkillName(conflictName);
+          setPendingFile(file);
+        } else {
+          toast.error(errorMessage || `Failed to ${isUpdateMode ? 'update' : 'upload'} skill. Please try again.`);
+        }
       }
-    }
-  };
+    },
+    [isUpdateMode, skillId, updateSkill, uploadSkill],
+  );
 
   const handleFile = useCallback(
     (file: File) => {
@@ -90,7 +93,7 @@ const UploadSkillModal = ({ isOpen, onClose, skillId, getSkillIdByName }: Upload
         handleSubmit(file);
       }
     },
-    [isUpdateMode, skillId],
+    [isUpdateMode, skillId, handleSubmit, clearConflict],
   );
 
   const handleDrop = useCallback(
