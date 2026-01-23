@@ -7,4 +7,5 @@ export * from './hooks/useThrottle';
 export * as IndexedDBCache from './indexeddb-cache';
 export * from './localstorage';
 export * as OPFSCache from './opfs-cache';
+export * from './string';
 export * from './url';
