@@ -614,12 +614,13 @@ export const findTimeDifference = (updated_at: string): string => {
   }
 
   const differenceInDaysValue = differenceInDays(currentTime, lastUpdatedTime);
+  const differenceInMonthsValue = differenceInMonths(currentTime, lastUpdatedTime);
 
-  if (differenceInDaysValue < 30) {
+  // Show days if less than 30 days OR if months calculation returns 0
+  // (handles edge case at month boundary when time of day hasn't passed)
+  if (differenceInDaysValue < 30 || differenceInMonthsValue === 0) {
     return `${formatPlural(differenceInDaysValue, 'day')} ago`;
   }
-
-  const differenceInMonthsValue = differenceInMonths(currentTime, lastUpdatedTime);
 
   return `${formatPlural(differenceInMonthsValue, 'month')} ago`;
 };
