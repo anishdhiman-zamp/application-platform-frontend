@@ -9,3 +9,10 @@ export const SIDEBAR_WIDTH = 400;
 
 export const SIDEBAR_CONVERSATION_ID_PARAM = 's';
 export const CHAT_CONVERSATION_ID_PARAM = 'c';
+
+export const ACCEPTED_SKILLFILE_TYPES = ['.zip', '.skill'];
+
+export const SKILL_FILE_REQUIREMENTS = [
+  '.md file must contain skill name and description formatted in YAML',
+  '.zip or .skill file must include a SKILL.md file',
+];
