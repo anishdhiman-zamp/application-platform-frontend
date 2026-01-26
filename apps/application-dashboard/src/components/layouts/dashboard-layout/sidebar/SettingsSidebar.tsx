@@ -14,7 +14,7 @@ import { useLogout } from '@/hooks/useLogout';
 import SidebarTab from 'components/layouts/dashboard-layout/components/SidebarTab';
 
 const SettingsSidebar = () => {
-  const { isSidebarOpen, lastVisitedRouteBeforeSettings } = useAppSelector((state: RootState) => state.layoutConfig);
+  const { isSidebarOpen } = useAppSelector((state: RootState) => state.layoutConfig);
   const pathname = usePathname();
   const { logout, isLoggingOut } = useLogout();
 
@@ -25,7 +25,7 @@ const SettingsSidebar = () => {
           {/* Back button */}
           <div className='px-2 py-5'>
             <div className='text-GRAY_700 flex w-full items-center gap-2.5'>
-              <Link prefetch href={lastVisitedRouteBeforeSettings || ROUTES_PATH.PROCESSES} className='cursor-pointer'>
+              <Link prefetch href={ROUTES_PATH.PROCESSES} className='cursor-pointer'>
                 <ArrowLeft size={16} />
               </Link>
               <span className='f-13-500 select-none'>Settings</span>

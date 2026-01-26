@@ -31,12 +31,15 @@ export const ROUTES_PATH = {
   SETTINGS: '/settings',
   INTEGRATIONS: '/settings/integrations',
   INTEGRATION_DETAIL: '/settings/integrations/:integrationId',
-  SETTINGS_TEAM: '/settings/team',
+  SETTINGS_PEOPLE: '/settings/people',
 
   MACS: '/macs',
 
   CHAT: '/chat',
   CHAT_SKILLS: '/chat/skills',
+  CHAT_SETTINGS: '/chat/settings',
+  CHAT_SETTINGS_PEOPLE: '/chat/settings/people',
+  CHAT_SETTINGS_INTEGRATIONS: '/chat/settings/integrations',
 };
 
 export const getPageRouteById = (pageId: string, sheetId?: string) => {

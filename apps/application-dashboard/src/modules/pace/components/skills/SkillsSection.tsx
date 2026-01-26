@@ -6,11 +6,11 @@ import { useListSkillsQuery } from '@/apis/pace';
 import NewPaceIcons from '@/assets/Icons/NewPaceIcons';
 import CommonWrapper from '@/components/commonWrapper';
 import { SkeletonTypes } from '@/components/commonWrapper/commonWrapper.types';
-import { useChatContext } from '@/modules/pace/chat.context';
 import SkillCardSkeleton from '@/modules/pace/components/loaders/SkillCardSkeleton';
 import SkillCard from '@/modules/pace/components/skills/SkillCard';
 import SkillsEmptyState from '@/modules/pace/components/skills/SkillsEmptyState';
 import UploadSkillModal from '@/modules/pace/components/skills/UploadSkillModal';
+import { usePaceContext } from '@/modules/pace/pace.context';
 
 const SkillsSection = () => {
   const [searchQuery, setSearchQuery] = useState('');
@@ -18,7 +18,7 @@ const SkillsSection = () => {
   const [isUploadModalOpen, setIsUploadModalOpen] = useState(false);
   const [skillIdToUpdate, setSkillIdToUpdate] = useState<string | undefined>(undefined);
 
-  const { isChatSidebarOpen, setIsChatSidebarOpen } = useChatContext();
+  const { isPaceSidebarOpen, setIsPaceSidebarOpen } = usePaceContext();
   const { data, isLoading, isError, refetch } = useListSkillsQuery({});
 
   const skills = data?.skills ?? [];
@@ -59,7 +59,7 @@ const SkillsSection = () => {
   };
 
   const onOpenChat = () => {
-    setIsChatSidebarOpen(true);
+    setIsPaceSidebarOpen(true);
   };
 
   return (
@@ -102,7 +102,7 @@ const SkillsSection = () => {
         </CommonWrapper>
       </div>
       <UploadSkillModal isOpen={isUploadModalOpen} onClose={onCloseModal} skillId={skillIdToUpdate} />
-      {!isChatSidebarOpen && (
+      {!isPaceSidebarOpen && (
         <Button
           onClick={onOpenChat}
           variant='secondary'

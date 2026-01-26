@@ -1,35 +1,18 @@
 'use client';
 
-import type { ReactNode } from 'react';
+import type { FC, ReactNode } from 'react';
 import { notFound } from 'next/navigation';
 import ImageLoader from '@/components/common/loader/ImageLoader';
 import { ZAMP_LOGO_LOADER_SVG } from '@/constants/icons';
 import { useIsPaceChatEnabled } from '@/hooks/useIsPaceChatEnabled';
-import { ChatProvider } from '@/modules/pace/chat.context';
-import ChatNavbar from '@/modules/pace/components/layout/ChatNavbar';
-import ChatSidebar from '@/modules/pace/components/layout/ChatSidebar';
+import PaceLayoutContent from '@/modules/pace/components/layout/PaceLayoutContent';
+import { PaceProvider } from '@/modules/pace/pace.context';
 
-interface ChatLayoutProps {
+interface PaceLayoutProps {
   children: ReactNode;
 }
 
-const ChatLayoutContent = ({ children }: ChatLayoutProps) => {
-  return (
-    <div className='bg-BG_GRAY_1 flex h-full w-full overflow-hidden'>
-      <ChatSidebar />
-      <div className='flex min-h-0 flex-1 flex-col overflow-hidden'>
-        <ChatNavbar />
-        <main className='flex min-h-0 flex-1 px-2'>
-          <section className='border-GRAY_400 shadow-chat-section flex min-h-0 w-full flex-1 flex-col overflow-hidden rounded-t-xl border bg-white'>
-            {children}
-          </section>
-        </main>
-      </div>
-    </div>
-  );
-};
-
-const ChatLayout = ({ children }: ChatLayoutProps) => {
+const PaceLayout: FC<PaceLayoutProps> = ({ children }) => {
   const { isPaceChatEnabled, isLoading } = useIsPaceChatEnabled();
 
   if (isLoading) {
@@ -41,10 +24,10 @@ const ChatLayout = ({ children }: ChatLayoutProps) => {
   }
 
   return (
-    <ChatProvider>
-      <ChatLayoutContent>{children}</ChatLayoutContent>
-    </ChatProvider>
+    <PaceProvider>
+      <PaceLayoutContent>{children}</PaceLayoutContent>
+    </PaceProvider>
   );
 };
 
-export default ChatLayout;
+export default PaceLayout;

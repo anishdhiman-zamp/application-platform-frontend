@@ -3,14 +3,14 @@
 import { useCallback, useEffect, useRef, useState } from 'react';
 import { SIDEBAR_CONVERSATION_ID_PARAM } from 'modules/pace/pace.constants';
 import { usePathname } from 'next/navigation';
-import { useChatContext } from '@/modules/pace/chat.context';
+import { usePaceContext } from '@/modules/pace/pace.context';
 
 interface UseChatSidebarStateProps {
   initialConversationId: string | null;
 }
 
 export const useChatSidebarState = ({ initialConversationId }: UseChatSidebarStateProps) => {
-  const { isChatSidebarOpen, setIsChatSidebarOpen } = useChatContext();
+  const { isPaceSidebarOpen, setIsPaceSidebarOpen } = usePaceContext();
   const pathname = usePathname();
 
   const isInitializedRef = useRef(false);
@@ -58,8 +58,8 @@ export const useChatSidebarState = ({ initialConversationId }: UseChatSidebarSta
   }, []);
 
   const handleClose = useCallback(() => {
-    setIsChatSidebarOpen(false);
-  }, [setIsChatSidebarOpen]);
+    setIsPaceSidebarOpen(false);
+  }, [setIsPaceSidebarOpen]);
 
   // Initialize conversation ID from URL on mount
   useEffect(() => {
@@ -69,11 +69,11 @@ export const useChatSidebarState = ({ initialConversationId }: UseChatSidebarSta
 
       if (urlConversationId) {
         setConversationIdState(urlConversationId);
-        setIsChatSidebarOpen(true);
+        setIsPaceSidebarOpen(true);
       }
       isInitializedRef.current = true;
     }
-  }, [setIsChatSidebarOpen]);
+  }, [setIsPaceSidebarOpen]);
 
   // Reset chat state when route changes
   useEffect(() => {
@@ -82,12 +82,12 @@ export const useChatSidebarState = ({ initialConversationId }: UseChatSidebarSta
       setChatTitle('');
       setConversationIdState(null);
       setChatKey((prev) => prev + 1);
-      setIsChatSidebarOpen(false);
+      setIsPaceSidebarOpen(false);
     }
-  }, [pathname, setIsChatSidebarOpen]);
+  }, [pathname, setIsPaceSidebarOpen]);
 
   return {
-    isChatSidebarOpen,
+    isPaceSidebarOpen,
     chatTitle,
     setChatTitle,
     conversationId,
