@@ -126,7 +126,7 @@ const ChatFeedback: FC<ChatFeedbackProps> = ({ messageId, conversationId, classN
           closeButtonClassName='top-[23px] right-5'
         >
           <DialogHeader className='h-fit border-b-0 px-5 pt-5'>
-            <DialogHeaderTitle className='f-16-600 font-semibold'>Feedback</DialogHeaderTitle>
+            <DialogHeaderTitle className='f-16-600'>Feedback</DialogHeaderTitle>
           </DialogHeader>
 
           <DialogBody className='flex flex-col gap-y-4 px-5'>
