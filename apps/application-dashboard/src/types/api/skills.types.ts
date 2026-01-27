@@ -13,3 +13,14 @@ export interface Skill {
   created_at: string;
   updated_at: string;
 }
+
+// Skill API Error Types
+export interface SkillApiError {
+  type: string;
+  code: string;
+  message: string;
+  details?: {
+    skill_name?: string;
+    organization_id?: string;
+  };
+}
