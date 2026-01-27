@@ -6,6 +6,7 @@ export const enum PaceNavbarItemId {
   SETTINGS = 'settings',
   PEOPLE = 'people',
   INTEGRATIONS = 'integrations',
+  ARTIFACTS = 'artifacts',
 }
 
 export interface PaceNavbarItemSchema {

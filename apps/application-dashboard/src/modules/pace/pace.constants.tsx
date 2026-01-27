@@ -1,4 +1,4 @@
-import { BookTextIcon, HomeIcon, SettingsIcon } from '@zamp-platform/ui';
+import { ActivityIcon, HomeIcon, SettingsIcon, ShapesIcon } from '@zamp-platform/ui';
 import { Link2 } from 'lucide-react';
 import { PaceNavbarItemId, PaceNavbarItemSchema, PaceSettingsTabSchema } from 'modules/pace/pace.types';
 import Users02 from '@/assets/Icons/Users02';
@@ -22,13 +22,18 @@ export const PACE_NAVBAR_ITEMS: PaceNavbarItemSchema[] = [
   },
   {
     id: PaceNavbarItemId.SKILL,
-    iconComponent: <BookTextIcon size={14} />,
+    iconComponent: <ActivityIcon size={14} />,
     path: ROUTES_PATH.CHAT_SKILLS,
   },
   {
     id: PaceNavbarItemId.SETTINGS,
     iconComponent: <SettingsIcon size={14} />,
     path: ROUTES_PATH.CHAT_SETTINGS_PEOPLE,
+  },
+  {
+    id: PaceNavbarItemId.ARTIFACTS,
+    iconComponent: <ShapesIcon size={14} />,
+    path: ROUTES_PATH.CHAT_ARTIFACTS,
   },
 ];
 
