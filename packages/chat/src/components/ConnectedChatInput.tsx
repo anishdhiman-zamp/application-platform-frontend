@@ -4,7 +4,7 @@ import { captureException } from '@sentry/nextjs';
 import { Button, Textarea, toast } from '@zamp-platform/ui';
 import { cn } from '@zamp-platform/ui/utils';
 import { ArrowUp, Check, Loader, Mic, Paperclip, X } from 'lucide-react';
-import { Dispatch, FC, SetStateAction, useCallback, useEffect, useMemo, useRef } from 'react';
+import { Dispatch, FC, RefObject, SetStateAction, useCallback, useEffect, useMemo, useRef } from 'react';
 
 import { useLazyGetSpeechToTextAccessTokenQuery } from '@/apis/voiceAgents';
 
@@ -15,9 +15,12 @@ import { MicrophoneState } from '../hooks/useMicrophoneRecorder';
 import { useTranscription } from '../hooks/useTranscription';
 import { AnnotationType, LocationData, ResourceType, ScopeType } from '../types/chat.types';
 import { SOCKET_STATES, SpeechToTextProvider } from '../types/transcription.types';
+import { formatRejectedExtensions, isFileTypeAccepted } from '../utils/fileUpload';
 import { AudioVisualizer } from './AudioVisualizer';
 import { AttachmentsList } from './blocks';
 import { FileMimeType } from './chat.constants';
+
+export type FileDropHandlerRef = RefObject<((files: FileList) => void) | null>;
 
 export interface ConnectedChatInputProps {
   chat: ReturnType<typeof useChat>;
@@ -47,6 +50,7 @@ export interface ConnectedChatInputProps {
   annotationType?: AnnotationType;
   defaultMessage?: string;
   onConversationCreated?: (conversationId: string) => void;
+  fileDropHandlerRef?: FileDropHandlerRef;
 }
 
 export const ConnectedChatInput: FC<ConnectedChatInputProps> = ({
@@ -76,6 +80,7 @@ export const ConnectedChatInput: FC<ConnectedChatInputProps> = ({
   disableAttachments = false,
   defaultMessage,
   onConversationCreated,
+  fileDropHandlerRef,
 }: ConnectedChatInputProps) => {
   const fileInputRef = useRef<HTMLInputElement>(null);
 
@@ -165,23 +170,8 @@ export const ConnectedChatInput: FC<ConnectedChatInputProps> = ({
     }
   };
 
-  const isFileTypeAccepted = useCallback(
-    (file: File): boolean => {
-      if (!acceptedFileTypes) return true;
-
-      const acceptedTypes = acceptedFileTypes.split(',').map((type) => type.trim().toLowerCase());
-      const fileExtension = `.${file.name.split('.').pop()?.toLowerCase()}`;
-      const fileMimeType = file.type.toLowerCase();
-
-      return acceptedTypes.some((acceptedType) => {
-        // Check if it's a MIME type match
-        if (acceptedType.includes('/')) {
-          return fileMimeType === acceptedType;
-        }
-        // Check if it's an extension match
-        return fileExtension === acceptedType;
-      });
-    },
+  const checkFileType = useCallback(
+    (file: File): boolean => isFileTypeAccepted(file, acceptedFileTypes),
     [acceptedFileTypes],
   );
 
@@ -192,23 +182,14 @@ export const ConnectedChatInput: FC<ConnectedChatInputProps> = ({
       e.preventDefault();
 
       const fileArray = Array.from(files);
-      const acceptedFiles = fileArray.filter(isFileTypeAccepted);
-      const rejectedFiles = fileArray.filter((file) => !isFileTypeAccepted(file));
+      const acceptedFiles = fileArray.filter(checkFileType);
+      const rejectedFiles = fileArray.filter((file) => !checkFileType(file));
 
       if (rejectedFiles.length > 0) {
         const rejectedExtensions = [...new Set(rejectedFiles.map((f) => `.${f.name.split('.').pop()?.toLowerCase()}`))];
 
-        let extensionsText: string;
-        if (rejectedExtensions.length === 1) {
-          extensionsText = rejectedExtensions[0];
-        } else if (rejectedExtensions.length === 2) {
-          extensionsText = `${rejectedExtensions[0]} and ${rejectedExtensions[1]}`;
-        } else {
-          const lastExtension = rejectedExtensions.pop();
-          extensionsText = `${rejectedExtensions.join(', ')}, and ${lastExtension}`;
-        }
-
-        toast.error(`${extensionsText} file type is not supported`);
+        const extensionsText = formatRejectedExtensions(rejectedExtensions);
+        toast.error?.(`${extensionsText} file type is not supported`);
 
         if (acceptedFiles.length === 0) {
           return;
@@ -279,6 +260,19 @@ export const ConnectedChatInput: FC<ConnectedChatInputProps> = ({
       setFirstMessage(defaultMessage || '');
     }
   }, [defaultMessage, setFirstMessage]);
+
+  // Expose handleFileSelect to parent for external drag and drop
+  useEffect(() => {
+    if (fileDropHandlerRef && !disableAttachments && !isDisabled) {
+      fileDropHandlerRef.current = handleFileSelect;
+    }
+
+    return () => {
+      if (fileDropHandlerRef) {
+        fileDropHandlerRef.current = null;
+      }
+    };
+  }, [fileDropHandlerRef, handleFileSelect, disableAttachments, isDisabled]);
 
   return (
     <div
