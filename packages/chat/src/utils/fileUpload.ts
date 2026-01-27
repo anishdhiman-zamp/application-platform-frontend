@@ -258,8 +258,8 @@ export const formatRejectedExtensions = (rejectedExtensions: string[]): string =
   } else if (rejectedExtensions.length === 2) {
     return `${rejectedExtensions[0]} and ${rejectedExtensions[1]}`;
   } else {
-    const lastExtension = rejectedExtensions.pop();
-    return `${rejectedExtensions.join(', ')}, and ${lastExtension}`;
+    const lastExtension = rejectedExtensions[rejectedExtensions.length - 1];
+    return `${rejectedExtensions.slice(0, -1).join(', ')}, and ${lastExtension}`;
   }
 };
 
