@@ -125,6 +125,53 @@ if (!global.TextEncoder) {
   } as unknown as typeof TextEncoder;
 }
 
+// Mock IDBKeyRange for IndexedDB tests
+if (!global.IDBKeyRange) {
+  global.IDBKeyRange = class IDBKeyRange {
+    lower: unknown;
+    upper: unknown;
+    lowerOpen: boolean;
+    upperOpen: boolean;
+
+    constructor() {
+      this.lower = undefined;
+      this.upper = undefined;
+      this.lowerOpen = false;
+      this.upperOpen = false;
+    }
+
+    static upperBound(upper: unknown, open = false): IDBKeyRange {
+      const range = new IDBKeyRange();
+      range.upper = upper;
+      range.upperOpen = open;
+      return range;
+    }
+
+    static lowerBound(lower: unknown, open = false): IDBKeyRange {
+      const range = new IDBKeyRange();
+      range.lower = lower;
+      range.lowerOpen = open;
+      return range;
+    }
+
+    static bound(lower: unknown, upper: unknown, lowerOpen = false, upperOpen = false): IDBKeyRange {
+      const range = new IDBKeyRange();
+      range.lower = lower;
+      range.upper = upper;
+      range.lowerOpen = lowerOpen;
+      range.upperOpen = upperOpen;
+      return range;
+    }
+
+    static only(value: unknown): IDBKeyRange {
+      const range = new IDBKeyRange();
+      range.lower = value;
+      range.upper = value;
+      return range;
+    }
+  } as typeof IDBKeyRange;
+}
+
 // Reset all mocks before each test
 beforeEach(() => {
   jest.clearAllMocks();

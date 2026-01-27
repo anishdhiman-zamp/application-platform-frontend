@@ -75,3 +75,5 @@ export const DisplayTypeOptions = [
 ];
 
 export const DisplayTypeNonApplicableFilterTypes = [FILTER_TYPES.AMOUNT_RANGE, FILTER_TYPES.DATE_RANGE];
+
+export const UI_COLUMN_RESIZED = 'uiColumnResized';

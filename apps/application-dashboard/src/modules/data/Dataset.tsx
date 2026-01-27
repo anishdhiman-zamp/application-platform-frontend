@@ -3,6 +3,18 @@
 import { FC, useEffect, useMemo, useRef, useState } from 'react';
 import { captureException } from '@sentry/browser';
 import {
+  BluePrintDataset,
+  convertFilterConfigToColumns,
+  DATASET_COLUMN_TYPES_LIST,
+  type DatasetColumnDependencies,
+  DatasetColumnProvider,
+  DatasetColumnTypes,
+  DatasetEditPreviewTab,
+  DatasetTabsTypes,
+  useDatasetColumnContext,
+  useDatasetGridSync,
+} from '@zamp-platform/dataset-create-edit';
+import {
   CellEditRequestEvent,
   ColDef,
   FillEndEvent,
@@ -11,38 +23,43 @@ import {
   IServerSideGetRowsRequest,
 } from 'ag-grid-community';
 import { AgGridReact } from 'ag-grid-react';
+import { useGetDatasetDisplayConfigQuery, useUpdateDatasetMutation } from 'apis/admin';
 import { useGetDatasetFilterConfigQuery, useLazyGetDatasetDataQuery, useUpdateDatasetDataMutation } from 'apis/dataset';
 import { useOnClickOutside } from 'hooks';
 import DatasetHistory from 'modules/data/components/datasetHistory/index';
 import ExportDataset from 'modules/data/components/exportDataset';
 import ImportDataset from 'modules/data/components/importDataset/index';
 import TableSchemaAlignmentStatus from 'modules/data/components/importDataset/TableSchemaAlignmentStatus';
-import { ColumnType, DatasetActionMessages, SourceType } from 'modules/data/data.constants';
+import { ColumnType, DatasetActionMessages, NEW_COLUMN_PREFIX, SourceType } from 'modules/data/data.constants';
 import { DATASET_ACTION_TYPE, LOADER_STATUS, RuleColumnDetailsType } from 'modules/data/data.types';
 import {
   formatColumns,
   formatDrilldownFilters,
   formatUrlFilters,
+  getColumnOrderingVisibilityForCurrentDataset,
   getFilters,
-  handleColumnMoved,
   handleDrilldownClick,
+  mergeAndOrderItems,
+  mergeBackendAndFrontendColumns,
   removeCellFocus,
-  syncFilterConfigHiddenColumnsInLocalStorage,
 } from 'modules/data/data.utils';
+import { useAgGridContextSync } from 'modules/data/hooks/useAgGridContextSync';
 import RowPropertiesSideDrawer from 'modules/data/RowProperties';
 import RulesListingSideDrawer from 'modules/data/RulesListing';
 import RuleDelete from 'modules/data/RulesListing/RuleDelete';
 import { LOCAL_CURRENCY, PAGE_CURRENCY_OPTIONS } from 'modules/page/pages.constants';
 import { DATASET_ACCESS_PRIVILEGES, ResourceType } from 'modules/shareResource/shareResource.types';
 import SingleSelectFilter from 'modules/widgets/components/SingleSelectFilter';
-import { useParams, useRouter, useSearchParams } from 'next/navigation';
+import { useParams, usePathname, useRouter, useSearchParams } from 'next/navigation';
 import { DatasetDataResponseType } from 'types/api/dataset.types';
 import { MapAny } from 'types/commonTypes';
 import { FilterModelType, LogicalOperatorType } from 'types/components/table.type';
 import { checkIsObjectEmpty, cn, snakeCaseToSentenceCase } from 'utils/common';
+import { getFromLocalStorage, LOCAL_STORAGE_KEYS, setToLocalStorage } from 'utils/localstorage';
 import ImageLoader from '@/components/common/loader/ImageLoader';
 import { ZAMP_LOGO_LOADER_SVG } from '@/constants/icons';
 import { useResourceAccess } from '@/hooks/useResourceAccess';
+import useIsDatasetCreationEnabled from '@/modules/process/hooks/useIsDatasetCreationEnabled';
 import CustomHeader from 'components/common/table/CustomHeader';
 import DatasetTable from 'components/common/table/DatasetTable';
 import DisplayOptions from 'components/common/table/DisplayOptions';
@@ -68,7 +85,8 @@ type DatasetByIdProps = {
   parentSelectedFilters?: MapAny;
 };
 
-const DatasetById: FC<DatasetByIdProps> = ({
+// Inner component that has access to DatasetColumnContext
+const DatasetByIdInner: FC<DatasetByIdProps> = ({
   id,
   drilldownFilters,
   pageSize,
@@ -80,17 +98,55 @@ const DatasetById: FC<DatasetByIdProps> = ({
   updateFilterConfigInParent,
   parentSelectedFilters,
 }) => {
-  const searchParams = useSearchParams();
+  const {
+    initializeColumns,
+    getColumnNamesMap,
+    columnOrder: contextColumnOrder,
+    columns: contextColumns, // Get columns from context
+    columnVisibility: contextColumnVisibility, // Get visibility map for sync
+  } = useDatasetColumnContext(); // Access the unified column context
   const params = useParams();
-  const filters = decodeURIComponent(searchParams?.get('filters') ?? '');
-  const processId = params?.processId as string;
-  const activityId = params?.activityId;
-  const currency = searchParams?.get('currency') ?? LOCAL_CURRENCY;
   const router = useRouter();
+  const searchParams = useSearchParams();
+  const pathname = usePathname();
+  const firstLoadDone = useRef(false);
   const tableRef = useRef<AgGridReact>(null);
   const datasetTableRef = useRef<HTMLDivElement>(null);
-  const firstLoadDone = useRef(false);
-
+  const {
+    dispatch,
+    state: { selectedFilters, filtersConfig },
+  } = useFiltersContextStore();
+  const currency = searchParams?.get('currency') ?? LOCAL_CURRENCY;
+  const [columns, setColumns] = useState<ColDef[]>([]);
+  const [totalRows, setTotalRows] = useState<number>(0);
+  const [deleteRuleId, setDeleteRuleId] = useState<string>();
+  const [gridReady, setGridReady] = useState<boolean>(false);
+  const [datasetTitle, setDatasetTitle] = useState<string>('');
+  const isDatasetCreationEnabled = useIsDatasetCreationEnabled();
+  const [fxCurrency, setFxCurrency] = useState<string[]>([currency]);
+  const [rowPropertiesData, setRowPropertiesData] = useState<MapAny>();
+  const [exportsDatasetQuery, setExportsDatasetQuery] = useState<string>('');
+  const [isNoRowsOverlayVisible, setIsNoRowsOverlayVisible] = useState<boolean>(false);
+  const [isRulesListingSideDrawerOpen, setIsRulesListingSideDrawerOpen] = useState(false);
+  const [cachedDatasetData, setCachedDatasetData] = useState<DatasetDataResponseType>();
+  const [hiddenColumnFilters, setHiddenColumnFilters] = useState<MapAny>();
+  const [ruleColumnDetails, setRuleColumnDetails] = useState<RuleColumnDetailsType>({
+    colId: '',
+    columnLabel: '',
+    tagColorMap: {},
+  });
+  const [showAiTransformationStatus, setShowAiTransformationStatus] = useState<{
+    open: boolean;
+    status: string;
+    title: string;
+    description: string;
+  }>({
+    open: false,
+    status: LOADER_STATUS.LOADING,
+    title: '',
+    description: '',
+  });
+  const { handleColumnMoved: syncColumnMoved } = useDatasetGridSync(); // Use the grid sync hook for AG Grid events
   const { checkUserPrivilege } = useResourceAccess({
     resourceType: ResourceType.DATASET,
     resourceId: id,
@@ -110,55 +166,20 @@ const DatasetById: FC<DatasetByIdProps> = ({
     },
     {
       skip: !id,
-      refetchOnMountOrArgChange: true,
+      refetchOnMountOrArgChange: false, // Prevent refetch on mount for better UX
     },
   );
 
   const [getDatasetData, { data: datasetData, isError: lazyloadDataSetError }] = useLazyGetDatasetDataQuery();
-
-  const {
-    dispatch,
-    state: { selectedFilters, filtersConfig },
-  } = useFiltersContextStore();
-
-  const currentUserHasEditAccess = useMemo(() => {
-    return (
-      checkUserPrivilege(DATASET_ACCESS_PRIVILEGES.ADMIN) || checkUserPrivilege(DATASET_ACCESS_PRIVILEGES.DATA_EDITOR)
-    );
-  }, [checkUserPrivilege]);
-
-  const showFileImports = filterConfigData?.config?.is_file_import_enabled;
-
-  const [gridReady, setGridReady] = useState<boolean>(false);
-  const [columns, setColumns] = useState<ColDef[]>([]);
-  const [totalRows, setTotalRows] = useState<number>(0);
-  const [ruleColumnDetails, setRuleColumnDetails] = useState<RuleColumnDetailsType>({
-    colId: '',
-    columnLabel: '',
-    tagColorMap: {},
-  });
-  const [isRulesListingSideDrawerOpen, setIsRulesListingSideDrawerOpen] = useState(false);
-  const [rowPropertiesData, setRowPropertiesData] = useState<MapAny>();
-  const [exportsDatasetQuery, setExportsDatasetQuery] = useState<string>('');
-  const [datasetTitle, setDatasetTitle] = useState<string>('');
-  const [fxCurrency, setFxCurrency] = useState<string[]>([currency]);
-  const [isNoRowsOverlayVisible, setIsNoRowsOverlayVisible] = useState<boolean>(false);
-  const [cachedDatasetData, setCachedDatasetData] = useState<DatasetDataResponseType>();
-  const [hiddenColumnFilters, setHiddenColumnFilters] = useState<MapAny>();
-  const [deleteRuleId, setDeleteRuleId] = useState<string>();
-  const [showAiTransformationStatus, setShowAiTransformationStatus] = useState<{
-    open: boolean;
-    status: string;
-    title: string;
-    description: string;
-  }>({
-    open: false,
-    status: LOADER_STATUS.LOADING,
-    title: '',
-    description: '',
-  });
-
   const [updateDatasetData] = useUpdateDatasetDataMutation();
+  const filters = decodeURIComponent(searchParams?.get('filters') ?? '');
+  const processId = params?.processId as string;
+  const activityId = params?.activityId;
+  const showFileImports = filterConfigData?.config?.is_file_import_enabled;
+  const tabFromUrl = searchParams?.get('tab'); // Get tab from URL query params, default to PREVIEW if not present or invalid
+  const isValidTab = tabFromUrl === DatasetTabsTypes.BLUEPRINT || tabFromUrl === DatasetTabsTypes.PREVIEW;
+  const initialTab = isValidTab ? tabFromUrl : DatasetTabsTypes.PREVIEW;
+  const [selectedTab, setSelectedTab] = useState<DatasetTabsTypes>(initialTab);
 
   const serverSideDatasource: IServerSideDatasource = useMemo(() => {
     return {
@@ -236,6 +257,12 @@ const DatasetById: FC<DatasetByIdProps> = ({
     tableRef.current?.api?.refreshServerSide();
     toast.success(DatasetActionMessages[actionType].SUCCESS);
   };
+
+  const currentUserHasEditAccess = useMemo(() => {
+    return (
+      checkUserPrivilege(DATASET_ACCESS_PRIVILEGES.ADMIN) || checkUserPrivilege(DATASET_ACCESS_PRIVILEGES.DATA_EDITOR)
+    );
+  }, [checkUserPrivilege]);
 
   const updateApi = ({
     rowId,
@@ -359,95 +386,114 @@ const DatasetById: FC<DatasetByIdProps> = ({
     handleSuccessfulUpdate(DATASET_ACTION_TYPE.RULE_DELETION);
   };
 
-  useEffect(() => {
-    if (filterConfigData?.data?.length && !isFetching && !isUninitialized) {
-      syncFilterConfigHiddenColumnsInLocalStorage(id as string, filterConfigData?.data);
+  const initializeFilterConfig = () => {
+    if (!filterConfigData?.data?.length || isFetching || isUninitialized) return;
 
-      const columns = formatColumns({
-        filterConfig: filterConfigData?.data,
-        currentUserHasEditAccess,
-        datasetId: id,
-        handleSuccessfulUpdate,
-        tableRef,
-        handleRulesListingSideDrawerOpen,
-        isSelfServe: true,
+    // Format backend columns for AG Grid
+    const backendAgGridColumns = formatColumns({
+      filterConfig: filterConfigData?.data,
+      currentUserHasEditAccess,
+      datasetId: id,
+      handleSuccessfulUpdate,
+      tableRef,
+      handleRulesListingSideDrawerOpen,
+      isSelfServe: true,
+    });
+
+    // Merge backend columns with frontend-only columns from localStorage
+    const storedConfigForAgGrid = getColumnOrderingVisibilityForCurrentDataset(id as string);
+    const finalColumns = mergeBackendAndFrontendColumns(backendAgGridColumns, storedConfigForAgGrid, {
+      datasetId: id as string,
+      handleSuccessfulUpdate,
+      tableRef,
+    });
+
+    if (finalColumns.length === 0) return;
+
+    setColumns(finalColumns);
+
+    const filtersConfig = filterConfigData?.data
+      ?.filter((item) => !item?.metadata?.is_hidden)
+      ?.map((column) => ({
+        key: column.column,
+        label: column.alias ?? snakeCaseToSentenceCase(column?.column),
+        values: column.options,
+        type: getColumnType(column),
+      }));
+
+    dispatch({
+      type: filtersContextActions.SET_FILTERS_CONFIG,
+      payload: { filtersConfig },
+    });
+    updateFilterConfigInParent?.(filtersConfig);
+
+    if (filters) {
+      firstLoadDone.current = false;
+      dispatch({
+        type: filtersContextActions.INITIALIZE_DEFAULT_FILTERS,
+        payload: { selectedFilters: getFilters(filters, filterConfigData.data) ?? {} },
       });
+    }
 
-      if (columns?.length > 0) {
-        setColumns(columns);
-        const filtersConfig = filterConfigData?.data
-          ?.filter((item) => !item?.metadata?.is_hidden)
-          ?.map((column) => ({
-            key: column.column,
-            label: column.alias ?? snakeCaseToSentenceCase(column?.column),
-            values: column.options,
-            type: getColumnType(column),
-          }));
+    if (parentSelectedFilters) {
+      dispatch({
+        type: filtersContextActions.INITIALIZE_DEFAULT_FILTERS,
+        payload: { selectedFilters: parentSelectedFilters },
+      });
+    }
 
+    // Initialize Blueprint columns from filterConfig
+    // HYBRID APPROACH: Merge backend columns + localStorage-only columns
+    const backendColumns = convertFilterConfigToColumns(filterConfigData.data);
+
+    // Check localStorage for additional columns (FE-only columns from Blueprint)
+    const storedConfig = getColumnOrderingVisibilityForCurrentDataset(id as string);
+    const storedColIds = storedConfig?.map((c) => c.colId) || [];
+
+    // Find new columns in localStorage that aren't in backend
+    const newColumnsInStorage = storedColIds.filter((colId) => !backendColumns.some((bc) => bc.id === colId));
+
+    // Create placeholder columns for FE-only columns
+    const newColumnDefs = newColumnsInStorage.map((colId) => {
+      const stored = storedConfig.find((c) => c.colId === colId);
+
+      return {
+        id: colId,
+        column_name: stored?.columnName || colId,
+        column_type: DATASET_COLUMN_TYPES_LIST[0].value as DatasetColumnTypes,
+        required: false,
+      };
+    });
+
+    // Merge backend + FE-only columns in localStorage order
+    const allColumns = mergeAndOrderItems(backendColumns, newColumnDefs, storedColIds);
+
+    if (allColumns.length > 0) {
+      initializeColumns(allColumns, id as string);
+    }
+
+    if (drilldownFilters) {
+      firstLoadDone.current = false;
+      const { selectedDrilldownFilters, hiddenDrilldownFilters } = formatDrilldownFilters(
+        drilldownFilters,
+        filterConfigData?.data,
+      );
+
+      if (!checkIsObjectEmpty(hiddenDrilldownFilters)) setHiddenColumnFilters(hiddenDrilldownFilters);
+      if (!checkIsObjectEmpty(selectedDrilldownFilters)) {
         dispatch({
-          type: filtersContextActions.SET_FILTERS_CONFIG,
-          payload: {
-            filtersConfig,
-          },
+          type: filtersContextActions.INITIALIZE_DEFAULT_FILTERS,
+          payload: { selectedFilters: selectedDrilldownFilters },
         });
-        updateFilterConfigInParent?.(filtersConfig);
-        if (filters) {
-          firstLoadDone.current = false;
-          dispatch({
-            type: filtersContextActions.INITIALIZE_DEFAULT_FILTERS,
-            payload: { selectedFilters: getFilters(filters, filterConfigData.data) ?? {} },
-          });
-        }
-        if (parentSelectedFilters) {
-          dispatch({
-            type: filtersContextActions.INITIALIZE_DEFAULT_FILTERS,
-            payload: { selectedFilters: parentSelectedFilters },
-          });
-        }
-
-        if (drilldownFilters) {
-          firstLoadDone.current = false;
-          const { selectedDrilldownFilters, hiddenDrilldownFilters } = formatDrilldownFilters(
-            drilldownFilters,
-            filterConfigData?.data,
-          );
-
-          if (!checkIsObjectEmpty(hiddenDrilldownFilters)) setHiddenColumnFilters(hiddenDrilldownFilters);
-          if (!checkIsObjectEmpty(selectedDrilldownFilters))
-            dispatch({
-              type: filtersContextActions.INITIALIZE_DEFAULT_FILTERS,
-              payload: { selectedFilters: selectedDrilldownFilters },
-            });
-        }
-        if (
-          isNoRowsOverlayVisible ||
-          datasetData?.data?.total_count === 0 ||
-          drilldownFilters?.conditions === null ||
-          isReadOnly
-        )
-          return;
       }
     }
-  }, [filterConfigData?.data, filters, id, drilldownFilters, isFetching, isUninitialized, currentUserHasEditAccess]);
+  };
 
-  useEffect(() => {
-    if (gridReady && selectedFilters) {
-      tableRef.current?.api?.setFilterModel(selectedFilters);
-      updateFiltersInParent?.(selectedFilters);
-    }
-  }, [selectedFilters, fxCurrency, gridReady]);
-
-  useEffect(() => {
-    if (isNoRowsOverlayVisible) {
-      tableRef.current?.api?.showNoRowsOverlay();
-    } else {
-      tableRef.current?.api?.hideOverlay();
-    }
-  }, [isNoRowsOverlayVisible]);
-
-  useEffect(() => {
+  const fetchInitialDatasetData = () => {
     firstLoadDone.current = false;
+
     if (drilldownFilters?.conditions === null) return;
+
     const urlFilters = formatUrlFilters(filters ?? '');
     const queryConfig = getEncodedRequest(
       {} as IServerSideGetRowsRequest,
@@ -477,6 +523,57 @@ const DatasetById: FC<DatasetByIdProps> = ({
       .catch((err) => {
         captureException(err);
       });
+  };
+
+  const handleTabSelect = (value: DatasetTabsTypes) => {
+    setSelectedTab(value);
+    // Update URL query param without losing other query params
+    const newSearchParams = new URLSearchParams(searchParams?.toString() || '');
+
+    newSearchParams.set('tab', value);
+    router.push(`${pathname}?${newSearchParams.toString()}`, { scroll: false });
+  };
+
+  const getTabVisibilityClass = (tabType: string) => {
+    return cn('h-full', selectedTab === tabType ? 'block' : 'hidden');
+  };
+
+  useEffect(() => {
+    initializeFilterConfig();
+  }, [filterConfigData?.data, filters, id, drilldownFilters, isFetching, isUninitialized, currentUserHasEditAccess]);
+
+  useEffect(() => {
+    if (gridReady && selectedFilters) {
+      tableRef.current?.api?.setFilterModel(selectedFilters);
+      updateFiltersInParent?.(selectedFilters);
+    }
+  }, [selectedFilters, fxCurrency, gridReady]);
+
+  // Sync AG Grid with context state (order, names, visibility, add/remove columns)
+  useAgGridContextSync({
+    gridReady,
+    contextColumnOrder,
+    contextColumns,
+    contextColumnVisibility,
+    getColumnNamesMap,
+    tableRef,
+    columns,
+    setColumns,
+    id: id as string,
+    handleSuccessfulUpdate,
+    selectedTab,
+  });
+
+  useEffect(() => {
+    if (isNoRowsOverlayVisible) {
+      tableRef.current?.api?.showNoRowsOverlay();
+    } else {
+      tableRef.current?.api?.hideOverlay();
+    }
+  }, [isNoRowsOverlayVisible]);
+
+  useEffect(() => {
+    fetchInitialDatasetData();
   }, [filters, drilldownFilters, id, processId, activityId]);
 
   useEffect(() => {
@@ -486,30 +583,28 @@ const DatasetById: FC<DatasetByIdProps> = ({
   useOnClickOutside(datasetTableRef, () => removeCellFocus(tableRef));
 
   return (
-    <>
-      <CommonWrapper
-        className={cn('h-full', {
-          'flex flex-col items-center justify-center': isFetching,
-        })}
-        isLoading={isFetching}
-        isError={isError}
-        skeletonType={SkeletonTypes.CUSTOM}
-        refetchFunction={refetchFilterConfig}
-        loader={
-          <ImageLoader
-            imageSrc={ZAMP_LOGO_LOADER_SVG}
-            width={140}
-            height={140}
-            className='z-50 h-[calc(100vh-200px)]'
-          />
-        }
-      >
-        <div className={cn('flex items-center justify-between gap-y-3 pr-8')}>
+    <CommonWrapper
+      className={cn('h-full', {
+        'flex flex-col items-center justify-center': isFetching,
+      })}
+      isLoading={isFetching}
+      isError={isError}
+      skeletonType={SkeletonTypes.CUSTOM}
+      refetchFunction={refetchFilterConfig}
+      loader={
+        <ImageLoader imageSrc={ZAMP_LOGO_LOADER_SVG} width={140} height={140} className='z-50 h-[calc(100vh-200px)]' />
+      }
+    >
+      <div className='flex h-full flex-col'>
+        <div className={cn('flex shrink-0 items-center justify-between gap-y-3 pr-8')}>
           <div className='flex items-center py-3'>
             <FiltersWrapper label='Filter' filterConfig={filtersConfig ?? []} />
           </div>
 
           <div className='relative flex items-center gap-2.5'>
+            {isDatasetCreationEnabled && (
+              <DatasetEditPreviewTab selectedTab={selectedTab} handleTabSelect={handleTabSelect} />
+            )}
             {!isReadOnly && (
               <TableSchemaAlignmentStatus
                 showAiTransformationStatus={showAiTransformationStatus}
@@ -552,36 +647,44 @@ const DatasetById: FC<DatasetByIdProps> = ({
           </div>
         </div>
 
-        <CommonWrapper
-          isError={lazyloadDataSetError}
-          errorCardTitle='Failed to load dataset'
-          errorCardSubTitle='Please try again later'
-          refetchFunction={handleRefetchDataset}
-        >
-          <div className='sensitive z-10 h-full w-full' ref={datasetTableRef}>
-            <DatasetTable
-              tableRef={tableRef}
-              columns={columns}
-              serverSideDatasource={serverSideDatasource}
-              columnConfig={{ enableRowGroup: true, enableValue: true, headerComponent: CustomHeader }}
-              totalRows={totalRows}
-              onCellEditRequest={onCellEditRequest}
-              onFillEnd={onFillEnd}
-              onRowPropertiesClick={(data) => setRowPropertiesData(data)}
-              onColumnMoved={(event) => handleColumnMoved(event, id as string)}
-              onGridReady={() => setGridReady(true)}
-              containerStyle={containerStyle}
-              gridStyle={gridStyle}
-              {...(datasetData?.data?.config?.is_drilldown_enabled
-                ? {
-                    onDrilldownClick: (data) =>
-                      handleDrilldownClick(data, id as string, params?.pageId as string, router),
-                  }
-                : {})}
-            />
+        {isDatasetCreationEnabled && (
+          <div className={cn('min-h-0 flex-1', getTabVisibilityClass(DatasetTabsTypes.BLUEPRINT))}>
+            <BluePrintDataset datasetId={id as string} />
           </div>
-        </CommonWrapper>
-      </CommonWrapper>
+        )}
+
+        <div className={cn('min-h-0 flex-1', getTabVisibilityClass(DatasetTabsTypes.PREVIEW))}>
+          <CommonWrapper
+            isError={lazyloadDataSetError}
+            errorCardTitle='Failed to load dataset'
+            errorCardSubTitle='Please try again later'
+            refetchFunction={handleRefetchDataset}
+          >
+            <div className='sensitive z-10 h-full w-full' ref={datasetTableRef}>
+              <DatasetTable
+                tableRef={tableRef}
+                columns={columns}
+                serverSideDatasource={serverSideDatasource}
+                columnConfig={{ enableRowGroup: true, enableValue: true, headerComponent: CustomHeader }}
+                totalRows={totalRows}
+                onCellEditRequest={onCellEditRequest}
+                onFillEnd={onFillEnd}
+                onRowPropertiesClick={(data) => setRowPropertiesData(data)}
+                onColumnMoved={(event) => syncColumnMoved(event)}
+                onGridReady={() => setGridReady(true)}
+                containerStyle={containerStyle}
+                gridStyle={gridStyle}
+                {...(datasetData?.data?.config?.is_drilldown_enabled
+                  ? {
+                      onDrilldownClick: (data) =>
+                        handleDrilldownClick(data, id as string, params?.pageId as string, router),
+                    }
+                  : {})}
+              />
+            </div>
+          </CommonWrapper>
+        </div>
+      </div>
       {isRulesListingSideDrawerOpen && (
         <RulesListingSideDrawer
           column={ruleColumnDetails?.colId}
@@ -610,7 +713,29 @@ const DatasetById: FC<DatasetByIdProps> = ({
           onSuccess={handleDeleteRuleSuccess}
         />
       )}
-    </>
+    </CommonWrapper>
+  );
+};
+
+// Dependencies for the DatasetColumnProvider
+const datasetColumnDependencies: DatasetColumnDependencies = {
+  getFromLocalStorage: getFromLocalStorage as (key: string) => string | null,
+  setToLocalStorage: setToLocalStorage as (key: string, value: string) => void,
+  LOCAL_STORAGE_KEYS: { COLUMN_ORDERING_VISIBILITY: LOCAL_STORAGE_KEYS.COLUMN_ORDERING_VISIBILITY },
+  NEW_COLUMN_PREFIX: { COL_: NEW_COLUMN_PREFIX.COL_ },
+  useGetDatasetDisplayConfigQuery:
+    useGetDatasetDisplayConfigQuery as unknown as DatasetColumnDependencies['useGetDatasetDisplayConfigQuery'],
+  useUpdateDatasetMutation:
+    useUpdateDatasetMutation as unknown as DatasetColumnDependencies['useUpdateDatasetMutation'],
+  captureException,
+};
+
+// Outer component that provides the DatasetColumnContext
+const DatasetById: FC<DatasetByIdProps> = (props) => {
+  return (
+    <DatasetColumnProvider datasetId={props.id as string} dependencies={datasetColumnDependencies}>
+      <DatasetByIdInner {...props} />
+    </DatasetColumnProvider>
   );
 };
 

@@ -132,7 +132,6 @@ export interface MenuOptionProps extends MenuOptionClassesProps {
   eventCallback: EventCallbackType;
   labelOverrideClassName?: string;
   checkboxClassName?: string;
-  checkboxDisplayContainerClassName?: string;
   disabled?: boolean;
   isRadio?: boolean;
   radioWrapperStyle?: string;

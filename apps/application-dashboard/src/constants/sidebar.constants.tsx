@@ -17,7 +17,7 @@ export const SIDEBAR_ITEMS: NavigationItemSchema[] = [
     id: 'people',
     label: 'People',
     iconComponent: <Users02 width={16} height={16} />,
-    path: ROUTES_PATH.TEAM,
+    path: ROUTES_PATH.PEOPLE,
   },
   {
     id: 'pace',

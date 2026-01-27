@@ -29,6 +29,21 @@ jest.mock('utils/postHog', () => ({
   resetPostHog: jest.fn(),
 }));
 
+// Mock the SSE context
+jest.mock('@/app/_providers/sse-provider', () => ({
+  useSSEContext: jest.fn(() => ({
+    disconnect: jest.fn(),
+  })),
+}));
+
+// Mock the cookie utility
+jest.mock('@/utils/cookie', () => ({
+  clearCookie: jest.fn(),
+  setCookie: jest.fn(),
+  PREV_ROUTE_COOKIE: 'PREV_ROUTE_COOKIE',
+  USER_SESSION_COOKIE: 'USER_SESSION_COOKIE',
+}));
+
 describe('useLogout', () => {
   beforeEach(() => {
     jest.clearAllMocks();

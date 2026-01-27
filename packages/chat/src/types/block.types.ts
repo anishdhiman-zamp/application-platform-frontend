@@ -10,6 +10,7 @@ export const enum BLOCK_TYPE {
   ATTACHMENTS = 'attachments',
   TEXT = 'text',
   TOOL_USE = 'tool_use',
+  TOOL_RESULT = 'tool_result',
   THINKING = 'thinking',
   OUTPUT_FILES = 'output_files',
 }
@@ -156,7 +157,8 @@ export type Block =
   | OutputFilesBlockType
   | ThinkingContentBlock
   | TextContentBlock
-  | ToolUseContentBlock;
+  | ToolUseContentBlock
+  | ToolResultContentBlock;
 export interface BlockMessage {
   block: Block[];
 }
@@ -185,6 +187,7 @@ export const enum StreamingContentBlockDeltaType {
   TEXT_DELTA = 'text_delta',
   INPUT_JSON_DELTA = 'input_json_delta',
   TOOL_USE_BLOCK_UPDATE_DELTA = 'tool_use_block_update_delta',
+  TOOL_RESULT_DELTA = 'tool_result_delta',
 }
 
 export interface StreamingContentBlockBase {
@@ -224,6 +227,16 @@ export interface ToolUseContentBlock extends StreamingContentBlockBase {
     display_content?: ToolUseDisplayContent;
     name?: string;
     tool_call_id?: string;
+    display_name?: string;
+  };
+}
+
+export interface ToolResultContentBlock extends StreamingContentBlockBase {
+  type: BLOCK_TYPE.TOOL_RESULT;
+  payload: {
+    content: string;
+    is_error: boolean;
+    tool_call_id?: string;
   };
 }
 
@@ -235,6 +248,8 @@ export interface StreamEventContentBlockStart {
     id?: string;
     name?: string;
     start_timestamp?: string;
+    tool_call_id?: string;
+    display_name?: string;
   };
 }
 
@@ -259,11 +274,19 @@ export interface StreamEventToolUseUpdateDelta {
   display_content?: ToolUseDisplayContent;
 }
 
+export interface StreamEventToolResultDelta {
+  type: StreamingContentBlockDeltaType.TOOL_RESULT_DELTA;
+  content: string;
+  is_error: boolean;
+  tool_call_id?: string;
+}
+
 export type StreamEventDelta =
   | StreamEventThinkingDelta
   | StreamEventTextDelta
   | StreamEventInputJsonDelta
-  | StreamEventToolUseUpdateDelta;
+  | StreamEventToolUseUpdateDelta
+  | StreamEventToolResultDelta;
 
 export interface StreamEventContentBlockDelta {
   type: StreamingContentBlockType.CONTENT_BLOCK_DELTA;

@@ -38,6 +38,7 @@ export type ListingPropsType = {
 
 export type ColumnOrderingVisibilityType = {
   colId: string;
+  columnName?: string;
   isVisible: boolean;
   width: number;
 };
@@ -88,3 +89,12 @@ export type FormatColumnsParamsType = {
   isSelfServe?: boolean;
   isArtifact?: boolean;
 };
+
+export interface FrontendColumnConfig {
+  datasetId: string;
+  handleSuccessfulUpdate: defaultFnType;
+  tableRef: RefObject<AgGridReact | null>;
+}
+export interface ItemWithId {
+  id: string;
+}

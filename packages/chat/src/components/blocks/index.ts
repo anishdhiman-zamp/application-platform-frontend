@@ -1,10 +1,13 @@
 export { AttachmentsBlock } from './AttachmentsBlock';
 export { AttachmentsList } from './AttachmentsList';
 export { ButtonBlock } from './ButtonBlock';
+export { CodePreviewBlock } from './CodePreviewBlock';
 export { MarkdownBlock } from './MarkdownBlock';
 export { OutputFilesBlock } from './OutputFilesBlock';
 export { PlainTextBlock } from './PlainTextBlock';
 export { QuestionGroupBlock } from './QuestionGroupBlock';
 export { RadioButtonBlock, SingleSelectBlock } from './RadioButtonBlock';
+export { StatusLabel } from './StatusLabel';
+export { StepsBlock } from './StepsBlock';
 export { ThinkingBlock } from './ThinkingBlock';
 export { ToolCallBlock } from './ToolCallBlock';
