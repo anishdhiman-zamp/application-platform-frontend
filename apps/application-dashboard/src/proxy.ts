@@ -163,7 +163,7 @@ const handleAuthenticatedRoutes = async (request: NextRequest) => {
   }
 };
 
-export async function middleware(request: NextRequest) {
+export async function proxy(request: NextRequest) {
   const isAuthenticated = validateSession(request);
 
   if (!isAuthenticated) {

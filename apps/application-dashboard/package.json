@@ -5,7 +5,8 @@
   "scripts": {
     "dev": "next dev -p 2000 --turbopack --experimental-https -H local.zamp.ai",
     "dev-coder": "next dev -p 2000 --turbopack -H 0.0.0.0",
-    "build": "NODE_OPTIONS='--max-old-space-size=4096' next build",
+    "build": "NODE_OPTIONS='--max-old-space-size=4096' next build --turbopack",
+    "build:analyze": "ANALYZE=true NODE_OPTIONS='--max-old-space-size=4096' next build --webpack",
     "start": "next start",
     "start-coder": "next start -H 0.0.0.0",
     "lint": "eslint --fix . --ext .ts,.tsx,.js,.jsx",
@@ -32,8 +33,8 @@
     "@monaco-editor/react": "^4.7.0",
     "@pdfslick/react": "^3.0.0",
     "@reduxjs/toolkit": "^2.4.0",
-    "@sentry/browser": "^9.1.0",
-    "@sentry/nextjs": "^9.19.0",
+    "@sentry/browser": "^10.35.0",
+    "@sentry/nextjs": "^10.35.0",
     "@tiptap/core": "^2.14.0",
     "@tiptap/extension-color": "^2.14.0",
     "@tiptap/extension-text-align": "^2.14.0",
@@ -77,15 +78,17 @@
     "rehype-slug": "^6.0.0",
     "remark-gfm": "^4.0.0",
     "totp-generator": "^1.0.0",
+    "shimmer": "^1.2.1",
     "xlsx": "https://cdn.sheetjs.com/xlsx-0.20.3/xlsx-0.20.3.tgz",
     "zod": "^3.25.76"
   },
   "peerDependencies": {
-    "next": "^15.5.9",
+    "next": "^16.1.4",
     "react": "^19.2.3",
     "react-dom": "^19.2.3"
   },
   "devDependencies": {
+    "@next/bundle-analyzer": "^16.1.4",
     "@playwright/test": "^1.56.1",
     "@testing-library/dom": "^10.4.0",
     "@testing-library/jest-dom": "^6.6.3",
@@ -95,6 +98,7 @@
     "@types/react": "^19",
     "@types/react-date-range": "^1.4.9",
     "@types/react-dom": "^19",
+    "babel-plugin-react-compiler": "^1.0.0",
     "eslint": "^8.57.1",
     "eslint-config-prettier": "^9.1.0",
     "eslint-plugin-absolute-imports": "^0.0.3",
