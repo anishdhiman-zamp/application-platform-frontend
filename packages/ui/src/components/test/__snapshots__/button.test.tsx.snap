@@ -2,7 +2,7 @@
 
 exports[`Button Component - Critical Variant Tests renders all sizes with default variant correctly 1`] = `
 <button
-  class="cursor-pointer inline-flex items-center justify-center whitespace-nowrap rounded-md text-sm font-medium ring-offset-background transition-colors focus-visible:outline-hidden focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none [&_svg]:pointer-events-none [&_svg]:shrink-0 bg-primary text-secondary hover:bg-primary/90 active:bg-GRAY_950 disabled:text-GRAY_700 disabled:cursor-not-allowed h-10 py-3 px-4 f-14-500"
+  class="cursor-pointer inline-flex items-center justify-center whitespace-nowrap rounded-md text-sm font-medium ring-offset-background transition-colors focus-visible:outline-hidden focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 [&_svg]:pointer-events-none [&_svg]:shrink-0 bg-primary text-secondary hover:bg-primary/90 active:bg-GRAY_950 disabled:bg-GRAY_100 disabled:text-GRAY_700 disabled:cursor-not-allowed h-10 py-3 px-4 f-14-500"
 >
   default
 </button>
@@ -10,7 +10,7 @@ exports[`Button Component - Critical Variant Tests renders all sizes with defaul
 
 exports[`Button Component - Critical Variant Tests renders all sizes with default variant correctly 2`] = `
 <button
-  class="cursor-pointer inline-flex items-center justify-center whitespace-nowrap rounded-md text-sm font-medium ring-offset-background transition-colors focus-visible:outline-hidden focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none [&_svg]:pointer-events-none [&_svg]:shrink-0 bg-primary text-secondary hover:bg-primary/90 active:bg-GRAY_950 disabled:text-GRAY_700 disabled:cursor-not-allowed h-10 py-3 px-4 f-14-500"
+  class="cursor-pointer inline-flex items-center justify-center whitespace-nowrap rounded-md text-sm font-medium ring-offset-background transition-colors focus-visible:outline-hidden focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 [&_svg]:pointer-events-none [&_svg]:shrink-0 bg-primary text-secondary hover:bg-primary/90 active:bg-GRAY_950 disabled:bg-GRAY_100 disabled:text-GRAY_700 disabled:cursor-not-allowed h-10 py-3 px-4 f-14-500"
 >
   large
 </button>
@@ -18,7 +18,7 @@ exports[`Button Component - Critical Variant Tests renders all sizes with defaul
 
 exports[`Button Component - Critical Variant Tests renders all sizes with default variant correctly 3`] = `
 <button
-  class="cursor-pointer inline-flex items-center justify-center whitespace-nowrap rounded-md text-sm font-medium ring-offset-background transition-colors focus-visible:outline-hidden focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none [&_svg]:pointer-events-none [&_svg]:shrink-0 bg-primary text-secondary hover:bg-primary/90 active:bg-GRAY_950 disabled:text-GRAY_700 disabled:cursor-not-allowed h-8 px-2 py-2 f-13-500"
+  class="cursor-pointer inline-flex items-center justify-center whitespace-nowrap rounded-md text-sm font-medium ring-offset-background transition-colors focus-visible:outline-hidden focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 [&_svg]:pointer-events-none [&_svg]:shrink-0 bg-primary text-secondary hover:bg-primary/90 active:bg-GRAY_950 disabled:bg-GRAY_100 disabled:text-GRAY_700 disabled:cursor-not-allowed h-8 px-2 py-2 f-13-500"
 >
   medium
 </button>
@@ -26,7 +26,7 @@ exports[`Button Component - Critical Variant Tests renders all sizes with defaul
 
 exports[`Button Component - Critical Variant Tests renders all sizes with default variant correctly 4`] = `
 <button
-  class="cursor-pointer inline-flex items-center justify-center whitespace-nowrap rounded-md text-sm font-medium ring-offset-background transition-colors focus-visible:outline-hidden focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none [&_svg]:pointer-events-none [&_svg]:shrink-0 bg-primary text-secondary hover:bg-primary/90 active:bg-GRAY_950 disabled:text-GRAY_700 disabled:cursor-not-allowed h-7 px-3 f-12-500"
+  class="cursor-pointer inline-flex items-center justify-center whitespace-nowrap rounded-md text-sm font-medium ring-offset-background transition-colors focus-visible:outline-hidden focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 [&_svg]:pointer-events-none [&_svg]:shrink-0 bg-primary text-secondary hover:bg-primary/90 active:bg-GRAY_950 disabled:bg-GRAY_100 disabled:text-GRAY_700 disabled:cursor-not-allowed h-7 px-3 f-12-500"
 >
   small
 </button>
@@ -34,7 +34,7 @@ exports[`Button Component - Critical Variant Tests renders all sizes with defaul
 
 exports[`Button Component - Critical Variant Tests renders all sizes with default variant correctly 5`] = `
 <button
-  class="cursor-pointer inline-flex items-center justify-center whitespace-nowrap text-sm font-medium ring-offset-background transition-colors focus-visible:outline-hidden focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none [&_svg]:pointer-events-none [&_svg]:shrink-0 bg-primary text-secondary hover:bg-primary/90 active:bg-GRAY_950 disabled:text-GRAY_700 disabled:cursor-not-allowed h-[26px] rounded-md px-2.5 py-1.5 f-11-500"
+  class="cursor-pointer inline-flex items-center justify-center whitespace-nowrap text-sm font-medium ring-offset-background transition-colors focus-visible:outline-hidden focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 [&_svg]:pointer-events-none [&_svg]:shrink-0 bg-primary text-secondary hover:bg-primary/90 active:bg-GRAY_950 disabled:bg-GRAY_100 disabled:text-GRAY_700 disabled:cursor-not-allowed h-[26px] rounded-md px-2.5 py-1.5 f-11-500"
 >
   xsmall
 </button>
@@ -42,7 +42,7 @@ exports[`Button Component - Critical Variant Tests renders all sizes with defaul
 
 exports[`Button Component - Critical Variant Tests renders all sizes with default variant correctly 6`] = `
 <button
-  class="cursor-pointer inline-flex items-center justify-center whitespace-nowrap text-sm font-medium ring-offset-background transition-colors focus-visible:outline-hidden focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none [&_svg]:pointer-events-none [&_svg]:shrink-0 bg-primary text-secondary hover:bg-primary/90 active:bg-GRAY_950 disabled:text-GRAY_700 disabled:cursor-not-allowed h-5 rounded-sm px-0.5 py-1 f-11-500"
+  class="cursor-pointer inline-flex items-center justify-center whitespace-nowrap text-sm font-medium ring-offset-background transition-colors focus-visible:outline-hidden focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 [&_svg]:pointer-events-none [&_svg]:shrink-0 bg-primary text-secondary hover:bg-primary/90 active:bg-GRAY_950 disabled:bg-GRAY_100 disabled:text-GRAY_700 disabled:cursor-not-allowed h-5 rounded-sm px-0.5 py-1 f-11-500"
 >
   xxsmall
 </button>
@@ -50,7 +50,7 @@ exports[`Button Component - Critical Variant Tests renders all sizes with defaul
 
 exports[`Button Component - Critical Variant Tests renders all sizes with default variant correctly 7`] = `
 <button
-  class="cursor-pointer inline-flex items-center justify-center whitespace-nowrap rounded-md text-sm font-medium ring-offset-background transition-colors focus-visible:outline-hidden focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none [&_svg]:pointer-events-none [&_svg]:shrink-0 bg-primary text-secondary hover:bg-primary/90 active:bg-GRAY_950 disabled:text-GRAY_700 disabled:cursor-not-allowed h-10 w-10"
+  class="cursor-pointer inline-flex items-center justify-center whitespace-nowrap rounded-md text-sm font-medium ring-offset-background transition-colors focus-visible:outline-hidden focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 [&_svg]:pointer-events-none [&_svg]:shrink-0 bg-primary text-secondary hover:bg-primary/90 active:bg-GRAY_950 disabled:bg-GRAY_100 disabled:text-GRAY_700 disabled:cursor-not-allowed h-10 w-10"
 >
   icon
 </button>
@@ -58,7 +58,7 @@ exports[`Button Component - Critical Variant Tests renders all sizes with defaul
 
 exports[`Button Component - Critical Variant Tests renders all variants with default size correctly 1`] = `
 <button
-  class="cursor-pointer inline-flex items-center justify-center whitespace-nowrap rounded-md text-sm font-medium ring-offset-background transition-colors focus-visible:outline-hidden focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none [&_svg]:pointer-events-none [&_svg]:shrink-0 bg-primary text-secondary hover:bg-primary/90 active:bg-GRAY_950 disabled:text-GRAY_700 disabled:cursor-not-allowed h-10 py-3 px-4 f-14-500"
+  class="cursor-pointer inline-flex items-center justify-center whitespace-nowrap rounded-md text-sm font-medium ring-offset-background transition-colors focus-visible:outline-hidden focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 [&_svg]:pointer-events-none [&_svg]:shrink-0 bg-primary text-secondary hover:bg-primary/90 active:bg-GRAY_950 disabled:bg-GRAY_100 disabled:text-GRAY_700 disabled:cursor-not-allowed h-10 py-3 px-4 f-14-500"
 >
   default
 </button>
@@ -66,7 +66,7 @@ exports[`Button Component - Critical Variant Tests renders all variants with def
 
 exports[`Button Component - Critical Variant Tests renders all variants with default size correctly 2`] = `
 <button
-  class="cursor-pointer inline-flex items-center justify-center whitespace-nowrap rounded-md text-sm font-medium ring-offset-background transition-colors focus-visible:outline-hidden focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none [&_svg]:pointer-events-none [&_svg]:shrink-0 bg-destructive text-destructive-foreground hover:bg-destructive/90 h-10 py-3 px-4 f-14-500"
+  class="cursor-pointer inline-flex items-center justify-center whitespace-nowrap rounded-md text-sm font-medium ring-offset-background transition-colors focus-visible:outline-hidden focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 [&_svg]:pointer-events-none [&_svg]:shrink-0 bg-destructive text-destructive-foreground hover:bg-destructive/90 h-10 py-3 px-4 f-14-500"
 >
   destructive
 </button>
@@ -74,7 +74,7 @@ exports[`Button Component - Critical Variant Tests renders all variants with def
 
 exports[`Button Component - Critical Variant Tests renders all variants with default size correctly 3`] = `
 <button
-  class="cursor-pointer inline-flex items-center justify-center whitespace-nowrap rounded-md text-sm font-medium ring-offset-background transition-colors focus-visible:outline-hidden focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none [&_svg]:pointer-events-none [&_svg]:shrink-0 border border-input bg-background hover:bg-accent hover:text-accent-foreground disabled:bg-GRAY_100 disabled:text-GRAY_700 disabled:cursor-not-allowed h-10 py-3 px-4 f-14-500"
+  class="cursor-pointer inline-flex items-center justify-center whitespace-nowrap rounded-md text-sm font-medium ring-offset-background transition-colors focus-visible:outline-hidden focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 [&_svg]:pointer-events-none [&_svg]:shrink-0 border border-input bg-background hover:bg-accent hover:text-accent-foreground disabled:bg-GRAY_100 disabled:text-GRAY_700 disabled:cursor-not-allowed h-10 py-3 px-4 f-14-500"
 >
   outline
 </button>
@@ -82,7 +82,7 @@ exports[`Button Component - Critical Variant Tests renders all variants with def
 
 exports[`Button Component - Critical Variant Tests renders all variants with default size correctly 4`] = `
 <button
-  class="cursor-pointer inline-flex items-center justify-center whitespace-nowrap rounded-md text-sm font-medium ring-offset-background transition-colors focus-visible:outline-hidden focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none [&_svg]:pointer-events-none [&_svg]:shrink-0 bg-transparent text-primary border border-gray-400 hover:bg-secondary/80 disabled:bg-GRAY_100 disabled:text-GRAY_700 disabled:!cursor-not-allowed h-10 py-3 px-4 f-14-500"
+  class="cursor-pointer inline-flex items-center justify-center whitespace-nowrap rounded-md text-sm font-medium ring-offset-background transition-colors focus-visible:outline-hidden focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 [&_svg]:pointer-events-none [&_svg]:shrink-0 bg-transparent text-primary border border-gray-400 hover:bg-secondary/80 disabled:bg-GRAY_100 disabled:text-GRAY_700 disabled:!cursor-not-allowed h-10 py-3 px-4 f-14-500"
 >
   secondary
 </button>
@@ -90,7 +90,7 @@ exports[`Button Component - Critical Variant Tests renders all variants with def
 
 exports[`Button Component - Critical Variant Tests renders all variants with default size correctly 5`] = `
 <button
-  class="cursor-pointer inline-flex items-center justify-center whitespace-nowrap rounded-md text-sm font-medium ring-offset-background transition-colors focus-visible:outline-hidden focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none [&_svg]:pointer-events-none [&_svg]:shrink-0 hover:bg-accent hover:text-accent-foreground h-10 py-3 px-4 f-14-500"
+  class="cursor-pointer inline-flex items-center justify-center whitespace-nowrap rounded-md text-sm font-medium ring-offset-background transition-colors focus-visible:outline-hidden focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 [&_svg]:pointer-events-none [&_svg]:shrink-0 hover:bg-accent hover:text-accent-foreground h-10 py-3 px-4 f-14-500"
 >
   ghost
 </button>
@@ -98,7 +98,7 @@ exports[`Button Component - Critical Variant Tests renders all variants with def
 
 exports[`Button Component - Critical Variant Tests renders all variants with default size correctly 6`] = `
 <button
-  class="cursor-pointer inline-flex items-center justify-center whitespace-nowrap rounded-md text-sm font-medium ring-offset-background transition-colors focus-visible:outline-hidden focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none [&_svg]:pointer-events-none [&_svg]:shrink-0 text-primary underline-offset-4 hover:underline h-10 py-3 px-4 f-14-500"
+  class="cursor-pointer inline-flex items-center justify-center whitespace-nowrap rounded-md text-sm font-medium ring-offset-background transition-colors focus-visible:outline-hidden focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 [&_svg]:pointer-events-none [&_svg]:shrink-0 text-primary underline-offset-4 hover:underline h-10 py-3 px-4 f-14-500"
 >
   link
 </button>
@@ -106,7 +106,7 @@ exports[`Button Component - Critical Variant Tests renders all variants with def
 
 exports[`Button Component - Functional Tests matches snapshot for default button 1`] = `
 <button
-  class="cursor-pointer inline-flex items-center justify-center whitespace-nowrap rounded-md text-sm font-medium ring-offset-background transition-colors focus-visible:outline-hidden focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none [&_svg]:pointer-events-none [&_svg]:shrink-0 bg-primary text-secondary hover:bg-primary/90 active:bg-GRAY_950 disabled:text-GRAY_700 disabled:cursor-not-allowed h-10 py-3 px-4 f-14-500"
+  class="cursor-pointer inline-flex items-center justify-center whitespace-nowrap rounded-md text-sm font-medium ring-offset-background transition-colors focus-visible:outline-hidden focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 [&_svg]:pointer-events-none [&_svg]:shrink-0 bg-primary text-secondary hover:bg-primary/90 active:bg-GRAY_950 disabled:bg-GRAY_100 disabled:text-GRAY_700 disabled:cursor-not-allowed h-10 py-3 px-4 f-14-500"
 >
   Snapshot
 </button>
@@ -114,7 +114,7 @@ exports[`Button Component - Functional Tests matches snapshot for default button
 
 exports[`Button Component - Functional Tests matches snapshot for destructive variant 1`] = `
 <button
-  class="cursor-pointer inline-flex items-center justify-center whitespace-nowrap rounded-md text-sm font-medium ring-offset-background transition-colors focus-visible:outline-hidden focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none [&_svg]:pointer-events-none [&_svg]:shrink-0 bg-destructive text-destructive-foreground hover:bg-destructive/90 h-10 py-3 px-4 f-14-500"
+  class="cursor-pointer inline-flex items-center justify-center whitespace-nowrap rounded-md text-sm font-medium ring-offset-background transition-colors focus-visible:outline-hidden focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 [&_svg]:pointer-events-none [&_svg]:shrink-0 bg-destructive text-destructive-foreground hover:bg-destructive/90 h-10 py-3 px-4 f-14-500"
 >
   Delete
 </button>
@@ -122,7 +122,7 @@ exports[`Button Component - Functional Tests matches snapshot for destructive va
 
 exports[`Button Component - Functional Tests matches snapshot for icon size 1`] = `
 <button
-  class="cursor-pointer inline-flex items-center justify-center whitespace-nowrap rounded-md text-sm font-medium ring-offset-background transition-colors focus-visible:outline-hidden focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none [&_svg]:pointer-events-none [&_svg]:shrink-0 bg-primary text-secondary hover:bg-primary/90 active:bg-GRAY_950 disabled:text-GRAY_700 disabled:cursor-not-allowed h-10 w-10"
+  class="cursor-pointer inline-flex items-center justify-center whitespace-nowrap rounded-md text-sm font-medium ring-offset-background transition-colors focus-visible:outline-hidden focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 [&_svg]:pointer-events-none [&_svg]:shrink-0 bg-primary text-secondary hover:bg-primary/90 active:bg-GRAY_950 disabled:bg-GRAY_100 disabled:text-GRAY_700 disabled:cursor-not-allowed h-10 w-10"
 >
   🔍
 </button>
@@ -130,7 +130,7 @@ exports[`Button Component - Functional Tests matches snapshot for icon size 1`] 
 
 exports[`Button Component - Functional Tests matches snapshot for outline variant 1`] = `
 <button
-  class="cursor-pointer inline-flex items-center justify-center whitespace-nowrap rounded-md text-sm font-medium ring-offset-background transition-colors focus-visible:outline-hidden focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none [&_svg]:pointer-events-none [&_svg]:shrink-0 border border-input bg-background hover:bg-accent hover:text-accent-foreground disabled:bg-GRAY_100 disabled:text-GRAY_700 disabled:cursor-not-allowed h-10 py-3 px-4 f-14-500"
+  class="cursor-pointer inline-flex items-center justify-center whitespace-nowrap rounded-md text-sm font-medium ring-offset-background transition-colors focus-visible:outline-hidden focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 [&_svg]:pointer-events-none [&_svg]:shrink-0 border border-input bg-background hover:bg-accent hover:text-accent-foreground disabled:bg-GRAY_100 disabled:text-GRAY_700 disabled:cursor-not-allowed h-10 py-3 px-4 f-14-500"
 >
   Outline
 </button>
@@ -138,7 +138,7 @@ exports[`Button Component - Functional Tests matches snapshot for outline varian
 
 exports[`Button Component - Functional Tests matches snapshot when loading 1`] = `
 <button
-  class="inline-flex items-center justify-center whitespace-nowrap rounded-md text-sm font-medium ring-offset-background transition-colors focus-visible:outline-hidden focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none [&_svg]:pointer-events-none [&_svg]:shrink-0 bg-primary text-secondary hover:bg-primary/90 active:bg-GRAY_950 disabled:text-GRAY_700 disabled:cursor-not-allowed h-10 py-3 px-4 f-14-500 cursor-not-allowed opacity-70"
+  class="inline-flex items-center justify-center whitespace-nowrap rounded-md text-sm font-medium ring-offset-background transition-colors focus-visible:outline-hidden focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 [&_svg]:pointer-events-none [&_svg]:shrink-0 bg-primary text-secondary hover:bg-primary/90 active:bg-GRAY_950 disabled:bg-GRAY_100 disabled:text-GRAY_700 disabled:cursor-not-allowed h-10 py-3 px-4 f-14-500 !bg-primary/90 cursor-not-allowed"
   disabled=""
 >
   <div
