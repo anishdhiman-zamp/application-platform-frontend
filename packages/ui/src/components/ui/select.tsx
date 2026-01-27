@@ -43,6 +43,9 @@ export interface SelectProps {
   side?: 'top' | 'right' | 'bottom' | 'left';
   sideOffset?: number;
   id?: string;
+  itemClassName?: string;
+  hideSearch?: boolean;
+  contentClassName?: string;
 }
 
 const selectVariants = cva(
@@ -95,6 +98,9 @@ const Select = ({
   side,
   sideOffset,
   id,
+  itemClassName,
+  hideSearch = false,
+  contentClassName,
 }: SelectProps) => {
   const [isOpen, setIsOpen] = useState(false);
   const [page, setPage] = useState(1);
@@ -164,15 +170,22 @@ const Select = ({
         open={isOpen}
         onOpenChange={setIsOpen}
         emptyText='No options'
-        itemClassName='flex items-center px-2 py-1.5'
+        itemClassName={cn('flex items-center px-2 py-1.5', itemClassName)}
         side={side}
         sideOffset={sideOffset}
+        hideSearch={hideSearch}
+        contentClassName={contentClassName}
       >
         <div
           className={cn(value ? 'text-primary' : 'text-gray-700', selectVariants({ variant }), controlClassName)}
           data-testid={id ? `${id}-select-trigger` : 'select-trigger'}
         >
-          <span className='flex-1 truncate'>
+          <span
+            className={cn(
+              'flex-1 truncate',
+              !(selectedOption?.display_value || selectedOption?.label) && 'text-GRAY_500',
+            )}
+          >
             {selectedOption?.display_value || selectedOption?.label || placeholder}
           </span>
           <ChevronDown

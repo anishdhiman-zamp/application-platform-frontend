@@ -152,7 +152,12 @@ export const ChatInput: FC<ChatInputProps> = ({
         aria-label='File input'
         accept={`${INPUT_FILE_FORMATS.TXT},${INPUT_FILE_FORMATS.PDF},${INPUT_FILE_FORMATS.DOCX},${INPUT_FILE_FORMATS.JPEG},${INPUT_FILE_FORMATS.JPG},${INPUT_FILE_FORMATS.PNG},${INPUT_FILE_FORMATS.BMP}`}
       />
-      <AttachmentsList attachments={attachments} removeAttachment={removeAttachment} isLoading={isUploading} />
+      <AttachmentsList
+        attachments={attachments}
+        removeAttachment={removeAttachment}
+        isLoading={isUploading}
+        className='mb-2'
+      />
       <div className={cn(shouldShowRecorder ? 'relative w-full rounded-xl border border-gray-600 p-1.5' : '')}>
         {/* Middle - Textarea and button wrapper */}
         <div className='relative'>

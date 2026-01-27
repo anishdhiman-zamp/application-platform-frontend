@@ -1,10 +1,11 @@
-export * from './blob';
 export * from './browser';
 export * from './cache';
 export * from './date';
 export * from './event-bus';
 export * from './hooks/useSSE';
 export * from './hooks/useThrottle';
+export * as IndexedDBCache from './indexeddb-cache';
 export * from './localstorage';
+export * as OPFSCache from './opfs-cache';
 export * from './string';
 export * from './url';

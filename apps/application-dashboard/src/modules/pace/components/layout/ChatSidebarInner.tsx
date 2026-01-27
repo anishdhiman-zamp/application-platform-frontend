@@ -9,6 +9,7 @@ import {
   SenderType,
   useChat,
 } from '@zamp-platform/chat';
+import { ArrowDownIcon, Button } from '@zamp-platform/ui';
 import { cn } from '@zamp-platform/ui/utils';
 import { ACCEPTED_FILE_TYPES } from 'modules/pace/pace.constants';
 import { API_ENDPOINTS } from '@/apis/apiEndpoint.constants';
@@ -21,6 +22,7 @@ import NewPaceAvatar from '@/modules/chatbot/NewPaceAvatar';
 import ChatTopbar from '@/modules/pace/components/chat/ChatTopbar';
 import ChatMessagesSkeleton from '@/modules/pace/components/loaders/ChatMessagesSkeleton';
 import { useChatDraftInput } from '@/modules/pace/hooks/useChatDraftInput';
+import { useChatScroll } from '@/modules/pace/hooks/useChatScroll';
 import { baseApi } from '@/services/baseApi';
 import type { RootState } from '@/store';
 
@@ -31,8 +33,6 @@ interface ChatSidebarInnerProps {
   startNewChat: () => void;
   handleClose: () => void;
   chatTitle: string;
-  isExpanded?: boolean;
-  onToggleExpand?: () => void;
 }
 
 const ChatSidebarInner: FC<ChatSidebarInnerProps> = ({
@@ -42,8 +42,6 @@ const ChatSidebarInner: FC<ChatSidebarInnerProps> = ({
   startNewChat,
   handleClose,
   chatTitle,
-  isExpanded,
-  onToggleExpand,
 }) => {
   const dispatch = useAppDispatch();
   const organizationId = useAppSelector((state: RootState) => state.user.user?.orgs?.[0]?.organization_id) ?? '';
@@ -83,20 +81,23 @@ const ChatSidebarInner: FC<ChatSidebarInnerProps> = ({
     }
   }, [chat.conversationId, conversationId, setConversationId]);
 
+  const { scrollContainerRef, showScrollButton, handleScroll, handleScrollToBottomClick } = useChatScroll({
+    messagesLength: chat.messages?.length ?? 0,
+    isLoading: isLoadingConversation,
+    streamingState: chat.streamingState,
+  });
+
   return (
-    <div className='flex min-h-0 flex-1 flex-col overflow-hidden'>
+    <>
       <ChatTopbar
         onStartNewChat={startNewChat}
         onClose={handleClose}
         title={isInConversation ? chatTitle : 'New chat'}
-        isExpanded={isExpanded}
-        onToggleExpand={onToggleExpand}
       />
       <div
-        className={cn(
-          'mx-auto flex min-h-0 flex-1 flex-col overflow-hidden',
-          isExpanded ? 'w-full max-w-[700px]' : 'w-full',
-        )}
+        ref={scrollContainerRef}
+        onScroll={handleScroll}
+        className='relative flex min-h-0 w-full flex-1 flex-col overflow-x-hidden overflow-y-auto [scrollbar-width:thin]'
       >
         {isInConversation ? (
           <>
@@ -105,18 +106,24 @@ const ChatSidebarInner: FC<ChatSidebarInnerProps> = ({
               isError={chat.isErrorConversationHistory}
               refetchFunction={chat.refetchConversationHistory}
               skeletonType={SkeletonTypes.CUSTOM}
-              loader={<ChatMessagesSkeleton />}
-              className='flex min-h-0 flex-1'
+              loader={<ChatMessagesSkeleton className='px-0' />}
+              className='mx-auto flex w-full flex-1 flex-col px-4'
+              disableAnimation
             >
               <MessageContainer
                 messages={chat.messages}
                 isAnalysing={isAnalysing}
                 streamingState={chat.streamingState}
-                className='gap-4 px-3 [scrollbar-width:none]'
+                className='gap-4 px-0 [scrollbar-width:none]'
                 assistantAvatar={<NewPaceAvatar />}
-                streamingEnabled
                 showTimestamp
+                showFeedback
+                showCopy
+                alignUserRight
+                hideSenderName
+                userAvatarClassName='h-5 min-h-5 w-5 min-w-5 f-11-500 rounded-[7.5px]'
               />
+              <div className='h-12 w-full bg-white' />
             </CommonWrapper>
           </>
         ) : (
@@ -127,12 +134,7 @@ const ChatSidebarInner: FC<ChatSidebarInnerProps> = ({
             </div>
           </div>
         )}
-        <div
-          className={cn(
-            'border-GRAY_400 w-full flex-shrink-0 border-t bg-[#fcfcfc] p-3',
-            isExpanded ? 'border-none pt-0' : '',
-          )}
-        >
+        <div className={cn('border-GRAY_400 sticky bottom-0 z-10 w-full flex-shrink-0 border-t bg-[#fcfcfc] p-3')}>
           <ConnectedChatInput
             chat={chat}
             conversationId={chat.conversationId ?? ''}
@@ -150,9 +152,21 @@ const ChatSidebarInner: FC<ChatSidebarInnerProps> = ({
             className='bg-white'
             onConversationCreated={handleConversationCreated}
           />
+          <Button
+            onClick={handleScrollToBottomClick}
+            variant='ghost'
+            className={cn(
+              'bg-gray-1000 hover:bg-gray-1000 absolute bottom-30 left-1/2 z-20 h-6 w-6 -translate-x-1/2 !rounded-full p-3',
+              'transition-all duration-200 ease-out',
+              showScrollButton ? 'translate-y-0 opacity-100' : 'pointer-events-none translate-y-2 opacity-0',
+            )}
+            aria-label='Scroll to bottom'
+          >
+            <ArrowDownIcon size={14} className='p-[2px] text-white' />
+          </Button>
         </div>
       </div>
-    </div>
+    </>
   );
 };
 
