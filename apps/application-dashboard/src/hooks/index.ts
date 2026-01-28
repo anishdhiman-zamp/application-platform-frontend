@@ -88,8 +88,6 @@ function useOnClickOutside(ref: any, handler: (event?: MouseEvent) => void, igno
  * Debounce: doesn't work on using directly on functional components
  * because it creates new instance on each re-render.
  * Use with useCallback
- *
- * TODO : Create hook
  */
 function debounce<T extends (...args: any[]) => any>(func: T, wait: number) {
   let timeout: NodeJS.Timeout | null;
@@ -106,4 +104,27 @@ function debounce<T extends (...args: any[]) => any>(func: T, wait: number) {
   };
 }
 
-export { debounce, useGetCountdown, useOnClickOutside };
+/**
+ * useDebounce hook - Returns a debounced value that updates after the specified delay
+ *
+ * @param value - The value to debounce
+ * @param delay - The delay in milliseconds (default: 300ms)
+ * @returns The debounced value
+ */
+function useDebounce<T>(value: T, delay = 300): T {
+  const [debouncedValue, setDebouncedValue] = useState<T>(value);
+
+  useEffect(() => {
+    const timer = setTimeout(() => {
+      setDebouncedValue(value);
+    }, delay);
+
+    return () => {
+      clearTimeout(timer);
+    };
+  }, [value, delay]);
+
+  return debouncedValue;
+}
+
+export { debounce, useDebounce, useGetCountdown, useOnClickOutside };
