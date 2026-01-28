@@ -1,158 +1,139 @@
 'use client';
 
-import { useEffect, useMemo, useRef, useState } from 'react';
-import { Button, Input, Tabs, TabsContent } from '@zamp-platform/ui';
+import { useMemo, useState } from 'react';
+import { Input, Tabs, TabsContent, TabsList, TabsTrigger } from '@zamp-platform/ui';
 import { cn } from '@zamp-platform/ui/utils';
-import { motion } from 'framer-motion';
-import { FileText, Table2 } from 'lucide-react';
+import { useRouter } from 'next/navigation';
+import { useGetDatasetListingQuery } from '@/apis/dataset';
+import { useGetPagesQuery } from '@/apis/pages';
+import ImageLoader from '@/components/common/loader/ImageLoader';
+import CommonWrapper from '@/components/commonWrapper';
+import { SkeletonTypes } from '@/components/commonWrapper/commonWrapper.types';
+import { ZAMP_LOGO_LOADER_SVG } from '@/constants/icons';
+import { getChatDatasetRoute, getChatPageSheetRoute } from '@/constants/routeConfig';
+import { ARTIFACT_ICON_MAP, ARTIFACTS_PAGE_SIZE, ARTIFACTS_TABS } from '@/modules/pace/artifacts/artifacts.constants';
+import { Artifact } from '@/modules/pace/artifacts/artifacts.types';
+import { usePaceContext } from '@/modules/pace/pace.context';
+import { DynamicTabType } from '@/modules/pace/pace.types';
+import { findTimeDifference } from '@/utils/common';
 
-type ArtifactType = 'page' | 'dataset';
+const ArtifactIcon = ({ type }: { type: DynamicTabType }) => {
+  const Icon = ARTIFACT_ICON_MAP[type];
 
-interface ArtifactUser {
-  name: string;
-  color: string;
-}
-
-interface Artifact {
-  id: string;
-  name: string;
-  type: ArtifactType;
-  updatedAt: string;
-  users: ArtifactUser[];
-}
-
-// Dummy data
-const DUMMY_ARTIFACTS: Artifact[] = [
-  {
-    id: '1',
-    name: 'Pace rebrand',
-    type: 'page',
-    updatedAt: '23 mins ago',
-    users: [
-      { name: 'Sarah', color: '#FFD6D6' },
-      { name: 'Victor', color: '#FFE4B8' },
-      { name: 'John', color: '#B8D4FF' },
-    ],
-  },
-  {
-    id: '2',
-    name: 'Recon dashboard',
-    type: 'page',
-    updatedAt: '23 mins ago',
-    users: [{ name: 'John', color: '#B8D4FF' }],
-  },
-  {
-    id: '3',
-    name: 'HSBC Transactions',
-    type: 'dataset',
-    updatedAt: '23 mins ago',
-    users: [{ name: 'Oliver', color: '#E8E8E8' }],
-  },
-  {
-    id: '4',
-    name: 'Pace rebrand',
-    type: 'page',
-    updatedAt: '23 mins ago',
-    users: [{ name: 'Sarah', color: '#FFD6D6' }],
-  },
-  {
-    id: '5',
-    name: 'Recon dashboard',
-    type: 'page',
-    updatedAt: '23 mins ago',
-    users: [{ name: 'John', color: '#B8D4FF' }],
-  },
-  {
-    id: '6',
-    name: 'HSBC Transactions',
-    type: 'dataset',
-    updatedAt: '23 mins ago',
-    users: [{ name: 'Victor', color: '#FFE4B8' }],
-  },
-  {
-    id: '7',
-    name: 'Pace rebrand',
-    type: 'page',
-    updatedAt: '23 mins ago',
-    users: [{ name: 'Sarah', color: '#FFD6D6' }],
-  },
-  {
-    id: '8',
-    name: 'Recon dashboard',
-    type: 'page',
-    updatedAt: '23 mins ago',
-    users: [{ name: 'John', color: '#B8D4FF' }],
-  },
-];
-
-const ArtifactIcon = ({ type }: { type: ArtifactType }) => {
-  if (type === 'page') {
-    return <FileText size={16} className='text-GRAY_900' />;
-  }
-
-  return <Table2 size={16} className='text-GRAY_900' />;
+  return <Icon size={16} className='text-GRAY_900' />;
 };
 
-const ArtifactItem = ({ artifact }: { artifact: Artifact }) => {
-  return (
-    <div className='hover:bg-BG_GRAY_2 flex cursor-pointer items-center justify-between rounded-md p-3'>
-      <div className='flex items-center gap-x-2.5'>
-        <div className='border-GRAY_400 flex h-8 w-8 items-center justify-center rounded-md border p-2'>
-          <ArtifactIcon type={artifact.type} />
-        </div>
-        <div className='flex flex-col'>
-          <span className='f-13-500 text-GRAY_1000'>{artifact.name}</span>
-          <span className='f-10-400 text-GRAY_700'>{artifact.updatedAt}</span>
-        </div>
+interface ArtifactItemProps {
+  artifact: Artifact;
+  onClick: (artifact: Artifact) => void;
+}
+
+const ArtifactItem = ({ artifact, onClick }: ArtifactItemProps) => (
+  <div
+    className='hover:bg-BG_GRAY_2 flex cursor-pointer items-center justify-between rounded-md p-3'
+    onClick={() => onClick(artifact)}
+    role='button'
+    tabIndex={0}
+    onKeyDown={(e) => {
+      if (e.key === 'Enter' || e.key === ' ') {
+        onClick(artifact);
+      }
+    }}
+  >
+    <div className='flex items-center gap-x-2.5'>
+      <div className='border-GRAY_400 flex h-8 w-8 items-center justify-center rounded-md border p-2'>
+        <ArtifactIcon type={artifact.type} />
+      </div>
+      <div className='flex flex-col'>
+        <span className='f-13-500 text-GRAY_1000'>{artifact.name}</span>
+        <span className='f-10-400 text-GRAY_700'>{artifact.updatedAt}</span>
       </div>
     </div>
-  );
-};
-
-const TABS = [
-  { id: 'all', label: 'All', icon: null },
-  { id: 'pages', label: 'Pages', icon: FileText },
-  { id: 'datasets', label: 'Datasets', icon: Table2 },
-];
+  </div>
+);
 
 const ArtifactsPage = () => {
+  const router = useRouter();
+  const { openDynamicTab } = usePaceContext();
   const [searchQuery, setSearchQuery] = useState('');
   const [activeTab, setActiveTab] = useState('all');
-  const tabRefs = useRef<Map<string, HTMLSpanElement>>(new Map());
-  const [indicatorStyle, setIndicatorStyle] = useState({ left: 0, width: 0 });
 
-  useEffect(() => {
-    const activeTabElement = tabRefs.current.get(activeTab);
+  const {
+    data: pagesData,
+    isFetching: isFetchingPages,
+    isError: isErrorPages,
+    refetch: refetchPages,
+  } = useGetPagesQuery(undefined, {
+    refetchOnMountOrArgChange: false,
+  });
 
-    if (activeTabElement) {
-      setIndicatorStyle({
-        left: activeTabElement.offsetLeft,
-        width: activeTabElement.offsetWidth,
-      });
-    }
-  }, [activeTab]);
+  const {
+    data: datasetsData,
+    isFetching: isFetchingDatasets,
+    isError: isErrorDatasets,
+    refetch: refetchDatasets,
+  } = useGetDatasetListingQuery(
+    { page: 1, pageSize: ARTIFACTS_PAGE_SIZE },
+    {
+      refetchOnMountOrArgChange: false,
+    },
+  );
 
-  const filteredArtifacts = useMemo(() => {
-    let artifacts = DUMMY_ARTIFACTS;
+  const isFetching = isFetchingPages || isFetchingDatasets;
+  const isError = isErrorPages || isErrorDatasets;
 
-    // Filter by search query
-    if (searchQuery) {
-      artifacts = artifacts.filter((artifact) => artifact.name.toLowerCase().includes(searchQuery.toLowerCase()));
-    }
+  const pages: Artifact[] = useMemo(() => {
+    if (!pagesData) return [];
 
-    // Filter by tab
-    if (activeTab === 'pages') {
-      artifacts = artifacts.filter((artifact) => artifact.type === 'page');
-    } else if (activeTab === 'datasets') {
-      artifacts = artifacts.filter((artifact) => artifact.type === 'dataset');
-    }
+    return pagesData
+      .filter((page) => page.sheets.length > 0)
+      .map((page) => ({
+        id: page.page_id,
+        name: page.name,
+        type: DynamicTabType.PAGE,
+        updatedAt: findTimeDifference(page.updated_at),
+        sheetId: page.sheets[0].sheet_id,
+      }));
+  }, [pagesData]);
 
-    return artifacts;
-  }, [searchQuery, activeTab]);
+  const datasets: Artifact[] = useMemo(() => {
+    if (!datasetsData?.datasets) return [];
 
-  const pages = useMemo(() => filteredArtifacts.filter((a) => a.type === 'page'), [filteredArtifacts]);
+    return datasetsData.datasets.map((dataset) => ({
+      id: dataset.id,
+      name: dataset.title,
+      type: DynamicTabType.DATASET,
+      updatedAt: findTimeDifference(dataset.updatedAt),
+    }));
+  }, [datasetsData]);
 
-  const datasets = useMemo(() => filteredArtifacts.filter((a) => a.type === 'dataset'), [filteredArtifacts]);
+  const filteredPages = useMemo(() => {
+    if (!searchQuery) return pages;
+
+    return pages.filter((page) => page.name.toLowerCase().includes(searchQuery.toLowerCase()));
+  }, [pages, searchQuery]);
+
+  const filteredDatasets = useMemo(() => {
+    if (!searchQuery) return datasets;
+
+    return datasets.filter((dataset) => dataset.name.toLowerCase().includes(searchQuery.toLowerCase()));
+  }, [datasets, searchQuery]);
+
+  const handleArtifactClick = (artifact: Artifact) => {
+    const path =
+      artifact.type === DynamicTabType.PAGE && artifact.sheetId
+        ? getChatPageSheetRoute(artifact.id, artifact.sheetId)
+        : getChatDatasetRoute(artifact.id);
+
+    openDynamicTab({
+      id: artifact.id,
+      name: artifact.name,
+      type: artifact.type,
+      path,
+    });
+
+    router.push(path);
+  };
 
   return (
     <div className='mx-auto flex h-full w-full max-w-[700px] flex-col gap-y-8 overflow-hidden px-6 pt-15'>
@@ -160,69 +141,63 @@ const ArtifactsPage = () => {
       <Input
         placeholder='Search'
         value={searchQuery}
+        autoFocus
+        disabled={isFetching}
         onChange={(e) => setSearchQuery(e.target.value)}
         className='f-12-450 placeholder:text-GRAY_500 h-8 p-3'
       />
 
-      <Tabs value={activeTab} onValueChange={setActiveTab} className='flex min-h-0 w-full flex-1 flex-col'>
-        <div className='relative mb-4 flex shrink-0 items-center gap-x-3'>
-          <motion.div
-            className='bg-GRAY_100 absolute h-full rounded-md'
-            initial={false}
-            animate={{
-              left: indicatorStyle.left,
-              width: indicatorStyle.width,
-            }}
-            transition={{
-              type: 'spring',
-              stiffness: 500,
-              damping: 35,
-            }}
-          />
-          {TABS.map((tab) => (
-            <span
-              key={tab.id}
-              ref={(el) => {
-                if (el) tabRefs.current.set(tab.id, el);
-              }}
-            >
-              <Button
-                onClick={() => setActiveTab(tab.id)}
-                variant='ghost'
-                leadingIcon={tab.icon ? <tab.icon size={12} /> : undefined}
+      <CommonWrapper
+        isLoading={isFetching}
+        loader={
+          <ImageLoader imageSrc={ZAMP_LOGO_LOADER_SVG} width={140} height={140} className='h-[calc(100vh-250px)]' />
+        }
+        skeletonType={SkeletonTypes.CUSTOM}
+        errorCardStyle='h-[calc(100vh-250px)]'
+        isError={isError}
+        refetchFunction={isErrorPages ? refetchPages : refetchDatasets}
+        disableAnimation
+        className='flex min-h-0 flex-1 flex-col'
+      >
+        <Tabs value={activeTab} onValueChange={setActiveTab} className='flex min-h-0 w-full flex-1 flex-col'>
+          <TabsList className='mb-4 flex h-auto shrink-0 items-center justify-start gap-x-3 bg-transparent p-0'>
+            {ARTIFACTS_TABS.map((tab) => (
+              <TabsTrigger
+                key={tab.id}
+                value={tab.id}
                 className={cn(
-                  'relative z-10 flex h-6 items-center justify-center rounded border-none bg-transparent px-2 py-1 hover:bg-transparent',
-                  activeTab === tab.id ? 'text-GRAY_1000' : 'text-GRAY_700 hover:text-GRAY_900',
-                  'f-12-500',
+                  'f-12-500 flex h-6 items-center gap-x-1.5 rounded border-none px-2 py-1 data-[state=active]:border-none data-[state=active]:shadow-none',
+                  'text-GRAY_700 hover:text-GRAY_900 data-[state=active]:bg-GRAY_100 data-[state=active]:text-GRAY_1000',
                 )}
               >
+                {tab.icon && <tab.icon size={12} />}
                 {tab.label}
-              </Button>
-            </span>
-          ))}
-        </div>
+              </TabsTrigger>
+            ))}
+          </TabsList>
 
-        <TabsContent value='all' className='flex-1 overflow-y-auto [scrollbar-width:thin]'>
-          {pages.map((artifact) => (
-            <ArtifactItem key={artifact.id} artifact={artifact} />
-          ))}
-          {datasets.map((artifact) => (
-            <ArtifactItem key={artifact.id} artifact={artifact} />
-          ))}
-        </TabsContent>
+          <TabsContent value='all' className='flex-1 overflow-y-auto [scrollbar-width:thin]'>
+            {filteredPages.map((artifact) => (
+              <ArtifactItem key={artifact.id} artifact={artifact} onClick={handleArtifactClick} />
+            ))}
+            {filteredDatasets.map((artifact) => (
+              <ArtifactItem key={artifact.id} artifact={artifact} onClick={handleArtifactClick} />
+            ))}
+          </TabsContent>
 
-        <TabsContent value='pages' className='flex-1 overflow-y-auto [scrollbar-width:thin]'>
-          {pages.map((artifact) => (
-            <ArtifactItem key={artifact.id} artifact={artifact} />
-          ))}
-        </TabsContent>
+          <TabsContent value='pages' className='flex-1 overflow-y-auto [scrollbar-width:thin]'>
+            {filteredPages.map((artifact) => (
+              <ArtifactItem key={artifact.id} artifact={artifact} onClick={handleArtifactClick} />
+            ))}
+          </TabsContent>
 
-        <TabsContent value='datasets' className='flex-1 overflow-y-auto [scrollbar-width:thin]'>
-          {datasets.map((artifact) => (
-            <ArtifactItem key={artifact.id} artifact={artifact} />
-          ))}
-        </TabsContent>
-      </Tabs>
+          <TabsContent value='datasets' className='flex-1 overflow-y-auto [scrollbar-width:thin]'>
+            {filteredDatasets.map((artifact) => (
+              <ArtifactItem key={artifact.id} artifact={artifact} onClick={handleArtifactClick} />
+            ))}
+          </TabsContent>
+        </Tabs>
+      </CommonWrapper>
     </div>
   );
 };

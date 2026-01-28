@@ -18,3 +18,15 @@ export interface PaceNavbarItemSchema {
 export interface PaceSettingsTabSchema extends PaceNavbarItemSchema {
   name: string;
 }
+
+export const enum DynamicTabType {
+  PAGE = 'page',
+  DATASET = 'dataset',
+}
+
+export interface DynamicTab {
+  id: string;
+  name: string;
+  type: DynamicTabType;
+  path: string;
+}

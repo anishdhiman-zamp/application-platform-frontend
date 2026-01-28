@@ -84,16 +84,16 @@ export type DatasetType = {
   id: string;
   title: string;
   description: string;
-  created_at: string;
-  updated_at: string;
-  created_by: string;
-  organization_id: string;
+  createdAt: string;
+  updatedAt: string;
+  createdBy: string;
+  organizationId: string;
   metadata: MapAny;
 };
 
 export type DatasetListingResponseType = {
   datasets: DatasetType[];
-  total_count: number;
+  totalCount: number;
 };
 
 export type DatasetListingRequestType = {

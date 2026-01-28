@@ -38,7 +38,8 @@ export const ROUTES_PATH = {
   CHAT: '/chat',
   CHAT_SKILLS: '/chat/skills',
   CHAT_ARTIFACTS: '/chat/artifacts',
-  CHAT_SETTINGS: '/chat/settings',
+  CHAT_PAGE_SHEET: '/chat/pages/:pageId/:sheetId',
+  CHAT_DATASET: '/chat/datasets/:datasetId',
   CHAT_SETTINGS_PEOPLE: '/chat/settings/people',
   CHAT_SETTINGS_INTEGRATIONS: '/chat/settings/integrations',
 };
@@ -110,6 +111,14 @@ export const getCreateKnowledgeBaseRouteByProcessId = (processId: string) => {
 
 export const getIntegrationDetailRoute = (integrationId: string) => {
   return `${ROUTES_PATH.INTEGRATION_DETAIL.replace(':integrationId', integrationId)}`;
+};
+
+export const getChatPageSheetRoute = (pageId: string, sheetId: string) => {
+  return ROUTES_PATH.CHAT_PAGE_SHEET.replace(':pageId', pageId).replace(':sheetId', sheetId);
+};
+
+export const getChatDatasetRoute = (datasetId: string) => {
+  return ROUTES_PATH.CHAT_DATASET.replace(':datasetId', datasetId);
 };
 
 export const LOGIN_URLS = [ROUTES_PATH.LOGIN];

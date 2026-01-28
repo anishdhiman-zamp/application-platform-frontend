@@ -1,19 +1,56 @@
 'use client';
 
-import { createContext, type ReactNode, useCallback, useContext, useMemo, useRef, useState } from 'react';
+import { createContext, type ReactNode, useCallback, useContext, useEffect, useMemo, useRef, useState } from 'react';
+import { DynamicTab } from 'modules/pace/pace.types';
+import { getFromLocalStorage, LOCAL_STORAGE_KEYS, setToLocalStorage } from '@/utils/localstorage';
+
+const getStoredTabs = (): DynamicTab[] => {
+  try {
+    const stored = getFromLocalStorage(LOCAL_STORAGE_KEYS.PACE_OPEN_DYNAMIC_TABS);
+
+    if (!stored) return [];
+    const tabs = JSON.parse(stored) as DynamicTab[];
+
+    // Filter out invalid tabs (e.g., from old localStorage data without required fields)
+    return tabs.filter((tab) => tab.id && tab.name && tab.path && tab.type);
+  } catch {
+    return [];
+  }
+};
+
+const setStoredTabs = (tabs: DynamicTab[]) => {
+  try {
+    setToLocalStorage(LOCAL_STORAGE_KEYS.PACE_OPEN_DYNAMIC_TABS, JSON.stringify(tabs));
+  } catch {
+    // Ignore storage errors
+  }
+};
 
 interface PaceContextType {
   isPaceSidebarOpen: boolean;
   setIsPaceSidebarOpen: (open: boolean) => void;
   registerStartNewChat: (callback: () => void) => void;
   startNewChat: () => void;
+  dynamicTabs: DynamicTab[];
+  openDynamicTab: (tab: DynamicTab) => void;
+  closeDynamicTab: (id: string) => void;
 }
 
 const PaceContext = createContext<PaceContextType | null>(null);
 
 export const PaceProvider = ({ children }: { children: ReactNode }) => {
   const [isPaceSidebarOpen, setIsPaceSidebarOpen] = useState(false);
+  const [dynamicTabs, setDynamicTabs] = useState<DynamicTab[]>([]);
   const startNewChatRef = useRef<(() => void) | null>(null);
+
+  // Hydrate from localStorage on mount
+  useEffect(() => {
+    const storedTabs = getStoredTabs();
+
+    if (storedTabs.length > 0) {
+      setDynamicTabs(storedTabs);
+    }
+  }, []);
 
   const registerStartNewChat = useCallback((callback: () => void) => {
     startNewChatRef.current = callback;
@@ -23,14 +60,42 @@ export const PaceProvider = ({ children }: { children: ReactNode }) => {
     startNewChatRef.current?.();
   }, []);
 
+  const openDynamicTab = useCallback((tab: DynamicTab) => {
+    setDynamicTabs((prev) => {
+      // Check if tab already exists
+      const exists = prev.some((t) => t.id === tab.id);
+
+      if (exists) return prev;
+
+      const newTabs = [...prev, tab];
+
+      setStoredTabs(newTabs);
+
+      return newTabs;
+    });
+  }, []);
+
+  const closeDynamicTab = useCallback((id: string) => {
+    setDynamicTabs((prev) => {
+      const newTabs = prev.filter((tab) => tab.id !== id);
+
+      setStoredTabs(newTabs);
+
+      return newTabs;
+    });
+  }, []);
+
   const value: PaceContextType = useMemo(
     () => ({
       isPaceSidebarOpen,
       setIsPaceSidebarOpen,
       registerStartNewChat,
       startNewChat,
+      dynamicTabs,
+      openDynamicTab,
+      closeDynamicTab,
     }),
-    [isPaceSidebarOpen, registerStartNewChat, startNewChat],
+    [isPaceSidebarOpen, registerStartNewChat, startNewChat, dynamicTabs, openDynamicTab, closeDynamicTab],
   );
 
   return <PaceContext.Provider value={value}>{children}</PaceContext.Provider>;
