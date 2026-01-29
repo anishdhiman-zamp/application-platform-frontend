@@ -1,11 +1,12 @@
 'use client';
 
 import { createContext, ReactNode, useContext, useEffect } from 'react';
-import { usePathname, useRouter } from 'next/navigation';
+import { useParams, usePathname, useRouter } from 'next/navigation';
 import { ROUTES_PATH } from '@/constants/routeConfig';
 import { useAppSelector } from '@/hooks/toolkit';
 import { usePersistedPageNavigation } from '@/hooks/useLastVisitedPage';
 import { usePagesAndProcessesData } from '@/hooks/usePagesAndProcessesData';
+import { useRedirectToFirstProcessAfterOrgSwitch } from '@/hooks/useRedirectToFirstProcessAfterOrgSwitch';
 
 interface PagesAndProcessesContextType {
   pages: ReturnType<typeof usePagesAndProcessesData>['pages'];
@@ -40,6 +41,7 @@ interface PagesAndProcessesProviderProps {
  */
 export function PagesAndProcessesProvider({ children }: PagesAndProcessesProviderProps) {
   const pathname = usePathname();
+  const params = useParams();
   const router = useRouter();
   const { isOrgSwitchIsInProgress } = useAppSelector((state) => state.user);
 
@@ -51,6 +53,14 @@ export function PagesAndProcessesProvider({ children }: PagesAndProcessesProvide
   const { pushToMostRelevantPage, pushToMostRelevantProcess } = usePersistedPageNavigation({
     pagesList: pages ?? [],
     processesList: processes ?? [],
+  });
+
+  // After org switch, redirect to first process if current processId is not in the list
+  useRedirectToFirstProcessAfterOrgSwitch({
+    processId: params?.processId as string | undefined,
+    isOrgSwitchIsInProgress: isOrgSwitchIsInProgress ?? false,
+    isSuccessProcesses: isSuccessProcesses ?? false,
+    processes: processes ?? undefined,
   });
 
   // Handle navigation logic - only for /process route
