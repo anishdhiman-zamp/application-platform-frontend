@@ -1,13 +1,15 @@
 'use client';
 
-import { FC, useCallback, useEffect, useMemo } from 'react';
+import { FC, useEffect, useMemo, useRef } from 'react';
 import {
   ConnectedChatInput,
+  DropOverlay,
   MessageContainer,
   ResourceType,
   ScopeType,
   SenderType,
   useChat,
+  useFileDragDrop,
 } from '@zamp-platform/chat';
 import { ArrowDownIcon, Button } from '@zamp-platform/ui';
 import { cn } from '@zamp-platform/ui/utils';
@@ -47,10 +49,11 @@ const ChatSidebarInner: FC<ChatSidebarInnerProps> = ({
   const organizationId = useAppSelector((state: RootState) => state.user.user?.orgs?.[0]?.organization_id) ?? '';
   const currentUserName = useAppSelector((state: RootState) => state.user.user?.user_name) ?? '';
   const { inputValue, setInputValue } = useChatDraftInput({ conversationId });
+  const fileDropHandlerRef = useRef<((files: FileList) => void) | null>(null);
 
-  const handleConversationCreated = useCallback(() => {
+  const handleConversationCreated = () => {
     dispatch(baseApi.util.invalidateTags([APITags.GET_CONVERSATION_HISTORY]));
-  }, [dispatch]);
+  };
 
   const chat = useChat({
     resourceId: organizationId,
@@ -87,8 +90,15 @@ const ChatSidebarInner: FC<ChatSidebarInnerProps> = ({
     streamingState: chat.streamingState,
   });
 
+  const { isDragOver, dropZoneProps } = useFileDragDrop({
+    onFileDrop: (files) => fileDropHandlerRef.current?.(files),
+    disabled: chat.isStreaming || chat.isCreatingConversationV2,
+    acceptedFileTypes: ACCEPTED_FILE_TYPES,
+  });
+
   return (
-    <>
+    <div className='relative flex h-full flex-1 flex-col' {...dropZoneProps}>
+      <DropOverlay isVisible={isDragOver} />
       <ChatTopbar
         onStartNewChat={startNewChat}
         onClose={handleClose}
@@ -151,6 +161,7 @@ const ChatSidebarInner: FC<ChatSidebarInnerProps> = ({
             acceptedFileTypes={ACCEPTED_FILE_TYPES}
             className='bg-white'
             onConversationCreated={handleConversationCreated}
+            fileDropHandlerRef={fileDropHandlerRef}
           />
           <Button
             onClick={handleScrollToBottomClick}
@@ -166,7 +177,7 @@ const ChatSidebarInner: FC<ChatSidebarInnerProps> = ({
           </Button>
         </div>
       </div>
-    </>
+    </div>
   );
 };
 
