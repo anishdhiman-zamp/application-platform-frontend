@@ -13,6 +13,7 @@ export enum LOCAL_STORAGE_KEYS {
   XZAMP_ORGANIZATION_ID = 'X-Zamp-Organization-Id',
   ORG_REGION = 'ORG_REGION_V5',
   ALL_REGIONS = 'ALL_REGIONS_V4',
+  PACE_OPEN_DYNAMIC_TABS = 'PACE_OPEN_DYNAMIC_TABS',
 }
 
 export const getFromLocalStorage = (key: string) => {

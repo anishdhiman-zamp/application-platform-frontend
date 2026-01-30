@@ -4,8 +4,13 @@ import { FC, useEffect, useMemo, useState } from 'react';
 import { DEFAULT_REGION } from '@zamp-platform/api';
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from '@zamp-platform/ui';
 import { cn } from '@zamp-platform/ui/utils';
-import { getFromLocalStorage, LOCAL_STORAGE_KEYS, setToLocalStorage } from '@zamp-platform/utils';
-import { useRouter } from 'next/navigation';
+import {
+  getFromLocalStorage,
+  LOCAL_STORAGE_KEYS,
+  removeFromLocalStorage,
+  setToLocalStorage,
+} from '@zamp-platform/utils';
+import { usePathname, useRouter } from 'next/navigation';
 import { useGetBaseUrlQuery } from '@/apis/auth';
 import { useGetOrganizationsQuery } from '@/apis/people';
 import { useSSEContext } from '@/app/_providers/sse-provider';
@@ -24,11 +29,14 @@ import type { Organization } from '@/types/api/auth.types';
 
 type OrgSwitcherProps = {
   isSidebarOpen: boolean;
+  menuContentClassName?: string;
+  menuTriggerClassName?: string;
 };
 
-const OrgSwitcher: FC<OrgSwitcherProps> = ({ isSidebarOpen }) => {
+const OrgSwitcher: FC<OrgSwitcherProps> = ({ isSidebarOpen, menuContentClassName, menuTriggerClassName }) => {
   const { isOrgSwitchIsInProgress, user } = useAppSelector((state) => state.user);
   const router = useRouter();
+  const pathname = usePathname();
   const dispatch = useAppDispatch();
   const { disconnect: disconnectSSE } = useSSEContext();
 
@@ -63,8 +71,13 @@ const OrgSwitcher: FC<OrgSwitcherProps> = ({ isSidebarOpen }) => {
     dispatch(setIsOrgSwitchIsInProgress(true));
 
     setSelectedOrg(org);
+    removeFromLocalStorage(LOCAL_STORAGE_KEYS.PACE_OPEN_DYNAMIC_TABS);
     setToLocalStorage(LOCAL_STORAGE_KEYS.XZAMP_ORGANIZATION_ID, org.organization_id);
-    router.push(ROUTES_PATH.PROCESSES);
+    if (pathname?.includes(ROUTES_PATH.CHAT)) {
+      router.push(ROUTES_PATH.CHAT_SETTINGS_PEOPLE);
+    } else {
+      router.push(ROUTES_PATH.PROCESSES);
+    }
   };
 
   const handleRegionChange = (region: { region: string; url: string }) => {
@@ -98,7 +111,10 @@ const OrgSwitcher: FC<OrgSwitcherProps> = ({ isSidebarOpen }) => {
       <DropdownMenu onOpenChange={setIsOrgSwitcherMenuOpen}>
         <DropdownMenuTrigger asChild>
           <div
-            className='border-GRAY_400 bg-BG_GRAY_1 flex h-[57px] w-full cursor-pointer items-center gap-2.5 border-t px-4 py-3'
+            className={cn(
+              'border-GRAY_400 bg-BG_GRAY_1 flex h-[57px] w-full cursor-pointer items-center gap-2.5 border-t px-4 py-3',
+              menuTriggerClassName,
+            )}
             data-testid='org-switcher-trigger'
             role='button'
             aria-label='Switch organization'
@@ -136,7 +152,10 @@ const OrgSwitcher: FC<OrgSwitcherProps> = ({ isSidebarOpen }) => {
         </DropdownMenuTrigger>
         <DropdownMenuContent
           align='end'
-          className='z-9999 mr-1 flex w-[229px] flex-col gap-[2px] overflow-y-auto p-1'
+          className={cn(
+            'z-9999 mr-1 flex w-[229px] flex-col gap-[2px] overflow-y-auto p-1 [scrollbar-width:none]',
+            menuContentClassName,
+          )}
           sideOffset={5}
         >
           <div className='flex max-h-[150px] flex-col gap-1 overflow-y-auto [scrollbar-width:none]'>

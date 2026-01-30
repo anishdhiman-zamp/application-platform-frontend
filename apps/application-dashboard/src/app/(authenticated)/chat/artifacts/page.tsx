@@ -3,7 +3,8 @@
 import { useMemo, useState } from 'react';
 import { Input, Tabs, TabsContent, TabsList, TabsTrigger } from '@zamp-platform/ui';
 import { cn } from '@zamp-platform/ui/utils';
-import { useRouter } from 'next/navigation';
+import { useAutoFocus } from '@zamp-platform/utils';
+import Link from 'next/link';
 import { useGetDatasetListingQuery } from '@/apis/dataset';
 import { useGetPagesQuery } from '@/apis/pages';
 import ImageLoader from '@/components/common/loader/ImageLoader';
@@ -25,20 +26,16 @@ const ArtifactIcon = ({ type }: { type: DynamicTabType }) => {
 
 interface ArtifactItemProps {
   artifact: Artifact;
+  href: string;
   onClick: (artifact: Artifact) => void;
 }
 
-const ArtifactItem = ({ artifact, onClick }: ArtifactItemProps) => (
-  <div
+const ArtifactItem = ({ artifact, href, onClick }: ArtifactItemProps) => (
+  <Link
+    prefetch
+    href={href}
     className='hover:bg-BG_GRAY_2 flex cursor-pointer items-center justify-between rounded-md p-3'
     onClick={() => onClick(artifact)}
-    role='button'
-    tabIndex={0}
-    onKeyDown={(e) => {
-      if (e.key === 'Enter' || e.key === ' ') {
-        onClick(artifact);
-      }
-    }}
   >
     <div className='flex items-center gap-x-2.5'>
       <div className='border-GRAY_400 flex h-8 w-8 items-center justify-center rounded-md border p-2'>
@@ -49,11 +46,10 @@ const ArtifactItem = ({ artifact, onClick }: ArtifactItemProps) => (
         <span className='f-10-400 text-GRAY_700'>{artifact.updatedAt}</span>
       </div>
     </div>
-  </div>
+  </Link>
 );
 
 const ArtifactsPage = () => {
-  const router = useRouter();
   const { openDynamicTab } = usePaceContext();
   const [searchQuery, setSearchQuery] = useState('');
   const [activeTab, setActiveTab] = useState('all');
@@ -81,6 +77,8 @@ const ArtifactsPage = () => {
 
   const isFetching = isFetchingPages || isFetchingDatasets;
   const isError = isErrorPages || isErrorDatasets;
+
+  const { setRef: setSearchInputRef } = useAutoFocus<HTMLInputElement>({ enabled: !isFetching });
 
   const pages: Artifact[] = useMemo(() => {
     if (!pagesData) return [];
@@ -119,29 +117,28 @@ const ArtifactsPage = () => {
     return datasets.filter((dataset) => dataset.name.toLowerCase().includes(searchQuery.toLowerCase()));
   }, [datasets, searchQuery]);
 
-  const handleArtifactClick = (artifact: Artifact) => {
-    const path =
-      artifact.type === DynamicTabType.PAGE && artifact.sheetId
-        ? getChatPageSheetRoute(artifact.id, artifact.sheetId)
-        : getChatDatasetRoute(artifact.id);
+  const getArtifactPath = (artifact: Artifact) => {
+    return artifact.type === DynamicTabType.PAGE && artifact.sheetId
+      ? getChatPageSheetRoute(artifact.id, artifact.sheetId)
+      : getChatDatasetRoute(artifact.id);
+  };
 
+  const handleArtifactClick = (artifact: Artifact) => {
     openDynamicTab({
       id: artifact.id,
       name: artifact.name,
       type: artifact.type,
-      path,
+      path: getArtifactPath(artifact),
     });
-
-    router.push(path);
   };
 
   return (
     <div className='mx-auto flex h-full w-full max-w-[700px] flex-col gap-y-8 overflow-hidden px-6 pt-15'>
       <h1 className='f-20-500 text-GRAY_1000 shrink-0'>Artifacts</h1>
       <Input
+        ref={setSearchInputRef}
         placeholder='Search'
         value={searchQuery}
-        autoFocus
         disabled={isFetching}
         onChange={(e) => setSearchQuery(e.target.value)}
         className='f-12-450 placeholder:text-GRAY_500 h-8 p-3'
@@ -176,24 +173,44 @@ const ArtifactsPage = () => {
             ))}
           </TabsList>
 
-          <TabsContent value='all' className='flex-1 overflow-y-auto [scrollbar-width:thin]'>
+          <TabsContent value='all' className='flex-1 overflow-y-auto [&::-webkit-scrollbar]:hidden'>
             {filteredPages.map((artifact) => (
-              <ArtifactItem key={artifact.id} artifact={artifact} onClick={handleArtifactClick} />
+              <ArtifactItem
+                key={artifact.id}
+                artifact={artifact}
+                href={getArtifactPath(artifact)}
+                onClick={handleArtifactClick}
+              />
             ))}
             {filteredDatasets.map((artifact) => (
-              <ArtifactItem key={artifact.id} artifact={artifact} onClick={handleArtifactClick} />
+              <ArtifactItem
+                key={artifact.id}
+                artifact={artifact}
+                href={getArtifactPath(artifact)}
+                onClick={handleArtifactClick}
+              />
             ))}
           </TabsContent>
 
-          <TabsContent value='pages' className='flex-1 overflow-y-auto [scrollbar-width:thin]'>
+          <TabsContent value='pages' className='flex-1 overflow-y-auto [&::-webkit-scrollbar]:hidden'>
             {filteredPages.map((artifact) => (
-              <ArtifactItem key={artifact.id} artifact={artifact} onClick={handleArtifactClick} />
+              <ArtifactItem
+                key={artifact.id}
+                artifact={artifact}
+                href={getArtifactPath(artifact)}
+                onClick={handleArtifactClick}
+              />
             ))}
           </TabsContent>
 
-          <TabsContent value='datasets' className='flex-1 overflow-y-auto [scrollbar-width:thin]'>
+          <TabsContent value='datasets' className='flex-1 overflow-y-auto [&::-webkit-scrollbar]:hidden'>
             {filteredDatasets.map((artifact) => (
-              <ArtifactItem key={artifact.id} artifact={artifact} onClick={handleArtifactClick} />
+              <ArtifactItem
+                key={artifact.id}
+                artifact={artifact}
+                href={getArtifactPath(artifact)}
+                onClick={handleArtifactClick}
+              />
             ))}
           </TabsContent>
         </Tabs>

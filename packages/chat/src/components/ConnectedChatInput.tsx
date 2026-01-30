@@ -343,6 +343,7 @@ export const ConnectedChatInput: FC<ConnectedChatInputProps> = ({
                 <Textarea
                   ref={textareaRef}
                   value={value}
+                  autoFocus
                   onChange={(e) => setValue(e.target.value)}
                   onKeyDown={isDisabled ? undefined : handleKeyDown}
                   onPaste={isDisabled || disableAttachments ? undefined : handlePaste}
@@ -357,15 +358,26 @@ export const ConnectedChatInput: FC<ConnectedChatInputProps> = ({
                 />
               </div>
 
-              <div className='flex items-center justify-between py-2.5 pr-2.5 pl-1.5'>
-                <div className='flex items-center gap-1'>
+              <div className='flex items-center justify-between px-2.5 py-2.5'>
+                <Button
+                  variant='ghost'
+                  size='icon'
+                  className='hover:text-gray-1000 !size-5 rounded-[2px] p-[2px] text-gray-900 hover:bg-gray-100 [&_svg]:size-3'
+                  aria-label='Attach file'
+                  onClick={handleAttachClick}
+                  disabled={isUploading || isDisabled || disableAttachments}
+                >
+                  <Paperclip />
+                </Button>
+
+                <div className='flex items-center gap-x-2'>
                   {isPreparingToRecord ? (
                     <Loader size={14} className='animate-spin text-gray-900' />
                   ) : (
                     <Button
                       variant='ghost'
                       size='icon'
-                      className='hover:text-gray-1000 !size-4 rounded-[2px] text-gray-900 hover:bg-gray-300 [&_svg]:size-3'
+                      className='hover:text-gray-1000 !size-5 rounded-[2px] p-[2px] text-gray-900 hover:bg-gray-100 [&_svg]:size-3'
                       aria-label='Start recording'
                       onClick={handleStartRecording}
                       disabled={microphoneState === MicrophoneState.SettingUp || isDisabled}
@@ -374,25 +386,15 @@ export const ConnectedChatInput: FC<ConnectedChatInputProps> = ({
                     </Button>
                   )}
                   <Button
-                    variant='ghost'
+                    onClick={handleSubmit}
+                    disabled={isSubmitDisabled}
                     size='icon'
-                    className='hover:text-gray-1000 !size-4 rounded-[2px] text-gray-900 hover:bg-gray-300 [&_svg]:size-3'
-                    aria-label='Attach file'
-                    onClick={handleAttachClick}
-                    disabled={isUploading || isDisabled || disableAttachments}
+                    aria-label='Send message'
+                    className='disabled:bg-GRAY_300 !size-5 rounded-full p-[2px] !text-white disabled:cursor-not-allowed [&_svg]:size-3'
                   >
-                    <Paperclip />
+                    <ArrowUp className={cn('text-white', { 'text-GRAY_700': isSubmitDisabled })} />
                   </Button>
                 </div>
-                <Button
-                  onClick={handleSubmit}
-                  disabled={isSubmitDisabled}
-                  size='icon'
-                  aria-label='Send message'
-                  className='!size-5 rounded-full !text-white disabled:cursor-not-allowed disabled:opacity-50 [&_svg]:size-3'
-                >
-                  <ArrowUp />
-                </Button>
               </div>
             </div>
           )}

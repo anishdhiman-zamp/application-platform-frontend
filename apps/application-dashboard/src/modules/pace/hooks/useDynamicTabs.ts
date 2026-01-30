@@ -1,6 +1,6 @@
 'use client';
 
-import { useCallback, useEffect, useRef } from 'react';
+import { useCallback } from 'react';
 import { usePathname, useRouter } from 'next/navigation';
 import { ROUTES_PATH } from '@/constants/routeConfig';
 import { usePaceContext } from '@/modules/pace/pace.context';
@@ -9,7 +9,6 @@ export const useDynamicTabs = () => {
   const pathname = usePathname();
   const router = useRouter();
   const { dynamicTabs, closeDynamicTab } = usePaceContext();
-  const tabRefsMap = useRef<Map<string, HTMLAnchorElement>>(new Map());
 
   const isDynamicTabActive = useCallback(
     (path: string) => {
@@ -50,35 +49,10 @@ export const useDynamicTabs = () => {
     [dynamicTabs, pathname, closeDynamicTab, router],
   );
 
-  const setTabRef = useCallback(
-    (id: string) => (el: HTMLAnchorElement | null) => {
-      if (el) {
-        tabRefsMap.current.set(id, el);
-      } else {
-        tabRefsMap.current.delete(id);
-      }
-    },
-    [],
-  );
-
-  // Auto-scroll to keep active tab visible
-  useEffect(() => {
-    const activeTab = dynamicTabs.find((tab) => tab.path === pathname);
-
-    if (!activeTab) return;
-
-    const tabElement = tabRefsMap.current.get(activeTab.id);
-
-    if (tabElement) {
-      tabElement.scrollIntoView({ behavior: 'smooth', block: 'nearest', inline: 'nearest' });
-    }
-  }, [pathname, dynamicTabs]);
-
   return {
     dynamicTabs,
     isDynamicTabActive,
     isOnAnyDynamicTab,
     handleCloseDynamicTab,
-    setTabRef,
   };
 };

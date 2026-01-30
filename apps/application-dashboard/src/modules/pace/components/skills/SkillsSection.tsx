@@ -2,6 +2,7 @@
 
 import { useMemo, useState } from 'react';
 import { Button, Input, toast } from '@zamp-platform/ui';
+import { useAutoFocus } from '@zamp-platform/utils';
 import { useListSkillsQuery } from '@/apis/pace';
 import NewPaceIcons from '@/assets/Icons/NewPaceIcons';
 import CommonWrapper from '@/components/commonWrapper';
@@ -20,6 +21,7 @@ const SkillsSection = () => {
 
   const { isPaceSidebarOpen, setIsPaceSidebarOpen } = usePaceContext();
   const { data, isLoading, isError, refetch } = useListSkillsQuery({});
+  const { setRef: setSearchInputRef } = useAutoFocus<HTMLInputElement>({ enabled: !isLoading });
 
   const skills = data?.skills ?? [];
 
@@ -63,19 +65,22 @@ const SkillsSection = () => {
   };
 
   return (
-    <>
-      <div className='flex w-full max-w-[700px] items-center justify-between gap-x-3 px-6 pb-4'>
+    <div className='flex w-full max-w-[700px] flex-col gap-y-4 overflow-hidden'>
+      <div className='flex w-full items-center justify-between px-6'>
         <Input
           placeholder='Search skills...'
           value={searchQuery}
           onChange={onSearchChange}
-          className='border-GRAY_400 focus:border-GRAY_600 w-full focus:ring-3'
+          className='border-GRAY_400 focus:border-GRAY_600 h-8 w-full focus:ring-3'
+          wrapperClassName='w-[40%]'
           size='small'
+          disabled={isLoading}
           aria-label='Search skills'
+          ref={setSearchInputRef}
         />
         <Button
           variant='secondary'
-          size='small'
+          size='medium'
           onClick={() => {
             setSkillIdToUpdate(undefined);
             setIsUploadModalOpen(true);
@@ -84,7 +89,7 @@ const SkillsSection = () => {
           Upload skill
         </Button>
       </div>
-      <div className='w-full max-w-[700px] flex-1 overflow-y-auto' style={{ scrollbarWidth: 'thin' }}>
+      <div className='w-full flex-1 overflow-y-auto [&::-webkit-scrollbar]:hidden'>
         <CommonWrapper
           isLoading={isLoading || isRefetching}
           isError={isError}
@@ -113,7 +118,7 @@ const SkillsSection = () => {
           <NewPaceIcons />
         </Button>
       )}
-    </>
+    </div>
   );
 };
 

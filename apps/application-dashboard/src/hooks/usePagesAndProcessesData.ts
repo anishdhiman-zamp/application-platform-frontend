@@ -26,9 +26,6 @@ export const usePagesAndProcessesData = () => {
     refetchOnMountOrArgChange: false,
   });
 
-  console.log('pages', pages);
-  console.log('processes', processes);
-
   return {
     pages,
     processes,

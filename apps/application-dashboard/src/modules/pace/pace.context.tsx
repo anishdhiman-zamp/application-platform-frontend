@@ -11,9 +11,10 @@ const getStoredTabs = (): DynamicTab[] => {
     if (!stored) return [];
     const tabs = JSON.parse(stored) as DynamicTab[];
 
-    // Filter out invalid tabs (e.g., from old localStorage data without required fields)
-    return tabs.filter((tab) => tab.id && tab.name && tab.path && tab.type);
-  } catch {
+    return tabs;
+  } catch (error) {
+    console.error('Error getting stored tabs:', error);
+
     return [];
   }
 };
@@ -21,8 +22,8 @@ const getStoredTabs = (): DynamicTab[] => {
 const setStoredTabs = (tabs: DynamicTab[]) => {
   try {
     setToLocalStorage(LOCAL_STORAGE_KEYS.PACE_OPEN_DYNAMIC_TABS, JSON.stringify(tabs));
-  } catch {
-    // Ignore storage errors
+  } catch (error) {
+    console.error('Error setting stored tabs:', error);
   }
 };
 
