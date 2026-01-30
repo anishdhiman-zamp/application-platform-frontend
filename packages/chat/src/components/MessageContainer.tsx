@@ -76,7 +76,7 @@ export const MessageContainer: FC<MessageContainerProps> = ({
       const behavior = isInitialScrollRef.current ? 'instant' : 'smooth';
       scrollToBottom(behavior);
     }
-  }, [messages?.length, scrollToBottom]);
+  }, [messages?.length, scrollToBottom, children]);
 
   return (
     <div ref={scrollContainerRef} className={cn('flex w-full flex-grow flex-col gap-6 p-4', className)}>

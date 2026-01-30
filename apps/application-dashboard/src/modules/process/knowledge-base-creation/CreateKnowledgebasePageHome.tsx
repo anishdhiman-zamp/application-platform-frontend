@@ -9,7 +9,7 @@ import CommonWrapper from '@/components/commonWrapper';
 import { SkeletonTypes } from '@/components/commonWrapper/commonWrapper.types';
 import { usePagesAndProcessesData } from '@/hooks/usePagesAndProcessesData';
 import ChatMessagesSkeleton from '@/modules/pace/components/loaders/ChatMessagesSkeleton';
-import { ProcessStatus } from '@/types/api/processApi.types';
+import { ProcessResponseType, ProcessStatus } from '@/types/api/processApi.types';
 import { PROCESS_CREATED_EVENT, ProcessCreatedEventDetail } from '@/utils/events';
 
 // Dynamic imports for heavy components
@@ -60,7 +60,7 @@ const CreateKnowledgeBasePageHome: FC<CreateKnowledgeBasePageHomeProps> = ({
   );
 
   const currentProcess = useMemo(
-    () => processes?.find((process) => process?.process_id === processId),
+    () => processes?.find((process: ProcessResponseType) => process?.process_id === processId),
     [processes, processId],
   );
 

@@ -19,6 +19,7 @@ import {
 import { cn } from '@zamp-platform/ui/utils';
 import { CirclePlus, EllipsisVertical } from 'lucide-react';
 import ProcessInProcessBanner from 'modules/process/knowledge-base-creation/ProcessInProcessBanner';
+import { useLazyGetOpenFeedbackQuery } from '@/apis/feedback';
 import SkeletonElement from '@/components/skeletons/SkeletonElement';
 import useActionHub from '@/modules/chatbot/actionHub';
 import StopProcessingFeedback from '@/modules/chatbot/StopProcessingFeedback';
@@ -63,6 +64,8 @@ const KnowledgeBaseChat: FC<KnowledgeBaseChatProps> = ({
     blockConfig: ButtonBlockType;
     payload: MapAny;
   }>();
+
+  const [getOpenFeedback] = useLazyGetOpenFeedbackQuery();
 
   const defaultMessageObject = {
     resource_type: ResourceType.PROCESS,
@@ -153,22 +156,23 @@ const KnowledgeBaseChat: FC<KnowledgeBaseChatProps> = ({
   useEffect(() => {
     if (chat?.conversationId) {
       setConversationId?.(chat?.conversationId);
+      getOpenFeedback({ processId });
     }
-  }, [chat?.conversationId]);
+  }, [chat?.conversationId, setConversationId, getOpenFeedback, processId]);
 
   // Reset isNewConversation when switching to a different conversation
   useEffect(() => {
     if (conversationId) {
       setIsNewConversation(false);
+      getOpenFeedback({ processId });
     }
-  }, [conversationId]);
-
+  }, [conversationId, getOpenFeedback, processId]);
   return (
     <div className='flex h-full w-full flex-col'>
       <div
         className={cn(
           'border-GRAY_400 hidden w-full items-center gap-3 border-b px-3.5 py-3',
-          status === ProcessStatus.LIVE || !showDefaultMessage ? 'flex' : 'hidden',
+          status === ProcessStatus.LIVE ? 'flex' : 'hidden',
         )}
       >
         {isSkeletonLoading ? (
