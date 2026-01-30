@@ -93,7 +93,7 @@ const ShareResourcePopup: FC<ShareResourcePopupProps> = (props) => {
   const [deleteAudience, { isLoading: isDeletingAudience }] = useDeleteAudienceFromResourceMutation();
 
   // get user access to resource list
-  const userAccessToResourceList = audiencesData ?? [];
+  const userAccessToResourceList = useMemo(() => audiencesData ?? [], [audiencesData]);
   const placeholderText = 'Share with people and teams';
   const { userEmail: user_email, userId: user_id, userRole: user_role } = useUserIdentity();
   const userPrivilege =

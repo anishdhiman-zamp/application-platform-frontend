@@ -64,11 +64,11 @@ deployment:
         healthcheck: 
           enabled: true
           livenessProbe: 
-            path : "/"
+            path : "/api/health-check"
             initialDelaySeconds : 40
             periodSeconds: 30
           readinessProbe: 
-            path : "/"
+            path : "/api/health-check"
             initialDelaySeconds : 30
             periodSeconds : 30
         command:

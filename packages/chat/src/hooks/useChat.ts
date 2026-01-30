@@ -89,12 +89,14 @@ export const useChat = (config: ChatConfig) => {
     }
   }, [config.enableStreaming]);
 
-  // Skip fetching conversation history if this conversation was just created in this session (only for streaming mode)
+  // Skip fetching conversation history if this conversation was just created in this session
+  // Check against both config.conversationId (prop) and _conversationId (internal state) to handle timing gaps
   const shouldSkipConversationFetch =
     !config.resourceId ||
     !config.resourceType ||
     !config.conversationId ||
-    (config.enableStreaming && isNewlyCreatedConversationRef.current === config.conversationId);
+    isNewlyCreatedConversationRef.current === config.conversationId ||
+    isNewlyCreatedConversationRef.current === _conversationId;
 
   const {
     data: conversationHistory,
@@ -402,7 +404,9 @@ export const useChat = (config: ChatConfig) => {
 
             setMessages((prev) => [...prev, { ...newMessage, timestamp: new Date().toISOString() }]);
 
-            if (newMessage.conversation_id) {
+            // Only invalidate cache if this is NOT a newly created conversation
+            // to prevent unnecessary refetches that would clear the optimistic UI
+            if (newMessage.conversation_id && isNewlyCreatedConversationRef.current !== newMessage.conversation_id) {
               dispatch(
                 chatApi.util.invalidateTags([{ type: APITags.GET_CONVERSATION_BY_ID, id: newMessage.conversation_id }]),
               );
@@ -410,7 +414,8 @@ export const useChat = (config: ChatConfig) => {
             config.onNewMessage?.(newMessage);
             break;
           case SSEEventType.CONVERSATION_UPDATED:
-            if (_conversationId) {
+            // Only invalidate cache if this is NOT a newly created conversation
+            if (_conversationId && isNewlyCreatedConversationRef.current !== _conversationId) {
               dispatch(chatApi.util.invalidateTags([{ type: APITags.GET_CONVERSATION_BY_ID, id: _conversationId }]));
             }
             break;

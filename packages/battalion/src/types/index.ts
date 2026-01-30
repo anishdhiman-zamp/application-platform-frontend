@@ -101,12 +101,26 @@ export interface TransactionConfig<T = unknown> {
   };
 }
 
+// SSE event configuration for live sync
+export interface SSEEventConfig {
+  /**
+   * Event name to listen for (e.g., "process", "page").
+   * When this event is received via the EventBus, it triggers a refetch of the resource data.
+   */
+  event: string;
+}
+
 // Live sync configuration
 export interface LiveSyncConfig {
   enabled: boolean;
   strategy: 'polling' | 'sse';
   interval?: number;
   endpoint?: string;
+  /**
+   * SSE event configuration (required when strategy is 'sse').
+   * Specifies which EventBus event to subscribe to for live updates.
+   */
+  sseConfig?: SSEEventConfig;
 }
 
 // Cache configuration
@@ -280,4 +294,51 @@ export interface ResourceRegistry {
   getByRelation(relationType: 'hasMany' | 'belongsTo', targetResource: ResourceName): Resource[];
   buildDependencyGraph(): Map<ResourceName, ResourceName[]>;
   validateDependencies(): { valid: boolean; errors: string[] };
+}
+
+/**
+ * Live sync state for a resource
+ */
+export interface LiveSyncState {
+  isConnected: boolean;
+  lastSyncAt: Date | null;
+  error?: Error;
+  /**
+   * Whether data was loaded from cache
+   */
+  loadedFromCache?: boolean;
+  /**
+   * Whether background sync is in progress
+   */
+  isSyncing?: boolean;
+}
+
+/**
+ * Stored resource data with metadata
+ */
+export interface StoredResourceData<T = unknown> {
+  resourceName: ResourceName;
+  data: T;
+  timestamp: number;
+  version: number;
+}
+
+/**
+ * Storage adapter interface for persistence
+ */
+export interface StorageAdapter {
+  save<T>(resourceName: ResourceName, data: T): Promise<void>;
+  load<T>(resourceName: ResourceName): Promise<T | null>;
+  loadWithMetadata<T>(resourceName: ResourceName): Promise<StoredResourceData<T> | null>;
+  delete(resourceName: ResourceName): Promise<void>;
+  clear(): Promise<void>;
+}
+
+/**
+ * Resolved persist configuration
+ */
+export interface ResolvedPersistConfig {
+  enabled: boolean;
+  storage: StorageType;
+  maxAge: number;
 }

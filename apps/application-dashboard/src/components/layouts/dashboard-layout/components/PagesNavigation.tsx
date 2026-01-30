@@ -13,28 +13,21 @@ import {
 import { arrayMove, SortableContext, verticalListSortingStrategy } from '@dnd-kit/sortable';
 import { Button, toast } from '@zamp-platform/ui';
 import { SvgSpriteLoader } from '@zamp-platform/ui/assets';
-import { cn } from '@zamp-platform/ui/utils';
 import { useRouter } from 'next/navigation';
 import { useCreatePageMutation, useUpdatePageIndexesMutation } from '@/apis/pages';
 import TooltipV2 from '@/components/common/TooltipV2';
-import CommonWrapper from '@/components/commonWrapper';
-import { SkeletonTypes } from '@/components/commonWrapper/commonWrapper.types';
 import { DEFAULT_PAGE_DESCRIPTION, DEFAULT_PAGE_NAME, DEFAULT_SHEET_NAME } from '@/constants/common.constants';
 import { getPageRouteById } from '@/constants/routeConfig';
 import { PageResponseType } from '@/types/api/pagesApi.types';
-import { ProcessesResponseType } from '@/types/api/processApi.types';
 import DraggablePageNavTab from 'components/layouts/dashboard-layout/components/DraggablePageNavTab';
 import PageNavTab from 'components/layouts/dashboard-layout/components/PageNavTab';
-import SkeletonLoaderSidebarPages from 'components/layouts/dashboard-layout/components/SkeletonLoaderSidebarPages';
 
 type PagesNavigationProps = {
   pages?: PageResponseType[];
-  processes?: ProcessesResponseType[];
-  isLoading: boolean;
   params: Record<string, string | string[]> | null;
 };
 
-const PagesNavigation: FC<PagesNavigationProps> = ({ pages, processes, isLoading, params }) => {
+const PagesNavigation: FC<PagesNavigationProps> = ({ pages, params }) => {
   const router = useRouter();
 
   const [pageOrder, setPageOrder] = useState<string[]>(pages?.map((p) => p.page_id) || []);
@@ -109,12 +102,7 @@ const PagesNavigation: FC<PagesNavigationProps> = ({ pages, processes, isLoading
   }, [pages]);
 
   return (
-    <CommonWrapper
-      isLoading={isLoading}
-      skeletonType={SkeletonTypes.CUSTOM}
-      loader={<SkeletonLoaderSidebarPages />}
-      className={cn('px-2', processes?.length === 0 ? 'py-2.5' : 'py-0')}
-    >
+    <>
       <div className='flex items-center justify-between'>
         <div className='f-12-550 text-GRAY_700 px-1.5 py-2'>Pages</div>
         <TooltipV2 tooltipBody='Add page' asChildTrigger>
@@ -139,27 +127,29 @@ const PagesNavigation: FC<PagesNavigationProps> = ({ pages, processes, isLoading
         onDragEnd={handleDragEnd}
       >
         <SortableContext items={pageOrder} strategy={verticalListSortingStrategy}>
-          {pageOrder.map((pageId, idx) => {
-            const page = pages?.find((p) => p.page_id === pageId);
+          <div className='flex flex-col gap-1'>
+            {pageOrder.map((pageId, idx) => {
+              const page = pages?.find((p) => p.page_id === pageId);
 
-            if (!page) return null;
+              if (!page) return null;
 
-            // Render drop indicator line above the hovered item
-            return (
-              <div key={pageId} className='relative'>
-                <DraggablePageNavTab
-                  pageId={page.page_id}
-                  label={page.name}
-                  isSelected={params?.pageId === page.page_id}
-                  page={page}
-                  defaultSheetId={page?.sheets?.[0]?.sheet_id}
-                />
-                {dropIndicatorIndex === idx && (
-                  <div className='absolute right-0 bottom-0 left-0 z-10 h-0.5 rounded-full bg-black' />
-                )}
-              </div>
-            );
-          })}
+              // Render drop indicator line above the hovered item
+              return (
+                <div key={pageId} className='relative'>
+                  <DraggablePageNavTab
+                    pageId={page.page_id}
+                    label={page.name}
+                    isSelected={params?.pageId === page.page_id}
+                    page={page}
+                    defaultSheetId={page?.sheets?.[0]?.sheet_id}
+                  />
+                  {dropIndicatorIndex === idx && (
+                    <div className='absolute right-0 bottom-0 left-0 z-10 h-0.5 rounded-full bg-black' />
+                  )}
+                </div>
+              );
+            })}
+          </div>
         </SortableContext>
         <DragOverlay>
           {activeId ? (
@@ -175,7 +165,7 @@ const PagesNavigation: FC<PagesNavigationProps> = ({ pages, processes, isLoading
           ) : null}
         </DragOverlay>
       </DndContext>
-    </CommonWrapper>
+    </>
   );
 };
 

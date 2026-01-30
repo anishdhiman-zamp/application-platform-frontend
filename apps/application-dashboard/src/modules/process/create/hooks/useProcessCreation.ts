@@ -1,7 +1,14 @@
 import { useCallback, useState } from 'react';
+import { useRouter } from 'next/navigation';
+import type { Process } from '@/app/(authenticated)/resources';
+import { getCreateKnowledgeBaseRouteByProcessId } from '@/constants/routeConfig';
 import { ProcessCreationErrors, ProcessCreationFormData } from '@/modules/process/create/types';
+import { storeProcessAudiences } from '@/modules/process/create/utils/audience';
+import { ProcessStatus } from '@/types/api/processApi.types';
 
-export const useProcessCreation = () => {
+export const useProcessCreation = (createProcess: (data: Partial<Process>) => void) => {
+  const router = useRouter();
+
   const [formData, setFormData] = useState<ProcessCreationFormData>({
     processName: '',
     selectedAudiences: [],
@@ -41,16 +48,20 @@ export const useProcessCreation = () => {
       return;
     }
 
-    // Placeholder for API integration
-    // TODO: Add process creation API call here
-    console.log('Process creation data:', {
-      processName: formData.processName.trim(),
-      selectedAudiences: formData.selectedAudiences,
+    const processId = crypto.randomUUID();
+
+    if (formData.selectedAudiences.length > 0) {
+      storeProcessAudiences(processId, formData.selectedAudiences);
+    }
+
+    createProcess({
+      process_id: processId,
+      display_name: formData.processName.trim(),
+      status: ProcessStatus.DRAFT,
     });
 
-    // TODO: Navigate to process detail page after creation
-    // router.push(getProcessRouteById(processId));
-  }, [formData, validateForm]);
+    router.push(`${getCreateKnowledgeBaseRouteByProcessId(processId)}?source=process-creation`);
+  }, [formData, validateForm, createProcess, router]);
 
   return {
     formData,

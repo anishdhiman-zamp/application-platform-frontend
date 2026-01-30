@@ -1,18 +1,18 @@
 'use client';
 
-import { KeyboardEvent, useOptimistic, useState } from 'react';
+import { KeyboardEvent, startTransition, useOptimistic, useState } from 'react';
 import { Button, Input, Popover, PopoverContent, PopoverTrigger, toast } from '@zamp-platform/ui';
-import { SvgSpriteLoader } from '@zamp-platform/ui/assets';
-import { useGetPagesQuery, useGetProcessesQuery, useUpdatePageMutation } from 'apis/pages';
-import { COLORS } from 'constants/colors';
+import { useGetPagesQuery, useUpdatePageMutation } from 'apis/pages';
 import { getPageRouteById, getProcessRouteById, ROUTES_PATH } from 'constants/routeConfig';
 import { KEYBOARD_KEYS } from 'constants/shortcuts';
+import { MoreVertical, Pencil, Trash } from 'lucide-react';
 import { useRouter } from 'next/navigation';
 import { PageResponseType } from 'types/api/pagesApi.types';
 import { cn, preventAutoFocus } from 'utils/common';
 import PageIcon from '@/assets/Icons/PageIcon';
 import { TOAST_MESSAGES } from '@/components/common/toast/toast.constants';
 import PermissionGuard from '@/components/hoc/PermissionGuard';
+import { usePagesAndProcesses } from '@/contexts/PagesAndProcessesContext';
 import { PAGE_ACCESS_PRIVILEGES, ResourceType } from '@/modules/shareResource/shareResource.types';
 import DeletePageDialog from 'components/layouts/dashboard-layout/components/DeletePageDialog';
 
@@ -33,7 +33,7 @@ const PageNavTab = ({ label, pageId, isSelected, page }: PageNavTabProps) => {
 
   const [updatePage] = useUpdatePageMutation();
   const { data: pages } = useGetPagesQuery(undefined, { refetchOnMountOrArgChange: false });
-  const { data: processes } = useGetProcessesQuery(undefined, { refetchOnMountOrArgChange: false });
+  const { processes } = usePagesAndProcesses();
 
   const [optimisticName, updateOptimisticName] = useOptimistic(finalName || label, (state, newName: string) => newName);
 
@@ -45,7 +45,9 @@ const PageNavTab = ({ label, pageId, isSelected, page }: PageNavTabProps) => {
     }
 
     setFinalName(trimmedName);
-    updateOptimisticName(trimmedName);
+    startTransition(() => {
+      updateOptimisticName(trimmedName);
+    });
 
     updatePage({
       pageId: pageId,
@@ -61,7 +63,9 @@ const PageNavTab = ({ label, pageId, isSelected, page }: PageNavTabProps) => {
         toast.error(TOAST_MESSAGES.ERROR_PAGE_NAME_UPDATE);
         setPageName(label);
         setFinalName(label);
-        updateOptimisticName(label);
+        startTransition(() => {
+          updateOptimisticName(label);
+        });
       });
   };
 
@@ -88,7 +92,7 @@ const PageNavTab = ({ label, pageId, isSelected, page }: PageNavTabProps) => {
       if (remainingPages && remainingPages.length > 0) {
         router.push(getPageRouteById(remainingPages[0]?.page_id, remainingPages[0]?.sheets[0]?.sheet_id));
       } else if (processes && processes.length > 0) {
-        router.push(getProcessRouteById(processes[0]?.id));
+        router.push(getProcessRouteById(processes[0]?.process_id));
       } else {
         router.push(ROUTES_PATH.DATA);
       }
@@ -109,9 +113,9 @@ const PageNavTab = ({ label, pageId, isSelected, page }: PageNavTabProps) => {
         )}
         data-testid={`${pageId}-page-nav-tab`}
       >
-        <PageIcon height={14} width={14} isSelected={isSelected} />
+        <PageIcon height={14} width={14} isSelected={isSelected} className='shrink-0' />
 
-        <div className='flex-1'>{optimisticName}</div>
+        <div className='flex-1 truncate'>{optimisticName}</div>
 
         <Popover open={isMenuOpen} onOpenChange={handleMenuOpen}>
           <PopoverTrigger
@@ -125,7 +129,7 @@ const PageNavTab = ({ label, pageId, isSelected, page }: PageNavTabProps) => {
               resourceId={pageId}
               privilege={PAGE_ACCESS_PRIVILEGES.ADMIN}
             >
-              <SvgSpriteLoader id='dots-vertical' size={14} color={isMenuOpen ? COLORS.GRAY_800 : COLORS.GRAY_500} />
+              <MoreVertical size={14} strokeWidth={1.5} className={isMenuOpen ? 'text-GRAY_800' : 'text-GRAY_500'} />
             </PermissionGuard>
           </PopoverTrigger>
           <PopoverContent
@@ -140,7 +144,7 @@ const PageNavTab = ({ label, pageId, isSelected, page }: PageNavTabProps) => {
               placeholder='Page name'
               value={pageName}
               onChange={(e) => setPageName(e.target.value)}
-              icon={<SvgSpriteLoader id='edit-03' size={16} color={COLORS.GRAY_500} />}
+              icon={<Pencil size={16} strokeWidth={1.5} className='text-GRAY_500' />}
               autoFocus
               onBlur={handleInputBlur}
               onKeyDown={handleEditKeyDown}
@@ -154,7 +158,7 @@ const PageNavTab = ({ label, pageId, isSelected, page }: PageNavTabProps) => {
               data-testid={`${pageId}-page-nav-tab-delete-page-btn`}
               id='page-nav-tab-delete-page-button'
             >
-              <SvgSpriteLoader id='trash-04' size={12} />
+              <Trash size={12} strokeWidth={1.5} />
               <span>Delete page</span>
             </Button>
           </PopoverContent>

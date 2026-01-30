@@ -21,28 +21,21 @@ export type ProcessActivityRunsRequestType = {
   query_config?: string;
 };
 
-export const enum ProcessStatus {
+export enum ProcessStatus {
   DRAFT = 'draft',
   LIVE = 'live',
+  BUILDING = 'building',
 }
 
-export type ProcessesResponseType = {
-  id: string;
+export type ProcessResponseType = {
+  process_id: string;
   display_name: string;
-  organization_id: string;
-  metadata: MetadataType;
-  process_type: string;
-  fractional_index: number;
-  created_by: string;
-  created_at: string;
-  updated_at: string;
-  deleted_at: string;
   status: ProcessStatus;
 };
 
-type MetadataType = {
-  sql_template: string;
-  view_name: string;
+export type ProcessesResponseType = {
+  processes: ProcessResponseType[];
+  total_count: number;
 };
 
 export type KnowledgeBaseRequestType = {
@@ -375,3 +368,7 @@ export interface ReprocessingEventType {
 export interface ReprocessingEventsResponseType {
   reprocessing_events: ReprocessingEventType[];
 }
+
+export type StopProcessBuildingRequestType = {
+  processId: string;
+};

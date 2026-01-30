@@ -75,6 +75,7 @@ export type TeamMemberAccessPrivilegesType = {
 
 export type EmptyStateListingPropsType = {
   title?: string;
+  className?: string;
 };
 
 export type TeamMembersListingPropsType = {

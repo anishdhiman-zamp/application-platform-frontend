@@ -3,7 +3,7 @@
 import { FC, KeyboardEvent, useEffect, useMemo, useRef, useState } from 'react';
 import { Button, Input } from '@zamp-platform/ui';
 import { SvgSpriteLoader } from '@zamp-platform/ui/assets';
-import { useGetPagesQuery, useGetProcessesQuery } from 'apis/pages';
+import { useGetPagesQuery } from 'apis/pages';
 import {
   getDatasetRouteById,
   getKnowledgeBasedRouteByProcessId,
@@ -21,11 +21,17 @@ import { useGetAllDatasetsQuery } from '@/apis/admin';
 import TooltipV2 from '@/components/common/TooltipV2';
 import { KEYBOARD_KEYS } from '@/constants/shortcuts';
 import useIsEditingBreadcrumbAllowed from '@/hooks/useIsEditingBreadcrumbAllowed';
+import { usePagesAndProcessesData } from '@/hooks/usePagesAndProcessesData';
 import useUpdateBreadcrumb from '@/hooks/useUpdateBreadcrumb';
 import { MODULE_TYPE, SIDE_OPTIONS } from '@/types/commonTypes';
 import { MenuWrapper } from 'components/common/MenuWrapper';
+import ProcessStatus from 'components/layouts/dashboard-layout/components/ProcessStatus';
 
-const BreadCrumb: FC = () => {
+interface BreadCrumbProps {
+  isDraftProcess?: boolean;
+}
+
+const BreadCrumb: FC<BreadCrumbProps> = ({ isDraftProcess = false }) => {
   const router = useRouter();
   const menuRef = useRef<HTMLDivElement>(null);
   const searchParams = useSearchParams();
@@ -42,9 +48,17 @@ const BreadCrumb: FC = () => {
   const { data: datasets } = useGetAllDatasetsQuery(undefined, {
     refetchOnMountOrArgChange: false,
   });
-  const { data: processes } = useGetProcessesQuery(undefined, {
-    refetchOnMountOrArgChange: false,
-  });
+  const { processes } = usePagesAndProcessesData();
+
+  const currentProcess = useMemo(() => {
+    if (pathname?.split('/')[1] === MODULE_TYPE.PROCESSES) {
+      const processId = params?.processId as string;
+
+      return processes?.find((process) => process?.process_id === processId);
+    }
+
+    return null;
+  }, [pathname, params?.processId, processes]);
 
   const breadcrumbStack = useMemo(() => {
     const breadcrumbStack = [];
@@ -74,7 +88,7 @@ const BreadCrumb: FC = () => {
           const activityId = params?.activityId;
           const processId = params?.processId as string;
           const status = searchParams?.get('status') as string;
-          const currentProcessTitle = processes?.find((process) => process?.id === processId)?.display_name ?? '';
+          const currentProcessTitle = currentProcess?.display_name ?? '';
 
           breadcrumbStack.push({
             title: currentProcessTitle,
@@ -120,7 +134,7 @@ const BreadCrumb: FC = () => {
     }
 
     return breadcrumbStack as BreadcrumbItem[];
-  }, [pathname, searchParams?.toString(), pages, datasets, processes]);
+  }, [pathname, searchParams?.toString(), pages, datasets, currentProcess]);
 
   const { firstBreadCrumb, middleBreadCrumbs, secondLastBreadCrumb, lastBreadCrumb } = useMemo(() => {
     const breadcrumbStackLength = breadcrumbStack?.length;
@@ -200,12 +214,16 @@ const BreadCrumb: FC = () => {
       )}
       <div className='f-13-400 text-GRAY_700 flex items-center gap-1'>
         {firstBreadCrumb && (
-          <button
-            className={cn({ 'f-13-500 text-GRAY_1000': !lastBreadCrumb }, 'cursor-pointer')}
-            onClick={() => handleBreadcrumbClick(firstBreadCrumb.href ?? '')}
-          >
-            {`${firstBreadCrumb.title} ${lastBreadCrumb ? '/' : ''}`}
-          </button>
+          <>
+            <button
+              className={cn({ 'f-13-500 text-GRAY_1000': !lastBreadCrumb }, 'cursor-pointer')}
+              onClick={() => handleBreadcrumbClick(firstBreadCrumb.href ?? '')}
+            >
+              {firstBreadCrumb.title}
+            </button>
+            {isDraftProcess && <ProcessStatus status={currentProcess?.status} className='ml-1' />}
+            {lastBreadCrumb && <span>/</span>}
+          </>
         )}
         {middleBreadCrumbs?.length > 0 && (
           <div className='group relative flex cursor-pointer items-center gap-1' ref={menuRef}>
@@ -233,9 +251,12 @@ const BreadCrumb: FC = () => {
           </div>
         )}
         {secondLastBreadCrumb && (
-          <button className='cursor-pointer' onClick={() => handleBreadcrumbClick(secondLastBreadCrumb.href ?? '')}>
-            {`${secondLastBreadCrumb.title}`}
-          </button>
+          <>
+            <button className='cursor-pointer' onClick={() => handleBreadcrumbClick(secondLastBreadCrumb.href ?? '')}>
+              {`${secondLastBreadCrumb.title}`}
+            </button>
+            {isDraftProcess && <ProcessStatus status={currentProcess?.status} className='ml-1' />}
+          </>
         )}
         {lastBreadCrumb &&
           (isEditingBreadcrumbAllowed ? (
@@ -264,9 +285,13 @@ const BreadCrumb: FC = () => {
                   </Button>
                 </TooltipV2>
               )}
+              {!firstBreadCrumb && isDraftProcess && <ProcessStatus status={currentProcess?.status} className='ml-1' />}
             </>
           ) : (
-            <div className='f-13-500 text-GRAY_1000'>{lastBreadCrumb.title}</div>
+            <>
+              <div className='f-13-500 text-GRAY_1000'>{lastBreadCrumb.title}</div>
+              {!firstBreadCrumb && isDraftProcess && <ProcessStatus status={currentProcess?.status} className='ml-1' />}
+            </>
           ))}
       </div>
     </div>

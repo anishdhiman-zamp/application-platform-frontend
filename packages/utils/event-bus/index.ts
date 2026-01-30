@@ -8,6 +8,10 @@ import type {
   EventCallback,
 } from './event-bus.types';
 
+// Re-export types and constants from event-bus.types
+export type { BaseEventPayload, EventBusInterface, EventBusSubscription, EventCallback } from './event-bus.types';
+export { EVENT_TYPE } from './event-bus.types';
+
 /**
  * Generic event bus implementation for decoupled communication.
  * This event bus supports any type of event communication including:

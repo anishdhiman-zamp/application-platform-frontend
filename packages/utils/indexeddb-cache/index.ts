@@ -165,6 +165,19 @@ export const hasContentChanged = (cachedEntry: IndexedDBCacheEntry | null, newCo
 };
 
 /**
+ * Checks if cached empty state has expired
+ * Default TTL: 5 minutes (allows periodic re-checking for newly created content)
+ */
+export const isEmptyStateCacheExpired = (
+  cachedEntry: IndexedDBCacheEntry | null,
+  ttlMs: number = 5 * 60 * 1000,
+): boolean => {
+  if (!cachedEntry?.isEmpty) return false;
+
+  return Date.now() - cachedEntry.timestamp > ttlMs;
+};
+
+/**
  * Clears cached content for a given key
  */
 export const clearCachedContent = async (key: string, config: IndexedDBCacheConfig = {}): Promise<void> => {
