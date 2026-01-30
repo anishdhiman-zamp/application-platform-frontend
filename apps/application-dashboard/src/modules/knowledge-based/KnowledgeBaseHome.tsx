@@ -6,15 +6,15 @@ import { cn } from '@zamp-platform/ui/utils';
 import { kbChatVariants, kbContentVariants } from 'modules/knowledge-based/knowledge-base.constants';
 import { motion } from 'motion/react';
 import { useParams } from 'next/navigation';
-import { useGetProcessesQuery } from '@/apis/pages';
 import { getBackgroundImageUrl } from '@/constants/icons';
 import { useAppSelector } from '@/hooks/toolkit';
+import { usePagesAndProcessesData } from '@/hooks/usePagesAndProcessesData';
 import KbChatInput from '@/modules/knowledge-based/chatbot/KbChatInput';
 import KBIcon from '@/modules/knowledge-based/icons/KBIcon';
 import PaceIcon from '@/modules/knowledge-based/icons/PaceIcon';
 import KnowledgeBaseChatWrapper from '@/modules/knowledge-based/KnowledgeBaseChatWrapper';
 import MarkdownRendererWithNavigation from '@/modules/knowledge-based/MarkdownRendererWithNavigation';
-import type { ProcessesResponseType } from '@/types/api/processApi.types';
+import type { ProcessResponseType } from '@/types/api/processApi.types';
 
 const KnowledgeBaseHome = () => {
   const scrollRef = useRef<HTMLDivElement>(null);
@@ -27,16 +27,14 @@ const KnowledgeBaseHome = () => {
   const [isChatbotExpanded, setIsChatbotExpanded] = useState(false);
   const [showKbContent, setShowKbContent] = useState(false);
 
-  const { data: processes } = useGetProcessesQuery(undefined, {
-    refetchOnMountOrArgChange: false,
-  });
+  const { processes } = usePagesAndProcessesData();
 
   const handleSendMessage = () => {
     setIsChatbotExpanded(true);
   };
 
   const processName = useMemo(
-    () => processes?.find((process: ProcessesResponseType) => process.id === processId)?.display_name,
+    () => processes?.find((process: ProcessResponseType) => process?.process_id === processId)?.display_name,
     [processes, processId],
   );
 

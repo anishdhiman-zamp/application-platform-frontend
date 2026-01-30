@@ -1,6 +1,7 @@
 'use client';
 
 import { FC, ReactNode, useMemo } from 'react';
+import { BattalionProvider } from '@zamp-platform/battalion';
 import { EventBus } from '@zamp-platform/utils';
 import AgChartInit from 'app/_providers/ag-chart';
 import PostHogProviderWrapper from 'app/_providers/posthog-provider';
@@ -20,7 +21,9 @@ const LayoutProviders: FC<LayoutProvidersProps> = ({ children }) => {
       <AgChartInit />
       <UserDetailsProvider />
       <PostHogProviderWrapper>
-        <SSEProvider sseEventBus={sseEventBus}>{children}</SSEProvider>
+        <SSEProvider sseEventBus={sseEventBus}>
+          <BattalionProvider eventBus={sseEventBus}>{children}</BattalionProvider>
+        </SSEProvider>
       </PostHogProviderWrapper>
     </Providers>
   );

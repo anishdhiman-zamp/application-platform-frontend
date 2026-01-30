@@ -37,6 +37,7 @@ interface MessageContainerProps {
   alignUserRight?: boolean;
   hideSenderName?: boolean;
   userAvatarClassName?: string;
+  children?: ReactNode;
 }
 
 export const MessageContainer: FC<MessageContainerProps> = ({
@@ -54,6 +55,7 @@ export const MessageContainer: FC<MessageContainerProps> = ({
   alignUserRight = false,
   hideSenderName = false,
   userAvatarClassName,
+  children,
 }) => {
   const defaultAssistantAvatar = assistantAvatar ?? <PaceAvatar />;
   const isInitialScrollRef = useRef(true);
@@ -127,6 +129,7 @@ export const MessageContainer: FC<MessageContainerProps> = ({
           <ShimmerText text='Analysing...' autoAnimate={true} />
         </div>
       ) : null}
+      {children}
     </div>
   );
 };

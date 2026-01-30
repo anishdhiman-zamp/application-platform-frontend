@@ -163,6 +163,7 @@ export const API_ENDPOINTS = {
   EMIT_HITL_ACTION_POST: `processes/{{processId}}/activity-runs/{{activityRunId}}/hitl/actions`,
   ACTIVITY_REPROCESSING_EVENTS_GET: `processes/{{processId}}/activity-runs/{{activityRunId}}/reprocessing-events`,
   PROCESSES_EVENTS_GET: `processes/events/{{activityId}}`,
+  STOP_PROCESS_BUILDING_POST: `processes/{{processId}}/build-stop`,
   UNIFIED_SSE: `events`,
 
   //Voice Agents

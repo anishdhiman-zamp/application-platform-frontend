@@ -6,7 +6,7 @@ interface PermissionGuardProps {
   resourceType: ResourceType;
   resourceId: string;
   children: ReactNode;
-  privilege: string;
+  privilege: string | string[];
 }
 
 const PermissionGuard: FC<PermissionGuardProps> = ({ resourceType, resourceId, children, privilege }) => {
@@ -17,7 +17,8 @@ const PermissionGuard: FC<PermissionGuardProps> = ({ resourceType, resourceId, c
     skipTeamsData: false,
   });
 
-  const hasPermission = checkUserPrivilege(privilege);
+  const privileges = Array.isArray(privilege) ? privilege : [privilege];
+  const hasPermission = privileges.some((p) => checkUserPrivilege(p));
 
   return hasPermission ? children : null;
 };

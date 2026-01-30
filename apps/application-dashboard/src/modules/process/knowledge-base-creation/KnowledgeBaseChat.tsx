@@ -3,11 +3,14 @@ import { FC, useEffect, useMemo, useState } from 'react';
 import { useSelector } from 'react-redux';
 import {
   AnnotationType,
+  BLOCK_TYPE,
   ButtonBlockType,
+  ChatMessageType,
   ConnectedChatInput,
   DisplayLayerActionType,
   LocationType,
   MessageContainer,
+  PlainTextBlockType,
   ResourceType,
   ScopeType,
   SenderType,
@@ -15,6 +18,8 @@ import {
 } from '@zamp-platform/chat';
 import { cn } from '@zamp-platform/ui/utils';
 import { CirclePlus, EllipsisVertical } from 'lucide-react';
+import ProcessInProcessBanner from 'modules/process/knowledge-base-creation/ProcessInProcessBanner';
+import SkeletonElement from '@/components/skeletons/SkeletonElement';
 import useActionHub from '@/modules/chatbot/actionHub';
 import StopProcessingFeedback from '@/modules/chatbot/StopProcessingFeedback';
 import ChatMessagesSkeleton from '@/modules/pace/components/loaders/ChatMessagesSkeleton';
@@ -31,7 +36,9 @@ interface KnowledgeBaseChatProps {
   defaultMessage?: string;
   onNewConversation?: () => void;
   setConversationId?: (conversationId: string) => void;
-  isDisabled?: boolean;
+  isDraftProcess?: boolean;
+  processName?: string;
+  showDefaultMessage?: boolean;
 }
 
 const KnowledgeBaseChat: FC<KnowledgeBaseChatProps> = ({
@@ -42,7 +49,9 @@ const KnowledgeBaseChat: FC<KnowledgeBaseChatProps> = ({
   defaultMessage,
   onNewConversation,
   setConversationId,
-  isDisabled,
+  isDraftProcess,
+  processName,
+  showDefaultMessage,
 }) => {
   const currentUserName = useSelector((state: RootState) => state?.user?.user?.user_name);
   const organizationId = useSelector((state: RootState) => state?.user?.user?.orgs?.[0]?.organization_id ?? '');
@@ -55,6 +64,31 @@ const KnowledgeBaseChat: FC<KnowledgeBaseChatProps> = ({
     payload: MapAny;
   }>();
 
+  const defaultMessageObject = {
+    resource_type: ResourceType.PROCESS,
+    resource_id: processId,
+    message_type: ChatMessageType.TEXT,
+    metadata: {},
+    id: '1',
+    sender_type: SenderType.USER,
+    sender_name: currentUserName,
+    message_content: {
+      text: ``,
+      text_type: 'plain_text',
+      elements: [
+        {
+          id: '1',
+          type: BLOCK_TYPE.PLAIN_TEXT,
+          order: 0,
+          payload: {
+            text: `I want to automate ${processName}`,
+          },
+        },
+      ] as PlainTextBlockType[],
+    },
+    timestamp: new Date().toISOString(),
+  };
+
   const { runAction } = useActionHub();
 
   const chat = useChat({
@@ -64,8 +98,16 @@ const KnowledgeBaseChat: FC<KnowledgeBaseChatProps> = ({
     setHeader: setHeader,
   });
 
+  const isSkeletonLoading =
+    status === ProcessStatus.LIVE
+      ? chat?.isLoadingConversationHistory
+      : chat?.messages?.length === 0 && !showDefaultMessage;
+
   const isAnalysing = useMemo(() => {
-    return chat?.messages[chat?.messages?.length - 1]?.sender_type === SenderType.USER;
+    return (
+      chat?.messages[chat?.messages?.length - 1]?.sender_type === SenderType.USER ||
+      (!!showDefaultMessage && chat?.messages?.length < 2)
+    );
   }, [chat?.messages?.length]);
 
   const handleStopProcessing = () => {
@@ -98,7 +140,7 @@ const KnowledgeBaseChat: FC<KnowledgeBaseChatProps> = ({
   };
 
   const handleNewConversation = () => {
-    if (isDisabled) return;
+    if (isDraftProcess) return;
 
     chat.clearMessages();
     onNewConversation?.();
@@ -126,60 +168,73 @@ const KnowledgeBaseChat: FC<KnowledgeBaseChatProps> = ({
       <div
         className={cn(
           'border-GRAY_400 hidden w-full items-center gap-3 border-b px-3.5 py-3',
-          status === ProcessStatus.DRAFT ? 'hidden' : 'flex',
+          status === ProcessStatus.LIVE || !showDefaultMessage ? 'flex' : 'hidden',
         )}
       >
-        {header ? (
-          <div className='f-14-500 text-GRAY_1000 flex-grow'>{header}</div>
+        {isSkeletonLoading ? (
+          <SkeletonElement elementCount={1} className='h-4 w-full' />
+        ) : header ? (
+          <div className='f-14-500 text-GRAY_1000 grow'>{header}</div>
         ) : (
-          <div className='f-12-550 text-GRAY_700 flex-grow'>Ask or give feedback</div>
+          <div className='f-12-550 text-GRAY_700 grow'>Ask or give feedback</div>
         )}
         <EllipsisVertical size={12} className='text-GRAY_700 hidden cursor-pointer' />
         <CirclePlus
           size={12}
           className={cn('text-GRAY_700 cursor-pointer', {
-            'cursor-not-allowed opacity-50': isDisabled,
+            'cursor-not-allowed opacity-50': isDraftProcess,
           })}
           onClick={handleNewConversation}
         />
       </div>
-      <MessageContainer
-        messages={chat?.messages || []}
-        handleAction={handleAction}
-        isAnalysing={isAnalysing}
-        className='overflow-y-auto [scrollbar-width:thin]'
-      />
-      {(chat.isLoadingConversationHistory || isLoadingFilterConversations) && (
-        <div className='flex h-full w-full justify-center'>
+
+      {(!chat.isLoadingConversationHistory || !isLoadingFilterConversations) && !isSkeletonLoading && (
+        <MessageContainer
+          messages={
+            showDefaultMessage ? [defaultMessageObject, ...(chat?.messages?.slice(1) ?? [])] : chat?.messages || []
+          }
+          handleAction={handleAction}
+          isAnalysing={isAnalysing}
+          className='overflow-y-auto [scrollbar-width:thin]'
+        >
+          {status === ProcessStatus.BUILDING && (
+            <ProcessInProcessBanner shouldRedirect={false} className='h-[400px] pb-4' />
+          )}
+        </MessageContainer>
+      )}
+      {isSkeletonLoading && (
+        <div className='animate-opacity flex h-full w-full justify-center overflow-y-auto pt-4'>
           <ChatMessagesSkeleton count={1} className='px-4 py-0' />
         </div>
       )}
-      <div className='border-GRAY_400 w-full border-t p-3'>
-        <div className='flex flex-shrink-0'>
-          <ConnectedChatInput
-            key={chatInputKey}
-            chat={chat}
-            placeholder='Ask anything or give feedback...'
-            annotationLocation={{
-              type: LocationType.SOP,
-              data: {
-                process_id: processId,
-              },
-            }}
-            conversationId={chat?.conversationId || ''}
-            isDisabled={isAnalysing || isLoadingFilterConversations || isDisabled}
-            scopeId={processId}
-            annotationType={status === ProcessStatus.DRAFT ? AnnotationType.PROCESS_SOP : undefined}
-            scope={ScopeType.PROCESS}
-            autoFocus={true}
-            currentUserName={currentUserName || ''}
-            resourceId={processId}
-            organizationId={organizationId}
-            setHeader={setHeader}
-            defaultMessage={isNewConversation ? undefined : defaultMessage}
-          />
+
+      {status !== ProcessStatus.BUILDING && (
+        <div className='border-GRAY_400 w-full border-t p-3'>
+          <div className='flex shrink-0'>
+            <ConnectedChatInput
+              key={chatInputKey}
+              chat={chat}
+              placeholder='Ask anything or give feedback...'
+              annotationLocation={{
+                type: LocationType.SOP,
+                data: {
+                  process_id: processId,
+                },
+              }}
+              conversationId={chat?.conversationId || ''}
+              scopeId={processId}
+              annotationType={status === ProcessStatus.DRAFT ? AnnotationType.PROCESS_SOP : undefined}
+              scope={ScopeType.PROCESS}
+              autoFocus={true}
+              currentUserName={currentUserName || ''}
+              resourceId={processId}
+              organizationId={organizationId}
+              setHeader={setHeader}
+              defaultMessage={isNewConversation ? undefined : defaultMessage}
+            />
+          </div>
         </div>
-      </div>
+      )}
       <StopProcessingFeedback
         isOpen={!!stopProcessingConfig}
         onOpenChange={handleOpenChangeForStopProcessing}

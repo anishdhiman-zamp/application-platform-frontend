@@ -62,6 +62,7 @@
     "framer-motion": "^12.23.26",
     "immer": "^10.1.1",
     "launchdarkly-react-client-sdk": "^3.6.1",
+    "lottie-react": "^2.4.1",
     "lucide-react": "^0.503.0",
     "monaco-editor": "^0.52.2",
     "motion": "^12.9.4",

@@ -28,7 +28,6 @@ import {
 import { formRequestUrlWithParams } from 'utils/common';
 import { APITags } from '@/constants/api.constants';
 import { baseApi } from '@/services/baseApi';
-import type { ProcessesResponseType } from '@/types/api/processApi.types';
 
 const Pages = baseApi.injectEndpoints({
   endpoints: (builder) => ({
@@ -49,9 +48,6 @@ const Pages = baseApi.injectEndpoints({
     }),
     getAudiencesByPageId: builder.query<AudiencesByPageIdResponse[], AudiencesByPageIdRequest>({
       query: ({ pageId }) => ({ url: formRequestUrlWithParams(API_ENDPOINTS.AUDIENCES_BY_PAGE_ID_GET, { pageId }) }),
-    }),
-    getProcesses: builder.query<ProcessesResponseType[], void>({
-      query: () => ({ url: API_ENDPOINTS.PROCESSES_GET }),
     }),
     postPagesToAudiencesByPageId: builder.mutation<void, PostPagesToAudiencesByPageIdType>({
       query: ({ pageId, body }) => ({
@@ -183,7 +179,6 @@ export const {
   useLazyGetSheetDetailsQuery,
   useGetSheetFilterConfigQuery,
   useGetAudiencesByPageIdQuery,
-  useGetProcessesQuery,
   usePostPagesToAudiencesByPageIdMutation,
   usePatchChangeAudienceRoleInPageMutation,
   useDeleteAudienceFromPageAccessMutation,

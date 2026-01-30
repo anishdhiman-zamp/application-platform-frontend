@@ -26,7 +26,9 @@ const Collaboration = baseApi.injectEndpoints({
       query: ({ resourceRoute, resourceId }) => ({
         url: buildUrl(API_ENDPOINTS.RESOURCE_AUDIENCES_BY_RESOURCE_ID_GET, resourceRoute, resourceId),
       }),
-      providesTags: [APITags.GET_AUDIENCE_BY_RESOURCE_ID],
+      providesTags: (_result, _error, { resourceRoute, resourceId }) => [
+        { type: APITags.GET_AUDIENCE_BY_RESOURCE_ID, id: `${resourceRoute}-${resourceId}` },
+      ],
     }),
     postShareResourceToAudiences: builder.mutation<PostResponseType, PostShareResourceToAudiencesType>({
       query: ({ resourceRoute, resourceId, body }) => ({
@@ -58,4 +60,5 @@ export const {
   usePostShareResourceToAudiencesMutation,
   usePatchChangeAudienceRoleInResourceMutation,
   useDeleteAudienceFromResourceMutation,
+  endpoints: collaborationEndpoints,
 } = Collaboration;

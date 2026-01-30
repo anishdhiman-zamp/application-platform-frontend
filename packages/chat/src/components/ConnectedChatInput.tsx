@@ -256,8 +256,8 @@ export const ConnectedChatInput: FC<ConnectedChatInputProps> = ({
   }, [autoFocus, isDisabled, shouldShowRecorder]);
 
   useEffect(() => {
-    if (setFirstMessage) {
-      setFirstMessage(defaultMessage || '');
+    if (setFirstMessage && defaultMessage) {
+      setFirstMessage(defaultMessage);
     }
   }, [defaultMessage, setFirstMessage]);
 
