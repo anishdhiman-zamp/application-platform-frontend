@@ -23,6 +23,7 @@ import type {
   SignedUrlByArtifactIdRequestType,
   SignedUrlByArtifactIdResponseType,
   StatusSummaryItem,
+  StopProcessBuildingRequestType,
   UpdateArtifactRequestType,
 } from '@/types/api/processApi.types';
 import { formRequestUrlWithParams } from '@/utils/common';
@@ -130,6 +131,12 @@ const Processes = baseApi.injectEndpoints({
         }),
       }),
     }),
+    stopProcessBuilding: builder.mutation<void, StopProcessBuildingRequestType>({
+      query: ({ processId }) => ({
+        url: formRequestUrlWithParams(API_ENDPOINTS.STOP_PROCESS_BUILDING_POST, { processId }),
+        method: REQUEST_TYPES.POST,
+      }),
+    }),
   }),
 });
 
@@ -158,4 +165,5 @@ export const {
   useLazyFilterConversationsQuery,
   useGetReprocessingEventsQuery,
   useLazyGetReprocessingEventsQuery,
+  useStopProcessBuildingMutation,
 } = Processes;

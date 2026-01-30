@@ -10,6 +10,7 @@ import {
   DialogHeader,
   DialogHeaderTitle,
 } from '@zamp-platform/ui';
+import { FEEDBACK_STATUS } from 'modules/feedback/feedback.constants';
 import { useDeleteConversationFeedbackMutation, useDeleteFeedbackMutation } from '@/apis/feedback';
 import { removeFeedbackItem, removeOpenFeedbackConversation } from '@/store/slices/feedback.slice';
 import { FeedbackItemType } from '@/types/api/feedbacks.types';
@@ -79,7 +80,9 @@ const FeedbackDeleteDialog: FC<FeedbackDeleteDialogProps> = ({
         dialogueOverlayClassName='z-[1004]'
       >
         <DialogHeader className='border-none'>
-          <DialogHeaderTitle>Are you sure you want to delete this feedback?</DialogHeaderTitle>
+          <DialogHeaderTitle>
+            Are you sure you want to delete this {feedback?.status === FEEDBACK_STATUS.DRAFT ? 'chat' : 'feedback'}?
+          </DialogHeaderTitle>
         </DialogHeader>
         <DialogBody className='px-4 pb-4'>
           <div className='bg-GRAY_50 border-GRAY_400 rounded-lg border border-dashed p-3'>

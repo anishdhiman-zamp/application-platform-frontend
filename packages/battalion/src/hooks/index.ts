@@ -4,6 +4,7 @@ import { useCallback, useEffect, useMemo, useState } from 'react';
 import { getLiveSyncManager } from '../core/live-sync';
 import { getQueryGraph } from '../core/query-graph';
 import { getResourceRegistry } from '../core/registry';
+import { useBattalionContext } from '../providers/BattalionProvider';
 import { TransactionFailureError } from '../transactions/client';
 import { transactionStore } from '../transactions/store';
 import {
@@ -19,6 +20,7 @@ import {
 
 export function useResource<T>(resourceName: ResourceName, options?: ResourceOptions): ResourceHookReturn<T> {
   const queryClient = options?.queryClient || useQueryClient();
+  const { eventBus } = useBattalionContext();
   const resource = getResourceRegistry().get(resourceName);
   const integration = transactionStore.getIntegration();
   const queryGraph = getQueryGraph();
@@ -41,12 +43,18 @@ export function useResource<T>(resourceName: ResourceName, options?: ResourceOpt
   useEffect(() => {
     if (resource.liveSync?.enabled) {
       liveSyncManager.setQueryClient(queryClient);
+
+      // Set eventBus for SSE strategy
+      if (eventBus && resource.liveSync.strategy === 'sse') {
+        liveSyncManager.setEventBus(eventBus);
+      }
+
       liveSyncManager.subscribe(resourceName, resource.liveSync, resource.persist, () => {
         setSyncState(liveSyncManager.getState(resourceName));
       });
       return () => liveSyncManager.unsubscribe(resourceName);
     }
-  }, [resourceName, resource.liveSync, resource.persist, queryClient, liveSyncManager]);
+  }, [resourceName, resource.liveSync, resource.persist, queryClient, liveSyncManager, eventBus]);
 
   const optimisticConfig = useMemo(() => resource.transactions?.optimistic, [resource]);
 

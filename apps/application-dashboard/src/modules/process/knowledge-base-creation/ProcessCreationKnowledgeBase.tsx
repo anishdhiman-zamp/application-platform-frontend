@@ -4,6 +4,13 @@ import { FC, Suspense, useCallback, useEffect, useRef, useState } from 'react';
 import { captureException } from '@sentry/nextjs';
 import { toast } from '@zamp-platform/ui';
 import { BaseEventPayload, EVENT_TYPE } from '@zamp-platform/utils/event-bus/event-bus.types';
+import {
+  getCachedContent,
+  hasContentChanged,
+  isEmptyStateCacheExpired,
+  setCachedContent,
+  setCachedEmptyState,
+} from '@zamp-platform/utils/indexeddb-cache';
 import ProcessEmptyState from 'modules/process/activity-runs/components/ProcessEmptyState';
 import { MarkdownContentSkeleton } from 'modules/process/knowledge-base-creation/components/KnowledgeBaseContentSkeleton';
 import MarkdownContent from 'modules/process/knowledge-base-creation/components/MarkdownContent';
@@ -42,16 +49,22 @@ const ProcessCreationKnowledgeBase: FC<ProcessCreationKnowledgeBaseProps> = ({
 }) => {
   const fetchedUrlRef = useRef<string | null>(null);
   const isFetchingRef = useRef(false);
+  const hasCacheBeenCheckedRef = useRef(false);
+  const hasReceivedSSEUpdateRef = useRef(false);
 
   const { isSidebarOpen } = useAppSelector((state) => state.layoutConfig);
 
   const [markdownContent, setMarkdownContent] = useState<string>('');
   const [isLoading, setIsLoading] = useState(true);
+  const [isKnownEmptyState, setIsKnownEmptyState] = useState(false);
   const [inputValue, setInputValue] = useState<string>('');
   const [isInputFocused, setIsInputFocused] = useState(false);
   const { sseEventBus } = useEventBus();
 
-  const { data, isError, error } = useGetKnowledgeBaseQuery({ processId });
+  const { data, isError, error, refetch } = useGetKnowledgeBaseQuery({ processId }, { skip: !processId });
+
+  // Cache key based on processId
+  const cacheKey = `kb-content-${processId}`;
 
   // Extract base path from signed URL for comparison (removes query params like signature/expiry)
   const getUrlBasePath = useCallback((url: string) => {
@@ -87,46 +100,120 @@ const ProcessCreationKnowledgeBase: FC<ProcessCreationKnowledgeBaseProps> = ({
         return;
       }
 
+      // If we have cached content, fetch in background without showing loader
+      const hasCachedContent = markdownContent.length > 0;
+
       try {
         isFetchingRef.current = true;
-        setIsLoading(true);
+
+        // Only show loader if we don't have cached content
+        if (!hasCachedContent) {
+          setIsLoading(true);
+        }
+
         const response = await fetch(targetUrl);
 
         if (!response.ok) {
-          setMarkdownContent('');
+          // Only clear content if we don't have cached version
+          if (!hasCachedContent) {
+            setMarkdownContent('');
+          }
           toast.error(KB_TOAST_MESSAGES.FAILED_FETCHING_KNOWLEDGE_BASE);
           isFetchingRef.current = false;
+          setIsLoading(false);
 
           return;
         }
         const content = await response.text();
 
         fetchedUrlRef.current = targetBasePath;
-        setMarkdownContent(content);
+
+        // When forceRefetch is true (e.g., SSE update), always update content
+        // Otherwise, check if content has changed before updating
+        if (forceRefetch) {
+          setMarkdownContent(content);
+          await setCachedContent(cacheKey, content);
+        } else {
+          const cached = await getCachedContent(cacheKey);
+
+          if (hasContentChanged(cached, content)) {
+            setMarkdownContent(content);
+            // Update cache with new content
+            await setCachedContent(cacheKey, content);
+          }
+        }
+
         setIsLoading(false);
         isFetchingRef.current = false;
-      } catch (error) {
-        setMarkdownContent('');
-        captureException(error);
+      } catch (fetchError) {
+        // Only clear content if we don't have cached version
+        if (!hasCachedContent) {
+          setMarkdownContent('');
+        }
+        captureException(fetchError);
         toast.error(KB_TOAST_MESSAGES.FAILED_FETCHING_KNOWLEDGE_BASE);
         setIsLoading(false);
         isFetchingRef.current = false;
       }
     },
-    [data?.content_signed_url, getUrlBasePath],
+    [data?.content_signed_url, getUrlBasePath, markdownContent.length, cacheKey],
   );
 
-  // Reset the fetched URL ref when processId changes
-  useEffect(() => {
-    fetchedUrlRef.current = null;
-  }, [processId]);
+  // Check if error is a 404 (zero state - no knowledge base exists yet)
+  const is404Error = isError && error && 'status' in error && error.status === 404;
 
   useEffect(() => {
-    if (isError) setIsLoading(false);
+    if (isError) {
+      setIsLoading(false);
+
+      // Cache zero state when we get a 404 error
+      // But skip if we've received an SSE update (refetch is in progress)
+      if (is404Error && !hasReceivedSSEUpdateRef.current) {
+        setIsKnownEmptyState(true);
+        setCachedEmptyState(cacheKey);
+      }
+    }
     if (!data?.content_signed_url) return;
 
+    // We have content now, so it's not an empty state anymore
+    // Also clear the SSE update flag since refetch completed successfully
+    hasReceivedSSEUpdateRef.current = false;
+    setIsKnownEmptyState(false);
     getMarkdownContent();
-  }, [data?.content_signed_url, getMarkdownContent, isError]);
+  }, [data?.content_signed_url, getMarkdownContent, isError, is404Error, cacheKey]);
+
+  // Load cached content when processId changes (includes initial mount)
+  useEffect(() => {
+    // Reset refs for new process
+    fetchedUrlRef.current = null;
+    hasCacheBeenCheckedRef.current = false;
+    hasReceivedSSEUpdateRef.current = false;
+
+    // Reset state for new process
+    setMarkdownContent('');
+    setIsLoading(true);
+    setIsKnownEmptyState(false);
+
+    // Load cache for processId
+    const loadCachedContent = async () => {
+      const cached = await getCachedContent(cacheKey);
+
+      if (cached?.isEmpty && !isEmptyStateCacheExpired(cached)) {
+        // Cached empty state (404) - show zero state immediately without loader
+        // Skip if expired to allow re-checking for newly created content
+        setIsKnownEmptyState(true);
+        setIsLoading(false);
+        // Will revalidate in background to check if content now exists
+      } else if (cached?.content) {
+        setMarkdownContent(cached.content);
+        setIsLoading(false);
+        // Will revalidate in background when URL is available
+      }
+      hasCacheBeenCheckedRef.current = true;
+    };
+
+    loadCachedContent();
+  }, [cacheKey]);
 
   useEffect(() => {
     const sub = sseEventBus.subscribe(EVENT_TYPE.KNOWLEDGE_BASE, (data: BaseEventPayload) => {
@@ -137,7 +224,13 @@ const ProcessCreationKnowledgeBase: FC<ProcessCreationKnowledgeBaseProps> = ({
       if (payload?.type === KNOWLEDGE_BASE_SSE_TYPES.KNOWLEDGE_BASE_UPDATED) {
         const url = payload?.content_signed_url;
 
-        // Force refetch when SSE update comes in
+        // Mark that we've received an SSE update to prevent error handler from overriding
+        hasReceivedSSEUpdateRef.current = true;
+        // Content now exists, clear the known empty state
+        setIsKnownEmptyState(false);
+        // Refetch the RTK Query to clear the cached 404 error state
+        refetch();
+        // Force refetch content when SSE update comes in
         getMarkdownContent(url, true);
       }
     });
@@ -145,7 +238,7 @@ const ProcessCreationKnowledgeBase: FC<ProcessCreationKnowledgeBaseProps> = ({
     return () => {
       sub.unsubscribe();
     };
-  }, [sseEventBus, processId, getMarkdownContent]);
+  }, [sseEventBus, processId, getMarkdownContent, refetch]);
 
   return (
     <div>
@@ -153,17 +246,21 @@ const ProcessCreationKnowledgeBase: FC<ProcessCreationKnowledgeBaseProps> = ({
         <div className='m-auto max-w-[800px]'>
           <CommonWrapper
             skeletonType={SkeletonTypes.CUSTOM}
-            isNoData={!markdownContent && !isLoading}
+            isNoData={(!markdownContent && !isLoading) || isKnownEmptyState}
             isError={error && 'status' in error && error.status !== 404}
             noDataBanner={
               <ProcessEmptyState
-                title='No process defined yet'
+                title=''
                 description='Start teaching Pace your workflow and watch it come to life.'
                 iconUrl={NEEDS_ATTENTION_EMPTY_STATE}
               />
             }
           >
-            <div>
+            <div
+              className={cn({
+                'animate-pulse': isLoading,
+              })}
+            >
               {markdownContent && <div className='f-26-550 border-GRAY_400 pb-4'>{processName}</div>}
               <Suspense fallback={<MarkdownContentSkeleton />}>
                 <MarkdownContent content={markdownContent} />

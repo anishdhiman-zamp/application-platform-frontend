@@ -11,15 +11,16 @@ const MACS = baseApi.injectEndpoints({
     // Get Conversation History
     getConversationHistory: builder.query<
       OpenFeedbackResponseType,
-      { resourceType: string; resourceId: string; page?: number; limit?: number }
+      { resourceType: string; resourceId: string; page?: number; limit?: number; search?: string }
     >({
-      query: ({ resourceType, resourceId, page, limit }) => ({
+      query: ({ resourceType, resourceId, page, limit, search }) => ({
         url: API_ENDPOINTS.CONVERSATION_HISTORY_GET,
         params: {
           resource_type: resourceType,
           resource_id: resourceId,
           page,
           limit,
+          search: search || undefined,
         },
       }),
       providesTags: [APITags.GET_CONVERSATION_HISTORY],

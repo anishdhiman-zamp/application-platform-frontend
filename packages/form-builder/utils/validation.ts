@@ -1,3 +1,4 @@
+import { Resolver } from 'react-hook-form';
 import { FormSchema, FormValues, Validation, ValidationDependency } from '../types';
 import { evaluateValidationDependencies } from './expressionEvaluator';
 
@@ -61,8 +62,8 @@ export const validateField = (
 };
 
 // Create a custom resolver for react-hook-form
-export const createCustomResolver = (schema: FormSchema) => {
-  return async (values: FormValues) => {
+export const createCustomResolver = (schema: FormSchema): Resolver<FormValues> => {
+  return async (values) => {
     const errors: Record<string, { type: string; message: string }> = {};
 
     Object.entries(schema.fields).forEach(([fieldName, field]) => {
@@ -84,6 +85,6 @@ export const createCustomResolver = (schema: FormSchema) => {
     return {
       values,
       errors,
-    };
+    } as ReturnType<Resolver<FormValues>>;
   };
 };

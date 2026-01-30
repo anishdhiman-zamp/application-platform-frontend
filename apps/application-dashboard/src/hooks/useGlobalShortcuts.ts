@@ -158,8 +158,8 @@ const useGlobalShortcuts = () => {
         if (isValidIndex) {
           const targetProcess = currentProcesses[numberIndex - 1];
 
-          if (targetProcess?.id) {
-            routerRef.current.push(getProcessRouteById(targetProcess.id));
+          if (targetProcess?.process_id) {
+            routerRef.current.push(getProcessRouteById(targetProcess.process_id));
           }
         }
       }
