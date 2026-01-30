@@ -167,6 +167,7 @@ const KnowledgeBaseChat: FC<KnowledgeBaseChatProps> = ({
       getOpenFeedback({ processId });
     }
   }, [conversationId, getOpenFeedback, processId]);
+
   return (
     <div className='flex h-full w-full flex-col'>
       <div
@@ -225,6 +226,7 @@ const KnowledgeBaseChat: FC<KnowledgeBaseChatProps> = ({
                   process_id: processId,
                 },
               }}
+              isDisabled={isAnalysing}
               conversationId={chat?.conversationId || ''}
               scopeId={processId}
               annotationType={status === ProcessStatus.DRAFT ? AnnotationType.PROCESS_SOP : undefined}
