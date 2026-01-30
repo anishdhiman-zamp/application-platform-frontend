@@ -22,6 +22,7 @@ import StopProcessingFeedback from 'modules/chatbot/StopProcessingFeedback';
 import { doesUrlMatchLocation, generateChatbotInstanceId } from 'modules/chatbot/utils';
 import { FEEDBACK_STATUS, FEEDBACK_STATUS_MESSAGES } from 'modules/feedback/feedback.constants';
 import { useSearchParams } from 'next/navigation';
+import { useLazyGetOpenFeedbackQuery } from '@/apis/feedback';
 import ImageLoader from '@/components/common/loader/ImageLoader';
 import { ZAMP_LOGO_LOADER_SVG } from '@/constants/icons';
 import { RootState } from '@/store';
@@ -43,6 +44,7 @@ interface ChatbotProps {
   onOpenChatbot?: () => void;
   scope?: ScopeType;
   clearInputOnClose?: boolean;
+  processId: string;
 }
 
 const Chatbot = ({
@@ -59,7 +61,11 @@ const Chatbot = ({
   onOpenChatbot,
   scope = ScopeType.ACTIVITY_RUN,
   clearInputOnClose = false,
+  processId,
 }: ChatbotProps & { scope?: ScopeType }) => {
+  const urlBasedOpenHandled = useRef(false);
+  const messagesContainerRef = useRef<HTMLDivElement>(null);
+
   const currentUserEmail = useSelector((state: RootState) => state?.user?.user?.user_email);
   const feedbackState = useSelector((state: RootState) => state?.feedbacks);
   const { mergedFeedbackItems = [] } = feedbackState;
@@ -68,13 +74,13 @@ const Chatbot = ({
   const [isOpen, setIsOpen] = useState(showChatbot);
   const [header, setHeader] = useState('');
   const [inputValue, setInputValue] = useState('');
-  const urlBasedOpenHandled = useRef(false);
+
+  const [getOpenFeedback] = useLazyGetOpenFeedbackQuery();
 
   const [stopProcessingConfig, setStopProcessingConfig] = useState<{
     blockConfig: ButtonBlockType;
     payload: MapAny;
   }>();
-  const messagesContainerRef = useRef<HTMLDivElement>(null);
   const [popoverSide, setPopoverSide] = useState<'top' | 'bottom'>('bottom');
 
   const chatbotInstanceId = useMemo(() => generateChatbotInstanceId(annotationLocation), [annotationLocation]);
@@ -92,6 +98,8 @@ const Chatbot = ({
     setHeader,
     refetchConversationHistory: hideFeedbackCount,
   });
+
+  const prevConversationIdRef = useRef<string | null | undefined>(chat.conversationId);
 
   const isAnalysing = chat?.messages[chat?.messages?.length - 1]?.sender_type === SenderType.USER;
 
@@ -253,6 +261,20 @@ const Chatbot = ({
       handleDeleteFeedbackSuccess();
     }
   }, [mergedFeedbackItems, feedbackItem]);
+
+  // Call getOpenFeedback when conversationId is created (changes from empty to non-empty)
+  useEffect(() => {
+    const prevConversationId = prevConversationIdRef.current;
+    const currentConversationId = chat.conversationId;
+
+    // Check if conversationId changed from empty to non-empty
+    if (!prevConversationId && currentConversationId) {
+      getOpenFeedback({ processId });
+    }
+
+    // Update the ref with current value
+    prevConversationIdRef.current = currentConversationId;
+  }, [chat.conversationId, getOpenFeedback, processId]);
 
   return (
     <>
