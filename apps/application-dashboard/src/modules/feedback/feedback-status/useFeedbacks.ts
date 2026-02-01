@@ -8,7 +8,6 @@ import { CONVERSATION_EVENT_TYPE, FEEDBACK_EVENT_TYPE } from '@/modules/feedback
 import { RootState } from '@/store';
 import {
   addFeedbackItem,
-  addOpenFeedbackConversation,
   removeOpenFeedbackConversation,
   setFeedbackItems,
   setLoading,
@@ -85,9 +84,6 @@ export const useFeedbacksProvider = (processId: string) => {
       switch (payload?.type) {
         case CONVERSATION_EVENT_TYPE.MOVED_TO_FEEDBACK:
           dispatch(removeOpenFeedbackConversation(data.source_id as string));
-          break;
-        case CONVERSATION_EVENT_TYPE.NEW_CREATED:
-          dispatch(addOpenFeedbackConversation(payload.conversation));
           break;
       }
     });

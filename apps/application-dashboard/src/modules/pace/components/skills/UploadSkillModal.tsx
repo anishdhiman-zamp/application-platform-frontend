@@ -1,50 +1,100 @@
 'use client';
 
 import { DragEvent, useCallback, useRef, useState } from 'react';
-import { Button, Dialog, DialogBody, DialogContent, DialogHeader, toast } from '@zamp-platform/ui';
-import { FileText, FolderUp } from 'lucide-react';
+import {
+  Button,
+  Dialog,
+  DialogBody,
+  DialogContent,
+  DialogFooter,
+  DialogHeader,
+  DialogHeaderTitle,
+  toast,
+} from '@zamp-platform/ui';
+import { FolderUp, Loader2 } from 'lucide-react';
 import { useUpdateSkillMutation, useUploadSkillMutation } from '@/apis/pace';
+import { ACCEPTED_SKILLFILE_TYPES, SKILL_FILE_REQUIREMENTS } from '@/modules/pace/pace.constants';
+import { getConflictingSkillName } from '@/modules/pace/pace.utils';
 import { cn } from '@/utils/common';
 
 interface UploadSkillModalProps {
   isOpen: boolean;
   onClose: () => void;
-  skillId?: string; // If provided, modal is in update mode
+  skillId?: string;
+  getSkillIdByName?: (skillName: string) => string | undefined;
 }
 
-const ACCEPTED_FILE_TYPES = ['.zip', '.skill'];
-
-const UploadSkillModal = ({ isOpen, onClose, skillId }: UploadSkillModalProps) => {
+const UploadSkillModal = ({ isOpen, onClose, skillId, getSkillIdByName }: UploadSkillModalProps) => {
   const [isDragOver, setIsDragOver] = useState(false);
-  const [selectedFile, setSelectedFile] = useState<File | null>(null);
+  const [conflictingSkillName, setConflictingSkillName] = useState<string | null>(null);
+  const [pendingFile, setPendingFile] = useState<File | null>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
 
   const isUpdateMode = !!skillId;
+  const hasConflict = !!conflictingSkillName && !isUpdateMode;
 
-  const [uploadSkill, { isLoading: isUploading, isError: isUploadError, reset: resetUpload }] =
-    useUploadSkillMutation();
-  const [updateSkill, { isLoading: isUpdating, isError: isUpdateError, reset: resetUpdate }] = useUpdateSkillMutation();
+  const [uploadSkill, { isLoading: isUploading, reset: resetUpload }] = useUploadSkillMutation();
+  const [updateSkill, { isLoading: isUpdating, reset: resetUpdate }] = useUpdateSkillMutation();
+  const [isReplacing, setIsReplacing] = useState(false);
 
-  const isLoading = isUploading || isUpdating;
+  const isLoading = isUploading || isUpdating || isReplacing;
 
-  const validateFile = (file: File): boolean => {
+  const clearConflict = useCallback(() => {
+    setConflictingSkillName(null);
+    setPendingFile(null);
+    resetUpload();
+    resetUpdate();
+  }, [resetUpload, resetUpdate]);
+
+  const validateFile = useCallback((file: File): boolean => {
     const fileName = file.name.toLowerCase();
-    const isValidType = ACCEPTED_FILE_TYPES.some((ext) => fileName.endsWith(ext));
+    const isValidType = ACCEPTED_SKILLFILE_TYPES.some((ext) => fileName.endsWith(ext));
 
     if (!isValidType) {
-      toast.error(`Invalid file type. Please upload a ${ACCEPTED_FILE_TYPES.join(' or ')} file.`);
+      toast.error(`Invalid file type. Please upload a ${ACCEPTED_SKILLFILE_TYPES.join(' or ')} file.`);
 
       return false;
     }
 
     return true;
-  };
-
-  const handleFile = useCallback((file: File) => {
-    if (validateFile(file)) {
-      setSelectedFile(file);
-    }
   }, []);
+
+  const handleSubmit = useCallback(
+    async (file: File) => {
+      try {
+        if (isUpdateMode && skillId) {
+          await updateSkill({ skillId, file }).unwrap();
+          toast.success('Skill updated successfully');
+        } else {
+          await uploadSkill({ file }).unwrap();
+          toast.success('Skill uploaded successfully');
+        }
+        handleClose();
+      } catch (error) {
+        const conflictName = getConflictingSkillName(error);
+        const errorMessage = (error as { data?: { message?: string } })?.data?.message;
+
+        if (conflictName && !isUpdateMode) {
+          // Conflict error in upload mode - show replace confirmation
+          setConflictingSkillName(conflictName);
+          setPendingFile(file);
+        } else {
+          toast.error(errorMessage || `Failed to ${isUpdateMode ? 'update' : 'upload'} skill. Please try again.`);
+        }
+      }
+    },
+    [isUpdateMode, skillId, updateSkill, uploadSkill],
+  );
+
+  const handleFile = useCallback(
+    (file: File) => {
+      if (validateFile(file)) {
+        clearConflict();
+        handleSubmit(file);
+      }
+    },
+    [isUpdateMode, skillId, handleSubmit, clearConflict],
+  );
 
   const handleDrop = useCallback(
     (e: DragEvent<HTMLDivElement>) => {
@@ -52,13 +102,15 @@ const UploadSkillModal = ({ isOpen, onClose, skillId }: UploadSkillModalProps) =
       e.stopPropagation();
       setIsDragOver(false);
 
+      if (hasConflict || isLoading) return;
+
       const file = e.dataTransfer?.files?.[0];
 
       if (file) {
         handleFile(file);
       }
     },
-    [handleFile],
+    [handleFile, hasConflict, isLoading],
   );
 
   const handleDragOver = useCallback((e: DragEvent<HTMLDivElement>) => {
@@ -66,11 +118,16 @@ const UploadSkillModal = ({ isOpen, onClose, skillId }: UploadSkillModalProps) =
     e.stopPropagation();
   }, []);
 
-  const handleDragEnter = useCallback((e: DragEvent<HTMLDivElement>) => {
-    e.preventDefault();
-    e.stopPropagation();
-    setIsDragOver(true);
-  }, []);
+  const handleDragEnter = useCallback(
+    (e: DragEvent<HTMLDivElement>) => {
+      e.preventDefault();
+      e.stopPropagation();
+      if (!hasConflict && !isLoading) {
+        setIsDragOver(true);
+      }
+    },
+    [hasConflict, isLoading],
+  );
 
   const handleDragLeave = useCallback((e: DragEvent<HTMLDivElement>) => {
     e.preventDefault();
@@ -79,7 +136,9 @@ const UploadSkillModal = ({ isOpen, onClose, skillId }: UploadSkillModalProps) =
   }, []);
 
   const handleClick = () => {
-    fileInputRef.current?.click();
+    if (!hasConflict && !isLoading) {
+      fileInputRef.current?.click();
+    }
   };
 
   const handleFileInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -89,128 +148,144 @@ const UploadSkillModal = ({ isOpen, onClose, skillId }: UploadSkillModalProps) =
       handleFile(file);
     }
 
-    // Reset input so the same file can be selected again
     if (fileInputRef.current) {
       fileInputRef.current.value = '';
     }
   };
 
-  const handleSubmit = async () => {
-    if (!selectedFile) return;
+  const handleUploadAndReplace = async () => {
+    if (!conflictingSkillName || !pendingFile || !getSkillIdByName) return;
 
+    const existingSkillId = getSkillIdByName(conflictingSkillName);
+
+    if (!existingSkillId) {
+      toast.error('Could not find the existing skill to replace.');
+
+      return;
+    }
+
+    setIsReplacing(true);
     try {
-      if (isUpdateMode && skillId) {
-        await updateSkill({ skillId, file: selectedFile }).unwrap();
-        toast.success('Skill updated successfully');
-      } else {
-        await uploadSkill({ file: selectedFile }).unwrap();
-        toast.success('Skill uploaded successfully');
-      }
+      await updateSkill({ skillId: existingSkillId, file: pendingFile }).unwrap();
+      toast.success('Skill replaced successfully');
       handleClose();
     } catch (error) {
       toast.error(
-        (error as any)?.data?.message || `Failed to ${isUpdateMode ? 'update' : 'upload'} skill. Please try again.`,
+        (error as { data?: { message?: string } })?.data?.message || 'Failed to replace skill. Please try again.',
       );
+    } finally {
+      setIsReplacing(false);
     }
+  };
+
+  const resetState = () => {
+    setIsDragOver(false);
+    setConflictingSkillName(null);
+    setPendingFile(null);
+    setIsReplacing(false);
   };
 
   const handleClose = () => {
-    setSelectedFile(null);
-    setIsDragOver(false);
     onClose();
+    setTimeout(resetState, 200);
   };
 
-  const handleOpenChange = (open: boolean) => {
-    if (!open) {
-      handleClose();
+  const getDialogTitle = () => {
+    if (hasConflict) {
+      return `Replace "${conflictingSkillName}" skill?`;
     }
+
+    return isUpdateMode ? 'Update skill' : 'Upload skill';
   };
 
   return (
-    <Dialog open={isOpen} onOpenChange={handleOpenChange}>
-      <DialogContent size='small' className='w-[480px]' showCloseButton onClick={(e) => e.stopPropagation()}>
-        <DialogHeader className='f-16-600 text-GRAY_950'>{isUpdateMode ? 'Update skill' : 'Upload skill'}</DialogHeader>
-        <DialogBody>
-          <div className='px-5 pt-4 pb-5'>
-            {/* Drop Zone */}
-            <div
-              className={cn(
-                'border-GRAY_400 flex min-h-[140px] cursor-pointer flex-col items-center justify-center rounded-lg border border-dashed transition-colors',
-                isDragOver && 'border-GRAY_600 bg-GRAY_50',
-                selectedFile && 'border-GREEN_500 bg-GREEN_50',
-                (isUploadError || isUpdateError) && 'border-RED_500 bg-RED_50',
-              )}
-              onClick={handleClick}
-              onDrop={handleDrop}
-              onDragOver={handleDragOver}
-              onDragEnter={handleDragEnter}
-              onDragLeave={handleDragLeave}
-              role='button'
-              tabIndex={0}
-              onKeyDown={(e) => {
-                if (e.key === 'Enter' || e.key === ' ') {
-                  handleClick();
-                }
-              }}
-            >
-              {selectedFile ? (
-                <div className='flex flex-col items-center gap-2'>
-                  <FileText
-                    size={24}
-                    className={cn(isUploadError || isUpdateError ? 'text-RED_600' : 'text-GREEN_600')}
-                  />
-                  <span className='f-14-500 text-GRAY_900'>{selectedFile.name}</span>
-                  <Button
-                    variant='link'
-                    size='xsmall'
-                    className='text-GRAY_600 hover:text-GRAY_900'
-                    onClick={(e) => {
-                      e.stopPropagation();
-                      setSelectedFile(null);
-                      resetUpload();
-                      resetUpdate();
-                    }}
-                  >
-                    Remove
-                  </Button>
-                </div>
-              ) : (
-                <div className='flex flex-col items-center gap-2'>
-                  <div className='border-GRAY_400 rounded-md border p-2'>
-                    <FolderUp size={16} className='text-GRAY_600' />
+    <Dialog open={isOpen} onOpenChange={(open) => !open && handleClose()}>
+      <DialogContent
+        size='small'
+        className='w-[450px] gap-y-4 rounded-[14px]'
+        showCloseButton
+        closeButtonClassName='top-[23px] right-5'
+        onClick={(e) => e.stopPropagation()}
+      >
+        <DialogHeader className='h-fit border-b-0 px-5 pt-5'>
+          <DialogHeaderTitle className='f-16-600'>{getDialogTitle()}</DialogHeaderTitle>
+        </DialogHeader>
+        <DialogBody className='flex flex-col gap-y-4 px-5'>
+          {hasConflict ? (
+            <p className='f-14-400 text-GRAY_700 pt-1'>
+              There's an existing skill with the same name. Uploading this skill will replace the existing one, which
+              can't be restored.
+            </p>
+          ) : (
+            <>
+              <div
+                className={cn(
+                  'flex min-h-[140px] flex-col items-center justify-center rounded-lg border border-dashed transition-all duration-200',
+                  'border-GRAY_400',
+                  !isLoading && 'hover:border-GRAY_600 hover:bg-GRAY_50 cursor-pointer',
+                  isLoading && 'border-GRAY_400 bg-GRAY_50 cursor-not-allowed opacity-70',
+                  isDragOver && !isLoading && 'border-PRIMARY_500 bg-PRIMARY_50 scale-[1.01] border-2',
+                )}
+                onClick={handleClick}
+                onDrop={handleDrop}
+                onDragOver={handleDragOver}
+                onDragEnter={handleDragEnter}
+                onDragLeave={handleDragLeave}
+                role='button'
+                tabIndex={isLoading ? -1 : 0}
+                onKeyDown={(e) => {
+                  if (!isLoading && (e.key === 'Enter' || e.key === ' ')) {
+                    handleClick();
+                  }
+                }}
+              >
+                {isLoading ? (
+                  <div className='flex flex-col items-center gap-2'>
+                    <Loader2 size={24} className='text-GRAY_600 animate-spin' />
+                    <span className='f-14-500 text-GRAY_700'>
+                      {isUpdateMode ? 'Updating skill...' : 'Uploading skill...'}
+                    </span>
                   </div>
-                  <span className='f-14-400 text-GRAY_700'>Drag and drop or click to upload</span>
-                </div>
-              )}
-            </div>
-
-            <input
-              ref={fileInputRef}
-              type='file'
-              accept={ACCEPTED_FILE_TYPES.join(',')}
-              onChange={handleFileInputChange}
-              className='hidden'
-            />
-
-            {/* File Requirements */}
-            <div className='mt-4'>
-              <p className='f-13-500 text-GRAY_900 mb-2'>File requirements</p>
-              <ul className='f-13-400 text-GRAY_700 list-disc space-y-1 pl-5'>
-                <li>.zip or .skill file that includes a SKILL.md file at the root level</li>
-                <li>SKILL.md contains a skill name and description formatted in YAML</li>
-              </ul>
-            </div>
-
-            {/* Submit Button */}
-            {selectedFile && (
-              <div className='mt-5 flex justify-end'>
-                <Button size='small' onClick={handleSubmit} isLoading={isLoading} disabled={isLoading}>
-                  {isUpdateMode ? 'Update' : 'Upload'}
-                </Button>
+                ) : (
+                  <div className='flex flex-col items-center gap-2'>
+                    <FolderUp size={32} className='text-GRAY_600' strokeWidth={1.5} />
+                    <span className='f-14-400 text-GRAY_700'>
+                      Drag and drop or click to {isUpdateMode ? 'update' : 'upload'}
+                    </span>
+                  </div>
+                )}
               </div>
-            )}
-          </div>
+
+              <input
+                ref={fileInputRef}
+                type='file'
+                accept={ACCEPTED_SKILLFILE_TYPES.join(',')}
+                onChange={handleFileInputChange}
+                className='hidden'
+              />
+
+              <div className='mb-5'>
+                <p className='f-12-450 text-GRAY_700'>File requirements</p>
+                <ul className='f-12-450 text-GRAY_700 mt-1 list-inside list-disc'>
+                  {SKILL_FILE_REQUIREMENTS.map((requirement) => (
+                    <li key={requirement}>{requirement}</li>
+                  ))}
+                </ul>
+              </div>
+            </>
+          )}
         </DialogBody>
+
+        {hasConflict && (
+          <DialogFooter className='mt-2 flex justify-end gap-x-2.5 px-5 py-4'>
+            <Button variant='secondary' size='small' onClick={clearConflict}>
+              Go back
+            </Button>
+            <Button size='small' onClick={handleUploadAndReplace} isLoading={isLoading} disabled={isLoading}>
+              Upload and replace
+            </Button>
+          </DialogFooter>
+        )}
       </DialogContent>
     </Dialog>
   );

@@ -7,6 +7,9 @@ export { defineResource, getResource } from './core/resource';
 // Hook exports
 export { useMetaState, useResource } from './hooks';
 
+// Provider exports
+export { BattalionProvider, useBattalionContext } from './providers/BattalionProvider';
+
 // Transaction exports
 export { transactionStore } from './transactions/store';
 // TransactionProvider is optional - only needed for custom config
@@ -32,6 +35,7 @@ export type {
   ResourceName,
   ResourceOptions,
   ResourceRegistry,
+  SSEEventConfig,
   StorageType,
   TransactionConfig,
   TransactionState,

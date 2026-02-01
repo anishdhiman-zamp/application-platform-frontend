@@ -1,12 +1,14 @@
 'use client';
 
 import { FC, ReactNode, useMemo } from 'react';
+import { BattalionProvider } from '@zamp-platform/battalion';
 import { EventBus } from '@zamp-platform/utils';
 import AgChartInit from 'app/_providers/ag-chart';
 import PostHogProviderWrapper from 'app/_providers/posthog-provider';
 import Providers from 'app/_providers/providers';
 import { SSEProvider } from 'app/_providers/sse-provider';
 import UserDetailsProvider from 'app/_providers/user-details-provider';
+import ErrorBoundary from '@/pages/ErrorBoundary';
 
 interface LayoutProvidersProps {
   children: ReactNode;
@@ -20,7 +22,11 @@ const LayoutProviders: FC<LayoutProvidersProps> = ({ children }) => {
       <AgChartInit />
       <UserDetailsProvider />
       <PostHogProviderWrapper>
-        <SSEProvider sseEventBus={sseEventBus}>{children}</SSEProvider>
+        <SSEProvider sseEventBus={sseEventBus}>
+          <BattalionProvider eventBus={sseEventBus}>
+            <ErrorBoundary>{children}</ErrorBoundary>
+          </BattalionProvider>
+        </SSEProvider>
       </PostHogProviderWrapper>
     </Providers>
   );

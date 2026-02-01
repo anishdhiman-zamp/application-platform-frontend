@@ -1,13 +1,15 @@
 'use client';
 
-import { useCallback, useEffect, useMemo } from 'react';
+import { useEffect, useMemo, useRef } from 'react';
 import {
   ConnectedChatInput,
+  DropOverlay,
   MessageContainer,
   ResourceType,
   ScopeType,
   SenderType,
   useChat,
+  useFileDragDrop,
 } from '@zamp-platform/chat';
 import { ArrowDownIcon, Button } from '@zamp-platform/ui';
 import { cn } from '@zamp-platform/ui/utils';
@@ -47,10 +49,11 @@ const ChatContentInner = ({
 }: ChatContentInnerProps) => {
   const dispatch = useAppDispatch();
   const { inputValue, setInputValue } = useChatDraftInput({ conversationId });
+  const fileDropHandlerRef = useRef<((files: FileList) => void) | null>(null);
 
-  const handleConversationCreated = useCallback(() => {
+  const handleConversationCreated = () => {
     dispatch(baseApi.util.invalidateTags([APITags.GET_CONVERSATION_HISTORY]));
-  }, [dispatch]);
+  };
 
   const chat = useChat({
     resourceId: organizationId,
@@ -81,6 +84,12 @@ const ChatContentInner = ({
     streamingState: chat.streamingState,
   });
 
+  const { isDragOver, dropZoneProps } = useFileDragDrop({
+    onFileDrop: (files) => fileDropHandlerRef.current?.(files),
+    disabled: chat.isStreaming || chat.isCreatingConversationV2,
+    acceptedFileTypes: ACCEPTED_FILE_TYPES,
+  });
+
   useEffect(() => {
     if (chat.conversationId && !conversationId) {
       setConversationId(chat.conversationId);
@@ -89,7 +98,8 @@ const ChatContentInner = ({
 
   if (isInConversation) {
     return (
-      <>
+      <div className='relative flex h-full flex-1 flex-col' {...dropZoneProps}>
+        <DropOverlay isVisible={isDragOver} />
         <ChatTopbar title={chatTitle || 'Untitled'} onStartNewChat={startNewChat} />
         <div
           ref={scrollContainerRef}
@@ -147,15 +157,20 @@ const ChatContentInner = ({
               externalInputValue={inputValue}
               setExternalInputValue={setInputValue}
               acceptedFileTypes={ACCEPTED_FILE_TYPES}
+              fileDropHandlerRef={fileDropHandlerRef}
             />
           </div>
         </div>
-      </>
+      </div>
     );
   }
 
   return (
-    <div className='mx-auto flex min-h-0 w-full max-w-[700px] flex-1 flex-col overflow-hidden'>
+    <div
+      className='relative mx-auto flex min-h-0 w-full max-w-[700px] flex-1 flex-col overflow-hidden'
+      {...dropZoneProps}
+    >
+      <DropOverlay isVisible={isDragOver} />
       <ChatHome />
       <div className='w-full shrink-0 p-3'>
         <ConnectedChatInput
@@ -172,6 +187,7 @@ const ChatContentInner = ({
           setExternalInputValue={setInputValue}
           acceptedFileTypes={ACCEPTED_FILE_TYPES}
           onConversationCreated={handleConversationCreated}
+          fileDropHandlerRef={fileDropHandlerRef}
         />
       </div>
       <ChatHistory onSelectConversation={setConversationId} />

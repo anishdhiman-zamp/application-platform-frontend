@@ -43,6 +43,12 @@ const SkillsSection = () => {
     setSkillIdToUpdate(undefined);
   };
 
+  const getSkillIdByName = (skillName: string): string | undefined => {
+    const existingSkill = skills.find((s) => s.name === skillName);
+
+    return existingSkill?.id;
+  };
+
   const onSearchChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     setSearchQuery(e.target.value);
   };
@@ -101,7 +107,12 @@ const SkillsSection = () => {
           ))}
         </CommonWrapper>
       </div>
-      <UploadSkillModal isOpen={isUploadModalOpen} onClose={onCloseModal} skillId={skillIdToUpdate} />
+      <UploadSkillModal
+        isOpen={isUploadModalOpen}
+        onClose={onCloseModal}
+        skillId={skillIdToUpdate}
+        getSkillIdByName={getSkillIdByName}
+      />
       {!isPaceSidebarOpen && (
         <Button
           onClick={onOpenChat}

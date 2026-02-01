@@ -94,6 +94,11 @@ export const StateProvider: FC<{ children: ReactElement }> = ({ children }) => {
   };
 
   const [state, dispatch] = useReducer((state: InitialStateType, action: ActionType): InitialStateType => {
+    // Guard against undefined action
+    if (!action) {
+      return state;
+    }
+
     switch (action.type) {
       case filtersContextActions.SET_PERSIST_ID:
         return { ...state, persistId: action?.payload?.persistId };
@@ -206,42 +211,55 @@ export const StateProvider: FC<{ children: ReactElement }> = ({ children }) => {
       }
 
       case filtersContextActions.ADD_EMPTY_STATE_FILTER: {
-        const selectedStateValue = state?.selectedFilters[action?.payload?.filterKey];
-        const currentPageFilters = state?.currentPageFilters;
+        // Return early if payload or filterKey is missing
+        if (!action?.payload || !action?.payload?.filterKey) {
+          return { ...state };
+        }
 
-        // if (selectedStateValue && !isFilterValueEmpty(action?.payload?.filterKey, selectedStateValue)) {
+        const filterKey = action.payload.filterKey;
+
+        const selectedStateValue = state?.selectedFilters?.[filterKey];
+        const currentPageFilters = state?.currentPageFilters ?? [];
+
+        // if (selectedStateValue && !isFilterValueEmpty(filterKey, selectedStateValue)) {
         if (selectedStateValue) {
           return { ...state };
         }
 
-        const selectedFiltersCurrentState = { ...state?.selectedFilters };
-        const selectedFiltersInUICurrentState = { ...state?.selectedFiltersInUI };
+        const selectedFiltersCurrentState = { ...(state?.selectedFilters ?? {}) };
+        const selectedFiltersInUICurrentState = { ...(state?.selectedFiltersInUI ?? {}) };
 
         return {
           ...state,
           selectedFilters: { ...selectedFiltersCurrentState },
-          currentPageFilters: [...currentPageFilters, action?.payload?.filterKey],
+          currentPageFilters: [...currentPageFilters, filterKey],
           selectedFiltersInUI: {
             ...selectedFiltersInUICurrentState,
-            [action?.payload?.filterKey]: null,
+            [filterKey]: null,
           },
         };
       }
 
       case filtersContextActions.REMOVE_FILTER: {
-        const selectedFilters = { ...state?.selectedFilters };
-        const selectedFiltersInUI = { ...state?.selectedFiltersInUI };
-        const activeCurrentPageFilters =
-          state.currentPageFilters.filter((filter) => filter !== action?.payload?.filterKey) ?? [];
+        // Return early if payload or filterKey is missing
+        if (!action?.payload || !action?.payload?.filterKey) {
+          return { ...state };
+        }
 
-        if (action?.payload?.filterKey in selectedFilters) {
-          delete selectedFilters[action?.payload?.filterKey];
+        const filterKey = action.payload.filterKey;
+
+        const selectedFilters = { ...(state?.selectedFilters ?? {}) };
+        const selectedFiltersInUI = { ...(state?.selectedFiltersInUI ?? {}) };
+        const activeCurrentPageFilters = (state?.currentPageFilters ?? []).filter((filter) => filter !== filterKey);
+
+        if (filterKey in selectedFilters) {
+          delete selectedFilters[filterKey];
           if (state?.persistId) {
             onSetFiltersToStorage(state?.persistId, selectedFilters);
           }
         }
 
-        delete selectedFiltersInUI[action?.payload?.filterKey];
+        delete selectedFiltersInUI[filterKey];
 
         return {
           ...state,

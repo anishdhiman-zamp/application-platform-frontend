@@ -1,58 +1,45 @@
 'use client';
 
-import React, { Component, ErrorInfo, ReactNode } from 'react';
+import { useEffect } from 'react';
 import { captureException } from '@sentry/browser';
 import { ErrorCardTypes } from '@/components/commonWrapper/commonWrapper.types';
 import ErrorCard from '@/components/commonWrapper/ErrorCard';
 
-interface ErrorBoundaryProps {
-  children: ReactNode;
-  onError?: (error: Error, errorInfo: ErrorInfo) => void;
+interface GlobalErrorProps {
+  error: Error & { digest?: string };
+  reset: () => void;
 }
 
-interface ErrorBoundaryState {
-  hasError: boolean;
-}
-
-export class GracefullyDegradingErrorBoundary extends Component<ErrorBoundaryProps, ErrorBoundaryState> {
-  constructor(props: ErrorBoundaryProps) {
-    super(props);
-    this.state = { hasError: false };
-  }
-
-  static getDerivedStateFromError(): ErrorBoundaryState {
-    return { hasError: true };
-  }
-
-  componentDidCatch(error: Error, errorInfo: ErrorInfo) {
+/**
+ * Global error boundary for Next.js App Router.
+ * This catches errors in the root layout and provides a fallback UI.
+ * Note: This only catches errors in the root layout. For route-specific errors,
+ * use error.tsx files in route segments.
+ */
+export default function GlobalError({ error, reset }: GlobalErrorProps) {
+  useEffect(() => {
+    // Log the error to Sentry
     captureException(error, {
       extra: {
-        errorInfo,
+        digest: error.digest,
       },
     });
-    if (this.props.onError) {
-      this.props.onError(error, errorInfo);
-    }
-  }
+    console.error('Global error caught:', error);
+  }, [error]);
 
-  render() {
-    if (this.state.hasError) {
-      // Render the current HTML content without hydration
-      return (
-        <div suppressHydrationWarning className='flex h-screen w-full items-center justify-center'>
+  return (
+    <html lang='en'>
+      <body className='light-mode bg-BACKGROUND_GRAY_1 h-screen antialiased'>
+        <div className='flex h-screen w-full items-center justify-center'>
           <ErrorCard
             title='Something went wrong'
             className='w-full'
             subtitle='Please try again later'
             type={ErrorCardTypes.GENERAL_API_FAIL}
-            onClose={() => window.location.reload()}
+            onClose={reset}
           />
         </div>
-      );
-    }
-
-    return this.props.children;
-  }
+      </body>
+    </html>
+  );
 }
-
-export default GracefullyDegradingErrorBoundary;

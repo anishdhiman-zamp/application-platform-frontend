@@ -1,6 +1,8 @@
 'use client';
 
-import { useGetPagesQuery, useGetProcessesQuery } from '@/apis/pages';
+import { useResource } from '@zamp-platform/battalion';
+import { useGetPagesQuery } from '@/apis/pages';
+import type { Process } from '@/app/(authenticated)/resources';
 
 /**
  * Hook that only fetches pages and processes data.
@@ -21,10 +23,9 @@ export const usePagesAndProcessesData = () => {
   const {
     data: processes,
     isLoading: isLoadingProcesses,
-    isSuccess: isSuccessProcesses,
-  } = useGetProcessesQuery(undefined, {
-    refetchOnMountOrArgChange: false,
-  });
+    update: updateProcess,
+    delete: deleteProcess,
+  } = useResource<Process>('Process');
 
   return {
     pages,
@@ -32,7 +33,9 @@ export const usePagesAndProcessesData = () => {
     isLoadingPages,
     isLoadingProcesses,
     isSuccessPages,
-    isSuccessProcesses,
+    isSuccessProcesses: processes !== undefined,
     isLoading: isLoadingPages || isLoadingProcesses,
+    updateProcess,
+    deleteProcess,
   };
 };

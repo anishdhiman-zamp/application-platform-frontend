@@ -1,11 +1,13 @@
 'use client';
 
 import { createContext, ReactNode, useContext, useEffect } from 'react';
-import { usePathname, useRouter } from 'next/navigation';
+import { useParams, usePathname, useRouter } from 'next/navigation';
+import { Process } from '@/app/(authenticated)/resources';
 import { ROUTES_PATH } from '@/constants/routeConfig';
 import { useAppSelector } from '@/hooks/toolkit';
 import { usePersistedPageNavigation } from '@/hooks/useLastVisitedPage';
 import { usePagesAndProcessesData } from '@/hooks/usePagesAndProcessesData';
+import { useRedirectToFirstProcessAfterOrgSwitch } from '@/hooks/useRedirectToFirstProcessAfterOrgSwitch';
 
 interface PagesAndProcessesContextType {
   pages: ReturnType<typeof usePagesAndProcessesData>['pages'];
@@ -15,6 +17,8 @@ interface PagesAndProcessesContextType {
   isLoadingProcesses: boolean;
   isSuccessPages: boolean;
   isSuccessProcesses: boolean;
+  updateProcess: (processId: string, data: Partial<Process>) => void;
+  deleteProcess: (processId: string) => void;
 }
 
 const PagesAndProcessesContext = createContext<PagesAndProcessesContextType | undefined>(undefined);
@@ -40,17 +44,34 @@ interface PagesAndProcessesProviderProps {
  */
 export function PagesAndProcessesProvider({ children }: PagesAndProcessesProviderProps) {
   const pathname = usePathname();
+  const params = useParams();
   const router = useRouter();
   const { isOrgSwitchIsInProgress } = useAppSelector((state) => state.user);
 
-  // Fetch data once at the provider level
-  const { pages, processes, isLoading, isLoadingPages, isLoadingProcesses, isSuccessPages, isSuccessProcesses } =
-    usePagesAndProcessesData();
+  const {
+    pages,
+    processes,
+    isLoading,
+    isLoadingPages,
+    isLoadingProcesses,
+    isSuccessPages,
+    isSuccessProcesses,
+    updateProcess,
+    deleteProcess,
+  } = usePagesAndProcessesData();
 
   // Get navigation functions
   const { pushToMostRelevantPage, pushToMostRelevantProcess } = usePersistedPageNavigation({
     pagesList: pages ?? [],
     processesList: processes ?? [],
+  });
+
+  // After org switch, redirect to first process if current processId is not in the list
+  useRedirectToFirstProcessAfterOrgSwitch({
+    processId: params?.processId as string | undefined,
+    isOrgSwitchIsInProgress: isOrgSwitchIsInProgress ?? false,
+    isSuccessProcesses: isSuccessProcesses ?? false,
+    processes: processes ?? undefined,
   });
 
   // Handle navigation logic - only for /process route
@@ -95,6 +116,8 @@ export function PagesAndProcessesProvider({ children }: PagesAndProcessesProvide
         isLoadingProcesses,
         isSuccessPages,
         isSuccessProcesses,
+        updateProcess,
+        deleteProcess,
       }}
     >
       {children}

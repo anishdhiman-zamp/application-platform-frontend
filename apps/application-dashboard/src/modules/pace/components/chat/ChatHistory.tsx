@@ -3,17 +3,21 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { ResourceType } from '@zamp-platform/chat';
 import { useInfiniteScroll } from '@zamp-platform/tanstack-table';
-import { MessagesSquare } from 'lucide-react';
+import { Button, Input } from '@zamp-platform/ui';
+import { Search } from 'lucide-react';
 import { useGetConversationHistoryQuery } from '@/apis/pace';
 import CommonWrapper from '@/components/commonWrapper';
 import { SkeletonTypes } from '@/components/commonWrapper/commonWrapper.types';
+import { useDebounce } from '@/hooks';
 import { useAppSelector } from '@/hooks/toolkit';
 import ChatHistoryItem from '@/modules/pace/components/chat/ChatHistoryItem';
 import ChatHistorySkeleton from '@/modules/pace/components/loaders/ChatHistorySkeleton';
+import EmptyStateListing from '@/modules/team/components/EmptyStateListing';
 import type { RootState } from '@/store';
 import type { FeedbackItemType } from '@/types/api/feedbacks.types';
 
 const PAGE_SIZE = 20;
+const SEARCH_DEBOUNCE_MS = 300;
 
 interface ChatHistoryProps {
   onSelectConversation: (id: string | null) => void;
@@ -21,10 +25,15 @@ interface ChatHistoryProps {
 
 const ChatHistory = ({ onSelectConversation }: ChatHistoryProps) => {
   const organizationId = useAppSelector((state: RootState) => state?.user?.user?.orgs?.[0]?.organization_id) ?? '';
+  const containerRef = useRef<HTMLDivElement>(null);
+
   const [page, setPage] = useState(1);
   const [allConversations, setAllConversations] = useState<FeedbackItemType[]>([]);
   const [totalCount, setTotalCount] = useState(0);
-  const containerRef = useRef<HTMLDivElement>(null);
+  const [searchTerm, setSearchTerm] = useState('');
+  const [isSearchOpen, setIsSearchOpen] = useState(false);
+
+  const debouncedSearch = useDebounce(searchTerm, SEARCH_DEBOUNCE_MS);
 
   const {
     data: conversationHistory,
@@ -39,6 +48,7 @@ const ChatHistory = ({ onSelectConversation }: ChatHistoryProps) => {
       resourceId: organizationId,
       page,
       limit: PAGE_SIZE,
+      search: debouncedSearch || undefined,
     },
     {
       skip: !organizationId,
@@ -76,21 +86,39 @@ const ChatHistory = ({ onSelectConversation }: ChatHistoryProps) => {
     setPage(1);
     setAllConversations([]);
     setTotalCount(0);
+    setSearchTerm('');
+    setIsSearchOpen(false);
     refetchConversationHistory();
   }, [refetchConversationHistory]);
 
+  const handleSearchChange = useCallback((e: React.ChangeEvent<HTMLInputElement>) => {
+    setSearchTerm(e.target.value);
+  }, []);
+
+  const handleToggleSearch = useCallback(() => {
+    setIsSearchOpen((prev) => !prev);
+    if (isSearchOpen) {
+      setSearchTerm('');
+    }
+  }, [isSearchOpen]);
+
   useEffect(() => {
-    if (conversationHistory?.count) {
+    setPage(1);
+    setAllConversations([]);
+    setTotalCount(0);
+  }, [debouncedSearch]);
+
+  useEffect(() => {
+    if (conversationHistory?.count !== undefined) {
       setTotalCount(conversationHistory.count);
     }
   }, [conversationHistory?.count]);
 
   useEffect(() => {
-    if (conversations.length > 0) {
+    if (page === 1) {
+      setAllConversations(conversations);
+    } else if (conversations.length > 0) {
       setAllConversations((prev) => {
-        if (page === 1) {
-          return conversations;
-        }
         const existingIds = new Set(prev.map((c) => c.id));
         const newConversations = conversations.filter((c) => !existingIds.has(c.id));
 
@@ -101,22 +129,47 @@ const ChatHistory = ({ onSelectConversation }: ChatHistoryProps) => {
 
   return (
     <div className='mx-auto flex min-h-0 w-full flex-1 flex-col overflow-hidden bg-white pt-4'>
-      <div className='flex shrink-0 items-center justify-between p-3'>
-        <p className='f-14-550 text-gray-1000'>Chat History</p>
+      <div className='flex shrink-0 flex-col gap-4 p-3'>
+        <div className='flex items-center justify-between'>
+          <p className='f-14-550 text-gray-1000'>Chat History</p>
+          <Button
+            variant='ghost'
+            size='icon'
+            onClick={handleToggleSearch}
+            className='h-7 w-7'
+            data-testid='chat-history-search-toggle'
+          >
+            <Search size={16} className='text-gray-1000' />
+          </Button>
+        </div>
+        {isSearchOpen && (
+          <Input
+            placeholder='Search conversations...'
+            value={searchTerm}
+            autoFocus
+            onChange={handleSearchChange}
+            iconPosition='leading'
+            size='small'
+            className='mb-1 w-full pr-8'
+            data-testid='chat-history-search-input'
+          />
+        )}
       </div>
       <CommonWrapper
-        isLoading={(isLoadingConversationHistory || isUninitializedConversationHistory) && page === 1}
+        isLoading={
+          ((isLoadingConversationHistory || isUninitializedConversationHistory) && page === 1) ||
+          (isFetchingConversationHistory && !!debouncedSearch && page === 1)
+        }
         skeletonType={SkeletonTypes.CUSTOM}
         loader={<ChatHistorySkeleton />}
         refetchFunction={handleRefetch}
         isError={isErrorConversationHistory}
-        isNoData={displayConversations.length === 0 && !isLoadingConversationHistory}
+        isNoData={displayConversations.length === 0 && !isLoadingConversationHistory && !isFetchingConversationHistory}
         noDataBanner={
-          <div className='flex h-full flex-col items-center justify-center py-12 text-center'>
-            <MessagesSquare size={48} className='mb-4 text-gray-300' />
-            <p className='f-14-500 text-gray-600'>No conversations found</p>
-            <p className='f-13-400 mt-1 text-gray-400'>Start a new chat to begin</p>
-          </div>
+          <EmptyStateListing
+            title={debouncedSearch ? 'No matching conversations' : 'No conversations found'}
+            className='h-full flex-col items-center justify-center py-12 text-center'
+          />
         }
         className='min-h-0 flex-1 pb-4'
         disableAnimation
