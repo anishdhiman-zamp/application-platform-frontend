@@ -60,7 +60,7 @@ const CopyMessageButton: FC<CopyMessageButtonProps> = ({ messageContent, classNa
   }, [messageContent]);
 
   return (
-    <TooltipProvider delayDuration={200}>
+    <TooltipProvider delayDuration={500}>
       <Tooltip>
         <TooltipTrigger asChild>
           <span className='inline-flex'>

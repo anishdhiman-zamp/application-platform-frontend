@@ -4,14 +4,12 @@ import { useMemo, useState } from 'react';
 import { Button, Input, toast } from '@zamp-platform/ui';
 import { useAutoFocus } from '@zamp-platform/utils';
 import { useListSkillsQuery } from '@/apis/pace';
-import NewPaceIcons from '@/assets/Icons/NewPaceIcons';
 import CommonWrapper from '@/components/commonWrapper';
 import { SkeletonTypes } from '@/components/commonWrapper/commonWrapper.types';
 import SkillCardSkeleton from '@/modules/pace/components/loaders/SkillCardSkeleton';
 import SkillCard from '@/modules/pace/components/skills/SkillCard';
 import SkillsEmptyState from '@/modules/pace/components/skills/SkillsEmptyState';
 import UploadSkillModal from '@/modules/pace/components/skills/UploadSkillModal';
-import { usePaceContext } from '@/modules/pace/pace.context';
 
 const SkillsSection = () => {
   const [searchQuery, setSearchQuery] = useState('');
@@ -19,7 +17,6 @@ const SkillsSection = () => {
   const [isUploadModalOpen, setIsUploadModalOpen] = useState(false);
   const [skillIdToUpdate, setSkillIdToUpdate] = useState<string | undefined>(undefined);
 
-  const { isPaceSidebarOpen, setIsPaceSidebarOpen } = usePaceContext();
   const { data, isLoading, isError, refetch } = useListSkillsQuery({});
   const { setRef: setSearchInputRef } = useAutoFocus<HTMLInputElement>({ enabled: !isLoading });
 
@@ -66,13 +63,9 @@ const SkillsSection = () => {
     }
   };
 
-  const onOpenChat = () => {
-    setIsPaceSidebarOpen(true);
-  };
-
   return (
     <div className='flex w-full max-w-[700px] flex-col gap-y-4 overflow-hidden'>
-      <div className='flex w-full items-center justify-between px-6'>
+      <div className='flex w-full items-center justify-between px-6 py-1'>
         <Input
           placeholder='Search skills...'
           value={searchQuery}
@@ -118,17 +111,6 @@ const SkillsSection = () => {
         skillId={skillIdToUpdate}
         getSkillIdByName={getSkillIdByName}
       />
-      {!isPaceSidebarOpen && (
-        <Button
-          onClick={onOpenChat}
-          variant='secondary'
-          size='icon'
-          className='absolute bottom-3 left-3 h-14 w-14 rounded-full border-none transition-all [&_svg]:size-10'
-          title='Start new chat'
-        >
-          <NewPaceIcons />
-        </Button>
-      )}
     </div>
   );
 };

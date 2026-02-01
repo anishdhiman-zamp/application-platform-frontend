@@ -126,7 +126,7 @@ const ChatContentInner = ({
               showCopy
               alignUserRight
               hideSenderName
-              userAvatarClassName='h-5 min-h-5 w-5 min-w-5 f-11-500 rounded-[7.5px]'
+              userAvatarClassName='h-6 min-h-6 w-6 min-w-6 f-11-500 rounded-[7.5px]'
             />
             <div className='h-12 w-full bg-white' />
           </CommonWrapper>

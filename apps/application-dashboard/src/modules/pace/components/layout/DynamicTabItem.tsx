@@ -21,14 +21,14 @@ const DynamicTabItem = ({ tab, isActive, onClose }: DynamicTabItemProps) => {
   const Icon = DYNAMIC_TAB_ICON_MAP[tab.type];
 
   return (
-    <TooltipV2 tooltipBody={tab.name} side={SIDE_OPTIONS.BOTTOM} delayDuration={300} asChildTrigger>
+    <TooltipV2 tooltipBody={tab.name} side={SIDE_OPTIONS.BOTTOM} delayDuration={500} asChildTrigger>
       <Link
         href={tab.path}
         className={cn(
           'group relative flex h-[30px] max-w-[172px] min-w-[60px] flex-1 cursor-pointer items-center gap-x-2 rounded-[8px] border p-2 transition-all duration-150 ease-in-out',
           isActive
             ? 'border-GRAY_300 text-GRAY_1000 bg-white hover:bg-white'
-            : 'text-GRAY_700 hover:text-GRAY_900 hover:bg-GRAY_100 border-transparent',
+            : 'text-GRAY_700 hover:text-GRAY_1000 hover:bg-GRAY_200 border-transparent',
         )}
         onMouseEnter={() => setIsHovered(true)}
         onMouseLeave={() => setIsHovered(false)}

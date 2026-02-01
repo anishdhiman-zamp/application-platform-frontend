@@ -12,7 +12,7 @@ const MessageTimestamp: FC<MessageTimestampProps> = ({ formattedTimestamp, toolt
   if (!formattedTimestamp) return null;
 
   return (
-    <TooltipProvider delayDuration={200}>
+    <TooltipProvider delayDuration={500}>
       <Tooltip>
         <TooltipTrigger asChild>
           <div className='text-GRAY_600 f-10-450 w-fit cursor-default'>{formattedTimestamp}</div>

@@ -112,6 +112,7 @@ export const MessageContainer: FC<MessageContainerProps> = ({
           streamingState={streamingState}
           assistantName={assistantName}
           assistantAvatar={defaultAssistantAvatar}
+          hideSenderName={hideSenderName}
         />
       )}
 
