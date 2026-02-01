@@ -20,7 +20,6 @@ const config = {
   },
 
   ignorePatterns: ['coverage/', 'node_modules/', 'dist/', '.turbo/'],
-  extends: ['plugin:storybook/recommended'],
 };
 
 module.exports = config;

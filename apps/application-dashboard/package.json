@@ -97,7 +97,8 @@
     "@types/react-date-range": "^1.4.9",
     "@types/react-dom": "^19",
     "babel-plugin-react-compiler": "^1.0.0",
-    "eslint": "^8.57.1",
+    "cross-env": "^10.1.0",
+    "eslint": "^9.39.2",
     "eslint-config-prettier": "^9.1.0",
     "eslint-plugin-absolute-imports": "^0.0.3",
     "eslint-plugin-import": "^2.31.0",
@@ -115,13 +116,9 @@
     "typescript": "^5"
   },
   "lint-staged": {
-    "*.ts": "eslint --fix",
-    "*.tsx": "eslint --fix",
-    "*.js": "eslint --fix",
-    "*.jsx": "eslint --fix",
-    "**/*.{js,jsx,ts,tsx}": [
-      "prettier --write",
-      "eslint --fix"
+    "*.{js,jsx,ts,tsx}": [
+      "cross-env ESLINT_USE_FLAT_CONFIG=false eslint --fix",
+      "prettier --write"
     ]
   }
 }
