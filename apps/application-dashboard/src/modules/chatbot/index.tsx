@@ -174,6 +174,7 @@ const ChatbotWrapper: FC<ChatbotProps> = ({
             </FeedbackList>
           ) : (
             <Chatbot
+              processId={annotationLocation.data.process_id}
               annotationLocation={annotationLocation}
               hideFeedbackCount={hideFeedbackCount}
               feedbackItem={currentFeedbackItem}

@@ -57,7 +57,7 @@ const LayoutChildren: FC<{ children: ReactNode; showTopbar: boolean }> = ({ chil
       <div
         className={cn(
           'border-GRAY_400 relative mx-auto w-full border bg-white',
-          showTopbar ? 'h-[calc(100vh-48px)]' : 'h-screen',
+          showTopbar ? 'h-[calc(100vh-48px)]' : 'h-screen border-none',
           isSidebarOpen && showTopbar && 'rounded-tl-xl',
         )}
       >

@@ -6,7 +6,6 @@ import { type ImperativePanelHandle, ResizableHandle, ResizablePanel, ResizableP
 import { useParams, useSearchParams } from 'next/navigation';
 import { useGetActivityArtifactsQuery, useLazyGetArtifactsByArtifactIdQuery } from '@/apis/processes';
 import { toast } from '@/components/common/toast/Toast';
-import { useAppDispatch } from '@/hooks/toolkit';
 import { CHATBOT_LOCATION_PARAMS } from '@/modules/chatbot/constants';
 import Logs from '@/modules/process/activity-logs/ActivityLogs';
 import { useActivitySSE } from '@/modules/process/activity-logs/hooks/useActivitySSE';
@@ -23,7 +22,6 @@ import {
   type EmitHITLActionPayload,
   type HandleShowArtifactsProps,
 } from '@/modules/process/process.types';
-import { closeSidebar, openSidebar } from '@/store/slices/layout-configs';
 import type { OtherArtifactsResponseType } from '@/types/api/processApi.types';
 import type { MapAny } from '@/types/commonTypes';
 import { cn } from '@/utils/common';
@@ -36,7 +34,6 @@ const Activity = () => {
   const activityId = params?.activityId as string;
 
   const panelRef = useRef<ImperativePanelHandle>(null);
-  const dispatch = useAppDispatch();
 
   const [isDragging, setIsDragging] = useState(false);
   const [isExpanded, setIsExpanded] = useState(false);
@@ -188,26 +185,14 @@ const Activity = () => {
     }
   }, [isLoadingArtifact]);
 
-  useEffect(() => {
-    dispatch(closeSidebar());
-
-    setTimeout(() => {
-      dispatch(closeSidebar());
-    }, 300);
-
-    return () => {
-      dispatch(openSidebar());
-    };
-  }, [dispatch]);
-
   return (
     <ResizablePanelGroup direction='horizontal' className='h-full w-full'>
       <ResizablePanel
         id={RESIZABLE_PANEL_ID.LOGS}
         order={1}
         defaultSize={showSummary ? 70 : isExpanded ? 0 : 35}
-        minSize={isExpanded ? 0 : 30}
-        maxSize={isExpanded ? 0 : 70}
+        minSize={isExpanded ? 0 : 35}
+        maxSize={isExpanded ? 0 : 65}
         className={cn('transition-all duration-300 ease-in-out', {
           'transition-none!': isDragging,
         })}
@@ -246,8 +231,8 @@ const Activity = () => {
         id={showSummary ? RESIZABLE_PANEL_ID.SUMMARY : RESIZABLE_PANEL_ID.ARTIFACTS}
         order={2}
         defaultSize={showSummary ? 30 : isExpanded ? 100 : 65}
-        minSize={isExpanded ? 100 : 30}
-        maxSize={isExpanded ? 100 : 70}
+        minSize={isExpanded ? 100 : 35}
+        maxSize={isExpanded ? 100 : 65}
         className={cn('transition-all duration-300 ease-in-out', {
           'transition-none!': isDragging,
         })}

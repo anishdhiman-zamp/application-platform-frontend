@@ -10,7 +10,7 @@ jest.mock('next/font/google', () => ({
 }));
 
 describe('getUpdatedColumnOrderingVisibility', () => {
-  it('should create new column visibility entries for columns not in current visibility', () => {
+  it('should create new column visibility entries for columns not in current visibility (excluding hidden columns)', () => {
     const currentVisibility: ColumnOrderingVisibilityType[] = [];
     const filterConfig: DatasetFilterConfigResponseType[] = [
       {
@@ -25,10 +25,8 @@ describe('getUpdatedColumnOrderingVisibility', () => {
 
     const result = getUpdatedColumnOrderingVisibility(currentVisibility, filterConfig);
 
-    expect(result).toEqual([
-      { colId: 'col1', isVisible: false, width: 0 },
-      { colId: 'col2', isVisible: true, width: 0 },
-    ]);
+    // Hidden columns (is_hidden: true) should NOT be added to localStorage
+    expect(result).toEqual([{ colId: 'col2', isVisible: true, width: 0 }]);
   });
 
   it('should preserve width from existing column visibility entries', () => {
@@ -58,7 +56,7 @@ describe('getUpdatedColumnOrderingVisibility', () => {
     expect(result).toEqual([{ colId: 'col1', isVisible: true, width: 0 }]);
   });
 
-  it('should update visibility based on metadata.is_hidden while preserving width', () => {
+  it('should filter out columns that become hidden in backend', () => {
     const currentVisibility: ColumnOrderingVisibilityType[] = [{ colId: 'col1', isVisible: true, width: 150 }];
     const filterConfig: DatasetFilterConfigResponseType[] = [
       {
@@ -69,7 +67,8 @@ describe('getUpdatedColumnOrderingVisibility', () => {
 
     const result = getUpdatedColumnOrderingVisibility(currentVisibility, filterConfig);
 
-    expect(result).toEqual([{ colId: 'col1', isVisible: false, width: 150 }]);
+    // Hidden columns should be removed from localStorage entirely
+    expect(result).toEqual([]);
   });
 
   it('should maintain column order from current visibility', () => {
@@ -102,7 +101,7 @@ describe('getUpdatedColumnOrderingVisibility', () => {
     ]);
   });
 
-  it('should handle columns present in visibility but not in filter config', () => {
+  it('should remove columns not in filter config (unless they are FE-only columns)', () => {
     const currentVisibility: ColumnOrderingVisibilityType[] = [
       { colId: 'col1', isVisible: true, width: 100 },
       { colId: 'col2', isVisible: true, width: 200 },
@@ -116,9 +115,7 @@ describe('getUpdatedColumnOrderingVisibility', () => {
 
     const result = getUpdatedColumnOrderingVisibility(currentVisibility, filterConfig);
 
-    expect(result).toEqual([
-      { colId: 'col1', isVisible: true, width: 100 },
-      { colId: 'col2', isVisible: false, width: 200 },
-    ]);
+    // col2 is removed because it's not in filterConfig and not a FE-only column
+    expect(result).toEqual([{ colId: 'col1', isVisible: true, width: 100 }]);
   });
 });

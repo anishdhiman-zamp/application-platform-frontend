@@ -63,6 +63,7 @@ export const DATASET_TABLE = IMAGE_PREFIX + '/icons/dataset-table.svg';
 export const ALIGN_CENTER = IMAGE_PREFIX + '/icons/align-center.svg';
 export const KNOWLEDGE_BASED = IMAGE_PREFIX + '/icons/knowledge-based.svg';
 export const DONUT_CHART_ICON = IMAGE_PREFIX + '/icons/donut.svg';
+export const TEXT_BACKGROUND = IMAGE_PREFIX + '/icons/text-background.svg';
 
 // Bank Icons
 export const ADCB_SVG = IMAGE_PREFIX + '/icons/bank-icons/adcb.svg';

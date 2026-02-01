@@ -5,9 +5,10 @@ type ProcessNameInputProps = {
   value: string;
   onChange: (value: string) => void;
   error?: string;
+  onEnter?: () => void;
 };
 
-const ProcessNameInput: FC<ProcessNameInputProps> = ({ value, onChange }) => {
+const ProcessNameInput: FC<ProcessNameInputProps> = ({ value, onChange, onEnter }) => {
   const [isEditing, setIsEditing] = useState(!value);
   const inputRef = useRef<HTMLInputElement | null>(null);
 
@@ -23,6 +24,13 @@ const ProcessNameInput: FC<ProcessNameInputProps> = ({ value, onChange }) => {
     }
   };
 
+  const handleKeyDown = (e: React.KeyboardEvent<HTMLInputElement>) => {
+    if (e.key === 'Enter' && onEnter && value.trim()) {
+      e.preventDefault();
+      onEnter();
+    }
+  };
+
   return (
     <div className='mt-5 mb-10 w-full space-y-2'>
       <input
@@ -34,6 +42,7 @@ const ProcessNameInput: FC<ProcessNameInputProps> = ({ value, onChange }) => {
         value={value}
         onChange={(e) => onChange(e.target.value)}
         onBlur={handleBlur}
+        onKeyDown={handleKeyDown}
         placeholder='Name your process'
       />
     </div>

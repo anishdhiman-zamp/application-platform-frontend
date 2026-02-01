@@ -161,7 +161,9 @@ export const API_ENDPOINTS = {
   ACTIVITY_SIGNED_URL_BY_FILE_ID_GET: `processes/{{processId}}/artifacts/{{artifactId}}/signed-url/{{fileId}}`,
   DATASET_ARTIFACTS_GET: `processes/{{processId}}/activity-runs/{{activityRunId}}/datasets/{{datasetId}}/data`,
   EMIT_HITL_ACTION_POST: `processes/{{processId}}/activity-runs/{{activityRunId}}/hitl/actions`,
+  ACTIVITY_REPROCESSING_EVENTS_GET: `processes/{{processId}}/activity-runs/{{activityRunId}}/reprocessing-events`,
   PROCESSES_EVENTS_GET: `processes/events/{{activityId}}`,
+  STOP_PROCESS_BUILDING_POST: `processes/{{processId}}/build-stop`,
   UNIFIED_SSE: `events`,
 
   //Voice Agents

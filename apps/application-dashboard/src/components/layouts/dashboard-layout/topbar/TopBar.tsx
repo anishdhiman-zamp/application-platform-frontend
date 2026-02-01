@@ -2,7 +2,6 @@
 
 import { Suspense, useEffect, useMemo, useState } from 'react';
 import { Button } from '@zamp-platform/ui';
-import { KNOWLEDGE_BASED } from 'constants/icons';
 import {
   getCreateKnowledgeBaseRouteByProcessId,
   getKnowledgeBasedRouteByProcessId,
@@ -13,19 +12,21 @@ import { useAppSelector } from 'hooks/toolkit';
 import { BookOpen } from 'lucide-react';
 import ShareDatasetPopup from 'modules/data/components/ShareDatasetPopup';
 import SharePagePopup from 'modules/page/SharePagePopup';
-import Image from 'next/image';
 import Link from 'next/link';
-import { useParams, usePathname } from 'next/navigation';
+import { useParams, usePathname, useRouter } from 'next/navigation';
 import { RootState } from 'store';
-import { useGetProcessesQuery } from '@/apis/pages';
 import TooltipV2 from '@/components/common/TooltipV2';
 import { FEATURE_FLAGS } from '@/constants/featureFlags';
+import { useFeatureFlag } from '@/hooks/useFeatureFlag';
 import { useFeatureFlags } from '@/hooks/useFeatureFlags';
+import { usePagesAndProcessesData } from '@/hooks/usePagesAndProcessesData';
 import WorkWithPace from '@/modules/chatbot/WorkWithPace';
 import DraftFeedbackButton from '@/modules/feedback/components/DraftFeedbackButton';
 import FeedbackStatusButton from '@/modules/feedback/feedback-status/FeedbackStatusButton';
 import useIsFeedbackEnabled from '@/modules/feedback/useIsFeedbackEnabled';
 import ShareProcessPopup from '@/modules/process/common/ShareProcessPopup';
+import useIsDatasetCreationEnabled from '@/modules/process/hooks/useIsDatasetCreationEnabled';
+import { DatasetTabsTypes } from '@/modules/process/process.types';
 import { ProcessStatus } from '@/types/api/processApi.types';
 import { SIDE_OPTIONS } from '@/types/commonTypes';
 import BreadCrumb from 'components/layouts/dashboard-layout/components/BreadCrumb';
@@ -52,38 +53,35 @@ const ShareButton = () => {
 const Topbar = () => {
   const { isSidebarOpen } = useAppSelector((state: RootState) => state.layoutConfig);
   const openFeedbackConversations = useAppSelector((state: RootState) => state?.feedbacks?.openFeedbackConversations);
-  const { data: processes } = useGetProcessesQuery(undefined, {
-    refetchOnMountOrArgChange: false,
-  });
+  const { isEnabled: isZampInternalEnabled } = useFeatureFlag(FEATURE_FLAGS.ZAMP_INTERNAL);
 
+  const { processes } = usePagesAndProcessesData();
   const pathname = usePathname();
+  const router = useRouter();
   const params = useParams<{ processId: string }>();
   const processId = params?.processId;
-  const { isProcessDraft, isProcessLive } = useMemo(() => {
+  const { isProcessLive, isProcessDraft } = useMemo(() => {
     return {
-      isProcessDraft: processes?.find((process) => process?.id === processId)?.status === ProcessStatus.DRAFT,
-      isProcessLive: processes?.find((process) => process?.id === processId)?.status === ProcessStatus.LIVE,
+      isProcessLive: processes?.find((process) => process?.process_id === processId)?.status === ProcessStatus.LIVE,
+      isProcessDraft: processes?.find((process) => process?.process_id === processId)?.status === ProcessStatus.DRAFT,
     };
   }, [processes, processId]);
 
   const [isKnowledgeBaseEnabled, setIsKnowledgeBaseEnabled] = useState<boolean>(false);
   const { evaluate, ldClient } = useFeatureFlags();
   const isFeedbackEnabled = useIsFeedbackEnabled();
+  const isCreateDatasetEnabled = useIsDatasetCreationEnabled();
 
   useEffect(() => {
-    if (ldClient) {
-      evaluate(FEATURE_FLAGS.ENABLE_KNOWLEDGE_BASE)
-        .then((res: string[]) => {
-          if (res?.includes(processId ?? '')) {
-            setIsKnowledgeBaseEnabled(true);
-          } else {
-            setIsKnowledgeBaseEnabled(false);
-          }
-        })
-        .catch(() => {
-          setIsKnowledgeBaseEnabled(false);
-        });
-    }
+    if (!ldClient) return;
+
+    evaluate(FEATURE_FLAGS.ENABLE_KNOWLEDGE_BASE)
+      .then((res: string[]) => {
+        setIsKnowledgeBaseEnabled(res?.includes(processId ?? '') ?? false);
+      })
+      .catch(() => {
+        setIsKnowledgeBaseEnabled(false);
+      });
   }, [evaluate, ldClient, processId]);
 
   const renderRightSideActions = useMemo(() => {
@@ -92,14 +90,14 @@ const Topbar = () => {
 
       return (
         <div className='flex items-center gap-3'>
-          {isFeedbackEnabled ? (
-            <TooltipV2 tooltipBody='knowledge base' side={SIDE_OPTIONS.BOTTOM} asChildTrigger>
+          {!isProcessDraft && (
+            <TooltipV2 tooltipBody='Knowledge Base' side={SIDE_OPTIONS.BOTTOM} asChildTrigger>
               <Link
                 prefetch
                 href={
-                  isProcessDraft
-                    ? getCreateKnowledgeBaseRouteByProcessId(processId ?? '')
-                    : getKnowledgeBasedRouteByProcessId(processId ?? '')
+                  isProcessLive || !isZampInternalEnabled
+                    ? getKnowledgeBasedRouteByProcessId(processId ?? '')
+                    : getCreateKnowledgeBaseRouteByProcessId(processId ?? '')
                 }
               >
                 <Button id='knowledge-base-btn' size='small' variant='secondary' aria-label='Knowledge base'>
@@ -107,18 +105,9 @@ const Topbar = () => {
                 </Button>
               </Link>
             </TooltipV2>
-          ) : isKnowledgeBaseEnabled ? (
-            <Link prefetch href={getKnowledgeBasedRouteByProcessId(processId ?? '')}>
-              <Button id='knowledge-base-btn' size='small' variant='secondary' className='w-[146px]'>
-                <div className='flex gap-1'>
-                  <Image src={KNOWLEDGE_BASED} height={16} width={16} alt='' />
-                  Knowledge Base
-                </div>
-              </Button>
-            </Link>
-          ) : null}
-          {isFeedbackEnabled && <DraftFeedbackButton processId={processId} />}
-          {isFeedbackEnabled && (
+          )}
+          {isFeedbackEnabled && isProcessLive && <DraftFeedbackButton processId={processId} />}
+          {isFeedbackEnabled && isProcessLive && (
             <Suspense>
               <FeedbackStatusButton processId={processId} />
             </Suspense>
@@ -129,8 +118,27 @@ const Topbar = () => {
       );
     }
 
+    if (pathname === ROUTES_PATH.DATA && isCreateDatasetEnabled) {
+      const handleCreateDataset = () => {
+        router.push(`${ROUTES_PATH.DATA}?tab=${DatasetTabsTypes.BLUEPRINT}`);
+      };
+
+      return (
+        <Button id='create-dataset-btn' size='small' variant='default' onClick={handleCreateDataset}>
+          Create dataset
+        </Button>
+      );
+    }
+
     return <ShareButton />;
-  }, [pathname, isKnowledgeBaseEnabled, processId, isFeedbackEnabled, openFeedbackConversations]);
+  }, [
+    pathname,
+    isKnowledgeBaseEnabled,
+    isCreateDatasetEnabled,
+    processId,
+    isFeedbackEnabled,
+    openFeedbackConversations,
+  ]);
 
   return (
     <motion.div
@@ -146,7 +154,7 @@ const Topbar = () => {
     >
       <div className='min-w-0 flex-1'>
         <Suspense>
-          <BreadCrumb isSidebarOpen={isSidebarOpen} />
+          <BreadCrumb isDraftProcess={!isProcessLive} />
         </Suspense>
       </div>
       <div className='-mi-6 flex-shrink-0'>

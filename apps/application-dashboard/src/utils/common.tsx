@@ -4,7 +4,14 @@ import { DATE_FILTER_CATEGORIES, DATE_FILTER_OPTIONS } from '@zamp-platform/util
 import { type ClassValue } from 'clsx';
 import { CHIP_COLORS, CUSTOM_FILTER_COLORS } from 'constants/colors';
 import { SCREEN_BREAKPOINTS } from 'constants/common.constants';
-import { format, startOfYear } from 'date-fns';
+import {
+  differenceInDays,
+  differenceInHours,
+  differenceInMinutes,
+  differenceInMonths,
+  format,
+  startOfYear,
+} from 'date-fns';
 import type { AudiencesByResourceResponse } from '@/types/api/collaboration.types';
 import { DateFilterValueType } from 'components/filter/DateRangeFilter';
 
@@ -584,4 +591,36 @@ export const ensureUTCTimestamp = (timestamp: string): string => {
   if (!timestamp) return timestamp;
 
   return timestamp.endsWith('Z') ? timestamp : `${timestamp}Z`;
+};
+
+export const findTimeDifference = (updated_at: string): string => {
+  const currentTime = new Date();
+  const lastUpdatedTime = new Date(updated_at);
+
+  const differenceInMinutesValue = differenceInMinutes(currentTime, lastUpdatedTime);
+
+  if (differenceInMinutesValue < 60) {
+    if (differenceInMinutesValue === 0) {
+      return 'just now';
+    }
+
+    return `${formatPlural(differenceInMinutesValue, 'minute')} ago`;
+  }
+
+  const differenceInHoursValue = differenceInHours(currentTime, lastUpdatedTime);
+
+  if (differenceInHoursValue < 24) {
+    return `${formatPlural(differenceInHoursValue, 'hour')} ago`;
+  }
+
+  const differenceInDaysValue = differenceInDays(currentTime, lastUpdatedTime);
+  const differenceInMonthsValue = differenceInMonths(currentTime, lastUpdatedTime);
+
+  // Show days if less than 30 days OR if months calculation returns 0
+  // (handles edge case at month boundary when time of day hasn't passed)
+  if (differenceInDaysValue < 30 || differenceInMonthsValue === 0) {
+    return `${formatPlural(differenceInDaysValue, 'day')} ago`;
+  }
+
+  return `${formatPlural(differenceInMonthsValue, 'month')} ago`;
 };

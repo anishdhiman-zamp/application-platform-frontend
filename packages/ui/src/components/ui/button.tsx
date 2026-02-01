@@ -17,11 +17,12 @@ import {
 } from 'react';
 
 const buttonVariants = cva(
-  'cursor-pointer inline-flex items-center justify-center whitespace-nowrap rounded-md text-sm font-medium ring-offset-background transition-colors focus-visible:outline-hidden focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed [&_svg]:pointer-events-none [&_svg]:shrink-0',
+  'cursor-pointer  inline-flex items-center justify-center whitespace-nowrap rounded-md text-sm font-medium ring-offset-background transition-colors focus-visible:outline-hidden focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 [&_svg]:pointer-events-none [&_svg]:shrink-0 ',
   {
     variants: {
       variant: {
-        default: 'bg-primary text-secondary hover:bg-primary/90 active:bg-GRAY_950 disabled:text-GRAY_700',
+        default:
+          'bg-primary text-secondary hover:bg-primary/90 active:bg-GRAY_950 disabled:bg-GRAY_100 disabled:text-GRAY_700 disabled:cursor-not-allowed ',
         destructive: 'bg-destructive text-destructive-foreground hover:bg-destructive/90 ',
         outline:
           'border border-input bg-background hover:bg-accent hover:text-accent-foreground disabled:bg-GRAY_100 disabled:text-GRAY_700',
@@ -79,10 +80,9 @@ export interface ButtonProps extends ButtonHTMLAttributes<HTMLButtonElement>, Va
   testId?: string;
 }
 
-function useDebounce<T extends (...args: Parameters<T>) => void>(
-  callback: T,
-  delay: number,
-): (...args: Parameters<T>) => void {
+/* eslint-disable no-unused-vars */
+function useDebounce<T extends (...args: any[]) => void>(callback: T, delay: number): (...args: Parameters<T>) => void {
+  /* eslint-enable no-unused-vars */
   const timeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   const callbackRef = useRef(callback);
 
@@ -204,11 +204,11 @@ function Button({
       ref={buttonRef}
       className={cn(
         buttonVariants({ variant, size, className }),
-        isLoading && 'cursor-not-allowed opacity-70',
+        isLoading && '!bg-primary/90 cursor-not-allowed',
         (leadingIcon || trailingIcon) && 'gap-1.5',
       )}
       style={{ minWidth: minWidth ? `${minWidth}px` : undefined, ...style }}
-      disabled={isLoading || disabled}
+      disabled={disabled || isLoading}
       onClick={handleClick}
       data-testid={testId ? `btn-${testId}` : undefined}
       {...props}

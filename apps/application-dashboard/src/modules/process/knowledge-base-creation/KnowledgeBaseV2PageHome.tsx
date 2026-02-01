@@ -2,17 +2,14 @@
 
 import { FC, useCallback, useEffect, useMemo, useState } from 'react';
 import dynamic from 'next/dynamic';
-import { useGetProcessesQuery } from '@/apis/pages';
 import ImageLoader from '@/components/common/loader/ImageLoader';
 import CommonWrapper from '@/components/commonWrapper';
 import { SkeletonTypes } from '@/components/commonWrapper/commonWrapper.types';
 import { FEATURE_FLAGS } from '@/constants/featureFlags';
 import { ZAMP_LOGO_LOADER_SVG } from '@/constants/icons';
-import { useAppDispatch } from '@/hooks/toolkit';
 import { useFeatureFlags } from '@/hooks/useFeatureFlags';
+import { usePagesAndProcessesData } from '@/hooks/usePagesAndProcessesData';
 import MarkdownSkeleton from '@/modules/process/knowledge-base-creation/components/MarkdownSkeleton';
-import { closeSidebar, openSidebar } from '@/store/slices/layout-configs';
-import { ProcessStatus } from '@/types/api/processApi.types';
 import { cn } from '@/utils/common';
 
 // Dynamic imports for heavy components - not needed for initial paint
@@ -35,31 +32,17 @@ interface KnowledgeBaseV2PageHomeProps {
 }
 
 const KnowledgeBaseV2PageHome: FC<KnowledgeBaseV2PageHomeProps> = ({ processId, conversationId }) => {
-  const dispatch = useAppDispatch();
   const { evaluate, ldClient } = useFeatureFlags();
   const [isChatbotExpanded, setIsChatbotExpanded] = useState(false);
   const [defaultMessage, setDefaultMessage] = useState<string | undefined>(undefined);
   const [isSopCreationEnabled, setIsSopCreationEnabled] = useState<boolean>(false);
 
-  const { data: processes, isLoading: isLoadingProcesses } = useGetProcessesQuery(undefined, {
-    refetchOnMountOrArgChange: false,
-  });
+  const { processes, isLoadingProcesses } = usePagesAndProcessesData();
 
-  const currentProcess = useMemo(() => processes?.find((process) => process.id === processId), [processes, processId]);
-  const disableChat = useMemo(
-    () => ![ProcessStatus.DRAFT, ProcessStatus.LIVE].includes(currentProcess?.status as ProcessStatus),
-    [currentProcess],
+  const currentProcess = useMemo(
+    () => processes?.find((process) => process?.process_id === processId),
+    [processes, processId],
   );
-
-  useEffect(() => {
-    setTimeout(() => {
-      dispatch(closeSidebar());
-    }, 300);
-
-    return () => {
-      dispatch(openSidebar());
-    };
-  }, [dispatch]);
 
   const handleChatSubmit = useCallback((message: string) => {
     if (message?.trim()) {
@@ -110,7 +93,6 @@ const KnowledgeBaseV2PageHome: FC<KnowledgeBaseV2PageHomeProps> = ({ processId, 
               status={currentProcess?.status}
               defaultMessage={defaultMessage}
               onNewConversation={() => setDefaultMessage(undefined)}
-              isDisabled={disableChat}
             />
           </div>
         </div>
@@ -120,7 +102,6 @@ const KnowledgeBaseV2PageHome: FC<KnowledgeBaseV2PageHomeProps> = ({ processId, 
             isChatbotExpanded={isChatbotExpanded || !!conversationId}
             processId={processId}
             processName={currentProcess?.display_name ?? ''}
-            isDisabled={disableChat}
           />
         </div>
       </div>

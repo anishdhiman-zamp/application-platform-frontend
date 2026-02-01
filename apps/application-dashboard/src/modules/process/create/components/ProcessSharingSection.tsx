@@ -25,6 +25,7 @@ type CombinedOptionListDataType = {
   type?: string;
   color?: string;
   team_id?: string;
+  resource_audience_id?: string;
 };
 
 const ProcessSharingSection: FC<ProcessSharingSectionProps> = ({
@@ -73,6 +74,7 @@ const ProcessSharingSection: FC<ProcessSharingSectionProps> = ({
             label: audience?.user?.name ?? getUserNameFromEmail(audience?.user?.email ?? '') ?? '',
             value: audience?.user?.email ?? '',
             type: ResourceAudienceType.USER,
+            resource_audience_id: audience?.resource_audience_id,
           });
         });
     }

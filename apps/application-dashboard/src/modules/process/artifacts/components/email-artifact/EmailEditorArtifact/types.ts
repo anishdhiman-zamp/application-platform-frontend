@@ -9,6 +9,7 @@ export type ToolbarConfig = {
   showDivider?: boolean;
   component?: React.ReactNode;
   tooltipBody?: string;
+  iconSize?: number;
 };
 
 export enum SENDER_HEADING_VALUES {

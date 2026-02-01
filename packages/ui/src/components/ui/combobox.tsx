@@ -34,6 +34,7 @@ interface BaseComboboxProps {
   disableSelectedOptions?: boolean;
   selectedValues?: Array<ComboboxOption['value']>;
   tooltipBody?: string;
+  hideSearch?: boolean;
 }
 
 interface SingleSelectComboboxProps extends BaseComboboxProps {
@@ -77,6 +78,7 @@ export function Combobox({
   isAnchorPointNeeded = false,
   disableSelectedOptions = false,
   tooltipBody,
+  hideSearch = false,
 }: ComboboxProps) {
   // Force portal usage for Safari to avoid transform context issues
   const shouldUsePortal = React.useMemo(() => {
@@ -152,8 +154,10 @@ export function Combobox({
             e.preventDefault();
           }}
         >
-          <Command shouldFilter={true}>
-            <CommandInput placeholder={searchPlaceholder} className={cn('h-9', inputClassName)} autoFocus />
+          <Command shouldFilter={!hideSearch}>
+            {!hideSearch && (
+              <CommandInput placeholder={searchPlaceholder} className={cn('h-9', inputClassName)} autoFocus />
+            )}
             <CommandList className={cn('', listClassName)}>
               {!optionsLoading && <CommandEmpty>{emptyText}</CommandEmpty>}
               <CommandGroup

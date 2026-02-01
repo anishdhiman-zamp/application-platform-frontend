@@ -1,0 +1,9 @@
+{
+  "$schema": "https://json.schemastore.org/tsconfig",
+  "extends": "@zamp-platform/config/tsconfig.json",
+  "compilerOptions": {
+    "types": ["jest", "node"]
+  },
+  "include": ["**/*.ts", "**/*.tsx"],
+  "exclude": ["node_modules", "dist"]
+}

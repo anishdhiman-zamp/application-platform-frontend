@@ -139,6 +139,13 @@ export const TEAM_OPTIONS_LIST = [
     color: COLORS.RED_250,
   },
 ];
+/**
+ * Prefix for new columns created in the frontend (not yet saved to backend)
+ */
+export const enum NEW_COLUMN_PREFIX {
+  COL_ = 'col_',
+}
+
 export const DatasetActionMessages = {
   [DATASET_ACTION_TYPE.TAGGING]: TaggingMessages,
   [DATASET_ACTION_TYPE.RULE_DELETION]: RuleDeletionMessages,

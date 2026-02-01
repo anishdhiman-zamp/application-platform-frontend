@@ -1,0 +1,39 @@
+{
+  "name": "@zamp-platform/dataset-create-edit",
+  "version": "0.0.0",
+  "private": true,
+  "type": "module",
+  "exports": {
+    ".": "./index.ts",
+    "./components/*": "./components/*.tsx",
+    "./context/*": "./context/*.tsx",
+    "./hooks/*": "./hooks/*.ts",
+    "./utils/*": "./utils/*.ts",
+    "./constants": "./constants/index.ts"
+  },
+  "dependencies": {
+    "@dnd-kit/core": "^6.0.8",
+    "@dnd-kit/sortable": "^7.0.2",
+    "@dnd-kit/utilities": "^3.2.1",
+    "@zamp-platform/ui": "*",
+    "framer-motion": "^11.0.0",
+    "lucide-react": "^0.469.0"
+  },
+  "devDependencies": {
+    "typescript": "^5.6.3"
+  },
+  "peerDependencies": {
+    "ag-grid-community": ">=30.0.0",
+    "ag-grid-react": ">=30.0.0",
+    "react": ">=18.0.0",
+    "react-dom": ">=18.0.0"
+  },
+  "peerDependenciesMeta": {
+    "ag-grid-community": {
+      "optional": true
+    },
+    "ag-grid-react": {
+      "optional": true
+    }
+  }
+}

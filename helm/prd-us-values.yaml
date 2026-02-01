@@ -51,12 +51,30 @@ deployment:
       create: true
       annotations:
         eks.amazonaws.com/role-arn: arn:aws:iam::916079538338:role/zamp-prd-us-application-platform-frontend-irsa-access-role
+    terminationGracePeriodSeconds: 140
     containers:
       - name: "svc"
         port: 3000
         env:
           NODE_ENV: "production"
           NEXT_PUBLIC_ENVIRONMENT: "production"
+        healthcheck:
+          enabled: true
+          livenessProbe:
+            path: "/api/health-check"
+            initialDelaySeconds: 40
+            periodSeconds: 30
+          readinessProbe:
+            path: "/api/health-check"
+            initialDelaySeconds: 30
+            periodSeconds: 30
+        lifecycle:
+          preStop:
+            exec:
+              command:
+                - /bin/sh
+                - -c
+                - sleep 120
     autoscaling:
       enabled: true
       minReplicas: 3 # Increased for US scale

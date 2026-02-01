@@ -82,6 +82,14 @@ export const getFilterValueForKey = (
 
     case FILTER_TYPES.ARRAY_SEARCH: {
       const filter = selectedFilters[key];
+
+      if (!filter) {
+        return {
+          ...config,
+          title: '',
+        };
+      }
+
       const operatorLabel = SEARCH_FILTER_OPTIONS.find((option) => option.value === filter?.type)?.label ?? '';
 
       const count = filter?.descriptionTags?.length;
@@ -91,10 +99,6 @@ export const getFilterValueForKey = (
         title = `${filter?.descriptionTags[0]?.label} ${`+${count - 1}`}`;
       } else {
         title = filter?.value;
-      }
-
-      if (!filter) {
-        title = '';
       }
 
       return {
@@ -128,12 +132,16 @@ export const getFilterValueForKey = (
 
     case FILTER_TYPES.SEARCH: {
       const filter = selectedFilters[key];
-      const operatorLabel = SEARCH_FILTER_OPTIONS.find((option) => option.value === filter?.type)?.label ?? '';
-      let title = filter?.filter ? `${operatorLabel} ${filter?.filter}` : '';
 
       if (!filter) {
-        title = '';
+        return {
+          ...config,
+          title: '',
+        };
       }
+
+      const operatorLabel = SEARCH_FILTER_OPTIONS.find((option) => option.value === filter?.type)?.label ?? '';
+      const title = filter?.filter ? `${operatorLabel} ${filter?.filter}` : '';
 
       return {
         ...config,
@@ -168,12 +176,16 @@ export const getFilterValueForKey = (
 
     case FILTER_TYPES.DOCUMENT: {
       const filter = selectedFilters[key];
-      const operatorLabel = DOCUMENT_SEARCH_FILTER_OPTIONS.find((option) => option.value === filter?.type)?.label ?? '';
-      let title = filter?.filter ? `${operatorLabel} ${filter?.filter}` : '';
 
       if (!filter) {
-        title = '';
+        return {
+          ...config,
+          title: '',
+        };
       }
+
+      const operatorLabel = DOCUMENT_SEARCH_FILTER_OPTIONS.find((option) => option.value === filter?.type)?.label ?? '';
+      const title = filter?.filter ? `${operatorLabel} ${filter?.filter}` : '';
 
       return {
         ...config,

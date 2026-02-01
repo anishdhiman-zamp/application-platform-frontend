@@ -1,6 +1,6 @@
 'use client';
 
-import { memo } from 'react';
+import { memo, Suspense } from 'react';
 import { ZAMP_ICON } from 'constants/icons';
 import { ROUTES_PATH } from 'constants/routeConfig';
 import { AnimatePresence, motion } from 'framer-motion';
@@ -15,9 +15,21 @@ import FlexAlignRight from '@/assets/Icons/FlexAlignRight';
 import { COLORS } from '@/constants/colors';
 import { SETTINGS_ID } from '@/constants/sidebar.constants';
 import { useFilteredSidebarItems } from '@/hooks/useFilteredSidebarItems';
+import useGlobalShortcuts from '@/hooks/useGlobalShortcuts';
 import OrgSwitcher from 'components/layouts/dashboard-layout/components/OrgSwitcher';
 import SidebarTab from 'components/layouts/dashboard-layout/components/SidebarTab';
 import SidebarDynamicNavItems from 'components/layouts/dashboard-layout/sidebar/SidebarDynamicNavItems';
+
+/**
+ * Component that initializes global keyboard shortcuts.
+ * Wrapped in Suspense because useGlobalShortcuts depends on useLogout,
+ * which uses useSearchParams() that requires a Suspense boundary.
+ */
+const GlobalShortcuts = () => {
+  useGlobalShortcuts();
+
+  return null;
+};
 
 const Sidebar = () => {
   const { isSidebarOpen, lastVisitedSettingsRoute } = useAppSelector((state: RootState) => state.layoutConfig);
@@ -41,6 +53,10 @@ const Sidebar = () => {
 
   return (
     <>
+      {/* Global keyboard shortcuts - wrapped in Suspense for useSearchParams compatibility */}
+      <Suspense fallback={null}>
+        <GlobalShortcuts />
+      </Suspense>
       {/* Toggle button in top-left corner - only visible when sidebar is closed */}
       <AnimatePresence>
         {!isSidebarOpen && (
@@ -95,7 +111,7 @@ const Sidebar = () => {
             />
           </div>
         </div>
-        <div className='border-GRAY_400 border-b px-2 pb-4'>
+        <div className='border-GRAY_400 flex-shrink-0 border-b px-2 pb-4'>
           {sidebarItems.map((item) => {
             const itemPath = item.id === SETTINGS_ID ? lastVisitedSettingsRoute || ROUTES_PATH.SETTINGS : item.path;
 
@@ -112,9 +128,11 @@ const Sidebar = () => {
           })}
         </div>
 
-        <SidebarDynamicNavItems params={params} />
+        <div className='min-h-0 flex-1 overflow-y-auto [scrollbar-width:thin]'>
+          <SidebarDynamicNavItems params={params} />
+        </div>
 
-        <div className='mt-auto'>
+        <div className='mt-auto flex-shrink-0'>
           <OrgSwitcher isSidebarOpen={isSidebarOpen} />
         </div>
       </motion.aside>

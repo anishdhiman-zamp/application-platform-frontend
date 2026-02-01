@@ -4,13 +4,12 @@ import { SvgSpriteLoader } from '@zamp-platform/ui/assets';
 import { ICON_SPRITE_TYPES } from '@zamp-platform/ui/types';
 import { ERROR_BUTTON_TEXT } from 'constants/auth.constants';
 import { COLORS } from 'constants/colors';
-import { defaultFn } from 'types/commonTypes';
 import { cn } from 'utils/common';
 import { ErrorCardPropTypes, ErrorCardTypes } from 'components/commonWrapper/commonWrapper.types';
 
 const ErrorCard: FC<ErrorCardPropTypes> = ({
   className,
-  onClose = defaultFn,
+  onClose,
   type = ErrorCardTypes.GENERAL_API_FAIL,
   isLoading = false,
   height,
@@ -56,16 +55,18 @@ const ErrorCard: FC<ErrorCardPropTypes> = ({
                     <span className='f-12-400'>{ERROR_BUTTON_TEXT.WIFI_ONLY}</span>
                   )}
                 </Button>
-                <Button
-                  variant='outline'
-                  isLoading={isLoading}
-                  size='small'
-                  onClick={onClose}
-                  testId={refetchButtonId}
-                  className='px-2.5 py-1.5'
-                >
-                  <span className='f-12-400'>Reload</span>
-                </Button>
+                {onClose && (
+                  <Button
+                    variant='outline'
+                    isLoading={isLoading}
+                    size='small'
+                    onClick={onClose}
+                    testId={refetchButtonId}
+                    className='px-2.5 py-1.5'
+                  >
+                    <span className='f-12-400'>Reload</span>
+                  </Button>
+                )}
               </div>
             </div>
             <div className='flex max-w-[182px] items-center justify-center text-center text-wrap'>
