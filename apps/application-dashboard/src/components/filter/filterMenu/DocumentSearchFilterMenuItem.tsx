@@ -1,6 +1,7 @@
 import { FC } from 'react';
 import { MapAny } from 'types/commonTypes';
 import { camelCaseToNormalText } from 'utils/common';
+import { FILTER_TYPES } from 'components/filter/filter.types';
 import SearchFilter from 'components/filter/filterMenu/components/SearchFilter';
 import { DOCUMENT_SEARCH_FILTER_OPTIONS } from 'components/filter/filters.constants';
 import { filtersContextActions, useFiltersContextStore } from 'components/filter/filters.context';
@@ -50,6 +51,7 @@ const DocumentSearchFilterMenuItem: FC<DocumentSearchFilterMenuItemType> = ({
       )}
       operatorOptions={DOCUMENT_SEARCH_FILTER_OPTIONS}
       onChange={setFilter}
+      filterType={FILTER_TYPES.DOCUMENT}
     />
   );
 };
