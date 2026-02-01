@@ -12,104 +12,104 @@ import {
 import { useElevenlabsConnection } from './useElevenlabsConnection';
 import { MicrophoneState } from './useMicrophoneRecorder';
 
-// Default ElevenLabs transcription settings
-export const defaultElevenLabsOptions: TranscriptionOptions = {
+export interface UseTranscriptionOptions {
+  adapter: TranscriptionAdapter;
+}
+
+const DEFAULT_OPTIONS: TranscriptionOptions = {
   modelId: 'scribe_v2_realtime',
   languageCode: 'en',
   includeTimestamps: false,
 };
 
-export interface UseTranscriptionOptions {
-  adapter: TranscriptionAdapter;
-}
+const noopGetToken = async () => '';
 
 /**
- * Hook to manage real-time audio transcription by coordinating microphone recording
- * and ElevenLabs WebSocket connection
+ * Hook to manage real-time audio transcription.
+ * Coordinates microphone recording and ElevenLabs WebSocket connection.
  */
 export const useTranscription = ({ adapter }: UseTranscriptionOptions): UseTranscriptionReturn => {
   const [isRecording, setIsRecording] = useState(false);
-  const [accumulatedTranscript, setAccumulatedTranscript] = useState('');
+  const [transcript, setTranscript] = useState('');
 
-  // Prevent concurrent start calls
-  const isStartingRef = useRef(false);
+  const stateRefs = useRef({
+    isStarting: false,
+    stopRequested: false,
+  });
 
-  // Accumulate committed transcripts from ElevenLabs
-  const onElevenLabsTranscript = useCallback((data: { text: string }) => {
+  const appendTranscript = useCallback((data: { text: string }) => {
     if (data.text) {
-      setAccumulatedTranscript((prev) => (prev ? `${prev} ${data.text}` : data.text));
+      setTranscript((prev) => (prev ? `${prev} ${data.text}` : data.text));
     }
   }, []);
-
-  // Create a no-op token getter as fallback
-  const noopGetToken = useCallback(async () => '', []);
 
   const {
     connectToElevenLabs,
     disconnectFromElevenLabs,
-    isConnected: elevenLabsIsConnected,
-    isCommitting: elevenLabsIsCommitting,
-    microphone: elevenLabsMicrophone,
-    microphoneState: elevenLabsMicrophoneState,
-    startRecording: startElevenLabsRecording,
-    stopRecording: stopElevenLabsRecording,
+    isConnected,
+    isCommitting,
+    microphone,
+    microphoneState,
+    startRecording: setupMicrophone,
+    stopRecording: cleanupMicrophone,
   } = useElevenlabsConnection({
-    onCommittedTranscript: onElevenLabsTranscript,
+    onCommittedTranscript: appendTranscript,
     isRecording,
     getToken: adapter.getElevenLabsToken || noopGetToken,
     onError: adapter.onError,
   });
 
-  const connectionState: SocketState = elevenLabsIsConnected ? SOCKET_STATES.open : SOCKET_STATES.closed;
-
-  // Initialize recording: establish connection and start recording
   const startRecording = useCallback(
     async (options: TranscriptionOptions = {}) => {
-      if (isStartingRef.current || isRecording) return;
+      if (stateRefs.current.isStarting || isRecording) return;
 
-      isStartingRef.current = true;
+      stateRefs.current.isStarting = true;
+      stateRefs.current.stopRequested = false;
       setIsRecording(true);
-      setAccumulatedTranscript('');
+      setTranscript('');
 
       try {
-        await startElevenLabsRecording();
-        await connectToElevenLabs({
-          ...defaultElevenLabsOptions,
-          ...options,
-        });
+        await setupMicrophone();
+
+        if (stateRefs.current.stopRequested) {
+          setIsRecording(false);
+          stateRefs.current.isStarting = false;
+          return;
+        }
+
+        await connectToElevenLabs({ ...DEFAULT_OPTIONS, ...options });
       } catch {
         setIsRecording(false);
       } finally {
-        isStartingRef.current = false;
+        stateRefs.current.isStarting = false;
       }
     },
-    [isRecording, connectToElevenLabs, startElevenLabsRecording],
+    [isRecording, connectToElevenLabs, setupMicrophone],
   );
 
   const stopRecording = useCallback(async () => {
+    stateRefs.current.stopRequested = true;
+    stateRefs.current.isStarting = false;
     setIsRecording(false);
-    isStartingRef.current = false;
 
     try {
-      stopElevenLabsRecording();
+      cleanupMicrophone();
       await disconnectFromElevenLabs();
-    } catch (error) {
-      adapter.onError?.(error);
-      throw error;
+    } catch {
+      // Expected when cancelling in-progress connection
     }
-  }, [stopElevenLabsRecording, disconnectFromElevenLabs, adapter]);
+  }, [cleanupMicrophone, disconnectFromElevenLabs]);
 
-  const microphone = elevenLabsMicrophone;
-  const microphoneState: MicrophoneState | null = elevenLabsMicrophoneState;
+  const connectionState: SocketState = isConnected ? SOCKET_STATES.open : SOCKET_STATES.closed;
 
   return {
-    transcript: accumulatedTranscript,
+    transcript,
     isRecording,
     startRecording,
     stopRecording,
     microphone,
-    microphoneState,
+    microphoneState: microphoneState as MicrophoneState | null,
     connectionState,
-    isCommitting: elevenLabsIsCommitting,
+    isCommitting,
   };
 };
