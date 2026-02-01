@@ -38,6 +38,7 @@ interface MessageContainerProps {
   hideSenderName?: boolean;
   userAvatarClassName?: string;
   children?: ReactNode;
+  organizationId?: string;
 }
 
 export const MessageContainer: FC<MessageContainerProps> = ({
@@ -56,6 +57,7 @@ export const MessageContainer: FC<MessageContainerProps> = ({
   hideSenderName = false,
   userAvatarClassName,
   children,
+  organizationId,
 }) => {
   const defaultAssistantAvatar = assistantAvatar ?? <PaceAvatar />;
   const isInitialScrollRef = useRef(true);
@@ -104,6 +106,7 @@ export const MessageContainer: FC<MessageContainerProps> = ({
           feedbackDisabled={feedbackDisabled}
           showCopy={showCopy}
           isLastMessage={index === messages.length - 1}
+          organizationId={organizationId}
         />
       ))}
 

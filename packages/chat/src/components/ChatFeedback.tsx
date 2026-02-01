@@ -16,16 +16,22 @@ import {
   TooltipTrigger,
 } from '@zamp-platform/ui';
 import { cn } from '@zamp-platform/ui/utils';
-import { ThumbsDown } from 'lucide-react';
+import { Loader2, ThumbsDown, Upload } from 'lucide-react';
 import { FC, useState } from 'react';
 import { toast } from 'sonner';
 
+import { INPUT_FILE_FORMATS } from '@/types/common/mime';
+
 import { useSubmitChatFeedbackMutation } from '../api';
+import { useFileUpload } from '../hooks/useFileUpload';
 import { ChatFeedbackCategory } from '../types/chat.types';
+import { AttachmentsList } from './blocks';
+import { FileMimeType } from './chat.constants';
 
 export interface ChatFeedbackProps {
   messageId?: string;
   conversationId?: string;
+  organizationId?: string;
   className?: string;
   disabled?: boolean;
 }
@@ -42,13 +48,43 @@ const ISSUE_TYPE_OPTIONS = [
   { label: 'Other', value: 'OTHER' },
 ];
 
-const ChatFeedback: FC<ChatFeedbackProps> = ({ messageId, conversationId, className, disabled = false }) => {
+const MAX_FILES = 5;
+const MAX_FILE_SIZE_MB = 25;
+const MAX_FILE_SIZE_BYTES = MAX_FILE_SIZE_MB * 1024 * 1024;
+const ACCEPTED_FILE_TYPES = `${INPUT_FILE_FORMATS.JPEG},${INPUT_FILE_FORMATS.JPG},${INPUT_FILE_FORMATS.PNG},${INPUT_FILE_FORMATS.BMP}`;
+
+const ChatFeedback: FC<ChatFeedbackProps> = ({
+  messageId,
+  conversationId,
+  organizationId,
+  className,
+  disabled = false,
+}) => {
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [issueType, setIssueType] = useState<string>('');
   const [details, setDetails] = useState('');
   const [feedbackGiven, setFeedbackGiven] = useState(false);
 
   const [submitChatFeedback, { isLoading: isSubmitting }] = useSubmitChatFeedbackMutation();
+
+  const {
+    files: attachments,
+    isUploading,
+    isDragOver,
+    fileInputRef,
+    dropZoneProps,
+    handleFileInputChange,
+    openFilePicker,
+    removeFile,
+    clearFiles,
+    canAddMoreFiles,
+  } = useFileUpload({
+    organizationId,
+    maxFiles: MAX_FILES,
+    maxFileSizeBytes: MAX_FILE_SIZE_BYTES,
+    acceptedMimeTypes: ACCEPTED_FILE_TYPES,
+    getMimeType: (fileType: string) => FileMimeType[fileType] ?? fileType,
+  });
 
   const isFormValid = issueType && details.trim();
 
@@ -61,12 +97,15 @@ const ChatFeedback: FC<ChatFeedbackProps> = ({ messageId, conversationId, classN
     if (!isFormValid || isSubmitting || !conversationId || !messageId) return;
 
     try {
+      const fileUploadIds = attachments.length > 0 ? attachments.map((a) => a.file_id) : undefined;
+
       await submitChatFeedback({
         conversationId,
         messageId,
         body: {
           category: issueType as ChatFeedbackCategory,
           description: details.trim(),
+          file_upload_ids: fileUploadIds,
         },
       }).unwrap();
 
@@ -86,6 +125,7 @@ const ChatFeedback: FC<ChatFeedbackProps> = ({ messageId, conversationId, classN
   const resetForm = () => {
     setIssueType('');
     setDetails('');
+    clearFiles();
   };
 
   return (
@@ -119,7 +159,7 @@ const ChatFeedback: FC<ChatFeedbackProps> = ({ messageId, conversationId, classN
       <Dialog open={isModalOpen} onOpenChange={setIsModalOpen}>
         <DialogContent
           size='small'
-          className='max-h-[90vh] w-[450px] gap-y-4 rounded-[14px]'
+          className='max-h-[90vh] w-[550px] gap-y-4 rounded-[14px]'
           title='Feedback'
           description='Submit feedback about this response'
           showCloseButton
@@ -153,6 +193,52 @@ const ChatFeedback: FC<ChatFeedbackProps> = ({ messageId, conversationId, classN
                 className='border-GRAY_400 f-12-450 placeholder:text-GRAY_500 resize-none bg-white'
               />
             </div>
+
+            {/* File Upload Section */}
+            {organizationId && (
+              <div className='space-y-2'>
+                <label className='text-GRAY_900 f-12-500 block'>Supporting documents (optional)</label>
+
+                {/* Hidden file input */}
+                <input
+                  ref={fileInputRef}
+                  type='file'
+                  multiple
+                  accept={ACCEPTED_FILE_TYPES}
+                  onChange={handleFileInputChange}
+                  className='hidden'
+                  aria-label='Upload attachments'
+                />
+
+                {/* Drop zone */}
+                <div
+                  {...dropZoneProps}
+                  onClick={canAddMoreFiles && !isUploading ? openFilePicker : undefined}
+                  className={cn(
+                    'border-GRAY_400 flex min-h-[80px] cursor-pointer flex-col items-center justify-center rounded-lg border border-dashed p-3 transition-colors',
+                    isDragOver && 'border-PRIMARY_500 bg-PRIMARY_50',
+                    !canAddMoreFiles && 'cursor-not-allowed opacity-50',
+                    isUploading && 'cursor-wait',
+                  )}
+                >
+                  {isUploading ? (
+                    <div className='flex items-center'>
+                      <Loader2 size={16} className='text-GRAY_500 animate-spin' />
+                    </div>
+                  ) : (
+                    <>
+                      <Upload size={16} className='text-GRAY_500 mb-1' />
+                      <span className='text-GRAY_600 f-12-450 text-center'>
+                        {isDragOver ? 'Drop files here' : 'Drag & drop or click to upload'}
+                      </span>
+                    </>
+                  )}
+                </div>
+
+                {/* Attachments list */}
+                <AttachmentsList attachments={attachments} removeAttachment={removeFile} isLoading={isUploading} />
+              </div>
+            )}
           </DialogBody>
           <DialogFooter className='mt-2 flex justify-end gap-x-2.5 px-5 py-4'>
             <Button variant='secondary' size='medium' onClick={handleCancel}>
@@ -162,9 +248,8 @@ const ChatFeedback: FC<ChatFeedbackProps> = ({ messageId, conversationId, classN
               variant='default'
               size='medium'
               onClick={handleSubmit}
-              disabled={!isFormValid}
+              disabled={!isFormValid || isUploading}
               isLoading={isSubmitting}
-              className='disabled:text-white disabled:opacity-50'
             >
               Submit
             </Button>

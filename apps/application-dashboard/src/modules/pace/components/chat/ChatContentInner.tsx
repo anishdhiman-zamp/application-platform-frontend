@@ -126,6 +126,7 @@ const ChatContentInner = ({
               showCopy
               alignUserRight
               hideSenderName
+              organizationId={organizationId}
             />
             <div className='h-12 w-full bg-white' />
           </CommonWrapper>

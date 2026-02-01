@@ -13,6 +13,7 @@ export * from './src/hooks/useChatAdapters';
 export * from './src/hooks/useChatInput';
 export * from './src/hooks/useElevenlabsConnection';
 export * from './src/hooks/useFileDragDrop';
+export * from './src/hooks/useFileUpload';
 export * from './src/hooks/useMicrophoneRecorder';
 export * from './src/hooks/useTranscription';
 export * from './src/types/block.types';
