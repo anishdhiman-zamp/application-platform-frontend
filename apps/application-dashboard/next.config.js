@@ -5,18 +5,16 @@ const isDev = process.env.NODE_ENV === 'development';
 /** @type {import('next').NextConfig} */
 const nextConfig = {
   reactStrictMode: true,
+  reactCompiler: true,
   output: 'standalone',
   assetPrefix: process.env.NEXT_PUBLIC_ASSET_PREFIX || '',
-  // Skip type checking and linting ONLY in CI (they run separately there)
+  // Skip type checking ONLY in CI (they run separately there)
   // Enable them for local development for immediate feedback
   typescript: {
     ignoreBuildErrors: process.env.CI === 'true',
   },
-  eslint: {
-    ignoreDuringBuilds: process.env.CI === 'true',
-  },
+  // Note: eslint configuration moved to next lint CLI options in Next.js 16
   experimental: {
-    serverActions: {},
     // Optimize memory usage during builds and hot reload
     optimizePackageImports: [
       'lucide-react',
@@ -36,22 +34,6 @@ const nextConfig = {
   env: {
     NEXT_PUBLIC_ASSET_PREFIX: process.env.NEXT_PUBLIC_ASSET_PREFIX || '',
     NEXT_PUBLIC_IMAGEKIT_URL_ENDPOINT: process.env.NEXT_PUBLIC_IMAGEKIT_URL_ENDPOINT || '',
-  },
-  webpack: (config, { isServer }) => {
-    config.resolve.fallback = {
-      ...config.resolve.fallback,
-      fs: false,
-    };
-
-    // Optimize build performance and memory usage
-    if (!isServer) {
-      config.optimization = {
-        ...config.optimization,
-        moduleIds: 'deterministic',
-      };
-    }
-
-    return config;
   },
   transpilePackages: ['@zamp-platform/ui', '@zamp-platform/form-builder', '@zamp-platform/chat'],
   // Only enable source maps in production builds, not during development
@@ -139,17 +121,9 @@ module.exports = isDev
       widenClientFileUpload: true,
       urlPrefix: '~/_next/static/chunks/pages',
       rewrite: true,
-      // Automatically tree-shake Sentry logger statements to reduce bundle size
-      disableLogger: true,
       // Route browser requests to Sentry through a Next.js rewrite to circumvent ad-blockers.
       // This can increase your server load as well as your hosting bill.
       // Note: Check that the configured route will not match with your Next.js middleware, otherwise reporting of client-
       // side errors will fail.
       tunnelRoute: '/monitoring',
-
-      // Enables automatic instrumentation of Vercel Cron Monitors. (Does not yet work with App Router route handlers.)
-      // See the following for more information:
-      // https://docs.sentry.io/product/crons/
-      // https://vercel.com/docs/cron-jobs
-      automaticVercelMonitors: true,
     });
