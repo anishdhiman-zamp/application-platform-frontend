@@ -3,10 +3,12 @@ module.exports = {
   overrides: [
     ...(require('@zamp-platform/config/eslint.js').overrides || []),
     {
-      // Next.js generated files should not be linted for triple slash references
+      // Next.js generated files should not be linted
       files: ['next-env.d.ts'],
       rules: {
         '@typescript-eslint/triple-slash-reference': 'off',
+        'import/extensions': 'off',
+        'import/no-unresolved': 'off',
       },
     },
     {
