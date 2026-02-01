@@ -16,15 +16,19 @@ import {
   TooltipTrigger,
 } from '@zamp-platform/ui';
 import { cn } from '@zamp-platform/ui/utils';
-import { Loader2, ThumbsDown, Upload } from 'lucide-react';
-import { FC, useState } from 'react';
+import { Check, Loader, Mic, Paperclip, ThumbsDown, X } from 'lucide-react';
+import { FC, useCallback, useEffect, useMemo, useState } from 'react';
 import { toast } from 'sonner';
 
 import { INPUT_FILE_FORMATS } from '@/types/common/mime';
 
-import { useSubmitChatFeedbackMutation } from '../api';
+import { useLazyGetSpeechToTextAccessTokenQuery, useSubmitChatFeedbackMutation } from '../api';
 import { useFileUpload } from '../hooks/useFileUpload';
+import { MicrophoneState } from '../hooks/useMicrophoneRecorder';
+import { useTranscription } from '../hooks/useTranscription';
 import { ChatFeedbackCategory } from '../types/chat.types';
+import { SOCKET_STATES, TranscriptionAdapter } from '../types/transcription.types';
+import { AudioVisualizer } from './AudioVisualizer';
 import { AttachmentsList } from './blocks';
 import { FileMimeType } from './chat.constants';
 
@@ -34,6 +38,8 @@ export interface ChatFeedbackProps {
   organizationId?: string;
   className?: string;
   disabled?: boolean;
+  onMicrophoneError?: () => void;
+  onRecordingError?: () => void;
 }
 
 const ISSUE_TYPE_OPTIONS = [
@@ -59,6 +65,8 @@ const ChatFeedback: FC<ChatFeedbackProps> = ({
   organizationId,
   className,
   disabled = false,
+  onMicrophoneError,
+  onRecordingError,
 }) => {
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [issueType, setIssueType] = useState<string>('');
@@ -66,18 +74,44 @@ const ChatFeedback: FC<ChatFeedbackProps> = ({
   const [feedbackGiven, setFeedbackGiven] = useState(false);
 
   const [submitChatFeedback, { isLoading: isSubmitting }] = useSubmitChatFeedbackMutation();
+  const [getSpeechToTextAccessToken] = useLazyGetSpeechToTextAccessTokenQuery({});
+
+  const getElevenLabsToken = useCallback(async () => {
+    const result = await getSpeechToTextAccessToken({}).unwrap();
+    return result.access_token;
+  }, [getSpeechToTextAccessToken]);
+
+  const transcriptionAdapter: TranscriptionAdapter = useMemo(
+    () => ({
+      getElevenLabsToken,
+      onError: (error) => {
+        toast.error(`${error instanceof Error ? error.message : 'An error occurred'}`);
+      },
+    }),
+    [getElevenLabsToken],
+  );
+
+  const {
+    transcript,
+    isRecording,
+    startRecording,
+    stopRecording,
+    microphoneState,
+    connectionState,
+    microphone,
+    isCommitting,
+  } = useTranscription({
+    adapter: transcriptionAdapter,
+  });
 
   const {
     files: attachments,
     isUploading,
-    isDragOver,
     fileInputRef,
-    dropZoneProps,
     handleFileInputChange,
     openFilePicker,
     removeFile,
     clearFiles,
-    canAddMoreFiles,
   } = useFileUpload({
     organizationId,
     maxFiles: MAX_FILES,
@@ -85,6 +119,26 @@ const ChatFeedback: FC<ChatFeedbackProps> = ({
     acceptedMimeTypes: ACCEPTED_FILE_TYPES,
     getMimeType: (fileType: string) => FileMimeType[fileType] ?? fileType,
   });
+
+  const handleAttachClick = () => {
+    openFilePicker();
+  };
+
+  const shouldShowRecorder = useMemo(
+    () => isRecording && connectionState === SOCKET_STATES.open,
+    [isRecording, connectionState],
+  );
+  const isPreparingToRecord = useMemo(
+    () => isRecording && connectionState !== SOCKET_STATES.open,
+    [isRecording, connectionState],
+  );
+
+  // Append transcript to details when it changes
+  useEffect(() => {
+    if (transcript) {
+      setDetails((prev) => (prev ? `${prev} ${transcript}` : transcript));
+    }
+  }, [transcript]);
 
   const isFormValid = issueType && details.trim();
 
@@ -126,6 +180,37 @@ const ChatFeedback: FC<ChatFeedbackProps> = ({
     setIssueType('');
     setDetails('');
     clearFiles();
+    if (isRecording) {
+      stopRecording();
+    }
+  };
+
+  const handleStartRecording = async () => {
+    if (microphoneState === MicrophoneState.Error) {
+      onMicrophoneError?.();
+      toast.error('Microphone unavailable. Please check browser permissions and try again.');
+      return;
+    }
+
+    await startRecording();
+  };
+
+  const handleAcceptRecording = () => {
+    try {
+      stopRecording();
+    } catch {
+      toast.error('Failed to stop recording. Please try again.');
+      onRecordingError?.();
+    }
+  };
+
+  const handleRejectRecording = () => {
+    try {
+      stopRecording();
+    } catch {
+      toast.error('Failed to stop recording. Please try again.');
+      onRecordingError?.();
+    }
   };
 
   return (
@@ -185,21 +270,9 @@ const ChatFeedback: FC<ChatFeedbackProps> = ({
             </div>
             <div className='space-y-2'>
               <label className='text-GRAY_900 f-12-500 block'>Please provide details:</label>
-              <Textarea
-                placeholder='What was unsatisfying about this response?'
-                value={details}
-                rows={3}
-                onChange={(e) => setDetails(e.target.value)}
-                className='border-GRAY_400 f-12-450 placeholder:text-GRAY_500 resize-none bg-white'
-              />
-            </div>
 
-            {/* File Upload Section */}
-            {organizationId && (
-              <div className='space-y-2'>
-                <label className='text-GRAY_900 f-12-500 block'>Supporting documents (optional)</label>
-
-                {/* Hidden file input */}
+              {/* Hidden file input */}
+              {organizationId && (
                 <input
                   ref={fileInputRef}
                   type='file'
@@ -209,36 +282,94 @@ const ChatFeedback: FC<ChatFeedbackProps> = ({
                   className='hidden'
                   aria-label='Upload attachments'
                 />
+              )}
 
-                {/* Drop zone */}
-                <div
-                  {...dropZoneProps}
-                  onClick={canAddMoreFiles && !isUploading ? openFilePicker : undefined}
-                  className={cn(
-                    'border-GRAY_400 flex min-h-[80px] cursor-pointer flex-col items-center justify-center rounded-lg border border-dashed p-3 transition-colors',
-                    isDragOver && 'border-PRIMARY_500 bg-PRIMARY_50',
-                    !canAddMoreFiles && 'cursor-not-allowed opacity-50',
-                    isUploading && 'cursor-wait',
-                  )}
-                >
-                  {isUploading ? (
-                    <div className='flex items-center'>
-                      <Loader2 size={16} className='text-GRAY_500 animate-spin' />
+              <div
+                className={cn(
+                  'border-GRAY_400 focus-within:border-GRAY_600 relative w-full rounded-lg border bg-white transition-all',
+                  shouldShowRecorder && 'border-gray-400',
+                )}
+              >
+                {/* Attachments list above textarea */}
+                <AttachmentsList
+                  attachments={attachments}
+                  removeAttachment={removeFile}
+                  isLoading={isUploading}
+                  className='px-2.5 pt-2'
+                />
+
+                {shouldShowRecorder ? (
+                  <div className='flex w-full items-center justify-between gap-2 p-2.5'>
+                    <Button
+                      variant='ghost'
+                      size='icon'
+                      className='bg-GRAY_200 hover:bg-GRAY_200 !size-5 rounded-full [&_svg]:size-3'
+                      aria-label='Reject recording'
+                      onClick={handleRejectRecording}
+                    >
+                      <X className='text-GRAY_1000' />
+                    </Button>
+
+                    {/* Visualizer */}
+                    {microphone && <AudioVisualizer microphone={microphone} />}
+
+                    <Button
+                      size='icon'
+                      className='!size-5 rounded-full [&_svg]:size-3'
+                      aria-label='Accept recording'
+                      onClick={handleAcceptRecording}
+                      disabled={isCommitting}
+                      isLoading={isCommitting}
+                    >
+                      <Check className='text-white' />
+                    </Button>
+                  </div>
+                ) : (
+                  <div className='flex w-full flex-col pt-2.5'>
+                    <div className='px-2.5'>
+                      <Textarea
+                        placeholder='What was unsatisfying about this response?'
+                        value={details}
+                        rows={3}
+                        onChange={(e) => setDetails(e.target.value)}
+                        className='f-12-450 placeholder:text-GRAY_500 min-h-0 resize-none border-none bg-transparent p-0 shadow-none outline-none'
+                      />
                     </div>
-                  ) : (
-                    <>
-                      <Upload size={16} className='text-GRAY_500 mb-1' />
-                      <span className='text-GRAY_600 f-12-450 text-center'>
-                        {isDragOver ? 'Drop files here' : 'Drag & drop or click to upload'}
-                      </span>
-                    </>
-                  )}
-                </div>
-
-                {/* Attachments list */}
-                <AttachmentsList attachments={attachments} removeAttachment={removeFile} isLoading={isUploading} />
+                    <div className='flex items-center justify-between py-2.5 pr-2.5 pl-1.5'>
+                      {organizationId && (
+                        <Button
+                          variant='ghost'
+                          size='icon'
+                          className='hover:text-gray-1000 !size-5 rounded-[2px] p-[2px] text-gray-900 hover:bg-gray-100 [&_svg]:size-3'
+                          aria-label='Attach file'
+                          onClick={handleAttachClick}
+                          disabled={isUploading}
+                        >
+                          <Paperclip />
+                        </Button>
+                      )}
+                      {!organizationId && <div />}
+                      <div className='flex items-center gap-x-2'>
+                        {isPreparingToRecord ? (
+                          <Loader size={14} className='animate-spin text-gray-900' />
+                        ) : (
+                          <Button
+                            variant='ghost'
+                            size='icon'
+                            className='hover:text-gray-1000 !size-5 rounded-[2px] p-[2px] text-gray-900 hover:bg-gray-100 [&_svg]:size-3'
+                            aria-label='Start recording'
+                            onClick={handleStartRecording}
+                            disabled={microphoneState === MicrophoneState.SettingUp}
+                          >
+                            <Mic />
+                          </Button>
+                        )}
+                      </div>
+                    </div>
+                  </div>
+                )}
               </div>
-            )}
+            </div>
           </DialogBody>
           <DialogFooter className='mt-2 flex justify-end gap-x-2.5 px-5 py-4'>
             <Button variant='secondary' size='medium' onClick={handleCancel}>

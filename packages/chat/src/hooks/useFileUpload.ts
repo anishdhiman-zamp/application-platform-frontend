@@ -13,58 +13,38 @@ export interface UploadedFile {
 }
 
 export interface UseFileUploadOptions {
-  /** Organization ID required for file uploads */
   organizationId?: string;
-  /** Maximum number of files allowed */
   maxFiles?: number;
-  /** Maximum file size in bytes */
   maxFileSizeBytes?: number;
-  /** Accepted MIME types (e.g., 'image/*,video/*') */
   acceptedMimeTypes?: string;
-  /** Callback when files are successfully uploaded */
   onUploadSuccess?: (files: UploadedFile[]) => void;
-  /** Callback when file upload fails */
   onUploadError?: (error: unknown) => void;
-  /** Custom file type validator */
   validateFileType?: (file: File) => boolean;
-  /** Function to map MIME type to file extension for backend API */
   getMimeType?: (fileType: string) => string;
 }
 
 export interface UseFileUploadReturn {
-  /** Currently uploaded files */
   files: UploadedFile[];
-  /** Whether files are currently being uploaded */
   isUploading: boolean;
-  /** Whether drag is currently over the drop zone */
   isDragOver: boolean;
-  /** Reference to the file input element */
   fileInputRef: React.RefObject<HTMLInputElement | null>;
-  /** Props to spread on the drop zone element */
   dropZoneProps: {
     onDragEnter: (e: React.DragEvent) => void;
     onDragLeave: (e: React.DragEvent) => void;
     onDragOver: (e: React.DragEvent) => void;
     onDrop: (e: React.DragEvent) => void;
   };
-  /** Handle file selection from input or drop */
   handleFileSelect: (fileList: FileList | null) => Promise<void>;
-  /** Handle file input change event */
   handleFileInputChange: (e: React.ChangeEvent<HTMLInputElement>) => void;
-  /** Open file picker dialog */
   openFilePicker: () => void;
-  /** Remove a file by ID */
   removeFile: (fileId: string) => void;
-  /** Clear all files */
   clearFiles: () => void;
-  /** Check if more files can be added */
   canAddMoreFiles: boolean;
-  /** Number of remaining file slots */
   remainingSlots: number;
 }
 
 const DEFAULT_MAX_FILES = 5;
-const DEFAULT_MAX_FILE_SIZE_BYTES = 25 * 1024 * 1024; // 25MB
+const DEFAULT_MAX_FILE_SIZE_BYTES = 25 * 1024 * 1024;
 
 export const useFileUpload = ({
   organizationId,
@@ -88,17 +68,12 @@ export const useFileUpload = ({
 
   const maxFileSizeMB = Math.round(maxFileSizeBytes / (1024 * 1024));
 
-  /**
-   * Check if a file type is accepted based on MIME type patterns
-   */
   const isFileTypeAccepted = useCallback(
     (file: File): boolean => {
-      // Use custom validator if provided
       if (validateFileType) {
         return validateFileType(file);
       }
 
-      // If no accepted types specified, accept all
       if (!acceptedMimeTypes) return true;
 
       const mimeType = file.type.toLowerCase();
@@ -106,7 +81,6 @@ export const useFileUpload = ({
 
       return acceptedTypes.some((acceptedType) => {
         if (acceptedType.endsWith('/*')) {
-          // Wildcard match (e.g., 'image/*')
           const prefix = acceptedType.slice(0, -2);
           return mimeType.startsWith(prefix);
         }
@@ -116,9 +90,6 @@ export const useFileUpload = ({
     [acceptedMimeTypes, validateFileType],
   );
 
-  /**
-   * Validate files and return valid files with any errors
-   */
   const validateFiles = useCallback(
     (filesToValidate: File[]): { valid: File[]; errors: string[] } => {
       const valid: File[] = [];
@@ -147,14 +118,19 @@ export const useFileUpload = ({
     [files.length, maxFiles, maxFileSizeBytes, maxFileSizeMB, isFileTypeAccepted],
   );
 
-  /**
-   * Upload files to S3 via presigned URLs
-   */
   const uploadFiles = useCallback(
     async (filesToUpload: File[]) => {
       if (!organizationId || filesToUpload.length === 0) return;
 
+      // Optimistically add files with empty file_id to show loading state
+      const uploadingFiles: UploadedFile[] = filesToUpload.map((file) => ({
+        file_id: '',
+        file_name: file.name,
+        file_type: file.type,
+      }));
+
       setIsUploading(true);
+      setFiles((prev) => [...prev, ...uploadingFiles]);
 
       try {
         const dataTransfer = new DataTransfer();
@@ -169,6 +145,49 @@ export const useFileUpload = ({
           getMimeType,
         );
 
+        const failedFileNames = new Set(result.failed.map((f) => f.file.name));
+
+        setFiles((prev) => {
+          const tempEntriesMap = new Map<string, number>();
+          prev.forEach((item, index) => {
+            if (item.file_id === '' && !tempEntriesMap.has(item.file_name)) {
+              tempEntriesMap.set(item.file_name, index);
+            }
+          });
+
+          const updated = prev.filter((att) => {
+            if (att.file_id !== '') return true;
+            if (failedFileNames.has(att.file_name)) return false;
+            return true;
+          });
+
+          const updatedTempEntriesMap = new Map<string, number>();
+          updated.forEach((item, index) => {
+            if (item.file_id === '' && !updatedTempEntriesMap.has(item.file_name)) {
+              updatedTempEntriesMap.set(item.file_name, index);
+            }
+          });
+
+          result.successful.forEach((newAttachment) => {
+            const index = updatedTempEntriesMap.get(newAttachment.file_name);
+            if (index !== undefined) {
+              updated[index] = {
+                file_id: newAttachment.file_id,
+                file_name: newAttachment.file_name,
+                file_type: newAttachment.file_type,
+              };
+            } else {
+              updated.push({
+                file_id: newAttachment.file_id,
+                file_name: newAttachment.file_name,
+                file_type: newAttachment.file_type,
+              });
+            }
+          });
+
+          return updated;
+        });
+
         if (result.failed.length > 0) {
           result.failed.forEach(({ file }) => {
             toast.error(`Failed to upload ${file.name}`);
@@ -181,11 +200,10 @@ export const useFileUpload = ({
             file_name: uploaded.file_name,
             file_type: uploaded.file_type,
           }));
-
-          setFiles((prev) => [...prev, ...newFiles]);
           onUploadSuccess?.(newFiles);
         }
       } catch (error) {
+        setFiles((prev) => prev.filter((f) => f.file_id !== ''));
         toast.error('Failed to upload files');
         onUploadError?.(error);
       } finally {
@@ -195,9 +213,6 @@ export const useFileUpload = ({
     [organizationId, getSignedUrl, postFormsSignedUploadAck, onUploadSuccess, onUploadError, getMimeType],
   );
 
-  /**
-   * Handle file selection from input or drop
-   */
   const handleFileSelect = useCallback(
     async (fileList: FileList | null) => {
       if (!fileList || fileList.length === 0) return;
@@ -214,13 +229,9 @@ export const useFileUpload = ({
     [validateFiles, uploadFiles],
   );
 
-  /**
-   * Handle file input change event
-   */
   const handleFileInputChange = useCallback(
     (e: React.ChangeEvent<HTMLInputElement>) => {
       handleFileSelect(e.target.files);
-      // Reset the input so the same file can be selected again
       if (fileInputRef.current) {
         fileInputRef.current.value = '';
       }
@@ -228,28 +239,18 @@ export const useFileUpload = ({
     [handleFileSelect],
   );
 
-  /**
-   * Open file picker dialog
-   */
   const openFilePicker = useCallback(() => {
     fileInputRef.current?.click();
   }, []);
 
-  /**
-   * Remove a file by ID
-   */
-  const removeFile = useCallback((fileId: string) => {
-    setFiles((prev) => prev.filter((f) => f.file_id !== fileId));
+  const removeFile = useCallback((fileIdOrName: string) => {
+    setFiles((prev) => prev.filter((f) => f.file_id !== fileIdOrName && f.file_name !== fileIdOrName));
   }, []);
 
-  /**
-   * Clear all files
-   */
   const clearFiles = useCallback(() => {
     setFiles([]);
   }, []);
 
-  // Drag and drop handlers
   const handleDragEnter = useCallback((e: React.DragEvent) => {
     e.preventDefault();
     e.stopPropagation();
