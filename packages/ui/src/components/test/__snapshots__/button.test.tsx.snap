@@ -74,7 +74,7 @@ exports[`Button Component - Critical Variant Tests renders all variants with def
 
 exports[`Button Component - Critical Variant Tests renders all variants with default size correctly 3`] = `
 <button
-  class="cursor-pointer inline-flex items-center justify-center whitespace-nowrap rounded-md text-sm font-medium ring-offset-background transition-colors focus-visible:outline-hidden focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 [&_svg]:pointer-events-none [&_svg]:shrink-0 border border-input bg-background hover:bg-accent hover:text-accent-foreground disabled:bg-GRAY_100 disabled:text-GRAY_700 disabled:cursor-not-allowed h-10 py-3 px-4 f-14-500"
+  class="cursor-pointer inline-flex items-center justify-center whitespace-nowrap rounded-md text-sm font-medium ring-offset-background transition-colors focus-visible:outline-hidden focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 [&_svg]:pointer-events-none [&_svg]:shrink-0 border border-input bg-background hover:bg-accent hover:text-accent-foreground disabled:bg-GRAY_100 disabled:text-GRAY_700 h-10 py-3 px-4 f-14-500"
 >
   outline
 </button>
@@ -82,7 +82,7 @@ exports[`Button Component - Critical Variant Tests renders all variants with def
 
 exports[`Button Component - Critical Variant Tests renders all variants with default size correctly 4`] = `
 <button
-  class="cursor-pointer inline-flex items-center justify-center whitespace-nowrap rounded-md text-sm font-medium ring-offset-background transition-colors focus-visible:outline-hidden focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 [&_svg]:pointer-events-none [&_svg]:shrink-0 bg-transparent text-primary border border-gray-400 hover:bg-secondary/80 disabled:bg-GRAY_100 disabled:text-GRAY_700 disabled:!cursor-not-allowed h-10 py-3 px-4 f-14-500"
+  class="cursor-pointer inline-flex items-center justify-center whitespace-nowrap rounded-md text-sm font-medium ring-offset-background transition-colors focus-visible:outline-hidden focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 [&_svg]:pointer-events-none [&_svg]:shrink-0 bg-transparent text-primary border border-gray-400 hover:bg-secondary/80 disabled:bg-GRAY_100 disabled:text-GRAY_700 h-10 py-3 px-4 f-14-500"
 >
   secondary
 </button>
@@ -130,7 +130,7 @@ exports[`Button Component - Functional Tests matches snapshot for icon size 1`] 
 
 exports[`Button Component - Functional Tests matches snapshot for outline variant 1`] = `
 <button
-  class="cursor-pointer inline-flex items-center justify-center whitespace-nowrap rounded-md text-sm font-medium ring-offset-background transition-colors focus-visible:outline-hidden focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 [&_svg]:pointer-events-none [&_svg]:shrink-0 border border-input bg-background hover:bg-accent hover:text-accent-foreground disabled:bg-GRAY_100 disabled:text-GRAY_700 disabled:cursor-not-allowed h-10 py-3 px-4 f-14-500"
+  class="cursor-pointer inline-flex items-center justify-center whitespace-nowrap rounded-md text-sm font-medium ring-offset-background transition-colors focus-visible:outline-hidden focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 [&_svg]:pointer-events-none [&_svg]:shrink-0 border border-input bg-background hover:bg-accent hover:text-accent-foreground disabled:bg-GRAY_100 disabled:text-GRAY_700 h-10 py-3 px-4 f-14-500"
 >
   Outline
 </button>
