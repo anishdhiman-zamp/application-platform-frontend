@@ -11,7 +11,6 @@ export * from './src/components/StreamingMessage';
 export * from './src/hooks/useChat';
 export * from './src/hooks/useChatAdapters';
 export * from './src/hooks/useChatInput';
-export * from './src/hooks/useDeepgramConnection';
 export * from './src/hooks/useElevenlabsConnection';
 export * from './src/hooks/useFileDragDrop';
 export * from './src/hooks/useMicrophoneRecorder';

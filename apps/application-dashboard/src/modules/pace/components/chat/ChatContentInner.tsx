@@ -126,7 +126,6 @@ const ChatContentInner = ({
               showCopy
               alignUserRight
               hideSenderName
-              userAvatarClassName='h-6 min-h-6 w-6 min-w-6 f-11-500 rounded-[7.5px]'
             />
             <div className='h-12 w-full bg-white' />
           </CommonWrapper>
@@ -135,7 +134,7 @@ const ChatContentInner = ({
               onClick={handleScrollToBottomClick}
               variant='ghost'
               className={cn(
-                'bg-gray-1000 hover:bg-gray-1000 absolute bottom-27 left-1/2 h-6 w-6 -translate-x-1/2 !rounded-full p-3',
+                'bg-gray-1000 hover:bg-gray-1000 absolute -top-10 left-1/2 h-6 w-6 -translate-x-1/2 !rounded-full p-3',
                 'transition-all duration-200 ease-out',
                 showScrollButton ? 'translate-y-0 opacity-100' : 'pointer-events-none translate-y-2 opacity-0',
               )}

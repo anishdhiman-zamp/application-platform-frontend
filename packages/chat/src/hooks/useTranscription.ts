@@ -5,22 +5,12 @@ import { useCallback, useRef, useState } from 'react';
 import {
   SOCKET_STATES,
   SocketState,
-  SpeechToTextProvider,
   TranscriptionAdapter,
   TranscriptionOptions,
   UseTranscriptionReturn,
 } from '../types/transcription.types';
-import { DeepgramTranscriptionEvent, useDeepgramConnection } from './useDeepgramConnection';
 import { useElevenlabsConnection } from './useElevenlabsConnection';
 import { MicrophoneState } from './useMicrophoneRecorder';
-
-// Default Deepgram transcription settings
-export const defaultDeepgramOptions: TranscriptionOptions = {
-  model: 'nova-3',
-  language: 'en-US',
-  smart_format: true,
-  punctuation: true,
-};
 
 // Default ElevenLabs transcription settings
 export const defaultElevenLabsOptions: TranscriptionOptions = {
@@ -30,18 +20,14 @@ export const defaultElevenLabsOptions: TranscriptionOptions = {
 };
 
 export interface UseTranscriptionOptions {
-  provider?: SpeechToTextProvider;
   adapter: TranscriptionAdapter;
 }
 
 /**
  * Hook to manage real-time audio transcription by coordinating microphone recording
- * and provider-specific WebSocket connections
+ * and ElevenLabs WebSocket connection
  */
-export const useTranscription = ({
-  provider = SpeechToTextProvider.ELEVENLABS,
-  adapter,
-}: UseTranscriptionOptions): UseTranscriptionReturn => {
+export const useTranscription = ({ adapter }: UseTranscriptionOptions): UseTranscriptionReturn => {
   const [isRecording, setIsRecording] = useState(false);
   const [accumulatedTranscript, setAccumulatedTranscript] = useState('');
 
@@ -55,34 +41,8 @@ export const useTranscription = ({
     }
   }, []);
 
-  // Accumulate final transcription results from Deepgram
-  const onDeepgramTranscript = useCallback((data: DeepgramTranscriptionEvent) => {
-    const { is_final, speech_final } = data;
-    const text = data.channel?.alternatives[0]?.transcript?.trim();
-
-    if (text && is_final && speech_final) {
-      setAccumulatedTranscript((prev) => (prev ? `${prev} ${text}` : text));
-    }
-  }, []);
-
-  // Create a no-op token getter for disabled providers
+  // Create a no-op token getter as fallback
   const noopGetToken = useCallback(async () => '', []);
-
-  const {
-    connectToDeepgram,
-    disconnectFromDeepgram,
-    connectionState: deepgramConnectionState,
-    microphone: deepgramMicrophone,
-    microphoneState: deepgramMicrophoneState,
-    startRecording: startDeepgramRecording,
-    stopRecording: stopDeepgramRecording,
-  } = useDeepgramConnection({
-    skip: provider !== SpeechToTextProvider.DEEPGRAM,
-    onTranscript: onDeepgramTranscript,
-    isRecording,
-    getToken: adapter.getDeepgramToken || noopGetToken,
-    onError: adapter.onError,
-  });
 
   const {
     connectToElevenLabs,
@@ -100,13 +60,7 @@ export const useTranscription = ({
     onError: adapter.onError,
   });
 
-  // Determine connection state based on provider
-  const connectionState: SocketState =
-    provider === SpeechToTextProvider.DEEPGRAM
-      ? deepgramConnectionState
-      : elevenLabsIsConnected
-        ? SOCKET_STATES.open
-        : SOCKET_STATES.closed;
+  const connectionState: SocketState = elevenLabsIsConnected ? SOCKET_STATES.open : SOCKET_STATES.closed;
 
   // Initialize recording: establish connection and start recording
   const startRecording = useCallback(
@@ -118,23 +72,18 @@ export const useTranscription = ({
       setAccumulatedTranscript('');
 
       try {
-        if (provider === SpeechToTextProvider.DEEPGRAM) {
-          await startDeepgramRecording();
-          await connectToDeepgram({ ...defaultDeepgramOptions, ...options });
-        } else {
-          await startElevenLabsRecording();
-          await connectToElevenLabs({
-            ...defaultElevenLabsOptions,
-            ...options,
-          });
-        }
+        await startElevenLabsRecording();
+        await connectToElevenLabs({
+          ...defaultElevenLabsOptions,
+          ...options,
+        });
       } catch {
         setIsRecording(false);
       } finally {
         isStartingRef.current = false;
       }
     },
-    [isRecording, connectToDeepgram, connectToElevenLabs, provider, startDeepgramRecording, startElevenLabsRecording],
+    [isRecording, connectToElevenLabs, startElevenLabsRecording],
   );
 
   const stopRecording = useCallback(async () => {
@@ -142,30 +91,16 @@ export const useTranscription = ({
     isStartingRef.current = false;
 
     try {
-      if (provider === SpeechToTextProvider.DEEPGRAM) {
-        stopDeepgramRecording();
-        disconnectFromDeepgram();
-      } else {
-        stopElevenLabsRecording();
-        await disconnectFromElevenLabs();
-      }
+      stopElevenLabsRecording();
+      await disconnectFromElevenLabs();
     } catch (error) {
       adapter.onError?.(error);
       throw error;
     }
-  }, [
-    stopDeepgramRecording,
-    stopElevenLabsRecording,
-    disconnectFromDeepgram,
-    disconnectFromElevenLabs,
-    provider,
-    adapter,
-  ]);
+  }, [stopElevenLabsRecording, disconnectFromElevenLabs, adapter]);
 
-  // Determine microphone and microphoneState based on provider
-  const microphone = provider === SpeechToTextProvider.DEEPGRAM ? deepgramMicrophone : elevenLabsMicrophone;
-  const microphoneState: MicrophoneState | null =
-    provider === SpeechToTextProvider.DEEPGRAM ? deepgramMicrophoneState : elevenLabsMicrophoneState;
+  const microphone = elevenLabsMicrophone;
+  const microphoneState: MicrophoneState | null = elevenLabsMicrophoneState;
 
   return {
     transcript: accumulatedTranscript,
