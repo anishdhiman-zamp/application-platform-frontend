@@ -1,18 +1,16 @@
 'use client';
 
-import { FC, useEffect, useMemo, useState } from 'react';
-import { captureException } from '@sentry/browser';
+import { FC, useCallback, useEffect, useMemo, useState } from 'react';
 import { AnnotationType, ResourceType } from '@zamp-platform/chat';
-import { toast } from '@zamp-platform/ui';
 import MarkdownSkeleton from 'modules/process/knowledge-base-creation/components/MarkdownSkeleton';
 import dynamic from 'next/dynamic';
-import { useGetProcessesQuery } from '@/apis/pages';
-import { useLazyFilterConversationsQuery } from '@/apis/processes';
-import { KB_TOAST_MESSAGES } from '@/components/common/toast/toast.constants';
+import { useFilterConversationsQuery } from '@/apis/processes';
 import CommonWrapper from '@/components/commonWrapper';
 import { SkeletonTypes } from '@/components/commonWrapper/commonWrapper.types';
+import { usePagesAndProcessesData } from '@/hooks/usePagesAndProcessesData';
 import ChatMessagesSkeleton from '@/modules/pace/components/loaders/ChatMessagesSkeleton';
-import { FilterConversationsResponseType, ProcessStatus } from '@/types/api/processApi.types';
+import { ProcessResponseType, ProcessStatus } from '@/types/api/processApi.types';
+import { PROCESS_CREATED_EVENT, ProcessCreatedEventDetail } from '@/utils/events';
 
 // Dynamic imports for heavy components
 const KnowledgeBaseChat = dynamic(() => import('@/modules/process/knowledge-base-creation/KnowledgeBaseChat'), {
@@ -27,44 +25,111 @@ const ProcessCreationKnowledgeBase = dynamic(
 interface CreateKnowledgeBasePageHomeProps {
   processId: string;
   conversationId?: string;
+  source?: string;
 }
 
 const CreateKnowledgeBasePageHome: FC<CreateKnowledgeBasePageHomeProps> = ({
   processId,
   conversationId: initialConversationId,
+  source,
 }) => {
+  const isFromProcessCreation = source === 'process-creation';
+
   const [conversationId, setConversationId] = useState<string | undefined>(initialConversationId);
-  const [defaultMessage, setDefaultMessage] = useState<string>();
+  const [isCreated, setIsCreated] = useState(isFromProcessCreation);
+  const { processes, isLoading: isLoadingProcesses } = usePagesAndProcessesData();
 
-  const { data: processes, isLoading: isLoadingProcesses } = useGetProcessesQuery(undefined, {
-    refetchOnMountOrArgChange: false,
-  });
-  const [filterConversations, { isFetching: isLoadingFilterConversations, isUninitialized }] =
-    useLazyFilterConversationsQuery();
+  const skipFilterConversations = useMemo(() => {
+    return isFromProcessCreation;
+  }, []);
 
-  const currentProcess = useMemo(() => processes?.find((process) => process.id === processId), [processes, processId]);
+  const {
+    data: filterConversationsData,
+    isFetching: isLoadingFilterConversations,
+    refetch: refetchFilterConversations,
+  } = useFilterConversationsQuery(
+    {
+      resource_id: processId,
+      resource_type: ResourceType.PROCESS,
+      annotation_types: AnnotationType.PROCESS_SOP,
+    },
+    {
+      skip: !!initialConversationId || isCreated || skipFilterConversations,
+      refetchOnMountOrArgChange: false,
+    },
+  );
+
+  const currentProcess = useMemo(
+    () => processes?.find((process: ProcessResponseType) => process?.process_id === processId),
+    [processes, processId],
+  );
+
+  const handleProcessCreated = useCallback(
+    (event: CustomEvent<ProcessCreatedEventDetail>) => {
+      if (event.detail.processId === processId) {
+        setIsCreated(false);
+        // Remove only the source query param from URL
+        const url = new URL(window.location.href);
+
+        url.searchParams.delete('source');
+
+        // Update URL immediately using history API to avoid race conditions
+        const newUrl = `${url.pathname}${url.search}`;
+
+        window.history.replaceState(window.history.state, '', newUrl);
+      }
+    },
+    [processId, refetchFilterConversations, setIsCreated],
+  );
+
+  // Derive conversationId from fetched data
+  const fetchedConversationId = useMemo(
+    () => filterConversationsData?.conversations?.[0]?.id,
+    [filterConversationsData],
+  );
+
+  // Determine the default message when there are no existing conversations
+  const defaultMessage = useMemo(() => {
+    if (initialConversationId || fetchedConversationId) {
+      return undefined;
+    }
+    // Only show default message after query has completed (not fetching) and no conversations exist
+    if (
+      (!isLoadingFilterConversations &&
+        filterConversationsData &&
+        filterConversationsData.conversations?.length === 0) ||
+      (skipFilterConversations && !isCreated)
+    ) {
+      return `I want to automate ${currentProcess?.display_name}`;
+    }
+
+    return undefined;
+  }, [
+    initialConversationId,
+    fetchedConversationId,
+    isLoadingFilterConversations,
+    filterConversationsData,
+    currentProcess?.display_name,
+    skipFilterConversations,
+    isCreated,
+  ]);
+
+  // Update local conversationId when fetched data changes
+  useEffect(() => {
+    if (fetchedConversationId && !conversationId) {
+      setConversationId(fetchedConversationId);
+    }
+  }, [fetchedConversationId, conversationId]);
 
   useEffect(() => {
-    if (!conversationId) {
-      filterConversations({
-        resource_id: processId,
-        resource_type: ResourceType.PROCESS,
-        annotation_types: AnnotationType.PROCESS_SOP,
-      })
-        .unwrap()
-        .then((res: FilterConversationsResponseType) => {
-          if (res?.conversations?.length > 0) {
-            setConversationId(res?.conversations?.[0]?.id);
-          } else {
-            setDefaultMessage(`I want to automate ${currentProcess?.display_name}`);
-          }
-        })
-        .catch((err: unknown) => {
-          toast.error(KB_TOAST_MESSAGES.FAILED_CONVERSATION_CREATION);
-          captureException(err);
-        });
-    }
-  }, [processId, conversationId, currentProcess, filterConversations]);
+    if (!isFromProcessCreation) return;
+
+    window.addEventListener(PROCESS_CREATED_EVENT, handleProcessCreated as EventListener);
+
+    return () => {
+      window.removeEventListener(PROCESS_CREATED_EVENT, handleProcessCreated as EventListener);
+    };
+  }, [handleProcessCreated, isFromProcessCreation]);
 
   return (
     <CommonWrapper
@@ -75,16 +140,17 @@ const CreateKnowledgeBasePageHome: FC<CreateKnowledgeBasePageHomeProps> = ({
     >
       <div className='border-GRAY_400 h-full w-[444px] min-w-[444px] border-r'>
         <KnowledgeBaseChat
-          key={conversationId}
           setConversationId={setConversationId}
           conversationId={conversationId || ''}
           processId={processId}
           status={currentProcess?.status}
           isLoadingFilterConversations={
-            currentProcess?.status === ProcessStatus.DRAFT && (isLoadingFilterConversations || isUninitialized)
+            (currentProcess?.status === ProcessStatus.DRAFT && isLoadingFilterConversations) || isCreated
           }
           defaultMessage={defaultMessage}
-          isDisabled={currentProcess?.status !== ProcessStatus.DRAFT}
+          processName={currentProcess?.display_name ?? ''}
+          isDraftProcess={currentProcess?.status === ProcessStatus.DRAFT}
+          showDefaultMessage={skipFilterConversations}
         />
       </div>
       <div className='w-full'>

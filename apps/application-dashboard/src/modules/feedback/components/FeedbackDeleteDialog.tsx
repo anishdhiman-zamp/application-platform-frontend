@@ -10,7 +10,6 @@ import {
   DialogHeader,
   DialogHeaderTitle,
 } from '@zamp-platform/ui';
-import { findTimeDifference } from 'modules/data/data.utils';
 import { FEEDBACK_STATUS } from 'modules/feedback/feedback.constants';
 import { useDeleteConversationFeedbackMutation, useDeleteFeedbackMutation } from '@/apis/feedback';
 import { removeFeedbackItem, removeOpenFeedbackConversation } from '@/store/slices/feedback.slice';
@@ -82,7 +81,7 @@ const FeedbackDeleteDialog: FC<FeedbackDeleteDialogProps> = ({
       >
         <DialogHeader className='border-none'>
           <DialogHeaderTitle>
-            Are you sure you want to delete this {feedback.status === FEEDBACK_STATUS.DRAFT ? 'chat' : 'feedback'}?
+            Are you sure you want to delete this {feedback?.status === FEEDBACK_STATUS.DRAFT ? 'chat' : 'feedback'}?
           </DialogHeaderTitle>
         </DialogHeader>
         <DialogBody className='px-4 pb-4'>

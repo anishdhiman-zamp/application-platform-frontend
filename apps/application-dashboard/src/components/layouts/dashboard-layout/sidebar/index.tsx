@@ -111,7 +111,7 @@ const Sidebar = () => {
             />
           </div>
         </div>
-        <div className='border-GRAY_400 border-b px-2 pb-4'>
+        <div className='border-GRAY_400 flex-shrink-0 border-b px-2 pb-4'>
           {sidebarItems.map((item) => {
             const itemPath = item.id === SETTINGS_ID ? lastVisitedSettingsRoute || ROUTES_PATH.SETTINGS : item.path;
 
@@ -128,9 +128,11 @@ const Sidebar = () => {
           })}
         </div>
 
-        <SidebarDynamicNavItems params={params} />
+        <div className='min-h-0 flex-1 overflow-y-auto [scrollbar-width:thin]'>
+          <SidebarDynamicNavItems params={params} />
+        </div>
 
-        <div className='mt-auto'>
+        <div className='mt-auto flex-shrink-0'>
           <OrgSwitcher isSidebarOpen={isSidebarOpen} />
         </div>
       </motion.aside>

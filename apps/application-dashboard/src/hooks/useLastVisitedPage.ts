@@ -5,7 +5,7 @@ import { getPageRouteById, getProcessRouteById, ROUTES_PATH } from 'constants/ro
 import { usePathname, useRouter } from 'next/navigation';
 import { PageResponseType } from 'types/api/pagesApi.types';
 import { getFromLocalStorage, LOCAL_STORAGE_KEYS, removeFromLocalStorage, setToLocalStorage } from 'utils/localstorage';
-import type { ProcessesResponseType } from '@/types/api/processApi.types';
+import type { ProcessResponseType } from '@/types/api/processApi.types';
 
 const getLastVisitedPage = (): string => {
   return getFromLocalStorage(LOCAL_STORAGE_KEYS.LAST_VISITED_PAGE_ID) || '';
@@ -47,7 +47,7 @@ const clearLastVisited = () => {
 
 type PersistedPageNavigationProps = {
   pagesList?: PageResponseType[];
-  processesList?: ProcessesResponseType[];
+  processesList?: ProcessResponseType[];
 };
 
 export const usePersistedPageNavigation = ({ pagesList, processesList }: PersistedPageNavigationProps) => {
@@ -89,7 +89,7 @@ export const usePersistedPageNavigation = ({ pagesList, processesList }: Persist
       const lastVisitedProcessId = getLastVisitedProcess();
 
       if (lastVisitedProcessId) {
-        if (processesList?.find((process) => process?.id === lastVisitedProcessId)) {
+        if (processesList?.find((process) => process?.process_id === lastVisitedProcessId)) {
           router.push(getProcessRouteById(lastVisitedProcessId));
 
           return;
@@ -100,7 +100,7 @@ export const usePersistedPageNavigation = ({ pagesList, processesList }: Persist
 
       // if the user has no last visited page, navigate to the first page in the list if it exists
       if (processesList && processesList?.length > 0) {
-        router.push(getProcessRouteById(processesList[0].id));
+        router.push(getProcessRouteById(processesList[0].process_id));
       }
     }
   };

@@ -2,6 +2,7 @@
 
 import { createContext, ReactNode, useContext, useEffect } from 'react';
 import { useParams, usePathname, useRouter } from 'next/navigation';
+import { Process } from '@/app/(authenticated)/resources';
 import { ROUTES_PATH } from '@/constants/routeConfig';
 import { useAppSelector } from '@/hooks/toolkit';
 import { usePersistedPageNavigation } from '@/hooks/useLastVisitedPage';
@@ -16,6 +17,8 @@ interface PagesAndProcessesContextType {
   isLoadingProcesses: boolean;
   isSuccessPages: boolean;
   isSuccessProcesses: boolean;
+  updateProcess: (processId: string, data: Partial<Process>) => void;
+  deleteProcess: (processId: string) => void;
 }
 
 const PagesAndProcessesContext = createContext<PagesAndProcessesContextType | undefined>(undefined);
@@ -45,9 +48,17 @@ export function PagesAndProcessesProvider({ children }: PagesAndProcessesProvide
   const router = useRouter();
   const { isOrgSwitchIsInProgress } = useAppSelector((state) => state.user);
 
-  // Fetch data once at the provider level
-  const { pages, processes, isLoading, isLoadingPages, isLoadingProcesses, isSuccessPages, isSuccessProcesses } =
-    usePagesAndProcessesData();
+  const {
+    pages,
+    processes,
+    isLoading,
+    isLoadingPages,
+    isLoadingProcesses,
+    isSuccessPages,
+    isSuccessProcesses,
+    updateProcess,
+    deleteProcess,
+  } = usePagesAndProcessesData();
 
   // Get navigation functions
   const { pushToMostRelevantPage, pushToMostRelevantProcess } = usePersistedPageNavigation({
@@ -105,6 +116,8 @@ export function PagesAndProcessesProvider({ children }: PagesAndProcessesProvide
         isLoadingProcesses,
         isSuccessPages,
         isSuccessProcesses,
+        updateProcess,
+        deleteProcess,
       }}
     >
       {children}

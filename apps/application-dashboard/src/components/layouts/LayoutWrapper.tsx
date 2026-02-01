@@ -9,6 +9,7 @@ import { PagesAndProcessesProvider } from '@/contexts/PagesAndProcessesContext';
 import Sidebar from 'components/layouts/dashboard-layout/sidebar';
 import Topbar from 'components/layouts/dashboard-layout/topbar/TopBar';
 import LayoutChildren from 'components/layouts/LayoutChildren';
+import '@/app/(authenticated)/resources';
 
 interface LayoutWrapperProps {
   children: React.ReactNode;

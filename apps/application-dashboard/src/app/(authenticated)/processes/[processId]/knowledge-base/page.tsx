@@ -2,14 +2,15 @@ import KnowledgeBaseV2PageHome from '@/modules/process/knowledge-base-creation/K
 
 interface KnowledgeBasePageProps {
   params: Promise<{ processId: string }>;
-  searchParams: Promise<{ chatbot_conversation_id?: string }>;
+  searchParams?: Promise<{ chatbot_conversation_id?: string }>;
 }
 
 const KnowledgeBasePage = async ({ params, searchParams }: KnowledgeBasePageProps) => {
   const { processId } = await params;
-  const { chatbot_conversation_id } = await searchParams;
+  const resolvedSearchParams = await searchParams;
+  const conversationId = resolvedSearchParams?.chatbot_conversation_id ?? null;
 
-  return <KnowledgeBaseV2PageHome processId={processId} conversationId={chatbot_conversation_id ?? null} />;
+  return <KnowledgeBaseV2PageHome processId={processId} conversationId={conversationId} />;
 };
 
 export default KnowledgeBasePage;

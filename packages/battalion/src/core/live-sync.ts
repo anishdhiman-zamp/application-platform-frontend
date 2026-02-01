@@ -1,62 +1,19 @@
 import { QueryClient } from '@tanstack/react-query';
+import type { EVENT_TYPE, EventBusInterface, EventBusSubscription } from '@zamp-platform/utils';
 import { OPFSCache } from '@zamp-platform/utils';
 
 import {
   DEFAULT_PERSIST_CONFIG,
   LiveSyncConfig,
+  LiveSyncState,
   PersistConfig,
+  ResolvedPersistConfig,
   ResourceName,
   STORAGE_TYPE,
-  StorageType,
+  StorageAdapter,
+  StoredResourceData,
 } from '../types';
 import { getResourceRegistry } from './registry';
-
-/**
- * Live sync state for a resource
- */
-export interface LiveSyncState {
-  isConnected: boolean;
-  lastSyncAt: Date | null;
-  error?: Error;
-  /**
-   * Whether data was loaded from cache
-   */
-  loadedFromCache?: boolean;
-  /**
-   * Whether background sync is in progress
-   */
-  isSyncing?: boolean;
-}
-
-/**
- * Stored resource data with metadata
- */
-interface StoredResourceData<T = unknown> {
-  resourceName: ResourceName;
-  data: T;
-  timestamp: number;
-  version: number;
-}
-
-/**
- * Storage adapter interface for persistence
- */
-interface StorageAdapter {
-  save<T>(resourceName: ResourceName, data: T): Promise<void>;
-  load<T>(resourceName: ResourceName): Promise<T | null>;
-  loadWithMetadata<T>(resourceName: ResourceName): Promise<StoredResourceData<T> | null>;
-  delete(resourceName: ResourceName): Promise<void>;
-  clear(): Promise<void>;
-}
-
-/**
- * Resolved persist configuration
- */
-interface ResolvedPersistConfig {
-  enabled: boolean;
-  storage: StorageType;
-  maxAge: number;
-}
 
 /**
  * Resolve persist config from boolean | PersistConfig | undefined
@@ -105,24 +62,8 @@ class IndexedDBStorageAdapter implements StorageAdapter {
   }
 
   /**
-   * Get current database version
-   */
-  private async getDBVersion(): Promise<number> {
-    return new Promise((resolve, reject) => {
-      const request = indexedDB.open(this.dbName);
-
-      request.onerror = () => reject(request.error);
-      request.onsuccess = () => {
-        const version = request.result.version || 1;
-        request.result.close();
-        resolve(version);
-      };
-      request.onupgradeneeded = () => resolve(1);
-    });
-  }
-
-  /**
    * Ensure a resource store exists, creating it if needed
+   * Note: IndexedDB requires version increments to create new stores (onupgradeneeded only fires on version increase)
    */
   private async ensureResourceStore(resourceName: ResourceName): Promise<IDBDatabase> {
     const storeName = this.getResourceStoreName(resourceName);
@@ -139,11 +80,13 @@ class IndexedDBStorageAdapter implements StorageAdapter {
       return db;
     }
 
-    // Store doesn't exist - create it
+    // Store doesn't exist - we need to create it
+    // IndexedDB limitation: can only create stores in onupgradeneeded, which requires version increment
     db.close();
     this.dbPromise = null;
 
-    const currentVersion = await this.getDBVersion();
+    // Get current version and increment to trigger onupgradeneeded
+    const currentVersion = await this.getCurrentVersion();
     const newVersion = currentVersion + 1;
 
     return new Promise((resolve, reject) => {
@@ -169,10 +112,27 @@ class IndexedDBStorageAdapter implements StorageAdapter {
     });
   }
 
+  /**
+   * Get current database version (needed to increment for store creation)
+   */
+  private async getCurrentVersion(): Promise<number> {
+    return new Promise((resolve, reject) => {
+      const request = indexedDB.open(this.dbName);
+      request.onerror = () => reject(request.error);
+      request.onsuccess = () => {
+        const version = request.result.version || 1;
+        request.result.close();
+        resolve(version);
+      };
+      request.onupgradeneeded = () => resolve(1);
+    });
+  }
+
   private async openDB(): Promise<IDBDatabase> {
     if (this.dbPromise) return this.dbPromise;
 
-    const version = await this.getDBVersion();
+    // Use version 1, or get current version if DB exists
+    const version = await this.getCurrentVersion();
 
     this.dbPromise = new Promise((resolve, reject) => {
       const request = indexedDB.open(this.dbName, version);
@@ -544,6 +504,8 @@ interface LiveSyncSubscription {
   state: LiveSyncState;
   intervalId?: ReturnType<typeof setInterval>;
   eventSource?: EventSource;
+  /** EventBus subscription for SSE strategy using global SSE provider */
+  eventSubscription?: EventBusSubscription;
   onStateChange?: () => void;
   subscriberCount: number;
   storageAdapter?: StorageAdapter;
@@ -556,6 +518,7 @@ interface LiveSyncSubscription {
 class LiveSyncManagerImpl {
   private subscriptions = new Map<ResourceName, LiveSyncSubscription>();
   private queryClient: QueryClient | null = null;
+  private eventBus: EventBusInterface | null = null;
   private resourceRegistry = getResourceRegistry();
 
   /**
@@ -563,6 +526,14 @@ class LiveSyncManagerImpl {
    */
   setQueryClient(queryClient: QueryClient): void {
     this.queryClient = queryClient;
+  }
+
+  /**
+   * Set the event bus for SSE subscriptions
+   * This should be called with the EventBus from BattalionProvider
+   */
+  setEventBus(eventBus: EventBusInterface): void {
+    this.eventBus = eventBus;
   }
 
   /**
@@ -712,53 +683,49 @@ class LiveSyncManagerImpl {
   }
 
   /**
-   * Start SSE connection for a subscription
+   * Start SSE connection for a subscription using EventBus
+   * Subscribes to the configured event and triggers refetch when received
    */
   private startSSE(subscription: LiveSyncSubscription): void {
-    const endpoint = subscription.liveSyncConfig.endpoint;
-    if (!endpoint) {
-      console.error(`SSE endpoint not configured for resource ${subscription.resourceName}`);
+    const sseConfig = subscription.liveSyncConfig.sseConfig;
+
+    if (!sseConfig?.event) {
+      console.error(`[LiveSync] SSE config not available for ${subscription.resourceName}`);
+      return;
+    }
+
+    if (!this.eventBus) {
+      console.error(
+        `[LiveSync] EventBus not available for ${subscription.resourceName}. Make sure BattalionProvider is set up with eventBus.`,
+      );
       return;
     }
 
     try {
-      const eventSource = new EventSource(endpoint);
+      // Subscribe to the resource event - triggers refetch when received
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      subscription.eventSubscription = this.eventBus.subscribe(sseConfig.event as EVENT_TYPE, () => {
+        this.handleSSEEvent(subscription);
+      });
 
-      eventSource.onopen = () => {
-        subscription.state.isConnected = true;
-        subscription.state.error = undefined;
-        this.notifyStateChange(subscription);
-      };
+      subscription.state.isConnected = true;
+      subscription.state.error = undefined;
+      this.notifyStateChange(subscription);
 
-      eventSource.onmessage = (event) => {
-        try {
-          const data = JSON.parse(event.data);
-          this.handleUpdate(subscription, data);
-        } catch (error) {
-          console.error(`Failed to parse SSE message for ${subscription.resourceName}:`, error);
-        }
-      };
-
-      eventSource.onerror = (error) => {
-        subscription.state.isConnected = false;
-        subscription.state.error = new Error('SSE connection error');
-        this.notifyStateChange(subscription);
-        console.error(`SSE error for ${subscription.resourceName}:`, error);
-
-        // Attempt to reconnect after 5 seconds
-        setTimeout(() => {
-          if (this.subscriptions.has(subscription.resourceName)) {
-            this.startSSE(subscription);
-          }
-        }, 5000);
-      };
-
-      subscription.eventSource = eventSource;
+      // Fetch initial data
+      this.fetchAndUpdate(subscription).catch(console.error);
     } catch (error) {
-      console.error(`Failed to start SSE for ${subscription.resourceName}:`, error);
+      console.error(`[LiveSync] Failed to start SSE for ${subscription.resourceName}:`, error);
       subscription.state.error = error instanceof Error ? error : new Error(String(error));
       this.notifyStateChange(subscription);
     }
+  }
+
+  /**
+   * Handle SSE event - refetch data from the list endpoint
+   */
+  private handleSSEEvent(subscription: LiveSyncSubscription): void {
+    this.fetchAndUpdate(subscription).catch(console.error);
   }
 
   /**
@@ -773,6 +740,12 @@ class LiveSyncManagerImpl {
     if (subscription.eventSource) {
       subscription.eventSource.close();
       subscription.eventSource = undefined;
+    }
+
+    // Clean up SSE event subscription
+    if (subscription.eventSubscription) {
+      subscription.eventSubscription.unsubscribe();
+      subscription.eventSubscription = undefined;
     }
 
     subscription.state.isConnected = false;

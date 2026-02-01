@@ -3,13 +3,13 @@
 import { useEffect, useRef } from 'react';
 import { useRouter } from 'next/navigation';
 import { getProcessRouteById } from '@/constants/routeConfig';
-import type { ProcessesResponseType } from '@/types/api/processApi.types';
+import type { ProcessResponseType } from '@/types/api/processApi.types';
 
 type UseRedirectToFirstProcessAfterOrgSwitchParams = {
   processId: string | undefined;
   isOrgSwitchIsInProgress: boolean;
   isSuccessProcesses: boolean;
-  processes: ProcessesResponseType[] | undefined;
+  processes: ProcessResponseType[] | undefined;
 };
 
 /**
@@ -40,11 +40,11 @@ export function useRedirectToFirstProcessAfterOrgSwitch({
       processId &&
       !hasCheckedProcessAfterOrgSwitch.current
     ) {
-      const isValidProcess = processes.some((process) => process.id === processId);
+      const isValidProcess = processes.some((process) => process.process_id === processId);
 
       if (!isValidProcess) {
         hasCheckedProcessAfterOrgSwitch.current = true;
-        router.push(getProcessRouteById(processes[0].id));
+        router.push(getProcessRouteById(processes[0].process_id));
 
         return;
       }
