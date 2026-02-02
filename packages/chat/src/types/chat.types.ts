@@ -407,21 +407,3 @@ export interface SubmitChatFeedbackResponseType {
   success: boolean;
   message: string;
 }
-
-/**
- * Update Conversation Title API Types
- */
-export interface UpdateConversationTitleRequestType {
-  conversationId: string;
-  body: {
-    resource_id: string;
-    resource_type: string;
-    title: string;
-  };
-}
-
-export interface UpdateConversationTitleResponseType {
-  success: boolean;
-  conversation_id: string;
-  title: string;
-}
