@@ -1,28 +1,60 @@
 'use client';
 
-import { type FC, useRef } from 'react';
-import { FormBuilder, type FormBuilderRef, type FormSchema } from '@zamp-platform/form-builder';
-import { Button, Dialog, DialogBody, DialogContent, DialogFooter } from '@zamp-platform/ui';
+import { type FC, useCallback, useEffect, useMemo, useRef, useState } from 'react';
+import { captureException } from '@sentry/nextjs';
+import { FormBuilder, type FormBuilderRef } from '@zamp-platform/form-builder';
+import { Button, Dialog, DialogBody, DialogContent, DialogFooter, toast } from '@zamp-platform/ui';
 import { ArrowRight } from 'lucide-react';
 import ConnectionGuidePanel from 'modules/integrations/components/ConnectionGuidePanel';
-import { connectionSchema } from 'modules/integrations/components/connectionSchema';
+import { generateFormSections } from 'modules/integrations/components/utils';
 import Image from 'next/image';
-import { IMAGE_PREFIX } from '@/constants/icons';
+import { useParams } from 'next/navigation';
+import { useAuthenticateIntegrationMutation } from '@/apis/integrations';
+import ImageLoader from '@/components/common/loader/ImageLoader';
+import CommonWrapper from '@/components/commonWrapper';
+import { SkeletonTypes } from '@/components/commonWrapper/commonWrapper.types';
+import { getAssetUrl, IMAGE_PREFIX, ZAMP_LOGO_LOADER_SVG } from '@/constants/icons';
+import { useAppSelector } from '@/hooks/toolkit';
+import { usePagesAndProcessesData } from '@/hooks/usePagesAndProcessesData';
 import { useScrollDetection } from '@/hooks/useScrollDetection';
-import type { IntegrationType } from '@/modules/integrations/types/integrations.types';
+import type { IntegrationAuth, IntegrationType } from '@/modules/integrations/types/integrations.types';
+import type { RootState } from '@/store';
 import { cn } from '@/utils/common';
 
 interface ConnectionModalProps {
   integration: IntegrationType;
   isOpen: boolean;
   onClose: () => void;
+  isCreatingTrigger?: boolean;
+  onSubmit?: (connectionId: string) => void;
+  animated?: boolean;
 }
 
-const ConnectionModal: FC<ConnectionModalProps> = ({ integration, isOpen, onClose }) => {
+const ConnectionModal: FC<ConnectionModalProps> = ({
+  integration,
+  isOpen,
+  onClose,
+  isCreatingTrigger = false,
+  onSubmit,
+  animated = false,
+}) => {
+  const params = useParams();
+  const orgName = useAppSelector((state: RootState) => state?.user?.user?.orgs?.[0]?.name);
   const formRef = useRef<FormBuilderRef>(null);
   const { ref: scrollContainerRef, isScrolled } = useScrollDetection();
+  const [authenticateIntegration, { isLoading: isAuthenticating }] = useAuthenticateIntegrationMutation();
+  const { processes } = usePagesAndProcessesData();
 
-  const { display_name, logo, guide } = integration;
+  const { display_name, logo, guide, auth, id } = integration;
+  const noGuide = !guide;
+  const [authContent, setAuthContent] = useState<IntegrationAuth[]>([]);
+  const [isLoading, setIsLoading] = useState<boolean>(true);
+  const [error, setError] = useState<string>('');
+
+  const currentProcess = useMemo(
+    () => processes?.find((process) => process.process_id === params?.processId),
+    [processes, params?.processId],
+  );
 
   const handleTest = () => {
     // TODO: Implement test connection logic
@@ -34,26 +66,80 @@ const ConnectionModal: FC<ConnectionModalProps> = ({ integration, isOpen, onClos
   };
 
   const handleFormSubmit = (data: Record<string, string>) => {
-    // TODO: Implement connection setup logic
-    console.log('Form submitted:', data);
-    onClose();
+    setError('');
+    authenticateIntegration({
+      integration_name: integration.id,
+      auth_type: 'custom',
+      credentials: data,
+    })
+      .unwrap()
+      .then((response) => {
+        if (onSubmit) {
+          onSubmit(response.id);
+        } else {
+          onClose();
+          toast.success('Integration authenticated successfully');
+        }
+      })
+      .catch((error) => {
+        setError(error?.data?.message);
+      });
   };
 
   const handleOpenChange = (open: boolean) => {
     if (!open) {
+      setError('');
       onClose();
     }
   };
 
+  const getAuthContent = useCallback(async () => {
+    if (!auth) {
+      setIsLoading(false);
+
+      return;
+    }
+
+    try {
+      setIsLoading(true);
+      const authUrl = getAssetUrl(auth);
+      const response = await fetch(authUrl);
+
+      if (!response.ok) {
+        throw new Error('Failed to fetch auth');
+      }
+
+      const content: IntegrationAuth[] = await response.json();
+
+      setAuthContent(content);
+    } catch (error) {
+      setAuthContent([]);
+      captureException(error);
+    } finally {
+      setIsLoading(false);
+    }
+  }, [auth]);
+
+  useEffect(() => {
+    getAuthContent();
+  }, [auth, getAuthContent]);
+
   return (
     <Dialog open={isOpen} onOpenChange={handleOpenChange}>
-      <DialogContent className='border-GRAY_300 h-[600px] max-h-[600px] w-[1000px] max-w-[1000px] rounded-xl border'>
+      <DialogContent
+        className={cn('border-GRAY_300 h-[600px] max-h-[600px] w-[1000px] max-w-[1000px] rounded-xl border', {
+          'h-auto w-[400px]': noGuide,
+        })}
+        showCloseButton={noGuide}
+      >
         <DialogBody className='flex flex-1 overflow-hidden rounded-xl'>
           {/* Left Side - Form */}
-          <div className='bg-BG_GRAY_2 flex w-[40%] flex-shrink-0 flex-col overflow-hidden'>
+          <div
+            className={cn('bg-BG_GRAY_2 flex w-[40%] flex-shrink-0 flex-col overflow-hidden', { 'w-full': noGuide })}
+          >
             {/* Integration name - Fixed header */}
             <div
-              className={cn('flex shrink-0 items-center gap-x-1 px-6 py-6', isScrolled && 'border-GRAY_500 border-b')}
+              className={cn('flex shrink-0 items-center gap-x-1.5 px-6 py-6', isScrolled && 'border-GRAY_500 border-b')}
             >
               <div className='relative h-5 w-5 flex-shrink-0 p-[2px]'>
                 <Image
@@ -69,9 +155,24 @@ const ConnectionModal: FC<ConnectionModalProps> = ({ integration, isOpen, onClos
             </div>
 
             {/* Form - Scrollable content */}
-            <div ref={scrollContainerRef} className='flex-1 overflow-y-auto px-6 pb-6 [scrollbar-width:none]'>
-              <FormBuilder ref={formRef} schema={connectionSchema as FormSchema} onSubmit={handleFormSubmit} />
-            </div>
+            <CommonWrapper
+              className='h-full'
+              loader={<ImageLoader imageSrc={ZAMP_LOGO_LOADER_SVG} width={100} height={100} />}
+              skeletonType={SkeletonTypes.CUSTOM}
+              isLoading={isLoading}
+            >
+              <div ref={scrollContainerRef} className='flex-1 overflow-y-auto px-6 pb-6 [scrollbar-width:none]'>
+                {authContent.length > 0 && (
+                  <FormBuilder
+                    ref={formRef}
+                    schema={generateFormSections(id, authContent[0], orgName, currentProcess?.display_name)}
+                    onSubmit={handleFormSubmit}
+                    animated={animated}
+                  />
+                )}
+                <div className='f-13-450 text-red-900'>{error}</div>
+              </div>
+            </CommonWrapper>
           </div>
 
           {/* Right Side - Guide */}
@@ -80,15 +181,18 @@ const ConnectionModal: FC<ConnectionModalProps> = ({ integration, isOpen, onClos
 
         {/* Footer */}
         <DialogFooter className='flex items-center justify-between border-t px-6 py-4'>
-          <Button variant='outline' size='small' onClick={handleTest} className='f-12-500 rounded-md px-3 py-1.5'>
-            Test
-          </Button>
+          {!noGuide && (
+            <Button variant='outline' size='small' onClick={handleTest} className='f-12-500 rounded-md px-3 py-1.5'>
+              Test
+            </Button>
+          )}
 
           <Button
             variant='default'
             size='small'
             onClick={handleSetupConnection}
-            className='f-12-500 gap-x-1 rounded-md px-3 py-1.5'
+            className='f-12-500 ml-auto gap-x-1 rounded-md px-3 py-1.5'
+            isLoading={isCreatingTrigger || isAuthenticating}
           >
             <ArrowRight width={16} height={16} />
             Setup connection

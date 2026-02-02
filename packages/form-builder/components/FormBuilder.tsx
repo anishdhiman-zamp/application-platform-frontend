@@ -5,6 +5,7 @@ import { FormProvider, useForm } from 'react-hook-form';
 
 import { DEFAULT_NESTED_ANIMATION, DEFAULT_SECTION_ANIMATION, DEFAULT_STAGGER_CHILDREN } from '../constants';
 import { FormSchema } from '../types';
+import { transformFormData } from '../utils/formDataTransform';
 import { createCustomResolver } from '../utils/validation';
 import { FormSection } from './FormSection';
 
@@ -40,9 +41,15 @@ export const FormBuilder = ({
     mode: 'onBlur',
   });
 
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  const handleSubmit = (data: any) => {
+    const transformedData = transformFormData(schema, data);
+    onSubmit(transformedData);
+  };
+
   useImperativeHandle(ref, () => ({
     submit: () => {
-      methods.handleSubmit(onSubmit, (err) => {
+      methods.handleSubmit(handleSubmit, (err) => {
         console.log('Error:', err);
       })();
     },
@@ -50,7 +57,7 @@ export const FormBuilder = ({
 
   return (
     <FormProvider {...methods}>
-      <form onSubmit={methods.handleSubmit(onSubmit)} className={`main-form ${formId} flex flex-col gap-5 pb-5`}>
+      <form onSubmit={methods.handleSubmit(handleSubmit)} className={`main-form ${formId} flex flex-col gap-5 pb-5`}>
         {schema.sections.map((section, index) => (
           <motion.div
             key={section.id || index}
