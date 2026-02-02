@@ -7,6 +7,7 @@ const config: Config = {
   moduleNameMapper: {
     ...baseConfig.moduleNameMapper,
     '^@zamp-platform/ui/(.*)$': '<rootDir>/src/$1',
+    '^react-resizable-panels$': '<rootDir>/src/__mocks__/react-resizable-panels.tsx',
   },
 };
 

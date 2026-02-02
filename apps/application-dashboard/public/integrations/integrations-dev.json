@@ -1,0 +1,51 @@
+{
+  "version": 1,
+  "integrations": [
+    {
+      "id": "cloudflare",
+      "display_name": "Email Forwarding",
+      "logo": "/integrations/logos/mail.svg",
+      "what_possible": [],
+      "guide": "",
+      "auth": "/integrations/auth/cloudflare-dev.json",
+      "events": [
+        {
+          "id": "enable_email_routing_rule",
+          "display_name": "Email Forwarding"
+        }
+      ]
+    },
+    {
+      "id": "oracle",
+      "display_name": "Oracle",
+      "logo": "/integrations/logos/oracle.svg",
+      "what_possible": [],
+      "guide": ""
+    },
+    {
+      "id": "coupa",
+      "display_name": "Coupa",
+      "logo": "/integrations/logos/coupa.svg",
+      "what_possible": [],
+      "guide": ""
+    },
+    {
+      "id": "slack",
+      "display_name": "Slack",
+      "logo": "/integrations/logos/slack.svg",
+      "what_possible": [
+        "Send message",
+        "Send alert",
+        "Get channels",
+        "Create channel",
+        "Get users",
+        "Upload file",
+        "Add reaction",
+        "Post to thread",
+        "Schedule message",
+        "Update message"
+      ],
+      "guide": "/integrations/guides/slack.md"
+    }
+  ]
+}

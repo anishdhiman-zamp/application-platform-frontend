@@ -1,3 +1,4 @@
+import { fetchIntegrations } from '@/modules/integrations/utils/integrations.utils';
 import KnowledgeBaseV2PageHome from '@/modules/process/knowledge-base-creation/KnowledgeBaseV2PageHome';
 
 interface KnowledgeBasePageProps {
@@ -6,11 +7,13 @@ interface KnowledgeBasePageProps {
 }
 
 const KnowledgeBasePage = async ({ params, searchParams }: KnowledgeBasePageProps) => {
+  const integrations = await fetchIntegrations();
+
   const { processId } = await params;
   const resolvedSearchParams = await searchParams;
   const conversationId = resolvedSearchParams?.chatbot_conversation_id ?? null;
 
-  return <KnowledgeBaseV2PageHome processId={processId} conversationId={conversationId} />;
+  return <KnowledgeBaseV2PageHome processId={processId} conversationId={conversationId} integrations={integrations} />;
 };
 
 export default KnowledgeBasePage;

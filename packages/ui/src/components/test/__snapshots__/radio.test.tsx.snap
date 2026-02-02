@@ -12,7 +12,7 @@ exports[`RadioGroup Component - Functional Tests matches snapshot for default ra
 >
   <button
     aria-checked="true"
-    class="text-gray-1000 ring-offset-background focus-visible:ring-ring aspect-square h-3.5 w-3.5 cursor-pointer rounded-full border border-gray-400 focus:outline-hidden focus-visible:ring-1 disabled:cursor-not-allowed disabled:opacity-50"
+    class="text-gray-1000 ring-offset-background focus-visible:ring-ring data-[state=checked]:border-gray-1000 aspect-square h-3.5 w-3.5 cursor-pointer rounded-full border border-gray-900 focus:outline-hidden focus-visible:ring-1 disabled:cursor-not-allowed disabled:opacity-50"
     data-radix-collection-item=""
     data-state="checked"
     role="radio"
@@ -46,7 +46,7 @@ exports[`RadioGroup Component - Functional Tests matches snapshot for default ra
   </button>
   <button
     aria-checked="false"
-    class="text-gray-1000 ring-offset-background focus-visible:ring-ring aspect-square h-3.5 w-3.5 cursor-pointer rounded-full border border-gray-400 focus:outline-hidden focus-visible:ring-1 disabled:cursor-not-allowed disabled:opacity-50"
+    class="text-gray-1000 ring-offset-background focus-visible:ring-ring data-[state=checked]:border-gray-1000 aspect-square h-3.5 w-3.5 cursor-pointer rounded-full border border-gray-900 focus:outline-hidden focus-visible:ring-1 disabled:cursor-not-allowed disabled:opacity-50"
     data-radix-collection-item=""
     data-state="unchecked"
     role="radio"
@@ -70,7 +70,7 @@ exports[`RadioGroup Component - Functional Tests matches snapshot for disabled r
 >
   <button
     aria-checked="true"
-    class="text-gray-1000 ring-offset-background focus-visible:ring-ring aspect-square h-3.5 w-3.5 cursor-pointer rounded-full border border-gray-400 focus:outline-hidden focus-visible:ring-1 disabled:cursor-not-allowed disabled:opacity-50"
+    class="text-gray-1000 ring-offset-background focus-visible:ring-ring data-[state=checked]:border-gray-1000 aspect-square h-3.5 w-3.5 cursor-pointer rounded-full border border-gray-900 focus:outline-hidden focus-visible:ring-1 disabled:cursor-not-allowed disabled:opacity-50"
     data-disabled=""
     data-radix-collection-item=""
     data-state="checked"
@@ -107,7 +107,7 @@ exports[`RadioGroup Component - Functional Tests matches snapshot for disabled r
   </button>
   <button
     aria-checked="false"
-    class="text-gray-1000 ring-offset-background focus-visible:ring-ring aspect-square h-3.5 w-3.5 cursor-pointer rounded-full border border-gray-400 focus:outline-hidden focus-visible:ring-1 disabled:cursor-not-allowed disabled:opacity-50"
+    class="text-gray-1000 ring-offset-background focus-visible:ring-ring data-[state=checked]:border-gray-1000 aspect-square h-3.5 w-3.5 cursor-pointer rounded-full border border-gray-900 focus:outline-hidden focus-visible:ring-1 disabled:cursor-not-allowed disabled:opacity-50"
     data-disabled=""
     data-radix-collection-item=""
     data-state="unchecked"
@@ -132,7 +132,7 @@ exports[`RadioGroup Component - Functional Tests matches snapshot for radio grou
 >
   <button
     aria-checked="true"
-    class="text-gray-1000 ring-offset-background focus-visible:ring-ring aspect-square h-3.5 w-3.5 cursor-pointer rounded-full border border-gray-400 focus:outline-hidden focus-visible:ring-1 disabled:cursor-not-allowed disabled:opacity-50 custom-radio"
+    class="text-gray-1000 ring-offset-background focus-visible:ring-ring data-[state=checked]:border-gray-1000 aspect-square h-3.5 w-3.5 cursor-pointer rounded-full border border-gray-900 focus:outline-hidden focus-visible:ring-1 disabled:cursor-not-allowed disabled:opacity-50 custom-radio"
     data-radix-collection-item=""
     data-state="checked"
     role="radio"
@@ -166,7 +166,7 @@ exports[`RadioGroup Component - Functional Tests matches snapshot for radio grou
   </button>
   <button
     aria-checked="false"
-    class="text-gray-1000 ring-offset-background focus-visible:ring-ring aspect-square h-3.5 w-3.5 cursor-pointer rounded-full border border-gray-400 focus:outline-hidden focus-visible:ring-1 disabled:cursor-not-allowed disabled:opacity-50"
+    class="text-gray-1000 ring-offset-background focus-visible:ring-ring data-[state=checked]:border-gray-1000 aspect-square h-3.5 w-3.5 cursor-pointer rounded-full border border-gray-900 focus:outline-hidden focus-visible:ring-1 disabled:cursor-not-allowed disabled:opacity-50"
     data-radix-collection-item=""
     data-state="unchecked"
     role="radio"
@@ -189,7 +189,7 @@ exports[`RadioGroup Component - Functional Tests matches snapshot for radio grou
 >
   <button
     aria-checked="false"
-    class="text-gray-1000 ring-offset-background focus-visible:ring-ring aspect-square h-3.5 w-3.5 cursor-pointer rounded-full border border-gray-400 focus:outline-hidden focus-visible:ring-1 disabled:cursor-not-allowed disabled:opacity-50"
+    class="text-gray-1000 ring-offset-background focus-visible:ring-ring data-[state=checked]:border-gray-1000 aspect-square h-3.5 w-3.5 cursor-pointer rounded-full border border-gray-900 focus:outline-hidden focus-visible:ring-1 disabled:cursor-not-allowed disabled:opacity-50"
     data-radix-collection-item=""
     data-state="unchecked"
     role="radio"
@@ -199,7 +199,7 @@ exports[`RadioGroup Component - Functional Tests matches snapshot for radio grou
   />
   <button
     aria-checked="true"
-    class="text-gray-1000 ring-offset-background focus-visible:ring-ring aspect-square h-3.5 w-3.5 cursor-pointer rounded-full border border-gray-400 focus:outline-hidden focus-visible:ring-1 disabled:cursor-not-allowed disabled:opacity-50"
+    class="text-gray-1000 ring-offset-background focus-visible:ring-ring data-[state=checked]:border-gray-1000 aspect-square h-3.5 w-3.5 cursor-pointer rounded-full border border-gray-900 focus:outline-hidden focus-visible:ring-1 disabled:cursor-not-allowed disabled:opacity-50"
     data-radix-collection-item=""
     data-state="checked"
     role="radio"
@@ -233,7 +233,7 @@ exports[`RadioGroup Component - Functional Tests matches snapshot for radio grou
   </button>
   <button
     aria-checked="false"
-    class="text-gray-1000 ring-offset-background focus-visible:ring-ring aspect-square h-3.5 w-3.5 cursor-pointer rounded-full border border-gray-400 focus:outline-hidden focus-visible:ring-1 disabled:cursor-not-allowed disabled:opacity-50"
+    class="text-gray-1000 ring-offset-background focus-visible:ring-ring data-[state=checked]:border-gray-1000 aspect-square h-3.5 w-3.5 cursor-pointer rounded-full border border-gray-900 focus:outline-hidden focus-visible:ring-1 disabled:cursor-not-allowed disabled:opacity-50"
     data-radix-collection-item=""
     data-state="unchecked"
     role="radio"

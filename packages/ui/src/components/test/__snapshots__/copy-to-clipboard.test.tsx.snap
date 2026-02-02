@@ -1,0 +1,23 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`CopyToClipboard Component matches snapshot 1`] = `
+<span
+  aria-label="Copy to clipboard"
+  class="inline-flex cursor-pointer"
+>
+  <button>
+    Copy Button
+  </button>
+</span>
+`;
+
+exports[`CopyToClipboard Component matches snapshot with icon child 1`] = `
+<span
+  aria-label="Copy to clipboard"
+  class="inline-flex cursor-pointer"
+>
+  <span>
+    📋
+  </span>
+</span>
+`;
