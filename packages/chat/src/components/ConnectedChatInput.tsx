@@ -335,7 +335,7 @@ export const ConnectedChatInput: FC<ConnectedChatInputProps> = ({
               <Textarea
                 ref={textareaRef}
                 value={value}
-                autoFocus
+                autoFocus={autoFocus}
                 onChange={(e) => setValue(e.target.value)}
                 onKeyDown={isDisabled ? undefined : handleKeyDown}
                 onPaste={isDisabled || disableAttachments ? undefined : handlePaste}

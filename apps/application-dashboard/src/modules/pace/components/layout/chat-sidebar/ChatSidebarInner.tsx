@@ -160,6 +160,7 @@ const ChatSidebarInner: FC<ChatSidebarInnerProps> = ({
             setExternalInputValue={setInputValue}
             acceptedFileTypes={ACCEPTED_FILE_TYPES}
             className='bg-white'
+            autoFocus
             onConversationCreated={handleConversationCreated}
             fileDropHandlerRef={fileDropHandlerRef}
           />

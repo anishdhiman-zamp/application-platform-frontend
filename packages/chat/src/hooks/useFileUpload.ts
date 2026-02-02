@@ -6,7 +6,7 @@ import { toast } from 'sonner';
 import { API_ENDPOINTS, useGetSignedUrlMutation, usePostFormsSignedUploadAckMutation } from '../api';
 import { handleFileUploads } from '../utils/fileUpload';
 
-export interface UploadedFile {
+interface UploadedFile {
   file_id: string;
   file_name: string;
   file_type?: string;

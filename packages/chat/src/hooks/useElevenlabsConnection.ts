@@ -173,6 +173,7 @@ export const useElevenlabsConnection = (options: UseElevenlabsConnectionOptions)
 
         await scribe.connect({
           token,
+          modelId: connectOptions.modelId ?? DEFAULT_SCRIBE_CONFIG.modelId,
           includeTimestamps: connectOptions.includeTimestamps ?? DEFAULT_SCRIBE_CONFIG.includeTimestamps,
           languageCode: connectOptions.languageCode ?? DEFAULT_SCRIBE_CONFIG.languageCode,
           microphone: {

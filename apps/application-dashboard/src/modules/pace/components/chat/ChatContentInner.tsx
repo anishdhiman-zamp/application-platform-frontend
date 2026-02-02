@@ -145,6 +145,7 @@ const ChatContentInner = ({
             </Button>
             <ConnectedChatInput
               chat={chat}
+              autoFocus
               conversationId={conversationId ?? chat.conversationId ?? ''}
               resourceType={ResourceType.ORGANIZATION}
               resourceId={organizationId}
@@ -178,6 +179,7 @@ const ChatContentInner = ({
           conversationId={chat.conversationId ?? ''}
           resourceType={ResourceType.ORGANIZATION}
           resourceId={organizationId}
+          autoFocus
           scope={ScopeType.ORGANIZATION}
           scopeId={organizationId}
           organizationId={organizationId}

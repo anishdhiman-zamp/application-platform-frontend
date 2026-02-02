@@ -79,6 +79,7 @@ export const useTranscription = ({ adapter }: UseTranscriptionOptions): UseTrans
 
         await connectToElevenLabs({ ...DEFAULT_OPTIONS, ...options });
       } catch {
+        cleanupMicrophone();
         setIsRecording(false);
       } finally {
         stateRefs.current.isStarting = false;
