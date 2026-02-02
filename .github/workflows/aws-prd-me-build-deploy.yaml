@@ -71,7 +71,7 @@ jobs:
 
   prepare-env:
     name: Prepare Env
-    runs-on: arc-runner-set-aws-prd # FIXME: Update to your production runner
+    runs-on: arc-runner-set-aws-prd-me # FIXME: Update to your production runner
     timeout-minutes: 2
     needs: validate-deployment
     outputs:
@@ -128,7 +128,7 @@ jobs:
     permissions:
       id-token: write
       contents: read
-    runs-on: arc-runner-set-aws-prd # FIXME: Update to your production runner
+    runs-on: arc-runner-set-aws-prd-me # FIXME: Update to your production runner
     env:
       AWS_REGION: ${{ needs.prepare-env.outputs.AWS_REGION }}
       AWS_ACCOUNT_ID: ${{needs.prepare-env.outputs.AWS_ACCOUNT_ID}}
@@ -336,7 +336,7 @@ jobs:
 
   deploy-to-eks:
     name: Deploy to EKS
-    runs-on: arc-runner-set-aws-prd # FIXME: Update to your production runner
+    runs-on: arc-runner-set-aws-prd-me # FIXME: Update to your production runner
     timeout-minutes: 15
     permissions:
       id-token: write

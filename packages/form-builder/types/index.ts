@@ -1,3 +1,5 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
+
 import { SelectOption as BaseSelectOption } from '@zamp-platform/ui';
 import { z } from 'zod';
 
@@ -87,6 +89,7 @@ export enum FieldType {
   MULTI_SELECT = 'multi-select',
   HEADER_TEXT = 'header-text',
   RADIO = 'radio',
+  EMAIL_ALIAS = 'email-alias',
 }
 
 export type SelectOptionValue = string | boolean | { type: string; id: string };

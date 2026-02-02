@@ -1,0 +1,40 @@
+[
+    {
+        "auth_type": "form",
+        "title": "Email Forwarding Setup",
+        "description": "Configure your email forwarding alias",
+        "fields": {
+            "email_alias": {
+                "id": "email_alias",
+                "type": "email-alias",
+                "label": "",
+                "default_value": "",
+                "suffix": "@zamp.dev",
+                "validations": [
+                    {
+                        "type": "required",
+                        "config": {
+                            "message": "Email alias is required",
+                            "value": null
+                        }
+                    },
+                    {
+                        "type": "minLength",
+                        "config": {
+                            "message": "Email alias must be at least 1 character",
+                            "value": 1
+                        }
+                    },
+                    {
+                        "type": "maxLength",
+                        "config": {
+                            "message": "Email alias must not exceed 100 characters",
+                            "value": 100
+                        }
+                    }
+                ],
+                "options": null
+            }
+        }
+    }
+]
