@@ -15,7 +15,7 @@ const Radio = ({ className, ...props }: React.ComponentProps<typeof RadioGroupPr
   return (
     <RadioGroupPrimitive.RadioGroupItem
       className={cn(
-        'text-gray-1000 ring-offset-background focus-visible:ring-ring aspect-square h-3.5 w-3.5 cursor-pointer rounded-full border border-gray-400 focus:outline-hidden focus-visible:ring-1 disabled:cursor-not-allowed disabled:opacity-50',
+        'text-gray-1000 ring-offset-background focus-visible:ring-ring data-[state=checked]:border-gray-1000 aspect-square h-3.5 w-3.5 cursor-pointer rounded-full border border-gray-900 focus:outline-hidden focus-visible:ring-1 disabled:cursor-not-allowed disabled:opacity-50',
         className,
       )}
       {...props}
