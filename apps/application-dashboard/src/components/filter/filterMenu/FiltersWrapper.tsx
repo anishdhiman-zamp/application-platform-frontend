@@ -62,6 +62,11 @@ const FiltersContainer: FC<FiltersContainerProps> = ({
   const [filtersList, setFiltersList] = useState<FilterConfigType[]>([]);
 
   const onAddFilterToFiltersList = (filterKey: string, list: FilterConfigType[], value: FilterConfigType) => {
+    // Skip if value is undefined
+    if (!value) {
+      return;
+    }
+
     const filterItemIndex = list.findIndex((item: FilterConfigType) => item?.key === filterKey);
 
     if (filterItemIndex === -1) {
@@ -93,7 +98,10 @@ const FiltersContainer: FC<FiltersContainerProps> = ({
     for (const key in selectedFilters) {
       const value: any = getFilterValueForKey(key as FILTER_KEYS, filterConfig, selectedFilters);
 
-      onAddFilterToFiltersList(key, list, value);
+      // Skip if value is undefined (filter config not found)
+      if (value) {
+        onAddFilterToFiltersList(key, list, value);
+      }
     }
 
     onRemoveFiltersWithoutKeys(list, selectedFiltersInUI);

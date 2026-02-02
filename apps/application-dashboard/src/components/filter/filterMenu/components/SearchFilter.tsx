@@ -21,6 +21,7 @@ export interface SearchFilterProps {
   onChange: (value: MapAny) => void;
   operatorOptions?: OptionsType[];
   onConfigureFilter?: defaultFnType;
+  filterType?: FILTER_TYPES;
 }
 
 const SearchFilter: FC<SearchFilterProps> = ({
@@ -34,6 +35,7 @@ const SearchFilter: FC<SearchFilterProps> = ({
   onChange,
   operatorOptions = SEARCH_FILTER_OPTIONS,
   onConfigureFilter,
+  filterType = FILTER_TYPES.SEARCH,
 }) => {
   const ref = useRef(null);
   const inputRef = useRef<HTMLInputElement>(null);
@@ -46,7 +48,7 @@ const SearchFilter: FC<SearchFilterProps> = ({
       const value = {
         [filterKey]: searchValue
           ? {
-              filterType: FILTER_TYPES.SEARCH,
+              filterType: filterType,
               type: operator,
               filter: searchValue,
             }
@@ -55,7 +57,7 @@ const SearchFilter: FC<SearchFilterProps> = ({
 
       onChange(value);
     },
-    [onChange, filterKey],
+    [onChange, filterKey, filterType],
   );
 
   const handleSetValues = useCallback(
