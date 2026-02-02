@@ -24,8 +24,6 @@ import {
   SignedUrlResponseType,
   SubmitChatFeedbackRequestType,
   SubmitChatFeedbackResponseType,
-  UpdateConversationTitleRequestType,
-  UpdateConversationTitleResponseType,
 } from '../types/chat.types';
 
 export enum APITags {
@@ -55,7 +53,6 @@ export const API_ENDPOINTS = {
   SPEECH_TO_TEXT_ACCESS_TOKEN_GET: '/speech-to-text/generate-access-token',
   GET_OUTPUT_FILE_DOWNLOAD: 'v3/conversations/{{conversationId}}/output-files/{{filename}}/download',
   SUBMIT_CHAT_FEEDBACK: 'v3/conversations/{{conversationId}}/messages/{{messageId}}/chat-feedback',
-  UPDATE_CONVERSATION_TITLE: 'v3/conversations/{{conversationId}}/title',
 };
 
 const ConversationService = chatApi.injectEndpoints({
@@ -163,13 +160,6 @@ const ConversationService = chatApi.injectEndpoints({
         body,
       }),
     }),
-    updateConversationTitle: builder.mutation<UpdateConversationTitleResponseType, UpdateConversationTitleRequestType>({
-      query: ({ conversationId, body }) => ({
-        url: formRequestUrlWithParams(API_ENDPOINTS.UPDATE_CONVERSATION_TITLE, { conversationId }),
-        method: REQUEST_TYPES.POST,
-        body,
-      }),
-    }),
   }),
 });
 
@@ -190,5 +180,4 @@ export const {
   useLazyGetSpeechToTextAccessTokenQuery,
   useLazyGetOutputFileDownloadQuery,
   useSubmitChatFeedbackMutation,
-  useUpdateConversationTitleMutation,
 } = ConversationService;
