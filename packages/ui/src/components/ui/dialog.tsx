@@ -120,7 +120,10 @@ const DialogBody = ({ className, ...props }: React.HTMLAttributes<HTMLDivElement
 DialogBody.displayName = 'DialogBody';
 
 const DialogFooter = ({ className, ...props }: React.HTMLAttributes<HTMLDivElement>) => (
-  <div className={cn('border-GRAY_400 mt-auto shrink-0 border-t px-6 py-4', className)} {...props} />
+  <div
+    className={cn('border-GRAY_400 mt-auto flex shrink-0 items-center justify-end gap-3 border-t px-6 py-4', className)}
+    {...props}
+  />
 );
 DialogFooter.displayName = 'DialogFooter';
 
