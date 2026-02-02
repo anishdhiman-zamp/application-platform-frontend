@@ -14,6 +14,7 @@ import {
 import ProcessEmptyState from 'modules/process/activity-runs/components/ProcessEmptyState';
 import { MarkdownContentSkeleton } from 'modules/process/knowledge-base-creation/components/KnowledgeBaseContentSkeleton';
 import MarkdownContent from 'modules/process/knowledge-base-creation/components/MarkdownContent';
+import KnowledgeBaseConfig from 'modules/process/knowledge-base-creation/KnowldgeBaseConfig';
 import { KNOWLEDGE_BASE_SSE_TYPES } from 'modules/process/knowledge-base-creation/sop-creation.constants';
 import dynamic from 'next/dynamic';
 import { useGetKnowledgeBaseQuery } from '@/apis/processes';
@@ -21,8 +22,11 @@ import { useEventBus } from '@/app/_providers/sse-provider';
 import { KB_TOAST_MESSAGES } from '@/components/common/toast/toast.constants';
 import CommonWrapper from '@/components/commonWrapper';
 import { SkeletonTypes } from '@/components/commonWrapper/commonWrapper.types';
+import { FEATURE_FLAGS } from '@/constants/featureFlags';
 import { NEEDS_ATTENTION_EMPTY_STATE } from '@/constants/icons';
 import { useAppSelector } from '@/hooks/toolkit';
+import { useFeatureFlag } from '@/hooks/useFeatureFlag';
+import { IntegrationType } from '@/modules/integrations/types/integrations.types';
 import PaceIcon from '@/modules/knowledge-based/icons/PaceIcon';
 import { defaultFn, MapAny } from '@/types/commonTypes';
 import { cn } from '@/utils/common';
@@ -38,6 +42,7 @@ interface ProcessCreationKnowledgeBaseProps {
   onChatSubmit?: (message: string) => void;
   isChatbotExpanded?: boolean;
   isDisabled?: boolean;
+  integrations: IntegrationType[];
 }
 
 const ProcessCreationKnowledgeBase: FC<ProcessCreationKnowledgeBaseProps> = ({
@@ -46,6 +51,7 @@ const ProcessCreationKnowledgeBase: FC<ProcessCreationKnowledgeBaseProps> = ({
   onChatSubmit = defaultFn,
   isChatbotExpanded,
   isDisabled,
+  integrations,
 }) => {
   const fetchedUrlRef = useRef<string | null>(null);
   const isFetchingRef = useRef(false);
@@ -53,6 +59,7 @@ const ProcessCreationKnowledgeBase: FC<ProcessCreationKnowledgeBaseProps> = ({
   const hasReceivedSSEUpdateRef = useRef(false);
 
   const { isSidebarOpen } = useAppSelector((state) => state.layoutConfig);
+  const { isEnabled: isKnowledgeBaseConfigEnabled } = useFeatureFlag(FEATURE_FLAGS.ZAMP_INTERNAL);
 
   const [markdownContent, setMarkdownContent] = useState<string>('');
   const [isLoading, setIsLoading] = useState(true);
@@ -89,6 +96,8 @@ const ProcessCreationKnowledgeBase: FC<ProcessCreationKnowledgeBaseProps> = ({
 
       // Prevent concurrent fetches
       if (isFetchingRef.current) {
+        setIsLoading(true);
+
         return;
       }
 
@@ -119,6 +128,7 @@ const ProcessCreationKnowledgeBase: FC<ProcessCreationKnowledgeBaseProps> = ({
             setMarkdownContent('');
           }
           toast.error(KB_TOAST_MESSAGES.FAILED_FETCHING_KNOWLEDGE_BASE);
+          setIsLoading(false);
           isFetchingRef.current = false;
           setIsLoading(false);
 
@@ -152,7 +162,6 @@ const ProcessCreationKnowledgeBase: FC<ProcessCreationKnowledgeBaseProps> = ({
         }
         captureException(fetchError);
         toast.error(KB_TOAST_MESSAGES.FAILED_FETCHING_KNOWLEDGE_BASE);
-        setIsLoading(false);
         isFetchingRef.current = false;
       }
     },
@@ -262,47 +271,49 @@ const ProcessCreationKnowledgeBase: FC<ProcessCreationKnowledgeBaseProps> = ({
               })}
             >
               {markdownContent && <div className='f-26-550 border-GRAY_400 pb-4'>{processName}</div>}
+              {isKnowledgeBaseConfigEnabled && <KnowledgeBaseConfig integrations={integrations} />}
               <Suspense fallback={<MarkdownContentSkeleton />}>
                 <MarkdownContent content={markdownContent} />
               </Suspense>
             </div>
           </CommonWrapper>
-          {!isDisabled && (
-            <div
-              className={cn('fixed right-0 bottom-0 z-1000 m-auto w-full transition-opacity duration-400', {
-                'opacity-100': !isChatbotExpanded,
-                'pointer-events-none opacity-0': isChatbotExpanded,
-                'w-[calc(100vw-241px)]': isSidebarOpen,
-                'w-full': !isSidebarOpen,
-              })}
-            >
-              <div className='bg-gradient-to-transparent w-full pb-6'>
-                <KbChatInput
-                  onSubmit={onChatSubmit}
-                  className={cn('mx-auto w-full transition-all duration-400', {
-                    'w-[672px]': isInputFocused || inputValue.length > 0,
-                    'w-[436px]': !isInputFocused && inputValue.length === 0,
-                  })}
-                  inputValue={inputValue}
-                  setInputValue={setInputValue}
-                  textWrapperClassName='flex pt-0 items-end'
-                  textAreaClassName='!pt-3 pb-3 !min-h-[26px]'
-                  placeholderClassName='!top-4'
-                  sendButtonClassName='!p-3'
-                  onFocus={() => setIsInputFocused(true)}
-                  onBlur={() => setIsInputFocused(false)}
-                  placeholder={
-                    <div className='-mt-1 flex items-center gap-1'>
-                      Ask away or give feedback to
-                      <PaceIcon height={12} width={12} />
-                      Pace
-                    </div>
-                  }
-                />
-              </div>
-            </div>
-          )}
         </div>
+
+        {!isDisabled && (
+          <div
+            className={cn('fixed right-0 bottom-0 z-1000 m-auto w-full transition-opacity duration-400', {
+              'opacity-100': !isChatbotExpanded,
+              'pointer-events-none opacity-0': isChatbotExpanded,
+              'w-[calc(100vw-241px)]': isSidebarOpen,
+              'w-full': !isSidebarOpen,
+            })}
+          >
+            <div className='bg-gradient-to-transparent w-full pb-6'>
+              <KbChatInput
+                onSubmit={onChatSubmit}
+                className={cn('mx-auto w-full transition-all duration-400', {
+                  'w-[672px]': isInputFocused || inputValue.length > 0,
+                  'w-[436px]': !isInputFocused && inputValue.length === 0,
+                })}
+                inputValue={inputValue}
+                setInputValue={setInputValue}
+                textWrapperClassName='flex pt-0 items-end'
+                textAreaClassName='!pt-3 pb-3 !min-h-[26px]'
+                placeholderClassName='!top-4'
+                sendButtonClassName='!p-3'
+                onFocus={() => setIsInputFocused(true)}
+                onBlur={() => setIsInputFocused(false)}
+                placeholder={
+                  <div className='-mt-1 flex items-center gap-1'>
+                    Ask away or give feedback to
+                    <PaceIcon height={12} width={12} />
+                    Pace
+                  </div>
+                }
+              />
+            </div>
+          </div>
+        )}
       </div>
     </div>
   );

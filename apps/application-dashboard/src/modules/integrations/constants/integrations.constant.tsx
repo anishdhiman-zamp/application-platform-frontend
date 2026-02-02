@@ -9,6 +9,11 @@ import {
   type StatusConfig,
 } from '@/modules/integrations/types/integrations.types';
 
+export const FORM_SCHEMA_TYPE = {
+  CONNECTION: 'connection',
+  RECIPIENT: 'recipient',
+} as const;
+
 export const CONNECTION_PILLS_DETAILS: ConnectionPillsDetailsMap = {
   synced: {
     title: '5 connections in sync',

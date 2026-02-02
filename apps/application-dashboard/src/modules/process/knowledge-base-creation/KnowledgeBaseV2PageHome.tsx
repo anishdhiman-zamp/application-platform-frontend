@@ -9,6 +9,7 @@ import { FEATURE_FLAGS } from '@/constants/featureFlags';
 import { ZAMP_LOGO_LOADER_SVG } from '@/constants/icons';
 import { useFeatureFlags } from '@/hooks/useFeatureFlags';
 import { usePagesAndProcessesData } from '@/hooks/usePagesAndProcessesData';
+import { IntegrationType } from '@/modules/integrations/types/integrations.types';
 import MarkdownSkeleton from '@/modules/process/knowledge-base-creation/components/MarkdownSkeleton';
 import { cn } from '@/utils/common';
 
@@ -29,9 +30,10 @@ const ProcessCreationKnowledgeBase = dynamic(
 interface KnowledgeBaseV2PageHomeProps {
   processId: string;
   conversationId: string | null;
+  integrations: IntegrationType[];
 }
 
-const KnowledgeBaseV2PageHome: FC<KnowledgeBaseV2PageHomeProps> = ({ processId, conversationId }) => {
+const KnowledgeBaseV2PageHome: FC<KnowledgeBaseV2PageHomeProps> = ({ processId, conversationId, integrations }) => {
   const { evaluate, ldClient } = useFeatureFlags();
   const [isChatbotExpanded, setIsChatbotExpanded] = useState(false);
   const [defaultMessage, setDefaultMessage] = useState<string | undefined>(undefined);
@@ -102,6 +104,7 @@ const KnowledgeBaseV2PageHome: FC<KnowledgeBaseV2PageHomeProps> = ({ processId, 
             isChatbotExpanded={isChatbotExpanded || !!conversationId}
             processId={processId}
             processName={currentProcess?.display_name ?? ''}
+            integrations={integrations}
           />
         </div>
       </div>

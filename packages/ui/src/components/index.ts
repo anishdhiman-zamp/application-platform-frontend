@@ -6,6 +6,7 @@ export * from './ui/autosize-textarea';
 export * from './ui/button';
 export * from './ui/checkbox';
 export * from './ui/combobox';
+export * from './ui/copy-to-clipboard';
 export * from './ui/dialog';
 export * from './ui/dropdown-menu';
 export * from './ui/email-input-to-chips';
@@ -26,6 +27,7 @@ export * from './ui/tags';
 export * from './ui/textarea';
 export * from './ui/toast';
 export * from './ui/tooltip';
+export * from './ui/DrilldownMenu';
 
 export * from '../constants/constants';
 
