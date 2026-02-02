@@ -19,8 +19,6 @@ interface UseEditableTitleReturn {
   editValue: string;
   isUpdatingTitle: boolean;
   canEdit: boolean;
-  setIsEditing: (isEditing: boolean) => void;
-  setEditValue: (value: string) => void;
   handleTitleClick: () => void;
   handleSave: () => Promise<void>;
   handleCancel: () => void;
@@ -141,8 +139,6 @@ export const useEditableTitle = ({
     editValue,
     isUpdatingTitle,
     canEdit,
-    setIsEditing,
-    setEditValue,
     handleTitleClick,
     handleSave,
     handleCancel,
