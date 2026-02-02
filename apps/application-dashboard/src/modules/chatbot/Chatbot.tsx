@@ -311,7 +311,7 @@ const Chatbot = ({
             )}
           >
             <div
-              className={cn('bg-chatbot-gradient flex max-h-[400px] flex-col rounded-[22px] p-1.5', {
+              className={cn('bg-chatbot-gradient flex max-h-[600px] flex-col rounded-[22px] p-1.5', {
                 'rounded-[20px]': !header,
               })}
             >

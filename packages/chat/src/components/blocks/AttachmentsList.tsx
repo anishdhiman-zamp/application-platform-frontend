@@ -15,7 +15,7 @@ export const AttachmentsList: FC<AttachmentsListProps> = ({ attachments, removeA
   return (
     <>
       {attachments.length > 0 && (
-        <div className={cn('flex flex-wrap gap-2 pt-1.5 [&::-webkit-scrollbar]:hidden', className)}>
+        <div className={cn('flex flex-wrap gap-2 pt-1.5', className)}>
           {[...attachments].reverse().map((attachment) => (
             <Attachment
               key={attachment.file_id || attachment.file_name}
