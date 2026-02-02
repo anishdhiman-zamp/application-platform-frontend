@@ -2,129 +2,32 @@
   "version": 1,
   "integrations": [
     {
-      "id": "linear",
-      "display_name": "Linear",
-      "logo": "/integrations/logos/linear.svg",
-      "what_possible": [
-        "Search issues",
-        "Create issue",
-        "Update issue",
-        "Delete issue",
-        "Get projects",
-        "Create project",
-        "Get teams",
-        "Get users",
-        "Add comment",
-        "Get labels",
-        "Assign issue",
-        "Change status"
-      ],
-      "guide": "/integrations/guides/linear.md"
+      "id": "cloudflare",
+      "display_name": "Email Forwarding",
+      "logo": "/integrations/logos/mail.svg",
+      "what_possible": [],
+      "guide": "",
+      "auth": "/integrations/auth/cloudflare.json",
+      "events": [
+        {
+          "id": "enable_email_routing_rule",
+          "display_name": "Email Forwarding"
+        }
+      ]
     },
     {
-      "id": "zapier",
-      "display_name": "Zapier",
-      "logo": "/integrations/logos/zapier.svg",
-      "what_possible": [
-        "Trigger on new row",
-        "Trigger on update",
-        "Create record",
-        "Update record",
-        "Search records",
-        "Delete record",
-        "Run process",
-        "Send notification"
-      ],
-      "guide": "/integrations/guides/zapier.md"
+      "id": "oracle",
+      "display_name": "Oracle",
+      "logo": "/integrations/logos/oracle.svg",
+      "what_possible": [],
+      "guide": ""
     },
     {
-      "id": "miro",
-      "display_name": "Miro",
-      "logo": "/integrations/logos/miro.svg",
-      "what_possible": [
-        "Get boards",
-        "Create board",
-        "Add sticky note",
-        "Add shape",
-        "Add text",
-        "Add image",
-        "Get items",
-        "Update item",
-        "Delete item",
-        "Export board"
-      ],
-      "guide": "/integrations/guides/miro.md"
-    },
-    {
-      "id": "square",
-      "display_name": "Square",
-      "logo": "/integrations/logos/square.svg",
-      "what_possible": [
-        "Get transactions",
-        "Get payments",
-        "Get refunds",
-        "Get customers",
-        "Search customers",
-        "Get inventory",
-        "Get locations",
-        "Get orders",
-        "Get catalog",
-        "Get invoices"
-      ],
-      "guide": "/integrations/guides/square.md"
-    },
-    {
-      "id": "dropbox",
-      "display_name": "Dropbox",
-      "logo": "/integrations/logos/dropbox.svg",
-      "what_possible": [
-        "Upload file",
-        "Download file",
-        "List files",
-        "Create folder",
-        "Delete file",
-        "Move file",
-        "Copy file",
-        "Get metadata",
-        "Search files",
-        "Share file"
-      ],
-      "guide": "/integrations/guides/dropbox.md"
-    },
-    {
-      "id": "medium",
-      "display_name": "Medium",
-      "logo": "/integrations/logos/medium.svg",
-      "what_possible": [
-        "Get publications",
-        "Get stories",
-        "Get stats",
-        "Get followers",
-        "Get user info",
-        "Create draft",
-        "Publish story"
-      ],
-      "guide": "/integrations/guides/medium.md"
-    },
-    {
-      "id": "jira",
-      "display_name": "Jira",
-      "logo": "/integrations/logos/jira.svg",
-      "what_possible": [
-        "Search issues",
-        "Create issue",
-        "Update issue",
-        "Delete issue",
-        "Get projects",
-        "Get sprints",
-        "Add comment",
-        "Get transitions",
-        "Transition issue",
-        "Assign issue",
-        "Get users",
-        "Add attachment"
-      ],
-      "guide": "/integrations/guides/jira.md"
+      "id": "coupa",
+      "display_name": "Coupa",
+      "logo": "/integrations/logos/coupa.svg",
+      "what_possible": [],
+      "guide": ""
     },
     {
       "id": "slack",
@@ -143,58 +46,6 @@
         "Update message"
       ],
       "guide": "/integrations/guides/slack.md"
-    },
-    {
-      "id": "mercury",
-      "display_name": "Mercury",
-      "logo": "/integrations/logos/mercury.svg",
-      "what_possible": [
-        "Get accounts",
-        "Get balances",
-        "Get transactions",
-        "Search transactions",
-        "Get statements",
-        "Get recipients",
-        "Get transfers"
-      ],
-      "guide": "/integrations/guides/mercury.md"
-    },
-    {
-      "id": "notion",
-      "display_name": "Notion",
-      "logo": "/integrations/logos/notion.svg",
-      "what_possible": [
-        "Search",
-        "Fetch",
-        "Create page",
-        "Update page",
-        "Move page",
-        "Duplicate page",
-        "Create database",
-        "Update database",
-        "Create comment",
-        "Get comments",
-        "Get users",
-        "Get self"
-      ],
-      "guide": "/integrations/guides/notion.md"
-    },
-    {
-      "id": "ramp",
-      "display_name": "Ramp",
-      "logo": "/integrations/logos/ramp.svg",
-      "what_possible": [
-        "Get transactions",
-        "Get receipts",
-        "Get cardholders",
-        "Get departments",
-        "Get merchants",
-        "Get statements",
-        "Get limits",
-        "Get reimbursements",
-        "Search expenses"
-      ],
-      "guide": "/integrations/guides/ramp.md"
     }
   ]
 }
