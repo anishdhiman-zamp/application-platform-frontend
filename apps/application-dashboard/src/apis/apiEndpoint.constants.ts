@@ -186,6 +186,19 @@ export const API_ENDPOINTS = {
   POST_MESSAGE_V3: `v3/conversations/{{conversationId}}/messages`,
   // Conversations V2
   FILTER_CONVERSATIONS_V2_GET: `v2/conversations/filter`,
+
+  // Integrations
+  INTEGRATIONS_AUTHENTICATE: `/integrations/authenticate`,
+  PROCESS_CONNECTION_MAPPINGS_POST: `process/{{process_id}}/connections`,
+  PROCESS_CONNECTION_MAPPINGS_GET: `process/{{process_id}}/connections`,
+  GET_CONNECTION_BY_INTEGRATION_NAME: `connections/by-integration/{{integration_name}}`,
+  DELETE_PROCESS_CONNECTION_MAPPING: `process/{{process_id}}/connections`,
+
+  // Trigger Subscriptions
+  TRIGGER_SUBSCRIPTIONS_POST: `trigger-subscriptions`,
+  TRIGGER_SUBSCRIPTIONS_GET_BY_ID: `trigger-subscriptions/{{subscription_id}}`,
+  TRIGGER_SUBSCRIPTIONS_GET: `trigger-subscriptions`,
+  TRIGGER_SUBSCRIPTIONS_DELETE: `trigger-subscriptions/{{subscription_id}}`,
   // Update Conversation Title
   UPDATE_CONVERSATION_TITLE: `v3/conversations/{{conversationId}}/title`,
 };

@@ -8,6 +8,7 @@ import { useFilterConversationsQuery } from '@/apis/processes';
 import CommonWrapper from '@/components/commonWrapper';
 import { SkeletonTypes } from '@/components/commonWrapper/commonWrapper.types';
 import { usePagesAndProcessesData } from '@/hooks/usePagesAndProcessesData';
+import { IntegrationType } from '@/modules/integrations/types/integrations.types';
 import ChatMessagesSkeleton from '@/modules/pace/components/loaders/ChatMessagesSkeleton';
 import { ProcessResponseType, ProcessStatus } from '@/types/api/processApi.types';
 import { PROCESS_CREATED_EVENT, ProcessCreatedEventDetail } from '@/utils/events';
@@ -25,12 +26,14 @@ const ProcessCreationKnowledgeBase = dynamic(
 interface CreateKnowledgeBasePageHomeProps {
   processId: string;
   conversationId?: string;
+  integrations: IntegrationType[];
   source?: string;
 }
 
 const CreateKnowledgeBasePageHome: FC<CreateKnowledgeBasePageHomeProps> = ({
   processId,
   conversationId: initialConversationId,
+  integrations,
   source,
 }) => {
   const isFromProcessCreation = source === 'process-creation';
@@ -158,6 +161,7 @@ const CreateKnowledgeBasePageHome: FC<CreateKnowledgeBasePageHomeProps> = ({
           isChatbotExpanded
           processId={processId}
           processName={currentProcess?.display_name ?? ''}
+          integrations={integrations}
         />
       </div>
     </CommonWrapper>

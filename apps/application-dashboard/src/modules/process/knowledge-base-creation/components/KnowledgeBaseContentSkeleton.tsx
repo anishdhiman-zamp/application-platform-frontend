@@ -11,7 +11,7 @@ import { Skeleton } from '@zamp-platform/ui';
  * Skeleton mimicking markdown content structure with headings, paragraphs, and lists
  */
 export const MarkdownContentSkeleton: FC = () => (
-  <div className='flex flex-col gap-6'>
+  <div className='mt-12 flex flex-col gap-6'>
     {/* Step heading */}
     <Skeleton className='mb-4 h-6.5 w-64 rounded' />
     <div className='flex flex-col gap-3'>
