@@ -2,7 +2,11 @@ import { REQUEST_TYPES } from '@zamp-platform/api';
 import { API_ENDPOINTS } from 'apis/apiEndpoint.constants';
 import { APITags } from '@/constants/api.constants';
 import { baseApi } from '@/services/baseApi';
-import type { OpenFeedbackResponseType } from '@/types/api/feedbacks.types';
+import type {
+  OpenFeedbackResponseType,
+  UpdateConversationTitleRequest,
+  UpdateConversationTitleResponse,
+} from '@/types/api/feedbacks.types';
 import type { Skill, SkillStatus } from '@/types/api/skills.types';
 import { formRequestUrlWithParams } from '@/utils/common';
 
@@ -131,6 +135,14 @@ const MACS = baseApi.injectEndpoints({
         }
       },
     }),
+    updateConversationTitle: builder.mutation<UpdateConversationTitleResponse, UpdateConversationTitleRequest>({
+      query: ({ conversationId, body }) => ({
+        url: formRequestUrlWithParams(API_ENDPOINTS.UPDATE_CONVERSATION_TITLE, { conversationId }),
+        method: REQUEST_TYPES.POST,
+        body,
+      }),
+      invalidatesTags: [APITags.GET_CONVERSATION_HISTORY],
+    }),
   }),
 });
 
@@ -144,4 +156,5 @@ export const {
   useUpdateSkillMutation,
   useUpdateSkillStatusMutation,
   useDeleteSkillMutation,
+  useUpdateConversationTitleMutation,
 } = MACS;
