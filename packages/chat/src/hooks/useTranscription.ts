@@ -85,7 +85,7 @@ export const useTranscription = ({ adapter }: UseTranscriptionOptions): UseTrans
         stateRefs.current.isStarting = false;
       }
     },
-    [isRecording, connectToElevenLabs, setupMicrophone],
+    [isRecording, connectToElevenLabs, setupMicrophone, cleanupMicrophone],
   );
 
   const stopRecording = useCallback(async () => {
