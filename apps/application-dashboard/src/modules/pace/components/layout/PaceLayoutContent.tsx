@@ -17,9 +17,12 @@ const PaceLayoutContent: FC<PaceLayoutContentProps> = ({ children }) => {
   const { isPaceSidebarOpen, setIsPaceSidebarOpen } = usePaceContext();
   const pathname = usePathname();
 
-  const isPaceHome = useMemo(() => pathname === ROUTES_PATH.CHAT, [pathname]);
+  const isHideFloatingButton = useMemo(
+    () => pathname === ROUTES_PATH.CHAT || pathname?.includes(ROUTES_PATH.CHAT_SETTINGS),
+    [pathname],
+  );
 
-  const showFloatingButton = !isPaceSidebarOpen && !isPaceHome;
+  const showFloatingButton = !isPaceSidebarOpen && !isHideFloatingButton;
 
   return (
     <div className='bg-BG_GRAY_1 flex h-full w-full overflow-hidden'>
