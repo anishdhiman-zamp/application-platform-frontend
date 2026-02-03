@@ -56,3 +56,5 @@ frontend.log
 apps/application-dashboard/tests/session-secrets/
 apps/application-dashboard/tests/playwright-report/
 apps/application-dashboard/tests/test-results/
+# next-agents-md
+.next-docs/
