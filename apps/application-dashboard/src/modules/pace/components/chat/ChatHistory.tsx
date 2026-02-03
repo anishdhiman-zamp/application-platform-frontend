@@ -20,7 +20,7 @@ const PAGE_SIZE = 20;
 const SEARCH_DEBOUNCE_MS = 300;
 
 interface ChatHistoryProps {
-  onSelectConversation: (id: string | null) => void;
+  onSelectConversation: (id: string | null, title?: string) => void;
 }
 
 const ChatHistory = ({ onSelectConversation }: ChatHistoryProps) => {

@@ -512,7 +512,7 @@ export const checkScreenBreakpoint = (width: number, height: number) =>
  * @returns boolean
  */
 export const validateEmail = (email: string): boolean => {
-  const testEmailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+  const testEmailRegex = /^[^\s@]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/;
 
   return testEmailRegex.test(email);
 };

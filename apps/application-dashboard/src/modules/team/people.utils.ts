@@ -22,19 +22,20 @@ export const extractEmailFromEntry = (entry: string): string => {
 
 /**
  * Extracts all emails from a search value that may contain:
- * - Multiple comma-separated entries
+ * - Multiple comma or semicolon-separated entries
  * - "Name <email>" format entries
  * - Plain email addresses
  * - Space-separated emails
  *
- * Example input: "Hello World <hello@example.com>, Test <test@example.com>, Jane Doe <jane@example.com>"
+ * Example input: "Hello World <hello@example.com>, Test <test@example.com>; Jane Doe <jane@example.com>"
  * Example output: ["hello@example.com", "test@example.com", "jane@example.com"]
  */
 export const extractEmailsFromSearchValue = (value: string): string[] => {
-  const commaSeparatedEntries = value.split(',');
+  // Split by both comma and semicolon as delimiters
+  const separatedEntries = value.split(/[,;]/);
   const emails: string[] = [];
 
-  commaSeparatedEntries.forEach((entry) => {
+  separatedEntries.forEach((entry) => {
     const extractedEmail = extractEmailFromEntry(entry);
 
     if (extractedEmail) {

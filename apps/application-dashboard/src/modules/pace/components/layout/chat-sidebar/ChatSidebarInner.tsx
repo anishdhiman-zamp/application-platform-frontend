@@ -30,7 +30,7 @@ import type { RootState } from '@/store';
 
 interface ChatSidebarInnerProps {
   conversationId: string | null;
-  setConversationId: (id: string | null) => void;
+  setConversationId: (id: string | null, title?: string) => void;
   setChatTitle: (title: string) => void;
   startNewChat: () => void;
   handleClose: () => void;
@@ -65,7 +65,9 @@ const ChatSidebarInner: FC<ChatSidebarInnerProps> = ({
       createConversation: API_ENDPOINTS.CREATE_CONVERSATION_V3,
     },
     setHeader: (header: string) => {
-      setChatTitle(header);
+      if (!chatTitle) {
+        setChatTitle(header);
+      }
     },
   });
 
@@ -80,7 +82,7 @@ const ChatSidebarInner: FC<ChatSidebarInnerProps> = ({
 
   useEffect(() => {
     if (chat.conversationId && chat.conversationId !== conversationId) {
-      setConversationId(chat.conversationId);
+      setConversationId(chat.conversationId, chatTitle);
     }
   }, [chat.conversationId, conversationId, setConversationId]);
 
@@ -102,7 +104,10 @@ const ChatSidebarInner: FC<ChatSidebarInnerProps> = ({
       <ChatTopbar
         onStartNewChat={startNewChat}
         onClose={handleClose}
+        conversationId={conversationId}
+        organizationId={organizationId}
         title={isInConversation ? chatTitle : 'New chat'}
+        onTitleChange={setChatTitle}
       />
       <div
         ref={scrollContainerRef}

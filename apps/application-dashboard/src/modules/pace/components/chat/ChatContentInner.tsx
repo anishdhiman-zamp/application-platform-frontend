@@ -32,7 +32,7 @@ interface ChatContentInnerProps {
   organizationId: string;
   currentUserName: string;
   conversationId: string | null;
-  setConversationId: (id: string | null) => void;
+  setConversationId: (id: string | null, title?: string) => void;
   setChatTitle: (title: string) => void;
   chatTitle: string;
   startNewChat: () => void;
@@ -65,7 +65,9 @@ const ChatContentInner = ({
       createConversation: API_ENDPOINTS.CREATE_CONVERSATION_V3,
     },
     setHeader: (header: string) => {
-      setChatTitle(header);
+      if (!chatTitle) {
+        setChatTitle(header);
+      }
     },
   });
 
@@ -100,7 +102,13 @@ const ChatContentInner = ({
     return (
       <div className='relative flex h-full flex-1 flex-col' {...dropZoneProps}>
         <DropOverlay isVisible={isDragOver} />
-        <ChatTopbar title={chatTitle || 'Untitled'} onStartNewChat={startNewChat} />
+        <ChatTopbar
+          title={chatTitle || 'Untitled'}
+          conversationId={conversationId ?? chat.conversationId}
+          organizationId={organizationId}
+          onStartNewChat={startNewChat}
+          onTitleChange={setChatTitle}
+        />
         <div
           ref={scrollContainerRef}
           onScroll={handleScroll}

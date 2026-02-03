@@ -33,8 +33,9 @@ export const useChatSidebarState = ({ initialConversationId }: UseChatSidebarSta
     window.history.replaceState(null, '', newUrl);
   }, []);
 
-  const setConversationId = useCallback((id: string | null) => {
+  const setConversationId = useCallback((id: string | null, title?: string) => {
     setConversationIdState(id);
+    setChatTitle(title || '');
 
     const params = new URLSearchParams(window.location.search);
 
