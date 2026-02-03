@@ -199,4 +199,6 @@ export const API_ENDPOINTS = {
   TRIGGER_SUBSCRIPTIONS_GET_BY_ID: `trigger-subscriptions/{{subscription_id}}`,
   TRIGGER_SUBSCRIPTIONS_GET: `trigger-subscriptions`,
   TRIGGER_SUBSCRIPTIONS_DELETE: `trigger-subscriptions/{{subscription_id}}`,
+  // Update Conversation Title
+  UPDATE_CONVERSATION_TITLE: `v3/conversations/{{conversationId}}/title`,
 };
