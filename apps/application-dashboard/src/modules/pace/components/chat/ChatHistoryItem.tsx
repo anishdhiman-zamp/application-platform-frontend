@@ -7,12 +7,12 @@ import type { FeedbackItemType } from '@/types/api/feedbacks.types';
 
 interface ChatHistoryItemProps {
   conversation: FeedbackItemType;
-  onSelect: (id: string | null) => void;
+  onSelect: (id: string | null, title?: string) => void;
 }
 
 const ChatHistoryItem: FC<ChatHistoryItemProps> = ({ conversation, onSelect }) => {
   const handleClick = () => {
-    onSelect(conversation?.id);
+    onSelect(conversation?.id, conversation?.title);
   };
 
   return (

@@ -48,3 +48,19 @@ export interface OpenFeedbackResponseType {
   total_pages: number;
   count: number;
 }
+
+// Update Conversation Title Types
+export interface UpdateConversationTitleRequest {
+  conversationId: string;
+  body: {
+    resource_id: string;
+    resource_type: string;
+    title: string;
+  };
+}
+
+export interface UpdateConversationTitleResponse {
+  success: boolean;
+  conversation_id: string;
+  title: string;
+}

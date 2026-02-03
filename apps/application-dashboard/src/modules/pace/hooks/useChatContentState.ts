@@ -19,8 +19,9 @@ export const useChatContentState = ({ initialConversationId }: UseChatContentSta
   const [chatKey, setChatKey] = useState(0);
   const isInitializedRef = useRef(false);
 
-  const setConversationId = useCallback((id: string | null) => {
+  const setConversationId = useCallback((id: string | null, title?: string) => {
     setConversationIdState(id);
+    setChatTitle(title || '');
 
     const params = new URLSearchParams(window.location.search);
 
