@@ -131,7 +131,7 @@ const ChatHistory = ({ onSelectConversation }: ChatHistoryProps) => {
     <div className='mx-auto flex min-h-0 w-full flex-1 flex-col overflow-hidden bg-white pt-4'>
       <div className='flex shrink-0 flex-col gap-4 p-3'>
         <div className='flex items-center justify-between'>
-          <p className='f-14-550 text-gray-1000'>Chat History</p>
+          <p className='f-14-550 text-gray-1000'>Chat</p>
           <Button
             variant='ghost'
             size='icon'

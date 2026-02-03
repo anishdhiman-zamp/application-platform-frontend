@@ -14,11 +14,6 @@ const PaceNavbar = () => {
   const { setIsPaceSidebarOpen, startNewChat } = usePaceContext();
   const { dynamicTabs, isDynamicTabActive, isOnAnyDynamicTab, handleCloseDynamicTab } = useDynamicTabs();
 
-  const onHomeClick = () => {
-    setIsPaceSidebarOpen(false);
-    startNewChat();
-  };
-
   const isNavItemActive = (id: PaceNavbarItemId, path: string) => {
     if (id === PaceNavbarItemId.HOME) {
       return pathname === path;
@@ -33,7 +28,8 @@ const PaceNavbar = () => {
 
   const handleNavItemClick = (id: PaceNavbarItemId) => {
     if (id === PaceNavbarItemId.HOME) {
-      onHomeClick();
+      setIsPaceSidebarOpen(false);
+      startNewChat();
     }
   };
 
@@ -46,7 +42,7 @@ const PaceNavbar = () => {
             key={item.id}
             href={item.path}
             className={cn(
-              'text-GRAY_900 hover:text-GRAY_900 hover:bg-GRAY_100 flex h-7 w-7 cursor-pointer items-center justify-center rounded-lg p-2',
+              'text-GRAY_900 hover:text-GRAY_1000 hover:bg-GRAY_200 flex h-7 w-7 cursor-pointer items-center justify-center rounded-lg p-2',
               isNavItemActive(item.id, item.path) &&
                 'border-GRAY_400 text-GRAY_1000 hover:text-GRAY_1000 shadow-tab-shadow border bg-white hover:bg-white',
             )}

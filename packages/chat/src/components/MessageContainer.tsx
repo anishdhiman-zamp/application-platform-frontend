@@ -38,6 +38,7 @@ interface MessageContainerProps {
   hideSenderName?: boolean;
   userAvatarClassName?: string;
   children?: ReactNode;
+  organizationId?: string;
 }
 
 export const MessageContainer: FC<MessageContainerProps> = ({
@@ -56,6 +57,7 @@ export const MessageContainer: FC<MessageContainerProps> = ({
   hideSenderName = false,
   userAvatarClassName,
   children,
+  organizationId,
 }) => {
   const defaultAssistantAvatar = assistantAvatar ?? <PaceAvatar />;
   const isInitialScrollRef = useRef(true);
@@ -95,7 +97,7 @@ export const MessageContainer: FC<MessageContainerProps> = ({
               name={senderName}
               backgroundColor={COLORS.YELLOW_300}
               className={cn(
-                'f-10-500 text-gray-1000 flex h-4 min-h-4 w-4 min-w-4 items-center justify-center rounded-md',
+                'f-12-500 text-gray-1000 flex h-6 min-h-6 w-6 min-w-6 items-center justify-center rounded-[7.5px] p-1',
                 userAvatarClassName,
               )}
             />
@@ -104,6 +106,7 @@ export const MessageContainer: FC<MessageContainerProps> = ({
           feedbackDisabled={feedbackDisabled}
           showCopy={showCopy}
           isLastMessage={index === messages.length - 1}
+          organizationId={organizationId}
         />
       ))}
 
@@ -112,6 +115,7 @@ export const MessageContainer: FC<MessageContainerProps> = ({
           streamingState={streamingState}
           assistantName={assistantName}
           assistantAvatar={defaultAssistantAvatar}
+          hideSenderName={hideSenderName}
         />
       )}
 

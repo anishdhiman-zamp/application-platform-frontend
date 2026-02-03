@@ -14,7 +14,7 @@ import { useChatInput } from '../hooks/useChatInput';
 import { MicrophoneState } from '../hooks/useMicrophoneRecorder';
 import { useTranscription } from '../hooks/useTranscription';
 import { AnnotationType, LocationData, ResourceType, ScopeType } from '../types/chat.types';
-import { SOCKET_STATES, SpeechToTextProvider } from '../types/transcription.types';
+import { SOCKET_STATES } from '../types/transcription.types';
 import { formatRejectedExtensions, isFileTypeAccepted } from '../utils/fileUpload';
 import { AudioVisualizer } from './AudioVisualizer';
 import { AttachmentsList } from './blocks';
@@ -34,7 +34,6 @@ export interface ConnectedChatInputProps {
   externalInputValue?: string;
   setExternalInputValue?: Dispatch<SetStateAction<string>>;
   autoFocus?: boolean;
-  speechToTextProvider?: SpeechToTextProvider;
   acceptedFileTypes?: string;
   onMicrophoneError?: () => void;
   onRecordingError?: () => void;
@@ -64,7 +63,6 @@ export const ConnectedChatInput: FC<ConnectedChatInputProps> = ({
   externalInputValue,
   setExternalInputValue,
   autoFocus = false,
-  speechToTextProvider = SpeechToTextProvider.ELEVENLABS,
   acceptedFileTypes,
   onMicrophoneError,
   onRecordingError,
@@ -148,7 +146,6 @@ export const ConnectedChatInput: FC<ConnectedChatInputProps> = ({
     microphone,
     isCommitting,
   } = useTranscription({
-    provider: speechToTextProvider,
     adapter: transcriptionAdapter,
   });
 
@@ -277,7 +274,6 @@ export const ConnectedChatInput: FC<ConnectedChatInputProps> = ({
   return (
     <div
       className={cn('w-full', {
-        'pt-1.5': attachments.length > 0,
         'cursor-not-allowed opacity-50': isDisabled,
       })}
     >
@@ -291,108 +287,108 @@ export const ConnectedChatInput: FC<ConnectedChatInputProps> = ({
         aria-label='File input'
         accept={acceptedFileTypes}
       />
-      <AttachmentsList
-        attachments={attachments}
-        removeAttachment={removeAttachment}
-        isLoading={isUploading}
-        className='mb-2'
-      />
+
       <div
-        className={cn(shouldShowRecorder ? 'relative w-full rounded-xl border border-gray-600 p-1.5' : '', className)}
+        className={cn(
+          'border-GRAY_400 focus-within:border-GRAY_600 relative w-full rounded-xl border shadow-xs transition-all',
+          shouldShowRecorder && 'border-gray-400',
+          className,
+        )}
       >
+        <AttachmentsList
+          attachments={attachments}
+          removeAttachment={removeAttachment}
+          isLoading={isUploading}
+          className='px-2.5 pt-2'
+        />
         {/* Middle - Textarea and button wrapper */}
-        <div className='relative'>
-          {shouldShowRecorder ? (
-            <div className='flex w-full items-center justify-between gap-2'>
+
+        {shouldShowRecorder ? (
+          <div className='flex w-full items-center justify-between gap-2 p-2.5'>
+            <Button
+              variant='ghost'
+              size='icon'
+              className='bg-GRAY_200 hover:bg-GRAY_200 !size-5 rounded-full [&_svg]:size-3'
+              aria-label='Reject recording'
+              onClick={handleReject}
+            >
+              <X className='text-GRAY_1000' />
+            </Button>
+
+            {/* Visualizer */}
+            {microphone && <AudioVisualizer microphone={microphone} />}
+
+            <Button
+              size='icon'
+              className='!size-5 rounded-full [&_svg]:size-3'
+              aria-label='Accept recording'
+              onClick={handleAccept}
+              disabled={isCommitting}
+              isLoading={isCommitting}
+            >
+              <Check className='text-white' />
+            </Button>
+          </div>
+        ) : (
+          <div onClick={handleContainerClick} className='flex w-full flex-col pt-2.5'>
+            <div className='px-2.5'>
+              <Textarea
+                ref={textareaRef}
+                value={value}
+                autoFocus={autoFocus}
+                onChange={(e) => setValue(e.target.value)}
+                onKeyDown={isDisabled ? undefined : handleKeyDown}
+                onPaste={isDisabled || disableAttachments ? undefined : handlePaste}
+                placeholder={placeholder}
+                className='f-13-450 placeholder:text-muted-foreground min-h-0 w-full resize-none overflow-y-auto rounded-none border-none bg-transparent p-0 shadow-none outline-none [scrollbar-width:none]'
+                style={{
+                  height: '20px',
+                  maxHeight: '200px',
+                  lineHeight: '18px',
+                }}
+                disabled={isDisabled}
+              />
+            </div>
+            <div className='flex items-center justify-between py-2.5 pr-2.5 pl-1.5'>
               <Button
                 variant='ghost'
                 size='icon'
-                className='bg-GRAY_200 hover:bg-GRAY_200 !size-5 rounded-full [&_svg]:size-3'
-                aria-label='Reject recording'
-                onClick={handleReject}
+                className='hover:text-gray-1000 !size-5 rounded-[2px] p-[2px] text-gray-900 hover:bg-gray-100 [&_svg]:size-3'
+                aria-label='Attach file'
+                onClick={handleAttachClick}
+                disabled={isUploading || isDisabled || disableAttachments}
               >
-                <X className='text-GRAY_1000' />
+                <Paperclip />
               </Button>
 
-              {/* Visualizer */}
-              {microphone && <AudioVisualizer microphone={microphone} />}
-
-              <Button
-                size='icon'
-                className='!size-5 rounded-full [&_svg]:size-3'
-                aria-label='Accept recording'
-                onClick={handleAccept}
-                disabled={isCommitting}
-                isLoading={isCommitting}
-              >
-                <Check className='text-white' />
-              </Button>
-            </div>
-          ) : (
-            <div
-              className='border-GRAY_400 focus-within:border-GRAY_600 rounded-xl border shadow-xs transition-all'
-              onClick={handleContainerClick}
-            >
-              <div className='p-2.5'>
-                <Textarea
-                  ref={textareaRef}
-                  value={value}
-                  autoFocus
-                  onChange={(e) => setValue(e.target.value)}
-                  onKeyDown={isDisabled ? undefined : handleKeyDown}
-                  onPaste={isDisabled || disableAttachments ? undefined : handlePaste}
-                  placeholder={placeholder}
-                  className='f-13-450 placeholder:text-muted-foreground min-h-0 w-full resize-none overflow-y-auto border-none bg-transparent p-0 shadow-none outline-none [scrollbar-width:thin]'
-                  style={{
-                    height: '20px',
-                    maxHeight: '200px',
-                    lineHeight: '18px',
-                  }}
-                  disabled={isDisabled}
-                />
-              </div>
-
-              <div className='flex items-center justify-between px-2.5 py-2.5'>
-                <Button
-                  variant='ghost'
-                  size='icon'
-                  className='hover:text-gray-1000 !size-5 rounded-[2px] p-[2px] text-gray-900 hover:bg-gray-100 [&_svg]:size-3'
-                  aria-label='Attach file'
-                  onClick={handleAttachClick}
-                  disabled={isUploading || isDisabled || disableAttachments}
-                >
-                  <Paperclip />
-                </Button>
-
-                <div className='flex items-center gap-x-2'>
-                  {isPreparingToRecord ? (
-                    <Loader size={14} className='animate-spin text-gray-900' />
-                  ) : (
-                    <Button
-                      variant='ghost'
-                      size='icon'
-                      className='hover:text-gray-1000 !size-5 rounded-[2px] p-[2px] text-gray-900 hover:bg-gray-100 [&_svg]:size-3'
-                      aria-label='Start recording'
-                      onClick={handleStartRecording}
-                      disabled={microphoneState === MicrophoneState.SettingUp || isDisabled}
-                    >
-                      <Mic />
-                    </Button>
-                  )}
+              <div className='flex items-center gap-x-2'>
+                {isPreparingToRecord ? (
+                  <Loader size={14} className='animate-spin text-gray-900' />
+                ) : (
                   <Button
-                    onClick={handleSubmit}
-                    disabled={isSubmitDisabled}
+                    variant='ghost'
                     size='icon'
-                    aria-label='Send message'
-                    className='disabled:bg-GRAY_300 !size-5 rounded-full p-[2px] !text-white disabled:cursor-not-allowed [&_svg]:size-3'
+                    className='hover:text-gray-1000 !size-5 rounded-[2px] p-[2px] text-gray-900 hover:bg-gray-100 [&_svg]:size-3'
+                    aria-label='Start recording'
+                    onClick={handleStartRecording}
+                    disabled={microphoneState === MicrophoneState.SettingUp || isDisabled}
                   >
-                    <ArrowUp className={cn('text-white', { 'text-GRAY_700': isSubmitDisabled })} />
+                    <Mic />
                   </Button>
-                </div>
+                )}
+                <Button
+                  onClick={handleSubmit}
+                  disabled={isSubmitDisabled}
+                  size='icon'
+                  aria-label='Send message'
+                  className='disabled:bg-GRAY_300 !size-5 rounded-full p-[2px] !text-white disabled:cursor-not-allowed [&_svg]:size-3'
+                >
+                  <ArrowUp className={cn('text-white', { 'text-GRAY_700': isSubmitDisabled })} />
+                </Button>
               </div>
             </div>
-          )}
-        </div>
+          </div>
+        )}
       </div>
     </div>
   );
