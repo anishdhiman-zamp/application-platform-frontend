@@ -77,8 +77,13 @@ const ChatFeedback: FC<ChatFeedbackProps> = ({
   const [getSpeechToTextAccessToken] = useLazyGetSpeechToTextAccessTokenQuery({});
 
   const getElevenLabsToken = useCallback(async () => {
-    const result = await getSpeechToTextAccessToken({}).unwrap();
-    return result.access_token;
+    try {
+      const result = await getSpeechToTextAccessToken({}).unwrap();
+      return result.access_token;
+    } catch (error) {
+      toast.error('Failed to get speech-to-text access token');
+      throw error;
+    }
   }, [getSpeechToTextAccessToken]);
 
   const transcriptionAdapter: TranscriptionAdapter = useMemo(
@@ -132,13 +137,6 @@ const ChatFeedback: FC<ChatFeedbackProps> = ({
     () => isRecording && connectionState !== SOCKET_STATES.open,
     [isRecording, connectionState],
   );
-
-  // Append transcript to details when it changes
-  useEffect(() => {
-    if (transcript) {
-      setDetails((prev) => (prev ? `${prev} ${transcript}` : transcript));
-    }
-  }, [transcript]);
 
   const isFormValid = issueType && details.trim();
 
@@ -212,6 +210,12 @@ const ChatFeedback: FC<ChatFeedbackProps> = ({
       onRecordingError?.();
     }
   };
+
+  useEffect(() => {
+    if (transcript) {
+      setDetails((prev) => (prev ? `${prev} ${transcript}` : transcript));
+    }
+  }, [transcript]);
 
   return (
     <>
