@@ -52,6 +52,7 @@ export type AudiencesByResourceResponse = {
     email?: string;
     user_id?: string;
     name?: string;
+    last_name?: string;
   };
   metadata?: {
     fgac_filters?: FilterModelType;

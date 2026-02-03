@@ -50,7 +50,7 @@ const MultiSelectInput: FC<MultiSelectInputPropsType> = ({
   onCustomDeleteFn,
   closeDropdownOnSelect = false,
   labelCasing,
-  allowedAddKeys = [KEY_CODES.ENTER, KEY_CODES.COMMA, KEY_CODES.SPACE],
+  allowedAddKeys = [KEY_CODES.ENTER, KEY_CODES.COMMA, KEY_CODES.SEMICOLON, KEY_CODES.SPACE],
 }) => {
   const inputRef = useRef<HTMLInputElement>(null);
   const containerRef = useRef<HTMLDivElement>(null);

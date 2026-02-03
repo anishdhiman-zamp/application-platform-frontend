@@ -67,6 +67,7 @@ export const KEY_CODES = {
   ESCAPE: 'Escape',
   SPACE: ' ',
   COMMA: ',',
+  SEMICOLON: ';',
   ARROW_UP: 'ArrowUp',
   ARROW_DOWN: 'ArrowDown',
 };
