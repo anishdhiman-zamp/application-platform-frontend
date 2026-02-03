@@ -40,6 +40,7 @@ export const ROUTES_PATH = {
   CHAT_ARTIFACTS: '/chat/artifacts',
   CHAT_PAGE_SHEET: '/chat/pages/:pageId/:sheetId',
   CHAT_DATASET: '/chat/datasets/:datasetId',
+  CHAT_SETTINGS: '/chat/settings',
   CHAT_SETTINGS_PEOPLE: '/chat/settings/people',
   CHAT_SETTINGS_INTEGRATIONS: '/chat/settings/integrations',
 };

@@ -1,6 +1,6 @@
 'use client';
 
-import { FC, ReactNode, useMemo } from 'react';
+import { FC, ReactNode } from 'react';
 import { Button } from '@zamp-platform/ui';
 import ChatSidebar from 'modules/pace/components/layout/chat-sidebar/ChatSidebar';
 import PaceNavbar from 'modules/pace/components/layout/PaceNavbar';
@@ -17,9 +17,9 @@ const PaceLayoutContent: FC<PaceLayoutContentProps> = ({ children }) => {
   const { isPaceSidebarOpen, setIsPaceSidebarOpen } = usePaceContext();
   const pathname = usePathname();
 
-  const isPaceHome = useMemo(() => pathname === ROUTES_PATH.CHAT, [pathname]);
+  const isHideFloatingButton = pathname === ROUTES_PATH.CHAT || pathname?.includes(ROUTES_PATH.CHAT_SETTINGS);
 
-  const showFloatingButton = !isPaceSidebarOpen && !isPaceHome;
+  const showFloatingButton = !isPaceSidebarOpen && !isHideFloatingButton;
 
   return (
     <div className='bg-BG_GRAY_1 flex h-full w-full overflow-hidden'>
