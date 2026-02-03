@@ -53,21 +53,21 @@ const ChatTopbar: FC<ChatTopbarProps> = ({ className, style, title, onStartNewCh
         <Button
           variant='ghost'
           size='icon'
-          className='h-6 w-6 rounded p-2 text-gray-600 hover:text-gray-900'
+          className='h-6 w-6 rounded p-2 text-gray-900 hover:text-gray-900'
           onClick={onStartNewChat}
           title='Start new chat'
         >
-          <Plus size={12} />
+          <Plus size={14} />
         </Button>
         {onClose && (
           <Button
             variant='ghost'
             size='icon'
-            className='h-6 w-6 rounded p-2 text-gray-600 hover:text-gray-900'
+            className='h-6 w-6 rounded p-2 text-gray-900 hover:text-gray-900'
             onClick={onClose}
             title='Close chat'
           >
-            <Minus size={12} />
+            <Minus size={14} />
           </Button>
         )}
       </div>

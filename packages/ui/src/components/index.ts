@@ -38,3 +38,5 @@ export * from './ui/arrow-down';
 export * from './ui/book-text';
 export * from './ui/home';
 export * from './ui/settings';
+export * from './ui/activity';
+export * from './ui/shapes';

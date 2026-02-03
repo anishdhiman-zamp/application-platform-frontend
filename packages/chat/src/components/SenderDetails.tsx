@@ -30,7 +30,7 @@ const SenderDetails: FC<SenderDetailsProps> = ({
   return (
     <div className={cn('flex items-center gap-x-1.5', className)}>
       {hideSenderName ? (
-        <TooltipProvider delayDuration={100}>
+        <TooltipProvider delayDuration={500}>
           <Tooltip>
             <TooltipTrigger asChild>
               <div className='cursor-default'>{avatarElement}</div>

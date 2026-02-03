@@ -55,7 +55,7 @@
   }
 
   * > ::-webkit-scrollbar {
-    width: 12px;
+    width: 6px;
     border-radius: 100%;
     overflow: hidden;
   }
@@ -876,6 +876,12 @@
   font-weight: 500;
   line-height: 0.9375rem;
   font-size: 0.75rem;
+}
+
+.f-12\.5-500 {
+  font-weight: 500;
+  line-height: 0.9375rem;
+  font-size: 0.78125rem;
 }
 
 .f-12-450 {

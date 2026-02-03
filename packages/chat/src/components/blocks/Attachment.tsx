@@ -1,6 +1,6 @@
 import { Button, toast } from '@zamp-platform/ui';
 import { cn } from '@zamp-platform/ui/utils';
-import { CircleX, FileText, Loader } from 'lucide-react';
+import { CircleX, FileText, LoaderCircle } from 'lucide-react';
 import React from 'react';
 
 import { useLazyGetFileDownloadUrlQuery } from '../../api';
@@ -65,7 +65,7 @@ const Attachment: React.FC<AttachmentProps> = ({ attachment, removeAttachment, i
       )}
       {((isLoading && !attachment.file_id) || isLoadingFileDownload) && (
         <Button
-          className='absolute size-4 rounded-full bg-white p-[1px] [&_svg]:size-3.5'
+          className='absolute size-4 rounded-full border border-gray-400 bg-white [&_svg]:size-3'
           variant='ghost'
           size='icon'
           style={{
@@ -73,7 +73,7 @@ const Attachment: React.FC<AttachmentProps> = ({ attachment, removeAttachment, i
             right: '-8px',
           }}
         >
-          <Loader size={14} className='animate-spin text-gray-900' />
+          <LoaderCircle size={12} className='animate-spin text-blue-700' />
         </Button>
       )}
     </div>

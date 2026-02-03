@@ -3,6 +3,7 @@
 import { useCallback, useEffect, useRef, useState } from 'react';
 import { SIDEBAR_CONVERSATION_ID_PARAM } from 'modules/pace/pace.constants';
 import { usePathname } from 'next/navigation';
+import { ROUTES_PATH } from '@/constants/routeConfig';
 import { usePaceContext } from '@/modules/pace/pace.context';
 
 interface UseChatSidebarStateProps {
@@ -75,16 +76,18 @@ export const useChatSidebarState = ({ initialConversationId }: UseChatSidebarSta
     }
   }, [setIsPaceSidebarOpen]);
 
-  // Reset chat state when route changes
+  // Reset chat state only when navigating to chat home route
   useEffect(() => {
     if (previousPathnameRef.current !== pathname) {
       previousPathnameRef.current = pathname;
-      setChatTitle('');
-      setConversationIdState(null);
-      setChatKey((prev) => prev + 1);
-      setIsPaceSidebarOpen(false);
+
+      if (pathname === ROUTES_PATH.CHAT) {
+        setChatTitle('');
+        setConversationIdState(null);
+        setChatKey((prev) => prev + 1);
+      }
     }
-  }, [pathname, setIsPaceSidebarOpen]);
+  }, [pathname]);
 
   return {
     isPaceSidebarOpen,

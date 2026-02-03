@@ -3,7 +3,7 @@
 import { memo } from 'react';
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
-import LogoutButton from '@/components/layouts/dashboard-layout/components/LogoutButton';
+import OrgSwitcher from '@/components/layouts/dashboard-layout/components/OrgSwitcher';
 import { PACE_SETTINGS_TABS } from '@/modules/pace/pace.constants';
 import SidebarTab from 'components/layouts/dashboard-layout/components/SidebarTab';
 
@@ -26,7 +26,9 @@ const PaceSettingsSidebar = () => {
       </div>
 
       {/* Logout button */}
-      <LogoutButton className='border-GRAY_400 border-t px-2 py-3' />
+      <div className='mt-auto'>
+        <OrgSwitcher isSidebarOpen={true} />
+      </div>
     </div>
   );
 };

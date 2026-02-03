@@ -28,6 +28,7 @@ export interface MessageProps extends Omit<SenderDetailsProps, 'message'> {
   feedbackDisabled?: boolean;
   isLastMessage?: boolean;
   alignUserRight?: boolean;
+  organizationId?: string;
 }
 
 export const Message: FC<MessageProps> = ({
@@ -50,6 +51,7 @@ export const Message: FC<MessageProps> = ({
   isLastMessage = false,
   alignUserRight = false,
   hideSenderName = false,
+  organizationId,
 }) => {
   const isUserMessage = message.sender_type === SenderType.USER;
   const shouldAlignRight = alignUserRight && isUserMessage;
@@ -101,6 +103,7 @@ export const Message: FC<MessageProps> = ({
             messageId={messageId || message?.id}
             conversationId={conversationId || message?.conversation_id}
             disabled={feedbackDisabled || isLoading}
+            organizationId={organizationId}
           />
         )}
       </div>
