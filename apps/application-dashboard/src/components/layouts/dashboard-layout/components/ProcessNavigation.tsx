@@ -1,6 +1,6 @@
 import { FC, useEffect, useRef, useState } from 'react';
-import { SvgSpriteLoader } from '@zamp-platform/ui/assets';
 import { getCreateKnowledgeBaseRouteByProcessId, getProcessRouteById, ROUTES_PATH } from 'constants/routeConfig';
+import { Plus } from 'lucide-react';
 import { AnimatePresence, motion } from 'motion/react';
 import Link from 'next/link';
 import { Process } from '@/app/(authenticated)/resources';
@@ -60,7 +60,7 @@ const ProcessNavigation: FC<ProcessNavigationProps> = ({ processes, params, dele
               className='inline-flex size-6 items-center justify-center rounded-md hover:bg-gray-100 [&_svg]:size-3.5'
               data-testid='add-process-btn'
             >
-              <SvgSpriteLoader id='plus' className='text-gray-700' />
+              <Plus className='text-gray-700' />
             </Link>
           </TooltipV2>
         )}

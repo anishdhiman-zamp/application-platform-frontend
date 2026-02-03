@@ -12,7 +12,7 @@ import {
 } from '@dnd-kit/core';
 import { arrayMove, SortableContext, verticalListSortingStrategy } from '@dnd-kit/sortable';
 import { Button, toast } from '@zamp-platform/ui';
-import { SvgSpriteLoader } from '@zamp-platform/ui/assets';
+import { Plus } from 'lucide-react';
 import { useRouter } from 'next/navigation';
 import { useCreatePageMutation, useUpdatePageIndexesMutation } from '@/apis/pages';
 import TooltipV2 from '@/components/common/TooltipV2';
@@ -110,12 +110,12 @@ const PagesNavigation: FC<PagesNavigationProps> = ({ pages, params }) => {
             size='xxsmall'
             variant='ghost'
             onClick={handleCreatePage}
-            className='[&_svg]:size-3.5'
+            className='inline-flex size-6 items-center justify-center rounded-md hover:bg-gray-100 [&_svg]:size-3.5'
             isLoading={isCreatingPage}
             data-testid='add-page-btn'
             aria-label='Add page'
           >
-            <SvgSpriteLoader id='plus' className='text-gray-700' />
+            <Plus className='text-gray-700' />
           </Button>
         </TooltipV2>
       </div>

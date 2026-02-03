@@ -41,13 +41,13 @@ export const TriggerChip = ({
   return (
     <span
       className={cn(
-        'flex h-6 items-center gap-1.5 bg-gray-100 px-2',
+        'flex h-6 min-w-0 items-center gap-1.5 bg-gray-100 px-2',
         { 'rounded-l': isFirst },
         { 'rounded-r': isLast },
       )}
     >
       {logo && (
-        <span className='relative size-[14px] flex-shrink-0'>
+        <span className='relative size-[14px] shrink-0'>
           <Image src={`${IMAGE_PREFIX}${logo}`} alt={text} priority fill sizes='14px' className='object-contain' />
         </span>
       )}
@@ -117,7 +117,7 @@ const TriggerDeleteConfirmationDialog = ({ id }: { id: string }) => {
 
 export const TriggerItem = ({ trigger, hideDeleteButton, connectionNameClassName }: TriggerItemProps) => {
   return (
-    <div className='f-12-450 flex items-center gap-0.5'>
+    <div className='f-12-450 flex min-w-0 items-center gap-0.5'>
       <TriggerChip text={trigger.trigger_display_name} logo={trigger.integration_logo} isFirst />
       <TriggerChip text={trigger.connection_name} labelClassName={connectionNameClassName} />
       <TriggerConnectionNameCopyButton text={trigger.connection_name} hideDeleteButton={hideDeleteButton} />
