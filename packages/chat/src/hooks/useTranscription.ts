@@ -5,176 +5,112 @@ import { useCallback, useRef, useState } from 'react';
 import {
   SOCKET_STATES,
   SocketState,
-  SpeechToTextProvider,
   TranscriptionAdapter,
   TranscriptionOptions,
   UseTranscriptionReturn,
 } from '../types/transcription.types';
-import { DeepgramTranscriptionEvent, useDeepgramConnection } from './useDeepgramConnection';
 import { useElevenlabsConnection } from './useElevenlabsConnection';
 import { MicrophoneState } from './useMicrophoneRecorder';
 
-// Default Deepgram transcription settings
-export const defaultDeepgramOptions: TranscriptionOptions = {
-  model: 'nova-3',
-  language: 'en-US',
-  smart_format: true,
-  punctuation: true,
-};
+export interface UseTranscriptionOptions {
+  adapter: TranscriptionAdapter;
+}
 
-// Default ElevenLabs transcription settings
-export const defaultElevenLabsOptions: TranscriptionOptions = {
+const DEFAULT_OPTIONS: TranscriptionOptions = {
   modelId: 'scribe_v2_realtime',
   languageCode: 'en',
   includeTimestamps: false,
 };
 
-export interface UseTranscriptionOptions {
-  provider?: SpeechToTextProvider;
-  adapter: TranscriptionAdapter;
-}
+const noopGetToken = async () => '';
 
 /**
- * Hook to manage real-time audio transcription by coordinating microphone recording
- * and provider-specific WebSocket connections
+ * Hook to manage real-time audio transcription.
+ * Coordinates microphone recording and ElevenLabs WebSocket connection.
  */
-export const useTranscription = ({
-  provider = SpeechToTextProvider.ELEVENLABS,
-  adapter,
-}: UseTranscriptionOptions): UseTranscriptionReturn => {
+export const useTranscription = ({ adapter }: UseTranscriptionOptions): UseTranscriptionReturn => {
   const [isRecording, setIsRecording] = useState(false);
-  const [accumulatedTranscript, setAccumulatedTranscript] = useState('');
+  const [transcript, setTranscript] = useState('');
 
-  // Prevent concurrent start calls
-  const isStartingRef = useRef(false);
-
-  // Accumulate committed transcripts from ElevenLabs
-  const onElevenLabsTranscript = useCallback((data: { text: string }) => {
-    if (data.text) {
-      setAccumulatedTranscript((prev) => (prev ? `${prev} ${data.text}` : data.text));
-    }
-  }, []);
-
-  // Accumulate final transcription results from Deepgram
-  const onDeepgramTranscript = useCallback((data: DeepgramTranscriptionEvent) => {
-    const { is_final, speech_final } = data;
-    const text = data.channel?.alternatives[0]?.transcript?.trim();
-
-    if (text && is_final && speech_final) {
-      setAccumulatedTranscript((prev) => (prev ? `${prev} ${text}` : text));
-    }
-  }, []);
-
-  // Create a no-op token getter for disabled providers
-  const noopGetToken = useCallback(async () => '', []);
-
-  const {
-    connectToDeepgram,
-    disconnectFromDeepgram,
-    connectionState: deepgramConnectionState,
-    microphone: deepgramMicrophone,
-    microphoneState: deepgramMicrophoneState,
-    startRecording: startDeepgramRecording,
-    stopRecording: stopDeepgramRecording,
-  } = useDeepgramConnection({
-    skip: provider !== SpeechToTextProvider.DEEPGRAM,
-    onTranscript: onDeepgramTranscript,
-    isRecording,
-    getToken: adapter.getDeepgramToken || noopGetToken,
-    onError: adapter.onError,
+  const stateRefs = useRef({
+    isStarting: false,
+    stopRequested: false,
   });
+
+  const appendTranscript = useCallback((data: { text: string }) => {
+    if (data.text) {
+      setTranscript((prev) => (prev ? `${prev} ${data.text}` : data.text));
+    }
+  }, []);
 
   const {
     connectToElevenLabs,
     disconnectFromElevenLabs,
-    isConnected: elevenLabsIsConnected,
-    isCommitting: elevenLabsIsCommitting,
-    microphone: elevenLabsMicrophone,
-    microphoneState: elevenLabsMicrophoneState,
-    startRecording: startElevenLabsRecording,
-    stopRecording: stopElevenLabsRecording,
+    isConnected,
+    isCommitting,
+    microphone,
+    microphoneState,
+    startRecording: setupMicrophone,
+    stopRecording: cleanupMicrophone,
   } = useElevenlabsConnection({
-    onCommittedTranscript: onElevenLabsTranscript,
+    onCommittedTranscript: appendTranscript,
     isRecording,
     getToken: adapter.getElevenLabsToken || noopGetToken,
     onError: adapter.onError,
   });
 
-  // Determine connection state based on provider
-  const connectionState: SocketState =
-    provider === SpeechToTextProvider.DEEPGRAM
-      ? deepgramConnectionState
-      : elevenLabsIsConnected
-        ? SOCKET_STATES.open
-        : SOCKET_STATES.closed;
-
-  // Initialize recording: establish connection and start recording
   const startRecording = useCallback(
     async (options: TranscriptionOptions = {}) => {
-      if (isStartingRef.current || isRecording) return;
+      if (stateRefs.current.isStarting || isRecording) return;
 
-      isStartingRef.current = true;
+      stateRefs.current.isStarting = true;
+      stateRefs.current.stopRequested = false;
       setIsRecording(true);
-      setAccumulatedTranscript('');
+      setTranscript('');
 
       try {
-        if (provider === SpeechToTextProvider.DEEPGRAM) {
-          await startDeepgramRecording();
-          await connectToDeepgram({ ...defaultDeepgramOptions, ...options });
-        } else {
-          await startElevenLabsRecording();
-          await connectToElevenLabs({
-            ...defaultElevenLabsOptions,
-            ...options,
-          });
+        await setupMicrophone();
+
+        if (stateRefs.current.stopRequested) {
+          setIsRecording(false);
+          stateRefs.current.isStarting = false;
+          return;
         }
+
+        await connectToElevenLabs({ ...DEFAULT_OPTIONS, ...options });
       } catch {
+        cleanupMicrophone();
         setIsRecording(false);
       } finally {
-        isStartingRef.current = false;
+        stateRefs.current.isStarting = false;
       }
     },
-    [isRecording, connectToDeepgram, connectToElevenLabs, provider, startDeepgramRecording, startElevenLabsRecording],
+    [isRecording, connectToElevenLabs, setupMicrophone, cleanupMicrophone],
   );
 
   const stopRecording = useCallback(async () => {
+    stateRefs.current.stopRequested = true;
+    stateRefs.current.isStarting = false;
     setIsRecording(false);
-    isStartingRef.current = false;
 
     try {
-      if (provider === SpeechToTextProvider.DEEPGRAM) {
-        stopDeepgramRecording();
-        disconnectFromDeepgram();
-      } else {
-        stopElevenLabsRecording();
-        await disconnectFromElevenLabs();
-      }
-    } catch (error) {
-      adapter.onError?.(error);
-      throw error;
+      cleanupMicrophone();
+      await disconnectFromElevenLabs();
+    } catch {
+      // Expected when cancelling in-progress connection
     }
-  }, [
-    stopDeepgramRecording,
-    stopElevenLabsRecording,
-    disconnectFromDeepgram,
-    disconnectFromElevenLabs,
-    provider,
-    adapter,
-  ]);
+  }, [cleanupMicrophone, disconnectFromElevenLabs]);
 
-  // Determine microphone and microphoneState based on provider
-  const microphone = provider === SpeechToTextProvider.DEEPGRAM ? deepgramMicrophone : elevenLabsMicrophone;
-  const microphoneState: MicrophoneState | null =
-    provider === SpeechToTextProvider.DEEPGRAM ? deepgramMicrophoneState : elevenLabsMicrophoneState;
+  const connectionState: SocketState = isConnected ? SOCKET_STATES.open : SOCKET_STATES.closed;
 
   return {
-    transcript: accumulatedTranscript,
+    transcript,
     isRecording,
     startRecording,
     stopRecording,
     microphone,
-    microphoneState,
+    microphoneState: microphoneState as MicrophoneState | null,
     connectionState,
-    isCommitting: elevenLabsIsCommitting,
+    isCommitting,
   };
 };

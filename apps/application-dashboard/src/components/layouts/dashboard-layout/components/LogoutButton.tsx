@@ -2,14 +2,19 @@
 
 import { FC } from 'react';
 import { Button } from '@zamp-platform/ui';
+import { cn } from '@zamp-platform/ui/utils';
 import { Loader2, LogOut } from 'lucide-react';
 import { useLogout } from '@/hooks/useLogout';
 
-const LogoutButton: FC = () => {
+interface LogoutButtonProps {
+  className?: string;
+}
+
+const LogoutButton: FC<LogoutButtonProps> = ({ className }) => {
   const { logout, isLoggingOut } = useLogout();
 
   return (
-    <div className='border-GRAY_400 mt-0.5 border-t pt-0.5'>
+    <div className={cn('border-GRAY_400 mt-0.5 border-t pt-0.5', className)}>
       <Button
         variant='ghost'
         onClick={logout}

@@ -4,6 +4,7 @@ import { useScribe } from '@elevenlabs/react';
 import { useCallback, useEffect, useRef, useState } from 'react';
 
 import { SOCKET_STATES, SocketState } from '../types/transcription.types';
+import { normalizeError } from '../utils/elevenlabs.utils';
 import { MicrophoneState, useMicrophoneRecorder } from './useMicrophoneRecorder';
 
 export interface ElevenLabsConnectionOptions {
@@ -38,9 +39,35 @@ export interface UseElevenlabsConnectionReturn {
   connectionState: SocketState;
 }
 
+const DEFAULT_SCRIBE_CONFIG = {
+  modelId: 'scribe_v2_realtime',
+  languageCode: 'en',
+  includeTimestamps: false,
+  microphone: {
+    echoCancellation: true,
+    noiseSuppression: true,
+    autoGainControl: true,
+  },
+} as const;
+
+const ERROR_MESSAGES = {
+  connection: 'Speech-to-text connection error',
+  auth: 'Speech-to-text authentication failed. Please try again.',
+  quota: 'Speech-to-text quota exceeded. Please try again later.',
+  microphone: 'Microphone error occurred',
+  connectFailed: 'Failed to connect to speech-to-text service',
+} as const;
+
+const COMMIT_WAIT_MS = 500;
+
 /**
- * Hook to manage ElevenLabs Scribe connection lifecycle
- * Uses injectable getToken for token management and @elevenlabs/react's useScribe for connection
+ * Hook to manage ElevenLabs Scribe connection lifecycle.
+ *
+ * Handles:
+ * - WebSocket connection to ElevenLabs speech-to-text service
+ * - Microphone setup and recording
+ * - Race condition prevention (quick connect/disconnect)
+ * - Error normalization and deduplication
  */
 export const useElevenlabsConnection = (options: UseElevenlabsConnectionOptions): UseElevenlabsConnectionReturn => {
   const [isConnected, setIsConnected] = useState(false);
@@ -48,155 +75,200 @@ export const useElevenlabsConnection = (options: UseElevenlabsConnectionOptions)
   const [isLoadingToken, setIsLoadingToken] = useState(false);
   const [tokenError, setTokenError] = useState(false);
 
-  const onCommittedTranscriptRef = useRef(options.onCommittedTranscript);
-  const getTokenRef = useRef(options.getToken);
-  const onErrorRef = useRef(options.onError);
-
-  const { setupMicrophone, microphone, startMicrophone, stopMicrophone, microphoneState } = useMicrophoneRecorder({
+  const callbackRefs = useRef({
+    onCommittedTranscript: options.onCommittedTranscript,
+    getToken: options.getToken,
     onError: options.onError,
   });
 
-  // Track if microphone has been started to avoid duplicate starts
-  const hasMicStartedRef = useRef(false);
-
-  // Update refs when callbacks change
   useEffect(() => {
-    onCommittedTranscriptRef.current = options.onCommittedTranscript;
-  }, [options.onCommittedTranscript]);
+    callbackRefs.current = {
+      onCommittedTranscript: options.onCommittedTranscript,
+      getToken: options.getToken,
+      onError: options.onError,
+    };
+  }, [options.onCommittedTranscript, options.getToken, options.onError]);
 
-  useEffect(() => {
-    getTokenRef.current = options.getToken;
-  }, [options.getToken]);
+  const connectionStateRefs = useRef({
+    hasReportedError: false,
+    isConnecting: false,
+    isIntentionalDisconnect: false,
+    hasMicStarted: false,
+  });
 
-  useEffect(() => {
-    onErrorRef.current = options.onError;
-  }, [options.onError]);
+  /**
+   * Reports an error only once per connection attempt.
+   * Suppresses errors if disconnect was intentional (user cancelled).
+   */
+  const reportErrorOnce = useCallback((error: unknown, defaultMessage: string) => {
+    const { hasReportedError, isIntentionalDisconnect } = connectionStateRefs.current;
+
+    if (hasReportedError || isIntentionalDisconnect) {
+      return;
+    }
+
+    connectionStateRefs.current.hasReportedError = true;
+    const normalizedError = normalizeError(error, defaultMessage);
+    callbackRefs.current.onError?.(normalizedError);
+  }, []);
+
+  const { setupMicrophone, microphone, startMicrophone, stopMicrophone, microphoneState } = useMicrophoneRecorder({
+    onError: (error) => reportErrorOnce(error, ERROR_MESSAGES.microphone),
+  });
 
   const scribe = useScribe({
-    modelId: 'scribe_v2_realtime',
-    languageCode: 'en',
-    includeTimestamps: false,
-    microphone: {
-      echoCancellation: true,
-      noiseSuppression: true,
-      autoGainControl: true,
-    },
+    ...DEFAULT_SCRIBE_CONFIG,
     onCommittedTranscript: (data: { text: string }) => {
-      if (onCommittedTranscriptRef.current) {
-        setIsCommitting(false);
-        onCommittedTranscriptRef.current(data);
-      }
+      setIsCommitting(false);
+      callbackRefs.current.onCommittedTranscript?.(data);
     },
     onError: (error: unknown) => {
       setIsConnected(false);
-      onErrorRef.current?.(error);
+      reportErrorOnce(error, ERROR_MESSAGES.connection);
     },
     onAuthError: (error: unknown) => {
       setIsConnected(false);
-      onErrorRef.current?.(error);
+      reportErrorOnce(error, ERROR_MESSAGES.auth);
     },
     onQuotaExceededError: (error: unknown) => {
       setIsConnected(false);
-      onErrorRef.current?.(error);
+      reportErrorOnce(error, ERROR_MESSAGES.quota);
     },
   });
 
-  // Track connection state
   useEffect(() => {
     setIsConnected(scribe.isConnected);
   }, [scribe.isConnected]);
 
-  // Establish connection to ElevenLabs Scribe with provided options
+  const shouldAbortConnection = useCallback(() => {
+    return connectionStateRefs.current.isIntentionalDisconnect;
+  }, []);
+
+  /**
+   * Establishes connection to ElevenLabs Scribe service.
+   */
   const connectToElevenLabs = useCallback(
     async (connectOptions: ElevenLabsConnectionOptions = {}) => {
+      connectionStateRefs.current.hasReportedError = false;
+      connectionStateRefs.current.isIntentionalDisconnect = false;
+      connectionStateRefs.current.isConnecting = true;
+
       try {
         setIsLoadingToken(true);
         setTokenError(false);
-        const token = await getTokenRef.current();
+
+        const token = await callbackRefs.current.getToken();
+
+        if (shouldAbortConnection()) {
+          setIsLoadingToken(false);
+          connectionStateRefs.current.isConnecting = false;
+          return;
+        }
+
         setIsLoadingToken(false);
 
-        // Disconnect existing connection before creating new one
         if (scribe.isConnected) {
           scribe.disconnect();
         }
 
-        // Connect with token and options
         await scribe.connect({
           token,
-          includeTimestamps: connectOptions.includeTimestamps ?? false,
-          languageCode: connectOptions.languageCode || 'en',
+          modelId: connectOptions.modelId ?? DEFAULT_SCRIBE_CONFIG.modelId,
+          includeTimestamps: connectOptions.includeTimestamps ?? DEFAULT_SCRIBE_CONFIG.includeTimestamps,
+          languageCode: connectOptions.languageCode ?? DEFAULT_SCRIBE_CONFIG.languageCode,
           microphone: {
-            echoCancellation: connectOptions.microphone?.echoCancellation ?? true,
-            noiseSuppression: connectOptions.microphone?.noiseSuppression ?? true,
-            autoGainControl: connectOptions.microphone?.autoGainControl ?? true,
+            echoCancellation:
+              connectOptions.microphone?.echoCancellation ?? DEFAULT_SCRIBE_CONFIG.microphone.echoCancellation,
+            noiseSuppression:
+              connectOptions.microphone?.noiseSuppression ?? DEFAULT_SCRIBE_CONFIG.microphone.noiseSuppression,
+            autoGainControl:
+              connectOptions.microphone?.autoGainControl ?? DEFAULT_SCRIBE_CONFIG.microphone.autoGainControl,
           },
         });
 
+        if (shouldAbortConnection()) {
+          scribe.disconnect();
+          setIsConnected(false);
+          connectionStateRefs.current.isConnecting = false;
+          return;
+        }
+
         setIsConnected(true);
+        connectionStateRefs.current.isConnecting = false;
       } catch (error) {
         setIsLoadingToken(false);
         setTokenError(true);
-        onErrorRef.current?.(error);
+        connectionStateRefs.current.isConnecting = false;
+
+        if (!shouldAbortConnection()) {
+          reportErrorOnce(error, ERROR_MESSAGES.connectFailed);
+        }
+
         setIsConnected(false);
-        throw error;
       }
     },
-    [scribe],
+    [scribe, reportErrorOnce, shouldAbortConnection],
   );
 
-  // Start recording: setup microphone (actual start happens in effect when connection is ready)
+  /**
+   * Gracefully disconnects from ElevenLabs and cleans up resources.
+   */
+  const disconnectFromElevenLabs = useCallback(async () => {
+    connectionStateRefs.current.isIntentionalDisconnect = true;
+
+    try {
+      const canCommit = scribe.isConnected && scribe.partialTranscript && !connectionStateRefs.current.isConnecting;
+
+      if (canCommit) {
+        setIsCommitting(true);
+        await scribe.commit();
+        await new Promise((resolve) => setTimeout(resolve, COMMIT_WAIT_MS));
+      }
+
+      scribe.disconnect();
+      setIsConnected(false);
+    } catch {
+      scribe.disconnect();
+      setIsConnected(false);
+    }
+
+    stopMicrophone();
+    connectionStateRefs.current.hasMicStarted = false;
+    connectionStateRefs.current.hasReportedError = false;
+    connectionStateRefs.current.isConnecting = false;
+    setIsCommitting(false);
+    setIsLoadingToken(false);
+  }, [scribe, stopMicrophone]);
+
   const startRecording = useCallback(async () => {
-    if (microphone) return; // Already set up
+    if (microphone) return;
     await setupMicrophone();
   }, [setupMicrophone, microphone]);
 
-  // Stop recording: stop microphone
   const stopRecording = useCallback(() => {
     stopMicrophone();
-    hasMicStartedRef.current = false;
+    connectionStateRefs.current.hasMicStarted = false;
   }, [stopMicrophone]);
 
-  // Gracefully disconnect from ElevenLabs
-  const disconnectFromElevenLabs = useCallback(async () => {
-    try {
-      // Commit any pending transcript before disconnecting
-      if (scribe.partialTranscript) {
-        setIsCommitting(true);
-        await scribe.commit();
-        // Wait a bit for the commit callback to fire
-        await new Promise((resolve) => setTimeout(resolve, 500));
-      }
-      scribe.disconnect();
-      setIsConnected(false);
-    } catch (error) {
-      onErrorRef.current?.(error);
-      // Still disconnect even if commit fails
-      scribe.disconnect();
-      setIsConnected(false);
-    }
-    stopMicrophone();
-    hasMicStartedRef.current = false;
-  }, [scribe, stopMicrophone]);
-
-  // Start microphone recording when connection is ready and recording is active
   useEffect(() => {
-    if (!microphone || !isConnected || !options.isRecording || hasMicStartedRef.current) {
+    const shouldStartMic =
+      microphone && isConnected && options.isRecording && !connectionStateRefs.current.hasMicStarted;
+
+    if (!shouldStartMic) {
       return;
     }
 
-    // Start microphone recording for visualization
     startMicrophone();
-    hasMicStartedRef.current = true;
+    connectionStateRefs.current.hasMicStarted = true;
 
     return () => {
-      if (hasMicStartedRef.current) {
+      if (connectionStateRefs.current.hasMicStarted) {
         stopMicrophone();
-        hasMicStartedRef.current = false;
+        connectionStateRefs.current.hasMicStarted = false;
       }
     };
   }, [microphone, isConnected, options.isRecording, startMicrophone, stopMicrophone]);
 
-  // Cleanup: disconnect when component unmounts
   useEffect(() => {
     return () => {
       if (scribe.isConnected) {
@@ -217,8 +289,8 @@ export const useElevenlabsConnection = (options: UseElevenlabsConnectionOptions)
     isLoadingToken,
     tokenError,
     isCommitting,
+    connectionState: isConnected ? SOCKET_STATES.open : SOCKET_STATES.closed,
     microphone,
     microphoneState,
-    connectionState: isConnected ? SOCKET_STATES.open : SOCKET_STATES.closed,
   };
 };

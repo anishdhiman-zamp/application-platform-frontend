@@ -32,7 +32,7 @@ const GlobalShortcuts = () => {
 };
 
 const Sidebar = () => {
-  const { isSidebarOpen, lastVisitedSettingsRoute } = useAppSelector((state: RootState) => state.layoutConfig);
+  const { isSidebarOpen } = useAppSelector((state: RootState) => state.layoutConfig);
   const dispatch = useAppDispatch();
   const params = useParams() as { pageId?: string; processId?: string };
   const pathname = usePathname();
@@ -113,7 +113,7 @@ const Sidebar = () => {
         </div>
         <div className='border-GRAY_400 flex-shrink-0 border-b px-2 pb-4'>
           {sidebarItems.map((item) => {
-            const itemPath = item.id === SETTINGS_ID ? lastVisitedSettingsRoute || ROUTES_PATH.SETTINGS : item.path;
+            const itemPath = item.id === SETTINGS_ID ? ROUTES_PATH.SETTINGS : item.path;
 
             return (
               <Link prefetch href={itemPath} key={item.label} className='cursor-pointer'>
