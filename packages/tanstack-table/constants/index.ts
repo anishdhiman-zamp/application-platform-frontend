@@ -46,3 +46,9 @@ export const HEADER_CELL_STYLES = {
   FLEX_FIXED: '0 0 auto', // For fixed width columns (e.g., status column)
   FLEX_GROW: '1 0 auto', // For flexible width columns
 } as const;
+
+/**
+ * Column sizing constants
+ */
+export const MIN_COLUMN_WIDTH = 50; // Minimum column width in pixels
+export const DEFAULT_COLUMN_WIDTH = 150; // Default column width in pixels

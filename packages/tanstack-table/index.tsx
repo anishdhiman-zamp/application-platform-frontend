@@ -18,6 +18,7 @@ export {
   type Column,
   type ColumnDef,
   type ColumnOrderState,
+  type ColumnSizingState,
   type Table,
   type VisibilityState,
 } from '@tanstack/react-table';

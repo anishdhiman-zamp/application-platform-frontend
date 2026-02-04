@@ -1,3 +1,5 @@
+'use no memo';
+
 import type { Header } from '@tanstack/react-table';
 import { flexRender } from '@tanstack/react-table';
 import { cn } from '@zamp-platform/ui/utils';
