@@ -128,7 +128,7 @@ const ConnectionModal: FC<ConnectionModalProps> = ({
     <Dialog open={isOpen} onOpenChange={handleOpenChange}>
       <DialogContent
         className={cn('border-GRAY_300 h-[600px] max-h-[600px] w-[1000px] max-w-[1000px] rounded-xl border', {
-          'h-auto w-[400px]': noGuide,
+          'h-auto w-[500px]': noGuide,
         })}
         showCloseButton={noGuide}
       >
