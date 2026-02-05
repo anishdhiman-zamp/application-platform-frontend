@@ -135,12 +135,6 @@ const ActivityByStatus: FC<ActivityByStatusProps> = ({ processId, status, totalC
               });
             }
 
-            if (response?.rows?.length) {
-              response?.rows?.forEach((row) => {
-                router.prefetch(getProcessActivityLogsRouteById(processId, row?.id, status));
-              });
-            }
-
             params.success({
               rowData: response?.rows,
               rowCount: params.request.startRow === 0 ? totalCount : 0,

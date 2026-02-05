@@ -155,16 +155,19 @@ describe('DrilldownMenu Component', () => {
       const backButton = screen.getByRole('button', { name: /back to main/i });
       await user.click(backButton);
 
-      // First wait for the back button to disappear (confirming state changed)
-      await waitFor(() => {
-        expect(screen.queryByText('Back to main')).not.toBeInTheDocument();
-      });
+      // Wait for Profile to disappear (animation exit completes)
+      await waitFor(
+        () => {
+          expect(screen.queryByText('Profile')).not.toBeInTheDocument();
+        },
+        { timeout: 2000 },
+      );
 
       // Then verify the menu shows root level items
       await waitFor(
         () => {
           expect(screen.getByText('Settings')).toBeInTheDocument();
-          expect(screen.queryByText('Profile')).not.toBeInTheDocument();
+          expect(screen.queryByText('Back to main')).not.toBeInTheDocument();
         },
         { timeout: 2000 },
       );
