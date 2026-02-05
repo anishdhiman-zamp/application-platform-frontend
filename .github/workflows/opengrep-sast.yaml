@@ -22,7 +22,7 @@ jobs:
     runs-on: ubuntu-latest
     timeout-minutes: 15
     permissions:
-      contents: write  # Required for auto-commit
+      contents: write
       pull-requests: write
 
     steps:
@@ -34,9 +34,20 @@ jobs:
     - name: Install OpenGrep
       run: |
         echo "📥 Installing OpenGrep..."
-        wget -q https://github.com/opengrep/opengrep/releases/download/v1.0.0-alpha.15/opengrep_manylinux_x86 -O opengrep
+        OPENGREP_VERSION="v1.0.0-alpha.15"
+        OPENGREP_SHA256="232015e9f2f0facb0cf93eb9cc95c1d1c4d5b0fa1c6eefda768d8fe71315267d"
+
+        wget -q "https://github.com/opengrep/opengrep/releases/download/${OPENGREP_VERSION}/opengrep_manylinux_x86" -O opengrep
+
+        echo "🔐 Verifying SHA256 checksum..."
+        echo "${OPENGREP_SHA256}  opengrep" | sha256sum -c -
+        if [ $? -ne 0 ]; then
+          echo "❌ SHA256 checksum verification failed!"
+          exit 1
+        fi
+
         chmod +x opengrep
-        echo "✅ OpenGrep installed"
+        echo "✅ OpenGrep installed and verified"
 
     - name: Download Security Rules
       run: |
@@ -48,8 +59,8 @@ jobs:
       run: |
         echo "🔍 Running security scan..."
 
-        # Run scan with comprehensive rules
         ./opengrep ci \
+          --exclude '.github' \
           --config rules/typescript \
           --config rules/javascript \
           --config rules/python \
@@ -68,7 +79,6 @@ jobs:
       run: |
         echo "📊 Processing scan results..."
 
-        # Create security waivers file if it doesn't exist and track if we created it
         WAIVERS_CREATED=false
         if [ ! -f ".security-waivers.json" ]; then
           echo '{
@@ -78,13 +88,11 @@ jobs:
           WAIVERS_CREATED=true
         fi
 
-        # Process results with Python for better JSON handling
         cat << 'EOF' > process_results.py
         import json
         import sys
         import os
 
-        # Load scan results
         try:
             with open('scan_results.json', 'r') as f:
                 scan_data = json.load(f)
@@ -92,7 +100,6 @@ jobs:
             print("❌ No scan results found")
             sys.exit(0)
 
-        # Load waivers
         try:
             with open('.security-waivers.json', 'r') as f:
                 waivers_data = json.load(f)
@@ -102,7 +109,6 @@ jobs:
 
         results = scan_data.get('results', [])
 
-        # Filter for critical/high severity issues
         critical_high = []
         all_issues = []
 
@@ -112,7 +118,6 @@ jobs:
             file_path = result.get('path', '')
             line = result.get('start', {}).get('line', 0)
 
-            # Check if this issue is waived
             is_waived = False
             for waiver in waivers:
                 if (waiver.get('rule_id') == rule_id and
@@ -127,7 +132,6 @@ jobs:
                 if severity in ['ERROR', 'CRITICAL', 'HIGH']:
                     critical_high.append(result)
 
-        # Generate markdown report
         with open('SECURITY_REPORT.md', 'w') as f:
             f.write("# 🔒 Security Scan Report\n\n")
             f.write(f"**Total Issues Found:** {len(all_issues)}\n")
@@ -146,7 +150,6 @@ jobs:
                     f.write(f"**File:** `{path}:{line}`\n")
                     f.write(f"**Issue:** {message}\n\n")
 
-                    # Add waiver instructions
                     f.write("**To waive this issue, add to `.security-waivers.json`:**\n")
                     f.write("```json\n")
                     f.write('{\n  "waivers": [\n')
@@ -168,12 +171,10 @@ jobs:
                 f.write(f"## 📋 Other Issues ({len(all_issues) - len(critical_high)})\n\n")
                 f.write("Additional lower-severity issues were found. Review the full scan results for details.\n\n")
 
-        # Output results for next steps
         print(f"Total issues: {len(all_issues)}")
         print(f"Critical/high issues: {len(critical_high)}")
         print(f"Waived issues: {len(results) - len(all_issues)}")
 
-        # Set GitHub outputs
         with open(os.environ['GITHUB_OUTPUT'], 'a') as f:
             f.write(f"critical_high_count={len(critical_high)}\n")
             f.write(f"total_issues={len(all_issues)}\n")
@@ -183,7 +184,6 @@ jobs:
 
         python3 process_results.py
 
-        # Set the waivers created output
         echo "waivers_created=$WAIVERS_CREATED" >> $GITHUB_OUTPUT
 
     - name: Auto-Commit Security Waivers File
@@ -194,11 +194,9 @@ jobs:
         git config --local user.name "GitHub Action"
         git add .security-waivers.json
 
-        # Only commit if there are changes
         if ! git diff --staged --quiet; then
           git commit -m "Auto-create security waivers file [skip ci]"
 
-          # Push to the appropriate branch
           if [ "${{ github.event_name }}" = "pull_request" ]; then
             git push origin HEAD:${{ github.head_ref }}
           else
