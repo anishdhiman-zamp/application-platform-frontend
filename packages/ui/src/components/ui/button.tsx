@@ -64,6 +64,17 @@ const ICON_SIZE_MAP = {
 
 type IconSize = keyof typeof ICON_SIZE_MAP;
 
+/** Variant-specific classes applied when isLoading is true */
+const LOADING_VARIANT_CLASSES: Record<string, string> = {
+  default: '!bg-primary/90 cursor-not-allowed',
+  destructive: '!bg-destructive/90 cursor-not-allowed',
+  outline: '!bg-background cursor-not-allowed',
+  'destructive-outline': '!bg-none cursor-not-allowed',
+  secondary: 'cursor-not-allowed !bg-none',
+  ghost: 'cursor-not-allowed !bg-none',
+  link: 'cursor-not-allowed !bg-none',
+};
+
 export interface ButtonProps extends ButtonHTMLAttributes<HTMLButtonElement>, VariantProps<typeof buttonVariants> {
   asChild?: boolean;
   isLoading?: boolean;
@@ -204,8 +215,7 @@ function Button({
       ref={buttonRef}
       className={cn(
         buttonVariants({ variant, size, className }),
-        isLoading && variant !== 'ghost' && variant !== 'link' && '!bg-primary/90 cursor-not-allowed',
-        isLoading && (variant === 'ghost' || variant === 'link') && 'cursor-not-allowed',
+        isLoading && LOADING_VARIANT_CLASSES[variant ?? 'default'],
         (leadingIcon || trailingIcon) && 'gap-1.5',
       )}
       style={{ minWidth: minWidth ? `${minWidth}px` : undefined, ...style }}

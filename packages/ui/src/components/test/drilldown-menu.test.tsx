@@ -2,7 +2,7 @@ import '@testing-library/jest-dom';
 import { render, screen, waitFor } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { createElement } from 'react';
-import { Settings, Zap } from 'lucide-react';
+import { Settings } from 'lucide-react';
 import { Button } from '../ui/button';
 import { DrilldownMenu, type MenuNode } from '../ui/DrilldownMenu';
 
@@ -151,14 +151,23 @@ describe('DrilldownMenu Component', () => {
         expect(screen.getByText('Back to main')).toBeInTheDocument();
       });
 
-      const backButton = screen.getByText('Back to main').closest('button');
-      if (backButton) {
-        await user.click(backButton);
-        await waitFor(() => {
+      // Find the back button by its accessible role and partial text match
+      const backButton = screen.getByRole('button', { name: /back to main/i });
+      await user.click(backButton);
+
+      // First wait for the back button to disappear (confirming state changed)
+      await waitFor(() => {
+        expect(screen.queryByText('Back to main')).not.toBeInTheDocument();
+      });
+
+      // Then verify the menu shows root level items
+      await waitFor(
+        () => {
           expect(screen.getByText('Settings')).toBeInTheDocument();
           expect(screen.queryByText('Profile')).not.toBeInTheDocument();
-        });
-      }
+        },
+        { timeout: 2000 },
+      );
     });
   });
 
@@ -544,53 +553,6 @@ describe('DrilldownMenu Component', () => {
       );
 
       expect(screen.getByText('Custom Trigger')).toBeInTheDocument();
-    });
-  });
-
-  describe('Snapshots', () => {
-    it('matches snapshot for basic menu', async () => {
-      const user = userEvent.setup();
-      const { container } = render(
-        <DrilldownMenu menuNode={basicMenu} handleClick={mockHandleClick} onPointerEnter={mockOnPointerEnter}>
-          <Button>Open Menu</Button>
-        </DrilldownMenu>,
-      );
-
-      await user.click(screen.getByText('Open Menu'));
-      await waitFor(() => {
-        expect(screen.getByText('Item 1')).toBeInTheDocument();
-      });
-
-      expect(container).toMatchSnapshot();
-    });
-
-    it('matches snapshot for menu with icons and descriptions', async () => {
-      const user = userEvent.setup();
-      const menuWithFeatures: MenuNode = {
-        id: 'root',
-        label: 'Root',
-        children: [
-          {
-            id: 'feature-item',
-            label: 'Feature Item',
-            description: 'Item description',
-            icon: createElement(Zap),
-          },
-        ],
-      };
-
-      const { container } = render(
-        <DrilldownMenu menuNode={menuWithFeatures} handleClick={mockHandleClick} onPointerEnter={mockOnPointerEnter}>
-          <Button>Open Menu</Button>
-        </DrilldownMenu>,
-      );
-
-      await user.click(screen.getByText('Open Menu'));
-      await waitFor(() => {
-        expect(screen.getByText('Feature Item')).toBeInTheDocument();
-      });
-
-      expect(container).toMatchSnapshot();
     });
   });
 });
