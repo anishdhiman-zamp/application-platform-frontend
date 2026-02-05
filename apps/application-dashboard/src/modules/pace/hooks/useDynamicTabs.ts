@@ -8,7 +8,7 @@ import { usePaceContext } from '@/modules/pace/pace.context';
 export const useDynamicTabs = () => {
   const pathname = usePathname();
   const router = useRouter();
-  const { dynamicTabs, closeDynamicTab } = usePaceContext();
+  const { dynamicTabs, closeDynamicTab, reorderDynamicTabs } = usePaceContext();
 
   const isDynamicTabActive = useCallback(
     (path: string) => {
@@ -49,10 +49,18 @@ export const useDynamicTabs = () => {
     [dynamicTabs, pathname, closeDynamicTab, router],
   );
 
+  const handleReorderTabs = useCallback(
+    (newOrder: string[]) => {
+      reorderDynamicTabs(newOrder);
+    },
+    [reorderDynamicTabs],
+  );
+
   return {
     dynamicTabs,
     isDynamicTabActive,
     isOnAnyDynamicTab,
     handleCloseDynamicTab,
+    handleReorderTabs,
   };
 };
