@@ -152,6 +152,36 @@ const OrgSwitcher: FC<OrgSwitcherProps> = ({ isSidebarOpen, menuContentClassName
     }
   }, [highlightedIndex]);
 
+  const renderOrganizationList = () => {
+    if (filteredOrganizations?.length === 0 && searchQuery.trim()) {
+      return <div className='f-12-400 text-GRAY_600 px-2 py-3 text-center'>No organizations found</div>;
+    }
+
+    return filteredOrganizations?.map((item: Organization, idx) => {
+      const originalIdx =
+        organizations?.findIndex((org: Organization) => org.organization_id === item.organization_id) ?? 0;
+      const isHighlighted = idx === highlightedIndex;
+
+      return (
+        <DropdownMenuItem
+          ref={(el) => {
+            itemRefs.current[idx] = el;
+          }}
+          className={cn('p-0', isHighlighted && 'bg-GRAY_200')}
+          onClick={() => handleOrgChange(item)}
+          key={item.organization_id}
+          data-testid={`org-switcher-item-${item?.name?.toLowerCase()}`}
+        >
+          <OrgCard
+            isSelected={item?.organization_id === selectedOrg?.organization_id}
+            name={item?.name}
+            className={ORG_COLORS[originalIdx]}
+          />
+        </DropdownMenuItem>
+      );
+    });
+  };
+
   useEffect(() => {
     if (organizations?.length) {
       const orgId = getFromLocalStorage(LOCAL_STORAGE_KEYS.XZAMP_ORGANIZATION_ID);
@@ -224,6 +254,7 @@ const OrgSwitcher: FC<OrgSwitcherProps> = ({ isSidebarOpen, menuContentClassName
                 type='text'
                 size='small'
                 placeholder='Search organization...'
+                className='mt-1'
                 autoFocus
                 value={searchQuery}
                 onChange={handleSearchChange}
@@ -239,29 +270,7 @@ const OrgSwitcher: FC<OrgSwitcherProps> = ({ isSidebarOpen, menuContentClassName
               isLoading={loading}
               isError={error}
             >
-              {filteredOrganizations?.map((item: Organization, idx) => {
-                const originalIdx =
-                  organizations?.findIndex((org: Organization) => org.organization_id === item.organization_id) ?? 0;
-                const isHighlighted = idx === highlightedIndex;
-
-                return (
-                  <DropdownMenuItem
-                    ref={(el) => {
-                      itemRefs.current[idx] = el;
-                    }}
-                    className={cn('p-0', isHighlighted && 'bg-GRAY_200')}
-                    onClick={() => handleOrgChange(item)}
-                    key={item.organization_id}
-                    data-testid={`org-switcher-item-${item?.name?.toLowerCase()}`}
-                  >
-                    <OrgCard
-                      isSelected={item?.organization_id === selectedOrg?.organization_id}
-                      name={item?.name}
-                      className={ORG_COLORS[originalIdx]}
-                    />
-                  </DropdownMenuItem>
-                );
-              })}
+              {renderOrganizationList()}
               {regionList?.length
                 ? regionList?.map((item, idx) => (
                     <DropdownMenuItem
