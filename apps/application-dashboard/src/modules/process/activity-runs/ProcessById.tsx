@@ -110,6 +110,18 @@ const ProcessById: FC<ProcessByIdProps> = ({ processId, status }) => {
     return visibility;
   }, [initialColumnPreferences]);
 
+  const initialColumnSizing = useMemo(() => {
+    const sizing: Record<string, number> = {};
+
+    initialColumnPreferences.forEach((column: ColumnOrderingVisibilityType) => {
+      if (column?.width && column.width > 0) {
+        sizing[column?.colId] = column.width;
+      }
+    });
+
+    return sizing;
+  }, [initialColumnPreferences]);
+
   const refetchConditionalSummaryOrFilterConfigApi = () => {
     if (isActivityRunsSummaryError) {
       refetchActivityRunsSummary();
@@ -194,6 +206,7 @@ const ProcessById: FC<ProcessByIdProps> = ({ processId, status }) => {
         processId={processId}
         initialVisibility={initialColumnVisibility}
         initialOrder={initialColumnOrder}
+        initialSizing={initialColumnSizing}
       >
         <div className='h-full w-full'>
           {/* custom tab navigation */}

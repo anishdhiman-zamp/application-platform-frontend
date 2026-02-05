@@ -45,6 +45,7 @@ interface ChatbotProps {
   scope?: ScopeType;
   clearInputOnClose?: boolean;
   processId: string;
+  isDisabled?: boolean;
 }
 
 const Chatbot = ({
@@ -62,6 +63,7 @@ const Chatbot = ({
   scope = ScopeType.ACTIVITY_RUN,
   clearInputOnClose = false,
   processId,
+  isDisabled = false,
 }: ChatbotProps & { scope?: ScopeType }) => {
   const urlBasedOpenHandled = useRef(false);
   const messagesContainerRef = useRef<HTMLDivElement>(null);
@@ -184,7 +186,7 @@ const Chatbot = ({
           annotationLocation={annotationLocation}
           conversationId={feedbackItem?.conversation_id || chat.conversationId || ''}
           setHeader={setHeader}
-          isDisabled={isAnalysing}
+          isDisabled={isAnalysing || isDisabled}
           header={header}
           scope={scope}
           externalInputValue={inputValue}

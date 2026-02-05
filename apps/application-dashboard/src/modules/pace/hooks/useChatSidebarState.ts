@@ -3,14 +3,15 @@
 import { useCallback, useEffect, useRef, useState } from 'react';
 import { SIDEBAR_CONVERSATION_ID_PARAM } from 'modules/pace/pace.constants';
 import { usePathname } from 'next/navigation';
-import { useChatContext } from '@/modules/pace/chat.context';
+import { ROUTES_PATH } from '@/constants/routeConfig';
+import { usePaceContext } from '@/modules/pace/pace.context';
 
 interface UseChatSidebarStateProps {
   initialConversationId: string | null;
 }
 
 export const useChatSidebarState = ({ initialConversationId }: UseChatSidebarStateProps) => {
-  const { isChatSidebarOpen, setIsChatSidebarOpen } = useChatContext();
+  const { isPaceSidebarOpen, setIsPaceSidebarOpen } = usePaceContext();
   const pathname = usePathname();
 
   const isInitializedRef = useRef(false);
@@ -59,8 +60,8 @@ export const useChatSidebarState = ({ initialConversationId }: UseChatSidebarSta
   }, []);
 
   const handleClose = useCallback(() => {
-    setIsChatSidebarOpen(false);
-  }, [setIsChatSidebarOpen]);
+    setIsPaceSidebarOpen(false);
+  }, [setIsPaceSidebarOpen]);
 
   // Initialize conversation ID from URL on mount
   useEffect(() => {
@@ -70,25 +71,27 @@ export const useChatSidebarState = ({ initialConversationId }: UseChatSidebarSta
 
       if (urlConversationId) {
         setConversationIdState(urlConversationId);
-        setIsChatSidebarOpen(true);
+        setIsPaceSidebarOpen(true);
       }
       isInitializedRef.current = true;
     }
-  }, [setIsChatSidebarOpen]);
+  }, [setIsPaceSidebarOpen]);
 
-  // Reset chat state when route changes
+  // Reset chat state only when navigating to chat home route
   useEffect(() => {
     if (previousPathnameRef.current !== pathname) {
       previousPathnameRef.current = pathname;
-      setChatTitle('');
-      setConversationIdState(null);
-      setChatKey((prev) => prev + 1);
-      setIsChatSidebarOpen(false);
+
+      if (pathname === ROUTES_PATH.CHAT) {
+        setChatTitle('');
+        setConversationIdState(null);
+        setChatKey((prev) => prev + 1);
+      }
     }
-  }, [pathname, setIsChatSidebarOpen]);
+  }, [pathname]);
 
   return {
-    isChatSidebarOpen,
+    isPaceSidebarOpen,
     chatTitle,
     setChatTitle,
     conversationId,

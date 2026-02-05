@@ -213,7 +213,7 @@ export const BlockRenderer: React.FC<BlockRendererProps> = ({
   }, [message.block]);
 
   return (
-    <div className={cn('space-y-2', className)}>
+    <div className={cn('space-y-3', className)}>
       {groupedBlocks.map((group, groupIndex) => {
         if (group.type === BLOCK_GROUP_TYPE.STEPS && group.blocks.length > 1) {
           return (

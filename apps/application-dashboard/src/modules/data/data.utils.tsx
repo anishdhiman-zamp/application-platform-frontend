@@ -57,7 +57,7 @@ import { AG_GRID_FILTER_TYPES, CONDITION_OPERATOR_TYPE } from 'components/filter
 export const formatData = (data: DatasetType[]): DatasetType[] => {
   return data.map((item) => ({
     ...item,
-    updated_at: findTimeDifference(item.updated_at),
+    updatedAt: findTimeDifference(item.updatedAt),
   }));
 };
 

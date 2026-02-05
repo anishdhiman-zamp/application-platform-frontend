@@ -2,11 +2,10 @@
 
 import { useMemo, useState } from 'react';
 import { Button, Input, toast } from '@zamp-platform/ui';
+import { useAutoFocus } from '@zamp-platform/utils';
 import { useListSkillsQuery } from '@/apis/pace';
-import NewPaceIcons from '@/assets/Icons/NewPaceIcons';
 import CommonWrapper from '@/components/commonWrapper';
 import { SkeletonTypes } from '@/components/commonWrapper/commonWrapper.types';
-import { useChatContext } from '@/modules/pace/chat.context';
 import SkillCardSkeleton from '@/modules/pace/components/loaders/SkillCardSkeleton';
 import SkillCard from '@/modules/pace/components/skills/SkillCard';
 import SkillsEmptyState from '@/modules/pace/components/skills/SkillsEmptyState';
@@ -18,8 +17,8 @@ const SkillsSection = () => {
   const [isUploadModalOpen, setIsUploadModalOpen] = useState(false);
   const [skillIdToUpdate, setSkillIdToUpdate] = useState<string | undefined>(undefined);
 
-  const { isChatSidebarOpen, setIsChatSidebarOpen } = useChatContext();
   const { data, isLoading, isError, refetch } = useListSkillsQuery({});
+  const { setRef: setSearchInputRef } = useAutoFocus<HTMLInputElement>({ enabled: !isLoading });
 
   const skills = data?.skills ?? [];
 
@@ -64,24 +63,23 @@ const SkillsSection = () => {
     }
   };
 
-  const onOpenChat = () => {
-    setIsChatSidebarOpen(true);
-  };
-
   return (
-    <>
-      <div className='flex w-full max-w-[700px] items-center justify-between gap-x-3 px-6 pb-4'>
+    <div className='flex w-full max-w-[700px] flex-col gap-y-4 overflow-hidden'>
+      <div className='flex w-full items-center justify-between px-6 py-1'>
         <Input
           placeholder='Search skills...'
           value={searchQuery}
           onChange={onSearchChange}
-          className='border-GRAY_400 focus:border-GRAY_600 w-full focus:ring-3'
+          className='border-GRAY_400 focus:border-GRAY_600 h-8 w-full focus:ring-3'
+          wrapperClassName='w-[40%]'
           size='small'
+          disabled={isLoading}
           aria-label='Search skills'
+          ref={setSearchInputRef}
         />
         <Button
           variant='secondary'
-          size='small'
+          size='medium'
           onClick={() => {
             setSkillIdToUpdate(undefined);
             setIsUploadModalOpen(true);
@@ -90,7 +88,7 @@ const SkillsSection = () => {
           Upload skill
         </Button>
       </div>
-      <div className='w-full max-w-[700px] flex-1 overflow-y-auto' style={{ scrollbarWidth: 'thin' }}>
+      <div className='w-full flex-1 overflow-y-auto [&::-webkit-scrollbar]:hidden'>
         <CommonWrapper
           isLoading={isLoading || isRefetching}
           isError={isError}
@@ -113,18 +111,7 @@ const SkillsSection = () => {
         skillId={skillIdToUpdate}
         getSkillIdByName={getSkillIdByName}
       />
-      {!isChatSidebarOpen && (
-        <Button
-          onClick={onOpenChat}
-          variant='secondary'
-          size='icon'
-          className='absolute bottom-3 left-3 h-14 w-14 rounded-full border-none transition-all [&_svg]:size-10'
-          title='Start new chat'
-        >
-          <NewPaceIcons />
-        </Button>
-      )}
-    </>
+    </div>
   );
 };
 
