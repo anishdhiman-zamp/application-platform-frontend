@@ -1,5 +1,12 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
-import { ColumnDef, ColumnOrderState, SortingState, Table, VisibilityState } from '@tanstack/react-table';
+import {
+  ColumnDef,
+  ColumnOrderState,
+  ColumnSizingState,
+  SortingState,
+  Table,
+  VisibilityState,
+} from '@tanstack/react-table';
 import { MutableRefObject } from 'react';
 
 import { ActivityRunRowData } from '@/modules/process/process.types';
@@ -76,6 +83,7 @@ export interface TanStackTableProps {
   rows?: MapAny[];
   onColumnVisible?: (columnId: string, visible: boolean) => void;
   onColumnMoved?: (columnId: string, fromIndex: number, toIndex: number) => void;
+  onColumnResized?: (sizing: ColumnSizingState) => void;
   containerStyle?: MapAny;
   gridStyle?: MapAny;
   onRowClicked?: (data: ActivityRunRowData, rowIndex?: number) => void;

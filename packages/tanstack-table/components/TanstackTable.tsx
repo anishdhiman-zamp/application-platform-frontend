@@ -1,8 +1,10 @@
-import type { Header } from '@tanstack/react-table';
+'use no memo';
+
+import type { ColumnSizingState, Header } from '@tanstack/react-table';
 import { getCoreRowModel, getSortedRowModel, Row, useReactTable } from '@tanstack/react-table';
 import { useVirtualizer } from '@tanstack/react-virtual';
 import { useThrottle } from '@zamp-platform/utils';
-import React, { FC, useCallback } from 'react';
+import React, { FC, useCallback, useEffect, useMemo, useRef, useState } from 'react';
 
 import SkeletonElement from '@/components/common/skeletons/SkeletonElement';
 import CustomNoRowsOverlay from '@/components/common/table/CustomNoRowsOverlay';
@@ -11,7 +13,7 @@ import SkeletonHeader from '@/components/common/tanstackTable/skeletons/Skeleton
 import { ActivityRunRowData } from '@/modules/process/process.types';
 import { MapAny } from '@/types/commonTypes';
 
-import { QUERY_KEYS, VIRTUALIZATION_DEFAULTS } from '../constants';
+import { DEFAULT_COLUMN_WIDTH, MIN_COLUMN_WIDTH, QUERY_KEYS, VIRTUALIZATION_DEFAULTS } from '../constants';
 import { useColumnDragAndDrop } from '../hooks/useColumnDragAndDrop';
 import { useInfiniteScroll } from '../hooks/useInfiniteScroll';
 import { useInfiniteTableData } from '../hooks/useInfiniteTableData';
@@ -37,6 +39,7 @@ export const TanStackTable: FC<TanStackTableProps> = ({
   queryKeyParts = [],
   onColumnVisible,
   onColumnMoved,
+  onColumnResized,
   containerStyle = { width: '100%', height: '100%' },
   gridStyle = { height: 'calc(100vh - 100px)', width: '100%' },
   onRowClicked,
@@ -80,6 +83,23 @@ export const TanStackTable: FC<TanStackTableProps> = ({
     initialColumnOrder,
     initialFilterModel: filterModel,
   });
+
+  // Track column sizing state locally (not in shared useTableState)
+  const [columnSizing, setColumnSizing] = useState<ColumnSizingState>({});
+
+  // Memoize columns to prevent unnecessary re-renders and column order resets
+  // This is critical for proper column reordering with React Compiler in Next.js 16
+  type ColumnDefType = (typeof columns)[number];
+  const prevColumnsRef = useRef<ColumnDefType[]>(columns);
+  const columnIdsKey = useMemo(
+    () => JSON.stringify(columns.map((col) => col.id ?? (col as ColumnDefType & { accessorKey?: string }).accessorKey)),
+    [columns],
+  );
+  const memoizedColumns = useMemo((): ColumnDefType[] => {
+    prevColumnsRef.current = columns;
+    return columns;
+  }, [columnIdsKey]);
+
   // Use infinite table data hook
   const { flatRowData, totalFetched, totalRowCount, fetchNextPage, isFetching, isFetchingNextPage } =
     useInfiniteTableData<MapAny>({
@@ -209,14 +229,22 @@ export const TanStackTable: FC<TanStackTableProps> = ({
     [onRowClicked, rowHighlighting?.enabled, setHighlightedRowIndex],
   );
 
+  // Memoize data to prevent column order resets on data changes
+  const memoizedData = useMemo((): MapAny[] => flatRowData, [flatRowData]);
+
   // table
   const table = useReactTable({
-    data: flatRowData,
-    columns,
+    data: memoizedData,
+    columns: memoizedColumns,
     state: {
       sorting,
       columnVisibility,
       columnOrder,
+      columnSizing,
+    },
+    defaultColumn: {
+      minSize: MIN_COLUMN_WIDTH,
+      size: DEFAULT_COLUMN_WIDTH,
     },
     getCoreRowModel: getCoreRowModel(),
     getSortedRowModel: getSortedRowModel(),
@@ -224,6 +252,7 @@ export const TanStackTable: FC<TanStackTableProps> = ({
     onSortingChange: setSorting,
     onColumnVisibilityChange: setColumnVisibility,
     onColumnOrderChange: setColumnOrder,
+    onColumnSizingChange: setColumnSizing,
     enableColumnPinning: true,
     debugTable: process.env.NODE_ENV === 'development',
     enableColumnResizing: true,
@@ -268,6 +297,13 @@ export const TanStackTable: FC<TanStackTableProps> = ({
     prevVisibilityRef,
     isDragOperationRef,
   });
+
+  // Notify parent when column sizing changes
+  useEffect(() => {
+    if (onColumnResized) {
+      onColumnResized(columnSizing);
+    }
+  }, [columnSizing, onColumnResized]);
 
   return (
     <div style={containerStyle} className='overflow-auto'>
@@ -327,6 +363,7 @@ export const TanStackTable: FC<TanStackTableProps> = ({
           className={customTheme}
         >
           <tbody
+            key={`${columnOrder.join(',')}-${JSON.stringify(columnVisibility)}`}
             style={{
               display: 'grid',
               height: `${rowVirtualizer.getTotalSize()}px`, // Tells scrollbar how big the table is
