@@ -175,24 +175,18 @@ gh pr create --title "<type>(<scope>): <description>" --body "<filled_template>"
 
 ### Step 5: Share PR Link and Team Review Message
 
-After creation, provide the user with:
+After creation, provide a single message for the user to copy and share with the team.
 
-1. **PR Link**: The full GitHub PR URL
-2. **Team Review Message**: A one-line message for notifying the team
-
-**Format for team notification:**
+**Format:**
 
 ```
-@fe-team Please review this PR - <one-line summary of what the PR does>.
+@fe-team <PR_URL> - <one-line summary of what the PR does>.
 ```
 
 **Example:**
 
 ```
-PR Link: https://github.com/Zampfi/application-platform-frontend/pull/1234
-
-Message:
-@fe-team Please review this PR - adds drag-and-drop reordering for dynamic tabs and improves caching.
+@fe-team https://github.com/Zampfi/application-platform-frontend/pull/1234 - adds drag-and-drop reordering for dynamic tabs and improves caching.
 ```
 
 ## Resolve PR Comments Workflow
