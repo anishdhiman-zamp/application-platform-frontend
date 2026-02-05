@@ -1,8 +1,8 @@
 'use client';
 
-import { FC, useEffect, useMemo, useState } from 'react';
+import { FC, useEffect, useMemo, useRef, useState } from 'react';
 import { DEFAULT_REGION } from '@zamp-platform/api';
-import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from '@zamp-platform/ui';
+import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger, Input } from '@zamp-platform/ui';
 import { cn } from '@zamp-platform/ui/utils';
 import {
   getFromLocalStorage,
@@ -23,6 +23,7 @@ import SkeletonLoaderSidebarPages from '@/components/layouts/dashboard-layout/co
 import SkeletonElement from '@/components/skeletons/SkeletonElement';
 import { ORG_COLORS } from '@/constants/common.constants';
 import { ROUTES_PATH } from '@/constants/routeConfig';
+import { KEYBOARD_KEYS } from '@/constants/shortcuts';
 import { useAppDispatch, useAppSelector } from '@/hooks/toolkit';
 import { setIsOrgSwitchIsInProgress } from '@/store/slices/user';
 import type { Organization } from '@/types/api/auth.types';
@@ -34,6 +35,7 @@ type OrgSwitcherProps = {
 };
 
 const OrgSwitcher: FC<OrgSwitcherProps> = ({ isSidebarOpen, menuContentClassName, menuTriggerClassName }) => {
+  const itemRefs = useRef<(HTMLDivElement | null)[]>([]);
   const { isOrgSwitchIsInProgress, user } = useAppSelector((state) => state.user);
   const router = useRouter();
   const pathname = usePathname();
@@ -42,6 +44,8 @@ const OrgSwitcher: FC<OrgSwitcherProps> = ({ isSidebarOpen, menuContentClassName
 
   const [isOrgSwitcherMenuOpen, setIsOrgSwitcherMenuOpen] = useState(false);
   const [selectedOrg, setSelectedOrg] = useState<Organization>();
+  const [searchQuery, setSearchQuery] = useState('');
+  const [highlightedIndex, setHighlightedIndex] = useState(-1);
 
   const { data: baseUrlData } = useGetBaseUrlQuery(
     { email: user?.user_email ?? '' },
@@ -92,6 +96,92 @@ const OrgSwitcher: FC<OrgSwitcherProps> = ({ isSidebarOpen, menuContentClassName
     [organizations, selectedOrg],
   );
 
+  const filteredOrganizations = useMemo(() => {
+    if (!searchQuery.trim()) return organizations;
+
+    return organizations?.filter((org: Organization) => org.name.toLowerCase().includes(searchQuery.toLowerCase()));
+  }, [organizations, searchQuery]);
+
+  const showSearchBox = (organizations?.length ?? 0) > 5;
+
+  const handleOpenChange = (open: boolean) => {
+    setIsOrgSwitcherMenuOpen(open);
+    if (!open) {
+      setSearchQuery('');
+      setHighlightedIndex(-1);
+    }
+  };
+
+  const handleSearchChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    setSearchQuery(e.target.value);
+    setHighlightedIndex(-1);
+  };
+
+  const handleSearchKeyDown = (e: React.KeyboardEvent<HTMLInputElement>) => {
+    e.stopPropagation();
+    const itemCount = filteredOrganizations?.length ?? 0;
+
+    switch (e.key) {
+      case KEYBOARD_KEYS.ARROW_DOWN:
+        e.preventDefault();
+        setHighlightedIndex((prev) => (prev < itemCount - 1 ? prev + 1 : 0));
+        break;
+      case KEYBOARD_KEYS.ARROW_UP:
+        e.preventDefault();
+        setHighlightedIndex((prev) => (prev > 0 ? prev - 1 : itemCount - 1));
+        break;
+      case KEYBOARD_KEYS.ENTER:
+        e.preventDefault();
+        if (highlightedIndex >= 0 && filteredOrganizations?.[highlightedIndex]) {
+          handleOrgChange(filteredOrganizations[highlightedIndex]);
+        }
+        break;
+      case KEYBOARD_KEYS.ESCAPE:
+        setIsOrgSwitcherMenuOpen(false);
+        break;
+    }
+  };
+
+  // Scroll highlighted item into view
+  useEffect(() => {
+    if (highlightedIndex >= 0 && itemRefs.current[highlightedIndex]) {
+      itemRefs.current[highlightedIndex]?.scrollIntoView({
+        block: 'nearest',
+        behavior: 'smooth',
+      });
+    }
+  }, [highlightedIndex]);
+
+  const renderOrganizationList = () => {
+    if (filteredOrganizations?.length === 0 && searchQuery.trim()) {
+      return <div className='f-12-400 text-GRAY_600 px-2 py-3 text-center'>No organizations found</div>;
+    }
+
+    return filteredOrganizations?.map((item: Organization, idx) => {
+      const originalIdx =
+        organizations?.findIndex((org: Organization) => org.organization_id === item.organization_id) ?? 0;
+      const isHighlighted = idx === highlightedIndex;
+
+      return (
+        <DropdownMenuItem
+          ref={(el) => {
+            itemRefs.current[idx] = el;
+          }}
+          className={cn('p-0', isHighlighted && 'bg-GRAY_200')}
+          onClick={() => handleOrgChange(item)}
+          key={item.organization_id}
+          data-testid={`org-switcher-item-${item?.name?.toLowerCase()}`}
+        >
+          <OrgCard
+            isSelected={item?.organization_id === selectedOrg?.organization_id}
+            name={item?.name}
+            className={ORG_COLORS[originalIdx]}
+          />
+        </DropdownMenuItem>
+      );
+    });
+  };
+
   useEffect(() => {
     if (organizations?.length) {
       const orgId = getFromLocalStorage(LOCAL_STORAGE_KEYS.XZAMP_ORGANIZATION_ID);
@@ -108,7 +198,7 @@ const OrgSwitcher: FC<OrgSwitcherProps> = ({ isSidebarOpen, menuContentClassName
 
   return (
     <div>
-      <DropdownMenu onOpenChange={setIsOrgSwitcherMenuOpen}>
+      <DropdownMenu onOpenChange={handleOpenChange}>
         <DropdownMenuTrigger asChild>
           <div
             className={cn(
@@ -158,6 +248,21 @@ const OrgSwitcher: FC<OrgSwitcherProps> = ({ isSidebarOpen, menuContentClassName
           )}
           sideOffset={5}
         >
+          {showSearchBox && (
+            <div className='px-1 pb-1'>
+              <Input
+                type='text'
+                size='small'
+                placeholder='Search organization...'
+                className='mt-1'
+                autoFocus
+                value={searchQuery}
+                onChange={handleSearchChange}
+                onClick={(e) => e.stopPropagation()}
+                onKeyDown={handleSearchKeyDown}
+              />
+            </div>
+          )}
           <div className='flex max-h-[150px] flex-col gap-1 overflow-y-auto [scrollbar-width:none]'>
             <CommonWrapper
               loader={<SkeletonLoaderSidebarPages />}
@@ -165,20 +270,7 @@ const OrgSwitcher: FC<OrgSwitcherProps> = ({ isSidebarOpen, menuContentClassName
               isLoading={loading}
               isError={error}
             >
-              {organizations?.map((item: Organization, idx) => (
-                <DropdownMenuItem
-                  className='p-0'
-                  onClick={() => handleOrgChange(item)}
-                  key={idx}
-                  data-testid={`org-switcher-item-${item?.name?.toLowerCase()}`}
-                >
-                  <OrgCard
-                    isSelected={item?.organization_id === selectedOrg?.organization_id}
-                    name={item?.name}
-                    className={ORG_COLORS[idx]}
-                  />
-                </DropdownMenuItem>
-              ))}
+              {renderOrganizationList()}
               {regionList?.length
                 ? regionList?.map((item, idx) => (
                     <DropdownMenuItem

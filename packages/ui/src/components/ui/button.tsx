@@ -204,7 +204,8 @@ function Button({
       ref={buttonRef}
       className={cn(
         buttonVariants({ variant, size, className }),
-        isLoading && '!bg-primary/90 cursor-not-allowed',
+        isLoading && variant !== 'ghost' && variant !== 'link' && '!bg-primary/90 cursor-not-allowed',
+        isLoading && (variant === 'ghost' || variant === 'link') && 'cursor-not-allowed',
         (leadingIcon || trailingIcon) && 'gap-1.5',
       )}
       style={{ minWidth: minWidth ? `${minWidth}px` : undefined, ...style }}
