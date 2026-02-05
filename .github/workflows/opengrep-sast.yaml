@@ -22,7 +22,7 @@ jobs:
     runs-on: ubuntu-latest
     timeout-minutes: 15
     permissions:
-      contents: write
+      contents: read
       pull-requests: write
 
     steps:
@@ -76,13 +76,9 @@ jobs:
       run: |
         echo "📊 Processing scan results..."
 
-        WAIVERS_CREATED=false
         if [ ! -f ".security-waivers.json" ]; then
-          echo '{
-          "waivers": []
-        }' > .security-waivers.json
-          echo "ℹ️  Created empty security waivers file"
-          WAIVERS_CREATED=true
+          echo '{"waivers": []}' > .security-waivers.json
+          echo "ℹ️  No security waivers file found, using empty waivers"
         fi
 
         cat << 'PYTHON_EOF' > process_results.py
@@ -176,22 +172,6 @@ jobs:
         PYTHON_EOF
 
         python3 process_results.py
-        echo "waivers_created=$WAIVERS_CREATED" >> $GITHUB_OUTPUT
-
-    - name: Auto-Commit Security Waivers File
-      if: steps.process-results.outputs.waivers_created == 'true'
-      run: |
-        git config --local user.email "action@github.com"
-        git config --local user.name "GitHub Action"
-        git add .security-waivers.json
-        if ! git diff --staged --quiet; then
-          git commit -m "Auto-create security waivers file [skip ci]"
-          if [ "${{ github.event_name }}" = "pull_request" ]; then
-            git push origin HEAD:${{ github.head_ref }}
-          else
-            git push origin ${{ github.ref_name }}
-          fi
-        fi
 
     - name: Comment on PR (Critical/High Issues Only)
       if: github.event_name == 'pull_request' && steps.process-results.outputs.critical_high_count != '0'
