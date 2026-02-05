@@ -89,6 +89,10 @@ jobs:
         import json
         import sys
         import os
+        from datetime import datetime, timedelta
+
+        # Calculate expiration date (1 year from now)
+        expiration_date = (datetime.now() + timedelta(days=365)).strftime('%Y-%m-%d')
 
         try:
             with open('scan_results.json', 'r') as f:
@@ -150,7 +154,7 @@ jobs:
                     f.write(f'      "file_path": "{path}",\n')
                     f.write(f'      "line": {line},\n')
                     f.write('      "reason": "<Brief justification for waiver>",\n')
-                    f.write('      "expires": "2025-12-31",\n')
+                    f.write(f'      "expires": "{expiration_date}",\n')
                     f.write('      "approved_by": "<approver email>"\n')
                     f.write('    }\n  ]\n}\n')
                     f.write("```\n\n---\n\n")
