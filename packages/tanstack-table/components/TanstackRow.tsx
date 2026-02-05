@@ -1,3 +1,5 @@
+'use no memo';
+
 import { Row } from '@tanstack/react-table';
 import { Virtualizer } from '@tanstack/react-virtual';
 import { cn } from '@zamp-platform/ui/utils';

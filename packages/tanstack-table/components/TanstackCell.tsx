@@ -1,3 +1,5 @@
+'use no memo';
+
 import { Cell, CellContext, flexRender } from '@tanstack/react-table';
 import { cn } from '@zamp-platform/ui/utils';
 import React from 'react';
