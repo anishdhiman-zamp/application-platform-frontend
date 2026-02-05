@@ -12,6 +12,7 @@ Automates commits with Conventional Commits format, PR creation via GitHub CLI, 
 1. **Commit messages MUST be single line** - No multi-line commits
 2. **Do NOT create PR unless user explicitly asks** - Only commit and push by default
 3. **Check for `gh` CLI before PR operations** - Install if missing
+4. **ALWAYS check for console.log statements before committing** - Remove debug logs before pushing
 
 ## Commit Workflow
 
@@ -23,7 +24,41 @@ git diff --staged
 git diff
 ```
 
-### Step 2: Stage Changes
+### Step 2: Check for console.log Statements (MANDATORY)
+
+**CRITICAL**: Before any commit, push, or PR creation, scan for `console.log` statements in the changed files.
+
+```bash
+# Check staged files for console.log
+git diff --staged --name-only | xargs grep -l "console.log" 2>/dev/null
+
+# Check all changed files (staged + unstaged)
+git diff --name-only HEAD | xargs grep -n "console.log" 2>/dev/null
+
+# More comprehensive check including console.warn, console.error used for debugging
+git diff --staged --name-only | xargs grep -nE "console\.(log|warn|info|debug)" 2>/dev/null
+```
+
+**If console.log statements are found:**
+
+1. **Review each occurrence** - Determine if it's intentional logging or debug code
+2. **Remove debug console.log statements** - These should not be committed
+3. **Keep intentional logging** - Error handling, analytics, or monitoring logs may be valid
+4. **Ask user if unsure** - "Found console.log at [file:line]. Is this intentional logging or debug code to remove?"
+
+**Acceptable console statements:**
+
+- `console.error()` for actual error handling
+- Logging in development-only code paths
+- Intentional analytics/monitoring
+
+**Must be removed:**
+
+- Debug `console.log()` statements
+- Temporary debugging output
+- `console.log` with variable dumps like `console.log('data:', data)`
+
+### Step 3: Stage Changes
 
 ```bash
 git add <file1> <file2>
@@ -31,7 +66,7 @@ git add <file1> <file2>
 git add .
 ```
 
-### Step 3: Create Single-Line Commit Message
+### Step 4: Create Single-Line Commit Message
 
 **Format**: `<type>(<scope>): <description>`
 
@@ -56,13 +91,13 @@ git commit -m "fix(dashboard): correct date formatting in reports"
 git commit -m "refactor(api): extract common validation logic"
 ```
 
-### Step 4: Push Branch
+### Step 5: Push Branch
 
 ```bash
 git push -u origin HEAD
 ```
 
-### Step 5: Update PR Description (If PR Exists)
+### Step 6: Update PR Description (If PR Exists)
 
 After pushing commits, check if a PR already exists for the branch. If so, update the PR description to reflect the new changes.
 
@@ -231,12 +266,15 @@ Fill based on repository's template. Default structure:
 
 ```
 Commit Workflow:
+- [ ] Changes reviewed (git status, git diff)
+- [ ] console.log statements checked and removed (MANDATORY)
 - [ ] Changes staged
 - [ ] Single-line commit message created
 - [ ] Branch pushed to remote
 - [ ] PR description updated (if PR exists)
 
 PR Creation (only if requested):
+- [ ] console.log check passed (no debug logs)
 - [ ] gh CLI installed and authenticated
 - [ ] PR template fetched from repo
 - [ ] PR created with filled template
@@ -245,6 +283,7 @@ PR Creation (only if requested):
 PR Comment Resolution (only if requested):
 - [ ] PR comments fetched via gh CLI
 - [ ] Code changes made to address feedback
+- [ ] console.log check passed before pushing
 - [ ] Changes committed and pushed
 ```
 
