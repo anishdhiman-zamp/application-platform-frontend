@@ -1,0 +1,236 @@
+name: Strix Security Scan
+
+# =============================================================================
+# Strix Security Scanner
+# =============================================================================
+#
+# Triggers:
+#   1. Weekly scheduled scan - Full scan (Sundays 2 AM UTC)
+#   2. Manual - On-demand scan (quick or full)
+#
+# Requirements:
+#   - Repository secrets: STRIX_LLM, LLM_API_KEY
+#   - Docker (pre-installed on GitHub runners)
+#
+# Docs: https://github.com/usestrix/strix
+# =============================================================================
+
+on:
+  # Weekly scheduled full scan
+  schedule:
+    - cron: '0 2 * * 0'  # Every Sunday at 2 AM UTC
+
+  # Manual trigger for on-demand scans
+  workflow_dispatch:
+    inputs:
+      scan_mode:
+        description: "Scan mode (quick=fast checks, deep=comprehensive)"
+        required: false
+        default: "deep"
+        type: choice
+        options:
+          - quick
+          - deep
+      instruction_file:
+        description: "Instruction file to use"
+        required: true
+        default: "full-scan.md"
+        type: choice
+        options:
+          - full-scan.md
+          - quick-scan.md
+
+jobs:
+  strix-scan:
+    name: "🦉 Strix Security Scan"
+    runs-on: ubuntu-latest
+
+    steps:
+      # =========================================================================
+      # Step 1: Determine scan configuration
+      # =========================================================================
+      - name: "📋 Determine scan configuration"
+        id: config
+        run: |
+          echo "=== Scan Configuration ==="
+
+          if [ "${{ github.event_name }}" = "workflow_dispatch" ]; then
+            echo "Trigger: Manual"
+            echo "trigger_type=manual" >> $GITHUB_OUTPUT
+            echo "instruction_file=${{ github.event.inputs.instruction_file }}" >> $GITHUB_OUTPUT
+            echo "scan_mode=${{ github.event.inputs.scan_mode }}" >> $GITHUB_OUTPUT
+          else
+            echo "Trigger: Scheduled (weekly full scan)"
+            echo "trigger_type=scheduled" >> $GITHUB_OUTPUT
+            echo "instruction_file=full-scan.md" >> $GITHUB_OUTPUT
+            echo "scan_mode=deep" >> $GITHUB_OUTPUT
+          fi
+
+      # =========================================================================
+      # Step 2: Checkout repository
+      # =========================================================================
+      - name: "📁 Checkout repository"
+        uses: actions/checkout@v4
+
+      # =========================================================================
+      # Step 3: Verify Docker is running
+      # =========================================================================
+      - name: "🐳 Verify Docker is running"
+        run: |
+          if ! docker info &> /dev/null; then
+            echo "❌ Docker daemon is not running"
+            exit 1
+          fi
+          echo "✅ Docker is running"
+
+      # =========================================================================
+      # Step 4: Install Strix
+      # =========================================================================
+      - name: "🦉 Install Strix"
+        run: |
+          echo "=== Installing Strix ==="
+          curl -sSL https://strix.ai/install | bash
+          export PATH="$HOME/.strix/bin:$HOME/.local/bin:$PATH"
+
+          if ! command -v strix &> /dev/null; then
+            echo "❌ Strix not found in PATH"
+            exit 1
+          fi
+
+          echo "✅ Strix installed"
+          strix --version || true
+          echo "$HOME/.strix/bin" >> $GITHUB_PATH
+
+      # =========================================================================
+      # Step 5: Run Strix scan
+      # =========================================================================
+      - name: "🔍 Run Strix scan"
+        id: scan
+        env:
+          STRIX_LLM: ${{ secrets.STRIX_LLM }}
+          LLM_API_KEY: ${{ secrets.LLM_API_KEY }}
+        run: |
+          set -e
+
+          INSTRUCTION_PATH="docs/strix-instructions/${{ steps.config.outputs.instruction_file }}"
+          SCAN_MODE="${{ steps.config.outputs.scan_mode }}"
+
+          echo "=============================================="
+          echo "  🦉 Strix Security Scan"
+          echo "=============================================="
+          echo "Repository:   ${{ github.repository }}"
+          echo "Branch:       ${{ github.ref_name }}"
+          echo "Trigger:      ${{ steps.config.outputs.trigger_type }}"
+          echo "Scan Mode:    $SCAN_MODE"
+          echo "Instructions: $INSTRUCTION_PATH"
+          echo "=============================================="
+
+          CMD="strix -n --target ."
+
+          if [ -n "${SCAN_MODE}" ]; then
+            CMD="${CMD} --scan-mode ${SCAN_MODE}"
+          fi
+
+          if [ -f "${INSTRUCTION_PATH}" ]; then
+            CMD="${CMD} --instruction-file ${INSTRUCTION_PATH}"
+          else
+            echo "⚠️ Instruction file not found, using defaults"
+          fi
+
+          echo "Executing: ${CMD}"
+          echo "--- Strix Output Start ---"
+
+          set +e
+          ${CMD} 2>&1 | tee strix_output.log
+          STRIX_EXIT_CODE=${PIPESTATUS[0]}
+          set -e
+
+          echo "--- Strix Output End ---"
+
+          if [ ${STRIX_EXIT_CODE} -ne 0 ]; then
+            echo "⚠️ Strix found vulnerabilities (exit code: ${STRIX_EXIT_CODE})"
+            echo "vulnerabilities_found=true" >> $GITHUB_OUTPUT
+          else
+            echo "✅ No vulnerabilities found"
+            echo "vulnerabilities_found=false" >> $GITHUB_OUTPUT
+          fi
+
+          echo "exit_code=${STRIX_EXIT_CODE}" >> $GITHUB_OUTPUT
+
+      # =========================================================================
+      # Step 6: Generate report
+      # =========================================================================
+      - name: "📊 Generate report"
+        if: always()
+        run: |
+          REPORT_FILE="STRIX_REPORT.md"
+
+          {
+            echo "# 🦉 Strix Security Scan Report"
+            echo ""
+            echo "**Generated:** $(date -u '+%Y-%m-%d %H:%M:%S UTC')"
+            echo "**Repository:** ${{ github.repository }}"
+            echo "**Branch:** ${{ github.ref_name }}"
+            echo "**Trigger:** ${{ steps.config.outputs.trigger_type }}"
+            echo "**Workflow Run:** [#${{ github.run_number }}](${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }})"
+            echo ""
+            echo "---"
+            echo ""
+            echo "## Scan Configuration"
+            echo ""
+            echo "| Setting | Value |"
+            echo "|---------|-------|"
+            echo "| Instruction File | \`${{ steps.config.outputs.instruction_file }}\` |"
+            echo "| Scan Mode | \`${{ steps.config.outputs.scan_mode }}\` |"
+            echo "| Vulnerabilities Found | ${{ steps.scan.outputs.vulnerabilities_found }} |"
+            echo "| Exit Code | ${{ steps.scan.outputs.exit_code }} |"
+            echo ""
+            echo "---"
+            echo ""
+            echo "## Strix CLI Output"
+            echo ""
+            echo '```'
+          } > ${REPORT_FILE}
+
+          if [ -f strix_output.log ]; then
+            cat strix_output.log >> ${REPORT_FILE}
+          fi
+
+          {
+            echo '```'
+            echo ""
+            echo "---"
+            echo "*This report was automatically generated by the Strix Security Scan workflow.*"
+          } >> ${REPORT_FILE}
+
+      # =========================================================================
+      # Step 7: Upload artifacts
+      # =========================================================================
+      - name: "📤 Upload artifacts"
+        uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: strix-scan-${{ github.run_number }}
+          path: |
+            STRIX_REPORT.md
+            strix_output.log
+            strix_runs/
+          retention-days: 30
+
+      # =========================================================================
+      # Step 8: Job summary
+      # =========================================================================
+      - name: "📋 Job summary"
+        if: always()
+        run: |
+          echo "## 🦉 Strix Security Scan Results" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "| Property | Value |" >> $GITHUB_STEP_SUMMARY
+          echo "|----------|-------|" >> $GITHUB_STEP_SUMMARY
+          echo "| Branch | ${{ github.ref_name }} |" >> $GITHUB_STEP_SUMMARY
+          echo "| Trigger | ${{ steps.config.outputs.trigger_type }} |" >> $GITHUB_STEP_SUMMARY
+          echo "| Instruction File | ${{ steps.config.outputs.instruction_file }} |" >> $GITHUB_STEP_SUMMARY
+          echo "| Scan Mode | ${{ steps.config.outputs.scan_mode }} |" >> $GITHUB_STEP_SUMMARY
+          echo "| Vulnerabilities Found | ${{ steps.scan.outputs.vulnerabilities_found }} |" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "📥 Download the full report from the Artifacts section." >> $GITHUB_STEP_SUMMARY
