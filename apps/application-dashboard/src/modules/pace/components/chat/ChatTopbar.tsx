@@ -3,7 +3,7 @@
 import type { FC } from 'react';
 import { Button, Input, Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@zamp-platform/ui';
 import { cn } from '@zamp-platform/ui/utils';
-import { Minus, Plus } from 'lucide-react';
+import { Expand, Minus, Plus } from 'lucide-react';
 import { useEditableTitle } from '@/modules/pace/hooks/useEditableTitle';
 
 interface ChatTopbarProps {
@@ -14,6 +14,7 @@ interface ChatTopbarProps {
   organizationId?: string;
   onStartNewChat: () => void;
   onClose?: () => void;
+  onExpand?: () => void;
   onTitleChange?: (newTitle: string) => void;
 }
 
@@ -25,6 +26,7 @@ const ChatTopbar: FC<ChatTopbarProps> = ({
   organizationId,
   onStartNewChat,
   onClose,
+  onExpand,
   onTitleChange,
 }) => {
   const {
@@ -87,6 +89,18 @@ const ChatTopbar: FC<ChatTopbarProps> = ({
         >
           <Plus size={14} />
         </Button>
+        {onExpand && (
+          <Button
+            variant='ghost'
+            size='icon'
+            className='h-6 w-6 rounded p-2 text-gray-900 hover:text-gray-900 disabled:opacity-50'
+            onClick={onExpand}
+            disabled={!conversationId}
+            title='Open in full page'
+          >
+            <Expand size={14} />
+          </Button>
+        )}
         {onClose && (
           <Button
             variant='ghost'
