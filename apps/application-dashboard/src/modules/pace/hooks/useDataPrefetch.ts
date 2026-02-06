@@ -1,15 +1,15 @@
 import { useGetDatasetListingQuery } from '@/apis/dataset';
 import { useGetConversationHistoryQuery, useListSkillsQuery } from '@/apis/pace';
 import { useGetPagesQuery } from '@/apis/pages';
-import { useAppSelector } from '@/hooks/toolkit';
 import { useIsPaceChatEnabled } from '@/hooks/useIsPaceChatEnabled';
 import { ARTIFACTS_PAGE_SIZE } from '@/modules/pace/artifacts/artifacts.constants';
-import type { RootState } from '@/store';
 import { ResourceType } from '@/types/api/policies.types';
+import { getUserSession } from '@/utils/cookie';
 
 const useDataPrefetch = () => {
   const { isPaceChatEnabled, isLoading } = useIsPaceChatEnabled();
-  const organizationId = useAppSelector((state: RootState) => state?.user?.user?.orgs?.[0]?.organization_id) ?? '';
+  const userSession = getUserSession();
+  const organizationId = userSession?.default_org_id ?? '';
 
   useGetConversationHistoryQuery(
     {
