@@ -4,12 +4,11 @@ import { useGetPagesQuery } from '@/apis/pages';
 import { useIsPaceChatEnabled } from '@/hooks/useIsPaceChatEnabled';
 import { ARTIFACTS_PAGE_SIZE } from '@/modules/pace/artifacts/artifacts.constants';
 import { ResourceType } from '@/types/api/policies.types';
-import { getUserSession } from '@/utils/cookie';
+import { getFromLocalStorage, LOCAL_STORAGE_KEYS } from '@/utils/localstorage';
 
 const useDataPrefetch = () => {
   const { isPaceChatEnabled, isLoading } = useIsPaceChatEnabled();
-  const userSession = getUserSession();
-  const organizationId = userSession?.default_org_id ?? '';
+  const organizationId = getFromLocalStorage(LOCAL_STORAGE_KEYS.XZAMP_ORGANIZATION_ID) ?? '';
 
   useGetConversationHistoryQuery(
     {
