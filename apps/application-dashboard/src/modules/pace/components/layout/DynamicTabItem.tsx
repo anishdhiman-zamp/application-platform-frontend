@@ -30,7 +30,7 @@ const DynamicTabItem = ({ tab, isActive, isDragging = false, onClose }: DynamicT
       <Link
         href={tab.path}
         className={cn(
-          'group relative flex h-[30px] w-full max-w-[172px] min-w-[48px] cursor-pointer items-center gap-x-2 rounded-[8px] border p-2 transition-all duration-150 ease-in-out',
+          'group relative flex h-[30px] w-full min-w-[48px] cursor-pointer items-center gap-x-2 rounded-[8px] border p-2 transition-all duration-150 ease-in-out',
           isActive
             ? 'border-GRAY_300 text-GRAY_1000 bg-white hover:bg-white'
             : 'text-GRAY_700 hover:text-GRAY_1000 hover:bg-GRAY_200 border-transparent',
