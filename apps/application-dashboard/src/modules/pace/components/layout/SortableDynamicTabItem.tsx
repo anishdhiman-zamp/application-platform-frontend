@@ -32,7 +32,7 @@ const SortableDynamicTabItem = ({ tab, isActive, isAnyDragging, onClose }: Sorta
       style={style}
       {...attributes}
       {...listeners}
-      className={cn('min-w-0 flex-1 basis-0 select-none', { 'opacity-50': isDragging })}
+      className={cn('max-w-[172px] min-w-[48px] flex-1 select-none', { 'opacity-50': isDragging })}
       onClick={(e) => {
         const target = e.target as HTMLElement;
 
