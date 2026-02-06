@@ -36,6 +36,7 @@ type OrgSwitcherProps = {
 
 const OrgSwitcher: FC<OrgSwitcherProps> = ({ isSidebarOpen, menuContentClassName, menuTriggerClassName }) => {
   const itemRefs = useRef<(HTMLDivElement | null)[]>([]);
+  const [searchInputEl, setSearchInputEl] = useState<HTMLInputElement | null>(null);
   const { isOrgSwitchIsInProgress, user } = useAppSelector((state) => state.user);
   const router = useRouter();
   const pathname = usePathname();
@@ -247,10 +248,12 @@ const OrgSwitcher: FC<OrgSwitcherProps> = ({ isSidebarOpen, menuContentClassName
             menuContentClassName,
           )}
           sideOffset={5}
+          onMouseMove={() => showSearchBox && searchInputEl?.focus()}
         >
           {showSearchBox && (
             <div className='px-1 pb-1'>
               <Input
+                ref={setSearchInputEl}
                 type='text'
                 size='small'
                 placeholder='Search organization...'
@@ -263,7 +266,13 @@ const OrgSwitcher: FC<OrgSwitcherProps> = ({ isSidebarOpen, menuContentClassName
               />
             </div>
           )}
-          <div className='flex max-h-[150px] flex-col gap-1 overflow-y-auto [scrollbar-width:none]'>
+          <div
+            className={cn(
+              'flex max-h-[150px] flex-col gap-1 overflow-y-auto [scrollbar-width:none]',
+              showSearchBox && 'min-h-[240px]',
+              showSearchBox && 'min-h-[150px]',
+            )}
+          >
             <CommonWrapper
               loader={<SkeletonLoaderSidebarPages />}
               skeletonType={SkeletonTypes.CUSTOM}
