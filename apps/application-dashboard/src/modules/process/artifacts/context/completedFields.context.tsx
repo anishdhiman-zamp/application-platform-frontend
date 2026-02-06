@@ -120,7 +120,7 @@ export const CompletedFieldsProvider: FC<{ children: ReactElement }> = ({ childr
   // Load from localStorage on mount
   useEffect(() => {
     const loadFromStorage = () => {
-      const storedData = getFromLocalStorage(LOCAL_STORAGE_KEYS.COMPLETED_MISSING_FIELDS);
+      const storedData = getFromLocalStorage(LOCAL_STORAGE_KEYS.DATASET_COMPLETED_FIELDS);
 
       if (storedData) {
         try {
@@ -142,10 +142,10 @@ export const CompletedFieldsProvider: FC<{ children: ReactElement }> = ({ childr
   // Save to localStorage whenever state changes
   useEffect(() => {
     if (Object.keys(state.completedFields).length > 0) {
-      setToLocalStorage(LOCAL_STORAGE_KEYS.COMPLETED_MISSING_FIELDS, JSON.stringify(state.completedFields));
+      setToLocalStorage(LOCAL_STORAGE_KEYS.DATASET_COMPLETED_FIELDS, JSON.stringify(state.completedFields));
     } else {
       // Remove from localStorage if no completed fields
-      removeFromLocalStorage(LOCAL_STORAGE_KEYS.COMPLETED_MISSING_FIELDS);
+      removeFromLocalStorage(LOCAL_STORAGE_KEYS.DATASET_COMPLETED_FIELDS);
     }
   }, [state.completedFields]);
 
