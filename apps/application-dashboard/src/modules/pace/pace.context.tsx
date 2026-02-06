@@ -35,6 +35,7 @@ interface PaceContextType {
   dynamicTabs: DynamicTab[];
   openDynamicTab: (tab: DynamicTab) => void;
   closeDynamicTab: (id: string) => void;
+  reorderDynamicTabs: (newOrder: string[]) => void;
 }
 
 const PaceContext = createContext<PaceContextType | null>(null);
@@ -86,6 +87,25 @@ export const PaceProvider = ({ children }: { children: ReactNode }) => {
     });
   }, []);
 
+  const reorderDynamicTabs = useCallback((newOrder: string[]) => {
+    setDynamicTabs((prev) => {
+      // Create a map for quick lookup
+      const tabMap = new Map(prev.map((tab) => [tab.id, tab]));
+
+      // Reorder tabs based on the new order
+      const reorderedTabs = newOrder.map((id) => tabMap.get(id)).filter((tab): tab is DynamicTab => tab !== undefined);
+
+      // If the reordered tabs don't match the original count, something went wrong
+      if (reorderedTabs.length !== prev.length) {
+        return prev;
+      }
+
+      setStoredTabs(reorderedTabs);
+
+      return reorderedTabs;
+    });
+  }, []);
+
   const value: PaceContextType = useMemo(
     () => ({
       isPaceSidebarOpen,
@@ -95,8 +115,17 @@ export const PaceProvider = ({ children }: { children: ReactNode }) => {
       dynamicTabs,
       openDynamicTab,
       closeDynamicTab,
+      reorderDynamicTabs,
     }),
-    [isPaceSidebarOpen, registerStartNewChat, startNewChat, dynamicTabs, openDynamicTab, closeDynamicTab],
+    [
+      isPaceSidebarOpen,
+      registerStartNewChat,
+      startNewChat,
+      dynamicTabs,
+      openDynamicTab,
+      closeDynamicTab,
+      reorderDynamicTabs,
+    ],
   );
 
   return <PaceContext.Provider value={value}>{children}</PaceContext.Provider>;
