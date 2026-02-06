@@ -15,6 +15,7 @@ import {
   useCreateConversationMutation,
   useCreateConversationV2Mutation,
   useGetConversationByIdQuery,
+  useLazyGetConversationByIdQuery,
   useSendMessageMutation,
   useSendMessageV2Mutation,
 } from '../api';
@@ -70,6 +71,9 @@ export const useChat = (config: ChatConfig) => {
     useCreateConversationMutation();
   const [createConversationV2Mutation, { isLoading: isCreatingConversationV2, error: createConversationV2Error }] =
     useCreateConversationV2Mutation();
+
+  // Lazy query to prefetch conversation history and populate RTK Query cache
+  const [triggerGetConversation] = useLazyGetConversationByIdQuery();
 
   const [streamingState, setStreamingState] = useState<StreamingState | null>(null);
 
@@ -521,6 +525,17 @@ export const useChat = (config: ChatConfig) => {
               return null;
             });
 
+            // Prefetch conversation history to populate RTK Query cache
+            // This ensures cached data is available when sidebar is reopened
+            if (conversationIdRef.current && config.resourceId && config.resourceType) {
+              triggerGetConversation({
+                conversationId: conversationIdRef.current,
+                resourceId: config.resourceId,
+                resourceType: config.resourceType,
+                url: config.apiConfig?.getConversationById,
+              });
+            }
+
             break;
           default:
         }
@@ -528,7 +543,14 @@ export const useChat = (config: ChatConfig) => {
         captureException(error);
       }
     },
-    [dispatch, _conversationId],
+    [
+      dispatch,
+      _conversationId,
+      config.resourceId,
+      config.resourceType,
+      config.apiConfig?.getConversationById,
+      triggerGetConversation,
+    ],
   );
 
   // Handle conversation ID changes - clear streaming state when switching conversations

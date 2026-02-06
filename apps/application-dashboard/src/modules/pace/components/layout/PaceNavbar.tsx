@@ -1,10 +1,23 @@
 'use client';
 
+import { useMemo, useState } from 'react';
+import {
+  closestCenter,
+  DndContext,
+  type DragEndEvent,
+  DragOverlay,
+  type DragStartEvent,
+  PointerSensor,
+  useSensor,
+  useSensors,
+} from '@dnd-kit/core';
+import { arrayMove, horizontalListSortingStrategy, SortableContext } from '@dnd-kit/sortable';
 import { cn } from '@zamp-platform/ui/utils';
 import DynamicTabItem from 'modules/pace/components/layout/DynamicTabItem';
 import { PaceNavbarItemId } from 'modules/pace/pace.types';
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
+import SortableDynamicTabItem from '@/modules/pace/components/layout/SortableDynamicTabItem';
 import { useDynamicTabs } from '@/modules/pace/hooks/useDynamicTabs';
 import { PACE_NAVBAR_ITEMS } from '@/modules/pace/pace.constants';
 import { usePaceContext } from '@/modules/pace/pace.context';
@@ -12,7 +25,36 @@ import { usePaceContext } from '@/modules/pace/pace.context';
 const PaceNavbar = () => {
   const pathname = usePathname();
   const { setIsPaceSidebarOpen, startNewChat } = usePaceContext();
-  const { dynamicTabs, isDynamicTabActive, isOnAnyDynamicTab, handleCloseDynamicTab } = useDynamicTabs();
+  const { dynamicTabs, isDynamicTabActive, isOnAnyDynamicTab, handleCloseDynamicTab, handleReorderTabs } =
+    useDynamicTabs();
+
+  const [activeId, setActiveId] = useState<string | null>(null);
+  const sensors = useSensors(useSensor(PointerSensor, { activationConstraint: { distance: 5 } }));
+
+  const tabIds = useMemo(() => dynamicTabs.map((tab) => tab.id), [dynamicTabs]);
+
+  const activeTab = useMemo(() => dynamicTabs.find((tab) => tab.id === activeId), [dynamicTabs, activeId]);
+
+  const handleDragStart = (event: DragStartEvent) => {
+    setActiveId(event.active.id as string);
+  };
+
+  const handleDragEnd = (event: DragEndEvent) => {
+    const { active, over } = event;
+
+    setActiveId(null);
+
+    if (active.id !== over?.id) {
+      const oldIndex = tabIds.indexOf(active.id as string);
+      const newIndex = tabIds.indexOf((over?.id as string) ?? '');
+
+      if (oldIndex !== -1 && newIndex !== -1) {
+        const newOrder = arrayMove(tabIds, oldIndex, newIndex);
+
+        handleReorderTabs(newOrder);
+      }
+    }
+  };
 
   const isNavItemActive = (id: PaceNavbarItemId, path: string) => {
     if (id === PaceNavbarItemId.HOME) {
@@ -58,16 +100,38 @@ const PaceNavbar = () => {
       {dynamicTabs.length > 0 && <div className='bg-GRAY_300 mx-3 h-4 w-px shrink-0' />}
 
       {dynamicTabs.length > 0 && (
-        <div className='flex min-w-0 flex-1 items-center gap-x-2.5 overflow-hidden'>
-          {dynamicTabs.map((tab) => (
-            <DynamicTabItem
-              key={tab.id}
-              tab={tab}
-              isActive={isDynamicTabActive(tab.path)}
-              onClose={handleCloseDynamicTab}
-            />
-          ))}
-        </div>
+        <DndContext
+          sensors={sensors}
+          collisionDetection={closestCenter}
+          onDragStart={handleDragStart}
+          onDragEnd={handleDragEnd}
+        >
+          <SortableContext items={tabIds} strategy={horizontalListSortingStrategy}>
+            <div className='flex min-w-0 flex-1 items-center gap-x-1'>
+              {dynamicTabs.map((tab) => (
+                <SortableDynamicTabItem
+                  key={tab.id}
+                  tab={tab}
+                  isActive={isDynamicTabActive(tab.path)}
+                  isAnyDragging={activeId !== null}
+                  onClose={handleCloseDynamicTab}
+                />
+              ))}
+            </div>
+          </SortableContext>
+          <DragOverlay>
+            {activeTab ? (
+              <div className='-rotate-2 rounded-lg border shadow-lg'>
+                <DynamicTabItem
+                  tab={activeTab}
+                  isActive={isDynamicTabActive(activeTab.path)}
+                  isDragging
+                  onClose={handleCloseDynamicTab}
+                />
+              </div>
+            ) : null}
+          </DragOverlay>
+        </DndContext>
       )}
     </div>
   );
