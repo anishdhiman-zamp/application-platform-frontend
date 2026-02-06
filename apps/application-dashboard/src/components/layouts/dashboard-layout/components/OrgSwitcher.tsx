@@ -1,6 +1,6 @@
 'use client';
 
-import { FC, useEffect, useMemo, useRef, useState } from 'react';
+import { FC, useEffect, useRef, useState } from 'react';
 import { DEFAULT_REGION } from '@zamp-platform/api';
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger, Input } from '@zamp-platform/ui';
 import { cn } from '@zamp-platform/ui/utils';
@@ -53,9 +53,7 @@ const OrgSwitcher: FC<OrgSwitcherProps> = ({ isSidebarOpen, menuContentClassName
     { refetchOnMountOrArgChange: false, skip: !user?.user_email },
   );
 
-  const regionList = useMemo(() => {
-    return baseUrlData?.api_base_urls.filter((item) => item.region !== DEFAULT_REGION);
-  }, [baseUrlData]);
+  const regionList = baseUrlData?.api_base_urls.filter((item) => item.region !== DEFAULT_REGION);
   const {
     data: organizations,
     isLoading: loading,
@@ -64,7 +62,7 @@ const OrgSwitcher: FC<OrgSwitcherProps> = ({ isSidebarOpen, menuContentClassName
     refetchOnMountOrArgChange: false,
   });
 
-  const defaultOrgName = useMemo(() => user?.orgs?.[0]?.name ?? '', [user]);
+  const defaultOrgName = user?.orgs?.[0]?.name ?? '';
 
   const handleOrgChange = (org: Organization) => {
     if (org.organization_id === selectedOrg?.organization_id) return;
@@ -89,19 +87,14 @@ const OrgSwitcher: FC<OrgSwitcherProps> = ({ isSidebarOpen, menuContentClassName
     window.open(`https://app-${region.region}.zamp.ai`, '_blank');
   };
 
-  const selectedOrgColor = useMemo(
-    () =>
-      ORG_COLORS[
-        organizations?.findIndex((org: Organization) => org.organization_id === selectedOrg?.organization_id) ?? 0
-      ] ?? 'bg-GRAY_200',
-    [organizations, selectedOrg],
-  );
+  const selectedOrgColor =
+    ORG_COLORS[
+      organizations?.findIndex((org: Organization) => org.organization_id === selectedOrg?.organization_id) ?? 0
+    ] ?? 'bg-GRAY_200';
 
-  const filteredOrganizations = useMemo(() => {
-    if (!searchQuery.trim()) return organizations;
-
-    return organizations?.filter((org: Organization) => org.name.toLowerCase().includes(searchQuery.toLowerCase()));
-  }, [organizations, searchQuery]);
+  const filteredOrganizations = !searchQuery.trim()
+    ? organizations
+    : organizations?.filter((org: Organization) => org.name.toLowerCase().includes(searchQuery.toLowerCase()));
 
   const showSearchBox = (organizations?.length ?? 0) > 5;
 
@@ -170,7 +163,7 @@ const OrgSwitcher: FC<OrgSwitcherProps> = ({ isSidebarOpen, menuContentClassName
           }}
           className={cn('p-0', isHighlighted && 'bg-GRAY_200')}
           onClick={() => handleOrgChange(item)}
-          key={item.organization_id}
+          key={item?.organization_id}
           data-testid={`org-switcher-item-${item?.name?.toLowerCase()}`}
         >
           <OrgCard

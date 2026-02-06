@@ -542,15 +542,10 @@ describe('DrilldownMenu Component', () => {
     });
   });
 
-  describe('asChildTrigger', () => {
-    it('uses asChild prop on DropdownMenuTrigger when asChildTrigger is true', () => {
+  describe('Trigger rendering', () => {
+    it('renders custom trigger without nested button (uses asChild)', () => {
       render(
-        <DrilldownMenu
-          menuNode={basicMenu}
-          handleClick={mockHandleClick}
-          onPointerEnter={mockOnPointerEnter}
-          asChildTrigger={true}
-        >
+        <DrilldownMenu menuNode={basicMenu} handleClick={mockHandleClick} onPointerEnter={mockOnPointerEnter}>
           <Button>Custom Trigger</Button>
         </DrilldownMenu>,
       );
