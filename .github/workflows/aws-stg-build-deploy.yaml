@@ -315,25 +315,23 @@ jobs:
       - id: upload-assets
         name: Upload Static Files to S3
         run: |
-          # Clear existing assets and upload new ones to ensure complete replacement
-          echo "Clearing existing assets from S3..."
-          aws s3 rm "s3://${ASSETS_S3_BUCKET}/application-platform-frontend/_next/static" --recursive --quiet
-          aws s3 rm "s3://${ASSETS_S3_BUCKET}/application-platform-frontend/public" --recursive --quiet
+          # Additive upload - old chunks are preserved so in-flight requests from
+          # existing pods continue to work during rolling deployment.
+          # Next.js uses content-hashed filenames so old and new chunks never collide.
+          echo "Uploading new Next.js static files (additive - preserving old chunks for in-flight requests)..."
+          aws s3 sync apps/application-dashboard/.next/static "s3://${ASSETS_S3_BUCKET}/application-platform-frontend/_next/static"
+          aws s3 sync apps/application-dashboard/public "s3://${ASSETS_S3_BUCKET}/application-platform-frontend/public"
 
-          echo "Uploading new Next.js static files..."
-          aws s3 sync apps/application-dashboard/.next/static "s3://${ASSETS_S3_BUCKET}/application-platform-frontend/_next/static" --delete
-          aws s3 sync apps/application-dashboard/public "s3://${ASSETS_S3_BUCKET}/application-platform-frontend/public" --delete
-
-          echo "Static assets completely replaced in S3 successfully!"
+          echo "Static assets uploaded to S3 successfully!"
           echo "Static files path: s3://${ASSETS_S3_BUCKET}/application-platform-frontend/_next/static"
 
-          echo "Invalidating CloudFront cache to serve new assets..."
+          echo "Invalidating CloudFront cache for non-hashed public assets..."
           aws cloudfront create-invalidation \
             --distribution-id E17C704YJ9Y0NG \
-            --paths "/*"
+            --paths "/application-platform-frontend/public/*"
 
-          echo "CloudFront invalidation initiated successfully!"
-          echo "New assets will be available shortly at: https://d2v2rvx5m3g178.cloudfront.net/application-platform-frontend"
+          echo "CloudFront invalidation initiated for public assets!"
+          echo "New assets available at: https://d2v2rvx5m3g178.cloudfront.net/application-platform-frontend"
 
   deploy-to-eks:
     name: Deploy to EKS
