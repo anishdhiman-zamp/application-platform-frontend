@@ -17,7 +17,7 @@ import {
 } from '@zamp-platform/ui';
 import { cn } from '@zamp-platform/ui/utils';
 import { Check, Loader, Mic, Paperclip, ThumbsDown, X } from 'lucide-react';
-import { FC, useCallback, useEffect, useMemo, useState } from 'react';
+import { FC, useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { toast } from 'sonner';
 
 import { INPUT_FILE_FORMATS } from '@/types/common/mime';
@@ -59,6 +59,8 @@ const MAX_FILE_SIZE_MB = 25;
 const MAX_FILE_SIZE_BYTES = MAX_FILE_SIZE_MB * 1024 * 1024;
 const ACCEPTED_FILE_TYPES = `${INPUT_FILE_FORMATS.JPEG},${INPUT_FILE_FORMATS.JPG},${INPUT_FILE_FORMATS.PNG},${INPUT_FILE_FORMATS.BMP}`;
 
+const MAX_TEXTAREA_HEIGHT = 200;
+
 const ChatFeedback: FC<ChatFeedbackProps> = ({
   messageId,
   conversationId,
@@ -72,6 +74,7 @@ const ChatFeedback: FC<ChatFeedbackProps> = ({
   const [issueType, setIssueType] = useState<string>('');
   const [details, setDetails] = useState('');
   const [feedbackGiven, setFeedbackGiven] = useState(false);
+  const textareaRef = useRef<HTMLTextAreaElement>(null);
 
   const [submitChatFeedback, { isLoading: isSubmitting }] = useSubmitChatFeedbackMutation();
   const [getSpeechToTextAccessToken] = useLazyGetSpeechToTextAccessTokenQuery({});
@@ -114,6 +117,7 @@ const ChatFeedback: FC<ChatFeedbackProps> = ({
     isUploading,
     fileInputRef,
     handleFileInputChange,
+    handleFileSelect,
     openFilePicker,
     removeFile,
     clearFiles,
@@ -128,6 +132,56 @@ const ChatFeedback: FC<ChatFeedbackProps> = ({
   const handleAttachClick = () => {
     openFilePicker();
   };
+
+  const isFileTypeAccepted = useCallback((file: File): boolean => {
+    if (!ACCEPTED_FILE_TYPES) return true;
+
+    const mimeType = file.type.toLowerCase();
+    const acceptedTypes = ACCEPTED_FILE_TYPES.split(',').map((t) => t.trim().toLowerCase());
+
+    return acceptedTypes.some((acceptedType) => {
+      if (acceptedType.endsWith('/*')) {
+        const prefix = acceptedType.slice(0, -2);
+        return mimeType.startsWith(prefix);
+      }
+      return mimeType === acceptedType;
+    });
+  }, []);
+
+  const handlePaste = useCallback(
+    (e: React.ClipboardEvent<HTMLTextAreaElement>) => {
+      if (!organizationId) return;
+
+      const files = e.clipboardData?.files;
+
+      if (files && files.length > 0) {
+        e.preventDefault();
+
+        const fileArray = Array.from(files);
+        const acceptedFiles = fileArray.filter(isFileTypeAccepted);
+        const rejectedFiles = fileArray.filter((file) => !isFileTypeAccepted(file));
+
+        if (rejectedFiles.length > 0) {
+          const rejectedExtensions = [
+            ...new Set(rejectedFiles.map((f) => `.${f.name.split('.').pop()?.toLowerCase()}`)),
+          ];
+          const extensionsText = rejectedExtensions.join(', ');
+          toast.error(`${extensionsText} file type is not supported`);
+
+          if (acceptedFiles.length === 0) {
+            return;
+          }
+        }
+
+        // Create a DataTransfer to convert the array back to FileList
+        const dataTransfer = new DataTransfer();
+        acceptedFiles.forEach((file) => dataTransfer.items.add(file));
+
+        handleFileSelect(dataTransfer.files);
+      }
+    },
+    [organizationId, isFileTypeAccepted, handleFileSelect],
+  );
 
   const shouldShowRecorder = useMemo(
     () => isRecording && connectionState === SOCKET_STATES.open,
@@ -216,6 +270,21 @@ const ChatFeedback: FC<ChatFeedbackProps> = ({
       setDetails((prev) => (prev ? `${prev} ${transcript}` : transcript));
     }
   }, [transcript]);
+
+  useEffect(() => {
+    const textarea = textareaRef.current;
+
+    if (!textarea) return;
+
+    textarea.style.height = '60px';
+
+    if (details.trim()) {
+      const scrollHeight = textarea.scrollHeight;
+      const newHeight = Math.min(scrollHeight, MAX_TEXTAREA_HEIGHT);
+
+      textarea.style.height = `${newHeight}px`;
+    }
+  }, [details]);
 
   return (
     <>
@@ -332,11 +401,17 @@ const ChatFeedback: FC<ChatFeedbackProps> = ({
                   <div className='flex w-full flex-col pt-2.5'>
                     <div className='px-2.5'>
                       <Textarea
+                        ref={textareaRef}
                         placeholder='What was unsatisfying about this response?'
                         value={details}
-                        rows={3}
                         onChange={(e) => setDetails(e.target.value)}
-                        className='f-12-450 placeholder:text-GRAY_500 min-h-0 resize-none border-none bg-transparent p-0 shadow-none outline-none'
+                        onPaste={organizationId ? handlePaste : undefined}
+                        className='f-12-450 placeholder:text-GRAY_500 min-h-0 w-full resize-none overflow-y-auto rounded-none border-none bg-transparent p-0 shadow-none outline-none [scrollbar-width:none]'
+                        style={{
+                          height: '60px',
+                          maxHeight: `${MAX_TEXTAREA_HEIGHT}px`,
+                          lineHeight: '18px',
+                        }}
                       />
                     </div>
                     <div className='flex items-center justify-between py-2.5 pr-2.5 pl-1.5'>
