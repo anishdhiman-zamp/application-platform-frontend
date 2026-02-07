@@ -28,6 +28,7 @@ import { MicrophoneState } from '../hooks/useMicrophoneRecorder';
 import { useTranscription } from '../hooks/useTranscription';
 import { ChatFeedbackCategory } from '../types/chat.types';
 import { SOCKET_STATES, TranscriptionAdapter } from '../types/transcription.types';
+import { isFileTypeAccepted } from '../utils/fileUpload';
 import { AudioVisualizer } from './AudioVisualizer';
 import { AttachmentsList } from './blocks';
 import { FileMimeType } from './chat.constants';
@@ -133,20 +134,7 @@ const ChatFeedback: FC<ChatFeedbackProps> = ({
     openFilePicker();
   };
 
-  const isFileTypeAccepted = useCallback((file: File): boolean => {
-    if (!ACCEPTED_FILE_TYPES) return true;
-
-    const mimeType = file.type.toLowerCase();
-    const acceptedTypes = ACCEPTED_FILE_TYPES.split(',').map((t) => t.trim().toLowerCase());
-
-    return acceptedTypes.some((acceptedType) => {
-      if (acceptedType.endsWith('/*')) {
-        const prefix = acceptedType.slice(0, -2);
-        return mimeType.startsWith(prefix);
-      }
-      return mimeType === acceptedType;
-    });
-  }, []);
+  const checkFileType = useCallback((file: File): boolean => isFileTypeAccepted(file, ACCEPTED_FILE_TYPES), []);
 
   const handlePaste = useCallback(
     (e: React.ClipboardEvent<HTMLTextAreaElement>) => {
@@ -158,8 +146,8 @@ const ChatFeedback: FC<ChatFeedbackProps> = ({
         e.preventDefault();
 
         const fileArray = Array.from(files);
-        const acceptedFiles = fileArray.filter(isFileTypeAccepted);
-        const rejectedFiles = fileArray.filter((file) => !isFileTypeAccepted(file));
+        const acceptedFiles = fileArray.filter(checkFileType);
+        const rejectedFiles = fileArray.filter((file) => !checkFileType(file));
 
         if (rejectedFiles.length > 0) {
           const rejectedExtensions = [
@@ -180,7 +168,7 @@ const ChatFeedback: FC<ChatFeedbackProps> = ({
         handleFileSelect(dataTransfer.files);
       }
     },
-    [organizationId, isFileTypeAccepted, handleFileSelect],
+    [organizationId, checkFileType, handleFileSelect],
   );
 
   const shouldShowRecorder = useMemo(
