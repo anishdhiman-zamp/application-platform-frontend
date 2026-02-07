@@ -28,7 +28,7 @@ import { MicrophoneState } from '../hooks/useMicrophoneRecorder';
 import { useTranscription } from '../hooks/useTranscription';
 import { ChatFeedbackCategory } from '../types/chat.types';
 import { SOCKET_STATES, TranscriptionAdapter } from '../types/transcription.types';
-import { isFileTypeAccepted } from '../utils/fileUpload';
+import { formatRejectedExtensions, isFileTypeAccepted } from '../utils/fileUpload';
 import { AudioVisualizer } from './AudioVisualizer';
 import { AttachmentsList } from './blocks';
 import { FileMimeType } from './chat.constants';
@@ -153,7 +153,7 @@ const ChatFeedback: FC<ChatFeedbackProps> = ({
           const rejectedExtensions = [
             ...new Set(rejectedFiles.map((f) => `.${f.name.split('.').pop()?.toLowerCase()}`)),
           ];
-          const extensionsText = rejectedExtensions.join(', ');
+          const extensionsText = formatRejectedExtensions(rejectedExtensions);
           toast.error(`${extensionsText} file type is not supported`);
 
           if (acceptedFiles.length === 0) {
