@@ -9,15 +9,14 @@ import {
   DialogHeader,
   DialogHeaderTitle,
   Select,
-  Textarea,
   Tooltip,
   TooltipContent,
   TooltipProvider,
   TooltipTrigger,
 } from '@zamp-platform/ui';
 import { cn } from '@zamp-platform/ui/utils';
-import { Check, Loader, Mic, Paperclip, ThumbsDown, X } from 'lucide-react';
-import { FC, useCallback, useEffect, useMemo, useRef, useState } from 'react';
+import { ThumbsDown } from 'lucide-react';
+import React, { FC, useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { toast } from 'sonner';
 
 import { INPUT_FILE_FORMATS } from '@/types/common/mime';
@@ -28,10 +27,9 @@ import { MicrophoneState } from '../hooks/useMicrophoneRecorder';
 import { useTranscription } from '../hooks/useTranscription';
 import { ChatFeedbackCategory } from '../types/chat.types';
 import { SOCKET_STATES, TranscriptionAdapter } from '../types/transcription.types';
-import { formatRejectedExtensions, isFileTypeAccepted } from '../utils/fileUpload';
-import { AudioVisualizer } from './AudioVisualizer';
-import { AttachmentsList } from './blocks';
+import { filesToFileList, filterPastedFiles } from '../utils/fileUpload';
 import { FileMimeType } from './chat.constants';
+import { ChatComposer } from './ChatComposer';
 
 export interface ChatFeedbackProps {
   messageId?: string;
@@ -71,11 +69,12 @@ const ChatFeedback: FC<ChatFeedbackProps> = ({
   onMicrophoneError,
   onRecordingError,
 }) => {
+  const textareaRef = useRef<HTMLTextAreaElement>(null);
+
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [issueType, setIssueType] = useState<string>('');
   const [details, setDetails] = useState('');
   const [feedbackGiven, setFeedbackGiven] = useState(false);
-  const textareaRef = useRef<HTMLTextAreaElement>(null);
 
   const [submitChatFeedback, { isLoading: isSubmitting }] = useSubmitChatFeedbackMutation();
   const [getSpeechToTextAccessToken] = useLazyGetSpeechToTextAccessTokenQuery({});
@@ -134,8 +133,6 @@ const ChatFeedback: FC<ChatFeedbackProps> = ({
     openFilePicker();
   };
 
-  const checkFileType = useCallback((file: File): boolean => isFileTypeAccepted(file, ACCEPTED_FILE_TYPES), []);
-
   const handlePaste = useCallback(
     (e: React.ClipboardEvent<HTMLTextAreaElement>) => {
       if (!organizationId) return;
@@ -145,30 +142,20 @@ const ChatFeedback: FC<ChatFeedbackProps> = ({
       if (files && files.length > 0) {
         e.preventDefault();
 
-        const fileArray = Array.from(files);
-        const acceptedFiles = fileArray.filter(checkFileType);
-        const rejectedFiles = fileArray.filter((file) => !checkFileType(file));
+        const { acceptedFiles, rejectedExtensionsText } = filterPastedFiles(files, ACCEPTED_FILE_TYPES);
 
-        if (rejectedFiles.length > 0) {
-          const rejectedExtensions = [
-            ...new Set(rejectedFiles.map((f) => `.${f.name.split('.').pop()?.toLowerCase()}`)),
-          ];
-          const extensionsText = formatRejectedExtensions(rejectedExtensions);
-          toast.error(`${extensionsText} file type is not supported`);
+        if (rejectedExtensionsText) {
+          toast.error(`${rejectedExtensionsText} file type is not supported`);
 
           if (acceptedFiles.length === 0) {
             return;
           }
         }
 
-        // Create a DataTransfer to convert the array back to FileList
-        const dataTransfer = new DataTransfer();
-        acceptedFiles.forEach((file) => dataTransfer.items.add(file));
-
-        handleFileSelect(dataTransfer.files);
+        handleFileSelect(filesToFileList(acceptedFiles));
       }
     },
-    [organizationId, checkFileType, handleFileSelect],
+    [organizationId, handleFileSelect],
   );
 
   const shouldShowRecorder = useMemo(
@@ -345,97 +332,32 @@ const ChatFeedback: FC<ChatFeedbackProps> = ({
                 />
               )}
 
-              <div
-                className={cn(
-                  'border-GRAY_400 focus-within:border-GRAY_600 relative w-full rounded-lg border bg-white transition-all',
-                  shouldShowRecorder && 'border-gray-400',
-                )}
-              >
-                {/* Attachments list above textarea */}
-                <AttachmentsList
-                  attachments={attachments}
-                  removeAttachment={removeFile}
-                  isLoading={isUploading}
-                  className='px-2.5 pt-2'
-                />
-
-                {shouldShowRecorder ? (
-                  <div className='flex w-full items-center justify-between gap-2 p-2.5'>
-                    <Button
-                      variant='ghost'
-                      size='icon'
-                      className='bg-GRAY_200 hover:bg-GRAY_200 !size-5 rounded-full [&_svg]:size-3'
-                      aria-label='Reject recording'
-                      onClick={handleRejectRecording}
-                    >
-                      <X className='text-GRAY_1000' />
-                    </Button>
-
-                    {/* Visualizer */}
-                    {microphone && <AudioVisualizer microphone={microphone} />}
-
-                    <Button
-                      size='icon'
-                      className='!size-5 rounded-full [&_svg]:size-3'
-                      aria-label='Accept recording'
-                      onClick={handleAcceptRecording}
-                      disabled={isCommitting}
-                      isLoading={isCommitting}
-                    >
-                      <Check className='text-white' />
-                    </Button>
-                  </div>
-                ) : (
-                  <div className='flex w-full flex-col pt-2.5'>
-                    <div className='px-2.5'>
-                      <Textarea
-                        ref={textareaRef}
-                        placeholder='What was unsatisfying about this response?'
-                        value={details}
-                        onChange={(e) => setDetails(e.target.value)}
-                        onPaste={organizationId ? handlePaste : undefined}
-                        className='f-12-450 placeholder:text-GRAY_500 min-h-0 w-full resize-none overflow-y-auto rounded-none border-none bg-transparent p-0 shadow-none outline-none [scrollbar-width:none]'
-                        style={{
-                          height: '60px',
-                          maxHeight: `${MAX_TEXTAREA_HEIGHT}px`,
-                          lineHeight: '18px',
-                        }}
-                      />
-                    </div>
-                    <div className='flex items-center justify-between py-2.5 pr-2.5 pl-1.5'>
-                      {organizationId && (
-                        <Button
-                          variant='ghost'
-                          size='icon'
-                          className='hover:text-gray-1000 !size-5 rounded-[2px] p-[2px] text-gray-900 hover:bg-gray-100 [&_svg]:size-3'
-                          aria-label='Attach file'
-                          onClick={handleAttachClick}
-                          disabled={isUploading}
-                        >
-                          <Paperclip />
-                        </Button>
-                      )}
-                      {!organizationId && <div />}
-                      <div className='flex items-center gap-x-2'>
-                        {isPreparingToRecord ? (
-                          <Loader size={14} className='animate-spin text-gray-900' />
-                        ) : (
-                          <Button
-                            variant='ghost'
-                            size='icon'
-                            className='hover:text-gray-1000 !size-5 rounded-[2px] p-[2px] text-gray-900 hover:bg-gray-100 [&_svg]:size-3'
-                            aria-label='Start recording'
-                            onClick={handleStartRecording}
-                            disabled={microphoneState === MicrophoneState.SettingUp}
-                          >
-                            <Mic />
-                          </Button>
-                        )}
-                      </div>
-                    </div>
-                  </div>
-                )}
-              </div>
+              <ChatComposer
+                value={details}
+                onChange={setDetails}
+                placeholder='What was unsatisfying about this response?'
+                textareaRef={textareaRef}
+                onPaste={organizationId ? handlePaste : undefined}
+                attachments={attachments}
+                removeAttachment={removeFile}
+                isUploading={isUploading}
+                onAttachClick={handleAttachClick}
+                showAttachButton={!!organizationId}
+                shouldShowRecorder={shouldShowRecorder}
+                isPreparingToRecord={isPreparingToRecord}
+                microphone={microphone}
+                isCommitting={isCommitting}
+                onStartRecording={handleStartRecording}
+                onAcceptRecording={handleAcceptRecording}
+                onRejectRecording={handleRejectRecording}
+                microphoneDisabled={microphoneState === MicrophoneState.SettingUp}
+                containerClassName='rounded-lg bg-white shadow-none'
+                textareaClassName='f-12-450 placeholder:text-GRAY_500'
+                textareaStyle={{
+                  height: '60px',
+                  maxHeight: `${MAX_TEXTAREA_HEIGHT}px`,
+                }}
+              />
             </div>
           </DialogBody>
           <DialogFooter className='mt-2 flex justify-end gap-x-2.5 px-5 py-4'>

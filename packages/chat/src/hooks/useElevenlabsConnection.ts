@@ -205,6 +205,7 @@ export const useElevenlabsConnection = (options: UseElevenlabsConnectionOptions)
         }
 
         setIsConnected(false);
+        throw error;
       }
     },
     [scribe, reportErrorOnce, shouldAbortConnection],

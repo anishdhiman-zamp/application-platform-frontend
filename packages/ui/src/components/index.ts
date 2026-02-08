@@ -13,6 +13,7 @@ export * from './ui/email-input-to-chips';
 export * from './ui/input';
 export * from './ui/label';
 export * from './ui/list-card';
+export * from './ui/live-waveform';
 export * from './ui/popover';
 export * from './ui/radio';
 export * from './ui/resizable';
