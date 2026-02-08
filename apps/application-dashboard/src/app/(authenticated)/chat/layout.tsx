@@ -1,7 +1,7 @@
 'use client';
 
 import type { FC, ReactNode } from 'react';
-import { notFound } from 'next/navigation';
+import NotFound from '@/app/not-found';
 import ImageLoader from '@/components/common/loader/ImageLoader';
 import { ZAMP_LOGO_LOADER_SVG } from '@/constants/icons';
 import { useIsPaceChatEnabled } from '@/hooks/useIsPaceChatEnabled';
@@ -23,7 +23,7 @@ const PaceLayout: FC<PaceLayoutProps> = ({ children }) => {
   }
 
   if (!isLoading && !isPaceChatEnabled) {
-    notFound();
+    return <NotFound />;
   }
 
   return (
