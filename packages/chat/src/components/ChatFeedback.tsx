@@ -273,7 +273,7 @@ const ChatFeedback: FC<ChatFeedbackProps> = ({
                 onClick={handleDislikeClick}
                 disabled={feedbackGiven || disabled}
                 className={cn(
-                  'hover:bg-GRAY_100 active:bg-GRAY_300 hover:text-GRAY_600 h-4 w-4 rounded-sm p-[2px]',
+                  'hover:bg-GRAY_100 active:bg-GRAY_300 hover:text-GRAY_600 h-5 w-5 rounded-sm p-1',
                   feedbackGiven && 'bg-none',
                   className,
                 )}

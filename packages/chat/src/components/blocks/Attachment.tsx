@@ -51,7 +51,7 @@ const Attachment: React.FC<AttachmentProps> = ({ attachment, removeAttachment, i
       </div>
       {attachment.file_id && removeAttachment && (
         <Button
-          className='absolute size-4 rounded-full bg-white p-[1px] opacity-0 group-hover:opacity-100 [&_svg]:size-3.5'
+          className='absolute size-4 rounded-full bg-white p-px opacity-0 group-hover:opacity-100 [&_svg]:size-3.5'
           variant='ghost'
           size='icon'
           onClick={() => removeAttachment(attachment.file_id)}
