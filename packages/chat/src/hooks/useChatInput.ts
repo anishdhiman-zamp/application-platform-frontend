@@ -52,6 +52,7 @@ export interface UseChatInputProps {
   externalInputValue?: string;
   setExternalInputValue?: Dispatch<SetStateAction<string>>;
   adapter: ChatInputAdapter;
+  minTextareaHeight?: number;
   maxTextareaHeight?: number;
   resourceType?: ResourceType;
   annotationType?: AnnotationType;
@@ -155,6 +156,7 @@ export const createConversationPayload = (
 };
 
 const KEYBOARD_KEY_ENTER = 'Enter';
+const DEFAULT_MIN_TEXTAREA_HEIGHT = 20;
 const DEFAULT_MAX_TEXTAREA_HEIGHT = 200;
 
 /**
@@ -171,6 +173,7 @@ export const useChatInput = ({
   setExternalInputValue,
   resourceType = ResourceType.PROCESS,
   adapter,
+  minTextareaHeight = DEFAULT_MIN_TEXTAREA_HEIGHT,
   maxTextareaHeight = DEFAULT_MAX_TEXTAREA_HEIGHT,
   annotationType,
   onConversationCreated,
@@ -363,17 +366,17 @@ export const useChatInput = ({
 
     if (!textarea) return;
 
-    // Reset height to calculate new height
-    textarea.style.height = '20px';
+    // Reset height to minimum to calculate new height
+    textarea.style.height = `${minTextareaHeight}px`;
 
     // Only expand if there's actual content
     if (value.trim()) {
       const scrollHeight = textarea.scrollHeight;
-      const newHeight = Math.min(scrollHeight, maxTextareaHeight);
+      const newHeight = Math.min(Math.max(scrollHeight, minTextareaHeight), maxTextareaHeight);
 
       textarea.style.height = `${newHeight}px`;
     }
-  }, [value, maxTextareaHeight]);
+  }, [value, minTextareaHeight, maxTextareaHeight]);
 
   useEffect(() => {
     if (firstMessage && !conversationId) {

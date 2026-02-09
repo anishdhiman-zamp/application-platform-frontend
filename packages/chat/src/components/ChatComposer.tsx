@@ -47,6 +47,10 @@ export interface ChatComposerProps {
   textareaStyle?: React.CSSProperties;
   containerClassName?: string;
   onContainerClick?: () => void;
+
+  // Textarea dimensions (used for initial style, hook controls actual height)
+  minTextareaHeight?: number;
+  maxTextareaHeight?: number;
 }
 
 export const ChatComposer: FC<ChatComposerProps> = ({
@@ -88,6 +92,10 @@ export const ChatComposer: FC<ChatComposerProps> = ({
   textareaStyle,
   containerClassName,
   onContainerClick,
+
+  // Textarea dimensions
+  minTextareaHeight = 20,
+  maxTextareaHeight = 200,
 }) => {
   const handleContainerClick = () => {
     if (!shouldShowRecorder && !disabled && onContainerClick) {
@@ -159,12 +167,12 @@ export const ChatComposer: FC<ChatComposerProps> = ({
               onPaste={onPaste}
               placeholder={placeholder}
               className={cn(
-                'f-13-450 placeholder:text-muted-foreground min-h-0 w-full resize-none overflow-y-auto rounded-none border-none bg-transparent p-0 shadow-none outline-none [scrollbar-width:none]',
+                'f-13-450 placeholder:text-muted-foreground min-h-0 w-full resize-none overflow-y-auto rounded-none border-none bg-transparent p-0 shadow-none transition-[height] duration-300 ease-out outline-none [scrollbar-width:none]',
                 textareaClassName,
               )}
               style={{
-                height: '20px',
-                maxHeight: '200px',
+                height: `${minTextareaHeight}px`,
+                maxHeight: `${maxTextareaHeight}px`,
                 lineHeight: '18px',
                 ...textareaStyle,
               }}

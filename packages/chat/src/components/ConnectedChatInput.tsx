@@ -48,6 +48,8 @@ export interface ConnectedChatInputProps {
   defaultMessage?: string;
   onConversationCreated?: (conversationId: string) => void;
   fileDropHandlerRef?: FileDropHandlerRef;
+  minTextareaHeight?: number;
+  maxTextareaHeight?: number;
 }
 
 export const ConnectedChatInput: FC<ConnectedChatInputProps> = ({
@@ -77,6 +79,8 @@ export const ConnectedChatInput: FC<ConnectedChatInputProps> = ({
   defaultMessage,
   onConversationCreated,
   fileDropHandlerRef,
+  minTextareaHeight,
+  maxTextareaHeight,
 }: ConnectedChatInputProps) => {
   const fileInputRef = useRef<HTMLInputElement>(null);
 
@@ -132,6 +136,8 @@ export const ConnectedChatInput: FC<ConnectedChatInputProps> = ({
     annotationType,
     onConversationCreated,
     isDisabled,
+    minTextareaHeight,
+    maxTextareaHeight,
   });
 
   const {
@@ -293,6 +299,8 @@ export const ConnectedChatInput: FC<ConnectedChatInputProps> = ({
         isSubmitDisabled={isSubmitDisabled}
         className={className}
         onContainerClick={() => textareaRef.current?.focus()}
+        minTextareaHeight={minTextareaHeight}
+        maxTextareaHeight={maxTextareaHeight}
       />
     </div>
   );
