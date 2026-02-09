@@ -40,7 +40,8 @@ const ActivityByStatus: FC<ActivityByStatusProps> = ({ processId, status, totalC
     dispatch,
     state: { selectedFilters, filtersConfig },
   } = useFiltersContextStore();
-  const { columnVisibility, columnOrder, setColumnVisibility, setColumnOrder } = useDisplayOptionContext(); // Use shared display-option context
+  const { columnVisibility, columnOrder, setColumnVisibility, setColumnOrder, setColumnSizing } =
+    useDisplayOptionContext(); // Use shared display-option context
 
   const [getActivityRuns, { data: activityRunsData, isError: lazyloadActivityRunsError }] =
     useLazyGetActivityRunsQuery();
@@ -131,12 +132,6 @@ const ActivityByStatus: FC<ActivityByStatusProps> = ({ processId, status, totalC
               dispatch({
                 type: filtersContextActions.SET_TOTAL_ROWS,
                 payload: { totalRows: totalCount },
-              });
-            }
-
-            if (response?.rows?.length) {
-              response?.rows?.forEach((row) => {
-                router.prefetch(getProcessActivityLogsRouteById(processId, row?.id, status));
               });
             }
 
@@ -262,6 +257,18 @@ const ActivityByStatus: FC<ActivityByStatusProps> = ({ processId, status, totalC
     [status, processId],
   );
 
+  // Sync column order from table to context if context is empty
+  // This ensures localStorage persistence works on first visit
+  useEffect(() => {
+    if (table && columns.length > 0 && columnOrder.length === 0) {
+      const tableColumnOrder = table.getAllLeafColumns().map((col) => col.id);
+
+      if (tableColumnOrder.length > 0) {
+        setColumnOrder(tableColumnOrder);
+      }
+    }
+  }, [table, columns.length, columnOrder.length, setColumnOrder]);
+
   if (shouldShowEmptyState) {
     return (
       <div className='h-full w-full'>
@@ -326,6 +333,7 @@ const ActivityByStatus: FC<ActivityByStatusProps> = ({ processId, status, totalC
             onRowClicked={handleRowClicked}
             onColumnMoved={handleColumnMoved}
             onColumnVisible={handleColumnVisible}
+            onColumnResized={setColumnSizing}
             initialColumnOrder={columnOrder}
             initialColumnVisibility={columnVisibility}
             showHeaderSkeleton={isFilterConfigLoading || columns.length === 0}

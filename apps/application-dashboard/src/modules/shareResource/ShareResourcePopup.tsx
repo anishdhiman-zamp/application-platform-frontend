@@ -529,7 +529,7 @@ const ShareResourcePopup: FC<ShareResourcePopupProps> = (props) => {
                           ...audience?.user,
                           email: audience?.user?.email ?? '',
                           type: audience?.resource_audience_type,
-                          name: `${audience?.user?.name} ${audience?.user?.last_name}`,
+                          name: [audience?.user?.name, audience?.user?.last_name].filter(Boolean).join(' '),
                         }}
                         resourceAudienceType={audience?.resource_audience_type}
                         userPrivilege={userPrivilege}

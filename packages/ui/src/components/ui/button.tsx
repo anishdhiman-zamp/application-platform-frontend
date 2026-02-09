@@ -17,7 +17,7 @@ import {
 } from 'react';
 
 const buttonVariants = cva(
-  'cursor-pointer  inline-flex items-center justify-center whitespace-nowrap rounded-md text-sm font-medium ring-offset-background transition-colors focus-visible:outline-hidden focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 [&_svg]:pointer-events-none [&_svg]:shrink-0 ',
+  'cursor-pointer inline-flex items-center justify-center whitespace-nowrap rounded-md text-sm font-medium ring-offset-background transition-colors focus-visible:outline-hidden focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 [&_svg]:pointer-events-none [&_svg]:shrink-0 ',
   {
     variants: {
       variant: {
@@ -63,6 +63,17 @@ const ICON_SIZE_MAP = {
 } as const;
 
 type IconSize = keyof typeof ICON_SIZE_MAP;
+
+/** Variant-specific classes applied when isLoading is true */
+const LOADING_VARIANT_CLASSES: Record<string, string> = {
+  default: '!bg-primary/90 cursor-not-allowed',
+  destructive: '!bg-destructive/90 cursor-not-allowed',
+  outline: '!bg-background cursor-not-allowed',
+  'destructive-outline': '!bg-none cursor-not-allowed',
+  secondary: 'cursor-not-allowed !bg-none',
+  ghost: 'cursor-not-allowed !bg-none',
+  link: 'cursor-not-allowed !bg-none',
+};
 
 export interface ButtonProps extends ButtonHTMLAttributes<HTMLButtonElement>, VariantProps<typeof buttonVariants> {
   asChild?: boolean;
@@ -123,7 +134,7 @@ function useDebounce<T extends (...args: any[]) => void>(callback: T, delay: num
 
 const ButtonIcon = ({ icon, size }: { icon: ReactNode; size: number }) => {
   return (
-    <span className='inline-flex shrink-0' style={{ width: size, height: size }}>
+    <span className='flex shrink-0 items-center justify-center' style={{ width: size, height: size }}>
       {icon}
     </span>
   );
@@ -204,7 +215,7 @@ function Button({
       ref={buttonRef}
       className={cn(
         buttonVariants({ variant, size, className }),
-        isLoading && '!bg-primary/90 cursor-not-allowed',
+        isLoading && LOADING_VARIANT_CLASSES[variant ?? 'default'],
         (leadingIcon || trailingIcon) && 'gap-1.5',
       )}
       style={{ minWidth: minWidth ? `${minWidth}px` : undefined, ...style }}

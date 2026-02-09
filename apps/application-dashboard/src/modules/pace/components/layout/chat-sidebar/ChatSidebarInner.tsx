@@ -1,6 +1,6 @@
 'use client';
 
-import { FC, useEffect, useMemo, useRef } from 'react';
+import { FC, useCallback, useEffect, useMemo, useRef } from 'react';
 import {
   ConnectedChatInput,
   DropOverlay,
@@ -13,12 +13,14 @@ import {
 } from '@zamp-platform/chat';
 import { ArrowDownIcon, Button } from '@zamp-platform/ui';
 import { cn } from '@zamp-platform/ui/utils';
-import { ACCEPTED_FILE_TYPES } from 'modules/pace/pace.constants';
+import { ACCEPTED_FILE_TYPES, CHAT_CONVERSATION_ID_PARAM } from 'modules/pace/pace.constants';
+import { useRouter } from 'next/navigation';
 import { API_ENDPOINTS } from '@/apis/apiEndpoint.constants';
 import NewPaceIcons from '@/assets/Icons/NewPaceIcons';
 import CommonWrapper from '@/components/commonWrapper';
 import { SkeletonTypes } from '@/components/commonWrapper/commonWrapper.types';
 import { APITags } from '@/constants/api.constants';
+import { ROUTES_PATH } from '@/constants/routeConfig';
 import { useAppDispatch, useAppSelector } from '@/hooks/toolkit';
 import NewPaceAvatar from '@/modules/chatbot/NewPaceAvatar';
 import ChatTopbar from '@/modules/pace/components/chat/ChatTopbar';
@@ -45,6 +47,7 @@ const ChatSidebarInner: FC<ChatSidebarInnerProps> = ({
   handleClose,
   chatTitle,
 }) => {
+  const router = useRouter();
   const dispatch = useAppDispatch();
   const organizationId = useAppSelector((state: RootState) => state.user.user?.orgs?.[0]?.organization_id) ?? '';
   const currentUserName = useAppSelector((state: RootState) => state.user.user?.user_name) ?? '';
@@ -98,12 +101,20 @@ const ChatSidebarInner: FC<ChatSidebarInnerProps> = ({
     acceptedFileTypes: ACCEPTED_FILE_TYPES,
   });
 
+  const handleExpand = useCallback(() => {
+    if (conversationId) {
+      router.push(`${ROUTES_PATH.CHAT}?${CHAT_CONVERSATION_ID_PARAM}=${conversationId}`);
+      handleClose();
+    }
+  }, [conversationId, router, handleClose]);
+
   return (
     <div className='relative flex h-full flex-1 flex-col' {...dropZoneProps}>
       <DropOverlay isVisible={isDragOver} />
       <ChatTopbar
         onStartNewChat={startNewChat}
         onClose={handleClose}
+        onExpand={handleExpand}
         conversationId={conversationId}
         organizationId={organizationId}
         title={isInConversation ? chatTitle : 'New chat'}
@@ -165,6 +176,7 @@ const ChatSidebarInner: FC<ChatSidebarInnerProps> = ({
             setExternalInputValue={setInputValue}
             acceptedFileTypes={ACCEPTED_FILE_TYPES}
             className='bg-white'
+            autoFocus
             onConversationCreated={handleConversationCreated}
             fileDropHandlerRef={fileDropHandlerRef}
           />

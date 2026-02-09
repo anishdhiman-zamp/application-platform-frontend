@@ -5,10 +5,9 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from '@zamp-platform/ui';
 import InvitedMembersListing from 'modules/team/components/members/InvitedMembersListing';
 import TeamMembersListing from 'modules/team/components/members/TeamMembersListing';
 import { TEAM_TABS_TYPES, TeamTabsList } from 'modules/team/people.types';
-import { useRouter } from 'next/navigation';
+import { usePathname, useRouter } from 'next/navigation';
 import { AudiencesByOrganisationIdResponse, InvitedAudiencesByOrganisationIdResponse } from 'types/api/people.types';
 import { useGetDualAdminPolicyQuery } from '@/apis/people';
-import { ROUTES_PATH } from '@/constants/routeConfig';
 import { useUserIdentity } from '@/hooks/useUserIdentity';
 import { cn } from '@/utils/common';
 
@@ -29,6 +28,7 @@ const PeopleTabs: FC<PeopleTabsPropsType> = ({
   search,
   tab,
 }) => {
+  const pathname = usePathname();
   const router = useRouter();
   const [, startTransition] = useTransition();
   const defaultTab = tab ?? TEAM_TABS_TYPES.TEAM_MEMBERS;
@@ -44,7 +44,7 @@ const PeopleTabs: FC<PeopleTabsPropsType> = ({
     if (!value) return;
 
     startTransition(() => {
-      router.replace(`${ROUTES_PATH.PEOPLE}?tab=${value}`);
+      router.replace(`${pathname}?tab=${value}`);
     });
   };
 

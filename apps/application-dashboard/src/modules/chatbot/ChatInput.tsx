@@ -140,6 +140,7 @@ export const ChatInput: FC<ChatInputProps> = ({
       className={cn('w-full border-t p-3', {
         'border-none p-0': !(firstMessage || header),
         'pt-1.5': attachments.length > 0,
+        'cursor-not-allowed': isDisabled,
       })}
     >
       {/* Hidden file input */}
@@ -150,7 +151,7 @@ export const ChatInput: FC<ChatInputProps> = ({
         onChange={handleFileChange}
         className='hidden'
         aria-label='File input'
-        accept={`${INPUT_FILE_FORMATS.TXT},${INPUT_FILE_FORMATS.PDF},${INPUT_FILE_FORMATS.DOCX},${INPUT_FILE_FORMATS.JPEG},${INPUT_FILE_FORMATS.JPG},${INPUT_FILE_FORMATS.PNG},${INPUT_FILE_FORMATS.BMP}`}
+        accept={`${INPUT_FILE_FORMATS.TXT},${INPUT_FILE_FORMATS.PDF},${INPUT_FILE_FORMATS.JPEG},${INPUT_FILE_FORMATS.JPG},${INPUT_FILE_FORMATS.PNG},${INPUT_FILE_FORMATS.BMP}`}
       />
       <AttachmentsList
         attachments={attachments}
@@ -205,7 +206,7 @@ export const ChatInput: FC<ChatInputProps> = ({
               />
 
               <div className='flex items-center justify-between py-2.5 pr-2.5 pl-1.5'>
-                <div className='flex items-center gap-1'>
+                <div className={cn('flex items-center gap-1', { 'pointer-events-none opacity-50': isDisabled })}>
                   {isPreparingToRecord ? (
                     <Loader size={14} className='animate-spin text-gray-900' />
                   ) : (

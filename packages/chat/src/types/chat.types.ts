@@ -400,6 +400,7 @@ export interface SubmitChatFeedbackRequestType {
   body: {
     category: ChatFeedbackCategory;
     description: string;
+    file_upload_ids?: string[];
   };
 }
 

@@ -83,7 +83,7 @@ const DialogContent = ({
       {showCloseButton && (
         <DialogClose
           className={cn(
-            'ring-offset-background focus:ring-ring absolute top-4 right-4 z-1002 rounded-sm opacity-70 transition-opacity hover:opacity-100 focus:ring-2 focus:ring-offset-2 focus:outline-hidden disabled:pointer-events-none',
+            'ring-offset-background focus:ring-ring absolute top-4 right-4 z-1002 cursor-pointer rounded-sm opacity-70 transition-opacity hover:opacity-100 focus:ring-2 focus:ring-offset-2 focus:outline-hidden disabled:pointer-events-none',
             closeButtonClassName,
           )}
         >

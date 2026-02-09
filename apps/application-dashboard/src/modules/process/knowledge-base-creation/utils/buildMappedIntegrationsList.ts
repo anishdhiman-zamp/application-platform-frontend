@@ -36,11 +36,11 @@ export const buildMappedIntegrationsList = (
   const integrationConnectionsMap: Record<string, ConnectionType[]> = {};
 
   // Collect connection names for each integration_name
-  processConnectionMappings.mappings.forEach((mapping) => {
-    const integrationName = mapping.connection.integration_name;
+  processConnectionMappings?.mappings?.forEach((mapping) => {
+    const integrationName = mapping?.connection?.integration_name;
 
     if (integrationName) {
-      const connection = mapping.connection;
+      const connection = mapping?.connection;
 
       if (connection) {
         if (!integrationConnectionsMap[integrationName]) {

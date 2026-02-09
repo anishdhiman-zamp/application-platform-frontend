@@ -187,6 +187,9 @@ const ChatbotWrapper: FC<ChatbotProps> = ({
               setCurrentFeedbackItem={setCurrentFeedbackItem}
               className={className}
               onOpenChatbot={handleOpenChatbot}
+              isDisabled={[FEEDBACK_STATUS.QUEUED, FEEDBACK_STATUS.APPLIED, FEEDBACK_STATUS.PROCESSING].includes(
+                currentFeedbackItem?.status as FEEDBACK_STATUS,
+              )}
               scope={scope}
               clearInputOnClose={clearInputOnClose}
             >

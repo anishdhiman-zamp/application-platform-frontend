@@ -14,6 +14,7 @@ export interface StreamingMessageProps {
   className?: string;
   thinkingLabel?: string;
   toolUseLabel?: string;
+  hideSenderName?: boolean;
 }
 
 /**
@@ -25,6 +26,7 @@ export const StreamingMessage: FC<StreamingMessageProps> = ({
   assistantName = 'Assistant',
   assistantAvatar,
   className,
+  hideSenderName = false,
 }) => {
   // Create a minimal assistant message for SenderDetails
   const assistantMessage = useMemo<ChatMessage>(
@@ -48,7 +50,12 @@ export const StreamingMessage: FC<StreamingMessageProps> = ({
 
   return (
     <div className={cn('space-y-2', className)}>
-      <SenderDetails message={assistantMessage} assistantName={assistantName} assistantAvatar={assistantAvatar} />
+      <SenderDetails
+        message={assistantMessage}
+        assistantName={assistantName}
+        assistantAvatar={assistantAvatar}
+        hideSenderName={hideSenderName}
+      />
       <BlockRenderer
         message={{ block: messageElements }}
         className='border-none shadow-none'

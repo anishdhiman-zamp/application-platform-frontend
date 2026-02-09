@@ -1,11 +1,16 @@
 'use client';
 
-import { FC, useEffect, useMemo, useState } from 'react';
+import { FC, useEffect, useRef, useState } from 'react';
 import { DEFAULT_REGION } from '@zamp-platform/api';
-import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from '@zamp-platform/ui';
+import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger, Input } from '@zamp-platform/ui';
 import { cn } from '@zamp-platform/ui/utils';
-import { getFromLocalStorage, LOCAL_STORAGE_KEYS, setToLocalStorage } from '@zamp-platform/utils';
-import { useRouter } from 'next/navigation';
+import {
+  getFromLocalStorage,
+  LOCAL_STORAGE_KEYS,
+  removeFromLocalStorage,
+  setToLocalStorage,
+} from '@zamp-platform/utils';
+import { usePathname, useRouter } from 'next/navigation';
 import { useGetBaseUrlQuery } from '@/apis/auth';
 import { useGetOrganizationsQuery } from '@/apis/people';
 import { useSSEContext } from '@/app/_providers/sse-provider';
@@ -18,31 +23,37 @@ import SkeletonLoaderSidebarPages from '@/components/layouts/dashboard-layout/co
 import SkeletonElement from '@/components/skeletons/SkeletonElement';
 import { ORG_COLORS } from '@/constants/common.constants';
 import { ROUTES_PATH } from '@/constants/routeConfig';
+import { KEYBOARD_KEYS } from '@/constants/shortcuts';
 import { useAppDispatch, useAppSelector } from '@/hooks/toolkit';
 import { setIsOrgSwitchIsInProgress } from '@/store/slices/user';
 import type { Organization } from '@/types/api/auth.types';
 
 type OrgSwitcherProps = {
   isSidebarOpen: boolean;
+  menuContentClassName?: string;
+  menuTriggerClassName?: string;
 };
 
-const OrgSwitcher: FC<OrgSwitcherProps> = ({ isSidebarOpen }) => {
+const OrgSwitcher: FC<OrgSwitcherProps> = ({ isSidebarOpen, menuContentClassName, menuTriggerClassName }) => {
+  const itemRefs = useRef<(HTMLDivElement | null)[]>([]);
+  const [searchInputEl, setSearchInputEl] = useState<HTMLInputElement | null>(null);
   const { isOrgSwitchIsInProgress, user } = useAppSelector((state) => state.user);
   const router = useRouter();
+  const pathname = usePathname();
   const dispatch = useAppDispatch();
   const { disconnect: disconnectSSE } = useSSEContext();
 
   const [isOrgSwitcherMenuOpen, setIsOrgSwitcherMenuOpen] = useState(false);
   const [selectedOrg, setSelectedOrg] = useState<Organization>();
+  const [searchQuery, setSearchQuery] = useState('');
+  const [highlightedIndex, setHighlightedIndex] = useState(-1);
 
   const { data: baseUrlData } = useGetBaseUrlQuery(
     { email: user?.user_email ?? '' },
     { refetchOnMountOrArgChange: false, skip: !user?.user_email },
   );
 
-  const regionList = useMemo(() => {
-    return baseUrlData?.api_base_urls.filter((item) => item.region !== DEFAULT_REGION);
-  }, [baseUrlData]);
+  const regionList = baseUrlData?.api_base_urls.filter((item) => item.region !== DEFAULT_REGION);
   const {
     data: organizations,
     isLoading: loading,
@@ -51,7 +62,7 @@ const OrgSwitcher: FC<OrgSwitcherProps> = ({ isSidebarOpen }) => {
     refetchOnMountOrArgChange: false,
   });
 
-  const defaultOrgName = useMemo(() => user?.orgs?.[0]?.name ?? '', [user]);
+  const defaultOrgName = user?.orgs?.[0]?.name ?? '';
 
   const handleOrgChange = (org: Organization) => {
     if (org.organization_id === selectedOrg?.organization_id) return;
@@ -63,21 +74,107 @@ const OrgSwitcher: FC<OrgSwitcherProps> = ({ isSidebarOpen }) => {
     dispatch(setIsOrgSwitchIsInProgress(true));
 
     setSelectedOrg(org);
+    removeFromLocalStorage(LOCAL_STORAGE_KEYS.PACE_OPEN_DYNAMIC_TABS);
     setToLocalStorage(LOCAL_STORAGE_KEYS.XZAMP_ORGANIZATION_ID, org.organization_id);
-    router.push(ROUTES_PATH.PROCESSES);
+    if (pathname?.includes(ROUTES_PATH.CHAT)) {
+      router.push(ROUTES_PATH.CHAT_SETTINGS_PEOPLE);
+    } else {
+      router.push(ROUTES_PATH.PROCESSES);
+    }
   };
 
   const handleRegionChange = (region: { region: string; url: string }) => {
     window.open(`https://app-${region.region}.zamp.ai`, '_blank');
   };
 
-  const selectedOrgColor = useMemo(
-    () =>
-      ORG_COLORS[
-        organizations?.findIndex((org: Organization) => org.organization_id === selectedOrg?.organization_id) ?? 0
-      ] ?? 'bg-GRAY_200',
-    [organizations, selectedOrg],
-  );
+  const selectedOrgColor =
+    ORG_COLORS[
+      organizations?.findIndex((org: Organization) => org.organization_id === selectedOrg?.organization_id) ?? 0
+    ] ?? 'bg-GRAY_200';
+
+  const filteredOrganizations = !searchQuery.trim()
+    ? organizations
+    : organizations?.filter((org: Organization) => org.name.toLowerCase().includes(searchQuery.toLowerCase()));
+
+  const showSearchBox = (organizations?.length ?? 0) > 5;
+
+  const handleOpenChange = (open: boolean) => {
+    setIsOrgSwitcherMenuOpen(open);
+    if (!open) {
+      setSearchQuery('');
+      setHighlightedIndex(-1);
+    }
+  };
+
+  const handleSearchChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    setSearchQuery(e.target.value);
+    setHighlightedIndex(-1);
+  };
+
+  const handleSearchKeyDown = (e: React.KeyboardEvent<HTMLInputElement>) => {
+    e.stopPropagation();
+    const itemCount = filteredOrganizations?.length ?? 0;
+
+    switch (e.key) {
+      case KEYBOARD_KEYS.ARROW_DOWN:
+        e.preventDefault();
+        setHighlightedIndex((prev) => (prev < itemCount - 1 ? prev + 1 : 0));
+        break;
+      case KEYBOARD_KEYS.ARROW_UP:
+        e.preventDefault();
+        setHighlightedIndex((prev) => (prev > 0 ? prev - 1 : itemCount - 1));
+        break;
+      case KEYBOARD_KEYS.ENTER:
+        e.preventDefault();
+        if (highlightedIndex >= 0 && filteredOrganizations?.[highlightedIndex]) {
+          handleOrgChange(filteredOrganizations[highlightedIndex]);
+        }
+        break;
+      case KEYBOARD_KEYS.ESCAPE:
+        setIsOrgSwitcherMenuOpen(false);
+        break;
+    }
+  };
+
+  // Scroll highlighted item into view
+  useEffect(() => {
+    if (highlightedIndex >= 0 && itemRefs.current[highlightedIndex]) {
+      itemRefs.current[highlightedIndex]?.scrollIntoView({
+        block: 'nearest',
+        behavior: 'smooth',
+      });
+    }
+  }, [highlightedIndex]);
+
+  const renderOrganizationList = () => {
+    if (filteredOrganizations?.length === 0 && searchQuery.trim()) {
+      return <div className='f-12-400 text-GRAY_600 px-2 py-3 text-center'>No organizations found</div>;
+    }
+
+    return filteredOrganizations?.map((item: Organization, idx) => {
+      const originalIdx =
+        organizations?.findIndex((org: Organization) => org.organization_id === item.organization_id) ?? 0;
+      const isHighlighted = idx === highlightedIndex;
+
+      return (
+        <DropdownMenuItem
+          ref={(el) => {
+            itemRefs.current[idx] = el;
+          }}
+          className={cn('p-0', isHighlighted && 'bg-GRAY_200')}
+          onClick={() => handleOrgChange(item)}
+          key={item?.organization_id}
+          data-testid={`org-switcher-item-${item?.name?.toLowerCase()}`}
+        >
+          <OrgCard
+            isSelected={item?.organization_id === selectedOrg?.organization_id}
+            name={item?.name}
+            className={ORG_COLORS[originalIdx]}
+          />
+        </DropdownMenuItem>
+      );
+    });
+  };
 
   useEffect(() => {
     if (organizations?.length) {
@@ -95,10 +192,13 @@ const OrgSwitcher: FC<OrgSwitcherProps> = ({ isSidebarOpen }) => {
 
   return (
     <div>
-      <DropdownMenu onOpenChange={setIsOrgSwitcherMenuOpen}>
+      <DropdownMenu onOpenChange={handleOpenChange}>
         <DropdownMenuTrigger asChild>
           <div
-            className='border-GRAY_400 bg-BG_GRAY_1 flex h-[57px] w-full cursor-pointer items-center gap-2.5 border-t px-4 py-3'
+            className={cn(
+              'border-GRAY_400 bg-BG_GRAY_1 flex h-[57px] w-full cursor-pointer items-center gap-2.5 border-t px-4 py-3',
+              menuTriggerClassName,
+            )}
             data-testid='org-switcher-trigger'
             role='button'
             aria-label='Switch organization'
@@ -136,30 +236,43 @@ const OrgSwitcher: FC<OrgSwitcherProps> = ({ isSidebarOpen }) => {
         </DropdownMenuTrigger>
         <DropdownMenuContent
           align='end'
-          className='z-9999 mr-1 flex w-[229px] flex-col gap-[2px] overflow-y-auto p-1'
+          className={cn(
+            'z-9999 mr-1 flex w-[229px] flex-col gap-[2px] overflow-y-auto p-1 [scrollbar-width:none]',
+            menuContentClassName,
+          )}
           sideOffset={5}
+          onMouseMove={() => showSearchBox && searchInputEl?.focus()}
         >
-          <div className='flex max-h-[150px] flex-col gap-1 overflow-y-auto [scrollbar-width:none]'>
+          {showSearchBox && (
+            <div className='px-1 pb-1'>
+              <Input
+                ref={setSearchInputEl}
+                type='text'
+                size='small'
+                placeholder='Search organization...'
+                className='mt-1'
+                autoFocus
+                value={searchQuery}
+                onChange={handleSearchChange}
+                onClick={(e) => e.stopPropagation()}
+                onKeyDown={handleSearchKeyDown}
+              />
+            </div>
+          )}
+          <div
+            className={cn(
+              'flex max-h-[150px] flex-col gap-1 overflow-y-auto [scrollbar-width:none]',
+              showSearchBox && 'min-h-[240px]',
+              showSearchBox && 'min-h-[150px]',
+            )}
+          >
             <CommonWrapper
               loader={<SkeletonLoaderSidebarPages />}
               skeletonType={SkeletonTypes.CUSTOM}
               isLoading={loading}
               isError={error}
             >
-              {organizations?.map((item: Organization, idx) => (
-                <DropdownMenuItem
-                  className='p-0'
-                  onClick={() => handleOrgChange(item)}
-                  key={idx}
-                  data-testid={`org-switcher-item-${item?.name?.toLowerCase()}`}
-                >
-                  <OrgCard
-                    isSelected={item?.organization_id === selectedOrg?.organization_id}
-                    name={item?.name}
-                    className={ORG_COLORS[idx]}
-                  />
-                </DropdownMenuItem>
-              ))}
+              {renderOrganizationList()}
               {regionList?.length
                 ? regionList?.map((item, idx) => (
                     <DropdownMenuItem

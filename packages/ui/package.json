@@ -61,7 +61,7 @@
     "clsx": "^2.1.1",
     "cmdk": "^1.1.1",
     "lucide-react": "^0.487.0",
-    "motion": "^12.26.2",
+    "motion": "^12.29.2",
     "react-resizable-panels": "^3.0.1",
     "sonner": "^2.0.3",
     "tailwind-merge": "^2.6.0"

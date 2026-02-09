@@ -281,3 +281,45 @@ export const isFileTypeAccepted = (file: File, acceptedFileTypes?: string): bool
     return fileExtension === acceptedType;
   });
 };
+
+/**
+ * Result type for filtering pasted files
+ */
+export interface FilteredPasteFilesResult {
+  acceptedFiles: File[];
+  rejectedExtensionsText: string | null;
+}
+
+/**
+ * Filters pasted files based on accepted file types
+ * @param files - FileList from clipboard
+ * @param acceptedFileTypes - Comma-separated string of accepted file types
+ * @returns Object with accepted files and formatted rejected extensions text (if any)
+ */
+export const filterPastedFiles = (files: FileList, acceptedFileTypes?: string): FilteredPasteFilesResult => {
+  const fileArray = Array.from(files);
+  const checkFileType = (file: File) => isFileTypeAccepted(file, acceptedFileTypes);
+
+  const acceptedFiles = fileArray.filter(checkFileType);
+  const rejectedFiles = fileArray.filter((file) => !checkFileType(file));
+
+  let rejectedExtensionsText: string | null = null;
+
+  if (rejectedFiles.length > 0) {
+    const rejectedExtensions = [...new Set(rejectedFiles.map((f) => `.${f.name.split('.').pop()?.toLowerCase()}`))];
+    rejectedExtensionsText = formatRejectedExtensions(rejectedExtensions);
+  }
+
+  return { acceptedFiles, rejectedExtensionsText };
+};
+
+/**
+ * Converts an array of files to a FileList using DataTransfer
+ * @param files - Array of File objects
+ * @returns FileList containing the files
+ */
+export const filesToFileList = (files: File[]): FileList => {
+  const dataTransfer = new DataTransfer();
+  files.forEach((file) => dataTransfer.items.add(file));
+  return dataTransfer.files;
+};
