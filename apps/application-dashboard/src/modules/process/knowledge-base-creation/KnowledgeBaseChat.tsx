@@ -22,6 +22,7 @@ import ProcessInProcessBanner from 'modules/process/knowledge-base-creation/Proc
 import { useLazyGetOpenFeedbackQuery } from '@/apis/feedback';
 import SkeletonElement from '@/components/skeletons/SkeletonElement';
 import useActionHub from '@/modules/chatbot/actionHub';
+import { CHATBOT_LOCATION_PARAMS } from '@/modules/chatbot/constants';
 import StopProcessingFeedback from '@/modules/chatbot/StopProcessingFeedback';
 import ChatMessagesSkeleton from '@/modules/pace/components/loaders/ChatMessagesSkeleton';
 import { RootState } from '@/store';
@@ -142,8 +143,10 @@ const KnowledgeBaseChat: FC<KnowledgeBaseChatProps> = ({
     }
   };
 
+  const isNewConversationDisabled = isDraftProcess || !chat?.conversationId;
+
   const handleNewConversation = () => {
-    if (isDraftProcess) return;
+    if (isNewConversationDisabled) return;
 
     chat.clearMessages();
     onNewConversation?.();
@@ -157,6 +160,13 @@ const KnowledgeBaseChat: FC<KnowledgeBaseChatProps> = ({
     if (chat?.conversationId) {
       setConversationId?.(chat?.conversationId);
       getOpenFeedback({ processId });
+
+      const url = new URL(window.location.href);
+
+      url.searchParams.set(CHATBOT_LOCATION_PARAMS.CHATBOT_CONVERSATION_ID, chat.conversationId);
+      const newUrl = url.search ? `${url.pathname}${url.search}` : url.pathname;
+
+      window.history.replaceState(window.history.state, '', newUrl);
     }
   }, [chat?.conversationId, setConversationId, getOpenFeedback, processId]);
 
@@ -187,7 +197,7 @@ const KnowledgeBaseChat: FC<KnowledgeBaseChatProps> = ({
         <CirclePlus
           size={12}
           className={cn('text-GRAY_700 cursor-pointer', {
-            'cursor-not-allowed opacity-50': isDraftProcess,
+            'cursor-not-allowed opacity-50': isNewConversationDisabled,
           })}
           onClick={handleNewConversation}
         />
