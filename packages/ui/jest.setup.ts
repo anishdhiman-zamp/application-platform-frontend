@@ -3,6 +3,18 @@ import '@testing-library/jest-dom';
 import '@testing-library/react';
 import { createElement } from 'react';
 
+// Mock framer-motion AnimatePresence to render children immediately without animation delays
+// This prevents flaky tests caused by animation timing in CI environments
+jest.mock('framer-motion', () => {
+  const actual = jest.requireActual('framer-motion');
+  return {
+    ...actual,
+    // AnimatePresence with mode='wait' keeps exiting elements in DOM during animation
+    // Mock it to render children immediately for deterministic tests
+    AnimatePresence: ({ children }: { children: React.ReactNode }) => children,
+  };
+});
+
 // Mock Next.js Image component (filter props that are invalid on native img)
 jest.mock('next/image', () => ({
   __esModule: true,
