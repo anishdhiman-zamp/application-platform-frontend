@@ -85,7 +85,7 @@ const ChatTopbar: FC<ChatTopbarProps> = ({
           size='icon'
           className='h-6 w-6 rounded p-2 text-gray-900 hover:text-gray-900 disabled:opacity-50'
           onClick={onStartNewChat}
-          disabled={true}
+          disabled={!conversationId}
           title='Start new chat'
         >
           <Plus size={14} />
