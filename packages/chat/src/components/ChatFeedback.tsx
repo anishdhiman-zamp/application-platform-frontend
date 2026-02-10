@@ -16,7 +16,7 @@ import {
 } from '@zamp-platform/ui';
 import { cn } from '@zamp-platform/ui/utils';
 import { ThumbsDown } from 'lucide-react';
-import React, { FC, useCallback, useEffect, useMemo, useRef, useState } from 'react';
+import React, { FC, useCallback, useEffect, useMemo, useState } from 'react';
 import { toast } from 'sonner';
 
 import { INPUT_FILE_FORMATS } from '@/types/common/mime';
@@ -69,8 +69,6 @@ const ChatFeedback: FC<ChatFeedbackProps> = ({
   onMicrophoneError,
   onRecordingError,
 }) => {
-  const textareaRef = useRef<HTMLTextAreaElement>(null);
-
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [issueType, setIssueType] = useState<string>('');
   const [details, setDetails] = useState('');
@@ -246,21 +244,6 @@ const ChatFeedback: FC<ChatFeedbackProps> = ({
     }
   }, [transcript]);
 
-  useEffect(() => {
-    const textarea = textareaRef.current;
-
-    if (!textarea) return;
-
-    textarea.style.height = '60px';
-
-    if (details.trim()) {
-      const scrollHeight = textarea.scrollHeight;
-      const newHeight = Math.min(scrollHeight, MAX_TEXTAREA_HEIGHT);
-
-      textarea.style.height = `${newHeight}px`;
-    }
-  }, [details]);
-
   return (
     <>
       <TooltipProvider delayDuration={500}>
@@ -336,7 +319,6 @@ const ChatFeedback: FC<ChatFeedbackProps> = ({
                 value={details}
                 onChange={setDetails}
                 placeholder='What was unsatisfying about this response?'
-                textareaRef={textareaRef}
                 onPaste={organizationId ? handlePaste : undefined}
                 attachments={attachments}
                 removeAttachment={removeFile}
@@ -353,10 +335,8 @@ const ChatFeedback: FC<ChatFeedbackProps> = ({
                 microphoneDisabled={microphoneState === MicrophoneState.SettingUp}
                 containerClassName='rounded-lg bg-white shadow-none'
                 textareaClassName='f-12-450 placeholder:text-GRAY_500'
-                textareaStyle={{
-                  height: '60px',
-                  maxHeight: `${MAX_TEXTAREA_HEIGHT}px`,
-                }}
+                minTextareaHeight={60}
+                maxTextareaHeight={MAX_TEXTAREA_HEIGHT}
               />
             </div>
           </DialogBody>
