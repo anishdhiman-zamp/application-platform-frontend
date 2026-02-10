@@ -83,8 +83,9 @@ const ChatTopbar: FC<ChatTopbarProps> = ({
         <Button
           variant='ghost'
           size='icon'
-          className='h-6 w-6 rounded p-2 text-gray-900 hover:text-gray-900'
+          className='h-6 w-6 rounded p-2 text-gray-900 hover:text-gray-900 disabled:opacity-50'
           onClick={onStartNewChat}
+          disabled={true}
           title='Start new chat'
         >
           <Plus size={14} />
@@ -95,7 +96,6 @@ const ChatTopbar: FC<ChatTopbarProps> = ({
             size='icon'
             className='h-6 w-6 rounded p-2 text-gray-900 hover:text-gray-900 disabled:opacity-50'
             onClick={onExpand}
-            disabled={!conversationId}
             title='Open in full page'
           >
             <Expand size={14} />

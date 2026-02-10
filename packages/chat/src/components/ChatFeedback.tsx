@@ -70,7 +70,7 @@ const ChatFeedback: FC<ChatFeedbackProps> = ({
   onRecordingError,
 }) => {
   const textareaRef = useRef<HTMLTextAreaElement>(null);
-
+  const isRejectingRef = useRef(false);
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [issueType, setIssueType] = useState<string>('');
   const [details, setDetails] = useState('');
@@ -219,6 +219,7 @@ const ChatFeedback: FC<ChatFeedbackProps> = ({
       return;
     }
 
+    isRejectingRef.current = false;
     await startRecording();
   };
 
@@ -233,6 +234,8 @@ const ChatFeedback: FC<ChatFeedbackProps> = ({
 
   const handleRejectRecording = () => {
     try {
+      isRejectingRef.current = true;
+      setDetails((prev) => prev.replace(transcript, '').trim());
       stopRecording();
     } catch {
       toast.error('Failed to stop recording. Please try again.');
@@ -241,6 +244,9 @@ const ChatFeedback: FC<ChatFeedbackProps> = ({
   };
 
   useEffect(() => {
+    if (isRejectingRef.current) {
+      return;
+    }
     if (transcript) {
       setDetails((prev) => (prev ? `${prev} ${transcript}` : transcript));
     }
