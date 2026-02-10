@@ -131,7 +131,7 @@ const ChatHistory = ({ onSelectConversation }: ChatHistoryProps) => {
     <div className='mx-auto flex min-h-0 w-full flex-1 flex-col overflow-hidden bg-white pt-4'>
       <div className='flex shrink-0 flex-col gap-4 p-3'>
         <div className='flex items-center justify-between'>
-          <p className='f-14-550 text-gray-1000'>Chat</p>
+          <p className='f-14-550 text-gray-1000'>Chats</p>
           <Button
             variant='ghost'
             size='icon'
@@ -139,7 +139,7 @@ const ChatHistory = ({ onSelectConversation }: ChatHistoryProps) => {
             className='h-7 w-7'
             data-testid='chat-history-search-toggle'
           >
-            <Search size={16} className='text-gray-1000' />
+            <Search size={16} className='text-gray-900' />
           </Button>
         </div>
         {isSearchOpen && (
@@ -175,7 +175,7 @@ const ChatHistory = ({ onSelectConversation }: ChatHistoryProps) => {
         disableAnimation
       >
         <div ref={containerRef} className='h-full overflow-y-auto [scrollbar-width:thin]' onScroll={handleScroll}>
-          <div className='space-y-0.5'>
+          <div className='w-full space-y-0.5 pr-3'>
             {displayConversations.map((conversation) => (
               <ChatHistoryItem key={conversation?.id} conversation={conversation} onSelect={onSelectConversation} />
             ))}

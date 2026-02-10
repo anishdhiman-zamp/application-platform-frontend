@@ -2,7 +2,6 @@
 
 import { captureException } from '@sentry/nextjs';
 import { toast } from '@zamp-platform/ui';
-import { cn } from '@zamp-platform/ui/utils';
 import React, { Dispatch, FC, RefObject, SetStateAction, useCallback, useEffect, useMemo, useRef } from 'react';
 
 import { useLazyGetSpeechToTextAccessTokenQuery } from '@/apis/voiceAgents';
@@ -250,11 +249,7 @@ export const ConnectedChatInput: FC<ConnectedChatInputProps> = ({
   }, [fileDropHandlerRef, handleFileSelect, disableAttachments, isDisabled]);
 
   return (
-    <div
-      className={cn('w-full', {
-        'cursor-not-allowed opacity-50': isDisabled,
-      })}
-    >
+    <div className='w-full'>
       {/* Hidden file input */}
       <input
         ref={fileInputRef}

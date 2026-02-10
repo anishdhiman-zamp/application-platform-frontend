@@ -25,9 +25,10 @@ const Attachment: React.FC<AttachmentProps> = ({ attachment, removeAttachment, i
   const [getFileDownloadUrl, { isFetching: isLoadingFileDownload }] = useLazyGetFileDownloadUrlQuery();
 
   const handleDownloadFile = async () => {
-    if (!attachment.file_id || removeAttachment) return;
+    if (!attachment.file_id) return;
     try {
       const res = await getFileDownloadUrl({ file_upload_id: attachment.file_id }).unwrap();
+      console.log('res', res);
       if (res?.download_url) {
         await downloadFile(res.download_url, attachment.file_name || 'download');
       }
@@ -40,8 +41,7 @@ const Attachment: React.FC<AttachmentProps> = ({ attachment, removeAttachment, i
     <div
       key={attachment.file_id || attachment.file_name}
       className={cn(
-        'rounded-2.5 shadow-table-filter-menu group relative flex w-[148px] items-center gap-2 border border-gray-400 bg-white p-1 pr-3',
-        { 'cursor-pointer': !removeAttachment },
+        'rounded-2.5 shadow-table-filter-menu group relative flex w-[148px] cursor-pointer items-center gap-2 border border-gray-400 bg-white p-1 pr-3',
       )}
       onClick={handleDownloadFile}
     >
@@ -54,7 +54,10 @@ const Attachment: React.FC<AttachmentProps> = ({ attachment, removeAttachment, i
           className='absolute size-4 rounded-full bg-white p-px opacity-0 group-hover:opacity-100 [&_svg]:size-3.5'
           variant='ghost'
           size='icon'
-          onClick={() => removeAttachment(attachment.file_id)}
+          onClick={(e) => {
+            e.stopPropagation();
+            removeAttachment(attachment.file_id);
+          }}
           style={{
             top: '-8px',
             right: '-8px',
