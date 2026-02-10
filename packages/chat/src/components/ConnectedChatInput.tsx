@@ -116,7 +116,6 @@ export const ConnectedChatInput: FC<ConnectedChatInputProps> = ({
     setValue,
     handleSubmit,
     handleKeyDown,
-    textareaRef,
     attachments,
     handleFileSelect,
     removeAttachment,
@@ -136,8 +135,6 @@ export const ConnectedChatInput: FC<ConnectedChatInputProps> = ({
     annotationType,
     onConversationCreated,
     isDisabled,
-    minTextareaHeight,
-    maxTextareaHeight,
   });
 
   const {
@@ -227,16 +224,6 @@ export const ConnectedChatInput: FC<ConnectedChatInputProps> = ({
   }, [transcript, setValue]);
 
   useEffect(() => {
-    if (autoFocus && !isDisabled && !shouldShowRecorder) {
-      const timeoutId = setTimeout(() => {
-        textareaRef.current?.focus();
-      }, 100);
-
-      return () => clearTimeout(timeoutId);
-    }
-  }, [autoFocus, isDisabled, shouldShowRecorder]);
-
-  useEffect(() => {
     if (setFirstMessage && defaultMessage) {
       setFirstMessage(defaultMessage);
     }
@@ -276,7 +263,6 @@ export const ConnectedChatInput: FC<ConnectedChatInputProps> = ({
         value={value}
         onChange={setValue}
         placeholder={placeholder}
-        textareaRef={textareaRef}
         onKeyDown={handleKeyDown}
         onPaste={isDisabled || disableAttachments ? undefined : handlePaste}
         autoFocus={autoFocus}
@@ -298,7 +284,6 @@ export const ConnectedChatInput: FC<ConnectedChatInputProps> = ({
         onSubmit={handleSubmit}
         isSubmitDisabled={isSubmitDisabled}
         className={className}
-        onContainerClick={() => textareaRef.current?.focus()}
         minTextareaHeight={minTextareaHeight}
         maxTextareaHeight={maxTextareaHeight}
       />

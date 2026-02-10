@@ -3,7 +3,7 @@
 import { Button, LiveWaveform, Textarea } from '@zamp-platform/ui';
 import { cn } from '@zamp-platform/ui/utils';
 import { ArrowUp, Check, Loader, Mic, Paperclip, X } from 'lucide-react';
-import React, { FC, RefObject } from 'react';
+import React, { FC, useEffect, useRef } from 'react';
 
 import { UploadedFileType } from '../types/block.types';
 import { AttachmentsList } from './blocks';
@@ -13,7 +13,6 @@ export interface ChatComposerProps {
   value: string;
   onChange: (value: string) => void;
   placeholder?: string;
-  textareaRef?: RefObject<HTMLTextAreaElement | null>;
   onKeyDown?: (e: React.KeyboardEvent<HTMLTextAreaElement>) => void;
   onPaste?: (e: React.ClipboardEvent<HTMLTextAreaElement>) => void;
   autoFocus?: boolean;
@@ -46,9 +45,8 @@ export interface ChatComposerProps {
   textareaClassName?: string;
   textareaStyle?: React.CSSProperties;
   containerClassName?: string;
-  onContainerClick?: () => void;
 
-  // Textarea dimensions (used for initial style, hook controls actual height)
+  // Textarea dimensions
   minTextareaHeight?: number;
   maxTextareaHeight?: number;
 }
@@ -58,7 +56,6 @@ export const ChatComposer: FC<ChatComposerProps> = ({
   value,
   onChange,
   placeholder = 'Ask anything or give feedback...',
-  textareaRef,
   onKeyDown,
   onPaste,
   autoFocus = false,
@@ -91,17 +88,43 @@ export const ChatComposer: FC<ChatComposerProps> = ({
   textareaClassName,
   textareaStyle,
   containerClassName,
-  onContainerClick,
 
   // Textarea dimensions
   minTextareaHeight = 20,
   maxTextareaHeight = 200,
 }) => {
+  const textareaRef = useRef<HTMLTextAreaElement>(null);
+
   const handleContainerClick = () => {
-    if (!shouldShowRecorder && !disabled && onContainerClick) {
-      onContainerClick();
+    if (!shouldShowRecorder && !disabled) {
+      textareaRef.current?.focus();
     }
   };
+
+  // Auto-focus effect
+  useEffect(() => {
+    if (autoFocus && !disabled && !shouldShowRecorder) {
+      const timeoutId = setTimeout(() => {
+        textareaRef.current?.focus();
+      }, 100);
+
+      return () => clearTimeout(timeoutId);
+    }
+  }, [autoFocus, disabled, shouldShowRecorder]);
+
+  // Auto-resize effect
+  useEffect(() => {
+    const textarea = textareaRef.current;
+    if (!textarea) return;
+
+    textarea.style.height = `${minTextareaHeight}px`;
+
+    if (value.trim()) {
+      const scrollHeight = textarea.scrollHeight;
+      const newHeight = Math.min(Math.max(scrollHeight, minTextareaHeight), maxTextareaHeight);
+      textarea.style.height = `${newHeight}px`;
+    }
+  }, [value, minTextareaHeight, maxTextareaHeight]);
 
   return (
     <div
