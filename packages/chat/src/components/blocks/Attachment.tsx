@@ -28,7 +28,7 @@ const Attachment: React.FC<AttachmentProps> = ({ attachment, removeAttachment, i
     if (!attachment.file_id) return;
     try {
       const res = await getFileDownloadUrl({ file_upload_id: attachment.file_id }).unwrap();
-      console.log('res', res);
+
       if (res?.download_url) {
         await downloadFile(res.download_url, attachment.file_name || 'download');
       }
