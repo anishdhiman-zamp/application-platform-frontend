@@ -67,6 +67,7 @@ export const ChatInput: FC<ChatInputProps> = ({
   } = useTranscription();
 
   const fileInputRef = useRef<HTMLInputElement>(null);
+  const isRejectingRef = useRef(false);
 
   const handleAttachClick = () => {
     fileInputRef.current?.click();
@@ -93,6 +94,7 @@ export const ChatInput: FC<ChatInputProps> = ({
       return;
     }
 
+    isRejectingRef.current = false;
     await startRecording();
   };
 
@@ -106,6 +108,8 @@ export const ChatInput: FC<ChatInputProps> = ({
 
   const handleReject = () => {
     try {
+      isRejectingRef.current = true;
+      setValue((prev) => prev.replace(transcript, '').trim());
       stopRecording();
     } catch {
       toast.error('Failed to stop recording. Please try again.');
@@ -122,6 +126,9 @@ export const ChatInput: FC<ChatInputProps> = ({
   );
 
   useEffect(() => {
+    if (isRejectingRef.current) {
+      return;
+    }
     setValue((prev) => (prev ? `${prev} ${transcript}` : transcript));
   }, [transcript, setValue]);
 

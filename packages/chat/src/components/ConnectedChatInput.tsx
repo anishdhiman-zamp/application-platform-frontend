@@ -79,6 +79,7 @@ export const ConnectedChatInput: FC<ConnectedChatInputProps> = ({
   fileDropHandlerRef,
 }: ConnectedChatInputProps) => {
   const fileInputRef = useRef<HTMLInputElement>(null);
+  const isRejectingRef = useRef(false);
 
   // Use the app's baseApi for speech-to-text token fetching
   const [getSpeechToTextAccessToken] = useLazyGetSpeechToTextAccessTokenQuery({});
@@ -185,6 +186,7 @@ export const ConnectedChatInput: FC<ConnectedChatInputProps> = ({
       toast.error('Microphone unavailable. Please check browser permissions and try again.');
       return;
     }
+    isRejectingRef.current = false;
 
     await startRecording();
   };
@@ -200,6 +202,8 @@ export const ConnectedChatInput: FC<ConnectedChatInputProps> = ({
 
   const handleReject = () => {
     try {
+      isRejectingRef.current = true;
+      setValue((prev) => prev.replace(transcript, '').trim());
       stopRecording();
     } catch {
       toast.error('Failed to stop recording. Please try again.');
@@ -217,6 +221,9 @@ export const ConnectedChatInput: FC<ConnectedChatInputProps> = ({
   );
 
   useEffect(() => {
+    if (isRejectingRef.current) {
+      return;
+    }
     setValue((prev) => (prev ? `${prev} ${transcript}` : transcript));
   }, [transcript, setValue]);
 
