@@ -102,10 +102,12 @@ const ChatSidebarInner: FC<ChatSidebarInnerProps> = ({
   });
 
   const handleExpand = useCallback(() => {
-    if (conversationId) {
-      router.push(`${ROUTES_PATH.CHAT}?${CHAT_CONVERSATION_ID_PARAM}=${conversationId}`);
-      handleClose();
-    }
+    const chatUrl = conversationId
+      ? `${ROUTES_PATH.CHAT}?${CHAT_CONVERSATION_ID_PARAM}=${conversationId}`
+      : ROUTES_PATH.CHAT;
+
+    router.push(chatUrl);
+    handleClose();
   }, [conversationId, router, handleClose]);
 
   return (

@@ -83,6 +83,7 @@ export const ConnectedChatInput: FC<ConnectedChatInputProps> = ({
   maxTextareaHeight,
 }: ConnectedChatInputProps) => {
   const fileInputRef = useRef<HTMLInputElement>(null);
+  const isRejectingRef = useRef(false);
 
   // Use the app's baseApi for speech-to-text token fetching
   const [getSpeechToTextAccessToken] = useLazyGetSpeechToTextAccessTokenQuery({});
@@ -188,6 +189,7 @@ export const ConnectedChatInput: FC<ConnectedChatInputProps> = ({
       toast.error('Microphone unavailable. Please check browser permissions and try again.');
       return;
     }
+    isRejectingRef.current = false;
 
     await startRecording();
   };
@@ -203,6 +205,8 @@ export const ConnectedChatInput: FC<ConnectedChatInputProps> = ({
 
   const handleReject = () => {
     try {
+      isRejectingRef.current = true;
+      setValue((prev) => prev.replace(transcript, '').trim());
       stopRecording();
     } catch {
       toast.error('Failed to stop recording. Please try again.');
@@ -220,6 +224,9 @@ export const ConnectedChatInput: FC<ConnectedChatInputProps> = ({
   );
 
   useEffect(() => {
+    if (isRejectingRef.current) {
+      return;
+    }
     setValue((prev) => (prev ? `${prev} ${transcript}` : transcript));
   }, [transcript, setValue]);
 
@@ -264,9 +271,8 @@ export const ConnectedChatInput: FC<ConnectedChatInputProps> = ({
         onChange={setValue}
         placeholder={placeholder}
         onKeyDown={handleKeyDown}
-        onPaste={isDisabled || disableAttachments ? undefined : handlePaste}
+        onPaste={disableAttachments ? undefined : handlePaste}
         autoFocus={autoFocus}
-        disabled={isDisabled}
         attachments={attachments}
         removeAttachment={removeAttachment}
         isUploading={isUploading}

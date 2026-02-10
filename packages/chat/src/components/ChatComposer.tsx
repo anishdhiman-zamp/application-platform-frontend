@@ -16,7 +16,6 @@ export interface ChatComposerProps {
   onKeyDown?: (e: React.KeyboardEvent<HTMLTextAreaElement>) => void;
   onPaste?: (e: React.ClipboardEvent<HTMLTextAreaElement>) => void;
   autoFocus?: boolean;
-  disabled?: boolean;
 
   // Attachments
   attachments: UploadedFileType[];
@@ -59,7 +58,6 @@ export const ChatComposer: FC<ChatComposerProps> = ({
   onKeyDown,
   onPaste,
   autoFocus = false,
-  disabled = false,
 
   // Attachments
   attachments,
@@ -94,23 +92,24 @@ export const ChatComposer: FC<ChatComposerProps> = ({
   maxTextareaHeight = 200,
 }) => {
   const textareaRef = useRef<HTMLTextAreaElement>(null);
+  const hasMountedRef = useRef(false);
 
   const handleContainerClick = () => {
-    if (!shouldShowRecorder && !disabled) {
+    if (!shouldShowRecorder) {
       textareaRef.current?.focus();
     }
   };
 
   // Auto-focus effect
   useEffect(() => {
-    if (autoFocus && !disabled && !shouldShowRecorder) {
+    if (autoFocus && !shouldShowRecorder) {
       const timeoutId = setTimeout(() => {
         textareaRef.current?.focus();
       }, 100);
 
       return () => clearTimeout(timeoutId);
     }
-  }, [autoFocus, disabled, shouldShowRecorder]);
+  }, [autoFocus, shouldShowRecorder]);
 
   // Auto-resize effect
   useEffect(() => {
@@ -123,6 +122,11 @@ export const ChatComposer: FC<ChatComposerProps> = ({
       const scrollHeight = textarea.scrollHeight;
       const newHeight = Math.min(Math.max(scrollHeight, minTextareaHeight), maxTextareaHeight);
       textarea.style.height = `${newHeight}px`;
+    }
+
+    // Enable transitions only after initial mount to prevent animation on load/refresh
+    if (!hasMountedRef.current) {
+      hasMountedRef.current = true;
     }
   }, [value, minTextareaHeight, maxTextareaHeight]);
 
@@ -186,11 +190,12 @@ export const ChatComposer: FC<ChatComposerProps> = ({
               value={value}
               autoFocus={autoFocus}
               onChange={(e) => onChange(e.target.value)}
-              onKeyDown={disabled ? undefined : onKeyDown}
+              onKeyDown={onKeyDown}
               onPaste={onPaste}
               placeholder={placeholder}
               className={cn(
-                'f-13-450 placeholder:text-muted-foreground min-h-0 w-full resize-none overflow-y-auto rounded-none border-none bg-transparent p-0 shadow-none transition-[height] duration-300 ease-out outline-none [scrollbar-width:none]',
+                'f-13-450 placeholder:text-muted-foreground min-h-0 w-full resize-none overflow-y-auto rounded-none border-none bg-transparent p-0 shadow-none outline-none [scrollbar-width:none]',
+                hasMountedRef.current && 'transition-[height] duration-300 ease-out',
                 textareaClassName,
               )}
               style={{
@@ -199,7 +204,6 @@ export const ChatComposer: FC<ChatComposerProps> = ({
                 lineHeight: '18px',
                 ...textareaStyle,
               }}
-              disabled={disabled}
             />
           </div>
           <div className='flex items-center justify-between py-2.5 pr-2.5 pl-1.5'>
@@ -210,7 +214,7 @@ export const ChatComposer: FC<ChatComposerProps> = ({
                 className='hover:text-gray-1000 !size-5 rounded-[2px] p-[2px] text-gray-900 hover:bg-gray-100 [&_svg]:size-3'
                 aria-label='Attach file'
                 onClick={onAttachClick}
-                disabled={isUploading || disabled}
+                disabled={isUploading}
               >
                 <Paperclip />
               </Button>
@@ -228,7 +232,7 @@ export const ChatComposer: FC<ChatComposerProps> = ({
                   className='hover:text-gray-1000 !size-5 rounded-[2px] p-[2px] text-gray-900 hover:bg-gray-100 [&_svg]:size-3'
                   aria-label='Start recording'
                   onClick={onStartRecording}
-                  disabled={microphoneDisabled || disabled}
+                  disabled={microphoneDisabled}
                 >
                   <Mic />
                 </Button>

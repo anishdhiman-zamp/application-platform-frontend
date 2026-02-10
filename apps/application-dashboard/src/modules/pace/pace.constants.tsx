@@ -35,14 +35,14 @@ export const PACE_NAVBAR_ITEMS: PaceNavbarItemSchema[] = [
     path: ROUTES_PATH.CHAT_SKILLS,
   },
   {
-    id: PaceNavbarItemId.SETTINGS,
-    iconComponent: <SettingsIcon size={16} />,
-    path: ROUTES_PATH.CHAT_SETTINGS_PEOPLE,
-  },
-  {
     id: PaceNavbarItemId.ARTIFACTS,
     iconComponent: <ShapesIcon size={16} />,
     path: ROUTES_PATH.CHAT_ARTIFACTS,
+  },
+  {
+    id: PaceNavbarItemId.SETTINGS,
+    iconComponent: <SettingsIcon size={16} />,
+    path: ROUTES_PATH.CHAT_SETTINGS_PEOPLE,
   },
 ];
 
