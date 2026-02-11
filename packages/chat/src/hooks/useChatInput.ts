@@ -1,7 +1,7 @@
 'use client';
 
 import { formatPlural } from '@zamp-platform/utils';
-import { Dispatch, SetStateAction, useCallback, useEffect, useMemo, useRef, useState } from 'react';
+import { Dispatch, SetStateAction, useCallback, useEffect, useMemo, useState } from 'react';
 
 import { ActionType, Block, BLOCK_TYPE, ButtonBlockType } from '../types/block.types';
 import {
@@ -52,7 +52,6 @@ export interface UseChatInputProps {
   externalInputValue?: string;
   setExternalInputValue?: Dispatch<SetStateAction<string>>;
   adapter: ChatInputAdapter;
-  maxTextareaHeight?: number;
   resourceType?: ResourceType;
   annotationType?: AnnotationType;
   onConversationCreated?: (conversationId: string) => void;
@@ -63,7 +62,6 @@ export interface UseChatInputReturn {
   value: string;
   setValue: Dispatch<SetStateAction<string>>;
   handleSubmit: () => void;
-  textareaRef: React.RefObject<HTMLTextAreaElement | null>;
   handleKeyDown: (e: React.KeyboardEvent<HTMLTextAreaElement>) => void;
   attachments: UploadedFile[];
   handleFileSelect: (files: FileList | null) => Promise<void>;
@@ -155,7 +153,6 @@ export const createConversationPayload = (
 };
 
 const KEYBOARD_KEY_ENTER = 'Enter';
-const DEFAULT_MAX_TEXTAREA_HEIGHT = 200;
 
 /**
  * Hook to manage chat input state and behavior
@@ -171,7 +168,6 @@ export const useChatInput = ({
   setExternalInputValue,
   resourceType = ResourceType.PROCESS,
   adapter,
-  maxTextareaHeight = DEFAULT_MAX_TEXTAREA_HEIGHT,
   annotationType,
   onConversationCreated,
   isDisabled,
@@ -196,7 +192,6 @@ export const useChatInput = ({
     [hasExternalControl, setExternalInputValue],
   );
 
-  const textareaRef = useRef<HTMLTextAreaElement>(null);
   const [attachments, setAttachments] = useState<UploadedFile[]>([]);
   const [isUploading, setIsUploading] = useState(false);
   const [firstMessage, setFirstMessage] = useState('');
@@ -359,23 +354,6 @@ export const useChatInput = ({
   };
 
   useEffect(() => {
-    const textarea = textareaRef.current;
-
-    if (!textarea) return;
-
-    // Reset height to calculate new height
-    textarea.style.height = '20px';
-
-    // Only expand if there's actual content
-    if (value.trim()) {
-      const scrollHeight = textarea.scrollHeight;
-      const newHeight = Math.min(scrollHeight, maxTextareaHeight);
-
-      textarea.style.height = `${newHeight}px`;
-    }
-  }, [value, maxTextareaHeight]);
-
-  useEffect(() => {
     if (firstMessage && !conversationId) {
       init();
     }
@@ -385,7 +363,6 @@ export const useChatInput = ({
     value,
     setValue,
     handleSubmit,
-    textareaRef,
     handleKeyDown,
     attachments,
     handleFileSelect,

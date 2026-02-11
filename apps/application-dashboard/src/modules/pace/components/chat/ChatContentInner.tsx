@@ -181,7 +181,7 @@ const ChatContentInner = ({
     >
       <DropOverlay isVisible={isDragOver} />
       <ChatHome />
-      <div className='w-full shrink-0 p-3'>
+      <div className='w-full shrink-0 p-3 pt-4'>
         <ConnectedChatInput
           chat={chat}
           conversationId={chat.conversationId ?? ''}
@@ -198,6 +198,8 @@ const ChatContentInner = ({
           acceptedFileTypes={ACCEPTED_FILE_TYPES}
           onConversationCreated={handleConversationCreated}
           fileDropHandlerRef={fileDropHandlerRef}
+          minTextareaHeight={48}
+          maxTextareaHeight={200}
         />
       </div>
       <ChatHistory onSelectConversation={setConversationId} />

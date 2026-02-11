@@ -2,7 +2,6 @@
 
 import { captureException } from '@sentry/nextjs';
 import { toast } from '@zamp-platform/ui';
-import { cn } from '@zamp-platform/ui/utils';
 import React, { Dispatch, FC, RefObject, SetStateAction, useCallback, useEffect, useMemo, useRef } from 'react';
 
 import { useLazyGetSpeechToTextAccessTokenQuery } from '@/apis/voiceAgents';
@@ -48,6 +47,8 @@ export interface ConnectedChatInputProps {
   defaultMessage?: string;
   onConversationCreated?: (conversationId: string) => void;
   fileDropHandlerRef?: FileDropHandlerRef;
+  minTextareaHeight?: number;
+  maxTextareaHeight?: number;
 }
 
 export const ConnectedChatInput: FC<ConnectedChatInputProps> = ({
@@ -77,6 +78,8 @@ export const ConnectedChatInput: FC<ConnectedChatInputProps> = ({
   defaultMessage,
   onConversationCreated,
   fileDropHandlerRef,
+  minTextareaHeight,
+  maxTextareaHeight,
 }: ConnectedChatInputProps) => {
   const fileInputRef = useRef<HTMLInputElement>(null);
   const isRejectingRef = useRef(false);
@@ -113,7 +116,6 @@ export const ConnectedChatInput: FC<ConnectedChatInputProps> = ({
     setValue,
     handleSubmit,
     handleKeyDown,
-    textareaRef,
     attachments,
     handleFileSelect,
     removeAttachment,
@@ -228,16 +230,6 @@ export const ConnectedChatInput: FC<ConnectedChatInputProps> = ({
   }, [transcript, setValue]);
 
   useEffect(() => {
-    if (autoFocus && !isDisabled && !shouldShowRecorder) {
-      const timeoutId = setTimeout(() => {
-        textareaRef.current?.focus();
-      }, 100);
-
-      return () => clearTimeout(timeoutId);
-    }
-  }, [autoFocus, isDisabled, shouldShowRecorder]);
-
-  useEffect(() => {
     if (setFirstMessage && defaultMessage) {
       setFirstMessage(defaultMessage);
     }
@@ -257,11 +249,7 @@ export const ConnectedChatInput: FC<ConnectedChatInputProps> = ({
   }, [fileDropHandlerRef, handleFileSelect, disableAttachments, isDisabled]);
 
   return (
-    <div
-      className={cn('w-full', {
-        'cursor-not-allowed opacity-50': isDisabled,
-      })}
-    >
+    <div className='w-full'>
       {/* Hidden file input */}
       <input
         ref={fileInputRef}
@@ -277,11 +265,9 @@ export const ConnectedChatInput: FC<ConnectedChatInputProps> = ({
         value={value}
         onChange={setValue}
         placeholder={placeholder}
-        textareaRef={textareaRef}
         onKeyDown={handleKeyDown}
-        onPaste={isDisabled || disableAttachments ? undefined : handlePaste}
+        onPaste={disableAttachments ? undefined : handlePaste}
         autoFocus={autoFocus}
-        disabled={isDisabled}
         attachments={attachments}
         removeAttachment={removeAttachment}
         isUploading={isUploading}
@@ -299,7 +285,8 @@ export const ConnectedChatInput: FC<ConnectedChatInputProps> = ({
         onSubmit={handleSubmit}
         isSubmitDisabled={isSubmitDisabled}
         className={className}
-        onContainerClick={() => textareaRef.current?.focus()}
+        minTextareaHeight={minTextareaHeight}
+        maxTextareaHeight={maxTextareaHeight}
       />
     </div>
   );
