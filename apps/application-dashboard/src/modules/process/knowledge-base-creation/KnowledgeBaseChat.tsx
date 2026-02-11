@@ -1,5 +1,5 @@
 'use client';
-import { FC, useEffect, useMemo, useState } from 'react';
+import { FC, useEffect, useMemo, useRef, useState } from 'react';
 import { useSelector } from 'react-redux';
 import {
   AnnotationType,
@@ -8,6 +8,7 @@ import {
   ChatMessageType,
   ConnectedChatInput,
   DisplayLayerActionType,
+  DropOverlay,
   LocationType,
   MessageContainer,
   OutputFilesBlockType,
@@ -16,6 +17,7 @@ import {
   ScopeType,
   SenderType,
   useChat,
+  useFileDragDrop,
 } from '@zamp-platform/chat';
 import { ArrowDownIcon, Button } from '@zamp-platform/ui';
 import { cn } from '@zamp-platform/ui/utils';
@@ -64,6 +66,7 @@ const KnowledgeBaseChat: FC<KnowledgeBaseChatProps> = ({
   showDefaultMessage,
   onCreatorSopFileFound,
 }) => {
+  const fileDropHandlerRef = useRef<((files: FileList) => void) | null>(null);
   const currentUserName = useSelector((state: RootState) => state?.user?.user?.user_name);
   const organizationId = useSelector((state: RootState) => state?.user?.user?.orgs?.[0]?.organization_id ?? '');
   const currentUserEmail = useSelector((state: RootState) => state?.user?.user?.user_email);
@@ -120,6 +123,12 @@ const KnowledgeBaseChat: FC<KnowledgeBaseChatProps> = ({
     messagesLength: chat.messages?.length ?? 0,
     isLoading: chat?.isLoadingConversationHistory || isLoadingFilterConversations,
     streamingState: chat.streamingState,
+  });
+
+  const { isDragOver, dropZoneProps } = useFileDragDrop({
+    onFileDrop: (files) => fileDropHandlerRef.current?.(files),
+    disabled: chat.isStreaming || chat.isCreatingConversationV2,
+    acceptedFileTypes: ACCEPTED_FILE_TYPES,
   });
 
   const isSkeletonLoading =
@@ -230,7 +239,8 @@ const KnowledgeBaseChat: FC<KnowledgeBaseChatProps> = ({
   }, [chat?.messages, onCreatorSopFileFound, conversationId]);
 
   return (
-    <div className='relative flex h-full w-full flex-col'>
+    <div className='relative flex h-full w-full flex-col' {...dropZoneProps}>
+      {status !== ProcessStatus.BUILDING && <DropOverlay isVisible={isDragOver} className='absolute h-full w-full' />}
       <div
         className={cn(
           'border-GRAY_400 hidden w-full items-center gap-3 border-b px-3.5 py-3',
@@ -256,7 +266,7 @@ const KnowledgeBaseChat: FC<KnowledgeBaseChatProps> = ({
       <div
         ref={scrollContainerRef}
         onScroll={handleScroll}
-        className='relative flex min-h-0 w-full flex-1 flex-col overflow-x-hidden overflow-y-auto [scrollbar-width:thin]'
+        className='relative flex min-h-0 w-full flex-1 flex-col overflow-x-hidden overflow-y-auto [scrollbar-width:none]'
       >
         {(!chat.isLoadingConversationHistory || !isLoadingFilterConversations) && !isSkeletonLoading && (
           <MessageContainer
@@ -276,6 +286,7 @@ const KnowledgeBaseChat: FC<KnowledgeBaseChatProps> = ({
             {status === ProcessStatus.BUILDING && (
               <ProcessInProcessBanner shouldRedirect={false} className='h-[400px] pb-4' />
             )}
+            {status !== ProcessStatus.BUILDING && <div className='h-12 w-full bg-white' />}
           </MessageContainer>
         )}
         {isSkeletonLoading && (
@@ -308,6 +319,7 @@ const KnowledgeBaseChat: FC<KnowledgeBaseChatProps> = ({
               organizationId={organizationId}
               defaultMessage={isNewConversation ? undefined : defaultMessage}
               acceptedFileTypes={ACCEPTED_FILE_TYPES}
+              fileDropHandlerRef={fileDropHandlerRef}
             />
             <Button
               onClick={handleScrollToBottomClick}
