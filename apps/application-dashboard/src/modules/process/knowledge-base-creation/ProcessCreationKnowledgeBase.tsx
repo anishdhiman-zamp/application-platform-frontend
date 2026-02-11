@@ -2,6 +2,7 @@
 
 import { FC, Suspense, useCallback, useEffect, useRef, useState } from 'react';
 import { captureException } from '@sentry/nextjs';
+import { SSEEventType, useLazyGetOutputFileDownloadQuery } from '@zamp-platform/chat';
 import { toast } from '@zamp-platform/ui';
 import { BaseEventPayload, EVENT_TYPE } from '@zamp-platform/utils/event-bus/event-bus.types';
 import {
@@ -15,9 +16,8 @@ import ProcessEmptyState from 'modules/process/activity-runs/components/ProcessE
 import { MarkdownContentSkeleton } from 'modules/process/knowledge-base-creation/components/KnowledgeBaseContentSkeleton';
 import MarkdownContent from 'modules/process/knowledge-base-creation/components/MarkdownContent';
 import KnowledgeBaseConfig from 'modules/process/knowledge-base-creation/KnowldgeBaseConfig';
-import { KNOWLEDGE_BASE_SSE_TYPES } from 'modules/process/knowledge-base-creation/sop-creation.constants';
+import { SOP_CREATION_FILENAME } from 'modules/process/knowledge-base-creation/sop-creation.constants';
 import dynamic from 'next/dynamic';
-import { useGetKnowledgeBaseQuery } from '@/apis/processes';
 import { useEventBus } from '@/app/_providers/sse-provider';
 import { KB_TOAST_MESSAGES } from '@/components/common/toast/toast.constants';
 import CommonWrapper from '@/components/commonWrapper';
@@ -43,6 +43,8 @@ interface ProcessCreationKnowledgeBaseProps {
   isChatbotExpanded?: boolean;
   isDisabled?: boolean;
   integrations: IntegrationType[];
+  initialSopFilename?: string;
+  conversationId?: string;
 }
 
 const ProcessCreationKnowledgeBase: FC<ProcessCreationKnowledgeBaseProps> = ({
@@ -52,6 +54,8 @@ const ProcessCreationKnowledgeBase: FC<ProcessCreationKnowledgeBaseProps> = ({
   isChatbotExpanded,
   isDisabled,
   integrations,
+  initialSopFilename,
+  conversationId,
 }) => {
   const fetchedUrlRef = useRef<string | null>(null);
   const isFetchingRef = useRef(false);
@@ -60,113 +64,95 @@ const ProcessCreationKnowledgeBase: FC<ProcessCreationKnowledgeBaseProps> = ({
 
   const { isSidebarOpen } = useAppSelector((state) => state.layoutConfig);
   const { isEnabled: isKnowledgeBaseConfigEnabled } = useFeatureFlag(FEATURE_FLAGS.ZAMP_INTERNAL);
+  const [getOutputFileDownload, { error, isError }] = useLazyGetOutputFileDownloadQuery();
 
   const [markdownContent, setMarkdownContent] = useState<string>('');
-  const [isLoading, setIsLoading] = useState(true);
   const [isKnownEmptyState, setIsKnownEmptyState] = useState(false);
+  const [isLoading, setIsLoading] = useState(true);
   const [inputValue, setInputValue] = useState<string>('');
   const [isInputFocused, setIsInputFocused] = useState(false);
   const { sseEventBus } = useEventBus();
 
-  const { data, isError, error, refetch } = useGetKnowledgeBaseQuery({ processId }, { skip: !processId });
-
   // Cache key based on processId
   const cacheKey = `kb-content-${processId}`;
 
-  // Extract base path from signed URL for comparison (removes query params like signature/expiry)
-  const getUrlBasePath = useCallback((url: string) => {
-    try {
-      const urlObj = new URL(url);
+  const getMarkdownContent = useCallback(async (url?: string, forceRefetch = false) => {
+    const targetUrl = url;
 
-      return urlObj.origin + urlObj.pathname;
-    } catch {
-      return url;
+    if (!targetUrl) {
+      setIsLoading(false);
+
+      return;
     }
-  }, []);
 
-  const getMarkdownContent = useCallback(
-    async (url?: string, forceRefetch = false) => {
-      const targetUrl = url || data?.content_signed_url;
+    // Prevent concurrent fetches
+    if (isFetchingRef.current) {
+      setIsLoading(true);
 
-      if (!targetUrl) {
-        setIsLoading(false);
+      return;
+    }
 
-        return;
-      }
+    // Skip if we've already fetched this content (unless forced by SSE update)
+    // Compare base paths since signed URLs change but path stays same for same content
+    if (!forceRefetch && fetchedUrlRef.current === targetUrl) {
+      return;
+    }
+    // If we have cached content, fetch in background without showing loader
+    const hasCachedContent = markdownContent.length > 0;
 
-      // Prevent concurrent fetches
-      if (isFetchingRef.current) {
+    try {
+      isFetchingRef.current = true;
+
+      // Only show loader if we don't have cached content
+      if (!hasCachedContent) {
         setIsLoading(true);
-
-        return;
       }
 
-      const targetBasePath = getUrlBasePath(targetUrl);
+      const response = await fetch(targetUrl);
 
-      // Skip if we've already fetched this content (unless forced by SSE update)
-      // Compare base paths since signed URLs change but path stays same for same content
-      if (!forceRefetch && fetchedUrlRef.current === targetBasePath) {
-        return;
-      }
-
-      // If we have cached content, fetch in background without showing loader
-      const hasCachedContent = markdownContent.length > 0;
-
-      try {
-        isFetchingRef.current = true;
-
-        // Only show loader if we don't have cached content
-        if (!hasCachedContent) {
-          setIsLoading(true);
-        }
-
-        const response = await fetch(targetUrl);
-
-        if (!response.ok) {
-          // Only clear content if we don't have cached version
-          if (!hasCachedContent) {
-            setMarkdownContent('');
-          }
-          toast.error(KB_TOAST_MESSAGES.FAILED_FETCHING_KNOWLEDGE_BASE);
-          setIsLoading(false);
-          isFetchingRef.current = false;
-          setIsLoading(false);
-
-          return;
-        }
-        const content = await response.text();
-
-        fetchedUrlRef.current = targetBasePath;
-
-        // When forceRefetch is true (e.g., SSE update), always update content
-        // Otherwise, check if content has changed before updating
-        if (forceRefetch) {
-          setMarkdownContent(content);
-          await setCachedContent(cacheKey, content);
-        } else {
-          const cached = await getCachedContent(cacheKey);
-
-          if (hasContentChanged(cached, content)) {
-            setMarkdownContent(content);
-            // Update cache with new content
-            await setCachedContent(cacheKey, content);
-          }
-        }
-
-        setIsLoading(false);
-        isFetchingRef.current = false;
-      } catch (fetchError) {
+      if (!response.ok) {
         // Only clear content if we don't have cached version
         if (!hasCachedContent) {
           setMarkdownContent('');
         }
-        captureException(fetchError);
         toast.error(KB_TOAST_MESSAGES.FAILED_FETCHING_KNOWLEDGE_BASE);
+        setIsLoading(false);
         isFetchingRef.current = false;
+        setIsLoading(false);
+
+        return;
       }
-    },
-    [data?.content_signed_url, getUrlBasePath, markdownContent.length, cacheKey],
-  );
+      const content = await response.text();
+
+      fetchedUrlRef.current = targetUrl;
+
+      // When forceRefetch is true (e.g., SSE update), always update content
+      // Otherwise, check if content has changed before updating
+      if (forceRefetch) {
+        setMarkdownContent(content);
+        await setCachedContent(cacheKey, content);
+      } else {
+        const cached = await getCachedContent(cacheKey);
+
+        if (hasContentChanged(cached, content)) {
+          setMarkdownContent(content);
+          // Update cache with new content
+          await setCachedContent(cacheKey, content);
+        }
+      }
+
+      setIsLoading(false);
+      isFetchingRef.current = false;
+    } catch (fetchError) {
+      // Only clear content if we don't have cached version
+      if (!hasCachedContent) {
+        setMarkdownContent('');
+      }
+      captureException(fetchError);
+      toast.error(KB_TOAST_MESSAGES.FAILED_FETCHING_KNOWLEDGE_BASE);
+      isFetchingRef.current = false;
+    }
+  }, []);
 
   // Check if error is a 404 (zero state - no knowledge base exists yet)
   const is404Error = isError && error && 'status' in error && error.status === 404;
@@ -182,14 +168,37 @@ const ProcessCreationKnowledgeBase: FC<ProcessCreationKnowledgeBaseProps> = ({
         setCachedEmptyState(cacheKey);
       }
     }
-    if (!data?.content_signed_url) return;
+    if (!initialSopFilename) return;
 
     // We have content now, so it's not an empty state anymore
     // Also clear the SSE update flag since refetch completed successfully
     hasReceivedSSEUpdateRef.current = false;
     setIsKnownEmptyState(false);
     getMarkdownContent();
-  }, [data?.content_signed_url, getMarkdownContent, isError, is404Error, cacheKey]);
+  }, [initialSopFilename, getMarkdownContent, isError, is404Error, cacheKey]);
+
+  useEffect(() => {
+    if (!initialSopFilename || !conversationId) {
+      setIsLoading(false);
+
+      return;
+    }
+
+    const fetchInitialSop = async () => {
+      try {
+        const res = await getOutputFileDownload({ conversationId, filename: initialSopFilename }).unwrap();
+
+        if (res?.download_url) {
+          getMarkdownContent(res.download_url, true);
+        }
+      } catch (error) {
+        console.error('Failed to fetch initial SOP download URL:', error);
+        setIsLoading(false);
+      }
+    };
+
+    fetchInitialSop();
+  }, [initialSopFilename, conversationId, getOutputFileDownload, getMarkdownContent]);
 
   // Load cached content when processId changes (includes initial mount)
   useEffect(() => {
@@ -225,29 +234,36 @@ const ProcessCreationKnowledgeBase: FC<ProcessCreationKnowledgeBaseProps> = ({
   }, [cacheKey]);
 
   useEffect(() => {
-    const sub = sseEventBus.subscribe(EVENT_TYPE.KNOWLEDGE_BASE, (data: BaseEventPayload) => {
+    const sub = sseEventBus.subscribe(EVENT_TYPE.CONVERSATION_V2, async (data: BaseEventPayload) => {
       const payload = data?.payload as MapAny;
 
-      if (data?.source_id !== processId) return;
+      if (data?.source_id !== conversationId) return;
 
-      if (payload?.type === KNOWLEDGE_BASE_SSE_TYPES.KNOWLEDGE_BASE_UPDATED) {
-        const url = payload?.content_signed_url;
+      if (payload?.type === SSEEventType.OUTPUT_FILES) {
+        const outputFiles = payload?.message?.output_files;
 
-        // Mark that we've received an SSE update to prevent error handler from overriding
-        hasReceivedSSEUpdateRef.current = true;
-        // Content now exists, clear the known empty state
-        setIsKnownEmptyState(false);
-        // Refetch the RTK Query to clear the cached 404 error state
-        refetch();
-        // Force refetch content when SSE update comes in
-        getMarkdownContent(url, true);
+        const currentSopFile = outputFiles?.find((file: MapAny) => file?.filename === SOP_CREATION_FILENAME);
+
+        if (currentSopFile && currentSopFile.filename && conversationId) {
+          try {
+            const res = await getOutputFileDownload({ conversationId, filename: currentSopFile.filename }).unwrap();
+
+            if (res?.download_url) {
+              hasReceivedSSEUpdateRef.current = true;
+              setIsKnownEmptyState(false);
+              getMarkdownContent(res.download_url, true);
+            }
+          } catch (error) {
+            console.error('Failed to fetch download URL:', error);
+          }
+        }
       }
     });
 
     return () => {
       sub.unsubscribe();
     };
-  }, [sseEventBus, processId, getMarkdownContent, refetch]);
+  }, [sseEventBus, conversationId, getMarkdownContent]);
 
   return (
     <div>
