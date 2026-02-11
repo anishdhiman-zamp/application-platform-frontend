@@ -1,8 +1,9 @@
-import { FC, ReactNode, RefObject, useCallback, useMemo } from 'react';
+import { FC, ReactNode, RefObject, useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import {
   type CellClickedEvent,
   CellDoubleClickedEvent,
   CellEditRequestEvent,
+  CellFocusedEvent,
   CellStyleModule,
   ClientSideRowModelModule,
   ColDef,
@@ -67,6 +68,7 @@ import CustomContextMenuItem from 'components/common/table/CustomContextMenuItem
 import CustomGroupHeader from 'components/common/table/CustomHeader/CustomGroupHeader';
 import CustomNoRowsOverlay from 'components/common/table/CustomNoRowsOverlay';
 import CustomStatusBar from 'components/common/table/CustomStatusBar';
+import LinkCellPopover from 'components/common/table/LinkCellPopover';
 import {
   AggregationFunctionMap,
   cellSelectionConfig,
@@ -75,6 +77,7 @@ import {
   PAGE_SIZE,
   sideBarConfig,
 } from 'components/common/table/table.constants';
+import { isCellValueUrl } from 'components/common/table/table.utils';
 
 ModuleRegistry.registerModules([
   ScrollApiModule,
@@ -209,6 +212,10 @@ const Table: FC<TableProps> = ({
   onCellClicked,
   useGetRowId = false,
 }) => {
+  const gridContainerRef = useRef<HTMLDivElement | null>(null);
+  const doubleClickTimerRef = useRef<NodeJS.Timeout | null>(null);
+  const [linkPopover, setLinkPopover] = useState<{ url: string; cellRect: DOMRect; gridRect: DOMRect } | null>(null);
+
   const checkIsMissingField = useCallback(
     (params: MapAny) => {
       return missingFields?.some(
@@ -282,8 +289,9 @@ const Table: FC<TableProps> = ({
         const baseClasses = 'f-11-400 content-center !px-2 py-1';
         const interactiveClass = onCellDoubleClicked || onRowClicked ? 'cursor-pointer' : '';
         const valueClass = getValueClass(params ?? []);
+        const linkClass = isCellValueUrl(params?.value) ? '!text-BLUE_700 underline' : '';
 
-        return cn(baseClasses, valueClass, interactiveClass, cellClass);
+        return cn(baseClasses, valueClass, interactiveClass, linkClass, cellClass);
       },
       cellClassRules: {
         'missing-focus': (params) => {
@@ -399,8 +407,96 @@ const Table: FC<TableProps> = ({
     return params.data?.id ?? params.data?._zamp_id ?? Object.values(params?.data)[0];
   }, []);
 
+  const handleCellClickedInternal = useCallback(
+    (event: CellClickedEvent) => {
+      onCellClicked?.(event);
+    },
+    [onCellClicked],
+  );
+
+  const handleCellDoubleClickedInternal = useCallback(
+    (event: CellDoubleClickedEvent) => {
+      if (doubleClickTimerRef.current) {
+        clearTimeout(doubleClickTimerRef.current);
+        doubleClickTimerRef.current = null;
+      }
+
+      setLinkPopover(null);
+      onCellDoubleClicked?.(event);
+    },
+    [onCellDoubleClicked],
+  );
+
+  const handleCloseLinkPopover = useCallback(() => {
+    setLinkPopover(null);
+  }, []);
+
+  // Single handler for ALL focus changes
+  const handleCellFocused = useCallback(
+    (event: CellFocusedEvent) => {
+      // Clear any pending popover open from a previous focus change
+      if (doubleClickTimerRef.current) {
+        clearTimeout(doubleClickTimerRef.current);
+        doubleClickTimerRef.current = null;
+      }
+
+      // Always close the existing popover immediately when focus moves
+      setLinkPopover(null);
+
+      const { rowIndex, column } = event;
+
+      if (rowIndex == null || !column) return;
+
+      const api = tableRef?.current?.api;
+
+      if (!api) return;
+
+      const colId = typeof column === 'string' ? column : column.getColId();
+      const rowNode = api.getDisplayedRowAtIndex(rowIndex);
+
+      if (!rowNode) return;
+
+      // Read value directly from the row data using the column field
+      const colDef = typeof column === 'string' ? api.getColumn(column)?.getColDef() : column.getColDef();
+      const field = colDef?.field;
+      const cellValue = field ? rowNode.data?.[field] : undefined;
+
+      if (!isCellValueUrl(cellValue)) return;
+
+      // Short delay so a double-click can cancel this before the popover appears
+      doubleClickTimerRef.current = setTimeout(() => {
+        doubleClickTimerRef.current = null;
+
+        const gridEl = gridContainerRef.current;
+
+        if (!gridEl) return;
+
+        const cellEl = gridEl.querySelector(`[row-index="${rowIndex}"] [col-id="${colId}"]`) as HTMLElement | null;
+
+        if (!cellEl) return;
+
+        const rect = cellEl.getBoundingClientRect();
+        const gridWrapper = cellEl.closest('.ag-root-wrapper') as HTMLElement | null;
+        const gridRect =
+          gridWrapper?.getBoundingClientRect() ?? new DOMRect(0, 0, window.innerWidth, window.innerHeight);
+
+        setLinkPopover({ url: cellValue.trim(), cellRect: rect, gridRect });
+      }, 100);
+    },
+    [tableRef],
+  );
+
+  useEffect(() => {
+    return () => {
+      if (doubleClickTimerRef.current) {
+        clearTimeout(doubleClickTimerRef.current);
+        doubleClickTimerRef.current = null;
+      }
+    };
+  }, []);
+
   return (
-    <div style={containerStyle}>
+    <div ref={gridContainerRef} style={containerStyle}>
       <div className='dataset' style={gridStyle}>
         <AgGridReact
           ref={tableRef}
@@ -409,7 +505,7 @@ const Table: FC<TableProps> = ({
           theme={theme}
           sideBar={sideBar}
           icons={icons}
-          onCellDoubleClicked={onCellDoubleClicked}
+          onCellDoubleClicked={handleCellDoubleClickedInternal}
           statusBar={statusBar}
           cellSelection={cellSelection}
           suppressCellFocus={suppressCellFocus}
@@ -433,7 +529,8 @@ const Table: FC<TableProps> = ({
           rowDragManaged={enableRowDrag}
           rowDragEntireRow={enableRowDrag}
           onRowDragEnd={onRowDragEnd}
-          onCellClicked={onCellClicked}
+          onCellClicked={handleCellClickedInternal}
+          onCellFocused={handleCellFocused}
           getRowId={useGetRowId ? getRowId : undefined}
           {...(serverSideDatasource
             ? {
@@ -446,6 +543,14 @@ const Table: FC<TableProps> = ({
             : { rowData: rows })}
         />
       </div>
+      {linkPopover && (
+        <LinkCellPopover
+          url={linkPopover.url}
+          cellRect={linkPopover.cellRect}
+          gridRect={linkPopover.gridRect}
+          onClose={handleCloseLinkPopover}
+        />
+      )}
     </div>
   );
 };
