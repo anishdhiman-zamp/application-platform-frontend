@@ -80,6 +80,7 @@ const KnowledgeBaseV2PageHome: FC<KnowledgeBaseV2PageHomeProps> = ({ processId, 
             processId={processId}
             processName={currentProcess?.display_name ?? ''}
             integrations={integrations}
+            isKnowledgeBaseCreated
           />
         </div>
       </div>
