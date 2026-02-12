@@ -2,7 +2,7 @@
 
 import { FC, ReactNode } from 'react';
 import { Provider } from 'react-redux';
-import ErrorBoundary from '@/pages/ErrorBoundary';
+import { ProductionErrorBoundary } from '@/pages/ErrorBoundary';
 import { store } from '@/store';
 
 interface LoginLayoutProps {
@@ -12,7 +12,7 @@ interface LoginLayoutProps {
 const LoginLayout: FC<LoginLayoutProps> = ({ children }) => {
   return (
     <Provider store={store}>
-      <ErrorBoundary>{children}</ErrorBoundary>
+      <ProductionErrorBoundary>{children}</ProductionErrorBoundary>
     </Provider>
   );
 };
