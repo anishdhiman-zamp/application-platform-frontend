@@ -99,6 +99,11 @@ export const ChatComposer: FC<ChatComposerProps> = ({
     }
   };
 
+  const handleRemoveAttachment = (fileId: string) => {
+    removeAttachment(fileId);
+    textareaRef.current?.focus();
+  };
+
   // Auto-focus effect
   useEffect(() => {
     if (autoFocus && !shouldShowRecorder) {
@@ -134,7 +139,7 @@ export const ChatComposer: FC<ChatComposerProps> = ({
     >
       <AttachmentsList
         attachments={attachments}
-        removeAttachment={removeAttachment}
+        removeAttachment={handleRemoveAttachment}
         isLoading={isUploading}
         className='px-2.5 pt-2'
       />
