@@ -174,7 +174,7 @@ const ChatHistory = ({ onSelectConversation }: ChatHistoryProps) => {
         className='min-h-0 flex-1 pb-4'
         disableAnimation
       >
-        <div ref={containerRef} className='h-full overflow-y-auto [scrollbar-width:thin]' onScroll={handleScroll}>
+        <div ref={containerRef} className='h-full overflow-y-auto [scrollbar-width:none]' onScroll={handleScroll}>
           <div className='w-full space-y-0.5 pr-3'>
             {displayConversations.map((conversation) => (
               <ChatHistoryItem key={conversation?.id} conversation={conversation} onSelect={onSelectConversation} />
