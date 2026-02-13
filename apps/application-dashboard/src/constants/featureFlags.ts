@@ -24,4 +24,5 @@ export enum FEATURE_FLAGS {
   DATASET_CREATION = 'dataset-creation',
   PACE_CHAT = 'pace-chat',
   ZAMP_INTERNAL = 'zamp-internal',
+  APP_SECURE = 'app-secure',
 }
