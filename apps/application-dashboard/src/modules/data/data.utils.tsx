@@ -1,5 +1,6 @@
 import { type RefObject } from 'react';
 import { captureException } from '@sentry/browser';
+import { snakeCaseToDisplayName } from '@zamp-platform/dataset-create-edit/utils/columnConversion';
 import { ColumnDef, CUSTOM_HEADER_NAME } from '@zamp-platform/tanstack-table';
 import { DATE_FORMATS, formatRelativeWithCustomLocale, VALID_DATE_FORMATS } from '@zamp-platform/utils';
 import {
@@ -37,7 +38,6 @@ import {
   getTagColor,
   snakeCaseToSentenceCase,
 } from 'utils/common';
-import { getFromLocalStorage, LOCAL_STORAGE_KEYS, setToLocalStorage } from 'utils/localstorage';
 import ActivityLinkWrapper from '@/components/common/table/CustomCellWrapper/ActivityLinkWrapper';
 import ChatbotCellWrapper from '@/components/common/table/CustomCellWrapper/ChatbotCellWrapper';
 import { withLinkCellWrapper } from '@/components/common/table/CustomCellWrapper/withLinkCellWrapper';
@@ -57,7 +57,7 @@ import { AG_GRID_FILTER_TYPES, CONDITION_OPERATOR_TYPE } from 'components/filter
 export const formatData = (data: DatasetType[]): DatasetType[] => {
   return data.map((item) => ({
     ...item,
-    updatedAt: findTimeDifference(item.updatedAt),
+    updated_at: findTimeDifference(item.updatedAt),
   }));
 };
 
@@ -106,8 +106,8 @@ export const formatColumns: (params: FormatColumnsParamsType) => ColDef[] = ({
 
   filterConfig?.forEach((column: DatasetFilterConfigResponseType) => {
     const columnNameLength = column?.alias?.length ?? column?.column?.length;
-    const columnWidth =
-      columnOrderingVisibility?.find((columnLocal) => columnLocal.colId === column?.column)?.width ?? 0;
+    const storedColumnConfig = columnOrderingVisibility?.find((columnLocal) => columnLocal.colId === column?.column);
+    const columnWidth = storedColumnConfig?.width ?? 0;
     const valueFormat = Array.isArray(column.metadata?.config?.value_format)
       ? column.metadata?.config?.value_format
       : [column.metadata?.config?.value_format];
@@ -118,9 +118,13 @@ export const formatColumns: (params: FormatColumnsParamsType) => ColDef[] = ({
       column?.metadata?.custom_type as CUSTOM_COLUMNS_TYPE,
     );
 
+    // Use localStorage visibility if available, otherwise fall back to backend metadata
+    // This prevents the "flash" when switching tabs (columns briefly visible then hidden)
+    const isHidden = storedColumnConfig !== undefined ? !storedColumnConfig.isVisible : column?.metadata?.is_hidden;
+
     let formattedColumn: ColDef = {
       field: column?.column,
-      hide: column?.metadata?.is_hidden,
+      hide: isHidden,
       cellRendererParams: { ...column?.metadata, datasetId },
       editable: (params: MapAny) =>
         !!(
@@ -147,8 +151,7 @@ export const formatColumns: (params: FormatColumnsParamsType) => ColDef[] = ({
         column?.metadata?.custom_type === CUSTOM_COLUMNS_TYPE.ACTIVITY_STATUS
           ? COLUMN_WIDTHS.ACTIVITY_STATUS
           : undefined,
-      // Use initialWidth instead of width - AG Grid only applies initialWidth when column is CREATED
-      initialWidth: finalWidth,
+      width: finalWidth,
       flex: 0, // Set flex to 0 to override defaultColDef's flex:1
     };
 
@@ -445,12 +448,30 @@ export const convertApiFiltersToRuleFilters = (filters?: RuleFilters): MapAny =>
   return filtersConfig;
 };
 
+/**
+ * Gets column ordering visibility for a dataset
+ * Handles both old format (array) and new format (object with dataset_name and columns)
+ */
 export const getColumnOrderingVisibilityForCurrentDataset = (datasetId: string): ColumnOrderingVisibilityType[] => {
-  const currentColumnOrderingVisibility = JSON.parse(
-    getFromLocalStorage(LOCAL_STORAGE_KEYS.COLUMN_ORDERING_VISIBILITY) ?? '{}',
-  );
+  const { getColumnConfigForDataset } = require('@zamp-platform/dataset-create-edit');
+  const datasetData = getColumnConfigForDataset(datasetId);
 
-  return currentColumnOrderingVisibility[datasetId];
+  // If no data exists for this dataset
+  if (!datasetData) {
+    return [];
+  }
+
+  // New format: object with dataset_name and columns
+  if (typeof datasetData === 'object' && 'columns' in datasetData) {
+    return datasetData.columns || [];
+  }
+
+  // Old format: direct array
+  if (Array.isArray(datasetData)) {
+    return datasetData;
+  }
+
+  return [];
 };
 
 export const getUpdatedColumnOrderingVisibility = (
@@ -844,15 +865,239 @@ export const formatUrlFilters = (filters: string): FilterModelType | null => {
   return urlFilters;
 };
 
+/**
+ * Updates localStorage with column ordering/visibility for a dataset
+ * Saves in new format with dataset_name and columns
+ * Preserves existing dataset_name if already set
+ */
 export const updateLocalStorage = (columnOrderingVisibility: ColumnOrderingVisibilityType[], datasetId: string) => {
-  const currentColumnOrderingVisibility = JSON.parse(
-    getFromLocalStorage(LOCAL_STORAGE_KEYS.COLUMN_ORDERING_VISIBILITY) ?? '{}',
-  );
+  const { getColumnConfigForDataset, setColumnConfigForDataset } = require('@zamp-platform/dataset-create-edit');
+  const existingData = getColumnConfigForDataset(datasetId);
 
-  setToLocalStorage(
-    LOCAL_STORAGE_KEYS.COLUMN_ORDERING_VISIBILITY,
-    JSON.stringify({ ...currentColumnOrderingVisibility, [datasetId]: columnOrderingVisibility }),
-  );
+  // Get existing dataset_name if available, otherwise use datasetId as fallback
+  let datasetName = datasetId;
+
+  if (existingData && typeof existingData === 'object' && 'dataset_name' in existingData) {
+    datasetName = (existingData as { dataset_name?: string }).dataset_name || datasetId;
+  }
+
+  // Preserve existing dataset_unique_key_name
+  const existingUniqueKeyName = (existingData as { dataset_unique_key_name?: string })?.dataset_unique_key_name || '';
+
+  // Save in new format (org-scoped), preserving dataset_unique_key_name
+  const updatedEntry = {
+    dataset_name: datasetName,
+    dataset_unique_key_name: existingUniqueKeyName,
+    columns: columnOrderingVisibility,
+  };
+
+  setColumnConfigForDataset(datasetId, updatedEntry);
+};
+
+/**
+ * Syncs dataset names and column types from listing API to localStorage
+ * Creates entries for all datasets with their titles and syncs column types from schema
+ * This should be called when the /datasets page loads
+ * @param datasets - Array of datasets from useGetDatasetListingQuery (DatasetType with metadata.schema)
+ */
+export const syncAllDatasetNamesToLocalStorage = (
+  datasets: Array<{
+    id: string;
+    title: string;
+    tableName?: string;
+    metadata?: {
+      display_config?: Array<{ column: string; alias?: string | null; is_hidden?: boolean }>;
+      schema?: {
+        columns?: Array<{
+          name: string;
+          type: string;
+          nullable?: boolean;
+          default?: string | boolean | null;
+        }>;
+      };
+    };
+  }>,
+) => {
+  try {
+    const { getColumnConfigForDataset, setColumnConfigForDataset } = require('@zamp-platform/dataset-create-edit');
+
+    // System columns to filter out
+    const SYSTEM_COLUMNS = ['id', '_zamp_is_deleted', 'created_at', 'updated_at'];
+
+    datasets.forEach((dataset) => {
+      if (!dataset.id || !dataset.title) return;
+
+      const datasetId = dataset.id;
+      const datasetTitle = dataset.title;
+      const datasetTableName = dataset.tableName || '';
+      const existingData = getColumnConfigForDataset(datasetId);
+
+      // Build schema info map (column name -> {type, nullable, default})
+      const schemaInfoMap = new Map<string, { type: string; nullable?: boolean; default?: string | boolean | null }>();
+
+      dataset.metadata?.schema?.columns?.forEach((col) => {
+        if (!SYSTEM_COLUMNS.includes(col.name)) {
+          schemaInfoMap.set(col.name.toLowerCase(), {
+            type: col.type,
+            nullable: col.nullable,
+            default: col.default,
+          });
+        }
+      });
+
+      // Keep schemaTypeMap for backward compatibility with type-only lookups
+      const schemaTypeMap = new Map<string, string>();
+
+      schemaInfoMap.forEach((info, name) => {
+        schemaTypeMap.set(name, info.type);
+      });
+
+      // Build display config map for aliases (column -> alias)
+      const displayConfigMap = new Map<string, string>();
+
+      dataset.metadata?.display_config?.forEach((item) => {
+        if (item.alias && !SYSTEM_COLUMNS.includes(item.column)) {
+          displayConfigMap.set(item.column.toLowerCase(), item.alias);
+        }
+      });
+
+      // Helper function to clean defaultValue - remove PostgreSQL type casting and quotes
+      const cleanDefaultValue = (value: string | boolean | null): string | null => {
+        if (value === null || value === undefined) return null;
+        const strValue = String(value);
+        // Remove PostgreSQL type casting (::text, ::integer, etc.)
+        let cleaned = strValue.replace(/::\w+/g, '');
+
+        // Remove surrounding single quotes if present
+        cleaned = cleaned.replace(/^'|'$/g, '');
+
+        return cleaned || null;
+      };
+
+      if (!existingData) {
+        // Dataset doesn't exist in localStorage - create new entry with columns from schema
+        const columnsFromSchema = Array.from(schemaInfoMap.entries()).map(([name, info]) => ({
+          colId: name,
+          columnName: displayConfigMap.get(name) || snakeCaseToDisplayName(name),
+          isVisible: true,
+          width: 150,
+          columnType: info.type.toUpperCase(),
+          isRequired: info.nullable === false,
+          defaultValue: cleanDefaultValue(info.default ?? null),
+        }));
+
+        setColumnConfigForDataset(datasetId, {
+          dataset_name: datasetTitle,
+          dataset_unique_key_name: datasetTableName,
+          columns: columnsFromSchema,
+        });
+      } else if (Array.isArray(existingData)) {
+        // Old format (array) - migrate to new format preserving columns but updating types
+        const updatedColumns = (existingData as ColumnOrderingVisibilityType[]).map(
+          (col: ColumnOrderingVisibilityType) => {
+            const schemaInfo = schemaInfoMap.get(col.colId?.toLowerCase() || '');
+            const alias = displayConfigMap.get(col.colId?.toLowerCase() || '');
+
+            return {
+              ...col,
+              columnType: schemaInfo?.type?.toUpperCase() || col.columnType?.toUpperCase(),
+              columnName: alias || snakeCaseToDisplayName(col.colId || ''),
+              isRequired: schemaInfo?.nullable === false,
+              defaultValue: cleanDefaultValue(schemaInfo?.default ?? col.defaultValue ?? null),
+            };
+          },
+        );
+
+        setColumnConfigForDataset(datasetId, {
+          dataset_name: datasetTitle,
+          dataset_unique_key_name: datasetTableName,
+          columns: updatedColumns,
+        });
+      } else if (typeof existingData === 'object' && 'columns' in existingData) {
+        // New format - only sync if localStorage is completely empty
+        const existingColumns = (existingData as { columns?: unknown[] }).columns || [];
+        const hasColumnData = existingColumns.length > 0;
+
+        // Only sync if columns array is completely empty
+        if (!hasColumnData) {
+          const columnsFromSchema = Array.from(schemaInfoMap.entries()).map(([name, info]) => ({
+            colId: name,
+            columnName: displayConfigMap.get(name) || snakeCaseToDisplayName(name),
+            isVisible: true,
+            width: 150,
+            columnType: info.type.toUpperCase(),
+            isRequired: info.nullable === false,
+            defaultValue: cleanDefaultValue(info.default ?? null),
+          }));
+
+          setColumnConfigForDataset(datasetId, {
+            dataset_name: datasetTitle,
+            dataset_unique_key_name: datasetTableName,
+            columns: columnsFromSchema,
+          });
+        } else {
+          // Even if columns exist, update the dataset_unique_key_name if missing
+          const existingRecord = existingData as Record<string, unknown>;
+
+          if (!existingRecord.dataset_unique_key_name && datasetTableName) {
+            setColumnConfigForDataset(datasetId, {
+              ...existingRecord,
+              dataset_unique_key_name: datasetTableName,
+            });
+          }
+        }
+      }
+    });
+  } catch (error) {
+    console.error('[data.utils] Error syncing dataset data to localStorage:', error);
+  }
+};
+
+/**
+ * Syncs a single dataset's metadata to localStorage
+ * Used on the detail page to ensure localStorage is synced from backend
+ * @param dataset - Single dataset with metadata
+ */
+export const syncSingleDatasetToLocalStorage = (dataset: {
+  id: string;
+  title: string;
+  tableName?: string;
+  metadata?: {
+    display_config?: Array<{ column: string; alias?: string | null; is_hidden?: boolean }>;
+    schema?: {
+      columns?: Array<{
+        name: string;
+        type: string;
+        nullable?: boolean;
+        default?: string | boolean | null;
+      }>;
+    };
+  };
+}) => {
+  if (!dataset?.id || !dataset?.title) return;
+
+  // Check if localStorage already has data for this dataset (org-scoped)
+  try {
+    const { getColumnConfigForDataset } = require('@zamp-platform/utils');
+    const datasetData = getColumnConfigForDataset(dataset.id);
+
+    // Only sync if localStorage is empty or doesn't have column data
+    const hasColumnData =
+      datasetData &&
+      ((Array.isArray(datasetData) && (datasetData as unknown[]).length > 0) ||
+        (typeof datasetData === 'object' &&
+          'columns' in (datasetData as Record<string, unknown>) &&
+          Array.isArray((datasetData as { columns?: unknown[] }).columns) &&
+          (datasetData as { columns: unknown[] }).columns.length > 0));
+
+    // Only sync if localStorage is completely empty (no columns)
+    if (!hasColumnData) {
+      syncAllDatasetNamesToLocalStorage([dataset]);
+    }
+  } catch {
+    // If error reading localStorage, sync from backend
+    syncAllDatasetNamesToLocalStorage([dataset]);
+  }
 };
 
 export const parseDatasets = (datasets: DatasetUrlDataType): DatasetTabType[] => {
@@ -932,14 +1177,8 @@ export const handleColumnMoved = (event: ColumnMovedEvent, datasetId: string) =>
     finalList = [...newIndexToStart, movedColumn, ...oldIndexToNewIndex, ...endToOldIndex];
   }
 
-  const currentColumnOrderingVisibility = JSON.parse(
-    getFromLocalStorage(LOCAL_STORAGE_KEYS.COLUMN_ORDERING_VISIBILITY) ?? '{}',
-  );
-
-  setToLocalStorage(
-    LOCAL_STORAGE_KEYS.COLUMN_ORDERING_VISIBILITY,
-    JSON.stringify({ ...currentColumnOrderingVisibility, [datasetId]: finalList }),
-  );
+  // Use updateLocalStorage to save in new format
+  updateLocalStorage(finalList as ColumnOrderingVisibilityType[], datasetId);
 };
 
 /**

@@ -2,6 +2,7 @@
 
 import { FC, useEffect, useMemo, useRef, useState } from 'react';
 import { captureException } from '@sentry/browser';
+import { useResource } from '@zamp-platform/battalion';
 import {
   BluePrintDataset,
   convertFilterConfigToColumns,
@@ -11,12 +12,18 @@ import {
   DatasetColumnTypes,
   DatasetEditPreviewTab,
   DatasetTabsTypes,
+  deleteColumnConfigForDataset,
+  getColumnConfigForDataset,
+  setColumnConfigForDataset,
+  snakeCaseToDisplayName,
+  useCheckDatasetCreationEnabled,
   useDatasetColumnContext,
   useDatasetGridSync,
 } from '@zamp-platform/dataset-create-edit';
 import {
   CellEditRequestEvent,
   ColDef,
+  ColumnVisibleEvent,
   FillEndEvent,
   IServerSideDatasource,
   IServerSideGetRowsParams,
@@ -42,8 +49,10 @@ import {
   mergeAndOrderItems,
   mergeBackendAndFrontendColumns,
   removeCellFocus,
+  syncSingleDatasetToLocalStorage,
 } from 'modules/data/data.utils';
 import { useAgGridContextSync } from 'modules/data/hooks/useAgGridContextSync';
+import { useDatasetSSE } from 'modules/data/hooks/useDatasetSSE';
 import RowPropertiesSideDrawer from 'modules/data/RowProperties';
 import RulesListingSideDrawer from 'modules/data/RulesListing';
 import RuleDelete from 'modules/data/RulesListing/RuleDelete';
@@ -56,8 +65,10 @@ import { MapAny } from 'types/commonTypes';
 import { FilterModelType, LogicalOperatorType } from 'types/components/table.type';
 import { checkIsObjectEmpty, cn, snakeCaseToSentenceCase } from 'utils/common';
 import { getFromLocalStorage, LOCAL_STORAGE_KEYS, setToLocalStorage } from 'utils/localstorage';
+import type { Dataset } from '@/app/(authenticated)/resources';
 import ImageLoader from '@/components/common/loader/ImageLoader';
 import { ZAMP_LOGO_LOADER_SVG } from '@/constants/icons';
+import { usePendingDatasetContext } from '@/context/pendingDataset.context';
 import { useResourceAccess } from '@/hooks/useResourceAccess';
 import useIsDatasetCreationEnabled from '@/modules/process/hooks/useIsDatasetCreationEnabled';
 import CustomHeader from 'components/common/table/CustomHeader';
@@ -83,6 +94,8 @@ type DatasetByIdProps = {
   updateFiltersInParent?: (filters: MapAny) => void;
   updateFilterConfigInParent?: (filterConfig: MapAny[]) => void;
   parentSelectedFilters?: MapAny;
+  /** When true, skip API calls for filter-config, data, display-config (optimistic creation) */
+  isCreating?: boolean;
 };
 
 // Inner component that has access to DatasetColumnContext
@@ -91,6 +104,7 @@ const DatasetByIdInner: FC<DatasetByIdProps> = ({
   drilldownFilters,
   pageSize,
   isReadOnly = false,
+  isCreating = false,
   containerStyle,
   gridStyle,
   updateDatasetTitleInParent,
@@ -104,6 +118,7 @@ const DatasetByIdInner: FC<DatasetByIdProps> = ({
     columnOrder: contextColumnOrder,
     columns: contextColumns, // Get columns from context
     columnVisibility: contextColumnVisibility, // Get visibility map for sync
+    updateColumnIdsFromBE, // Update column IDs after SSE event
   } = useDatasetColumnContext(); // Access the unified column context
   const params = useParams();
   const router = useRouter();
@@ -123,6 +138,7 @@ const DatasetByIdInner: FC<DatasetByIdProps> = ({
   const [gridReady, setGridReady] = useState<boolean>(false);
   const [datasetTitle, setDatasetTitle] = useState<string>('');
   const isDatasetCreationEnabled = useIsDatasetCreationEnabled();
+  const { pendingTitle, setPendingTitle } = usePendingDatasetContext() || {};
   const [fxCurrency, setFxCurrency] = useState<string[]>([currency]);
   const [rowPropertiesData, setRowPropertiesData] = useState<MapAny>();
   const [exportsDatasetQuery, setExportsDatasetQuery] = useState<string>('');
@@ -146,13 +162,17 @@ const DatasetByIdInner: FC<DatasetByIdProps> = ({
     title: '',
     description: '',
   });
-  const { handleColumnMoved: syncColumnMoved } = useDatasetGridSync(); // Use the grid sync hook for AG Grid events
+  const { handleColumnMoved: syncColumnMoved, handleVisibilityChange: syncVisibilityChange } = useDatasetGridSync(); // Use the grid sync hook for AG Grid events
   const { checkUserPrivilege } = useResourceAccess({
     resourceType: ResourceType.DATASET,
     resourceId: id,
     skipAudienceData: false,
     skipTeamsData: false,
   });
+
+  // Get full dataset metadata from Battalion for localStorage sync
+  const { data: datasets } = useResource<Dataset>('Dataset');
+  const currentDataset = datasets?.find((d) => d.id === id);
 
   const {
     data: filterConfigData,
@@ -165,7 +185,7 @@ const DatasetByIdInner: FC<DatasetByIdProps> = ({
       datasetId: id as string,
     },
     {
-      skip: !id,
+      skip: !id || isCreating, // Skip when creating new dataset optimistically
       refetchOnMountOrArgChange: false, // Prevent refetch on mount for better UX
     },
   );
@@ -176,7 +196,8 @@ const DatasetByIdInner: FC<DatasetByIdProps> = ({
   const processId = params?.processId as string;
   const activityId = params?.activityId;
   const showFileImports = filterConfigData?.config?.is_file_import_enabled;
-  const tabFromUrl = searchParams?.get('tab'); // Get tab from URL query params, default to PREVIEW if not present or invalid
+  const tabFromUrl = searchParams?.get('tab');
+  const isDatasetCreationModeEnabled = useCheckDatasetCreationEnabled();
   const isValidTab = tabFromUrl === DatasetTabsTypes.BLUEPRINT || tabFromUrl === DatasetTabsTypes.PREVIEW;
   const initialTab = isValidTab ? tabFromUrl : DatasetTabsTypes.PREVIEW;
   const [selectedTab, setSelectedTab] = useState<DatasetTabsTypes>(initialTab);
@@ -184,6 +205,17 @@ const DatasetByIdInner: FC<DatasetByIdProps> = ({
   const serverSideDatasource: IServerSideDatasource = useMemo(() => {
     return {
       getRows: (parameters: IServerSideGetRowsParams): void => {
+        // For creation mode, return empty rows immediately (no server data yet)
+        if (isCreating) {
+          setIsNoRowsOverlayVisible(true);
+          parameters.success({
+            rowData: [],
+            rowCount: 0,
+          });
+
+          return;
+        }
+
         const queryConfig = getEncodedRequest(
           parameters.request,
           fxCurrency?.[0],
@@ -251,7 +283,7 @@ const DatasetByIdInner: FC<DatasetByIdProps> = ({
         }
       },
     };
-  }, [getDatasetData, id, fxCurrency, cachedDatasetData, drilldownFilters, processId, activityId]);
+  }, [getDatasetData, id, fxCurrency, cachedDatasetData, drilldownFilters, processId, activityId, isCreating]);
 
   const handleSuccessfulUpdate = (actionType = DATASET_ACTION_TYPE.UPDATE_MISSING_FIELD) => {
     tableRef.current?.api?.refreshServerSide();
@@ -387,6 +419,44 @@ const DatasetByIdInner: FC<DatasetByIdProps> = ({
   };
 
   const initializeFilterConfig = () => {
+    // For new datasets, we need to load columns from localStorage even if there's no backend data
+    if (isCreating) {
+      // Load columns directly from localStorage for new datasets
+      let storedConfig = getColumnOrderingVisibilityForCurrentDataset(id as string);
+
+      if (!storedConfig || storedConfig.length === 0) {
+        // Try PREVIEW_DATASET_ID if id is empty
+        const PREVIEW_DATASET_ID = 'preview-dataset';
+
+        storedConfig = getColumnOrderingVisibilityForCurrentDataset(PREVIEW_DATASET_ID);
+      }
+
+      if (storedConfig && storedConfig.length > 0) {
+        const tempColumns = storedConfig.map((stored, index) => ({
+          id: stored.colId,
+          column_name: stored.columnName?.trim() ? stored.columnName : `Column ${index + 1}`,
+          column_type: (stored.columnType?.toLowerCase() as any) || DatasetColumnTypes.TEXT.toLowerCase(),
+          required: stored.isRequired ?? false,
+          default: stored.defaultValue ?? null,
+        }));
+
+        if (tempColumns.length > 0) {
+          // Use the dataset ID if available, otherwise use PREVIEW_DATASET_ID
+          const datasetIdForInit = id && id.trim() !== '' ? id : 'preview-dataset';
+
+          initializeColumns(tempColumns, datasetIdForInit);
+        }
+      } else {
+        // No stored config for new dataset - initialize with empty array to trigger default "Column 1" creation
+        const datasetIdForInit = id && id.trim() !== '' ? id : 'preview-dataset';
+
+        initializeColumns([], datasetIdForInit);
+      }
+
+      return;
+    }
+
+    // For existing datasets, require backend filter config data
     if (!filterConfigData?.data?.length || isFetching || isUninitialized) return;
 
     // Format backend columns for AG Grid
@@ -447,29 +517,92 @@ const DatasetByIdInner: FC<DatasetByIdProps> = ({
     const backendColumns = convertFilterConfigToColumns(filterConfigData.data);
 
     // Check localStorage for additional columns (FE-only columns from Blueprint)
-    const storedConfig = getColumnOrderingVisibilityForCurrentDataset(id as string);
+    // For new datasets, if id is empty, also check PREVIEW_DATASET_ID
+    let storedConfig = getColumnOrderingVisibilityForCurrentDataset(id as string);
+
+    if ((!storedConfig || storedConfig.length === 0) && (!id || id.trim() === '') && isCreating) {
+      const PREVIEW_DATASET_ID = 'preview-dataset';
+
+      storedConfig = getColumnOrderingVisibilityForCurrentDataset(PREVIEW_DATASET_ID);
+    }
     const storedColIds = storedConfig?.map((c) => c.colId) || [];
 
     // Find new columns in localStorage that aren't in backend
-    const newColumnsInStorage = storedColIds.filter((colId) => !backendColumns.some((bc) => bc.id === colId));
+    // For new datasets (isCreating), include FE temp columns; for existing datasets, filter them out
+    const newColumnsInStorage = storedColIds.filter((colId) => {
+      // Skip if column exists in backend
+      if (backendColumns.some((bc) => bc.id === colId)) return false;
+
+      // For existing datasets, skip FE-generated temporary column IDs (col_<timestamp>_<random>)
+      // These are temporary IDs used during creation flow and should be replaced by BE IDs after save
+      // For new datasets, we need to include them so they can be loaded on reload
+      if (!isCreating && /^col_\d+_/.test(colId)) return false;
+
+      return true;
+    });
 
     // Create placeholder columns for FE-only columns
     const newColumnDefs = newColumnsInStorage.map((colId) => {
       const stored = storedConfig.find((c) => c.colId === colId);
 
+      // If stored columnName matches colId (auto-generated), convert it to display format
+      // Otherwise, preserve the user-set custom name
+      const isAutoGeneratedName = !stored?.columnName || stored.columnName === colId;
+      const columnName = isAutoGeneratedName ? snakeCaseToDisplayName(colId) : (stored?.columnName ?? colId);
+
+      // Convert stored columnType from uppercase to lowercase if needed
+      let storedColumnType = stored?.columnType;
+
+      if (storedColumnType && storedColumnType === storedColumnType.toUpperCase()) {
+        storedColumnType = storedColumnType.toLowerCase();
+      }
+
       return {
         id: colId,
-        column_name: stored?.columnName || colId,
-        column_type: DATASET_COLUMN_TYPES_LIST[0].value as DatasetColumnTypes,
-        required: false,
+        column_name: columnName,
+        column_type:
+          (storedColumnType as DatasetColumnTypes) || (DATASET_COLUMN_TYPES_LIST[0].value as DatasetColumnTypes),
+        required: stored?.isRequired ?? false,
+        default: stored?.defaultValue ?? null,
       };
     });
 
     // Merge backend + FE-only columns in localStorage order
     const allColumns = mergeAndOrderItems(backendColumns, newColumnDefs, storedColIds);
 
+    // For new datasets, use PREVIEW_DATASET_ID if id is empty
+    const datasetIdForInit = id && id.trim() !== '' ? id : isCreating ? 'preview-dataset' : id;
+
     if (allColumns.length > 0) {
-      initializeColumns(allColumns, id as string);
+      initializeColumns(allColumns, datasetIdForInit as string);
+    } else if (isCreating && storedConfig && storedConfig.length > 0) {
+      // For new datasets, even if allColumns is empty (e.g., only FE temp columns),
+      // we should still initialize with columns from localStorage
+      const tempColumns = storedConfig.map((stored, index) => {
+        // Convert stored columnType from uppercase to lowercase if needed
+        let storedColumnType = stored.columnType;
+
+        if (storedColumnType && storedColumnType === storedColumnType.toUpperCase()) {
+          storedColumnType = storedColumnType.toLowerCase();
+        }
+
+        return {
+          id: stored.colId,
+          column_name: stored.columnName?.trim() ? stored.columnName : `Column ${index + 1}`,
+          column_type:
+            (storedColumnType as DatasetColumnTypes) || (DATASET_COLUMN_TYPES_LIST[0].value as DatasetColumnTypes),
+          required: stored.isRequired ?? false,
+          default: stored.defaultValue ?? null,
+        };
+      });
+
+      if (tempColumns.length > 0) {
+        initializeColumns(tempColumns, datasetIdForInit as string);
+      }
+    } else if (isCreating && (!storedConfig || storedConfig.length === 0)) {
+      // For new datasets with no columns and no stored config, initialize with empty array
+      // This will trigger the default "Column 1" creation in initializeColumns
+      initializeColumns([], datasetIdForInit as string);
     }
 
     if (drilldownFilters) {
@@ -490,6 +623,9 @@ const DatasetByIdInner: FC<DatasetByIdProps> = ({
   };
 
   const fetchInitialDatasetData = () => {
+    // Skip fetching when creating new dataset optimistically
+    if (isCreating) return;
+
     firstLoadDone.current = false;
 
     if (drilldownFilters?.conditions === null) return;
@@ -540,7 +676,16 @@ const DatasetByIdInner: FC<DatasetByIdProps> = ({
 
   useEffect(() => {
     initializeFilterConfig();
-  }, [filterConfigData?.data, filters, id, drilldownFilters, isFetching, isUninitialized, currentUserHasEditAccess]);
+  }, [
+    filterConfigData?.data,
+    filters,
+    id,
+    drilldownFilters,
+    isFetching,
+    isUninitialized,
+    currentUserHasEditAccess,
+    isCreating,
+  ]);
 
   useEffect(() => {
     if (gridReady && selectedFilters) {
@@ -564,6 +709,12 @@ const DatasetByIdInner: FC<DatasetByIdProps> = ({
     selectedTab,
   });
 
+  // Listen for dataset SSE events to update localStorage and context with correct column IDs after transaction
+  useDatasetSSE({
+    datasetId: id as string,
+    updateColumnIdsFromBE,
+  });
+
   useEffect(() => {
     if (isNoRowsOverlayVisible) {
       tableRef.current?.api?.showNoRowsOverlay();
@@ -572,9 +723,57 @@ const DatasetByIdInner: FC<DatasetByIdProps> = ({
     }
   }, [isNoRowsOverlayVisible]);
 
+  // Initialize pendingTitle from localStorage on load (for breadcrumb)
+  useEffect(() => {
+    if (id && !isCreating) {
+      try {
+        const datasetData = getColumnConfigForDataset(id);
+
+        if (datasetData && typeof datasetData === 'object' && 'dataset_name' in datasetData) {
+          const storedName = (datasetData as { dataset_name?: string }).dataset_name;
+
+          if (storedName && storedName.trim() !== '') {
+            setPendingTitle?.(storedName);
+          }
+        }
+      } catch (error) {
+        console.error('[Dataset] Error reading from localStorage:', error);
+      }
+    }
+  }, [id, isCreating, setPendingTitle]);
+
+  // Sync localStorage from backend dataset metadata ONLY when localStorage is completely empty
+  // Never overwrite existing localStorage data - preserve user changes
+  useEffect(() => {
+    if (currentDataset && !isCreating && id) {
+      // Check if localStorage already has data for this dataset
+      try {
+        const datasetData = getColumnConfigForDataset(id);
+
+        // Only sync if localStorage is completely empty (no data at all for this dataset)
+        const hasColumnData =
+          datasetData &&
+          ((Array.isArray(datasetData) && (datasetData as unknown[]).length > 0) ||
+            (typeof datasetData === 'object' &&
+              'columns' in datasetData &&
+              Array.isArray((datasetData as { columns?: unknown[] }).columns) &&
+              (datasetData as { columns: unknown[] }).columns.length > 0));
+
+        // Only sync if localStorage is empty - never overwrite existing data
+        if (!hasColumnData) {
+          syncSingleDatasetToLocalStorage(currentDataset as any);
+        }
+        // If localStorage has data, do nothing - preserve user changes
+      } catch {
+        // If error, sync from backend
+        syncSingleDatasetToLocalStorage(currentDataset as any);
+      }
+    }
+  }, [currentDataset, id, isCreating]);
+
   useEffect(() => {
     fetchInitialDatasetData();
-  }, [filters, drilldownFilters, id, processId, activityId]);
+  }, [filters, drilldownFilters, id, processId, activityId, isCreating]);
 
   useEffect(() => {
     updateDatasetTitleInParent?.(datasetTitle);
@@ -598,14 +797,14 @@ const DatasetByIdInner: FC<DatasetByIdProps> = ({
       <div className='flex h-full flex-col'>
         <div className={cn('flex shrink-0 items-center justify-between gap-y-3 pr-8')}>
           <div className='flex items-center py-3'>
-            <FiltersWrapper label='Filter' filterConfig={filtersConfig ?? []} />
+            <FiltersWrapper label='Filter' filterConfig={filtersConfig ?? []} disable={isDatasetCreationModeEnabled} />
           </div>
 
-          <div className='relative flex items-center gap-2.5'>
+          <div className='relative flex items-center gap-2.5 py-3'>
             {isDatasetCreationEnabled && (
               <DatasetEditPreviewTab selectedTab={selectedTab} handleTabSelect={handleTabSelect} />
             )}
-            {!isReadOnly && (
+            {!isReadOnly && !isDatasetCreationModeEnabled && (
               <TableSchemaAlignmentStatus
                 showAiTransformationStatus={showAiTransformationStatus}
                 setShowAiTransformationStatus={setShowAiTransformationStatus}
@@ -617,15 +816,17 @@ const DatasetByIdInner: FC<DatasetByIdProps> = ({
                 datasetId={id as string}
                 hasFilters={!!Object.keys(selectedFilters)?.length}
                 tableRef={tableRef}
+                disable={isDatasetCreationModeEnabled}
               />
             )}
             {!isReadOnly && showFileImports && (
               <ImportDataset
                 onRefetch={handleRefetchDataset}
                 setShowAiTransformationStatus={setShowAiTransformationStatus}
+                disable={isDatasetCreationModeEnabled}
               />
             )}
-            {!isReadOnly && <DatasetHistory />}
+            {!isReadOnly && <DatasetHistory disable={isDatasetCreationModeEnabled} />}
             {!isReadOnly && (
               <>
                 <DisplayOptions tableRef={tableRef} datasetId={id as string} isSelfServe />
@@ -649,7 +850,12 @@ const DatasetByIdInner: FC<DatasetByIdProps> = ({
 
         {isDatasetCreationEnabled && (
           <div className={cn('min-h-0 flex-1', getTabVisibilityClass(DatasetTabsTypes.BLUEPRINT))}>
-            <BluePrintDataset datasetId={id as string} />
+            <BluePrintDataset
+              datasetId={id as string}
+              isCreating={isCreating}
+              title={datasetTitle || pendingTitle}
+              onTransactionSuccess={() => handleTabSelect(DatasetTabsTypes.PREVIEW)}
+            />
           </div>
         )}
 
@@ -665,12 +871,33 @@ const DatasetByIdInner: FC<DatasetByIdProps> = ({
                 tableRef={tableRef}
                 columns={columns}
                 serverSideDatasource={serverSideDatasource}
-                columnConfig={{ enableRowGroup: true, enableValue: true, headerComponent: CustomHeader }}
+                columnConfig={{
+                  enableRowGroup: true,
+                  enableValue: true,
+                  headerComponent: CustomHeader,
+                  // Use fixed widths for all dataset columns (no flex stretching)
+                  // BE columns will use their stored width from localStorage
+                  // FE-generated columns default to 150px
+                  flex: 0,
+                  width: 150,
+                  minWidth: 100,
+                  maxWidth: 400,
+                }}
                 totalRows={totalRows}
                 onCellEditRequest={onCellEditRequest}
                 onFillEnd={onFillEnd}
                 onRowPropertiesClick={(data) => setRowPropertiesData(data)}
                 onColumnMoved={(event) => syncColumnMoved(event)}
+                onColumnVisible={(event: ColumnVisibleEvent) => {
+                  const column = event.column;
+
+                  if (column) {
+                    const colId = column.getColId();
+                    const isVisible = column.isVisible();
+
+                    syncVisibilityChange(colId, isVisible);
+                  }
+                }}
                 onGridReady={() => setGridReady(true)}
                 containerStyle={containerStyle}
                 gridStyle={gridStyle}
@@ -722,6 +949,9 @@ const datasetColumnDependencies: DatasetColumnDependencies = {
   getFromLocalStorage: getFromLocalStorage as (key: string) => string | null,
   setToLocalStorage: setToLocalStorage as (key: string, value: string) => void,
   LOCAL_STORAGE_KEYS: { COLUMN_ORDERING_VISIBILITY: LOCAL_STORAGE_KEYS.COLUMN_ORDERING_VISIBILITY },
+  getColumnConfigForDataset,
+  setColumnConfigForDataset,
+  deleteColumnConfigForDataset,
   NEW_COLUMN_PREFIX: { COL_: NEW_COLUMN_PREFIX.COL_ },
   useGetDatasetDisplayConfigQuery:
     useGetDatasetDisplayConfigQuery as unknown as DatasetColumnDependencies['useGetDatasetDisplayConfigQuery'],
@@ -732,8 +962,17 @@ const datasetColumnDependencies: DatasetColumnDependencies = {
 
 // Outer component that provides the DatasetColumnContext
 const DatasetById: FC<DatasetByIdProps> = (props) => {
+  // When creating, don't pass API hooks to prevent unnecessary API calls
+  const dependencies = props.isCreating
+    ? {
+        ...datasetColumnDependencies,
+        useGetDatasetDisplayConfigQuery: undefined,
+        useUpdateDatasetMutation: undefined,
+      }
+    : datasetColumnDependencies;
+
   return (
-    <DatasetColumnProvider datasetId={props.id as string} dependencies={datasetColumnDependencies}>
+    <DatasetColumnProvider datasetId={props.id as string} dependencies={dependencies}>
       <DatasetByIdInner {...props} />
     </DatasetColumnProvider>
   );

@@ -85,6 +85,7 @@ export type TableSchemaAlignmentStatusPropsType = {
 };
 
 export type ImportDatasetPropsType = {
+  disable?: boolean;
   setShowAiTransformationStatus: Dispatch<
     SetStateAction<{ open: boolean; status: string; title: string; description: string }>
   >;

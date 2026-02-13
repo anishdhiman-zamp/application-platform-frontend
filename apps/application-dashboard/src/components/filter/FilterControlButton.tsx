@@ -55,7 +55,7 @@ const FilterControlButton: FC<FilterControlButtonProps> = ({
           'border-GRAY_400 text-GRAY_1000 flex h-[26px] w-fit cursor-pointer items-center rounded border px-2 py-1.5 outline-hidden',
           className,
           isSelected ? 'bg-DIVIDER_SAIL_1' : '',
-          disabled ? 'opacity-50' : 'hover:border-DIVIDER_SAIL_4',
+          disabled ? 'cursor-not-allowed opacity-50' : 'hover:border-DIVIDER_SAIL_4',
         )}
         onClick={onButtonClick}
         ref={buttonRef}

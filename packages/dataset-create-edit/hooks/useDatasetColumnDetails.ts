@@ -26,11 +26,20 @@ export const useDatasetColumnDetails = ({ columnData, onChange }: UseDatasetColu
   };
 
   const handleTypeChange = (type: string) => {
-    onChange(columnData.id, DatasetColumnHeaderTypes.COLUMN_TYPE, type);
+    // If type changed, reset required to false and default to null
+    if (type !== columnData?.column_type) {
+      onChange(columnData?.id, DatasetColumnHeaderTypes.REQUIRED, false);
+      onChange(columnData?.id, 'default' as DatasetColumnHeaderTypes, null as unknown as string);
+    }
+    onChange(columnData?.id, DatasetColumnHeaderTypes.COLUMN_TYPE, type);
   };
 
   const handleRequiredChange = (checked: boolean) => {
-    onChange(columnData.id, DatasetColumnHeaderTypes.REQUIRED, checked);
+    onChange(columnData?.id, DatasetColumnHeaderTypes.REQUIRED, checked);
+  };
+
+  const handleVisibilityChange = () => {
+    onChange(columnData?.id, DatasetColumnHeaderTypes.HIDDEN, !columnData?.isVisible);
   };
 
   return {
@@ -42,5 +51,6 @@ export const useDatasetColumnDetails = ({ columnData, onChange }: UseDatasetColu
     handleNameChange,
     handleTypeChange,
     handleRequiredChange,
+    handleVisibilityChange,
   };
 };

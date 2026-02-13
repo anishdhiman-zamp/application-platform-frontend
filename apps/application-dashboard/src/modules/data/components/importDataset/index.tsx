@@ -26,7 +26,7 @@ import { toast } from '@/components/common/toast/Toast';
 import { SIDE_OPTIONS } from '@/types/commonTypes';
 import TooltipV2 from 'components/common/TooltipV2';
 
-const ImportDataset: FC<ImportDatasetPropsType> = ({ setShowAiTransformationStatus, onRefetch }) => {
+const ImportDataset: FC<ImportDatasetPropsType> = ({ setShowAiTransformationStatus, onRefetch, disable }) => {
   const dispatch = useDispatch();
   const searchParams = useSearchParams();
   const params = useParams();
@@ -185,7 +185,15 @@ const ImportDataset: FC<ImportDatasetPropsType> = ({ setShowAiTransformationStat
         tooltipClassName='f-12-300 rounded-md whitespace-nowrap z-[1000] bg-black text-GRAY_200'
         className='z-1 h-full w-full'
       >
-        <div className={cn('hover:bg-GRAY_100 cursor-pointer rounded! p-1', isImportFilePopupOpen && 'bg-GRAY_100')}>
+        <div
+          className={cn(
+            'rounded! p-1',
+            isImportFilePopupOpen && 'bg-GRAY_100',
+            disable
+              ? 'disabled:text-GRAY_300 hover:text-GRAY_300 cursor-not-allowed'
+              : 'hover:text-GRAY_100 cursor-pointer',
+          )}
+        >
           <Image
             src={COINS_STACKED_05}
             alt='coins-stacked-05'

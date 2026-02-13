@@ -29,6 +29,14 @@ export class TransactionIntegration {
   }
 
   private discoverMappings(): void {
+    this.refreshMappings();
+  }
+
+  /**
+   * Refresh mappings from registered resources.
+   * Call this after registering new resources if the integration was already initialized.
+   */
+  refreshMappings(): void {
     const resources = getResourceRegistry().getAll();
 
     resources.forEach((resource) => {

@@ -20,9 +20,11 @@ import { capitalizeFirstLetter, cn } from 'utils/common';
 import { useGetAllDatasetsQuery } from '@/apis/admin';
 import TooltipV2 from '@/components/common/TooltipV2';
 import { KEYBOARD_KEYS } from '@/constants/shortcuts';
+import { usePendingDatasetContext } from '@/context/pendingDataset.context';
 import useIsEditingBreadcrumbAllowed from '@/hooks/useIsEditingBreadcrumbAllowed';
 import { usePagesAndProcessesData } from '@/hooks/usePagesAndProcessesData';
 import useUpdateBreadcrumb from '@/hooks/useUpdateBreadcrumb';
+import { UNTITLED_DATASET_NAME } from '@/modules/data/data.constants';
 import { MODULE_TYPE, SIDE_OPTIONS } from '@/types/commonTypes';
 import { MenuWrapper } from 'components/common/MenuWrapper';
 import ProcessStatus from 'components/layouts/dashboard-layout/components/ProcessStatus';
@@ -37,10 +39,12 @@ const BreadCrumb: FC<BreadCrumbProps> = ({ isDraftProcess = false }) => {
   const searchParams = useSearchParams();
   const params = useParams();
   const pathname = usePathname();
+  const { pendingTitle, shouldAutoFocusTitle, setShouldAutoFocusTitle } = usePendingDatasetContext() || {};
 
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const [isEditing, setIsEditing] = useState(false);
   const [editedName, setEditedName] = useState<string>();
+  const prevDatasetIdRef = useRef<string | undefined>(undefined);
 
   const { data: pages } = useGetPagesQuery(undefined, {
     refetchOnMountOrArgChange: false,
@@ -59,6 +63,27 @@ const BreadCrumb: FC<BreadCrumbProps> = ({ isDraftProcess = false }) => {
 
     return null;
   }, [pathname, params?.processId, processes]);
+
+  // Track localStorage changes to force breadcrumb re-render
+  const [localStorageVersion, setLocalStorageVersion] = useState(0);
+
+  // Listen for localStorage changes (for dataset title updates)
+  useEffect(() => {
+    const handleStorageChange = () => {
+      setLocalStorageVersion((prev) => prev + 1);
+    };
+
+    // Listen for storage events (from other tabs/windows)
+    window.addEventListener('storage', handleStorageChange);
+
+    // Also listen for custom events (from same tab)
+    window.addEventListener('localStorageUpdated', handleStorageChange);
+
+    return () => {
+      window.removeEventListener('storage', handleStorageChange);
+      window.removeEventListener('localStorageUpdated', handleStorageChange);
+    };
+  }, []);
 
   const breadcrumbStack = useMemo(() => {
     const breadcrumbStack = [];
@@ -110,11 +135,33 @@ const BreadCrumb: FC<BreadCrumbProps> = ({ isDraftProcess = false }) => {
         break;
       case MODULE_TYPE.DATASETS:
         {
-          const datasetId = params?.datasetId;
+          const datasetId = Array.isArray(params?.datasetId) ? params?.datasetId[0] : params?.datasetId;
 
           breadcrumbStack.push({ title: 'Data', href: ROUTES_PATH.DATA });
-          if (datasetId) {
-            const datasetTitle = datasets?.datasets.find((dataset) => dataset?.ID === datasetId)?.Title ?? '';
+          if (datasetId && typeof datasetId === 'string' && datasetId.trim() !== '') {
+            const existingDataset = datasets?.datasets.find((dataset) => dataset?.ID === datasetId);
+
+            // Try to get title from localStorage first (highest priority, org-scoped)
+            let localStorageTitle: string | null = null;
+
+            try {
+              const { getColumnConfigForDataset } = require('@zamp-platform/dataset-create-edit');
+              const datasetData = getColumnConfigForDataset(datasetId as string);
+
+              if (datasetData && typeof datasetData === 'object' && 'dataset_name' in datasetData) {
+                const storedName = (datasetData as { dataset_name?: string }).dataset_name;
+
+                // Only use storedName if it's not empty and not the same as datasetId (which is a fallback)
+                if (storedName && storedName.trim() !== '' && storedName !== datasetId) {
+                  localStorageTitle = storedName;
+                }
+              }
+            } catch (error) {
+              console.error('[BreadCrumb] Error reading from localStorage:', error);
+            }
+
+            // Priority: localStorage > API listing > pendingTitle > "Untitled Dataset"
+            const datasetTitle = localStorageTitle || existingDataset?.Title || pendingTitle || UNTITLED_DATASET_NAME;
 
             breadcrumbStack.push({
               title: datasetTitle,
@@ -134,7 +181,7 @@ const BreadCrumb: FC<BreadCrumbProps> = ({ isDraftProcess = false }) => {
     }
 
     return breadcrumbStack as BreadcrumbItem[];
-  }, [pathname, searchParams?.toString(), pages, datasets, currentProcess]);
+  }, [pathname, searchParams?.toString(), pages, datasets, processes, pendingTitle, localStorageVersion]);
 
   const { firstBreadCrumb, middleBreadCrumbs, secondLastBreadCrumb, lastBreadCrumb } = useMemo(() => {
     const breadcrumbStackLength = breadcrumbStack?.length;
@@ -198,19 +245,65 @@ const BreadCrumb: FC<BreadCrumbProps> = ({ isDraftProcess = false }) => {
   };
 
   useEffect(() => {
-    if (params && lastBreadCrumb) setEditedName(lastBreadCrumb?.title ?? '');
-  }, [lastBreadCrumb, params]);
+    const currentDatasetId = params?.datasetId as string | undefined;
+    const isDatasetPage = pathname?.split('/')[1] === MODULE_TYPE.DATASETS;
+
+    // Only reset editedName when:
+    // 1. We're not currently editing
+    // 2. We navigated to a different dataset (dataset ID changed)
+    // 3. Or it's the initial load (prevDatasetIdRef is undefined and we have a dataset ID)
+    const datasetIdChanged = prevDatasetIdRef.current !== currentDatasetId;
+
+    if (params && lastBreadCrumb && !isEditing) {
+      if (isDatasetPage && datasetIdChanged) {
+        // Dataset changed - reset to new breadcrumb title
+        setEditedName(lastBreadCrumb?.title ?? '');
+        prevDatasetIdRef.current = currentDatasetId;
+      } else if (!isDatasetPage) {
+        // Not a dataset page - always sync with breadcrumb
+        setEditedName(lastBreadCrumb?.title ?? '');
+      }
+      // For dataset pages where dataset ID hasn't changed, don't reset
+      // This preserves the user's input even after pendingTitle updates
+    } else if (isDatasetPage && currentDatasetId) {
+      // Update the ref even if we're editing, so we track the current dataset
+      prevDatasetIdRef.current = currentDatasetId;
+    }
+  }, [lastBreadCrumb, params, isEditing, pathname]);
+
+  // Auto-focus the title input when navigating to a dataset page with shouldAutoFocusTitle flag
+  useEffect(() => {
+    const isDatasetPage = pathname?.split('/')[1] === MODULE_TYPE.DATASETS && params?.datasetId;
+
+    if (shouldAutoFocusTitle && isDatasetPage && isEditingBreadcrumbAllowed) {
+      setIsEditing(true);
+      setShouldAutoFocusTitle?.(false);
+    }
+  }, [shouldAutoFocusTitle, pathname, params?.datasetId, isEditingBreadcrumbAllowed, setShouldAutoFocusTitle]);
+
+  const handleArrowClick = () => {
+    const datasetId = Array.isArray(params?.datasetId) ? params?.datasetId[0] : params?.datasetId;
+
+    // For dataset pages, use router.replace to go to datasets listing
+    if (pathname?.split('/')[1] === MODULE_TYPE.DATASETS && datasetId) {
+      router.replace(ROUTES_PATH.DATA);
+    } else {
+      router.back();
+    }
+  };
 
   return (
-    <div className='bg-BACKGROUND_GRAY_1 z-1000 flex h-full items-center gap-2 transition-all'>
+    <div className='bg-BACKGROUND_GRAY_1 z-1000 flex h-full min-w-0 flex-1 items-center gap-2 transition-all'>
       {breadcrumbStack?.length > 1 && (
-        <SvgSpriteLoader
-          id='arrow-left'
-          height={16}
-          width={16}
-          onClick={() => router.back()}
-          className='cursor-pointer'
-        />
+        <div data-breadcrumb-arrow='true'>
+          <SvgSpriteLoader
+            id='arrow-left'
+            height={16}
+            width={16}
+            onClick={handleArrowClick}
+            className='cursor-pointer'
+          />
+        </div>
       )}
       <div className='f-13-400 text-GRAY_700 flex items-center gap-1'>
         {firstBreadCrumb && (
@@ -267,8 +360,10 @@ const BreadCrumb: FC<BreadCrumbProps> = ({ isDraftProcess = false }) => {
                   onChange={(e) => setEditedName(e.target.value)}
                   size='small'
                   className='text-gray-1000'
+                  wrapperClassName='min-w-0 flex-1 max-w-[400px]'
                   onBlur={handleEditBlur}
                   autoFocus
+                  onFocus={(e) => e.target.select()}
                   onKeyDown={handleEditKeyDown}
                   data-testid='breadcrumb-edit-input'
                 />
@@ -277,11 +372,11 @@ const BreadCrumb: FC<BreadCrumbProps> = ({ isDraftProcess = false }) => {
                   <Button
                     variant='ghost'
                     size='xsmall'
-                    className='h-6 p-1'
+                    className='h-6 max-w-[400px] min-w-0 p-1'
                     onClick={handleLastBreadCrumbClick}
                     data-testid='breadcrumb-edit-btn'
                   >
-                    <span className='f-13-500 text-gray-1000'>{editedName}</span>
+                    <span className='f-13-500 text-gray-1000 truncate'>{editedName}</span>
                   </Button>
                 </TooltipV2>
               )}
@@ -289,7 +384,7 @@ const BreadCrumb: FC<BreadCrumbProps> = ({ isDraftProcess = false }) => {
             </>
           ) : (
             <>
-              <div className='f-13-500 text-GRAY_1000'>{lastBreadCrumb.title}</div>
+              <div className='f-13-500 text-GRAY_1000 max-w-[400px] truncate'>{lastBreadCrumb.title}</div>
               {!firstBreadCrumb && isDraftProcess && <ProcessStatus status={currentProcess?.status} className='ml-1' />}
             </>
           ))}

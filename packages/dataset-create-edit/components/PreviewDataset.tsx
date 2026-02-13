@@ -26,11 +26,8 @@ export interface DisplayOptionsComponentProps {
 }
 
 interface PreviewDatasetProps {
-  /** Optional custom table component - if not provided, uses basic AG Grid */
   TableComponent?: FC<DatasetTableComponentProps>;
-  /** Optional display options component */
   DisplayOptionsComponent?: FC<DisplayOptionsComponentProps>;
-  /** Dataset ID for display options */
   datasetId?: string;
 }
 
@@ -44,16 +41,16 @@ const PreviewDataset: FC<PreviewDatasetProps> = ({
 
   // Generate column definitions from dataset columns
   const columnDefs = useMemo(() => {
-    // Safety check: if no columns at all, return empty array temporarily
-    if (!datasetColumns || datasetColumns.length === 0) {
+    if (!datasetColumns || datasetColumns?.length === 0) {
       return [];
     }
 
     // Common column configuration for preview dataset
+    // Use flex: 0 to disable flex sizing and respect the fixed width
     const commonColConfig = {
       width: 200,
       minWidth: 200,
-      flex: undefined,
+      flex: 0,
       resizable: true,
       filter: false,
       suppressMenu: true,
@@ -61,25 +58,25 @@ const PreviewDataset: FC<PreviewDatasetProps> = ({
     };
 
     // If no columns with names, show all columns (even empty ones)
-    const filteredColumns = datasetColumns.filter((col) => col.column_name.trim() !== '');
+    const filteredColumns = datasetColumns.filter((col) => col?.column_name?.trim() !== '');
 
     if (filteredColumns.length === 0) {
       // Show columns even if they don't have names yet
       return datasetColumns.map((col) => ({
-        field: col.id,
-        headerName: col.column_name ?? '',
+        field: col?.id, // Always use ID as the stable identifier
+        headerName: col?.column_name || col?.id, // Display name, fallback to ID if empty
         ...commonColConfig,
       }));
     }
 
+    // Always use col.id as the field (stable identifier for AG Grid)
     return filteredColumns.map((col) => ({
-      field: col.column_name,
-      headerName: col.column_name ?? '',
+      field: col?.id, // Always use ID as the stable identifier
+      headerName: col?.column_name, // Display name
       ...commonColConfig,
     }));
   }, [datasetColumns]);
 
-  // Generate empty rows to fill the page (approximately 20-30 rows for good visual fill)
   const emptyRows = useMemo(() => {
     // Safety check: if no columns, return empty rows array
     if (!datasetColumns || datasetColumns.length === 0) {
@@ -92,11 +89,9 @@ const PreviewDataset: FC<PreviewDatasetProps> = ({
     for (let i = 0; i < rowCount; i++) {
       const row: Record<string, unknown> = { id: `empty-row-${i}` };
 
-      // Add empty values for each column using either the column name or id
+      // Always use col.id as the field name to match the column definitions
       datasetColumns.forEach((col) => {
-        const fieldName = col.column_name.trim() !== '' ? col.column_name : col.id;
-
-        row[fieldName] = '';
+        row[col.id] = '';
       });
 
       rows.push(row);
@@ -141,7 +136,7 @@ const PreviewDataset: FC<PreviewDatasetProps> = ({
             suppressCellFocus={true}
             enableCellSelection={false}
             autoSizeStrategy={undefined}
-            columnConfig={{ flex: undefined, minWidth: 200 }}
+            columnConfig={{ flex: 0, minWidth: 200 }}
             onGridReady={handleGridReady}
           />
         </div>

@@ -58,7 +58,7 @@ const WhoHasAccessLoaderVariants = {
 };
 
 const ShareResourcePopup: FC<ShareResourcePopupProps> = (props) => {
-  const { resourceType, resourceConfig, isCustomiseAccess = false, title } = props;
+  const { resourceType, resourceConfig, isCustomiseAccess = false, title, disable } = props;
   const resourceId = props.resourceId || '';
   const [selectedRole, setSelectedRole] = useState<string>(resourceConfig.accessPrivilegesList[0]?.value ?? '');
   const [search, setSearch] = useState<string>('');
@@ -422,11 +422,19 @@ const ShareResourcePopup: FC<ShareResourcePopupProps> = (props) => {
     }
   };
 
+  console.log('disable', disable);
+  console.log('isResourceSharable', isResourceSharable);
+
   return (
     <div className='flex w-fit'>
       <Popover open={openPopup} onOpenChange={handleTogglePopup}>
         <PopoverTrigger asChild>
-          <Button size='small' variant='secondary' id={`share-${resourceType.toLowerCase()}-to-audience-btn`}>
+          <Button
+            size='small'
+            variant='secondary'
+            id={`share-${resourceType.toLowerCase()}-to-audience-btn`}
+            disabled={disable}
+          >
             Share
           </Button>
         </PopoverTrigger>

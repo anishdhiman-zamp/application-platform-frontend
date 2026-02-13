@@ -11,9 +11,10 @@ import { PERMISSION_ROLES } from '@/utils/accessPermission/accessPermission.type
 
 type ShareDatasetPopupProps = {
   datasetId: string;
+  disable?: boolean;
 };
 
-const ShareDatasetPopup: FC<ShareDatasetPopupProps> = ({ datasetId }) => {
+const ShareDatasetPopup: FC<ShareDatasetPopupProps> = ({ datasetId, disable }) => {
   const [isCustomiseAccess, setIsCustomiseAccess] = useState<boolean>(false);
   const { evaluate, ldClient } = useFeatureFlags();
 
@@ -36,6 +37,7 @@ const ShareDatasetPopup: FC<ShareDatasetPopupProps> = ({ datasetId }) => {
       resourceConfig={datasetConfig}
       resourceAdminPrivilege={PERMISSION_ROLES.ADMIN}
       isCustomiseAccess={isCustomiseAccess}
+      disable={disable}
     />
   );
 };

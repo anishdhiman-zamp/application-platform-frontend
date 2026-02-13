@@ -33,18 +33,18 @@ export const DatasetCreationProvider: FC<DatasetCreationProviderProps> = ({ chil
   ]);
 
   const handleColumnChange = (id: string, field: string, value: string | boolean) => {
-    setColumns((prev) => prev.map((col) => (col.id === id ? { ...col, [field]: value } : col)));
+    setColumns((prev) => prev.map((col) => (col?.id === id ? { ...col, [field]: value } : col)));
   };
 
   const handleDeleteColumn = (id: string) => {
-    setColumns((prev) => prev.filter((col) => col.id !== id));
+    setColumns((prev) => prev.filter((col) => col?.id !== id));
   };
 
   const handleAddColumn = (type: string) => {
     const newColumn: ColumnDataType = {
       id: crypto.randomUUID(),
       column_name: '',
-      column_type: type,
+      column_type: type as DatasetColumnTypes,
       required: false,
     };
 

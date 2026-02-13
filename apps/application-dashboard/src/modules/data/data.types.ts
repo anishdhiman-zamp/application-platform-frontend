@@ -39,9 +39,21 @@ export type ListingPropsType = {
 export type ColumnOrderingVisibilityType = {
   colId: string;
   columnName?: string;
+  columnType?: string;
   isVisible: boolean;
   width: number;
+  isRequired?: boolean;
+  defaultValue?: string | boolean | null;
 };
+
+/**
+ * New localStorage structure for dataset column configuration
+ * Each dataset ID maps to this object containing dataset name and columns
+ */
+export interface DatasetColumnConfigType {
+  dataset_name: string;
+  columns: ColumnOrderingVisibilityType[];
+}
 
 export enum DATASET_ACTION_TYPE {
   TAGGING = 'tagging',
@@ -97,4 +109,16 @@ export interface FrontendColumnConfig {
 }
 export interface ItemWithId {
   id: string;
+}
+
+export const enum DATASET_RESOURCE_TRANSACTION_PAYLOAD_TYPE {
+  DATASET_UPDATED = 'dataset_updated',
+  DATASET_CREATED = 'dataset_created',
+  DATASET_DELETED = 'dataset_deleted',
+}
+
+export const enum TRANSACTION_CONTROLLER_WORKFLOW_NAMES {
+  CREATE_DATASET = 'CreateDatasetControllerWorkflow',
+  UPDATE_DATASET = 'UpdateDatasetControllerWorkflow',
+  DELETE_DATASET = 'DeleteDatasetControllerWorkflow',
 }

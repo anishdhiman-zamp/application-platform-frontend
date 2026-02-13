@@ -1,4 +1,11 @@
+'use client';
+
 import { FC, type ReactElement, useEffect, useMemo, useRef, useState } from 'react';
+import {
+  ColumnOrderingVisibilityType,
+  getColumnConfigForDataset,
+  setColumnConfigForDataset,
+} from '@zamp-platform/dataset-create-edit';
 import { GlobalCacheStore } from '@zamp-platform/utils';
 import {
   ColDef,
@@ -20,7 +27,6 @@ import { useRouter, useSearchParams } from 'next/navigation';
 import { MapAny } from 'types/commonTypes';
 import { FilterModelType } from 'types/components/table.type';
 import { checkIsObjectEmpty, cn, snakeCaseToSentenceCase } from 'utils/common';
-import { getFromLocalStorage, LOCAL_STORAGE_KEYS, setToLocalStorage } from 'utils/localstorage';
 import { ZAMP_LOGO_LOADER_SVG } from '@/constants/icons';
 import ImageLoader from 'components/common/loader/ImageLoader';
 import CustomHeader from 'components/common/table/CustomHeader';
@@ -185,14 +191,21 @@ const CommonFilterTable: FC<CommonFilterTableProps> = ({
 
       finalList = [...newIndexToStart, movedColumn, ...oldIndexToNewIndex, ...endToOldIndex];
     }
-    const currentColumnOrderingVisibility = JSON.parse(
-      getFromLocalStorage(LOCAL_STORAGE_KEYS.COLUMN_ORDERING_VISIBILITY) ?? '{}',
-    );
 
-    setToLocalStorage(
-      LOCAL_STORAGE_KEYS.COLUMN_ORDERING_VISIBILITY,
-      JSON.stringify({ ...currentColumnOrderingVisibility, [id]: finalList }),
-    );
+    // Preserve the existing config structure (dataset_name, dataset_unique_key_name)
+    // and only update the columns field
+    const existingData = getColumnConfigForDataset(id);
+
+    if (existingData && typeof existingData === 'object' && 'columns' in existingData) {
+      // New format: update only the columns field
+      setColumnConfigForDataset(id, {
+        ...existingData,
+        columns: finalList as ColumnOrderingVisibilityType[],
+      });
+    } else {
+      // Old format or no existing data: set the array directly
+      setColumnConfigForDataset(id, finalList as ColumnOrderingVisibilityType[]);
+    }
   };
 
   useEffect(() => {

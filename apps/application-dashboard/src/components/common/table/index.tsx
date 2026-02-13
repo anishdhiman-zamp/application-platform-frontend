@@ -66,6 +66,7 @@ import { isValueEmpty } from '@/modules/widgets/TreeTable/utils';
 import { cn } from '@/utils/common';
 import CustomContextMenuItem from 'components/common/table/CustomContextMenuItem';
 import CustomGroupHeader from 'components/common/table/CustomHeader/CustomGroupHeader';
+import CustomLoadingOverlay from 'components/common/table/CustomLoadingOverlay';
 import CustomNoRowsOverlay from 'components/common/table/CustomNoRowsOverlay';
 import CustomStatusBar from 'components/common/table/CustomStatusBar';
 import LinkCellPopover from 'components/common/table/LinkCellPopover';
@@ -522,6 +523,7 @@ const Table: FC<TableProps> = ({
           autoGroupColumnDef={autoGroupColumnDef}
           enableCellTextSelection
           noRowsOverlayComponent={CustomNoRowsOverlay}
+          loadingOverlayComponent={CustomLoadingOverlay}
           maintainColumnOrder
           suppressDragLeaveHidesColumns
           onColumnMoved={onColumnMoved}

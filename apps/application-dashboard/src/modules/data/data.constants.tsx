@@ -176,3 +176,5 @@ export const enum SourceType {
   EDIT = 'edit',
   API = 'api',
 }
+
+export const UNTITLED_DATASET_NAME = 'Untitled Dataset';

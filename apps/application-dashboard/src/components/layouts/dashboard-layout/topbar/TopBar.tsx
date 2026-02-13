@@ -1,6 +1,7 @@
 'use client';
 
-import { Suspense, useEffect, useMemo, useState } from 'react';
+import { Suspense, useCallback, useEffect, useMemo, useState } from 'react';
+import { useCheckDatasetCreationEnabled } from '@zamp-platform/dataset-create-edit';
 import { Button } from '@zamp-platform/ui';
 import {
   getCreateKnowledgeBaseRouteByProcessId,
@@ -9,7 +10,7 @@ import {
 } from 'constants/routeConfig';
 import { motion } from 'framer-motion';
 import { useAppSelector } from 'hooks/toolkit';
-import { BookOpen } from 'lucide-react';
+import { BookOpen, PlusIcon } from 'lucide-react';
 import ShareDatasetPopup from 'modules/data/components/ShareDatasetPopup';
 import SharePagePopup from 'modules/page/SharePagePopup';
 import Link from 'next/link';
@@ -17,6 +18,7 @@ import { useParams, usePathname, useRouter } from 'next/navigation';
 import { RootState } from 'store';
 import TooltipV2 from '@/components/common/TooltipV2';
 import { FEATURE_FLAGS } from '@/constants/featureFlags';
+import { usePendingDatasetContext } from '@/context/pendingDataset.context';
 import { useFeatureFlag } from '@/hooks/useFeatureFlag';
 import { useFeatureFlags } from '@/hooks/useFeatureFlags';
 import { usePagesAndProcessesData } from '@/hooks/usePagesAndProcessesData';
@@ -36,11 +38,14 @@ const ShareButton = () => {
   const params = useParams<{ pageId: string; datasetId: string; paymentConfigId: string; processId: string }>();
   const pathname = usePathname();
 
+  // Hide share button when creating a new dataset (source=creation)
+  const isCreationMode = useCheckDatasetCreationEnabled();
+
   switch (true) {
     case pathname?.includes(SHARE_BTN_ALLOWED_ROUTES.PAGES):
       return <SharePagePopup pageId={params?.pageId || ''} />;
     case pathname?.includes(SHARE_BTN_ALLOWED_ROUTES.DATASETS):
-      return <ShareDatasetPopup datasetId={params?.datasetId || ''} />;
+      return <ShareDatasetPopup datasetId={params?.datasetId || ''} disable={isCreationMode} />;
     case pathname?.includes(SHARE_BTN_ALLOWED_ROUTES.PROCESSES):
       return <ShareProcessPopup processId={params?.processId || ''} />;
     case pathname === SHARE_BTN_ALLOWED_ROUTES.DATASET:
@@ -71,6 +76,17 @@ const Topbar = () => {
   const { evaluate, ldClient } = useFeatureFlags();
   const isFeedbackEnabled = useIsFeedbackEnabled();
   const isCreateDatasetEnabled = useIsDatasetCreationEnabled();
+  const { clearPendingData, setShouldAutoFocusTitle } = usePendingDatasetContext() || {};
+
+  const handleCreateDataset = useCallback(() => {
+    const datasetId = crypto.randomUUID();
+
+    // Clear any previous pending data and set flag to auto-focus title
+    clearPendingData?.();
+    setShouldAutoFocusTitle?.(true);
+
+    router.push(`/datasets/${datasetId}?tab=${DatasetTabsTypes.BLUEPRINT}&source=creation`);
+  }, [router, clearPendingData, setShouldAutoFocusTitle]);
 
   useEffect(() => {
     if (!ldClient) return;
@@ -119,12 +135,15 @@ const Topbar = () => {
     }
 
     if (pathname === ROUTES_PATH.DATA && isCreateDatasetEnabled) {
-      const handleCreateDataset = () => {
-        router.push(`${ROUTES_PATH.DATA}?tab=${DatasetTabsTypes.BLUEPRINT}`);
-      };
-
       return (
-        <Button id='create-dataset-btn' size='small' variant='default' onClick={handleCreateDataset}>
+        <Button
+          id='create-dataset-btn'
+          size='small'
+          variant='default'
+          onClick={handleCreateDataset}
+          className='flex gap-1'
+        >
+          <PlusIcon className='h-3.5 w-3.5' />
           Create dataset
         </Button>
       );
@@ -138,6 +157,7 @@ const Topbar = () => {
     processId,
     isFeedbackEnabled,
     openFeedbackConversations,
+    handleCreateDataset,
   ]);
 
   return (

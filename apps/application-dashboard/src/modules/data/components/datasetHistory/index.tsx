@@ -9,7 +9,7 @@ import { cn } from 'utils/common';
 import { SIDE_OPTIONS } from '@/types/commonTypes';
 import TooltipV2 from 'components/common/TooltipV2';
 
-const DatasetHistory = () => {
+const DatasetHistory = ({ disable }: { disable: boolean }) => {
   const datasetBulkLoaders = useSelector((state: RootState) => state?.user?.datasetBulkLoaders) || [];
   const [isFileImportHistoryOpen, setIsFileImportHistoryOpen] = useState<boolean>(false);
 
@@ -27,7 +27,13 @@ const DatasetHistory = () => {
           className='z-1 h-full w-full'
         >
           <div
-            className={cn('hover:bg-GRAY_100 cursor-pointer rounded p-1', isFileImportHistoryOpen && 'bg-GRAY_100')}
+            className={cn(
+              'rounded p-1',
+              isFileImportHistoryOpen && 'bg-GRAY_100',
+              disable
+                ? 'disabled:text-GRAY_300 hover:text-GRAY_300 cursor-not-allowed'
+                : 'hover:text-GRAY_100 cursor-pointer',
+            )}
             onClick={handleOpenFileImportHistory}
           >
             <SvgSpriteLoader id='clock-rewind' width={14} height={14} color={COLORS.GRAY_900} />

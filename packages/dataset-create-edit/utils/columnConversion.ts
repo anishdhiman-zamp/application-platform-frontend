@@ -11,6 +11,7 @@ export interface FilterConfigType {
   metadata?: {
     is_hidden?: boolean;
     is_required?: boolean;
+    default_value?: string | boolean | null;
   };
 }
 
@@ -30,14 +31,16 @@ export const snakeCaseToDisplayName = (str: string): string => {
 /**
  * Pattern mapping for datatype to column type conversion
  * Each entry maps patterns (substrings) to a column type
+ * Order matters - more specific patterns should come first
  */
 const DATATYPE_PATTERNS: Array<{ patterns: string[]; type: DatasetColumnTypes }> = [
-  { patterns: ['text', 'string', 'varchar'], type: DatasetColumnTypes.TEXT },
-  { patterns: ['int', 'float', 'decimal', 'double', 'numeric'], type: DatasetColumnTypes.NUMBER },
-  { patterns: ['date', 'time'], type: DatasetColumnTypes.DATE },
-  { patterns: ['file', 'blob'], type: DatasetColumnTypes.FILE },
-  { patterns: ['link', 'url'], type: DatasetColumnTypes.LINK },
-  { patterns: ['email', 'mail'], type: DatasetColumnTypes.EMAIL },
+  { patterns: ['boolean', 'bool'], type: DatasetColumnTypes.BOOLEAN },
+  { patterns: ['timestamp', 'datetime'], type: DatasetColumnTypes.TIMESTAMP },
+  { patterns: ['double'], type: DatasetColumnTypes.DOUBLE },
+  { patterns: ['float', 'real'], type: DatasetColumnTypes.FLOAT },
+  { patterns: ['int', 'integer', 'bigint', 'smallint'], type: DatasetColumnTypes.INTEGER },
+  { patterns: ['json', 'jsonb'], type: DatasetColumnTypes.JSON },
+  { patterns: ['text', 'string', 'varchar', 'char'], type: DatasetColumnTypes.TEXT },
 ];
 
 /**
@@ -49,6 +52,63 @@ export const mapDatatypeToColumnType = (datatype: string): DatasetColumnTypes =>
   const match = DATATYPE_PATTERNS.find(({ patterns }) => patterns.some((pattern) => datatypeLower.includes(pattern)));
 
   return match?.type ?? DatasetColumnTypes.TEXT;
+};
+
+/**
+ * Maps backend schema type (e.g., "TEXT", "INTEGER") to frontend DatasetColumnTypes enum
+ * This handles the case sensitivity difference between backend and frontend
+ */
+export const mapSchemaTypeToColumnType = (schemaType: string | null | undefined): DatasetColumnTypes => {
+  if (!schemaType) return DatasetColumnTypes.TEXT;
+
+  const typeLower = schemaType.toLowerCase().trim();
+
+  // Direct mapping for known types
+  const directMapping: Record<string, DatasetColumnTypes> = {
+    // Text types
+    text: DatasetColumnTypes.TEXT,
+    varchar: DatasetColumnTypes.TEXT,
+    char: DatasetColumnTypes.TEXT,
+    string: DatasetColumnTypes.TEXT,
+    // Integer types
+    integer: DatasetColumnTypes.INTEGER,
+    int: DatasetColumnTypes.INTEGER,
+    int4: DatasetColumnTypes.INTEGER,
+    int8: DatasetColumnTypes.INTEGER,
+    bigint: DatasetColumnTypes.INTEGER,
+    smallint: DatasetColumnTypes.INTEGER,
+    // Boolean types
+    boolean: DatasetColumnTypes.BOOLEAN,
+    bool: DatasetColumnTypes.BOOLEAN,
+    // Timestamp types
+    timestamp: DatasetColumnTypes.TIMESTAMP,
+    timestamptz: DatasetColumnTypes.TIMESTAMP,
+    datetime: DatasetColumnTypes.TIMESTAMP,
+    date: DatasetColumnTypes.TIMESTAMP,
+    time: DatasetColumnTypes.TIMESTAMP,
+    timetz: DatasetColumnTypes.TIMESTAMP,
+    // Float types
+    float: DatasetColumnTypes.FLOAT,
+    float4: DatasetColumnTypes.FLOAT,
+    real: DatasetColumnTypes.FLOAT,
+    // Double types
+    double: DatasetColumnTypes.DOUBLE,
+    float8: DatasetColumnTypes.DOUBLE,
+    'double precision': DatasetColumnTypes.DOUBLE,
+    numeric: DatasetColumnTypes.DOUBLE,
+    decimal: DatasetColumnTypes.DOUBLE,
+    // JSON types
+    json: DatasetColumnTypes.JSON,
+    jsonb: DatasetColumnTypes.JSON,
+  };
+
+  // Check direct mapping first
+  if (directMapping[typeLower]) {
+    return directMapping[typeLower];
+  }
+
+  // Fall back to pattern-based matching
+  return mapDatatypeToColumnType(schemaType);
 };
 
 /**
@@ -66,20 +126,46 @@ export const convertFilterConfigToColumns = <T extends FilterConfigType>(filterC
   return filterConfig
     .filter((config) => !config.metadata?.is_hidden) // Only show visible columns in Blueprint
     .map((config) => {
-      // Check if alias is already in friendly format (has spaces or capital letters)
-      const aliasIsFriendly = config.alias && (config.alias.includes(' ') || /[A-Z]/.test(config.alias));
+      // Use alias if provided, otherwise fall back to friendly format of column name
+      // Always prefer the alias when it exists, as it's the user-defined display name
+      const displayName = config.alias || snakeCaseToDisplayName(config.column);
 
-      const displayName = aliasIsFriendly ? config.alias : snakeCaseToDisplayName(config.column);
+      // Map the datatype to column type - use mapSchemaTypeToColumnType for better coverage
+      const columnType = mapSchemaTypeToColumnType(config.datatype);
 
       const columnData: ColumnDataType = {
-        id: config.column, // STABLE ID from API (e.g., "invoice_description") - NEVER changes
+        id: config?.column, // STABLE ID from API (e.g., "invoice_description") - NEVER changes
         column_name: displayName || '', // Always friendly format
-        column_type: mapDatatypeToColumnType(config.datatype),
-        required: config.metadata?.is_required || false,
+        column_type: columnType,
+        required: config?.metadata?.is_required || false,
+        default: config?.metadata?.default_value ?? null,
       };
 
       return columnData;
     });
+};
+
+/**
+ * Normalizes column types for comparison purposes.
+ * Groups equivalent types together (e.g., FLOAT, DOUBLE, DOUBLE PRECISION are all treated as the same)
+ * because PostgreSQL internally converts FLOAT to DOUBLE PRECISION.
+ *
+ * @param type - The column type string (from backend or frontend)
+ * @returns Normalized type string for comparison
+ */
+export const normalizeTypeForComparison = (type: string): string => {
+  if (!type) return '';
+  const mapped = mapSchemaTypeToColumnType(type);
+  // FLOAT, DOUBLE, and DOUBLE_PRECISION are all equivalent
+  // (PostgreSQL stores FLOAT as DOUBLE PRECISION internally)
+  if (
+    mapped === DatasetColumnTypes.FLOAT ||
+    mapped === DatasetColumnTypes.DOUBLE ||
+    mapped === DatasetColumnTypes.DOUBLE_PRECISION
+  ) {
+    return 'FLOAT_FAMILY';
+  }
+  return mapped;
 };
 
 /**
@@ -90,11 +176,11 @@ export const convertFilterConfigToColumns = <T extends FilterConfigType>(filterC
  */
 export const convertColumnsToFilterConfig = (columns: ColumnDataType[]): Partial<FilterConfigType>[] => {
   return columns.map((col) => ({
-    column: col.column_name,
-    alias: col.column_name,
-    datatype: col.column_type,
+    column: col?.column_name,
+    alias: col?.column_name,
+    datatype: col?.column_type,
     metadata: {
-      is_required: col.required,
+      is_required: col?.required,
     },
   }));
 };
