@@ -422,27 +422,32 @@ const BluePrintDataset: FC<BluePrintDatasetProps> = ({
       });
 
       // Transform localStorage columns OR use current columns from context (for immediate comparison)
-      const currentColumnsFromContext = columns.map((col) => ({
-        colId: col.id,
-        columnName: normalizeColumnName(col.column_name || ''),
-        columnType: col.column_type?.toUpperCase() || '',
-        isVisible: col.isVisible,
-        isRequired: col.required || false,
-        defaultValue: col.default ?? null,
-      }));
+      // Filter out system columns to match the backend side filtering
+      const currentColumnsFromContext = columns
+        .filter((col) => !SYSTEM_COLUMNS.includes(col.id))
+        .map((col) => ({
+          colId: col.id,
+          columnName: normalizeColumnName(col.column_name || ''),
+          columnType: col.column_type?.toUpperCase() || '',
+          isVisible: col.isVisible,
+          isRequired: col.required || false,
+          defaultValue: col.default ?? null,
+        }));
 
       // Use context columns if available, otherwise fallback to localStorage
       const transformedLocalStorageColumns =
         currentColumnsFromContext.length > 0
           ? currentColumnsFromContext
-          : localStorageColumns.map((col) => ({
-              colId: col.colId, // Keep colId for matching with backend
-              columnName: normalizeColumnName(col.columnName || ''),
-              columnType: col.columnType || '',
-              isVisible: col.isVisible,
-              isRequired: col.isRequired || false,
-              defaultValue: col.defaultValue ?? null,
-            }));
+          : localStorageColumns
+              .filter((col) => !SYSTEM_COLUMNS.includes(col.colId))
+              .map((col) => ({
+                colId: col.colId, // Keep colId for matching with backend
+                columnName: normalizeColumnName(col.columnName || ''),
+                columnType: col.columnType || '',
+                isVisible: col.isVisible,
+                isRequired: col.isRequired || false,
+                defaultValue: col.defaultValue ?? null,
+              }));
 
       // If localStorage is empty but backend has data, there's a diff
       if (!localStorageData || localStorageColumns.length === 0) {

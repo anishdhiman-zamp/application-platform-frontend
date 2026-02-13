@@ -422,9 +422,6 @@ const ShareResourcePopup: FC<ShareResourcePopupProps> = (props) => {
     }
   };
 
-  console.log('disable', disable);
-  console.log('isResourceSharable', isResourceSharable);
-
   return (
     <div className='flex w-fit'>
       <Popover open={openPopup} onOpenChange={handleTogglePopup}>

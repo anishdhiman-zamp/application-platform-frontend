@@ -12,7 +12,11 @@ import React, {
 
 import type { ColumnDataType } from '../components/DatasetColumDetails';
 import { DatasetColumnTypes } from '../constants';
-import { mapSchemaTypeToColumnType, normalizeTypeForComparison } from '../utils/columnConversion';
+import {
+  mapSchemaTypeToColumnType,
+  normalizeTypeForComparison,
+  snakeCaseToDisplayName,
+} from '../utils/columnConversion';
 
 /**
  * Column configuration that includes ordering, visibility, and width
@@ -299,9 +303,15 @@ export const DatasetColumnProvider: FC<DatasetColumnProviderProps> = ({
         if (alias && alias !== col?.column_name) {
           return { ...col, column_name: alias };
         }
-        // If column_name matches id, is empty, or is whitespace-only, fall back to Column {index}
-        if (col?.column_name === col?.id || !col?.column_name?.trim()) {
+        // If column_name is empty or whitespace-only, generate a fallback name
+        if (!col?.column_name?.trim()) {
           return { ...col, column_name: `Column ${index + 1}` };
+        }
+        // If column_name equals the raw column ID (e.g., filter-config API returned alias = column name),
+        // convert to a user-friendly display name instead of using generic "Column N" fallback.
+        // This handles cases like alias="embeddings" where col.column_name === col.id === "embeddings"
+        if (col?.column_name === col?.id) {
+          return { ...col, column_name: snakeCaseToDisplayName(col?.id) };
         }
         return col;
       });

@@ -246,13 +246,24 @@ export const formatColumns: (params: FormatColumnsParamsType) => ColDef[] = ({
     );
 
     orderedColumns?.push(...missingColumns);
-    const columnOrderingVisibility: ColumnOrderingVisibilityType[] = orderedColumns?.map((column) => ({
-      colId: column?.field ?? '',
-      isVisible: !column?.hide,
-      width: column?.width ?? 0,
-    }));
+    // Build a map from existing localStorage to preserve columnType, isRequired, defaultValue
+    const existingLsMap = new Map((columnOrderingVisibility ?? []).map((col: MapAny) => [col.colId, col]));
+    const updatedColumnOrderingVisibility: ColumnOrderingVisibilityType[] = orderedColumns?.map((column) => {
+      const existingLsCol = existingLsMap.get(column?.field ?? '') as ColumnOrderingVisibilityType | undefined;
 
-    updateLocalStorage(columnOrderingVisibility, datasetId);
+      return {
+        colId: column?.field ?? '',
+        columnName: column?.headerName || column?.field || '',
+        isVisible: !column?.hide,
+        width: column?.width ?? 0,
+        // Preserve existing metadata from localStorage so it doesn't get wiped out
+        ...(existingLsCol?.columnType && { columnType: existingLsCol.columnType }),
+        ...(existingLsCol?.isRequired !== undefined && { isRequired: existingLsCol.isRequired }),
+        ...(existingLsCol?.defaultValue !== undefined && { defaultValue: existingLsCol.defaultValue }),
+      };
+    });
+
+    updateLocalStorage(updatedColumnOrderingVisibility, datasetId);
   }
 
   return orderedColumns?.length ? orderedColumns : columns;
@@ -505,8 +516,13 @@ export const getUpdatedColumnOrderingVisibility = (
   // exclude columns with is_hidden=true, they should NEVER appear in localStorage
   filterConfig.forEach((column) => {
     if (!existingColumnsMap.has(column.column) && !column.metadata?.is_hidden) {
+      // Use alias if it's a custom alias (different from raw column name), otherwise generate display name
+      const hasCustomAlias = column.alias && column.alias !== column.column;
+      const columnName = hasCustomAlias ? column.alias : snakeCaseToSentenceCase(column.column);
+
       updatedColumnOrderingVisibility.push({
         colId: column.column,
+        columnName,
         isVisible: true, // If it's not hidden, it should be visible by default
         width: 0,
       });
@@ -954,10 +970,17 @@ export const syncAllDatasetNamesToLocalStorage = (
 
       // Build display config map for aliases (column -> alias)
       const displayConfigMap = new Map<string, string>();
+      // Build is_hidden map (column -> is_hidden) to respect backend visibility
+      const isHiddenMap = new Map<string, boolean>();
 
       dataset.metadata?.display_config?.forEach((item) => {
-        if (item.alias && !SYSTEM_COLUMNS.includes(item.column)) {
-          displayConfigMap.set(item.column.toLowerCase(), item.alias);
+        if (!SYSTEM_COLUMNS.includes(item.column)) {
+          if (item.alias) {
+            displayConfigMap.set(item.column.toLowerCase(), item.alias);
+          }
+          if (item.is_hidden !== undefined) {
+            isHiddenMap.set(item.column.toLowerCase(), item.is_hidden);
+          }
         }
       });
 
@@ -979,7 +1002,7 @@ export const syncAllDatasetNamesToLocalStorage = (
         const columnsFromSchema = Array.from(schemaInfoMap.entries()).map(([name, info]) => ({
           colId: name,
           columnName: displayConfigMap.get(name) || snakeCaseToDisplayName(name),
-          isVisible: true,
+          isVisible: !isHiddenMap.get(name), // Respect backend is_hidden: true → isVisible: false
           width: 150,
           columnType: info.type.toUpperCase(),
           isRequired: info.nullable === false,
@@ -1023,7 +1046,7 @@ export const syncAllDatasetNamesToLocalStorage = (
           const columnsFromSchema = Array.from(schemaInfoMap.entries()).map(([name, info]) => ({
             colId: name,
             columnName: displayConfigMap.get(name) || snakeCaseToDisplayName(name),
-            isVisible: true,
+            isVisible: !isHiddenMap.get(name), // Respect backend is_hidden: true → isVisible: false
             width: 150,
             columnType: info.type.toUpperCase(),
             isRequired: info.nullable === false,
