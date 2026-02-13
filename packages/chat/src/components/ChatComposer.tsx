@@ -92,7 +92,6 @@ export const ChatComposer: FC<ChatComposerProps> = ({
   maxTextareaHeight = 200,
 }) => {
   const textareaRef = useRef<HTMLTextAreaElement>(null);
-  const hasMountedRef = useRef(false);
 
   const handleContainerClick = () => {
     if (!shouldShowRecorder) {
@@ -116,18 +115,12 @@ export const ChatComposer: FC<ChatComposerProps> = ({
     const textarea = textareaRef.current;
     if (!textarea) return;
 
+    // Reset to min height to get accurate scrollHeight for shrinking
     textarea.style.height = `${minTextareaHeight}px`;
 
-    if (value.trim()) {
-      const scrollHeight = textarea.scrollHeight;
-      const newHeight = Math.min(Math.max(scrollHeight, minTextareaHeight), maxTextareaHeight);
-      textarea.style.height = `${newHeight}px`;
-    }
-
-    // Enable transitions only after initial mount to prevent animation on load/refresh
-    if (!hasMountedRef.current) {
-      hasMountedRef.current = true;
-    }
+    // Calculate and set new height based on content
+    const newHeight = Math.min(Math.max(textarea.scrollHeight, minTextareaHeight), maxTextareaHeight);
+    textarea.style.height = `${newHeight}px`;
   }, [value, minTextareaHeight, maxTextareaHeight]);
 
   return (
@@ -195,7 +188,6 @@ export const ChatComposer: FC<ChatComposerProps> = ({
               placeholder={placeholder}
               className={cn(
                 'f-13-450 placeholder:text-muted-foreground min-h-0 w-full resize-none overflow-y-auto rounded-none border-none bg-transparent p-0 shadow-none outline-none [scrollbar-width:none]',
-                hasMountedRef.current && 'transition-[height] duration-300 ease-out',
                 textareaClassName,
               )}
               style={{
