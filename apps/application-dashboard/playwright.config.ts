@@ -4,6 +4,7 @@ const isCI = !!process.env.GITHUB_ACTIONS; // check if running in CI
 const USE_LOCAL_SELENIUM_BROWSER = process.env.USE_LOCAL_SELENIUM === 'true'; // make this "!==" to run remote selenium-gird locally
 const STORAGE_STATE = 'tests/session-secrets/session-state.json'; // session data storage path
 
+// configs
 const GOOGLE_SSO_CONFIG = {
   adminEmail: process.env.ADMIN_EMAIL || '',
   adminPassword: process.env.ADMIN_PASSWORD || '',
