@@ -23,6 +23,7 @@ export interface TransactionResponse {
     code: string;
     message: string;
   };
+  output_payload?: Record<string, unknown>;
 }
 
 /**

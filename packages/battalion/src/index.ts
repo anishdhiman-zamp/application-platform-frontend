@@ -45,4 +45,4 @@ export type {
 export { DEFAULT_PERSIST_CONFIG, STORAGE_TYPE } from './types';
 
 // Client config type for custom configuration
-export type { TransactionClientConfig } from './transactions/client';
+export type { TransactionClientConfig, TransactionRequestResponse, TransactionResponse } from './transactions/client';
