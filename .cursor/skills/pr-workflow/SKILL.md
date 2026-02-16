@@ -13,6 +13,7 @@ Automates commits with Conventional Commits format, PR creation via GitHub CLI, 
 2. **Do NOT create PR unless user explicitly asks** - Only commit and push by default
 3. **Check for `gh` CLI before PR operations** - Install if missing
 4. **ALWAYS check for console.log statements before committing** - Remove debug logs before pushing
+5. **ALWAYS check for excessive comments before committing** - Keep only relevant, necessary comments
 
 ## Commit Workflow
 
@@ -58,7 +59,34 @@ git diff --staged --name-only | xargs grep -nE "console\.(log|warn|info|debug)" 
 - Temporary debugging output
 - `console.log` with variable dumps like `console.log('data:', data)`
 
-### Step 3: Stage Changes
+### Step 3: Check for Excessive Comments (MANDATORY)
+
+**CRITICAL**: Before committing, review comments in changed files to ensure they are relevant and necessary.
+
+```bash
+# Review comments in staged files
+git diff --staged | grep -E "^\+.*(/\*|//|\*)" | head -50
+```
+
+**Comments to KEEP:**
+
+- JSDoc comments for public APIs and exported functions
+- Complex algorithm explanations that aren't obvious from code
+- TODO/FIXME with ticket references
+- Legal/license headers
+- Type/interface property descriptions when not self-evident
+
+**Comments to REMOVE:**
+
+- Obvious comments that repeat what the code does (e.g., `// increment counter` before `counter++`)
+- Commented-out code blocks
+- Excessive inline comments for self-explanatory code
+- Redundant JSDoc for simple, self-documenting functions
+- Step-by-step comments that clutter readable code
+
+**Best practice:** Code should be self-documenting. Use comments only when the "why" isn't clear from the "what".
+
+### Step 4: Stage Changes
 
 ```bash
 git add <file1> <file2>
@@ -66,7 +94,7 @@ git add <file1> <file2>
 git add .
 ```
 
-### Step 4: Create Single-Line Commit Message
+### Step 5: Create Single-Line Commit Message
 
 **Format**: `<type>(<scope>): <description>`
 
@@ -91,13 +119,13 @@ git commit -m "fix(dashboard): correct date formatting in reports"
 git commit -m "refactor(api): extract common validation logic"
 ```
 
-### Step 5: Push Branch
+### Step 6: Push Branch
 
 ```bash
 git push -u origin HEAD
 ```
 
-### Step 6: Update PR Description (If PR Exists)
+### Step 7: Update PR Description (If PR Exists)
 
 After pushing commits, check if a PR already exists for the branch. If so, update the PR description to reflect the new changes.
 
@@ -280,6 +308,7 @@ Fill based on repository's template. Default structure:
 Commit Workflow:
 - [ ] Changes reviewed (git status, git diff)
 - [ ] console.log statements checked and removed (MANDATORY)
+- [ ] Excessive/unnecessary comments removed (MANDATORY)
 - [ ] Changes staged
 - [ ] Single-line commit message created
 - [ ] Branch pushed to remote
@@ -287,6 +316,7 @@ Commit Workflow:
 
 PR Creation (only if requested):
 - [ ] console.log check passed (no debug logs)
+- [ ] Comment check passed (only relevant comments)
 - [ ] gh CLI installed and authenticated
 - [ ] PR template fetched from repo
 - [ ] PR created with filled template
@@ -297,6 +327,7 @@ PR Comment Resolution (only if requested):
 - [ ] PR comments fetched via gh CLI
 - [ ] Code changes made to address feedback
 - [ ] console.log check passed before pushing
+- [ ] Comment check passed before pushing
 - [ ] Changes committed and pushed
 ```
 

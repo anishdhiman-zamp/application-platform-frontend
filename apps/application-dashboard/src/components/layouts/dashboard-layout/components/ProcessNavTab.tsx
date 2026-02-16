@@ -2,12 +2,13 @@
 
 import { startTransition, useOptimistic, useState } from 'react';
 import { Button, Input, Popover, PopoverContent, PopoverTrigger } from '@zamp-platform/ui';
+import { getNextNavigationTarget } from '@zamp-platform/utils';
 import { Activity, Hammer, MoreVertical, Pencil, Trash } from 'lucide-react';
 import { useRouter } from 'next/navigation';
 import { cn, preventAutoFocus } from 'utils/common';
 import type { Process } from '@/app/(authenticated)/resources';
 import TooltipV2 from '@/components/common/TooltipV2';
-import { getProcessRouteById } from '@/constants/routeConfig';
+import { getProcessRouteById, ROUTES_PATH } from '@/constants/routeConfig';
 import { KEYBOARD_KEYS } from '@/constants/shortcuts';
 import { usePagesAndProcesses } from '@/contexts/PagesAndProcessesContext';
 import { type ProcessResponseType, ProcessStatus as ProcessStatusEnum } from '@/types/api/processApi.types';
@@ -74,12 +75,23 @@ const ProcessNavTab = ({
   };
 
   const handleDeleteSuccess = () => {
-    if (isSelected) {
-      const remainingProcesses = processes?.filter((p) => p?.process_id !== processId);
+    if (!isSelected || !processes) return;
 
-      if (remainingProcesses && remainingProcesses.length > 0) {
-        router.push(getProcessRouteById(remainingProcesses[0]?.process_id || ''));
-      }
+    const currentProcess = processes.find((p) => p?.process_id === processId);
+
+    if (!currentProcess) return;
+
+    const { target, hasRemainingItems } = getNextNavigationTarget({
+      items: processes,
+      closingItem: currentProcess,
+      isEqual: (a, b) => a?.process_id === b?.process_id,
+      strategy: 'previous',
+    });
+
+    if (hasRemainingItems && target) {
+      router.push(getProcessRouteById(target.process_id || ''));
+    } else {
+      router.push(ROUTES_PATH.PEOPLE);
     }
   };
 
