@@ -34,7 +34,7 @@ export const prioritizedSearch = <T>({
       let hasMatch = false;
 
       for (const field of fields) {
-        const fieldValue = field.getValue(item).toLowerCase();
+        const fieldValue = (field.getValue(item) ?? '').toLowerCase();
         const matches = fieldValue.includes(queryLower);
 
         if (matches) {
