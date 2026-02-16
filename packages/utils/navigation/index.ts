@@ -28,6 +28,11 @@ export const getNextNavigationTarget = <T>({
   strategy = 'browser-like',
 }: GetNextNavigationTargetOptions<T>): NavigationTargetResult<T> => {
   const closingIndex = items.findIndex((item) => isEqual(item, closingItem));
+
+  if (closingIndex === -1) {
+    return { target: null, remainingItems: items, hasRemainingItems: items.length > 0 };
+  }
+
   const remainingItems = items.filter((item) => !isEqual(item, closingItem));
 
   if (remainingItems.length === 0) {
