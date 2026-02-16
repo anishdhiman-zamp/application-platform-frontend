@@ -71,12 +71,10 @@ describe('prioritizedSearch', () => {
         fields: defaultFields,
       });
 
-      // Items with "payment" in name should come before items with "payment" only in description
       expect(result).toHaveLength(3);
-      // "payment" (exact match) and "Payment Processing" (name match) should be first
-      expect(result[0].id).toBe('4'); // exact match gets highest score
-      expect(result[1].id).toBe('1'); // name contains "payment"
-      expect(result[2].id).toBe('2'); // only description contains "payment"
+      expect(result[0].id).toBe('4');
+      expect(result[1].id).toBe('1');
+      expect(result[2].id).toBe('2');
     });
 
     it('should give bonus to exact matches', () => {
@@ -86,7 +84,6 @@ describe('prioritizedSearch', () => {
         fields: defaultFields,
       });
 
-      // "payment" (exact match) should be first
       expect(result[0].name).toBe('payment');
     });
 
@@ -103,7 +100,6 @@ describe('prioritizedSearch', () => {
         fields: [{ getValue: (item: { id: string; name: string; description: string }) => item.name, weight: 100 }],
       });
 
-      // "Auth" (exact) should be first, then "Authentication Service" (starts with)
       expect(result[0].id).toBe('3');
       expect(result[1].id).toBe('1');
       expect(result[2].id).toBe('2');
@@ -128,7 +124,6 @@ describe('prioritizedSearch', () => {
         fields: defaultFields,
       });
 
-      // Should still find exact match (case-insensitive)
       expect(result[0].name.toLowerCase()).toBe('payment');
     });
   });
@@ -149,8 +144,6 @@ describe('prioritizedSearch', () => {
         ],
       });
 
-      // "Auth Service" matches in both name (100) and description (10) = 110 + bonuses
-      // "Login" matches only in description (10)
       expect(result[0].id).toBe('1');
       expect(result[1].id).toBe('2');
     });
@@ -170,7 +163,7 @@ describe('prioritizedSearch', () => {
         exactMatchBonus: 200,
       });
 
-      expect(result[0].id).toBe('1'); // exact match with high bonus
+      expect(result[0].id).toBe('1');
     });
 
     it('should use custom startsWithBonus', () => {
@@ -186,7 +179,7 @@ describe('prioritizedSearch', () => {
         startsWithBonus: 75,
       });
 
-      expect(result[0].id).toBe('1'); // starts with gets bonus
+      expect(result[0].id).toBe('1');
     });
   });
 });

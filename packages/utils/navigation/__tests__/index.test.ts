@@ -31,41 +31,41 @@ describe('getNextNavigationTarget', () => {
 
   describe('browser-like strategy (default)', () => {
     it('should navigate to next item when closing first item', () => {
-      const items = createItems(4); // [0, 1, 2, 3]
+      const items = createItems(4);
       const result = getNextNavigationTarget({
         items,
-        closingItem: items[0], // closing item 0
+        closingItem: items[0],
         isEqual,
       });
 
-      expect(result.target?.id).toBe('item-1'); // next item
+      expect(result.target?.id).toBe('item-1');
       expect(result.hasRemainingItems).toBe(true);
     });
 
     it('should navigate to next item when closing middle item', () => {
-      const items = createItems(4); // [0, 1, 2, 3]
+      const items = createItems(4);
       const result = getNextNavigationTarget({
         items,
-        closingItem: items[1], // closing item 1
+        closingItem: items[1],
         isEqual,
       });
 
-      expect(result.target?.id).toBe('item-2'); // next item
+      expect(result.target?.id).toBe('item-2');
     });
 
     it('should navigate to previous item when closing last item', () => {
-      const items = createItems(4); // [0, 1, 2, 3]
+      const items = createItems(4);
       const result = getNextNavigationTarget({
         items,
-        closingItem: items[3], // closing item 3 (last)
+        closingItem: items[3],
         isEqual,
       });
 
-      expect(result.target?.id).toBe('item-2'); // previous item
+      expect(result.target?.id).toBe('item-2');
     });
 
     it('should navigate to remaining item when only two items exist', () => {
-      const items = createItems(2); // [0, 1]
+      const items = createItems(2);
       const result = getNextNavigationTarget({
         items,
         closingItem: items[0],
@@ -78,77 +78,77 @@ describe('getNextNavigationTarget', () => {
 
   describe('previous strategy', () => {
     it('should navigate to previous item when closing middle item', () => {
-      const items = createItems(4); // [0, 1, 2, 3]
+      const items = createItems(4);
       const result = getNextNavigationTarget({
         items,
-        closingItem: items[2], // closing item 2
+        closingItem: items[2],
         isEqual,
         strategy: 'previous',
       });
 
-      expect(result.target?.id).toBe('item-1'); // previous item
+      expect(result.target?.id).toBe('item-1');
     });
 
     it('should navigate to first item when closing first item', () => {
-      const items = createItems(4); // [0, 1, 2, 3]
+      const items = createItems(4);
       const result = getNextNavigationTarget({
         items,
-        closingItem: items[0], // closing item 0
+        closingItem: items[0],
         isEqual,
         strategy: 'previous',
       });
 
-      expect(result.target?.id).toBe('item-1'); // first remaining item (was item-1)
+      expect(result.target?.id).toBe('item-1');
     });
 
     it('should navigate to previous item when closing last item', () => {
-      const items = createItems(4); // [0, 1, 2, 3]
+      const items = createItems(4);
       const result = getNextNavigationTarget({
         items,
-        closingItem: items[3], // closing item 3
+        closingItem: items[3],
         isEqual,
         strategy: 'previous',
       });
 
-      expect(result.target?.id).toBe('item-2'); // previous item
+      expect(result.target?.id).toBe('item-2');
     });
   });
 
   describe('next strategy', () => {
     it('should navigate to next item when closing first item', () => {
-      const items = createItems(4); // [0, 1, 2, 3]
+      const items = createItems(4);
       const result = getNextNavigationTarget({
         items,
-        closingItem: items[0], // closing item 0
+        closingItem: items[0],
         isEqual,
         strategy: 'next',
       });
 
-      expect(result.target?.id).toBe('item-1'); // next item
+      expect(result.target?.id).toBe('item-1');
     });
 
     it('should navigate to next item when closing middle item', () => {
-      const items = createItems(4); // [0, 1, 2, 3]
+      const items = createItems(4);
       const result = getNextNavigationTarget({
         items,
-        closingItem: items[1], // closing item 1
+        closingItem: items[1],
         isEqual,
         strategy: 'next',
       });
 
-      expect(result.target?.id).toBe('item-2'); // next item (shifted to index 1)
+      expect(result.target?.id).toBe('item-2');
     });
 
     it('should navigate to last remaining item when closing last item', () => {
-      const items = createItems(4); // [0, 1, 2, 3]
+      const items = createItems(4);
       const result = getNextNavigationTarget({
         items,
-        closingItem: items[3], // closing item 3
+        closingItem: items[3],
         isEqual,
         strategy: 'next',
       });
 
-      expect(result.target?.id).toBe('item-2'); // last remaining item
+      expect(result.target?.id).toBe('item-2');
     });
   });
 
