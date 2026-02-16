@@ -165,6 +165,7 @@ export const API_ENDPOINTS = {
   PROCESSES_EVENTS_GET: `processes/events/{{activityId}}`,
   STOP_PROCESS_BUILDING_POST: `processes/{{processId}}/build-stop`,
   UNIFIED_SSE: `events`,
+  ACTIVITY_RUN_DELETE: `processes/{{processId}}/activity-runs/{{activityRunId}}`,
 
   //Voice Agents
   SPEECH_TO_TEXT_ACCESS_TOKEN_GET: `/speech-to-text/generate-access-token`,
