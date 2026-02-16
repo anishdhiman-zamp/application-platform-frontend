@@ -89,8 +89,14 @@ export const ProcessResource = defineResource({
     },
     onSuccess: {
       create: (data) => {
+        const response = data as {
+          status?: string;
+          transactions?: Array<{ failure: unknown; output_payload?: { id?: string } }>;
+        };
+
+        const processId = (response?.transactions?.[0]?.output_payload?.id as string) ?? '';
+
         // Get audiences from temporary storage
-        const processId = (data as Process).process_id;
         const audiences = getAndRemoveProcessAudiences(processId);
 
         // Share process with audiences if provided
