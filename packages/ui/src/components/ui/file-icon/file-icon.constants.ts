@@ -25,7 +25,7 @@ export const FILE_EXTENSION_COLORS: Record<string, string> = {
   scss: '#CD6799',
   sass: '#CD6799',
   less: '#1D365D',
-  js: '#F7DF1E',
+  js: '#B8A000',
   jsx: '#61DAFB',
   ts: '#3178C6',
   tsx: '#3178C6',
@@ -61,7 +61,7 @@ export const FILE_EXTENSION_COLORS: Record<string, string> = {
   bash: '#4EAA25',
   zsh: '#4EAA25',
   ps1: '#012456',
-  bat: '#C1F12E',
+  bat: '#5E7A00',
 
   // Code - Database
   sql: '#336791',
@@ -70,7 +70,7 @@ export const FILE_EXTENSION_COLORS: Record<string, string> = {
 
   // Markdown & Docs
   md: '#083FA1',
-  mdx: '#FCB32C',
+  mdx: '#B87800',
   rst: '#141414',
   tex: '#3D6117',
 

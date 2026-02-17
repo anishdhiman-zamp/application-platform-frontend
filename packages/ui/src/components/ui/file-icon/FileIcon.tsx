@@ -2,7 +2,20 @@ import React, { useMemo } from 'react';
 import { cn } from '@zamp-platform/ui/utils';
 import { FILE_ICON_SIZES } from './file-icon.constants';
 import { getExtensionColor, formatExtensionText } from './file-icon.utils';
-import { BaseSvg } from '../../assets/file/BaseSvg';
+
+/**
+ * Available size variants for the FileIcon component
+ */
+export type FileIconSize = keyof typeof FILE_ICON_SIZES;
+
+/**
+ * Props for the FileIcon component
+ */
+export interface FileIconProps {
+  extension: string;
+  size?: FileIconSize;
+  className?: string;
+}
 
 /**
  * FileIcon component renders a document-style icon with a colored ribbon
@@ -18,20 +31,6 @@ import { BaseSvg } from '../../assets/file/BaseSvg';
  * <FileIcon extension="unknown" /> // Falls back to gray
  * ```
  */
-/**
- * Available size variants for the FileIcon component
- */
-export type FileIconSize = keyof typeof FILE_ICON_SIZES;
-
-/**
- * Props for the FileIcon component
- */
-export interface FileIconProps {
-  extension: string;
-  size?: FileIconSize;
-  className?: string;
-}
-
 export const FileIcon: React.FC<FileIconProps> = ({ extension, size = 'sm', className }) => {
   const sizeConfig = FILE_ICON_SIZES[size];
   const { width, height, fontSize, borderRadius } = sizeConfig;
@@ -46,9 +45,22 @@ export const FileIcon: React.FC<FileIconProps> = ({ extension, size = 'sm', clas
   const ribbonHeight = 10 * scale;
 
   return (
-    <div className={cn('relative inline-flex shrink-0', className)} style={{ width, height }} data-testid='file-icon'>
-      {/* Base document SVG - exact design from base.svg */}
-      <BaseSvg width={width} height={height} className='absolute inset-0' />
+    <div
+      className={cn('relative inline-flex shrink-0', className)}
+      style={{ width, height }}
+      data-testid='file-icon'
+      role='img'
+      aria-label={`${displayText} file`}
+    >
+      {/* Base document SVG */}
+      <img
+        src='/icons/file-icon-base.svg'
+        alt=''
+        width={width}
+        height={height}
+        className='absolute inset-0'
+        aria-hidden='true'
+      />
 
       {/* Ribbon overlay with dynamic color and text */}
       <div

@@ -1,10 +1,15 @@
 import { FILE_EXTENSION_COLORS, DEFAULT_FILE_COLOR } from './file-icon.constants';
 
 /**
- * Normalizes a file extension by removing leading dots and converting to lowercase
+ * Normalizes a file extension by extracting from filename if needed and converting to lowercase
+ * @example normalizeExtension('.pdf') // 'pdf'
+ * @example normalizeExtension('document.pdf') // 'pdf'
+ * @example normalizeExtension('PDF') // 'pdf'
  */
 export const normalizeExtension = (extension: string): string => {
-  return extension.replace(/^\./, '').toLowerCase().trim();
+  const lastDot = extension.lastIndexOf('.');
+  const ext = lastDot !== -1 ? extension.slice(lastDot + 1) : extension;
+  return ext.toLowerCase().trim();
 };
 
 /**
