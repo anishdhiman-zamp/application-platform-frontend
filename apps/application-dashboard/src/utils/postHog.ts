@@ -21,16 +21,31 @@ export const initializePostHog = () => {
   }
 };
 
-export const identifyPostHogUser = (userId: string, merchantName?: string) => {
-  posthogJs.identify(userId, {
+export const identifyPostHogUser = (
+  userId: string,
+  merchantName: string,
+  organizationId?: string,
+  organizationName?: string,
+) => {
+  const personProperties = {
     id: userId,
-    merchant: merchantName,
-  });
+    merchant: merchantName, // Email domain only (no PII)
+  };
 
-  posthogJs.people.set({
-    id: userId,
-    merchant: merchantName,
-  });
+  // Identify user with UUID and merchant (email domain)
+  // Note: identify() already sets person properties via $set, so people.set() below is redundant
+  // but we maintain the existing codebase pattern for consistency
+  posthogJs.identify(userId, personProperties);
+
+  // Set person properties explicitly (redundant but matches existing pattern)
+  posthogJs.people.set(personProperties);
+
+  // Set organization group if provided
+  if (organizationId && organizationName) {
+    posthogJs.group('company', organizationId, {
+      name: organizationName,
+    });
+  }
 };
 
 export const resetPostHog = () => {
