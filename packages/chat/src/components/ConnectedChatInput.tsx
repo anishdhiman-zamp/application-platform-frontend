@@ -81,7 +81,7 @@ export const ConnectedChatInput: FC<ConnectedChatInputProps> = ({
 }: ConnectedChatInputProps) => {
   const fileInputRef = useRef<HTMLInputElement>(null);
   const isRejectingRef = useRef(false);
-  const accumulatedTranscriptRef = useRef('');
+  const transcriptInsertionIndexRef = useRef(-1);
 
   // Use the app's baseApi for speech-to-text token fetching
   const [getSpeechToTextAccessToken] = useLazyGetSpeechToTextAccessTokenQuery({});
@@ -139,10 +139,12 @@ export const ConnectedChatInput: FC<ConnectedChatInputProps> = ({
     (chunk: string) => {
       if (isRejectingRef.current) return;
 
-      setValue((prev) => (prev ? `${prev} ${chunk}` : chunk));
-      accumulatedTranscriptRef.current = accumulatedTranscriptRef.current
-        ? `${accumulatedTranscriptRef.current} ${chunk}`
-        : chunk;
+      setValue((prev) => {
+        if (transcriptInsertionIndexRef.current === -1) {
+          transcriptInsertionIndexRef.current = prev.length > 0 ? prev.length + 1 : 0;
+        }
+        return prev ? `${prev} ${chunk}` : chunk;
+      });
     },
     [setValue],
   );
@@ -192,7 +194,7 @@ export const ConnectedChatInput: FC<ConnectedChatInputProps> = ({
       return;
     }
     isRejectingRef.current = false;
-    accumulatedTranscriptRef.current = '';
+    transcriptInsertionIndexRef.current = -1;
 
     await startRecording();
   };
@@ -209,8 +211,11 @@ export const ConnectedChatInput: FC<ConnectedChatInputProps> = ({
   const handleReject = () => {
     try {
       isRejectingRef.current = true;
-      setValue((prev) => prev.replace(accumulatedTranscriptRef.current, '').trim());
-      accumulatedTranscriptRef.current = '';
+      setValue((prev) => {
+        if (transcriptInsertionIndexRef.current === -1) return prev;
+        return prev.slice(0, transcriptInsertionIndexRef.current).trim();
+      });
+      transcriptInsertionIndexRef.current = -1;
       stopRecording();
     } catch {
       toast.error('Failed to stop recording. Please try again.');

@@ -70,7 +70,7 @@ const ChatFeedback: FC<ChatFeedbackProps> = ({
   onRecordingError,
 }) => {
   const isRejectingRef = useRef(false);
-  const accumulatedTranscriptRef = useRef('');
+  const transcriptInsertionIndexRef = useRef(-1);
 
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [issueType, setIssueType] = useState<string>('');
@@ -103,10 +103,12 @@ const ChatFeedback: FC<ChatFeedbackProps> = ({
   const handleTranscriptChunk = useCallback((chunk: string) => {
     if (isRejectingRef.current) return;
 
-    setDetails((prev) => (prev ? `${prev} ${chunk}` : chunk));
-    accumulatedTranscriptRef.current = accumulatedTranscriptRef.current
-      ? `${accumulatedTranscriptRef.current} ${chunk}`
-      : chunk;
+    setDetails((prev) => {
+      if (transcriptInsertionIndexRef.current === -1) {
+        transcriptInsertionIndexRef.current = prev.length > 0 ? prev.length + 1 : 0;
+      }
+      return prev ? `${prev} ${chunk}` : chunk;
+    });
   }, []);
 
   const { isRecording, startRecording, stopRecording, microphoneState, connectionState, microphone, isCommitting } =
@@ -223,7 +225,7 @@ const ChatFeedback: FC<ChatFeedbackProps> = ({
     }
 
     isRejectingRef.current = false;
-    accumulatedTranscriptRef.current = '';
+    transcriptInsertionIndexRef.current = -1;
     await startRecording();
   };
 
@@ -239,8 +241,11 @@ const ChatFeedback: FC<ChatFeedbackProps> = ({
   const handleRejectRecording = () => {
     try {
       isRejectingRef.current = true;
-      setDetails((prev) => prev.replace(accumulatedTranscriptRef.current, '').trim());
-      accumulatedTranscriptRef.current = '';
+      setDetails((prev) => {
+        if (transcriptInsertionIndexRef.current === -1) return prev;
+        return prev.slice(0, transcriptInsertionIndexRef.current).trim();
+      });
+      transcriptInsertionIndexRef.current = -1;
       stopRecording();
     } catch {
       toast.error('Failed to stop recording. Please try again.');
