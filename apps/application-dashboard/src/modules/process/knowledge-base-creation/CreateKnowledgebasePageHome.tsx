@@ -16,7 +16,7 @@ import { PROCESS_CREATED_EVENT, ProcessCreatedEventDetail } from '@/utils/events
 // Dynamic imports for heavy components
 const KnowledgeBaseChat = dynamic(() => import('@/modules/process/knowledge-base-creation/KnowledgeBaseChat'), {
   ssr: false,
-  loading: () => <ChatMessagesSkeleton count={2} className='px-0 py-0' />,
+  loading: () => <ChatMessagesSkeleton count={1} className='px-4' alignUserRight hideSenderName />,
 });
 
 const ProcessCreationKnowledgeBase = dynamic(
@@ -39,6 +39,7 @@ const CreateKnowledgeBasePageHome: FC<CreateKnowledgeBasePageHomeProps> = ({
   const isFromProcessCreation = source === 'process-creation';
 
   const [conversationId, setConversationId] = useState<string | undefined>(initialConversationId);
+  const [initialSopFilename, setInitialSopFilename] = useState<string | undefined>();
   const [isCreated, setIsCreated] = useState(isFromProcessCreation);
   const { processes, isLoading: isLoadingProcesses } = usePagesAndProcessesData();
 
@@ -103,7 +104,7 @@ const CreateKnowledgeBasePageHome: FC<CreateKnowledgeBasePageHomeProps> = ({
         filterConversationsData.conversations?.length === 0) ||
       (skipFilterConversations && !isCreated)
     ) {
-      return `I want to automate ${currentProcess?.display_name}`;
+      return `I want to create SOP for ${currentProcess?.display_name}`;
     }
 
     return undefined;
@@ -154,6 +155,8 @@ const CreateKnowledgeBasePageHome: FC<CreateKnowledgeBasePageHomeProps> = ({
           processName={currentProcess?.display_name ?? ''}
           isDraftProcess={currentProcess?.status === ProcessStatus.DRAFT}
           showDefaultMessage={skipFilterConversations}
+          onCreatorSopFileFound={setInitialSopFilename}
+          streamingEnabled
         />
       </div>
       <div className='w-full'>
@@ -162,6 +165,8 @@ const CreateKnowledgeBasePageHome: FC<CreateKnowledgeBasePageHomeProps> = ({
           processId={processId}
           processName={currentProcess?.display_name ?? ''}
           integrations={integrations}
+          initialSopFilename={initialSopFilename}
+          conversationId={conversationId}
         />
       </div>
     </CommonWrapper>

@@ -39,6 +39,7 @@ interface MessageContainerProps {
   userAvatarClassName?: string;
   children?: ReactNode;
   organizationId?: string;
+  streamingEnabled?: boolean;
 }
 
 export const MessageContainer: FC<MessageContainerProps> = ({
@@ -58,6 +59,7 @@ export const MessageContainer: FC<MessageContainerProps> = ({
   userAvatarClassName,
   children,
   organizationId,
+  streamingEnabled = true,
 }) => {
   const defaultAssistantAvatar = assistantAvatar ?? <PaceAvatar />;
   const isInitialScrollRef = useRef(true);
@@ -107,6 +109,7 @@ export const MessageContainer: FC<MessageContainerProps> = ({
           showCopy={showCopy}
           isLastMessage={index === messages.length - 1}
           organizationId={organizationId}
+          streamingEnabled={streamingEnabled}
         />
       ))}
 

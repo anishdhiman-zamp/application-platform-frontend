@@ -23,7 +23,6 @@ export interface ConnectedChatInputProps {
   chat: ReturnType<typeof useChat>;
   annotationLocation?: LocationData;
   conversationId?: string;
-  setHeader?: (header: string) => void;
   resourceType?: ResourceType;
   isDisabled?: boolean;
   header?: string;
@@ -56,7 +55,6 @@ export const ConnectedChatInput: FC<ConnectedChatInputProps> = ({
   annotationLocation,
   resourceType = ResourceType.PROCESS,
   conversationId,
-  setHeader,
   isDisabled = false,
   scope = ScopeType.ACTIVITY_RUN,
   externalInputValue,
@@ -126,7 +124,6 @@ export const ConnectedChatInput: FC<ConnectedChatInputProps> = ({
     chat,
     annotationLocation,
     conversationId,
-    setHeader,
     scope,
     externalInputValue,
     setExternalInputValue,
