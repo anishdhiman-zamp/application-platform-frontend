@@ -67,7 +67,7 @@ const SkillsSection = () => {
   };
 
   return (
-    <div className='flex w-full max-w-[700px] flex-col gap-y-4 overflow-hidden'>
+    <div className='flex w-full flex-col gap-y-4 overflow-hidden'>
       <div className='flex w-full items-center justify-between px-6 py-1'>
         <Input
           placeholder='Search skills...'
