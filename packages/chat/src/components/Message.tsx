@@ -29,6 +29,7 @@ export interface MessageProps extends Omit<SenderDetailsProps, 'message'> {
   isLastMessage?: boolean;
   alignUserRight?: boolean;
   organizationId?: string;
+  streamingEnabled?: boolean;
 }
 
 export const Message: FC<MessageProps> = ({
@@ -52,6 +53,7 @@ export const Message: FC<MessageProps> = ({
   alignUserRight = false,
   hideSenderName = false,
   organizationId,
+  streamingEnabled = true,
 }) => {
   const isUserMessage = message.sender_type === SenderType.USER;
   const shouldAlignRight = alignUserRight && isUserMessage;
@@ -87,26 +89,28 @@ export const Message: FC<MessageProps> = ({
         messageId={messageId || message?.id}
         isLoading={isLoading}
       />
-      <div
-        className={cn(
-          'mt-3 flex items-center gap-x-1.5',
-          isLastMessage ? 'visible' : 'invisible group-hover:visible',
-          shouldAlignRight && 'mt-0',
-        )}
-      >
-        {showCopy && <CopyMessageButton messageContent={message.message_content} />}
-        {showTimestamp && message.sender_type === SenderType.USER && (
-          <MessageTimestamp formattedTimestamp={formattedTimestamp} tooltipTimestamp={tooltipTimestamp} />
-        )}
-        {showFeedback && message.sender_type === SenderType.ASSISTANT && (
-          <ChatFeedback
-            messageId={messageId || message?.id}
-            conversationId={conversationId || message?.conversation_id}
-            disabled={feedbackDisabled || isLoading}
-            organizationId={organizationId}
-          />
-        )}
-      </div>
+      {streamingEnabled && (
+        <div
+          className={cn(
+            'mt-3 flex items-center gap-x-1.5',
+            isLastMessage ? 'visible' : 'invisible group-hover:visible',
+            shouldAlignRight && 'mt-0',
+          )}
+        >
+          {showCopy && <CopyMessageButton messageContent={message.message_content} />}
+          {showTimestamp && message.sender_type === SenderType.USER && (
+            <MessageTimestamp formattedTimestamp={formattedTimestamp} tooltipTimestamp={tooltipTimestamp} />
+          )}
+          {showFeedback && message.sender_type === SenderType.ASSISTANT && (
+            <ChatFeedback
+              messageId={messageId || message?.id}
+              conversationId={conversationId || message?.conversation_id}
+              disabled={feedbackDisabled || isLoading}
+              organizationId={organizationId}
+            />
+          )}
+        </div>
+      )}
     </div>
   );
 };
