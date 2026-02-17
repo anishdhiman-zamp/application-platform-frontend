@@ -2,8 +2,8 @@ import PaceIcon from 'modules/knowledge-based/icons/PaceIcon';
 
 const PaceAvatar = () => {
   return (
-    <div className='flex h-4 min-h-4 w-4 min-w-4 items-center justify-center rounded-md bg-blue-700 text-white'>
-      <PaceIcon height={12} width={12} />
+    <div className='flex h-6 min-h-6 w-6 min-w-6 items-center justify-center rounded-[7.5px] bg-blue-700 text-white'>
+      <PaceIcon height={16} width={16} />
     </div>
   );
 };
