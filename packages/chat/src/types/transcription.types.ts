@@ -7,7 +7,6 @@ export interface TranscriptionOptions {
 }
 
 export interface UseTranscriptionReturn {
-  transcript: string;
   isRecording: boolean;
   startRecording: (options?: TranscriptionOptions) => Promise<void>;
   stopRecording: () => void | Promise<void>;

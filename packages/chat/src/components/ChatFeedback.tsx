@@ -16,7 +16,7 @@ import {
 } from '@zamp-platform/ui';
 import { cn } from '@zamp-platform/ui/utils';
 import { ThumbsDown } from 'lucide-react';
-import React, { FC, useCallback, useEffect, useMemo, useRef, useState } from 'react';
+import React, { FC, useCallback, useMemo, useRef, useState } from 'react';
 import { toast } from 'sonner';
 
 import { INPUT_FILE_FORMATS } from '@/types/common/mime';
@@ -70,6 +70,8 @@ const ChatFeedback: FC<ChatFeedbackProps> = ({
   onRecordingError,
 }) => {
   const isRejectingRef = useRef(false);
+  // Track accumulated transcript for rejection - stores what we've added to details
+  const accumulatedTranscriptRef = useRef('');
 
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [issueType, setIssueType] = useState<string>('');
@@ -99,18 +101,22 @@ const ChatFeedback: FC<ChatFeedbackProps> = ({
     [getElevenLabsToken],
   );
 
-  const {
-    transcript,
-    isRecording,
-    startRecording,
-    stopRecording,
-    microphoneState,
-    connectionState,
-    microphone,
-    isCommitting,
-  } = useTranscription({
-    adapter: transcriptionAdapter,
-  });
+  // Handle incremental transcript chunks - appends only new text to the details
+  const handleTranscriptChunk = useCallback((chunk: string) => {
+    if (isRejectingRef.current) return;
+
+    setDetails((prev) => (prev ? `${prev} ${chunk}` : chunk));
+    // Track what we've added for potential rejection
+    accumulatedTranscriptRef.current = accumulatedTranscriptRef.current
+      ? `${accumulatedTranscriptRef.current} ${chunk}`
+      : chunk;
+  }, []);
+
+  const { isRecording, startRecording, stopRecording, microphoneState, connectionState, microphone, isCommitting } =
+    useTranscription({
+      adapter: transcriptionAdapter,
+      onTranscriptChunk: handleTranscriptChunk,
+    });
 
   const {
     files: attachments,
@@ -220,6 +226,7 @@ const ChatFeedback: FC<ChatFeedbackProps> = ({
     }
 
     isRejectingRef.current = false;
+    accumulatedTranscriptRef.current = '';
     await startRecording();
   };
 
@@ -235,22 +242,15 @@ const ChatFeedback: FC<ChatFeedbackProps> = ({
   const handleRejectRecording = () => {
     try {
       isRejectingRef.current = true;
-      setDetails((prev) => prev.replace(transcript, '').trim());
+      // Remove the accumulated transcript we added during this recording session
+      setDetails((prev) => prev.replace(accumulatedTranscriptRef.current, '').trim());
+      accumulatedTranscriptRef.current = '';
       stopRecording();
     } catch {
       toast.error('Failed to stop recording. Please try again.');
       onRecordingError?.();
     }
   };
-
-  useEffect(() => {
-    if (isRejectingRef.current) {
-      return;
-    }
-    if (transcript) {
-      setDetails((prev) => (prev ? `${prev} ${transcript}` : transcript));
-    }
-  }, [transcript]);
 
   return (
     <>
