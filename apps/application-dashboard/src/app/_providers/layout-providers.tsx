@@ -8,7 +8,7 @@ import PostHogProviderWrapper from 'app/_providers/posthog-provider';
 import Providers from 'app/_providers/providers';
 import { SSEProvider } from 'app/_providers/sse-provider';
 import UserDetailsProvider from 'app/_providers/user-details-provider';
-import ErrorBoundary from '@/pages/ErrorBoundary';
+import { ProductionErrorBoundary } from '@/pages/ErrorBoundary';
 
 interface LayoutProvidersProps {
   children: ReactNode;
@@ -24,7 +24,7 @@ const LayoutProviders: FC<LayoutProvidersProps> = ({ children }) => {
       <PostHogProviderWrapper>
         <SSEProvider sseEventBus={sseEventBus}>
           <BattalionProvider eventBus={sseEventBus}>
-            <ErrorBoundary>{children}</ErrorBoundary>
+            <ProductionErrorBoundary>{children}</ProductionErrorBoundary>
           </BattalionProvider>
         </SSEProvider>
       </PostHogProviderWrapper>

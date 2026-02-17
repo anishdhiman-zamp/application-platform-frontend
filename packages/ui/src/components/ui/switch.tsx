@@ -11,6 +11,7 @@ const switchVariants = cva(
       size: {
         default: 'h-5 w-9',
         small: 'h-3 w-5',
+        medium: 'h-3.5 w-6',
       },
     },
     defaultVariants: {
@@ -26,6 +27,7 @@ const thumbVariants = cva(
       size: {
         default: 'h-4 w-4 data-[state=checked]:translate-x-4',
         small: 'h-2 w-2 data-[state=checked]:translate-x-2',
+        medium: 'h-2.5 w-2.5 data-[state=checked]:translate-x-2.5',
       },
     },
     defaultVariants: {
@@ -35,8 +37,7 @@ const thumbVariants = cva(
 );
 
 export interface SwitchProps
-  extends React.ComponentProps<typeof SwitchPrimitives.Root>,
-    VariantProps<typeof switchVariants> {
+  extends React.ComponentProps<typeof SwitchPrimitives.Root>, VariantProps<typeof switchVariants> {
   thumbClassName?: string;
 }
 

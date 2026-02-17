@@ -20,6 +20,7 @@ import {
   ArrayFilters,
   LogicalOperatorMap,
   PAGE_SIZE,
+  URL_PREFIXES,
 } from 'components/common/table/table.constants';
 import { CUSTOM_COLUMNS_TYPE } from 'components/common/table/table.types';
 import { FILTER_TYPES } from 'components/filter/filter.types';
@@ -317,6 +318,13 @@ export const getDataTableTheme = (params: MapAny) => themeQuartz.withParams(para
  * @param column - The column to get the type of
  * @returns The type of the column
  */
+export const isCellValueUrl = (value: unknown): value is string => {
+  if (typeof value !== 'string') return false;
+  const cellValue = value.trim().toLowerCase();
+
+  return URL_PREFIXES.some((prefix) => cellValue.startsWith(prefix));
+};
+
 export const getColumnType = (column: DatasetFilterConfigResponseType) => {
   if (column?.metadata?.custom_type === CUSTOM_COLUMNS_TYPE.TAG) {
     return FILTER_TYPES.TAGS;

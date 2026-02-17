@@ -2,6 +2,7 @@ import { RefObject, useEffect, useRef } from 'react';
 import type { EnhancedColumnDataType } from '@zamp-platform/dataset-create-edit';
 import { ColDef } from 'ag-grid-community';
 import { AgGridReact } from 'ag-grid-react';
+import { getColumnOrderingVisibilityForCurrentDataset } from '@/modules/data/data.utils';
 import { defaultFnType } from '@/types/commonTypes';
 
 interface UseAgGridContextSyncProps {
@@ -48,7 +49,7 @@ export const useAgGridContextSync = ({
 
   /**
    * Force sync when switching TO Preview tab
-   * This handles the case where user reorders in Blueprint while grid is hidden
+   * This handles the case where user reorders/hides/resizes columns while grid is hidden
    */
   useEffect(() => {
     // Detect switch TO preview tab
@@ -56,37 +57,75 @@ export const useAgGridContextSync = ({
 
     prevTabRef.current = selectedTab;
 
-    if (!switchedToPreview || !gridReady || contextColumnOrder.length === 0) return;
+    if (!switchedToPreview || !gridReady || contextColumnOrder.length === 0) {
+      return;
+    }
 
     const api = tableRef.current?.api;
 
     if (!api) return;
 
-    // Check if grid order matches context order
+    // Force sync visibility immediately when switching to Preview
+    Object.entries(contextColumnVisibility).forEach(([colId, isVisible]) => {
+      api.setColumnsVisible([colId], isVisible);
+    });
+
     const currentColumns = api.getColumns();
 
     if (!currentColumns || currentColumns.length === 0) return;
 
+    // Read widths from localStorage (source of truth for user resizes)
+    const storedConfig = getColumnOrderingVisibilityForCurrentDataset(id);
+    const localStorageWidthMap = new Map(storedConfig?.map((c) => [c.colId, c.width]) || []);
+
+    // Check if we need to sync widths (even if order is the same)
+    const needsWidthSync = storedConfig?.some((stored) => {
+      const col = currentColumns.find((c) => c.getColId() === stored.colId);
+
+      return col && stored.width > 0 && col.getActualWidth() !== stored.width;
+    });
+
     const currentGridOrder = currentColumns.map((col) => col.getColId()).join(',');
     const targetOrder = contextColumnOrder.join(',');
+    const needsOrderSync = currentGridOrder !== targetOrder;
 
-    if (currentGridOrder === targetOrder) {
+    // Always sync if widths or order need updating
+    if (!needsWidthSync && !needsOrderSync) {
       lastAppliedOrderRef.current = targetOrder;
 
       return;
     }
 
-    // Force sync by updating columnDefs with correct order
+    // Get column names from context to ensure headerName is always correct
+    const columnNamesMap = getColumnNamesMap();
+
+    // Force sync by updating columnDefs with correct order, visibility, AND widths from localStorage
     const allColumns = api.getAllGridColumns() || [];
     const colDefMap = new Map<string, ColDef>();
 
     allColumns.forEach((col) => {
       const colDef = col.getColDef();
       const colId = col.getColId();
-      // Remove width to let AG Grid use cached widths
-      const { width: _width, ...colDefWithoutWidth } = colDef;
+      const actualWidth = col.getActualWidth(); // Get the current rendered width from AG Grid
 
-      colDefMap.set(colId, colDefWithoutWidth);
+      // Apply context visibility and localStorage width to the colDef
+      const isVisible = contextColumnVisibility[colId];
+      const localStorageWidth = localStorageWidthMap.get(colId);
+      // Prioritize localStorage width (from user resizes), then current actual width, then default
+      const width = localStorageWidth && localStorageWidth > 0 ? localStorageWidth : actualWidth || 200;
+
+      // Get the correct header name from context (column_name), fallback to existing headerName
+      const headerName = colId in columnNamesMap ? columnNamesMap[colId] : colDef.headerName;
+
+      const colDefWithVisibility = {
+        ...colDef,
+        width,
+        flex: 0, // Disable flex to use fixed width
+        hide: isVisible !== undefined ? !isVisible : colDef.hide,
+        headerName, // Always apply the correct header name from context
+      };
+
+      colDefMap.set(colId, colDefWithVisibility);
     });
 
     // Create reordered columnDefs array
@@ -98,18 +137,14 @@ export const useAgGridContextSync = ({
       api.setGridOption('columnDefs', reorderedColDefs);
       lastAppliedOrderRef.current = targetOrder;
     }
-  }, [selectedTab, gridReady, contextColumnOrder, tableRef]);
+  }, [selectedTab, gridReady, contextColumnOrder, contextColumnVisibility, id, tableRef, getColumnNamesMap]);
 
   /**
    * Sync context column order to AG Grid
-   * NOTE: We don't sync widths here - AG Grid manages widths internally
-   * and CustomHeader saves directly to localStorage
+   * Also syncs widths from localStorage to ensure resized columns persist
    */
   useEffect(() => {
     if (!gridReady || contextColumnOrder.length === 0 || columns.length === 0) return;
-
-    // Skip if a move is already in progress
-    if (moveInProgressRef.current) return;
 
     const api = tableRef.current?.api;
 
@@ -118,74 +153,122 @@ export const useAgGridContextSync = ({
     // Create a string representation of the new order for comparison
     const newOrderKey = contextColumnOrder.join(',');
 
-    // Skip if we already applied this order (prevents infinite loop)
-    if (lastAppliedOrderRef.current === newOrderKey) return;
-
-    // Get current columns from AG Grid
+    // Get current AG Grid order BEFORE checking lastAppliedOrderRef
+    // This ensures we sync when order changes from BluePrintDataset (context) even if lastAppliedOrderRef matches
     const currentColumns = api.getColumns();
 
     if (!currentColumns || currentColumns.length === 0) return;
-
-    // Check current AG Grid order
     const currentGridOrder = currentColumns.map((col) => col.getColId()).join(',');
 
-    // If AG Grid already has this order, just update ref and return
-    if (currentGridOrder === newOrderKey) {
-      lastAppliedOrderRef.current = newOrderKey;
+    // Check if order changed from context (BluePrintDataset reordering)
+    // This is the key check - if order changed from context, we MUST sync regardless of other flags
+    const orderChangedFromContext = lastAppliedOrderRef.current !== newOrderKey;
 
-      return;
+    // If order changed from context, force sync (BluePrintDataset reordered)
+    // Reset all flags to ensure sync happens
+    if (orderChangedFromContext) {
+      moveInProgressRef.current = false;
+      // Don't return - proceed to sync
+    } else {
+      // Order hasn't changed from context
+      // Skip if we already applied this order AND ag-grid already has this order (prevents infinite loop)
+      if (lastAppliedOrderRef.current === newOrderKey && currentGridOrder === newOrderKey) {
+        moveInProgressRef.current = false;
+
+        return;
+      }
+
+      // If AG Grid already has this order, just update ref and return
+      if (currentGridOrder === newOrderKey) {
+        lastAppliedOrderRef.current = newOrderKey;
+        moveInProgressRef.current = false;
+
+        return;
+      }
+
+      // Skip if a move is already in progress (only if order hasn't changed from context)
+      if (moveInProgressRef.current) {
+        return;
+      }
     }
 
-    // Reorder columns using AG Grid API directly
-    const orderedColIds = contextColumnOrder.filter((colId) => {
-      return currentColumns.some((col) => col.getColId() === colId);
+    // Mark move as in progress
+    moveInProgressRef.current = true;
+
+    // Read widths from localStorage (source of truth for user resizes)
+    const storedConfig = getColumnOrderingVisibilityForCurrentDataset(id);
+    const localStorageWidthMap = new Map(storedConfig?.map((c) => [c.colId, c.width]) || []);
+
+    // Get column names from context to ensure headerName is always correct
+    const columnNamesMap = getColumnNamesMap();
+
+    // Build columnDefs map with proper widths from localStorage
+    const allColumns = api.getAllGridColumns() || [];
+    const colDefMap = new Map<string, ColDef>();
+
+    allColumns.forEach((col) => {
+      const colDef = col.getColDef();
+      const colId = col.getColId();
+      const actualWidth = col.getActualWidth(); // Get the current rendered width from AG Grid
+
+      // Apply context visibility and localStorage width to the colDef
+      const isVisible = contextColumnVisibility[colId];
+      const localStorageWidth = localStorageWidthMap.get(colId);
+      // Prioritize localStorage width (from user resizes), then current actual width, then default
+      const width = localStorageWidth && localStorageWidth > 0 ? localStorageWidth : actualWidth || 200;
+
+      // Get the correct header name from context (column_name), fallback to existing headerName
+      const headerName = colId in columnNamesMap ? columnNamesMap[colId] : colDef.headerName;
+
+      const colDefWithVisibility = {
+        ...colDef,
+        width,
+        flex: 0, // Disable flex to use fixed width
+        hide: isVisible !== undefined ? !isVisible : colDef.hide,
+        headerName, // Always apply the correct header name from context
+      };
+
+      colDefMap.set(colId, colDefWithVisibility);
     });
 
-    if (orderedColIds.length > 0) {
-      // Mark move as in progress
-      moveInProgressRef.current = true;
+    // Get columns in the new order from ag-grid (not columnDefs)
+    // We need to use moveColumns API to actually reorder columns in ag-grid
+    const reorderedColumns = contextColumnOrder
+      .map((colId) => {
+        const col = allColumns.find((c) => c.getColId() === colId);
 
-      // Store the target order key for later verification
-      const targetOrderKey = newOrderKey;
+        return col;
+      })
+      .filter((col): col is NonNullable<typeof col> => col !== undefined);
 
-      // Move each column to its target position one by one
-      // This is more reliable than applyColumnState for reordering
-      orderedColIds.forEach((colId, targetIndex) => {
-        const currentCols = api.getColumns() || [];
-        const currentIndex = currentCols.findIndex((col) => col.getColId() === colId);
+    if (reorderedColumns.length > 0) {
+      // Use moveColumns to actually reorder columns in ag-grid
+      // This is more reliable than setGridOption for reordering
+      api.moveColumns(reorderedColumns, 0);
 
-        if (currentIndex !== -1 && currentIndex !== targetIndex) {
-          api.moveColumns([colId], targetIndex);
-        }
-      });
+      // Also update columnDefs to ensure visibility, width, and headerName are correct
+      const reorderedColDefs = contextColumnOrder
+        .map((colId) => colDefMap.get(colId))
+        .filter((colDef): colDef is ColDef => colDef !== undefined);
 
-      // Use requestAnimationFrame to defer verification - AG Grid updates asynchronously
-      // so getColumns() may return stale data immediately after moveColumns()
-      requestAnimationFrame(() => {
-        const gridApi = tableRef.current?.api;
+      if (reorderedColDefs.length > 0) {
+        api.setGridOption('columnDefs', reorderedColDefs);
+      }
 
-        if (!gridApi) {
-          moveInProgressRef.current = false;
-
-          return;
-        }
-
-        // Verify the move was applied
-        const finalGridOrder = gridApi.getColumns()?.map((col) => col.getColId()) || [];
-        const moveApplied = orderedColIds.every((colId, index) => finalGridOrder[index] === colId);
-
-        if (moveApplied) {
-          lastAppliedOrderRef.current = targetOrderKey;
-        }
-        // If not applied, the tab switch effect will handle it when user switches to Preview
-
-        moveInProgressRef.current = false;
-      });
-    } else {
-      // No columns to move, just update ref
       lastAppliedOrderRef.current = newOrderKey;
     }
-  }, [contextColumnOrder, contextColumns, gridReady, columns.length, tableRef]);
+
+    moveInProgressRef.current = false;
+  }, [
+    contextColumnOrder,
+    contextColumns,
+    contextColumnVisibility,
+    gridReady,
+    columns.length,
+    tableRef,
+    id,
+    getColumnNamesMap,
+  ]);
 
   /**
    * Sync context column names to AG Grid headers
@@ -212,37 +295,56 @@ export const useAgGridContextSync = ({
 
     if (!allColumns || allColumns.length === 0) return;
 
+    // Read widths from localStorage (source of truth for user resizes)
+    const storedConfig = getColumnOrderingVisibilityForCurrentDataset(id);
+    const localStorageWidthMap = new Map(storedConfig?.map((c) => [c.colId, c.width]) || []);
+
     let hasChanges = false;
     const updatedColumnDefs = allColumns.map((column) => {
       const colDef = column.getColDef();
       const colId = column.getColId();
-      const contextName = columnNamesMap[colId];
+      const actualWidth = column.getActualWidth(); // Get the current rendered width from AG Grid
+      const contextName = colId in columnNamesMap ? columnNamesMap[colId] : undefined;
+      const localStorageWidth = localStorageWidthMap.get(colId);
+      // Prioritize localStorage width (from user resizes), then current actual width, then default
+      const width = localStorageWidth && localStorageWidth > 0 ? localStorageWidth : actualWidth || 200;
 
       // Only update if the header name actually changed
-      if (contextName && colDef.headerName !== contextName) {
+      if (contextName !== undefined && colDef.headerName !== contextName) {
         hasChanges = true;
 
-        // Don't set 'width' - let AG Grid manage widths internally
-        // Setting 'width' causes AG Grid to reset widths on every re-render
-        const { width: _width, ...colDefWithoutWidth } = colDef;
+        // IMPORTANT: Preserve context visibility when rebuilding columnDefs
+        const isVisible = contextColumnVisibility[colId];
 
         return {
-          ...colDefWithoutWidth,
+          ...colDef,
+          width,
+          flex: 0, // Disable flex to use fixed width
           headerName: contextName,
+          hide: isVisible !== undefined ? !isVisible : colDef.hide,
         };
       }
 
-      return colDef;
+      // Even for unchanged columns, ensure visibility is correct
+      const isVisible = contextColumnVisibility[colId];
+
+      return {
+        ...colDef,
+        width,
+        flex: 0, // Disable flex to use fixed width
+        hide: isVisible !== undefined ? !isVisible : colDef.hide,
+      };
     });
 
     // Update all column definitions if there were changes
     if (hasChanges) {
       api.setGridOption('columnDefs', updatedColumnDefs);
     }
-  }, [gridReady, contextColumns, getColumnNamesMap, tableRef]);
+  }, [gridReady, contextColumns, contextColumnVisibility, getColumnNamesMap, id, tableRef]);
 
   /**
    * Sync context column visibility to AG Grid
+   * IMPORTANT: Also update the columns state to prevent React re-renders from resetting visibility
    */
   useEffect(() => {
     if (!gridReady) return;
@@ -251,11 +353,47 @@ export const useAgGridContextSync = ({
 
     if (!api) return;
 
-    // Apply visibility changes to AG Grid
+    // Apply visibility changes to AG Grid API
     Object.entries(contextColumnVisibility).forEach(([colId, isVisible]) => {
       api.setColumnsVisible([colId], isVisible);
     });
-  }, [gridReady, contextColumnVisibility, tableRef]);
+
+    // Get column names map to ensure headerName is always correct
+    const columnNamesMap = getColumnNamesMap();
+
+    // CRITICAL: Also update the columns state to prevent React re-renders from resetting visibility
+    // When React re-renders, it passes the columns prop to AG Grid again.
+    // If the columns prop has stale hide values, AG Grid will reset to those values.
+    const hasChanges = columns.some((col) => {
+      const colId = col.field || '';
+      const contextVisible = contextColumnVisibility[colId];
+      const contextName = colId in columnNamesMap ? columnNamesMap[colId] : undefined;
+
+      if (contextVisible === undefined && contextName === undefined) return false;
+
+      const visibilityChanged = contextVisible !== undefined && col.hide !== !contextVisible;
+      const nameChanged = contextName !== undefined && col.headerName !== contextName;
+
+      return visibilityChanged || nameChanged;
+    });
+
+    if (hasChanges) {
+      const updatedColumns = columns.map((col) => {
+        const colId = col.field || '';
+        const isVisible = contextColumnVisibility[colId];
+        const contextName = colId in columnNamesMap ? columnNamesMap[colId] : undefined;
+
+        // Apply visibility and headerName updates
+        return {
+          ...col,
+          hide: isVisible !== undefined ? !isVisible : col.hide,
+          headerName: contextName !== undefined ? contextName : col.headerName, // Update headerName from context
+        };
+      });
+
+      setColumns(updatedColumns);
+    }
+  }, [gridReady, contextColumnVisibility, tableRef, setColumns, getColumnNamesMap, columns]);
 
   // Track the last synced context column IDs to prevent infinite loops
   const lastSyncedContextColIdsRef = useRef<string>('');
@@ -290,15 +428,38 @@ export const useAgGridContextSync = ({
       // Mark as synced BEFORE calling setColumns to prevent loop
       lastSyncedContextColIdsRef.current = contextColIdsKey;
 
+      // Read widths from localStorage (source of truth for user resizes)
+      const storedConfig = getColumnOrderingVisibilityForCurrentDataset(id);
+      const localStorageWidthMap = new Map(storedConfig?.map((c) => [c.colId, c.width]) || []);
+
+      // Build a map of current AG Grid widths for fallback
+      const agGridWidthMap = new Map(currentAgGridCols.map((col) => [col.getColId(), col.getActualWidth()]));
+
+      // Get column names from context to ensure headerName is always correct
+      const columnNamesMap = getColumnNamesMap();
+
       // Rebuild columnDefs based on context columns
-      // Don't set 'width' - let AG Grid manage widths internally to prevent resets
       const existingColDefs = columns
         .filter((colDef) => contextColIds.includes(colDef.field || '') && !addedColIds.includes(colDef.field || ''))
         .map((colDef) => {
-          // Remove 'width' from colDef to prevent AG Grid from resetting widths
-          const { width: _width, ...colDefWithoutWidth } = colDef;
+          // Apply context visibility and localStorage width to existing columns
+          const colId = colDef.field || '';
+          const contextVisibility = contextColumnVisibility[colId];
+          const localStorageWidth = localStorageWidthMap.get(colId);
+          const actualWidth = agGridWidthMap.get(colId); // Get current rendered width from AG Grid
+          // Prioritize localStorage width (from user resizes), then current actual width, then default
+          const width = localStorageWidth && localStorageWidth > 0 ? localStorageWidth : actualWidth || 200;
 
-          return colDefWithoutWidth;
+          // Get the correct header name from context (column_name), fallback to existing headerName
+          const headerName = colId in columnNamesMap ? columnNamesMap[colId] : colDef.headerName;
+
+          return {
+            ...colDef,
+            width,
+            flex: 0, // Disable flex to use fixed width
+            hide: contextVisibility !== undefined ? !contextVisibility : colDef.hide,
+            headerName, // Always apply the correct header name from context
+          };
         });
 
       // Create ColDefs for new columns
@@ -308,14 +469,19 @@ export const useAgGridContextSync = ({
 
           if (!contextCol) return null;
 
+          // Check localStorage for width first (for new datasets where columns might have been resized)
+          const localStorageWidth = localStorageWidthMap.get(colId);
+          const width = localStorageWidth && localStorageWidth > 0 ? localStorageWidth : 200;
+
           return {
             field: colId,
             headerName: contextCol.column_name || colId,
             editable: true,
             hide: !contextCol.isVisible,
-            // Use initialWidth instead of width to prevent resets on re-render
-            initialWidth: contextCol.width || 150,
+            // Set explicit width and disable flex for fixed column sizes
+            width,
             minWidth: 100,
+            flex: 0, // Disable flex to use fixed width
             cellRenderer: undefined,
             filter: 'agTextColumnFilter',
             headerComponentParams: {
@@ -343,5 +509,5 @@ export const useAgGridContextSync = ({
     } else {
       lastSyncedContextColIdsRef.current = contextColIdsKey;
     }
-  }, [gridReady, contextColumns, columns, id, handleSuccessfulUpdate, tableRef, setColumns]);
+  }, [gridReady, contextColumns, contextColumnVisibility, columns, id, handleSuccessfulUpdate, tableRef, setColumns]);
 };

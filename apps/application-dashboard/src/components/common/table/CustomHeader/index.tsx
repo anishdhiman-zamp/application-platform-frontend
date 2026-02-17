@@ -1,6 +1,10 @@
 import { FC, KeyboardEvent, RefObject, useCallback, useEffect, useMemo, useRef, useState } from 'react';
-import { useDatasetColumnContextOptional } from '@zamp-platform/dataset-create-edit';
-import { Button, Input } from '@zamp-platform/ui';
+import {
+  DatasetColumnTypes,
+  RequiredDefaultValueModal,
+  useDatasetColumnContextOptional,
+} from '@zamp-platform/dataset-create-edit';
+import { Button, Input, Switch } from '@zamp-platform/ui';
 import { SvgSpriteLoader } from '@zamp-platform/ui/assets';
 import { DATE_FORMATS, formatRelativeWithCustomLocale } from '@zamp-platform/utils';
 import { ColDef, ColumnHeaderClickedEvent, ColumnResizedEvent } from 'ag-grid-community';
@@ -8,6 +12,7 @@ import { AgGridReact } from 'ag-grid-react';
 import { COLORS } from 'constants/colors';
 import { PIVOT_HEADER_BG } from 'constants/icons';
 import { format } from 'date-fns';
+import { Asterisk } from 'lucide-react';
 import AddTag from 'modules/data/AddTag';
 import { getColumnOrderingVisibilityForCurrentDataset, updateLocalStorage } from 'modules/data/data.utils';
 import { DatasetColumnHeaderTypes } from 'modules/process/process.types';
@@ -18,10 +23,8 @@ import { OrderType } from 'types/components/table.type';
 import { cn } from 'utils/common';
 import { KEYBOARD_KEYS } from '@/constants/shortcuts';
 import useDisplayConfigUpdate from '@/hooks/useDisplayConfigUpdate';
-import { useResourceAccess } from '@/hooks/useResourceAccess';
 import { ColumnOrderingVisibilityType, RuleColumnDetailsType } from '@/modules/data/data.types';
-import { DATASET_ACCESS_PRIVILEGES } from '@/modules/shareResource/shareResource.types';
-import { ResourceType } from '@/types/api/policies.types';
+import { useEditDataset } from '@/modules/data/hooks/useEditDataset';
 import PositionedMenuWrapper from 'components/common/PositionedMenuWrapper';
 import {
   CustomHeaderMenuOptions,
@@ -74,6 +77,7 @@ const CustomHeader: FC<CustomHeaderProps> = ({
 }) => {
   const menuRef = useRef<HTMLDivElement>(null);
   const lastResizedTimeRef = useRef<number | null>(null); // Track last resize time
+  const wasRequiredFalseWhenModalOpenedRef = useRef<boolean>(false); // Track if modal was opened from false state
   const { colId, colDef } = column;
   const { handleAliasUpdate, handleDateFormatUpdate, handleTypeUpdate } = useDisplayConfigUpdate(tableRef, datasetId);
   const columnContext = useDatasetColumnContextOptional(); // Use context if available (for unified state management)
@@ -85,25 +89,20 @@ const CustomHeader: FC<CustomHeaderProps> = ({
   const [isAddTagOpen, setIsAddTagOpen] = useState(false);
   const [isFilterOpen, setIsFilterOpen] = useState(false);
   const [isDateFormatOpen, setIsDateFormatOpen] = useState(false);
+  const [isRequiredModalOpen, setIsRequiredModalOpen] = useState(false);
   const [headerName, setHeaderName] = useState(colDef?.headerName ?? colId);
   const [menuPosition, setMenuPosition] = useState<{ top: number; left: number }>({ top: 0, left: 0 });
   const contextHandleColumnChange = columnContext?.handleColumnChange;
-  const contextHandleColumnWidthChange = columnContext?.handleColumnWidthChange;
-  const filtersCount = selectedFilters ? Object.keys(selectedFilters)?.length : 0;
+
+  // Get current column's required status from context
+  const currentColumn = columnContext?.columns?.find((col) => col?.id === colId);
+  const [requiredToggleState, setRequiredToggleState] = useState(currentColumn?.required ?? false);
   const isTagColumn = metadata?.custom_type === CUSTOM_COLUMNS_TYPE.TAG;
   const sortState = tableRef?.current?.api?.getColumn(colId)?.getSort();
+  const columnType = currentColumn?.column_type ?? DatasetColumnTypes.TEXT;
+  const filtersCount = selectedFilters ? Object.keys(selectedFilters)?.length : 0;
   const isFilterActive = tableRef?.current?.api?.getColumn(colId)?.isFilterActive();
-
-  const { checkUserPrivilege } = useResourceAccess({
-    resourceType: ResourceType.DATASET,
-    resourceId: datasetId,
-    skipAudienceData: false,
-    skipTeamsData: false,
-  });
-
-  const isCurrentUserAdmin = useMemo(() => {
-    return checkUserPrivilege(DATASET_ACCESS_PRIVILEGES.ADMIN);
-  }, [checkUserPrivilege]);
+  const isCurrentUserAdmin = useEditDataset(datasetId);
 
   const filteredMenuOptions = useMemo(
     () =>
@@ -118,6 +117,8 @@ const CustomHeader: FC<CustomHeaderProps> = ({
   );
 
   const handleMenuClose = () => {
+    // Don't close menu while required modal is open
+    if (isRequiredModalOpen) return;
     handleHeaderNameBlur();
     setIsMenuOpen(false);
   };
@@ -182,10 +183,15 @@ const CustomHeader: FC<CustomHeaderProps> = ({
     if (!menuRef.current) return;
 
     const rect = menuRef.current.getBoundingClientRect();
+    const menuWidth = 208; // w-52 = 13rem = 208px
+    const viewportWidth = window.innerWidth;
+
+    // If the dropdown would overflow the right edge of the viewport, align it to the right edge of the header
+    const left = rect.left + menuWidth > viewportWidth ? rect.right - menuWidth : rect.left;
 
     setMenuPosition({
       top: rect.bottom + window.scrollY, // Stick below the header
-      left: rect.left, // Adjust for AG Grid's horizontal scroll
+      left, // Flip to left if it would overflow the viewport
     });
   };
 
@@ -231,7 +237,7 @@ const CustomHeader: FC<CustomHeaderProps> = ({
     (event: ColumnResizedEvent) => {
       if (event.column?.getId() !== colId) return;
 
-      // Only save widths from user interactions, not grid internal changes, which prevents AG-Grid from overwriting user resizes with default widths
+      // Only save widths from user interactions
       if (event.source !== UI_COLUMN_RESIZED) {
         return;
       }
@@ -245,31 +251,42 @@ const CustomHeader: FC<CustomHeaderProps> = ({
 
       if (!newWidth) return;
 
-      // Update localStorage directly for persistence
-      // We DON'T update context here to avoid triggering re-renders that reset AG Grid widths
-      // Context will read widths from localStorage when needed (e.g., on reorder or reload)
+      // IMPORTANT: Only save to localStorage here, NOT to context
+      // Updating context during resize causes React re-renders that reset AG Grid widths
+      // Context will read from localStorage when needed (e.g., on tab switch)
       const columnOrderingVisibility = getColumnOrderingVisibilityForCurrentDataset(datasetId);
       const columnOrderingVisibilityIndex = columnOrderingVisibility.findIndex((column) => column.colId === colId);
 
       if (columnOrderingVisibilityIndex !== -1) {
         columnOrderingVisibility[columnOrderingVisibilityIndex].width = newWidth;
         updateLocalStorage(columnOrderingVisibility, datasetId);
+      } else {
+        // Column doesn't exist in localStorage yet (new dataset) - add it
+        const headerName = colDef?.headerName || colId;
+
+        columnOrderingVisibility.push({
+          colId,
+          columnName: headerName,
+          isVisible: true,
+          width: newWidth,
+        });
+        updateLocalStorage(columnOrderingVisibility, datasetId);
       }
 
       lastResizedTimeRef.current = Date.now();
     },
-    [colId, datasetId, contextHandleColumnWidthChange],
+    [colId, datasetId, colDef?.headerName],
   );
 
   const handleHeaderNameBlur = () => {
-    const updatedHeaderName = headerName?.trim();
+    const updatedHeaderName = headerName?.trim() ?? '';
 
-    if (updatedHeaderName === colDef?.headerName || !updatedHeaderName) return;
+    if (updatedHeaderName === colDef?.headerName) return;
 
     // Use context if available, otherwise fallback to regular flow
     if (contextHandleColumnChange) {
       contextHandleColumnChange(colId, DatasetColumnHeaderTypes.COLUMN_NAME, updatedHeaderName);
-    } else {
+    } else if (updatedHeaderName) {
       handleAliasUpdate?.({ columnId: colId, value: updatedHeaderName });
     }
   };
@@ -292,6 +309,52 @@ const CustomHeader: FC<CustomHeaderProps> = ({
     if (value === metadata?.custom_type) return;
 
     handleTypeUpdate?.({ columnId: colId, value });
+  };
+
+  // Handle required toggle - opens modal when turning ON
+  const handleRequiredToggle = (checked: boolean) => {
+    if (checked) {
+      wasRequiredFalseWhenModalOpenedRef.current = !requiredToggleState;
+      setIsRequiredModalOpen(true);
+    } else {
+      // Turning OFF - set required to false and clear default
+      setRequiredToggleState(false);
+      if (contextHandleColumnChange) {
+        contextHandleColumnChange(colId, DatasetColumnHeaderTypes.REQUIRED, false);
+        contextHandleColumnChange(colId, 'default' as DatasetColumnHeaderTypes, null);
+      }
+    }
+  };
+
+  const handleRequiredModalConfirm = (defaultValue: string) => {
+    setRequiredToggleState(true);
+    if (contextHandleColumnChange) {
+      contextHandleColumnChange(colId, DatasetColumnHeaderTypes.REQUIRED, true);
+      contextHandleColumnChange(colId, 'default' as DatasetColumnHeaderTypes, defaultValue);
+    }
+    setIsRequiredModalOpen(false);
+    setIsMenuOpen(false);
+    wasRequiredFalseWhenModalOpenedRef.current = false;
+  };
+
+  const handleModalCloseBtn = () => {
+    // If we opened the modal from a false state, revert the toggle
+    if (wasRequiredFalseWhenModalOpenedRef.current) {
+      setRequiredToggleState(false);
+      wasRequiredFalseWhenModalOpenedRef.current = false;
+    }
+    setIsRequiredModalOpen(false);
+    setIsMenuOpen(false);
+  };
+
+  const handleModalDismissBtn = () => {
+    setRequiredToggleState(false);
+    if (contextHandleColumnChange) {
+      contextHandleColumnChange(colId, DatasetColumnHeaderTypes.REQUIRED, false);
+      contextHandleColumnChange(colId, 'default' as DatasetColumnHeaderTypes, null);
+    }
+    setIsRequiredModalOpen(false);
+    setIsMenuOpen(false);
   };
 
   // Track column resize
@@ -319,6 +382,11 @@ const CustomHeader: FC<CustomHeaderProps> = ({
       setHeaderName(colDef?.headerName ?? colId);
     }
   }, [isMenuOpen]);
+
+  // Sync required toggle state with context changes
+  useEffect(() => {
+    setRequiredToggleState(currentColumn?.required ?? false);
+  }, [currentColumn?.required]);
 
   return (
     <div ref={menuRef} className='relative -mx-4 h-full w-full flex-1'>
@@ -444,6 +512,18 @@ const CustomHeader: FC<CustomHeaderProps> = ({
               <div className='f-12-500'>{option.label}</div>
             </div>
           ))}
+          {isCurrentUserAdmin && contextHandleColumnChange && (
+            <div
+              className='hover:bg-GRAY_100 flex cursor-pointer items-center justify-between rounded-md px-2.5 py-2'
+              onClick={(e) => e.stopPropagation()}
+            >
+              <div className='flex items-center gap-1.5'>
+                <Asterisk size={12} color={COLORS.GRAY_900} />
+                <span className='f-12-500'>Require</span>
+              </div>
+              <Switch checked={requiredToggleState} onCheckedChange={handleRequiredToggle} size='small' />
+            </div>
+          )}
           {isTagColumn && (
             <div className='px-2.5 py-3'>
               <Button
@@ -579,6 +659,16 @@ const CustomHeader: FC<CustomHeaderProps> = ({
           </div>
         </PositionedMenuWrapper>
       )}
+
+      {/* Required Default Value Modal */}
+      <RequiredDefaultValueModal
+        isOpen={isRequiredModalOpen}
+        onClose={handleModalCloseBtn}
+        onDismiss={handleModalDismissBtn}
+        onConfirm={handleRequiredModalConfirm}
+        columnType={columnType}
+        initialDefaultValue={currentColumn?.default}
+      />
     </div>
   );
 };

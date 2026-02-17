@@ -72,7 +72,8 @@ export const useFileDragDrop = ({
       if (disabled) return;
 
       dragCounterRef.current += 1;
-      if (e.dataTransfer?.items && e.dataTransfer.items.length > 0) {
+      // Use types instead of items for Safari compatibility
+      if (e.dataTransfer?.types && e.dataTransfer.types.length > 0) {
         setIsDragOver(true);
       }
     },

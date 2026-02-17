@@ -11,7 +11,7 @@ import { getColumnOrderingVisibilityForCurrentDataset, updateLocalStorage } from
 import Image from 'next/image';
 import { SIZE_TYPES } from 'types/common/components';
 import { defaultFnType, ResponsiveGridLayoutType } from 'types/commonTypes';
-import { cn } from 'utils/common';
+import { cn, snakeCaseToSentenceCase } from 'utils/common';
 import { useGetDatasetDisplayConfigQuery } from '@/apis/admin';
 import { POSITION } from '@/constants/common.constants';
 import useDisplayConfigUpdate from '@/hooks/useDisplayConfigUpdate';
@@ -52,6 +52,7 @@ const ColumnListing: FC<ColumnListingProps> = ({
   const contextAvailable = !!columnContext;
   const updateColumnVisibility = columnContext?.updateColumnVisibility;
   const updateColumnOrder = columnContext?.updateColumnOrder;
+  const contextColumnVisibility = columnContext?.columnVisibility;
   const { handleDefaultOrderUpdate } = useDisplayConfigUpdate(tableRef, datasetId);
   const { checkUserPrivilege } = useResourceAccess({
     resourceType: ResourceType.DATASET,
@@ -73,7 +74,12 @@ const ColumnListing: FC<ColumnListingProps> = ({
   const handleCheckBoxClick = (column?: Column) => {
     if (!column) return;
     const colId = column.getColId();
-    const newVisibility = !column.isVisible();
+    // Get current visibility from context if available, otherwise from AG Grid
+    const currentVisibility =
+      contextAvailable && contextColumnVisibility?.[colId] !== undefined
+        ? contextColumnVisibility[colId]
+        : column.isVisible();
+    const newVisibility = !currentVisibility;
 
     tableRef?.current?.api?.setColumnsVisible([colId], newVisibility);
 
@@ -327,16 +333,35 @@ const ColumnListing: FC<ColumnListingProps> = ({
     }
 
     setColumnsChecked(
-      finalColumns.map((column) => ({
-        colId: column.getColId(),
-        isVisible: column.isVisible(),
-      })),
+      finalColumns.map((column) => {
+        const colId = column.getColId();
+        // Use context visibility if available (source of truth), otherwise fall back to AG Grid
+        const isVisible =
+          contextAvailable && contextColumnVisibility?.[colId] !== undefined
+            ? contextColumnVisibility[colId]
+            : column.isVisible();
+
+        return { colId, isVisible };
+      }),
     );
   };
 
+  // Initialize layout only once on mount
   useEffect(() => {
     initializeColumnLayout();
   }, []);
+
+  // Sync columnsChecked with context visibility changes
+  useEffect(() => {
+    if (!contextAvailable || !contextColumnVisibility) return;
+
+    setColumnsChecked((prev) =>
+      prev.map((col) => ({
+        ...col,
+        isVisible: contextColumnVisibility[col.colId] ?? col.isVisible,
+      })),
+    );
+  }, [contextColumnVisibility, contextAvailable]);
 
   return (
     <MenuWrapper
@@ -358,7 +383,7 @@ const ColumnListing: FC<ColumnListingProps> = ({
           <div className='f-12-500 text-GRAY_1000 flex w-full justify-between'>
             <div>Columns</div>
             <div
-              className='cursor-pointer'
+              className='cursor-pointer select-none'
               onClick={() => handleSelectAll(!columnsChecked.every((col) => col.isVisible))}
             >
               {columnsChecked.every((col) => col.isVisible) ? 'Deselect All' : 'Select All'}
@@ -408,7 +433,7 @@ const ColumnListing: FC<ColumnListingProps> = ({
                   onCheckedChange={() => handleCheckBoxClick(column)}
                 />
                 <div className='f-12-400 text-GRAY_1000 whitespace-nowrap select-none'>
-                  {column?.getColDef()?.headerName}
+                  {snakeCaseToSentenceCase(column?.getColDef()?.headerName ?? column?.getColId() ?? '')}
                 </div>
               </div>
             </div>
@@ -416,7 +441,7 @@ const ColumnListing: FC<ColumnListingProps> = ({
         </ResponsiveGridLayout>
       </div>
       {isSelfServe && (
-        <div className='flex justify-end gap-3 border-t p-1'>
+        <div className='flex justify-end gap-3 border-t p-1 select-none'>
           <Button variant='ghost' size='small' className='px-1 text-gray-900' onClick={handleReset}>
             Reset
           </Button>

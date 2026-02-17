@@ -1,5 +1,6 @@
 import { type RefObject, useRef, useState } from 'react';
 import { SvgSpriteLoader } from '@zamp-platform/ui/assets';
+import { cn } from '@zamp-platform/ui/utils';
 import type { AgGridReact } from 'ag-grid-react';
 import {
   useLazyGetActionStatusQuery,
@@ -23,9 +24,10 @@ interface ExportDatasetProps {
   datasetId: string;
   hasFilters: boolean;
   tableRef: RefObject<AgGridReact<any> | null>;
+  disable?: boolean;
 }
 
-const ExportDataset = ({ query, datasetId, hasFilters, tableRef }: ExportDatasetProps) => {
+const ExportDataset = ({ query, datasetId, hasFilters, tableRef, disable = false }: ExportDatasetProps) => {
   const router = useRouter();
   const params = useParams();
   const activityId = params?.activityId as string;
@@ -93,7 +95,14 @@ const ExportDataset = ({ query, datasetId, hasFilters, tableRef }: ExportDataset
         side={SIDE_OPTIONS.TOP}
         disabled={isPolling}
       >
-        <div className='hover:bg-GRAY_100 flex h-full w-full cursor-pointer items-center justify-center rounded'>
+        <div
+          className={cn(
+            'flex h-full w-full cursor-pointer items-center justify-center rounded',
+            disable
+              ? 'disabled:text-GRAY_300 hover:text-GRAY_300 cursor-not-allowed'
+              : 'hover:text-GRAY_100 cursor-pointer',
+          )}
+        >
           <SvgSpriteLoader id='download-02' width={14} height={14} className='text-GRAY_900' />
           {isPolling && (
             <div className='absolute bottom-px left-[3px]'>

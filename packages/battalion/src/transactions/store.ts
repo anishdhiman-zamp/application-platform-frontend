@@ -84,6 +84,16 @@ class TransactionStore {
     this.client = null;
     this.customConfig = null;
   }
+
+  /**
+   * Refresh resource mappings.
+   * Call this after registering new resources if the integration was already initialized.
+   */
+  refreshMappings(): void {
+    if (this.integration) {
+      this.integration.refreshMappings();
+    }
+  }
 }
 
 export const transactionStore = new TransactionStore();

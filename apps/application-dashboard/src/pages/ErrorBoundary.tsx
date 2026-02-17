@@ -108,4 +108,16 @@ class ErrorBoundary extends Component<ErrorBoundaryProps, ErrorBoundaryState> {
   }
 }
 
+/**
+ * Wraps children with ErrorBoundary only in production.
+ * In development, errors propagate normally for easier debugging.
+ */
+export function ProductionErrorBoundary({ children }: ErrorBoundaryProps) {
+  if (process.env.NODE_ENV === 'production') {
+    return <ErrorBoundary>{children}</ErrorBoundary>;
+  }
+
+  return <Fragment>{children}</Fragment>;
+}
+
 export default ErrorBoundary;

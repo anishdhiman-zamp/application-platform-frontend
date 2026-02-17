@@ -11,6 +11,7 @@ interface IColumnDropdownProps {
   selectedClassName?: string;
   triggerClassName?: string;
   label?: string;
+  disabled?: boolean;
 }
 
 const ColumnTypeDropdown: FC<IColumnDropdownProps> = ({
@@ -19,6 +20,7 @@ const ColumnTypeDropdown: FC<IColumnDropdownProps> = ({
   selectedClassName,
   triggerClassName,
   label = 'More inputs',
+  disabled = false,
 }) => {
   const [isDropdownOpen, setIsDropdownOpen] = useState(false);
 
@@ -37,8 +39,9 @@ const ColumnTypeDropdown: FC<IColumnDropdownProps> = ({
       <DropdownMenuTrigger asChild>
         <Button
           size='medium'
+          disabled={disabled}
           className={cn(
-            'f-12-500 text-gray-1000 border-GRAY_400 hover:bg-GRAY_50 active:bg-GRAY_50 flex cursor-pointer items-center gap-1 rounded-md border bg-white px-3 py-1.5 text-sm font-medium focus:outline-none focus-visible:ring-0 focus-visible:ring-offset-0',
+            'f-12-500 text-gray-1000 border-GRAY_400 hover:bg-GRAY_100 active:bg-GRAY_50 flex cursor-pointer items-center gap-1 rounded-md border bg-white px-3 py-1.5 text-sm font-medium focus:outline-none focus-visible:ring-0 focus-visible:ring-offset-0',
             triggerClassName,
             isDropdownOpen && 'bg-GRAY_50',
             selectedType && 'border-GRAY_300 bg-GRAY_100',
@@ -47,8 +50,8 @@ const ColumnTypeDropdown: FC<IColumnDropdownProps> = ({
         >
           {selectedItem ? (
             <div className='flex items-center justify-center gap-1'>
-              <selectedItem.icon className='text-GRAY_700 h-3.5! w-3.5!' />
-              <span>{selectedItem.label}</span>
+              <selectedItem.icon className='text-GRAY_700 h-3.5 w-3.5' />
+              <span>{selectedItem?.label}</span>
               <ChevronDown className='text-GRAY_900 ml-1.5 h-3.5 w-3.5' />
             </div>
           ) : (
@@ -62,12 +65,12 @@ const ColumnTypeDropdown: FC<IColumnDropdownProps> = ({
       <DropdownMenuContent className='mt-1.5 w-40 bg-white' align='start'>
         {DATASET_COLUMN_TYPES_LIST.map((type) => (
           <DropdownMenuItem
-            key={type.value}
+            key={type?.value}
             className='f-13-500 text-GRAY_900 hover:bg-GRAY_50 flex cursor-pointer items-center gap-2 rounded-md p-2'
-            onClick={() => handleSelect(type.value)}
+            onClick={() => handleSelect(type?.value)}
           >
             <type.icon className='text-GRAY_700 h-3 w-3' />
-            <span>{type.label}</span>
+            <span>{type?.label}</span>
           </DropdownMenuItem>
         ))}
       </DropdownMenuContent>

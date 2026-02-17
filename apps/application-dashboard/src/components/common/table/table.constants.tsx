@@ -182,3 +182,5 @@ export const DisplayOptionsList: DisplayOptionItemProps[] = [
 export const enum TABLE_COPIES {
   DEFAULT = 'Default',
 }
+
+export const URL_PREFIXES = ['http://', 'https://', 'www.'];

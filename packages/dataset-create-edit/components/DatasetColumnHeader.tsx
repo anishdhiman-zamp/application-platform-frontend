@@ -5,7 +5,7 @@ import { DATASET_COLUMN_HEADERS_LIST } from '../constants';
 
 const DatasetColumnHeader: FC = () => {
   return (
-    <div className='border-GRAY_100 flex items-center justify-between border-b pt-4 pr-8 pl-9'>
+    <div className='border-GRAY_100 flex items-center justify-between border-b pt-4 pr-8 pl-4'>
       {DATASET_COLUMN_HEADERS_LIST.map((header) => (
         <div
           key={header.value}

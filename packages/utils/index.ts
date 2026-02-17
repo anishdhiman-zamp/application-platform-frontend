@@ -7,6 +7,8 @@ export * from './hooks/useSSE';
 export * from './hooks/useThrottle';
 export * as IndexedDBCache from './indexeddb-cache';
 export * from './localstorage';
+export * from './navigation';
 export * as OPFSCache from './opfs-cache';
+export * from './search';
 export * from './string';
 export * from './url';

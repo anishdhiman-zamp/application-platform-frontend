@@ -33,6 +33,7 @@ interface FiltersContainerProps {
   isSheetFilters?: boolean;
   isProcessContext?: boolean;
   testIdSuffix?: string;
+  disable?: boolean;
 }
 
 const FiltersContainer: FC<FiltersContainerProps> = ({
@@ -52,6 +53,7 @@ const FiltersContainer: FC<FiltersContainerProps> = ({
   isPlayground = false,
   isSheetFilters = false,
   isProcessContext = false,
+  disable = false,
 }) => {
   const [shouldShowConfirmationPopup, setShouldShowConfirmationPopup] = useState(false);
   const {
@@ -173,7 +175,7 @@ const FiltersContainer: FC<FiltersContainerProps> = ({
         ))}
 
         {!isSheetFilters && !isPlayground && allowActions && !filtersList?.length && (
-          <FiltersMenu label={label} onAddFilter={onAddEmptyFilter} testIdSuffix={testIdSuffix} />
+          <FiltersMenu label={label} onAddFilter={onAddEmptyFilter} testIdSuffix={testIdSuffix} disable={disable} />
         )}
 
         {!isSheetFilters && !isPlayground && allowActions && filtersList?.length > 0 ? (

@@ -1,4 +1,9 @@
+'use client';
+
 import { useMemo, useState } from 'react';
+import { useResource } from '@zamp-platform/battalion';
+import { getColumnConfigForDataset, setColumnConfigForDataset } from '@zamp-platform/dataset-create-edit';
+import { DATASET_TOAST_MESSAGES } from '@zamp-platform/dataset-create-edit/constants';
 import {
   Button,
   Dialog,
@@ -12,12 +17,13 @@ import {
 } from '@zamp-platform/ui';
 import { SvgSpriteLoader } from '@zamp-platform/ui/assets';
 import { ICellRendererParams } from 'ag-grid-community';
-import { useUpdateDatasetMutation } from '@/apis/admin';
-import { APITags } from '@/constants/api.constants';
+import { Dataset } from '@/app/(authenticated)/resources/dataset.resource';
 import { COLORS } from '@/constants/colors';
+import { usePendingDatasetContextOptional } from '@/context/pendingDataset.context';
 import { useResourceAccess } from '@/hooks/useResourceAccess';
 import { DATASET_ACCESS_PRIVILEGES } from '@/modules/shareResource/shareResource.types';
 import { ResourceType } from '@/types/api/policies.types';
+import { dispatchDatasetUpdated } from '@/utils/events';
 
 const EditNameDescription = (props: ICellRendererParams) => {
   const { data } = props;
@@ -25,7 +31,11 @@ const EditNameDescription = (props: ICellRendererParams) => {
   const [title, setTitle] = useState<string>();
   const [description, setDescription] = useState<string>();
 
-  const [updateDataset, { isLoading }] = useUpdateDatasetMutation();
+  // Use Battalion resource for transaction API
+  const { update: updateDataset, isUpdating: isLoading } = useResource<Dataset>('Dataset');
+
+  // Get pendingTitle context to update it when title changes
+  const pendingTitleContext = usePendingDatasetContextOptional?.();
 
   const { checkUserPrivilege } = useResourceAccess({
     resourceType: ResourceType.DATASET,
@@ -48,26 +58,56 @@ const EditNameDescription = (props: ICellRendererParams) => {
       return;
     }
 
-    updateDataset({
-      datasetId: data?.id as string,
-      title,
-      description,
-      invalidateTags: [APITags.GET_DATASET_LISTING, APITags.GET_DATASET_ALL_LISTING],
-    })
-      .unwrap()
-      .then(() => {
-        toast.success('Dataset updated successfully');
-      })
-      .catch(() => {
-        toast.error('Failed to update dataset');
-      })
-      .finally(() => {
-        setIsOpen(false);
+    // Validate title is not empty
+    const trimmedTitle = title?.trim();
+
+    if (!trimmedTitle || trimmedTitle === '') {
+      toast.error('Dataset title cannot be empty');
+
+      return;
+    }
+
+    // Call transaction API with title and description
+    updateDataset(data?.id as string, {
+      title: trimmedTitle,
+      description: description || undefined,
+    });
+
+    // Update localStorage with the new title immediately (org-scoped)
+    if (data?.id) {
+      const existingData = getColumnConfigForDataset(data.id);
+
+      // Preserve existing columns and dataset_unique_key_name
+      const existingColumns = (existingData as { columns?: unknown[] })?.columns || [];
+      const existingUniqueKeyName =
+        (existingData as { dataset_unique_key_name?: string })?.dataset_unique_key_name || '';
+
+      setColumnConfigForDataset(data.id, {
+        dataset_name: trimmedTitle,
+        dataset_unique_key_name: existingUniqueKeyName,
+        columns: existingColumns,
       });
+
+      // Dispatch dataset updated event to notify other components (e.g., breadcrumb)
+      dispatchDatasetUpdated(data.id);
+    }
+
+    // Update pendingTitle context so breadcrumb reflects the change immediately
+    if (pendingTitleContext?.setPendingTitle) {
+      pendingTitleContext.setPendingTitle(trimmedTitle);
+    }
+
+    toast.success(DATASET_TOAST_MESSAGES.DATASET_UPDATED_SUCCESS);
+    setIsOpen(false);
   };
 
   const isDisabled = useMemo(() => {
-    return !title || (title === data?.title && description === data?.description) || isLoading;
+    return (
+      !title?.trim() ||
+      !description?.trim() ||
+      (title === data?.title && description === data?.description) ||
+      isLoading
+    );
   }, [isLoading, title, description, data?.title, data?.description]);
 
   const handleOpen = (open: boolean) => {
@@ -92,7 +132,7 @@ const EditNameDescription = (props: ICellRendererParams) => {
               <div className='mx-5 mt-5 mb-6 space-y-5'>
                 <Input placeholder='Name' value={title} onChange={(e) => setTitle(e.target.value)} />
                 <Textarea
-                  className='min-h-[108px] focus:border-gray-600 focus:ring-2 focus:ring-gray-400'
+                  className='max-h-[200px] min-h-[108px] focus:border-gray-600 focus:ring-2 focus:ring-gray-400'
                   placeholder='Description'
                   value={description}
                   onChange={(e) => setDescription(e.target.value)}
@@ -104,7 +144,7 @@ const EditNameDescription = (props: ICellRendererParams) => {
                     Cancel
                   </Button>
                 </DialogClose>
-                <Button type='submit' size='medium' disabled={isDisabled} isLoading={isLoading}>
+                <Button type='submit' size='medium' disabled={isDisabled}>
                   Save changes
                 </Button>
               </DialogFooter>

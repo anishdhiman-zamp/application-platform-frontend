@@ -9,7 +9,7 @@ const useIsDatasetCreationEnabled = () => {
   useEffect(() => {
     if (!ldClient) return;
 
-    evaluate(FEATURE_FLAGS.DATASET_CREATION)
+    evaluate(FEATURE_FLAGS.ZAMP_INTERNAL)
       .then((res: boolean) => {
         setIsEnabled(res);
       })

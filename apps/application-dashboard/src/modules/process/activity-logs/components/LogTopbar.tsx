@@ -1,16 +1,20 @@
-import { type FC, memo } from 'react';
+import { type FC, memo, useState } from 'react';
+import { Button, toast } from '@zamp-platform/ui';
 import { SvgSpriteLoader } from '@zamp-platform/ui/assets';
 import { cn } from '@zamp-platform/ui/utils';
+import { Trash2 } from 'lucide-react';
+import DeleteActivityDialog from 'modules/process/activity-logs/components/DeleteActivityDialog';
 import TopbarStatusIcon from 'modules/process/common/TopbarStatusIcon';
 import { useActivityNavigation } from 'modules/process/hooks/useActivityNavigation';
 import { STATUS_ICON_COLOR_MAPPING } from 'modules/process/process.constant';
 import { ACTIVITY_RUN_STATUS } from 'modules/process/process.types';
-import { useParams } from 'next/navigation';
-import { useGetActivitySummaryQuery } from '@/apis/processes';
+import { useParams, useRouter, useSearchParams } from 'next/navigation';
+import { useDeleteActivityRunMutation, useGetActivitySummaryQuery } from '@/apis/processes';
 import TooltipV2 from '@/components/common/TooltipV2';
 import CommonWrapper from '@/components/commonWrapper';
 import { SkeletonTypes } from '@/components/commonWrapper/commonWrapper.types';
 import SkeletonElement from '@/components/skeletons/SkeletonElement';
+import { getProcessRouteById } from '@/constants/routeConfig';
 
 interface ActivityNavigationProps {
   processId: string;
@@ -19,9 +23,27 @@ interface ActivityNavigationProps {
 
 const LogTopbar: FC = () => {
   const params = useParams();
-
+  const router = useRouter();
+  const searchParams = useSearchParams();
   const activityId = params?.activityId as string;
   const processId = params?.processId as string;
+  const status = searchParams?.get('status');
+
+  const [deleteActivityRun, { isLoading: isDeletingActivityRun }] = useDeleteActivityRunMutation();
+  const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState(false);
+
+  const handleDeleteActivityRun = () => {
+    deleteActivityRun({ processId, activityRunId: activityId })
+      .unwrap()
+      .then(() => {
+        toast.success('Activity deleted successfully');
+        setIsDeleteDialogOpen(false);
+        router.replace(getProcessRouteById(processId, status as string));
+      })
+      .catch(() => {
+        toast.error('Failed to delete activity');
+      });
+  };
 
   const {
     data: summaryData,
@@ -74,6 +96,22 @@ const LogTopbar: FC = () => {
             </span>
           </div>
         )}
+        <TooltipV2 tooltipBody='Delete activity' asChildTrigger>
+          <Button
+            variant='ghost'
+            size='icon'
+            className='text-GRAY_700 hover:text-GRAY_1000 h-8 w-8 [&_svg]:size-3.5'
+            onClick={() => setIsDeleteDialogOpen(true)}
+            leadingIcon={<Trash2 size={14} />}
+            aria-label='Delete activity'
+          />
+        </TooltipV2>
+        <DeleteActivityDialog
+          isOpen={isDeleteDialogOpen}
+          onOpenChange={setIsDeleteDialogOpen}
+          onDelete={handleDeleteActivityRun}
+          isDeleting={isDeletingActivityRun}
+        />
       </CommonWrapper>
 
       <ActivityNavigation processId={processId} />

@@ -165,6 +165,7 @@ export const API_ENDPOINTS = {
   PROCESSES_EVENTS_GET: `processes/events/{{activityId}}`,
   STOP_PROCESS_BUILDING_POST: `processes/{{processId}}/build-stop`,
   UNIFIED_SSE: `events`,
+  ACTIVITY_RUN_DELETE: `processes/{{processId}}/activity-runs/{{activityRunId}}`,
 
   //Voice Agents
   SPEECH_TO_TEXT_ACCESS_TOKEN_GET: `/speech-to-text/generate-access-token`,
@@ -193,6 +194,9 @@ export const API_ENDPOINTS = {
   PROCESS_CONNECTION_MAPPINGS_GET: `process/{{process_id}}/connections`,
   GET_CONNECTION_BY_INTEGRATION_NAME: `connections/by-integration/{{integration_name}}`,
   DELETE_PROCESS_CONNECTION_MAPPING: `process/{{process_id}}/connections`,
+  PROCESS_CONNECTIONS_BULK_POST: `process/{{process_id}}/connections/bulk`,
+  PROCESS_CONNECTION_MODES_GET: `process/{{process_id}}/connections/modes`,
+  PROCESS_CONNECTION_MODES_BULK_POST: `process/{{process_id}}/connections/modes/bulk`,
 
   // Trigger Subscriptions
   TRIGGER_SUBSCRIPTIONS_POST: `trigger-subscriptions`,

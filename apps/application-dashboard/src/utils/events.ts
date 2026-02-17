@@ -42,3 +42,32 @@ export const dispatchProcessCreated = (processId: string) => {
     }),
   );
 };
+
+// Dataset Events
+export const DATASET_CREATED_EVENT = 'app:dataset-created';
+export const DATASET_UPDATED_EVENT = 'app:dataset-updated';
+
+export interface DatasetCreatedEventDetail {
+  datasetId: string;
+}
+
+export interface DatasetUpdatedEventDetail {
+  datasetId: string;
+}
+
+/* Dispatches an event when a dataset is successfully created. */
+export const dispatchDatasetCreated = (datasetId: string) => {
+  window.dispatchEvent(
+    new CustomEvent<DatasetCreatedEventDetail>(DATASET_CREATED_EVENT, {
+      detail: { datasetId },
+    }),
+  );
+};
+
+export const dispatchDatasetUpdated = (datasetId: string) => {
+  window.dispatchEvent(
+    new CustomEvent<DatasetUpdatedEventDetail>(DATASET_UPDATED_EVENT, {
+      detail: { datasetId },
+    }),
+  );
+};

@@ -40,6 +40,7 @@ const ProcessCreationKnowledgeBase: FC<ProcessCreationKnowledgeBaseProps> = ({
   isKnowledgeBaseCreated = false,
 }) => {
   const { isEnabled: isKnowledgeBaseConfigEnabled } = useFeatureFlag(FEATURE_FLAGS.ZAMP_INTERNAL);
+  const { isEnabled: isAppSecureEnabled } = useFeatureFlag(FEATURE_FLAGS.APP_SECURE);
 
   const { markdownContent, isLoading, isKnownEmptyState, hasNon404Error, refetch } = useKnowledgeBaseContent({
     processId,
@@ -69,7 +70,9 @@ const ProcessCreationKnowledgeBase: FC<ProcessCreationKnowledgeBaseProps> = ({
           >
             <div className={cn({ 'animate-pulse': isLoading })}>
               {markdownContent && <div className='f-26-550 border-GRAY_400 pb-4'>{processName}</div>}
-              {isKnowledgeBaseConfigEnabled && <KnowledgeBaseConfig integrations={integrations} />}
+              {(isAppSecureEnabled || isKnowledgeBaseConfigEnabled) && (
+                <KnowledgeBaseConfig integrations={integrations} />
+              )}
               <Suspense fallback={<MarkdownContentSkeleton />}>
                 <MarkdownContent content={markdownContent} />
               </Suspense>

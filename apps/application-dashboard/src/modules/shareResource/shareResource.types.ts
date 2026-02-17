@@ -72,6 +72,7 @@ export type ShareResourcePopupProps = {
   resourceConfig: ShareResourceConfig;
   isCustomiseAccess?: boolean;
   title?: string;
+  disable?: boolean;
 };
 
 /**

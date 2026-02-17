@@ -13,9 +13,17 @@ interface FiltersMenuProps {
   tooltipText?: string;
   currentPageFilters?: string[];
   testIdSuffix?: string;
+  disable?: boolean;
 }
 
-const FiltersMenu: FC<FiltersMenuProps> = ({ onAddFilter, label, tooltipText, currentPageFilters, testIdSuffix }) => {
+const FiltersMenu: FC<FiltersMenuProps> = ({
+  onAddFilter,
+  label,
+  tooltipText,
+  currentPageFilters,
+  testIdSuffix,
+  disable,
+}) => {
   const {
     state: { filtersConfig },
   } = useFiltersContextStore();
@@ -42,6 +50,7 @@ const FiltersMenu: FC<FiltersMenuProps> = ({ onAddFilter, label, tooltipText, cu
               tooltipText={tooltipText}
               id='add-filters'
               testIdSuffix={testIdSuffix}
+              disabled={disable}
             >
               {label}
             </FilterControlButton>

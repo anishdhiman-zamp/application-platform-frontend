@@ -5,6 +5,7 @@ export { default as DatasetColumDetails } from './components/DatasetColumDetails
 export { default as DatasetColumnHeader } from './components/DatasetColumnHeader';
 export { default as DatasetEditPreviewTab } from './components/DatasetEditPreviewTab';
 export { default as PreviewDataset } from './components/PreviewDataset';
+export { default as RequiredDefaultValueModal } from './components/RequiredDefaultValueModal';
 
 // Context
 export {
@@ -18,16 +19,25 @@ export {
 export { DatasetCreationProvider, useDatasetCreationContext } from './context/DatasetCreationContext';
 
 // Hooks
+export { useCheckDatasetCreationEnabled } from './hooks/useCheckDatasetCreationEnabled';
 export { useDatasetColumnDetails } from './hooks/useDatasetColumnDetails';
 export { useDatasetGridSync } from './hooks/useDatasetGridSync';
 export { useDragAndDrop } from './hooks/useDragAndDrop';
 
 // Utils
 export {
+  deleteColumnConfigForDataset,
+  getColumnConfigForDataset,
+  getOrgColumnConfigs,
+  setAllOrgColumnConfigs,
+  setColumnConfigForDataset,
+} from './utils/columnConfig';
+export {
   convertColumnsToFilterConfig,
   convertFilterConfigToColumns,
   type FilterConfigType,
   mapDatatypeToColumnType,
+  mapSchemaTypeToColumnType,
   snakeCaseToDisplayName,
 } from './utils/columnConversion';
 

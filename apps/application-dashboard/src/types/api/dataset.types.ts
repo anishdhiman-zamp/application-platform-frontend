@@ -24,6 +24,7 @@ export type DatasetFilterConfigMetadataType = {
   };
   is_editable?: boolean;
   is_required?: boolean;
+  default_value?: string | boolean | null;
 };
 
 export type DatasetFilterConfigResponseType = {
@@ -80,15 +81,45 @@ export type DatasetDrilldownResponseType = {
   }[];
 };
 
+export type DatasetSchemaColumn = {
+  name: string;
+  type: string;
+  default: string | null;
+  nullable: boolean;
+  primary_key: boolean;
+  auto_increment: boolean;
+};
+
+export type DatasetDisplayConfigItem = {
+  column: string;
+  alias: string | null;
+  is_hidden: boolean;
+  is_editable: boolean;
+  type: string | null;
+  config: MapAny | null;
+};
+
+export type DatasetMetadataType = {
+  default_filter: MapAny | null;
+  display_config: DatasetDisplayConfigItem[];
+  schema: {
+    columns: DatasetSchemaColumn[];
+    indexes: MapAny[];
+  };
+  embedding_config: MapAny | null;
+  is_hidden?: boolean;
+};
+
 export type DatasetType = {
   id: string;
   title: string;
+  tableName?: string;
   description: string;
   createdAt: string;
   updatedAt: string;
   createdBy: string;
   organizationId: string;
-  metadata: MapAny;
+  metadata: DatasetMetadataType;
 };
 
 export type DatasetListingResponseType = {

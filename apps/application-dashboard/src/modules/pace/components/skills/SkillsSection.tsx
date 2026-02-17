@@ -2,7 +2,7 @@
 
 import { useMemo, useState } from 'react';
 import { Button, Input, toast } from '@zamp-platform/ui';
-import { useAutoFocus } from '@zamp-platform/utils';
+import { prioritizedSearch, useAutoFocus } from '@zamp-platform/utils';
 import { useListSkillsQuery } from '@/apis/pace';
 import CommonWrapper from '@/components/commonWrapper';
 import { SkeletonTypes } from '@/components/commonWrapper/commonWrapper.types';
@@ -22,15 +22,18 @@ const SkillsSection = () => {
 
   const skills = data?.skills ?? [];
 
-  const filteredSkills = useMemo(() => {
-    if (!searchQuery.trim()) return skills;
-
-    const query = searchQuery.toLowerCase();
-
-    return skills.filter(
-      (skill) => skill.name.toLowerCase().includes(query) || skill.description.toLowerCase().includes(query),
-    );
-  }, [skills, searchQuery]);
+  const filteredSkills = useMemo(
+    () =>
+      prioritizedSearch({
+        items: skills,
+        query: searchQuery,
+        fields: [
+          { getValue: (skill) => skill.name, weight: 100 },
+          { getValue: (skill) => skill.description, weight: 10 },
+        ],
+      }),
+    [skills, searchQuery],
+  );
 
   const onUpdate = (id: string) => {
     setSkillIdToUpdate(id);

@@ -1,5 +1,6 @@
 import { REQUEST_TYPES } from '@zamp-platform/api';
 import { API_ENDPOINTS } from 'apis/apiEndpoint.constants';
+import { APITags } from '@/constants/api.constants';
 import { baseApi } from '@/services/baseApi';
 import type { DatasetDataResponseType, DatasetFilterConfigResponseType } from '@/types/api/dataset.types';
 import type {
@@ -45,12 +46,14 @@ const Processes = baseApi.injectEndpoints({
           params: { query_config },
         };
       },
+      providesTags: [APITags.GET_ACTIVITY_RUNS_SUMMARY],
     }),
     getActivityRuns: builder.query<ActivityRunsDataResponseType, ProcessActivityRunsRequestType>({
       query: ({ processId, query_config }) => ({
         url: formRequestUrlWithParams(API_ENDPOINTS.ACTIVITY_RUNS_GET, { processId }),
         params: { query_config },
       }),
+      providesTags: [APITags.GET_ACTIVITY_RUNS_SUMMARY],
     }),
     getActivityArtifacts: builder.query<ActivityArtifactsResponseType, ActivityArtifactsRequestType>({
       query: ({ processId, activityRunId }) => ({
@@ -137,6 +140,13 @@ const Processes = baseApi.injectEndpoints({
         method: REQUEST_TYPES.POST,
       }),
     }),
+    deleteActivityRun: builder.mutation<void, { processId: string; activityRunId: string }>({
+      query: ({ processId, activityRunId }) => ({
+        url: formRequestUrlWithParams(API_ENDPOINTS.ACTIVITY_RUN_DELETE, { processId, activityRunId }),
+        method: REQUEST_TYPES.DELETE,
+      }),
+      invalidatesTags: [APITags.GET_ACTIVITY_RUNS_SUMMARY],
+    }),
   }),
 });
 
@@ -166,4 +176,5 @@ export const {
   useGetReprocessingEventsQuery,
   useLazyGetReprocessingEventsQuery,
   useStopProcessBuildingMutation,
+  useDeleteActivityRunMutation,
 } = Processes;

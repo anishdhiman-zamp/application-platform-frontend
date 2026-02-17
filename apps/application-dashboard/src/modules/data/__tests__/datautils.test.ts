@@ -26,7 +26,7 @@ describe('getUpdatedColumnOrderingVisibility', () => {
     const result = getUpdatedColumnOrderingVisibility(currentVisibility, filterConfig);
 
     // Hidden columns (is_hidden: true) should NOT be added to localStorage
-    expect(result).toEqual([{ colId: 'col2', isVisible: true, width: 0 }]);
+    expect(result).toEqual([{ colId: 'col2', columnName: 'Col2', isVisible: true, width: 0 }]);
   });
 
   it('should preserve width from existing column visibility entries', () => {
@@ -53,7 +53,7 @@ describe('getUpdatedColumnOrderingVisibility', () => {
 
     const result = getUpdatedColumnOrderingVisibility(currentVisibility, filterConfig);
 
-    expect(result).toEqual([{ colId: 'col1', isVisible: true, width: 0 }]);
+    expect(result).toEqual([{ colId: 'col1', columnName: 'Col1', isVisible: true, width: 0 }]);
   });
 
   it('should filter out columns that become hidden in backend', () => {

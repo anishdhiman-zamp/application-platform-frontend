@@ -4,7 +4,7 @@
  * Defines the Process resource using Battalion's defineResource.
  */
 
-import { defineResource } from '@zamp-platform/battalion';
+import { defineResource, TransactionRequestResponse } from '@zamp-platform/battalion';
 import { toast } from '@zamp-platform/ui';
 import { EVENT_TYPE } from '@zamp-platform/utils';
 import { z } from 'zod';
@@ -89,8 +89,10 @@ export const ProcessResource = defineResource({
     },
     onSuccess: {
       create: (data) => {
+        const response = data as TransactionRequestResponse;
+        const processId = (response?.transactions?.[0]?.output_payload?.process as { id?: string })?.id ?? '';
+
         // Get audiences from temporary storage
-        const processId = (data as Process).process_id;
         const audiences = getAndRemoveProcessAudiences(processId);
 
         // Share process with audiences if provided

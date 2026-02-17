@@ -1,3 +1,4 @@
+import { captureException } from '@sentry/browser';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { useCallback, useEffect, useMemo, useState } from 'react';
 
@@ -115,30 +116,54 @@ export function useResource<T>(resourceName: ResourceName, options?: ResourceOpt
 
   const createMutation = useMutation({
     mutationFn: async (data: Partial<T>) => {
-      if (integration?.shouldUseTransactions(resourceName, 'create')) {
-        // Await transaction request to check for failures
-        // This will throw TransactionFailureError if any transaction failed
-        await integration.createTransactionRequest(resourceName, 'create', data);
-      }
-      // Return optimistic item if getOptimisticItem is defined, otherwise partial data
-      return getOptimisticItem ? getOptimisticItem(data) : ({ ...data, [idField]: `temp-${Date.now()}` } as T);
-    },
-    onMutate: async (newData) => {
-      await queryClient.cancelQueries({ queryKey: [resourceName] });
-      const previous = queryClient.getQueryData([resourceName]);
-      if (optimisticConfig?.create) {
-        queryClient.setQueryData([resourceName], (old: T[] = []) => {
-          // Use getOptimisticItem if defined, otherwise fallback to spreading data
-          const item = getOptimisticItem
-            ? getOptimisticItem(newData)
-            : ({ ...newData, [idField]: `temp-${Date.now()}` } as T);
-          return optimisticConfig.create === 'prepend' ? [item, ...old] : [...old, item];
+      try {
+        let transactionResult: unknown = null;
+
+        if (integration?.shouldUseTransactions(resourceName, 'create')) {
+          // Await transaction request to check for failures
+          // This will throw TransactionFailureError if any transaction failed
+          transactionResult = await integration.createTransactionRequest(resourceName, 'create', data);
+        }
+        // Return optimistic item with transaction result attached
+        const returnValue = getOptimisticItem
+          ? getOptimisticItem(data)
+          : ({ ...data, [idField]: `temp-${Date.now()}` } as T);
+
+        // Attach transaction result for onSuccess callback
+        return { ...returnValue, __transactionResult: transactionResult } as T & { __transactionResult: unknown };
+      } catch (error) {
+        captureException(error, {
+          extra: { resourceName, context: 'useResource - create mutation' },
         });
       }
-      return { previous };
+    },
+    onMutate: async (newData) => {
+      try {
+        await queryClient.cancelQueries({ queryKey: [resourceName] });
+        const previous = queryClient.getQueryData([resourceName]);
+
+        if (optimisticConfig?.create) {
+          queryClient.setQueryData([resourceName], (old: T[] = []) => {
+            // Use getOptimisticItem if defined, otherwise fallback to spreading data
+            const item = getOptimisticItem
+              ? getOptimisticItem(newData)
+              : ({ ...newData, [idField]: `temp-${Date.now()}` } as T);
+            return optimisticConfig.create === 'prepend' ? [item, ...old] : [...old, item];
+          });
+        }
+
+        return { previous };
+      } catch (error) {
+        captureException(error, {
+          extra: { resourceName, context: 'useResource - optimistic create' },
+        });
+      }
     },
     onSuccess: (data) => {
-      resource.transactions?.onSuccess?.create?.(data);
+      // Pass the transaction result to the resource's onSuccess callback
+      const transactionResult = (data as T & { __transactionResult?: unknown }).__transactionResult;
+
+      resource.transactions?.onSuccess?.create?.(transactionResult ?? data);
     },
     onError: (err, newData, context) => {
       if (context?.previous) queryClient.setQueryData([resourceName], context.previous);
@@ -148,12 +173,18 @@ export function useResource<T>(resourceName: ResourceName, options?: ResourceOpt
 
   const updateMutation = useMutation({
     mutationFn: async ({ id, data }: { id: string; data: Partial<T> }) => {
+      let transactionResult: unknown = null;
+
       if (integration?.shouldUseTransactions(resourceName, 'update')) {
         // Await transaction request to check for failures
         // This will throw TransactionFailureError if any transaction failed
-        await integration.createTransactionRequest(resourceName, 'update', { [idField]: id, ...data });
+        transactionResult = await integration.createTransactionRequest(resourceName, 'update', {
+          [idField]: id,
+          ...data,
+        });
       }
-      return { [idField]: id, ...data } as T;
+
+      return { [idField]: id, ...data, __transactionResult: transactionResult } as T & { __transactionResult: unknown };
     },
     onMutate: async ({ id, data }) => {
       await queryClient.cancelQueries({ queryKey: [resourceName] });
@@ -164,6 +195,11 @@ export function useResource<T>(resourceName: ResourceName, options?: ResourceOpt
         );
       }
       return { previous };
+    },
+    onSuccess: (data, { id }) => {
+      const transactionResult = (data as T & { __transactionResult?: unknown }).__transactionResult;
+
+      resource.transactions?.onSuccess?.update?.(id, transactionResult ?? data);
     },
     onError: (err, { id, data }, context) => {
       if (context?.previous) queryClient.setQueryData([resourceName], context.previous);
@@ -243,13 +279,17 @@ export function useResource<T>(resourceName: ResourceName, options?: ResourceOpt
     failed: errorState.failedTransactions.length,
   };
 
+  const wrappedCreate = (data: Partial<T>) => {
+    createMutation.mutate(data);
+  };
+
   return {
     data: listQuery.data as T[] | undefined,
     isLoading: listQuery.isLoading,
     isFetching: listQuery.isFetching,
     isStale: listQuery.isStale,
     error: listQuery.error,
-    create: createMutation.mutate,
+    create: wrappedCreate,
     update: (id: string, data: Partial<T>) => updateMutation.mutate({ id, data }),
     delete: deleteMutation.mutate,
     batch,
