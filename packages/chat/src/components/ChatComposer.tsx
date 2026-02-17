@@ -120,6 +120,12 @@ export const ChatComposer: FC<ChatComposerProps> = ({
     const textarea = textareaRef.current;
     if (!textarea) return;
 
+    // If value is empty, keep at min height
+    if (!value) {
+      textarea.style.height = `${minTextareaHeight}px`;
+      return;
+    }
+
     // Reset to min height to get accurate scrollHeight for shrinking
     textarea.style.height = `${minTextareaHeight}px`;
 
