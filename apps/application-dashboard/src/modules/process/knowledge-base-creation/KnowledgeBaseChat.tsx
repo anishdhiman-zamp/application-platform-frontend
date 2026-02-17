@@ -51,6 +51,7 @@ interface KnowledgeBaseChatProps {
   processName?: string;
   showDefaultMessage?: boolean;
   onCreatorSopFileFound?: (filename: string) => void;
+  streamingEnabled?: boolean;
 }
 
 const KnowledgeBaseChat: FC<KnowledgeBaseChatProps> = ({
@@ -65,6 +66,7 @@ const KnowledgeBaseChat: FC<KnowledgeBaseChatProps> = ({
   processName,
   showDefaultMessage,
   onCreatorSopFileFound,
+  streamingEnabled = false,
 }) => {
   const fileDropHandlerRef = useRef<((files: FileList) => void) | null>(null);
   const currentUserName = useSelector((state: RootState) => state?.user?.user?.user_name);
@@ -111,12 +113,14 @@ const KnowledgeBaseChat: FC<KnowledgeBaseChatProps> = ({
     resourceId: processId,
     resourceType: ResourceType.PROCESS,
     conversationId: conversationId,
-    enableStreaming: true,
+    enableStreaming: streamingEnabled,
     setHeader: setHeader,
-    apiConfig: {
-      sendMessage: API_ENDPOINTS.POST_MESSAGE_V3,
-      createConversation: API_ENDPOINTS.CREATE_CONVERSATION_V3,
-    },
+    ...(streamingEnabled && {
+      apiConfig: {
+        sendMessage: API_ENDPOINTS.POST_MESSAGE_V3,
+        createConversation: API_ENDPOINTS.CREATE_CONVERSATION_V3,
+      },
+    }),
   });
 
   const { scrollContainerRef, showScrollButton, handleScroll, handleScrollToBottomClick } = useChatScroll({
@@ -275,12 +279,12 @@ const KnowledgeBaseChat: FC<KnowledgeBaseChatProps> = ({
             }
             handleAction={handleAction}
             isAnalysing={isAnalysing}
-            streamingState={chat.streamingState}
-            assistantAvatar={<NewPaceAvatar />}
-            showTimestamp
-            showCopy
-            alignUserRight
-            hideSenderName
+            streamingState={streamingEnabled ? chat.streamingState : undefined}
+            assistantAvatar={streamingEnabled ? <NewPaceAvatar /> : undefined}
+            showTimestamp={streamingEnabled}
+            showCopy={streamingEnabled}
+            alignUserRight={streamingEnabled}
+            hideSenderName={streamingEnabled}
             className='flex-1'
           >
             {status === ProcessStatus.BUILDING && (

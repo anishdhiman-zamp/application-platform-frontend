@@ -156,6 +156,7 @@ const CreateKnowledgeBasePageHome: FC<CreateKnowledgeBasePageHomeProps> = ({
           isDraftProcess={currentProcess?.status === ProcessStatus.DRAFT}
           showDefaultMessage={skipFilterConversations}
           onCreatorSopFileFound={setInitialSopFilename}
+          streamingEnabled
         />
       </div>
       <div className='w-full'>
