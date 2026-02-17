@@ -30,7 +30,14 @@ const UserDetailsProvider = () => {
       const defaultWorkspace = session?.organization_id;
       const user_role = session?.orgs?.[0]?.resource_audience_policies?.[0]?.privilege;
 
-      identifyPostHogUser(session.user_id, session?.user_email?.split('@')?.[1]);
+      const org = session?.orgs?.[0];
+
+      identifyPostHogUser(
+        session.user_id,
+        session?.user_email?.split('@')?.[1] || '', // Merchant (email domain only, no PII)
+        org?.organization_id,
+        org?.name,
+      );
 
       dispatch(setRoles([{ id: UserRoleIdType.USER, name: user_role }]));
       dispatch(setWorkspace(defaultWorkspace));

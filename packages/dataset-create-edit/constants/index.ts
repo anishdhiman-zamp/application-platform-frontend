@@ -87,6 +87,8 @@ export const DATASET_TOAST_MESSAGES = {
   NO_CHANGES_TO_SAVE: 'No changes to save',
   NO_PERMISSION_TO_EDIT_DATASET: "You don't have permission to edit this dataset",
   DUPLICATE_COLUMN_NAME: 'Column names must be unique',
+  INVALID_COLUMN_NAME_CHARS: 'Column name can only contain alphabets, numbers, and spaces',
+  FIX_ERRORS_BEFORE_CREATING: 'Please fix the error(s) before creating this dataset.',
 } as const;
 
 /** Radio options for timestamp default values */

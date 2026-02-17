@@ -118,15 +118,22 @@ export const ChatComposer: FC<ChatComposerProps> = ({
   // Auto-resize effect
   useEffect(() => {
     const textarea = textareaRef.current;
-    if (!textarea) return;
+    if (!textarea || shouldShowRecorder) return;
 
-    // Reset to min height to get accurate scrollHeight for shrinking
-    textarea.style.height = `${minTextareaHeight}px`;
+    // Use requestAnimationFrame to ensure DOM is ready after view switch
+    requestAnimationFrame(() => {
+      if (!value) {
+        textarea.style.height = `${minTextareaHeight}px`;
+        return;
+      }
 
-    // Calculate and set new height based on content
-    const newHeight = Math.min(Math.max(textarea.scrollHeight, minTextareaHeight), maxTextareaHeight);
-    textarea.style.height = `${newHeight}px`;
-  }, [value, minTextareaHeight, maxTextareaHeight]);
+      // Reset to auto to get accurate scrollHeight
+      textarea.style.height = 'auto';
+
+      const newHeight = Math.min(Math.max(textarea.scrollHeight, minTextareaHeight), maxTextareaHeight);
+      textarea.style.height = `${newHeight}px`;
+    });
+  }, [value, minTextareaHeight, maxTextareaHeight, shouldShowRecorder]);
 
   return (
     <div
@@ -196,7 +203,6 @@ export const ChatComposer: FC<ChatComposerProps> = ({
                 textareaClassName,
               )}
               style={{
-                height: `${minTextareaHeight}px`,
                 maxHeight: `${maxTextareaHeight}px`,
                 lineHeight: '18px',
                 ...textareaStyle,

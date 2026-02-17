@@ -16,7 +16,7 @@ import {
 } from '@zamp-platform/ui';
 import { cn } from '@zamp-platform/ui/utils';
 import { ThumbsDown } from 'lucide-react';
-import React, { FC, useCallback, useEffect, useMemo, useRef, useState } from 'react';
+import React, { FC, useCallback, useMemo, useRef, useState } from 'react';
 import { toast } from 'sonner';
 
 import { INPUT_FILE_FORMATS } from '@/types/common/mime';
@@ -70,6 +70,7 @@ const ChatFeedback: FC<ChatFeedbackProps> = ({
   onRecordingError,
 }) => {
   const isRejectingRef = useRef(false);
+  const transcriptInsertionIndexRef = useRef(-1);
 
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [issueType, setIssueType] = useState<string>('');
@@ -99,18 +100,22 @@ const ChatFeedback: FC<ChatFeedbackProps> = ({
     [getElevenLabsToken],
   );
 
-  const {
-    transcript,
-    isRecording,
-    startRecording,
-    stopRecording,
-    microphoneState,
-    connectionState,
-    microphone,
-    isCommitting,
-  } = useTranscription({
-    adapter: transcriptionAdapter,
-  });
+  const handleTranscriptChunk = useCallback((chunk: string) => {
+    if (isRejectingRef.current) return;
+
+    setDetails((prev) => {
+      if (transcriptInsertionIndexRef.current === -1) {
+        transcriptInsertionIndexRef.current = prev.length > 0 ? prev.length + 1 : 0;
+      }
+      return prev ? `${prev} ${chunk}` : chunk;
+    });
+  }, []);
+
+  const { isRecording, startRecording, stopRecording, microphoneState, connectionState, microphone, isCommitting } =
+    useTranscription({
+      adapter: transcriptionAdapter,
+      onTranscriptChunk: handleTranscriptChunk,
+    });
 
   const {
     files: attachments,
@@ -220,6 +225,7 @@ const ChatFeedback: FC<ChatFeedbackProps> = ({
     }
 
     isRejectingRef.current = false;
+    transcriptInsertionIndexRef.current = -1;
     await startRecording();
   };
 
@@ -235,22 +241,17 @@ const ChatFeedback: FC<ChatFeedbackProps> = ({
   const handleRejectRecording = () => {
     try {
       isRejectingRef.current = true;
-      setDetails((prev) => prev.replace(transcript, '').trim());
+      setDetails((prev) => {
+        if (transcriptInsertionIndexRef.current === -1) return prev;
+        return prev.slice(0, transcriptInsertionIndexRef.current).trim();
+      });
+      transcriptInsertionIndexRef.current = -1;
       stopRecording();
     } catch {
       toast.error('Failed to stop recording. Please try again.');
       onRecordingError?.();
     }
   };
-
-  useEffect(() => {
-    if (isRejectingRef.current) {
-      return;
-    }
-    if (transcript) {
-      setDetails((prev) => (prev ? `${prev} ${transcript}` : transcript));
-    }
-  }, [transcript]);
 
   return (
     <>

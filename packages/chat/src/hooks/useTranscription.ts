@@ -14,6 +14,7 @@ import { MicrophoneState } from './useMicrophoneRecorder';
 
 export interface UseTranscriptionOptions {
   adapter: TranscriptionAdapter;
+  onTranscriptChunk?: (chunk: string) => void;
 }
 
 const DEFAULT_OPTIONS: TranscriptionOptions = {
@@ -28,20 +29,22 @@ const noopGetToken = async () => '';
  * Hook to manage real-time audio transcription.
  * Coordinates microphone recording and ElevenLabs WebSocket connection.
  */
-export const useTranscription = ({ adapter }: UseTranscriptionOptions): UseTranscriptionReturn => {
+export const useTranscription = ({ adapter, onTranscriptChunk }: UseTranscriptionOptions): UseTranscriptionReturn => {
   const [isRecording, setIsRecording] = useState(false);
-  const [transcript, setTranscript] = useState('');
 
   const stateRefs = useRef({
     isStarting: false,
     stopRequested: false,
   });
 
-  const appendTranscript = useCallback((data: { text: string }) => {
-    if (data.text) {
-      setTranscript((prev) => (prev ? `${prev} ${data.text}` : data.text));
-    }
-  }, []);
+  const appendTranscript = useCallback(
+    (data: { text: string }) => {
+      if (data.text) {
+        onTranscriptChunk?.(data.text);
+      }
+    },
+    [onTranscriptChunk],
+  );
 
   const {
     connectToElevenLabs,
@@ -66,7 +69,6 @@ export const useTranscription = ({ adapter }: UseTranscriptionOptions): UseTrans
       stateRefs.current.isStarting = true;
       stateRefs.current.stopRequested = false;
       setIsRecording(true);
-      setTranscript('');
 
       try {
         await setupMicrophone();
@@ -104,7 +106,6 @@ export const useTranscription = ({ adapter }: UseTranscriptionOptions): UseTrans
   const connectionState: SocketState = isConnected ? SOCKET_STATES.open : SOCKET_STATES.closed;
 
   return {
-    transcript,
     isRecording,
     startRecording,
     stopRecording,

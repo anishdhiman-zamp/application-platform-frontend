@@ -7,6 +7,8 @@ import { RootState } from 'store';
 import { getLayoutConfig } from 'utils/layout.config';
 import { PendingDatasetProvider } from '@/context/pendingDataset.context';
 import { PagesAndProcessesProvider } from '@/contexts/PagesAndProcessesContext';
+// eslint-disable-next-line import/no-named-as-default
+import usePostHogHeartbeat from '@/hooks/usePostHogHeartbeat';
 import Sidebar from 'components/layouts/dashboard-layout/sidebar';
 import Topbar from 'components/layouts/dashboard-layout/topbar/TopBar';
 import LayoutChildren from 'components/layouts/LayoutChildren';
@@ -17,6 +19,7 @@ interface LayoutWrapperProps {
 }
 
 export default function LayoutWrapper({ children }: LayoutWrapperProps) {
+  usePostHogHeartbeat(); // Add heartbeat tracking
   const pathname = usePathname() || '/';
   const { isSidebarOpen } = useAppSelector((state: RootState) => state.layoutConfig);
   const { showTopbar, showSidebar } = getLayoutConfig(pathname);
