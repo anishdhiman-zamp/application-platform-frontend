@@ -28,6 +28,7 @@ interface IDatasetColumDetailsProps {
   allColumns?: ColumnDataType[]; // All columns to check for duplicates
   skipInitialAnimation?: boolean; // Skip animation for default/initial column
   canEdit?: boolean; // Whether the user can edit this column (admin/editor or creation mode)
+  isCreating?: boolean; // Whether the dataset is in creation mode (new dataset)
 }
 
 const DatasetColumDetails: FC<IDatasetColumDetailsProps> = memo(
@@ -40,6 +41,7 @@ const DatasetColumDetails: FC<IDatasetColumDetailsProps> = memo(
     allColumns = [],
     skipInitialAnimation = false,
     canEdit = true,
+    isCreating = false,
   }) => {
     const inputRef = useRef<HTMLInputElement | null>(null);
     const [isModalOpen, setIsModalOpen] = useState(false);
@@ -64,6 +66,11 @@ const DatasetColumDetails: FC<IDatasetColumDetailsProps> = memo(
       // Check if empty
       if (!trimmedName) {
         return DATASET_TOAST_MESSAGES.COLUMN_NAME_EMPTY;
+      }
+
+      // In creation mode, check for invalid characters (only alphabets, numbers, and spaces allowed)
+      if (isCreating && /[^a-zA-Z0-9 ]/.test(trimmedName)) {
+        return DATASET_TOAST_MESSAGES.INVALID_COLUMN_NAME_CHARS;
       }
 
       // Check for duplicates (case-insensitive)

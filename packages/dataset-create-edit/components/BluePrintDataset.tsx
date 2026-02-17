@@ -645,9 +645,17 @@ const BluePrintDataset: FC<BluePrintDatasetProps> = ({
     const duplicateNames = columnNames.filter((name, index) => columnNames.indexOf(name) !== index);
     const hasDuplicateNames = duplicateNames.length > 0;
 
+    // In creation mode, validate that column names only contain alphabets, numbers, and spaces
+    const hasInvalidColumnNameChars =
+      isCreating &&
+      currentColumns.some((col) => {
+        const columnName = col.column_name?.trim();
+        return columnName && /[^a-zA-Z0-9 ]/.test(columnName);
+      });
+
     // Show unified error message if there are any validation errors
-    if (hasEmptyColumnName || hasDuplicateNames) {
-      toast.error('Please fix the error(s) before creating this dataset.');
+    if (hasEmptyColumnName || hasDuplicateNames || hasInvalidColumnNameChars) {
+      toast.error(DATASET_TOAST_MESSAGES.FIX_ERRORS_BEFORE_CREATING);
       return;
     }
 
@@ -1246,6 +1254,7 @@ const BluePrintDataset: FC<BluePrintDatasetProps> = ({
                         allColumns={columns}
                         skipInitialAnimation={isDefaultColumn}
                         canEdit
+                        isCreating={isCreating}
                       />
                     );
                   })}

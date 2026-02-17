@@ -195,7 +195,6 @@ const DatasetByIdInner: FC<DatasetByIdProps> = ({
   const filters = decodeURIComponent(searchParams?.get('filters') ?? '');
   const processId = params?.processId as string;
   const activityId = params?.activityId;
-  const showFileImports = filterConfigData?.config?.is_file_import_enabled;
   const tabFromUrl = searchParams?.get('tab');
   const isDatasetCreationModeEnabled = useCheckDatasetCreationEnabled();
   const isValidTab = tabFromUrl === DatasetTabsTypes.BLUEPRINT || tabFromUrl === DatasetTabsTypes.PREVIEW;
@@ -819,7 +818,7 @@ const DatasetByIdInner: FC<DatasetByIdProps> = ({
                 disable={isDatasetCreationModeEnabled}
               />
             )}
-            {!isReadOnly && showFileImports && (
+            {!isReadOnly && (
               <ImportDataset
                 onRefetch={handleRefetchDataset}
                 setShowAiTransformationStatus={setShowAiTransformationStatus}
