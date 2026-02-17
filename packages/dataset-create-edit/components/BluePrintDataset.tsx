@@ -645,9 +645,9 @@ const BluePrintDataset: FC<BluePrintDatasetProps> = ({
     const duplicateNames = columnNames.filter((name, index) => columnNames.indexOf(name) !== index);
     const hasDuplicateNames = duplicateNames.length > 0;
 
-    // In creation mode, validate that column names only contain alphabets, numbers, and spaces
+    // In creation mode (source=creation), validate that column names only contain alphabets, numbers, and spaces
     const hasInvalidColumnNameChars =
-      isCreating &&
+      isCreationMode &&
       currentColumns.some((col) => {
         const columnName = col.column_name?.trim();
         return columnName && /[^a-zA-Z0-9 ]/.test(columnName);
@@ -1254,7 +1254,7 @@ const BluePrintDataset: FC<BluePrintDatasetProps> = ({
                         allColumns={columns}
                         skipInitialAnimation={isDefaultColumn}
                         canEdit
-                        isCreating={isCreating}
+                        isCreating={isCreationMode}
                       />
                     );
                   })}
