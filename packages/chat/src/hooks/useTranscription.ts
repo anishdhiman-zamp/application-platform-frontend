@@ -14,7 +14,6 @@ import { MicrophoneState } from './useMicrophoneRecorder';
 
 export interface UseTranscriptionOptions {
   adapter: TranscriptionAdapter;
-  /** Callback fired with only the new text chunk when transcript is updated */
   onTranscriptChunk?: (chunk: string) => void;
 }
 

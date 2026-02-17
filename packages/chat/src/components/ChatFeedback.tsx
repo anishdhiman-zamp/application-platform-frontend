@@ -70,7 +70,6 @@ const ChatFeedback: FC<ChatFeedbackProps> = ({
   onRecordingError,
 }) => {
   const isRejectingRef = useRef(false);
-  // Track accumulated transcript for rejection - stores what we've added to details
   const accumulatedTranscriptRef = useRef('');
 
   const [isModalOpen, setIsModalOpen] = useState(false);
@@ -101,12 +100,10 @@ const ChatFeedback: FC<ChatFeedbackProps> = ({
     [getElevenLabsToken],
   );
 
-  // Handle incremental transcript chunks - appends only new text to the details
   const handleTranscriptChunk = useCallback((chunk: string) => {
     if (isRejectingRef.current) return;
 
     setDetails((prev) => (prev ? `${prev} ${chunk}` : chunk));
-    // Track what we've added for potential rejection
     accumulatedTranscriptRef.current = accumulatedTranscriptRef.current
       ? `${accumulatedTranscriptRef.current} ${chunk}`
       : chunk;
@@ -242,7 +239,6 @@ const ChatFeedback: FC<ChatFeedbackProps> = ({
   const handleRejectRecording = () => {
     try {
       isRejectingRef.current = true;
-      // Remove the accumulated transcript we added during this recording session
       setDetails((prev) => prev.replace(accumulatedTranscriptRef.current, '').trim());
       accumulatedTranscriptRef.current = '';
       stopRecording();

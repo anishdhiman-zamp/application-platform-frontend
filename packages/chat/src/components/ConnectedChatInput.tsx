@@ -81,7 +81,6 @@ export const ConnectedChatInput: FC<ConnectedChatInputProps> = ({
 }: ConnectedChatInputProps) => {
   const fileInputRef = useRef<HTMLInputElement>(null);
   const isRejectingRef = useRef(false);
-  // Track accumulated transcript for rejection - stores what we've added to value
   const accumulatedTranscriptRef = useRef('');
 
   // Use the app's baseApi for speech-to-text token fetching
@@ -136,13 +135,11 @@ export const ConnectedChatInput: FC<ConnectedChatInputProps> = ({
     isDisabled,
   });
 
-  // Handle incremental transcript chunks - appends only new text to the input value
   const handleTranscriptChunk = useCallback(
     (chunk: string) => {
       if (isRejectingRef.current) return;
 
       setValue((prev) => (prev ? `${prev} ${chunk}` : chunk));
-      // Track what we've added for potential rejection
       accumulatedTranscriptRef.current = accumulatedTranscriptRef.current
         ? `${accumulatedTranscriptRef.current} ${chunk}`
         : chunk;
@@ -203,7 +200,6 @@ export const ConnectedChatInput: FC<ConnectedChatInputProps> = ({
   const handleAccept = () => {
     try {
       stopRecording();
-      // No need to append transcript here - onTranscriptChunk already syncs it incrementally
     } catch {
       toast.error('Failed to stop recording. Please try again.');
       onRecordingError?.();
@@ -213,7 +209,6 @@ export const ConnectedChatInput: FC<ConnectedChatInputProps> = ({
   const handleReject = () => {
     try {
       isRejectingRef.current = true;
-      // Remove the accumulated transcript we added during this recording session
       setValue((prev) => prev.replace(accumulatedTranscriptRef.current, '').trim());
       accumulatedTranscriptRef.current = '';
       stopRecording();
