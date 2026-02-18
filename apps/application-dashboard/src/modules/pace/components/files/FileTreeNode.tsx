@@ -93,7 +93,7 @@ const FileTreeNode = ({ node, depth, expandedPaths, selectedPath, onToggleExpand
           'hover:bg-GRAY_100 flex cursor-pointer items-center gap-2 rounded-md py-2 pr-1',
           isSelected && 'bg-GRAY_300 hover:bg-GRAY_300',
         )}
-        style={{ paddingLeft: `${depth * 16 + 8}px` }}
+        style={{ paddingLeft: `${depth * 24 + 8}px` }}
       >
         {isFolder ? (
           <Button

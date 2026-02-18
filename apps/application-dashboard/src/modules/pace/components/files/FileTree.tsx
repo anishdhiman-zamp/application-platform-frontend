@@ -31,28 +31,13 @@ const FileTree = ({
     return map;
   }, [files]);
 
+  const rawTree = useMemo(() => buildFileTree(files), [files]);
+
   const treeData = useMemo(() => {
-    const tree = buildFileTree(files);
-    const filtered = filterTreeNodes(tree, searchQuery);
-    const sorted = sortTreeNodes(filtered, sortBy, sortDirection);
+    const filtered = filterTreeNodes(rawTree, searchQuery);
 
-    return sorted;
-  }, [files, searchQuery, sortBy, sortDirection]);
-
-  useEffect(() => {
-    if (searchQuery.trim()) {
-      const tree = buildFileTree(files);
-      const pathsToExpand = getExpandedPathsForSearch(tree, searchQuery);
-
-      setExpandedPaths((prev) => {
-        const newSet = new Set(prev);
-
-        pathsToExpand.forEach((path) => newSet.add(path));
-
-        return newSet;
-      });
-    }
-  }, [searchQuery, files]);
+    return sortTreeNodes(filtered, sortBy, sortDirection);
+  }, [rawTree, searchQuery, sortBy, sortDirection]);
 
   const handleToggleExpand = useCallback((path: string) => {
     setExpandedPaths((prev) => {
@@ -80,6 +65,20 @@ const FileTree = ({
     },
     [onSelectFile, filesMap],
   );
+
+  useEffect(() => {
+    if (searchQuery.trim()) {
+      const pathsToExpand = getExpandedPathsForSearch(rawTree, searchQuery);
+
+      setExpandedPaths((prev) => {
+        const newSet = new Set(prev);
+
+        pathsToExpand.forEach((path) => newSet.add(path));
+
+        return newSet;
+      });
+    }
+  }, [searchQuery, rawTree]);
 
   if (treeData.length === 0) {
     return (

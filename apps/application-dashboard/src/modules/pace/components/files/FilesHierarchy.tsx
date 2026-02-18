@@ -3,9 +3,9 @@
 import { useState } from 'react';
 import { Button } from '@zamp-platform/ui';
 import { File, Folder } from 'lucide-react';
-import type { FileItem } from 'modules/pace/components/files/file-tree.types';
+import type { FileItem, SortDirection, SortOption } from 'modules/pace/components/files/file-tree.types';
 import { MOCK_FILES } from 'modules/pace/components/files/files.constants';
-import FilesToolbar, { SortDirection, SortOption } from 'modules/pace/components/files/FilesToolbar';
+import FilesToolbar from 'modules/pace/components/files/FilesToolbar';
 import FileTree from 'modules/pace/components/files/FileTree';
 
 interface FilesHierarchyProps {

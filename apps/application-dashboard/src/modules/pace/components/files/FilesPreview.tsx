@@ -6,6 +6,7 @@ import {
   getFileExtension,
   getFileTypeLabel,
 } from 'modules/pace/components/files/file-tree.utils';
+import Image from 'next/image';
 
 const FilesPreview = ({ selectedFile }: FilesPreviewProps) => {
   if (!selectedFile || selectedFile.type === FILE_TYPE.DIRECTORY) {
@@ -14,7 +15,14 @@ const FilesPreview = ({ selectedFile }: FilesPreviewProps) => {
         <div className='flex h-full flex-col items-center justify-start gap-y-8 p-3'>
           <div className='border-GRAY_400 rounded-xl border border-dashed p-1.5'>
             <div className='aspect-5/4 w-full overflow-hidden rounded-lg'>
-              <img src='/images/files/file-empty-state.png' alt='File Empty State' className='size-full object-cover' />
+              <Image
+                src='/images/files/file-empty-state.png'
+                alt='File Empty State'
+                className='size-full object-cover'
+                width={400}
+                height={320}
+                unoptimized
+              />
             </div>
           </div>
           <p className='f-14-500 text-GRAY_700'>Your preview will appear here. Until then, breathe.</p>
