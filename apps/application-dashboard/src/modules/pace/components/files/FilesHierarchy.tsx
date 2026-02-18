@@ -44,13 +44,7 @@ const FilesHierarchy = ({ onSelectFile, selectedFile }: FilesHierarchyProps) => 
       </div>
 
       {/* File and Folder Create */}
-      <div
-        className='absolute right-0 bottom-0 left-0 flex w-full items-center justify-center px-3 py-4'
-        style={{
-          background: 'linear-gradient(0deg, #EAEAEA 0%, rgba(255, 255, 255, 0.00) 100%)',
-          backdropFilter: 'blur(12.9px)',
-        }}
-      >
+      <div className='from-GRAY_200 absolute right-0 bottom-0 left-0 flex w-full items-center justify-center bg-linear-to-t to-transparent px-3 py-4 backdrop-blur-md'>
         <Button
           variant='outline'
           size='medium'
