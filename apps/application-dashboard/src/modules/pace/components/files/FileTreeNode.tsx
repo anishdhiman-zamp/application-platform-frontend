@@ -64,6 +64,7 @@ const FileTreeNode = ({ node, depth, expandedPaths, selectedPath, onToggleExpand
             top: contextMenuPosition.y,
           }}
         >
+          {/* TODO: Add onClick handlers when file actions API is integrated */}
           {filteredActions.map((action) => (
             <DropdownMenuItem
               key={action.id}
