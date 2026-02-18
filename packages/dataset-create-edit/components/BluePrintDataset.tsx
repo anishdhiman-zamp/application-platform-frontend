@@ -7,6 +7,7 @@ import { useResource } from '@zamp-platform/battalion';
 import {
   deleteColumnConfigForDataset,
   getColumnConfigForDataset,
+  getOrgColumnConfigs,
   setColumnConfigForDataset,
 } from '@zamp-platform/dataset-create-edit';
 import { Button, toast } from '@zamp-platform/ui';
@@ -16,13 +17,18 @@ import React, { FC, useCallback, useEffect, useMemo, useRef, useState } from 're
 
 import { usePendingDatasetContextOptional } from '@/context/pendingDataset.context';
 import { UNTITLED_DATASET_NAME } from '@/modules/data/data.constants';
+import { defaultFnType } from '@/types/commonTypes';
 import { DATASET_CREATED_EVENT, DATASET_UPDATED_EVENT } from '@/utils/events';
 
 import { DATASET_TOAST_MESSAGES, DatasetTabsTypes, PREVIEW_DATASET_ID, SYSTEM_COLUMNS } from '../constants';
 import { useDatasetColumnContext } from '../context/DatasetColumnContext';
 import { useCheckDatasetCreationEnabled } from '../hooks/useCheckDatasetCreationEnabled';
 import { useDragAndDrop } from '../hooks/useDragAndDrop';
-import { normalizeTypeForComparison } from '../utils/columnConversion';
+import {
+  mapSchemaTypeToColumnType,
+  normalizeTypeForComparison,
+  snakeCaseToDisplayName,
+} from '../utils/columnConversion';
 import ColumnTypeDropdown from './ColumnTypeDropdown';
 import DatasetColumDetails from './DatasetColumDetails';
 import DatasetColumnHeader from './DatasetColumnHeader';
@@ -46,7 +52,7 @@ interface BluePrintDatasetProps {
   datasetId?: string; // If provided, it's an existing dataset
   isCreating?: boolean; // If true, we're in creation mode
   title?: string; // Dataset title (from breadcrumb or parent)
-  onTransactionSuccess?: () => void; // Callback when transaction succeeds
+  onTransactionSuccess?: defaultFnType; // Callback when transaction succeeds
 }
 
 const BluePrintDataset: FC<BluePrintDatasetProps> = ({
@@ -103,7 +109,8 @@ const BluePrintDataset: FC<BluePrintDatasetProps> = ({
     syncWithLocalStorage,
     getColumnChanges,
     resetOriginalColumns,
-  } = useDatasetColumnContext(); // Get columns from context
+    initializeColumns,
+  } = useDatasetColumnContext();
 
   const columns = getBlueprintColumns();
   const isInitialMountRef = useRef(true);
@@ -133,7 +140,10 @@ const BluePrintDataset: FC<BluePrintDatasetProps> = ({
           }
         }
       } catch (error) {
-        console.error('[actualTitle] Error reading from localStorage:', error);
+        captureException(error, {
+          tags: { source: 'BluePrintDataset', context: 'actualTitle_localStorage' },
+          extra: { datasetId, storageKey },
+        });
         if (cachedLocalStorageTitleRef.current) {
           return cachedLocalStorageTitleRef.current;
         }
@@ -155,7 +165,7 @@ const BluePrintDataset: FC<BluePrintDatasetProps> = ({
 
     // 3. Use title prop (which comes from pendingTitle context when user edits)
     const currentTitleProp = title;
-    if (currentTitleProp && currentTitleProp.trim() !== '' && currentTitleProp.trim() !== 'Untitled Dataset') {
+    if (currentTitleProp && currentTitleProp.trim() !== '' && currentTitleProp.trim() !== UNTITLED_DATASET_NAME) {
       return currentTitleProp;
     }
 
@@ -173,8 +183,8 @@ const BluePrintDataset: FC<BluePrintDatasetProps> = ({
 
     // Pre-populate cache from localStorage on initial load
     if (!prevDatasetIdForCacheRef.current && !cachedLocalStorageTitleRef.current) {
+      const storageKey = datasetId.trim() !== '' ? datasetId : isCreating ? PREVIEW_DATASET_ID : null;
       try {
-        const storageKey = datasetId.trim() !== '' ? datasetId : isCreating ? PREVIEW_DATASET_ID : null;
         if (storageKey) {
           const datasetData = getColumnConfigForDataset(storageKey);
           if (datasetData && typeof datasetData === 'object' && 'dataset_name' in datasetData) {
@@ -185,7 +195,10 @@ const BluePrintDataset: FC<BluePrintDatasetProps> = ({
           }
         }
       } catch (error) {
-        console.error('[actualTitle] Error pre-populating cache:', error);
+        captureException(error, {
+          tags: { source: 'BluePrintDataset', context: 'syncCachedTitle_prepopulateCache' },
+          extra: { datasetId, storageKey },
+        });
       }
     }
 
@@ -296,7 +309,7 @@ const BluePrintDataset: FC<BluePrintDatasetProps> = ({
     if (!storageKey) return;
 
     const currentTitle = pendingTitleContext?.pendingTitle;
-    if (!currentTitle || currentTitle.trim() === '' || currentTitle.trim() === 'Untitled Dataset') return;
+    if (!currentTitle || currentTitle.trim() === '' || currentTitle.trim() === UNTITLED_DATASET_NAME) return;
 
     try {
       const existingData = getColumnConfigForDataset(storageKey);
@@ -316,7 +329,10 @@ const BluePrintDataset: FC<BluePrintDatasetProps> = ({
 
       cachedLocalStorageTitleRef.current = currentTitle.trim();
     } catch (error) {
-      console.error('[BluePrintDataset] Error saving title to localStorage:', error);
+      captureException(error, {
+        tags: { source: 'BluePrintDataset', context: 'saveTitleToLocalStorage' },
+        extra: { datasetId, storageKey, currentTitle: pendingTitleContext?.pendingTitle },
+      });
     }
   }, [datasetId, isCreating, pendingTitleContext?.pendingTitle]);
 
@@ -435,19 +451,19 @@ const BluePrintDataset: FC<BluePrintDatasetProps> = ({
         }));
 
       // Use context columns if available, otherwise fallback to localStorage
-      const transformedLocalStorageColumns =
-        currentColumnsFromContext.length > 0
-          ? currentColumnsFromContext
-          : localStorageColumns
-              .filter((col) => !SYSTEM_COLUMNS.includes(col.colId))
-              .map((col) => ({
-                colId: col.colId, // Keep colId for matching with backend
-                columnName: normalizeColumnName(col.columnName || ''),
-                columnType: col.columnType || '',
-                isVisible: col.isVisible,
-                isRequired: col.isRequired || false,
-                defaultValue: col.defaultValue ?? null,
-              }));
+      const usingContext = currentColumnsFromContext.length > 0;
+      const transformedLocalStorageColumns = usingContext
+        ? currentColumnsFromContext
+        : localStorageColumns
+            .filter((col) => !SYSTEM_COLUMNS.includes(col.colId))
+            .map((col) => ({
+              colId: col.colId, // Keep colId for matching with backend
+              columnName: normalizeColumnName(col.columnName || ''),
+              columnType: col.columnType || '',
+              isVisible: col.isVisible,
+              isRequired: col.isRequired || false,
+              defaultValue: col.defaultValue ?? null,
+            }));
 
       // If localStorage is empty but backend has data, there's a diff
       if (!localStorageData || localStorageColumns.length === 0) {
@@ -467,37 +483,64 @@ const BluePrintDataset: FC<BluePrintDatasetProps> = ({
         return true;
       }
 
-      // Match columns by colId (stable backend ID) - this ensures we match correctly even if column name changes
-      for (const beCol of transformedBackendColumns) {
-        // Find matching localStorage column by colId (stable ID, not by name)
-        const matchingLsCol = transformedLocalStorageColumns.find((lsCol) => {
-          return lsCol.colId?.toLowerCase() === beCol.colId.toLowerCase();
-        });
+      // Two-pass matching: first by colId, then fallback to columnName for FE temp IDs
+      // This handles the race condition where context/localStorage still has temp IDs
+      const FE_TEMP_ID_PATTERN = /^col_\d+_/;
+      const diffs: string[] = [];
+      const matchedLocalIndices = new Set<number>();
 
-        if (!matchingLsCol) {
-          return true;
+      for (const beCol of transformedBackendColumns) {
+        // Pass 1: Try exact colId match
+        let matchIdx = transformedLocalStorageColumns.findIndex(
+          (lsCol) => lsCol.colId?.toLowerCase() === beCol.colId.toLowerCase(),
+        );
+
+        // Pass 2: If no colId match, try matching by columnName against temp-ID columns only
+        if (matchIdx === -1) {
+          matchIdx = transformedLocalStorageColumns.findIndex(
+            (lsCol, idx) =>
+              !matchedLocalIndices.has(idx) &&
+              FE_TEMP_ID_PATTERN.test(lsCol.colId) &&
+              lsCol.columnName === beCol.columnName,
+          );
         }
+
+        if (matchIdx === -1) {
+          diffs.push(`BE column "${beCol.colId}" not found in local`);
+          continue;
+        }
+
+        matchedLocalIndices.add(matchIdx);
+        const matchingLsCol = transformedLocalStorageColumns[matchIdx];
 
         // Compare columnName - normalized comparison
         if (beCol.columnName !== matchingLsCol.columnName) {
-          return true;
+          diffs.push(
+            `columnName mismatch for "${beCol.colId}": BE="${beCol.columnName}" vs local="${matchingLsCol.columnName}"`,
+          );
         }
 
         // Compare columnType - normalize using mapSchemaTypeToColumnType to handle equivalent types
         const beType = normalizeTypeForComparison(beCol.columnType || '');
         const lsType = normalizeTypeForComparison(matchingLsCol.columnType || '');
         if (beType !== lsType) {
-          return true;
+          diffs.push(
+            `columnType mismatch for "${beCol.colId}": BE="${beCol.columnType}"(${beType}) vs local="${matchingLsCol.columnType}"(${lsType})`,
+          );
         }
 
         // Compare isVisible
         if (beCol.isVisible !== matchingLsCol.isVisible) {
-          return true;
+          diffs.push(
+            `isVisible mismatch for "${beCol.colId}": BE=${beCol.isVisible} vs local=${matchingLsCol.isVisible}`,
+          );
         }
 
         // Compare isRequired
         if (beCol.isRequired !== matchingLsCol.isRequired) {
-          return true;
+          diffs.push(
+            `isRequired mismatch for "${beCol.colId}": BE=${beCol.isRequired} vs local=${matchingLsCol.isRequired}`,
+          );
         }
 
         // Compare defaultValue
@@ -508,23 +551,29 @@ const BluePrintDataset: FC<BluePrintDatasetProps> = ({
             ? null
             : String(matchingLsCol.defaultValue);
         if (beDefault !== lsDefault) {
-          return true;
+          diffs.push(
+            `defaultValue mismatch for "${beCol.colId}": BE=${JSON.stringify(beDefault)} vs local=${JSON.stringify(lsDefault)}`,
+          );
         }
       }
 
-      // Check for columns in localStorage that aren't in backend
-      for (const lsCol of transformedLocalStorageColumns) {
-        const foundMatch = transformedBackendColumns.some((beCol) => {
-          return lsCol.colId?.toLowerCase() === beCol.colId.toLowerCase();
-        });
-
-        if (!foundMatch) {
-          return true;
+      // Check for columns in localStorage that aren't matched to any backend column
+      for (let i = 0; i < transformedLocalStorageColumns.length; i++) {
+        if (!matchedLocalIndices.has(i)) {
+          diffs.push(`local column "${transformedLocalStorageColumns[i].colId}" not found in BE`);
         }
       }
 
-      return false; // No differences found
-    } catch {
+      if (diffs.length > 0) {
+        return true;
+      }
+
+      return false;
+    } catch (error) {
+      captureException(error, {
+        tags: { source: 'BluePrintDataset', context: 'hasBackendLocalStorageDiff' },
+        extra: { datasetId, isCreating },
+      });
       return false; // On error, assume no diff to be safe
     }
   }, [datasetId, isCreating, datasets, columns, pendingTitleContext?.pendingTitle]);
@@ -534,7 +583,7 @@ const BluePrintDataset: FC<BluePrintDatasetProps> = ({
     if (!datasetId) return false;
 
     // Check if dataset exists in backend
-    const datasetExists = datasets?.some((d) => d.id === datasetId);
+    const datasetExists = datasets?.some((d) => d?.id === datasetId);
 
     // If dataset exists in backend, always use diff logic to check for unsaved changes
     if (datasetExists) {
@@ -561,15 +610,12 @@ const BluePrintDataset: FC<BluePrintDatasetProps> = ({
 
   const isDuplicateDatasetName = useCallback(
     (nameToCheck: string): boolean => {
-      if (!nameToCheck || nameToCheck === 'Untitled Dataset') return false;
+      if (!nameToCheck || nameToCheck === UNTITLED_DATASET_NAME) return false;
 
       const normalizedName = nameToCheck.trim().toLowerCase();
 
       // Priority 1: Check localStorage dataset_unique_key_name (org-scoped)
-      // Transform dataset_unique_key_name: remove schema prefix, replace _ with space, then compare
       try {
-        // eslint-disable-next-line @typescript-eslint/no-require-imports
-        const { getOrgColumnConfigs } = require('@zamp-platform/utils');
         const orgConfigs = getOrgColumnConfigs() as Record<string, unknown>;
 
         const existingNames: string[] = [];
@@ -600,7 +646,10 @@ const BluePrintDataset: FC<BluePrintDatasetProps> = ({
           return true;
         }
       } catch (error) {
-        console.error('Failed to check for duplicate dataset name in localStorage:', error);
+        captureException(error, {
+          tags: { source: 'BluePrintDataset', context: 'isDuplicateDatasetName_localStorage' },
+          extra: { datasetId, nameToCheck },
+        });
       }
 
       // Priority 2: Always check datasets listing from Battalion as well
@@ -661,7 +710,7 @@ const BluePrintDataset: FC<BluePrintDatasetProps> = ({
 
     // For new datasets, prioritize actualTitle (from localStorage) if userInputTitle is empty or "Untitled Dataset"
     const datasetTitle =
-      isCreating && (!userInputTitle || userInputTitle.trim() === '' || userInputTitle.trim() === 'Untitled Dataset')
+      isCreating && (!userInputTitle || userInputTitle.trim() === '' || userInputTitle.trim() === UNTITLED_DATASET_NAME)
         ? actualTitle // For new datasets, use localStorage title if userInputTitle is empty/default
         : userInputTitle && userInputTitle.trim() !== ''
           ? userInputTitle.trim()
@@ -690,14 +739,17 @@ const BluePrintDataset: FC<BluePrintDatasetProps> = ({
             originalTitle = (datasetData as { dataset_name?: string }).dataset_name || '';
           }
         } catch (error) {
-          console.error('[handlePreviewDataset] Error reading from localStorage:', error);
+          captureException(error, {
+            tags: { source: 'BluePrintDataset', context: 'handlePreviewDataset_getOriginalTitle' },
+            extra: { datasetId },
+          });
         }
       }
 
       // Compare userInputTitle (from pendingTitle context - user's current input) with localStorage
       // userInputTitle reflects what the user typed in the breadcrumb, so compare that directly
       const currentTitleForComparison =
-        userInputTitle && userInputTitle.trim() !== '' && userInputTitle.trim() !== 'Untitled Dataset'
+        userInputTitle && userInputTitle.trim() !== '' && userInputTitle.trim() !== UNTITLED_DATASET_NAME
           ? userInputTitle.trim()
           : datasetTitle.trim();
 
@@ -742,7 +794,7 @@ const BluePrintDataset: FC<BluePrintDatasetProps> = ({
     } else if (isCreating) {
       // CREATE FLOW: New dataset, call create transaction
       // Block creation with default "Untitled Dataset" name
-      if (!datasetTitle || datasetTitle.trim() === 'Untitled Dataset') {
+      if (!datasetTitle || datasetTitle.trim() === UNTITLED_DATASET_NAME) {
         toast.error(DATASET_TOAST_MESSAGES.DUPLICATE_DATASET_NAME);
         return;
       }
@@ -753,8 +805,6 @@ const BluePrintDataset: FC<BluePrintDatasetProps> = ({
       }
 
       // Transform blueprint columns to API format
-      // When nullable is false (required), include the default value
-      // When nullable is true (not required), default is null
       const apiColumns = columns.map((col) => ({
         name: col.column_name,
         type: col.column_type.toUpperCase(),
@@ -994,13 +1044,31 @@ const BluePrintDataset: FC<BluePrintDatasetProps> = ({
             dataset_unique_key_name: existingUniqueKeyName,
             columns: restoredColumns,
           });
+
+          // Re-initialize context columns from BE data so context matches localStorage
+          const contextColumns = schemaColumns.map((schemaCol) => {
+            const displayConfig = displayConfigMap.get(schemaCol.name.toLowerCase());
+            const columnName = displayConfig?.alias || snakeCaseToDisplayName(schemaCol.name);
+
+            return {
+              id: schemaCol.name,
+              column_name: columnName,
+              column_type: mapSchemaTypeToColumnType(schemaCol.type),
+              required: !schemaCol.nullable,
+              default: cleanDefault(schemaCol.default ?? null),
+            };
+          });
+
+          initializeColumns(contextColumns, datasetId);
         } else {
-          // No BE data found, just delete
           deleteColumnConfigForDataset(datasetId);
         }
       }
     } catch (error) {
-      console.error('[NavigationGuard] Error restoring localStorage:', error);
+      captureException(error, {
+        tags: { source: 'BluePrintDataset', context: 'handleDiscardDataset_restoreLocalStorage' },
+        extra: { datasetId, isCreationMode },
+      });
     }
 
     // Close modal immediately (non-blocking state update)
@@ -1020,7 +1088,7 @@ const BluePrintDataset: FC<BluePrintDatasetProps> = ({
     setTimeout(() => {
       hasDiscardedRef.current = false;
     }, 500);
-  }, [datasetId, pendingNavigationPath, router]);
+  }, [datasetId, pendingNavigationPath, router, datasets, isCreationMode, initializeColumns]);
 
   // Handle modal close (X button or outside click)
   const handleModalClose = useCallback((open: boolean) => {
@@ -1140,7 +1208,10 @@ const BluePrintDataset: FC<BluePrintDatasetProps> = ({
 
           cachedLocalStorageTitleRef.current = payloadTitle;
         } catch (error) {
-          captureException(error, { tags: { source: 'BluePrintDataset', datasetId } });
+          captureException(error, {
+            tags: { source: 'BluePrintDataset', context: 'handleTransactionSuccess_saveToLocalStorage' },
+            extra: { datasetId, operationType },
+          });
         }
 
         lastTransactionPayloadRef.current = null;
