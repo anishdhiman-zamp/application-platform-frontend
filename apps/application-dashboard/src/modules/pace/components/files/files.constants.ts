@@ -1,6 +1,8 @@
 import { Copy, Download, ExternalLink, Link, Pencil, Scissors, Share, Trash2 } from 'lucide-react';
 import { type ContextMenuAction, FILE_TYPE, type FileItem } from 'modules/pace/components/files/file-tree.types';
 
+export const DATE_FORMAT = "EEEE, d MMMM yyyy 'at' h:mm a";
+
 export const CONTEXT_MENU_ACTIONS: ContextMenuAction[] = [
   { id: 'open-in-tab', label: 'Open in Tab', icon: ExternalLink, fileOnly: true },
   { id: 'work-with-zamp', label: 'Work with Zamp', icon: Link },

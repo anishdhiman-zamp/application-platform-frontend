@@ -6,7 +6,7 @@ import {
   type SortOption,
   type TreeNode,
 } from 'modules/pace/components/files/file-tree.types';
-import { FILE_TYPE_LABELS } from 'modules/pace/components/files/files.constants';
+import { DATE_FORMAT, FILE_TYPE_LABELS } from 'modules/pace/components/files/files.constants';
 
 /**
  * Builds a hierarchical tree structure from a flat array of files.
@@ -64,7 +64,8 @@ export function getFileExtension(filename: string): string {
  * Formats file size in bytes to human-readable format
  */
 export function formatFileSize(bytes: number | null): string {
-  if (bytes === null || bytes <= 0) return '0 KB';
+  if (bytes === null) return '-';
+  if (bytes <= 0) return '0 KB';
 
   const units = ['B', 'KB', 'MB', 'GB', 'TB'];
   const k = 1024;
@@ -77,7 +78,7 @@ export function formatFileSize(bytes: number | null): string {
  * Formats timestamp to human-readable date string
  */
 export function formatDate(timestamp: number): string {
-  return format(new Date(timestamp), "EEEE, d MMMM yyyy 'at' h:mm a");
+  return format(new Date(timestamp), DATE_FORMAT);
 }
 
 /**
