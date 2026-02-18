@@ -16,7 +16,7 @@ import { useParams, usePathname, useRouter } from 'next/navigation';
 import React, { FC, useCallback, useEffect, useMemo, useRef, useState } from 'react';
 
 import { usePendingDatasetContextOptional } from '@/context/pendingDataset.context';
-import { UNTITLED_DATASET_NAME } from '@/modules/data/data.constants';
+import { NEW_COLUMN_PREFIX, UNTITLED_DATASET_NAME } from '@/modules/data/data.constants';
 import { defaultFnType } from '@/types/commonTypes';
 import { DATASET_CREATED_EVENT, DATASET_UPDATED_EVENT } from '@/utils/events';
 
@@ -694,13 +694,12 @@ const BluePrintDataset: FC<BluePrintDatasetProps> = ({
     const duplicateNames = columnNames.filter((name, index) => columnNames.indexOf(name) !== index);
     const hasDuplicateNames = duplicateNames.length > 0;
 
-    // In creation mode (source=creation), validate that column names only contain alphabets, numbers, and spaces
-    const hasInvalidColumnNameChars =
-      isCreationMode &&
-      currentColumns.some((col) => {
-        const columnName = col.column_name?.trim();
-        return columnName && /[^a-zA-Z0-9 ]/.test(columnName);
-      });
+    // For new (unsaved) columns (FE temp ID starts with "col_"), validate that column names only contain alphabets, numbers, and spaces
+    const hasInvalidColumnNameChars = currentColumns.some((col) => {
+      if (!col.id?.startsWith(NEW_COLUMN_PREFIX.COL_)) return false;
+      const columnName = col.column_name?.trim();
+      return columnName && /[^a-zA-Z0-9 ]/.test(columnName);
+    });
 
     // Show unified error message if there are any validation errors
     if (hasEmptyColumnName || hasDuplicateNames || hasInvalidColumnNameChars) {
