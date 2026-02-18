@@ -1,7 +1,12 @@
 import { format } from 'date-fns';
-import { FILE_TYPE, type FileItem, type TreeNode } from 'modules/pace/components/files/file-tree.types';
+import {
+  FILE_TYPE,
+  type FileItem,
+  type SortDirection,
+  type SortOption,
+  type TreeNode,
+} from 'modules/pace/components/files/file-tree.types';
 import { FILE_TYPE_LABELS } from 'modules/pace/components/files/files.constants';
-import type { SortDirection, SortOption } from 'modules/pace/components/files/FilesToolbar';
 
 /**
  * Builds a hierarchical tree structure from a flat array of files.
@@ -59,7 +64,7 @@ export function getFileExtension(filename: string): string {
  * Formats file size in bytes to human-readable format
  */
 export function formatFileSize(bytes: number | null): string {
-  if (bytes === null || bytes === 0) return '0 KB';
+  if (bytes === null || bytes <= 0) return '0 KB';
 
   const units = ['B', 'KB', 'MB', 'GB', 'TB'];
   const k = 1024;
@@ -107,7 +112,6 @@ export function sortTreeNodes(nodes: TreeNode[], sortBy: SortOption, sortDirecti
         comparison = getFileExtension(a.name).localeCompare(getFileExtension(b.name));
         break;
       case 'date_modified':
-      case 'date_created':
       default:
         comparison = a.mtime_ms - b.mtime_ms;
         break;

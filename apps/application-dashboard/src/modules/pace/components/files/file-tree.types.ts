@@ -1,4 +1,5 @@
-import type { SortDirection, SortOption } from 'modules/pace/components/files/FilesToolbar';
+export type SortOption = 'date_modified' | 'name' | 'size' | 'type';
+export type SortDirection = 'asc' | 'desc';
 
 export const FILE_TYPE = {
   DIRECTORY: 'directory',
