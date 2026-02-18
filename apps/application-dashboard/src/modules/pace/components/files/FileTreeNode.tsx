@@ -1,6 +1,6 @@
 'use client';
 
-import { useRef, useState } from 'react';
+import { useMemo, useRef, useState } from 'react';
 import {
   Button,
   DropdownMenu,
@@ -21,10 +21,16 @@ const FileTreeNode = ({ node, depth, expandedPaths, selectedPath, onToggleExpand
   const [contextMenuOpen, setContextMenuOpen] = useState(false);
   const [contextMenuPosition, setContextMenuPosition] = useState({ x: 0, y: 0 });
   const triggerRef = useRef<HTMLDivElement>(null);
+
   const isFolder = node.type === FILE_TYPE.DIRECTORY;
   const isExpanded = expandedPaths.has(node.path);
   const isSelected = selectedPath === node.path;
   const extension = isFolder ? '' : getFileExtension(node.name);
+
+  const filteredActions = useMemo(
+    () => CONTEXT_MENU_ACTIONS.filter((action) => !action.fileOnly || !isFolder),
+    [isFolder],
+  );
 
   const handleClick = () => {
     onSelect(node.path);
@@ -46,8 +52,6 @@ const FileTreeNode = ({ node, depth, expandedPaths, selectedPath, onToggleExpand
     setContextMenuPosition({ x: e.clientX, y: e.clientY });
     setContextMenuOpen(true);
   };
-
-  const filteredActions = CONTEXT_MENU_ACTIONS.filter((action) => !action.fileOnly || !isFolder);
 
   return (
     <div>
