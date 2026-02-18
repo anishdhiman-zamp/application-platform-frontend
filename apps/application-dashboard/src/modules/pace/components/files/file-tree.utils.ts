@@ -107,7 +107,8 @@ export function sortTreeNodes(nodes: TreeNode[], sortBy: SortOption, sortDirecti
         comparison = getFileExtension(a.name).localeCompare(getFileExtension(b.name));
         break;
       case 'date_modified':
-      case 'date_created':
+        comparison = a.mtime_ms - b.mtime_ms;
+        break;
       default:
         comparison = a.mtime_ms - b.mtime_ms;
         break;

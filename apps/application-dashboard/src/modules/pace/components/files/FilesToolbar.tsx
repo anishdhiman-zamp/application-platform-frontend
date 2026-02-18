@@ -16,7 +16,6 @@ export type SortDirection = 'asc' | 'desc';
 
 export const SORT_OPTIONS: { value: SortOption; label: string }[] = [
   { value: 'date_modified', label: 'Date modified' },
-  { value: 'date_created', label: 'Date created' },
   { value: 'name', label: 'Name' },
   { value: 'size', label: 'Size' },
   { value: 'type', label: 'Type' },

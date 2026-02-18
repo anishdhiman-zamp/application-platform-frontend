@@ -1,4 +1,17 @@
-import { FILE_TYPE, type FileItem } from 'modules/pace/components/files/file-tree.types';
+import { Copy, Download, ExternalLink, Link, Pencil, Scissors, Share, Trash2 } from 'lucide-react';
+import { type ContextMenuAction, FILE_TYPE, type FileItem } from 'modules/pace/components/files/file-tree.types';
+
+export const CONTEXT_MENU_ACTIONS: ContextMenuAction[] = [
+  { id: 'open-in-tab', label: 'Open in Tab', icon: ExternalLink, fileOnly: true },
+  { id: 'work-with-zamp', label: 'Work with Zamp', icon: Link },
+  { id: 'rename', label: 'Rename', icon: Pencil },
+  { id: 'duplicate', label: 'Duplicate', icon: Copy },
+  { id: 'copy', label: 'Copy', icon: Copy },
+  { id: 'cut', label: 'Cut', icon: Scissors },
+  { id: 'share', label: 'Share', icon: Share },
+  { id: 'download', label: 'Download', icon: Download },
+  { id: 'delete', label: 'Delete', icon: Trash2, isDestructive: true },
+];
 
 export const FILE_TYPE_LABELS: Record<string, string> = {
   // Documents
@@ -235,5 +248,110 @@ export const MOCK_FILES: FileItem[] = [
     type: FILE_TYPE.FILE,
     size: 104857600,
     mtime_ms: 1770986876590,
+  },
+  {
+    path: 'Budget spreadsheet/Guest list/Flowers/bouquet_design.psd',
+    name: 'bouquet_design.psd',
+    type: FILE_TYPE.FILE,
+    size: 25600000,
+    mtime_ms: 1770986877100,
+  },
+  {
+    path: 'Budget spreadsheet/Guest list/Flowers/flower_arrangement.png',
+    name: 'flower_arrangement.png',
+    type: FILE_TYPE.FILE,
+    size: 2048000,
+    mtime_ms: 1770986877200,
+  },
+  {
+    path: 'Budget spreadsheet/seating_chart.pdf',
+    name: 'seating_chart.pdf',
+    type: FILE_TYPE.FILE,
+    size: 512000,
+    mtime_ms: 1771354002000,
+  },
+  {
+    path: 'Budget spreadsheet/wedding_timeline.json',
+    name: 'wedding_timeline.json',
+    type: FILE_TYPE.FILE,
+    size: 4096,
+    mtime_ms: 1771354002100,
+  },
+  {
+    path: 'Budget spreadsheet/invitation_template.svg',
+    name: 'invitation_template.svg',
+    type: FILE_TYPE.FILE,
+    size: 8192,
+    mtime_ms: 1771354002200,
+  },
+  {
+    path: 'Budget spreadsheet/Scripts',
+    name: 'Scripts',
+    type: FILE_TYPE.DIRECTORY,
+    size: null,
+    mtime_ms: 1771354002300,
+  },
+  {
+    path: 'Budget spreadsheet/Scripts/rsvp_handler.py',
+    name: 'rsvp_handler.py',
+    type: FILE_TYPE.FILE,
+    size: 3072,
+    mtime_ms: 1771354002400,
+  },
+  {
+    path: 'Budget spreadsheet/Scripts/email_sender.ts',
+    name: 'email_sender.ts',
+    type: FILE_TYPE.FILE,
+    size: 2560,
+    mtime_ms: 1771354002500,
+  },
+  {
+    path: 'Budget spreadsheet/Scripts/database_backup.sql',
+    name: 'database_backup.sql',
+    type: FILE_TYPE.FILE,
+    size: 102400,
+    mtime_ms: 1771354002600,
+  },
+  {
+    path: 'Budget spreadsheet/config.yaml',
+    name: 'config.yaml',
+    type: FILE_TYPE.FILE,
+    size: 1536,
+    mtime_ms: 1771354002700,
+  },
+  {
+    path: 'Budget spreadsheet/ceremony_photos.rar',
+    name: 'ceremony_photos.rar',
+    type: FILE_TYPE.FILE,
+    size: 157286400,
+    mtime_ms: 1771354002800,
+  },
+  {
+    path: 'Budget spreadsheet/speech_notes.txt',
+    name: 'speech_notes.txt',
+    type: FILE_TYPE.FILE,
+    size: 2048,
+    mtime_ms: 1771354002900,
+  },
+  {
+    path: 'Budget spreadsheet/wedding_logo.ai',
+    name: 'wedding_logo.ai',
+    type: FILE_TYPE.FILE,
+    size: 5120000,
+    mtime_ms: 1771354003000,
+  },
+  {
+    path: 'Budget spreadsheet/background_music.wav',
+    name: 'background_music.wav',
+    type: FILE_TYPE.FILE,
+    size: 45000000,
+    mtime_ms: 1771354003100,
+  },
+  {
+    path: 'Budget spreadsheet/venue_3d_model.gltf',
+    name: 'venue_3d_model.gltf',
+    type: FILE_TYPE.FILE,
+    size: 8500000,
+    mtime_ms: 1771354003200,
   },
 ];

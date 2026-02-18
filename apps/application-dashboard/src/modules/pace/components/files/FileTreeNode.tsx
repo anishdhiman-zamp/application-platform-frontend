@@ -1,14 +1,26 @@
 'use client';
 
-import { Button, FileIcon } from '@zamp-platform/ui';
+import { useRef, useState } from 'react';
+import {
+  Button,
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+  FileIcon,
+} from '@zamp-platform/ui';
 import { cn } from '@zamp-platform/ui/utils';
 import { ChevronRight } from 'lucide-react';
 import { FILE_TYPE, type FileTreeNodeProps } from 'modules/pace/components/files/file-tree.types';
 import { getFileExtension } from 'modules/pace/components/files/file-tree.utils';
+import { CONTEXT_MENU_ACTIONS } from 'modules/pace/components/files/files.constants';
 import { AnimatePresence, motion } from 'motion/react';
 import Image from 'next/image';
 
 const FileTreeNode = ({ node, depth, expandedPaths, selectedPath, onToggleExpand, onSelect }: FileTreeNodeProps) => {
+  const [contextMenuOpen, setContextMenuOpen] = useState(false);
+  const [contextMenuPosition, setContextMenuPosition] = useState({ x: 0, y: 0 });
+  const triggerRef = useRef<HTMLDivElement>(null);
   const isFolder = node.type === FILE_TYPE.DIRECTORY;
   const isExpanded = expandedPaths.has(node.path);
   const isSelected = selectedPath === node.path;
@@ -28,12 +40,50 @@ const FileTreeNode = ({ node, depth, expandedPaths, selectedPath, onToggleExpand
     }
   };
 
+  const handleContextMenu = (e: React.MouseEvent) => {
+    e.preventDefault();
+    e.stopPropagation();
+    setContextMenuPosition({ x: e.clientX, y: e.clientY });
+    setContextMenuOpen(true);
+  };
+
+  const filteredActions = CONTEXT_MENU_ACTIONS.filter((action) => !action.fileOnly || !isFolder);
+
   return (
     <div>
+      <DropdownMenu open={contextMenuOpen} onOpenChange={setContextMenuOpen}>
+        <DropdownMenuTrigger asChild>
+          <div ref={triggerRef} className='hidden' aria-hidden='true' />
+        </DropdownMenuTrigger>
+        <DropdownMenuContent
+          align='start'
+          className='flex min-w-[180px] flex-col gap-y-[2px]'
+          style={{
+            position: 'fixed',
+            left: contextMenuPosition.x,
+            top: contextMenuPosition.y,
+          }}
+        >
+          {filteredActions.map((action) => (
+            <DropdownMenuItem
+              key={action.id}
+              className={cn(
+                'hover:bg-GRAY_100 f-12-500 text-GRAY_900 cursor-pointer rounded-md',
+                action.isDestructive && 'text-red-600',
+              )}
+            >
+              <action.icon className='size-4' />
+              {action.label}
+            </DropdownMenuItem>
+          ))}
+        </DropdownMenuContent>
+      </DropdownMenu>
+
       <div
         role='button'
         tabIndex={0}
         onClick={handleClick}
+        onContextMenu={handleContextMenu}
         onKeyDown={(e) => {
           if (e.key === 'Enter' || e.key === ' ') {
             handleClick();
