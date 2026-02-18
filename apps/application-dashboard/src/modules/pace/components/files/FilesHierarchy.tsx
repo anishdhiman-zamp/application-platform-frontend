@@ -1,9 +1,17 @@
 'use client';
 
 import { useState } from 'react';
+import type { FileItem } from 'modules/pace/components/files/file-tree.types';
+import { MOCK_FILES } from 'modules/pace/components/files/files.constants';
 import FilesToolbar, { SortDirection, SortOption } from 'modules/pace/components/files/FilesToolbar';
+import FileTree from 'modules/pace/components/files/FileTree';
 
-const FilesHierarchy = () => {
+interface FilesHierarchyProps {
+  onSelectFile?: (file: FileItem | null) => void;
+  selectedFile?: FileItem | null;
+}
+
+const FilesHierarchy = ({ onSelectFile, selectedFile }: FilesHierarchyProps) => {
   const [searchQuery, setSearchQuery] = useState('');
   const [sortBy, setSortBy] = useState<SortOption>('date_modified');
   const [sortDirection, setSortDirection] = useState<SortDirection>('desc');
@@ -23,7 +31,14 @@ const FilesHierarchy = () => {
         onSortDirectionToggle={toggleSortDirection}
       />
 
-      {/* File tree will go here */}
+      <FileTree
+        files={MOCK_FILES}
+        searchQuery={searchQuery}
+        sortBy={sortBy}
+        sortDirection={sortDirection}
+        selectedPath={selectedFile?.path ?? null}
+        onSelectFile={onSelectFile}
+      />
     </div>
   );
 };
