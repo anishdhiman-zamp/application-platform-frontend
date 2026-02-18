@@ -19,8 +19,8 @@ const FilesPreview = ({ selectedFile }: FilesPreviewProps) => {
                 src='/images/files/file-empty-state.png'
                 alt='File Empty State'
                 className='size-full object-cover'
-                width={300}
-                height={240}
+                width={400}
+                height={320}
                 unoptimized
               />
             </div>
