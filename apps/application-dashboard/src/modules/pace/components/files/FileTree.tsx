@@ -6,7 +6,6 @@ import {
   buildFileTree,
   buildNodeMap,
   filterTreeNodes,
-  getAncestorPaths,
   sortTreeNodes,
 } from 'modules/pace/components/files/file-tree.utils';
 import FileTreeNode from 'modules/pace/components/files/FileTreeNode';
@@ -43,8 +42,6 @@ const FileTree = ({
 
     return sortTreeNodes(filtered, sortBy, sortDirection);
   }, [sortedRawTree, searchQuery, sortBy, sortDirection]);
-
-  const ancestorPaths = useMemo(() => getAncestorPaths(selectedPath), [selectedPath]);
 
   const handleToggleExpand = useCallback((path: string) => {
     setExpandedPaths((prev) => {
@@ -90,7 +87,6 @@ const FileTree = ({
           depth={0}
           expandedPaths={expandedPaths}
           selectedPath={selectedPath}
-          ancestorPaths={ancestorPaths}
           originalNodeMap={originalNodeMap}
           onToggleExpand={handleToggleExpand}
           onSelect={handleSelect}

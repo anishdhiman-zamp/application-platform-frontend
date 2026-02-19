@@ -55,11 +55,17 @@ const FilesHierarchy = ({ onSelectFile, selectedFile }: FilesHierarchyProps) => 
       </div>
 
       {/* File and Folder Create */}
-      <div className='from-GRAY_200 absolute right-0 bottom-0 left-0 flex w-full items-center justify-center bg-linear-to-t to-transparent px-3 py-4 backdrop-blur-md'>
+      <div
+        className='pointer-events-none absolute right-0 bottom-0 left-0 flex w-full items-center justify-center px-3 pt-12 pb-4'
+        style={{
+          background:
+            'linear-gradient(to top, rgba(234, 234, 234, 1) 0%, rgba(234, 234, 234, 0.95) 30%, rgba(234, 234, 234, 0.7) 50%, rgba(234, 234, 234, 0.3) 70%, rgba(234, 234, 234, 0) 100%)',
+        }}
+      >
         <Button
           variant='outline'
           size='medium'
-          className='f-12-500 gap-x-2.5 rounded-md bg-white px-3 py-2 hover:bg-white'
+          className='f-12-500 pointer-events-auto gap-x-2.5 rounded-md bg-white px-3 py-2 hover:bg-white'
           style={{ minWidth: '216px' }}
         >
           <span className='text-GRAY_700'>Create new</span>

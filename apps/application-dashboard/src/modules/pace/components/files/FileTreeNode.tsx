@@ -22,7 +22,6 @@ const FileTreeNode = ({
   depth,
   expandedPaths,
   selectedPath,
-  ancestorPaths,
   originalNodeMap,
   onToggleExpand,
   onSelect,
@@ -34,7 +33,6 @@ const FileTreeNode = ({
   const isFolder = node.type === FILE_TYPE.DIRECTORY;
   const isExpanded = expandedPaths.has(node.path);
   const isSelected = selectedPath === node.path;
-  const isAncestorOfSelected = ancestorPaths.has(node.path);
   const extension = isFolder ? '' : getFileExtension(node.name);
 
   const originalNode = originalNodeMap.get(node.path);
@@ -110,7 +108,6 @@ const FileTreeNode = ({
         className={cn(
           'hover:bg-GRAY_100 flex cursor-pointer items-center gap-2 rounded-md py-2 pr-1',
           isSelected && 'bg-GRAY_300 hover:bg-GRAY_300',
-          isAncestorOfSelected && !isSelected && 'bg-GRAY_100',
         )}
         style={{ paddingLeft: `${depth * 24 + 8}px` }}
       >
@@ -162,7 +159,6 @@ const FileTreeNode = ({
                 depth={depth + 1}
                 expandedPaths={expandedPaths}
                 selectedPath={selectedPath}
-                ancestorPaths={ancestorPaths}
                 originalNodeMap={originalNodeMap}
                 onToggleExpand={onToggleExpand}
                 onSelect={onSelect}

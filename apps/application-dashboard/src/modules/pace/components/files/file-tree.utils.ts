@@ -155,23 +155,6 @@ export function filterTreeNodes(nodes: TreeNode[], searchQuery: string): TreeNod
 }
 
 /**
- * Gets all ancestor folder paths for a given file path
- */
-export function getAncestorPaths(filePath: string | null): Set<string> {
-  const ancestors = new Set<string>();
-
-  if (!filePath) return ancestors;
-
-  const parts = filePath.split('/');
-
-  for (let i = 1; i < parts.length; i++) {
-    ancestors.add(parts.slice(0, i).join('/'));
-  }
-
-  return ancestors;
-}
-
-/**
  * Builds a map of path -> TreeNode for quick lookups
  */
 export function buildNodeMap(nodes: TreeNode[]): Map<string, TreeNode> {

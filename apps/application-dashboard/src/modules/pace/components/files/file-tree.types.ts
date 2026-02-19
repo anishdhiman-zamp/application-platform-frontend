@@ -68,7 +68,6 @@ export interface FileTreeNodeProps {
   depth: number;
   expandedPaths: Set<string>;
   selectedPath: string | null;
-  ancestorPaths: Set<string>;
   originalNodeMap: Map<string, TreeNode>;
   onToggleExpand: (path: string) => void;
   onSelect: (path: string) => void;
