@@ -188,6 +188,9 @@ export const FEEDBACK_OPEN_ICON = IMAGE_PREFIX + '/icons/feedback/feedback-open.
 export const ZAMP_LOGO_LOADER_SVG = '/loaders/zamp-logo-loader.svg';
 export const WIDGET_LOADER_SVG = '/loaders/widget-loader.svg';
 
+//Files
+export const FILE_EMPTY_STATE = IMAGE_PREFIX + '/images/files/file-empty-state.png';
+
 export const VERCEL_BLOB_BASE_URL = process.env.NEXT_PUBLIC_VERCEL_BLOB_BASE_URL;
 export const VERCEL_BLOB_ICON_URL = `${VERCEL_BLOB_BASE_URL}/icons`;
 

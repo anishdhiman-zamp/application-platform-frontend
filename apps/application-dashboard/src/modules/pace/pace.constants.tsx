@@ -39,6 +39,11 @@ export const PACE_NAVBAR_ITEMS: PaceNavbarItemSchema[] = [
     iconComponent: <ShapesIcon size={16} />,
     path: ROUTES_PATH.CHAT_ARTIFACTS,
   },
+  // {
+  //   id: PaceNavbarItemId.FILES,
+  //   iconComponent: <FolderOpenIcon size={16} />,
+  //   path: ROUTES_PATH.CHAT_FILES,
+  // },
   {
     id: PaceNavbarItemId.SETTINGS,
     iconComponent: <SettingsIcon size={16} />,

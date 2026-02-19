@@ -38,6 +38,8 @@ export const ROUTES_PATH = {
   CHAT: '/chat',
   CHAT_SKILLS: '/chat/skills',
   CHAT_ARTIFACTS: '/chat/artifacts',
+  CHAT_FILES: '/chat/files',
+  CHAT_FILE: '/chat/files/:fileId',
   CHAT_PAGE_SHEET: '/chat/pages/:pageId/:sheetId',
   CHAT_DATASET: '/chat/datasets/:datasetId',
   CHAT_SETTINGS: '/chat/settings',
