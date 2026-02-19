@@ -130,11 +130,10 @@ export const DatasetResource = defineResource({
         const datasetData = data as Partial<Dataset>;
         const rawColumns = datasetData.columns || [];
 
-        // Sanitize column names: replace spaces with underscores
         const regexforSpaceReplacement = /\s+/g;
         const sanitizedColumns = rawColumns.map((col) => ({
           ...col,
-          name: col.name.replace(regexforSpaceReplacement, '_'),
+          name: col.name.replace(regexforSpaceReplacement, '_').toLowerCase(),
         }));
 
         const payload = {
@@ -143,7 +142,6 @@ export const DatasetResource = defineResource({
           description: datasetData?.description || '',
           type: 'source',
           schema: {
-            // Only send schema-relevant fields (strip is_hidden which is display-only)
             columns: sanitizedColumns.map(({ name, type, nullable, default: defaultValue }) => ({
               name,
               type,
@@ -166,14 +164,19 @@ export const DatasetResource = defineResource({
         const { id, title, description, add_columns, drop_columns, alter_columns, display_config } =
           data as DatasetUpdatePayload;
 
+        const lcAddColumns = add_columns?.map((col) => ({ ...col, name: col.name?.toLowerCase() }));
+        const lcDropColumns = drop_columns?.map((col) => col?.toLowerCase());
+        const lcAlterColumns = alter_columns?.map((col) => ({ ...col, name: col.name?.toLowerCase() }));
+        const lcDisplayConfig = display_config?.map((col) => ({ ...col, column: col.column?.toLowerCase() }));
+
         return {
           dataset_id: id,
           ...(title && { title }),
           ...(description && { description }),
-          ...(add_columns?.length && { add_columns }),
-          ...(drop_columns?.length && { drop_columns }),
-          ...(alter_columns?.length && { alter_columns }),
-          ...(display_config?.length && { display_config }),
+          ...(lcAddColumns?.length && { add_columns: lcAddColumns }),
+          ...(lcDropColumns?.length && { drop_columns: lcDropColumns }),
+          ...(lcAlterColumns?.length && { alter_columns: lcAlterColumns }),
+          ...(lcDisplayConfig?.length && { display_config: lcDisplayConfig }),
         };
       },
       delete: (data: unknown) => {
@@ -206,17 +209,10 @@ export const DatasetResource = defineResource({
     },
     onSuccess: {
       create: (data: unknown) => {
-        const response = data as {
-          status?: string;
-          transactions?: Array<{ failure: unknown; output_payload?: { dataset_id?: string } }>;
-        };
-
-        const datasetId = (response?.transactions?.[0]?.output_payload?.dataset_id as string) ?? '';
+        const datasetId = (data as Dataset)?.id as string;
 
         dispatchDatasetCreated(datasetId);
         toast.success(DATASET_TOAST_MESSAGES.DATASET_CREATED_SUCCESS);
-
-        // Invalidate listing cache so the datasets list refetches with the new dataset
         store.dispatch(baseApi.util.invalidateTags([APITags.GET_DATASET_LISTING]));
 
         if (datasetId) {
@@ -229,17 +225,9 @@ export const DatasetResource = defineResource({
           );
         }
       },
-      update: (data: unknown) => {
-        const response = data as {
-          status?: string;
-          transactions?: Array<{ failure: unknown; output_payload?: { dataset_id?: string } }>;
-        };
-
-        const datasetId = (response?.transactions?.[0]?.output_payload?.dataset_id as string) ?? '';
-
-        dispatchDatasetUpdated(datasetId);
+      update: (id: string) => {
+        dispatchDatasetUpdated(id);
         toast.success(DATASET_TOAST_MESSAGES.DATASET_UPDATED_SUCCESS);
-        // Invalidate listing cache so the datasets list refetches with the updated data
         store.dispatch(baseApi.util.invalidateTags([APITags.GET_DATASET_LISTING]));
       },
     },

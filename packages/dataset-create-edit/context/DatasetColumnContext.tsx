@@ -527,15 +527,14 @@ export const DatasetColumnProvider: FC<DatasetColumnProviderProps> = ({
 
         setColumns(enhancedColumns);
         // Store original columns for change tracking (only existing BE columns, not FE temp columns)
+        // Use enhancedColumns as source to inherit correct types from localStorage/schema
+        const enhancedColumnsMap = new Map(enhancedColumns.map((col) => [col.id.toLowerCase(), col]));
         const beOriginalColumns = columnsWithAliases
           .filter((col) => !FE_TEMP_ID_PATTERN.test(col.id))
           .map((col, index) => {
             // Generate uniqueId if it doesn't exist
             const uniqueId = (col as EnhancedColumnDataType).uniqueId || `unique_${col.id}_${index}`;
             // Determine isVisible - priority order:
-            // 1. Backend display_config (most reliable source of truth)
-            // 2. Stored config / localStorage (fallback when display_config not available, e.g., creation mode)
-            // 3. Default to true
             const displayConfigItem = displayConfigData?.display_config?.find(
               (item) => item.column.toLowerCase() === col.id.toLowerCase(),
             );
@@ -544,13 +543,18 @@ export const DatasetColumnProvider: FC<DatasetColumnProviderProps> = ({
               isVisible = !displayConfigItem.is_hidden;
             } else {
               // Fallback: use stored config (localStorage) visibility
-              // This handles creation mode where displayConfigData is not available
               const storedCol = storedConfig?.find((s) => s.colId.toLowerCase() === col.id.toLowerCase());
               isVisible = storedCol?.isVisible ?? true;
             }
 
+            // Use the resolved column_type from enhancedColumns (which has accurate types
+            // from localStorage/schema) instead of filterConfig's generic JS types
+            const enhancedCol = enhancedColumnsMap.get(col.id.toLowerCase());
+            const resolvedColumnType = enhancedCol?.column_type || col.column_type;
+
             return {
               ...col,
+              column_type: resolvedColumnType,
               uniqueId,
               isVisible,
               width: 0,
@@ -637,15 +641,13 @@ export const DatasetColumnProvider: FC<DatasetColumnProviderProps> = ({
   const syncWithLocalStorage = useCallback(() => {
     if (!datasetId || columns?.length === 0) return;
 
-    // Load existing widths from localStorage - these are the source of truth for user resizes
     const existingConfig = loadFromLocalStorage(datasetId);
     const existingWidthsMap = new Map(existingConfig?.map((col) => [col?.colId, col?.width]) || []);
 
     const config: ColumnOrderingVisibilityType[] = [...columns]
+      .filter((col) => col?.id?.trim())
       .sort((a, b) => a.order - b.order)
       .map((col) => {
-        // Prioritize localStorage width (user resizes save directly to localStorage)
-        // Only use context width if localStorage doesn't have this column
         const localStorageWidth = existingWidthsMap.get(col?.id);
         const width =
           localStorageWidth !== undefined && localStorageWidth > 0
@@ -657,10 +659,10 @@ export const DatasetColumnProvider: FC<DatasetColumnProviderProps> = ({
         return {
           colId: col?.id,
           columnName: col?.column_name,
-          columnType: col?.column_type?.toUpperCase(), // Normalize to uppercase to match frontend constants
+          columnType: col?.column_type?.toUpperCase() || 'TEXT',
           isVisible: col?.isVisible,
           width,
-          isRequired: col?.required,
+          isRequired: col?.required ?? false,
           defaultValue: col?.default ?? null,
         };
       });
@@ -1064,11 +1066,9 @@ export const DatasetColumnProvider: FC<DatasetColumnProviderProps> = ({
   const getColumnChanges = useCallback((): ColumnChanges => {
     const FE_TEMP_ID_PATTERN = /^col_\d+_/;
 
-    // Build a map from backend display_config (backend source of truth for visibility)
     const backendDisplayConfigMap = new Map<string, { is_hidden: boolean }>();
     if (displayConfigData?.display_config) {
       displayConfigData.display_config.forEach((item) => {
-        // Use !! to ensure proper boolean coercion (handles 0/1, "true"/"false", etc.)
         backendDisplayConfigMap.set(item.column.toLowerCase(), { is_hidden: !!item.is_hidden });
       });
     }
@@ -1081,13 +1081,9 @@ export const DatasetColumnProvider: FC<DatasetColumnProviderProps> = ({
     const alter_columns: ColumnChanges['alter_columns'] = [];
     const display_config: ColumnChanges['display_config'] = [];
 
-    // Find new columns (FE-generated IDs that don't exist in original)
     columns.forEach((col) => {
       if (FE_TEMP_ID_PATTERN.test(col?.id)) {
-        // Only add to add_columns if this column doesn't exist in originalColumns
-        // (i.e., it's truly new and wasn't part of a previous successful transaction)
         if (!originalColumnsMap.has(col?.id)) {
-          // Convert default value to string if boolean, otherwise keep as string | null
           const defaultValue =
             col?.required && col?.default !== null && col?.default !== undefined
               ? typeof col?.default === 'boolean'
@@ -1095,10 +1091,9 @@ export const DatasetColumnProvider: FC<DatasetColumnProviderProps> = ({
                 : col?.default
               : null;
 
-          const sanitizedName = col?.column_name?.replace(/\s+/g, '_'); // Sanitize name
+          const sanitizedName = col?.column_name?.replace(/\s+/g, '_')?.toLowerCase();
           const columnType = col?.column_type?.toUpperCase();
 
-          // add_columns: name, type, nullable, default
           const addColumnEntry = {
             name: sanitizedName,
             type: columnType,
@@ -1107,12 +1102,11 @@ export const DatasetColumnProvider: FC<DatasetColumnProviderProps> = ({
           };
           add_columns.push(addColumnEntry);
 
-          // display_config: Use SAME name from add_columns, plus display-related fields (type, is_hidden, is_editable, alias)
           const displayConfigEntry = {
-            column: addColumnEntry.name, // Use the SAME name from add_columns
-            alias: col?.column_name, // Original display name with spaces
+            column: addColumnEntry.name,
+            alias: col?.column_name,
             is_hidden: !col?.isVisible,
-            is_editable: true, // New user columns are editable by default
+            is_editable: true,
             type: columnType,
           };
           display_config.push(displayConfigEntry);
@@ -1120,38 +1114,23 @@ export const DatasetColumnProvider: FC<DatasetColumnProviderProps> = ({
       }
     });
 
-    // Find deleted columns (in original but not in current)
     originalColumns.forEach((originalCol) => {
       if (!currentColumnsMap.has(originalCol?.id)) {
-        // Column was deleted - use id (colId) as the identifier for BE
-        drop_columns.push(originalCol?.id);
+        drop_columns.push(originalCol?.id?.toLowerCase());
       }
     });
 
-    // Find modified columns (columns that exist in both original and current with changes)
     columns.forEach((col) => {
       const originalCol = originalColumnsMap.get(col?.id);
-
-      // Skip if this column doesn't exist in originalColumns (it's a new column)
       if (!originalCol) return;
 
-      // Check if any properties changed
       const nameChanged = col?.column_name !== originalCol?.column_name;
-
-      // For visibility: Compare current col.isVisible with backend's is_hidden
-      // col.isVisible comes from context state (which syncs with localStorage)
-      // backend.is_hidden comes from display_config API (source of truth)
-      // They are inverses: isVisible=true means visible, is_hidden=true means hidden
-      // If they have the SAME boolean value, there's a mismatch!
       const backendDisplayConfig = backendDisplayConfigMap.get(col?.id.toLowerCase());
 
       let visibilityChanged = false;
       if (backendDisplayConfig !== undefined) {
-        // Primary: Compare with backend display_config
-        // If isVisible === is_hidden (both true or both false), there's a mismatch
         visibilityChanged = !!col?.isVisible === !!backendDisplayConfig.is_hidden;
       } else {
-        // Fallback: Compare with originalCol's visibility (set from backend during initialization)
         visibilityChanged = col?.isVisible !== originalCol?.isVisible;
       }
 
@@ -1161,14 +1140,12 @@ export const DatasetColumnProvider: FC<DatasetColumnProviderProps> = ({
       const requiredChanged = col?.required !== originalCol?.required;
       const defaultChanged = col?.default !== originalCol?.default;
 
-      // If ANY property changed, add entries to BOTH alter_columns AND display_config
       const hasAnyChange = nameChanged || visibilityChanged || typeChanged || requiredChanged || defaultChanged;
 
       if (hasAnyChange) {
-        // 1. Add to alter_columns (for schema changes: type, nullable, default)
         if (typeChanged || requiredChanged || defaultChanged) {
           const alterEntry: ColumnChanges['alter_columns'][0] = {
-            name: originalCol?.id, // Column ID (stable identifier from backend)
+            name: originalCol?.id?.toLowerCase(),
           };
 
           if (typeChanged) {
@@ -1178,7 +1155,6 @@ export const DatasetColumnProvider: FC<DatasetColumnProviderProps> = ({
             alterEntry.nullable = !col?.required;
           }
           if (requiredChanged || defaultChanged) {
-            // Convert default value to string if boolean, otherwise keep as string | null
             alterEntry.default = col?.required
               ? col?.default !== null && col?.default !== undefined
                 ? typeof col?.default === 'boolean'
@@ -1191,29 +1167,24 @@ export const DatasetColumnProvider: FC<DatasetColumnProviderProps> = ({
           alter_columns.push(alterEntry);
         }
 
-        // 2. Add to display_config (for display changes: alias, is_hidden, type)
         if (nameChanged || visibilityChanged || typeChanged) {
-          // Find existing display_config entry for this column, or create new one
-          let displayConfigEntry = display_config.find((entry) => entry?.column === originalCol?.id);
+          let displayConfigEntry = display_config.find((entry) => entry?.column === originalCol?.id?.toLowerCase());
 
           if (!displayConfigEntry) {
             displayConfigEntry = {
-              column: originalCol.id, // Column ID (stable identifier from backend)
+              column: originalCol.id?.toLowerCase(),
             };
             display_config.push(displayConfigEntry);
           }
 
-          // Update alias if name changed
           if (nameChanged) {
-            displayConfigEntry.alias = col?.column_name; // New display name (alias)
+            displayConfigEntry.alias = col?.column_name;
           }
 
-          // Update is_hidden if visibility changed (is_hidden is inverse of isVisible)
           if (visibilityChanged) {
             displayConfigEntry.is_hidden = !col?.isVisible;
           }
 
-          // Update type if changed
           if (typeChanged) {
             displayConfigEntry.type = col?.column_type?.toUpperCase();
           }
