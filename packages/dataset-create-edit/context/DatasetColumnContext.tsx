@@ -527,15 +527,14 @@ export const DatasetColumnProvider: FC<DatasetColumnProviderProps> = ({
 
         setColumns(enhancedColumns);
         // Store original columns for change tracking (only existing BE columns, not FE temp columns)
+        // Use enhancedColumns as source to inherit correct types from localStorage/schema
+        const enhancedColumnsMap = new Map(enhancedColumns.map((col) => [col.id.toLowerCase(), col]));
         const beOriginalColumns = columnsWithAliases
           .filter((col) => !FE_TEMP_ID_PATTERN.test(col.id))
           .map((col, index) => {
             // Generate uniqueId if it doesn't exist
             const uniqueId = (col as EnhancedColumnDataType).uniqueId || `unique_${col.id}_${index}`;
             // Determine isVisible - priority order:
-            // 1. Backend display_config (most reliable source of truth)
-            // 2. Stored config / localStorage (fallback when display_config not available, e.g., creation mode)
-            // 3. Default to true
             const displayConfigItem = displayConfigData?.display_config?.find(
               (item) => item.column.toLowerCase() === col.id.toLowerCase(),
             );
@@ -544,13 +543,18 @@ export const DatasetColumnProvider: FC<DatasetColumnProviderProps> = ({
               isVisible = !displayConfigItem.is_hidden;
             } else {
               // Fallback: use stored config (localStorage) visibility
-              // This handles creation mode where displayConfigData is not available
               const storedCol = storedConfig?.find((s) => s.colId.toLowerCase() === col.id.toLowerCase());
               isVisible = storedCol?.isVisible ?? true;
             }
 
+            // Use the resolved column_type from enhancedColumns (which has accurate types
+            // from localStorage/schema) instead of filterConfig's generic JS types
+            const enhancedCol = enhancedColumnsMap.get(col.id.toLowerCase());
+            const resolvedColumnType = enhancedCol?.column_type || col.column_type;
+
             return {
               ...col,
+              column_type: resolvedColumnType,
               uniqueId,
               isVisible,
               width: 0,
