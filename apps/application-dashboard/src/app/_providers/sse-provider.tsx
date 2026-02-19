@@ -39,6 +39,10 @@ export const SSEProvider: React.FC<SSEProviderProps> = ({ children, sseEventBus 
       const data = JSON.parse(event.data);
 
       if (data?.type) {
+        // Log history events for debugging durable streams feature
+        if (data.is_history) {
+          console.log('[SSE] Received history event:', data.type, data);
+        }
         sseEventBus.publish(data.type, data);
       } else {
         captureException(new Error('SSE event received without required type field'));

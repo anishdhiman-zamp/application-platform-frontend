@@ -377,6 +377,12 @@ export interface GenerateSpeechToTextAccessTokenResponse {
 
 export interface StreamingState extends ChatMessage {
   is_active: boolean;
+  /**
+   * Indicates if this streaming state is from history replay (e.g., after page refresh).
+   * When true, the message is being replayed from Redis stream history.
+   * UI should render content immediately without streaming animations.
+   */
+  is_history?: boolean;
 }
 
 /**

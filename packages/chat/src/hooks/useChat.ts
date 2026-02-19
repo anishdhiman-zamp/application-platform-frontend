@@ -194,6 +194,9 @@ export const useChat = (config: ChatConfig) => {
 
       try {
         const payload = data.payload as StreamEventPayload;
+        // History events are replayed from Redis stream after page refresh/reconnect
+        // When is_history is true, we render content immediately without streaming animation
+        const isHistoryEvent = data.is_history === true;
 
         switch (payload.type) {
           case StreamingContentBlockType.CONTENT_BLOCK_START: {
@@ -202,13 +205,16 @@ export const useChat = (config: ChatConfig) => {
 
             let newBlock: Block;
 
+            // For history events, mark blocks as complete immediately to skip animations
+            const isComplete = isHistoryEvent;
+
             if (blockType === BLOCK_TYPE.THINKING) {
               newBlock = {
                 type: BLOCK_TYPE.THINKING,
                 order: index,
                 payload: { thinking: '' },
                 start_timestamp: content_block?.start_timestamp,
-                is_complete: false,
+                is_complete: isComplete,
               };
             } else if (blockType === BLOCK_TYPE.TEXT) {
               newBlock = {
@@ -216,7 +222,7 @@ export const useChat = (config: ChatConfig) => {
                 order: index,
                 payload: { text: '' },
                 start_timestamp: content_block?.start_timestamp,
-                is_complete: false,
+                is_complete: isComplete,
               };
             } else if (blockType === BLOCK_TYPE.TOOL_RESULT) {
               const toolCallId = content_block?.tool_call_id || content_block?.id;
@@ -230,7 +236,7 @@ export const useChat = (config: ChatConfig) => {
                   tool_call_id: toolCallId,
                 },
                 start_timestamp: content_block?.start_timestamp,
-                is_complete: false,
+                is_complete: isComplete,
               };
             } else {
               newBlock = {
@@ -244,7 +250,7 @@ export const useChat = (config: ChatConfig) => {
                   display_name: content_block?.display_name,
                 },
                 start_timestamp: content_block?.start_timestamp,
-                is_complete: false,
+                is_complete: isComplete,
               };
             }
 
@@ -268,6 +274,8 @@ export const useChat = (config: ChatConfig) => {
                   timestamp: new Date().toISOString(),
                   metadata: {},
                   is_active: true,
+                  // Mark as history replay so UI can render without streaming animations
+                  is_history: isHistoryEvent,
                 };
               }
               const existingBlocks = prev.message_content?.elements ?? [];
@@ -400,6 +408,9 @@ export const useChat = (config: ChatConfig) => {
 
   const handleMessage = useCallback(
     (data: MapAny) => {
+      // History events are replayed from Redis stream after page refresh/reconnect
+      const isHistoryEvent = data.is_history === true;
+
       try {
         switch (data.payload.type) {
           case SSEEventType.MESSAGE:
@@ -453,6 +464,8 @@ export const useChat = (config: ChatConfig) => {
                 timestamp: message.created_at || new Date().toISOString(),
                 metadata: {},
                 is_active: true,
+                // Mark as history replay so UI can render without streaming animations
+                is_history: isHistoryEvent,
               });
             }
             break;
@@ -574,7 +587,13 @@ export const useChat = (config: ChatConfig) => {
     const sub = sseEventBus.subscribe(EVENT_TYPE.CONVERSATION_V2, (data: BaseEventPayload) => {
       const payload = data?.payload as MapAny;
       const conversationId = payload?.conversation_id as string;
-      if (data?.source_id === _conversationId || conversationId === _conversationId) handleMessage(data);
+      if (data?.source_id === _conversationId || conversationId === _conversationId) {
+        // Log history events for debugging durable streams
+        if (data.is_history) {
+          console.log('[Chat] Processing history conversation event:', payload?.type, data);
+        }
+        handleMessage(data);
+      }
     });
     return () => sub.unsubscribe();
   }, [handleMessage, _conversationId]);
@@ -585,7 +604,13 @@ export const useChat = (config: ChatConfig) => {
     const sub = sseEventBus.subscribe(EVENT_TYPE.AGENT_STREAMS, (data: BaseEventPayload) => {
       const payload = data?.payload as MapAny;
       const streamingId = payload?.streaming_id as string;
-      if (streamingId === _conversationId) handleStreamEvent(data);
+      if (streamingId === _conversationId) {
+        // Log history events for debugging durable streams
+        if (data.is_history) {
+          console.log('[Chat] Processing history stream event:', payload?.type, data);
+        }
+        handleStreamEvent(data);
+      }
     });
     return () => sub.unsubscribe();
   }, [config.enableStreaming, _conversationId, handleStreamEvent]);
@@ -594,12 +619,44 @@ export const useChat = (config: ChatConfig) => {
     if (!isFetchingConversationHistory && conversationHistory && conversationHistory?.messages?.length > 0) {
       const historyMessages: ChatMessage[] = getHistoryFormattedMessages(conversationHistory);
 
-      // This handles page refresh scenarios where streaming was in progress
+      // Preserve streaming state if it's from history replay (durable streams feature).
+      // When page refreshes during an active stream, history events from Redis contain
+      // the in-progress content that hasn't been saved to DB yet. We must NOT clear
+      // this streaming state, otherwise the replayed content will be lost.
       if (config.enableStreaming) {
-        setStreamingState(null);
+        setStreamingState((prev) => {
+          // Keep streaming state if it's from history replay (even if elements not yet received)
+          if (prev?.is_history) {
+            console.log('[Chat] Preserving history replay streaming state', {
+              hasElements: !!prev?.message_content?.elements?.length,
+              elementsCount: prev?.message_content?.elements?.length || 0,
+            });
+            return prev;
+          }
+          // Clear stale streaming state from previous sessions
+          return null;
+        });
       }
 
-      setMessages(historyMessages);
+      // Merge DB history with any existing messages from history replay.
+      // This handles the case where MESSAGE_STOP was received before the API response,
+      // meaning the streamed message was added to messages but would be lost on replace.
+      setMessages((prev) => {
+        // If we have existing messages that aren't in DB history (from history replay),
+        // we need to preserve them. These are typically streaming messages that completed
+        // but haven't been persisted to DB yet.
+        if (prev.length > 0) {
+          const dbMessageIds = new Set(historyMessages.map((m) => m.id).filter(Boolean));
+          const replayedMessages = prev.filter((m) => m.id && !dbMessageIds.has(m.id));
+
+          if (replayedMessages.length > 0) {
+            console.log('[Chat] Preserving replayed messages not yet in DB:', replayedMessages.length);
+            return [...historyMessages, ...replayedMessages];
+          }
+        }
+        return historyMessages;
+      });
+
       config.setHeader?.(conversationHistory?.conversation?.title || '');
     }
   }, [conversationHistory, isFetchingConversationHistory, config.enableStreaming]);
