@@ -17,7 +17,15 @@ import { CONTEXT_MENU_ACTIONS } from 'modules/pace/components/files/files.consta
 import { motion } from 'motion/react';
 import Image from 'next/image';
 
-const FileTreeNode = ({ node, depth, expandedPaths, selectedPath, onToggleExpand, onSelect }: FileTreeNodeProps) => {
+const FileTreeNode = ({
+  node,
+  depth,
+  expandedPaths,
+  selectedPath,
+  originalNodeMap,
+  onToggleExpand,
+  onSelect,
+}: FileTreeNodeProps) => {
   const [contextMenuOpen, setContextMenuOpen] = useState(false);
   const [contextMenuPosition, setContextMenuPosition] = useState({ x: 0, y: 0 });
   const triggerRef = useRef<HTMLDivElement>(null);
@@ -26,6 +34,9 @@ const FileTreeNode = ({ node, depth, expandedPaths, selectedPath, onToggleExpand
   const isExpanded = expandedPaths.has(node.path);
   const isSelected = selectedPath === node.path;
   const extension = isFolder ? '' : getFileExtension(node.name);
+
+  const originalNode = originalNodeMap.get(node.path);
+  const childrenToRender = originalNode?.children ?? node.children;
 
   const filteredActions = useMemo(
     () => CONTEXT_MENU_ACTIONS.filter((action) => !action.fileOnly || !isFolder),
@@ -135,19 +146,20 @@ const FileTreeNode = ({ node, depth, expandedPaths, selectedPath, onToggleExpand
         <span className='f-13-450 text-GRAY_1000 truncate select-none'>{node.name}</span>
       </div>
 
-      {isFolder && node.children && node.children.length > 0 && (
+      {isFolder && childrenToRender && childrenToRender.length > 0 && (
         <div
           className='grid transition-[grid-template-rows] duration-100 ease-out'
           style={{ gridTemplateRows: isExpanded ? '1fr' : '0fr' }}
         >
           <div className='flex flex-col gap-0.5 overflow-hidden pt-0.5'>
-            {node.children.map((child) => (
+            {childrenToRender.map((child) => (
               <FileTreeNode
                 key={child.path}
                 node={child}
                 depth={depth + 1}
                 expandedPaths={expandedPaths}
                 selectedPath={selectedPath}
+                originalNodeMap={originalNodeMap}
                 onToggleExpand={onToggleExpand}
                 onSelect={onSelect}
               />

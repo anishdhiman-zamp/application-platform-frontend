@@ -1,6 +1,6 @@
 'use client';
 
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { Button } from '@zamp-platform/ui';
 import { File, Folder } from 'lucide-react';
 import type { FileItem, SortDirection, SortOption } from 'modules/pace/components/files/file-tree.types';
@@ -8,13 +8,16 @@ import { MOCK_FILES } from 'modules/pace/components/files/files.constants';
 import FilesToolbar from 'modules/pace/components/files/FilesToolbar';
 import FileTree from 'modules/pace/components/files/FileTree';
 
+const SEARCH_DEBOUNCE_MS = 300;
+
 interface FilesHierarchyProps {
   onSelectFile?: (file: FileItem | null) => void;
   selectedFile?: FileItem | null;
 }
 
 const FilesHierarchy = ({ onSelectFile, selectedFile }: FilesHierarchyProps) => {
-  const [searchQuery, setSearchQuery] = useState('');
+  const [searchInput, setSearchInput] = useState('');
+  const [debouncedSearchQuery, setDebouncedSearchQuery] = useState('');
   const [sortBy, setSortBy] = useState<SortOption>('date_modified');
   const [sortDirection, setSortDirection] = useState<SortDirection>('desc');
 
@@ -22,11 +25,19 @@ const FilesHierarchy = ({ onSelectFile, selectedFile }: FilesHierarchyProps) => 
     setSortDirection((prev) => (prev === 'asc' ? 'desc' : 'asc'));
   };
 
+  useEffect(() => {
+    const timer = setTimeout(() => {
+      setDebouncedSearchQuery(searchInput);
+    }, SEARCH_DEBOUNCE_MS);
+
+    return () => clearTimeout(timer);
+  }, [searchInput]);
+
   return (
     <div className='bg-BG_GRAY_2 border-GRAY_400 relative flex w-2/5 flex-col border-r'>
       <FilesToolbar
-        searchQuery={searchQuery}
-        onSearchChange={setSearchQuery}
+        searchQuery={searchInput}
+        onSearchChange={setSearchInput}
         sortBy={sortBy}
         onSortByChange={setSortBy}
         sortDirection={sortDirection}
@@ -35,7 +46,7 @@ const FilesHierarchy = ({ onSelectFile, selectedFile }: FilesHierarchyProps) => 
       <div className='flex-1 overflow-y-auto pb-20 [scrollbar-width:none]'>
         <FileTree
           files={MOCK_FILES}
-          searchQuery={searchQuery}
+          searchQuery={debouncedSearchQuery}
           sortBy={sortBy}
           sortDirection={sortDirection}
           selectedPath={selectedFile?.path ?? null}
@@ -44,11 +55,17 @@ const FilesHierarchy = ({ onSelectFile, selectedFile }: FilesHierarchyProps) => 
       </div>
 
       {/* File and Folder Create */}
-      <div className='from-GRAY_200 absolute right-0 bottom-0 left-0 flex w-full items-center justify-center bg-linear-to-t to-transparent px-3 py-4 backdrop-blur-md'>
+      <div
+        className='pointer-events-none absolute right-0 bottom-0 left-0 flex w-full items-center justify-center px-3 pt-12 pb-4'
+        style={{
+          background:
+            'linear-gradient(to top, rgba(234, 234, 234, 1) 0%, rgba(234, 234, 234, 0.95) 30%, rgba(234, 234, 234, 0.7) 50%, rgba(234, 234, 234, 0.3) 70%, rgba(234, 234, 234, 0) 100%)',
+        }}
+      >
         <Button
           variant='outline'
           size='medium'
-          className='f-12-500 gap-x-2.5 rounded-md bg-white px-3 py-2 hover:bg-white'
+          className='f-12-500 pointer-events-auto gap-x-2.5 rounded-md bg-white px-3 py-2 hover:bg-white'
           style={{ minWidth: '216px' }}
         >
           <span className='text-GRAY_700'>Create new</span>
