@@ -27,6 +27,65 @@ export const CONTEXT_MENU_ACTIONS: ContextMenuAction[] = [
   { id: 'delete', label: 'Delete', icon: Trash2, isDestructive: true },
 ];
 
+// File types that can be edited with Monaco editor
+export const MONACO_EDITABLE_EXTENSIONS = [
+  // Plain text & Markdown
+  'txt',
+  'md',
+  'mdx',
+  // Web
+  'html',
+  'css',
+  'scss',
+  'sass',
+  'less',
+  'js',
+  'jsx',
+  'ts',
+  'tsx',
+  'vue',
+  'svelte',
+  // Backend
+  'py',
+  'rb',
+  'php',
+  'java',
+  'kt',
+  'swift',
+  'go',
+  'rs',
+  'c',
+  'cpp',
+  'cs',
+  'r',
+  'scala',
+  // Config
+  'json',
+  'yaml',
+  'yml',
+  'xml',
+  'toml',
+  'ini',
+  'env',
+  // Shell
+  'sh',
+  'bash',
+  'zsh',
+  'ps1',
+  'bat',
+  // Database
+  'sql',
+  'graphql',
+  'prisma',
+  // Data
+  'csv',
+] as const;
+
+export const MONACO_FILE_TYPE_OPTIONS: { label: string; value: string }[] = MONACO_EDITABLE_EXTENSIONS.map((ext) => ({
+  label: `.${ext}`,
+  value: ext,
+}));
+
 export const FILE_TYPE_LABELS: Record<string, string> = {
   // Documents
   PDF: 'PDF file',

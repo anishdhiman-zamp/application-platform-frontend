@@ -1,7 +1,20 @@
 import type { LucideIcon } from 'lucide-react';
 
-export type SortOption = 'date_modified' | 'name' | 'size' | 'type';
-export type SortDirection = 'asc' | 'desc';
+export const SORT_OPTION = {
+  DATE_MODIFIED: 'date_modified',
+  NAME: 'name',
+  SIZE: 'size',
+  TYPE: 'type',
+} as const;
+
+export type SortOption = (typeof SORT_OPTION)[keyof typeof SORT_OPTION];
+
+export const SORT_DIRECTION = {
+  ASC: 'asc',
+  DESC: 'desc',
+} as const;
+
+export type SortDirection = (typeof SORT_DIRECTION)[keyof typeof SORT_DIRECTION];
 
 export interface ContextMenuAction {
   id: string;
@@ -17,6 +30,13 @@ export const FILE_TYPE = {
 } as const;
 
 export type FileType = (typeof FILE_TYPE)[keyof typeof FILE_TYPE];
+
+export const CREATE_ITEM_TYPE = {
+  FILE: 'file',
+  FOLDER: 'folder',
+} as const;
+
+export type CreateItemType = (typeof CREATE_ITEM_TYPE)[keyof typeof CREATE_ITEM_TYPE];
 
 /**
  * File item as returned from the backend API
