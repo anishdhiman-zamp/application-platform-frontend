@@ -1,0 +1,198 @@
+import { REQUEST_TYPES } from '@zamp-platform/api';
+import { API_ENDPOINTS } from 'apis/apiEndpoint.constants';
+import { APITags } from '@/constants/api.constants';
+import { baseApi } from '@/services/baseApi';
+import type {
+  CancelUploadResponse,
+  CompleteUploadRequest,
+  CompleteUploadResponse,
+  CopyMoveRequest,
+  CopyMoveResponse,
+  CreateItemRequest,
+  CreateItemResponse,
+  DeleteResponse,
+  DirectUploadResponse,
+  FilesystemStatusResponse,
+  InitUploadRequest,
+  InitUploadResponse,
+  ListFilesRequest,
+  ListFilesResponse,
+  ReadDirectoryResponse,
+  ReadFileResponse,
+  UploadChunkRequest,
+  UploadChunkResponse,
+  WriteFileRequest,
+  WriteFileResponse,
+} from '@/types/api/filesystem.types';
+import { formRequestUrlWithParams } from '@/utils/common';
+
+const FilesystemApi = baseApi.injectEndpoints({
+  endpoints: (builder) => ({
+    // Get Filesystem/Sandbox Status
+    getFilesystemStatus: builder.query<FilesystemStatusResponse, void>({
+      query: () => ({
+        url: API_ENDPOINTS.FILESYSTEM_STATUS_GET,
+      }),
+      providesTags: [APITags.GET_FILESYSTEM_STATUS],
+    }),
+
+    // List Files (Recursive)
+    listFiles: builder.query<ListFilesResponse, ListFilesRequest>({
+      query: ({ recursive = true, path }) => ({
+        url: API_ENDPOINTS.FILES_LIST_GET,
+        params: {
+          recursive,
+          path: path || undefined,
+        },
+      }),
+      providesTags: [APITags.GET_FILES_LIST],
+    }),
+
+    // Read File Content
+    readFile: builder.query<ReadFileResponse, { path: string }>({
+      query: ({ path }) => ({
+        url: formRequestUrlWithParams(API_ENDPOINTS.FILES_READ_GET, { path }),
+      }),
+    }),
+
+    // Read Directory Contents
+    readDirectory: builder.query<ReadDirectoryResponse, { path: string }>({
+      query: ({ path }) => ({
+        url: formRequestUrlWithParams(API_ENDPOINTS.FILES_READ_GET, { path }),
+      }),
+    }),
+
+    // Create File or Directory
+    createItem: builder.mutation<CreateItemResponse, CreateItemRequest>({
+      query: ({ path, type }) => ({
+        url: API_ENDPOINTS.FILES_CREATE_POST,
+        method: REQUEST_TYPES.POST,
+        body: { path, type },
+      }),
+      invalidatesTags: [APITags.GET_FILES_LIST],
+    }),
+
+    // Write File Content
+    writeFile: builder.mutation<WriteFileResponse, WriteFileRequest>({
+      query: ({ relative_path, content, expected_mtime_ms }) => ({
+        url: API_ENDPOINTS.FILES_WRITE_POST,
+        method: REQUEST_TYPES.POST,
+        body: {
+          relative_path,
+          content,
+          expected_mtime_ms: expected_mtime_ms || undefined,
+        },
+      }),
+      invalidatesTags: [APITags.GET_FILES_LIST],
+    }),
+
+    // Copy File or Directory
+    copyFile: builder.mutation<CopyMoveResponse, CopyMoveRequest>({
+      query: ({ source, destination }) => ({
+        url: API_ENDPOINTS.FILES_COPY_POST,
+        method: REQUEST_TYPES.POST,
+        body: { source, destination },
+      }),
+      invalidatesTags: [APITags.GET_FILES_LIST],
+    }),
+
+    // Move/Rename File or Directory
+    moveFile: builder.mutation<CopyMoveResponse, CopyMoveRequest>({
+      query: ({ source, destination }) => ({
+        url: API_ENDPOINTS.FILES_MOVE_POST,
+        method: REQUEST_TYPES.POST,
+        body: { source, destination },
+      }),
+      invalidatesTags: [APITags.GET_FILES_LIST],
+    }),
+
+    // Delete File or Directory
+    deleteFile: builder.mutation<DeleteResponse, { path: string }>({
+      query: ({ path }) => ({
+        url: formRequestUrlWithParams(API_ENDPOINTS.FILES_DELETE, { path }),
+        method: REQUEST_TYPES.DELETE,
+      }),
+      invalidatesTags: [APITags.GET_FILES_LIST],
+    }),
+
+    // Direct Upload (Small Files <= 1MB)
+    directUpload: builder.mutation<DirectUploadResponse, { path: string; file: File }>({
+      query: ({ path, file }) => {
+        const formData = new FormData();
+
+        formData.append('path', path);
+        formData.append('file', file);
+
+        return {
+          url: API_ENDPOINTS.FILES_UPLOAD_POST,
+          method: REQUEST_TYPES.POST,
+          body: formData,
+        };
+      },
+      invalidatesTags: [APITags.GET_FILES_LIST],
+    }),
+
+    // Initialize Chunked Upload
+    initChunkedUpload: builder.mutation<InitUploadResponse, InitUploadRequest>({
+      query: ({ path, file_name, total_bytes }) => ({
+        url: API_ENDPOINTS.FILES_UPLOAD_INIT_POST,
+        method: REQUEST_TYPES.POST,
+        body: { path, file_name, total_bytes },
+      }),
+    }),
+
+    // Upload Chunk
+    uploadChunk: builder.mutation<UploadChunkResponse, UploadChunkRequest>({
+      query: ({ uploadId, chunkIndex, chunkOffset, data }) => ({
+        url: API_ENDPOINTS.FILES_UPLOAD_CHUNK_POST,
+        method: REQUEST_TYPES.POST,
+        headers: {
+          'Content-Type': 'application/octet-stream',
+          'X-Upload-Id': uploadId,
+          'X-Chunk-Index': String(chunkIndex),
+          'X-Chunk-Offset': String(chunkOffset),
+        },
+        body: data,
+      }),
+    }),
+
+    // Complete Chunked Upload
+    completeUpload: builder.mutation<CompleteUploadResponse, CompleteUploadRequest>({
+      query: ({ upload_id }) => ({
+        url: API_ENDPOINTS.FILES_UPLOAD_COMPLETE_POST,
+        method: REQUEST_TYPES.POST,
+        body: { upload_id },
+      }),
+      invalidatesTags: [APITags.GET_FILES_LIST],
+    }),
+
+    // Cancel Chunked Upload
+    cancelUpload: builder.mutation<CancelUploadResponse, { uploadId: string }>({
+      query: ({ uploadId }) => ({
+        url: formRequestUrlWithParams(API_ENDPOINTS.FILES_UPLOAD_CANCEL_DELETE, { uploadId }),
+        method: REQUEST_TYPES.DELETE,
+      }),
+    }),
+  }),
+});
+
+export const {
+  useGetFilesystemStatusQuery,
+  useLazyGetFilesystemStatusQuery,
+  useListFilesQuery,
+  useLazyListFilesQuery,
+  useReadFileQuery,
+  useLazyReadFileQuery,
+  useReadDirectoryQuery,
+  useLazyReadDirectoryQuery,
+  useCreateItemMutation,
+  useWriteFileMutation,
+  useCopyFileMutation,
+  useMoveFileMutation,
+  useDeleteFileMutation,
+  useDirectUploadMutation,
+  useInitChunkedUploadMutation,
+  useUploadChunkMutation,
+  useCompleteUploadMutation,
+  useCancelUploadMutation,
+} = FilesystemApi;
