@@ -1,5 +1,15 @@
+import type { LucideIcon } from 'lucide-react';
+
 export type SortOption = 'date_modified' | 'name' | 'size' | 'type';
 export type SortDirection = 'asc' | 'desc';
+
+export interface ContextMenuAction {
+  id: string;
+  label: string;
+  icon: LucideIcon;
+  isDestructive?: boolean;
+  fileOnly?: boolean;
+}
 
 export const FILE_TYPE = {
   DIRECTORY: 'directory',
