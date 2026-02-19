@@ -1,11 +1,12 @@
 'use client';
 
-import { useCallback, useEffect, useMemo, useState } from 'react';
+import { useCallback, useMemo, useState } from 'react';
 import type { FileItem, FileTreeProps } from 'modules/pace/components/files/file-tree.types';
 import {
   buildFileTree,
+  buildNodeMap,
   filterTreeNodes,
-  getExpandedPathsForSearch,
+  getAncestorPaths,
   sortTreeNodes,
 } from 'modules/pace/components/files/file-tree.utils';
 import FileTreeNode from 'modules/pace/components/files/FileTreeNode';
@@ -33,11 +34,17 @@ const FileTree = ({
 
   const rawTree = useMemo(() => buildFileTree(files), [files]);
 
+  const sortedRawTree = useMemo(() => sortTreeNodes(rawTree, sortBy, sortDirection), [rawTree, sortBy, sortDirection]);
+
+  const originalNodeMap = useMemo(() => buildNodeMap(sortedRawTree), [sortedRawTree]);
+
   const treeData = useMemo(() => {
-    const filtered = filterTreeNodes(rawTree, searchQuery);
+    const filtered = filterTreeNodes(sortedRawTree, searchQuery);
 
     return sortTreeNodes(filtered, sortBy, sortDirection);
-  }, [rawTree, searchQuery, sortBy, sortDirection]);
+  }, [sortedRawTree, searchQuery, sortBy, sortDirection]);
+
+  const ancestorPaths = useMemo(() => getAncestorPaths(selectedPath), [selectedPath]);
 
   const handleToggleExpand = useCallback((path: string) => {
     setExpandedPaths((prev) => {
@@ -66,20 +73,6 @@ const FileTree = ({
     [onSelectFile, filesMap],
   );
 
-  useEffect(() => {
-    if (searchQuery.trim()) {
-      const pathsToExpand = getExpandedPathsForSearch(rawTree, searchQuery);
-
-      setExpandedPaths((prev) => {
-        const newSet = new Set(prev);
-
-        pathsToExpand.forEach((path) => newSet.add(path));
-
-        return newSet;
-      });
-    }
-  }, [searchQuery, rawTree]);
-
   if (treeData.length === 0) {
     return (
       <div className='flex flex-col items-center justify-center py-8 text-center'>
@@ -97,6 +90,8 @@ const FileTree = ({
           depth={0}
           expandedPaths={expandedPaths}
           selectedPath={selectedPath}
+          ancestorPaths={ancestorPaths}
+          originalNodeMap={originalNodeMap}
           onToggleExpand={handleToggleExpand}
           onSelect={handleSelect}
         />

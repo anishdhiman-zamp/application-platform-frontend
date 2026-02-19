@@ -128,69 +128,66 @@ export function sortTreeNodes(nodes: TreeNode[], sortBy: SortOption, sortDirecti
 }
 
 /**
- * Filters tree nodes by search query, keeping parent folders if any children match
+ * Filters tree nodes by search query - only shows items whose name matches.
+ * Does not include parent folders just because children match.
  */
 export function filterTreeNodes(nodes: TreeNode[], searchQuery: string): TreeNode[] {
   if (!searchQuery.trim()) return nodes;
 
   const query = searchQuery.toLowerCase();
+  const results: TreeNode[] = [];
 
-  return nodes
-    .map((node) => {
-      const nameMatches = node.name.toLowerCase().includes(query);
-
-      if (node.type === FILE_TYPE.DIRECTORY && node.children) {
-        const filteredChildren = filterTreeNodes(node.children, searchQuery);
-
-        if (filteredChildren.length > 0 || nameMatches) {
-          return {
-            ...node,
-            children: filteredChildren,
-          };
-        }
-
-        return null;
+  const collectMatches = (nodeList: TreeNode[]) => {
+    for (const node of nodeList) {
+      if (node.name.toLowerCase().includes(query)) {
+        results.push(node);
       }
 
-      return nameMatches ? node : null;
-    })
-    .filter((node): node is TreeNode => node !== null);
+      if (node.type === FILE_TYPE.DIRECTORY && node.children) {
+        collectMatches(node.children);
+      }
+    }
+  };
+
+  collectMatches(nodes);
+
+  return results;
 }
 
 /**
- * Gets all folder paths that should be expanded to show search results
+ * Gets all ancestor folder paths for a given file path
  */
-export function getExpandedPathsForSearch(nodes: TreeNode[], searchQuery: string): Set<string> {
-  const expandedPaths = new Set<string>();
+export function getAncestorPaths(filePath: string | null): Set<string> {
+  const ancestors = new Set<string>();
 
-  if (!searchQuery.trim()) return expandedPaths;
+  if (!filePath) return ancestors;
 
-  const query = searchQuery.toLowerCase();
+  const parts = filePath.split('/');
 
-  for (const node of nodes) {
-    if (node.type === FILE_TYPE.DIRECTORY && node.children) {
-      const hasMatchingDescendant = hasMatchingChild(node.children, query);
-
-      if (hasMatchingDescendant) {
-        expandedPaths.add(node.path);
-
-        const childPaths = getExpandedPathsForSearch(node.children, searchQuery);
-
-        childPaths.forEach((path) => expandedPaths.add(path));
-      }
-    }
+  for (let i = 1; i < parts.length; i++) {
+    ancestors.add(parts.slice(0, i).join('/'));
   }
 
-  return expandedPaths;
+  return ancestors;
 }
 
-function hasMatchingChild(nodes: TreeNode[], query: string): boolean {
-  for (const node of nodes) {
-    if (node.name.toLowerCase().includes(query)) return true;
-    if (node.type === FILE_TYPE.DIRECTORY && node.children && hasMatchingChild(node.children, query)) {
-      return true;
-    }
-  }
+/**
+ * Builds a map of path -> TreeNode for quick lookups
+ */
+export function buildNodeMap(nodes: TreeNode[]): Map<string, TreeNode> {
+  const map = new Map<string, TreeNode>();
 
-  return false;
+  const addToMap = (nodeList: TreeNode[]) => {
+    for (const node of nodeList) {
+      map.set(node.path, node);
+
+      if (node.children) {
+        addToMap(node.children);
+      }
+    }
+  };
+
+  addToMap(nodes);
+
+  return map;
 }
