@@ -137,9 +137,9 @@ export interface InitUploadResponse {
 }
 
 export interface UploadChunkRequest {
-  uploadId: string;
-  chunkIndex: number;
-  chunkOffset: number;
+  upload_id: string;
+  chunk_index: number;
+  chunk_offset: number;
   data: ArrayBuffer | Blob;
 }
 
@@ -160,7 +160,7 @@ export interface CompleteUploadResponse {
 }
 
 export interface CancelUploadRequest {
-  uploadId: string;
+  upload_id: string;
 }
 
 export interface CancelUploadResponse {

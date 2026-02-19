@@ -3,6 +3,7 @@ import { API_ENDPOINTS } from 'apis/apiEndpoint.constants';
 import { APITags } from '@/constants/api.constants';
 import { baseApi } from '@/services/baseApi';
 import type {
+  CancelUploadRequest,
   CancelUploadResponse,
   CompleteUploadRequest,
   CompleteUploadResponse,
@@ -143,14 +144,14 @@ const FilesystemApi = baseApi.injectEndpoints({
 
     // Upload Chunk
     uploadChunk: builder.mutation<UploadChunkResponse, UploadChunkRequest>({
-      query: ({ uploadId, chunkIndex, chunkOffset, data }) => ({
+      query: ({ upload_id, chunk_index, chunk_offset, data }) => ({
         url: API_ENDPOINTS.FILES_UPLOAD_CHUNK_POST,
         method: REQUEST_TYPES.POST,
         headers: {
           'Content-Type': 'application/octet-stream',
-          'X-Upload-Id': uploadId,
-          'X-Chunk-Index': String(chunkIndex),
-          'X-Chunk-Offset': String(chunkOffset),
+          'X-Upload-Id': upload_id,
+          'X-Chunk-Index': String(chunk_index),
+          'X-Chunk-Offset': String(chunk_offset),
         },
         body: data,
       }),
@@ -167,9 +168,9 @@ const FilesystemApi = baseApi.injectEndpoints({
     }),
 
     // Cancel Chunked Upload
-    cancelUpload: builder.mutation<CancelUploadResponse, { uploadId: string }>({
-      query: ({ uploadId }) => ({
-        url: formRequestUrlWithParams(API_ENDPOINTS.FILES_UPLOAD_CANCEL_DELETE, { uploadId }),
+    cancelUpload: builder.mutation<CancelUploadResponse, CancelUploadRequest>({
+      query: ({ upload_id }) => ({
+        url: formRequestUrlWithParams(API_ENDPOINTS.FILES_UPLOAD_CANCEL_DELETE, { upload_id }),
         method: REQUEST_TYPES.DELETE,
       }),
     }),
