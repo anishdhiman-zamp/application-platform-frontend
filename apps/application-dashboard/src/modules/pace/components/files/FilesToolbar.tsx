@@ -10,8 +10,8 @@ import {
 } from '@zamp-platform/ui';
 import { cn } from '@zamp-platform/ui/utils';
 import { ArrowDown, ArrowUp, ChevronDownIcon, ListFilter, SearchIcon } from 'lucide-react';
-import { SORT_DIRECTION, SortDirection, SortOption } from 'modules/pace/components/files/file-tree.types';
-import { SORT_OPTIONS } from 'modules/pace/components/files/files.constants';
+import { SORT_DIRECTION, SortDirection, SortOption } from '@/modules/pace/components/files/file-tree.types';
+import { SORT_OPTIONS } from '@/modules/pace/components/files/files.constants';
 
 interface FilesToolbarProps {
   searchQuery: string;

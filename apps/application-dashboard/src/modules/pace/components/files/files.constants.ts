@@ -1,10 +1,21 @@
-import { Copy, Download, ExternalLink, Link, Pencil, Scissors, Share, Trash2 } from 'lucide-react';
+import {
+  Copy,
+  Download,
+  ExternalLink,
+  FilePlus,
+  FolderPlus,
+  Link,
+  Pencil,
+  Scissors,
+  Share,
+  Trash2,
+} from 'lucide-react';
 import {
   type ContextMenuAction,
   FILE_TYPE,
   type FileItem,
   type SortOption,
-} from 'modules/pace/components/files/file-tree.types';
+} from '@/modules/pace/components/files/file-tree.types';
 
 export const DATE_FORMAT = "EEEE, d MMMM yyyy 'at' h:mm a";
 
@@ -16,6 +27,8 @@ export const SORT_OPTIONS: { value: SortOption; label: string }[] = [
 ];
 
 export const CONTEXT_MENU_ACTIONS: ContextMenuAction[] = [
+  { id: 'create-file', label: 'Create File', icon: FilePlus, folderOnly: true },
+  { id: 'create-folder', label: 'Create Folder', icon: FolderPlus, folderOnly: true },
   { id: 'open-in-tab', label: 'Open in Tab', icon: ExternalLink, fileOnly: true },
   { id: 'work-with-zamp', label: 'Work with Zamp', icon: Link },
   { id: 'rename', label: 'Rename', icon: Pencil },

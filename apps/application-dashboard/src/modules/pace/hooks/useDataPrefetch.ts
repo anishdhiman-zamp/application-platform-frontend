@@ -1,4 +1,6 @@
+import { useFilesystemStatus } from 'modules/pace/hooks/useFilesystemStatus';
 import { useGetDatasetListingQuery } from '@/apis/dataset';
+import { useListFilesQuery } from '@/apis/filesystem';
 import { useGetConversationHistoryQuery, useListSkillsQuery } from '@/apis/pace';
 import { useGetPagesQuery } from '@/apis/pages';
 import { useIsPaceChatEnabled } from '@/hooks/useIsPaceChatEnabled';
@@ -8,7 +10,11 @@ import { getFromLocalStorage, LOCAL_STORAGE_KEYS } from '@/utils/localstorage';
 
 const useDataPrefetch = () => {
   const { isPaceChatEnabled, isLoading } = useIsPaceChatEnabled();
+  const { isFilesystemActive, isFilesystemStatusLoading } = useFilesystemStatus();
   const organizationId = getFromLocalStorage(LOCAL_STORAGE_KEYS.XZAMP_ORGANIZATION_ID) ?? '';
+
+  const shouldSkip =
+    !organizationId || isLoading || !isPaceChatEnabled || isFilesystemStatusLoading || !isFilesystemActive;
 
   useGetConversationHistoryQuery(
     {
@@ -18,7 +24,7 @@ const useDataPrefetch = () => {
       limit: 20,
     },
     {
-      skip: !organizationId || isLoading || !isPaceChatEnabled,
+      skip: shouldSkip,
       refetchOnMountOrArgChange: false,
     },
   );
@@ -27,20 +33,28 @@ const useDataPrefetch = () => {
     {},
     {
       refetchOnMountOrArgChange: false,
-      skip: !isPaceChatEnabled || isLoading,
+      skip: shouldSkip,
     },
   );
 
   useGetPagesQuery(undefined, {
     refetchOnMountOrArgChange: false,
-    skip: !isPaceChatEnabled || isLoading,
+    skip: shouldSkip,
   });
 
   useGetDatasetListingQuery(
     { page: 1, pageSize: ARTIFACTS_PAGE_SIZE },
     {
       refetchOnMountOrArgChange: false,
-      skip: !isPaceChatEnabled || isLoading,
+      skip: shouldSkip,
+    },
+  );
+
+  useListFilesQuery(
+    { recursive: true },
+    {
+      refetchOnMountOrArgChange: false,
+      skip: shouldSkip,
     },
   );
 

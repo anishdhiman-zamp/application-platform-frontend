@@ -22,6 +22,7 @@ export interface ContextMenuAction {
   icon: LucideIcon;
   isDestructive?: boolean;
   fileOnly?: boolean;
+  folderOnly?: boolean;
 }
 
 export const FILE_TYPE = {
@@ -89,6 +90,7 @@ export interface FileTreeNodeProps {
   expandedPaths: Set<string>;
   selectedPath: string | null;
   originalNodeMap: Map<string, TreeNode>;
+  siblingNames: string[];
   onToggleExpand: (path: string) => void;
   onSelect: (path: string) => void;
 }

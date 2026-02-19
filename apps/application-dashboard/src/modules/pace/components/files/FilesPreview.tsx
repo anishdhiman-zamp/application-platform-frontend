@@ -1,12 +1,12 @@
 import { FileIcon } from '@zamp-platform/ui';
-import { FILE_TYPE, type FilesPreviewProps } from 'modules/pace/components/files/file-tree.types';
+import Image from 'next/image';
+import { FILE_TYPE, type FilesPreviewProps } from '@/modules/pace/components/files/file-tree.types';
 import {
   formatDate,
   formatFileSize,
   getFileExtension,
   getFileTypeLabel,
-} from 'modules/pace/components/files/file-tree.utils';
-import Image from 'next/image';
+} from '@/modules/pace/components/files/file-tree.utils';
 
 const FilesPreview = ({ selectedFile }: FilesPreviewProps) => {
   if (!selectedFile || selectedFile.type === FILE_TYPE.DIRECTORY) {

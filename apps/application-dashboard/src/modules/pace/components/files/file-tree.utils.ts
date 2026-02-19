@@ -5,8 +5,8 @@ import {
   type SortDirection,
   type SortOption,
   type TreeNode,
-} from 'modules/pace/components/files/file-tree.types';
-import { DATE_FORMAT, FILE_TYPE_LABELS } from 'modules/pace/components/files/files.constants';
+} from '@/modules/pace/components/files/file-tree.types';
+import { DATE_FORMAT, FILE_TYPE_LABELS } from '@/modules/pace/components/files/files.constants';
 
 /**
  * Builds a hierarchical tree structure from a flat array of files.

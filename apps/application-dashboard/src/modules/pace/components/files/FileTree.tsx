@@ -1,14 +1,16 @@
 'use client';
 
 import { useCallback, useMemo, useState } from 'react';
-import type { FileItem, FileTreeProps } from 'modules/pace/components/files/file-tree.types';
+import ImageKitImage from '@/components/ImageKitImage';
+import { TEAM_MEMBERS_EMPTY_STATE } from '@/constants/icons';
+import type { FileItem, FileTreeProps } from '@/modules/pace/components/files/file-tree.types';
 import {
   buildFileTree,
   buildNodeMap,
   filterTreeNodes,
   sortTreeNodes,
-} from 'modules/pace/components/files/file-tree.utils';
-import FileTreeNode from 'modules/pace/components/files/FileTreeNode';
+} from '@/modules/pace/components/files/file-tree.utils';
+import FileTreeNode from '@/modules/pace/components/files/FileTreeNode';
 
 const FileTree = ({
   files,
@@ -30,13 +32,9 @@ const FileTree = ({
 
     return map;
   }, [files]);
-
   const rawTree = useMemo(() => buildFileTree(files), [files]);
-
   const sortedRawTree = useMemo(() => sortTreeNodes(rawTree, sortBy, sortDirection), [rawTree, sortBy, sortDirection]);
-
   const originalNodeMap = useMemo(() => buildNodeMap(sortedRawTree), [sortedRawTree]);
-
   const treeData = useMemo(() => {
     const filtered = filterTreeNodes(sortedRawTree, searchQuery);
 
@@ -70,10 +68,21 @@ const FileTree = ({
     [onSelectFile, filesMap],
   );
 
-  if (treeData.length === 0) {
+  const rootSiblingNames = useMemo(() => treeData.map((node) => node.name), [treeData]);
+
+  if (treeData.length === 0 && searchQuery) {
     return (
-      <div className='flex flex-col items-center justify-center py-8 text-center'>
-        <p className='f-14-400 text-GRAY_600'>{searchQuery ? 'No files match your search' : 'No files found'}</p>
+      <div className='flex h-full w-full flex-col items-center justify-center gap-y-2 py-8'>
+        <div className='relative flex h-[150px] w-[190px] items-center justify-center'>
+          <ImageKitImage
+            src={TEAM_MEMBERS_EMPTY_STATE}
+            alt='No files found'
+            className='h-full w-full object-cover object-center'
+            width={222}
+            height={181}
+          />
+        </div>
+        <p className='f-14-400 text-GRAY_600 text-center'>No files match your search</p>
       </div>
     );
   }
@@ -88,6 +97,7 @@ const FileTree = ({
           expandedPaths={expandedPaths}
           selectedPath={selectedPath}
           originalNodeMap={originalNodeMap}
+          siblingNames={rootSiblingNames}
           onToggleExpand={handleToggleExpand}
           onSelect={handleSelect}
         />
