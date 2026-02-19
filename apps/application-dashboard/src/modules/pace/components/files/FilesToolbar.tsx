@@ -10,13 +10,10 @@ import {
 } from '@zamp-platform/ui';
 import { cn } from '@zamp-platform/ui/utils';
 import { ArrowDown, ArrowUp, ChevronDownIcon, ListFilter, SearchIcon } from 'lucide-react';
-
-export type SortOption = 'date_modified' | 'date_created' | 'name' | 'size' | 'type';
-export type SortDirection = 'asc' | 'desc';
+import type { SortDirection, SortOption } from 'modules/pace/components/files/file-tree.types';
 
 export const SORT_OPTIONS: { value: SortOption; label: string }[] = [
   { value: 'date_modified', label: 'Date modified' },
-  { value: 'date_created', label: 'Date created' },
   { value: 'name', label: 'Name' },
   { value: 'size', label: 'Size' },
   { value: 'type', label: 'Type' },
