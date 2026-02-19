@@ -1,20 +1,24 @@
-// Filesystem Status Types
-export interface FilesystemStatusResponse {
-  status: 'active' | 'inactive';
-  started_at: string | null;
-}
-
-// File/Directory Info Types
+export type FilesystemStatus = 'active' | 'inactive';
 export type FileItemType = 'file' | 'directory';
 
+export interface FilesystemStatusResponse {
+  status: FilesystemStatus;
+  started_at: string | null;
+}
 export interface FileInfo {
   name: string;
   path: string;
   type: FileItemType;
   size: number;
   mtime_ms: number;
-  created_at?: string;
-  updated_at?: string;
+}
+
+// Base interface for read responses (shared fields)
+interface BaseReadResponse {
+  path_parts: string[];
+  mtime_ms: number;
+  file_extension: string | null;
+  mime_type: string | null;
 }
 
 // List Files Types
@@ -36,9 +40,10 @@ export interface CreateItemRequest {
 }
 
 export interface CreateItemResponse {
+  success: boolean;
   path: string;
   type: FileItemType;
-  created: boolean;
+  mtime_ms: number;
 }
 
 // Write File Types
@@ -51,7 +56,6 @@ export interface WriteFileRequest {
 export interface WriteFileResponse {
   path: string;
   mtime_ms: number;
-  size: number;
 }
 
 // Read File Types
@@ -59,20 +63,26 @@ export interface ReadFileRequest {
   path: string;
 }
 
-export interface ReadFileResponse {
-  file_content: string;
-  mtime_ms: number;
-  path_parts: string[];
-  size: number;
+export interface ReadFileResponse extends BaseReadResponse {
   type: 'file';
+  is_dir: false;
+  file_content: string;
+  file_size: number;
+  size: number;
+  directory_contents: null;
 }
 
 // Read Directory Types
-export interface ReadDirectoryResponse {
-  directory_contents: FileInfo[];
-  path_parts: string[];
+export interface ReadDirectoryResponse extends BaseReadResponse {
   type: 'directory';
+  is_dir: true;
+  directory_contents: FileInfo[];
+  file_content: null;
+  file_size: null;
 }
+
+// Union type for read operations
+export type ReadResponse = ReadFileResponse | ReadDirectoryResponse;
 
 // Copy/Move Types
 export interface CopyMoveRequest {
@@ -81,19 +91,22 @@ export interface CopyMoveRequest {
 }
 
 export interface CopyMoveResponse {
+  success: boolean;
   source: string;
   destination: string;
-  success: boolean;
+  path: string;
+  mtime_ms: number;
 }
 
 // Delete Types
-export interface DeleteFileRequest {
+export interface DeleteRequest {
   path: string;
 }
 
 export interface DeleteResponse {
+  success: boolean;
   path: string;
-  deleted: boolean;
+  mtime_ms: number;
 }
 
 // Direct Upload Types
@@ -103,9 +116,10 @@ export interface DirectUploadRequest {
 }
 
 export interface DirectUploadResponse {
+  success: boolean;
   path: string;
   mtime_ms: number;
-  size: number;
+  bytes_written: number;
 }
 
 // Chunked Upload Types
@@ -119,6 +133,7 @@ export interface InitUploadResponse {
   upload_id: string;
   chunk_size_bytes: number;
   total_chunks: number;
+  target_path: string;
 }
 
 export interface UploadChunkRequest {
@@ -129,9 +144,8 @@ export interface UploadChunkRequest {
 }
 
 export interface UploadChunkResponse {
-  upload_id: string;
   chunk_index: number;
-  received_bytes: number;
+  bytes_received: number;
 }
 
 export interface CompleteUploadRequest {
@@ -139,9 +153,10 @@ export interface CompleteUploadRequest {
 }
 
 export interface CompleteUploadResponse {
+  success: boolean;
   path: string;
   mtime_ms: number;
-  size: number;
+  bytes_written: number;
 }
 
 export interface CancelUploadRequest {
@@ -149,6 +164,5 @@ export interface CancelUploadRequest {
 }
 
 export interface CancelUploadResponse {
-  upload_id: string;
-  cancelled: boolean;
+  success: boolean;
 }
