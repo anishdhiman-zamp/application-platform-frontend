@@ -4,6 +4,8 @@ import { motion } from 'framer-motion';
 import { Eye, EyeOff, GripVertical, Trash2 } from 'lucide-react';
 import React, { FC, memo, useEffect, useRef, useState } from 'react';
 
+import { NEW_COLUMN_PREFIX } from '@/modules/data/data.constants';
+
 import { DATASET_COLUMN_HEADERS_LIST, DATASET_TOAST_MESSAGES, DatasetColumnHeaderTypes } from '../constants';
 import { useDatasetColumnDetails } from '../hooks/useDatasetColumnDetails';
 import ColumnTypeDropdown from './ColumnTypeDropdown';
@@ -41,7 +43,6 @@ const DatasetColumDetails: FC<IDatasetColumDetailsProps> = memo(
     allColumns = [],
     skipInitialAnimation = false,
     canEdit = true,
-    isCreating = false,
   }) => {
     const inputRef = useRef<HTMLInputElement | null>(null);
     const [isModalOpen, setIsModalOpen] = useState(false);
@@ -68,8 +69,9 @@ const DatasetColumDetails: FC<IDatasetColumDetailsProps> = memo(
         return DATASET_TOAST_MESSAGES.COLUMN_NAME_EMPTY;
       }
 
-      // In creation mode, check for invalid characters (only alphabets, numbers, and spaces allowed)
-      if (isCreating && /[^a-zA-Z0-9 ]/.test(trimmedName)) {
+      // For new (unsaved) columns (FE temp ID starts with "col_"), check for invalid characters
+      // Only alphabets, numbers, and spaces are allowed
+      if (columnData?.id?.startsWith(NEW_COLUMN_PREFIX.COL_) && /[^a-zA-Z0-9 ]/.test(trimmedName)) {
         return DATASET_TOAST_MESSAGES.INVALID_COLUMN_NAME_CHARS;
       }
 

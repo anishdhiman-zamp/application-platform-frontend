@@ -11,13 +11,7 @@ import {
 import { cn } from '@zamp-platform/ui/utils';
 import { ArrowDown, ArrowUp, ChevronDownIcon, ListFilter, SearchIcon } from 'lucide-react';
 import type { SortDirection, SortOption } from 'modules/pace/components/files/file-tree.types';
-
-export const SORT_OPTIONS: { value: SortOption; label: string }[] = [
-  { value: 'date_modified', label: 'Date modified' },
-  { value: 'name', label: 'Name' },
-  { value: 'size', label: 'Size' },
-  { value: 'type', label: 'Type' },
-];
+import { SORT_OPTIONS } from 'modules/pace/components/files/files.constants';
 
 interface FilesToolbarProps {
   searchQuery: string;

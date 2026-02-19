@@ -1,7 +1,19 @@
 import { Copy, Download, ExternalLink, Link, Pencil, Scissors, Share, Trash2 } from 'lucide-react';
-import { type ContextMenuAction, FILE_TYPE, type FileItem } from 'modules/pace/components/files/file-tree.types';
+import {
+  type ContextMenuAction,
+  FILE_TYPE,
+  type FileItem,
+  type SortOption,
+} from 'modules/pace/components/files/file-tree.types';
 
 export const DATE_FORMAT = "EEEE, d MMMM yyyy 'at' h:mm a";
+
+export const SORT_OPTIONS: { value: SortOption; label: string }[] = [
+  { value: 'date_modified', label: 'Date modified' },
+  { value: 'name', label: 'Name' },
+  { value: 'size', label: 'Size' },
+  { value: 'type', label: 'Type' },
+];
 
 export const CONTEXT_MENU_ACTIONS: ContextMenuAction[] = [
   { id: 'open-in-tab', label: 'Open in Tab', icon: ExternalLink, fileOnly: true },
