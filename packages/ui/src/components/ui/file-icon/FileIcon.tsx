@@ -15,6 +15,7 @@ export interface FileIconProps {
   extension: string;
   size?: FileIconSize;
   className?: string;
+  baseSvgPath?: string;
 }
 
 /**
@@ -31,7 +32,12 @@ export interface FileIconProps {
  * <FileIcon extension="unknown" /> // Falls back to gray
  * ```
  */
-export const FileIcon: React.FC<FileIconProps> = ({ extension, size = 'sm', className }) => {
+export const FileIcon: React.FC<FileIconProps> = ({
+  extension,
+  size = 'sm',
+  className,
+  baseSvgPath = '/icons/file-icon-base.svg',
+}) => {
   const sizeConfig = FILE_ICON_SIZES[size];
   const { width, height, fontSize, borderRadius } = sizeConfig;
 
@@ -53,14 +59,7 @@ export const FileIcon: React.FC<FileIconProps> = ({ extension, size = 'sm', clas
       aria-label={`${displayText} file`}
     >
       {/* Base document SVG */}
-      <img
-        src='/icons/file-icon-base.svg'
-        alt=''
-        width={width}
-        height={height}
-        className='absolute inset-0'
-        aria-hidden='true'
-      />
+      <img src={baseSvgPath} alt='' width={width} height={height} className='absolute inset-0' aria-hidden='true' />
 
       {/* Ribbon overlay with dynamic color and text */}
       <div
