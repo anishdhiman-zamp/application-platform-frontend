@@ -39,6 +39,35 @@ export const CREATE_ITEM_TYPE = {
 
 export type CreateItemType = (typeof CREATE_ITEM_TYPE)[keyof typeof CREATE_ITEM_TYPE];
 
+export const CLIPBOARD_OPERATION = {
+  COPY: 'copy',
+  CUT: 'cut',
+} as const;
+
+export type ClipboardOperation = (typeof CLIPBOARD_OPERATION)[keyof typeof CLIPBOARD_OPERATION];
+
+export interface ClipboardState {
+  path: string;
+  name: string;
+  type: FileType;
+  operation: ClipboardOperation;
+}
+
+export const CONFLICT_RESOLUTION = {
+  KEEP_BOTH: 'keep_both',
+  REPLACE: 'replace',
+  STOP: 'stop',
+} as const;
+
+export type ConflictResolution = (typeof CONFLICT_RESOLUTION)[keyof typeof CONFLICT_RESOLUTION];
+
+export interface FileConflict {
+  sourcePath: string;
+  sourceName: string;
+  destinationPath: string;
+  operation: ClipboardOperation | 'move';
+}
+
 /**
  * File item as returned from the backend API
  */
@@ -81,6 +110,13 @@ export interface FilesPreviewProps {
   selectedFile: FileItem | null;
 }
 
+export interface DropToSiblingData {
+  sourcePath: string;
+  sourceName: string;
+  sourceType: FileType;
+  isCopy: boolean;
+}
+
 /**
  * Props for the FileTreeNode component
  */
@@ -91,6 +127,8 @@ export interface FileTreeNodeProps {
   selectedPath: string | null;
   originalNodeMap: Map<string, TreeNode>;
   siblingNames: string[];
+  parentPath: string | null;
   onToggleExpand: (path: string) => void;
   onSelect: (path: string) => void;
+  onDropToSibling?: (data: DropToSiblingData) => void;
 }

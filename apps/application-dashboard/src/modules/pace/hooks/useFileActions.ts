@@ -5,37 +5,7 @@ import {
   useDeleteFileMutation,
   useMoveFileMutation,
 } from '@/apis/filesystem';
-
-const buildFullPath = (parentPath: string, name: string): string => {
-  if (parentPath === '/' || parentPath === '') {
-    return name;
-  }
-
-  return `${parentPath}/${name}`;
-};
-
-const getParentPath = (path: string): string => {
-  const lastSlashIndex = path.lastIndexOf('/');
-
-  if (lastSlashIndex === -1) {
-    return '/';
-  }
-
-  return path.slice(0, lastSlashIndex) || '/';
-};
-
-const generateDuplicateName = (name: string): string => {
-  const lastDotIndex = name.lastIndexOf('.');
-
-  if (lastDotIndex === -1) {
-    return `${name}_copy`;
-  }
-
-  const baseName = name.slice(0, lastDotIndex);
-  const extension = name.slice(lastDotIndex);
-
-  return `${baseName}_copy${extension}`;
-};
+import { buildFullPath, generateDuplicateName, getParentPath } from '@/modules/pace/components/files/file-tree.utils';
 
 interface UseFileActionsReturn {
   createFile: (name: string, parentPath: string) => Promise<void>;

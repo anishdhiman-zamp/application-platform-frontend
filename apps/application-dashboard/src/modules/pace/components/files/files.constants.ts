@@ -1,4 +1,5 @@
 import {
+  Clipboard,
   Copy,
   Download,
   ExternalLink,
@@ -35,6 +36,7 @@ export const CONTEXT_MENU_ACTIONS: ContextMenuAction[] = [
   { id: 'duplicate', label: 'Duplicate', icon: Copy },
   { id: 'copy', label: 'Copy', icon: Copy },
   { id: 'cut', label: 'Cut', icon: Scissors },
+  { id: 'paste', label: 'Paste', icon: Clipboard, folderOnly: true },
   { id: 'share', label: 'Share', icon: Share },
   { id: 'download', label: 'Download', icon: Download },
   { id: 'delete', label: 'Delete', icon: Trash2, isDestructive: true },

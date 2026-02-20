@@ -1,4 +1,9 @@
-export type FilesystemStatus = 'active' | 'inactive';
+export const FILESYSTEM_STATUS = {
+  ACTIVE: 'active',
+  INACTIVE: 'inactive',
+} as const;
+
+export type FilesystemStatus = (typeof FILESYSTEM_STATUS)[keyof typeof FILESYSTEM_STATUS];
 export type FileItemType = 'file' | 'directory';
 
 export interface FilesystemStatusResponse {

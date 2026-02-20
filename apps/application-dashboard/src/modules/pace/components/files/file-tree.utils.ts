@@ -93,13 +93,10 @@ export function getFileTypeLabel(name: string): string {
 }
 
 /**
- * Sorts tree nodes with folders first, then files, according to the specified criteria
+ * Sorts tree nodes according to the specified criteria (folders and files are treated equally)
  */
 export function sortTreeNodes(nodes: TreeNode[], sortBy: SortOption, sortDirection: SortDirection): TreeNode[] {
   const sorted = [...nodes].sort((a, b) => {
-    if (a.type === FILE_TYPE.DIRECTORY && b.type === FILE_TYPE.FILE) return -1;
-    if (a.type === FILE_TYPE.FILE && b.type === FILE_TYPE.DIRECTORY) return 1;
-
     let comparison = 0;
 
     switch (sortBy) {
@@ -173,4 +170,64 @@ export function buildNodeMap(nodes: TreeNode[]): Map<string, TreeNode> {
   addToMap(nodes);
 
   return map;
+}
+
+/**
+ * Builds a full path from parent path and name
+ */
+export function buildFullPath(parentPath: string, name: string): string {
+  if (parentPath === '/' || parentPath === '') {
+    return name;
+  }
+
+  return `${parentPath}/${name}`;
+}
+
+/**
+ * Gets the parent path from a full path
+ */
+export function getParentPath(path: string): string {
+  const lastSlashIndex = path.lastIndexOf('/');
+
+  if (lastSlashIndex === -1) {
+    return '/';
+  }
+
+  return path.slice(0, lastSlashIndex) || '/';
+}
+
+/**
+ * Generates a duplicate name by appending _copy before the extension
+ */
+export function generateDuplicateName(name: string): string {
+  const lastDotIndex = name.lastIndexOf('.');
+
+  if (lastDotIndex === -1) {
+    return `${name}_copy`;
+  }
+
+  const baseName = name.slice(0, lastDotIndex);
+  const extension = name.slice(lastDotIndex);
+
+  return `${baseName}_copy${extension}`;
+}
+
+/**
+ * Generates a unique "keep both" name by appending a counter before the extension
+ */
+export function generateKeepBothName(name: string, existingNames: string[]): string {
+  const lastDotIndex = name.lastIndexOf('.');
+  const hasExtension = lastDotIndex !== -1;
+  const baseName = hasExtension ? name.slice(0, lastDotIndex) : name;
+  const extension = hasExtension ? name.slice(lastDotIndex) : '';
+
+  let counter = 2;
+  let newName = `${baseName} ${counter}${extension}`;
+
+  while (existingNames.includes(newName)) {
+    counter++;
+    newName = `${baseName} ${counter}${extension}`;
+  }
+
+  return newName;
 }

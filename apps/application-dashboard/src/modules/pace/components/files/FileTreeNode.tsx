@@ -15,17 +15,23 @@ import {
 import { cn } from '@zamp-platform/ui/utils';
 import { ChevronRight } from 'lucide-react';
 import { useFileActions } from 'modules/pace/hooks/useFileActions';
+import { useFileClipboard } from 'modules/pace/hooks/useFileClipboard';
 import { motion } from 'motion/react';
 import Image from 'next/image';
 import TooltipV2 from '@/components/common/TooltipV2';
 import CreateItemModal from '@/modules/pace/components/files/CreateItemModal';
 import {
+  CLIPBOARD_OPERATION,
+  CONFLICT_RESOLUTION,
+  type ConflictResolution,
   CREATE_ITEM_TYPE,
   type CreateItemType,
   FILE_TYPE,
+  type FileConflict,
   type FileTreeNodeProps,
 } from '@/modules/pace/components/files/file-tree.types';
-import { getFileExtension } from '@/modules/pace/components/files/file-tree.utils';
+import { generateKeepBothName, getFileExtension } from '@/modules/pace/components/files/file-tree.utils';
+import FileConflictModal from '@/modules/pace/components/files/FileConflictModal';
 import { CONTEXT_MENU_ACTIONS } from '@/modules/pace/components/files/files.constants';
 import { SIDE_OPTIONS } from '@/types/commonTypes';
 
@@ -38,16 +44,23 @@ const FileTreeNode = ({
   siblingNames,
   onToggleExpand,
   onSelect,
+  onDropToSibling,
 }: FileTreeNodeProps) => {
   const [contextMenuOpen, setContextMenuOpen] = useState(false);
   const [contextMenuPosition, setContextMenuPosition] = useState({ x: 0, y: 0 });
   const [createModalType, setCreateModalType] = useState<CreateItemType | null>(null);
   const [isRenaming, setIsRenaming] = useState(false);
   const [renameValue, setRenameValue] = useState(node.name);
+  const [isDragging, setIsDragging] = useState(false);
+  const [isDragOver, setIsDragOver] = useState(false);
+  const [isDragOverTop, setIsDragOverTop] = useState(false);
+  const [fileConflict, setFileConflict] = useState<FileConflict | null>(null);
   const triggerRef = useRef<HTMLDivElement>(null);
   const renameInputRef = useRef<HTMLInputElement | null>(null);
+  const nodeRef = useRef<HTMLDivElement>(null);
 
-  const { createFile, createFolder, deleteItem, duplicateItem, renameItem } = useFileActions();
+  const { createFile, createFolder, deleteItem, duplicateItem, renameItem, copyItem, moveItem } = useFileActions();
+  const { clipboard, setCopyClipboard, setCutClipboard, clearClipboard } = useFileClipboard();
 
   const isFolder = node.type === FILE_TYPE.DIRECTORY;
   const isExpanded = expandedPaths.has(node.path);
@@ -56,17 +69,25 @@ const FileTreeNode = ({
 
   const originalNode = originalNodeMap.get(node.path);
   const childrenToRender = originalNode?.children ?? node.children;
+  const childrenNames = useMemo(() => childrenToRender?.map((child) => child.name) ?? [], [childrenToRender]);
 
   const filteredActions = useMemo(
     () =>
       CONTEXT_MENU_ACTIONS.filter((action) => {
         if (action.fileOnly && isFolder) return false;
         if (action.folderOnly && !isFolder) return false;
+        if (action.id === 'paste' && !clipboard) return false;
 
         return true;
       }),
-    [isFolder],
+    [isFolder, clipboard],
   );
+
+  const isDuplicateName = useMemo(() => {
+    if (!renameValue.trim() || renameValue === node.name) return false;
+
+    return siblingNames.filter((name) => name !== node.name).some((name) => name === renameValue.trim());
+  }, [renameValue, siblingNames, node.name]);
 
   const handleClick = () => {
     if (isRenaming) return;
@@ -91,12 +112,6 @@ const FileTreeNode = ({
     setContextMenuOpen(true);
   };
 
-  const isDuplicateName = useMemo(() => {
-    if (!renameValue.trim() || renameValue === node.name) return false;
-
-    return siblingNames.filter((name) => name !== node.name).some((name) => name === renameValue.trim());
-  }, [renameValue, siblingNames, node.name]);
-
   const handleActionClick = async (actionId: string) => {
     setContextMenuOpen(false);
 
@@ -117,6 +132,52 @@ const FileTreeNode = ({
           break;
         case 'duplicate':
           await duplicateItem(node.path);
+          break;
+        case 'copy':
+          setCopyClipboard(node.path, node.name, node.type);
+          break;
+        case 'cut':
+          setCutClipboard(node.path, node.name, node.type);
+          break;
+        case 'paste':
+          if (clipboard) {
+            const destinationPath = `${node.path}/${clipboard.name}`;
+
+            // Skip if cutting/moving to the same location (no-op)
+            if (clipboard.operation === CLIPBOARD_OPERATION.CUT && clipboard.path === destinationPath) {
+              break;
+            }
+
+            const isInvalidTarget = node.path === clipboard.path || node.path.startsWith(`${clipboard.path}/`);
+
+            if (isInvalidTarget) {
+              toast.error('Cannot paste a folder into itself');
+              break;
+            }
+
+            const hasConflict = childrenNames.includes(clipboard.name);
+
+            if (hasConflict) {
+              setFileConflict({
+                sourcePath: clipboard.path,
+                sourceName: clipboard.name,
+                destinationPath,
+                operation: clipboard.operation,
+              });
+              break;
+            }
+
+            if (!isExpanded) {
+              onToggleExpand(node.path);
+            }
+
+            if (clipboard.operation === CLIPBOARD_OPERATION.COPY) {
+              await copyItem(clipboard.path, destinationPath);
+            } else {
+              await moveItem(clipboard.path, destinationPath);
+              clearClipboard();
+            }
+          }
           break;
         default:
           break;
@@ -164,6 +225,209 @@ const FileTreeNode = ({
     renameInputRef.current = element;
   }, []);
 
+  const handleCreate = async (name: string, parentPath: string) => {
+    if (!isExpanded) {
+      onToggleExpand(node.path);
+    }
+
+    try {
+      if (createModalType === CREATE_ITEM_TYPE.FILE) {
+        await createFile(name, parentPath);
+      } else {
+        await createFolder(name, parentPath);
+      }
+    } catch (error) {
+      captureException(error);
+      toast.error('Failed to create item');
+    }
+  };
+
+  const handleDragStart = (e: React.DragEvent) => {
+    e.dataTransfer.setData(
+      'application/json',
+      JSON.stringify({
+        path: node.path,
+        name: node.name,
+        type: node.type,
+      }),
+    );
+    e.dataTransfer.effectAllowed = 'copyMove';
+    setIsDragging(true);
+  };
+
+  const handleDragEnd = () => {
+    setIsDragging(false);
+  };
+
+  const handleDragOver = (e: React.DragEvent) => {
+    e.preventDefault();
+    e.stopPropagation();
+
+    const rect = nodeRef.current?.getBoundingClientRect();
+
+    if (rect) {
+      const topThreshold = rect.top + rect.height * 0.25;
+      const isOverTop = e.clientY < topThreshold;
+
+      if (isOverTop && onDropToSibling) {
+        e.dataTransfer.dropEffect = e.altKey ? 'copy' : 'move';
+        setIsDragOverTop(true);
+        setIsDragOver(false);
+
+        return;
+      }
+    }
+
+    setIsDragOverTop(false);
+
+    if (isFolder) {
+      e.dataTransfer.dropEffect = e.altKey ? 'copy' : 'move';
+      setIsDragOver(true);
+    }
+  };
+
+  const handleDragLeave = (e: React.DragEvent) => {
+    e.preventDefault();
+    e.stopPropagation();
+    if (nodeRef.current && !nodeRef.current.contains(e.relatedTarget as Node)) {
+      setIsDragOver(false);
+      setIsDragOverTop(false);
+    }
+  };
+
+  const handleDrop = async (e: React.DragEvent) => {
+    e.preventDefault();
+    e.stopPropagation();
+    setIsDragOver(false);
+    setIsDragOverTop(false);
+
+    try {
+      const rawData = e.dataTransfer.getData('application/json');
+
+      if (!rawData) {
+        return;
+      }
+
+      const data = JSON.parse(rawData);
+
+      if (!data?.path || !data?.name) {
+        return;
+      }
+
+      const sourcePath = data.path;
+      const sourceName = data.name;
+      const sourceType = data.type;
+
+      const rect = nodeRef.current?.getBoundingClientRect();
+
+      if (rect && onDropToSibling) {
+        const topThreshold = rect.top + rect.height * 0.25;
+        const isOverTop = e.clientY < topThreshold;
+
+        if (isOverTop) {
+          onDropToSibling({
+            sourcePath,
+            sourceName,
+            sourceType,
+            isCopy: e.altKey,
+          });
+
+          return;
+        }
+      }
+
+      if (!isFolder) return;
+
+      const destinationPath = `${node.path}/${sourceName}`;
+
+      // Skip if moving to the same location (no-op)
+      if (!e.altKey && sourcePath === destinationPath) {
+        return;
+      }
+
+      const isInvalidTarget = node.path === sourcePath || node.path.startsWith(`${sourcePath}/`);
+
+      if (isInvalidTarget) {
+        toast.error('Cannot move a folder into itself');
+
+        return;
+      }
+
+      const hasConflict = childrenNames.includes(sourceName);
+      const operation = e.altKey ? CLIPBOARD_OPERATION.COPY : 'move';
+
+      if (hasConflict) {
+        setFileConflict({
+          sourcePath,
+          sourceName,
+          destinationPath,
+          operation,
+        });
+
+        return;
+      }
+
+      if (!isExpanded) {
+        onToggleExpand(node.path);
+      }
+
+      if (e.altKey) {
+        await copyItem(sourcePath, destinationPath);
+      } else {
+        await moveItem(sourcePath, destinationPath);
+      }
+    } catch (error) {
+      captureException(error);
+      toast.error('Failed to move/copy');
+    }
+  };
+
+  const isCutItem = clipboard?.operation === CLIPBOARD_OPERATION.CUT && clipboard.path === node.path;
+
+  const handleConflictResolve = async (resolution: ConflictResolution) => {
+    if (!fileConflict) return;
+
+    const { sourcePath, sourceName, destinationPath, operation } = fileConflict;
+
+    // Close dialog immediately for better UX
+    setFileConflict(null);
+
+    try {
+      if (!isExpanded) {
+        onToggleExpand(node.path);
+      }
+
+      if (resolution === CONFLICT_RESOLUTION.KEEP_BOTH) {
+        const newName = generateKeepBothName(sourceName, childrenNames);
+        const parentPath = destinationPath.slice(0, destinationPath.lastIndexOf('/'));
+        const newDestinationPath = `${parentPath}/${newName}`;
+
+        if (operation === CLIPBOARD_OPERATION.COPY) {
+          await copyItem(sourcePath, newDestinationPath);
+        } else {
+          await moveItem(sourcePath, newDestinationPath);
+          if (operation === CLIPBOARD_OPERATION.CUT) {
+            clearClipboard();
+          }
+        }
+      } else if (resolution === CONFLICT_RESOLUTION.REPLACE) {
+        deleteItem(destinationPath);
+
+        if (operation === CLIPBOARD_OPERATION.COPY) {
+          await copyItem(sourcePath, destinationPath);
+        } else {
+          await moveItem(sourcePath, destinationPath);
+          if (operation === CLIPBOARD_OPERATION.CUT) {
+            clearClipboard();
+          }
+        }
+      }
+    } catch (error) {
+      captureException(error);
+      toast.error('Failed to resolve conflict');
+    }
+  };
+
   useEffect(() => {
     if (isRenaming && renameInputRef.current) {
       renameInputRef.current.focus();
@@ -174,23 +438,6 @@ const FileTreeNode = ({
       renameInputRef.current.setSelectionRange(0, selectionEnd);
     }
   }, [isRenaming, node.name]);
-
-  const handleCreate = async (name: string, parentPath: string) => {
-    try {
-      if (createModalType === CREATE_ITEM_TYPE.FILE) {
-        await createFile(name, parentPath);
-      } else {
-        await createFolder(name, parentPath);
-      }
-
-      if (!isExpanded) {
-        onToggleExpand(node.path);
-      }
-    } catch (error) {
-      captureException(error);
-      toast.error('Failed to create item');
-    }
-  };
 
   return (
     <div>
@@ -229,15 +476,32 @@ const FileTreeNode = ({
           onOpenChange={(open) => !open && setCreateModalType(null)}
           itemType={createModalType}
           onCreate={(name) => handleCreate(name, node.path)}
-          existingNames={childrenToRender?.map((child) => child.name) ?? []}
+          existingNames={childrenNames}
         />
       )}
 
+      <FileConflictModal
+        isOpen={!!fileConflict}
+        conflict={fileConflict}
+        onResolve={handleConflictResolve}
+        onCancel={() => setFileConflict(null)}
+      />
+
+      {isDragOverTop && (
+        <div className='bg-GRAY_500 -mb-0.5 h-0.5 rounded-full' style={{ marginLeft: `${depth * 24 + 8}px` }} />
+      )}
       <div
+        ref={nodeRef}
         role='button'
         tabIndex={0}
+        draggable={!isRenaming}
         onClick={handleClick}
         onContextMenu={handleContextMenu}
+        onDragStart={handleDragStart}
+        onDragEnd={handleDragEnd}
+        onDragOver={handleDragOver}
+        onDragLeave={handleDragLeave}
+        onDrop={handleDrop}
         onKeyDown={(e) => {
           if (isRenaming) return;
 
@@ -248,7 +512,9 @@ const FileTreeNode = ({
         className={cn(
           'hover:bg-GRAY_100 flex cursor-pointer items-center gap-2 rounded-md py-2 pr-1',
           contextMenuOpen && !isSelected && 'bg-GRAY_100',
-          isSelected && 'bg-GRAY_300 hover:bg-GRAY_300',
+          isSelected && !isFolder && 'bg-GRAY_300 hover:bg-GRAY_300',
+          (isDragging || isCutItem) && 'opacity-50',
+          isDragOver && 'bg-GRAY_200',
         )}
         style={{ paddingLeft: `${depth * 24 + 8}px` }}
       >
@@ -327,8 +593,10 @@ const FileTreeNode = ({
                 selectedPath={selectedPath}
                 originalNodeMap={originalNodeMap}
                 siblingNames={childrenToRender.map((c) => c.name)}
+                parentPath={node.path}
                 onToggleExpand={onToggleExpand}
                 onSelect={onSelect}
+                onDropToSibling={onDropToSibling}
               />
             ))}
           </div>

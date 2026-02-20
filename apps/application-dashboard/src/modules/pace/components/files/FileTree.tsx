@@ -1,18 +1,32 @@
 'use client';
 
-import { useCallback, useMemo, useState } from 'react';
-import ImageKitImage from '@/components/ImageKitImage';
-import { TEAM_MEMBERS_EMPTY_STATE } from '@/constants/icons';
-import type { FileItem, FileTreeProps } from '@/modules/pace/components/files/file-tree.types';
+import { useCallback, useMemo, useRef, useState } from 'react';
+import { captureException } from '@sentry/browser';
+import { toast } from '@zamp-platform/ui';
+import { cn } from '@zamp-platform/ui/utils';
+import {
+  CLIPBOARD_OPERATION,
+  CONFLICT_RESOLUTION,
+  type ConflictResolution,
+  type DropToSiblingData,
+  type FileConflict,
+  type FileItem,
+  type FileTreeProps,
+} from '@/modules/pace/components/files/file-tree.types';
 import {
   buildFileTree,
   buildNodeMap,
   filterTreeNodes,
+  generateKeepBothName,
   sortTreeNodes,
 } from '@/modules/pace/components/files/file-tree.utils';
+import FileConflictModal from '@/modules/pace/components/files/FileConflictModal';
+import FileTreeEmptyState from '@/modules/pace/components/files/FileTreeEmptyState';
 import FileTreeNode from '@/modules/pace/components/files/FileTreeNode';
+import { useFileActions } from '@/modules/pace/hooks/useFileActions';
+import { FileClipboardProvider } from '@/modules/pace/hooks/useFileClipboard';
 
-const FileTree = ({
+const FileTreeContent = ({
   files,
   searchQuery,
   sortBy,
@@ -22,6 +36,10 @@ const FileTree = ({
 }: FileTreeProps) => {
   const [expandedPaths, setExpandedPaths] = useState<Set<string>>(new Set());
   const [internalSelectedPath, setInternalSelectedPath] = useState<string | null>(null);
+  const [fileConflict, setFileConflict] = useState<FileConflict | null>(null);
+  const containerRef = useRef<HTMLDivElement>(null);
+
+  const { copyItem, moveItem, deleteItem } = useFileActions();
 
   const selectedPath = controlledSelectedPath ?? internalSelectedPath;
 
@@ -40,6 +58,7 @@ const FileTree = ({
 
     return sortTreeNodes(filtered, sortBy, sortDirection);
   }, [sortedRawTree, searchQuery, sortBy, sortDirection]);
+  const rootSiblingNames = useMemo(() => treeData.map((node) => node.name), [treeData]);
 
   const handleToggleExpand = useCallback((path: string) => {
     setExpandedPaths((prev) => {
@@ -68,41 +87,197 @@ const FileTree = ({
     [onSelectFile, filesMap],
   );
 
-  const rootSiblingNames = useMemo(() => treeData.map((node) => node.name), [treeData]);
+  const handleDropToRootSibling = useCallback(
+    async (data: DropToSiblingData) => {
+      const { sourcePath, sourceName, isCopy } = data;
+
+      // Skip if already at root level
+      if (!sourcePath.includes('/')) {
+        return;
+      }
+
+      const destinationPath = sourceName;
+
+      // Skip if moving to the same location (no-op)
+      if (!isCopy && sourcePath === destinationPath) {
+        return;
+      }
+
+      const hasConflict = rootSiblingNames.includes(sourceName);
+      const operation = isCopy ? CLIPBOARD_OPERATION.COPY : 'move';
+
+      if (hasConflict) {
+        setFileConflict({
+          sourcePath,
+          sourceName,
+          destinationPath,
+          operation,
+        });
+
+        return;
+      }
+
+      try {
+        if (isCopy) {
+          await copyItem(sourcePath, destinationPath);
+        } else {
+          await moveItem(sourcePath, destinationPath);
+        }
+      } catch (error) {
+        captureException(error);
+        toast.error('Failed to move/copy');
+      }
+    },
+    [copyItem, moveItem, rootSiblingNames],
+  );
+
+  const handleRootDragOver = useCallback((e: React.DragEvent) => {
+    e.preventDefault();
+    e.dataTransfer.dropEffect = e.altKey ? 'copy' : 'move';
+  }, []);
+
+  const handleRootDragLeave = useCallback((e: React.DragEvent) => {
+    e.preventDefault();
+  }, []);
+
+  const handleRootDrop = useCallback(
+    async (e: React.DragEvent) => {
+      e.preventDefault();
+
+      try {
+        const rawData = e.dataTransfer.getData('application/json');
+
+        if (!rawData) {
+          return;
+        }
+
+        const data = JSON.parse(rawData);
+
+        if (!data?.path || !data?.name) {
+          return;
+        }
+
+        const sourcePath = data.path;
+        const sourceName = data.name;
+
+        // Skip if already at root level
+        if (!sourcePath.includes('/')) {
+          return;
+        }
+
+        const destinationPath = sourceName;
+
+        // Skip if moving to the same location (no-op)
+        if (!e.altKey && sourcePath === destinationPath) {
+          return;
+        }
+
+        const hasConflict = rootSiblingNames.includes(sourceName);
+        const operation = e.altKey ? CLIPBOARD_OPERATION.COPY : 'move';
+
+        if (hasConflict) {
+          setFileConflict({
+            sourcePath,
+            sourceName,
+            destinationPath,
+            operation,
+          });
+
+          return;
+        }
+
+        if (e.altKey) {
+          await copyItem(sourcePath, destinationPath);
+        } else {
+          await moveItem(sourcePath, destinationPath);
+        }
+      } catch (error) {
+        captureException(error);
+        toast.error('Failed to move/copy');
+      }
+    },
+    [copyItem, moveItem, rootSiblingNames],
+  );
+
+  const handleRootConflictResolve = useCallback(
+    async (resolution: ConflictResolution) => {
+      if (!fileConflict) return;
+
+      const { sourcePath, sourceName, destinationPath, operation } = fileConflict;
+
+      // Close dialog immediately for better UX
+      setFileConflict(null);
+
+      try {
+        if (resolution === CONFLICT_RESOLUTION.KEEP_BOTH) {
+          const newName = generateKeepBothName(sourceName, rootSiblingNames);
+
+          if (operation === CLIPBOARD_OPERATION.COPY) {
+            await copyItem(sourcePath, newName);
+          } else {
+            await moveItem(sourcePath, newName);
+          }
+        } else if (resolution === CONFLICT_RESOLUTION.REPLACE) {
+          deleteItem(destinationPath);
+
+          if (operation === CLIPBOARD_OPERATION.COPY) {
+            await copyItem(sourcePath, destinationPath);
+          } else {
+            await moveItem(sourcePath, destinationPath);
+          }
+        }
+      } catch (error) {
+        captureException(error);
+        toast.error('Failed to resolve conflict');
+      }
+    },
+    [fileConflict, rootSiblingNames, copyItem, moveItem, deleteItem],
+  );
 
   if (treeData.length === 0 && searchQuery) {
-    return (
-      <div className='flex h-full w-full flex-col items-center justify-center gap-y-2 py-8'>
-        <div className='relative flex h-[150px] w-[190px] items-center justify-center'>
-          <ImageKitImage
-            src={TEAM_MEMBERS_EMPTY_STATE}
-            alt='No files found'
-            className='h-full w-full object-cover object-center'
-            width={222}
-            height={181}
-          />
-        </div>
-        <p className='f-14-400 text-GRAY_600 text-center'>No files match your search</p>
-      </div>
-    );
+    return <FileTreeEmptyState />;
   }
 
   return (
-    <div className='flex flex-col gap-0.5 px-3 py-2'>
-      {treeData.map((node) => (
-        <FileTreeNode
-          key={node.path}
-          node={node}
-          depth={0}
-          expandedPaths={expandedPaths}
-          selectedPath={selectedPath}
-          originalNodeMap={originalNodeMap}
-          siblingNames={rootSiblingNames}
-          onToggleExpand={handleToggleExpand}
-          onSelect={handleSelect}
-        />
-      ))}
-    </div>
+    <>
+      <div
+        ref={containerRef}
+        className={cn('flex h-full flex-col gap-0.5 px-3 py-2')}
+        onDragOver={handleRootDragOver}
+        onDragLeave={handleRootDragLeave}
+        onDrop={handleRootDrop}
+      >
+        {treeData.map((node) => (
+          <FileTreeNode
+            key={node.path}
+            node={node}
+            depth={0}
+            expandedPaths={expandedPaths}
+            selectedPath={selectedPath}
+            originalNodeMap={originalNodeMap}
+            siblingNames={rootSiblingNames}
+            parentPath={null}
+            onToggleExpand={handleToggleExpand}
+            onSelect={handleSelect}
+            onDropToSibling={handleDropToRootSibling}
+          />
+        ))}
+      </div>
+      <FileConflictModal
+        isOpen={!!fileConflict}
+        conflict={fileConflict}
+        onResolve={handleRootConflictResolve}
+        onCancel={() => setFileConflict(null)}
+      />
+    </>
+  );
+};
+
+const FileTree = (props: FileTreeProps) => {
+  return (
+    <FileClipboardProvider>
+      <FileTreeContent {...props} />
+    </FileClipboardProvider>
   );
 };
 

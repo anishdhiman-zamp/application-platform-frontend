@@ -1,10 +1,9 @@
-import { useFilesystemStatus } from 'modules/pace/hooks/useFilesystemStatus';
 import { useGetDatasetListingQuery } from '@/apis/dataset';
-import { useListFilesQuery } from '@/apis/filesystem';
 import { useGetConversationHistoryQuery, useListSkillsQuery } from '@/apis/pace';
 import { useGetPagesQuery } from '@/apis/pages';
 import { useIsPaceChatEnabled } from '@/hooks/useIsPaceChatEnabled';
 import { ARTIFACTS_PAGE_SIZE } from '@/modules/pace/artifacts/artifacts.constants';
+import { useFilesystemStatus } from '@/modules/pace/hooks/useFilesystemStatus';
 import { ResourceType } from '@/types/api/policies.types';
 import { getFromLocalStorage, LOCAL_STORAGE_KEYS } from '@/utils/localstorage';
 
@@ -44,14 +43,6 @@ const useDataPrefetch = () => {
 
   useGetDatasetListingQuery(
     { page: 1, pageSize: ARTIFACTS_PAGE_SIZE },
-    {
-      refetchOnMountOrArgChange: false,
-      skip: shouldSkip,
-    },
-  );
-
-  useListFilesQuery(
-    { recursive: true },
     {
       refetchOnMountOrArgChange: false,
       skip: shouldSkip,
