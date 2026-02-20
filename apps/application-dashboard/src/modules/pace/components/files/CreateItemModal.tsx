@@ -77,6 +77,7 @@ const CreateItemModal = ({ isOpen, onOpenChange, itemType, onCreate, existingNam
             <label className='f-13-500 text-GRAY_1000'>Name</label>
             <Input
               value={name}
+              autoFocus
               onChange={(e) => setName(e.target.value)}
               className={cn('h-8', isDuplicate && 'border-RED_700! focus:shadow-input-error-outline-shadow')}
               placeholder='Type here'
