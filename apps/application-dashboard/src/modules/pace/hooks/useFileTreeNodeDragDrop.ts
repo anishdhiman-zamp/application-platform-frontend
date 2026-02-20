@@ -1,4 +1,4 @@
-import { type RefObject, useState } from 'react';
+import { type RefObject, useRef, useState } from 'react';
 import { captureException } from '@sentry/browser';
 import { toast } from '@zamp-platform/ui';
 import { useFileActions } from 'modules/pace/hooks/useFileActions';
@@ -45,7 +45,16 @@ export const useFileTreeNodeDragDrop = ({
   const [isDragOver, setIsDragOver] = useState(false);
   const [isDragOverTop, setIsDragOverTop] = useState(false);
 
+  const expandTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+
   const { copyItem, moveItem } = useFileActions();
+
+  const clearExpandTimeout = () => {
+    if (expandTimeoutRef.current) {
+      clearTimeout(expandTimeoutRef.current);
+      expandTimeoutRef.current = null;
+    }
+  };
 
   const handleDragStart = (e: React.DragEvent) => {
     e.dataTransfer.setData(
@@ -62,6 +71,7 @@ export const useFileTreeNodeDragDrop = ({
 
   const handleDragEnd = () => {
     setIsDragging(false);
+    clearExpandTimeout();
   };
 
   const handleDragOver = (e: React.DragEvent) => {
@@ -78,6 +88,7 @@ export const useFileTreeNodeDragDrop = ({
         e.dataTransfer.dropEffect = e.altKey ? 'copy' : 'move';
         setIsDragOverTop(true);
         setIsDragOver(false);
+        clearExpandTimeout();
 
         return;
       }
@@ -88,6 +99,13 @@ export const useFileTreeNodeDragDrop = ({
     if (isFolder) {
       e.dataTransfer.dropEffect = e.altKey ? 'copy' : 'move';
       setIsDragOver(true);
+
+      if (!isExpanded && !expandTimeoutRef.current) {
+        expandTimeoutRef.current = setTimeout(() => {
+          onToggleExpand(node.path);
+          expandTimeoutRef.current = null;
+        }, 800);
+      }
     }
   };
 
@@ -97,6 +115,7 @@ export const useFileTreeNodeDragDrop = ({
     if (nodeRef.current && !nodeRef.current.contains(e.relatedTarget as Node)) {
       setIsDragOver(false);
       setIsDragOverTop(false);
+      clearExpandTimeout();
     }
   };
 
@@ -105,6 +124,7 @@ export const useFileTreeNodeDragDrop = ({
     e.stopPropagation();
     setIsDragOver(false);
     setIsDragOverTop(false);
+    clearExpandTimeout();
 
     try {
       const rawData = e.dataTransfer.getData('application/json');
