@@ -93,25 +93,36 @@ export function getFileTypeLabel(name: string): string {
 }
 
 /**
- * Sorts tree nodes according to the specified criteria (folders and files are treated equally)
+ * Sorts tree nodes according to the specified criteria
+ * For 'type' sort: directories first (asc) or files first (desc), with alphabetical order within each group
  */
 export function sortTreeNodes(nodes: TreeNode[], sortBy: SortOption, sortDirection: SortDirection): TreeNode[] {
-  const sorted = [...nodes].sort((a, b) => {
+  const sorted = [...nodes].sort((firstNode, secondNode) => {
     let comparison = 0;
 
     switch (sortBy) {
       case 'name':
-        comparison = a.name.localeCompare(b.name);
+        comparison = firstNode.name.localeCompare(secondNode.name);
         break;
       case 'size':
-        comparison = (a.size ?? 0) - (b.size ?? 0);
+        comparison = (firstNode.size ?? 0) - (secondNode.size ?? 0);
         break;
-      case 'type':
-        comparison = getFileExtension(a.name).localeCompare(getFileExtension(b.name));
+      case 'type': {
+        const firstNodeIsDirectory = firstNode.type === FILE_TYPE.DIRECTORY;
+        const secondNodeIsDirectory = secondNode.type === FILE_TYPE.DIRECTORY;
+
+        if (firstNodeIsDirectory !== secondNodeIsDirectory) {
+          comparison = firstNodeIsDirectory ? -1 : 1;
+        } else {
+          comparison = firstNode.name.localeCompare(secondNode.name);
+        }
         break;
+      }
       case 'date_modified':
+        comparison = firstNode.mtime_ms - secondNode.mtime_ms;
+        break;
       default:
-        comparison = a.mtime_ms - b.mtime_ms;
+        comparison = firstNode.name.localeCompare(secondNode.name);
         break;
     }
 

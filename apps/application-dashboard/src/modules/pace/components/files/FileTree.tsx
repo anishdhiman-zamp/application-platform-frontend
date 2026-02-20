@@ -39,9 +39,7 @@ const FileTreeContent = ({
   }, [files]);
 
   const rawTree = useMemo(() => buildFileTree(files), [files]);
-
   const sortedRawTree = useMemo(() => sortTreeNodes(rawTree, sortBy, sortDirection), [rawTree, sortBy, sortDirection]);
-
   const originalNodeMap = useMemo(() => buildNodeMap(sortedRawTree), [sortedRawTree]);
 
   const treeData = useMemo(() => {

@@ -76,7 +76,7 @@ const FileTreeNodeRow = forwardRef<HTMLDivElement, FileTreeNodeRowProps>(
         }}
         className={cn(
           'hover:bg-GRAY_100 flex cursor-pointer items-center gap-2 rounded-md py-2 pr-1',
-          state.contextMenuOpen && !state.isSelected && 'bg-GRAY_100',
+          state.contextMenuOpen && (state.isFolder || !state.isSelected) && 'bg-GRAY_100',
           state.isSelected && !state.isFolder && 'bg-GRAY_300 hover:bg-GRAY_300',
           (state.isDragging || state.isCutItem) && 'opacity-50',
           state.isDragOver && 'bg-GRAY_200',
