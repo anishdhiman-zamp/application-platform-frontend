@@ -58,6 +58,7 @@ const FileTreeContent = ({
 
   const { handleDropToRootSibling, handleRootDragOver, handleRootDragLeave, handleRootDrop } = useFileTreeRootDragDrop({
     rootSiblingNames,
+    containerRef,
     onConflict: setFileConflict,
   });
 

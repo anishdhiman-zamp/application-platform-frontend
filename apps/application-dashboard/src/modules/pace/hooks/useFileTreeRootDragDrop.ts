@@ -10,6 +10,7 @@ import {
 
 interface UseFileTreeRootDragDropProps {
   rootSiblingNames: string[];
+  containerRef: React.RefObject<HTMLDivElement | null>;
   onConflict: (conflict: FileConflict) => void;
 }
 
@@ -22,6 +23,7 @@ interface UseFileTreeRootDragDropReturn {
 
 export const useFileTreeRootDragDrop = ({
   rootSiblingNames,
+  containerRef,
   onConflict,
 }: UseFileTreeRootDragDropProps): UseFileTreeRootDragDropReturn => {
   const { copyItem, moveItem } = useFileActions();
@@ -68,10 +70,17 @@ export const useFileTreeRootDragDrop = ({
     [copyItem, moveItem, rootSiblingNames, onConflict],
   );
 
-  const handleRootDragOver = useCallback((e: React.DragEvent) => {
-    e.preventDefault();
-    e.dataTransfer.dropEffect = e.altKey ? 'copy' : 'move';
-  }, []);
+  const handleRootDragOver = useCallback(
+    (e: React.DragEvent) => {
+      e.preventDefault();
+
+      // Only show drop effect if hovering over the container itself (empty space)
+      if (e.target === containerRef.current) {
+        e.dataTransfer.dropEffect = e.altKey ? 'copy' : 'move';
+      }
+    },
+    [containerRef],
+  );
 
   const handleRootDragLeave = useCallback((e: React.DragEvent) => {
     e.preventDefault();
@@ -80,6 +89,12 @@ export const useFileTreeRootDragDrop = ({
   const handleRootDrop = useCallback(
     async (e: React.DragEvent) => {
       e.preventDefault();
+
+      // Only handle drop if the target is the container itself (empty space)
+      // This prevents capturing drops that should be handled by child nodes
+      if (e.target !== containerRef.current) {
+        return;
+      }
 
       try {
         const rawData = e.dataTransfer.getData('application/json');
@@ -131,7 +146,7 @@ export const useFileTreeRootDragDrop = ({
         toast.error('Failed to move/copy');
       }
     },
-    [copyItem, moveItem, rootSiblingNames, onConflict],
+    [copyItem, moveItem, rootSiblingNames, containerRef, onConflict],
   );
 
   return {

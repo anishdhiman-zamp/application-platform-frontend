@@ -151,11 +151,7 @@ export const useFileTreeNodeDragDrop = ({
 
       const isInvalidTarget = node.path === sourcePath || node.path.startsWith(`${sourcePath}/`);
 
-      if (isInvalidTarget) {
-        toast.error('Cannot move a folder into itself');
-
-        return;
-      }
+      if (isInvalidTarget) return;
 
       const hasConflict = childrenNames.includes(sourceName);
       const operation = e.altKey ? CLIPBOARD_OPERATION.COPY : 'move';
