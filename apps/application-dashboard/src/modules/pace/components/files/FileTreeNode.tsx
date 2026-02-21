@@ -28,6 +28,9 @@ const FileTreeNode = ({
   onToggleExpand,
   onSelect,
   onDropToSibling,
+  onFileMoved,
+  onFileDeleted,
+  onFileCreated,
 }: FileTreeNodeProps) => {
   const [contextMenuOpen, setContextMenuOpen] = useState(false);
   const [contextMenuPosition, setContextMenuPosition] = useState({ x: 0, y: 0 });
@@ -71,6 +74,7 @@ const FileTreeNode = ({
     node,
     siblingNames,
     isProtected,
+    onFileMoved,
   });
 
   const dragDrop = useFileTreeNodeDragDrop({
@@ -83,6 +87,7 @@ const FileTreeNode = ({
     onToggleExpand,
     onDropToSibling,
     onConflict: setFileConflict,
+    onFileMoved,
   });
 
   const actions = useFileTreeNodeActions({
@@ -95,6 +100,9 @@ const FileTreeNode = ({
     onOpenCreateModal: setCreateModalType,
     onConflict: setFileConflict,
     onCloseContextMenu: () => setContextMenuOpen(false),
+    onFileMoved,
+    onFileDeleted,
+    onFileCreated,
   });
 
   const handleClick = useCallback(() => {
@@ -218,6 +226,9 @@ const FileTreeNode = ({
                 onToggleExpand={onToggleExpand}
                 onSelect={onSelect}
                 onDropToSibling={onDropToSibling}
+                onFileMoved={onFileMoved}
+                onFileDeleted={onFileDeleted}
+                onFileCreated={onFileCreated}
               />
             ))}
           </div>

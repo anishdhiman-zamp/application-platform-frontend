@@ -24,6 +24,9 @@ const FileTreeContent = ({
   sortDirection,
   selectedPath: controlledSelectedPath,
   onSelectFile,
+  onFileMoved,
+  onFileDeleted,
+  onFileCreated,
 }: FileTreeProps) => {
   const [expandedPaths, setExpandedPaths] = useState<Set<string>>(new Set());
   const [internalSelectedPath, setInternalSelectedPath] = useState<string | null>(null);
@@ -53,12 +56,14 @@ const FileTreeContent = ({
 
   const { fileConflict, setFileConflict, handleConflictResolve, handleConflictCancel } = useFileTreeRootConflict({
     rootSiblingNames,
+    onFileMoved,
   });
 
   const { handleDropToRootSibling } = useFileTreeRootDragDrop({
     rootSiblingNames,
     containerRef,
     onConflict: setFileConflict,
+    onFileMoved,
   });
 
   const handleToggleExpand = useCallback((path: string) => {
@@ -114,6 +119,9 @@ const FileTreeContent = ({
             onToggleExpand={handleToggleExpand}
             onSelect={handleSelect}
             onDropToSibling={handleDropToRootSibling}
+            onFileMoved={onFileMoved}
+            onFileDeleted={onFileDeleted}
+            onFileCreated={onFileCreated}
           />
         ))}
       </div>

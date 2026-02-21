@@ -6,6 +6,8 @@ import {
   CLIPBOARD_OPERATION,
   type DropToSiblingData,
   type FileConflict,
+  type FileItem,
+  type FileType,
   type TreeNode,
 } from '@/modules/pace/components/files/file-tree.types';
 import { useProtectedFolders } from '@/modules/pace/hooks/useProtectedFolders';
@@ -20,6 +22,7 @@ interface UseFileTreeNodeDragDropProps {
   onToggleExpand: (path: string) => void;
   onDropToSibling?: (data: DropToSiblingData) => void;
   onConflict: (conflict: FileConflict) => void;
+  onFileMoved?: (oldPath: string, newFile: FileItem) => void;
 }
 
 interface UseFileTreeNodeDragDropReturn {
@@ -43,6 +46,7 @@ export const useFileTreeNodeDragDrop = ({
   onToggleExpand,
   onDropToSibling,
   onConflict,
+  onFileMoved,
 }: UseFileTreeNodeDragDropProps): UseFileTreeNodeDragDropReturn => {
   const [isDragging, setIsDragging] = useState(false);
   const [isDragOver, setIsDragOver] = useState(false);
@@ -73,6 +77,8 @@ export const useFileTreeNodeDragDrop = ({
         path: node.path,
         name: node.name,
         type: node.type,
+        size: node.size,
+        owner: node.owner,
       }),
     );
     e.dataTransfer.effectAllowed = 'copyMove';
@@ -152,6 +158,8 @@ export const useFileTreeNodeDragDrop = ({
       const sourcePath = data.path;
       const sourceName = data.name;
       const sourceType = data.type;
+      const sourceSize = data.size ?? null;
+      const sourceOwner = data.owner ?? '';
 
       const sourceIsProtected = isProtectedRoot(sourcePath);
 
@@ -172,6 +180,8 @@ export const useFileTreeNodeDragDrop = ({
             sourcePath,
             sourceName,
             sourceType,
+            sourceSize,
+            sourceOwner,
             isCopy: e.altKey,
           });
 
@@ -204,6 +214,9 @@ export const useFileTreeNodeDragDrop = ({
         onConflict({
           sourcePath,
           sourceName,
+          sourceType: sourceType as FileType,
+          sourceSize,
+          sourceOwner,
           destinationPath,
           operation,
         });
@@ -219,6 +232,17 @@ export const useFileTreeNodeDragDrop = ({
         await copyItem(sourcePath, destinationPath);
       } else {
         await moveItem(sourcePath, destinationPath);
+
+        const newFile: FileItem = {
+          path: destinationPath,
+          name: sourceName,
+          type: sourceType as FileType,
+          size: sourceSize,
+          mtime_ms: Date.now(),
+          owner: sourceOwner,
+        };
+
+        onFileMoved?.(sourcePath, newFile);
       }
     } catch (error) {
       captureException(error);

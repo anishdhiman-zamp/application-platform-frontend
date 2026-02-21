@@ -7,11 +7,13 @@ import {
   CONFLICT_RESOLUTION,
   type ConflictResolution,
   type FileConflict,
+  type FileItem,
 } from '@/modules/pace/components/files/file-tree.types';
 import { generateKeepBothName } from '@/modules/pace/components/files/file-tree.utils';
 
 interface UseFileTreeRootConflictProps {
   rootSiblingNames: string[];
+  onFileMoved?: (oldPath: string, newFile: FileItem) => void;
 }
 
 interface UseFileTreeRootConflictReturn {
@@ -23,6 +25,7 @@ interface UseFileTreeRootConflictReturn {
 
 export const useFileTreeRootConflict = ({
   rootSiblingNames,
+  onFileMoved,
 }: UseFileTreeRootConflictProps): UseFileTreeRootConflictReturn => {
   const [fileConflict, setFileConflict] = useState<FileConflict | null>(null);
 
@@ -32,7 +35,7 @@ export const useFileTreeRootConflict = ({
     async (resolution: ConflictResolution) => {
       if (!fileConflict) return;
 
-      const { sourcePath, sourceName, destinationPath, operation } = fileConflict;
+      const { sourcePath, sourceName, sourceType, sourceSize, sourceOwner, destinationPath, operation } = fileConflict;
 
       setFileConflict(null);
 
@@ -44,6 +47,17 @@ export const useFileTreeRootConflict = ({
             await copyItem(sourcePath, newName);
           } else {
             await moveItem(sourcePath, newName);
+
+            const newFile: FileItem = {
+              path: newName,
+              name: newName,
+              type: sourceType,
+              size: sourceSize,
+              mtime_ms: Date.now(),
+              owner: sourceOwner,
+            };
+
+            onFileMoved?.(sourcePath, newFile);
           }
         } else if (resolution === CONFLICT_RESOLUTION.REPLACE) {
           deleteItem(destinationPath);
@@ -52,6 +66,17 @@ export const useFileTreeRootConflict = ({
             await copyItem(sourcePath, destinationPath);
           } else {
             await moveItem(sourcePath, destinationPath);
+
+            const newFile: FileItem = {
+              path: destinationPath,
+              name: sourceName,
+              type: sourceType,
+              size: sourceSize,
+              mtime_ms: Date.now(),
+              owner: sourceOwner,
+            };
+
+            onFileMoved?.(sourcePath, newFile);
           }
         }
       } catch (error) {
@@ -59,7 +84,7 @@ export const useFileTreeRootConflict = ({
         toast.error('Failed to resolve conflict');
       }
     },
-    [fileConflict, rootSiblingNames, copyItem, moveItem, deleteItem],
+    [fileConflict, rootSiblingNames, copyItem, moveItem, deleteItem, onFileMoved],
   );
 
   const handleConflictCancel = useCallback(() => {

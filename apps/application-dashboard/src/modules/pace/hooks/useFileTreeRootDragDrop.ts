@@ -6,12 +6,15 @@ import {
   CLIPBOARD_OPERATION,
   type DropToSiblingData,
   type FileConflict,
+  type FileItem,
+  type FileType,
 } from '@/modules/pace/components/files/file-tree.types';
 
 interface UseFileTreeRootDragDropProps {
   rootSiblingNames: string[];
   containerRef: React.RefObject<HTMLDivElement | null>;
   onConflict: (conflict: FileConflict) => void;
+  onFileMoved?: (oldPath: string, newFile: FileItem) => void;
 }
 
 interface UseFileTreeRootDragDropReturn {
@@ -25,12 +28,13 @@ export const useFileTreeRootDragDrop = ({
   rootSiblingNames,
   containerRef,
   onConflict,
+  onFileMoved,
 }: UseFileTreeRootDragDropProps): UseFileTreeRootDragDropReturn => {
   const { copyItem, moveItem } = useFileActions();
 
   const handleDropToRootSibling = useCallback(
     async (data: DropToSiblingData) => {
-      const { sourcePath, sourceName, isCopy } = data;
+      const { sourcePath, sourceName, sourceType, sourceSize, sourceOwner, isCopy } = data;
 
       if (!sourcePath.includes('/')) {
         return;
@@ -49,6 +53,9 @@ export const useFileTreeRootDragDrop = ({
         onConflict({
           sourcePath,
           sourceName,
+          sourceType,
+          sourceSize,
+          sourceOwner,
           destinationPath,
           operation,
         });
@@ -61,13 +68,24 @@ export const useFileTreeRootDragDrop = ({
           await copyItem(sourcePath, destinationPath);
         } else {
           await moveItem(sourcePath, destinationPath);
+
+          const newFile: FileItem = {
+            path: destinationPath,
+            name: sourceName,
+            type: sourceType as FileType,
+            size: sourceSize,
+            mtime_ms: Date.now(),
+            owner: sourceOwner,
+          };
+
+          onFileMoved?.(sourcePath, newFile);
         }
       } catch (error) {
         captureException(error);
         toast.error('Failed to move/copy');
       }
     },
-    [copyItem, moveItem, rootSiblingNames, onConflict],
+    [copyItem, moveItem, rootSiblingNames, onConflict, onFileMoved],
   );
 
   const handleRootDragOver = useCallback(
@@ -111,6 +129,9 @@ export const useFileTreeRootDragDrop = ({
 
         const sourcePath = data.path;
         const sourceName = data.name;
+        const sourceType = data.type;
+        const sourceSize = data.size ?? null;
+        const sourceOwner = data.owner ?? '';
 
         if (!sourcePath.includes('/')) {
           return;
@@ -129,6 +150,9 @@ export const useFileTreeRootDragDrop = ({
           onConflict({
             sourcePath,
             sourceName,
+            sourceType: sourceType as FileType,
+            sourceSize,
+            sourceOwner,
             destinationPath,
             operation,
           });
@@ -140,13 +164,24 @@ export const useFileTreeRootDragDrop = ({
           await copyItem(sourcePath, destinationPath);
         } else {
           await moveItem(sourcePath, destinationPath);
+
+          const newFile: FileItem = {
+            path: destinationPath,
+            name: sourceName,
+            type: sourceType as FileType,
+            size: sourceSize,
+            mtime_ms: Date.now(),
+            owner: sourceOwner,
+          };
+
+          onFileMoved?.(sourcePath, newFile);
         }
       } catch (error) {
         captureException(error);
         toast.error('Failed to move/copy');
       }
     },
-    [copyItem, moveItem, rootSiblingNames, containerRef, onConflict],
+    [copyItem, moveItem, rootSiblingNames, containerRef, onConflict, onFileMoved],
   );
 
   return {
