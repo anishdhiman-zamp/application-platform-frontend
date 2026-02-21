@@ -73,7 +73,7 @@ export function ProcessesProvider({ children }: ProcessesProviderProps) {
     if (pathname === ROUTES_PATH.PROCESSES && isSuccessProcesses) {
       if (processes && processes.length > 0) {
         pushToMostRelevantProcess();
-      } else {
+        // Fallback navigation if no processes
         // Fallback navigation if no processes or pages
         router.push(ROUTES_PATH.PEOPLE);
       }
