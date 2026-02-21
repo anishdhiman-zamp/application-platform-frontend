@@ -30,10 +30,9 @@ const FileTreeNode = ({
   onFileDeleted,
   onFileCreated,
 }: FileTreeNodeProps) => {
+  const nodeRef = useRef<HTMLDivElement>(null);
   const [contextMenuOpen, setContextMenuOpen] = useState(false);
   const [createModalType, setCreateModalType] = useState<CreateItemType | null>(null);
-
-  const nodeRef = useRef<HTMLDivElement>(null);
 
   const { clipboard } = useFileClipboard();
   const { isProtectedRoot, username } = useProtectedFolders();
@@ -46,8 +45,8 @@ const FileTreeNode = ({
 
   const originalNode = originalNodeMap.get(node.path);
   const childrenToRender = originalNode?.children ?? node.children;
-  const childrenNames = useMemo(() => childrenToRender?.map((child) => child.name) ?? [], [childrenToRender]);
 
+  const childrenNames = useMemo(() => childrenToRender?.map((child) => child.name) ?? [], [childrenToRender]);
   const filteredActions = useMemo(
     () =>
       CONTEXT_MENU_ACTIONS.filter((action) => {
@@ -174,30 +173,25 @@ const FileTreeNode = ({
         />
       </FileTreeNodeContextMenu>
 
-      {isFolder && childrenToRender && childrenToRender.length > 0 && (
-        <div
-          className='grid transition-[grid-template-rows] duration-100 ease-out'
-          style={{ gridTemplateRows: isExpanded ? '1fr' : '0fr' }}
-        >
-          <div className='flex flex-col gap-0.5 overflow-hidden pt-0.5'>
-            {childrenToRender.map((child) => (
-              <FileTreeNode
-                key={child.path}
-                node={child}
-                depth={depth + 1}
-                expandedPaths={expandedPaths}
-                selectedPath={selectedPath}
-                originalNodeMap={originalNodeMap}
-                siblingNames={childrenNames}
-                onToggleExpand={onToggleExpand}
-                onSelect={onSelect}
-                onDropToSibling={onDropToSibling}
-                onFileMoved={onFileMoved}
-                onFileDeleted={onFileDeleted}
-                onFileCreated={onFileCreated}
-              />
-            ))}
-          </div>
+      {isFolder && childrenToRender && isExpanded && childrenToRender.length > 0 && (
+        <div className='flex flex-col gap-0.5 pt-0.5'>
+          {childrenToRender.map((child) => (
+            <FileTreeNode
+              key={child.path}
+              node={child}
+              depth={depth + 1}
+              expandedPaths={expandedPaths}
+              selectedPath={selectedPath}
+              originalNodeMap={originalNodeMap}
+              siblingNames={childrenNames}
+              onToggleExpand={onToggleExpand}
+              onSelect={onSelect}
+              onDropToSibling={onDropToSibling}
+              onFileMoved={onFileMoved}
+              onFileDeleted={onFileDeleted}
+              onFileCreated={onFileCreated}
+            />
+          ))}
         </div>
       )}
     </div>
