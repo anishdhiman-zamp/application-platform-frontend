@@ -351,7 +351,7 @@ export async function executeConflictResolution(
       onFileMoved?.(sourcePath, newFile);
     }
   } else if (resolution === CONFLICT_RESOLUTION.REPLACE) {
-    deleteItem(destinationPath);
+    await deleteItem(destinationPath);
 
     if (operation === CLIPBOARD_OPERATION.COPY) {
       await copyItem(sourcePath, destinationPath);
