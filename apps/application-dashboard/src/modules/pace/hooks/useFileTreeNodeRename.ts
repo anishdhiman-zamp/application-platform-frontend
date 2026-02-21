@@ -7,6 +7,7 @@ import type { TreeNode } from '@/modules/pace/components/files/file-tree.types';
 interface UseFileTreeNodeRenameProps {
   node: TreeNode;
   siblingNames: string[];
+  isProtected?: boolean;
 }
 
 interface UseFileTreeNodeRenameReturn {
@@ -24,6 +25,7 @@ interface UseFileTreeNodeRenameReturn {
 export const useFileTreeNodeRename = ({
   node,
   siblingNames,
+  isProtected = false,
 }: UseFileTreeNodeRenameProps): UseFileTreeNodeRenameReturn => {
   const [isRenaming, setIsRenaming] = useState(false);
   const [renameValue, setRenameValue] = useState(node.name);
@@ -38,9 +40,11 @@ export const useFileTreeNodeRename = ({
   }, [renameValue, siblingNames, node.name]);
 
   const startRename = useCallback(() => {
+    if (isProtected) return;
+
     setRenameValue(node.name);
     setIsRenaming(true);
-  }, [node.name]);
+  }, [node.name, isProtected]);
 
   const handleRenameSubmit = async () => {
     const trimmedValue = renameValue.trim();

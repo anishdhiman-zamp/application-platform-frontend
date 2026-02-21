@@ -17,6 +17,7 @@ interface UseFileTreeNodeActionsProps {
   node: TreeNode;
   isExpanded: boolean;
   childrenNames: string[];
+  isProtected?: boolean;
   onToggleExpand: (path: string) => void;
   onStartRename: () => void;
   onOpenCreateModal: (type: CreateItemType) => void;
@@ -35,6 +36,7 @@ export const useFileTreeNodeActions = ({
   node,
   isExpanded,
   childrenNames,
+  isProtected = false,
   onToggleExpand,
   onStartRename,
   onOpenCreateModal,
@@ -58,9 +60,17 @@ export const useFileTreeNodeActions = ({
           onOpenCreateModal(CREATE_ITEM_TYPE.FOLDER);
           break;
         case 'rename':
+          if (isProtected) {
+            toast.error('Cannot rename protected folders');
+            break;
+          }
           onStartRename();
           break;
         case 'delete':
+          if (isProtected) {
+            toast.error('Cannot delete protected folders');
+            break;
+          }
           await deleteItem(node.path);
           break;
         case 'duplicate':
@@ -70,6 +80,10 @@ export const useFileTreeNodeActions = ({
           setCopyClipboard(node.path, node.name, node.type);
           break;
         case 'cut':
+          if (isProtected) {
+            toast.error('Cannot cut protected folders');
+            break;
+          }
           setCutClipboard(node.path, node.name, node.type);
           break;
         case 'paste':

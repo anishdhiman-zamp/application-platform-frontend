@@ -8,6 +8,7 @@ import {
   type FileConflict,
   type TreeNode,
 } from '@/modules/pace/components/files/file-tree.types';
+import { useProtectedFolders } from '@/modules/pace/hooks/useProtectedFolders';
 
 interface UseFileTreeNodeDragDropProps {
   node: TreeNode;
@@ -15,6 +16,7 @@ interface UseFileTreeNodeDragDropProps {
   isFolder: boolean;
   isExpanded: boolean;
   childrenNames: string[];
+  isProtected?: boolean;
   onToggleExpand: (path: string) => void;
   onDropToSibling?: (data: DropToSiblingData) => void;
   onConflict: (conflict: FileConflict) => void;
@@ -37,6 +39,7 @@ export const useFileTreeNodeDragDrop = ({
   isFolder,
   isExpanded,
   childrenNames,
+  isProtected = false,
   onToggleExpand,
   onDropToSibling,
   onConflict,
@@ -48,6 +51,7 @@ export const useFileTreeNodeDragDrop = ({
   const expandTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 
   const { copyItem, moveItem } = useFileActions();
+  const { isProtectedRoot, isInvalidCrossMove } = useProtectedFolders();
 
   const clearExpandTimeout = () => {
     if (expandTimeoutRef.current) {
@@ -57,6 +61,12 @@ export const useFileTreeNodeDragDrop = ({
   };
 
   const handleDragStart = (e: React.DragEvent) => {
+    if (isProtected) {
+      e.preventDefault();
+
+      return;
+    }
+
     e.dataTransfer.setData(
       'application/json',
       JSON.stringify({
@@ -143,6 +153,14 @@ export const useFileTreeNodeDragDrop = ({
       const sourceName = data.name;
       const sourceType = data.type;
 
+      const sourceIsProtected = isProtectedRoot(sourcePath);
+
+      if (sourceIsProtected) {
+        toast.error('Cannot move protected folders');
+
+        return;
+      }
+
       const rect = nodeRef.current?.getBoundingClientRect();
 
       if (rect && onDropToSibling) {
@@ -166,6 +184,12 @@ export const useFileTreeNodeDragDrop = ({
       const destinationPath = `${node.path}/${sourceName}`;
 
       if (!e.altKey && sourcePath === destinationPath) {
+        return;
+      }
+
+      if (isInvalidCrossMove(sourcePath, destinationPath)) {
+        toast.error('Cannot move protected folders into each other');
+
         return;
       }
 

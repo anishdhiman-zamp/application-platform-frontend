@@ -20,6 +20,8 @@ interface FileTreeNodeRowState {
   isDragging: boolean;
   isDragOver: boolean;
   isCutItem: boolean;
+  isProtected: boolean;
+  isUserPrivateFolder: boolean;
   contextMenuOpen: boolean;
 }
 
@@ -59,7 +61,7 @@ const FileTreeNodeRow = forwardRef<HTMLDivElement, FileTreeNodeRowProps>(
         ref={ref}
         role='button'
         tabIndex={0}
-        draggable={!state.isRenaming}
+        draggable={!state.isRenaming && !state.isProtected}
         onClick={handlers.onRowClick}
         onContextMenu={handlers.onContextMenu}
         onDragStart={handlers.onDragStart}
@@ -139,7 +141,9 @@ const FileTreeNodeRow = forwardRef<HTMLDivElement, FileTreeNodeRowProps>(
             />
           </TooltipV2>
         ) : (
-          <span className='f-13-450 text-GRAY_1000 truncate select-none'>{node.name}</span>
+          <span className='f-13-450 text-GRAY_1000 truncate select-none'>
+            {state.isUserPrivateFolder ? `${node.name} (Private)` : node.name}
+          </span>
         )}
       </div>
     );

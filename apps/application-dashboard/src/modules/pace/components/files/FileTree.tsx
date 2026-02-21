@@ -15,6 +15,7 @@ import FileTreeNode from '@/modules/pace/components/files/FileTreeNode';
 import { FileClipboardProvider } from '@/modules/pace/hooks/useFileClipboard';
 import { useFileTreeRootConflict } from '@/modules/pace/hooks/useFileTreeRootConflict';
 import { useFileTreeRootDragDrop } from '@/modules/pace/hooks/useFileTreeRootDragDrop';
+import { ProtectedFoldersProvider } from '@/modules/pace/hooks/useProtectedFolders';
 
 const FileTreeContent = ({
   files,
@@ -54,7 +55,7 @@ const FileTreeContent = ({
     rootSiblingNames,
   });
 
-  const { handleDropToRootSibling, handleRootDragOver, handleRootDragLeave, handleRootDrop } = useFileTreeRootDragDrop({
+  const { handleDropToRootSibling } = useFileTreeRootDragDrop({
     rootSiblingNames,
     containerRef,
     onConflict: setFileConflict,
@@ -96,9 +97,9 @@ const FileTreeContent = ({
       <div
         ref={containerRef}
         className={cn('flex h-full flex-col gap-0.5 px-3 py-2')}
-        onDragOver={handleRootDragOver}
-        onDragLeave={handleRootDragLeave}
-        onDrop={handleRootDrop}
+        // onDragOver={handleRootDragOver}
+        // onDragLeave={handleRootDragLeave}
+        // onDrop={handleRootDrop}
       >
         {treeData.map((node) => (
           <FileTreeNode
@@ -128,9 +129,11 @@ const FileTreeContent = ({
 
 const FileTree = (props: FileTreeProps) => {
   return (
-    <FileClipboardProvider>
-      <FileTreeContent {...props} />
-    </FileClipboardProvider>
+    <ProtectedFoldersProvider>
+      <FileClipboardProvider>
+        <FileTreeContent {...props} />
+      </FileClipboardProvider>
+    </ProtectedFoldersProvider>
   );
 };
 

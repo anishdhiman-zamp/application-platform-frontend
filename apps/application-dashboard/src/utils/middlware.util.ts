@@ -7,9 +7,12 @@ import { ORY_KRATOS_SESSION_COOKIE, USER_SESSION_COOKIE } from '@/utils/cookie';
 type SessionCache = {
   user_id: string;
   user_name: string;
+  last_name: string;
   user_email: string;
+  org_slug: string;
   org_count: number;
   cached_at: number;
+  username: string;
 };
 
 export function setServerSideUserCookie(
@@ -83,6 +86,9 @@ export async function getUserSession(
         workspaces: [],
         organization_id: { workspace_id: '', name: '', description: '' },
         user_name: cachedSessionData.user_name ?? '',
+        last_name: cachedSessionData.last_name ?? '',
+        org_slug: cachedSessionData.org_slug ?? '',
+        username: cachedSessionData.username ?? '',
       };
 
       return { session, cached: true };

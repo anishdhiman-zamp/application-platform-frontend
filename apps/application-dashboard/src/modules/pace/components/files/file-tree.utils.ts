@@ -25,6 +25,7 @@ export function buildFileTree(files: FileItem[]): TreeNode[] {
       type: file.type,
       size: file.size,
       mtime_ms: file.mtime_ms,
+      owner: file.owner,
       children: file.type === FILE_TYPE.DIRECTORY ? [] : undefined,
     };
 
@@ -241,4 +242,54 @@ export function generateKeepBothName(name: string, existingNames: string[]): str
   }
 
   return newName;
+}
+
+/**
+ * Check if a path represents a protected root folder (org_slug or username)
+ */
+export function isProtectedRootFolder(path: string, orgSlug: string, username: string): boolean {
+  if (!orgSlug && !username) return false;
+
+  return path === orgSlug || path === username;
+}
+
+/**
+ * Check if a move/copy operation from source to destination is invalid
+ * because it involves moving a protected root folder into another protected root folder
+ */
+export function isInvalidCrossProtectedMove(
+  sourcePath: string,
+  destinationPath: string,
+  orgSlug: string,
+  username: string,
+): boolean {
+  const sourceIsProtected = isProtectedRootFolder(sourcePath, orgSlug, username);
+
+  if (!sourceIsProtected) return false;
+
+  const destIsInsideOtherProtected =
+    (sourcePath === orgSlug && (destinationPath === username || destinationPath.startsWith(`${username}/`))) ||
+    (sourcePath === username && (destinationPath === orgSlug || destinationPath.startsWith(`${orgSlug}/`)));
+
+  return destIsInsideOtherProtected;
+}
+
+/**
+ * Get the root folder name from a path
+ */
+export function getRootFolderFromPath(path: string): string {
+  const segments = path.split('/');
+
+  return segments[0] || '';
+}
+
+/**
+ * Check if a path is a child of a protected root folder (not the root itself)
+ */
+export function isChildOfProtectedFolder(path: string, orgSlug: string, username: string): boolean {
+  if (!path.includes('/')) return false;
+
+  const rootFolder = getRootFolderFromPath(path);
+
+  return rootFolder === orgSlug || rootFolder === username;
 }

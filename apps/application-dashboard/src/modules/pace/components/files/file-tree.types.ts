@@ -77,6 +77,7 @@ export interface FileItem {
   type: FileType;
   size: number | null;
   mtime_ms: number;
+  owner: string;
 }
 
 /**
@@ -88,6 +89,7 @@ export interface TreeNode {
   type: FileType;
   size: number | null;
   mtime_ms: number;
+  owner: string;
   children?: TreeNode[];
 }
 

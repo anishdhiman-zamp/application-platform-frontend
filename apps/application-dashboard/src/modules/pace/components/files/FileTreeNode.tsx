@@ -16,6 +16,7 @@ import FileConflictModal from '@/modules/pace/components/files/FileConflictModal
 import { CONTEXT_MENU_ACTIONS } from '@/modules/pace/components/files/files.constants';
 import FileTreeNodeContextMenu from '@/modules/pace/components/files/FileTreeNodeContextMenu';
 import FileTreeNodeRow from '@/modules/pace/components/files/FileTreeNodeRow';
+import { useProtectedFolders } from '@/modules/pace/hooks/useProtectedFolders';
 
 const FileTreeNode = ({
   node,
@@ -37,10 +38,13 @@ const FileTreeNode = ({
   const nodeRef = useRef<HTMLDivElement>(null);
 
   const { clipboard } = useFileClipboard();
+  const { isProtectedRoot, username } = useProtectedFolders();
 
   const isFolder = node.type === FILE_TYPE.DIRECTORY;
   const isExpanded = expandedPaths.has(node.path);
   const isSelected = selectedPath === node.path;
+  const isProtected = depth === 0 && isProtectedRoot(node.path);
+  const isUserPrivateFolder = depth === 0 && node.path === username;
 
   const originalNode = originalNodeMap.get(node.path);
   const childrenToRender = originalNode?.children ?? node.children;
@@ -52,15 +56,21 @@ const FileTreeNode = ({
         if (action.fileOnly && isFolder) return false;
         if (action.folderOnly && !isFolder) return false;
         if (action.id === 'paste' && !clipboard) return false;
+        if (
+          isProtected &&
+          (action.id === 'delete' || action.id === 'rename' || action.id === 'cut' || action.id === 'duplicate')
+        )
+          return false;
 
         return true;
       }),
-    [isFolder, clipboard],
+    [isFolder, clipboard, isProtected],
   );
 
   const rename = useFileTreeNodeRename({
     node,
     siblingNames,
+    isProtected,
   });
 
   const dragDrop = useFileTreeNodeDragDrop({
@@ -69,6 +79,7 @@ const FileTreeNode = ({
     isFolder,
     isExpanded,
     childrenNames,
+    isProtected,
     onToggleExpand,
     onDropToSibling,
     onConflict: setFileConflict,
@@ -78,6 +89,7 @@ const FileTreeNode = ({
     node,
     isExpanded,
     childrenNames,
+    isProtected,
     onToggleExpand,
     onStartRename: rename.startRename,
     onOpenCreateModal: setCreateModalType,
@@ -164,6 +176,8 @@ const FileTreeNode = ({
           isDragging: dragDrop.isDragging,
           isDragOver: dragDrop.isDragOver,
           isCutItem: actions.isCutItem,
+          isProtected,
+          isUserPrivateFolder,
           contextMenuOpen,
         }}
         rename={{

@@ -1,23 +1,13 @@
 'use client';
 
 import { useEffect, useState } from 'react';
-import { captureException } from '@sentry/browser';
-import { Button, toast } from '@zamp-platform/ui';
-import { File, Folder } from 'lucide-react';
-import { useFileActions } from 'modules/pace/hooks/useFileActions';
 import { useListFilesQuery } from '@/apis/filesystem';
 import ImageLoader from '@/components/common/loader/ImageLoader';
 import CommonWrapper from '@/components/commonWrapper';
 import { SkeletonTypes } from '@/components/commonWrapper/commonWrapper.types';
 import { ZAMP_LOGO_LOADER_SVG } from '@/constants/icons';
-import CreateItemModal from '@/modules/pace/components/files/CreateItemModal';
-import type {
-  CreateItemType,
-  FileItem,
-  SortDirection,
-  SortOption,
-} from '@/modules/pace/components/files/file-tree.types';
-import { CREATE_ITEM_TYPE, SORT_DIRECTION, SORT_OPTION } from '@/modules/pace/components/files/file-tree.types';
+import type { FileItem, SortDirection, SortOption } from '@/modules/pace/components/files/file-tree.types';
+import { SORT_DIRECTION, SORT_OPTION } from '@/modules/pace/components/files/file-tree.types';
 import FilesEmptyState from '@/modules/pace/components/files/FilesEmptyState';
 import FilesToolbar from '@/modules/pace/components/files/FilesToolbar';
 import FileTree from '@/modules/pace/components/files/FileTree';
@@ -32,9 +22,9 @@ interface FilesHierarchyProps {
 const FilesHierarchy = ({ onSelectFile, selectedFile }: FilesHierarchyProps) => {
   const [searchInput, setSearchInput] = useState('');
   const [debouncedSearchQuery, setDebouncedSearchQuery] = useState('');
-  const [sortBy, setSortBy] = useState<SortOption>(SORT_OPTION.DATE_MODIFIED);
+  const [sortBy, setSortBy] = useState<SortOption>(SORT_OPTION.NAME);
   const [sortDirection, setSortDirection] = useState<SortDirection>(SORT_DIRECTION.DESC);
-  const [createModalType, setCreateModalType] = useState<CreateItemType | null>(null);
+  // const [createModalType, setCreateModalType] = useState<CreateItemType | null>(null);
 
   const {
     data: files,
@@ -45,24 +35,24 @@ const FilesHierarchy = ({ onSelectFile, selectedFile }: FilesHierarchyProps) => 
     recursive: true,
   });
 
-  const { createFile, createFolder } = useFileActions();
+  // const { createFile, createFolder } = useFileActions();
 
   const toggleSortDirection = () => {
     setSortDirection((prev) => (prev === SORT_DIRECTION.ASC ? SORT_DIRECTION.DESC : SORT_DIRECTION.ASC));
   };
 
-  const handleCreate = async (name: string, parentPath: string) => {
-    try {
-      if (createModalType === CREATE_ITEM_TYPE.FILE) {
-        await createFile(name, parentPath);
-      } else {
-        await createFolder(name, parentPath);
-      }
-    } catch (error) {
-      captureException(error);
-      toast.error(`Failed to create ${createModalType === CREATE_ITEM_TYPE.FILE ? 'file' : 'folder'}`);
-    }
-  };
+  // const handleCreate = async (name: string, parentPath: string) => {
+  //   try {
+  //     if (createModalType === CREATE_ITEM_TYPE.FILE) {
+  //       await createFile(name, parentPath);
+  //     } else {
+  //       await createFolder(name, parentPath);
+  //     }
+  //   } catch (error) {
+  //     captureException(error);
+  //     toast.error(`Failed to create ${createModalType === CREATE_ITEM_TYPE.FILE ? 'file' : 'folder'}`);
+  //   }
+  // };
 
   useEffect(() => {
     const timer = setTimeout(() => {
@@ -102,8 +92,8 @@ const FilesHierarchy = ({ onSelectFile, selectedFile }: FilesHierarchyProps) => 
         />
       </CommonWrapper>
 
-      {/* File and Folder Create */}
-      <div
+      {/* File and Folder Create - TODO: Add this back in */}
+      {/* <div
         className='pointer-events-none absolute right-0 bottom-0 left-0 flex w-full items-center justify-center px-3 pt-12 pb-4'
         style={{
           background:
@@ -134,9 +124,9 @@ const FilesHierarchy = ({ onSelectFile, selectedFile }: FilesHierarchyProps) => 
             <span className='text-GRAY_1000'>File</span>
           </Button>
         </div>
-      </div>
+      </div> */}
 
-      {createModalType && (
+      {/* {createModalType && (
         <CreateItemModal
           isOpen={!!createModalType}
           onOpenChange={(open) => !open && setCreateModalType(null)}
@@ -144,7 +134,7 @@ const FilesHierarchy = ({ onSelectFile, selectedFile }: FilesHierarchyProps) => 
           onCreate={handleCreate}
           existingNames={files?.files?.filter((f) => !f.path.includes('/')).map((f) => f.name) ?? []}
         />
-      )}
+      )} */}
     </div>
   );
 };
