@@ -36,7 +36,6 @@ interface FileTreeNodeRowRename {
 interface FileTreeNodeRowHandlers {
   onRowClick: () => void;
   onChevronClick: (e: React.MouseEvent) => void;
-  onContextMenu: (e: React.MouseEvent) => void;
   onDragStart: (e: React.DragEvent) => void;
   onDragEnd: () => void;
   onDragOver: (e: React.DragEvent) => void;
@@ -44,7 +43,7 @@ interface FileTreeNodeRowHandlers {
   onDrop: (e: React.DragEvent) => void;
 }
 
-interface FileTreeNodeRowProps {
+interface FileTreeNodeRowProps extends React.HTMLAttributes<HTMLDivElement> {
   node: TreeNode;
   depth: number;
   state: FileTreeNodeRowState;
@@ -53,7 +52,7 @@ interface FileTreeNodeRowProps {
 }
 
 const FileTreeNodeRow = forwardRef<HTMLDivElement, FileTreeNodeRowProps>(
-  ({ node, depth, state, rename, handlers }, ref) => {
+  ({ node, depth, state, rename, handlers, className: externalClassName, ...restProps }, ref) => {
     const extension = state.isFolder ? '' : getFileExtension(node.name);
 
     return (
@@ -63,7 +62,6 @@ const FileTreeNodeRow = forwardRef<HTMLDivElement, FileTreeNodeRowProps>(
         tabIndex={0}
         draggable={!state.isRenaming && !state.isProtected}
         onClick={handlers.onRowClick}
-        onContextMenu={handlers.onContextMenu}
         onDragStart={handlers.onDragStart}
         onDragEnd={handlers.onDragEnd}
         onDragOver={handlers.onDragOver}
@@ -76,12 +74,14 @@ const FileTreeNodeRow = forwardRef<HTMLDivElement, FileTreeNodeRowProps>(
             handlers.onRowClick();
           }
         }}
+        {...restProps}
         className={cn(
           'hover:bg-GRAY_100 flex cursor-pointer items-center gap-2 rounded-md py-2 pr-1',
           state.contextMenuOpen && (state.isFolder || !state.isSelected) && 'bg-GRAY_100',
           state.isSelected && !state.isFolder && 'bg-GRAY_300 hover:bg-GRAY_300',
           (state.isDragging || state.isCutItem) && 'opacity-50',
           state.isDragOver && 'bg-GRAY_200',
+          externalClassName,
         )}
         style={{ paddingLeft: `${depth * 24 + 8}px` }}
       >

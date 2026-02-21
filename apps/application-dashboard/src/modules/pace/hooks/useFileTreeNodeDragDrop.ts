@@ -5,11 +5,11 @@ import { useFileActions } from 'modules/pace/hooks/useFileActions';
 import {
   CLIPBOARD_OPERATION,
   type DropToSiblingData,
-  type FileConflict,
   type FileItem,
-  type FileType,
   type TreeNode,
 } from '@/modules/pace/components/files/file-tree.types';
+import { executeMoveOrCopy, parseDragData } from '@/modules/pace/components/files/file-tree.utils';
+import { useFileConflict } from '@/modules/pace/hooks/useFileConflict';
 import { useProtectedFolders } from '@/modules/pace/hooks/useProtectedFolders';
 
 interface UseFileTreeNodeDragDropProps {
@@ -21,7 +21,6 @@ interface UseFileTreeNodeDragDropProps {
   isProtected?: boolean;
   onToggleExpand: (path: string) => void;
   onDropToSibling?: (data: DropToSiblingData) => void;
-  onConflict: (conflict: FileConflict) => void;
   onFileMoved?: (oldPath: string, newFile: FileItem) => void;
 }
 
@@ -45,7 +44,6 @@ export const useFileTreeNodeDragDrop = ({
   isProtected = false,
   onToggleExpand,
   onDropToSibling,
-  onConflict,
   onFileMoved,
 }: UseFileTreeNodeDragDropProps): UseFileTreeNodeDragDropReturn => {
   const [isDragging, setIsDragging] = useState(false);
@@ -55,6 +53,7 @@ export const useFileTreeNodeDragDrop = ({
   const expandTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 
   const { copyItem, moveItem } = useFileActions();
+  const { setConflict } = useFileConflict();
   const { isProtectedRoot, isInvalidCrossMove } = useProtectedFolders();
 
   const clearExpandTimeout = () => {
@@ -143,27 +142,15 @@ export const useFileTreeNodeDragDrop = ({
     clearExpandTimeout();
 
     try {
-      const rawData = e.dataTransfer.getData('application/json');
+      const dragData = parseDragData(e);
 
-      if (!rawData) {
+      if (!dragData) {
         return;
       }
 
-      const data = JSON.parse(rawData);
+      const { sourcePath, sourceName, sourceType, sourceSize, sourceOwner } = dragData;
 
-      if (!data?.path || !data?.name) {
-        return;
-      }
-
-      const sourcePath = data.path;
-      const sourceName = data.name;
-      const sourceType = data.type;
-      const sourceSize = data.size ?? null;
-      const sourceOwner = data.owner ?? '';
-
-      const sourceIsProtected = isProtectedRoot(sourcePath);
-
-      if (sourceIsProtected) {
+      if (isProtectedRoot(sourcePath)) {
         toast.error('Cannot move protected folders');
 
         return;
@@ -211,10 +198,10 @@ export const useFileTreeNodeDragDrop = ({
       const operation = e.altKey ? CLIPBOARD_OPERATION.COPY : 'move';
 
       if (hasConflict) {
-        onConflict({
+        setConflict({
           sourcePath,
           sourceName,
-          sourceType: sourceType as FileType,
+          sourceType,
           sourceSize,
           sourceOwner,
           destinationPath,
@@ -228,22 +215,17 @@ export const useFileTreeNodeDragDrop = ({
         onToggleExpand(node.path);
       }
 
-      if (e.altKey) {
-        await copyItem(sourcePath, destinationPath);
-      } else {
-        await moveItem(sourcePath, destinationPath);
-
-        const newFile: FileItem = {
-          path: destinationPath,
-          name: sourceName,
-          type: sourceType as FileType,
-          size: sourceSize,
-          mtime_ms: Date.now(),
-          owner: sourceOwner,
-        };
-
-        onFileMoved?.(sourcePath, newFile);
-      }
+      await executeMoveOrCopy({
+        sourcePath,
+        sourceName,
+        sourceType,
+        sourceSize,
+        sourceOwner,
+        destinationPath,
+        isCopy: e.altKey,
+        actions: { copyItem, moveItem },
+        onFileMoved,
+      });
     } catch (error) {
       captureException(error);
       toast.error('Failed to move/copy');

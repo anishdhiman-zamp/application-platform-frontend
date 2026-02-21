@@ -9,10 +9,8 @@ import CreateItemModal from '@/modules/pace/components/files/CreateItemModal';
 import {
   type CreateItemType,
   FILE_TYPE,
-  type FileConflict,
   type FileTreeNodeProps,
 } from '@/modules/pace/components/files/file-tree.types';
-import FileConflictModal from '@/modules/pace/components/files/FileConflictModal';
 import { CONTEXT_MENU_ACTIONS } from '@/modules/pace/components/files/files.constants';
 import FileTreeNodeContextMenu from '@/modules/pace/components/files/FileTreeNodeContextMenu';
 import FileTreeNodeRow from '@/modules/pace/components/files/FileTreeNodeRow';
@@ -33,11 +31,8 @@ const FileTreeNode = ({
   onFileCreated,
 }: FileTreeNodeProps) => {
   const [contextMenuOpen, setContextMenuOpen] = useState(false);
-  const [contextMenuPosition, setContextMenuPosition] = useState({ x: 0, y: 0 });
   const [createModalType, setCreateModalType] = useState<CreateItemType | null>(null);
-  const [fileConflict, setFileConflict] = useState<FileConflict | null>(null);
 
-  const triggerRef = useRef<HTMLDivElement>(null);
   const nodeRef = useRef<HTMLDivElement>(null);
 
   const { clipboard } = useFileClipboard();
@@ -86,7 +81,6 @@ const FileTreeNode = ({
     isProtected,
     onToggleExpand,
     onDropToSibling,
-    onConflict: setFileConflict,
     onFileMoved,
   });
 
@@ -98,7 +92,6 @@ const FileTreeNode = ({
     onToggleExpand,
     onStartRename: rename.startRename,
     onOpenCreateModal: setCreateModalType,
-    onConflict: setFileConflict,
     onCloseContextMenu: () => setContextMenuOpen(false),
     onFileMoved,
     onFileDeleted,
@@ -124,32 +117,8 @@ const FileTreeNode = ({
     [isFolder, onToggleExpand, node.path],
   );
 
-  const handleContextMenu = useCallback((e: React.MouseEvent) => {
-    e.preventDefault();
-    e.stopPropagation();
-    setContextMenuPosition({ x: e.clientX, y: e.clientY });
-    setContextMenuOpen(true);
-  }, []);
-
-  const handleConflictResolve = useCallback(
-    async (resolution: Parameters<typeof actions.handleConflictResolve>[0]) => {
-      setFileConflict(null);
-      await actions.handleConflictResolve(resolution, fileConflict);
-    },
-    [actions, fileConflict],
-  );
-
   return (
     <div>
-      <FileTreeNodeContextMenu
-        isOpen={contextMenuOpen}
-        position={contextMenuPosition}
-        actions={filteredActions}
-        triggerRef={triggerRef}
-        onOpenChange={setContextMenuOpen}
-        onActionClick={actions.handleActionClick}
-      />
-
       {createModalType && (
         <CreateItemModal
           isOpen={!!createModalType}
@@ -160,52 +129,50 @@ const FileTreeNode = ({
         />
       )}
 
-      <FileConflictModal
-        isOpen={!!fileConflict}
-        conflict={fileConflict}
-        onResolve={handleConflictResolve}
-        onCancel={() => setFileConflict(null)}
-      />
-
       {dragDrop.isDragOverTop && (
         <div className='bg-GRAY_500 -mb-0.5 h-0.5 rounded-full' style={{ marginLeft: `${depth * 24 + 8}px` }} />
       )}
 
-      <FileTreeNodeRow
-        ref={nodeRef}
-        node={node}
-        depth={depth}
-        state={{
-          isFolder,
-          isExpanded,
-          isSelected,
-          isRenaming: rename.isRenaming,
-          isDuplicateName: rename.isDuplicateName,
-          isDragging: dragDrop.isDragging,
-          isDragOver: dragDrop.isDragOver,
-          isCutItem: actions.isCutItem,
-          isProtected,
-          isUserPrivateFolder,
-          contextMenuOpen,
-        }}
-        rename={{
-          value: rename.renameValue,
-          onChange: rename.setRenameValue,
-          onSubmit: rename.handleRenameSubmit,
-          onKeyDown: rename.handleRenameKeyDown,
-          onInputRef: rename.handleRenameInputRef,
-        }}
-        handlers={{
-          onRowClick: handleClick,
-          onChevronClick: handleChevronClick,
-          onContextMenu: handleContextMenu,
-          onDragStart: dragDrop.handleDragStart,
-          onDragEnd: dragDrop.handleDragEnd,
-          onDragOver: dragDrop.handleDragOver,
-          onDragLeave: dragDrop.handleDragLeave,
-          onDrop: dragDrop.handleDrop,
-        }}
-      />
+      <FileTreeNodeContextMenu
+        actions={filteredActions}
+        onOpenChange={setContextMenuOpen}
+        onActionClick={actions.handleActionClick}
+      >
+        <FileTreeNodeRow
+          ref={nodeRef}
+          node={node}
+          depth={depth}
+          state={{
+            isFolder,
+            isExpanded,
+            isSelected,
+            isRenaming: rename.isRenaming,
+            isDuplicateName: rename.isDuplicateName,
+            isDragging: dragDrop.isDragging,
+            isDragOver: dragDrop.isDragOver,
+            isCutItem: actions.isCutItem,
+            isProtected,
+            isUserPrivateFolder,
+            contextMenuOpen,
+          }}
+          rename={{
+            value: rename.renameValue,
+            onChange: rename.setRenameValue,
+            onSubmit: rename.handleRenameSubmit,
+            onKeyDown: rename.handleRenameKeyDown,
+            onInputRef: rename.handleRenameInputRef,
+          }}
+          handlers={{
+            onRowClick: handleClick,
+            onChevronClick: handleChevronClick,
+            onDragStart: dragDrop.handleDragStart,
+            onDragEnd: dragDrop.handleDragEnd,
+            onDragOver: dragDrop.handleDragOver,
+            onDragLeave: dragDrop.handleDragLeave,
+            onDrop: dragDrop.handleDrop,
+          }}
+        />
+      </FileTreeNodeContextMenu>
 
       {isFolder && childrenToRender && childrenToRender.length > 0 && (
         <div
@@ -221,8 +188,7 @@ const FileTreeNode = ({
                 expandedPaths={expandedPaths}
                 selectedPath={selectedPath}
                 originalNodeMap={originalNodeMap}
-                siblingNames={childrenToRender.map((c) => c.name)}
-                parentPath={node.path}
+                siblingNames={childrenNames}
                 onToggleExpand={onToggleExpand}
                 onSelect={onSelect}
                 onDropToSibling={onDropToSibling}

@@ -49,7 +49,7 @@ export const useFileTreeNodeRename = ({
     setIsRenaming(true);
   }, [node.name, isProtected]);
 
-  const handleRenameSubmit = async () => {
+  const handleRenameSubmit = useCallback(async () => {
     const trimmedValue = renameValue.trim();
 
     if (!trimmedValue || trimmedValue === node.name || isDuplicateName) {
@@ -81,19 +81,22 @@ export const useFileTreeNodeRename = ({
       setRenameValue(node.name);
       setIsRenaming(false);
     }
-  };
+  }, [renameValue, node, isDuplicateName, renameItem, onFileMoved]);
 
-  const handleRenameKeyDown = (e: React.KeyboardEvent<HTMLInputElement>) => {
-    e.stopPropagation();
+  const handleRenameKeyDown = useCallback(
+    (e: React.KeyboardEvent<HTMLInputElement>) => {
+      e.stopPropagation();
 
-    if (e.key === 'Enter') {
-      e.preventDefault();
-      handleRenameSubmit();
-    } else if (e.key === 'Escape') {
-      setIsRenaming(false);
-      setRenameValue(node.name);
-    }
-  };
+      if (e.key === 'Enter') {
+        e.preventDefault();
+        handleRenameSubmit();
+      } else if (e.key === 'Escape') {
+        setIsRenaming(false);
+        setRenameValue(node.name);
+      }
+    },
+    [handleRenameSubmit, node.name],
+  );
 
   const handleRenameInputRef = useCallback((element: HTMLInputElement | null) => {
     renameInputRef.current = element;

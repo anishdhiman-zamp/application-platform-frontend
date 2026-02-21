@@ -139,7 +139,6 @@ export interface FileTreeNodeProps {
   selectedPath: string | null;
   originalNodeMap: Map<string, TreeNode>;
   siblingNames: string[];
-  parentPath: string | null;
   onToggleExpand: (path: string) => void;
   onSelect: (path: string) => void;
   onDropToSibling?: (data: DropToSiblingData) => void;

@@ -1,42 +1,23 @@
 'use client';
 
-import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from '@zamp-platform/ui';
+import { ContextMenu, ContextMenuContent, ContextMenuItem, ContextMenuTrigger } from '@zamp-platform/ui';
 import { cn } from '@zamp-platform/ui/utils';
 import type { ContextMenuAction } from '@/modules/pace/components/files/file-tree.types';
 
 interface FileTreeNodeContextMenuProps {
-  isOpen: boolean;
-  position: { x: number; y: number };
+  children: React.ReactNode;
   actions: ContextMenuAction[];
-  triggerRef: React.RefObject<HTMLDivElement | null>;
-  onOpenChange: (open: boolean) => void;
+  onOpenChange?: (open: boolean) => void;
   onActionClick: (actionId: string) => void;
 }
 
-const FileTreeNodeContextMenu = ({
-  isOpen,
-  position,
-  actions,
-  triggerRef,
-  onOpenChange,
-  onActionClick,
-}: FileTreeNodeContextMenuProps) => {
+const FileTreeNodeContextMenu = ({ children, actions, onOpenChange, onActionClick }: FileTreeNodeContextMenuProps) => {
   return (
-    <DropdownMenu open={isOpen} onOpenChange={onOpenChange}>
-      <DropdownMenuTrigger asChild>
-        <div ref={triggerRef} className='hidden' aria-hidden='true' />
-      </DropdownMenuTrigger>
-      <DropdownMenuContent
-        align='start'
-        className='flex min-w-[180px] flex-col gap-y-[2px]'
-        style={{
-          position: 'fixed',
-          left: position.x,
-          top: position.y,
-        }}
-      >
+    <ContextMenu onOpenChange={onOpenChange}>
+      <ContextMenuTrigger asChild>{children}</ContextMenuTrigger>
+      <ContextMenuContent className='flex min-w-[180px] flex-col gap-y-[2px]'>
         {actions.map((action) => (
-          <DropdownMenuItem
+          <ContextMenuItem
             key={action.id}
             className={cn(
               'hover:bg-GRAY_100 f-12-500 text-GRAY_900 cursor-pointer rounded-md',
@@ -46,10 +27,10 @@ const FileTreeNodeContextMenu = ({
           >
             <action.icon className='size-4' />
             {action.label}
-          </DropdownMenuItem>
+          </ContextMenuItem>
         ))}
-      </DropdownMenuContent>
-    </DropdownMenu>
+      </ContextMenuContent>
+    </ContextMenu>
   );
 };
 

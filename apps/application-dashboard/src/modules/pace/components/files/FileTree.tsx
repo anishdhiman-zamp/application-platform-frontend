@@ -13,7 +13,7 @@ import FileConflictModal from '@/modules/pace/components/files/FileConflictModal
 import FileTreeEmptyState from '@/modules/pace/components/files/FileTreeEmptyState';
 import FileTreeNode from '@/modules/pace/components/files/FileTreeNode';
 import { FileClipboardProvider } from '@/modules/pace/hooks/useFileClipboard';
-import { useFileTreeRootConflict } from '@/modules/pace/hooks/useFileTreeRootConflict';
+import { FileConflictProvider, useFileConflict } from '@/modules/pace/hooks/useFileConflict';
 import { useFileTreeRootDragDrop } from '@/modules/pace/hooks/useFileTreeRootDragDrop';
 import { ProtectedFoldersProvider } from '@/modules/pace/hooks/useProtectedFolders';
 
@@ -33,6 +33,8 @@ const FileTreeContent = ({
   const containerRef = useRef<HTMLDivElement>(null);
 
   const selectedPath = controlledSelectedPath ?? internalSelectedPath;
+
+  const { conflict, resolveConflict, cancelConflict } = useFileConflict();
 
   const filesMap = useMemo(() => {
     const map = new Map<string, FileItem>();
@@ -54,15 +56,9 @@ const FileTreeContent = ({
 
   const rootSiblingNames = useMemo(() => treeData.map((node) => node.name), [treeData]);
 
-  const { fileConflict, setFileConflict, handleConflictResolve, handleConflictCancel } = useFileTreeRootConflict({
-    rootSiblingNames,
-    onFileMoved,
-  });
-
   const { handleDropToRootSibling } = useFileTreeRootDragDrop({
     rootSiblingNames,
     containerRef,
-    onConflict: setFileConflict,
     onFileMoved,
   });
 
@@ -93,6 +89,13 @@ const FileTreeContent = ({
     [onSelectFile, filesMap],
   );
 
+  const handleConflictResolve = useCallback(
+    (resolution: Parameters<typeof resolveConflict>[0]) => {
+      resolveConflict(resolution, rootSiblingNames);
+    },
+    [resolveConflict, rootSiblingNames],
+  );
+
   if (treeData.length === 0 && searchQuery) {
     return <FileTreeEmptyState />;
   }
@@ -115,7 +118,6 @@ const FileTreeContent = ({
             selectedPath={selectedPath}
             originalNodeMap={originalNodeMap}
             siblingNames={rootSiblingNames}
-            parentPath={null}
             onToggleExpand={handleToggleExpand}
             onSelect={handleSelect}
             onDropToSibling={handleDropToRootSibling}
@@ -126,10 +128,10 @@ const FileTreeContent = ({
         ))}
       </div>
       <FileConflictModal
-        isOpen={!!fileConflict}
-        conflict={fileConflict}
+        isOpen={!!conflict}
+        conflict={conflict}
         onResolve={handleConflictResolve}
-        onCancel={handleConflictCancel}
+        onCancel={cancelConflict}
       />
     </>
   );
@@ -139,7 +141,9 @@ const FileTree = (props: FileTreeProps) => {
   return (
     <ProtectedFoldersProvider>
       <FileClipboardProvider>
-        <FileTreeContent {...props} />
+        <FileConflictProvider onFileMoved={props.onFileMoved}>
+          <FileTreeContent {...props} />
+        </FileConflictProvider>
       </FileClipboardProvider>
     </ProtectedFoldersProvider>
   );
