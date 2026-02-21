@@ -89,7 +89,7 @@ const FilesHierarchy = ({
         noDataBanner={<FilesEmptyState />}
         skeletonType={SkeletonTypes.CUSTOM}
         loader={<ImageLoader imageSrc={ZAMP_LOGO_LOADER_SVG} width={150} height={150} className='bg-BG_GRAY_2' />}
-        className='flex-1 overflow-y-auto pb-20 [scrollbar-width:none]'
+        className='flex-1 overflow-y-auto [scrollbar-width:none]'
       >
         <FileTree
           files={files?.files ?? []}

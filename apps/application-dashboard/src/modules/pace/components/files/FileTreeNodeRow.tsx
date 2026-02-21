@@ -127,6 +127,7 @@ const FileTreeNodeRow = forwardRef<HTMLDivElement, FileTreeNodeRowProps>(
           >
             <Input
               ref={rename.onInputRef}
+              autoFocus
               value={rename.value}
               onChange={(e) => rename.onChange(e.target.value)}
               onBlur={rename.onSubmit}
