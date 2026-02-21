@@ -6,7 +6,6 @@ import { cn } from '@zamp-platform/ui/utils';
 import { useAutoFocus } from '@zamp-platform/utils';
 import Link from 'next/link';
 import { useGetDatasetListingQuery } from '@/apis/dataset';
-import { useGetPagesQuery } from '@/apis/pages';
 import ImageLoader from '@/components/common/loader/ImageLoader';
 import CommonWrapper from '@/components/commonWrapper';
 import { SkeletonTypes } from '@/components/commonWrapper/commonWrapper.types';
@@ -52,16 +51,7 @@ const ArtifactItem = ({ artifact, href, onClick }: ArtifactItemProps) => (
 const ArtifactsPage = () => {
   const { openDynamicTab } = usePaceContext();
   const [searchQuery, setSearchQuery] = useState('');
-  const [activeTab, setActiveTab] = useState('all');
-
-  const {
-    data: pagesData,
-    isFetching: isFetchingPages,
-    isError: isErrorPages,
-    refetch: refetchPages,
-  } = useGetPagesQuery(undefined, {
-    refetchOnMountOrArgChange: false,
-  });
+  const [activeTab, setActiveTab] = useState('datasets');
 
   const {
     data: datasetsData,
@@ -75,24 +65,7 @@ const ArtifactsPage = () => {
     },
   );
 
-  const isFetching = isFetchingPages || isFetchingDatasets;
-  const isError = isErrorPages || isErrorDatasets;
-
-  const { setRef: setSearchInputRef } = useAutoFocus<HTMLInputElement>({ enabled: !isFetching });
-
-  const pages: Artifact[] = useMemo(() => {
-    if (!pagesData) return [];
-
-    return pagesData
-      .filter((page) => page.sheets.length > 0)
-      .map((page) => ({
-        id: page.page_id,
-        name: page.name,
-        type: DynamicTabType.PAGE,
-        updatedAt: findTimeDifference(page.updated_at),
-        sheetId: page.sheets[0].sheet_id,
-      }));
-  }, [pagesData]);
+  const { setRef: setSearchInputRef } = useAutoFocus<HTMLInputElement>({ enabled: !isFetchingDatasets });
 
   const datasets: Artifact[] = useMemo(() => {
     if (!datasetsData?.datasets) return [];
@@ -104,12 +77,6 @@ const ArtifactsPage = () => {
       updatedAt: findTimeDifference(dataset.updatedAt),
     }));
   }, [datasetsData]);
-
-  const filteredPages = useMemo(() => {
-    if (!searchQuery) return pages;
-
-    return pages.filter((page) => page.name.toLowerCase().includes(searchQuery.toLowerCase()));
-  }, [pages, searchQuery]);
 
   const filteredDatasets = useMemo(() => {
     if (!searchQuery) return datasets;
@@ -139,20 +106,20 @@ const ArtifactsPage = () => {
         ref={setSearchInputRef}
         placeholder='Search'
         value={searchQuery}
-        disabled={isFetching}
+        disabled={isFetchingDatasets}
         onChange={(e) => setSearchQuery(e.target.value)}
         className='f-12-450 placeholder:text-GRAY_500 h-8 p-3'
       />
 
       <CommonWrapper
-        isLoading={isFetching}
+        isLoading={isFetchingDatasets}
         loader={
           <ImageLoader imageSrc={ZAMP_LOGO_LOADER_SVG} width={140} height={140} className='h-[calc(100vh-250px)]' />
         }
         skeletonType={SkeletonTypes.CUSTOM}
         errorCardStyle='h-[calc(100vh-250px)]'
-        isError={isError}
-        refetchFunction={isErrorPages ? refetchPages : refetchDatasets}
+        isError={isErrorDatasets}
+        refetchFunction={refetchDatasets}
         disableAnimation
         className='flex min-h-0 flex-1 flex-col'
       >
@@ -172,36 +139,6 @@ const ArtifactsPage = () => {
               </TabsTrigger>
             ))}
           </TabsList>
-
-          <TabsContent value='all' className='flex-1 overflow-y-auto [&::-webkit-scrollbar]:hidden'>
-            {filteredPages.map((artifact) => (
-              <ArtifactItem
-                key={artifact.id}
-                artifact={artifact}
-                href={getArtifactPath(artifact)}
-                onClick={handleArtifactClick}
-              />
-            ))}
-            {filteredDatasets.map((artifact) => (
-              <ArtifactItem
-                key={artifact.id}
-                artifact={artifact}
-                href={getArtifactPath(artifact)}
-                onClick={handleArtifactClick}
-              />
-            ))}
-          </TabsContent>
-
-          <TabsContent value='pages' className='flex-1 overflow-y-auto [&::-webkit-scrollbar]:hidden'>
-            {filteredPages.map((artifact) => (
-              <ArtifactItem
-                key={artifact.id}
-                artifact={artifact}
-                href={getArtifactPath(artifact)}
-                onClick={handleArtifactClick}
-              />
-            ))}
-          </TabsContent>
 
           <TabsContent value='datasets' className='flex-1 overflow-y-auto [&::-webkit-scrollbar]:hidden'>
             {filteredDatasets.map((artifact) => (
