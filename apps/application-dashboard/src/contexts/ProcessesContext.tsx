@@ -48,7 +48,7 @@ export function ProcessesProvider({ children }: ProcessesProviderProps) {
   const { processes, isLoadingProcesses, isSuccessProcesses, updateProcess, deleteProcess } = useProcessesData();
 
   // Get navigation functions
-  const { pushToMostRelevantPage, pushToMostRelevantProcess } = usePersistedPageNavigation({
+  const { pushToMostRelevantProcess } = usePersistedPageNavigation({
     processesList: processes ?? [],
   });
 
@@ -78,15 +78,7 @@ export function ProcessesProvider({ children }: ProcessesProviderProps) {
         router.push(ROUTES_PATH.PEOPLE);
       }
     }
-  }, [
-    pathname,
-    processes,
-    isSuccessProcesses,
-    isOrgSwitchIsInProgress,
-    pushToMostRelevantPage,
-    pushToMostRelevantProcess,
-    router,
-  ]);
+  }, [pathname, processes, isSuccessProcesses, isOrgSwitchIsInProgress, pushToMostRelevantProcess, router]);
 
   return (
     <ProcessesContext.Provider
