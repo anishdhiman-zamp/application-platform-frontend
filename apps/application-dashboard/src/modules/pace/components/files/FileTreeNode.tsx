@@ -14,6 +14,7 @@ import { useFileTreeContext } from '@/modules/pace/hooks/useFileTreeContext';
 import { useFileTreeNodeActions } from '@/modules/pace/hooks/useFileTreeNodeActions';
 import { useFileTreeNodeDragDrop } from '@/modules/pace/hooks/useFileTreeNodeDragDrop';
 import { useFileTreeNodeRename } from '@/modules/pace/hooks/useFileTreeNodeRename';
+import { useFileUploadContext } from '@/modules/pace/hooks/useFileUploadContext';
 
 const FileTreeNode = memo(function FileTreeNode({
   node,
@@ -39,12 +40,14 @@ const FileTreeNode = memo(function FileTreeNode({
   const [createModalType, setCreateModalType] = useState<CreateItemType | null>(null);
 
   const { clipboard, isProtectedRoot, username } = useFileTreeContext();
+  const { uploadingPath } = useFileUploadContext();
 
   const isFolder = node.type === FILE_TYPE.DIRECTORY;
   const isExpanded = expandedPaths.has(node.path);
   const isSelected = !isFolder && selectedPath === node.path;
   const isProtected = depth === 0 && isProtectedRoot(node.path);
   const isUserPrivateFolder = depth === 0 && node.path === username;
+  const isUploading = uploadingPath === node.path;
 
   const originalNode = originalNodeMap.get(node.path);
   const childrenToRender = originalNode?.children ?? node.children;
@@ -156,6 +159,7 @@ const FileTreeNode = memo(function FileTreeNode({
 
       <FileTreeNodeContextMenu
         actions={filteredActions}
+        disabled={isUploading}
         onOpenChange={setContextMenuOpen}
         onActionClick={actions.handleActionClick}
       >
@@ -175,6 +179,7 @@ const FileTreeNode = memo(function FileTreeNode({
             isProtected,
             isUserPrivateFolder,
             contextMenuOpen,
+            isUploading,
           }}
           rename={{
             value: rename.renameValue,

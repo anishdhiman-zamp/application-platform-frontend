@@ -8,22 +8,32 @@ import type { ContextMenuAction } from '@/modules/pace/components/files/file-tre
 interface FileTreeNodeContextMenuProps {
   children: React.ReactNode;
   actions: ContextMenuAction[];
+  disabled?: boolean;
   onOpenChange?: (open: boolean) => void;
   onActionClick: (actionId: string) => void;
 }
 
-const FileTreeNodeContextMenu = ({ children, actions, onOpenChange, onActionClick }: FileTreeNodeContextMenuProps) => {
+const FileTreeNodeContextMenu = ({
+  children,
+  actions,
+  disabled,
+  onOpenChange,
+  onActionClick,
+}: FileTreeNodeContextMenuProps) => {
   const [isOpen, setIsOpen] = useState(false);
 
   const handleOpenChange = (open: boolean) => {
+    if (disabled && open) return;
     setIsOpen(open);
     onOpenChange?.(open);
   };
 
   return (
     <ContextMenu onOpenChange={handleOpenChange}>
-      <ContextMenuTrigger asChild>{children}</ContextMenuTrigger>
-      {isOpen && (
+      <ContextMenuTrigger asChild disabled={disabled}>
+        {children}
+      </ContextMenuTrigger>
+      {isOpen && !disabled && (
         <ContextMenuContent className='flex min-w-[180px] flex-col gap-y-[2px]'>
           {actions.map((action) => (
             <ContextMenuItem

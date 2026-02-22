@@ -3,7 +3,7 @@
 import { forwardRef } from 'react';
 import { Button, FileIcon, Input } from '@zamp-platform/ui';
 import { cn } from '@zamp-platform/ui/utils';
-import { ChevronRight } from 'lucide-react';
+import { ChevronRight, Loader } from 'lucide-react';
 import Image from 'next/image';
 import TooltipV2 from '@/components/common/TooltipV2';
 import type { TreeNode } from '@/modules/pace/components/files/file-tree.types';
@@ -22,6 +22,7 @@ interface FileTreeNodeRowState {
   isProtected: boolean;
   isUserPrivateFolder: boolean;
   contextMenuOpen: boolean;
+  isUploading: boolean;
 }
 
 interface FileTreeNodeRowRename {
@@ -53,33 +54,39 @@ interface FileTreeNodeRowProps extends React.HTMLAttributes<HTMLDivElement> {
 const FileTreeNodeRow = forwardRef<HTMLDivElement, FileTreeNodeRowProps>(
   ({ node, depth, state, rename, handlers, className: externalClassName, ...restProps }, ref) => {
     const extension = state.isFolder ? '' : getFileExtension(node.name);
+    const isDisabled = state.isUploading;
 
     return (
       <div
         ref={ref}
         role='button'
-        tabIndex={0}
-        draggable={!state.isRenaming && !state.isProtected}
-        onClick={handlers.onRowClick}
-        onDragStart={handlers.onDragStart}
-        onDragEnd={handlers.onDragEnd}
-        onDragOver={handlers.onDragOver}
-        onDragLeave={handlers.onDragLeave}
-        onDrop={handlers.onDrop}
-        onKeyDown={(e) => {
-          if (state.isRenaming) return;
+        tabIndex={isDisabled ? -1 : 0}
+        draggable={!state.isRenaming && !state.isProtected && !isDisabled}
+        onClick={isDisabled ? undefined : handlers.onRowClick}
+        onDragStart={isDisabled ? undefined : handlers.onDragStart}
+        onDragEnd={isDisabled ? undefined : handlers.onDragEnd}
+        onDragOver={isDisabled ? undefined : handlers.onDragOver}
+        onDragLeave={isDisabled ? undefined : handlers.onDragLeave}
+        onDrop={isDisabled ? undefined : handlers.onDrop}
+        onKeyDown={
+          isDisabled
+            ? undefined
+            : (e) => {
+                if (state.isRenaming) return;
 
-          if (e.key === 'Enter' || e.key === ' ') {
-            handlers.onRowClick();
-          }
-        }}
+                if (e.key === 'Enter' || e.key === ' ') {
+                  handlers.onRowClick();
+                }
+              }
+        }
         {...restProps}
         className={cn(
           'hover:bg-GRAY_100 flex h-9 cursor-pointer items-center gap-2 rounded-md pr-1',
           state.contextMenuOpen && (state.isFolder || !state.isSelected) && 'bg-GRAY_100',
           state.isSelected && !state.isFolder && 'bg-GRAY_300 hover:bg-GRAY_300',
-          (state.isDragging || state.isCutItem) && 'opacity-50',
+          (state.isDragging || state.isCutItem || state.isUploading) && 'opacity-50',
           state.isDragOver && 'bg-GRAY_200',
+          isDisabled && 'pointer-events-none',
           externalClassName,
         )}
         style={{ paddingLeft: `${depth * 24 + 8}px` }}
@@ -144,6 +151,8 @@ const FileTreeNodeRow = forwardRef<HTMLDivElement, FileTreeNodeRowProps>(
             {state.isUserPrivateFolder ? `${node.name} (Private)` : node.name}
           </span>
         )}
+
+        {state.isUploading && <Loader className='text-GRAY_600 ml-auto size-3.5 shrink-0 animate-spin' />}
       </div>
     );
   },

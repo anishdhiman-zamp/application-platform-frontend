@@ -1,6 +1,6 @@
 'use client';
 
-import { useCallback, useEffect, useRef, useState } from 'react';
+import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { useListFilesQuery } from '@/apis/filesystem';
 import ImageLoader from '@/components/common/loader/ImageLoader';
 import CommonWrapper from '@/components/commonWrapper';
@@ -45,7 +45,33 @@ const FilesHierarchy = ({
   } = useListFilesQuery({
     recursive: true,
   });
-  const { uploadFiles, uploadFolder } = useFileUploadContext();
+  const { uploadFiles, uploadFolder, uploadingItem, clearUploadingItem } = useFileUploadContext();
+
+  const filesWithUploading = useMemo(() => {
+    const fileList = files?.files ?? [];
+
+    if (!uploadingItem) {
+      return fileList;
+    }
+
+    const existsInList = fileList.some((f) => f.path === uploadingItem.path);
+
+    if (existsInList) {
+      return fileList;
+    }
+
+    return [...fileList, uploadingItem];
+  }, [files?.files, uploadingItem]);
+
+  useEffect(() => {
+    if (!uploadingItem) return;
+
+    const existsInList = files?.files?.some((f) => f.path === uploadingItem.path);
+
+    if (existsInList) {
+      clearUploadingItem();
+    }
+  }, [files?.files, uploadingItem, clearUploadingItem]);
 
   const toggleSortDirection = useCallback(() => {
     setSortDirection((prev) => (prev === SORT_DIRECTION.ASC ? SORT_DIRECTION.DESC : SORT_DIRECTION.ASC));
@@ -106,14 +132,15 @@ const FilesHierarchy = ({
         isLoading={isLoadingFiles}
         isError={isErrorFiles}
         refetchFunction={refetchFiles}
-        isNoData={files?.files?.length === 0}
+        isNoData={filesWithUploading.length === 0}
         noDataBanner={<FilesEmptyState />}
         skeletonType={SkeletonTypes.CUSTOM}
         loader={<ImageLoader imageSrc={ZAMP_LOGO_LOADER_SVG} width={150} height={150} className='bg-BG_GRAY_2' />}
         className='flex-1 overflow-y-auto [scrollbar-width:none]'
+        disableAnimation
       >
         <FileTree
-          files={files?.files ?? []}
+          files={filesWithUploading}
           searchQuery={debouncedSearchQuery}
           sortBy={sortBy}
           sortDirection={sortDirection}

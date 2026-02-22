@@ -13,7 +13,13 @@ import {
 } from '@/apis/filesystem';
 import { APITags } from '@/constants/api.constants';
 import { useAppDispatch } from '@/hooks/toolkit';
-import { type FolderUploadProgress, UPLOAD_STATUS, UPLOAD_TYPE } from '@/modules/pace/components/files/file-tree.types';
+import {
+  FILE_TYPE,
+  type FileItem,
+  type FolderUploadProgress,
+  UPLOAD_STATUS,
+  UPLOAD_TYPE,
+} from '@/modules/pace/components/files/file-tree.types';
 import {
   calculateTotalBytes,
   extractFilesWithPaths,
@@ -45,6 +51,8 @@ interface UploadState {
   } | null;
   error: string | null;
   folderUpload: FolderUploadProgress | null;
+  uploadingPath: string | null;
+  uploadingItem: FileItem | null;
 }
 
 interface UseFileUploadReturn {
@@ -53,6 +61,7 @@ interface UseFileUploadReturn {
   uploadFiles: (files: FileList | File[], basePath: string) => Promise<void>;
   uploadFolder: (files: FileList, basePath: string) => Promise<void>;
   cancelUpload: () => void;
+  clearUploadingItem: () => void;
   isUploading: boolean;
 }
 
@@ -63,6 +72,8 @@ export const useFileUpload = (options?: UseFileUploadOptions): UseFileUploadRetu
     currentUpload: null,
     error: null,
     folderUpload: null,
+    uploadingPath: null,
+    uploadingItem: null,
   });
 
   const abortControllerRef = useRef<AbortController | null>(null);
@@ -125,6 +136,17 @@ export const useFileUpload = (options?: UseFileUploadOptions): UseFileUploadRetu
       const isChunkedUpload = shouldUseChunkedUpload(file.size);
       const uploadType = isChunkedUpload ? UPLOAD_TYPE.CHUNKED : UPLOAD_TYPE.DIRECT;
 
+      const uploadingItem: FileItem | null = isChunkedUpload
+        ? {
+            path: targetPath,
+            name: file.name,
+            type: FILE_TYPE.FILE,
+            size: file.size,
+            mtime_ms: Date.now(),
+            owner: '',
+          }
+        : null;
+
       setUploadState({
         isUploading: true,
         currentUpload: isChunkedUpload
@@ -140,6 +162,8 @@ export const useFileUpload = (options?: UseFileUploadOptions): UseFileUploadRetu
           : null,
         error: null,
         folderUpload: null,
+        uploadingPath: isChunkedUpload ? targetPath : null,
+        uploadingItem,
       });
 
       const callbacks: UploadCallbacks = {
@@ -159,12 +183,14 @@ export const useFileUpload = (options?: UseFileUploadOptions): UseFileUploadRetu
             }
           : undefined,
         onComplete: (path) => {
-          setUploadState({
+          setUploadState((prev) => ({
             isUploading: false,
             currentUpload: null,
             error: null,
             folderUpload: null,
-          });
+            uploadingPath: null,
+            uploadingItem: prev.uploadingItem,
+          }));
           toast.success(`${file.name} uploaded successfully`);
           options?.onUploadComplete?.(path);
         },
@@ -174,6 +200,8 @@ export const useFileUpload = (options?: UseFileUploadOptions): UseFileUploadRetu
             currentUpload: null,
             error: error.message,
             folderUpload: null,
+            uploadingPath: null,
+            uploadingItem: null,
           });
           options?.onUploadError?.(error, file.name);
           captureException(error);
@@ -184,6 +212,8 @@ export const useFileUpload = (options?: UseFileUploadOptions): UseFileUploadRetu
             currentUpload: null,
             error: null,
             folderUpload: null,
+            uploadingPath: null,
+            uploadingItem: null,
           });
         },
       };
@@ -244,6 +274,16 @@ export const useFileUpload = (options?: UseFileUploadOptions): UseFileUploadRetu
       const folderName = getRootFolderName(filesWithPaths);
       const totalBytes = calculateTotalBytes(filesWithPaths);
       const totalFiles = filesWithPaths.length;
+      const rootFolderPath = `${basePath}/${folderName}`;
+
+      const uploadingItem: FileItem = {
+        path: rootFolderPath,
+        name: folderName,
+        type: FILE_TYPE.DIRECTORY,
+        size: null,
+        mtime_ms: Date.now(),
+        owner: '',
+      };
 
       setUploadState({
         isUploading: true,
@@ -257,6 +297,8 @@ export const useFileUpload = (options?: UseFileUploadOptions): UseFileUploadRetu
           totalBytes,
           uploadedBytes: 0,
         },
+        uploadingPath: rootFolderPath,
+        uploadingItem,
       });
 
       try {
@@ -354,12 +396,14 @@ export const useFileUpload = (options?: UseFileUploadOptions): UseFileUploadRetu
 
         invalidateFilesList();
 
-        setUploadState({
+        setUploadState((prev) => ({
           isUploading: false,
           currentUpload: null,
           error: null,
           folderUpload: null,
-        });
+          uploadingPath: null,
+          uploadingItem: prev.uploadingItem,
+        }));
 
         toast.success(`${folderName} uploaded successfully (${totalFiles} files)`);
       } catch (error) {
@@ -369,6 +413,8 @@ export const useFileUpload = (options?: UseFileUploadOptions): UseFileUploadRetu
             currentUpload: null,
             error: null,
             folderUpload: null,
+            uploadingPath: null,
+            uploadingItem: null,
           });
           toast.info(`Upload of ${folderName} cancelled`);
         } else {
@@ -377,6 +423,8 @@ export const useFileUpload = (options?: UseFileUploadOptions): UseFileUploadRetu
             currentUpload: null,
             error: error instanceof Error ? error.message : 'Folder upload failed',
             folderUpload: null,
+            uploadingPath: null,
+            uploadingItem: null,
           });
           captureException(error);
           toast.error(`Failed to upload folder ${folderName}`);
@@ -394,11 +442,20 @@ export const useFileUpload = (options?: UseFileUploadOptions): UseFileUploadRetu
       currentUpload: null,
       error: null,
       folderUpload: null,
+      uploadingPath: null,
+      uploadingItem: null,
     });
 
     if (abortControllerRef.current) {
       abortControllerRef.current.abort();
     }
+  }, []);
+
+  const clearUploadingItem = useCallback(() => {
+    setUploadState((prev) => ({
+      ...prev,
+      uploadingItem: null,
+    }));
   }, []);
 
   return {
@@ -407,6 +464,7 @@ export const useFileUpload = (options?: UseFileUploadOptions): UseFileUploadRetu
     uploadFiles,
     uploadFolder,
     cancelUpload,
+    clearUploadingItem,
     isUploading: uploadState.isUploading,
   };
 };

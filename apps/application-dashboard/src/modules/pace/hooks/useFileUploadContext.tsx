@@ -1,7 +1,7 @@
 'use client';
 
 import { createContext, type ReactNode, useContext, useMemo } from 'react';
-import type { FolderUploadProgress } from '@/modules/pace/components/files/file-tree.types';
+import type { FileItem, FolderUploadProgress } from '@/modules/pace/components/files/file-tree.types';
 import { useFileUpload } from '@/modules/pace/hooks/useFileUpload';
 
 interface UploadProgress {
@@ -19,6 +19,8 @@ interface UploadState {
   currentUpload: UploadProgress | null;
   error: string | null;
   folderUpload: FolderUploadProgress | null;
+  uploadingPath: string | null;
+  uploadingItem: FileItem | null;
 }
 
 interface FileUploadContextValue {
@@ -27,7 +29,10 @@ interface FileUploadContextValue {
   uploadFiles: (files: FileList | File[], basePath: string) => Promise<void>;
   uploadFolder: (files: FileList, basePath: string) => Promise<void>;
   cancelUpload: () => void;
+  clearUploadingItem: () => void;
   isUploading: boolean;
+  uploadingPath: string | null;
+  uploadingItem: FileItem | null;
 }
 
 const FileUploadContext = createContext<FileUploadContextValue | null>(null);
@@ -37,7 +42,8 @@ interface FileUploadProviderProps {
 }
 
 export const FileUploadProvider = ({ children }: FileUploadProviderProps) => {
-  const { uploadState, uploadFile, uploadFiles, uploadFolder, cancelUpload, isUploading } = useFileUpload();
+  const { uploadState, uploadFile, uploadFiles, uploadFolder, cancelUpload, clearUploadingItem, isUploading } =
+    useFileUpload();
 
   const value = useMemo<FileUploadContextValue>(
     () => ({
@@ -46,9 +52,12 @@ export const FileUploadProvider = ({ children }: FileUploadProviderProps) => {
       uploadFiles,
       uploadFolder,
       cancelUpload,
+      clearUploadingItem,
       isUploading,
+      uploadingPath: uploadState.uploadingPath,
+      uploadingItem: uploadState.uploadingItem,
     }),
-    [uploadState, uploadFile, uploadFiles, uploadFolder, cancelUpload, isUploading],
+    [uploadState, uploadFile, uploadFiles, uploadFolder, cancelUpload, clearUploadingItem, isUploading],
   );
 
   return <FileUploadContext.Provider value={value}>{children}</FileUploadContext.Provider>;
