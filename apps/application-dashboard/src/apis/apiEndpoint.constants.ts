@@ -219,5 +219,5 @@ export const API_ENDPOINTS = {
   FILES_UPLOAD_INIT_POST: `files/upload/init`,
   FILES_UPLOAD_CHUNK_POST: `files/upload/chunk`,
   FILES_UPLOAD_COMPLETE_POST: `files/upload/complete`,
-  FILES_UPLOAD_CANCEL_DELETE: `files/upload/{{uploadId}}`,
+  FILES_UPLOAD_CANCEL_DELETE: `files/upload/{{upload_id}}`,
 };

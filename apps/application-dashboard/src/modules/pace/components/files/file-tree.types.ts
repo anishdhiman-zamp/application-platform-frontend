@@ -119,6 +119,7 @@ export interface FileTreeProps {
   onFileMoved?: (oldPath: string, newFile: FileItem) => void;
   onFileDeleted?: (deletedPath: string) => void;
   onFileCreated?: (newFile: FileItem) => void;
+  onUploadFiles?: (files: FileList, targetPath: string) => void;
 }
 
 /**
@@ -153,5 +154,40 @@ export interface FileTreeNodeProps {
   onFileMoved?: (oldPath: string, newFile: FileItem) => void;
   onFileDeleted?: (deletedPath: string) => void;
   onFileCreated?: (newFile: FileItem) => void;
+  onUploadFiles?: (files: FileList, targetPath: string) => void;
   style?: React.CSSProperties;
+}
+
+export const UPLOAD_STATUS = {
+  IDLE: 'idle',
+  UPLOADING: 'uploading',
+  COMPLETED: 'completed',
+  FAILED: 'failed',
+  CANCELLED: 'cancelled',
+} as const;
+
+export type UploadStatus = (typeof UPLOAD_STATUS)[keyof typeof UPLOAD_STATUS];
+
+export const UPLOAD_TYPE = {
+  DIRECT: 'direct',
+  CHUNKED: 'chunked',
+} as const;
+
+export type UploadType = (typeof UPLOAD_TYPE)[keyof typeof UPLOAD_TYPE];
+
+export interface UploadProgress {
+  fileName: string;
+  filePath: string;
+  loaded: number;
+  total: number;
+  percentage: number;
+  status: UploadStatus;
+  uploadType: UploadType;
+  uploadId?: string;
+}
+
+export interface UploadState {
+  isUploading: boolean;
+  currentUpload: UploadProgress | null;
+  error: string | null;
 }

@@ -22,6 +22,7 @@ interface UseFileTreeNodeDragDropProps {
   onToggleExpand: (path: string) => void;
   onDropToSibling?: (data: DropToSiblingData) => void;
   onFileMoved?: (oldPath: string, newFile: FileItem) => void;
+  onExternalFileDrop?: (files: FileList, targetPath: string) => void;
 }
 
 interface UseFileTreeNodeDragDropReturn {
@@ -45,6 +46,7 @@ export const useFileTreeNodeDragDrop = ({
   onToggleExpand,
   onDropToSibling,
   onFileMoved,
+  onExternalFileDrop,
 }: UseFileTreeNodeDragDropProps): UseFileTreeNodeDragDropReturn => {
   const [isDragging, setIsDragging] = useState(false);
   const [isDragOver, setIsDragOver] = useState(false);
@@ -82,6 +84,10 @@ export const useFileTreeNodeDragDrop = ({
     );
     e.dataTransfer.effectAllowed = 'copyMove';
     setIsDragging(true);
+  };
+
+  const isExternalFileDrop = (e: React.DragEvent): boolean => {
+    return e.dataTransfer.types.includes('Files') && !e.dataTransfer.types.includes('application/json');
   };
 
   const handleDragEnd = () => {
@@ -140,6 +146,19 @@ export const useFileTreeNodeDragDrop = ({
     setIsDragOver(false);
     setIsDragOverTop(false);
     clearExpandTimeout();
+
+    if (isExternalFileDrop(e) && isFolder && onExternalFileDrop) {
+      const files = e.dataTransfer.files;
+
+      if (files.length > 0) {
+        if (!isExpanded) {
+          onToggleExpand(node.path);
+        }
+        onExternalFileDrop(files, node.path);
+      }
+
+      return;
+    }
 
     try {
       const dragData = parseDragData(e);

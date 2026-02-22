@@ -1,6 +1,6 @@
 'use client';
 
-import { useEffect, useState } from 'react';
+import { useCallback, useEffect, useState } from 'react';
 import { useListFilesQuery } from '@/apis/filesystem';
 import ImageLoader from '@/components/common/loader/ImageLoader';
 import CommonWrapper from '@/components/commonWrapper';
@@ -11,6 +11,7 @@ import { SORT_DIRECTION, SORT_OPTION } from '@/modules/pace/components/files/fil
 import FilesEmptyState from '@/modules/pace/components/files/FilesEmptyState';
 import FilesToolbar from '@/modules/pace/components/files/FilesToolbar';
 import FileTree from '@/modules/pace/components/files/FileTree';
+import { useFileUploadContext } from '@/modules/pace/hooks/useFileUploadContext';
 
 const SEARCH_DEBOUNCE_MS = 300;
 
@@ -43,12 +44,20 @@ const FilesHierarchy = ({
   } = useListFilesQuery({
     recursive: true,
   });
+  const { uploadFiles } = useFileUploadContext();
 
   // const { createFile, createFolder } = useFileActions();
 
   const toggleSortDirection = () => {
     setSortDirection((prev) => (prev === SORT_DIRECTION.ASC ? SORT_DIRECTION.DESC : SORT_DIRECTION.ASC));
   };
+
+  const handleUploadFiles = useCallback(
+    (fileList: FileList, targetPath: string) => {
+      uploadFiles(fileList, targetPath);
+    },
+    [uploadFiles],
+  );
 
   // const handleCreate = async (name: string, parentPath: string) => {
   //   try {
@@ -101,6 +110,7 @@ const FilesHierarchy = ({
           onFileMoved={onFileMoved}
           onFileDeleted={onFileDeleted}
           onFileCreated={onFileCreated}
+          onUploadFiles={handleUploadFiles}
         />
       </CommonWrapper>
 

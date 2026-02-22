@@ -29,9 +29,11 @@ const FileTreeNode = memo(function FileTreeNode({
   onFileMoved,
   onFileDeleted,
   onFileCreated,
+  onUploadFiles,
   style,
 }: FileTreeNodeProps) {
   const nodeRef = useRef<HTMLDivElement>(null);
+  const fileInputRef = useRef<HTMLInputElement>(null);
   const [contextMenuOpen, setContextMenuOpen] = useState(false);
   const [createModalType, setCreateModalType] = useState<CreateItemType | null>(null);
 
@@ -65,12 +67,38 @@ const FileTreeNode = memo(function FileTreeNode({
     [isFolder, clipboard, isProtected],
   );
 
+  const handleFileInputChange = useCallback(
+    (e: React.ChangeEvent<HTMLInputElement>) => {
+      const files = e.target.files;
+
+      if (files && files.length > 0 && onUploadFiles) {
+        onUploadFiles(files, node.path);
+      }
+
+      e.target.value = '';
+    },
+    [node.path, onUploadFiles],
+  );
+
+  const triggerFileUpload = useCallback(() => {
+    fileInputRef.current?.click();
+  }, []);
+
   const rename = useFileTreeNodeRename({
     node,
     siblingNames,
     isProtected,
     onFileMoved,
   });
+
+  const handleExternalFileDrop = useCallback(
+    (files: FileList, targetPath: string) => {
+      if (onUploadFiles) {
+        onUploadFiles(files, targetPath);
+      }
+    },
+    [onUploadFiles],
+  );
 
   const dragDrop = useFileTreeNodeDragDrop({
     node,
@@ -82,6 +110,7 @@ const FileTreeNode = memo(function FileTreeNode({
     onToggleExpand,
     onDropToSibling,
     onFileMoved,
+    onExternalFileDrop: handleExternalFileDrop,
   });
 
   const actions = useFileTreeNodeActions({
@@ -96,6 +125,7 @@ const FileTreeNode = memo(function FileTreeNode({
     onFileMoved,
     onFileDeleted,
     onFileCreated,
+    onTriggerFileUpload: triggerFileUpload,
   });
 
   const handleClick = useCallback(() => {
@@ -131,6 +161,10 @@ const FileTreeNode = memo(function FileTreeNode({
 
       {dragDrop.isDragOverTop && (
         <div className='bg-GRAY_500 -mb-0.5 h-0.5 rounded-full' style={{ marginLeft: `${depth * 24 + 8}px` }} />
+      )}
+
+      {isFolder && (
+        <input ref={fileInputRef} type='file' multiple className='hidden' onChange={handleFileInputChange} />
       )}
 
       <FileTreeNodeContextMenu

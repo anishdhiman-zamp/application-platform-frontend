@@ -70,7 +70,6 @@ const FilesystemApi = baseApi.injectEndpoints({
         method: REQUEST_TYPES.POST,
         body: { path, type },
       }),
-      invalidatesTags: [APITags.GET_FILES_LIST],
       async onQueryStarted({ path, type, owner }, { dispatch, queryFulfilled }) {
         const name = path.split('/').pop() || path;
 
@@ -107,7 +106,6 @@ const FilesystemApi = baseApi.injectEndpoints({
           expected_mtime_ms: expected_mtime_ms || undefined,
         },
       }),
-      invalidatesTags: [APITags.GET_FILES_LIST],
     }),
 
     // Copy File or Directory
@@ -117,7 +115,6 @@ const FilesystemApi = baseApi.injectEndpoints({
         method: REQUEST_TYPES.POST,
         body: { source, destination },
       }),
-      invalidatesTags: [APITags.GET_FILES_LIST],
       async onQueryStarted({ source, destination }, { dispatch, queryFulfilled }) {
         const patchResult = dispatch(
           FilesystemApi.util.updateQueryData('listFiles', { recursive: true }, (draft) => {
@@ -170,7 +167,6 @@ const FilesystemApi = baseApi.injectEndpoints({
         method: REQUEST_TYPES.POST,
         body: { source, destination },
       }),
-      invalidatesTags: [APITags.GET_FILES_LIST],
       async onQueryStarted({ source, destination }, { dispatch, queryFulfilled }) {
         const patchResult = dispatch(
           FilesystemApi.util.updateQueryData('listFiles', { recursive: true }, (draft) => {
@@ -211,7 +207,6 @@ const FilesystemApi = baseApi.injectEndpoints({
         url: formRequestUrlWithParams(API_ENDPOINTS.FILES_DELETE, { path }),
         method: REQUEST_TYPES.DELETE,
       }),
-      invalidatesTags: [APITags.GET_FILES_LIST],
       async onQueryStarted({ path }, { dispatch, queryFulfilled }) {
         const patchResult = dispatch(
           FilesystemApi.util.updateQueryData('listFiles', { recursive: true }, (draft) => {
@@ -311,3 +306,5 @@ export const {
   useCompleteUploadMutation,
   useCancelUploadMutation,
 } = FilesystemApi;
+
+export { FilesystemApi };

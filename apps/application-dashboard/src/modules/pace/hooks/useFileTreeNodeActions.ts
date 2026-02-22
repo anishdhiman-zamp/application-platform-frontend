@@ -30,6 +30,7 @@ interface UseFileTreeNodeActionsProps {
   onFileMoved?: (oldPath: string, newFile: FileItem) => void;
   onFileDeleted?: (deletedPath: string) => void;
   onFileCreated?: (newFile: FileItem) => void;
+  onTriggerFileUpload?: () => void;
 }
 
 interface UseFileTreeNodeActionsReturn {
@@ -50,6 +51,7 @@ export const useFileTreeNodeActions = ({
   onFileMoved,
   onFileDeleted,
   onFileCreated,
+  onTriggerFileUpload,
 }: UseFileTreeNodeActionsProps): UseFileTreeNodeActionsReturn => {
   const { createFile, createFolder, deleteItem, duplicateItem, copyItem, moveItem } = useFileActions();
   const { clipboard, setCopyClipboard, setCutClipboard, clearClipboard } = useFileClipboard();
@@ -143,6 +145,12 @@ export const useFileTreeNodeActions = ({
               clearClipboard();
             }
           }
+          break;
+        case 'upload-file':
+          if (!isExpanded) {
+            onToggleExpand(node.path);
+          }
+          onTriggerFileUpload?.();
           break;
         default:
           break;
