@@ -22,6 +22,7 @@ export interface ContextMenuAction {
   icon: LucideIcon;
   isDestructive?: boolean;
   fileOnly?: boolean;
+  folderOnly?: boolean;
 }
 
 export const FILE_TYPE = {
@@ -38,6 +39,40 @@ export const CREATE_ITEM_TYPE = {
 
 export type CreateItemType = (typeof CREATE_ITEM_TYPE)[keyof typeof CREATE_ITEM_TYPE];
 
+export const CLIPBOARD_OPERATION = {
+  COPY: 'copy',
+  CUT: 'cut',
+} as const;
+
+export type ClipboardOperation = (typeof CLIPBOARD_OPERATION)[keyof typeof CLIPBOARD_OPERATION];
+
+export interface ClipboardState {
+  path: string;
+  name: string;
+  type: FileType;
+  size: number | null;
+  owner: string;
+  operation: ClipboardOperation;
+}
+
+export const CONFLICT_RESOLUTION = {
+  KEEP_BOTH: 'keep_both',
+  REPLACE: 'replace',
+  STOP: 'stop',
+} as const;
+
+export type ConflictResolution = (typeof CONFLICT_RESOLUTION)[keyof typeof CONFLICT_RESOLUTION];
+
+export interface FileConflict {
+  sourcePath: string;
+  sourceName: string;
+  sourceType: FileType;
+  sourceSize: number | null;
+  sourceOwner: string;
+  destinationPath: string;
+  operation: ClipboardOperation | 'move';
+}
+
 /**
  * File item as returned from the backend API
  */
@@ -47,6 +82,7 @@ export interface FileItem {
   type: FileType;
   size: number | null;
   mtime_ms: number;
+  owner: string;
 }
 
 /**
@@ -58,7 +94,16 @@ export interface TreeNode {
   type: FileType;
   size: number | null;
   mtime_ms: number;
+  owner: string;
   children?: TreeNode[];
+}
+
+/**
+ * Flattened tree node for virtualized rendering
+ */
+export interface FlatNode extends TreeNode {
+  depth: number;
+  siblingNames: string[];
 }
 
 /**
@@ -71,6 +116,9 @@ export interface FileTreeProps {
   sortDirection: SortDirection;
   selectedPath?: string | null;
   onSelectFile?: (file: FileItem | null) => void;
+  onFileMoved?: (oldPath: string, newFile: FileItem) => void;
+  onFileDeleted?: (deletedPath: string) => void;
+  onFileCreated?: (newFile: FileItem) => void;
 }
 
 /**
@@ -78,6 +126,15 @@ export interface FileTreeProps {
  */
 export interface FilesPreviewProps {
   selectedFile: FileItem | null;
+}
+
+export interface DropToSiblingData {
+  sourcePath: string;
+  sourceName: string;
+  sourceType: FileType;
+  sourceSize: number | null;
+  sourceOwner: string;
+  isCopy: boolean;
 }
 
 /**
@@ -89,6 +146,12 @@ export interface FileTreeNodeProps {
   expandedPaths: Set<string>;
   selectedPath: string | null;
   originalNodeMap: Map<string, TreeNode>;
+  siblingNames: string[];
   onToggleExpand: (path: string) => void;
   onSelect: (path: string) => void;
+  onDropToSibling?: (data: DropToSiblingData) => void;
+  onFileMoved?: (oldPath: string, newFile: FileItem) => void;
+  onFileDeleted?: (deletedPath: string) => void;
+  onFileCreated?: (newFile: FileItem) => void;
+  style?: React.CSSProperties;
 }

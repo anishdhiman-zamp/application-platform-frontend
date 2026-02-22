@@ -1,6 +1,6 @@
 'use client';
 
-import { useState } from 'react';
+import { useMemo, useRef, useState } from 'react';
 import {
   Button,
   Dialog,
@@ -11,19 +11,22 @@ import {
   DialogHeaderTitle,
   Input,
 } from '@zamp-platform/ui';
-import type { CreateItemType } from 'modules/pace/components/files/file-tree.types';
-import { CREATE_ITEM_TYPE } from 'modules/pace/components/files/file-tree.types';
-import { getFileExtension } from 'modules/pace/components/files/file-tree.utils';
+import { cn } from '@zamp-platform/ui/utils';
+import type { CreateItemType } from '@/modules/pace/components/files/file-tree.types';
+import { CREATE_ITEM_TYPE } from '@/modules/pace/components/files/file-tree.types';
+import { getFileExtension } from '@/modules/pace/components/files/file-tree.utils';
 
 interface CreateItemModalProps {
   isOpen: boolean;
   onOpenChange: (open: boolean) => void;
   itemType: CreateItemType;
-  onCreate: (name: string, path: string, type?: string) => void;
+  onCreate: (name: string) => void;
+  existingNames?: string[];
 }
 
-const CreateItemModal = ({ isOpen, onOpenChange, itemType, onCreate }: CreateItemModalProps) => {
+const CreateItemModal = ({ isOpen, onOpenChange, itemType, onCreate, existingNames = [] }: CreateItemModalProps) => {
   const [name, setName] = useState('');
+  const inputRef = useRef<HTMLInputElement | null>(null);
 
   const handleOpenChange = (open: boolean) => {
     if (!open) {
@@ -32,24 +35,32 @@ const CreateItemModal = ({ isOpen, onOpenChange, itemType, onCreate }: CreateIte
     onOpenChange(open);
   };
 
+  const finalName = useMemo(() => {
+    if (!name.trim()) return '';
+
+    return itemType === CREATE_ITEM_TYPE.FILE
+      ? getFileExtension(name)
+        ? name.trim()
+        : `${name.trim()}.txt`
+      : name.trim();
+  }, [name, itemType]);
+
+  const isDuplicate = useMemo(() => {
+    if (!finalName) return false;
+
+    return existingNames.some((existingName) => existingName === finalName);
+  }, [finalName, existingNames]);
+
   const handleCreate = () => {
-    if (!name.trim()) return;
+    if (!name.trim() || isDuplicate) return;
 
-    if (itemType === CREATE_ITEM_TYPE.FILE) {
-      const extension = getFileExtension(name);
-      const finalName = extension ? name.trim() : `${name.trim()}.txt`;
-      const fileType = extension || 'txt';
-
-      onCreate(finalName, '/', fileType);
-    } else {
-      onCreate(name.trim(), '/');
-    }
-
+    onCreate(finalName);
     handleOpenChange(false);
   };
 
-  const isCreateDisabled = !name.trim();
+  const isCreateDisabled = !name.trim() || isDuplicate;
   const title = itemType === CREATE_ITEM_TYPE.FILE ? 'New file' : 'New folder';
+  const itemTypeLabel = itemType === CREATE_ITEM_TYPE.FILE ? 'file' : 'folder';
 
   return (
     <Dialog open={isOpen} onOpenChange={handleOpenChange}>
@@ -58,6 +69,10 @@ const CreateItemModal = ({ isOpen, onOpenChange, itemType, onCreate }: CreateIte
         showCloseButton
         className='w-[460px] rounded-[14px]'
         closeButtonClassName='top-5.5 right-5 cursor-pointer'
+        onOpenAutoFocus={(e) => {
+          e.preventDefault();
+          inputRef.current?.focus();
+        }}
       >
         <DialogHeader className='h-fit border-b-0 px-5 pt-5 pb-0'>
           <DialogHeaderTitle className='f-16-600'>{title}</DialogHeaderTitle>
@@ -66,9 +81,12 @@ const CreateItemModal = ({ isOpen, onOpenChange, itemType, onCreate }: CreateIte
           <div className='flex flex-col gap-y-2'>
             <label className='f-13-500 text-GRAY_1000'>Name</label>
             <Input
+              ref={(el) => {
+                inputRef.current = el;
+              }}
               value={name}
               onChange={(e) => setName(e.target.value)}
-              className='h-8'
+              className={cn('h-8', isDuplicate && 'border-RED_700! focus:shadow-input-error-outline-shadow')}
               placeholder='Type here'
               size='medium'
               onKeyDown={(e) => {
@@ -77,6 +95,12 @@ const CreateItemModal = ({ isOpen, onOpenChange, itemType, onCreate }: CreateIte
                 }
               }}
             />
+            {isDuplicate && (
+              <span className='f-11-400 text-RED_700 mt-2'>
+                A {itemTypeLabel} or folder <span className='font-semibold'>{finalName}</span> already exists at this
+                location. Please choose a different name.
+              </span>
+            )}
           </div>
         </DialogBody>
         <DialogFooter className='flex justify-end gap-2.5 p-5'>
