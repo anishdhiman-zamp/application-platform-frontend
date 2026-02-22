@@ -9,9 +9,9 @@ import {
   Input,
 } from '@zamp-platform/ui';
 import { cn } from '@zamp-platform/ui/utils';
-import { ArrowDown, ArrowUp, ChevronDownIcon, ListFilter, SearchIcon } from 'lucide-react';
-import type { SortDirection, SortOption } from 'modules/pace/components/files/file-tree.types';
-import { SORT_OPTIONS } from 'modules/pace/components/files/files.constants';
+import { ArrowDown, ArrowUp, ChevronDownIcon, SearchIcon } from 'lucide-react';
+import { SORT_DIRECTION, SortDirection, SortOption } from '@/modules/pace/components/files/file-tree.types';
+import { SORT_OPTIONS } from '@/modules/pace/components/files/files.constants';
 
 interface FilesToolbarProps {
   searchQuery: string;
@@ -55,8 +55,12 @@ const FilesToolbar = ({
             onClick={onSortDirectionToggle}
             className='border-GRAY_400 gap-x-[2px] rounded-r-none! border-r-0 bg-white p-1.5! hover:bg-white'
           >
-            <ArrowUp className={cn('text-GRAY_1000 size-3.5', sortDirection === 'desc' && 'text-GRAY_300')} />
-            <ArrowDown className={cn('text-GRAY_1000 size-3.5', sortDirection === 'asc' && 'text-GRAY_300')} />
+            <ArrowUp
+              className={cn('text-GRAY_1000 size-3.5', sortDirection === SORT_DIRECTION.DESC && 'text-GRAY_300')}
+            />
+            <ArrowDown
+              className={cn('text-GRAY_1000 size-3.5', sortDirection === SORT_DIRECTION.ASC && 'text-GRAY_300')}
+            />
           </Button>
 
           <DropdownMenu>
@@ -86,11 +90,6 @@ const FilesToolbar = ({
             </DropdownMenuContent>
           </DropdownMenu>
         </div>
-
-        {/* Filter Button */}
-        <Button variant='secondary' size='small' className='border-GRAY_400 bg-white px-2.5! hover:bg-white'>
-          <ListFilter className='text-GRAY_1000 size-3.5' />
-        </Button>
       </div>
     </div>
   );
