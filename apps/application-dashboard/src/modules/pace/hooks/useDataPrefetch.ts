@@ -1,6 +1,5 @@
 import { useGetDatasetListingQuery } from '@/apis/dataset';
 import { useGetConversationHistoryQuery, useListSkillsQuery } from '@/apis/pace';
-import { useGetPagesQuery } from '@/apis/pages';
 import { useIsPaceChatEnabled } from '@/hooks/useIsPaceChatEnabled';
 import { ARTIFACTS_PAGE_SIZE } from '@/modules/pace/artifacts/artifacts.constants';
 import { ResourceType } from '@/types/api/policies.types';
@@ -30,11 +29,6 @@ const useDataPrefetch = () => {
       skip: !isPaceChatEnabled || isLoading,
     },
   );
-
-  useGetPagesQuery(undefined, {
-    refetchOnMountOrArgChange: false,
-    skip: !isPaceChatEnabled || isLoading,
-  });
 
   useGetDatasetListingQuery(
     { page: 1, pageSize: ARTIFACTS_PAGE_SIZE },

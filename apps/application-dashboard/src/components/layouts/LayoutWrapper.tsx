@@ -6,7 +6,7 @@ import { usePathname } from 'next/navigation';
 import { RootState } from 'store';
 import { getLayoutConfig } from 'utils/layout.config';
 import { PendingDatasetProvider } from '@/context/pendingDataset.context';
-import { PagesAndProcessesProvider } from '@/contexts/PagesAndProcessesContext';
+import { ProcessesProvider } from '@/contexts/ProcessesContext';
 // eslint-disable-next-line import/no-named-as-default
 import usePostHogHeartbeat from '@/hooks/usePostHogHeartbeat';
 import Sidebar from 'components/layouts/dashboard-layout/sidebar';
@@ -25,7 +25,7 @@ export default function LayoutWrapper({ children }: LayoutWrapperProps) {
   const { showTopbar, showSidebar } = getLayoutConfig(pathname);
 
   return (
-    <PagesAndProcessesProvider>
+    <ProcessesProvider>
       <PendingDatasetProvider>
         <div className='relative'>
           <div className='relative flex h-full w-full min-w-[768px]'>
@@ -51,6 +51,6 @@ export default function LayoutWrapper({ children }: LayoutWrapperProps) {
           </div>
         </div>
       </PendingDatasetProvider>
-    </PagesAndProcessesProvider>
+    </ProcessesProvider>
   );
 }

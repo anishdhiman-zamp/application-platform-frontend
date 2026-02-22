@@ -7,8 +7,8 @@ import { kbChatVariants, kbContentVariants } from 'modules/knowledge-based/knowl
 import { motion } from 'motion/react';
 import { useParams } from 'next/navigation';
 import { getBackgroundImageUrl } from '@/constants/icons';
+import { useProcesses } from '@/contexts/ProcessesContext';
 import { useAppSelector } from '@/hooks/toolkit';
-import { usePagesAndProcessesData } from '@/hooks/usePagesAndProcessesData';
 import KbChatInput from '@/modules/knowledge-based/chatbot/KbChatInput';
 import KBIcon from '@/modules/knowledge-based/icons/KBIcon';
 import PaceIcon from '@/modules/knowledge-based/icons/PaceIcon';
@@ -27,7 +27,7 @@ const KnowledgeBaseHome = () => {
   const [isChatbotExpanded, setIsChatbotExpanded] = useState(false);
   const [showKbContent, setShowKbContent] = useState(false);
 
-  const { processes } = usePagesAndProcessesData();
+  const { processes } = useProcesses();
 
   const handleSendMessage = () => {
     setIsChatbotExpanded(true);
