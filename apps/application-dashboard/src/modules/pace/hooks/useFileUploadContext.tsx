@@ -1,6 +1,7 @@
 'use client';
 
 import { createContext, type ReactNode, useContext, useMemo } from 'react';
+import type { FolderUploadProgress } from '@/modules/pace/components/files/file-tree.types';
 import { useFileUpload } from '@/modules/pace/hooks/useFileUpload';
 
 interface UploadProgress {
@@ -17,12 +18,14 @@ interface UploadState {
   isUploading: boolean;
   currentUpload: UploadProgress | null;
   error: string | null;
+  folderUpload: FolderUploadProgress | null;
 }
 
 interface FileUploadContextValue {
   uploadState: UploadState;
   uploadFile: (file: File, targetPath: string) => Promise<void>;
   uploadFiles: (files: FileList | File[], basePath: string) => Promise<void>;
+  uploadFolder: (files: FileList, basePath: string) => Promise<void>;
   cancelUpload: () => void;
   isUploading: boolean;
 }
@@ -34,17 +37,18 @@ interface FileUploadProviderProps {
 }
 
 export const FileUploadProvider = ({ children }: FileUploadProviderProps) => {
-  const { uploadState, uploadFile, uploadFiles, cancelUpload, isUploading } = useFileUpload();
+  const { uploadState, uploadFile, uploadFiles, uploadFolder, cancelUpload, isUploading } = useFileUpload();
 
   const value = useMemo<FileUploadContextValue>(
     () => ({
       uploadState,
       uploadFile,
       uploadFiles,
+      uploadFolder,
       cancelUpload,
       isUploading,
     }),
-    [uploadState, uploadFile, uploadFiles, cancelUpload, isUploading],
+    [uploadState, uploadFile, uploadFiles, uploadFolder, cancelUpload, isUploading],
   );
 
   return <FileUploadContext.Provider value={value}>{children}</FileUploadContext.Provider>;

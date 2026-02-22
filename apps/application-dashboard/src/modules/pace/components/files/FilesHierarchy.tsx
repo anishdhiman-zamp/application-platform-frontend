@@ -44,7 +44,7 @@ const FilesHierarchy = ({
   } = useListFilesQuery({
     recursive: true,
   });
-  const { uploadFiles } = useFileUploadContext();
+  const { uploadFiles, uploadFolder } = useFileUploadContext();
 
   // const { createFile, createFolder } = useFileActions();
 
@@ -57,6 +57,13 @@ const FilesHierarchy = ({
       uploadFiles(fileList, targetPath);
     },
     [uploadFiles],
+  );
+
+  const handleUploadFolder = useCallback(
+    (fileList: FileList, targetPath: string) => {
+      uploadFolder(fileList, targetPath);
+    },
+    [uploadFolder],
   );
 
   // const handleCreate = async (name: string, parentPath: string) => {
@@ -111,6 +118,7 @@ const FilesHierarchy = ({
           onFileDeleted={onFileDeleted}
           onFileCreated={onFileCreated}
           onUploadFiles={handleUploadFiles}
+          onUploadFolder={handleUploadFolder}
         />
       </CommonWrapper>
 

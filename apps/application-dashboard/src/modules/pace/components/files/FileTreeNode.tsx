@@ -30,10 +30,12 @@ const FileTreeNode = memo(function FileTreeNode({
   onFileDeleted,
   onFileCreated,
   onUploadFiles,
+  onUploadFolder,
   style,
 }: FileTreeNodeProps) {
   const nodeRef = useRef<HTMLDivElement>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
+  const folderInputRef = useRef<HTMLInputElement>(null);
   const [contextMenuOpen, setContextMenuOpen] = useState(false);
   const [createModalType, setCreateModalType] = useState<CreateItemType | null>(null);
 
@@ -80,8 +82,25 @@ const FileTreeNode = memo(function FileTreeNode({
     [node.path, onUploadFiles],
   );
 
+  const handleFolderInputChange = useCallback(
+    (e: React.ChangeEvent<HTMLInputElement>) => {
+      const files = e.target.files;
+
+      if (files && files.length > 0 && onUploadFolder) {
+        onUploadFolder(files, node.path);
+      }
+
+      e.target.value = '';
+    },
+    [node.path, onUploadFolder],
+  );
+
   const triggerFileUpload = useCallback(() => {
     fileInputRef.current?.click();
+  }, []);
+
+  const triggerFolderUpload = useCallback(() => {
+    folderInputRef.current?.click();
   }, []);
 
   const rename = useFileTreeNodeRename({
@@ -126,6 +145,7 @@ const FileTreeNode = memo(function FileTreeNode({
     onFileDeleted,
     onFileCreated,
     onTriggerFileUpload: triggerFileUpload,
+    onTriggerFolderUpload: triggerFolderUpload,
   });
 
   const handleClick = useCallback(() => {
@@ -164,7 +184,17 @@ const FileTreeNode = memo(function FileTreeNode({
       )}
 
       {isFolder && (
-        <input ref={fileInputRef} type='file' multiple className='hidden' onChange={handleFileInputChange} />
+        <>
+          <input ref={fileInputRef} type='file' multiple className='hidden' onChange={handleFileInputChange} />
+          <input
+            ref={folderInputRef}
+            type='file'
+            multiple
+            className='hidden'
+            onChange={handleFolderInputChange}
+            {...({ webkitdirectory: '', directory: '' } as React.InputHTMLAttributes<HTMLInputElement>)}
+          />
+        </>
       )}
 
       <FileTreeNodeContextMenu

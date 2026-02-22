@@ -1,10 +1,11 @@
 'use client';
 
 import { useCallback, useEffect, useRef } from 'react';
-import { Button } from '@zamp-platform/ui';
-import { CheckCircle2, Loader2, Upload, X } from 'lucide-react';
+import { Button, Progress } from '@zamp-platform/ui';
+import { FolderUp, Loader2, X } from 'lucide-react';
 import { toast } from 'sonner';
-import { UPLOAD_STATUS } from '@/modules/pace/components/files/file-tree.types';
+import type { FolderUploadProgress } from '@/modules/pace/components/files/file-tree.types';
+import { UPLOAD_TYPE } from '@/modules/pace/components/files/file-tree.types';
 import { formatFileSize } from '@/modules/pace/components/files/file-tree.utils';
 
 interface UploadProgress {
@@ -21,6 +22,7 @@ interface UploadState {
   isUploading: boolean;
   currentUpload: UploadProgress | null;
   error: string | null;
+  folderUpload: FolderUploadProgress | null;
 }
 
 interface UploadProgressToastProps {
@@ -28,49 +30,59 @@ interface UploadProgressToastProps {
   onCancel: () => void;
 }
 
-const ProgressBar = ({ value, className }: { value: number; className?: string }) => {
+const ChunkedFileProgress = ({ progress }: { progress: UploadProgress }) => {
   return (
-    <div className={`bg-GRAY_200 h-1.5 w-full overflow-hidden rounded-full ${className || ''}`}>
-      <div
-        className='bg-BLUE_500 h-full rounded-full transition-all duration-300 ease-out'
-        style={{ width: `${Math.min(100, Math.max(0, value))}%` }}
-      />
+    <div className='border-GRAY_200 mt-2 border-t pt-2'>
+      <div className='f-12-500 text-GRAY_700 mb-1'>Current file progress</div>
+      <div className='flex items-center gap-2'>
+        <Progress value={progress.percentage} className='flex-1' />
+        <span className='f-12-400 text-GRAY_600 min-w-[40px] text-right'>{progress.percentage}%</span>
+      </div>
+      <div className='f-11-400 text-GRAY_500 mt-1'>
+        {formatFileSize(progress.loaded)} / {formatFileSize(progress.total)}
+      </div>
     </div>
   );
 };
 
-const SingleFileProgress = ({ progress, onCancel }: { progress: UploadProgress; onCancel: () => void }) => {
-  const isComplete = progress.status === UPLOAD_STATUS.COMPLETED;
+const FolderUploadProgressContent = ({
+  folderProgress,
+  currentFile,
+}: {
+  folderProgress: FolderUploadProgress;
+  currentFile: UploadProgress | null;
+}) => {
+  const overallPercentage =
+    folderProgress.totalBytes > 0 ? Math.round((folderProgress.uploadedBytes / folderProgress.totalBytes) * 100) : 0;
+
+  const isChunkedUpload = currentFile?.uploadType === UPLOAD_TYPE.CHUNKED;
+  const currentFileIndex = Math.min(folderProgress.completedFiles + 1, folderProgress.totalFiles);
 
   return (
     <div className='flex w-full flex-col gap-y-2'>
-      <div className='flex items-center justify-between'>
+      <div className='f-12-400 text-GRAY_600'>
+        Uploading {currentFileIndex} of {folderProgress.totalFiles} files
+      </div>
+
+      {currentFile && (
         <div className='flex items-center gap-2'>
-          {isComplete ? (
-            <CheckCircle2 className='text-GREEN_300 size-4' />
-          ) : (
-            <Loader2 className='text-BLUE_500 size-4 animate-spin' />
-          )}
-          <span className='f-13-500 text-GRAY_1000 max-w-[200px] truncate'>{progress.fileName}</span>
+          <Loader2 className='text-BLUE_500 size-4 animate-spin' />
+          <span className='f-13-500 text-GRAY_1000 max-w-[240px] truncate'>{currentFile.fileName}</span>
         </div>
-        {!isComplete && (
-          <Button
-            variant='ghost'
-            size='small'
-            className='text-GRAY_600 hover:text-GRAY_900 h-6 w-6 p-0'
-            onClick={onCancel}
-          >
-            <X className='size-4' />
-          </Button>
-        )}
+      )}
+
+      <div className='mt-1'>
+        <div className='f-12-500 text-GRAY_700 mb-1'>Overall progress</div>
+        <div className='flex items-center gap-2'>
+          <Progress value={overallPercentage} className='flex-1' />
+          <span className='f-12-400 text-GRAY_600 min-w-[40px] text-right'>{overallPercentage}%</span>
+        </div>
+        <div className='f-11-400 text-GRAY_500 mt-1'>
+          {formatFileSize(folderProgress.uploadedBytes)} / {formatFileSize(folderProgress.totalBytes)}
+        </div>
       </div>
-      <div className='flex items-center gap-2'>
-        <ProgressBar value={progress.percentage} className='flex-1' />
-        <span className='f-12-400 text-GRAY_600 min-w-[40px] text-right'>{progress.percentage}%</span>
-      </div>
-      <div className='f-11-400 text-GRAY_500'>
-        {formatFileSize(progress.loaded)} / {formatFileSize(progress.total)}
-      </div>
+
+      {isChunkedUpload && currentFile && <ChunkedFileProgress progress={currentFile} />}
     </div>
   );
 };
@@ -78,13 +90,28 @@ const SingleFileProgress = ({ progress, onCancel }: { progress: UploadProgress; 
 const UploadToastContent = ({ uploadState, onCancel }: UploadProgressToastProps) => {
   return (
     <div className='flex w-full flex-col gap-y-3'>
-      <div className='flex items-center gap-2'>
-        <div className='bg-BLUE_100 flex size-8 items-center justify-center rounded-full'>
-          <Upload className='text-BLUE_600 size-4' />
+      <div className='flex items-center justify-between'>
+        <div className='flex items-center gap-2'>
+          <div className='bg-BLUE_100 flex size-8 items-center justify-center rounded-full'>
+            <FolderUp className='text-BLUE_600 size-4' />
+          </div>
+          <span className='f-14-600 text-GRAY_1000'>Uploading {uploadState.folderUpload?.folderName}</span>
         </div>
-        <span className='f-14-600 text-GRAY_1000'>Uploading file</span>
+        <Button
+          variant='ghost'
+          size='small'
+          className='text-GRAY_600 hover:text-GRAY_900 h-6 w-6 p-0'
+          onClick={onCancel}
+        >
+          <X className='size-4' />
+        </Button>
       </div>
-      {uploadState.currentUpload && <SingleFileProgress progress={uploadState.currentUpload} onCancel={onCancel} />}
+      {uploadState.folderUpload && (
+        <FolderUploadProgressContent
+          folderProgress={uploadState.folderUpload}
+          currentFile={uploadState.currentUpload}
+        />
+      )}
     </div>
   );
 };
@@ -100,9 +127,9 @@ export const UploadProgressToast = ({ uploadState, onCancel }: UploadProgressToa
   }, []);
 
   useEffect(() => {
-    const hasProgressToShow = uploadState.currentUpload !== null;
+    const isFolderUpload = uploadState.folderUpload !== null;
 
-    if (!uploadState.isUploading || !hasProgressToShow) {
+    if (!uploadState.isUploading || !isFolderUpload) {
       dismissUploadProgress();
 
       return;

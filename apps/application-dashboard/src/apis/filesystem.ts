@@ -226,7 +226,7 @@ const FilesystemApi = baseApi.injectEndpoints({
     }),
 
     // Direct Upload (Small Files <= 1MB)
-    directUpload: builder.mutation<DirectUploadResponse, { path: string; file: File }>({
+    directUpload: builder.mutation<DirectUploadResponse, { path: string; file: File; skipInvalidation?: boolean }>({
       query: ({ path, file }) => {
         const formData = new FormData();
 
@@ -239,7 +239,7 @@ const FilesystemApi = baseApi.injectEndpoints({
           body: formData,
         };
       },
-      invalidatesTags: [APITags.GET_FILES_LIST],
+      invalidatesTags: (_result, _error, { skipInvalidation }) => (skipInvalidation ? [] : [APITags.GET_FILES_LIST]),
     }),
 
     // Initialize Chunked Upload
@@ -267,13 +267,13 @@ const FilesystemApi = baseApi.injectEndpoints({
     }),
 
     // Complete Chunked Upload
-    completeUpload: builder.mutation<CompleteUploadResponse, CompleteUploadRequest>({
+    completeUpload: builder.mutation<CompleteUploadResponse, CompleteUploadRequest & { skipInvalidation?: boolean }>({
       query: ({ upload_id }) => ({
         url: API_ENDPOINTS.FILES_UPLOAD_COMPLETE_POST,
         method: REQUEST_TYPES.POST,
         body: { upload_id },
       }),
-      invalidatesTags: [APITags.GET_FILES_LIST],
+      invalidatesTags: (_result, _error, { skipInvalidation }) => (skipInvalidation ? [] : [APITags.GET_FILES_LIST]),
     }),
 
     // Cancel Chunked Upload

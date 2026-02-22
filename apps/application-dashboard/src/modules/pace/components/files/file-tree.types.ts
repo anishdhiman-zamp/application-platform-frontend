@@ -120,6 +120,7 @@ export interface FileTreeProps {
   onFileDeleted?: (deletedPath: string) => void;
   onFileCreated?: (newFile: FileItem) => void;
   onUploadFiles?: (files: FileList, targetPath: string) => void;
+  onUploadFolder?: (files: FileList, targetPath: string) => void;
 }
 
 /**
@@ -155,6 +156,7 @@ export interface FileTreeNodeProps {
   onFileDeleted?: (deletedPath: string) => void;
   onFileCreated?: (newFile: FileItem) => void;
   onUploadFiles?: (files: FileList, targetPath: string) => void;
+  onUploadFolder?: (files: FileList, targetPath: string) => void;
   style?: React.CSSProperties;
 }
 
@@ -190,4 +192,31 @@ export interface UploadState {
   isUploading: boolean;
   currentUpload: UploadProgress | null;
   error: string | null;
+}
+
+/**
+ * File with relative path for folder uploads
+ */
+export interface FileWithPath {
+  file: File;
+  relativePath: string;
+}
+
+/**
+ * Progress tracking for folder uploads
+ */
+export interface FolderUploadProgress {
+  folderName: string;
+  totalFiles: number;
+  completedFiles: number;
+  currentFile: UploadProgress | null;
+  totalBytes: number;
+  uploadedBytes: number;
+}
+
+/**
+ * Extended upload state that includes folder upload progress
+ */
+export interface ExtendedUploadState extends UploadState {
+  folderUpload: FolderUploadProgress | null;
 }

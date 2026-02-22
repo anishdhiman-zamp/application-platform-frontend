@@ -1,4 +1,15 @@
-import { Clipboard, Copy, ExternalLink, FilePlus, FolderPlus, Pencil, Scissors, Trash2, Upload } from 'lucide-react';
+import {
+  Clipboard,
+  Copy,
+  ExternalLink,
+  FilePlus,
+  FolderPlus,
+  FolderUp,
+  Pencil,
+  Scissors,
+  Trash2,
+  Upload,
+} from 'lucide-react';
 import {
   type ContextMenuAction,
   FILE_TYPE,
@@ -19,6 +30,7 @@ export const CONTEXT_MENU_ACTIONS: ContextMenuAction[] = [
   { id: 'create-file', label: 'Create File', icon: FilePlus, folderOnly: true },
   { id: 'create-folder', label: 'Create Folder', icon: FolderPlus, folderOnly: true },
   { id: 'upload-file', label: 'Upload File', icon: Upload, folderOnly: true },
+  { id: 'upload-folder', label: 'Upload Folder', icon: FolderUp, folderOnly: true },
   { id: 'open-in-tab', label: 'Open in Tab', icon: ExternalLink, fileOnly: true },
   // { id: 'work-with-zamp', label: 'Work with Zamp', icon: Link },
   { id: 'rename', label: 'Rename', icon: Pencil },

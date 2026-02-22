@@ -4,14 +4,23 @@ import { useCallback, useRef, useState } from 'react';
 import { captureException } from '@sentry/browser';
 import { toast } from '@zamp-platform/ui';
 import {
+  FilesystemApi,
   useCancelUploadMutation,
   useCompleteUploadMutation,
+  useCreateItemMutation,
   useDirectUploadMutation,
   useInitChunkedUploadMutation,
   useUploadChunkMutation,
 } from '@/apis/filesystem';
-import { UPLOAD_STATUS, UPLOAD_TYPE } from '@/modules/pace/components/files/file-tree.types';
+import { APITags } from '@/constants/api.constants';
+import { useAppDispatch } from '@/hooks/toolkit';
+import { type FolderUploadProgress, UPLOAD_STATUS, UPLOAD_TYPE } from '@/modules/pace/components/files/file-tree.types';
 import {
+  calculateTotalBytes,
+  extractFilesWithPaths,
+  extractUniqueDirectories,
+  getFileTargetPath,
+  getRootFolderName,
   getTargetPath,
   shouldUseChunkedUpload,
   type UploadCallbacks,
@@ -36,21 +45,25 @@ interface UploadState {
     uploadType: string;
   } | null;
   error: string | null;
+  folderUpload: FolderUploadProgress | null;
 }
 
 interface UseFileUploadReturn {
   uploadState: UploadState;
   uploadFile: (file: File, targetPath: string) => Promise<void>;
   uploadFiles: (files: FileList | File[], basePath: string) => Promise<void>;
+  uploadFolder: (files: FileList, basePath: string) => Promise<void>;
   cancelUpload: () => void;
   isUploading: boolean;
 }
 
 export const useFileUpload = (options?: UseFileUploadOptions): UseFileUploadReturn => {
+  const dispatch = useAppDispatch();
   const [uploadState, setUploadState] = useState<UploadState>({
     isUploading: false,
     currentUpload: null,
     error: null,
+    folderUpload: null,
   });
 
   const abortControllerRef = useRef<AbortController | null>(null);
@@ -61,9 +74,15 @@ export const useFileUpload = (options?: UseFileUploadOptions): UseFileUploadRetu
   const [uploadChunk] = useUploadChunkMutation();
   const [completeUpload] = useCompleteUploadMutation();
   const [cancelUploadMutation] = useCancelUploadMutation();
+  const [createItem] = useCreateItemMutation();
+
+  const invalidateFilesList = useCallback(() => {
+    dispatch(FilesystemApi.util.invalidateTags([APITags.GET_FILES_LIST]));
+  }, [dispatch]);
 
   const mutations: UploadMutations = {
     directUpload: async (args) => {
+      // Pass skipInvalidation to control cache invalidation
       const result = await directUpload(args).unwrap();
 
       return { data: result };
@@ -81,6 +100,7 @@ export const useFileUpload = (options?: UseFileUploadOptions): UseFileUploadRetu
       return { data: result };
     },
     completeUpload: async (args) => {
+      // Pass skipInvalidation to control cache invalidation for chunked uploads
       const result = await completeUpload(args).unwrap();
 
       currentUploadIdRef.current = null;
@@ -117,6 +137,7 @@ export const useFileUpload = (options?: UseFileUploadOptions): UseFileUploadRetu
             }
           : null,
         error: null,
+        folderUpload: null,
       });
 
       const callbacks: UploadCallbacks = {
@@ -140,6 +161,7 @@ export const useFileUpload = (options?: UseFileUploadOptions): UseFileUploadRetu
             isUploading: false,
             currentUpload: null,
             error: null,
+            folderUpload: null,
           });
           toast.success(`${file.name} uploaded successfully`);
           options?.onUploadComplete?.(path);
@@ -149,6 +171,7 @@ export const useFileUpload = (options?: UseFileUploadOptions): UseFileUploadRetu
             isUploading: false,
             currentUpload: null,
             error: error.message,
+            folderUpload: null,
           });
           options?.onUploadError?.(error, file.name);
           captureException(error);
@@ -158,6 +181,7 @@ export const useFileUpload = (options?: UseFileUploadOptions): UseFileUploadRetu
             isUploading: false,
             currentUpload: null,
             error: null,
+            folderUpload: null,
           });
         },
       };
@@ -196,6 +220,177 @@ export const useFileUpload = (options?: UseFileUploadOptions): UseFileUploadRetu
     [uploadFile],
   );
 
+  const uploadFolder = useCallback(
+    async (files: FileList, basePath: string) => {
+      const filesWithPaths = extractFilesWithPaths(files);
+
+      if (filesWithPaths.length === 0) {
+        toast.error('No files found in folder');
+
+        return;
+      }
+
+      abortControllerRef.current = new AbortController();
+
+      const folderName = getRootFolderName(filesWithPaths);
+      const totalBytes = calculateTotalBytes(filesWithPaths);
+      const totalFiles = filesWithPaths.length;
+
+      setUploadState({
+        isUploading: true,
+        currentUpload: null,
+        error: null,
+        folderUpload: {
+          folderName,
+          totalFiles,
+          completedFiles: 0,
+          currentFile: null,
+          totalBytes,
+          uploadedBytes: 0,
+        },
+      });
+
+      try {
+        const directories = extractUniqueDirectories(filesWithPaths, basePath);
+
+        for (const dirPath of directories) {
+          if (abortControllerRef.current?.signal.aborted) {
+            throw new Error('Upload cancelled');
+          }
+
+          await createItem({ path: dirPath, type: 'directory' }).unwrap();
+        }
+
+        let completedFiles = 0;
+        let uploadedBytes = 0;
+
+        for (const { file, relativePath } of filesWithPaths) {
+          if (abortControllerRef.current?.signal.aborted) {
+            throw new Error('Upload cancelled');
+          }
+
+          const targetPath = getFileTargetPath(basePath, relativePath);
+          const isChunkedUpload = shouldUseChunkedUpload(file.size);
+          const uploadType = isChunkedUpload ? UPLOAD_TYPE.CHUNKED : UPLOAD_TYPE.DIRECT;
+
+          setUploadState((prev) => ({
+            ...prev,
+            currentUpload: {
+              fileName: file.name,
+              filePath: targetPath,
+              loaded: 0,
+              total: file.size,
+              percentage: 0,
+              status: UPLOAD_STATUS.UPLOADING,
+              uploadType,
+            },
+            folderUpload: prev.folderUpload
+              ? {
+                  ...prev.folderUpload,
+                  currentFile: {
+                    fileName: file.name,
+                    filePath: targetPath,
+                    loaded: 0,
+                    total: file.size,
+                    percentage: 0,
+                    status: UPLOAD_STATUS.UPLOADING,
+                    uploadType,
+                  },
+                }
+              : null,
+          }));
+
+          const fileUploadedBytes = uploadedBytes;
+
+          const callbacks: UploadCallbacks = {
+            onProgress: (loaded, total) => {
+              setUploadState((prev) => ({
+                ...prev,
+                currentUpload: prev.currentUpload
+                  ? {
+                      ...prev.currentUpload,
+                      loaded,
+                      total,
+                      percentage: Math.round((loaded / total) * 100),
+                    }
+                  : null,
+                folderUpload: prev.folderUpload
+                  ? {
+                      ...prev.folderUpload,
+                      uploadedBytes: fileUploadedBytes + loaded,
+                      currentFile: prev.folderUpload.currentFile
+                        ? {
+                            ...prev.folderUpload.currentFile,
+                            loaded,
+                            total,
+                            percentage: Math.round((loaded / total) * 100),
+                          }
+                        : null,
+                    }
+                  : null,
+              }));
+            },
+          };
+
+          // Skip cache invalidation for each file - we'll invalidate once at the end
+          await uploadFileUtil(file, targetPath, mutations, callbacks, abortControllerRef.current.signal, true);
+
+          uploadedBytes += file.size;
+          completedFiles += 1;
+
+          setUploadState((prev) => ({
+            ...prev,
+            currentUpload: null,
+            folderUpload: prev.folderUpload
+              ? {
+                  ...prev.folderUpload,
+                  completedFiles,
+                  uploadedBytes,
+                  currentFile: null,
+                }
+              : null,
+          }));
+
+          options?.onUploadComplete?.(targetPath);
+        }
+
+        // Invalidate files list cache once after all files are uploaded
+        invalidateFilesList();
+
+        setUploadState({
+          isUploading: false,
+          currentUpload: null,
+          error: null,
+          folderUpload: null,
+        });
+
+        toast.success(`${folderName} uploaded successfully (${totalFiles} files)`);
+      } catch (error) {
+        if (error instanceof Error && error.message === 'Upload cancelled') {
+          setUploadState({
+            isUploading: false,
+            currentUpload: null,
+            error: null,
+            folderUpload: null,
+          });
+          toast.info(`Upload of ${folderName} cancelled`);
+        } else {
+          setUploadState({
+            isUploading: false,
+            currentUpload: null,
+            error: error instanceof Error ? error.message : 'Folder upload failed',
+            folderUpload: null,
+          });
+          captureException(error);
+          toast.error(`Failed to upload folder ${folderName}`);
+        }
+      } finally {
+        abortControllerRef.current = null;
+      }
+    },
+    [mutations, createItem, options, invalidateFilesList],
+  );
+
   const cancelUpload = useCallback(() => {
     if (abortControllerRef.current) {
       abortControllerRef.current.abort();
@@ -212,6 +407,7 @@ export const useFileUpload = (options?: UseFileUploadOptions): UseFileUploadRetu
     uploadState,
     uploadFile,
     uploadFiles,
+    uploadFolder,
     cancelUpload,
     isUploading: uploadState.isUploading,
   };

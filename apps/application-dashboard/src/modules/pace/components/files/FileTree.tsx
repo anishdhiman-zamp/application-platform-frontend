@@ -19,7 +19,6 @@ import { useFileTreeRootDragDrop } from '@/modules/pace/hooks/useFileTreeRootDra
 import { ProtectedFoldersProvider } from '@/modules/pace/hooks/useProtectedFolders';
 
 const ROW_HEIGHT = 36;
-const ROW_GAP = 4;
 const OVERSCAN_COUNT = 10;
 
 const FileTreeContent = ({
@@ -33,6 +32,7 @@ const FileTreeContent = ({
   onFileDeleted,
   onFileCreated,
   onUploadFiles,
+  onUploadFolder,
 }: FileTreeProps) => {
   const [expandedPaths, setExpandedPaths] = useState<Set<string>>(new Set());
   const [internalSelectedPath, setInternalSelectedPath] = useState<string | null>(null);
@@ -73,7 +73,7 @@ const FileTreeContent = ({
   const virtualizer = useVirtualizer({
     count: flatNodes.length,
     getScrollElement: () => containerRef.current,
-    estimateSize: () => ROW_HEIGHT + ROW_GAP,
+    estimateSize: () => ROW_HEIGHT,
     overscan: OVERSCAN_COUNT,
   });
 
@@ -144,12 +144,13 @@ const FileTreeContent = ({
                 onFileDeleted={onFileDeleted}
                 onFileCreated={onFileCreated}
                 onUploadFiles={onUploadFiles}
+                onUploadFolder={onUploadFolder}
                 style={{
                   position: 'absolute',
                   top: 0,
                   left: 0,
                   width: '100%',
-                  height: `${ROW_HEIGHT}px`,
+                  height: `${virtualRow.size}px`,
                   transform: `translateY(${virtualRow.start}px)`,
                 }}
               />
