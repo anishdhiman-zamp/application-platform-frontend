@@ -4,7 +4,6 @@ import { forwardRef } from 'react';
 import { Button, FileIcon, Input } from '@zamp-platform/ui';
 import { cn } from '@zamp-platform/ui/utils';
 import { ChevronRight } from 'lucide-react';
-import { motion } from 'motion/react';
 import Image from 'next/image';
 import TooltipV2 from '@/components/common/TooltipV2';
 import type { TreeNode } from '@/modules/pace/components/files/file-tree.types';
@@ -93,12 +92,12 @@ const FileTreeNodeRow = forwardRef<HTMLDivElement, FileTreeNodeRowProps>(
             className='size-4 shrink-0 p-0! hover:bg-transparent'
             aria-label={state.isExpanded ? 'Collapse folder' : 'Expand folder'}
           >
-            <motion.div
-              animate={{ rotate: state.isExpanded ? 90 : 0 }}
-              transition={{ duration: 0.12, ease: [0.4, 0, 0.2, 1] }}
-            >
-              <ChevronRight className='text-GRAY_1000 size-3.5' />
-            </motion.div>
+            <ChevronRight
+              className={cn(
+                'text-GRAY_1000 size-3.5 transition-transform duration-100',
+                state.isExpanded && 'rotate-90',
+              )}
+            />
           </Button>
         ) : (
           <span className='size-4 shrink-0' />
@@ -128,6 +127,7 @@ const FileTreeNodeRow = forwardRef<HTMLDivElement, FileTreeNodeRowProps>(
           >
             <Input
               ref={rename.onInputRef}
+              autoFocus
               value={rename.value}
               onChange={(e) => rename.onChange(e.target.value)}
               onBlur={rename.onSubmit}

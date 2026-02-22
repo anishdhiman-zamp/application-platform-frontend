@@ -1,6 +1,6 @@
 'use client';
 
-import { useCallback, useMemo, useRef, useState } from 'react';
+import { memo, useCallback, useMemo, useRef, useState } from 'react';
 import { useFileClipboard } from 'modules/pace/hooks/useFileClipboard';
 import { useFileTreeNodeActions } from 'modules/pace/hooks/useFileTreeNodeActions';
 import { useFileTreeNodeDragDrop } from 'modules/pace/hooks/useFileTreeNodeDragDrop';
@@ -16,7 +16,7 @@ import FileTreeNodeContextMenu from '@/modules/pace/components/files/FileTreeNod
 import FileTreeNodeRow from '@/modules/pace/components/files/FileTreeNodeRow';
 import { useProtectedFolders } from '@/modules/pace/hooks/useProtectedFolders';
 
-const FileTreeNode = ({
+const FileTreeNode = memo(function FileTreeNode({
   node,
   depth,
   expandedPaths,
@@ -29,11 +29,11 @@ const FileTreeNode = ({
   onFileMoved,
   onFileDeleted,
   onFileCreated,
-}: FileTreeNodeProps) => {
+  style,
+}: FileTreeNodeProps) {
+  const nodeRef = useRef<HTMLDivElement>(null);
   const [contextMenuOpen, setContextMenuOpen] = useState(false);
   const [createModalType, setCreateModalType] = useState<CreateItemType | null>(null);
-
-  const nodeRef = useRef<HTMLDivElement>(null);
 
   const { clipboard } = useFileClipboard();
   const { isProtectedRoot, username } = useProtectedFolders();
@@ -46,8 +46,8 @@ const FileTreeNode = ({
 
   const originalNode = originalNodeMap.get(node.path);
   const childrenToRender = originalNode?.children ?? node.children;
-  const childrenNames = useMemo(() => childrenToRender?.map((child) => child.name) ?? [], [childrenToRender]);
 
+  const childrenNames = useMemo(() => childrenToRender?.map((child) => child.name) ?? [], [childrenToRender]);
   const filteredActions = useMemo(
     () =>
       CONTEXT_MENU_ACTIONS.filter((action) => {
@@ -118,7 +118,7 @@ const FileTreeNode = ({
   );
 
   return (
-    <div>
+    <div style={style}>
       {createModalType && (
         <CreateItemModal
           isOpen={!!createModalType}
@@ -173,35 +173,8 @@ const FileTreeNode = ({
           }}
         />
       </FileTreeNodeContextMenu>
-
-      {isFolder && childrenToRender && childrenToRender.length > 0 && (
-        <div
-          className='grid transition-[grid-template-rows] duration-100 ease-out'
-          style={{ gridTemplateRows: isExpanded ? '1fr' : '0fr' }}
-        >
-          <div className='flex flex-col gap-0.5 overflow-hidden pt-0.5'>
-            {childrenToRender.map((child) => (
-              <FileTreeNode
-                key={child.path}
-                node={child}
-                depth={depth + 1}
-                expandedPaths={expandedPaths}
-                selectedPath={selectedPath}
-                originalNodeMap={originalNodeMap}
-                siblingNames={childrenNames}
-                onToggleExpand={onToggleExpand}
-                onSelect={onSelect}
-                onDropToSibling={onDropToSibling}
-                onFileMoved={onFileMoved}
-                onFileDeleted={onFileDeleted}
-                onFileCreated={onFileCreated}
-              />
-            ))}
-          </div>
-        </div>
-      )}
     </div>
   );
-};
+});
 
 export default FileTreeNode;

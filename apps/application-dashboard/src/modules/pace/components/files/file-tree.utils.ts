@@ -7,6 +7,7 @@ import {
   type FileConflict,
   type FileItem,
   type FileType,
+  type FlatNode,
   type SortDirection,
   type SortOption,
   type TreeNode,
@@ -166,6 +167,25 @@ export function filterTreeNodes(nodes: TreeNode[], searchQuery: string): TreeNod
   collectMatches(nodes);
 
   return results;
+}
+
+/**
+ * Flattens a hierarchical tree into a flat array for virtualized rendering.
+ * Only includes children of expanded folders.
+ */
+export function flattenTree(nodes: TreeNode[], expandedPaths: Set<string>, depth = 0): FlatNode[] {
+  const result: FlatNode[] = [];
+  const siblingNames = nodes.map((n) => n.name);
+
+  for (const node of nodes) {
+    result.push({ ...node, depth, siblingNames });
+
+    if (node.children && expandedPaths.has(node.path)) {
+      result.push(...flattenTree(node.children, expandedPaths, depth + 1));
+    }
+  }
+
+  return result;
 }
 
 /**

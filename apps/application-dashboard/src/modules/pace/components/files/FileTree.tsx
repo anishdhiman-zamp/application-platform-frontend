@@ -1,12 +1,13 @@
 'use client';
 
 import { useCallback, useMemo, useRef, useState } from 'react';
-import { cn } from '@zamp-platform/ui/utils';
+import { useVirtualizer } from '@tanstack/react-virtual';
 import type { FileItem, FileTreeProps } from '@/modules/pace/components/files/file-tree.types';
 import {
   buildFileTree,
   buildNodeMap,
   filterTreeNodes,
+  flattenTree,
   sortTreeNodes,
 } from '@/modules/pace/components/files/file-tree.utils';
 import FileConflictModal from '@/modules/pace/components/files/FileConflictModal';
@@ -16,6 +17,9 @@ import { FileClipboardProvider } from '@/modules/pace/hooks/useFileClipboard';
 import { FileConflictProvider, useFileConflict } from '@/modules/pace/hooks/useFileConflict';
 import { useFileTreeRootDragDrop } from '@/modules/pace/hooks/useFileTreeRootDragDrop';
 import { ProtectedFoldersProvider } from '@/modules/pace/hooks/useProtectedFolders';
+
+const ROW_HEIGHT = 36;
+const OVERSCAN_COUNT = 10;
 
 const FileTreeContent = ({
   files,
@@ -54,12 +58,21 @@ const FileTreeContent = ({
     return sortTreeNodes(filtered, sortBy, sortDirection);
   }, [sortedRawTree, searchQuery, sortBy, sortDirection]);
 
+  const flatNodes = useMemo(() => flattenTree(treeData, expandedPaths), [treeData, expandedPaths]);
+
   const rootSiblingNames = useMemo(() => treeData.map((node) => node.name), [treeData]);
 
   const { handleDropToRootSibling } = useFileTreeRootDragDrop({
     rootSiblingNames,
     containerRef,
     onFileMoved,
+  });
+
+  const virtualizer = useVirtualizer({
+    count: flatNodes.length,
+    getScrollElement: () => containerRef.current,
+    estimateSize: () => ROW_HEIGHT,
+    overscan: OVERSCAN_COUNT,
   });
 
   const handleToggleExpand = useCallback((path: string) => {
@@ -101,31 +114,45 @@ const FileTreeContent = ({
   }
 
   return (
-    <>
-      <div
-        ref={containerRef}
-        className={cn('flex h-full flex-col gap-0.5 px-3 py-2')}
-        // onDragOver={handleRootDragOver}
-        // onDragLeave={handleRootDragLeave}
-        // onDrop={handleRootDrop}
-      >
-        {treeData.map((node) => (
-          <FileTreeNode
-            key={node.path}
-            node={node}
-            depth={0}
-            expandedPaths={expandedPaths}
-            selectedPath={selectedPath}
-            originalNodeMap={originalNodeMap}
-            siblingNames={rootSiblingNames}
-            onToggleExpand={handleToggleExpand}
-            onSelect={handleSelect}
-            onDropToSibling={handleDropToRootSibling}
-            onFileMoved={onFileMoved}
-            onFileDeleted={onFileDeleted}
-            onFileCreated={onFileCreated}
-          />
-        ))}
+    <div className='flex h-full flex-col'>
+      <div ref={containerRef} className='bg-background min-h-0 flex-1 overflow-auto px-3 py-2'>
+        <div
+          style={{
+            height: virtualizer.getTotalSize(),
+            width: '100%',
+            position: 'relative',
+          }}
+        >
+          {virtualizer.getVirtualItems().map((virtualRow) => {
+            const node = flatNodes[virtualRow.index];
+
+            return (
+              <FileTreeNode
+                key={node.path}
+                node={node}
+                depth={node.depth}
+                expandedPaths={expandedPaths}
+                selectedPath={selectedPath}
+                originalNodeMap={originalNodeMap}
+                siblingNames={node.siblingNames}
+                onToggleExpand={handleToggleExpand}
+                onSelect={handleSelect}
+                onDropToSibling={node.depth === 0 ? handleDropToRootSibling : undefined}
+                onFileMoved={onFileMoved}
+                onFileDeleted={onFileDeleted}
+                onFileCreated={onFileCreated}
+                style={{
+                  position: 'absolute',
+                  top: 0,
+                  left: 0,
+                  width: '100%',
+                  height: `${virtualRow.size}px`,
+                  transform: `translateY(${virtualRow.start}px)`,
+                }}
+              />
+            );
+          })}
+        </div>
       </div>
       <FileConflictModal
         isOpen={!!conflict}
@@ -133,7 +160,7 @@ const FileTreeContent = ({
         onResolve={handleConflictResolve}
         onCancel={cancelConflict}
       />
-    </>
+    </div>
   );
 };
 

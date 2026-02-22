@@ -99,6 +99,14 @@ export interface TreeNode {
 }
 
 /**
+ * Flattened tree node for virtualized rendering
+ */
+export interface FlatNode extends TreeNode {
+  depth: number;
+  siblingNames: string[];
+}
+
+/**
  * Props for the FileTree component
  */
 export interface FileTreeProps {
@@ -145,4 +153,5 @@ export interface FileTreeNodeProps {
   onFileMoved?: (oldPath: string, newFile: FileItem) => void;
   onFileDeleted?: (deletedPath: string) => void;
   onFileCreated?: (newFile: FileItem) => void;
+  style?: React.CSSProperties;
 }

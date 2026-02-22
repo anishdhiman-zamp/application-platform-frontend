@@ -20,7 +20,7 @@ interface CreateItemModalProps {
   isOpen: boolean;
   onOpenChange: (open: boolean) => void;
   itemType: CreateItemType;
-  onCreate: (name: string, parentPath: string) => void;
+  onCreate: (name: string) => void;
   existingNames?: string[];
 }
 
@@ -54,7 +54,7 @@ const CreateItemModal = ({ isOpen, onOpenChange, itemType, onCreate, existingNam
   const handleCreate = () => {
     if (!name.trim() || isDuplicate) return;
 
-    onCreate(finalName, '/');
+    onCreate(finalName);
     handleOpenChange(false);
   };
 
