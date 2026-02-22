@@ -7,7 +7,6 @@ import {
   FilesystemApi,
   useCancelUploadMutation,
   useCompleteUploadMutation,
-  useCreateItemMutation,
   useDirectUploadMutation,
   useInitChunkedUploadMutation,
   useUploadChunkMutation,
@@ -18,7 +17,6 @@ import { type FolderUploadProgress, UPLOAD_STATUS, UPLOAD_TYPE } from '@/modules
 import {
   calculateTotalBytes,
   extractFilesWithPaths,
-  extractUniqueDirectories,
   getFileTargetPath,
   getRootFolderName,
   getTargetPath,
@@ -75,7 +73,6 @@ export const useFileUpload = (options?: UseFileUploadOptions): UseFileUploadRetu
   const [uploadChunk] = useUploadChunkMutation();
   const [completeUpload] = useCompleteUploadMutation();
   const [cancelUploadMutation] = useCancelUploadMutation();
-  const [createItem] = useCreateItemMutation();
 
   const invalidateFilesList = useCallback(() => {
     dispatch(FilesystemApi.util.invalidateTags([APITags.GET_FILES_LIST]));
@@ -83,7 +80,6 @@ export const useFileUpload = (options?: UseFileUploadOptions): UseFileUploadRetu
 
   const mutations: UploadMutations = {
     directUpload: async (args) => {
-      // Pass skipInvalidation to control cache invalidation
       const result = await directUpload(args).unwrap();
 
       return { data: result };
@@ -96,7 +92,6 @@ export const useFileUpload = (options?: UseFileUploadOptions): UseFileUploadRetu
       return { data: result };
     },
     uploadChunk: async (args) => {
-      // Pass signal through to the mutation for proper cancellation
       const result = await uploadChunk({
         upload_id: args.upload_id,
         chunk_index: args.chunk_index,
@@ -108,7 +103,6 @@ export const useFileUpload = (options?: UseFileUploadOptions): UseFileUploadRetu
       return { data: result };
     },
     completeUpload: async (args) => {
-      // Pass skipInvalidation to control cache invalidation for chunked uploads
       const result = await completeUpload(args).unwrap();
 
       currentUploadIdRef.current = null;
@@ -218,7 +212,6 @@ export const useFileUpload = (options?: UseFileUploadOptions): UseFileUploadRetu
         return;
       }
 
-      // Upload files sequentially
       for (const file of fileArray) {
         const targetPath = getTargetPath(basePath, file.name);
 
@@ -267,16 +260,6 @@ export const useFileUpload = (options?: UseFileUploadOptions): UseFileUploadRetu
       });
 
       try {
-        const directories = extractUniqueDirectories(filesWithPaths, basePath);
-
-        for (const dirPath of directories) {
-          if (abortControllerRef.current?.signal.aborted) {
-            throw new Error('Upload cancelled');
-          }
-
-          await createItem({ path: dirPath, type: 'directory' }).unwrap();
-        }
-
         let completedFiles = 0;
         let uploadedBytes = 0;
 
@@ -348,7 +331,6 @@ export const useFileUpload = (options?: UseFileUploadOptions): UseFileUploadRetu
             },
           };
 
-          // Skip cache invalidation for each file - we'll invalidate once at the end
           await uploadFileUtil(file, targetPath, mutations, callbacks, abortControllerRef.current.signal, true);
 
           uploadedBytes += file.size;
@@ -370,7 +352,6 @@ export const useFileUpload = (options?: UseFileUploadOptions): UseFileUploadRetu
           options?.onUploadComplete?.(targetPath);
         }
 
-        // Invalidate files list cache once after all files are uploaded
         invalidateFilesList();
 
         setUploadState({
@@ -404,11 +385,10 @@ export const useFileUpload = (options?: UseFileUploadOptions): UseFileUploadRetu
         abortControllerRef.current = null;
       }
     },
-    [mutations, createItem, options, invalidateFilesList],
+    [mutations, options, invalidateFilesList],
   );
 
   const cancelUpload = useCallback(() => {
-    // Immediately update UI state for instant feedback
     setUploadState({
       isUploading: false,
       currentUpload: null,
@@ -416,8 +396,6 @@ export const useFileUpload = (options?: UseFileUploadOptions): UseFileUploadRetu
       folderUpload: null,
     });
 
-    // Abort the controller - the uploadFileChunked function will handle
-    // calling the cancelUpload API in its catch block when it detects the abort
     if (abortControllerRef.current) {
       abortControllerRef.current.abort();
     }

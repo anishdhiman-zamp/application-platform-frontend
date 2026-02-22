@@ -9,7 +9,7 @@ import {
   Input,
 } from '@zamp-platform/ui';
 import { cn } from '@zamp-platform/ui/utils';
-import { ArrowDown, ArrowUp, ChevronDownIcon, ChevronsDownUp, ChevronsUpDown, SearchIcon } from 'lucide-react';
+import { ArrowDown, ArrowUp, ChevronDownIcon, FoldVertical, SearchIcon } from 'lucide-react';
 import { SORT_DIRECTION, SortDirection, SortOption } from '@/modules/pace/components/files/file-tree.types';
 import { SORT_OPTIONS } from '@/modules/pace/components/files/files.constants';
 
@@ -20,8 +20,7 @@ interface FilesToolbarProps {
   onSortByChange: (value: SortOption) => void;
   sortDirection: SortDirection;
   onSortDirectionToggle: () => void;
-  isAllExpanded?: boolean;
-  onToggleExpandAll?: () => void;
+  onCollapseAll?: () => void;
 }
 
 const FilesToolbar = ({
@@ -31,8 +30,7 @@ const FilesToolbar = ({
   onSortByChange,
   sortDirection,
   onSortDirectionToggle,
-  isAllExpanded = false,
-  onToggleExpandAll,
+  onCollapseAll,
 }: FilesToolbarProps) => {
   const selectedSortLabel = SORT_OPTIONS.find((opt) => opt.value === sortBy)?.label ?? 'Date modified';
 
@@ -95,19 +93,15 @@ const FilesToolbar = ({
           </DropdownMenu>
         </div>
 
-        {onToggleExpandAll && (
+        {onCollapseAll && (
           <Button
             variant='secondary'
             size='small'
-            onClick={onToggleExpandAll}
+            onClick={onCollapseAll}
             className='border-GRAY_400 bg-white px-2.5! hover:bg-white'
-            title={isAllExpanded ? 'Collapse all folders' : 'Expand all folders'}
+            title='Collapse all folders'
           >
-            {isAllExpanded ? (
-              <ChevronsDownUp className='text-GRAY_1000 size-3.5' />
-            ) : (
-              <ChevronsUpDown className='text-GRAY_1000 size-3.5' />
-            )}
+            <FoldVertical className='text-GRAY_1000 size-3.5' />
           </Button>
         )}
       </div>

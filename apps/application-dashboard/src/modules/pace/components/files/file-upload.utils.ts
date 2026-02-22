@@ -389,32 +389,6 @@ export const getRootFolderName = (files: FileWithRelativePath[]): string => {
 };
 
 /**
- * Extract unique directory paths that need to be created
- * Returns paths sorted by depth (parent directories first)
- */
-export const extractUniqueDirectories = (files: FileWithRelativePath[], basePath: string): string[] => {
-  const directories = new Set<string>();
-
-  for (const { relativePath } of files) {
-    const parts = relativePath.split('/');
-
-    let currentPath = basePath;
-
-    for (let i = 0; i < parts.length - 1; i++) {
-      currentPath = `${currentPath}/${parts[i]}`;
-      directories.add(currentPath);
-    }
-  }
-
-  return Array.from(directories).sort((a, b) => {
-    const depthA = a.split('/').length;
-    const depthB = b.split('/').length;
-
-    return depthA - depthB;
-  });
-};
-
-/**
  * Get the full target path for a file within the folder upload
  */
 export const getFileTargetPath = (basePath: string, relativePath: string): string => {

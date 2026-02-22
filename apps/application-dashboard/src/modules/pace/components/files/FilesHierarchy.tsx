@@ -1,13 +1,13 @@
 'use client';
 
-import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
+import { useCallback, useEffect, useRef, useState } from 'react';
 import { useListFilesQuery } from '@/apis/filesystem';
 import ImageLoader from '@/components/common/loader/ImageLoader';
 import CommonWrapper from '@/components/commonWrapper';
 import { SkeletonTypes } from '@/components/commonWrapper/commonWrapper.types';
 import { ZAMP_LOGO_LOADER_SVG } from '@/constants/icons';
 import type { FileItem, SortDirection, SortOption } from '@/modules/pace/components/files/file-tree.types';
-import { FILE_TYPE, SORT_DIRECTION, SORT_OPTION } from '@/modules/pace/components/files/file-tree.types';
+import { SORT_DIRECTION, SORT_OPTION } from '@/modules/pace/components/files/file-tree.types';
 import FilesEmptyState from '@/modules/pace/components/files/FilesEmptyState';
 import FilesToolbar from '@/modules/pace/components/files/FilesToolbar';
 import FileTree from '@/modules/pace/components/files/FileTree';
@@ -34,9 +34,7 @@ const FilesHierarchy = ({
   const [debouncedSearchQuery, setDebouncedSearchQuery] = useState('');
   const [sortBy, setSortBy] = useState<SortOption>(SORT_OPTION.NAME);
   const [sortDirection, setSortDirection] = useState<SortDirection>(SORT_DIRECTION.DESC);
-  const [isAllExpanded, setIsAllExpanded] = useState(false);
 
-  const expandAllRef = useRef<((allPaths: string[]) => void) | null>(null);
   const collapseAllRef = useRef<(() => void) | null>(null);
 
   const {
@@ -49,28 +47,17 @@ const FilesHierarchy = ({
   });
   const { uploadFiles, uploadFolder } = useFileUploadContext();
 
-  const allFolderPaths = useMemo(() => {
-    return files?.files?.filter((file) => file.type === FILE_TYPE.DIRECTORY).map((file) => file.path) ?? [];
-  }, [files?.files]);
-
   const toggleSortDirection = useCallback(() => {
     setSortDirection((prev) => (prev === SORT_DIRECTION.ASC ? SORT_DIRECTION.DESC : SORT_DIRECTION.ASC));
   }, []);
 
-  const handleExpandAllChange = useCallback((expandAll: (allPaths: string[]) => void, collapseAll: () => void) => {
-    expandAllRef.current = expandAll;
+  const handleCollapseAllChange = useCallback((collapseAll: () => void) => {
     collapseAllRef.current = collapseAll;
   }, []);
 
-  const handleToggleExpandAll = useCallback(() => {
-    if (isAllExpanded) {
-      collapseAllRef.current?.();
-      setIsAllExpanded(false);
-    } else {
-      expandAllRef.current?.(allFolderPaths);
-      setIsAllExpanded(true);
-    }
-  }, [isAllExpanded, allFolderPaths]);
+  const handleCollapseAll = useCallback(() => {
+    collapseAllRef.current?.();
+  }, []);
 
   const handleUploadFiles = useCallback(
     (fileList: FileList, targetPath: string) => {
@@ -113,8 +100,7 @@ const FilesHierarchy = ({
         onSortByChange={setSortBy}
         sortDirection={sortDirection}
         onSortDirectionToggle={toggleSortDirection}
-        isAllExpanded={isAllExpanded}
-        onToggleExpandAll={handleToggleExpandAll}
+        onCollapseAll={handleCollapseAll}
       />
       <CommonWrapper
         isLoading={isLoadingFiles}
@@ -138,7 +124,7 @@ const FilesHierarchy = ({
           onFileCreated={onFileCreated}
           onUploadFiles={handleUploadFiles}
           onUploadFolder={handleUploadFolder}
-          onExpandAllChange={handleExpandAllChange}
+          onCollapseAllChange={handleCollapseAllChange}
         />
       </CommonWrapper>
     </div>

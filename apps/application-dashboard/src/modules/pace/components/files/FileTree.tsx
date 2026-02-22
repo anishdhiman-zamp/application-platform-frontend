@@ -31,7 +31,7 @@ const FileTreeContent = ({
   onFileCreated,
   onUploadFiles,
   onUploadFolder,
-  onExpandAllChange,
+  onCollapseAllChange,
 }: FileTreeProps) => {
   const [expandedPaths, setExpandedPaths] = useState<Set<string>>(new Set());
   const [internalSelectedPath, setInternalSelectedPath] = useState<string | null>(null);
@@ -44,10 +44,6 @@ const FileTreeContent = ({
   const selectedPath = controlledSelectedPath ?? internalSelectedPath;
 
   const { conflict, resolveConflict, cancelConflict } = useFileConflict();
-
-  const expandAll = useCallback((allPaths: string[]) => {
-    setExpandedPaths(new Set(allPaths));
-  }, []);
 
   const collapseAll = useCallback(() => {
     setExpandedPaths(new Set());
@@ -92,10 +88,10 @@ const FileTreeContent = ({
   }, [files]);
 
   useEffect(() => {
-    if (onExpandAllChange) {
-      onExpandAllChange(expandAll, collapseAll);
+    if (onCollapseAllChange) {
+      onCollapseAllChange(collapseAll);
     }
-  }, [onExpandAllChange, expandAll, collapseAll]);
+  }, [onCollapseAllChange, collapseAll]);
 
   const rawTree = useMemo(() => buildFileTree(files), [files]);
   const sortedRawTree = useMemo(() => sortTreeNodes(rawTree, sortBy, sortDirection), [rawTree, sortBy, sortDirection]);
