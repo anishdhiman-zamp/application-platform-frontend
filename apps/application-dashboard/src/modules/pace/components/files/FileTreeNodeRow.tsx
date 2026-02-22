@@ -4,7 +4,6 @@ import { forwardRef } from 'react';
 import { Button, FileIcon, Input } from '@zamp-platform/ui';
 import { cn } from '@zamp-platform/ui/utils';
 import { ChevronRight } from 'lucide-react';
-import { motion } from 'motion/react';
 import Image from 'next/image';
 import TooltipV2 from '@/components/common/TooltipV2';
 import type { TreeNode } from '@/modules/pace/components/files/file-tree.types';
@@ -20,6 +19,8 @@ interface FileTreeNodeRowState {
   isDragging: boolean;
   isDragOver: boolean;
   isCutItem: boolean;
+  isProtected: boolean;
+  isUserPrivateFolder: boolean;
   contextMenuOpen: boolean;
 }
 
@@ -34,7 +35,6 @@ interface FileTreeNodeRowRename {
 interface FileTreeNodeRowHandlers {
   onRowClick: () => void;
   onChevronClick: (e: React.MouseEvent) => void;
-  onContextMenu: (e: React.MouseEvent) => void;
   onDragStart: (e: React.DragEvent) => void;
   onDragEnd: () => void;
   onDragOver: (e: React.DragEvent) => void;
@@ -42,7 +42,7 @@ interface FileTreeNodeRowHandlers {
   onDrop: (e: React.DragEvent) => void;
 }
 
-interface FileTreeNodeRowProps {
+interface FileTreeNodeRowProps extends React.HTMLAttributes<HTMLDivElement> {
   node: TreeNode;
   depth: number;
   state: FileTreeNodeRowState;
@@ -51,7 +51,7 @@ interface FileTreeNodeRowProps {
 }
 
 const FileTreeNodeRow = forwardRef<HTMLDivElement, FileTreeNodeRowProps>(
-  ({ node, depth, state, rename, handlers }, ref) => {
+  ({ node, depth, state, rename, handlers, className: externalClassName, ...restProps }, ref) => {
     const extension = state.isFolder ? '' : getFileExtension(node.name);
 
     return (
@@ -59,9 +59,8 @@ const FileTreeNodeRow = forwardRef<HTMLDivElement, FileTreeNodeRowProps>(
         ref={ref}
         role='button'
         tabIndex={0}
-        draggable={!state.isRenaming}
+        draggable={!state.isRenaming && !state.isProtected}
         onClick={handlers.onRowClick}
-        onContextMenu={handlers.onContextMenu}
         onDragStart={handlers.onDragStart}
         onDragEnd={handlers.onDragEnd}
         onDragOver={handlers.onDragOver}
@@ -74,12 +73,14 @@ const FileTreeNodeRow = forwardRef<HTMLDivElement, FileTreeNodeRowProps>(
             handlers.onRowClick();
           }
         }}
+        {...restProps}
         className={cn(
           'hover:bg-GRAY_100 flex cursor-pointer items-center gap-2 rounded-md py-2 pr-1',
-          state.contextMenuOpen && !state.isSelected && 'bg-GRAY_100',
+          state.contextMenuOpen && (state.isFolder || !state.isSelected) && 'bg-GRAY_100',
           state.isSelected && !state.isFolder && 'bg-GRAY_300 hover:bg-GRAY_300',
           (state.isDragging || state.isCutItem) && 'opacity-50',
           state.isDragOver && 'bg-GRAY_200',
+          externalClassName,
         )}
         style={{ paddingLeft: `${depth * 24 + 8}px` }}
       >
@@ -91,12 +92,12 @@ const FileTreeNodeRow = forwardRef<HTMLDivElement, FileTreeNodeRowProps>(
             className='size-4 shrink-0 p-0! hover:bg-transparent'
             aria-label={state.isExpanded ? 'Collapse folder' : 'Expand folder'}
           >
-            <motion.div
-              animate={{ rotate: state.isExpanded ? 90 : 0 }}
-              transition={{ duration: 0.12, ease: [0.4, 0, 0.2, 1] }}
-            >
-              <ChevronRight className='text-GRAY_1000 size-3.5' />
-            </motion.div>
+            <ChevronRight
+              className={cn(
+                'text-GRAY_1000 size-3.5 transition-transform duration-100',
+                state.isExpanded && 'rotate-90',
+              )}
+            />
           </Button>
         ) : (
           <span className='size-4 shrink-0' />
@@ -126,6 +127,7 @@ const FileTreeNodeRow = forwardRef<HTMLDivElement, FileTreeNodeRowProps>(
           >
             <Input
               ref={rename.onInputRef}
+              autoFocus
               value={rename.value}
               onChange={(e) => rename.onChange(e.target.value)}
               onBlur={rename.onSubmit}
@@ -139,7 +141,9 @@ const FileTreeNodeRow = forwardRef<HTMLDivElement, FileTreeNodeRowProps>(
             />
           </TooltipV2>
         ) : (
-          <span className='f-13-450 text-GRAY_1000 truncate select-none'>{node.name}</span>
+          <span className='f-13-450 text-GRAY_1000 truncate select-none'>
+            {state.isUserPrivateFolder ? `${node.name} (Private)` : node.name}
+          </span>
         )}
       </div>
     );

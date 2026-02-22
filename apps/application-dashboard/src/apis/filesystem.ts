@@ -71,7 +71,7 @@ const FilesystemApi = baseApi.injectEndpoints({
         body: { path, type },
       }),
       invalidatesTags: [APITags.GET_FILES_LIST],
-      async onQueryStarted({ path, type }, { dispatch, queryFulfilled }) {
+      async onQueryStarted({ path, type, owner }, { dispatch, queryFulfilled }) {
         const name = path.split('/').pop() || path;
 
         const patchResult = dispatch(
@@ -81,6 +81,7 @@ const FilesystemApi = baseApi.injectEndpoints({
               name,
               type,
               size: 0,
+              owner: owner || 'user',
               mtime_ms: Date.now(),
             });
             draft.total_count += 1;
@@ -131,6 +132,7 @@ const FilesystemApi = baseApi.injectEndpoints({
                 type: sourceItem.type,
                 size: sourceItem.size,
                 mtime_ms: Date.now(),
+                owner: sourceItem.owner,
               });
               draft.total_count += 1;
 

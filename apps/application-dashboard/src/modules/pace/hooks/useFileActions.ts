@@ -1,4 +1,5 @@
 import { useCallback } from 'react';
+import { useSelector } from 'react-redux';
 import {
   useCopyFileMutation,
   useCreateItemMutation,
@@ -6,6 +7,7 @@ import {
   useMoveFileMutation,
 } from '@/apis/filesystem';
 import { buildFullPath, generateDuplicateName, getParentPath } from '@/modules/pace/components/files/file-tree.utils';
+import { RootState } from '@/store';
 
 interface UseFileActionsReturn {
   createFile: (name: string, parentPath: string) => Promise<void>;
@@ -27,23 +29,24 @@ export const useFileActions = (): UseFileActionsReturn => {
   const [deleteFile, { isLoading: isDeleting }] = useDeleteFileMutation();
   const [moveFile, { isLoading: isMoveLoading }] = useMoveFileMutation();
   const [copyFile, { isLoading: isCopying }] = useCopyFileMutation();
+  const username = useSelector((state: RootState) => state.user.user?.username);
 
   const createFileAction = useCallback(
     async (name: string, parentPath: string) => {
       const fullPath = buildFullPath(parentPath, name);
 
-      await createItem({ path: fullPath, type: 'file' }).unwrap();
+      await createItem({ path: fullPath, type: 'file', owner: username }).unwrap();
     },
-    [createItem],
+    [createItem, username],
   );
 
   const createFolderAction = useCallback(
     async (name: string, parentPath: string) => {
       const fullPath = buildFullPath(parentPath, name);
 
-      await createItem({ path: fullPath, type: 'directory' }).unwrap();
+      await createItem({ path: fullPath, type: 'directory', owner: username }).unwrap();
     },
-    [createItem],
+    [createItem, username],
   );
 
   const deleteItemAction = useCallback(

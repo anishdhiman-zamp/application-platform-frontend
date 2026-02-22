@@ -1,13 +1,17 @@
-import { type RefObject, useState } from 'react';
+import { type RefObject, useRef, useState } from 'react';
 import { captureException } from '@sentry/browser';
 import { toast } from '@zamp-platform/ui';
 import { useFileActions } from 'modules/pace/hooks/useFileActions';
 import {
   CLIPBOARD_OPERATION,
   type DropToSiblingData,
-  type FileConflict,
+  type FileItem,
   type TreeNode,
 } from '@/modules/pace/components/files/file-tree.types';
+import { executeMoveOrCopy, parseDragData } from '@/modules/pace/components/files/file-tree.utils';
+import { FILE_TOAST_MESSAGES } from '@/modules/pace/components/files/files.constants';
+import { useFileConflict } from '@/modules/pace/hooks/useFileConflict';
+import { useProtectedFolders } from '@/modules/pace/hooks/useProtectedFolders';
 
 interface UseFileTreeNodeDragDropProps {
   node: TreeNode;
@@ -15,9 +19,10 @@ interface UseFileTreeNodeDragDropProps {
   isFolder: boolean;
   isExpanded: boolean;
   childrenNames: string[];
+  isProtected?: boolean;
   onToggleExpand: (path: string) => void;
   onDropToSibling?: (data: DropToSiblingData) => void;
-  onConflict: (conflict: FileConflict) => void;
+  onFileMoved?: (oldPath: string, newFile: FileItem) => void;
 }
 
 interface UseFileTreeNodeDragDropReturn {
@@ -37,23 +42,43 @@ export const useFileTreeNodeDragDrop = ({
   isFolder,
   isExpanded,
   childrenNames,
+  isProtected = false,
   onToggleExpand,
   onDropToSibling,
-  onConflict,
+  onFileMoved,
 }: UseFileTreeNodeDragDropProps): UseFileTreeNodeDragDropReturn => {
   const [isDragging, setIsDragging] = useState(false);
   const [isDragOver, setIsDragOver] = useState(false);
   const [isDragOverTop, setIsDragOverTop] = useState(false);
 
+  const expandTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+
   const { copyItem, moveItem } = useFileActions();
+  const { setConflict } = useFileConflict();
+  const { isProtectedRoot, isInvalidCrossMove } = useProtectedFolders();
+
+  const clearExpandTimeout = () => {
+    if (expandTimeoutRef.current) {
+      clearTimeout(expandTimeoutRef.current);
+      expandTimeoutRef.current = null;
+    }
+  };
 
   const handleDragStart = (e: React.DragEvent) => {
+    if (isProtected) {
+      e.preventDefault();
+
+      return;
+    }
+
     e.dataTransfer.setData(
       'application/json',
       JSON.stringify({
         path: node.path,
         name: node.name,
         type: node.type,
+        size: node.size,
+        owner: node.owner,
       }),
     );
     e.dataTransfer.effectAllowed = 'copyMove';
@@ -62,6 +87,7 @@ export const useFileTreeNodeDragDrop = ({
 
   const handleDragEnd = () => {
     setIsDragging(false);
+    clearExpandTimeout();
   };
 
   const handleDragOver = (e: React.DragEvent) => {
@@ -78,6 +104,7 @@ export const useFileTreeNodeDragDrop = ({
         e.dataTransfer.dropEffect = e.altKey ? 'copy' : 'move';
         setIsDragOverTop(true);
         setIsDragOver(false);
+        clearExpandTimeout();
 
         return;
       }
@@ -88,6 +115,13 @@ export const useFileTreeNodeDragDrop = ({
     if (isFolder) {
       e.dataTransfer.dropEffect = e.altKey ? 'copy' : 'move';
       setIsDragOver(true);
+
+      if (!isExpanded && !expandTimeoutRef.current) {
+        expandTimeoutRef.current = setTimeout(() => {
+          onToggleExpand(node.path);
+          expandTimeoutRef.current = null;
+        }, 800);
+      }
     }
   };
 
@@ -97,6 +131,7 @@ export const useFileTreeNodeDragDrop = ({
     if (nodeRef.current && !nodeRef.current.contains(e.relatedTarget as Node)) {
       setIsDragOver(false);
       setIsDragOverTop(false);
+      clearExpandTimeout();
     }
   };
 
@@ -105,23 +140,22 @@ export const useFileTreeNodeDragDrop = ({
     e.stopPropagation();
     setIsDragOver(false);
     setIsDragOverTop(false);
+    clearExpandTimeout();
 
     try {
-      const rawData = e.dataTransfer.getData('application/json');
+      const dragData = parseDragData(e);
 
-      if (!rawData) {
+      if (!dragData) {
         return;
       }
 
-      const data = JSON.parse(rawData);
+      const { sourcePath, sourceName, sourceType, sourceSize, sourceOwner } = dragData;
 
-      if (!data?.path || !data?.name) {
+      if (isProtectedRoot(sourcePath)) {
+        toast.error(FILE_TOAST_MESSAGES.CANNOT_MOVE_PROTECTED);
+
         return;
       }
-
-      const sourcePath = data.path;
-      const sourceName = data.name;
-      const sourceType = data.type;
 
       const rect = nodeRef.current?.getBoundingClientRect();
 
@@ -134,6 +168,8 @@ export const useFileTreeNodeDragDrop = ({
             sourcePath,
             sourceName,
             sourceType,
+            sourceSize,
+            sourceOwner,
             isCopy: e.altKey,
           });
 
@@ -149,6 +185,12 @@ export const useFileTreeNodeDragDrop = ({
         return;
       }
 
+      if (isInvalidCrossMove(sourcePath, destinationPath)) {
+        toast.error(FILE_TOAST_MESSAGES.CANNOT_MOVE_PROTECTED_INTO_EACH_OTHER);
+
+        return;
+      }
+
       const isInvalidTarget = node.path === sourcePath || node.path.startsWith(`${sourcePath}/`);
 
       if (isInvalidTarget) return;
@@ -157,9 +199,12 @@ export const useFileTreeNodeDragDrop = ({
       const operation = e.altKey ? CLIPBOARD_OPERATION.COPY : 'move';
 
       if (hasConflict) {
-        onConflict({
+        setConflict({
           sourcePath,
           sourceName,
+          sourceType,
+          sourceSize,
+          sourceOwner,
           destinationPath,
           operation,
         });
@@ -171,14 +216,20 @@ export const useFileTreeNodeDragDrop = ({
         onToggleExpand(node.path);
       }
 
-      if (e.altKey) {
-        await copyItem(sourcePath, destinationPath);
-      } else {
-        await moveItem(sourcePath, destinationPath);
-      }
+      await executeMoveOrCopy({
+        sourcePath,
+        sourceName,
+        sourceType,
+        sourceSize,
+        sourceOwner,
+        destinationPath,
+        isCopy: e.altKey,
+        actions: { copyItem, moveItem },
+        onFileMoved,
+      });
     } catch (error) {
       captureException(error);
-      toast.error('Failed to move/copy');
+      toast.error(FILE_TOAST_MESSAGES.FAILED_TO_MOVE_COPY);
     }
   };
 

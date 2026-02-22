@@ -50,6 +50,8 @@ export interface ClipboardState {
   path: string;
   name: string;
   type: FileType;
+  size: number | null;
+  owner: string;
   operation: ClipboardOperation;
 }
 
@@ -64,6 +66,9 @@ export type ConflictResolution = (typeof CONFLICT_RESOLUTION)[keyof typeof CONFL
 export interface FileConflict {
   sourcePath: string;
   sourceName: string;
+  sourceType: FileType;
+  sourceSize: number | null;
+  sourceOwner: string;
   destinationPath: string;
   operation: ClipboardOperation | 'move';
 }
@@ -77,6 +82,7 @@ export interface FileItem {
   type: FileType;
   size: number | null;
   mtime_ms: number;
+  owner: string;
 }
 
 /**
@@ -88,7 +94,16 @@ export interface TreeNode {
   type: FileType;
   size: number | null;
   mtime_ms: number;
+  owner: string;
   children?: TreeNode[];
+}
+
+/**
+ * Flattened tree node for virtualized rendering
+ */
+export interface FlatNode extends TreeNode {
+  depth: number;
+  siblingNames: string[];
 }
 
 /**
@@ -101,6 +116,9 @@ export interface FileTreeProps {
   sortDirection: SortDirection;
   selectedPath?: string | null;
   onSelectFile?: (file: FileItem | null) => void;
+  onFileMoved?: (oldPath: string, newFile: FileItem) => void;
+  onFileDeleted?: (deletedPath: string) => void;
+  onFileCreated?: (newFile: FileItem) => void;
 }
 
 /**
@@ -114,6 +132,8 @@ export interface DropToSiblingData {
   sourcePath: string;
   sourceName: string;
   sourceType: FileType;
+  sourceSize: number | null;
+  sourceOwner: string;
   isCopy: boolean;
 }
 
@@ -127,8 +147,11 @@ export interface FileTreeNodeProps {
   selectedPath: string | null;
   originalNodeMap: Map<string, TreeNode>;
   siblingNames: string[];
-  parentPath: string | null;
   onToggleExpand: (path: string) => void;
   onSelect: (path: string) => void;
   onDropToSibling?: (data: DropToSiblingData) => void;
+  onFileMoved?: (oldPath: string, newFile: FileItem) => void;
+  onFileDeleted?: (deletedPath: string) => void;
+  onFileCreated?: (newFile: FileItem) => void;
+  style?: React.CSSProperties;
 }

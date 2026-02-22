@@ -4,45 +4,58 @@ import { useFileActions } from 'modules/pace/hooks/useFileActions';
 import { useFileClipboard } from 'modules/pace/hooks/useFileClipboard';
 import {
   CLIPBOARD_OPERATION,
-  CONFLICT_RESOLUTION,
-  type ConflictResolution,
   CREATE_ITEM_TYPE,
   type CreateItemType,
-  type FileConflict,
+  FILE_TYPE,
+  type FileItem,
   type TreeNode,
 } from '@/modules/pace/components/files/file-tree.types';
-import { generateKeepBothName } from '@/modules/pace/components/files/file-tree.utils';
+import {
+  buildFullPath,
+  executeMoveOrCopy,
+  validatePasteOperation,
+} from '@/modules/pace/components/files/file-tree.utils';
+import { CONTEXT_MENU_ACTION_IDS, FILE_TOAST_MESSAGES } from '@/modules/pace/components/files/files.constants';
+import { useFileConflict } from '@/modules/pace/hooks/useFileConflict';
+import { useProtectedFolders } from '@/modules/pace/hooks/useProtectedFolders';
 
 interface UseFileTreeNodeActionsProps {
   node: TreeNode;
   isExpanded: boolean;
   childrenNames: string[];
+  isProtected?: boolean;
   onToggleExpand: (path: string) => void;
   onStartRename: () => void;
   onOpenCreateModal: (type: CreateItemType) => void;
-  onConflict: (conflict: FileConflict) => void;
   onCloseContextMenu: () => void;
+  onFileMoved?: (oldPath: string, newFile: FileItem) => void;
+  onFileDeleted?: (deletedPath: string) => void;
+  onFileCreated?: (newFile: FileItem) => void;
 }
 
 interface UseFileTreeNodeActionsReturn {
   isCutItem: boolean;
   handleActionClick: (actionId: string) => Promise<void>;
   handleCreate: (name: string, parentPath: string, createModalType: CreateItemType | null) => Promise<void>;
-  handleConflictResolve: (resolution: ConflictResolution, fileConflict: FileConflict | null) => Promise<void>;
 }
 
 export const useFileTreeNodeActions = ({
   node,
   isExpanded,
   childrenNames,
+  isProtected = false,
   onToggleExpand,
   onStartRename,
   onOpenCreateModal,
-  onConflict,
   onCloseContextMenu,
+  onFileMoved,
+  onFileDeleted,
+  onFileCreated,
 }: UseFileTreeNodeActionsProps): UseFileTreeNodeActionsReturn => {
   const { createFile, createFolder, deleteItem, duplicateItem, copyItem, moveItem } = useFileActions();
   const { clipboard, setCopyClipboard, setCutClipboard, clearClipboard } = useFileClipboard();
+  const { setConflict } = useFileConflict();
+  const { username } = useProtectedFolders();
 
   const isCutItem = clipboard?.operation === CLIPBOARD_OPERATION.CUT && clipboard.path === node.path;
 
@@ -51,49 +64,59 @@ export const useFileTreeNodeActions = ({
 
     try {
       switch (actionId) {
-        case 'create-file':
+        case CONTEXT_MENU_ACTION_IDS.CREATE_FILE:
           onOpenCreateModal(CREATE_ITEM_TYPE.FILE);
           break;
-        case 'create-folder':
+        case CONTEXT_MENU_ACTION_IDS.CREATE_FOLDER:
           onOpenCreateModal(CREATE_ITEM_TYPE.FOLDER);
           break;
-        case 'rename':
+        case CONTEXT_MENU_ACTION_IDS.RENAME:
+          if (isProtected) {
+            toast.error(FILE_TOAST_MESSAGES.CANNOT_RENAME_PROTECTED);
+            break;
+          }
           onStartRename();
           break;
-        case 'delete':
+        case CONTEXT_MENU_ACTION_IDS.DELETE:
+          if (isProtected) {
+            toast.error(FILE_TOAST_MESSAGES.CANNOT_DELETE_PROTECTED);
+            break;
+          }
           await deleteItem(node.path);
+          onFileDeleted?.(node.path);
           break;
-        case 'duplicate':
+        case CONTEXT_MENU_ACTION_IDS.DUPLICATE:
           await duplicateItem(node.path);
           break;
-        case 'copy':
-          setCopyClipboard(node.path, node.name, node.type);
+        case CONTEXT_MENU_ACTION_IDS.COPY:
+          setCopyClipboard(node.path, node.name, node.type, node.size, node.owner);
           break;
-        case 'cut':
-          setCutClipboard(node.path, node.name, node.type);
+        case CONTEXT_MENU_ACTION_IDS.CUT:
+          if (isProtected) {
+            toast.error(FILE_TOAST_MESSAGES.CANNOT_CUT_PROTECTED);
+            break;
+          }
+          setCutClipboard(node.path, node.name, node.type, node.size, node.owner);
           break;
-        case 'paste':
+        case CONTEXT_MENU_ACTION_IDS.PASTE:
           if (clipboard) {
-            const destinationPath = `${node.path}/${clipboard.name}`;
+            const validation = validatePasteOperation(clipboard, node.path, childrenNames);
 
-            if (clipboard.operation === CLIPBOARD_OPERATION.CUT && clipboard.path === destinationPath) {
+            if (!validation.valid) {
+              if (validation.reason === 'invalid-target') {
+                toast.error(FILE_TOAST_MESSAGES.CANNOT_PASTE_INTO_ITSELF);
+              }
               break;
             }
 
-            const isInvalidTarget = node.path === clipboard.path || node.path.startsWith(`${clipboard.path}/`);
-
-            if (isInvalidTarget) {
-              toast.error('Cannot paste a folder into itself');
-              break;
-            }
-
-            const hasConflict = childrenNames.includes(clipboard.name);
-
-            if (hasConflict) {
-              onConflict({
+            if (validation.hasConflict) {
+              setConflict({
                 sourcePath: clipboard.path,
                 sourceName: clipboard.name,
-                destinationPath,
+                sourceType: clipboard.type,
+                sourceSize: clipboard.size,
+                sourceOwner: clipboard.owner,
+                destinationPath: validation.destinationPath,
                 operation: clipboard.operation,
               });
               break;
@@ -103,10 +126,21 @@ export const useFileTreeNodeActions = ({
               onToggleExpand(node.path);
             }
 
-            if (clipboard.operation === CLIPBOARD_OPERATION.COPY) {
-              await copyItem(clipboard.path, destinationPath);
-            } else {
-              await moveItem(clipboard.path, destinationPath);
+            const isCopy = clipboard.operation === CLIPBOARD_OPERATION.COPY;
+
+            await executeMoveOrCopy({
+              sourcePath: clipboard.path,
+              sourceName: clipboard.name,
+              sourceType: clipboard.type,
+              sourceSize: clipboard.size,
+              sourceOwner: clipboard.owner,
+              destinationPath: validation.destinationPath,
+              isCopy,
+              actions: { copyItem, moveItem },
+              onFileMoved: isCopy ? undefined : onFileMoved,
+            });
+
+            if (!isCopy) {
               clearClipboard();
             }
           }
@@ -131,50 +165,21 @@ export const useFileTreeNodeActions = ({
       } else {
         await createFolder(name, parentPath);
       }
+
+      const fullPath = buildFullPath(parentPath, name);
+      const newFile: FileItem = {
+        path: fullPath,
+        name,
+        type: createModalType === CREATE_ITEM_TYPE.FILE ? FILE_TYPE.FILE : FILE_TYPE.DIRECTORY,
+        size: 0,
+        mtime_ms: Date.now(),
+        owner: username,
+      };
+
+      onFileCreated?.(newFile);
     } catch (error) {
       captureException(error);
-      toast.error('Failed to create item');
-    }
-  };
-
-  const handleConflictResolve = async (resolution: ConflictResolution, fileConflict: FileConflict | null) => {
-    if (!fileConflict) return;
-
-    const { sourcePath, sourceName, destinationPath, operation } = fileConflict;
-
-    try {
-      if (!isExpanded) {
-        onToggleExpand(node.path);
-      }
-
-      if (resolution === CONFLICT_RESOLUTION.KEEP_BOTH) {
-        const newName = generateKeepBothName(sourceName, childrenNames);
-        const parentPath = destinationPath.slice(0, destinationPath.lastIndexOf('/'));
-        const newDestinationPath = `${parentPath}/${newName}`;
-
-        if (operation === CLIPBOARD_OPERATION.COPY) {
-          await copyItem(sourcePath, newDestinationPath);
-        } else {
-          await moveItem(sourcePath, newDestinationPath);
-          if (operation === CLIPBOARD_OPERATION.CUT) {
-            clearClipboard();
-          }
-        }
-      } else if (resolution === CONFLICT_RESOLUTION.REPLACE) {
-        deleteItem(destinationPath);
-
-        if (operation === CLIPBOARD_OPERATION.COPY) {
-          await copyItem(sourcePath, destinationPath);
-        } else {
-          await moveItem(sourcePath, destinationPath);
-          if (operation === CLIPBOARD_OPERATION.CUT) {
-            clearClipboard();
-          }
-        }
-      }
-    } catch (error) {
-      captureException(error);
-      toast.error('Failed to resolve conflict');
+      toast.error(FILE_TOAST_MESSAGES.FAILED_TO_CREATE_ITEM);
     }
   };
 
@@ -182,6 +187,5 @@ export const useFileTreeNodeActions = ({
     isCutItem,
     handleActionClick,
     handleCreate,
-    handleConflictResolve,
   };
 };

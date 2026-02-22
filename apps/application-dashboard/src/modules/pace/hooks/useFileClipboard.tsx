@@ -9,8 +9,8 @@ import {
 
 interface FileClipboardContextValue {
   clipboard: ClipboardState | null;
-  setCopyClipboard: (path: string, name: string, type: FileType) => void;
-  setCutClipboard: (path: string, name: string, type: FileType) => void;
+  setCopyClipboard: (path: string, name: string, type: FileType, size: number | null, owner: string) => void;
+  setCutClipboard: (path: string, name: string, type: FileType, size: number | null, owner: string) => void;
   clearClipboard: () => void;
 }
 
@@ -23,13 +23,19 @@ interface FileClipboardProviderProps {
 export const FileClipboardProvider = ({ children }: FileClipboardProviderProps) => {
   const [clipboard, setClipboard] = useState<ClipboardState | null>(null);
 
-  const setCopyClipboard = useCallback((path: string, name: string, type: FileType) => {
-    setClipboard({ path, name, type, operation: CLIPBOARD_OPERATION.COPY });
-  }, []);
+  const setCopyClipboard = useCallback(
+    (path: string, name: string, type: FileType, size: number | null, owner: string) => {
+      setClipboard({ path, name, type, size, owner, operation: CLIPBOARD_OPERATION.COPY });
+    },
+    [],
+  );
 
-  const setCutClipboard = useCallback((path: string, name: string, type: FileType) => {
-    setClipboard({ path, name, type, operation: CLIPBOARD_OPERATION.CUT });
-  }, []);
+  const setCutClipboard = useCallback(
+    (path: string, name: string, type: FileType, size: number | null, owner: string) => {
+      setClipboard({ path, name, type, size, owner, operation: CLIPBOARD_OPERATION.CUT });
+    },
+    [],
+  );
 
   const clearClipboard = useCallback(() => {
     setClipboard(null);
