@@ -35,7 +35,6 @@ const FilesHierarchy = ({
   const [sortBy, setSortBy] = useState<SortOption>(SORT_OPTION.NAME);
   const [sortDirection, setSortDirection] = useState<SortDirection>(SORT_DIRECTION.DESC);
   const [isAllExpanded, setIsAllExpanded] = useState(false);
-  // const [createModalType, setCreateModalType] = useState<CreateItemType | null>(null);
 
   const expandAllRef = useRef<((allPaths: string[]) => void) | null>(null);
   const collapseAllRef = useRef<(() => void) | null>(null);
@@ -49,8 +48,6 @@ const FilesHierarchy = ({
     recursive: true,
   });
   const { uploadFiles, uploadFolder } = useFileUploadContext();
-
-  // const { createFile, createFolder } = useFileActions();
 
   const allFolderPaths = useMemo(() => {
     return files?.files?.filter((file) => file.type === FILE_TYPE.DIRECTORY).map((file) => file.path) ?? [];
@@ -89,18 +86,15 @@ const FilesHierarchy = ({
     [uploadFolder],
   );
 
-  // const handleCreate = async (name: string, parentPath: string) => {
-  //   try {
-  //     if (createModalType === CREATE_ITEM_TYPE.FILE) {
-  //       await createFile(name, parentPath);
-  //     } else {
-  //       await createFolder(name, parentPath);
-  //     }
-  //   } catch (error) {
-  //     captureException(error);
-  //     toast.error(`Failed to create ${createModalType === CREATE_ITEM_TYPE.FILE ? 'file' : 'folder'}`);
-  //   }
-  // };
+  useEffect(() => {
+    if (!selectedFile || !files?.files || !onSelectFile) return;
+
+    const updatedFile = files.files.find((f) => f.path === selectedFile.path);
+
+    if (updatedFile && updatedFile.mtime_ms !== selectedFile.mtime_ms) {
+      onSelectFile(updatedFile);
+    }
+  }, [files?.files, selectedFile, onSelectFile]);
 
   useEffect(() => {
     const timer = setTimeout(() => {
@@ -147,50 +141,6 @@ const FilesHierarchy = ({
           onExpandAllChange={handleExpandAllChange}
         />
       </CommonWrapper>
-
-      {/* File and Folder Create - TODO: Add this back in */}
-      {/* <div
-        className='pointer-events-none absolute right-0 bottom-0 left-0 flex w-full items-center justify-center px-3 pt-12 pb-4'
-        style={{
-          background:
-            'linear-gradient(to top, rgba(234, 234, 234, 1) 0%, rgba(234, 234, 234, 0.95) 30%, rgba(234, 234, 234, 0.7) 50%, rgba(234, 234, 234, 0.3) 70%, rgba(234, 234, 234, 0) 100%)',
-        }}
-      >
-        <div className='pointer-events-auto flex items-center'>
-          <Button
-            variant='outline'
-            size='medium'
-            className='f-12-500 gap-x-1 rounded-r-none border-r-0 bg-white px-2 py-2 hover:bg-white'
-            onClick={() => setCreateModalType(CREATE_ITEM_TYPE.FOLDER)}
-            disabled={isLoadingFiles}
-          >
-            <span className='text-GRAY_700 mr-1.5'>Create new</span>
-            <Folder className='text-GRAY_1000 size-3.5' />
-            <span className='text-GRAY_1000'>Folder</span>
-          </Button>
-          <span className='border-GRAY_400 text-GRAY_700 f-12-500 flex h-8 items-center border-y bg-white'>/</span>
-          <Button
-            variant='outline'
-            size='medium'
-            className='f-12-500 gap-x-1 rounded-l-none border-l-0 bg-white px-2 py-2 hover:bg-white'
-            onClick={() => setCreateModalType(CREATE_ITEM_TYPE.FILE)}
-            disabled={isLoadingFiles}
-          >
-            <File className='text-GRAY_1000 size-3.5' />
-            <span className='text-GRAY_1000'>File</span>
-          </Button>
-        </div>
-      </div> */}
-
-      {/* {createModalType && (
-        <CreateItemModal
-          isOpen={!!createModalType}
-          onOpenChange={(open) => !open && setCreateModalType(null)}
-          itemType={createModalType}
-          onCreate={handleCreate}
-          existingNames={files?.files?.filter((f) => !f.path.includes('/')).map((f) => f.name) ?? []}
-        />
-      )} */}
     </div>
   );
 };

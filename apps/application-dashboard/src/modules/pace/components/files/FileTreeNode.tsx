@@ -42,7 +42,7 @@ const FileTreeNode = memo(function FileTreeNode({
 
   const isFolder = node.type === FILE_TYPE.DIRECTORY;
   const isExpanded = expandedPaths.has(node.path);
-  const isSelected = selectedPath === node.path;
+  const isSelected = !isFolder && selectedPath === node.path;
   const isProtected = depth === 0 && isProtectedRoot(node.path);
   const isUserPrivateFolder = depth === 0 && node.path === username;
 
@@ -125,9 +125,10 @@ const FileTreeNode = memo(function FileTreeNode({
   const handleClick = useCallback(() => {
     if (rename.isRenaming) return;
 
-    onSelect(node.path);
     if (isFolder) {
       onToggleExpand(node.path);
+    } else {
+      onSelect(node.path);
     }
   }, [rename.isRenaming, onSelect, node.path, isFolder, onToggleExpand]);
 
