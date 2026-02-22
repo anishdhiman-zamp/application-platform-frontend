@@ -7,6 +7,7 @@ import { useFileActions } from 'modules/pace/hooks/useFileActions';
 import { useFileClipboard } from 'modules/pace/hooks/useFileClipboard';
 import type { ConflictResolution, FileConflict, FileItem } from '@/modules/pace/components/files/file-tree.types';
 import { executeConflictResolution } from '@/modules/pace/components/files/file-tree.utils';
+import { FILE_TOAST_MESSAGES } from '@/modules/pace/components/files/files.constants';
 
 interface FileConflictContextValue {
   conflict: FileConflict | null;
@@ -46,7 +47,7 @@ export const FileConflictProvider = ({ children, onFileMoved }: FileConflictProv
         );
       } catch (error) {
         captureException(error);
-        toast.error('Failed to resolve conflict');
+        toast.error(FILE_TOAST_MESSAGES.FAILED_TO_RESOLVE_CONFLICT);
       }
     },
     [conflict, copyItem, moveItem, deleteItem, clearClipboard, onFileMoved],

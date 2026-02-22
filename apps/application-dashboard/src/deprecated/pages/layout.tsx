@@ -1,5 +1,5 @@
 import { type FC, ReactNode, Suspense } from 'react';
-import SheetLayoutContent from 'app/(authenticated)/pages/SheetLayoutContent';
+import SheetLayoutContent from '@/deprecated/pages/SheetLayoutContent';
 
 interface SheetLayoutProps {
   children: ReactNode;

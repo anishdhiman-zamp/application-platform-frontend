@@ -19,6 +19,33 @@ import {
 
 export const DATE_FORMAT = "EEEE, d MMMM yyyy 'at' h:mm a";
 
+export const FILE_TOAST_MESSAGES = {
+  CANNOT_RENAME_PROTECTED: 'Cannot rename protected folders',
+  CANNOT_DELETE_PROTECTED: 'Cannot delete protected folders',
+  CANNOT_CUT_PROTECTED: 'Cannot cut protected folders',
+  CANNOT_PASTE_INTO_ITSELF: 'Cannot paste a folder into itself',
+  CANNOT_MOVE_PROTECTED: 'Cannot move protected folders',
+  CANNOT_MOVE_PROTECTED_INTO_EACH_OTHER: 'Cannot move protected folders into each other',
+  FAILED_TO_CREATE_ITEM: 'Failed to create item',
+  FAILED_TO_RENAME: 'Failed to rename',
+  FAILED_TO_MOVE_COPY: 'Failed to move/copy',
+  FAILED_TO_RESOLVE_CONFLICT: 'Failed to resolve conflict',
+} as const;
+
+export const CONTEXT_MENU_ACTION_IDS = {
+  CREATE_FILE: 'create-file',
+  CREATE_FOLDER: 'create-folder',
+  UPLOAD_FILE: 'upload-file',
+  UPLOAD_FOLDER: 'upload-folder',
+  OPEN_IN_TAB: 'open-in-tab',
+  RENAME: 'rename',
+  DUPLICATE: 'duplicate',
+  COPY: 'copy',
+  CUT: 'cut',
+  PASTE: 'paste',
+  DELETE: 'delete',
+} as const;
+
 export const SORT_OPTIONS: { value: SortOption; label: string }[] = [
   { value: 'date_modified', label: 'Date modified' },
   { value: 'name', label: 'Name' },
@@ -27,20 +54,20 @@ export const SORT_OPTIONS: { value: SortOption; label: string }[] = [
 ];
 
 export const CONTEXT_MENU_ACTIONS: ContextMenuAction[] = [
-  { id: 'create-file', label: 'Create File', icon: FilePlus, folderOnly: true },
-  { id: 'create-folder', label: 'Create Folder', icon: FolderPlus, folderOnly: true },
-  { id: 'upload-file', label: 'Upload File', icon: Upload, folderOnly: true },
-  { id: 'upload-folder', label: 'Upload Folder', icon: FolderUp, folderOnly: true },
-  { id: 'open-in-tab', label: 'Open in Tab', icon: ExternalLink, fileOnly: true },
+  { id: CONTEXT_MENU_ACTION_IDS.CREATE_FILE, label: 'Create File', icon: FilePlus, folderOnly: true },
+  { id: CONTEXT_MENU_ACTION_IDS.CREATE_FOLDER, label: 'Create Folder', icon: FolderPlus, folderOnly: true },
+  { id: CONTEXT_MENU_ACTION_IDS.UPLOAD_FILE, label: 'Upload File', icon: Upload, folderOnly: true },
+  { id: CONTEXT_MENU_ACTION_IDS.UPLOAD_FOLDER, label: 'Upload Folder', icon: FolderUp, folderOnly: true },
+  { id: CONTEXT_MENU_ACTION_IDS.OPEN_IN_TAB, label: 'Open in Tab', icon: ExternalLink, fileOnly: true },
   // { id: 'work-with-zamp', label: 'Work with Zamp', icon: Link },
-  { id: 'rename', label: 'Rename', icon: Pencil },
-  { id: 'duplicate', label: 'Duplicate', icon: Copy },
-  { id: 'copy', label: 'Copy', icon: Copy },
-  { id: 'cut', label: 'Cut', icon: Scissors },
-  { id: 'paste', label: 'Paste', icon: Clipboard, folderOnly: true },
+  { id: CONTEXT_MENU_ACTION_IDS.RENAME, label: 'Rename', icon: Pencil },
+  { id: CONTEXT_MENU_ACTION_IDS.DUPLICATE, label: 'Duplicate', icon: Copy },
+  { id: CONTEXT_MENU_ACTION_IDS.COPY, label: 'Copy', icon: Copy },
+  { id: CONTEXT_MENU_ACTION_IDS.CUT, label: 'Cut', icon: Scissors },
+  { id: CONTEXT_MENU_ACTION_IDS.PASTE, label: 'Paste', icon: Clipboard, folderOnly: true },
   // { id: 'share', label: 'Share', icon: Share },
   // { id: 'download', label: 'Download', icon: Download },
-  { id: 'delete', label: 'Delete', icon: Trash2, isDestructive: true },
+  { id: CONTEXT_MENU_ACTION_IDS.DELETE, label: 'Delete', icon: Trash2, isDestructive: true },
 ];
 
 // File types that can be edited with Monaco editor

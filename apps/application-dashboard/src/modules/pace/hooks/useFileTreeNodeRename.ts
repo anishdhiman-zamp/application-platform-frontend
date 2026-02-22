@@ -4,6 +4,7 @@ import { toast } from '@zamp-platform/ui';
 import { useFileActions } from 'modules/pace/hooks/useFileActions';
 import type { FileItem, TreeNode } from '@/modules/pace/components/files/file-tree.types';
 import { buildFullPath, getParentPath } from '@/modules/pace/components/files/file-tree.utils';
+import { FILE_TOAST_MESSAGES } from '@/modules/pace/components/files/files.constants';
 
 interface UseFileTreeNodeRenameProps {
   node: TreeNode;
@@ -77,7 +78,7 @@ export const useFileTreeNodeRename = ({
       onFileMoved?.(node.path, newFile);
     } catch (error) {
       captureException(error);
-      toast.error('Failed to rename');
+      toast.error(FILE_TOAST_MESSAGES.FAILED_TO_RENAME);
       setRenameValue(node.name);
       setIsRenaming(false);
     }

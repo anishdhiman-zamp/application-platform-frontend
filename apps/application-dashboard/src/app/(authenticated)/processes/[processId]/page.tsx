@@ -5,7 +5,7 @@ import { useParams, useRouter, useSearchParams } from 'next/navigation';
 import ImageLoader from '@/components/common/loader/ImageLoader';
 import { ZAMP_LOGO_LOADER_SVG } from '@/constants/icons';
 import { getCreateKnowledgeBaseRouteByProcessId, ROUTES_PATH } from '@/constants/routeConfig';
-import { usePagesAndProcessesData } from '@/hooks/usePagesAndProcessesData';
+import { useProcesses } from '@/contexts/ProcessesContext';
 import ProcessById from '@/modules/process/activity-runs/ProcessById';
 import ProcessInProcessBanner from '@/modules/process/knowledge-base-creation/ProcessInProcessBanner';
 import { ProcessStatus } from '@/types/api/processApi.types';
@@ -14,7 +14,7 @@ const Process = () => {
   const params = useParams();
   const router = useRouter();
   const searchParams = useSearchParams();
-  const { processes, isLoadingProcesses } = usePagesAndProcessesData();
+  const { processes, isLoadingProcesses } = useProcesses();
 
   const currentProcess = useMemo(
     () => processes?.find((process) => process?.process_id === params?.processId),

@@ -6,7 +6,7 @@ import ImageLoader from '@/components/common/loader/ImageLoader';
 import CommonWrapper from '@/components/commonWrapper';
 import { SkeletonTypes } from '@/components/commonWrapper/commonWrapper.types';
 import { ZAMP_LOGO_LOADER_SVG } from '@/constants/icons';
-import { usePagesAndProcessesData } from '@/hooks/usePagesAndProcessesData';
+import { useProcesses } from '@/contexts/ProcessesContext';
 import { IntegrationType } from '@/modules/integrations/types/integrations.types';
 import MarkdownSkeleton from '@/modules/process/knowledge-base-creation/components/MarkdownSkeleton';
 import { cn } from '@/utils/common';
@@ -30,7 +30,7 @@ const KnowledgeBaseV2PageHome: FC<KnowledgeBaseV2PageHomeProps> = ({ processId, 
   const [isChatbotExpanded, setIsChatbotExpanded] = useState(false);
   const [defaultMessage, setDefaultMessage] = useState<string | undefined>(undefined);
 
-  const { processes, isLoadingProcesses } = usePagesAndProcessesData();
+  const { processes, isLoadingProcesses } = useProcesses();
 
   const currentProcess = useMemo(
     () => processes?.find((process) => process?.process_id === processId),

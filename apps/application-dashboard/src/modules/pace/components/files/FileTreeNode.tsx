@@ -7,7 +7,7 @@ import {
   FILE_TYPE,
   type FileTreeNodeProps,
 } from '@/modules/pace/components/files/file-tree.types';
-import { CONTEXT_MENU_ACTIONS } from '@/modules/pace/components/files/files.constants';
+import { CONTEXT_MENU_ACTION_IDS, CONTEXT_MENU_ACTIONS } from '@/modules/pace/components/files/files.constants';
 import FileTreeNodeContextMenu from '@/modules/pace/components/files/FileTreeNodeContextMenu';
 import FileTreeNodeRow from '@/modules/pace/components/files/FileTreeNodeRow';
 import { useFileTreeContext } from '@/modules/pace/hooks/useFileTreeContext';
@@ -58,10 +58,13 @@ const FileTreeNode = memo(function FileTreeNode({
       CONTEXT_MENU_ACTIONS.filter((action) => {
         if (action.fileOnly && isFolder) return false;
         if (action.folderOnly && !isFolder) return false;
-        if (action.id === 'paste' && !clipboard) return false;
+        if (action.id === CONTEXT_MENU_ACTION_IDS.PASTE && !clipboard) return false;
         if (
           isProtected &&
-          (action.id === 'delete' || action.id === 'rename' || action.id === 'cut' || action.id === 'duplicate')
+          (action.id === CONTEXT_MENU_ACTION_IDS.DELETE ||
+            action.id === CONTEXT_MENU_ACTION_IDS.RENAME ||
+            action.id === CONTEXT_MENU_ACTION_IDS.CUT ||
+            action.id === CONTEXT_MENU_ACTION_IDS.DUPLICATE)
         )
           return false;
 
