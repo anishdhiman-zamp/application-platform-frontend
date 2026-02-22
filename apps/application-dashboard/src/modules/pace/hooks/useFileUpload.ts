@@ -96,7 +96,14 @@ export const useFileUpload = (options?: UseFileUploadOptions): UseFileUploadRetu
       return { data: result };
     },
     uploadChunk: async (args) => {
-      const result = await uploadChunk(args).unwrap();
+      // Pass signal through to the mutation for proper cancellation
+      const result = await uploadChunk({
+        upload_id: args.upload_id,
+        chunk_index: args.chunk_index,
+        chunk_offset: args.chunk_offset,
+        data: args.data,
+        signal: args.signal,
+      }).unwrap();
 
       return { data: result };
     },
@@ -401,16 +408,20 @@ export const useFileUpload = (options?: UseFileUploadOptions): UseFileUploadRetu
   );
 
   const cancelUpload = useCallback(() => {
+    // Immediately update UI state for instant feedback
+    setUploadState({
+      isUploading: false,
+      currentUpload: null,
+      error: null,
+      folderUpload: null,
+    });
+
+    // Abort the controller - the uploadFileChunked function will handle
+    // calling the cancelUpload API in its catch block when it detects the abort
     if (abortControllerRef.current) {
       abortControllerRef.current.abort();
     }
-
-    if (currentUploadIdRef.current) {
-      cancelUploadMutation({ upload_id: currentUploadIdRef.current }).catch(() => {
-        // Ignore cancel errors
-      });
-    }
-  }, [cancelUploadMutation]);
+  }, []);
 
   return {
     uploadState,

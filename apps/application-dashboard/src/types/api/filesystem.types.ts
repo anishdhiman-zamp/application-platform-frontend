@@ -148,6 +148,7 @@ export interface UploadChunkRequest {
   chunk_index: number;
   chunk_offset: number;
   data: ArrayBuffer | Blob;
+  signal?: AbortSignal;
 }
 
 export interface UploadChunkResponse {

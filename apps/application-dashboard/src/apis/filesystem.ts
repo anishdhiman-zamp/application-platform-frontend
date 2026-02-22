@@ -255,7 +255,7 @@ const FilesystemApi = baseApi.injectEndpoints({
     // Upload Chunk - sends binary data directly as application/octet-stream
     // Using queryFn to ensure binary data is sent raw without any transformation
     uploadChunk: builder.mutation<UploadChunkResponse, UploadChunkRequest>({
-      queryFn: async ({ upload_id, chunk_index, chunk_offset, data }) => {
+      queryFn: async ({ upload_id, chunk_index, chunk_offset, data, signal }) => {
         try {
           const orgId = getFromLocalStorage(LOCAL_STORAGE_KEYS.XZAMP_ORGANIZATION_ID);
 
@@ -270,6 +270,7 @@ const FilesystemApi = baseApi.injectEndpoints({
               [LOCAL_STORAGE_KEYS.XZAMP_ORGANIZATION_ID]: orgId,
             },
             body: data,
+            signal,
           });
 
           if (!response.ok) {
@@ -287,6 +288,16 @@ const FilesystemApi = baseApi.injectEndpoints({
 
           return { data: result as UploadChunkResponse };
         } catch (error) {
+          // Handle abort error specifically
+          if (error instanceof Error && error.name === 'AbortError') {
+            return {
+              error: {
+                status: 'CUSTOM_ERROR',
+                error: 'Upload cancelled',
+              },
+            };
+          }
+
           return {
             error: {
               status: 'FETCH_ERROR',
