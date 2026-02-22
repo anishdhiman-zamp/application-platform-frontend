@@ -42,7 +42,7 @@ const SingleFileUploadProgressContent = ({ progress }: { progress: UploadProgres
           <Progress value={progress.percentage} className='flex-1' />
           <span className='f-12-400 text-GRAY_600 min-w-[40px] text-right'>{progress.percentage}%</span>
         </div>
-        <div className='f-11-400 text-GRAY_500 mt-1'>
+        <div className='f-11-400 text-GRAY_700 mt-1'>
           {formatFileSize(progress.loaded)} / {formatFileSize(progress.total)}
         </div>
       </div>
@@ -81,7 +81,7 @@ const FolderUploadProgressContent = ({
           <Progress value={overallPercentage} className='flex-1' />
           <span className='f-12-400 text-GRAY_600 min-w-[40px] text-right'>{overallPercentage}%</span>
         </div>
-        <div className='f-11-400 text-GRAY_500 mt-1'>
+        <div className='f-11-400 text-GRAY_700 mt-1'>
           {formatFileSize(folderProgress.uploadedBytes)} / {formatFileSize(folderProgress.totalBytes)}
         </div>
       </div>
