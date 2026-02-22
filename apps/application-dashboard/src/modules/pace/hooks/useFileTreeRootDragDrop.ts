@@ -5,13 +5,15 @@ import { useFileActions } from 'modules/pace/hooks/useFileActions';
 import {
   CLIPBOARD_OPERATION,
   type DropToSiblingData,
-  type FileConflict,
+  type FileItem,
 } from '@/modules/pace/components/files/file-tree.types';
+import { executeMoveOrCopy, parseDragData } from '@/modules/pace/components/files/file-tree.utils';
+import { useFileConflict } from '@/modules/pace/hooks/useFileConflict';
 
 interface UseFileTreeRootDragDropProps {
   rootSiblingNames: string[];
   containerRef: React.RefObject<HTMLDivElement | null>;
-  onConflict: (conflict: FileConflict) => void;
+  onFileMoved?: (oldPath: string, newFile: FileItem) => void;
 }
 
 interface UseFileTreeRootDragDropReturn {
@@ -24,13 +26,14 @@ interface UseFileTreeRootDragDropReturn {
 export const useFileTreeRootDragDrop = ({
   rootSiblingNames,
   containerRef,
-  onConflict,
+  onFileMoved,
 }: UseFileTreeRootDragDropProps): UseFileTreeRootDragDropReturn => {
   const { copyItem, moveItem } = useFileActions();
+  const { setConflict } = useFileConflict();
 
   const handleDropToRootSibling = useCallback(
     async (data: DropToSiblingData) => {
-      const { sourcePath, sourceName, isCopy } = data;
+      const { sourcePath, sourceName, sourceType, sourceSize, sourceOwner, isCopy } = data;
 
       if (!sourcePath.includes('/')) {
         return;
@@ -46,9 +49,12 @@ export const useFileTreeRootDragDrop = ({
       const operation = isCopy ? CLIPBOARD_OPERATION.COPY : 'move';
 
       if (hasConflict) {
-        onConflict({
+        setConflict({
           sourcePath,
           sourceName,
+          sourceType,
+          sourceSize,
+          sourceOwner,
           destinationPath,
           operation,
         });
@@ -57,17 +63,23 @@ export const useFileTreeRootDragDrop = ({
       }
 
       try {
-        if (isCopy) {
-          await copyItem(sourcePath, destinationPath);
-        } else {
-          await moveItem(sourcePath, destinationPath);
-        }
+        await executeMoveOrCopy({
+          sourcePath,
+          sourceName,
+          sourceType,
+          sourceSize,
+          sourceOwner,
+          destinationPath,
+          isCopy,
+          actions: { copyItem, moveItem },
+          onFileMoved,
+        });
       } catch (error) {
         captureException(error);
         toast.error('Failed to move/copy');
       }
     },
-    [copyItem, moveItem, rootSiblingNames, onConflict],
+    [copyItem, moveItem, rootSiblingNames, setConflict, onFileMoved],
   );
 
   const handleRootDragOver = useCallback(
@@ -97,20 +109,13 @@ export const useFileTreeRootDragDrop = ({
       }
 
       try {
-        const rawData = e.dataTransfer.getData('application/json');
+        const dragData = parseDragData(e);
 
-        if (!rawData) {
+        if (!dragData) {
           return;
         }
 
-        const data = JSON.parse(rawData);
-
-        if (!data?.path || !data?.name) {
-          return;
-        }
-
-        const sourcePath = data.path;
-        const sourceName = data.name;
+        const { sourcePath, sourceName, sourceType, sourceSize, sourceOwner } = dragData;
 
         if (!sourcePath.includes('/')) {
           return;
@@ -126,9 +131,12 @@ export const useFileTreeRootDragDrop = ({
         const operation = e.altKey ? CLIPBOARD_OPERATION.COPY : 'move';
 
         if (hasConflict) {
-          onConflict({
+          setConflict({
             sourcePath,
             sourceName,
+            sourceType,
+            sourceSize,
+            sourceOwner,
             destinationPath,
             operation,
           });
@@ -136,17 +144,23 @@ export const useFileTreeRootDragDrop = ({
           return;
         }
 
-        if (e.altKey) {
-          await copyItem(sourcePath, destinationPath);
-        } else {
-          await moveItem(sourcePath, destinationPath);
-        }
+        await executeMoveOrCopy({
+          sourcePath,
+          sourceName,
+          sourceType,
+          sourceSize,
+          sourceOwner,
+          destinationPath,
+          isCopy: e.altKey,
+          actions: { copyItem, moveItem },
+          onFileMoved,
+        });
       } catch (error) {
         captureException(error);
         toast.error('Failed to move/copy');
       }
     },
-    [copyItem, moveItem, rootSiblingNames, containerRef, onConflict],
+    [copyItem, moveItem, rootSiblingNames, containerRef, setConflict, onFileMoved],
   );
 
   return {

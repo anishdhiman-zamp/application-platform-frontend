@@ -1,7 +1,13 @@
 import { format } from 'date-fns';
 import {
+  CLIPBOARD_OPERATION,
+  CONFLICT_RESOLUTION,
+  type ConflictResolution,
   FILE_TYPE,
+  type FileConflict,
   type FileItem,
+  type FileType,
+  type FlatNode,
   type SortDirection,
   type SortOption,
   type TreeNode,
@@ -164,6 +170,25 @@ export function filterTreeNodes(nodes: TreeNode[], searchQuery: string): TreeNod
 }
 
 /**
+ * Flattens a hierarchical tree into a flat array for virtualized rendering.
+ * Only includes children of expanded folders.
+ */
+export function flattenTree(nodes: TreeNode[], expandedPaths: Set<string>, depth = 0): FlatNode[] {
+  const result: FlatNode[] = [];
+  const siblingNames = nodes.map((n) => n.name);
+
+  for (const node of nodes) {
+    result.push({ ...node, depth, siblingNames });
+
+    if (node.children && expandedPaths.has(node.path)) {
+      result.push(...flattenTree(node.children, expandedPaths, depth + 1));
+    }
+  }
+
+  return result;
+}
+
+/**
  * Builds a map of path -> TreeNode for quick lookups
  */
 export function buildNodeMap(nodes: TreeNode[]): Map<string, TreeNode> {
@@ -292,4 +317,201 @@ export function isChildOfProtectedFolder(path: string, orgSlug: string, username
   const rootFolder = getRootFolderFromPath(path);
 
   return rootFolder === orgSlug || rootFolder === username;
+}
+
+export interface FileActions {
+  copyItem: (sourcePath: string, destinationPath: string) => Promise<void>;
+  moveItem: (sourcePath: string, destinationPath: string) => Promise<void>;
+  deleteItem: (path: string) => Promise<void>;
+}
+
+interface ConflictCallbacks {
+  clearClipboard?: () => void;
+  onFileMoved?: (oldPath: string, newFile: FileItem) => void;
+}
+
+/**
+ * Executes conflict resolution logic for file operations.
+ * Centralizes the duplicated conflict resolution code from multiple hooks.
+ */
+export async function executeConflictResolution(
+  resolution: ConflictResolution,
+  conflict: FileConflict,
+  siblingNames: string[],
+  actions: FileActions,
+  callbacks: ConflictCallbacks,
+): Promise<void> {
+  const { sourcePath, sourceName, sourceType, sourceSize, sourceOwner, destinationPath, operation } = conflict;
+  const { copyItem, moveItem, deleteItem } = actions;
+  const { clearClipboard, onFileMoved } = callbacks;
+
+  if (resolution === CONFLICT_RESOLUTION.KEEP_BOTH) {
+    const newName = generateKeepBothName(sourceName, siblingNames);
+    const parentPath = destinationPath.includes('/') ? destinationPath.slice(0, destinationPath.lastIndexOf('/')) : '';
+    const newDestinationPath = parentPath ? `${parentPath}/${newName}` : newName;
+
+    if (operation === CLIPBOARD_OPERATION.COPY) {
+      await copyItem(sourcePath, newDestinationPath);
+    } else {
+      await moveItem(sourcePath, newDestinationPath);
+
+      if (operation === CLIPBOARD_OPERATION.CUT) {
+        clearClipboard?.();
+      }
+
+      const newFile: FileItem = {
+        path: newDestinationPath,
+        name: newName,
+        type: sourceType,
+        size: sourceSize,
+        mtime_ms: Date.now(),
+        owner: sourceOwner,
+      };
+
+      onFileMoved?.(sourcePath, newFile);
+    }
+  } else if (resolution === CONFLICT_RESOLUTION.REPLACE) {
+    await deleteItem(destinationPath);
+
+    if (operation === CLIPBOARD_OPERATION.COPY) {
+      await copyItem(sourcePath, destinationPath);
+    } else {
+      await moveItem(sourcePath, destinationPath);
+
+      if (operation === CLIPBOARD_OPERATION.CUT) {
+        clearClipboard?.();
+      }
+
+      const newFile: FileItem = {
+        path: destinationPath,
+        name: sourceName,
+        type: sourceType,
+        size: sourceSize,
+        mtime_ms: Date.now(),
+        owner: sourceOwner,
+      };
+
+      onFileMoved?.(sourcePath, newFile);
+    }
+  }
+}
+
+/**
+ * Parsed drag data from dataTransfer
+ */
+export interface ParsedDragData {
+  sourcePath: string;
+  sourceName: string;
+  sourceType: FileType;
+  sourceSize: number | null;
+  sourceOwner: string;
+}
+
+/**
+ * Parses drag data from a drag event's dataTransfer.
+ * Returns null if the data is invalid or missing.
+ */
+export function parseDragData(e: React.DragEvent): ParsedDragData | null {
+  try {
+    const rawData = e.dataTransfer.getData('application/json');
+
+    if (!rawData) {
+      return null;
+    }
+
+    const data = JSON.parse(rawData);
+
+    if (!data?.path || !data?.name) {
+      return null;
+    }
+
+    return {
+      sourcePath: data.path,
+      sourceName: data.name,
+      sourceType: data.type as FileType,
+      sourceSize: data.size ?? null,
+      sourceOwner: data.owner ?? '',
+    };
+  } catch {
+    return null;
+  }
+}
+
+interface ExecuteMoveOrCopyParams {
+  sourcePath: string;
+  sourceName: string;
+  sourceType: FileType;
+  sourceSize: number | null;
+  sourceOwner: string;
+  destinationPath: string;
+  isCopy: boolean;
+  actions: Pick<FileActions, 'copyItem' | 'moveItem'>;
+  onFileMoved?: (oldPath: string, newFile: FileItem) => void;
+}
+
+/**
+ * Executes a move or copy operation.
+ * Centralizes the duplicated move/copy execution code from multiple hooks.
+ */
+export async function executeMoveOrCopy({
+  sourcePath,
+  sourceName,
+  sourceType,
+  sourceSize,
+  sourceOwner,
+  destinationPath,
+  isCopy,
+  actions,
+  onFileMoved,
+}: ExecuteMoveOrCopyParams): Promise<void> {
+  const { copyItem, moveItem } = actions;
+
+  if (isCopy) {
+    await copyItem(sourcePath, destinationPath);
+  } else {
+    await moveItem(sourcePath, destinationPath);
+
+    const newFile: FileItem = {
+      path: destinationPath,
+      name: sourceName,
+      type: sourceType,
+      size: sourceSize,
+      mtime_ms: Date.now(),
+      owner: sourceOwner,
+    };
+
+    onFileMoved?.(sourcePath, newFile);
+  }
+}
+
+/**
+ * Result of paste validation
+ */
+export type PasteValidationResult =
+  | { valid: false; reason: 'no-op' | 'invalid-target' }
+  | { valid: true; hasConflict: boolean; destinationPath: string };
+
+/**
+ * Validates a paste operation and returns the result.
+ */
+export function validatePasteOperation(
+  clipboard: { path: string; name: string; operation: string },
+  targetPath: string,
+  childrenNames: string[],
+): PasteValidationResult {
+  const destinationPath = `${targetPath}/${clipboard.name}`;
+
+  if (clipboard.operation === 'cut' && clipboard.path === destinationPath) {
+    return { valid: false, reason: 'no-op' };
+  }
+
+  const isInvalidTarget = targetPath === clipboard.path || targetPath.startsWith(`${clipboard.path}/`);
+
+  if (isInvalidTarget) {
+    return { valid: false, reason: 'invalid-target' };
+  }
+
+  const hasConflict = childrenNames.includes(clipboard.name);
+
+  return { valid: true, hasConflict, destinationPath };
 }

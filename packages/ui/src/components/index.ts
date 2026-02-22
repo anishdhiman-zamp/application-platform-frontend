@@ -7,6 +7,7 @@ export * from './ui/button';
 export * from './ui/checkbox';
 export * from './ui/combobox';
 export * from './ui/combobox-v2';
+export * from './ui/context-menu';
 export * from './ui/copy-to-clipboard';
 export * from './ui/dialog';
 export * from './ui/dropdown-menu';

@@ -17,9 +17,18 @@ const SEARCH_DEBOUNCE_MS = 300;
 interface FilesHierarchyProps {
   onSelectFile?: (file: FileItem | null) => void;
   selectedFile?: FileItem | null;
+  onFileMoved?: (oldPath: string, newFile: FileItem) => void;
+  onFileDeleted?: (deletedPath: string) => void;
+  onFileCreated?: (newFile: FileItem) => void;
 }
 
-const FilesHierarchy = ({ onSelectFile, selectedFile }: FilesHierarchyProps) => {
+const FilesHierarchy = ({
+  onSelectFile,
+  selectedFile,
+  onFileMoved,
+  onFileDeleted,
+  onFileCreated,
+}: FilesHierarchyProps) => {
   const [searchInput, setSearchInput] = useState('');
   const [debouncedSearchQuery, setDebouncedSearchQuery] = useState('');
   const [sortBy, setSortBy] = useState<SortOption>(SORT_OPTION.NAME);
@@ -80,7 +89,7 @@ const FilesHierarchy = ({ onSelectFile, selectedFile }: FilesHierarchyProps) => 
         noDataBanner={<FilesEmptyState />}
         skeletonType={SkeletonTypes.CUSTOM}
         loader={<ImageLoader imageSrc={ZAMP_LOGO_LOADER_SVG} width={150} height={150} className='bg-BG_GRAY_2' />}
-        className='flex-1 overflow-y-auto pb-20 [scrollbar-width:none]'
+        className='flex-1 overflow-y-auto [scrollbar-width:none]'
       >
         <FileTree
           files={files?.files ?? []}
@@ -89,6 +98,9 @@ const FilesHierarchy = ({ onSelectFile, selectedFile }: FilesHierarchyProps) => 
           sortDirection={sortDirection}
           selectedPath={selectedFile?.path ?? null}
           onSelectFile={onSelectFile}
+          onFileMoved={onFileMoved}
+          onFileDeleted={onFileDeleted}
+          onFileCreated={onFileCreated}
         />
       </CommonWrapper>
 

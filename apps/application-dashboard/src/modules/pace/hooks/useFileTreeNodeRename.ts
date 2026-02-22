@@ -2,12 +2,14 @@ import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { captureException } from '@sentry/browser';
 import { toast } from '@zamp-platform/ui';
 import { useFileActions } from 'modules/pace/hooks/useFileActions';
-import type { TreeNode } from '@/modules/pace/components/files/file-tree.types';
+import type { FileItem, TreeNode } from '@/modules/pace/components/files/file-tree.types';
+import { buildFullPath, getParentPath } from '@/modules/pace/components/files/file-tree.utils';
 
 interface UseFileTreeNodeRenameProps {
   node: TreeNode;
   siblingNames: string[];
   isProtected?: boolean;
+  onFileMoved?: (oldPath: string, newFile: FileItem) => void;
 }
 
 interface UseFileTreeNodeRenameReturn {
@@ -26,6 +28,7 @@ export const useFileTreeNodeRename = ({
   node,
   siblingNames,
   isProtected = false,
+  onFileMoved,
 }: UseFileTreeNodeRenameProps): UseFileTreeNodeRenameReturn => {
   const [isRenaming, setIsRenaming] = useState(false);
   const [renameValue, setRenameValue] = useState(node.name);
@@ -46,7 +49,7 @@ export const useFileTreeNodeRename = ({
     setIsRenaming(true);
   }, [node.name, isProtected]);
 
-  const handleRenameSubmit = async () => {
+  const handleRenameSubmit = useCallback(async () => {
     const trimmedValue = renameValue.trim();
 
     if (!trimmedValue || trimmedValue === node.name || isDuplicateName) {
@@ -59,25 +62,41 @@ export const useFileTreeNodeRename = ({
     try {
       await renameItem(node.path, trimmedValue);
       setIsRenaming(false);
+
+      const parentPath = getParentPath(node.path);
+      const newPath = buildFullPath(parentPath, trimmedValue);
+      const newFile: FileItem = {
+        path: newPath,
+        name: trimmedValue,
+        type: node.type,
+        size: node.size,
+        mtime_ms: Date.now(),
+        owner: node.owner,
+      };
+
+      onFileMoved?.(node.path, newFile);
     } catch (error) {
       captureException(error);
       toast.error('Failed to rename');
       setRenameValue(node.name);
       setIsRenaming(false);
     }
-  };
+  }, [renameValue, node, isDuplicateName, renameItem, onFileMoved]);
 
-  const handleRenameKeyDown = (e: React.KeyboardEvent<HTMLInputElement>) => {
-    e.stopPropagation();
+  const handleRenameKeyDown = useCallback(
+    (e: React.KeyboardEvent<HTMLInputElement>) => {
+      e.stopPropagation();
 
-    if (e.key === 'Enter') {
-      e.preventDefault();
-      handleRenameSubmit();
-    } else if (e.key === 'Escape') {
-      setIsRenaming(false);
-      setRenameValue(node.name);
-    }
-  };
+      if (e.key === 'Enter') {
+        e.preventDefault();
+        handleRenameSubmit();
+      } else if (e.key === 'Escape') {
+        setIsRenaming(false);
+        setRenameValue(node.name);
+      }
+    },
+    [handleRenameSubmit, node.name],
+  );
 
   const handleRenameInputRef = useCallback((element: HTMLInputElement | null) => {
     renameInputRef.current = element;
