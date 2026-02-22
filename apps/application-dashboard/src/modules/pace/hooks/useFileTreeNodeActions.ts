@@ -15,6 +15,7 @@ import {
   executeMoveOrCopy,
   validatePasteOperation,
 } from '@/modules/pace/components/files/file-tree.utils';
+import { CONTEXT_MENU_ACTION_IDS, FILE_TOAST_MESSAGES } from '@/modules/pace/components/files/files.constants';
 import { useFileConflict } from '@/modules/pace/hooks/useFileConflict';
 import { useProtectedFolders } from '@/modules/pace/hooks/useProtectedFolders';
 
@@ -63,47 +64,47 @@ export const useFileTreeNodeActions = ({
 
     try {
       switch (actionId) {
-        case 'create-file':
+        case CONTEXT_MENU_ACTION_IDS.CREATE_FILE:
           onOpenCreateModal(CREATE_ITEM_TYPE.FILE);
           break;
-        case 'create-folder':
+        case CONTEXT_MENU_ACTION_IDS.CREATE_FOLDER:
           onOpenCreateModal(CREATE_ITEM_TYPE.FOLDER);
           break;
-        case 'rename':
+        case CONTEXT_MENU_ACTION_IDS.RENAME:
           if (isProtected) {
-            toast.error('Cannot rename protected folders');
+            toast.error(FILE_TOAST_MESSAGES.CANNOT_RENAME_PROTECTED);
             break;
           }
           onStartRename();
           break;
-        case 'delete':
+        case CONTEXT_MENU_ACTION_IDS.DELETE:
           if (isProtected) {
-            toast.error('Cannot delete protected folders');
+            toast.error(FILE_TOAST_MESSAGES.CANNOT_DELETE_PROTECTED);
             break;
           }
           await deleteItem(node.path);
           onFileDeleted?.(node.path);
           break;
-        case 'duplicate':
+        case CONTEXT_MENU_ACTION_IDS.DUPLICATE:
           await duplicateItem(node.path);
           break;
-        case 'copy':
+        case CONTEXT_MENU_ACTION_IDS.COPY:
           setCopyClipboard(node.path, node.name, node.type, node.size, node.owner);
           break;
-        case 'cut':
+        case CONTEXT_MENU_ACTION_IDS.CUT:
           if (isProtected) {
-            toast.error('Cannot cut protected folders');
+            toast.error(FILE_TOAST_MESSAGES.CANNOT_CUT_PROTECTED);
             break;
           }
           setCutClipboard(node.path, node.name, node.type, node.size, node.owner);
           break;
-        case 'paste':
+        case CONTEXT_MENU_ACTION_IDS.PASTE:
           if (clipboard) {
             const validation = validatePasteOperation(clipboard, node.path, childrenNames);
 
             if (!validation.valid) {
               if (validation.reason === 'invalid-target') {
-                toast.error('Cannot paste a folder into itself');
+                toast.error(FILE_TOAST_MESSAGES.CANNOT_PASTE_INTO_ITSELF);
               }
               break;
             }
@@ -178,7 +179,7 @@ export const useFileTreeNodeActions = ({
       onFileCreated?.(newFile);
     } catch (error) {
       captureException(error);
-      toast.error('Failed to create item');
+      toast.error(FILE_TOAST_MESSAGES.FAILED_TO_CREATE_ITEM);
     }
   };
 

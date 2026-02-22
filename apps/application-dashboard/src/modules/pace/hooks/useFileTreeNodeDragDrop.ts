@@ -9,6 +9,7 @@ import {
   type TreeNode,
 } from '@/modules/pace/components/files/file-tree.types';
 import { executeMoveOrCopy, parseDragData } from '@/modules/pace/components/files/file-tree.utils';
+import { FILE_TOAST_MESSAGES } from '@/modules/pace/components/files/files.constants';
 import { useFileConflict } from '@/modules/pace/hooks/useFileConflict';
 import { useProtectedFolders } from '@/modules/pace/hooks/useProtectedFolders';
 
@@ -151,7 +152,7 @@ export const useFileTreeNodeDragDrop = ({
       const { sourcePath, sourceName, sourceType, sourceSize, sourceOwner } = dragData;
 
       if (isProtectedRoot(sourcePath)) {
-        toast.error('Cannot move protected folders');
+        toast.error(FILE_TOAST_MESSAGES.CANNOT_MOVE_PROTECTED);
 
         return;
       }
@@ -185,7 +186,7 @@ export const useFileTreeNodeDragDrop = ({
       }
 
       if (isInvalidCrossMove(sourcePath, destinationPath)) {
-        toast.error('Cannot move protected folders into each other');
+        toast.error(FILE_TOAST_MESSAGES.CANNOT_MOVE_PROTECTED_INTO_EACH_OTHER);
 
         return;
       }
@@ -228,7 +229,7 @@ export const useFileTreeNodeDragDrop = ({
       });
     } catch (error) {
       captureException(error);
-      toast.error('Failed to move/copy');
+      toast.error(FILE_TOAST_MESSAGES.FAILED_TO_MOVE_COPY);
     }
   };
 

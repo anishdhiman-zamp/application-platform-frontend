@@ -8,6 +8,7 @@ import {
   type FileItem,
 } from '@/modules/pace/components/files/file-tree.types';
 import { executeMoveOrCopy, parseDragData } from '@/modules/pace/components/files/file-tree.utils';
+import { FILE_TOAST_MESSAGES } from '@/modules/pace/components/files/files.constants';
 import { useFileConflict } from '@/modules/pace/hooks/useFileConflict';
 
 interface UseFileTreeRootDragDropProps {
@@ -76,7 +77,7 @@ export const useFileTreeRootDragDrop = ({
         });
       } catch (error) {
         captureException(error);
-        toast.error('Failed to move/copy');
+        toast.error(FILE_TOAST_MESSAGES.FAILED_TO_MOVE_COPY);
       }
     },
     [copyItem, moveItem, rootSiblingNames, setConflict, onFileMoved],
@@ -157,7 +158,7 @@ export const useFileTreeRootDragDrop = ({
         });
       } catch (error) {
         captureException(error);
-        toast.error('Failed to move/copy');
+        toast.error(FILE_TOAST_MESSAGES.FAILED_TO_MOVE_COPY);
       }
     },
     [copyItem, moveItem, rootSiblingNames, containerRef, setConflict, onFileMoved],
