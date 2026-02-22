@@ -104,6 +104,7 @@ export interface TreeNode {
 export interface FlatNode extends TreeNode {
   depth: number;
   siblingNames: string[];
+  parentPath: string | null;
 }
 
 /**
@@ -131,15 +132,6 @@ export interface FilesPreviewProps {
   selectedFile: FileItem | null;
 }
 
-export interface DropToSiblingData {
-  sourcePath: string;
-  sourceName: string;
-  sourceType: FileType;
-  sourceSize: number | null;
-  sourceOwner: string;
-  isCopy: boolean;
-}
-
 /**
  * Props for the FileTreeNode component
  */
@@ -150,9 +142,9 @@ export interface FileTreeNodeProps {
   selectedPath: string | null;
   originalNodeMap: Map<string, TreeNode>;
   siblingNames: string[];
+  parentPath: string | null;
   onToggleExpand: (path: string) => void;
   onSelect: (path: string) => void;
-  onDropToSibling?: (data: DropToSiblingData) => void;
   onFileMoved?: (oldPath: string, newFile: FileItem) => void;
   onFileDeleted?: (deletedPath: string) => void;
   onFileCreated?: (newFile: FileItem) => void;
@@ -160,6 +152,7 @@ export interface FileTreeNodeProps {
   onUploadFolder?: (files: FileList, targetPath: string) => void;
   onTriggerFileUpload?: (targetPath: string) => void;
   onTriggerFolderUpload?: (targetPath: string) => void;
+  onDragOverFolderChange?: (path: string | null) => void;
   style?: React.CSSProperties;
 }
 

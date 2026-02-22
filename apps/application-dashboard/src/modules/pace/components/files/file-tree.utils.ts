@@ -173,15 +173,20 @@ export function filterTreeNodes(nodes: TreeNode[], searchQuery: string): TreeNod
  * Flattens a hierarchical tree into a flat array for virtualized rendering.
  * Only includes children of expanded folders.
  */
-export function flattenTree(nodes: TreeNode[], expandedPaths: Set<string>, depth = 0): FlatNode[] {
+export function flattenTree(
+  nodes: TreeNode[],
+  expandedPaths: Set<string>,
+  depth = 0,
+  parentPath: string | null = null,
+): FlatNode[] {
   const result: FlatNode[] = [];
   const siblingNames = nodes.map((n) => n.name);
 
   for (const node of nodes) {
-    result.push({ ...node, depth, siblingNames });
+    result.push({ ...node, depth, siblingNames, parentPath });
 
     if (node.children && expandedPaths.has(node.path)) {
-      result.push(...flattenTree(node.children, expandedPaths, depth + 1));
+      result.push(...flattenTree(node.children, expandedPaths, depth + 1, node.path));
     }
   }
 

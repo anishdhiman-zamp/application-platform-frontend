@@ -1,12 +1,7 @@
 import { type RefObject, useRef, useState } from 'react';
 import { captureException } from '@sentry/browser';
 import { toast } from '@zamp-platform/ui';
-import {
-  CLIPBOARD_OPERATION,
-  type DropToSiblingData,
-  type FileItem,
-  type TreeNode,
-} from '@/modules/pace/components/files/file-tree.types';
+import { CLIPBOARD_OPERATION, type FileItem, type TreeNode } from '@/modules/pace/components/files/file-tree.types';
 import { executeMoveOrCopy, parseDragData } from '@/modules/pace/components/files/file-tree.utils';
 import { useFileTreeContext } from '@/modules/pace/hooks/useFileTreeContext';
 
@@ -16,17 +11,18 @@ interface UseFileTreeNodeDragDropProps {
   isFolder: boolean;
   isExpanded: boolean;
   childrenNames: string[];
+  siblingNames: string[];
   isProtected?: boolean;
+  parentPath?: string | null;
   onToggleExpand: (path: string) => void;
-  onDropToSibling?: (data: DropToSiblingData) => void;
   onFileMoved?: (oldPath: string, newFile: FileItem) => void;
   onExternalFileDrop?: (files: FileList, targetPath: string) => void;
+  onDragOverFolderChange?: (path: string | null) => void;
 }
 
 interface UseFileTreeNodeDragDropReturn {
   isDragging: boolean;
   isDragOver: boolean;
-  isDragOverTop: boolean;
   handleDragStart: (e: React.DragEvent) => void;
   handleDragEnd: () => void;
   handleDragOver: (e: React.DragEvent) => void;
@@ -40,15 +36,16 @@ export const useFileTreeNodeDragDrop = ({
   isFolder,
   isExpanded,
   childrenNames,
+  siblingNames,
   isProtected = false,
+  parentPath,
   onToggleExpand,
-  onDropToSibling,
   onFileMoved,
   onExternalFileDrop,
+  onDragOverFolderChange,
 }: UseFileTreeNodeDragDropProps): UseFileTreeNodeDragDropReturn => {
   const [isDragging, setIsDragging] = useState(false);
   const [isDragOver, setIsDragOver] = useState(false);
-  const [isDragOverTop, setIsDragOverTop] = useState(false);
 
   const expandTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 
@@ -95,34 +92,20 @@ export const useFileTreeNodeDragDrop = ({
     e.preventDefault();
     e.stopPropagation();
 
-    const rect = nodeRef.current?.getBoundingClientRect();
-
-    if (rect) {
-      const topThreshold = rect.top + rect.height * 0.25;
-      const isOverTop = e.clientY < topThreshold;
-
-      if (isOverTop && onDropToSibling) {
-        e.dataTransfer.dropEffect = e.altKey ? 'copy' : 'move';
-        setIsDragOverTop(true);
-        setIsDragOver(false);
-        clearExpandTimeout();
-
-        return;
-      }
-    }
-
-    setIsDragOverTop(false);
-
     if (isFolder) {
       e.dataTransfer.dropEffect = e.altKey ? 'copy' : 'move';
       setIsDragOver(true);
+      onDragOverFolderChange?.(node.path);
 
       if (!isExpanded && !expandTimeoutRef.current) {
         expandTimeoutRef.current = setTimeout(() => {
           onToggleExpand(node.path);
           expandTimeoutRef.current = null;
-        }, 800);
+        }, 400);
       }
+    } else {
+      // For files, keep parent folder overlay visible
+      onDragOverFolderChange?.(parentPath ?? null);
     }
   };
 
@@ -131,8 +114,9 @@ export const useFileTreeNodeDragDrop = ({
     e.stopPropagation();
     if (nodeRef.current && !nodeRef.current.contains(e.relatedTarget as Node)) {
       setIsDragOver(false);
-      setIsDragOverTop(false);
       clearExpandTimeout();
+      // Don't clear dragOverFolderPath here - let the next dragOver event set the correct value
+      // This prevents flashing when moving between files in the same folder
     }
   };
 
@@ -140,22 +124,33 @@ export const useFileTreeNodeDragDrop = ({
     e.preventDefault();
     e.stopPropagation();
     setIsDragOver(false);
-    setIsDragOverTop(false);
     clearExpandTimeout();
+    onDragOverFolderChange?.(null);
 
-    if (isExternalFileDrop(e) && isFolder && onExternalFileDrop) {
-      const files = e.dataTransfer.files;
+    // Handle external file drops (from desktop)
+    if (isExternalFileDrop(e)) {
+      if (isFolder && onExternalFileDrop) {
+        const files = e.dataTransfer.files;
 
-      if (files.length > 0) {
-        if (!isExpanded) {
-          onToggleExpand(node.path);
+        if (files.length > 0) {
+          if (!isExpanded) {
+            onToggleExpand(node.path);
+          }
+          onExternalFileDrop(files, node.path);
         }
-        onExternalFileDrop(files, node.path);
+      } else if (parentPath && onExternalFileDrop) {
+        // Drop on a file - upload to parent folder
+        const files = e.dataTransfer.files;
+
+        if (files.length > 0) {
+          onExternalFileDrop(files, parentPath);
+        }
       }
 
       return;
     }
 
+    // Handle internal drag (moving/copying files within the tree)
     try {
       const dragData = parseDragData(e);
 
@@ -171,29 +166,12 @@ export const useFileTreeNodeDragDrop = ({
         return;
       }
 
-      const rect = nodeRef.current?.getBoundingClientRect();
+      // Determine target folder - if dropping on a file, use its parent folder
+      const targetFolder = isFolder ? node.path : parentPath;
 
-      if (rect && onDropToSibling) {
-        const topThreshold = rect.top + rect.height * 0.25;
-        const isOverTop = e.clientY < topThreshold;
+      if (!targetFolder) return;
 
-        if (isOverTop) {
-          onDropToSibling({
-            sourcePath,
-            sourceName,
-            sourceType,
-            sourceSize,
-            sourceOwner,
-            isCopy: e.altKey,
-          });
-
-          return;
-        }
-      }
-
-      if (!isFolder) return;
-
-      const destinationPath = `${node.path}/${sourceName}`;
+      const destinationPath = `${targetFolder}/${sourceName}`;
 
       if (!e.altKey && sourcePath === destinationPath) {
         return;
@@ -205,11 +183,14 @@ export const useFileTreeNodeDragDrop = ({
         return;
       }
 
-      const isInvalidTarget = node.path === sourcePath || node.path.startsWith(`${sourcePath}/`);
+      const isInvalidTarget = targetFolder === sourcePath || targetFolder.startsWith(`${sourcePath}/`);
 
       if (isInvalidTarget) return;
 
-      const hasConflict = childrenNames.includes(sourceName);
+      // Get children names of target folder
+      // If dropping on a folder, use its children; if dropping on a file, use its siblings (parent's children)
+      const targetChildrenNames = isFolder ? childrenNames : siblingNames;
+      const hasConflict = targetChildrenNames.includes(sourceName);
       const operation = e.altKey ? CLIPBOARD_OPERATION.COPY : 'move';
 
       if (hasConflict) {
@@ -226,7 +207,7 @@ export const useFileTreeNodeDragDrop = ({
         return;
       }
 
-      if (!isExpanded) {
+      if (isFolder && !isExpanded) {
         onToggleExpand(node.path);
       }
 
@@ -250,7 +231,6 @@ export const useFileTreeNodeDragDrop = ({
   return {
     isDragging,
     isDragOver,
-    isDragOverTop,
     handleDragStart,
     handleDragEnd,
     handleDragOver,

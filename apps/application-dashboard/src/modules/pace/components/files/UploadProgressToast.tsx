@@ -2,10 +2,9 @@
 
 import { useCallback, useEffect, useRef } from 'react';
 import { Button, Progress } from '@zamp-platform/ui';
-import { FolderUp, Loader2, X } from 'lucide-react';
+import { FileUp, FolderUp, Loader2, X } from 'lucide-react';
 import { toast } from 'sonner';
-import type { FolderUploadProgress } from '@/modules/pace/components/files/file-tree.types';
-import { UPLOAD_TYPE } from '@/modules/pace/components/files/file-tree.types';
+import { type FolderUploadProgress, UPLOAD_TYPE } from '@/modules/pace/components/files/file-tree.types';
 import { formatFileSize } from '@/modules/pace/components/files/file-tree.utils';
 
 interface UploadProgress {
@@ -30,16 +29,22 @@ interface UploadProgressToastProps {
   onCancel: () => void;
 }
 
-const ChunkedFileProgress = ({ progress }: { progress: UploadProgress }) => {
+const SingleFileUploadProgressContent = ({ progress }: { progress: UploadProgress }) => {
   return (
-    <div className='border-GRAY_200 mt-2 border-t pt-2'>
-      <div className='f-12-500 text-GRAY_700 mb-1'>Current file progress</div>
+    <div className='flex w-full flex-col gap-y-2'>
       <div className='flex items-center gap-2'>
-        <Progress value={progress.percentage} className='flex-1' />
-        <span className='f-12-400 text-GRAY_600 min-w-[40px] text-right'>{progress.percentage}%</span>
+        <Loader2 className='text-BLUE_500 size-4 animate-spin' />
+        <span className='f-13-500 text-GRAY_1000 max-w-[240px] truncate'>{progress.fileName}</span>
       </div>
-      <div className='f-11-400 text-GRAY_500 mt-1'>
-        {formatFileSize(progress.loaded)} / {formatFileSize(progress.total)}
+
+      <div className='mt-1'>
+        <div className='flex items-center gap-2'>
+          <Progress value={progress.percentage} className='flex-1' />
+          <span className='f-12-400 text-GRAY_600 min-w-[40px] text-right'>{progress.percentage}%</span>
+        </div>
+        <div className='f-11-400 text-GRAY_500 mt-1'>
+          {formatFileSize(progress.loaded)} / {formatFileSize(progress.total)}
+        </div>
       </div>
     </div>
   );
@@ -55,7 +60,6 @@ const FolderUploadProgressContent = ({
   const overallPercentage =
     folderProgress.totalBytes > 0 ? Math.round((folderProgress.uploadedBytes / folderProgress.totalBytes) * 100) : 0;
 
-  const isChunkedUpload = currentFile?.uploadType === UPLOAD_TYPE.CHUNKED;
   const currentFileIndex = Math.min(folderProgress.completedFiles + 1, folderProgress.totalFiles);
 
   return (
@@ -81,13 +85,11 @@ const FolderUploadProgressContent = ({
           {formatFileSize(folderProgress.uploadedBytes)} / {formatFileSize(folderProgress.totalBytes)}
         </div>
       </div>
-
-      {isChunkedUpload && currentFile && <ChunkedFileProgress progress={currentFile} />}
     </div>
   );
 };
 
-const UploadToastContent = ({ uploadState, onCancel }: UploadProgressToastProps) => {
+const FolderUploadToastContent = ({ uploadState, onCancel }: UploadProgressToastProps) => {
   return (
     <div className='flex w-full flex-col gap-y-3'>
       <div className='flex items-center justify-between'>
@@ -116,6 +118,30 @@ const UploadToastContent = ({ uploadState, onCancel }: UploadProgressToastProps)
   );
 };
 
+const SingleFileUploadToastContent = ({ uploadState, onCancel }: UploadProgressToastProps) => {
+  return (
+    <div className='flex w-full flex-col gap-y-3'>
+      <div className='flex items-center justify-between'>
+        <div className='flex items-center gap-2'>
+          <div className='bg-BLUE_100 flex size-8 items-center justify-center rounded-full'>
+            <FileUp className='text-BLUE_600 size-4' />
+          </div>
+          <span className='f-14-600 text-GRAY_1000'>Uploading file</span>
+        </div>
+        <Button
+          variant='ghost'
+          size='small'
+          className='text-GRAY_600 hover:text-GRAY_900 h-6 w-6 p-0'
+          onClick={onCancel}
+        >
+          <X className='size-4' />
+        </Button>
+      </div>
+      {uploadState.currentUpload && <SingleFileUploadProgressContent progress={uploadState.currentUpload} />}
+    </div>
+  );
+};
+
 export const UploadProgressToast = ({ uploadState, onCancel }: UploadProgressToastProps) => {
   const toastIdRef = useRef<string | number | null>(null);
 
@@ -128,14 +154,21 @@ export const UploadProgressToast = ({ uploadState, onCancel }: UploadProgressToa
 
   useEffect(() => {
     const isFolderUpload = uploadState.folderUpload !== null;
+    const isChunkedFileUpload =
+      uploadState.currentUpload !== null && uploadState.currentUpload.uploadType === UPLOAD_TYPE.CHUNKED;
 
-    if (!uploadState.isUploading || !isFolderUpload) {
+    // Show toast for folder uploads or chunked file uploads
+    if (!uploadState.isUploading || (!isFolderUpload && !isChunkedFileUpload)) {
       dismissUploadProgress();
 
       return;
     }
 
-    const toastContent = <UploadToastContent uploadState={uploadState} onCancel={onCancel} />;
+    const toastContent = isFolderUpload ? (
+      <FolderUploadToastContent uploadState={uploadState} onCancel={onCancel} />
+    ) : (
+      <SingleFileUploadToastContent uploadState={uploadState} onCancel={onCancel} />
+    );
 
     if (toastIdRef.current) {
       toast(toastContent, {

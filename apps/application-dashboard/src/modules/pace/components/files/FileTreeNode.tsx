@@ -22,15 +22,16 @@ const FileTreeNode = memo(function FileTreeNode({
   selectedPath,
   originalNodeMap,
   siblingNames,
+  parentPath,
   onToggleExpand,
   onSelect,
-  onDropToSibling,
   onFileMoved,
   onFileDeleted,
   onFileCreated,
   onUploadFiles,
   onTriggerFileUpload,
   onTriggerFolderUpload,
+  onDragOverFolderChange,
   style,
 }: FileTreeNodeProps) {
   const nodeRef = useRef<HTMLDivElement>(null);
@@ -96,11 +97,13 @@ const FileTreeNode = memo(function FileTreeNode({
     isFolder,
     isExpanded,
     childrenNames,
+    siblingNames,
     isProtected,
+    parentPath,
     onToggleExpand,
-    onDropToSibling,
     onFileMoved,
     onExternalFileDrop: handleExternalFileDrop,
+    onDragOverFolderChange,
   });
 
   const actions = useFileTreeNodeActions({
@@ -148,10 +151,6 @@ const FileTreeNode = memo(function FileTreeNode({
           onCreate={(name) => actions.handleCreate(name, node.path, createModalType)}
           existingNames={childrenNames}
         />
-      )}
-
-      {dragDrop.isDragOverTop && (
-        <div className='bg-GRAY_500 -mb-0.5 h-0.5 rounded-full' style={{ marginLeft: `${depth * 24 + 8}px` }} />
       )}
 
       <FileTreeNodeContextMenu

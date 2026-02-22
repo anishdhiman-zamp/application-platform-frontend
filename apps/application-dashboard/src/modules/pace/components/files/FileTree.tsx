@@ -2,7 +2,7 @@
 
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { useVirtualizer } from '@tanstack/react-virtual';
-import type { FileItem, FileTreeProps } from '@/modules/pace/components/files/file-tree.types';
+import { type FileItem, type FileTreeProps } from '@/modules/pace/components/files/file-tree.types';
 import {
   buildFileTree,
   buildNodeMap,
@@ -15,7 +15,6 @@ import FileTreeEmptyState from '@/modules/pace/components/files/FileTreeEmptySta
 import FileTreeNode from '@/modules/pace/components/files/FileTreeNode';
 import { FileTreeProvider } from '@/modules/pace/hooks/FileTreeProvider';
 import { useFileConflict } from '@/modules/pace/hooks/useFileConflict';
-import { useFileTreeRootDragDrop } from '@/modules/pace/hooks/useFileTreeRootDragDrop';
 
 const ROW_HEIGHT = 36;
 const OVERSCAN_COUNT = 10;
@@ -37,6 +36,7 @@ const FileTreeContent = ({
   const [expandedPaths, setExpandedPaths] = useState<Set<string>>(new Set());
   const [internalSelectedPath, setInternalSelectedPath] = useState<string | null>(null);
   const [uploadTargetPath, setUploadTargetPath] = useState<string>('');
+  const [dragOverFolderPath, setDragOverFolderPath] = useState<string | null>(null);
   const containerRef = useRef<HTMLDivElement>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
   const folderInputRef = useRef<HTMLInputElement>(null);
@@ -111,12 +111,6 @@ const FileTreeContent = ({
 
   const rootSiblingNames = useMemo(() => treeData.map((node) => node.name), [treeData]);
 
-  const { handleDropToRootSibling } = useFileTreeRootDragDrop({
-    rootSiblingNames,
-    containerRef,
-    onFileMoved,
-  });
-
   const virtualizer = useVirtualizer({
     count: flatNodes.length,
     getScrollElement: () => containerRef.current,
@@ -158,6 +152,43 @@ const FileTreeContent = ({
     [resolveConflict, rootSiblingNames],
   );
 
+  const handleDragOverFolderChange = useCallback((path: string | null) => {
+    setDragOverFolderPath(path);
+  }, []);
+
+  const handleContainerDragLeave = useCallback((e: React.DragEvent) => {
+    // Only clear when leaving the container entirely (not moving to a child element)
+    if (containerRef.current && !containerRef.current.contains(e.relatedTarget as Node)) {
+      setDragOverFolderPath(null);
+    }
+  }, []);
+
+  const dragOverlayBounds = useMemo(() => {
+    if (!dragOverFolderPath) return null;
+
+    const folderIndex = flatNodes.findIndex((n) => n.path === dragOverFolderPath);
+
+    if (folderIndex === -1) return null;
+
+    let lastChildIndex = folderIndex;
+
+    for (let i = folderIndex + 1; i < flatNodes.length; i++) {
+      if (flatNodes[i].path.startsWith(dragOverFolderPath + '/')) {
+        lastChildIndex = i;
+      } else {
+        break;
+      }
+    }
+
+    const startY = folderIndex * ROW_HEIGHT;
+    const endY = (lastChildIndex + 1) * ROW_HEIGHT;
+
+    return {
+      top: startY,
+      height: endY - startY,
+    };
+  }, [dragOverFolderPath, flatNodes]);
+
   if (treeData.length === 0 && searchQuery) {
     return <FileTreeEmptyState />;
   }
@@ -173,7 +204,7 @@ const FileTreeContent = ({
         onChange={handleFolderInputChange}
         {...({ webkitdirectory: '', directory: '' } as React.InputHTMLAttributes<HTMLInputElement>)}
       />
-      <div ref={containerRef} className='min-h-0 flex-1 overflow-auto px-3 py-2'>
+      <div ref={containerRef} className='min-h-0 flex-1 overflow-auto px-3 py-2' onDragLeave={handleContainerDragLeave}>
         <div
           style={{
             height: virtualizer.getTotalSize(),
@@ -193,9 +224,9 @@ const FileTreeContent = ({
                 selectedPath={selectedPath}
                 originalNodeMap={originalNodeMap}
                 siblingNames={node.siblingNames}
+                parentPath={node.parentPath}
                 onToggleExpand={handleToggleExpand}
                 onSelect={handleSelect}
-                onDropToSibling={node.depth === 0 ? handleDropToRootSibling : undefined}
                 onFileMoved={onFileMoved}
                 onFileDeleted={onFileDeleted}
                 onFileCreated={onFileCreated}
@@ -203,6 +234,7 @@ const FileTreeContent = ({
                 onUploadFolder={onUploadFolder}
                 onTriggerFileUpload={triggerFileUpload}
                 onTriggerFolderUpload={triggerFolderUpload}
+                onDragOverFolderChange={handleDragOverFolderChange}
                 style={{
                   position: 'absolute',
                   top: 0,
@@ -214,6 +246,15 @@ const FileTreeContent = ({
               />
             );
           })}
+          {dragOverlayBounds && (
+            <div
+              className='border-GRAY_1000 pointer-events-none absolute right-0 left-0 rounded-md border-2 border-dashed'
+              style={{
+                top: dragOverlayBounds.top,
+                height: dragOverlayBounds.height,
+              }}
+            />
+          )}
         </div>
       </div>
       <FileConflictModal

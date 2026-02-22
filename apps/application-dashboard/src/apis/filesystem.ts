@@ -1,4 +1,5 @@
-import { REQUEST_TYPES } from '@zamp-platform/api';
+import { API_DOMAIN, REQUEST_TYPES } from '@zamp-platform/api';
+import { getFromLocalStorage, LOCAL_STORAGE_KEYS } from '@zamp-platform/utils';
 import { API_ENDPOINTS } from 'apis/apiEndpoint.constants';
 import { APITags } from '@/constants/api.constants';
 import { baseApi } from '@/services/baseApi';
@@ -251,19 +252,49 @@ const FilesystemApi = baseApi.injectEndpoints({
       }),
     }),
 
-    // Upload Chunk
+    // Upload Chunk - sends binary data directly as application/octet-stream
+    // Using queryFn to ensure binary data is sent raw without any transformation
     uploadChunk: builder.mutation<UploadChunkResponse, UploadChunkRequest>({
-      query: ({ upload_id, chunk_index, chunk_offset, data }) => ({
-        url: API_ENDPOINTS.FILES_UPLOAD_CHUNK_POST,
-        method: REQUEST_TYPES.POST,
-        headers: {
-          'Content-Type': 'application/octet-stream',
-          'X-Upload-Id': upload_id,
-          'X-Chunk-Index': String(chunk_index),
-          'X-Chunk-Offset': String(chunk_offset),
-        },
-        body: data,
-      }),
+      queryFn: async ({ upload_id, chunk_index, chunk_offset, data }) => {
+        try {
+          const orgId = getFromLocalStorage(LOCAL_STORAGE_KEYS.XZAMP_ORGANIZATION_ID);
+
+          const response = await fetch(`${API_DOMAIN}/${API_ENDPOINTS.FILES_UPLOAD_CHUNK_POST}`, {
+            method: 'POST',
+            credentials: 'include',
+            headers: {
+              'Content-Type': 'application/octet-stream',
+              'X-Upload-Id': upload_id,
+              'X-Chunk-Index': String(chunk_index),
+              'X-Chunk-Offset': String(chunk_offset),
+              [LOCAL_STORAGE_KEYS.XZAMP_ORGANIZATION_ID]: orgId,
+            },
+            body: data,
+          });
+
+          if (!response.ok) {
+            const errorData = await response.json().catch(() => ({}));
+
+            return {
+              error: {
+                status: response.status,
+                data: errorData,
+              },
+            };
+          }
+
+          const result = await response.json();
+
+          return { data: result as UploadChunkResponse };
+        } catch (error) {
+          return {
+            error: {
+              status: 'FETCH_ERROR',
+              error: error instanceof Error ? error.message : 'Unknown error',
+            },
+          };
+        }
+      },
     }),
 
     // Complete Chunked Upload
