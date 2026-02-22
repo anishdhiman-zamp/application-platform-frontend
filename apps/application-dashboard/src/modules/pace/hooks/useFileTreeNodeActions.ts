@@ -1,7 +1,5 @@
 import { captureException } from '@sentry/browser';
 import { toast } from '@zamp-platform/ui';
-import { useFileActions } from 'modules/pace/hooks/useFileActions';
-import { useFileClipboard } from 'modules/pace/hooks/useFileClipboard';
 import {
   CLIPBOARD_OPERATION,
   CREATE_ITEM_TYPE,
@@ -15,8 +13,7 @@ import {
   executeMoveOrCopy,
   validatePasteOperation,
 } from '@/modules/pace/components/files/file-tree.utils';
-import { useFileConflict } from '@/modules/pace/hooks/useFileConflict';
-import { useProtectedFolders } from '@/modules/pace/hooks/useProtectedFolders';
+import { useFileTreeContext } from '@/modules/pace/hooks/useFileTreeContext';
 
 interface UseFileTreeNodeActionsProps {
   node: TreeNode;
@@ -55,10 +52,20 @@ export const useFileTreeNodeActions = ({
   onTriggerFileUpload,
   onTriggerFolderUpload,
 }: UseFileTreeNodeActionsProps): UseFileTreeNodeActionsReturn => {
-  const { createFile, createFolder, deleteItem, duplicateItem, copyItem, moveItem } = useFileActions();
-  const { clipboard, setCopyClipboard, setCutClipboard, clearClipboard } = useFileClipboard();
-  const { setConflict } = useFileConflict();
-  const { username } = useProtectedFolders();
+  const {
+    createFile,
+    createFolder,
+    deleteItem,
+    duplicateItem,
+    copyItem,
+    moveItem,
+    clipboard,
+    setCopyClipboard,
+    setCutClipboard,
+    clearClipboard,
+    setConflict,
+    username,
+  } = useFileTreeContext();
 
   const isCutItem = clipboard?.operation === CLIPBOARD_OPERATION.CUT && clipboard.path === node.path;
 
@@ -188,7 +195,7 @@ export const useFileTreeNodeActions = ({
         type: createModalType === CREATE_ITEM_TYPE.FILE ? FILE_TYPE.FILE : FILE_TYPE.DIRECTORY,
         size: 0,
         mtime_ms: Date.now(),
-        owner: username,
+        owner: username ?? 'user',
       };
 
       onFileCreated?.(newFile);

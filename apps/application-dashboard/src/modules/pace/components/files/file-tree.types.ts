@@ -121,6 +121,7 @@ export interface FileTreeProps {
   onFileCreated?: (newFile: FileItem) => void;
   onUploadFiles?: (files: FileList, targetPath: string) => void;
   onUploadFolder?: (files: FileList, targetPath: string) => void;
+  onExpandAllChange?: (expandAll: (allPaths: string[]) => void, collapseAll: () => void) => void;
 }
 
 /**
@@ -157,6 +158,8 @@ export interface FileTreeNodeProps {
   onFileCreated?: (newFile: FileItem) => void;
   onUploadFiles?: (files: FileList, targetPath: string) => void;
   onUploadFolder?: (files: FileList, targetPath: string) => void;
+  onTriggerFileUpload?: (targetPath: string) => void;
+  onTriggerFolderUpload?: (targetPath: string) => void;
   style?: React.CSSProperties;
 }
 

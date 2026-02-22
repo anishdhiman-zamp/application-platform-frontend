@@ -1,10 +1,6 @@
 'use client';
 
 import { memo, useCallback, useMemo, useRef, useState } from 'react';
-import { useFileClipboard } from 'modules/pace/hooks/useFileClipboard';
-import { useFileTreeNodeActions } from 'modules/pace/hooks/useFileTreeNodeActions';
-import { useFileTreeNodeDragDrop } from 'modules/pace/hooks/useFileTreeNodeDragDrop';
-import { useFileTreeNodeRename } from 'modules/pace/hooks/useFileTreeNodeRename';
 import CreateItemModal from '@/modules/pace/components/files/CreateItemModal';
 import {
   type CreateItemType,
@@ -14,7 +10,10 @@ import {
 import { CONTEXT_MENU_ACTIONS } from '@/modules/pace/components/files/files.constants';
 import FileTreeNodeContextMenu from '@/modules/pace/components/files/FileTreeNodeContextMenu';
 import FileTreeNodeRow from '@/modules/pace/components/files/FileTreeNodeRow';
-import { useProtectedFolders } from '@/modules/pace/hooks/useProtectedFolders';
+import { useFileTreeContext } from '@/modules/pace/hooks/useFileTreeContext';
+import { useFileTreeNodeActions } from '@/modules/pace/hooks/useFileTreeNodeActions';
+import { useFileTreeNodeDragDrop } from '@/modules/pace/hooks/useFileTreeNodeDragDrop';
+import { useFileTreeNodeRename } from '@/modules/pace/hooks/useFileTreeNodeRename';
 
 const FileTreeNode = memo(function FileTreeNode({
   node,
@@ -30,17 +29,15 @@ const FileTreeNode = memo(function FileTreeNode({
   onFileDeleted,
   onFileCreated,
   onUploadFiles,
-  onUploadFolder,
+  onTriggerFileUpload,
+  onTriggerFolderUpload,
   style,
 }: FileTreeNodeProps) {
   const nodeRef = useRef<HTMLDivElement>(null);
-  const fileInputRef = useRef<HTMLInputElement>(null);
-  const folderInputRef = useRef<HTMLInputElement>(null);
   const [contextMenuOpen, setContextMenuOpen] = useState(false);
   const [createModalType, setCreateModalType] = useState<CreateItemType | null>(null);
 
-  const { clipboard } = useFileClipboard();
-  const { isProtectedRoot, username } = useProtectedFolders();
+  const { clipboard, isProtectedRoot, username } = useFileTreeContext();
 
   const isFolder = node.type === FILE_TYPE.DIRECTORY;
   const isExpanded = expandedPaths.has(node.path);
@@ -69,39 +66,13 @@ const FileTreeNode = memo(function FileTreeNode({
     [isFolder, clipboard, isProtected],
   );
 
-  const handleFileInputChange = useCallback(
-    (e: React.ChangeEvent<HTMLInputElement>) => {
-      const files = e.target.files;
+  const handleTriggerFileUpload = useCallback(() => {
+    onTriggerFileUpload?.(node.path);
+  }, [onTriggerFileUpload, node.path]);
 
-      if (files && files.length > 0 && onUploadFiles) {
-        onUploadFiles(files, node.path);
-      }
-
-      e.target.value = '';
-    },
-    [node.path, onUploadFiles],
-  );
-
-  const handleFolderInputChange = useCallback(
-    (e: React.ChangeEvent<HTMLInputElement>) => {
-      const files = e.target.files;
-
-      if (files && files.length > 0 && onUploadFolder) {
-        onUploadFolder(files, node.path);
-      }
-
-      e.target.value = '';
-    },
-    [node.path, onUploadFolder],
-  );
-
-  const triggerFileUpload = useCallback(() => {
-    fileInputRef.current?.click();
-  }, []);
-
-  const triggerFolderUpload = useCallback(() => {
-    folderInputRef.current?.click();
-  }, []);
+  const handleTriggerFolderUpload = useCallback(() => {
+    onTriggerFolderUpload?.(node.path);
+  }, [onTriggerFolderUpload, node.path]);
 
   const rename = useFileTreeNodeRename({
     node,
@@ -144,8 +115,8 @@ const FileTreeNode = memo(function FileTreeNode({
     onFileMoved,
     onFileDeleted,
     onFileCreated,
-    onTriggerFileUpload: triggerFileUpload,
-    onTriggerFolderUpload: triggerFolderUpload,
+    onTriggerFileUpload: handleTriggerFileUpload,
+    onTriggerFolderUpload: handleTriggerFolderUpload,
   });
 
   const handleClick = useCallback(() => {
@@ -181,20 +152,6 @@ const FileTreeNode = memo(function FileTreeNode({
 
       {dragDrop.isDragOverTop && (
         <div className='bg-GRAY_500 -mb-0.5 h-0.5 rounded-full' style={{ marginLeft: `${depth * 24 + 8}px` }} />
-      )}
-
-      {isFolder && (
-        <>
-          <input ref={fileInputRef} type='file' multiple className='hidden' onChange={handleFileInputChange} />
-          <input
-            ref={folderInputRef}
-            type='file'
-            multiple
-            className='hidden'
-            onChange={handleFolderInputChange}
-            {...({ webkitdirectory: '', directory: '' } as React.InputHTMLAttributes<HTMLInputElement>)}
-          />
-        </>
       )}
 
       <FileTreeNodeContextMenu

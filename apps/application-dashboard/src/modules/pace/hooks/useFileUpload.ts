@@ -22,6 +22,7 @@ import {
   getFileTargetPath,
   getRootFolderName,
   getTargetPath,
+  MAX_FOLDER_UPLOAD_FILES,
   shouldUseChunkedUpload,
   type UploadCallbacks,
   uploadFile as uploadFileUtil,
@@ -226,6 +227,14 @@ export const useFileUpload = (options?: UseFileUploadOptions): UseFileUploadRetu
 
       if (filesWithPaths.length === 0) {
         toast.error('No files found in folder');
+
+        return;
+      }
+
+      if (filesWithPaths.length > MAX_FOLDER_UPLOAD_FILES) {
+        toast.error(
+          `Folder contains ${filesWithPaths.length} files. Maximum allowed is ${MAX_FOLDER_UPLOAD_FILES} files.`,
+        );
 
         return;
       }

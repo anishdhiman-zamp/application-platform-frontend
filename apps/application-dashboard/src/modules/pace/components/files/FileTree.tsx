@@ -1,6 +1,6 @@
 'use client';
 
-import { useCallback, useMemo, useRef, useState } from 'react';
+import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { useVirtualizer } from '@tanstack/react-virtual';
 import type { FileItem, FileTreeProps } from '@/modules/pace/components/files/file-tree.types';
 import {
@@ -13,10 +13,9 @@ import {
 import FileConflictModal from '@/modules/pace/components/files/FileConflictModal';
 import FileTreeEmptyState from '@/modules/pace/components/files/FileTreeEmptyState';
 import FileTreeNode from '@/modules/pace/components/files/FileTreeNode';
-import { FileClipboardProvider } from '@/modules/pace/hooks/useFileClipboard';
-import { FileConflictProvider, useFileConflict } from '@/modules/pace/hooks/useFileConflict';
+import { FileTreeProvider } from '@/modules/pace/hooks/FileTreeProvider';
+import { useFileConflict } from '@/modules/pace/hooks/useFileConflict';
 import { useFileTreeRootDragDrop } from '@/modules/pace/hooks/useFileTreeRootDragDrop';
-import { ProtectedFoldersProvider } from '@/modules/pace/hooks/useProtectedFolders';
 
 const ROW_HEIGHT = 36;
 const OVERSCAN_COUNT = 10;
@@ -33,14 +32,56 @@ const FileTreeContent = ({
   onFileCreated,
   onUploadFiles,
   onUploadFolder,
+  onExpandAllChange,
 }: FileTreeProps) => {
   const [expandedPaths, setExpandedPaths] = useState<Set<string>>(new Set());
   const [internalSelectedPath, setInternalSelectedPath] = useState<string | null>(null);
+  const [uploadTargetPath, setUploadTargetPath] = useState<string>('');
   const containerRef = useRef<HTMLDivElement>(null);
+  const fileInputRef = useRef<HTMLInputElement>(null);
+  const folderInputRef = useRef<HTMLInputElement>(null);
 
   const selectedPath = controlledSelectedPath ?? internalSelectedPath;
 
   const { conflict, resolveConflict, cancelConflict } = useFileConflict();
+
+  const expandAll = useCallback((allPaths: string[]) => {
+    setExpandedPaths(new Set(allPaths));
+  }, []);
+
+  const collapseAll = useCallback(() => {
+    setExpandedPaths(new Set());
+  }, []);
+
+  const triggerFileUpload = useCallback((targetPath: string) => {
+    setUploadTargetPath(targetPath);
+    fileInputRef.current?.click();
+  }, []);
+
+  const triggerFolderUpload = useCallback((targetPath: string) => {
+    setUploadTargetPath(targetPath);
+    folderInputRef.current?.click();
+  }, []);
+
+  const handleFileInputChange = useCallback(
+    (e: React.ChangeEvent<HTMLInputElement>) => {
+      if (e.target.files?.length && onUploadFiles) {
+        onUploadFiles(e.target.files, uploadTargetPath);
+      }
+      e.target.value = '';
+    },
+    [uploadTargetPath, onUploadFiles],
+  );
+
+  const handleFolderInputChange = useCallback(
+    (e: React.ChangeEvent<HTMLInputElement>) => {
+      if (e.target.files?.length && onUploadFolder) {
+        onUploadFolder(e.target.files, uploadTargetPath);
+      }
+      e.target.value = '';
+    },
+    [uploadTargetPath, onUploadFolder],
+  );
 
   const filesMap = useMemo(() => {
     const map = new Map<string, FileItem>();
@@ -49,6 +90,12 @@ const FileTreeContent = ({
 
     return map;
   }, [files]);
+
+  useEffect(() => {
+    if (onExpandAllChange) {
+      onExpandAllChange(expandAll, collapseAll);
+    }
+  }, [onExpandAllChange, expandAll, collapseAll]);
 
   const rawTree = useMemo(() => buildFileTree(files), [files]);
   const sortedRawTree = useMemo(() => sortTreeNodes(rawTree, sortBy, sortDirection), [rawTree, sortBy, sortDirection]);
@@ -117,6 +164,15 @@ const FileTreeContent = ({
 
   return (
     <div className='flex h-full flex-col'>
+      <input ref={fileInputRef} type='file' multiple className='hidden' onChange={handleFileInputChange} />
+      <input
+        ref={folderInputRef}
+        type='file'
+        multiple
+        className='hidden'
+        onChange={handleFolderInputChange}
+        {...({ webkitdirectory: '', directory: '' } as React.InputHTMLAttributes<HTMLInputElement>)}
+      />
       <div ref={containerRef} className='min-h-0 flex-1 overflow-auto px-3 py-2'>
         <div
           style={{
@@ -145,6 +201,8 @@ const FileTreeContent = ({
                 onFileCreated={onFileCreated}
                 onUploadFiles={onUploadFiles}
                 onUploadFolder={onUploadFolder}
+                onTriggerFileUpload={triggerFileUpload}
+                onTriggerFolderUpload={triggerFolderUpload}
                 style={{
                   position: 'absolute',
                   top: 0,
@@ -170,13 +228,9 @@ const FileTreeContent = ({
 
 const FileTree = (props: FileTreeProps) => {
   return (
-    <ProtectedFoldersProvider>
-      <FileClipboardProvider>
-        <FileConflictProvider onFileMoved={props.onFileMoved}>
-          <FileTreeContent {...props} />
-        </FileConflictProvider>
-      </FileClipboardProvider>
-    </ProtectedFoldersProvider>
+    <FileTreeProvider onFileMoved={props.onFileMoved}>
+      <FileTreeContent {...props} />
+    </FileTreeProvider>
   );
 };
 

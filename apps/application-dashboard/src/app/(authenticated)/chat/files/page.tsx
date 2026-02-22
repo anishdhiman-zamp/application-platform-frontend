@@ -1,6 +1,6 @@
 'use client';
 
-import { useCallback, useState } from 'react';
+import { useCallback, useRef, useState } from 'react';
 import type { FileItem } from '@/modules/pace/components/files/file-tree.types';
 import FilesHeader from '@/modules/pace/components/files/FilesHeader';
 import FilesHierarchy from '@/modules/pace/components/files/FilesHierarchy';
@@ -8,32 +8,33 @@ import FilesPreview from '@/modules/pace/components/files/FilesPreview';
 
 const FilesPage = () => {
   const [selectedFile, setSelectedFile] = useState<FileItem | null>(null);
+  const selectedFileRef = useRef<FileItem | null>(null);
 
-  const handleFileMoved = useCallback(
-    (oldPath: string, newFile: FileItem) => {
-      if (selectedFile?.path === oldPath) {
-        setSelectedFile(newFile);
-      } else if (selectedFile?.path.startsWith(oldPath + '/')) {
-        const relativePath = selectedFile.path.slice(oldPath.length);
+  selectedFileRef.current = selectedFile;
 
-        setSelectedFile({
-          ...selectedFile,
-          path: newFile.path + relativePath,
-          mtime_ms: Date.now(),
-        });
-      }
-    },
-    [selectedFile],
-  );
+  const handleFileMoved = useCallback((oldPath: string, newFile: FileItem) => {
+    const currentSelected = selectedFileRef.current;
 
-  const handleFileDeleted = useCallback(
-    (deletedPath: string) => {
-      if (selectedFile?.path === deletedPath || selectedFile?.path.startsWith(deletedPath + '/')) {
-        setSelectedFile(null);
-      }
-    },
-    [selectedFile],
-  );
+    if (currentSelected?.path === oldPath) {
+      setSelectedFile(newFile);
+    } else if (currentSelected?.path.startsWith(oldPath + '/')) {
+      const relativePath = currentSelected.path.slice(oldPath.length);
+
+      setSelectedFile({
+        ...currentSelected,
+        path: newFile.path + relativePath,
+        mtime_ms: Date.now(),
+      });
+    }
+  }, []);
+
+  const handleFileDeleted = useCallback((deletedPath: string) => {
+    const currentSelected = selectedFileRef.current;
+
+    if (currentSelected?.path === deletedPath || currentSelected?.path.startsWith(deletedPath + '/')) {
+      setSelectedFile(null);
+    }
+  }, []);
 
   const handleFileCreated = useCallback((newFile: FileItem) => {
     setSelectedFile(newFile);

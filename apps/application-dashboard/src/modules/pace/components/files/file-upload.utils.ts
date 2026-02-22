@@ -9,6 +9,7 @@ import type {
 
 export const DIRECT_UPLOAD_THRESHOLD_BYTES = 1 * 1024 * 1024; // 1MB
 export const DEFAULT_CHUNK_SIZE = 1 * 1024 * 1024; // 1MB default chunk size
+export const MAX_FOLDER_UPLOAD_FILES = 200;
 
 export interface UploadCallbacks {
   onProgress?: (loaded: number, total: number) => void;

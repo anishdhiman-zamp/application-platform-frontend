@@ -1,7 +1,6 @@
 import { type RefObject, useRef, useState } from 'react';
 import { captureException } from '@sentry/browser';
 import { toast } from '@zamp-platform/ui';
-import { useFileActions } from 'modules/pace/hooks/useFileActions';
 import {
   CLIPBOARD_OPERATION,
   type DropToSiblingData,
@@ -9,8 +8,7 @@ import {
   type TreeNode,
 } from '@/modules/pace/components/files/file-tree.types';
 import { executeMoveOrCopy, parseDragData } from '@/modules/pace/components/files/file-tree.utils';
-import { useFileConflict } from '@/modules/pace/hooks/useFileConflict';
-import { useProtectedFolders } from '@/modules/pace/hooks/useProtectedFolders';
+import { useFileTreeContext } from '@/modules/pace/hooks/useFileTreeContext';
 
 interface UseFileTreeNodeDragDropProps {
   node: TreeNode;
@@ -54,9 +52,7 @@ export const useFileTreeNodeDragDrop = ({
 
   const expandTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 
-  const { copyItem, moveItem } = useFileActions();
-  const { setConflict } = useFileConflict();
-  const { isProtectedRoot, isInvalidCrossMove } = useProtectedFolders();
+  const { copyItem, moveItem, setConflict, isProtectedRoot, isInvalidCrossMove } = useFileTreeContext();
 
   const clearExpandTimeout = () => {
     if (expandTimeoutRef.current) {
