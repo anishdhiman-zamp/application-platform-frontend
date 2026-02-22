@@ -7,7 +7,6 @@ import { ZAMP_LOGO_LOADER_SVG } from '@/constants/icons';
 import { useIsPaceChatEnabled } from '@/hooks/useIsPaceChatEnabled';
 import PaceLayoutContent from '@/modules/pace/components/layout/PaceLayoutContent';
 import useDataPrefetch from '@/modules/pace/hooks/useDataPrefetch';
-import { useFilesystemStatus } from '@/modules/pace/hooks/useFilesystemStatus';
 import { PaceProvider } from '@/modules/pace/pace.context';
 
 interface PaceLayoutProps {
@@ -19,9 +18,9 @@ const PaceLayout: FC<PaceLayoutProps> = ({ children }) => {
 
   useDataPrefetch();
 
-  const { isFilesystemActive, isFilesystemStatusLoading, isFilesystemError } = useFilesystemStatus();
+  // const { isFilesystemActive, isFilesystemStatusLoading, isFilesystemError } = useFilesystemStatus();
 
-  if (isLoading || isFilesystemStatusLoading || !isFilesystemActive || isFilesystemError) {
+  if (isLoading) {
     return <ImageLoader imageSrc={ZAMP_LOGO_LOADER_SVG} width={140} height={140} />;
   }
 
