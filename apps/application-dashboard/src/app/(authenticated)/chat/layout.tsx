@@ -19,9 +19,9 @@ const PaceLayout: FC<PaceLayoutProps> = ({ children }) => {
 
   useDataPrefetch();
 
-  const { isFilesystemActive, isFilesystemStatusLoading } = useFilesystemStatus();
+  const { isFilesystemActive, isFilesystemStatusLoading, isFilesystemError } = useFilesystemStatus();
 
-  if (isLoading || isFilesystemStatusLoading || !isFilesystemActive) {
+  if (isLoading || isFilesystemStatusLoading || !isFilesystemActive || isFilesystemError) {
     return <ImageLoader imageSrc={ZAMP_LOGO_LOADER_SVG} width={140} height={140} />;
   }
 

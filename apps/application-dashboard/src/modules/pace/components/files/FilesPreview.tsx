@@ -52,6 +52,11 @@ const FilesPreview = ({ selectedFile }: FilesPreviewProps) => {
             <span className='f-13-450 text-GRAY_700'>Last modified on</span>
             <span className='f-13-450 text-GRAY_1000'>{formatDate(selectedFile.mtime_ms)}</span>
           </div>
+          <div className='border-GRAY_400 border-t border-dashed' />
+          <div className='flex items-center justify-between'>
+            <span className='f-13-450 text-GRAY_700'>Owner</span>
+            <span className='f-13-450 text-GRAY_1000'>{selectedFile.owner}</span>
+          </div>
         </div>
       </div>
     </div>

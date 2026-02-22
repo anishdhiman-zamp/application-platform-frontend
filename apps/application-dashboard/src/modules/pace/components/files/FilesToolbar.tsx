@@ -9,7 +9,7 @@ import {
   Input,
 } from '@zamp-platform/ui';
 import { cn } from '@zamp-platform/ui/utils';
-import { ArrowDown, ArrowUp, ChevronDownIcon, ListFilter, SearchIcon } from 'lucide-react';
+import { ArrowDown, ArrowUp, ChevronDownIcon, SearchIcon } from 'lucide-react';
 import { SORT_DIRECTION, SortDirection, SortOption } from '@/modules/pace/components/files/file-tree.types';
 import { SORT_OPTIONS } from '@/modules/pace/components/files/files.constants';
 
@@ -90,11 +90,6 @@ const FilesToolbar = ({
             </DropdownMenuContent>
           </DropdownMenu>
         </div>
-
-        {/* Filter Button */}
-        <Button variant='secondary' size='small' className='border-GRAY_400 bg-white px-2.5! hover:bg-white'>
-          <ListFilter className='text-GRAY_1000 size-3.5' />
-        </Button>
       </div>
     </div>
   );

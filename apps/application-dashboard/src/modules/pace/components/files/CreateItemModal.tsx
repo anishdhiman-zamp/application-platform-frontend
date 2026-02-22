@@ -1,6 +1,6 @@
 'use client';
 
-import { useMemo, useState } from 'react';
+import { useMemo, useRef, useState } from 'react';
 import {
   Button,
   Dialog,
@@ -20,12 +20,13 @@ interface CreateItemModalProps {
   isOpen: boolean;
   onOpenChange: (open: boolean) => void;
   itemType: CreateItemType;
-  onCreate: (name: string, parentPath: string) => void;
+  onCreate: (name: string) => void;
   existingNames?: string[];
 }
 
 const CreateItemModal = ({ isOpen, onOpenChange, itemType, onCreate, existingNames = [] }: CreateItemModalProps) => {
   const [name, setName] = useState('');
+  const inputRef = useRef<HTMLInputElement | null>(null);
 
   const handleOpenChange = (open: boolean) => {
     if (!open) {
@@ -53,7 +54,7 @@ const CreateItemModal = ({ isOpen, onOpenChange, itemType, onCreate, existingNam
   const handleCreate = () => {
     if (!name.trim() || isDuplicate) return;
 
-    onCreate(finalName, '/');
+    onCreate(finalName);
     handleOpenChange(false);
   };
 
@@ -68,6 +69,10 @@ const CreateItemModal = ({ isOpen, onOpenChange, itemType, onCreate, existingNam
         showCloseButton
         className='w-[460px] rounded-[14px]'
         closeButtonClassName='top-5.5 right-5 cursor-pointer'
+        onOpenAutoFocus={(e) => {
+          e.preventDefault();
+          inputRef.current?.focus();
+        }}
       >
         <DialogHeader className='h-fit border-b-0 px-5 pt-5 pb-0'>
           <DialogHeaderTitle className='f-16-600'>{title}</DialogHeaderTitle>
@@ -76,6 +81,9 @@ const CreateItemModal = ({ isOpen, onOpenChange, itemType, onCreate, existingNam
           <div className='flex flex-col gap-y-2'>
             <label className='f-13-500 text-GRAY_1000'>Name</label>
             <Input
+              ref={(el) => {
+                inputRef.current = el;
+              }}
               value={name}
               onChange={(e) => setName(e.target.value)}
               className={cn('h-8', isDuplicate && 'border-RED_700! focus:shadow-input-error-outline-shadow')}
