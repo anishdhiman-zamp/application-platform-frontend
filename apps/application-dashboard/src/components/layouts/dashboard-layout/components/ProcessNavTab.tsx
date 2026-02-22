@@ -10,7 +10,7 @@ import type { Process } from '@/app/(authenticated)/resources';
 import TooltipV2 from '@/components/common/TooltipV2';
 import { getProcessRouteById, ROUTES_PATH } from '@/constants/routeConfig';
 import { KEYBOARD_KEYS } from '@/constants/shortcuts';
-import { usePagesAndProcesses } from '@/contexts/PagesAndProcessesContext';
+import { useProcesses } from '@/contexts/ProcessesContext';
 import { type ProcessResponseType, ProcessStatus as ProcessStatusEnum } from '@/types/api/processApi.types';
 import DeleteProcessDialog from 'components/layouts/dashboard-layout/components/DeleteProcessDialog';
 
@@ -39,7 +39,7 @@ const ProcessNavTab = ({
   const [finalName, setFinalName] = useState<string>();
 
   const router = useRouter();
-  const { processes } = usePagesAndProcesses();
+  const { processes } = useProcesses();
 
   const [optimisticName, updateOptimisticName] = useOptimistic(finalName || label, (state, newName: string) => newName);
 

@@ -65,3 +65,8 @@ export enum DEVICE_TYPES {
   MOBILE = 'mobile',
   TABLET = 'tablet',
 }
+
+export const enum LOCAL_DEVELOPMENT_URLS {
+  LOCAL = 'local.zamp.ai',
+  CODER = 'coder-live.zamp.dev',
+}

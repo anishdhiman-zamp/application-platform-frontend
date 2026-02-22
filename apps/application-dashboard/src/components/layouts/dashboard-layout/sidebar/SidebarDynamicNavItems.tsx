@@ -1,25 +1,15 @@
-import { useMemo } from 'react';
 import CommonWrapper from '@/components/commonWrapper';
 import { SkeletonTypes } from '@/components/commonWrapper/commonWrapper.types';
-import PagesNavigation from '@/components/layouts/dashboard-layout/components/PagesNavigation';
 import ProcessNavigation from '@/components/layouts/dashboard-layout/components/ProcessNavigation';
 import SkeletonLoaderSidebarPages from '@/components/layouts/dashboard-layout/components/SkeletonLoaderSidebarPages';
-import { usePagesAndProcesses } from '@/contexts/PagesAndProcessesContext';
+import { useProcesses } from '@/contexts/ProcessesContext';
 
 const SidebarDynamicNavItems = ({ params }: { params: { pageId?: string; processId?: string } }) => {
-  const { pages, processes, isLoading, deleteProcess, updateProcess } = usePagesAndProcesses();
-
-  const sortedPages = useMemo(() => {
-    if (pages && pages?.length > 0) {
-      return [...pages].sort((a, b) => a?.fractional_index - b?.fractional_index);
-    }
-
-    return [];
-  }, [pages]);
+  const { processes, isLoadingProcesses, deleteProcess, updateProcess } = useProcesses();
 
   return (
     <CommonWrapper
-      isLoading={isLoading}
+      isLoading={isLoadingProcesses}
       skeletonType={SkeletonTypes.CUSTOM}
       loader={<SkeletonLoaderSidebarPages />}
       className='px-2 py-2.5'
@@ -30,7 +20,6 @@ const SidebarDynamicNavItems = ({ params }: { params: { pageId?: string; process
         deleteProcess={deleteProcess}
         updateProcess={updateProcess}
       />
-      <PagesNavigation pages={sortedPages} params={params} />
     </CommonWrapper>
   );
 };

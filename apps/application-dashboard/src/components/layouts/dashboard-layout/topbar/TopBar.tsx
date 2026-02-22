@@ -19,9 +19,9 @@ import { RootState } from 'store';
 import TooltipV2 from '@/components/common/TooltipV2';
 import { FEATURE_FLAGS } from '@/constants/featureFlags';
 import { usePendingDatasetContext } from '@/context/pendingDataset.context';
+import { useProcesses } from '@/contexts/ProcessesContext';
 import { useFeatureFlag } from '@/hooks/useFeatureFlag';
 import { useFeatureFlags } from '@/hooks/useFeatureFlags';
-import { usePagesAndProcessesData } from '@/hooks/usePagesAndProcessesData';
 import WorkWithPace from '@/modules/chatbot/WorkWithPace';
 import DraftFeedbackButton from '@/modules/feedback/components/DraftFeedbackButton';
 import FeedbackStatusButton from '@/modules/feedback/feedback-status/FeedbackStatusButton';
@@ -60,7 +60,7 @@ const Topbar = () => {
   const openFeedbackConversations = useAppSelector((state: RootState) => state?.feedbacks?.openFeedbackConversations);
   const { isEnabled: isZampInternalEnabled } = useFeatureFlag(FEATURE_FLAGS.ZAMP_INTERNAL);
 
-  const { processes } = usePagesAndProcessesData();
+  const { processes } = useProcesses();
   const pathname = usePathname();
   const router = useRouter();
   const params = useParams<{ processId: string }>();

@@ -6,34 +6,31 @@ import { Process } from '@/app/(authenticated)/resources';
 import { ROUTES_PATH } from '@/constants/routeConfig';
 import { useAppSelector } from '@/hooks/toolkit';
 import { usePersistedPageNavigation } from '@/hooks/useLastVisitedPage';
-import { usePagesAndProcessesData } from '@/hooks/usePagesAndProcessesData';
+import { useProcessesData } from '@/hooks/useProcessesData';
 import { useRedirectToFirstProcessAfterOrgSwitch } from '@/hooks/useRedirectToFirstProcessAfterOrgSwitch';
+import { ProcessResponseType } from '@/types/api/processApi.types';
 
-interface PagesAndProcessesContextType {
-  pages: ReturnType<typeof usePagesAndProcessesData>['pages'];
-  processes: ReturnType<typeof usePagesAndProcessesData>['processes'];
-  isLoading: boolean;
-  isLoadingPages: boolean;
+interface ProcessesContextType {
+  processes: ProcessResponseType[];
   isLoadingProcesses: boolean;
-  isSuccessPages: boolean;
   isSuccessProcesses: boolean;
   updateProcess: (processId: string, data: Partial<Process>) => void;
   deleteProcess: (processId: string) => void;
 }
 
-const PagesAndProcessesContext = createContext<PagesAndProcessesContextType | undefined>(undefined);
+const ProcessesContext = createContext<ProcessesContextType | undefined>(undefined);
 
-export const usePagesAndProcesses = () => {
-  const context = useContext(PagesAndProcessesContext);
+export const useProcesses = () => {
+  const context = useContext(ProcessesContext);
 
   if (!context) {
-    throw new Error('usePagesAndProcesses must be used within PagesAndProcessesProvider');
+    throw new Error('useProcesses must be used within ProcessesProvider');
   }
 
   return context;
 };
 
-interface PagesAndProcessesProviderProps {
+interface ProcessesProviderProps {
   children: ReactNode;
 }
 
@@ -42,27 +39,16 @@ interface PagesAndProcessesProviderProps {
  * Also handles navigation logic for routes that need it (e.g., /process page).
  * This ensures the API is only called once, even if multiple components need the data.
  */
-export function PagesAndProcessesProvider({ children }: PagesAndProcessesProviderProps) {
+export function ProcessesProvider({ children }: ProcessesProviderProps) {
   const pathname = usePathname();
   const params = useParams();
   const router = useRouter();
   const { isOrgSwitchIsInProgress } = useAppSelector((state) => state.user);
 
-  const {
-    pages,
-    processes,
-    isLoading,
-    isLoadingPages,
-    isLoadingProcesses,
-    isSuccessPages,
-    isSuccessProcesses,
-    updateProcess,
-    deleteProcess,
-  } = usePagesAndProcessesData();
+  const { processes, isLoadingProcesses, isSuccessProcesses, updateProcess, deleteProcess } = useProcessesData();
 
   // Get navigation functions
-  const { pushToMostRelevantPage, pushToMostRelevantProcess } = usePersistedPageNavigation({
-    pagesList: pages ?? [],
+  const { pushToMostRelevantProcess } = usePersistedPageNavigation({
     processesList: processes ?? [],
   });
 
@@ -84,43 +70,26 @@ export function PagesAndProcessesProvider({ children }: PagesAndProcessesProvide
     }
 
     // Only navigate on /process route
-    if (pathname === ROUTES_PATH.PROCESSES && isSuccessPages && isSuccessProcesses) {
+    if (pathname === ROUTES_PATH.PROCESSES && isSuccessProcesses) {
       if (processes && processes.length > 0) {
         pushToMostRelevantProcess();
-      } else if (pages && pages.length > 0) {
-        pushToMostRelevantPage();
       } else {
-        // Fallback navigation if no processes or pages
         router.push(ROUTES_PATH.PEOPLE);
       }
     }
-  }, [
-    pathname,
-    pages,
-    processes,
-    isSuccessPages,
-    isSuccessProcesses,
-    isOrgSwitchIsInProgress,
-    pushToMostRelevantPage,
-    pushToMostRelevantProcess,
-    router,
-  ]);
+  }, [pathname, processes, isSuccessProcesses, isOrgSwitchIsInProgress, pushToMostRelevantProcess, router]);
 
   return (
-    <PagesAndProcessesContext.Provider
+    <ProcessesContext.Provider
       value={{
-        pages,
-        processes,
-        isLoading,
-        isLoadingPages,
+        processes: processes ?? [],
         isLoadingProcesses,
-        isSuccessPages,
         isSuccessProcesses,
         updateProcess,
         deleteProcess,
       }}
     >
       {children}
-    </PagesAndProcessesContext.Provider>
+    </ProcessesContext.Provider>
   );
 }

@@ -3,12 +3,9 @@
 import { FC, KeyboardEvent, useEffect, useMemo, useRef, useState } from 'react';
 import { Button, Input } from '@zamp-platform/ui';
 import { SvgSpriteLoader } from '@zamp-platform/ui/assets';
-import { useGetPagesQuery } from 'apis/pages';
 import {
   getDatasetRouteById,
   getKnowledgeBasedRouteByProcessId,
-  getPageDatasetRoute,
-  getPageRouteById,
   getProcessActivityLogsRouteById,
   getProcessRouteById,
   ROUTES_PATH,
@@ -21,8 +18,8 @@ import { useGetAllDatasetsQuery } from '@/apis/admin';
 import TooltipV2 from '@/components/common/TooltipV2';
 import { KEYBOARD_KEYS } from '@/constants/shortcuts';
 import { usePendingDatasetContext } from '@/context/pendingDataset.context';
+import { useProcesses } from '@/contexts/ProcessesContext';
 import useIsEditingBreadcrumbAllowed from '@/hooks/useIsEditingBreadcrumbAllowed';
-import { usePagesAndProcessesData } from '@/hooks/usePagesAndProcessesData';
 import useUpdateBreadcrumb from '@/hooks/useUpdateBreadcrumb';
 import { UNTITLED_DATASET_NAME } from '@/modules/data/data.constants';
 import { MODULE_TYPE, SIDE_OPTIONS } from '@/types/commonTypes';
@@ -46,13 +43,10 @@ const BreadCrumb: FC<BreadCrumbProps> = ({ isDraftProcess = false }) => {
   const [editedName, setEditedName] = useState<string>();
   const prevDatasetIdRef = useRef<string | undefined>(undefined);
 
-  const { data: pages } = useGetPagesQuery(undefined, {
-    refetchOnMountOrArgChange: false,
-  });
   const { data: datasets } = useGetAllDatasetsQuery(undefined, {
     refetchOnMountOrArgChange: false,
   });
-  const { processes } = usePagesAndProcessesData();
+  const { processes } = useProcesses();
 
   const currentProcess = useMemo(() => {
     if (pathname?.split('/')[1] === MODULE_TYPE.PROCESSES) {
@@ -89,25 +83,6 @@ const BreadCrumb: FC<BreadCrumbProps> = ({ isDraftProcess = false }) => {
     const breadcrumbStack = [];
 
     switch (pathname?.split('/')[1]) {
-      case MODULE_TYPE.PAGES:
-        {
-          const pageId = params?.pageId;
-          const currentPageTitle = pages?.find((page) => page?.page_id === pageId)?.name ?? '';
-          const datasetId = params?.datasetId;
-
-          const query: Record<string, string> = Object.fromEntries(searchParams?.entries() ?? []);
-
-          breadcrumbStack.push({ title: currentPageTitle, href: getPageRouteById(pageId as string) });
-          if (datasetId) {
-            const datasetTitle = datasets?.datasets.find((dataset) => dataset?.ID === datasetId)?.Title ?? '';
-
-            breadcrumbStack.push({
-              title: datasetTitle,
-              href: getPageDatasetRoute(pageId as string, datasetId as string, query),
-            });
-          }
-        }
-        break;
       case MODULE_TYPE.PROCESSES:
         {
           const activityId = params?.activityId;
@@ -181,7 +156,7 @@ const BreadCrumb: FC<BreadCrumbProps> = ({ isDraftProcess = false }) => {
     }
 
     return breadcrumbStack as BreadcrumbItem[];
-  }, [pathname, searchParams?.toString(), pages, datasets, processes, pendingTitle, localStorageVersion]);
+  }, [pathname, searchParams?.toString(), datasets, processes, pendingTitle, localStorageVersion]);
 
   const { firstBreadCrumb, middleBreadCrumbs, secondLastBreadCrumb, lastBreadCrumb } = useMemo(() => {
     const breadcrumbStackLength = breadcrumbStack?.length;

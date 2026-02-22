@@ -1,5 +1,5 @@
 import { Suspense } from 'react';
-import WidgetPageContent from 'app/(authenticated)/pages/@widget/WidgetPageContent';
+import WidgetPageContent from '@/deprecated/pages/@widget/WidgetPageContent';
 
 const WidgetPage = () => {
   return (

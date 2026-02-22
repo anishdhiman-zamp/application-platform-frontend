@@ -7,7 +7,7 @@ import dynamic from 'next/dynamic';
 import { useFilterConversationsQuery } from '@/apis/processes';
 import CommonWrapper from '@/components/commonWrapper';
 import { SkeletonTypes } from '@/components/commonWrapper/commonWrapper.types';
-import { usePagesAndProcessesData } from '@/hooks/usePagesAndProcessesData';
+import { useProcesses } from '@/contexts/ProcessesContext';
 import { IntegrationType } from '@/modules/integrations/types/integrations.types';
 import ChatMessagesSkeleton from '@/modules/pace/components/loaders/ChatMessagesSkeleton';
 import { ProcessResponseType, ProcessStatus } from '@/types/api/processApi.types';
@@ -41,7 +41,7 @@ const CreateKnowledgeBasePageHome: FC<CreateKnowledgeBasePageHomeProps> = ({
   const [conversationId, setConversationId] = useState<string | undefined>(initialConversationId);
   const [initialSopFilename, setInitialSopFilename] = useState<string | undefined>();
   const [isCreated, setIsCreated] = useState(isFromProcessCreation);
-  const { processes, isLoading: isLoadingProcesses } = usePagesAndProcessesData();
+  const { processes, isLoadingProcesses } = useProcesses();
 
   const skipFilterConversations = useMemo(() => {
     return isFromProcessCreation;
