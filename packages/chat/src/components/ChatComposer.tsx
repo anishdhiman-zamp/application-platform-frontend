@@ -48,6 +48,9 @@ export interface ChatComposerProps {
   // Textarea dimensions
   minTextareaHeight?: number;
   maxTextareaHeight?: number;
+
+  // Slot for extra content in the right action bar (e.g. model selector)
+  rightSlot?: React.ReactNode;
 }
 
 export const ChatComposer: FC<ChatComposerProps> = ({
@@ -90,6 +93,9 @@ export const ChatComposer: FC<ChatComposerProps> = ({
   // Textarea dimensions
   minTextareaHeight = 20,
   maxTextareaHeight = 200,
+
+  // Slots
+  rightSlot,
 }) => {
   const textareaRef = useRef<HTMLTextAreaElement>(null);
 
@@ -226,6 +232,7 @@ export const ChatComposer: FC<ChatComposerProps> = ({
             )}
 
             <div className='flex items-center gap-x-2'>
+              {rightSlot}
               {isPreparingToRecord ? (
                 <Loader size={14} className='animate-spin text-gray-900' />
               ) : (

@@ -1,6 +1,6 @@
 'use client';
 
-import { useEffect, useMemo, useRef } from 'react';
+import { useEffect, useMemo, useRef, useState } from 'react';
 import {
   ConnectedChatInput,
   DropOverlay,
@@ -23,6 +23,7 @@ import NewPaceAvatar from '@/modules/chatbot/NewPaceAvatar';
 import ChatHistory from '@/modules/pace/components/chat/ChatHistory';
 import ChatHome from '@/modules/pace/components/chat/ChatHome';
 import ChatTopbar from '@/modules/pace/components/chat/ChatTopbar';
+import ModelSelector from '@/modules/pace/components/chat/ModelSelector';
 import ChatMessagesSkeleton from '@/modules/pace/components/loaders/ChatMessagesSkeleton';
 import { useChatDraftInput } from '@/modules/pace/hooks/useChatDraftInput';
 import { useChatScroll } from '@/modules/pace/hooks/useChatScroll';
@@ -50,6 +51,7 @@ const ChatContentInner = ({
   const dispatch = useAppDispatch();
   const { inputValue, setInputValue } = useChatDraftInput({ conversationId });
   const fileDropHandlerRef = useRef<((files: FileList) => void) | null>(null);
+  const [selectedModel, setSelectedModel] = useState<string | null>(null);
 
   const handleConversationCreated = () => {
     dispatch(baseApi.util.invalidateTags([APITags.GET_CONVERSATION_HISTORY]));
@@ -167,6 +169,8 @@ const ChatContentInner = ({
               setExternalInputValue={setInputValue}
               acceptedFileTypes={ACCEPTED_FILE_TYPES}
               fileDropHandlerRef={fileDropHandlerRef}
+              llmModel={selectedModel}
+              rightSlot={<ModelSelector value={selectedModel} onChange={setSelectedModel} />}
             />
           </div>
         </div>
@@ -200,6 +204,8 @@ const ChatContentInner = ({
           fileDropHandlerRef={fileDropHandlerRef}
           minTextareaHeight={48}
           maxTextareaHeight={200}
+          llmModel={selectedModel}
+          rightSlot={<ModelSelector value={selectedModel} onChange={setSelectedModel} />}
         />
       </div>
       <ChatHistory onSelectConversation={setConversationId} />

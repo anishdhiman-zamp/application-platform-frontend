@@ -48,6 +48,8 @@ export interface ConnectedChatInputProps {
   fileDropHandlerRef?: FileDropHandlerRef;
   minTextareaHeight?: number;
   maxTextareaHeight?: number;
+  llmModel?: string | null;
+  rightSlot?: React.ReactNode;
 }
 
 export const ConnectedChatInput: FC<ConnectedChatInputProps> = ({
@@ -78,6 +80,8 @@ export const ConnectedChatInput: FC<ConnectedChatInputProps> = ({
   fileDropHandlerRef,
   minTextareaHeight,
   maxTextareaHeight,
+  llmModel,
+  rightSlot,
 }: ConnectedChatInputProps) => {
   const fileInputRef = useRef<HTMLInputElement>(null);
   const isRejectingRef = useRef(false);
@@ -133,6 +137,7 @@ export const ConnectedChatInput: FC<ConnectedChatInputProps> = ({
     annotationType,
     onConversationCreated,
     isDisabled,
+    llmModel,
   });
 
   const handleTranscriptChunk = useCallback(
@@ -290,6 +295,7 @@ export const ConnectedChatInput: FC<ConnectedChatInputProps> = ({
         className={className}
         minTextareaHeight={minTextareaHeight}
         maxTextareaHeight={maxTextareaHeight}
+        rightSlot={rightSlot}
       />
     </div>
   );
