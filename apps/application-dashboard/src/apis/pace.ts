@@ -10,6 +10,17 @@ import type {
 import type { Skill, SkillStatus } from '@/types/api/skills.types';
 import { formRequestUrlWithParams } from '@/utils/common';
 
+export interface ChatModelOption {
+  id: string;
+  display_name: string;
+  description: string;
+  is_default: boolean;
+}
+
+export interface ListChatModelsResponse {
+  models: ChatModelOption[];
+}
+
 const MACS = baseApi.injectEndpoints({
   endpoints: (builder) => ({
     // Get Conversation History
@@ -51,7 +62,6 @@ const MACS = baseApi.injectEndpoints({
       }),
     }),
 
-    // Upload Skill
     uploadSkill: builder.mutation<Skill, { file: File }>({
       query: ({ file }) => {
         const formData = new FormData();
@@ -143,6 +153,12 @@ const MACS = baseApi.injectEndpoints({
       }),
       invalidatesTags: [APITags.GET_CONVERSATION_HISTORY],
     }),
+
+    listChatModels: builder.query<ListChatModelsResponse, void>({
+      query: () => ({
+        url: API_ENDPOINTS.LIST_CHAT_MODELS,
+      }),
+    }),
   }),
 });
 
@@ -157,4 +173,5 @@ export const {
   useUpdateSkillStatusMutation,
   useDeleteSkillMutation,
   useUpdateConversationTitleMutation,
+  useListChatModelsQuery,
 } = MACS;

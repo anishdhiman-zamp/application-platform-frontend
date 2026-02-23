@@ -1,6 +1,6 @@
 'use client';
 
-import { FC, useCallback, useEffect, useMemo, useRef } from 'react';
+import { FC, useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import {
   ConnectedChatInput,
   DropOverlay,
@@ -24,6 +24,7 @@ import { ROUTES_PATH } from '@/constants/routeConfig';
 import { useAppDispatch, useAppSelector } from '@/hooks/toolkit';
 import NewPaceAvatar from '@/modules/chatbot/NewPaceAvatar';
 import ChatTopbar from '@/modules/pace/components/chat/ChatTopbar';
+import ModelSelector from '@/modules/pace/components/chat/ModelSelector';
 import ChatMessagesSkeleton from '@/modules/pace/components/loaders/ChatMessagesSkeleton';
 import { useChatDraftInput } from '@/modules/pace/hooks/useChatDraftInput';
 import { useChatScroll } from '@/modules/pace/hooks/useChatScroll';
@@ -53,6 +54,12 @@ const ChatSidebarInner: FC<ChatSidebarInnerProps> = ({
   const currentUserName = useAppSelector((state: RootState) => state.user.user?.user_name) ?? '';
   const { inputValue, setInputValue } = useChatDraftInput({ conversationId });
   const fileDropHandlerRef = useRef<((files: FileList) => void) | null>(null);
+  const [selectedModel, setSelectedModel] = useState<string | null>(null);
+
+  const modelSelectorSlot = useMemo(
+    () => <ModelSelector value={selectedModel} onChange={setSelectedModel} />,
+    [selectedModel],
+  );
 
   const handleConversationCreated = () => {
     dispatch(baseApi.util.invalidateTags([APITags.GET_CONVERSATION_HISTORY]));
@@ -181,6 +188,9 @@ const ChatSidebarInner: FC<ChatSidebarInnerProps> = ({
             autoFocus
             onConversationCreated={handleConversationCreated}
             fileDropHandlerRef={fileDropHandlerRef}
+            llmModel={selectedModel}
+            showModelSelector
+            modelSelectorSlot={modelSelectorSlot}
           />
           <Button
             onClick={handleScrollToBottomClick}
