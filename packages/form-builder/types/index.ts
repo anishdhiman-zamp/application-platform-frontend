@@ -84,6 +84,7 @@ export interface DisplayDependency {
 
 export enum FieldType {
   TEXT = 'text',
+  PASSWORD = 'password',
   SELECT = 'select',
   INPUT = 'input',
   MULTI_SELECT = 'multi-select',
