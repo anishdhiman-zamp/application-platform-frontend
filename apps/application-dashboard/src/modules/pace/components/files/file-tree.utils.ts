@@ -1,3 +1,4 @@
+import { API_DOMAIN } from '@zamp-platform/api';
 import { format } from 'date-fns';
 import {
   CLIPBOARD_OPERATION,
@@ -12,7 +13,18 @@ import {
   type SortOption,
   type TreeNode,
 } from '@/modules/pace/components/files/file-tree.types';
-import { DATE_FORMAT, FILE_TYPE_LABELS } from '@/modules/pace/components/files/files.constants';
+import {
+  AUDIO_EXTENSIONS,
+  DATE_FORMAT,
+  FILE_CATEGORY,
+  FILE_TYPE_LABELS,
+  type FileCategory,
+  IMAGE_EXTENSIONS,
+  MARKDOWN_EXTENSIONS,
+  MONACO_EDITABLE_EXTENSIONS,
+  PDF_EXTENSIONS,
+  VIDEO_EXTENSIONS,
+} from '@/modules/pace/components/files/files.constants';
 
 /**
  * Builds a hierarchical tree structure from a flat array of files.
@@ -57,6 +69,19 @@ export function buildFileTree(files: FileItem[]): TreeNode[] {
 }
 
 /**
+ * Builds a media URL for accessing file content via the API.
+ * Each path segment is URL-encoded to handle special characters.
+ */
+export function getMediaUrl(filePath: string): string {
+  const encodedPath = filePath
+    .split('/')
+    .map((segment) => encodeURIComponent(segment))
+    .join('/');
+
+  return `${API_DOMAIN}/files/${encodedPath}?content`;
+}
+
+/**
  * Gets the file extension from a filename
  */
 export function getFileExtension(filename: string): string {
@@ -97,6 +122,50 @@ export function getFileTypeLabel(name: string): string {
   if (!ext) return 'File';
 
   return FILE_TYPE_LABELS[ext] || `${ext} file`;
+}
+
+/**
+ * Determines the file category based on extension for viewer selection
+ */
+export function getFileCategory(filename: string): FileCategory {
+  const ext = getFileExtension(filename).toLowerCase();
+
+  if (!ext) return FILE_CATEGORY.UNKNOWN;
+
+  if ((IMAGE_EXTENSIONS as readonly string[]).includes(ext)) {
+    return FILE_CATEGORY.IMAGE;
+  }
+
+  if ((AUDIO_EXTENSIONS as readonly string[]).includes(ext)) {
+    return FILE_CATEGORY.AUDIO;
+  }
+
+  if ((VIDEO_EXTENSIONS as readonly string[]).includes(ext)) {
+    return FILE_CATEGORY.VIDEO;
+  }
+
+  if ((PDF_EXTENSIONS as readonly string[]).includes(ext)) {
+    return FILE_CATEGORY.PDF;
+  }
+
+  if ((MARKDOWN_EXTENSIONS as readonly string[]).includes(ext)) {
+    return FILE_CATEGORY.MARKDOWN;
+  }
+
+  if ((MONACO_EDITABLE_EXTENSIONS as readonly string[]).includes(ext)) {
+    return FILE_CATEGORY.CODE;
+  }
+
+  return FILE_CATEGORY.UNKNOWN;
+}
+
+/**
+ * Checks if a file is editable (code or markdown)
+ */
+export function isFileEditable(filename: string): boolean {
+  const category = getFileCategory(filename);
+
+  return category === FILE_CATEGORY.CODE || category === FILE_CATEGORY.MARKDOWN;
 }
 
 /**

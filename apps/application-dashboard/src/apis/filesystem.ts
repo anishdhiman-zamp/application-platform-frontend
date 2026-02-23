@@ -50,10 +50,18 @@ const FilesystemApi = baseApi.injectEndpoints({
       providesTags: [APITags.GET_FILES_LIST],
     }),
 
-    // Read File Content
+    // Read File Metadata (without content)
     readFile: builder.query<ReadFileResponse, { path: string }>({
       query: ({ path }) => ({
         url: formRequestUrlWithParams(API_ENDPOINTS.FILES_READ_GET, { path }),
+      }),
+    }),
+
+    // Read File Content (raw text content via ?content)
+    readFileContent: builder.query<string, { path: string }>({
+      query: ({ path }) => ({
+        url: `${formRequestUrlWithParams(API_ENDPOINTS.FILES_READ_GET, { path })}?content`,
+        responseHandler: (response) => response.text(),
       }),
     }),
 
@@ -335,6 +343,8 @@ export const {
   useLazyListFilesQuery,
   useReadFileQuery,
   useLazyReadFileQuery,
+  useReadFileContentQuery,
+  useLazyReadFileContentQuery,
   useReadDirectoryQuery,
   useLazyReadDirectoryQuery,
   useCreateItemMutation,
