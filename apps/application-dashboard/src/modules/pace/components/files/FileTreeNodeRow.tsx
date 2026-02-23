@@ -35,6 +35,7 @@ interface FileTreeNodeRowRename {
 
 interface FileTreeNodeRowHandlers {
   onRowClick: () => void;
+  onRowDoubleClick?: () => void;
   onChevronClick: (e: React.MouseEvent) => void;
   onDragStart: (e: React.DragEvent) => void;
   onDragEnd: () => void;
@@ -63,6 +64,7 @@ const FileTreeNodeRow = forwardRef<HTMLDivElement, FileTreeNodeRowProps>(
         tabIndex={isDisabled ? -1 : 0}
         draggable={!state.isRenaming && !state.isProtected && !isDisabled}
         onClick={isDisabled ? undefined : handlers.onRowClick}
+        onDoubleClick={isDisabled ? undefined : handlers.onRowDoubleClick}
         onDragStart={isDisabled ? undefined : handlers.onDragStart}
         onDragEnd={isDisabled ? undefined : handlers.onDragEnd}
         onDragOver={isDisabled ? undefined : handlers.onDragOver}

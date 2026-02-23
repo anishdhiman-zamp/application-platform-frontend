@@ -1,5 +1,7 @@
 import { captureException } from '@sentry/browser';
 import { toast } from '@zamp-platform/ui';
+import { useRouter } from 'next/navigation';
+import { getChatFileRoute } from '@/constants/routeConfig';
 import {
   CLIPBOARD_OPERATION,
   CREATE_ITEM_TYPE,
@@ -11,10 +13,13 @@ import {
 import {
   buildFullPath,
   executeMoveOrCopy,
+  getMediaUrl,
   validatePasteOperation,
 } from '@/modules/pace/components/files/file-tree.utils';
 import { CONTEXT_MENU_ACTION_IDS, FILE_TOAST_MESSAGES } from '@/modules/pace/components/files/files.constants';
 import { useFileTreeContext } from '@/modules/pace/hooks/useFileTreeContext';
+import { usePaceContext } from '@/modules/pace/pace.context';
+import { DynamicTabType } from '@/modules/pace/pace.types';
 
 interface UseFileTreeNodeActionsProps {
   node: TreeNode;
@@ -53,6 +58,8 @@ export const useFileTreeNodeActions = ({
   onTriggerFileUpload,
   onTriggerFolderUpload,
 }: UseFileTreeNodeActionsProps): UseFileTreeNodeActionsReturn => {
+  const router = useRouter();
+  const { openDynamicTab } = usePaceContext();
   const {
     createFile,
     createFolder,
@@ -156,6 +163,29 @@ export const useFileTreeNodeActions = ({
             }
           }
           break;
+        case CONTEXT_MENU_ACTION_IDS.OPEN_IN_TAB: {
+          const filePath = getChatFileRoute(node.path);
+
+          openDynamicTab({
+            id: node.path,
+            name: node.name,
+            type: DynamicTabType.FILE,
+            path: filePath,
+          });
+          router.push(filePath);
+          break;
+        }
+        case CONTEXT_MENU_ACTION_IDS.DOWNLOAD: {
+          const downloadUrl = getMediaUrl(node.path);
+          const link = document.createElement('a');
+
+          link.href = downloadUrl;
+          link.download = node.name;
+          document.body.appendChild(link);
+          link.click();
+          document.body.removeChild(link);
+          break;
+        }
         case 'upload-file':
           if (!isExpanded) {
             onToggleExpand(node.path);

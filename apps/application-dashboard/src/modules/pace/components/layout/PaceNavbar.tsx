@@ -61,8 +61,8 @@ const PaceNavbar = () => {
       return pathname === path;
     }
 
-    if (id === PaceNavbarItemId.ARTIFACTS) {
-      if (isOnAnyDynamicTab()) return false;
+    if (isOnAnyDynamicTab()) {
+      return false;
     }
 
     return pathname?.includes(path) ?? false;

@@ -244,7 +244,7 @@ const FileTreeContent = ({
           })}
           {dragOverlayBounds && (
             <div
-              className='border-GRAY_1000 pointer-events-none absolute right-0 left-0 rounded-md border-2 border-dashed'
+              className='border-GRAY_700 pointer-events-none absolute right-0 left-0 rounded-md border-2 border-dotted'
               style={{
                 top: dragOverlayBounds.top,
                 height: dragOverlayBounds.height,

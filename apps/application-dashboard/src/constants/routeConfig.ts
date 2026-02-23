@@ -124,4 +124,8 @@ export const getChatDatasetRoute = (datasetId: string) => {
   return ROUTES_PATH.CHAT_DATASET.replace(':datasetId', datasetId);
 };
 
+export const getChatFileRoute = (filePath: string) => {
+  return `${ROUTES_PATH.CHAT_FILES}?f=${encodeURIComponent(filePath)}`;
+};
+
 export const LOGIN_URLS = [ROUTES_PATH.LOGIN];

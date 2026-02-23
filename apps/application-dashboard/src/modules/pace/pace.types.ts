@@ -23,6 +23,7 @@ export interface PaceSettingsTabSchema extends PaceNavbarItemSchema {
 export const enum DynamicTabType {
   PAGE = 'page',
   DATASET = 'dataset',
+  FILE = 'file',
 }
 
 export interface DynamicTab {
