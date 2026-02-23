@@ -35,6 +35,7 @@ interface PaceContextType {
   dynamicTabs: DynamicTab[];
   openDynamicTab: (tab: DynamicTab) => void;
   closeDynamicTab: (id: string) => void;
+  updateDynamicTab: (oldId: string, newTab: DynamicTab) => void;
   reorderDynamicTabs: (newOrder: string[]) => void;
 }
 
@@ -87,6 +88,21 @@ export const PaceProvider = ({ children }: { children: ReactNode }) => {
     });
   }, []);
 
+  const updateDynamicTab = useCallback((oldId: string, newTab: DynamicTab) => {
+    setDynamicTabs((prev) => {
+      const tabIndex = prev.findIndex((tab) => tab.id === oldId);
+
+      if (tabIndex === -1) return prev;
+
+      const newTabs = [...prev];
+
+      newTabs[tabIndex] = newTab;
+      setStoredTabs(newTabs);
+
+      return newTabs;
+    });
+  }, []);
+
   const reorderDynamicTabs = useCallback((newOrder: string[]) => {
     setDynamicTabs((prev) => {
       // Create a map for quick lookup
@@ -115,6 +131,7 @@ export const PaceProvider = ({ children }: { children: ReactNode }) => {
       dynamicTabs,
       openDynamicTab,
       closeDynamicTab,
+      updateDynamicTab,
       reorderDynamicTabs,
     }),
     [
@@ -124,6 +141,7 @@ export const PaceProvider = ({ children }: { children: ReactNode }) => {
       dynamicTabs,
       openDynamicTab,
       closeDynamicTab,
+      updateDynamicTab,
       reorderDynamicTabs,
     ],
   );

@@ -114,6 +114,31 @@ export function formatDate(timestamp: number): string {
 }
 
 /**
+ * Formats timestamp to compact relative time string (e.g., "just now", "5m ago", "2h ago")
+ */
+export function formatRelativeTime(timestamp: number): string {
+  const now = Date.now();
+  const diffMs = now - timestamp;
+  const diffMins = Math.floor(diffMs / 60000);
+  const diffHours = Math.floor(diffMs / 3600000);
+  const diffDays = Math.floor(diffMs / 86400000);
+
+  if (diffMins < 1) {
+    return 'just now';
+  }
+
+  if (diffMins < 60) {
+    return `${diffMins}m ago`;
+  }
+
+  if (diffHours < 24) {
+    return `${diffHours}h ago`;
+  }
+
+  return `${diffDays}d ago`;
+}
+
+/**
  * Gets a human-readable label for a file type based on extension
  */
 export function getFileTypeLabel(name: string): string {

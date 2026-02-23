@@ -12,7 +12,7 @@ import { getMonacoLanguage } from '@/modules/pace/components/file-viewer/viewers
 import UnsupportedFileView from '@/modules/pace/components/file-viewer/viewers/UnsupportedFileView';
 import VideoViewer from '@/modules/pace/components/file-viewer/viewers/VideoViewer';
 import { getMediaUrl } from '@/modules/pace/components/files/file-tree.utils';
-import { FILE_CATEGORY, type FileCategory } from '@/modules/pace/components/files/files.constants';
+import { FILE_CATEGORY, FILE_TOAST_MESSAGES, type FileCategory } from '@/modules/pace/components/files/files.constants';
 import useFileViewer from '@/modules/pace/hooks/useFileViewer';
 
 const PdfViewer = dynamic(() => import('./viewers/PdfViewer'), {
@@ -95,19 +95,20 @@ interface FileViewerTabProps {
 
 const FileViewerTab = memo(({ filePath, isActive }: FileViewerTabProps) => {
   const handleSaveError = useCallback(() => {
-    toast.error('Failed to save file');
+    toast.error(FILE_TOAST_MESSAGES.FAILED_TO_SAVE_FILE);
   }, []);
 
-  const { content, isLoading, fileCategory, fileExtension, isEditable, updateContent, isSaving } = useFileViewer({
-    filePath,
-    onSaveError: handleSaveError,
-  });
+  const { content, isLoading, fileCategory, fileExtension, isEditable, updateContent, isSaving, lastSavedAt } =
+    useFileViewer({
+      filePath,
+      onSaveError: handleSaveError,
+    });
 
   const fileName = filePath.split('/').pop() || filePath;
 
   return (
     <div className='flex h-full w-full flex-col overflow-hidden'>
-      <FileViewerHeader fileName={fileName} isSaving={isSaving} />
+      <FileViewerHeader filePath={filePath} fileName={fileName} isSaving={isSaving} lastSavedAt={lastSavedAt} />
       <div className='min-h-0 flex-1 overflow-hidden'>
         <FileViewerContent
           filePath={filePath}
