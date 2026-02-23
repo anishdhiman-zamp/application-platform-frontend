@@ -53,6 +53,11 @@ const ChatContentInner = ({
   const fileDropHandlerRef = useRef<((files: FileList) => void) | null>(null);
   const [selectedModel, setSelectedModel] = useState<string | null>(null);
 
+  const modelSelectorSlot = useMemo(
+    () => <ModelSelector value={selectedModel} onChange={setSelectedModel} />,
+    [selectedModel],
+  );
+
   const handleConversationCreated = () => {
     dispatch(baseApi.util.invalidateTags([APITags.GET_CONVERSATION_HISTORY]));
   };
@@ -170,7 +175,8 @@ const ChatContentInner = ({
               acceptedFileTypes={ACCEPTED_FILE_TYPES}
               fileDropHandlerRef={fileDropHandlerRef}
               llmModel={selectedModel}
-              rightSlot={<ModelSelector value={selectedModel} onChange={setSelectedModel} />}
+              showModelSelector
+              modelSelectorSlot={modelSelectorSlot}
             />
           </div>
         </div>
@@ -205,7 +211,8 @@ const ChatContentInner = ({
           minTextareaHeight={48}
           maxTextareaHeight={200}
           llmModel={selectedModel}
-          rightSlot={<ModelSelector value={selectedModel} onChange={setSelectedModel} />}
+          showModelSelector
+          modelSelectorSlot={modelSelectorSlot}
         />
       </div>
       <ChatHistory onSelectConversation={setConversationId} />

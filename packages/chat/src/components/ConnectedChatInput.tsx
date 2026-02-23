@@ -49,7 +49,8 @@ export interface ConnectedChatInputProps {
   minTextareaHeight?: number;
   maxTextareaHeight?: number;
   llmModel?: string | null;
-  rightSlot?: React.ReactNode;
+  showModelSelector?: boolean;
+  modelSelectorSlot?: React.ReactNode;
 }
 
 export const ConnectedChatInput: FC<ConnectedChatInputProps> = ({
@@ -81,7 +82,8 @@ export const ConnectedChatInput: FC<ConnectedChatInputProps> = ({
   minTextareaHeight,
   maxTextareaHeight,
   llmModel,
-  rightSlot,
+  showModelSelector,
+  modelSelectorSlot,
 }: ConnectedChatInputProps) => {
   const fileInputRef = useRef<HTMLInputElement>(null);
   const isRejectingRef = useRef(false);
@@ -295,7 +297,7 @@ export const ConnectedChatInput: FC<ConnectedChatInputProps> = ({
         className={className}
         minTextareaHeight={minTextareaHeight}
         maxTextareaHeight={maxTextareaHeight}
-        rightSlot={rightSlot}
+        modelSelectorSlot={showModelSelector ? modelSelectorSlot : undefined}
       />
     </div>
   );

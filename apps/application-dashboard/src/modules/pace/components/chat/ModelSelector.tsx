@@ -1,11 +1,10 @@
 'use client';
 
 import { type FC, useMemo } from 'react';
-import { Button, Popover, PopoverContent, PopoverPortal, PopoverTrigger } from '@zamp-platform/ui';
+import { Button, Popover, PopoverContent, PopoverPortal, PopoverTrigger, Skeleton } from '@zamp-platform/ui';
 import { cn } from '@zamp-platform/ui/utils';
 import { Check, ChevronDown } from 'lucide-react';
 import { type ChatModelOption, useListChatModelsQuery } from '@/apis/pace';
-import { useIsPaceChatEnabled } from '@/hooks/useIsPaceChatEnabled';
 
 interface ModelSelectorProps {
   value: string | null;
@@ -14,15 +13,18 @@ interface ModelSelectorProps {
 }
 
 const ModelSelector: FC<ModelSelectorProps> = ({ value, onChange, className }) => {
-  const { isPaceChatEnabled } = useIsPaceChatEnabled();
-  const { data, isLoading } = useListChatModelsQuery(undefined, { skip: !isPaceChatEnabled });
+  const { data, isLoading } = useListChatModelsQuery();
 
   const models = data?.models ?? [];
   const defaultModel = useMemo(() => models.find((m) => m.is_default), [models]);
   const selectedId = value ?? defaultModel?.id ?? null;
   const selectedModel = useMemo(() => models.find((m) => m.id === selectedId), [models, selectedId]);
 
-  if (!isPaceChatEnabled || isLoading || models.length === 0) {
+  if (isLoading) {
+    return <Skeleton className='h-5 w-16 rounded' />;
+  }
+
+  if (models.length === 0) {
     return null;
   }
 
@@ -31,7 +33,7 @@ const ModelSelector: FC<ModelSelectorProps> = ({ value, onChange, className }) =
       <PopoverTrigger asChild>
         <Button
           variant='ghost'
-          size='sm'
+          size='small'
           className={cn(
             'f-11-500 text-GRAY_600 hover:text-GRAY_900 flex h-5 items-center gap-0.5 rounded px-1.5',
             className,
@@ -44,12 +46,12 @@ const ModelSelector: FC<ModelSelectorProps> = ({ value, onChange, className }) =
       <PopoverPortal>
         <PopoverContent align='end' className='max-h-[340px] w-[240px] overflow-y-auto p-1'>
           {models.map((model: ChatModelOption) => (
-            <button
+            <Button
               key={model.id}
+              variant='ghost'
               onClick={() => onChange(model.id)}
               className={cn(
-                'flex w-full cursor-pointer items-center justify-between rounded-md px-3 py-2.5 text-left transition-colors',
-                'hover:bg-gray-50',
+                'flex h-auto w-full items-center justify-between rounded-md px-3 py-2.5 text-left',
                 model.id === selectedId && 'bg-gray-50',
               )}
             >
@@ -58,7 +60,7 @@ const ModelSelector: FC<ModelSelectorProps> = ({ value, onChange, className }) =
                 <span className='f-11-400 text-GRAY_600'>{model.description}</span>
               </div>
               {model.id === selectedId && <Check size={14} className='ml-2 shrink-0 text-blue-500' />}
-            </button>
+            </Button>
           ))}
         </PopoverContent>
       </PopoverPortal>
