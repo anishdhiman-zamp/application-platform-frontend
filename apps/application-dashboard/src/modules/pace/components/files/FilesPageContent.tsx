@@ -46,7 +46,7 @@ const FilesPageContent = ({ filePath }: FilesPageContentProps) => {
   }, []);
 
   if (filePath) {
-    return <FileTabsContainer currentFilePath={filePath} />;
+    return <FileTabsContainer />;
   }
 
   return (

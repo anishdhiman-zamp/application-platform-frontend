@@ -4,7 +4,7 @@ import { useCallback, useEffect, useMemo, useRef } from 'react';
 import { useLazyReadFileContentQuery, useLazyReadFileQuery, useWriteFileMutation } from '@/apis/filesystem';
 import { getFileCategory, getFileExtension } from '@/modules/pace/components/files/file-tree.utils';
 import { FILE_CATEGORY, type FileCategory } from '@/modules/pace/components/files/files.constants';
-import { useFileViewerContext } from '@/modules/pace/hooks/FileViewerContext';
+import { useFileViewerContext } from '@/modules/pace/context/FileViewerContext';
 
 const AUTO_SAVE_DELAY_MS = 1000;
 

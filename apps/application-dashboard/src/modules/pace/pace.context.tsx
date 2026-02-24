@@ -37,12 +37,12 @@ interface PaceContextType {
   startNewChat: () => void;
   dynamicTabs: DynamicTab[];
   isDynamicTabsHydrated: boolean;
-  activeFileTabKey: string | null;
-  setActiveFileTabKey: (key: string | null) => void;
   openDynamicTab: (tab: Omit<DynamicTab, 'stableKey'>) => void;
   closeDynamicTab: (id: string) => void;
   updateDynamicTab: (oldId: string, newTab: Omit<DynamicTab, 'stableKey'>) => void;
   reorderDynamicTabs: (newOrder: string[]) => void;
+  pendingActiveStableKey: string | null;
+  setPendingActiveStableKey: (key: string | null) => void;
 }
 
 const PaceContext = createContext<PaceContextType | null>(null);
@@ -51,10 +51,9 @@ export const PaceProvider = ({ children }: { children: ReactNode }) => {
   const [isPaceSidebarOpen, setIsPaceSidebarOpen] = useState(false);
   const [dynamicTabs, setDynamicTabs] = useState<DynamicTab[]>([]);
   const [isDynamicTabsHydrated, setIsDynamicTabsHydrated] = useState(false);
-  const [activeFileTabKey, setActiveFileTabKey] = useState<string | null>(null);
+  const [pendingActiveStableKey, setPendingActiveStableKey] = useState<string | null>(null);
   const startNewChatRef = useRef<(() => void) | null>(null);
 
-  // Hydrate from localStorage on mount
   useEffect(() => {
     const storedTabs = getStoredTabs();
 
@@ -142,12 +141,12 @@ export const PaceProvider = ({ children }: { children: ReactNode }) => {
       startNewChat,
       dynamicTabs,
       isDynamicTabsHydrated,
-      activeFileTabKey,
-      setActiveFileTabKey,
       openDynamicTab,
       closeDynamicTab,
       updateDynamicTab,
       reorderDynamicTabs,
+      pendingActiveStableKey,
+      setPendingActiveStableKey,
     }),
     [
       isPaceSidebarOpen,
@@ -155,11 +154,11 @@ export const PaceProvider = ({ children }: { children: ReactNode }) => {
       startNewChat,
       dynamicTabs,
       isDynamicTabsHydrated,
-      activeFileTabKey,
       openDynamicTab,
       closeDynamicTab,
       updateDynamicTab,
       reorderDynamicTabs,
+      pendingActiveStableKey,
     ],
   );
 

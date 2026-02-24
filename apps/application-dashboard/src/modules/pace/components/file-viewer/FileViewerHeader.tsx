@@ -91,7 +91,10 @@ const FileViewerHeader = ({
               {fileExtension && <span className='f-14-500 text-GRAY_600 shrink-0 select-none'>{fileExtension}</span>}
             </div>
           ) : (
-            <span className='f-14-500 text-GRAY_1000 cursor-pointer' onDoubleClick={startRename}>
+            <span
+              className='f-14-500 text-GRAY_1000 hover:bg-GRAY_200 cursor-pointer rounded-lg p-1'
+              onClick={startRename}
+            >
               {fileName}
             </span>
           )}

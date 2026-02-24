@@ -4,8 +4,8 @@ import { toast } from '@zamp-platform/ui';
 import { CLIPBOARD_OPERATION, type FileItem, type TreeNode } from '@/modules/pace/components/files/file-tree.types';
 import { executeMoveOrCopy, parseDragData } from '@/modules/pace/components/files/file-tree.utils';
 import { FILE_TOAST_MESSAGES } from '@/modules/pace/components/files/files.constants';
+import { useDynamicTabs } from '@/modules/pace/hooks/useDynamicTabs';
 import { useFileTreeContext } from '@/modules/pace/hooks/useFileTreeContext';
-import { useUpdateFileTab } from '@/modules/pace/hooks/useUpdateFileTab';
 
 interface UseFileTreeNodeDragDropProps {
   node: TreeNode;
@@ -52,7 +52,7 @@ export const useFileTreeNodeDragDrop = ({
   const expandTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 
   const { copyItem, moveItem, setConflict, isProtectedRoot, isInvalidCrossMove } = useFileTreeContext();
-  const { updateFileTab } = useUpdateFileTab();
+  const { updateTab } = useDynamicTabs();
 
   const clearExpandTimeout = () => {
     if (expandTimeoutRef.current) {
@@ -229,11 +229,7 @@ export const useFileTreeNodeDragDrop = ({
       });
 
       if (!isCopy) {
-        updateFileTab({
-          oldPath: sourcePath,
-          newPath: destinationPath,
-          newName: sourceName,
-        });
+        updateTab(sourcePath, destinationPath, sourceName);
       }
     } catch (error) {
       captureException(error);

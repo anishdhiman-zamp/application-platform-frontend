@@ -14,9 +14,10 @@ interface UseSiblingNamesReturn {
 /**
  * Hook to get sibling file/folder names for a given file path.
  * Uses the cached files list from RTK Query.
+ * Does not trigger a refetch if data is already cached.
  */
 export const useSiblingNames = ({ filePath }: UseSiblingNamesProps): UseSiblingNamesReturn => {
-  const { data: filesData, isLoading } = useListFilesQuery({ recursive: true });
+  const { data: filesData, isLoading } = useListFilesQuery({ recursive: true }, { refetchOnMountOrArgChange: false });
 
   const siblingNames = useMemo(() => {
     if (!filesData?.files || !filePath) {

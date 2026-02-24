@@ -111,7 +111,7 @@ interface FileViewerTabProps {
 
 const FileViewerTab = memo(({ filePath, isActive }: FileViewerTabProps) => {
   const [markdownViewMode, setMarkdownViewMode] = useState<MarkdownViewMode>('edit');
-  const { handleCloseDynamicTab } = useDynamicTabs();
+  const { closeTab } = useDynamicTabs();
 
   const handleSaveError = useCallback(() => {
     toast.error(FILE_TOAST_MESSAGES.FAILED_TO_SAVE_FILE);
@@ -121,9 +121,9 @@ const FileViewerTab = memo(({ filePath, isActive }: FileViewerTabProps) => {
     (e?: React.MouseEvent) => {
       const syntheticEvent = e ?? ({ preventDefault: () => {}, stopPropagation: () => {} } as React.MouseEvent);
 
-      handleCloseDynamicTab(syntheticEvent, filePath);
+      closeTab(syntheticEvent, filePath);
     },
-    [handleCloseDynamicTab, filePath],
+    [closeTab, filePath],
   );
 
   const { content, isLoading, isError, fileCategory, fileExtension, isEditable, updateContent, isSaving, lastSavedAt } =
