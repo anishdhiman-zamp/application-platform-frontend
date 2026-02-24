@@ -47,10 +47,13 @@ export const StepsBlock: FC<StepsBlockProps> = ({ blocks, toolResultsMap }) => {
     }
 
     if (block.type === BLOCK_TYPE.TOOL_USE) {
-      if (block?.payload?.icon) {
-        return (
-          <ImageWithFallback src={block?.payload?.icon} alt={block?.payload?.display_name} className='h-3.5 w-3.5' />
-        );
+      const displayContent = safeJsonParse<{ tool_name?: string; icon?: string }>(
+        block?.payload?.display_content?.json_block,
+      );
+      const name = block?.payload?.name || displayContent?.tool_name;
+      const icon = block?.payload?.icon || displayContent?.icon;
+      if (icon?.length) {
+        return <ImageWithFallback src={icon} alt={name} className='h-3.5 w-3.5' />;
       }
       return <AnimatedTerminalIcon showAnimation={!isComplete} size={12} />;
     }
