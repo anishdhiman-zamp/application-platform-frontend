@@ -178,6 +178,7 @@ const DatasetByIdInner: FC<DatasetByIdProps> = ({
     data: filterConfigData,
     refetch: refetchFilterConfig,
     isFetching,
+    isLoading: isFilterConfigLoading,
     isError,
     isUninitialized,
   } = useGetDatasetFilterConfigQuery(
@@ -186,7 +187,7 @@ const DatasetByIdInner: FC<DatasetByIdProps> = ({
     },
     {
       skip: !id || isCreating, // Skip when creating new dataset optimistically
-      refetchOnMountOrArgChange: false, // Prevent refetch on mount for better UX
+      refetchOnMountOrArgChange: true, // Refetch on mount to get fresh column aliases after transactions
     },
   );
 
@@ -783,9 +784,9 @@ const DatasetByIdInner: FC<DatasetByIdProps> = ({
   return (
     <CommonWrapper
       className={cn('h-full', {
-        'flex flex-col items-center justify-center': isFetching,
+        'flex flex-col items-center justify-center': isFilterConfigLoading,
       })}
-      isLoading={isFetching}
+      isLoading={isFilterConfigLoading}
       isError={isError}
       skeletonType={SkeletonTypes.CUSTOM}
       refetchFunction={refetchFilterConfig}
@@ -853,7 +854,10 @@ const DatasetByIdInner: FC<DatasetByIdProps> = ({
               datasetId={id as string}
               isCreating={isCreating}
               title={datasetTitle || pendingTitle}
-              onTransactionSuccess={() => handleTabSelect(DatasetTabsTypes.PREVIEW)}
+              onTransactionSuccess={() => {
+                handleTabSelect(DatasetTabsTypes.PREVIEW);
+                refetchFilterConfig();
+              }}
             />
           </div>
         )}

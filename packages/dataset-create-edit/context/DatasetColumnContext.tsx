@@ -206,11 +206,12 @@ export const DatasetColumnProvider: FC<DatasetColumnProviderProps> = ({
   // const [updateDataset] = dependencies.useUpdateDatasetMutation?.() || [null, null];
 
   // Get display config (needed for alias updates, optional)
+  // refetchOnMountOrArgChange: true ensures fresh display_config on remount.
   const displayConfigData = dependencies.useGetDatasetDisplayConfigQuery?.(
     { datasetId: datasetId || '' },
     {
       skip: !datasetId,
-      refetchOnMountOrArgChange: false,
+      refetchOnMountOrArgChange: true,
     },
   )?.data;
 
@@ -520,9 +521,15 @@ export const DatasetColumnProvider: FC<DatasetColumnProviderProps> = ({
               default: feSettings?.defaultValue ?? col.default ?? null,
               isVisible: feSettings?.isVisible ?? true,
               width: columnWidth,
-              order: enhancedColumns.length + index,
+              order: enhancedColumns.length, // Will be reassigned below
             });
           }
+        });
+
+        // Reassign order sequentially to prevent gaps (from filtered null entries in
+        // validStoredConfig) and collisions (from global index in the append step).
+        enhancedColumns.forEach((col, i) => {
+          col.order = i;
         });
 
         setColumns(enhancedColumns);
@@ -712,6 +719,15 @@ export const DatasetColumnProvider: FC<DatasetColumnProviderProps> = ({
       return;
     }
 
+    // Load localStorage column names — these represent the user's/transaction's saved state.
+    const storedConfig = loadFromLocalStorage(datasetId);
+    const storedNameByColId = new Map<string, string>();
+    storedConfig?.forEach((stored) => {
+      if (stored?.colId && stored?.columnName) {
+        storedNameByColId.set(stored.colId.toLowerCase(), stored.columnName);
+      }
+    });
+
     // Build alias map from displayConfigData (case-insensitive)
     const aliasMap = new Map<string, string>();
     displayConfigData?.display_config?.forEach((item) => {
@@ -724,11 +740,19 @@ export const DatasetColumnProvider: FC<DatasetColumnProviderProps> = ({
     let needsUpdate = false;
     const updatedColumns = columns?.map((col) => {
       const alias = aliasMap.get(col?.id?.toLowerCase());
-      if (alias && alias !== col?.column_name) {
-        needsUpdate = true;
-        return { ...col, column_name: alias };
+      if (!alias || alias === col?.column_name) {
+        return col; // No alias or already matches — skip
       }
-      return col;
+
+      // If localStorage has a saved name for this column, and the context column name
+      // matches it, the name was set from a save/transaction.
+      const storedName = storedNameByColId.get(col?.id?.toLowerCase());
+      if (storedName && col?.column_name === storedName) {
+        return col; // Context name matches localStorage — preserve it
+      }
+
+      needsUpdate = true;
+      return { ...col, column_name: alias };
     });
 
     if (needsUpdate) {
@@ -743,12 +767,18 @@ export const DatasetColumnProvider: FC<DatasetColumnProviderProps> = ({
 
         if (existingConfig?.columns) {
           // Update column names in localStorage using case-insensitive matching
+          // Only update columns that were also updated in context (same guard applies)
           const updatedLocalStorageColumns = existingConfig.columns.map((col) => {
             const alias = aliasMap.get(col?.colId?.toLowerCase());
-            if (alias && alias !== col?.columnName) {
-              return { ...col, columnName: alias };
+            if (!alias || alias === col?.columnName) {
+              return col;
             }
-            return col;
+            // Don't overwrite localStorage name with stale alias
+            const storedName = storedNameByColId.get(col?.colId?.toLowerCase());
+            if (storedName && col?.columnName === storedName) {
+              return col;
+            }
+            return { ...col, columnName: alias };
           });
 
           dependencies.setColumnConfigForDataset(datasetId, {
@@ -760,7 +790,13 @@ export const DatasetColumnProvider: FC<DatasetColumnProviderProps> = ({
         console.error('[DatasetColumnContext] Error updating localStorage with aliases:', error);
       }
     }
-  }, [displayConfigData, datasetId, columns.length, dependencies.LOCAL_STORAGE_KEYS.COLUMN_ORDERING_VISIBILITY]); // Run when displayConfigData or columns.length changes
+  }, [
+    displayConfigData,
+    datasetId,
+    columns.length,
+    dependencies.LOCAL_STORAGE_KEYS.COLUMN_ORDERING_VISIBILITY,
+    loadFromLocalStorage,
+  ]); // Run when displayConfigData or columns.length changes
 
   /**
    * Sync originalColumns visibility with backend display_config when it becomes available
