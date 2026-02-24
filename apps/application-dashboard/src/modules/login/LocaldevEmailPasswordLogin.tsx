@@ -56,7 +56,7 @@ const LoginForm: FC<LoginFormProps> = ({ className = '', loginFlow, setLoginFlow
       let csrfToken = '';
 
       if (csrfNode && 'value' in csrfNode.attributes) {
-        csrfToken = csrfNode.attributes.value;
+        csrfToken = csrfNode.attributes.value ?? '';
       }
 
       fetch(loginFlow.ui.action, {
