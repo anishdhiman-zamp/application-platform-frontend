@@ -207,6 +207,11 @@ export const API_ENDPOINTS = {
   // Update Conversation Title
   UPDATE_CONVERSATION_TITLE: `v3/conversations/{{conversationId}}/title`,
 
+  //INTEGRATIONS
+  INTEGRATIONS_CATALOG_GET: `integrations/catalog`,
+  INTEGRATIONS_CATALOG_ENABLED_GET: `integrations/catalog/enabled`,
+  INTEGRATIONS_CONNECTIONS_DELETE: `integrations/connections/{{connectionId}}`,
+  INTEGRATIONS_AUTHENTICATE_V2_POST: `integrations/authenticate`,
   // Filesystem API
   FILESYSTEM_STATUS_GET: `filesystem/status`,
   FILES_LIST_GET: `files`,

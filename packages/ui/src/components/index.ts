@@ -13,6 +13,7 @@ export * from './ui/dialog';
 export * from './ui/dropdown-menu';
 export * from './ui/email-input-to-chips';
 export * from './ui/file-icon';
+export * from './ui/image-with-fallback';
 export * from './ui/input';
 export * from './ui/label';
 export * from './ui/list-card';
