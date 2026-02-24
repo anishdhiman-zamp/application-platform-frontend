@@ -61,7 +61,7 @@ const FileTreeNodeRow = forwardRef<HTMLDivElement, FileTreeNodeRowProps>(
       <div
         ref={ref}
         role='button'
-        tabIndex={isDisabled ? -1 : 0}
+        tabIndex={isDisabled || state.isRenaming ? -1 : 0}
         draggable={!state.isRenaming && !state.isProtected && !isDisabled}
         onClick={isDisabled ? undefined : handlers.onRowClick}
         onDoubleClick={isDisabled ? undefined : handlers.onRowDoubleClick}
@@ -120,6 +120,7 @@ const FileTreeNodeRow = forwardRef<HTMLDivElement, FileTreeNodeRowProps>(
             height={20}
             className='shrink-0'
             unoptimized
+            priority
           />
         ) : (
           <FileIcon extension={extension || 'txt'} size='sm' />
@@ -137,6 +138,8 @@ const FileTreeNodeRow = forwardRef<HTMLDivElement, FileTreeNodeRowProps>(
             >
               <Input
                 ref={rename.onInputRef}
+                autoFocus
+                autoComplete='off'
                 value={rename.value}
                 onChange={(e) => rename.onChange(e.target.value)}
                 onBlur={rename.onSubmit}

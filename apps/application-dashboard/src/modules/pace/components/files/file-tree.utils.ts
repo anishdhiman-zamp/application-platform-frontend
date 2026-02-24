@@ -614,3 +614,57 @@ export function validatePasteOperation(
 
   return { valid: true, hasConflict, destinationPath };
 }
+
+/**
+ * Splits a filename into base name and extension.
+ * For folders (isFile = false), the entire name is the base name with no extension.
+ */
+export function getFileNameParts(name: string, isFile = true): { baseName: string; extension: string } {
+  if (!isFile) {
+    return { baseName: name, extension: '' };
+  }
+
+  const lastDotIndex = name.lastIndexOf('.');
+
+  if (lastDotIndex > 0) {
+    return {
+      baseName: name.slice(0, lastDotIndex),
+      extension: name.slice(lastDotIndex),
+    };
+  }
+
+  return { baseName: name, extension: '' };
+}
+
+/**
+ * Checks if a new name would conflict with existing sibling names.
+ * Excludes the current name from the check (for rename operations).
+ */
+export function checkDuplicateName(newName: string, siblingNames: string[], currentName?: string): boolean {
+  if (!newName) return false;
+
+  const namesToCheck = currentName ? siblingNames.filter((name) => name !== currentName) : siblingNames;
+
+  return namesToCheck.some((name) => name === newName);
+}
+
+/**
+ * Gets sibling file/folder names from a flat file list for a given file path.
+ * Returns names of items in the same directory as the target file.
+ */
+export function getSiblingNamesFromFiles(files: FileItem[], filePath: string): string[] {
+  const parentPath = getParentPath(filePath);
+  const isRoot = parentPath === '/';
+
+  return files
+    .filter((file) => {
+      const fileParentPath = getParentPath(file.path);
+
+      if (isRoot) {
+        return !file.path.includes('/');
+      }
+
+      return fileParentPath === parentPath;
+    })
+    .map((file) => file.name);
+}

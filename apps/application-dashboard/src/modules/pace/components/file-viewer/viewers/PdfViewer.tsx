@@ -7,10 +7,13 @@ import { cn } from '@zamp-platform/ui/utils';
 import { ChevronDown, ChevronUp, Download, ZoomIn, ZoomOut } from 'lucide-react';
 import ImageLoader from '@/components/common/loader/ImageLoader';
 import { ZAMP_LOGO_LOADER_SVG } from '@/constants/icons';
+import FileNotFoundError from '@/modules/pace/components/file-viewer/FileNotFoundError';
 
 interface PdfViewerProps {
   src: string;
   className?: string;
+  fileName?: string;
+  onClose?: () => void;
 }
 
 const PdfToolbar = ({ usePDFSlickStore }: { usePDFSlickStore: ReturnType<typeof usePDFSlick>['usePDFSlickStore'] }) => {
@@ -91,8 +94,10 @@ const ErrorFallback = ({ message }: { message: string }) => (
   </div>
 );
 
-const PdfViewer = ({ src, className = '' }: PdfViewerProps) => {
+const PdfViewer = ({ src, className = '', fileName, onClose }: PdfViewerProps) => {
   const [isLoading, setIsLoading] = useState(true);
+
+  const displayFileName = fileName || decodeURIComponent(src.split('/').pop() || 'document.pdf');
 
   const { viewerRef, usePDFSlickStore, PDFSlickViewer, isDocumentLoaded, error } = usePDFSlick(src, {
     scaleValue: 'page-fit',
@@ -116,9 +121,13 @@ const PdfViewer = ({ src, className = '' }: PdfViewerProps) => {
     }
   }, [error, src]);
 
+  if (error && onClose) {
+    return <FileNotFoundError fileName={displayFileName} onClose={onClose} />;
+  }
+
   return (
     <div className={cn('pdfSlick bg-BG_GRAY_2 relative h-full w-full', className)}>
-      {error && <ErrorFallback message={error.message || 'Unknown error'} />}
+      {error && !onClose && <ErrorFallback message={error.message || 'Unknown error'} />}
       {!error && <LoadingIndicator isLoading={isLoading} />}
 
       {!error && (

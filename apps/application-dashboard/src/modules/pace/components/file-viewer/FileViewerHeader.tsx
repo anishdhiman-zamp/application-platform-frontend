@@ -3,11 +3,13 @@
 import { FileIcon, Input, Tabs, TabsList, TabsTrigger } from '@zamp-platform/ui';
 import { cn } from '@zamp-platform/ui/utils';
 import { Eye, Pencil } from 'lucide-react';
+import TooltipV2 from '@/components/common/TooltipV2';
 import FileSaveStatus from '@/modules/pace/components/file-viewer/FileSaveStatus';
 import FileViewerHeaderMenu from '@/modules/pace/components/file-viewer/FileViewerHeaderMenu';
 import { getFileExtension } from '@/modules/pace/components/files/file-tree.utils';
 import { useFileViewerHeaderActions } from '@/modules/pace/hooks/useFileViewerHeaderActions';
 import { useFileViewerHeaderRename } from '@/modules/pace/hooks/useFileViewerHeaderRename';
+import { SIDE_OPTIONS } from '@/types/commonTypes';
 
 export type MarkdownViewMode = 'edit' | 'preview';
 
@@ -39,6 +41,7 @@ const FileViewerHeader = ({
     renameValue,
     fileExtension,
     isRenameLoading,
+    isDuplicateName,
     startRename,
     setRenameValue,
     handleRenameSubmit,
@@ -62,17 +65,29 @@ const FileViewerHeader = ({
         <div className='flex items-center gap-x-3'>
           {isRenaming ? (
             <div className='flex items-center'>
-              <Input
-                ref={handleRenameInputRef}
-                autoFocus
-                value={renameValue}
-                onChange={(e) => setRenameValue(e.target.value)}
-                onKeyDown={handleRenameKeyDown}
-                onBlur={handleRenameSubmit}
-                disabled={isRenameLoading}
-                className='f-14-500 text-GRAY_1000 h-6 w-auto min-w-[100px] px-1 py-1'
-                autoComplete='off'
-              />
+              <TooltipV2
+                tooltipBody='A file or folder with this name already exists.'
+                side={SIDE_OPTIONS.BOTTOM}
+                open={isDuplicateName}
+                delayDuration={0}
+                tooltipClassName='bg-RED_100 text-RED_700 border-RED_300 border'
+                asChildTrigger
+              >
+                <Input
+                  ref={handleRenameInputRef}
+                  autoFocus
+                  value={renameValue}
+                  autoComplete='off'
+                  onChange={(e) => setRenameValue(e.target.value)}
+                  onBlur={handleRenameSubmit}
+                  onKeyDown={handleRenameKeyDown}
+                  disabled={isRenameLoading}
+                  className={cn(
+                    'f-14-500 text-GRAY_1000 h-6 w-auto min-w-[100px] px-1 py-1',
+                    isDuplicateName && 'border-RED_700! focus:shadow-input-error-outline-shadow',
+                  )}
+                />
+              </TooltipV2>
               {fileExtension && <span className='f-14-500 text-GRAY_600 shrink-0 select-none'>{fileExtension}</span>}
             </div>
           ) : (

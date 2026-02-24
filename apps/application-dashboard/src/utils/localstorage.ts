@@ -45,3 +45,23 @@ export const removeFromLocalStorage = (key: LOCAL_STORAGE_KEYS) => {
 
   window.localStorage.removeItem(key);
 };
+
+export const getStoredExpandedPaths = (): string[] => {
+  try {
+    const stored = getFromLocalStorage(LOCAL_STORAGE_KEYS.PACE_FILE_TREE_EXPANDED_PATHS);
+
+    if (!stored) return [];
+
+    return JSON.parse(stored) as string[];
+  } catch {
+    return [];
+  }
+};
+
+export const setStoredExpandedPaths = (paths: string[]) => {
+  try {
+    setToLocalStorage(LOCAL_STORAGE_KEYS.PACE_FILE_TREE_EXPANDED_PATHS, JSON.stringify(paths));
+  } catch {
+    console.error('Error setting stored expanded paths', paths);
+  }
+};

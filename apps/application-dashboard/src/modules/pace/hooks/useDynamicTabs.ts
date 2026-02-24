@@ -1,41 +1,30 @@
 'use client';
 
-import { useCallback, useMemo } from 'react';
+import { useCallback } from 'react';
 import { getNextNavigationTarget, NAVIGATION_STRATEGY } from '@zamp-platform/utils';
-import { usePathname, useRouter, useSearchParams } from 'next/navigation';
+import { useRouter, useSearchParams } from 'next/navigation';
 import { ROUTES_PATH } from '@/constants/routeConfig';
 import { useFileViewerContext } from '@/modules/pace/hooks/FileViewerContext';
 import { usePaceContext } from '@/modules/pace/pace.context';
-import { DynamicTab, DynamicTabType } from '@/modules/pace/pace.types';
+import { DynamicTab } from '@/modules/pace/pace.types';
 
 export const useDynamicTabs = () => {
   const router = useRouter();
-  const pathname = usePathname();
   const searchParams = useSearchParams();
   const currentFileParam = searchParams?.get('f') ?? null;
 
   const { dynamicTabs, activeFileTabKey, closeDynamicTab, reorderDynamicTabs } = usePaceContext();
   const { removeFileState } = useFileViewerContext();
 
-  const currentFullPath = useMemo(() => {
-    if (currentFileParam) {
-      return `${pathname}?f=${encodeURIComponent(currentFileParam)}`;
-    }
-
-    const search = searchParams?.toString();
-
-    return search ? `${pathname}?${search}` : pathname;
-  }, [pathname, searchParams, currentFileParam]);
-
   const isDynamicTabActive = useCallback(
     (tab: DynamicTab) => {
-      if (tab.type === DynamicTabType.FILE) {
-        return tab.stableKey === activeFileTabKey;
+      if (!currentFileParam) {
+        return false;
       }
 
-      return currentFullPath === tab.path;
+      return tab.stableKey === activeFileTabKey;
     },
-    [activeFileTabKey, currentFullPath],
+    [activeFileTabKey, currentFileParam],
   );
 
   const isOnAnyDynamicTab = useCallback(() => {
@@ -53,10 +42,7 @@ export const useDynamicTabs = () => {
 
       const isClosingActiveTab = isDynamicTabActive(closingTab);
 
-      if (closingTab.type === DynamicTabType.FILE) {
-        removeFileState(closingTab.id);
-      }
-
+      removeFileState(closingTab.id);
       closeDynamicTab(closingTab.id);
 
       if (isClosingActiveTab) {

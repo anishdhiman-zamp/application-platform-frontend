@@ -119,13 +119,10 @@ export const PaceProvider = ({ children }: { children: ReactNode }) => {
 
   const reorderDynamicTabs = useCallback((newOrder: string[]) => {
     setDynamicTabs((prev) => {
-      // Create a map for quick lookup
       const tabMap = new Map(prev.map((tab) => [tab.id, tab]));
 
-      // Reorder tabs based on the new order
       const reorderedTabs = newOrder.map((id) => tabMap.get(id)).filter((tab): tab is DynamicTab => tab !== undefined);
 
-      // If the reordered tabs don't match the original count, something went wrong
       if (reorderedTabs.length !== prev.length) {
         return prev;
       }

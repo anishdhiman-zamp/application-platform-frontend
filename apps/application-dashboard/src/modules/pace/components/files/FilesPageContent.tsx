@@ -1,7 +1,7 @@
 'use client';
 
 import { useCallback, useRef, useState } from 'react';
-import FileTabsContainer from '@/modules/pace/components/file-viewer/FileTabsContainer';
+import FileTabsContainer from 'modules/pace/components/file-viewer/FileTabsContainer';
 import type { FileItem } from '@/modules/pace/components/files/file-tree.types';
 import FilesHeader from '@/modules/pace/components/files/FilesHeader';
 import FilesHierarchy from '@/modules/pace/components/files/FilesHierarchy';

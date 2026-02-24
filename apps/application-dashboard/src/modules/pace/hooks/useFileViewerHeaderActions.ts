@@ -9,7 +9,6 @@ import { FILE_TOAST_MESSAGES, FILE_VIEWER_HEADER_ACTION_IDS } from '@/modules/pa
 import { useFileViewerContext } from '@/modules/pace/hooks/FileViewerContext';
 import { useFileActions } from '@/modules/pace/hooks/useFileActions';
 import { usePaceContext } from '@/modules/pace/pace.context';
-import { DynamicTabType } from '@/modules/pace/pace.types';
 
 interface UseFileViewerHeaderActionsProps {
   filePath: string;
@@ -45,10 +44,7 @@ export const useFileViewerHeaderActions = ({
     const closingTab = dynamicTabs.find((tab) => tab.id === filePath);
 
     if (closingTab) {
-      if (closingTab.type === DynamicTabType.FILE) {
-        removeFileState(closingTab.id);
-      }
-
+      removeFileState(closingTab.id);
       closeDynamicTab(closingTab.id);
 
       const { target, hasRemainingItems } = getNextNavigationTarget({

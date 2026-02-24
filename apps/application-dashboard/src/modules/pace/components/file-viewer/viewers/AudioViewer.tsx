@@ -4,6 +4,7 @@ import { useCallback, useEffect, useRef, useState } from 'react';
 import { captureException } from '@sentry/nextjs';
 import { cn } from '@zamp-platform/ui/utils';
 import { LoaderCircle, Music } from 'lucide-react';
+import FileNotFoundError from '@/modules/pace/components/file-viewer/FileNotFoundError';
 import MuteButton from '@/modules/pace/components/file-viewer/viewers/components/MuteButton';
 import PlayButton from '@/modules/pace/components/file-viewer/viewers/components/PlayButton';
 import ProgressBar from '@/modules/pace/components/file-viewer/viewers/components/ProgressBar';
@@ -14,15 +15,18 @@ interface AudioViewerProps {
   fileName?: string;
   className?: string;
   isActive?: boolean;
+  onClose?: () => void;
 }
 
-const AudioViewer = ({ src, fileName, className = '', isActive = true }: AudioViewerProps) => {
+const AudioViewer = ({ src, fileName, className = '', isActive = true, onClose }: AudioViewerProps) => {
   const audioRef = useRef<HTMLAudioElement>(null);
+  const displayFileName = fileName || decodeURIComponent(src.split('/').pop() || 'audio');
 
   const [isPlaying, setIsPlaying] = useState(false);
   const [currentTime, setCurrentTime] = useState(0);
   const [duration, setDuration] = useState(0);
   const [isLoading, setIsLoading] = useState(true);
+  const [isBuffering, setIsBuffering] = useState(false);
   const [error, setError] = useState(false);
   const [isMuted, setIsMuted] = useState(false);
 
@@ -39,7 +43,26 @@ const AudioViewer = ({ src, fileName, className = '', isActive = true }: AudioVi
 
   const handlePlay = () => setIsPlaying(true);
   const handlePause = () => setIsPlaying(false);
-  const handleEnded = () => setIsPlaying(false);
+  const handleEnded = () => {
+    const audio = audioRef.current;
+
+    setIsPlaying(false);
+
+    if (audio) {
+      audio.currentTime = 0;
+      setCurrentTime(0);
+    }
+  };
+  const handleWaiting = () => setIsBuffering(true);
+  const handleCanPlay = () => setIsBuffering(false);
+  const handleSeeking = () => setIsBuffering(true);
+  const handleSeeked = useCallback(() => {
+    const audio = audioRef.current;
+
+    if (audio && audio.readyState >= 3) {
+      setIsBuffering(false);
+    }
+  }, []);
 
   const togglePlayPause = () => {
     const audio = audioRef.current;
@@ -105,6 +128,10 @@ const AudioViewer = ({ src, fileName, className = '', isActive = true }: AudioVi
     audio.addEventListener('pause', handlePause);
     audio.addEventListener('ended', handleEnded);
     audio.addEventListener('error', handleError);
+    audio.addEventListener('waiting', handleWaiting);
+    audio.addEventListener('canplay', handleCanPlay);
+    audio.addEventListener('seeking', handleSeeking);
+    audio.addEventListener('seeked', handleSeeked);
 
     return () => {
       audio.removeEventListener('loadedmetadata', handleLoadedMetadata);
@@ -113,8 +140,16 @@ const AudioViewer = ({ src, fileName, className = '', isActive = true }: AudioVi
       audio.removeEventListener('pause', handlePause);
       audio.removeEventListener('ended', handleEnded);
       audio.removeEventListener('error', handleError);
+      audio.removeEventListener('waiting', handleWaiting);
+      audio.removeEventListener('canplay', handleCanPlay);
+      audio.removeEventListener('seeking', handleSeeking);
+      audio.removeEventListener('seeked', handleSeeked);
     };
-  }, [handleError, src]);
+  }, [handleError, handleSeeked, src]);
+
+  if (error && onClose) {
+    return <FileNotFoundError fileName={displayFileName} onClose={onClose} />;
+  }
 
   return (
     <div className={cn('flex h-full w-full flex-col items-center justify-center p-4', className)}>
@@ -131,7 +166,13 @@ const AudioViewer = ({ src, fileName, className = '', isActive = true }: AudioVi
             <LoaderCircle size={48} className='text-GRAY_700 animate-spin' />
           </div>
 
-          {error ? (
+          {isBuffering && !isLoading && (
+            <div className='bg-BG_GRAY_2/80 pointer-events-none absolute inset-0 z-10 flex items-center justify-center rounded-t-[10px]'>
+              <LoaderCircle size={48} className='text-GRAY_700 animate-spin' />
+            </div>
+          )}
+
+          {error && !onClose ? (
             <div className='text-center'>
               <Music size={64} className='text-GRAY_500 mx-auto mb-2' />
               <p className='f-13-450 text-GRAY_700'>Error loading audio</p>

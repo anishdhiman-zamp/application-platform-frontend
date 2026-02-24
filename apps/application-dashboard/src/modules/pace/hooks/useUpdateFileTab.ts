@@ -2,7 +2,6 @@ import { useCallback } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
 import { getChatFileRoute } from '@/constants/routeConfig';
 import { usePaceContext } from '@/modules/pace/pace.context';
-import { DynamicTabType } from '@/modules/pace/pace.types';
 
 interface UpdateFileTabParams {
   oldPath: string;
@@ -32,7 +31,6 @@ export const useUpdateFileTab = () => {
       updateDynamicTab(oldPath, {
         id: newPath,
         name: newName,
-        type: DynamicTabType.FILE,
         path: newTabPath,
       });
 
