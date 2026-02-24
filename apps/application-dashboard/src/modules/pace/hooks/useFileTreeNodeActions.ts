@@ -134,7 +134,7 @@ export const useFileTreeNodeActions = ({
 
           await deleteItem(node.path);
           onFileDeleted?.(node.path);
-          toast.success(FILE_TOAST_MESSAGES.FILE_DELETED);
+          toast.success(isFolder ? FILE_TOAST_MESSAGES.FOLDER_DELETED : FILE_TOAST_MESSAGES.FILE_DELETED);
           break;
         }
         case CONTEXT_MENU_ACTION_IDS.DUPLICATE:

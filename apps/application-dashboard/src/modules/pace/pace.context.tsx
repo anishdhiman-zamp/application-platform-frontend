@@ -36,6 +36,7 @@ interface PaceContextType {
   registerStartNewChat: (callback: () => void) => void;
   startNewChat: () => void;
   dynamicTabs: DynamicTab[];
+  isDynamicTabsHydrated: boolean;
   activeFileTabKey: string | null;
   setActiveFileTabKey: (key: string | null) => void;
   openDynamicTab: (tab: Omit<DynamicTab, 'stableKey'>) => void;
@@ -49,6 +50,7 @@ const PaceContext = createContext<PaceContextType | null>(null);
 export const PaceProvider = ({ children }: { children: ReactNode }) => {
   const [isPaceSidebarOpen, setIsPaceSidebarOpen] = useState(false);
   const [dynamicTabs, setDynamicTabs] = useState<DynamicTab[]>([]);
+  const [isDynamicTabsHydrated, setIsDynamicTabsHydrated] = useState(false);
   const [activeFileTabKey, setActiveFileTabKey] = useState<string | null>(null);
   const startNewChatRef = useRef<(() => void) | null>(null);
 
@@ -56,9 +58,8 @@ export const PaceProvider = ({ children }: { children: ReactNode }) => {
   useEffect(() => {
     const storedTabs = getStoredTabs();
 
-    if (storedTabs.length > 0) {
-      setDynamicTabs(storedTabs);
-    }
+    setDynamicTabs(storedTabs);
+    setIsDynamicTabsHydrated(true);
   }, []);
 
   const registerStartNewChat = useCallback((callback: () => void) => {
@@ -140,6 +141,7 @@ export const PaceProvider = ({ children }: { children: ReactNode }) => {
       registerStartNewChat,
       startNewChat,
       dynamicTabs,
+      isDynamicTabsHydrated,
       activeFileTabKey,
       setActiveFileTabKey,
       openDynamicTab,
@@ -152,6 +154,7 @@ export const PaceProvider = ({ children }: { children: ReactNode }) => {
       registerStartNewChat,
       startNewChat,
       dynamicTabs,
+      isDynamicTabsHydrated,
       activeFileTabKey,
       openDynamicTab,
       closeDynamicTab,

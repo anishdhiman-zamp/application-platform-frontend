@@ -111,7 +111,7 @@ const FileTreeContent = ({
     overscan: OVERSCAN_COUNT,
   });
 
-const handleToggleExpand = useCallback(
+  const handleToggleExpand = useCallback(
     (path: string) => {
       toggleExpand(path);
     },

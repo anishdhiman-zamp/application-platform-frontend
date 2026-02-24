@@ -29,6 +29,7 @@ export const FILE_TOAST_MESSAGES = {
   FAILED_TO_SAVE_FILE: 'Failed to save file',
   FAILED_TO_DELETE_FILE: 'Failed to delete file',
   FILE_DELETED: 'File deleted',
+  FOLDER_DELETED: 'Folder deleted',
 } as const;
 
 export const CONTEXT_MENU_ACTION_IDS = {

@@ -3,8 +3,8 @@
 import { useEffect } from 'react';
 import { cn } from '@zamp-platform/ui/utils';
 import FileViewerTab from 'modules/pace/components/file-viewer/FileViewerTab';
-import { useRouter } from 'next/navigation';
-import { ROUTES_PATH } from '@/constants/routeConfig';
+import ImageLoader from '@/components/common/loader/ImageLoader';
+import { ZAMP_LOGO_LOADER_SVG } from '@/constants/icons';
 import { usePaceContext } from '@/modules/pace/pace.context';
 
 interface FileTabsContainerProps {
@@ -12,21 +12,23 @@ interface FileTabsContainerProps {
 }
 
 const FileTabsContainer = ({ currentFilePath }: FileTabsContainerProps) => {
-  const router = useRouter();
-  const { dynamicTabs, activeFileTabKey, setActiveFileTabKey } = usePaceContext();
+  const { dynamicTabs, isDynamicTabsHydrated, activeFileTabKey, setActiveFileTabKey, openDynamicTab } =
+    usePaceContext();
 
   useEffect(() => {
+    if (!isDynamicTabsHydrated || !currentFilePath) return;
+
     const matchingTab = dynamicTabs.find((tab) => tab.id === currentFilePath);
 
     if (matchingTab) {
       setActiveFileTabKey(matchingTab.stableKey);
+
+      return;
     }
-  }, [currentFilePath, dynamicTabs, setActiveFileTabKey]);
+  }, [currentFilePath, dynamicTabs, isDynamicTabsHydrated, activeFileTabKey, setActiveFileTabKey, openDynamicTab]);
 
-  if (dynamicTabs.length === 0) {
-    router.push(ROUTES_PATH.CHAT_FILES);
-
-    return null;
+  if (!isDynamicTabsHydrated || dynamicTabs.length === 0) {
+    return <ImageLoader imageSrc={ZAMP_LOGO_LOADER_SVG} width={140} height={140} />;
   }
 
   return (
