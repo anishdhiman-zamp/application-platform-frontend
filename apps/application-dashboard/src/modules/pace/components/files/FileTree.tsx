@@ -13,9 +13,9 @@ import {
 import FileConflictModal from '@/modules/pace/components/files/FileConflictModal';
 import FileTreeEmptyState from '@/modules/pace/components/files/FileTreeEmptyState';
 import FileTreeNode from '@/modules/pace/components/files/FileTreeNode';
-import { FileTreeProvider } from '@/modules/pace/hooks/FileTreeProvider';
+import { useFileConflict } from '@/modules/pace/context/FileConflictContext';
 import { useExpandedPaths } from '@/modules/pace/hooks/useExpandedPaths';
-import { useFileConflict } from '@/modules/pace/hooks/useFileConflict';
+import { FileTreeProvider } from '@/modules/pace/provider/FileTreeProvider';
 
 const ROW_HEIGHT = 36;
 const OVERSCAN_COUNT = 10;

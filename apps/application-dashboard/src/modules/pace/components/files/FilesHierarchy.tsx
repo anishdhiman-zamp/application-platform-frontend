@@ -11,7 +11,7 @@ import { SORT_DIRECTION, SORT_OPTION } from '@/modules/pace/components/files/fil
 import FilesEmptyState from '@/modules/pace/components/files/FilesEmptyState';
 import FilesToolbar from '@/modules/pace/components/files/FilesToolbar';
 import FileTree from '@/modules/pace/components/files/FileTree';
-import { useFileUploadContext } from '@/modules/pace/hooks/useFileUploadContext';
+import { useFileUploadContext } from '@/modules/pace/context/FileUploadContext';
 
 const SEARCH_DEBOUNCE_MS = 300;
 

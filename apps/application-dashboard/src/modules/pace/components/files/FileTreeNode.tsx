@@ -10,12 +10,12 @@ import {
 import { CONTEXT_MENU_ACTION_IDS, CONTEXT_MENU_ACTIONS } from '@/modules/pace/components/files/files.constants';
 import FileTreeNodeContextMenu from '@/modules/pace/components/files/FileTreeNodeContextMenu';
 import FileTreeNodeRow from '@/modules/pace/components/files/FileTreeNodeRow';
+import { useFileUploadContext } from '@/modules/pace/context/FileUploadContext';
 import { useDynamicTabs } from '@/modules/pace/hooks/useDynamicTabs';
 import { useFileTreeContext } from '@/modules/pace/hooks/useFileTreeContext';
 import { useFileTreeNodeActions } from '@/modules/pace/hooks/useFileTreeNodeActions';
 import { useFileTreeNodeDragDrop } from '@/modules/pace/hooks/useFileTreeNodeDragDrop';
 import { useFileTreeNodeRename } from '@/modules/pace/hooks/useFileTreeNodeRename';
-import { useFileUploadContext } from '@/modules/pace/hooks/useFileUploadContext';
 
 const FileTreeNode = memo(function FileTreeNode({
   node,
