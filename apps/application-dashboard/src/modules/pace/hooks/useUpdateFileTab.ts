@@ -13,7 +13,7 @@ interface UpdateFileTabParams {
 export const useUpdateFileTab = () => {
   const router = useRouter();
   const searchParams = useSearchParams();
-  const { dynamicTabs, updateDynamicTab } = usePaceContext();
+  const { dynamicTabs, updateDynamicTab, setActiveFileTabKey } = usePaceContext();
 
   const updateFileTab = useCallback(
     ({ oldPath, newPath, newName }: UpdateFileTabParams) => {
@@ -22,6 +22,12 @@ export const useUpdateFileTab = () => {
       if (!openTab) return;
 
       const newTabPath = getChatFileRoute(newPath);
+      const currentFileParam = searchParams?.get('f') ?? null;
+      const isCurrentlyActive = currentFileParam === oldPath;
+
+      if (isCurrentlyActive) {
+        setActiveFileTabKey(openTab.stableKey);
+      }
 
       updateDynamicTab(oldPath, {
         id: newPath,
@@ -30,13 +36,11 @@ export const useUpdateFileTab = () => {
         path: newTabPath,
       });
 
-      const currentFileParam = searchParams?.get('f') ?? null;
-
-      if (currentFileParam === oldPath) {
+      if (isCurrentlyActive) {
         router.replace(newTabPath);
       }
     },
-    [dynamicTabs, updateDynamicTab, searchParams, router],
+    [dynamicTabs, updateDynamicTab, setActiveFileTabKey, searchParams, router],
   );
 
   return { updateFileTab };

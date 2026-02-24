@@ -27,6 +27,7 @@ export const enum DynamicTabType {
 }
 
 export interface DynamicTab {
+  stableKey: string;
   id: string;
   name: string;
   type: DynamicTabType;

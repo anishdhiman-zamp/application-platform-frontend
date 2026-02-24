@@ -18,7 +18,7 @@ interface SortableDynamicTabItemProps {
 
 const SortableDynamicTabItem = ({ tab, isActive, isAnyDragging, onClose }: SortableDynamicTabItemProps) => {
   const { attributes, listeners, setNodeRef, transform, transition, isDragging } = useSortable({
-    id: tab.id,
+    id: tab.stableKey,
   });
 
   const style: CSSProperties = {

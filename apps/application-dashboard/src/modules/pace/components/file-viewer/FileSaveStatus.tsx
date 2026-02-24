@@ -55,7 +55,7 @@ const FileSaveStatus = ({ isSaving, lastSavedAt }: FileSaveStatusProps) => {
 
   if (status === SAVE_STATUS.SAVING) {
     return (
-      <div className='text-GRAY_600 f-12-400 flex items-center gap-x-1.5'>
+      <div className='text-GRAY_700 f-12-400 flex items-center gap-x-1.5'>
         <Loader2 size={12} className='animate-spin' />
         <span>Saving...</span>
       </div>
@@ -64,7 +64,7 @@ const FileSaveStatus = ({ isSaving, lastSavedAt }: FileSaveStatusProps) => {
 
   if (status === SAVE_STATUS.SAVED) {
     return (
-      <div className='text-GRAY_600 f-12-400 flex items-center gap-x-1.5'>
+      <div className='text-GRAY_700 f-12-400 flex items-center gap-x-1.5'>
         <Check size={12} className='text-green-600' />
         <span>Saved</span>
       </div>
@@ -73,7 +73,7 @@ const FileSaveStatus = ({ isSaving, lastSavedAt }: FileSaveStatusProps) => {
 
   if (lastSavedAt && relativeTime) {
     return (
-      <div className='text-GRAY_500 f-12-400'>
+      <div className='text-GRAY_700 f-12-400'>
         <span>Edited {relativeTime}</span>
       </div>
     );

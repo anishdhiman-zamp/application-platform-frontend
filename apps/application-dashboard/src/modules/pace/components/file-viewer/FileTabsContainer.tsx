@@ -1,6 +1,6 @@
 'use client';
 
-import { useMemo } from 'react';
+import { useEffect, useMemo } from 'react';
 import { cn } from '@zamp-platform/ui/utils';
 import FileViewerTab from 'modules/pace/components/file-viewer/FileViewerTab';
 import { usePaceContext } from '@/modules/pace/pace.context';
@@ -11,11 +11,19 @@ interface FileTabsContainerProps {
 }
 
 const FileTabsContainer = ({ currentFilePath }: FileTabsContainerProps) => {
-  const { dynamicTabs } = usePaceContext();
+  const { dynamicTabs, activeFileTabKey, setActiveFileTabKey } = usePaceContext();
 
   const fileTabs = useMemo(() => {
     return dynamicTabs.filter((tab) => tab.type === DynamicTabType.FILE);
   }, [dynamicTabs]);
+
+  useEffect(() => {
+    const matchingTab = fileTabs.find((tab) => tab.id === currentFilePath);
+
+    if (matchingTab) {
+      setActiveFileTabKey(matchingTab.stableKey);
+    }
+  }, [currentFilePath, fileTabs, setActiveFileTabKey]);
 
   if (fileTabs.length === 0) {
     return null;
@@ -24,15 +32,14 @@ const FileTabsContainer = ({ currentFilePath }: FileTabsContainerProps) => {
   return (
     <div className='relative h-full w-full'>
       {fileTabs.map((tab) => {
-        const tabFilePath = new URLSearchParams(tab.path.split('?')[1] || '').get('f');
-        const isActive = currentFilePath === tabFilePath;
+        const isActive = tab.stableKey === activeFileTabKey;
 
         return (
           <div
-            key={tab.id}
+            key={tab.stableKey}
             className={cn(
               'absolute inset-0',
-              isActive ? 'pointer-events-auto visible z-[1]' : 'pointer-events-none invisible z-0',
+              isActive ? 'pointer-events-auto visible z-1' : 'pointer-events-none invisible z-0',
             )}
           >
             <FileViewerTab filePath={tab.id} isActive={isActive} />

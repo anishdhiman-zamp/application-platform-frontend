@@ -6,7 +6,7 @@ import { usePathname, useRouter, useSearchParams } from 'next/navigation';
 import { ROUTES_PATH } from '@/constants/routeConfig';
 import { useFileViewerContext } from '@/modules/pace/hooks/FileViewerContext';
 import { usePaceContext } from '@/modules/pace/pace.context';
-import { DynamicTabType } from '@/modules/pace/pace.types';
+import { DynamicTab, DynamicTabType } from '@/modules/pace/pace.types';
 
 export const useDynamicTabs = () => {
   const router = useRouter();
@@ -14,7 +14,7 @@ export const useDynamicTabs = () => {
   const searchParams = useSearchParams();
   const currentFileParam = searchParams?.get('f') ?? null;
 
-  const { dynamicTabs, closeDynamicTab, reorderDynamicTabs } = usePaceContext();
+  const { dynamicTabs, activeFileTabKey, closeDynamicTab, reorderDynamicTabs } = usePaceContext();
   const { removeFileState } = useFileViewerContext();
 
   const currentFullPath = useMemo(() => {
@@ -28,21 +28,18 @@ export const useDynamicTabs = () => {
   }, [pathname, searchParams, currentFileParam]);
 
   const isDynamicTabActive = useCallback(
-    (tabPath: string) => {
-      if (currentFileParam && tabPath.includes('?f=')) {
-        const [tabPathname, tabSearch] = tabPath.split('?');
-        const tabFileParam = new URLSearchParams(tabSearch).get('f');
-
-        return pathname === tabPathname && currentFileParam === tabFileParam;
+    (tab: DynamicTab) => {
+      if (tab.type === DynamicTabType.FILE) {
+        return tab.stableKey === activeFileTabKey;
       }
 
-      return currentFullPath === tabPath;
+      return currentFullPath === tab.path;
     },
-    [pathname, currentFileParam, currentFullPath],
+    [activeFileTabKey, currentFullPath],
   );
 
   const isOnAnyDynamicTab = useCallback(() => {
-    return dynamicTabs.some((tab) => isDynamicTabActive(tab.path));
+    return dynamicTabs.some((tab) => isDynamicTabActive(tab));
   }, [dynamicTabs, isDynamicTabActive]);
 
   const handleCloseDynamicTab = useCallback(
@@ -54,7 +51,7 @@ export const useDynamicTabs = () => {
 
       if (!closingTab) return;
 
-      const isClosingActiveTab = isDynamicTabActive(closingTab.path);
+      const isClosingActiveTab = isDynamicTabActive(closingTab);
 
       if (closingTab.type === DynamicTabType.FILE) {
         removeFileState(closingTab.id);
