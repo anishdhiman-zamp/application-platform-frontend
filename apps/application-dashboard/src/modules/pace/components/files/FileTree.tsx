@@ -2,6 +2,7 @@
 
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { useVirtualizer } from '@tanstack/react-virtual';
+import { FileTreeProvider } from 'modules/pace/provider/FileTreeProvider';
 import { type FileItem, type FileTreeProps } from '@/modules/pace/components/files/file-tree.types';
 import {
   buildFileTree,
@@ -13,7 +14,6 @@ import {
 import FileConflictModal from '@/modules/pace/components/files/FileConflictModal';
 import FileTreeEmptyState from '@/modules/pace/components/files/FileTreeEmptyState';
 import FileTreeNode from '@/modules/pace/components/files/FileTreeNode';
-import { FileTreeProvider } from '@/modules/pace/hooks/FileTreeProvider';
 import { useExpandedPaths } from '@/modules/pace/hooks/useExpandedPaths';
 import { useFileConflict } from '@/modules/pace/hooks/useFileConflict';
 

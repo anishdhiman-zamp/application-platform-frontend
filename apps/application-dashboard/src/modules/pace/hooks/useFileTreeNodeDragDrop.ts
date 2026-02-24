@@ -1,7 +1,12 @@
 import { type RefObject, useRef, useState } from 'react';
 import { captureException } from '@sentry/browser';
 import { toast } from '@zamp-platform/ui';
-import { CLIPBOARD_OPERATION, type FileItem, type TreeNode } from '@/modules/pace/components/files/file-tree.types';
+import {
+  CLIPBOARD_OPERATION,
+  FILE_TYPE,
+  type FileItem,
+  type TreeNode,
+} from '@/modules/pace/components/files/file-tree.types';
 import { executeMoveOrCopy, parseDragData } from '@/modules/pace/components/files/file-tree.utils';
 import { FILE_TOAST_MESSAGES } from '@/modules/pace/components/files/files.constants';
 import { useDynamicTabs } from '@/modules/pace/hooks/useDynamicTabs';
@@ -52,7 +57,7 @@ export const useFileTreeNodeDragDrop = ({
   const expandTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 
   const { copyItem, moveItem, setConflict, isProtectedRoot, isInvalidCrossMove } = useFileTreeContext();
-  const { updateTab } = useDynamicTabs();
+  const { updateTab, updateTabsForFolderMove } = useDynamicTabs();
 
   const clearExpandTimeout = () => {
     if (expandTimeoutRef.current) {
@@ -229,7 +234,11 @@ export const useFileTreeNodeDragDrop = ({
       });
 
       if (!isCopy) {
-        updateTab(sourcePath, destinationPath, sourceName);
+        if (sourceType === FILE_TYPE.DIRECTORY) {
+          updateTabsForFolderMove(sourcePath, destinationPath);
+        } else {
+          updateTab(sourcePath, destinationPath, sourceName);
+        }
       }
     } catch (error) {
       captureException(error);

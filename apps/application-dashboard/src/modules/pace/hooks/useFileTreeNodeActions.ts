@@ -55,7 +55,7 @@ export const useFileTreeNodeActions = ({
   onTriggerFileUpload,
   onTriggerFolderUpload,
 }: UseFileTreeNodeActionsProps): UseFileTreeNodeActionsReturn => {
-  const { openTab, closeTabsForPath, updateTab } = useDynamicTabs();
+  const { openTab, closeTabsForPath, updateTab, updateTabsForFolderMove } = useDynamicTabs();
   const {
     createFile,
     createFolder,
@@ -163,7 +163,11 @@ export const useFileTreeNodeActions = ({
 
             if (!isCopy) {
               clearClipboard();
-              updateTab(clipboard.path, validation.destinationPath, clipboard.name);
+              if (clipboard.type === FILE_TYPE.DIRECTORY) {
+                updateTabsForFolderMove(clipboard.path, validation.destinationPath);
+              } else {
+                updateTab(clipboard.path, validation.destinationPath, clipboard.name);
+              }
             }
           }
           break;

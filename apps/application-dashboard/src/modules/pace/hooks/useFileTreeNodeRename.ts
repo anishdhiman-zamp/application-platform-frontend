@@ -57,7 +57,7 @@ export const useFileTreeNodeRename = ({
   const renameInputRef = useRef<HTMLInputElement | null>(null);
 
   const { renameItem } = useFileActions();
-  const { updateTab } = useDynamicTabs();
+  const { updateTab, updateTabsForFolderMove } = useDynamicTabs();
 
   const fullNewName = useMemo(() => {
     const trimmed = renameValue.trim();
@@ -101,7 +101,11 @@ export const useFileTreeNodeRename = ({
         owner: node.owner,
       };
 
-      updateTab(node.path, newPath, fullNewName);
+      if (node.type === FILE_TYPE.DIRECTORY) {
+        updateTabsForFolderMove(node.path, newPath);
+      } else {
+        updateTab(node.path, newPath, fullNewName);
+      }
 
       onFileMoved?.(node.path, newFile);
     } catch (error) {
@@ -110,7 +114,7 @@ export const useFileTreeNodeRename = ({
       setRenameValue(baseName);
       setIsRenaming(false);
     }
-  }, [fullNewName, baseName, node, isDuplicateName, renameItem, updateTab, onFileMoved]);
+  }, [fullNewName, baseName, node, isDuplicateName, renameItem, updateTab, updateTabsForFolderMove, onFileMoved]);
 
   const handleRenameKeyDown = useCallback(
     (e: React.KeyboardEvent<HTMLInputElement>) => {

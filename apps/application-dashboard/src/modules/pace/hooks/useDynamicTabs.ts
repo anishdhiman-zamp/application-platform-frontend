@@ -16,6 +16,7 @@ interface UseDynamicTabsReturn {
   closeTab: (e: React.MouseEvent, id: string) => void;
   closeTabsForPath: (path: string, isFolder: boolean) => void;
   updateTab: (oldPath: string, newPath: string, newName: string) => void;
+  updateTabsForFolderMove: (oldFolderPath: string, newFolderPath: string) => void;
   reorderTabs: (newOrder: string[]) => void;
   isTabActive: (tab: DynamicTab) => boolean;
   getTabByPath: (path: string) => DynamicTab | undefined;
@@ -38,7 +39,7 @@ export const useDynamicTabs = (): UseDynamicTabsReturn => {
     pendingActiveStableKey,
     setPendingActiveStableKey,
   } = usePaceContext();
-  const { removeFileState } = useFileViewerContext();
+  const { removeFileState, updateFileStatePath, updateFileStatePathsForFolder } = useFileViewerContext();
 
   // Clear pending key once URL matches a tab
   useEffect(() => {
@@ -182,6 +183,9 @@ export const useDynamicTabs = (): UseDynamicTabsReturn => {
         setPendingActiveStableKey(tabToUpdate.stableKey);
       }
 
+      // Update file viewer context state first to prevent Monaco editor errors
+      updateFileStatePath(oldPath, newPath);
+
       updateDynamicTab(oldPath, {
         id: newPath,
         name: newName,
@@ -192,7 +196,44 @@ export const useDynamicTabs = (): UseDynamicTabsReturn => {
         router.replace(newTabPath);
       }
     },
-    [tabs, currentFileParam, updateDynamicTab, router],
+    [tabs, currentFileParam, updateDynamicTab, router, setPendingActiveStableKey, updateFileStatePath],
+  );
+
+  const updateTabsForFolderMove = useCallback(
+    (oldFolderPath: string, newFolderPath: string) => {
+      const oldPrefix = oldFolderPath + '/';
+      let activeTabNewPath: string | null = null;
+
+      // Update file viewer context state first to prevent Monaco editor errors
+      updateFileStatePathsForFolder(oldFolderPath, newFolderPath);
+
+      tabs.forEach((tab) => {
+        if (tab.id === oldFolderPath || tab.id.startsWith(oldPrefix)) {
+          const newTabId =
+            tab.id === oldFolderPath ? newFolderPath : newFolderPath + tab.id.slice(oldFolderPath.length);
+          const newName = newTabId.split('/').pop() || tab.name;
+          const newTabPath = getChatFileRoute(newTabId);
+
+          // Set pending stableKey before update to prevent flash during transition
+          if (tab.id === currentFileParam) {
+            setPendingActiveStableKey(tab.stableKey);
+            activeTabNewPath = newTabPath;
+          }
+
+          updateDynamicTab(tab.id, {
+            id: newTabId,
+            name: newName,
+            path: newTabPath,
+          });
+        }
+      });
+
+      // Update URL after all tabs are updated if active tab was affected
+      if (activeTabNewPath) {
+        router.replace(activeTabNewPath);
+      }
+    },
+    [tabs, currentFileParam, updateDynamicTab, router, setPendingActiveStableKey, updateFileStatePathsForFolder],
   );
 
   const reorderTabs = useCallback(
@@ -211,6 +252,7 @@ export const useDynamicTabs = (): UseDynamicTabsReturn => {
     closeTab,
     closeTabsForPath,
     updateTab,
+    updateTabsForFolderMove,
     reorderTabs,
 
     isTabActive,
