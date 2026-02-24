@@ -8,7 +8,7 @@ import {
   removeFromLocalStorage,
   setToLocalStorage,
 } from '@zamp-platform/utils';
-import { LOGIN_PROVIDERS } from 'constants/auth.constants';
+import { LOGIN_METHODS, LOGIN_PROVIDERS } from 'constants/auth.constants';
 import { LOGIN_ERROR_TEXT } from 'modules/login/constants';
 import LocaldevEmailPasswordLogin from 'modules/login/LocaldevEmailPasswordLogin';
 import { LOGIN_GROUPS, VALID_SESSION_DETECTED_ERROR_MSG } from 'modules/login/login.constants';
@@ -21,11 +21,11 @@ import { MapAny } from '@/types/commonTypes';
 
 type LoadingAction = 'idle' | 'email' | 'google' | 'sso';
 
-async function createLoginFlow(apiBaseUrl: string, email: string): Promise<LoginFlow | null> {
+async function createLoginFlow(apiBaseUrl: string, email: string, method?: string): Promise<LoginFlow | null> {
   const apiUrl = `${apiBaseUrl}/${API_ENDPOINTS.AUTH_INITIAL_LOGIN_FLOW_BY_EMAIL_POST}`;
   const response = await fetch(apiUrl, {
     method: REQUEST_TYPES.POST,
-    body: JSON.stringify({ email }),
+    body: JSON.stringify({ email, ...(method && { method }) }),
     headers: { 'Content-Type': 'application/json', Accept: 'application/json' },
     credentials: 'include',
   });
@@ -43,10 +43,15 @@ function flowHasCodeNodes(flow: LoginFlow): boolean {
   return flow.ui?.nodes?.some((n: FlowNode) => n.group === LOGIN_GROUPS.CODE) ?? false;
 }
 
+function flowHasPasswordNodes(flow: LoginFlow): boolean {
+  return flow.ui?.nodes?.some((n: FlowNode) => n.group === LOGIN_GROUPS.PASSWORD) ?? false;
+}
+
 export const LoginForm = () => {
   const [email, setEmail] = useState('');
   const [passwordFlow, setPasswordFlow] = useState<LoginFlow | null>(null);
   const [otpFlow, setOtpFlow] = useState<LoginFlow | null>(null);
+  const [methodPickerFlow, setMethodPickerFlow] = useState<LoginFlow | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [loadingAction, setLoadingAction] = useState<LoadingAction>('idle');
   const [providerLogo, setProviderLogo] = useState('');
@@ -188,8 +193,13 @@ export const LoginForm = () => {
       }
 
       const nodes = flow.ui?.nodes ?? [];
+      const hasCode = flowHasCodeNodes(flow);
+      const hasPassword = flowHasPasswordNodes(flow);
 
-      if (flowHasCodeNodes(flow)) {
+      if (hasCode && hasPassword) {
+        setMethodPickerFlow(flow);
+        resetLoadingState();
+      } else if (hasCode) {
         setOtpFlow(flow);
         resetLoadingState();
       } else if (nodes.length === 1 && nodes[0]?.group === LOGIN_GROUPS.OIDC) {
@@ -308,6 +318,70 @@ export const LoginForm = () => {
 
   if (passwordFlow) {
     return <LocaldevEmailPasswordLogin loginFlow={passwordFlow} setLoginFlow={setPasswordFlow} />;
+  }
+
+  const initiateOtpFromPicker = async () => {
+    setLoadingAction('email');
+    try {
+      const apiBaseUrl = await resolveApiBaseUrl();
+      const flow = await createLoginFlow(apiBaseUrl, email, LOGIN_METHODS.CODE);
+
+      if (flow && flowHasCodeNodes(flow)) {
+        setOtpFlow(flow);
+        setMethodPickerFlow(null);
+      } else {
+        setError('Failed to send code. Please try again.');
+      }
+    } catch {
+      setError('Failed to send code. Please try again.');
+    } finally {
+      resetLoadingState();
+    }
+  };
+
+  if (methodPickerFlow) {
+    const btnBase =
+      'w-full rounded-2xl border px-5 py-3.5 text-sm font-medium transition-all duration-250 cursor-pointer active:scale-[0.98]';
+
+    return (
+      <div>
+        <p className='mb-1 text-sm text-[#1a1a1a]'>
+          Signing in as <span className='font-medium'>{email}</span>
+        </p>
+        <p className='mb-6 text-[13px] text-[#999]'>Choose how you want to sign in</p>
+        {error && <p className='mb-4 text-xs text-[#e53935]'>{error}</p>}
+        <div className='flex flex-col gap-3'>
+          <button
+            type='button'
+            disabled={isLoading}
+            className={`${btnBase} border-black/10 bg-[#1a1a1a] text-white hover:bg-[#2a2a2a] disabled:opacity-60`}
+            onClick={() => initiateOtpFromPicker()}
+          >
+            {loadingAction === 'email' ? 'Sending code...' : 'Sign in with OTP'}
+          </button>
+          <button
+            type='button'
+            className={`${btnBase} border-black/12 bg-[#f3f3f3] text-[#1a1a1a] hover:bg-[#ebebeb]`}
+            onClick={() => {
+              setPasswordFlow(methodPickerFlow);
+              setMethodPickerFlow(null);
+            }}
+          >
+            Sign in with Password
+          </button>
+        </div>
+        <button
+          type='button'
+          className='mt-4 text-[13px] text-[#999] transition-colors hover:text-[#666]'
+          onClick={() => {
+            setMethodPickerFlow(null);
+            setError(null);
+          }}
+        >
+          ← Use a different email
+        </button>
+      </div>
+    );
   }
 
   // ── Email Entry View ────────────────────────────────────────────
