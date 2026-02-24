@@ -39,7 +39,7 @@ const PaceLayoutContentInner: FC<PaceLayoutContentProps> = ({ children }) => {
             onClick={() => setIsPaceSidebarOpen(true)}
             variant='secondary'
             size='icon'
-            className='absolute bottom-3 left-5 h-14 w-14 rounded-full border-none bg-white transition-all [&_svg]:size-10'
+            className='absolute bottom-3 left-5 z-10 h-14 w-14 rounded-full border-none bg-white transition-all [&_svg]:size-10'
           >
             <NewPaceIcons />
           </Button>

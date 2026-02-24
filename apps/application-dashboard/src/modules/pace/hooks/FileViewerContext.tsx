@@ -61,6 +61,12 @@ export const FileViewerProvider = ({ children }: { children: ReactNode }) => {
           content,
           isDirty,
         });
+      } else {
+        newMap.set(path, {
+          content,
+          originalContent: '',
+          isDirty: true,
+        });
       }
 
       return newMap;

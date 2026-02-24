@@ -1,11 +1,11 @@
 'use client';
 
-import { memo, useCallback } from 'react';
+import { memo, useCallback, useState } from 'react';
 import { toast } from '@zamp-platform/ui';
 import dynamic from 'next/dynamic';
 import ImageLoader from '@/components/common/loader/ImageLoader';
 import { ZAMP_LOGO_LOADER_SVG } from '@/constants/icons';
-import FileViewerHeader from '@/modules/pace/components/file-viewer/FileViewerHeader';
+import FileViewerHeader, { type MarkdownViewMode } from '@/modules/pace/components/file-viewer/FileViewerHeader';
 import AudioViewer from '@/modules/pace/components/file-viewer/viewers/AudioViewer';
 import ImageViewer from '@/modules/pace/components/file-viewer/viewers/ImageViewer';
 import { getMonacoLanguage } from '@/modules/pace/components/file-viewer/viewers/MonacoCodeEditor';
@@ -25,6 +25,11 @@ const MonacoCodeEditor = dynamic(() => import('./viewers/MonacoCodeEditor'), {
   loading: () => <ImageLoader imageSrc={ZAMP_LOGO_LOADER_SVG} width={140} height={140} />,
 });
 
+const MarkdownPreview = dynamic(() => import('./viewers/MarkdownPreview'), {
+  ssr: false,
+  loading: () => <ImageLoader imageSrc={ZAMP_LOGO_LOADER_SVG} width={140} height={140} />,
+});
+
 interface FileViewerContentProps {
   filePath: string;
   fileCategory: FileCategory;
@@ -34,6 +39,7 @@ interface FileViewerContentProps {
   fileExtension: string;
   isActive: boolean;
   onContentChange: (content: string) => void;
+  markdownViewMode?: MarkdownViewMode;
 }
 
 const FileViewerContent = memo(
@@ -46,6 +52,7 @@ const FileViewerContent = memo(
     fileExtension,
     isActive,
     onContentChange,
+    markdownViewMode = 'edit',
   }: FileViewerContentProps) => {
     const fileName = filePath.split('/').pop() || filePath;
     const mediaUrl = getMediaUrl(filePath);
@@ -68,6 +75,10 @@ const FileViewerContent = memo(
         return <PdfViewer src={mediaUrl} />;
 
       case FILE_CATEGORY.MARKDOWN:
+        if (markdownViewMode === 'preview') {
+          return <MarkdownPreview content={content || ''} />;
+        }
+
         return <MonacoCodeEditor content={content || ''} language='markdown' onChange={onContentChange} />;
 
       case FILE_CATEGORY.CODE:
@@ -94,6 +105,8 @@ interface FileViewerTabProps {
 }
 
 const FileViewerTab = memo(({ filePath, isActive }: FileViewerTabProps) => {
+  const [markdownViewMode, setMarkdownViewMode] = useState<MarkdownViewMode>('edit');
+
   const handleSaveError = useCallback(() => {
     toast.error(FILE_TOAST_MESSAGES.FAILED_TO_SAVE_FILE);
   }, []);
@@ -105,10 +118,19 @@ const FileViewerTab = memo(({ filePath, isActive }: FileViewerTabProps) => {
     });
 
   const fileName = filePath.split('/').pop() || filePath;
+  const isMarkdown = fileCategory === FILE_CATEGORY.MARKDOWN;
 
   return (
     <div className='flex h-full w-full flex-col overflow-hidden'>
-      <FileViewerHeader filePath={filePath} fileName={fileName} isSaving={isSaving} lastSavedAt={lastSavedAt} />
+      <FileViewerHeader
+        filePath={filePath}
+        fileName={fileName}
+        isSaving={isSaving}
+        lastSavedAt={lastSavedAt}
+        isMarkdown={isMarkdown}
+        viewMode={markdownViewMode}
+        onViewModeChange={setMarkdownViewMode}
+      />
       <div className='min-h-0 flex-1 overflow-hidden'>
         <FileViewerContent
           filePath={filePath}
@@ -119,6 +141,7 @@ const FileViewerTab = memo(({ filePath, isActive }: FileViewerTabProps) => {
           fileExtension={fileExtension}
           isActive={isActive}
           onContentChange={updateContent}
+          markdownViewMode={markdownViewMode}
         />
       </div>
     </div>
