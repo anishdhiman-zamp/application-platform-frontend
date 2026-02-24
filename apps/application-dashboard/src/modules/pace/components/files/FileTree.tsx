@@ -15,6 +15,27 @@ import FileTreeEmptyState from '@/modules/pace/components/files/FileTreeEmptySta
 import FileTreeNode from '@/modules/pace/components/files/FileTreeNode';
 import { FileTreeProvider } from '@/modules/pace/hooks/FileTreeProvider';
 import { useFileConflict } from '@/modules/pace/hooks/useFileConflict';
+import { getFromLocalStorage, LOCAL_STORAGE_KEYS, setToLocalStorage } from '@/utils/localstorage';
+
+const getStoredExpandedPaths = (): string[] => {
+  try {
+    const stored = getFromLocalStorage(LOCAL_STORAGE_KEYS.PACE_FILE_TREE_EXPANDED_PATHS);
+
+    if (!stored) return [];
+
+    return JSON.parse(stored) as string[];
+  } catch {
+    return [];
+  }
+};
+
+const setStoredExpandedPaths = (paths: string[]) => {
+  try {
+    setToLocalStorage(LOCAL_STORAGE_KEYS.PACE_FILE_TREE_EXPANDED_PATHS, JSON.stringify(paths));
+  } catch {
+    // Silently fail if localStorage is unavailable
+  }
+};
 
 const ROW_HEIGHT = 36;
 const OVERSCAN_COUNT = 10;
@@ -37,6 +58,7 @@ const FileTreeContent = ({
   const [internalSelectedPath, setInternalSelectedPath] = useState<string | null>(null);
   const [uploadTargetPath, setUploadTargetPath] = useState<string>('');
   const [dragOverFolderPath, setDragOverFolderPath] = useState<string | null>(null);
+  const [isHydrated, setIsHydrated] = useState(false);
   const containerRef = useRef<HTMLDivElement>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
   const folderInputRef = useRef<HTMLInputElement>(null);
@@ -45,8 +67,34 @@ const FileTreeContent = ({
 
   const { conflict, resolveConflict, cancelConflict } = useFileConflict();
 
+  // Hydrate expanded paths from localStorage on mount
+  useEffect(() => {
+    if (isHydrated || files.length === 0) return;
+
+    const storedPaths = getStoredExpandedPaths();
+
+    if (storedPaths.length > 0) {
+      // Validate paths against current files - only keep paths that exist as directories
+      const validPaths = storedPaths.filter((path) =>
+        files.some((file) => file.path === path && file.type === 'directory'),
+      );
+
+      if (validPaths.length > 0) {
+        setExpandedPaths(new Set(validPaths));
+      }
+
+      // Clean up stale paths by saving only valid ones
+      if (validPaths.length !== storedPaths.length) {
+        setStoredExpandedPaths(validPaths);
+      }
+    }
+
+    setIsHydrated(true);
+  }, [files, isHydrated]);
+
   const collapseAll = useCallback(() => {
     setExpandedPaths(new Set());
+    setStoredExpandedPaths([]);
   }, []);
 
   const triggerFileUpload = useCallback((targetPath: string) => {
@@ -123,6 +171,8 @@ const FileTreeContent = ({
       } else {
         newSet.add(path);
       }
+
+      setStoredExpandedPaths(Array.from(newSet));
 
       return newSet;
     });
