@@ -1,7 +1,5 @@
 import { captureException } from '@sentry/browser';
 import { toast } from '@zamp-platform/ui';
-import { useFileActions } from 'modules/pace/hooks/useFileActions';
-import { useFileClipboard } from 'modules/pace/hooks/useFileClipboard';
 import {
   CLIPBOARD_OPERATION,
   CREATE_ITEM_TYPE,
@@ -16,8 +14,7 @@ import {
   validatePasteOperation,
 } from '@/modules/pace/components/files/file-tree.utils';
 import { CONTEXT_MENU_ACTION_IDS, FILE_TOAST_MESSAGES } from '@/modules/pace/components/files/files.constants';
-import { useFileConflict } from '@/modules/pace/hooks/useFileConflict';
-import { useProtectedFolders } from '@/modules/pace/hooks/useProtectedFolders';
+import { useFileTreeContext } from '@/modules/pace/hooks/useFileTreeContext';
 
 interface UseFileTreeNodeActionsProps {
   node: TreeNode;
@@ -31,6 +28,8 @@ interface UseFileTreeNodeActionsProps {
   onFileMoved?: (oldPath: string, newFile: FileItem) => void;
   onFileDeleted?: (deletedPath: string) => void;
   onFileCreated?: (newFile: FileItem) => void;
+  onTriggerFileUpload?: () => void;
+  onTriggerFolderUpload?: () => void;
 }
 
 interface UseFileTreeNodeActionsReturn {
@@ -51,11 +50,23 @@ export const useFileTreeNodeActions = ({
   onFileMoved,
   onFileDeleted,
   onFileCreated,
+  onTriggerFileUpload,
+  onTriggerFolderUpload,
 }: UseFileTreeNodeActionsProps): UseFileTreeNodeActionsReturn => {
-  const { createFile, createFolder, deleteItem, duplicateItem, copyItem, moveItem } = useFileActions();
-  const { clipboard, setCopyClipboard, setCutClipboard, clearClipboard } = useFileClipboard();
-  const { setConflict } = useFileConflict();
-  const { username } = useProtectedFolders();
+  const {
+    createFile,
+    createFolder,
+    deleteItem,
+    duplicateItem,
+    copyItem,
+    moveItem,
+    clipboard,
+    setCopyClipboard,
+    setCutClipboard,
+    clearClipboard,
+    setConflict,
+    username,
+  } = useFileTreeContext();
 
   const isCutItem = clipboard?.operation === CLIPBOARD_OPERATION.CUT && clipboard.path === node.path;
 
@@ -145,6 +156,18 @@ export const useFileTreeNodeActions = ({
             }
           }
           break;
+        case 'upload-file':
+          if (!isExpanded) {
+            onToggleExpand(node.path);
+          }
+          onTriggerFileUpload?.();
+          break;
+        case 'upload-folder':
+          if (!isExpanded) {
+            onToggleExpand(node.path);
+          }
+          onTriggerFolderUpload?.();
+          break;
         default:
           break;
       }
@@ -173,7 +196,7 @@ export const useFileTreeNodeActions = ({
         type: createModalType === CREATE_ITEM_TYPE.FILE ? FILE_TYPE.FILE : FILE_TYPE.DIRECTORY,
         size: 0,
         mtime_ms: Date.now(),
-        owner: username,
+        owner: username ?? 'user',
       };
 
       onFileCreated?.(newFile);

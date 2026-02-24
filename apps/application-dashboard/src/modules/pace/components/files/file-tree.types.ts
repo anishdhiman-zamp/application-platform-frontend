@@ -104,6 +104,7 @@ export interface TreeNode {
 export interface FlatNode extends TreeNode {
   depth: number;
   siblingNames: string[];
+  parentPath: string | null;
 }
 
 /**
@@ -119,6 +120,9 @@ export interface FileTreeProps {
   onFileMoved?: (oldPath: string, newFile: FileItem) => void;
   onFileDeleted?: (deletedPath: string) => void;
   onFileCreated?: (newFile: FileItem) => void;
+  onUploadFiles?: (files: FileList, targetPath: string) => void;
+  onUploadFolder?: (files: FileList, targetPath: string) => void;
+  onCollapseAllChange?: (collapseAll: () => void) => void;
 }
 
 /**
@@ -126,15 +130,6 @@ export interface FileTreeProps {
  */
 export interface FilesPreviewProps {
   selectedFile: FileItem | null;
-}
-
-export interface DropToSiblingData {
-  sourcePath: string;
-  sourceName: string;
-  sourceType: FileType;
-  sourceSize: number | null;
-  sourceOwner: string;
-  isCopy: boolean;
 }
 
 /**
@@ -147,11 +142,77 @@ export interface FileTreeNodeProps {
   selectedPath: string | null;
   originalNodeMap: Map<string, TreeNode>;
   siblingNames: string[];
+  parentPath: string | null;
   onToggleExpand: (path: string) => void;
   onSelect: (path: string) => void;
-  onDropToSibling?: (data: DropToSiblingData) => void;
   onFileMoved?: (oldPath: string, newFile: FileItem) => void;
   onFileDeleted?: (deletedPath: string) => void;
   onFileCreated?: (newFile: FileItem) => void;
+  onUploadFiles?: (files: FileList, targetPath: string) => void;
+  onUploadFolder?: (files: FileList, targetPath: string) => void;
+  onTriggerFileUpload?: (targetPath: string) => void;
+  onTriggerFolderUpload?: (targetPath: string) => void;
+  onDragOverFolderChange?: (path: string | null) => void;
   style?: React.CSSProperties;
+}
+
+export const UPLOAD_STATUS = {
+  IDLE: 'idle',
+  UPLOADING: 'uploading',
+  COMPLETED: 'completed',
+  FAILED: 'failed',
+  CANCELLED: 'cancelled',
+} as const;
+
+export type UploadStatus = (typeof UPLOAD_STATUS)[keyof typeof UPLOAD_STATUS];
+
+export const UPLOAD_TYPE = {
+  DIRECT: 'direct',
+  CHUNKED: 'chunked',
+} as const;
+
+export type UploadType = (typeof UPLOAD_TYPE)[keyof typeof UPLOAD_TYPE];
+
+export interface UploadProgress {
+  fileName: string;
+  filePath: string;
+  loaded: number;
+  total: number;
+  percentage: number;
+  status: UploadStatus;
+  uploadType: UploadType;
+  uploadId?: string;
+}
+
+export interface UploadState {
+  isUploading: boolean;
+  currentUpload: UploadProgress | null;
+  error: string | null;
+}
+
+/**
+ * File with relative path for folder uploads
+ */
+export interface FileWithPath {
+  file: File;
+  relativePath: string;
+}
+
+/**
+ * Progress tracking for folder uploads
+ */
+export interface FolderUploadProgress {
+  folderName: string;
+  totalFiles: number;
+  completedFiles: number;
+  currentFile: UploadProgress | null;
+  totalBytes: number;
+  uploadedBytes: number;
+}
+
+/**
+ * Extended upload state that includes folder upload progress
+ */
+export interface ExtendedUploadState extends UploadState {
+  folderUpload: FolderUploadProgress | null;
 }

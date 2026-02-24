@@ -1,10 +1,6 @@
 'use client';
 
 import { memo, useCallback, useMemo, useRef, useState } from 'react';
-import { useFileClipboard } from 'modules/pace/hooks/useFileClipboard';
-import { useFileTreeNodeActions } from 'modules/pace/hooks/useFileTreeNodeActions';
-import { useFileTreeNodeDragDrop } from 'modules/pace/hooks/useFileTreeNodeDragDrop';
-import { useFileTreeNodeRename } from 'modules/pace/hooks/useFileTreeNodeRename';
 import CreateItemModal from '@/modules/pace/components/files/CreateItemModal';
 import {
   type CreateItemType,
@@ -14,7 +10,11 @@ import {
 import { CONTEXT_MENU_ACTION_IDS, CONTEXT_MENU_ACTIONS } from '@/modules/pace/components/files/files.constants';
 import FileTreeNodeContextMenu from '@/modules/pace/components/files/FileTreeNodeContextMenu';
 import FileTreeNodeRow from '@/modules/pace/components/files/FileTreeNodeRow';
-import { useProtectedFolders } from '@/modules/pace/hooks/useProtectedFolders';
+import { useFileTreeContext } from '@/modules/pace/hooks/useFileTreeContext';
+import { useFileTreeNodeActions } from '@/modules/pace/hooks/useFileTreeNodeActions';
+import { useFileTreeNodeDragDrop } from '@/modules/pace/hooks/useFileTreeNodeDragDrop';
+import { useFileTreeNodeRename } from '@/modules/pace/hooks/useFileTreeNodeRename';
+import { useFileUploadContext } from '@/modules/pace/hooks/useFileUploadContext';
 
 const FileTreeNode = memo(function FileTreeNode({
   node,
@@ -23,26 +23,31 @@ const FileTreeNode = memo(function FileTreeNode({
   selectedPath,
   originalNodeMap,
   siblingNames,
+  parentPath,
   onToggleExpand,
   onSelect,
-  onDropToSibling,
   onFileMoved,
   onFileDeleted,
   onFileCreated,
+  onUploadFiles,
+  onTriggerFileUpload,
+  onTriggerFolderUpload,
+  onDragOverFolderChange,
   style,
 }: FileTreeNodeProps) {
   const nodeRef = useRef<HTMLDivElement>(null);
   const [contextMenuOpen, setContextMenuOpen] = useState(false);
   const [createModalType, setCreateModalType] = useState<CreateItemType | null>(null);
 
-  const { clipboard } = useFileClipboard();
-  const { isProtectedRoot, username } = useProtectedFolders();
+  const { clipboard, isProtectedRoot, username } = useFileTreeContext();
+  const { uploadingPath } = useFileUploadContext();
 
   const isFolder = node.type === FILE_TYPE.DIRECTORY;
   const isExpanded = expandedPaths.has(node.path);
-  const isSelected = selectedPath === node.path;
+  const isSelected = !isFolder && selectedPath === node.path;
   const isProtected = depth === 0 && isProtectedRoot(node.path);
   const isUserPrivateFolder = depth === 0 && node.path === username;
+  const isUploading = uploadingPath === node.path;
 
   const originalNode = originalNodeMap.get(node.path);
   const childrenToRender = originalNode?.children ?? node.children;
@@ -68,6 +73,14 @@ const FileTreeNode = memo(function FileTreeNode({
     [isFolder, clipboard, isProtected],
   );
 
+  const handleTriggerFileUpload = useCallback(() => {
+    onTriggerFileUpload?.(node.path);
+  }, [onTriggerFileUpload, node.path]);
+
+  const handleTriggerFolderUpload = useCallback(() => {
+    onTriggerFolderUpload?.(node.path);
+  }, [onTriggerFolderUpload, node.path]);
+
   const rename = useFileTreeNodeRename({
     node,
     siblingNames,
@@ -75,16 +88,28 @@ const FileTreeNode = memo(function FileTreeNode({
     onFileMoved,
   });
 
+  const handleExternalFileDrop = useCallback(
+    (files: FileList, targetPath: string) => {
+      if (onUploadFiles) {
+        onUploadFiles(files, targetPath);
+      }
+    },
+    [onUploadFiles],
+  );
+
   const dragDrop = useFileTreeNodeDragDrop({
     node,
     nodeRef,
     isFolder,
     isExpanded,
     childrenNames,
+    siblingNames,
     isProtected,
+    parentPath,
     onToggleExpand,
-    onDropToSibling,
     onFileMoved,
+    onExternalFileDrop: handleExternalFileDrop,
+    onDragOverFolderChange,
   });
 
   const actions = useFileTreeNodeActions({
@@ -99,14 +124,17 @@ const FileTreeNode = memo(function FileTreeNode({
     onFileMoved,
     onFileDeleted,
     onFileCreated,
+    onTriggerFileUpload: handleTriggerFileUpload,
+    onTriggerFolderUpload: handleTriggerFolderUpload,
   });
 
   const handleClick = useCallback(() => {
     if (rename.isRenaming) return;
 
-    onSelect(node.path);
     if (isFolder) {
       onToggleExpand(node.path);
+    } else {
+      onSelect(node.path);
     }
   }, [rename.isRenaming, onSelect, node.path, isFolder, onToggleExpand]);
 
@@ -132,12 +160,9 @@ const FileTreeNode = memo(function FileTreeNode({
         />
       )}
 
-      {dragDrop.isDragOverTop && (
-        <div className='bg-GRAY_500 -mb-0.5 h-0.5 rounded-full' style={{ marginLeft: `${depth * 24 + 8}px` }} />
-      )}
-
       <FileTreeNodeContextMenu
         actions={filteredActions}
+        disabled={isUploading}
         onOpenChange={setContextMenuOpen}
         onActionClick={actions.handleActionClick}
       >
@@ -157,6 +182,7 @@ const FileTreeNode = memo(function FileTreeNode({
             isProtected,
             isUserPrivateFolder,
             contextMenuOpen,
+            isUploading,
           }}
           rename={{
             value: rename.renameValue,

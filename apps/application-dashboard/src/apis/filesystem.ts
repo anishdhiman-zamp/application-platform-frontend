@@ -26,6 +26,7 @@ import type {
   WriteFileResponse,
 } from '@/types/api/filesystem.types';
 import { formRequestUrlWithParams } from '@/utils/common';
+import { uploadChunk } from '@/utils/fileUpload';
 
 const FilesystemApi = baseApi.injectEndpoints({
   endpoints: (builder) => ({
@@ -70,7 +71,6 @@ const FilesystemApi = baseApi.injectEndpoints({
         method: REQUEST_TYPES.POST,
         body: { path, type },
       }),
-      invalidatesTags: [APITags.GET_FILES_LIST],
       async onQueryStarted({ path, type, owner }, { dispatch, queryFulfilled }) {
         const name = path.split('/').pop() || path;
 
@@ -107,7 +107,6 @@ const FilesystemApi = baseApi.injectEndpoints({
           expected_mtime_ms: expected_mtime_ms || undefined,
         },
       }),
-      invalidatesTags: [APITags.GET_FILES_LIST],
     }),
 
     // Copy File or Directory
@@ -117,7 +116,6 @@ const FilesystemApi = baseApi.injectEndpoints({
         method: REQUEST_TYPES.POST,
         body: { source, destination },
       }),
-      invalidatesTags: [APITags.GET_FILES_LIST],
       async onQueryStarted({ source, destination }, { dispatch, queryFulfilled }) {
         const patchResult = dispatch(
           FilesystemApi.util.updateQueryData('listFiles', { recursive: true }, (draft) => {
@@ -170,7 +168,6 @@ const FilesystemApi = baseApi.injectEndpoints({
         method: REQUEST_TYPES.POST,
         body: { source, destination },
       }),
-      invalidatesTags: [APITags.GET_FILES_LIST],
       async onQueryStarted({ source, destination }, { dispatch, queryFulfilled }) {
         const patchResult = dispatch(
           FilesystemApi.util.updateQueryData('listFiles', { recursive: true }, (draft) => {
@@ -211,7 +208,6 @@ const FilesystemApi = baseApi.injectEndpoints({
         url: formRequestUrlWithParams(API_ENDPOINTS.FILES_DELETE, { path }),
         method: REQUEST_TYPES.DELETE,
       }),
-      invalidatesTags: [APITags.GET_FILES_LIST],
       async onQueryStarted({ path }, { dispatch, queryFulfilled }) {
         const patchResult = dispatch(
           FilesystemApi.util.updateQueryData('listFiles', { recursive: true }, (draft) => {
@@ -231,7 +227,7 @@ const FilesystemApi = baseApi.injectEndpoints({
     }),
 
     // Direct Upload (Small Files <= 1MB)
-    directUpload: builder.mutation<DirectUploadResponse, { path: string; file: File }>({
+    directUpload: builder.mutation<DirectUploadResponse, { path: string; file: File; skipInvalidation?: boolean }>({
       query: ({ path, file }) => {
         const formData = new FormData();
 
@@ -244,7 +240,7 @@ const FilesystemApi = baseApi.injectEndpoints({
           body: formData,
         };
       },
-      invalidatesTags: [APITags.GET_FILES_LIST],
+      invalidatesTags: (_result, _error, { skipInvalidation }) => (skipInvalidation ? [] : [APITags.GET_FILES_LIST]),
     }),
 
     // Initialize Chunked Upload
@@ -256,29 +252,22 @@ const FilesystemApi = baseApi.injectEndpoints({
       }),
     }),
 
-    // Upload Chunk
+    // Upload Chunk - sends binary data directly as application/octet-stream
+    // Using queryFn to ensure binary data is sent raw without any transformation
     uploadChunk: builder.mutation<UploadChunkResponse, UploadChunkRequest>({
-      query: ({ upload_id, chunk_index, chunk_offset, data }) => ({
-        url: API_ENDPOINTS.FILES_UPLOAD_CHUNK_POST,
-        method: REQUEST_TYPES.POST,
-        headers: {
-          'Content-Type': 'application/octet-stream',
-          'X-Upload-Id': upload_id,
-          'X-Chunk-Index': String(chunk_index),
-          'X-Chunk-Offset': String(chunk_offset),
-        },
-        body: data,
-      }),
+      queryFn: async ({ upload_id, chunk_index, chunk_offset, data, signal }) => {
+        return uploadChunk({ upload_id, chunk_index, chunk_offset, data, signal });
+      },
     }),
 
     // Complete Chunked Upload
-    completeUpload: builder.mutation<CompleteUploadResponse, CompleteUploadRequest>({
+    completeUpload: builder.mutation<CompleteUploadResponse, CompleteUploadRequest & { skipInvalidation?: boolean }>({
       query: ({ upload_id }) => ({
         url: API_ENDPOINTS.FILES_UPLOAD_COMPLETE_POST,
         method: REQUEST_TYPES.POST,
         body: { upload_id },
       }),
-      invalidatesTags: [APITags.GET_FILES_LIST],
+      invalidatesTags: (_result, _error, { skipInvalidation }) => (skipInvalidation ? [] : [APITags.GET_FILES_LIST]),
     }),
 
     // Cancel Chunked Upload
@@ -311,3 +300,5 @@ export const {
   useCompleteUploadMutation,
   useCancelUploadMutation,
 } = FilesystemApi;
+
+export { FilesystemApi };
