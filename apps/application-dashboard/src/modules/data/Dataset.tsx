@@ -1,6 +1,6 @@
 'use client';
 
-import { FC, useEffect, useMemo, useRef, useState } from 'react';
+import { FC, useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { captureException } from '@sentry/browser';
 import { useResource } from '@zamp-platform/battalion';
 import {
@@ -25,6 +25,7 @@ import {
   ColDef,
   ColumnVisibleEvent,
   FillEndEvent,
+  type IRowNode,
   IServerSideDatasource,
   IServerSideGetRowsParams,
   IServerSideGetRowsRequest,
@@ -353,6 +354,30 @@ const DatasetByIdInner: FC<DatasetByIdProps> = ({
       });
     }
   };
+
+  const onFlushPendingEdit = useCallback(
+    ({ node, colId, value }: { node: IRowNode; colId: string; value: unknown }) => {
+      const rowId = node.data?._zamp_id || node.data?.id;
+
+      if (!rowId || !colId) return;
+
+      const idColumn = node.data?._zamp_id ? ColumnType._ZAMP_ID : ColumnType.ID;
+
+      // Optimistic update
+      const updatedRow = { ...node.data, [colId]: value };
+
+      node.setData(updatedRow);
+
+      // Persist
+      updateApi({
+        rowId: rowId as string,
+        field: colId,
+        newValue: value as string,
+        idColumn,
+      });
+    },
+    [updateApi],
+  );
 
   const onFillEnd = (event: FillEndEvent) => {
     const { finalRange } = event;
@@ -888,6 +913,7 @@ const DatasetByIdInner: FC<DatasetByIdProps> = ({
                 }}
                 totalRows={totalRows}
                 onCellEditRequest={onCellEditRequest}
+                onFlushPendingEdit={onFlushPendingEdit}
                 onFillEnd={onFillEnd}
                 onRowPropertiesClick={(data) => setRowPropertiesData(data)}
                 onColumnMoved={(event) => syncColumnMoved(event)}
