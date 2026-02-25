@@ -10,7 +10,7 @@
       "auth": "/integrations/auth/cloudflare.json",
       "events": [
         {
-          "id": "enable_email_routing_rule",
+          "id": "cloudflare",
           "display_name": "Email Forwarding"
         }
       ]
