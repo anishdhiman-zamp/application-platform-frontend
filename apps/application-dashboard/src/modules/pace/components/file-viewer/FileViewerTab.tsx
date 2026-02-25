@@ -10,7 +10,6 @@ import FileViewerHeader, { type MarkdownViewMode } from '@/modules/pace/componen
 import AudioViewer from '@/modules/pace/components/file-viewer/viewers/AudioViewer';
 import ImageViewer from '@/modules/pace/components/file-viewer/viewers/ImageViewer';
 import { getMonacoLanguage } from '@/modules/pace/components/file-viewer/viewers/MonacoCodeEditor';
-import UnsupportedFileView from '@/modules/pace/components/file-viewer/viewers/UnsupportedFileView';
 import VideoViewer from '@/modules/pace/components/file-viewer/viewers/VideoViewer';
 import { getMediaUrl } from '@/modules/pace/components/files/file-tree.utils';
 import { FILE_CATEGORY, FILE_TOAST_MESSAGES, type FileCategory } from '@/modules/pace/components/files/files.constants';
@@ -97,7 +96,7 @@ const FileViewerContent = memo(
 
       case FILE_CATEGORY.UNKNOWN:
       default:
-        return <UnsupportedFileView fileName={fileName} downloadUrl={mediaUrl} />;
+        return <MonacoCodeEditor content={content || ''} language='txt' onChange={onContentChange} />;
     }
   },
 );
@@ -110,7 +109,7 @@ interface FileViewerTabProps {
 }
 
 const FileViewerTab = memo(({ filePath, isActive }: FileViewerTabProps) => {
-  const [markdownViewMode, setMarkdownViewMode] = useState<MarkdownViewMode>('edit');
+  const [markdownViewMode, setMarkdownViewMode] = useState<MarkdownViewMode>('preview');
   const { closeTab } = useDynamicTabs();
 
   const handleSaveError = useCallback(() => {

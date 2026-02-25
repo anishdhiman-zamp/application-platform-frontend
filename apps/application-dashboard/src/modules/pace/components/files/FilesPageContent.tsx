@@ -2,7 +2,7 @@
 
 import { useCallback, useRef, useState } from 'react';
 import FileTabsContainer from 'modules/pace/components/file-viewer/FileTabsContainer';
-import type { FileItem } from '@/modules/pace/components/files/file-tree.types';
+import { FILE_TYPE, type FileItem } from '@/modules/pace/components/files/file-tree.types';
 import FilesHeader from '@/modules/pace/components/files/FilesHeader';
 import FilesHierarchy from '@/modules/pace/components/files/FilesHierarchy';
 import FilesPreview from '@/modules/pace/components/files/FilesPreview';
@@ -42,6 +42,10 @@ const FilesPageContent = ({ filePath }: FilesPageContentProps) => {
   }, []);
 
   const handleFileCreated = useCallback((newFile: FileItem) => {
+    if (newFile.type === FILE_TYPE.DIRECTORY) {
+      return;
+    }
+
     setSelectedFile(newFile);
   }, []);
 

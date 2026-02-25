@@ -1,7 +1,6 @@
 'use client';
 
-import { Button, FileIcon } from '@zamp-platform/ui';
-import { Download } from 'lucide-react';
+import { FileIcon } from '@zamp-platform/ui';
 import { getFileExtension } from '@/modules/pace/components/files/file-tree.utils';
 
 interface UnsupportedFileViewProps {
@@ -10,20 +9,20 @@ interface UnsupportedFileViewProps {
   className?: string;
 }
 
-const UnsupportedFileView = ({ fileName, downloadUrl, className = '' }: UnsupportedFileViewProps) => {
+const UnsupportedFileView = ({ fileName, className = '' }: UnsupportedFileViewProps) => {
   const extension = getFileExtension(fileName);
 
-  const handleDownload = () => {
-    if (downloadUrl) {
-      const link = document.createElement('a');
+  // const handleDownload = () => {
+  //   if (downloadUrl) {
+  //     const link = document.createElement('a');
 
-      link.href = downloadUrl;
-      link.download = fileName;
-      document.body.appendChild(link);
-      link.click();
-      document.body.removeChild(link);
-    }
-  };
+  //     link.href = downloadUrl;
+  //     link.download = fileName;
+  //     document.body.appendChild(link);
+  //     link.click();
+  //     document.body.removeChild(link);
+  //   }
+  // };
 
   return (
     <div className={`flex h-full w-full flex-col items-center justify-center gap-1 p-8 ${className}`}>
@@ -37,12 +36,12 @@ const UnsupportedFileView = ({ fileName, downloadUrl, className = '' }: Unsuppor
 
       <div className='text-center'>
         <p className='f-14-400 text-GRAY_900 mb-4'>Preview is not available for this file type.</p>
-        {downloadUrl && (
+        {/* {downloadUrl && (
           <Button variant='outline' size={'medium'} onClick={handleDownload} className='gap-2'>
             <Download size={16} />
             Download
           </Button>
-        )}
+        )} */}
       </div>
     </div>
   );

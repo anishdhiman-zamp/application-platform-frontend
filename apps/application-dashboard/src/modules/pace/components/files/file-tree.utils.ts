@@ -78,7 +78,7 @@ export function getMediaUrl(filePath: string): string {
     .map((segment) => encodeURIComponent(segment))
     .join('/');
 
-  return `${API_DOMAIN}/files/${encodedPath}?content`;
+  return `${API_DOMAIN}/files/${encodedPath}?raw=true`;
 }
 
 /**
@@ -239,17 +239,48 @@ export function sortTreeNodes(nodes: TreeNode[], sortBy: SortOption, sortDirecti
 /**
  * Filters tree nodes by search query - only shows items whose name matches.
  * Does not include parent folders just because children match.
+ * Matching children are shown at root level, not inside their parent folder,
+ * to prevent duplicate keys when the folder is expanded.
  */
 export function filterTreeNodes(nodes: TreeNode[], searchQuery: string): TreeNode[] {
   if (!searchQuery.trim()) return nodes;
 
   const query = searchQuery.toLowerCase();
   const results: TreeNode[] = [];
+  const matchedPaths = new Set<string>();
+
+  const collectMatchingPaths = (nodeList: TreeNode[]) => {
+    for (const node of nodeList) {
+      if (node.name.toLowerCase().includes(query)) {
+        matchedPaths.add(node.path);
+      }
+
+      if (node.type === FILE_TYPE.DIRECTORY && node.children) {
+        collectMatchingPaths(node.children);
+      }
+    }
+  };
+
+  collectMatchingPaths(nodes);
+
+  const filterChildrenRecursively = (children: TreeNode[] | undefined): TreeNode[] | undefined => {
+    if (!children) return undefined;
+
+    return children
+      .filter((child) => !matchedPaths.has(child.path))
+      .map((child) => ({
+        ...child,
+        children: filterChildrenRecursively(child.children),
+      }));
+  };
 
   const collectMatches = (nodeList: TreeNode[]) => {
     for (const node of nodeList) {
       if (node.name.toLowerCase().includes(query)) {
-        results.push(node);
+        results.push({
+          ...node,
+          children: filterChildrenRecursively(node.children),
+        });
       }
 
       if (node.type === FILE_TYPE.DIRECTORY && node.children) {

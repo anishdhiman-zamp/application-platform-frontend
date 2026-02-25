@@ -17,7 +17,12 @@ interface UseSiblingNamesReturn {
  * Does not trigger a refetch if data is already cached.
  */
 export const useSiblingNames = ({ filePath }: UseSiblingNamesProps): UseSiblingNamesReturn => {
-  const { data: filesData, isLoading } = useListFilesQuery({ recursive: true }, { refetchOnMountOrArgChange: false });
+  const { data: filesData, isLoading } = useListFilesQuery(
+    {
+      depth: -1,
+    },
+    { refetchOnMountOrArgChange: false },
+  );
 
   const siblingNames = useMemo(() => {
     if (!filesData?.files || !filePath) {

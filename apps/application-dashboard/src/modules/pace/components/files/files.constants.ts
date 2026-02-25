@@ -1,7 +1,6 @@
 import {
   Clipboard,
   Copy,
-  Download,
   ExternalLink,
   FilePlus,
   FolderPlus,
@@ -28,6 +27,7 @@ export const FILE_TOAST_MESSAGES = {
   FAILED_TO_RESOLVE_CONFLICT: 'Failed to resolve conflict',
   FAILED_TO_SAVE_FILE: 'Failed to save file',
   FAILED_TO_DELETE_FILE: 'Failed to delete file',
+  FAILED_TO_DELETE_ITEM: 'Failed to delete item',
   FILE_DELETED: 'File deleted',
   FOLDER_DELETED: 'Folder deleted',
 } as const;
@@ -76,7 +76,7 @@ export const CONTEXT_MENU_ACTIONS: ContextMenuAction[] = [
   { id: CONTEXT_MENU_ACTION_IDS.UPLOAD_FILE, label: 'Upload File', icon: Upload, folderOnly: true },
   { id: CONTEXT_MENU_ACTION_IDS.UPLOAD_FOLDER, label: 'Upload Folder', icon: FolderUp, folderOnly: true },
   { id: CONTEXT_MENU_ACTION_IDS.OPEN_IN_TAB, label: 'Open in Tab', icon: ExternalLink, fileOnly: true },
-  { id: CONTEXT_MENU_ACTION_IDS.DOWNLOAD, label: 'Download', icon: Download, fileOnly: true },
+  // { id: CONTEXT_MENU_ACTION_IDS.DOWNLOAD, label: 'Download', icon: Download, fileOnly: true },
   { id: CONTEXT_MENU_ACTION_IDS.RENAME, label: 'Rename', icon: Pencil },
   { id: CONTEXT_MENU_ACTION_IDS.DUPLICATE, label: 'Duplicate', icon: Copy },
   { id: CONTEXT_MENU_ACTION_IDS.COPY, label: 'Copy', icon: Copy },
@@ -86,7 +86,7 @@ export const CONTEXT_MENU_ACTIONS: ContextMenuAction[] = [
 ];
 
 export const FILE_VIEWER_HEADER_ACTIONS: ContextMenuAction[] = [
-  { id: FILE_VIEWER_HEADER_ACTION_IDS.DOWNLOAD, label: 'Download', icon: Download },
+  // { id: FILE_VIEWER_HEADER_ACTION_IDS.DOWNLOAD, label: 'Download', icon: Download },
   { id: FILE_VIEWER_HEADER_ACTION_IDS.DELETE, label: 'Delete', icon: Trash2, isDestructive: true },
 ];
 

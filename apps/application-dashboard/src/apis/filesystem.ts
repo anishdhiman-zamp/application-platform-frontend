@@ -40,10 +40,10 @@ const FilesystemApi = baseApi.injectEndpoints({
 
     // List Files (Recursive)
     listFiles: builder.query<ListFilesResponse, ListFilesRequest>({
-      query: ({ recursive = true, path }) => ({
+      query: ({ depth = -1, path }) => ({
         url: API_ENDPOINTS.FILES_LIST_GET,
         params: {
-          recursive,
+          depth,
           path: path || undefined,
         },
       }),
@@ -60,7 +60,7 @@ const FilesystemApi = baseApi.injectEndpoints({
     // Read File Content (raw text content via ?content)
     readFileContent: builder.query<string, { path: string }>({
       query: ({ path }) => ({
-        url: `${formRequestUrlWithParams(API_ENDPOINTS.FILES_READ_GET, { path })}?content`,
+        url: `${formRequestUrlWithParams(API_ENDPOINTS.FILES_READ_GET, { path })}?raw=true`,
         responseHandler: (response) => response.text(),
       }),
     }),
@@ -75,15 +75,15 @@ const FilesystemApi = baseApi.injectEndpoints({
     // Create File or Directory
     createItem: builder.mutation<CreateItemResponse, CreateItemRequest>({
       query: ({ path, type }) => ({
-        url: API_ENDPOINTS.FILES_CREATE_POST,
-        method: REQUEST_TYPES.POST,
-        body: { path, type },
+        url: API_ENDPOINTS.FILES_CREATE_PUT.replace('{{path}}', path),
+        method: REQUEST_TYPES.PUT,
+        body: { type, content: '' },
       }),
       async onQueryStarted({ path, type, owner }, { dispatch, queryFulfilled }) {
         const name = path.split('/').pop() || path;
 
         const patchResult = dispatch(
-          FilesystemApi.util.updateQueryData('listFiles', { recursive: true }, (draft) => {
+          FilesystemApi.util.updateQueryData('listFiles', { depth: -1 }, (draft) => {
             draft.files.push({
               path,
               name,
@@ -106,13 +106,11 @@ const FilesystemApi = baseApi.injectEndpoints({
 
     // Write File Content
     writeFile: builder.mutation<WriteFileResponse, WriteFileRequest>({
-      query: ({ relative_path, content, expected_mtime_ms }) => ({
-        url: API_ENDPOINTS.FILES_WRITE_POST,
-        method: REQUEST_TYPES.POST,
+      query: ({ path, content }) => ({
+        url: API_ENDPOINTS.FILES_WRITE_POST.replace('{{path}}', path),
+        method: REQUEST_TYPES.PUT,
         body: {
-          relative_path,
           content,
-          expected_mtime_ms: expected_mtime_ms || undefined,
         },
       }),
     }),
@@ -126,7 +124,7 @@ const FilesystemApi = baseApi.injectEndpoints({
       }),
       async onQueryStarted({ source, destination }, { dispatch, queryFulfilled }) {
         const patchResult = dispatch(
-          FilesystemApi.util.updateQueryData('listFiles', { recursive: true }, (draft) => {
+          FilesystemApi.util.updateQueryData('listFiles', { depth: -1 }, (draft) => {
             const sourceItem = draft.files.find((f) => f.path === source);
 
             if (sourceItem) {
@@ -178,7 +176,7 @@ const FilesystemApi = baseApi.injectEndpoints({
       }),
       async onQueryStarted({ source, destination }, { dispatch, queryFulfilled }) {
         const patchResult = dispatch(
-          FilesystemApi.util.updateQueryData('listFiles', { recursive: true }, (draft) => {
+          FilesystemApi.util.updateQueryData('listFiles', { depth: -1 }, (draft) => {
             const sourceIndex = draft.files.findIndex((f) => f.path === source);
 
             if (sourceIndex !== -1) {
@@ -218,7 +216,7 @@ const FilesystemApi = baseApi.injectEndpoints({
       }),
       async onQueryStarted({ path }, { dispatch, queryFulfilled }) {
         const patchResult = dispatch(
-          FilesystemApi.util.updateQueryData('listFiles', { recursive: true }, (draft) => {
+          FilesystemApi.util.updateQueryData('listFiles', { depth: -1 }, (draft) => {
             const initialCount = draft.files.length;
 
             draft.files = draft.files.filter((file) => file.path !== path && !file.path.startsWith(path + '/'));

@@ -101,7 +101,6 @@ const FileTreeContent = ({
   }, [sortedRawTree, searchQuery, sortBy, sortDirection]);
 
   const flatNodes = useMemo(() => flattenTree(treeData, expandedPaths), [treeData, expandedPaths]);
-
   const rootSiblingNames = useMemo(() => treeData.map((node) => node.name), [treeData]);
 
   const virtualizer = useVirtualizer({

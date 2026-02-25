@@ -1,4 +1,4 @@
-import { useCallback } from 'react';
+import { useCallback, useState } from 'react';
 import { captureException } from '@sentry/browser';
 import { toast } from '@zamp-platform/ui';
 import { getMediaUrl } from '@/modules/pace/components/files/file-tree.utils';
@@ -14,12 +14,18 @@ interface UseFileViewerHeaderActionsProps {
 interface UseFileViewerHeaderActionsReturn {
   handleActionClick: (actionId: string) => Promise<void>;
   isDeleting: boolean;
+  deleteConfirmation: {
+    isOpen: boolean;
+    onOpenChange: (open: boolean) => void;
+    onConfirm: () => Promise<void>;
+  };
 }
 
 export const useFileViewerHeaderActions = ({
   filePath,
   fileName,
 }: UseFileViewerHeaderActionsProps): UseFileViewerHeaderActionsReturn => {
+  const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState(false);
   const { deleteItem, isDeleting } = useFileActions();
   const { closeTabsForPath } = useDynamicTabs();
 
@@ -34,17 +40,22 @@ export const useFileViewerHeaderActions = ({
     document.body.removeChild(link);
   }, [filePath, fileName]);
 
-  const handleDelete = useCallback(async () => {
+  const handleDeleteConfirm = useCallback(async () => {
     closeTabsForPath(filePath, false);
 
     try {
       await deleteItem(filePath);
       toast.success(FILE_TOAST_MESSAGES.FILE_DELETED);
+      setIsDeleteDialogOpen(false);
     } catch (error) {
       captureException(error);
       toast.error(FILE_TOAST_MESSAGES.FAILED_TO_DELETE_FILE);
     }
   }, [filePath, deleteItem, closeTabsForPath]);
+
+  const handleDeleteDialogOpenChange = useCallback((open: boolean) => {
+    setIsDeleteDialogOpen(open);
+  }, []);
 
   const handleActionClick = useCallback(
     async (actionId: string) => {
@@ -53,17 +64,22 @@ export const useFileViewerHeaderActions = ({
           handleDownload();
           break;
         case FILE_VIEWER_HEADER_ACTION_IDS.DELETE:
-          await handleDelete();
+          setIsDeleteDialogOpen(true);
           break;
         default:
           break;
       }
     },
-    [handleDownload, handleDelete],
+    [handleDownload],
   );
 
   return {
     handleActionClick,
     isDeleting,
+    deleteConfirmation: {
+      isOpen: isDeleteDialogOpen,
+      onOpenChange: handleDeleteDialogOpenChange,
+      onConfirm: handleDeleteConfirm,
+    },
   };
 };

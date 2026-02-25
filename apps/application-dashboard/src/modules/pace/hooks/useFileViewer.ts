@@ -39,6 +39,7 @@ export const useFileViewer = ({ filePath, onSaveSuccess, onSaveError }: UseFileV
 
   const autoSaveTimerRef = useRef<NodeJS.Timeout | null>(null);
   const isSavingRef = useRef(false);
+  const pendingSaveRef = useRef(false);
 
   const fileState = filePath ? getFileState(filePath) : undefined;
 
@@ -88,19 +89,26 @@ export const useFileViewer = ({ filePath, onSaveSuccess, onSaveError }: UseFileV
   }, [filePath, isEditable, fetchFileMetadata, fetchFileContent, getFileState, initFileState]);
 
   const saveFile = useCallback(async () => {
-    if (!filePath || isSavingRef.current) return;
+    if (!filePath) return;
+
+    // If already saving, mark that we need another save after current one completes
+    if (isSavingRef.current) {
+      pendingSaveRef.current = true;
+
+      return;
+    }
 
     const currentState = getFileState(filePath);
 
     if (!currentState || !currentState.isDirty) return;
 
     isSavingRef.current = true;
+    pendingSaveRef.current = false;
 
     try {
       const result = await writeFile({
-        relative_path: filePath,
+        path: filePath,
         content: currentState.content,
-        expected_mtime_ms: currentState.mtime_ms,
       }).unwrap();
 
       markFileSaved(filePath, result.mtime_ms);
@@ -110,6 +118,13 @@ export const useFileViewer = ({ filePath, onSaveSuccess, onSaveError }: UseFileV
       onSaveError?.(err);
     } finally {
       isSavingRef.current = false;
+
+      // If edits were made during save, trigger another save
+      if (pendingSaveRef.current) {
+        pendingSaveRef.current = false;
+        // Use setTimeout to avoid potential stack overflow and allow state to update
+        setTimeout(() => saveFile(), 0);
+      }
     }
   }, [filePath, getFileState, writeFile, markFileSaved, onSaveSuccess, onSaveError]);
 
