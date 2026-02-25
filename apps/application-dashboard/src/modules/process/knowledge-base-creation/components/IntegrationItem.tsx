@@ -45,13 +45,13 @@ const IntegrationItem = ({ mappedIntegration }: { mappedIntegration: MappedInteg
         <DropdownMenuTrigger className='cursor-pointer'>
           <div className='f-12-450 flex items-center gap-0.5'>
             <TriggerChip
-              text={mappedIntegration.integration.display_name}
-              logo={mappedIntegration.integration.logo}
+              text={mappedIntegration?.integration?.display_name}
+              logo={mappedIntegration?.integration?.logo}
               isFirst
             />
             <div className='flex h-6 items-center gap-1 rounded-r bg-gray-100 px-2'>
               <Link size={14} className='text-gray-900' />
-              <span>{mappedIntegration.number_of_connections}</span>
+              <span>{mappedIntegration?.number_of_connections}</span>
             </div>
           </div>
         </DropdownMenuTrigger>
@@ -134,12 +134,12 @@ const IntegrationItem = ({ mappedIntegration }: { mappedIntegration: MappedInteg
         onOpenChange={handleListOpenChange}
         onConnect={handleConnectWrapper}
         onAddAnother={handleAddAnother}
-        integrationName={mappedIntegration.integration.display_name || ''}
+        integrationName={mappedIntegration?.integration?.display_name || ''}
         connections={connectionsToAdd}
         isLoading={isCreatingProcessConnectionMapping}
       />
       <ConnectionModal
-        integration={mappedIntegration.integration}
+        integration={mappedIntegration?.integration}
         isOpen={dialogIntent?.type === 'create'}
         onClose={handleCloseDeleteDialog}
         onSubmit={handleCreateConnectionMapping}
