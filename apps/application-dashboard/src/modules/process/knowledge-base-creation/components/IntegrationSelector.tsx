@@ -122,7 +122,7 @@ const IntegrationSelector = ({ integrations }: { integrations: IntegrationType[]
           onOpenChange={handleDialogOpenChange}
           onConnect={handleConnectWrapper}
           onAddAnother={handleAddAnother}
-          connections={getAvailableConnections(dialogIntent.connections)}
+          connections={getAvailableConnections(dialogIntent?.connections)}
           integrationName={selectedIntegration?.display_name || ''}
           isLoading={isCreatingProcessConnectionMapping}
         />

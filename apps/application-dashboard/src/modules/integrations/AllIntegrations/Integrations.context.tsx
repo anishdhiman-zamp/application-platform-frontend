@@ -109,7 +109,7 @@ function integrationsReducer(state: IntegrationsState, action: IntegrationsActio
         ...state,
         items: state.items.map((item) =>
           item.name === integrationName
-            ? { ...item, connections: item.connections.filter((conn) => conn.id !== connectionId) }
+            ? { ...item, connections: item?.connections.filter((conn) => conn.id !== connectionId) }
             : item,
         ),
       };
@@ -123,7 +123,7 @@ function integrationsReducer(state: IntegrationsState, action: IntegrationsActio
         items: state.items.map((item) => {
           if (item.name !== integrationName) return item;
 
-          const existingIndex = item.connections.findIndex((conn) => conn.id === connection.id);
+          const existingIndex = item?.connections?.findIndex((conn) => conn.id === connection.id);
 
           if (existingIndex !== -1) {
             // Update existing connection

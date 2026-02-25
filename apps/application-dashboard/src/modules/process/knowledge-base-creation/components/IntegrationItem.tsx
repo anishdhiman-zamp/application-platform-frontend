@@ -57,7 +57,7 @@ const IntegrationItem = ({ mappedIntegration }: { mappedIntegration: MappedInteg
         </DropdownMenuTrigger>
         <DropdownMenuContent onCloseAutoFocus={preventAutoFocus} className='p-0'>
           <div className='p-1'>
-            {mappedIntegration.connections?.map((connection) => (
+            {mappedIntegration?.connections?.map((connection) => (
               <DropdownMenuItem
                 key={connection.id}
                 className='group f-13-500 flex cursor-default items-center justify-between rounded-md p-0 hover:bg-gray-50'
