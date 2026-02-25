@@ -17,7 +17,8 @@ export async function fetchIntegrations(): Promise<IntegrationType[]> {
       ENVIRONMENT === ENVIRONMENT_TYPES.DEVELOPMENT
         ? `${cdnUrl}/integrations/integrations-dev.json`
         : `${cdnUrl}/integrations/integrations.json`;
-    const response = await fetch(integrationsUrl, { next: { revalidate: 3600 } });
+
+    const response = await fetch(integrationsUrl);
 
     if (response.ok) {
       const data: IntegrationsDataType = await response.json();
