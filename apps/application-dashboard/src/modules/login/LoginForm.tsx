@@ -2,6 +2,7 @@
 
 import { ChangeEvent, type SubmitEvent, useEffect, useRef, useState } from 'react';
 import { BASE_API_URL, getApiDomainAndRegions, reinitializeApiDomain, REQUEST_TYPES } from '@zamp-platform/api';
+import { Button } from '@zamp-platform/ui';
 import {
   getFromLocalStorage,
   LOCAL_STORAGE_KEYS,
@@ -9,6 +10,7 @@ import {
   setToLocalStorage,
 } from '@zamp-platform/utils';
 import { LOGIN_METHODS, LOGIN_PROVIDERS } from 'constants/auth.constants';
+import { AnimatedDitherArrow } from 'modules/login/AnimatedDitherArrow';
 import { LOGIN_ERROR_TEXT } from 'modules/login/constants';
 import LocaldevEmailPasswordLogin from 'modules/login/LocaldevEmailPasswordLogin';
 import { LOGIN_GROUPS, VALID_SESSION_DETECTED_ERROR_MSG } from 'modules/login/login.constants';
@@ -18,6 +20,7 @@ import { getDomainFromEmail, isValidEmail } from 'utils/common';
 import { API_ENDPOINTS } from '@/apis/apiEndpoint.constants';
 import { API_STATUS_CODES } from '@/types/common/statusCodes';
 import { MapAny } from '@/types/commonTypes';
+import Input from 'components/common/input';
 
 type LoadingAction = 'idle' | 'email' | 'google' | 'sso';
 
@@ -346,7 +349,7 @@ export const LoginForm = () => {
 
   if (methodPickerFlow) {
     const btnBase =
-      'w-full rounded-2xl border px-5 py-3.5 text-sm font-medium transition-all duration-250 cursor-pointer active:scale-[0.98]';
+      'h-auto w-full overflow-hidden rounded-2xl border px-5 py-3.5 text-sm font-medium transition-all duration-250 cursor-pointer active:scale-[0.98]';
 
     return (
       <div>
@@ -356,35 +359,36 @@ export const LoginForm = () => {
         <p className='mb-6 text-[13px] text-[#999]'>Choose how you want to sign in</p>
         {error && <p className='mb-4 text-xs text-[#e53935]'>{error}</p>}
         <div className='flex flex-col gap-3'>
-          <button
+          <Button
             type='button'
             disabled={isLoading}
-            className={`${btnBase} border-black/10 bg-[#1a1a1a] text-white hover:bg-[#2a2a2a] disabled:opacity-60`}
+            className={`${btnBase} border-black/10 bg-[#1a1a1a] text-white hover:bg-[#2a2a2a] active:bg-[#1a1a1a] disabled:opacity-60`}
             onClick={() => initiateOtpFromPicker()}
           >
             {loadingAction === 'email' ? 'Sending code...' : 'Sign in with OTP'}
-          </button>
-          <button
+          </Button>
+          <Button
             type='button'
-            className={`${btnBase} border-black/12 bg-[#f3f3f3] text-[#1a1a1a] hover:bg-[#ebebeb]`}
+            className={`${btnBase} border-black/12 bg-[#f3f3f3] text-[#1a1a1a] hover:bg-[#ebebeb] active:bg-[#f3f3f3]`}
             onClick={() => {
               setPasswordFlow(methodPickerFlow);
               setMethodPickerFlow(null);
             }}
           >
             Sign in with Password
-          </button>
+          </Button>
         </div>
-        <button
+        <Button
           type='button'
-          className='mt-4 text-[13px] text-[#999] transition-colors hover:text-[#666]'
+          variant='ghost'
+          className='mt-4 h-auto bg-transparent text-[13px] text-[#999] transition-colors hover:bg-transparent hover:text-[#666]'
           onClick={() => {
             setMethodPickerFlow(null);
             setError(null);
           }}
         >
           ← Use a different email
-        </button>
+        </Button>
       </div>
     );
   }
@@ -396,11 +400,11 @@ export const LoginForm = () => {
   return (
     <div>
       {/* Google Sign In */}
-      <button
+      <Button
         type='button'
         disabled={isLoading}
         onClick={handleGoogleLogin}
-        className='btn-login relative flex w-full cursor-pointer items-center justify-center gap-2.5 overflow-hidden rounded-2xl border border-black/12 bg-[#f3f3f3] px-5 py-3.5 text-sm font-medium text-[#1a1a1a] transition-all duration-250 hover:bg-[#ebebeb] active:scale-[0.98] disabled:cursor-not-allowed disabled:opacity-60'
+        className='btn-login relative flex h-auto w-full cursor-pointer items-center justify-center gap-2.5 overflow-hidden rounded-2xl border border-black/12 bg-[#f3f3f3] px-5 py-3.5 text-sm font-medium text-[#1a1a1a] transition-all duration-250 hover:bg-[#ebebeb] active:scale-[0.98] active:bg-[#f3f3f3] disabled:cursor-not-allowed disabled:bg-[#f3f3f3] disabled:opacity-60'
       >
         <svg
           className='relative z-[1] h-[18px] w-[18px] shrink-0'
@@ -425,7 +429,7 @@ export const LoginForm = () => {
           />
         </svg>
         <span className='relative z-[1]'>{loadingAction === 'google' ? 'Connecting...' : 'Continue with Google'}</span>
-      </button>
+      </Button>
 
       {/* Divider */}
       <div className='my-6 flex items-center gap-4'>
@@ -437,13 +441,10 @@ export const LoginForm = () => {
       {/* Email Form */}
       <form onSubmit={handleSubmit}>
         <div className='mb-5'>
-          <label htmlFor='login-email' className='mb-2 block text-[13px] font-medium text-[#666]'>
-            Email
-          </label>
-          <input
+          <Input
+            label='Email'
+            labelOverrideClassName='mb-2 block text-[13px] font-medium text-[#666]'
             id='login-email'
-            data-testid='email-input'
-            data-error={error ?? ''}
             placeholder='Enter your work email'
             name='email'
             type='email'
@@ -451,23 +452,27 @@ export const LoginForm = () => {
             autoFocus
             onChange={handleEmailChange}
             disabled={isLoading}
-            className={`w-full rounded-xl border bg-white px-3.5 py-3 text-sm text-[#1a1a1a] transition-all duration-250 outline-none placeholder:text-[#bbb] ${
+            noBorders
+            customPaddingClassName='px-3.5 py-3'
+            inputClassName={`w-full rounded-xl border bg-white px-3.5 py-3 text-sm text-[#1a1a1a] transition-all duration-250 outline-none placeholder:text-[#bbb] ${
               error
                 ? 'border-[#e53935] shadow-[0_0_0_3px_rgba(229,57,53,0.08)] focus:border-[#e53935] focus:shadow-[0_0_0_3px_rgba(229,57,53,0.12)]'
                 : 'border-black/10 focus:border-black/25 focus:shadow-[0_0_0_3px_rgba(0,0,0,0.04)]'
             }`}
+            focusClassNames=''
+            inputRoundedClassName=''
           />
           {error && <p className='mt-1.5 text-xs text-[#e53935]'>{error}</p>}
         </div>
 
-        <button
+        <Button
           type='submit'
           data-testid='login-button'
           disabled={isSubmitDisabled}
-          className={`group btn-login relative mt-1 flex w-full items-center justify-center gap-2.5 overflow-hidden rounded-2xl border px-5 py-3.5 text-sm font-medium transition-all duration-250 ${
+          className={`group btn-login relative mt-1 flex h-auto w-full items-center justify-center gap-2.5 overflow-hidden rounded-2xl border px-5 py-3.5 text-sm font-medium transition-all duration-250 ${
             !isSubmitDisabled
-              ? 'cursor-pointer border-black/10 bg-[#1a1a1a] text-white hover:bg-[#2a2a2a] active:scale-[0.98]'
-              : 'cursor-not-allowed border-black/3 bg-[#d0d0d0] text-[#999]'
+              ? 'cursor-pointer border-black/10 bg-[#1a1a1a] text-white hover:bg-[#2a2a2a] active:scale-[0.98] active:bg-[#1a1a1a]'
+              : 'cursor-not-allowed border-black/3 bg-[#d0d0d0] text-[#999] disabled:bg-[#d0d0d0] disabled:text-[#999]'
           }`}
         >
           <span className='relative z-[1] flex items-center gap-1.5'>
@@ -485,76 +490,8 @@ export const LoginForm = () => {
               'Continue'
             )}
           </span>
-          <span className='relative z-[1] inline-flex h-[17px] w-[17px] overflow-hidden'>
-            <svg
-              className={`h-[17px] w-[17px] -translate-x-[40%] translate-y-[40%] opacity-0 transition-all duration-300 ease-[cubic-bezier(0.25,0.46,0.45,0.94)] ${
-                !isSubmitDisabled
-                  ? 'group-hover:translate-x-0 group-hover:translate-y-0 group-hover:opacity-100'
-                  : 'opacity-30'
-              }`}
-              viewBox='0 0 17 17'
-              fill='none'
-              xmlns='http://www.w3.org/2000/svg'
-            >
-              <rect
-                x='3'
-                y='11.9998'
-                width='8.48409'
-                height='2.12102'
-                transform='rotate(-45 3 11.9998)'
-                fill='currentColor'
-              />
-              <rect
-                x='9'
-                y='5.99979'
-                width='2.12102'
-                height='2.12102'
-                transform='rotate(-45 9 5.99979)'
-                fill='currentColor'
-              />
-              <rect
-                x='7.49609'
-                y='4.49979'
-                width='2.12102'
-                height='2.12102'
-                transform='rotate(-45 7.49609 4.49979)'
-                fill='currentColor'
-              />
-              <rect
-                x='4.49609'
-                y='4.5037'
-                width='2.12102'
-                height='2.12102'
-                transform='rotate(-45 4.49609 4.5037)'
-                fill='currentColor'
-              />
-              <rect
-                x='10.5'
-                y='7.50174'
-                width='2.12102'
-                height='2.12102'
-                transform='rotate(-45 10.5 7.50174)'
-                fill='currentColor'
-              />
-              <rect
-                x='10.5'
-                y='4.50174'
-                width='2.12102'
-                height='2.12102'
-                transform='rotate(-45 10.5 4.50174)'
-                fill='currentColor'
-              />
-              <rect
-                x='10.4961'
-                y='10.5037'
-                width='2.12102'
-                height='2.12102'
-                transform='rotate(-45 10.4961 10.5037)'
-                fill='currentColor'
-              />
-            </svg>
-          </span>
-        </button>
+          <AnimatedDitherArrow disabled={isSubmitDisabled} />
+        </Button>
       </form>
 
       {/* Terms */}

@@ -1,82 +1,14 @@
 'use client';
 
 import { RefObject, useEffect, useRef } from 'react';
-
-const PROFESSIONS = [
-  'Engineer',
-  'Accountant',
-  'CFO',
-  'CEO',
-  'Designer',
-  'Architect',
-  'Analyst',
-  'Strategist',
-  'Developer',
-  'Marketer',
-  'Scientist',
-  'Editor',
-  'Copywriter',
-  'Lawyer',
-  'Economist',
-  'Researcher',
-  'Technician',
-  'Consultant',
-  'Manager',
-  'Recruiter',
-  'Data Scientist',
-  'UI/UX Expert',
-  'Project Lead',
-  'Systems Admin',
-  'Cloud Architect',
-  'Content Creator',
-  'Videographer',
-  'Social Media Head',
-  'Product Manager',
-  'Support Specialist',
-  'HR Director',
-  'Growth Hacker',
-  'Cybersecurity',
-  'Sales Rep',
-  'PR Manager',
-  'Operations Lead',
-  'Investor',
-  'Blockchain Eng',
-  'ML Researcher',
-  'QA Engineer',
-  'Solutions Architect',
-  'Data Engineer',
-  'Frontend Dev',
-  'Backend Dev',
-  'Fullstack Dev',
-  'DevOps',
-  'Legal Counsel',
-  'Auditor',
-  'Tax Consultant',
-  'Supply Chain Manager',
-  'Logistics Expert',
-  'E-commerce Head',
-  'Brand Designer',
-  'Art Director',
-  'Motion Designer',
-  '3D Artist',
-  'Game Developer',
-  'Community Manager',
-  'Customer Success',
-  'Business Analyst',
-  'Market Researcher',
-  'Finance Lead',
-  'Treasury Head',
-  'Compliance Officer',
-  'Risk Manager',
-  'Portfolio Manager',
-];
-
-const COLOR_PALETTE = ['#6b6b5d', '#2563EB', '#843d63', '#6d7a42', '#4a5d29', '#9b7fa3'];
-
-const REVEAL_RADIUS = 350;
-const CARD_PAD_X = 60;
-const CARD_PAD_Y = 40;
-const CARD_FADE_ZONE = 120;
+import {
+  CARD_FADE_ZONE,
+  CARD_PAD_X,
+  CARD_PAD_Y,
+  COLOR_PALETTE,
+  PROFESSIONS,
+  REVEAL_RADIUS,
+} from 'modules/login/login.constants';
 
 function seededRandom(seed: number) {
   let s = seed;
@@ -89,12 +21,12 @@ function seededRandom(seed: number) {
 }
 
 const rng = seededRandom(42);
-const EXTENDED_ITEMS = Array(6)
-  .fill(PROFESSIONS)
-  .flat()
+
+const shuffledProfessionItems = Array.from({ length: 6 })
+  .flatMap(() => PROFESSIONS)
   .sort(() => rng() - 0.5)
-  .map((name) => ({
-    name,
+  .map((profession) => ({
+    name: profession,
     color: COLOR_PALETTE[Math.floor(rng() * COLOR_PALETTE.length)],
   }));
 
@@ -105,6 +37,38 @@ type LabelData = {
   isHovered: boolean;
   switchTimeout: ReturnType<typeof setTimeout> | null;
 };
+
+function cachePositions(labelData: LabelData[]) {
+  for (const label of labelData) {
+    const { left, top, width, height } = label.el.getBoundingClientRect();
+
+    label.cx = left + width / 2;
+    label.cy = top + height / 2;
+  }
+}
+
+function startSwitching(data: LabelData) {
+  if (data.switchTimeout) return;
+  const run = () => {
+    if (!data.isHovered) {
+      data.switchTimeout = null;
+
+      return;
+    }
+    data.el.textContent = PROFESSIONS[Math.floor(Math.random() * PROFESSIONS.length)];
+    data.el.style.fontWeight = String(Math.random() > 0.5 ? 500 : 200);
+    data.switchTimeout = setTimeout(run, 100 + Math.random() * 500);
+  };
+
+  run();
+}
+
+function stopSwitching(data: LabelData) {
+  if (data.switchTimeout) {
+    clearTimeout(data.switchTimeout);
+    data.switchTimeout = null;
+  }
+}
 
 type Props = {
   /** Ref to the centered card container, used to dampen label opacity near it */
@@ -124,48 +88,17 @@ export const ProfessionRevealBackground = ({ containerRef }: Props) => {
 
     const labelData: LabelData[] = [];
 
-    EXTENDED_ITEMS.forEach((item) => {
-      const el = document.createElement('div');
+    shuffledProfessionItems.forEach(({ name, color }) => {
+      const element = document.createElement('div');
 
-      el.className = 'profession-label';
-      el.textContent = item.name;
-      el.style.color = item.color;
-      grid.appendChild(el);
-      labelData.push({ el, cx: 0, cy: 0, isHovered: false, switchTimeout: null });
+      element.className = 'profession-label';
+      element.textContent = name;
+      element.style.color = color;
+      grid.appendChild(element);
+      labelData.push({ el: element, cx: 0, cy: 0, isHovered: false, switchTimeout: null });
     });
 
-    function cachePositions() {
-      for (let i = 0; i < labelData.length; i++) {
-        const rect = labelData[i].el.getBoundingClientRect();
-
-        labelData[i].cx = rect.left + rect.width / 2;
-        labelData[i].cy = rect.top + rect.height / 2;
-      }
-    }
-    requestAnimationFrame(cachePositions);
-
-    function startSwitching(data: LabelData) {
-      if (data.switchTimeout) return;
-      const run = () => {
-        if (!data.isHovered) {
-          data.switchTimeout = null;
-
-          return;
-        }
-        data.el.textContent = PROFESSIONS[Math.floor(Math.random() * PROFESSIONS.length)];
-        data.el.style.fontWeight = String(Math.random() > 0.5 ? 500 : 200);
-        data.switchTimeout = setTimeout(run, 100 + Math.random() * 500);
-      };
-
-      run();
-    }
-
-    function stopSwitching(data: LabelData) {
-      if (data.switchTimeout) {
-        clearTimeout(data.switchTimeout);
-        data.switchTimeout = null;
-      }
-    }
+    requestAnimationFrame(() => cachePositions(labelData));
 
     let rafId = 0;
     let isActive = false;
@@ -177,23 +110,22 @@ export const ProfessionRevealBackground = ({ containerRef }: Props) => {
       if (mouseOffscreen) {
         let anyHovered = false;
 
-        for (let i = 0; i < labelData.length; i++) {
-          if (labelData[i].isHovered) {
-            labelData[i].isHovered = false;
-            stopSwitching(labelData[i]);
-            labelData[i].el.style.fontWeight = '100';
-            labelData[i].el.style.opacity = '0';
-            labelData[i].el.style.transitionDuration = '1200ms';
-            anyHovered = true;
-          }
+        for (const label of labelData) {
+          if (!label.isHovered) continue;
+
+          anyHovered = true;
+          label.isHovered = false;
+          stopSwitching(label);
+
+          Object.assign(label.el.style, {
+            fontWeight: '100',
+            opacity: '0',
+            transitionDuration: '1200ms',
+          });
         }
         if (glow) glow.style.background = 'none';
-        if (!anyHovered) {
-          isActive = false;
-
-          return;
-        }
         isActive = false;
+        if (anyHovered) return;
 
         return;
       }
@@ -209,10 +141,8 @@ export const ProfessionRevealBackground = ({ containerRef }: Props) => {
           }
         : null;
 
-      for (let i = 0; i < labelData.length; i++) {
-        const data = labelData[i];
-        const el = data.el;
-        const { cx, cy } = data;
+      for (const data of labelData) {
+        const { el, cx, cy } = data;
         const dist = Math.sqrt((cx - mouseX) ** 2 + (cy - mouseY) ** 2);
 
         if (dist < REVEAL_RADIUS) {
@@ -290,11 +220,13 @@ export const ProfessionRevealBackground = ({ containerRef }: Props) => {
       scheduleUpdate();
     };
 
+    const onResize = () => cachePositions(labelData);
+
     window.addEventListener('mousemove', onMouseMove, { passive: true });
     window.addEventListener('touchstart', onTouchStart, { passive: true });
     window.addEventListener('touchmove', onTouchMove, { passive: true });
     window.addEventListener('touchend', onTouchEnd);
-    window.addEventListener('resize', cachePositions);
+    window.addEventListener('resize', onResize);
 
     return () => {
       cancelAnimationFrame(rafId);
@@ -302,7 +234,7 @@ export const ProfessionRevealBackground = ({ containerRef }: Props) => {
       window.removeEventListener('touchstart', onTouchStart);
       window.removeEventListener('touchmove', onTouchMove);
       window.removeEventListener('touchend', onTouchEnd);
-      window.removeEventListener('resize', cachePositions);
+      window.removeEventListener('resize', onResize);
       labelData.forEach((d) => stopSwitching(d));
       while (grid.firstChild) grid.removeChild(grid.firstChild);
     };

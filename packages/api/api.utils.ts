@@ -4,12 +4,8 @@ import { getFromLocalStorage, LOCAL_STORAGE_KEYS } from '@zamp-platform/utils';
 import { BASE_API_URL, DEFAULT_REGION, ENVIRONMENT, MULTI_REGION_ENABLED } from './constants';
 
 function getSavedLoginEmail(): string {
-  try {
-    const info = getFromLocalStorage(LOCAL_STORAGE_KEYS.LAST_LOGIN_INFO);
-    if (info) return JSON.parse(info)?.email ?? '';
-  } catch {
-    // fall through
-  }
+  const info = getFromLocalStorage(LOCAL_STORAGE_KEYS.LAST_LOGIN_INFO);
+  if (info) return JSON.parse(info)?.email ?? '';
   return getFromLocalStorage(LOCAL_STORAGE_KEYS.LAST_LOGGED_IN_OIDC_EMAIL);
 }
 

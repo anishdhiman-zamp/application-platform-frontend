@@ -1,11 +1,13 @@
 'use client';
-import { FC, FormEvent, useEffect, useState } from 'react';
+import { FC, FormEvent, useState } from 'react';
+import { Button } from '@zamp-platform/ui';
 import { useGetErrorDetailsQuery } from 'apis/auth';
 import { LOGIN_METHODS } from 'constants/auth.constants';
 import { LOGIN_ERROR_TEXT } from 'modules/login/constants';
-import { useRouter, useSearchParams } from 'next/navigation';
+import { useSearchParams } from 'next/navigation';
 import { LoginFlow } from 'types/api/auth.types';
 import { getFromLocalStorage, LOCAL_STORAGE_KEYS, setToLocalStorage } from 'utils/localstorage';
+import Input from 'components/common/input';
 
 type LoginFormProps = {
   loginFlow: LoginFlow;
@@ -14,11 +16,10 @@ type LoginFormProps = {
 
 const LoginForm: FC<LoginFormProps> = ({ loginFlow, setLoginFlow }) => {
   const cachedUserEmail = JSON.parse(getFromLocalStorage(LOCAL_STORAGE_KEYS.XZAMP_USER) ?? '{}');
-  const router = useRouter();
   const searchParams = useSearchParams();
   const errorId = searchParams?.get('error')?.toString() ?? '';
 
-  const [loading, setLoading] = useState(false);
+  const [loading, setLoading] = useState<boolean>(false);
   const [error, setError] = useState<string | null>(null);
 
   const { data: userFacingError } = useGetErrorDetailsQuery(errorId, { skip: !errorId });
@@ -70,12 +71,6 @@ const LoginForm: FC<LoginFormProps> = ({ loginFlow, setLoginFlow }) => {
     }
   };
 
-  useEffect(() => {
-    const token = localStorage.getItem('token');
-
-    if (token) router.push('/payments');
-  }, []);
-
   const formDisabled = loading || !loginFlow;
   const inputBase =
     'w-full rounded-xl border bg-white px-3.5 py-3 text-sm text-[#1a1a1a] transition-all duration-250 outline-none placeholder:text-[#bbb]';
@@ -92,28 +87,29 @@ const LoginForm: FC<LoginFormProps> = ({ loginFlow, setLoginFlow }) => {
       ))}
 
       <form onSubmit={handlePasswordSubmit}>
-        <div className='mb-4'>
-          <label htmlFor='login-email' className='mb-2 block text-[13px] font-medium text-[#666]'>
-            Email
-          </label>
-          <input
-            id='login-email'
-            placeholder='Enter your email'
-            name='email'
-            type='email'
-            value={email}
-            autoFocus
-            onChange={(e) => setEmail(e.target.value)}
-            disabled={formDisabled}
-            className={`${inputBase} ${inputNormal}`}
-          />
-        </div>
+        <Input
+          label='Email'
+          labelOverrideClassName='mb-2 block text-[13px] font-medium text-[#666]'
+          className='mb-4'
+          id='login-email'
+          placeholder='Enter your email'
+          name='email'
+          type='email'
+          value={email}
+          autoFocus
+          onChange={(e) => setEmail(e.target.value)}
+          disabled={formDisabled}
+          noBorders
+          customPaddingClassName='px-3.5 py-3'
+          inputClassName={`${inputBase} ${inputNormal}`}
+          focusClassNames=''
+          inputRoundedClassName=''
+        />
 
         <div className='mb-5'>
-          <label htmlFor='login-password' className='mb-2 block text-[13px] font-medium text-[#666]'>
-            Password
-          </label>
-          <input
+          <Input
+            label='Password'
+            labelOverrideClassName='mb-2 block text-[13px] font-medium text-[#666]'
             id='login-password'
             placeholder='Enter your password'
             name='password'
@@ -121,23 +117,27 @@ const LoginForm: FC<LoginFormProps> = ({ loginFlow, setLoginFlow }) => {
             value={password}
             onChange={(e) => setPassword(e.target.value)}
             disabled={formDisabled}
-            className={`${inputBase} ${error ? inputError : inputNormal}`}
+            noBorders
+            customPaddingClassName='px-3.5 py-3'
+            inputClassName={`${inputBase} ${error ? inputError : inputNormal}`}
+            focusClassNames=''
+            inputRoundedClassName=''
           />
           {error && <p className='mt-1.5 text-xs text-[#e53935]'>{error}</p>}
         </div>
 
-        <button
+        <Button
           type='submit'
           data-testid='login'
           disabled={formDisabled || !email.trim() || !password}
-          className={`group relative mt-1 flex w-full items-center justify-center gap-2.5 overflow-hidden rounded-2xl border px-5 py-3.5 text-sm font-medium transition-all duration-250 ${
+          className={`group relative mt-1 h-auto w-full overflow-hidden rounded-2xl border px-5 py-3.5 text-sm font-medium transition-all duration-250 ${
             !(formDisabled || !email.trim() || !password)
-              ? 'cursor-pointer border-black/10 bg-[#1a1a1a] text-white hover:bg-[#2a2a2a] active:scale-[0.98]'
-              : 'cursor-not-allowed border-black/3 bg-[#d0d0d0] text-[#999]'
+              ? 'cursor-pointer border-black/10 bg-[#1a1a1a] text-white hover:bg-[#2a2a2a] active:scale-[0.98] active:bg-[#1a1a1a]'
+              : 'cursor-not-allowed border-black/3 bg-[#d0d0d0] text-[#999] disabled:bg-[#d0d0d0] disabled:text-[#999]'
           }`}
         >
-          <span className='relative z-[1]'>{loading ? 'Signing in...' : 'Sign in'}</span>
-        </button>
+          {loading ? 'Signing in...' : 'Sign in'}
+        </Button>
       </form>
     </div>
   );

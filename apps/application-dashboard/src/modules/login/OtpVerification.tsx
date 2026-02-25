@@ -1,10 +1,17 @@
 'use client';
 
 import { ClipboardEvent, FC, KeyboardEvent, useCallback, useEffect, useRef, useState } from 'react';
+import { Button } from '@zamp-platform/ui';
 import { LOCAL_STORAGE_KEYS, setToLocalStorage } from '@zamp-platform/utils';
-import { LOGIN_METHODS } from 'constants/auth.constants';
-import { INVALID_CODE_MESSAGE_IDS, RESEND_SUCCESS_MESSAGE_IDS } from 'modules/login/login.constants';
-import { collectHiddenNodeValues, getCsrfToken } from 'modules/login/otp.utils';
+import { KEYBOARD_KEYS } from 'constants/shortcuts';
+import { Pencil } from 'lucide-react';
+import {
+  buildOtpSubmitBody,
+  buildResendBody,
+  determineExpiryType,
+  isInvalidCodeResponse,
+  isResendSuccessResponse,
+} from 'modules/login/otp.utils';
 import { FlowExpiredResponse, FlowUiMessage, LoginFlow } from 'types/api/auth.types';
 import { API_STATUS_CODES } from '@/types/common/statusCodes';
 
@@ -34,33 +41,6 @@ export const OtpVerification: FC<Props> = ({ email, flow, onEditEmail, onFlowExp
   const isBusy = status !== 'idle';
   const allFilled = digits.every((d) => d.length === 1);
 
-  useEffect(() => {
-    flowRef.current = flow;
-  }, [flow]);
-
-  useEffect(() => {
-    inputRefs.current[0]?.focus();
-
-    return () => abortRef.current?.abort();
-  }, []);
-
-  useEffect(() => {
-    if (resendCooldown <= 0) return;
-    const timer = setInterval(() => {
-      setResendCooldown((prev) => {
-        if (prev <= 1) {
-          clearInterval(timer);
-
-          return 0;
-        }
-
-        return prev - 1;
-      });
-    }, 1000);
-
-    return () => clearInterval(timer);
-  }, [resendCooldown]);
-
   const clearDigitsAndFocus = useCallback(() => {
     setDigits(Array(OTP_LENGTH).fill(''));
     requestAnimationFrame(() => inputRefs.current[0]?.focus());
@@ -89,11 +69,11 @@ export const OtpVerification: FC<Props> = ({ email, flow, onEditEmail, onFlowExp
   };
 
   const handleKeyDown = (index: number, e: KeyboardEvent<HTMLInputElement>) => {
-    if (e.key === 'Backspace' && !digits[index] && index > 0) {
+    if (e.key === KEYBOARD_KEYS.BACKSPACE && !digits[index] && index > 0) {
       setDigitAt(index - 1, '');
       inputRefs.current[index - 1]?.focus();
     }
-    if (e.key === 'Enter' && allFilled && !isBusy) {
+    if (e.key === KEYBOARD_KEYS.ENTER && allFilled && !isBusy) {
       submitCode();
     }
   };
@@ -132,10 +112,6 @@ export const OtpVerification: FC<Props> = ({ email, flow, onEditEmail, onFlowExp
     }
   }
 
-  /**
-   * Attempts to resend the OTP on the current flow.
-   * Pure function — does NOT handle flow expiry. Caller decides recovery strategy.
-   */
   async function resendOnCurrentFlow(signal: AbortSignal): Promise<'sent' | 'flow_expired' | 'failed'> {
     try {
       const currentFlow = flowRef.current;
@@ -144,25 +120,17 @@ export const OtpVerification: FC<Props> = ({ email, flow, onEditEmail, onFlowExp
         credentials: 'include',
         signal,
         headers: { 'Content-Type': 'application/json', Accept: 'application/json' },
-        body: JSON.stringify({
-          method: LOGIN_METHODS.CODE,
-          resend: 'code',
-          csrf_token: getCsrfToken(currentFlow.ui.nodes),
-          ...collectHiddenNodeValues(currentFlow.ui.nodes),
-        }),
+        body: JSON.stringify(buildResendBody(currentFlow.ui.nodes)),
       });
 
       if (resp.status === API_STATUS_CODES.GONE) return 'flow_expired';
       if (resp.status >= 500) return 'failed';
 
       const data = await resp.json();
-      const codeSent =
-        data.state === 'sent_email' ||
-        data.ui?.messages?.some((m: FlowUiMessage) => m.type === 'info' && RESEND_SUCCESS_MESSAGE_IDS.includes(m.id));
 
-      if (codeSent) updateFlowUi(data);
+      if (isResendSuccessResponse(data)) updateFlowUi(data);
 
-      return codeSent ? 'sent' : 'failed';
+      return isResendSuccessResponse(data) ? 'sent' : 'failed';
     } catch {
       return 'failed';
     }
@@ -186,24 +154,12 @@ export const OtpVerification: FC<Props> = ({ email, flow, onEditEmail, onFlowExp
     }
   }
 
-  /**
-   * 410 handler — uses timestamp comparison (Approach 1) with network fallback (Approach 2).
-   *
-   * Approach 1: Compare response.expired_at vs flow.expires_at
-   *   - expired_at < flow.expires_at  → code expired, flow alive → resend on same flow
-   *   - expired_at >= flow.expires_at → flow expired → create new flow via onFlowExpired
-   *
-   * Approach 2 (fallback if timestamps unparseable): try resend, if 410 again → new flow
-   */
   async function handleExpired(data: FlowExpiredResponse, signal: AbortSignal): Promise<void> {
     clearDigitsAndFocus();
 
-    const responseExpiredAt = new Date(data.expired_at).getTime();
-    const flowExpiresAt = new Date(flowRef.current.expires_at).getTime();
-    const canParseTimestamps = !isNaN(responseExpiredAt) && !isNaN(flowExpiresAt);
+    const expiryType = determineExpiryType(data.expired_at, flowRef.current.expires_at);
 
-    if (canParseTimestamps && responseExpiredAt < flowExpiresAt) {
-      // CODE expired, flow still alive — resend on same flow
+    if (expiryType === 'code_expired') {
       const result = await resendOnCurrentFlow(signal);
 
       if (result === 'sent') {
@@ -211,8 +167,7 @@ export const OtpVerification: FC<Props> = ({ email, flow, onEditEmail, onFlowExp
       } else {
         setMessage({ type: 'error', text: 'Code expired. Please click Resend to get a new code.' });
       }
-    } else if (canParseTimestamps) {
-      // FLOW expired — create entirely new flow
+    } else if (expiryType === 'flow_expired') {
       const newFlow = await onFlowExpired();
 
       if (newFlow) {
@@ -221,7 +176,6 @@ export const OtpVerification: FC<Props> = ({ email, flow, onEditEmail, onFlowExp
         setMessage({ type: 'error', text: 'Session expired. Please try again.' });
       }
     } else {
-      // Timestamps unparseable — fallback to Approach 2 (try resend, infer from result)
       const result = await resendOnCurrentFlow(signal);
 
       if (result === 'sent') {
@@ -252,9 +206,7 @@ export const OtpVerification: FC<Props> = ({ email, flow, onEditEmail, onFlowExp
     updateFlowUi(data);
     clearDigitsAndFocus();
 
-    const isInvalidCode = data.ui?.messages?.some((m: FlowUiMessage) => INVALID_CODE_MESSAGE_IDS.includes(m.id));
-
-    if (isInvalidCode) {
+    if (isInvalidCodeResponse(data.ui?.messages as FlowUiMessage[])) {
       setMessage({ type: 'error', text: 'Incorrect code. Please try again.' });
     } else {
       setMessage({ type: 'error', text: 'Something went wrong. Please try again.' });
@@ -281,12 +233,7 @@ export const OtpVerification: FC<Props> = ({ email, flow, onEditEmail, onFlowExp
         credentials: 'include',
         signal: controller.signal,
         headers: { 'Content-Type': 'application/json', Accept: 'application/json' },
-        body: JSON.stringify({
-          method: LOGIN_METHODS.CODE,
-          code,
-          csrf_token: getCsrfToken(currentFlow.ui.nodes),
-          ...collectHiddenNodeValues(currentFlow.ui.nodes),
-        }),
+        body: JSON.stringify(buildOtpSubmitBody(code, currentFlow.ui.nodes)),
       });
 
       if (resp.status === API_STATUS_CODES.OK) {
@@ -354,6 +301,35 @@ export const OtpVerification: FC<Props> = ({ email, flow, onEditEmail, onFlowExp
     }
   };
 
+  // ── Effects ────────────────────────────────────────────────────
+
+  useEffect(() => {
+    flowRef.current = flow;
+  }, [flow]);
+
+  useEffect(() => {
+    inputRefs.current[0]?.focus();
+
+    return () => abortRef.current?.abort();
+  }, []);
+
+  useEffect(() => {
+    if (resendCooldown <= 0) return;
+    const timer = setInterval(() => {
+      setResendCooldown((prev) => {
+        if (prev <= 1) {
+          clearInterval(timer);
+
+          return 0;
+        }
+
+        return prev - 1;
+      });
+    }, 1000);
+
+    return () => clearInterval(timer);
+  }, [resendCooldown]);
+
   // ── Render ──────────────────────────────────────────────────────
 
   const isError = message?.type === 'error';
@@ -376,22 +352,7 @@ export const OtpVerification: FC<Props> = ({ email, flow, onEditEmail, onFlowExp
               }`}
               title='Edit email'
             >
-              <svg width='14' height='14' viewBox='0 0 14 14' fill='none' xmlns='http://www.w3.org/2000/svg'>
-                <path
-                  d='M10.08 1.92a1.25 1.25 0 0 1 1.77 0l.23.23a1.25 1.25 0 0 1 0 1.77L5.33 10.67l-2.5.5.5-2.5L10.08 1.92Z'
-                  stroke='currentColor'
-                  strokeWidth='1.2'
-                  strokeLinecap='round'
-                  strokeLinejoin='round'
-                />
-                <path
-                  d='M8.75 3.25l2 2'
-                  stroke='currentColor'
-                  strokeWidth='1.2'
-                  strokeLinecap='round'
-                  strokeLinejoin='round'
-                />
-              </svg>
+              <Pencil size={14} />
             </button>
           </span>
         </p>
@@ -430,18 +391,18 @@ export const OtpVerification: FC<Props> = ({ email, flow, onEditEmail, onFlowExp
         <p className={`-mt-4 mb-4 text-center text-xs ${isError ? 'text-[#e53935]' : 'text-[#666]'}`}>{message.text}</p>
       )}
 
-      <button
+      <Button
         type='button'
         onClick={submitCode}
         disabled={!allFilled || isBusy}
-        className={`relative w-full overflow-hidden rounded-2xl px-5 py-3.5 text-sm font-medium transition-all duration-250 ${
+        className={`relative h-auto w-full overflow-hidden rounded-2xl px-5 py-3.5 text-sm font-medium transition-all duration-250 ${
           allFilled && !isBusy
-            ? 'cursor-pointer bg-[#1a1a1a] text-white hover:bg-[#2a2a2a] active:scale-[0.98]'
-            : 'cursor-not-allowed bg-[#d0d0d0] text-[#999]'
+            ? 'cursor-pointer bg-[#1a1a1a] text-white hover:bg-[#2a2a2a] active:scale-[0.98] active:bg-[#1a1a1a]'
+            : 'cursor-not-allowed bg-[#d0d0d0] text-[#999] disabled:bg-[#d0d0d0] disabled:text-[#999]'
         }`}
       >
         {status === 'submitting' || status === 'success' ? 'Verifying...' : 'Verify'}
-      </button>
+      </Button>
 
       <p className='mt-6 text-center text-[13px] text-[#999]'>
         Didn&apos;t receive a code?{' '}
