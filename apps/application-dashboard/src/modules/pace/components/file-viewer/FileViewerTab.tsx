@@ -2,6 +2,7 @@
 
 import { memo, useCallback, useState } from 'react';
 import { toast } from '@zamp-platform/ui';
+import UnsupportedFileView from 'modules/pace/components/file-viewer/viewers/UnsupportedFileView';
 import dynamic from 'next/dynamic';
 import ImageLoader from '@/components/common/loader/ImageLoader';
 import { ZAMP_LOGO_LOADER_SVG } from '@/constants/icons';
@@ -26,7 +27,7 @@ const MonacoCodeEditor = dynamic(() => import('./viewers/MonacoCodeEditor'), {
   loading: () => <ImageLoader imageSrc={ZAMP_LOGO_LOADER_SVG} width={140} height={140} />,
 });
 
-const MarkdownPreview = dynamic(() => import('./viewers/MarkdownPreview'), {
+const MilkdownEditor = dynamic(() => import('./viewers/MilkdownEditor'), {
   ssr: false,
   loading: () => <ImageLoader imageSrc={ZAMP_LOGO_LOADER_SVG} width={140} height={140} />,
 });
@@ -57,7 +58,7 @@ const FileViewerContent = memo(
     isActive,
     onContentChange,
     onClose,
-    markdownViewMode = 'edit',
+    markdownViewMode = 'milkdown',
   }: FileViewerContentProps) => {
     const mediaUrl = getMediaUrl(filePath);
 
@@ -79,11 +80,11 @@ const FileViewerContent = memo(
         return <PdfViewer src={mediaUrl} fileName={fileName} onClose={onClose} />;
 
       case FILE_CATEGORY.MARKDOWN:
-        if (markdownViewMode === 'preview') {
-          return <MarkdownPreview content={content || ''} />;
+        if (markdownViewMode === 'raw') {
+          return <MonacoCodeEditor content={content || ''} language='markdown' onChange={onContentChange} />;
         }
 
-        return <MonacoCodeEditor content={content || ''} language='markdown' onChange={onContentChange} />;
+        return <MilkdownEditor content={content || ''} onChange={onContentChange} />;
 
       case FILE_CATEGORY.CODE:
         return (
@@ -96,7 +97,7 @@ const FileViewerContent = memo(
 
       case FILE_CATEGORY.UNKNOWN:
       default:
-        return <MonacoCodeEditor content={content || ''} language='txt' onChange={onContentChange} />;
+        return <UnsupportedFileView fileName={fileName} />;
     }
   },
 );
@@ -109,7 +110,7 @@ interface FileViewerTabProps {
 }
 
 const FileViewerTab = memo(({ filePath, isActive }: FileViewerTabProps) => {
-  const [markdownViewMode, setMarkdownViewMode] = useState<MarkdownViewMode>('preview');
+  const [markdownViewMode, setMarkdownViewMode] = useState<MarkdownViewMode>('milkdown');
   const { closeTab } = useDynamicTabs();
 
   const handleSaveError = useCallback(() => {

@@ -1,0 +1,112 @@
+/* Override Crepe CSS variables with product design system */
+.milkdown-editor-wrapper .milkdown {
+  /* Font families - use Inter Variable */
+  --crepe-font-title: 'Inter Variable', system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+  --crepe-font-default: 'Inter Variable', system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+  --crepe-font-code: 'JetBrains Mono', 'Fira Code', Menlo, Monaco, 'Courier New', monospace;
+
+  /* Colors - mapped from product design tokens */
+  --crepe-color-background: #ffffff;
+  --crepe-color-on-background: var(--GRAY_1000, #171717);
+  --crepe-color-surface: var(--GRAY_80, #f7f7f7);
+  --crepe-color-surface-low: var(--GRAY_100, #f2f2f2);
+  --crepe-color-on-surface: var(--GRAY_1000, #171717);
+  --crepe-color-on-surface-variant: var(--GRAY_900, #666666);
+  --crepe-color-outline: var(--GRAY_600, #a8a8a8);
+  --crepe-color-primary: var(--BLUE_700, #2546f5);
+  --crepe-color-secondary: var(--GRAY_200, #ebebeb);
+  --crepe-color-on-secondary: var(--GRAY_1000, #171717);
+  --crepe-color-inverse: var(--GRAY_100, #f2f2f2);
+  --crepe-color-on-inverse: var(--GRAY_1000, #171717);
+  --crepe-color-inline-code: var(--RED_700, #ff1515);
+  --crepe-color-error: var(--RED_700, #ff1515);
+  --crepe-color-hover: var(--GRAY_200, #ebebeb);
+  --crepe-color-selected: var(--BLUE_100, #eaf3ff);
+  --crepe-color-inline-area: var(--GRAY_500, #c9c9c9);
+
+  /* Shadows - softer shadows matching product style */
+  --crepe-shadow-1: 0px 1px 3px 0px rgba(0, 0, 0, 0.08), 0px 1px 2px 0px rgba(0, 0, 0, 0.06);
+  --crepe-shadow-2: 0px 2px 6px 0px rgba(0, 0, 0, 0.1), 0px 1px 2px 0px rgba(0, 0, 0, 0.06);
+}
+
+/* Ensure font inheritance throughout the editor */
+.milkdown-editor-wrapper .milkdown,
+.milkdown-editor-wrapper .editor,
+.milkdown-editor-wrapper .ProseMirror {
+  font-family: var(--crepe-font-default);
+}
+
+/* Editor content area styling */
+.milkdown-editor-wrapper .ProseMirror {
+  padding: 1.5rem;
+  min-height: 100%;
+  outline: none;
+}
+
+/* Headings use the title font */
+.milkdown-editor-wrapper h1,
+.milkdown-editor-wrapper h2,
+.milkdown-editor-wrapper h3,
+.milkdown-editor-wrapper h4,
+.milkdown-editor-wrapper h5,
+.milkdown-editor-wrapper h6 {
+  font-family: var(--crepe-font-title);
+  color: var(--GRAY_1000, #171717);
+}
+
+/* Body text styling */
+.milkdown-editor-wrapper p,
+.milkdown-editor-wrapper li,
+.milkdown-editor-wrapper td,
+.milkdown-editor-wrapper th {
+  font-family: var(--crepe-font-default);
+  color: var(--GRAY_1000, #171717);
+}
+
+/* Blockquote styling */
+.milkdown-editor-wrapper blockquote {
+  font-family: var(--crepe-font-default);
+  border-left-color: var(--GRAY_400, #ebebeb);
+  color: var(--GRAY_900, #666666);
+}
+
+/* Code blocks */
+.milkdown-editor-wrapper code,
+.milkdown-editor-wrapper pre {
+  font-family: var(--crepe-font-code);
+}
+
+/* Links */
+.milkdown-editor-wrapper a {
+  color: var(--BLUE_700, #2546f5);
+}
+
+.milkdown-editor-wrapper a:hover {
+  color: var(--BLUE_800, #1e0ac8);
+}
+
+/* UI components (toolbar, slash menu, etc.) */
+.milkdown-editor-wrapper milkdown-toolbar,
+.milkdown-editor-wrapper milkdown-slash-menu,
+.milkdown-editor-wrapper milkdown-block-handle,
+.milkdown-editor-wrapper milkdown-link-preview,
+.milkdown-editor-wrapper milkdown-link-edit,
+.milkdown-editor-wrapper milkdown-image-block,
+.milkdown-editor-wrapper milkdown-list-item-block,
+.milkdown-editor-wrapper milkdown-code-block {
+  font-family: var(--crepe-font-default);
+}
+
+/* Table styling */
+.milkdown-editor-wrapper table {
+  border-color: var(--GRAY_400, #ebebeb);
+}
+
+.milkdown-editor-wrapper th {
+  background-color: var(--GRAY_100, #f2f2f2);
+}
+
+.milkdown-editor-wrapper td,
+.milkdown-editor-wrapper th {
+  border-color: var(--GRAY_400, #ebebeb);
+}

@@ -2,7 +2,7 @@
 
 import { FileIcon, Input, Tabs, TabsList, TabsTrigger } from '@zamp-platform/ui';
 import { cn } from '@zamp-platform/ui/utils';
-import { Eye, Pencil } from 'lucide-react';
+import { Code, FileText } from 'lucide-react';
 import TooltipV2 from '@/components/common/TooltipV2';
 import FileSaveStatus from '@/modules/pace/components/file-viewer/FileSaveStatus';
 import FileViewerHeaderMenu from '@/modules/pace/components/file-viewer/FileViewerHeaderMenu';
@@ -12,7 +12,7 @@ import { useFileViewerHeaderActions } from '@/modules/pace/hooks/useFileViewerHe
 import { useFileViewerHeaderRename } from '@/modules/pace/hooks/useFileViewerHeaderRename';
 import { SIDE_OPTIONS } from '@/types/commonTypes';
 
-export type MarkdownViewMode = 'edit' | 'preview';
+export type MarkdownViewMode = 'milkdown' | 'raw';
 
 interface FileViewerHeaderProps {
   filePath: string;
@@ -32,7 +32,7 @@ const FileViewerHeader = ({
   lastSavedAt,
   className = '',
   isMarkdown = false,
-  viewMode = 'edit',
+  viewMode = 'milkdown',
   onViewModeChange,
 }: FileViewerHeaderProps) => {
   const extension = getFileExtension(fileName);
@@ -116,11 +116,11 @@ const FileViewerHeader = ({
           {isMarkdown && (
             <Tabs value={viewMode} onValueChange={(value) => onViewModeChange?.(value as MarkdownViewMode)}>
               <TabsList className='gap-x-1'>
-                <TabsTrigger value='edit' className='flex h-6 w-[26px] shrink-0 items-center justify-center p-1.5'>
-                  <Pencil size={14} />
+                <TabsTrigger value='milkdown' className='flex h-6 w-[26px] shrink-0 items-center justify-center p-1.5'>
+                  <FileText size={14} />
                 </TabsTrigger>
-                <TabsTrigger value='preview' className='flex h-6 w-[26px] shrink-0 items-center justify-center p-1.5'>
-                  <Eye size={14} />
+                <TabsTrigger value='raw' className='flex h-6 w-[26px] shrink-0 items-center justify-center p-1.5'>
+                  <Code size={14} />
                 </TabsTrigger>
               </TabsList>
             </Tabs>
