@@ -9,7 +9,7 @@ const INTEGRATIONS_PRODUCTION: IntegrationType[] = [
     what_possible: [],
     guide: '',
     auth: '/integrations/auth/cloudflare.json',
-    events: [{ id: 'internal_email_forwarding', display_name: 'Email Forwarding' }],
+    events: [{ id: 'enable_email_routing_rule', display_name: 'Email Forwarding' }],
   },
   {
     id: 'oracle',
