@@ -137,31 +137,35 @@ export const OtpVerification: FC<Props> = ({ email, flow, onEditEmail, onFlowExp
    * Pure function — does NOT handle flow expiry. Caller decides recovery strategy.
    */
   async function resendOnCurrentFlow(signal: AbortSignal): Promise<'sent' | 'flow_expired' | 'failed'> {
-    const currentFlow = flowRef.current;
-    const resp = await fetch(currentFlow.ui.action, {
-      method: 'POST',
-      credentials: 'include',
-      signal,
-      headers: { 'Content-Type': 'application/json', Accept: 'application/json' },
-      body: JSON.stringify({
-        method: LOGIN_METHODS.CODE,
-        resend: 'code',
-        csrf_token: getCsrfToken(currentFlow.ui.nodes),
-        ...collectHiddenNodeValues(currentFlow.ui.nodes),
-      }),
-    });
+    try {
+      const currentFlow = flowRef.current;
+      const resp = await fetch(currentFlow.ui.action, {
+        method: 'POST',
+        credentials: 'include',
+        signal,
+        headers: { 'Content-Type': 'application/json', Accept: 'application/json' },
+        body: JSON.stringify({
+          method: LOGIN_METHODS.CODE,
+          resend: 'code',
+          csrf_token: getCsrfToken(currentFlow.ui.nodes),
+          ...collectHiddenNodeValues(currentFlow.ui.nodes),
+        }),
+      });
 
-    if (resp.status === API_STATUS_CODES.GONE) return 'flow_expired';
-    if (resp.status >= 500) return 'failed';
+      if (resp.status === API_STATUS_CODES.GONE) return 'flow_expired';
+      if (resp.status >= 500) return 'failed';
 
-    const data = await resp.json();
-    const codeSent =
-      data.state === 'sent_email' ||
-      data.ui?.messages?.some((m: FlowUiMessage) => m.type === 'info' && RESEND_SUCCESS_MESSAGE_IDS.includes(m.id));
+      const data = await resp.json();
+      const codeSent =
+        data.state === 'sent_email' ||
+        data.ui?.messages?.some((m: FlowUiMessage) => m.type === 'info' && RESEND_SUCCESS_MESSAGE_IDS.includes(m.id));
 
-    if (codeSent) updateFlowUi(data);
+      if (codeSent) updateFlowUi(data);
 
-    return codeSent ? 'sent' : 'failed';
+      return codeSent ? 'sent' : 'failed';
+    } catch {
+      return 'failed';
+    }
   }
 
   // ── Response Handlers (for submitCode) ──────────────────────────

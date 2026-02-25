@@ -1,6 +1,6 @@
 'use client';
 
-import { ChangeEvent, FormEvent, useEffect, useRef, useState } from 'react';
+import { ChangeEvent, type SubmitEvent, useEffect, useRef, useState } from 'react';
 import { BASE_API_URL, getApiDomainAndRegions, reinitializeApiDomain, REQUEST_TYPES } from '@zamp-platform/api';
 import {
   getFromLocalStorage,
@@ -20,6 +20,9 @@ import { API_STATUS_CODES } from '@/types/common/statusCodes';
 import { MapAny } from '@/types/commonTypes';
 
 type LoadingAction = 'idle' | 'email' | 'google' | 'sso';
+
+// Brief pause after SSO provider logo loads so the user sees which provider they're redirecting to
+const SSO_LOGO_DISPLAY_MS = 600;
 
 async function createLoginFlow(apiBaseUrl: string, email: string, method?: string): Promise<LoginFlow | null> {
   const apiUrl = `${apiBaseUrl}/${API_ENDPOINTS.AUTH_INITIAL_LOGIN_FLOW_BY_EMAIL_POST}`;
@@ -119,7 +122,7 @@ export const LoginForm = () => {
       }
       if (logoPromiseRef.current) {
         await logoPromiseRef.current;
-        await new Promise((r) => setTimeout(r, 1200));
+        await new Promise((r) => setTimeout(r, SSO_LOGO_DISPLAY_MS));
       }
       window.location.href = urlObj.toString();
     } catch {
@@ -218,7 +221,7 @@ export const LoginForm = () => {
     }
   };
 
-  const handleSubmit = async (e: FormEvent<HTMLFormElement>) => {
+  const handleSubmit = async (e: SubmitEvent<HTMLFormElement>) => {
     e?.preventDefault();
     setError(null);
     setLoadingAction('email');
@@ -262,7 +265,9 @@ export const LoginForm = () => {
         return;
       }
 
-      const oidcNode = (flow.ui?.nodes ?? []).find((n: FlowNode) => n.group === LOGIN_GROUPS.OIDC);
+      const oidcNode = (flow.ui?.nodes ?? []).find(
+        (n: FlowNode) => n.group === LOGIN_GROUPS.OIDC && n.attributes.value === LOGIN_PROVIDERS.GOOGLE,
+      );
 
       if (oidcNode) {
         const actionUrlObj = new URL(flow.ui.action);
