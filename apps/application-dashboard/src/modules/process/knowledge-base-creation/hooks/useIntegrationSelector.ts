@@ -47,7 +47,7 @@ export const useIntegrationSelector = ({ mappedIntegrations }: UseIntegrationSel
 
   const getAvailableConnectionsForIntegration = useCallback(
     (connections: ConnectionType[]) => {
-      const allMappedConnections = mappedIntegrations.flatMap((mi) => mi.connections || []);
+      const allMappedConnections = mappedIntegrations.flatMap((mi) => mi?.connections || []);
 
       return getAvailableConnections(connections, allMappedConnections);
     },

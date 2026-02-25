@@ -1,4 +1,4 @@
-import { fetchIntegrations } from '@/modules/integrations/utils/integrations.utils';
+import { getIntegrations } from '@/constants/integrations.constants';
 import KnowledgeBaseV2PageHome from '@/modules/process/knowledge-base-creation/KnowledgeBaseV2PageHome';
 
 interface KnowledgeBasePageProps {
@@ -7,7 +7,7 @@ interface KnowledgeBasePageProps {
 }
 
 const KnowledgeBasePage = async ({ params, searchParams }: KnowledgeBasePageProps) => {
-  const integrations = await fetchIntegrations();
+  const integrations = getIntegrations();
 
   const { processId } = await params;
   const resolvedSearchParams = await searchParams;

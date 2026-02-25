@@ -1,5 +1,5 @@
 import { BookTextIcon, HomeIcon, SettingsIcon, ShapesIcon } from '@zamp-platform/ui';
-import { FileText, LucideIcon, Table2 } from 'lucide-react';
+import { FileText, Link2, LucideIcon, Table2 } from 'lucide-react';
 import { DynamicTabType, PaceNavbarItemId, PaceNavbarItemSchema, PaceSettingsTabSchema } from 'modules/pace/pace.types';
 import Users02 from '@/assets/Icons/Users02';
 import { ROUTES_PATH } from '@/constants/routeConfig';
@@ -58,12 +58,12 @@ export const PACE_SETTINGS_TABS: PaceSettingsTabSchema[] = [
     iconComponent: <Users02 width={16} height={16} />,
     path: ROUTES_PATH.CHAT_SETTINGS_PEOPLE,
   },
-  // {
-  //   id: PaceNavbarItemId.INTEGRATIONS,
-  //   name: 'Integrations',
-  //   iconComponent: <Link2 width={16} height={16} className='-rotate-45' />,
-  //   path: ROUTES_PATH.CHAT_SETTINGS_INTEGRATIONS,
-  // },
+  {
+    id: PaceNavbarItemId.INTEGRATIONS,
+    name: 'Integrations',
+    iconComponent: <Link2 width={16} height={16} className='-rotate-45' />,
+    path: ROUTES_PATH.CHAT_SETTINGS_INTEGRATIONS,
+  },
 ];
 
 export const ACCEPTED_SKILLFILE_TYPES = ['.zip', '.skill'];

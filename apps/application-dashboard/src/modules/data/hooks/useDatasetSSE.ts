@@ -47,28 +47,13 @@ interface DatasetSSEPayload {
 }
 
 interface UseDatasetSSEProps {
-  /** If provided, enables detail mode: filters events by this ID and syncs localStorage + context */
   datasetId?: string;
-  /** If true, invalidates the dataset listing RTK Query cache on any dataset event */
   invalidateListing?: boolean;
-  /** Callback when columns are updated from SSE (detail mode only) */
   onColumnsUpdated?: (columns: NonNullable<DatasetSSEPayload['dataset']>['metadata']['schema']['columns']) => void;
-  /** Callback to update context column IDs to match backend (detail mode only) */
   updateColumnIdsFromBE?: (beColumns: Array<{ id: string; name?: string }>) => void;
 }
 
-/**
- * Unified hook to listen for dataset SSE events.
- *
- * - **Detail mode** (`datasetId` provided): Filters events for the specific dataset,
- *   updates localStorage with correct column IDs, syncs display config (aliases, visibility),
- *   and maps frontend temporary IDs to backend IDs.
- *
- * - **Listing mode** (`invalidateListing: true`): Invalidates the RTK Query cache for the
- *   dataset listing, triggering an auto-refresh on the listing page.
- *
- * Both modes can be enabled simultaneously.
- */
+/** Listens for dataset SSE events to sync localStorage, context, and RTK Query cache. */
 export function useDatasetSSE({
   datasetId,
   invalidateListing = false,
@@ -84,7 +69,6 @@ export function useDatasetSSE({
 
       const payload = data.payload as DatasetSSEPayload;
 
-      // --- Listing mode: invalidate cache on any dataset event ---
       if (
         invalidateListing &&
         (payload?.type === DATASET_RESOURCE_TRANSACTION_PAYLOAD_TYPE.DATASET_UPDATED ||
@@ -94,7 +78,6 @@ export function useDatasetSSE({
         dispatch(baseApi.util.invalidateTags([APITags.GET_DATASET_LISTING]));
       }
 
-      // Sync localStorage for any dataset create/update event with metadata
       if (
         payload?.type === DATASET_RESOURCE_TRANSACTION_PAYLOAD_TYPE.DATASET_UPDATED ||
         payload?.type === DATASET_RESOURCE_TRANSACTION_PAYLOAD_TYPE.DATASET_CREATED
@@ -106,13 +89,9 @@ export function useDatasetSSE({
           const displayConfig = dataset.metadata?.display_config || [];
           const schemaColumns = dataset.metadata?.schema?.columns || [];
 
-          // System columns to filter out
           const userSchemaColumns = schemaColumns.filter((col) => !SYSTEM_COLUMNS.includes(col?.name || ''));
-
-          // Build a map of display_config by column name (lowercase for case-insensitive matching)
           const displayConfigMap = new Map(displayConfig.map((dc) => [dc.column.toLowerCase(), dc]));
 
-          // Sync localStorage — only if this dataset already has an entry
           try {
             const existingConfig = getColumnConfigForDataset(eventDatasetId) as Record<string, unknown> | null;
 
@@ -124,7 +103,6 @@ export function useDatasetSSE({
                   }
                 )?.columns || [];
 
-              // Create maps of column name/id -> existing settings (width, visibility, order)
               const existingSettingsByName = new Map<string, { width: number; isVisible: boolean; order: number }>();
               const existingSettingsById = new Map<string, { width: number; isVisible: boolean; order: number }>();
 
@@ -143,23 +121,19 @@ export function useDatasetSSE({
                 },
               );
 
-              // Build new columns array with correct BE column IDs
               const newColumns = userSchemaColumns.map((schemaCol) => {
                 const beColumnId = schemaCol.name;
                 const displayConfigEntry = displayConfigMap.get(beColumnId.toLowerCase());
 
-                // Generate display name: use alias if available, otherwise capitalize and replace underscores
                 const displayName =
                   displayConfigEntry?.alias ||
                   beColumnId.charAt(0).toUpperCase() + beColumnId.slice(1).replace(/_/g, ' ');
 
-                // Try to get existing settings by matching column name (normalized)
                 const normalizedBeId = beColumnId.toLowerCase().trim();
                 const existingByName = existingSettingsByName.get(normalizedBeId);
                 const existingById = existingSettingsById.get(beColumnId);
                 const existingSettings = existingByName || existingById;
 
-                // Determine visibility: use existing settings, then displayConfig, default to true
                 const isHiddenFromConfig = displayConfigEntry?.is_hidden ?? false;
 
                 return {
@@ -173,16 +147,21 @@ export function useDatasetSSE({
                 };
               });
 
-              // Sort by original order if available, to preserve user's column ordering
+              // Sort by original order: lookup by name first, then by column ID (handles renamed columns)
               newColumns.sort((a, b) => {
-                const orderA = existingSettingsByName.get(a.colId.toLowerCase())?.order ?? 999;
-                const orderB = existingSettingsByName.get(b.colId.toLowerCase())?.order ?? 999;
+                const orderA =
+                  existingSettingsByName.get(a.colId.toLowerCase())?.order ??
+                  existingSettingsById.get(a.colId)?.order ??
+                  999;
+                const orderB =
+                  existingSettingsByName.get(b.colId.toLowerCase())?.order ??
+                  existingSettingsById.get(b.colId)?.order ??
+                  999;
 
                 return orderA - orderB;
               });
 
-              // Append any FE-only columns that aren't in backend yet (unsaved additions)
-              // Filter out temp columns whose name matches a BE column (already saved)
+              // Append FE-only columns not yet in backend
               const FE_TEMP_ID_PATTERN = /^col_\d+_/;
               const beColumnIds = new Set(newColumns.map((c: { colId: string }) => c.colId.toLowerCase()));
               const beColumnNamesNormalized = new Set(
@@ -192,7 +171,6 @@ export function useDatasetSSE({
                 .filter((col: { colId: string; columnName: string }) => {
                   if (!FE_TEMP_ID_PATTERN.test(col.colId)) return false;
                   if (beColumnIds.has(col.colId.toLowerCase())) return false;
-                  // If this temp column's name matches a BE column, it was already saved
                   const normalizedName = col.columnName?.toLowerCase().trim().replace(/\s+/g, '_');
 
                   if (normalizedName && beColumnNamesNormalized.has(normalizedName)) return false;
@@ -223,7 +201,6 @@ export function useDatasetSSE({
                 newColumns.push(...feOnlyColumns);
               }
 
-              // Update localStorage with BE column IDs
               setColumnConfigForDataset(eventDatasetId, {
                 dataset_name: dataset.title,
                 dataset_unique_key_name: dataset.table_name || '',
@@ -237,7 +214,6 @@ export function useDatasetSSE({
             });
           }
 
-          // --- Detail mode only: update React context (column IDs, callbacks) ---
           if (datasetId && eventDatasetId === datasetId) {
             if (updateColumnIdsFromBE) {
               const beColumns = userSchemaColumns.map((schemaCol) => {

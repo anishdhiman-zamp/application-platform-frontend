@@ -7,6 +7,8 @@ export const enum ACTION_TYPE {
 
 export const enum AUTH_TYPE {
   FORM = 'form',
+  CUSTOM = 'custom',
+  CONNECTED_URL = 'connected_url',
 }
 
 export interface IntegrationAuthButtonAction {
@@ -22,7 +24,7 @@ export interface IntegrationAuthButton {
 export interface IntegrationAuth {
   auth_type: AUTH_TYPE;
   fields: Record<string, FormField>;
-  button: IntegrationAuthButton;
+  button?: IntegrationAuthButton;
 }
 
 export interface IntegrationEvent {

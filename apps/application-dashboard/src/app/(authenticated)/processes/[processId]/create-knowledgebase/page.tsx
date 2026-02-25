@@ -1,4 +1,4 @@
-import { fetchIntegrations } from '@/modules/integrations/utils/integrations.utils';
+import { getIntegrations } from '@/constants/integrations.constants';
 import CreateKnowledgebasePageHome from '@/modules/process/knowledge-base-creation/CreateKnowledgebasePageHome';
 
 interface CreateKnowledgebasePageProps {
@@ -7,7 +7,7 @@ interface CreateKnowledgebasePageProps {
 }
 
 const CreateKnowledgebasePage = async ({ params, searchParams }: CreateKnowledgebasePageProps) => {
-  const integrations = await fetchIntegrations();
+  const integrations = getIntegrations();
   const { processId } = await params;
   const resolvedSearchParams = await searchParams;
   const conversationId = resolvedSearchParams?.conversationId;

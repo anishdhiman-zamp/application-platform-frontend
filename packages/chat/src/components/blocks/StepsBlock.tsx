@@ -7,10 +7,16 @@ import {
   AccordionTrigger,
   AnimatedDot,
   AnimatedTerminalIcon,
+  ImageWithFallback,
   ShimmerText,
 } from '@zamp-platform/ui';
+import { cn } from '@zamp-platform/ui/utils';
+import { safeJsonParse } from '@zamp-platform/utils';
 import { AlertCircle } from 'lucide-react';
 import React, { FC, useState } from 'react';
+
+import IntegrationCardV2 from '@/modules/integrations/AllIntegrations/IntegrationCardV2';
+import type { IntegrationItem } from '@/types/api/integrations';
 
 import {
   BLOCK_TYPE,
@@ -18,7 +24,8 @@ import {
   type ToolResultContentBlock,
   type ToolUseContentBlock,
 } from '../../types/block.types';
-import { formatThinkingDuration } from '../block.utils';
+import { buildIntegrationItemFromToolResult, formatThinkingDuration } from '../block.utils';
+import { TOOL_NAMES } from '../chat.constants';
 import { CodePreviewBlock } from './CodePreviewBlock';
 import { StatusLabel } from './StatusLabel';
 
@@ -40,6 +47,14 @@ export const StepsBlock: FC<StepsBlockProps> = ({ blocks, toolResultsMap }) => {
     }
 
     if (block.type === BLOCK_TYPE.TOOL_USE) {
+      const displayContent = safeJsonParse<{ tool_name?: string; icon?: string }>(
+        block?.payload?.display_content?.json_block,
+      );
+      const name = block?.payload?.name || displayContent?.tool_name;
+      const icon = block?.payload?.icon || displayContent?.icon;
+      if (icon?.length) {
+        return <ImageWithFallback src={icon} alt={name} className='h-3.5 w-3.5' />;
+      }
       return <AnimatedTerminalIcon showAnimation={!isComplete} size={12} />;
     }
 
@@ -75,6 +90,36 @@ export const StepsBlock: FC<StepsBlockProps> = ({ blocks, toolResultsMap }) => {
               <AlertCircle className='h-3.5 w-3.5 text-red-500' />
             </div>
           )}
+        </div>
+      );
+    }
+
+    return null;
+  };
+
+  const getIntegrationCardForToolBlock = (block: ToolUseContentBlock, isLast: boolean): React.ReactNode | null => {
+    const toolCallId = block.payload?.tool_call_id || block.id;
+    const toolResult = toolCallId ? toolResultsMap.get(toolCallId) : undefined;
+    const payload = block.payload;
+    const displayContent = safeJsonParse<{ tool_name?: string }>(payload?.display_content?.json_block);
+    const name = payload?.name || displayContent?.tool_name;
+
+    const toolResultData = safeJsonParse<{
+      title?: string;
+      integration_name?: string;
+      metadata?: { redirect_url?: string };
+      [key: string]: unknown;
+    }>(toolResult?.payload?.content);
+
+    if (name === TOOL_NAMES.AUTHENTICATE_INTEGRATION_AND_CREATE_CONNECTION && toolResultData?.title) {
+      const integrationItem = buildIntegrationItemFromToolResult(toolResultData) as IntegrationItem;
+      return (
+        <div className={cn('border-GRAY_100 border-b', isLast && 'border-b-0')}>
+          <IntegrationCardV2
+            className='min-h-[0px] border-none'
+            integrationItem={integrationItem}
+            redirectUrl={toolResultData?.metadata?.redirect_url}
+          />
         </div>
       );
     }
@@ -127,6 +172,13 @@ export const StepsBlock: FC<StepsBlockProps> = ({ blocks, toolResultsMap }) => {
           const isLast = index === blocks.length - 1;
           const isFirst = index === 0;
           const stepIcon = getStepIcon(block);
+
+          if (block.type === BLOCK_TYPE.TOOL_USE) {
+            const integrationCard = getIntegrationCardForToolBlock(block as ToolUseContentBlock, isLast);
+            if (integrationCard) {
+              return <React.Fragment key={`step-${index}`}>{integrationCard}</React.Fragment>;
+            }
+          }
 
           return (
             <AccordionItem key={`step-${index}`} value={`step-${index}`} className='relative border-none'>
