@@ -138,13 +138,15 @@ const IntegrationItem = ({ mappedIntegration }: { mappedIntegration: MappedInteg
         connections={connectionsToAdd}
         isLoading={isCreatingProcessConnectionMapping}
       />
-      <ConnectionModal
-        integration={mappedIntegration?.integration}
-        isOpen={dialogIntent?.type === 'create'}
-        onClose={handleCloseDeleteDialog}
-        onSubmit={handleCreateConnectionMapping}
-        isCreatingTrigger={isCreatingProcessConnectionMapping}
-      />
+      {mappedIntegration?.integration && Object.keys(mappedIntegration?.integration).length > 0 && (
+        <ConnectionModal
+          integration={mappedIntegration?.integration}
+          isOpen={dialogIntent?.type === 'create'}
+          onClose={handleCloseDeleteDialog}
+          onSubmit={handleCreateConnectionMapping}
+          isCreatingTrigger={isCreatingProcessConnectionMapping}
+        />
+      )}
     </>
   );
 };

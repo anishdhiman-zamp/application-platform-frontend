@@ -127,7 +127,7 @@ const IntegrationSelector = ({ integrations }: { integrations: IntegrationType[]
           isLoading={isCreatingProcessConnectionMapping}
         />
       )}
-      {selectedIntegration && (
+      {selectedIntegration && Object.keys(selectedIntegration).length > 0 && (
         <ConnectionModal
           integration={selectedIntegration}
           isOpen={dialogIntent?.type === 'create'}
