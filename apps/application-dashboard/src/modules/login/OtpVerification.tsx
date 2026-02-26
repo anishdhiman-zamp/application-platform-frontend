@@ -3,9 +3,16 @@
 import { FC, useCallback, useEffect, useRef, useState } from 'react';
 import { Button } from '@zamp-platform/ui';
 import { cn } from '@zamp-platform/ui/utils';
-import { LOCAL_STORAGE_KEYS, setToLocalStorage } from '@zamp-platform/utils';
 import { Pencil } from 'lucide-react';
-import { OTP_MESSAGES, OTP_STATUS } from 'modules/login/login.constants';
+import {
+  EXPIRY_TYPE,
+  OTP_LENGTH,
+  OTP_MESSAGES,
+  OTP_STATUS,
+  RESEND_COOLDOWN_SECONDS,
+  RESEND_RESULT,
+  SESSION_ALREADY_AVAILABLE_ERROR,
+} from 'modules/login/login.constants';
 import {
   buildOtpSubmitBody,
   buildResendBody,
@@ -17,9 +24,6 @@ import { OtpInput, OtpInputHandle } from 'modules/login/OtpInput';
 import { FlowExpiredResponse, FlowUiMessage, LoginFlow } from 'types/api/auth.types';
 import { API_STATUS_CODES } from '@/types/common/statusCodes';
 
-const OTP_LENGTH = 6;
-const RESEND_COOLDOWN_SECONDS = 30;
-
 type OtpMessage = { type: 'error' | 'info'; text: string } | null;
 
 type Props = {
@@ -30,14 +34,14 @@ type Props = {
 };
 
 export const OtpVerification: FC<Props> = ({ email, flow, onEditEmail, onFlowExpired }) => {
+  const flowRef = useRef(flow);
+  const otpInputRef = useRef<OtpInputHandle>(null);
+  const abortRef = useRef<AbortController | null>(null);
+
   const [digits, setDigits] = useState<string[]>(Array(OTP_LENGTH).fill(''));
   const [message, setMessage] = useState<OtpMessage>(null);
   const [status, setStatus] = useState<OTP_STATUS>(OTP_STATUS.IDLE);
   const [resendCooldown, setResendCooldown] = useState(0);
-
-  const otpInputRef = useRef<OtpInputHandle>(null);
-  const flowRef = useRef(flow);
-  const abortRef = useRef<AbortController | null>(null);
 
   const isBusy = status !== OTP_STATUS.IDLE;
   const allFilled = digits.every((d) => d.length === 1);
@@ -74,7 +78,7 @@ export const OtpVerification: FC<Props> = ({ email, flow, onEditEmail, onFlowExp
     }
   }
 
-  async function resendOnCurrentFlow(signal: AbortSignal): Promise<'sent' | 'flow_expired' | 'failed'> {
+  async function resendOnCurrentFlow(signal: AbortSignal): Promise<RESEND_RESULT> {
     try {
       const currentFlow = flowRef.current;
       const resp = await fetch(currentFlow.ui.action, {
@@ -85,16 +89,16 @@ export const OtpVerification: FC<Props> = ({ email, flow, onEditEmail, onFlowExp
         body: JSON.stringify(buildResendBody(currentFlow.ui.nodes)),
       });
 
-      if (resp.status === API_STATUS_CODES.GONE) return 'flow_expired';
-      if (resp.status >= 500) return 'failed';
+      if (resp.status === API_STATUS_CODES.GONE) return RESEND_RESULT.FLOW_EXPIRED;
+      if (resp.status >= 500) return RESEND_RESULT.FAILED;
 
       const data = await resp.json();
 
       if (isResendSuccessResponse(data)) updateFlowUi(data);
 
-      return isResendSuccessResponse(data) ? 'sent' : 'failed';
+      return isResendSuccessResponse(data) ? RESEND_RESULT.SENT : RESEND_RESULT.FAILED;
     } catch {
-      return 'failed';
+      return RESEND_RESULT.FAILED;
     }
   }
 
@@ -102,7 +106,6 @@ export const OtpVerification: FC<Props> = ({ email, flow, onEditEmail, onFlowExp
 
   function handleSubmitSuccess(data: { continue_with?: { redirect_browser_to?: string }[] }): void {
     setStatus(OTP_STATUS.SUCCESS);
-    setToLocalStorage(LOCAL_STORAGE_KEYS.LAST_LOGIN_INFO, JSON.stringify({ email, method: 'code' }));
     const redirectUrl = data.continue_with?.[0]?.redirect_browser_to;
 
     window.location.href = redirectUrl || window.location.href;
@@ -122,16 +125,17 @@ export const OtpVerification: FC<Props> = ({ email, flow, onEditEmail, onFlowExp
     const expiryType = determineExpiryType(data.expired_at, flowRef.current.expires_at);
 
     switch (expiryType) {
-      case 'code_expired': {
+      case EXPIRY_TYPE.CODE_EXPIRED: {
         const result = await resendOnCurrentFlow(signal);
 
         setMessage({
-          type: result === 'sent' ? 'info' : 'error',
-          text: result === 'sent' ? OTP_MESSAGES.CODE_EXPIRED_RESENT : OTP_MESSAGES.CODE_EXPIRED_RESEND_PROMPT,
+          type: result === RESEND_RESULT.SENT ? 'info' : 'error',
+          text:
+            result === RESEND_RESULT.SENT ? OTP_MESSAGES.CODE_EXPIRED_RESENT : OTP_MESSAGES.CODE_EXPIRED_RESEND_PROMPT,
         });
         break;
       }
-      case 'flow_expired': {
+      case EXPIRY_TYPE.FLOW_EXPIRED: {
         const newFlow = await onFlowExpired();
 
         setMessage({
@@ -143,9 +147,9 @@ export const OtpVerification: FC<Props> = ({ email, flow, onEditEmail, onFlowExp
       default: {
         const result = await resendOnCurrentFlow(signal);
 
-        if (result === 'sent') {
+        if (result === RESEND_RESULT.SENT) {
           setMessage({ type: 'info', text: OTP_MESSAGES.CODE_EXPIRED_RESENT });
-        } else if (result === 'flow_expired') {
+        } else if (result === RESEND_RESULT.FLOW_EXPIRED) {
           const newFlow = await onFlowExpired();
 
           setMessage({
@@ -163,7 +167,7 @@ export const OtpVerification: FC<Props> = ({ email, flow, onEditEmail, onFlowExp
   }
 
   function handleSubmitBadRequest(data: { error?: { id: string }; ui?: LoginFlow['ui'] }): void {
-    if (data.error?.id === 'session_already_available') {
+    if (data.error?.id === SESSION_ALREADY_AVAILABLE_ERROR) {
       window.location.reload();
 
       return;
@@ -243,10 +247,10 @@ export const OtpVerification: FC<Props> = ({ email, flow, onEditEmail, onFlowExp
       const result = await resendOnCurrentFlow(controller.signal);
 
       switch (result) {
-        case 'sent':
+        case RESEND_RESULT.SENT:
           setMessage({ type: 'info', text: OTP_MESSAGES.NEW_CODE_SENT });
           break;
-        case 'flow_expired': {
+        case RESEND_RESULT.FLOW_EXPIRED: {
           const newFlow = await onFlowExpired();
 
           if (newFlow) {
@@ -257,7 +261,7 @@ export const OtpVerification: FC<Props> = ({ email, flow, onEditEmail, onFlowExp
           }
           break;
         }
-        case 'failed':
+        case RESEND_RESULT.FAILED:
           setMessage({ type: 'error', text: OTP_MESSAGES.RESEND_FAILED });
           setResendCooldown(0);
           break;
@@ -312,18 +316,19 @@ export const OtpVerification: FC<Props> = ({ email, flow, onEditEmail, onFlowExp
           <span className='mb-2 block'>Enter the code we sent to</span>
           <span className='inline-flex items-center gap-1.5'>
             <span className='text-GRAY_950 font-medium'>{email}</span>
-            <button
+            <Button
               type='button'
+              variant='ghost'
               onClick={onEditEmail}
               disabled={isBusy}
               className={cn(
-                'inline-flex items-center border-none bg-transparent p-0.5 transition-colors duration-200',
+                'inline-flex h-auto items-center border-none bg-transparent p-0.5 transition-colors duration-200 hover:bg-transparent disabled:bg-transparent',
                 isBusy ? 'text-GRAY_500 cursor-not-allowed' : 'text-GRAY_700 hover:text-GRAY_1000 cursor-pointer',
               )}
               title='Edit email'
             >
               <Pencil size={14} />
-            </button>
+            </Button>
           </span>
         </p>
       </div>
@@ -341,7 +346,7 @@ export const OtpVerification: FC<Props> = ({ email, flow, onEditEmail, onFlowExp
       />
 
       {message && (
-        <p className={cn('-mt-4 mb-4 text-center text-xs', isError ? 'text-red-600' : 'text-GRAY_900')}>
+        <p className={cn('-mt-4 mb-4 text-center text-xs', isError ? 'text-RED_700' : 'text-GRAY_900')}>
           {message.text}
         </p>
       )}
@@ -362,12 +367,13 @@ export const OtpVerification: FC<Props> = ({ email, flow, onEditEmail, onFlowExp
 
       <p className='text-GRAY_700 mt-6 text-center text-[13px]'>
         Didn&apos;t receive a code?{' '}
-        <button
+        <Button
           type='button'
+          variant='ghost'
           onClick={handleResend}
           disabled={resendCooldown > 0 || isBusy}
           className={cn(
-            'border-none bg-transparent font-medium transition-colors duration-150',
+            'h-auto border-none bg-transparent p-0 font-medium transition-colors duration-150 hover:bg-transparent disabled:bg-transparent',
             resendCooldown > 0 || isBusy
               ? 'text-GRAY_500 cursor-not-allowed no-underline'
               : 'text-GRAY_950 hover:text-GRAY_1000 cursor-pointer underline underline-offset-2',
@@ -379,7 +385,7 @@ export const OtpVerification: FC<Props> = ({ email, flow, onEditEmail, onFlowExp
             : resendCooldown > 0
               ? `Resend in ${resendCooldown}s`
               : 'Resend code'}
-        </button>
+        </Button>
       </p>
     </div>
   );

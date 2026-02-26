@@ -86,11 +86,41 @@ export const CARD_PAD_X = 60;
 export const CARD_PAD_Y = 40;
 export const CARD_FADE_ZONE = 120;
 
+export const OTP_LENGTH = 6;
+export const RESEND_COOLDOWN_SECONDS = 30;
+export const SESSION_ALREADY_AVAILABLE_ERROR = 'session_already_available';
+
 export const enum OTP_STATUS {
   IDLE = 'idle',
   SUBMITTING = 'submitting',
   RESENDING = 'resending',
   SUCCESS = 'success',
+}
+
+export const enum RESEND_RESULT {
+  SENT = 'sent',
+  FLOW_EXPIRED = 'flow_expired',
+  FAILED = 'failed',
+}
+
+export const enum EXPIRY_TYPE {
+  CODE_EXPIRED = 'code_expired',
+  FLOW_EXPIRED = 'flow_expired',
+  UNKNOWN = 'unknown',
+}
+
+export const enum LOADING_ACTION {
+  IDLE = 'idle',
+  EMAIL = 'email',
+  GOOGLE = 'google',
+  SSO = 'sso',
+}
+
+export const enum ACTIVE_VIEW {
+  OTP = 'otp',
+  PASSWORD = 'password',
+  METHOD_PICKER = 'methodPicker',
+  EMAIL_ENTRY = 'emailEntry',
 }
 
 export const enum LOGIN_FORM_MESSAGES {

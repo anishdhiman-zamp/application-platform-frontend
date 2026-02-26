@@ -4,18 +4,20 @@ import { ChangeEvent, type SubmitEvent, useEffect, useRef, useState } from 'reac
 import { BASE_API_URL, getApiDomainAndRegions, reinitializeApiDomain, REQUEST_TYPES } from '@zamp-platform/api';
 import { Button } from '@zamp-platform/ui';
 import { cn } from '@zamp-platform/ui/utils';
-import {
-  getFromLocalStorage,
-  LOCAL_STORAGE_KEYS,
-  removeFromLocalStorage,
-  setToLocalStorage,
-} from '@zamp-platform/utils';
+import { getFromLocalStorage, LOCAL_STORAGE_KEYS, removeFromLocalStorage } from '@zamp-platform/utils';
 import { LOGIN_METHODS, LOGIN_PROVIDERS } from 'constants/auth.constants';
+import { MoveLeft } from 'lucide-react';
 import { AnimatedDitherArrow } from 'modules/login/AnimatedDitherArrow';
 import { LOGIN_ERROR_TEXT } from 'modules/login/constants';
 import { GoogleIcon } from 'modules/login/GoogleIcon';
 import LocaldevEmailPasswordLogin from 'modules/login/LocaldevEmailPasswordLogin';
-import { LOGIN_FORM_MESSAGES, LOGIN_GROUPS, VALID_SESSION_DETECTED_ERROR_MSG } from 'modules/login/login.constants';
+import {
+  ACTIVE_VIEW,
+  LOADING_ACTION,
+  LOGIN_FORM_MESSAGES,
+  LOGIN_GROUPS,
+  VALID_SESSION_DETECTED_ERROR_MSG,
+} from 'modules/login/login.constants';
 import { OtpVerification } from 'modules/login/OtpVerification';
 import Link from 'next/link';
 import { FlowNode, LoginFlow } from 'types/api/auth.types';
@@ -24,8 +26,6 @@ import { API_ENDPOINTS } from '@/apis/apiEndpoint.constants';
 import { API_STATUS_CODES } from '@/types/common/statusCodes';
 import { MapAny } from '@/types/commonTypes';
 import Input from 'components/common/input';
-
-type LoadingAction = 'idle' | 'email' | 'google' | 'sso';
 
 const SSO_LOGO_DISPLAY_MS = 600;
 
@@ -55,20 +55,57 @@ function flowHasPasswordNodes(flow: LoginFlow): boolean {
   return flow.ui?.nodes?.some((n: FlowNode) => n.group === LOGIN_GROUPS.PASSWORD) ?? false;
 }
 
-type ActiveView = 'otp' | 'password' | 'methodPicker' | 'emailEntry';
+function safeJsonParse(str: string): MapAny | null {
+  try {
+    return JSON.parse(str);
+  } catch {
+    return null;
+  }
+}
 
 export const LoginForm = () => {
+  const logoPromiseRef = useRef<Promise<void> | null>(null);
+
   const [email, setEmail] = useState('');
   const [passwordFlow, setPasswordFlow] = useState<LoginFlow | null>(null);
   const [otpFlow, setOtpFlow] = useState<LoginFlow | null>(null);
   const [methodPickerFlow, setMethodPickerFlow] = useState<LoginFlow | null>(null);
   const [error, setError] = useState<string | null>(null);
-  const [loadingAction, setLoadingAction] = useState<LoadingAction>('idle');
+  const [loadingAction, setLoadingAction] = useState<LOADING_ACTION>(LOADING_ACTION.IDLE);
   const [providerLogo, setProviderLogo] = useState('');
   const [logoLoaded, setLogoLoaded] = useState(false);
-  const logoPromiseRef = useRef<Promise<void> | null>(null);
 
-  const isLoading = loadingAction !== 'idle';
+  const isLoading = loadingAction !== LOADING_ACTION.IDLE;
+
+  useEffect(() => {
+    const raw = getFromLocalStorage(LOCAL_STORAGE_KEYS.LAST_LOGIN_INFO);
+
+    if (raw) {
+      const info = safeJsonParse(raw);
+
+      if (info?.email) {
+        setEmail(info.email);
+
+        return;
+      }
+    }
+
+    const legacy = getFromLocalStorage(LOCAL_STORAGE_KEYS.LAST_LOGGED_IN_OIDC_EMAIL);
+
+    if (legacy) setEmail(legacy);
+  }, []);
+
+  useEffect(() => {
+    const onPageShow = (e: PageTransitionEvent) => {
+      if (e.persisted) setLoadingAction(LOADING_ACTION.IDLE);
+    };
+
+    window.addEventListener('pageshow', onPageShow);
+
+    return () => window.removeEventListener('pageshow', onPageShow);
+  }, []);
+
+  // ── Helpers ─────────────────────────────────────────────────────
 
   const preloadLogo = (url: string) => {
     setProviderLogo(url);
@@ -79,62 +116,27 @@ export const LoginForm = () => {
       img.src = url;
       img.onload = () => {
         setLogoLoaded(true);
-        setLoadingAction('sso');
+        setLoadingAction(LOADING_ACTION.SSO);
         resolve();
       };
       img.onerror = () => {
-        setLoadingAction('sso');
+        setLoadingAction(LOADING_ACTION.SSO);
         resolve();
       };
     });
   };
 
-  useEffect(() => {
-    try {
-      const raw = getFromLocalStorage(LOCAL_STORAGE_KEYS.LAST_LOGIN_INFO);
+  const resetLoadingState = () => setLoadingAction(LOADING_ACTION.IDLE);
 
-      if (raw) {
-        const info = JSON.parse(raw);
-
-        if (info?.email) setEmail(info.email);
-
-        return;
-      }
-    } catch {
-      // fall through to legacy key
-    }
-    const legacy = getFromLocalStorage(LOCAL_STORAGE_KEYS.LAST_LOGGED_IN_OIDC_EMAIL);
-
-    if (legacy) setEmail(legacy);
-  }, []);
-
-  useEffect(() => {
-    const onPageShow = (e: PageTransitionEvent) => {
-      if (e.persisted) setLoadingAction('idle');
-    };
-
-    window.addEventListener('pageshow', onPageShow);
-
-    return () => window.removeEventListener('pageshow', onPageShow);
-  }, []);
-
-  // ── Helpers ─────────────────────────────────────────────────────
-
-  const resetLoadingState = () => setLoadingAction('idle');
-
-  const handleRedirect = async (respJson: MapAny, provider: LOGIN_PROVIDERS) => {
-    if (email) {
-      setToLocalStorage(LOCAL_STORAGE_KEYS.LAST_LOGIN_INFO, JSON.stringify({ email, method: 'oidc', provider }));
-    }
-
+  const handleRedirect = async (respJson: MapAny, provider: LOGIN_PROVIDERS, emailHint?: string) => {
     try {
       const redirectUrl = respJson.redirect_browser_to;
       const urlObj = new URL(redirectUrl);
 
-      if (email) {
-        urlObj.searchParams.set('login_hint', email);
+      if (emailHint) {
+        urlObj.searchParams.set('login_hint', emailHint);
         if (provider === LOGIN_PROVIDERS.GOOGLE) {
-          urlObj.searchParams.set('hd', getDomainFromEmail(email));
+          urlObj.searchParams.set('hd', getDomainFromEmail(emailHint));
         }
       }
       if (logoPromiseRef.current) {
@@ -165,7 +167,7 @@ export const LoginForm = () => {
 
   // ── OIDC / SSO ─────────────────────────────────────────────────
 
-  const initiateOidcLogin = async (url: string, method: string, providerId: LOGIN_PROVIDERS) => {
+  const initiateOidcLogin = async (url: string, method: string, providerId: LOGIN_PROVIDERS, emailHint?: string) => {
     try {
       const resp = await fetch(url, {
         method,
@@ -184,7 +186,7 @@ export const LoginForm = () => {
         resp.status === API_STATUS_CODES.UNPROCESSABLE_ENTITY ||
         validSessionMsg
       ) {
-        handleRedirect(respJson, providerId);
+        handleRedirect(respJson, providerId, emailHint);
       } else {
         const errorText = respJson?.ui?.messages?.[0]?.text ?? respJson?.error?.message ?? LOGIN_ERROR_TEXT;
 
@@ -226,7 +228,7 @@ export const LoginForm = () => {
         const logoUrl = nodes[0].attributes.logo_url ?? '';
 
         if (logoUrl) preloadLogo(logoUrl);
-        await initiateOidcLogin(flow.ui.action, flow.ui.method, nodes[0].attributes.value as LOGIN_PROVIDERS);
+        await initiateOidcLogin(flow.ui.action, flow.ui.method, nodes[0].attributes.value as LOGIN_PROVIDERS, email);
       } else {
         setPasswordFlow(flow);
         resetLoadingState();
@@ -241,7 +243,7 @@ export const LoginForm = () => {
   const handleSubmit = async (e: SubmitEvent<HTMLFormElement>) => {
     e?.preventDefault();
     setError(null);
-    setLoadingAction('email');
+    setLoadingAction(LOADING_ACTION.EMAIL);
 
     if (!isValidEmail(email)) {
       setError(LOGIN_FORM_MESSAGES.INVALID_EMAIL);
@@ -263,7 +265,7 @@ export const LoginForm = () => {
   // ── Google Login ────────────────────────────────────────────────
 
   const handleGoogleLogin = async () => {
-    setLoadingAction('google');
+    setLoadingAction(LOADING_ACTION.GOOGLE);
     setError(null);
 
     try {
@@ -292,7 +294,12 @@ export const LoginForm = () => {
 
         actionUrlObj.protocol = baseUrlObj.protocol;
         actionUrlObj.host = baseUrlObj.host;
-        await initiateOidcLogin(actionUrlObj.toString(), flow.ui.method, oidcNode.attributes.value as LOGIN_PROVIDERS);
+        await initiateOidcLogin(
+          actionUrlObj.toString(),
+          flow.ui.method,
+          oidcNode.attributes.value as LOGIN_PROVIDERS,
+          '',
+        );
       } else {
         setError(LOGIN_FORM_MESSAGES.GOOGLE_UNAVAILABLE);
         resetLoadingState();
@@ -333,7 +340,7 @@ export const LoginForm = () => {
   // ── Method Picker Helpers ───────────────────────────────────────
 
   const initiateOtpFromPicker = async () => {
-    setLoadingAction('email');
+    setLoadingAction(LOADING_ACTION.EMAIL);
     try {
       const apiBaseUrl = await resolveApiBaseUrl();
       const flow = await createLoginFlow(apiBaseUrl, email, LOGIN_METHODS.CODE);
@@ -351,18 +358,37 @@ export const LoginForm = () => {
     }
   };
 
+  const getSubmitButtonContent = () => {
+    if (loadingAction === LOADING_ACTION.SSO && providerLogo && logoLoaded) {
+      return (
+        <>
+          Signing in with
+          {/* eslint-disable-next-line @next/next/no-img-element */}
+          <img src={providerLogo} alt='provider' className='h-5 max-w-[40px] object-contain' />
+        </>
+      );
+    }
+
+    const labelMap: Partial<Record<LOADING_ACTION, string>> = {
+      [LOADING_ACTION.SSO]: 'Signing in...',
+      [LOADING_ACTION.EMAIL]: 'Continuing...',
+    };
+
+    return labelMap[loadingAction] ?? 'Continue';
+  };
+
   // ── View Routing ────────────────────────────────────────────────
 
-  const activeView: ActiveView = otpFlow
-    ? 'otp'
+  const activeView: ACTIVE_VIEW = otpFlow
+    ? ACTIVE_VIEW.OTP
     : passwordFlow
-      ? 'password'
+      ? ACTIVE_VIEW.PASSWORD
       : methodPickerFlow
-        ? 'methodPicker'
-        : 'emailEntry';
+        ? ACTIVE_VIEW.METHOD_PICKER
+        : ACTIVE_VIEW.EMAIL_ENTRY;
 
   switch (activeView) {
-    case 'otp':
+    case ACTIVE_VIEW.OTP:
       return (
         <OtpVerification
           email={email}
@@ -372,10 +398,10 @@ export const LoginForm = () => {
         />
       );
 
-    case 'password':
+    case ACTIVE_VIEW.PASSWORD:
       return <LocaldevEmailPasswordLogin loginFlow={passwordFlow!} setLoginFlow={setPasswordFlow} />;
 
-    case 'methodPicker': {
+    case ACTIVE_VIEW.METHOD_PICKER: {
       const btnBase =
         'h-auto w-full overflow-hidden rounded-2xl border px-5 py-3.5 text-sm font-medium transition-all duration-250 cursor-pointer active:scale-[0.98]';
 
@@ -396,7 +422,7 @@ export const LoginForm = () => {
               )}
               onClick={() => initiateOtpFromPicker()}
             >
-              {loadingAction === 'email' ? 'Sending code...' : 'Sign in with OTP'}
+              {loadingAction === LOADING_ACTION.EMAIL ? 'Sending code...' : 'Sign in with OTP'}
             </Button>
             <Button
               type='button'
@@ -412,19 +438,20 @@ export const LoginForm = () => {
           <Button
             type='button'
             variant='ghost'
-            className='text-GRAY_700 hover:text-GRAY_900 mt-4 h-auto bg-transparent text-[13px] transition-colors hover:bg-transparent'
+            className='text-GRAY_700 hover:text-GRAY_900 mt-4 flex h-auto items-center gap-1.5 bg-transparent text-[13px] transition-colors hover:bg-transparent'
             onClick={() => {
               setMethodPickerFlow(null);
               setError(null);
             }}
           >
-            ← Use a different email
+            <MoveLeft className='h-4 w-4' />
+            Use a different email
           </Button>
         </div>
       );
     }
 
-    case 'emailEntry': {
+    case ACTIVE_VIEW.EMAIL_ENTRY: {
       const isSubmitDisabled = !email.trim() || isLoading;
 
       return (
@@ -438,7 +465,7 @@ export const LoginForm = () => {
           >
             <GoogleIcon className='relative z-[1] h-[18px] w-[18px] shrink-0' />
             <span className='relative z-[1]'>
-              {loadingAction === 'google' ? 'Connecting...' : 'Continue with Google'}
+              {loadingAction === LOADING_ACTION.GOOGLE ? 'Connecting...' : 'Continue with Google'}
             </span>
           </Button>
 
@@ -488,21 +515,7 @@ export const LoginForm = () => {
                   : 'bg-GRAY_500 text-GRAY_700 disabled:bg-GRAY_500 disabled:text-GRAY_700 cursor-not-allowed border-black/3',
               )}
             >
-              <span className='relative z-[1] flex items-center gap-1.5'>
-                {loadingAction === 'sso' && providerLogo && logoLoaded ? (
-                  <>
-                    Signing in with
-                    {/* eslint-disable-next-line @next/next/no-img-element */}
-                    <img src={providerLogo} alt='provider' className='h-5 max-w-[40px] object-contain' />
-                  </>
-                ) : loadingAction === 'sso' ? (
-                  'Signing in...'
-                ) : loadingAction === 'email' ? (
-                  'Continuing...'
-                ) : (
-                  'Continue'
-                )}
-              </span>
+              <span className='relative z-[1] flex items-center gap-1.5'>{getSubmitButtonContent()}</span>
               <span className='relative z-[1] inline-flex h-[17px] w-[17px] overflow-hidden'>
                 <AnimatedDitherArrow disabled={isSubmitDisabled} />
               </span>

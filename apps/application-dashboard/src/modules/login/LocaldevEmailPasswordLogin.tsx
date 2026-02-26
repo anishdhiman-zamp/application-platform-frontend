@@ -16,17 +16,16 @@ type LoginFormProps = {
 };
 
 const LoginForm: FC<LoginFormProps> = ({ loginFlow, setLoginFlow }) => {
-  const cachedUserEmail = JSON.parse(getFromLocalStorage(LOCAL_STORAGE_KEYS.XZAMP_USER) ?? '{}');
   const searchParams = useSearchParams();
   const errorId = searchParams?.get('error')?.toString() ?? '';
+  const cachedUserEmail = JSON.parse(getFromLocalStorage(LOCAL_STORAGE_KEYS.XZAMP_USER) ?? '{}');
 
   const [loading, setLoading] = useState<boolean>(false);
   const [error, setError] = useState<string | null>(null);
-
-  const { data: userFacingError } = useGetErrorDetailsQuery(errorId, { skip: !errorId });
-
   const [email, setEmail] = useState(cachedUserEmail.email ?? '');
   const [password, setPassword] = useState(cachedUserEmail.password ?? '');
+
+  const { data: userFacingError } = useGetErrorDetailsQuery(errorId, { skip: !errorId });
 
   const handlePasswordSubmit = async (e: FormEvent<HTMLFormElement>) => {
     e.preventDefault();
@@ -77,7 +76,7 @@ const LoginForm: FC<LoginFormProps> = ({ loginFlow, setLoginFlow }) => {
   return (
     <div>
       {userFacingError?.map((err, index) => (
-        <p key={index} className='mb-4 rounded-lg bg-red-50 px-3 py-2 text-xs text-red-600'>
+        <p key={index} className='bg-RED_100 text-RED_600 mb-4 rounded-lg px-3 py-2 text-xs'>
           {err?.message}
         </p>
       ))}
@@ -118,13 +117,13 @@ const LoginForm: FC<LoginFormProps> = ({ loginFlow, setLoginFlow }) => {
             inputClassName={cn(
               'w-full rounded-xl border bg-white px-3.5 py-3 text-sm text-GRAY_1000 transition-all duration-250 outline-none placeholder:text-GRAY_500',
               error
-                ? 'border-red-600 shadow-[0_0_0_3px_rgba(220,38,38,0.08)] focus:border-red-600 focus:shadow-[0_0_0_3px_rgba(220,38,38,0.12)]'
+                ? 'border-RED_600 shadow-[0_0_0_3px_rgba(220,38,38,0.08)] focus:border-RED_600 focus:shadow-[0_0_0_3px_rgba(220,38,38,0.12)]'
                 : 'border-black/10 focus:border-black/25 focus:shadow-[0_0_0_3px_rgba(0,0,0,0.04)]',
             )}
             focusClassNames=''
             inputRoundedClassName=''
           />
-          {error && <p className='mt-1.5 text-xs text-red-600'>{error}</p>}
+          {error && <p className='text-RED_600 mt-1.5 text-xs'>{error}</p>}
         </div>
 
         <Button

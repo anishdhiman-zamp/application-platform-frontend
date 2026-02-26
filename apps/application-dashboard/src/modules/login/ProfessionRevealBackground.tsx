@@ -10,6 +10,8 @@ import {
   REVEAL_RADIUS,
 } from 'modules/login/login.constants';
 
+const DEFAULT_MOUSE_POSITION = { x: -1000, y: -1000 };
+
 function seededRandom(seed: number) {
   let s = seed;
 
@@ -186,6 +188,94 @@ function updateGrid(
   return true;
 }
 
+function createAnimationLoop(
+  labelData: LabelData[],
+  mouseRef: { current: { x: number; y: number } },
+  glow: HTMLDivElement | null,
+  containerRef: RefObject<HTMLDivElement | null>,
+) {
+  let rafId = 0;
+  let isActive = false;
+
+  function loop() {
+    const shouldContinue = updateGrid(labelData, mouseRef, glow, containerRef.current);
+
+    if (shouldContinue) {
+      rafId = requestAnimationFrame(loop);
+    } else {
+      isActive = false;
+    }
+  }
+
+  function scheduleUpdate() {
+    if (!isActive) {
+      isActive = true;
+      rafId = requestAnimationFrame(loop);
+    }
+  }
+
+  function cancel() {
+    cancelAnimationFrame(rafId);
+  }
+
+  return { scheduleUpdate, cancel };
+}
+
+type EventHandlers = {
+  onMouseMove: (e: MouseEvent) => void;
+  onTouchStart: (e: TouchEvent) => void;
+  onTouchMove: (e: TouchEvent) => void;
+  onTouchEnd: () => void;
+  onResize: () => void;
+};
+
+function createEventHandlers(
+  mouseRef: { current: { x: number; y: number } },
+  scheduleUpdate: () => void,
+  labelData: LabelData[],
+): EventHandlers {
+  const onMouseMove = (e: MouseEvent) => {
+    mouseRef.current = { x: e.clientX, y: e.clientY };
+    scheduleUpdate();
+  };
+  const onTouchStart = (e: TouchEvent) => {
+    mouseRef.current = { x: e.touches[0].clientX, y: e.touches[0].clientY };
+    scheduleUpdate();
+  };
+  const onTouchMove = (e: TouchEvent) => {
+    mouseRef.current = { x: e.touches[0].clientX, y: e.touches[0].clientY };
+    scheduleUpdate();
+  };
+  const onTouchEnd = () => {
+    mouseRef.current = DEFAULT_MOUSE_POSITION;
+    scheduleUpdate();
+  };
+  const onResize = () => cachePositions(labelData);
+
+  return { onMouseMove, onTouchStart, onTouchMove, onTouchEnd, onResize };
+}
+
+function addEventListeners(handlers: EventHandlers) {
+  window.addEventListener('mousemove', handlers.onMouseMove, { passive: true });
+  window.addEventListener('touchstart', handlers.onTouchStart, { passive: true });
+  window.addEventListener('touchmove', handlers.onTouchMove, { passive: true });
+  window.addEventListener('touchend', handlers.onTouchEnd);
+  window.addEventListener('resize', handlers.onResize);
+}
+
+function removeEventListeners(handlers: EventHandlers) {
+  window.removeEventListener('mousemove', handlers.onMouseMove);
+  window.removeEventListener('touchstart', handlers.onTouchStart);
+  window.removeEventListener('touchmove', handlers.onTouchMove);
+  window.removeEventListener('touchend', handlers.onTouchEnd);
+  window.removeEventListener('resize', handlers.onResize);
+}
+
+function cleanupLabels(grid: HTMLDivElement, labelData: LabelData[]) {
+  labelData.forEach((d) => stopSwitching(d));
+  while (grid.firstChild) grid.removeChild(grid.firstChild);
+}
+
 type Props = {
   containerRef: RefObject<HTMLDivElement | null>;
 };
@@ -193,7 +283,7 @@ type Props = {
 export const ProfessionRevealBackground = ({ containerRef }: Props) => {
   const gridRef = useRef<HTMLDivElement>(null);
   const glowRef = useRef<HTMLDivElement>(null);
-  const mouseRef = useRef({ x: -1000, y: -1000 });
+  const mouseRef = useRef(DEFAULT_MOUSE_POSITION);
 
   useEffect(() => {
     const grid = gridRef.current;
@@ -205,60 +295,15 @@ export const ProfessionRevealBackground = ({ containerRef }: Props) => {
 
     requestAnimationFrame(() => cachePositions(labelData));
 
-    let rafId = 0;
-    let isActive = false;
+    const { scheduleUpdate, cancel } = createAnimationLoop(labelData, mouseRef, glow, containerRef);
+    const handlers = createEventHandlers(mouseRef, scheduleUpdate, labelData);
 
-    function loop() {
-      const shouldContinue = updateGrid(labelData, mouseRef, glow, containerRef.current);
-
-      if (shouldContinue) {
-        rafId = requestAnimationFrame(loop);
-      } else {
-        isActive = false;
-      }
-    }
-
-    function scheduleUpdate() {
-      if (!isActive) {
-        isActive = true;
-        rafId = requestAnimationFrame(loop);
-      }
-    }
-
-    const onMouseMove = (e: MouseEvent) => {
-      mouseRef.current = { x: e.clientX, y: e.clientY };
-      scheduleUpdate();
-    };
-    const onTouchStart = (e: TouchEvent) => {
-      mouseRef.current = { x: e.touches[0].clientX, y: e.touches[0].clientY };
-      scheduleUpdate();
-    };
-    const onTouchMove = (e: TouchEvent) => {
-      mouseRef.current = { x: e.touches[0].clientX, y: e.touches[0].clientY };
-      scheduleUpdate();
-    };
-    const onTouchEnd = () => {
-      mouseRef.current = { x: -1000, y: -1000 };
-      scheduleUpdate();
-    };
-
-    const onResize = () => cachePositions(labelData);
-
-    window.addEventListener('mousemove', onMouseMove, { passive: true });
-    window.addEventListener('touchstart', onTouchStart, { passive: true });
-    window.addEventListener('touchmove', onTouchMove, { passive: true });
-    window.addEventListener('touchend', onTouchEnd);
-    window.addEventListener('resize', onResize);
+    addEventListeners(handlers);
 
     return () => {
-      cancelAnimationFrame(rafId);
-      window.removeEventListener('mousemove', onMouseMove);
-      window.removeEventListener('touchstart', onTouchStart);
-      window.removeEventListener('touchmove', onTouchMove);
-      window.removeEventListener('touchend', onTouchEnd);
-      window.removeEventListener('resize', onResize);
-      labelData.forEach((d) => stopSwitching(d));
-      while (grid.firstChild) grid.removeChild(grid.firstChild);
+      cancel();
+      removeEventListeners(handlers);
+      cleanupLabels(grid, labelData);
     };
   }, [containerRef]);
 

@@ -1,8 +1,10 @@
 import { ClipboardEvent, forwardRef, KeyboardEvent, useImperativeHandle, useRef } from 'react';
 import { cn } from '@zamp-platform/ui/utils';
 import { KEYBOARD_KEYS } from 'constants/shortcuts';
+import { OTP_LENGTH } from 'modules/login/login.constants';
+import { processPastedOtp } from 'modules/login/otp.utils';
 
-const OTP_LENGTH = 6;
+const defaultFn = () => {};
 
 export type OtpInputHandle = {
   focusFirst: () => void;
@@ -15,12 +17,24 @@ type Props = {
   allFilled: boolean;
   onDigitChange: (index: number, value: string) => void;
   onDigitsReplace: (digits: string[]) => void;
-  onClearMessage: () => void;
-  onSubmit: () => void;
+  onClearMessage?: () => void;
+  onSubmit?: () => void;
 };
 
 export const OtpInput = forwardRef<OtpInputHandle, Props>(
-  ({ digits, isError, isBusy, allFilled, onDigitChange, onDigitsReplace, onClearMessage, onSubmit }, ref) => {
+  (
+    {
+      digits,
+      isError,
+      isBusy,
+      allFilled,
+      onDigitChange,
+      onDigitsReplace,
+      onClearMessage = defaultFn,
+      onSubmit = defaultFn,
+    },
+    ref,
+  ) => {
     const inputRefs = useRef<(HTMLInputElement | null)[]>([]);
 
     useImperativeHandle(ref, () => ({
@@ -49,25 +63,14 @@ export const OtpInput = forwardRef<OtpInputHandle, Props>(
 
     const handlePaste = (index: number, e: ClipboardEvent<HTMLInputElement>) => {
       e.preventDefault();
-      const pasted = (e.clipboardData.getData('text') || '').replace(/[^0-9]/g, '');
 
-      if (!pasted) return;
+      const result = processPastedOtp(digits, e.clipboardData.getData('text') || '', index, OTP_LENGTH);
 
-      const newDigits = [...digits];
+      if (!result) return;
 
-      for (const [offset, char] of [...pasted].entries()) {
-        const targetIdx = index + offset;
-
-        if (targetIdx >= OTP_LENGTH) break;
-        newDigits[targetIdx] = char;
-      }
-
-      onDigitsReplace(newDigits);
+      onDigitsReplace(result.newDigits);
       onClearMessage();
-
-      const nextIdx = Math.min(index + pasted.length, OTP_LENGTH - 1);
-
-      inputRefs.current[nextIdx]?.focus();
+      inputRefs.current[result.nextFocusIndex]?.focus();
     };
 
     return (
@@ -91,7 +94,7 @@ export const OtpInput = forwardRef<OtpInputHandle, Props>(
             className={cn(
               'text-GRAY_1000 h-14 w-12 rounded-xl border bg-white text-center text-[22px] font-semibold caret-transparent transition-all duration-250 outline-none',
               isError
-                ? 'border-red-600 shadow-[0_0_0_3px_rgba(220,38,38,0.08)] focus:border-red-600 focus:shadow-[0_0_0_3px_rgba(220,38,38,0.12)]'
+                ? 'border-RED_600 focus:border-RED_600 shadow-[0_0_0_3px_rgba(220,38,38,0.08)] focus:shadow-[0_0_0_3px_rgba(220,38,38,0.12)]'
                 : digit
                   ? 'border-black/18 focus:border-black/30 focus:shadow-[0_0_0_3px_rgba(0,0,0,0.05)]'
                   : 'border-black/10 focus:border-black/30 focus:shadow-[0_0_0_3px_rgba(0,0,0,0.05)]',

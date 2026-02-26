@@ -1,5 +1,5 @@
 import { LOGIN_METHODS } from 'constants/auth.constants';
-import { INVALID_CODE_MESSAGE_IDS, RESEND_SUCCESS_MESSAGE_IDS } from 'modules/login/login.constants';
+import { EXPIRY_TYPE, INVALID_CODE_MESSAGE_IDS, RESEND_SUCCESS_MESSAGE_IDS } from 'modules/login/login.constants';
 import { FlowNode, FlowUiMessage } from 'types/api/auth.types';
 
 type NestedRecord = Record<string, unknown>;
@@ -57,16 +57,13 @@ export function buildResendBody(nodes: FlowNode[]): Record<string, unknown> {
   };
 }
 
-export function determineExpiryType(
-  responseExpiredAt: string,
-  flowExpiresAt: string,
-): 'code_expired' | 'flow_expired' | 'unknown' {
+export function determineExpiryType(responseExpiredAt: string, flowExpiresAt: string): EXPIRY_TYPE {
   const respTime = new Date(responseExpiredAt).getTime();
   const flowTime = new Date(flowExpiresAt).getTime();
 
-  if (isNaN(respTime) || isNaN(flowTime)) return 'unknown';
+  if (isNaN(respTime) || isNaN(flowTime)) return EXPIRY_TYPE.UNKNOWN;
 
-  return respTime < flowTime ? 'code_expired' : 'flow_expired';
+  return respTime < flowTime ? EXPIRY_TYPE.CODE_EXPIRED : EXPIRY_TYPE.FLOW_EXPIRED;
 }
 
 export function isInvalidCodeResponse(messages?: FlowUiMessage[]): boolean {
@@ -78,4 +75,28 @@ export function isResendSuccessResponse(data: { state?: string; ui?: { messages?
     data.state === 'sent_email' ||
     (data.ui?.messages?.some((m) => m.type === 'info' && RESEND_SUCCESS_MESSAGE_IDS.includes(m.id)) ?? false)
   );
+}
+
+export function processPastedOtp(
+  digits: string[],
+  pasteText: string,
+  startIndex: number,
+  otpLength: number,
+): { newDigits: string[]; nextFocusIndex: number } | null {
+  const pasted = pasteText.replace(/[^0-9]/g, '');
+
+  if (!pasted) return null;
+
+  const newDigits = [...digits];
+
+  for (const [offset, char] of [...pasted].entries()) {
+    const targetIdx = startIndex + offset;
+
+    if (targetIdx >= otpLength) break;
+    newDigits[targetIdx] = char;
+  }
+
+  const nextFocusIndex = Math.min(startIndex + pasted.length, otpLength - 1);
+
+  return { newDigits, nextFocusIndex };
 }
