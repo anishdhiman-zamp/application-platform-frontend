@@ -5,9 +5,15 @@ import { captureException } from '@sentry/browser';
 import { toast } from '@zamp-platform/ui';
 import { useFileActions } from 'modules/pace/hooks/useFileActions';
 import { useFileClipboard } from 'modules/pace/hooks/useFileClipboard';
-import type { ConflictResolution, FileConflict, FileItem } from '@/modules/pace/components/files/file-tree.types';
+import {
+  CLIPBOARD_OPERATION,
+  type ConflictResolution,
+  type FileConflict,
+  type FileItem,
+} from '@/modules/pace/components/files/file-tree.types';
 import { executeConflictResolution } from '@/modules/pace/components/files/file-tree.utils';
 import { FILE_TOAST_MESSAGES } from '@/modules/pace/components/files/files.constants';
+import { useUpdateFileTab } from '@/modules/pace/hooks/useUpdateFileTab';
 
 interface FileConflictContextValue {
   conflict: FileConflict | null;
@@ -28,6 +34,7 @@ export const FileConflictProvider = ({ children, onFileMoved }: FileConflictProv
 
   const { copyItem, moveItem, deleteItem } = useFileActions();
   const { clearClipboard } = useFileClipboard();
+  const { updateFileTab } = useUpdateFileTab();
 
   const resolveConflict = useCallback(
     async (resolution: ConflictResolution, siblingNames: string[]) => {
@@ -45,12 +52,22 @@ export const FileConflictProvider = ({ children, onFileMoved }: FileConflictProv
           { copyItem, moveItem, deleteItem },
           { clearClipboard, onFileMoved },
         );
+
+        const isMove = currentConflict.operation !== CLIPBOARD_OPERATION.COPY;
+
+        if (isMove) {
+          updateFileTab({
+            oldPath: currentConflict.sourcePath,
+            newPath: currentConflict.destinationPath,
+            newName: currentConflict.sourceName,
+          });
+        }
       } catch (error) {
         captureException(error);
         toast.error(FILE_TOAST_MESSAGES.FAILED_TO_RESOLVE_CONFLICT);
       }
     },
-    [conflict, copyItem, moveItem, deleteItem, clearClipboard, onFileMoved],
+    [conflict, copyItem, moveItem, deleteItem, clearClipboard, onFileMoved, updateFileTab],
   );
 
   const cancelConflict = useCallback(() => {

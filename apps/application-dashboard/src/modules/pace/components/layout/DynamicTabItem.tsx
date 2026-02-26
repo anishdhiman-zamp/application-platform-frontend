@@ -1,11 +1,11 @@
 'use client';
 
-import { Button } from '@zamp-platform/ui';
+import { Button, FileIcon } from '@zamp-platform/ui';
 import { cn } from '@zamp-platform/ui/utils';
 import { X } from 'lucide-react';
 import Link from 'next/link';
 import TooltipV2 from '@/components/common/TooltipV2';
-import { DYNAMIC_TAB_ICON_MAP } from '@/modules/pace/pace.constants';
+import { getFileExtension } from '@/modules/pace/components/files/file-tree.utils';
 import { DynamicTab } from '@/modules/pace/pace.types';
 import { SIDE_OPTIONS } from '@/types/commonTypes';
 
@@ -17,7 +17,7 @@ export interface DynamicTabItemProps {
 }
 
 const DynamicTabItem = ({ tab, isActive, isDragging = false, onClose }: DynamicTabItemProps) => {
-  const Icon = DYNAMIC_TAB_ICON_MAP[tab.type];
+  const fileExtension = getFileExtension(tab.name);
 
   return (
     <TooltipV2
@@ -36,7 +36,7 @@ const DynamicTabItem = ({ tab, isActive, isDragging = false, onClose }: DynamicT
             : 'text-GRAY_700 hover:text-GRAY_1000 hover:bg-GRAY_200 border-transparent',
         )}
       >
-        <Icon size={14} className='shrink-0' />
+        <FileIcon extension={fileExtension || 'txt'} size='xs' />
         <span className='f-11-500 min-w-0 flex-1 truncate'>{tab.name}</span>
         <Button
           id='dynamic-tab-close-button'

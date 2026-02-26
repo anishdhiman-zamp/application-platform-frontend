@@ -1,8 +1,8 @@
 'use client';
 
 import { useCallback, useEffect, useRef } from 'react';
-import { Button, Progress } from '@zamp-platform/ui';
-import { FileUp, FolderUp, Loader2, X } from 'lucide-react';
+import { Button, Progress, ShimmerText } from '@zamp-platform/ui';
+import { FileUp, FolderUp, X } from 'lucide-react';
 import { toast } from 'sonner';
 import { type FolderUploadProgress, UPLOAD_TYPE } from '@/modules/pace/components/files/file-tree.types';
 import { formatFileSize } from '@/modules/pace/components/files/file-tree.utils';
@@ -32,10 +32,7 @@ interface UploadProgressToastProps {
 const SingleFileUploadProgressContent = ({ progress }: { progress: UploadProgress }) => {
   return (
     <div className='flex w-full flex-col gap-y-2'>
-      <div className='flex items-center gap-2'>
-        <Loader2 className='text-BLUE_500 size-4 animate-spin' />
-        <span className='f-13-500 text-GRAY_1000 max-w-[240px] truncate'>{progress.fileName}</span>
-      </div>
+      <ShimmerText text={progress.fileName} baseTextClassName='f-13-500 text-GRAY_1000 max-w-[240px] truncate' />
 
       <div className='mt-1'>
         <div className='flex items-center gap-2'>
@@ -64,19 +61,16 @@ const FolderUploadProgressContent = ({
 
   return (
     <div className='flex w-full flex-col gap-y-2'>
-      <div className='f-12-400 text-GRAY_600'>
-        Uploading {currentFileIndex} of {folderProgress.totalFiles} files
+      <div className='f-12-450 text-GRAY_900'>
+        {currentFileIndex} of {folderProgress.totalFiles} files
       </div>
 
       {currentFile && (
-        <div className='flex items-center gap-2'>
-          <Loader2 className='text-BLUE_500 size-4 animate-spin' />
-          <span className='f-13-500 text-GRAY_1000 max-w-[240px] truncate'>{currentFile.fileName}</span>
-        </div>
+        <ShimmerText text={currentFile.fileName} baseTextClassName='f-13-500 text-GRAY_1000 max-w-[240px] truncate' />
       )}
 
       <div className='mt-1'>
-        <div className='f-12-500 text-GRAY_700 mb-1'>Overall progress</div>
+        <div className='f-12-450 text-GRAY_900 mb-1'>Overall progress</div>
         <div className='flex items-center gap-2'>
           <Progress value={overallPercentage} className='flex-1' />
           <span className='f-12-400 text-GRAY_600 min-w-[40px] text-right'>{overallPercentage}%</span>
@@ -93,10 +87,8 @@ const FolderUploadToastContent = ({ uploadState, onCancel }: UploadProgressToast
   return (
     <div className='flex w-full flex-col gap-y-3'>
       <div className='flex items-center justify-between'>
-        <div className='flex items-center gap-2'>
-          <div className='bg-BLUE_100 flex size-8 items-center justify-center rounded-full'>
-            <FolderUp className='text-BLUE_600 size-4' />
-          </div>
+        <div className='flex items-center gap-1.5'>
+          <FolderUp className='text-GRAY_1000 size-4' />
           <span className='f-14-600 text-GRAY_1000'>Uploading {uploadState.folderUpload?.folderName}</span>
         </div>
         <Button
@@ -122,10 +114,8 @@ const SingleFileUploadToastContent = ({ uploadState, onCancel }: UploadProgressT
   return (
     <div className='flex w-full flex-col gap-y-3'>
       <div className='flex items-center justify-between'>
-        <div className='flex items-center gap-2'>
-          <div className='bg-BLUE_100 flex size-8 items-center justify-center rounded-full'>
-            <FileUp className='text-BLUE_600 size-4' />
-          </div>
+        <div className='flex items-center gap-1.5'>
+          <FileUp className='text-GRAY_1000 size-4' />
           <span className='f-14-600 text-GRAY_1000'>Uploading file</span>
         </div>
         <Button

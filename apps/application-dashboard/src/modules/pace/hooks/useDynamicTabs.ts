@@ -1,26 +1,35 @@
 'use client';
 
 import { useCallback } from 'react';
-import { getNextNavigationTarget } from '@zamp-platform/utils';
-import { usePathname, useRouter } from 'next/navigation';
+import { getNextNavigationTarget, NAVIGATION_STRATEGY } from '@zamp-platform/utils';
+import { useRouter, useSearchParams } from 'next/navigation';
 import { ROUTES_PATH } from '@/constants/routeConfig';
+import { useFileViewerContext } from '@/modules/pace/hooks/FileViewerContext';
 import { usePaceContext } from '@/modules/pace/pace.context';
+import { DynamicTab } from '@/modules/pace/pace.types';
 
 export const useDynamicTabs = () => {
-  const pathname = usePathname();
   const router = useRouter();
-  const { dynamicTabs, closeDynamicTab, reorderDynamicTabs } = usePaceContext();
+  const searchParams = useSearchParams();
+  const currentFileParam = searchParams?.get('f') ?? null;
+
+  const { dynamicTabs, activeFileTabKey, closeDynamicTab, reorderDynamicTabs } = usePaceContext();
+  const { removeFileState } = useFileViewerContext();
 
   const isDynamicTabActive = useCallback(
-    (path: string) => {
-      return pathname === path;
+    (tab: DynamicTab) => {
+      if (!currentFileParam) {
+        return false;
+      }
+
+      return tab.stableKey === activeFileTabKey;
     },
-    [pathname],
+    [activeFileTabKey, currentFileParam],
   );
 
   const isOnAnyDynamicTab = useCallback(() => {
-    return dynamicTabs.some((tab) => pathname === tab.path);
-  }, [dynamicTabs, pathname]);
+    return dynamicTabs.some((tab) => isDynamicTabActive(tab));
+  }, [dynamicTabs, isDynamicTabActive]);
 
   const handleCloseDynamicTab = useCallback(
     (e: React.MouseEvent, id: string) => {
@@ -31,22 +40,23 @@ export const useDynamicTabs = () => {
 
       if (!closingTab) return;
 
-      const isClosingActiveTab = pathname === closingTab.path;
+      const isClosingActiveTab = isDynamicTabActive(closingTab);
 
-      closeDynamicTab(id);
+      removeFileState(closingTab.id);
+      closeDynamicTab(closingTab.id);
 
       if (isClosingActiveTab) {
         const { target, hasRemainingItems } = getNextNavigationTarget({
           items: dynamicTabs,
           closingItem: closingTab,
           isEqual: (a, b) => a.id === b.id,
-          strategy: 'browser-like',
+          strategy: NAVIGATION_STRATEGY.BROWSER_LIKE,
         });
 
-        router.push(hasRemainingItems && target ? target.path : ROUTES_PATH.CHAT_ARTIFACTS);
+        router.push(hasRemainingItems && target ? target.path : ROUTES_PATH.CHAT_FILES);
       }
     },
-    [dynamicTabs, pathname, closeDynamicTab, router],
+    [dynamicTabs, isDynamicTabActive, closeDynamicTab, removeFileState, router],
   );
 
   const handleReorderTabs = useCallback(

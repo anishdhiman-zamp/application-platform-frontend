@@ -26,6 +26,7 @@ interface UseFileViewerReturn {
   isEditable: boolean;
   updateContent: (newContent: string) => void;
   isSaving: boolean;
+  lastSavedAt: number | null;
   refetch: () => void;
 }
 
@@ -77,9 +78,7 @@ export const useFileViewer = ({ filePath, onSaveSuccess, onSaveError }: UseFileV
           fetchFileContent({ path: filePath }).unwrap(),
         ]);
 
-        if (contentResult) {
-          initFileState(filePath, contentResult, metadataResult.mtime_ms);
-        }
+        initFileState(filePath, contentResult ?? '', metadataResult.mtime_ms);
       } catch (err) {
         console.error('Failed to load file:', err);
       }
@@ -164,9 +163,7 @@ export const useFileViewer = ({ filePath, onSaveSuccess, onSaveError }: UseFileV
 
     Promise.all([fetchFileMetadata({ path: filePath }).unwrap(), fetchFileContent({ path: filePath }).unwrap()])
       .then(([metadataResult, contentResult]) => {
-        if (contentResult) {
-          initFileState(filePath, contentResult, metadataResult.mtime_ms);
-        }
+        initFileState(filePath, contentResult ?? '', metadataResult.mtime_ms);
       })
       .catch((err) => {
         console.error('Failed to refetch file:', err);
@@ -185,6 +182,7 @@ export const useFileViewer = ({ filePath, onSaveSuccess, onSaveError }: UseFileV
     isEditable,
     updateContent,
     isSaving,
+    lastSavedAt: fileState?.mtime_ms ?? null,
     refetch,
   };
 };

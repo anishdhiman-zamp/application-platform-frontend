@@ -15,6 +15,7 @@ interface FileViewerContextType {
   updateFileContent: (path: string, content: string) => void;
   markFileSaved: (path: string, newMtime?: number) => void;
   removeFileState: (path: string) => void;
+  updateFileStatePath: (oldPath: string, newPath: string) => void;
 }
 
 const FileViewerContext = createContext<FileViewerContextType | null>(null);
@@ -60,6 +61,12 @@ export const FileViewerProvider = ({ children }: { children: ReactNode }) => {
           content,
           isDirty,
         });
+      } else {
+        newMap.set(path, {
+          content,
+          originalContent: '',
+          isDirty: true,
+        });
       }
 
       return newMap;
@@ -94,6 +101,21 @@ export const FileViewerProvider = ({ children }: { children: ReactNode }) => {
     });
   }, []);
 
+  const updateFileStatePath = useCallback((oldPath: string, newPath: string) => {
+    setFileStates((prev) => {
+      const existing = prev.get(oldPath);
+
+      if (!existing) return prev;
+
+      const newMap = new Map(prev);
+
+      newMap.delete(oldPath);
+      newMap.set(newPath, existing);
+
+      return newMap;
+    });
+  }, []);
+
   const value: FileViewerContextType = useMemo(
     () => ({
       getFileState,
@@ -101,8 +123,9 @@ export const FileViewerProvider = ({ children }: { children: ReactNode }) => {
       updateFileContent,
       markFileSaved,
       removeFileState,
+      updateFileStatePath,
     }),
-    [getFileState, initFileState, updateFileContent, markFileSaved, removeFileState],
+    [getFileState, initFileState, updateFileContent, markFileSaved, removeFileState, updateFileStatePath],
   );
 
   return <FileViewerContext.Provider value={value}>{children}</FileViewerContext.Provider>;

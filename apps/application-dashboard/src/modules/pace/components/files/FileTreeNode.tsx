@@ -1,6 +1,8 @@
 'use client';
 
 import { memo, useCallback, useMemo, useRef, useState } from 'react';
+import { useRouter } from 'next/navigation';
+import { getChatFileRoute } from '@/constants/routeConfig';
 import CreateItemModal from '@/modules/pace/components/files/CreateItemModal';
 import {
   type CreateItemType,
@@ -15,6 +17,7 @@ import { useFileTreeNodeActions } from '@/modules/pace/hooks/useFileTreeNodeActi
 import { useFileTreeNodeDragDrop } from '@/modules/pace/hooks/useFileTreeNodeDragDrop';
 import { useFileTreeNodeRename } from '@/modules/pace/hooks/useFileTreeNodeRename';
 import { useFileUploadContext } from '@/modules/pace/hooks/useFileUploadContext';
+import { usePaceContext } from '@/modules/pace/pace.context';
 
 const FileTreeNode = memo(function FileTreeNode({
   node,
@@ -39,8 +42,10 @@ const FileTreeNode = memo(function FileTreeNode({
   const [contextMenuOpen, setContextMenuOpen] = useState(false);
   const [createModalType, setCreateModalType] = useState<CreateItemType | null>(null);
 
+  const router = useRouter();
   const { clipboard, isProtectedRoot, username } = useFileTreeContext();
   const { uploadingPath } = useFileUploadContext();
+  const { openDynamicTab } = usePaceContext();
 
   const isFolder = node.type === FILE_TYPE.DIRECTORY;
   const isExpanded = expandedPaths.has(node.path);
@@ -148,6 +153,19 @@ const FileTreeNode = memo(function FileTreeNode({
     [isFolder, onToggleExpand, node.path],
   );
 
+  const handleDoubleClick = useCallback(() => {
+    if (rename.isRenaming || isFolder) return;
+
+    const filePath = getChatFileRoute(node.path);
+
+    openDynamicTab({
+      id: node.path,
+      name: node.name,
+      path: filePath,
+    });
+    router.push(filePath);
+  }, [rename.isRenaming, isFolder, node.path, node.name, openDynamicTab, router]);
+
   return (
     <div style={style}>
       {createModalType && (
@@ -193,6 +211,7 @@ const FileTreeNode = memo(function FileTreeNode({
           }}
           handlers={{
             onRowClick: handleClick,
+            onRowDoubleClick: handleDoubleClick,
             onChevronClick: handleChevronClick,
             onDragStart: dragDrop.handleDragStart,
             onDragEnd: dragDrop.handleDragEnd,

@@ -114,6 +114,31 @@ export function formatDate(timestamp: number): string {
 }
 
 /**
+ * Formats timestamp to compact relative time string (e.g., "just now", "5m ago", "2h ago")
+ */
+export function formatRelativeTime(timestamp: number): string {
+  const now = Date.now();
+  const diffMs = now - timestamp;
+  const diffMins = Math.floor(diffMs / 60000);
+  const diffHours = Math.floor(diffMs / 3600000);
+  const diffDays = Math.floor(diffMs / 86400000);
+
+  if (diffMins < 1) {
+    return 'just now';
+  }
+
+  if (diffMins < 60) {
+    return `${diffMins}m ago`;
+  }
+
+  if (diffHours < 24) {
+    return `${diffHours}h ago`;
+  }
+
+  return `${diffDays}d ago`;
+}
+
+/**
  * Gets a human-readable label for a file type based on extension
  */
 export function getFileTypeLabel(name: string): string {
@@ -588,4 +613,58 @@ export function validatePasteOperation(
   const hasConflict = childrenNames.includes(clipboard.name);
 
   return { valid: true, hasConflict, destinationPath };
+}
+
+/**
+ * Splits a filename into base name and extension.
+ * For folders (isFile = false), the entire name is the base name with no extension.
+ */
+export function getFileNameParts(name: string, isFile = true): { baseName: string; extension: string } {
+  if (!isFile) {
+    return { baseName: name, extension: '' };
+  }
+
+  const lastDotIndex = name.lastIndexOf('.');
+
+  if (lastDotIndex > 0) {
+    return {
+      baseName: name.slice(0, lastDotIndex),
+      extension: name.slice(lastDotIndex),
+    };
+  }
+
+  return { baseName: name, extension: '' };
+}
+
+/**
+ * Checks if a new name would conflict with existing sibling names.
+ * Excludes the current name from the check (for rename operations).
+ */
+export function checkDuplicateName(newName: string, siblingNames: string[], currentName?: string): boolean {
+  if (!newName) return false;
+
+  const namesToCheck = currentName ? siblingNames.filter((name) => name !== currentName) : siblingNames;
+
+  return namesToCheck.some((name) => name === newName);
+}
+
+/**
+ * Gets sibling file/folder names from a flat file list for a given file path.
+ * Returns names of items in the same directory as the target file.
+ */
+export function getSiblingNamesFromFiles(files: FileItem[], filePath: string): string[] {
+  const parentPath = getParentPath(filePath);
+  const isRoot = parentPath === '/';
+
+  return files
+    .filter((file) => {
+      const fileParentPath = getParentPath(file.path);
+
+      if (isRoot) {
+        return !file.path.includes('/');
+      }
+
+      return fileParentPath === parentPath;
+    })
+    .map((file) => file.name);
 }
