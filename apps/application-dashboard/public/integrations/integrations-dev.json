@@ -2,7 +2,7 @@
   "version": 1,
   "integrations": [
     {
-      "id": "cloudflare",
+      "id": "internal_email_forwarding",
       "display_name": "Email Forwarding",
       "logo": "/integrations/logos/mail.svg",
       "what_possible": [],

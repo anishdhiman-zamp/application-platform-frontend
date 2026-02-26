@@ -8,6 +8,7 @@ import {
   ColumnVisibleEvent,
   FillEndEvent,
   GridReadyEvent,
+  type IRowNode,
   IServerSideDatasource,
   RowClickedEvent,
   RowDragEndEvent,
@@ -31,6 +32,7 @@ export interface DatasetTableProps {
   rows?: MapAny[];
   onColumnVisible?: (event: ColumnVisibleEvent) => void;
   onCellEditRequest?: (event: CellEditRequestEvent) => void;
+  onFlushPendingEdit?: (params: { node: IRowNode; colId: string; value: unknown }) => void;
   onFillEnd?: (event: FillEndEvent) => void;
   onDrilldownClick?: (data: MapAny) => void;
   onRowPropertiesClick?: (data: MapAny) => void;
@@ -70,6 +72,7 @@ const DatasetTable: FC<DatasetTableProps> = ({
   columnConfig,
   onColumnVisible,
   onCellEditRequest,
+  onFlushPendingEdit,
   onFillEnd,
   onDrilldownClick,
   onRowPropertiesClick,
@@ -106,6 +109,7 @@ const DatasetTable: FC<DatasetTableProps> = ({
         totalRows={totalRows}
         serverSideDatasource={serverSideDatasource}
         onCellEditRequest={onCellEditRequest}
+        onFlushPendingEdit={onFlushPendingEdit}
         showStatusBar={showStatusBar}
         enableCellSelection={enableCellSelection}
         suppressCellFocus={suppressCellFocus}

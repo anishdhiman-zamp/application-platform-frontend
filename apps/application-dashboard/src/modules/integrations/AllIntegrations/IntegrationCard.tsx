@@ -74,11 +74,13 @@ const IntegrationCard: FC<IntegrationCardProps> = ({ integration, isEnabled = fa
         )}
       </div>
 
-      <ConnectionModal
-        integration={integration}
-        isOpen={isConnectionModalOpen}
-        onClose={() => setIsConnectionModalOpen(false)}
-      />
+      {integration && Object.keys(integration).length > 0 && (
+        <ConnectionModal
+          integration={integration}
+          isOpen={isConnectionModalOpen}
+          onClose={() => setIsConnectionModalOpen(false)}
+        />
+      )}
     </>
   );
 };

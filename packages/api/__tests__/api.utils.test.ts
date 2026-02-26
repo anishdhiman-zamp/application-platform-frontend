@@ -11,6 +11,7 @@ jest.mock('@sentry/browser', () => ({
 jest.mock('@zamp-platform/utils', () => ({
   getFromLocalStorage: jest.fn(),
   LOCAL_STORAGE_KEYS: {
+    LAST_LOGIN_INFO: 'LAST_LOGIN_INFO',
     LAST_LOGGED_IN_OIDC_EMAIL: 'LAST_LOGGED_IN_OIDC_EMAIL',
   },
 }));
@@ -61,7 +62,7 @@ describe('api.utils', () => {
     });
 
     it('should use email from localStorage when parameter is empty', async () => {
-      mockGetFromLocalStorage.mockReturnValue('saved@example.com');
+      mockGetFromLocalStorage.mockReturnValue(JSON.stringify({ email: 'saved@example.com' }));
 
       const mockApiResponse = {
         api_base_urls: [{ region: 'us', url: 'https://api-us.zamp.ai' }],

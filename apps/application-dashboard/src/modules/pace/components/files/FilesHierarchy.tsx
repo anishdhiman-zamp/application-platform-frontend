@@ -30,12 +30,13 @@ const FilesHierarchy = ({
   onFileDeleted,
   onFileCreated,
 }: FilesHierarchyProps) => {
+  const collapseAllRef = useRef<(() => void) | null>(null);
+  const { uploadFiles, uploadFolder, uploadingItem, clearUploadingItem } = useFileUploadContext();
+
   const [searchInput, setSearchInput] = useState('');
   const [debouncedSearchQuery, setDebouncedSearchQuery] = useState('');
   const [sortBy, setSortBy] = useState<SortOption>(SORT_OPTION.NAME);
   const [sortDirection, setSortDirection] = useState<SortDirection>(SORT_DIRECTION.DESC);
-
-  const collapseAllRef = useRef<(() => void) | null>(null);
 
   const {
     data: files,
@@ -45,7 +46,6 @@ const FilesHierarchy = ({
   } = useListFilesQuery({
     recursive: true,
   });
-  const { uploadFiles, uploadFolder, uploadingItem, clearUploadingItem } = useFileUploadContext();
 
   const filesWithUploading = useMemo(() => {
     const fileList = files?.files ?? [];
@@ -62,16 +62,6 @@ const FilesHierarchy = ({
 
     return [...fileList, uploadingItem];
   }, [files?.files, uploadingItem]);
-
-  useEffect(() => {
-    if (!uploadingItem) return;
-
-    const existsInList = files?.files?.some((f) => f.path === uploadingItem.path);
-
-    if (existsInList) {
-      clearUploadingItem();
-    }
-  }, [files?.files, uploadingItem, clearUploadingItem]);
 
   const toggleSortDirection = useCallback(() => {
     setSortDirection((prev) => (prev === SORT_DIRECTION.ASC ? SORT_DIRECTION.DESC : SORT_DIRECTION.ASC));
@@ -116,6 +106,16 @@ const FilesHierarchy = ({
 
     return () => clearTimeout(timer);
   }, [searchInput]);
+
+  useEffect(() => {
+    if (!uploadingItem) return;
+
+    const existsInList = files?.files?.some((f) => f.path === uploadingItem.path);
+
+    if (existsInList) {
+      clearUploadingItem();
+    }
+  }, [files?.files, uploadingItem, clearUploadingItem]);
 
   return (
     <div className='bg-BG_GRAY_2 border-GRAY_400 relative flex w-2/5 flex-col border-r'>

@@ -33,8 +33,8 @@ export const useIntegrationItem = ({ mappedIntegration }: UseIntegrationItemProp
     isCreatingProcessConnectionMapping,
     isDeletingProcessConnectionMapping,
   } = useConnectionManagement({
-    integrationId: mappedIntegration.integration.id,
-    mappedConnections: mappedIntegration.connections,
+    integrationId: mappedIntegration?.integration?.id,
+    mappedConnections: mappedIntegration?.connections,
   });
 
   const handleRemoveConnection = useCallback(() => {

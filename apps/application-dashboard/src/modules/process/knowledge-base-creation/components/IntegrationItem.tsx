@@ -45,19 +45,19 @@ const IntegrationItem = ({ mappedIntegration }: { mappedIntegration: MappedInteg
         <DropdownMenuTrigger className='cursor-pointer'>
           <div className='f-12-450 flex items-center gap-0.5'>
             <TriggerChip
-              text={mappedIntegration.integration.display_name}
-              logo={mappedIntegration.integration.logo}
+              text={mappedIntegration?.integration?.display_name}
+              logo={mappedIntegration?.integration?.logo}
               isFirst
             />
             <div className='flex h-6 items-center gap-1 rounded-r bg-gray-100 px-2'>
               <Link size={14} className='text-gray-900' />
-              <span>{mappedIntegration.number_of_connections}</span>
+              <span>{mappedIntegration?.number_of_connections}</span>
             </div>
           </div>
         </DropdownMenuTrigger>
         <DropdownMenuContent onCloseAutoFocus={preventAutoFocus} className='p-0'>
           <div className='p-1'>
-            {mappedIntegration.connections?.map((connection) => (
+            {mappedIntegration?.connections?.map((connection) => (
               <DropdownMenuItem
                 key={connection.id}
                 className='group f-13-500 flex cursor-default items-center justify-between rounded-md p-0 hover:bg-gray-50'
@@ -134,17 +134,19 @@ const IntegrationItem = ({ mappedIntegration }: { mappedIntegration: MappedInteg
         onOpenChange={handleListOpenChange}
         onConnect={handleConnectWrapper}
         onAddAnother={handleAddAnother}
-        integrationName={mappedIntegration.integration.display_name || ''}
+        integrationName={mappedIntegration?.integration?.display_name || ''}
         connections={connectionsToAdd}
         isLoading={isCreatingProcessConnectionMapping}
       />
-      <ConnectionModal
-        integration={mappedIntegration.integration}
-        isOpen={dialogIntent?.type === 'create'}
-        onClose={handleCloseDeleteDialog}
-        onSubmit={handleCreateConnectionMapping}
-        isCreatingTrigger={isCreatingProcessConnectionMapping}
-      />
+      {mappedIntegration?.integration && Object.keys(mappedIntegration?.integration).length > 0 && (
+        <ConnectionModal
+          integration={mappedIntegration?.integration}
+          isOpen={dialogIntent?.type === 'create'}
+          onClose={handleCloseDeleteDialog}
+          onSubmit={handleCreateConnectionMapping}
+          isCreatingTrigger={isCreatingProcessConnectionMapping}
+        />
+      )}
     </>
   );
 };
