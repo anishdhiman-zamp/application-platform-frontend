@@ -289,17 +289,7 @@ export const LoginForm = () => {
       );
 
       if (oidcNode) {
-        const actionUrlObj = new URL(flow.ui.action);
-        const baseUrlObj = new URL(BASE_API_URL);
-
-        actionUrlObj.protocol = baseUrlObj.protocol;
-        actionUrlObj.host = baseUrlObj.host;
-        await initiateOidcLogin(
-          actionUrlObj.toString(),
-          flow.ui.method,
-          oidcNode.attributes.value as LOGIN_PROVIDERS,
-          '',
-        );
+        await initiateOidcLogin(flow.ui.action, flow.ui.method, oidcNode.attributes.value as LOGIN_PROVIDERS, '');
       } else {
         setError(LOGIN_FORM_MESSAGES.GOOGLE_UNAVAILABLE);
         resetLoadingState();
