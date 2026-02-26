@@ -7,6 +7,7 @@ import { LoaderCircle } from 'lucide-react';
 import Image from 'next/image';
 import { PAUSED_OVERLAY } from '@/constants/icons';
 import { KEYBOARD_KEYS } from '@/constants/shortcuts';
+import FileNotFoundError from '@/modules/pace/components/file-viewer/FileNotFoundError';
 import MuteButton from '@/modules/pace/components/file-viewer/viewers/components/MuteButton';
 import PlayButton from '@/modules/pace/components/file-viewer/viewers/components/PlayButton';
 import ProgressBar from '@/modules/pace/components/file-viewer/viewers/components/ProgressBar';
@@ -17,17 +18,22 @@ interface VideoViewerProps {
   poster?: string;
   className?: string;
   isActive?: boolean;
+  fileName?: string;
+  onClose?: () => void;
 }
 
-const VideoViewer = ({ src, poster, className = '', isActive = true }: VideoViewerProps) => {
+const VideoViewer = ({ src, poster, className = '', isActive = true, fileName, onClose }: VideoViewerProps) => {
   const videoRef = useRef<HTMLVideoElement>(null);
 
   const [isPlaying, setIsPlaying] = useState(false);
   const [currentTime, setCurrentTime] = useState(0);
   const [duration, setDuration] = useState(0);
   const [isLoading, setIsLoading] = useState(true);
+  const [isBuffering, setIsBuffering] = useState(false);
   const [error, setError] = useState(false);
   const [isMuted, setIsMuted] = useState(false);
+
+  const displayFileName = fileName || decodeURIComponent(src.split('/').pop() || 'video');
 
   const handleError = useCallback(
     (e: React.SyntheticEvent) => {
@@ -52,7 +58,26 @@ const VideoViewer = ({ src, poster, className = '', isActive = true }: VideoView
 
   const handlePlay = () => setIsPlaying(true);
   const handlePause = () => setIsPlaying(false);
-  const handleEnded = () => setIsPlaying(false);
+  const handleEnded = () => {
+    const video = videoRef.current;
+
+    setIsPlaying(false);
+
+    if (video) {
+      video.currentTime = 0;
+      setCurrentTime(0);
+    }
+  };
+  const handleWaiting = () => setIsBuffering(true);
+  const handleCanPlay = () => setIsBuffering(false);
+  const handleSeeking = () => setIsBuffering(true);
+  const handleSeeked = useCallback(() => {
+    const video = videoRef.current;
+
+    if (video && video.readyState >= 3) {
+      setIsBuffering(false);
+    }
+  }, []);
 
   const togglePlayPause = () => {
     const video = videoRef.current;
@@ -111,20 +136,32 @@ const VideoViewer = ({ src, poster, className = '', isActive = true }: VideoView
     video.addEventListener('play', handlePlay);
     video.addEventListener('pause', handlePause);
     video.addEventListener('ended', handleEnded);
+    video.addEventListener('waiting', handleWaiting);
+    video.addEventListener('canplay', handleCanPlay);
+    video.addEventListener('seeking', handleSeeking);
+    video.addEventListener('seeked', handleSeeked);
 
     return () => {
       video.removeEventListener('timeupdate', handleTimeUpdate);
       video.removeEventListener('play', handlePlay);
       video.removeEventListener('pause', handlePause);
       video.removeEventListener('ended', handleEnded);
+      video.removeEventListener('waiting', handleWaiting);
+      video.removeEventListener('canplay', handleCanPlay);
+      video.removeEventListener('seeking', handleSeeking);
+      video.removeEventListener('seeked', handleSeeked);
     };
-  }, [handleLoadedMetadata, isLoading]);
+  }, [handleLoadedMetadata, handleSeeked, isLoading]);
+
+  if (error && onClose) {
+    return <FileNotFoundError fileName={displayFileName} onClose={onClose} />;
+  }
 
   return (
     <div className={cn('flex h-full w-full flex-col items-center justify-center p-4', className)}>
-      <div className='flex h-full w-full max-w-5xl flex-col overflow-hidden rounded-[10px]'>
+      <div className='flex h-full w-full flex-col overflow-hidden'>
         <div
-          className='relative min-h-0 flex-1 overflow-hidden bg-black'
+          className='relative min-h-0 flex-1 overflow-hidden rounded-t-[10px] bg-black'
           onClick={togglePlayPause}
           tabIndex={0}
           role='button'
@@ -158,7 +195,13 @@ const VideoViewer = ({ src, poster, className = '', isActive = true }: VideoView
             <LoaderCircle size={48} className='animate-spin text-white' />
           </div>
 
-          {error && (
+          {isBuffering && !isLoading && (
+            <div className='pointer-events-none absolute inset-0 z-10 flex items-center justify-center'>
+              <LoaderCircle size={48} className='animate-spin text-white' />
+            </div>
+          )}
+
+          {error && !onClose && (
             <div className='absolute inset-0 flex items-center justify-center bg-black/50'>
               <div className='text-center text-white'>
                 <p>Error loading video</p>
@@ -173,7 +216,7 @@ const VideoViewer = ({ src, poster, className = '', isActive = true }: VideoView
           )}
         </div>
 
-        <div className='bg-GRAY_100 border-GRAY_500 flex h-[60px] w-full shrink-0 items-center gap-x-2.5 border-x border-b p-4'>
+        <div className='bg-GRAY_100 border-GRAY_500 flex h-[60px] w-full shrink-0 items-center gap-x-2.5 overflow-hidden rounded-b-[10px] border-x border-b p-4'>
           <PlayButton isPlaying={isPlaying} onClick={togglePlayPause} disabled={isLoading || error} />
           <ProgressBar
             currentTime={currentTime}

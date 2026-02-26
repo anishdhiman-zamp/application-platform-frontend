@@ -23,7 +23,6 @@ import { useDynamicTabs } from '@/modules/pace/hooks/useDynamicTabs';
 import { useFileTreeContext } from '@/modules/pace/hooks/useFileTreeContext';
 import { useUpdateFileTab } from '@/modules/pace/hooks/useUpdateFileTab';
 import { usePaceContext } from '@/modules/pace/pace.context';
-import { DynamicTabType } from '@/modules/pace/pace.types';
 
 interface UseFileTreeNodeActionsProps {
   node: TreeNode;
@@ -108,25 +107,29 @@ export const useFileTreeNodeActions = ({
             break;
           }
 
-          const openTab = dynamicTabs.find((tab) => tab.id === node.path);
+          const isFolder = node.type === FILE_TYPE.DIRECTORY;
+          const folderPathPrefix = `${node.path}/`;
 
-          if (openTab) {
-            if (openTab.type === DynamicTabType.FILE) {
-              removeFileState(openTab.id);
-            }
+          const tabsToClose = isFolder
+            ? dynamicTabs.filter((tab) => tab.id === node.path || tab.id.startsWith(folderPathPrefix))
+            : dynamicTabs.filter((tab) => tab.id === node.path);
 
-            closeDynamicTab(openTab.id);
+          const activeTabToClose = tabsToClose.find((tab) => isDynamicTabActive(tab));
 
-            if (isDynamicTabActive(openTab.path)) {
-              const { target, hasRemainingItems } = getNextNavigationTarget({
-                items: dynamicTabs,
-                closingItem: openTab,
-                isEqual: (a, b) => a.id === b.id,
-                strategy: NAVIGATION_STRATEGY.BROWSER_LIKE,
-              });
+          tabsToClose.forEach((tab) => {
+            removeFileState(tab.id);
+            closeDynamicTab(tab.id);
+          });
 
-              router.push(hasRemainingItems && target ? target.path : ROUTES_PATH.CHAT_FILES);
-            }
+          if (activeTabToClose) {
+            const { target, hasRemainingItems } = getNextNavigationTarget({
+              items: dynamicTabs,
+              closingItem: activeTabToClose,
+              isEqual: (a, b) => a.id === b.id,
+              strategy: NAVIGATION_STRATEGY.BROWSER_LIKE,
+            });
+
+            router.push(hasRemainingItems && target ? target.path : ROUTES_PATH.CHAT_FILES);
           }
 
           await deleteItem(node.path);
@@ -205,7 +208,6 @@ export const useFileTreeNodeActions = ({
           openDynamicTab({
             id: node.path,
             name: node.name,
-            type: DynamicTabType.FILE,
             path: filePath,
           });
           router.push(filePath);

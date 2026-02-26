@@ -1,19 +1,8 @@
 import { BookTextIcon, FolderOpenIcon, HomeIcon, SettingsIcon } from '@zamp-platform/ui';
-import { File, FileText, LucideIcon, Table2 } from 'lucide-react';
-import { DynamicTabType, PaceNavbarItemId, PaceNavbarItemSchema, PaceSettingsTabSchema } from 'modules/pace/pace.types';
+import { PaceNavbarItemId, PaceNavbarItemSchema, PaceSettingsTabSchema } from 'modules/pace/pace.types';
 import Users02 from '@/assets/Icons/Users02';
 import { ROUTES_PATH } from '@/constants/routeConfig';
 import { INPUT_FILE_FORMATS } from '@/types/common/mime';
-
-/**
- * Icon map for dynamic tabs based on their type.
- * Add new entries here when extending DynamicTabType.
- */
-export const DYNAMIC_TAB_ICON_MAP: Record<DynamicTabType, LucideIcon> = {
-  [DynamicTabType.PAGE]: FileText,
-  [DynamicTabType.DATASET]: Table2,
-  [DynamicTabType.FILE]: File,
-};
 
 export const ACCEPTED_FILE_TYPES = `${INPUT_FILE_FORMATS.TXT},${INPUT_FILE_FORMATS.PDF},${INPUT_FILE_FORMATS.JPEG},${INPUT_FILE_FORMATS.JPG},${INPUT_FILE_FORMATS.PNG},${INPUT_FILE_FORMATS.BMP}`;
 

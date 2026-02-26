@@ -6,16 +6,21 @@ import { cn } from '@zamp-platform/ui/utils';
 import Image from 'next/image';
 import ImageLoader from '@/components/common/loader/ImageLoader';
 import { ZAMP_LOGO_LOADER_SVG } from '@/constants/icons';
+import FileNotFoundError from '@/modules/pace/components/file-viewer/FileNotFoundError';
 
 interface ImageViewerProps {
   src: string;
   alt?: string;
   className?: string;
+  fileName?: string;
+  onClose?: () => void;
 }
 
-const ImageViewer = ({ src, alt = 'Image preview', className = '' }: ImageViewerProps) => {
+const ImageViewer = ({ src, alt = 'Image preview', className = '', fileName, onClose }: ImageViewerProps) => {
   const [isLoading, setIsLoading] = useState(true);
   const [isError, setIsError] = useState(false);
+
+  const displayFileName = fileName || decodeURIComponent(src.split('/').pop() || 'image');
 
   const handleImageError = useCallback(
     (e: React.SyntheticEvent<HTMLImageElement>) => {
@@ -33,6 +38,10 @@ const ImageViewer = ({ src, alt = 'Image preview', className = '' }: ImageViewer
     setIsError(false);
   }, []);
 
+  if (isError && onClose) {
+    return <FileNotFoundError fileName={displayFileName} onClose={onClose} />;
+  }
+
   return (
     <div className={cn('relative flex h-full w-full flex-col', className)}>
       <div className='bg-BG_GRAY_1 relative flex-1 overflow-auto'>
@@ -45,7 +54,7 @@ const ImageViewer = ({ src, alt = 'Image preview', className = '' }: ImageViewer
           <ImageLoader imageSrc={ZAMP_LOGO_LOADER_SVG} width={140} height={140} className='bg-BG_GRAY_1' />
         </div>
 
-        {isError && (
+        {isError && !onClose && (
           <div className='flex h-full w-full items-center justify-center'>
             <div className='text-center'>
               <p className='f-14-500 text-GRAY_700'>Failed to load image</p>

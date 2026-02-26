@@ -2,25 +2,18 @@ import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { captureException } from '@sentry/browser';
 import { toast } from '@zamp-platform/ui';
 import { KEYBOARD_KEYS } from '@/constants/shortcuts';
-import { buildFullPath, getParentPath } from '@/modules/pace/components/files/file-tree.utils';
+import {
+  buildFullPath,
+  checkDuplicateName,
+  getFileNameParts,
+  getParentPath,
+} from '@/modules/pace/components/files/file-tree.utils';
 import { FILE_TOAST_MESSAGES } from '@/modules/pace/components/files/files.constants';
 import { useFileViewerContext } from '@/modules/pace/hooks/FileViewerContext';
 import { useFileActions } from '@/modules/pace/hooks/useFileActions';
+import { useSiblingNames } from '@/modules/pace/hooks/useSiblingNames';
 import { useUpdateFileTab } from '@/modules/pace/hooks/useUpdateFileTab';
 import { defaultFnType } from '@/types/commonTypes';
-
-const getFileNameParts = (name: string): { baseName: string; extension: string } => {
-  const lastDotIndex = name.lastIndexOf('.');
-
-  if (lastDotIndex > 0) {
-    return {
-      baseName: name.slice(0, lastDotIndex),
-      extension: name.slice(lastDotIndex),
-    };
-  }
-
-  return { baseName: name, extension: '' };
-};
 
 interface UseFileViewerHeaderRenameProps {
   filePath: string;
@@ -32,6 +25,7 @@ interface UseFileViewerHeaderRenameReturn {
   renameValue: string;
   fileExtension: string;
   isRenameLoading: boolean;
+  isDuplicateName: boolean;
   startRename: defaultFnType;
   setRenameValue: (value: string) => void;
   handleRenameSubmit: () => Promise<void>;
@@ -44,7 +38,7 @@ export const useFileViewerHeaderRename = ({
   fileName,
 }: UseFileViewerHeaderRenameProps): UseFileViewerHeaderRenameReturn => {
   const renameInputRef = useRef<HTMLInputElement | null>(null);
-  const { baseName, extension } = useMemo(() => getFileNameParts(fileName), [fileName]);
+  const { baseName, extension } = useMemo(() => getFileNameParts(fileName, true), [fileName]);
 
   const [isRenaming, setIsRenaming] = useState(false);
   const [renameValue, setRenameValue] = useState(baseName);
@@ -52,6 +46,7 @@ export const useFileViewerHeaderRename = ({
   const { renameItem, isRenaming: isRenameLoading } = useFileActions();
   const { updateFileStatePath } = useFileViewerContext();
   const { updateFileTab } = useUpdateFileTab();
+  const { siblingNames } = useSiblingNames({ filePath });
 
   const fullNewName = useMemo(() => {
     const trimmed = renameValue.trim();
@@ -59,13 +54,19 @@ export const useFileViewerHeaderRename = ({
     return trimmed ? `${trimmed}${extension}` : '';
   }, [renameValue, extension]);
 
+  const isDuplicateName = useMemo(() => {
+    if (!fullNewName || fullNewName === fileName) return false;
+
+    return checkDuplicateName(fullNewName, siblingNames, fileName);
+  }, [fullNewName, siblingNames, fileName]);
+
   const startRename = useCallback(() => {
     setRenameValue(baseName);
     setIsRenaming(true);
   }, [baseName]);
 
   const handleRenameSubmit = useCallback(async () => {
-    if (!fullNewName || fullNewName === fileName) {
+    if (!fullNewName || fullNewName === fileName || isDuplicateName) {
       setIsRenaming(false);
       setRenameValue(baseName);
 
@@ -92,7 +93,7 @@ export const useFileViewerHeaderRename = ({
       setRenameValue(baseName);
       setIsRenaming(false);
     }
-  }, [fullNewName, fileName, baseName, filePath, renameItem, updateFileStatePath, updateFileTab]);
+  }, [fullNewName, fileName, baseName, filePath, isDuplicateName, renameItem, updateFileStatePath, updateFileTab]);
 
   const handleRenameKeyDown = useCallback(
     (e: React.KeyboardEvent<HTMLInputElement>) => {
@@ -125,6 +126,7 @@ export const useFileViewerHeaderRename = ({
     renameValue,
     fileExtension: extension,
     isRenameLoading,
+    isDuplicateName,
     startRename,
     setRenameValue,
     handleRenameSubmit,

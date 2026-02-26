@@ -137,8 +137,10 @@ export const useFileTreeNodeRename = ({
 
   useEffect(() => {
     if (isRenaming && renameInputRef.current) {
-      renameInputRef.current.focus();
-      renameInputRef.current.select();
+      setTimeout(() => {
+        renameInputRef.current?.focus();
+        renameInputRef.current?.select();
+      }, 30);
     }
   }, [isRenaming]);
 

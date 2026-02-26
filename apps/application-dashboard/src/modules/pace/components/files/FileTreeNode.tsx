@@ -18,7 +18,6 @@ import { useFileTreeNodeDragDrop } from '@/modules/pace/hooks/useFileTreeNodeDra
 import { useFileTreeNodeRename } from '@/modules/pace/hooks/useFileTreeNodeRename';
 import { useFileUploadContext } from '@/modules/pace/hooks/useFileUploadContext';
 import { usePaceContext } from '@/modules/pace/pace.context';
-import { DynamicTabType } from '@/modules/pace/pace.types';
 
 const FileTreeNode = memo(function FileTreeNode({
   node,
@@ -162,7 +161,6 @@ const FileTreeNode = memo(function FileTreeNode({
     openDynamicTab({
       id: node.path,
       name: node.name,
-      type: DynamicTabType.FILE,
       path: filePath,
     });
     router.push(filePath);
