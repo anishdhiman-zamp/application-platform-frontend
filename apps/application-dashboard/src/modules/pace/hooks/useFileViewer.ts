@@ -56,7 +56,11 @@ export const useFileViewer = ({ filePath, onSaveSuccess, onSaveError }: UseFileV
   }, [filePath]);
 
   const isEditable = useMemo(() => {
-    return fileCategory === FILE_CATEGORY.CODE || fileCategory === FILE_CATEGORY.MARKDOWN;
+    return (
+      fileCategory === FILE_CATEGORY.CODE ||
+      fileCategory === FILE_CATEGORY.MARKDOWN ||
+      fileCategory === FILE_CATEGORY.HTML
+    );
   }, [fileCategory]);
 
   useEffect(() => {
