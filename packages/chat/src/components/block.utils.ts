@@ -97,6 +97,26 @@ export const formatThinkingDuration = (startTimestamp?: string, stopTimestamp?: 
  * @param jsonString - The JSON string to format
  * @returns Formatted JSON string or original string if parsing fails
  */
+export const buildIntegrationItemFromToolResult = (
+  toolResultData: Record<string, unknown> & { integration_name?: string },
+) => ({
+  title: '',
+  description: '',
+  icon: '',
+  provider: '',
+  connections: [],
+  ...toolResultData,
+  name: toolResultData?.integration_name,
+  auth: [
+    {
+      auth_type: 'connected_url',
+      title: null,
+      description: null,
+      fields: {},
+    },
+  ],
+});
+
 export const formatJson = (jsonString: string | undefined): string => {
   if (!jsonString) return '';
   try {

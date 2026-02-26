@@ -185,6 +185,7 @@ export const API_ENDPOINTS = {
   // Conversations V3
   CREATE_CONVERSATION_V3: `v3/conversations`,
   POST_MESSAGE_V3: `v3/conversations/{{conversationId}}/messages`,
+  LIST_CHAT_MODELS: `v3/conversations/models`,
   // Conversations V2
   FILTER_CONVERSATIONS_V2_GET: `v2/conversations/filter`,
 
@@ -206,6 +207,11 @@ export const API_ENDPOINTS = {
   // Update Conversation Title
   UPDATE_CONVERSATION_TITLE: `v3/conversations/{{conversationId}}/title`,
 
+  //INTEGRATIONS
+  INTEGRATIONS_CATALOG_GET: `integrations/catalog`,
+  INTEGRATIONS_CATALOG_ENABLED_GET: `integrations/catalog/enabled`,
+  INTEGRATIONS_CONNECTIONS_DELETE: `integrations/connections/{{connectionId}}`,
+  INTEGRATIONS_AUTHENTICATE_V2_POST: `integrations/authenticate`,
   // Filesystem API
   FILESYSTEM_STATUS_GET: `filesystem/status`,
   FILES_LIST_GET: `files`,

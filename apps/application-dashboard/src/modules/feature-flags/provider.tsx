@@ -3,7 +3,6 @@
 import { ReactNode, useMemo } from 'react';
 import { LAUNCH_DARKLY_CLIENT_SIDE_ID } from 'constants/featureFlags';
 import { LDProvider } from 'launchdarkly-react-client-sdk';
-import { ENVIRONMENT } from '@/constants/common.constants';
 import { getUserSession } from '@/utils/cookie';
 
 type Props = {
@@ -22,10 +21,6 @@ export const FeatureFlagsProvider = ({ children }: Props) => {
     }),
     [userSession?.user_id, userSession?.user_email, userSession?.default_org_id],
   );
-
-  if (ENVIRONMENT === 'local') {
-    return children;
-  }
 
   return (
     <LDProvider clientSideID={LAUNCH_DARKLY_CLIENT_SIDE_ID} context={context}>

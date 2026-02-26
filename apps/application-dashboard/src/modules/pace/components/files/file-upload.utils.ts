@@ -1,17 +1,17 @@
 'use client';
 
+import {
+  DEFAULT_CHUNK_SIZE,
+  DIRECT_UPLOAD_THRESHOLD_BYTES,
+  MAX_CHUNK_RETRIES,
+  PARALLEL_CHUNK_CONCURRENCY,
+} from 'modules/pace/components/files/files.constants';
 import type {
   CompleteUploadResponse,
   DirectUploadResponse,
   InitUploadResponse,
   UploadChunkResponse,
 } from '@/types/api/filesystem.types';
-
-export const DIRECT_UPLOAD_THRESHOLD_BYTES = 1 * 1024 * 1024; // 1MB
-export const DEFAULT_CHUNK_SIZE = 6 * 1024 * 1024; // 6MB chunk size
-export const PARALLEL_CHUNK_CONCURRENCY = 6; // Upload 6 chunks in parallel
-export const MAX_CHUNK_RETRIES = 3; // Retry failed chunks up to 3 times
-export const MAX_FOLDER_UPLOAD_FILES = 200;
 
 export interface UploadCallbacks {
   onProgress?: (loaded: number, total: number) => void;
@@ -20,17 +20,23 @@ export interface UploadCallbacks {
   onCancel?: () => void;
 }
 
-export interface UploadMutations {
+export interface DirectUploadMutation {
   directUpload: (args: {
     path: string;
     file: File;
     skipInvalidation?: boolean;
   }) => Promise<{ data: DirectUploadResponse }>;
+}
+
+export interface InitChunkedUploadMutation {
   initChunkedUpload: (args: {
     path: string;
     file_name: string;
     total_bytes: number;
   }) => Promise<{ data: InitUploadResponse }>;
+}
+
+export interface UploadChunkMutation {
   uploadChunk: (args: {
     upload_id: string;
     chunk_index: number;
@@ -38,12 +44,23 @@ export interface UploadMutations {
     data: Blob;
     signal?: AbortSignal;
   }) => Promise<{ data: UploadChunkResponse }>;
+}
+
+export interface CompleteUploadMutation {
   completeUpload: (args: {
     upload_id: string;
     skipInvalidation?: boolean;
   }) => Promise<{ data: CompleteUploadResponse }>;
+}
+
+export interface CancelUploadMutation {
   cancelUpload: (args: { upload_id: string }) => Promise<unknown>;
 }
+
+export interface ChunkedUploadMutations
+  extends InitChunkedUploadMutation, UploadChunkMutation, CompleteUploadMutation, CancelUploadMutation {}
+
+export interface UploadMutations extends DirectUploadMutation, ChunkedUploadMutations {}
 
 export const shouldUseChunkedUpload = (fileSize: number): boolean => {
   return fileSize >= DIRECT_UPLOAD_THRESHOLD_BYTES;
@@ -58,7 +75,7 @@ interface ChunkUploadArgs {
 }
 
 const uploadChunkWithRetry = async (
-  mutations: Pick<UploadMutations, 'uploadChunk'>,
+  mutations: UploadChunkMutation,
   args: ChunkUploadArgs,
   maxRetries: number = MAX_CHUNK_RETRIES,
 ): Promise<UploadChunkResponse> => {
@@ -121,7 +138,7 @@ const uploadChunksInParallel = async (
   file: File,
   uploadId: string,
   chunks: ChunkInfo[],
-  mutations: Pick<UploadMutations, 'uploadChunk' | 'cancelUpload'>,
+  mutations: UploadChunkMutation & CancelUploadMutation,
   abortSignal: AbortSignal | undefined,
   onChunkComplete: (chunkEnd: number) => void,
 ): Promise<void> => {
@@ -215,7 +232,7 @@ export const getTargetPath = (basePath: string, fileName: string): string => {
 export const uploadFileDirectly = async (
   file: File,
   targetPath: string,
-  mutations: Pick<UploadMutations, 'directUpload'>,
+  mutations: DirectUploadMutation,
   callbacks?: UploadCallbacks,
   skipInvalidation?: boolean,
 ): Promise<DirectUploadResponse> => {
@@ -237,7 +254,7 @@ export const uploadFileDirectly = async (
 export const uploadFileChunked = async (
   file: File,
   targetPath: string,
-  mutations: Omit<UploadMutations, 'directUpload'>,
+  mutations: ChunkedUploadMutations,
   callbacks?: UploadCallbacks,
   abortSignal?: AbortSignal,
   skipInvalidation?: boolean,
@@ -361,9 +378,7 @@ export interface FileWithRelativePath {
 export const extractFilesWithPaths = (files: FileList): FileWithRelativePath[] => {
   const result: FileWithRelativePath[] = [];
 
-  for (let i = 0; i < files.length; i++) {
-    const file = files[i];
-
+  for (const file of files) {
     if (file.webkitRelativePath) {
       result.push({
         file,
@@ -386,15 +401,6 @@ export const getRootFolderName = (files: FileWithRelativePath[]): string => {
   const firstSlash = firstPath.indexOf('/');
 
   return firstSlash > 0 ? firstPath.substring(0, firstSlash) : firstPath;
-};
-
-/**
- * Get the full target path for a file within the folder upload
- */
-export const getFileTargetPath = (basePath: string, relativePath: string): string => {
-  const normalizedBase = basePath.endsWith('/') ? basePath.slice(0, -1) : basePath;
-
-  return `${normalizedBase}/${relativePath}`;
 };
 
 /**

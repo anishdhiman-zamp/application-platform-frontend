@@ -2,6 +2,7 @@ import { FC, ReactNode, RefObject, useCallback, useEffect, useMemo, useRef, useS
 import {
   type CellClickedEvent,
   CellDoubleClickedEvent,
+  CellEditingStartedEvent,
   CellEditRequestEvent,
   CellFocusedEvent,
   CellStyleModule,
@@ -19,6 +20,7 @@ import {
   GetContextMenuItemsParams,
   type GetRowIdParams,
   GridReadyEvent,
+  type IRowNode,
   IServerSideDatasource,
   ModuleRegistry,
   NumberEditorModule,
@@ -125,6 +127,15 @@ ModuleRegistry.registerModules([
   PaginationModule,
 ]);
 
+// --- Pending edit tracking for flush-on-unmount ---
+interface PendingEdit {
+  node: IRowNode;
+  colId: string;
+  oldValue: unknown;
+  latestValue?: unknown; // undefined means no keystrokes captured yet
+  inputCleanup?: () => void;
+}
+
 interface TableProps {
   tableRef?: RefObject<AgGridReact | null>;
   rows?: MapAny[];
@@ -142,6 +153,7 @@ interface TableProps {
   suppressCellFocus?: boolean;
   onColumnVisible?: (event: ColumnVisibleEvent) => void;
   onCellEditRequest?: (event: CellEditRequestEvent) => void;
+  onFlushPendingEdit?: (params: { node: IRowNode; colId: string; value: unknown }) => void;
   onFillEnd?: (event: FillEndEvent) => void;
   onRowClicked?: (event: RowClickedEvent) => void;
   onDrilldownClick?: (data: MapAny) => void;
@@ -193,6 +205,7 @@ const Table: FC<TableProps> = ({
   suppressCellFocus = false,
   onColumnVisible,
   onCellEditRequest,
+  onFlushPendingEdit,
   onFillEnd,
   onRowClicked,
   onDrilldownClick,
@@ -216,6 +229,95 @@ const Table: FC<TableProps> = ({
   const gridContainerRef = useRef<HTMLDivElement | null>(null);
   const doubleClickTimerRef = useRef<NodeJS.Timeout | null>(null);
   const [linkPopover, setLinkPopover] = useState<{ url: string; cellRect: DOMRect; gridRect: DOMRect } | null>(null);
+
+  // --- Pending edit tracking for flush-on-unmount ---
+  const pendingEditRef = useRef<PendingEdit | null>(null);
+  const flushCallbackRef = useRef(onFlushPendingEdit);
+
+  const handleCellEditingStarted = useCallback((event: CellEditingStartedEvent) => {
+    const colId = event.column.getColId();
+    const node = event.node;
+    const oldValue = node.data?.[colId];
+
+    // Store the editing context
+    pendingEditRef.current = { node, colId, oldValue };
+
+    // Attach a DOM input listener to track the latest typed value.
+    // This avoids needing getCellEditorInstances() at cleanup time.
+    const attachInputListener = () => {
+      const editingCell = document.querySelector('.ag-cell-inline-editing');
+
+      if (!editingCell) return false;
+
+      const input = editingCell.querySelector<HTMLInputElement | HTMLTextAreaElement>('input, textarea');
+
+      if (!input || !pendingEditRef.current) return false;
+
+      const handler = (e: Event) => {
+        if (pendingEditRef.current) {
+          pendingEditRef.current.latestValue = (e.target as HTMLInputElement).value;
+        }
+      };
+
+      input.addEventListener('input', handler);
+
+      // Capture the current input value (handles case where editor pre-fills)
+      pendingEditRef.current.latestValue = input.value;
+      pendingEditRef.current.inputCleanup = () => {
+        input.removeEventListener('input', handler);
+      };
+
+      return true;
+    };
+
+    // Try synchronously first (works for built-in editors whose DOM is ready immediately).
+    // Fall back to setTimeout(0) for custom React editors whose DOM renders async.
+    if (!attachInputListener()) {
+      setTimeout(attachInputListener, 0);
+    }
+  }, []);
+
+  const handleCellEditingStopped = useCallback(() => {
+    // Edit completed normally (Enter, Tab, click outside, or Escape).
+    // The normal onCellEditRequest flow already handled committed edits.
+    // Escape discards the edit (correct — user explicitly cancelled).
+    // Either way, clear the pending edit so unmount cleanup won't flush.
+    const pending = pendingEditRef.current;
+
+    if (pending?.inputCleanup) {
+      pending.inputCleanup();
+    }
+    pendingEditRef.current = null;
+  }, []);
+
+  // Keep flush callback ref in sync with latest prop
+  useEffect(() => {
+    flushCallbackRef.current = onFlushPendingEdit;
+  }, [onFlushPendingEdit]);
+
+  // Flush pending edit on unmount ONLY
+  useEffect(() => {
+    return () => {
+      const pending = pendingEditRef.current;
+
+      if (!pending) return;
+
+      // Clean up DOM listener
+      pending.inputCleanup?.();
+
+      // Only flush if we captured a typed value AND it differs from the original
+      if (pending.latestValue !== undefined && pending.latestValue !== pending.oldValue) {
+        flushCallbackRef.current?.({
+          node: pending.node,
+          colId: pending.colId,
+          value: pending.latestValue,
+        });
+      }
+
+      pendingEditRef.current = null;
+    };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
 
   const checkIsMissingField = useCallback(
     (params: MapAny) => {
@@ -513,6 +615,8 @@ const Table: FC<TableProps> = ({
           onColumnVisible={onColumnVisible}
           readOnlyEdit
           onCellEditRequest={onCellEditRequest}
+          onCellEditingStarted={handleCellEditingStarted}
+          onCellEditingStopped={handleCellEditingStopped}
           onFillEnd={onFillEnd}
           onRowClicked={onRowClicked}
           getContextMenuItems={getContextMenuItems}

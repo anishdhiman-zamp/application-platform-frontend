@@ -1,17 +1,14 @@
+import { getIntegrations } from '@/constants/integrations.constants';
 import IntegrationHeader from '@/modules/integrations/AllIntegrations/IntegrationHeader';
 import IntegrationsGrid from '@/modules/integrations/AllIntegrations/IntegrationsGrid';
-import {
-  fetchIntegrations,
-  filterIntegrations,
-  splitIntegrations,
-} from '@/modules/integrations/utils/integrations.utils';
+import { filterIntegrations, splitIntegrations } from '@/modules/integrations/utils/integrations.utils';
 
 interface IntegrationsPageProps {
   searchParams: Promise<{ search?: string }>;
 }
 
 const IntegrationsPage = async ({ searchParams }: IntegrationsPageProps) => {
-  const integrations = await fetchIntegrations();
+  const integrations = getIntegrations();
 
   const { search = '' } = await searchParams;
 
