@@ -11,10 +11,11 @@ interface FileSaveStatusProps {
 }
 
 const FileSaveStatus = ({ isSaving, lastSavedAt }: FileSaveStatusProps) => {
+  const prevIsSavingRef = useRef(isSaving);
+  const savedTimeoutRef = useRef<NodeJS.Timeout | null>(null);
+
   const [status, setStatus] = useState<SaveStatus>(SAVE_STATUS.IDLE);
   const [relativeTime, setRelativeTime] = useState<string | null>(null);
-  const savedTimeoutRef = useRef<NodeJS.Timeout | null>(null);
-  const prevIsSavingRef = useRef(isSaving);
 
   useEffect(() => {
     if (isSaving && !prevIsSavingRef.current) {
