@@ -34,7 +34,7 @@ export interface IntegrationEvent {
 }
 
 export interface IntegrationType {
-  name: string;
+  name?: string;
   id: string;
   display_name: string;
   logo: string;
