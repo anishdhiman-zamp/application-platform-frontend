@@ -1,11 +1,13 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { captureException } from '@sentry/browser';
 import { toast } from '@zamp-platform/ui';
+import { KEYBOARD_KEYS } from '@/constants/shortcuts';
 import { buildFullPath, getParentPath } from '@/modules/pace/components/files/file-tree.utils';
 import { FILE_TOAST_MESSAGES } from '@/modules/pace/components/files/files.constants';
 import { useFileViewerContext } from '@/modules/pace/hooks/FileViewerContext';
 import { useFileActions } from '@/modules/pace/hooks/useFileActions';
 import { useUpdateFileTab } from '@/modules/pace/hooks/useUpdateFileTab';
+import { defaultFnType } from '@/types/commonTypes';
 
 const getFileNameParts = (name: string): { baseName: string; extension: string } => {
   const lastDotIndex = name.lastIndexOf('.');
@@ -30,7 +32,7 @@ interface UseFileViewerHeaderRenameReturn {
   renameValue: string;
   fileExtension: string;
   isRenameLoading: boolean;
-  startRename: () => void;
+  startRename: defaultFnType;
   setRenameValue: (value: string) => void;
   handleRenameSubmit: () => Promise<void>;
   handleRenameKeyDown: (e: React.KeyboardEvent<HTMLInputElement>) => void;
@@ -41,11 +43,11 @@ export const useFileViewerHeaderRename = ({
   filePath,
   fileName,
 }: UseFileViewerHeaderRenameProps): UseFileViewerHeaderRenameReturn => {
+  const renameInputRef = useRef<HTMLInputElement | null>(null);
   const { baseName, extension } = useMemo(() => getFileNameParts(fileName), [fileName]);
 
   const [isRenaming, setIsRenaming] = useState(false);
   const [renameValue, setRenameValue] = useState(baseName);
-  const renameInputRef = useRef<HTMLInputElement | null>(null);
 
   const { renameItem, isRenaming: isRenameLoading } = useFileActions();
   const { updateFileStatePath } = useFileViewerContext();
@@ -96,10 +98,10 @@ export const useFileViewerHeaderRename = ({
     (e: React.KeyboardEvent<HTMLInputElement>) => {
       e.stopPropagation();
 
-      if (e.key === 'Enter') {
+      if (e.key === KEYBOARD_KEYS.ENTER) {
         e.preventDefault();
         handleRenameSubmit();
-      } else if (e.key === 'Escape') {
+      } else if (e.key === KEYBOARD_KEYS.ESCAPE) {
         setIsRenaming(false);
         setRenameValue(baseName);
       }
