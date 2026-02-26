@@ -2,6 +2,7 @@ import { ResourceAudienceType } from 'types/api/auth.types';
 import { FilterModelType } from 'types/components/table.type';
 
 export type AudiencesByResourceIdRequest = {
+  apiEndpoint: string;
   resourceRoute: string;
   resourceId: string;
 };
@@ -22,12 +23,12 @@ export type DeleteAudiencesFromResourcePayload = {
 
 type withResource<T> = T & AudiencesByResourceIdRequest;
 
-export type ChangeAudienceRoleInResourcePayload = withResource<{
+export type ChangeAudienceRoleInResourcePayload = {
   audience_id: string;
   role: string;
   fgac_filters?: FilterModelType | null;
   audience_type: string;
-}>;
+};
 
 export type PostShareResourceToAudiencesType = withResource<{
   body: AddAudiencesToResourcePayload;

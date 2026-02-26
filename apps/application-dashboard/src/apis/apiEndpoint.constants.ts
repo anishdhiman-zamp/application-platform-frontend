@@ -132,10 +132,17 @@ export const API_ENDPOINTS = {
   POLICY_APPROVE_POST: `/approval/approve`,
   POLICY_REJECT_POST: `/approval/reject`,
 
+  // v1 endpoints -->
   RESOURCE_AUDIENCES_BY_RESOURCE_ID_GET: `{{resourceRoute}}/{{resourceId}}/audiences`,
   SHARE_RESOURCE_TO_AUDIENCES_POST: `{{resourceRoute}}/{{resourceId}}/audiences`,
   CHANGE_AUDIENCE_ROLE_IN_RESOURCE_PATCH: `{{resourceRoute}}/{{resourceId}}/audiences`,
   DELETE_RESOURCE_FROM_AUDIENCES: `{{resourceRoute}}/{{resourceId}}/audiences`,
+  // v2 endpoints -->
+  RESOURCE_AUDIENCES_BY_RESOURCE_ID_GET_V2: `access-control/{{resourceRoute}}/{{resourceId}}/audiences`,
+  SHARE_RESOURCE_TO_AUDIENCES_POST_V2: `access-control/{{resourceRoute}}/{{resourceId}}/audiences`,
+  CHANGE_AUDIENCE_ROLE_IN_RESOURCE_PATCH_V2: `access-control/{{resourceRoute}}/{{resourceId}}/audiences`,
+  DELETE_RESOURCE_FROM_AUDIENCES_V2: `access-control/{{resourceRoute}}/{{resourceId}}/audiences`,
+
   FORMS_CONFIG_GET: `v1/forms/config`,
   FORMS_SUBMIT: `v1/forms/submissions`,
 

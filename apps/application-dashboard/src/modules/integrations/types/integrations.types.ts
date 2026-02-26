@@ -1,5 +1,6 @@
 import type { ReactNode } from 'react';
 import { FormField } from '@zamp-platform/form-builder';
+import type { IntegrationConnection } from '@/types/api/integrations';
 
 export const enum ACTION_TYPE {
   TOOL_CALL = 'tool_call',
@@ -33,13 +34,16 @@ export interface IntegrationEvent {
 }
 
 export interface IntegrationType {
+  name: string;
   id: string;
   display_name: string;
   logo: string;
+  description?: string;
   what_possible: string[];
   guide: string;
   auth?: string;
   events?: IntegrationEvent[];
+  connectionMetadata?: IntegrationConnection;
 }
 
 export interface IntegrationsDataType {
