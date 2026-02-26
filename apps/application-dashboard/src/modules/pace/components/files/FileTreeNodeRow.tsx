@@ -35,6 +35,7 @@ interface FileTreeNodeRowRename {
 
 interface FileTreeNodeRowHandlers {
   onRowClick: () => void;
+  onRowDoubleClick?: () => void;
   onChevronClick: (e: React.MouseEvent) => void;
   onDragStart: (e: React.DragEvent) => void;
   onDragEnd: () => void;
@@ -60,9 +61,10 @@ const FileTreeNodeRow = forwardRef<HTMLDivElement, FileTreeNodeRowProps>(
       <div
         ref={ref}
         role='button'
-        tabIndex={isDisabled ? -1 : 0}
+        tabIndex={isDisabled || state.isRenaming ? -1 : 0}
         draggable={!state.isRenaming && !state.isProtected && !isDisabled}
         onClick={isDisabled ? undefined : handlers.onRowClick}
+        onDoubleClick={isDisabled ? undefined : handlers.onRowDoubleClick}
         onDragStart={isDisabled ? undefined : handlers.onDragStart}
         onDragEnd={isDisabled ? undefined : handlers.onDragEnd}
         onDragOver={isDisabled ? undefined : handlers.onDragOver}
@@ -118,34 +120,40 @@ const FileTreeNodeRow = forwardRef<HTMLDivElement, FileTreeNodeRowProps>(
             height={20}
             className='shrink-0'
             unoptimized
+            priority
           />
         ) : (
           <FileIcon extension={extension || 'txt'} size='sm' />
         )}
 
         {state.isRenaming ? (
-          <TooltipV2
-            tooltipBody='A file or folder with this name already exists.'
-            side={SIDE_OPTIONS.BOTTOM}
-            open={state.isDuplicateName}
-            delayDuration={0}
-            tooltipClassName='bg-RED_100 text-RED_700 border-RED_300 border'
-            asChildTrigger
-          >
-            <Input
-              ref={rename.onInputRef}
-              value={rename.value}
-              onChange={(e) => rename.onChange(e.target.value)}
-              onBlur={rename.onSubmit}
-              onKeyDown={rename.onKeyDown}
-              size='small'
-              className={cn(
-                'h-5! min-w-0 flex-1 p-0.5 text-[13px]! leading-4! font-normal!',
-                state.isDuplicateName && 'border-RED_700! focus:shadow-input-error-outline-shadow',
-              )}
-              onClick={(e) => e.stopPropagation()}
-            />
-          </TooltipV2>
+          <div className='flex min-w-0 flex-1 items-center'>
+            <TooltipV2
+              tooltipBody='A file or folder with this name already exists.'
+              side={SIDE_OPTIONS.BOTTOM}
+              open={state.isDuplicateName}
+              delayDuration={0}
+              tooltipClassName='bg-RED_100 text-RED_700 border-RED_300 border'
+              asChildTrigger
+            >
+              <Input
+                ref={rename.onInputRef}
+                autoFocus
+                autoComplete='off'
+                value={rename.value}
+                onChange={(e) => rename.onChange(e.target.value)}
+                onBlur={rename.onSubmit}
+                onKeyDown={rename.onKeyDown}
+                size='small'
+                className={cn(
+                  'h-5! min-w-0 flex-1 p-0.5 text-[13px]! leading-4! font-normal!',
+                  state.isDuplicateName && 'border-RED_700! focus:shadow-input-error-outline-shadow',
+                )}
+                onClick={(e) => e.stopPropagation()}
+              />
+            </TooltipV2>
+            {extension && <span className='f-13-450 text-GRAY_600 shrink-0 select-none'>.{extension}</span>}
+          </div>
         ) : (
           <span className='f-13-450 text-GRAY_1000 truncate select-none'>
             {state.isUserPrivateFolder ? `${node.name} (Private)` : node.name}

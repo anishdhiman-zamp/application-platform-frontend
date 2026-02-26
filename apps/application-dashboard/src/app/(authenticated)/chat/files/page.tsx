@@ -1,60 +1,13 @@
-'use client';
+import FilesPageContent from '@/modules/pace/components/files/FilesPageContent';
 
-import { useCallback, useRef, useState } from 'react';
-import type { FileItem } from '@/modules/pace/components/files/file-tree.types';
-import FilesHeader from '@/modules/pace/components/files/FilesHeader';
-import FilesHierarchy from '@/modules/pace/components/files/FilesHierarchy';
-import FilesPreview from '@/modules/pace/components/files/FilesPreview';
+interface FilesPageProps {
+  searchParams: Promise<{ f?: string }>;
+}
 
-const FilesPage = () => {
-  const [selectedFile, setSelectedFile] = useState<FileItem | null>(null);
-  const selectedFileRef = useRef<FileItem | null>(null);
+const FilesPage = async ({ searchParams }: FilesPageProps) => {
+  const { f: filePath = null } = await searchParams;
 
-  selectedFileRef.current = selectedFile;
-
-  const handleFileMoved = useCallback((oldPath: string, newFile: FileItem) => {
-    const currentSelected = selectedFileRef.current;
-
-    if (currentSelected?.path === oldPath) {
-      setSelectedFile(newFile);
-    } else if (currentSelected?.path.startsWith(oldPath + '/')) {
-      const relativePath = currentSelected.path.slice(oldPath.length);
-
-      setSelectedFile({
-        ...currentSelected,
-        path: newFile.path + relativePath,
-        mtime_ms: Date.now(),
-      });
-    }
-  }, []);
-
-  const handleFileDeleted = useCallback((deletedPath: string) => {
-    const currentSelected = selectedFileRef.current;
-
-    if (currentSelected?.path === deletedPath || currentSelected?.path.startsWith(deletedPath + '/')) {
-      setSelectedFile(null);
-    }
-  }, []);
-
-  const handleFileCreated = useCallback((newFile: FileItem) => {
-    setSelectedFile(newFile);
-  }, []);
-
-  return (
-    <div className='mx-auto flex h-full w-full max-w-[1024px] flex-col gap-y-4 pt-15'>
-      <FilesHeader />
-      <div className='border-GRAY_400 flex h-full overflow-hidden rounded-t-xl border'>
-        <FilesHierarchy
-          selectedFile={selectedFile}
-          onSelectFile={setSelectedFile}
-          onFileMoved={handleFileMoved}
-          onFileDeleted={handleFileDeleted}
-          onFileCreated={handleFileCreated}
-        />
-        <FilesPreview selectedFile={selectedFile} />
-      </div>
-    </div>
-  );
+  return <FilesPageContent filePath={filePath} />;
 };
 
 export default FilesPage;

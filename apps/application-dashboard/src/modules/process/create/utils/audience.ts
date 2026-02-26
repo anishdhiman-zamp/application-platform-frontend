@@ -1,4 +1,5 @@
 import { getFromLocalStorage, LOCAL_STORAGE_KEYS } from '@zamp-platform/utils';
+import { API_ENDPOINTS } from 'apis/apiEndpoint.constants';
 import { collaborationEndpoints } from '@/apis/collaboration';
 import { ArrayListOption } from '@/components/multiSelectInput/multiSelectInput.types';
 import { APITags } from '@/constants/api.constants';
@@ -61,6 +62,7 @@ export const shareProcessWithAudiences = async (processId: string, audiences: Ar
     await store
       .dispatch(
         collaborationEndpoints.postShareResourceToAudiences.initiate({
+          apiEndpoint: API_ENDPOINTS.SHARE_RESOURCE_TO_AUDIENCES_POST,
           resourceRoute,
           resourceId: processId,
           body: shareData,

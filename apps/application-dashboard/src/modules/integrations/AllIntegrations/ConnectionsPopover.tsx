@@ -1,17 +1,17 @@
 'use client';
 
-import { type FC, useCallback, useEffect, useRef, useState } from 'react';
+import { type FC, useCallback, useState } from 'react';
 import {
-  Accordion,
-  AccordionContent,
-  AccordionItem,
-  AccordionTrigger,
   Button,
   Popover,
   PopoverContent,
   PopoverPortal,
   PopoverTrigger,
   toast,
+  Tooltip,
+  TooltipContent,
+  TooltipProvider,
+  TooltipTrigger,
 } from '@zamp-platform/ui';
 import { Link2 } from 'lucide-react';
 import { useDeleteIntegrationConnectionMutation } from '@/apis/integrations';
@@ -25,7 +25,6 @@ interface ConnectionsPopoverProps {
 
 const ConnectionsPopover: FC<ConnectionsPopoverProps> = ({ integrationName, connections }) => {
   const [isPopoverOpen, setIsPopoverOpen] = useState(false);
-  const closeTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   const [deleteIntegrationConnection, { isLoading: isDeletingConnection }] = useDeleteIntegrationConnectionMutation();
   const [deletingConnectionId, setDeletingConnectionId] = useState<string | null>(null);
   const integrationsContext = useOptionalIntegrationsContext();
@@ -49,95 +48,56 @@ const ConnectionsPopover: FC<ConnectionsPopoverProps> = ({ integrationName, conn
     [deleteIntegrationConnection, integrationsContext, integrationName],
   );
 
-  const handleMouseEnter = useCallback(() => {
-    if (closeTimeoutRef.current) {
-      clearTimeout(closeTimeoutRef.current);
-      closeTimeoutRef.current = null;
-    }
-    setIsPopoverOpen(true);
-  }, []);
-
-  const handleMouseLeave = useCallback(() => {
-    closeTimeoutRef.current = setTimeout(() => {
-      setIsPopoverOpen(false);
-    }, 150);
-  }, []);
-
-  useEffect(() => {
-    return () => {
-      if (closeTimeoutRef.current) {
-        clearTimeout(closeTimeoutRef.current);
-      }
-    };
-  }, []);
-
   return (
     <Popover open={isPopoverOpen} onOpenChange={setIsPopoverOpen}>
-      <PopoverTrigger asChild>
-        <div
-          className='f-12-500 flex cursor-default items-center gap-x-1'
-          onMouseEnter={handleMouseEnter}
-          onMouseLeave={handleMouseLeave}
-        >
-          <Link2 size={14} className='-rotate-45' />
-          {connections?.length}
-        </div>
-      </PopoverTrigger>
+      <TooltipProvider delayDuration={300}>
+        <Tooltip open={isPopoverOpen ? false : undefined}>
+          <PopoverTrigger asChild>
+            <TooltipTrigger asChild>
+              <div className='actions-bar f-12-500 hover:bg-GRAY_100 flex cursor-pointer items-center gap-x-1 rounded-sm px-1 py-0.5'>
+                <Link2 size={14} className='-rotate-45' />
+                {connections?.length}
+              </div>
+            </TooltipTrigger>
+          </PopoverTrigger>
+          <TooltipContent side='bottom' align='start'>
+            <span className='f-10-450'>
+              {connections?.length} {connections?.length === 1 ? 'connection' : 'connections'}
+            </span>
+          </TooltipContent>
+        </Tooltip>
+      </TooltipProvider>
       <PopoverPortal>
         <PopoverContent
-          className='max-h-[300px] w-[400px] overflow-auto p-1'
+          className='max-h-[300px] w-[250px] overflow-auto p-1'
+          align='start'
           avoidCollisions={false}
-          onMouseEnter={handleMouseEnter}
-          onMouseLeave={handleMouseLeave}
           onOpenAutoFocus={(e) => e.preventDefault()}
         >
-          <Accordion type='single' collapsible>
-            {connections.map((connection) => {
-              const { id, name, description, status, ...metadata } = connection;
-              const hasMetadata = Object.keys(metadata).length > 0;
-
-              return (
-                <AccordionItem key={id} value={id ?? ''} className='border-b-GRAY_100 last:border-b-0'>
-                  <AccordionTrigger
-                    icon={() => null}
-                    className='hover:bg-GRAY_50 flex items-center justify-between gap-x-2 rounded-md px-2 py-1.5'
-                  >
-                    <span className='f-12-500 text-GRAY_900 flex-1 truncate text-left'>{name ?? id}</span>
-                    <Button
-                      variant='outline'
-                      size='xsmall'
-                      isLoading={deletingConnectionId === id && isDeletingConnection}
-                      className='f-11-500 shrink-0 bg-white px-1.5 py-1 hover:bg-white'
-                      onClick={(e) => {
-                        e.stopPropagation();
-                        handleRemoveClick(id ?? '');
-                      }}
-                    >
-                      Remove
-                    </Button>
-                  </AccordionTrigger>
-                  <AccordionContent className='max-h-[300px] overflow-y-auto px-2 pb-2'>
-                    {status && (
-                      <p className='f-11-400 text-GRAY_600 mb-1'>
-                        Status: <span className='f-11-500'>{status}</span>
-                      </p>
-                    )}
-                    {description && (
-                      <p className='f-11-400 text-GRAY_600 mb-1'>
-                        Description: <span className='f-11-500'>{description}</span>
-                      </p>
-                    )}
-
-                    {hasMetadata && (
-                      <pre className='bg-GRAY_50 text-GRAY_700 f-11-400 overflow-x-auto rounded-md p-2'>
-                        {JSON.stringify(metadata, null, 2)}
-                      </pre>
-                    )}
-                  </AccordionContent>
-                </AccordionItem>
-              );
-            })}
-          </Accordion>
+          <div>
+            {connections.map((connection) => (
+              <div
+                key={connection?.id}
+                className='text-GRAY_900 hover:bg-GRAY_50 border-b-GRAY_100 flex items-center justify-between gap-x-2 rounded-md px-2 py-1.5 text-sm font-medium last:border-b-0'
+              >
+                <span className='f-12-500 text-GRAY_900 w-fit flex-1 truncate text-left'>
+                  {connection?.name ?? connection?.id}
+                </span>
+                <Button
+                  variant='outline'
+                  size='xsmall'
+                  isLoading={deletingConnectionId === (connection?.id ?? '') && isDeletingConnection}
+                  className='f-11-500 shrink-0 bg-white px-1.5 py-1 hover:bg-white'
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    handleRemoveClick(connection?.id ?? '');
+                  }}
+                >
+                  Remove
+                </Button>
+              </div>
+            ))}
+          </div>
         </PopoverContent>
       </PopoverPortal>
     </Popover>

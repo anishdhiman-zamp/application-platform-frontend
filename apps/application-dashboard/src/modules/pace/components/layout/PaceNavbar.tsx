@@ -17,6 +17,7 @@ import DynamicTabItem from 'modules/pace/components/layout/DynamicTabItem';
 import { PaceNavbarItemId } from 'modules/pace/pace.types';
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
+import { useIsMacsFileSystemEnabled } from '@/hooks/useIsMacsFileSystemEnabled';
 import SortableDynamicTabItem from '@/modules/pace/components/layout/SortableDynamicTabItem';
 import { useDynamicTabs } from '@/modules/pace/hooks/useDynamicTabs';
 import { PACE_NAVBAR_ITEMS } from '@/modules/pace/pace.constants';
@@ -27,13 +28,24 @@ const PaceNavbar = () => {
   const { setIsPaceSidebarOpen, startNewChat } = usePaceContext();
   const { dynamicTabs, isDynamicTabActive, isOnAnyDynamicTab, handleCloseDynamicTab, handleReorderTabs } =
     useDynamicTabs();
+  const { isMacsFileSystemEnabled } = useIsMacsFileSystemEnabled();
 
   const [activeId, setActiveId] = useState<string | null>(null);
   const sensors = useSensors(useSensor(PointerSensor, { activationConstraint: { distance: 5 } }));
 
-  const tabIds = useMemo(() => dynamicTabs.map((tab) => tab.id), [dynamicTabs]);
+  const tabStableKeys = useMemo(() => dynamicTabs.map((tab) => tab.stableKey), [dynamicTabs]);
 
-  const activeTab = useMemo(() => dynamicTabs.find((tab) => tab.id === activeId), [dynamicTabs, activeId]);
+  const filteredNavbarItems = useMemo(() => {
+    return PACE_NAVBAR_ITEMS.filter((item) => {
+      if (item.id === PaceNavbarItemId.FILES) {
+        return isMacsFileSystemEnabled;
+      }
+
+      return true;
+    });
+  }, [isMacsFileSystemEnabled]);
+
+  const activeTab = useMemo(() => dynamicTabs.find((tab) => tab.stableKey === activeId), [dynamicTabs, activeId]);
 
   const handleDragStart = (event: DragStartEvent) => {
     setActiveId(event.active.id as string);
@@ -45,11 +57,11 @@ const PaceNavbar = () => {
     setActiveId(null);
 
     if (active.id !== over?.id) {
-      const oldIndex = tabIds.indexOf(active.id as string);
-      const newIndex = tabIds.indexOf((over?.id as string) ?? '');
+      const oldIndex = tabStableKeys.indexOf(active.id as string);
+      const newIndex = tabStableKeys.indexOf((over?.id as string) ?? '');
 
       if (oldIndex !== -1 && newIndex !== -1) {
-        const newOrder = arrayMove(tabIds, oldIndex, newIndex);
+        const newOrder = arrayMove(dynamicTabs, oldIndex, newIndex).map((tab) => tab.id);
 
         handleReorderTabs(newOrder);
       }
@@ -61,8 +73,8 @@ const PaceNavbar = () => {
       return pathname === path;
     }
 
-    if (id === PaceNavbarItemId.ARTIFACTS) {
-      if (isOnAnyDynamicTab()) return false;
+    if (isOnAnyDynamicTab()) {
+      return false;
     }
 
     return pathname?.includes(path) ?? false;
@@ -79,7 +91,7 @@ const PaceNavbar = () => {
     <div className='flex h-[38px] items-center overflow-hidden px-2 pt-1.5 pb-1'>
       {/* Static navbar items */}
       <div className='flex shrink-0 items-center gap-x-2'>
-        {PACE_NAVBAR_ITEMS.map((item) => (
+        {filteredNavbarItems.map((item) => (
           <Link
             key={item.id}
             href={item.path}
@@ -106,13 +118,13 @@ const PaceNavbar = () => {
           onDragStart={handleDragStart}
           onDragEnd={handleDragEnd}
         >
-          <SortableContext items={tabIds} strategy={horizontalListSortingStrategy}>
+          <SortableContext items={tabStableKeys} strategy={horizontalListSortingStrategy}>
             <div className='flex min-w-0 flex-1 items-center gap-x-1'>
               {dynamicTabs.map((tab) => (
                 <SortableDynamicTabItem
-                  key={tab.id}
+                  key={tab.stableKey}
                   tab={tab}
-                  isActive={isDynamicTabActive(tab.path)}
+                  isActive={isDynamicTabActive(tab)}
                   isAnyDragging={activeId !== null}
                   onClose={handleCloseDynamicTab}
                 />
@@ -124,7 +136,7 @@ const PaceNavbar = () => {
               <div className='-rotate-2 rounded-lg border shadow-lg'>
                 <DynamicTabItem
                   tab={activeTab}
-                  isActive={isDynamicTabActive(activeTab.path)}
+                  isActive={isDynamicTabActive(activeTab)}
                   isDragging
                   onClose={handleCloseDynamicTab}
                 />

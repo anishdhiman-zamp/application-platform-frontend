@@ -1,3 +1,4 @@
+import { API_DOMAIN } from '@zamp-platform/api';
 import { format } from 'date-fns';
 import {
   CLIPBOARD_OPERATION,
@@ -12,7 +13,18 @@ import {
   type SortOption,
   type TreeNode,
 } from '@/modules/pace/components/files/file-tree.types';
-import { DATE_FORMAT, FILE_TYPE_LABELS } from '@/modules/pace/components/files/files.constants';
+import {
+  AUDIO_EXTENSIONS,
+  DATE_FORMAT,
+  FILE_CATEGORY,
+  FILE_TYPE_LABELS,
+  type FileCategory,
+  IMAGE_EXTENSIONS,
+  MARKDOWN_EXTENSIONS,
+  MONACO_EDITABLE_EXTENSIONS,
+  PDF_EXTENSIONS,
+  VIDEO_EXTENSIONS,
+} from '@/modules/pace/components/files/files.constants';
 
 /**
  * Builds a hierarchical tree structure from a flat array of files.
@@ -57,6 +69,19 @@ export function buildFileTree(files: FileItem[]): TreeNode[] {
 }
 
 /**
+ * Builds a media URL for accessing file content via the API.
+ * Each path segment is URL-encoded to handle special characters.
+ */
+export function getMediaUrl(filePath: string): string {
+  const encodedPath = filePath
+    .split('/')
+    .map((segment) => encodeURIComponent(segment))
+    .join('/');
+
+  return `${API_DOMAIN}/files/${encodedPath}?content`;
+}
+
+/**
  * Gets the file extension from a filename
  */
 export function getFileExtension(filename: string): string {
@@ -89,6 +114,31 @@ export function formatDate(timestamp: number): string {
 }
 
 /**
+ * Formats timestamp to compact relative time string (e.g., "just now", "5m ago", "2h ago")
+ */
+export function formatRelativeTime(timestamp: number): string {
+  const now = Date.now();
+  const diffMs = now - timestamp;
+  const diffMins = Math.floor(diffMs / 60000);
+  const diffHours = Math.floor(diffMs / 3600000);
+  const diffDays = Math.floor(diffMs / 86400000);
+
+  if (diffMins < 1) {
+    return 'just now';
+  }
+
+  if (diffMins < 60) {
+    return `${diffMins}m ago`;
+  }
+
+  if (diffHours < 24) {
+    return `${diffHours}h ago`;
+  }
+
+  return `${diffDays}d ago`;
+}
+
+/**
  * Gets a human-readable label for a file type based on extension
  */
 export function getFileTypeLabel(name: string): string {
@@ -97,6 +147,50 @@ export function getFileTypeLabel(name: string): string {
   if (!ext) return 'File';
 
   return FILE_TYPE_LABELS[ext] || `${ext} file`;
+}
+
+/**
+ * Determines the file category based on extension for viewer selection
+ */
+export function getFileCategory(filename: string): FileCategory {
+  const ext = getFileExtension(filename).toLowerCase();
+
+  if (!ext) return FILE_CATEGORY.UNKNOWN;
+
+  if ((IMAGE_EXTENSIONS as readonly string[]).includes(ext)) {
+    return FILE_CATEGORY.IMAGE;
+  }
+
+  if ((AUDIO_EXTENSIONS as readonly string[]).includes(ext)) {
+    return FILE_CATEGORY.AUDIO;
+  }
+
+  if ((VIDEO_EXTENSIONS as readonly string[]).includes(ext)) {
+    return FILE_CATEGORY.VIDEO;
+  }
+
+  if ((PDF_EXTENSIONS as readonly string[]).includes(ext)) {
+    return FILE_CATEGORY.PDF;
+  }
+
+  if ((MARKDOWN_EXTENSIONS as readonly string[]).includes(ext)) {
+    return FILE_CATEGORY.MARKDOWN;
+  }
+
+  if ((MONACO_EDITABLE_EXTENSIONS as readonly string[]).includes(ext)) {
+    return FILE_CATEGORY.CODE;
+  }
+
+  return FILE_CATEGORY.UNKNOWN;
+}
+
+/**
+ * Checks if a file is editable (code or markdown)
+ */
+export function isFileEditable(filename: string): boolean {
+  const category = getFileCategory(filename);
+
+  return category === FILE_CATEGORY.CODE || category === FILE_CATEGORY.MARKDOWN;
 }
 
 /**
@@ -519,4 +613,58 @@ export function validatePasteOperation(
   const hasConflict = childrenNames.includes(clipboard.name);
 
   return { valid: true, hasConflict, destinationPath };
+}
+
+/**
+ * Splits a filename into base name and extension.
+ * For folders (isFile = false), the entire name is the base name with no extension.
+ */
+export function getFileNameParts(name: string, isFile = true): { baseName: string; extension: string } {
+  if (!isFile) {
+    return { baseName: name, extension: '' };
+  }
+
+  const lastDotIndex = name.lastIndexOf('.');
+
+  if (lastDotIndex > 0) {
+    return {
+      baseName: name.slice(0, lastDotIndex),
+      extension: name.slice(lastDotIndex),
+    };
+  }
+
+  return { baseName: name, extension: '' };
+}
+
+/**
+ * Checks if a new name would conflict with existing sibling names.
+ * Excludes the current name from the check (for rename operations).
+ */
+export function checkDuplicateName(newName: string, siblingNames: string[], currentName?: string): boolean {
+  if (!newName) return false;
+
+  const namesToCheck = currentName ? siblingNames.filter((name) => name !== currentName) : siblingNames;
+
+  return namesToCheck.some((name) => name === newName);
+}
+
+/**
+ * Gets sibling file/folder names from a flat file list for a given file path.
+ * Returns names of items in the same directory as the target file.
+ */
+export function getSiblingNamesFromFiles(files: FileItem[], filePath: string): string[] {
+  const parentPath = getParentPath(filePath);
+  const isRoot = parentPath === '/';
+
+  return files
+    .filter((file) => {
+      const fileParentPath = getParentPath(file.path);
+
+      if (isRoot) {
+        return !file.path.includes('/');
+      }
+
+      return fileParentPath === parentPath;
+    })
+    .map((file) => file.name);
 }

@@ -172,6 +172,12 @@ export const DEFAULT_FILE_COLOR = '#78909C';
  * Each size includes dimensions and typography settings
  */
 export const FILE_ICON_SIZES = {
+  xs: {
+    width: 14,
+    height: 14,
+    fontSize: 3.5,
+    borderRadius: 1,
+  },
   sm: {
     width: 24,
     height: 24,
