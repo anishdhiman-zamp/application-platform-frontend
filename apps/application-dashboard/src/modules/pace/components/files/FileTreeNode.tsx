@@ -1,174 +1,209 @@
 'use client';
 
-import { useMemo, useRef, useState } from 'react';
+import { memo, useCallback, useMemo, useRef, useState } from 'react';
+import CreateItemModal from '@/modules/pace/components/files/CreateItemModal';
 import {
-  Button,
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuItem,
-  DropdownMenuTrigger,
-  FileIcon,
-} from '@zamp-platform/ui';
-import { cn } from '@zamp-platform/ui/utils';
-import { ChevronRight } from 'lucide-react';
-import { FILE_TYPE, type FileTreeNodeProps } from 'modules/pace/components/files/file-tree.types';
-import { getFileExtension } from 'modules/pace/components/files/file-tree.utils';
-import { CONTEXT_MENU_ACTIONS } from 'modules/pace/components/files/files.constants';
-import { motion } from 'motion/react';
-import Image from 'next/image';
+  type CreateItemType,
+  FILE_TYPE,
+  type FileTreeNodeProps,
+} from '@/modules/pace/components/files/file-tree.types';
+import { CONTEXT_MENU_ACTION_IDS, CONTEXT_MENU_ACTIONS } from '@/modules/pace/components/files/files.constants';
+import FileTreeNodeContextMenu from '@/modules/pace/components/files/FileTreeNodeContextMenu';
+import FileTreeNodeRow from '@/modules/pace/components/files/FileTreeNodeRow';
+import { useFileTreeContext } from '@/modules/pace/hooks/useFileTreeContext';
+import { useFileTreeNodeActions } from '@/modules/pace/hooks/useFileTreeNodeActions';
+import { useFileTreeNodeDragDrop } from '@/modules/pace/hooks/useFileTreeNodeDragDrop';
+import { useFileTreeNodeRename } from '@/modules/pace/hooks/useFileTreeNodeRename';
+import { useFileUploadContext } from '@/modules/pace/hooks/useFileUploadContext';
 
-const FileTreeNode = ({
+const FileTreeNode = memo(function FileTreeNode({
   node,
   depth,
   expandedPaths,
   selectedPath,
   originalNodeMap,
+  siblingNames,
+  parentPath,
   onToggleExpand,
   onSelect,
-}: FileTreeNodeProps) => {
+  onFileMoved,
+  onFileDeleted,
+  onFileCreated,
+  onUploadFiles,
+  onTriggerFileUpload,
+  onTriggerFolderUpload,
+  onDragOverFolderChange,
+  style,
+}: FileTreeNodeProps) {
+  const nodeRef = useRef<HTMLDivElement>(null);
   const [contextMenuOpen, setContextMenuOpen] = useState(false);
-  const [contextMenuPosition, setContextMenuPosition] = useState({ x: 0, y: 0 });
-  const triggerRef = useRef<HTMLDivElement>(null);
+  const [createModalType, setCreateModalType] = useState<CreateItemType | null>(null);
+
+  const { clipboard, isProtectedRoot, username } = useFileTreeContext();
+  const { uploadingPath } = useFileUploadContext();
 
   const isFolder = node.type === FILE_TYPE.DIRECTORY;
   const isExpanded = expandedPaths.has(node.path);
-  const isSelected = selectedPath === node.path;
-  const extension = isFolder ? '' : getFileExtension(node.name);
+  const isSelected = !isFolder && selectedPath === node.path;
+  const isProtected = depth === 0 && isProtectedRoot(node.path);
+  const isUserPrivateFolder = depth === 0 && node.path === username;
+  const isUploading = uploadingPath === node.path;
 
   const originalNode = originalNodeMap.get(node.path);
   const childrenToRender = originalNode?.children ?? node.children;
 
+  const childrenNames = useMemo(() => childrenToRender?.map((child) => child.name) ?? [], [childrenToRender]);
   const filteredActions = useMemo(
-    () => CONTEXT_MENU_ACTIONS.filter((action) => !action.fileOnly || !isFolder),
-    [isFolder],
+    () =>
+      CONTEXT_MENU_ACTIONS.filter((action) => {
+        if (action.fileOnly && isFolder) return false;
+        if (action.folderOnly && !isFolder) return false;
+        if (action.id === CONTEXT_MENU_ACTION_IDS.PASTE && !clipboard) return false;
+        if (
+          isProtected &&
+          (action.id === CONTEXT_MENU_ACTION_IDS.DELETE ||
+            action.id === CONTEXT_MENU_ACTION_IDS.RENAME ||
+            action.id === CONTEXT_MENU_ACTION_IDS.CUT ||
+            action.id === CONTEXT_MENU_ACTION_IDS.DUPLICATE)
+        )
+          return false;
+
+        return true;
+      }),
+    [isFolder, clipboard, isProtected],
   );
 
-  const handleClick = () => {
-    onSelect(node.path);
+  const handleTriggerFileUpload = useCallback(() => {
+    onTriggerFileUpload?.(node.path);
+  }, [onTriggerFileUpload, node.path]);
+
+  const handleTriggerFolderUpload = useCallback(() => {
+    onTriggerFolderUpload?.(node.path);
+  }, [onTriggerFolderUpload, node.path]);
+
+  const rename = useFileTreeNodeRename({
+    node,
+    siblingNames,
+    isProtected,
+    onFileMoved,
+  });
+
+  const handleExternalFileDrop = useCallback(
+    (files: FileList, targetPath: string) => {
+      if (onUploadFiles) {
+        onUploadFiles(files, targetPath);
+      }
+    },
+    [onUploadFiles],
+  );
+
+  const dragDrop = useFileTreeNodeDragDrop({
+    node,
+    nodeRef,
+    isFolder,
+    isExpanded,
+    childrenNames,
+    siblingNames,
+    isProtected,
+    parentPath,
+    onToggleExpand,
+    onFileMoved,
+    onExternalFileDrop: handleExternalFileDrop,
+    onDragOverFolderChange,
+  });
+
+  const actions = useFileTreeNodeActions({
+    node,
+    isExpanded,
+    childrenNames,
+    isProtected,
+    onToggleExpand,
+    onStartRename: rename.startRename,
+    onOpenCreateModal: setCreateModalType,
+    onCloseContextMenu: () => setContextMenuOpen(false),
+    onFileMoved,
+    onFileDeleted,
+    onFileCreated,
+    onTriggerFileUpload: handleTriggerFileUpload,
+    onTriggerFolderUpload: handleTriggerFolderUpload,
+  });
+
+  const handleClick = useCallback(() => {
+    if (rename.isRenaming) return;
+
     if (isFolder) {
       onToggleExpand(node.path);
+    } else {
+      onSelect(node.path);
     }
-  };
+  }, [rename.isRenaming, onSelect, node.path, isFolder, onToggleExpand]);
 
-  const handleChevronClick = (e: React.MouseEvent) => {
-    e.stopPropagation();
-    if (isFolder) {
-      onToggleExpand(node.path);
-    }
-  };
-
-  const handleContextMenu = (e: React.MouseEvent) => {
-    e.preventDefault();
-    e.stopPropagation();
-    setContextMenuPosition({ x: e.clientX, y: e.clientY });
-    setContextMenuOpen(true);
-  };
+  const handleChevronClick = useCallback(
+    (e: React.MouseEvent) => {
+      e.stopPropagation();
+      if (isFolder) {
+        onToggleExpand(node.path);
+      }
+    },
+    [isFolder, onToggleExpand, node.path],
+  );
 
   return (
-    <div>
-      <DropdownMenu open={contextMenuOpen} onOpenChange={setContextMenuOpen}>
-        <DropdownMenuTrigger asChild>
-          <div ref={triggerRef} className='hidden' aria-hidden='true' />
-        </DropdownMenuTrigger>
-        <DropdownMenuContent
-          align='start'
-          className='flex min-w-[180px] flex-col gap-y-[2px]'
-          style={{
-            position: 'fixed',
-            left: contextMenuPosition.x,
-            top: contextMenuPosition.y,
-          }}
-        >
-          {/* TODO: Add onClick handlers when file actions API is integrated */}
-          {filteredActions.map((action) => (
-            <DropdownMenuItem
-              key={action.id}
-              className={cn(
-                'hover:bg-GRAY_100 f-12-500 text-GRAY_900 cursor-pointer rounded-md',
-                action.isDestructive && 'text-red-600',
-              )}
-            >
-              <action.icon className='size-4' />
-              {action.label}
-            </DropdownMenuItem>
-          ))}
-        </DropdownMenuContent>
-      </DropdownMenu>
-
-      <div
-        role='button'
-        tabIndex={0}
-        onClick={handleClick}
-        onContextMenu={handleContextMenu}
-        onKeyDown={(e) => {
-          if (e.key === 'Enter' || e.key === ' ') {
-            handleClick();
-          }
-        }}
-        className={cn(
-          'hover:bg-GRAY_100 flex cursor-pointer items-center gap-2 rounded-md py-2 pr-1',
-          isSelected && 'bg-GRAY_300 hover:bg-GRAY_300',
-        )}
-        style={{ paddingLeft: `${depth * 24 + 8}px` }}
-      >
-        {isFolder ? (
-          <Button
-            variant='ghost'
-            size='xxsmall'
-            onClick={handleChevronClick}
-            className='size-4 shrink-0 p-0! hover:bg-transparent'
-            aria-label={isExpanded ? 'Collapse folder' : 'Expand folder'}
-          >
-            <motion.div
-              animate={{ rotate: isExpanded ? 90 : 0 }}
-              transition={{ duration: 0.12, ease: [0.4, 0, 0.2, 1] }}
-            >
-              <ChevronRight className='text-GRAY_1000 size-3.5' />
-            </motion.div>
-          </Button>
-        ) : (
-          <span className='size-4 shrink-0' />
-        )}
-
-        {isFolder ? (
-          <Image
-            src='/images/files/folder-icon.png'
-            alt='Folder'
-            width={20}
-            height={20}
-            className='shrink-0'
-            unoptimized
-          />
-        ) : (
-          <FileIcon extension={extension || 'txt'} size='sm' />
-        )}
-
-        <span className='f-13-450 text-GRAY_1000 truncate select-none'>{node.name}</span>
-      </div>
-
-      {isFolder && childrenToRender && childrenToRender.length > 0 && (
-        <div
-          className='grid transition-[grid-template-rows] duration-100 ease-out'
-          style={{ gridTemplateRows: isExpanded ? '1fr' : '0fr' }}
-        >
-          <div className='flex flex-col gap-0.5 overflow-hidden pt-0.5'>
-            {childrenToRender.map((child) => (
-              <FileTreeNode
-                key={child.path}
-                node={child}
-                depth={depth + 1}
-                expandedPaths={expandedPaths}
-                selectedPath={selectedPath}
-                originalNodeMap={originalNodeMap}
-                onToggleExpand={onToggleExpand}
-                onSelect={onSelect}
-              />
-            ))}
-          </div>
-        </div>
+    <div style={style}>
+      {createModalType && (
+        <CreateItemModal
+          isOpen={!!createModalType}
+          onOpenChange={(open) => !open && setCreateModalType(null)}
+          itemType={createModalType}
+          onCreate={(name) => actions.handleCreate(name, node.path, createModalType)}
+          existingNames={childrenNames}
+        />
       )}
+
+      <FileTreeNodeContextMenu
+        actions={filteredActions}
+        disabled={isUploading}
+        onOpenChange={setContextMenuOpen}
+        onActionClick={actions.handleActionClick}
+      >
+        <FileTreeNodeRow
+          ref={nodeRef}
+          node={node}
+          depth={depth}
+          state={{
+            isFolder,
+            isExpanded,
+            isSelected,
+            isRenaming: rename.isRenaming,
+            isDuplicateName: rename.isDuplicateName,
+            isDragging: dragDrop.isDragging,
+            isDragOver: dragDrop.isDragOver,
+            isCutItem: actions.isCutItem,
+            isProtected,
+            isUserPrivateFolder,
+            contextMenuOpen,
+            isUploading,
+          }}
+          rename={{
+            value: rename.renameValue,
+            onChange: rename.setRenameValue,
+            onSubmit: rename.handleRenameSubmit,
+            onKeyDown: rename.handleRenameKeyDown,
+            onInputRef: rename.handleRenameInputRef,
+          }}
+          handlers={{
+            onRowClick: handleClick,
+            onChevronClick: handleChevronClick,
+            onDragStart: dragDrop.handleDragStart,
+            onDragEnd: dragDrop.handleDragEnd,
+            onDragOver: dragDrop.handleDragOver,
+            onDragLeave: dragDrop.handleDragLeave,
+            onDrop: dragDrop.handleDrop,
+          }}
+        />
+      </FileTreeNodeContextMenu>
     </div>
   );
-};
+});
 
 export default FileTreeNode;

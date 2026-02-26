@@ -7,7 +7,10 @@ import { getFromLocalStorage, LOCAL_STORAGE_KEYS } from '@/utils/localstorage';
 
 const useDataPrefetch = () => {
   const { isPaceChatEnabled, isLoading } = useIsPaceChatEnabled();
+  // const { isFilesystemActive, isFilesystemStatusLoading } = useFilesystemStatus();
   const organizationId = getFromLocalStorage(LOCAL_STORAGE_KEYS.XZAMP_ORGANIZATION_ID) ?? '';
+
+  const shouldSkip = !organizationId || isLoading || !isPaceChatEnabled;
 
   useGetConversationHistoryQuery(
     {
@@ -17,7 +20,7 @@ const useDataPrefetch = () => {
       limit: 20,
     },
     {
-      skip: !organizationId || isLoading || !isPaceChatEnabled,
+      skip: shouldSkip,
       refetchOnMountOrArgChange: false,
     },
   );
@@ -26,7 +29,7 @@ const useDataPrefetch = () => {
     {},
     {
       refetchOnMountOrArgChange: false,
-      skip: !isPaceChatEnabled || isLoading,
+      skip: shouldSkip,
     },
   );
 
@@ -34,7 +37,7 @@ const useDataPrefetch = () => {
     { page: 1, pageSize: ARTIFACTS_PAGE_SIZE },
     {
       refetchOnMountOrArgChange: false,
-      skip: !isPaceChatEnabled || isLoading,
+      skip: shouldSkip,
     },
   );
 

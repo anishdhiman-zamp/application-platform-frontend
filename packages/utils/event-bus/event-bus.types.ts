@@ -54,4 +54,5 @@ export const enum EVENT_TYPE {
   KNOWLEDGE_BASE = 'knowledge_base',
   DATASET = 'dataset',
   PROCESS = 'process',
+  CONNECTION_UPDATE = 'connection_update',
 }

@@ -228,6 +228,7 @@ export interface ToolUseContentBlock extends StreamingContentBlockBase {
     name?: string;
     tool_call_id?: string;
     display_name?: string;
+    icon?: string;
   };
 }
 

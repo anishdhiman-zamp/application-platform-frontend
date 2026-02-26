@@ -379,7 +379,7 @@ const ShareResourcePopup: FC<ShareResourcePopupProps> = (props) => {
   const combinedOptionListsData: CombinedOptionListDataType[] = [
     { label: orgLabel ?? '', value: orgName ?? '', type: ResourceAudienceType.ORGANIZATION, color: '' },
     ...(teamMembersData?.map((member) => ({
-      label: member?.user?.name ?? getUserNameFromEmail(member?.user?.email ?? '') ?? '',
+      label: member?.user?.name || getUserNameFromEmail(member?.user?.email ?? '') || '',
       value: member?.user?.email ?? '',
       type: member?.resource_audience_type ?? '',
     })) || []),

@@ -110,6 +110,43 @@ Prompt Generation Rules:
 - Use Suspense for async operations
 - Optimize for performance and Web Vitals
 
+### Component Internal Structure
+
+Follow this order within React components for consistency and readability:
+
+1. **State** - useState, useRef declarations
+2. **Derived State** - useMemo, computed values, context values
+3. **Hooks** - Custom hooks (useFileActions, useFileClipboard, etc.)
+4. **Handlers** - useCallback wrapped event handlers
+5. **Render** - Early returns, JSX
+
+```typescript
+const MyComponent = ({ prop1, prop2 }: Props) => {
+  // State
+  const [value, setValue] = useState(false);
+  const ref = useRef<HTMLDivElement>(null);
+
+  // Derived State
+  const computedValue = useMemo(() => /* ... */, [dep]);
+  const { contextValue } = useMyContext();
+
+  // Hooks
+  const { action1, action2 } = useMyCustomHook({ /* ... */ });
+
+  // Handlers
+  const handleClick = useCallback(() => { /* ... */ }, []);
+
+  // Render
+  if (loading) return <Spinner />;
+
+  return <div>...</div>;
+};
+```
+
+- Memoize handlers with useCallback when passed to child components
+- Group related props into objects (state, handlers, etc.) for cleaner APIs
+- Extract complex logic into custom hooks for reusability and testability
+
 ### State Management
 
 - Use `useActionState` instead of deprecated `useFormState`

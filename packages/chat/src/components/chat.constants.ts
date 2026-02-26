@@ -1,3 +1,7 @@
+export const TOOL_NAMES = {
+  AUTHENTICATE_INTEGRATION_AND_CREATE_CONNECTION: 'authenticate_integration_and_create_connection',
+} as const;
+
 export enum FILE_MIME {
   APPLICATION_PDF = 'application/pdf',
   IMAGE_JPEG = 'image/jpeg',

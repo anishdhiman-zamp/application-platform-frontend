@@ -103,6 +103,9 @@ export type Session = {
   organization_id: Workspace;
   user_email: string;
   user_name: string;
+  last_name: string;
+  org_slug: string;
+  username: string;
   orgs: Organization[];
 };
 

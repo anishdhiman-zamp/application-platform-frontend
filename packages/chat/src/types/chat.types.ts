@@ -110,6 +110,7 @@ export interface ChatMessage {
   sender_name?: string;
   id?: string;
   conversation_id?: string;
+  llm_model?: string;
 }
 
 export interface ChatState {
@@ -186,6 +187,7 @@ export interface CreateConversationPayloadTypeV2 {
   annotation_data?: AnnotationData;
   message_content: MessageContentType;
   sender_name?: string;
+  llm_model?: string;
 }
 
 export interface AnnotationLocationDataType {

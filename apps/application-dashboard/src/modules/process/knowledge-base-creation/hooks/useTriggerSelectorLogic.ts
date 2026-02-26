@@ -105,8 +105,8 @@ export const useTriggerSelectorLogic = ({ integrations }: { integrations: Integr
   const availableConnections = useMemo(() => {
     if (dialogIntent?.type !== 'connections') return [];
 
-    return dialogIntent.connections.filter(
-      (connection) => !combinedTriggers.some((trigger) => trigger.connection_name === connection.name),
+    return dialogIntent?.connections?.filter(
+      (connection) => !combinedTriggers?.some((trigger) => trigger.connection_name === connection.name),
     );
   }, [dialogIntent, combinedTriggers]);
 

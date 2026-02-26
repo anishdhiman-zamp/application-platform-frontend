@@ -7,14 +7,17 @@ import PaceNavbar from 'modules/pace/components/layout/PaceNavbar';
 import { usePathname } from 'next/navigation';
 import NewPaceIcons from '@/assets/Icons/NewPaceIcons';
 import { ROUTES_PATH } from '@/constants/routeConfig';
+import { UploadProgressToast } from '@/modules/pace/components/files/UploadProgressToast';
+import { FileUploadProvider, useFileUploadContext } from '@/modules/pace/hooks/useFileUploadContext';
 import { usePaceContext } from '@/modules/pace/pace.context';
 
 interface PaceLayoutContentProps {
   children: ReactNode;
 }
 
-const PaceLayoutContent: FC<PaceLayoutContentProps> = ({ children }) => {
+const PaceLayoutContentInner: FC<PaceLayoutContentProps> = ({ children }) => {
   const { isPaceSidebarOpen, setIsPaceSidebarOpen } = usePaceContext();
+  const { uploadState, cancelUpload } = useFileUploadContext();
   const pathname = usePathname();
 
   const isHideFloatingButton = pathname === ROUTES_PATH.CHAT || pathname?.includes(ROUTES_PATH.CHAT_SETTINGS);
@@ -42,7 +45,16 @@ const PaceLayoutContent: FC<PaceLayoutContentProps> = ({ children }) => {
           </Button>
         )}
       </div>
+      <UploadProgressToast uploadState={uploadState} onCancel={cancelUpload} />
     </div>
+  );
+};
+
+const PaceLayoutContent: FC<PaceLayoutContentProps> = ({ children }) => {
+  return (
+    <FileUploadProvider>
+      <PaceLayoutContentInner>{children}</PaceLayoutContentInner>
+    </FileUploadProvider>
   );
 };
 

@@ -1,12 +1,56 @@
-import { Copy, Download, ExternalLink, Link, Pencil, Scissors, Share, Trash2 } from 'lucide-react';
+import {
+  Clipboard,
+  Copy,
+  ExternalLink,
+  FilePlus,
+  FolderPlus,
+  FolderUp,
+  Pencil,
+  Scissors,
+  Trash2,
+  Upload,
+} from 'lucide-react';
 import {
   type ContextMenuAction,
   FILE_TYPE,
   type FileItem,
   type SortOption,
-} from 'modules/pace/components/files/file-tree.types';
+} from '@/modules/pace/components/files/file-tree.types';
 
 export const DATE_FORMAT = "EEEE, d MMMM yyyy 'at' h:mm a";
+
+export const DIRECT_UPLOAD_THRESHOLD_BYTES = 1 * 1024 * 1024; // 1MB
+export const DEFAULT_CHUNK_SIZE = 6 * 1024 * 1024; // 6MB chunk size
+export const PARALLEL_CHUNK_CONCURRENCY = 6; // Upload 6 chunks in parallel
+export const MAX_CHUNK_RETRIES = 3; // Retry failed chunks up to 3 times
+export const MAX_FOLDER_UPLOAD_FILES = 200;
+
+export const FILE_TOAST_MESSAGES = {
+  CANNOT_RENAME_PROTECTED: 'Cannot rename protected folders',
+  CANNOT_DELETE_PROTECTED: 'Cannot delete protected folders',
+  CANNOT_CUT_PROTECTED: 'Cannot cut protected folders',
+  CANNOT_PASTE_INTO_ITSELF: 'Cannot paste a folder into itself',
+  CANNOT_MOVE_PROTECTED: 'Cannot move protected folders',
+  CANNOT_MOVE_PROTECTED_INTO_EACH_OTHER: 'Cannot move protected folders into each other',
+  FAILED_TO_CREATE_ITEM: 'Failed to create item',
+  FAILED_TO_RENAME: 'Failed to rename',
+  FAILED_TO_MOVE_COPY: 'Failed to move/copy',
+  FAILED_TO_RESOLVE_CONFLICT: 'Failed to resolve conflict',
+} as const;
+
+export const CONTEXT_MENU_ACTION_IDS = {
+  CREATE_FILE: 'create-file',
+  CREATE_FOLDER: 'create-folder',
+  UPLOAD_FILE: 'upload-file',
+  UPLOAD_FOLDER: 'upload-folder',
+  OPEN_IN_TAB: 'open-in-tab',
+  RENAME: 'rename',
+  DUPLICATE: 'duplicate',
+  COPY: 'copy',
+  CUT: 'cut',
+  PASTE: 'paste',
+  DELETE: 'delete',
+} as const;
 
 export const SORT_OPTIONS: { value: SortOption; label: string }[] = [
   { value: 'date_modified', label: 'Date modified' },
@@ -16,16 +60,80 @@ export const SORT_OPTIONS: { value: SortOption; label: string }[] = [
 ];
 
 export const CONTEXT_MENU_ACTIONS: ContextMenuAction[] = [
-  { id: 'open-in-tab', label: 'Open in Tab', icon: ExternalLink, fileOnly: true },
-  { id: 'work-with-zamp', label: 'Work with Zamp', icon: Link },
-  { id: 'rename', label: 'Rename', icon: Pencil },
-  { id: 'duplicate', label: 'Duplicate', icon: Copy },
-  { id: 'copy', label: 'Copy', icon: Copy },
-  { id: 'cut', label: 'Cut', icon: Scissors },
-  { id: 'share', label: 'Share', icon: Share },
-  { id: 'download', label: 'Download', icon: Download },
-  { id: 'delete', label: 'Delete', icon: Trash2, isDestructive: true },
+  { id: CONTEXT_MENU_ACTION_IDS.CREATE_FILE, label: 'Create File', icon: FilePlus, folderOnly: true },
+  { id: CONTEXT_MENU_ACTION_IDS.CREATE_FOLDER, label: 'Create Folder', icon: FolderPlus, folderOnly: true },
+  { id: CONTEXT_MENU_ACTION_IDS.UPLOAD_FILE, label: 'Upload File', icon: Upload, folderOnly: true },
+  { id: CONTEXT_MENU_ACTION_IDS.UPLOAD_FOLDER, label: 'Upload Folder', icon: FolderUp, folderOnly: true },
+  { id: CONTEXT_MENU_ACTION_IDS.OPEN_IN_TAB, label: 'Open in Tab', icon: ExternalLink, fileOnly: true },
+  // { id: 'work-with-zamp', label: 'Work with Zamp', icon: Link },
+  { id: CONTEXT_MENU_ACTION_IDS.RENAME, label: 'Rename', icon: Pencil },
+  { id: CONTEXT_MENU_ACTION_IDS.DUPLICATE, label: 'Duplicate', icon: Copy },
+  { id: CONTEXT_MENU_ACTION_IDS.COPY, label: 'Copy', icon: Copy },
+  { id: CONTEXT_MENU_ACTION_IDS.CUT, label: 'Cut', icon: Scissors },
+  { id: CONTEXT_MENU_ACTION_IDS.PASTE, label: 'Paste', icon: Clipboard, folderOnly: true },
+  // { id: 'share', label: 'Share', icon: Share },
+  // { id: 'download', label: 'Download', icon: Download },
+  { id: CONTEXT_MENU_ACTION_IDS.DELETE, label: 'Delete', icon: Trash2, isDestructive: true },
 ];
+
+// File types that can be edited with Monaco editor
+export const MONACO_EDITABLE_EXTENSIONS = [
+  // Plain text & Markdown
+  'txt',
+  'md',
+  'mdx',
+  // Web
+  'html',
+  'css',
+  'scss',
+  'sass',
+  'less',
+  'js',
+  'jsx',
+  'ts',
+  'tsx',
+  'vue',
+  'svelte',
+  // Backend
+  'py',
+  'rb',
+  'php',
+  'java',
+  'kt',
+  'swift',
+  'go',
+  'rs',
+  'c',
+  'cpp',
+  'cs',
+  'r',
+  'scala',
+  // Config
+  'json',
+  'yaml',
+  'yml',
+  'xml',
+  'toml',
+  'ini',
+  'env',
+  // Shell
+  'sh',
+  'bash',
+  'zsh',
+  'ps1',
+  'bat',
+  // Database
+  'sql',
+  'graphql',
+  'prisma',
+  // Data
+  'csv',
+] as const;
+
+export const MONACO_FILE_TYPE_OPTIONS: { label: string; value: string }[] = MONACO_EDITABLE_EXTENSIONS.map((ext) => ({
+  label: `.${ext}`,
+  value: ext,
+}));
 
 export const FILE_TYPE_LABELS: Record<string, string> = {
   // Documents
@@ -192,6 +300,7 @@ export const MOCK_FILES: FileItem[] = [
     type: FILE_TYPE.DIRECTORY,
     size: null,
     mtime_ms: 1771349214794,
+    owner: 'user',
   },
   {
     path: 'Budget spreadsheet/first_dance_song.mp3',
@@ -199,6 +308,7 @@ export const MOCK_FILES: FileItem[] = [
     type: FILE_TYPE.FILE,
     size: 4500000,
     mtime_ms: 1771354001854,
+    owner: 'user',
   },
   {
     path: 'Budget spreadsheet/venue_options.md',
@@ -206,6 +316,7 @@ export const MOCK_FILES: FileItem[] = [
     type: FILE_TYPE.FILE,
     size: 2048,
     mtime_ms: 1771354001843,
+    owner: 'user',
   },
   {
     path: 'Budget spreadsheet/guest_addresses.xlsx',
@@ -213,6 +324,7 @@ export const MOCK_FILES: FileItem[] = [
     type: FILE_TYPE.FILE,
     size: 15360,
     mtime_ms: 1771354001865,
+    owner: 'user',
   },
   {
     path: 'Budget spreadsheet/vendor_contacts.docx',
@@ -220,6 +332,7 @@ export const MOCK_FILES: FileItem[] = [
     type: FILE_TYPE.FILE,
     size: 8192,
     mtime_ms: 1770790929081,
+    owner: 'user',
   },
   {
     path: 'Budget spreadsheet/rsvp_form.css',
@@ -227,6 +340,7 @@ export const MOCK_FILES: FileItem[] = [
     type: FILE_TYPE.FILE,
     size: 1024,
     mtime_ms: 1770816275272,
+    owner: 'user',
   },
   {
     path: 'Budget spreadsheet/rsvp_form.html',
@@ -234,6 +348,7 @@ export const MOCK_FILES: FileItem[] = [
     type: FILE_TYPE.FILE,
     size: 2048,
     mtime_ms: 1770816275770,
+    owner: 'user',
   },
   {
     path: 'Budget spreadsheet/Guest list',
@@ -241,6 +356,7 @@ export const MOCK_FILES: FileItem[] = [
     type: FILE_TYPE.DIRECTORY,
     size: null,
     mtime_ms: 1770816275290,
+    owner: 'user',
   },
   {
     path: 'Budget spreadsheet/Guest list/ceremony_songs.zip',
@@ -248,6 +364,7 @@ export const MOCK_FILES: FileItem[] = [
     type: FILE_TYPE.FILE,
     size: 52428800,
     mtime_ms: 1770986876296,
+    owner: 'user',
   },
   {
     path: 'Budget spreadsheet/Guest list/Flowers',
@@ -255,6 +372,7 @@ export const MOCK_FILES: FileItem[] = [
     type: FILE_TYPE.DIRECTORY,
     size: null,
     mtime_ms: 1770986877373,
+    owner: 'user',
   },
   {
     path: 'Budget spreadsheet/Guest list/Flowers/dress_inspiration.mp4',
@@ -262,6 +380,7 @@ export const MOCK_FILES: FileItem[] = [
     type: FILE_TYPE.FILE,
     size: 104857600,
     mtime_ms: 1770986876590,
+    owner: 'user',
   },
   {
     path: 'Budget spreadsheet/Guest list/Flowers/bouquet_design.psd',
@@ -269,6 +388,7 @@ export const MOCK_FILES: FileItem[] = [
     type: FILE_TYPE.FILE,
     size: 25600000,
     mtime_ms: 1770986877100,
+    owner: 'user',
   },
   {
     path: 'Budget spreadsheet/Guest list/Flowers/flower_arrangement.png',
@@ -276,6 +396,7 @@ export const MOCK_FILES: FileItem[] = [
     type: FILE_TYPE.FILE,
     size: 2048000,
     mtime_ms: 1770986877200,
+    owner: 'user',
   },
   {
     path: 'Budget spreadsheet/seating_chart.pdf',
@@ -283,6 +404,7 @@ export const MOCK_FILES: FileItem[] = [
     type: FILE_TYPE.FILE,
     size: 512000,
     mtime_ms: 1771354002000,
+    owner: 'user',
   },
   {
     path: 'Budget spreadsheet/wedding_timeline.json',
@@ -290,6 +412,7 @@ export const MOCK_FILES: FileItem[] = [
     type: FILE_TYPE.FILE,
     size: 4096,
     mtime_ms: 1771354002100,
+    owner: 'user',
   },
   {
     path: 'Budget spreadsheet/invitation_template.svg',
@@ -297,6 +420,7 @@ export const MOCK_FILES: FileItem[] = [
     type: FILE_TYPE.FILE,
     size: 8192,
     mtime_ms: 1771354002200,
+    owner: 'user',
   },
   {
     path: 'Budget spreadsheet/Scripts',
@@ -304,6 +428,7 @@ export const MOCK_FILES: FileItem[] = [
     type: FILE_TYPE.DIRECTORY,
     size: null,
     mtime_ms: 1771354002300,
+    owner: 'user',
   },
   {
     path: 'Budget spreadsheet/Scripts/rsvp_handler.py',
@@ -311,6 +436,7 @@ export const MOCK_FILES: FileItem[] = [
     type: FILE_TYPE.FILE,
     size: 3072,
     mtime_ms: 1771354002400,
+    owner: 'user',
   },
   {
     path: 'Budget spreadsheet/Scripts/email_sender.ts',
@@ -318,6 +444,7 @@ export const MOCK_FILES: FileItem[] = [
     type: FILE_TYPE.FILE,
     size: 2560,
     mtime_ms: 1771354002500,
+    owner: 'user',
   },
   {
     path: 'Budget spreadsheet/Scripts/database_backup.sql',
@@ -325,6 +452,7 @@ export const MOCK_FILES: FileItem[] = [
     type: FILE_TYPE.FILE,
     size: 102400,
     mtime_ms: 1771354002600,
+    owner: 'user',
   },
   {
     path: 'Budget spreadsheet/config.yaml',
@@ -332,6 +460,7 @@ export const MOCK_FILES: FileItem[] = [
     type: FILE_TYPE.FILE,
     size: 1536,
     mtime_ms: 1771354002700,
+    owner: 'user',
   },
   {
     path: 'Budget spreadsheet/ceremony_photos.rar',
@@ -339,6 +468,7 @@ export const MOCK_FILES: FileItem[] = [
     type: FILE_TYPE.FILE,
     size: 157286400,
     mtime_ms: 1771354002800,
+    owner: 'user',
   },
   {
     path: 'Budget spreadsheet/speech_notes.txt',
@@ -346,6 +476,7 @@ export const MOCK_FILES: FileItem[] = [
     type: FILE_TYPE.FILE,
     size: 2048,
     mtime_ms: 1771354002900,
+    owner: 'user',
   },
   {
     path: 'Budget spreadsheet/wedding_logo.ai',
@@ -353,6 +484,7 @@ export const MOCK_FILES: FileItem[] = [
     type: FILE_TYPE.FILE,
     size: 5120000,
     mtime_ms: 1771354003000,
+    owner: 'user',
   },
   {
     path: 'Budget spreadsheet/background_music.wav',
@@ -360,6 +492,7 @@ export const MOCK_FILES: FileItem[] = [
     type: FILE_TYPE.FILE,
     size: 45000000,
     mtime_ms: 1771354003100,
+    owner: 'user',
   },
   {
     path: 'Budget spreadsheet/venue_3d_model.gltf',
@@ -367,300 +500,6 @@ export const MOCK_FILES: FileItem[] = [
     type: FILE_TYPE.FILE,
     size: 8500000,
     mtime_ms: 1771354003200,
-  },
-  // Deeply nested project structure
-  {
-    path: 'Project Alpha',
-    name: 'Project Alpha',
-    type: FILE_TYPE.DIRECTORY,
-    size: null,
-    mtime_ms: 1771354010000,
-  },
-  {
-    path: 'Project Alpha/README.md',
-    name: 'README.md',
-    type: FILE_TYPE.FILE,
-    size: 4096,
-    mtime_ms: 1771354010100,
-  },
-  {
-    path: 'Project Alpha/package.json',
-    name: 'package.json',
-    type: FILE_TYPE.FILE,
-    size: 2048,
-    mtime_ms: 1771354010200,
-  },
-  {
-    path: 'Project Alpha/src',
-    name: 'src',
-    type: FILE_TYPE.DIRECTORY,
-    size: null,
-    mtime_ms: 1771354011000,
-  },
-  {
-    path: 'Project Alpha/src/index.ts',
-    name: 'index.ts',
-    type: FILE_TYPE.FILE,
-    size: 512,
-    mtime_ms: 1771354011100,
-  },
-  {
-    path: 'Project Alpha/src/app.tsx',
-    name: 'app.tsx',
-    type: FILE_TYPE.FILE,
-    size: 3072,
-    mtime_ms: 1771354011200,
-  },
-  {
-    path: 'Project Alpha/src/components',
-    name: 'components',
-    type: FILE_TYPE.DIRECTORY,
-    size: null,
-    mtime_ms: 1771354012000,
-  },
-  {
-    path: 'Project Alpha/src/components/Button.tsx',
-    name: 'Button.tsx',
-    type: FILE_TYPE.FILE,
-    size: 1536,
-    mtime_ms: 1771354012100,
-  },
-  {
-    path: 'Project Alpha/src/components/Input.tsx',
-    name: 'Input.tsx',
-    type: FILE_TYPE.FILE,
-    size: 2048,
-    mtime_ms: 1771354012200,
-  },
-  {
-    path: 'Project Alpha/src/components/Modal.tsx',
-    name: 'Modal.tsx',
-    type: FILE_TYPE.FILE,
-    size: 3584,
-    mtime_ms: 1771354012300,
-  },
-  {
-    path: 'Project Alpha/src/components/ui',
-    name: 'ui',
-    type: FILE_TYPE.DIRECTORY,
-    size: null,
-    mtime_ms: 1771354013000,
-  },
-  {
-    path: 'Project Alpha/src/components/ui/Card.tsx',
-    name: 'Card.tsx',
-    type: FILE_TYPE.FILE,
-    size: 1024,
-    mtime_ms: 1771354013100,
-  },
-  {
-    path: 'Project Alpha/src/components/ui/Badge.tsx',
-    name: 'Badge.tsx',
-    type: FILE_TYPE.FILE,
-    size: 768,
-    mtime_ms: 1771354013200,
-  },
-  {
-    path: 'Project Alpha/src/components/ui/icons',
-    name: 'icons',
-    type: FILE_TYPE.DIRECTORY,
-    size: null,
-    mtime_ms: 1771354014000,
-  },
-  {
-    path: 'Project Alpha/src/components/ui/icons/ArrowIcon.tsx',
-    name: 'ArrowIcon.tsx',
-    type: FILE_TYPE.FILE,
-    size: 512,
-    mtime_ms: 1771354014100,
-  },
-  {
-    path: 'Project Alpha/src/components/ui/icons/CheckIcon.tsx',
-    name: 'CheckIcon.tsx',
-    type: FILE_TYPE.FILE,
-    size: 512,
-    mtime_ms: 1771354014200,
-  },
-  {
-    path: 'Project Alpha/src/components/ui/icons/CloseIcon.tsx',
-    name: 'CloseIcon.tsx',
-    type: FILE_TYPE.FILE,
-    size: 512,
-    mtime_ms: 1771354014300,
-  },
-  {
-    path: 'Project Alpha/src/hooks',
-    name: 'hooks',
-    type: FILE_TYPE.DIRECTORY,
-    size: null,
-    mtime_ms: 1771354015000,
-  },
-  {
-    path: 'Project Alpha/src/hooks/useAuth.ts',
-    name: 'useAuth.ts',
-    type: FILE_TYPE.FILE,
-    size: 2560,
-    mtime_ms: 1771354015100,
-  },
-  {
-    path: 'Project Alpha/src/hooks/useDebounce.ts',
-    name: 'useDebounce.ts',
-    type: FILE_TYPE.FILE,
-    size: 1024,
-    mtime_ms: 1771354015200,
-  },
-  {
-    path: 'Project Alpha/src/utils',
-    name: 'utils',
-    type: FILE_TYPE.DIRECTORY,
-    size: null,
-    mtime_ms: 1771354016000,
-  },
-  {
-    path: 'Project Alpha/src/utils/helpers.ts',
-    name: 'helpers.ts',
-    type: FILE_TYPE.FILE,
-    size: 4096,
-    mtime_ms: 1771354016100,
-  },
-  {
-    path: 'Project Alpha/src/utils/constants.ts',
-    name: 'constants.ts',
-    type: FILE_TYPE.FILE,
-    size: 1536,
-    mtime_ms: 1771354016200,
-  },
-  {
-    path: 'Project Alpha/src/utils/api',
-    name: 'api',
-    type: FILE_TYPE.DIRECTORY,
-    size: null,
-    mtime_ms: 1771354017000,
-  },
-  {
-    path: 'Project Alpha/src/utils/api/client.ts',
-    name: 'client.ts',
-    type: FILE_TYPE.FILE,
-    size: 2048,
-    mtime_ms: 1771354017100,
-  },
-  {
-    path: 'Project Alpha/src/utils/api/endpoints.ts',
-    name: 'endpoints.ts',
-    type: FILE_TYPE.FILE,
-    size: 3072,
-    mtime_ms: 1771354017200,
-  },
-  {
-    path: 'Project Alpha/src/utils/api/types.ts',
-    name: 'types.ts',
-    type: FILE_TYPE.FILE,
-    size: 1536,
-    mtime_ms: 1771354017300,
-  },
-  {
-    path: 'Project Alpha/src/styles',
-    name: 'styles',
-    type: FILE_TYPE.DIRECTORY,
-    size: null,
-    mtime_ms: 1771354018000,
-  },
-  {
-    path: 'Project Alpha/src/styles/globals.css',
-    name: 'globals.css',
-    type: FILE_TYPE.FILE,
-    size: 2048,
-    mtime_ms: 1771354018100,
-  },
-  {
-    path: 'Project Alpha/src/styles/variables.scss',
-    name: 'variables.scss',
-    type: FILE_TYPE.FILE,
-    size: 1024,
-    mtime_ms: 1771354018200,
-  },
-  {
-    path: 'Project Alpha/tests',
-    name: 'tests',
-    type: FILE_TYPE.DIRECTORY,
-    size: null,
-    mtime_ms: 1771354019000,
-  },
-  {
-    path: 'Project Alpha/tests/setup.ts',
-    name: 'setup.ts',
-    type: FILE_TYPE.FILE,
-    size: 512,
-    mtime_ms: 1771354019100,
-  },
-  {
-    path: 'Project Alpha/tests/unit',
-    name: 'unit',
-    type: FILE_TYPE.DIRECTORY,
-    size: null,
-    mtime_ms: 1771354020000,
-  },
-  {
-    path: 'Project Alpha/tests/unit/Button.test.tsx',
-    name: 'Button.test.tsx',
-    type: FILE_TYPE.FILE,
-    size: 2048,
-    mtime_ms: 1771354020100,
-  },
-  {
-    path: 'Project Alpha/tests/unit/helpers.test.ts',
-    name: 'helpers.test.ts',
-    type: FILE_TYPE.FILE,
-    size: 3072,
-    mtime_ms: 1771354020200,
-  },
-  {
-    path: 'Project Alpha/tests/e2e',
-    name: 'e2e',
-    type: FILE_TYPE.DIRECTORY,
-    size: null,
-    mtime_ms: 1771354021000,
-  },
-  {
-    path: 'Project Alpha/tests/e2e/auth.spec.ts',
-    name: 'auth.spec.ts',
-    type: FILE_TYPE.FILE,
-    size: 4096,
-    mtime_ms: 1771354021100,
-  },
-  {
-    path: 'Project Alpha/tests/e2e/dashboard.spec.ts',
-    name: 'dashboard.spec.ts',
-    type: FILE_TYPE.FILE,
-    size: 5120,
-    mtime_ms: 1771354021200,
-  },
-  {
-    path: 'Project Alpha/config',
-    name: 'config',
-    type: FILE_TYPE.DIRECTORY,
-    size: null,
-    mtime_ms: 1771354022000,
-  },
-  {
-    path: 'Project Alpha/config/tsconfig.json',
-    name: 'tsconfig.json',
-    type: FILE_TYPE.FILE,
-    size: 1024,
-    mtime_ms: 1771354022100,
-  },
-  {
-    path: 'Project Alpha/config/eslint.config.js',
-    name: 'eslint.config.js',
-    type: FILE_TYPE.FILE,
-    size: 2048,
-    mtime_ms: 1771354022200,
-  },
-  {
-    path: 'Project Alpha/config/vite.config.ts',
-    name: 'vite.config.ts',
-    type: FILE_TYPE.FILE,
-    size: 1536,
-    mtime_ms: 1771354022300,
+    owner: 'user',
   },
 ];

@@ -185,6 +185,7 @@ export const API_ENDPOINTS = {
   // Conversations V3
   CREATE_CONVERSATION_V3: `v3/conversations`,
   POST_MESSAGE_V3: `v3/conversations/{{conversationId}}/messages`,
+  LIST_CHAT_MODELS: `v3/conversations/models`,
   // Conversations V2
   FILTER_CONVERSATIONS_V2_GET: `v2/conversations/filter`,
 
@@ -205,4 +206,24 @@ export const API_ENDPOINTS = {
   TRIGGER_SUBSCRIPTIONS_DELETE: `trigger-subscriptions/{{subscription_id}}`,
   // Update Conversation Title
   UPDATE_CONVERSATION_TITLE: `v3/conversations/{{conversationId}}/title`,
+
+  //INTEGRATIONS
+  INTEGRATIONS_CATALOG_GET: `integrations/catalog`,
+  INTEGRATIONS_CATALOG_ENABLED_GET: `integrations/catalog/enabled`,
+  INTEGRATIONS_CONNECTIONS_DELETE: `integrations/connections/{{connectionId}}`,
+  INTEGRATIONS_AUTHENTICATE_V2_POST: `integrations/authenticate`,
+  // Filesystem API
+  FILESYSTEM_STATUS_GET: `filesystem/status`,
+  FILES_LIST_GET: `files`,
+  FILES_CREATE_POST: `files/create`,
+  FILES_WRITE_POST: `files/write`,
+  FILES_READ_GET: `files/{{path}}`,
+  FILES_COPY_POST: `files/copy`,
+  FILES_MOVE_POST: `files/move`,
+  FILES_DELETE: `files/{{path}}`,
+  FILES_UPLOAD_POST: `files/upload`,
+  FILES_UPLOAD_INIT_POST: `files/upload/init`,
+  FILES_UPLOAD_CHUNK_POST: `files/upload/chunk`,
+  FILES_UPLOAD_COMPLETE_POST: `files/upload/complete`,
+  FILES_UPLOAD_CANCEL_DELETE: `files/upload/{{upload_id}}`,
 };
