@@ -26,6 +26,9 @@ export const FILE_TOAST_MESSAGES = {
   FAILED_TO_RENAME: 'Failed to rename',
   FAILED_TO_MOVE_COPY: 'Failed to move/copy',
   FAILED_TO_RESOLVE_CONFLICT: 'Failed to resolve conflict',
+  FAILED_TO_SAVE_FILE: 'Failed to save file',
+  FAILED_TO_DELETE_FILE: 'Failed to delete file',
+  FILE_DELETED: 'File deleted',
 } as const;
 
 export const CONTEXT_MENU_ACTION_IDS = {
@@ -42,6 +45,22 @@ export const CONTEXT_MENU_ACTION_IDS = {
   PASTE: 'paste',
   DELETE: 'delete',
 } as const;
+
+export const FILE_VIEWER_HEADER_ACTION_IDS = {
+  DOWNLOAD: 'download',
+  DELETE: 'delete',
+} as const;
+
+export const SAVE_STATUS = {
+  IDLE: 'idle',
+  SAVING: 'saving',
+  SAVED: 'saved',
+} as const;
+
+export type SaveStatus = (typeof SAVE_STATUS)[keyof typeof SAVE_STATUS];
+
+export type FileViewerHeaderActionId =
+  (typeof FILE_VIEWER_HEADER_ACTION_IDS)[keyof typeof FILE_VIEWER_HEADER_ACTION_IDS];
 
 export const SORT_OPTIONS: { value: SortOption; label: string }[] = [
   { value: 'date_modified', label: 'Date modified' },
@@ -63,6 +82,11 @@ export const CONTEXT_MENU_ACTIONS: ContextMenuAction[] = [
   { id: CONTEXT_MENU_ACTION_IDS.CUT, label: 'Cut', icon: Scissors },
   { id: CONTEXT_MENU_ACTION_IDS.PASTE, label: 'Paste', icon: Clipboard, folderOnly: true },
   { id: CONTEXT_MENU_ACTION_IDS.DELETE, label: 'Delete', icon: Trash2, isDestructive: true },
+];
+
+export const FILE_VIEWER_HEADER_ACTIONS: ContextMenuAction[] = [
+  { id: FILE_VIEWER_HEADER_ACTION_IDS.DOWNLOAD, label: 'Download', icon: Download },
+  { id: FILE_VIEWER_HEADER_ACTION_IDS.DELETE, label: 'Delete', icon: Trash2, isDestructive: true },
 ];
 
 // File categories for viewer selection

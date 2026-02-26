@@ -11,7 +11,10 @@ const getStoredTabs = (): DynamicTab[] => {
     if (!stored) return [];
     const tabs = JSON.parse(stored) as DynamicTab[];
 
-    return tabs;
+    return tabs.map((tab) => ({
+      ...tab,
+      stableKey: tab.stableKey || crypto.randomUUID(),
+    }));
   } catch (error) {
     console.error('Error getting stored tabs:', error);
 
@@ -33,8 +36,11 @@ interface PaceContextType {
   registerStartNewChat: (callback: () => void) => void;
   startNewChat: () => void;
   dynamicTabs: DynamicTab[];
-  openDynamicTab: (tab: DynamicTab) => void;
+  activeFileTabKey: string | null;
+  setActiveFileTabKey: (key: string | null) => void;
+  openDynamicTab: (tab: Omit<DynamicTab, 'stableKey'>) => void;
   closeDynamicTab: (id: string) => void;
+  updateDynamicTab: (oldId: string, newTab: Omit<DynamicTab, 'stableKey'>) => void;
   reorderDynamicTabs: (newOrder: string[]) => void;
 }
 
@@ -43,6 +49,7 @@ const PaceContext = createContext<PaceContextType | null>(null);
 export const PaceProvider = ({ children }: { children: ReactNode }) => {
   const [isPaceSidebarOpen, setIsPaceSidebarOpen] = useState(false);
   const [dynamicTabs, setDynamicTabs] = useState<DynamicTab[]>([]);
+  const [activeFileTabKey, setActiveFileTabKey] = useState<string | null>(null);
   const startNewChatRef = useRef<(() => void) | null>(null);
 
   // Hydrate from localStorage on mount
@@ -62,14 +69,18 @@ export const PaceProvider = ({ children }: { children: ReactNode }) => {
     startNewChatRef.current?.();
   }, []);
 
-  const openDynamicTab = useCallback((tab: DynamicTab) => {
+  const openDynamicTab = useCallback((tab: Omit<DynamicTab, 'stableKey'>) => {
     setDynamicTabs((prev) => {
-      // Check if tab already exists
       const exists = prev.some((t) => t.id === tab.id);
 
       if (exists) return prev;
 
-      const newTabs = [...prev, tab];
+      const newTab: DynamicTab = {
+        ...tab,
+        stableKey: crypto.randomUUID(),
+      };
+
+      const newTabs = [...prev, newTab];
 
       setStoredTabs(newTabs);
 
@@ -81,6 +92,25 @@ export const PaceProvider = ({ children }: { children: ReactNode }) => {
     setDynamicTabs((prev) => {
       const newTabs = prev.filter((tab) => tab.id !== id);
 
+      setStoredTabs(newTabs);
+
+      return newTabs;
+    });
+  }, []);
+
+  const updateDynamicTab = useCallback((oldId: string, newTab: Omit<DynamicTab, 'stableKey'>) => {
+    setDynamicTabs((prev) => {
+      const tabIndex = prev.findIndex((tab) => tab.id === oldId);
+
+      if (tabIndex === -1) return prev;
+
+      const existingTab = prev[tabIndex];
+      const newTabs = [...prev];
+
+      newTabs[tabIndex] = {
+        ...newTab,
+        stableKey: existingTab.stableKey,
+      };
       setStoredTabs(newTabs);
 
       return newTabs;
@@ -113,8 +143,11 @@ export const PaceProvider = ({ children }: { children: ReactNode }) => {
       registerStartNewChat,
       startNewChat,
       dynamicTabs,
+      activeFileTabKey,
+      setActiveFileTabKey,
       openDynamicTab,
       closeDynamicTab,
+      updateDynamicTab,
       reorderDynamicTabs,
     }),
     [
@@ -122,8 +155,10 @@ export const PaceProvider = ({ children }: { children: ReactNode }) => {
       registerStartNewChat,
       startNewChat,
       dynamicTabs,
+      activeFileTabKey,
       openDynamicTab,
       closeDynamicTab,
+      updateDynamicTab,
       reorderDynamicTabs,
     ],
   );

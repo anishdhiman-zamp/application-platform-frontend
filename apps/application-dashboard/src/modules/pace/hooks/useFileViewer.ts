@@ -26,6 +26,7 @@ interface UseFileViewerReturn {
   isEditable: boolean;
   updateContent: (newContent: string) => void;
   isSaving: boolean;
+  lastSavedAt: number | null;
   refetch: () => void;
 }
 
@@ -185,6 +186,7 @@ export const useFileViewer = ({ filePath, onSaveSuccess, onSaveError }: UseFileV
     isEditable,
     updateContent,
     isSaving,
+    lastSavedAt: fileState?.mtime_ms ?? null,
     refetch,
   };
 };

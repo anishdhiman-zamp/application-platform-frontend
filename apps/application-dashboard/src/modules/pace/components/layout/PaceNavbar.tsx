@@ -110,9 +110,9 @@ const PaceNavbar = () => {
             <div className='flex min-w-0 flex-1 items-center gap-x-1'>
               {dynamicTabs.map((tab) => (
                 <SortableDynamicTabItem
-                  key={tab.id}
+                  key={tab.stableKey}
                   tab={tab}
-                  isActive={isDynamicTabActive(tab.path)}
+                  isActive={isDynamicTabActive(tab)}
                   isAnyDragging={activeId !== null}
                   onClose={handleCloseDynamicTab}
                 />
@@ -124,7 +124,7 @@ const PaceNavbar = () => {
               <div className='-rotate-2 rounded-lg border shadow-lg'>
                 <DynamicTabItem
                   tab={activeTab}
-                  isActive={isDynamicTabActive(activeTab.path)}
+                  isActive={isDynamicTabActive(activeTab)}
                   isDragging
                   onClose={handleCloseDynamicTab}
                 />

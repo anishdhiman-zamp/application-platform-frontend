@@ -5,6 +5,7 @@ import { CLIPBOARD_OPERATION, type FileItem, type TreeNode } from '@/modules/pac
 import { executeMoveOrCopy, parseDragData } from '@/modules/pace/components/files/file-tree.utils';
 import { FILE_TOAST_MESSAGES } from '@/modules/pace/components/files/files.constants';
 import { useFileTreeContext } from '@/modules/pace/hooks/useFileTreeContext';
+import { useUpdateFileTab } from '@/modules/pace/hooks/useUpdateFileTab';
 
 interface UseFileTreeNodeDragDropProps {
   node: TreeNode;
@@ -51,6 +52,7 @@ export const useFileTreeNodeDragDrop = ({
   const expandTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 
   const { copyItem, moveItem, setConflict, isProtectedRoot, isInvalidCrossMove } = useFileTreeContext();
+  const { updateFileTab } = useUpdateFileTab();
 
   const clearExpandTimeout = () => {
     if (expandTimeoutRef.current) {
@@ -212,6 +214,8 @@ export const useFileTreeNodeDragDrop = ({
         onToggleExpand(node.path);
       }
 
+      const isCopy = e.altKey;
+
       await executeMoveOrCopy({
         sourcePath,
         sourceName,
@@ -219,10 +223,18 @@ export const useFileTreeNodeDragDrop = ({
         sourceSize,
         sourceOwner,
         destinationPath,
-        isCopy: e.altKey,
+        isCopy,
         actions: { copyItem, moveItem },
         onFileMoved,
       });
+
+      if (!isCopy) {
+        updateFileTab({
+          oldPath: sourcePath,
+          newPath: destinationPath,
+          newName: sourceName,
+        });
+      }
     } catch (error) {
       captureException(error);
       toast.error(FILE_TOAST_MESSAGES.FAILED_TO_MOVE_COPY);

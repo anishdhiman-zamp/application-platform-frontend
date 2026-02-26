@@ -126,28 +126,31 @@ const FileTreeNodeRow = forwardRef<HTMLDivElement, FileTreeNodeRowProps>(
         )}
 
         {state.isRenaming ? (
-          <TooltipV2
-            tooltipBody='A file or folder with this name already exists.'
-            side={SIDE_OPTIONS.BOTTOM}
-            open={state.isDuplicateName}
-            delayDuration={0}
-            tooltipClassName='bg-RED_100 text-RED_700 border-RED_300 border'
-            asChildTrigger
-          >
-            <Input
-              ref={rename.onInputRef}
-              value={rename.value}
-              onChange={(e) => rename.onChange(e.target.value)}
-              onBlur={rename.onSubmit}
-              onKeyDown={rename.onKeyDown}
-              size='small'
-              className={cn(
-                'h-5! min-w-0 flex-1 p-0.5 text-[13px]! leading-4! font-normal!',
-                state.isDuplicateName && 'border-RED_700! focus:shadow-input-error-outline-shadow',
-              )}
-              onClick={(e) => e.stopPropagation()}
-            />
-          </TooltipV2>
+          <div className='flex min-w-0 flex-1 items-center'>
+            <TooltipV2
+              tooltipBody='A file or folder with this name already exists.'
+              side={SIDE_OPTIONS.BOTTOM}
+              open={state.isDuplicateName}
+              delayDuration={0}
+              tooltipClassName='bg-RED_100 text-RED_700 border-RED_300 border'
+              asChildTrigger
+            >
+              <Input
+                ref={rename.onInputRef}
+                value={rename.value}
+                onChange={(e) => rename.onChange(e.target.value)}
+                onBlur={rename.onSubmit}
+                onKeyDown={rename.onKeyDown}
+                size='small'
+                className={cn(
+                  'h-5! min-w-0 flex-1 p-0.5 text-[13px]! leading-4! font-normal!',
+                  state.isDuplicateName && 'border-RED_700! focus:shadow-input-error-outline-shadow',
+                )}
+                onClick={(e) => e.stopPropagation()}
+              />
+            </TooltipV2>
+            {extension && <span className='f-13-450 text-GRAY_600 shrink-0 select-none'>.{extension}</span>}
+          </div>
         ) : (
           <span className='f-13-450 text-GRAY_1000 truncate select-none'>
             {state.isUserPrivateFolder ? `${node.name} (Private)` : node.name}
