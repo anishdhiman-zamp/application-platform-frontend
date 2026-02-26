@@ -65,15 +65,6 @@ function safeJsonParse(str: string): MapAny | null {
 
 export const LoginForm = () => {
   const logoPromiseRef = useRef<Promise<void> | null>(null);
-  const isGoogleSsoEnabled = (() => {
-    try {
-      const flags = JSON.parse(getFromLocalStorage(LOCAL_STORAGE_KEYS.FEATURE_FLAGS) ?? '{}');
-
-      return flags['google-sso-login'] === true;
-    } catch {
-      return false;
-    }
-  })();
 
   const [email, setEmail] = useState('');
   const [passwordFlow, setPasswordFlow] = useState<LoginFlow | null>(null);
@@ -455,27 +446,23 @@ export const LoginForm = () => {
 
       return (
         <div>
-          {isGoogleSsoEnabled && (
-            <>
-              <Button
-                type='button'
-                disabled={isLoading}
-                onClick={handleGoogleLogin}
-                className='btn-login bg-GRAY_100 text-GRAY_1000 hover:bg-GRAY_200 active:bg-GRAY_100 disabled:bg-GRAY_100 relative flex h-auto w-full cursor-pointer items-center justify-center gap-2.5 overflow-hidden rounded-2xl border border-black/12 px-5 py-3.5 text-sm font-medium transition-all duration-250 active:scale-[0.98] disabled:cursor-not-allowed disabled:opacity-60'
-              >
-                <GoogleIcon className='relative z-[1] h-[18px] w-[18px] shrink-0' />
-                <span className='relative z-[1]'>
-                  {loadingAction === LOADING_ACTION.GOOGLE ? 'Connecting...' : 'Continue with Google'}
-                </span>
-              </Button>
+          <Button
+            type='button'
+            disabled={isLoading}
+            onClick={handleGoogleLogin}
+            className='btn-login bg-GRAY_100 text-GRAY_1000 hover:bg-GRAY_200 active:bg-GRAY_100 disabled:bg-GRAY_100 relative flex h-auto w-full cursor-pointer items-center justify-center gap-2.5 overflow-hidden rounded-2xl border border-black/12 px-5 py-3.5 text-sm font-medium transition-all duration-250 active:scale-[0.98] disabled:cursor-not-allowed disabled:opacity-60'
+          >
+            <GoogleIcon className='relative z-[1] h-[18px] w-[18px] shrink-0' />
+            <span className='relative z-[1]'>
+              {loadingAction === LOADING_ACTION.GOOGLE ? 'Connecting...' : 'Continue with Google'}
+            </span>
+          </Button>
 
-              <div className='my-6 flex items-center gap-4'>
-                <div className='h-px flex-1 bg-black/8' />
-                <span className='text-GRAY_700 text-xs font-medium tracking-wide uppercase'>or</span>
-                <div className='h-px flex-1 bg-black/8' />
-              </div>
-            </>
-          )}
+          <div className='my-6 flex items-center gap-4'>
+            <div className='h-px flex-1 bg-black/8' />
+            <span className='text-GRAY_700 text-xs font-medium tracking-wide uppercase'>or</span>
+            <div className='h-px flex-1 bg-black/8' />
+          </div>
 
           {/* Email Form */}
           <form onSubmit={handleSubmit}>
