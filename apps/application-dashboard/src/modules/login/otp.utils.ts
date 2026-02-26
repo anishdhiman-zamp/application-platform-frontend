@@ -6,13 +6,15 @@ type NestedRecord = Record<string, unknown>;
 
 function setNestedValue(obj: NestedRecord, path: string, value: unknown): void {
   const keys = path.split('.');
-  let current: NestedRecord = obj;
+  const lastKey = keys.pop()!;
 
-  for (let i = 0; i < keys.length - 1; i++) {
-    current[keys[i]] = (current[keys[i]] as NestedRecord) || {};
-    current = current[keys[i]] as NestedRecord;
-  }
-  current[keys[keys.length - 1]] = value;
+  const target = keys.reduce<NestedRecord>((current, key) => {
+    current[key] = (current[key] as NestedRecord) || {};
+
+    return current[key] as NestedRecord;
+  }, obj);
+
+  target[lastKey] = value;
 }
 
 /**

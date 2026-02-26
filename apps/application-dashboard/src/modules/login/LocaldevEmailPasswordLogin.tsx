@@ -1,6 +1,7 @@
 'use client';
 import { FC, FormEvent, useState } from 'react';
 import { Button } from '@zamp-platform/ui';
+import { cn } from '@zamp-platform/ui/utils';
 import { useGetErrorDetailsQuery } from 'apis/auth';
 import { LOGIN_METHODS } from 'constants/auth.constants';
 import { LOGIN_ERROR_TEXT } from 'modules/login/constants';
@@ -72,24 +73,19 @@ const LoginForm: FC<LoginFormProps> = ({ loginFlow, setLoginFlow }) => {
   };
 
   const formDisabled = loading || !loginFlow;
-  const inputBase =
-    'w-full rounded-xl border bg-white px-3.5 py-3 text-sm text-[#1a1a1a] transition-all duration-250 outline-none placeholder:text-[#bbb]';
-  const inputNormal = 'border-black/10 focus:border-black/25 focus:shadow-[0_0_0_3px_rgba(0,0,0,0.04)]';
-  const inputError =
-    'border-[#e53935] shadow-[0_0_0_3px_rgba(229,57,53,0.08)] focus:border-[#e53935] focus:shadow-[0_0_0_3px_rgba(229,57,53,0.12)]';
 
   return (
     <div>
       {userFacingError?.map((err, index) => (
-        <p key={index} className='mb-4 rounded-lg bg-red-50 px-3 py-2 text-xs text-[#e53935]'>
-          {err.message}
+        <p key={index} className='mb-4 rounded-lg bg-red-50 px-3 py-2 text-xs text-red-600'>
+          {err?.message}
         </p>
       ))}
 
       <form onSubmit={handlePasswordSubmit}>
         <Input
           label='Email'
-          labelOverrideClassName='mb-2 block text-[13px] font-medium text-[#666]'
+          labelOverrideClassName='mb-2 block text-[13px] font-medium text-GRAY_900'
           className='mb-4'
           id='login-email'
           placeholder='Enter your email'
@@ -101,7 +97,7 @@ const LoginForm: FC<LoginFormProps> = ({ loginFlow, setLoginFlow }) => {
           disabled={formDisabled}
           noBorders
           customPaddingClassName='px-3.5 py-3'
-          inputClassName={`${inputBase} ${inputNormal}`}
+          inputClassName='w-full rounded-xl border border-black/10 bg-white px-3.5 py-3 text-sm text-GRAY_1000 transition-all duration-250 outline-none placeholder:text-GRAY_500 focus:border-black/25 focus:shadow-[0_0_0_3px_rgba(0,0,0,0.04)]'
           focusClassNames=''
           inputRoundedClassName=''
         />
@@ -109,7 +105,7 @@ const LoginForm: FC<LoginFormProps> = ({ loginFlow, setLoginFlow }) => {
         <div className='mb-5'>
           <Input
             label='Password'
-            labelOverrideClassName='mb-2 block text-[13px] font-medium text-[#666]'
+            labelOverrideClassName='mb-2 block text-[13px] font-medium text-GRAY_900'
             id='login-password'
             placeholder='Enter your password'
             name='password'
@@ -119,22 +115,28 @@ const LoginForm: FC<LoginFormProps> = ({ loginFlow, setLoginFlow }) => {
             disabled={formDisabled}
             noBorders
             customPaddingClassName='px-3.5 py-3'
-            inputClassName={`${inputBase} ${error ? inputError : inputNormal}`}
+            inputClassName={cn(
+              'w-full rounded-xl border bg-white px-3.5 py-3 text-sm text-GRAY_1000 transition-all duration-250 outline-none placeholder:text-GRAY_500',
+              error
+                ? 'border-red-600 shadow-[0_0_0_3px_rgba(220,38,38,0.08)] focus:border-red-600 focus:shadow-[0_0_0_3px_rgba(220,38,38,0.12)]'
+                : 'border-black/10 focus:border-black/25 focus:shadow-[0_0_0_3px_rgba(0,0,0,0.04)]',
+            )}
             focusClassNames=''
             inputRoundedClassName=''
           />
-          {error && <p className='mt-1.5 text-xs text-[#e53935]'>{error}</p>}
+          {error && <p className='mt-1.5 text-xs text-red-600'>{error}</p>}
         </div>
 
         <Button
           type='submit'
           data-testid='login'
           disabled={formDisabled || !email.trim() || !password}
-          className={`group relative mt-1 h-auto w-full overflow-hidden rounded-2xl border px-5 py-3.5 text-sm font-medium transition-all duration-250 ${
+          className={cn(
+            'group relative mt-1 h-auto w-full overflow-hidden rounded-2xl border px-5 py-3.5 text-sm font-medium transition-all duration-250',
             !(formDisabled || !email.trim() || !password)
-              ? 'cursor-pointer border-black/10 bg-[#1a1a1a] text-white hover:bg-[#2a2a2a] active:scale-[0.98] active:bg-[#1a1a1a]'
-              : 'cursor-not-allowed border-black/3 bg-[#d0d0d0] text-[#999] disabled:bg-[#d0d0d0] disabled:text-[#999]'
-          }`}
+              ? 'bg-GRAY_1000 hover:bg-GRAY_950 active:bg-GRAY_1000 cursor-pointer border-black/10 text-white active:scale-[0.98]'
+              : 'bg-GRAY_500 text-GRAY_700 disabled:bg-GRAY_500 disabled:text-GRAY_700 cursor-not-allowed border-black/3',
+          )}
         >
           {loading ? 'Signing in...' : 'Sign in'}
         </Button>

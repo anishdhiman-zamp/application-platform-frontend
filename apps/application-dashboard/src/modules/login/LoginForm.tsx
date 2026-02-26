@@ -3,6 +3,7 @@
 import { ChangeEvent, type SubmitEvent, useEffect, useRef, useState } from 'react';
 import { BASE_API_URL, getApiDomainAndRegions, reinitializeApiDomain, REQUEST_TYPES } from '@zamp-platform/api';
 import { Button } from '@zamp-platform/ui';
+import { cn } from '@zamp-platform/ui/utils';
 import {
   getFromLocalStorage,
   LOCAL_STORAGE_KEYS,
@@ -12,9 +13,11 @@ import {
 import { LOGIN_METHODS, LOGIN_PROVIDERS } from 'constants/auth.constants';
 import { AnimatedDitherArrow } from 'modules/login/AnimatedDitherArrow';
 import { LOGIN_ERROR_TEXT } from 'modules/login/constants';
+import { GoogleIcon } from 'modules/login/GoogleIcon';
 import LocaldevEmailPasswordLogin from 'modules/login/LocaldevEmailPasswordLogin';
-import { LOGIN_GROUPS, VALID_SESSION_DETECTED_ERROR_MSG } from 'modules/login/login.constants';
+import { LOGIN_FORM_MESSAGES, LOGIN_GROUPS, VALID_SESSION_DETECTED_ERROR_MSG } from 'modules/login/login.constants';
 import { OtpVerification } from 'modules/login/OtpVerification';
+import Link from 'next/link';
 import { FlowNode, LoginFlow } from 'types/api/auth.types';
 import { getDomainFromEmail, isValidEmail } from 'utils/common';
 import { API_ENDPOINTS } from '@/apis/apiEndpoint.constants';
@@ -24,7 +27,6 @@ import Input from 'components/common/input';
 
 type LoadingAction = 'idle' | 'email' | 'google' | 'sso';
 
-// Brief pause after SSO provider logo loads so the user sees which provider they're redirecting to
 const SSO_LOGO_DISPLAY_MS = 600;
 
 async function createLoginFlow(apiBaseUrl: string, email: string, method?: string): Promise<LoginFlow | null> {
@@ -52,6 +54,8 @@ function flowHasCodeNodes(flow: LoginFlow): boolean {
 function flowHasPasswordNodes(flow: LoginFlow): boolean {
   return flow.ui?.nodes?.some((n: FlowNode) => n.group === LOGIN_GROUPS.PASSWORD) ?? false;
 }
+
+type ActiveView = 'otp' | 'password' | 'methodPicker' | 'emailEntry';
 
 export const LoginForm = () => {
   const [email, setEmail] = useState('');
@@ -102,6 +106,16 @@ export const LoginForm = () => {
     const legacy = getFromLocalStorage(LOCAL_STORAGE_KEYS.LAST_LOGGED_IN_OIDC_EMAIL);
 
     if (legacy) setEmail(legacy);
+  }, []);
+
+  useEffect(() => {
+    const onPageShow = (e: PageTransitionEvent) => {
+      if (e.persisted) setLoadingAction('idle');
+    };
+
+    window.addEventListener('pageshow', onPageShow);
+
+    return () => window.removeEventListener('pageshow', onPageShow);
   }, []);
 
   // ── Helpers ─────────────────────────────────────────────────────
@@ -230,7 +244,7 @@ export const LoginForm = () => {
     setLoadingAction('email');
 
     if (!isValidEmail(email)) {
-      setError('Please enter a valid email address');
+      setError(LOGIN_FORM_MESSAGES.INVALID_EMAIL);
       resetLoadingState();
 
       return;
@@ -280,7 +294,7 @@ export const LoginForm = () => {
         actionUrlObj.host = baseUrlObj.host;
         await initiateOidcLogin(actionUrlObj.toString(), flow.ui.method, oidcNode.attributes.value as LOGIN_PROVIDERS);
       } else {
-        setError('Google login is not available for this configuration');
+        setError(LOGIN_FORM_MESSAGES.GOOGLE_UNAVAILABLE);
         resetLoadingState();
       }
     } catch {
@@ -316,17 +330,7 @@ export const LoginForm = () => {
     }
   };
 
-  // ── View Routing ────────────────────────────────────────────────
-
-  if (otpFlow) {
-    return (
-      <OtpVerification email={email} flow={otpFlow} onEditEmail={handleEditEmail} onFlowExpired={handleFlowExpired} />
-    );
-  }
-
-  if (passwordFlow) {
-    return <LocaldevEmailPasswordLogin loginFlow={passwordFlow} setLoginFlow={setPasswordFlow} />;
-  }
+  // ── Method Picker Helpers ───────────────────────────────────────
 
   const initiateOtpFromPicker = async () => {
     setLoadingAction('email');
@@ -338,185 +342,198 @@ export const LoginForm = () => {
         setOtpFlow(flow);
         setMethodPickerFlow(null);
       } else {
-        setError('Failed to send code. Please try again.');
+        setError(LOGIN_FORM_MESSAGES.SEND_CODE_FAILED);
       }
     } catch {
-      setError('Failed to send code. Please try again.');
+      setError(LOGIN_FORM_MESSAGES.SEND_CODE_FAILED);
     } finally {
       resetLoadingState();
     }
   };
 
-  if (methodPickerFlow) {
-    const btnBase =
-      'h-auto w-full overflow-hidden rounded-2xl border px-5 py-3.5 text-sm font-medium transition-all duration-250 cursor-pointer active:scale-[0.98]';
+  // ── View Routing ────────────────────────────────────────────────
 
-    return (
-      <div>
-        <p className='mb-1 text-sm text-[#1a1a1a]'>
-          Signing in as <span className='font-medium'>{email}</span>
-        </p>
-        <p className='mb-6 text-[13px] text-[#999]'>Choose how you want to sign in</p>
-        {error && <p className='mb-4 text-xs text-[#e53935]'>{error}</p>}
-        <div className='flex flex-col gap-3'>
+  const activeView: ActiveView = otpFlow
+    ? 'otp'
+    : passwordFlow
+      ? 'password'
+      : methodPickerFlow
+        ? 'methodPicker'
+        : 'emailEntry';
+
+  switch (activeView) {
+    case 'otp':
+      return (
+        <OtpVerification
+          email={email}
+          flow={otpFlow!}
+          onEditEmail={handleEditEmail}
+          onFlowExpired={handleFlowExpired}
+        />
+      );
+
+    case 'password':
+      return <LocaldevEmailPasswordLogin loginFlow={passwordFlow!} setLoginFlow={setPasswordFlow} />;
+
+    case 'methodPicker': {
+      const btnBase =
+        'h-auto w-full overflow-hidden rounded-2xl border px-5 py-3.5 text-sm font-medium transition-all duration-250 cursor-pointer active:scale-[0.98]';
+
+      return (
+        <div>
+          <p className='text-GRAY_1000 mb-1 text-sm'>
+            Signing in as <span className='font-medium'>{email}</span>
+          </p>
+          <p className='text-GRAY_700 mb-6 text-[13px]'>Choose how you want to sign in</p>
+          {error && <p className='mb-4 text-xs text-red-600'>{error}</p>}
+          <div className='flex flex-col gap-3'>
+            <Button
+              type='button'
+              disabled={isLoading}
+              className={cn(
+                btnBase,
+                'bg-GRAY_1000 hover:bg-GRAY_950 active:bg-GRAY_1000 border-black/10 text-white disabled:opacity-60',
+              )}
+              onClick={() => initiateOtpFromPicker()}
+            >
+              {loadingAction === 'email' ? 'Sending code...' : 'Sign in with OTP'}
+            </Button>
+            <Button
+              type='button'
+              className={cn(btnBase, 'bg-GRAY_100 text-GRAY_1000 hover:bg-GRAY_200 active:bg-GRAY_100 border-black/12')}
+              onClick={() => {
+                setPasswordFlow(methodPickerFlow);
+                setMethodPickerFlow(null);
+              }}
+            >
+              Sign in with Password
+            </Button>
+          </div>
           <Button
             type='button'
-            disabled={isLoading}
-            className={`${btnBase} border-black/10 bg-[#1a1a1a] text-white hover:bg-[#2a2a2a] active:bg-[#1a1a1a] disabled:opacity-60`}
-            onClick={() => initiateOtpFromPicker()}
-          >
-            {loadingAction === 'email' ? 'Sending code...' : 'Sign in with OTP'}
-          </Button>
-          <Button
-            type='button'
-            className={`${btnBase} border-black/12 bg-[#f3f3f3] text-[#1a1a1a] hover:bg-[#ebebeb] active:bg-[#f3f3f3]`}
+            variant='ghost'
+            className='text-GRAY_700 hover:text-GRAY_900 mt-4 h-auto bg-transparent text-[13px] transition-colors hover:bg-transparent'
             onClick={() => {
-              setPasswordFlow(methodPickerFlow);
               setMethodPickerFlow(null);
+              setError(null);
             }}
           >
-            Sign in with Password
+            ← Use a different email
           </Button>
         </div>
-        <Button
-          type='button'
-          variant='ghost'
-          className='mt-4 h-auto bg-transparent text-[13px] text-[#999] transition-colors hover:bg-transparent hover:text-[#666]'
-          onClick={() => {
-            setMethodPickerFlow(null);
-            setError(null);
-          }}
-        >
-          ← Use a different email
-        </Button>
-      </div>
-    );
-  }
+      );
+    }
 
-  // ── Email Entry View ────────────────────────────────────────────
+    case 'emailEntry': {
+      const isSubmitDisabled = !email.trim() || isLoading;
 
-  const isSubmitDisabled = !email.trim() || isLoading;
-
-  return (
-    <div>
-      {/* Google Sign In */}
-      <Button
-        type='button'
-        disabled={isLoading}
-        onClick={handleGoogleLogin}
-        className='btn-login relative flex h-auto w-full cursor-pointer items-center justify-center gap-2.5 overflow-hidden rounded-2xl border border-black/12 bg-[#f3f3f3] px-5 py-3.5 text-sm font-medium text-[#1a1a1a] transition-all duration-250 hover:bg-[#ebebeb] active:scale-[0.98] active:bg-[#f3f3f3] disabled:cursor-not-allowed disabled:bg-[#f3f3f3] disabled:opacity-60'
-      >
-        <svg
-          className='relative z-[1] h-[18px] w-[18px] shrink-0'
-          viewBox='0 0 24 24'
-          xmlns='http://www.w3.org/2000/svg'
-        >
-          <path
-            d='M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92a5.06 5.06 0 0 1-2.2 3.32v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.1z'
-            fill='#4285F4'
-          />
-          <path
-            d='M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z'
-            fill='#34A853'
-          />
-          <path
-            d='M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l2.85-2.22.81-.62z'
-            fill='#FBBC05'
-          />
-          <path
-            d='M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z'
-            fill='#EA4335'
-          />
-        </svg>
-        <span className='relative z-[1]'>{loadingAction === 'google' ? 'Connecting...' : 'Continue with Google'}</span>
-      </Button>
-
-      {/* Divider */}
-      <div className='my-6 flex items-center gap-4'>
-        <div className='h-px flex-1 bg-black/8' />
-        <span className='text-xs font-medium tracking-wide text-[#999] uppercase'>or</span>
-        <div className='h-px flex-1 bg-black/8' />
-      </div>
-
-      {/* Email Form */}
-      <form onSubmit={handleSubmit}>
-        <div className='mb-5'>
-          <Input
-            label='Email'
-            labelOverrideClassName='mb-2 block text-[13px] font-medium text-[#666]'
-            id='login-email'
-            placeholder='Enter your work email'
-            name='email'
-            type='email'
-            value={email}
-            autoFocus
-            onChange={handleEmailChange}
+      return (
+        <div>
+          {/* Google Sign In */}
+          <Button
+            type='button'
             disabled={isLoading}
-            noBorders
-            customPaddingClassName='px-3.5 py-3'
-            inputClassName={`w-full rounded-xl border bg-white px-3.5 py-3 text-sm text-[#1a1a1a] transition-all duration-250 outline-none placeholder:text-[#bbb] ${
-              error
-                ? 'border-[#e53935] shadow-[0_0_0_3px_rgba(229,57,53,0.08)] focus:border-[#e53935] focus:shadow-[0_0_0_3px_rgba(229,57,53,0.12)]'
-                : 'border-black/10 focus:border-black/25 focus:shadow-[0_0_0_3px_rgba(0,0,0,0.04)]'
-            }`}
-            focusClassNames=''
-            inputRoundedClassName=''
-          />
-          {error && <p className='mt-1.5 text-xs text-[#e53935]'>{error}</p>}
+            onClick={handleGoogleLogin}
+            className='btn-login bg-GRAY_100 text-GRAY_1000 hover:bg-GRAY_200 active:bg-GRAY_100 disabled:bg-GRAY_100 relative flex h-auto w-full cursor-pointer items-center justify-center gap-2.5 overflow-hidden rounded-2xl border border-black/12 px-5 py-3.5 text-sm font-medium transition-all duration-250 active:scale-[0.98] disabled:cursor-not-allowed disabled:opacity-60'
+          >
+            <GoogleIcon className='relative z-[1] h-[18px] w-[18px] shrink-0' />
+            <span className='relative z-[1]'>
+              {loadingAction === 'google' ? 'Connecting...' : 'Continue with Google'}
+            </span>
+          </Button>
+
+          {/* Divider */}
+          <div className='my-6 flex items-center gap-4'>
+            <div className='h-px flex-1 bg-black/8' />
+            <span className='text-GRAY_700 text-xs font-medium tracking-wide uppercase'>or</span>
+            <div className='h-px flex-1 bg-black/8' />
+          </div>
+
+          {/* Email Form */}
+          <form onSubmit={handleSubmit}>
+            <div className='mb-5'>
+              <Input
+                label='Email'
+                labelOverrideClassName='mb-2 block text-[13px] font-medium text-GRAY_900'
+                id='login-email'
+                placeholder='Enter your work email'
+                name='email'
+                type='email'
+                value={email}
+                autoFocus
+                onChange={handleEmailChange}
+                disabled={isLoading}
+                noBorders
+                customPaddingClassName='px-3.5 py-3'
+                inputClassName={cn(
+                  'w-full rounded-xl border bg-white px-3.5 py-3 text-sm text-GRAY_1000 transition-all duration-250 outline-none placeholder:text-GRAY_500',
+                  error
+                    ? 'border-red-600 shadow-[0_0_0_3px_rgba(220,38,38,0.08)] focus:border-red-600 focus:shadow-[0_0_0_3px_rgba(220,38,38,0.12)]'
+                    : 'border-black/10 focus:border-black/25 focus:shadow-[0_0_0_3px_rgba(0,0,0,0.04)]',
+                )}
+                focusClassNames=''
+                inputRoundedClassName=''
+              />
+              {error && <p className='mt-1.5 text-xs text-red-600'>{error}</p>}
+            </div>
+
+            <Button
+              type='submit'
+              data-testid='login-button'
+              disabled={isSubmitDisabled}
+              className={cn(
+                'group btn-login relative mt-1 flex h-auto w-full items-center justify-center gap-2.5 overflow-hidden rounded-2xl border px-5 py-3.5 text-sm font-medium transition-all duration-250',
+                !isSubmitDisabled
+                  ? 'bg-GRAY_1000 hover:bg-GRAY_950 active:bg-GRAY_1000 cursor-pointer border-black/10 text-white active:scale-[0.98]'
+                  : 'bg-GRAY_500 text-GRAY_700 disabled:bg-GRAY_500 disabled:text-GRAY_700 cursor-not-allowed border-black/3',
+              )}
+            >
+              <span className='relative z-[1] flex items-center gap-1.5'>
+                {loadingAction === 'sso' && providerLogo && logoLoaded ? (
+                  <>
+                    Signing in with
+                    {/* eslint-disable-next-line @next/next/no-img-element */}
+                    <img src={providerLogo} alt='provider' className='h-5 max-w-[40px] object-contain' />
+                  </>
+                ) : loadingAction === 'sso' ? (
+                  'Signing in...'
+                ) : loadingAction === 'email' ? (
+                  'Continuing...'
+                ) : (
+                  'Continue'
+                )}
+              </span>
+              <span className='relative z-[1] inline-flex h-[17px] w-[17px] overflow-hidden'>
+                <AnimatedDitherArrow disabled={isSubmitDisabled} />
+              </span>
+            </Button>
+          </form>
+
+          {/* Terms */}
+          <p className='text-GRAY_700 mt-6 text-center text-[11.5px] leading-[1.7]'>
+            By using Zamp, you are agreeing to our
+            <br />
+            <Link
+              href='https://www.zamp.finance/privacy-policy'
+              className='border-GRAY_900/30 text-GRAY_900 hover:border-GRAY_1000/40 hover:text-GRAY_1000 border-b transition-colors duration-150'
+              target='_blank'
+              rel='noopener noreferrer'
+            >
+              Privacy Policy
+            </Link>{' '}
+            and{' '}
+            <Link
+              href='https://www.zamp.finance/terms-of-use'
+              className='border-GRAY_900/30 text-GRAY_900 hover:border-GRAY_1000/40 hover:text-GRAY_1000 border-b transition-colors duration-150'
+              target='_blank'
+              rel='noopener noreferrer'
+            >
+              Terms of Service
+            </Link>
+            .
+          </p>
         </div>
-
-        <Button
-          type='submit'
-          data-testid='login-button'
-          disabled={isSubmitDisabled}
-          className={`group btn-login relative mt-1 flex h-auto w-full items-center justify-center gap-2.5 overflow-hidden rounded-2xl border px-5 py-3.5 text-sm font-medium transition-all duration-250 ${
-            !isSubmitDisabled
-              ? 'cursor-pointer border-black/10 bg-[#1a1a1a] text-white hover:bg-[#2a2a2a] active:scale-[0.98] active:bg-[#1a1a1a]'
-              : 'cursor-not-allowed border-black/3 bg-[#d0d0d0] text-[#999] disabled:bg-[#d0d0d0] disabled:text-[#999]'
-          }`}
-        >
-          <span className='relative z-[1] flex items-center gap-1.5'>
-            {loadingAction === 'sso' && providerLogo && logoLoaded ? (
-              <>
-                Signing in with
-                {/* eslint-disable-next-line @next/next/no-img-element */}
-                <img src={providerLogo} alt='provider' className='h-5 max-w-[40px] object-contain' />
-              </>
-            ) : loadingAction === 'sso' ? (
-              'Signing in...'
-            ) : loadingAction === 'email' ? (
-              'Continuing...'
-            ) : (
-              'Continue'
-            )}
-          </span>
-          <AnimatedDitherArrow disabled={isSubmitDisabled} />
-        </Button>
-      </form>
-
-      {/* Terms */}
-      <p className='mt-6 text-center text-[11.5px] leading-[1.7] text-[#999]'>
-        By using Zamp, you are agreeing to our
-        <br />
-        <a
-          href='https://www.zamp.finance/privacy-policy'
-          className='border-b border-[#555]/30 text-[#555] transition-colors duration-150 hover:border-[#1a1a1a]/40 hover:text-[#1a1a1a]'
-          target='_blank'
-          rel='noopener noreferrer'
-        >
-          Privacy Policy
-        </a>{' '}
-        and{' '}
-        <a
-          href='https://www.zamp.finance/terms-of-use'
-          className='border-b border-[#555]/30 text-[#555] transition-colors duration-150 hover:border-[#1a1a1a]/40 hover:text-[#1a1a1a]'
-          target='_blank'
-          rel='noopener noreferrer'
-        >
-          Terms of Service
-        </a>
-        .
-      </p>
-    </div>
-  );
+      );
+    }
+  }
 };

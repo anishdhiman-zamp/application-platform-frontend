@@ -30,6 +30,9 @@ const shuffledProfessionItems = Array.from({ length: 6 })
     color: COLOR_PALETTE[Math.floor(rng() * COLOR_PALETTE.length)],
   }));
 
+const PROFESSION_LABEL_CLASSES =
+  "flex items-center font-['Geist_Mono',monospace] text-[0.8rem] uppercase tracking-[0.1em] leading-none whitespace-nowrap opacity-0 transition-opacity duration-[1200ms] ease-out font-thin will-change-[opacity] select-none";
+
 type LabelData = {
   el: HTMLDivElement;
   cx: number;
@@ -70,8 +73,120 @@ function stopSwitching(data: LabelData) {
   }
 }
 
+function buildLabels(grid: HTMLDivElement): LabelData[] {
+  const labelData: LabelData[] = [];
+
+  shuffledProfessionItems.forEach(({ name, color }) => {
+    const element = document.createElement('div');
+
+    element.className = PROFESSION_LABEL_CLASSES;
+    element.textContent = name;
+    element.style.color = color;
+    grid.appendChild(element);
+    labelData.push({ el: element, cx: 0, cy: 0, isHovered: false, switchTimeout: null });
+  });
+
+  return labelData;
+}
+
+function updateGrid(
+  labelData: LabelData[],
+  mouseRef: { current: { x: number; y: number } },
+  glow: HTMLDivElement | null,
+  cardEl: HTMLDivElement | null,
+): boolean {
+  const { x: mouseX, y: mouseY } = mouseRef.current;
+  const mouseOffscreen = mouseX < -500;
+
+  if (mouseOffscreen) {
+    let anyHovered = false;
+
+    for (const label of labelData) {
+      if (!label.isHovered) continue;
+
+      anyHovered = true;
+      label.isHovered = false;
+      stopSwitching(label);
+
+      Object.assign(label.el.style, {
+        fontWeight: '100',
+        opacity: '0',
+        transitionDuration: '1200ms',
+      });
+    }
+    if (glow) glow.style.background = 'none';
+    if (anyHovered) return false;
+
+    return false;
+  }
+
+  const cardRect = cardEl?.getBoundingClientRect();
+  const expanded = cardRect
+    ? {
+        left: cardRect.left - CARD_PAD_X,
+        right: cardRect.right + CARD_PAD_X,
+        top: cardRect.top - CARD_PAD_Y,
+        bottom: cardRect.bottom + CARD_PAD_Y,
+      }
+    : null;
+
+  for (const data of labelData) {
+    const { el, cx, cy } = data;
+    const dist = Math.sqrt((cx - mouseX) ** 2 + (cy - mouseY) ** 2);
+
+    if (dist < REVEAL_RADIUS) {
+      const strength = 1 - dist / REVEAL_RADIUS;
+      let opacity = Math.pow(strength, 1.2) * 0.95;
+
+      if (expanded) {
+        const nearestX = Math.max(expanded.left, Math.min(cx, expanded.right));
+        const nearestY = Math.max(expanded.top, Math.min(cy, expanded.bottom));
+        const cardDist = Math.sqrt((cx - nearestX) ** 2 + (cy - nearestY) ** 2);
+
+        if (cardDist <= 0) {
+          opacity *= 0.08;
+        } else if (cardDist < CARD_FADE_ZONE) {
+          opacity *= 0.14 + (cardDist / CARD_FADE_ZONE) * 0.86;
+        }
+      }
+
+      el.style.opacity = String(opacity);
+      el.style.transitionDuration = '150ms';
+
+      if (!data.isHovered) {
+        data.isHovered = true;
+        startSwitching(data);
+      }
+    } else {
+      if (data.isHovered) {
+        data.isHovered = false;
+        stopSwitching(data);
+        el.style.fontWeight = '100';
+      }
+      el.style.opacity = '0';
+      if (
+        !(
+          expanded &&
+          !data.isHovered &&
+          cx >= expanded.left &&
+          cx <= expanded.right &&
+          cy >= expanded.top &&
+          cy <= expanded.bottom
+        )
+      ) {
+        el.style.transitionDuration = '1200ms';
+      }
+    }
+  }
+
+  if (glow) {
+    glow.style.background = `radial-gradient(500px circle at ${mouseX}px ${mouseY}px, rgba(255, 255, 255, 0.3), transparent 100%)`;
+  }
+
+  return true;
+}
+
 type Props = {
-  /** Ref to the centered card container, used to dampen label opacity near it */
   containerRef: RefObject<HTMLDivElement | null>;
 };
 
@@ -86,120 +201,27 @@ export const ProfessionRevealBackground = ({ containerRef }: Props) => {
 
     if (!grid || !glow) return;
 
-    const labelData: LabelData[] = [];
-
-    shuffledProfessionItems.forEach(({ name, color }) => {
-      const element = document.createElement('div');
-
-      element.className = 'profession-label';
-      element.textContent = name;
-      element.style.color = color;
-      grid.appendChild(element);
-      labelData.push({ el: element, cx: 0, cy: 0, isHovered: false, switchTimeout: null });
-    });
+    const labelData = buildLabels(grid);
 
     requestAnimationFrame(() => cachePositions(labelData));
 
     let rafId = 0;
     let isActive = false;
 
-    function updateGrid() {
-      const { x: mouseX, y: mouseY } = mouseRef.current;
-      const mouseOffscreen = mouseX < -500;
+    function loop() {
+      const shouldContinue = updateGrid(labelData, mouseRef, glow, containerRef.current);
 
-      if (mouseOffscreen) {
-        let anyHovered = false;
-
-        for (const label of labelData) {
-          if (!label.isHovered) continue;
-
-          anyHovered = true;
-          label.isHovered = false;
-          stopSwitching(label);
-
-          Object.assign(label.el.style, {
-            fontWeight: '100',
-            opacity: '0',
-            transitionDuration: '1200ms',
-          });
-        }
-        if (glow) glow.style.background = 'none';
+      if (shouldContinue) {
+        rafId = requestAnimationFrame(loop);
+      } else {
         isActive = false;
-        if (anyHovered) return;
-
-        return;
       }
-
-      const card = containerRef.current;
-      const cardRect = card?.getBoundingClientRect();
-      const expanded = cardRect
-        ? {
-            left: cardRect.left - CARD_PAD_X,
-            right: cardRect.right + CARD_PAD_X,
-            top: cardRect.top - CARD_PAD_Y,
-            bottom: cardRect.bottom + CARD_PAD_Y,
-          }
-        : null;
-
-      for (const data of labelData) {
-        const { el, cx, cy } = data;
-        const dist = Math.sqrt((cx - mouseX) ** 2 + (cy - mouseY) ** 2);
-
-        if (dist < REVEAL_RADIUS) {
-          const strength = 1 - dist / REVEAL_RADIUS;
-          let opacity = Math.pow(strength, 1.2) * 0.95;
-
-          if (expanded) {
-            const nearestX = Math.max(expanded.left, Math.min(cx, expanded.right));
-            const nearestY = Math.max(expanded.top, Math.min(cy, expanded.bottom));
-            const cardDist = Math.sqrt((cx - nearestX) ** 2 + (cy - nearestY) ** 2);
-
-            if (cardDist <= 0) {
-              opacity *= 0.08;
-            } else if (cardDist < CARD_FADE_ZONE) {
-              opacity *= 0.14 + (cardDist / CARD_FADE_ZONE) * 0.86;
-            }
-          }
-
-          el.style.opacity = String(opacity);
-          el.style.transitionDuration = '150ms';
-
-          if (!data.isHovered) {
-            data.isHovered = true;
-            startSwitching(data);
-          }
-        } else {
-          if (data.isHovered) {
-            data.isHovered = false;
-            stopSwitching(data);
-            el.style.fontWeight = '100';
-          }
-          if (
-            expanded &&
-            !data.isHovered &&
-            cx >= expanded.left &&
-            cx <= expanded.right &&
-            cy >= expanded.top &&
-            cy <= expanded.bottom
-          ) {
-            el.style.opacity = '0';
-          } else {
-            el.style.opacity = '0';
-            el.style.transitionDuration = '1200ms';
-          }
-        }
-      }
-
-      if (glow) {
-        glow.style.background = `radial-gradient(500px circle at ${mouseX}px ${mouseY}px, rgba(255, 255, 255, 0.3), transparent 100%)`;
-      }
-      rafId = requestAnimationFrame(updateGrid);
     }
 
     function scheduleUpdate() {
       if (!isActive) {
         isActive = true;
-        rafId = requestAnimationFrame(updateGrid);
+        rafId = requestAnimationFrame(loop);
       }
     }
 
@@ -242,7 +264,6 @@ export const ProfessionRevealBackground = ({ containerRef }: Props) => {
 
   return (
     <>
-      <style>{`.profession-label{display:flex;align-items:center;font-family:'Geist Mono',monospace;font-size:.8rem;text-transform:uppercase;letter-spacing:.1em;line-height:1;white-space:nowrap;opacity:0;transition:opacity 1200ms ease-out;font-weight:100;will-change:opacity;user-select:none}`}</style>
       <div
         ref={gridRef}
         className='pointer-events-none fixed inset-0 z-0 grid gap-x-4 gap-y-7 p-8'

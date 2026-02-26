@@ -85,3 +85,28 @@ export const REVEAL_RADIUS = 350;
 export const CARD_PAD_X = 60;
 export const CARD_PAD_Y = 40;
 export const CARD_FADE_ZONE = 120;
+
+export const enum OTP_STATUS {
+  IDLE = 'idle',
+  SUBMITTING = 'submitting',
+  RESENDING = 'resending',
+  SUCCESS = 'success',
+}
+
+export const enum LOGIN_FORM_MESSAGES {
+  INVALID_EMAIL = 'Please enter a valid email address',
+  GOOGLE_UNAVAILABLE = 'Google login is not available for this configuration',
+  SEND_CODE_FAILED = 'Failed to send code. Please try again.',
+}
+
+export const enum OTP_MESSAGES {
+  CODE_EXPIRED_RESENT = 'Code expired. New code sent to your email.',
+  CODE_EXPIRED_RESEND_PROMPT = 'Code expired. Please click Resend to get a new code.',
+  SESSION_EXPIRED_RESENT = 'Session expired. New code sent to your email.',
+  SESSION_EXPIRED_RETRY = 'Session expired. Please try again.',
+  INCORRECT_CODE = 'Incorrect code. Please try again.',
+  GENERIC_ERROR = 'Something went wrong. Please try again.',
+  NETWORK_ERROR = 'Network error. Please try again.',
+  NEW_CODE_SENT = 'New code sent to your email.',
+  RESEND_FAILED = 'Failed to resend code. Please try again.',
+}
