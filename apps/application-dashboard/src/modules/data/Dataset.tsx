@@ -1,6 +1,6 @@
 'use client';
 
-import { FC, useEffect, useMemo, useRef, useState } from 'react';
+import { FC, useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { captureException } from '@sentry/browser';
 import { useResource } from '@zamp-platform/battalion';
 import {
@@ -25,6 +25,7 @@ import {
   ColDef,
   ColumnVisibleEvent,
   FillEndEvent,
+  type IRowNode,
   IServerSideDatasource,
   IServerSideGetRowsParams,
   IServerSideGetRowsRequest,
@@ -178,6 +179,7 @@ const DatasetByIdInner: FC<DatasetByIdProps> = ({
     data: filterConfigData,
     refetch: refetchFilterConfig,
     isFetching,
+    isLoading: isFilterConfigLoading,
     isError,
     isUninitialized,
   } = useGetDatasetFilterConfigQuery(
@@ -186,7 +188,7 @@ const DatasetByIdInner: FC<DatasetByIdProps> = ({
     },
     {
       skip: !id || isCreating, // Skip when creating new dataset optimistically
-      refetchOnMountOrArgChange: false, // Prevent refetch on mount for better UX
+      refetchOnMountOrArgChange: true, // Refetch on mount to get fresh column aliases after transactions
     },
   );
 
@@ -352,6 +354,30 @@ const DatasetByIdInner: FC<DatasetByIdProps> = ({
       });
     }
   };
+
+  const onFlushPendingEdit = useCallback(
+    ({ node, colId, value }: { node: IRowNode; colId: string; value: unknown }) => {
+      const rowId = node.data?._zamp_id || node.data?.id;
+
+      if (!rowId || !colId) return;
+
+      const idColumn = node.data?._zamp_id ? ColumnType._ZAMP_ID : ColumnType.ID;
+
+      // Optimistic update
+      const updatedRow = { ...node.data, [colId]: value };
+
+      node.setData(updatedRow);
+
+      // Persist
+      updateApi({
+        rowId: rowId as string,
+        field: colId,
+        newValue: value as string,
+        idColumn,
+      });
+    },
+    [updateApi],
+  );
 
   const onFillEnd = (event: FillEndEvent) => {
     const { finalRange } = event;
@@ -783,9 +809,9 @@ const DatasetByIdInner: FC<DatasetByIdProps> = ({
   return (
     <CommonWrapper
       className={cn('h-full', {
-        'flex flex-col items-center justify-center': isFetching,
+        'flex flex-col items-center justify-center': isFilterConfigLoading,
       })}
-      isLoading={isFetching}
+      isLoading={isFilterConfigLoading}
       isError={isError}
       skeletonType={SkeletonTypes.CUSTOM}
       refetchFunction={refetchFilterConfig}
@@ -853,7 +879,10 @@ const DatasetByIdInner: FC<DatasetByIdProps> = ({
               datasetId={id as string}
               isCreating={isCreating}
               title={datasetTitle || pendingTitle}
-              onTransactionSuccess={() => handleTabSelect(DatasetTabsTypes.PREVIEW)}
+              onTransactionSuccess={() => {
+                handleTabSelect(DatasetTabsTypes.PREVIEW);
+                refetchFilterConfig();
+              }}
             />
           </div>
         )}
@@ -884,6 +913,7 @@ const DatasetByIdInner: FC<DatasetByIdProps> = ({
                 }}
                 totalRows={totalRows}
                 onCellEditRequest={onCellEditRequest}
+                onFlushPendingEdit={onFlushPendingEdit}
                 onFillEnd={onFillEnd}
                 onRowPropertiesClick={(data) => setRowPropertiesData(data)}
                 onColumnMoved={(event) => syncColumnMoved(event)}

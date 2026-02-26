@@ -22,6 +22,7 @@ export const TextField: React.FC<TextFieldProps> = ({ field, name, className }) 
           {field.label && <Label>{field.label}</Label>}
           <Input
             placeholder={field.placeholder}
+            type={field.type || 'text'}
             id={name}
             value={value || ''}
             onChange={(e) => {
@@ -37,7 +38,7 @@ export const TextField: React.FC<TextFieldProps> = ({ field, name, className }) 
           />
           {fieldState.error?.message ? (
             <span
-              className='transition-all duration-200 f-11-400 ease-in-out'
+              className='f-11-400 transition-all duration-200 ease-in-out'
               style={{ marginBottom: '12px', color: 'var(--RED_700)' }}
             >
               {fieldState.error.message}

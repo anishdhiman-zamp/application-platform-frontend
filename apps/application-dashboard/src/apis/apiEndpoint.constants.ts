@@ -132,10 +132,17 @@ export const API_ENDPOINTS = {
   POLICY_APPROVE_POST: `/approval/approve`,
   POLICY_REJECT_POST: `/approval/reject`,
 
+  // v1 endpoints -->
   RESOURCE_AUDIENCES_BY_RESOURCE_ID_GET: `{{resourceRoute}}/{{resourceId}}/audiences`,
   SHARE_RESOURCE_TO_AUDIENCES_POST: `{{resourceRoute}}/{{resourceId}}/audiences`,
   CHANGE_AUDIENCE_ROLE_IN_RESOURCE_PATCH: `{{resourceRoute}}/{{resourceId}}/audiences`,
   DELETE_RESOURCE_FROM_AUDIENCES: `{{resourceRoute}}/{{resourceId}}/audiences`,
+  // v2 endpoints -->
+  RESOURCE_AUDIENCES_BY_RESOURCE_ID_GET_V2: `access-control/{{resourceRoute}}/{{resourceId}}/audiences`,
+  SHARE_RESOURCE_TO_AUDIENCES_POST_V2: `access-control/{{resourceRoute}}/{{resourceId}}/audiences`,
+  CHANGE_AUDIENCE_ROLE_IN_RESOURCE_PATCH_V2: `access-control/{{resourceRoute}}/{{resourceId}}/audiences`,
+  DELETE_RESOURCE_FROM_AUDIENCES_V2: `access-control/{{resourceRoute}}/{{resourceId}}/audiences`,
+
   FORMS_CONFIG_GET: `v1/forms/config`,
   FORMS_SUBMIT: `v1/forms/submissions`,
 
@@ -185,6 +192,7 @@ export const API_ENDPOINTS = {
   // Conversations V3
   CREATE_CONVERSATION_V3: `v3/conversations`,
   POST_MESSAGE_V3: `v3/conversations/{{conversationId}}/messages`,
+  LIST_CHAT_MODELS: `v3/conversations/models`,
   // Conversations V2
   FILTER_CONVERSATIONS_V2_GET: `v2/conversations/filter`,
 
@@ -206,6 +214,11 @@ export const API_ENDPOINTS = {
   // Update Conversation Title
   UPDATE_CONVERSATION_TITLE: `v3/conversations/{{conversationId}}/title`,
 
+  //INTEGRATIONS
+  INTEGRATIONS_CATALOG_GET: `integrations/catalog`,
+  INTEGRATIONS_CATALOG_ENABLED_GET: `integrations/catalog/enabled`,
+  INTEGRATIONS_CONNECTIONS_DELETE: `integrations/connections/{{connectionId}}`,
+  INTEGRATIONS_AUTHENTICATE_V2_POST: `integrations/authenticate`,
   // Filesystem API
   FILESYSTEM_STATUS_GET: `filesystem/status`,
   FILES_LIST_GET: `files`,

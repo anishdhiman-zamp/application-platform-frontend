@@ -1,4 +1,5 @@
 import { useEffect } from 'react';
+import { LOCAL_STORAGE_KEYS, setToLocalStorage } from '@zamp-platform/utils';
 import { useWhoAmIQuery } from '@/apis/auth';
 import NotAuthorized from '@/components/NotAuthorized';
 import { ALLOWED_EMAIL_DOMAINS, ENVIRONMENT } from '@/constants/common.constants';
@@ -38,6 +39,10 @@ const UserDetailsProvider = () => {
         org?.organization_id,
         org?.name,
       );
+
+      if (session.user_email) {
+        setToLocalStorage(LOCAL_STORAGE_KEYS.LAST_LOGIN_INFO, JSON.stringify({ email: session.user_email }));
+      }
 
       dispatch(setRoles([{ id: UserRoleIdType.USER, name: user_role }]));
       dispatch(setWorkspace(defaultWorkspace));

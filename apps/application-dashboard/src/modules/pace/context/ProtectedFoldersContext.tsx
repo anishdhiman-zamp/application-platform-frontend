@@ -22,13 +22,13 @@ interface ProtectedFoldersProviderProps {
 export const ProtectedFoldersProvider = ({ children }: ProtectedFoldersProviderProps) => {
   const orgs = useAppSelector((state: RootState) => state.user.user?.orgs) ?? [];
   const username = useAppSelector((state: RootState) => state.user.user?.username) ?? '';
+  const orgId = getFromLocalStorage(LOCAL_STORAGE_KEYS.XZAMP_ORGANIZATION_ID);
 
   const orgSlug = useMemo(() => {
-    const orgId = getFromLocalStorage(LOCAL_STORAGE_KEYS.XZAMP_ORGANIZATION_ID);
     const currentOrg = orgs.find((org) => org.organization_id === orgId);
 
     return currentOrg?.slug ?? '';
-  }, [orgs]);
+  }, [orgs, orgId]);
 
   const value = useMemo<ProtectedFoldersContextValue>(
     () => ({

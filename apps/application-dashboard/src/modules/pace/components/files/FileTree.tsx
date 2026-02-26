@@ -84,14 +84,10 @@ const FileTreeContent = ({
     return map;
   }, [files]);
 
-  useEffect(() => {
-    if (onCollapseAllChange) {
-      onCollapseAllChange(collapseAll);
-    }
-  }, [onCollapseAllChange, collapseAll]);
-
   const rawTree = useMemo(() => buildFileTree(files), [files]);
+
   const sortedRawTree = useMemo(() => sortTreeNodes(rawTree, sortBy, sortDirection), [rawTree, sortBy, sortDirection]);
+
   const originalNodeMap = useMemo(() => buildNodeMap(sortedRawTree), [sortedRawTree]);
 
   const treeData = useMemo(() => {
@@ -102,6 +98,32 @@ const FileTreeContent = ({
 
   const flatNodes = useMemo(() => flattenTree(treeData, expandedPaths), [treeData, expandedPaths]);
   const rootSiblingNames = useMemo(() => treeData.map((node) => node.name), [treeData]);
+
+  const dragOverlayBounds = useMemo(() => {
+    if (!dragOverFolderPath) return null;
+
+    const folderIndex = flatNodes.findIndex((n) => n.path === dragOverFolderPath);
+
+    if (folderIndex === -1) return null;
+
+    let lastChildIndex = folderIndex;
+
+    for (let i = folderIndex + 1; i < flatNodes.length; i++) {
+      if (flatNodes[i].path.startsWith(dragOverFolderPath + '/')) {
+        lastChildIndex = i;
+      } else {
+        break;
+      }
+    }
+
+    const startY = folderIndex * ROW_HEIGHT;
+    const endY = (lastChildIndex + 1) * ROW_HEIGHT;
+
+    return {
+      top: startY,
+      height: endY - startY,
+    };
+  }, [dragOverFolderPath, flatNodes]);
 
   const virtualizer = useVirtualizer({
     count: flatNodes.length,
@@ -147,31 +169,11 @@ const FileTreeContent = ({
     }
   }, []);
 
-  const dragOverlayBounds = useMemo(() => {
-    if (!dragOverFolderPath) return null;
-
-    const folderIndex = flatNodes.findIndex((n) => n.path === dragOverFolderPath);
-
-    if (folderIndex === -1) return null;
-
-    let lastChildIndex = folderIndex;
-
-    for (let i = folderIndex + 1; i < flatNodes.length; i++) {
-      if (flatNodes[i].path.startsWith(dragOverFolderPath + '/')) {
-        lastChildIndex = i;
-      } else {
-        break;
-      }
+  useEffect(() => {
+    if (onCollapseAllChange) {
+      onCollapseAllChange(collapseAll);
     }
-
-    const startY = folderIndex * ROW_HEIGHT;
-    const endY = (lastChildIndex + 1) * ROW_HEIGHT;
-
-    return {
-      top: startY,
-      height: endY - startY,
-    };
-  }, [dragOverFolderPath, flatNodes]);
+  }, [onCollapseAllChange, collapseAll]);
 
   if (treeData.length === 0 && searchQuery) {
     return <FileTreeEmptyState />;

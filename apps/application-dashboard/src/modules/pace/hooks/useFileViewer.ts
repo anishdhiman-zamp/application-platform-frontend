@@ -31,15 +31,15 @@ interface UseFileViewerReturn {
 }
 
 export const useFileViewer = ({ filePath, onSaveSuccess, onSaveError }: UseFileViewerOptions): UseFileViewerReturn => {
+  const autoSaveTimerRef = useRef<NodeJS.Timeout | null>(null);
+  const isSavingRef = useRef(false);
+  const pendingSaveRef = useRef(false);
+
   const { getFileState, initFileState, updateFileContent, markFileSaved } = useFileViewerContext();
 
   const [fetchFileMetadata] = useLazyReadFileQuery();
   const [fetchFileContent, { isLoading, isError, error }] = useLazyReadFileContentQuery();
   const [writeFile, { isLoading: isSaving }] = useWriteFileMutation();
-
-  const autoSaveTimerRef = useRef<NodeJS.Timeout | null>(null);
-  const isSavingRef = useRef(false);
-  const pendingSaveRef = useRef(false);
 
   const fileState = filePath ? getFileState(filePath) : undefined;
 
@@ -62,35 +62,6 @@ export const useFileViewer = ({ filePath, onSaveSuccess, onSaveError }: UseFileV
       fileCategory === FILE_CATEGORY.HTML
     );
   }, [fileCategory]);
-
-  useEffect(() => {
-    const loadFile = async () => {
-      if (!filePath) return;
-
-      const existingState = getFileState(filePath);
-
-      if (existingState) {
-        return;
-      }
-
-      if (!isEditable) {
-        return;
-      }
-
-      try {
-        const [metadataResult, contentResult] = await Promise.all([
-          fetchFileMetadata({ path: filePath }).unwrap(),
-          fetchFileContent({ path: filePath }).unwrap(),
-        ]);
-
-        initFileState(filePath, contentResult ?? '', metadataResult.mtime_ms);
-      } catch (err) {
-        console.error('Failed to load file:', err);
-      }
-    };
-
-    loadFile();
-  }, [filePath, isEditable, fetchFileMetadata, fetchFileContent, getFileState, initFileState]);
 
   const saveFile = useCallback(async () => {
     if (!filePath) return;
@@ -153,6 +124,47 @@ export const useFileViewer = ({ filePath, onSaveSuccess, onSaveError }: UseFileV
     [filePath, updateFileContent, scheduleAutoSave],
   );
 
+  const refetch = useCallback(() => {
+    if (!filePath || !isEditable) return;
+
+    Promise.all([fetchFileMetadata({ path: filePath }).unwrap(), fetchFileContent({ path: filePath }).unwrap()])
+      .then(([metadataResult, contentResult]) => {
+        initFileState(filePath, contentResult ?? '', metadataResult.mtime_ms);
+      })
+      .catch((err) => {
+        console.error('Failed to refetch file:', err);
+      });
+  }, [filePath, isEditable, fetchFileMetadata, fetchFileContent, initFileState]);
+
+  useEffect(() => {
+    const loadFile = async () => {
+      if (!filePath) return;
+
+      const existingState = getFileState(filePath);
+
+      if (existingState) {
+        return;
+      }
+
+      if (!isEditable) {
+        return;
+      }
+
+      try {
+        const [metadataResult, contentResult] = await Promise.all([
+          fetchFileMetadata({ path: filePath }).unwrap(),
+          fetchFileContent({ path: filePath }).unwrap(),
+        ]);
+
+        initFileState(filePath, contentResult ?? '', metadataResult.mtime_ms);
+      } catch (err) {
+        console.error('Failed to load file:', err);
+      }
+    };
+
+    loadFile();
+  }, [filePath, isEditable, fetchFileMetadata, fetchFileContent, getFileState, initFileState]);
+
   // Cleanup timer on unmount
   useEffect(() => {
     return () => {
@@ -176,18 +188,6 @@ export const useFileViewer = ({ filePath, onSaveSuccess, onSaveError }: UseFileV
       document.removeEventListener('visibilitychange', handleVisibilityChange);
     };
   }, [fileState?.isDirty, saveFile]);
-
-  const refetch = useCallback(() => {
-    if (!filePath || !isEditable) return;
-
-    Promise.all([fetchFileMetadata({ path: filePath }).unwrap(), fetchFileContent({ path: filePath }).unwrap()])
-      .then(([metadataResult, contentResult]) => {
-        initFileState(filePath, contentResult ?? '', metadataResult.mtime_ms);
-      })
-      .catch((err) => {
-        console.error('Failed to refetch file:', err);
-      });
-  }, [filePath, isEditable, fetchFileMetadata, fetchFileContent, initFileState]);
 
   return {
     content: fileState?.content ?? null,

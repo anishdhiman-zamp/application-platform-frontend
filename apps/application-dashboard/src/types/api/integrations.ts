@@ -1,3 +1,6 @@
+import type { FormField } from '@zamp-platform/form-builder';
+import { AUTH_TYPE } from '@/modules/integrations/types/integrations.types';
+
 export type AuthenticateIntegrationRequestType = {
   integration_name: string;
   auth_type: string;
@@ -47,4 +50,68 @@ export type ProcessConnectionMappingResponseType = {
 };
 export type GetProcessConnectionMappingsResponseType = {
   mappings: ProcessConnectionMappingResponseType[];
+};
+
+export type IntegrationCatalogRequestType = {
+  search?: string;
+  provider?: string;
+  page?: number;
+  page_size?: number;
+};
+
+// Represents one authentication method for an integration
+interface IntegrationAuth {
+  auth_type: AUTH_TYPE;
+  title: string | null;
+  description?: string | null;
+  fields: Record<string, FormField>;
+}
+
+// Represents a single connection (currently empty but extendable)
+export interface IntegrationConnection {
+  id?: string;
+  name?: string;
+  status?: string;
+  [key: string]: any;
+}
+
+// Represents a single integration item
+export interface IntegrationItem {
+  name: string;
+  title: string;
+  description: string;
+  icon: string;
+  provider: string;
+  auth: IntegrationAuth[];
+  connections: IntegrationConnection[];
+}
+
+// Represents the full paginated API response
+export interface IntegrationCatalogResponseType {
+  items: IntegrationItem[];
+  total: number;
+  page: number;
+  page_size: number;
+  total_pages: number;
+}
+
+export type AuthenticateIntegrationRequestTypeV2 = {
+  integration_name: string;
+  auth_type: string;
+  name: string;
+  description: string;
+};
+
+export type AuthenticateIntegrationResponseTypeV2 = {
+  id: string;
+  connector_id: string | null;
+  organization_id: string;
+  name: string;
+  integration_name: string;
+  status: string;
+  metadata: Record<string, string>;
+  created_by: string;
+  created_at: string;
+  updated_at: string;
+  deleted_at: string | null;
 };
