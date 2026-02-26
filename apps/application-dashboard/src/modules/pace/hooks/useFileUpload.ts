@@ -23,20 +23,14 @@ import {
 import {
   calculateTotalBytes,
   extractFilesWithPaths,
-  getFileTargetPath,
   getRootFolderName,
   getTargetPath,
-  MAX_FOLDER_UPLOAD_FILES,
   shouldUseChunkedUpload,
   type UploadCallbacks,
   uploadFile as uploadFileUtil,
   type UploadMutations,
 } from '@/modules/pace/components/files/file-upload.utils';
-
-interface UseFileUploadOptions {
-  onUploadComplete?: (path: string) => void;
-  onUploadError?: (error: Error, fileName: string) => void;
-}
+import { MAX_FOLDER_UPLOAD_FILES } from '@/modules/pace/components/files/files.constants';
 
 interface UploadState {
   isUploading: boolean;
@@ -65,16 +59,18 @@ interface UseFileUploadReturn {
   isUploading: boolean;
 }
 
-export const useFileUpload = (options?: UseFileUploadOptions): UseFileUploadReturn => {
+const DEFAULT_UPLOAD_STATE: UploadState = {
+  isUploading: false,
+  currentUpload: null,
+  error: null,
+  folderUpload: null,
+  uploadingPath: null,
+  uploadingItem: null,
+};
+
+export const useFileUpload = (): UseFileUploadReturn => {
   const dispatch = useAppDispatch();
-  const [uploadState, setUploadState] = useState<UploadState>({
-    isUploading: false,
-    currentUpload: null,
-    error: null,
-    folderUpload: null,
-    uploadingPath: null,
-    uploadingItem: null,
-  });
+  const [uploadState, setUploadState] = useState<UploadState>(DEFAULT_UPLOAD_STATE);
 
   const abortControllerRef = useRef<AbortController | null>(null);
   const currentUploadIdRef = useRef<string | null>(null);
@@ -180,39 +176,22 @@ export const useFileUpload = (options?: UseFileUploadOptions): UseFileUploadRetu
               }));
             }
           : undefined,
-        onComplete: (path) => {
+        onComplete: () => {
           setUploadState((prev) => ({
-            isUploading: false,
-            currentUpload: null,
-            error: null,
-            folderUpload: null,
-            uploadingPath: null,
+            ...DEFAULT_UPLOAD_STATE,
             uploadingItem: prev.uploadingItem,
           }));
           toast.success(`${file.name} uploaded successfully`);
-          options?.onUploadComplete?.(path);
         },
         onError: (error) => {
           setUploadState({
-            isUploading: false,
-            currentUpload: null,
+            ...DEFAULT_UPLOAD_STATE,
             error: error.message,
-            folderUpload: null,
-            uploadingPath: null,
-            uploadingItem: null,
           });
-          options?.onUploadError?.(error, file.name);
           captureException(error);
         },
         onCancel: () => {
-          setUploadState({
-            isUploading: false,
-            currentUpload: null,
-            error: null,
-            folderUpload: null,
-            uploadingPath: null,
-            uploadingItem: null,
-          });
+          setUploadState(DEFAULT_UPLOAD_STATE);
         },
       };
 
@@ -227,7 +206,7 @@ export const useFileUpload = (options?: UseFileUploadOptions): UseFileUploadRetu
         abortControllerRef.current = null;
       }
     },
-    [mutations, options],
+    [mutations],
   );
 
   const uploadFiles = useCallback(
@@ -308,62 +287,42 @@ export const useFileUpload = (options?: UseFileUploadOptions): UseFileUploadRetu
             throw new Error('Upload cancelled');
           }
 
-          const targetPath = getFileTargetPath(basePath, relativePath);
+          const targetPath = getTargetPath(basePath, relativePath);
           const isChunkedUpload = shouldUseChunkedUpload(file.size);
           const uploadType = isChunkedUpload ? UPLOAD_TYPE.CHUNKED : UPLOAD_TYPE.DIRECT;
 
+          const currentFileInfo = {
+            fileName: file.name,
+            filePath: targetPath,
+            loaded: 0,
+            total: file.size,
+            percentage: 0,
+            status: UPLOAD_STATUS.UPLOADING,
+            uploadType,
+          };
+
           setUploadState((prev) => ({
             ...prev,
-            currentUpload: {
-              fileName: file.name,
-              filePath: targetPath,
-              loaded: 0,
-              total: file.size,
-              percentage: 0,
-              status: UPLOAD_STATUS.UPLOADING,
-              uploadType,
-            },
-            folderUpload: prev.folderUpload
-              ? {
-                  ...prev.folderUpload,
-                  currentFile: {
-                    fileName: file.name,
-                    filePath: targetPath,
-                    loaded: 0,
-                    total: file.size,
-                    percentage: 0,
-                    status: UPLOAD_STATUS.UPLOADING,
-                    uploadType,
-                  },
-                }
-              : null,
+            currentUpload: currentFileInfo,
+            folderUpload: prev.folderUpload ? { ...prev.folderUpload, currentFile: currentFileInfo } : null,
           }));
 
           const fileUploadedBytes = uploadedBytes;
 
           const callbacks: UploadCallbacks = {
             onProgress: (loaded, total) => {
+              const percentage = Math.round((loaded / total) * 100);
+              const progressUpdate = { loaded, total, percentage };
+
               setUploadState((prev) => ({
                 ...prev,
-                currentUpload: prev.currentUpload
-                  ? {
-                      ...prev.currentUpload,
-                      loaded,
-                      total,
-                      percentage: Math.round((loaded / total) * 100),
-                    }
-                  : null,
+                currentUpload: prev.currentUpload ? { ...prev.currentUpload, ...progressUpdate } : null,
                 folderUpload: prev.folderUpload
                   ? {
                       ...prev.folderUpload,
                       uploadedBytes: fileUploadedBytes + loaded,
                       currentFile: prev.folderUpload.currentFile
-                        ? {
-                            ...prev.folderUpload.currentFile,
-                            loaded,
-                            total,
-                            percentage: Math.round((loaded / total) * 100),
-                          }
+                        ? { ...prev.folderUpload.currentFile, ...progressUpdate }
                         : null,
                     }
                   : null,
@@ -388,41 +347,24 @@ export const useFileUpload = (options?: UseFileUploadOptions): UseFileUploadRetu
                 }
               : null,
           }));
-
-          options?.onUploadComplete?.(targetPath);
         }
 
         invalidateFilesList();
 
         setUploadState((prev) => ({
-          isUploading: false,
-          currentUpload: null,
-          error: null,
-          folderUpload: null,
-          uploadingPath: null,
+          ...DEFAULT_UPLOAD_STATE,
           uploadingItem: prev.uploadingItem,
         }));
 
         toast.success(`${folderName} uploaded successfully (${totalFiles} files)`);
       } catch (error) {
         if (error instanceof Error && error.message === 'Upload cancelled') {
-          setUploadState({
-            isUploading: false,
-            currentUpload: null,
-            error: null,
-            folderUpload: null,
-            uploadingPath: null,
-            uploadingItem: null,
-          });
+          setUploadState(DEFAULT_UPLOAD_STATE);
           toast.info(`Upload of ${folderName} cancelled`);
         } else {
           setUploadState({
-            isUploading: false,
-            currentUpload: null,
+            ...DEFAULT_UPLOAD_STATE,
             error: error instanceof Error ? error.message : 'Folder upload failed',
-            folderUpload: null,
-            uploadingPath: null,
-            uploadingItem: null,
           });
           captureException(error);
           toast.error(`Failed to upload folder ${folderName}`);
@@ -431,18 +373,11 @@ export const useFileUpload = (options?: UseFileUploadOptions): UseFileUploadRetu
         abortControllerRef.current = null;
       }
     },
-    [mutations, options, invalidateFilesList],
+    [mutations, invalidateFilesList],
   );
 
   const cancelUpload = useCallback(() => {
-    setUploadState({
-      isUploading: false,
-      currentUpload: null,
-      error: null,
-      folderUpload: null,
-      uploadingPath: null,
-      uploadingItem: null,
-    });
+    setUploadState(DEFAULT_UPLOAD_STATE);
 
     if (abortControllerRef.current) {
       abortControllerRef.current.abort();

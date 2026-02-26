@@ -15,6 +15,7 @@ import { getMediaUrl } from '@/modules/pace/components/files/file-tree.utils';
 import { FILE_CATEGORY, FILE_TOAST_MESSAGES, type FileCategory } from '@/modules/pace/components/files/files.constants';
 import { useDynamicTabs } from '@/modules/pace/hooks/useDynamicTabs';
 import useFileViewer from '@/modules/pace/hooks/useFileViewer';
+import { defaultFnType } from '@/types/commonTypes';
 
 const PdfViewer = dynamic(() => import('./viewers/PdfViewer'), {
   ssr: false,
@@ -41,7 +42,7 @@ interface FileViewerContentProps {
   fileExtension: string;
   isActive: boolean;
   onContentChange: (content: string) => void;
-  onClose: () => void;
+  onClose: defaultFnType;
   markdownViewMode?: MarkdownViewMode;
 }
 

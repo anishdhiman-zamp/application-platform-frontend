@@ -56,6 +56,7 @@ export interface UseChatInputProps {
   annotationType?: AnnotationType;
   onConversationCreated?: (conversationId: string) => void;
   isDisabled?: boolean;
+  llmModel?: string | null;
 }
 
 export interface UseChatInputReturn {
@@ -81,6 +82,7 @@ export const createUserMessagePayload = (
   resourceType: ResourceType,
   senderName: string,
   attachments?: MessageAttachment[],
+  llmModel?: string | null,
 ): ChatMessage => {
   return {
     resource_id: resourceId,
@@ -105,6 +107,7 @@ export const createUserMessagePayload = (
     timestamp: new Date().toISOString(),
     metadata: {},
     sender_name: senderName,
+    ...(llmModel ? { llm_model: llmModel } : {}),
   };
 };
 
@@ -121,6 +124,7 @@ export const createConversationPayload = (
   scope = ScopeType.ACTIVITY_RUN,
   annotationLocation?: LocationData,
   annotationType?: AnnotationType,
+  llmModel?: string | null,
 ) => {
   return {
     resource_id: resourceId,
@@ -149,6 +153,7 @@ export const createConversationPayload = (
       },
     }),
     sender_name: senderName,
+    ...(llmModel ? { llm_model: llmModel } : {}),
   };
 };
 
@@ -171,6 +176,7 @@ export const useChatInput = ({
   annotationType,
   onConversationCreated,
   isDisabled,
+  llmModel,
 }: UseChatInputProps): UseChatInputReturn => {
   const currentUserName = adapter.getCurrentUserName();
   const resourceId = adapter.getResourceId();
@@ -211,6 +217,7 @@ export const useChatInput = ({
       scope,
       annotationLocation,
       annotationType,
+      llmModel,
     );
 
     setAttachments([]);
@@ -312,6 +319,7 @@ export const useChatInput = ({
       attachments.length > 0
         ? attachments.map((att) => ({ file_id: att.file_id, file_name: att.file_name }))
         : undefined,
+      llmModel,
     );
 
     setValue('');

@@ -1,5 +1,4 @@
-import { API_DOMAIN, REQUEST_TYPES } from '@zamp-platform/api';
-import { getFromLocalStorage, LOCAL_STORAGE_KEYS } from '@zamp-platform/utils';
+import { REQUEST_TYPES } from '@zamp-platform/api';
 import { API_ENDPOINTS } from 'apis/apiEndpoint.constants';
 import { APITags } from '@/constants/api.constants';
 import { baseApi } from '@/services/baseApi';
@@ -27,6 +26,7 @@ import type {
   WriteFileResponse,
 } from '@/types/api/filesystem.types';
 import { formRequestUrlWithParams } from '@/utils/common';
+import { uploadChunk } from '@/utils/fileUpload';
 
 const FilesystemApi = baseApi.injectEndpoints({
   endpoints: (builder) => ({
@@ -262,55 +262,7 @@ const FilesystemApi = baseApi.injectEndpoints({
     // Using queryFn to ensure binary data is sent raw without any transformation
     uploadChunk: builder.mutation<UploadChunkResponse, UploadChunkRequest>({
       queryFn: async ({ upload_id, chunk_index, chunk_offset, data, signal }) => {
-        try {
-          const orgId = getFromLocalStorage(LOCAL_STORAGE_KEYS.XZAMP_ORGANIZATION_ID);
-
-          const response = await fetch(`${API_DOMAIN}/${API_ENDPOINTS.FILES_UPLOAD_CHUNK_POST}`, {
-            method: 'POST',
-            credentials: 'include',
-            headers: {
-              'Content-Type': 'application/octet-stream',
-              'X-Upload-Id': upload_id,
-              'X-Chunk-Index': String(chunk_index),
-              'X-Chunk-Offset': String(chunk_offset),
-              [LOCAL_STORAGE_KEYS.XZAMP_ORGANIZATION_ID]: orgId,
-            },
-            body: data,
-            signal,
-          });
-
-          if (!response.ok) {
-            const errorData = await response.json().catch(() => ({}));
-
-            return {
-              error: {
-                status: response.status,
-                data: errorData,
-              },
-            };
-          }
-
-          const result = await response.json();
-
-          return { data: result as UploadChunkResponse };
-        } catch (error) {
-          // Handle abort error specifically
-          if (error instanceof Error && error.name === 'AbortError') {
-            return {
-              error: {
-                status: 'CUSTOM_ERROR',
-                error: 'Upload cancelled',
-              },
-            };
-          }
-
-          return {
-            error: {
-              status: 'FETCH_ERROR',
-              error: error instanceof Error ? error.message : 'Unknown error',
-            },
-          };
-        }
+        return uploadChunk({ upload_id, chunk_index, chunk_offset, data, signal });
       },
     }),
 
