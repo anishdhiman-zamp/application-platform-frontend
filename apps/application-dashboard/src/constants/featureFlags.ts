@@ -25,4 +25,5 @@ export enum FEATURE_FLAGS {
   PACE_CHAT = 'pace-chat',
   ZAMP_INTERNAL = 'zamp-internal',
   APP_SECURE = 'app-secure',
+  MACS_FILE_SYSTEM = 'macs-file-system',
 }

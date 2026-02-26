@@ -4,11 +4,15 @@ import { APITags } from '@/constants/api.constants';
 import { baseApi } from '@/services/baseApi';
 import {
   AuthenticateIntegrationRequestType,
+  AuthenticateIntegrationRequestTypeV2,
   AuthenticateIntegrationResponseType,
+  AuthenticateIntegrationResponseTypeV2,
   ConnectionType,
   CreateProcessConnectionMappingRequestType,
   CreateProcessConnectionMappingResponseType,
   GetProcessConnectionMappingsResponseType,
+  IntegrationCatalogRequestType,
+  IntegrationCatalogResponseType,
 } from '@/types/api/integrations';
 import { formRequestUrlWithParams } from '@/utils/common';
 
@@ -98,6 +102,32 @@ export const Integrations = baseApi.injectEndpoints({
       },
       invalidatesTags: [APITags.GET_PROCESS_CONNECTION_MAPPINGS],
     }),
+    getIntegrationsCatalog: builder.query<IntegrationCatalogResponseType, IntegrationCatalogRequestType>({
+      query: (params) => ({ url: API_ENDPOINTS.INTEGRATIONS_CATALOG_GET, params }),
+      providesTags: [APITags.INTEGRATIONS_CATALOG_GET],
+    }),
+    getIntegrationsCatalogEnabled: builder.query<IntegrationCatalogResponseType, IntegrationCatalogRequestType>({
+      query: (params) => ({ url: API_ENDPOINTS.INTEGRATIONS_CATALOG_ENABLED_GET, params }),
+      providesTags: [APITags.INTEGRATIONS_CATALOG_ENABLED_GET],
+    }),
+    authenticateIntegrationV2: builder.mutation<
+      AuthenticateIntegrationResponseTypeV2,
+      AuthenticateIntegrationRequestTypeV2
+    >({
+      query: (body) => ({
+        url: API_ENDPOINTS.INTEGRATIONS_AUTHENTICATE_V2_POST,
+        method: REQUEST_TYPES.POST,
+        body,
+      }),
+      invalidatesTags: [APITags.INTEGRATIONS_CATALOG_GET, APITags.INTEGRATIONS_CATALOG_ENABLED_GET],
+    }),
+    deleteIntegrationConnection: builder.mutation<void, { connectionId: string }>({
+      query: ({ connectionId }) => ({
+        url: formRequestUrlWithParams(API_ENDPOINTS.INTEGRATIONS_CONNECTIONS_DELETE, { connectionId }),
+        method: REQUEST_TYPES.DELETE,
+      }),
+      invalidatesTags: [APITags.INTEGRATIONS_CATALOG_GET, APITags.INTEGRATIONS_CATALOG_ENABLED_GET],
+    }),
   }),
 });
 
@@ -108,4 +138,9 @@ export const {
   useGetConnectionsByIntegrationNameQuery,
   useLazyGetConnectionsByIntegrationNameQuery,
   useDeleteProcessConnectionMappingMutation,
+  useGetIntegrationsCatalogQuery,
+  useLazyGetIntegrationsCatalogQuery,
+  useAuthenticateIntegrationV2Mutation,
+  useDeleteIntegrationConnectionMutation,
+  useGetIntegrationsCatalogEnabledQuery,
 } = Integrations;

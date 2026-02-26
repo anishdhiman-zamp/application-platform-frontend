@@ -12,7 +12,7 @@ import { useAppSelector } from 'hooks/toolkit';
 import { useUserIdentity } from 'hooks/useUserIdentity';
 import AccessFilters from 'modules/shareResource/AccessFilters';
 import AudienceAccess from 'modules/shareResource/AudienceAccess';
-import { resourceTypeRouteMap } from 'modules/shareResource/shareResource.constants';
+import { RESOURCE_COLLABORATION_ENDPOINTS, resourceTypeRouteMap } from 'modules/shareResource/shareResource.constants';
 import { motion } from 'motion/react';
 import { RootState } from 'store';
 import { ResourceAudienceType } from 'types/api/auth.types';
@@ -26,12 +26,14 @@ import { useResourceAccess } from '@/hooks/useResourceAccess';
 import CustomiseAccess from '@/modules/shareResource/CustomiseAccess';
 import {
   CombinedOptionListDataType,
+  CONNECTION_ACCESS_PRIVILEGES,
   DATASET_ACCESS_PRIVILEGES,
   PAGE_ACCESS_PRIVILEGES,
   PAYMENT_ACCESS_PRIVILEGES,
   PROCESS_ACCESS_PRIVILEGES,
   ResourceType,
   ShareResourcePopupProps,
+  ShareResourceVersion,
   ValidationResult,
 } from '@/modules/shareResource/shareResource.types';
 import { AddAudiencesToResourcePayload } from '@/types/api/collaboration.types';
@@ -58,7 +60,7 @@ const WhoHasAccessLoaderVariants = {
 };
 
 const ShareResourcePopup: FC<ShareResourcePopupProps> = (props) => {
-  const { resourceType, resourceConfig, isCustomiseAccess = false, title, disable } = props;
+  const { resourceType, resourceConfig, isCustomiseAccess = false, title, disable, version } = props;
   const resourceId = props.resourceId || '';
   const [selectedRole, setSelectedRole] = useState<string>(resourceConfig.accessPrivilegesList[0]?.value ?? '');
   const [search, setSearch] = useState<string>('');
@@ -67,10 +69,11 @@ const ShareResourcePopup: FC<ShareResourcePopupProps> = (props) => {
   const [validationErrorText, setValidationErrorText] = useState<string>('');
   const [openPopup, setOpenPopup] = useState<boolean>(false);
   const [showCustomiseAccess, setShowCustomiseAccess] = useState<boolean>(false);
+  const collaborationEndpoints = RESOURCE_COLLABORATION_ENDPOINTS[version ?? ShareResourceVersion.V1];
   const organizationId = useAppSelector((state: RootState) => state?.user?.user?.orgs?.[0]?.organization_id) ?? '';
 
   const { audiencesData, checkUserPrivilege, allTeamsData, isLoadingAudiencesData, refetchAudiencesData } =
-    useResourceAccess({ resourceType, resourceId, skipAudienceData: !openPopup, skipTeamsData: !openPopup });
+    useResourceAccess({ resourceType, resourceId, skipAudienceData: !openPopup, skipTeamsData: !openPopup, version });
 
   const {
     state: { selectedFilters },
@@ -108,6 +111,8 @@ const ShareResourcePopup: FC<ShareResourcePopupProps> = (props) => {
         return checkUserPrivilege(PAYMENT_ACCESS_PRIVILEGES.ADMIN);
       case ResourceType.PROCESS:
         return checkUserPrivilege(PROCESS_ACCESS_PRIVILEGES.ADMIN);
+      case ResourceType.CONNECTION:
+        return checkUserPrivilege(CONNECTION_ACCESS_PRIVILEGES.ADMIN);
       default:
         return false;
     }
@@ -194,7 +199,12 @@ const ShareResourcePopup: FC<ShareResourcePopupProps> = (props) => {
       })),
     };
 
-    postInviteAudiences({ resourceRoute: resourceTypeRouteMap[resourceType], resourceId, body: shareData })
+    postInviteAudiences({
+      apiEndpoint: collaborationEndpoints.shareResource,
+      resourceRoute: resourceTypeRouteMap[resourceType],
+      resourceId,
+      body: shareData,
+    })
       .unwrap()
       .then(() => {
         setSelectedItems([]);
@@ -214,11 +224,10 @@ const ShareResourcePopup: FC<ShareResourcePopupProps> = (props) => {
     audienceType?: string,
   ): Promise<boolean> => {
     const success = await changeRole({
+      apiEndpoint: collaborationEndpoints.changeRole,
       resourceRoute: resourceTypeRouteMap[resourceType],
       resourceId,
       body: {
-        resourceRoute: resourceTypeRouteMap[resourceType],
-        resourceId,
         audience_id: resourceAudienceId,
         role,
         fgac_filters: fgacFilters,
@@ -247,6 +256,7 @@ const ShareResourcePopup: FC<ShareResourcePopupProps> = (props) => {
     audience_type: ResourceAudienceType,
   ) => {
     await deleteAudience({
+      apiEndpoint: collaborationEndpoints.deleteAudience,
       resourceRoute: resourceTypeRouteMap[resourceType],
       resourceId,
       body: {
@@ -379,7 +389,7 @@ const ShareResourcePopup: FC<ShareResourcePopupProps> = (props) => {
   const combinedOptionListsData: CombinedOptionListDataType[] = [
     { label: orgLabel ?? '', value: orgName ?? '', type: ResourceAudienceType.ORGANIZATION, color: '' },
     ...(teamMembersData?.map((member) => ({
-      label: member?.user?.name ?? getUserNameFromEmail(member?.user?.email ?? '') ?? '',
+      label: member?.user?.name || getUserNameFromEmail(member?.user?.email ?? '') || '',
       value: member?.user?.email ?? '',
       type: member?.resource_audience_type ?? '',
     })) || []),

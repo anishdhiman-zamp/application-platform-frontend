@@ -4,10 +4,11 @@ import { memo } from 'react';
 import { Button } from '@zamp-platform/ui';
 import ImageKitImage from '@/components/ImageKitImage';
 import { NEEDS_ATTENTION_EMPTY_STATE } from '@/constants/icons';
+import { defaultFnType } from '@/types/commonTypes';
 
 interface FileNotFoundErrorProps {
   fileName: string;
-  onClose: () => void;
+  onClose: defaultFnType;
 }
 
 const FileNotFoundError = memo(({ fileName, onClose }: FileNotFoundErrorProps) => {

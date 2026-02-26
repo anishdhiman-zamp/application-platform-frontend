@@ -31,14 +31,14 @@ interface UseFileViewerReturn {
 }
 
 export const useFileViewer = ({ filePath, onSaveSuccess, onSaveError }: UseFileViewerOptions): UseFileViewerReturn => {
+  const autoSaveTimerRef = useRef<NodeJS.Timeout | null>(null);
+  const isSavingRef = useRef(false);
+
   const { getFileState, initFileState, updateFileContent, markFileSaved } = useFileViewerContext();
 
   const [fetchFileMetadata] = useLazyReadFileQuery();
   const [fetchFileContent, { isLoading, isError, error }] = useLazyReadFileContentQuery();
   const [writeFile, { isLoading: isSaving }] = useWriteFileMutation();
-
-  const autoSaveTimerRef = useRef<NodeJS.Timeout | null>(null);
-  const isSavingRef = useRef(false);
 
   const fileState = filePath ? getFileState(filePath) : undefined;
 
@@ -57,35 +57,6 @@ export const useFileViewer = ({ filePath, onSaveSuccess, onSaveError }: UseFileV
   const isEditable = useMemo(() => {
     return fileCategory === FILE_CATEGORY.CODE || fileCategory === FILE_CATEGORY.MARKDOWN;
   }, [fileCategory]);
-
-  useEffect(() => {
-    const loadFile = async () => {
-      if (!filePath) return;
-
-      const existingState = getFileState(filePath);
-
-      if (existingState) {
-        return;
-      }
-
-      if (!isEditable) {
-        return;
-      }
-
-      try {
-        const [metadataResult, contentResult] = await Promise.all([
-          fetchFileMetadata({ path: filePath }).unwrap(),
-          fetchFileContent({ path: filePath }).unwrap(),
-        ]);
-
-        initFileState(filePath, contentResult ?? '', metadataResult.mtime_ms);
-      } catch (err) {
-        console.error('Failed to load file:', err);
-      }
-    };
-
-    loadFile();
-  }, [filePath, isEditable, fetchFileMetadata, fetchFileContent, getFileState, initFileState]);
 
   const saveFile = useCallback(async () => {
     if (!filePath || isSavingRef.current) return;
@@ -134,6 +105,18 @@ export const useFileViewer = ({ filePath, onSaveSuccess, onSaveError }: UseFileV
     [filePath, updateFileContent, scheduleAutoSave],
   );
 
+  const refetch = useCallback(() => {
+    if (!filePath || !isEditable) return;
+
+    Promise.all([fetchFileMetadata({ path: filePath }).unwrap(), fetchFileContent({ path: filePath }).unwrap()])
+      .then(([metadataResult, contentResult]) => {
+        initFileState(filePath, contentResult ?? '', metadataResult.mtime_ms);
+      })
+      .catch((err) => {
+        console.error('Failed to refetch file:', err);
+      });
+  }, [filePath, isEditable, fetchFileMetadata, fetchFileContent, initFileState]);
+
   // Cleanup timer on unmount
   useEffect(() => {
     return () => {
@@ -158,17 +141,34 @@ export const useFileViewer = ({ filePath, onSaveSuccess, onSaveError }: UseFileV
     };
   }, [fileState?.isDirty, saveFile]);
 
-  const refetch = useCallback(() => {
-    if (!filePath || !isEditable) return;
+  useEffect(() => {
+    const loadFile = async () => {
+      if (!filePath) return;
 
-    Promise.all([fetchFileMetadata({ path: filePath }).unwrap(), fetchFileContent({ path: filePath }).unwrap()])
-      .then(([metadataResult, contentResult]) => {
+      const existingState = getFileState(filePath);
+
+      if (existingState) {
+        return;
+      }
+
+      if (!isEditable) {
+        return;
+      }
+
+      try {
+        const [metadataResult, contentResult] = await Promise.all([
+          fetchFileMetadata({ path: filePath }).unwrap(),
+          fetchFileContent({ path: filePath }).unwrap(),
+        ]);
+
         initFileState(filePath, contentResult ?? '', metadataResult.mtime_ms);
-      })
-      .catch((err) => {
-        console.error('Failed to refetch file:', err);
-      });
-  }, [filePath, isEditable, fetchFileMetadata, fetchFileContent, initFileState]);
+      } catch (err) {
+        console.error('Failed to load file:', err);
+      }
+    };
+
+    loadFile();
+  }, [filePath, isEditable, fetchFileMetadata, fetchFileContent, getFileState, initFileState]);
 
   return {
     content: fileState?.content ?? null,

@@ -40,9 +40,9 @@ const AsyncDropdown: FC<AsyncDropdownPropsType> = ({
 
   useEffect(() => {
     if (isOpen && buttonRef?.current) {
-      const rect = buttonRef?.current.getBoundingClientRect();
+      const buttonEl = buttonRef.current;
 
-      setDropdownTop(rect.bottom - 40);
+      setDropdownTop(buttonEl.offsetTop + buttonEl.offsetHeight);
     }
   }, [isOpen, options?.length]);
 
