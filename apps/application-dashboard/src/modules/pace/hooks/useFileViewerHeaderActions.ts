@@ -41,10 +41,9 @@ export const useFileViewerHeaderActions = ({
   }, [filePath, fileName]);
 
   const handleDeleteConfirm = useCallback(async () => {
-    closeTabsForPath(filePath, false);
-
     try {
       await deleteItem(filePath);
+      closeTabsForPath(filePath, false);
       toast.success(FILE_TOAST_MESSAGES.FILE_DELETED);
       setIsDeleteDialogOpen(false);
     } catch (error) {

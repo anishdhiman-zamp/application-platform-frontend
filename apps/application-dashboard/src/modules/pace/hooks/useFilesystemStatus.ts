@@ -7,9 +7,8 @@ export const useFilesystemStatus = () => {
   const { data: filesystemStatus, isLoading: isStatusLoading, isError: isStatusError } = useGetFilesystemStatusQuery();
 
   const isActive = filesystemStatus?.status === FILESYSTEM_STATUS.ACTIVE;
-  const isInactive = filesystemStatus?.status === FILESYSTEM_STATUS.INACTIVE;
 
-  const { isError: isFilesError } = useListFilesQuery({ depth: -1 }, { skip: !isInactive });
+  const { isError: isFilesError } = useListFilesQuery({ depth: -1 }, { skip: isActive });
 
   const pollingInterval = isActive || isStatusError || isFilesError ? 0 : FILESYSTEM_POLL_INTERVAL_MS;
 
