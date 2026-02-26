@@ -3,12 +3,6 @@ import { getFromLocalStorage, LOCAL_STORAGE_KEYS } from '@zamp-platform/utils';
 
 import { BASE_API_URL, DEFAULT_REGION, ENVIRONMENT, MULTI_REGION_ENABLED } from './constants';
 
-function getSavedLoginEmail(): string {
-  const info = getFromLocalStorage(LOCAL_STORAGE_KEYS.LAST_LOGIN_INFO);
-  if (info) return JSON.parse(info)?.email ?? '';
-  return getFromLocalStorage(LOCAL_STORAGE_KEYS.LAST_LOGGED_IN_OIDC_EMAIL);
-}
-
 export const getApiDomainAndRegions = async (email = '') => {
   const defaultRegions = [{ region: DEFAULT_REGION, url: BASE_API_URL }];
   let allRegions = defaultRegions;
@@ -18,7 +12,7 @@ export const getApiDomainAndRegions = async (email = '') => {
       const apiBaseUrlsResponse = await fetch(`${getApiDomain(ENVIRONMENT)}/auth/api-base-url`, {
         method: 'POST',
         body: JSON.stringify({
-          email: email || getSavedLoginEmail(),
+          email: email ? email : getFromLocalStorage(LOCAL_STORAGE_KEYS.LAST_LOGGED_IN_OIDC_EMAIL),
         }),
       }).then((res) => res.json() as Promise<{ api_base_urls: { region: string; url: string }[] }>);
       const allRegionsResponse = apiBaseUrlsResponse.api_base_urls;

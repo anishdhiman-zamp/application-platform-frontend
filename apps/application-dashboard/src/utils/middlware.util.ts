@@ -105,7 +105,7 @@ export async function getUserSession(
       return { session: null, cached: true };
     }
 
-    const baseUrl = process.env.NEXT_SERVER_API_URL || process.env.NEXT_PUBLIC_BASE_API_URL;
+    const baseUrl = process.env.NEXT_PUBLIC_BASE_API_URL;
 
     if (!baseUrl) {
       throw new Error('NEXT_PUBLIC_API_BASE_URL environment variable is required');

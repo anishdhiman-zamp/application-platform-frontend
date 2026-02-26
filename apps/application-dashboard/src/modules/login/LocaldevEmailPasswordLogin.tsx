@@ -1,143 +1,156 @@
 'use client';
-import { FC, FormEvent, useState } from 'react';
+import { FC, FormEvent, MouseEvent, useEffect, useState } from 'react';
 import { Button } from '@zamp-platform/ui';
-import { cn } from '@zamp-platform/ui/utils';
 import { useGetErrorDetailsQuery } from 'apis/auth';
 import { LOGIN_METHODS } from 'constants/auth.constants';
+import { ArrowRight } from 'lucide-react';
 import { LOGIN_ERROR_TEXT } from 'modules/login/constants';
-import { useSearchParams } from 'next/navigation';
+import { useRouter, useSearchParams } from 'next/navigation';
 import { LoginFlow } from 'types/api/auth.types';
 import { getFromLocalStorage, LOCAL_STORAGE_KEYS, setToLocalStorage } from 'utils/localstorage';
 import Input from 'components/common/input';
 
 type LoginFormProps = {
+  className?: string;
   loginFlow: LoginFlow;
   setLoginFlow: (loginFlow: LoginFlow) => void;
 };
 
-const LoginForm: FC<LoginFormProps> = ({ loginFlow, setLoginFlow }) => {
+const commonFetchConfig = {
+  headers: {
+    Accept: 'application/json',
+    'Content-Type': 'application/json',
+  },
+};
+
+const LoginForm: FC<LoginFormProps> = ({ className = '', loginFlow, setLoginFlow }) => {
+  const cachedUserEmail = JSON.parse(getFromLocalStorage(LOCAL_STORAGE_KEYS.XZAMP_USER) ?? '{}');
+  const router = useRouter();
   const searchParams = useSearchParams();
   const errorId = searchParams?.get('error')?.toString() ?? '';
-  const cachedUserEmail = JSON.parse(getFromLocalStorage(LOCAL_STORAGE_KEYS.XZAMP_USER) ?? '{}');
 
   const [loading, setLoading] = useState<boolean>(false);
   const [error, setError] = useState<string | null>(null);
-  const [email, setEmail] = useState(cachedUserEmail.email ?? '');
-  const [password, setPassword] = useState(cachedUserEmail.password ?? '');
+  const [isEmailLogin, setIsEmailLogin] = useState<boolean>(false);
 
   const { data: userFacingError } = useGetErrorDetailsQuery(errorId, { skip: !errorId });
 
-  const handlePasswordSubmit = async (e: FormEvent<HTMLFormElement>) => {
-    e.preventDefault();
-    if (!loginFlow) return;
+  const [email, setEmail] = useState<string>(cachedUserEmail.email ?? '');
+  const [password, setPassword] = useState<string>(cachedUserEmail.password ?? '');
 
-    setLoading(true);
-    setError(null);
+  const handlePasswordSubmit = (e?: FormEvent<HTMLFormElement> | MouseEvent<HTMLButtonElement>) => {
+    setIsEmailLogin(true);
+    e?.preventDefault?.();
+    if (loginFlow) {
+      setLoading(true);
 
-    const csrfNode = loginFlow.ui.nodes.find(
-      (node) => 'name' in node.attributes && node.attributes.name === 'csrf_token',
-    );
-    const csrfToken = csrfNode && 'value' in csrfNode.attributes ? (csrfNode.attributes.value ?? '') : '';
+      const csrfNode = loginFlow.ui.nodes.find((node) => {
+        const nodeAttributes = node.attributes;
 
-    try {
-      const response = await fetch(loginFlow.ui.action, {
+        if ('name' in nodeAttributes && nodeAttributes['name'] === 'csrf_token') {
+          return true;
+        }
+
+        return false;
+      });
+      let csrfToken = '';
+
+      if (csrfNode && 'value' in csrfNode.attributes) {
+        csrfToken = csrfNode.attributes.value;
+      }
+
+      fetch(loginFlow.ui.action, {
+        ...commonFetchConfig,
         method: loginFlow.ui.method,
         credentials: 'include',
-        headers: { Accept: 'application/json', 'Content-Type': 'application/json' },
         body: JSON.stringify({
-          password,
+          password: password,
           csrf_token: csrfToken,
           method: LOGIN_METHODS.PASSWORD,
           identifier: email,
         }),
+      }).then((response) => {
+        return response
+          .json()
+          .then((responseJson) => {
+            setToLocalStorage(LOCAL_STORAGE_KEYS.XZAMP_USER, JSON.stringify({ email, password }));
+
+            if (response.status < 300) {
+              window.location.reload();
+
+              return;
+            }
+            if (response.status === 400) {
+              setLoginFlow(responseJson);
+              setError(responseJson?.ui?.messages?.[0]?.text ?? LOGIN_ERROR_TEXT);
+              setLoading(false);
+            }
+          })
+          ?.catch(() => {
+            setError(LOGIN_ERROR_TEXT);
+          });
       });
-      const responseJson = await response.json();
-
-      setToLocalStorage(LOCAL_STORAGE_KEYS.XZAMP_USER, JSON.stringify({ email, password }));
-
-      if (response.status < 300) {
-        window.location.reload();
-
-        return;
-      }
-      if (response.status === 400) {
-        setLoginFlow(responseJson);
-        setError(responseJson?.ui?.messages?.[0]?.text ?? LOGIN_ERROR_TEXT);
-      }
-      setLoading(false);
-    } catch {
-      setError(LOGIN_ERROR_TEXT);
-      setLoading(false);
     }
   };
+
+  useEffect(() => {
+    const token = localStorage.getItem('token');
+
+    if (token) {
+      router.push('/payments');
+    }
+  }, []);
 
   const formDisabled = loading || !loginFlow;
 
   return (
-    <div>
-      {userFacingError?.map((err, index) => (
-        <p key={index} className='bg-RED_100 text-RED_600 mb-4 rounded-lg px-3 py-2 text-xs'>
-          {err?.message}
-        </p>
-      ))}
-
-      <form onSubmit={handlePasswordSubmit}>
+    <div className={`mx-auto mt-10 flex w-full flex-col items-center gap-10 ${className}`}>
+      {userFacingError &&
+        userFacingError.map((error, index) => (
+          <div key={index} className='text-red-600'>
+            {error.message}
+          </div>
+        ))}
+      <form className='flex w-full flex-col gap-3' onSubmit={handlePasswordSubmit}>
         <Input
-          label='Email'
-          labelOverrideClassName='mb-2 block text-[13px] font-medium text-GRAY_900'
-          className='mb-4'
           id='login-email'
+          label='Email'
+          required
           placeholder='Enter your email'
           name='email'
           type='email'
           value={email}
-          autoFocus
-          onChange={(e) => setEmail(e.target.value)}
+          onChange={(e) => {
+            if (e?.target?.value !== undefined) {
+              setEmail(e.target.value);
+            }
+          }}
           disabled={formDisabled}
-          noBorders
-          customPaddingClassName='px-3.5 py-3'
-          inputClassName='w-full rounded-xl border border-black/10 bg-white px-3.5 py-3 text-sm text-GRAY_1000 transition-all duration-250 outline-none placeholder:text-GRAY_500 focus:border-black/25 focus:shadow-[0_0_0_3px_rgba(0,0,0,0.04)]'
-          focusClassNames=''
-          inputRoundedClassName=''
         />
-
-        <div className='mb-5'>
-          <Input
-            label='Password'
-            labelOverrideClassName='mb-2 block text-[13px] font-medium text-GRAY_900'
-            id='login-password'
-            placeholder='Enter your password'
-            name='password'
-            type='password'
-            value={password}
-            onChange={(e) => setPassword(e.target.value)}
-            disabled={formDisabled}
-            noBorders
-            customPaddingClassName='px-3.5 py-3'
-            inputClassName={cn(
-              'w-full rounded-xl border bg-white px-3.5 py-3 text-sm text-GRAY_1000 transition-all duration-250 outline-none placeholder:text-GRAY_500',
-              error
-                ? 'border-RED_600 shadow-[0_0_0_3px_rgba(220,38,38,0.08)] focus:border-RED_600 focus:shadow-[0_0_0_3px_rgba(220,38,38,0.12)]'
-                : 'border-black/10 focus:border-black/25 focus:shadow-[0_0_0_3px_rgba(0,0,0,0.04)]',
-            )}
-            focusClassNames=''
-            inputRoundedClassName=''
-          />
-          {error && <p className='text-RED_600 mt-1.5 text-xs'>{error}</p>}
-        </div>
-
+        <Input
+          id='login-password'
+          label='Password'
+          required
+          disabled={formDisabled}
+          placeholder='Enter your password'
+          type='password'
+          name='password'
+          value={password}
+          onChange={(e) => {
+            if (e?.target?.value !== undefined) {
+              setPassword(e.target.value);
+            }
+          }}
+          error={error ?? ''}
+        />
         <Button
-          type='submit'
-          data-testid='login'
-          disabled={formDisabled || !email.trim() || !password}
-          className={cn(
-            'group relative mt-1 h-auto w-full overflow-hidden rounded-2xl border px-5 py-3.5 text-sm font-medium transition-all duration-250',
-            !(formDisabled || !email.trim() || !password)
-              ? 'bg-GRAY_1000 hover:bg-GRAY_950 active:bg-GRAY_1000 cursor-pointer border-black/10 text-white active:scale-[0.98]'
-              : 'bg-GRAY_500 text-GRAY_700 disabled:bg-GRAY_500 disabled:text-GRAY_700 cursor-not-allowed border-black/3',
-          )}
+          testId='login'
+          className='w-fit'
+          disabled={formDisabled}
+          trailingIcon={<ArrowRight size={16} />}
+          isLoading={isEmailLogin ? loading : false}
         >
-          {loading ? 'Signing in...' : 'Sign in'}
+          Login
         </Button>
       </form>
     </div>

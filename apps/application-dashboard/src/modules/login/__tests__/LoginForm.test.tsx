@@ -1,7 +1,12 @@
 import React, { createElement } from 'react';
 import { cleanup, fireEvent, render, screen, waitFor } from '@testing-library/react';
 import { getApiDomainAndRegions } from '@zamp-platform/api';
-import { getFromLocalStorage, LOCAL_STORAGE_KEYS, removeFromLocalStorage } from '@zamp-platform/utils';
+import {
+  getFromLocalStorage,
+  LOCAL_STORAGE_KEYS,
+  removeFromLocalStorage,
+  setToLocalStorage,
+} from '@zamp-platform/utils';
 import { LoginForm } from 'modules/login/LoginForm';
 import '@testing-library/jest-dom';
 
@@ -45,7 +50,6 @@ jest.mock('@zamp-platform/utils', () => ({
   setToLocalStorage: jest.fn(),
   removeFromLocalStorage: jest.fn(),
   LOCAL_STORAGE_KEYS: {
-    LAST_LOGIN_INFO: 'LAST_LOGIN_INFO',
     LAST_LOGGED_IN_OIDC_EMAIL: 'LAST_LOGGED_IN_OIDC_EMAIL',
   },
 }));
@@ -129,6 +133,7 @@ Object.defineProperty(window, 'location', {
 describe('LoginForm', () => {
   const mockGetApiDomainAndRegions = getApiDomainAndRegions as jest.Mock;
   const mockGetFromLocalStorage = getFromLocalStorage as jest.Mock;
+  const mockSetToLocalStorage = setToLocalStorage as jest.Mock;
   const mockRemoveFromLocalStorage = removeFromLocalStorage as jest.Mock;
   const mockIsValidEmail = require('utils/common').isValidEmail as jest.Mock;
   const mockGetDomainFromEmail = require('utils/common').getDomainFromEmail as jest.Mock;
@@ -197,7 +202,7 @@ describe('LoginForm', () => {
     }
 
     await waitFor(() => {
-      expect(screen.getByText('Please enter a valid email address')).toBeInTheDocument();
+      expect(screen.getByTestId('email-input')).toHaveAttribute('data-error', expect.any(String));
     });
   });
 
@@ -350,6 +355,10 @@ describe('LoginForm', () => {
 
     await waitFor(() => {
       expect(mockFetch).toHaveBeenCalledTimes(2);
+      expect(mockSetToLocalStorage).toHaveBeenCalledWith(
+        LOCAL_STORAGE_KEYS.LAST_LOGGED_IN_OIDC_EMAIL,
+        'test@example.com',
+      );
     });
   });
 
@@ -360,7 +369,7 @@ describe('LoginForm', () => {
           {
             group: 'oidc',
             attributes: {
-              value: 'google-id',
+              value: 'google',
               logo_url: 'https://example.com/logo.png',
             },
           },
@@ -434,7 +443,7 @@ describe('LoginForm', () => {
     }
 
     await waitFor(() => {
-      expect(mockRemoveFromLocalStorage).toHaveBeenCalledWith(LOCAL_STORAGE_KEYS.LAST_LOGIN_INFO);
+      expect(mockRemoveFromLocalStorage).toHaveBeenCalledWith(LOCAL_STORAGE_KEYS.LAST_LOGGED_IN_OIDC_EMAIL);
     });
   });
 
@@ -553,9 +562,15 @@ describe('LoginForm', () => {
       fireEvent.submit(form);
     }
 
-    await waitFor(() => {
-      expect(mockFetch).toHaveBeenCalledTimes(2);
-    });
+    await waitFor(
+      () => {
+        expect(mockSetToLocalStorage).toHaveBeenCalledWith(
+          LOCAL_STORAGE_KEYS.LAST_LOGGED_IN_OIDC_EMAIL,
+          'test@example.com',
+        );
+      },
+      { timeout: 15000 },
+    );
   });
 
   it('should handle network errors gracefully', async () => {

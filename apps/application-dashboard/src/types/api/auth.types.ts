@@ -3,43 +3,6 @@ export type LogoutFlow = {
   logout_token: string;
 };
 
-export type FlowUiMessage = {
-  id: number;
-  text: string;
-  type: 'info' | 'error';
-};
-
-export type FlowNode = {
-  type: string;
-  group: string;
-  attributes: {
-    name: string;
-    type: string;
-    value: string | null;
-    disabled?: boolean;
-    node_type?: string;
-    logo_url?: string;
-  };
-  messages: FlowUiMessage[];
-  meta?: {
-    label?: {
-      id: number;
-      text: string;
-      type: string;
-      context?: {
-        provider: string;
-      };
-    };
-  };
-};
-
-export type FlowExpiredResponse = {
-  error: { id: string; code: number; status: string; reason: string; message: string };
-  expired_at: string;
-  since: number;
-  use_flow_id: string;
-};
-
 export type LoginFlow = {
   id: string;
   organization_id: null;
@@ -50,15 +13,35 @@ export type LoginFlow = {
   ui: {
     action: string;
     method: string;
-    nodes: FlowNode[];
-    messages?: FlowUiMessage[] | null;
+    nodes: {
+      type: string;
+      group: string;
+      attributes: {
+        name: string;
+        type: string;
+        value: string;
+        disabled: boolean;
+        node_type: string;
+      };
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      messages: any[];
+      meta: {
+        label: {
+          id: number;
+          text: string;
+          type: string;
+          context: {
+            provider: string;
+          };
+        };
+      };
+    }[];
   };
   created_at: string;
   updated_at: string;
   refresh: boolean;
   requested_aal: string;
   state: string;
-  continue_with?: { action: string; redirect_browser_to?: string }[];
 };
 
 // TODO: check if type is correct
