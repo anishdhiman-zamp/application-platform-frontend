@@ -5,7 +5,13 @@ import { BASE_API_URL, DEFAULT_REGION, ENVIRONMENT, MULTI_REGION_ENABLED } from 
 
 function getSavedLoginEmail(): string {
   const info = getFromLocalStorage(LOCAL_STORAGE_KEYS.LAST_LOGIN_INFO);
-  if (info) return JSON.parse(info)?.email ?? '';
+  if (info) {
+    try {
+      return JSON.parse(info)?.email ?? '';
+    } catch {
+      return '';
+    }
+  }
   return getFromLocalStorage(LOCAL_STORAGE_KEYS.LAST_LOGGED_IN_OIDC_EMAIL);
 }
 
