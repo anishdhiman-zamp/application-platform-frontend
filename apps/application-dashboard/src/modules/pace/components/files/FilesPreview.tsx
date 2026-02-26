@@ -22,6 +22,7 @@ const FilesPreview = ({ selectedFile }: FilesPreviewProps) => {
                 width={400}
                 height={320}
                 unoptimized
+                priority
               />
             </div>
           </div>

@@ -19,6 +19,7 @@ export enum LOCAL_STORAGE_KEYS {
   MAPPED_INTEGRATIONS_LIST = 'MAPPED_INTEGRATIONS_LIST',
   CONVERSATION_DRAFTS = 'CONVERSATION_DRAFTS',
   PACE_OPEN_DYNAMIC_TABS = 'PACE_OPEN_DYNAMIC_TABS',
+  PACE_FILE_TREE_EXPANDED_PATHS = 'PACE_FILE_TREE_EXPANDED_PATHS',
 }
 
 export const getFromLocalStorage = (key: LOCAL_STORAGE_KEYS) => {
@@ -43,4 +44,24 @@ export const removeFromLocalStorage = (key: LOCAL_STORAGE_KEYS) => {
   }
 
   window.localStorage.removeItem(key);
+};
+
+export const getStoredExpandedPaths = (): string[] => {
+  try {
+    const stored = getFromLocalStorage(LOCAL_STORAGE_KEYS.PACE_FILE_TREE_EXPANDED_PATHS);
+
+    if (!stored) return [];
+
+    return JSON.parse(stored) as string[];
+  } catch {
+    return [];
+  }
+};
+
+export const setStoredExpandedPaths = (paths: string[]) => {
+  try {
+    setToLocalStorage(LOCAL_STORAGE_KEYS.PACE_FILE_TREE_EXPANDED_PATHS, JSON.stringify(paths));
+  } catch {
+    // silent error
+  }
 };

@@ -14,6 +14,7 @@ import FileConflictModal from '@/modules/pace/components/files/FileConflictModal
 import FileTreeEmptyState from '@/modules/pace/components/files/FileTreeEmptyState';
 import FileTreeNode from '@/modules/pace/components/files/FileTreeNode';
 import { FileTreeProvider } from '@/modules/pace/hooks/FileTreeProvider';
+import { useExpandedPaths } from '@/modules/pace/hooks/useExpandedPaths';
 import { useFileConflict } from '@/modules/pace/hooks/useFileConflict';
 
 const ROW_HEIGHT = 36;
@@ -33,7 +34,9 @@ const FileTreeContent = ({
   onUploadFolder,
   onCollapseAllChange,
 }: FileTreeProps) => {
-  const [expandedPaths, setExpandedPaths] = useState<Set<string>>(new Set());
+  const { conflict, resolveConflict, cancelConflict } = useFileConflict();
+  const { expandedPaths, toggleExpand, collapseAll } = useExpandedPaths({ files });
+
   const [internalSelectedPath, setInternalSelectedPath] = useState<string | null>(null);
   const [uploadTargetPath, setUploadTargetPath] = useState<string>('');
   const [dragOverFolderPath, setDragOverFolderPath] = useState<string | null>(null);
@@ -42,12 +45,6 @@ const FileTreeContent = ({
   const folderInputRef = useRef<HTMLInputElement>(null);
 
   const selectedPath = controlledSelectedPath ?? internalSelectedPath;
-
-  const { conflict, resolveConflict, cancelConflict } = useFileConflict();
-
-  const collapseAll = useCallback(() => {
-    setExpandedPaths(new Set());
-  }, []);
 
   const triggerFileUpload = useCallback((targetPath: string) => {
     setUploadTargetPath(targetPath);
@@ -135,19 +132,12 @@ const FileTreeContent = ({
     overscan: OVERSCAN_COUNT,
   });
 
-  const handleToggleExpand = useCallback((path: string) => {
-    setExpandedPaths((prev) => {
-      const newSet = new Set(prev);
-
-      if (newSet.has(path)) {
-        newSet.delete(path);
-      } else {
-        newSet.add(path);
-      }
-
-      return newSet;
-    });
-  }, []);
+  const handleToggleExpand = useCallback(
+    (path: string) => {
+      toggleExpand(path);
+    },
+    [toggleExpand],
+  );
 
   const handleSelect = useCallback(
     (path: string) => {
@@ -174,7 +164,6 @@ const FileTreeContent = ({
   }, []);
 
   const handleContainerDragLeave = useCallback((e: React.DragEvent) => {
-    // Only clear when leaving the container entirely (not moving to a child element)
     if (containerRef.current && !containerRef.current.contains(e.relatedTarget as Node)) {
       setDragOverFolderPath(null);
     }
@@ -245,7 +234,7 @@ const FileTreeContent = ({
           })}
           {dragOverlayBounds && (
             <div
-              className='border-GRAY_1000 pointer-events-none absolute right-0 left-0 rounded-md border-2 border-dashed'
+              className='border-GRAY_700 pointer-events-none absolute right-0 left-0 rounded-md border-2 border-dotted'
               style={{
                 top: dragOverlayBounds.top,
                 height: dragOverlayBounds.height,

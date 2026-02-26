@@ -1,6 +1,7 @@
 import {
   Clipboard,
   Copy,
+  Download,
   ExternalLink,
   FilePlus,
   FolderPlus,
@@ -10,12 +11,7 @@ import {
   Trash2,
   Upload,
 } from 'lucide-react';
-import {
-  type ContextMenuAction,
-  FILE_TYPE,
-  type FileItem,
-  type SortOption,
-} from '@/modules/pace/components/files/file-tree.types';
+import { type ContextMenuAction, type SortOption } from '@/modules/pace/components/files/file-tree.types';
 
 export const DATE_FORMAT = "EEEE, d MMMM yyyy 'at' h:mm a";
 
@@ -36,6 +32,9 @@ export const FILE_TOAST_MESSAGES = {
   FAILED_TO_RENAME: 'Failed to rename',
   FAILED_TO_MOVE_COPY: 'Failed to move/copy',
   FAILED_TO_RESOLVE_CONFLICT: 'Failed to resolve conflict',
+  FAILED_TO_SAVE_FILE: 'Failed to save file',
+  FAILED_TO_DELETE_FILE: 'Failed to delete file',
+  FILE_DELETED: 'File deleted',
 } as const;
 
 export const CONTEXT_MENU_ACTION_IDS = {
@@ -44,6 +43,7 @@ export const CONTEXT_MENU_ACTION_IDS = {
   UPLOAD_FILE: 'upload-file',
   UPLOAD_FOLDER: 'upload-folder',
   OPEN_IN_TAB: 'open-in-tab',
+  DOWNLOAD: 'download',
   RENAME: 'rename',
   DUPLICATE: 'duplicate',
   COPY: 'copy',
@@ -51,6 +51,22 @@ export const CONTEXT_MENU_ACTION_IDS = {
   PASTE: 'paste',
   DELETE: 'delete',
 } as const;
+
+export const FILE_VIEWER_HEADER_ACTION_IDS = {
+  DOWNLOAD: 'download',
+  DELETE: 'delete',
+} as const;
+
+export const SAVE_STATUS = {
+  IDLE: 'idle',
+  SAVING: 'saving',
+  SAVED: 'saved',
+} as const;
+
+export type SaveStatus = (typeof SAVE_STATUS)[keyof typeof SAVE_STATUS];
+
+export type FileViewerHeaderActionId =
+  (typeof FILE_VIEWER_HEADER_ACTION_IDS)[keyof typeof FILE_VIEWER_HEADER_ACTION_IDS];
 
 export const SORT_OPTIONS: { value: SortOption; label: string }[] = [
   { value: 'date_modified', label: 'Date modified' },
@@ -65,18 +81,90 @@ export const CONTEXT_MENU_ACTIONS: ContextMenuAction[] = [
   { id: CONTEXT_MENU_ACTION_IDS.UPLOAD_FILE, label: 'Upload File', icon: Upload, folderOnly: true },
   { id: CONTEXT_MENU_ACTION_IDS.UPLOAD_FOLDER, label: 'Upload Folder', icon: FolderUp, folderOnly: true },
   { id: CONTEXT_MENU_ACTION_IDS.OPEN_IN_TAB, label: 'Open in Tab', icon: ExternalLink, fileOnly: true },
-  // { id: 'work-with-zamp', label: 'Work with Zamp', icon: Link },
+  { id: CONTEXT_MENU_ACTION_IDS.DOWNLOAD, label: 'Download', icon: Download, fileOnly: true },
   { id: CONTEXT_MENU_ACTION_IDS.RENAME, label: 'Rename', icon: Pencil },
   { id: CONTEXT_MENU_ACTION_IDS.DUPLICATE, label: 'Duplicate', icon: Copy },
   { id: CONTEXT_MENU_ACTION_IDS.COPY, label: 'Copy', icon: Copy },
   { id: CONTEXT_MENU_ACTION_IDS.CUT, label: 'Cut', icon: Scissors },
   { id: CONTEXT_MENU_ACTION_IDS.PASTE, label: 'Paste', icon: Clipboard, folderOnly: true },
-  // { id: 'share', label: 'Share', icon: Share },
-  // { id: 'download', label: 'Download', icon: Download },
   { id: CONTEXT_MENU_ACTION_IDS.DELETE, label: 'Delete', icon: Trash2, isDestructive: true },
 ];
 
-// File types that can be edited with Monaco editor
+export const FILE_VIEWER_HEADER_ACTIONS: ContextMenuAction[] = [
+  { id: FILE_VIEWER_HEADER_ACTION_IDS.DOWNLOAD, label: 'Download', icon: Download },
+  { id: FILE_VIEWER_HEADER_ACTION_IDS.DELETE, label: 'Delete', icon: Trash2, isDestructive: true },
+];
+
+// File categories for viewer selection
+export const FILE_CATEGORY = {
+  IMAGE: 'image',
+  AUDIO: 'audio',
+  VIDEO: 'video',
+  PDF: 'pdf',
+  MARKDOWN: 'markdown',
+  CODE: 'code',
+  UNKNOWN: 'unknown',
+} as const;
+
+export type FileCategory = (typeof FILE_CATEGORY)[keyof typeof FILE_CATEGORY];
+
+export const IMAGE_EXTENSIONS = ['png', 'jpg', 'jpeg', 'gif', 'webp', 'svg', 'bmp', 'ico'] as const;
+
+export const AUDIO_EXTENSIONS = ['mp3', 'wav', 'flac', 'aac', 'm4a', 'ogg', 'wma', 'aiff'] as const;
+
+export const VIDEO_EXTENSIONS = ['mp4', 'mov', 'avi', 'mkv', 'webm', 'wmv', 'flv', 'm4v'] as const;
+
+export const PDF_EXTENSIONS = ['pdf'] as const;
+
+export const MARKDOWN_EXTENSIONS = ['md', 'mdx'] as const;
+
+export const EXTENSION_TO_MONACO_LANGUAGE: Record<string, string> = {
+  js: 'javascript',
+  jsx: 'javascript',
+  ts: 'typescript',
+  tsx: 'typescript',
+  py: 'python',
+  rb: 'ruby',
+  php: 'php',
+  java: 'java',
+  kt: 'kotlin',
+  swift: 'swift',
+  go: 'go',
+  rs: 'rust',
+  c: 'c',
+  cpp: 'cpp',
+  cs: 'csharp',
+  r: 'r',
+  scala: 'scala',
+  html: 'html',
+  htm: 'html',
+  css: 'css',
+  scss: 'scss',
+  sass: 'scss',
+  less: 'less',
+  json: 'json',
+  yaml: 'yaml',
+  yml: 'yaml',
+  xml: 'xml',
+  toml: 'toml',
+  ini: 'ini',
+  env: 'plaintext',
+  sh: 'shell',
+  bash: 'shell',
+  zsh: 'shell',
+  ps1: 'powershell',
+  bat: 'bat',
+  sql: 'sql',
+  graphql: 'graphql',
+  prisma: 'prisma',
+  md: 'markdown',
+  mdx: 'markdown',
+  txt: 'plaintext',
+  csv: 'plaintext',
+  vue: 'vue',
+  svelte: 'svelte',
+};
+
 export const MONACO_EDITABLE_EXTENSIONS = [
   // Plain text & Markdown
   'txt',
@@ -292,214 +380,3 @@ export const FILE_TYPE_LABELS: Record<string, string> = {
   LOG: 'Log file',
   LICENSE: 'License file',
 };
-
-export const MOCK_FILES: FileItem[] = [
-  {
-    path: 'Budget spreadsheet',
-    name: 'Budget spreadsheet',
-    type: FILE_TYPE.DIRECTORY,
-    size: null,
-    mtime_ms: 1771349214794,
-    owner: 'user',
-  },
-  {
-    path: 'Budget spreadsheet/first_dance_song.mp3',
-    name: 'first_dance_song.mp3',
-    type: FILE_TYPE.FILE,
-    size: 4500000,
-    mtime_ms: 1771354001854,
-    owner: 'user',
-  },
-  {
-    path: 'Budget spreadsheet/venue_options.md',
-    name: 'venue_options.md',
-    type: FILE_TYPE.FILE,
-    size: 2048,
-    mtime_ms: 1771354001843,
-    owner: 'user',
-  },
-  {
-    path: 'Budget spreadsheet/guest_addresses.xlsx',
-    name: 'guest_addresses.xlsx',
-    type: FILE_TYPE.FILE,
-    size: 15360,
-    mtime_ms: 1771354001865,
-    owner: 'user',
-  },
-  {
-    path: 'Budget spreadsheet/vendor_contacts.docx',
-    name: 'vendor_contacts.docx',
-    type: FILE_TYPE.FILE,
-    size: 8192,
-    mtime_ms: 1770790929081,
-    owner: 'user',
-  },
-  {
-    path: 'Budget spreadsheet/rsvp_form.css',
-    name: 'rsvp_form.css',
-    type: FILE_TYPE.FILE,
-    size: 1024,
-    mtime_ms: 1770816275272,
-    owner: 'user',
-  },
-  {
-    path: 'Budget spreadsheet/rsvp_form.html',
-    name: 'rsvp_form.html',
-    type: FILE_TYPE.FILE,
-    size: 2048,
-    mtime_ms: 1770816275770,
-    owner: 'user',
-  },
-  {
-    path: 'Budget spreadsheet/Guest list',
-    name: 'Guest list',
-    type: FILE_TYPE.DIRECTORY,
-    size: null,
-    mtime_ms: 1770816275290,
-    owner: 'user',
-  },
-  {
-    path: 'Budget spreadsheet/Guest list/ceremony_songs.zip',
-    name: 'ceremony_songs.zip',
-    type: FILE_TYPE.FILE,
-    size: 52428800,
-    mtime_ms: 1770986876296,
-    owner: 'user',
-  },
-  {
-    path: 'Budget spreadsheet/Guest list/Flowers',
-    name: 'Flowers',
-    type: FILE_TYPE.DIRECTORY,
-    size: null,
-    mtime_ms: 1770986877373,
-    owner: 'user',
-  },
-  {
-    path: 'Budget spreadsheet/Guest list/Flowers/dress_inspiration.mp4',
-    name: 'dress_inspiration.mp4',
-    type: FILE_TYPE.FILE,
-    size: 104857600,
-    mtime_ms: 1770986876590,
-    owner: 'user',
-  },
-  {
-    path: 'Budget spreadsheet/Guest list/Flowers/bouquet_design.psd',
-    name: 'bouquet_design.psd',
-    type: FILE_TYPE.FILE,
-    size: 25600000,
-    mtime_ms: 1770986877100,
-    owner: 'user',
-  },
-  {
-    path: 'Budget spreadsheet/Guest list/Flowers/flower_arrangement.png',
-    name: 'flower_arrangement.png',
-    type: FILE_TYPE.FILE,
-    size: 2048000,
-    mtime_ms: 1770986877200,
-    owner: 'user',
-  },
-  {
-    path: 'Budget spreadsheet/seating_chart.pdf',
-    name: 'seating_chart.pdf',
-    type: FILE_TYPE.FILE,
-    size: 512000,
-    mtime_ms: 1771354002000,
-    owner: 'user',
-  },
-  {
-    path: 'Budget spreadsheet/wedding_timeline.json',
-    name: 'wedding_timeline.json',
-    type: FILE_TYPE.FILE,
-    size: 4096,
-    mtime_ms: 1771354002100,
-    owner: 'user',
-  },
-  {
-    path: 'Budget spreadsheet/invitation_template.svg',
-    name: 'invitation_template.svg',
-    type: FILE_TYPE.FILE,
-    size: 8192,
-    mtime_ms: 1771354002200,
-    owner: 'user',
-  },
-  {
-    path: 'Budget spreadsheet/Scripts',
-    name: 'Scripts',
-    type: FILE_TYPE.DIRECTORY,
-    size: null,
-    mtime_ms: 1771354002300,
-    owner: 'user',
-  },
-  {
-    path: 'Budget spreadsheet/Scripts/rsvp_handler.py',
-    name: 'rsvp_handler.py',
-    type: FILE_TYPE.FILE,
-    size: 3072,
-    mtime_ms: 1771354002400,
-    owner: 'user',
-  },
-  {
-    path: 'Budget spreadsheet/Scripts/email_sender.ts',
-    name: 'email_sender.ts',
-    type: FILE_TYPE.FILE,
-    size: 2560,
-    mtime_ms: 1771354002500,
-    owner: 'user',
-  },
-  {
-    path: 'Budget spreadsheet/Scripts/database_backup.sql',
-    name: 'database_backup.sql',
-    type: FILE_TYPE.FILE,
-    size: 102400,
-    mtime_ms: 1771354002600,
-    owner: 'user',
-  },
-  {
-    path: 'Budget spreadsheet/config.yaml',
-    name: 'config.yaml',
-    type: FILE_TYPE.FILE,
-    size: 1536,
-    mtime_ms: 1771354002700,
-    owner: 'user',
-  },
-  {
-    path: 'Budget spreadsheet/ceremony_photos.rar',
-    name: 'ceremony_photos.rar',
-    type: FILE_TYPE.FILE,
-    size: 157286400,
-    mtime_ms: 1771354002800,
-    owner: 'user',
-  },
-  {
-    path: 'Budget spreadsheet/speech_notes.txt',
-    name: 'speech_notes.txt',
-    type: FILE_TYPE.FILE,
-    size: 2048,
-    mtime_ms: 1771354002900,
-    owner: 'user',
-  },
-  {
-    path: 'Budget spreadsheet/wedding_logo.ai',
-    name: 'wedding_logo.ai',
-    type: FILE_TYPE.FILE,
-    size: 5120000,
-    mtime_ms: 1771354003000,
-    owner: 'user',
-  },
-  {
-    path: 'Budget spreadsheet/background_music.wav',
-    name: 'background_music.wav',
-    type: FILE_TYPE.FILE,
-    size: 45000000,
-    mtime_ms: 1771354003100,
-    owner: 'user',
-  },
-  {
-    path: 'Budget spreadsheet/venue_3d_model.gltf',
-    name: 'venue_3d_model.gltf',
-    type: FILE_TYPE.FILE,
-    size: 8500000,
-    mtime_ms: 1771354003200,
-    owner: 'user',
-  },
-];

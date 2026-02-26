@@ -1,5 +1,8 @@
 import { captureException } from '@sentry/browser';
 import { toast } from '@zamp-platform/ui';
+import { getNextNavigationTarget, NAVIGATION_STRATEGY } from '@zamp-platform/utils';
+import { useRouter } from 'next/navigation';
+import { getChatFileRoute, ROUTES_PATH } from '@/constants/routeConfig';
 import {
   CLIPBOARD_OPERATION,
   CREATE_ITEM_TYPE,
@@ -11,10 +14,15 @@ import {
 import {
   buildFullPath,
   executeMoveOrCopy,
+  getMediaUrl,
   validatePasteOperation,
 } from '@/modules/pace/components/files/file-tree.utils';
 import { CONTEXT_MENU_ACTION_IDS, FILE_TOAST_MESSAGES } from '@/modules/pace/components/files/files.constants';
+import { useFileViewerContext } from '@/modules/pace/hooks/FileViewerContext';
+import { useDynamicTabs } from '@/modules/pace/hooks/useDynamicTabs';
 import { useFileTreeContext } from '@/modules/pace/hooks/useFileTreeContext';
+import { useUpdateFileTab } from '@/modules/pace/hooks/useUpdateFileTab';
+import { usePaceContext } from '@/modules/pace/pace.context';
 
 interface UseFileTreeNodeActionsProps {
   node: TreeNode;
@@ -53,6 +61,11 @@ export const useFileTreeNodeActions = ({
   onTriggerFileUpload,
   onTriggerFolderUpload,
 }: UseFileTreeNodeActionsProps): UseFileTreeNodeActionsReturn => {
+  const router = useRouter();
+  const { dynamicTabs, openDynamicTab, closeDynamicTab } = usePaceContext();
+  const { updateFileTab } = useUpdateFileTab();
+  const { isDynamicTabActive } = useDynamicTabs();
+  const { removeFileState } = useFileViewerContext();
   const {
     createFile,
     createFolder,
@@ -88,14 +101,42 @@ export const useFileTreeNodeActions = ({
           }
           onStartRename();
           break;
-        case CONTEXT_MENU_ACTION_IDS.DELETE:
+        case CONTEXT_MENU_ACTION_IDS.DELETE: {
           if (isProtected) {
             toast.error(FILE_TOAST_MESSAGES.CANNOT_DELETE_PROTECTED);
             break;
           }
+
+          const isFolder = node.type === FILE_TYPE.DIRECTORY;
+          const folderPathPrefix = `${node.path}/`;
+
+          const tabsToClose = isFolder
+            ? dynamicTabs.filter((tab) => tab.id === node.path || tab.id.startsWith(folderPathPrefix))
+            : dynamicTabs.filter((tab) => tab.id === node.path);
+
+          const activeTabToClose = tabsToClose.find((tab) => isDynamicTabActive(tab));
+
+          tabsToClose.forEach((tab) => {
+            removeFileState(tab.id);
+            closeDynamicTab(tab.id);
+          });
+
+          if (activeTabToClose) {
+            const { target, hasRemainingItems } = getNextNavigationTarget({
+              items: dynamicTabs,
+              closingItem: activeTabToClose,
+              isEqual: (a, b) => a.id === b.id,
+              strategy: NAVIGATION_STRATEGY.BROWSER_LIKE,
+            });
+
+            router.push(hasRemainingItems && target ? target.path : ROUTES_PATH.CHAT_FILES);
+          }
+
           await deleteItem(node.path);
           onFileDeleted?.(node.path);
+          toast.success(FILE_TOAST_MESSAGES.FILE_DELETED);
           break;
+        }
         case CONTEXT_MENU_ACTION_IDS.DUPLICATE:
           await duplicateItem(node.path);
           break;
@@ -153,9 +194,36 @@ export const useFileTreeNodeActions = ({
 
             if (!isCopy) {
               clearClipboard();
+              updateFileTab({
+                oldPath: clipboard.path,
+                newPath: validation.destinationPath,
+                newName: clipboard.name,
+              });
             }
           }
           break;
+        case CONTEXT_MENU_ACTION_IDS.OPEN_IN_TAB: {
+          const filePath = getChatFileRoute(node.path);
+
+          openDynamicTab({
+            id: node.path,
+            name: node.name,
+            path: filePath,
+          });
+          router.push(filePath);
+          break;
+        }
+        case CONTEXT_MENU_ACTION_IDS.DOWNLOAD: {
+          const downloadUrl = getMediaUrl(node.path);
+          const link = document.createElement('a');
+
+          link.href = downloadUrl;
+          link.download = node.name;
+          document.body.appendChild(link);
+          link.click();
+          document.body.removeChild(link);
+          break;
+        }
         case 'upload-file':
           if (!isExpanded) {
             onToggleExpand(node.path);

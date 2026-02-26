@@ -31,9 +31,9 @@ const PaceNavbar = () => {
   const [activeId, setActiveId] = useState<string | null>(null);
   const sensors = useSensors(useSensor(PointerSensor, { activationConstraint: { distance: 5 } }));
 
-  const tabIds = useMemo(() => dynamicTabs.map((tab) => tab.id), [dynamicTabs]);
+  const tabStableKeys = useMemo(() => dynamicTabs.map((tab) => tab.stableKey), [dynamicTabs]);
 
-  const activeTab = useMemo(() => dynamicTabs.find((tab) => tab.id === activeId), [dynamicTabs, activeId]);
+  const activeTab = useMemo(() => dynamicTabs.find((tab) => tab.stableKey === activeId), [dynamicTabs, activeId]);
 
   const handleDragStart = (event: DragStartEvent) => {
     setActiveId(event.active.id as string);
@@ -45,11 +45,11 @@ const PaceNavbar = () => {
     setActiveId(null);
 
     if (active.id !== over?.id) {
-      const oldIndex = tabIds.indexOf(active.id as string);
-      const newIndex = tabIds.indexOf((over?.id as string) ?? '');
+      const oldIndex = tabStableKeys.indexOf(active.id as string);
+      const newIndex = tabStableKeys.indexOf((over?.id as string) ?? '');
 
       if (oldIndex !== -1 && newIndex !== -1) {
-        const newOrder = arrayMove(tabIds, oldIndex, newIndex);
+        const newOrder = arrayMove(dynamicTabs, oldIndex, newIndex).map((tab) => tab.id);
 
         handleReorderTabs(newOrder);
       }
@@ -61,8 +61,8 @@ const PaceNavbar = () => {
       return pathname === path;
     }
 
-    if (id === PaceNavbarItemId.ARTIFACTS) {
-      if (isOnAnyDynamicTab()) return false;
+    if (isOnAnyDynamicTab()) {
+      return false;
     }
 
     return pathname?.includes(path) ?? false;
@@ -106,13 +106,13 @@ const PaceNavbar = () => {
           onDragStart={handleDragStart}
           onDragEnd={handleDragEnd}
         >
-          <SortableContext items={tabIds} strategy={horizontalListSortingStrategy}>
+          <SortableContext items={tabStableKeys} strategy={horizontalListSortingStrategy}>
             <div className='flex min-w-0 flex-1 items-center gap-x-1'>
               {dynamicTabs.map((tab) => (
                 <SortableDynamicTabItem
-                  key={tab.id}
+                  key={tab.stableKey}
                   tab={tab}
-                  isActive={isDynamicTabActive(tab.path)}
+                  isActive={isDynamicTabActive(tab)}
                   isAnyDragging={activeId !== null}
                   onClose={handleCloseDynamicTab}
                 />
@@ -124,7 +124,7 @@ const PaceNavbar = () => {
               <div className='-rotate-2 rounded-lg border shadow-lg'>
                 <DynamicTabItem
                   tab={activeTab}
-                  isActive={isDynamicTabActive(activeTab.path)}
+                  isActive={isDynamicTabActive(activeTab)}
                   isDragging
                   onClose={handleCloseDynamicTab}
                 />
