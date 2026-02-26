@@ -62,6 +62,6 @@ export const setStoredExpandedPaths = (paths: string[]) => {
   try {
     setToLocalStorage(LOCAL_STORAGE_KEYS.PACE_FILE_TREE_EXPANDED_PATHS, JSON.stringify(paths));
   } catch {
-    console.error('Error setting stored expanded paths', paths);
+    // silent error
   }
 };
