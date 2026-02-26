@@ -1,3 +1,4 @@
+import { API_ENDPOINTS } from 'apis/apiEndpoint.constants';
 import {
   DATASET_ACCESS_PRIVILEGES,
   PAGE_ACCESS_PRIVILEGES,
@@ -6,6 +7,7 @@ import {
   ResourcePrivilege,
   ResourceType,
   ShareResourceConfig,
+  ShareResourceVersion,
 } from '@/modules/shareResource/shareResource.types';
 import { TOAST_MESSAGES } from 'components/common/toast/toast.constants';
 
@@ -76,6 +78,18 @@ export const CHANGE_ACCESS_PRIVILEGES_LIST: ResourcePrivilege[] = [
     value: PROCESS_ACCESS_PRIVILEGES.EDITOR,
     desc: 'Can edit process',
   },
+  {
+    kind: ResourceType.CONNECTION,
+    label: 'Admin',
+    value: 'admin',
+    desc: 'Can manage and share connection',
+  },
+  {
+    kind: ResourceType.CONNECTION,
+    label: 'Viewer',
+    value: 'viewer',
+    desc: 'Can view connection only',
+  },
 ];
 
 export const resourcePrivilegeRank = {
@@ -103,6 +117,9 @@ export const RESOURCE_PRIVILEGES: Record<ResourceType, ResourcePrivilege[]> = {
   [ResourceType.PROCESS]: CHANGE_ACCESS_PRIVILEGES_LIST.filter((privilege) => privilege.kind === ResourceType.PROCESS),
   [ResourceType.ORGANIZATION]: CHANGE_ACCESS_PRIVILEGES_LIST.filter(
     (privilege) => privilege.kind === ResourceType.ORGANIZATION,
+  ),
+  [ResourceType.CONNECTION]: CHANGE_ACCESS_PRIVILEGES_LIST.filter(
+    (privilege) => privilege.kind === ResourceType.CONNECTION,
   ),
 };
 
@@ -149,13 +166,39 @@ export const processConfig: ShareResourceConfig = {
   },
 };
 
+export const connectionConfig: ShareResourceConfig = {
+  type: ResourceType.CONNECTION,
+  accessPrivilegesList: RESOURCE_PRIVILEGES[ResourceType.CONNECTION],
+  displayName: 'connection',
+  toastMessages: {
+    success: 'Connection shared successfully',
+    failed: 'Failed to share connection',
+  },
+};
+
 export const resourceTypeRouteMap = {
   [ResourceType.DATASET]: 'datasets',
   [ResourceType.PAGE]: 'pages',
   [ResourceType.PAYMENTS]: 'payments',
   [ResourceType.PROCESS]: 'processes',
   [ResourceType.ORGANIZATION]: 'organizations',
+  [ResourceType.CONNECTION]: 'connection',
 };
 
 export const ACCESS_MESSAGES_ADMIN_ROLE = 'Admin will have access to all data';
 export const ACCESS_MESSAGES_CUSTOMISE_ACCESS = 'Only admins can customise access';
+
+export const RESOURCE_COLLABORATION_ENDPOINTS = {
+  [ShareResourceVersion.V1]: {
+    getAudiences: API_ENDPOINTS.RESOURCE_AUDIENCES_BY_RESOURCE_ID_GET,
+    shareResource: API_ENDPOINTS.SHARE_RESOURCE_TO_AUDIENCES_POST,
+    changeRole: API_ENDPOINTS.CHANGE_AUDIENCE_ROLE_IN_RESOURCE_PATCH,
+    deleteAudience: API_ENDPOINTS.DELETE_RESOURCE_FROM_AUDIENCES,
+  },
+  [ShareResourceVersion.V2]: {
+    getAudiences: API_ENDPOINTS.RESOURCE_AUDIENCES_BY_RESOURCE_ID_GET_V2,
+    shareResource: API_ENDPOINTS.SHARE_RESOURCE_TO_AUDIENCES_POST_V2,
+    changeRole: API_ENDPOINTS.CHANGE_AUDIENCE_ROLE_IN_RESOURCE_PATCH_V2,
+    deleteAudience: API_ENDPOINTS.DELETE_RESOURCE_FROM_AUDIENCES_V2,
+  },
+} as const;

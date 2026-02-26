@@ -1,4 +1,5 @@
 import { useMemo } from 'react';
+import { API_ENDPOINTS } from 'apis/apiEndpoint.constants';
 import { useAppSelector } from 'hooks/toolkit';
 import { useGetAudiencesByResourceIdQuery } from '@/apis/collaboration';
 import { useGetTeamsByOrganizationIdQuery } from '@/apis/people';
@@ -25,6 +26,7 @@ const useAudienceMembers = (args: { resourceType: ResourceType; resourceId: stri
     error: errorAudiencesData,
   } = useGetAudiencesByResourceIdQuery(
     {
+      apiEndpoint: API_ENDPOINTS.RESOURCE_AUDIENCES_BY_RESOURCE_ID_GET,
       resourceRoute: resourceTypeRouteMap[args?.resourceType],
       resourceId: args?.resourceType === ResourceType.ORGANIZATION ? organizationId : args?.resourceId,
     },

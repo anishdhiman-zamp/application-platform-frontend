@@ -104,6 +104,7 @@ export const Integrations = baseApi.injectEndpoints({
     }),
     getIntegrationsCatalog: builder.query<IntegrationCatalogResponseType, IntegrationCatalogRequestType>({
       query: (params) => ({ url: API_ENDPOINTS.INTEGRATIONS_CATALOG_GET, params }),
+      providesTags: [APITags.INTEGRATIONS_CATALOG_GET],
     }),
     getIntegrationsCatalogEnabled: builder.query<IntegrationCatalogResponseType, IntegrationCatalogRequestType>({
       query: (params) => ({ url: API_ENDPOINTS.INTEGRATIONS_CATALOG_ENABLED_GET, params }),
@@ -118,13 +119,14 @@ export const Integrations = baseApi.injectEndpoints({
         method: REQUEST_TYPES.POST,
         body,
       }),
+      invalidatesTags: [APITags.INTEGRATIONS_CATALOG_GET, APITags.INTEGRATIONS_CATALOG_ENABLED_GET],
     }),
     deleteIntegrationConnection: builder.mutation<void, { connectionId: string }>({
       query: ({ connectionId }) => ({
         url: formRequestUrlWithParams(API_ENDPOINTS.INTEGRATIONS_CONNECTIONS_DELETE, { connectionId }),
         method: REQUEST_TYPES.DELETE,
       }),
-      invalidatesTags: [APITags.INTEGRATIONS_CATALOG_ENABLED_GET],
+      invalidatesTags: [APITags.INTEGRATIONS_CATALOG_GET, APITags.INTEGRATIONS_CATALOG_ENABLED_GET],
     }),
   }),
 });
@@ -136,6 +138,7 @@ export const {
   useGetConnectionsByIntegrationNameQuery,
   useLazyGetConnectionsByIntegrationNameQuery,
   useDeleteProcessConnectionMappingMutation,
+  useGetIntegrationsCatalogQuery,
   useLazyGetIntegrationsCatalogQuery,
   useAuthenticateIntegrationV2Mutation,
   useDeleteIntegrationConnectionMutation,

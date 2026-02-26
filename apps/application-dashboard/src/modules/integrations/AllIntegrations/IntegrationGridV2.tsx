@@ -15,13 +15,28 @@ const SectionTitle: FC<{ title: string }> = ({ title }) => (
 
 const IntegrationGridV2: FC = () => {
   const sentinelRef = useRef<HTMLDivElement>(null);
-  const { items, enabledItems, searchQuery, isFetching, hasMore, isInitialised, loadNextPage } =
-    useIntegrationsContext();
+  const {
+    items: availableItems,
+    enabledItems,
+    searchQuery,
+    isFetching,
+    hasMore,
+    isInitialised,
+    loadNextPage,
+  } = useIntegrationsContext();
 
   const isFetchingRef = useRef(isFetching);
+
+  const enabledNames = useMemo(() => new Set(enabledItems.map((item) => item.name)), [enabledItems]);
+
+  const filteredAvailableItems = useMemo(
+    () => availableItems.filter((item) => !enabledNames.has(item.name)),
+    [availableItems, enabledNames],
+  );
+
   const showEmptyState = useMemo(
-    () => isInitialised && !isFetching && !hasMore && items.length === 0,
-    [isInitialised, isFetching, hasMore, items.length],
+    () => isInitialised && !isFetching && !hasMore && filteredAvailableItems.length === 0,
+    [isInitialised, isFetching, hasMore, filteredAvailableItems.length],
   );
 
   isFetchingRef.current = isFetching;
@@ -53,7 +68,7 @@ const IntegrationGridV2: FC = () => {
           {enabledItems.length > 0 && (
             <div className={GRID_CLASSES}>
               {enabledItems.map((item) => (
-                <IntegrationCardV2 key={item.name} integrationItem={item} />
+                <IntegrationCardV2 key={item.name} integrationItem={item} enabled />
               ))}
             </div>
           )}
@@ -62,9 +77,9 @@ const IntegrationGridV2: FC = () => {
 
       <div className='flex flex-col gap-y-2.5'>
         <SectionTitle title='Available' />
-        {items.length > 0 && (
+        {filteredAvailableItems.length > 0 && (
           <div className={GRID_CLASSES}>
-            {items.map((item) => (
+            {filteredAvailableItems.map((item) => (
               <IntegrationCardV2 key={item.name} integrationItem={item} />
             ))}
           </div>
