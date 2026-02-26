@@ -7,8 +7,12 @@ import dynamic from 'next/dynamic';
 import ImageLoader from '@/components/common/loader/ImageLoader';
 import { ZAMP_LOGO_LOADER_SVG } from '@/constants/icons';
 import FileNotFoundError from '@/modules/pace/components/file-viewer/FileNotFoundError';
-import FileViewerHeader, { type MarkdownViewMode } from '@/modules/pace/components/file-viewer/FileViewerHeader';
+import FileViewerHeader, {
+  type HtmlViewMode,
+  type MarkdownViewMode,
+} from '@/modules/pace/components/file-viewer/FileViewerHeader';
 import AudioViewer from '@/modules/pace/components/file-viewer/viewers/AudioViewer';
+import HtmlPreviewViewer from '@/modules/pace/components/file-viewer/viewers/HtmlPreviewViewer';
 import ImageViewer from '@/modules/pace/components/file-viewer/viewers/ImageViewer';
 import { getMonacoLanguage } from '@/modules/pace/components/file-viewer/viewers/MonacoCodeEditor';
 import VideoViewer from '@/modules/pace/components/file-viewer/viewers/VideoViewer';
@@ -44,6 +48,7 @@ interface FileViewerContentProps {
   onContentChange: (content: string) => void;
   onClose: () => void;
   markdownViewMode?: MarkdownViewMode;
+  htmlViewMode?: HtmlViewMode;
 }
 
 const FileViewerContent = memo(
@@ -59,6 +64,7 @@ const FileViewerContent = memo(
     onContentChange,
     onClose,
     markdownViewMode = 'milkdown',
+    htmlViewMode = 'preview',
   }: FileViewerContentProps) => {
     const mediaUrl = getMediaUrl(filePath);
 
@@ -86,6 +92,13 @@ const FileViewerContent = memo(
 
         return <MilkdownEditor content={content || ''} onChange={onContentChange} />;
 
+      case FILE_CATEGORY.HTML:
+        if (htmlViewMode === 'code') {
+          return <MonacoCodeEditor content={content || ''} language='html' onChange={onContentChange} />;
+        }
+
+        return <HtmlPreviewViewer content={content || ''} />;
+
       case FILE_CATEGORY.CODE:
         return (
           <MonacoCodeEditor
@@ -111,6 +124,7 @@ interface FileViewerTabProps {
 
 const FileViewerTab = memo(({ filePath, isActive }: FileViewerTabProps) => {
   const [markdownViewMode, setMarkdownViewMode] = useState<MarkdownViewMode>('milkdown');
+  const [htmlViewMode, setHtmlViewMode] = useState<HtmlViewMode>('preview');
   const { closeTab } = useDynamicTabs();
 
   const handleSaveError = useCallback(() => {
@@ -134,6 +148,7 @@ const FileViewerTab = memo(({ filePath, isActive }: FileViewerTabProps) => {
 
   const fileName = filePath.split('/').pop() || filePath;
   const isMarkdown = fileCategory === FILE_CATEGORY.MARKDOWN;
+  const isHtml = fileCategory === FILE_CATEGORY.HTML;
 
   if (isError && isEditable) {
     return <FileNotFoundError fileName={fileName} onClose={handleCloseTab} />;
@@ -147,8 +162,11 @@ const FileViewerTab = memo(({ filePath, isActive }: FileViewerTabProps) => {
         isSaving={isSaving}
         lastSavedAt={lastSavedAt}
         isMarkdown={isMarkdown}
+        isHtml={isHtml}
         viewMode={markdownViewMode}
+        htmlViewMode={htmlViewMode}
         onViewModeChange={setMarkdownViewMode}
+        onHtmlViewModeChange={setHtmlViewMode}
       />
       <div className='min-h-0 flex-1 overflow-hidden'>
         <FileViewerContent
@@ -163,6 +181,7 @@ const FileViewerTab = memo(({ filePath, isActive }: FileViewerTabProps) => {
           onContentChange={updateContent}
           onClose={handleCloseTab}
           markdownViewMode={markdownViewMode}
+          htmlViewMode={htmlViewMode}
         />
       </div>
     </div>

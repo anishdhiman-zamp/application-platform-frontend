@@ -1,3 +1,14 @@
+// Vue feature flags required by @milkdown/crepe (must be set before Vue loads)
+// These flags enable tree-shaking in production builds
+declare global {
+  var __VUE_OPTIONS_API__: boolean;
+  var __VUE_PROD_DEVTOOLS__: boolean;
+  var __VUE_PROD_HYDRATION_MISMATCH_DETAILS__: boolean;
+}
+globalThis.__VUE_OPTIONS_API__ = true;
+globalThis.__VUE_PROD_DEVTOOLS__ = false;
+globalThis.__VUE_PROD_HYDRATION_MISMATCH_DETAILS__ = false;
+
 // This file configures the initialization of Sentry on the client.
 // The added config here will be used whenever a users loads a page in their browser.
 // https://docs.sentry.io/platforms/javascript/guides/nextjs/

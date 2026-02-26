@@ -2,7 +2,7 @@
 
 import { FileIcon, Input, Tabs, TabsList, TabsTrigger } from '@zamp-platform/ui';
 import { cn } from '@zamp-platform/ui/utils';
-import { Code, FileText } from 'lucide-react';
+import { Code, Eye, FileText } from 'lucide-react';
 import TooltipV2 from '@/components/common/TooltipV2';
 import FileSaveStatus from '@/modules/pace/components/file-viewer/FileSaveStatus';
 import FileViewerHeaderMenu from '@/modules/pace/components/file-viewer/FileViewerHeaderMenu';
@@ -13,6 +13,7 @@ import { useFileViewerHeaderRename } from '@/modules/pace/hooks/useFileViewerHea
 import { SIDE_OPTIONS } from '@/types/commonTypes';
 
 export type MarkdownViewMode = 'milkdown' | 'raw';
+export type HtmlViewMode = 'preview' | 'code';
 
 interface FileViewerHeaderProps {
   filePath: string;
@@ -21,8 +22,11 @@ interface FileViewerHeaderProps {
   lastSavedAt: number | null;
   className?: string;
   isMarkdown?: boolean;
+  isHtml?: boolean;
   viewMode?: MarkdownViewMode;
+  htmlViewMode?: HtmlViewMode;
   onViewModeChange?: (mode: MarkdownViewMode) => void;
+  onHtmlViewModeChange?: (mode: HtmlViewMode) => void;
 }
 
 const FileViewerHeader = ({
@@ -32,8 +36,11 @@ const FileViewerHeader = ({
   lastSavedAt,
   className = '',
   isMarkdown = false,
+  isHtml = false,
   viewMode = 'milkdown',
+  htmlViewMode = 'preview',
   onViewModeChange,
+  onHtmlViewModeChange,
 }: FileViewerHeaderProps) => {
   const extension = getFileExtension(fileName);
 
@@ -120,6 +127,18 @@ const FileViewerHeader = ({
                   <FileText size={14} />
                 </TabsTrigger>
                 <TabsTrigger value='raw' className='flex h-6 w-[26px] shrink-0 items-center justify-center p-1.5'>
+                  <Code size={14} />
+                </TabsTrigger>
+              </TabsList>
+            </Tabs>
+          )}
+          {isHtml && (
+            <Tabs value={htmlViewMode} onValueChange={(value) => onHtmlViewModeChange?.(value as HtmlViewMode)}>
+              <TabsList className='gap-x-1'>
+                <TabsTrigger value='preview' className='flex h-6 w-[26px] shrink-0 items-center justify-center p-1.5'>
+                  <Eye size={14} />
+                </TabsTrigger>
+                <TabsTrigger value='code' className='flex h-6 w-[26px] shrink-0 items-center justify-center p-1.5'>
                   <Code size={14} />
                 </TabsTrigger>
               </TabsList>

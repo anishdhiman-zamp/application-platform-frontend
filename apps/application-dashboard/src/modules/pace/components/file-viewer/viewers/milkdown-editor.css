@@ -36,12 +36,7 @@
   font-family: var(--crepe-font-default);
 }
 
-/* Editor content area styling */
-.milkdown-editor-wrapper .ProseMirror {
-  padding: 1.5rem;
-  min-height: 100%;
-  outline: none;
-}
+
 
 /* Headings use the title font */
 .milkdown-editor-wrapper h1,
@@ -95,6 +90,150 @@
 .milkdown-editor-wrapper milkdown-list-item-block,
 .milkdown-editor-wrapper milkdown-code-block {
   font-family: var(--crepe-font-default);
+}
+
+/* Text selection toolbar styling */
+.milkdown-editor-wrapper .milkdown-toolbar {
+  background: var(--GRAY_1000, #171717);
+  border-radius: 8px;
+  box-shadow: 0px 4px 12px rgba(0, 0, 0, 0.15);
+  padding: 2px;
+}
+
+.milkdown-editor-wrapper .milkdown-toolbar .toolbar-item {
+  width: 28px;
+  height: 28px;
+  margin: 4px;
+  padding: 4px;
+  border-radius: 4px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.milkdown-editor-wrapper .milkdown-toolbar .toolbar-item:hover {
+  background: var(--GRAY_900, #333333);
+}
+
+.milkdown-editor-wrapper .milkdown-toolbar .toolbar-item:active {
+  background: var(--GRAY_800, #444444);
+}
+
+.milkdown-editor-wrapper .milkdown-toolbar .toolbar-item svg {
+  color: var(--GRAY_300, #d4d4d4);
+  fill: var(--GRAY_300, #d4d4d4);
+}
+
+.milkdown-editor-wrapper .milkdown-toolbar .toolbar-item:hover svg {
+  color: var(--GRAY_100, #f2f2f2);
+  fill: var(--GRAY_100, #f2f2f2);
+}
+
+.milkdown-editor-wrapper .milkdown-toolbar .toolbar-item.active svg {
+  color: var(--BLUE_500, #5b7fff);
+  fill: var(--BLUE_500, #5b7fff);
+}
+
+.milkdown-editor-wrapper .milkdown-toolbar .divider {
+  background: var(--GRAY_800, #444444);
+  height: 20px;
+  margin: 8px 4px;
+}
+
+/* Slash menu (block type dropdown) - styled like shadcn dropdown */
+.milkdown-editor-wrapper .milkdown-slash-menu {
+  background: white;
+  border: 1px solid var(--GRAY_400, #e5e5e5);
+  border-radius: 6px;
+  box-shadow: 0px 4px 6px -1px rgba(0, 0, 0, 0.1), 0px 2px 4px -1px rgba(0, 0, 0, 0.06);
+  padding: 4px;
+  min-width: 180px;
+}
+
+/* Tab group (Text, List, Advanced tabs) */
+.milkdown-editor-wrapper .milkdown-slash-menu .tab-group {
+  border-bottom: 1px solid var(--GRAY_300, #e5e5e5);
+  padding: 4px 4px 0;
+  margin-bottom: 4px;
+}
+
+.milkdown-editor-wrapper .milkdown-slash-menu .tab-group ul {
+  padding: 0;
+  gap: 4px;
+}
+
+.milkdown-editor-wrapper .milkdown-slash-menu .tab-group ul li {
+  font-size: 12px;
+  font-weight: 500;
+  padding: 6px 12px;
+  color: var(--GRAY_700, #666666);
+  border-radius: 4px;
+  margin-bottom: 4px;
+}
+
+.milkdown-editor-wrapper .milkdown-slash-menu .tab-group ul li:hover {
+  background: var(--GRAY_100, #f5f5f5);
+  color: var(--GRAY_900, #171717);
+}
+
+.milkdown-editor-wrapper .milkdown-slash-menu .tab-group ul li.selected {
+  background: var(--GRAY_200, #ebebeb);
+  color: var(--GRAY_1000, #171717);
+}
+
+/* Menu groups container */
+.milkdown-editor-wrapper .milkdown-slash-menu .menu-groups {
+  padding: 0;
+  max-height: 320px;
+}
+
+/* Group header (TEXT, etc.) */
+.milkdown-editor-wrapper .milkdown-slash-menu .menu-groups .menu-group h6 {
+  font-size: 11px;
+  font-weight: 500;
+  padding: 8px 10px 4px;
+  color: var(--GRAY_600, #a3a3a3);
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+}
+
+/* Menu items */
+.milkdown-editor-wrapper .milkdown-slash-menu .menu-groups .menu-group li {
+  min-width: unset;
+  gap: 10px;
+  padding: 8px 10px;
+  border-radius: 4px;
+  margin: 0 4px;
+}
+
+.milkdown-editor-wrapper .milkdown-slash-menu .menu-groups .menu-group li:hover,
+.milkdown-editor-wrapper .milkdown-slash-menu .menu-groups .menu-group li.hover {
+  background: var(--GRAY_100, #f5f5f5);
+}
+
+.milkdown-editor-wrapper .milkdown-slash-menu .menu-groups .menu-group li.active {
+  background: var(--GRAY_200, #ebebeb);
+}
+
+/* Menu item icons */
+.milkdown-editor-wrapper .milkdown-slash-menu .menu-groups .menu-group li svg {
+  width: 18px;
+  height: 18px;
+  color: var(--GRAY_600, #737373);
+  fill: var(--GRAY_600, #737373);
+}
+
+/* Menu item text */
+.milkdown-editor-wrapper .milkdown-slash-menu .menu-groups .menu-group li > span {
+  font-size: 12px;
+  font-weight: 500;
+  color: var(--GRAY_900, #171717);
+}
+
+/* Separator between groups */
+.milkdown-editor-wrapper .milkdown-slash-menu .menu-groups .menu-group + .menu-group::before {
+  background: var(--GRAY_300, #e5e5e5);
+  margin: 4px 14px;
 }
 
 /* Table styling */

@@ -97,6 +97,7 @@ export const FILE_CATEGORY = {
   VIDEO: 'video',
   PDF: 'pdf',
   MARKDOWN: 'markdown',
+  HTML: 'html',
   CODE: 'code',
   UNKNOWN: 'unknown',
 } as const;
@@ -112,6 +113,8 @@ export const VIDEO_EXTENSIONS = ['mp4', 'mov', 'avi', 'mkv', 'webm', 'wmv', 'flv
 export const PDF_EXTENSIONS = ['pdf'] as const;
 
 export const MARKDOWN_EXTENSIONS = ['md', 'mdx'] as const;
+
+export const HTML_EXTENSIONS = ['html', 'htm', 'xhtml', 'shtml'] as const;
 
 export const EXTENSION_TO_MONACO_LANGUAGE: Record<string, string> = {
   // Web - JavaScript/TypeScript
