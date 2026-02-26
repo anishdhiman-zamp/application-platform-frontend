@@ -1,6 +1,6 @@
 import { useCallback } from 'react';
-import { resourceTypeRouteMap } from 'modules/shareResource/shareResource.constants';
-import { ResourceType } from 'modules/shareResource/shareResource.types';
+import { RESOURCE_COLLABORATION_ENDPOINTS, resourceTypeRouteMap } from 'modules/shareResource/shareResource.constants';
+import { ResourceType, ShareResourceVersion } from 'modules/shareResource/shareResource.types';
 import { useGetAudiencesByResourceIdQuery } from '@/apis/collaboration';
 import { useGetTeamsByOrganizationIdQuery } from '@/apis/people';
 import { useAppSelector } from '@/hooks/toolkit';
@@ -13,6 +13,7 @@ type UseResourceAccessProps = {
   resourceId?: string;
   skipAudienceData?: boolean;
   skipTeamsData?: boolean;
+  version?: ShareResourceVersion;
 };
 
 const checkPrivilege = (
@@ -53,13 +54,14 @@ export const useResourceAccess = ({
   resourceId = '',
   skipAudienceData = true,
   skipTeamsData = true,
+  version = ShareResourceVersion.V1,
 }: UseResourceAccessProps) => {
   const { user } = useAppSelector((state: RootState) => state.user);
-
-  const organizationId = user?.orgs?.[0]?.organization_id ?? '';
   const userId = user?.user_id ?? '';
+  const organizationId = user?.orgs?.[0]?.organization_id ?? '';
   const effectiveResourceId = resourceType === ResourceType.PAYMENTS ? '' : (resourceId ?? '');
   const shouldSkipAudiencesQuery = resourceType === ResourceType.PAYMENTS ? false : effectiveResourceId === '';
+  const collaborationEndpoints = RESOURCE_COLLABORATION_ENDPOINTS[version];
 
   // get existing audiences for the resource
   const {
@@ -68,7 +70,11 @@ export const useResourceAccess = ({
     refetch,
     isUninitialized,
   } = useGetAudiencesByResourceIdQuery(
-    { resourceRoute: resourceTypeRouteMap[resourceType], resourceId },
+    {
+      apiEndpoint: collaborationEndpoints.getAudiences,
+      resourceRoute: resourceTypeRouteMap[resourceType],
+      resourceId,
+    },
     { skip: shouldSkipAudiencesQuery || skipAudienceData, refetchOnMountOrArgChange: false },
   );
 
