@@ -11,7 +11,11 @@ interface SingleFileUploadProgressContentProps {
 const SingleFileUploadProgressContent = ({ progress }: SingleFileUploadProgressContentProps) => {
   return (
     <div className='flex w-full flex-col gap-y-2'>
-      <ShimmerText text={progress.fileName} baseTextClassName='f-13-500 text-GRAY_1000 max-w-[240px] truncate' />
+      <ShimmerText
+        text={progress.fileName}
+        className='block max-w-[240px]'
+        baseTextClassName='f-13-500 text-GRAY_1000 truncate'
+      />
 
       <div className='mt-1'>
         <div className='flex items-center gap-2'>

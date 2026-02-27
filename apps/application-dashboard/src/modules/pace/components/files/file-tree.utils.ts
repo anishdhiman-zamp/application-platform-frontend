@@ -19,6 +19,7 @@ import {
   FILE_CATEGORY,
   FILE_TYPE_LABELS,
   type FileCategory,
+  HTML_EXTENSIONS,
   IMAGE_EXTENSIONS,
   MARKDOWN_EXTENSIONS,
   MONACO_EDITABLE_EXTENSIONS,
@@ -177,6 +178,10 @@ export function getFileCategory(filename: string): FileCategory {
     return FILE_CATEGORY.MARKDOWN;
   }
 
+  if ((HTML_EXTENSIONS as readonly string[]).includes(ext)) {
+    return FILE_CATEGORY.HTML;
+  }
+
   if ((MONACO_EDITABLE_EXTENSIONS as readonly string[]).includes(ext)) {
     return FILE_CATEGORY.CODE;
   }
@@ -190,7 +195,7 @@ export function getFileCategory(filename: string): FileCategory {
 export function isFileEditable(filename: string): boolean {
   const category = getFileCategory(filename);
 
-  return category === FILE_CATEGORY.CODE || category === FILE_CATEGORY.MARKDOWN;
+  return category === FILE_CATEGORY.CODE || category === FILE_CATEGORY.MARKDOWN || category === FILE_CATEGORY.HTML;
 }
 
 /**
