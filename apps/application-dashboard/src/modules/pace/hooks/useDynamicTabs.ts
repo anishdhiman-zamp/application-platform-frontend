@@ -41,25 +41,36 @@ export const useDynamicTabs = (): UseDynamicTabsReturn => {
   } = usePaceContext();
   const { removeFileState, updateFileStatePath, updateFileStatePathsForFolder } = useFileViewerContext();
 
+  const tabMaps = useMemo(() => {
+    const byId = new Map<string, DynamicTab>();
+    const byStableKey = new Map<string, DynamicTab>();
+
+    for (const tab of tabs) {
+      byId.set(tab.id, tab);
+      byStableKey.set(tab.stableKey, tab);
+    }
+
+    return { byId, byStableKey };
+  }, [tabs]);
+
   const activeTab = useMemo(() => {
     if (!isHydrated) return null;
 
-    // First, try to match by URL param
     if (currentFileParam) {
-      const matchedTab = tabs.find((tab) => tab.id === currentFileParam);
+      const matchedTab = tabMaps.byId.get(currentFileParam);
 
       if (matchedTab) {
         return matchedTab;
       }
     }
 
-    // During rename/move transition, use pending stableKey to maintain active state
+    // During rename/move transition, use pending stableKey to maintain active state - O(1) lookup
     if (pendingActiveStableKey) {
-      return tabs.find((tab) => tab.stableKey === pendingActiveStableKey) ?? null;
+      return tabMaps.byStableKey.get(pendingActiveStableKey) ?? null;
     }
 
     return null;
-  }, [tabs, currentFileParam, isHydrated, pendingActiveStableKey]);
+  }, [tabMaps, currentFileParam, isHydrated, pendingActiveStableKey]);
 
   const isTabActive = useCallback(
     (tab: DynamicTab) => {
@@ -71,14 +82,14 @@ export const useDynamicTabs = (): UseDynamicTabsReturn => {
   );
 
   const isOnAnyDynamicTab = useCallback(() => {
-    return currentFileParam !== null && tabs.some((tab) => tab.id === currentFileParam);
-  }, [tabs, currentFileParam]);
+    return currentFileParam !== null && tabMaps.byId.has(currentFileParam);
+  }, [tabMaps, currentFileParam]);
 
   const getTabByPath = useCallback(
     (path: string) => {
-      return tabs.find((tab) => tab.id === path);
+      return tabMaps.byId.get(path);
     },
-    [tabs],
+    [tabMaps],
   );
 
   const hasOpenTabs = useCallback(() => {

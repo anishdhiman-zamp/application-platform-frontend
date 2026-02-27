@@ -18,7 +18,6 @@ import { getMonacoLanguage } from '@/modules/pace/components/file-viewer/viewers
 import VideoViewer from '@/modules/pace/components/file-viewer/viewers/VideoViewer';
 import { getMediaUrl } from '@/modules/pace/components/files/file-tree.utils';
 import { FILE_CATEGORY, FILE_TOAST_MESSAGES, type FileCategory } from '@/modules/pace/components/files/files.constants';
-import { useDynamicTabs } from '@/modules/pace/hooks/useDynamicTabs';
 import useFileViewer from '@/modules/pace/hooks/useFileViewer';
 import { defaultFnType } from '@/types/commonTypes';
 
@@ -121,12 +120,12 @@ FileViewerContent.displayName = 'FileViewerContent';
 interface FileViewerTabProps {
   filePath: string;
   isActive: boolean;
+  onCloseTab: (e: React.MouseEvent, id: string) => void;
 }
 
-const FileViewerTab = memo(({ filePath, isActive }: FileViewerTabProps) => {
+const FileViewerTab = memo(({ filePath, isActive, onCloseTab }: FileViewerTabProps) => {
   const [markdownViewMode, setMarkdownViewMode] = useState<MarkdownViewMode>('milkdown');
   const [htmlViewMode, setHtmlViewMode] = useState<HtmlViewMode>('preview');
-  const { closeTab } = useDynamicTabs();
 
   const handleSaveError = useCallback(() => {
     toast.error(FILE_TOAST_MESSAGES.FAILED_TO_SAVE_FILE);
@@ -136,9 +135,9 @@ const FileViewerTab = memo(({ filePath, isActive }: FileViewerTabProps) => {
     (e?: React.MouseEvent) => {
       const syntheticEvent = e ?? ({ preventDefault: () => {}, stopPropagation: () => {} } as React.MouseEvent);
 
-      closeTab(syntheticEvent, filePath);
+      onCloseTab(syntheticEvent, filePath);
     },
-    [closeTab, filePath],
+    [onCloseTab, filePath],
   );
 
   const { content, isLoading, isError, fileCategory, fileExtension, isEditable, updateContent, isSaving, lastSavedAt } =

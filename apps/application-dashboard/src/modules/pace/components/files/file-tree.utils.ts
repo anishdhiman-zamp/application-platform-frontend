@@ -83,6 +83,20 @@ export function getMediaUrl(filePath: string): string {
 }
 
 /**
+ * Checks if an image is already cached in the browser.
+ * Used to prevent loading flash when switching to already-loaded images.
+ */
+export function isImageCached(src: string): boolean {
+  if (typeof window === 'undefined') return false;
+
+  const img = new window.Image();
+
+  img.src = src;
+
+  return img.complete && img.naturalWidth > 0;
+}
+
+/**
  * Gets the file extension from a filename
  */
 export function getFileExtension(filename: string): string {
