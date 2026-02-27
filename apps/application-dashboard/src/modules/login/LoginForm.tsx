@@ -477,7 +477,7 @@ export const LoginForm = () => {
                 inputClassName={cn(
                   'w-full rounded-xl border bg-white px-3.5 py-3 text-sm text-GRAY_1000 transition-all duration-250 outline-none placeholder:text-GRAY_500',
                   error
-                    ? 'border-RED_600 shadow-[0_0_0_3px_rgba(220,38,38,0.08)] focus:border-red-600 focus:shadow-[0_0_0_3px_rgba(220,38,38,0.12)]'
+                    ? 'border-RED_600 shadow-[0_0_0_3px_rgba(220,38,38,0.08)] focus:border-RED_600 focus:shadow-[0_0_0_3px_rgba(220,38,38,0.12)]'
                     : 'border-black/10 focus:border-black/25 focus:shadow-[0_0_0_3px_rgba(0,0,0,0.04)]',
                 )}
                 focusClassNames=''
