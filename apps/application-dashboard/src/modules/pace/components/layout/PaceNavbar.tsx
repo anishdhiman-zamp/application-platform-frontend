@@ -16,15 +16,17 @@ import { cn } from '@zamp-platform/ui/utils';
 import DynamicTabItem from 'modules/pace/components/layout/DynamicTabItem';
 import { PaceNavbarItemId } from 'modules/pace/pace.types';
 import Link from 'next/link';
-import { usePathname } from 'next/navigation';
+import { usePathname, useSearchParams } from 'next/navigation';
 import { useIsMacsFileSystemEnabled } from '@/hooks/useIsMacsFileSystemEnabled';
 import SortableDynamicTabItem from '@/modules/pace/components/layout/SortableDynamicTabItem';
 import { useDynamicTabs } from '@/modules/pace/hooks/useDynamicTabs';
 import { PACE_NAVBAR_ITEMS } from '@/modules/pace/pace.constants';
 import { usePaceContext } from '@/modules/pace/pace.context';
+import { normalizeUrlPath } from '@/modules/pace/pace.utils';
 
 const PaceNavbar = () => {
   const pathname = usePathname();
+  const searchParams = useSearchParams();
   const { setIsPaceSidebarOpen, startNewChat } = usePaceContext();
   const { tabs, isTabActive, isOnAnyDynamicTab, closeTab, reorderTabs } = useDynamicTabs();
   const { isMacsFileSystemEnabled } = useIsMacsFileSystemEnabled();
@@ -79,7 +81,16 @@ const PaceNavbar = () => {
     return pathname?.includes(path) ?? false;
   };
 
-  const handleNavItemClick = (id: PaceNavbarItemId) => {
+  const handleNavItemClick = (e: React.MouseEvent<HTMLAnchorElement>, id: PaceNavbarItemId, path: string) => {
+    const queryString = searchParams?.toString();
+    const currentFullPath = pathname + (queryString ? `?${queryString}` : '');
+
+    if (normalizeUrlPath(path) === normalizeUrlPath(currentFullPath)) {
+      e.preventDefault();
+
+      return;
+    }
+
     if (id === PaceNavbarItemId.HOME) {
       setIsPaceSidebarOpen(false);
       startNewChat();
@@ -101,7 +112,7 @@ const PaceNavbar = () => {
             )}
             role='button'
             tabIndex={0}
-            onClick={() => handleNavItemClick(item.id)}
+            onClick={(e) => handleNavItemClick(e, item.id, item.path)}
           >
             {item.iconComponent}
           </Link>

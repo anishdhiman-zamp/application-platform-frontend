@@ -5,6 +5,9 @@ const IDB_NAME = 'zamp-sw-store';
 const IDB_STORE = 'config';
 const ORG_ID_KEY = 'X-Zamp-Organization-Id';
 
+// In-memory cache for organizationId to avoid IndexedDB reads on every request
+let cachedOrganizationId = null;
+
 const CACHE_PATTERNS = [
   /^\/_next\/static\//, // Next.js static files
   /^\/_next\/image\//, // Optimized images
@@ -34,43 +37,70 @@ function openDB() {
 }
 
 async function getOrganizationId() {
+  // Return cached value if available
+  if (cachedOrganizationId !== null) {
+    return cachedOrganizationId;
+  }
+
+  let db;
+
   try {
-    const db = await openDB();
+    db = await openDB();
 
     return new Promise((resolve) => {
       const transaction = db.transaction(IDB_STORE, 'readonly');
       const store = transaction.objectStore(IDB_STORE);
       const request = store.get(ORG_ID_KEY);
 
-      request.onsuccess = () => resolve(request.result || '');
-      request.onerror = () => resolve('');
+      request.onsuccess = () => {
+        cachedOrganizationId = request.result || '';
+        db.close();
+        resolve(cachedOrganizationId);
+      };
+      request.onerror = () => {
+        db.close();
+        resolve('');
+      };
     });
   } catch {
+    db?.close();
+
     return '';
   }
 }
 
 async function setOrganizationId(orgId) {
+  let db;
+
   try {
-    const db = await openDB();
+    db = await openDB();
 
     return new Promise((resolve, reject) => {
       const transaction = db.transaction(IDB_STORE, 'readwrite');
       const store = transaction.objectStore(IDB_STORE);
       const request = store.put(orgId, ORG_ID_KEY);
 
-      request.onsuccess = () => resolve();
-      request.onerror = () => reject(request.error);
+      request.onsuccess = () => {
+        db.close();
+        resolve();
+      };
+      request.onerror = () => {
+        db.close();
+        reject(request.error);
+      };
     });
   } catch {
-    // Silently fail
+    db?.close();
   }
 }
 
 // Listen for messages from the main thread to update org ID in IndexedDB
 self.addEventListener('message', (event) => {
   if (event.data && event.data.type === 'SET_ORGANIZATION_ID') {
-    setOrganizationId(event.data.organizationId || '');
+    const orgId = event.data.organizationId || '';
+
+    cachedOrganizationId = orgId; // Update in-memory cache immediately
+    setOrganizationId(orgId); // Persist to IndexedDB
   }
 });
 
@@ -78,9 +108,15 @@ self.addEventListener('message', (event) => {
 function isFileApiRequest(url) {
   try {
     const urlObj = new URL(url);
+    const hostname = urlObj.hostname;
 
-    // Match /files/ path on API domains (e.g., api-dev.zamp.ai, api.zamp.ai)
-    return urlObj.hostname.includes('zamp.ai') && urlObj.pathname.startsWith('/files/');
+    // Match /files/ path on API domains:
+    // - Production: api.zamp.ai, api-dev.zamp.ai
+    // - Staging: api-stg.zamp.ai
+    // - Codern: api-coder.zamp.dev
+    const isZampDomain = hostname.includes('zamp.ai') || hostname.includes('zamp.dev');
+
+    return isZampDomain && urlObj.pathname.startsWith('/files/');
   } catch {
     return false;
   }

@@ -28,19 +28,27 @@ function openDB(): Promise<IDBDatabase> {
  * Stores the organization ID in IndexedDB for the service worker to access.
  */
 async function setOrganizationIdInIDB(orgId: string): Promise<void> {
+  let db: IDBDatabase | undefined;
+
   try {
-    const db = await openDB();
+    db = await openDB();
 
     return new Promise((resolve, reject) => {
-      const transaction = db.transaction(IDB_STORE, 'readwrite');
+      const transaction = db!.transaction(IDB_STORE, 'readwrite');
       const store = transaction.objectStore(IDB_STORE);
       const request = store.put(orgId, ORG_ID_KEY);
 
-      request.onsuccess = () => resolve();
-      request.onerror = () => reject(request.error);
+      request.onsuccess = () => {
+        db!.close();
+        resolve();
+      };
+      request.onerror = () => {
+        db!.close();
+        reject(request.error);
+      };
     });
   } catch {
-    // Silently fail - service worker will fall back to postMessage
+    db?.close();
   }
 }
 
