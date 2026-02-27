@@ -41,17 +41,6 @@ export const useDynamicTabs = (): UseDynamicTabsReturn => {
   } = usePaceContext();
   const { removeFileState, updateFileStatePath, updateFileStatePathsForFolder } = useFileViewerContext();
 
-  // Clear pending key once URL matches a tab
-  useEffect(() => {
-    if (pendingActiveStableKey && currentFileParam) {
-      const matchedTab = tabs.find((tab) => tab.id === currentFileParam);
-
-      if (matchedTab) {
-        setPendingActiveStableKey(null);
-      }
-    }
-  }, [currentFileParam, tabs, pendingActiveStableKey, setPendingActiveStableKey]);
-
   const activeTab = useMemo(() => {
     if (!isHydrated) return null;
 
@@ -242,6 +231,17 @@ export const useDynamicTabs = (): UseDynamicTabsReturn => {
     },
     [reorderDynamicTabs],
   );
+
+  // Clear pending key once URL matches a tab
+  useEffect(() => {
+    if (pendingActiveStableKey && currentFileParam) {
+      const matchedTab = tabs.find((tab) => tab.id === currentFileParam);
+
+      if (matchedTab) {
+        setPendingActiveStableKey(null);
+      }
+    }
+  }, [currentFileParam, tabs, pendingActiveStableKey, setPendingActiveStableKey]);
 
   return {
     tabs,
