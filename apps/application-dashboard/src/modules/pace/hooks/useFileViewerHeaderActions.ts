@@ -1,10 +1,10 @@
 import { useCallback, useState } from 'react';
 import { captureException } from '@sentry/browser';
 import { toast } from '@zamp-platform/ui';
-import { getMediaUrl } from '@/modules/pace/components/files/file-tree.utils';
 import { FILE_TOAST_MESSAGES, FILE_VIEWER_HEADER_ACTION_IDS } from '@/modules/pace/components/files/files.constants';
 import { useDynamicTabs } from '@/modules/pace/hooks/useDynamicTabs';
 import { useFileActions } from '@/modules/pace/hooks/useFileActions';
+import { useFileDownload } from '@/modules/pace/hooks/useFileDownload';
 
 interface UseFileViewerHeaderActionsProps {
   filePath: string;
@@ -28,17 +28,14 @@ export const useFileViewerHeaderActions = ({
   const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState(false);
   const { deleteItem, isDeleting } = useFileActions();
   const { closeTabsForPath } = useDynamicTabs();
+  const { downloadFile } = useFileDownload();
 
-  const handleDownload = useCallback(() => {
-    const downloadUrl = getMediaUrl(filePath);
-    const link = document.createElement('a');
-
-    link.href = downloadUrl;
-    link.download = fileName;
-    document.body.appendChild(link);
-    link.click();
-    document.body.removeChild(link);
-  }, [filePath, fileName]);
+  const handleDownload = useCallback(async () => {
+    await downloadFile({
+      path: filePath,
+      fileName,
+    });
+  }, [filePath, fileName, downloadFile]);
 
   const handleDeleteConfirm = useCallback(async () => {
     try {
@@ -60,7 +57,7 @@ export const useFileViewerHeaderActions = ({
     async (actionId: string) => {
       switch (actionId) {
         case FILE_VIEWER_HEADER_ACTION_IDS.DOWNLOAD:
-          handleDownload();
+          await handleDownload();
           break;
         case FILE_VIEWER_HEADER_ACTION_IDS.DELETE:
           setIsDeleteDialogOpen(true);

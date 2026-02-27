@@ -306,7 +306,7 @@ export const LoginForm = () => {
   const getSubmitButtonContent = () => {
     if (loadingAction === LOADING_ACTION.SSO && providerLogo && logoLoaded) {
       return (
-        <span>
+        <span className='flex items-center gap-2 whitespace-nowrap'>
           Signing in with
           <ImageWithFallback src={providerLogo} alt='provider' className='h-5 max-w-10 object-contain' />
         </span>

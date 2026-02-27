@@ -12,11 +12,11 @@ import {
 import {
   buildFullPath,
   executeMoveOrCopy,
-  getMediaUrl,
   validatePasteOperation,
 } from '@/modules/pace/components/files/file-tree.utils';
 import { CONTEXT_MENU_ACTION_IDS, FILE_TOAST_MESSAGES } from '@/modules/pace/components/files/files.constants';
 import { useDynamicTabs } from '@/modules/pace/hooks/useDynamicTabs';
+import { useFileDownload } from '@/modules/pace/hooks/useFileDownload';
 import { useFileTreeContext } from '@/modules/pace/hooks/useFileTreeContext';
 
 interface UseFileTreeNodeActionsProps {
@@ -66,6 +66,7 @@ export const useFileTreeNodeActions = ({
   const [isDeleting, setIsDeleting] = useState(false);
 
   const { openTab, closeTabsForPath, updateTab, updateTabsForFolderMove } = useDynamicTabs();
+  const { downloadFile } = useFileDownload();
   const {
     createFile,
     createFolder,
@@ -179,14 +180,13 @@ export const useFileTreeNodeActions = ({
           break;
         }
         case CONTEXT_MENU_ACTION_IDS.DOWNLOAD: {
-          const downloadUrl = getMediaUrl(node.path);
-          const link = document.createElement('a');
+          const isFolder = node.type === FILE_TYPE.DIRECTORY;
+          const fileName = isFolder ? `${node.name}.zip` : node.name;
 
-          link.href = downloadUrl;
-          link.download = node.name;
-          document.body.appendChild(link);
-          link.click();
-          document.body.removeChild(link);
+          await downloadFile({
+            path: node.path,
+            fileName,
+          });
           break;
         }
         case 'upload-file':
