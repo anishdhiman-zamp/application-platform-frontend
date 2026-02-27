@@ -20,13 +20,18 @@ interface ProgressInfo {
 
 interface UseFileDownloadReturn {
   downloadFile: (options: DownloadOptions) => Promise<void>;
-  isDownloading: boolean;
+  activeDownloads: number;
 }
 
 interface DownloadWithProgressOptions {
   path: string;
   onProgress: (info: ProgressInfo) => void;
   onAbort: (abortFn: () => void) => void;
+}
+
+interface ActiveDownload {
+  toastId: string | number;
+  abort: () => void;
 }
 
 /**
@@ -86,52 +91,52 @@ const triggerBrowserDownload = (blob: Blob, fileName: string): void => {
   URL.revokeObjectURL(url);
 };
 
-/**
- * Shows the download progress toast with the styled component
- */
-const showProgressToast = (
-  toastIdRef: React.MutableRefObject<string | number | null>,
-  progress: DownloadProgress,
-  onCancel?: () => void,
-) => {
-  const content = <DownloadProgressToastContent progress={progress} onCancel={onCancel} />;
-  const options = { duration: Infinity, closeButton: false };
-
-  if (toastIdRef.current) {
-    toast(content, { ...options, id: toastIdRef.current });
-  } else {
-    toastIdRef.current = toast(content, options);
-  }
-};
+let downloadCounter = 0;
+const generateDownloadId = (): string => `${Date.now()}-${++downloadCounter}`;
 
 export const useFileDownload = (): UseFileDownloadReturn => {
-  const isDownloadingRef = useRef(false);
-  const toastIdRef = useRef<string | number | null>(null);
-  const abortRef = useRef<(() => void) | null>(null);
+  const activeDownloadsRef = useRef<Map<string, ActiveDownload>>(new Map());
 
-  const dismissToast = useCallback(() => {
-    if (toastIdRef.current) {
-      toast.dismiss(toastIdRef.current);
-      toastIdRef.current = null;
+  const showProgressToast = useCallback((downloadId: string, progress: DownloadProgress, onCancel: () => void) => {
+    const content = <DownloadProgressToastContent progress={progress} onCancel={onCancel} />;
+    const options = { duration: Infinity, closeButton: false };
+
+    const existing = activeDownloadsRef.current.get(downloadId);
+
+    if (existing) {
+      toast(content, { ...options, id: existing.toastId });
+    } else {
+      const toastId = toast(content, options);
+
+      activeDownloadsRef.current.set(downloadId, {
+        toastId,
+        abort: () => {},
+      });
     }
   }, []);
 
-  const handleCancel = useCallback(() => {
-    abortRef.current?.();
-    dismissToast();
-  }, [dismissToast]);
+  const dismissToast = useCallback((downloadId: string) => {
+    const download = activeDownloadsRef.current.get(downloadId);
+
+    if (download) {
+      toast.dismiss(download.toastId);
+      activeDownloadsRef.current.delete(downloadId);
+    }
+  }, []);
 
   const downloadFile = useCallback(
     async ({ path, fileName }: DownloadOptions) => {
-      if (isDownloadingRef.current) {
-        return;
-      }
+      const downloadId = generateDownloadId();
 
-      isDownloadingRef.current = true;
+      const handleCancel = () => {
+        const download = activeDownloadsRef.current.get(downloadId);
 
-      // Show initializing toast immediately
+        download?.abort();
+        dismissToast(downloadId);
+      };
+
       showProgressToast(
-        toastIdRef,
+        downloadId,
         {
           fileName,
           loaded: 0,
@@ -147,7 +152,7 @@ export const useFileDownload = (): UseFileDownloadReturn => {
           path,
           onProgress: (info) => {
             showProgressToast(
-              toastIdRef,
+              downloadId,
               {
                 fileName,
                 loaded: info.loaded,
@@ -158,31 +163,32 @@ export const useFileDownload = (): UseFileDownloadReturn => {
             );
           },
           onAbort: (abortFn) => {
-            abortRef.current = abortFn;
+            const download = activeDownloadsRef.current.get(downloadId);
+
+            if (download) {
+              download.abort = abortFn;
+            }
           },
         });
 
-        dismissToast();
+        dismissToast(downloadId);
         triggerBrowserDownload(blob, fileName);
         toast.success(`${fileName} downloaded successfully`);
       } catch (error) {
         captureException(error);
-        dismissToast();
+        dismissToast(downloadId);
         const errorMessage = error instanceof Error ? error.message : 'Unknown error';
 
         if (errorMessage !== 'Download was cancelled') {
           toast.error(`Failed to download ${fileName}: ${errorMessage}`);
         }
-      } finally {
-        isDownloadingRef.current = false;
-        abortRef.current = null;
       }
     },
-    [dismissToast, handleCancel],
+    [dismissToast, showProgressToast],
   );
 
   return {
     downloadFile,
-    isDownloading: isDownloadingRef.current,
+    activeDownloads: activeDownloadsRef.current.size,
   };
 };
