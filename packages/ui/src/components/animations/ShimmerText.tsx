@@ -17,6 +17,7 @@ import { COLORS } from '../../constants/constants';
 interface ShimmerTextProps {
   text: string;
   shimmerControlRef?: React.RefObject<(() => void) | null>; // for animation callback
+  className?: string; // wrapper className
   shimmerTextClassName?: string;
   baseTextClassName?: string;
   baseColor?: string; // base text color
@@ -28,6 +29,7 @@ interface ShimmerTextProps {
 export const ShimmerText: FC<ShimmerTextProps> = ({
   text,
   shimmerControlRef,
+  className,
   shimmerTextClassName,
   baseTextClassName,
   baseColor = COLORS.GRAY_450,
@@ -83,8 +85,10 @@ export const ShimmerText: FC<ShimmerTextProps> = ({
     }
   }, [shimmerControlRef, autoAnimate, animationDuration, startAnimation]);
 
+  const shouldTruncate = baseTextClassName?.includes('truncate');
+
   return (
-    <div className='relative inline-block leading-none'>
+    <div className={cn('relative inline-block leading-none', shouldTruncate && 'overflow-hidden', className)}>
       {/* font-size and leading should be same, eg. f-13-450 and leading-[13px] */}
       <span className={cn('f-13-450 block leading-[13px]', baseTextClassName)} style={{ color: baseColor }}>
         {text}
@@ -94,6 +98,7 @@ export const ShimmerText: FC<ShimmerTextProps> = ({
         aria-hidden='true'
         className={cn(
           'f-13-450 pointer-events-none absolute top-0 left-0 bg-clip-text leading-[13px] text-transparent',
+          shouldTruncate && 'inset-0 block truncate',
           shimmerTextClassName,
         )}
         style={{

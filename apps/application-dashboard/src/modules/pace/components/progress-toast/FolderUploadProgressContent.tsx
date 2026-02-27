@@ -23,7 +23,11 @@ const FolderUploadProgressContent = ({ folderProgress, currentFile }: FolderUplo
       </div>
 
       {currentFile && (
-        <ShimmerText text={currentFile.fileName} baseTextClassName='f-13-500 text-GRAY_1000 max-w-[240px] truncate' />
+        <ShimmerText
+          text={currentFile.fileName}
+          className='block max-w-[240px]'
+          baseTextClassName='f-13-500 text-GRAY_1000 truncate'
+        />
       )}
 
       <div className='mt-1'>

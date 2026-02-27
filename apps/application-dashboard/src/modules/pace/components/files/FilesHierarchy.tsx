@@ -43,9 +43,7 @@ const FilesHierarchy = ({
     isLoading: isLoadingFiles,
     isError: isErrorFiles,
     refetch: refetchFiles,
-  } = useListFilesQuery({
-    recursive: true,
-  });
+  } = useListFilesQuery({ depth: -1 }, { refetchOnMountOrArgChange: false });
 
   const filesWithUploading = useMemo(() => {
     const fileList = files?.files ?? [];

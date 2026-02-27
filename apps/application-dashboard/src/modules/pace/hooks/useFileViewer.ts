@@ -33,6 +33,7 @@ interface UseFileViewerReturn {
 export const useFileViewer = ({ filePath, onSaveSuccess, onSaveError }: UseFileViewerOptions): UseFileViewerReturn => {
   const autoSaveTimerRef = useRef<NodeJS.Timeout | null>(null);
   const isSavingRef = useRef(false);
+  const pendingSaveRef = useRef(false);
 
   const { getFileState, initFileState, updateFileContent, markFileSaved } = useFileViewerContext();
 
@@ -55,23 +56,34 @@ export const useFileViewer = ({ filePath, onSaveSuccess, onSaveError }: UseFileV
   }, [filePath]);
 
   const isEditable = useMemo(() => {
-    return fileCategory === FILE_CATEGORY.CODE || fileCategory === FILE_CATEGORY.MARKDOWN;
+    return (
+      fileCategory === FILE_CATEGORY.CODE ||
+      fileCategory === FILE_CATEGORY.MARKDOWN ||
+      fileCategory === FILE_CATEGORY.HTML
+    );
   }, [fileCategory]);
 
   const saveFile = useCallback(async () => {
-    if (!filePath || isSavingRef.current) return;
+    if (!filePath) return;
+
+    // If already saving, mark that we need another save after current one completes
+    if (isSavingRef.current) {
+      pendingSaveRef.current = true;
+
+      return;
+    }
 
     const currentState = getFileState(filePath);
 
     if (!currentState || !currentState.isDirty) return;
 
     isSavingRef.current = true;
+    pendingSaveRef.current = false;
 
     try {
       const result = await writeFile({
-        relative_path: filePath,
+        path: filePath,
         content: currentState.content,
-        expected_mtime_ms: currentState.mtime_ms,
       }).unwrap();
 
       markFileSaved(filePath, result.mtime_ms);
@@ -81,6 +93,13 @@ export const useFileViewer = ({ filePath, onSaveSuccess, onSaveError }: UseFileV
       onSaveError?.(err);
     } finally {
       isSavingRef.current = false;
+
+      // If edits were made during save, trigger another save
+      if (pendingSaveRef.current) {
+        pendingSaveRef.current = false;
+        // Use setTimeout to avoid potential stack overflow and allow state to update
+        setTimeout(() => saveFile(), 0);
+      }
     }
   }, [filePath, getFileState, writeFile, markFileSaved, onSaveSuccess, onSaveError]);
 
@@ -117,30 +136,6 @@ export const useFileViewer = ({ filePath, onSaveSuccess, onSaveError }: UseFileV
       });
   }, [filePath, isEditable, fetchFileMetadata, fetchFileContent, initFileState]);
 
-  // Cleanup timer on unmount
-  useEffect(() => {
-    return () => {
-      if (autoSaveTimerRef.current) {
-        clearTimeout(autoSaveTimerRef.current);
-      }
-    };
-  }, []);
-
-  // Save on tab switch (when becoming inactive)
-  useEffect(() => {
-    const handleVisibilityChange = () => {
-      if (document.hidden && fileState?.isDirty) {
-        saveFile();
-      }
-    };
-
-    document.addEventListener('visibilitychange', handleVisibilityChange);
-
-    return () => {
-      document.removeEventListener('visibilitychange', handleVisibilityChange);
-    };
-  }, [fileState?.isDirty, saveFile]);
-
   useEffect(() => {
     const loadFile = async () => {
       if (!filePath) return;
@@ -169,6 +164,30 @@ export const useFileViewer = ({ filePath, onSaveSuccess, onSaveError }: UseFileV
 
     loadFile();
   }, [filePath, isEditable, fetchFileMetadata, fetchFileContent, getFileState, initFileState]);
+
+  // Cleanup timer on unmount
+  useEffect(() => {
+    return () => {
+      if (autoSaveTimerRef.current) {
+        clearTimeout(autoSaveTimerRef.current);
+      }
+    };
+  }, []);
+
+  // Save on tab switch (when becoming inactive)
+  useEffect(() => {
+    const handleVisibilityChange = () => {
+      if (document.hidden && fileState?.isDirty) {
+        saveFile();
+      }
+    };
+
+    document.addEventListener('visibilitychange', handleVisibilityChange);
+
+    return () => {
+      document.removeEventListener('visibilitychange', handleVisibilityChange);
+    };
+  }, [fileState?.isDirty, saveFile]);
 
   return {
     content: fileState?.content ?? null,

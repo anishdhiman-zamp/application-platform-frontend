@@ -1,3 +1,4 @@
+import { useCallback, useState } from 'react';
 import { captureException } from '@sentry/browser';
 import { toast } from '@zamp-platform/ui';
 import {
@@ -38,6 +39,12 @@ interface UseFileTreeNodeActionsReturn {
   isCutItem: boolean;
   handleActionClick: (actionId: string) => Promise<void>;
   handleCreate: (name: string, parentPath: string, createModalType: CreateItemType | null) => Promise<void>;
+  deleteConfirmation: {
+    isOpen: boolean;
+    isDeleting: boolean;
+    onOpenChange: (open: boolean) => void;
+    onConfirm: () => Promise<void>;
+  };
 }
 
 export const useFileTreeNodeActions = ({
@@ -55,6 +62,9 @@ export const useFileTreeNodeActions = ({
   onTriggerFileUpload,
   onTriggerFolderUpload,
 }: UseFileTreeNodeActionsProps): UseFileTreeNodeActionsReturn => {
+  const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState(false);
+  const [isDeleting, setIsDeleting] = useState(false);
+
   const { openTab, closeTabsForPath, updateTab, updateTabsForFolderMove } = useDynamicTabs();
   const {
     createFile,
@@ -96,14 +106,7 @@ export const useFileTreeNodeActions = ({
             toast.error(FILE_TOAST_MESSAGES.CANNOT_DELETE_PROTECTED);
             break;
           }
-
-          const isFolder = node.type === FILE_TYPE.DIRECTORY;
-
-          closeTabsForPath(node.path, isFolder);
-
-          await deleteItem(node.path);
-          onFileDeleted?.(node.path);
-          toast.success(isFolder ? FILE_TOAST_MESSAGES.FOLDER_DELETED : FILE_TOAST_MESSAGES.FILE_DELETED);
+          setIsDeleteDialogOpen(true);
           break;
         }
         case CONTEXT_MENU_ACTION_IDS.DUPLICATE:
@@ -236,9 +239,37 @@ export const useFileTreeNodeActions = ({
     }
   };
 
+  const handleDeleteConfirm = useCallback(async () => {
+    const isFolder = node.type === FILE_TYPE.DIRECTORY;
+
+    setIsDeleting(true);
+    try {
+      closeTabsForPath(node.path, isFolder);
+      await deleteItem(node.path);
+      onFileDeleted?.(node.path);
+      toast.success(isFolder ? FILE_TOAST_MESSAGES.FOLDER_DELETED : FILE_TOAST_MESSAGES.FILE_DELETED);
+      setIsDeleteDialogOpen(false);
+    } catch (error) {
+      captureException(error);
+      toast.error(FILE_TOAST_MESSAGES.FAILED_TO_DELETE_ITEM);
+    } finally {
+      setIsDeleting(false);
+    }
+  }, [node.path, node.type, closeTabsForPath, deleteItem, onFileDeleted]);
+
+  const handleDeleteDialogOpenChange = useCallback((open: boolean) => {
+    setIsDeleteDialogOpen(open);
+  }, []);
+
   return {
     isCutItem,
     handleActionClick,
     handleCreate,
+    deleteConfirmation: {
+      isOpen: isDeleteDialogOpen,
+      isDeleting,
+      onOpenChange: handleDeleteDialogOpenChange,
+      onConfirm: handleDeleteConfirm,
+    },
   };
 };

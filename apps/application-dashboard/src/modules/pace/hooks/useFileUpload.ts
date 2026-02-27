@@ -132,16 +132,14 @@ export const useFileUpload = (): UseFileUploadReturn => {
       const isChunkedUpload = shouldUseChunkedUpload(file.size);
       const uploadType = isChunkedUpload ? UPLOAD_TYPE.CHUNKED : UPLOAD_TYPE.DIRECT;
 
-      const uploadingItem: FileItem | null = isChunkedUpload
-        ? {
-            path: targetPath,
-            name: file.name,
-            type: FILE_TYPE.FILE,
-            size: file.size,
-            mtime_ms: Date.now(),
-            owner: '',
-          }
-        : null;
+      const uploadingItem: FileItem = {
+        path: targetPath,
+        name: file.name,
+        type: FILE_TYPE.FILE,
+        size: file.size,
+        mtime_ms: Date.now(),
+        owner: '',
+      };
 
       setUploadState({
         isUploading: true,
@@ -158,7 +156,7 @@ export const useFileUpload = (): UseFileUploadReturn => {
           : null,
         error: null,
         folderUpload: null,
-        uploadingPath: isChunkedUpload ? targetPath : null,
+        uploadingPath: targetPath,
         uploadingItem,
       });
 

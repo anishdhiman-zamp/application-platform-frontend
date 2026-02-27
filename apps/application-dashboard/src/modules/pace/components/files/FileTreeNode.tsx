@@ -2,6 +2,7 @@
 
 import { memo, useCallback, useMemo, useRef, useState } from 'react';
 import CreateItemModal from '@/modules/pace/components/files/CreateItemModal';
+import DeleteConfirmationDialog from '@/modules/pace/components/files/DeleteConfirmationDialog';
 import {
   type CreateItemType,
   FILE_TYPE,
@@ -114,7 +115,7 @@ const FileTreeNode = memo(function FileTreeNode({
     onDragOverFolderChange,
   });
 
-  const actions = useFileTreeNodeActions({
+  const { deleteConfirmation, ...actions } = useFileTreeNodeActions({
     node,
     isExpanded,
     childrenNames,
@@ -167,6 +168,15 @@ const FileTreeNode = memo(function FileTreeNode({
           existingNames={childrenNames}
         />
       )}
+
+      <DeleteConfirmationDialog
+        open={deleteConfirmation.isOpen}
+        onOpenChange={deleteConfirmation.onOpenChange}
+        itemName={node.name}
+        itemType={isFolder ? 'folder' : 'file'}
+        isDeleting={deleteConfirmation.isDeleting}
+        onConfirm={deleteConfirmation.onConfirm}
+      />
 
       <FileTreeNodeContextMenu
         actions={filteredActions}
