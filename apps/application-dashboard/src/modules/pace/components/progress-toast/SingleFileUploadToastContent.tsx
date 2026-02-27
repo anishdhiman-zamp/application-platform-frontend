@@ -22,7 +22,7 @@ const SingleFileUploadToastContent = ({ uploadState, onCancel }: UploadProgressT
           <X className='size-4' />
         </Button>
       </div>
-      {uploadState.currentUpload && <SingleFileUploadProgressContent progress={uploadState.currentUpload} />}
+      {uploadState?.currentUpload && <SingleFileUploadProgressContent progress={uploadState?.currentUpload} />}
     </div>
   );
 };

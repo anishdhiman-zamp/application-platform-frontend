@@ -12,18 +12,18 @@ const SingleFileUploadProgressContent = ({ progress }: SingleFileUploadProgressC
   return (
     <div className='flex w-full flex-col gap-y-2'>
       <ShimmerText
-        text={progress.fileName}
+        text={progress?.fileName}
         className='block max-w-[240px]'
         baseTextClassName='f-13-500 text-GRAY_1000 truncate'
       />
 
       <div className='mt-1'>
         <div className='flex items-center gap-2'>
-          <Progress value={progress.percentage} className='flex-1' />
-          <span className='f-12-400 text-GRAY_600 min-w-[40px] text-right'>{progress.percentage}%</span>
+          <Progress value={progress?.percentage ?? 0} className='flex-1' />
+          <span className='f-12-400 text-GRAY_600 min-w-[40px] text-right'>{progress?.percentage ?? 0}%</span>
         </div>
         <div className='f-11-400 text-GRAY_700 mt-1'>
-          {formatFileSize(progress.loaded)} / {formatFileSize(progress.total)}
+          {formatFileSize(progress?.loaded ?? 0)} / {formatFileSize(progress?.total ?? 0)}
         </div>
       </div>
     </div>

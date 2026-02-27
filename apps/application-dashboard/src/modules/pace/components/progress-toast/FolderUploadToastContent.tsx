@@ -11,7 +11,7 @@ const FolderUploadToastContent = ({ uploadState, onCancel }: UploadProgressToast
       <div className='flex items-center justify-between'>
         <div className='flex items-center gap-1.5'>
           <FolderUp className='text-GRAY_1000 size-4' />
-          <span className='f-14-600 text-GRAY_1000'>Uploading {uploadState.folderUpload?.folderName}</span>
+          <span className='f-14-600 text-GRAY_1000'>Uploading {uploadState?.folderUpload?.folderName}</span>
         </div>
         <Button
           variant='ghost'
@@ -22,10 +22,10 @@ const FolderUploadToastContent = ({ uploadState, onCancel }: UploadProgressToast
           <X className='size-4' />
         </Button>
       </div>
-      {uploadState.folderUpload && (
+      {uploadState?.folderUpload && (
         <FolderUploadProgressContent
-          folderProgress={uploadState.folderUpload}
-          currentFile={uploadState.currentUpload}
+          folderProgress={uploadState?.folderUpload}
+          currentFile={uploadState?.currentUpload}
         />
       )}
     </div>
