@@ -347,18 +347,18 @@ export const LoginForm = () => {
     const raw = getFromLocalStorage(LOCAL_STORAGE_KEYS.LAST_LOGIN_INFO);
 
     if (raw) {
-      const info = safeJsonParse<{ email: string }>(raw);
+      const lastLoginInfo = safeJsonParse<{ email: string }>(raw);
 
-      if (info?.email) {
-        setEmail(info.email);
+      if (lastLoginInfo?.email) {
+        setEmail(lastLoginInfo.email);
 
         return;
       }
     }
 
-    const legacy = getFromLocalStorage(LOCAL_STORAGE_KEYS.LAST_LOGGED_IN_OIDC_EMAIL);
+    const lastLoggedInOidcEmail = getFromLocalStorage(LOCAL_STORAGE_KEYS.LAST_LOGGED_IN_OIDC_EMAIL);
 
-    if (legacy) setEmail(legacy);
+    if (lastLoggedInOidcEmail) setEmail(lastLoggedInOidcEmail);
   }, []);
 
   useEffect(() => {
