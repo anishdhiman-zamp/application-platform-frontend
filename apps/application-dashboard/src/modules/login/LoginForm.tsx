@@ -289,17 +289,7 @@ export const LoginForm = () => {
       );
 
       if (oidcNode) {
-        const actionUrlObj = new URL(flow.ui.action);
-        const baseUrlObj = new URL(BASE_API_URL);
-
-        actionUrlObj.protocol = baseUrlObj.protocol;
-        actionUrlObj.host = baseUrlObj.host;
-        await initiateOidcLogin(
-          actionUrlObj.toString(),
-          flow.ui.method,
-          oidcNode.attributes.value as LOGIN_PROVIDERS,
-          '',
-        );
+        await initiateOidcLogin(flow.ui.action, flow.ui.method, oidcNode.attributes.value as LOGIN_PROVIDERS, '');
       } else {
         setError(LOGIN_FORM_MESSAGES.GOOGLE_UNAVAILABLE);
         resetLoadingState();
@@ -456,7 +446,6 @@ export const LoginForm = () => {
 
       return (
         <div>
-          {/* Google Sign In */}
           <Button
             type='button'
             disabled={isLoading}
@@ -469,7 +458,6 @@ export const LoginForm = () => {
             </span>
           </Button>
 
-          {/* Divider */}
           <div className='my-6 flex items-center gap-4'>
             <div className='h-px flex-1 bg-black/8' />
             <span className='text-GRAY_700 text-xs font-medium tracking-wide uppercase'>or</span>
