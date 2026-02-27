@@ -22,7 +22,7 @@ export const MarkdownBlock: React.FC<MarkdownBlockProps> = ({ payload }) => {
           a: ({ href, ...props }) => {
             if (!href) return null;
             return (
-              <Link href={href} className='text-blue-700'>
+              <Link href={href} target='_blank' className='text-blue-700'>
                 {props.children}
               </Link>
             );
