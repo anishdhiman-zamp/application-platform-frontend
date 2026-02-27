@@ -56,7 +56,6 @@ export type MembersNamePropsType = {
 export type MembersRolePropsType = {
   value: { user_id: string; privilege: string; userEmail?: string };
   member?: boolean;
-  hasPeoplePolicy?: boolean;
 };
 
 export enum TEAM_MEMBERS_PRIVILEGES {
@@ -81,7 +80,6 @@ export type EmptyStateListingPropsType = {
 export type TeamMembersListingPropsType = {
   isLoadingTeamMembersData: boolean;
   data: AudiencesByOrganisationIdResponse[];
-  hasPeoplePolicy: boolean;
   search: string;
 };
 
@@ -139,7 +137,6 @@ export type MembersTeamPropsType = {
   userInfo: UserInfoType;
   organizationId: string;
   userId: string;
-  hasPeoplePolicy: boolean;
   teamsData: TeamType[];
   userMappedTeams: UserMappedTeamType[];
   teamsRandomColorRef: RefObject<() => string>;
@@ -163,6 +160,5 @@ export interface TeamItemProps {
   onSelectTeamToBeDeleted: defaultFnType;
   userInfo: UserInfoType;
   onAddUserToTeam: (team: UserMappedTeamType) => void;
-  hasPeoplePolicy: boolean;
   onRemoveUserFromTeam: (teamId: string) => void;
 }
