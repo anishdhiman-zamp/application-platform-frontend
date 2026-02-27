@@ -24,3 +24,18 @@ export function getConflictingSkillName(error: unknown): string | null {
 
   return details?.skill_name || null;
 }
+
+/**
+ * Normalizes a URL path by decoding URI components and handling different space encodings.
+ * Converts '+' to space before decoding to handle both %20 and + space representations.
+ * @param str - The URL path string to normalize
+ * @returns The normalized, decoded string
+ */
+export const normalizeUrlPath = (str: string): string => {
+  if (!str) return '';
+  try {
+    return decodeURIComponent(str.replace(/\+/g, ' '));
+  } catch {
+    return str;
+  }
+};
