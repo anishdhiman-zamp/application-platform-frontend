@@ -1,4 +1,5 @@
 const { withSentryConfig } = require('@sentry/nextjs');
+const webpack = require('webpack');
 
 const isDev = process.env.NODE_ENV === 'development';
 
@@ -14,6 +15,17 @@ const nextConfig = {
     ignoreBuildErrors: process.env.CI === 'true',
   },
   // Note: eslint configuration moved to next lint CLI options in Next.js 16
+  webpack: (config) => {
+    // Vue feature flags required by @milkdown/crepe
+    config.plugins.push(
+      new webpack.DefinePlugin({
+        __VUE_OPTIONS_API__: JSON.stringify(true),
+        __VUE_PROD_DEVTOOLS__: JSON.stringify(false),
+        __VUE_PROD_HYDRATION_MISMATCH_DETAILS__: JSON.stringify(false),
+      }),
+    );
+    return config;
+  },
   experimental: {
     // Optimize memory usage during builds and hot reload
     optimizePackageImports: [

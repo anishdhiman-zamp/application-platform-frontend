@@ -5,7 +5,7 @@ import { useFileActions } from 'modules/pace/hooks/useFileActions';
 import { FILE_TYPE, type FileItem, type TreeNode } from '@/modules/pace/components/files/file-tree.types';
 import { buildFullPath, getParentPath } from '@/modules/pace/components/files/file-tree.utils';
 import { FILE_TOAST_MESSAGES } from '@/modules/pace/components/files/files.constants';
-import { useUpdateFileTab } from '@/modules/pace/hooks/useUpdateFileTab';
+import { useDynamicTabs } from '@/modules/pace/hooks/useDynamicTabs';
 
 const getFileNameParts = (name: string, isFile: boolean): { baseName: string; extension: string } => {
   if (!isFile) {
@@ -57,7 +57,7 @@ export const useFileTreeNodeRename = ({
   const renameInputRef = useRef<HTMLInputElement | null>(null);
 
   const { renameItem } = useFileActions();
-  const { updateFileTab } = useUpdateFileTab();
+  const { updateTab, updateTabsForFolderMove } = useDynamicTabs();
 
   const fullNewName = useMemo(() => {
     const trimmed = renameValue.trim();
@@ -101,11 +101,11 @@ export const useFileTreeNodeRename = ({
         owner: node.owner,
       };
 
-      updateFileTab({
-        oldPath: node.path,
-        newPath,
-        newName: fullNewName,
-      });
+      if (node.type === FILE_TYPE.DIRECTORY) {
+        updateTabsForFolderMove(node.path, newPath);
+      } else {
+        updateTab(node.path, newPath, fullNewName);
+      }
 
       onFileMoved?.(node.path, newFile);
     } catch (error) {
@@ -114,7 +114,7 @@ export const useFileTreeNodeRename = ({
       setRenameValue(baseName);
       setIsRenaming(false);
     }
-  }, [fullNewName, baseName, node, isDuplicateName, renameItem, updateFileTab, onFileMoved]);
+  }, [fullNewName, baseName, node, isDuplicateName, renameItem, updateTab, updateTabsForFolderMove, onFileMoved]);
 
   const handleRenameKeyDown = useCallback(
     (e: React.KeyboardEvent<HTMLInputElement>) => {

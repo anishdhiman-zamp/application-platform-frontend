@@ -1,38 +1,22 @@
 'use client';
 
-import { useEffect } from 'react';
 import { cn } from '@zamp-platform/ui/utils';
 import FileViewerTab from 'modules/pace/components/file-viewer/FileViewerTab';
-import { useRouter } from 'next/navigation';
-import { ROUTES_PATH } from '@/constants/routeConfig';
-import { usePaceContext } from '@/modules/pace/pace.context';
+import ImageLoader from '@/components/common/loader/ImageLoader';
+import { ZAMP_LOGO_LOADER_SVG } from '@/constants/icons';
+import { useDynamicTabs } from '@/modules/pace/hooks/useDynamicTabs';
 
-interface FileTabsContainerProps {
-  currentFilePath: string;
-}
+const FileTabsContainer = () => {
+  const { tabs, activeTab, isHydrated } = useDynamicTabs();
 
-const FileTabsContainer = ({ currentFilePath }: FileTabsContainerProps) => {
-  const router = useRouter();
-  const { dynamicTabs, activeFileTabKey, setActiveFileTabKey } = usePaceContext();
-
-  useEffect(() => {
-    const matchingTab = dynamicTabs.find((tab) => tab.id === currentFilePath);
-
-    if (matchingTab) {
-      setActiveFileTabKey(matchingTab.stableKey);
-    }
-  }, [currentFilePath, dynamicTabs, setActiveFileTabKey]);
-
-  if (dynamicTabs.length === 0) {
-    router.push(ROUTES_PATH.CHAT_FILES);
-
-    return null;
+  if (!isHydrated || tabs.length === 0) {
+    return <ImageLoader imageSrc={ZAMP_LOGO_LOADER_SVG} width={140} height={140} />;
   }
 
   return (
     <div className='relative h-full w-full'>
-      {dynamicTabs.map((tab) => {
-        const isActive = tab.stableKey === activeFileTabKey;
+      {tabs.map((tab) => {
+        const isActive = activeTab?.stableKey === tab.stableKey;
 
         return (
           <div

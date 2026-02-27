@@ -1,9 +1,8 @@
 'use client';
 
 import { memo, useCallback, useMemo, useRef, useState } from 'react';
-import { useRouter } from 'next/navigation';
-import { getChatFileRoute } from '@/constants/routeConfig';
 import CreateItemModal from '@/modules/pace/components/files/CreateItemModal';
+import DeleteConfirmationDialog from '@/modules/pace/components/files/DeleteConfirmationDialog';
 import {
   type CreateItemType,
   FILE_TYPE,
@@ -12,12 +11,12 @@ import {
 import { CONTEXT_MENU_ACTION_IDS, CONTEXT_MENU_ACTIONS } from '@/modules/pace/components/files/files.constants';
 import FileTreeNodeContextMenu from '@/modules/pace/components/files/FileTreeNodeContextMenu';
 import FileTreeNodeRow from '@/modules/pace/components/files/FileTreeNodeRow';
+import { useFileUploadContext } from '@/modules/pace/context/FileUploadContext';
+import { useDynamicTabs } from '@/modules/pace/hooks/useDynamicTabs';
 import { useFileTreeContext } from '@/modules/pace/hooks/useFileTreeContext';
 import { useFileTreeNodeActions } from '@/modules/pace/hooks/useFileTreeNodeActions';
 import { useFileTreeNodeDragDrop } from '@/modules/pace/hooks/useFileTreeNodeDragDrop';
 import { useFileTreeNodeRename } from '@/modules/pace/hooks/useFileTreeNodeRename';
-import { useFileUploadContext } from '@/modules/pace/hooks/useFileUploadContext';
-import { usePaceContext } from '@/modules/pace/pace.context';
 
 const FileTreeNode = memo(function FileTreeNode({
   node,
@@ -42,10 +41,9 @@ const FileTreeNode = memo(function FileTreeNode({
   const [contextMenuOpen, setContextMenuOpen] = useState(false);
   const [createModalType, setCreateModalType] = useState<CreateItemType | null>(null);
 
-  const router = useRouter();
   const { clipboard, isProtectedRoot, username } = useFileTreeContext();
   const { uploadingPath } = useFileUploadContext();
-  const { openDynamicTab } = usePaceContext();
+  const { openTab } = useDynamicTabs();
 
   const isFolder = node.type === FILE_TYPE.DIRECTORY;
   const isExpanded = expandedPaths.has(node.path);
@@ -117,7 +115,7 @@ const FileTreeNode = memo(function FileTreeNode({
     onDragOverFolderChange,
   });
 
-  const actions = useFileTreeNodeActions({
+  const { deleteConfirmation, ...actions } = useFileTreeNodeActions({
     node,
     isExpanded,
     childrenNames,
@@ -156,15 +154,8 @@ const FileTreeNode = memo(function FileTreeNode({
   const handleDoubleClick = useCallback(() => {
     if (rename.isRenaming || isFolder) return;
 
-    const filePath = getChatFileRoute(node.path);
-
-    openDynamicTab({
-      id: node.path,
-      name: node.name,
-      path: filePath,
-    });
-    router.push(filePath);
-  }, [rename.isRenaming, isFolder, node.path, node.name, openDynamicTab, router]);
+    openTab(node.path, node.name);
+  }, [rename.isRenaming, isFolder, node.path, node.name, openTab]);
 
   return (
     <div style={style}>
@@ -177,6 +168,15 @@ const FileTreeNode = memo(function FileTreeNode({
           existingNames={childrenNames}
         />
       )}
+
+      <DeleteConfirmationDialog
+        open={deleteConfirmation.isOpen}
+        onOpenChange={deleteConfirmation.onOpenChange}
+        itemName={node.name}
+        itemType={isFolder ? 'folder' : 'file'}
+        isDeleting={deleteConfirmation.isDeleting}
+        onConfirm={deleteConfirmation.onConfirm}
+      />
 
       <FileTreeNodeContextMenu
         actions={filteredActions}

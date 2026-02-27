@@ -1,8 +1,6 @@
+import { useCallback, useState } from 'react';
 import { captureException } from '@sentry/browser';
 import { toast } from '@zamp-platform/ui';
-import { getNextNavigationTarget, NAVIGATION_STRATEGY } from '@zamp-platform/utils';
-import { useRouter } from 'next/navigation';
-import { getChatFileRoute, ROUTES_PATH } from '@/constants/routeConfig';
 import {
   CLIPBOARD_OPERATION,
   CREATE_ITEM_TYPE,
@@ -18,11 +16,8 @@ import {
   validatePasteOperation,
 } from '@/modules/pace/components/files/file-tree.utils';
 import { CONTEXT_MENU_ACTION_IDS, FILE_TOAST_MESSAGES } from '@/modules/pace/components/files/files.constants';
-import { useFileViewerContext } from '@/modules/pace/hooks/FileViewerContext';
 import { useDynamicTabs } from '@/modules/pace/hooks/useDynamicTabs';
 import { useFileTreeContext } from '@/modules/pace/hooks/useFileTreeContext';
-import { useUpdateFileTab } from '@/modules/pace/hooks/useUpdateFileTab';
-import { usePaceContext } from '@/modules/pace/pace.context';
 
 interface UseFileTreeNodeActionsProps {
   node: TreeNode;
@@ -44,6 +39,12 @@ interface UseFileTreeNodeActionsReturn {
   isCutItem: boolean;
   handleActionClick: (actionId: string) => Promise<void>;
   handleCreate: (name: string, parentPath: string, createModalType: CreateItemType | null) => Promise<void>;
+  deleteConfirmation: {
+    isOpen: boolean;
+    isDeleting: boolean;
+    onOpenChange: (open: boolean) => void;
+    onConfirm: () => Promise<void>;
+  };
 }
 
 export const useFileTreeNodeActions = ({
@@ -61,11 +62,10 @@ export const useFileTreeNodeActions = ({
   onTriggerFileUpload,
   onTriggerFolderUpload,
 }: UseFileTreeNodeActionsProps): UseFileTreeNodeActionsReturn => {
-  const router = useRouter();
-  const { dynamicTabs, openDynamicTab, closeDynamicTab } = usePaceContext();
-  const { updateFileTab } = useUpdateFileTab();
-  const { isDynamicTabActive } = useDynamicTabs();
-  const { removeFileState } = useFileViewerContext();
+  const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState(false);
+  const [isDeleting, setIsDeleting] = useState(false);
+
+  const { openTab, closeTabsForPath, updateTab, updateTabsForFolderMove } = useDynamicTabs();
   const {
     createFile,
     createFolder,
@@ -106,35 +106,7 @@ export const useFileTreeNodeActions = ({
             toast.error(FILE_TOAST_MESSAGES.CANNOT_DELETE_PROTECTED);
             break;
           }
-
-          const isFolder = node.type === FILE_TYPE.DIRECTORY;
-          const folderPathPrefix = `${node.path}/`;
-
-          const tabsToClose = isFolder
-            ? dynamicTabs.filter((tab) => tab.id === node.path || tab.id.startsWith(folderPathPrefix))
-            : dynamicTabs.filter((tab) => tab.id === node.path);
-
-          const activeTabToClose = tabsToClose.find((tab) => isDynamicTabActive(tab));
-
-          tabsToClose.forEach((tab) => {
-            removeFileState(tab.id);
-            closeDynamicTab(tab.id);
-          });
-
-          if (activeTabToClose) {
-            const { target, hasRemainingItems } = getNextNavigationTarget({
-              items: dynamicTabs,
-              closingItem: activeTabToClose,
-              isEqual: (a, b) => a.id === b.id,
-              strategy: NAVIGATION_STRATEGY.BROWSER_LIKE,
-            });
-
-            router.push(hasRemainingItems && target ? target.path : ROUTES_PATH.CHAT_FILES);
-          }
-
-          await deleteItem(node.path);
-          onFileDeleted?.(node.path);
-          toast.success(FILE_TOAST_MESSAGES.FILE_DELETED);
+          setIsDeleteDialogOpen(true);
           break;
         }
         case CONTEXT_MENU_ACTION_IDS.DUPLICATE:
@@ -194,23 +166,16 @@ export const useFileTreeNodeActions = ({
 
             if (!isCopy) {
               clearClipboard();
-              updateFileTab({
-                oldPath: clipboard.path,
-                newPath: validation.destinationPath,
-                newName: clipboard.name,
-              });
+              if (clipboard.type === FILE_TYPE.DIRECTORY) {
+                updateTabsForFolderMove(clipboard.path, validation.destinationPath);
+              } else {
+                updateTab(clipboard.path, validation.destinationPath, clipboard.name);
+              }
             }
           }
           break;
         case CONTEXT_MENU_ACTION_IDS.OPEN_IN_TAB: {
-          const filePath = getChatFileRoute(node.path);
-
-          openDynamicTab({
-            id: node.path,
-            name: node.name,
-            path: filePath,
-          });
-          router.push(filePath);
+          openTab(node.path, node.name);
           break;
         }
         case CONTEXT_MENU_ACTION_IDS.DOWNLOAD: {
@@ -274,9 +239,37 @@ export const useFileTreeNodeActions = ({
     }
   };
 
+  const handleDeleteConfirm = useCallback(async () => {
+    const isFolder = node.type === FILE_TYPE.DIRECTORY;
+
+    setIsDeleting(true);
+    try {
+      closeTabsForPath(node.path, isFolder);
+      await deleteItem(node.path);
+      onFileDeleted?.(node.path);
+      toast.success(isFolder ? FILE_TOAST_MESSAGES.FOLDER_DELETED : FILE_TOAST_MESSAGES.FILE_DELETED);
+      setIsDeleteDialogOpen(false);
+    } catch (error) {
+      captureException(error);
+      toast.error(FILE_TOAST_MESSAGES.FAILED_TO_DELETE_ITEM);
+    } finally {
+      setIsDeleting(false);
+    }
+  }, [node.path, node.type, closeTabsForPath, deleteItem, onFileDeleted]);
+
+  const handleDeleteDialogOpenChange = useCallback((open: boolean) => {
+    setIsDeleteDialogOpen(open);
+  }, []);
+
   return {
     isCutItem,
     handleActionClick,
     handleCreate,
+    deleteConfirmation: {
+      isOpen: isDeleteDialogOpen,
+      isDeleting,
+      onOpenChange: handleDeleteDialogOpenChange,
+      onConfirm: handleDeleteConfirm,
+    },
   };
 };

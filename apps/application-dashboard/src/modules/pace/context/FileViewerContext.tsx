@@ -16,6 +16,7 @@ interface FileViewerContextType {
   markFileSaved: (path: string, newMtime?: number) => void;
   removeFileState: (path: string) => void;
   updateFileStatePath: (oldPath: string, newPath: string) => void;
+  updateFileStatePathsForFolder: (oldFolderPath: string, newFolderPath: string) => void;
 }
 
 const FileViewerContext = createContext<FileViewerContextType | null>(null);
@@ -102,15 +103,74 @@ export const FileViewerProvider = ({ children }: { children: ReactNode }) => {
   }, []);
 
   const updateFileStatePath = useCallback((oldPath: string, newPath: string) => {
-    setFileStates((prev) => {
-      const existing = prev.get(oldPath);
+    // Update ref synchronously so getFileState returns correct value immediately
+    const existing = fileStatesRef.current.get(oldPath);
 
-      if (!existing) return prev;
+    if (existing) {
+      const newMap = new Map(fileStatesRef.current);
+
+      newMap.delete(oldPath);
+      newMap.set(newPath, existing);
+      fileStatesRef.current = newMap;
+    }
+
+    setFileStates((prev) => {
+      const existingState = prev.get(oldPath);
+
+      if (!existingState) return prev;
 
       const newMap = new Map(prev);
 
       newMap.delete(oldPath);
-      newMap.set(newPath, existing);
+      newMap.set(newPath, existingState);
+
+      return newMap;
+    });
+  }, []);
+
+  const updateFileStatePathsForFolder = useCallback((oldFolderPath: string, newFolderPath: string) => {
+    // Update ref synchronously so getFileState returns correct value immediately
+    const oldPrefix = oldFolderPath + '/';
+    const updates: Array<{ oldPath: string; newPath: string; state: FileState }> = [];
+
+    fileStatesRef.current.forEach((state, path) => {
+      if (path === oldFolderPath || path.startsWith(oldPrefix)) {
+        const newPath = path === oldFolderPath ? newFolderPath : newFolderPath + path.slice(oldFolderPath.length);
+
+        updates.push({ oldPath: path, newPath, state });
+      }
+    });
+
+    if (updates.length > 0) {
+      const newMap = new Map(fileStatesRef.current);
+
+      updates.forEach(({ oldPath, newPath, state }) => {
+        newMap.delete(oldPath);
+        newMap.set(newPath, state);
+      });
+
+      fileStatesRef.current = newMap;
+    }
+
+    setFileStates((prev) => {
+      const folderUpdates: Array<{ oldPath: string; newPath: string; state: FileState }> = [];
+
+      prev.forEach((state, path) => {
+        if (path === oldFolderPath || path.startsWith(oldPrefix)) {
+          const newPath = path === oldFolderPath ? newFolderPath : newFolderPath + path.slice(oldFolderPath.length);
+
+          folderUpdates.push({ oldPath: path, newPath, state });
+        }
+      });
+
+      if (folderUpdates.length === 0) return prev;
+
+      const newMap = new Map(prev);
+
+      folderUpdates.forEach(({ oldPath, newPath, state }) => {
+        newMap.delete(oldPath);
+        newMap.set(newPath, state);
+      });
 
       return newMap;
     });
@@ -124,8 +184,17 @@ export const FileViewerProvider = ({ children }: { children: ReactNode }) => {
       markFileSaved,
       removeFileState,
       updateFileStatePath,
+      updateFileStatePathsForFolder,
     }),
-    [getFileState, initFileState, updateFileContent, markFileSaved, removeFileState, updateFileStatePath],
+    [
+      getFileState,
+      initFileState,
+      updateFileContent,
+      markFileSaved,
+      removeFileState,
+      updateFileStatePath,
+      updateFileStatePathsForFolder,
+    ],
   );
 
   return <FileViewerContext.Provider value={value}>{children}</FileViewerContext.Provider>;

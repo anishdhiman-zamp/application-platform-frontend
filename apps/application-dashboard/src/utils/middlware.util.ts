@@ -9,7 +9,6 @@ type SessionCache = {
   user_name: string;
   last_name: string;
   user_email: string;
-  org_slug: string;
   org_count: number;
   cached_at: number;
   username: string;
@@ -76,6 +75,7 @@ export async function getUserSession(
       const orgs = Array.from({ length: cachedSessionData.org_count }, () => ({
         organization_id: '',
         name: '',
+        slug: '',
         resource_audience_policies: [],
       }));
 
@@ -87,7 +87,6 @@ export async function getUserSession(
         organization_id: { workspace_id: '', name: '', description: '' },
         user_name: cachedSessionData.user_name ?? '',
         last_name: cachedSessionData.last_name ?? '',
-        org_slug: cachedSessionData.org_slug ?? '',
         username: cachedSessionData.username ?? '',
       };
 

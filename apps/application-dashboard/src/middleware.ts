@@ -88,7 +88,6 @@ const handleAuthenticatedRoutes = async (request: NextRequest) => {
           org_count: session.orgs?.length ?? 0,
           default_org_id: session?.orgs?.[0]?.organization_id,
           cached_at: Date.now(),
-          org_slug: session.org_slug,
           username: session.username,
         };
 
