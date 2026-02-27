@@ -110,13 +110,11 @@ function isFileApiRequest(url) {
     const urlObj = new URL(url);
     const hostname = urlObj.hostname;
 
-    // Match /files/ path on API domains:
-    // - Production: api.zamp.ai, api-dev.zamp.ai
-    // - Staging: api-stg.zamp.ai
-    // - Codern: api-coder.zamp.dev
-    const isZampDomain = hostname.includes('zamp.ai') || hostname.includes('zamp.dev');
+    // Match /files/ path on allowed API domains
+    const allowedHosts = ['api-us.zamp.ai', 'api-me.zamp.ai', 'api-dev.zamp.ai', 'api-stg.zamp.ai'];
+    const isAllowedHost = allowedHosts.includes(hostname) || hostname.endsWith('.coder-live.zamp.dev');
 
-    return isZampDomain && urlObj.pathname.startsWith('/files/');
+    return isAllowedHost && urlObj.pathname.startsWith('/files/');
   } catch {
     return false;
   }
