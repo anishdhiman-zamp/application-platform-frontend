@@ -4,29 +4,23 @@ import { FILESYSTEM_STATUS } from '@/types/api/filesystem.types';
 const FILESYSTEM_POLL_INTERVAL_MS = 3000;
 
 export const useFilesystemStatus = () => {
-  // Call listFiles to initiate the filesystem
-  const { isError: isFilesError } = useListFilesQuery({ recursive: true });
-
-  const {
-    data: filesystemStatus,
-    isLoading,
-    isError,
-  } = useGetFilesystemStatusQuery(undefined, {
-    skip: isFilesError,
-  });
+  const { data: filesystemStatus, isLoading: isStatusLoading, isError: isStatusError } = useGetFilesystemStatusQuery();
 
   const isActive = filesystemStatus?.status === FILESYSTEM_STATUS.ACTIVE;
-  const pollingInterval = isActive || isError || isFilesError ? 0 : FILESYSTEM_POLL_INTERVAL_MS;
+
+  const { isError: isFilesError } = useListFilesQuery({ depth: -1 }, { skip: isActive });
+
+  const pollingInterval = isActive || isStatusError || isFilesError ? 0 : FILESYSTEM_POLL_INTERVAL_MS;
 
   useGetFilesystemStatusQuery(undefined, {
     pollingInterval,
-    skip: isFilesError,
+    skip: isStatusError,
   });
 
   return {
     isFilesystemActive: isActive,
-    isFilesystemStatusLoading: isLoading,
-    isFilesystemError: isError || isFilesError,
+    isFilesystemStatusLoading: isStatusLoading,
+    isFilesystemError: isStatusError || isFilesError,
     filesystemStatus,
   };
 };

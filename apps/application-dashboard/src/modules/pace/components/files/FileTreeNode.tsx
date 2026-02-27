@@ -2,6 +2,7 @@
 
 import { memo, useCallback, useMemo, useRef, useState } from 'react';
 import CreateItemModal from '@/modules/pace/components/files/CreateItemModal';
+import DeleteConfirmationDialog from '@/modules/pace/components/files/DeleteConfirmationDialog';
 import {
   type CreateItemType,
   FILE_TYPE,
@@ -10,12 +11,12 @@ import {
 import { CONTEXT_MENU_ACTION_IDS, CONTEXT_MENU_ACTIONS } from '@/modules/pace/components/files/files.constants';
 import FileTreeNodeContextMenu from '@/modules/pace/components/files/FileTreeNodeContextMenu';
 import FileTreeNodeRow from '@/modules/pace/components/files/FileTreeNodeRow';
+import { useFileUploadContext } from '@/modules/pace/context/FileUploadContext';
 import { useDynamicTabs } from '@/modules/pace/hooks/useDynamicTabs';
 import { useFileTreeContext } from '@/modules/pace/hooks/useFileTreeContext';
 import { useFileTreeNodeActions } from '@/modules/pace/hooks/useFileTreeNodeActions';
 import { useFileTreeNodeDragDrop } from '@/modules/pace/hooks/useFileTreeNodeDragDrop';
 import { useFileTreeNodeRename } from '@/modules/pace/hooks/useFileTreeNodeRename';
-import { useFileUploadContext } from '@/modules/pace/hooks/useFileUploadContext';
 
 const FileTreeNode = memo(function FileTreeNode({
   node,
@@ -114,7 +115,7 @@ const FileTreeNode = memo(function FileTreeNode({
     onDragOverFolderChange,
   });
 
-  const actions = useFileTreeNodeActions({
+  const { deleteConfirmation, ...actions } = useFileTreeNodeActions({
     node,
     isExpanded,
     childrenNames,
@@ -167,6 +168,15 @@ const FileTreeNode = memo(function FileTreeNode({
           existingNames={childrenNames}
         />
       )}
+
+      <DeleteConfirmationDialog
+        open={deleteConfirmation.isOpen}
+        onOpenChange={deleteConfirmation.onOpenChange}
+        itemName={node.name}
+        itemType={isFolder ? 'folder' : 'file'}
+        isDeleting={deleteConfirmation.isDeleting}
+        onConfirm={deleteConfirmation.onConfirm}
+      />
 
       <FileTreeNodeContextMenu
         actions={filteredActions}

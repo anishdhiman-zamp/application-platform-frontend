@@ -84,6 +84,7 @@ export type Workspace = {
 export type Organization = {
   organization_id: string;
   name: string;
+  slug: string;
   resource_audience_policies: {
     privilege: string;
     resource_audience_type: string;
@@ -104,7 +105,6 @@ export type Session = {
   user_email: string;
   user_name: string;
   last_name: string;
-  org_slug: string;
   username: string;
   orgs: Organization[];
 };
