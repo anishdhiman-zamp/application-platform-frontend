@@ -39,6 +39,27 @@ export function getCsrfToken(nodes: FlowNode[]): string {
   return nodes.find((n) => n.attributes.name === 'csrf_token')?.attributes.value ?? '';
 }
 
+/**
+ * Ensures the action URL uses the same origin as the API base that created the flow.
+ * This prevents CSRF mismatch when the flow's action points to a different host (e.g. central
+ * api.zamp.ai) but the flow was created on a regional host (e.g. api-us.zamp.ai) that set the cookie.
+ */
+export function actionUrlWithOrigin(actionUrl: string, apiBaseUrl: string | undefined): string {
+  if (!apiBaseUrl) return actionUrl;
+  try {
+    const action = new URL(actionUrl);
+    const base = new URL(apiBaseUrl);
+
+    if (action.origin !== base.origin) {
+      return new URL(action.pathname + action.search, base.origin).toString();
+    }
+
+    return actionUrl;
+  } catch {
+    return actionUrl;
+  }
+}
+
 export function buildOtpSubmitBody(code: string, nodes: FlowNode[]): Record<string, unknown> {
   return {
     method: LOGIN_METHODS.CODE,

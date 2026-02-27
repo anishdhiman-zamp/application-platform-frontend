@@ -14,6 +14,7 @@ import {
   SESSION_ALREADY_AVAILABLE_ERROR,
 } from 'modules/login/login.constants';
 import {
+  actionUrlWithOrigin,
   buildOtpSubmitBody,
   buildResendBody,
   determineExpiryType,
@@ -74,7 +75,12 @@ export const OtpVerification: FC<Props> = ({ email, flow, onEditEmail, onFlowExp
 
   function updateFlowUi(responseData: { ui?: LoginFlow['ui'] }): void {
     if (responseData.ui?.nodes) {
-      flowRef.current = { ...flowRef.current, ui: responseData.ui };
+      const updatedUi = { ...responseData.ui };
+
+      if (updatedUi.action) {
+        updatedUi.action = actionUrlWithOrigin(updatedUi.action, flowRef.current.ui.action);
+      }
+      flowRef.current = { ...flowRef.current, ui: updatedUi };
     }
   }
 
