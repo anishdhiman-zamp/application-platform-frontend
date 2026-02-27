@@ -446,8 +446,8 @@ export const LoginForm = () => {
             onClick={handleGoogleLogin}
             className='btn-login bg-GRAY_100 text-GRAY_1000 hover:bg-GRAY_200 active:bg-GRAY_100 disabled:bg-GRAY_100 f-14-500 relative flex h-auto w-full cursor-pointer items-center justify-center gap-2.5 overflow-hidden rounded-2xl border border-black/12 px-5 py-3.5 transition-all duration-250 active:scale-[1] disabled:cursor-not-allowed disabled:opacity-60'
           >
-            <GoogleIcon className='relative z-[1] h-4 w-4 shrink-0' />
-            <span className='relative z-[1]'>
+            <GoogleIcon className='relative z-1 h-4 w-4 shrink-0' />
+            <span className='relative z-1'>
               {loadingAction === LOADING_ACTION.GOOGLE ? 'Connecting...' : 'Continue with Google'}
             </span>
           </Button>
@@ -497,9 +497,9 @@ export const LoginForm = () => {
                   : 'bg-GRAY_500 text-GRAY_700 disabled:bg-GRAY_500 disabled:text-GRAY_700 cursor-not-allowed border-black/3',
               )}
             >
-              <span className='relative z-[1]'>
+              <span className='relative z-1'>
                 {getSubmitButtonContent()}
-                <span className='absolute top-1/2 left-full z-[1] ml-2 inline-flex h-4 w-4 -translate-y-1/2 overflow-hidden'>
+                <span className='absolute top-1/2 left-full z-1 ml-2 inline-flex h-4 w-4 -translate-y-1/2 overflow-hidden'>
                   <AnimatedDitherArrow disabled={isSubmitDisabled} />
                 </span>
               </span>
