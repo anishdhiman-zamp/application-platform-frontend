@@ -27,6 +27,7 @@ import { KEYBOARD_KEYS } from '@/constants/shortcuts';
 import { useAppDispatch, useAppSelector } from '@/hooks/toolkit';
 import { setIsOrgSwitchIsInProgress } from '@/store/slices/user';
 import type { Organization } from '@/types/api/auth.types';
+import { syncOrganizationIdToSW } from '@/utils/serviceWorker';
 
 type OrgSwitcherProps = {
   isSidebarOpen: boolean;
@@ -76,6 +77,7 @@ const OrgSwitcher: FC<OrgSwitcherProps> = ({ isSidebarOpen, menuContentClassName
     setSelectedOrg(org);
     removeFromLocalStorage(LOCAL_STORAGE_KEYS.PACE_OPEN_DYNAMIC_TABS);
     setToLocalStorage(LOCAL_STORAGE_KEYS.XZAMP_ORGANIZATION_ID, org.organization_id);
+    syncOrganizationIdToSW();
     if (pathname?.includes(ROUTES_PATH.CHAT)) {
       router.push(ROUTES_PATH.CHAT_SETTINGS_PEOPLE);
     } else {
@@ -187,6 +189,7 @@ const OrgSwitcher: FC<OrgSwitcherProps> = ({ isSidebarOpen, menuContentClassName
         setSelectedOrg(organizations?.[0]);
         setToLocalStorage(LOCAL_STORAGE_KEYS.XZAMP_ORGANIZATION_ID, organizations?.[0]?.organization_id);
       }
+      syncOrganizationIdToSW();
     }
   }, [organizations]);
 

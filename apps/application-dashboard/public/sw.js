@@ -1,6 +1,9 @@
 const CACHE_VERSION = '1'; // increment manually, whenever updating old static assets
 const CACHE_NAME = `zamp-sw-cache-v${CACHE_VERSION}`;
 const MAX_CACHE_ENTRIES = 100;
+const IDB_NAME = 'zamp-sw-store';
+const IDB_STORE = 'config';
+const ORG_ID_KEY = 'X-Zamp-Organization-Id';
 
 const CACHE_PATTERNS = [
   /^\/_next\/static\//, // Next.js static files
@@ -12,6 +15,96 @@ const CACHE_PATTERNS = [
   /^\/[^/]+\.(ico|svg|png|jpg|jpeg|webp)$/i, // Root level icons and images
   /^\/pdf\.worker\.min\.mjs$/, // PDF worker
 ];
+
+// IndexedDB helpers for storing/retrieving org ID
+function openDB() {
+  return new Promise((resolve, reject) => {
+    const request = indexedDB.open(IDB_NAME, 1);
+
+    request.onerror = () => reject(request.error);
+    request.onsuccess = () => resolve(request.result);
+    request.onupgradeneeded = (event) => {
+      const db = event.target.result;
+
+      if (!db.objectStoreNames.contains(IDB_STORE)) {
+        db.createObjectStore(IDB_STORE);
+      }
+    };
+  });
+}
+
+async function getOrganizationId() {
+  try {
+    const db = await openDB();
+
+    return new Promise((resolve) => {
+      const transaction = db.transaction(IDB_STORE, 'readonly');
+      const store = transaction.objectStore(IDB_STORE);
+      const request = store.get(ORG_ID_KEY);
+
+      request.onsuccess = () => resolve(request.result || '');
+      request.onerror = () => resolve('');
+    });
+  } catch {
+    return '';
+  }
+}
+
+async function setOrganizationId(orgId) {
+  try {
+    const db = await openDB();
+
+    return new Promise((resolve, reject) => {
+      const transaction = db.transaction(IDB_STORE, 'readwrite');
+      const store = transaction.objectStore(IDB_STORE);
+      const request = store.put(orgId, ORG_ID_KEY);
+
+      request.onsuccess = () => resolve();
+      request.onerror = () => reject(request.error);
+    });
+  } catch {
+    // Silently fail
+  }
+}
+
+// Listen for messages from the main thread to update org ID in IndexedDB
+self.addEventListener('message', (event) => {
+  if (event.data && event.data.type === 'SET_ORGANIZATION_ID') {
+    setOrganizationId(event.data.organizationId || '');
+  }
+});
+
+// Check if URL is a file API request that needs auth headers
+function isFileApiRequest(url) {
+  try {
+    const urlObj = new URL(url);
+
+    // Match /files/ path on API domains (e.g., api-dev.zamp.ai, api.zamp.ai)
+    return urlObj.hostname.includes('zamp.ai') && urlObj.pathname.startsWith('/files/');
+  } catch {
+    return false;
+  }
+}
+
+// Handle file API requests with custom headers
+async function handleFileApiRequest(request) {
+  const organizationId = await getOrganizationId();
+  const headers = new Headers(request.headers);
+
+  if (organizationId) {
+    headers.set('X-Zamp-Organization-Id', organizationId);
+  }
+
+  const modifiedRequest = new Request(request.url, {
+    method: request.method,
+    headers: headers,
+    mode: 'cors',
+    credentials: 'include',
+    redirect: request.redirect,
+  });
+
+  return fetch(modifiedRequest);
+}
 
 // Clean up old caches
 async function cleanupOldCaches() {
@@ -93,6 +186,13 @@ self.addEventListener('fetch', (event) => {
   const { request } = event;
 
   if (request.method !== 'GET' || !request.url.startsWith('http')) return;
+
+  // Handle cross-origin file API requests with auth headers
+  if (isFileApiRequest(request.url)) {
+    event.respondWith(handleFileApiRequest(request));
+
+    return;
+  }
 
   const url = new URL(request.url);
 
