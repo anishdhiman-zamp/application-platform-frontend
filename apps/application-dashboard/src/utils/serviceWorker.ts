@@ -99,7 +99,7 @@ export const syncOrganizationIdToSW = (): void => {
   const organizationId = getFromLocalStorage(LOCAL_STORAGE_KEYS.XZAMP_ORGANIZATION_ID) || '';
 
   // Store in IndexedDB for direct service worker access
-  setOrganizationIdInIDB(organizationId);
+  setOrganizationIdInIDB(organizationId).catch(() => {});
 
   // Also send via postMessage for immediate update if SW is already active
   if ('serviceWorker' in navigator && navigator.serviceWorker.controller) {

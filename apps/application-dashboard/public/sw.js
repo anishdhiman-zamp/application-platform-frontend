@@ -100,7 +100,7 @@ self.addEventListener('message', (event) => {
     const orgId = event.data.organizationId || '';
 
     cachedOrganizationId = orgId; // Update in-memory cache immediately
-    setOrganizationId(orgId); // Persist to IndexedDB
+    setOrganizationId(orgId).catch(() => {}); // Persist to IndexedDB
   }
 });
 
