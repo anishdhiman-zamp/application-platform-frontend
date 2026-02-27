@@ -1,12 +1,14 @@
 import { LOGIN_METHODS } from 'constants/auth.constants';
+import { FlowNode, FlowUiMessage, LoginFlow } from 'types/api/auth.types';
+import { ROUTES_PATH } from '@/constants/routeConfig';
 import {
   EXPIRY_TYPE,
   INVALID_CODE_MESSAGE_IDS,
   LOGIN_GROUPS,
   RESEND_SUCCESS_MESSAGE_IDS,
-} from 'modules/login/login.constants';
-import { FlowNode, FlowUiMessage, LoginFlow } from 'types/api/auth.types';
-import { ROUTES_PATH } from '@/constants/routeConfig';
+  SESSION_ALREADY_AVAILABLE_ERROR,
+  VALID_SESSION_DETECTED_ERROR_MSG,
+} from '@/modules/login/login.constants';
 
 type NestedRecord = Record<string, unknown>;
 
@@ -144,4 +146,20 @@ export function redirectToDashboard(): void {
   const dashboardPath = currentPath.replace(ROUTES_PATH.LOGIN, ROUTES_PATH.HOME) || ROUTES_PATH.HOME;
 
   window.location.href = dashboardPath;
+}
+
+/** Kratos signals valid session via top-level error id or via flow ui.messages; match both. */
+export function hasValidSessionMessage(
+  data?: {
+    error?: { id?: string };
+    ui?: LoginFlow['ui'];
+  } | null,
+): boolean {
+  if (data == null) return false;
+  const hasErrorId = data.error?.id != null && data.error.id === SESSION_ALREADY_AVAILABLE_ERROR;
+  const hasMessage =
+    data.ui?.messages?.some((m) => typeof m?.text === 'string' && m.text.includes(VALID_SESSION_DETECTED_ERROR_MSG)) ??
+    false;
+
+  return hasErrorId || hasMessage;
 }

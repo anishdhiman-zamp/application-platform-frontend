@@ -11,18 +11,19 @@ import {
   OTP_STATUS,
   RESEND_COOLDOWN_SECONDS,
   RESEND_RESULT,
-  SESSION_ALREADY_AVAILABLE_ERROR,
 } from 'modules/login/login.constants';
-import { OtpInput, OtpInputHandle } from 'modules/login/OtpInput';
 import { FlowExpiredResponse, FlowUiMessage, LoginFlow } from 'types/api/auth.types';
 import {
   actionUrlWithOrigin,
   buildOtpSubmitBody,
   buildResendBody,
   determineExpiryType,
+  hasValidSessionMessage,
   isInvalidCodeResponse,
   isResendSuccessResponse,
+  redirectToDashboard,
 } from '@/modules/login/login.utils';
+import { OtpInput, OtpInputHandle } from '@/modules/login/OtpInput';
 import { API_STATUS_CODES } from '@/types/common/statusCodes';
 
 type OtpMessage = { type: 'error' | 'info'; text: string } | null;
@@ -110,11 +111,9 @@ export const OtpVerification: FC<Props> = ({ email, flow, onEditEmail, onFlowExp
 
   // ── Response Handlers (for submitCode) ──────────────────────────
 
-  function handleSubmitSuccess(data: { continue_with?: { redirect_browser_to?: string }[] }): void {
+  function handleSubmitSuccess(): void {
     setStatus(OTP_STATUS.SUCCESS);
-    const redirectUrl = data.continue_with?.[0]?.redirect_browser_to;
-
-    window.location.href = redirectUrl || window.location.href;
+    redirectToDashboard();
   }
 
   function handleLocationChange(data: { redirect_browser_to?: string }): void {
@@ -173,8 +172,8 @@ export const OtpVerification: FC<Props> = ({ email, flow, onEditEmail, onFlowExp
   }
 
   function handleSubmitBadRequest(data: { error?: { id: string }; ui?: LoginFlow['ui'] }): void {
-    if (data.error?.id === SESSION_ALREADY_AVAILABLE_ERROR) {
-      window.location.reload();
+    if (hasValidSessionMessage(data)) {
+      redirectToDashboard();
 
       return;
     }
@@ -214,10 +213,18 @@ export const OtpVerification: FC<Props> = ({ email, flow, onEditEmail, onFlowExp
       });
 
       switch (resp.status) {
-        case API_STATUS_CODES.OK:
-          handleSubmitSuccess(await resp.json());
+        case API_STATUS_CODES.OK: {
+          const data = await resp.json();
+
+          if (hasValidSessionMessage(data)) {
+            redirectToDashboard();
+
+            return;
+          }
+          handleSubmitSuccess();
 
           return;
+        }
         case API_STATUS_CODES.UNPROCESSABLE_ENTITY:
           handleLocationChange(await resp.json());
 
