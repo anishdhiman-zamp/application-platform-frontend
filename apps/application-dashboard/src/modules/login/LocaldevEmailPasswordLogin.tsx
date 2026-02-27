@@ -5,6 +5,8 @@ import { cn } from '@zamp-platform/ui/utils';
 import { useGetErrorDetailsQuery } from 'apis/auth';
 import { LOGIN_METHODS } from 'constants/auth.constants';
 import { LOGIN_ERROR_TEXT } from 'modules/login/constants';
+import { VALID_SESSION_DETECTED_ERROR_MSG } from 'modules/login/login.constants';
+import { redirectToDashboard } from 'modules/login/login.utils';
 import { useSearchParams } from 'next/navigation';
 import { LoginFlow } from 'types/api/auth.types';
 import { getFromLocalStorage, LOCAL_STORAGE_KEYS, setToLocalStorage } from 'utils/localstorage';
@@ -56,13 +58,22 @@ const LoginForm: FC<LoginFormProps> = ({ loginFlow, setLoginFlow }) => {
       setToLocalStorage(LOCAL_STORAGE_KEYS.XZAMP_USER, JSON.stringify({ email, password }));
 
       if (response.status < 300) {
-        window.location.reload();
+        redirectToDashboard();
 
         return;
       }
       if (response.status === 400) {
+        const errorMessage = responseJson?.ui?.messages?.[0]?.text ?? LOGIN_ERROR_TEXT;
+        const isValidSessionDetected = errorMessage.includes(VALID_SESSION_DETECTED_ERROR_MSG);
+
+        if (isValidSessionDetected) {
+          redirectToDashboard();
+
+          return;
+        }
+
         setLoginFlow(responseJson);
-        setError(responseJson?.ui?.messages?.[0]?.text ?? LOGIN_ERROR_TEXT);
+        setError(errorMessage);
       }
       setLoading(false);
     } catch {

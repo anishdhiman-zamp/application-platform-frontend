@@ -2,7 +2,7 @@ import { ClipboardEvent, forwardRef, KeyboardEvent, useImperativeHandle, useRef 
 import { cn } from '@zamp-platform/ui/utils';
 import { KEYBOARD_KEYS } from 'constants/shortcuts';
 import { OTP_LENGTH } from 'modules/login/login.constants';
-import { processPastedOtp } from 'modules/login/otp.utils';
+import { processPastedOtp } from '@/modules/login/login.utils';
 
 const defaultFn = () => {};
 
