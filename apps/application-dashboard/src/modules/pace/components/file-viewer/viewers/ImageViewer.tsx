@@ -3,6 +3,7 @@
 import { useCallback, useState } from 'react';
 import { captureException } from '@sentry/nextjs';
 import { cn } from '@zamp-platform/ui/utils';
+import { isImageCached } from 'modules/pace/components/files/file-tree.utils';
 import Image from 'next/image';
 import ImageLoader from '@/components/common/loader/ImageLoader';
 import { ZAMP_LOGO_LOADER_SVG } from '@/constants/icons';
@@ -17,7 +18,7 @@ interface ImageViewerProps {
 }
 
 const ImageViewer = ({ src, alt = 'Image preview', className = '', fileName, onClose }: ImageViewerProps) => {
-  const [isLoading, setIsLoading] = useState(true);
+  const [isLoading, setIsLoading] = useState(() => !isImageCached(src));
   const [isError, setIsError] = useState(false);
 
   const displayFileName = fileName || decodeURIComponent(src.split('/').pop() || 'image');
