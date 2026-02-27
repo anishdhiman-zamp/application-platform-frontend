@@ -344,10 +344,10 @@ export const LoginForm = () => {
         : ACTIVE_VIEW.EMAIL_ENTRY;
 
   useEffect(() => {
-    const raw = getFromLocalStorage(LOCAL_STORAGE_KEYS.LAST_LOGIN_INFO);
+    const lastLoginInfoFromLocalStorage = getFromLocalStorage(LOCAL_STORAGE_KEYS.LAST_LOGIN_INFO);
 
-    if (raw) {
-      const lastLoginInfo = safeJsonParse<{ email: string }>(raw);
+    if (lastLoginInfoFromLocalStorage) {
+      const lastLoginInfo = safeJsonParse<{ email: string }>(lastLoginInfoFromLocalStorage);
 
       if (lastLoginInfo?.email) {
         setEmail(lastLoginInfo.email);
