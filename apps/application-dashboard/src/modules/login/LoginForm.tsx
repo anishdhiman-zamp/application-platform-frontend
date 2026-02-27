@@ -2,9 +2,9 @@
 
 import { ChangeEvent, type SubmitEvent, useEffect, useRef, useState } from 'react';
 import { BASE_API_URL, getApiDomainAndRegions, reinitializeApiDomain, REQUEST_TYPES } from '@zamp-platform/api';
-import { Button } from '@zamp-platform/ui';
+import { Button, ImageWithFallback } from '@zamp-platform/ui';
 import { cn } from '@zamp-platform/ui/utils';
-import { getFromLocalStorage, LOCAL_STORAGE_KEYS, removeFromLocalStorage } from '@zamp-platform/utils';
+import { getFromLocalStorage, LOCAL_STORAGE_KEYS, removeFromLocalStorage, safeJsonParse } from '@zamp-platform/utils';
 import { LOGIN_METHODS, LOGIN_PROVIDERS } from 'constants/auth.constants';
 import { MoveLeft } from 'lucide-react';
 import { AnimatedDitherArrow } from 'modules/login/AnimatedDitherArrow';
@@ -18,7 +18,8 @@ import {
   LOGIN_GROUPS,
   VALID_SESSION_DETECTED_ERROR_MSG,
 } from 'modules/login/login.constants';
-import { actionUrlWithOrigin } from 'modules/login/otp.utils';
+import { actionUrlWithOrigin } from 'modules/login/login.utils';
+import { flowHasCodeNodes, flowHasPasswordNodes } from 'modules/login/login.utils';
 import { OtpVerification } from 'modules/login/OtpVerification';
 import Link from 'next/link';
 import { FlowNode, LoginFlow } from 'types/api/auth.types';
@@ -48,22 +49,6 @@ async function createLoginFlow(apiBaseUrl: string, email: string, method?: strin
   return response.json();
 }
 
-function flowHasCodeNodes(flow: LoginFlow): boolean {
-  return flow.ui?.nodes?.some((n: FlowNode) => n.group === LOGIN_GROUPS.CODE) ?? false;
-}
-
-function flowHasPasswordNodes(flow: LoginFlow): boolean {
-  return flow.ui?.nodes?.some((n: FlowNode) => n.group === LOGIN_GROUPS.PASSWORD) ?? false;
-}
-
-function safeJsonParse(str: string): MapAny | null {
-  try {
-    return JSON.parse(str);
-  } catch {
-    return null;
-  }
-}
-
 function normalizeFlowActionOrigin(flow: LoginFlow, apiBaseUrl: string): LoginFlow {
   if (!flow?.ui?.action) return flow;
 
@@ -75,45 +60,15 @@ function normalizeFlowActionOrigin(flow: LoginFlow, apiBaseUrl: string): LoginFl
 
 export const LoginForm = () => {
   const logoPromiseRef = useRef<Promise<void> | null>(null);
-
   const [email, setEmail] = useState('');
-  const [passwordFlow, setPasswordFlow] = useState<LoginFlow | null>(null);
-  const [otpFlow, setOtpFlow] = useState<LoginFlow | null>(null);
-  const [methodPickerFlow, setMethodPickerFlow] = useState<LoginFlow | null>(null);
+  const [logoLoaded, setLogoLoaded] = useState<boolean>(false);
+  const [providerLogo, setProviderLogo] = useState<string>('');
   const [error, setError] = useState<string | null>(null);
+  const [otpFlow, setOtpFlow] = useState<LoginFlow | null>(null);
+  const [passwordFlow, setPasswordFlow] = useState<LoginFlow | null>(null);
+  const [methodPickerFlow, setMethodPickerFlow] = useState<LoginFlow | null>(null);
   const [loadingAction, setLoadingAction] = useState<LOADING_ACTION>(LOADING_ACTION.IDLE);
-  const [providerLogo, setProviderLogo] = useState('');
-  const [logoLoaded, setLogoLoaded] = useState(false);
-
   const isLoading = loadingAction !== LOADING_ACTION.IDLE;
-
-  useEffect(() => {
-    const raw = getFromLocalStorage(LOCAL_STORAGE_KEYS.LAST_LOGIN_INFO);
-
-    if (raw) {
-      const info = safeJsonParse(raw);
-
-      if (info?.email) {
-        setEmail(info.email);
-
-        return;
-      }
-    }
-
-    const legacy = getFromLocalStorage(LOCAL_STORAGE_KEYS.LAST_LOGGED_IN_OIDC_EMAIL);
-
-    if (legacy) setEmail(legacy);
-  }, []);
-
-  useEffect(() => {
-    const onPageShow = (e: PageTransitionEvent) => {
-      if (e.persisted) setLoadingAction(LOADING_ACTION.IDLE);
-    };
-
-    window.addEventListener('pageshow', onPageShow);
-
-    return () => window.removeEventListener('pageshow', onPageShow);
-  }, []);
 
   // ── Helpers ─────────────────────────────────────────────────────
 
@@ -365,8 +320,7 @@ export const LoginForm = () => {
       return (
         <>
           Signing in with
-          {/* eslint-disable-next-line @next/next/no-img-element */}
-          <img src={providerLogo} alt='provider' className='h-5 max-w-[40px] object-contain' />
+          <ImageWithFallback src={providerLogo} alt='provider' className='h-5 max-w-[40px] object-contain' />
         </>
       );
     }
@@ -388,6 +342,34 @@ export const LoginForm = () => {
       : methodPickerFlow
         ? ACTIVE_VIEW.METHOD_PICKER
         : ACTIVE_VIEW.EMAIL_ENTRY;
+
+  useEffect(() => {
+    const raw = getFromLocalStorage(LOCAL_STORAGE_KEYS.LAST_LOGIN_INFO);
+
+    if (raw) {
+      const info = safeJsonParse<{ email: string }>(raw);
+
+      if (info?.email) {
+        setEmail(info.email);
+
+        return;
+      }
+    }
+
+    const legacy = getFromLocalStorage(LOCAL_STORAGE_KEYS.LAST_LOGGED_IN_OIDC_EMAIL);
+
+    if (legacy) setEmail(legacy);
+  }, []);
+
+  useEffect(() => {
+    const onPageShow = (e: PageTransitionEvent) => {
+      if (e.persisted) setLoadingAction(LOADING_ACTION.IDLE);
+    };
+
+    window.addEventListener('pageshow', onPageShow);
+
+    return () => window.removeEventListener('pageshow', onPageShow);
+  }, []);
 
   switch (activeView) {
     case ACTIVE_VIEW.OTP:
@@ -509,15 +491,17 @@ export const LoginForm = () => {
               data-testid='login-button'
               disabled={isSubmitDisabled}
               className={cn(
-                'group btn-login relative mt-1 flex h-auto w-full items-center justify-center gap-2.5 overflow-hidden rounded-2xl border px-5 py-3.5 text-sm font-medium transition-all duration-250',
+                'group btn-login relative mt-1 flex h-auto w-full items-center justify-center overflow-visible rounded-2xl border px-5 py-3.5 text-sm font-medium transition-all duration-250',
                 !isSubmitDisabled
                   ? 'bg-GRAY_1000 hover:bg-GRAY_950 active:bg-GRAY_1000 cursor-pointer border-black/10 text-white active:scale-[0.98]'
                   : 'bg-GRAY_500 text-GRAY_700 disabled:bg-GRAY_500 disabled:text-GRAY_700 cursor-not-allowed border-black/3',
               )}
             >
-              <span className='relative z-[1] flex items-center gap-1.5'>{getSubmitButtonContent()}</span>
-              <span className='relative z-[1] inline-flex h-[17px] w-[17px] overflow-hidden'>
-                <AnimatedDitherArrow disabled={isSubmitDisabled} />
+              <span className='relative z-[1]'>
+                {getSubmitButtonContent()}
+                <span className='absolute top-1/2 left-full z-[1] ml-2 inline-flex h-[17px] w-[17px] -translate-y-1/2 overflow-hidden'>
+                  <AnimatedDitherArrow disabled={isSubmitDisabled} />
+                </span>
               </span>
             </Button>
           </form>

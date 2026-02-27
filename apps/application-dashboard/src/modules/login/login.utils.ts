@@ -1,6 +1,12 @@
 import { LOGIN_METHODS } from 'constants/auth.constants';
-import { EXPIRY_TYPE, INVALID_CODE_MESSAGE_IDS, RESEND_SUCCESS_MESSAGE_IDS } from 'modules/login/login.constants';
-import { FlowNode, FlowUiMessage } from 'types/api/auth.types';
+import {
+  EXPIRY_TYPE,
+  INVALID_CODE_MESSAGE_IDS,
+  LOGIN_GROUPS,
+  RESEND_SUCCESS_MESSAGE_IDS,
+} from 'modules/login/login.constants';
+import { FlowNode, FlowUiMessage, LoginFlow } from 'types/api/auth.types';
+import { ROUTES_PATH } from '@/constants/routeConfig';
 
 type NestedRecord = Record<string, unknown>;
 
@@ -121,3 +127,29 @@ export function processPastedOtp(
 
   return { newDigits, nextFocusIndex };
 }
+
+export function flowHasCodeNodes(flow: LoginFlow): boolean {
+  return flow.ui?.nodes?.some((n: FlowNode) => n.group === LOGIN_GROUPS.CODE) ?? false;
+}
+
+export function flowHasPasswordNodes(flow: LoginFlow): boolean {
+  return flow.ui?.nodes?.some((n: FlowNode) => n.group === LOGIN_GROUPS.PASSWORD) ?? false;
+}
+
+/**
+ * Redirects to dashboard by removing /login from the URL
+ */
+export function redirectToDashboard(): void {
+  const currentPath = window.location.pathname;
+  const dashboardPath = currentPath.replace(ROUTES_PATH.LOGIN, ROUTES_PATH.HOME) || ROUTES_PATH.HOME;
+
+  window.location.href = dashboardPath;
+}
+
+// export function safeJsonParse(str: string): MapAny | null {
+//   try {
+//     return JSON.parse(str);
+//   } catch {
+//     return null;
+//   }
+// }

@@ -13,6 +13,8 @@ import {
   RESEND_RESULT,
   SESSION_ALREADY_AVAILABLE_ERROR,
 } from 'modules/login/login.constants';
+import { OtpInput, OtpInputHandle } from 'modules/login/OtpInput';
+import { FlowExpiredResponse, FlowUiMessage, LoginFlow } from 'types/api/auth.types';
 import {
   actionUrlWithOrigin,
   buildOtpSubmitBody,
@@ -20,9 +22,7 @@ import {
   determineExpiryType,
   isInvalidCodeResponse,
   isResendSuccessResponse,
-} from 'modules/login/otp.utils';
-import { OtpInput, OtpInputHandle } from 'modules/login/OtpInput';
-import { FlowExpiredResponse, FlowUiMessage, LoginFlow } from 'types/api/auth.types';
+} from '@/modules/login/login.utils';
 import { API_STATUS_CODES } from '@/types/common/statusCodes';
 
 type OtpMessage = { type: 'error' | 'info'; text: string } | null;
