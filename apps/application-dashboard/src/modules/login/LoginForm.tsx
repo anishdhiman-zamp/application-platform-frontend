@@ -7,10 +7,6 @@ import { cn } from '@zamp-platform/ui/utils';
 import { getFromLocalStorage, LOCAL_STORAGE_KEYS, removeFromLocalStorage, safeJsonParse } from '@zamp-platform/utils';
 import { LOGIN_METHODS, LOGIN_PROVIDERS } from 'constants/auth.constants';
 import { MoveLeft } from 'lucide-react';
-import { AnimatedDitherArrow } from 'modules/login/AnimatedDitherArrow';
-import { LOGIN_ERROR_TEXT } from 'modules/login/constants';
-import { GoogleIcon } from 'modules/login/GoogleIcon';
-import LocaldevEmailPasswordLogin from 'modules/login/LocaldevEmailPasswordLogin';
 import {
   ACTIVE_VIEW,
   LOADING_ACTION,
@@ -20,11 +16,15 @@ import {
 } from 'modules/login/login.constants';
 import { actionUrlWithOrigin } from 'modules/login/login.utils';
 import { flowHasCodeNodes, flowHasPasswordNodes } from 'modules/login/login.utils';
+import LoginFooter from 'modules/login/LoginFooter';
 import { OtpVerification } from 'modules/login/OtpVerification';
-import Link from 'next/link';
 import { FlowNode, LoginFlow } from 'types/api/auth.types';
 import { getDomainFromEmail, isValidEmail } from 'utils/common';
 import { API_ENDPOINTS } from '@/apis/apiEndpoint.constants';
+import { AnimatedDitherArrow } from '@/modules/login/AnimatedDitherArrow';
+import { LOGIN_ERROR_TEXT } from '@/modules/login/constants';
+import { GoogleIcon } from '@/modules/login/GoogleIcon';
+import LocaldevEmailPasswordLogin from '@/modules/login/LocaldevEmailPasswordLogin';
 import { API_STATUS_CODES } from '@/types/common/statusCodes';
 import { MapAny } from '@/types/commonTypes';
 import Input from 'components/common/input';
@@ -320,7 +320,7 @@ export const LoginForm = () => {
       return (
         <>
           Signing in with
-          <ImageWithFallback src={providerLogo} alt='provider' className='h-5 max-w-[40px] object-contain' />
+          <ImageWithFallback src={providerLogo} alt='provider' className='h-5 max-w-10 object-contain' />
         </>
       );
     }
@@ -387,15 +387,15 @@ export const LoginForm = () => {
 
     case ACTIVE_VIEW.METHOD_PICKER: {
       const btnBase =
-        'h-auto w-full overflow-hidden rounded-2xl border px-5 py-3.5 text-sm font-medium transition-all duration-250 cursor-pointer active:scale-[0.98]';
+        'h-auto w-full overflow-hidden rounded-2xl border px-5 py-3.5 text-sm font-medium transition-all duration-250 cursor-pointer active:scale-[1]';
 
       return (
         <div>
           <p className='text-GRAY_1000 mb-1 text-sm'>
             Signing in as <span className='font-medium'>{email}</span>
           </p>
-          <p className='text-GRAY_700 mb-6 text-[13px]'>Choose how you want to sign in</p>
-          {error && <p className='mb-4 text-xs text-red-600'>{error}</p>}
+          <p className='text-GRAY_700 f-13-400 mb-6'>Choose how you want to sign in</p>
+          {error && <p className='text-RED_600 mb-4 text-xs'>{error}</p>}
           <div className='flex flex-col gap-3'>
             <Button
               type='button'
@@ -422,7 +422,7 @@ export const LoginForm = () => {
           <Button
             type='button'
             variant='ghost'
-            className='text-GRAY_700 hover:text-GRAY_900 mt-4 flex h-auto items-center gap-1.5 bg-transparent text-[13px] transition-colors hover:bg-transparent'
+            className='text-GRAY_700 hover:text-GRAY_900 f-13-400 mt-4 flex h-auto items-center gap-1.5 bg-transparent transition-colors hover:bg-transparent'
             onClick={() => {
               setMethodPickerFlow(null);
               setError(null);
@@ -444,9 +444,9 @@ export const LoginForm = () => {
             type='button'
             disabled={isLoading}
             onClick={handleGoogleLogin}
-            className='btn-login bg-GRAY_100 text-GRAY_1000 hover:bg-GRAY_200 active:bg-GRAY_100 disabled:bg-GRAY_100 relative flex h-auto w-full cursor-pointer items-center justify-center gap-2.5 overflow-hidden rounded-2xl border border-black/12 px-5 py-3.5 text-sm font-medium transition-all duration-250 active:scale-[0.98] disabled:cursor-not-allowed disabled:opacity-60'
+            className='btn-login bg-GRAY_100 text-GRAY_1000 hover:bg-GRAY_200 active:bg-GRAY_100 disabled:bg-GRAY_100 f-14-500 relative flex h-auto w-full cursor-pointer items-center justify-center gap-2.5 overflow-hidden rounded-2xl border border-black/12 px-5 py-3.5 transition-all duration-250 active:scale-[1] disabled:cursor-not-allowed disabled:opacity-60'
           >
-            <GoogleIcon className='relative z-[1] h-[18px] w-[18px] shrink-0' />
+            <GoogleIcon className='relative z-[1] h-4 w-4 shrink-0' />
             <span className='relative z-[1]'>
               {loadingAction === LOADING_ACTION.GOOGLE ? 'Connecting...' : 'Continue with Google'}
             </span>
@@ -463,7 +463,7 @@ export const LoginForm = () => {
             <div className='mb-5'>
               <Input
                 label='Email'
-                labelOverrideClassName='mb-2 block text-[13px] font-medium text-GRAY_900'
+                labelOverrideClassName='mb-2 block f-13-500 text-GRAY_900'
                 id='login-email'
                 placeholder='Enter your work email'
                 name='email'
@@ -477,13 +477,13 @@ export const LoginForm = () => {
                 inputClassName={cn(
                   'w-full rounded-xl border bg-white px-3.5 py-3 text-sm text-GRAY_1000 transition-all duration-250 outline-none placeholder:text-GRAY_500',
                   error
-                    ? 'border-red-600 shadow-[0_0_0_3px_rgba(220,38,38,0.08)] focus:border-red-600 focus:shadow-[0_0_0_3px_rgba(220,38,38,0.12)]'
+                    ? 'border-RED_600 shadow-[0_0_0_3px_rgba(220,38,38,0.08)] focus:border-red-600 focus:shadow-[0_0_0_3px_rgba(220,38,38,0.12)]'
                     : 'border-black/10 focus:border-black/25 focus:shadow-[0_0_0_3px_rgba(0,0,0,0.04)]',
                 )}
                 focusClassNames=''
                 inputRoundedClassName=''
               />
-              {error && <p className='mt-1.5 text-xs text-red-600'>{error}</p>}
+              {error && <p className='text-RED_600 mt-1.5 text-xs'>{error}</p>}
             </div>
 
             <Button
@@ -499,36 +499,14 @@ export const LoginForm = () => {
             >
               <span className='relative z-[1]'>
                 {getSubmitButtonContent()}
-                <span className='absolute top-1/2 left-full z-[1] ml-2 inline-flex h-[17px] w-[17px] -translate-y-1/2 overflow-hidden'>
+                <span className='absolute top-1/2 left-full z-[1] ml-2 inline-flex h-4 w-4 -translate-y-1/2 overflow-hidden'>
                   <AnimatedDitherArrow disabled={isSubmitDisabled} />
                 </span>
               </span>
             </Button>
           </form>
 
-          {/* Terms */}
-          <p className='text-GRAY_700 mt-6 text-center text-[11.5px] leading-[1.7]'>
-            By using Zamp, you are agreeing to our
-            <br />
-            <Link
-              href='https://www.zamp.finance/privacy-policy'
-              className='border-GRAY_900/30 text-GRAY_900 hover:border-GRAY_1000/40 hover:text-GRAY_1000 border-b transition-colors duration-150'
-              target='_blank'
-              rel='noopener noreferrer'
-            >
-              Privacy Policy
-            </Link>{' '}
-            and{' '}
-            <Link
-              href='https://www.zamp.finance/terms-of-use'
-              className='border-GRAY_900/30 text-GRAY_900 hover:border-GRAY_1000/40 hover:text-GRAY_1000 border-b transition-colors duration-150'
-              target='_blank'
-              rel='noopener noreferrer'
-            >
-              Terms of Service
-            </Link>
-            .
-          </p>
+          <LoginFooter />
         </div>
       );
     }

@@ -145,11 +145,3 @@ export function redirectToDashboard(): void {
 
   window.location.href = dashboardPath;
 }
-
-// export function safeJsonParse(str: string): MapAny | null {
-//   try {
-//     return JSON.parse(str);
-//   } catch {
-//     return null;
-//   }
-// }
