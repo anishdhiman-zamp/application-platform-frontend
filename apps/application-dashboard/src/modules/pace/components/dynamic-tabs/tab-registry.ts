@@ -1,14 +1,14 @@
 import { ROUTES_PATH } from '@/constants/routeConfig';
-import { DynamicTabRouteConfig, DynamicTabType, ROUTE_KIND } from '@/modules/pace/pace.types';
+import { DynamicTabRouteConfig, DynamicTabType, ROUTE_KIND, TAB_TYPE } from '@/modules/pace/pace.types';
 
 export const TAB_TYPE_CONFIG: Record<DynamicTabType, DynamicTabRouteConfig> = {
-  file: {
+  [TAB_TYPE.FILE]: {
     kind: ROUTE_KIND.QUERY,
     basePath: ROUTES_PATH.CHAT_FILES,
     paramName: 'f',
     fallbackPath: ROUTES_PATH.CHAT_FILES,
   },
-  task: {
+  [TAB_TYPE.TASK]: {
     kind: ROUTE_KIND.DYNAMIC,
     basePath: '/chat/tasks',
     buildPath: (id: string) => `/chat/tasks/${encodeURIComponent(id)}`,
@@ -16,7 +16,7 @@ export const TAB_TYPE_CONFIG: Record<DynamicTabType, DynamicTabRouteConfig> = {
   },
 };
 
-const DEFAULT_TAB_TYPE: DynamicTabType = 'file';
+const DEFAULT_TAB_TYPE: DynamicTabType = TAB_TYPE.FILE;
 
 export const getTabTypeConfig = (type?: DynamicTabType): DynamicTabRouteConfig => {
   return TAB_TYPE_CONFIG[type ?? DEFAULT_TAB_TYPE];

@@ -19,7 +19,12 @@ export interface PaceSettingsTabSchema extends PaceNavbarItemSchema {
   name: string;
 }
 
-export type DynamicTabType = 'file' | 'task';
+export const TAB_TYPE = {
+  FILE: 'file',
+  TASK: 'task',
+} as const;
+
+export type DynamicTabType = (typeof TAB_TYPE)[keyof typeof TAB_TYPE];
 
 export const ROUTE_KIND = {
   QUERY: 'query',

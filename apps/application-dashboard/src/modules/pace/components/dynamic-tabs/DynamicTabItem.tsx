@@ -9,7 +9,7 @@ import { isOnSameBasePath } from 'modules/pace/components/dynamic-tabs/tab-regis
 import { useRouter } from 'next/navigation';
 import TooltipV2 from '@/components/common/TooltipV2';
 import { usePaceContext } from '@/modules/pace/pace.context';
-import { DynamicTab } from '@/modules/pace/pace.types';
+import { DynamicTab, TAB_TYPE } from '@/modules/pace/pace.types';
 import { SIDE_OPTIONS } from '@/types/commonTypes';
 
 export interface DynamicTabItemProps {
@@ -27,7 +27,7 @@ const DynamicTabItem = ({ tab, isActive, isDragging = false, onClose, renderIcon
   const handleClick = () => {
     if (isActive) return;
 
-    const tabType = tab.type ?? 'file';
+    const tabType = tab.type ?? TAB_TYPE.FILE;
     const canUseFastSwitch = isOnSameBasePath(tabType);
 
     setActiveTabId(tab.id);

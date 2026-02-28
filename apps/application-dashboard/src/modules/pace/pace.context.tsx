@@ -1,7 +1,7 @@
 'use client';
 
 import { createContext, type ReactNode, useCallback, useContext, useEffect, useMemo, useRef, useState } from 'react';
-import { DynamicTab } from 'modules/pace/pace.types';
+import { DynamicTab, TAB_TYPE } from 'modules/pace/pace.types';
 import { getFromLocalStorage, LOCAL_STORAGE_KEYS, setToLocalStorage } from '@/utils/localstorage';
 
 const getStoredTabs = (): DynamicTab[] => {
@@ -14,7 +14,7 @@ const getStoredTabs = (): DynamicTab[] => {
     return tabs.map((tab) => ({
       ...tab,
       stableKey: tab.stableKey || crypto.randomUUID(),
-      type: tab.type ?? 'file',
+      type: tab.type ?? TAB_TYPE.FILE,
     }));
   } catch (error) {
     console.error('Error getting stored tabs:', error);
@@ -72,13 +72,13 @@ export const PaceProvider = ({ children }: { children: ReactNode }) => {
 
   const openDynamicTab = useCallback((tab: Omit<DynamicTab, 'stableKey'>) => {
     setDynamicTabs((prev) => {
-      const exists = prev.some((t) => t.id === tab.id && t.type === (tab.type ?? 'file'));
+      const exists = prev.some((t) => t.id === tab.id && t.type === (tab.type ?? TAB_TYPE.FILE));
 
       if (exists) return prev;
 
       const newTab: DynamicTab = {
         ...tab,
-        type: tab.type ?? 'file',
+        type: tab.type ?? TAB_TYPE.FILE,
         stableKey: crypto.randomUUID(),
       };
 
@@ -111,7 +111,7 @@ export const PaceProvider = ({ children }: { children: ReactNode }) => {
 
       newTabs[tabIndex] = {
         ...newTab,
-        type: newTab.type ?? existingTab.type ?? 'file',
+        type: newTab.type ?? existingTab.type ?? TAB_TYPE.FILE,
         stableKey: existingTab.stableKey,
       };
       setStoredTabs(newTabs);

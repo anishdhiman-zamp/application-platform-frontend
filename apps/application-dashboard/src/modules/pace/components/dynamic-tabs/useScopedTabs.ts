@@ -10,7 +10,7 @@ import {
 } from 'modules/pace/components/dynamic-tabs/tab-registry';
 import { useSearchParams } from 'next/navigation';
 import { usePaceContext } from '@/modules/pace/pace.context';
-import { DynamicTab, DynamicTabType, ROUTE_KIND } from '@/modules/pace/pace.types';
+import { DynamicTab, DynamicTabType, ROUTE_KIND, TAB_TYPE } from '@/modules/pace/pace.types';
 
 interface UseScopedTabsConfig {
   type?: DynamicTabType;
@@ -36,7 +36,7 @@ interface UseScopedTabsReturn {
 }
 
 export const useScopedTabs = (config: UseScopedTabsConfig = {}): UseScopedTabsReturn => {
-  const { type = 'file', onTabClose, onTabUpdate, onFolderMove } = config;
+  const { type = TAB_TYPE.FILE, onTabClose, onTabUpdate, onFolderMove } = config;
 
   const searchParams = useSearchParams();
   const tabConfig = getTabTypeConfig(type);
@@ -61,7 +61,7 @@ export const useScopedTabs = (config: UseScopedTabsConfig = {}): UseScopedTabsRe
   } = usePaceContext();
 
   const tabs = useMemo(() => {
-    return allTabs.filter((tab) => (tab.type ?? 'file') === type);
+    return allTabs.filter((tab) => (tab.type ?? TAB_TYPE.FILE) === type);
   }, [allTabs, type]);
 
   const tabMaps = useMemo(() => {
