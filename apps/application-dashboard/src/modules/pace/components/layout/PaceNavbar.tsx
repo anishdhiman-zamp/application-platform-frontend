@@ -16,24 +16,25 @@ import { cn } from '@zamp-platform/ui/utils';
 import DynamicTabItem from 'modules/pace/components/layout/DynamicTabItem';
 import { PaceNavbarItemId } from 'modules/pace/pace.types';
 import Link from 'next/link';
-import { usePathname } from 'next/navigation';
+import { usePathname, useSearchParams } from 'next/navigation';
 import { useIsMacsFileSystemEnabled } from '@/hooks/useIsMacsFileSystemEnabled';
 import SortableDynamicTabItem from '@/modules/pace/components/layout/SortableDynamicTabItem';
 import { useDynamicTabs } from '@/modules/pace/hooks/useDynamicTabs';
 import { PACE_NAVBAR_ITEMS } from '@/modules/pace/pace.constants';
 import { usePaceContext } from '@/modules/pace/pace.context';
+import { normalizeUrlPath } from '@/modules/pace/pace.utils';
 
 const PaceNavbar = () => {
   const pathname = usePathname();
+  const searchParams = useSearchParams();
   const { setIsPaceSidebarOpen, startNewChat } = usePaceContext();
-  const { dynamicTabs, isDynamicTabActive, isOnAnyDynamicTab, handleCloseDynamicTab, handleReorderTabs } =
-    useDynamicTabs();
+  const { tabs, isTabActive, isOnAnyDynamicTab, closeTab, reorderTabs } = useDynamicTabs();
   const { isMacsFileSystemEnabled } = useIsMacsFileSystemEnabled();
 
   const [activeId, setActiveId] = useState<string | null>(null);
   const sensors = useSensors(useSensor(PointerSensor, { activationConstraint: { distance: 5 } }));
 
-  const tabStableKeys = useMemo(() => dynamicTabs.map((tab) => tab.stableKey), [dynamicTabs]);
+  const tabStableKeys = useMemo(() => tabs.map((tab) => tab.stableKey), [tabs]);
 
   const filteredNavbarItems = useMemo(() => {
     return PACE_NAVBAR_ITEMS.filter((item) => {
@@ -45,7 +46,7 @@ const PaceNavbar = () => {
     });
   }, [isMacsFileSystemEnabled]);
 
-  const activeTab = useMemo(() => dynamicTabs.find((tab) => tab.stableKey === activeId), [dynamicTabs, activeId]);
+  const draggedTab = useMemo(() => tabs.find((tab) => tab.stableKey === activeId), [tabs, activeId]);
 
   const handleDragStart = (event: DragStartEvent) => {
     setActiveId(event.active.id as string);
@@ -61,9 +62,9 @@ const PaceNavbar = () => {
       const newIndex = tabStableKeys.indexOf((over?.id as string) ?? '');
 
       if (oldIndex !== -1 && newIndex !== -1) {
-        const newOrder = arrayMove(dynamicTabs, oldIndex, newIndex).map((tab) => tab.id);
+        const newOrder = arrayMove(tabs, oldIndex, newIndex).map((tab) => tab.id);
 
-        handleReorderTabs(newOrder);
+        reorderTabs(newOrder);
       }
     }
   };
@@ -80,7 +81,16 @@ const PaceNavbar = () => {
     return pathname?.includes(path) ?? false;
   };
 
-  const handleNavItemClick = (id: PaceNavbarItemId) => {
+  const handleNavItemClick = (e: React.MouseEvent<HTMLAnchorElement>, id: PaceNavbarItemId, path: string) => {
+    const queryString = searchParams?.toString();
+    const currentFullPath = pathname + (queryString ? `?${queryString}` : '');
+
+    if (normalizeUrlPath(path) === normalizeUrlPath(currentFullPath)) {
+      e.preventDefault();
+
+      return;
+    }
+
     if (id === PaceNavbarItemId.HOME) {
       setIsPaceSidebarOpen(false);
       startNewChat();
@@ -102,16 +112,16 @@ const PaceNavbar = () => {
             )}
             role='button'
             tabIndex={0}
-            onClick={() => handleNavItemClick(item.id)}
+            onClick={(e) => handleNavItemClick(e, item.id, item.path)}
           >
             {item.iconComponent}
           </Link>
         ))}
       </div>
 
-      {dynamicTabs.length > 0 && <div className='bg-GRAY_300 mx-3 h-4 w-px shrink-0' />}
+      {tabs.length > 0 && <div className='bg-GRAY_300 mx-3 h-4 w-px shrink-0' />}
 
-      {dynamicTabs.length > 0 && (
+      {tabs.length > 0 && (
         <DndContext
           sensors={sensors}
           collisionDetection={closestCenter}
@@ -120,26 +130,21 @@ const PaceNavbar = () => {
         >
           <SortableContext items={tabStableKeys} strategy={horizontalListSortingStrategy}>
             <div className='flex min-w-0 flex-1 items-center gap-x-1'>
-              {dynamicTabs.map((tab) => (
+              {tabs.map((tab) => (
                 <SortableDynamicTabItem
                   key={tab.stableKey}
                   tab={tab}
-                  isActive={isDynamicTabActive(tab)}
+                  isActive={isTabActive(tab)}
                   isAnyDragging={activeId !== null}
-                  onClose={handleCloseDynamicTab}
+                  onClose={closeTab}
                 />
               ))}
             </div>
           </SortableContext>
           <DragOverlay>
-            {activeTab ? (
+            {draggedTab ? (
               <div className='-rotate-2 rounded-lg border shadow-lg'>
-                <DynamicTabItem
-                  tab={activeTab}
-                  isActive={isDynamicTabActive(activeTab)}
-                  isDragging
-                  onClose={handleCloseDynamicTab}
-                />
+                <DynamicTabItem tab={draggedTab} isActive={isTabActive(draggedTab)} isDragging onClose={closeTab} />
               </div>
             ) : null}
           </DragOverlay>

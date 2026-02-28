@@ -29,7 +29,7 @@ interface BaseReadResponse {
 
 // List Files Types
 export interface ListFilesRequest {
-  recursive?: boolean;
+  depth?: number;
   path?: string;
 }
 
@@ -55,9 +55,8 @@ export interface CreateItemResponse {
 
 // Write File Types
 export interface WriteFileRequest {
-  relative_path: string;
+  path: string;
   content: string;
-  expected_mtime_ms?: number;
 }
 
 export interface WriteFileResponse {

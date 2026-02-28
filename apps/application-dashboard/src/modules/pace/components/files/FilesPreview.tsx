@@ -1,6 +1,6 @@
 import { FileIcon } from '@zamp-platform/ui';
 import Image from 'next/image';
-import { type FilesPreviewProps } from '@/modules/pace/components/files/file-tree.types';
+import { FILE_TYPE, type FilesPreviewProps } from '@/modules/pace/components/files/file-tree.types';
 import {
   formatDate,
   formatFileSize,
@@ -9,7 +9,7 @@ import {
 } from '@/modules/pace/components/files/file-tree.utils';
 
 const FilesPreview = ({ selectedFile }: FilesPreviewProps) => {
-  if (!selectedFile) {
+  if (!selectedFile || selectedFile.type === FILE_TYPE.DIRECTORY) {
     return (
       <div className='w-3/5 overflow-y-auto p-3'>
         <div className='flex h-full flex-col items-center justify-start gap-y-8 p-3'>

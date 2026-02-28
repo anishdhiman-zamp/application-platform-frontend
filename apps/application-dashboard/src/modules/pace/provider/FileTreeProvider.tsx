@@ -2,10 +2,10 @@
 
 import { type ReactNode } from 'react';
 import type { FileItem } from '@/modules/pace/components/files/file-tree.types';
-import { FileActionsProvider } from '@/modules/pace/hooks/useFileActionsContext';
-import { FileClipboardProvider } from '@/modules/pace/hooks/useFileClipboard';
-import { FileConflictProvider } from '@/modules/pace/hooks/useFileConflict';
-import { ProtectedFoldersProvider } from '@/modules/pace/hooks/useProtectedFolders';
+import { FileActionsProvider } from '@/modules/pace/context/FileActionsContext';
+import { FileClipboardProvider } from '@/modules/pace/context/FileClipboardContext';
+import { FileConflictProvider } from '@/modules/pace/context/FileConflictContext';
+import { ProtectedFoldersProvider } from '@/modules/pace/context/ProtectedFoldersContext';
 
 interface FileTreeProviderProps {
   children: ReactNode;

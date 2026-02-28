@@ -19,6 +19,7 @@ import {
   FILE_CATEGORY,
   FILE_TYPE_LABELS,
   type FileCategory,
+  HTML_EXTENSIONS,
   IMAGE_EXTENSIONS,
   MARKDOWN_EXTENSIONS,
   MONACO_EDITABLE_EXTENSIONS,
@@ -78,7 +79,21 @@ export function getMediaUrl(filePath: string): string {
     .map((segment) => encodeURIComponent(segment))
     .join('/');
 
-  return `${API_DOMAIN}/files/${encodedPath}?content`;
+  return `${API_DOMAIN}/files/${encodedPath}?raw=true`;
+}
+
+/**
+ * Checks if an image is already cached in the browser.
+ * Used to prevent loading flash when switching to already-loaded images.
+ */
+export function isImageCached(src: string): boolean {
+  if (typeof window === 'undefined') return false;
+
+  const img = new window.Image();
+
+  img.src = src;
+
+  return img.complete && img.naturalWidth > 0;
 }
 
 /**
@@ -177,6 +192,10 @@ export function getFileCategory(filename: string): FileCategory {
     return FILE_CATEGORY.MARKDOWN;
   }
 
+  if ((HTML_EXTENSIONS as readonly string[]).includes(ext)) {
+    return FILE_CATEGORY.HTML;
+  }
+
   if ((MONACO_EDITABLE_EXTENSIONS as readonly string[]).includes(ext)) {
     return FILE_CATEGORY.CODE;
   }
@@ -190,7 +209,7 @@ export function getFileCategory(filename: string): FileCategory {
 export function isFileEditable(filename: string): boolean {
   const category = getFileCategory(filename);
 
-  return category === FILE_CATEGORY.CODE || category === FILE_CATEGORY.MARKDOWN;
+  return category === FILE_CATEGORY.CODE || category === FILE_CATEGORY.MARKDOWN || category === FILE_CATEGORY.HTML;
 }
 
 /**
@@ -239,17 +258,48 @@ export function sortTreeNodes(nodes: TreeNode[], sortBy: SortOption, sortDirecti
 /**
  * Filters tree nodes by search query - only shows items whose name matches.
  * Does not include parent folders just because children match.
+ * Matching children are shown at root level, not inside their parent folder,
+ * to prevent duplicate keys when the folder is expanded.
  */
 export function filterTreeNodes(nodes: TreeNode[], searchQuery: string): TreeNode[] {
   if (!searchQuery.trim()) return nodes;
 
   const query = searchQuery.toLowerCase();
   const results: TreeNode[] = [];
+  const matchedPaths = new Set<string>();
+
+  const collectMatchingPaths = (nodeList: TreeNode[]) => {
+    for (const node of nodeList) {
+      if (node.name.toLowerCase().includes(query)) {
+        matchedPaths.add(node.path);
+      }
+
+      if (node.type === FILE_TYPE.DIRECTORY && node.children) {
+        collectMatchingPaths(node.children);
+      }
+    }
+  };
+
+  collectMatchingPaths(nodes);
+
+  const filterChildrenRecursively = (children: TreeNode[] | undefined): TreeNode[] | undefined => {
+    if (!children) return undefined;
+
+    return children
+      .filter((child) => !matchedPaths.has(child.path))
+      .map((child) => ({
+        ...child,
+        children: filterChildrenRecursively(child.children),
+      }));
+  };
 
   const collectMatches = (nodeList: TreeNode[]) => {
     for (const node of nodeList) {
       if (node.name.toLowerCase().includes(query)) {
-        results.push(node);
+        results.push({
+          ...node,
+          children: filterChildrenRecursively(node.children),
+        });
       }
 
       if (node.type === FILE_TYPE.DIRECTORY && node.children) {

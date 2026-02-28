@@ -7,9 +7,9 @@ import PaceNavbar from 'modules/pace/components/layout/PaceNavbar';
 import { usePathname } from 'next/navigation';
 import NewPaceIcons from '@/assets/Icons/NewPaceIcons';
 import { ROUTES_PATH } from '@/constants/routeConfig';
-import { UploadProgressToast } from '@/modules/pace/components/files/UploadProgressToast';
+import UploadProgressToast from '@/modules/pace/components/progress-toast/UploadProgressToast';
+import { FileUploadProvider, useFileUploadContext } from '@/modules/pace/context/FileUploadContext';
 import { useDynamicTabs } from '@/modules/pace/hooks/useDynamicTabs';
-import { FileUploadProvider, useFileUploadContext } from '@/modules/pace/hooks/useFileUploadContext';
 import { usePaceContext } from '@/modules/pace/pace.context';
 
 interface PaceLayoutContentProps {
