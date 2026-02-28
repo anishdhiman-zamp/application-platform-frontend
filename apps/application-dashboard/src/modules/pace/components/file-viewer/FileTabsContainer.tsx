@@ -5,10 +5,10 @@ import { cn } from '@zamp-platform/ui/utils';
 import FileViewerTab from 'modules/pace/components/file-viewer/FileViewerTab';
 import ImageLoader from '@/components/common/loader/ImageLoader';
 import { ZAMP_LOGO_LOADER_SVG } from '@/constants/icons';
-import { useDynamicTabs } from '@/modules/pace/hooks/useDynamicTabs';
+import { useFileTabs } from '@/modules/pace/components/dynamic-tabs/useFileTabs';
 
 const FileTabsContainer = () => {
-  const { tabs, activeTab, isHydrated, closeTab } = useDynamicTabs();
+  const { tabs, activeTab, isHydrated, closeTab } = useFileTabs();
 
   if (!isHydrated || tabs.length === 0) {
     return <ImageLoader imageSrc={ZAMP_LOGO_LOADER_SVG} width={140} height={140} />;

@@ -13,13 +13,13 @@ import {
 } from '@dnd-kit/core';
 import { arrayMove, horizontalListSortingStrategy, SortableContext } from '@dnd-kit/sortable';
 import { cn } from '@zamp-platform/ui/utils';
-import DynamicTabItem from 'modules/pace/components/layout/DynamicTabItem';
 import { PaceNavbarItemId } from 'modules/pace/pace.types';
 import Link from 'next/link';
 import { usePathname, useSearchParams } from 'next/navigation';
 import { useIsMacsFileSystemEnabled } from '@/hooks/useIsMacsFileSystemEnabled';
-import SortableDynamicTabItem from '@/modules/pace/components/layout/SortableDynamicTabItem';
-import { useDynamicTabs } from '@/modules/pace/hooks/useDynamicTabs';
+import DynamicTabItem from '@/modules/pace/components/dynamic-tabs/DynamicTabItem';
+import SortableDynamicTabItem from '@/modules/pace/components/dynamic-tabs/SortableDynamicTabItem';
+import { useNavbarTabs } from '@/modules/pace/components/dynamic-tabs/useNavbarTabs';
 import { PACE_NAVBAR_ITEMS } from '@/modules/pace/pace.constants';
 import { usePaceContext } from '@/modules/pace/pace.context';
 import { normalizeUrlPath } from '@/modules/pace/pace.utils';
@@ -28,7 +28,7 @@ const PaceNavbar = () => {
   const pathname = usePathname();
   const searchParams = useSearchParams();
   const { setIsPaceSidebarOpen, startNewChat } = usePaceContext();
-  const { tabs, isTabActive, isOnAnyDynamicTab, closeTab, reorderTabs } = useDynamicTabs();
+  const { tabs, isTabActive, isOnAnyDynamicTab, closeTab, reorderTabs } = useNavbarTabs();
   const { isMacsFileSystemEnabled } = useIsMacsFileSystemEnabled();
 
   const [activeId, setActiveId] = useState<string | null>(null);

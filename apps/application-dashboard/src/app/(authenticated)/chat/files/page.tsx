@@ -1,11 +1,11 @@
+'use client';
+
+import { useSearchParams } from 'next/navigation';
 import FilesPageContent from '@/modules/pace/components/files/FilesPageContent';
 
-interface FilesPageProps {
-  searchParams: Promise<{ f?: string }>;
-}
-
-const FilesPage = async ({ searchParams }: FilesPageProps) => {
-  const { f: filePath = null } = await searchParams;
+const FilesPage = () => {
+  const searchParams = useSearchParams();
+  const filePath = searchParams?.get('f') ?? null;
 
   return <FilesPageContent filePath={filePath} />;
 };
