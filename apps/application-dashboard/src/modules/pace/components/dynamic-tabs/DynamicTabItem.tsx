@@ -21,7 +21,7 @@ export interface DynamicTabItemProps {
 }
 
 const DynamicTabItem = ({ tab, isActive, isDragging = false, onClose, renderIcon }: DynamicTabItemProps) => {
-  const { setOptimisticActiveTabId } = usePaceContext();
+  const { setActiveTabId } = usePaceContext();
   const router = useRouter();
 
   const handleClick = () => {
@@ -30,7 +30,7 @@ const DynamicTabItem = ({ tab, isActive, isDragging = false, onClose, renderIcon
     const tabType = tab.type ?? 'file';
     const canUseFastSwitch = isOnSameBasePath(tabType);
 
-    setOptimisticActiveTabId(tab.id);
+    setActiveTabId(tab.id);
 
     if (canUseFastSwitch) {
       window.history.pushState({ tabId: tab.id, tabType }, '', tab.path);

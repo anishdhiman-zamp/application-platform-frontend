@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useCallback, useEffect, useMemo, useRef } from 'react';
+import React, { useCallback, useEffect, useMemo } from 'react';
 import { getNextNavigationTarget, NAVIGATION_STRATEGY } from '@zamp-platform/utils';
 import {
   buildTabRoute,
@@ -56,66 +56,42 @@ export const useScopedTabs = (config: UseScopedTabsConfig = {}): UseScopedTabsRe
     closeDynamicTab,
     updateDynamicTab,
     reorderDynamicTabs,
-    pendingActiveStableKey,
-    setPendingActiveStableKey,
-    optimisticActiveTabId,
-    setOptimisticActiveTabId,
+    activeTabId,
+    setActiveTabId,
   } = usePaceContext();
 
   const tabs = useMemo(() => {
     return allTabs.filter((tab) => (tab.type ?? 'file') === type);
   }, [allTabs, type]);
 
-  const closedTabIdsRef = useRef<Set<string>>(new Set());
-
   const tabMaps = useMemo(() => {
     const byId = new Map<string, DynamicTab>();
-    const byStableKey = new Map<string, DynamicTab>();
 
     for (const tab of tabs) {
       byId.set(tab.id, tab);
-      byStableKey.set(tab.stableKey, tab);
     }
 
-    return { byId, byStableKey };
+    return { byId };
   }, [tabs]);
 
-  const tabExistsForUrlParam = useMemo(() => {
-    return currentUrlParam ? tabMaps.byId.has(currentUrlParam) : false;
-  }, [currentUrlParam, tabMaps]);
-
-  const effectiveActiveTabId = optimisticActiveTabId ?? currentUrlParam;
-
   const activeTab = useMemo(() => {
-    if (!isHydrated) return null;
+    if (!isHydrated || !activeTabId) return null;
 
-    if (effectiveActiveTabId) {
-      const matchedTab = tabMaps.byId.get(effectiveActiveTabId);
-
-      if (matchedTab) {
-        return matchedTab;
-      }
-    }
-
-    if (pendingActiveStableKey) {
-      return tabMaps.byStableKey.get(pendingActiveStableKey) ?? null;
-    }
-
-    return null;
-  }, [tabMaps, effectiveActiveTabId, isHydrated, pendingActiveStableKey]);
+    return tabMaps.byId.get(activeTabId) ?? null;
+  }, [isHydrated, activeTabId, tabMaps.byId]);
 
   const isTabActive = useCallback(
     (tab: DynamicTab) => {
-      if (!effectiveActiveTabId) return false;
+      if (!activeTabId) return false;
 
-      return tab.id === effectiveActiveTabId;
+      return tab.id === activeTabId;
     },
-    [effectiveActiveTabId],
+    [activeTabId],
   );
 
   const isOnAnyDynamicTab = useCallback(() => {
-    return effectiveActiveTabId !== null && tabMaps.byId.has(effectiveActiveTabId);
-  }, [tabMaps, effectiveActiveTabId]);
+    return activeTabId !== null && tabMaps.byId.has(activeTabId);
+  }, [tabMaps, activeTabId]);
 
   const getTabById = useCallback(
     (id: string) => {
@@ -132,8 +108,6 @@ export const useScopedTabs = (config: UseScopedTabsConfig = {}): UseScopedTabsRe
     (id: string, name: string, metadata?: Record<string, unknown>) => {
       const tabPath = buildTabRoute(id, type);
 
-      setOptimisticActiveTabId(id);
-
       openDynamicTab({
         id,
         name,
@@ -142,9 +116,10 @@ export const useScopedTabs = (config: UseScopedTabsConfig = {}): UseScopedTabsRe
         metadata,
       });
 
+      setActiveTabId(id);
       window.history.pushState({ tabId: id, tabType: type }, '', tabPath);
     },
-    [openDynamicTab, setOptimisticActiveTabId, type],
+    [openDynamicTab, setActiveTabId, type],
   );
 
   const closeTab = useCallback(
@@ -156,9 +131,7 @@ export const useScopedTabs = (config: UseScopedTabsConfig = {}): UseScopedTabsRe
 
       if (!closingTab) return;
 
-      const isClosingActiveTab = closingTab.id === effectiveActiveTabId;
-
-      closedTabIdsRef.current.add(closingTab.id);
+      const isClosingActiveTab = closingTab.id === activeTabId;
 
       onTabClose?.(closingTab.id);
       closeDynamicTab(closingTab.id);
@@ -174,11 +147,11 @@ export const useScopedTabs = (config: UseScopedTabsConfig = {}): UseScopedTabsRe
         const fallbackPath = getTabFallbackPath(closingTab.type);
         const newPath = hasRemainingItems && target ? target.path : fallbackPath;
 
-        setOptimisticActiveTabId(target?.id ?? null);
+        setActiveTabId(target?.id ?? null);
         window.history.pushState({ tabId: target?.id ?? null, tabType: type }, '', newPath);
       }
     },
-    [tabs, effectiveActiveTabId, closeDynamicTab, onTabClose, setOptimisticActiveTabId, type],
+    [tabs, activeTabId, closeDynamicTab, onTabClose, setActiveTabId, type],
   );
 
   const closeTabsForPath = useCallback(
@@ -191,10 +164,9 @@ export const useScopedTabs = (config: UseScopedTabsConfig = {}): UseScopedTabsRe
 
       if (tabsToClose.length === 0) return;
 
-      const activeTabToClose = tabsToClose.find((tab) => tab.id === effectiveActiveTabId);
+      const activeTabToClose = tabsToClose.find((tab) => tab.id === activeTabId);
 
       tabsToClose.forEach((tab) => {
-        closedTabIdsRef.current.add(tab.id);
         onTabClose?.(tab.id);
         closeDynamicTab(tab.id);
       });
@@ -210,11 +182,11 @@ export const useScopedTabs = (config: UseScopedTabsConfig = {}): UseScopedTabsRe
         const fallbackPath = getTabFallbackPath(activeTabToClose.type);
         const newPath = hasRemainingItems && target ? target.path : fallbackPath;
 
-        setOptimisticActiveTabId(target?.id ?? null);
+        setActiveTabId(target?.id ?? null);
         window.history.pushState({ tabId: target?.id ?? null, tabType: type }, '', newPath);
       }
     },
-    [tabs, effectiveActiveTabId, closeDynamicTab, onTabClose, setOptimisticActiveTabId, type],
+    [tabs, activeTabId, closeDynamicTab, onTabClose, setActiveTabId, type],
   );
 
   const updateTab = useCallback(
@@ -224,12 +196,7 @@ export const useScopedTabs = (config: UseScopedTabsConfig = {}): UseScopedTabsRe
       if (!tabToUpdate) return;
 
       const newTabPath = buildTabRoute(newId, tabToUpdate.type);
-      const isCurrentlyActive = effectiveActiveTabId === oldId;
-
-      if (isCurrentlyActive) {
-        setPendingActiveStableKey(tabToUpdate.stableKey);
-        setOptimisticActiveTabId(newId);
-      }
+      const isCurrentlyActive = activeTabId === oldId;
 
       onTabUpdate?.(oldId, newId);
 
@@ -242,10 +209,11 @@ export const useScopedTabs = (config: UseScopedTabsConfig = {}): UseScopedTabsRe
       });
 
       if (isCurrentlyActive) {
+        setActiveTabId(newId);
         window.history.replaceState({ tabId: newId, tabType: tabToUpdate.type }, '', newTabPath);
       }
     },
-    [tabs, effectiveActiveTabId, updateDynamicTab, setPendingActiveStableKey, setOptimisticActiveTabId, onTabUpdate],
+    [tabs, activeTabId, updateDynamicTab, setActiveTabId, onTabUpdate],
   );
 
   const updateTabsForFolderMove = useCallback(
@@ -264,8 +232,7 @@ export const useScopedTabs = (config: UseScopedTabsConfig = {}): UseScopedTabsRe
           const newName = newTabId.split('/').pop() || tab.name;
           const newTabPath = buildTabRoute(newTabId, tab.type);
 
-          if (tab.id === effectiveActiveTabId) {
-            setPendingActiveStableKey(tab.stableKey);
+          if (tab.id === activeTabId) {
             activeTabNewPath = newTabPath;
             activeTabNewId = newTabId;
             activeTabType = tab.type;
@@ -281,12 +248,12 @@ export const useScopedTabs = (config: UseScopedTabsConfig = {}): UseScopedTabsRe
         }
       });
 
-      if (activeTabNewPath) {
-        setOptimisticActiveTabId(activeTabNewId);
+      if (activeTabNewPath && activeTabNewId) {
+        setActiveTabId(activeTabNewId);
         window.history.replaceState({ tabId: activeTabNewId, tabType: activeTabType }, '', activeTabNewPath);
       }
     },
-    [tabs, effectiveActiveTabId, updateDynamicTab, setPendingActiveStableKey, setOptimisticActiveTabId, onFolderMove],
+    [tabs, activeTabId, updateDynamicTab, setActiveTabId, onFolderMove],
   );
 
   const reorderTabs = useCallback(
@@ -297,20 +264,25 @@ export const useScopedTabs = (config: UseScopedTabsConfig = {}): UseScopedTabsRe
   );
 
   useEffect(() => {
-    if (pendingActiveStableKey && currentUrlParam) {
-      const matchedTab = tabs.find((tab) => tab.id === currentUrlParam);
+    if (!isHydrated) return;
 
-      if (matchedTab) {
-        setPendingActiveStableKey(null);
-      }
+    if (currentUrlParam !== activeTabId) {
+      setActiveTabId(currentUrlParam);
     }
-  }, [currentUrlParam, tabs, pendingActiveStableKey, setPendingActiveStableKey]);
 
-  useEffect(() => {
-    if (optimisticActiveTabId && currentUrlParam === optimisticActiveTabId) {
-      setOptimisticActiveTabId(null);
+    if (currentUrlParam && !tabMaps.byId.has(currentUrlParam)) {
+      const fileName = currentUrlParam.split('/').pop() || currentUrlParam;
+      const tabPath = buildTabRoute(currentUrlParam, type);
+
+      openDynamicTab({
+        id: currentUrlParam,
+        name: fileName,
+        path: tabPath,
+        type,
+      });
     }
-  }, [currentUrlParam, optimisticActiveTabId, setOptimisticActiveTabId]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [isHydrated, currentUrlParam]);
 
   useEffect(() => {
     const handlePopState = () => {
@@ -318,11 +290,11 @@ export const useScopedTabs = (config: UseScopedTabsConfig = {}): UseScopedTabsRe
         const params = new URLSearchParams(window.location.search);
         const urlParam = params.get(tabConfig.paramName);
 
-        setOptimisticActiveTabId(urlParam);
+        setActiveTabId(urlParam);
       } else {
         const activeId = getActiveTabIdFromUrl(type);
 
-        setOptimisticActiveTabId(activeId);
+        setActiveTabId(activeId);
       }
     };
 
@@ -331,25 +303,7 @@ export const useScopedTabs = (config: UseScopedTabsConfig = {}): UseScopedTabsRe
     return () => {
       window.removeEventListener('popstate', handlePopState);
     };
-  }, [setOptimisticActiveTabId, tabConfig, type]);
-
-  useEffect(() => {
-    if (!isHydrated || !currentUrlParam) return;
-
-    if (tabExistsForUrlParam) return;
-
-    if (closedTabIdsRef.current.has(currentUrlParam)) return;
-
-    const fileName = currentUrlParam.split('/').pop() || currentUrlParam;
-    const tabPath = buildTabRoute(currentUrlParam, type);
-
-    openDynamicTab({
-      id: currentUrlParam,
-      name: fileName,
-      path: tabPath,
-      type,
-    });
-  }, [isHydrated, currentUrlParam, type]);
+  }, [setActiveTabId, tabConfig, type]);
 
   return {
     tabs,
