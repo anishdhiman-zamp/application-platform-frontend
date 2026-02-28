@@ -3,12 +3,12 @@
 import { Button, FileIcon } from '@zamp-platform/ui';
 import { cn } from '@zamp-platform/ui/utils';
 import { X } from 'lucide-react';
-import Link from 'next/link';
-import { usePathname, useSearchParams } from 'next/navigation';
+import { useRouter } from 'next/navigation';
 import TooltipV2 from '@/components/common/TooltipV2';
+import { ROUTES_PATH } from '@/constants/routeConfig';
 import { getFileExtension } from '@/modules/pace/components/files/file-tree.utils';
+import { usePaceContext } from '@/modules/pace/pace.context';
 import { DynamicTab } from '@/modules/pace/pace.types';
-import { normalizeUrlPath } from '@/modules/pace/pace.utils';
 import { SIDE_OPTIONS } from '@/types/commonTypes';
 
 export interface DynamicTabItemProps {
@@ -20,17 +20,20 @@ export interface DynamicTabItemProps {
 
 const DynamicTabItem = ({ tab, isActive, isDragging = false, onClose }: DynamicTabItemProps) => {
   const fileExtension = getFileExtension(tab.name);
-  const pathname = usePathname();
-  const searchParams = useSearchParams();
+  const { setOptimisticActiveTabId } = usePaceContext();
+  const router = useRouter();
 
-  const handleClick = (e: React.MouseEvent<HTMLAnchorElement>, path: string) => {
-    const queryString = searchParams?.toString();
-    const currentFullPath = pathname + (queryString ? `?${queryString}` : '');
+  const handleClick = () => {
+    if (isActive) return;
 
-    if (normalizeUrlPath(path) === normalizeUrlPath(currentFullPath)) {
-      e.preventDefault();
+    const isOnFilesPage = window.location.pathname === ROUTES_PATH.CHAT_FILES;
 
-      return;
+    setOptimisticActiveTabId(tab.id);
+
+    if (isOnFilesPage) {
+      window.history.pushState({ filePath: tab.id }, '', tab.path);
+    } else {
+      router.push(tab.path);
     }
   };
 
@@ -42,19 +45,18 @@ const DynamicTabItem = ({ tab, isActive, isDragging = false, onClose }: DynamicT
       asChildTrigger
       disabled={isDragging}
     >
-      <Link
-        href={tab.path}
-        scroll={false}
+      <Button
+        variant='ghost'
+        onClick={handleClick}
         className={cn(
-          'group relative flex h-[30px] w-full min-w-[48px] cursor-pointer items-center gap-x-2 rounded-[8px] border p-2 transition-all duration-150 ease-in-out',
+          'group relative flex h-[30px] w-full min-w-[48px] cursor-pointer items-center justify-start gap-x-2 rounded-[8px] border p-2 transition-all duration-150 ease-in-out',
           isActive
             ? 'border-GRAY_300 text-GRAY_1000 bg-white hover:bg-white'
             : 'text-GRAY_700 hover:text-GRAY_1000 hover:bg-GRAY_200 border-transparent',
         )}
-        onClick={(e) => handleClick(e, tab.path)}
       >
         <FileIcon extension={fileExtension || 'txt'} size='xs' />
-        <span className='f-11-500 min-w-0 flex-1 truncate'>{tab.name}</span>
+        <span className='f-11-500 min-w-0 flex-1 truncate text-left'>{tab.name}</span>
         <Button
           id='dynamic-tab-close-button'
           variant='ghost'
@@ -64,7 +66,7 @@ const DynamicTabItem = ({ tab, isActive, isDragging = false, onClose }: DynamicT
         >
           <X size={12} className='text-GRAY_700' />
         </Button>
-      </Link>
+      </Button>
     </TooltipV2>
   );
 };

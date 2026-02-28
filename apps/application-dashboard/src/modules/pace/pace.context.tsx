@@ -43,6 +43,8 @@ interface PaceContextType {
   reorderDynamicTabs: (newOrder: string[]) => void;
   pendingActiveStableKey: string | null;
   setPendingActiveStableKey: (key: string | null) => void;
+  optimisticActiveTabId: string | null;
+  setOptimisticActiveTabId: (id: string | null) => void;
 }
 
 const PaceContext = createContext<PaceContextType | null>(null);
@@ -52,6 +54,7 @@ export const PaceProvider = ({ children }: { children: ReactNode }) => {
   const [dynamicTabs, setDynamicTabs] = useState<DynamicTab[]>([]);
   const [isDynamicTabsHydrated, setIsDynamicTabsHydrated] = useState(false);
   const [pendingActiveStableKey, setPendingActiveStableKey] = useState<string | null>(null);
+  const [optimisticActiveTabId, setOptimisticActiveTabId] = useState<string | null>(null);
   const startNewChatRef = useRef<(() => void) | null>(null);
 
   useEffect(() => {
@@ -147,6 +150,8 @@ export const PaceProvider = ({ children }: { children: ReactNode }) => {
       reorderDynamicTabs,
       pendingActiveStableKey,
       setPendingActiveStableKey,
+      optimisticActiveTabId,
+      setOptimisticActiveTabId,
     }),
     [
       isPaceSidebarOpen,
@@ -159,6 +164,7 @@ export const PaceProvider = ({ children }: { children: ReactNode }) => {
       updateDynamicTab,
       reorderDynamicTabs,
       pendingActiveStableKey,
+      optimisticActiveTabId,
     ],
   );
 

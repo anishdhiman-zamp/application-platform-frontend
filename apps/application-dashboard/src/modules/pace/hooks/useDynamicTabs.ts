@@ -2,7 +2,7 @@
 
 import React, { useCallback, useEffect, useMemo } from 'react';
 import { getNextNavigationTarget, NAVIGATION_STRATEGY } from '@zamp-platform/utils';
-import { useRouter, useSearchParams } from 'next/navigation';
+import { useSearchParams } from 'next/navigation';
 import { getChatFileRoute, ROUTES_PATH } from '@/constants/routeConfig';
 import { useFileViewerContext } from '@/modules/pace/context/FileViewerContext';
 import { usePaceContext } from '@/modules/pace/pace.context';
@@ -25,7 +25,6 @@ interface UseDynamicTabsReturn {
 }
 
 export const useDynamicTabs = (): UseDynamicTabsReturn => {
-  const router = useRouter();
   const searchParams = useSearchParams();
   const currentFileParam = searchParams?.get('f') ?? null;
 
@@ -38,6 +37,8 @@ export const useDynamicTabs = (): UseDynamicTabsReturn => {
     reorderDynamicTabs,
     pendingActiveStableKey,
     setPendingActiveStableKey,
+    optimisticActiveTabId,
+    setOptimisticActiveTabId,
   } = usePaceContext();
   const { removeFileState, updateFileStatePath, updateFileStatePathsForFolder } = useFileViewerContext();
 
@@ -53,11 +54,13 @@ export const useDynamicTabs = (): UseDynamicTabsReturn => {
     return { byId, byStableKey };
   }, [tabs]);
 
+  const effectiveActiveTabId = optimisticActiveTabId ?? currentFileParam;
+
   const activeTab = useMemo(() => {
     if (!isHydrated) return null;
 
-    if (currentFileParam) {
-      const matchedTab = tabMaps.byId.get(currentFileParam);
+    if (effectiveActiveTabId) {
+      const matchedTab = tabMaps.byId.get(effectiveActiveTabId);
 
       if (matchedTab) {
         return matchedTab;
@@ -70,20 +73,20 @@ export const useDynamicTabs = (): UseDynamicTabsReturn => {
     }
 
     return null;
-  }, [tabMaps, currentFileParam, isHydrated, pendingActiveStableKey]);
+  }, [tabMaps, effectiveActiveTabId, isHydrated, pendingActiveStableKey]);
 
   const isTabActive = useCallback(
     (tab: DynamicTab) => {
-      if (!currentFileParam) return false;
+      if (!effectiveActiveTabId) return false;
 
-      return tab.id === currentFileParam;
+      return tab.id === effectiveActiveTabId;
     },
-    [currentFileParam],
+    [effectiveActiveTabId],
   );
 
   const isOnAnyDynamicTab = useCallback(() => {
-    return currentFileParam !== null && tabMaps.byId.has(currentFileParam);
-  }, [tabMaps, currentFileParam]);
+    return effectiveActiveTabId !== null && tabMaps.byId.has(effectiveActiveTabId);
+  }, [tabMaps, effectiveActiveTabId]);
 
   const getTabByPath = useCallback(
     (path: string) => {
@@ -100,14 +103,17 @@ export const useDynamicTabs = (): UseDynamicTabsReturn => {
     (path: string, name: string) => {
       const filePath = getChatFileRoute(path);
 
+      setOptimisticActiveTabId(path);
+
       openDynamicTab({
         id: path,
         name,
         path: filePath,
       });
-      router.push(filePath);
+
+      window.history.pushState({ filePath: path }, '', filePath);
     },
-    [openDynamicTab, router],
+    [openDynamicTab, setOptimisticActiveTabId],
   );
 
   const closeTab = useCallback(
@@ -119,7 +125,7 @@ export const useDynamicTabs = (): UseDynamicTabsReturn => {
 
       if (!closingTab) return;
 
-      const isClosingActiveTab = closingTab.id === currentFileParam;
+      const isClosingActiveTab = closingTab.id === effectiveActiveTabId;
 
       removeFileState(closingTab.id);
       closeDynamicTab(closingTab.id);
@@ -132,10 +138,13 @@ export const useDynamicTabs = (): UseDynamicTabsReturn => {
           strategy: NAVIGATION_STRATEGY.BROWSER_LIKE,
         });
 
-        router.push(hasRemainingItems && target ? target.path : ROUTES_PATH.CHAT_FILES);
+        const newPath = hasRemainingItems && target ? target.path : ROUTES_PATH.CHAT_FILES;
+
+        setOptimisticActiveTabId(target?.id ?? null);
+        window.history.pushState({ filePath: target?.id ?? null }, '', newPath);
       }
     },
-    [tabs, currentFileParam, closeDynamicTab, removeFileState, router],
+    [tabs, effectiveActiveTabId, closeDynamicTab, removeFileState, setOptimisticActiveTabId],
   );
 
   const closeTabsForPath = useCallback(
@@ -148,7 +157,7 @@ export const useDynamicTabs = (): UseDynamicTabsReturn => {
 
       if (tabsToClose.length === 0) return;
 
-      const activeTabToClose = tabsToClose.find((tab) => tab.id === currentFileParam);
+      const activeTabToClose = tabsToClose.find((tab) => tab.id === effectiveActiveTabId);
 
       tabsToClose.forEach((tab) => {
         removeFileState(tab.id);
@@ -163,10 +172,13 @@ export const useDynamicTabs = (): UseDynamicTabsReturn => {
           strategy: NAVIGATION_STRATEGY.BROWSER_LIKE,
         });
 
-        router.push(hasRemainingItems && target ? target.path : ROUTES_PATH.CHAT_FILES);
+        const newPath = hasRemainingItems && target ? target.path : ROUTES_PATH.CHAT_FILES;
+
+        setOptimisticActiveTabId(target?.id ?? null);
+        window.history.pushState({ filePath: target?.id ?? null }, '', newPath);
       }
     },
-    [tabs, currentFileParam, closeDynamicTab, removeFileState, router],
+    [tabs, effectiveActiveTabId, closeDynamicTab, removeFileState, setOptimisticActiveTabId],
   );
 
   const updateTab = useCallback(
@@ -176,14 +188,13 @@ export const useDynamicTabs = (): UseDynamicTabsReturn => {
       if (!tabToUpdate) return;
 
       const newTabPath = getChatFileRoute(newPath);
-      const isCurrentlyActive = currentFileParam === oldPath;
+      const isCurrentlyActive = effectiveActiveTabId === oldPath;
 
-      // Set pending stableKey before update to prevent flash during transition
       if (isCurrentlyActive) {
         setPendingActiveStableKey(tabToUpdate.stableKey);
+        setOptimisticActiveTabId(newPath);
       }
 
-      // Update file viewer context state first to prevent Monaco editor errors
       updateFileStatePath(oldPath, newPath);
 
       updateDynamicTab(oldPath, {
@@ -193,18 +204,25 @@ export const useDynamicTabs = (): UseDynamicTabsReturn => {
       });
 
       if (isCurrentlyActive) {
-        router.replace(newTabPath);
+        window.history.replaceState({ filePath: newPath }, '', newTabPath);
       }
     },
-    [tabs, currentFileParam, updateDynamicTab, router, setPendingActiveStableKey, updateFileStatePath],
+    [
+      tabs,
+      effectiveActiveTabId,
+      updateDynamicTab,
+      setPendingActiveStableKey,
+      setOptimisticActiveTabId,
+      updateFileStatePath,
+    ],
   );
 
   const updateTabsForFolderMove = useCallback(
     (oldFolderPath: string, newFolderPath: string) => {
       const oldPrefix = oldFolderPath + '/';
       let activeTabNewPath: string | null = null;
+      let activeTabNewId: string | null = null;
 
-      // Update file viewer context state first to prevent Monaco editor errors
       updateFileStatePathsForFolder(oldFolderPath, newFolderPath);
 
       tabs.forEach((tab) => {
@@ -214,10 +232,10 @@ export const useDynamicTabs = (): UseDynamicTabsReturn => {
           const newName = newTabId.split('/').pop() || tab.name;
           const newTabPath = getChatFileRoute(newTabId);
 
-          // Set pending stableKey before update to prevent flash during transition
-          if (tab.id === currentFileParam) {
+          if (tab.id === effectiveActiveTabId) {
             setPendingActiveStableKey(tab.stableKey);
             activeTabNewPath = newTabPath;
+            activeTabNewId = newTabId;
           }
 
           updateDynamicTab(tab.id, {
@@ -228,12 +246,19 @@ export const useDynamicTabs = (): UseDynamicTabsReturn => {
         }
       });
 
-      // Update URL after all tabs are updated if active tab was affected
       if (activeTabNewPath) {
-        router.replace(activeTabNewPath);
+        setOptimisticActiveTabId(activeTabNewId);
+        window.history.replaceState({ filePath: activeTabNewId }, '', activeTabNewPath);
       }
     },
-    [tabs, currentFileParam, updateDynamicTab, router, setPendingActiveStableKey, updateFileStatePathsForFolder],
+    [
+      tabs,
+      effectiveActiveTabId,
+      updateDynamicTab,
+      setPendingActiveStableKey,
+      setOptimisticActiveTabId,
+      updateFileStatePathsForFolder,
+    ],
   );
 
   const reorderTabs = useCallback(
@@ -243,7 +268,6 @@ export const useDynamicTabs = (): UseDynamicTabsReturn => {
     [reorderDynamicTabs],
   );
 
-  // Clear pending key once URL matches a tab
   useEffect(() => {
     if (pendingActiveStableKey && currentFileParam) {
       const matchedTab = tabs.find((tab) => tab.id === currentFileParam);
@@ -253,6 +277,27 @@ export const useDynamicTabs = (): UseDynamicTabsReturn => {
       }
     }
   }, [currentFileParam, tabs, pendingActiveStableKey, setPendingActiveStableKey]);
+
+  useEffect(() => {
+    if (optimisticActiveTabId && currentFileParam === optimisticActiveTabId) {
+      setOptimisticActiveTabId(null);
+    }
+  }, [currentFileParam, optimisticActiveTabId, setOptimisticActiveTabId]);
+
+  useEffect(() => {
+    const handlePopState = () => {
+      const params = new URLSearchParams(window.location.search);
+      const urlFileParam = params.get('f');
+
+      setOptimisticActiveTabId(urlFileParam);
+    };
+
+    window.addEventListener('popstate', handlePopState);
+
+    return () => {
+      window.removeEventListener('popstate', handlePopState);
+    };
+  }, [setOptimisticActiveTabId]);
 
   return {
     tabs,
