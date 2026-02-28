@@ -432,9 +432,10 @@ export const uploadFileToSignedUrl = async (uploadUrl: string, file: File, fileT
  * Creates a user message payload for chat
  * @param inputValue - The text content of the message
  * @param resourceId - The ID of the resource (e.g., process ID)
- * @param senderEmail - The email of the sender
- * @param attachments - Optional array of file attachments
+ * @param senderName - The name of the sender
+ * @param attachments - Optional array of file attachments (S3 uploads)
  * @returns ChatMessage payload
+ * @deprecated This function uses the legacy S3 upload flow. Consider using the new filesystem upload flow.
  */
 export const createUserMessagePayload = (
   inputValue: string,
@@ -622,11 +623,12 @@ export const isSubmitKeyPress = (event: React.KeyboardEvent): boolean => {
  * @param processId - The process ID
  * @param activityRunId - The activity run ID
  * @param messageText - The text content of the first message
- * @param annotationLocation - The location data for annotation
- * @param senderEmail - The email of the sender
- * @param attachments - Optional array of file attachments
+ * @param senderName - The name of the sender
+ * @param attachments - Optional array of file attachments (S3 uploads)
  * @param scope - The scope type for the conversation
+ * @param annotationLocation - The location data for annotation
  * @returns Conversation creation payload
+ * @deprecated This function uses the legacy S3 upload flow. Consider using the new filesystem upload flow.
  */
 export const createConversationPayload = (
   processId: string,

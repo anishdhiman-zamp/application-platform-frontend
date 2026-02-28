@@ -26,10 +26,10 @@ import { useAppDispatch, useAppSelector } from '@/hooks/toolkit';
 import NewPaceAvatar from '@/modules/chatbot/NewPaceAvatar';
 import ChatTopbar from '@/modules/pace/components/chat/ChatTopbar';
 import ModelSelector from '@/modules/pace/components/chat/ModelSelector';
+import { useFileTabs } from '@/modules/pace/components/dynamic-tabs/useFileTabs';
 import ChatMessagesSkeleton from '@/modules/pace/components/loaders/ChatMessagesSkeleton';
 import { useChatDraftInput } from '@/modules/pace/hooks/useChatDraftInput';
 import { useChatScroll } from '@/modules/pace/hooks/useChatScroll';
-import { useDynamicTabs } from '@/modules/pace/hooks/useDynamicTabs';
 import { baseApi } from '@/services/baseApi';
 import type { RootState } from '@/store';
 
@@ -59,7 +59,7 @@ const ChatSidebarInner: FC<ChatSidebarInnerProps> = ({
   const { inputValue, setInputValue } = useChatDraftInput({ conversationId });
   const fileDropHandlerRef = useRef<((files: FileList) => void) | null>(null);
   const [selectedModel, setSelectedModel] = useState<string | null>(null);
-  const { openTab } = useDynamicTabs();
+  const { openTab } = useFileTabs();
 
   const handleFileOpen = useCallback(
     (path: string, name: string) => {
