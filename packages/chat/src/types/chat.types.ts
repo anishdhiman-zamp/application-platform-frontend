@@ -101,7 +101,7 @@ export interface ChatMessage {
     elements?: Block[];
     text?: string;
     text_type?: string;
-    attachments?: MessageAttachmentType[];
+    file_references?: FileReferenceType[];
   };
   message_type: ChatMessageType;
   sender_type: SenderType;
@@ -133,15 +133,16 @@ export interface ChatActions {
 
 export type ChatFramework = ChatState & ChatActions;
 
-export interface MessageAttachmentType {
-  file_id: string;
-  file_name?: string;
+export interface FileReferenceType {
+  path: string;
+  name: string;
 }
+
 export interface MessageContentType {
   text: string;
   text_type: string;
   elements?: Block[];
-  attachments?: MessageAttachmentType[];
+  file_references?: FileReferenceType[];
 }
 
 export interface DatasetFieldLocationData {

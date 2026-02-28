@@ -1,15 +1,14 @@
-import { Button, toast } from '@zamp-platform/ui';
+import { Button } from '@zamp-platform/ui';
 import { cn } from '@zamp-platform/ui/utils';
 import { CircleX, FileText, LoaderCircle } from 'lucide-react';
 import React from 'react';
 
-import { useLazyGetFileDownloadUrlQuery } from '../../api';
+import { useChatActions } from '../../context/ChatActionsContext';
 import { UploadedFileType } from '../../types/block.types';
-import { downloadFile } from '../block.utils';
 
-interface AttachmentProps {
-  attachment: UploadedFileType;
-  removeAttachment?: (fileId: string) => void;
+interface FileReferenceItemProps {
+  fileReference: UploadedFileType;
+  onRemove?: (fileId: string) => void;
   isLoading?: boolean;
 }
 
@@ -21,42 +20,38 @@ const getFileIcon = () => {
   );
 };
 
-const Attachment: React.FC<AttachmentProps> = ({ attachment, removeAttachment, isLoading }) => {
-  const [getFileDownloadUrl, { isFetching: isLoadingFileDownload }] = useLazyGetFileDownloadUrlQuery();
+const FileReferenceItem: React.FC<FileReferenceItemProps> = ({ fileReference, onRemove, isLoading }) => {
+  const { onFileOpen } = useChatActions();
 
-  const handleDownloadFile = async () => {
-    if (!attachment.file_id) return;
-    try {
-      const res = await getFileDownloadUrl({ file_upload_id: attachment.file_id }).unwrap();
+  const handleClick = () => {
+    if (!fileReference.path) return;
 
-      if (res?.download_url) {
-        await downloadFile(res.download_url, attachment.file_name || 'download');
-      }
-    } catch {
-      toast.error('Failed to download file');
+    if (onFileOpen) {
+      const normalizedPath = fileReference.path.startsWith('/home/') ? fileReference.path.slice(6) : fileReference.path;
+      onFileOpen(normalizedPath, fileReference.name);
     }
   };
 
   return (
     <div
-      key={attachment.file_id || attachment.file_name}
+      key={fileReference.path || fileReference.name}
       className={cn(
         'rounded-2.5 shadow-table-filter-menu group relative flex w-[148px] cursor-pointer items-center gap-2 border border-gray-400 bg-white p-1 pr-3',
       )}
-      onClick={handleDownloadFile}
+      onClick={handleClick}
     >
       <div className='flex items-center gap-1'>
         {getFileIcon()}
-        <span className='f-12-500 max-w-[104px] truncate'>{attachment.file_name}</span>
+        <span className='f-12-500 max-w-[104px] truncate'>{fileReference.name}</span>
       </div>
-      {attachment.file_id && removeAttachment && (
+      {fileReference.path && onRemove && (
         <Button
           className='absolute size-4 rounded-full bg-white p-px opacity-0 group-hover:opacity-100 [&_svg]:size-3.5'
           variant='ghost'
           size='icon'
           onClick={(e) => {
             e.stopPropagation();
-            removeAttachment(attachment.file_id);
+            onRemove(fileReference.path);
           }}
           style={{
             top: '-8px',
@@ -66,7 +61,7 @@ const Attachment: React.FC<AttachmentProps> = ({ attachment, removeAttachment, i
           <CircleX className='size-3.5 text-gray-700' />
         </Button>
       )}
-      {((isLoading && !attachment.file_id) || isLoadingFileDownload) && (
+      {isLoading && !fileReference.path && (
         <Button
           className='absolute size-4 rounded-full border border-gray-400 bg-white [&_svg]:size-3'
           variant='ghost'
@@ -83,4 +78,4 @@ const Attachment: React.FC<AttachmentProps> = ({ attachment, removeAttachment, i
   );
 };
 
-export default Attachment;
+export default FileReferenceItem;

@@ -1,5 +1,3 @@
-import { MessageAttachmentType } from '../..';
-
 export const enum BLOCK_TYPE {
   PLAIN_TEXT = 'plain_text',
   MARKDOWN = 'markdown',
@@ -7,7 +5,7 @@ export const enum BLOCK_TYPE {
   BUTTON = 'button',
   QUESTION_GROUP = 'question_group',
   QUESTION = 'question',
-  ATTACHMENTS = 'attachments',
+  FILE_REFERENCES = 'file_references',
   TEXT = 'text',
   TOOL_USE = 'tool_use',
   TOOL_RESULT = 'tool_result',
@@ -117,12 +115,12 @@ export interface QuestionGroupBlockType {
   };
 }
 
-export interface AttachmentsBlockType {
+export interface FileReferencesBlockType {
   id: string;
   order: number;
-  type: BLOCK_TYPE.ATTACHMENTS;
+  type: BLOCK_TYPE.FILE_REFERENCES;
   payload: {
-    attachments: MessageAttachmentType[];
+    file_references: { path: string; name: string }[];
   };
 }
 
@@ -153,7 +151,7 @@ export type Block =
   | ButtonBlockType
   | QuestionGroupBlockType
   | QuestionBlockType
-  | AttachmentsBlockType
+  | FileReferencesBlockType
   | OutputFilesBlockType
   | ThinkingContentBlock
   | TextContentBlock
@@ -164,8 +162,8 @@ export interface BlockMessage {
 }
 
 export interface UploadedFileType {
-  file_id: string;
-  file_name: string;
+  path: string;
+  name: string;
   file_type?: string;
   file?: File;
 }

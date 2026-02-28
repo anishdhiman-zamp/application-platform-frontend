@@ -13,8 +13,6 @@ import { MicrophoneState } from '../hooks/useMicrophoneRecorder';
 import { useTranscription } from '../hooks/useTranscription';
 import { AnnotationType, LocationData, ResourceType, ScopeType } from '../types/chat.types';
 import { SOCKET_STATES } from '../types/transcription.types';
-import { filesToFileList, filterPastedFiles } from '../utils/fileUpload';
-import { FileMimeType } from './chat.constants';
 import { ChatComposer } from './ChatComposer';
 
 export type FileDropHandlerRef = RefObject<((files: FileList) => void) | null>;
@@ -30,13 +28,12 @@ export interface ConnectedChatInputProps {
   externalInputValue?: string;
   setExternalInputValue?: Dispatch<SetStateAction<string>>;
   autoFocus?: boolean;
-  acceptedFileTypes?: string;
   onMicrophoneError?: () => void;
   onRecordingError?: () => void;
   currentUserName: string;
   resourceId: string;
   scopeId: string;
-  organizationId: string;
+  username: string;
   onError?: (error: unknown) => void;
   onSuccess?: (message: string) => void;
   placeholder?: string;
@@ -63,13 +60,12 @@ export const ConnectedChatInput: FC<ConnectedChatInputProps> = ({
   externalInputValue,
   setExternalInputValue,
   autoFocus = false,
-  acceptedFileTypes,
   onMicrophoneError,
   onRecordingError,
   currentUserName,
   resourceId,
   scopeId,
-  organizationId,
+  username,
   onError,
   onSuccess,
   placeholder = 'Ask anything or give feedback...',
@@ -102,13 +98,12 @@ export const ConnectedChatInput: FC<ConnectedChatInputProps> = ({
     getCurrentUserName: () => currentUserName || '',
     getResourceId: () => resourceId,
     getScopeId: () => scopeId,
-    getOrganizationId: () => organizationId,
-    getMimeType: (fileType: string) => FileMimeType[fileType] ?? fileType,
+    getUsername: () => username || '',
     getElevenLabsToken,
     onError: (error) => {
       captureException(error);
       onError?.(error);
-      toast.error(`${error instanceof Error ? error.message : 'An error occurred'}`);
+      toast.error(error instanceof Error ? error.message : 'Something went wrong. Please try again.');
     },
     onSuccess: (message) => {
       onSuccess?.(message);
@@ -121,9 +116,9 @@ export const ConnectedChatInput: FC<ConnectedChatInputProps> = ({
     setValue,
     handleSubmit,
     handleKeyDown,
-    attachments,
+    fileReferences,
     handleFileSelect,
-    removeAttachment,
+    removeFileReference,
     isUploading,
     setFirstMessage,
     isSubmitDisabled,
@@ -179,18 +174,7 @@ export const ConnectedChatInput: FC<ConnectedChatInputProps> = ({
 
     if (files && files.length > 0) {
       e.preventDefault();
-
-      const { acceptedFiles, rejectedExtensionsText } = filterPastedFiles(files, acceptedFileTypes);
-
-      if (rejectedExtensionsText) {
-        toast.error?.(`${rejectedExtensionsText} file type is not supported`);
-
-        if (acceptedFiles.length === 0) {
-          return;
-        }
-      }
-
-      handleFileSelect(filesToFileList(acceptedFiles));
+      handleFileSelect(files);
     }
   };
 
@@ -268,7 +252,6 @@ export const ConnectedChatInput: FC<ConnectedChatInputProps> = ({
         onChange={handleFileChange}
         className='hidden'
         aria-label='File input'
-        accept={acceptedFileTypes}
       />
 
       <ChatComposer
@@ -278,8 +261,8 @@ export const ConnectedChatInput: FC<ConnectedChatInputProps> = ({
         onKeyDown={handleKeyDown}
         onPaste={disableAttachments ? undefined : handlePaste}
         autoFocus={autoFocus}
-        attachments={attachments}
-        removeAttachment={removeAttachment}
+        fileReferences={fileReferences}
+        onRemoveFileReference={removeFileReference}
         isUploading={isUploading}
         onAttachClick={handleAttachClick}
         showAttachButton={!disableAttachments}

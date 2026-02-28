@@ -6,7 +6,7 @@ import { ArrowUp, Check, Loader, Mic, Paperclip, X } from 'lucide-react';
 import React, { FC, useEffect, useRef } from 'react';
 
 import { UploadedFileType } from '../types/block.types';
-import { AttachmentsList } from './blocks';
+import { FileReferencesList } from './blocks';
 
 export interface ChatComposerProps {
   // Textarea props
@@ -17,9 +17,9 @@ export interface ChatComposerProps {
   onPaste?: (e: React.ClipboardEvent<HTMLTextAreaElement>) => void;
   autoFocus?: boolean;
 
-  // Attachments
-  attachments: UploadedFileType[];
-  removeAttachment: (fileId: string) => void;
+  // File references
+  fileReferences: UploadedFileType[];
+  onRemoveFileReference: (fileId: string) => void;
   isUploading?: boolean;
   onAttachClick?: () => void;
   showAttachButton?: boolean;
@@ -62,9 +62,9 @@ export const ChatComposer: FC<ChatComposerProps> = ({
   onPaste,
   autoFocus = false,
 
-  // Attachments
-  attachments,
-  removeAttachment,
+  // File references
+  fileReferences,
+  onRemoveFileReference,
   isUploading = false,
   onAttachClick,
   showAttachButton = true,
@@ -105,8 +105,8 @@ export const ChatComposer: FC<ChatComposerProps> = ({
     }
   };
 
-  const handleRemoveAttachment = (fileId: string) => {
-    removeAttachment(fileId);
+  const handleRemoveFileReference = (fileId: string) => {
+    onRemoveFileReference(fileId);
     textareaRef.current?.focus();
   };
 
@@ -150,9 +150,9 @@ export const ChatComposer: FC<ChatComposerProps> = ({
         className,
       )}
     >
-      <AttachmentsList
-        attachments={attachments}
-        removeAttachment={handleRemoveAttachment}
+      <FileReferencesList
+        fileReferences={fileReferences}
+        onRemove={handleRemoveFileReference}
         isLoading={isUploading}
         className='px-2.5 pt-2'
       />

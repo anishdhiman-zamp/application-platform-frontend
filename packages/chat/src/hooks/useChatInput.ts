@@ -13,26 +13,28 @@ import {
   ScopeType,
   SenderType,
 } from '../types/chat.types';
-import { MultipleFileUploadResult } from '../utils/fileUpload';
+import { DeleteFileMutation, handleFilesystemUploads, UploadMutations } from '../utils/filesystemUpload';
 import { useChat } from './useChat';
 
 export interface UploadedFile {
-  file_id: string;
-  file_name: string;
+  path: string;
+  name: string;
   file_type: string;
   file: File;
 }
 
-export interface MessageAttachment {
-  file_id: string;
-  file_name: string;
-}
+export type FileReference = {
+  path: string;
+  name: string;
+};
 
 export interface ChatInputAdapter {
   getCurrentUserName: () => string;
   getResourceId: () => string;
   getScopeId: () => string;
-  uploadFiles: (files: FileList) => Promise<MultipleFileUploadResult>;
+  getUsername: () => string;
+  uploadMutations: UploadMutations;
+  deleteFileMutation: DeleteFileMutation;
   disableInteraction?: (params: {
     conversationId: string;
     messageId: string;
@@ -64,9 +66,9 @@ export interface UseChatInputReturn {
   setValue: Dispatch<SetStateAction<string>>;
   handleSubmit: () => void;
   handleKeyDown: (e: React.KeyboardEvent<HTMLTextAreaElement>) => void;
-  attachments: UploadedFile[];
+  fileReferences: UploadedFile[];
   handleFileSelect: (files: FileList | null) => Promise<void>;
-  removeAttachment: (fileId: string) => void;
+  removeFileReference: (fileId: string) => void;
   isUploading: boolean;
   firstMessage: string;
   setFirstMessage: Dispatch<SetStateAction<string>>;
@@ -81,7 +83,7 @@ export const createUserMessagePayload = (
   resourceId: string,
   resourceType: ResourceType,
   senderName: string,
-  attachments?: MessageAttachment[],
+  fileReferences?: FileReference[],
   llmModel?: string | null,
 ): ChatMessage => {
   return {
@@ -100,7 +102,7 @@ export const createUserMessagePayload = (
           },
         },
       ] as Block[],
-      attachments: attachments && attachments.length > 0 ? attachments : undefined,
+      file_references: fileReferences && fileReferences.length > 0 ? fileReferences : undefined,
     },
     message_type: ChatMessageType.TEXT,
     sender_type: SenderType.USER,
@@ -120,7 +122,7 @@ export const createConversationPayload = (
   scopeId: string,
   messageText: string,
   senderName: string,
-  attachments?: MessageAttachment[],
+  fileReferences?: FileReference[],
   scope = ScopeType.ACTIVITY_RUN,
   annotationLocation?: LocationData,
   annotationType?: AnnotationType,
@@ -145,7 +147,7 @@ export const createConversationPayload = (
           },
         },
       ] as Block[],
-      attachments: attachments && attachments.length > 0 ? attachments : undefined,
+      file_references: fileReferences && fileReferences.length > 0 ? fileReferences : undefined,
     },
     ...(annotationLocation && {
       annotation_data: {
@@ -198,7 +200,7 @@ export const useChatInput = ({
     [hasExternalControl, setExternalInputValue],
   );
 
-  const [attachments, setAttachments] = useState<UploadedFile[]>([]);
+  const [fileReferences, setFileReferences] = useState<UploadedFile[]>([]);
   const [isUploading, setIsUploading] = useState(false);
   const [firstMessage, setFirstMessage] = useState('');
 
@@ -211,16 +213,14 @@ export const useChatInput = ({
       scopeId,
       firstMessage || 'Hello, how are you?',
       currentUserName || '',
-      attachments.length > 0
-        ? attachments.map((att) => ({ file_id: att.file_id, file_name: att.file_name }))
-        : undefined,
+      fileReferences.length > 0 ? fileReferences.map((ref) => ({ path: ref.path, name: ref.name })) : undefined,
       scope,
       annotationLocation,
       annotationType,
       llmModel,
     );
 
-    setAttachments([]);
+    setFileReferences([]);
     const response = await chat.createConversationV2(payload);
 
     if (!response?.conversation_id) {
@@ -233,49 +233,56 @@ export const useChatInput = ({
   const handleFileSelect = async (files: FileList | null) => {
     if (!files || files.length === 0) return;
 
+    const username = adapter.getUsername();
+
+    if (!username) {
+      adapter.onError?.(new Error('Username is required for file uploads'));
+      return;
+    }
+
     const uploadingFiles = Array.from(files).map((file) => ({
-      file_id: '',
-      file_name: file.name,
+      path: '',
+      name: file.name,
       file_type: file.type,
       file: file,
     }));
 
     setIsUploading(true);
-    setAttachments((prev) => [...prev, ...uploadingFiles]);
+    setFileReferences((prev) => [...prev, ...uploadingFiles]);
 
-    const { successful, failed } = await adapter.uploadFiles(files);
+    const { successful, failed } = await handleFilesystemUploads(files, username, adapter.uploadMutations);
 
     const failedFileNames = new Set(failed.map((f) => f.file.name));
 
-    setAttachments((prev) => {
+    setFileReferences((prev) => {
       const tempEntriesMap = new Map<string, number>();
 
       prev.forEach((item, index) => {
-        if (item.file_id === '' && !tempEntriesMap.has(item.file_name)) {
-          tempEntriesMap.set(item.file_name, index);
+        if (item.path === '' && !tempEntriesMap.has(item.name)) {
+          tempEntriesMap.set(item.name, index);
         }
       });
 
       const updated = prev.filter((att) => {
-        if (att.file_id !== '') return true;
-        if (failedFileNames.has(att.file_name)) return false;
+        if (att.path !== '') return true;
+        if (failedFileNames.has(att.name)) return false;
         return true;
       });
 
       const updatedTempEntriesMap = new Map<string, number>();
       updated.forEach((item, index) => {
-        if (item.file_id === '' && !updatedTempEntriesMap.has(item.file_name)) {
-          updatedTempEntriesMap.set(item.file_name, index);
+        if (item.path === '' && !updatedTempEntriesMap.has(item.name)) {
+          updatedTempEntriesMap.set(item.name, index);
         }
       });
 
-      successful.forEach((newAttachment) => {
-        const index = updatedTempEntriesMap.get(newAttachment.file_name);
+      successful.forEach((uploadedFile) => {
+        const index = updatedTempEntriesMap.get(uploadedFile.name);
 
         if (index !== undefined) {
-          updated[index] = newAttachment;
+          updated[index] = uploadedFile;
         } else {
-          updated.push(newAttachment);
+          updated.push(uploadedFile);
         }
       });
 
@@ -290,8 +297,14 @@ export const useChatInput = ({
     setIsUploading(false);
   };
 
-  const removeAttachment = (fileId: string) => {
-    setAttachments((prev) => prev.filter((attachment) => attachment.file_id !== fileId));
+  const removeFileReference = (fileId: string) => {
+    setFileReferences((prev) => prev.filter((ref) => ref.path !== fileId));
+
+    if (fileId) {
+      adapter.deleteFileMutation.deleteFile({ path: fileId }).catch((error) => {
+        adapter.onError?.(error);
+      });
+    }
   };
 
   const handleSubmit = () => {
@@ -316,14 +329,12 @@ export const useChatInput = ({
       resourceId,
       resourceType,
       currentUserName || '',
-      attachments.length > 0
-        ? attachments.map((att) => ({ file_id: att.file_id, file_name: att.file_name }))
-        : undefined,
+      fileReferences.length > 0 ? fileReferences.map((ref) => ({ path: ref.path, name: ref.name })) : undefined,
       llmModel,
     );
 
     setValue('');
-    setAttachments([]);
+    setFileReferences([]);
 
     const lastMessage = chat.messages[chat.messages.length - 1];
     let messageId = '';
@@ -372,9 +383,9 @@ export const useChatInput = ({
     setValue,
     handleSubmit,
     handleKeyDown,
-    attachments,
+    fileReferences,
     handleFileSelect,
-    removeAttachment,
+    removeFileReference,
     isUploading,
     firstMessage,
     setFirstMessage,

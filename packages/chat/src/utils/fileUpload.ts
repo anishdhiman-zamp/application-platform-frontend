@@ -1,6 +1,14 @@
 import { REQUEST_TYPES } from '@zamp-platform/api';
 
-import { UploadedFile } from '../hooks/useChatInput';
+/**
+ * Uploaded file type for S3 uploads (used by ChatFeedback)
+ */
+export interface S3UploadedFile {
+  file_id: string;
+  file_name: string;
+  file_type: string;
+  file: File;
+}
 
 /**
  * Signed URL response type
@@ -79,7 +87,7 @@ export const processFileUpload = async (
   organizationId: string,
   postUploadAck?: PostUploadAckFn,
   getMimeType?: (fileType: string) => string,
-): Promise<UploadedFile> => {
+): Promise<S3UploadedFile> => {
   const fileType = file.type || 'application/octet-stream';
   const mappedFileType = getMimeType ? getMimeType(fileType) : fileType;
 
@@ -113,7 +121,7 @@ export const processFileUpload = async (
  * Result type for multiple file uploads
  */
 export interface MultipleFileUploadResult {
-  successful: UploadedFile[];
+  successful: S3UploadedFile[];
   failed: { file: File; error: unknown }[];
 }
 
@@ -135,7 +143,7 @@ export const processMultipleFileUploads = async (
   postUploadAck?: PostUploadAckFn,
   getMimeType?: (fileType: string) => string,
 ): Promise<MultipleFileUploadResult> => {
-  const uploadPromises: Promise<UploadedFile>[] = [];
+  const uploadPromises: Promise<S3UploadedFile>[] = [];
   const fileArray = Array.from(files);
 
   for (let i = 0; i < files.length; i++) {
@@ -146,7 +154,7 @@ export const processMultipleFileUploads = async (
 
   const results = await Promise.allSettled(uploadPromises);
 
-  const successful: UploadedFile[] = [];
+  const successful: S3UploadedFile[] = [];
   const failed: { file: File; error: unknown }[] = [];
 
   results.forEach((result, index) => {
@@ -235,15 +243,6 @@ export const handleFileUploads = async (
     postUploadAckWrapper,
     getMimeType,
   );
-};
-
-/**
- * Checks if Enter key was pressed without Shift
- * @param event - Keyboard event
- * @returns true if Enter without Shift, false otherwise
- */
-export const isSubmitKeyPress = (event: React.KeyboardEvent): boolean => {
-  return event.key === 'Enter' && !event.shiftKey;
 };
 
 /**

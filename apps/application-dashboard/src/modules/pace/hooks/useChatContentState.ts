@@ -12,7 +12,7 @@ interface UseChatContentStateProps {
 
 export const useChatContentState = ({ initialConversationId }: UseChatContentStateProps) => {
   const organizationId = useAppSelector((state: RootState) => state.user.user?.orgs?.[0]?.organization_id) ?? '';
-  const currentUserName = useAppSelector((state: RootState) => state.user.user?.user_name) ?? '';
+  const username = useAppSelector((state: RootState) => state.user.user?.username) ?? '';
 
   const [chatTitle, setChatTitle] = useState('');
   const [conversationId, setConversationIdState] = useState<string | null>(initialConversationId);
@@ -83,7 +83,7 @@ export const useChatContentState = ({ initialConversationId }: UseChatContentSta
 
   return {
     organizationId,
-    currentUserName,
+    username,
     chatTitle,
     setChatTitle,
     conversationId,
