@@ -4,7 +4,6 @@ import { createContext, type ReactNode, useCallback, useContext, useMemo, useSta
 import { captureException } from '@sentry/browser';
 import { toast } from '@zamp-platform/ui';
 import { useFileActions } from 'modules/pace/hooks/useFileActions';
-import { useFileClipboard } from 'modules/pace/hooks/useFileClipboard';
 import {
   CLIPBOARD_OPERATION,
   type ConflictResolution,
@@ -13,7 +12,8 @@ import {
 } from '@/modules/pace/components/files/file-tree.types';
 import { executeConflictResolution } from '@/modules/pace/components/files/file-tree.utils';
 import { FILE_TOAST_MESSAGES } from '@/modules/pace/components/files/files.constants';
-import { useUpdateFileTab } from '@/modules/pace/hooks/useUpdateFileTab';
+import { useFileClipboard } from '@/modules/pace/context/FileClipboardContext';
+import { useDynamicTabs } from '@/modules/pace/hooks/useDynamicTabs';
 
 interface FileConflictContextValue {
   conflict: FileConflict | null;
@@ -34,7 +34,7 @@ export const FileConflictProvider = ({ children, onFileMoved }: FileConflictProv
 
   const { copyItem, moveItem, deleteItem } = useFileActions();
   const { clearClipboard } = useFileClipboard();
-  const { updateFileTab } = useUpdateFileTab();
+  const { updateTab } = useDynamicTabs();
 
   const resolveConflict = useCallback(
     async (resolution: ConflictResolution, siblingNames: string[]) => {
@@ -56,18 +56,14 @@ export const FileConflictProvider = ({ children, onFileMoved }: FileConflictProv
         const isMove = currentConflict.operation !== CLIPBOARD_OPERATION.COPY;
 
         if (isMove) {
-          updateFileTab({
-            oldPath: currentConflict.sourcePath,
-            newPath: currentConflict.destinationPath,
-            newName: currentConflict.sourceName,
-          });
+          updateTab(currentConflict.sourcePath, currentConflict.destinationPath, currentConflict.sourceName);
         }
       } catch (error) {
         captureException(error);
         toast.error(FILE_TOAST_MESSAGES.FAILED_TO_RESOLVE_CONFLICT);
       }
     },
-    [conflict, copyItem, moveItem, deleteItem, clearClipboard, onFileMoved, updateFileTab],
+    [conflict, copyItem, moveItem, deleteItem, clearClipboard, onFileMoved, updateTab],
   );
 
   const cancelConflict = useCallback(() => {

@@ -36,12 +36,13 @@ interface PaceContextType {
   registerStartNewChat: (callback: () => void) => void;
   startNewChat: () => void;
   dynamicTabs: DynamicTab[];
-  activeFileTabKey: string | null;
-  setActiveFileTabKey: (key: string | null) => void;
+  isDynamicTabsHydrated: boolean;
   openDynamicTab: (tab: Omit<DynamicTab, 'stableKey'>) => void;
   closeDynamicTab: (id: string) => void;
   updateDynamicTab: (oldId: string, newTab: Omit<DynamicTab, 'stableKey'>) => void;
   reorderDynamicTabs: (newOrder: string[]) => void;
+  pendingActiveStableKey: string | null;
+  setPendingActiveStableKey: (key: string | null) => void;
 }
 
 const PaceContext = createContext<PaceContextType | null>(null);
@@ -49,16 +50,15 @@ const PaceContext = createContext<PaceContextType | null>(null);
 export const PaceProvider = ({ children }: { children: ReactNode }) => {
   const [isPaceSidebarOpen, setIsPaceSidebarOpen] = useState(false);
   const [dynamicTabs, setDynamicTabs] = useState<DynamicTab[]>([]);
-  const [activeFileTabKey, setActiveFileTabKey] = useState<string | null>(null);
+  const [isDynamicTabsHydrated, setIsDynamicTabsHydrated] = useState(false);
+  const [pendingActiveStableKey, setPendingActiveStableKey] = useState<string | null>(null);
   const startNewChatRef = useRef<(() => void) | null>(null);
 
-  // Hydrate from localStorage on mount
   useEffect(() => {
     const storedTabs = getStoredTabs();
 
-    if (storedTabs.length > 0) {
-      setDynamicTabs(storedTabs);
-    }
+    setDynamicTabs(storedTabs);
+    setIsDynamicTabsHydrated(true);
   }, []);
 
   const registerStartNewChat = useCallback((callback: () => void) => {
@@ -140,23 +140,25 @@ export const PaceProvider = ({ children }: { children: ReactNode }) => {
       registerStartNewChat,
       startNewChat,
       dynamicTabs,
-      activeFileTabKey,
-      setActiveFileTabKey,
+      isDynamicTabsHydrated,
       openDynamicTab,
       closeDynamicTab,
       updateDynamicTab,
       reorderDynamicTabs,
+      pendingActiveStableKey,
+      setPendingActiveStableKey,
     }),
     [
       isPaceSidebarOpen,
       registerStartNewChat,
       startNewChat,
       dynamicTabs,
-      activeFileTabKey,
+      isDynamicTabsHydrated,
       openDynamicTab,
       closeDynamicTab,
       updateDynamicTab,
       reorderDynamicTabs,
+      pendingActiveStableKey,
     ],
   );
 

@@ -58,10 +58,10 @@ const FilesToolbar = ({
             className='border-GRAY_400 gap-x-[2px] rounded-r-none! border-r-0 bg-white p-1.5! hover:bg-white'
           >
             <ArrowUp
-              className={cn('text-GRAY_1000 size-3.5', sortDirection === SORT_DIRECTION.DESC && 'text-GRAY_300')}
+              className={cn('text-GRAY_1000 size-3.5', sortDirection === SORT_DIRECTION.ASC && 'text-GRAY_300')}
             />
             <ArrowDown
-              className={cn('text-GRAY_1000 size-3.5', sortDirection === SORT_DIRECTION.ASC && 'text-GRAY_300')}
+              className={cn('text-GRAY_1000 size-3.5', sortDirection === SORT_DIRECTION.DESC && 'text-GRAY_300')}
             />
           </Button>
 

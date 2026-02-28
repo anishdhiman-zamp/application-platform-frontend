@@ -1,11 +1,18 @@
 'use client';
 
 import { useCallback, useEffect, useRef } from 'react';
-import Editor, { type Monaco, type OnMount } from '@monaco-editor/react';
+import Editor, { loader, type Monaco, type OnMount } from '@monaco-editor/react';
 import { Skeleton } from '@zamp-platform/ui';
 import { cn } from '@zamp-platform/ui/utils';
 import type { editor } from 'monaco-editor';
 import { EXTENSION_TO_MONACO_LANGUAGE } from '@/modules/pace/components/files/files.constants';
+
+// Configure monaco-editor to use version 0.49.0 from CDN
+loader.config({
+  paths: {
+    vs: 'https://cdn.jsdelivr.net/npm/monaco-editor@0.49.0/min/vs',
+  },
+});
 
 interface MonacoCodeEditorProps {
   content: string;
@@ -54,23 +61,6 @@ const MonacoCodeEditor = ({
     },
     [onChange],
   );
-
-  useEffect(() => {
-    return () => {
-      if (editorRef.current) {
-        const model = editorRef.current.getModel();
-
-        editorRef.current.dispose();
-
-        if (model) {
-          model.dispose();
-        }
-
-        editorRef.current = null;
-        monacoRef.current = null;
-      }
-    };
-  }, []);
 
   useEffect(() => {
     const handleKeyDown = (e: KeyboardEvent) => {

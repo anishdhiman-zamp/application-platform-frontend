@@ -44,6 +44,13 @@ jest.mock('@zamp-platform/utils', () => ({
   getFromLocalStorage: jest.fn(),
   setToLocalStorage: jest.fn(),
   removeFromLocalStorage: jest.fn(),
+  safeJsonParse: jest.fn((value: string | undefined | null, fallback = {}) => {
+    try {
+      return JSON.parse(value || '{}');
+    } catch {
+      return fallback;
+    }
+  }),
   LOCAL_STORAGE_KEYS: {
     LAST_LOGIN_INFO: 'LAST_LOGIN_INFO',
     LAST_LOGGED_IN_OIDC_EMAIL: 'LAST_LOGGED_IN_OIDC_EMAIL',
@@ -162,7 +169,13 @@ describe('LoginForm', () => {
   it('should initialize with email from localStorage', () => {
     const savedEmail = 'test@example.com';
 
-    mockGetFromLocalStorage.mockReturnValue(savedEmail);
+    mockGetFromLocalStorage.mockImplementation((key: string) => {
+      if (key === LOCAL_STORAGE_KEYS.LAST_LOGIN_INFO) {
+        return JSON.stringify({ email: savedEmail });
+      }
+
+      return '';
+    });
 
     render(createElement(LoginForm));
 

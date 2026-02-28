@@ -221,8 +221,8 @@ export const API_ENDPOINTS = {
   // Filesystem API
   FILESYSTEM_STATUS_GET: `filesystem/status`,
   FILES_LIST_GET: `files`,
-  FILES_CREATE_POST: `files/create`,
-  FILES_WRITE_POST: `files/write`,
+  FILES_CREATE_PUT: `files/{{path}}`,
+  FILES_WRITE_POST: `files/{{path}}`,
   FILES_READ_GET: `files/{{path}}`,
   FILES_COPY_POST: `files/copy`,
   FILES_MOVE_POST: `files/move`,
