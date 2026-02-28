@@ -1,6 +1,7 @@
 import { useCallback, useState } from 'react';
 import { captureException } from '@sentry/browser';
 import { toast } from '@zamp-platform/ui';
+import { useFileTabs } from '@/modules/pace/components/dynamic-tabs/useFileTabs';
 import {
   CLIPBOARD_OPERATION,
   CREATE_ITEM_TYPE,
@@ -15,7 +16,6 @@ import {
   validatePasteOperation,
 } from '@/modules/pace/components/files/file-tree.utils';
 import { CONTEXT_MENU_ACTION_IDS, FILE_TOAST_MESSAGES } from '@/modules/pace/components/files/files.constants';
-import { useDynamicTabs } from '@/modules/pace/hooks/useDynamicTabs';
 import { useFileDownload } from '@/modules/pace/hooks/useFileDownload';
 import { useFileTreeContext } from '@/modules/pace/hooks/useFileTreeContext';
 
@@ -65,7 +65,7 @@ export const useFileTreeNodeActions = ({
   const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState(false);
   const [isDeleting, setIsDeleting] = useState(false);
 
-  const { openTab, closeTabsForPath, updateTab, updateTabsForFolderMove } = useDynamicTabs();
+  const { openTab, closeTabsForPath, updateTab, updateTabsForFolderMove } = useFileTabs();
   const { downloadFile } = useFileDownload();
   const {
     createFile,

@@ -1,6 +1,7 @@
 'use client';
 
 import { memo, useCallback, useMemo, useRef, useState } from 'react';
+import { useFileTabs } from '@/modules/pace/components/dynamic-tabs/useFileTabs';
 import CreateItemModal from '@/modules/pace/components/files/CreateItemModal';
 import DeleteConfirmationDialog from '@/modules/pace/components/files/DeleteConfirmationDialog';
 import {
@@ -12,7 +13,6 @@ import { CONTEXT_MENU_ACTION_IDS, CONTEXT_MENU_ACTIONS } from '@/modules/pace/co
 import FileTreeNodeContextMenu from '@/modules/pace/components/files/FileTreeNodeContextMenu';
 import FileTreeNodeRow from '@/modules/pace/components/files/FileTreeNodeRow';
 import { useFileUploadContext } from '@/modules/pace/context/FileUploadContext';
-import { useDynamicTabs } from '@/modules/pace/hooks/useDynamicTabs';
 import { useFileTreeContext } from '@/modules/pace/hooks/useFileTreeContext';
 import { useFileTreeNodeActions } from '@/modules/pace/hooks/useFileTreeNodeActions';
 import { useFileTreeNodeDragDrop } from '@/modules/pace/hooks/useFileTreeNodeDragDrop';
@@ -43,7 +43,7 @@ const FileTreeNode = memo(function FileTreeNode({
 
   const { clipboard, isProtectedRoot, username } = useFileTreeContext();
   const { uploadingPath } = useFileUploadContext();
-  const { openTab } = useDynamicTabs();
+  const { openTab } = useFileTabs();
 
   const isFolder = node.type === FILE_TYPE.DIRECTORY;
   const isExpanded = expandedPaths.has(node.path);

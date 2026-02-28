@@ -1,7 +1,7 @@
 'use client';
 
 import { createContext, type ReactNode, useCallback, useContext, useEffect, useMemo, useRef, useState } from 'react';
-import { DynamicTab } from 'modules/pace/pace.types';
+import { DynamicTab, TAB_TYPE } from 'modules/pace/pace.types';
 import { getFromLocalStorage, LOCAL_STORAGE_KEYS, setToLocalStorage } from '@/utils/localstorage';
 
 const getStoredTabs = (): DynamicTab[] => {
@@ -14,6 +14,7 @@ const getStoredTabs = (): DynamicTab[] => {
     return tabs.map((tab) => ({
       ...tab,
       stableKey: tab.stableKey || crypto.randomUUID(),
+      type: tab.type ?? TAB_TYPE.FILE,
     }));
   } catch (error) {
     console.error('Error getting stored tabs:', error);
@@ -41,8 +42,8 @@ interface PaceContextType {
   closeDynamicTab: (id: string) => void;
   updateDynamicTab: (oldId: string, newTab: Omit<DynamicTab, 'stableKey'>) => void;
   reorderDynamicTabs: (newOrder: string[]) => void;
-  pendingActiveStableKey: string | null;
-  setPendingActiveStableKey: (key: string | null) => void;
+  activeTabId: string | null;
+  setActiveTabId: (id: string | null) => void;
 }
 
 const PaceContext = createContext<PaceContextType | null>(null);
@@ -51,7 +52,7 @@ export const PaceProvider = ({ children }: { children: ReactNode }) => {
   const [isPaceSidebarOpen, setIsPaceSidebarOpen] = useState(false);
   const [dynamicTabs, setDynamicTabs] = useState<DynamicTab[]>([]);
   const [isDynamicTabsHydrated, setIsDynamicTabsHydrated] = useState(false);
-  const [pendingActiveStableKey, setPendingActiveStableKey] = useState<string | null>(null);
+  const [activeTabId, setActiveTabId] = useState<string | null>(null);
   const startNewChatRef = useRef<(() => void) | null>(null);
 
   useEffect(() => {
@@ -71,12 +72,13 @@ export const PaceProvider = ({ children }: { children: ReactNode }) => {
 
   const openDynamicTab = useCallback((tab: Omit<DynamicTab, 'stableKey'>) => {
     setDynamicTabs((prev) => {
-      const exists = prev.some((t) => t.id === tab.id);
+      const exists = prev.some((t) => t.id === tab.id && t.type === (tab.type ?? TAB_TYPE.FILE));
 
       if (exists) return prev;
 
       const newTab: DynamicTab = {
         ...tab,
+        type: tab.type ?? TAB_TYPE.FILE,
         stableKey: crypto.randomUUID(),
       };
 
@@ -109,6 +111,7 @@ export const PaceProvider = ({ children }: { children: ReactNode }) => {
 
       newTabs[tabIndex] = {
         ...newTab,
+        type: newTab.type ?? existingTab.type ?? TAB_TYPE.FILE,
         stableKey: existingTab.stableKey,
       };
       setStoredTabs(newTabs);
@@ -145,8 +148,8 @@ export const PaceProvider = ({ children }: { children: ReactNode }) => {
       closeDynamicTab,
       updateDynamicTab,
       reorderDynamicTabs,
-      pendingActiveStableKey,
-      setPendingActiveStableKey,
+      activeTabId,
+      setActiveTabId,
     }),
     [
       isPaceSidebarOpen,
@@ -158,7 +161,7 @@ export const PaceProvider = ({ children }: { children: ReactNode }) => {
       closeDynamicTab,
       updateDynamicTab,
       reorderDynamicTabs,
-      pendingActiveStableKey,
+      activeTabId,
     ],
   );
 
