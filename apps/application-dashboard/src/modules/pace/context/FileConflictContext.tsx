@@ -4,6 +4,7 @@ import { createContext, type ReactNode, useCallback, useContext, useMemo, useSta
 import { captureException } from '@sentry/browser';
 import { toast } from '@zamp-platform/ui';
 import { useFileActions } from 'modules/pace/hooks/useFileActions';
+import { useFileTabs } from '@/modules/pace/components/dynamic-tabs/useFileTabs';
 import {
   CLIPBOARD_OPERATION,
   type ConflictResolution,
@@ -13,7 +14,6 @@ import {
 import { executeConflictResolution } from '@/modules/pace/components/files/file-tree.utils';
 import { FILE_TOAST_MESSAGES } from '@/modules/pace/components/files/files.constants';
 import { useFileClipboard } from '@/modules/pace/context/FileClipboardContext';
-import { useDynamicTabs } from '@/modules/pace/hooks/useDynamicTabs';
 
 interface FileConflictContextValue {
   conflict: FileConflict | null;
@@ -34,7 +34,7 @@ export const FileConflictProvider = ({ children, onFileMoved }: FileConflictProv
 
   const { copyItem, moveItem, deleteItem } = useFileActions();
   const { clearClipboard } = useFileClipboard();
-  const { updateTab } = useDynamicTabs();
+  const { updateTab } = useFileTabs();
 
   const resolveConflict = useCallback(
     async (resolution: ConflictResolution, siblingNames: string[]) => {

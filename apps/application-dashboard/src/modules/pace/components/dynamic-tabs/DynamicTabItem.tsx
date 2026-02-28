@@ -1,12 +1,13 @@
 'use client';
 
-import { Button, FileIcon } from '@zamp-platform/ui';
+import { type ReactNode } from 'react';
+import { Button } from '@zamp-platform/ui';
 import { cn } from '@zamp-platform/ui/utils';
 import { X } from 'lucide-react';
+import { getDefaultIcon } from 'modules/pace/components/dynamic-tabs/dynamic-tabs.utils';
+import { isOnSameBasePath } from 'modules/pace/components/dynamic-tabs/tab-registry';
 import { useRouter } from 'next/navigation';
 import TooltipV2 from '@/components/common/TooltipV2';
-import { ROUTES_PATH } from '@/constants/routeConfig';
-import { getFileExtension } from '@/modules/pace/components/files/file-tree.utils';
 import { usePaceContext } from '@/modules/pace/pace.context';
 import { DynamicTab } from '@/modules/pace/pace.types';
 import { SIDE_OPTIONS } from '@/types/commonTypes';
@@ -16,26 +17,29 @@ export interface DynamicTabItemProps {
   isActive: boolean;
   isDragging?: boolean;
   onClose: (e: React.MouseEvent, id: string) => void;
+  renderIcon?: (tab: DynamicTab) => ReactNode;
 }
 
-const DynamicTabItem = ({ tab, isActive, isDragging = false, onClose }: DynamicTabItemProps) => {
-  const fileExtension = getFileExtension(tab.name);
+const DynamicTabItem = ({ tab, isActive, isDragging = false, onClose, renderIcon }: DynamicTabItemProps) => {
   const { setOptimisticActiveTabId } = usePaceContext();
   const router = useRouter();
 
   const handleClick = () => {
     if (isActive) return;
 
-    const isOnFilesPage = window.location.pathname === ROUTES_PATH.CHAT_FILES;
+    const tabType = tab.type ?? 'file';
+    const canUseFastSwitch = isOnSameBasePath(tabType);
 
     setOptimisticActiveTabId(tab.id);
 
-    if (isOnFilesPage) {
-      window.history.pushState({ filePath: tab.id }, '', tab.path);
+    if (canUseFastSwitch) {
+      window.history.pushState({ tabId: tab.id, tabType }, '', tab.path);
     } else {
       router.push(tab.path);
     }
   };
+
+  const icon = renderIcon ? renderIcon(tab) : getDefaultIcon(tab);
 
   return (
     <TooltipV2
@@ -55,7 +59,7 @@ const DynamicTabItem = ({ tab, isActive, isDragging = false, onClose }: DynamicT
             : 'text-GRAY_700 hover:text-GRAY_1000 hover:bg-GRAY_200 border-transparent',
         )}
       >
-        <FileIcon extension={fileExtension || 'txt'} size='xs' />
+        {icon}
         <span className='f-11-500 min-w-0 flex-1 truncate text-left'>{tab.name}</span>
         <Button
           id='dynamic-tab-close-button'
