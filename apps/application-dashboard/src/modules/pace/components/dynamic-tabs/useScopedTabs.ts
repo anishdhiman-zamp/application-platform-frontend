@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useCallback, useEffect, useMemo } from 'react';
+import React, { useCallback, useEffect, useMemo, useRef } from 'react';
 import { getNextNavigationTarget, NAVIGATION_STRATEGY } from '@zamp-platform/utils';
 import {
   buildTabRoute,
@@ -66,6 +66,8 @@ export const useScopedTabs = (config: UseScopedTabsConfig = {}): UseScopedTabsRe
     return allTabs.filter((tab) => (tab.type ?? 'file') === type);
   }, [allTabs, type]);
 
+  const closedTabIdsRef = useRef<Set<string>>(new Set());
+
   const tabMaps = useMemo(() => {
     const byId = new Map<string, DynamicTab>();
     const byStableKey = new Map<string, DynamicTab>();
@@ -77,6 +79,10 @@ export const useScopedTabs = (config: UseScopedTabsConfig = {}): UseScopedTabsRe
 
     return { byId, byStableKey };
   }, [tabs]);
+
+  const tabExistsForUrlParam = useMemo(() => {
+    return currentUrlParam ? tabMaps.byId.has(currentUrlParam) : false;
+  }, [currentUrlParam, tabMaps]);
 
   const effectiveActiveTabId = optimisticActiveTabId ?? currentUrlParam;
 
@@ -152,6 +158,8 @@ export const useScopedTabs = (config: UseScopedTabsConfig = {}): UseScopedTabsRe
 
       const isClosingActiveTab = closingTab.id === effectiveActiveTabId;
 
+      closedTabIdsRef.current.add(closingTab.id);
+
       onTabClose?.(closingTab.id);
       closeDynamicTab(closingTab.id);
 
@@ -186,6 +194,7 @@ export const useScopedTabs = (config: UseScopedTabsConfig = {}): UseScopedTabsRe
       const activeTabToClose = tabsToClose.find((tab) => tab.id === effectiveActiveTabId);
 
       tabsToClose.forEach((tab) => {
+        closedTabIdsRef.current.add(tab.id);
         onTabClose?.(tab.id);
         closeDynamicTab(tab.id);
       });
@@ -323,6 +332,24 @@ export const useScopedTabs = (config: UseScopedTabsConfig = {}): UseScopedTabsRe
       window.removeEventListener('popstate', handlePopState);
     };
   }, [setOptimisticActiveTabId, tabConfig, type]);
+
+  useEffect(() => {
+    if (!isHydrated || !currentUrlParam) return;
+
+    if (tabExistsForUrlParam) return;
+
+    if (closedTabIdsRef.current.has(currentUrlParam)) return;
+
+    const fileName = currentUrlParam.split('/').pop() || currentUrlParam;
+    const tabPath = buildTabRoute(currentUrlParam, type);
+
+    openDynamicTab({
+      id: currentUrlParam,
+      name: fileName,
+      path: tabPath,
+      type,
+    });
+  }, [isHydrated, currentUrlParam, type]);
 
   return {
     tabs,
