@@ -14,6 +14,7 @@ import {
 } from '@zamp-platform/chat';
 import { ArrowDownIcon, Button } from '@zamp-platform/ui';
 import { cn } from '@zamp-platform/ui/utils';
+import { useFileTabs } from 'modules/pace/components/dynamic-tabs/useFileTabs';
 import { CHAT_CONVERSATION_ID_PARAM } from 'modules/pace/pace.constants';
 import { useRouter } from 'next/navigation';
 import { API_ENDPOINTS } from '@/apis/apiEndpoint.constants';
@@ -29,7 +30,7 @@ import ModelSelector from '@/modules/pace/components/chat/ModelSelector';
 import ChatMessagesSkeleton from '@/modules/pace/components/loaders/ChatMessagesSkeleton';
 import { useChatDraftInput } from '@/modules/pace/hooks/useChatDraftInput';
 import { useChatScroll } from '@/modules/pace/hooks/useChatScroll';
-import { useDynamicTabs } from '@/modules/pace/hooks/useDynamicTabs';
+import { usePaceContext } from '@/modules/pace/pace.context';
 import { baseApi } from '@/services/baseApi';
 import type { RootState } from '@/store';
 
@@ -58,8 +59,17 @@ const ChatSidebarInner: FC<ChatSidebarInnerProps> = ({
 
   const { inputValue, setInputValue } = useChatDraftInput({ conversationId });
   const fileDropHandlerRef = useRef<((files: FileList) => void) | null>(null);
+  const addFileReferenceRef = useRef<((ref: { path: string; name: string }) => void) | null>(null);
   const [selectedModel, setSelectedModel] = useState<string | null>(null);
-  const { openTab } = useDynamicTabs();
+  const { openTab } = useFileTabs();
+  const { pendingFileReference, clearPendingFileReference } = usePaceContext();
+
+  useEffect(() => {
+    if (pendingFileReference && addFileReferenceRef.current) {
+      addFileReferenceRef.current(pendingFileReference);
+      clearPendingFileReference();
+    }
+  }, [pendingFileReference, clearPendingFileReference]);
 
   const handleFileOpen = useCallback(
     (path: string, name: string) => {
@@ -199,6 +209,7 @@ const ChatSidebarInner: FC<ChatSidebarInnerProps> = ({
               autoFocus
               onConversationCreated={handleConversationCreated}
               fileDropHandlerRef={fileDropHandlerRef}
+              addFileReferenceRef={addFileReferenceRef}
               llmModel={selectedModel}
               showModelSelector
               modelSelectorSlot={modelSelectorSlot}

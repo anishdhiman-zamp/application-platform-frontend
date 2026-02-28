@@ -31,6 +31,11 @@ const setStoredTabs = (tabs: DynamicTab[]) => {
   }
 };
 
+export interface PendingFileReference {
+  path: string;
+  name: string;
+}
+
 interface PaceContextType {
   isPaceSidebarOpen: boolean;
   setIsPaceSidebarOpen: (open: boolean) => void;
@@ -44,6 +49,9 @@ interface PaceContextType {
   reorderDynamicTabs: (newOrder: string[]) => void;
   activeTabId: string | null;
   setActiveTabId: (id: string | null) => void;
+  pendingFileReference: PendingFileReference | null;
+  setPendingFileReference: (ref: PendingFileReference | null) => void;
+  clearPendingFileReference: () => void;
 }
 
 const PaceContext = createContext<PaceContextType | null>(null);
@@ -53,7 +61,12 @@ export const PaceProvider = ({ children }: { children: ReactNode }) => {
   const [dynamicTabs, setDynamicTabs] = useState<DynamicTab[]>([]);
   const [isDynamicTabsHydrated, setIsDynamicTabsHydrated] = useState(false);
   const [activeTabId, setActiveTabId] = useState<string | null>(null);
+  const [pendingFileReference, setPendingFileReference] = useState<PendingFileReference | null>(null);
   const startNewChatRef = useRef<(() => void) | null>(null);
+
+  const clearPendingFileReference = useCallback(() => {
+    setPendingFileReference(null);
+  }, []);
 
   useEffect(() => {
     const storedTabs = getStoredTabs();
@@ -150,6 +163,9 @@ export const PaceProvider = ({ children }: { children: ReactNode }) => {
       reorderDynamicTabs,
       activeTabId,
       setActiveTabId,
+      pendingFileReference,
+      setPendingFileReference,
+      clearPendingFileReference,
     }),
     [
       isPaceSidebarOpen,
@@ -162,6 +178,8 @@ export const PaceProvider = ({ children }: { children: ReactNode }) => {
       updateDynamicTab,
       reorderDynamicTabs,
       activeTabId,
+      pendingFileReference,
+      clearPendingFileReference,
     ],
   );
 

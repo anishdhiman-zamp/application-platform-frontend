@@ -1,7 +1,7 @@
 'use client';
 
 import { formatPlural } from '@zamp-platform/utils';
-import { Dispatch, SetStateAction, useCallback, useEffect, useMemo, useState } from 'react';
+import { Dispatch, SetStateAction, useCallback, useEffect, useMemo, useRef, useState } from 'react';
 
 import { ActionType, Block, BLOCK_TYPE, ButtonBlockType } from '../types/block.types';
 import {
@@ -69,6 +69,7 @@ export interface UseChatInputReturn {
   fileReferences: UploadedFile[];
   handleFileSelect: (files: FileList | null) => Promise<void>;
   removeFileReference: (fileId: string) => void;
+  addFileReference: (ref: { path: string; name: string }) => void;
   isUploading: boolean;
   firstMessage: string;
   setFirstMessage: Dispatch<SetStateAction<string>>;
@@ -203,6 +204,7 @@ export const useChatInput = ({
   const [fileReferences, setFileReferences] = useState<UploadedFile[]>([]);
   const [isUploading, setIsUploading] = useState(false);
   const [firstMessage, setFirstMessage] = useState('');
+  const externalFilePathsRef = useRef<Set<string>>(new Set());
 
   const isSubmitDisabled = useMemo(() => isDisabled || isUploading || !value.trim(), [isDisabled, isUploading, value]);
 
@@ -297,15 +299,41 @@ export const useChatInput = ({
     setIsUploading(false);
   };
 
-  const removeFileReference = (fileId: string) => {
-    setFileReferences((prev) => prev.filter((ref) => ref.path !== fileId));
+  const removeFileReference = useCallback(
+    (fileId: string) => {
+      setFileReferences((prev) => prev.filter((ref) => ref.path !== fileId));
 
-    if (fileId) {
-      adapter.deleteFileMutation.deleteFile({ path: fileId }).catch((error) => {
-        adapter.onError?.(error);
-      });
-    }
-  };
+      const isExternalFile = externalFilePathsRef.current.has(fileId);
+
+      if (isExternalFile) {
+        externalFilePathsRef.current.delete(fileId);
+      } else if (fileId) {
+        adapter.deleteFileMutation.deleteFile({ path: fileId }).catch((error) => {
+          adapter.onError?.(error);
+        });
+      }
+    },
+    [adapter],
+  );
+
+  const addFileReference = useCallback((ref: { path: string; name: string }) => {
+    setFileReferences((prev) => {
+      const exists = prev.some((existing) => existing.path === ref.path);
+      if (exists) return prev;
+
+      externalFilePathsRef.current.add(ref.path);
+
+      return [
+        ...prev,
+        {
+          path: ref.path,
+          name: ref.name,
+          file_type: '',
+          file: new File([], ref.name),
+        },
+      ];
+    });
+  }, []);
 
   const handleSubmit = () => {
     if (value.trim()) {
@@ -386,6 +414,7 @@ export const useChatInput = ({
     fileReferences,
     handleFileSelect,
     removeFileReference,
+    addFileReference,
     isUploading,
     firstMessage,
     setFirstMessage,
