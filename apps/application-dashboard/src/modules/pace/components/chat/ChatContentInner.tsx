@@ -28,6 +28,7 @@ import { useFileTabs } from '@/modules/pace/components/dynamic-tabs/useFileTabs'
 import ChatMessagesSkeleton from '@/modules/pace/components/loaders/ChatMessagesSkeleton';
 import { useChatDraftInput } from '@/modules/pace/hooks/useChatDraftInput';
 import { useChatScroll } from '@/modules/pace/hooks/useChatScroll';
+import { SIDEBAR_CONVERSATION_ID_PARAM } from '@/modules/pace/pace.constants';
 import { usePaceContext } from '@/modules/pace/pace.context';
 import { baseApi } from '@/services/baseApi';
 import { RootState } from '@/store';
@@ -121,7 +122,7 @@ const ChatContentInner = ({
         setIsPaceSidebarOpen(true);
         const params = new URLSearchParams(window.location.search);
 
-        params.set('s', currentConversationId);
+        params.set(SIDEBAR_CONVERSATION_ID_PARAM, currentConversationId);
         const newUrl = `${window.location.pathname}?${params.toString()}`;
 
         window.history.replaceState(null, '', newUrl);

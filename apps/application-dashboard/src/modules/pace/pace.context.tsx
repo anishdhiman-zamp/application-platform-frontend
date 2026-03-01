@@ -3,6 +3,7 @@
 import { createContext, type ReactNode, useCallback, useContext, useEffect, useMemo, useRef, useState } from 'react';
 import { DynamicTab, TAB_TYPE } from 'modules/pace/pace.types';
 import { SIDEBAR_CONVERSATION_ID_PARAM } from '@/modules/pace/pace.constants';
+import { defaultFnType } from '@/types/commonTypes';
 import { getFromLocalStorage, LOCAL_STORAGE_KEYS, setToLocalStorage } from '@/utils/localstorage';
 
 const getStoredTabs = (): DynamicTab[] => {
@@ -40,8 +41,8 @@ export interface PendingFileReference {
 interface PaceContextType {
   isPaceSidebarOpen: boolean;
   setIsPaceSidebarOpen: (open: boolean) => void;
-  registerStartNewChat: (callback: () => void) => void;
-  startNewChat: () => void;
+  registerStartNewChat: (callback: defaultFnType) => void;
+  startNewChat: defaultFnType;
   dynamicTabs: DynamicTab[];
   isDynamicTabsHydrated: boolean;
   openDynamicTab: (tab: Omit<DynamicTab, 'stableKey'>) => void;
@@ -52,7 +53,7 @@ interface PaceContextType {
   setActiveTabId: (id: string | null) => void;
   pendingFileReference: PendingFileReference | null;
   setPendingFileReference: (ref: PendingFileReference | null) => void;
-  clearPendingFileReference: () => void;
+  clearPendingFileReference: defaultFnType;
 }
 
 const PaceContext = createContext<PaceContextType | null>(null);
@@ -63,7 +64,7 @@ export const PaceProvider = ({ children }: { children: ReactNode }) => {
   const [isDynamicTabsHydrated, setIsDynamicTabsHydrated] = useState(false);
   const [activeTabId, setActiveTabId] = useState<string | null>(null);
   const [pendingFileReference, setPendingFileReference] = useState<PendingFileReference | null>(null);
-  const startNewChatRef = useRef<(() => void) | null>(null);
+  const startNewChatRef = useRef<defaultFnType | null>(null);
 
   const clearPendingFileReference = useCallback(() => {
     setPendingFileReference(null);
@@ -83,7 +84,7 @@ export const PaceProvider = ({ children }: { children: ReactNode }) => {
     }
   }, []);
 
-  const registerStartNewChat = useCallback((callback: () => void) => {
+  const registerStartNewChat = useCallback((callback: defaultFnType) => {
     startNewChatRef.current = callback;
   }, []);
 
