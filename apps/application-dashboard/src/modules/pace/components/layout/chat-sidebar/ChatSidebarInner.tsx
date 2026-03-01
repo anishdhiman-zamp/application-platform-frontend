@@ -14,6 +14,7 @@ import {
 } from '@zamp-platform/chat';
 import { ArrowDownIcon, Button } from '@zamp-platform/ui';
 import { cn } from '@zamp-platform/ui/utils';
+import { useFileTabs } from 'modules/pace/components/dynamic-tabs/useFileTabs';
 import { CHAT_CONVERSATION_ID_PARAM } from 'modules/pace/pace.constants';
 import { useRouter } from 'next/navigation';
 import { API_ENDPOINTS } from '@/apis/apiEndpoint.constants';
@@ -26,10 +27,10 @@ import { useAppDispatch, useAppSelector } from '@/hooks/toolkit';
 import NewPaceAvatar from '@/modules/chatbot/NewPaceAvatar';
 import ChatTopbar from '@/modules/pace/components/chat/ChatTopbar';
 import ModelSelector from '@/modules/pace/components/chat/ModelSelector';
-import { useFileTabs } from '@/modules/pace/components/dynamic-tabs/useFileTabs';
 import ChatMessagesSkeleton from '@/modules/pace/components/loaders/ChatMessagesSkeleton';
 import { useChatDraftInput } from '@/modules/pace/hooks/useChatDraftInput';
 import { useChatScroll } from '@/modules/pace/hooks/useChatScroll';
+import { usePaceContext } from '@/modules/pace/pace.context';
 import { baseApi } from '@/services/baseApi';
 import type { RootState } from '@/store';
 
@@ -52,14 +53,16 @@ const ChatSidebarInner: FC<ChatSidebarInnerProps> = ({
 }) => {
   const router = useRouter();
   const dispatch = useAppDispatch();
+  const { openTab } = useFileTabs();
   const organizationId = useAppSelector((state: RootState) => state.user.user?.orgs?.[0]?.organization_id) ?? '';
   const currentUserName = useAppSelector((state: RootState) => state.user.user?.user_name) ?? '';
   const username = useAppSelector((state: RootState) => state.user.user?.username) ?? '';
 
-  const { inputValue, setInputValue } = useChatDraftInput({ conversationId });
   const fileDropHandlerRef = useRef<((files: FileList) => void) | null>(null);
+  const addFileReferenceRef = useRef<((ref: { path: string; name: string }) => void) | null>(null);
+  const { inputValue, setInputValue } = useChatDraftInput({ conversationId });
   const [selectedModel, setSelectedModel] = useState<string | null>(null);
-  const { openTab } = useFileTabs();
+  const { pendingFileReference, clearPendingFileReference } = usePaceContext();
 
   const handleFileOpen = useCallback(
     (path: string, name: string) => {
@@ -102,12 +105,6 @@ const ChatSidebarInner: FC<ChatSidebarInnerProps> = ({
   const isLoadingConversation = Boolean(conversationId && chat.isLoadingConversationHistory) || !hasMessages;
   const isInConversation = Boolean(conversationId || chat.conversationId || hasMessages);
 
-  useEffect(() => {
-    if (chat.conversationId && chat.conversationId !== conversationId) {
-      setConversationId(chat.conversationId, chatTitle);
-    }
-  }, [chat.conversationId, conversationId, setConversationId]);
-
   const { scrollContainerRef, showScrollButton, handleScroll, handleScrollToBottomClick } = useChatScroll({
     messagesLength: chat.messages?.length ?? 0,
     isLoading: isLoadingConversation,
@@ -127,6 +124,19 @@ const ChatSidebarInner: FC<ChatSidebarInnerProps> = ({
     router.push(chatUrl);
     handleClose();
   }, [conversationId, router, handleClose]);
+
+  useEffect(() => {
+    if (chat.conversationId && chat.conversationId !== conversationId) {
+      setConversationId(chat.conversationId, chatTitle);
+    }
+  }, [chat.conversationId, conversationId, setConversationId, chatTitle]);
+
+  useEffect(() => {
+    if (pendingFileReference && addFileReferenceRef.current) {
+      addFileReferenceRef.current(pendingFileReference);
+      clearPendingFileReference();
+    }
+  }, [pendingFileReference, clearPendingFileReference, addFileReferenceRef]);
 
   return (
     <ChatActionsProvider onFileOpen={handleFileOpen}>
@@ -199,6 +209,7 @@ const ChatSidebarInner: FC<ChatSidebarInnerProps> = ({
               autoFocus
               onConversationCreated={handleConversationCreated}
               fileDropHandlerRef={fileDropHandlerRef}
+              addFileReferenceRef={addFileReferenceRef}
               llmModel={selectedModel}
               showModelSelector
               modelSelectorSlot={modelSelectorSlot}

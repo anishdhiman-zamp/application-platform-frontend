@@ -7,8 +7,9 @@ import {
   getActiveTabIdFromUrl,
   getTabFallbackPath,
   getTabTypeConfig,
+  isOnSameBasePath,
 } from 'modules/pace/components/dynamic-tabs/tab-registry';
-import { useSearchParams } from 'next/navigation';
+import { useRouter, useSearchParams } from 'next/navigation';
 import { usePaceContext } from '@/modules/pace/pace.context';
 import { DynamicTab, DynamicTabType, ROUTE_KIND, TAB_TYPE } from '@/modules/pace/pace.types';
 
@@ -38,6 +39,7 @@ interface UseScopedTabsReturn {
 export const useScopedTabs = (config: UseScopedTabsConfig = {}): UseScopedTabsReturn => {
   const { type = TAB_TYPE.FILE, onTabClose, onTabUpdate, onFolderMove } = config;
 
+  const router = useRouter();
   const searchParams = useSearchParams();
   const tabConfig = getTabTypeConfig(type);
 
@@ -117,9 +119,16 @@ export const useScopedTabs = (config: UseScopedTabsConfig = {}): UseScopedTabsRe
       });
 
       setActiveTabId(id);
-      window.history.pushState({ tabId: id, tabType: type }, '', tabPath);
+
+      const canUseFastSwitch = isOnSameBasePath(type);
+
+      if (canUseFastSwitch) {
+        window.history.pushState({ tabId: id, tabType: type }, '', tabPath);
+      } else {
+        router.push(tabPath);
+      }
     },
-    [openDynamicTab, setActiveTabId, type],
+    [openDynamicTab, router, setActiveTabId, type],
   );
 
   const closeTab = useCallback(

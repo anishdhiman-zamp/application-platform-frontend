@@ -16,6 +16,7 @@ import { SOCKET_STATES } from '../types/transcription.types';
 import { ChatComposer } from './ChatComposer';
 
 export type FileDropHandlerRef = RefObject<((files: FileList) => void) | null>;
+export type AddFileReferenceRef = RefObject<((ref: { path: string; name: string }) => void) | null>;
 
 export interface ConnectedChatInputProps {
   chat: ReturnType<typeof useChat>;
@@ -43,6 +44,7 @@ export interface ConnectedChatInputProps {
   defaultMessage?: string;
   onConversationCreated?: (conversationId: string) => void;
   fileDropHandlerRef?: FileDropHandlerRef;
+  addFileReferenceRef?: AddFileReferenceRef;
   minTextareaHeight?: number;
   maxTextareaHeight?: number;
   llmModel?: string | null;
@@ -75,6 +77,7 @@ export const ConnectedChatInput: FC<ConnectedChatInputProps> = ({
   defaultMessage,
   onConversationCreated,
   fileDropHandlerRef,
+  addFileReferenceRef,
   minTextareaHeight,
   maxTextareaHeight,
   llmModel,
@@ -119,6 +122,7 @@ export const ConnectedChatInput: FC<ConnectedChatInputProps> = ({
     fileReferences,
     handleFileSelect,
     removeFileReference,
+    addFileReference,
     isUploading,
     setFirstMessage,
     isSubmitDisabled,
@@ -241,6 +245,19 @@ export const ConnectedChatInput: FC<ConnectedChatInputProps> = ({
       }
     };
   }, [fileDropHandlerRef, handleFileSelect, disableAttachments, isDisabled]);
+
+  // Expose addFileReference to parent for external file references
+  useEffect(() => {
+    if (addFileReferenceRef && !isDisabled) {
+      addFileReferenceRef.current = addFileReference;
+    }
+
+    return () => {
+      if (addFileReferenceRef) {
+        addFileReferenceRef.current = null;
+      }
+    };
+  }, [addFileReferenceRef, addFileReference, isDisabled]);
 
   return (
     <div className='w-full'>

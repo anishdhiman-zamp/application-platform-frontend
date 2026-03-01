@@ -18,6 +18,7 @@ import {
 import { CONTEXT_MENU_ACTION_IDS, FILE_TOAST_MESSAGES } from '@/modules/pace/components/files/files.constants';
 import { useFileDownload } from '@/modules/pace/hooks/useFileDownload';
 import { useFileTreeContext } from '@/modules/pace/hooks/useFileTreeContext';
+import { usePaceContext } from '@/modules/pace/pace.context';
 
 interface UseFileTreeNodeActionsProps {
   node: TreeNode;
@@ -67,6 +68,7 @@ export const useFileTreeNodeActions = ({
 
   const { openTab, closeTabsForPath, updateTab, updateTabsForFolderMove } = useFileTabs();
   const { downloadFile } = useFileDownload();
+  const { setPendingFileReference, setIsPaceSidebarOpen } = usePaceContext();
   const {
     createFile,
     createFolder,
@@ -177,6 +179,11 @@ export const useFileTreeNodeActions = ({
           break;
         case CONTEXT_MENU_ACTION_IDS.OPEN_IN_TAB: {
           openTab(node.path, node.name);
+          break;
+        }
+        case CONTEXT_MENU_ACTION_IDS.REFERENCE_IN_CHAT: {
+          setPendingFileReference({ path: node.path, name: node.name });
+          setIsPaceSidebarOpen(true);
           break;
         }
         case CONTEXT_MENU_ACTION_IDS.DOWNLOAD: {

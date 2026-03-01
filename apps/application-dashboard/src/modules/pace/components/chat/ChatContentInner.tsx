@@ -28,6 +28,8 @@ import { useFileTabs } from '@/modules/pace/components/dynamic-tabs/useFileTabs'
 import ChatMessagesSkeleton from '@/modules/pace/components/loaders/ChatMessagesSkeleton';
 import { useChatDraftInput } from '@/modules/pace/hooks/useChatDraftInput';
 import { useChatScroll } from '@/modules/pace/hooks/useChatScroll';
+import { SIDEBAR_CONVERSATION_ID_PARAM } from '@/modules/pace/pace.constants';
+import { usePaceContext } from '@/modules/pace/pace.context';
 import { baseApi } from '@/services/baseApi';
 import { RootState } from '@/store';
 
@@ -59,6 +61,7 @@ const ChatContentInner = ({
   const [selectedModel, setSelectedModel] = useState<string | null>(null);
 
   const { openTab } = useFileTabs();
+  const { setIsPaceSidebarOpen } = usePaceContext();
 
   const modelSelectorSlot = useMemo(
     () => <ModelSelector value={selectedModel} onChange={setSelectedModel} />,
@@ -68,13 +71,6 @@ const ChatContentInner = ({
   const handleConversationCreated = () => {
     dispatch(baseApi.util.invalidateTags([APITags.GET_CONVERSATION_HISTORY]));
   };
-
-  const handleFileOpen = useCallback(
-    (path: string, name: string) => {
-      openTab(path, name);
-    },
-    [openTab],
-  );
 
   const chat = useChat({
     resourceId: organizationId,
@@ -117,6 +113,24 @@ const ChatContentInner = ({
       setConversationId(chat.conversationId);
     }
   }, [chat.conversationId, conversationId, setConversationId]);
+
+  const handleFileOpen = useCallback(
+    (path: string, name: string) => {
+      const currentConversationId = conversationId ?? chat.conversationId;
+
+      if (currentConversationId) {
+        setIsPaceSidebarOpen(true);
+        const params = new URLSearchParams(window.location.search);
+
+        params.set(SIDEBAR_CONVERSATION_ID_PARAM, currentConversationId);
+        const newUrl = `${window.location.pathname}?${params.toString()}`;
+
+        window.history.replaceState(null, '', newUrl);
+      }
+      openTab(path, name);
+    },
+    [openTab, conversationId, chat.conversationId, setIsPaceSidebarOpen],
+  );
 
   if (isInConversation) {
     return (
