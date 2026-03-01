@@ -43,10 +43,14 @@ const unpatchHistory = () => {
 const useUrlChangeListener = (onUrlChange: () => void) => {
   const onUrlChangeRef = useRef(onUrlChange);
 
-  onUrlChangeRef.current = onUrlChange;
+  useEffect(() => {
+    onUrlChangeRef.current = onUrlChange;
+  });
 
   useEffect(() => {
-    const handleUrlChange = () => onUrlChangeRef.current();
+    const handleUrlChange = () => {
+      queueMicrotask(() => onUrlChangeRef.current());
+    };
 
     window.addEventListener('popstate', handleUrlChange);
     historyPatchState.listeners.add(handleUrlChange);

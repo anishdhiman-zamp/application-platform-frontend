@@ -106,11 +106,12 @@ const FilesystemApi = baseApi.injectEndpoints({
 
     // Write File Content
     writeFile: builder.mutation<WriteFileResponse, WriteFileRequest>({
-      query: ({ path, content }) => ({
+      query: ({ path, content, expectedMtimeMs }) => ({
         url: API_ENDPOINTS.FILES_WRITE_POST.replace('{{path}}', path),
         method: REQUEST_TYPES.PUT,
         body: {
           content,
+          ...(expectedMtimeMs !== undefined && { expectedMtimeMs }),
         },
       }),
     }),

@@ -1,15 +1,17 @@
 'use client';
 
-import { useCallback, useEffect, useMemo, useRef } from 'react';
+import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { useLazyReadFileContentQuery, useLazyReadFileQuery, useWriteFileMutation } from '@/apis/filesystem';
-import { getFileCategory, getFileExtension } from '@/modules/pace/components/files/file-tree.utils';
+import { getFileCategory, getFileExtension, getMediaUrl } from '@/modules/pace/components/files/file-tree.utils';
 import { FILE_CATEGORY, type FileCategory } from '@/modules/pace/components/files/files.constants';
 import { useFileViewerContext } from '@/modules/pace/context/FileViewerContext';
 
 const AUTO_SAVE_DELAY_MS = 1000;
+const POLL_INTERVAL_MS = 1000;
 
 interface UseFileViewerOptions {
   filePath: string | null;
+  isActive?: boolean;
   onSaveSuccess?: () => void;
   onSaveError?: (error: unknown) => void;
 }
@@ -28,14 +30,23 @@ interface UseFileViewerReturn {
   isSaving: boolean;
   lastSavedAt: number | null;
   refetch: () => void;
+  mediaUrl: string | null;
 }
 
-export const useFileViewer = ({ filePath, onSaveSuccess, onSaveError }: UseFileViewerOptions): UseFileViewerReturn => {
+export const useFileViewer = ({
+  filePath,
+  isActive = true,
+  onSaveSuccess,
+  onSaveError,
+}: UseFileViewerOptions): UseFileViewerReturn => {
   const autoSaveTimerRef = useRef<NodeJS.Timeout | null>(null);
   const isSavingRef = useRef(false);
   const pendingSaveRef = useRef(false);
 
-  const { getFileState, initFileState, updateFileContent, markFileSaved } = useFileViewerContext();
+  const [mediaMtime, setMediaMtime] = useState<number | null>(null);
+
+  const { getFileState, initFileState, forceUpdateFileState, updateFileContent, markFileSaved } =
+    useFileViewerContext();
 
   const [fetchFileMetadata] = useLazyReadFileQuery();
   const [fetchFileContent, { isLoading, isError, error }] = useLazyReadFileContentQuery();
@@ -88,7 +99,7 @@ export const useFileViewer = ({ filePath, onSaveSuccess, onSaveError }: UseFileV
 
       markFileSaved(filePath, result.mtime_ms);
       onSaveSuccess?.();
-    } catch (err) {
+    } catch (err: unknown) {
       console.error('Failed to save file:', err);
       onSaveError?.(err);
     } finally {
@@ -125,16 +136,27 @@ export const useFileViewer = ({ filePath, onSaveSuccess, onSaveError }: UseFileV
   );
 
   const refetch = useCallback(() => {
-    if (!filePath || !isEditable) return;
+    if (!filePath) return;
 
-    Promise.all([fetchFileMetadata({ path: filePath }).unwrap(), fetchFileContent({ path: filePath }).unwrap()])
-      .then(([metadataResult, contentResult]) => {
-        initFileState(filePath, contentResult ?? '', metadataResult.mtime_ms);
-      })
-      .catch((err) => {
-        console.error('Failed to refetch file:', err);
-      });
-  }, [filePath, isEditable, fetchFileMetadata, fetchFileContent, initFileState]);
+    if (isEditable) {
+      Promise.all([fetchFileMetadata({ path: filePath }).unwrap(), fetchFileContent({ path: filePath }).unwrap()])
+        .then(([metadataResult, contentResult]) => {
+          forceUpdateFileState(filePath, contentResult ?? '', metadataResult.mtime_ms);
+        })
+        .catch((err) => {
+          console.error('Failed to refetch file:', err);
+        });
+    } else {
+      fetchFileMetadata({ path: filePath })
+        .unwrap()
+        .then((metadataResult) => {
+          setMediaMtime(metadataResult.mtime_ms);
+        })
+        .catch((err) => {
+          console.error('Failed to refetch file metadata:', err);
+        });
+    }
+  }, [filePath, isEditable, fetchFileMetadata, fetchFileContent, forceUpdateFileState]);
 
   useEffect(() => {
     const loadFile = async () => {
@@ -189,6 +211,67 @@ export const useFileViewer = ({ filePath, onSaveSuccess, onSaveError }: UseFileV
     };
   }, [fileState?.isDirty, saveFile]);
 
+  // Polling for editable files - detect external changes
+  useEffect(() => {
+    if (!filePath || !isEditable || !isActive) return;
+
+    const pollForChanges = async () => {
+      const currentState = getFileState(filePath);
+
+      if (!currentState || currentState.isDirty) return;
+
+      try {
+        const metadata = await fetchFileMetadata({ path: filePath }).unwrap();
+
+        if (metadata.mtime_ms !== currentState.mtime_ms) {
+          const content = await fetchFileContent({ path: filePath }).unwrap();
+
+          forceUpdateFileState(filePath, content ?? '', metadata.mtime_ms);
+        }
+      } catch {
+        // Silently ignore polling errors
+      }
+    };
+
+    const intervalId = setInterval(pollForChanges, POLL_INTERVAL_MS);
+
+    return () => clearInterval(intervalId);
+  }, [filePath, isEditable, isActive, getFileState, fetchFileMetadata, fetchFileContent, forceUpdateFileState]);
+
+  // Polling for media files - detect external changes and update URL
+  useEffect(() => {
+    if (!filePath || isEditable || !isActive) return;
+
+    const pollForMediaChanges = async () => {
+      try {
+        const metadata = await fetchFileMetadata({ path: filePath }).unwrap();
+
+        if (mediaMtime !== null && metadata.mtime_ms !== mediaMtime) {
+          setMediaMtime(metadata.mtime_ms);
+        } else if (mediaMtime === null) {
+          setMediaMtime(metadata.mtime_ms);
+        }
+      } catch {
+        // Silently ignore polling errors
+      }
+    };
+
+    pollForMediaChanges();
+
+    const intervalId = setInterval(pollForMediaChanges, POLL_INTERVAL_MS);
+
+    return () => clearInterval(intervalId);
+  }, [filePath, isEditable, isActive, mediaMtime, fetchFileMetadata]);
+
+  const mediaUrl = useMemo(() => {
+    if (!filePath || isEditable) return null;
+
+    const baseUrl = getMediaUrl(filePath);
+
+    // baseUrl already contains ?raw=true, so use & for additional params
+    return mediaMtime ? `${baseUrl}&v=${mediaMtime}` : baseUrl;
+  }, [filePath, isEditable, mediaMtime]);
+
   return {
     content: fileState?.content ?? null,
     originalContent: fileState?.originalContent ?? null,
@@ -203,6 +286,7 @@ export const useFileViewer = ({ filePath, onSaveSuccess, onSaveError }: UseFileV
     isSaving,
     lastSavedAt: fileState?.mtime_ms ?? null,
     refetch,
+    mediaUrl,
   };
 };
 

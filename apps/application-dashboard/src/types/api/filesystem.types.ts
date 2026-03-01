@@ -57,6 +57,7 @@ export interface CreateItemResponse {
 export interface WriteFileRequest {
   path: string;
   content: string;
+  expectedMtimeMs?: number;
 }
 
 export interface WriteFileResponse {
