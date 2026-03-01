@@ -53,23 +53,16 @@ const ChatSidebarInner: FC<ChatSidebarInnerProps> = ({
 }) => {
   const router = useRouter();
   const dispatch = useAppDispatch();
+  const { openTab } = useFileTabs();
   const organizationId = useAppSelector((state: RootState) => state.user.user?.orgs?.[0]?.organization_id) ?? '';
   const currentUserName = useAppSelector((state: RootState) => state.user.user?.user_name) ?? '';
   const username = useAppSelector((state: RootState) => state.user.user?.username) ?? '';
 
-  const { inputValue, setInputValue } = useChatDraftInput({ conversationId });
   const fileDropHandlerRef = useRef<((files: FileList) => void) | null>(null);
   const addFileReferenceRef = useRef<((ref: { path: string; name: string }) => void) | null>(null);
+  const { inputValue, setInputValue } = useChatDraftInput({ conversationId });
   const [selectedModel, setSelectedModel] = useState<string | null>(null);
-  const { openTab } = useFileTabs();
   const { pendingFileReference, clearPendingFileReference } = usePaceContext();
-
-  useEffect(() => {
-    if (pendingFileReference && addFileReferenceRef.current) {
-      addFileReferenceRef.current(pendingFileReference);
-      clearPendingFileReference();
-    }
-  }, [pendingFileReference, clearPendingFileReference]);
 
   const handleFileOpen = useCallback(
     (path: string, name: string) => {
@@ -112,12 +105,6 @@ const ChatSidebarInner: FC<ChatSidebarInnerProps> = ({
   const isLoadingConversation = Boolean(conversationId && chat.isLoadingConversationHistory) || !hasMessages;
   const isInConversation = Boolean(conversationId || chat.conversationId || hasMessages);
 
-  useEffect(() => {
-    if (chat.conversationId && chat.conversationId !== conversationId) {
-      setConversationId(chat.conversationId, chatTitle);
-    }
-  }, [chat.conversationId, conversationId, setConversationId]);
-
   const { scrollContainerRef, showScrollButton, handleScroll, handleScrollToBottomClick } = useChatScroll({
     messagesLength: chat.messages?.length ?? 0,
     isLoading: isLoadingConversation,
@@ -137,6 +124,19 @@ const ChatSidebarInner: FC<ChatSidebarInnerProps> = ({
     router.push(chatUrl);
     handleClose();
   }, [conversationId, router, handleClose]);
+
+  useEffect(() => {
+    if (chat.conversationId && chat.conversationId !== conversationId) {
+      setConversationId(chat.conversationId, chatTitle);
+    }
+  }, [chat.conversationId, conversationId, setConversationId, chatTitle]);
+
+  useEffect(() => {
+    if (pendingFileReference && addFileReferenceRef.current) {
+      addFileReferenceRef.current(pendingFileReference);
+      clearPendingFileReference();
+    }
+  }, [pendingFileReference, clearPendingFileReference, addFileReferenceRef]);
 
   return (
     <ChatActionsProvider onFileOpen={handleFileOpen}>
