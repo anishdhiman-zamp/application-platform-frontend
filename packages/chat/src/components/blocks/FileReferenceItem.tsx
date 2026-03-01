@@ -46,16 +46,12 @@ const FileReferenceItem: React.FC<FileReferenceItemProps> = ({ fileReference, on
       </div>
       {fileReference.path && onRemove && (
         <Button
-          className='absolute size-4 rounded-full bg-white p-px opacity-0 group-hover:opacity-100 [&_svg]:size-3.5'
+          className='absolute -top-2 -right-2 size-4 rounded-full bg-white p-px opacity-0 group-hover:opacity-100 [&_svg]:size-3.5'
           variant='ghost'
           size='icon'
           onClick={(e) => {
             e.stopPropagation();
             onRemove(fileReference.path);
-          }}
-          style={{
-            top: '-8px',
-            right: '-8px',
           }}
         >
           <CircleX className='size-3.5 text-gray-700' />
@@ -63,13 +59,9 @@ const FileReferenceItem: React.FC<FileReferenceItemProps> = ({ fileReference, on
       )}
       {isLoading && !fileReference.path && (
         <Button
-          className='absolute size-4 rounded-full border border-gray-400 bg-white [&_svg]:size-3'
+          className='absolute -top-2 -right-2 size-4 rounded-full border border-gray-400 bg-white [&_svg]:size-3'
           variant='ghost'
           size='icon'
-          style={{
-            top: '-8px',
-            right: '-8px',
-          }}
         >
           <LoaderCircle size={12} className='animate-spin text-blue-700' />
         </Button>
