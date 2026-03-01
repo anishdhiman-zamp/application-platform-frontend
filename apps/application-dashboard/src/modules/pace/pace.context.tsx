@@ -2,6 +2,7 @@
 
 import { createContext, type ReactNode, useCallback, useContext, useEffect, useMemo, useRef, useState } from 'react';
 import { DynamicTab, TAB_TYPE } from 'modules/pace/pace.types';
+import { SIDEBAR_CONVERSATION_ID_PARAM } from '@/modules/pace/pace.constants';
 import { getFromLocalStorage, LOCAL_STORAGE_KEYS, setToLocalStorage } from '@/utils/localstorage';
 
 const getStoredTabs = (): DynamicTab[] => {
@@ -73,6 +74,13 @@ export const PaceProvider = ({ children }: { children: ReactNode }) => {
 
     setDynamicTabs(storedTabs);
     setIsDynamicTabsHydrated(true);
+
+    const params = new URLSearchParams(window.location.search);
+    const sidebarConvId = params.get(SIDEBAR_CONVERSATION_ID_PARAM);
+
+    if (sidebarConvId) {
+      setIsPaceSidebarOpen(true);
+    }
   }, []);
 
   const registerStartNewChat = useCallback((callback: () => void) => {

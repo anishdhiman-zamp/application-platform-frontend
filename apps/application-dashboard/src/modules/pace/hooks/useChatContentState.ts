@@ -16,10 +16,11 @@ export const useChatContentState = ({ initialConversationId }: UseChatContentSta
   const username = useAppSelector((state: RootState) => state.user.user?.username) ?? '';
   const router = useRouter();
 
+  const prevInitialConversationIdRef = useRef(initialConversationId);
+
   const [chatTitle, setChatTitle] = useState('');
   const [conversationId, setConversationIdState] = useState<string | null>(initialConversationId);
   const [chatKey, setChatKey] = useState(0);
-  const isInitializedRef = useRef(false);
 
   const setConversationId = useCallback(
     (id: string | null, title?: string) => {
@@ -70,10 +71,8 @@ export const useChatContentState = ({ initialConversationId }: UseChatContentSta
       const urlConversationId = params.get(CHAT_CONVERSATION_ID_PARAM);
 
       if (urlConversationId) {
-        // URL has conversation ID, update state
         setConversationIdState(urlConversationId);
       } else {
-        // No conversation ID in URL, start fresh chat
         setChatTitle('');
         setConversationIdState(null);
         setChatKey((prev) => prev + 1);
@@ -87,11 +86,16 @@ export const useChatContentState = ({ initialConversationId }: UseChatContentSta
     };
   }, []);
 
-  // Initialize from URL on mount
+  // Sync state with URL when initialConversationId changes (e.g., browser back/forward)
   useEffect(() => {
-    if (!isInitializedRef.current && initialConversationId) {
+    if (prevInitialConversationIdRef.current !== initialConversationId) {
+      prevInitialConversationIdRef.current = initialConversationId;
       setConversationIdState(initialConversationId);
-      isInitializedRef.current = true;
+
+      if (!initialConversationId) {
+        setChatTitle('');
+        setChatKey((prev) => prev + 1);
+      }
     }
   }, [initialConversationId]);
 

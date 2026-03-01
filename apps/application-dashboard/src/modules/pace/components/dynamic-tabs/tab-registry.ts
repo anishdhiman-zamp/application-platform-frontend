@@ -1,5 +1,24 @@
+import { SIDEBAR_CONVERSATION_ID_PARAM } from 'modules/pace/pace.constants';
 import { ROUTES_PATH } from '@/constants/routeConfig';
 import { DynamicTabRouteConfig, DynamicTabType, ROUTE_KIND, TAB_TYPE } from '@/modules/pace/pace.types';
+
+export const preserveSidebarParam = (path: string): string => {
+  if (typeof window === 'undefined') return path;
+
+  const currentParams = new URLSearchParams(window.location.search);
+  const sParam = currentParams.get(SIDEBAR_CONVERSATION_ID_PARAM);
+
+  if (!sParam) {
+    return path;
+  }
+
+  const [basePath, existingQuery] = path.split('?');
+  const params = new URLSearchParams(existingQuery || '');
+
+  params.set(SIDEBAR_CONVERSATION_ID_PARAM, sParam);
+
+  return `${basePath}?${params.toString()}`;
+};
 
 export const TAB_TYPE_CONFIG: Record<DynamicTabType, DynamicTabRouteConfig> = {
   [TAB_TYPE.FILE]: {
@@ -24,18 +43,21 @@ export const getTabTypeConfig = (type?: DynamicTabType): DynamicTabRouteConfig =
 
 export const buildTabRoute = (id: string, type?: DynamicTabType): string => {
   const config = getTabTypeConfig(type);
+  let path: string;
 
   if (config.kind === ROUTE_KIND.QUERY) {
-    return `${config.basePath}?${config.paramName}=${encodeURIComponent(id)}`;
+    path = `${config.basePath}?${config.paramName}=${encodeURIComponent(id)}`;
+  } else {
+    path = config.buildPath(id);
   }
 
-  return config.buildPath(id);
+  return preserveSidebarParam(path);
 };
 
 export const getTabFallbackPath = (type?: DynamicTabType): string => {
   const config = getTabTypeConfig(type);
 
-  return config.fallbackPath;
+  return preserveSidebarParam(config.fallbackPath);
 };
 
 export const isOnSameBasePath = (type?: DynamicTabType): boolean => {

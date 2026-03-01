@@ -5,7 +5,7 @@ import { Button } from '@zamp-platform/ui';
 import { cn } from '@zamp-platform/ui/utils';
 import { X } from 'lucide-react';
 import { getDefaultIcon } from 'modules/pace/components/dynamic-tabs/dynamic-tabs.utils';
-import { isOnSameBasePath } from 'modules/pace/components/dynamic-tabs/tab-registry';
+import { isOnSameBasePath, preserveSidebarParam } from 'modules/pace/components/dynamic-tabs/tab-registry';
 import { useRouter } from 'next/navigation';
 import TooltipV2 from '@/components/common/TooltipV2';
 import { usePaceContext } from '@/modules/pace/pace.context';
@@ -29,13 +29,14 @@ const DynamicTabItem = ({ tab, isActive, isDragging = false, onClose, renderIcon
 
     const tabType = tab.type ?? TAB_TYPE.FILE;
     const canUseFastSwitch = isOnSameBasePath(tabType);
+    const tabPath = preserveSidebarParam(tab.path);
 
     setActiveTabId(tab.id);
 
     if (canUseFastSwitch) {
-      window.history.pushState({ tabId: tab.id, tabType }, '', tab.path);
+      window.history.pushState({ tabId: tab.id, tabType }, '', tabPath);
     } else {
-      router.push(tab.path);
+      router.push(tabPath);
     }
   };
 

@@ -81,6 +81,20 @@ const PaceNavbar = () => {
     return pathname?.includes(path) ?? false;
   };
 
+  const getNavItemHref = (id: PaceNavbarItemId, path: string) => {
+    if (id === PaceNavbarItemId.HOME) {
+      return path;
+    }
+
+    const sParam = searchParams?.get('s');
+
+    if (sParam) {
+      return `${path}?s=${sParam}`;
+    }
+
+    return path;
+  };
+
   const handleNavItemClick = (e: React.MouseEvent<HTMLAnchorElement>, id: PaceNavbarItemId, path: string) => {
     const queryString = searchParams?.toString();
     const currentFullPath = pathname + (queryString ? `?${queryString}` : '');
@@ -104,7 +118,7 @@ const PaceNavbar = () => {
         {filteredNavbarItems.map((item) => (
           <Link
             key={item.id}
-            href={item.path}
+            href={getNavItemHref(item.id, item.path)}
             className={cn(
               'text-GRAY_900 hover:text-GRAY_1000 hover:bg-GRAY_200 flex h-7 w-7 cursor-pointer items-center justify-center rounded-lg p-2',
               isNavItemActive(item.id, item.path) &&
