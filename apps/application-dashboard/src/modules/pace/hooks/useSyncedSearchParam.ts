@@ -2,9 +2,43 @@
 
 import { useCallback, useEffect, useRef, useState } from 'react';
 
+// Singleton state for history patching
+const historyPatchState = {
+  listeners: new Set<() => void>(),
+  originalPushState: null as typeof history.pushState | null,
+  originalReplaceState: null as typeof history.replaceState | null,
+};
+
+const patchHistory = () => {
+  if (historyPatchState.originalPushState) return; // Already patched
+
+  historyPatchState.originalPushState = history.pushState.bind(history);
+  historyPatchState.originalReplaceState = history.replaceState.bind(history);
+
+  history.pushState = (...args) => {
+    historyPatchState.originalPushState!(...args);
+    historyPatchState.listeners.forEach((fn) => fn());
+  };
+
+  history.replaceState = (...args) => {
+    historyPatchState.originalReplaceState!(...args);
+    historyPatchState.listeners.forEach((fn) => fn());
+  };
+};
+
+const unpatchHistory = () => {
+  if (historyPatchState.listeners.size > 0) return; // Still has listeners
+  if (!historyPatchState.originalPushState) return;
+
+  history.pushState = historyPatchState.originalPushState;
+  history.replaceState = historyPatchState.originalReplaceState!;
+  historyPatchState.originalPushState = null;
+  historyPatchState.originalReplaceState = null;
+};
+
 /**
  * Sets up listeners for URL changes (popstate, pushState, replaceState).
- * Returns a cleanup function.
+ * Uses singleton pattern to avoid nested patching issues.
  */
 const useUrlChangeListener = (onUrlChange: () => void) => {
   const onUrlChangeRef = useRef(onUrlChange);
@@ -12,31 +46,16 @@ const useUrlChangeListener = (onUrlChange: () => void) => {
   onUrlChangeRef.current = onUrlChange;
 
   useEffect(() => {
-    const handleUrlChange = () => {
-      onUrlChangeRef.current();
-    };
+    const handleUrlChange = () => onUrlChangeRef.current();
 
-    // Handle browser back/forward
     window.addEventListener('popstate', handleUrlChange);
-
-    // Patch pushState and replaceState to detect programmatic URL changes
-    const originalPushState = history.pushState.bind(history);
-    const originalReplaceState = history.replaceState.bind(history);
-
-    history.pushState = (...args) => {
-      originalPushState(...args);
-      handleUrlChange();
-    };
-
-    history.replaceState = (...args) => {
-      originalReplaceState(...args);
-      handleUrlChange();
-    };
+    historyPatchState.listeners.add(handleUrlChange);
+    patchHistory();
 
     return () => {
       window.removeEventListener('popstate', handleUrlChange);
-      history.pushState = originalPushState;
-      history.replaceState = originalReplaceState;
+      historyPatchState.listeners.delete(handleUrlChange);
+      unpatchHistory();
     };
   }, []);
 };
