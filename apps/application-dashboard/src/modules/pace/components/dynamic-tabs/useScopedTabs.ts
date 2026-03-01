@@ -8,6 +8,7 @@ import {
   getTabFallbackPath,
   getTabTypeConfig,
   isOnSameBasePath,
+  preserveSidebarParam,
 } from 'modules/pace/components/dynamic-tabs/tab-registry';
 import { useRouter, useSearchParams } from 'next/navigation';
 import { usePaceContext } from '@/modules/pace/pace.context';
@@ -154,10 +155,10 @@ export const useScopedTabs = (config: UseScopedTabsConfig = {}): UseScopedTabsRe
         });
 
         const fallbackPath = getTabFallbackPath(closingTab.type);
-        const newPath = hasRemainingItems && target ? target.path : fallbackPath;
+        const targetPath = hasRemainingItems && target ? preserveSidebarParam(target.path) : fallbackPath;
 
         setActiveTabId(target?.id ?? null);
-        window.history.pushState({ tabId: target?.id ?? null, tabType: type }, '', newPath);
+        window.history.pushState({ tabId: target?.id ?? null, tabType: type }, '', targetPath);
       }
     },
     [tabs, activeTabId, closeDynamicTab, onTabClose, setActiveTabId, type],
@@ -189,10 +190,10 @@ export const useScopedTabs = (config: UseScopedTabsConfig = {}): UseScopedTabsRe
         });
 
         const fallbackPath = getTabFallbackPath(activeTabToClose.type);
-        const newPath = hasRemainingItems && target ? target.path : fallbackPath;
+        const targetPath = hasRemainingItems && target ? preserveSidebarParam(target.path) : fallbackPath;
 
         setActiveTabId(target?.id ?? null);
-        window.history.pushState({ tabId: target?.id ?? null, tabType: type }, '', newPath);
+        window.history.pushState({ tabId: target?.id ?? null, tabType: type }, '', targetPath);
       }
     },
     [tabs, activeTabId, closeDynamicTab, onTabClose, setActiveTabId, type],

@@ -31,7 +31,16 @@ const PaceNavbar = () => {
   const pathname = usePathname();
   const searchParams = useSearchParams();
   const { isPaceSidebarOpen, setIsPaceSidebarOpen, startNewChat } = usePaceContext();
-  const { tabs, isTabActive, isOnAnyDynamicTab, closeTab, reorderTabs } = useNavbarTabs();
+  const {
+    tabs,
+    isTabActive,
+    isOnAnyDynamicTab,
+    closeTab,
+    closeOtherTabs,
+    closeTabsToRight,
+    closeAllTabs,
+    reorderTabs,
+  } = useNavbarTabs();
   const { isMacsFileSystemEnabled } = useIsMacsFileSystemEnabled();
 
   const [activeId, setActiveId] = useState<string | null>(null);
@@ -161,13 +170,18 @@ const PaceNavbar = () => {
         >
           <SortableContext items={tabStableKeys} strategy={horizontalListSortingStrategy}>
             <div className='flex min-w-0 flex-1 items-center gap-x-1'>
-              {tabs.map((tab) => (
+              {tabs.map((tab, index) => (
                 <SortableDynamicTabItem
                   key={tab.stableKey}
                   tab={tab}
                   isActive={isTabActive(tab)}
                   isAnyDragging={activeId !== null}
+                  tabIndex={index}
+                  totalTabs={tabs.length}
                   onClose={closeTab}
+                  onCloseOthers={closeOtherTabs}
+                  onCloseToRight={closeTabsToRight}
+                  onCloseAll={closeAllTabs}
                 />
               ))}
             </div>
@@ -175,7 +189,17 @@ const PaceNavbar = () => {
           <DragOverlay>
             {draggedTab ? (
               <div className='-rotate-2 rounded-lg border shadow-lg'>
-                <DynamicTabItem tab={draggedTab} isActive={isTabActive(draggedTab)} isDragging onClose={closeTab} />
+                <DynamicTabItem
+                  tab={draggedTab}
+                  isActive={isTabActive(draggedTab)}
+                  isDragging
+                  tabIndex={tabs.findIndex((t) => t.id === draggedTab.id)}
+                  totalTabs={tabs.length}
+                  onClose={closeTab}
+                  onCloseOthers={closeOtherTabs}
+                  onCloseToRight={closeTabsToRight}
+                  onCloseAll={closeAllTabs}
+                />
               </div>
             ) : null}
           </DragOverlay>
