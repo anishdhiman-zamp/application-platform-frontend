@@ -30,10 +30,12 @@ export const useResizable = ({
       setIsResizing(true);
       onResizeStart?.();
 
+      let finalWidth = width;
       const handleMouseMove = (e: MouseEvent) => {
         const newWidth = e.clientX;
         const clampedWidth = Math.min(Math.max(newWidth, minWidth), maxWidth);
 
+        finalWidth = clampedWidth;
         setWidth(clampedWidth);
       };
 
@@ -43,7 +45,7 @@ export const useResizable = ({
         document.removeEventListener('mouseup', handleMouseUp);
         document.body.style.cursor = '';
         document.body.style.userSelect = '';
-        onResizeEnd?.(width);
+        onResizeEnd?.(finalWidth);
       };
 
       document.body.style.cursor = 'col-resize';
