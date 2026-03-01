@@ -10,7 +10,8 @@ import {
   isOnSameBasePath,
   preserveSidebarParam,
 } from 'modules/pace/components/dynamic-tabs/tab-registry';
-import { useRouter, useSearchParams } from 'next/navigation';
+import { useRouter } from 'next/navigation';
+import { useSyncedSearchParams } from '@/modules/pace/hooks/useSyncedSearchParam';
 import { usePaceContext } from '@/modules/pace/pace.context';
 import { DynamicTab, DynamicTabType, ROUTE_KIND, TAB_TYPE } from '@/modules/pace/pace.types';
 
@@ -41,7 +42,7 @@ export const useScopedTabs = (config: UseScopedTabsConfig = {}): UseScopedTabsRe
   const { type = TAB_TYPE.FILE, onTabClose, onTabUpdate, onFolderMove } = config;
 
   const router = useRouter();
-  const searchParams = useSearchParams();
+  const searchParams = useSyncedSearchParams();
   const tabConfig = getTabTypeConfig(type);
 
   const currentUrlParam = useMemo(() => {

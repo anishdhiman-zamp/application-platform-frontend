@@ -36,7 +36,7 @@ export const viewport: Viewport = {
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {
   return (
-    <html lang='en' className={inter.className}>
+    <html lang='en' className={`${inter.className} overscroll-none`}>
       <body className='light-mode bg-BACKGROUND_GRAY_1 h-screen antialiased'>
         <SpeedInsights />
         <NetworkStatus />

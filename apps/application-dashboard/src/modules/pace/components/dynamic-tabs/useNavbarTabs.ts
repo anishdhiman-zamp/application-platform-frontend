@@ -7,7 +7,7 @@ import {
   preserveSidebarParam,
   TAB_TYPE_CONFIG,
 } from 'modules/pace/components/dynamic-tabs/tab-registry';
-import { usePathname, useSearchParams } from 'next/navigation';
+import { useSyncedPathname, useSyncedSearchParams } from '@/modules/pace/hooks/useSyncedSearchParam';
 import { usePaceContext } from '@/modules/pace/pace.context';
 import { DynamicTab, ROUTE_KIND } from '@/modules/pace/pace.types';
 
@@ -25,8 +25,8 @@ interface UseNavbarTabsReturn {
 }
 
 export const useNavbarTabs = (): UseNavbarTabsReturn => {
-  const pathname = usePathname();
-  const searchParams = useSearchParams();
+  const pathname = useSyncedPathname();
+  const searchParams = useSyncedSearchParams();
 
   const {
     dynamicTabs: tabs,
