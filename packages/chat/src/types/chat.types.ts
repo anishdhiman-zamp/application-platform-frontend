@@ -102,6 +102,8 @@ export interface ChatMessage {
     text?: string;
     text_type?: string;
     file_references?: FileReferenceType[];
+    /** @deprecated Use file_references instead. Kept for backward compatibility with S3 uploads. */
+    attachments?: MessageAttachmentType[];
   };
   message_type: ChatMessageType;
   sender_type: SenderType;
@@ -138,11 +140,21 @@ export interface FileReferenceType {
   name: string;
 }
 
+/**
+ * @deprecated Use FileReferenceType instead. This type is kept for backward compatibility.
+ */
+export interface MessageAttachmentType {
+  file_id: string;
+  file_name?: string;
+}
+
 export interface MessageContentType {
   text: string;
   text_type: string;
   elements?: Block[];
   file_references?: FileReferenceType[];
+  /** @deprecated Use file_references instead. Kept for backward compatibility with S3 uploads. */
+  attachments?: MessageAttachmentType[];
 }
 
 export interface DatasetFieldLocationData {

@@ -6,7 +6,14 @@ import { ArrowUp, Check, Loader, Mic, Paperclip, X } from 'lucide-react';
 import React, { FC, useEffect, useRef } from 'react';
 
 import { UploadedFileType } from '../types/block.types';
-import { FileReferencesList } from './blocks';
+import { AttachmentsList, FileReferencesList } from './blocks';
+
+interface S3UploadedFile {
+  file_id: string;
+  file_name: string;
+  file_type?: string;
+  file?: File;
+}
 
 export interface ChatComposerProps {
   // Textarea props
@@ -17,9 +24,15 @@ export interface ChatComposerProps {
   onPaste?: (e: React.ClipboardEvent<HTMLTextAreaElement>) => void;
   autoFocus?: boolean;
 
-  // File references
-  fileReferences: UploadedFileType[];
-  onRemoveFileReference: (fileId: string) => void;
+  // File references (new filesystem upload flow)
+  fileReferences?: UploadedFileType[];
+  onRemoveFileReference?: (fileId: string) => void;
+
+  /** @deprecated Use fileReferences instead. Kept for backward compatibility with S3 uploads. */
+  attachments?: S3UploadedFile[];
+  /** @deprecated Use onRemoveFileReference instead. Kept for backward compatibility with S3 uploads. */
+  removeAttachment?: (fileId: string) => void;
+
   isUploading?: boolean;
   onAttachClick?: () => void;
   showAttachButton?: boolean;
@@ -62,9 +75,14 @@ export const ChatComposer: FC<ChatComposerProps> = ({
   onPaste,
   autoFocus = false,
 
-  // File references
+  // File references (new flow)
   fileReferences,
   onRemoveFileReference,
+
+  // Attachments (legacy S3 flow - deprecated)
+  attachments,
+  removeAttachment,
+
   isUploading = false,
   onAttachClick,
   showAttachButton = true,
@@ -106,9 +124,18 @@ export const ChatComposer: FC<ChatComposerProps> = ({
   };
 
   const handleRemoveFileReference = (fileId: string) => {
-    onRemoveFileReference(fileId);
+    onRemoveFileReference?.(fileId);
     textareaRef.current?.focus();
   };
+
+  const handleRemoveAttachment = (fileId: string) => {
+    removeAttachment?.(fileId);
+    textareaRef.current?.focus();
+  };
+
+  // Determine which file display to use
+  const useFileReferences = fileReferences && fileReferences.length > 0;
+  const useAttachments = attachments && attachments.length > 0;
 
   // Auto-focus effect
   useEffect(() => {
@@ -150,12 +177,22 @@ export const ChatComposer: FC<ChatComposerProps> = ({
         className,
       )}
     >
-      <FileReferencesList
-        fileReferences={fileReferences}
-        onRemove={handleRemoveFileReference}
-        isLoading={isUploading}
-        className='px-2.5 pt-2'
-      />
+      {useFileReferences && (
+        <FileReferencesList
+          fileReferences={fileReferences}
+          onRemove={handleRemoveFileReference}
+          isLoading={isUploading}
+          className='px-2.5 pt-2'
+        />
+      )}
+      {useAttachments && (
+        <AttachmentsList
+          attachments={attachments}
+          removeAttachment={handleRemoveAttachment}
+          isLoading={isUploading}
+          className='px-2.5 pt-2'
+        />
+      )}
 
       {shouldShowRecorder ? (
         <div className='flex w-full items-center justify-between gap-2 p-2.5'>

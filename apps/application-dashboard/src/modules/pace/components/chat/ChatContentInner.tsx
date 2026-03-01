@@ -119,16 +119,13 @@ const ChatContentInner = ({
 
       if (currentConversationId) {
         setIsPaceSidebarOpen(true);
-
         const params = new URLSearchParams(window.location.search);
 
         params.set('s', currentConversationId);
-
         const newUrl = `${window.location.pathname}?${params.toString()}`;
 
         window.history.replaceState(null, '', newUrl);
       }
-
       openTab(path, name);
     },
     [openTab, conversationId, chat.conversationId, setIsPaceSidebarOpen],

@@ -625,8 +625,8 @@ export const useChat = (config: ChatConfig) => {
       }
 
       // Store the message count before adding the optimistic message
-      // to enable rollback on error
-      let previousMessageCount: number;
+      // to enable rollback on error. Initialize to -1 to detect if assignment failed.
+      let previousMessageCount = -1;
 
       if (messagePayload?.message_content?.file_references?.length) {
         const messageWithFileReferences: ChatMessage = {
@@ -673,7 +673,8 @@ export const useChat = (config: ChatConfig) => {
         return response;
       } catch (error) {
         // Remove the optimistic message on error by restoring to previous state
-        setMessages((prev) => prev.slice(0, previousMessageCount!));
+        // If previousMessageCount is still -1, remove the last message as fallback
+        setMessages((prev) => (previousMessageCount >= 0 ? prev.slice(0, previousMessageCount) : prev.slice(0, -1)));
         captureException(error);
         throw new Error('Failed to send message. Please try again.');
       }
