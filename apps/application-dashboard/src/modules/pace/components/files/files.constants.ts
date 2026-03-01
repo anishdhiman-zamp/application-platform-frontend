@@ -38,6 +38,10 @@ export const FILE_TOAST_MESSAGES = {
   FAILED_TO_DELETE_ITEM: 'Failed to delete item',
   FILE_DELETED: 'File deleted',
   FOLDER_DELETED: 'Folder deleted',
+  FILE_MODIFIED_EXTERNALLY: 'File was modified externally',
+  FILE_CONFLICT_DESCRIPTION: 'This file was changed while you were editing. Choose an action:',
+  FORCE_SAVE: 'Force Save',
+  RELOAD_FILE: 'Reload File',
 } as const;
 
 export const CONTEXT_MENU_ACTION_IDS = {
