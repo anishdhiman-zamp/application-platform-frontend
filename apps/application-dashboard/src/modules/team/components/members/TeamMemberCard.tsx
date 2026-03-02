@@ -27,7 +27,6 @@ interface TeamMemberCardProps {
   };
   organizationId: string;
   teamsData: GetTeamsByOrganizationIdResponseType[];
-  hasPeoplePolicy: boolean;
   teamsRandomColorRef: RefObject<() => string>;
   value: {
     user_id: string;
@@ -99,7 +98,6 @@ const TeamMemberCard = ({
         teamsData={teamsData ?? []}
         userId={row?.user_id}
         userMappedTeams={row?.teams}
-        hasPeoplePolicy={hasPeoplePolicy}
         teamsRandomColorRef={teamsRandomColorRef}
       />
       <div className='absolute top-2 right-0'>
