@@ -6,6 +6,7 @@ import {
   FilePlus,
   FolderPlus,
   FolderUp,
+  MessageSquare,
   Pencil,
   Scissors,
   Trash2,
@@ -37,6 +38,11 @@ export const FILE_TOAST_MESSAGES = {
   FAILED_TO_DELETE_ITEM: 'Failed to delete item',
   FILE_DELETED: 'File deleted',
   FOLDER_DELETED: 'Folder deleted',
+  FILE_MODIFIED_EXTERNALLY: 'File was modified externally',
+  FILE_CONFLICT_DESCRIPTION: 'This file was changed while you were editing. Choose an action:',
+  FORCE_SAVE: 'Force Save',
+  RELOAD_FILE: 'Reload File',
+  FAILED_TO_LOAD_FILE: 'Failed to load file',
 } as const;
 
 export const CONTEXT_MENU_ACTION_IDS = {
@@ -45,6 +51,7 @@ export const CONTEXT_MENU_ACTION_IDS = {
   UPLOAD_FILE: 'upload-file',
   UPLOAD_FOLDER: 'upload-folder',
   OPEN_IN_TAB: 'open-in-tab',
+  REFERENCE_IN_CHAT: 'reference-in-chat',
   DOWNLOAD: 'download',
   RENAME: 'rename',
   DUPLICATE: 'duplicate',
@@ -83,6 +90,7 @@ export const CONTEXT_MENU_ACTIONS: ContextMenuAction[] = [
   { id: CONTEXT_MENU_ACTION_IDS.UPLOAD_FILE, label: 'Upload File', icon: Upload, folderOnly: true },
   { id: CONTEXT_MENU_ACTION_IDS.UPLOAD_FOLDER, label: 'Upload Folder', icon: FolderUp, folderOnly: true },
   { id: CONTEXT_MENU_ACTION_IDS.OPEN_IN_TAB, label: 'Open in Tab', icon: ExternalLink, fileOnly: true },
+  { id: CONTEXT_MENU_ACTION_IDS.REFERENCE_IN_CHAT, label: 'Reference in Chat', icon: MessageSquare, fileOnly: true },
   { id: CONTEXT_MENU_ACTION_IDS.DOWNLOAD, label: 'Download', icon: Download },
   { id: CONTEXT_MENU_ACTION_IDS.RENAME, label: 'Rename', icon: Pencil },
   { id: CONTEXT_MENU_ACTION_IDS.DUPLICATE, label: 'Duplicate', icon: Copy },

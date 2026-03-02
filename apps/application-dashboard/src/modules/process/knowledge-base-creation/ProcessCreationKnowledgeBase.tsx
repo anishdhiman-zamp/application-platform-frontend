@@ -23,7 +23,9 @@ interface ProcessCreationKnowledgeBaseProps {
   isChatbotExpanded?: boolean;
   isDisabled?: boolean;
   integrations: IntegrationType[];
-  initialSopFilename?: string;
+  outputSopFilename?: string;
+  markdownSopFilename?: string;
+  markdownSopFetchKey?: number;
   conversationId?: string;
   isKnowledgeBaseCreated?: boolean;
 }
@@ -35,9 +37,11 @@ const ProcessCreationKnowledgeBase: FC<ProcessCreationKnowledgeBaseProps> = ({
   isChatbotExpanded,
   isDisabled,
   integrations,
-  initialSopFilename,
   conversationId,
   isKnowledgeBaseCreated = false,
+  outputSopFilename,
+  markdownSopFilename,
+  markdownSopFetchKey,
 }) => {
   const { isEnabled: isKnowledgeBaseConfigEnabled } = useFeatureFlag(FEATURE_FLAGS.ZAMP_INTERNAL);
   const { isEnabled: isAppSecureEnabled } = useFeatureFlag(FEATURE_FLAGS.APP_SECURE);
@@ -45,7 +49,9 @@ const ProcessCreationKnowledgeBase: FC<ProcessCreationKnowledgeBaseProps> = ({
   const { markdownContent, isLoading, isKnownEmptyState, hasNon404Error, refetch } = useKnowledgeBaseContent({
     processId,
     conversationId,
-    initialSopFilename,
+    outputSopFilename,
+    markdownSopFilename,
+    markdownSopFetchKey,
     isKnowledgeBaseCreated,
   });
 

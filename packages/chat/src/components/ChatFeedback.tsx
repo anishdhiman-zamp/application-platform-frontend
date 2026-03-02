@@ -94,7 +94,7 @@ const ChatFeedback: FC<ChatFeedbackProps> = ({
     () => ({
       getElevenLabsToken,
       onError: (error) => {
-        toast.error(`${error instanceof Error ? error.message : 'An error occurred'}`);
+        toast.error(error instanceof Error ? error.message : 'Something went wrong. Please try again.');
       },
     }),
     [getElevenLabsToken],

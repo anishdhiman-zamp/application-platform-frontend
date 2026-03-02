@@ -1,15 +1,17 @@
 'use client';
-import { FC, useEffect, useMemo, useRef, useState } from 'react';
+import { FC, useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { useSelector } from 'react-redux';
 import {
   AnnotationType,
   BLOCK_TYPE,
   ButtonBlockType,
+  ChatActionsProvider,
   ChatMessageType,
   ConnectedChatInput,
   DisplayLayerActionType,
   DropOverlay,
   LocationType,
+  MarkdownBlockType,
   MessageContainer,
   OutputFilesBlockType,
   PlainTextBlockType,
@@ -23,7 +25,10 @@ import { ArrowDownIcon, Button } from '@zamp-platform/ui';
 import { cn } from '@zamp-platform/ui/utils';
 import { CirclePlus, EllipsisVertical } from 'lucide-react';
 import ProcessInProcessBanner from 'modules/process/knowledge-base-creation/ProcessInProcessBanner';
-import { SOP_CREATION_FILENAME } from 'modules/process/knowledge-base-creation/sop-creation.constants';
+import {
+  SOP_CREATION_FILENAME,
+  SOP_FILE_PATH_REGEX,
+} from 'modules/process/knowledge-base-creation/sop-creation.constants';
 import { API_ENDPOINTS } from '@/apis/apiEndpoint.constants';
 import { useLazyGetOpenFeedbackQuery } from '@/apis/feedback';
 import SkeletonElement from '@/components/skeletons/SkeletonElement';
@@ -33,7 +38,7 @@ import NewPaceAvatar from '@/modules/chatbot/NewPaceAvatar';
 import StopProcessingFeedback from '@/modules/chatbot/StopProcessingFeedback';
 import ChatMessagesSkeleton from '@/modules/pace/components/loaders/ChatMessagesSkeleton';
 import { useChatScroll } from '@/modules/pace/hooks/useChatScroll';
-import { ACCEPTED_FILE_TYPES } from '@/modules/pace/pace.constants';
+import { useFileDownload } from '@/modules/pace/hooks/useFileDownload';
 import { RootState } from '@/store';
 import { ProcessStatus } from '@/types/api/processApi.types';
 import { MapAny } from '@/types/commonTypes';
@@ -50,7 +55,8 @@ interface KnowledgeBaseChatProps {
   isDraftProcess?: boolean;
   processName?: string;
   showDefaultMessage?: boolean;
-  onCreatorSopFileFound?: (filename: string) => void;
+  onOutputSopFileFound?: (filename: string) => void;
+  onMarkdownSopFileFound?: (filename: string) => void;
   streamingEnabled?: boolean;
 }
 
@@ -65,13 +71,14 @@ const KnowledgeBaseChat: FC<KnowledgeBaseChatProps> = ({
   isDraftProcess,
   processName,
   showDefaultMessage,
-  onCreatorSopFileFound,
+  onOutputSopFileFound,
+  onMarkdownSopFileFound,
   streamingEnabled = false,
 }) => {
   const fileDropHandlerRef = useRef<((files: FileList) => void) | null>(null);
   const currentUserName = useSelector((state: RootState) => state?.user?.user?.user_name);
-  const organizationId = useSelector((state: RootState) => state?.user?.user?.orgs?.[0]?.organization_id ?? '');
   const currentUserEmail = useSelector((state: RootState) => state?.user?.user?.user_email);
+  const username = useSelector((state: RootState) => state?.user?.user?.username) ?? '';
   const [header, setHeader] = useState('');
   const [isNewConversation, setIsNewConversation] = useState(false);
   const [chatInputKey, setChatInputKey] = useState(0);
@@ -81,6 +88,7 @@ const KnowledgeBaseChat: FC<KnowledgeBaseChatProps> = ({
   }>();
 
   const [getOpenFeedback] = useLazyGetOpenFeedbackQuery();
+  const { downloadFile } = useFileDownload();
 
   const defaultMessageObject = {
     resource_type: ResourceType.PROCESS,
@@ -132,7 +140,6 @@ const KnowledgeBaseChat: FC<KnowledgeBaseChatProps> = ({
   const { isDragOver, dropZoneProps } = useFileDragDrop({
     onFileDrop: (files) => fileDropHandlerRef.current?.(files),
     disabled: chat.isStreaming || chat.isCreatingConversationV2,
-    acceptedFileTypes: ACCEPTED_FILE_TYPES,
   });
 
   const isSkeletonLoading =
@@ -189,6 +196,13 @@ const KnowledgeBaseChat: FC<KnowledgeBaseChatProps> = ({
     setChatInputKey((prev) => prev + 1);
   };
 
+  const handleFileOpen = useCallback(
+    (path: string, name: string) => {
+      downloadFile({ path, fileName: name });
+    },
+    [downloadFile],
+  );
+
   useEffect(() => {
     if (chat?.conversationId) {
       setConversationId?.(chat?.conversationId);
@@ -213,7 +227,7 @@ const KnowledgeBaseChat: FC<KnowledgeBaseChatProps> = ({
 
   // Check for creator-sop.md file in the latest assistant message with output files
   useEffect(() => {
-    if (!chat?.messages?.length || !onCreatorSopFileFound || !conversationId) return;
+    if (!chat?.messages?.length || !onOutputSopFileFound || !conversationId || !onMarkdownSopFileFound) return;
 
     // Find the latest assistant message that has an output files block with creator-sop.md
     for (let i = chat.messages.length - 1; i >= 0; i--) {
@@ -229,129 +243,149 @@ const KnowledgeBaseChat: FC<KnowledgeBaseChatProps> = ({
         (element): element is OutputFilesBlockType => element.type === BLOCK_TYPE.OUTPUT_FILES,
       );
 
+      const markdownBlocks = elements.filter(
+        (element): element is MarkdownBlockType => element.type === BLOCK_TYPE.MARKDOWN,
+      );
+
+      const lastMarkdownBlock = markdownBlocks[markdownBlocks.length - 1];
+
+      if (lastMarkdownBlock?.payload?.text) {
+        let match = lastMarkdownBlock.payload.text.match(SOP_FILE_PATH_REGEX.MARKDOWN_LINK);
+
+        if (!match) {
+          match = lastMarkdownBlock.payload.text.match(SOP_FILE_PATH_REGEX.BACKTICK);
+        }
+
+        if (match && match[1].includes(SOP_CREATION_FILENAME)) {
+          onMarkdownSopFileFound(match[1]);
+          break;
+        }
+      }
+
       if (!outputFilesBlock?.payload?.output_files?.length) continue;
 
-      const creatorSopFile = outputFilesBlock.payload.output_files.find(
+      const outputSopFile = outputFilesBlock.payload.output_files.find(
         (file) => file.filename === SOP_CREATION_FILENAME,
       );
 
-      if (creatorSopFile) {
-        onCreatorSopFileFound(creatorSopFile.filename);
+      if (outputSopFile) {
+        onOutputSopFileFound(outputSopFile.filename);
         break;
       }
     }
-  }, [chat?.messages, onCreatorSopFileFound, conversationId]);
+  }, [chat?.messages, onOutputSopFileFound, onMarkdownSopFileFound, conversationId]);
 
   return (
-    <div className='relative flex h-full w-full flex-col' {...dropZoneProps}>
-      {status !== ProcessStatus.BUILDING && <DropOverlay isVisible={isDragOver} className='absolute h-full w-full' />}
-      <div
-        className={cn(
-          'border-GRAY_400 hidden w-full items-center gap-3 border-b px-3.5 py-3',
-          status === ProcessStatus.LIVE ? 'flex' : 'hidden',
-        )}
-      >
-        {isSkeletonLoading ? (
-          <SkeletonElement elementCount={1} className='h-4 w-full' />
-        ) : header ? (
-          <div className='f-14-500 text-GRAY_1000 grow'>{header}</div>
-        ) : (
-          <div className='f-12-550 text-GRAY_700 grow'>Ask or give feedback</div>
-        )}
-        <EllipsisVertical size={12} className='text-GRAY_700 hidden cursor-pointer' />
-        <CirclePlus
-          size={12}
-          className={cn('text-GRAY_700 cursor-pointer', {
-            'cursor-not-allowed opacity-50': isNewConversationDisabled,
-          })}
-          onClick={handleNewConversation}
-        />
-      </div>
-      <div
-        ref={scrollContainerRef}
-        onScroll={handleScroll}
-        className='relative flex min-h-0 w-full flex-1 flex-col overflow-x-hidden overflow-y-auto [scrollbar-width:none]'
-      >
-        {(!chat.isLoadingConversationHistory || !isLoadingFilterConversations) && !isSkeletonLoading && (
-          <MessageContainer
-            messages={
-              showDefaultMessage ? [defaultMessageObject, ...(chat?.messages?.slice(1) ?? [])] : chat?.messages || []
-            }
-            handleAction={handleAction}
-            isAnalysing={isAnalysing}
-            streamingState={streamingEnabled ? chat.streamingState : undefined}
-            assistantAvatar={streamingEnabled ? <NewPaceAvatar /> : undefined}
-            showTimestamp={streamingEnabled}
-            showCopy={streamingEnabled}
-            alignUserRight={streamingEnabled}
-            hideSenderName={streamingEnabled}
-            className='flex-1'
-            streamingEnabled={streamingEnabled}
-          >
-            {status === ProcessStatus.BUILDING && (
-              <ProcessInProcessBanner shouldRedirect={false} className='h-[400px] pb-4' />
-            )}
-            {status !== ProcessStatus.BUILDING && <div className='h-12 w-full bg-white' />}
-          </MessageContainer>
-        )}
-        {isSkeletonLoading && (
-          <div className='animate-opacity flex h-full w-full justify-center pt-4'>
-            <ChatMessagesSkeleton
-              count={1}
-              className='px-4 py-0'
+    <ChatActionsProvider onFileOpen={handleFileOpen}>
+      <div className='relative flex h-full w-full flex-col' {...dropZoneProps}>
+        {status !== ProcessStatus.BUILDING && <DropOverlay isVisible={isDragOver} className='absolute h-full w-full' />}
+        <div
+          className={cn(
+            'border-GRAY_400 hidden w-full items-center gap-3 border-b px-3.5 py-3',
+            status === ProcessStatus.LIVE ? 'flex' : 'hidden',
+          )}
+        >
+          {isSkeletonLoading ? (
+            <SkeletonElement elementCount={1} className='h-4 w-full' />
+          ) : header ? (
+            <div className='f-14-500 text-GRAY_1000 grow'>{header}</div>
+          ) : (
+            <div className='f-12-550 text-GRAY_700 grow'>Ask or give feedback</div>
+          )}
+          <EllipsisVertical size={12} className='text-GRAY_700 hidden cursor-pointer' />
+          <CirclePlus
+            size={12}
+            className={cn('text-GRAY_700 cursor-pointer', {
+              'cursor-not-allowed opacity-50': isNewConversationDisabled,
+            })}
+            onClick={handleNewConversation}
+          />
+        </div>
+        <div
+          ref={scrollContainerRef}
+          onScroll={handleScroll}
+          className='relative flex min-h-0 w-full flex-1 flex-col overflow-x-hidden overflow-y-auto [scrollbar-width:none]'
+        >
+          {(!chat.isLoadingConversationHistory || !isLoadingFilterConversations) && !isSkeletonLoading && (
+            <MessageContainer
+              messages={
+                showDefaultMessage ? [defaultMessageObject, ...(chat?.messages?.slice(1) ?? [])] : chat?.messages || []
+              }
+              handleAction={handleAction}
+              isAnalysing={isAnalysing}
+              streamingState={streamingEnabled ? chat.streamingState : undefined}
+              assistantAvatar={streamingEnabled ? <NewPaceAvatar /> : undefined}
+              showTimestamp={streamingEnabled}
+              showCopy={streamingEnabled}
               alignUserRight={streamingEnabled}
               hideSenderName={streamingEnabled}
-            />
-          </div>
-        )}
-
-        {status !== ProcessStatus.BUILDING && (
-          <div className={cn('border-GRAY_400 sticky bottom-0 z-10 w-full shrink-0 border-t bg-[#fcfcfc] p-3')}>
-            <ConnectedChatInput
-              key={chatInputKey}
-              chat={chat}
-              autoFocus
-              className='bg-white'
-              placeholder='Ask anything or give feedback...'
-              annotationLocation={{
-                type: LocationType.SOP,
-                data: {
-                  process_id: processId,
-                },
-              }}
-              isDisabled={isAnalysing}
-              conversationId={chat?.conversationId || ''}
-              scopeId={processId}
-              annotationType={status === ProcessStatus.DRAFT ? AnnotationType.PROCESS_SOP : undefined}
-              scope={ScopeType.PROCESS}
-              currentUserName={currentUserName || ''}
-              resourceId={processId}
-              organizationId={organizationId}
-              defaultMessage={isNewConversation ? undefined : defaultMessage}
-              acceptedFileTypes={ACCEPTED_FILE_TYPES}
-              fileDropHandlerRef={fileDropHandlerRef}
-            />
-            <Button
-              onClick={handleScrollToBottomClick}
-              variant='ghost'
-              className={cn(
-                'bg-gray-1000 hover:bg-gray-1000 absolute -top-10 left-1/2 z-20 h-6 w-6 -translate-x-1/2 !rounded-full p-3',
-                'transition-all duration-200 ease-out',
-                showScrollButton ? 'translate-y-0 opacity-100' : 'pointer-events-none translate-y-2 opacity-0',
-              )}
-              aria-label='Scroll to bottom'
+              className='flex-1'
+              streamingEnabled={streamingEnabled}
             >
-              <ArrowDownIcon size={14} className='p-[2px] text-white' />
-            </Button>
-          </div>
-        )}
+              {status === ProcessStatus.BUILDING && (
+                <ProcessInProcessBanner shouldRedirect={false} className='h-[400px] pb-4' />
+              )}
+              {status !== ProcessStatus.BUILDING && <div className='h-12 w-full bg-white' />}
+            </MessageContainer>
+          )}
+          {isSkeletonLoading && (
+            <div className='animate-opacity flex h-full w-full justify-center pt-4'>
+              <ChatMessagesSkeleton
+                count={1}
+                className='px-4 py-0'
+                alignUserRight={streamingEnabled}
+                hideSenderName={streamingEnabled}
+              />
+            </div>
+          )}
+
+          {status !== ProcessStatus.BUILDING && (
+            <div className={cn('border-GRAY_400 sticky bottom-0 z-10 w-full shrink-0 border-t bg-[#fcfcfc] p-3')}>
+              <ConnectedChatInput
+                key={chatInputKey}
+                chat={chat}
+                autoFocus
+                className='bg-white'
+                placeholder='Ask anything or give feedback...'
+                annotationLocation={{
+                  type: LocationType.SOP,
+                  data: {
+                    process_id: processId,
+                  },
+                }}
+                isDisabled={isAnalysing}
+                conversationId={chat?.conversationId || ''}
+                scopeId={processId}
+                annotationType={status === ProcessStatus.DRAFT ? AnnotationType.PROCESS_SOP : undefined}
+                scope={ScopeType.PROCESS}
+                currentUserName={currentUserName || ''}
+                resourceId={processId}
+                username={username}
+                defaultMessage={isNewConversation ? undefined : defaultMessage}
+                fileDropHandlerRef={fileDropHandlerRef}
+              />
+              <Button
+                onClick={handleScrollToBottomClick}
+                variant='ghost'
+                className={cn(
+                  'bg-gray-1000 hover:bg-gray-1000 absolute -top-10 left-1/2 z-20 h-6 w-6 -translate-x-1/2 !rounded-full p-3',
+                  'transition-all duration-200 ease-out',
+                  showScrollButton ? 'translate-y-0 opacity-100' : 'pointer-events-none translate-y-2 opacity-0',
+                )}
+                aria-label='Scroll to bottom'
+              >
+                <ArrowDownIcon size={14} className='p-[2px] text-white' />
+              </Button>
+            </div>
+          )}
+        </div>
+        <StopProcessingFeedback
+          isOpen={!!stopProcessingConfig}
+          onOpenChange={handleOpenChangeForStopProcessing}
+          onStopProcessing={handleStopProcessing}
+        />
       </div>
-      <StopProcessingFeedback
-        isOpen={!!stopProcessingConfig}
-        onOpenChange={handleOpenChangeForStopProcessing}
-        onStopProcessing={handleStopProcessing}
-      />
-    </div>
+    </ChatActionsProvider>
   );
 };
 

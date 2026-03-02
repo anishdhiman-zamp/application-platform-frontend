@@ -1,5 +1,33 @@
+import { SIDEBAR_CONVERSATION_ID_PARAM } from 'modules/pace/pace.constants';
 import { ROUTES_PATH } from '@/constants/routeConfig';
 import { DynamicTabRouteConfig, DynamicTabType, ROUTE_KIND, TAB_TYPE } from '@/modules/pace/pace.types';
+
+const buildUrl = (basePath: string, params: URLSearchParams): string => {
+  const query = params.toString();
+
+  return query ? `${basePath}?${query}` : basePath;
+};
+
+/**
+ * Syncs the sidebar conversation param with the current URL state.
+ * - Strips any stale sidebar param from the stored path
+ * - Adds the current sidebar param from URL (if open)
+ */
+export const preserveSidebarParam = (path: string): string => {
+  if (typeof window === 'undefined') return path;
+
+  const [basePath, existingQuery] = path.split('?');
+  const params = new URLSearchParams(existingQuery || '');
+  const currentSidebarId = new URLSearchParams(window.location.search).get(SIDEBAR_CONVERSATION_ID_PARAM);
+
+  params.delete(SIDEBAR_CONVERSATION_ID_PARAM);
+
+  if (currentSidebarId) {
+    params.set(SIDEBAR_CONVERSATION_ID_PARAM, currentSidebarId);
+  }
+
+  return buildUrl(basePath, params);
+};
 
 export const TAB_TYPE_CONFIG: Record<DynamicTabType, DynamicTabRouteConfig> = {
   [TAB_TYPE.FILE]: {
@@ -24,18 +52,21 @@ export const getTabTypeConfig = (type?: DynamicTabType): DynamicTabRouteConfig =
 
 export const buildTabRoute = (id: string, type?: DynamicTabType): string => {
   const config = getTabTypeConfig(type);
+  let path: string;
 
   if (config.kind === ROUTE_KIND.QUERY) {
-    return `${config.basePath}?${config.paramName}=${encodeURIComponent(id)}`;
+    path = `${config.basePath}?${config.paramName}=${encodeURIComponent(id)}`;
+  } else {
+    path = config.buildPath(id);
   }
 
-  return config.buildPath(id);
+  return preserveSidebarParam(path);
 };
 
 export const getTabFallbackPath = (type?: DynamicTabType): string => {
   const config = getTabTypeConfig(type);
 
-  return config.fallbackPath;
+  return preserveSidebarParam(config.fallbackPath);
 };
 
 export const isOnSameBasePath = (type?: DynamicTabType): boolean => {

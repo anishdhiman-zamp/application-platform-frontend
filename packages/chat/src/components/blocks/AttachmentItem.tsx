@@ -4,11 +4,17 @@ import { CircleX, FileText, LoaderCircle } from 'lucide-react';
 import React from 'react';
 
 import { useLazyGetFileDownloadUrlQuery } from '../../api';
-import { UploadedFileType } from '../../types/block.types';
 import { downloadFile } from '../block.utils';
 
-interface AttachmentProps {
-  attachment: UploadedFileType;
+interface UploadedFile {
+  file_id: string;
+  file_name: string;
+  file_type?: string;
+  file?: File;
+}
+
+interface AttachmentItemProps {
+  attachment: UploadedFile;
   removeAttachment?: (fileId: string) => void;
   isLoading?: boolean;
 }
@@ -21,7 +27,7 @@ const getFileIcon = () => {
   );
 };
 
-const Attachment: React.FC<AttachmentProps> = ({ attachment, removeAttachment, isLoading }) => {
+const AttachmentItem: React.FC<AttachmentItemProps> = ({ attachment, removeAttachment, isLoading }) => {
   const [getFileDownloadUrl, { isFetching: isLoadingFileDownload }] = useLazyGetFileDownloadUrlQuery();
 
   const handleDownloadFile = async () => {
@@ -83,4 +89,4 @@ const Attachment: React.FC<AttachmentProps> = ({ attachment, removeAttachment, i
   );
 };
 
-export default Attachment;
+export default AttachmentItem;

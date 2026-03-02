@@ -64,6 +64,7 @@ export interface ChatConfig extends Omit<UseSSEOptions, 'url' | 'onMessage' | 'a
 export const useChat = (config: ChatConfig) => {
   const dispatch = useDispatch();
   const [messages, setMessages] = useState<ChatMessage[]>([]);
+  const messagesRef = useRef<ChatMessage[]>(messages);
   const [sendMessageMutation, { isLoading: isSendingMessage, error: sendMessageError }] = useSendMessageMutation();
   const [sendMessageV2Mutation, { isLoading: isSendingMessageV2, error: sendMessageV2Error }] =
     useSendMessageV2Mutation();
@@ -83,6 +84,10 @@ export const useChat = (config: ChatConfig) => {
 
   // Track if conversation was created in this session (to skip fetching history for newly created conversations)
   const isNewlyCreatedConversationRef = useRef<string | null>(null);
+
+  useEffect(() => {
+    messagesRef.current = messages;
+  }, [messages]);
 
   const isStreaming = useMemo(() => {
     return config.enableStreaming ? (streamingState?.is_active ?? false) : false;
@@ -135,10 +140,17 @@ export const useChat = (config: ChatConfig) => {
         timestamp: new Date().toISOString(),
       },
     ]);
-    const response = await createConversationMutation(conversationPayload).unwrap();
-    setConversationId(response.conversation_id);
-    isNewlyCreatedConversationRef.current = response.conversation_id;
-    return response.conversation_id;
+    try {
+      const response = await createConversationMutation(conversationPayload).unwrap();
+      setConversationId(response.conversation_id);
+      isNewlyCreatedConversationRef.current = response.conversation_id;
+      return response.conversation_id;
+    } catch (error) {
+      // Remove optimistic message on error
+      setMessages([]);
+      captureException(error);
+      throw new Error('Failed to start conversation. Please try again.');
+    }
   };
 
   const createConversationV2 = async (conversationPayload: CreateConversationPayloadTypeV2) => {
@@ -151,33 +163,40 @@ export const useChat = (config: ChatConfig) => {
       metadata: {},
       timestamp: new Date().toISOString(),
     };
-    if (messagePayload?.message_content?.attachments?.length) {
+    if (messagePayload?.message_content?.file_references?.length) {
       messagePayload.message_content.elements = [
         ...(messagePayload.message_content.elements || []),
         {
           id: 'element_2',
-          type: BLOCK_TYPE.ATTACHMENTS,
+          type: BLOCK_TYPE.FILE_REFERENCES,
           order: 2,
           payload: {
-            attachments: messagePayload.message_content.attachments,
+            file_references: messagePayload.message_content.file_references,
           },
         },
       ];
     }
     setMessages([messagePayload]);
-    const response = await createConversationV2Mutation({
-      ...conversationPayload,
-      url: config.apiConfig?.createConversation,
-    }).unwrap();
-    setConversationId(response.conversation_id);
-    isNewlyCreatedConversationRef.current = response.conversation_id;
+    try {
+      const response = await createConversationV2Mutation({
+        ...conversationPayload,
+        url: config.apiConfig?.createConversation,
+      }).unwrap();
+      setConversationId(response.conversation_id);
+      isNewlyCreatedConversationRef.current = response.conversation_id;
 
-    // Update header with title from response
-    if (response.title && !config.enableStreaming) {
-      config.setHeader?.(response.title);
+      // Update header with title from response
+      if (response.title && !config.enableStreaming) {
+        config.setHeader?.(response.title);
+      }
+
+      return response;
+    } catch (error) {
+      // Remove optimistic message on error
+      setMessages([]);
+      captureException(error);
+      throw new Error('Failed to start conversation. Please try again.');
     }
-
-    return response;
   };
 
   const clearMessages = useCallback(() => {
@@ -643,31 +662,33 @@ export const useChat = (config: ChatConfig) => {
         throw new Error('Conversation ID is required to send messages');
       }
 
-      try {
-        if (messagePayload?.message_content?.attachments?.length) {
-          const attachmentsMessagePayload: ChatMessage = {
-            ...messagePayload,
-            message_content: {
-              ...messagePayload.message_content,
-              elements: [
-                ...(messagePayload.message_content.elements || []),
-                {
-                  id: 'element_2',
-                  type: BLOCK_TYPE.ATTACHMENTS,
-                  order: 2,
-                  payload: {
-                    attachments: messagePayload.message_content.attachments,
-                  },
+      const previousMessageCount = messagesRef.current.length;
+
+      if (messagePayload?.message_content?.file_references?.length) {
+        const messageWithFileReferences: ChatMessage = {
+          ...messagePayload,
+          message_content: {
+            ...messagePayload.message_content,
+            elements: [
+              ...(messagePayload.message_content.elements || []),
+              {
+                id: 'element_2',
+                type: BLOCK_TYPE.FILE_REFERENCES,
+                order: 2,
+                payload: {
+                  file_references: messagePayload.message_content.file_references,
                 },
-              ],
-            },
-          };
+              },
+            ],
+          },
+        };
 
-          setMessages((prev) => [...prev, attachmentsMessagePayload]);
-        } else {
-          setMessages((prev) => [...prev, messagePayload]);
-        }
+        setMessages((prev) => [...prev, messageWithFileReferences]);
+      } else {
+        setMessages((prev) => [...prev, messagePayload]);
+      }
 
+      try {
         const response = useV2Api
           ? await sendMessageV2Mutation({
               conversationId: _conversationId,
@@ -681,11 +702,12 @@ export const useChat = (config: ChatConfig) => {
 
         return response;
       } catch (error) {
+        setMessages((prev) => prev.slice(0, previousMessageCount));
         captureException(error);
-        throw error;
+        throw new Error('Failed to send message. Please try again.');
       }
     },
-    [_conversationId, sendMessageMutation, streamingState],
+    [_conversationId, sendMessageMutation, sendMessageV2Mutation, config.apiConfig?.sendMessage],
   );
 
   return {

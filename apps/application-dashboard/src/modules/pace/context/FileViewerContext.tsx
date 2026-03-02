@@ -12,6 +12,7 @@ export interface FileState {
 interface FileViewerContextType {
   getFileState: (path: string) => FileState | undefined;
   initFileState: (path: string, content: string, mtime_ms?: number) => void;
+  forceUpdateFileState: (path: string, content: string, mtime_ms?: number) => void;
   updateFileContent: (path: string, content: string) => void;
   markFileSaved: (path: string, newMtime?: number) => void;
   removeFileState: (path: string) => void;
@@ -44,6 +45,21 @@ export const FileViewerProvider = ({ children }: { children: ReactNode }) => {
           mtime_ms,
         });
       }
+
+      return newMap;
+    });
+  }, []);
+
+  const forceUpdateFileState = useCallback((path: string, content: string, mtime_ms?: number) => {
+    setFileStates((prev) => {
+      const newMap = new Map(prev);
+
+      newMap.set(path, {
+        content,
+        originalContent: content,
+        isDirty: false,
+        mtime_ms,
+      });
 
       return newMap;
     });
@@ -180,6 +196,7 @@ export const FileViewerProvider = ({ children }: { children: ReactNode }) => {
     () => ({
       getFileState,
       initFileState,
+      forceUpdateFileState,
       updateFileContent,
       markFileSaved,
       removeFileState,
@@ -189,6 +206,7 @@ export const FileViewerProvider = ({ children }: { children: ReactNode }) => {
     [
       getFileState,
       initFileState,
+      forceUpdateFileState,
       updateFileContent,
       markFileSaved,
       removeFileState,

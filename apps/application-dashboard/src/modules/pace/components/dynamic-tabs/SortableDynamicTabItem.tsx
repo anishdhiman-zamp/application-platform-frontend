@@ -13,10 +13,25 @@ interface SortableDynamicTabItemProps {
   tab: DynamicTab;
   isActive: boolean;
   isAnyDragging: boolean;
+  tabIndex: number;
+  totalTabs: number;
   onClose: (e: React.MouseEvent, id: string) => void;
+  onCloseOthers: (id: string) => void;
+  onCloseToRight: (id: string) => void;
+  onCloseAll: () => void;
 }
 
-const SortableDynamicTabItem = ({ tab, isActive, isAnyDragging, onClose }: SortableDynamicTabItemProps) => {
+const SortableDynamicTabItem = ({
+  tab,
+  isActive,
+  isAnyDragging,
+  tabIndex,
+  totalTabs,
+  onClose,
+  onCloseOthers,
+  onCloseToRight,
+  onCloseAll,
+}: SortableDynamicTabItemProps) => {
   const { attributes, listeners, setNodeRef, transform, transition, isDragging } = useSortable({
     id: tab.stableKey,
   });
@@ -36,14 +51,23 @@ const SortableDynamicTabItem = ({ tab, isActive, isAnyDragging, onClose }: Sorta
       onClick={(e) => {
         const target = e.target as HTMLElement;
 
-        // Prevent navigation when clicking the close button
         if (target.closest(CLOSE_BUTTON_SELECTOR)) {
           e.preventDefault();
           e.stopPropagation();
         }
       }}
     >
-      <DynamicTabItem tab={tab} isActive={isActive} isDragging={isAnyDragging} onClose={onClose} />
+      <DynamicTabItem
+        tab={tab}
+        isActive={isActive}
+        isDragging={isAnyDragging}
+        tabIndex={tabIndex}
+        totalTabs={totalTabs}
+        onClose={onClose}
+        onCloseOthers={onCloseOthers}
+        onCloseToRight={onCloseToRight}
+        onCloseAll={onCloseAll}
+      />
     </div>
   );
 };

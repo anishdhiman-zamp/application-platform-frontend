@@ -39,7 +39,9 @@ const CreateKnowledgeBasePageHome: FC<CreateKnowledgeBasePageHomeProps> = ({
   const isFromProcessCreation = source === 'process-creation';
 
   const [conversationId, setConversationId] = useState<string | undefined>(initialConversationId);
-  const [initialSopFilename, setInitialSopFilename] = useState<string | undefined>();
+  const [outputSopFilename, setOutputSopFilename] = useState<string | undefined>();
+  const [markdownSopFilename, setMarkdownSopFilename] = useState<string | undefined>();
+  const [markdownSopFetchKey, setMarkdownSopFetchKey] = useState(0);
   const [isCreated, setIsCreated] = useState(isFromProcessCreation);
   const { processes, isLoadingProcesses } = useProcesses();
 
@@ -155,7 +157,11 @@ const CreateKnowledgeBasePageHome: FC<CreateKnowledgeBasePageHomeProps> = ({
           processName={currentProcess?.display_name ?? ''}
           isDraftProcess={currentProcess?.status === ProcessStatus.DRAFT}
           showDefaultMessage={skipFilterConversations}
-          onCreatorSopFileFound={setInitialSopFilename}
+          onOutputSopFileFound={setOutputSopFilename}
+          onMarkdownSopFileFound={(filename) => {
+            setMarkdownSopFilename(filename);
+            setMarkdownSopFetchKey((prev) => prev + 1);
+          }}
           streamingEnabled
         />
       </div>
@@ -165,7 +171,9 @@ const CreateKnowledgeBasePageHome: FC<CreateKnowledgeBasePageHomeProps> = ({
           processId={processId}
           processName={currentProcess?.display_name ?? ''}
           integrations={integrations}
-          initialSopFilename={initialSopFilename}
+          outputSopFilename={outputSopFilename}
+          markdownSopFilename={markdownSopFilename}
+          markdownSopFetchKey={markdownSopFetchKey}
           conversationId={conversationId}
         />
       </div>

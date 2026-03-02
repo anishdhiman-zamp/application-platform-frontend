@@ -12,23 +12,34 @@ import {
   useSensors,
 } from '@dnd-kit/core';
 import { arrayMove, horizontalListSortingStrategy, SortableContext } from '@dnd-kit/sortable';
+import { Button } from '@zamp-platform/ui';
 import { cn } from '@zamp-platform/ui/utils';
+import { MessageSquare } from 'lucide-react';
 import { PaceNavbarItemId } from 'modules/pace/pace.types';
 import Link from 'next/link';
 import { usePathname, useSearchParams } from 'next/navigation';
+import { ROUTES_PATH } from '@/constants/routeConfig';
 import { useIsMacsFileSystemEnabled } from '@/hooks/useIsMacsFileSystemEnabled';
 import DynamicTabItem from '@/modules/pace/components/dynamic-tabs/DynamicTabItem';
 import SortableDynamicTabItem from '@/modules/pace/components/dynamic-tabs/SortableDynamicTabItem';
 import { useNavbarTabs } from '@/modules/pace/components/dynamic-tabs/useNavbarTabs';
 import { PACE_NAVBAR_ITEMS } from '@/modules/pace/pace.constants';
 import { usePaceContext } from '@/modules/pace/pace.context';
-import { normalizeUrlPath } from '@/modules/pace/pace.utils';
 
 const PaceNavbar = () => {
   const pathname = usePathname();
   const searchParams = useSearchParams();
-  const { setIsPaceSidebarOpen, startNewChat } = usePaceContext();
-  const { tabs, isTabActive, isOnAnyDynamicTab, closeTab, reorderTabs } = useNavbarTabs();
+  const { isPaceSidebarOpen, setIsPaceSidebarOpen, startNewChat } = usePaceContext();
+  const {
+    tabs,
+    isTabActive,
+    isOnAnyDynamicTab,
+    closeTab,
+    closeOtherTabs,
+    closeTabsToRight,
+    closeAllTabs,
+    reorderTabs,
+  } = useNavbarTabs();
   const { isMacsFileSystemEnabled } = useIsMacsFileSystemEnabled();
 
   const [activeId, setActiveId] = useState<string | null>(null);
@@ -81,16 +92,21 @@ const PaceNavbar = () => {
     return pathname?.includes(path) ?? false;
   };
 
-  const handleNavItemClick = (e: React.MouseEvent<HTMLAnchorElement>, id: PaceNavbarItemId, path: string) => {
-    const queryString = searchParams?.toString();
-    const currentFullPath = pathname + (queryString ? `?${queryString}` : '');
-
-    if (normalizeUrlPath(path) === normalizeUrlPath(currentFullPath)) {
-      e.preventDefault();
-
-      return;
+  const getNavItemHref = (id: PaceNavbarItemId, path: string) => {
+    if (id === PaceNavbarItemId.HOME) {
+      return path;
     }
 
+    const sParam = searchParams?.get('s');
+
+    if (sParam) {
+      return `${path}?s=${sParam}`;
+    }
+
+    return path;
+  };
+
+  const handleNavItemClick = (id: PaceNavbarItemId) => {
     if (id === PaceNavbarItemId.HOME) {
       setIsPaceSidebarOpen(false);
       startNewChat();
@@ -99,12 +115,26 @@ const PaceNavbar = () => {
 
   return (
     <div className='flex h-[38px] items-center overflow-hidden px-2 pt-1.5 pb-1'>
+      {!isPaceSidebarOpen && pathname !== ROUTES_PATH.CHAT && (
+        <>
+          <Button
+            variant='ghost'
+            size='icon'
+            onClick={() => setIsPaceSidebarOpen(true)}
+            className='text-GRAY_700 hover:text-GRAY_1000 hover:bg-GRAY_200 h-7 w-7 shrink-0'
+          >
+            <MessageSquare size={18} />
+          </Button>
+          <div className='bg-GRAY_300 mx-2 h-4 w-px shrink-0' />
+        </>
+      )}
+
       {/* Static navbar items */}
       <div className='flex shrink-0 items-center gap-x-2'>
         {filteredNavbarItems.map((item) => (
           <Link
             key={item.id}
-            href={item.path}
+            href={getNavItemHref(item.id, item.path)}
             className={cn(
               'text-GRAY_900 hover:text-GRAY_1000 hover:bg-GRAY_200 flex h-7 w-7 cursor-pointer items-center justify-center rounded-lg p-2',
               isNavItemActive(item.id, item.path) &&
@@ -112,7 +142,7 @@ const PaceNavbar = () => {
             )}
             role='button'
             tabIndex={0}
-            onClick={(e) => handleNavItemClick(e, item.id, item.path)}
+            onClick={() => handleNavItemClick(item.id)}
           >
             {item.iconComponent}
           </Link>
@@ -130,13 +160,18 @@ const PaceNavbar = () => {
         >
           <SortableContext items={tabStableKeys} strategy={horizontalListSortingStrategy}>
             <div className='flex min-w-0 flex-1 items-center gap-x-1'>
-              {tabs.map((tab) => (
+              {tabs.map((tab, index) => (
                 <SortableDynamicTabItem
                   key={tab.stableKey}
                   tab={tab}
                   isActive={isTabActive(tab)}
                   isAnyDragging={activeId !== null}
+                  tabIndex={index}
+                  totalTabs={tabs.length}
                   onClose={closeTab}
+                  onCloseOthers={closeOtherTabs}
+                  onCloseToRight={closeTabsToRight}
+                  onCloseAll={closeAllTabs}
                 />
               ))}
             </div>
@@ -144,7 +179,17 @@ const PaceNavbar = () => {
           <DragOverlay>
             {draggedTab ? (
               <div className='-rotate-2 rounded-lg border shadow-lg'>
-                <DynamicTabItem tab={draggedTab} isActive={isTabActive(draggedTab)} isDragging onClose={closeTab} />
+                <DynamicTabItem
+                  tab={draggedTab}
+                  isActive={isTabActive(draggedTab)}
+                  isDragging
+                  tabIndex={tabs.findIndex((t) => t.id === draggedTab.id)}
+                  totalTabs={tabs.length}
+                  onClose={closeTab}
+                  onCloseOthers={closeOtherTabs}
+                  onCloseToRight={closeTabsToRight}
+                  onCloseAll={closeAllTabs}
+                />
               </div>
             ) : null}
           </DragOverlay>

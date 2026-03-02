@@ -1,7 +1,7 @@
-export { AttachmentsBlock } from './AttachmentsBlock';
 export { AttachmentsList } from './AttachmentsList';
 export { ButtonBlock } from './ButtonBlock';
 export { CodePreviewBlock } from './CodePreviewBlock';
+export { FileReferencesList } from './FileReferencesList';
 export { MarkdownBlock } from './MarkdownBlock';
 export { OutputFilesBlock } from './OutputFilesBlock';
 export { PlainTextBlock } from './PlainTextBlock';

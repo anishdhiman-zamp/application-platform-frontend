@@ -101,6 +101,8 @@ export interface ChatMessage {
     elements?: Block[];
     text?: string;
     text_type?: string;
+    file_references?: FileReferenceType[];
+    /** @deprecated Use file_references instead. Kept for backward compatibility with S3 uploads. */
     attachments?: MessageAttachmentType[];
   };
   message_type: ChatMessageType;
@@ -133,14 +135,25 @@ export interface ChatActions {
 
 export type ChatFramework = ChatState & ChatActions;
 
+export interface FileReferenceType {
+  path: string;
+  name: string;
+}
+
+/**
+ * @deprecated Use FileReferenceType instead. This type is kept for backward compatibility.
+ */
 export interface MessageAttachmentType {
   file_id: string;
   file_name?: string;
 }
+
 export interface MessageContentType {
   text: string;
   text_type: string;
   elements?: Block[];
+  file_references?: FileReferenceType[];
+  /** @deprecated Use file_references instead. Kept for backward compatibility with S3 uploads. */
   attachments?: MessageAttachmentType[];
 }
 
