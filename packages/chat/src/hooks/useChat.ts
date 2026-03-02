@@ -27,6 +27,7 @@ import {
   type StreamEventPayload,
   StreamingContentBlockDeltaType,
   StreamingContentBlockType,
+  type TaskContentBlock,
 } from '../types/block.types';
 import {
   ChatMessage,
@@ -221,50 +222,70 @@ export const useChat = (config: ChatConfig) => {
 
             let newBlock: Block;
 
-            if (blockType === BLOCK_TYPE.THINKING) {
-              newBlock = {
-                type: BLOCK_TYPE.THINKING,
-                order: index,
-                payload: { thinking: '' },
-                start_timestamp: content_block?.start_timestamp,
-                is_complete: false,
-              };
-            } else if (blockType === BLOCK_TYPE.TEXT) {
-              newBlock = {
-                type: BLOCK_TYPE.TEXT,
-                order: index,
-                payload: { text: '' },
-                start_timestamp: content_block?.start_timestamp,
-                is_complete: false,
-              };
-            } else if (blockType === BLOCK_TYPE.TOOL_RESULT) {
-              const toolCallId = content_block?.tool_call_id || content_block?.id;
-              newBlock = {
-                type: BLOCK_TYPE.TOOL_RESULT,
-                order: index,
-                id: content_block.id,
-                payload: {
-                  content: '',
-                  is_error: false,
-                  tool_call_id: toolCallId,
-                },
-                start_timestamp: content_block?.start_timestamp,
-                is_complete: false,
-              };
-            } else {
-              newBlock = {
-                type: BLOCK_TYPE.TOOL_USE,
-                order: index,
-                id: content_block?.id,
-                name: content_block?.name,
-                payload: {
-                  partial_json: '',
-                  tool_call_id: content_block?.id,
-                  display_name: content_block?.display_name,
-                },
-                start_timestamp: content_block?.start_timestamp,
-                is_complete: false,
-              };
+            switch (blockType) {
+              case BLOCK_TYPE.THINKING:
+                newBlock = {
+                  type: BLOCK_TYPE.THINKING,
+                  order: index,
+                  payload: { thinking: '' },
+                  start_timestamp: content_block?.start_timestamp,
+                  is_complete: false,
+                };
+                break;
+              case BLOCK_TYPE.TEXT:
+                newBlock = {
+                  type: BLOCK_TYPE.TEXT,
+                  order: index,
+                  payload: { text: '' },
+                  start_timestamp: content_block?.start_timestamp,
+                  is_complete: false,
+                };
+                break;
+              case BLOCK_TYPE.TOOL_RESULT: {
+                const toolCallId = content_block?.tool_call_id || content_block?.id;
+                newBlock = {
+                  type: BLOCK_TYPE.TOOL_RESULT,
+                  order: index,
+                  id: content_block.id,
+                  payload: {
+                    content: '',
+                    is_error: false,
+                    tool_call_id: toolCallId,
+                  },
+                  start_timestamp: content_block?.start_timestamp,
+                  is_complete: false,
+                };
+                break;
+              }
+              case BLOCK_TYPE.TASK:
+                newBlock = {
+                  type: BLOCK_TYPE.TASK,
+                  order: index,
+                  id: content_block?.id,
+                  payload: {
+                    id: content_block?.id || '',
+                    title: (content_block as MapAny)?.title || '',
+                    task_id: (content_block as MapAny)?.task_id || content_block?.id || '',
+                    status: (content_block as MapAny)?.status,
+                  },
+                  start_timestamp: content_block?.start_timestamp,
+                  is_complete: false,
+                } as TaskContentBlock;
+                break;
+              default:
+                newBlock = {
+                  type: BLOCK_TYPE.TOOL_USE,
+                  order: index,
+                  id: content_block?.id,
+                  name: content_block?.name,
+                  payload: {
+                    partial_json: '',
+                    tool_call_id: content_block?.id,
+                    display_name: content_block?.display_name,
+                  },
+                  start_timestamp: content_block?.start_timestamp,
+                  is_complete: false,
+                };
             }
 
             setStreamingState((prev) => {
@@ -362,6 +383,18 @@ export const useChat = (config: ChatConfig) => {
                           content: (block.payload.content || '') + delta.content,
                           is_error: delta.is_error,
                           tool_call_id: delta.tool_call_id ?? block.payload.tool_call_id,
+                        },
+                      };
+                    }
+                    break;
+                  case StreamingContentBlockDeltaType.TASK_DELTA:
+                    if (block.type === BLOCK_TYPE.TASK) {
+                      return {
+                        ...block,
+                        payload: {
+                          ...block.payload,
+                          title: delta.title ?? block.payload.title,
+                          status: delta.status ?? block.payload.status,
                         },
                       };
                     }

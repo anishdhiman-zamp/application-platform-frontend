@@ -11,6 +11,7 @@ export const enum BLOCK_TYPE {
   TOOL_RESULT = 'tool_result',
   THINKING = 'thinking',
   OUTPUT_FILES = 'output_files',
+  TASK = 'task',
 }
 
 export const enum ActionType {
@@ -139,6 +140,26 @@ export interface OutputFilesBlockType {
   };
 }
 
+export const TASK_STATUS = {
+  COMPLETED: 'COMPLETED',
+  IN_PROGRESS: 'IN_PROGRESS',
+  FAILED: 'FAILED',
+} as const;
+
+export type TaskStatus = (typeof TASK_STATUS)[keyof typeof TASK_STATUS];
+
+export interface TaskBlockType {
+  id: string;
+  order: number;
+  type: BLOCK_TYPE.TASK;
+  payload: {
+    id: string;
+    title: string;
+    task_id: string;
+    status?: TaskStatus;
+  };
+}
+
 export enum TEXT_TYPE {
   PLAIN_TEXT = 'plain_text',
   MARKDOWN = 'markdown',
@@ -153,10 +174,12 @@ export type Block =
   | QuestionBlockType
   | FileReferencesBlockType
   | OutputFilesBlockType
+  | TaskBlockType
   | ThinkingContentBlock
   | TextContentBlock
   | ToolUseContentBlock
-  | ToolResultContentBlock;
+  | ToolResultContentBlock
+  | TaskContentBlock;
 export interface BlockMessage {
   block: Block[];
 }
@@ -186,6 +209,7 @@ export const enum StreamingContentBlockDeltaType {
   INPUT_JSON_DELTA = 'input_json_delta',
   TOOL_USE_BLOCK_UPDATE_DELTA = 'tool_use_block_update_delta',
   TOOL_RESULT_DELTA = 'tool_result_delta',
+  TASK_DELTA = 'task_delta',
 }
 
 export interface StreamingContentBlockBase {
@@ -239,6 +263,16 @@ export interface ToolResultContentBlock extends StreamingContentBlockBase {
   };
 }
 
+export interface TaskContentBlock extends StreamingContentBlockBase {
+  type: BLOCK_TYPE.TASK;
+  payload: {
+    id: string;
+    title: string;
+    task_id: string;
+    status?: TaskStatus;
+  };
+}
+
 export interface StreamEventContentBlockStart {
   type: StreamingContentBlockType.CONTENT_BLOCK_START;
   index: number;
@@ -280,12 +314,19 @@ export interface StreamEventToolResultDelta {
   tool_call_id?: string;
 }
 
+export interface StreamEventTaskDelta {
+  type: StreamingContentBlockDeltaType.TASK_DELTA;
+  title?: string;
+  status?: TaskStatus;
+}
+
 export type StreamEventDelta =
   | StreamEventThinkingDelta
   | StreamEventTextDelta
   | StreamEventInputJsonDelta
   | StreamEventToolUseUpdateDelta
-  | StreamEventToolResultDelta;
+  | StreamEventToolResultDelta
+  | StreamEventTaskDelta;
 
 export interface StreamEventContentBlockDelta {
   type: StreamingContentBlockType.CONTENT_BLOCK_DELTA;

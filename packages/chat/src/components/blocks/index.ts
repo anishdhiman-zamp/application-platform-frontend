@@ -9,5 +9,6 @@ export { QuestionGroupBlock } from './QuestionGroupBlock';
 export { RadioButtonBlock, SingleSelectBlock } from './RadioButtonBlock';
 export { StatusLabel } from './StatusLabel';
 export { StepsBlock } from './StepsBlock';
+export { default as TaskBlock } from './TaskBlock';
 export { ThinkingBlock } from './ThinkingBlock';
 export { ToolCallBlock } from './ToolCallBlock';

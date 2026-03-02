@@ -14,13 +14,7 @@ import { useUserIdentity } from '@/hooks/useUserIdentity';
 import { RootState } from '@/store';
 import { capitalizeWords } from '@/utils/common';
 
-const MembersTeamV2: FC<MembersTeamPropsType> = ({
-  teamsData,
-  userMappedTeams,
-  userInfo,
-  hasPeoplePolicy,
-  teamsRandomColorRef,
-}) => {
+const MembersTeamV2: FC<MembersTeamPropsType> = ({ teamsData, userMappedTeams, userInfo, teamsRandomColorRef }) => {
   const [search, setSearch] = useState('');
   const [filteredTeams, setFilteredTeams] = useState<TeamType[]>([]);
   const [isPopoverOpen, setIsPopoverOpen] = useState(false);
@@ -93,10 +87,8 @@ const MembersTeamV2: FC<MembersTeamPropsType> = ({
   const handleAddTeamToAudience = (payload: PostAddTeamToAudiencePayload) => {
     postAddTeamToAudience({ organizationId, teamId: payload?.team_id, payload })
       .unwrap()
-      .then((res) => {
-        toast.success(
-          hasPeoplePolicy ? res?.message : `${capitalizeWords(userInfo?.name)} added to ${payload?.team_name}`,
-        );
+      .then(() => {
+        toast.success(`${capitalizeWords(userInfo?.name)} added to ${payload?.team_name}`);
       })
       .catch(() => {
         toast.error(`Failed to add ${capitalizeWords(userInfo?.name)} to ${payload?.team_name}`);
@@ -200,7 +192,6 @@ const MembersTeamV2: FC<MembersTeamPropsType> = ({
                 onSelectTeamToBeDeleted={() => handleSelectTeamToBeDeleted(team)}
                 userInfo={userInfo}
                 onAddUserToTeam={handleAddUserToTeam}
-                hasPeoplePolicy={hasPeoplePolicy}
                 onRemoveUserFromTeam={handleRemoveUserFromTeam}
               />
             ))}

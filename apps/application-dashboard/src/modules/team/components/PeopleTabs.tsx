@@ -1,13 +1,12 @@
 'use client';
 
-import { FC, useMemo, useTransition } from 'react';
+import { FC, useTransition } from 'react';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@zamp-platform/ui';
 import InvitedMembersListing from 'modules/team/components/members/InvitedMembersListing';
 import TeamMembersListing from 'modules/team/components/members/TeamMembersListing';
 import { TEAM_TABS_TYPES, TeamTabsList } from 'modules/team/people.types';
 import { usePathname, useRouter } from 'next/navigation';
 import { AudiencesByOrganisationIdResponse, InvitedAudiencesByOrganisationIdResponse } from 'types/api/people.types';
-import { useGetDualAdminPolicyQuery } from '@/apis/people';
 import { useUserIdentity } from '@/hooks/useUserIdentity';
 import { cn } from '@/utils/common';
 
@@ -34,11 +33,6 @@ const PeopleTabs: FC<PeopleTabsPropsType> = ({
   const defaultTab = tab ?? TEAM_TABS_TYPES.TEAM_MEMBERS;
 
   const { isSystemAdmin, userRole } = useUserIdentity();
-  const { data: dualAdminPolicy } = useGetDualAdminPolicyQuery();
-
-  const hasPeoplePolicy = useMemo(() => {
-    return !!dualAdminPolicy?.find((policy) => policy.name === 'People')?.policy;
-  }, [dualAdminPolicy]);
 
   const handleTabSelect = (value: string) => {
     if (!value) return;
@@ -51,7 +45,6 @@ const PeopleTabs: FC<PeopleTabsPropsType> = ({
   if (userRole && !isSystemAdmin) {
     return (
       <TeamMembersListing
-        hasPeoplePolicy={hasPeoplePolicy}
         data={filteredTeamMembers}
         isLoadingTeamMembersData={isLoadingTeamMembersData}
         search={search}
@@ -80,7 +73,6 @@ const PeopleTabs: FC<PeopleTabsPropsType> = ({
 
       <TabsContent value={TEAM_TABS_TYPES.TEAM_MEMBERS} className='h-full w-full'>
         <TeamMembersListing
-          hasPeoplePolicy={hasPeoplePolicy}
           data={filteredTeamMembers}
           isLoadingTeamMembersData={isLoadingTeamMembersData}
           search={search}

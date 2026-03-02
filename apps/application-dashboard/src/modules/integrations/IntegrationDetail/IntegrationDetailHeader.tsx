@@ -44,7 +44,7 @@ const IntegrationDetailHeader: FC<IntegrationDetailHeaderProps> = ({
       <div className='flex items-center gap-x-2'>
         <ConnectIntegrationAction
           integrationItem={integrationItem || ({} as IntegrationItem)}
-          copy={hasConnections ? 'Add Connections' : 'Connect'}
+          copy={hasConnections ? 'Add Connection' : 'Connect'}
           buttonVariant='default'
         />
 

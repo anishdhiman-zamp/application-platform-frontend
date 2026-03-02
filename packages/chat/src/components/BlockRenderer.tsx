@@ -24,6 +24,7 @@ import {
   QuestionGroupBlock,
   SingleSelectBlock,
   StepsBlock,
+  TaskBlock,
   ThinkingBlock,
   ToolCallBlock,
 } from './blocks';
@@ -183,6 +184,9 @@ export const BlockRenderer: React.FC<BlockRendererProps> = ({
 
       case BLOCK_TYPE.OUTPUT_FILES:
         return <OutputFilesBlock key={block?.id} payload={block?.payload} conversationId={conversationId} />;
+
+      case BLOCK_TYPE.TASK:
+        return <TaskBlock key={block?.id} payload={block?.payload} conversationId={conversationId} />;
 
       default:
         return null;

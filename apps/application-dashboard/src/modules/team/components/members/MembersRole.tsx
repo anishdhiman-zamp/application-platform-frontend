@@ -10,7 +10,7 @@ import AsyncDropdown from 'components/asyncDropdown/AsyncDropdown';
 import { toast } from 'components/common/toast/Toast';
 import { TOAST_MESSAGES } from 'components/common/toast/toast.constants';
 
-const MembersRole: FC<MembersRolePropsType> = ({ value, member = false, hasPeoplePolicy }) => {
+const MembersRole: FC<MembersRolePropsType> = ({ value, member = false }) => {
   const { user_id, privilege } = value;
   const role = TEAM_MEMBERS_PRIVILEGES_LIST.find((role) => role?.value === privilege);
   const [isHoveredDropdown, setIsHoveredDropdown] = useState<boolean>(false);
@@ -49,12 +49,12 @@ const MembersRole: FC<MembersRolePropsType> = ({ value, member = false, hasPeopl
         },
       })
         .unwrap()
-        .then((res) => {
-          if (!hasPeoplePolicy) setSelectedRole(selectedOption);
+        .then(() => {
+          setSelectedRole(selectedOption);
           setOpenChangeRoleDropdown(false);
           setIsHoveredDropdown(false);
           refetchAudiencesByOrganizationId();
-          toast.success(hasPeoplePolicy ? res?.message : TOAST_MESSAGES.SUCCESS_AUDIENCE_ROLE_CHANGED);
+          toast.success(TOAST_MESSAGES.SUCCESS_AUDIENCE_ROLE_CHANGED);
         })
         .catch((err) => {
           toast.error(err?.data?.error || TOAST_MESSAGES.FAILED_AUDIENCE_ROLE_CHANGED);

@@ -12,7 +12,7 @@ interface ChatTopbarProps {
   title?: string;
   conversationId?: string | null;
   organizationId?: string;
-  onStartNewChat: () => void;
+  onStartNewChat?: () => void;
   onClose?: () => void;
   onExpand?: () => void;
   onTitleChange?: (newTitle: string) => void;
@@ -80,16 +80,18 @@ const ChatTopbar: FC<ChatTopbarProps> = ({
         )}
       </div>
       <div className='flex items-center gap-1.5'>
-        <Button
-          variant='ghost'
-          size='icon'
-          className='h-6 w-6 rounded p-2 text-gray-900 hover:text-gray-900 disabled:opacity-50'
-          onClick={onStartNewChat}
-          disabled={!conversationId}
-          title='Start new chat'
-        >
-          <Plus size={14} />
-        </Button>
+        {onStartNewChat && (
+          <Button
+            variant='ghost'
+            size='icon'
+            className='h-6 w-6 rounded p-2 text-gray-900 hover:text-gray-900 disabled:opacity-50'
+            onClick={onStartNewChat}
+            disabled={!conversationId}
+            title='Start new chat'
+          >
+            <Plus size={14} />
+          </Button>
+        )}
         {onExpand && (
           <Button
             variant='ghost'

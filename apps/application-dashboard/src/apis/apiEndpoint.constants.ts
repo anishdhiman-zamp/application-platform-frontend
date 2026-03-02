@@ -112,7 +112,6 @@ export const API_ENDPOINTS = {
   DOWNLOAD_FILE_GET: `file-imports/{{fileImportId}}/download-url`,
   PAYMENTS_AUDIENCES_GET: `payments/audiences`,
 
-  DUAL_ADMIN_POLICY_GET: `/dual-admin-policy`,
   APPROVAL_ACTION_POST: '/approval/action',
 
   PAYMENT_LIST_FILTER_CONFIG_GET: `payments/filter-config`,
@@ -213,6 +212,12 @@ export const API_ENDPOINTS = {
   TRIGGER_SUBSCRIPTIONS_DELETE: `trigger-subscriptions/{{subscription_id}}`,
   // Update Conversation Title
   UPDATE_CONVERSATION_TITLE: `v3/conversations/{{conversationId}}/title`,
+
+  //TASKS
+  TASKS_MESSAGES_GET: `tasks/{{conversationId}}/messages`,
+  CREATE_CONVERSATION_V4: `v4/conversations`,
+  POST_MESSAGE_V4: `v4/conversations/{{conversationId}}/messages`,
+  GET_CONVERSATION_BY_ID_V4: `v4/conversations/{{conversationId}}`,
 
   //INTEGRATIONS
   INTEGRATIONS_CATALOG_GET: `integrations/catalog`,
