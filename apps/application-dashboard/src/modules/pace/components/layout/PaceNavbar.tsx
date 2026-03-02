@@ -25,7 +25,6 @@ import SortableDynamicTabItem from '@/modules/pace/components/dynamic-tabs/Sorta
 import { useNavbarTabs } from '@/modules/pace/components/dynamic-tabs/useNavbarTabs';
 import { PACE_NAVBAR_ITEMS } from '@/modules/pace/pace.constants';
 import { usePaceContext } from '@/modules/pace/pace.context';
-import { normalizeUrlPath } from '@/modules/pace/pace.utils';
 
 const PaceNavbar = () => {
   const pathname = usePathname();
@@ -107,16 +106,7 @@ const PaceNavbar = () => {
     return path;
   };
 
-  const handleNavItemClick = (e: React.MouseEvent<HTMLAnchorElement>, id: PaceNavbarItemId, path: string) => {
-    const queryString = searchParams?.toString();
-    const currentFullPath = pathname + (queryString ? `?${queryString}` : '');
-
-    if (normalizeUrlPath(path) === normalizeUrlPath(currentFullPath)) {
-      e.preventDefault();
-
-      return;
-    }
-
+  const handleNavItemClick = (id: PaceNavbarItemId) => {
     if (id === PaceNavbarItemId.HOME) {
       setIsPaceSidebarOpen(false);
       startNewChat();
@@ -152,7 +142,7 @@ const PaceNavbar = () => {
             )}
             role='button'
             tabIndex={0}
-            onClick={(e) => handleNavItemClick(e, item.id, item.path)}
+            onClick={() => handleNavItemClick(item.id)}
           >
             {item.iconComponent}
           </Link>

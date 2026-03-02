@@ -2,9 +2,8 @@
 
 import { useCallback, useEffect, useRef, useState } from 'react';
 import { captureException } from '@sentry/nextjs';
-import { SSEEventType, useLazyGetOutputFileDownloadQuery } from '@zamp-platform/chat';
+import { useLazyGetOutputFileDownloadQuery } from '@zamp-platform/chat';
 import { toast } from '@zamp-platform/ui';
-import { BaseEventPayload, EVENT_TYPE } from '@zamp-platform/utils/event-bus/event-bus.types';
 import {
   getCachedContent,
   hasContentChanged,
@@ -12,16 +11,16 @@ import {
   setCachedContent,
   setCachedEmptyState,
 } from '@zamp-platform/utils/indexeddb-cache';
-import { SOP_CREATION_FILENAME } from 'modules/process/knowledge-base-creation/sop-creation.constants';
+import { useLazyReadFileContentQuery } from '@/apis/filesystem';
 import { useGetKnowledgeBaseQuery } from '@/apis/processes';
-import { useEventBus } from '@/app/_providers/sse-provider';
 import { KB_TOAST_MESSAGES } from '@/components/common/toast/toast.constants';
-import { MapAny } from '@/types/commonTypes';
 
 interface UseKnowledgeBaseContentParams {
   processId: string;
   conversationId?: string;
-  initialSopFilename?: string;
+  outputSopFilename?: string;
+  markdownSopFilename?: string;
+  markdownSopFetchKey?: number;
   isKnowledgeBaseCreated?: boolean;
 }
 
@@ -49,7 +48,9 @@ const CACHE_KEY_PREFIX = 'kb-content-';
 export const useKnowledgeBaseContent = ({
   processId,
   conversationId,
-  initialSopFilename,
+  outputSopFilename,
+  markdownSopFilename,
+  markdownSopFetchKey,
   isKnowledgeBaseCreated = false,
 }: UseKnowledgeBaseContentParams): UseKnowledgeBaseContentReturn => {
   const [markdownContent, setMarkdownContent] = useState<string>('');
@@ -63,8 +64,8 @@ export const useKnowledgeBaseContent = ({
     hasReceivedSSEUpdate: false,
   });
 
-  const { sseEventBus } = useEventBus();
   const [getOutputFileDownload] = useLazyGetOutputFileDownloadQuery();
+  const [readFileContent] = useLazyReadFileContentQuery();
 
   const {
     data: knowledgeBaseData,
@@ -206,6 +207,34 @@ export const useKnowledgeBaseContent = ({
     [conversationId, getOutputFileDownload, fetchMarkdownContent],
   );
 
+  /**
+   * Fetches SOP file content directly from file path
+   */
+  const fetchMarkdownSopFile = useCallback(
+    async (filePath: string) => {
+      if (!filePath) return;
+
+      try {
+        setIsLoading(true);
+        fetchStateRef.current.hasReceivedSSEUpdate = true;
+        setIsKnownEmptyState(false);
+
+        const content = await readFileContent({ path: filePath }).unwrap();
+
+        if (content) {
+          setMarkdownContent(content);
+          await setCachedContent(cacheKey, content);
+        }
+      } catch (error) {
+        console.error('Failed to read file content:', error);
+        captureException(error);
+      } finally {
+        setIsLoading(false);
+      }
+    },
+    [readFileContent, cacheKey],
+  );
+
   // Load cached content when processId changes
   useEffect(() => {
     // Reset state for new process
@@ -259,38 +288,24 @@ export const useKnowledgeBaseContent = ({
     fetchMarkdownContent();
   }, [knowledgeBaseData?.content_signed_url, isKnowledgeBaseError, is404Error, cacheKey, fetchMarkdownContent]);
 
-  // Fetch initial SOP file if provided
+  // Fetch initial SOP file if provided (from output files block)
   useEffect(() => {
-    if (!initialSopFilename || !conversationId) {
+    if (!outputSopFilename || !conversationId) {
       setIsLoading(false);
 
       return;
     }
 
-    fetchFileContent(initialSopFilename, true);
-  }, [initialSopFilename, conversationId, fetchFileContent]);
+    fetchFileContent(outputSopFilename, true);
+  }, [outputSopFilename, conversationId, fetchFileContent]);
 
-  // Subscribe to SSE events for real-time updates
+  // Fetch SOP file directly from file path (from markdown block)
+  // markdownSopFetchKey is used to force refetch even when the filename is the same
   useEffect(() => {
-    const subscription = sseEventBus.subscribe(EVENT_TYPE.CONVERSATION_V2, async (data: BaseEventPayload) => {
-      const payload = data?.payload as MapAny;
+    if (!markdownSopFilename) return;
 
-      if (data?.source_id !== conversationId) return;
-
-      if (payload?.type === SSEEventType.OUTPUT_FILES) {
-        const outputFiles = payload?.message?.output_files;
-        const currentSopFile = outputFiles?.find((file: MapAny) => file?.filename === SOP_CREATION_FILENAME);
-
-        if (currentSopFile?.filename) {
-          await fetchFileContent(currentSopFile.filename, true);
-        }
-      }
-    });
-
-    return () => {
-      subscription.unsubscribe();
-    };
-  }, [sseEventBus, conversationId, fetchFileContent]);
+    fetchMarkdownSopFile(markdownSopFilename);
+  }, [markdownSopFilename, markdownSopFetchKey, fetchMarkdownSopFile]);
 
   return {
     markdownContent,
