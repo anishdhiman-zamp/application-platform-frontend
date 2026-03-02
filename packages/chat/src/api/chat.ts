@@ -53,6 +53,7 @@ export const API_ENDPOINTS = {
   SPEECH_TO_TEXT_ACCESS_TOKEN_GET: '/speech-to-text/generate-access-token',
   GET_OUTPUT_FILE_DOWNLOAD: 'v3/conversations/{{conversationId}}/output-files/{{filename}}/download',
   SUBMIT_CHAT_FEEDBACK: 'v3/conversations/{{conversationId}}/messages/{{messageId}}/chat-feedback',
+  TASKS_MESSAGES_GET: 'tasks/{{conversationId}}/messages',
 };
 
 const ConversationService = chatApi.injectEndpoints({
@@ -97,6 +98,7 @@ const ConversationService = chatApi.injectEndpoints({
         method: REQUEST_TYPES.POST,
         body,
       }),
+      // invalidatesTags: (_result, _error, arg) => [{ type: APITags.GET_CONVERSATION_BY_ID, id: arg.conversationId }],
     }),
     getFilesByIds: builder.query<GetFilesByIdsResponseType, GetFilesByIdsRequestType>({
       query: (params) => ({
