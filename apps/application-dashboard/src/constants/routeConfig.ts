@@ -41,6 +41,7 @@ export const ROUTES_PATH = {
   CHAT_SETTINGS: '/chat/settings',
   CHAT_SETTINGS_PEOPLE: '/chat/settings/people',
   CHAT_SETTINGS_INTEGRATIONS: '/chat/settings/integrations',
+  CHAT_TASK: '/chat/task/:taskId',
 };
 
 export const getPageRouteById = (pageId: string, sheetId?: string) => {
@@ -114,6 +115,12 @@ export const getIntegrationDetailRoute = (integrationId: string) => {
 
 export const getChatFileRoute = (filePath: string) => {
   return `${ROUTES_PATH.CHAT_FILES}?f=${encodeURIComponent(filePath)}`;
+};
+
+export const getChatTaskRoute = (taskId: string, conversationId?: string) => {
+  const basePath = ROUTES_PATH.CHAT_TASK.replace(':taskId', taskId);
+
+  return conversationId ? `${basePath}?s=${conversationId}` : basePath;
 };
 
 export const LOGIN_URLS = [ROUTES_PATH.LOGIN];

@@ -213,6 +213,12 @@ export const API_ENDPOINTS = {
   // Update Conversation Title
   UPDATE_CONVERSATION_TITLE: `v3/conversations/{{conversationId}}/title`,
 
+  //TASKS
+  TASKS_MESSAGES_GET: `tasks/{{conversationId}}/messages`,
+  CREATE_CONVERSATION_V4: `v4/conversations`,
+  POST_MESSAGE_V4: `v4/conversations/{{conversationId}}/messages`,
+  GET_CONVERSATION_BY_ID_V4: `v4/conversations/{{conversationId}}`,
+
   //INTEGRATIONS
   INTEGRATIONS_CATALOG_GET: `integrations/catalog`,
   INTEGRATIONS_CATALOG_ENABLED_GET: `integrations/catalog/enabled`,

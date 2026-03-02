@@ -35,8 +35,8 @@ export const extractInitialValues = (blocks: Block[]): Record<string, { label: s
 
 export const getHistoryFormattedMessages = (conversationHistory: GetConversationByIdResponseType): ChatMessage[] => {
   return conversationHistory.messages.map((message) => ({
-    resource_type: conversationHistory.conversation.resource_type,
-    resource_id: conversationHistory.conversation.resource_id,
+    resource_type: conversationHistory?.conversation?.resource_type,
+    resource_id: conversationHistory?.conversation?.resource_id,
     message_content: message.content,
     message_type: ChatMessageType.TEXT,
     sender_type: message.sender_type as SenderType,
@@ -44,7 +44,7 @@ export const getHistoryFormattedMessages = (conversationHistory: GetConversation
     timestamp: message.created_at,
     sender_name: message.sender_name,
     id: message.id,
-    conversation_id: message.conversation_id,
+    conversation_id: message?.conversation_id,
   }));
 };
 

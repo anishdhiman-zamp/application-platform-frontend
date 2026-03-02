@@ -131,6 +131,7 @@ const ChatContentInner = ({
             disableAnimation
           >
             <MessageContainer
+              conversationId={conversationId || chat.conversationId || ''}
               messages={chat.messages}
               isAnalysing={isAnalysing}
               streamingState={chat.streamingState}

@@ -40,6 +40,7 @@ interface MessageContainerProps {
   children?: ReactNode;
   organizationId?: string;
   streamingEnabled?: boolean;
+  conversationId?: string;
 }
 
 export const MessageContainer: FC<MessageContainerProps> = ({
@@ -60,6 +61,7 @@ export const MessageContainer: FC<MessageContainerProps> = ({
   children,
   organizationId,
   streamingEnabled = true,
+  conversationId,
 }) => {
   const defaultAssistantAvatar = assistantAvatar ?? <PaceAvatar />;
   const isInitialScrollRef = useRef(true);
@@ -93,6 +95,7 @@ export const MessageContainer: FC<MessageContainerProps> = ({
           assistantAvatar={defaultAssistantAvatar}
           showTimestamp={showTimestamp}
           alignUserRight={alignUserRight}
+          conversationId={conversationId}
           hideSenderName={hideSenderName}
           userAvatar={(senderName) => (
             <Avatar
