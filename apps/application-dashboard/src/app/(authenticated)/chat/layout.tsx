@@ -24,7 +24,7 @@ const PaceLayout: FC<PaceLayoutProps> = ({ children }) => {
     return <ImageLoader imageSrc={ZAMP_LOGO_LOADER_SVG} width={140} height={140} />;
   }
 
-  if (!isLoading && !isPaceChatEnabled) {
+  if (!isPaceChatEnabled) {
     return <NotFound />;
   }
 
