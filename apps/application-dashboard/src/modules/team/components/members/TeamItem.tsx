@@ -21,7 +21,6 @@ const TeamItem: FC<TeamItemProps> = ({
   onSelectTeamToBeDeleted,
   userInfo,
   onAddUserToTeam,
-  hasPeoplePolicy,
   onRemoveUserFromTeam,
 }) => {
   const [editedName, setEditedName] = useState('');
@@ -72,8 +71,8 @@ const TeamItem: FC<TeamItemProps> = ({
         payload: { user_id: userInfo?.user_id, team_id: team?.team_id, team_name: team?.name },
       })
         .unwrap()
-        .then((res) => {
-          toast.success(hasPeoplePolicy ? res?.message : `${capitalizeWords(userInfo?.name)} added to ${team?.name}`);
+        .then(() => {
+          toast.success(`${capitalizeWords(userInfo?.name)} added to ${team?.name}`);
         })
         .catch(() => {
           toast.error(`Failed to add ${capitalizeWords(userInfo?.name)} to ${team?.name}`);

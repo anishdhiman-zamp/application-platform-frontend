@@ -47,16 +47,6 @@ export type GetPolicyResultApprovalsResponse = {
   data: Approval[];
 };
 
-export type GetDualAdminPolicyResponse = {
-  name: string;
-  description: string;
-  resource_id: string;
-  resource_type: string;
-  action_type: PolicyActionType;
-  icon_id: string;
-  policy: PolicyDetailsType;
-};
-
 export type ProcessApprovalRequest = {
   ids: string[];
   comments?: string;

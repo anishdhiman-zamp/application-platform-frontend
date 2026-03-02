@@ -112,7 +112,6 @@ export const API_ENDPOINTS = {
   DOWNLOAD_FILE_GET: `file-imports/{{fileImportId}}/download-url`,
   PAYMENTS_AUDIENCES_GET: `payments/audiences`,
 
-  DUAL_ADMIN_POLICY_GET: `/dual-admin-policy`,
   APPROVAL_ACTION_POST: '/approval/action',
 
   PAYMENT_LIST_FILTER_CONFIG_GET: `payments/filter-config`,
