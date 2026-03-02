@@ -1,9 +1,11 @@
 import React, { type RefObject } from 'react';
 import { fireEvent, render, screen } from '@testing-library/react';
+import Row from 'modules/process/artifacts/components/pdf-dataset-artifact/dataset-row/Row';
 import type { ColumnDef } from '@/components/common/agGridTable/AgGridTable';
 import { FILTER_TYPES } from '@/components/filter/filter.types';
 
-// Mock dependencies before importing Row
+const mockGetFormattedDate = jest.fn((_config, value) => value);
+
 jest.mock('next/navigation', () => ({
   useParams: () => ({ processId: 'test-process-id' }),
 }));
@@ -24,8 +26,6 @@ jest.mock('@/modules/chatbot/CommentButton', () => ({
   default: () => <button data-testid='comment-button'>Comment</button>,
 }));
 
-const mockGetFormattedDate = jest.fn((_config, value) => value);
-
 jest.mock('@/modules/data/data.utils', () => ({
   getColumnOrderingVisibilityForCurrentDataset: () => [],
   getFormattedDate: (config: unknown, value: unknown) => mockGetFormattedDate(config, value),
@@ -36,7 +36,6 @@ jest.mock('@/modules/widgets/TreeTable/utils', () => ({
   isValueEmpty: (value: unknown) => value === null || value === undefined || value === '',
 }));
 
-// Mock DisplayField and EditableField with minimal implementations
 jest.mock(
   'modules/process/artifacts/components/pdf-dataset-artifact/dataset-row/DisplayField',
   () =>
@@ -91,8 +90,6 @@ jest.mock(
       );
     },
 );
-
-import Row from 'modules/process/artifacts/components/pdf-dataset-artifact/dataset-row/Row';
 
 // Helper to create default props
 const createDefaultProps = (overrides: Partial<Parameters<typeof Row>[0]> = {}) => {
