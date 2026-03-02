@@ -333,7 +333,12 @@ export const formatTanStackColumns = (params: FormatColumnsParamsType): ColumnDe
           return <CellRenderer {...agGridParams} />;
         }
 
-        return getValue();
+        const rawValue = getValue();
+
+        if (Array.isArray(rawValue)) return rawValue.join(', ');
+        if (rawValue != null && typeof rawValue === 'object') return '';
+
+        return rawValue;
       };
     } else if (tanColumn.valueFormatter && typeof tanColumn.valueFormatter === 'function') {
       tanStackColumn.cell = ({ getValue, row, column }: any) => {
