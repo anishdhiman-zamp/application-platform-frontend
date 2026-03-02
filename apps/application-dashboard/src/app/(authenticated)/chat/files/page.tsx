@@ -1,11 +1,10 @@
 'use client';
 
-import { useSearchParams } from 'next/navigation';
 import FilesPageContent from '@/modules/pace/components/files/FilesPageContent';
+import { useSyncedUrlParam } from '@/modules/pace/hooks/useSyncedSearchParam';
 
 const FilesPage = () => {
-  const searchParams = useSearchParams();
-  const filePath = searchParams?.get('f') ?? null;
+  const filePath = useSyncedUrlParam('f');
 
   return <FilesPageContent filePath={filePath} />;
 };

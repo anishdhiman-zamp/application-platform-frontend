@@ -8,8 +8,10 @@ import {
   getTabFallbackPath,
   getTabTypeConfig,
   isOnSameBasePath,
+  preserveSidebarParam,
 } from 'modules/pace/components/dynamic-tabs/tab-registry';
-import { useRouter, useSearchParams } from 'next/navigation';
+import { useRouter } from 'next/navigation';
+import { useSyncedSearchParams } from '@/modules/pace/hooks/useSyncedSearchParam';
 import { usePaceContext } from '@/modules/pace/pace.context';
 import { DynamicTab, DynamicTabType, ROUTE_KIND, TAB_TYPE } from '@/modules/pace/pace.types';
 
@@ -40,7 +42,7 @@ export const useScopedTabs = (config: UseScopedTabsConfig = {}): UseScopedTabsRe
   const { type = TAB_TYPE.FILE, onTabClose, onTabUpdate, onFolderMove } = config;
 
   const router = useRouter();
-  const searchParams = useSearchParams();
+  const searchParams = useSyncedSearchParams();
   const tabConfig = getTabTypeConfig(type);
 
   const currentUrlParam = useMemo(() => {
@@ -154,10 +156,10 @@ export const useScopedTabs = (config: UseScopedTabsConfig = {}): UseScopedTabsRe
         });
 
         const fallbackPath = getTabFallbackPath(closingTab.type);
-        const newPath = hasRemainingItems && target ? target.path : fallbackPath;
+        const targetPath = hasRemainingItems && target ? preserveSidebarParam(target.path) : fallbackPath;
 
         setActiveTabId(target?.id ?? null);
-        window.history.pushState({ tabId: target?.id ?? null, tabType: type }, '', newPath);
+        window.history.pushState({ tabId: target?.id ?? null, tabType: type }, '', targetPath);
       }
     },
     [tabs, activeTabId, closeDynamicTab, onTabClose, setActiveTabId, type],
@@ -189,10 +191,10 @@ export const useScopedTabs = (config: UseScopedTabsConfig = {}): UseScopedTabsRe
         });
 
         const fallbackPath = getTabFallbackPath(activeTabToClose.type);
-        const newPath = hasRemainingItems && target ? target.path : fallbackPath;
+        const targetPath = hasRemainingItems && target ? preserveSidebarParam(target.path) : fallbackPath;
 
         setActiveTabId(target?.id ?? null);
-        window.history.pushState({ tabId: target?.id ?? null, tabType: type }, '', newPath);
+        window.history.pushState({ tabId: target?.id ?? null, tabType: type }, '', targetPath);
       }
     },
     [tabs, activeTabId, closeDynamicTab, onTabClose, setActiveTabId, type],

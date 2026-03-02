@@ -63,6 +63,7 @@ export interface ChatConfig extends Omit<UseSSEOptions, 'url' | 'onMessage' | 'a
 export const useChat = (config: ChatConfig) => {
   const dispatch = useDispatch();
   const [messages, setMessages] = useState<ChatMessage[]>([]);
+  const messagesRef = useRef<ChatMessage[]>(messages);
   const [sendMessageMutation, { isLoading: isSendingMessage, error: sendMessageError }] = useSendMessageMutation();
   const [sendMessageV2Mutation, { isLoading: isSendingMessageV2, error: sendMessageV2Error }] =
     useSendMessageV2Mutation();
@@ -82,6 +83,10 @@ export const useChat = (config: ChatConfig) => {
 
   // Track if conversation was created in this session (to skip fetching history for newly created conversations)
   const isNewlyCreatedConversationRef = useRef<string | null>(null);
+
+  useEffect(() => {
+    messagesRef.current = messages;
+  }, [messages]);
 
   const isStreaming = useMemo(() => {
     return config.enableStreaming ? (streamingState?.is_active ?? false) : false;
@@ -624,9 +629,7 @@ export const useChat = (config: ChatConfig) => {
         throw new Error('Conversation ID is required to send messages');
       }
 
-      // Store the message count before adding the optimistic message
-      // to enable rollback on error. Initialize to -1 to detect if assignment failed.
-      let previousMessageCount = -1;
+      const previousMessageCount = messagesRef.current.length;
 
       if (messagePayload?.message_content?.file_references?.length) {
         const messageWithFileReferences: ChatMessage = {
@@ -647,15 +650,9 @@ export const useChat = (config: ChatConfig) => {
           },
         };
 
-        setMessages((prev) => {
-          previousMessageCount = prev.length;
-          return [...prev, messageWithFileReferences];
-        });
+        setMessages((prev) => [...prev, messageWithFileReferences]);
       } else {
-        setMessages((prev) => {
-          previousMessageCount = prev.length;
-          return [...prev, messagePayload];
-        });
+        setMessages((prev) => [...prev, messagePayload]);
       }
 
       try {
@@ -672,9 +669,7 @@ export const useChat = (config: ChatConfig) => {
 
         return response;
       } catch (error) {
-        // Remove the optimistic message on error by restoring to previous state
-        // If previousMessageCount is still -1, remove the last message as fallback
-        setMessages((prev) => (previousMessageCount >= 0 ? prev.slice(0, previousMessageCount) : prev.slice(0, -1)));
+        setMessages((prev) => prev.slice(0, previousMessageCount));
         captureException(error);
         throw new Error('Failed to send message. Please try again.');
       }

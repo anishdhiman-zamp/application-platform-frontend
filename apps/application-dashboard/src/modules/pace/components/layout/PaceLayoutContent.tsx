@@ -14,7 +14,7 @@ const PaceLayoutContentInner: FC<PaceLayoutContentProps> = ({ children }) => {
   const { uploadState, cancelUpload } = useFileUploadContext();
 
   return (
-    <div className='bg-BG_GRAY_1 flex h-full w-full overflow-hidden'>
+    <div className='bg-BG_GRAY_1 flex h-full w-full overflow-hidden overscroll-none'>
       <ChatSidebar />
       <div className='flex min-h-0 flex-1 flex-col overflow-hidden'>
         <PaceNavbar />

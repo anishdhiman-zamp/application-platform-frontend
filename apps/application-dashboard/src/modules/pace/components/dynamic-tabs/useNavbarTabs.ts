@@ -2,8 +2,12 @@
 
 import React, { useCallback, useEffect, useMemo } from 'react';
 import { getNextNavigationTarget, NAVIGATION_STRATEGY } from '@zamp-platform/utils';
-import { getTabFallbackPath, TAB_TYPE_CONFIG } from 'modules/pace/components/dynamic-tabs/tab-registry';
-import { usePathname, useSearchParams } from 'next/navigation';
+import {
+  getTabFallbackPath,
+  preserveSidebarParam,
+  TAB_TYPE_CONFIG,
+} from 'modules/pace/components/dynamic-tabs/tab-registry';
+import { useSyncedPathname, useSyncedSearchParams } from '@/modules/pace/hooks/useSyncedSearchParam';
 import { usePaceContext } from '@/modules/pace/pace.context';
 import { DynamicTab, ROUTE_KIND } from '@/modules/pace/pace.types';
 
@@ -11,14 +15,18 @@ interface UseNavbarTabsReturn {
   tabs: DynamicTab[];
   isHydrated: boolean;
   closeTab: (e: React.MouseEvent, id: string) => void;
+  closeOtherTabs: (id: string) => void;
+  closeTabsToRight: (id: string) => void;
+  closeAllTabs: () => void;
   reorderTabs: (newOrder: string[]) => void;
   isTabActive: (tab: DynamicTab) => boolean;
   isOnAnyDynamicTab: () => boolean;
+  getTabIndex: (id: string) => number;
 }
 
 export const useNavbarTabs = (): UseNavbarTabsReturn => {
-  const pathname = usePathname();
-  const searchParams = useSearchParams();
+  const pathname = useSyncedPathname();
+  const searchParams = useSyncedSearchParams();
 
   const {
     dynamicTabs: tabs,
@@ -97,14 +105,79 @@ export const useNavbarTabs = (): UseNavbarTabsReturn => {
         });
 
         const fallbackPath = getTabFallbackPath(closingTab.type);
-        const newPath = hasRemainingItems && target ? target.path : fallbackPath;
+        const targetPath = hasRemainingItems && target ? preserveSidebarParam(target.path) : fallbackPath;
 
         setActiveTabId(target?.id ?? null);
-        window.history.pushState({ tabId: target?.id ?? null, tabType: closingTab.type }, '', newPath);
+        window.history.pushState({ tabId: target?.id ?? null, tabType: closingTab.type }, '', targetPath);
       }
     },
     [tabs, activeTabId, closeDynamicTab, setActiveTabId],
   );
+
+  const closeOtherTabs = useCallback(
+    (id: string) => {
+      const tabToKeep = tabs.find((tab) => tab.id === id);
+
+      if (!tabToKeep) return;
+
+      const tabsToClose = tabs.filter((tab) => tab.id !== id);
+
+      tabsToClose.forEach((tab) => {
+        closeDynamicTab(tab.id);
+      });
+
+      if (activeTabId !== id) {
+        setActiveTabId(id);
+        window.history.pushState({ tabId: id, tabType: tabToKeep.type }, '', preserveSidebarParam(tabToKeep.path));
+      }
+    },
+    [tabs, activeTabId, closeDynamicTab, setActiveTabId],
+  );
+
+  const closeTabsToRight = useCallback(
+    (id: string) => {
+      const tabIndex = tabs.findIndex((tab) => tab.id === id);
+
+      if (tabIndex === -1) return;
+
+      const tabsToClose = tabs.slice(tabIndex + 1);
+
+      tabsToClose.forEach((tab) => {
+        closeDynamicTab(tab.id);
+      });
+
+      const activeTab = tabs.find((tab) => tab.id === activeTabId);
+
+      if (activeTab) {
+        const activeTabIndex = tabs.findIndex((tab) => tab.id === activeTabId);
+
+        if (activeTabIndex > tabIndex) {
+          const newActiveTab = tabs[tabIndex];
+
+          setActiveTabId(newActiveTab.id);
+          window.history.pushState(
+            { tabId: newActiveTab.id, tabType: newActiveTab.type },
+            '',
+            preserveSidebarParam(newActiveTab.path),
+          );
+        }
+      }
+    },
+    [tabs, activeTabId, closeDynamicTab, setActiveTabId],
+  );
+
+  const closeAllTabs = useCallback(() => {
+    const firstTab = tabs[0];
+
+    tabs.forEach((tab) => {
+      closeDynamicTab(tab.id);
+    });
+
+    const fallbackPath = firstTab ? getTabFallbackPath(firstTab.type) : preserveSidebarParam('/');
+
+    setActiveTabId(null);
+    window.history.pushState({ tabId: null, tabType: null }, '', fallbackPath);
+  }, [tabs, closeDynamicTab, setActiveTabId]);
 
   const reorderTabs = useCallback(
     (newOrder: string[]) => {
@@ -113,12 +186,23 @@ export const useNavbarTabs = (): UseNavbarTabsReturn => {
     [reorderDynamicTabs],
   );
 
+  const getTabIndex = useCallback(
+    (id: string) => {
+      return tabs.findIndex((tab) => tab.id === id);
+    },
+    [tabs],
+  );
+
   return {
     tabs,
     isHydrated,
     closeTab,
+    closeOtherTabs,
+    closeTabsToRight,
+    closeAllTabs,
     reorderTabs,
     isTabActive,
     isOnAnyDynamicTab,
+    getTabIndex,
   };
 };

@@ -72,7 +72,7 @@ export const useChatSidebarState = ({ initialConversationId }: UseChatSidebarSta
         setChatKey((prev) => prev + 1);
       }
     }
-  }, [initialConversationId]);
+  }, [initialConversationId, setIsPaceSidebarOpen]);
 
   return {
     isPaceSidebarOpen,

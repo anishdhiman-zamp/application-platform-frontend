@@ -1,8 +1,9 @@
 'use client';
 
-import { memo, useRef } from 'react';
+import { memo, useEffect, useRef } from 'react';
 import { Crepe } from '@milkdown/crepe';
-import { Milkdown, MilkdownProvider, useEditor } from '@milkdown/react';
+import { Milkdown, MilkdownProvider, useEditor, useInstance } from '@milkdown/react';
+import { replaceAll } from '@milkdown/utils';
 import { cn } from '@zamp-platform/ui/utils';
 import '@milkdown/crepe/theme/common/style.css';
 import '@milkdown/crepe/theme/frame.css';
@@ -14,30 +15,41 @@ interface MilkdownEditorProps {
   className?: string;
 }
 
-interface CrepeEditorProps {
-  defaultValue: string;
-  onChange?: (value: string) => void;
-}
-
-const CrepeEditor = ({ defaultValue, onChange }: CrepeEditorProps) => {
+const CrepeEditor = ({ content, onChange }: { content: string; onChange?: (value: string) => void }) => {
   const onChangeRef = useRef(onChange);
+  const editorContentRef = useRef(content);
 
   onChangeRef.current = onChange;
 
   useEditor((root) => {
     const crepe = new Crepe({
       root,
-      defaultValue,
+      defaultValue: content,
     });
 
     crepe.on((listener) => {
       listener.markdownUpdated((_, markdown) => {
+        editorContentRef.current = markdown;
         onChangeRef.current?.(markdown);
       });
     });
 
     return crepe;
   }, []);
+
+  const [loading, getInstance] = useInstance();
+
+  useEffect(() => {
+    if (loading) return;
+    if (content === editorContentRef.current) return;
+
+    const editor = getInstance();
+
+    if (editor) {
+      editorContentRef.current = content;
+      editor.action(replaceAll(content));
+    }
+  }, [content, loading, getInstance]);
 
   return <Milkdown />;
 };
@@ -46,7 +58,7 @@ const MilkdownEditor = ({ content, onChange, className = '' }: MilkdownEditorPro
   return (
     <div className={cn('milkdown-editor-wrapper animate-opacity h-full w-full overflow-auto', className)}>
       <MilkdownProvider>
-        <CrepeEditor defaultValue={content} onChange={onChange} />
+        <CrepeEditor content={content} onChange={onChange} />
       </MilkdownProvider>
     </div>
   );

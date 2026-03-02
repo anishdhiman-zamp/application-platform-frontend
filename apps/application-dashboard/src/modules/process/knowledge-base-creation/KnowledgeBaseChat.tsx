@@ -1,5 +1,5 @@
 'use client';
-import { FC, useEffect, useMemo, useRef, useState } from 'react';
+import { FC, useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { useSelector } from 'react-redux';
 import {
   AnnotationType,
@@ -11,6 +11,7 @@ import {
   DisplayLayerActionType,
   DropOverlay,
   LocationType,
+  MarkdownBlockType,
   MessageContainer,
   OutputFilesBlockType,
   PlainTextBlockType,
@@ -24,7 +25,10 @@ import { ArrowDownIcon, Button } from '@zamp-platform/ui';
 import { cn } from '@zamp-platform/ui/utils';
 import { CirclePlus, EllipsisVertical } from 'lucide-react';
 import ProcessInProcessBanner from 'modules/process/knowledge-base-creation/ProcessInProcessBanner';
-import { SOP_CREATION_FILENAME } from 'modules/process/knowledge-base-creation/sop-creation.constants';
+import {
+  SOP_CREATION_FILENAME,
+  SOP_FILE_PATH_REGEX,
+} from 'modules/process/knowledge-base-creation/sop-creation.constants';
 import { API_ENDPOINTS } from '@/apis/apiEndpoint.constants';
 import { useLazyGetOpenFeedbackQuery } from '@/apis/feedback';
 import SkeletonElement from '@/components/skeletons/SkeletonElement';
@@ -34,6 +38,7 @@ import NewPaceAvatar from '@/modules/chatbot/NewPaceAvatar';
 import StopProcessingFeedback from '@/modules/chatbot/StopProcessingFeedback';
 import ChatMessagesSkeleton from '@/modules/pace/components/loaders/ChatMessagesSkeleton';
 import { useChatScroll } from '@/modules/pace/hooks/useChatScroll';
+import { useFileDownload } from '@/modules/pace/hooks/useFileDownload';
 import { RootState } from '@/store';
 import { ProcessStatus } from '@/types/api/processApi.types';
 import { MapAny } from '@/types/commonTypes';
@@ -50,7 +55,8 @@ interface KnowledgeBaseChatProps {
   isDraftProcess?: boolean;
   processName?: string;
   showDefaultMessage?: boolean;
-  onCreatorSopFileFound?: (filename: string) => void;
+  onOutputSopFileFound?: (filename: string) => void;
+  onMarkdownSopFileFound?: (filename: string) => void;
   streamingEnabled?: boolean;
 }
 
@@ -65,7 +71,8 @@ const KnowledgeBaseChat: FC<KnowledgeBaseChatProps> = ({
   isDraftProcess,
   processName,
   showDefaultMessage,
-  onCreatorSopFileFound,
+  onOutputSopFileFound,
+  onMarkdownSopFileFound,
   streamingEnabled = false,
 }) => {
   const fileDropHandlerRef = useRef<((files: FileList) => void) | null>(null);
@@ -81,6 +88,7 @@ const KnowledgeBaseChat: FC<KnowledgeBaseChatProps> = ({
   }>();
 
   const [getOpenFeedback] = useLazyGetOpenFeedbackQuery();
+  const { downloadFile } = useFileDownload();
 
   const defaultMessageObject = {
     resource_type: ResourceType.PROCESS,
@@ -188,6 +196,13 @@ const KnowledgeBaseChat: FC<KnowledgeBaseChatProps> = ({
     setChatInputKey((prev) => prev + 1);
   };
 
+  const handleFileOpen = useCallback(
+    (path: string, name: string) => {
+      downloadFile({ path, fileName: name });
+    },
+    [downloadFile],
+  );
+
   useEffect(() => {
     if (chat?.conversationId) {
       setConversationId?.(chat?.conversationId);
@@ -212,7 +227,7 @@ const KnowledgeBaseChat: FC<KnowledgeBaseChatProps> = ({
 
   // Check for creator-sop.md file in the latest assistant message with output files
   useEffect(() => {
-    if (!chat?.messages?.length || !onCreatorSopFileFound || !conversationId) return;
+    if (!chat?.messages?.length || !onOutputSopFileFound || !conversationId || !onMarkdownSopFileFound) return;
 
     // Find the latest assistant message that has an output files block with creator-sop.md
     for (let i = chat.messages.length - 1; i >= 0; i--) {
@@ -228,21 +243,40 @@ const KnowledgeBaseChat: FC<KnowledgeBaseChatProps> = ({
         (element): element is OutputFilesBlockType => element.type === BLOCK_TYPE.OUTPUT_FILES,
       );
 
+      const markdownBlocks = elements.filter(
+        (element): element is MarkdownBlockType => element.type === BLOCK_TYPE.MARKDOWN,
+      );
+
+      const lastMarkdownBlock = markdownBlocks[markdownBlocks.length - 1];
+
+      if (lastMarkdownBlock?.payload?.text) {
+        let match = lastMarkdownBlock.payload.text.match(SOP_FILE_PATH_REGEX.MARKDOWN_LINK);
+
+        if (!match) {
+          match = lastMarkdownBlock.payload.text.match(SOP_FILE_PATH_REGEX.BACKTICK);
+        }
+
+        if (match && match[1].includes(SOP_CREATION_FILENAME)) {
+          onMarkdownSopFileFound(match[1]);
+          break;
+        }
+      }
+
       if (!outputFilesBlock?.payload?.output_files?.length) continue;
 
-      const creatorSopFile = outputFilesBlock.payload.output_files.find(
+      const outputSopFile = outputFilesBlock.payload.output_files.find(
         (file) => file.filename === SOP_CREATION_FILENAME,
       );
 
-      if (creatorSopFile) {
-        onCreatorSopFileFound(creatorSopFile.filename);
+      if (outputSopFile) {
+        onOutputSopFileFound(outputSopFile.filename);
         break;
       }
     }
-  }, [chat?.messages, onCreatorSopFileFound, conversationId]);
+  }, [chat?.messages, onOutputSopFileFound, onMarkdownSopFileFound, conversationId]);
 
   return (
-    <ChatActionsProvider>
+    <ChatActionsProvider onFileOpen={handleFileOpen}>
       <div className='relative flex h-full w-full flex-col' {...dropZoneProps}>
         {status !== ProcessStatus.BUILDING && <DropOverlay isVisible={isDragOver} className='absolute h-full w-full' />}
         <div

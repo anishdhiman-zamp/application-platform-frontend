@@ -1,9 +1,10 @@
 'use client';
 
 import { memo, useCallback, useState } from 'react';
-import { toast } from '@zamp-platform/ui';
+import { captureException } from '@sentry/browser';
 import UnsupportedFileView from 'modules/pace/components/file-viewer/viewers/UnsupportedFileView';
 import dynamic from 'next/dynamic';
+import { toast } from 'sonner';
 import ImageLoader from '@/components/common/loader/ImageLoader';
 import { ZAMP_LOGO_LOADER_SVG } from '@/constants/icons';
 import FileNotFoundError from '@/modules/pace/components/file-viewer/FileNotFoundError';
@@ -41,6 +42,7 @@ interface FileViewerContentProps {
   fileName: string;
   fileCategory: FileCategory;
   content: string | null;
+  mediaUrl: string | null;
   isLoading: boolean;
   isEditable: boolean;
   fileExtension: string;
@@ -57,6 +59,7 @@ const FileViewerContent = memo(
     fileName,
     fileCategory,
     content,
+    mediaUrl,
     isLoading,
     isEditable,
     fileExtension,
@@ -66,7 +69,8 @@ const FileViewerContent = memo(
     markdownViewMode = 'milkdown',
     htmlViewMode = 'preview',
   }: FileViewerContentProps) => {
-    const mediaUrl = getMediaUrl(filePath);
+    const fallbackMediaUrl = getMediaUrl(filePath);
+    const effectiveMediaUrl = mediaUrl || fallbackMediaUrl;
 
     if (isLoading && isEditable) {
       return <ImageLoader imageSrc={ZAMP_LOGO_LOADER_SVG} width={140} height={140} />;
@@ -74,38 +78,46 @@ const FileViewerContent = memo(
 
     switch (fileCategory) {
       case FILE_CATEGORY.IMAGE:
-        return <ImageViewer src={mediaUrl} alt={fileName} fileName={fileName} onClose={onClose} />;
+        return <ImageViewer src={effectiveMediaUrl} alt={fileName} fileName={fileName} onClose={onClose} />;
 
       case FILE_CATEGORY.AUDIO:
-        return <AudioViewer src={mediaUrl} fileName={fileName} isActive={isActive} onClose={onClose} />;
+        return <AudioViewer src={effectiveMediaUrl} fileName={fileName} isActive={isActive} onClose={onClose} />;
 
       case FILE_CATEGORY.VIDEO:
-        return <VideoViewer src={mediaUrl} fileName={fileName} isActive={isActive} onClose={onClose} />;
+        return <VideoViewer src={effectiveMediaUrl} fileName={fileName} isActive={isActive} onClose={onClose} />;
 
       case FILE_CATEGORY.PDF:
-        return <PdfViewer src={mediaUrl} fileName={fileName} onClose={onClose} />;
+        return <PdfViewer key={effectiveMediaUrl} src={effectiveMediaUrl} fileName={fileName} onClose={onClose} />;
 
       case FILE_CATEGORY.MARKDOWN:
-        if (markdownViewMode === 'raw') {
-          return <MonacoCodeEditor content={content || ''} language='markdown' onChange={onContentChange} />;
+        if (content === null) {
+          return <ImageLoader imageSrc={ZAMP_LOGO_LOADER_SVG} width={140} height={140} />;
         }
 
-        return <MilkdownEditor content={content || ''} onChange={onContentChange} />;
+        if (markdownViewMode === 'raw') {
+          return <MonacoCodeEditor content={content} language='markdown' onChange={onContentChange} />;
+        }
+
+        return <MilkdownEditor content={content} onChange={onContentChange} />;
 
       case FILE_CATEGORY.HTML:
-        if (htmlViewMode === 'code') {
-          return <MonacoCodeEditor content={content || ''} language='html' onChange={onContentChange} />;
+        if (content === null) {
+          return <ImageLoader imageSrc={ZAMP_LOGO_LOADER_SVG} width={140} height={140} />;
         }
 
-        return <HtmlPreviewViewer content={content || ''} />;
+        if (htmlViewMode === 'code') {
+          return <MonacoCodeEditor content={content} language='html' onChange={onContentChange} />;
+        }
+
+        return <HtmlPreviewViewer content={content} />;
 
       case FILE_CATEGORY.CODE:
+        if (content === null) {
+          return <ImageLoader imageSrc={ZAMP_LOGO_LOADER_SVG} width={140} height={140} />;
+        }
+
         return (
-          <MonacoCodeEditor
-            content={content || ''}
-            language={getMonacoLanguage(fileExtension)}
-            onChange={onContentChange}
-          />
+          <MonacoCodeEditor content={content} language={getMonacoLanguage(fileExtension)} onChange={onContentChange} />
         );
 
       case FILE_CATEGORY.UNKNOWN:
@@ -127,8 +139,14 @@ const FileViewerTab = memo(({ filePath, isActive, onCloseTab }: FileViewerTabPro
   const [markdownViewMode, setMarkdownViewMode] = useState<MarkdownViewMode>('milkdown');
   const [htmlViewMode, setHtmlViewMode] = useState<HtmlViewMode>('preview');
 
-  const handleSaveError = useCallback(() => {
+  const handleSaveError = useCallback((error: unknown) => {
+    captureException(error);
     toast.error(FILE_TOAST_MESSAGES.FAILED_TO_SAVE_FILE);
+  }, []);
+
+  const handleLoadError = useCallback((error: unknown) => {
+    captureException(error);
+    toast.error(FILE_TOAST_MESSAGES.FAILED_TO_LOAD_FILE);
   }, []);
 
   const handleCloseTab = useCallback(
@@ -140,11 +158,23 @@ const FileViewerTab = memo(({ filePath, isActive, onCloseTab }: FileViewerTabPro
     [onCloseTab, filePath],
   );
 
-  const { content, isLoading, isError, fileCategory, fileExtension, isEditable, updateContent, isSaving, lastSavedAt } =
-    useFileViewer({
-      filePath,
-      onSaveError: handleSaveError,
-    });
+  const {
+    content,
+    isLoading,
+    isError,
+    fileCategory,
+    fileExtension,
+    isEditable,
+    updateContent,
+    isSaving,
+    lastSavedAt,
+    mediaUrl,
+  } = useFileViewer({
+    filePath,
+    isActive,
+    onSaveError: handleSaveError,
+    onLoadError: handleLoadError,
+  });
 
   const fileName = filePath.split('/').pop() || filePath;
   const isMarkdown = fileCategory === FILE_CATEGORY.MARKDOWN;
@@ -174,6 +204,7 @@ const FileViewerTab = memo(({ filePath, isActive, onCloseTab }: FileViewerTabPro
           fileName={fileName}
           fileCategory={fileCategory}
           content={content}
+          mediaUrl={mediaUrl}
           isLoading={isLoading}
           isEditable={isEditable}
           fileExtension={fileExtension}
