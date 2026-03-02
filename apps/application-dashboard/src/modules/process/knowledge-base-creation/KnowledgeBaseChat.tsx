@@ -25,7 +25,10 @@ import { ArrowDownIcon, Button } from '@zamp-platform/ui';
 import { cn } from '@zamp-platform/ui/utils';
 import { CirclePlus, EllipsisVertical } from 'lucide-react';
 import ProcessInProcessBanner from 'modules/process/knowledge-base-creation/ProcessInProcessBanner';
-import { SOP_CREATION_FILENAME } from 'modules/process/knowledge-base-creation/sop-creation.constants';
+import {
+  SOP_CREATION_FILENAME,
+  SOP_FILE_PATH_REGEX,
+} from 'modules/process/knowledge-base-creation/sop-creation.constants';
 import { API_ENDPOINTS } from '@/apis/apiEndpoint.constants';
 import { useLazyGetOpenFeedbackQuery } from '@/apis/feedback';
 import SkeletonElement from '@/components/skeletons/SkeletonElement';
@@ -240,13 +243,18 @@ const KnowledgeBaseChat: FC<KnowledgeBaseChatProps> = ({
         (element): element is OutputFilesBlockType => element.type === BLOCK_TYPE.OUTPUT_FILES,
       );
 
-      const markdownBlock = elements.find(
+      const markdownBlocks = elements.filter(
         (element): element is MarkdownBlockType => element.type === BLOCK_TYPE.MARKDOWN,
       );
 
-      if (markdownBlock?.payload?.text) {
-        const pathRegex = /`(\/[^`]*\/current-sop\.md)`/;
-        const match = markdownBlock.payload.text.match(pathRegex);
+      const lastMarkdownBlock = markdownBlocks[markdownBlocks.length - 1];
+
+      if (lastMarkdownBlock?.payload?.text) {
+        let match = lastMarkdownBlock.payload.text.match(SOP_FILE_PATH_REGEX.MARKDOWN_LINK);
+
+        if (!match) {
+          match = lastMarkdownBlock.payload.text.match(SOP_FILE_PATH_REGEX.BACKTICK);
+        }
 
         if (match && match[1].includes(SOP_CREATION_FILENAME)) {
           onMarkdownSopFileFound(match[1]);
