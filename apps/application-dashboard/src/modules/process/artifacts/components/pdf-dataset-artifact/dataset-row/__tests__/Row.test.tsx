@@ -1,5 +1,7 @@
 import React, { type RefObject } from 'react';
 import { fireEvent, render, screen } from '@testing-library/react';
+import type { ColumnDef } from '@/components/common/agGridTable/AgGridTable';
+import { FILTER_TYPES } from '@/components/filter/filter.types';
 
 // Mock dependencies before importing Row
 jest.mock('next/navigation', () => ({
@@ -26,7 +28,7 @@ const mockGetFormattedDate = jest.fn((_config, value) => value);
 
 jest.mock('@/modules/data/data.utils', () => ({
   getColumnOrderingVisibilityForCurrentDataset: () => [],
-  getFormattedDate: (...args: unknown[]) => mockGetFormattedDate(...args),
+  getFormattedDate: (config: unknown, value: unknown) => mockGetFormattedDate(config, value),
   getValueFormatter: () => undefined,
 }));
 
@@ -91,7 +93,6 @@ jest.mock(
 );
 
 import Row from 'modules/process/artifacts/components/pdf-dataset-artifact/dataset-row/Row';
-import type { ColumnDef } from '@/components/common/agGridTable/AgGridTable';
 
 // Helper to create default props
 const createDefaultProps = (overrides: Partial<Parameters<typeof Row>[0]> = {}) => {
@@ -358,9 +359,10 @@ describe('Row Component - Flush on Unmount', () => {
         filterConfig: [
           {
             column: 'dateField',
-            type: 'DATE_RANGE', // This triggers getFormattedDate in Row.tsx
+            type: FILTER_TYPES.DATE_RANGE,
             alias: 'Date Field',
             options: [],
+            datatype: 'date',
             metadata: {},
           },
         ],
