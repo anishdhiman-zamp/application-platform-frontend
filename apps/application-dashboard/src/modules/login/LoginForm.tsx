@@ -14,7 +14,7 @@ import {
   LOGIN_GROUPS,
   VALID_SESSION_DETECTED_ERROR_MSG,
 } from 'modules/login/login.constants';
-import { flowHasCodeNodes, flowHasPasswordNodes } from 'modules/login/login.utils';
+import { actionUrlWithOrigin, flowHasCodeNodes, flowHasPasswordNodes } from 'modules/login/login.utils';
 import LoginFooter from 'modules/login/LoginFooter';
 import { OtpVerification } from 'modules/login/OtpVerification';
 import { FlowNode, LoginFlow } from 'types/api/auth.types';
@@ -46,6 +46,15 @@ async function createLoginFlow(apiBaseUrl: string, email: string, method?: strin
   }
 
   return response.json();
+}
+
+function normalizeFlowActionOrigin(flow: LoginFlow, apiBaseUrl: string): LoginFlow {
+  if (!flow?.ui?.action) return flow;
+
+  return {
+    ...flow,
+    ui: { ...flow.ui, action: actionUrlWithOrigin(flow.ui.action, apiBaseUrl) },
+  };
 }
 
 export const LoginForm = () => {
@@ -177,7 +186,7 @@ export const LoginForm = () => {
         setMethodPickerFlow(flow);
         resetLoadingState();
       } else if (hasCode) {
-        setOtpFlow(flow);
+        setOtpFlow(normalizeFlowActionOrigin(flow, apiBaseUrl));
         resetLoadingState();
       } else if (nodes.length === 1 && nodes[0]?.group === LOGIN_GROUPS.OIDC) {
         const logoUrl = nodes[0].attributes.logo_url ?? '';
@@ -271,9 +280,11 @@ export const LoginForm = () => {
       const flow = await createLoginFlow(apiBaseUrl, email);
 
       if (flow && flowHasCodeNodes(flow)) {
-        setOtpFlow(flow);
+        const normalized = normalizeFlowActionOrigin(flow, apiBaseUrl);
 
-        return flow;
+        setOtpFlow(normalized);
+
+        return normalized;
       }
 
       return null;
@@ -291,7 +302,7 @@ export const LoginForm = () => {
       const flow = await createLoginFlow(apiBaseUrl, email, LOGIN_METHODS.CODE);
 
       if (flow && flowHasCodeNodes(flow)) {
-        setOtpFlow(flow);
+        setOtpFlow(normalizeFlowActionOrigin(flow, apiBaseUrl));
         setMethodPickerFlow(null);
       } else {
         setError(LOGIN_FORM_MESSAGES.SEND_CODE_FAILED);

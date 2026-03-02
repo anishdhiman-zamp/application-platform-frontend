@@ -7,9 +7,9 @@ import PaceNavbar from 'modules/pace/components/layout/PaceNavbar';
 import { usePathname } from 'next/navigation';
 import NewPaceIcons from '@/assets/Icons/NewPaceIcons';
 import { ROUTES_PATH } from '@/constants/routeConfig';
+import { useNavbarTabs } from '@/modules/pace/components/dynamic-tabs/useNavbarTabs';
 import UploadProgressToast from '@/modules/pace/components/progress-toast/UploadProgressToast';
 import { FileUploadProvider, useFileUploadContext } from '@/modules/pace/context/FileUploadContext';
-import { useDynamicTabs } from '@/modules/pace/hooks/useDynamicTabs';
 import { usePaceContext } from '@/modules/pace/pace.context';
 
 interface PaceLayoutContentProps {
@@ -19,7 +19,7 @@ interface PaceLayoutContentProps {
 const PaceLayoutContentInner: FC<PaceLayoutContentProps> = ({ children }) => {
   const { isPaceSidebarOpen, setIsPaceSidebarOpen } = usePaceContext();
   const { uploadState, cancelUpload } = useFileUploadContext();
-  const { isOnAnyDynamicTab } = useDynamicTabs();
+  const { isOnAnyDynamicTab } = useNavbarTabs();
   const pathname = usePathname();
 
   const isHideFloatingButton =

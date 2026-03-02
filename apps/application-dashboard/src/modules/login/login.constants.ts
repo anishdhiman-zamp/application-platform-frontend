@@ -4,6 +4,7 @@ export enum LOGIN_GROUPS {
   PASSWORD = 'password',
 }
 
+export const SESSION_ALREADY_AVAILABLE_ERROR = 'session_already_available';
 export const VALID_SESSION_DETECTED_ERROR_MSG = 'A valid session was detected';
 
 export const RESEND_SUCCESS_MESSAGE_IDS = [1040005, 1010014];
@@ -88,7 +89,6 @@ export const CARD_FADE_ZONE = 120;
 
 export const OTP_LENGTH = 6;
 export const RESEND_COOLDOWN_SECONDS = 30;
-export const SESSION_ALREADY_AVAILABLE_ERROR = 'session_already_available';
 
 export const enum OTP_STATUS {
   IDLE = 'idle',

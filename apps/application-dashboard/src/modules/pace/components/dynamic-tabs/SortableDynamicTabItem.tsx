@@ -4,7 +4,7 @@ import { type CSSProperties } from 'react';
 import { useSortable } from '@dnd-kit/sortable';
 import { CSS } from '@dnd-kit/utilities';
 import { cn } from '@zamp-platform/ui/utils';
-import DynamicTabItem from '@/modules/pace/components/layout/DynamicTabItem';
+import DynamicTabItem from 'modules/pace/components/dynamic-tabs/DynamicTabItem';
 import { DynamicTab } from '@/modules/pace/pace.types';
 
 const CLOSE_BUTTON_SELECTOR = '#dynamic-tab-close-button';
