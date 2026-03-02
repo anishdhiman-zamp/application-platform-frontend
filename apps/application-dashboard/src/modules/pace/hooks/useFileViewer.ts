@@ -14,6 +14,7 @@ interface UseFileViewerOptions {
   isActive?: boolean;
   onSaveSuccess?: () => void;
   onSaveError?: (error: unknown) => void;
+  onLoadError?: (error: unknown) => void;
 }
 
 interface UseFileViewerReturn {
@@ -29,7 +30,6 @@ interface UseFileViewerReturn {
   updateContent: (newContent: string) => void;
   isSaving: boolean;
   lastSavedAt: number | null;
-  refetch: () => void;
   mediaUrl: string | null;
 }
 
@@ -38,6 +38,7 @@ export const useFileViewer = ({
   isActive = true,
   onSaveSuccess,
   onSaveError,
+  onLoadError,
 }: UseFileViewerOptions): UseFileViewerReturn => {
   const autoSaveTimerRef = useRef<NodeJS.Timeout | null>(null);
   const isSavingRef = useRef(false);
@@ -100,7 +101,6 @@ export const useFileViewer = ({
       markFileSaved(filePath, result.mtime_ms);
       onSaveSuccess?.();
     } catch (err: unknown) {
-      console.error('Failed to save file:', err);
       onSaveError?.(err);
     } finally {
       isSavingRef.current = false;
@@ -135,29 +135,6 @@ export const useFileViewer = ({
     [filePath, updateFileContent, scheduleAutoSave],
   );
 
-  const refetch = useCallback(() => {
-    if (!filePath) return;
-
-    if (isEditable) {
-      Promise.all([fetchFileMetadata({ path: filePath }).unwrap(), fetchFileContent({ path: filePath }).unwrap()])
-        .then(([metadataResult, contentResult]) => {
-          forceUpdateFileState(filePath, contentResult ?? '', metadataResult.mtime_ms);
-        })
-        .catch((err) => {
-          console.error('Failed to refetch file:', err);
-        });
-    } else {
-      fetchFileMetadata({ path: filePath })
-        .unwrap()
-        .then((metadataResult) => {
-          setMediaMtime(metadataResult.mtime_ms);
-        })
-        .catch((err) => {
-          console.error('Failed to refetch file metadata:', err);
-        });
-    }
-  }, [filePath, isEditable, fetchFileMetadata, fetchFileContent, forceUpdateFileState]);
-
   useEffect(() => {
     const loadFile = async () => {
       if (!filePath) return;
@@ -180,12 +157,12 @@ export const useFileViewer = ({
 
         initFileState(filePath, contentResult ?? '', metadataResult.mtime_ms);
       } catch (err) {
-        console.error('Failed to load file:', err);
+        onLoadError?.(err);
       }
     };
 
     loadFile();
-  }, [filePath, isEditable, fetchFileMetadata, fetchFileContent, getFileState, initFileState]);
+  }, [filePath, isEditable, fetchFileMetadata, fetchFileContent, getFileState, initFileState, onLoadError]);
 
   // Cleanup timer on unmount
   useEffect(() => {
@@ -285,7 +262,6 @@ export const useFileViewer = ({
     updateContent,
     isSaving,
     lastSavedAt: fileState?.mtime_ms ?? null,
-    refetch,
     mediaUrl,
   };
 };

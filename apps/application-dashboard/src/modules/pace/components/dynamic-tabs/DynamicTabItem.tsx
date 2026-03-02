@@ -12,7 +12,7 @@ import { useRouter } from 'next/navigation';
 import TooltipV2 from '@/components/common/TooltipV2';
 import { usePaceContext } from '@/modules/pace/pace.context';
 import { DynamicTab, TAB_TYPE } from '@/modules/pace/pace.types';
-import { SIDE_OPTIONS } from '@/types/commonTypes';
+import { defaultFnType, SIDE_OPTIONS } from '@/types/commonTypes';
 
 export interface DynamicTabItemProps {
   tab: DynamicTab;
@@ -23,7 +23,7 @@ export interface DynamicTabItemProps {
   onClose: (e: React.MouseEvent, id: string) => void;
   onCloseOthers: (id: string) => void;
   onCloseToRight: (id: string) => void;
-  onCloseAll: () => void;
+  onCloseAll: defaultFnType;
   renderIcon?: (tab: DynamicTab) => ReactNode;
 }
 
@@ -101,7 +101,7 @@ const DynamicTabItem = ({
             variant='ghost'
             onClick={handleClick}
             className={cn(
-              'group relative flex h-[30px] w-full min-w-[48px] cursor-pointer items-center justify-start gap-x-2 rounded-[8px] border p-2 transition-all duration-150 ease-in-out',
+              'group relative flex h-[30px] w-full min-w-12 cursor-pointer items-center justify-start gap-x-2 rounded-[8px] border p-2 transition-all duration-150 ease-in-out',
               isActive
                 ? 'border-GRAY_300 text-GRAY_1000 bg-white hover:bg-white'
                 : 'text-GRAY_700 hover:text-GRAY_1000 hover:bg-GRAY_200 border-transparent',

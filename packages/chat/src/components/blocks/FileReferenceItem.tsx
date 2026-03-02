@@ -10,6 +10,7 @@ interface FileReferenceItemProps {
   fileReference: UploadedFileType;
   onRemove?: (fileId: string) => void;
   isLoading?: boolean;
+  className?: string;
 }
 
 const getFileIcon = () => {
@@ -20,7 +21,7 @@ const getFileIcon = () => {
   );
 };
 
-const FileReferenceItem: React.FC<FileReferenceItemProps> = ({ fileReference, onRemove, isLoading }) => {
+const FileReferenceItem: React.FC<FileReferenceItemProps> = ({ fileReference, onRemove, isLoading, className }) => {
   const { onFileOpen } = useChatActions();
 
   const handleClick = () => {
@@ -33,10 +34,11 @@ const FileReferenceItem: React.FC<FileReferenceItemProps> = ({ fileReference, on
   };
 
   return (
-    <div
+    <span
       key={fileReference.path || fileReference.name}
       className={cn(
-        'rounded-2.5 shadow-table-filter-menu group relative flex w-[148px] cursor-pointer items-center gap-2 border border-gray-400 bg-white p-1 pr-3',
+        'rounded-2.5 shadow-table-filter-menu group relative inline-flex w-fit cursor-pointer items-center gap-2 border border-gray-400 bg-white p-1 pr-3',
+        className,
       )}
       onClick={handleClick}
     >
@@ -74,7 +76,7 @@ const FileReferenceItem: React.FC<FileReferenceItemProps> = ({ fileReference, on
           <LoaderCircle size={12} className='animate-spin text-blue-700' />
         </Button>
       )}
-    </div>
+    </span>
   );
 };
 

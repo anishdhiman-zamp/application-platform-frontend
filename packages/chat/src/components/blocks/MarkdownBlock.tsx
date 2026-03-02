@@ -6,7 +6,7 @@ import ReactMarkdown from 'react-markdown';
 import rehypeSlug from 'rehype-slug';
 import remarkGfm from 'remark-gfm';
 
-import FileReferenceItem from './FileReferenceItem';
+import { useChatActions } from '../../context/ChatActionsContext';
 
 const ZAMP_FILE_PROTOCOL = 'zamp-file://';
 
@@ -41,6 +41,15 @@ interface MarkdownBlockProps {
 }
 
 export const MarkdownBlock: React.FC<MarkdownBlockProps> = ({ payload }) => {
+  const { onFileOpen } = useChatActions();
+
+  const handleFileOpen = (filePath: string, fileName: string) => {
+    if (onFileOpen) {
+      const normalizedPath = filePath.startsWith('/home/') ? filePath.slice(6) : filePath;
+      onFileOpen(normalizedPath, fileName);
+    }
+  };
+
   return (
     <div className='prose prose-sm f-13-450 text-gray-1000 max-w-none wrap-break-word' data-testid='markdown-block'>
       <ReactMarkdown
@@ -55,7 +64,14 @@ export const MarkdownBlock: React.FC<MarkdownBlockProps> = ({ payload }) => {
               const filePath = href.slice(ZAMP_FILE_PROTOCOL.length);
               const extractedText = extractTextFromChildren(children);
               const fileName = extractedText || filePath.split('/').pop() || 'File';
-              return <FileReferenceItem fileReference={{ path: filePath, name: fileName }} />;
+              return (
+                <span
+                  onClick={() => handleFileOpen(filePath, fileName)}
+                  className='bg-gray-1000 ml-0.5 inline-flex cursor-pointer items-center rounded-md px-2 py-0.5 text-xs font-medium text-white transition-all duration-150 hover:bg-black hover:shadow-md active:scale-[0.98]'
+                >
+                  {fileName}
+                </span>
+              );
             }
 
             return (

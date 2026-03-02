@@ -25,13 +25,6 @@ const ChatSidebar: FC<ChatSidebarProps> = ({ className }) => {
   const pathname = useSyncedPathname();
   const { setIsPaceSidebarOpen } = usePaceContext();
 
-  // Close sidebar when navigating to /chat page (which has its own full chat interface)
-  useEffect(() => {
-    if (pathname === ROUTES_PATH.CHAT) {
-      setIsPaceSidebarOpen(false);
-    }
-  }, [pathname, setIsPaceSidebarOpen]);
-
   const {
     width: sidebarWidth,
     isResizing,
@@ -56,6 +49,12 @@ const ChatSidebar: FC<ChatSidebarProps> = ({ className }) => {
   const handleCloseWithReset = useCallback(() => {
     handleClose();
   }, [handleClose]);
+
+  useEffect(() => {
+    if (pathname === ROUTES_PATH.CHAT) {
+      setIsPaceSidebarOpen(false);
+    }
+  }, [pathname, setIsPaceSidebarOpen]);
 
   return (
     <AnimatePresence>

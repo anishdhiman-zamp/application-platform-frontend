@@ -1,6 +1,7 @@
 'use client';
 
 import { memo, useCallback, useState } from 'react';
+import { captureException } from '@sentry/browser';
 import UnsupportedFileView from 'modules/pace/components/file-viewer/viewers/UnsupportedFileView';
 import dynamic from 'next/dynamic';
 import { toast } from 'sonner';
@@ -138,8 +139,14 @@ const FileViewerTab = memo(({ filePath, isActive, onCloseTab }: FileViewerTabPro
   const [markdownViewMode, setMarkdownViewMode] = useState<MarkdownViewMode>('milkdown');
   const [htmlViewMode, setHtmlViewMode] = useState<HtmlViewMode>('preview');
 
-  const handleSaveError = useCallback(() => {
+  const handleSaveError = useCallback((error: unknown) => {
+    captureException(error);
     toast.error(FILE_TOAST_MESSAGES.FAILED_TO_SAVE_FILE);
+  }, []);
+
+  const handleLoadError = useCallback((error: unknown) => {
+    captureException(error);
+    toast.error(FILE_TOAST_MESSAGES.FAILED_TO_LOAD_FILE);
   }, []);
 
   const handleCloseTab = useCallback(
@@ -166,6 +173,7 @@ const FileViewerTab = memo(({ filePath, isActive, onCloseTab }: FileViewerTabPro
     filePath,
     isActive,
     onSaveError: handleSaveError,
+    onLoadError: handleLoadError,
   });
 
   const fileName = filePath.split('/').pop() || filePath;
