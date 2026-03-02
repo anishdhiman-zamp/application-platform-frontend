@@ -20,7 +20,7 @@ export const DIRECT_UPLOAD_THRESHOLD_BYTES = 1 * 1024 * 1024; // 1MB
 export const DEFAULT_CHUNK_SIZE = 6 * 1024 * 1024; // 6MB chunk size
 export const PARALLEL_CHUNK_CONCURRENCY = 6; // Upload 6 chunks in parallel
 export const MAX_CHUNK_RETRIES = 3; // Retry failed chunks up to 3 times
-export const MAX_FOLDER_UPLOAD_FILES = 200;
+export const MAX_FOLDER_UPLOAD_FILES = 500;
 
 export const FILE_TOAST_MESSAGES = {
   CANNOT_RENAME_PROTECTED: 'Cannot rename protected folders',
