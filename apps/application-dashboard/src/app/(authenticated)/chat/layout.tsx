@@ -3,8 +3,9 @@
 import type { FC, ReactNode } from 'react';
 import NotFound from '@/app/not-found';
 import ImageLoader from '@/components/common/loader/ImageLoader';
+import { FEATURE_FLAGS } from '@/constants/featureFlags';
 import { ZAMP_LOGO_LOADER_SVG } from '@/constants/icons';
-import { useIsPaceChatEnabled } from '@/hooks/useIsPaceChatEnabled';
+import { useFeatureFlag } from '@/hooks/useFeatureFlag';
 import PaceLayoutContent from '@/modules/pace/components/layout/PaceLayoutContent';
 import { FileViewerProvider } from '@/modules/pace/context/FileViewerContext';
 import useDataPrefetch from '@/modules/pace/hooks/useDataPrefetch';
@@ -15,7 +16,7 @@ interface PaceLayoutProps {
 }
 
 const PaceLayout: FC<PaceLayoutProps> = ({ children }) => {
-  const { isPaceChatEnabled, isLoading } = useIsPaceChatEnabled();
+  const { isEnabled: isPaceChatEnabled, isLoading } = useFeatureFlag(FEATURE_FLAGS.ZAMP_INTERNAL);
 
   useDataPrefetch();
 

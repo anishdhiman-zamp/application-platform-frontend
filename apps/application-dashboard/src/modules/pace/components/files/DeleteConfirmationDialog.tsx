@@ -31,17 +31,19 @@ const DeleteConfirmationDialog = ({
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent size='small' showCloseButton className='w-[400px]' id='delete-file-dialog'>
-        <DialogHeader className='border-none'>
+        <DialogHeader>
           <DialogHeaderTitle>Delete {itemType === 'folder' ? 'Folder' : 'File'}</DialogHeaderTitle>
         </DialogHeader>
-        <DialogBody className='f-14-400 px-5 pt-0 pb-5'>
+        <DialogBody className='f-14-400 p-5'>
           Are you sure you want to delete <span className='font-medium'>{itemName}</span>? This action cannot be undone.
         </DialogBody>
         <DialogFooter className='flex justify-end gap-2.5'>
           <DialogClose asChild>
-            <Button variant='secondary'>Cancel</Button>
+            <Button variant='secondary' size='medium'>
+              Cancel
+            </Button>
           </DialogClose>
-          <Button variant='destructive' onClick={onConfirm} isLoading={isDeleting}>
+          <Button variant='destructive' size='medium' onClick={onConfirm} isLoading={isDeleting} className='w-14'>
             Delete
           </Button>
         </DialogFooter>
