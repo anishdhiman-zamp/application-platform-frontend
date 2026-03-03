@@ -63,8 +63,17 @@ const handleAuthenticatedRoutes = async (request: NextRequest) => {
     return NextResponse.redirect(new URL(ROUTES_PATH.INVALID_SCREEN_SIZE, request.url));
   }
 
-  if (pathname !== ROUTES_PATH.MEMBERSHIP_PENDING && pathname !== ROUTES_PATH.LOGIN) {
+  if (
+    pathname !== ROUTES_PATH.MEMBERSHIP_PENDING &&
+    pathname !== ROUTES_PATH.LOGIN &&
+    pathname !== ROUTES_PATH.ONBOARDING
+  ) {
     const { session, cached } = await getUserSession(request);
+
+    // If user is in onboarding flow, redirect to onboarding page
+    if (session?.onboarding_status && session.onboarding_status !== 'onboarded') {
+      return NextResponse.redirect(new URL(ROUTES_PATH.ONBOARDING, request.url));
+    }
 
     const prevRoute = getServerSideCookie(request, PREV_ROUTE_COOKIE);
 
