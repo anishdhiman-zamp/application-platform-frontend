@@ -101,8 +101,12 @@ export async function getUserSession(
         workspaces: [],
         organization_id: { workspace_id: '', name: '', description: '' },
         user_name: cachedSessionData.user_name ?? '',
+        display_name: cachedSessionData.user_name ?? '',
         last_name: cachedSessionData.last_name ?? '',
         username: cachedSessionData.username ?? '',
+        onboarding_status: null,
+        avatar_type: null,
+        avatar_value: null,
       };
 
       return { session, cached: true };
@@ -150,7 +154,7 @@ export function checkOrgMembership(session: Session | null, pathname: string): b
 
   if (!orgs || !Array.isArray(orgs)) return false;
 
-  return orgs.length === 0 && !pathname.includes(ROUTES_PATH.INVITATIONS);
+  return orgs.length === 0 && !pathname.includes(ROUTES_PATH.INVITATIONS) && !pathname.includes(ROUTES_PATH.ONBOARDING);
 }
 
 /**

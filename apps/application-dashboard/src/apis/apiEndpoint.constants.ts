@@ -12,6 +12,13 @@ export const API_ENDPOINTS = {
   AUTH_INITIATE_LOGOUT_FLOW_GET: `auth/relay/self-service/logout/browser`,
   AUTH_INITIAL_LOGIN_FLOW_BY_EMAIL_POST: `auth/login/flow/create`,
   USER_WHOAMI_GET: 'auth/whoami',
+  USER_CHECK_USERNAME_GET: 'users/check-username',
+
+  // Onboarding
+  ONBOARDING_UPDATE_PROFILE_POST: 'onboarding/update-profile',
+  ONBOARDING_SETUP_ORG_POST: 'onboarding/setup-org',
+  ONBOARDING_WELCOME_POST: 'onboarding/welcome',
+  ONBOARDING_UPLOAD_URL_POST: 'onboarding/upload-url',
   AUTH_BASE_URL_GET: `auth/api-base-url`,
   AUTH_ERROR_DETAILS_GET: `auth/relay/internal/self-service/errors`,
   TEAMS_BY_ORGANIZATION_ID_GET: `organizations/{{organizationId}}/teams`,

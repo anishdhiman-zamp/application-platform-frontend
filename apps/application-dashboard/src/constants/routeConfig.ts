@@ -34,7 +34,9 @@ export const ROUTES_PATH = {
   INTEGRATION_DETAIL: '/settings/integrations/:integrationId',
   SETTINGS_PEOPLE: '/settings/people',
 
-  MACS: '/macs',
+  ONBOARDING: '/onboarding',
+
+  MACS: '/chat',
 
   CHAT: '/chat',
   CHAT_SKILLS: '/chat/skills',

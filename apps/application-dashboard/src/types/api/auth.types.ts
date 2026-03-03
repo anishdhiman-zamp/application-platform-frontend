@@ -105,9 +105,13 @@ export type Session = {
   organization_id: Workspace;
   user_email: string;
   user_name: string;
+  display_name: string;
   last_name: string;
   username: string;
   orgs: Organization[];
+  onboarding_status: string | null;
+  avatar_type: 'seed' | 'url' | null;
+  avatar_value: string | null;
 };
 
 export type loginPayloadType = {
