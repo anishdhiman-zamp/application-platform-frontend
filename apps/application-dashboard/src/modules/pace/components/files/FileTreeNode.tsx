@@ -42,7 +42,7 @@ const FileTreeNode = memo(function FileTreeNode({
   const [createModalType, setCreateModalType] = useState<CreateItemType | null>(null);
 
   const { clipboard, isProtectedRoot, username } = useFileTreeContext();
-  const { uploadingPath } = useFileUploadContext();
+  const { uploadingPaths } = useFileUploadContext();
   const { openTab } = useFileTabs();
 
   const isFolder = node.type === FILE_TYPE.DIRECTORY;
@@ -50,7 +50,7 @@ const FileTreeNode = memo(function FileTreeNode({
   const isSelected = !isFolder && selectedPath === node.path;
   const isProtected = depth === 0 && isProtectedRoot(node.path);
   const isUserPrivateFolder = depth === 0 && node.path === username;
-  const isUploading = uploadingPath === node.path;
+  const isUploading = uploadingPaths.has(node?.path);
 
   const originalNode = originalNodeMap.get(node.path);
   const childrenToRender = originalNode?.children ?? node.children;

@@ -12,12 +12,13 @@ import type {
   InitUploadResponse,
   UploadChunkResponse,
 } from '@/types/api/filesystem.types';
+import { defaultFnType } from '@/types/commonTypes';
 
 export interface UploadCallbacks {
   onProgress?: (loaded: number, total: number) => void;
   onComplete?: (path: string, mtime_ms: number) => void;
   onError?: (error: Error) => void;
-  onCancel?: () => void;
+  onCancel?: defaultFnType;
 }
 
 export interface DirectUploadMutation {
@@ -361,6 +362,86 @@ export const uploadFile = async (
   }
 
   return uploadFileDirectly(file, targetPath, mutations, callbacks, skipInvalidation);
+};
+
+interface ProcessInParallelOptions {
+  continueOnError?: boolean;
+}
+
+export interface ProcessInParallelResult {
+  errors: Error[];
+  totalProcessed: number;
+  totalFailed: number;
+  wasCancelled: boolean;
+}
+
+export const processInParallel = async <T>(
+  items: T[],
+  concurrency: number,
+  processor: (item: T) => Promise<void>,
+  abortSignal?: AbortSignal,
+  options?: ProcessInParallelOptions,
+): Promise<ProcessInParallelResult> => {
+  const { continueOnError = false } = options ?? {};
+  const pending = [...items];
+  const inFlight: Promise<void>[] = [];
+  let hasError = false;
+  let firstError: Error | null = null;
+  const errors: Error[] = [];
+  let totalProcessed = 0;
+
+  const processItem = async (item: T): Promise<void> => {
+    if ((!continueOnError && hasError) || abortSignal?.aborted) return;
+
+    try {
+      await processor(item);
+      totalProcessed++;
+    } catch (error) {
+      if (error instanceof Error && error.message === 'Upload cancelled') return;
+
+      const err = error instanceof Error ? error : new Error('Parallel processing failed');
+
+      errors.push(err);
+
+      if (!continueOnError) {
+        hasError = true;
+        firstError = err;
+        throw error;
+      }
+    }
+  };
+
+  while (pending.length > 0 || inFlight.length > 0) {
+    if ((!continueOnError && hasError) || abortSignal?.aborted) break;
+
+    while (pending.length > 0 && inFlight.length < concurrency) {
+      if ((!continueOnError && hasError) || abortSignal?.aborted) break;
+
+      const item = pending.shift()!;
+      const promise = processItem(item).finally(() => {
+        const index = inFlight.indexOf(promise);
+
+        if (index > -1) inFlight.splice(index, 1);
+      });
+
+      inFlight.push(promise);
+    }
+
+    if (inFlight.length > 0) {
+      await Promise.race(inFlight).catch(() => {});
+    }
+  }
+
+  if (!continueOnError && (firstError || abortSignal?.aborted)) {
+    if (firstError) throw firstError;
+    throw new Error('Upload cancelled');
+  }
+
+  if (inFlight.length > 0) {
+    await Promise.allSettled(inFlight);
+  }
+
+  return { errors, totalProcessed, totalFailed: errors.length, wasCancelled: abortSignal?.aborted ?? false };
 };
 
 /**

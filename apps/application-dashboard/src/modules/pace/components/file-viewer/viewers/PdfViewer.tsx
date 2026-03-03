@@ -8,12 +8,13 @@ import { ChevronDown, ChevronUp, Download, ZoomIn, ZoomOut } from 'lucide-react'
 import ImageLoader from '@/components/common/loader/ImageLoader';
 import { ZAMP_LOGO_LOADER_SVG } from '@/constants/icons';
 import FileNotFoundError from '@/modules/pace/components/file-viewer/FileNotFoundError';
+import { defaultFnType } from '@/types/commonTypes';
 
 interface PdfViewerProps {
   src: string;
   className?: string;
   fileName?: string;
-  onClose?: () => void;
+  onClose?: defaultFnType;
 }
 
 const PdfToolbar = ({ usePDFSlickStore }: { usePDFSlickStore: ReturnType<typeof usePDFSlick>['usePDFSlickStore'] }) => {
@@ -101,6 +102,7 @@ const PdfViewer = ({ src, className = '', fileName, onClose }: PdfViewerProps) =
 
   const { viewerRef, usePDFSlickStore, PDFSlickViewer, isDocumentLoaded, error } = usePDFSlick(src, {
     scaleValue: 'page-fit',
+    annotationEditorMode: -1,
     getDocumentParams: {
       withCredentials: true,
     },
@@ -126,7 +128,7 @@ const PdfViewer = ({ src, className = '', fileName, onClose }: PdfViewerProps) =
   }
 
   return (
-    <div className={cn('pdfSlick bg-BG_GRAY_2 relative h-full w-full', className)}>
+    <div className={cn('pdfSlick bg-BG_GRAY_2 relative h-full w-full select-none', className)}>
       {error && !onClose && <ErrorFallback message={error.message || 'Unknown error'} />}
       {!error && <LoadingIndicator isLoading={isLoading} />}
 

@@ -12,6 +12,7 @@ import FilesEmptyState from '@/modules/pace/components/files/FilesEmptyState';
 import FilesToolbar from '@/modules/pace/components/files/FilesToolbar';
 import FileTree from '@/modules/pace/components/files/FileTree';
 import { useFileUploadContext } from '@/modules/pace/context/FileUploadContext';
+import { defaultFnType } from '@/types/commonTypes';
 
 const SEARCH_DEBOUNCE_MS = 300;
 
@@ -30,8 +31,8 @@ const FilesHierarchy = ({
   onFileDeleted,
   onFileCreated,
 }: FilesHierarchyProps) => {
-  const collapseAllRef = useRef<(() => void) | null>(null);
-  const { uploadFiles, uploadFolder, uploadingItem, clearUploadingItem } = useFileUploadContext();
+  const collapseAllRef = useRef<defaultFnType | null>(null);
+  const { uploadFiles, uploadFolder, uploadingItems, clearUploadingItems } = useFileUploadContext();
 
   const [searchInput, setSearchInput] = useState('');
   const [debouncedSearchQuery, setDebouncedSearchQuery] = useState('');
@@ -48,18 +49,19 @@ const FilesHierarchy = ({
   const filesWithUploading = useMemo(() => {
     const fileList = files?.files ?? [];
 
-    if (!uploadingItem) {
+    if (uploadingItems?.length === 0) {
       return fileList;
     }
 
-    const existsInList = fileList.some((f) => f.path === uploadingItem.path);
+    const existingPaths = new Set(fileList.map((f) => f.path));
+    const newItems = uploadingItems.filter((item) => !existingPaths.has(item.path));
 
-    if (existsInList) {
+    if (newItems.length === 0) {
       return fileList;
     }
 
-    return [...fileList, uploadingItem];
-  }, [files?.files, uploadingItem]);
+    return [...fileList, ...newItems];
+  }, [files?.files, uploadingItems]);
 
   const toggleSortDirection = useCallback(() => {
     setSortDirection((prev) => (prev === SORT_DIRECTION.ASC ? SORT_DIRECTION.DESC : SORT_DIRECTION.ASC));
@@ -106,14 +108,14 @@ const FilesHierarchy = ({
   }, [searchInput]);
 
   useEffect(() => {
-    if (!uploadingItem) return;
+    if (uploadingItems.length === 0) return;
 
-    const existsInList = files?.files?.some((f) => f.path === uploadingItem.path);
+    const allExist = uploadingItems.every((item) => files?.files?.some((f) => f.path === item.path));
 
-    if (existsInList) {
-      clearUploadingItem();
+    if (allExist) {
+      clearUploadingItems();
     }
-  }, [files?.files, uploadingItem, clearUploadingItem]);
+  }, [files?.files, uploadingItems, clearUploadingItems]);
 
   return (
     <div className='bg-BG_GRAY_2 border-GRAY_400 relative flex w-2/5 flex-col border-r'>
