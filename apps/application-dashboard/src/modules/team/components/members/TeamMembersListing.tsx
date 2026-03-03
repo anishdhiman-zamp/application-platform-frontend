@@ -15,12 +15,7 @@ import { cyclicIterator } from '@/utils/common';
 import CommonWrapper from 'components/commonWrapper';
 import { SkeletonTypes } from 'components/commonWrapper/commonWrapper.types';
 
-const TeamMembersListing: FC<TeamMembersListingPropsType> = ({
-  data,
-  isLoadingTeamMembersData,
-  hasPeoplePolicy,
-  search,
-}) => {
+const TeamMembersListing: FC<TeamMembersListingPropsType> = ({ data, isLoadingTeamMembersData, search }) => {
   const { organizationId } = useUserIdentity();
   const teamsRandomColorRef = useRef(cyclicIterator(TEAMS_COLORS));
 
@@ -98,7 +93,6 @@ const TeamMembersListing: FC<TeamMembersListingPropsType> = ({
             row={row}
             teamsData={teamsData ?? []}
             organizationId={organizationId}
-            hasPeoplePolicy={hasPeoplePolicy}
             teamsRandomColorRef={teamsRandomColorRef}
             value={{ user_id: row?.user_id, privilege: row?.privilege, userEmail: row?.email }}
           />

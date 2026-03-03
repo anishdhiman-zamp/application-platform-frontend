@@ -1,14 +1,14 @@
-import { useGetDatasetListingQuery } from '@/apis/dataset';
 import { useGetConversationHistoryQuery, useListSkillsQuery } from '@/apis/pace';
-import { useGetPagesQuery } from '@/apis/pages';
-import { useIsPaceChatEnabled } from '@/hooks/useIsPaceChatEnabled';
-import { ARTIFACTS_PAGE_SIZE } from '@/modules/pace/artifacts/artifacts.constants';
+import { FEATURE_FLAGS } from '@/constants/featureFlags';
+import { useFeatureFlag } from '@/hooks/useFeatureFlag';
 import { ResourceType } from '@/types/api/policies.types';
 import { getFromLocalStorage, LOCAL_STORAGE_KEYS } from '@/utils/localstorage';
 
 const useDataPrefetch = () => {
-  const { isPaceChatEnabled, isLoading } = useIsPaceChatEnabled();
+  const { isEnabled: isPaceChatEnabled, isLoading } = useFeatureFlag(FEATURE_FLAGS.ZAMP_INTERNAL);
   const organizationId = getFromLocalStorage(LOCAL_STORAGE_KEYS.XZAMP_ORGANIZATION_ID) ?? '';
+
+  const shouldSkip = !organizationId || isLoading || !isPaceChatEnabled;
 
   useGetConversationHistoryQuery(
     {
@@ -18,7 +18,7 @@ const useDataPrefetch = () => {
       limit: 20,
     },
     {
-      skip: !organizationId || isLoading || !isPaceChatEnabled,
+      skip: shouldSkip,
       refetchOnMountOrArgChange: false,
     },
   );
@@ -27,20 +27,7 @@ const useDataPrefetch = () => {
     {},
     {
       refetchOnMountOrArgChange: false,
-      skip: !isPaceChatEnabled || isLoading,
-    },
-  );
-
-  useGetPagesQuery(undefined, {
-    refetchOnMountOrArgChange: false,
-    skip: !isPaceChatEnabled || isLoading,
-  });
-
-  useGetDatasetListingQuery(
-    { page: 1, pageSize: ARTIFACTS_PAGE_SIZE },
-    {
-      refetchOnMountOrArgChange: false,
-      skip: !isPaceChatEnabled || isLoading,
+      skip: shouldSkip,
     },
   );
 

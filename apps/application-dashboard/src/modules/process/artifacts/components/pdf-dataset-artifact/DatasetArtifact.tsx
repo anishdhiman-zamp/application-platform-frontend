@@ -9,6 +9,7 @@ import {
   ColDef,
   FillEndEvent,
   type GridApi,
+  type IRowNode,
   IServerSideDatasource,
   IServerSideGetRowsParams,
 } from 'ag-grid-community';
@@ -344,6 +345,33 @@ const DatasetArtifact: FC<DatasetByIdProps> = ({
       });
     }
   };
+
+  const onFlushPendingEdit = useCallback(
+    ({ node, colId, value }: { node: IRowNode; colId: string; value: unknown }) => {
+      const rowId = node.data?.id ?? node.data?._zamp_id;
+
+      if (!rowId || !colId) return;
+
+      const normalizedValue = isValueEmpty(value as string | number | null | undefined) ? null : value;
+      const idColumn = node.data?._zamp_id ? ColumnType._ZAMP_ID : ColumnType.ID;
+
+      // Optimistic update
+      isLocalUpdateRef.current = true;
+      const updatedRow = { ...node.data, [colId]: normalizedValue };
+
+      node.setData(updatedRow);
+      setRowData(updatedRow);
+
+      // Persist
+      updateApi({
+        rowId: rowId as string,
+        field: colId,
+        newValue: normalizedValue as string | number | null,
+        idColumn,
+      });
+    },
+    [updateApi],
+  );
 
   const onFillEnd = (event: FillEndEvent) => {
     const { finalRange } = event;
@@ -764,6 +792,7 @@ const DatasetArtifact: FC<DatasetByIdProps> = ({
               columnConfig={{ enableRowGroup: true, enableValue: true, headerComponent: CustomHeader }}
               totalRows={totalRows}
               onCellEditRequest={onCellEditRequest}
+              onFlushPendingEdit={onFlushPendingEdit}
               onFillEnd={onFillEnd}
               onColumnMoved={(event) => handleColumnMoved(event, id as string)}
               onGridReady={(params) => {

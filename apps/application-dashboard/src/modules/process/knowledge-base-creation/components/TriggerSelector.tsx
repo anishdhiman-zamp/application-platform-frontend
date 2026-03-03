@@ -68,7 +68,7 @@ const TriggerSelector = ({ integrations }: { integrations: IntegrationType[] }) 
         isLoading={isCreatingTriggerSubscription}
         isTriggerSelector
       />
-      {selectedIntegration && (
+      {selectedIntegration && Object.keys(selectedIntegration).length > 0 && (
         <ConnectionModal
           integration={selectedIntegration}
           isOpen={dialogIntent?.type === 'create'}

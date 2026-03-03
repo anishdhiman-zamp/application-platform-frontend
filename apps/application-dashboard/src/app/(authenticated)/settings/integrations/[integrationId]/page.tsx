@@ -1,6 +1,6 @@
 import { notFound } from 'next/navigation';
+import { getIntegrations } from '@/constants/integrations.constants';
 import IntegrationDetailPage from '@/modules/integrations/IntegrationDetail/IntegrationDetailPage';
-import { fetchIntegrations } from '@/modules/integrations/utils/integrations.utils';
 
 interface IntegrationDetailPageProps {
   params: Promise<{ integrationId: string }>;
@@ -8,7 +8,7 @@ interface IntegrationDetailPageProps {
 
 const Page = async ({ params }: IntegrationDetailPageProps) => {
   const { integrationId } = await params;
-  const integrations = await fetchIntegrations();
+  const integrations = getIntegrations();
   const integration = integrations.find((int) => int.id === integrationId);
 
   if (!integration) {

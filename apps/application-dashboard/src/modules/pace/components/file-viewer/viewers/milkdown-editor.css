@@ -1,0 +1,251 @@
+/* Override Crepe CSS variables with product design system */
+.milkdown-editor-wrapper .milkdown {
+  /* Font families - use Inter Variable */
+  --crepe-font-title: 'Inter Variable', system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+  --crepe-font-default: 'Inter Variable', system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+  --crepe-font-code: 'JetBrains Mono', 'Fira Code', Menlo, Monaco, 'Courier New', monospace;
+
+  /* Colors - mapped from product design tokens */
+  --crepe-color-background: #ffffff;
+  --crepe-color-on-background: var(--GRAY_1000, #171717);
+  --crepe-color-surface: var(--GRAY_80, #f7f7f7);
+  --crepe-color-surface-low: var(--GRAY_100, #f2f2f2);
+  --crepe-color-on-surface: var(--GRAY_1000, #171717);
+  --crepe-color-on-surface-variant: var(--GRAY_900, #666666);
+  --crepe-color-outline: var(--GRAY_600, #a8a8a8);
+  --crepe-color-primary: var(--BLUE_700, #2546f5);
+  --crepe-color-secondary: var(--GRAY_200, #ebebeb);
+  --crepe-color-on-secondary: var(--GRAY_1000, #171717);
+  --crepe-color-inverse: var(--GRAY_100, #f2f2f2);
+  --crepe-color-on-inverse: var(--GRAY_1000, #171717);
+  --crepe-color-inline-code: var(--RED_700, #ff1515);
+  --crepe-color-error: var(--RED_700, #ff1515);
+  --crepe-color-hover: var(--GRAY_200, #ebebeb);
+  --crepe-color-selected: var(--BLUE_100, #eaf3ff);
+  --crepe-color-inline-area: var(--GRAY_500, #c9c9c9);
+
+  /* Shadows - softer shadows matching product style */
+  --crepe-shadow-1: 0px 1px 3px 0px rgba(0, 0, 0, 0.08), 0px 1px 2px 0px rgba(0, 0, 0, 0.06);
+  --crepe-shadow-2: 0px 2px 6px 0px rgba(0, 0, 0, 0.1), 0px 1px 2px 0px rgba(0, 0, 0, 0.06);
+}
+
+/* Ensure font inheritance throughout the editor */
+.milkdown-editor-wrapper .milkdown,
+.milkdown-editor-wrapper .editor,
+.milkdown-editor-wrapper .ProseMirror {
+  font-family: var(--crepe-font-default);
+}
+
+
+
+/* Headings use the title font */
+.milkdown-editor-wrapper h1,
+.milkdown-editor-wrapper h2,
+.milkdown-editor-wrapper h3,
+.milkdown-editor-wrapper h4,
+.milkdown-editor-wrapper h5,
+.milkdown-editor-wrapper h6 {
+  font-family: var(--crepe-font-title);
+  color: var(--GRAY_1000, #171717);
+}
+
+/* Body text styling */
+.milkdown-editor-wrapper p,
+.milkdown-editor-wrapper li,
+.milkdown-editor-wrapper td,
+.milkdown-editor-wrapper th {
+  font-family: var(--crepe-font-default);
+  color: var(--GRAY_1000, #171717);
+}
+
+/* Blockquote styling */
+.milkdown-editor-wrapper blockquote {
+  font-family: var(--crepe-font-default);
+  border-left-color: var(--GRAY_400, #ebebeb);
+  color: var(--GRAY_900, #666666);
+}
+
+/* Code blocks */
+.milkdown-editor-wrapper code,
+.milkdown-editor-wrapper pre {
+  font-family: var(--crepe-font-code);
+}
+
+/* Links */
+.milkdown-editor-wrapper a {
+  color: var(--BLUE_700, #2546f5);
+}
+
+.milkdown-editor-wrapper a:hover {
+  color: var(--BLUE_800, #1e0ac8);
+}
+
+/* UI components (toolbar, slash menu, etc.) */
+.milkdown-editor-wrapper milkdown-toolbar,
+.milkdown-editor-wrapper milkdown-slash-menu,
+.milkdown-editor-wrapper milkdown-block-handle,
+.milkdown-editor-wrapper milkdown-link-preview,
+.milkdown-editor-wrapper milkdown-link-edit,
+.milkdown-editor-wrapper milkdown-image-block,
+.milkdown-editor-wrapper milkdown-list-item-block,
+.milkdown-editor-wrapper milkdown-code-block {
+  font-family: var(--crepe-font-default);
+}
+
+/* Text selection toolbar styling */
+.milkdown-editor-wrapper .milkdown-toolbar {
+  background: var(--GRAY_1000, #171717);
+  border-radius: 8px;
+  box-shadow: 0px 4px 12px rgba(0, 0, 0, 0.15);
+  padding: 2px;
+}
+
+.milkdown-editor-wrapper .milkdown-toolbar .toolbar-item {
+  width: 28px;
+  height: 28px;
+  margin: 4px;
+  padding: 4px;
+  border-radius: 4px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.milkdown-editor-wrapper .milkdown-toolbar .toolbar-item:hover {
+  background: var(--GRAY_900, #333333);
+}
+
+.milkdown-editor-wrapper .milkdown-toolbar .toolbar-item:active {
+  background: var(--GRAY_800, #444444);
+}
+
+.milkdown-editor-wrapper .milkdown-toolbar .toolbar-item svg {
+  color: var(--GRAY_300, #d4d4d4);
+  fill: var(--GRAY_300, #d4d4d4);
+}
+
+.milkdown-editor-wrapper .milkdown-toolbar .toolbar-item:hover svg {
+  color: var(--GRAY_100, #f2f2f2);
+  fill: var(--GRAY_100, #f2f2f2);
+}
+
+.milkdown-editor-wrapper .milkdown-toolbar .toolbar-item.active svg {
+  color: var(--BLUE_500, #5b7fff);
+  fill: var(--BLUE_500, #5b7fff);
+}
+
+.milkdown-editor-wrapper .milkdown-toolbar .divider {
+  background: var(--GRAY_800, #444444);
+  height: 20px;
+  margin: 8px 4px;
+}
+
+/* Slash menu (block type dropdown) - styled like shadcn dropdown */
+.milkdown-editor-wrapper .milkdown-slash-menu {
+  background: white;
+  border: 1px solid var(--GRAY_400, #e5e5e5);
+  border-radius: 6px;
+  box-shadow: 0px 4px 6px -1px rgba(0, 0, 0, 0.1), 0px 2px 4px -1px rgba(0, 0, 0, 0.06);
+  padding: 4px;
+  min-width: 180px;
+}
+
+/* Tab group (Text, List, Advanced tabs) */
+.milkdown-editor-wrapper .milkdown-slash-menu .tab-group {
+  border-bottom: 1px solid var(--GRAY_300, #e5e5e5);
+  padding: 4px 4px 0;
+  margin-bottom: 4px;
+}
+
+.milkdown-editor-wrapper .milkdown-slash-menu .tab-group ul {
+  padding: 0;
+  gap: 4px;
+}
+
+.milkdown-editor-wrapper .milkdown-slash-menu .tab-group ul li {
+  font-size: 12px;
+  font-weight: 500;
+  padding: 6px 12px;
+  color: var(--GRAY_700, #666666);
+  border-radius: 4px;
+  margin-bottom: 4px;
+}
+
+.milkdown-editor-wrapper .milkdown-slash-menu .tab-group ul li:hover {
+  background: var(--GRAY_100, #f5f5f5);
+  color: var(--GRAY_900, #171717);
+}
+
+.milkdown-editor-wrapper .milkdown-slash-menu .tab-group ul li.selected {
+  background: var(--GRAY_200, #ebebeb);
+  color: var(--GRAY_1000, #171717);
+}
+
+/* Menu groups container */
+.milkdown-editor-wrapper .milkdown-slash-menu .menu-groups {
+  padding: 0;
+  max-height: 320px;
+}
+
+/* Group header (TEXT, etc.) */
+.milkdown-editor-wrapper .milkdown-slash-menu .menu-groups .menu-group h6 {
+  font-size: 11px;
+  font-weight: 500;
+  padding: 8px 10px 4px;
+  color: var(--GRAY_600, #a3a3a3);
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+}
+
+/* Menu items */
+.milkdown-editor-wrapper .milkdown-slash-menu .menu-groups .menu-group li {
+  min-width: unset;
+  gap: 10px;
+  padding: 8px 10px;
+  border-radius: 4px;
+  margin: 0 4px;
+}
+
+.milkdown-editor-wrapper .milkdown-slash-menu .menu-groups .menu-group li:hover,
+.milkdown-editor-wrapper .milkdown-slash-menu .menu-groups .menu-group li.hover {
+  background: var(--GRAY_100, #f5f5f5);
+}
+
+.milkdown-editor-wrapper .milkdown-slash-menu .menu-groups .menu-group li.active {
+  background: var(--GRAY_200, #ebebeb);
+}
+
+/* Menu item icons */
+.milkdown-editor-wrapper .milkdown-slash-menu .menu-groups .menu-group li svg {
+  width: 18px;
+  height: 18px;
+  color: var(--GRAY_600, #737373);
+  fill: var(--GRAY_600, #737373);
+}
+
+/* Menu item text */
+.milkdown-editor-wrapper .milkdown-slash-menu .menu-groups .menu-group li > span {
+  font-size: 12px;
+  font-weight: 500;
+  color: var(--GRAY_900, #171717);
+}
+
+/* Separator between groups */
+.milkdown-editor-wrapper .milkdown-slash-menu .menu-groups .menu-group + .menu-group::before {
+  background: var(--GRAY_300, #e5e5e5);
+  margin: 4px 14px;
+}
+
+/* Table styling */
+.milkdown-editor-wrapper table {
+  border-color: var(--GRAY_400, #ebebeb);
+}
+
+.milkdown-editor-wrapper th {
+  background-color: var(--GRAY_100, #f2f2f2);
+}
+
+.milkdown-editor-wrapper td,
+.milkdown-editor-wrapper th {
+  border-color: var(--GRAY_400, #ebebeb);
+}

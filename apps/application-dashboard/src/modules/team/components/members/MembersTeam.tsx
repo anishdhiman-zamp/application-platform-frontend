@@ -1,4 +1,4 @@
-import React, { FC, useEffect, useMemo, useRef, useState } from 'react';
+import { FC, useEffect, useMemo, useRef, useState } from 'react';
 import {
   usePostAddTeamToAudienceMutation,
   usePostAddTeamToOrganizationMutation,
@@ -21,14 +21,7 @@ import { KEY_CODES } from '@/components/multiSelectInput/multiSelectInput.types'
 import { toast } from 'components/common/toast/Toast';
 import MultiSelectInput from 'components/multiSelectInput/MultiSelectInput';
 
-const MembersTeam: FC<MembersTeamPropsType> = ({
-  userInfo,
-  organizationId,
-  teamsData,
-  userId,
-  userMappedTeams,
-  hasPeoplePolicy,
-}) => {
+const MembersTeam: FC<MembersTeamPropsType> = ({ userInfo, organizationId, teamsData, userId, userMappedTeams }) => {
   const { isMember } = useUserIdentity();
   const teamsRowRef = useRef<HTMLDivElement>(null);
   const teamsRandomColorRef = useRef(cyclicIterator(TEAMS_COLORS));
@@ -68,8 +61,8 @@ const MembersTeam: FC<MembersTeamPropsType> = ({
   const handleAddTeamToAudience = async (payload: PostAddTeamToAudiencePayload) => {
     postAddTeamToAudience({ organizationId, teamId: payload?.team_id, payload })
       .unwrap()
-      .then((res) => {
-        toast.success(hasPeoplePolicy ? res?.message : `${userInfo?.name} added to ${payload?.team_name}`);
+      .then(() => {
+        toast.success(`${userInfo?.name} added to ${payload?.team_name}`);
       })
       .catch(() => {
         toast.error(`Failed to add ${userInfo?.name} to ${payload?.team_id}`);
@@ -157,18 +150,16 @@ const MembersTeam: FC<MembersTeamPropsType> = ({
 
   const handleOptionSelection = (option: { value: string; label: string; color?: string; isNew?: boolean }) => {
     // optimistic update
-    if (!hasPeoplePolicy) {
-      setSelectedItems((prev) => [
-        ...prev,
-        {
-          value: option?.value,
-          label: option?.value,
-          valid: true,
-          color: option?.color ?? randomColor,
-          isNew: option?.isNew,
-        },
-      ]);
-    }
+    setSelectedItems((prev) => [
+      ...prev,
+      {
+        value: option?.value,
+        label: option?.value,
+        valid: true,
+        color: option?.color ?? randomColor,
+        isNew: option?.isNew,
+      },
+    ]);
 
     const payload = {
       name: option?.value,
@@ -290,7 +281,7 @@ const MembersTeam: FC<MembersTeamPropsType> = ({
             setIsCustomInputFocused={setIsCustomInputFocused}
             selectOnlyFromList
             onCustomDeleteFn={handleRemoveAudienceFromTeam}
-            closeDropdownOnSelect={hasPeoplePolicy}
+            closeDropdownOnSelect
             allowedAddKeys={[KEY_CODES.ENTER, KEY_CODES.COMMA]}
           />
         </div>

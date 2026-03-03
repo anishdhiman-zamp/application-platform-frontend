@@ -26,11 +26,8 @@ export const useFeatureFlag = (flag: FEATURE_FLAGS) => {
         .finally(() => {
           setIsLoading(false);
         });
-    } else {
-      // Handle case when ldClient is not available
-      setIsEnabled(false);
-      setIsLoading(false);
     }
+    // Keep isLoading true while waiting for ldClient to be available
   }, [evaluate, ldClient, flag]);
 
   return { isEnabled, isLoading };

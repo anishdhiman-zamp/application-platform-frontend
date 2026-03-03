@@ -773,9 +773,14 @@ const BluePrintDataset: FC<BluePrintDatasetProps> = ({
         return;
       }
 
+      // For updates, always use the title from localStorage as the source of truth.
+      // localStorage is kept in sync with user edits (via saveTitleToLocalStorage),
+      // so it reliably reflects the current dataset's title without stale context issues.
+      const updateTitle = originalTitle.trim() || trimmedTitle;
+
       const updatePayload = {
         id: datasetId,
-        title: trimmedTitle,
+        title: updateTitle,
         add_columns: columnChanges.add_columns,
         drop_columns: columnChanges.drop_columns,
         alter_columns: columnChanges.alter_columns,
@@ -784,7 +789,7 @@ const BluePrintDataset: FC<BluePrintDatasetProps> = ({
 
       // Store the payload title and columns for saving to localStorage on success
       lastTransactionPayloadRef.current = {
-        title: trimmedTitle,
+        title: updateTitle,
         columns: getPreviewColumnConfig(),
       };
 
@@ -1059,8 +1064,14 @@ const BluePrintDataset: FC<BluePrintDatasetProps> = ({
           });
 
           initializeColumns(contextColumns, datasetId);
+
+          // Reset pendingTitle in context to the BE title.
+          pendingTitleContext?.setPendingTitle?.(backendDataset.title);
+          cachedLocalStorageTitleRef.current = backendDataset.title;
         } else {
           deleteColumnConfigForDataset(datasetId);
+          // Clear pendingTitle when deleting localStorage config
+          pendingTitleContext?.clearPendingData?.();
         }
       }
     } catch (error) {
@@ -1087,7 +1098,7 @@ const BluePrintDataset: FC<BluePrintDatasetProps> = ({
     setTimeout(() => {
       hasDiscardedRef.current = false;
     }, 500);
-  }, [datasetId, pendingNavigationPath, router, datasets, isCreationMode, initializeColumns]);
+  }, [datasetId, pendingNavigationPath, router, datasets, isCreationMode, initializeColumns, pendingTitleContext]);
 
   // Handle modal close (X button or outside click)
   const handleModalClose = useCallback((open: boolean) => {
@@ -1206,6 +1217,9 @@ const BluePrintDataset: FC<BluePrintDatasetProps> = ({
           });
 
           cachedLocalStorageTitleRef.current = payloadTitle;
+
+          // Sync pendingTitle in context so it matches what was saved.
+          pendingTitleContext?.setPendingTitle?.(payloadTitle);
         } catch (error) {
           captureException(error, {
             tags: { source: 'BluePrintDataset', context: 'handleTransactionSuccess_saveToLocalStorage' },
@@ -1230,6 +1244,7 @@ const BluePrintDataset: FC<BluePrintDatasetProps> = ({
       isCreationMode,
       router,
       invalidateDatasetCache,
+      pendingTitleContext,
     ],
   );
 

@@ -1,7 +1,7 @@
-export { AttachmentsBlock } from './AttachmentsBlock';
 export { AttachmentsList } from './AttachmentsList';
 export { ButtonBlock } from './ButtonBlock';
 export { CodePreviewBlock } from './CodePreviewBlock';
+export { FileReferencesList } from './FileReferencesList';
 export { MarkdownBlock } from './MarkdownBlock';
 export { OutputFilesBlock } from './OutputFilesBlock';
 export { PlainTextBlock } from './PlainTextBlock';
@@ -9,5 +9,6 @@ export { QuestionGroupBlock } from './QuestionGroupBlock';
 export { RadioButtonBlock, SingleSelectBlock } from './RadioButtonBlock';
 export { StatusLabel } from './StatusLabel';
 export { StepsBlock } from './StepsBlock';
+export { default as TaskBlock } from './TaskBlock';
 export { ThinkingBlock } from './ThinkingBlock';
 export { ToolCallBlock } from './ToolCallBlock';

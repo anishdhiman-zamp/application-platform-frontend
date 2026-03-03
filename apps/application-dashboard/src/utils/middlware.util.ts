@@ -7,9 +7,11 @@ import { ORY_KRATOS_SESSION_COOKIE, USER_SESSION_COOKIE } from '@/utils/cookie';
 type SessionCache = {
   user_id: string;
   user_name: string;
+  last_name: string;
   user_email: string;
   org_count: number;
   cached_at: number;
+  username: string;
 };
 
 export function setServerSideUserCookie(
@@ -73,6 +75,7 @@ export async function getUserSession(
       const orgs = Array.from({ length: cachedSessionData.org_count }, () => ({
         organization_id: '',
         name: '',
+        slug: '',
         resource_audience_policies: [],
       }));
 
@@ -83,6 +86,8 @@ export async function getUserSession(
         workspaces: [],
         organization_id: { workspace_id: '', name: '', description: '' },
         user_name: cachedSessionData.user_name ?? '',
+        last_name: cachedSessionData.last_name ?? '',
+        username: cachedSessionData.username ?? '',
       };
 
       return { session, cached: true };
@@ -99,7 +104,7 @@ export async function getUserSession(
       return { session: null, cached: true };
     }
 
-    const baseUrl = process.env.NEXT_PUBLIC_BASE_API_URL;
+    const baseUrl = process.env.NEXT_SERVER_API_URL || process.env.NEXT_PUBLIC_BASE_API_URL;
 
     if (!baseUrl) {
       throw new Error('NEXT_PUBLIC_API_BASE_URL environment variable is required');

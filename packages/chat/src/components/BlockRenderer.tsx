@@ -8,6 +8,7 @@ import {
   BLOCK_TYPE,
   BlockMessage,
   ButtonBlockType,
+  FileReferencesBlockType,
   type TextContentBlock,
   type ThinkingContentBlock,
   type ToolResultContentBlock,
@@ -15,14 +16,15 @@ import {
 } from '../types/block.types';
 import { extractInitialValues } from './block.utils';
 import {
-  AttachmentsBlock,
   ButtonBlock,
+  FileReferencesList,
   MarkdownBlock,
   OutputFilesBlock,
   PlainTextBlock,
   QuestionGroupBlock,
   SingleSelectBlock,
   StepsBlock,
+  TaskBlock,
   ThinkingBlock,
   ToolCallBlock,
 } from './blocks';
@@ -169,11 +171,22 @@ export const BlockRenderer: React.FC<BlockRendererProps> = ({
       case BLOCK_TYPE.QUESTION_GROUP:
         return <QuestionGroupBlock key={block?.id} payload={block?.payload} />;
 
-      case BLOCK_TYPE.ATTACHMENTS:
-        return <AttachmentsBlock key={block?.id} payload={block?.payload} />;
+      case BLOCK_TYPE.FILE_REFERENCES:
+        return (
+          <FileReferencesList
+            key={block?.id}
+            fileReferences={(block as FileReferencesBlockType)?.payload?.file_references?.map((ref) => ({
+              path: ref.path,
+              name: ref.name,
+            }))}
+          />
+        );
 
       case BLOCK_TYPE.OUTPUT_FILES:
         return <OutputFilesBlock key={block?.id} payload={block?.payload} conversationId={conversationId} />;
+
+      case BLOCK_TYPE.TASK:
+        return <TaskBlock key={block?.id} payload={block?.payload} conversationId={conversationId} />;
 
       default:
         return null;

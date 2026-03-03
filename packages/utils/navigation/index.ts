@@ -1,4 +1,10 @@
-type NavigationStrategy = 'previous' | 'next' | 'browser-like';
+export type NavigationStrategy = 'previous' | 'next' | 'browser-like';
+
+export const NAVIGATION_STRATEGY = {
+  PREVIOUS: 'previous',
+  NEXT: 'next',
+  BROWSER_LIKE: 'browser-like',
+} as const;
 
 interface GetNextNavigationTargetOptions<T> {
   items: T[];

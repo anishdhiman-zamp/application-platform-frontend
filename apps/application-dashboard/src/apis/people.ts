@@ -31,7 +31,6 @@ import { APITags } from '@/constants/api.constants';
 import { baseApi } from '@/services/baseApi';
 import type { Organization } from '@/types/api/auth.types';
 import {
-  type GetDualAdminPolicyResponse,
   GetPendingApprovalsResponse,
   GetPoliciesResponse,
   GetPolicyResultApprovalsResponse,
@@ -243,13 +242,6 @@ const People = baseApi.injectEndpoints({
       }),
       providesTags: [APITags.GET_POLICY_APPROVALS],
     }),
-    getDualAdminPolicy: builder.query<GetDualAdminPolicyResponse[], void>({
-      query: () => ({
-        url: API_ENDPOINTS.DUAL_ADMIN_POLICY_GET,
-      }),
-      providesTags: [APITags.GET_POLICY_LIST],
-      transformResponse: ({ data }) => data,
-    }),
     getTeamPendingApprovals: builder.query<GetTeamPendingApprovalsResponse[], void>({
       query: () => ({
         url: API_ENDPOINTS.TEAM_PENDING_APPROVALS_GET,
@@ -310,7 +302,6 @@ export const {
   useRejectPolicyMutation,
   useGetAllPoliciesQuery,
   useGetPolicyResultApprovalsQuery,
-  useGetDualAdminPolicyQuery,
   useApprovalActionMutation,
   useGetTeamPendingApprovalsQuery,
   useGetTeamPendingApprovalsByResourceIdQuery,

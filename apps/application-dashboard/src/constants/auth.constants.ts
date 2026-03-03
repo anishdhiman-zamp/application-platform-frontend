@@ -1,5 +1,6 @@
 export enum LOGIN_METHODS {
   PASSWORD = 'password',
+  CODE = 'code',
 }
 
 export enum LOGIN_PROVIDERS {

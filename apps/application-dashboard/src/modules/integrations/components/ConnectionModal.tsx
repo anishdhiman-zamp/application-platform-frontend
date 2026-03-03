@@ -14,8 +14,8 @@ import ImageLoader from '@/components/common/loader/ImageLoader';
 import CommonWrapper from '@/components/commonWrapper';
 import { SkeletonTypes } from '@/components/commonWrapper/commonWrapper.types';
 import { getAssetUrl, IMAGE_PREFIX, ZAMP_LOGO_LOADER_SVG } from '@/constants/icons';
+import { useProcesses } from '@/contexts/ProcessesContext';
 import { useAppSelector } from '@/hooks/toolkit';
-import { usePagesAndProcessesData } from '@/hooks/usePagesAndProcessesData';
 import { useScrollDetection } from '@/hooks/useScrollDetection';
 import type { IntegrationAuth, IntegrationType } from '@/modules/integrations/types/integrations.types';
 import type { RootState } from '@/store';
@@ -43,7 +43,9 @@ const ConnectionModal: FC<ConnectionModalProps> = ({
   const formRef = useRef<FormBuilderRef>(null);
   const { ref: scrollContainerRef, isScrolled } = useScrollDetection();
   const [authenticateIntegration, { isLoading: isAuthenticating }] = useAuthenticateIntegrationMutation();
-  const { processes } = usePagesAndProcessesData();
+  const { processes } = useProcesses();
+
+  console.log('integration', integration);
 
   const { display_name, logo, guide, auth, id } = integration;
   const noGuide = !guide;

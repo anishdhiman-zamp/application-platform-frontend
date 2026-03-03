@@ -13,7 +13,7 @@ const ChatContent = ({ initialConversationId }: ChatContentProps) => {
   const { registerStartNewChat } = usePaceContext();
   const {
     organizationId,
-    currentUserName,
+    username,
     chatTitle,
     setChatTitle,
     conversationId,
@@ -30,7 +30,7 @@ const ChatContent = ({ initialConversationId }: ChatContentProps) => {
     <ChatContentInner
       key={chatKey}
       organizationId={organizationId}
-      currentUserName={currentUserName}
+      username={username}
       conversationId={conversationId}
       setConversationId={setConversationId}
       setChatTitle={setChatTitle}

@@ -7,6 +7,7 @@ export enum ResourceType {
   PAYMENTS = 'payments',
   PROCESS = 'process',
   ORGANIZATION = 'organization',
+  CONNECTION = 'connection',
 }
 
 export type TeamInfoType = {
@@ -65,6 +66,11 @@ export type ShareResourceConfig = {
 /**
  * Props for the shared component
  */
+
+export const enum ShareResourceVersion {
+  V1 = 'v1',
+  V2 = 'v2',
+}
 export type ShareResourcePopupProps = {
   resourceId?: string;
   resourceType: ResourceType;
@@ -73,6 +79,7 @@ export type ShareResourcePopupProps = {
   isCustomiseAccess?: boolean;
   title?: string;
   disable?: boolean;
+  version?: ShareResourceVersion;
 };
 
 /**
@@ -136,6 +143,11 @@ export enum PROCESS_ACCESS_PRIVILEGES {
   ADMIN = 'admin',
   VIEWER = 'viewer',
   EDITOR = 'editor',
+}
+
+export enum CONNECTION_ACCESS_PRIVILEGES {
+  ADMIN = 'admin',
+  VIEWER = 'viewer',
 }
 
 export type ProcessAccessPrivilegesType = {

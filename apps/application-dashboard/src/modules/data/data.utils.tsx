@@ -333,7 +333,12 @@ export const formatTanStackColumns = (params: FormatColumnsParamsType): ColumnDe
           return <CellRenderer {...agGridParams} />;
         }
 
-        return getValue();
+        const rawValue = getValue();
+
+        if (Array.isArray(rawValue)) return rawValue.join(', ');
+        if (rawValue != null && typeof rawValue === 'object') return '';
+
+        return rawValue;
       };
     } else if (tanColumn.valueFormatter && typeof tanColumn.valueFormatter === 'function') {
       tanStackColumn.cell = ({ getValue, row, column }: any) => {
@@ -1477,28 +1482,29 @@ export const mergeBackendAndFrontendColumns = (
     })
     .filter(Boolean) as ColDef[];
 
-  // Merge backend + frontend-only columns into a map for O(1) lookup
+  // Merge backend + frontend-only columns into a map for O(1) lookup (case-insensitive)
   const allColumnsMap = new Map<string, ColDef>();
 
   backendColumns.forEach((col) => {
     if (col.field) {
-      allColumnsMap.set(col.field, col);
+      allColumnsMap.set(col.field.toLowerCase(), col);
     }
   });
   frontendOnlyColDefs.forEach((col) => {
     if (col.field) {
-      allColumnsMap.set(col.field, col);
+      allColumnsMap.set(col.field.toLowerCase(), col);
     }
   });
 
-  // Build final array in localStorage order
-  const orderedColumns = storedColIds
+  // Build final array in localStorage order (case-insensitive lookup)
+  const storedColIdsLower = storedColIds.map((id) => id.toLowerCase());
+  const orderedColumns = storedColIdsLower
     .map((colId) => allColumnsMap.get(colId))
     .filter((col): col is ColDef => col !== undefined);
 
   // Add any backend columns not in localStorage (safety fallback)
   backendColumns.forEach((col) => {
-    if (col.field && !storedColIds.includes(col.field)) {
+    if (col.field && !storedColIdsLower.includes(col.field.toLowerCase())) {
       orderedColumns.push(col);
     }
   });
@@ -1524,18 +1530,21 @@ export const mergeAndOrderItems = <T extends ItemWithId>(
     return backendItems;
   }
 
-  // Build a map of all items for O(1) lookup
+  // Case-insensitive matching prevents column reordering when IDs differ in casing
   const allItemsMap = new Map<string, T>();
 
-  backendItems.forEach((item) => allItemsMap.set(item.id, item));
-  frontendOnlyItems.forEach((item) => allItemsMap.set(item.id, item));
+  backendItems.forEach((item) => allItemsMap.set(item.id.toLowerCase(), item));
+  frontendOnlyItems.forEach((item) => allItemsMap.set(item.id.toLowerCase(), item));
 
-  // Build final array in localStorage order
-  const orderedItems = storedOrder.map((id) => allItemsMap.get(id)).filter((item): item is T => item !== undefined);
+  // Build final array in localStorage order (case-insensitive lookup)
+  const storedOrderLower = storedOrder.map((id) => id.toLowerCase());
+  const orderedItems = storedOrderLower
+    .map((id) => allItemsMap.get(id))
+    .filter((item): item is T => item !== undefined);
 
   // Add any backend items not in localStorage (safety fallback)
   backendItems.forEach((item) => {
-    if (!storedOrder.includes(item.id)) {
+    if (!storedOrderLower.includes(item.id.toLowerCase())) {
       orderedItems.push(item);
     }
   });

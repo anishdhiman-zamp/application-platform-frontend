@@ -1,5 +1,5 @@
 import type { FC, RefObject } from 'react';
-import { useEffect, useMemo, useRef, useState } from 'react';
+import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { LocationType } from '@zamp-platform/chat';
 import { cn } from '@zamp-platform/ui/utils';
 import { DATE_FORMATS } from '@zamp-platform/utils';
@@ -79,6 +79,14 @@ const Row: FC<RowProps> = ({
   const isClicked = clickedField === fieldId;
   const editTextareaRef = useRef<HTMLTextAreaElement>(null);
 
+  // --- Refs for unmount flush ---
+  const editingValueRef = useRef(editingValue);
+  const valueRef = useRef(value); // raw prop value — NOT formattedValue
+  const hasSavedRef = useRef(false); // guard against duplicate flush after blur/Enter
+  const hasCancelledRef = useRef(false); // guard against flush after Escape
+  const onChangeRef = useRef(onChange); // stable ref for unstable onChange prop
+  const isDirtyRef = useRef(false); // tracks if user actually typed (prevents spurious flush on formatted fields)
+
   const column = useMemo(() => columns.find((col) => col?.field === key), [columns, key]);
   const columnConfig = useMemo(() => filterConfig.find((col) => col?.column === key), [filterConfig, key]);
   const currentDatasetCompletedFields = useMemo(
@@ -128,6 +136,13 @@ const Row: FC<RowProps> = ({
 
   const shouldShowInputDirectly = useMemo(() => isEditable && !isCompleted, [isEditable, isCompleted]);
 
+  const handleInputChange = useCallback((newValue: string) => {
+    setEditingValue(newValue);
+    isDirtyRef.current = true; // user actually typed
+    hasSavedRef.current = false; // new keystroke after save → re-enable flush
+    hasCancelledRef.current = false; // new keystroke after cancel → re-enable flush
+  }, []);
+
   const handleClick = () => {
     setClickedField(fieldId);
     onValueClick?.(rowId, key);
@@ -142,13 +157,15 @@ const Row: FC<RowProps> = ({
 
   const handleEditSave = () => {
     onChange?.(key, editingValue, rowId);
-
     setIsEditing(false);
+    hasSavedRef.current = true; // prevent duplicate flush on unmount
   };
 
   const handleEditCancel = () => {
     setEditingValue(value);
     setIsEditing(false);
+    isDirtyRef.current = false; // cancel clears dirty state
+    hasCancelledRef.current = true; // prevent flush of cancelled edit
   };
 
   const handleKeyDown = (e: React.KeyboardEvent) => {
@@ -168,6 +185,32 @@ const Row: FC<RowProps> = ({
     }
   }, [isEditing]);
 
+  // --- Keep refs in sync ---
+  useEffect(() => {
+    editingValueRef.current = editingValue;
+  }, [editingValue]);
+  useEffect(() => {
+    valueRef.current = value;
+  }, [value]);
+  useEffect(() => {
+    onChangeRef.current = onChange;
+  }, [onChange]);
+
+  // --- Flush pending edit on unmount (e.g., dataset tab switch) ---
+  useEffect(() => {
+    return () => {
+      if (!isDirtyRef.current) return; // no user input → no flush (prevents spurious flush on formatted fields)
+      if (hasSavedRef.current) return; // already saved via blur/Enter
+      if (hasCancelledRef.current) return; // user pressed Escape
+      const current = editingValueRef.current;
+      const original = valueRef.current; // compare against RAW value, not formatted
+
+      if (current !== original && current !== '') {
+        onChangeRef.current?.(key, current, rowId);
+      }
+    };
+  }, []); // empty deps = unmount only
+
   if (!column || !isColumnVisible) return null;
 
   return (
@@ -185,7 +228,7 @@ const Row: FC<RowProps> = ({
           <EditableField
             value={formattedValue}
             editingValue={editingValue}
-            onInputChange={setEditingValue}
+            onInputChange={handleInputChange}
             onBlur={handleEditSave}
             onKeyDown={handleKeyDown}
             onClick={handleClick}

@@ -12,28 +12,52 @@ import {
   useSensors,
 } from '@dnd-kit/core';
 import { arrayMove, horizontalListSortingStrategy, SortableContext } from '@dnd-kit/sortable';
+import { Button } from '@zamp-platform/ui';
 import { cn } from '@zamp-platform/ui/utils';
-import DynamicTabItem from 'modules/pace/components/layout/DynamicTabItem';
+import { MessageSquare } from 'lucide-react';
 import { PaceNavbarItemId } from 'modules/pace/pace.types';
 import Link from 'next/link';
-import { usePathname } from 'next/navigation';
-import SortableDynamicTabItem from '@/modules/pace/components/layout/SortableDynamicTabItem';
-import { useDynamicTabs } from '@/modules/pace/hooks/useDynamicTabs';
+import { usePathname, useSearchParams } from 'next/navigation';
+import { ROUTES_PATH } from '@/constants/routeConfig';
+import { useIsMacsFileSystemEnabled } from '@/hooks/useIsMacsFileSystemEnabled';
+import DynamicTabItem from '@/modules/pace/components/dynamic-tabs/DynamicTabItem';
+import SortableDynamicTabItem from '@/modules/pace/components/dynamic-tabs/SortableDynamicTabItem';
+import { useNavbarTabs } from '@/modules/pace/components/dynamic-tabs/useNavbarTabs';
 import { PACE_NAVBAR_ITEMS } from '@/modules/pace/pace.constants';
 import { usePaceContext } from '@/modules/pace/pace.context';
 
 const PaceNavbar = () => {
   const pathname = usePathname();
-  const { setIsPaceSidebarOpen, startNewChat } = usePaceContext();
-  const { dynamicTabs, isDynamicTabActive, isOnAnyDynamicTab, handleCloseDynamicTab, handleReorderTabs } =
-    useDynamicTabs();
+  const searchParams = useSearchParams();
+  const { isPaceSidebarOpen, setIsPaceSidebarOpen, startNewChat } = usePaceContext();
+  const {
+    tabs,
+    isTabActive,
+    isOnAnyDynamicTab,
+    closeTab,
+    closeOtherTabs,
+    closeTabsToRight,
+    closeAllTabs,
+    reorderTabs,
+  } = useNavbarTabs();
+  const { isMacsFileSystemEnabled } = useIsMacsFileSystemEnabled();
 
   const [activeId, setActiveId] = useState<string | null>(null);
   const sensors = useSensors(useSensor(PointerSensor, { activationConstraint: { distance: 5 } }));
 
-  const tabIds = useMemo(() => dynamicTabs.map((tab) => tab.id), [dynamicTabs]);
+  const tabStableKeys = useMemo(() => tabs.map((tab) => tab.stableKey), [tabs]);
 
-  const activeTab = useMemo(() => dynamicTabs.find((tab) => tab.id === activeId), [dynamicTabs, activeId]);
+  const filteredNavbarItems = useMemo(() => {
+    return PACE_NAVBAR_ITEMS.filter((item) => {
+      if (item.id === PaceNavbarItemId.FILES) {
+        return isMacsFileSystemEnabled;
+      }
+
+      return true;
+    });
+  }, [isMacsFileSystemEnabled]);
+
+  const draggedTab = useMemo(() => tabs.find((tab) => tab.stableKey === activeId), [tabs, activeId]);
 
   const handleDragStart = (event: DragStartEvent) => {
     setActiveId(event.active.id as string);
@@ -45,13 +69,13 @@ const PaceNavbar = () => {
     setActiveId(null);
 
     if (active.id !== over?.id) {
-      const oldIndex = tabIds.indexOf(active.id as string);
-      const newIndex = tabIds.indexOf((over?.id as string) ?? '');
+      const oldIndex = tabStableKeys.indexOf(active.id as string);
+      const newIndex = tabStableKeys.indexOf((over?.id as string) ?? '');
 
       if (oldIndex !== -1 && newIndex !== -1) {
-        const newOrder = arrayMove(tabIds, oldIndex, newIndex);
+        const newOrder = arrayMove(tabs, oldIndex, newIndex).map((tab) => tab.id);
 
-        handleReorderTabs(newOrder);
+        reorderTabs(newOrder);
       }
     }
   };
@@ -61,11 +85,25 @@ const PaceNavbar = () => {
       return pathname === path;
     }
 
-    if (id === PaceNavbarItemId.ARTIFACTS) {
-      if (isOnAnyDynamicTab()) return false;
+    if (isOnAnyDynamicTab()) {
+      return false;
     }
 
     return pathname?.includes(path) ?? false;
+  };
+
+  const getNavItemHref = (id: PaceNavbarItemId, path: string) => {
+    if (id === PaceNavbarItemId.HOME) {
+      return path;
+    }
+
+    const sParam = searchParams?.get('s');
+
+    if (sParam) {
+      return `${path}?s=${sParam}`;
+    }
+
+    return path;
   };
 
   const handleNavItemClick = (id: PaceNavbarItemId) => {
@@ -77,12 +115,26 @@ const PaceNavbar = () => {
 
   return (
     <div className='flex h-[38px] items-center overflow-hidden px-2 pt-1.5 pb-1'>
+      {!isPaceSidebarOpen && pathname !== ROUTES_PATH.CHAT && (
+        <>
+          <Button
+            variant='ghost'
+            size='icon'
+            onClick={() => setIsPaceSidebarOpen(true)}
+            className='text-GRAY_700 hover:text-GRAY_1000 hover:bg-GRAY_200 h-7 w-7 shrink-0'
+          >
+            <MessageSquare size={18} />
+          </Button>
+          <div className='bg-GRAY_300 mx-2 h-4 w-px shrink-0' />
+        </>
+      )}
+
       {/* Static navbar items */}
       <div className='flex shrink-0 items-center gap-x-2'>
-        {PACE_NAVBAR_ITEMS.map((item) => (
+        {filteredNavbarItems.map((item) => (
           <Link
             key={item.id}
-            href={item.path}
+            href={getNavItemHref(item.id, item.path)}
             className={cn(
               'text-GRAY_900 hover:text-GRAY_1000 hover:bg-GRAY_200 flex h-7 w-7 cursor-pointer items-center justify-center rounded-lg p-2',
               isNavItemActive(item.id, item.path) &&
@@ -97,36 +149,46 @@ const PaceNavbar = () => {
         ))}
       </div>
 
-      {dynamicTabs.length > 0 && <div className='bg-GRAY_300 mx-3 h-4 w-px shrink-0' />}
+      {tabs.length > 0 && <div className='bg-GRAY_300 mx-3 h-4 w-px shrink-0' />}
 
-      {dynamicTabs.length > 0 && (
+      {tabs.length > 0 && (
         <DndContext
           sensors={sensors}
           collisionDetection={closestCenter}
           onDragStart={handleDragStart}
           onDragEnd={handleDragEnd}
         >
-          <SortableContext items={tabIds} strategy={horizontalListSortingStrategy}>
+          <SortableContext items={tabStableKeys} strategy={horizontalListSortingStrategy}>
             <div className='flex min-w-0 flex-1 items-center gap-x-1'>
-              {dynamicTabs.map((tab) => (
+              {tabs.map((tab, index) => (
                 <SortableDynamicTabItem
-                  key={tab.id}
+                  key={tab.stableKey}
                   tab={tab}
-                  isActive={isDynamicTabActive(tab.path)}
+                  isActive={isTabActive(tab)}
                   isAnyDragging={activeId !== null}
-                  onClose={handleCloseDynamicTab}
+                  tabIndex={index}
+                  totalTabs={tabs.length}
+                  onClose={closeTab}
+                  onCloseOthers={closeOtherTabs}
+                  onCloseToRight={closeTabsToRight}
+                  onCloseAll={closeAllTabs}
                 />
               ))}
             </div>
           </SortableContext>
           <DragOverlay>
-            {activeTab ? (
+            {draggedTab ? (
               <div className='-rotate-2 rounded-lg border shadow-lg'>
                 <DynamicTabItem
-                  tab={activeTab}
-                  isActive={isDynamicTabActive(activeTab.path)}
+                  tab={draggedTab}
+                  isActive={isTabActive(draggedTab)}
                   isDragging
-                  onClose={handleCloseDynamicTab}
+                  tabIndex={tabs.findIndex((t) => t.id === draggedTab.id)}
+                  totalTabs={tabs.length}
+                  onClose={closeTab}
+                  onCloseOthers={closeOtherTabs}
+                  onCloseToRight={closeTabsToRight}
+                  onCloseAll={closeAllTabs}
                 />
               </div>
             ) : null}

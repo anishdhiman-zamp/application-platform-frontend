@@ -1,5 +1,3 @@
-import { MessageAttachmentType } from '../..';
-
 export const enum BLOCK_TYPE {
   PLAIN_TEXT = 'plain_text',
   MARKDOWN = 'markdown',
@@ -7,12 +5,13 @@ export const enum BLOCK_TYPE {
   BUTTON = 'button',
   QUESTION_GROUP = 'question_group',
   QUESTION = 'question',
-  ATTACHMENTS = 'attachments',
+  FILE_REFERENCES = 'file_references',
   TEXT = 'text',
   TOOL_USE = 'tool_use',
   TOOL_RESULT = 'tool_result',
   THINKING = 'thinking',
   OUTPUT_FILES = 'output_files',
+  TASK = 'task',
 }
 
 export const enum ActionType {
@@ -117,12 +116,12 @@ export interface QuestionGroupBlockType {
   };
 }
 
-export interface AttachmentsBlockType {
+export interface FileReferencesBlockType {
   id: string;
   order: number;
-  type: BLOCK_TYPE.ATTACHMENTS;
+  type: BLOCK_TYPE.FILE_REFERENCES;
   payload: {
-    attachments: MessageAttachmentType[];
+    file_references: { path: string; name: string }[];
   };
 }
 
@@ -141,6 +140,26 @@ export interface OutputFilesBlockType {
   };
 }
 
+export const TASK_STATUS = {
+  COMPLETED: 'COMPLETED',
+  IN_PROGRESS: 'IN_PROGRESS',
+  FAILED: 'FAILED',
+} as const;
+
+export type TaskStatus = (typeof TASK_STATUS)[keyof typeof TASK_STATUS];
+
+export interface TaskBlockType {
+  id: string;
+  order: number;
+  type: BLOCK_TYPE.TASK;
+  payload: {
+    id: string;
+    title: string;
+    task_id: string;
+    status?: TaskStatus;
+  };
+}
+
 export enum TEXT_TYPE {
   PLAIN_TEXT = 'plain_text',
   MARKDOWN = 'markdown',
@@ -153,19 +172,21 @@ export type Block =
   | ButtonBlockType
   | QuestionGroupBlockType
   | QuestionBlockType
-  | AttachmentsBlockType
+  | FileReferencesBlockType
   | OutputFilesBlockType
+  | TaskBlockType
   | ThinkingContentBlock
   | TextContentBlock
   | ToolUseContentBlock
-  | ToolResultContentBlock;
+  | ToolResultContentBlock
+  | TaskContentBlock;
 export interface BlockMessage {
   block: Block[];
 }
 
 export interface UploadedFileType {
-  file_id: string;
-  file_name: string;
+  path: string;
+  name: string;
   file_type?: string;
   file?: File;
 }
@@ -188,6 +209,7 @@ export const enum StreamingContentBlockDeltaType {
   INPUT_JSON_DELTA = 'input_json_delta',
   TOOL_USE_BLOCK_UPDATE_DELTA = 'tool_use_block_update_delta',
   TOOL_RESULT_DELTA = 'tool_result_delta',
+  TASK_DELTA = 'task_delta',
 }
 
 export interface StreamingContentBlockBase {
@@ -228,6 +250,7 @@ export interface ToolUseContentBlock extends StreamingContentBlockBase {
     name?: string;
     tool_call_id?: string;
     display_name?: string;
+    icon?: string;
   };
 }
 
@@ -237,6 +260,16 @@ export interface ToolResultContentBlock extends StreamingContentBlockBase {
     content: string;
     is_error: boolean;
     tool_call_id?: string;
+  };
+}
+
+export interface TaskContentBlock extends StreamingContentBlockBase {
+  type: BLOCK_TYPE.TASK;
+  payload: {
+    id: string;
+    title: string;
+    task_id: string;
+    status?: TaskStatus;
   };
 }
 
@@ -281,12 +314,19 @@ export interface StreamEventToolResultDelta {
   tool_call_id?: string;
 }
 
+export interface StreamEventTaskDelta {
+  type: StreamingContentBlockDeltaType.TASK_DELTA;
+  title?: string;
+  status?: TaskStatus;
+}
+
 export type StreamEventDelta =
   | StreamEventThinkingDelta
   | StreamEventTextDelta
   | StreamEventInputJsonDelta
   | StreamEventToolUseUpdateDelta
-  | StreamEventToolResultDelta;
+  | StreamEventToolResultDelta
+  | StreamEventTaskDelta;
 
 export interface StreamEventContentBlockDelta {
   type: StreamingContentBlockType.CONTENT_BLOCK_DELTA;

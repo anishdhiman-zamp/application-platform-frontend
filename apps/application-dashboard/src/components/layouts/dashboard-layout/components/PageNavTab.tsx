@@ -12,7 +12,7 @@ import { cn, preventAutoFocus } from 'utils/common';
 import PageIcon from '@/assets/Icons/PageIcon';
 import { TOAST_MESSAGES } from '@/components/common/toast/toast.constants';
 import PermissionGuard from '@/components/hoc/PermissionGuard';
-import { usePagesAndProcesses } from '@/contexts/PagesAndProcessesContext';
+import { useProcesses } from '@/contexts/ProcessesContext';
 import { PAGE_ACCESS_PRIVILEGES, ResourceType } from '@/modules/shareResource/shareResource.types';
 import DeletePageDialog from 'components/layouts/dashboard-layout/components/DeletePageDialog';
 
@@ -33,7 +33,7 @@ const PageNavTab = ({ label, pageId, isSelected, page }: PageNavTabProps) => {
 
   const [updatePage] = useUpdatePageMutation();
   const { data: pages } = useGetPagesQuery(undefined, { refetchOnMountOrArgChange: false });
-  const { processes } = usePagesAndProcesses();
+  const { processes } = useProcesses();
 
   const [optimisticName, updateOptimisticName] = useOptimistic(finalName || label, (state, newName: string) => newName);
 

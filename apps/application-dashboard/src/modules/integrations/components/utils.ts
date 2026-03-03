@@ -18,7 +18,7 @@ const injectEmailAliasConfig = (
   orgName?: string,
   processName?: string,
 ): IntegrationAuth['fields'] => {
-  if (!fields || !orgName || !processName) {
+  if (!fields || !orgName) {
     return fields;
   }
 

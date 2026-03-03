@@ -27,7 +27,6 @@ interface TeamMemberCardProps {
   };
   organizationId: string;
   teamsData: GetTeamsByOrganizationIdResponseType[];
-  hasPeoplePolicy: boolean;
   teamsRandomColorRef: RefObject<() => string>;
   value: {
     user_id: string;
@@ -42,7 +41,6 @@ const TeamMemberCard = ({
   row,
   organizationId,
   teamsData,
-  hasPeoplePolicy,
   teamsRandomColorRef,
 }: TeamMemberCardProps) => {
   const { user_id, userEmail } = value;
@@ -93,18 +91,13 @@ const TeamMemberCard = ({
     <div className='border-b-0.5 border-DIVIDER_GRAY group relative grid grid-cols-4 gap-4'>
       <MembersName name={row?.name || row?.email} value={row?.email} member />
       <MembersEmail value={row?.email} />
-      <MembersRole
-        value={{ user_id: row?.user_id, privilege: row?.privilege, userEmail: row?.email }}
-        member
-        hasPeoplePolicy={hasPeoplePolicy}
-      />
+      <MembersRole value={{ user_id: row?.user_id, privilege: row?.privilege, userEmail: row?.email }} member />
       <MembersTeamV2
         userInfo={{ user_id: row?.user_id, name: row?.name, email: row?.email }}
         organizationId={organizationId}
         teamsData={teamsData ?? []}
         userId={row?.user_id}
         userMappedTeams={row?.teams}
-        hasPeoplePolicy={hasPeoplePolicy}
         teamsRandomColorRef={teamsRandomColorRef}
       />
       <div className='absolute top-2 right-0'>

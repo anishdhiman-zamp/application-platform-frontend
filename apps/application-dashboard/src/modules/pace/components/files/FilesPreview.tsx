@@ -1,12 +1,12 @@
 import { FileIcon } from '@zamp-platform/ui';
-import { FILE_TYPE, type FilesPreviewProps } from 'modules/pace/components/files/file-tree.types';
+import Image from 'next/image';
+import { FILE_TYPE, type FilesPreviewProps } from '@/modules/pace/components/files/file-tree.types';
 import {
   formatDate,
   formatFileSize,
   getFileExtension,
   getFileTypeLabel,
-} from 'modules/pace/components/files/file-tree.utils';
-import Image from 'next/image';
+} from '@/modules/pace/components/files/file-tree.utils';
 
 const FilesPreview = ({ selectedFile }: FilesPreviewProps) => {
   if (!selectedFile || selectedFile.type === FILE_TYPE.DIRECTORY) {
@@ -22,6 +22,7 @@ const FilesPreview = ({ selectedFile }: FilesPreviewProps) => {
                 width={400}
                 height={320}
                 unoptimized
+                priority
               />
             </div>
           </div>
@@ -51,6 +52,11 @@ const FilesPreview = ({ selectedFile }: FilesPreviewProps) => {
           <div className='flex items-center justify-between'>
             <span className='f-13-450 text-GRAY_700'>Last modified on</span>
             <span className='f-13-450 text-GRAY_1000'>{formatDate(selectedFile.mtime_ms)}</span>
+          </div>
+          <div className='border-GRAY_400 border-t border-dashed' />
+          <div className='flex items-center justify-between'>
+            <span className='f-13-450 text-GRAY_700'>Owner</span>
+            <span className='f-13-450 text-GRAY_1000'>{selectedFile.owner}</span>
           </div>
         </div>
       </div>

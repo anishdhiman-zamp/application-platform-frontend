@@ -1,0 +1,92 @@
+import { Button, toast } from '@zamp-platform/ui';
+import { cn } from '@zamp-platform/ui/utils';
+import { CircleX, FileText, LoaderCircle } from 'lucide-react';
+import React from 'react';
+
+import { useLazyGetFileDownloadUrlQuery } from '../../api';
+import { downloadFile } from '../block.utils';
+
+interface UploadedFile {
+  file_id: string;
+  file_name: string;
+  file_type?: string;
+  file?: File;
+}
+
+interface AttachmentItemProps {
+  attachment: UploadedFile;
+  removeAttachment?: (fileId: string) => void;
+  isLoading?: boolean;
+}
+
+const getFileIcon = () => {
+  return (
+    <div className='flex h-5 w-6 items-center justify-center rounded-md bg-gray-100 [&_svg]:size-3.5'>
+      <FileText />
+    </div>
+  );
+};
+
+const AttachmentItem: React.FC<AttachmentItemProps> = ({ attachment, removeAttachment, isLoading }) => {
+  const [getFileDownloadUrl, { isFetching: isLoadingFileDownload }] = useLazyGetFileDownloadUrlQuery();
+
+  const handleDownloadFile = async () => {
+    if (!attachment.file_id) return;
+    try {
+      const res = await getFileDownloadUrl({ file_upload_id: attachment.file_id }).unwrap();
+
+      if (res?.download_url) {
+        await downloadFile(res.download_url, attachment.file_name || 'download');
+      }
+    } catch {
+      toast.error('Failed to download file');
+    }
+  };
+
+  return (
+    <div
+      key={attachment.file_id || attachment.file_name}
+      className={cn(
+        'rounded-2.5 shadow-table-filter-menu group relative flex w-[148px] cursor-pointer items-center gap-2 border border-gray-400 bg-white p-1 pr-3',
+      )}
+      onClick={handleDownloadFile}
+    >
+      <div className='flex items-center gap-1'>
+        {getFileIcon()}
+        <span className='f-12-500 max-w-[104px] truncate'>{attachment.file_name}</span>
+      </div>
+      {attachment.file_id && removeAttachment && (
+        <Button
+          className='absolute size-4 rounded-full bg-white p-px opacity-0 group-hover:opacity-100 [&_svg]:size-3.5'
+          variant='ghost'
+          size='icon'
+          onClick={(e) => {
+            e.stopPropagation();
+            removeAttachment(attachment.file_id);
+          }}
+          style={{
+            top: '-8px',
+            right: '-8px',
+          }}
+        >
+          <CircleX className='size-3.5 text-gray-700' />
+        </Button>
+      )}
+      {((isLoading && !attachment.file_id) || isLoadingFileDownload) && (
+        <Button
+          className='absolute size-4 rounded-full border border-gray-400 bg-white [&_svg]:size-3'
+          variant='ghost'
+          size='icon'
+          style={{
+            top: '-8px',
+            right: '-8px',
+          }}
+        >
+          <LoaderCircle size={12} className='animate-spin text-blue-700' />
+        </Button>
+      )}
+    </div>
+  );
+};
+
+export default AttachmentItem;

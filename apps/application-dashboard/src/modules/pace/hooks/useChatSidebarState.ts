@@ -2,8 +2,6 @@
 
 import { useCallback, useEffect, useRef, useState } from 'react';
 import { SIDEBAR_CONVERSATION_ID_PARAM } from 'modules/pace/pace.constants';
-import { usePathname } from 'next/navigation';
-import { ROUTES_PATH } from '@/constants/routeConfig';
 import { usePaceContext } from '@/modules/pace/pace.context';
 
 interface UseChatSidebarStateProps {
@@ -12,10 +10,8 @@ interface UseChatSidebarStateProps {
 
 export const useChatSidebarState = ({ initialConversationId }: UseChatSidebarStateProps) => {
   const { isPaceSidebarOpen, setIsPaceSidebarOpen } = usePaceContext();
-  const pathname = usePathname();
 
-  const isInitializedRef = useRef(false);
-  const previousPathnameRef = useRef(pathname);
+  const prevInitialConversationIdRef = useRef(initialConversationId);
 
   const [chatTitle, setChatTitle] = useState('');
   const [conversationId, setConversationIdState] = useState<string | null>(initialConversationId);
@@ -63,32 +59,20 @@ export const useChatSidebarState = ({ initialConversationId }: UseChatSidebarSta
     setIsPaceSidebarOpen(false);
   }, [setIsPaceSidebarOpen]);
 
-  // Initialize conversation ID from URL on mount
+  // Sync state with URL when initialConversationId changes (e.g., browser back/forward)
   useEffect(() => {
-    if (!isInitializedRef.current) {
-      const params = new URLSearchParams(window.location.search);
-      const urlConversationId = params.get(SIDEBAR_CONVERSATION_ID_PARAM);
+    if (prevInitialConversationIdRef.current !== initialConversationId) {
+      prevInitialConversationIdRef.current = initialConversationId;
+      setConversationIdState(initialConversationId);
 
-      if (urlConversationId) {
-        setConversationIdState(urlConversationId);
+      if (initialConversationId) {
         setIsPaceSidebarOpen(true);
-      }
-      isInitializedRef.current = true;
-    }
-  }, [setIsPaceSidebarOpen]);
-
-  // Reset chat state only when navigating to chat home route
-  useEffect(() => {
-    if (previousPathnameRef.current !== pathname) {
-      previousPathnameRef.current = pathname;
-
-      if (pathname === ROUTES_PATH.CHAT) {
+      } else {
         setChatTitle('');
-        setConversationIdState(null);
         setChatKey((prev) => prev + 1);
       }
     }
-  }, [pathname]);
+  }, [initialConversationId, setIsPaceSidebarOpen]);
 
   return {
     isPaceSidebarOpen,

@@ -5,7 +5,7 @@ import { useRouter } from 'next/navigation';
 import { FEATURE_FLAGS } from '@/constants/featureFlags';
 import { getProcessRouteById, ROUTES_PATH } from '@/constants/routeConfig';
 import { KEYBOARD_KEYS } from '@/constants/shortcuts';
-import { usePagesAndProcesses } from '@/contexts/PagesAndProcessesContext';
+import { useProcesses } from '@/contexts/ProcessesContext';
 import { useAppDispatch } from '@/hooks/toolkit';
 import { useFeatureFlags } from '@/hooks/useFeatureFlags';
 import useKeyDown from '@/hooks/useKeyDown';
@@ -77,7 +77,7 @@ const MONITOR_KEYS = [
 const useGlobalShortcuts = () => {
   const router = useRouter();
   const dispatch = useAppDispatch();
-  const { processes } = usePagesAndProcesses();
+  const { processes } = useProcesses();
   const { logout, isLoggingOut } = useLogout();
   const { evaluate, ldClient } = useFeatureFlags();
   const [isZampInternalEnabled, setIsZampInternalEnabled] = useState(false);

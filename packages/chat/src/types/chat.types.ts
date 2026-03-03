@@ -101,6 +101,8 @@ export interface ChatMessage {
     elements?: Block[];
     text?: string;
     text_type?: string;
+    file_references?: FileReferenceType[];
+    /** @deprecated Use file_references instead. Kept for backward compatibility with S3 uploads. */
     attachments?: MessageAttachmentType[];
   };
   message_type: ChatMessageType;
@@ -110,6 +112,7 @@ export interface ChatMessage {
   sender_name?: string;
   id?: string;
   conversation_id?: string;
+  llm_model?: string;
 }
 
 export interface ChatState {
@@ -132,14 +135,25 @@ export interface ChatActions {
 
 export type ChatFramework = ChatState & ChatActions;
 
+export interface FileReferenceType {
+  path: string;
+  name: string;
+}
+
+/**
+ * @deprecated Use FileReferenceType instead. This type is kept for backward compatibility.
+ */
 export interface MessageAttachmentType {
   file_id: string;
   file_name?: string;
 }
+
 export interface MessageContentType {
   text: string;
   text_type: string;
   elements?: Block[];
+  file_references?: FileReferenceType[];
+  /** @deprecated Use file_references instead. Kept for backward compatibility with S3 uploads. */
   attachments?: MessageAttachmentType[];
 }
 
@@ -186,6 +200,7 @@ export interface CreateConversationPayloadTypeV2 {
   annotation_data?: AnnotationData;
   message_content: MessageContentType;
   sender_name?: string;
+  llm_model?: string;
 }
 
 export interface AnnotationLocationDataType {

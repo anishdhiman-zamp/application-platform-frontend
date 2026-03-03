@@ -2,17 +2,11 @@
 
 import { useCallback, useMemo } from 'react';
 
-import {
-  API_ENDPOINTS,
-  useGetSignedUrlMutation,
-  useLazyGetSpeechToTextAccessTokenQuery,
-  usePostFormsSignedUploadAckMutation,
-  usePostInteractionDisableMutation,
-} from '../api';
+import { useLazyGetSpeechToTextAccessTokenQuery, usePostInteractionDisableMutation } from '../api';
 import { ResourceType } from '../types/chat.types';
 import { TranscriptionAdapter } from '../types/transcription.types';
-import { handleFileUploads, MultipleFileUploadResult } from '../utils/fileUpload';
 import { ChatInputAdapter } from './useChatInput';
+import { useFilesystemMutations } from './useFilesystemMutations';
 
 /**
  * Configuration for creating chat adapters
@@ -21,8 +15,7 @@ export interface ChatAdaptersConfig {
   getCurrentUserName: () => string;
   getResourceId: () => string;
   getScopeId: () => string;
-  getOrganizationId: () => string;
-  getMimeType?: (fileType: string) => string;
+  getUsername: () => string;
   onError?: (error: unknown) => void;
   onSuccess?: (message: string) => void;
   /**
@@ -54,8 +47,7 @@ export interface ChatAdaptersResult {
  *   getCurrentUserName: () => currentUserName || '',
  *   getResourceId: () => processId,
  *   getScopeId: () => activityRunId,
- *   getOrganizationId: () => organizationId,
- *   getMimeType: (fileType) => FileMimeType[fileType] ?? fileType,
+ *   getUsername: () => username || '',
  *   onError: (error) => {
  *     captureException(error);
  *     toast.error('An error occurred');
@@ -69,32 +61,17 @@ export function useChatAdapters(config: ChatAdaptersConfig): ChatAdaptersResult 
     getCurrentUserName,
     getResourceId,
     getScopeId,
-    getOrganizationId,
-    getMimeType,
+    getUsername,
     onError,
     onSuccess,
     getElevenLabsToken: customGetElevenLabsToken,
   } = config;
 
-  const [getSignedUrl] = useGetSignedUrlMutation();
-  const [postFormsSignedUploadAck] = usePostFormsSignedUploadAckMutation();
+  const { uploadMutations, deleteFileMutation } = useFilesystemMutations();
+
   const [postInteractionDisable] = usePostInteractionDisableMutation();
   // Always call the hook unconditionally to satisfy rules of hooks
   const [getSpeechToTextAccessToken] = useLazyGetSpeechToTextAccessTokenQuery({});
-
-  const uploadFiles = useCallback(
-    async (files: FileList): Promise<MultipleFileUploadResult> => {
-      return handleFileUploads(
-        files,
-        getSignedUrl,
-        API_ENDPOINTS.FORMS_SIGNED_UPLOAD_URL_POST,
-        getOrganizationId(),
-        postFormsSignedUploadAck,
-        getMimeType,
-      );
-    },
-    [getSignedUrl, getOrganizationId, postFormsSignedUploadAck, getMimeType],
-  );
 
   const disableInteraction = useCallback(
     async (interactionParams: {
@@ -134,12 +111,24 @@ export function useChatAdapters(config: ChatAdaptersConfig): ChatAdaptersResult 
       getCurrentUserName,
       getResourceId,
       getScopeId,
-      uploadFiles,
+      getUsername,
+      uploadMutations,
+      deleteFileMutation,
       disableInteraction,
       onError,
       onSuccess,
     }),
-    [getCurrentUserName, getResourceId, getScopeId, uploadFiles, disableInteraction, onError, onSuccess],
+    [
+      getCurrentUserName,
+      getResourceId,
+      getScopeId,
+      getUsername,
+      uploadMutations,
+      deleteFileMutation,
+      disableInteraction,
+      onError,
+      onSuccess,
+    ],
   );
 
   const transcriptionAdapter: TranscriptionAdapter = useMemo(
