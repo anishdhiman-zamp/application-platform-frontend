@@ -12,9 +12,8 @@ import {
   useSensors,
 } from '@dnd-kit/core';
 import { arrayMove, horizontalListSortingStrategy, SortableContext } from '@dnd-kit/sortable';
-import { Button } from '@zamp-platform/ui';
+import { Button, MessageSquareIcon } from '@zamp-platform/ui';
 import { cn } from '@zamp-platform/ui/utils';
-import { MessageSquare } from 'lucide-react';
 import { PaceNavbarItemId } from 'modules/pace/pace.types';
 import Link from 'next/link';
 import { usePathname, useSearchParams } from 'next/navigation';
@@ -123,7 +122,7 @@ const PaceNavbar = () => {
             onClick={() => setIsPaceSidebarOpen(true)}
             className='text-GRAY_700 hover:text-GRAY_1000 hover:bg-GRAY_200 h-7 w-7 shrink-0'
           >
-            <MessageSquare size={18} />
+            <MessageSquareIcon size={16} />
           </Button>
           <div className='bg-GRAY_300 mx-2 h-4 w-px shrink-0' />
         </>

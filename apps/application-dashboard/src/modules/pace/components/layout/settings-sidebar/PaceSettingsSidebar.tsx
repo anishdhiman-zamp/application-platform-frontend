@@ -1,21 +1,34 @@
 'use client';
 
-import { memo } from 'react';
+import { memo, useCallback } from 'react';
 import Link from 'next/link';
-import { usePathname } from 'next/navigation';
+import { usePathname, useSearchParams } from 'next/navigation';
 import OrgSwitcher from '@/components/layouts/dashboard-layout/components/OrgSwitcher';
 import { PACE_SETTINGS_TABS } from '@/modules/pace/pace.constants';
 import SidebarTab from 'components/layouts/dashboard-layout/components/SidebarTab';
 
 const PaceSettingsSidebar = () => {
   const pathname = usePathname();
+  const searchParams = useSearchParams();
+
+  const getHref = useCallback(
+    (path: string) => {
+      const sParam = searchParams?.get('s');
+
+      if (sParam) {
+        return `${path}?s=${sParam}`;
+      }
+
+      return path;
+    },
+    [searchParams],
+  );
 
   return (
     <div className='bg-BACKGROUND_GRAY_1 border-GRAY_400 flex h-full w-60 flex-col border-r'>
-      {/* Settings tabs */}
       <div className='flex flex-1 flex-col gap-y-[2px] px-2 pt-2 pb-4'>
         {PACE_SETTINGS_TABS.map((item) => (
-          <Link prefetch href={item.path} key={item.id} className='cursor-pointer'>
+          <Link prefetch href={getHref(item.path)} key={item.id} className='cursor-pointer'>
             <SidebarTab
               name={item.name}
               iconComponent={item.iconComponent}
@@ -25,7 +38,6 @@ const PaceSettingsSidebar = () => {
         ))}
       </div>
 
-      {/* Logout button */}
       <div className='mt-auto'>
         <OrgSwitcher isSidebarOpen={true} />
       </div>

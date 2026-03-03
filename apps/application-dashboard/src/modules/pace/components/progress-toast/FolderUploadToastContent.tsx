@@ -22,12 +22,7 @@ const FolderUploadToastContent = ({ uploadState, onCancel }: UploadProgressToast
           <X className='size-4' />
         </Button>
       </div>
-      {uploadState?.folderUpload && (
-        <FolderUploadProgressContent
-          folderProgress={uploadState?.folderUpload}
-          currentFile={uploadState?.currentUpload}
-        />
-      )}
+      {uploadState?.folderUpload && <FolderUploadProgressContent folderProgress={uploadState?.folderUpload} />}
     </div>
   );
 };

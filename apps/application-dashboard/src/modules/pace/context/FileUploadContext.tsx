@@ -1,26 +1,27 @@
 'use client';
 
 import { createContext, type ReactNode, useContext, useMemo } from 'react';
-import type { FileItem, FolderUploadProgress } from '@/modules/pace/components/files/file-tree.types';
+import type { FileItem, FolderUploadProgress, UploadProgress } from '@/modules/pace/components/files/file-tree.types';
 import { useFileUpload } from '@/modules/pace/hooks/useFileUpload';
+import { defaultFnType } from '@/types/commonTypes';
 
-interface UploadProgress {
-  fileName: string;
-  filePath: string;
-  loaded: number;
-  total: number;
-  percentage: number;
-  status: string;
-  uploadType: string;
+interface MultiFileUploadProgress {
+  totalFiles: number;
+  completedFiles: number;
+  totalBytes: number;
+  uploadedBytes: number;
 }
 
 interface UploadState {
   isUploading: boolean;
   currentUpload: UploadProgress | null;
+  activeUploads: Record<string, UploadProgress>;
   error: string | null;
   folderUpload: FolderUploadProgress | null;
+  multiFileUpload: MultiFileUploadProgress | null;
   uploadingPath: string | null;
-  uploadingItem: FileItem | null;
+  uploadingItems: FileItem[];
+  completedPaths: Set<string>;
 }
 
 interface FileUploadContextValue {
@@ -28,11 +29,12 @@ interface FileUploadContextValue {
   uploadFile: (file: File, targetPath: string) => Promise<void>;
   uploadFiles: (files: FileList | File[], basePath: string) => Promise<void>;
   uploadFolder: (files: FileList, basePath: string) => Promise<void>;
-  cancelUpload: () => void;
-  clearUploadingItem: () => void;
+  cancelUpload: defaultFnType;
+  clearUploadingItems: defaultFnType;
   isUploading: boolean;
   uploadingPath: string | null;
-  uploadingItem: FileItem | null;
+  uploadingItems: FileItem[];
+  uploadingPaths: Set<string>;
 }
 
 const FileUploadContext = createContext<FileUploadContextValue | null>(null);
@@ -42,8 +44,16 @@ interface FileUploadProviderProps {
 }
 
 export const FileUploadProvider = ({ children }: FileUploadProviderProps) => {
-  const { uploadState, uploadFile, uploadFiles, uploadFolder, cancelUpload, clearUploadingItem, isUploading } =
+  const { uploadState, uploadFile, uploadFiles, uploadFolder, cancelUpload, clearUploadingItems, isUploading } =
     useFileUpload();
+
+  const uploadingPaths = useMemo(
+    () =>
+      new Set(
+        uploadState.uploadingItems.map((item) => item.path).filter((path) => !uploadState.completedPaths.has(path)),
+      ),
+    [uploadState.uploadingItems, uploadState.completedPaths],
+  );
 
   const value = useMemo<FileUploadContextValue>(
     () => ({
@@ -52,12 +62,22 @@ export const FileUploadProvider = ({ children }: FileUploadProviderProps) => {
       uploadFiles,
       uploadFolder,
       cancelUpload,
-      clearUploadingItem,
+      clearUploadingItems,
       isUploading,
       uploadingPath: uploadState.uploadingPath,
-      uploadingItem: uploadState.uploadingItem,
+      uploadingItems: uploadState.uploadingItems,
+      uploadingPaths,
     }),
-    [uploadState, uploadFile, uploadFiles, uploadFolder, cancelUpload, clearUploadingItem, isUploading],
+    [
+      uploadState,
+      uploadFile,
+      uploadFiles,
+      uploadFolder,
+      cancelUpload,
+      clearUploadingItems,
+      isUploading,
+      uploadingPaths,
+    ],
   );
 
   return <FileUploadContext.Provider value={value}>{children}</FileUploadContext.Provider>;
