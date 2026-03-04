@@ -9,12 +9,6 @@ export interface BaseEventPayload {
   source_id?: string;
   timestamp?: string;
   payload?: string | MapAny;
-  /**
-   * Indicates if this event is from history replay (e.g., after page refresh).
-   * When true, the event was fetched from Redis stream history, not received in real-time.
-   * Frontend should render these events immediately without streaming animations.
-   */
-  is_history?: boolean;
 }
 
 /**
