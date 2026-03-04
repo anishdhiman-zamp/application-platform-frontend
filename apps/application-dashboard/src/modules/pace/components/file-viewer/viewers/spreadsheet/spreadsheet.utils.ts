@@ -24,9 +24,15 @@ export function parseWorkbook(workbook: XLSX.WorkBook, sheetName: string): Parse
 
   if (!hasAnyHeader) return { ...EMPTY_PARSE_RESULT };
 
-  const headers = rawHeaders.map((headerValue, index) =>
-    headerValue && String(headerValue).trim() ? String(headerValue) : `Column ${index + 1}`,
-  );
+  const seenHeaders = new Map<string, number>();
+  const headers = rawHeaders.map((headerValue, index) => {
+    const base = headerValue && String(headerValue).trim() ? String(headerValue) : `Column ${index + 1}`;
+    const count = seenHeaders.get(base) ?? 0;
+
+    seenHeaders.set(base, count + 1);
+
+    return count === 0 ? base : `${base}_${count}`;
+  });
 
   const rows = jsonData.slice(1).map((row) => {
     const rowData: Record<string, string> = {};
