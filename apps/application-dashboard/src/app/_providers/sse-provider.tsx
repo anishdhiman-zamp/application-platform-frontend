@@ -344,12 +344,21 @@ function handleGlobalConversationEvent(data: BaseEventPayload): void {
 
         if (!conversationId) return;
 
-        // Mark inactive; useChat moves content to messages for the active conversation.
         streamingStateStore.update(conversationId, (prev) => {
           if (!prev) return prev;
 
           return { ...prev, is_active: false };
         });
+
+        // Deferred cleanup: if no useChat instance processes this entry within 5s, delete it
+        // to prevent memory leaks from background conversations that have no active subscriber.
+        setTimeout(() => {
+          const entry = streamingStateStore.get(conversationId);
+
+          if (entry && !entry.is_active) {
+            streamingStateStore.delete(conversationId);
+          }
+        }, 5000);
         break;
       }
     }

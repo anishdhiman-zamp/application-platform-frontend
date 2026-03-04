@@ -1,4 +1,4 @@
-import { useCallback, useRef, useSyncExternalStore } from 'react';
+import { useCallback, useMemo, useRef, useSyncExternalStore } from 'react';
 
 import { streamingStateStore } from '../stores/streamingStateStore';
 
@@ -29,5 +29,5 @@ export function useActiveStreamingIds(): Set<string> {
 
   const activeIds = useSyncExternalStore(subscribe, getSnapshot, getSnapshot);
 
-  return new Set(activeIds);
+  return useMemo(() => new Set(activeIds), [activeIds]);
 }
