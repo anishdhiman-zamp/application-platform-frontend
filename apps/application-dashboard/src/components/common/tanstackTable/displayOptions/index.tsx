@@ -1,5 +1,6 @@
 import { ChangeEvent, FC, MouseEvent, useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { Responsive, WidthProvider } from 'react-grid-layout';
+import { useResource } from '@zamp-platform/battalion';
 import { Column } from '@zamp-platform/tanstack-table';
 import { Button, Checkbox } from '@zamp-platform/ui';
 import { SvgSpriteLoader } from '@zamp-platform/ui/assets';
@@ -10,7 +11,7 @@ import Image from 'next/image';
 import { SIZE_TYPES } from 'types/common/components';
 import { MapAny, ResponsiveGridLayoutType } from 'types/commonTypes';
 import { cn } from 'utils/common';
-import { useGetDatasetDisplayConfigQuery } from '@/apis/admin';
+import type { Dataset } from '@/app/(authenticated)/resources';
 import { POSITION } from '@/constants/common.constants';
 import useDisplayConfigUpdate from '@/hooks/useDisplayConfigUpdate';
 import { useResourceAccess } from '@/hooks/useResourceAccess';
@@ -55,14 +56,14 @@ const ColumnListingTk: FC<ColumnListingTkProps> = ({
     datasetId,
   );
 
-  const { data: displayConfigData } = useGetDatasetDisplayConfigQuery(
-    { datasetId },
-    { skip: !datasetId || !isCurrentUserAdmin },
-  );
+  const { data: datasets } = useResource<Dataset>('Dataset');
+  const currentDataset = datasets?.find((d) => d?.id === datasetId);
 
   const defaultColumnOrder = useMemo(() => {
-    return displayConfigData?.display_config?.map((item) => item?.column);
-  }, [displayConfigData]);
+    const metadata = currentDataset?.metadata as { display_config?: Array<{ column: string }> } | undefined;
+
+    return metadata?.display_config?.map((item) => item?.column);
+  }, [currentDataset?.metadata]);
 
   const handleCheckBoxClick = (column?: Column<MapAny>) => {
     if (!column) return;

@@ -160,12 +160,8 @@ export interface DatasetColumnDependencies {
   // Prefix for new columns (e.g., 'new_col_')
   NEW_COLUMN_PREFIX: { COL_: string };
 
-  // API hooks (optional - only needed if updating backend)
-  // These use permissive types to support RTK Query and other data fetching libraries
-  useGetDatasetDisplayConfigQuery?: (
-    args: { datasetId: string },
-    options: { skip: boolean; refetchOnMountOrArgChange: boolean },
-  ) => { data?: { display_config?: DisplayConfigItem[] } | undefined };
+  // Display config data from listing API (optional - replaces the old useGetDatasetDisplayConfigQuery hook)
+  displayConfigData?: { display_config?: DisplayConfigItem[] };
 
   useUpdateDatasetMutation?: () => [
     (params: {
@@ -202,18 +198,8 @@ export const DatasetColumnProvider: FC<DatasetColumnProviderProps> = ({
   const [datasetId, setDatasetId] = useState<string | null>(initialDatasetId || null);
   const isInitializedRef = useRef(false);
 
-  // API mutation for updating dataset (optional) - kept for potential future use
-  // const [updateDataset] = dependencies.useUpdateDatasetMutation?.() || [null, null];
-
-  // Get display config (needed for alias updates, optional)
-  // refetchOnMountOrArgChange: true ensures fresh display_config on remount.
-  const displayConfigData = dependencies.useGetDatasetDisplayConfigQuery?.(
-    { datasetId: datasetId || '' },
-    {
-      skip: !datasetId,
-      refetchOnMountOrArgChange: true,
-    },
-  )?.data;
+  // Display config data from listing API (passed via dependencies)
+  const displayConfigData = dependencies.displayConfigData;
 
   /**
    * Load column configuration from local storage

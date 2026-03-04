@@ -1,7 +1,7 @@
 import { useMemo } from 'react';
 import { useResourceAccess } from 'hooks/useResourceAccess';
 import { useParams, usePathname } from 'next/navigation';
-import { useGetAllDatasetsQuery } from '@/apis/admin';
+import { useGetAllDatasetsQuery } from '@/apis/dataset';
 import {
   DATASET_ACCESS_PRIVILEGES,
   PAGE_ACCESS_PRIVILEGES,
