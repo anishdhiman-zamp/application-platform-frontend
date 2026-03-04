@@ -27,7 +27,13 @@ import {
   ItemWithId,
 } from 'modules/data/data.types';
 import { N_A_VALUE } from 'modules/process/process.constant';
-import { DatasetFilterConfigResponseType, DatasetType, RuleFilters, ValueFormatType } from 'types/api/dataset.types';
+import {
+  DatasetFilterConfigResponseType,
+  DatasetType,
+  DisplayConfigType,
+  RuleFilters,
+  ValueFormatType,
+} from 'types/api/dataset.types';
 import { MapAny } from 'types/commonTypes';
 import { AggregationFunctionType, FilterModelType, FilterType, LogicalOperatorType } from 'types/components/table.type';
 import {
@@ -44,7 +50,6 @@ import { withLinkCellWrapper } from '@/components/common/table/CustomCellWrapper
 import CustomHeaderTk from '@/components/common/tanstackTable/customHeader';
 import { toast } from '@/components/common/toast/Toast';
 import { getDatasetDrilldownRoute, getPageDatasetDrilldownRoute } from '@/constants/routeConfig';
-import { DisplayConfigType } from '@/types/api/admin.types';
 import type { MissingFieldItemType } from '@/types/api/processApi.types';
 import CustomDateTimeEditor from 'components/common/table/CustomCellEditors/CustomDateTimeEditor';
 import CustomTagEditor from 'components/common/table/CustomCellEditors/CustomTagEditor';

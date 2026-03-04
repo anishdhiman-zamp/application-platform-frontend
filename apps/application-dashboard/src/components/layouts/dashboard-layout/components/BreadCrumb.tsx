@@ -14,7 +14,7 @@ import { useOnClickOutside } from 'hooks';
 import { useParams, usePathname, useRouter, useSearchParams } from 'next/navigation';
 import { BreadcrumbItem } from 'store/slices/layout-configs';
 import { capitalizeFirstLetter, cn } from 'utils/common';
-import { useGetAllDatasetsQuery } from '@/apis/admin';
+import { useGetAllDatasetsQuery } from '@/apis/dataset';
 import TooltipV2 from '@/components/common/TooltipV2';
 import { KEYBOARD_KEYS } from '@/constants/shortcuts';
 import { usePendingDatasetContext } from '@/context/pendingDataset.context';

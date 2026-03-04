@@ -31,8 +31,12 @@ import {
   IServerSideGetRowsRequest,
 } from 'ag-grid-community';
 import { AgGridReact } from 'ag-grid-react';
-import { useGetDatasetDisplayConfigQuery, useUpdateDatasetMutation } from 'apis/admin';
-import { useGetDatasetFilterConfigQuery, useLazyGetDatasetDataQuery, useUpdateDatasetDataMutation } from 'apis/dataset';
+import {
+  useGetDatasetFilterConfigQuery,
+  useLazyGetDatasetDataQuery,
+  useUpdateDatasetDataMutation,
+  useUpdateDatasetMutation,
+} from 'apis/dataset';
 import { useOnClickOutside } from 'hooks';
 import DatasetHistory from 'modules/data/components/datasetHistory/index';
 import ExportDataset from 'modules/data/components/exportDataset';
@@ -973,32 +977,38 @@ const DatasetByIdInner: FC<DatasetByIdProps> = ({
   );
 };
 
-// Dependencies for the DatasetColumnProvider
-const datasetColumnDependencies: DatasetColumnDependencies = {
-  getFromLocalStorage: getFromLocalStorage as (key: string) => string | null,
-  setToLocalStorage: setToLocalStorage as (key: string, value: string) => void,
-  LOCAL_STORAGE_KEYS: { COLUMN_ORDERING_VISIBILITY: LOCAL_STORAGE_KEYS.COLUMN_ORDERING_VISIBILITY },
-  getColumnConfigForDataset,
-  setColumnConfigForDataset,
-  deleteColumnConfigForDataset,
-  NEW_COLUMN_PREFIX: { COL_: NEW_COLUMN_PREFIX.COL_ },
-  useGetDatasetDisplayConfigQuery:
-    useGetDatasetDisplayConfigQuery as unknown as DatasetColumnDependencies['useGetDatasetDisplayConfigQuery'],
-  useUpdateDatasetMutation:
-    useUpdateDatasetMutation as unknown as DatasetColumnDependencies['useUpdateDatasetMutation'],
-  captureException,
-};
-
 // Outer component that provides the DatasetColumnContext
 const DatasetById: FC<DatasetByIdProps> = (props) => {
-  // When creating, don't pass API hooks to prevent unnecessary API calls
-  const dependencies = props.isCreating
-    ? {
-        ...datasetColumnDependencies,
-        useGetDatasetDisplayConfigQuery: undefined,
-        useUpdateDatasetMutation: undefined,
-      }
-    : datasetColumnDependencies;
+  const { data: allDatasets } = useResource<Dataset>('Dataset');
+  const currentDataset = allDatasets?.find((d) => d.id === props.id);
+
+  const displayConfigData = useMemo(() => {
+    const metadata = currentDataset?.metadata as
+      | { display_config?: Array<{ column: string; alias: string; is_hidden: boolean }> }
+      | undefined;
+
+    if (!metadata?.display_config) return undefined;
+
+    return { display_config: metadata.display_config };
+  }, [currentDataset?.metadata]);
+
+  const dependencies: DatasetColumnDependencies = useMemo(
+    () => ({
+      getFromLocalStorage: getFromLocalStorage as (key: string) => string | null,
+      setToLocalStorage: setToLocalStorage as (key: string, value: string) => void,
+      LOCAL_STORAGE_KEYS: { COLUMN_ORDERING_VISIBILITY: LOCAL_STORAGE_KEYS.COLUMN_ORDERING_VISIBILITY },
+      getColumnConfigForDataset,
+      setColumnConfigForDataset,
+      deleteColumnConfigForDataset,
+      NEW_COLUMN_PREFIX: { COL_: NEW_COLUMN_PREFIX.COL_ },
+      displayConfigData: props.isCreating ? undefined : displayConfigData,
+      useUpdateDatasetMutation: props.isCreating
+        ? undefined
+        : (useUpdateDatasetMutation as unknown as DatasetColumnDependencies['useUpdateDatasetMutation']),
+      captureException,
+    }),
+    [props.isCreating, displayConfigData],
+  );
 
   return (
     <DatasetColumnProvider datasetId={props.id as string} dependencies={dependencies}>

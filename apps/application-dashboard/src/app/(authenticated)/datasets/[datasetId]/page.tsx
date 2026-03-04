@@ -2,7 +2,7 @@
 
 import dynamic from 'next/dynamic';
 import { useParams } from 'next/navigation';
-import { useGetAllDatasetsQuery } from '@/apis/admin';
+import { useGetAllDatasetsQuery } from '@/apis/dataset';
 import ImageLoader from '@/components/common/loader/ImageLoader';
 import { ZAMP_LOGO_LOADER_SVG } from '@/constants/icons';
 

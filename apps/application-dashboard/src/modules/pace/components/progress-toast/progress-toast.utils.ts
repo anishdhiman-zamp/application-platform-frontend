@@ -4,6 +4,7 @@ import { UPLOAD_TYPE } from '@/modules/pace/components/files/file-tree.types';
 
 export const getUploadType = (uploadState: UploadState): UploadToastType | null => {
   if (uploadState.folderUpload !== null) return 'folder';
+  if (uploadState.multiFileUpload !== null) return 'multi-file';
   if (uploadState.currentUpload?.uploadType === UPLOAD_TYPE.CHUNKED) return 'chunked';
 
   return null;

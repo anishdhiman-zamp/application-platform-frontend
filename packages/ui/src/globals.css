@@ -20,6 +20,12 @@
     mix-blend-mode: multiply !important;
     border-radius: 0px !important;
   }
+
+  .pdfSlick .textLayer {
+    user-select: none !important;
+    -webkit-user-select: none !important;
+    cursor: default !important;
+  }
 }
 
 /*

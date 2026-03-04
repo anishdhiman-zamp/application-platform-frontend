@@ -1,6 +1,11 @@
 import { REQUEST_TYPES } from '@zamp-platform/api';
 import { API_ENDPOINTS } from 'apis/apiEndpoint.constants';
 import {
+  DatasetListingAllResponseType,
+  UpdateDatasetRequestType,
+  UpdateDatasetResponseType,
+} from 'types/api/dataset.types';
+import {
   AudiencesByDatasetIdRequestType,
   AudiencesByDatasetIdResponseType,
   DatasetActionStatusRequestType,
@@ -181,6 +186,24 @@ const Dataset = baseApi.injectEndpoints({
         method: REQUEST_TYPES.POST,
       }),
     }),
+    getAllDatasets: builder.query<DatasetListingAllResponseType, void>({
+      query: () => ({
+        url: API_ENDPOINTS.DATASET_ALL_GET,
+      }),
+      providesTags: [APITags.GET_DATASET_ALL_LISTING],
+    }),
+    updateDataset: builder.mutation<UpdateDatasetResponseType, UpdateDatasetRequestType>({
+      query: ({ datasetId, ...rest }) => ({
+        url: formRequestUrlWithParams(API_ENDPOINTS.DATASET_UPDATE_PATCH, { datasetId }),
+        method: REQUEST_TYPES.PATCH,
+        body: rest,
+      }),
+      onQueryStarted: async (arg, { dispatch }) => {
+        if (arg.invalidateTags) {
+          dispatch(baseApi.util.invalidateTags(arg.invalidateTags));
+        }
+      },
+    }),
   }),
 });
 
@@ -211,4 +234,6 @@ export const {
   useDeleteRuleMutation,
   useLazyDownloadFileQuery,
   usePostFormsSignedUploadAckMutation,
+  useGetAllDatasetsQuery,
+  useUpdateDatasetMutation,
 } = Dataset;
