@@ -50,7 +50,13 @@ const SpreadsheetViewer = memo(({ content, mediaUrl, fileExtension }: Spreadshee
     const rowNumCol: ColumnDef<Record<string, string>> = {
       id: ROW_NUMBER_COLUMN_ID,
       header: '',
-      cell: ({ row }) => row.index + 1,
+      cell: ({ row, table: t }) => {
+        const { pageIndex, pageSize } = t.getState().pagination;
+        const paginatedRows = t.getPaginationRowModel().rows;
+        const visualIndex = paginatedRows.indexOf(row);
+
+        return pageIndex * pageSize + visualIndex + 1;
+      },
       size: 40,
       enableSorting: false,
       enableGlobalFilter: false,
