@@ -52,8 +52,7 @@ const SpreadsheetViewer = memo(({ content, mediaUrl, fileExtension }: Spreadshee
       header: '',
       cell: ({ row, table: t }) => {
         const { pageIndex, pageSize } = t.getState().pagination;
-        const paginatedRows = t.getPaginationRowModel().rows;
-        const visualIndex = paginatedRows.indexOf(row);
+        const visualIndex = t.getPaginationRowModel().rows.findIndex((r) => r.id === row.id);
 
         return pageIndex * pageSize + visualIndex + 1;
       },
