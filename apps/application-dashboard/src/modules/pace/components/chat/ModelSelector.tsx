@@ -13,7 +13,9 @@ interface ModelSelectorProps {
 }
 
 const ModelSelector: FC<ModelSelectorProps> = ({ value, onChange, className }) => {
-  const { data, isLoading } = useListChatModelsQuery();
+  const { data, isLoading } = useListChatModelsQuery(undefined, {
+    refetchOnMountOrArgChange: false,
+  });
 
   const models = data?.models ?? [];
   const defaultModel = useMemo(() => models.find((m) => m.is_default), [models]);

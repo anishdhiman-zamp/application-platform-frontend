@@ -2,15 +2,16 @@
 
 import type { FC } from 'react';
 import { Button } from '@zamp-platform/ui';
-import { MessagesSquare } from 'lucide-react';
+import { Loader, MessagesSquare } from 'lucide-react';
 import type { FeedbackItemType } from '@/types/api/feedbacks.types';
 
 interface ChatHistoryItemProps {
   conversation: FeedbackItemType;
   onSelect: (id: string | null, title?: string) => void;
+  isStreaming?: boolean;
 }
 
-const ChatHistoryItem: FC<ChatHistoryItemProps> = ({ conversation, onSelect }) => {
+const ChatHistoryItem: FC<ChatHistoryItemProps> = ({ conversation, onSelect, isStreaming }) => {
   const handleClick = () => {
     onSelect(conversation?.id, conversation?.title);
   };
@@ -25,6 +26,7 @@ const ChatHistoryItem: FC<ChatHistoryItemProps> = ({ conversation, onSelect }) =
       <p className='f-13-500 text-gray-1000 line-clamp-1 text-left first-letter:uppercase'>
         {conversation?.title || 'Untitled conversation'}
       </p>
+      {isStreaming && <Loader size={14} className='ml-auto shrink-0 animate-spin text-gray-500' />}
     </Button>
   );
 };
