@@ -50,17 +50,8 @@ export const API_ENDPOINTS = {
   DELETE_AUDIENCE_FROM_DATASET_ACCESS: `datasets/{{datasetId}}/audiences`,
   DATASET_RULES_LISTING_GET: `datasets/rules/listing`,
   DATASET_FILE_IMPORT_HISTORY_GET: `datasets/{{datasetId}}/file-imports/history`,
-
-  // admin
-  ADMIN_DATASET_DISPLAY_CONFIG_GET: `datasets/{{datasetId}}/display-config`,
-  ADMIN_DATASET_DISPLAY_CONFIG_POST: `datasets/{{datasetId}}/display-config`,
-  ADMIN_DATASET_DAG_GET: `datasets/ops/dag`,
-  ADMIN_DATASET_CREATE_POST: `datasets/ops/create`,
-  ADMIN_DATASET_TRANSFORM_POST: `datasets/ops/transform`,
-  ADMIN_DATASET_ALL_GET: `/datasets/listing-all`,
-  ADMIN_DATASET_TEMPLATES_GET: `/datasets/templates/listing`,
-  ADMIN_DATASET_UPDATE_PATCH: `/datasets/{{datasetId}}/update`,
-  ADMIN_DATASET_TEMPLATES_UPSERT_POST: `/datasets/templates/upsert`,
+  DATASET_ALL_GET: `/datasets/listing-all`,
+  DATASET_UPDATE_PATCH: `/datasets/{{datasetId}}/update`,
 
   // file-import
   DATASET_SIGNED_UPLOAD_URL_POST: `datasets/file-imports/init`,

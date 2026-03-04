@@ -2,6 +2,7 @@ import { DATASET_ACTION_STATUS } from 'modules/data/data.types';
 import { ResourceAudienceType } from 'types/api/auth.types';
 import { MapAny } from 'types/commonTypes';
 import { FilterModelType } from 'types/components/table.type';
+import { APITags } from '@/constants/api.constants';
 import { CUSTOM_COLUMNS_TYPE, VALUE_FORMAT_TYPE } from 'components/common/table/table.types';
 import { FILTER_TYPES } from 'components/filter/filter.types';
 import { CONDITION_OPERATOR_TYPE } from 'components/filter/filters.constants';
@@ -365,4 +366,66 @@ export type DownloadFileResponseType = {
 export interface GetDatasetFilterConfigResponseType {
   config: { is_file_import_enabled: boolean; is_fx_enabled: boolean };
   data: DatasetFilterConfigResponseType[];
+}
+
+export type DisplayConfigType = {
+  column: string;
+  alias?: string;
+  is_hidden: boolean;
+  is_editable: boolean;
+  type?: CUSTOM_COLUMNS_TYPE;
+  config?: {
+    value_format?: ValueFormatType[];
+  };
+};
+
+export interface DatasetColumnConfig {
+  is_required: boolean;
+}
+
+export interface DatasetConfig {
+  columns: Record<string, DatasetColumnConfig>;
+  custom_column_groups: { type: string; config: Record<string, string> }[];
+}
+
+export type UpdateDatasetRequestType = {
+  datasetId: string;
+  title?: string;
+  description?: string;
+  dedup_columns?: string[];
+  cluster_columns?: string[];
+  partition_columns?: string[];
+  order_by_column?: string;
+  display_config?: DisplayConfigType[];
+  dataset_config?: DatasetConfig;
+  invalidateTags?: APITags[];
+};
+
+export type UpdateDatasetResponseType = {
+  action_id: string;
+  dataset_id: string;
+};
+
+export type DatasetListingAllType = {
+  ID: string;
+  Title: string;
+  Description: string;
+  CreatedAt: string;
+  UpdatedAt: string;
+  CreatedBy: string;
+  OrganizationId: string;
+  Metadata: DatasetMetadataType;
+};
+
+export type DatasetListingAllResponseType = {
+  datasets: DatasetListingAllType[];
+};
+
+export enum DISPLAY_CONFIG_HEADERS {
+  COLUMN = 'column',
+  ALIAS = 'alias',
+  IS_HIDDEN = 'is_hidden',
+  IS_EDITABLE = 'is_editable',
+  TYPE = 'type',
+  CONFIG = 'config',
 }

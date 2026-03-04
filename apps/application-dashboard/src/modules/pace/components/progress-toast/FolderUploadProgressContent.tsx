@@ -1,20 +1,42 @@
 'use client';
 
+import { useEffect, useMemo, useState } from 'react';
 import { Progress, ShimmerText } from '@zamp-platform/ui';
-import type { UploadProgress } from 'modules/pace/components/progress-toast/progress-toast.types';
 import type { FolderUploadProgress } from '@/modules/pace/components/files/file-tree.types';
 import { formatFileSize } from '@/modules/pace/components/files/file-tree.utils';
+import { FILE_NAME_CYCLE_INTERVAL_MS } from '@/modules/pace/components/files/files.constants';
 
 interface FolderUploadProgressContentProps {
   folderProgress: FolderUploadProgress;
-  currentFile: UploadProgress | null;
 }
 
-const FolderUploadProgressContent = ({ folderProgress, currentFile }: FolderUploadProgressContentProps) => {
+const FolderUploadProgressContent = ({ folderProgress }: FolderUploadProgressContentProps) => {
+  const [displayIndex, setDisplayIndex] = useState(0);
+
   const overallPercentage =
     folderProgress?.totalBytes > 0 ? Math.round((folderProgress?.uploadedBytes / folderProgress?.totalBytes) * 100) : 0;
 
   const currentFileIndex = Math.min(folderProgress?.completedFiles + 1, folderProgress?.totalFiles);
+  const activeFileNames = useMemo(
+    () => Object.values(folderProgress?.activeFiles ?? {}).map((f) => f.fileName),
+    [folderProgress?.activeFiles],
+  );
+  const safeIndex = activeFileNames.length > 0 ? displayIndex % activeFileNames.length : 0;
+  const displayFileName = activeFileNames[safeIndex] ?? null;
+
+  useEffect(() => {
+    if (activeFileNames?.length <= 1) {
+      setDisplayIndex(0);
+
+      return;
+    }
+
+    const interval = setInterval(() => {
+      setDisplayIndex((prev) => (prev + 1) % activeFileNames?.length);
+    }, FILE_NAME_CYCLE_INTERVAL_MS);
+
+    return () => clearInterval(interval);
+  }, [activeFileNames?.length]);
 
   return (
     <div className='flex w-full flex-col gap-y-2'>
@@ -22,9 +44,9 @@ const FolderUploadProgressContent = ({ folderProgress, currentFile }: FolderUplo
         {currentFileIndex} of {folderProgress?.totalFiles} files
       </div>
 
-      {currentFile && (
+      {displayFileName && (
         <ShimmerText
-          text={currentFile.fileName}
+          text={displayFileName}
           className='block max-w-[240px]'
           baseTextClassName='f-13-500 text-GRAY_1000 truncate'
         />

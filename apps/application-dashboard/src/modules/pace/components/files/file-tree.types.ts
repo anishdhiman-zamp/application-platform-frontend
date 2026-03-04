@@ -1,4 +1,5 @@
 import type { LucideIcon } from 'lucide-react';
+import { defaultFnType } from '@/types/commonTypes';
 
 export const SORT_OPTION = {
   DATE_MODIFIED: 'date_modified',
@@ -122,7 +123,7 @@ export interface FileTreeProps {
   onFileCreated?: (newFile: FileItem) => void;
   onUploadFiles?: (files: FileList, targetPath: string) => void;
   onUploadFolder?: (files: FileList, targetPath: string) => void;
-  onCollapseAllChange?: (collapseAll: () => void) => void;
+  onCollapseAllChange?: (collapseAll: defaultFnType) => void;
 }
 
 /**
@@ -206,13 +207,21 @@ export interface FolderUploadProgress {
   totalFiles: number;
   completedFiles: number;
   currentFile: UploadProgress | null;
+  activeFiles: Record<string, UploadProgress>;
   totalBytes: number;
   uploadedBytes: number;
 }
 
-/**
- * Extended upload state that includes folder upload progress
- */
 export interface ExtendedUploadState extends UploadState {
   folderUpload: FolderUploadProgress | null;
+}
+
+export interface MultiFileUploadState {
+  isUploading: boolean;
+  activeUploads: Record<string, UploadProgress>;
+  currentUpload: UploadProgress | null;
+  error: string | null;
+  folderUpload: FolderUploadProgress | null;
+  uploadingPath: string | null;
+  uploadingItems: FileItem[];
 }

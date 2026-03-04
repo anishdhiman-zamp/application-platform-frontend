@@ -63,7 +63,7 @@ const PdfArtifact = ({
 
   const { viewerRef, usePDFSlickStore, PDFSlickViewer, isDocumentLoaded, error } = usePDFSlick(
     signedUrl?.signed_url || '',
-    { scaleValue: 'page-fit' },
+    { scaleValue: 'page-fit', annotationEditorMode: -1 },
   );
 
   const isCommonLoading = useMemo(

@@ -1,4 +1,5 @@
 import FolderUploadToastContent from 'modules/pace/components/progress-toast/FolderUploadToastContent';
+import MultiFileUploadToastContent from 'modules/pace/components/progress-toast/MultiFileUploadToastContent';
 import type {
   UploadProgressToastProps,
   UploadToastType,
@@ -7,5 +8,6 @@ import SingleFileUploadToastContent from 'modules/pace/components/progress-toast
 
 export const UPLOAD_TOAST_CONTENT_MAP: Record<UploadToastType, React.FC<UploadProgressToastProps>> = {
   folder: FolderUploadToastContent,
+  'multi-file': MultiFileUploadToastContent,
   chunked: SingleFileUploadToastContent,
 };
