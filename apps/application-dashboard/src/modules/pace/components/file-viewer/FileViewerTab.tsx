@@ -11,6 +11,7 @@ import FileNotFoundError from '@/modules/pace/components/file-viewer/FileNotFoun
 import FileViewerHeader, {
   type HtmlViewMode,
   type MarkdownViewMode,
+  type SpreadsheetViewMode,
 } from '@/modules/pace/components/file-viewer/FileViewerHeader';
 import AudioViewer from '@/modules/pace/components/file-viewer/viewers/AudioViewer';
 import HtmlPreviewViewer from '@/modules/pace/components/file-viewer/viewers/HtmlPreviewViewer';
@@ -18,7 +19,12 @@ import ImageViewer from '@/modules/pace/components/file-viewer/viewers/ImageView
 import { getMonacoLanguage } from '@/modules/pace/components/file-viewer/viewers/MonacoCodeEditor';
 import VideoViewer from '@/modules/pace/components/file-viewer/viewers/VideoViewer';
 import { getMediaUrl } from '@/modules/pace/components/files/file-tree.utils';
-import { FILE_CATEGORY, FILE_TOAST_MESSAGES, type FileCategory } from '@/modules/pace/components/files/files.constants';
+import {
+  FILE_CATEGORY,
+  FILE_TOAST_MESSAGES,
+  type FileCategory,
+  TEXT_SPREADSHEET_EXTENSIONS,
+} from '@/modules/pace/components/files/files.constants';
 import useFileViewer from '@/modules/pace/hooks/useFileViewer';
 import { defaultFnType } from '@/types/commonTypes';
 
@@ -37,6 +43,11 @@ const MilkdownEditor = dynamic(() => import('./viewers/MilkdownEditor'), {
   loading: () => <ImageLoader imageSrc={ZAMP_LOGO_LOADER_SVG} width={140} height={140} />,
 });
 
+const SpreadsheetViewer = dynamic(() => import('./viewers/spreadsheet/SpreadsheetViewer'), {
+  ssr: false,
+  loading: () => <ImageLoader imageSrc={ZAMP_LOGO_LOADER_SVG} width={140} height={140} />,
+});
+
 interface FileViewerContentProps {
   filePath: string;
   fileName: string;
@@ -51,6 +62,7 @@ interface FileViewerContentProps {
   onClose: defaultFnType;
   markdownViewMode?: MarkdownViewMode;
   htmlViewMode?: HtmlViewMode;
+  spreadsheetViewMode?: SpreadsheetViewMode;
 }
 
 const FileViewerContent = memo(
@@ -68,6 +80,7 @@ const FileViewerContent = memo(
     onClose,
     markdownViewMode = 'milkdown',
     htmlViewMode = 'preview',
+    spreadsheetViewMode = 'table',
   }: FileViewerContentProps) => {
     const fallbackMediaUrl = getMediaUrl(filePath);
     const effectiveMediaUrl = mediaUrl || fallbackMediaUrl;
@@ -111,6 +124,28 @@ const FileViewerContent = memo(
 
         return <HtmlPreviewViewer content={content} />;
 
+      case FILE_CATEGORY.SPREADSHEET: {
+        const isTextSpreadsheet = (TEXT_SPREADSHEET_EXTENSIONS as readonly string[]).includes(
+          fileExtension.toLowerCase(),
+        );
+
+        if (isTextSpreadsheet && spreadsheetViewMode === 'raw') {
+          if (content === null) {
+            return <ImageLoader imageSrc={ZAMP_LOGO_LOADER_SVG} width={140} height={140} />;
+          }
+
+          return <MonacoCodeEditor content={content} language='plaintext' onChange={onContentChange} />;
+        }
+
+        return (
+          <SpreadsheetViewer
+            content={isTextSpreadsheet ? content : undefined}
+            mediaUrl={!isTextSpreadsheet ? effectiveMediaUrl : undefined}
+            fileExtension={fileExtension}
+          />
+        );
+      }
+
       case FILE_CATEGORY.CODE:
         if (content === null) {
           return <ImageLoader imageSrc={ZAMP_LOGO_LOADER_SVG} width={140} height={140} />;
@@ -138,6 +173,7 @@ interface FileViewerTabProps {
 const FileViewerTab = memo(({ filePath, isActive, onCloseTab }: FileViewerTabProps) => {
   const [markdownViewMode, setMarkdownViewMode] = useState<MarkdownViewMode>('milkdown');
   const [htmlViewMode, setHtmlViewMode] = useState<HtmlViewMode>('preview');
+  const [spreadsheetViewMode, setSpreadsheetViewMode] = useState<SpreadsheetViewMode>('table');
 
   const handleSaveError = useCallback((error: unknown) => {
     captureException(error);
@@ -179,6 +215,9 @@ const FileViewerTab = memo(({ filePath, isActive, onCloseTab }: FileViewerTabPro
   const fileName = filePath.split('/').pop() || filePath;
   const isMarkdown = fileCategory === FILE_CATEGORY.MARKDOWN;
   const isHtml = fileCategory === FILE_CATEGORY.HTML;
+  const isTextSpreadsheet =
+    fileCategory === FILE_CATEGORY.SPREADSHEET &&
+    (TEXT_SPREADSHEET_EXTENSIONS as readonly string[]).includes(fileExtension.toLowerCase());
 
   if (isError && isEditable) {
     return <FileNotFoundError fileName={fileName} onClose={handleCloseTab} />;
@@ -193,10 +232,13 @@ const FileViewerTab = memo(({ filePath, isActive, onCloseTab }: FileViewerTabPro
         lastSavedAt={lastSavedAt}
         isMarkdown={isMarkdown}
         isHtml={isHtml}
+        isTextSpreadsheet={isTextSpreadsheet}
         viewMode={markdownViewMode}
         htmlViewMode={htmlViewMode}
+        spreadsheetViewMode={spreadsheetViewMode}
         onViewModeChange={setMarkdownViewMode}
         onHtmlViewModeChange={setHtmlViewMode}
+        onSpreadsheetViewModeChange={setSpreadsheetViewMode}
       />
       <div className='min-h-0 flex-1 overflow-hidden'>
         <FileViewerContent
@@ -213,6 +255,7 @@ const FileViewerTab = memo(({ filePath, isActive, onCloseTab }: FileViewerTabPro
           onClose={handleCloseTab}
           markdownViewMode={markdownViewMode}
           htmlViewMode={htmlViewMode}
+          spreadsheetViewMode={spreadsheetViewMode}
         />
       </div>
     </div>

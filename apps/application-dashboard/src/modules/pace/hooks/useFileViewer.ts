@@ -3,7 +3,11 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { useLazyReadFileContentQuery, useLazyReadFileQuery, useWriteFileMutation } from '@/apis/filesystem';
 import { getFileCategory, getFileExtension, getMediaUrl } from '@/modules/pace/components/files/file-tree.utils';
-import { FILE_CATEGORY, type FileCategory } from '@/modules/pace/components/files/files.constants';
+import {
+  FILE_CATEGORY,
+  type FileCategory,
+  TEXT_SPREADSHEET_EXTENSIONS,
+} from '@/modules/pace/components/files/files.constants';
 import { useFileViewerContext } from '@/modules/pace/context/FileViewerContext';
 
 const AUTO_SAVE_DELAY_MS = 1000;
@@ -67,13 +71,21 @@ export const useFileViewer = ({
     return getFileExtension(filePath);
   }, [filePath]);
 
+  const isTextSpreadsheet = useMemo(() => {
+    return (
+      fileCategory === FILE_CATEGORY.SPREADSHEET &&
+      (TEXT_SPREADSHEET_EXTENSIONS as readonly string[]).includes(fileExtension)
+    );
+  }, [fileCategory, fileExtension]);
+
   const isEditable = useMemo(() => {
     return (
       fileCategory === FILE_CATEGORY.CODE ||
       fileCategory === FILE_CATEGORY.MARKDOWN ||
-      fileCategory === FILE_CATEGORY.HTML
+      fileCategory === FILE_CATEGORY.HTML ||
+      isTextSpreadsheet
     );
-  }, [fileCategory]);
+  }, [fileCategory, isTextSpreadsheet]);
 
   const saveFile = useCallback(async () => {
     if (!filePath) return;
