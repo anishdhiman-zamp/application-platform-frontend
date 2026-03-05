@@ -7,6 +7,8 @@ class StreamingStateStore {
   private states = new Map<string, StreamingState>();
   private listeners = new Map<string, Set<Listener>>();
   private globalListeners = new Set<Listener>();
+  private pendingNotifications = new Set<string>();
+  private flushScheduled = false;
 
   get(conversationId: string): StreamingState | null {
     return this.states.get(conversationId) ?? null;
@@ -18,7 +20,7 @@ class StreamingStateStore {
     } else {
       this.states.set(conversationId, state);
     }
-    this.notify(conversationId);
+    this.scheduleNotify(conversationId);
   }
 
   update(conversationId: string, updater: (prev: StreamingState | null) => StreamingState | null): void {
@@ -29,7 +31,7 @@ class StreamingStateStore {
 
   delete(conversationId: string): void {
     this.states.delete(conversationId);
-    this.notify(conversationId);
+    this.scheduleNotify(conversationId);
   }
 
   has(conversationId: string): boolean {
@@ -83,15 +85,37 @@ class StreamingStateStore {
     }
   }
 
-  private notify(conversationId: string): void {
-    const listeners = this.listeners.get(conversationId);
-    if (listeners) {
-      for (const listener of listeners) {
-        listener();
+  /**
+   * Batches notifications via microtask so multiple rapid store updates
+   * (e.g. from SSE delta events) coalesce into a single listener flush,
+   * preventing React's "Maximum update depth exceeded" error.
+   */
+  private scheduleNotify(conversationId: string): void {
+    this.pendingNotifications.add(conversationId);
+    if (!this.flushScheduled) {
+      this.flushScheduled = true;
+      queueMicrotask(() => this.flush());
+    }
+  }
+
+  private flush(): void {
+    const conversationIds = Array.from(this.pendingNotifications);
+    this.pendingNotifications.clear();
+    this.flushScheduled = false;
+
+    for (const conversationId of conversationIds) {
+      const listeners = this.listeners.get(conversationId);
+      if (listeners) {
+        for (const listener of listeners) {
+          listener();
+        }
       }
     }
-    for (const listener of this.globalListeners) {
-      listener();
+
+    if (conversationIds.length > 0 && this.globalListeners.size > 0) {
+      for (const listener of this.globalListeners) {
+        listener();
+      }
     }
   }
 }
