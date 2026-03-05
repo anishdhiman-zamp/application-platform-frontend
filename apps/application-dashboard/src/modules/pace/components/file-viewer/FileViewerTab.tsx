@@ -2,6 +2,7 @@
 
 import { memo, useCallback, useState } from 'react';
 import { captureException } from '@sentry/browser';
+import { isNotFoundError } from '@zamp-platform/api';
 import UnsupportedFileView from 'modules/pace/components/file-viewer/viewers/UnsupportedFileView';
 import dynamic from 'next/dynamic';
 import { toast } from 'sonner';
@@ -145,6 +146,8 @@ const FileViewerTab = memo(({ filePath, isActive, onCloseTab }: FileViewerTabPro
   }, []);
 
   const handleLoadError = useCallback((error: unknown) => {
+    if (isNotFoundError(error)) return;
+
     captureException(error);
     toast.error(FILE_TOAST_MESSAGES.FAILED_TO_LOAD_FILE);
   }, []);

@@ -49,9 +49,12 @@ export const useFileViewer = ({
   const { getFileState, initFileState, forceUpdateFileState, updateFileContent, markFileSaved } =
     useFileViewerContext();
 
-  const [fetchFileMetadata] = useLazyReadFileQuery();
-  const [fetchFileContent, { isLoading, isError, error }] = useLazyReadFileContentQuery();
+  const [fetchFileMetadata, { isError: isMetadataError, error: metadataError }] = useLazyReadFileQuery();
+  const [fetchFileContent, { isLoading, isError: isContentError, error: contentError }] = useLazyReadFileContentQuery();
   const [writeFile, { isLoading: isSaving }] = useWriteFileMutation();
+
+  const isError = isMetadataError || isContentError;
+  const error = metadataError ?? contentError;
 
   const fileState = filePath ? getFileState(filePath) : undefined;
 
@@ -74,6 +77,14 @@ export const useFileViewer = ({
       fileCategory === FILE_CATEGORY.HTML
     );
   }, [fileCategory]);
+
+  const mediaUrl = useMemo(() => {
+    if (!filePath || isEditable) return null;
+
+    const baseUrl = getMediaUrl(filePath);
+
+    return mediaMtime ? `${baseUrl}&v=${mediaMtime}` : baseUrl;
+  }, [filePath, isEditable, mediaMtime]);
 
   const saveFile = useCallback(async () => {
     if (!filePath) return;
@@ -135,34 +146,35 @@ export const useFileViewer = ({
     [filePath, updateFileContent, scheduleAutoSave],
   );
 
-  useEffect(() => {
-    const loadFile = async () => {
-      if (!filePath) return;
+  const loadFile = useCallback(async () => {
+    if (!filePath) return;
 
-      const existingState = getFileState(filePath);
+    const existingState = getFileState(filePath);
 
-      if (existingState) {
-        return;
-      }
+    if (existingState) {
+      return;
+    }
 
-      if (!isEditable) {
-        return;
-      }
+    if (!isEditable) {
+      return;
+    }
 
-      try {
-        const [metadataResult, contentResult] = await Promise.all([
-          fetchFileMetadata({ path: filePath }).unwrap(),
-          fetchFileContent({ path: filePath }).unwrap(),
-        ]);
+    try {
+      const [metadataResult, contentResult] = await Promise.all([
+        fetchFileMetadata({ path: filePath }).unwrap(),
+        fetchFileContent({ path: filePath }).unwrap(),
+      ]);
 
-        initFileState(filePath, contentResult ?? '', metadataResult.mtime_ms);
-      } catch (err) {
-        onLoadError?.(err);
-      }
-    };
-
-    loadFile();
+      initFileState(filePath, contentResult ?? '', metadataResult.mtime_ms);
+    } catch (err) {
+      onLoadError?.(err);
+    }
   }, [filePath, isEditable, fetchFileMetadata, fetchFileContent, getFileState, initFileState, onLoadError]);
+
+  // Load file on mount
+  useEffect(() => {
+    loadFile();
+  }, [loadFile]);
 
   // Cleanup timer on unmount
   useEffect(() => {
@@ -173,24 +185,9 @@ export const useFileViewer = ({
     };
   }, []);
 
-  // Save on tab switch (when becoming inactive)
-  useEffect(() => {
-    const handleVisibilityChange = () => {
-      if (document.hidden && fileState?.isDirty) {
-        saveFile();
-      }
-    };
-
-    document.addEventListener('visibilitychange', handleVisibilityChange);
-
-    return () => {
-      document.removeEventListener('visibilitychange', handleVisibilityChange);
-    };
-  }, [fileState?.isDirty, saveFile]);
-
   // Polling for editable files - detect external changes
   useEffect(() => {
-    if (!filePath || !isEditable || !isActive) return;
+    if (!filePath || !isEditable || !isActive || isError) return;
 
     const pollForChanges = async () => {
       const currentState = getFileState(filePath);
@@ -205,8 +202,9 @@ export const useFileViewer = ({
 
           forceUpdateFileState(filePath, content ?? '', metadata.mtime_ms);
         }
-      } catch {
-        // Silently ignore polling errors
+      } catch (err) {
+        onLoadError?.(err);
+        // Error state is tracked via the RTK Query result
       }
     };
 
@@ -217,7 +215,7 @@ export const useFileViewer = ({
 
   // Polling for media files - detect external changes and update URL
   useEffect(() => {
-    if (!filePath || isEditable || !isActive) return;
+    if (!filePath || isEditable || !isActive || isError) return;
 
     const pollForMediaChanges = async () => {
       try {
@@ -228,8 +226,9 @@ export const useFileViewer = ({
         } else if (mediaMtime === null) {
           setMediaMtime(metadata.mtime_ms);
         }
-      } catch {
-        // Silently ignore polling errors
+      } catch (err) {
+        // Error state is tracked via the RTK Query result
+        onLoadError?.(err);
       }
     };
 
@@ -239,15 +238,6 @@ export const useFileViewer = ({
 
     return () => clearInterval(intervalId);
   }, [filePath, isEditable, isActive, mediaMtime, fetchFileMetadata]);
-
-  const mediaUrl = useMemo(() => {
-    if (!filePath || isEditable) return null;
-
-    const baseUrl = getMediaUrl(filePath);
-
-    // baseUrl already contains ?raw=true, so use & for additional params
-    return mediaMtime ? `${baseUrl}&v=${mediaMtime}` : baseUrl;
-  }, [filePath, isEditable, mediaMtime]);
 
   return {
     content: fileState?.content ?? null,

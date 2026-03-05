@@ -3,6 +3,9 @@ import { getFromLocalStorage, LOCAL_STORAGE_KEYS } from '@zamp-platform/utils';
 
 import { BASE_API_URL, DEFAULT_REGION, ENVIRONMENT, MULTI_REGION_ENABLED } from './constants';
 
+export const isNotFoundError = (error: unknown): boolean =>
+  typeof error === 'object' && error !== null && 'status' in error && (error as { status: number }).status === 404;
+
 function getSavedLoginEmail(): string {
   const info = getFromLocalStorage(LOCAL_STORAGE_KEYS.LAST_LOGIN_INFO);
   if (info) {
