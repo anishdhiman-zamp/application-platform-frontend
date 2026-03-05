@@ -37,7 +37,7 @@ const getDraftsFromStorage = (): ChatDraft[] => {
 const evictOldDrafts = (drafts: ChatDraft[]): ChatDraft[] => {
   if (drafts.length <= MAX_DRAFTS) return drafts;
 
-  return drafts.sort((a, b) => b.timestamp - a.timestamp).slice(0, MAX_DRAFTS);
+  return [...drafts].sort((a, b) => b.timestamp - a.timestamp).slice(0, MAX_DRAFTS);
 };
 
 const saveDraftsToStorage = (drafts: ChatDraft[]) => {
