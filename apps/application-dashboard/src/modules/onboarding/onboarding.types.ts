@@ -1,4 +1,4 @@
-export enum OnboardingStatus {
+export const enum OnboardingStatus {
   PENDING_APPROVAL = 'pending_approval',
   SETUP_PROFILE = 'setup_profile',
   SETUP_USERNAME = 'setup_username',
@@ -8,23 +8,23 @@ export enum OnboardingStatus {
   ONBOARDED = 'onboarded',
 }
 
-export enum ProvisioningStatus {
+export const enum ProvisioningStatus {
   IN_PROGRESS = 'in_progress',
   COMPLETED = 'completed',
   FAILED = 'failed',
 }
 
-export enum MediaType {
+export const enum MediaType {
   SEED = 'seed',
   URL = 'url',
 }
 
-export enum UploadType {
+export const enum UploadType {
   AVATAR = 'avatar',
   ORG_ICON = 'org_icon',
 }
 
-export enum ImageContentType {
+export const enum ImageContentType {
   PNG = 'image/png',
   JPEG = 'image/jpeg',
 }
