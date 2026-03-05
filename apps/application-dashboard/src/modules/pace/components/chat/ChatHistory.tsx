@@ -1,7 +1,7 @@
 'use client';
 
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
-import { ResourceType } from '@zamp-platform/chat';
+import { ResourceType, useActiveStreamingIds } from '@zamp-platform/chat';
 import { useInfiniteScroll } from '@zamp-platform/tanstack-table';
 import { Button, Input } from '@zamp-platform/ui';
 import { Search } from 'lucide-react';
@@ -26,6 +26,7 @@ interface ChatHistoryProps {
 const ChatHistory = ({ onSelectConversation }: ChatHistoryProps) => {
   const organizationId = useAppSelector((state: RootState) => state?.user?.user?.orgs?.[0]?.organization_id) ?? '';
   const containerRef = useRef<HTMLDivElement>(null);
+  const activeStreamingIds = useActiveStreamingIds();
 
   const [page, setPage] = useState(1);
   const [allConversations, setAllConversations] = useState<FeedbackItemType[]>([]);
@@ -177,7 +178,12 @@ const ChatHistory = ({ onSelectConversation }: ChatHistoryProps) => {
         <div ref={containerRef} className='h-full overflow-y-auto [scrollbar-width:none]' onScroll={handleScroll}>
           <div className='w-full space-y-0.5 pr-3'>
             {displayConversations.map((conversation) => (
-              <ChatHistoryItem key={conversation?.id} conversation={conversation} onSelect={onSelectConversation} />
+              <ChatHistoryItem
+                key={conversation?.id}
+                conversation={conversation}
+                onSelect={onSelectConversation}
+                isStreaming={activeStreamingIds.has(conversation?.id)}
+              />
             ))}
           </div>
           {isFetchingConversationHistory && page > 1 && <ChatHistorySkeleton itemCount={10} />}
