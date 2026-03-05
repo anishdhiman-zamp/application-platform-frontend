@@ -1,4 +1,4 @@
-import { useGetConversationHistoryQuery, useListSkillsQuery } from '@/apis/pace';
+import { useGetConversationHistoryQuery, useListChatModelsQuery, useListSkillsQuery } from '@/apis/pace';
 import { FEATURE_FLAGS } from '@/constants/featureFlags';
 import { useFeatureFlag } from '@/hooks/useFeatureFlag';
 import { ResourceType } from '@/types/api/policies.types';
@@ -30,6 +30,11 @@ const useDataPrefetch = () => {
       skip: shouldSkip,
     },
   );
+
+  useListChatModelsQuery(undefined, {
+    refetchOnMountOrArgChange: false,
+    skip: shouldSkip,
+  });
 
   return null;
 };

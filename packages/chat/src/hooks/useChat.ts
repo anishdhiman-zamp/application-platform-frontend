@@ -20,15 +20,8 @@ import {
   useSendMessageV2Mutation,
 } from '../api';
 import { getHistoryFormattedMessages } from '../components/block.utils';
-import {
-  type Block,
-  BLOCK_TYPE,
-  type OutputFilesBlockType,
-  type StreamEventPayload,
-  StreamingContentBlockDeltaType,
-  StreamingContentBlockType,
-  type TaskContentBlock,
-} from '../types/block.types';
+import { streamingStateStore } from '../stores/streamingStateStore';
+import { BLOCK_TYPE } from '../types/block.types';
 import {
   ChatMessage,
   ChatMessageType,
@@ -37,8 +30,8 @@ import {
   ResourceType,
   SenderType,
   SSEEventType,
-  StreamingState,
 } from '../types/chat.types';
+import { useStreamingState } from './useStreamingState';
 
 export interface ChatConfig extends Omit<UseSSEOptions, 'url' | 'onMessage' | 'autoConnect'> {
   conversationId?: string;
@@ -56,7 +49,6 @@ export interface ChatConfig extends Omit<UseSSEOptions, 'url' | 'onMessage' | 'a
     sendMessage?: string;
     createConversation?: string;
   };
-  // Streaming config options (opt-in, all optional with defaults)
   enableStreaming?: boolean;
   showThinkingContent?: boolean;
 }
@@ -74,15 +66,15 @@ export const useChat = (config: ChatConfig) => {
   const [createConversationV2Mutation, { isLoading: isCreatingConversationV2, error: createConversationV2Error }] =
     useCreateConversationV2Mutation();
 
-  // Lazy query to prefetch conversation history and populate RTK Query cache
   const [triggerGetConversation] = useLazyGetConversationByIdQuery();
 
-  const [streamingState, setStreamingState] = useState<StreamingState | null>(null);
+  const { sseEventBus } = useEventBus();
 
-  // Ref to track the current conversation ID for use in callbacks without stale closures
+  const streamingState = useStreamingState(_conversationId);
+
   const conversationIdRef = useRef<string | null>(_conversationId);
 
-  // Track if conversation was created in this session (to skip fetching history for newly created conversations)
+  // Skip fetching history for conversations created in this session
   const isNewlyCreatedConversationRef = useRef<string | null>(null);
 
   useEffect(() => {
@@ -94,13 +86,11 @@ export const useChat = (config: ChatConfig) => {
   }, [config.enableStreaming, streamingState?.is_active]);
 
   const clearStreamingState = useCallback(() => {
-    if (config.enableStreaming) {
-      setStreamingState(null);
+    if (config.enableStreaming && _conversationId) {
+      streamingStateStore.delete(_conversationId);
     }
-  }, [config.enableStreaming]);
+  }, [config.enableStreaming, _conversationId]);
 
-  // Skip fetching conversation history if this conversation was just created in this session
-  // Check against both config.conversationId (prop) and _conversationId (internal state) to handle timing gaps
   const shouldSkipConversationFetch =
     !config.resourceId ||
     !config.resourceType ||
@@ -128,7 +118,6 @@ export const useChat = (config: ChatConfig) => {
     },
   );
 
-  const { sseEventBus } = useEventBus();
   const createConversation = async (conversationPayload: CreateConversationPayloadType) => {
     setMessages([
       {
@@ -144,9 +133,18 @@ export const useChat = (config: ChatConfig) => {
       const response = await createConversationMutation(conversationPayload).unwrap();
       setConversationId(response.conversation_id);
       isNewlyCreatedConversationRef.current = response.conversation_id;
+
+      if (config.resourceId && config.resourceType) {
+        triggerGetConversation({
+          conversationId: response.conversation_id,
+          resourceId: config.resourceId,
+          resourceType: config.resourceType,
+          url: config.apiConfig?.getConversationById,
+        });
+      }
+
       return response.conversation_id;
     } catch (error) {
-      // Remove optimistic message on error
       setMessages([]);
       captureException(error);
       throw new Error('Failed to start conversation. Please try again.');
@@ -185,14 +183,21 @@ export const useChat = (config: ChatConfig) => {
       setConversationId(response.conversation_id);
       isNewlyCreatedConversationRef.current = response.conversation_id;
 
-      // Update header with title from response
+      if (config.resourceId && config.resourceType) {
+        triggerGetConversation({
+          conversationId: response.conversation_id,
+          resourceId: config.resourceId,
+          resourceType: config.resourceType,
+          url: config.apiConfig?.getConversationById,
+        });
+      }
+
       if (response.title && !config.enableStreaming) {
         config.setHeader?.(response.title);
       }
 
       return response;
     } catch (error) {
-      // Remove optimistic message on error
       setMessages([]);
       captureException(error);
       throw new Error('Failed to start conversation. Please try again.');
@@ -200,268 +205,26 @@ export const useChat = (config: ChatConfig) => {
   };
 
   const clearMessages = useCallback(() => {
+    if (config.enableStreaming && conversationIdRef.current) {
+      streamingStateStore.delete(conversationIdRef.current);
+    }
     setMessages([]);
     setConversationId(null);
     isNewlyCreatedConversationRef.current = null;
-    if (config.enableStreaming) {
-      setStreamingState(null);
-    }
   }, [config.enableStreaming]);
-
-  const handleStreamEvent = useCallback(
-    (data: BaseEventPayload) => {
-      if (!config.enableStreaming) return;
-
-      try {
-        const payload = data.payload as StreamEventPayload;
-
-        switch (payload.type) {
-          case StreamingContentBlockType.CONTENT_BLOCK_START: {
-            const { index, content_block } = payload;
-            const blockType = content_block?.type;
-
-            let newBlock: Block;
-
-            switch (blockType) {
-              case BLOCK_TYPE.THINKING:
-                newBlock = {
-                  type: BLOCK_TYPE.THINKING,
-                  order: index,
-                  payload: { thinking: '' },
-                  start_timestamp: content_block?.start_timestamp,
-                  is_complete: false,
-                };
-                break;
-              case BLOCK_TYPE.TEXT:
-                newBlock = {
-                  type: BLOCK_TYPE.TEXT,
-                  order: index,
-                  payload: { text: '' },
-                  start_timestamp: content_block?.start_timestamp,
-                  is_complete: false,
-                };
-                break;
-              case BLOCK_TYPE.TOOL_RESULT: {
-                const toolCallId = content_block?.tool_call_id || content_block?.id;
-                newBlock = {
-                  type: BLOCK_TYPE.TOOL_RESULT,
-                  order: index,
-                  id: content_block.id,
-                  payload: {
-                    content: '',
-                    is_error: false,
-                    tool_call_id: toolCallId,
-                  },
-                  start_timestamp: content_block?.start_timestamp,
-                  is_complete: false,
-                };
-                break;
-              }
-              case BLOCK_TYPE.TASK:
-                newBlock = {
-                  type: BLOCK_TYPE.TASK,
-                  order: index,
-                  id: content_block?.id,
-                  payload: {
-                    id: content_block?.id || '',
-                    title: (content_block as MapAny)?.title || '',
-                    task_id: (content_block as MapAny)?.task_id || content_block?.id || '',
-                    status: (content_block as MapAny)?.status,
-                  },
-                  start_timestamp: content_block?.start_timestamp,
-                  is_complete: false,
-                } as TaskContentBlock;
-                break;
-              default:
-                newBlock = {
-                  type: BLOCK_TYPE.TOOL_USE,
-                  order: index,
-                  id: content_block?.id,
-                  name: content_block?.name,
-                  payload: {
-                    partial_json: '',
-                    tool_call_id: content_block?.id,
-                    display_name: content_block?.display_name,
-                  },
-                  start_timestamp: content_block?.start_timestamp,
-                  is_complete: false,
-                };
-            }
-
-            setStreamingState((prev) => {
-              // Validate that streaming state belongs to current conversation
-              if (prev && prev.conversation_id && prev.conversation_id !== conversationIdRef.current) {
-                return null; // Clear stale streaming state from different conversation
-              }
-
-              if (!prev) {
-                // If no previous state, create a new one with defaults
-                return {
-                  resource_type: config.resourceType || ResourceType.ORGANIZATION,
-                  resource_id: config.resourceId || '',
-                  conversation_id: conversationIdRef.current || undefined,
-                  message_content: {
-                    elements: [newBlock],
-                  },
-                  message_type: ChatMessageType.SYSTEM,
-                  sender_type: SenderType.ASSISTANT,
-                  timestamp: new Date().toISOString(),
-                  metadata: {},
-                  is_active: true,
-                };
-              }
-              const existingBlocks = prev.message_content?.elements ?? [];
-              return {
-                ...prev,
-                message_content: {
-                  ...prev.message_content,
-                  elements: [...existingBlocks, newBlock],
-                },
-              };
-            });
-
-            break;
-          }
-
-          case StreamingContentBlockType.CONTENT_BLOCK_DELTA: {
-            const { index, delta } = payload;
-
-            setStreamingState((prev) => {
-              if (!prev) return prev;
-
-              // Validate that streaming state belongs to current conversation
-              if (prev.conversation_id && prev.conversation_id !== conversationIdRef.current) {
-                return null; // Clear stale streaming state from different conversation
-              }
-
-              const existingBlocks = prev.message_content?.elements ?? [];
-
-              const updatedBlocks = existingBlocks.map((block) => {
-                if (block.order !== index) return block;
-
-                switch (delta.type) {
-                  case StreamingContentBlockDeltaType.THINKING_DELTA:
-                    if (block.type === BLOCK_TYPE.THINKING) {
-                      return { ...block, payload: { thinking: (block.payload.thinking || '') + delta.thinking } };
-                    }
-                    break;
-                  case StreamingContentBlockDeltaType.TEXT_DELTA:
-                    if (block.type === BLOCK_TYPE.TEXT) {
-                      return { ...block, payload: { text: block.payload.text + delta.text } };
-                    }
-                    break;
-                  case StreamingContentBlockDeltaType.INPUT_JSON_DELTA:
-                    if (block.type === BLOCK_TYPE.TOOL_USE) {
-                      return {
-                        ...block,
-                        payload: {
-                          ...block.payload,
-                          partial_json: (block.payload.partial_json || '') + delta.partial_json,
-                        },
-                      };
-                    }
-                    break;
-                  case StreamingContentBlockDeltaType.TOOL_USE_BLOCK_UPDATE_DELTA:
-                    if (block.type === BLOCK_TYPE.TOOL_USE) {
-                      return {
-                        ...block,
-                        payload: {
-                          ...block.payload,
-                          message: delta.message ?? block.payload.message,
-                          display_content: delta.display_content ?? block.payload.display_content,
-                        },
-                      };
-                    }
-                    break;
-                  case StreamingContentBlockDeltaType.TOOL_RESULT_DELTA:
-                    // Update existing tool_result block with content
-                    if (block.type === BLOCK_TYPE.TOOL_RESULT) {
-                      return {
-                        ...block,
-                        payload: {
-                          ...block.payload,
-                          content: (block.payload.content || '') + delta.content,
-                          is_error: delta.is_error,
-                          tool_call_id: delta.tool_call_id ?? block.payload.tool_call_id,
-                        },
-                      };
-                    }
-                    break;
-                  case StreamingContentBlockDeltaType.TASK_DELTA:
-                    if (block.type === BLOCK_TYPE.TASK) {
-                      return {
-                        ...block,
-                        payload: {
-                          ...block.payload,
-                          title: delta.title ?? block.payload.title,
-                          status: delta.status ?? block.payload.status,
-                        },
-                      };
-                    }
-                    break;
-                }
-                return block;
-              });
-
-              return {
-                ...prev,
-                message_content: {
-                  ...prev.message_content,
-                  elements: updatedBlocks,
-                },
-              };
-            });
-            break;
-          }
-
-          case StreamingContentBlockType.CONTENT_BLOCK_STOP: {
-            const { index, stop_timestamp } = payload;
-
-            setStreamingState((prev) => {
-              if (!prev) return prev;
-
-              // Validate that streaming state belongs to current conversation
-              if (prev.conversation_id && prev.conversation_id !== conversationIdRef.current) {
-                return null; // Clear stale streaming state from different conversation
-              }
-
-              const existingBlocks = prev.message_content?.elements ?? [];
-              const updatedBlocks = existingBlocks.map((block) => {
-                if (block.order !== index) return block;
-                return { ...block, is_complete: true, stop_timestamp: stop_timestamp };
-              });
-
-              return {
-                ...prev,
-                message_content: {
-                  ...prev.message_content,
-                  elements: updatedBlocks,
-                },
-                is_active: true,
-              };
-            });
-            break;
-          }
-        }
-      } catch (error) {
-        captureException(error);
-      }
-    },
-    [config],
-  );
 
   const handleMessage = useCallback(
     (data: MapAny) => {
       try {
+        const convId = (data.payload?.conversation_id as string) || conversationIdRef.current;
+
         switch (data.payload.type) {
           case SSEEventType.MESSAGE:
-          case SSEEventType.NEW_CHAT_MESSAGE:
+          case SSEEventType.NEW_CHAT_MESSAGE: {
             const newMessage: ChatMessage = data.payload.message;
 
             setMessages((prev) => [...prev, { ...newMessage, timestamp: new Date().toISOString() }]);
 
-            // Only invalidate cache if this is NOT a newly created conversation
-            // to prevent unnecessary refetches that would clear the optimistic UI
             if (newMessage.conversation_id && isNewlyCreatedConversationRef.current !== newMessage.conversation_id) {
               dispatch(
                 chatApi.util.invalidateTags([{ type: APITags.GET_CONVERSATION_BY_ID, id: newMessage.conversation_id }]),
@@ -469,8 +232,8 @@ export const useChat = (config: ChatConfig) => {
             }
             config.onNewMessage?.(newMessage);
             break;
+          }
           case SSEEventType.CONVERSATION_UPDATED:
-            // Only invalidate cache if this is NOT a newly created conversation
             if (_conversationId && isNewlyCreatedConversationRef.current !== _conversationId) {
               dispatch(chatApi.util.invalidateTags([{ type: APITags.GET_CONVERSATION_BY_ID, id: _conversationId }]));
             }
@@ -482,74 +245,13 @@ export const useChat = (config: ChatConfig) => {
             }
             break;
           case SSEEventType.MESSAGE_START:
-            if (config.enableStreaming) {
-              const message = data.payload.message;
-
-              // Map sender_type string to enum
-              const senderType =
-                message.sender_type === 'ASSISTANT' || message.sender_type === SenderType.ASSISTANT
-                  ? SenderType.ASSISTANT
-                  : SenderType.USER;
-
-              setStreamingState({
-                resource_type: config.resourceType || ResourceType.ORGANIZATION,
-                resource_id: config.resourceId || message.organization_id || '',
-                conversation_id: message.conversation_id,
-                id: message.id,
-                message_content: {
-                  elements: [],
-                },
-                message_type: ChatMessageType.SYSTEM,
-                sender_type: senderType,
-                sender_name: message.sender_name || 'assistant',
-                timestamp: message.created_at || new Date().toISOString(),
-                metadata: {},
-                is_active: true,
-              });
-            }
-            break;
           case SSEEventType.OUTPUT_FILES:
-            if (config.enableStreaming) {
-              const outputFilesPayload = data.payload.message;
-              const messageIdForOutputFiles = outputFilesPayload.id;
-
-              setStreamingState((prev) => {
-                if (!prev) return prev;
-
-                // Verify that the output files belong to the current streaming message
-                if (prev.id && prev.id !== messageIdForOutputFiles) {
-                  return prev;
-                }
-
-                const outputFilesBlock: OutputFilesBlockType = {
-                  id: `output-files-${messageIdForOutputFiles}`,
-                  type: BLOCK_TYPE.OUTPUT_FILES,
-                  order: (prev.message_content?.elements?.length || 0) + 1,
-                  payload: {
-                    output_files: outputFilesPayload.output_files,
-                  },
-                };
-
-                return {
-                  ...prev,
-                  message_content: {
-                    ...prev.message_content,
-                    elements: [...(prev.message_content?.elements || []), outputFilesBlock],
-                  },
-                };
-              });
-            }
+            // Handled globally by SSEProvider -> streamingStateStore
             break;
-          case SSEEventType.MESSAGE_STOP:
-            setStreamingState((prev) => {
-              if (!prev) return null;
-
-              // Don't add message if it belongs to a different conversation
-              if (prev.conversation_id && prev.conversation_id !== conversationIdRef.current) {
-                return null; // Clear stale streaming state without adding to messages
-              }
-
-              if (prev.message_content?.elements && prev.message_content.elements.length > 0) {
+          case SSEEventType.MESSAGE_STOP: {
+            if (convId) {
+              const prev = streamingStateStore.get(convId);
+              if (prev?.message_content?.elements && prev.message_content.elements.length > 0) {
                 const streamingMessagePayload: ChatMessage = {
                   resource_type: prev.resource_type,
                   resource_id: prev.resource_id,
@@ -566,19 +268,15 @@ export const useChat = (config: ChatConfig) => {
                 };
 
                 setMessages((messagePrev) => {
-                  // Check if message with same id already exists to prevent duplicates from StrictMode
                   if (streamingMessagePayload.id && messagePrev.some((msg) => msg.id === streamingMessagePayload.id)) {
                     return messagePrev;
                   }
                   return [...messagePrev, streamingMessagePayload];
                 });
               }
+              streamingStateStore.delete(convId);
+            }
 
-              return null;
-            });
-
-            // Prefetch conversation history to populate RTK Query cache
-            // This ensures cached data is available when sidebar is reopened
             if (conversationIdRef.current && config.resourceId && config.resourceType) {
               triggerGetConversation({
                 conversationId: conversationIdRef.current,
@@ -589,6 +287,7 @@ export const useChat = (config: ChatConfig) => {
             }
 
             break;
+          }
           default:
         }
       } catch (error) {
@@ -605,7 +304,6 @@ export const useChat = (config: ChatConfig) => {
     ],
   );
 
-  // Handle conversation ID changes - clear streaming state when switching conversations
   useEffect(() => {
     const newConversationId = config.conversationId || null;
     const previousConversationId = conversationIdRef.current;
@@ -613,45 +311,47 @@ export const useChat = (config: ChatConfig) => {
     conversationIdRef.current = newConversationId;
 
     if (newConversationId !== previousConversationId) {
-      // Clear streaming state when switching to a different conversation
-      if (config.enableStreaming) {
-        setStreamingState(null);
-      }
-
       setConversationId(newConversationId);
     }
-  }, [config.conversationId, config.enableStreaming]);
+  }, [config.conversationId]);
 
+  // Per-conversation CONVERSATION_V2 handler for local messages state and RTK cache
   useEffect(() => {
     const sub = sseEventBus.subscribe(EVENT_TYPE.CONVERSATION_V2, (data: BaseEventPayload) => {
       const payload = data?.payload as MapAny;
       const conversationId = payload?.conversation_id as string;
-      if (data?.source_id === _conversationId || conversationId === _conversationId) handleMessage(data);
+      if (data?.source_id === _conversationId || conversationId === _conversationId) {
+        handleMessage(data);
+      }
     });
     return () => sub.unsubscribe();
-  }, [handleMessage, _conversationId]);
-
-  useEffect(() => {
-    if (!config.enableStreaming) return;
-
-    const sub = sseEventBus.subscribe(EVENT_TYPE.AGENT_STREAMS, (data: BaseEventPayload) => {
-      const payload = data?.payload as MapAny;
-      const streamingId = payload?.streaming_id as string;
-      if (streamingId === _conversationId) handleStreamEvent(data);
-    });
-    return () => sub.unsubscribe();
-  }, [config.enableStreaming, _conversationId, handleStreamEvent]);
+  }, [handleMessage, _conversationId, sseEventBus]);
 
   useEffect(() => {
     if (!isFetchingConversationHistory && conversationHistory && conversationHistory?.messages?.length > 0) {
       const historyMessages: ChatMessage[] = getHistoryFormattedMessages(conversationHistory);
 
-      // This handles page refresh scenarios where streaming was in progress
-      if (config.enableStreaming) {
-        setStreamingState(null);
+      // Clean up completed streams once DB history is loaded
+      if (config.enableStreaming && conversationIdRef.current) {
+        const currentStreamState = streamingStateStore.get(conversationIdRef.current);
+        if (currentStreamState && !currentStreamState.is_active) {
+          streamingStateStore.delete(conversationIdRef.current);
+        }
       }
 
-      setMessages(historyMessages);
+      // Merge DB history with any in-flight streaming messages not yet persisted
+      setMessages((prev) => {
+        if (prev.length > 0) {
+          const dbMessageIds = new Set(historyMessages.map((m) => m.id).filter(Boolean));
+          const replayedMessages = prev.filter((m) => m.id && !dbMessageIds.has(m.id));
+
+          if (replayedMessages.length > 0) {
+            return [...historyMessages, ...replayedMessages];
+          }
+        }
+        return historyMessages;
+      });
+
       config.setHeader?.(conversationHistory?.conversation?.title || '');
     }
   }, [conversationHistory, isFetchingConversationHistory, config.enableStreaming]);
@@ -700,6 +400,15 @@ export const useChat = (config: ChatConfig) => {
               body: messagePayload,
             }).unwrap();
 
+        if (config.resourceId && config.resourceType) {
+          triggerGetConversation({
+            conversationId: _conversationId,
+            resourceId: config.resourceId,
+            resourceType: config.resourceType,
+            url: config.apiConfig?.getConversationById,
+          });
+        }
+
         return response;
       } catch (error) {
         setMessages((prev) => prev.slice(0, previousMessageCount));
@@ -707,11 +416,19 @@ export const useChat = (config: ChatConfig) => {
         throw new Error('Failed to send message. Please try again.');
       }
     },
-    [_conversationId, sendMessageMutation, sendMessageV2Mutation, config.apiConfig?.sendMessage],
+    [
+      _conversationId,
+      sendMessageMutation,
+      sendMessageV2Mutation,
+      config.apiConfig?.sendMessage,
+      config.apiConfig?.getConversationById,
+      config.resourceId,
+      config.resourceType,
+      triggerGetConversation,
+    ],
   );
 
   return {
-    // Existing return values - unchanged for backward compatibility
     messages,
     sendMessage,
     clearMessages,

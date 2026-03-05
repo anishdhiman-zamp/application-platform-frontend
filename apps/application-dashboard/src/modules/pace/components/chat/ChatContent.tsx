@@ -1,7 +1,8 @@
 'use client';
 
-import { useEffect } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 import ChatContentInner from '@/modules/pace/components/chat/ChatContentInner';
+import ModelSelector from '@/modules/pace/components/chat/ModelSelector';
 import { useChatContentState } from '@/modules/pace/hooks/useChatContentState';
 import { usePaceContext } from '@/modules/pace/pace.context';
 
@@ -11,6 +12,8 @@ interface ChatContentProps {
 
 const ChatContent = ({ initialConversationId }: ChatContentProps) => {
   const { registerStartNewChat } = usePaceContext();
+  const [selectedModel, setSelectedModel] = useState<string | null>(null);
+
   const {
     organizationId,
     username,
@@ -21,6 +24,11 @@ const ChatContent = ({ initialConversationId }: ChatContentProps) => {
     chatKey,
     startNewChat,
   } = useChatContentState({ initialConversationId });
+
+  const modelSelectorSlot = useMemo(
+    () => <ModelSelector value={selectedModel} onChange={setSelectedModel} />,
+    [selectedModel],
+  );
 
   useEffect(() => {
     registerStartNewChat(startNewChat);
@@ -36,6 +44,8 @@ const ChatContent = ({ initialConversationId }: ChatContentProps) => {
       setChatTitle={setChatTitle}
       chatTitle={chatTitle}
       startNewChat={startNewChat}
+      selectedModel={selectedModel}
+      modelSelectorSlot={modelSelectorSlot}
     />
   );
 };

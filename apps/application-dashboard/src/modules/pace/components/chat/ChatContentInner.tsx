@@ -1,6 +1,6 @@
 'use client';
 
-import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
+import { useCallback, useEffect, useMemo, useRef } from 'react';
 import {
   ChatActionsProvider,
   ConnectedChatInput,
@@ -23,7 +23,6 @@ import NewPaceAvatar from '@/modules/chatbot/NewPaceAvatar';
 import ChatHistory from '@/modules/pace/components/chat/ChatHistory';
 import ChatHome from '@/modules/pace/components/chat/ChatHome';
 import ChatTopbar from '@/modules/pace/components/chat/ChatTopbar';
-import ModelSelector from '@/modules/pace/components/chat/ModelSelector';
 import { useFileTabs } from '@/modules/pace/components/dynamic-tabs/useFileTabs';
 import ChatMessagesSkeleton from '@/modules/pace/components/loaders/ChatMessagesSkeleton';
 import { useChatDraftInput } from '@/modules/pace/hooks/useChatDraftInput';
@@ -41,6 +40,8 @@ interface ChatContentInnerProps {
   setChatTitle: (title: string) => void;
   chatTitle: string;
   startNewChat: () => void;
+  selectedModel: string | null;
+  modelSelectorSlot: React.ReactNode;
 }
 
 const ChatContentInner = ({
@@ -51,6 +52,8 @@ const ChatContentInner = ({
   setChatTitle,
   chatTitle,
   startNewChat,
+  selectedModel,
+  modelSelectorSlot,
 }: ChatContentInnerProps) => {
   const dispatch = useAppDispatch();
 
@@ -58,15 +61,9 @@ const ChatContentInner = ({
   const { inputValue, setInputValue } = useChatDraftInput({ conversationId });
 
   const fileDropHandlerRef = useRef<((files: FileList) => void) | null>(null);
-  const [selectedModel, setSelectedModel] = useState<string | null>(null);
 
   const { openTab } = useFileTabs();
   const { setIsPaceSidebarOpen } = usePaceContext();
-
-  const modelSelectorSlot = useMemo(
-    () => <ModelSelector value={selectedModel} onChange={setSelectedModel} />,
-    [selectedModel],
-  );
 
   const handleConversationCreated = () => {
     dispatch(baseApi.util.invalidateTags([APITags.GET_CONVERSATION_HISTORY]));

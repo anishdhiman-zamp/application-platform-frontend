@@ -109,7 +109,7 @@ export const ChatComposer: FC<ChatComposerProps> = ({
   containerClassName,
 
   // Textarea dimensions
-  minTextareaHeight = 20,
+  minTextareaHeight = 18,
   maxTextareaHeight = 200,
 
   // Model selector
@@ -153,15 +153,13 @@ export const ChatComposer: FC<ChatComposerProps> = ({
     const textarea = textareaRef.current;
     if (!textarea || shouldShowRecorder) return;
 
-    // Use requestAnimationFrame to ensure DOM is ready after view switch
     requestAnimationFrame(() => {
       if (!value) {
         textarea.style.height = `${minTextareaHeight}px`;
         return;
       }
 
-      // Reset to auto to get accurate scrollHeight
-      textarea.style.height = 'auto';
+      textarea.style.height = `${minTextareaHeight}px`;
 
       const newHeight = Math.min(Math.max(textarea.scrollHeight, minTextareaHeight), maxTextareaHeight);
       textarea.style.height = `${newHeight}px`;
