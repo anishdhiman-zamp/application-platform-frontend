@@ -90,10 +90,14 @@ class StreamingStateStore {
 
   /**
    * Batches notifications via microtask. Re-entrant writes during flush
-   * are skipped to prevent "Maximum update depth exceeded" cascades.
+   * are deferred to a follow-up microtask to prevent "Maximum update depth
+   * exceeded" cascades while still guaranteeing eventual notification.
    */
   private scheduleNotify(conversationId: string): void {
-    if (this.isFlushing) return;
+    if (this.isFlushing) {
+      Promise.resolve().then(() => this.scheduleNotify(conversationId));
+      return;
+    }
 
     this.pendingNotifications.add(conversationId);
 
