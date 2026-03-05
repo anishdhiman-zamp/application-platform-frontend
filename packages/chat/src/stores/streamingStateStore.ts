@@ -79,6 +79,11 @@ class StreamingStateStore {
     for (const id of allConversationIds) {
       this.scheduleNotify(id);
     }
+    if (allConversationIds.length === 0 && this.globalListeners.size > 0) {
+      for (const listener of this.globalListeners) {
+        listener();
+      }
+    }
   }
 
   private isFlushing = false;
