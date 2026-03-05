@@ -168,8 +168,9 @@ export const useFileViewer = ({
     } catch (err) {
       if (isNotFoundError(err)) {
         setIsFileNotFound(true);
+      } else {
+        onLoadError?.(err);
       }
-      onLoadError?.(err);
     }
   }, [filePath, isEditable, fetchFileMetadata, fetchFileContent, getFileState, initFileState, onLoadError]);
 
@@ -210,8 +211,9 @@ export const useFileViewer = ({
         if (isNotFoundError(err)) {
           stopped = true;
           setIsFileNotFound(true);
+        } else {
+          onLoadError?.(err);
         }
-        onLoadError?.(err);
       }
     };
 
@@ -251,8 +253,9 @@ export const useFileViewer = ({
         if (isNotFoundError(err)) {
           stopped = true;
           setIsFileNotFound(true);
+        } else {
+          onLoadError?.(err);
         }
-        onLoadError?.(err);
       }
     };
 
