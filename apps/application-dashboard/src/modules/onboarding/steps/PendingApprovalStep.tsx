@@ -1,20 +1,25 @@
 'use client';
 
-import { useEffect, useRef, useState } from 'react';
+import { useEffect, useMemo, useRef, useState } from 'react';
+import { EventBus } from '@zamp-platform/utils';
 import { OnboardingStatus } from 'modules/onboarding/onboarding.types';
 import { handleOnboardingApiError } from 'modules/onboarding/utils/onboardingErrors';
 import { useCheckApprovalMutation } from '@/apis/onboarding';
+import { SSEProvider } from '@/app/_providers/sse-provider';
+import OrgMembershipPending from '@/modules/login/OrgMembershipPending';
 
 type Props = {
+  email: string;
   onComplete: (status: OnboardingStatus) => void;
   onWrongStep: () => void;
   onFlagDisabled: () => void;
 };
 
-export const PendingApprovalStep = ({ onComplete, onWrongStep, onFlagDisabled }: Props) => {
+export const PendingApprovalStep = ({ email, onComplete, onWrongStep, onFlagDisabled }: Props) => {
   const [checkApproval] = useCheckApprovalMutation();
   const [checked, setChecked] = useState(false);
   const calledRef = useRef(false);
+  const sseEventBus = useMemo(() => new EventBus(), []);
 
   const onCompleteRef = useRef(onComplete);
 
@@ -50,40 +55,17 @@ export const PendingApprovalStep = ({ onComplete, onWrongStep, onFlagDisabled }:
 
   if (!checked) {
     return (
-      <div className='flex w-full max-w-[520px] items-center justify-center py-20'>
+      <div className='flex h-screen w-screen items-center justify-center bg-white'>
         <div className='h-6 w-6 animate-spin rounded-full border-2 border-black/10 border-t-black' />
       </div>
     );
   }
 
   return (
-    <div className='flex w-full max-w-[520px] flex-col'>
-      <div className='mb-8'>
-        <WaitlistIcon />
+    <SSEProvider sseEventBus={sseEventBus}>
+      <div className='flex h-screen w-screen items-center justify-center bg-white'>
+        <OrgMembershipPending email={email} />
       </div>
-      <h2
-        className='mb-3'
-        style={{
-          fontSize: 48,
-          lineHeight: 1.3,
-          fontFamily: "'FunnelDisplay', serif",
-          color: '#1a1a1a',
-          fontWeight: 300,
-        }}
-      >
-        You&rsquo;re on the list.
-      </h2>
-      <p className='text-sm' style={{ color: '#999', lineHeight: 1.6 }}>
-        We&rsquo;ll notify you when your access is approved.
-      </p>
-    </div>
+    </SSEProvider>
   );
 };
-
-const WaitlistIcon = () => (
-  <svg width='48' height='48' viewBox='0 0 48 48' fill='none' xmlns='http://www.w3.org/2000/svg'>
-    <rect width='48' height='48' rx='12' fill='#f5f5f5' />
-    <path d='M24 14v10l6 3' stroke='#888' strokeWidth='2' strokeLinecap='round' strokeLinejoin='round' />
-    <circle cx='24' cy='24' r='10' stroke='#888' strokeWidth='2' />
-  </svg>
-);
