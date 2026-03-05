@@ -107,7 +107,7 @@ export const OnboardingRoot = () => {
 
   if (isLoading || isFlagLoading || !currentStatus) {
     return (
-      <div className='bg-GRAY_100 flex h-screen w-screen items-center justify-center'>
+      <div className='flex h-screen w-screen items-center justify-center bg-white'>
         <style>{funnelDisplayFont}</style>
         <div className='h-6 w-6 animate-spin rounded-full border-2 border-black/10 border-t-black' />
       </div>
@@ -145,6 +145,17 @@ export const OnboardingRoot = () => {
           nextStatus={isReload ? currentStatus : undefined}
         />
       </>
+    );
+  }
+
+  if (currentStatus === OnboardingStatus.PENDING_APPROVAL) {
+    return (
+      <PendingApprovalStep
+        email={session!.user_email}
+        onComplete={handleStepComplete}
+        onWrongStep={handleWrongStep}
+        onFlagDisabled={handleFlagDisabled}
+      />
     );
   }
 
@@ -208,9 +219,6 @@ const StepContent = ({
 
     case OnboardingStatus.SETUP_ORG:
       return <UpdateOrgStep onComplete={onComplete} onWrongStep={onWrongStep} onFlagDisabled={onFlagDisabled} />;
-
-    case OnboardingStatus.PENDING_APPROVAL:
-      return <PendingApprovalStep onComplete={onComplete} onWrongStep={onWrongStep} onFlagDisabled={onFlagDisabled} />;
 
     case OnboardingStatus.SETUP_WORKSPACE: {
       const resolvedOrgId = orgIdFromSetup || session.orgs?.[0]?.organization_id;
