@@ -25,6 +25,8 @@ export enum LOCAL_STORAGE_KEYS {
   PACE_FILE_TREE_EXPANDED_PATHS = 'PACE_FILE_TREE_EXPANDED_PATHS',
 }
 
+const QUOTA_ERROR_NAMES: readonly string[] = ['QuotaExceededError', 'NS_ERROR_DOM_QUOTA_REACHED'];
+
 export const getFromLocalStorage = (key: LOCAL_STORAGE_KEYS) => {
   if (typeof window === 'undefined') {
     return '';
@@ -41,7 +43,11 @@ export const setToLocalStorage = (key: LOCAL_STORAGE_KEYS, value: string) => {
   try {
     window.localStorage.setItem(key, value);
   } catch (error) {
-    if (error instanceof DOMException && error.name === 'QuotaExceededError') {
+    const isQuotaError =
+      error instanceof DOMException &&
+      QUOTA_ERROR_NAMES.some((name) => name === error.name);
+
+    if (isQuotaError) {
       console.warn(`localStorage quota exceeded for key "${key}". Clearing key and retrying.`);
       try {
         window.localStorage.removeItem(key);
@@ -49,6 +55,8 @@ export const setToLocalStorage = (key: LOCAL_STORAGE_KEYS, value: string) => {
       } catch {
         captureException(new Error(`localStorage quota exceeded for key "${key}" even after clearing`));
       }
+    } else {
+      captureException(error);
     }
   }
 };
