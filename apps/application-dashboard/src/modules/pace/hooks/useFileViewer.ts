@@ -211,7 +211,16 @@ export const useFileViewer = ({
     const intervalId = setInterval(pollForChanges, POLL_INTERVAL_MS);
 
     return () => clearInterval(intervalId);
-  }, [filePath, isEditable, isActive, getFileState, fetchFileMetadata, fetchFileContent, forceUpdateFileState]);
+  }, [
+    filePath,
+    isEditable,
+    isActive,
+    isError,
+    getFileState,
+    fetchFileMetadata,
+    fetchFileContent,
+    forceUpdateFileState,
+  ]);
 
   // Polling for media files - detect external changes and update URL
   useEffect(() => {
@@ -237,7 +246,7 @@ export const useFileViewer = ({
     const intervalId = setInterval(pollForMediaChanges, POLL_INTERVAL_MS);
 
     return () => clearInterval(intervalId);
-  }, [filePath, isEditable, isActive, mediaMtime, fetchFileMetadata]);
+  }, [filePath, isEditable, isActive, isError, mediaMtime, fetchFileMetadata]);
 
   return {
     content: fileState?.content ?? null,
