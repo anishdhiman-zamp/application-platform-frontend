@@ -26,4 +26,5 @@ export enum FEATURE_FLAGS {
   ZAMP_INTERNAL = 'zamp-internal',
   APP_SECURE = 'app-secure',
   MACS_FILE_SYSTEM = 'macs-file-system',
+  ENABLE_ONBOARDING_FLOW = 'enable_onboarding_flow',
 }

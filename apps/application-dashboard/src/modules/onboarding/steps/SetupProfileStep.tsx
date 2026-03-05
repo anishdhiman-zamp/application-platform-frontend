@@ -2,23 +2,34 @@
 
 import { useEffect, useRef, useState } from 'react';
 import { AvatarPicker } from 'modules/onboarding/components/AvatarPicker';
-import { AvatarState, MediaType, OnboardingStatus, UploadType } from 'modules/onboarding/onboarding.types';
+import {
+  AvatarState,
+  ImageContentType,
+  MediaType,
+  OnboardingStatus,
+  UploadType,
+} from 'modules/onboarding/onboarding.types';
 import { generateAvatarSvg, generatePlaceholderSvg } from 'modules/onboarding/utils/avatarGenerator';
-import { useUpdateProfileMutation } from '@/apis/onboarding';
+import { handleOnboardingApiError } from 'modules/onboarding/utils/onboardingErrors';
+import { useGetUploadUrlMutation, useUpdateProfileMutation } from '@/apis/onboarding';
 
 type Props = {
   initialName?: string;
   onComplete: (status: OnboardingStatus) => void;
+  onWrongStep: () => void;
+  onFlagDisabled: () => void;
 };
 
-export const SetupProfileStep = ({ initialName = '', onComplete }: Props) => {
+export const SetupProfileStep = ({ initialName = '', onComplete, onWrongStep, onFlagDisabled }: Props) => {
   const [name, setName] = useState(initialName);
   const [variant, setVariant] = useState(0);
   const [avatar, setAvatar] = useState<AvatarState>({ type: MediaType.SEED, value: initialName });
+  const [pendingFile, setPendingFile] = useState<File | null>(null);
   const [error, setError] = useState<string | null>(null);
   const userPickedAvatarRef = useRef(false);
   const inputRef = useRef<HTMLInputElement>(null);
   const [updateProfile, { isLoading }] = useUpdateProfileMutation();
+  const [getUploadUrl] = useGetUploadUrlMutation();
 
   useEffect(() => {
     inputRef.current?.focus();
@@ -53,13 +64,15 @@ export const SetupProfileStep = ({ initialName = '', onComplete }: Props) => {
     setAvatar({ type: MediaType.SEED, value: baseName + '_v' + next });
   };
 
-  const handleUpload = (s3Uri: string, previewUrl: string) => {
+  const handleUpload = (file: File, previewUrl: string) => {
     userPickedAvatarRef.current = true;
-    setAvatar({ type: MediaType.URL, value: s3Uri, previewUrl });
+    setPendingFile(file);
+    setAvatar({ type: MediaType.URL, value: '', previewUrl });
   };
 
   const handleRemove = () => {
     userPickedAvatarRef.current = false;
+    setPendingFile(null);
     setVariant(0);
     setAvatar({ type: MediaType.SEED, value: name || '' });
   };
@@ -67,16 +80,44 @@ export const SetupProfileStep = ({ initialName = '', onComplete }: Props) => {
   const handleSubmit = async () => {
     if (!name.trim()) return;
     setError(null);
+
+    let avatarValue = avatar.value || null;
+
+    // Upload image to S3 if user picked a file
+    if (avatar.type === MediaType.URL && pendingFile) {
+      try {
+        const contentType = pendingFile.type === 'image/jpeg' ? ImageContentType.JPEG : ImageContentType.PNG;
+        const { upload_url, s3_uri } = await getUploadUrl({
+          upload_type: UploadType.AVATAR,
+          content_type: contentType,
+        }).unwrap();
+
+        await fetch(upload_url, {
+          method: 'PUT',
+          headers: { 'Content-Type': pendingFile.type },
+          body: pendingFile,
+        });
+
+        avatarValue = s3_uri;
+      } catch {
+        setError('Failed to upload image. Please try again.');
+
+        return;
+      }
+    }
+
     try {
       const result = await updateProfile({
         full_name: name.trim(),
         avatar_type: avatar.type,
-        avatar_value: avatar.value || null,
+        avatar_value: avatarValue,
       }).unwrap();
 
       onComplete(result.onboarding_status);
-    } catch {
-      setError('Something went wrong. Please try again.');
+    } catch (err) {
+      if (!handleOnboardingApiError(err, { setError, onWrongStep, onFlagDisabled })) {
+        setError('Something went wrong. Please try again.');
+      }
     }
   };
 
@@ -90,13 +131,7 @@ export const SetupProfileStep = ({ initialName = '', onComplete }: Props) => {
   return (
     <div className='w-full max-w-[520px]'>
       <div className='mb-5'>
-        <AvatarPicker
-          svgContent={getSvg()}
-          onShuffle={handleShuffle}
-          onUpload={handleUpload}
-          onRemove={handleRemove}
-          uploadType={UploadType.AVATAR}
-        />
+        <AvatarPicker svgContent={getSvg()} onShuffle={handleShuffle} onUpload={handleUpload} onRemove={handleRemove} />
       </div>
 
       <div className='mb-6'>

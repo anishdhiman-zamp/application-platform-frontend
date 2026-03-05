@@ -3,16 +3,19 @@
 import { useCallback, useEffect, useRef, useState } from 'react';
 import { OnboardingStatus } from 'modules/onboarding/onboarding.types';
 import { generateAtIconSvg } from 'modules/onboarding/utils/avatarGenerator';
+import { handleOnboardingApiError } from 'modules/onboarding/utils/onboardingErrors';
 import { useLazyCheckUsernameQuery, useUpdateProfileMutation } from '@/apis/onboarding';
 
 type Props = {
   initialUsername?: string;
   onComplete: (status: OnboardingStatus) => void;
+  onWrongStep: () => void;
+  onFlagDisabled: () => void;
 };
 
 const USERNAME_REGEX = /^[a-zA-Z0-9_-]+$/;
 
-export const SetupUsernameStep = ({ initialUsername = '', onComplete }: Props) => {
+export const SetupUsernameStep = ({ initialUsername = '', onComplete, onWrongStep, onFlagDisabled }: Props) => {
   const [username, setUsername] = useState(initialUsername);
   const [error, setError] = useState<string | null>(null);
   const [checking, setChecking] = useState(false);
@@ -24,6 +27,8 @@ export const SetupUsernameStep = ({ initialUsername = '', onComplete }: Props) =
 
   useEffect(() => {
     inputRef.current?.focus();
+    if (initialUsername) check(initialUsername);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   const check = useCallback(
@@ -81,8 +86,10 @@ export const SetupUsernameStep = ({ initialUsername = '', onComplete }: Props) =
       const result = await updateProfile({ username: username.trim() }).unwrap();
 
       onComplete(result.onboarding_status);
-    } catch {
-      setError('Something went wrong. Please try again.');
+    } catch (err) {
+      if (!handleOnboardingApiError(err, { setError, onWrongStep, onFlagDisabled })) {
+        setError('Something went wrong. Please try again.');
+      }
     }
   };
 
@@ -127,7 +134,7 @@ export const SetupUsernameStep = ({ initialUsername = '', onComplete }: Props) =
           <button
             type='button'
             onClick={handleSubmit}
-            disabled={!username.trim() || isLoading || checking}
+            disabled={!username.trim() || isLoading || checking || available === false}
             className='mb-4 flex shrink-0 cursor-pointer items-center justify-center transition-all hover:opacity-70 active:scale-90 disabled:pointer-events-none disabled:opacity-40'
           >
             <EnterIcon />

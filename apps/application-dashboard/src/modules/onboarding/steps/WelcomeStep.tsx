@@ -2,12 +2,20 @@
 
 import { useCallback, useEffect, useRef, useState } from 'react';
 import { OnboardingStatus } from 'modules/onboarding/onboarding.types';
+import { handleOnboardingApiError } from 'modules/onboarding/utils/onboardingErrors';
 import { useWelcomeMutation } from '@/apis/onboarding';
-import { Session } from '@/types/api/auth.types';
+
+const WELCOME_SEEN_KEY = 'zamp_welcome_seen';
 
 type Props = {
-  session: Session;
+  organizationId: string | null;
   onComplete: (status: OnboardingStatus) => void;
+  onWrongStep: () => void;
+  onFlagDisabled: () => void;
+  /** When true, skip the /welcome API call (animation-only mode for reload scenarios) */
+  skipApi?: boolean;
+  /** Status to navigate to when skipApi is true (defaults to SETUP_WORKSPACE) */
+  nextStatus?: OnboardingStatus;
 };
 
 const STORY_LINES = [
@@ -19,6 +27,7 @@ const STORY_LINES = [
   'Just say what needs to happen.',
   'And it happens.',
   "It's time to start building.",
+  'Ready?',
 ];
 
 const FLOAT_COLORS = [
@@ -39,76 +48,139 @@ const IMG_TRIGGERS = [
   { showAt: 1, expandAt: 4 },
   { showAt: 2, expandAt: 5 },
   { showAt: 4, expandAt: 7 },
-  { showAt: 5, expandAt: 8 },
+  { showAt: 5, expandAt: 9 },
 ];
 
-export const WelcomeStep = ({ session, onComplete }: Props) => {
+export { WELCOME_SEEN_KEY };
+
+export const WelcomeStep = ({
+  organizationId,
+  onComplete,
+  onWrongStep,
+  onFlagDisabled,
+  skipApi = false,
+  nextStatus,
+}: Props) => {
   const [currentIdx, setCurrentIdx] = useState(-1);
-  const [phase, setPhase] = useState<'revealing' | 'fading' | 'fadingOut' | 'ready' | 'done'>('revealing');
-  const [isAnimating, setIsAnimating] = useState(false);
+  const currentIdxRef = useRef(-1);
+  const [phase, setPhase] = useState<'revealing' | 'done'>('revealing');
+  const phaseRef = useRef<'revealing' | 'done'>('revealing');
+  const isAnimatingRef = useRef(false);
   const [revealedWords, setRevealedWords] = useState<Record<number, Set<number>>>({});
   const [exitIdx, setExitIdx] = useState<number | null>(null);
-  const [showReady, setShowReady] = useState(false);
-  const wheelAccum = useRef(0);
+  const [apiError, setApiError] = useState(false);
   const [welcomeMutation] = useWelcomeMutation();
-  const [apiCalled, setApiCalled] = useState(false);
 
-  const callWelcomeApi = useCallback(async () => {
-    if (apiCalled) return;
-    setApiCalled(true);
+  // Track both conditions: API response received + animation finished
+  const apiResultRef = useRef<OnboardingStatus | null>(null);
+  const animationDoneRef = useRef(false);
+  const navigatedRef = useRef(false);
+
+  const tryNavigate = useCallback(() => {
+    if (navigatedRef.current) return;
+    if (apiResultRef.current && animationDoneRef.current) {
+      navigatedRef.current = true;
+      try {
+        localStorage.setItem(WELCOME_SEEN_KEY, 'true');
+      } catch {
+        // localStorage may be unavailable
+      }
+      onComplete(apiResultRef.current);
+    }
+  }, [onComplete]);
+
+  // Call /welcome API immediately on mount — provisioning starts while animation plays
+  // In skipApi mode, set the result immediately (API was already called before reload)
+  const calledRef = useRef(false);
+
+  useEffect(() => {
+    if (calledRef.current) return;
+    calledRef.current = true;
+
+    if (skipApi) {
+      apiResultRef.current = nextStatus || OnboardingStatus.SETUP_WORKSPACE;
+      tryNavigate();
+
+      return;
+    }
+
+    const callApi = async () => {
+      try {
+        const body = organizationId ? { organization_id: organizationId } : {};
+        const result = await welcomeMutation(body).unwrap();
+
+        apiResultRef.current = result.onboarding_status;
+        setApiError(false);
+        tryNavigate();
+      } catch (err) {
+        const noopSetError = () => {};
+
+        if (!handleOnboardingApiError(err, { setError: noopSetError, onWrongStep, onFlagDisabled })) {
+          setApiError(true);
+        }
+      }
+    };
+
+    callApi();
+  }, []); // eslint-disable-line react-hooks/exhaustive-deps
+
+  const handleRetry = async () => {
+    setApiError(false);
     try {
-      const orgId = session.orgs?.[0]?.organization_id;
-      const body = orgId ? { organization_id: orgId } : {};
+      const body = organizationId ? { organization_id: organizationId } : {};
       const result = await welcomeMutation(body).unwrap();
 
-      onComplete(result.onboarding_status);
-    } catch {
-      // On error, re-fetch whoami and render correct screen
-      onComplete(OnboardingStatus.WELCOME);
-    }
-  }, [apiCalled, session, welcomeMutation, onComplete]);
+      apiResultRef.current = result.onboarding_status;
+      tryNavigate();
+    } catch (err) {
+      const noopSetError = () => {};
 
-  const showSection = useCallback(
-    (idx: number) => {
-      if (idx < 0 || idx >= STORY_LINES.length || isAnimating) return;
-      setIsAnimating(true);
-      setExitIdx(currentIdx);
-      setCurrentIdx(idx);
-
-      const line = STORY_LINES[idx];
-      const wordCount = line.split(' ').length;
-      const overlap = 50;
-
-      // Reveal words staggered
-      const timers: ReturnType<typeof setTimeout>[] = [];
-
-      for (let wi = 0; wi < wordCount; wi++) {
-        timers.push(
-          setTimeout(() => {
-            setRevealedWords((prev) => {
-              const next = { ...prev };
-
-              next[idx] = new Set([...(prev[idx] ?? []), wi]);
-
-              return next;
-            });
-          }, wi * overlap),
-        );
+      if (!handleOnboardingApiError(err, { setError: noopSetError, onWrongStep, onFlagDisabled })) {
+        setApiError(true);
       }
+    }
+  };
 
-      const animTime = (wordCount - 1) * overlap + 600;
+  const showSection = useCallback((idx: number) => {
+    if (idx < 0 || idx >= STORY_LINES.length || isAnimatingRef.current) return;
+    isAnimatingRef.current = true;
+    setExitIdx(currentIdxRef.current >= 0 ? currentIdxRef.current : null);
+    currentIdxRef.current = idx;
+    setCurrentIdx(idx);
 
+    const line = STORY_LINES[idx];
+    const wordCount = line.split(' ').length;
+    const overlap = 50;
+
+    const timers: ReturnType<typeof setTimeout>[] = [];
+
+    for (let wi = 0; wi < wordCount; wi++) {
       timers.push(
         setTimeout(() => {
-          setExitIdx(null);
-          setIsAnimating(false);
-        }, animTime),
-      );
+          setRevealedWords((prev) => {
+            const next = { ...prev };
 
-      return () => timers.forEach(clearTimeout);
-    },
-    [currentIdx, isAnimating],
-  );
+            next[idx] = new Set([...(prev[idx] ?? []), wi]);
+
+            return next;
+          });
+        }, wi * overlap),
+      );
+    }
+
+    const animTime = (wordCount - 1) * overlap + 600;
+    // Lock for at least 1200ms so trackpad inertia dies before next scroll is accepted
+    const lockTime = Math.max(animTime, 1200);
+
+    timers.push(
+      setTimeout(() => {
+        setExitIdx(null);
+        isAnimatingRef.current = false;
+      }, lockTime),
+    );
+
+    return () => timers.forEach(clearTimeout);
+  }, []);
 
   useEffect(() => {
     const timer = setTimeout(() => showSection(0), 400);
@@ -116,43 +188,36 @@ export const WelcomeStep = ({ session, onComplete }: Props) => {
     return () => clearTimeout(timer);
   }, []); // eslint-disable-line react-hooks/exhaustive-deps
 
+  const lastAdvanceRef = useRef(0);
+
   useEffect(() => {
     const handleWheel = (e: WheelEvent) => {
       e.preventDefault();
       if (e.deltaY <= 0) return;
-      if (isAnimating) return;
 
-      wheelAccum.current += Math.abs(e.deltaY);
-      if (wheelAccum.current < 30) return;
-      wheelAccum.current = 0;
+      // Only allow one advance per 1.5s — kills all trackpad inertia
+      if (Date.now() - lastAdvanceRef.current < 1500) return;
 
-      if (phase === 'revealing') {
-        const next = currentIdx + 1;
+      if (phaseRef.current === 'revealing') {
+        const next = currentIdxRef.current + 1;
 
         if (next < STORY_LINES.length) {
+          lastAdvanceRef.current = Date.now();
           showSection(next);
-          if (next >= STORY_LINES.length - 1) {
-            setTimeout(() => setPhase('fading'), 1200);
-          }
+        } else {
+          // All lines including "Ready?" have been shown — done
+          phaseRef.current = 'done';
+          setPhase('done');
+          animationDoneRef.current = true;
+          tryNavigate();
         }
-      } else if (phase === 'fading') {
-        setPhase('fadingOut');
-        setExitIdx(currentIdx);
-        setTimeout(() => {
-          setShowReady(true);
-          setPhase('ready');
-        }, 600);
-      } else if (phase === 'ready') {
-        setPhase('done');
-        setShowReady(false);
-        callWelcomeApi();
       }
     };
 
     window.addEventListener('wheel', handleWheel, { passive: false });
 
     return () => window.removeEventListener('wheel', handleWheel);
-  }, [phase, currentIdx, isAnimating, showSection, callWelcomeApi]);
+  }, [showSection, tryNavigate]);
 
   const getImgState = (imgIdx: number) => {
     const t = IMG_TRIGGERS[imgIdx];
@@ -163,6 +228,26 @@ export const WelcomeStep = ({ session, onComplete }: Props) => {
 
     return 'hidden';
   };
+
+  // If animation is done but API failed, show retry
+  if (phase === 'done' && apiError) {
+    return (
+      <div className='fixed inset-0 z-[150] flex items-center justify-center overflow-hidden bg-[#f3f3f3]'>
+        <div className='text-center'>
+          <p className='mb-4 text-sm' style={{ color: '#999' }}>
+            Something went wrong. Please try again.
+          </p>
+          <button
+            type='button'
+            onClick={handleRetry}
+            className='rounded-lg bg-[#1a1a1a] px-6 py-2.5 text-sm text-white transition-opacity hover:opacity-80'
+          >
+            Retry
+          </button>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className='fixed inset-0 z-[150] flex items-center justify-center overflow-hidden bg-[#f3f3f3]'>
@@ -216,7 +301,7 @@ export const WelcomeStep = ({ session, onComplete }: Props) => {
             <div
               style={{
                 fontFamily: "'FunnelDisplay', serif",
-                fontSize: 44,
+                fontSize: idx === STORY_LINES.length - 1 ? 52 : 44,
                 color: '#1a1a1a',
                 lineHeight: 1.45,
                 fontWeight: 300,
@@ -243,25 +328,12 @@ export const WelcomeStep = ({ session, onComplete }: Props) => {
         );
       })}
 
-      {/* "Ready?" overlay */}
-      <div
-        style={{
-          position: 'absolute',
-          top: '50%',
-          left: '50%',
-          transform: 'translate(-50%, -50%)',
-          fontFamily: "'FunnelDisplay', serif",
-          fontSize: 52,
-          color: '#1a1a1a',
-          fontWeight: 300,
-          opacity: showReady ? 1 : 0,
-          transition: 'opacity 0.6s cubic-bezier(0.16,1,0.3,1)',
-          zIndex: 3,
-          pointerEvents: 'none',
-        }}
-      >
-        Ready?
-      </div>
+      {/* Loading spinner after animation done, waiting for API */}
+      {phase === 'done' && !apiError && (
+        <div className='absolute z-10' style={{ bottom: '15%' }}>
+          <div className='h-5 w-5 animate-spin rounded-full border-2 border-black/10 border-t-black' />
+        </div>
+      )}
 
       {/* Scroll hint */}
       {currentIdx >= 0 && phase !== 'done' && (

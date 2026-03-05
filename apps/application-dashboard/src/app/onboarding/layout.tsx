@@ -2,6 +2,7 @@
 
 import { FC, ReactNode } from 'react';
 import { Provider } from 'react-redux';
+import { FeatureFlagsProvider } from '@/modules/feature-flags/provider';
 import { ProductionErrorBoundary } from '@/pages/ErrorBoundary';
 import { store } from '@/store';
 
@@ -12,7 +13,9 @@ interface OnboardingLayoutProps {
 const OnboardingLayout: FC<OnboardingLayoutProps> = ({ children }) => {
   return (
     <Provider store={store}>
-      <ProductionErrorBoundary>{children}</ProductionErrorBoundary>
+      <FeatureFlagsProvider>
+        <ProductionErrorBoundary>{children}</ProductionErrorBoundary>
+      </FeatureFlagsProvider>
     </Provider>
   );
 };
