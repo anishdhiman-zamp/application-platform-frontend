@@ -197,7 +197,7 @@ const FileViewerTab = memo(({ filePath, isActive, onCloseTab }: FileViewerTabPro
   const {
     content,
     isLoading,
-    isError,
+    isFileNotFound,
     fileCategory,
     fileExtension,
     isEditable,
@@ -219,7 +219,7 @@ const FileViewerTab = memo(({ filePath, isActive, onCloseTab }: FileViewerTabPro
     fileCategory === FILE_CATEGORY.SPREADSHEET &&
     (TEXT_SPREADSHEET_EXTENSIONS as readonly string[]).includes(fileExtension.toLowerCase());
 
-  if (isError && isEditable) {
+  if (isFileNotFound && isEditable) {
     return <FileNotFoundError fileName={fileName} onClose={handleCloseTab} />;
   }
 
