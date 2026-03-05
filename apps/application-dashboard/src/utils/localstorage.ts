@@ -1,3 +1,5 @@
+import { captureException } from '@sentry/browser';
+
 export enum LOCAL_STORAGE_KEYS {
   XZAMP_GOD_MODE = 'XZAMP_GOD_MODE',
   XZAMP_USER = 'TMS_XZAMP_USER',
@@ -36,7 +38,19 @@ export const setToLocalStorage = (key: LOCAL_STORAGE_KEYS, value: string) => {
     return;
   }
 
-  window.localStorage.setItem(key, value);
+  try {
+    window.localStorage.setItem(key, value);
+  } catch (error) {
+    if (error instanceof DOMException && error.name === 'QuotaExceededError') {
+      console.warn(`localStorage quota exceeded for key "${key}". Clearing key and retrying.`);
+      try {
+        window.localStorage.removeItem(key);
+        window.localStorage.setItem(key, value);
+      } catch {
+        captureException(new Error(`localStorage quota exceeded for key "${key}" even after clearing`));
+      }
+    }
+  }
 };
 
 export const removeFromLocalStorage = (key: LOCAL_STORAGE_KEYS) => {
