@@ -1,6 +1,7 @@
 'use client';
 
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
+import { isNotFoundError } from '@zamp-platform/api';
 import { useLazyReadFileContentQuery, useLazyReadFileQuery, useWriteFileMutation } from '@/apis/filesystem';
 import { getFileCategory, getFileExtension, getMediaUrl } from '@/modules/pace/components/files/file-tree.utils';
 import { FILE_CATEGORY, type FileCategory } from '@/modules/pace/components/files/files.constants';
@@ -189,6 +190,8 @@ export const useFileViewer = ({
   useEffect(() => {
     if (!filePath || !isEditable || !isActive || isError) return;
 
+    let stopped = false;
+
     const pollForChanges = async () => {
       const currentState = getFileState(filePath);
 
@@ -203,12 +206,16 @@ export const useFileViewer = ({
           forceUpdateFileState(filePath, content ?? '', metadata.mtime_ms);
         }
       } catch (err) {
+        if (isNotFoundError(err)) {
+          stopped = true;
+        }
         onLoadError?.(err);
-        // Error state is tracked via the RTK Query result
       }
     };
 
-    const intervalId = setInterval(pollForChanges, POLL_INTERVAL_MS);
+    const intervalId = setInterval(() => {
+      if (!stopped) pollForChanges();
+    }, POLL_INTERVAL_MS);
 
     return () => clearInterval(intervalId);
   }, [
@@ -220,11 +227,14 @@ export const useFileViewer = ({
     fetchFileMetadata,
     fetchFileContent,
     forceUpdateFileState,
+    onLoadError,
   ]);
 
   // Polling for media files - detect external changes and update URL
   useEffect(() => {
     if (!filePath || isEditable || !isActive || isError) return;
+
+    let stopped = false;
 
     const pollForMediaChanges = async () => {
       try {
@@ -236,17 +246,21 @@ export const useFileViewer = ({
           setMediaMtime(metadata.mtime_ms);
         }
       } catch (err) {
-        // Error state is tracked via the RTK Query result
+        if (isNotFoundError(err)) {
+          stopped = true;
+        }
         onLoadError?.(err);
       }
     };
 
     pollForMediaChanges();
 
-    const intervalId = setInterval(pollForMediaChanges, POLL_INTERVAL_MS);
+    const intervalId = setInterval(() => {
+      if (!stopped) pollForMediaChanges();
+    }, POLL_INTERVAL_MS);
 
     return () => clearInterval(intervalId);
-  }, [filePath, isEditable, isActive, isError, mediaMtime, fetchFileMetadata]);
+  }, [filePath, isEditable, isActive, isError, mediaMtime, fetchFileMetadata, onLoadError]);
 
   return {
     content: fileState?.content ?? null,
