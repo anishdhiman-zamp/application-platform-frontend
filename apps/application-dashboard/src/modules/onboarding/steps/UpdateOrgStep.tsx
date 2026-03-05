@@ -2,22 +2,33 @@
 
 import { useEffect, useRef, useState } from 'react';
 import { AvatarPicker } from 'modules/onboarding/components/AvatarPicker';
-import { AvatarState, MediaType, OnboardingStatus, UploadType } from 'modules/onboarding/onboarding.types';
+import {
+  AvatarState,
+  ImageContentType,
+  MediaType,
+  OnboardingStatus,
+  UploadType,
+} from 'modules/onboarding/onboarding.types';
 import { generateOrgIconSvg } from 'modules/onboarding/utils/avatarGenerator';
-import { useSetupOrgMutation } from '@/apis/onboarding';
+import { handleOnboardingApiError } from 'modules/onboarding/utils/onboardingErrors';
+import { useGetUploadUrlMutation, useSetupOrgMutation } from '@/apis/onboarding';
 
 type Props = {
-  onComplete: (status: OnboardingStatus) => void;
+  onComplete: (status: OnboardingStatus, organizationId?: string) => void;
+  onWrongStep: () => void;
+  onFlagDisabled: () => void;
 };
 
-export const UpdateOrgStep = ({ onComplete }: Props) => {
+export const UpdateOrgStep = ({ onComplete, onWrongStep, onFlagDisabled }: Props) => {
   const [orgName, setOrgName] = useState('');
   const [variant, setVariant] = useState(0);
   const [icon, setIcon] = useState<AvatarState>({ type: MediaType.SEED, value: '' });
+  const [pendingFile, setPendingFile] = useState<File | null>(null);
   const [error, setError] = useState<string | null>(null);
   const userPickedIconRef = useRef(false);
   const inputRef = useRef<HTMLInputElement>(null);
   const [setupOrg, { isLoading }] = useSetupOrgMutation();
+  const [getUploadUrl] = useGetUploadUrlMutation();
 
   useEffect(() => {
     inputRef.current?.focus();
@@ -47,13 +58,15 @@ export const UpdateOrgStep = ({ onComplete }: Props) => {
     setIcon({ type: MediaType.SEED, value: (orgName || 'Org') + '_v' + next });
   };
 
-  const handleUpload = (s3Uri: string, previewUrl: string) => {
+  const handleUpload = (file: File, previewUrl: string) => {
     userPickedIconRef.current = true;
-    setIcon({ type: MediaType.URL, value: s3Uri, previewUrl });
+    setPendingFile(file);
+    setIcon({ type: MediaType.URL, value: '', previewUrl });
   };
 
   const handleRemove = () => {
     userPickedIconRef.current = false;
+    setPendingFile(null);
     setVariant(0);
     setIcon({ type: MediaType.SEED, value: orgName });
   };
@@ -61,16 +74,44 @@ export const UpdateOrgStep = ({ onComplete }: Props) => {
   const handleSubmit = async () => {
     if (!orgName.trim()) return;
     setError(null);
+
+    let iconValue = icon.value || null;
+
+    // Upload icon to S3 if user picked a file
+    if (icon.type === MediaType.URL && pendingFile) {
+      try {
+        const contentType = pendingFile.type === 'image/jpeg' ? ImageContentType.JPEG : ImageContentType.PNG;
+        const { upload_url, s3_uri } = await getUploadUrl({
+          upload_type: UploadType.ORG_ICON,
+          content_type: contentType,
+        }).unwrap();
+
+        await fetch(upload_url, {
+          method: 'PUT',
+          headers: { 'Content-Type': pendingFile.type },
+          body: pendingFile,
+        });
+
+        iconValue = s3_uri;
+      } catch {
+        setError('Failed to upload icon. Please try again.');
+
+        return;
+      }
+    }
+
     try {
       const result = await setupOrg({
         organization_name: orgName.trim(),
         icon_type: icon.type,
-        icon_value: icon.value || null,
+        icon_value: iconValue,
       }).unwrap();
 
-      onComplete(result.onboarding_status);
-    } catch {
-      setError('Something went wrong. Please try again.');
+      onComplete(result.onboarding_status, result.organization_id);
+    } catch (err) {
+      if (!handleOnboardingApiError(err, { setError, onWrongStep, onFlagDisabled })) {
+        setError('Something went wrong. Please try again.');
+      }
     }
   };
 
@@ -84,13 +125,7 @@ export const UpdateOrgStep = ({ onComplete }: Props) => {
   return (
     <div className='w-full max-w-[520px]'>
       <div className='mb-5'>
-        <AvatarPicker
-          svgContent={getSvg()}
-          onShuffle={handleShuffle}
-          onUpload={handleUpload}
-          onRemove={handleRemove}
-          uploadType={UploadType.ORG_ICON}
-        />
+        <AvatarPicker svgContent={getSvg()} onShuffle={handleShuffle} onUpload={handleUpload} onRemove={handleRemove} />
       </div>
 
       <div className='mb-6'>

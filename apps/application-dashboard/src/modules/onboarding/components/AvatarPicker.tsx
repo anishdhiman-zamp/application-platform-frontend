@@ -1,27 +1,21 @@
 'use client';
 
 import { useEffect, useRef, useState } from 'react';
-import { ImageContentType, UploadType } from 'modules/onboarding/onboarding.types';
-import { useGetUploadUrlMutation } from '@/apis/onboarding';
 
 type Props = {
   svgContent: string;
   onShuffle: () => void;
-  onUpload: (s3Uri: string, previewUrl: string) => void;
+  onUpload: (file: File, previewUrl: string) => void;
   onRemove: () => void;
-  uploadType: UploadType;
 };
 
-export const AvatarPicker = ({ svgContent, onShuffle, onUpload, onRemove, uploadType }: Props) => {
+export const AvatarPicker = ({ svgContent, onShuffle, onUpload, onRemove }: Props) => {
   const [open, setOpen] = useState(false);
   const [activeTab, setActiveTab] = useState<'zamp' | 'upload'>('zamp');
   const [previewUrl, setPreviewUrl] = useState<string | null>(null);
   const [pendingFile, setPendingFile] = useState<File | null>(null);
-  const [uploading, setUploading] = useState(false);
-  const [uploadError, setUploadError] = useState<string | null>(null);
   const wrapperRef = useRef<HTMLDivElement>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
-  const [getUploadUrl] = useGetUploadUrlMutation();
 
   useEffect(() => {
     const handler = (e: MouseEvent) => {
@@ -43,37 +37,15 @@ export const AvatarPicker = ({ svgContent, onShuffle, onUpload, onRemove, upload
 
     setPreviewUrl(url);
     setPendingFile(file);
-    setUploadError(null);
     e.target.value = '';
   };
 
-  const handleSave = async () => {
-    if (!pendingFile) return;
-    setUploading(true);
-    setUploadError(null);
-
-    try {
-      const contentType = pendingFile.type === 'image/jpeg' ? ImageContentType.JPEG : ImageContentType.PNG;
-      const { upload_url, s3_uri } = await getUploadUrl({
-        upload_type: uploadType,
-        content_type: contentType,
-      }).unwrap();
-
-      await fetch(upload_url, {
-        method: 'PUT',
-        headers: { 'Content-Type': pendingFile.type },
-        body: pendingFile,
-      });
-
-      onUpload(s3_uri, previewUrl!);
-      setOpen(false);
-      setPreviewUrl(null);
-      setPendingFile(null);
-    } catch {
-      setUploadError('Upload failed. Please try again.');
-    } finally {
-      setUploading(false);
-    }
+  const handleSave = () => {
+    if (!pendingFile || !previewUrl) return;
+    onUpload(pendingFile, previewUrl);
+    setOpen(false);
+    setPreviewUrl(null);
+    setPendingFile(null);
   };
 
   const handleRemove = () => {
@@ -162,7 +134,6 @@ export const AvatarPicker = ({ svgContent, onShuffle, onUpload, onRemove, upload
                   className='hidden'
                   onChange={handleFileChange}
                 />
-                {uploadError && <p className='mt-1.5 text-[11px] text-red-500'>{uploadError}</p>}
               </div>
             )}
           </div>
@@ -197,11 +168,10 @@ export const AvatarPicker = ({ svgContent, onShuffle, onUpload, onRemove, upload
               {activeTab === 'upload' && pendingFile && (
                 <button
                   type='button'
-                  disabled={uploading}
-                  className='rounded-md bg-[#171717] px-3.5 py-1.5 text-[11px] text-white transition-all hover:bg-[#333] disabled:opacity-60'
+                  className='rounded-md bg-[#171717] px-3.5 py-1.5 text-[11px] text-white transition-all hover:bg-[#333]'
                   onClick={handleSave}
                 >
-                  {uploading ? 'Saving...' : 'Save'}
+                  Save
                 </button>
               )}
             </div>

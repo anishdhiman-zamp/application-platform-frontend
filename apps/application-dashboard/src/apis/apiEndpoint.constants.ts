@@ -15,10 +15,12 @@ export const API_ENDPOINTS = {
   USER_CHECK_USERNAME_GET: 'users/check-username',
 
   // Onboarding
-  ONBOARDING_UPDATE_PROFILE_POST: 'onboarding/update-profile',
-  ONBOARDING_SETUP_ORG_POST: 'onboarding/setup-org',
+  ONBOARDING_APPROVAL_POST: 'onboarding/approval',
+  ONBOARDING_USER_PROFILE_PATCH: 'onboarding/user/profile',
+  ONBOARDING_ORG_SETUP_POST: 'onboarding/org/setup',
   ONBOARDING_WELCOME_POST: 'onboarding/welcome',
-  ONBOARDING_UPLOAD_URL_POST: 'onboarding/upload-url',
+  ONBOARDING_PROVISIONING_STATUS_GET: 'onboarding/provisioning/status',
+  ONBOARDING_UPLOAD_URL_POST: 'onboarding/assets/upload-url',
   AUTH_BASE_URL_GET: `auth/api-base-url`,
   AUTH_ERROR_DETAILS_GET: `auth/relay/internal/self-service/errors`,
   TEAMS_BY_ORGANIZATION_ID_GET: `organizations/{{organizationId}}/teams`,

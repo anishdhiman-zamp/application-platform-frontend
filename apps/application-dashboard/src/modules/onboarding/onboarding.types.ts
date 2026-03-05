@@ -1,11 +1,17 @@
 export enum OnboardingStatus {
+  PENDING_APPROVAL = 'pending_approval',
   SETUP_PROFILE = 'setup_profile',
   SETUP_USERNAME = 'setup_username',
-  UPDATE_ORG = 'update_org',
-  PENDING_WAITLIST = 'pending_waitlist',
+  SETUP_ORG = 'setup_org',
   WELCOME = 'welcome',
   SETUP_WORKSPACE = 'setup_workspace',
   ONBOARDED = 'onboarded',
+}
+
+export enum ProvisioningStatus {
+  IN_PROGRESS = 'in_progress',
+  COMPLETED = 'completed',
+  FAILED = 'failed',
 }
 
 export enum MediaType {
@@ -30,39 +36,38 @@ export type UpdateProfileRequest = {
   username?: string | null;
 };
 
-export type UserModel = {
-  user_id: string;
-  email: string;
-  name: string;
-  last_name: string;
-  username: string | null;
-  avatar_type: MediaType | null;
-  avatar_value: string | null;
-  onboarding_status: OnboardingStatus;
-};
-
 export type SetupOrgRequest = {
   organization_name: string;
   icon_type?: MediaType | null;
   icon_value?: string | null;
 };
 
-export type OrganizationModel = {
-  organization_id: string;
-  name: string;
-  slug: string;
-  icon_type: MediaType | null;
-  icon_value: string | null;
-};
-
 export type WelcomeRequest = {
   organization_id?: string | null;
 };
 
-export type OnboardingResponse<T> = {
+export type OnboardingResponse = {
   message: string;
   onboarding_status: OnboardingStatus;
-  data: T | null;
+};
+
+export type SetupOrgResponse = {
+  message: string;
+  onboarding_status: OnboardingStatus;
+  organization_id: string;
+};
+
+export type ApprovalCheckResponse = {
+  onboarding_status: OnboardingStatus;
+  is_approved: boolean;
+  reason: string | null;
+};
+
+export type ProvisioningStatusResponse = {
+  onboarding_status: OnboardingStatus;
+  provisioning_status: ProvisioningStatus;
+  provisioning_started_at: string | null;
+  email_threshold_seconds: number;
 };
 
 export type UploadUrlRequest = {
