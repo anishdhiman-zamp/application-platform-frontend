@@ -113,7 +113,7 @@ const PaceNavbar = () => {
   };
 
   return (
-    <div className='flex h-[38px] items-center overflow-hidden px-2 pt-1.5 pb-1'>
+    <div className='flex h-[42px] items-center overflow-hidden px-2 pt-1.5 pb-1.5'>
       {!isPaceSidebarOpen && pathname !== ROUTES_PATH.CHAT && (
         <>
           <Button
@@ -135,9 +135,9 @@ const PaceNavbar = () => {
             key={item.id}
             href={getNavItemHref(item.id, item.path)}
             className={cn(
-              'text-GRAY_900 hover:text-GRAY_1000 hover:bg-GRAY_200 flex h-7 w-7 cursor-pointer items-center justify-center rounded-lg p-2',
+              'text-GRAY_900 hover:text-GRAY_1000 hover:bg-GRAY_200 flex h-8 w-8 cursor-pointer items-center justify-center rounded-lg p-[7px]',
               isNavItemActive(item.id, item.path) &&
-                'border-GRAY_400 text-GRAY_1000 hover:text-GRAY_1000 shadow-tab-shadow border bg-white hover:bg-white',
+                'border-GRAY_500 text-GRAY_1000 hover:text-GRAY_1000 shadow-tab-shadow border border-[0.75px] bg-white hover:bg-white',
             )}
             role='button'
             tabIndex={0}

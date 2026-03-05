@@ -1,6 +1,7 @@
 'use client';
 
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
+import { isNotFoundError } from '@zamp-platform/api';
 import { useLazyReadFileContentQuery, useLazyReadFileQuery, useWriteFileMutation } from '@/apis/filesystem';
 import { getFileCategory, getFileExtension, getMediaUrl } from '@/modules/pace/components/files/file-tree.utils';
 import { FILE_CATEGORY, type FileCategory } from '@/modules/pace/components/files/files.constants';
@@ -22,8 +23,7 @@ interface UseFileViewerReturn {
   originalContent: string | null;
   isDirty: boolean;
   isLoading: boolean;
-  isError: boolean;
-  error: unknown;
+  isFileNotFound: boolean;
   fileCategory: FileCategory;
   fileExtension: string;
   isEditable: boolean;
@@ -50,8 +50,10 @@ export const useFileViewer = ({
     useFileViewerContext();
 
   const [fetchFileMetadata] = useLazyReadFileQuery();
-  const [fetchFileContent, { isLoading, isError, error }] = useLazyReadFileContentQuery();
+  const [fetchFileContent, { isLoading }] = useLazyReadFileContentQuery();
   const [writeFile, { isLoading: isSaving }] = useWriteFileMutation();
+
+  const [isFileNotFound, setIsFileNotFound] = useState(false);
 
   const fileState = filePath ? getFileState(filePath) : undefined;
 
@@ -74,6 +76,14 @@ export const useFileViewer = ({
       fileCategory === FILE_CATEGORY.HTML
     );
   }, [fileCategory]);
+
+  const mediaUrl = useMemo(() => {
+    if (!filePath || isEditable) return null;
+
+    const baseUrl = getMediaUrl(filePath);
+
+    return mediaMtime ? `${baseUrl}&v=${mediaMtime}` : baseUrl;
+  }, [filePath, isEditable, mediaMtime]);
 
   const saveFile = useCallback(async () => {
     if (!filePath) return;
@@ -135,34 +145,39 @@ export const useFileViewer = ({
     [filePath, updateFileContent, scheduleAutoSave],
   );
 
-  useEffect(() => {
-    const loadFile = async () => {
-      if (!filePath) return;
+  const loadFile = useCallback(async () => {
+    if (!filePath) return;
 
-      const existingState = getFileState(filePath);
+    const existingState = getFileState(filePath);
 
-      if (existingState) {
-        return;
-      }
+    if (existingState) {
+      return;
+    }
 
-      if (!isEditable) {
-        return;
-      }
+    if (!isEditable) {
+      return;
+    }
 
-      try {
-        const [metadataResult, contentResult] = await Promise.all([
-          fetchFileMetadata({ path: filePath }).unwrap(),
-          fetchFileContent({ path: filePath }).unwrap(),
-        ]);
+    try {
+      const [metadataResult, contentResult] = await Promise.all([
+        fetchFileMetadata({ path: filePath }).unwrap(),
+        fetchFileContent({ path: filePath }).unwrap(),
+      ]);
 
-        initFileState(filePath, contentResult ?? '', metadataResult.mtime_ms);
-      } catch (err) {
+      initFileState(filePath, contentResult ?? '', metadataResult.mtime_ms);
+    } catch (err) {
+      if (isNotFoundError(err)) {
+        setIsFileNotFound(true);
+      } else {
         onLoadError?.(err);
       }
-    };
-
-    loadFile();
+    }
   }, [filePath, isEditable, fetchFileMetadata, fetchFileContent, getFileState, initFileState, onLoadError]);
+
+  // Load file on mount
+  useEffect(() => {
+    loadFile();
+  }, [loadFile]);
 
   // Cleanup timer on unmount
   useEffect(() => {
@@ -173,24 +188,11 @@ export const useFileViewer = ({
     };
   }, []);
 
-  // Save on tab switch (when becoming inactive)
-  useEffect(() => {
-    const handleVisibilityChange = () => {
-      if (document.hidden && fileState?.isDirty) {
-        saveFile();
-      }
-    };
-
-    document.addEventListener('visibilitychange', handleVisibilityChange);
-
-    return () => {
-      document.removeEventListener('visibilitychange', handleVisibilityChange);
-    };
-  }, [fileState?.isDirty, saveFile]);
-
   // Polling for editable files - detect external changes
   useEffect(() => {
-    if (!filePath || !isEditable || !isActive) return;
+    if (!filePath || !isEditable || !isActive || isFileNotFound) return;
+
+    let stopped = false;
 
     const pollForChanges = async () => {
       const currentState = getFileState(filePath);
@@ -205,19 +207,38 @@ export const useFileViewer = ({
 
           forceUpdateFileState(filePath, content ?? '', metadata.mtime_ms);
         }
-      } catch {
-        // Silently ignore polling errors
+      } catch (err) {
+        if (isNotFoundError(err)) {
+          stopped = true;
+          setIsFileNotFound(true);
+        } else {
+          onLoadError?.(err);
+        }
       }
     };
 
-    const intervalId = setInterval(pollForChanges, POLL_INTERVAL_MS);
+    const intervalId = setInterval(() => {
+      if (!stopped) pollForChanges();
+    }, POLL_INTERVAL_MS);
 
     return () => clearInterval(intervalId);
-  }, [filePath, isEditable, isActive, getFileState, fetchFileMetadata, fetchFileContent, forceUpdateFileState]);
+  }, [
+    filePath,
+    isEditable,
+    isActive,
+    isFileNotFound,
+    getFileState,
+    fetchFileMetadata,
+    fetchFileContent,
+    forceUpdateFileState,
+    onLoadError,
+  ]);
 
   // Polling for media files - detect external changes and update URL
   useEffect(() => {
-    if (!filePath || isEditable || !isActive) return;
+    if (!filePath || isEditable || !isActive || isFileNotFound) return;
+
+    let stopped = false;
 
     const pollForMediaChanges = async () => {
       try {
@@ -228,34 +249,31 @@ export const useFileViewer = ({
         } else if (mediaMtime === null) {
           setMediaMtime(metadata.mtime_ms);
         }
-      } catch {
-        // Silently ignore polling errors
+      } catch (err) {
+        if (isNotFoundError(err)) {
+          stopped = true;
+          setIsFileNotFound(true);
+        } else {
+          onLoadError?.(err);
+        }
       }
     };
 
     pollForMediaChanges();
 
-    const intervalId = setInterval(pollForMediaChanges, POLL_INTERVAL_MS);
+    const intervalId = setInterval(() => {
+      if (!stopped) pollForMediaChanges();
+    }, POLL_INTERVAL_MS);
 
     return () => clearInterval(intervalId);
-  }, [filePath, isEditable, isActive, mediaMtime, fetchFileMetadata]);
-
-  const mediaUrl = useMemo(() => {
-    if (!filePath || isEditable) return null;
-
-    const baseUrl = getMediaUrl(filePath);
-
-    // baseUrl already contains ?raw=true, so use & for additional params
-    return mediaMtime ? `${baseUrl}&v=${mediaMtime}` : baseUrl;
-  }, [filePath, isEditable, mediaMtime]);
+  }, [filePath, isEditable, isActive, isFileNotFound, mediaMtime, fetchFileMetadata, onLoadError]);
 
   return {
     content: fileState?.content ?? null,
     originalContent: fileState?.originalContent ?? null,
     isDirty: fileState?.isDirty ?? false,
     isLoading,
-    isError,
-    error,
+    isFileNotFound,
     fileCategory,
     fileExtension,
     isEditable,

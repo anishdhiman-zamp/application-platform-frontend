@@ -161,7 +161,7 @@ const FileViewerTab = memo(({ filePath, isActive, onCloseTab }: FileViewerTabPro
   const {
     content,
     isLoading,
-    isError,
+    isFileNotFound,
     fileCategory,
     fileExtension,
     isEditable,
@@ -180,7 +180,7 @@ const FileViewerTab = memo(({ filePath, isActive, onCloseTab }: FileViewerTabPro
   const isMarkdown = fileCategory === FILE_CATEGORY.MARKDOWN;
   const isHtml = fileCategory === FILE_CATEGORY.HTML;
 
-  if (isError && isEditable) {
+  if (isFileNotFound && isEditable) {
     return <FileNotFoundError fileName={fileName} onClose={handleCloseTab} />;
   }
 

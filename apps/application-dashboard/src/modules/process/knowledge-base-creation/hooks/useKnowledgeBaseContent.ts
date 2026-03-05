@@ -2,6 +2,7 @@
 
 import { useCallback, useEffect, useRef, useState } from 'react';
 import { captureException } from '@sentry/nextjs';
+import { isNotFoundError } from '@zamp-platform/api';
 import { useLazyGetOutputFileDownloadQuery } from '@zamp-platform/chat';
 import { toast } from '@zamp-platform/ui';
 import {
@@ -76,21 +77,9 @@ export const useKnowledgeBaseContent = ({
 
   const cacheKey = `${CACHE_KEY_PREFIX}${processId}`;
 
-  // Determine if error is a 404 (zero state)
-  const is404Error =
-    isKnowledgeBaseError &&
-    knowledgeBaseError &&
-    typeof knowledgeBaseError === 'object' &&
-    'status' in knowledgeBaseError &&
-    knowledgeBaseError.status === 404;
+  const is404Error = isKnowledgeBaseError && isNotFoundError(knowledgeBaseError);
 
-  // Determine if there's a non-404 error (actual error to show)
-  const hasNon404Error =
-    isKnowledgeBaseError &&
-    knowledgeBaseError &&
-    typeof knowledgeBaseError === 'object' &&
-    'status' in knowledgeBaseError &&
-    knowledgeBaseError.status !== 404;
+  const hasNon404Error = isKnowledgeBaseError && !isNotFoundError(knowledgeBaseError);
 
   /**
    * Fetches markdown content from a URL with caching support

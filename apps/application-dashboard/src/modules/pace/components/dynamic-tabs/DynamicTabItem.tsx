@@ -104,12 +104,12 @@ const DynamicTabItem = ({
             className={cn(
               'group relative flex h-[30px] w-full cursor-pointer items-center justify-start gap-x-2 rounded-[8px] border p-2 transition-all duration-150 ease-in-out',
               isActive
-                ? 'border-GRAY_300 text-GRAY_1000 bg-white hover:bg-white'
+                ? 'border-GRAY_500 text-GRAY_1000 border-[0.75px] bg-white hover:bg-white'
                 : 'text-GRAY_700 hover:text-GRAY_1000 hover:bg-GRAY_200 border-transparent',
             )}
           >
             {icon}
-            <span className='f-11-500 min-w-0 flex-1 truncate text-left'>{tab.name}</span>
+            <span className='f-13-500 min-w-0 flex-1 truncate text-left'>{tab.name}</span>
             <Button
               id='dynamic-tab-close-button'
               variant='ghost'

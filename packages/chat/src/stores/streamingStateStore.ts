@@ -75,23 +75,32 @@ class StreamingStateStore {
 
   clear(): void {
     this.states.clear();
-    for (const listeners of this.listeners.values()) {
-      for (const listener of listeners) {
+    const allConversationIds = Array.from(this.listeners.keys());
+    for (const id of allConversationIds) {
+      this.scheduleNotify(id);
+    }
+    if (allConversationIds.length === 0 && this.globalListeners.size > 0) {
+      for (const listener of this.globalListeners) {
         listener();
       }
     }
-    for (const listener of this.globalListeners) {
-      listener();
-    }
   }
 
+  private isFlushing = false;
+
   /**
-   * Batches notifications via microtask so multiple rapid store updates
-   * (e.g. from SSE delta events) coalesce into a single listener flush,
-   * preventing React's "Maximum update depth exceeded" error.
+   * Batches notifications via microtask. Re-entrant writes during flush
+   * are deferred to a follow-up microtask to prevent "Maximum update depth
+   * exceeded" cascades while still guaranteeing eventual notification.
    */
   private scheduleNotify(conversationId: string): void {
+    if (this.isFlushing) {
+      Promise.resolve().then(() => this.scheduleNotify(conversationId));
+      return;
+    }
+
     this.pendingNotifications.add(conversationId);
+
     if (!this.flushScheduled) {
       this.flushScheduled = true;
       queueMicrotask(() => this.flush());
@@ -99,23 +108,30 @@ class StreamingStateStore {
   }
 
   private flush(): void {
-    const conversationIds = Array.from(this.pendingNotifications);
-    this.pendingNotifications.clear();
-    this.flushScheduled = false;
+    if (this.isFlushing) return;
+    this.isFlushing = true;
 
-    for (const conversationId of conversationIds) {
-      const listeners = this.listeners.get(conversationId);
-      if (listeners) {
-        for (const listener of listeners) {
+    try {
+      const conversationIds = Array.from(this.pendingNotifications);
+      this.pendingNotifications.clear();
+      this.flushScheduled = false;
+
+      for (const conversationId of conversationIds) {
+        const listeners = this.listeners.get(conversationId);
+        if (listeners) {
+          for (const listener of listeners) {
+            listener();
+          }
+        }
+      }
+
+      if (conversationIds.length > 0 && this.globalListeners.size > 0) {
+        for (const listener of this.globalListeners) {
           listener();
         }
       }
-    }
-
-    if (conversationIds.length > 0 && this.globalListeners.size > 0) {
-      for (const listener of this.globalListeners) {
-        listener();
-      }
+    } finally {
+      this.isFlushing = false;
     }
   }
 }
