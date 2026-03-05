@@ -23,8 +23,7 @@ interface UseFileViewerReturn {
   originalContent: string | null;
   isDirty: boolean;
   isLoading: boolean;
-  isError: boolean;
-  error: unknown;
+  isFileNotFound: boolean;
   fileCategory: FileCategory;
   fileExtension: string;
   isEditable: boolean;
@@ -50,12 +49,11 @@ export const useFileViewer = ({
   const { getFileState, initFileState, forceUpdateFileState, updateFileContent, markFileSaved } =
     useFileViewerContext();
 
-  const [fetchFileMetadata, { isError: isMetadataError, error: metadataError }] = useLazyReadFileQuery();
-  const [fetchFileContent, { isLoading, isError: isContentError, error: contentError }] = useLazyReadFileContentQuery();
+  const [fetchFileMetadata] = useLazyReadFileQuery();
+  const [fetchFileContent, { isLoading }] = useLazyReadFileContentQuery();
   const [writeFile, { isLoading: isSaving }] = useWriteFileMutation();
 
-  const isError = isMetadataError || isContentError;
-  const error = metadataError ?? contentError;
+  const [isFileNotFound, setIsFileNotFound] = useState(false);
 
   const fileState = filePath ? getFileState(filePath) : undefined;
 
@@ -168,6 +166,9 @@ export const useFileViewer = ({
 
       initFileState(filePath, contentResult ?? '', metadataResult.mtime_ms);
     } catch (err) {
+      if (isNotFoundError(err)) {
+        setIsFileNotFound(true);
+      }
       onLoadError?.(err);
     }
   }, [filePath, isEditable, fetchFileMetadata, fetchFileContent, getFileState, initFileState, onLoadError]);
@@ -188,7 +189,7 @@ export const useFileViewer = ({
 
   // Polling for editable files - detect external changes
   useEffect(() => {
-    if (!filePath || !isEditable || !isActive || isError) return;
+    if (!filePath || !isEditable || !isActive || isFileNotFound) return;
 
     let stopped = false;
 
@@ -208,6 +209,7 @@ export const useFileViewer = ({
       } catch (err) {
         if (isNotFoundError(err)) {
           stopped = true;
+          setIsFileNotFound(true);
         }
         onLoadError?.(err);
       }
@@ -222,7 +224,7 @@ export const useFileViewer = ({
     filePath,
     isEditable,
     isActive,
-    isError,
+    isFileNotFound,
     getFileState,
     fetchFileMetadata,
     fetchFileContent,
@@ -232,7 +234,7 @@ export const useFileViewer = ({
 
   // Polling for media files - detect external changes and update URL
   useEffect(() => {
-    if (!filePath || isEditable || !isActive || isError) return;
+    if (!filePath || isEditable || !isActive || isFileNotFound) return;
 
     let stopped = false;
 
@@ -248,6 +250,7 @@ export const useFileViewer = ({
       } catch (err) {
         if (isNotFoundError(err)) {
           stopped = true;
+          setIsFileNotFound(true);
         }
         onLoadError?.(err);
       }
@@ -260,15 +263,14 @@ export const useFileViewer = ({
     }, POLL_INTERVAL_MS);
 
     return () => clearInterval(intervalId);
-  }, [filePath, isEditable, isActive, isError, mediaMtime, fetchFileMetadata, onLoadError]);
+  }, [filePath, isEditable, isActive, isFileNotFound, mediaMtime, fetchFileMetadata, onLoadError]);
 
   return {
     content: fileState?.content ?? null,
     originalContent: fileState?.originalContent ?? null,
     isDirty: fileState?.isDirty ?? false,
     isLoading,
-    isError,
-    error,
+    isFileNotFound,
     fileCategory,
     fileExtension,
     isEditable,
