@@ -34,7 +34,7 @@ const IntegrationHeader: FC = () => {
   }, [setSearchQuery]);
 
   return (
-    <div className='flex flex-col items-start gap-y-5 px-10'>
+    <div className='bg-BG_WHITE flex flex-col items-start gap-y-5 px-10'>
       <h1 className='f-20-600 text-GRAY_1000'>Integrations</h1>
 
       <div className='flex w-full items-center justify-between'>
@@ -43,7 +43,7 @@ const IntegrationHeader: FC = () => {
             placeholder='Search'
             value={inputValue}
             onChange={handleChange}
-            className='border-GRAY_400 focus:border-GRAY_600 w-[300px] focus:ring-3'
+            className='border-GRAY_400 focus:border-GRAY_600 bg-BG_WHITE w-[300px] focus:ring-3'
             size='small'
             aria-label='Search integrations'
           />

@@ -27,7 +27,7 @@ const IntegrationCardV2: FC<IntegrationCardProps> = ({ integrationItem, classNam
   return (
     <div
       className={cn(
-        'border-GRAY_400 group [&:hover:not(:has(.actions-bar:hover))]:border-GRAY_300 [&:hover:not(:has(.actions-bar:hover))]:bg-BG_GRAY_2 [&:active:not(:has(.actions-bar:hover))]:border-GRAY_300 [&:active:not(:has(.actions-bar:hover))]:bg-GRAY_100 flex min-h-[170px] cursor-pointer flex-col justify-between rounded-md border bg-white p-3.5 transition-colors select-none',
+        'bg-BG_WHITE border-GRAY_400 group [&:hover:not(:has(.actions-bar:hover))]:border-GRAY_300 [&:hover:not(:has(.actions-bar:hover))]:bg-BG_GRAY_2 [&:active:not(:has(.actions-bar:hover))]:border-GRAY_300 [&:active:not(:has(.actions-bar:hover))]:bg-GRAY_100 flex min-h-[170px] cursor-pointer flex-col justify-between rounded-md border p-3.5 transition-colors select-none',
         className,
       )}
       onClick={handleCardClick}

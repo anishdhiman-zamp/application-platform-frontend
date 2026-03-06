@@ -1,6 +1,7 @@
 const { withSentryConfig } = require('@sentry/nextjs');
 const webpack = require('webpack');
 
+const COLOR_SCHEME_HEADER = 'Sec-CH-Prefers-Color-Scheme';
 const isDev = process.env.NODE_ENV === 'development';
 
 /** @type {import('next').NextConfig} */
@@ -116,6 +117,17 @@ const nextConfig = {
           {
             key: 'Cache-Control',
             value: 'public, max-age=0, must-revalidate',
+          },
+        ],
+      },
+      {
+        // Opt browsers into sending OS color scheme as a client hint so the
+        // server can resolve "system" theme correctly on subsequent requests
+        source: '/(.*)',
+        headers: [
+          {
+            key: 'Accept-CH',
+            value: COLOR_SCHEME_HEADER,
           },
         ],
       },
