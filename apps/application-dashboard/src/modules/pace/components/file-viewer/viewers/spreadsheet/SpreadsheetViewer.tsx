@@ -193,20 +193,21 @@ const SpreadsheetViewer = memo(({ content, mediaUrl, fileExtension }: Spreadshee
       </div>
 
       {/* Table */}
-      <div className='min-h-0 flex-1 overflow-auto'>
+      <div className='min-h-0 flex-1 overflow-auto [scrollbar-width:thin]'>
         <table className='w-full border-collapse' style={{ minWidth: table.getCenterTotalSize() }}>
-          <thead className='bg-GRAY_100 sticky top-0 z-10'>
+          <thead>
             {table.getHeaderGroups().map((headerGroup) => (
               <tr key={headerGroup.id}>
                 {headerGroup.headers.map((header) => (
                   <th
                     key={header.id}
                     className={cn(
-                      'border-GRAY_400 f-12-500 text-GRAY_700 relative border-r border-b px-3 py-2 text-left whitespace-nowrap',
+                      'bg-GRAY_100 border-GRAY_400 f-12-500 text-GRAY_700 border-r border-b px-3 py-2 text-left whitespace-nowrap',
+                      'sticky top-0 z-10',
                       header.column.getCanSort() &&
                         !table.getState().columnSizingInfo.isResizingColumn &&
                         'hover:bg-GRAY_200 cursor-pointer select-none',
-                      header.id === ROW_NUMBER_COLUMN_ID && 'bg-GRAY_100 sticky left-0 z-20',
+                      header.id === ROW_NUMBER_COLUMN_ID && 'left-0 z-20',
                     )}
                     style={{ width: header.getSize() }}
                     onClick={() => {
@@ -270,7 +271,7 @@ const SpreadsheetViewer = memo(({ content, mediaUrl, fileExtension }: Spreadshee
       </div>
 
       {/* Footer: Sheet tabs + Pagination */}
-      <div className='border-GRAY_400 flex shrink-0 items-center justify-between border-t'>
+      <div className='border-GRAY_400 flex shrink-0 items-stretch justify-between border-t'>
         <SheetTabs
           sheetNames={spreadsheetData.sheetNames}
           activeSheet={activeSheet}
