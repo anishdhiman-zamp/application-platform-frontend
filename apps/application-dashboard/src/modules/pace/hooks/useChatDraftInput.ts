@@ -4,6 +4,8 @@ import { Dispatch, SetStateAction, useCallback, useEffect, useRef, useState } fr
 import { DEBOUNCE_DELAY_MS, NEW_CONVERSATION_ID } from '@/modules/pace/pace.constants';
 import { getFromLocalStorage, LOCAL_STORAGE_KEYS, setToLocalStorage } from '@/utils/localstorage';
 
+const MAX_DRAFTS = 10;
+
 interface ChatDraft {
   id: string;
   content: string;
@@ -32,8 +34,16 @@ const getDraftsFromStorage = (): ChatDraft[] => {
   }
 };
 
+const evictOldDrafts = (drafts: ChatDraft[]): ChatDraft[] => {
+  if (drafts.length <= MAX_DRAFTS) return drafts;
+
+  return [...drafts].sort((a, b) => b.timestamp - a.timestamp).slice(0, MAX_DRAFTS);
+};
+
 const saveDraftsToStorage = (drafts: ChatDraft[]) => {
-  setToLocalStorage(LOCAL_STORAGE_KEYS.CONVERSATION_DRAFTS, JSON.stringify(drafts));
+  const trimmed = evictOldDrafts(drafts);
+
+  setToLocalStorage(LOCAL_STORAGE_KEYS.CONVERSATION_DRAFTS, JSON.stringify(trimmed));
 };
 
 const getDraftById = (drafts: ChatDraft[], id: string): ChatDraft | undefined => {
