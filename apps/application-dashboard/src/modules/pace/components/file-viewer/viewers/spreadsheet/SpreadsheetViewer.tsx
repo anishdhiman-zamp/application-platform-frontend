@@ -107,49 +107,59 @@ const SpreadsheetViewer = memo(({ content, mediaUrl, fileExtension }: Spreadshee
     [workbookRef],
   );
 
-  const parseData = useCallback(async () => {
-    setIsLoading(true);
-    setError(null);
+  const parseData = useCallback(
+    async (signal?: AbortSignal) => {
+      setIsLoading(true);
+      setError(null);
 
-    try {
-      let workbook: XLSX.WorkBook;
+      try {
+        let workbook: XLSX.WorkBook;
 
-      if (isTextBased && content != null) {
-        workbook = XLSX.read(content, { type: 'string' });
-      } else if (mediaUrl) {
-        const response = await fetch(mediaUrl);
+        if (isTextBased && content != null) {
+          workbook = XLSX.read(content, { type: 'string' });
+        } else if (mediaUrl) {
+          const response = await fetch(mediaUrl, { signal });
 
-        if (!response.ok) throw new Error(`Failed to fetch file: ${response.statusText}`);
+          if (!response.ok) throw new Error(`Failed to fetch file: ${response.statusText}`);
 
-        const arrayBuffer = await response.arrayBuffer();
+          const arrayBuffer = await response.arrayBuffer();
 
-        workbook = XLSX.read(arrayBuffer, { type: 'array' });
-      } else {
-        setIsLoading(false);
+          workbook = XLSX.read(arrayBuffer, { type: 'array' });
+        } else {
+          setIsLoading(false);
 
-        return;
+          return;
+        }
+
+        if (signal?.aborted) return;
+
+        setWorkbookRef(workbook);
+
+        const sheetNames = workbook?.SheetNames ?? [];
+        const firstSheet = sheetNames[0] ?? '';
+        const parsed = parseWorkbook(workbook, firstSheet);
+
+        setSpreadsheetData({
+          ...parsed,
+          sheetNames,
+        });
+        setActiveSheet(firstSheet);
+      } catch (err) {
+        if (err instanceof Error && err.name === 'AbortError') return;
+        setError(err instanceof Error ? err.message : 'Unknown error occurred');
+      } finally {
+        if (!signal?.aborted) setIsLoading(false);
       }
-
-      setWorkbookRef(workbook);
-
-      const sheetNames = workbook?.SheetNames ?? [];
-      const firstSheet = sheetNames[0] ?? '';
-      const parsed = parseWorkbook(workbook, firstSheet);
-
-      setSpreadsheetData({
-        ...parsed,
-        sheetNames,
-      });
-      setActiveSheet(firstSheet);
-    } catch (err) {
-      setError(err instanceof Error ? err.message : 'Unknown error occurred');
-    } finally {
-      setIsLoading(false);
-    }
-  }, [content, mediaUrl, isTextBased]);
+    },
+    [content, mediaUrl, isTextBased],
+  );
 
   useEffect(() => {
-    parseData();
+    const controller = new AbortController();
+
+    parseData(controller.signal);
+
+    return () => controller.abort();
   }, [parseData]);
 
   if (isLoading) return <SpreadsheetViewerLoading />;
