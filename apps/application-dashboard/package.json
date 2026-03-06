@@ -38,6 +38,7 @@
     "@reduxjs/toolkit": "^2.4.0",
     "@sentry/browser": "^10.38.0",
     "@sentry/nextjs": "^10.38.0",
+    "@tanstack/react-table": "^8.21.3",
     "@tanstack/react-virtual": "^3.13.18",
     "@tiptap/core": "^2.14.0",
     "@tiptap/extension-color": "^2.14.0",
