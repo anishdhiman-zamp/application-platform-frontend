@@ -3,7 +3,7 @@ import { Skeleton } from '@zamp-platform/ui';
 
 const IntegrationPageLoadingState: FC = () => {
   return (
-    <div className='flex h-full w-full items-center justify-center'>
+    <div className='bg-BG_WHITE flex h-full w-full items-center justify-center'>
       <div className='flex h-full w-[700px] flex-col'>
         {/* Back arrow */}
         <div className='flex w-full items-center justify-start py-5'>

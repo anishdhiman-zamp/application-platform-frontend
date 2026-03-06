@@ -164,7 +164,7 @@ export const MonthOrQuarterPicker: FC<MonthOrQuarterPickerProps> = ({
                       isSelected(year, config?.value)
                         ? 'bg-BLUE_700 border-GRAY_400 text-white'
                         : shouldHighlightCell(year, config)
-                          ? 'bg-BLUE_50'
+                          ? 'bg-BLUE_100'
                           : isPartiallySelected(year, config?.value)
                             ? 'border-BLUE_700 selected-year'
                             : 'hover:border-BLUE_700 hover:selected-year bg-BG_GRAY_2'
