@@ -72,6 +72,7 @@ export const useChat = (config: ChatConfig) => {
   const [stopConversationMutation] = useStopConversationMutation();
 
   const { sseEventBus } = useEventBus();
+  const stoppingTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 
   const streamingState = useStreamingState(_conversationId);
 
@@ -84,6 +85,12 @@ export const useChat = (config: ChatConfig) => {
     messagesRef.current = messages;
   }, [messages]);
 
+  useEffect(() => {
+    return () => {
+      if (stoppingTimerRef.current) clearTimeout(stoppingTimerRef.current);
+    };
+  }, []);
+
   const isStreaming = useMemo(() => {
     return config.enableStreaming ? (streamingState?.is_active ?? false) : false;
   }, [config.enableStreaming, streamingState?.is_active]);
@@ -94,18 +101,31 @@ export const useChat = (config: ChatConfig) => {
     }
   }, [config.enableStreaming, _conversationId]);
 
+  const clearStoppingTimer = useCallback(() => {
+    if (stoppingTimerRef.current) {
+      clearTimeout(stoppingTimerRef.current);
+      stoppingTimerRef.current = null;
+    }
+  }, []);
+
   const stopConversation = useCallback(async () => {
     if (!_conversationId || isStopping) return;
 
     setIsStopping(true);
+    stoppingTimerRef.current = setTimeout(() => {
+      setIsStopping(false);
+      stoppingTimerRef.current = null;
+    }, 30_000);
+
     try {
       await stopConversationMutation({ conversationId: _conversationId }).unwrap();
     } catch (error) {
+      clearStoppingTimer();
       setIsStopping(false);
       captureException(error);
       throw new Error('Failed to stop conversation. Please try again.');
     }
-  }, [_conversationId, stopConversationMutation, isStopping]);
+  }, [_conversationId, stopConversationMutation, isStopping, clearStoppingTimer]);
 
   const shouldSkipConversationFetch =
     !config.resourceId ||
@@ -293,6 +313,7 @@ export const useChat = (config: ChatConfig) => {
               streamingStateStore.delete(convId);
             }
 
+            clearStoppingTimer();
             setIsStopping(false);
 
             if (conversationIdRef.current && config.resourceId && config.resourceType) {
@@ -319,6 +340,7 @@ export const useChat = (config: ChatConfig) => {
       config.resourceType,
       config.apiConfig?.getConversationById,
       triggerGetConversation,
+      clearStoppingTimer,
     ],
   );
 
