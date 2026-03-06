@@ -115,6 +115,7 @@ export const FILE_CATEGORY = {
   PDF: 'pdf',
   MARKDOWN: 'markdown',
   HTML: 'html',
+  SPREADSHEET: 'spreadsheet',
   CODE: 'code',
   UNKNOWN: 'unknown',
 } as const;
@@ -132,6 +133,10 @@ export const PDF_EXTENSIONS = ['pdf'] as const;
 export const MARKDOWN_EXTENSIONS = ['md', 'mdx'] as const;
 
 export const HTML_EXTENSIONS = ['html', 'htm', 'xhtml', 'shtml'] as const;
+
+export const SPREADSHEET_EXTENSIONS = ['csv', 'tsv', 'tab', 'xls', 'xlsx', 'xlsm', 'xlsb', 'ods'] as const;
+
+export const TEXT_SPREADSHEET_EXTENSIONS = ['csv', 'tsv', 'tab'] as const;
 
 export const EXTENSION_TO_MONACO_LANGUAGE: Record<string, string> = {
   // Web - JavaScript/TypeScript
@@ -691,9 +696,6 @@ export const MONACO_EDITABLE_EXTENSIONS = [
   'properties',
   'env',
   'dotenv',
-  'csv',
-  'tsv',
-  'tab',
   'log',
   'out',
   'diff',

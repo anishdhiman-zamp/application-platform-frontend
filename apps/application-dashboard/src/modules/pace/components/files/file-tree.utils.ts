@@ -24,6 +24,7 @@ import {
   MARKDOWN_EXTENSIONS,
   MONACO_EDITABLE_EXTENSIONS,
   PDF_EXTENSIONS,
+  SPREADSHEET_EXTENSIONS,
   VIDEO_EXTENSIONS,
 } from '@/modules/pace/components/files/files.constants';
 
@@ -194,6 +195,10 @@ export function getFileCategory(filename: string): FileCategory {
 
   if ((HTML_EXTENSIONS as readonly string[]).includes(ext)) {
     return FILE_CATEGORY.HTML;
+  }
+
+  if ((SPREADSHEET_EXTENSIONS as readonly string[]).includes(ext)) {
+    return FILE_CATEGORY.SPREADSHEET;
   }
 
   if ((MONACO_EDITABLE_EXTENSIONS as readonly string[]).includes(ext)) {

@@ -2,7 +2,7 @@
 
 import { FileIcon, Input, Tabs, TabsList, TabsTrigger } from '@zamp-platform/ui';
 import { cn } from '@zamp-platform/ui/utils';
-import { Code, Eye, FileText } from 'lucide-react';
+import { Code, Eye, FileText, Table } from 'lucide-react';
 import TooltipV2 from '@/components/common/TooltipV2';
 import FileSaveStatus from '@/modules/pace/components/file-viewer/FileSaveStatus';
 import FileViewerHeaderMenu from '@/modules/pace/components/file-viewer/FileViewerHeaderMenu';
@@ -14,6 +14,7 @@ import { SIDE_OPTIONS } from '@/types/commonTypes';
 
 export type MarkdownViewMode = 'milkdown' | 'raw';
 export type HtmlViewMode = 'preview' | 'code';
+export type SpreadsheetViewMode = 'table' | 'raw';
 
 interface FileViewerHeaderProps {
   filePath: string;
@@ -23,10 +24,13 @@ interface FileViewerHeaderProps {
   className?: string;
   isMarkdown?: boolean;
   isHtml?: boolean;
+  isTextSpreadsheet?: boolean;
   viewMode?: MarkdownViewMode;
   htmlViewMode?: HtmlViewMode;
+  spreadsheetViewMode?: SpreadsheetViewMode;
   onViewModeChange?: (mode: MarkdownViewMode) => void;
   onHtmlViewModeChange?: (mode: HtmlViewMode) => void;
+  onSpreadsheetViewModeChange?: (mode: SpreadsheetViewMode) => void;
 }
 
 const FileViewerHeader = ({
@@ -37,10 +41,13 @@ const FileViewerHeader = ({
   className = '',
   isMarkdown = false,
   isHtml = false,
+  isTextSpreadsheet = false,
   viewMode = 'milkdown',
   htmlViewMode = 'preview',
+  spreadsheetViewMode = 'table',
   onViewModeChange,
   onHtmlViewModeChange,
+  onSpreadsheetViewModeChange,
 }: FileViewerHeaderProps) => {
   const extension = getFileExtension(fileName);
 
@@ -139,6 +146,21 @@ const FileViewerHeader = ({
                   <Eye size={14} />
                 </TabsTrigger>
                 <TabsTrigger value='code' className='flex h-6 w-[26px] shrink-0 items-center justify-center p-1.5'>
+                  <Code size={14} />
+                </TabsTrigger>
+              </TabsList>
+            </Tabs>
+          )}
+          {isTextSpreadsheet && (
+            <Tabs
+              value={spreadsheetViewMode}
+              onValueChange={(value) => onSpreadsheetViewModeChange?.(value as SpreadsheetViewMode)}
+            >
+              <TabsList className='gap-x-1'>
+                <TabsTrigger value='table' className='flex h-6 w-[26px] shrink-0 items-center justify-center p-1.5'>
+                  <Table size={14} />
+                </TabsTrigger>
+                <TabsTrigger value='raw' className='flex h-6 w-[26px] shrink-0 items-center justify-center p-1.5'>
                   <Code size={14} />
                 </TabsTrigger>
               </TabsList>
