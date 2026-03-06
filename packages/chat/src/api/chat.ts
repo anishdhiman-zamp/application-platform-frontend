@@ -22,6 +22,8 @@ import {
   PostMessageResponseType,
   SignedUrlBodyType,
   SignedUrlResponseType,
+  StopConversationPayloadType,
+  StopConversationResponseType,
   SubmitChatFeedbackRequestType,
   SubmitChatFeedbackResponseType,
 } from '../types/chat.types';
@@ -54,6 +56,7 @@ export const API_ENDPOINTS = {
   GET_OUTPUT_FILE_DOWNLOAD: 'v3/conversations/{{conversationId}}/output-files/{{filename}}/download',
   SUBMIT_CHAT_FEEDBACK: 'v3/conversations/{{conversationId}}/messages/{{messageId}}/chat-feedback',
   TASKS_MESSAGES_GET: 'tasks/{{conversationId}}/messages',
+  STOP_CONVERSATION: 'v3/conversations/{{conversationId}}/stop',
 };
 
 const ConversationService = chatApi.injectEndpoints({
@@ -161,6 +164,12 @@ const ConversationService = chatApi.injectEndpoints({
         body,
       }),
     }),
+    stopConversation: builder.mutation<StopConversationResponseType, StopConversationPayloadType>({
+      query: ({ conversationId }) => ({
+        url: formRequestUrlWithParams(API_ENDPOINTS.STOP_CONVERSATION, { conversationId }),
+        method: REQUEST_TYPES.POST,
+      }),
+    }),
   }),
 });
 
@@ -181,4 +190,5 @@ export const {
   useLazyGetSpeechToTextAccessTokenQuery,
   useLazyGetOutputFileDownloadQuery,
   useSubmitChatFeedbackMutation,
+  useStopConversationMutation,
 } = ConversationService;
