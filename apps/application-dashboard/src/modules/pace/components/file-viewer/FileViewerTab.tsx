@@ -176,12 +176,12 @@ const FileViewerTab = memo(({ filePath, isActive, onCloseTab }: FileViewerTabPro
   const [spreadsheetViewMode, setSpreadsheetViewMode] = useState<SpreadsheetViewMode>('table');
 
   const handleSaveError = useCallback((error: unknown) => {
-    captureException(error);
+    captureException(error instanceof Error ? error : new Error(`File save failed: ${JSON.stringify(error)}`));
     toast.error(FILE_TOAST_MESSAGES.FAILED_TO_SAVE_FILE);
   }, []);
 
   const handleLoadError = useCallback((error: unknown) => {
-    captureException(error);
+    captureException(error instanceof Error ? error : new Error(`File load failed: ${JSON.stringify(error)}`));
     toast.error(FILE_TOAST_MESSAGES.FAILED_TO_LOAD_FILE);
   }, []);
 
