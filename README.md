@@ -1,5 +1,7 @@
 ## Getting Started
 
+This is the Application Platform Frontend monorepo.
+
 First, run the development server:
 
 ```bash
