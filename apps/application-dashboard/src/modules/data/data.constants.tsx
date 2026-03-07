@@ -112,33 +112,6 @@ export enum TEAM_OPTIONS {
   HIRING = 'hiring',
 }
 
-export const TEAM_OPTIONS_LIST = [
-  {
-    label: 'Engg',
-    value: TEAM_OPTIONS.ENGG,
-    color: COLORS.ORANGE_200,
-  },
-  {
-    label: 'Design',
-    value: TEAM_OPTIONS.DESIGN,
-    color: COLORS.BLUE_150,
-  },
-  {
-    label: 'Sales/Marketing',
-    value: TEAM_OPTIONS.SALES_MARKETING,
-    color: COLORS.VIOLET_100,
-  },
-  {
-    label: 'Product',
-    value: TEAM_OPTIONS.PRODUCT,
-    color: COLORS.BLUE_150,
-  },
-  {
-    label: 'Hiring',
-    value: TEAM_OPTIONS.HIRING,
-    color: COLORS.RED_250,
-  },
-];
 /**
  * Prefix for new columns created in the frontend (not yet saved to backend)
  */

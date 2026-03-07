@@ -57,7 +57,7 @@ const SheetOverlay = ({ className, ...props }: React.ComponentProps<typeof Sheet
 SheetOverlay.displayName = SheetPrimitive.Overlay.displayName;
 
 const sheetVariants = cva(
-  `fixed bg-background shadow-drawer-shadow transition-all duration-[${SHEET_ANIMATION_DURATION}ms]! ease-in-out flex flex-col rounded-lg m-4 z-1001 h-[calc(100vh-2rem)]!`,
+  `fixed bg-background shadow-MENU_SHADOW transition-all duration-[${SHEET_ANIMATION_DURATION}ms]! ease-in-out flex flex-col rounded-lg m-4 z-1001 h-[calc(100vh-2rem)]!`,
   {
     variants: {
       side: {
@@ -81,8 +81,7 @@ const sheetVariants = cva(
 );
 
 interface SheetContentProps
-  extends React.ComponentProps<typeof SheetPrimitive.Content>,
-    VariantProps<typeof sheetVariants> {
+  extends React.ComponentProps<typeof SheetPrimitive.Content>, VariantProps<typeof sheetVariants> {
   showCloseButton?: boolean;
   className?: string;
   children?: React.ReactNode;

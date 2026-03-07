@@ -1,3 +1,5 @@
+import { captureException } from '@sentry/browser';
+
 export enum LOCAL_STORAGE_KEYS {
   XZAMP_GOD_MODE = 'XZAMP_GOD_MODE',
   XZAMP_USER = 'TMS_XZAMP_USER',
@@ -21,7 +23,10 @@ export enum LOCAL_STORAGE_KEYS {
   CONVERSATION_DRAFTS = 'CONVERSATION_DRAFTS',
   PACE_OPEN_DYNAMIC_TABS = 'PACE_OPEN_DYNAMIC_TABS',
   PACE_FILE_TREE_EXPANDED_PATHS = 'PACE_FILE_TREE_EXPANDED_PATHS',
+  THEME = 'zamp-theme',
 }
+
+const QUOTA_ERROR_NAMES: readonly string[] = ['QuotaExceededError', 'NS_ERROR_DOM_QUOTA_REACHED'];
 
 export const getFromLocalStorage = (key: LOCAL_STORAGE_KEYS) => {
   if (typeof window === 'undefined') {
@@ -36,7 +41,25 @@ export const setToLocalStorage = (key: LOCAL_STORAGE_KEYS, value: string) => {
     return;
   }
 
-  window.localStorage.setItem(key, value);
+  try {
+    window.localStorage.setItem(key, value);
+  } catch (error) {
+    const isQuotaError =
+      error instanceof DOMException &&
+      QUOTA_ERROR_NAMES.some((name) => name === error.name);
+
+    if (isQuotaError) {
+      console.warn(`localStorage quota exceeded for key "${key}". Clearing key and retrying.`);
+      try {
+        window.localStorage.removeItem(key);
+        window.localStorage.setItem(key, value);
+      } catch {
+        captureException(new Error(`localStorage quota exceeded for key "${key}" even after clearing`));
+      }
+    } else {
+      captureException(error);
+    }
+  }
 };
 
 export const removeFromLocalStorage = (key: LOCAL_STORAGE_KEYS) => {

@@ -8,7 +8,7 @@
   /* Colors - mapped from product design tokens */
   --crepe-color-background: #ffffff;
   --crepe-color-on-background: var(--GRAY_1000, #171717);
-  --crepe-color-surface: var(--GRAY_80, #f7f7f7);
+  --crepe-color-surface: var(--GRAY_70, #0000000d);
   --crepe-color-surface-low: var(--GRAY_100, #f2f2f2);
   --crepe-color-on-surface: var(--GRAY_1000, #171717);
   --crepe-color-on-surface-variant: var(--GRAY_900, #666666);

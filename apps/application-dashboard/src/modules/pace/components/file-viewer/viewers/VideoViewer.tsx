@@ -36,11 +36,13 @@ const VideoViewer = ({ src, poster, className = '', isActive = true, fileName, o
   const displayFileName = fileName || decodeURIComponent(src.split('/').pop() || 'video');
 
   const handleError = useCallback(
-    (e: React.SyntheticEvent) => {
+    (e: React.SyntheticEvent<HTMLVideoElement>) => {
       setIsLoading(false);
       setError(true);
-      captureException(e, {
-        extra: { src },
+      const mediaError = e.currentTarget?.error;
+
+      captureException(new Error(mediaError?.message || `Video load failed (code: ${mediaError?.code})`), {
+        extra: { src, mediaErrorCode: mediaError?.code },
       });
     },
     [src],

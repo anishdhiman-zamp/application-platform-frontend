@@ -9,6 +9,14 @@ export interface PostMessageResponseType {
   message: string;
 }
 
+export interface StopConversationPayloadType {
+  conversationId: string;
+}
+
+export interface StopConversationResponseType {
+  message: string;
+}
+
 export const enum ResourceType {
   PROCESS = 'process',
   DATASET = 'dataset',

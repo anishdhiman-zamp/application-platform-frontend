@@ -124,7 +124,7 @@ export const YearPicker: FC<YearPickerProps> = ({
               isSelected(year)
                 ? 'bg-BLUE_700 border-DIVIDER_SAIL_2 text-white'
                 : shouldHighlightCell(year)
-                  ? 'bg-BLUE_50'
+                  ? 'bg-BLUE_100'
                   : isPartiallySelected(year)
                     ? 'border-BLUE_700'
                     : 'hover:border-BLUE_700 bg-BG_GRAY_2 border-GRAY_400'

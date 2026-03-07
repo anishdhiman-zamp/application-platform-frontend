@@ -18,6 +18,7 @@ import {
   useLazyGetConversationByIdQuery,
   useSendMessageMutation,
   useSendMessageV2Mutation,
+  useStopConversationMutation,
 } from '../api';
 import { getHistoryFormattedMessages } from '../components/block.utils';
 import { streamingStateStore } from '../stores/streamingStateStore';
@@ -56,6 +57,7 @@ export interface ChatConfig extends Omit<UseSSEOptions, 'url' | 'onMessage' | 'a
 export const useChat = (config: ChatConfig) => {
   const dispatch = useDispatch();
   const [messages, setMessages] = useState<ChatMessage[]>([]);
+  const [isStopping, setIsStopping] = useState(false);
   const messagesRef = useRef<ChatMessage[]>(messages);
   const [sendMessageMutation, { isLoading: isSendingMessage, error: sendMessageError }] = useSendMessageMutation();
   const [sendMessageV2Mutation, { isLoading: isSendingMessageV2, error: sendMessageV2Error }] =
@@ -67,8 +69,10 @@ export const useChat = (config: ChatConfig) => {
     useCreateConversationV2Mutation();
 
   const [triggerGetConversation] = useLazyGetConversationByIdQuery();
+  const [stopConversationMutation] = useStopConversationMutation();
 
   const { sseEventBus } = useEventBus();
+  const stoppingTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 
   const streamingState = useStreamingState(_conversationId);
 
@@ -81,6 +85,12 @@ export const useChat = (config: ChatConfig) => {
     messagesRef.current = messages;
   }, [messages]);
 
+  useEffect(() => {
+    return () => {
+      if (stoppingTimerRef.current) clearTimeout(stoppingTimerRef.current);
+    };
+  }, []);
+
   const isStreaming = useMemo(() => {
     return config.enableStreaming ? (streamingState?.is_active ?? false) : false;
   }, [config.enableStreaming, streamingState?.is_active]);
@@ -90,6 +100,32 @@ export const useChat = (config: ChatConfig) => {
       streamingStateStore.delete(_conversationId);
     }
   }, [config.enableStreaming, _conversationId]);
+
+  const clearStoppingTimer = useCallback(() => {
+    if (stoppingTimerRef.current) {
+      clearTimeout(stoppingTimerRef.current);
+      stoppingTimerRef.current = null;
+    }
+  }, []);
+
+  const stopConversation = useCallback(async () => {
+    if (!_conversationId || isStopping) return;
+
+    setIsStopping(true);
+    stoppingTimerRef.current = setTimeout(() => {
+      setIsStopping(false);
+      stoppingTimerRef.current = null;
+    }, 30_000);
+
+    try {
+      await stopConversationMutation({ conversationId: _conversationId }).unwrap();
+    } catch (error) {
+      clearStoppingTimer();
+      setIsStopping(false);
+      captureException(error);
+      throw new Error('Failed to stop conversation. Please try again.');
+    }
+  }, [_conversationId, stopConversationMutation, isStopping, clearStoppingTimer]);
 
   const shouldSkipConversationFetch =
     !config.resourceId ||
@@ -277,6 +313,9 @@ export const useChat = (config: ChatConfig) => {
               streamingStateStore.delete(convId);
             }
 
+            clearStoppingTimer();
+            setIsStopping(false);
+
             if (conversationIdRef.current && config.resourceId && config.resourceType) {
               triggerGetConversation({
                 conversationId: conversationIdRef.current,
@@ -301,6 +340,7 @@ export const useChat = (config: ChatConfig) => {
       config.resourceType,
       config.apiConfig?.getConversationById,
       triggerGetConversation,
+      clearStoppingTimer,
     ],
   );
 
@@ -450,6 +490,8 @@ export const useChat = (config: ChatConfig) => {
     streamingState,
     isStreaming,
     clearStreamingState,
+    stopConversation,
+    isStopping,
     isUninitializedConversationHistory,
     isErrorConversationHistory,
     refetchConversationHistory: refetchConversationHistory,

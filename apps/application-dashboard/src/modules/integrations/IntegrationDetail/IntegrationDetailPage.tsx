@@ -49,7 +49,7 @@ const IntegrationDetailPage: FC<IntegrationDetailPageProps> = ({ integration }) 
   };
 
   return (
-    <div className='flex h-full w-full'>
+    <div className='bg-BG_WHITE flex h-full w-full'>
       <motion.div
         initial={false}
         animate={{
