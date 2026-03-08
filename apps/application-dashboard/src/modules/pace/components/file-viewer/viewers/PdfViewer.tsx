@@ -7,14 +7,12 @@ import { cn } from '@zamp-platform/ui/utils';
 import { ChevronDown, ChevronUp, Download, ZoomIn, ZoomOut } from 'lucide-react';
 import ImageLoader from '@/components/common/loader/ImageLoader';
 import { ZAMP_LOGO_LOADER_SVG } from '@/constants/icons';
-import FileNotFoundError from '@/modules/pace/components/file-viewer/FileNotFoundError';
-import { defaultFnType } from '@/types/commonTypes';
 
 interface PdfViewerProps {
   src: string;
   className?: string;
   fileName?: string;
-  onClose?: defaultFnType;
+  onError?: (message?: string) => void;
 }
 
 const PdfToolbar = ({ usePDFSlickStore }: { usePDFSlickStore: ReturnType<typeof usePDFSlick>['usePDFSlickStore'] }) => {
@@ -82,23 +80,12 @@ const LoadingIndicator = ({ isLoading }: { isLoading: boolean }) => (
       isLoading ? 'opacity-100' : 'pointer-events-none opacity-0',
     )}
   >
-    <ImageLoader imageSrc={ZAMP_LOGO_LOADER_SVG} width={140} height={140} className='bg-BG_GRAY_2' />
+    <ImageLoader imageSrc={ZAMP_LOGO_LOADER_SVG} width={140} height={140} />
   </div>
 );
 
-const ErrorFallback = ({ message }: { message: string }) => (
-  <div className='flex h-full w-full items-center justify-center'>
-    <div className='text-center'>
-      <p className='f-14-500 text-GRAY_700'>Failed to load PDF</p>
-      <p className='f-12-400 text-GRAY_500 mt-1'>{message}</p>
-    </div>
-  </div>
-);
-
-const PdfViewer = ({ src, className = '', fileName, onClose }: PdfViewerProps) => {
+const PdfViewer = ({ src, className = '', onError }: PdfViewerProps) => {
   const [isLoading, setIsLoading] = useState(true);
-
-  const displayFileName = fileName || decodeURIComponent(src.split('/').pop() || 'document.pdf');
 
   const { viewerRef, usePDFSlickStore, PDFSlickViewer, isDocumentLoaded, error } = usePDFSlick(src, {
     scaleValue: 'page-fit',
@@ -120,16 +107,12 @@ const PdfViewer = ({ src, className = '', fileName, onClose }: PdfViewerProps) =
       captureException(error, {
         extra: { src },
       });
+      onError?.(error.message || 'The PDF could not be loaded');
     }
-  }, [error, src]);
-
-  if (error && onClose) {
-    return <FileNotFoundError fileName={displayFileName} onClose={onClose} />;
-  }
+  }, [error, src, onError]);
 
   return (
     <div className={cn('pdfSlick bg-BG_GRAY_2 relative h-full w-full select-none', className)}>
-      {error && !onClose && <ErrorFallback message={error.message || 'Unknown error'} />}
       {!error && <LoadingIndicator isLoading={isLoading} />}
 
       {!error && (

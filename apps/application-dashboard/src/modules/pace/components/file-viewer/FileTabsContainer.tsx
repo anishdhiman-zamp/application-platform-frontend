@@ -10,18 +10,18 @@ import { useFileTabs } from '@/modules/pace/components/dynamic-tabs/useFileTabs'
 const FileTabsContainer = () => {
   const { tabs, activeTab, isHydrated, closeTab } = useFileTabs();
 
-  if (!isHydrated || tabs.length === 0) {
+  if (!isHydrated || !tabs?.length) {
     return <ImageLoader imageSrc={ZAMP_LOGO_LOADER_SVG} width={140} height={140} />;
   }
 
   return (
     <div className='relative h-full w-full'>
-      {tabs.map((tab) => {
-        const isActive = activeTab?.stableKey === tab.stableKey;
+      {tabs?.map((tab) => {
+        const isActive = activeTab?.stableKey === tab?.stableKey;
 
         return (
-          <TabWrapper key={tab.stableKey} isActive={isActive}>
-            <FileViewerTab filePath={tab.id} isActive={isActive} onCloseTab={closeTab} />
+          <TabWrapper key={tab?.stableKey} isActive={isActive}>
+            <FileViewerTab filePath={tab?.id} isActive={isActive} onCloseTab={closeTab} />
           </TabWrapper>
         );
       })}
