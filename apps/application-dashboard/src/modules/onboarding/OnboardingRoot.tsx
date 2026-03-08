@@ -11,6 +11,7 @@ import { UpdateOrgStep } from 'modules/onboarding/steps/UpdateOrgStep';
 import { WELCOME_SEEN_KEY, WelcomeStep } from 'modules/onboarding/steps/WelcomeStep';
 import { useRouter } from 'next/navigation';
 import { useWhoAmIQuery } from '@/apis/auth';
+import { useEnsureProvisioningMutation, useSkipOnboardingMutation } from '@/apis/onboarding';
 import { FEATURE_FLAGS } from '@/constants/featureFlags';
 import { ROUTES_PATH } from '@/constants/routeConfig';
 import { useFeatureFlag } from '@/hooks/useFeatureFlag';
@@ -41,14 +42,26 @@ export const OnboardingRoot = () => {
   );
   const { isPaceChatEnabled } = useIsPaceChatEnabled();
   const landingRoute = isPaceChatEnabled ? ROUTES_PATH.CHAT : ROUTES_PATH.PROCESSES;
+  const [skipOnboarding] = useSkipOnboardingMutation();
+  const [ensureProvisioning] = useEnsureProvisioningMutation();
+  const skipCalledRef = useRef(false);
 
-  // If feature flag is off, skip onboarding entirely — follow old app flow
+  // If feature flag is off, call POST /onboarding/skip to force-complete, then redirect
   useEffect(() => {
-    if (isFlagLoading) return;
-    if (!isOnboardingEnabled) {
+    if (isFlagLoading || isOnboardingEnabled || skipCalledRef.current) return;
+    skipCalledRef.current = true;
+
+    const doSkip = async () => {
+      try {
+        await skipOnboarding().unwrap();
+      } catch {
+        // If skip fails (e.g. flag is actually on, or network error), still redirect
+      }
       router.replace(landingRoute);
-    }
-  }, [isFlagLoading, isOnboardingEnabled, router]);
+    };
+
+    doSkip();
+  }, [isFlagLoading, isOnboardingEnabled, skipOnboarding, router, landingRoute]);
 
   useEffect(() => {
     if (!session || isFlagLoading || !isOnboardingEnabled) return;
@@ -80,11 +93,29 @@ export const OnboardingRoot = () => {
     }
   }, [currentStatus, orgIdFromSetup, session, refetchSession]);
 
+  // Fire provisioning call immediately when entering SETUP_WORKSPACE (gives provisioning a head start during welcome animation)
+  const provisioningFiredRef = useRef(false);
+
+  useEffect(() => {
+    if (currentStatus !== OnboardingStatus.SETUP_WORKSPACE || provisioningFiredRef.current) return;
+    const resolvedOrgId = orgIdFromSetup || session?.orgs?.[0]?.organization_id;
+
+    if (!resolvedOrgId) return;
+    provisioningFiredRef.current = true;
+    // Fire-and-forget — SetupWorkspaceStep will poll for status
+    ensureProvisioning({ organization_id: resolvedOrgId })
+      .unwrap()
+      .catch(() => {});
+  }, [currentStatus, orgIdFromSetup, session, ensureProvisioning]);
+
   const handleStepComplete = (nextStatus: OnboardingStatus, organizationId?: string) => {
     if (nextStatus === OnboardingStatus.ONBOARDED) {
-      router.replace(landingRoute);
+      if (isWelcomeSeen()) {
+        router.replace(landingRoute);
 
-      return;
+        return;
+      }
+      // Show welcome animation before entering the app (invited user path)
     }
 
     if (organizationId) {
@@ -100,10 +131,15 @@ export const OnboardingRoot = () => {
     refetchSession();
   }, [refetchSession]);
 
-  // 403 "feature flag off" → silently exit onboarding, follow old app flow
-  const handleFlagDisabled = useCallback(() => {
+  // 403 "feature flag off" → call skip, then redirect to main app
+  const handleFlagDisabled = useCallback(async () => {
+    try {
+      await skipOnboarding().unwrap();
+    } catch {
+      // Best-effort skip
+    }
     router.replace(landingRoute);
-  }, [router, landingRoute]);
+  }, [skipOnboarding, router, landingRoute]);
 
   if (isLoading || isFlagLoading || !currentStatus) {
     return (
@@ -114,36 +150,16 @@ export const OnboardingRoot = () => {
     );
   }
 
-  // Fresh welcome flow — reset the flag so animation plays from scratch
-  if (currentStatus === OnboardingStatus.WELCOME) {
-    try {
-      localStorage.removeItem(WELCOME_SEEN_KEY);
-    } catch {
-      // localStorage may be unavailable
-    }
-  }
-
-  // Welcome screen is full-page (no card wrapper)
-  // Also show welcome animation for setup_workspace/onboarded if the user hasn't seen it yet (e.g. reload mid-animation)
+  // Show welcome animation for setup_workspace/onboarded if the user hasn't seen it yet
   const showWelcomeAnimation =
-    currentStatus === OnboardingStatus.WELCOME ||
-    ((currentStatus === OnboardingStatus.SETUP_WORKSPACE || currentStatus === OnboardingStatus.ONBOARDED) &&
-      !welcomeSeen);
+    (currentStatus === OnboardingStatus.SETUP_WORKSPACE || currentStatus === OnboardingStatus.ONBOARDED) &&
+    !welcomeSeen;
 
   if (showWelcomeAnimation) {
-    const isReload = currentStatus !== OnboardingStatus.WELCOME;
-
     return (
       <>
         <style>{funnelDisplayFont}</style>
-        <WelcomeStep
-          organizationId={orgIdFromSetup || session!.orgs?.[0]?.organization_id || null}
-          onComplete={handleStepComplete}
-          onWrongStep={handleWrongStep}
-          onFlagDisabled={handleFlagDisabled}
-          skipApi={isReload}
-          nextStatus={isReload ? currentStatus : undefined}
-        />
+        <WelcomeStep nextStatus={currentStatus} onComplete={handleStepComplete} />
       </>
     );
   }
@@ -165,7 +181,6 @@ export const OnboardingRoot = () => {
       <ProfessionRevealBackground containerRef={containerRef} />
 
       <div ref={containerRef} className='relative z-2 w-full max-w-[520px] px-6 py-10'>
-        {/* Step content */}
         <StepContent
           status={currentStatus}
           session={session!}
@@ -225,7 +240,7 @@ const StepContent = ({
 
       if (!resolvedOrgId) return null; // wait for refetch to populate org ID
 
-      return <SetupWorkspaceStep userId={session.user_id} organizationId={resolvedOrgId} onComplete={onComplete} />;
+      return <SetupWorkspaceStep organizationId={resolvedOrgId} onComplete={onComplete} />;
     }
 
     default:

@@ -66,7 +66,9 @@ const handleAuthenticatedRoutes = async (request: NextRequest) => {
   if (
     pathname !== ROUTES_PATH.MEMBERSHIP_PENDING &&
     pathname !== ROUTES_PATH.LOGIN &&
-    pathname !== ROUTES_PATH.ONBOARDING
+    pathname !== ROUTES_PATH.ONBOARDING &&
+    pathname !== ROUTES_PATH.INVITATIONS &&
+    pathname !== ROUTES_PATH.SETUP_WORKSPACE
   ) {
     const { session, cached } = await getUserSession(request);
 
@@ -88,7 +90,7 @@ const handleAuthenticatedRoutes = async (request: NextRequest) => {
     }
 
     if (checkOrgMembership(session, pathname)) {
-      const response = NextResponse.redirect(new URL(ROUTES_PATH.MEMBERSHIP_PENDING, request.url));
+      const response = NextResponse.redirect(new URL(ROUTES_PATH.SETUP_WORKSPACE, request.url));
 
       if (session) {
         const sessionCache = {

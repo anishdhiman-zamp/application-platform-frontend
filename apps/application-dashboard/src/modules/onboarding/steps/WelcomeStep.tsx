@@ -2,20 +2,12 @@
 
 import { useCallback, useEffect, useRef, useState } from 'react';
 import { OnboardingStatus } from 'modules/onboarding/onboarding.types';
-import { handleOnboardingApiError } from 'modules/onboarding/utils/onboardingErrors';
-import { useWelcomeMutation } from '@/apis/onboarding';
 
-const WELCOME_SEEN_KEY = 'zamp_welcome_seen';
+export const WELCOME_SEEN_KEY = 'zamp_welcome_seen';
 
 type Props = {
-  organizationId: string | null;
+  nextStatus: OnboardingStatus;
   onComplete: (status: OnboardingStatus) => void;
-  onWrongStep: () => void;
-  onFlagDisabled: () => void;
-  /** When true, skip the /welcome API call (animation-only mode for reload scenarios) */
-  skipApi?: boolean;
-  /** Status to navigate to when skipApi is true (defaults to SETUP_WORKSPACE) */
-  nextStatus?: OnboardingStatus;
 };
 
 const STORY_LINES = [
@@ -51,16 +43,7 @@ const IMG_TRIGGERS = [
   { showAt: 5, expandAt: 9 },
 ];
 
-export { WELCOME_SEEN_KEY };
-
-export const WelcomeStep = ({
-  organizationId,
-  onComplete,
-  onWrongStep,
-  onFlagDisabled,
-  skipApi = false,
-  nextStatus,
-}: Props) => {
+export const WelcomeStep = ({ nextStatus, onComplete }: Props) => {
   const [currentIdx, setCurrentIdx] = useState(-1);
   const currentIdxRef = useRef(-1);
   const [phase, setPhase] = useState<'revealing' | 'done'>('revealing');
@@ -68,78 +51,18 @@ export const WelcomeStep = ({
   const isAnimatingRef = useRef(false);
   const [revealedWords, setRevealedWords] = useState<Record<number, Set<number>>>({});
   const [exitIdx, setExitIdx] = useState<number | null>(null);
-  const [apiError, setApiError] = useState(false);
-  const [welcomeMutation] = useWelcomeMutation();
-
-  // Track both conditions: API response received + animation finished
-  const apiResultRef = useRef<OnboardingStatus | null>(null);
-  const animationDoneRef = useRef(false);
   const navigatedRef = useRef(false);
 
-  const tryNavigate = useCallback(() => {
+  const handleDone = useCallback(() => {
     if (navigatedRef.current) return;
-    if (apiResultRef.current && animationDoneRef.current) {
-      navigatedRef.current = true;
-      try {
-        localStorage.setItem(WELCOME_SEEN_KEY, 'true');
-      } catch {
-        // localStorage may be unavailable
-      }
-      onComplete(apiResultRef.current);
-    }
-  }, [onComplete]);
-
-  // Call /welcome API immediately on mount — provisioning starts while animation plays
-  // In skipApi mode, set the result immediately (API was already called before reload)
-  const calledRef = useRef(false);
-
-  useEffect(() => {
-    if (calledRef.current) return;
-    calledRef.current = true;
-
-    if (skipApi) {
-      apiResultRef.current = nextStatus || OnboardingStatus.SETUP_WORKSPACE;
-      tryNavigate();
-
-      return;
-    }
-
-    const callApi = async () => {
-      try {
-        const body = organizationId ? { organization_id: organizationId } : {};
-        const result = await welcomeMutation(body).unwrap();
-
-        apiResultRef.current = result.onboarding_status;
-        setApiError(false);
-        tryNavigate();
-      } catch (err) {
-        const noopSetError = () => {};
-
-        if (!handleOnboardingApiError(err, { setError: noopSetError, onWrongStep, onFlagDisabled })) {
-          setApiError(true);
-        }
-      }
-    };
-
-    callApi();
-  }, []); // eslint-disable-line react-hooks/exhaustive-deps
-
-  const handleRetry = async () => {
-    setApiError(false);
+    navigatedRef.current = true;
     try {
-      const body = organizationId ? { organization_id: organizationId } : {};
-      const result = await welcomeMutation(body).unwrap();
-
-      apiResultRef.current = result.onboarding_status;
-      tryNavigate();
-    } catch (err) {
-      const noopSetError = () => {};
-
-      if (!handleOnboardingApiError(err, { setError: noopSetError, onWrongStep, onFlagDisabled })) {
-        setApiError(true);
-      }
+      localStorage.setItem(WELCOME_SEEN_KEY, 'true');
+    } catch {
+      // localStorage may be unavailable
     }
-  };
+    onComplete(nextStatus);
+  }, [onComplete, nextStatus]);
 
   const showSection = useCallback((idx: number) => {
     if (idx < 0 || idx >= STORY_LINES.length || isAnimatingRef.current) return;
@@ -169,7 +92,6 @@ export const WelcomeStep = ({
     }
 
     const animTime = (wordCount - 1) * overlap + 600;
-    // Lock for at least 1200ms so trackpad inertia dies before next scroll is accepted
     const lockTime = Math.max(animTime, 1200);
 
     timers.push(
@@ -195,7 +117,6 @@ export const WelcomeStep = ({
       e.preventDefault();
       if (e.deltaY <= 0) return;
 
-      // Only allow one advance per 1.5s — kills all trackpad inertia
       if (Date.now() - lastAdvanceRef.current < 1500) return;
 
       if (phaseRef.current === 'revealing') {
@@ -205,11 +126,9 @@ export const WelcomeStep = ({
           lastAdvanceRef.current = Date.now();
           showSection(next);
         } else {
-          // All lines including "Ready?" have been shown — done
           phaseRef.current = 'done';
           setPhase('done');
-          animationDoneRef.current = true;
-          tryNavigate();
+          handleDone();
         }
       }
     };
@@ -217,7 +136,7 @@ export const WelcomeStep = ({
     window.addEventListener('wheel', handleWheel, { passive: false });
 
     return () => window.removeEventListener('wheel', handleWheel);
-  }, [showSection, tryNavigate]);
+  }, [showSection, handleDone]);
 
   const getImgState = (imgIdx: number) => {
     const t = IMG_TRIGGERS[imgIdx];
@@ -228,26 +147,6 @@ export const WelcomeStep = ({
 
     return 'hidden';
   };
-
-  // If animation is done but API failed, show retry
-  if (phase === 'done' && apiError) {
-    return (
-      <div className='fixed inset-0 z-[150] flex items-center justify-center overflow-hidden bg-[#f3f3f3]'>
-        <div className='text-center'>
-          <p className='mb-4 text-sm' style={{ color: '#999' }}>
-            Something went wrong. Please try again.
-          </p>
-          <button
-            type='button'
-            onClick={handleRetry}
-            className='rounded-lg bg-[#1a1a1a] px-6 py-2.5 text-sm text-white transition-opacity hover:opacity-80'
-          >
-            Retry
-          </button>
-        </div>
-      </div>
-    );
-  }
 
   return (
     <div className='fixed inset-0 z-[150] flex items-center justify-center overflow-hidden bg-[#f3f3f3]'>
@@ -327,13 +226,6 @@ export const WelcomeStep = ({
           </div>
         );
       })}
-
-      {/* Loading spinner after animation done, waiting for API */}
-      {phase === 'done' && !apiError && (
-        <div className='absolute z-10' style={{ bottom: '15%' }}>
-          <div className='h-5 w-5 animate-spin rounded-full border-2 border-black/10 border-t-black' />
-        </div>
-      )}
 
       {/* Scroll hint */}
       {currentIdx >= 0 && phase !== 'done' && (

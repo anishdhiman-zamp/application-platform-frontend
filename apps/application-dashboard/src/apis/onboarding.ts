@@ -3,14 +3,17 @@ import { API_ENDPOINTS } from 'apis/apiEndpoint.constants';
 import {
   ApprovalCheckResponse,
   CheckUsernameResponse,
+  EnsureProvisioningRequest,
+  EnsureProvisioningResponse,
   OnboardingResponse,
-  ProvisioningStatusResponse,
+  OrgProvisioningStatusResponse,
+  RegisterOrgRequest,
+  RegisterOrgResponse,
   SetupOrgRequest,
   SetupOrgResponse,
   UpdateProfileRequest,
   UploadUrlRequest,
   UploadUrlResponse,
-  WelcomeRequest,
 } from 'modules/onboarding/onboarding.types';
 import { baseApi } from '@/services/baseApi';
 
@@ -36,17 +39,17 @@ const onboardingApi = baseApi.injectEndpoints({
         body,
       }),
     }),
-    welcome: builder.mutation<OnboardingResponse, WelcomeRequest>({
+    ensureProvisioning: builder.mutation<EnsureProvisioningResponse, EnsureProvisioningRequest>({
       query: (body) => ({
-        url: API_ENDPOINTS.ONBOARDING_WELCOME_POST,
+        url: API_ENDPOINTS.ONBOARDING_PROVISIONING_POST,
         method: REQUEST_TYPES.POST,
         body,
       }),
     }),
-    getProvisioningStatus: builder.query<ProvisioningStatusResponse, { organization_id: string }>({
-      query: ({ organization_id }) => ({
-        url: API_ENDPOINTS.ONBOARDING_PROVISIONING_STATUS_GET,
-        params: { organization_id },
+    skipOnboarding: builder.mutation<OnboardingResponse, void>({
+      query: () => ({
+        url: API_ENDPOINTS.ONBOARDING_SKIP_POST,
+        method: REQUEST_TYPES.POST,
       }),
     }),
     getUploadUrl: builder.mutation<UploadUrlResponse, UploadUrlRequest>({
@@ -62,6 +65,19 @@ const onboardingApi = baseApi.injectEndpoints({
         params: { username },
       }),
     }),
+    registerOrg: builder.mutation<RegisterOrgResponse, RegisterOrgRequest>({
+      query: (body) => ({
+        url: API_ENDPOINTS.ORGANIZATIONS_REGISTER_POST,
+        method: REQUEST_TYPES.POST,
+        body,
+      }),
+    }),
+    provisionOrg: builder.mutation<OrgProvisioningStatusResponse, string>({
+      query: (organizationId) => ({
+        url: API_ENDPOINTS.ORGANIZATIONS_PROVISION_POST.replace('{{organizationId}}', organizationId),
+        method: REQUEST_TYPES.POST,
+      }),
+    }),
   }),
 });
 
@@ -69,8 +85,10 @@ export const {
   useCheckApprovalMutation,
   useUpdateProfileMutation,
   useSetupOrgMutation,
-  useWelcomeMutation,
-  useLazyGetProvisioningStatusQuery,
+  useEnsureProvisioningMutation,
+  useSkipOnboardingMutation,
   useGetUploadUrlMutation,
   useLazyCheckUsernameQuery,
+  useRegisterOrgMutation,
+  useProvisionOrgMutation,
 } = onboardingApi;
