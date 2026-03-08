@@ -32,6 +32,7 @@ const baseQuery = (timeout = REQUEST_TIMEOUT, domain = API_DOMAIN, orgId: string
     prepareHeaders: (headers) => {
       headers.set('Accept', 'application/json');
 
+
       if (orgId) {
         headers.set(LOCAL_STORAGE_KEYS.XZAMP_ORGANIZATION_ID, orgId);
       }

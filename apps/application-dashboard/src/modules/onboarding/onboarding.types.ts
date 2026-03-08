@@ -9,6 +9,7 @@ export const enum OnboardingStatus {
 }
 
 export const enum ProvisioningStatus {
+  PENDING = 'pending',
   IN_PROGRESS = 'in_progress',
   COMPLETED = 'completed',
   FAILED = 'failed',

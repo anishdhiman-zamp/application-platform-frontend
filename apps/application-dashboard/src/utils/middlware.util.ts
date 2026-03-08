@@ -90,6 +90,7 @@ export async function getUserSession(
         organization_id: '',
         name: '',
         slug: '',
+        provisioning_status: 'completed',
         resource_audience_policies: [],
         ...(cachedSessionData.provisioning_status && { provisioning_status: cachedSessionData.provisioning_status }),
       }));
