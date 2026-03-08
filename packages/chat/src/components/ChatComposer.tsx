@@ -2,7 +2,7 @@
 
 import { Button, LiveWaveform, Textarea } from '@zamp-platform/ui';
 import { cn } from '@zamp-platform/ui/utils';
-import { ArrowUp, Check, Loader, Mic, Paperclip, X } from 'lucide-react';
+import { ArrowUp, Check, CircleStop, Loader, Loader2, Mic, Paperclip, X } from 'lucide-react';
 import React, { FC, useEffect, useRef } from 'react';
 
 import { UploadedFileType } from '../types/block.types';
@@ -51,6 +51,11 @@ export interface ChatComposerProps {
   showSubmitButton?: boolean;
   onSubmit?: () => void;
   isSubmitDisabled?: boolean;
+
+  // Streaming / stop
+  isStreaming?: boolean;
+  onStop?: () => void;
+  isStopping?: boolean;
 
   // Styling
   className?: string;
@@ -101,6 +106,11 @@ export const ChatComposer: FC<ChatComposerProps> = ({
   showSubmitButton = false,
   onSubmit,
   isSubmitDisabled = true,
+
+  // Streaming / stop
+  isStreaming = false,
+  onStop,
+  isStopping = false,
 
   // Styling
   className,
@@ -282,16 +292,30 @@ export const ChatComposer: FC<ChatComposerProps> = ({
                   <Mic />
                 </Button>
               )}
-              {showSubmitButton && onSubmit && (
+              {showSubmitButton && (isStreaming || isStopping) && onStop ? (
                 <Button
-                  onClick={onSubmit}
-                  disabled={isSubmitDisabled}
+                  onClick={onStop}
+                  disabled={isStopping}
                   size='icon'
-                  aria-label='Send message'
-                  className='disabled:bg-GRAY_300 !size-5 rounded-full p-[2px] !text-white disabled:cursor-not-allowed [&_svg]:size-3'
+                  variant='ghost'
+                  aria-label='Stop generating'
+                  className='!size-5 rounded-full bg-black p-0 text-white hover:bg-black hover:text-white [&_svg]:size-3'
                 >
-                  <ArrowUp className={cn('text-white', { 'text-GRAY_700': isSubmitDisabled })} />
+                  {isStopping ? <Loader2 className='animate-spin' /> : <CircleStop />}
                 </Button>
+              ) : (
+                showSubmitButton &&
+                onSubmit && (
+                  <Button
+                    onClick={onSubmit}
+                    disabled={isSubmitDisabled}
+                    size='icon'
+                    aria-label='Send message'
+                    className='disabled:bg-GRAY_300 !size-5 rounded-full p-[2px] !text-white disabled:cursor-not-allowed [&_svg]:size-3'
+                  >
+                    <ArrowUp className={cn('text-white', { 'text-GRAY_700': isSubmitDisabled })} />
+                  </Button>
+                )
               )}
             </div>
           </div>
