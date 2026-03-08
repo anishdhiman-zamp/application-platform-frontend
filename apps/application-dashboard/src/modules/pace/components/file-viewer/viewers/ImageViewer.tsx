@@ -12,7 +12,6 @@ interface ImageViewerProps {
   src: string;
   alt?: string;
   className?: string;
-  fileName?: string;
   onError?: (message?: string) => void;
 }
 
