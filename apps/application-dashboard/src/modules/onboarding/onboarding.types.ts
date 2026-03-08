@@ -3,7 +3,7 @@ export const enum OnboardingStatus {
   SETUP_PROFILE = 'setup_profile',
   SETUP_USERNAME = 'setup_username',
   SETUP_ORG = 'setup_org',
-  WELCOME = 'welcome',
+
   SETUP_WORKSPACE = 'setup_workspace',
   ONBOARDED = 'onboarded',
 }
@@ -42,8 +42,8 @@ export type SetupOrgRequest = {
   icon_value?: string | null;
 };
 
-export type WelcomeRequest = {
-  organization_id?: string | null;
+export type EnsureProvisioningRequest = {
+  organization_id: string;
 };
 
 export type OnboardingResponse = {
@@ -63,11 +63,12 @@ export type ApprovalCheckResponse = {
   reason: string | null;
 };
 
-export type ProvisioningStatusResponse = {
+export type EnsureProvisioningResponse = {
   onboarding_status: OnboardingStatus;
   provisioning_status: ProvisioningStatus;
+  organization_id: string;
   provisioning_started_at: string | null;
-  email_threshold_seconds: number;
+  expected_completion_seconds: number | null;
 };
 
 export type UploadUrlRequest = {
@@ -83,6 +84,31 @@ export type UploadUrlResponse = {
 export type CheckUsernameResponse = {
   available: boolean;
   username: string;
+};
+
+// POST /organizations/register
+export type RegisterOrgRequest = {
+  organization_name: string;
+  owner_id: string;
+  icon_type?: MediaType | null;
+  icon_value?: string | null;
+};
+
+export type RegisterOrgResponse = {
+  organization: {
+    organization_id: string;
+    name: string;
+    slug: string;
+  };
+  user_id: string;
+};
+
+// POST /organizations/{organization_id}/provision
+export type OrgProvisioningStatusResponse = {
+  provisioning_status: ProvisioningStatus;
+  started_at: string | null;
+  expected_completion_seconds: number | null;
+  is_completed: boolean;
 };
 
 export type AvatarState = {

@@ -1,5 +1,7 @@
 export const API_ENDPOINTS = {
   ORGANIZATIONS_GET: `organizations/`,
+  ORGANIZATIONS_REGISTER_POST: `organizations/register`,
+  ORGANIZATIONS_PROVISION_POST: `organizations/{{organizationId}}/provision`,
   MEMBERSHIP_REQUESTS_ALL_GET: `organizations/membership-requests`,
   INVITE_AUDIENCES_BY_ORGANIZATION_ID_POST: `organizations/{{organizationId}}/audiences/invitations`,
   INVITED_AUDIENCES_BY_ORGANIZATION_ID_GET: `organizations/{{organizationId}}/audiences/invitations`,
@@ -18,8 +20,8 @@ export const API_ENDPOINTS = {
   ONBOARDING_APPROVAL_POST: 'onboarding/approval',
   ONBOARDING_USER_PROFILE_PATCH: 'onboarding/user/profile',
   ONBOARDING_ORG_SETUP_POST: 'onboarding/org/setup',
-  ONBOARDING_WELCOME_POST: 'onboarding/welcome',
-  ONBOARDING_PROVISIONING_STATUS_GET: 'onboarding/provisioning/status',
+  ONBOARDING_PROVISIONING_POST: 'onboarding/provisioning',
+  ONBOARDING_SKIP_POST: 'onboarding/skip',
   ONBOARDING_UPLOAD_URL_POST: 'onboarding/assets/upload-url',
   AUTH_BASE_URL_GET: `auth/api-base-url`,
   AUTH_ERROR_DETAILS_GET: `auth/relay/internal/self-service/errors`,
