@@ -1,6 +1,6 @@
 'use client';
 
-import { memo, useCallback, useState } from 'react';
+import { memo, useCallback, useEffect, useState } from 'react';
 import UnsupportedFileView from 'modules/pace/components/file-viewer/viewers/UnsupportedFileView';
 import dynamic from 'next/dynamic';
 import ImageLoader from '@/components/common/loader/ImageLoader';
@@ -92,6 +92,10 @@ const FileViewerContent = memo(
 
     const fallbackMediaUrl = getMediaUrl(filePath);
     const effectiveMediaUrl = mediaUrl || fallbackMediaUrl;
+
+    useEffect(() => {
+      setMediaError(null);
+    }, [filePath, mediaUrl]);
 
     if (mediaError) {
       return (
