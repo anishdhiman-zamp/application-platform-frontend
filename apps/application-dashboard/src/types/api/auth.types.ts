@@ -87,6 +87,7 @@ export type Organization = {
   organization_id: string;
   name: string;
   slug: string;
+  provisioning_status: string;
   resource_audience_policies: {
     privilege: string;
     resource_audience_type: string;

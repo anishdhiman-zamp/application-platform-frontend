@@ -77,19 +77,12 @@ const handleAuthenticatedRoutes = async (request: NextRequest) => {
       return NextResponse.redirect(new URL(ROUTES_PATH.ONBOARDING, request.url));
     }
 
-    const prevRoute = getServerSideCookie(request, PREV_ROUTE_COOKIE);
+    // Redirect to /setup-workspace if user has no orgs OR primary org is not yet provisioned
+    const hasNoOrgs = checkOrgMembership(session, pathname);
+    const primaryOrgUnprovisioned =
+      !hasNoOrgs && session?.orgs?.[0]?.provisioning_status && session.orgs[0].provisioning_status !== 'completed';
 
-    if (prevRoute) {
-      const response = NextResponse.redirect(new URL(prevRoute, request.url));
-
-      const domain = ENVIRONMENT === ENVIRONMENT_TYPES.PRODUCTION ? '.zamp.ai' : '.zamp.dev';
-
-      clearServerSideCookie(response, PREV_ROUTE_COOKIE, domain);
-
-      return response;
-    }
-
-    if (checkOrgMembership(session, pathname)) {
+    if (hasNoOrgs || primaryOrgUnprovisioned) {
       const response = NextResponse.redirect(new URL(ROUTES_PATH.SETUP_WORKSPACE, request.url));
 
       if (session) {
@@ -104,6 +97,18 @@ const handleAuthenticatedRoutes = async (request: NextRequest) => {
 
         setServerSideUserCookie(response, USER_SESSION_COOKIE, JSON.stringify(sessionCache), SESSION_CACHE_MAX_AGE);
       }
+
+      return response;
+    }
+
+    const prevRoute = getServerSideCookie(request, PREV_ROUTE_COOKIE);
+
+    if (prevRoute) {
+      const response = NextResponse.redirect(new URL(prevRoute, request.url));
+
+      const domain = ENVIRONMENT === ENVIRONMENT_TYPES.PRODUCTION ? '.zamp.ai' : '.zamp.dev';
+
+      clearServerSideCookie(response, PREV_ROUTE_COOKIE, domain);
 
       return response;
     }

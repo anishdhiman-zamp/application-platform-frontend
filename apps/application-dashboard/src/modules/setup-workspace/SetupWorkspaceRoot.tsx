@@ -7,9 +7,12 @@ import { useLazyWhoAmIQuery, useWhoAmIQuery } from '@/apis/auth';
 import { useProvisionOrgMutation, useRegisterOrgMutation } from '@/apis/onboarding';
 import { useAcceptInvitationMutation, useGetMyInvitationsQuery } from '@/apis/people';
 import { ROUTES_PATH } from '@/constants/routeConfig';
+import { useAppDispatch } from '@/hooks/toolkit';
 import { useIsPaceChatEnabled } from '@/hooks/useIsPaceChatEnabled';
+import { setUser } from '@/store/slices/user';
 
-type Phase = 'checking_invitations' | 'creating_org' | 'provisioning' | 'error';
+const MAX_REGISTER_RETRIES = 3;
+const REGISTER_RETRY_DELAY = 5000;
 
 const deriveOrgName = (displayName: string | undefined, email: string): string => {
   const firstName = displayName?.trim() || email.split('@')[0].replace(/^./, (c) => c.toUpperCase());
@@ -19,11 +22,11 @@ const deriveOrgName = (displayName: string | undefined, email: string): string =
 
 export const SetupWorkspaceRoot = () => {
   const router = useRouter();
+  const dispatch = useAppDispatch();
   const { data: session, isLoading: sessionLoading } = useWhoAmIQuery();
   const { isPaceChatEnabled } = useIsPaceChatEnabled();
   const landingRoute = isPaceChatEnabled ? ROUTES_PATH.CHAT : ROUTES_PATH.PROCESSES;
 
-  const [phase, setPhase] = useState<Phase>('checking_invitations');
   const [takingLonger, setTakingLonger] = useState(false);
   const startedRef = useRef(false);
 
@@ -33,17 +36,29 @@ export const SetupWorkspaceRoot = () => {
   const [registerOrg] = useRegisterOrgMutation();
   const [provisionOrg] = useProvisionOrgMutation();
 
-  // If user already has orgs, redirect immediately
+  // If user already has orgs on initial load, check provisioning_status from whoami.
+  // If all orgs are provisioned → redirect to app.
+  // If any org is not yet provisioned (e.g. user closed tab mid-flow) → resume polling.
   useEffect(() => {
-    if (!sessionLoading && session && session.orgs && session.orgs.length > 0) {
+    if (startedRef.current) return;
+    if (sessionLoading || !session || !session.orgs || session.orgs.length === 0) return;
+
+    const org = session.orgs[0];
+
+    if (org.provisioning_status === 'completed') {
       router.replace(landingRoute);
+
+      return;
     }
-  }, [session, sessionLoading, router, landingRoute]);
+
+    // Provisioning not complete — stay here and poll
+    startedRef.current = true;
+    dispatch(setUser(session));
+    pollProvisioning(org.organization_id);
+  }, [session, sessionLoading, router, landingRoute, dispatch, pollProvisioning]);
 
   const pollProvisioning = useCallback(
     async (orgId: string) => {
-      setPhase('provisioning');
-
       const poll = async () => {
         try {
           const result = await provisionOrg(orgId).unwrap();
@@ -83,25 +98,39 @@ export const SetupWorkspaceRoot = () => {
 
   const createAndProvision = useCallback(
     async (userId: string, displayName: string | undefined, email: string) => {
-      setPhase('creating_org');
       const orgName = deriveOrgName(displayName, email);
 
-      try {
-        const result = await registerOrg({
-          organization_name: orgName,
-          owner_id: userId,
-          icon_type: MediaType.SEED,
-          icon_value: orgName,
-        }).unwrap();
+      for (let attempt = 0; attempt < MAX_REGISTER_RETRIES; attempt++) {
+        try {
+          const result = await registerOrg({
+            organization_name: orgName,
+            owner_id: userId,
+            icon_type: MediaType.SEED,
+            icon_value: orgName,
+          }).unwrap();
 
-        const orgId = result.organization.organization_id;
+          const orgId = result.organization.organization_id;
 
-        await pollProvisioning(orgId);
-      } catch {
-        setPhase('error');
+          // Refresh session so the new org appears in the Redux store
+          // (baseQuery reads org ID from state for the x-zamp-organization-id header)
+          const refreshed = await fetchWhoAmI().unwrap();
+
+          dispatch(setUser(refreshed));
+
+          await pollProvisioning(orgId);
+
+          return;
+        } catch {
+          // Silent retry — keep showing the spinner
+          if (attempt < MAX_REGISTER_RETRIES - 1) {
+            await new Promise((r) => setTimeout(r, REGISTER_RETRY_DELAY));
+          }
+        }
       }
+
+      // All retries exhausted — keep showing spinner, user can reload
     },
-    [registerOrg, pollProvisioning],
+    [registerOrg, fetchWhoAmI, dispatch, pollProvisioning],
   );
 
   // Main flow: try invitations first, then auto-create
@@ -150,31 +179,6 @@ export const SetupWorkspaceRoot = () => {
     landingRoute,
     createAndProvision,
   ]);
-
-  const handleRetry = () => {
-    if (!session) return;
-    setPhase('creating_org');
-    createAndProvision(session.user_id, session.display_name, session.user_email);
-  };
-
-  if (phase === 'error') {
-    return (
-      <div className='flex h-screen w-screen items-center justify-center bg-white'>
-        <div className='flex max-w-[520px] flex-col items-center text-center'>
-          <p className='mb-4 text-sm' style={{ color: '#999' }}>
-            Something went wrong while setting up your workspace.
-          </p>
-          <button
-            type='button'
-            onClick={handleRetry}
-            className='rounded-lg bg-[#1a1a1a] px-6 py-2.5 text-sm text-white transition-opacity hover:opacity-80'
-          >
-            Try again
-          </button>
-        </div>
-      </div>
-    );
-  }
 
   return (
     <div className='flex h-screen w-screen items-center justify-center bg-white'>

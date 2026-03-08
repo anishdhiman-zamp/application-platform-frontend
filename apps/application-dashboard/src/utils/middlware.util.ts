@@ -76,6 +76,7 @@ export async function getUserSession(
         organization_id: '',
         name: '',
         slug: '',
+        provisioning_status: 'completed',
         resource_audience_policies: [],
       }));
 

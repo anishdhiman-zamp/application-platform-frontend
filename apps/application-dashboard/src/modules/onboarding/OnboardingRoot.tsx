@@ -52,11 +52,15 @@ export const OnboardingRoot = () => {
     skipCalledRef.current = true;
 
     const doSkip = async () => {
+      console.log('[Onboarding] Flag is OFF, calling POST /onboarding/skip');
       try {
-        await skipOnboarding().unwrap();
-      } catch {
-        // If skip fails (e.g. flag is actually on, or network error), still redirect
+        const result = await skipOnboarding().unwrap();
+
+        console.log('[Onboarding] Skip succeeded:', result);
+      } catch (err) {
+        console.error('[Onboarding] Skip failed:', err);
       }
+      console.log('[Onboarding] Redirecting to', landingRoute);
       router.replace(landingRoute);
     };
 
