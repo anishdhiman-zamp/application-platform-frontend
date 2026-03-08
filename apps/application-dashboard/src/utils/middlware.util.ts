@@ -2,6 +2,7 @@ import type { NextRequest, NextResponse } from 'next/server';
 import { Session } from 'types/api/auth.types';
 import { API_ENDPOINTS } from '@/apis/apiEndpoint.constants';
 import { ROUTES_PATH } from '@/constants/routeConfig';
+import { PROVISIONING_STATUS } from '@/modules/setup-workspace/setup-workspace.types';
 import { ORY_KRATOS_SESSION_COOKIE, USER_SESSION_COOKIE } from '@/utils/cookie';
 
 type SessionCache = {
@@ -12,7 +13,20 @@ type SessionCache = {
   org_count: number;
   cached_at: number;
   username: string;
+  provisioning_status?: string;
 };
+
+export function buildSessionCache(session: Session) {
+  return {
+    user_id: session.user_id,
+    user_email: session.user_email,
+    org_count: session.orgs?.length ?? 0,
+    default_org_id: session.orgs?.[0]?.organization_id,
+    cached_at: Date.now(),
+    username: session.username,
+    provisioning_status: session.orgs?.[0]?.provisioning_status,
+  };
+}
 
 export function setServerSideUserCookie(
   response: NextResponse,
@@ -77,6 +91,7 @@ export async function getUserSession(
         name: '',
         slug: '',
         resource_audience_policies: [],
+        ...(cachedSessionData.provisioning_status && { provisioning_status: cachedSessionData.provisioning_status }),
       }));
 
       const session: Session = {
@@ -136,6 +151,26 @@ export function checkOrgMembership(session: Session | null, pathname: string): b
   if (!orgs || !Array.isArray(orgs)) return false;
 
   return orgs.length === 0 && !pathname.includes(ROUTES_PATH.INVITATIONS);
+}
+
+/**
+ * Returns true if the user needs the setup-workspace flow:
+ * - No orgs at all (and not on invitations page)
+ * - Has orgs but primary org is not yet provisioned
+ */
+export function needsWorkspaceSetup(session: Session | null, pathname: string): boolean {
+  if (!session) return false;
+
+  // No orgs → needs setup
+  if (checkOrgMembership(session, pathname)) return true;
+
+  // Has orgs but not yet provisioned → needs setup
+  // Flag-off users will bounce: setup-workspace → client checks flag → membership-pending (no loop)
+  const primaryOrg = session.orgs?.[0];
+
+  if (primaryOrg?.provisioning_status && primaryOrg.provisioning_status !== PROVISIONING_STATUS.COMPLETED) return true;
+
+  return false;
 }
 
 export function validateSession(request: NextRequest): boolean {

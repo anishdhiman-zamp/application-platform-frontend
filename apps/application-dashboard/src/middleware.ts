@@ -11,10 +11,11 @@ import {
 } from 'utils/cookie';
 import { DOMAINS } from '@/constants/domains';
 import {
-  checkOrgMembership,
+  buildSessionCache,
   clearServerSideCookie,
   getServerSideCookie,
   getUserSession,
+  needsWorkspaceSetup,
   setServerSideUserCookie,
   validateSession,
 } from '@/utils/middlware.util';
@@ -63,8 +64,28 @@ const handleAuthenticatedRoutes = async (request: NextRequest) => {
     return NextResponse.redirect(new URL(ROUTES_PATH.INVALID_SCREEN_SIZE, request.url));
   }
 
-  if (pathname !== ROUTES_PATH.MEMBERSHIP_PENDING && pathname !== ROUTES_PATH.LOGIN) {
+  if (
+    pathname !== ROUTES_PATH.MEMBERSHIP_PENDING &&
+    pathname !== ROUTES_PATH.SETUP_WORKSPACE &&
+    pathname !== ROUTES_PATH.LOGIN
+  ) {
     const { session, cached } = await getUserSession(request);
+
+    // No orgs or primary org not yet provisioned → send to setup-workspace
+    if (needsWorkspaceSetup(session, pathname)) {
+      const response = NextResponse.redirect(new URL(ROUTES_PATH.SETUP_WORKSPACE, request.url));
+
+      if (session) {
+        setServerSideUserCookie(
+          response,
+          USER_SESSION_COOKIE,
+          JSON.stringify(buildSessionCache(session)),
+          SESSION_CACHE_MAX_AGE,
+        );
+      }
+
+      return response;
+    }
 
     const prevRoute = getServerSideCookie(request, PREV_ROUTE_COOKIE);
 
@@ -78,37 +99,15 @@ const handleAuthenticatedRoutes = async (request: NextRequest) => {
       return response;
     }
 
-    if (checkOrgMembership(session, pathname)) {
-      const response = NextResponse.redirect(new URL(ROUTES_PATH.MEMBERSHIP_PENDING, request.url));
-
-      if (session) {
-        const sessionCache = {
-          user_id: session.user_id,
-          user_email: session.user_email,
-          org_count: session.orgs?.length ?? 0,
-          default_org_id: session?.orgs?.[0]?.organization_id,
-          cached_at: Date.now(),
-          username: session.username,
-        };
-
-        setServerSideUserCookie(response, USER_SESSION_COOKIE, JSON.stringify(sessionCache), SESSION_CACHE_MAX_AGE);
-      }
-
-      return response;
-    }
-
     if (session && !cached) {
       const response = NextResponse.next();
 
-      const sessionCache = {
-        user_id: session?.user_id,
-        user_email: session?.user_email,
-        org_count: session?.orgs?.length || 0,
-        default_org_id: session?.orgs?.[0]?.organization_id,
-        cached_at: Date.now(),
-      };
-
-      setServerSideUserCookie(response, USER_SESSION_COOKIE, JSON.stringify(sessionCache), SESSION_CACHE_MAX_AGE);
+      setServerSideUserCookie(
+        response,
+        USER_SESSION_COOKIE,
+        JSON.stringify(buildSessionCache(session)),
+        SESSION_CACHE_MAX_AGE,
+      );
 
       return response;
     }
@@ -133,11 +132,11 @@ const handleAuthenticatedRoutes = async (request: NextRequest) => {
       }
 
       if (session) {
-        const hasOrgs = !!(session && Array.isArray(session.orgs) && session.orgs.length > 0);
+        if (needsWorkspaceSetup(session, pathname)) {
+          return NextResponse.redirect(new URL(ROUTES_PATH.SETUP_WORKSPACE, request.url));
+        }
 
-        return NextResponse.redirect(
-          new URL(hasOrgs ? ROUTES_PATH.PROCESSES : ROUTES_PATH.MEMBERSHIP_PENDING, request.url),
-        );
+        return NextResponse.redirect(new URL(ROUTES_PATH.PROCESSES, request.url));
       }
 
       clearServerSideCookie(response, ORY_KRATOS_SESSION_COOKIE);
@@ -150,8 +149,28 @@ const handleAuthenticatedRoutes = async (request: NextRequest) => {
 
       const hasOrgs = !!(session && Array.isArray(session.orgs) && session.orgs.length > 0);
 
-      if (hasOrgs) {
+      if (hasOrgs && !needsWorkspaceSetup(session, pathname)) {
         return NextResponse.redirect(new URL(ROUTES_PATH.PROCESSES, request.url));
+      }
+
+      return NextResponse.next();
+    }
+    case ROUTES_PATH.SETUP_WORKSPACE: {
+      const { session } = await getUserSession(request, false);
+
+      // If user doesn't need setup (has provisioned orgs), redirect to app
+      // Update the session cache so stale org_count=0 doesn't cause a redirect loop
+      if (session && !needsWorkspaceSetup(session, pathname)) {
+        const response = NextResponse.redirect(new URL(ROUTES_PATH.PROCESSES, request.url));
+
+        setServerSideUserCookie(
+          response,
+          USER_SESSION_COOKIE,
+          JSON.stringify(buildSessionCache(session)),
+          SESSION_CACHE_MAX_AGE,
+        );
+
+        return response;
       }
 
       return NextResponse.next();
@@ -188,7 +207,6 @@ export const config = {
      * - mp4 (video files)
      * - public (public files)
      * - sw.js (service worker)
-     * - membership-pending (membership pending page)
      * - monitoring (Sentry tunnel route)
      */
     '/((?!_next/static|_next/image|_vercel|api/health-check|auth|favicon.ico|icons|mp4|public|sw.js|monitoring).*)',

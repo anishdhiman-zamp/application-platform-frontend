@@ -27,6 +27,7 @@ export const ROUTES_PATH = {
   WIDGET_CREATE: '/widgets/create',
   INVALID_SCREEN_SIZE: '/invalid-screen-size',
   MEMBERSHIP_PENDING: '/membership-pending',
+  SETUP_WORKSPACE: '/setup-workspace',
 
   SETTINGS: '/settings',
   INTEGRATIONS: '/settings/integrations',

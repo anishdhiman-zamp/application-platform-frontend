@@ -1,0 +1,243 @@
+'use client';
+
+import { useCallback, useEffect, useRef, useState } from 'react';
+import { ProfessionRevealBackground } from 'modules/login/ProfessionRevealBackground';
+import { ProvisioningScreen } from 'modules/setup-workspace/components/ProvisioningScreen';
+import { useRouter } from 'next/navigation';
+import { useLazyWhoAmIQuery, useWhoAmIQuery } from '@/apis/auth';
+import { useAcceptInvitationMutation, useGetMyInvitationsQuery } from '@/apis/people';
+import { useProvisionOrgMutation, useRegisterOrgMutation } from '@/apis/setup-workspace';
+import ImageLoader from '@/components/common/loader/ImageLoader';
+import { FEATURE_FLAGS } from '@/constants/featureFlags';
+import { ZAMP_LOGO_LOADER_SVG } from '@/constants/icons';
+import { ROUTES_PATH } from '@/constants/routeConfig';
+import { useAppDispatch } from '@/hooks/toolkit';
+import { useFeatureFlag } from '@/hooks/useFeatureFlag';
+import { MEDIA_TYPE, PROVISIONING_STATUS } from '@/modules/setup-workspace/setup-workspace.types';
+import { setUser } from '@/store/slices/user';
+import { clearCookie, USER_SESSION_COOKIE } from '@/utils/cookie';
+
+const funnelDisplayFont = `
+@import url('https://fonts.googleapis.com/css2?family=Funnel+Display:wght@300;400;500;600;700&display=swap');
+`;
+
+const MAX_REGISTER_RETRIES = 3;
+const REGISTER_RETRY_DELAY = 5000;
+const POLLING_INTERVAL = 5000;
+const MAX_POLL_ATTEMPTS = 60; // 5 minutes at 5s intervals
+
+const deriveOrgName = (displayName: string | undefined, email: string): string => {
+  const firstName = displayName?.trim() || email.split('@')[0].replace(/^./, (c) => c.toUpperCase());
+
+  return `${firstName}'s Organization`;
+};
+
+export const SetupWorkspaceRoot = () => {
+  const containerRef = useRef<HTMLDivElement>(null);
+  const router = useRouter();
+  const dispatch = useAppDispatch();
+  const { data: session, isLoading: sessionLoading } = useWhoAmIQuery();
+  const landingRoute = ROUTES_PATH.PROCESSES;
+
+  const { isEnabled: isAutoOrgEnabled, isLoading: isFlagLoading } = useFeatureFlag(FEATURE_FLAGS.AUTO_ORG_CREATION);
+
+  const [takingLonger, setTakingLonger] = useState(false);
+  const startedRef = useRef(false);
+  const pollingIntervalRef = useRef<ReturnType<typeof setInterval> | null>(null);
+
+  const { data: invitationsData, isLoading: invitationsLoading } = useGetMyInvitationsQuery();
+  const [acceptInvitation] = useAcceptInvitationMutation();
+  const [fetchWhoAmI] = useLazyWhoAmIQuery();
+  const [registerOrg] = useRegisterOrgMutation();
+  const [provisionOrg] = useProvisionOrgMutation();
+
+  const redirectToApp = useCallback(() => {
+    clearCookie(USER_SESSION_COOKIE);
+    router.replace(landingRoute);
+  }, [router, landingRoute]);
+
+  const pollProvisioning = useCallback(
+    async (orgId: string) => {
+      let attempts = 0;
+
+      const poll = async () => {
+        attempts++;
+
+        try {
+          const result = await provisionOrg(orgId).unwrap();
+
+          if (result.expected_completion_seconds && result.started_at) {
+            const elapsed = (Date.now() - new Date(result.started_at).getTime()) / 1000;
+
+            if (elapsed > result.expected_completion_seconds) {
+              setTakingLonger(true);
+            }
+          }
+
+          if (result.is_completed || result.provisioning_status === PROVISIONING_STATUS.COMPLETED) {
+            redirectToApp();
+
+            return true;
+          }
+        } catch {
+          // Ignore errors, keep polling — backend self-heals
+        }
+
+        if (attempts >= MAX_POLL_ATTEMPTS) {
+          setTakingLonger(true);
+
+          return true;
+        }
+
+        return false;
+      };
+
+      if (await poll()) return;
+
+      pollingIntervalRef.current = setInterval(async () => {
+        if (await poll()) {
+          clearInterval(pollingIntervalRef.current!);
+          pollingIntervalRef.current = null;
+        }
+      }, POLLING_INTERVAL);
+    },
+    [provisionOrg, redirectToApp],
+  );
+
+  const acceptPendingInvitations = useCallback(async () => {
+    const invitations = invitationsData?.invitations ?? [];
+
+    if (invitations.length === 0) return false;
+
+    for (const inv of invitations) {
+      try {
+        await acceptInvitation({ invitationId: inv.organization_invitation_id });
+      } catch {
+        // Continue even if individual acceptance fails
+      }
+    }
+
+    const refreshed = await fetchWhoAmI().unwrap();
+
+    if (refreshed.orgs && refreshed.orgs.length > 0) {
+      redirectToApp();
+
+      return true;
+    }
+
+    return false;
+  }, [invitationsData, acceptInvitation, fetchWhoAmI, redirectToApp]);
+
+  const createAndProvision = useCallback(
+    async (userId: string, displayName: string | undefined, email: string) => {
+      const orgName = deriveOrgName(displayName, email);
+
+      for (let attempt = 0; attempt < MAX_REGISTER_RETRIES; attempt++) {
+        try {
+          const result = await registerOrg({
+            organization_name: orgName,
+            owner_id: userId,
+            icon_type: MEDIA_TYPE.SEED,
+            icon_value: orgName,
+          }).unwrap();
+
+          const orgId = result.organization.organization_id;
+
+          const refreshed = await fetchWhoAmI().unwrap();
+
+          dispatch(setUser(refreshed));
+
+          await pollProvisioning(orgId);
+
+          return;
+        } catch {
+          if (attempt < MAX_REGISTER_RETRIES - 1) {
+            await new Promise((r) => setTimeout(r, REGISTER_RETRY_DELAY));
+          }
+        }
+      }
+
+      // All retries exhausted — show "taking longer" so user knows to reload
+      setTakingLonger(true);
+    },
+    [registerOrg, fetchWhoAmI, dispatch, pollProvisioning],
+  );
+
+  // Cleanup polling on unmount
+  useEffect(() => {
+    return () => {
+      if (pollingIntervalRef.current) {
+        clearInterval(pollingIntervalRef.current);
+      }
+    };
+  }, []);
+
+  // If feature flag is off, redirect to membership-pending
+  useEffect(() => {
+    if (isFlagLoading) return;
+
+    if (!isAutoOrgEnabled) {
+      router.replace(ROUTES_PATH.MEMBERSHIP_PENDING);
+    }
+  }, [isFlagLoading, isAutoOrgEnabled, router]);
+
+  // Resume polling if user already has an unprovisioned org (e.g. closed tab mid-flow)
+  useEffect(() => {
+    if (startedRef.current) return;
+    if (isFlagLoading || !isAutoOrgEnabled) return;
+    if (sessionLoading || !session || !session.orgs || session.orgs.length === 0) return;
+
+    const org = session.orgs[0];
+
+    if (org.provisioning_status === PROVISIONING_STATUS.COMPLETED) {
+      redirectToApp();
+
+      return;
+    }
+
+    startedRef.current = true;
+    dispatch(setUser(session));
+    pollProvisioning(org.organization_id);
+  }, [session, sessionLoading, dispatch, pollProvisioning, isFlagLoading, isAutoOrgEnabled, redirectToApp]);
+
+  // Main flow: accept invitations → auto-create org
+  useEffect(() => {
+    if (isFlagLoading || !isAutoOrgEnabled) return;
+    if (sessionLoading || invitationsLoading || !session || startedRef.current) return;
+    if (session.orgs && session.orgs.length > 0) return;
+    startedRef.current = true;
+
+    const run = async () => {
+      const accepted = await acceptPendingInvitations();
+
+      if (accepted) return;
+
+      await createAndProvision(session.user_id, session.user_name, session.user_email);
+    };
+
+    run();
+  }, [
+    isFlagLoading,
+    isAutoOrgEnabled,
+    sessionLoading,
+    invitationsLoading,
+    session,
+    acceptPendingInvitations,
+    createAndProvision,
+  ]);
+
+  if (isFlagLoading) return <ImageLoader imageSrc={ZAMP_LOGO_LOADER_SVG} width={140} height={140} />;
+
+  if (!isAutoOrgEnabled) return null;
+
+  return (
+    <div className='bg-GRAY_100 relative flex h-screen w-screen items-center justify-center overflow-hidden'>
+      <style>{funnelDisplayFont}</style>
+      <ProfessionRevealBackground containerRef={containerRef} />
+
+      <div ref={containerRef} className='relative z-2 w-full max-w-[520px] px-6 py-10'>
+        <ProvisioningScreen takingLonger={takingLonger} />
+      </div>
+    </div>
+  );
+};
