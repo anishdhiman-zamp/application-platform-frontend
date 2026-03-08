@@ -118,7 +118,7 @@ const FileViewerContent = memo(
 
     switch (fileCategory) {
       case FILE_CATEGORY.IMAGE:
-        return <ImageViewer src={effectiveMediaUrl} alt={fileName} fileName={fileName} onError={handleMediaError} />;
+        return <ImageViewer src={effectiveMediaUrl} alt={fileName} onError={handleMediaError} />;
 
       case FILE_CATEGORY.AUDIO:
         return (
@@ -130,7 +130,13 @@ const FileViewerContent = memo(
 
       case FILE_CATEGORY.PDF:
         return (
-          <PdfViewer key={effectiveMediaUrl} src={effectiveMediaUrl} fileName={fileName} onError={handleMediaError} />
+          <PdfViewer
+            key={effectiveMediaUrl}
+            src={effectiveMediaUrl}
+            fileName={fileName}
+            isActive={isActive}
+            onError={handleMediaError}
+          />
         );
 
       case FILE_CATEGORY.MARKDOWN:
