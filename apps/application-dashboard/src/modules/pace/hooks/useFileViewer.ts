@@ -49,6 +49,7 @@ export const useFileViewer = ({
   const pendingSaveRef = useRef(false);
 
   const [mediaMtime, setMediaMtime] = useState<number | null>(null);
+  const mediaMtimeRef = useRef(mediaMtime);
 
   const { getFileState, initFileState, forceUpdateFileState, updateFileContent, markFileSaved } =
     useFileViewerContext();
@@ -212,6 +213,10 @@ export const useFileViewer = ({
     fetchInitialMediaMetadata();
   }, [fetchInitialMediaMetadata]);
 
+  useEffect(() => {
+    mediaMtimeRef.current = mediaMtime;
+  }, [mediaMtime]);
+
   // Cleanup timer on unmount
   useEffect(() => {
     return () => {
@@ -277,7 +282,7 @@ export const useFileViewer = ({
       try {
         const metadata = await fetchFileMetadata({ path: filePath }).unwrap();
 
-        if (metadata.mtime_ms !== mediaMtime) {
+        if (metadata.mtime_ms !== mediaMtimeRef.current) {
           setMediaMtime(metadata.mtime_ms);
         }
       } catch (err) {
@@ -295,7 +300,7 @@ export const useFileViewer = ({
     }, POLL_INTERVAL_MS);
 
     return () => clearInterval(intervalId);
-  }, [filePath, isEditable, isActive, isFileNotFound, mediaMtime, fetchFileMetadata, onLoadError]);
+  }, [filePath, isEditable, isActive, isFileNotFound, fetchFileMetadata, onLoadError]);
 
   return {
     content: fileState?.content ?? null,
