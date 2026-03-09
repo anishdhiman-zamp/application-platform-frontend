@@ -36,16 +36,21 @@ export const SetupWorkspaceRoot = () => {
   const containerRef = useRef<HTMLDivElement>(null);
   const router = useRouter();
   const dispatch = useAppDispatch();
-  const { data: session, isLoading: sessionLoading } = useWhoAmIQuery();
   const landingRoute = ROUTES_PATH.PROCESSES;
 
   const { isEnabled: isAutoOrgEnabled, isLoading: isFlagLoading } = useFeatureFlag(FEATURE_FLAGS.AUTO_ORG_CREATION);
+
+  const flagReady = !isFlagLoading && isAutoOrgEnabled;
+
+  const { data: session, isLoading: sessionLoading } = useWhoAmIQuery(undefined, { skip: !flagReady });
 
   const [takingLonger, setTakingLonger] = useState(false);
   const startedRef = useRef(false);
   const pollingIntervalRef = useRef<ReturnType<typeof setInterval> | null>(null);
 
-  const { data: invitationsData, isLoading: invitationsLoading } = useGetMyInvitationsQuery();
+  const { data: invitationsData, isLoading: invitationsLoading } = useGetMyInvitationsQuery(undefined, {
+    skip: !flagReady,
+  });
   const [acceptInvitation] = useAcceptInvitationMutation();
   const [fetchWhoAmI] = useLazyWhoAmIQuery();
   const [registerOrg] = useRegisterOrgMutation();
@@ -75,6 +80,10 @@ export const SetupWorkspaceRoot = () => {
           }
 
           if (result.is_completed || result.provisioning_status === PROVISIONING_STATUS.COMPLETED) {
+            if (pollingIntervalRef.current) {
+              clearInterval(pollingIntervalRef.current);
+              pollingIntervalRef.current = null;
+            }
             redirectToApp();
 
             return true;
@@ -117,7 +126,7 @@ export const SetupWorkspaceRoot = () => {
       }
     }
 
-    const refreshed = await fetchWhoAmI().unwrap();
+    const refreshed = await fetchWhoAmI(undefined, false).unwrap();
 
     if (refreshed.orgs && refreshed.orgs.length > 0) {
       redirectToApp();
@@ -143,7 +152,7 @@ export const SetupWorkspaceRoot = () => {
 
           const orgId = result.organization.organization_id;
 
-          const refreshed = await fetchWhoAmI().unwrap();
+          const refreshed = await fetchWhoAmI(undefined, false).unwrap();
 
           dispatch(setUser(refreshed));
 
@@ -226,9 +235,9 @@ export const SetupWorkspaceRoot = () => {
     createAndProvision,
   ]);
 
-  if (isFlagLoading) return <ImageLoader imageSrc={ZAMP_LOGO_LOADER_SVG} width={140} height={140} />;
-
-  if (!isAutoOrgEnabled) return null;
+  if (!flagReady || sessionLoading || !session) {
+    return <ImageLoader imageSrc={ZAMP_LOGO_LOADER_SVG} width={140} height={140} />;
+  }
 
   return (
     <div className='bg-GRAY_100 relative flex h-screen w-screen items-center justify-center overflow-hidden'>
@@ -236,7 +245,7 @@ export const SetupWorkspaceRoot = () => {
       <ProfessionRevealBackground containerRef={containerRef} />
 
       <div ref={containerRef} className='relative z-2 w-full max-w-[520px] px-6 py-10'>
-        <ProvisioningScreen takingLonger={takingLonger} />
+        <ProvisioningScreen takingLonger={takingLonger} userName={session?.user_email || ''} />
       </div>
     </div>
   );

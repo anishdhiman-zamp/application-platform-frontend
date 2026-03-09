@@ -209,6 +209,6 @@ export const config = {
      * - sw.js (service worker)
      * - monitoring (Sentry tunnel route)
      */
-    '/((?!_next/static|_next/image|_vercel|api/health-check|auth|favicon.ico|icons|mp4|public|sw.js|monitoring).*)',
+    '/((?!_next/static|_next/image|_vercel|api/health-check|auth|favicon.ico|icons|loaders|mp4|public|sw.js|monitoring).*)',
   ],
 };
