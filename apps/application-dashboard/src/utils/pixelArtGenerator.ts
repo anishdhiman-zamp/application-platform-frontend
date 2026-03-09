@@ -1,14 +1,17 @@
-// Pixel-art avatar and icon generator
-// Ported from the signup.html design prototype
+// Pixel-art SVG generator for avatars and org icons
+// Generates deterministic pixel art from seed strings using Zamp brand colors
 
 export const ZAMP_COLORS = ['#C5C5B5', '#3B673B', '#848484', '#682C4B', '#D0DDA3', '#005eff'];
+
 const BLUES = ['#005eff'];
 
-function makeSeed(t: string): number {
+// ── Seed & RNG ───────────────────────────────────────────────────────────────
+
+function makeSeed(text: string): number {
   let h = 0;
 
-  for (let i = 0; i < t.length; i++) {
-    h = ((h << 5) - h + t.toLowerCase().charCodeAt(i)) | 0;
+  for (let i = 0; i < text.length; i++) {
+    h = ((h << 5) - h + text.toLowerCase().charCodeAt(i)) | 0;
   }
 
   return Math.abs(h) || 1;
@@ -26,6 +29,8 @@ function makeRng(seed: number): () => number {
     return ((t ^ (t >>> 14)) >>> 0) / 4294967296;
   };
 }
+
+// ── Color utilities ──────────────────────────────────────────────────────────
 
 function hexToRgb(hex: string): [number, number, number] {
   const n = parseInt(hex.slice(1), 16);
@@ -73,6 +78,34 @@ function pickBlueBiased(rng: () => number): string {
   return ZAMP_COLORS[Math.floor(rng() * ZAMP_COLORS.length)];
 }
 
+// ── SVG renderer ─────────────────────────────────────────────────────────────
+
+interface Pill {
+  x: number;
+  y: number;
+  color: string;
+}
+
+function renderPillsToSvg(pills: Pill[], cols: number, rows: number, cellSize: number, cornerRadius: number): string {
+  const pw = cellSize * 0.88;
+  const ph = cellSize * 0.88;
+  const rx = ph * cornerRadius;
+  const w = cols * cellSize;
+  const h = rows * cellSize;
+
+  let svg = `<svg xmlns="http://www.w3.org/2000/svg" width="${w}" height="${h}" viewBox="0 0 ${w} ${h}">`;
+
+  for (const p of pills) {
+    const cx = p.x * cellSize + cellSize / 2;
+    const cy = p.y * cellSize + cellSize / 2;
+
+    svg += `<rect x="${(cx - pw / 2).toFixed(1)}" y="${(cy - ph / 2).toFixed(1)}" width="${pw.toFixed(1)}" height="${ph.toFixed(1)}" rx="${rx.toFixed(1)}" ry="${rx.toFixed(1)}" fill="${p.color}"/>`;
+  }
+  svg += `</svg>`;
+
+  return svg;
+}
+
 // ── Avatar (person) ──────────────────────────────────────────────────────────
 
 const BASE_HEAD = [
@@ -92,294 +125,268 @@ const BASE_HEAD = [
   '....SSSSSS....',
 ];
 
-const HAIR_STYLES: Array<{ cells: [number, number][] }> = [
-  {
-    cells: [
-      [0, 4],
-      [0, 5],
-      [0, 6],
-      [0, 7],
-      [0, 8],
-      [0, 9],
-      [1, 2],
-      [1, 3],
-      [1, 4],
-      [1, 5],
-      [1, 6],
-      [1, 7],
-      [1, 8],
-      [1, 9],
-      [1, 10],
-      [1, 11],
-      [2, 1],
-      [2, 2],
-      [2, 3],
-      [2, 4],
-      [2, 5],
-      [2, 6],
-      [2, 7],
-      [2, 8],
-      [2, 9],
-      [2, 10],
-      [2, 11],
-      [2, 12],
-      [3, 1],
-      [3, 2],
-      [3, 11],
-      [3, 12],
-    ],
-  },
-  {
-    cells: [
-      [0, 4],
-      [0, 5],
-      [0, 6],
-      [0, 7],
-      [0, 8],
-      [0, 9],
-      [1, 2],
-      [1, 3],
-      [1, 4],
-      [1, 5],
-      [1, 6],
-      [1, 7],
-      [1, 8],
-      [1, 9],
-      [1, 10],
-      [1, 11],
-      [2, 1],
-      [2, 2],
-      [2, 3],
-      [2, 4],
-      [2, 5],
-      [3, 1],
-      [3, 2],
-      [3, 3],
-      [4, 0],
-      [4, 1],
-    ],
-  },
-  {
-    cells: [
-      [-1, 5],
-      [-1, 6],
-      [-1, 7],
-      [-1, 8],
-      [0, 3],
-      [0, 4],
-      [0, 5],
-      [0, 6],
-      [0, 7],
-      [0, 8],
-      [0, 9],
-      [0, 10],
-      [1, 2],
-      [1, 3],
-      [1, 4],
-      [1, 5],
-      [1, 6],
-      [1, 7],
-      [1, 8],
-      [1, 9],
-      [1, 10],
-      [1, 11],
-      [2, 1],
-      [2, 2],
-      [2, 3],
-      [2, 4],
-      [2, 5],
-      [2, 6],
-      [2, 7],
-      [2, 8],
-      [2, 9],
-      [2, 10],
-      [2, 11],
-      [2, 12],
-      [3, 1],
-      [3, 2],
-      [3, 3],
-      [3, 4],
-      [3, 5],
-      [3, 6],
-      [3, 7],
-    ],
-  },
-  {
-    cells: [
-      [-2, 4],
-      [-2, 5],
-      [-2, 6],
-      [-2, 7],
-      [-2, 8],
-      [-2, 9],
-      [-1, 3],
-      [-1, 4],
-      [-1, 5],
-      [-1, 6],
-      [-1, 7],
-      [-1, 8],
-      [-1, 9],
-      [-1, 10],
-      [0, 2],
-      [0, 3],
-      [0, 4],
-      [0, 5],
-      [0, 6],
-      [0, 7],
-      [0, 8],
-      [0, 9],
-      [0, 10],
-      [0, 11],
-      [1, 1],
-      [1, 2],
-      [1, 3],
-      [1, 4],
-      [1, 5],
-      [1, 6],
-      [1, 7],
-      [1, 8],
-      [1, 9],
-      [1, 10],
-      [1, 11],
-      [1, 12],
-      [2, 0],
-      [2, 1],
-      [2, 12],
-      [2, 13],
-      [3, 0],
-      [3, 1],
-      [3, 12],
-      [3, 13],
-      [4, 0],
-      [4, 13],
-      [5, 0],
-      [5, 13],
-    ],
-  },
-  {
-    cells: [
-      [-1, 3],
-      [-1, 4],
-      [-1, 5],
-      [-1, 6],
-      [-1, 7],
-      [-1, 8],
-      [-1, 9],
-      [-1, 10],
-      [0, 2],
-      [0, 3],
-      [0, 4],
-      [0, 5],
-      [0, 6],
-      [0, 7],
-      [0, 8],
-      [0, 9],
-      [0, 10],
-      [0, 11],
-      [1, 2],
-      [1, 3],
-      [1, 4],
-      [1, 5],
-      [1, 6],
-      [1, 7],
-      [1, 8],
-      [1, 9],
-      [1, 10],
-      [1, 11],
-      [2, 1],
-      [2, 2],
-      [2, 11],
-      [2, 12],
-    ],
-  },
+const HAIR_STYLES: [number, number][][] = [
+  [
+    [0, 4],
+    [0, 5],
+    [0, 6],
+    [0, 7],
+    [0, 8],
+    [0, 9],
+    [1, 2],
+    [1, 3],
+    [1, 4],
+    [1, 5],
+    [1, 6],
+    [1, 7],
+    [1, 8],
+    [1, 9],
+    [1, 10],
+    [1, 11],
+    [2, 1],
+    [2, 2],
+    [2, 3],
+    [2, 4],
+    [2, 5],
+    [2, 6],
+    [2, 7],
+    [2, 8],
+    [2, 9],
+    [2, 10],
+    [2, 11],
+    [2, 12],
+    [3, 1],
+    [3, 2],
+    [3, 11],
+    [3, 12],
+  ],
+  [
+    [0, 4],
+    [0, 5],
+    [0, 6],
+    [0, 7],
+    [0, 8],
+    [0, 9],
+    [1, 2],
+    [1, 3],
+    [1, 4],
+    [1, 5],
+    [1, 6],
+    [1, 7],
+    [1, 8],
+    [1, 9],
+    [1, 10],
+    [1, 11],
+    [2, 1],
+    [2, 2],
+    [2, 3],
+    [2, 4],
+    [2, 5],
+    [3, 1],
+    [3, 2],
+    [3, 3],
+    [4, 0],
+    [4, 1],
+  ],
+  [
+    [-1, 5],
+    [-1, 6],
+    [-1, 7],
+    [-1, 8],
+    [0, 3],
+    [0, 4],
+    [0, 5],
+    [0, 6],
+    [0, 7],
+    [0, 8],
+    [0, 9],
+    [0, 10],
+    [1, 2],
+    [1, 3],
+    [1, 4],
+    [1, 5],
+    [1, 6],
+    [1, 7],
+    [1, 8],
+    [1, 9],
+    [1, 10],
+    [1, 11],
+    [2, 1],
+    [2, 2],
+    [2, 3],
+    [2, 4],
+    [2, 5],
+    [2, 6],
+    [2, 7],
+    [2, 8],
+    [2, 9],
+    [2, 10],
+    [2, 11],
+    [2, 12],
+    [3, 1],
+    [3, 2],
+    [3, 3],
+    [3, 4],
+    [3, 5],
+    [3, 6],
+    [3, 7],
+  ],
+  [
+    [-2, 4],
+    [-2, 5],
+    [-2, 6],
+    [-2, 7],
+    [-2, 8],
+    [-2, 9],
+    [-1, 3],
+    [-1, 4],
+    [-1, 5],
+    [-1, 6],
+    [-1, 7],
+    [-1, 8],
+    [-1, 9],
+    [-1, 10],
+    [0, 2],
+    [0, 3],
+    [0, 4],
+    [0, 5],
+    [0, 6],
+    [0, 7],
+    [0, 8],
+    [0, 9],
+    [0, 10],
+    [0, 11],
+    [1, 1],
+    [1, 2],
+    [1, 3],
+    [1, 4],
+    [1, 5],
+    [1, 6],
+    [1, 7],
+    [1, 8],
+    [1, 9],
+    [1, 10],
+    [1, 11],
+    [1, 12],
+    [2, 0],
+    [2, 1],
+    [2, 12],
+    [2, 13],
+    [3, 0],
+    [3, 1],
+    [3, 12],
+    [3, 13],
+    [4, 0],
+    [4, 13],
+    [5, 0],
+    [5, 13],
+  ],
+  [
+    [-1, 3],
+    [-1, 4],
+    [-1, 5],
+    [-1, 6],
+    [-1, 7],
+    [-1, 8],
+    [-1, 9],
+    [-1, 10],
+    [0, 2],
+    [0, 3],
+    [0, 4],
+    [0, 5],
+    [0, 6],
+    [0, 7],
+    [0, 8],
+    [0, 9],
+    [0, 10],
+    [0, 11],
+    [1, 2],
+    [1, 3],
+    [1, 4],
+    [1, 5],
+    [1, 6],
+    [1, 7],
+    [1, 8],
+    [1, 9],
+    [1, 10],
+    [1, 11],
+    [2, 1],
+    [2, 2],
+    [2, 11],
+    [2, 12],
+  ],
 ];
 
-const EYE_STYLES: Array<{ pixels: () => [number, number][] }> = [
-  {
-    pixels: () => [
-      [6, 3],
-      [6, 4],
-      [7, 3],
-      [7, 4],
-      [6, 9],
-      [6, 10],
-      [7, 9],
-      [7, 10],
-    ],
-  },
-  {
-    pixels: () => [
-      [5, 3],
-      [5, 4],
-      [6, 3],
-      [6, 4],
-      [7, 3],
-      [7, 4],
-      [5, 9],
-      [5, 10],
-      [6, 9],
-      [6, 10],
-      [7, 9],
-      [7, 10],
-    ],
-  },
-  {
-    pixels: () => [
-      [7, 3],
-      [7, 4],
-      [6, 2],
-      [6, 5],
-      [7, 9],
-      [7, 10],
-      [6, 8],
-      [6, 11],
-    ],
-  },
-  {
-    pixels: () => [
-      [5, 4],
-      [6, 4],
-      [7, 4],
-      [5, 9],
-      [6, 9],
-      [7, 9],
-    ],
-  },
+const EYE_STYLES: [number, number][][] = [
+  [
+    [6, 3],
+    [6, 4],
+    [7, 3],
+    [7, 4],
+    [6, 9],
+    [6, 10],
+    [7, 9],
+    [7, 10],
+  ],
+  [
+    [5, 3],
+    [5, 4],
+    [6, 3],
+    [6, 4],
+    [7, 3],
+    [7, 4],
+    [5, 9],
+    [5, 10],
+    [6, 9],
+    [6, 10],
+    [7, 9],
+    [7, 10],
+  ],
+  [
+    [7, 3],
+    [7, 4],
+    [6, 2],
+    [6, 5],
+    [7, 9],
+    [7, 10],
+    [6, 8],
+    [6, 11],
+  ],
+  [
+    [5, 4],
+    [6, 4],
+    [7, 4],
+    [5, 9],
+    [6, 9],
+    [7, 9],
+  ],
 ];
 
-const MOUTH_STYLES: Array<{ pixels: () => [number, number][] }> = [
-  {
-    pixels: () => [
-      [10, 6],
-      [10, 7],
-    ],
-  },
-  {
-    pixels: () => [
-      [10, 6],
-      [10, 7],
-      [9, 5],
-      [9, 8],
-    ],
-  },
-  {
-    pixels: () => [
-      [10, 5],
-      [10, 6],
-      [10, 7],
-      [10, 8],
-    ],
-  },
-  {
-    pixels: () => [
-      [9, 6],
-      [9, 7],
-      [10, 5],
-      [10, 8],
-      [11, 6],
-      [11, 7],
-    ],
-  },
+const MOUTH_STYLES: [number, number][][] = [
+  [
+    [10, 6],
+    [10, 7],
+  ],
+  [
+    [10, 6],
+    [10, 7],
+    [9, 5],
+    [9, 8],
+  ],
+  [
+    [10, 5],
+    [10, 6],
+    [10, 7],
+    [10, 8],
+  ],
+  [
+    [9, 6],
+    [9, 7],
+    [10, 5],
+    [10, 8],
+    [11, 6],
+    [11, 7],
+  ],
 ];
 
 export function generateAvatarSvg(name: string): string {
@@ -399,6 +406,7 @@ export function generateAvatarSvg(name: string): string {
   const rowOffset = 3;
   const rows = 18;
   const cols = 14;
+  const cellSize = 14;
   const g: (string | null)[][] = Array.from({ length: rows }, () => Array(cols).fill(null));
 
   const set = (row: number, col: number, color: string) => {
@@ -413,11 +421,11 @@ export function generateAvatarSvg(name: string): string {
     }
   });
 
-  HAIR_STYLES[hairIdx].cells.forEach(([hr, hc]) => set(hr, hc, finalHair));
-  EYE_STYLES[eyeIdx].pixels().forEach(([er, ec]) => set(er, ec, finalEye));
-  MOUTH_STYLES[mouthIdx].pixels().forEach(([mr, mc]) => set(mr, mc, finalMouth));
+  HAIR_STYLES[hairIdx].forEach(([hr, hc]) => set(hr, hc, finalHair));
+  EYE_STYLES[eyeIdx].forEach(([er, ec]) => set(er, ec, finalEye));
+  MOUTH_STYLES[mouthIdx].forEach(([mr, mc]) => set(mr, mc, finalMouth));
 
-  const pills: { x: number; y: number; color: string }[] = [];
+  const pills: Pill[] = [];
 
   for (let ri = 0; ri < rows; ri++) {
     for (let ci = 0; ci < cols; ci++) {
@@ -425,24 +433,7 @@ export function generateAvatarSvg(name: string): string {
     }
   }
 
-  const cellSize = 14;
-  const pw = cellSize * 0.88;
-  const ph = cellSize * 0.88;
-  const rx = ph * 0.28;
-  const w = cols * cellSize;
-  const h = rows * cellSize;
-
-  let svg = `<svg xmlns="http://www.w3.org/2000/svg" width="${w}" height="${h}" viewBox="0 0 ${w} ${h}">`;
-
-  for (const p of pills) {
-    const cx = p.x * cellSize + cellSize / 2;
-    const cy = p.y * cellSize + cellSize / 2;
-
-    svg += `<rect x="${(cx - pw / 2).toFixed(1)}" y="${(cy - ph / 2).toFixed(1)}" width="${pw.toFixed(1)}" height="${ph.toFixed(1)}" rx="${rx.toFixed(1)}" ry="${rx.toFixed(1)}" fill="${p.color}"/>`;
-  }
-  svg += `</svg>`;
-
-  return svg;
+  return renderPillsToSvg(pills, cols, rows, cellSize, 0.28);
 }
 
 // ── Org icon (letter-based pixel art) ────────────────────────────────────────
@@ -478,19 +469,20 @@ const PIXEL_LETTERS: Record<string, string[]> = {
   '@': ['01110', '10001', '10111', '10101', '10110', '10000', '01110'],
 };
 
-function buildLetterSvg(key: string, seed: string): string {
+function buildLetterPills(key: string, seed: string): Pill[] {
   const letterData = PIXEL_LETTERS[key];
 
-  if (!letterData) return '';
-  const G = 16;
+  if (!letterData) return [];
+
+  const gridSize = 16;
   const scale = 2;
   const lw = 5 * scale;
   const lh = 7 * scale;
-  const offX = Math.floor((G - lw) / 2);
-  const offY = Math.floor((G - lh) / 2);
+  const offX = Math.floor((gridSize - lw) / 2);
+  const offY = Math.floor((gridSize - lh) / 2);
   const rng = makeRng(makeSeed(seed));
   const color = pickBlueBiased(rng);
-  const pills: { x: number; y: number; color: string }[] = [];
+  const pills: Pill[] = [];
 
   for (let row = 0; row < 7; row++) {
     for (let col = 0; col < 5; col++) {
@@ -504,47 +496,30 @@ function buildLetterSvg(key: string, seed: string): string {
     }
   }
 
-  const cellSize = 14;
-  const pw = cellSize * 0.88;
-  const ph = cellSize * 0.88;
-  const rx = ph * 0.38;
-  const w = G * cellSize;
-  const h = G * cellSize;
-
-  let svg = `<svg xmlns="http://www.w3.org/2000/svg" width="${w}" height="${h}" viewBox="0 0 ${w} ${h}">`;
-
-  for (const p of pills) {
-    const cx = p.x * cellSize + cellSize / 2;
-    const cy = p.y * cellSize + cellSize / 2;
-
-    svg += `<rect x="${(cx - pw / 2).toFixed(1)}" y="${(cy - ph / 2).toFixed(1)}" width="${pw.toFixed(1)}" height="${ph.toFixed(1)}" rx="${rx.toFixed(1)}" ry="${rx.toFixed(1)}" fill="${p.color}"/>`;
-  }
-  svg += `</svg>`;
-
-  return svg;
+  return pills;
 }
 
 export function generateOrgIconSvg(name: string): string {
-  if (!name) return buildLetterSvg('HOME', 'home');
+  if (!name) return renderPillsToSvg(buildLetterPills('HOME', 'home'), 16, 16, 14, 0.38);
   const ch = name.charAt(0).toUpperCase();
 
-  return buildLetterSvg(ch in PIXEL_LETTERS ? ch : 'HOME', name);
+  return renderPillsToSvg(buildLetterPills(ch in PIXEL_LETTERS ? ch : 'HOME', name), 16, 16, 14, 0.38);
 }
 
 export function generateAtIconSvg(): string {
-  return buildLetterSvg('@', 'at-icon');
+  return renderPillsToSvg(buildLetterPills('@', 'at-icon'), 16, 16, 14, 0.38);
 }
 
 export function generatePlaceholderSvg(): string {
   const letterData = ['01110', '10001', '00001', '00110', '00100', '00000', '00100'];
-  const G = 16;
+  const gridSize = 16;
   const scale = 2;
   const lw = 5 * scale;
   const lh = 7 * scale;
-  const offX = Math.floor((G - lw) / 2);
-  const offY = Math.floor((G - lh) / 2);
+  const offX = Math.floor((gridSize - lw) / 2);
+  const offY = Math.floor((gridSize - lh) / 2);
   const color = pickBlueBiased(makeRng(makeSeed('?')));
-  const pills: { x: number; y: number; color: string }[] = [];
+  const pills: Pill[] = [];
 
   for (let row = 0; row < 7; row++) {
     for (let col = 0; col < 5; col++) {
@@ -558,22 +533,5 @@ export function generatePlaceholderSvg(): string {
     }
   }
 
-  const cellSize = 14;
-  const pw = cellSize * 0.88;
-  const ph = cellSize * 0.88;
-  const rx = ph * 0.38;
-  const w = G * cellSize;
-  const h = G * cellSize;
-
-  let svg = `<svg xmlns="http://www.w3.org/2000/svg" width="${w}" height="${h}" viewBox="0 0 ${w} ${h}">`;
-
-  for (const p of pills) {
-    const cx = p.x * cellSize + cellSize / 2;
-    const cy = p.y * cellSize + cellSize / 2;
-
-    svg += `<rect x="${(cx - pw / 2).toFixed(1)}" y="${(cy - ph / 2).toFixed(1)}" width="${pw.toFixed(1)}" height="${ph.toFixed(1)}" rx="${rx.toFixed(1)}" ry="${rx.toFixed(1)}" fill="${p.color}"/>`;
-  }
-  svg += `</svg>`;
-
-  return svg;
+  return renderPillsToSvg(pills, gridSize, gridSize, 14, 0.38);
 }

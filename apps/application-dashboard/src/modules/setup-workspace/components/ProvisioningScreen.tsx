@@ -1,5 +1,5 @@
 import { useMemo } from 'react';
-import { generateAvatarSvg } from '@/modules/setup-workspace/utils/avatarGenerator';
+import { generateAvatarSvg } from '@/utils/pixelArtGenerator';
 
 interface ProvisioningScreenProps {
   takingLonger: boolean;
@@ -16,17 +16,12 @@ export const ProvisioningScreen = ({ takingLonger, userName }: ProvisioningScree
         dangerouslySetInnerHTML={{ __html: avatarSvg }}
       />
       <h2
-        className='text-GRAY_1000 mb-3 whitespace-nowrap'
-        style={{
-          fontSize: 36,
-          lineHeight: 1.3,
-          fontFamily: "'Funnel Display', serif",
-          fontWeight: 300,
-        }}
+        className='text-GRAY_1000 mb-3 text-4xl leading-tight font-light whitespace-nowrap'
+        style={{ fontFamily: "'Funnel Display', serif" }}
       >
         {takingLonger ? 'Taking a bit longer than usual\u2026' : 'Getting things ready\u2026'}
       </h2>
-      <p className='text-GRAY_700 text-sm' style={{ lineHeight: 1.6 }}>
+      <p className='text-GRAY_700 text-sm leading-relaxed'>
         {takingLonger ? (
           <>
             We&rsquo;ll drop you an email once it&rsquo;s done.

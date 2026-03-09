@@ -33,21 +33,25 @@ const deriveOrgName = (displayName: string | undefined, email: string): string =
 };
 
 export const SetupWorkspaceRoot = () => {
+  // Refs
   const containerRef = useRef<HTMLDivElement>(null);
-  const router = useRouter();
-  const dispatch = useAppDispatch();
-  const landingRoute = ROUTES_PATH.PROCESSES;
-
-  const { isEnabled: isAutoOrgEnabled, isLoading: isFlagLoading } = useFeatureFlag(FEATURE_FLAGS.AUTO_ORG_CREATION);
-
-  const flagReady = !isFlagLoading && isAutoOrgEnabled;
-
-  const { data: session, isLoading: sessionLoading } = useWhoAmIQuery(undefined, { skip: !flagReady });
-
-  const [takingLonger, setTakingLonger] = useState(false);
   const startedRef = useRef(false);
   const pollingIntervalRef = useRef<ReturnType<typeof setInterval> | null>(null);
 
+  // Hooks
+  const router = useRouter();
+  const dispatch = useAppDispatch();
+  const { isEnabled: isAutoOrgEnabled, isLoading: isFlagLoading } = useFeatureFlag(FEATURE_FLAGS.AUTO_ORG_CREATION);
+
+  // Derived state
+  const landingRoute = ROUTES_PATH.PROCESSES;
+  const flagReady = !isFlagLoading && isAutoOrgEnabled;
+
+  // Local state
+  const [takingLonger, setTakingLonger] = useState(false);
+
+  // RTK Query
+  const { data: session, isLoading: sessionLoading } = useWhoAmIQuery(undefined, { skip: !flagReady });
   const { data: invitationsData, isLoading: invitationsLoading } = useGetMyInvitationsQuery(undefined, {
     skip: !flagReady,
   });
@@ -105,7 +109,9 @@ export const SetupWorkspaceRoot = () => {
 
       pollingIntervalRef.current = setInterval(async () => {
         if (await poll()) {
-          clearInterval(pollingIntervalRef.current!);
+          if (pollingIntervalRef.current) {
+            clearInterval(pollingIntervalRef.current);
+          }
           pollingIntervalRef.current = null;
         }
       }, POLLING_INTERVAL);
@@ -126,12 +132,16 @@ export const SetupWorkspaceRoot = () => {
       }
     }
 
-    const refreshed = await fetchWhoAmI(undefined, false).unwrap();
+    try {
+      const refreshed = await fetchWhoAmI(undefined, false).unwrap();
 
-    if (refreshed.orgs && refreshed.orgs.length > 0) {
-      redirectToApp();
+      if (refreshed.orgs && refreshed.orgs.length > 0) {
+        redirectToApp();
 
-      return true;
+        return true;
+      }
+    } catch {
+      // Session refresh failed — fall through to org creation
     }
 
     return false;
