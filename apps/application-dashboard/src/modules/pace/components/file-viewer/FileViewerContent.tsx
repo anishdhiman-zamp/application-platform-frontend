@@ -36,7 +36,6 @@ const CONTENT_BASED_CATEGORIES: ReadonlySet<FileCategory> = new Set([
   FILE_CATEGORY.MARKDOWN,
   FILE_CATEGORY.HTML,
   FILE_CATEGORY.CODE,
-  FILE_CATEGORY.SPREADSHEET,
 ]);
 
 interface FileViewerContentProps {
@@ -81,8 +80,14 @@ const FileViewerContent = memo(
 
     const fallbackMediaUrl = getMediaUrl(filePath);
     const effectiveMediaUrl = mediaUrl || fallbackMediaUrl;
+    const isTextSpreadsheet =
+      fileCategory === FILE_CATEGORY.SPREADSHEET &&
+      (TEXT_SPREADSHEET_EXTENSIONS as readonly string[]).includes(fileExtension.toLowerCase());
+
     const isContentLoading =
-      (isLoading && isEditable) || (CONTENT_BASED_CATEGORIES.has(fileCategory) && content === null);
+      (isLoading && isEditable) ||
+      (CONTENT_BASED_CATEGORIES.has(fileCategory) && content === null) ||
+      (isTextSpreadsheet && content === null);
 
     useEffect(() => {
       setMediaError(null);
