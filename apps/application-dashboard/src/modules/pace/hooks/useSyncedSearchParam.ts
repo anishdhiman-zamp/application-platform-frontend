@@ -80,6 +80,10 @@ export const useSyncedSearchParams = (): URLSearchParams | null => {
 
   const [searchParams, setSearchParams] = useState<URLSearchParams | null>(getSearchParams);
 
+  useUrlChangeListener(() => {
+    setSearchParams(getSearchParams());
+  });
+
   useEffect(() => {
     const current = getSearchParams();
 
@@ -87,11 +91,7 @@ export const useSyncedSearchParams = (): URLSearchParams | null => {
       setSearchParams(current);
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []);
-
-  useUrlChangeListener(() => {
-    setSearchParams(getSearchParams());
-  });
+  }, [getSearchParams]);
 
   return searchParams;
 };
@@ -114,6 +114,10 @@ export const useSyncedUrlParam = (paramName: string): string | null => {
 
   const [value, setValue] = useState<string | null>(getParamValue);
 
+  useUrlChangeListener(() => {
+    setValue(getParamValue());
+  });
+
   useEffect(() => {
     const currentValue = getParamValue();
 
@@ -121,11 +125,7 @@ export const useSyncedUrlParam = (paramName: string): string | null => {
       setValue(currentValue);
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []);
-
-  useUrlChangeListener(() => {
-    setValue(getParamValue());
-  });
+  }, [getParamValue]);
 
   return value;
 };
