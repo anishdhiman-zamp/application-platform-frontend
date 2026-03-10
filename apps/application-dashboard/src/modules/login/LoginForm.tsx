@@ -376,18 +376,16 @@ export const LoginForm = () => {
 
     if (!el) return;
 
-    const handlePaste = () => {
-      requestAnimationFrame(() => {
-        setEmail(el.value);
-        setError(null);
-        setProviderLogo('');
-        setLogoLoaded(false);
-      });
+    const syncValue = () => {
+      setEmail(el.value);
+      setError(null);
+      setProviderLogo('');
+      setLogoLoaded(false);
     };
 
-    el.addEventListener('paste', handlePaste);
+    el.addEventListener('input', syncValue);
 
-    return () => el.removeEventListener('paste', handlePaste);
+    return () => el.removeEventListener('input', syncValue);
   }, [activeView]);
 
   switch (activeView) {
