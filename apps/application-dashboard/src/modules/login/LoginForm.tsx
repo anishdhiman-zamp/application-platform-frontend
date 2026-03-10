@@ -59,6 +59,7 @@ function normalizeFlowActionOrigin(flow: LoginFlow, apiBaseUrl: string): LoginFl
 
 export const LoginForm = () => {
   const logoPromiseRef = useRef<Promise<void> | null>(null);
+  const emailInputRef = useRef<HTMLInputElement | null>(null);
   const [email, setEmail] = useState('');
   const [logoLoaded, setLogoLoaded] = useState<boolean>(false);
   const [providerLogo, setProviderLogo] = useState<string>('');
@@ -370,6 +371,25 @@ export const LoginForm = () => {
     return () => window.removeEventListener('pageshow', onPageShow);
   }, []);
 
+  useEffect(() => {
+    const el = emailInputRef.current;
+
+    if (!el) return;
+
+    const handlePaste = () => {
+      requestAnimationFrame(() => {
+        setEmail(el.value);
+        setError(null);
+        setProviderLogo('');
+        setLogoLoaded(false);
+      });
+    };
+
+    el.addEventListener('paste', handlePaste);
+
+    return () => el.removeEventListener('paste', handlePaste);
+  }, [activeView]);
+
   switch (activeView) {
     case ACTIVE_VIEW.OTP:
       return (
@@ -382,7 +402,17 @@ export const LoginForm = () => {
       );
 
     case ACTIVE_VIEW.PASSWORD:
-      return <LocaldevEmailPasswordLogin loginFlow={passwordFlow!} setLoginFlow={setPasswordFlow} />;
+      return (
+        <LocaldevEmailPasswordLogin
+          loginFlow={passwordFlow!}
+          setLoginFlow={setPasswordFlow}
+          onBack={() => {
+            setMethodPickerFlow(passwordFlow);
+            setPasswordFlow(null);
+            setError(null);
+          }}
+        />
+      );
 
     case ACTIVE_VIEW.METHOD_PICKER: {
       const btnBase =
@@ -469,6 +499,7 @@ export const LoginForm = () => {
                 type='email'
                 value={email}
                 autoFocus
+                inputRef={emailInputRef}
                 onChange={handleEmailChange}
                 disabled={isLoading}
                 noBorders
