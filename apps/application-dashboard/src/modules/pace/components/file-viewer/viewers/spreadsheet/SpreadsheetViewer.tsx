@@ -1,6 +1,6 @@
 'use client';
 
-import { memo, useCallback, useEffect, useMemo, useState } from 'react';
+import { memo, useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import {
   type ColumnDef,
   type ColumnResizeMode,
@@ -31,6 +31,7 @@ import { parseWorkbook } from '@/modules/pace/components/file-viewer/viewers/spr
 import SpreadsheetViewerLoading from '@/modules/pace/components/file-viewer/viewers/spreadsheet/SpreadsheetViewerLoading';
 
 const SpreadsheetViewer = memo(({ content, mediaUrl, fileExtension, onError }: SpreadsheetViewerProps) => {
+  const hasLoadedOnce = useRef(false);
   const [spreadsheetData, setSpreadsheetData] = useState<SpreadsheetData | null>(null);
   const [activeSheet, setActiveSheet] = useState<string>('');
   const [isLoading, setIsLoading] = useState(true);
@@ -108,7 +109,9 @@ const SpreadsheetViewer = memo(({ content, mediaUrl, fileExtension, onError }: S
 
   const parseData = useCallback(
     async (signal?: AbortSignal) => {
-      setIsLoading(true);
+      if (!hasLoadedOnce.current) {
+        setIsLoading(true);
+      }
       setError(null);
 
       try {
@@ -143,6 +146,7 @@ const SpreadsheetViewer = memo(({ content, mediaUrl, fileExtension, onError }: S
           sheetNames,
         });
         setActiveSheet(firstSheet);
+        hasLoadedOnce.current = true;
       } catch (err) {
         if (err instanceof Error && err.name === 'AbortError') return;
         const message = err instanceof Error ? err.message : 'Unknown error occurred';

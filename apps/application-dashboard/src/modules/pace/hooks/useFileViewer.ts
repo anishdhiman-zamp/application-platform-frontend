@@ -49,6 +49,7 @@ export const useFileViewer = ({
   const pendingSaveRef = useRef(false);
 
   const [mediaMtime, setMediaMtime] = useState<number | null>(null);
+  const mediaMtimeRef = useRef(mediaMtime);
 
   const { getFileState, initFileState, forceUpdateFileState, updateFileContent, markFileSaved } =
     useFileViewerContext();
@@ -186,10 +187,35 @@ export const useFileViewer = ({
     }
   }, [filePath, isEditable, fetchFileMetadata, fetchFileContent, getFileState, initFileState, onLoadError]);
 
+  const fetchInitialMediaMetadata = useCallback(async () => {
+    if (!filePath || isEditable || isFileNotFound) return;
+
+    try {
+      const metadata = await fetchFileMetadata({ path: filePath }).unwrap();
+
+      setMediaMtime(metadata.mtime_ms);
+    } catch (err) {
+      if (isNotFoundError(err)) {
+        setIsFileNotFound(true);
+      } else {
+        onLoadError?.(err);
+      }
+    }
+  }, [filePath, isEditable, isFileNotFound, fetchFileMetadata, onLoadError]);
+
   // Load file on mount
   useEffect(() => {
     loadFile();
   }, [loadFile]);
+
+  // Eagerly fetch metadata for media files so mediaMtime is set before the tab becomes active
+  useEffect(() => {
+    fetchInitialMediaMetadata();
+  }, [fetchInitialMediaMetadata]);
+
+  useEffect(() => {
+    mediaMtimeRef.current = mediaMtime;
+  }, [mediaMtime]);
 
   // Cleanup timer on unmount
   useEffect(() => {
@@ -256,9 +282,7 @@ export const useFileViewer = ({
       try {
         const metadata = await fetchFileMetadata({ path: filePath }).unwrap();
 
-        if (mediaMtime !== null && metadata.mtime_ms !== mediaMtime) {
-          setMediaMtime(metadata.mtime_ms);
-        } else if (mediaMtime === null) {
+        if (metadata.mtime_ms !== mediaMtimeRef.current) {
           setMediaMtime(metadata.mtime_ms);
         }
       } catch (err) {
@@ -271,14 +295,12 @@ export const useFileViewer = ({
       }
     };
 
-    pollForMediaChanges();
-
     const intervalId = setInterval(() => {
       if (!stopped) pollForMediaChanges();
     }, POLL_INTERVAL_MS);
 
     return () => clearInterval(intervalId);
-  }, [filePath, isEditable, isActive, isFileNotFound, mediaMtime, fetchFileMetadata, onLoadError]);
+  }, [filePath, isEditable, isActive, isFileNotFound, fetchFileMetadata, onLoadError]);
 
   return {
     content: fileState?.content ?? null,

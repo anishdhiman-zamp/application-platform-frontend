@@ -2,9 +2,14 @@
 
 import { memo, useCallback, useEffect, useState } from 'react';
 import UnsupportedFileView from 'modules/pace/components/file-viewer/viewers/UnsupportedFileView';
-import dynamic from 'next/dynamic';
 import ImageLoader from '@/components/common/loader/ImageLoader';
 import { ZAMP_LOGO_LOADER_SVG } from '@/constants/icons';
+import {
+  MilkdownEditor,
+  MonacoCodeEditor,
+  PdfViewer,
+  SpreadsheetViewer,
+} from '@/modules/pace/components/file-viewer/file-viewer.dynamic';
 import type {
   HtmlViewMode,
   MarkdownViewMode,
@@ -23,26 +28,6 @@ import {
   TEXT_SPREADSHEET_EXTENSIONS,
 } from '@/modules/pace/components/files/files.constants';
 import { defaultFnType } from '@/types/commonTypes';
-
-const PdfViewer = dynamic(() => import('./viewers/PdfViewer'), {
-  ssr: false,
-  loading: () => <ImageLoader imageSrc={ZAMP_LOGO_LOADER_SVG} width={140} height={140} />,
-});
-
-const MonacoCodeEditor = dynamic(() => import('./viewers/MonacoCodeEditor'), {
-  ssr: false,
-  loading: () => <ImageLoader imageSrc={ZAMP_LOGO_LOADER_SVG} width={140} height={140} />,
-});
-
-const MilkdownEditor = dynamic(() => import('./viewers/MilkdownEditor'), {
-  ssr: false,
-  loading: () => <ImageLoader imageSrc={ZAMP_LOGO_LOADER_SVG} width={140} height={140} />,
-});
-
-const SpreadsheetViewer = dynamic(() => import('./viewers/spreadsheet/SpreadsheetViewer'), {
-  ssr: false,
-  loading: () => <ImageLoader imageSrc={ZAMP_LOGO_LOADER_SVG} width={140} height={140} />,
-});
 
 const CONTENT_BASED_CATEGORIES: ReadonlySet<FileCategory> = new Set([
   FILE_CATEGORY.MARKDOWN,
@@ -130,13 +115,7 @@ const FileViewerContent = memo(
 
       case FILE_CATEGORY.PDF:
         return (
-          <PdfViewer
-            key={effectiveMediaUrl}
-            src={effectiveMediaUrl}
-            fileName={fileName}
-            isActive={isActive}
-            onError={handleMediaError}
-          />
+          <PdfViewer key={effectiveMediaUrl} src={effectiveMediaUrl} fileName={fileName} onError={handleMediaError} />
         );
 
       case FILE_CATEGORY.MARKDOWN:
