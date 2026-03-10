@@ -54,7 +54,7 @@ export const buildTabRoute = (id: string, type?: DynamicTabType): string => {
   const config = getTabTypeConfig(type);
   let path: string;
 
-  if (config?.kind === ROUTE_KIND.QUERY) {
+  if (config.kind === ROUTE_KIND.QUERY) {
     path = `${config.basePath}?${config.paramName}=${encodeURIComponent(id)}`;
   } else {
     path = config.buildPath(id);
@@ -75,7 +75,7 @@ export const isOnSameBasePath = (type?: DynamicTabType): boolean => {
   const config = getTabTypeConfig(type);
   const currentPath = window.location.pathname;
 
-  if (config?.kind === ROUTE_KIND.QUERY) {
+  if (config.kind === ROUTE_KIND.QUERY) {
     return currentPath === config.basePath;
   }
 

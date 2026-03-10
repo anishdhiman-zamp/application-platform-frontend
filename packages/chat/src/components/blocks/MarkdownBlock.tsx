@@ -51,7 +51,10 @@ export const MarkdownBlock: React.FC<MarkdownBlockProps> = ({ payload }) => {
   };
 
   return (
-    <div className='prose prose-sm f-13-450 text-gray-1000 max-w-none wrap-break-word' data-testid='markdown-block'>
+    <div
+      className='prose prose-sm f-13-450 text-gray-1000 max-w-none overflow-hidden wrap-break-word [&_pre]:overflow-x-auto [&_table]:block [&_table]:overflow-x-auto'
+      data-testid='markdown-block'
+    >
       <ReactMarkdown
         remarkPlugins={[remarkGfm]}
         rehypePlugins={[rehypeSlug]}

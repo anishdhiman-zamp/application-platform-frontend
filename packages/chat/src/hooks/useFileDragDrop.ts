@@ -31,6 +31,11 @@ export const useFileDragDrop = ({ onFileDrop, disabled = false }: UseFileDragDro
     [onFileDrop],
   );
 
+  const hasFiles = useCallback((dataTransfer: DataTransfer | null): boolean => {
+    if (!dataTransfer?.types) return false;
+    return Array.from(dataTransfer.types).includes('Files');
+  }, []);
+
   const handleDragEnter = useCallback(
     (e: React.DragEvent) => {
       e.preventDefault();
@@ -39,12 +44,11 @@ export const useFileDragDrop = ({ onFileDrop, disabled = false }: UseFileDragDro
       if (disabled) return;
 
       dragCounterRef.current += 1;
-      // Use types instead of items for Safari compatibility
-      if (e.dataTransfer?.types && e.dataTransfer.types.length > 0) {
+      if (hasFiles(e.dataTransfer)) {
         setIsDragOver(true);
       }
     },
-    [disabled],
+    [disabled, hasFiles],
   );
 
   const handleDragLeave = useCallback((e: React.DragEvent) => {
@@ -70,12 +74,12 @@ export const useFileDragDrop = ({ onFileDrop, disabled = false }: UseFileDragDro
       setIsDragOver(false);
       dragCounterRef.current = 0;
 
-      if (disabled) return;
+      if (disabled || !hasFiles(e.dataTransfer)) return;
 
       const files = e.dataTransfer?.files;
       processFiles(files);
     },
-    [disabled, processFiles],
+    [disabled, hasFiles, processFiles],
   );
 
   // Reset drag counter when disabled changes
