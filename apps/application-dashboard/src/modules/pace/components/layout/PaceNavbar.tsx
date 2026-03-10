@@ -12,9 +12,8 @@ import {
   useSensors,
 } from '@dnd-kit/core';
 import { arrayMove, horizontalListSortingStrategy, SortableContext } from '@dnd-kit/sortable';
-import { Button, MessageSquareIcon, Popover, PopoverContent, PopoverTrigger } from '@zamp-platform/ui';
+import { Button, MessageSquareIcon } from '@zamp-platform/ui';
 import { cn } from '@zamp-platform/ui/utils';
-import { getDefaultIcon } from 'modules/pace/components/dynamic-tabs/dynamic-tabs.utils';
 import { DynamicTab, PaceNavbarItemId, TAB_TYPE } from 'modules/pace/pace.types';
 import Link from 'next/link';
 import { usePathname, useSearchParams } from 'next/navigation';
@@ -25,6 +24,7 @@ import {
   OVERFLOW_BUTTON_WIDTH_PX,
 } from '@/modules/pace/components/dynamic-tabs/dynamic-tabs.constants';
 import DynamicTabItem from '@/modules/pace/components/dynamic-tabs/DynamicTabItem';
+import OverflowTabsPopover from '@/modules/pace/components/dynamic-tabs/OverflowTabsPopover';
 import SortableDynamicTabItem from '@/modules/pace/components/dynamic-tabs/SortableDynamicTabItem';
 import { isOnSameBasePath, preserveSidebarParam } from '@/modules/pace/components/dynamic-tabs/tab-registry';
 import { useNavbarTabs } from '@/modules/pace/components/dynamic-tabs/useNavbarTabs';
@@ -53,12 +53,10 @@ const PaceNavbar = () => {
   const sensors = useSensors(useSensor(PointerSensor, { activationConstraint: { distance: 5 } }));
 
   const [activeId, setActiveId] = useState<string | null>(null);
-  const [isOverflowOpen, setIsOverflowOpen] = useState(false);
 
   const hasOverflow = tabs.length > maxVisibleTabs;
   const visibleTabs = hasOverflow ? tabs.slice(0, maxVisibleTabs) : tabs;
   const overflowTabs = hasOverflow ? tabs.slice(maxVisibleTabs) : [];
-  const overflowCount = overflowTabs.length;
 
   const tabStableKeys = useMemo(() => visibleTabs.map((tab) => tab.stableKey), [visibleTabs]);
 
@@ -84,8 +82,11 @@ const PaceNavbar = () => {
     setActiveId(null);
 
     if (active.id !== over?.id) {
-      const oldIndex = tabStableKeys.indexOf(active.id as string);
-      const newIndex = tabStableKeys.indexOf((over?.id as string) ?? '');
+      const activeKey = active.id as string;
+      const overKey = (over?.id as string) ?? '';
+
+      const oldIndex = tabs.findIndex((tab) => tab.stableKey === activeKey);
+      const newIndex = tabs.findIndex((tab) => tab.stableKey === overKey);
 
       if (oldIndex !== -1 && newIndex !== -1) {
         const newOrder = arrayMove(tabs, oldIndex, newIndex).map((tab) => tab.id);
@@ -121,8 +122,6 @@ const PaceNavbar = () => {
       if (canUseFastSwitch) {
         window.history.pushState({ tabId: selectedTab.id, tabType }, '', tabPath);
       }
-
-      setIsOverflowOpen(false);
     },
     [tabs, visibleTabs, reorderTabs, setActiveTabId],
   );
@@ -223,33 +222,11 @@ const PaceNavbar = () => {
               ))}
             </SortableContext>
             {hasOverflow && (
-              <Popover open={isOverflowOpen} onOpenChange={setIsOverflowOpen}>
-                <PopoverTrigger asChild>
-                  <Button
-                    variant='ghost'
-                    className='text-GRAY_700 hover:text-GRAY_1000 hover:bg-GRAY_200 f-12-500 h-[30px] shrink-0 rounded-[8px] px-2'
-                  >
-                    +{overflowCount}
-                  </Button>
-                </PopoverTrigger>
-                <PopoverContent
-                  align='end'
-                  sideOffset={6}
-                  className='max-h-[300px] w-[220px] overflow-y-auto p-1 [scrollbar-width:thin]'
-                >
-                  {overflowTabs.map((tab) => (
-                    <Button
-                      key={tab.id}
-                      variant='ghost'
-                      onClick={() => handleOverflowTabSelect(tab)}
-                      className='hover:bg-GRAY_100 flex h-auto w-full items-center justify-start gap-x-2 rounded-md px-2 py-1.5'
-                    >
-                      <span className='shrink-0'>{getDefaultIcon(tab)}</span>
-                      <span className='f-12-500 text-GRAY_900 min-w-0 truncate'>{tab.name}</span>
-                    </Button>
-                  ))}
-                </PopoverContent>
-              </Popover>
+              <OverflowTabsPopover
+                overflowTabs={overflowTabs}
+                onTabSelect={handleOverflowTabSelect}
+                onTabClose={closeTab}
+              />
             )}
           </div>
           <DragOverlay>
