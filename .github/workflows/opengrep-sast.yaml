@@ -56,8 +56,23 @@ jobs:
         echo "✅ Security rules downloaded"
 
     - name: Run Security Scan
+      env:
+        EVENT_NAME: ${{ github.event_name }}
+        PR_BASE_SHA: ${{ github.event.pull_request.base.sha }}
+        PUSH_BEFORE_SHA: ${{ github.event.before }}
       run: |
         echo "🔍 Running security scan..."
+
+        BASELINE_ARGS=""
+        if [ "$EVENT_NAME" = "pull_request" ] && [ -n "$PR_BASE_SHA" ]; then
+          echo "📋 PR scan — only flagging findings introduced in this PR"
+          BASELINE_ARGS="--baseline-commit $PR_BASE_SHA"
+        elif [ "$EVENT_NAME" = "push" ] && [ -n "$PUSH_BEFORE_SHA" ] && [ "$PUSH_BEFORE_SHA" != "0000000000000000000000000000000000000000" ]; then
+          echo "📋 Push scan — only flagging findings introduced in this push"
+          BASELINE_ARGS="--baseline-commit $PUSH_BEFORE_SHA"
+        else
+          echo "📋 Full scan — checking all findings"
+        fi
 
         ./opengrep ci \
           --exclude '.github' \
@@ -66,6 +81,7 @@ jobs:
           --config rules/dockerfile \
           --config rules/yaml \
           --config rules/generic \
+          $BASELINE_ARGS \
           --json --json-output scan_results.json \
           --verbose || true
 
