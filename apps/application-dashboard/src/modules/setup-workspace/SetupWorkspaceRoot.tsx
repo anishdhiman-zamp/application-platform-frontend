@@ -17,10 +17,6 @@ import { MEDIA_TYPE, PROVISIONING_STATUS } from '@/modules/setup-workspace/setup
 import { setUser } from '@/store/slices/user';
 import { clearCookie, USER_SESSION_COOKIE } from '@/utils/cookie';
 
-const funnelDisplayFont = `
-@import url('https://fonts.googleapis.com/css2?family=Funnel+Display:wght@300;400;500;600;700&display=swap');
-`;
-
 const MAX_REGISTER_RETRIES = 3;
 const REGISTER_RETRY_DELAY = 5000;
 const POLLING_INTERVAL = 5000;
@@ -251,7 +247,6 @@ export const SetupWorkspaceRoot = () => {
 
   return (
     <div className='bg-GRAY_100 relative flex h-screen w-screen items-center justify-center overflow-hidden'>
-      <style>{funnelDisplayFont}</style>
       <ProfessionRevealBackground containerRef={containerRef} />
 
       <div ref={containerRef} className='relative z-2 w-full max-w-[520px] px-6 py-10'>

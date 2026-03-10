@@ -10,6 +10,7 @@ import {
   USER_SESSION_COOKIE,
 } from 'utils/cookie';
 import { DOMAINS } from '@/constants/domains';
+import { OnboardingStatus } from '@/modules/onboarding/onboarding.types';
 import {
   buildSessionCache,
   clearServerSideCookie,
@@ -71,7 +72,30 @@ const handleAuthenticatedRoutes = async (request: NextRequest) => {
     pathname !== ROUTES_PATH.ONBOARDING &&
     pathname !== ROUTES_PATH.INVITATIONS
   ) {
-    const { session, cached } = await getUserSession(request);
+    const userSession = await getUserSession(request);
+    const { cached } = userSession;
+    let { session } = userSession;
+
+    // User hasn't completed onboarding → send to onboarding flow
+    // If using cached session, re-fetch fresh to avoid stale redirect after onboarding completes
+    if (session?.onboarding_status && session.onboarding_status !== OnboardingStatus.ONBOARDED) {
+      if (cached) {
+        ({ session } = await getUserSession(request, false));
+      }
+
+      if (session?.onboarding_status && session.onboarding_status !== OnboardingStatus.ONBOARDED) {
+        const response = NextResponse.redirect(new URL(ROUTES_PATH.ONBOARDING, request.url));
+
+        setServerSideUserCookie(
+          response,
+          USER_SESSION_COOKIE,
+          JSON.stringify(buildSessionCache(session)),
+          SESSION_CACHE_MAX_AGE,
+        );
+
+        return response;
+      }
+    }
 
     // No orgs or primary org not yet provisioned → send to setup-workspace
     if (needsWorkspaceSetup(session, pathname)) {
@@ -87,11 +111,6 @@ const handleAuthenticatedRoutes = async (request: NextRequest) => {
       }
 
       return response;
-    }
-
-    // If user is in onboarding flow, redirect to onboarding page
-    if (session?.onboarding_status && session.onboarding_status !== 'onboarded') {
-      return NextResponse.redirect(new URL(ROUTES_PATH.ONBOARDING, request.url));
     }
 
     const prevRoute = getServerSideCookie(request, PREV_ROUTE_COOKIE);

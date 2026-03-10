@@ -21,7 +21,7 @@ export const enum MediaType {
 }
 
 export const enum UploadType {
-  AVATAR = 'avatar',
+  AVATAR = 'user_avatar',
   ORG_ICON = 'org_icon',
 }
 
@@ -39,6 +39,7 @@ export type UpdateProfileRequest = {
 
 export type SetupOrgRequest = {
   organization_name: string;
+  organization_description?: string | null;
   icon_type?: MediaType | null;
   icon_value?: string | null;
 };
@@ -48,12 +49,10 @@ export type EnsureProvisioningRequest = {
 };
 
 export type OnboardingResponse = {
-  message: string;
   onboarding_status: OnboardingStatus;
 };
 
 export type SetupOrgResponse = {
-  message: string;
   onboarding_status: OnboardingStatus;
   organization_id: string;
 };
@@ -64,12 +63,18 @@ export type ApprovalCheckResponse = {
   reason: string | null;
 };
 
+export type ProvisioningStatusDetail = {
+  provisioning_status: ProvisioningStatus;
+  started_at: string | null;
+  expected_completion_seconds: number | null;
+  is_completed: boolean;
+};
+
 export type EnsureProvisioningResponse = {
   onboarding_status: OnboardingStatus;
-  provisioning_status: ProvisioningStatus;
   organization_id: string;
-  provisioning_started_at: string | null;
-  expected_completion_seconds: number | null;
+  started_new: boolean;
+  status: ProvisioningStatusDetail;
 };
 
 export type UploadUrlRequest = {
@@ -116,4 +121,10 @@ export type AvatarState = {
   type: MediaType;
   value: string;
   previewUrl?: string;
+};
+
+export type OnboardingStepCallbacks = {
+  onComplete: (status: OnboardingStatus, organizationId?: string) => void;
+  onWrongStep: () => void;
+  onFlagDisabled: () => void;
 };

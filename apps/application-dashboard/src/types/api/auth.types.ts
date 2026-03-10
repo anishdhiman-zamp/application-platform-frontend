@@ -87,6 +87,7 @@ export type Organization = {
   organization_id: string;
   name: string;
   slug: string;
+  product?: 'macs' | 'classic';
   provisioning_status?: string;
   resource_audience_policies: {
     privilege: string;
@@ -111,7 +112,7 @@ export type Session = {
   last_name: string;
   username: string;
   orgs: Organization[];
-  onboarding_status: OnboardingStatus | null;
+  onboarding_status: OnboardingStatus;
   avatar_type: 'seed' | 'url' | null;
   avatar_value: string | null;
 };

@@ -112,31 +112,44 @@ export const WelcomeStep = ({ nextStatus, onComplete }: Props) => {
 
   const lastAdvanceRef = useRef(0);
 
+  const advance = useCallback(() => {
+    if (Date.now() - lastAdvanceRef.current < 1500) return;
+    if (phaseRef.current !== 'revealing') return;
+
+    const next = currentIdxRef.current + 1;
+
+    if (next < STORY_LINES.length) {
+      lastAdvanceRef.current = Date.now();
+      showSection(next);
+    } else {
+      phaseRef.current = 'done';
+      setPhase('done');
+      handleDone();
+    }
+  }, [showSection, handleDone]);
+
   useEffect(() => {
     const handleWheel = (e: WheelEvent) => {
       e.preventDefault();
       if (e.deltaY <= 0) return;
+      advance();
+    };
 
-      if (Date.now() - lastAdvanceRef.current < 1500) return;
-
-      if (phaseRef.current === 'revealing') {
-        const next = currentIdxRef.current + 1;
-
-        if (next < STORY_LINES.length) {
-          lastAdvanceRef.current = Date.now();
-          showSection(next);
-        } else {
-          phaseRef.current = 'done';
-          setPhase('done');
-          handleDone();
-        }
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if (['ArrowDown', 'ArrowRight', ' ', 'Enter'].includes(e.key)) {
+        e.preventDefault();
+        advance();
       }
     };
 
     window.addEventListener('wheel', handleWheel, { passive: false });
+    window.addEventListener('keydown', handleKeyDown);
 
-    return () => window.removeEventListener('wheel', handleWheel);
-  }, [showSection, handleDone]);
+    return () => {
+      window.removeEventListener('wheel', handleWheel);
+      window.removeEventListener('keydown', handleKeyDown);
+    };
+  }, [advance]);
 
   const getImgState = (imgIdx: number) => {
     const t = IMG_TRIGGERS[imgIdx];
@@ -149,7 +162,7 @@ export const WelcomeStep = ({ nextStatus, onComplete }: Props) => {
   };
 
   return (
-    <div className='fixed inset-0 z-[150] flex items-center justify-center overflow-hidden bg-[#f3f3f3]'>
+    <div className='bg-GRAY_100 fixed inset-0 z-[150] flex items-center justify-center overflow-hidden'>
       {/* Floating image panels */}
       {FLOAT_POSITIONS.map((pos, i) => {
         const state = getImgState(i);
@@ -199,9 +212,9 @@ export const WelcomeStep = ({ nextStatus, onComplete }: Props) => {
           >
             <div
               style={{
-                fontFamily: "'FunnelDisplay', serif",
+                fontFamily: 'var(--font-funnel-display), serif',
                 fontSize: idx === STORY_LINES.length - 1 ? 52 : 44,
-                color: '#1a1a1a',
+                color: 'var(--GRAY_1000)',
                 lineHeight: 1.45,
                 fontWeight: 300,
               }}
@@ -231,7 +244,7 @@ export const WelcomeStep = ({ nextStatus, onComplete }: Props) => {
       {currentIdx >= 0 && phase !== 'done' && (
         <div
           className='absolute bottom-10 text-xs'
-          style={{ color: '#bbb', fontFamily: 'Inter, sans-serif', letterSpacing: '0.05em' }}
+          style={{ color: 'var(--GRAY_600)', fontFamily: 'Inter, sans-serif', letterSpacing: '0.05em' }}
         >
           scroll to continue
         </div>

@@ -15,10 +15,7 @@ export const ProvisioningScreen = ({ takingLonger, userName }: ProvisioningScree
         className='mb-10 h-[63px] w-[63px] [&>svg]:h-full [&>svg]:w-full'
         dangerouslySetInnerHTML={{ __html: avatarSvg }}
       />
-      <h2
-        className='text-GRAY_1000 mb-3 text-4xl leading-tight font-light whitespace-nowrap'
-        style={{ fontFamily: "'Funnel Display', serif" }}
-      >
+      <h2 className='text-GRAY_1000 mb-3 font-[family-name:var(--font-funnel-display)] text-4xl leading-tight font-light whitespace-nowrap'>
         {takingLonger ? 'Taking a bit longer than usual\u2026' : 'Getting things ready\u2026'}
       </h2>
       <p className='text-GRAY_700 text-sm leading-relaxed'>

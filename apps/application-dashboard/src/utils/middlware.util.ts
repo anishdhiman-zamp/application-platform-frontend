@@ -14,6 +14,7 @@ type SessionCache = {
   cached_at: number;
   username: string;
   provisioning_status?: string;
+  onboarding_status?: string;
 };
 
 export function buildSessionCache(session: Session) {
@@ -25,6 +26,7 @@ export function buildSessionCache(session: Session) {
     cached_at: Date.now(),
     username: session.username,
     provisioning_status: session.orgs?.[0]?.provisioning_status,
+    onboarding_status: session.onboarding_status,
   };
 }
 
@@ -90,7 +92,6 @@ export async function getUserSession(
         organization_id: '',
         name: '',
         slug: '',
-        provisioning_status: 'completed',
         resource_audience_policies: [],
         ...(cachedSessionData.provisioning_status && { provisioning_status: cachedSessionData.provisioning_status }),
       }));
@@ -102,10 +103,10 @@ export async function getUserSession(
         workspaces: [],
         organization_id: { workspace_id: '', name: '', description: '' },
         user_name: cachedSessionData.user_name ?? '',
-        display_name: cachedSessionData.user_name ?? '',
+        display_name: '',
         last_name: cachedSessionData.last_name ?? '',
         username: cachedSessionData.username ?? '',
-        onboarding_status: null,
+        onboarding_status: cachedSessionData.onboarding_status as Session['onboarding_status'],
         avatar_type: null,
         avatar_value: null,
       };
@@ -155,7 +156,7 @@ export function checkOrgMembership(session: Session | null, pathname: string): b
 
   if (!orgs || !Array.isArray(orgs)) return false;
 
-  return orgs.length === 0 && !pathname.includes(ROUTES_PATH.INVITATIONS) && !pathname.includes(ROUTES_PATH.ONBOARDING);
+  return orgs.length === 0 && !pathname.includes(ROUTES_PATH.INVITATIONS);
 }
 
 /**

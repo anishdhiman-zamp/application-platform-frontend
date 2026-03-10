@@ -1,20 +1,24 @@
 'use client';
 
 import { useCallback, useEffect, useRef, useState } from 'react';
-import { ProvisioningScreen } from 'modules/onboarding/components/ProvisioningScreen';
-import { OnboardingStatus, ProvisioningStatus } from 'modules/onboarding/onboarding.types';
+import { OnboardingStatus } from 'modules/onboarding/onboarding.types';
+import { ProvisioningScreen } from 'modules/setup-workspace/components/ProvisioningScreen';
 import { useEnsureProvisioningMutation } from '@/apis/onboarding';
+import ImageLoader from '@/components/common/loader/ImageLoader';
+import { ZAMP_LOGO_LOADER_SVG } from '@/constants/icons';
 
 type Props = {
   organizationId: string;
+  userName: string;
   onComplete: (status: OnboardingStatus) => void;
 };
 
-export const SetupWorkspaceStep = ({ organizationId, onComplete }: Props) => {
+export const SetupWorkspaceStep = ({ organizationId, userName, onComplete }: Props) => {
   const [ensureProvisioning] = useEnsureProvisioningMutation();
   const [takingLonger, setTakingLonger] = useState(false);
   const [ready, setReady] = useState(false);
   const completedRef = useRef(false);
+  const readyRef = useRef(false);
 
   const handleOnboarded = useCallback(() => {
     if (completedRef.current) return;
@@ -27,24 +31,30 @@ export const SetupWorkspaceStep = ({ organizationId, onComplete }: Props) => {
     try {
       const result = await ensureProvisioning({ organization_id: organizationId }).unwrap();
 
-      if (result.provisioning_started_at && result.expected_completion_seconds) {
-        const elapsed = (Date.now() - new Date(result.provisioning_started_at).getTime()) / 1000;
+      if (result.status.started_at && result.status.expected_completion_seconds) {
+        const elapsed = (Date.now() - new Date(result.status.started_at).getTime()) / 1000;
 
-        if (elapsed > result.expected_completion_seconds) {
+        if (elapsed > result.status.expected_completion_seconds) {
           setTakingLonger(true);
         }
       }
 
-      if (!ready) setReady(true);
+      if (!readyRef.current) {
+        readyRef.current = true;
+        setReady(true);
+      }
 
-      if (result.onboarding_status === 'onboarded' || result.provisioning_status === ProvisioningStatus.COMPLETED) {
+      if (result.onboarding_status === OnboardingStatus.ONBOARDED || result.status.is_completed) {
         handleOnboarded();
       }
     } catch {
       // Ignore errors and continue polling — backend self-heals failed workflows
-      if (!ready) setReady(true);
+      if (!readyRef.current) {
+        readyRef.current = true;
+        setReady(true);
+      }
     }
-  }, [ensureProvisioning, organizationId, handleOnboarded, ready]);
+  }, [ensureProvisioning, organizationId, handleOnboarded]);
 
   useEffect(() => {
     checkStatus();
@@ -61,7 +71,7 @@ export const SetupWorkspaceStep = ({ organizationId, onComplete }: Props) => {
     return () => clearInterval(poll);
   }, [checkStatus]);
 
-  if (!ready) return null;
+  if (!ready) return <ImageLoader imageSrc={ZAMP_LOGO_LOADER_SVG} width={140} height={140} />;
 
-  return <ProvisioningScreen takingLonger={takingLonger} />;
+  return <ProvisioningScreen takingLonger={takingLonger} userName={userName} />;
 };

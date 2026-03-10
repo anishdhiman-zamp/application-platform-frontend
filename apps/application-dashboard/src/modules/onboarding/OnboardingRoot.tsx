@@ -2,7 +2,7 @@
 
 import { useCallback, useEffect, useRef, useState } from 'react';
 import { ProfessionRevealBackground } from 'modules/login/ProfessionRevealBackground';
-import { OnboardingStatus } from 'modules/onboarding/onboarding.types';
+import { OnboardingStatus, OnboardingStepCallbacks } from 'modules/onboarding/onboarding.types';
 import { PendingApprovalStep } from 'modules/onboarding/steps/PendingApprovalStep';
 import { SetupProfileStep } from 'modules/onboarding/steps/SetupProfileStep';
 import { SetupUsernameStep } from 'modules/onboarding/steps/SetupUsernameStep';
@@ -12,15 +12,11 @@ import { WELCOME_SEEN_KEY, WelcomeStep } from 'modules/onboarding/steps/WelcomeS
 import { useRouter } from 'next/navigation';
 import { useWhoAmIQuery } from '@/apis/auth';
 import { useEnsureProvisioningMutation, useSkipOnboardingMutation } from '@/apis/onboarding';
+import ImageLoader from '@/components/common/loader/ImageLoader';
 import { FEATURE_FLAGS } from '@/constants/featureFlags';
+import { ZAMP_LOGO_LOADER_SVG } from '@/constants/icons';
 import { ROUTES_PATH } from '@/constants/routeConfig';
 import { useFeatureFlag } from '@/hooks/useFeatureFlag';
-import { useIsPaceChatEnabled } from '@/hooks/useIsPaceChatEnabled';
-
-// FunnelDisplay font via Google Fonts (inline style to avoid modifying global layout)
-const funnelDisplayFont = `
-@import url('https://fonts.googleapis.com/css2?family=Funnel+Display:wght@300;400;500;600;700&display=swap');
-`;
 
 const isWelcomeSeen = () => {
   try {
@@ -40,8 +36,7 @@ export const OnboardingRoot = () => {
   const { isEnabled: isOnboardingEnabled, isLoading: isFlagLoading } = useFeatureFlag(
     FEATURE_FLAGS.ENABLE_ONBOARDING_FLOW,
   );
-  const { isPaceChatEnabled } = useIsPaceChatEnabled();
-  const landingRoute = isPaceChatEnabled ? ROUTES_PATH.CHAT : ROUTES_PATH.PROCESSES;
+  const landingRoute = session?.orgs?.[0]?.product === 'macs' ? ROUTES_PATH.CHAT : ROUTES_PATH.PROCESSES;
   const [skipOnboarding] = useSkipOnboardingMutation();
   const [ensureProvisioning] = useEnsureProvisioningMutation();
   const skipCalledRef = useRef(false);
@@ -52,15 +47,11 @@ export const OnboardingRoot = () => {
     skipCalledRef.current = true;
 
     const doSkip = async () => {
-      console.log('[Onboarding] Flag is OFF, calling POST /onboarding/skip');
       try {
-        const result = await skipOnboarding().unwrap();
-
-        console.log('[Onboarding] Skip succeeded:', result);
-      } catch (err) {
-        console.error('[Onboarding] Skip failed:', err);
+        await skipOnboarding().unwrap();
+      } catch {
+        // Best-effort skip
       }
-      console.log('[Onboarding] Redirecting to', landingRoute);
       router.replace(landingRoute);
     };
 
@@ -70,13 +61,7 @@ export const OnboardingRoot = () => {
   useEffect(() => {
     if (!session || isFlagLoading || !isOnboardingEnabled) return;
 
-    const status = session.onboarding_status as OnboardingStatus | null;
-
-    if (!status) {
-      router.replace(landingRoute);
-
-      return;
-    }
+    const status = session.onboarding_status;
 
     if (status === OnboardingStatus.ONBOARDED) {
       if (isWelcomeSeen()) {
@@ -146,12 +131,7 @@ export const OnboardingRoot = () => {
   }, [skipOnboarding, router, landingRoute]);
 
   if (isLoading || isFlagLoading || !currentStatus) {
-    return (
-      <div className='flex h-screen w-screen items-center justify-center bg-white'>
-        <style>{funnelDisplayFont}</style>
-        <div className='h-6 w-6 animate-spin rounded-full border-2 border-black/10 border-t-black' />
-      </div>
-    );
+    return <ImageLoader imageSrc={ZAMP_LOGO_LOADER_SVG} width={140} height={140} />;
   }
 
   // Show welcome animation for setup_workspace/onboarded if the user hasn't seen it yet
@@ -160,12 +140,7 @@ export const OnboardingRoot = () => {
     !welcomeSeen;
 
   if (showWelcomeAnimation) {
-    return (
-      <>
-        <style>{funnelDisplayFont}</style>
-        <WelcomeStep nextStatus={currentStatus} onComplete={handleStepComplete} />
-      </>
-    );
+    return <WelcomeStep nextStatus={currentStatus} onComplete={handleStepComplete} />;
   }
 
   if (currentStatus === OnboardingStatus.PENDING_APPROVAL) {
@@ -181,7 +156,6 @@ export const OnboardingRoot = () => {
 
   return (
     <div className='bg-GRAY_100 relative flex h-screen w-screen items-center justify-center overflow-hidden'>
-      <style>{funnelDisplayFont}</style>
       <ProfessionRevealBackground containerRef={containerRef} />
 
       <div ref={containerRef} className='relative z-2 w-full max-w-[520px] px-6 py-10'>
@@ -198,13 +172,10 @@ export const OnboardingRoot = () => {
   );
 };
 
-type StepContentProps = {
+type StepContentProps = OnboardingStepCallbacks & {
   status: OnboardingStatus;
   session: NonNullable<ReturnType<typeof useWhoAmIQuery>['data']>;
-  onComplete: (next: OnboardingStatus, organizationId?: string) => void;
   orgIdFromSetup: string | null;
-  onWrongStep: () => void;
-  onFlagDisabled: () => void;
 };
 
 const StepContent = ({
@@ -244,7 +215,13 @@ const StepContent = ({
 
       if (!resolvedOrgId) return null; // wait for refetch to populate org ID
 
-      return <SetupWorkspaceStep organizationId={resolvedOrgId} onComplete={onComplete} />;
+      return (
+        <SetupWorkspaceStep
+          organizationId={resolvedOrgId}
+          userName={session.username || session.user_email}
+          onComplete={onComplete}
+        />
+      );
     }
 
     default:
