@@ -68,7 +68,8 @@ const handleAuthenticatedRoutes = async (request: NextRequest) => {
     pathname !== ROUTES_PATH.MEMBERSHIP_PENDING &&
     pathname !== ROUTES_PATH.SETUP_WORKSPACE &&
     pathname !== ROUTES_PATH.LOGIN &&
-    pathname !== ROUTES_PATH.ONBOARDING
+    pathname !== ROUTES_PATH.ONBOARDING &&
+    pathname !== ROUTES_PATH.INVITATIONS
   ) {
     const { session, cached } = await getUserSession(request);
 
@@ -93,10 +94,7 @@ const handleAuthenticatedRoutes = async (request: NextRequest) => {
       return NextResponse.redirect(new URL(ROUTES_PATH.ONBOARDING, request.url));
     }
 
-    // Redirect to /setup-workspace if user has no orgs OR primary org is not yet provisioned
-    const hasNoOrgs = checkOrgMembership(session, pathname);
-    const primaryOrgUnprovisioned =
-      !hasNoOrgs && session?.orgs?.[0]?.provisioning_status && session.orgs[0].provisioning_status !== 'completed';
+    const prevRoute = getServerSideCookie(request, PREV_ROUTE_COOKIE);
 
     if (prevRoute) {
       const response = NextResponse.redirect(new URL(prevRoute, request.url));
