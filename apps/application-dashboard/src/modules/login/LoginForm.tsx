@@ -399,18 +399,25 @@ export const LoginForm = () => {
         />
       );
 
-    case ACTIVE_VIEW.PASSWORD:
+    case ACTIVE_VIEW.PASSWORD: {
+      const hasOtpOption = flowHasCodeNodes(passwordFlow!);
+
       return (
         <LocaldevEmailPasswordLogin
           loginFlow={passwordFlow!}
           setLoginFlow={setPasswordFlow}
-          onBack={() => {
-            setMethodPickerFlow(passwordFlow);
-            setPasswordFlow(null);
-            setError(null);
-          }}
+          onBack={
+            hasOtpOption
+              ? () => {
+                  setMethodPickerFlow(passwordFlow);
+                  setPasswordFlow(null);
+                  setError(null);
+                }
+              : undefined
+          }
         />
       );
+    }
 
     case ACTIVE_VIEW.METHOD_PICKER: {
       const btnBase =

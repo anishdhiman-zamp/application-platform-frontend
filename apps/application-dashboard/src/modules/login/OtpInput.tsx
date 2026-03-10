@@ -52,7 +52,6 @@ export const OtpInput = forwardRef<OtpInputHandle, Props>(
           onChange={handleChange}
           onComplete={handleComplete}
           disabled={isBusy}
-          containerClassName='gap-2.5'
         >
           <InputOTPGroup className='gap-2.5'>
             {Array.from({ length: OTP_LENGTH }).map((_, index) => (
