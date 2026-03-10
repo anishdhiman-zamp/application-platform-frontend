@@ -16,7 +16,7 @@ import { Button, MessageSquareIcon } from '@zamp-platform/ui';
 import { cn } from '@zamp-platform/ui/utils';
 import { DynamicTab, PaceNavbarItemId, TAB_TYPE } from 'modules/pace/pace.types';
 import Link from 'next/link';
-import { usePathname, useSearchParams } from 'next/navigation';
+import { usePathname, useRouter, useSearchParams } from 'next/navigation';
 import { ROUTES_PATH } from '@/constants/routeConfig';
 import { useIsMacsFileSystemEnabled } from '@/hooks/useIsMacsFileSystemEnabled';
 import {
@@ -34,6 +34,7 @@ import { usePaceContext } from '@/modules/pace/pace.context';
 
 const PaceNavbar = () => {
   const pathname = usePathname();
+  const router = useRouter();
   const searchParams = useSearchParams();
   const { isPaceSidebarOpen, setIsPaceSidebarOpen, startNewChat, setActiveTabId } = usePaceContext();
   const {
@@ -121,9 +122,11 @@ const PaceNavbar = () => {
 
       if (canUseFastSwitch) {
         window.history.pushState({ tabId: selectedTab.id, tabType }, '', tabPath);
+      } else {
+        router.push(tabPath);
       }
     },
-    [tabs, visibleTabs, reorderTabs, setActiveTabId],
+    [tabs, visibleTabs, reorderTabs, setActiveTabId, router],
   );
 
   const isNavItemActive = (id: PaceNavbarItemId, path: string) => {
