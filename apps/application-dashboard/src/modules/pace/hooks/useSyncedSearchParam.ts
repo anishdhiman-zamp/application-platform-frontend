@@ -80,6 +80,15 @@ export const useSyncedSearchParams = (): URLSearchParams | null => {
 
   const [searchParams, setSearchParams] = useState<URLSearchParams | null>(getSearchParams);
 
+  useEffect(() => {
+    const current = getSearchParams();
+
+    if (current?.toString() !== searchParams?.toString()) {
+      setSearchParams(current);
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
+
   useUrlChangeListener(() => {
     setSearchParams(getSearchParams());
   });
@@ -104,6 +113,15 @@ export const useSyncedUrlParam = (paramName: string): string | null => {
   }, [paramName]);
 
   const [value, setValue] = useState<string | null>(getParamValue);
+
+  useEffect(() => {
+    const currentValue = getParamValue();
+
+    if (currentValue !== value) {
+      setValue(currentValue);
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
 
   useUrlChangeListener(() => {
     setValue(getParamValue());
