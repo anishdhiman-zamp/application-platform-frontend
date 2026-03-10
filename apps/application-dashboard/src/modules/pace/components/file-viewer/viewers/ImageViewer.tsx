@@ -7,21 +7,17 @@ import { isImageCached } from 'modules/pace/components/files/file-tree.utils';
 import Image from 'next/image';
 import ImageLoader from '@/components/common/loader/ImageLoader';
 import { ZAMP_LOGO_LOADER_SVG } from '@/constants/icons';
-import FileNotFoundError from '@/modules/pace/components/file-viewer/FileNotFoundError';
 
 interface ImageViewerProps {
   src: string;
   alt?: string;
   className?: string;
-  fileName?: string;
-  onClose?: () => void;
+  onError?: (message?: string) => void;
 }
 
-const ImageViewer = ({ src, alt = 'Image preview', className = '', fileName, onClose }: ImageViewerProps) => {
+const ImageViewer = ({ src, alt = 'Image preview', className = '', onError }: ImageViewerProps) => {
   const [isLoading, setIsLoading] = useState(() => !isImageCached(src));
   const [isError, setIsError] = useState(false);
-
-  const displayFileName = fileName || decodeURIComponent(src.split('/').pop() || 'image');
 
   const handleImageError = useCallback(
     (e: React.SyntheticEvent<HTMLImageElement>) => {
@@ -30,18 +26,15 @@ const ImageViewer = ({ src, alt = 'Image preview', className = '', fileName, onC
       captureException(e, {
         extra: { src },
       });
+      onError?.('The image could not be displayed');
     },
-    [src],
+    [src, onError],
   );
 
   const handleImageLoad = useCallback(() => {
     setIsLoading(false);
     setIsError(false);
   }, []);
-
-  if (isError && onClose) {
-    return <FileNotFoundError fileName={displayFileName} onClose={onClose} />;
-  }
 
   return (
     <div className={cn('relative flex h-full w-full flex-col', className)}>
@@ -52,17 +45,8 @@ const ImageViewer = ({ src, alt = 'Image preview', className = '', fileName, onC
             isLoading ? 'opacity-100' : 'pointer-events-none opacity-0',
           )}
         >
-          <ImageLoader imageSrc={ZAMP_LOGO_LOADER_SVG} width={140} height={140} className='bg-BG_GRAY_1' />
+          <ImageLoader imageSrc={ZAMP_LOGO_LOADER_SVG} width={140} height={140} />
         </div>
-
-        {isError && !onClose && (
-          <div className='flex h-full w-full items-center justify-center'>
-            <div className='text-center'>
-              <p className='f-14-500 text-GRAY_700'>Failed to load image</p>
-              <p className='f-12-400 text-GRAY_500 mt-1'>The image could not be displayed</p>
-            </div>
-          </div>
-        )}
 
         {!isError && (
           <div

@@ -7,7 +7,6 @@ import { LoaderCircle } from 'lucide-react';
 import Image from 'next/image';
 import { PAUSED_OVERLAY } from '@/constants/icons';
 import { KEYBOARD_KEYS } from '@/constants/shortcuts';
-import FileNotFoundError from '@/modules/pace/components/file-viewer/FileNotFoundError';
 import MuteButton from '@/modules/pace/components/file-viewer/viewers/components/MuteButton';
 import PlayButton from '@/modules/pace/components/file-viewer/viewers/components/PlayButton';
 import ProgressBar from '@/modules/pace/components/file-viewer/viewers/components/ProgressBar';
@@ -18,11 +17,10 @@ interface VideoViewerProps {
   poster?: string;
   className?: string;
   isActive?: boolean;
-  fileName?: string;
-  onClose?: () => void;
+  onError?: (message?: string) => void;
 }
 
-const VideoViewer = ({ src, poster, className = '', isActive = true, fileName, onClose }: VideoViewerProps) => {
+const VideoViewer = ({ src, poster, className = '', isActive = true, onError }: VideoViewerProps) => {
   const videoRef = useRef<HTMLVideoElement>(null);
 
   const [isPlaying, setIsPlaying] = useState(false);
@@ -33,8 +31,6 @@ const VideoViewer = ({ src, poster, className = '', isActive = true, fileName, o
   const [error, setError] = useState(false);
   const [isMuted, setIsMuted] = useState(false);
 
-  const displayFileName = fileName || decodeURIComponent(src.split('/').pop() || 'video');
-
   const handleError = useCallback(
     (e: React.SyntheticEvent<HTMLVideoElement>) => {
       setIsLoading(false);
@@ -44,8 +40,9 @@ const VideoViewer = ({ src, poster, className = '', isActive = true, fileName, o
       captureException(new Error(mediaError?.message || `Video load failed (code: ${mediaError?.code})`), {
         extra: { src, mediaErrorCode: mediaError?.code },
       });
+      onError?.(mediaError?.message || 'The video could not be played');
     },
-    [src],
+    [src, onError],
   );
 
   const handleLoadedMetadata = useCallback(() => {
@@ -111,7 +108,6 @@ const VideoViewer = ({ src, poster, className = '', isActive = true, fileName, o
     setIsMuted(video.muted);
   };
 
-  // Pause video when tab becomes inactive
   useEffect(() => {
     const video = videoRef.current;
 
@@ -129,7 +125,6 @@ const VideoViewer = ({ src, poster, className = '', isActive = true, fileName, o
       setCurrentTime(video.currentTime ?? 0);
     };
 
-    // Check if already loaded (e.g., from cache)
     if (video.readyState >= 1 && isLoading) {
       handleLoadedMetadata();
     }
@@ -154,10 +149,6 @@ const VideoViewer = ({ src, poster, className = '', isActive = true, fileName, o
       video.removeEventListener('seeked', handleSeeked);
     };
   }, [handleLoadedMetadata, handleSeeked, isLoading]);
-
-  if (error && onClose) {
-    return <FileNotFoundError fileName={displayFileName} onClose={onClose} />;
-  }
 
   return (
     <div className={cn('flex h-full w-full flex-col items-center justify-center p-4', className)}>
@@ -200,14 +191,6 @@ const VideoViewer = ({ src, poster, className = '', isActive = true, fileName, o
           {isBuffering && !isLoading && (
             <div className='pointer-events-none absolute inset-0 z-10 flex items-center justify-center'>
               <LoaderCircle size={48} className='animate-spin text-white' />
-            </div>
-          )}
-
-          {error && !onClose && (
-            <div className='absolute inset-0 flex items-center justify-center bg-black/50'>
-              <div className='text-center text-white'>
-                <p>Error loading video</p>
-              </div>
             </div>
           )}
 

@@ -177,7 +177,7 @@ export const useFileViewer = ({
         fetchFileContent({ path: filePath }).unwrap(),
       ]);
 
-      initFileState(filePath, contentResult ?? '', metadataResult.mtime_ms);
+      initFileState(filePath, contentResult ?? '', metadataResult?.mtime_ms);
     } catch (err) {
       if (isNotFoundError(err)) {
         setIsFileNotFound(true);
