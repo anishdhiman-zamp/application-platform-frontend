@@ -58,3 +58,4 @@ apps/application-dashboard/tests/playwright-report/
 apps/application-dashboard/tests/test-results/
 # next-agents-md
 .next-docs/
+apps/application-dashboard/.next-env.d.ts
