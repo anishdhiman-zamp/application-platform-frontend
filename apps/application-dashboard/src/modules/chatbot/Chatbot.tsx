@@ -1,6 +1,7 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { useSelector } from 'react-redux';
 import {
+  API_ENDPOINTS,
   BlockRenderer,
   ButtonBlockType,
   DisplayLayerActionType,
@@ -99,6 +100,11 @@ const Chatbot = ({
     conversationId: (hideFeedbackCount && isUrlMatching && conversationIdFromParam) || feedbackItem?.conversation_id,
     setHeader,
     refetchConversationHistory: hideFeedbackCount,
+    apiConfig: {
+      getConversationById: API_ENDPOINTS.GET_CONVERSATION_BY_ID_V2,
+      sendMessage: API_ENDPOINTS.POST_MESSAGE_V2,
+      createConversation: API_ENDPOINTS.CREATE_CONVERSATION_V2,
+    },
   });
 
   const prevConversationIdRef = useRef<string | null | undefined>(chat.conversationId);

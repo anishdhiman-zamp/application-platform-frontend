@@ -1,7 +1,7 @@
 import { FC, useCallback, useEffect, useState } from 'react';
 import { useSelector } from 'react-redux';
 import { captureException } from '@sentry/nextjs';
-import { ResourceType, useLazyGetConversationByIdQuery } from '@zamp-platform/chat';
+import { API_ENDPOINTS, ResourceType, useLazyGetConversationByIdQuery } from '@zamp-platform/chat';
 import { Popover, PopoverContent, PopoverPortal, PopoverTrigger } from '@zamp-platform/ui';
 import FeedbacksStatusTabs from 'modules/feedback/feedback-status/FeedbacksStatusTabs';
 import { useFeedbacksProvider } from 'modules/feedback/feedback-status/useFeedbacks';
@@ -52,6 +52,7 @@ const FeedbackStatusButtonContent: FC = () => {
             conversationId: item.conversation_id,
             resourceId: item.process_id,
             resourceType: ResourceType.PROCESS,
+            url: API_ENDPOINTS.GET_CONVERSATION_BY_ID_V2,
           }),
         ),
       );

@@ -14,7 +14,6 @@ import {
 } from '@zamp-platform/chat';
 import { ArrowDownIcon, Button } from '@zamp-platform/ui';
 import { cn } from '@zamp-platform/ui/utils';
-import { API_ENDPOINTS } from '@/apis/apiEndpoint.constants';
 import CommonWrapper from '@/components/commonWrapper';
 import { SkeletonTypes } from '@/components/commonWrapper/commonWrapper.types';
 import { APITags } from '@/constants/api.constants';
@@ -74,10 +73,6 @@ const ChatContentInner = ({
     resourceType: ResourceType.ORGANIZATION,
     conversationId: conversationId ?? undefined,
     enableStreaming: true,
-    apiConfig: {
-      sendMessage: API_ENDPOINTS.POST_MESSAGE_V3,
-      createConversation: API_ENDPOINTS.CREATE_CONVERSATION_V3,
-    },
     setHeader: (header: string) => {
       if (!chatTitle) {
         setChatTitle(header);
