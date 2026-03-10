@@ -108,12 +108,19 @@ jobs:
         critical_high = []
         all_issues = []
 
+        ignored_count = 0
+
         for result in results:
             severity = result.get('extra', {}).get('severity', 'info').upper()
             rule_id = result.get('check_id', '')
             file_path = result.get('path', '')
             line = result.get('start', {}).get('line', 0)
 
+            is_ignored = result.get('extra', {}).get('is_ignored', False)
+
+            if is_ignored:
+                ignored_count += 1
+                continue
             is_waived = False
             for waiver in waivers:
                 if (waiver.get('rule_id') == rule_id and
@@ -132,7 +139,8 @@ jobs:
             f.write("# 🔒 Security Scan Report\n\n")
             f.write(f"**Total Issues Found:** {len(all_issues)}\n")
             f.write(f"**Critical/High Issues:** {len(critical_high)}\n")
-            f.write(f"**Waived Issues:** {len(results) - len(all_issues)}\n\n")
+            f.write(f"**Waived Issues:** {len(results) - len(all_issues) - ignored_count}\n")
+            f.write(f"**Inline Suppressed (nosemgrep):** {ignored_count}\n\n")
             if critical_high:
                 f.write("## 🔴 Critical/High Severity Issues\n\n")
                 for issue in critical_high:
@@ -163,7 +171,8 @@ jobs:
 
         print(f"Total issues: {len(all_issues)}")
         print(f"Critical/high issues: {len(critical_high)}")
-        print(f"Waived issues: {len(results) - len(all_issues)}")
+        print(f"Waived issues: {len(results) - len(all_issues) - ignored_count}")
+        print(f"Inline suppressed (nosemgrep): {ignored_count}")
 
         with open(os.environ['GITHUB_OUTPUT'], 'a') as f:
             f.write(f"critical_high_count={len(critical_high)}\n")
