@@ -100,7 +100,7 @@ const FileViewerContent = memo(
         return <VideoViewer src={effectiveMediaUrl} fileName={fileName} isActive={isActive} onClose={onClose} />;
 
       case FILE_CATEGORY.PDF:
-        return <PdfViewer key={effectiveMediaUrl} src={effectiveMediaUrl} fileName={fileName} onClose={onClose} />;
+        return <PdfViewer src={effectiveMediaUrl} fileName={fileName} onClose={onClose} />;
 
       case FILE_CATEGORY.MARKDOWN:
         if (content === null) {
