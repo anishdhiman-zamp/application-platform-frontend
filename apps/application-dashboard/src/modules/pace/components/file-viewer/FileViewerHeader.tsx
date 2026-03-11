@@ -105,9 +105,8 @@ const FileViewerHeader = ({
         onConfirm={deleteConfirmation.onConfirm}
       />
       <div className={cn('border-GRAY_400 flex items-center justify-between border-b bg-white px-4 py-3', className)}>
-        <div className='flex items-center gap-3'>
+        <div className='flex items-center gap-2'>
           <FileIcon extension={extension || 'txt'} className='text-GRAY_900 size-6' />
-
           <div className='flex items-center gap-x-3'>
             {isRenaming ? (
               <div className='flex items-center'>
@@ -138,7 +137,7 @@ const FileViewerHeader = ({
               </div>
             ) : (
               <span
-                className='f-14-500 text-GRAY_1000 hover:bg-GRAY_200 cursor-pointer rounded-lg p-1'
+                className='f-14-500 text-GRAY_1000 hover:bg-GRAY_200 inline-flex cursor-pointer items-center rounded-md px-1.5 py-0.5 transition-colors'
                 onClick={startRename}
               >
                 {fileName}

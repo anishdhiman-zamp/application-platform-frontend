@@ -99,7 +99,7 @@ const FileTreeNodeRow = forwardRef<HTMLDivElement, FileTreeNodeRowProps>(
         }
         {...restProps}
         className={cn(
-          'hover:bg-GRAY_100 group flex h-9 cursor-pointer items-center gap-2 rounded-md pr-1',
+          'hover:bg-GRAY_100 group flex h-8 cursor-pointer items-center gap-2 rounded-md pr-1 transition-colors',
           dropdownOpen && (state.isFolder || !state.isSelected) && 'bg-GRAY_100',
           state.isSelected && !state.isFolder && 'bg-GRAY_300 hover:bg-GRAY_300',
           (state.isDragging || state.isCutItem || state.isUploading) && 'opacity-50',
