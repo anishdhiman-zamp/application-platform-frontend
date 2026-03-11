@@ -16,7 +16,7 @@ import ImageLoader from '@/components/common/loader/ImageLoader';
 import { FEATURE_FLAGS } from '@/constants/featureFlags';
 import { ZAMP_LOGO_LOADER_SVG } from '@/constants/icons';
 import { ROUTES_PATH } from '@/constants/routeConfig';
-import { useFeatureFlag } from '@/hooks/useFeatureFlag';
+import { useFeatureFlags } from '@/hooks/useFeatureFlags';
 
 const isWelcomeSeen = () => {
   try {
@@ -33,26 +33,57 @@ export const OnboardingRoot = () => {
   const [currentStatus, setCurrentStatus] = useState<OnboardingStatus | null>(null);
   const [orgIdFromSetup, setOrgIdFromSetup] = useState<string | null>(null);
   const [welcomeSeen, setWelcomeSeen] = useState(isWelcomeSeen());
-  const { isEnabled: isOnboardingEnabled, isLoading: isFlagLoading } = useFeatureFlag(
-    FEATURE_FLAGS.ENABLE_ONBOARDING_FLOW,
-  );
+  const { ldClient } = useFeatureFlags();
+  const [isOnboardingEnabled, setIsOnboardingEnabled] = useState<boolean | null>(null);
+  const isFlagLoading = isOnboardingEnabled === null;
   const landingRoute = session?.orgs?.[0]?.product === 'macs' ? ROUTES_PATH.CHAT : ROUTES_PATH.PROCESSES;
   const [skipOnboarding] = useSkipOnboardingMutation();
   const [ensureProvisioning] = useEnsureProvisioningMutation();
   const skipCalledRef = useRef(false);
 
-  // If feature flag is off, call POST /onboarding/skip to force-complete, then redirect
+  // Resolve the flag only after fixing LD's context with the real user from whoami.
+  // The shared LDProvider initializes with getUserSession() which may have an empty user key,
+  // causing "Invalid context". We call identify() with the real session to fix it.
+  useEffect(() => {
+    if (!ldClient || !session) return;
+
+    let cancelled = false;
+
+    ldClient
+      .identify({ kind: 'user', key: session.user_id, email: session.user_email })
+      .then(() => {
+        if (!cancelled) {
+          setIsOnboardingEnabled(ldClient.variation(FEATURE_FLAGS.ENABLE_ONBOARDING_FLOW, false));
+        }
+      })
+      .catch(() => {
+        // LD completely unavailable — default to enabled so we don't bypass onboarding
+        if (!cancelled) setIsOnboardingEnabled(true);
+      });
+
+    return () => {
+      cancelled = true;
+    };
+  }, [ldClient, session]);
+
+  // If feature flag is off, call POST /onboarding/skip to force-complete, then redirect.
   useEffect(() => {
     if (isFlagLoading || isOnboardingEnabled || skipCalledRef.current) return;
     skipCalledRef.current = true;
 
     const doSkip = async () => {
       try {
-        await skipOnboarding().unwrap();
+        const result = await skipOnboarding().unwrap();
+        const status = result.onboarding_status;
+
+        if (status === OnboardingStatus.ONBOARDED) {
+          router.replace(landingRoute);
+        } else {
+          setCurrentStatus(status);
+        }
       } catch {
-        // Best-effort skip
+        // Best-effort skip — don't redirect if it failed
       }
-      router.replace(landingRoute);
     };
 
     doSkip();
@@ -64,12 +95,9 @@ export const OnboardingRoot = () => {
     const status = session.onboarding_status;
 
     if (status === OnboardingStatus.ONBOARDED) {
-      if (isWelcomeSeen()) {
-        router.replace(landingRoute);
+      router.replace(landingRoute);
 
-        return;
-      }
-      // Welcome animation not seen yet — let it play before redirecting
+      return;
     }
 
     setCurrentStatus(status);
@@ -82,11 +110,12 @@ export const OnboardingRoot = () => {
     }
   }, [currentStatus, orgIdFromSetup, session, refetchSession]);
 
-  // Fire provisioning call immediately when entering SETUP_WORKSPACE (gives provisioning a head start during welcome animation)
+  // Fire provisioning call early only when welcome animation will play (gives provisioning a head start).
+  // Skip if welcome is already seen — SetupWorkspaceStep will call it on mount anyway.
   const provisioningFiredRef = useRef(false);
 
   useEffect(() => {
-    if (currentStatus !== OnboardingStatus.SETUP_WORKSPACE || provisioningFiredRef.current) return;
+    if (currentStatus !== OnboardingStatus.SETUP_WORKSPACE || provisioningFiredRef.current || isWelcomeSeen()) return;
     const resolvedOrgId = orgIdFromSetup || session?.orgs?.[0]?.organization_id;
 
     if (!resolvedOrgId) return;
@@ -116,8 +145,12 @@ export const OnboardingRoot = () => {
   };
 
   // 400 "wrong step" → re-fetch session to get correct onboarding_status
-  const handleWrongStep = useCallback(() => {
-    refetchSession();
+  const handleWrongStep = useCallback(async () => {
+    const { data } = await refetchSession();
+
+    if (data?.onboarding_status) {
+      setCurrentStatus(data.onboarding_status);
+    }
   }, [refetchSession]);
 
   // 403 "feature flag off" → call skip, then redirect to main app
@@ -191,6 +224,7 @@ const StepContent = ({
       return (
         <SetupProfileStep
           initialName={[session.display_name, session.last_name].filter(Boolean).join(' ') || session.user_name || ''}
+          username={session.username || session.user_email || ''}
           onComplete={onComplete}
           onWrongStep={onWrongStep}
           onFlagDisabled={onFlagDisabled}
@@ -208,7 +242,14 @@ const StepContent = ({
       );
 
     case OnboardingStatus.SETUP_ORG:
-      return <UpdateOrgStep onComplete={onComplete} onWrongStep={onWrongStep} onFlagDisabled={onFlagDisabled} />;
+      return (
+        <UpdateOrgStep
+          username={session.username || session.user_email || ''}
+          onComplete={onComplete}
+          onWrongStep={onWrongStep}
+          onFlagDisabled={onFlagDisabled}
+        />
+      );
 
     case OnboardingStatus.SETUP_WORKSPACE: {
       const resolvedOrgId = orgIdFromSetup || session.orgs?.[0]?.organization_id;

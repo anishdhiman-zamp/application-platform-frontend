@@ -41,10 +41,15 @@ export const handleOnboardingApiError = (
   }
 
   if (error.status === 400) {
-    if (error.data?.detail?.startsWith(BACKEND_ERRORS.WRONG_STEP_PREFIX)) {
+    const detail = error.data?.detail || '';
+
+    if (
+      detail.startsWith(BACKEND_ERRORS.WRONG_STEP_PREFIX) ||
+      BACKEND_ERRORS.WRONG_STEP_REQUIRED_PATTERN.test(detail)
+    ) {
       opts.onWrongStep();
     } else {
-      opts.setError(error.data?.detail || ERROR_MESSAGES.INVALID_REQUEST);
+      opts.setError(detail || ERROR_MESSAGES.INVALID_REQUEST);
     }
 
     return true;

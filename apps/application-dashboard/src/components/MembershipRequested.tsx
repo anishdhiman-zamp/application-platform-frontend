@@ -1,6 +1,5 @@
 import { Button } from '@zamp-platform/ui';
 import { ZAMP_ICON } from 'constants/icons';
-import { Loader2 } from 'lucide-react';
 import Image from 'next/image';
 import { defaultFnType } from 'types/commonTypes';
 
@@ -11,7 +10,6 @@ type MembershipRequestedProps = {
   actionItems: {
     text: string;
     onClick: defaultFnType;
-    loading?: boolean;
   }[];
 };
 
@@ -47,12 +45,9 @@ export const MembershipRequested = (props: MembershipRequestedProps) => {
             variant='outline'
             testId='send-user-invite-btn'
             size='small'
-            className='flex items-center gap-2'
             onClick={actionItem.onClick}
-            disabled={actionItem.loading}
           >
             {actionItem.text}
-            {actionItem.loading && <Loader2 className='h-4 w-4 animate-spin' />}
           </Button>
         ))}
       </div>

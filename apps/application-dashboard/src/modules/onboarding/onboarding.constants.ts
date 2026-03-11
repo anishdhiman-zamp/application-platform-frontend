@@ -2,6 +2,8 @@
 export const BACKEND_ERRORS = {
   FLAG_OFF_MESSAGE: 'Onboarding flow is currently disabled',
   WRONG_STEP_PREFIX: 'Expected status',
+  /** Backend returns "X is required for Y setup" when a field from a different step is missing */
+  WRONG_STEP_REQUIRED_PATTERN: /required for .+ setup/,
 } as const;
 
 /** Fallback messages when backend detail is missing */

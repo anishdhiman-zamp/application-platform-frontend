@@ -6,9 +6,6 @@ import {
   EnsureProvisioningRequest,
   EnsureProvisioningResponse,
   OnboardingResponse,
-  OrgProvisioningStatusResponse,
-  RegisterOrgRequest,
-  RegisterOrgResponse,
   SetupOrgRequest,
   SetupOrgResponse,
   UpdateProfileRequest,
@@ -65,19 +62,6 @@ const onboardingApi = baseApi.injectEndpoints({
         params: { username },
       }),
     }),
-    registerOrg: builder.mutation<RegisterOrgResponse, RegisterOrgRequest>({
-      query: (body) => ({
-        url: API_ENDPOINTS.ORGANIZATIONS_REGISTER_POST,
-        method: REQUEST_TYPES.POST,
-        body,
-      }),
-    }),
-    provisionOrg: builder.mutation<OrgProvisioningStatusResponse, string>({
-      query: (organizationId) => ({
-        url: API_ENDPOINTS.ORGANIZATIONS_PROVISION_POST.replace('{{organizationId}}', organizationId),
-        method: REQUEST_TYPES.POST,
-      }),
-    }),
   }),
 });
 
@@ -89,6 +73,4 @@ export const {
   useSkipOnboardingMutation,
   useGetUploadUrlMutation,
   useLazyCheckUsernameQuery,
-  useRegisterOrgMutation,
-  useProvisionOrgMutation,
 } = onboardingApi;

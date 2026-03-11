@@ -6,24 +6,26 @@ import { OnboardingInputStep } from 'modules/onboarding/components/OnboardingInp
 import { useAvatarState } from 'modules/onboarding/hooks/useAvatarState';
 import { ERROR_MESSAGES, VALIDATION } from 'modules/onboarding/onboarding.constants';
 import { OnboardingStepCallbacks, UploadType } from 'modules/onboarding/onboarding.types';
-import { generateAvatarSvg, generatePlaceholderSvg } from 'modules/onboarding/utils/avatarGenerator';
+import { generateAvatarSvg } from 'modules/onboarding/utils/avatarGenerator';
 import { handleOnboardingApiError } from 'modules/onboarding/utils/onboardingErrors';
 import { useUpdateProfileMutation } from '@/apis/onboarding';
 
 type Props = OnboardingStepCallbacks & {
   initialName?: string;
+  username: string;
 };
 
-export const SetupProfileStep = ({ initialName = '', onComplete, onWrongStep, onFlagDisabled }: Props) => {
+export const SetupProfileStep = ({ initialName = '', username, onComplete, onWrongStep, onFlagDisabled }: Props) => {
   const [name, setName] = useState(initialName);
   const [error, setError] = useState<string | null>(null);
-  const [updateProfile, { isLoading }] = useUpdateProfileMutation();
+  const [isSubmitting, setIsSubmitting] = useState(false);
+  const [updateProfile] = useUpdateProfileMutation();
 
-  const { display, updateSeed, handleShuffle, handleUpload, handleRemove, uploadImage } = useAvatarState({
-    initialValue: initialName,
+  const { display, updateSeed, handleShuffle, handleUpload, handleReset, uploadImage } = useAvatarState({
+    initialValue: initialName || username,
     generateSvg: generateAvatarSvg,
-    placeholderSvg: generatePlaceholderSvg(),
     uploadType: UploadType.AVATAR,
+    defaultName: username,
   });
 
   const handleNameChange = (val: string) => {
@@ -33,13 +35,14 @@ export const SetupProfileStep = ({ initialName = '', onComplete, onWrongStep, on
   };
 
   const handleSubmit = async () => {
-    if (!name.trim()) return;
+    if (!name.trim() || isSubmitting) return;
     if (name.trim().length > VALIDATION.NAME_MAX) {
       setError(ERROR_MESSAGES.NAME_MAX_LENGTH);
 
       return;
     }
     setError(null);
+    setIsSubmitting(true);
 
     try {
       const { type, value } = await uploadImage();
@@ -54,6 +57,8 @@ export const SetupProfileStep = ({ initialName = '', onComplete, onWrongStep, on
       if (!handleOnboardingApiError(err, { setError, onWrongStep, onFlagDisabled })) {
         setError(ERROR_MESSAGES.GENERIC);
       }
+    } finally {
+      setIsSubmitting(false);
     }
   };
 
@@ -64,14 +69,14 @@ export const SetupProfileStep = ({ initialName = '', onComplete, onWrongStep, on
       value={name}
       onChange={handleNameChange}
       onSubmit={handleSubmit}
-      disabled={!name.trim() || isLoading}
+      disabled={!name.trim() || isSubmitting}
       error={error}
     >
       <AvatarPicker
         avatar={display}
         onShuffle={() => handleShuffle(name)}
         onUpload={handleUpload}
-        onRemove={() => handleRemove(name)}
+        onReset={handleReset}
       />
     </OnboardingInputStep>
   );

@@ -6,18 +6,11 @@ import { useGetUploadUrlMutation } from '@/apis/onboarding';
 type Options = {
   initialValue: string;
   generateSvg: (value: string) => string;
-  placeholderSvg?: string;
   uploadType: UploadType;
   defaultName?: string;
 };
 
-export const useAvatarState = ({
-  initialValue,
-  generateSvg,
-  placeholderSvg,
-  uploadType,
-  defaultName = 'User',
-}: Options) => {
+export const useAvatarState = ({ initialValue, generateSvg, uploadType, defaultName = 'User' }: Options) => {
   const [avatar, setAvatar] = useState<AvatarState>({ type: MediaType.SEED, value: initialValue });
   const [variant, setVariant] = useState(0);
   const [pendingFile, setPendingFile] = useState<File | null>(null);
@@ -27,7 +20,7 @@ export const useAvatarState = ({
   const display: AvatarDisplay =
     avatar.type === MediaType.URL && avatar.previewUrl
       ? { type: 'url', src: avatar.previewUrl }
-      : { type: 'seed', svg: avatar.value ? generateSvg(avatar.value) : (placeholderSvg ?? generateSvg(defaultName)) };
+      : { type: 'seed', svg: generateSvg(avatar.value || defaultName) };
 
   const updateSeed = useCallback((value: string) => {
     if (!userPickedRef.current) {
@@ -52,12 +45,12 @@ export const useAvatarState = ({
     setAvatar({ type: MediaType.URL, value: '', previewUrl });
   }, []);
 
-  const handleRemove = useCallback((currentName: string) => {
+  const handleReset = useCallback(() => {
     userPickedRef.current = false;
     setPendingFile(null);
     setVariant(0);
-    setAvatar({ type: MediaType.SEED, value: currentName || '' });
-  }, []);
+    setAvatar({ type: MediaType.SEED, value: initialValue });
+  }, [initialValue]);
 
   const uploadImage = useCallback(async (): Promise<{ type: MediaType; value: string | null }> => {
     if (avatar.type === MediaType.URL && pendingFile) {
@@ -84,7 +77,7 @@ export const useAvatarState = ({
     updateSeed,
     handleShuffle,
     handleUpload,
-    handleRemove,
+    handleReset,
     uploadImage,
   };
 };

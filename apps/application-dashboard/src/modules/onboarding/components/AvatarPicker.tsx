@@ -1,6 +1,6 @@
 'use client';
 
-import { useRef, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import {
   Button,
   Popover,
@@ -20,7 +20,7 @@ type Props = {
   avatar: AvatarDisplay;
   onShuffle: () => void;
   onUpload: (file: File, previewUrl: string) => void;
-  onRemove: () => void;
+  onReset: () => void;
 };
 
 export const AvatarImage = ({ avatar, size }: { avatar: AvatarDisplay; size: number }) => {
@@ -39,7 +39,7 @@ export const AvatarImage = ({ avatar, size }: { avatar: AvatarDisplay; size: num
   );
 };
 
-export const AvatarPicker = ({ avatar, onShuffle, onUpload, onRemove }: Props) => {
+export const AvatarPicker = ({ avatar, onShuffle, onUpload, onReset }: Props) => {
   const [open, setOpen] = useState(false);
   const [activeTab, setActiveTab] = useState('zamp');
   const [previewUrl, setPreviewUrl] = useState<string | null>(null);
@@ -72,24 +72,49 @@ export const AvatarPicker = ({ avatar, onShuffle, onUpload, onRemove }: Props) =
     e.target.value = '';
   };
 
+  const closePopover = () => {
+    setOpen(false);
+    // Clean up local state after close animation completes
+    setTimeout(() => {
+      setPreviewUrl(null);
+      setPendingFile(null);
+      setFileError(null);
+    }, 200);
+  };
+
   const handleSave = () => {
     if (!pendingFile || !previewUrl) return;
     onUpload(pendingFile, previewUrl);
-    setOpen(false);
     // Don't revoke here — the preview URL is now owned by the parent
-    setPreviewUrl(null);
-    setPendingFile(null);
-    setFileError(null);
+    closePopover();
   };
 
-  const handleRemove = () => {
-    onRemove();
+  const handleReset = () => {
+    onReset();
     revokePreview();
-    setPreviewUrl(null);
-    setPendingFile(null);
-    setFileError(null);
-    setOpen(false);
+    closePopover();
   };
+
+  // When popover is open, Enter saves (upload tab with file) or just closes
+  useEffect(() => {
+    if (!open) return;
+
+    const handleEnter = (e: KeyboardEvent) => {
+      if (e.key !== 'Enter') return;
+      e.preventDefault();
+      e.stopImmediatePropagation();
+
+      if (activeTab === 'upload' && pendingFile) {
+        handleSave();
+      } else {
+        closePopover();
+      }
+    };
+
+    window.addEventListener('keydown', handleEnter, { capture: true });
+
+    return () => window.removeEventListener('keydown', handleEnter, { capture: true });
+  }, [open, activeTab, pendingFile]);
 
   return (
     <Popover open={open} onOpenChange={setOpen}>
@@ -127,20 +152,22 @@ export const AvatarPicker = ({ avatar, onShuffle, onUpload, onRemove }: Props) =
             </div>
           </TabsContent>
 
-          <TabsContent value='upload' className='p-4'>
+          <TabsContent value='upload' className='p-2'>
             {previewUrl ? (
-              <img src={previewUrl} alt='preview' className='max-h-[120px] w-full rounded-md object-cover' />
+              <div className='flex items-center justify-center py-2'>
+                <img src={previewUrl} alt='preview' className='h-[120px] w-[120px] rounded-lg object-cover' />
+              </div>
             ) : (
               <Button
                 variant='ghost'
-                className='bg-BG_GRAY_2 border-GRAY_200 hover:border-GRAY_500 hover:bg-GRAY_100 flex w-full flex-col items-center justify-center gap-2 rounded-md border border-dashed py-4'
+                className='border-GRAY_200 hover:border-GRAY_400 hover:bg-GRAY_50 flex h-[136px] w-full flex-col items-center justify-center gap-1.5 rounded-lg border border-dashed'
                 onClick={() => fileInputRef.current?.click()}
               >
-                <Upload className='text-GRAY_700 h-4 w-4' />
-                <span className='text-GRAY_900 text-[11px]'>Upload a file</span>
+                <Upload className='text-GRAY_500 h-4 w-4' />
+                <span className='text-GRAY_600 text-[11px]'>Upload a file</span>
               </Button>
             )}
-            {fileError && <p className='text-RED_600 mt-2 text-xs'>{fileError}</p>}
+            {fileError && <p className='text-RED_600 mt-1 text-xs'>{fileError}</p>}
             <input
               ref={fileInputRef}
               type='file'
@@ -157,9 +184,9 @@ export const AvatarPicker = ({ avatar, onShuffle, onUpload, onRemove }: Props) =
             variant='ghost'
             size='xsmall'
             className='text-GRAY_700 hover:text-GRAY_900 text-[11px]'
-            onClick={handleRemove}
+            onClick={handleReset}
           >
-            Remove
+            Reset
           </Button>
           <div className='flex items-center gap-1.5'>
             {activeTab === 'zamp' && (

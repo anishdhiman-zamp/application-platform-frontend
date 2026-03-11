@@ -10,18 +10,21 @@ import { generateOrgIconSvg } from 'modules/onboarding/utils/avatarGenerator';
 import { handleOnboardingApiError } from 'modules/onboarding/utils/onboardingErrors';
 import { useSetupOrgMutation } from '@/apis/onboarding';
 
-type Props = OnboardingStepCallbacks;
+type Props = OnboardingStepCallbacks & {
+  username: string;
+};
 
-export const UpdateOrgStep = ({ onComplete, onWrongStep, onFlagDisabled }: Props) => {
+export const UpdateOrgStep = ({ username, onComplete, onWrongStep, onFlagDisabled }: Props) => {
   const [orgName, setOrgName] = useState('');
   const [error, setError] = useState<string | null>(null);
-  const [setupOrg, { isLoading }] = useSetupOrgMutation();
+  const [isSubmitting, setIsSubmitting] = useState(false);
+  const [setupOrg] = useSetupOrgMutation();
 
-  const { display, updateSeed, handleShuffle, handleUpload, handleRemove, uploadImage } = useAvatarState({
-    initialValue: '',
+  const { display, updateSeed, handleShuffle, handleUpload, handleReset, uploadImage } = useAvatarState({
+    initialValue: username + '_org',
     generateSvg: generateOrgIconSvg,
     uploadType: UploadType.ORG_ICON,
-    defaultName: 'Org',
+    defaultName: username + '_org',
   });
 
   const handleOrgNameChange = (val: string) => {
@@ -31,13 +34,14 @@ export const UpdateOrgStep = ({ onComplete, onWrongStep, onFlagDisabled }: Props
   };
 
   const handleSubmit = async () => {
-    if (!orgName.trim()) return;
+    if (!orgName.trim() || isSubmitting) return;
     if (orgName.trim().length > VALIDATION.ORG_NAME_MAX) {
       setError(ERROR_MESSAGES.ORG_NAME_MAX_LENGTH);
 
       return;
     }
     setError(null);
+    setIsSubmitting(true);
 
     try {
       const { type, value } = await uploadImage();
@@ -52,6 +56,8 @@ export const UpdateOrgStep = ({ onComplete, onWrongStep, onFlagDisabled }: Props
       if (!handleOnboardingApiError(err, { setError, onWrongStep, onFlagDisabled })) {
         setError(ERROR_MESSAGES.GENERIC);
       }
+    } finally {
+      setIsSubmitting(false);
     }
   };
 
@@ -62,14 +68,14 @@ export const UpdateOrgStep = ({ onComplete, onWrongStep, onFlagDisabled }: Props
       value={orgName}
       onChange={handleOrgNameChange}
       onSubmit={handleSubmit}
-      disabled={!orgName.trim() || isLoading}
+      disabled={!orgName.trim() || isSubmitting}
       error={error}
     >
       <AvatarPicker
         avatar={display}
         onShuffle={() => handleShuffle(orgName)}
         onUpload={handleUpload}
-        onRemove={() => handleRemove(orgName)}
+        onReset={handleReset}
       />
     </OnboardingInputStep>
   );

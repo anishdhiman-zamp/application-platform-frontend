@@ -48,6 +48,9 @@ export const useSSEContext = () => {
   return context;
 };
 
+/** Returns SSE context if available, or undefined if outside SSEProvider. */
+export const useOptionalSSEContext = () => useContext(SSEContext);
+
 /** Routes AGENT_STREAMS events to the correct conversation in streamingStateStore. */
 function handleGlobalStreamEvent(data: BaseEventPayload): void {
   try {

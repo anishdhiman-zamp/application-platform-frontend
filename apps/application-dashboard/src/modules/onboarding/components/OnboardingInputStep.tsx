@@ -33,12 +33,29 @@ export const OnboardingInputStep = ({
     if (autoFocus) inputRef.current?.focus();
   }, [autoFocus]);
 
-  const handleKeyDown = (e: React.KeyboardEvent) => {
-    if (e.key === 'Enter') {
+  // Global Enter key listener so submit works even without input focus
+  const onSubmitRef = useRef(onSubmit);
+  const disabledRef = useRef(disabled);
+
+  onSubmitRef.current = onSubmit;
+  disabledRef.current = disabled;
+
+  useEffect(() => {
+    const handleGlobalKeyDown = (e: KeyboardEvent) => {
+      if (e.key !== 'Enter' || disabledRef.current) return;
+
+      // Don't submit if a popover/dialog is open (e.g. avatar picker)
+      if (document.querySelector('[data-radix-popper-content-wrapper]') || document.querySelector('[role="dialog"]'))
+        return;
+
       e.preventDefault();
-      onSubmit();
-    }
-  };
+      onSubmitRef.current();
+    };
+
+    window.addEventListener('keydown', handleGlobalKeyDown);
+
+    return () => window.removeEventListener('keydown', handleGlobalKeyDown);
+  }, []);
 
   return (
     <div className='w-full max-w-[520px]'>
@@ -52,7 +69,6 @@ export const OnboardingInputStep = ({
             type='text'
             value={value}
             onChange={(e) => onChange(e.target.value)}
-            onKeyDown={handleKeyDown}
             placeholder={placeholder}
             className='text-GRAY_1000 flex-1 border-none bg-transparent p-0 font-[family-name:var(--font-funnel-display)] text-5xl leading-[1.4] outline-none'
           />

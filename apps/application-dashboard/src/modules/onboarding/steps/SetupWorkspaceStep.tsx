@@ -39,13 +39,15 @@ export const SetupWorkspaceStep = ({ organizationId, userName, onComplete }: Pro
         }
       }
 
+      if (result.onboarding_status === OnboardingStatus.ONBOARDED || result.status.is_completed) {
+        handleOnboarded();
+
+        return;
+      }
+
       if (!readyRef.current) {
         readyRef.current = true;
         setReady(true);
-      }
-
-      if (result.onboarding_status === OnboardingStatus.ONBOARDED || result.status.is_completed) {
-        handleOnboarded();
       }
     } catch {
       // Ignore errors and continue polling — backend self-heals failed workflows
@@ -71,7 +73,12 @@ export const SetupWorkspaceStep = ({ organizationId, userName, onComplete }: Pro
     return () => clearInterval(poll);
   }, [checkStatus]);
 
-  if (!ready) return <ImageLoader imageSrc={ZAMP_LOGO_LOADER_SVG} width={140} height={140} />;
+  if (!ready)
+    return (
+      <div className='fixed inset-0 z-50'>
+        <ImageLoader imageSrc={ZAMP_LOGO_LOADER_SVG} width={140} height={140} />
+      </div>
+    );
 
   return <ProvisioningScreen takingLonger={takingLonger} userName={userName} />;
 };
