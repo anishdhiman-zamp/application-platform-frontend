@@ -4,7 +4,7 @@ import React, { useImperativeHandle } from 'react';
 import { FormProvider, useForm } from 'react-hook-form';
 
 import { DEFAULT_NESTED_ANIMATION, DEFAULT_SECTION_ANIMATION, DEFAULT_STAGGER_CHILDREN } from '../constants';
-import { FormSchema } from '../types';
+import { FieldType, FormSchema } from '../types';
 import { transformFormData } from '../utils/formDataTransform';
 import { createCustomResolver } from '../utils/validation';
 import { FormSection } from './FormSection';
@@ -30,9 +30,13 @@ export const FormBuilder = ({
 }: FormBuilderProps & {
   ref: React.RefObject<FormBuilderRef | null>;
 }) => {
-  // Build defaultValues from schema.fields
   const defaultValues = Object.fromEntries(
-    Object.entries(schema.fields).map(([key, field]) => [key, field.default_value]),
+    Object.entries(schema.fields).map(([key, field]) => {
+      if (field.type === FieldType.MULTI_SELECT && typeof field.default_value === 'string') {
+        return [key, field.default_value ? field.default_value.split(' ') : []];
+      }
+      return [key, field.default_value];
+    }),
   );
 
   const methods = useForm({
