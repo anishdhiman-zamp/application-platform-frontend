@@ -12,7 +12,7 @@ import {
 import { useFileViewerContext } from '@/modules/pace/context/FileViewerContext';
 
 const AUTO_SAVE_DELAY_MS = 1000;
-const POLL_INTERVAL_MS = 1000;
+const POLL_INTERVAL_MS = 3000;
 
 interface UseFileViewerOptions {
   filePath: string | null;
@@ -47,6 +47,7 @@ export const useFileViewer = ({
   const autoSaveTimerRef = useRef<NodeJS.Timeout | null>(null);
   const isSavingRef = useRef(false);
   const pendingSaveRef = useRef(false);
+  const isPollingRef = useRef(false);
 
   const [mediaMtime, setMediaMtime] = useState<number | null>(null);
   const mediaMtimeRef = useRef(mediaMtime);
@@ -233,9 +234,13 @@ export const useFileViewer = ({
     let stopped = false;
 
     const pollForChanges = async () => {
+      if (isPollingRef.current) return;
+
       const currentState = getFileState(filePath);
 
       if (!currentState || currentState.isDirty) return;
+
+      isPollingRef.current = true;
 
       try {
         const metadata = await fetchFileMetadata({ path: filePath }).unwrap();
@@ -252,6 +257,8 @@ export const useFileViewer = ({
         } else {
           onLoadError?.(err);
         }
+      } finally {
+        isPollingRef.current = false;
       }
     };
 
@@ -279,6 +286,10 @@ export const useFileViewer = ({
     let stopped = false;
 
     const pollForMediaChanges = async () => {
+      if (isPollingRef.current) return;
+
+      isPollingRef.current = true;
+
       try {
         const metadata = await fetchFileMetadata({ path: filePath }).unwrap();
 
@@ -292,6 +303,8 @@ export const useFileViewer = ({
         } else {
           onLoadError?.(err);
         }
+      } finally {
+        isPollingRef.current = false;
       }
     };
 
