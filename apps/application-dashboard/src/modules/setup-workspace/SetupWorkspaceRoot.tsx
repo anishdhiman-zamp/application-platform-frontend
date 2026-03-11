@@ -17,8 +17,6 @@ import { MEDIA_TYPE, PROVISIONING_STATUS } from '@/modules/setup-workspace/setup
 import { setUser } from '@/store/slices/user';
 import { clearCookie, USER_SESSION_COOKIE } from '@/utils/cookie';
 
-const MAX_REGISTER_RETRIES = 3;
-const REGISTER_RETRY_DELAY = 5000;
 const POLLING_INTERVAL = 5000;
 const MAX_POLL_ATTEMPTS = 60; // 5 minutes at 5s intervals
 
@@ -138,32 +136,24 @@ export const SetupWorkspaceRoot = () => {
     async (userId: string, displayName: string | undefined, email: string) => {
       const orgName = deriveOrgName(displayName, email);
 
-      for (let attempt = 0; attempt < MAX_REGISTER_RETRIES; attempt++) {
-        try {
-          const result = await registerOrg({
-            organization_name: orgName,
-            owner_id: userId,
-            icon_type: MEDIA_TYPE.SEED,
-            icon_value: orgName,
-          }).unwrap();
+      try {
+        const result = await registerOrg({
+          organization_name: orgName,
+          owner_id: userId,
+          icon_type: MEDIA_TYPE.SEED,
+          icon_value: orgName,
+        }).unwrap();
 
-          const orgId = result.organization.organization_id;
+        const orgId = result.organization.organization_id;
 
-          const refreshed = await fetchWhoAmI(undefined, false).unwrap();
+        const refreshed = await fetchWhoAmI(undefined, false).unwrap();
 
-          dispatch(setUser(refreshed));
+        dispatch(setUser(refreshed));
 
-          await pollProvisioning(orgId);
-
-          return;
-        } catch {
-          if (attempt < MAX_REGISTER_RETRIES - 1) {
-            await new Promise((r) => setTimeout(r, REGISTER_RETRY_DELAY));
-          }
-        }
+        await pollProvisioning(orgId);
+      } catch {
+        setHasError(true);
       }
-
-      setHasError(true);
     },
     [registerOrg, fetchWhoAmI, dispatch, pollProvisioning],
   );
