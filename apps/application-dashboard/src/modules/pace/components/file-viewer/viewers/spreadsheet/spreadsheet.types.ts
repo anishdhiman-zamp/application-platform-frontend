@@ -11,6 +11,7 @@ export interface SpreadsheetViewerProps {
   content?: string | null;
   mediaUrl?: string | null;
   fileExtension: string;
+  onError?: (message?: string) => void;
 }
 
 export const PAGE_SIZE_OPTIONS = [10, 25, 50, 100] as const;

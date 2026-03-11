@@ -1,0 +1,39 @@
+import { Code, Eye, FileText, Table } from 'lucide-react';
+import type {
+  FileViewerErrorType,
+  HtmlViewMode,
+  MarkdownViewMode,
+  SpreadsheetViewMode,
+  ViewModeOption,
+} from '@/modules/pace/components/file-viewer/file-viewer.types';
+
+const ICON_SIZE = 14;
+
+export const MARKDOWN_VIEW_OPTIONS: [ViewModeOption<MarkdownViewMode>, ViewModeOption<MarkdownViewMode>] = [
+  { value: 'milkdown', icon: <FileText size={ICON_SIZE} /> },
+  { value: 'raw', icon: <Code size={ICON_SIZE} /> },
+];
+
+export const HTML_VIEW_OPTIONS: [ViewModeOption<HtmlViewMode>, ViewModeOption<HtmlViewMode>] = [
+  { value: 'preview', icon: <Eye size={ICON_SIZE} /> },
+  { value: 'code', icon: <Code size={ICON_SIZE} /> },
+];
+
+export const SPREADSHEET_VIEW_OPTIONS: [ViewModeOption<SpreadsheetViewMode>, ViewModeOption<SpreadsheetViewMode>] = [
+  { value: 'table', icon: <Table size={ICON_SIZE} /> },
+  { value: 'raw', icon: <Code size={ICON_SIZE} /> },
+];
+
+export const FILE_VIEWER_ERROR_CONFIG: Record<
+  FileViewerErrorType,
+  { title: string; getDescription: (fileName: string) => string }
+> = {
+  'not-found': {
+    title: 'File not found',
+    getDescription: (fileName) => `The file ${fileName} may have been moved or deleted.`,
+  },
+  'load-error': {
+    title: 'Failed to load file',
+    getDescription: (fileName) => `The file ${fileName} could not be loaded. It may be corrupted or unsupported.`,
+  },
+};

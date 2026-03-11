@@ -1,6 +1,6 @@
 'use client';
 
-import { memo, useCallback, useEffect, useMemo, useState } from 'react';
+import { memo, useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import {
   type ColumnDef,
   type ColumnResizeMode,
@@ -28,10 +28,10 @@ import {
   TEXT_BASED_EXTENSIONS,
 } from '@/modules/pace/components/file-viewer/viewers/spreadsheet/spreadsheet.types';
 import { parseWorkbook } from '@/modules/pace/components/file-viewer/viewers/spreadsheet/spreadsheet.utils';
-import SpreadsheetError from '@/modules/pace/components/file-viewer/viewers/spreadsheet/SpreadsheetError';
 import SpreadsheetViewerLoading from '@/modules/pace/components/file-viewer/viewers/spreadsheet/SpreadsheetViewerLoading';
 
-const SpreadsheetViewer = memo(({ content, mediaUrl, fileExtension }: SpreadsheetViewerProps) => {
+const SpreadsheetViewer = memo(({ content, mediaUrl, fileExtension, onError }: SpreadsheetViewerProps) => {
+  const hasLoadedOnce = useRef(false);
   const [spreadsheetData, setSpreadsheetData] = useState<SpreadsheetData | null>(null);
   const [activeSheet, setActiveSheet] = useState<string>('');
   const [isLoading, setIsLoading] = useState(true);
@@ -109,7 +109,9 @@ const SpreadsheetViewer = memo(({ content, mediaUrl, fileExtension }: Spreadshee
 
   const parseData = useCallback(
     async (signal?: AbortSignal) => {
-      setIsLoading(true);
+      if (!hasLoadedOnce.current) {
+        setIsLoading(true);
+      }
       setError(null);
 
       try {
@@ -144,14 +146,18 @@ const SpreadsheetViewer = memo(({ content, mediaUrl, fileExtension }: Spreadshee
           sheetNames,
         });
         setActiveSheet(firstSheet);
+        hasLoadedOnce.current = true;
       } catch (err) {
         if (err instanceof Error && err.name === 'AbortError') return;
-        setError(err instanceof Error ? err.message : 'Unknown error occurred');
+        const message = err instanceof Error ? err.message : 'Unknown error occurred';
+
+        setError(message);
+        onError?.(message);
       } finally {
         if (!signal?.aborted) setIsLoading(false);
       }
     },
-    [content, mediaUrl, isTextBased],
+    [content, mediaUrl, isTextBased, onError],
   );
 
   useEffect(() => {
@@ -163,8 +169,7 @@ const SpreadsheetViewer = memo(({ content, mediaUrl, fileExtension }: Spreadshee
   }, [parseData]);
 
   if (isLoading) return <SpreadsheetViewerLoading />;
-  if (error) return <SpreadsheetError message={error} />;
-  if (!spreadsheetData) return null;
+  if (error || !spreadsheetData) return null;
 
   if (!hasData) {
     return <EmptyState imageSrc={SHEET_EMPTY_STATE} imageAlt='No data available' title='No data available' />;

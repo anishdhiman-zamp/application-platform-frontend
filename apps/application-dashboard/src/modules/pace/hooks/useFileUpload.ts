@@ -28,6 +28,7 @@ import {
   getRootFolderName,
   getTargetPath,
   processInParallel,
+  sanitizeFileName,
   shouldUseChunkedUpload,
   type UploadCallbacks,
   uploadFile as uploadFileUtil,
@@ -157,9 +158,11 @@ export const useFileUpload = (): UseFileUploadReturn => {
       const isChunkedUpload = shouldUseChunkedUpload(file.size);
       const uploadType = isChunkedUpload ? UPLOAD_TYPE.CHUNKED : UPLOAD_TYPE.DIRECT;
 
+      const sanitizedName = sanitizeFileName(file.name);
+
       const uploadingItem: FileItem = {
         path: targetPath,
-        name: file.name,
+        name: sanitizedName,
         type: FILE_TYPE.FILE,
         size: file.size,
         mtime_ms: Date.now(),
@@ -167,7 +170,7 @@ export const useFileUpload = (): UseFileUploadReturn => {
       };
 
       const uploadInfo: UploadProgress = {
-        fileName: file.name,
+        fileName: sanitizedName,
         filePath: targetPath,
         loaded: 0,
         total: file.size,
@@ -209,7 +212,7 @@ export const useFileUpload = (): UseFileUploadReturn => {
             ...DEFAULT_UPLOAD_STATE,
             uploadingItems: prev.uploadingItems,
           }));
-          toast.success(`${file.name} uploaded successfully`);
+          toast.success(`${sanitizedName} uploaded successfully`);
         },
         onError: (error) => {
           setUploadState({
@@ -228,7 +231,7 @@ export const useFileUpload = (): UseFileUploadReturn => {
       } catch (error) {
         if (!(error instanceof Error && error.message === 'Upload cancelled')) {
           captureException(error);
-          toast.error(`Failed to upload ${file.name}`);
+          toast.error(`Failed to upload ${sanitizedName}`);
         }
       } finally {
         abortControllerRef.current = null;
@@ -259,7 +262,7 @@ export const useFileUpload = (): UseFileUploadReturn => {
 
       const uploadingItems: FileItem[] = fileArray.map((file) => ({
         path: getTargetPath(basePath, file.name),
-        name: file.name,
+        name: sanitizeFileName(file.name),
         type: FILE_TYPE.FILE,
         size: file.size,
         mtime_ms: Date.now(),
@@ -293,11 +296,12 @@ export const useFileUpload = (): UseFileUploadReturn => {
           PARALLEL_FILE_UPLOAD_CONCURRENCY,
           async (file: File) => {
             const targetPath = getTargetPath(basePath, file.name);
+            const sanitizedName = sanitizeFileName(file.name);
             const isChunkedUpload = shouldUseChunkedUpload(file.size);
             const uploadType = isChunkedUpload ? UPLOAD_TYPE.CHUNKED : UPLOAD_TYPE.DIRECT;
 
             const fileInfo: UploadProgress = {
-              fileName: file.name,
+              fileName: sanitizedName,
               filePath: targetPath,
               loaded: 0,
               total: file.size,
@@ -364,7 +368,7 @@ export const useFileUpload = (): UseFileUploadReturn => {
 
               if (!isCancelled) {
                 captureException(fileError);
-                failedFiles.push(file.name);
+                failedFiles.push(sanitizedName);
               }
 
               setUploadState((prev) => {
@@ -524,11 +528,12 @@ export const useFileUpload = (): UseFileUploadReturn => {
           PARALLEL_FILE_UPLOAD_CONCURRENCY,
           async ({ file, relativePath }) => {
             const targetPath = getTargetPath(basePath, relativePath);
+            const sanitizedName = sanitizeFileName(file.name);
             const isChunkedUpload = shouldUseChunkedUpload(file.size);
             const uploadType = isChunkedUpload ? UPLOAD_TYPE.CHUNKED : UPLOAD_TYPE.DIRECT;
 
             const currentFileInfo: UploadProgress = {
-              fileName: file.name,
+              fileName: sanitizedName,
               filePath: targetPath,
               loaded: 0,
               total: file.size,

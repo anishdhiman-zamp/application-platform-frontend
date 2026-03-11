@@ -224,10 +224,21 @@ const uploadChunksInParallel = async (
   }
 };
 
+export const sanitizeFileName = (name: string): string => {
+  return name.replace(/\s+/g, '_');
+};
+
+export const sanitizePath = (filePath: string): string => {
+  return filePath
+    .split('/')
+    .map((segment) => sanitizeFileName(segment))
+    .join('/');
+};
+
 export const getTargetPath = (basePath: string, fileName: string): string => {
   const normalizedBase = basePath.endsWith('/') ? basePath.slice(0, -1) : basePath;
 
-  return `${normalizedBase}/${fileName}`;
+  return `${normalizedBase}/${sanitizePath(fileName)}`;
 };
 
 export const uploadFileDirectly = async (
@@ -273,7 +284,7 @@ export const uploadFileChunked = async (
 
     const initResult = await mutations.initChunkedUpload({
       path: targetPath.split('/').slice(0, -1).join('/') || '/',
-      file_name: file.name,
+      file_name: sanitizeFileName(file.name),
       total_bytes: file.size,
     });
 
@@ -463,7 +474,7 @@ export const extractFilesWithPaths = (files: FileList): FileWithRelativePath[] =
     if (file.webkitRelativePath) {
       result.push({
         file,
-        relativePath: file.webkitRelativePath,
+        relativePath: sanitizePath(file.webkitRelativePath),
       });
     }
   }
