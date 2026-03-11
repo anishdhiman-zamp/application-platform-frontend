@@ -29,7 +29,6 @@ import {
   SOP_CREATION_FILENAME,
   SOP_FILE_PATH_REGEX,
 } from 'modules/process/knowledge-base-creation/sop-creation.constants';
-import { API_ENDPOINTS } from '@/apis/apiEndpoint.constants';
 import { useLazyGetOpenFeedbackQuery } from '@/apis/feedback';
 import SkeletonElement from '@/components/skeletons/SkeletonElement';
 import useActionHub from '@/modules/chatbot/actionHub';
@@ -123,12 +122,6 @@ const KnowledgeBaseChat: FC<KnowledgeBaseChatProps> = ({
     conversationId: conversationId,
     enableStreaming: streamingEnabled,
     setHeader: setHeader,
-    ...(streamingEnabled && {
-      apiConfig: {
-        sendMessage: API_ENDPOINTS.POST_MESSAGE_V3,
-        createConversation: API_ENDPOINTS.CREATE_CONVERSATION_V3,
-      },
-    }),
   });
 
   const { scrollContainerRef, showScrollButton, handleScroll, handleScrollToBottomClick } = useChatScroll({
