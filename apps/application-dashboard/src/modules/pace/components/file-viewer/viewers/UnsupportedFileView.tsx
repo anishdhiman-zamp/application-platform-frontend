@@ -27,7 +27,7 @@ const UnsupportedFileView = ({ fileName, className = '' }: UnsupportedFileViewPr
   return (
     <div className={`flex h-full w-full flex-col items-center justify-center gap-1 p-8 ${className}`}>
       <div className='flex h-32 w-32 items-center justify-center rounded-2xl'>
-        <FileIcon extension={extension || 'file'} size='lg' />
+        <FileIcon extension={extension || 'file'} className='text-GRAY_900 size-25' />
       </div>
 
       <div className='text-center'>

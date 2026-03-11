@@ -1,2 +1,2 @@
 export { FileIcon, default } from './FileIcon';
-export { FILE_EXTENSION_COLORS, FILE_ICON_SIZES, DEFAULT_FILE_COLOR } from './file-icon.constants';
+export { FILE_EXTENSION_ICON_MAP, DEFAULT_FILE_ICON, FolderClosedIcon, FolderOpenedIcon } from './file-icon.constants';

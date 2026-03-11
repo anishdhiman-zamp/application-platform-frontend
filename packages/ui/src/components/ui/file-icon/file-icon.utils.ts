@@ -1,4 +1,7 @@
-import { FILE_EXTENSION_COLORS, DEFAULT_FILE_COLOR } from './file-icon.constants';
+'use client';
+
+import type { Icon } from '@phosphor-icons/react';
+import { FILE_EXTENSION_ICON_MAP, DEFAULT_FILE_ICON } from './file-icon.constants';
 
 /**
  * Normalizes a file extension by extracting from filename if needed and converting to lowercase
@@ -13,18 +16,9 @@ export const normalizeExtension = (extension: string): string => {
 };
 
 /**
- * Gets the color for a file extension, falling back to default if not found
+ * Returns the Phosphor icon component for a given file extension
  */
-export const getExtensionColor = (extension: string): string => {
+export const getIconForExtension = (extension: string): Icon => {
   const normalized = normalizeExtension(extension);
-  return FILE_EXTENSION_COLORS[normalized] ?? DEFAULT_FILE_COLOR;
-};
-
-/**
- * Formats the extension text for display (uppercase, truncated if needed)
- */
-export const formatExtensionText = (extension: string, maxLength = 5): string => {
-  const normalized = normalizeExtension(extension);
-  const text = normalized.toUpperCase();
-  return text.length > maxLength ? text.slice(0, maxLength) : text;
+  return FILE_EXTENSION_ICON_MAP[normalized] ?? DEFAULT_FILE_ICON;
 };
