@@ -1,0 +1,83 @@
+global:
+  service:
+    name: application-platform-frontend-prd-eu
+
+projectName: zamp  # required
+serviceName: application-platform-frontend
+default:
+  annotations:
+    all:
+      app.kv.io/env: prd-eu
+  labels:
+    all:
+      service-name: application-platform-frontend-svc
+  resources:
+    request:
+      cpu: 1000m
+      memory: 1000Mi
+    limit:
+      cpu: 1000m
+      memory: 1000Mi
+  replicaCount: 2
+  image:
+    repository: "916079538338.dkr.ecr.eu-central-1.amazonaws.com/zamp-prd-eu-application-platform-frontend-ecr"
+    tag: "latest"
+    imagePullPolicy: Always
+  signoz:
+    enabled: false
+  configMaps:
+    injection:
+      enabled: false
+    volumeMount:
+      enabled: false
+  externalSecrets:
+    injection:
+      enabled: false
+    volumeMount:
+      enabled: false
+deployment:
+  - name: "svc"
+    rollingUpdate:
+      maxSurge: "1"
+      maxUnavailable: "0"
+    labels:
+      app.kubernetes.io/component: genesis
+    service:
+      type: ClusterIP
+      ports:
+      - port: 3000
+        name: api
+    serviceAccount:
+        create: true
+        annotations:
+          eks.amazonaws.com/role-arn: arn:aws:iam::916079538338:role/zamp-prd-eu-app-dashboard-frontend-irsa-access-role
+    terminationGracePeriodSeconds: 140
+    containers:
+      - name: "svc"
+        port: 3000
+        env:
+          NODE_ENV: "production"
+          NEXT_PUBLIC_ENVIRONMENT: "production"
+        healthcheck:
+          enabled: true
+          livenessProbe:
+            path : "/api/health-check"
+            initialDelaySeconds : 40
+            periodSeconds: 30
+          readinessProbe:
+            path : "/api/health-check"
+            initialDelaySeconds : 30
+            periodSeconds : 30
+        lifecycle:
+          preStop:
+            exec:
+              command:
+              - /bin/sh
+              - -c
+              - sleep 120
+    autoscaling:
+      enabled: true
+      minReplicas: 2
+      maxReplicas: 10
+      targetCPUUtilizationPercentage: 60
+      targetMemoryUtilizationPercentage: 80

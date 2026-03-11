@@ -53,16 +53,6 @@ export const OtpVerification: FC<Props> = ({ email, flow, onEditEmail, onFlowExp
     requestAnimationFrame(() => otpInputRef.current?.focusFirst());
   }, []);
 
-  const setDigitAt = useCallback((index: number, value: string) => {
-    setDigits((prev) => {
-      const next = [...prev];
-
-      next[index] = value;
-
-      return next;
-    });
-  }, []);
-
   // ── Network Helpers ─────────────────────────────────────────────
 
   function makeAbortController(): AbortController {
@@ -351,8 +341,6 @@ export const OtpVerification: FC<Props> = ({ email, flow, onEditEmail, onFlowExp
         digits={digits}
         isError={!!isError}
         isBusy={isBusy}
-        allFilled={allFilled}
-        onDigitChange={setDigitAt}
         onDigitsReplace={setDigits}
         onClearMessage={() => setMessage(null)}
         onSubmit={submitCode}

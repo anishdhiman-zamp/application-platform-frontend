@@ -59,6 +59,7 @@ function normalizeFlowActionOrigin(flow: LoginFlow, apiBaseUrl: string): LoginFl
 
 export const LoginForm = () => {
   const logoPromiseRef = useRef<Promise<void> | null>(null);
+  const emailInputRef = useRef<HTMLInputElement | null>(null);
   const [email, setEmail] = useState('');
   const [logoLoaded, setLogoLoaded] = useState<boolean>(false);
   const [providerLogo, setProviderLogo] = useState<string>('');
@@ -370,6 +371,23 @@ export const LoginForm = () => {
     return () => window.removeEventListener('pageshow', onPageShow);
   }, []);
 
+  useEffect(() => {
+    const el = emailInputRef.current;
+
+    if (!el) return;
+
+    const syncValue = () => {
+      setEmail(el.value);
+      setError(null);
+      setProviderLogo('');
+      setLogoLoaded(false);
+    };
+
+    el.addEventListener('input', syncValue);
+
+    return () => el.removeEventListener('input', syncValue);
+  }, [activeView]);
+
   switch (activeView) {
     case ACTIVE_VIEW.OTP:
       return (
@@ -381,8 +399,25 @@ export const LoginForm = () => {
         />
       );
 
-    case ACTIVE_VIEW.PASSWORD:
-      return <LocaldevEmailPasswordLogin loginFlow={passwordFlow!} setLoginFlow={setPasswordFlow} />;
+    case ACTIVE_VIEW.PASSWORD: {
+      const hasOtpOption = flowHasCodeNodes(passwordFlow!);
+
+      return (
+        <LocaldevEmailPasswordLogin
+          loginFlow={passwordFlow!}
+          setLoginFlow={setPasswordFlow}
+          onBack={
+            hasOtpOption
+              ? () => {
+                  setMethodPickerFlow(passwordFlow);
+                  setPasswordFlow(null);
+                  setError(null);
+                }
+              : undefined
+          }
+        />
+      );
+    }
 
     case ACTIVE_VIEW.METHOD_PICKER: {
       const btnBase =
@@ -469,6 +504,7 @@ export const LoginForm = () => {
                 type='email'
                 value={email}
                 autoFocus
+                inputRef={emailInputRef}
                 onChange={handleEmailChange}
                 disabled={isLoading}
                 noBorders

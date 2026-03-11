@@ -1,0 +1,463 @@
+name: AWS Prd-EU Application Platform Frontend - Build and Deploy
+
+on:
+  workflow_dispatch:
+    inputs:
+      BRANCH:
+        description: 'Branch to deploy'
+        required: false
+        default: 'main'
+        type: string
+      staging_tag:
+        description: 'Staging tag that passed tests and should be deployed to production EU'
+        required: false
+        type: string
+      staging_tests_passed:
+        description: 'Whether staging tests passed'
+        required: false
+        type: string
+        default: 'false'
+  workflow_call:
+    inputs:
+      staging_tag:
+        description: 'Staging tag that passed tests and should be deployed to production EU'
+        required: true
+        type: string
+      staging_tests_passed:
+        description: 'Whether staging tests passed'
+        required: true
+        type: boolean
+
+env:
+  APP_NAME: application-platform-frontend
+
+concurrency:
+  group: frontend-prd-eu-deploy
+  cancel-in-progress: false
+
+jobs:
+  validate-deployment:
+    name: Validate Deployment Gate (EU)
+    runs-on: ubuntu-latest
+    outputs:
+      STAGING_TAG: ${{ steps.validate.outputs.STAGING_TAG }}
+      DEPLOYMENT_APPROVED: ${{ steps.validate.outputs.DEPLOYMENT_APPROVED }}
+    steps:
+      - name: Validate staging tests passed
+        id: validate
+        run: |
+          echo "Validating production EU deployment gate..."
+          echo "Staging tag: ${{ inputs.staging_tag || 'manual-trigger' }}"
+          echo "Tests passed: ${{ inputs.staging_tests_passed || 'manual-trigger' }}"
+
+          if [ "${{ github.event_name }}" == "workflow_call" ] || [ "${{ inputs.staging_tag }}" != "" ]; then
+            if [ "${{ inputs.staging_tests_passed }}" != "true" ]; then
+              echo "DEPLOYMENT BLOCKED: Staging tests did not pass!"
+              echo "Production EU deployment requires all staging tests to pass"
+              exit 1
+            fi
+            echo "Staging tests passed - production EU deployment approved"
+            echo "STAGING_TAG=${{ inputs.staging_tag }}" >> $GITHUB_OUTPUT
+            echo "DEPLOYMENT_APPROVED=true" >> $GITHUB_OUTPUT
+          else
+            echo "Manual trigger without staging validation - proceeding"
+            echo "STAGING_TAG=manual-$(date +%s)" >> $GITHUB_OUTPUT
+            echo "DEPLOYMENT_APPROVED=true" >> $GITHUB_OUTPUT
+          fi
+
+          echo "Using tag: ${{ inputs.staging_tag || 'manual-trigger' }}" >> $GITHUB_STEP_SUMMARY
+          echo "Production EU deployment approved" >> $GITHUB_STEP_SUMMARY
+
+  prepare-env:
+    name: Prepare Env
+    runs-on: arc-runner-set-aws-prd-eu
+    timeout-minutes: 2
+    needs: validate-deployment
+    outputs:
+      SLACK_WEBHOOK_URL: ${{ steps.vars.outputs.SLACK_WEBHOOK_URL }}
+      SSH_PRIVATE_KEY: ${{ steps.vars.outputs.SSH_PRIVATE_KEY }}
+      HELM_CHART_NAME: ${{ steps.vars.outputs.HELM_CHART_NAME }}
+      AWS_ACCOUNT_ID: ${{ steps.vars.outputs.AWS_ACCOUNT_ID }}
+      VALUES_FILE: ${{ steps.vars.outputs.VALUES_FILE }}
+      HELM_REPOSITORY: ${{ steps.vars.outputs.HELM_REPOSITORY }}
+      ECR_REPO: ${{ steps.vars.outputs.ECR_REPO }}
+      NAMESPACE: ${{ steps.vars.outputs.NAMESPACE }}
+      EKS_CLUSTER: ${{ steps.vars.outputs.EKS_CLUSTER }}
+      AWS_REGION: ${{ steps.vars.outputs.AWS_REGION }}
+      ENVIRONMENT: ${{ steps.vars.outputs.ENVIRONMENT }}
+      BUILD_ENV: ${{ steps.vars.outputs.BUILD_ENV }}
+      APP_NAME: ${{ steps.vars.outputs.APP_NAME }}
+      TIMESTAMP: ${{ steps.vars.outputs.TIMESTAMP }}
+      ASSETS_S3_BUCKET: ${{ steps.vars.outputs.ASSETS_S3_BUCKET }}
+      CLOUDFRONT_DISTRIBUTION_ID: ${{ steps.vars.outputs.CLOUDFRONT_DISTRIBUTION_ID }}
+      CLOUDFRONT_DOMAIN: ${{ steps.vars.outputs.CLOUDFRONT_DOMAIN }}
+      STAGING_TAG: ${{ needs.validate-deployment.outputs.STAGING_TAG }}
+
+    steps:
+      - id: vars
+        run: |
+          TIMESTAMP=$(date +'%Y%m%dT%H%M%S')
+          echo "HELM_CHART_NAME=zamp-svc" >> $GITHUB_OUTPUT
+          echo "SLACK_WEBHOOK_URL=SLACK_WEBHOOK_URL_APPLICATION_PLATFORM_FRONTEND" >> $GITHUB_OUTPUT
+          echo "SSH_PRIVATE_KEY=SSH_PRIVATE_KEY" >> $GITHUB_OUTPUT
+          echo "ECR_REPO=zamp-prd-eu-application-platform-frontend-ecr" >> $GITHUB_OUTPUT
+          echo "HELM_REPOSITORY=zamp-prd-eu-helmcharts" >> $GITHUB_OUTPUT
+          echo "NAMESPACE=application-platform-frontend" >> $GITHUB_OUTPUT
+          echo "EKS_CLUSTER=zamp-prd-eu-cluster" >> $GITHUB_OUTPUT
+          echo "AWS_REGION=eu-central-1" >> $GITHUB_OUTPUT
+          echo "AWS_ACCOUNT_ID=916079538338" >> $GITHUB_OUTPUT
+          echo "VALUES_FILE=prd-eu-values.yaml" >> $GITHUB_OUTPUT
+          echo "ASSETS_S3_BUCKET=zamp-prd-eu-application-platform-assets" >> $GITHUB_OUTPUT
+          echo "CLOUDFRONT_DISTRIBUTION_ID=E12B4SW6FNF1YY" >> $GITHUB_OUTPUT
+          echo "CLOUDFRONT_DOMAIN=d32iplxsg1jjfq.cloudfront.net" >> $GITHUB_OUTPUT
+          echo "BUILD_ENV=awsprd" >> $GITHUB_OUTPUT
+          echo "TIMESTAMP=$TIMESTAMP" >> $GITHUB_OUTPUT
+          echo "APP_NAME=$APP_NAME" >> $GITHUB_OUTPUT
+          echo "ENVIRONMENT=production" >> $GITHUB_OUTPUT
+
+      - name: Output deployment info
+        run: |
+          echo "Staging Tag: ${{ needs.validate-deployment.outputs.STAGING_TAG }}" >> $GITHUB_STEP_SUMMARY
+          echo "Environment: production (EU)" >> $GITHUB_STEP_SUMMARY
+          echo "Branch: ${{ github.event.inputs.BRANCH || github.ref_name }}" >> $GITHUB_STEP_SUMMARY
+          echo "Tests: Validated in staging" >> $GITHUB_STEP_SUMMARY
+
+  build-push-image:
+    needs:
+      - validate-deployment
+      - prepare-env
+    name: Build and Push Image
+    permissions:
+      id-token: write
+      contents: read
+    runs-on: arc-runner-set-aws-prd-eu
+    env:
+      AWS_REGION: ${{ needs.prepare-env.outputs.AWS_REGION }}
+      AWS_ACCOUNT_ID: ${{needs.prepare-env.outputs.AWS_ACCOUNT_ID}}
+      ECR_REPO: ${{ needs.prepare-env.outputs.ECR_REPO }}
+      APP_NAME: ${{ needs.prepare-env.outputs.APP_NAME }}
+      SSH_PRIVATE_KEY: ${{ needs.prepare-env.outputs.SSH_PRIVATE_KEY }}
+      ENVIRONMENT: ${{ needs.prepare-env.outputs.ENVIRONMENT }}
+      TIMESTAMP: ${{ needs.prepare-env.outputs.TIMESTAMP }}
+      ASSETS_S3_BUCKET: ${{ needs.prepare-env.outputs.ASSETS_S3_BUCKET }}
+      STAGING_TAG: ${{ needs.validate-deployment.outputs.STAGING_TAG }}
+      SECRET_NAME: zamp-prd-eu-app-dashboard-frontend-secrets
+      CLOUDFRONT_DISTRIBUTION_ID: ${{ needs.prepare-env.outputs.CLOUDFRONT_DISTRIBUTION_ID }}
+      CLOUDFRONT_DOMAIN: ${{ needs.prepare-env.outputs.CLOUDFRONT_DOMAIN }}
+    outputs:
+      IMAGE_TAG: ${{ steps.build.outputs.IMAGE_TAG }}
+      ECR_REPO_URI: ${{ steps.build.outputs.ECR_REPO_URI }}
+
+    steps:
+      - name: Determine ref to checkout
+        id: resolve-ref
+        run: |
+          if [ "${{ inputs.staging_tag }}" != "" ]; then
+            echo "REF=${{ inputs.staging_tag }}" >> $GITHUB_OUTPUT
+            echo "Using staging_tag as checkout ref: ${{ inputs.staging_tag }}"
+          else
+            echo "REF=${{ github.event.inputs.BRANCH || github.ref }}" >> $GITHUB_OUTPUT
+            echo "Using branch/ref as checkout ref: ${{ github.event.inputs.BRANCH || github.ref }}"
+          fi
+
+      - name: 'Checkout repository on : ${{ steps.resolve-ref.outputs.REF }}'
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+          ref: ${{ steps.resolve-ref.outputs.REF }}
+
+      - name: 'Debug Environment Variables'
+        run: |
+          echo "=== Job Environment Variables ==="
+          echo "AWS_ACCOUNT_ID: '$AWS_ACCOUNT_ID'"
+          echo "AWS_REGION: '$AWS_REGION'" 
+          echo "ECR_REPO: '$ECR_REPO'"
+          echo "APP_NAME: '$APP_NAME'"
+          echo "================================"
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          cache: 'npm'
+
+      - name: 'Set up AWS credentials using OIDC'
+        uses: aws-actions/configure-aws-credentials@v4
+        with:
+          role-to-assume: arn:aws:iam::${{ env.AWS_ACCOUNT_ID }}:role/GitHubActionsRole
+          aws-region: ${{ env.AWS_REGION }}
+          role-session-name: GitHubActionsSession
+
+      - name: 'Install AWS CLI'
+        run: |
+          curl "https://awscli.amazonaws.com/awscli-exe-linux-aarch64.zip" -o "awscliv2.zip"
+          unzip awscliv2.zip
+          sudo ./aws/install
+
+      - name: 'Login to Amazon ECR'
+        run: |
+          aws ecr get-login-password --region $AWS_REGION | docker login --username AWS --password-stdin $AWS_ACCOUNT_ID.dkr.ecr.$AWS_REGION.amazonaws.com
+
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v3
+        with:
+          endpoint: tcp://buildkitd.buildkit.svc.cluster.local:1234
+          driver: remote
+
+      - uses: actions/cache@v4
+        with:
+          path: .turbo
+          key: ${{ runner.os }}-turbo-${{ github.sha }}
+          restore-keys: |
+            ${{ runner.os }}-turbo-
+
+      - uses: webfactory/ssh-agent@v0.9.0
+        with:
+          ssh-private-key: '${{secrets[env.SSH_PRIVATE_KEY]}}'
+
+      - name: Install dependencies
+        run: |
+          npm ci
+
+      - name: Fetch secrets from AWS Secrets Manager
+        run: |
+          echo "Fetching secrets from AWS Secrets Manager..."
+          echo "Secret Name: ${{ env.SECRET_NAME }}"
+          echo "Region: ${{ env.AWS_REGION }}"
+
+          SECRET_JSON=$(aws secretsmanager get-secret-value \
+            --secret-id ${{ env.SECRET_NAME }} \
+            --region ${{ env.AWS_REGION }} \
+            --query SecretString \
+            --output text)
+
+          echo "$SECRET_JSON" | jq -r 'to_entries|map("\(.key)=\(.value)")|.[]' >> $GITHUB_ENV
+
+          echo "Secrets loaded successfully"
+
+      - name: Set Sentry release and dist
+        run: |
+          echo "SENTRY_RELEASE=$GITHUB_SHA" >> $GITHUB_ENV
+          echo "NEXT_PUBLIC_SENTRY_RELEASE=$GITHUB_SHA" >> $GITHUB_ENV
+          echo "DEPLOY_TARGET=aws-${AWS_REGION}" >> $GITHUB_ENV
+          echo "NEXT_PUBLIC_DEPLOY_TARGET=aws-${AWS_REGION}" >> $GITHUB_ENV
+
+      - name: Build application
+        env:
+          TIMESTAMP: '${TIMESTAMP}'
+          NODE_OPTIONS: '--max-old-space-size=8192'
+        run: |
+          echo "Building application with environment variables:"
+          echo "NEXT_PUBLIC_ASSET_PREFIX: $NEXT_PUBLIC_ASSET_PREFIX"
+          echo "TIMESTAMP: $TIMESTAMP"
+          echo "NODE_OPTIONS: $NODE_OPTIONS"
+          echo "NEXT_PUBLIC_BASE_API_URL: $NEXT_PUBLIC_BASE_API_URL"
+          echo "NEXT_PUBLIC_DEFAULT_REGION: $NEXT_PUBLIC_DEFAULT_REGION"
+          echo "NEXT_PUBLIC_MULTI_REGION_ENABLED: $NEXT_PUBLIC_MULTI_REGION_ENABLED"
+          npm run build
+
+          echo "Build completed successfully!"
+          echo "Build artifacts:"
+          ls -la apps/application-dashboard/.next/
+
+      - name: Upload source maps to Sentry
+        env:
+          SENTRY_ORG: varni-labs-pte-ltd
+          SENTRY_PROJECT: application-platform-dashboard
+        run: |
+          npx sentry-cli sourcemaps upload \
+            apps/application-dashboard/.next \
+            --release "$SENTRY_RELEASE" \
+            --dist aws-${AWS_REGION} \
+            --url-prefix "~/_next" \
+            --rewrite
+
+      - id: build
+        name: Build and Push Image
+        run: |
+          echo "=== Environment Variables Debug ==="
+          echo "AWS_ACCOUNT_ID: '$AWS_ACCOUNT_ID'"
+          echo "AWS_REGION: '$AWS_REGION'"
+          echo "ECR_REPO: '$ECR_REPO'"
+          echo "=================================="
+
+          ECR_REGISTRY="$AWS_ACCOUNT_ID.dkr.ecr.$AWS_REGION.amazonaws.com"
+          ECR_REPO_URI="$ECR_REGISTRY/$ECR_REPO"
+          IMAGE_TAG=$GITHUB_SHA-$GITHUB_RUN_NUMBER-$(date +%s)
+
+          echo "=== Build Debug Info ==="
+          echo "ECR_REGISTRY: '$ECR_REGISTRY'"
+          echo "ECR_REPO: '$ECR_REPO'"
+          echo "ECR_REPO_URI: '$ECR_REPO_URI'"
+          echo "IMAGE_TAG: '$IMAGE_TAG'"
+          echo "Full Image: '$ECR_REGISTRY/$ECR_REPO:$IMAGE_TAG'"
+          echo "========================="
+
+          if [ -z "$ECR_REPO_URI" ]; then
+            echo "ERROR: ECR_REPO_URI is empty!"
+            exit 1
+          fi
+
+          docker buildx build \
+            --platform linux/arm64 \
+            -t $ECR_REGISTRY/$ECR_REPO:$IMAGE_TAG \
+            --build-arg NEXT_PUBLIC_ASSET_PREFIX="$NEXT_PUBLIC_ASSET_PREFIX" \
+            --build-arg TIMESTAMP="$TIMESTAMP" \
+            --build-arg NEXT_PUBLIC_ENVIRONMENT="$NEXT_PUBLIC_ENVIRONMENT" \
+            --build-arg NEXT_PUBLIC_BASE_API_URL="$NEXT_PUBLIC_BASE_API_URL" \
+            --build-arg NEXT_PUBLIC_DEFAULT_REGION="$NEXT_PUBLIC_DEFAULT_REGION" \
+            --build-arg NEXT_PUBLIC_MULTI_REGION_ENABLED="$NEXT_PUBLIC_MULTI_REGION_ENABLED" \
+            --push .
+
+
+          echo "ECR_REPO_URI=$ECR_REPO_URI" >> $GITHUB_OUTPUT
+          echo "IMAGE_TAG=$IMAGE_TAG" >> $GITHUB_OUTPUT
+          echo ":whale2:App Image Tag: ${IMAGE_TAG} " >> $GITHUB_STEP_SUMMARY
+
+      - id: upload-assets
+        name: Upload Static Files to S3
+        run: |
+          echo "Uploading new Next.js static files (additive - preserving old chunks for in-flight requests)..."
+          aws s3 sync apps/application-dashboard/.next/static "s3://${ASSETS_S3_BUCKET}/application-platform-frontend/_next/static"
+          aws s3 sync apps/application-dashboard/public "s3://${ASSETS_S3_BUCKET}/application-platform-frontend/public"
+
+          echo "Static assets uploaded to S3 successfully!"
+          echo "Static files path: s3://${ASSETS_S3_BUCKET}/application-platform-frontend/_next/static"
+
+          echo "Invalidating CloudFront cache for non-hashed public assets..."
+          aws cloudfront create-invalidation \
+            --distribution-id ${CLOUDFRONT_DISTRIBUTION_ID} \
+            --paths "/application-platform-frontend/public/*"
+
+          echo "CloudFront invalidation initiated for public assets!"
+          echo "New assets available at: https://${CLOUDFRONT_DOMAIN}/application-platform-frontend"
+
+  deploy-to-eks:
+    name: Deploy to EKS
+    runs-on: arc-runner-set-aws-prd-eu
+    timeout-minutes: 15
+    permissions:
+      id-token: write
+      contents: read
+    needs:
+      - validate-deployment
+      - prepare-env
+      - build-push-image
+    env:
+      APP_NAME: ${{needs.prepare-env.outputs.APP_NAME}}
+      AWS_REGION: ${{needs.prepare-env.outputs.AWS_REGION}}
+      EKS_CLUSTER: ${{needs.prepare-env.outputs.EKS_CLUSTER}}
+      HELM_REPOSITORY: ${{needs.prepare-env.outputs.HELM_REPOSITORY}}
+      HELM_CHART_NAME: ${{needs.prepare-env.outputs.HELM_CHART_NAME}}
+      NAMESPACE: ${{needs.prepare-env.outputs.NAMESPACE}}
+      ECR_REPO: ${{needs.prepare-env.outputs.ECR_REPO}}
+      IMAGE_TAG: ${{needs.build-push-image.outputs.IMAGE_TAG}}
+      BUILD_ENV: ${{needs.prepare-env.outputs.BUILD_ENV}}
+      AWS_ACCOUNT_ID: ${{needs.prepare-env.outputs.AWS_ACCOUNT_ID}}
+      VALUES_FILE: ${{needs.prepare-env.outputs.VALUES_FILE}}
+      STAGING_TAG: ${{needs.validate-deployment.outputs.STAGING_TAG}}
+
+    steps:
+      - name: Determine ref to checkout
+        id: resolve-ref
+        run: |
+          if [ "${{ inputs.staging_tag }}" != "" ]; then
+            echo "REF=${{ inputs.staging_tag }}" >> $GITHUB_OUTPUT
+          else
+            echo "REF=${{ github.event.inputs.BRANCH || github.ref }}" >> $GITHUB_OUTPUT
+          fi
+
+      - name: 'Checkout repository on : ${{ steps.resolve-ref.outputs.REF }}'
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+          ref: ${{ steps.resolve-ref.outputs.REF }}
+
+      - name: 'Set up AWS credentials using OIDC'
+        uses: aws-actions/configure-aws-credentials@v4
+        with:
+          role-to-assume: arn:aws:iam::${{ env.AWS_ACCOUNT_ID }}:role/GitHubActionsRole
+          aws-region: ${{ env.AWS_REGION }}
+          role-session-name: GitHubActionsSession
+
+      - name: 'Install AWS CLI'
+        run: |
+          curl "https://awscli.amazonaws.com/awscli-exe-linux-aarch64.zip" -o "awscliv2.zip"
+          unzip awscliv2.zip
+          sudo ./aws/install
+
+      - uses: azure/setup-helm@v4
+        name: Install Helm
+        with:
+          version: 'v3.7.2'
+
+      - uses: azure/setup-kubectl@v4
+        with:
+          version: 'v1.22.0'
+        id: install
+
+      - name: 'Set up kubectl'
+        run: |
+          aws eks update-kubeconfig --region $AWS_REGION --name $EKS_CLUSTER
+
+      - name: Deploy
+        run: |
+          ECR_REPO_URI="$AWS_ACCOUNT_ID.dkr.ecr.$AWS_REGION.amazonaws.com/$ECR_REPO"
+
+          aws s3 cp s3://${HELM_REPOSITORY}/${HELM_CHART_NAME}-0.0.1.tgz .
+          tar -xvzf ${HELM_CHART_NAME}-0.0.1.tgz
+
+          echo "Deploying production EU with staging tag: $STAGING_TAG and image: $IMAGE_TAG"
+          helm upgrade --install ${APP_NAME} ./${HELM_CHART_NAME} \
+              --namespace ${NAMESPACE} \
+              --set default.image.repository="${ECR_REPO_URI}" \
+              --set default.image.tag="${IMAGE_TAG}" \
+              --values helm/${VALUES_FILE} \
+              --wait \
+              --timeout 10m0s \
+              --create-namespace
+
+          echo "Production EU deployment completed successfully!" >> $GITHUB_STEP_SUMMARY
+          echo "Staging Tag: $STAGING_TAG" >> $GITHUB_STEP_SUMMARY
+          echo "Environment: production (EU)" >> $GITHUB_STEP_SUMMARY
+          echo "Tests: Validated in staging before deployment" >> $GITHUB_STEP_SUMMARY
+
+  slack-notification:
+    name: Slack Notification
+    if: always()
+    runs-on: ubuntu-latest
+    needs:
+      - validate-deployment
+      - prepare-env
+      - build-push-image
+      - deploy-to-eks
+    env:
+      SLACK_WEBHOOK_URL: ${{needs.prepare-env.outputs.SLACK_WEBHOOK_URL}}
+      ENVIRONMENT: ${{needs.prepare-env.outputs.ENVIRONMENT}}
+      STAGING_TAG: ${{needs.validate-deployment.outputs.STAGING_TAG}}
+    steps:
+      - uses: technote-space/workflow-conclusion-action@v3
+      - name: Update slack message body
+        id: body
+        run: |
+          if [ '${{ env.WORKFLOW_CONCLUSION }}' == 'success' ]
+          then
+            echo "SLACK_MESSAGE=Production EU Success :white_check_mark: Tag: $STAGING_TAG | Tests: Validated in Staging" >> $GITHUB_OUTPUT
+          elif [ '${{ env.WORKFLOW_CONCLUSION }}'  == 'failure' ]
+          then
+            echo "SLACK_MESSAGE=Production EU Failed :x: Tag: $STAGING_TAG" >> $GITHUB_OUTPUT
+          elif [ '${{ env.WORKFLOW_CONCLUSION }}'  == 'cancelled' ]
+          then
+            echo "SLACK_MESSAGE=Production EU Cancelled :grey_exclamation: Tag: $STAGING_TAG" >> $GITHUB_OUTPUT
+          fi
+      - name: Slack Notification
+        uses: Zampfi/town_crier@main
+        env:
+          SLACK_COLOR: ${{ env.WORKFLOW_CONCLUSION }}
+          SLACK_ICON: https://media-exp1.licdn.com/dms/image/C4D0BAQEsXCky1jDBjw/company-logo_200_200/0/1650191766210?e=2147483647&v=beta&t=skUuL49MkcdxJZmEEN2wy5E7Xqy176Ar7EPsKoSMUEE
+          SLACK_MESSAGE: ${{ steps.body.outputs.SLACK_MESSAGE }}
+          SLACK_TITLE: Production EU Deployment - Gated by Staging Tests
+          ZAMP_ENV: ${{ env.ENVIRONMENT }}
+          SLACK_FOOTER: '<${{ github.server_url }}/${{ github.repository }}|${{ github.repository }}>'
+          SLACK_USERNAME: Zamp-Devops
+          SLACK_WEBHOOK: ${{ secrets[env.SLACK_WEBHOOK_URL] }}

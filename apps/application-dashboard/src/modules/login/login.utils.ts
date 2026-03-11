@@ -106,30 +106,6 @@ export function isResendSuccessResponse(data: { state?: string; ui?: { messages?
   );
 }
 
-export function processPastedOtp(
-  digits: string[],
-  pasteText: string,
-  startIndex: number,
-  otpLength: number,
-): { newDigits: string[]; nextFocusIndex: number } | null {
-  const pasted = pasteText.replace(/[^0-9]/g, '');
-
-  if (!pasted) return null;
-
-  const newDigits = [...digits];
-
-  for (const [offset, char] of [...pasted].entries()) {
-    const targetIdx = startIndex + offset;
-
-    if (targetIdx >= otpLength) break;
-    newDigits[targetIdx] = char;
-  }
-
-  const nextFocusIndex = Math.min(startIndex + pasted.length, otpLength - 1);
-
-  return { newDigits, nextFocusIndex };
-}
-
 export function flowHasCodeNodes(flow: LoginFlow): boolean {
   return flow.ui?.nodes?.some((n: FlowNode) => n.group === LOGIN_GROUPS.CODE) ?? false;
 }

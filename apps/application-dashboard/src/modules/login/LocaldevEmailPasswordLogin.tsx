@@ -4,6 +4,7 @@ import { Button } from '@zamp-platform/ui';
 import { cn } from '@zamp-platform/ui/utils';
 import { useGetErrorDetailsQuery } from 'apis/auth';
 import { LOGIN_METHODS } from 'constants/auth.constants';
+import { MoveLeft } from 'lucide-react';
 import { LOGIN_ERROR_TEXT } from 'modules/login/constants';
 import { useSearchParams } from 'next/navigation';
 import { LoginFlow } from 'types/api/auth.types';
@@ -14,9 +15,10 @@ import Input from 'components/common/input';
 type LoginFormProps = {
   loginFlow: LoginFlow;
   setLoginFlow: (loginFlow: LoginFlow) => void;
+  onBack?: () => void;
 };
 
-const LoginForm: FC<LoginFormProps> = ({ loginFlow, setLoginFlow }) => {
+const LoginForm: FC<LoginFormProps> = ({ loginFlow, setLoginFlow, onBack }) => {
   const searchParams = useSearchParams();
   const errorId = searchParams?.get('error')?.toString() ?? '';
   const cachedUserEmail = JSON.parse(getFromLocalStorage(LOCAL_STORAGE_KEYS.XZAMP_USER) ?? '{}');
@@ -149,6 +151,17 @@ const LoginForm: FC<LoginFormProps> = ({ loginFlow, setLoginFlow }) => {
           {loading ? 'Signing in...' : 'Sign in'}
         </Button>
       </form>
+      {onBack && (
+        <Button
+          type='button'
+          variant='ghost'
+          className='text-GRAY_700 hover:text-GRAY_900 f-13-400 mt-4 flex h-auto items-center gap-1.5 bg-transparent transition-colors hover:bg-transparent'
+          onClick={onBack}
+        >
+          <MoveLeft className='h-4 w-4' />
+          Pick a different method
+        </Button>
+      )}
     </div>
   );
 };
