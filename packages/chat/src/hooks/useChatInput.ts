@@ -13,7 +13,12 @@ import {
   ScopeType,
   SenderType,
 } from '../types/chat.types';
-import { DeleteFileMutation, handleFilesystemUploads, UploadMutations } from '../utils/filesystemUpload';
+import {
+  DeleteFileMutation,
+  handleFilesystemUploads,
+  sanitizeFileName,
+  UploadMutations,
+} from '../utils/filesystemUpload';
 import { useChat } from './useChat';
 
 export interface UploadedFile {
@@ -244,7 +249,7 @@ export const useChatInput = ({
 
     const uploadingFiles = Array.from(files).map((file) => ({
       path: '',
-      name: file.name,
+      name: sanitizeFileName(file.name),
       file_type: file.type,
       file: file,
     }));
@@ -254,7 +259,7 @@ export const useChatInput = ({
 
     const { successful, failed } = await handleFilesystemUploads(files, username, adapter.uploadMutations);
 
-    const failedFileNames = new Set(failed.map((f) => f.file.name));
+    const failedFileNames = new Set(failed.map((f) => sanitizeFileName(f.file.name)));
 
     setFileReferences((prev) => {
       const tempEntriesMap = new Map<string, number>();
