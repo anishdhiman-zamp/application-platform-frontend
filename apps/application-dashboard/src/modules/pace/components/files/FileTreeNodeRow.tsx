@@ -1,12 +1,21 @@
 'use client';
 
-import { forwardRef } from 'react';
-import { Button, FileIcon, Input } from '@zamp-platform/ui';
+import { forwardRef, useState } from 'react';
+import {
+  Button,
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+  FileIcon,
+  FolderClosedIcon,
+  FolderOpenedIcon,
+  Input,
+} from '@zamp-platform/ui';
 import { cn } from '@zamp-platform/ui/utils';
-import { ChevronRight, Loader } from 'lucide-react';
-import Image from 'next/image';
+import { ChevronRight, Loader, MoreVertical } from 'lucide-react';
 import TooltipV2 from '@/components/common/TooltipV2';
-import type { TreeNode } from '@/modules/pace/components/files/file-tree.types';
+import type { ContextMenuAction, TreeNode } from '@/modules/pace/components/files/file-tree.types';
 import { getFileExtension } from '@/modules/pace/components/files/file-tree.utils';
 import { SIDE_OPTIONS } from '@/types/commonTypes';
 
@@ -21,7 +30,6 @@ interface FileTreeNodeRowState {
   isCutItem: boolean;
   isProtected: boolean;
   isUserPrivateFolder: boolean;
-  contextMenuOpen: boolean;
   isUploading: boolean;
 }
 
@@ -50,12 +58,19 @@ interface FileTreeNodeRowProps extends React.HTMLAttributes<HTMLDivElement> {
   state: FileTreeNodeRowState;
   rename: FileTreeNodeRowRename;
   handlers: FileTreeNodeRowHandlers;
+  actions: ContextMenuAction[];
+  onActionClick: (actionId: string) => void;
 }
 
 const FileTreeNodeRow = forwardRef<HTMLDivElement, FileTreeNodeRowProps>(
-  ({ node, depth, state, rename, handlers, className: externalClassName, ...restProps }, ref) => {
+  (
+    { node, depth, state, rename, handlers, actions, onActionClick, className: externalClassName, ...restProps },
+    ref,
+  ) => {
     const extension = state.isFolder ? '' : getFileExtension(node.name);
     const isDisabled = state.isUploading;
+    const isEmptyFolder = state.isFolder && (!node.children || node.children.length === 0);
+    const [dropdownOpen, setDropdownOpen] = useState(false);
 
     return (
       <div
@@ -63,7 +78,7 @@ const FileTreeNodeRow = forwardRef<HTMLDivElement, FileTreeNodeRowProps>(
         role='button'
         tabIndex={isDisabled || state.isRenaming ? -1 : 0}
         draggable={!state.isRenaming && !state.isProtected && !isDisabled}
-        onClick={isDisabled ? undefined : handlers.onRowClick}
+        onClick={isDisabled || isEmptyFolder ? undefined : handlers.onRowClick}
         onDoubleClick={isDisabled ? undefined : handlers.onRowDoubleClick}
         onDragStart={isDisabled ? undefined : handlers.onDragStart}
         onDragEnd={isDisabled ? undefined : handlers.onDragEnd}
@@ -71,7 +86,7 @@ const FileTreeNodeRow = forwardRef<HTMLDivElement, FileTreeNodeRowProps>(
         onDragLeave={isDisabled ? undefined : handlers.onDragLeave}
         onDrop={isDisabled ? undefined : handlers.onDrop}
         onKeyDown={
-          isDisabled
+          isDisabled || isEmptyFolder
             ? undefined
             : (e) => {
                 if (state.isRenaming) return;
@@ -83,12 +98,12 @@ const FileTreeNodeRow = forwardRef<HTMLDivElement, FileTreeNodeRowProps>(
         }
         {...restProps}
         className={cn(
-          'hover:bg-GRAY_100 flex h-9 cursor-pointer items-center gap-2 rounded-md pr-1',
-          state.contextMenuOpen && (state.isFolder || !state.isSelected) && 'bg-GRAY_100',
+          'hover:bg-GRAY_100 group flex h-9 cursor-pointer items-center gap-2 rounded-md pr-1',
+          dropdownOpen && (state.isFolder || !state.isSelected) && 'bg-GRAY_100',
           state.isSelected && !state.isFolder && 'bg-GRAY_300 hover:bg-GRAY_300',
           (state.isDragging || state.isCutItem || state.isUploading) && 'opacity-50',
           state.isDragOver && 'bg-GRAY_200',
-          isDisabled && 'pointer-events-none',
+          (isDisabled || isEmptyFolder) && 'cursor-default',
           externalClassName,
         )}
         style={{ paddingLeft: `${depth * 24 + 8}px` }}
@@ -97,13 +112,15 @@ const FileTreeNodeRow = forwardRef<HTMLDivElement, FileTreeNodeRowProps>(
           <Button
             variant='ghost'
             size='xxsmall'
-            onClick={handlers.onChevronClick}
-            className='size-4 shrink-0 p-0! hover:bg-transparent'
+            onClick={isEmptyFolder ? undefined : handlers.onChevronClick}
+            disabled={isEmptyFolder}
+            className={cn('size-4 shrink-0 p-0! hover:bg-transparent', isEmptyFolder && 'cursor-default')}
             aria-label={state.isExpanded ? 'Collapse folder' : 'Expand folder'}
           >
             <ChevronRight
               className={cn(
-                'text-GRAY_1000 size-3.5 transition-transform duration-100',
+                'size-3.5 transition-transform duration-100',
+                isEmptyFolder ? 'text-GRAY_500' : 'text-GRAY_700 group-hover:text-GRAY_1000',
                 state.isExpanded && 'rotate-90',
               )}
             />
@@ -113,17 +130,13 @@ const FileTreeNodeRow = forwardRef<HTMLDivElement, FileTreeNodeRowProps>(
         )}
 
         {state.isFolder ? (
-          <Image
-            src='/images/files/folder-icon.png'
-            alt='Folder'
-            width={20}
-            height={20}
-            className='shrink-0'
-            unoptimized
-            priority
-          />
+          state.isExpanded ? (
+            <FolderOpenedIcon size={20} weight='fill' className='text-BLUE_600 shrink-0' />
+          ) : (
+            <FolderClosedIcon size={20} weight='fill' className='text-BLUE_600 shrink-0' />
+          )
         ) : (
-          <FileIcon extension={extension || 'txt'} size='sm' />
+          <FileIcon extension={extension || 'txt'} className='text-GRAY_1000 size-4' />
         )}
 
         {state.isRenaming ? (
@@ -155,12 +168,56 @@ const FileTreeNodeRow = forwardRef<HTMLDivElement, FileTreeNodeRowProps>(
             {extension && <span className='f-13-450 text-GRAY_600 shrink-0 select-none'>.{extension}</span>}
           </div>
         ) : (
-          <span className='f-13-450 text-GRAY_1000 truncate select-none'>
+          <span className='f-13-450 text-GRAY_1000 min-w-0 flex-1 truncate select-none'>
             {state.isUserPrivateFolder ? `${node.name} (Private)` : node.name}
           </span>
         )}
 
-        {state.isUploading && <Loader className='text-GRAY_600 ml-auto size-3.5 shrink-0 animate-spin' />}
+        {state.isFolder && !state.isRenaming && (
+          <span className='f-13-450 text-GRAY_700 ml-auto shrink-0 opacity-0 select-none group-hover:opacity-100'>
+            {node.children?.length ?? 0} {(node.children?.length ?? 0) === 1 ? 'item' : 'items'}
+          </span>
+        )}
+
+        {state.isUploading ? (
+          <Loader className='text-GRAY_600 ml-auto size-3.5 shrink-0 animate-spin' />
+        ) : (
+          !state.isRenaming &&
+          actions.length > 0 && (
+            <DropdownMenu onOpenChange={setDropdownOpen}>
+              <DropdownMenuTrigger asChild>
+                <div
+                  role='button'
+                  tabIndex={0}
+                  className={cn(
+                    'flex size-5 shrink-0 cursor-pointer items-center justify-center rounded opacity-0 outline-none group-hover:opacity-100',
+                    !state.isFolder && 'ml-auto',
+                    dropdownOpen && 'opacity-100',
+                  )}
+                  onClick={(e) => e.stopPropagation()}
+                  aria-label='More actions'
+                >
+                  <MoreVertical size={14} className='text-GRAY_700' />
+                </div>
+              </DropdownMenuTrigger>
+              <DropdownMenuContent align='start' className='flex min-w-[180px] flex-col gap-y-[2px]'>
+                {actions.map((action) => (
+                  <DropdownMenuItem
+                    key={action.id}
+                    onClick={() => onActionClick(action.id)}
+                    className={cn(
+                      'hover:bg-GRAY_100 f-12-500 text-GRAY_900 cursor-pointer rounded-md',
+                      action.isDestructive && 'text-red-600 hover:text-red-600',
+                    )}
+                  >
+                    <action.icon className='size-4' />
+                    {action.label}
+                  </DropdownMenuItem>
+                ))}
+              </DropdownMenuContent>
+            </DropdownMenu>
+          )
+        )}
       </div>
     );
   },

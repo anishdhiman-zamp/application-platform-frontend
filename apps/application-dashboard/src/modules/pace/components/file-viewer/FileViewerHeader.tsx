@@ -106,7 +106,7 @@ const FileViewerHeader = ({
       />
       <div className={cn('border-GRAY_400 flex items-center justify-between border-b bg-white px-4 py-3', className)}>
         <div className='flex items-center gap-3'>
-          <FileIcon extension={extension || 'txt'} size='sm' />
+          <FileIcon extension={extension || 'txt'} className='text-GRAY_900 size-6' />
 
           <div className='flex items-center gap-x-3'>
             {isRenaming ? (
