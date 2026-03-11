@@ -82,6 +82,10 @@ export const shouldUseChunkedUpload = (fileSize: number): boolean => {
   return fileSize >= DIRECT_UPLOAD_THRESHOLD_BYTES;
 };
 
+export const sanitizeFileName = (name: string): string => {
+  return name.replace(/\s+/g, '_');
+};
+
 export const getTargetPath = (basePath: string, fileName: string): string => {
   const normalizedBase = basePath.endsWith('/') ? basePath.slice(0, -1) : basePath;
   return `${normalizedBase}/${fileName}`;
@@ -89,7 +93,7 @@ export const getTargetPath = (basePath: string, fileName: string): string => {
 
 export const generateUploadPath = (username: string, fileName: string): string => {
   const uuid = crypto.randomUUID();
-  return `${username}/uploads/${uuid}/${fileName}`;
+  return `${username}/uploads/${uuid}/${sanitizeFileName(fileName)}`;
 };
 
 interface ChunkUploadArgs {
@@ -280,7 +284,7 @@ export const uploadFileChunked = async (
 
     const initResult = await mutations.initChunkedUpload({
       path: targetPath.split('/').slice(0, -1).join('/') || '/',
-      file_name: file.name,
+      file_name: sanitizeFileName(file.name),
       total_bytes: file.size,
     });
 
@@ -369,13 +373,14 @@ export const processFilesystemUpload = async (
   username: string,
   mutations: UploadMutations,
 ): Promise<UploadedFile> => {
+  const sanitizedName = sanitizeFileName(file.name);
   const targetPath = generateUploadPath(username, file.name);
 
   await uploadFile(file, targetPath, mutations, undefined, undefined, true);
 
   return {
     path: targetPath,
-    name: file.name,
+    name: sanitizedName,
     file_type: file.type || 'application/octet-stream',
     file: file,
   };
