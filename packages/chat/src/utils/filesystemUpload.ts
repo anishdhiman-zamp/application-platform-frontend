@@ -374,7 +374,7 @@ export const processFilesystemUpload = async (
   mutations: UploadMutations,
 ): Promise<UploadedFile> => {
   const sanitizedName = sanitizeFileName(file.name);
-  const targetPath = generateUploadPath(username, file.name);
+  const targetPath = generateUploadPath(username, sanitizedName);
 
   await uploadFile(file, targetPath, mutations, undefined, undefined, true);
 
