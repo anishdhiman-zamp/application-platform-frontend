@@ -259,7 +259,7 @@ export const useChatInput = ({
 
     const { successful, failed } = await handleFilesystemUploads(files, username, adapter.uploadMutations);
 
-    const failedFileNames = new Set(failed.map((f) => f.file.name));
+    const failedFileNames = new Set(failed.map((f) => sanitizeFileName(f.file.name)));
 
     setFileReferences((prev) => {
       const tempEntriesMap = new Map<string, number>();
