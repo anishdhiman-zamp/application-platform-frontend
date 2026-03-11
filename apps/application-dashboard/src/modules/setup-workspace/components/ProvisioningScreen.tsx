@@ -2,12 +2,16 @@ import { useMemo } from 'react';
 import { generateAvatarSvg } from '@/utils/pixelArtGenerator';
 
 interface ProvisioningScreenProps {
-  takingLonger: boolean;
-  hasError: boolean;
-  userName: string;
+  takingLonger?: boolean;
+  hasError?: boolean;
+  userName?: string;
 }
 
-export const ProvisioningScreen = ({ takingLonger, hasError, userName }: ProvisioningScreenProps) => {
+export const ProvisioningScreen = ({
+  takingLonger = false,
+  hasError = false,
+  userName = '',
+}: ProvisioningScreenProps) => {
   const avatarSvg = useMemo(() => generateAvatarSvg(userName), [userName]);
 
   const heading = hasError
