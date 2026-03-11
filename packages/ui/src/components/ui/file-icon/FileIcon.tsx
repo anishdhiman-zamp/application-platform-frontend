@@ -12,11 +12,11 @@ export interface FileIconProps {
 /**
  * FileIcon renders a Phosphor icon matching the given file extension.
  * Falls back to a generic File icon for unrecognized extensions.
- * Control size via className (e.g. `size-4`, `size-6`, `size-[100px]`).
+ * Control size via className (e.g. `size-4`, `size-6`, `size-25`).
  *
  * @example
  * ```tsx
- * <FileIcon extension="pdf" className="size-[100px]" />
+ * <FileIcon extension="pdf" className="size-25" />
  * <FileIcon extension=".docx" className="size-6" />
  * <FileIcon extension="unknown" />
  * ```
