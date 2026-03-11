@@ -15,6 +15,7 @@ export * from './ui/email-input-to-chips';
 export * from './ui/file-icon';
 export * from './ui/image-with-fallback';
 export * from './ui/input';
+export * from './ui/input-otp';
 export * from './ui/label';
 export * from './ui/list-card';
 export * from './ui/live-waveform';
