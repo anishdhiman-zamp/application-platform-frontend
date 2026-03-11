@@ -31,7 +31,7 @@ jest.mock('utils/postHog', () => ({
 
 // Mock the SSE context
 jest.mock('@/app/_providers/sse-provider', () => ({
-  useSSEContext: jest.fn(() => ({
+  useOptionalSSEContext: jest.fn(() => ({
     disconnect: jest.fn(),
   })),
 }));
