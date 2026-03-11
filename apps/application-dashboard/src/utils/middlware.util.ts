@@ -150,7 +150,7 @@ export function getActiveOrg(request: NextRequest, session: Session | null): Ses
   const activeOrgId = getServerSideCookie(request, ACTIVE_ORG_ID_COOKIE);
 
   if (activeOrgId && session?.orgs?.length) {
-    const matchedOrg = session.orgs.find((org) => org.organization_id === activeOrgId);
+    const matchedOrg = session.orgs.find((org) => org?.organization_id === activeOrgId);
 
     if (matchedOrg) return matchedOrg;
   }
