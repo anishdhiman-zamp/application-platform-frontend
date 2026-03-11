@@ -1,6 +1,6 @@
 'use client';
 
-import { type FC, useMemo } from 'react';
+import { type FC, useEffect, useMemo } from 'react';
 import { Button, Popover, PopoverContent, PopoverPortal, PopoverTrigger, Skeleton } from '@zamp-platform/ui';
 import { cn } from '@zamp-platform/ui/utils';
 import { Check, ChevronDown } from 'lucide-react';
@@ -21,6 +21,12 @@ const ModelSelector: FC<ModelSelectorProps> = ({ value, onChange, className }) =
   const defaultModel = useMemo(() => models.find((m) => m.is_default), [models]);
   const selectedId = value ?? defaultModel?.id ?? null;
   const selectedModel = useMemo(() => models.find((m) => m.id === selectedId), [models, selectedId]);
+
+  useEffect(() => {
+    if (value === null && defaultModel) {
+      onChange(defaultModel.id);
+    }
+  }, [value, defaultModel, onChange]);
 
   if (isLoading) {
     return <Skeleton className='h-5 w-16 rounded' />;
