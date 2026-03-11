@@ -21,7 +21,7 @@ default:
   replicaCount: 2
   image:
     repository: "916079538338.dkr.ecr.eu-central-1.amazonaws.com/zamp-prd-eu-application-platform-frontend-ecr"
-    tag: "latest"
+    tag: "v1"
     imagePullPolicy: Always
   signoz:
     enabled: false

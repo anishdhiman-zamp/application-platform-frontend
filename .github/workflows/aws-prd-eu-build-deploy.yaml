@@ -89,6 +89,8 @@ jobs:
       APP_NAME: ${{ steps.vars.outputs.APP_NAME }}
       TIMESTAMP: ${{ steps.vars.outputs.TIMESTAMP }}
       ASSETS_S3_BUCKET: ${{ steps.vars.outputs.ASSETS_S3_BUCKET }}
+      CLOUDFRONT_DISTRIBUTION_ID: ${{ steps.vars.outputs.CLOUDFRONT_DISTRIBUTION_ID }}
+      CLOUDFRONT_DOMAIN: ${{ steps.vars.outputs.CLOUDFRONT_DOMAIN }}
       STAGING_TAG: ${{ needs.validate-deployment.outputs.STAGING_TAG }}
 
     steps:
@@ -106,6 +108,8 @@ jobs:
           echo "AWS_ACCOUNT_ID=916079538338" >> $GITHUB_OUTPUT
           echo "VALUES_FILE=prd-eu-values.yaml" >> $GITHUB_OUTPUT
           echo "ASSETS_S3_BUCKET=zamp-prd-eu-application-platform-assets" >> $GITHUB_OUTPUT
+          echo "CLOUDFRONT_DISTRIBUTION_ID=E12B4SW6FNF1YY" >> $GITHUB_OUTPUT
+          echo "CLOUDFRONT_DOMAIN=d32iplxsg1jjfq.cloudfront.net" >> $GITHUB_OUTPUT
           echo "BUILD_ENV=awsprd" >> $GITHUB_OUTPUT
           echo "TIMESTAMP=$TIMESTAMP" >> $GITHUB_OUTPUT
           echo "APP_NAME=$APP_NAME" >> $GITHUB_OUTPUT
@@ -138,16 +142,29 @@ jobs:
       ASSETS_S3_BUCKET: ${{ needs.prepare-env.outputs.ASSETS_S3_BUCKET }}
       STAGING_TAG: ${{ needs.validate-deployment.outputs.STAGING_TAG }}
       SECRET_NAME: zamp-prd-eu-app-dashboard-frontend-secrets
+      CLOUDFRONT_DISTRIBUTION_ID: ${{ needs.prepare-env.outputs.CLOUDFRONT_DISTRIBUTION_ID }}
+      CLOUDFRONT_DOMAIN: ${{ needs.prepare-env.outputs.CLOUDFRONT_DOMAIN }}
     outputs:
       IMAGE_TAG: ${{ steps.build.outputs.IMAGE_TAG }}
       ECR_REPO_URI: ${{ steps.build.outputs.ECR_REPO_URI }}
 
     steps:
-      - name: 'Checkout repository on : ${{ github.event.inputs.BRANCH || github.ref }}'
+      - name: Determine ref to checkout
+        id: resolve-ref
+        run: |
+          if [ "${{ inputs.staging_tag }}" != "" ]; then
+            echo "REF=${{ inputs.staging_tag }}" >> $GITHUB_OUTPUT
+            echo "Using staging_tag as checkout ref: ${{ inputs.staging_tag }}"
+          else
+            echo "REF=${{ github.event.inputs.BRANCH || github.ref }}" >> $GITHUB_OUTPUT
+            echo "Using branch/ref as checkout ref: ${{ github.event.inputs.BRANCH || github.ref }}"
+          fi
+
+      - name: 'Checkout repository on : ${{ steps.resolve-ref.outputs.REF }}'
         uses: actions/checkout@v4
         with:
           fetch-depth: 0
-          ref: ${{ github.event.inputs.BRANCH || github.ref }}
+          ref: ${{ steps.resolve-ref.outputs.REF }}
 
       - name: 'Debug Environment Variables'
         run: |
@@ -309,11 +326,11 @@ jobs:
 
           echo "Invalidating CloudFront cache for non-hashed public assets..."
           aws cloudfront create-invalidation \
-            --distribution-id E12B4SW6FNF1YY \
+            --distribution-id ${CLOUDFRONT_DISTRIBUTION_ID} \
             --paths "/application-platform-frontend/public/*"
 
           echo "CloudFront invalidation initiated for public assets!"
-          echo "New assets available at: https://d32iplxsg1jjfq.cloudfront.net/application-platform-frontend"
+          echo "New assets available at: https://${CLOUDFRONT_DOMAIN}/application-platform-frontend"
 
   deploy-to-eks:
     name: Deploy to EKS
@@ -341,11 +358,20 @@ jobs:
       STAGING_TAG: ${{needs.validate-deployment.outputs.STAGING_TAG}}
 
     steps:
-      - name: 'Checkout repository on : ${{ github.event.inputs.BRANCH || github.ref }}'
+      - name: Determine ref to checkout
+        id: resolve-ref
+        run: |
+          if [ "${{ inputs.staging_tag }}" != "" ]; then
+            echo "REF=${{ inputs.staging_tag }}" >> $GITHUB_OUTPUT
+          else
+            echo "REF=${{ github.event.inputs.BRANCH || github.ref }}" >> $GITHUB_OUTPUT
+          fi
+
+      - name: 'Checkout repository on : ${{ steps.resolve-ref.outputs.REF }}'
         uses: actions/checkout@v4
         with:
           fetch-depth: 0
-          ref: ${{ github.event.inputs.BRANCH || github.ref }}
+          ref: ${{ steps.resolve-ref.outputs.REF }}
 
       - name: 'Set up AWS credentials using OIDC'
         uses: aws-actions/configure-aws-credentials@v4
