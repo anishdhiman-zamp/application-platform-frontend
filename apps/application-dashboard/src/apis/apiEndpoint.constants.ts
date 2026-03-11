@@ -227,4 +227,8 @@ export const API_ENDPOINTS = {
   FILES_UPLOAD_CHUNK_POST: `files/upload/chunk`,
   FILES_UPLOAD_COMPLETE_POST: `files/upload/complete`,
   FILES_UPLOAD_CANCEL_DELETE: `files/upload/{{upload_id}}`,
+
+  // Organizations - auto org creation
+  ORGANIZATIONS_REGISTER_POST: `organizations/register`,
+  ORGANIZATIONS_PROVISION_POST: `organizations/{{organizationId}}/provision`,
 };

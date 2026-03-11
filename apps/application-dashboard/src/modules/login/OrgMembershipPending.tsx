@@ -8,8 +8,9 @@ import Image from 'next/image';
 import { RootState } from 'store';
 import { MembershipRequested } from 'components/MembershipRequested';
 
-const OrgMembershipPending = () => {
-  const userEmail = useSelector((state: RootState) => state?.user?.user)?.user_email;
+const OrgMembershipPending = ({ email }: { email?: string }) => {
+  const reduxEmail = useSelector((state: RootState) => state?.user?.user)?.user_email;
+  const userEmail = reduxEmail || email;
   const { logout } = useLogout();
   const { data: membershipRequests, isLoading: isLoadingMembershipRequests } =
     useGetOrganizationMembershipRequestsAllQuery();

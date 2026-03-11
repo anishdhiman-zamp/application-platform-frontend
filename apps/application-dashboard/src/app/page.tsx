@@ -1,6 +1,6 @@
 import { redirect } from 'next/navigation';
-import { ROUTES_PATH } from '@/constants/routeConfig';
+import { getLandingRoute } from '@/utils/route.util';
 
-export default function Home() {
-  redirect(ROUTES_PATH.PROCESSES);
+export default async function Home() {
+  redirect(getLandingRoute());
 }

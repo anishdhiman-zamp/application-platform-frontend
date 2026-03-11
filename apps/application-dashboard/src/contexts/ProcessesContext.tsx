@@ -62,10 +62,8 @@ export function ProcessesProvider({ children }: ProcessesProviderProps) {
 
   // Handle navigation logic - only for /process route
   useEffect(() => {
-    // Check for org switch in progress and reload if needed
+    // Skip navigation logic during org switch — OrgSwitcher handles the redirect
     if (isOrgSwitchIsInProgress) {
-      window.location.reload();
-
       return;
     }
 

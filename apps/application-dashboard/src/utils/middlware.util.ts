@@ -1,18 +1,29 @@
 import type { NextRequest, NextResponse } from 'next/server';
-import { Session } from 'types/api/auth.types';
+import { Session, type UserSessionCache } from 'types/api/auth.types';
 import { API_ENDPOINTS } from '@/apis/apiEndpoint.constants';
 import { ROUTES_PATH } from '@/constants/routeConfig';
-import { ORY_KRATOS_SESSION_COOKIE, USER_SESSION_COOKIE } from '@/utils/cookie';
+import { PROVISIONING_STATUS } from '@/modules/setup-workspace/setup-workspace.types';
+import { ACTIVE_ORG_ID_COOKIE, ORY_KRATOS_SESSION_COOKIE, USER_SESSION_COOKIE } from '@/utils/cookie';
+import { getLandingRoute } from '@/utils/route.util';
 
-type SessionCache = {
-  user_id: string;
-  user_name: string;
-  last_name: string;
-  user_email: string;
-  org_count: number;
-  cached_at: number;
-  username: string;
-};
+export function buildSessionCache(request: NextRequest, session: Session): UserSessionCache {
+  const activeOrg = getActiveOrg(request, session);
+
+  return {
+    user_id: session.user_id,
+    user_name: session.user_name,
+    last_name: session.last_name,
+    user_email: session.user_email,
+    org_count: session.orgs?.length ?? 0,
+    default_org_id: activeOrg?.organization_id ?? session.orgs?.[0]?.organization_id,
+    cached_at: Date.now(),
+    display_name: session.display_name,
+    username: session.username,
+    provisioning_status: activeOrg?.provisioning_status ?? session.orgs?.[0]?.provisioning_status,
+    onboarding_status: session.onboarding_status,
+    product: activeOrg?.product ?? session.orgs?.[0]?.product,
+  };
+}
 
 export function setServerSideUserCookie(
   response: NextResponse,
@@ -64,7 +75,7 @@ export async function getUserSession(
   request: NextRequest,
   checkCache = true,
 ): Promise<{ session: Session | null; cached: boolean }> {
-  const cachedSessionData = getServerSideCookie(request, USER_SESSION_COOKIE, true) as SessionCache | null;
+  const cachedSessionData = getServerSideCookie(request, USER_SESSION_COOKIE, true) as UserSessionCache | null;
 
   if (cachedSessionData && checkCache) {
     const now = Date.now();
@@ -72,11 +83,14 @@ export async function getUserSession(
     const maxAge = 5 * 60 * 1000; // 5 minutes in milliseconds
 
     if (cacheAge < maxAge) {
-      const orgs = Array.from({ length: cachedSessionData.org_count }, () => ({
-        organization_id: '',
+      const orgs = Array.from({ length: cachedSessionData.org_count }, (_, i) => ({
+        organization_id: i === 0 ? (cachedSessionData.default_org_id ?? '') : '',
         name: '',
         slug: '',
         resource_audience_policies: [],
+        ...(i === 0 &&
+          cachedSessionData.provisioning_status && { provisioning_status: cachedSessionData.provisioning_status }),
+        ...(i === 0 && cachedSessionData.product && { product: cachedSessionData.product }),
       }));
 
       const session: Session = {
@@ -86,8 +100,12 @@ export async function getUserSession(
         workspaces: [],
         organization_id: { workspace_id: '', name: '', description: '' },
         user_name: cachedSessionData.user_name ?? '',
+        display_name: cachedSessionData.display_name ?? '',
         last_name: cachedSessionData.last_name ?? '',
         username: cachedSessionData.username ?? '',
+        onboarding_status: cachedSessionData.onboarding_status ?? '',
+        avatar_type: null,
+        avatar_value: null,
       };
 
       return { session, cached: true };
@@ -128,6 +146,18 @@ export async function getUserSession(
   }
 }
 
+export function getActiveOrg(request: NextRequest, session: Session | null): Session['orgs'][number] | undefined {
+  const activeOrgId = getServerSideCookie(request, ACTIVE_ORG_ID_COOKIE);
+
+  if (activeOrgId && session?.orgs?.length) {
+    const matchedOrg = session.orgs.find((org) => org.organization_id === activeOrgId);
+
+    if (matchedOrg) return matchedOrg;
+  }
+
+  return session?.orgs?.[0];
+}
+
 export function checkOrgMembership(session: Session | null, pathname: string): boolean {
   if (!session) return false;
 
@@ -136,6 +166,26 @@ export function checkOrgMembership(session: Session | null, pathname: string): b
   if (!orgs || !Array.isArray(orgs)) return false;
 
   return orgs.length === 0 && !pathname.includes(ROUTES_PATH.INVITATIONS);
+}
+
+/**
+ * Returns true if the user needs the setup-workspace flow:
+ * - No orgs at all (and not on invitations page)
+ * - Has orgs but primary org is not yet provisioned
+ */
+export function needsWorkspaceSetup(session: Session | null, pathname: string, request?: NextRequest): boolean {
+  if (!session) return false;
+
+  // No orgs → needs setup
+  if (checkOrgMembership(session, pathname)) return true;
+
+  // Has orgs but not yet provisioned → needs setup
+  // Flag-off users will bounce: setup-workspace → client checks flag → membership-pending (no loop)
+  const activeOrg = request ? getActiveOrg(request, session) : session.orgs?.[0];
+
+  if (activeOrg?.provisioning_status && activeOrg.provisioning_status !== PROVISIONING_STATUS.COMPLETED) return true;
+
+  return false;
 }
 
 export function validateSession(request: NextRequest): boolean {
@@ -151,4 +201,13 @@ export function validateSession(request: NextRequest): boolean {
   } catch {
     return false;
   }
+}
+
+/**
+ * Returns the correct landing route based on the active org's product mode.
+ */
+export function getActiveLandingRoute(request: NextRequest, session: Session | null): string {
+  const activeOrg = getActiveOrg(request, session);
+
+  return getLandingRoute(activeOrg?.product);
 }
