@@ -44,8 +44,11 @@ export const API_ENDPOINTS = {
   POST_MESSAGE: '/conversations/{{conversationId}}/messages',
   CREATE_CONVERSATION: '/conversations/',
   POST_MESSAGE_V2: 'v2/conversations/{{conversationId}}/messages',
-  GET_CONVERSATION_BY_ID: 'v2/conversations/{{conversationId}}',
+  POST_MESSAGE_V4: 'v4/conversations/{{conversationId}}/messages',
+  GET_CONVERSATION_BY_ID: 'v4/conversations/{{conversationId}}',
+  GET_CONVERSATION_BY_ID_V2: 'v2/conversations/{{conversationId}}',
   CREATE_CONVERSATION_V2: 'v2/conversations',
+  CREATE_CONVERSATION_V4: 'v4/conversations',
   GET_FILES_BY_IDS: '/file-imports',
   GET_FILE_DOWNLOAD_URL: '/file-imports/{{file_upload_id}}/download-url',
   FORMS_SIGNED_UPLOAD_URL_POST: 'file-imports/initiate',
@@ -53,10 +56,10 @@ export const API_ENDPOINTS = {
   INTERACTION_POST: '/v2/conversations/{{conversationId}}/messages/{{messageId}}/interactions',
   INTERACTION_DISABLE_POST: '/v2/conversations/{{conversationId}}/messages/{{messageId}}/interactions/disable',
   SPEECH_TO_TEXT_ACCESS_TOKEN_GET: '/speech-to-text/generate-access-token',
-  GET_OUTPUT_FILE_DOWNLOAD: 'v3/conversations/{{conversationId}}/output-files/{{filename}}/download',
-  SUBMIT_CHAT_FEEDBACK: 'v3/conversations/{{conversationId}}/messages/{{messageId}}/chat-feedback',
+  GET_OUTPUT_FILE_DOWNLOAD: 'v4/conversations/{{conversationId}}/output-files/{{filename}}/download',
+  SUBMIT_CHAT_FEEDBACK: 'v4/conversations/{{conversationId}}/messages/{{messageId}}/chat-feedback',
   TASKS_MESSAGES_GET: 'tasks/{{conversationId}}/messages',
-  STOP_CONVERSATION: 'v3/conversations/{{conversationId}}/stop',
+  STOP_CONVERSATION: 'v4/conversations/{{conversationId}}/stop',
 };
 
 const ConversationService = chatApi.injectEndpoints({
@@ -90,14 +93,14 @@ const ConversationService = chatApi.injectEndpoints({
       CreateConversationPayloadTypeV2 & { url?: string }
     >({
       query: ({ url, ...body }) => ({
-        url: url || API_ENDPOINTS.CREATE_CONVERSATION_V2,
+        url: url || API_ENDPOINTS.CREATE_CONVERSATION_V4,
         method: REQUEST_TYPES.POST,
         body,
       }),
     }),
     sendMessageV2: builder.mutation<PostMessageResponseType, PostMessagePayloadType & { url?: string }>({
       query: ({ conversationId, body, url }) => ({
-        url: formRequestUrlWithParams(url || API_ENDPOINTS.POST_MESSAGE_V2, { conversationId }),
+        url: formRequestUrlWithParams(url || API_ENDPOINTS.POST_MESSAGE_V4, { conversationId }),
         method: REQUEST_TYPES.POST,
         body,
       }),
