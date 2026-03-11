@@ -56,8 +56,23 @@ jobs:
         echo "✅ Security rules downloaded"
 
     - name: Run Security Scan
+      env:
+        EVENT_NAME: ${{ github.event_name }}
+        PR_BASE_SHA: ${{ github.event.pull_request.base.sha }}
+        PUSH_BEFORE_SHA: ${{ github.event.before }}
       run: |
         echo "🔍 Running security scan..."
+
+        BASELINE_ARGS=""
+        if [ "$EVENT_NAME" = "pull_request" ] && [ -n "$PR_BASE_SHA" ]; then
+          echo "📋 PR scan — only flagging findings introduced in this PR"
+          BASELINE_ARGS="--baseline-commit $PR_BASE_SHA"
+        elif [ "$EVENT_NAME" = "push" ] && [ -n "$PUSH_BEFORE_SHA" ] && [ "$PUSH_BEFORE_SHA" != "0000000000000000000000000000000000000000" ]; then
+          echo "📋 Push scan — only flagging findings introduced in this push"
+          BASELINE_ARGS="--baseline-commit $PUSH_BEFORE_SHA"
+        else
+          echo "📋 Full scan — checking all findings"
+        fi
 
         ./opengrep ci \
           --exclude '.github' \
@@ -66,6 +81,7 @@ jobs:
           --config rules/dockerfile \
           --config rules/yaml \
           --config rules/generic \
+          $BASELINE_ARGS \
           --json --json-output scan_results.json \
           --verbose || true
 
@@ -108,12 +124,19 @@ jobs:
         critical_high = []
         all_issues = []
 
+        ignored_count = 0
+
         for result in results:
             severity = result.get('extra', {}).get('severity', 'info').upper()
             rule_id = result.get('check_id', '')
             file_path = result.get('path', '')
             line = result.get('start', {}).get('line', 0)
 
+            is_ignored = result.get('extra', {}).get('is_ignored', False)
+
+            if is_ignored:
+                ignored_count += 1
+                continue
             is_waived = False
             for waiver in waivers:
                 if (waiver.get('rule_id') == rule_id and
@@ -132,7 +155,8 @@ jobs:
             f.write("# 🔒 Security Scan Report\n\n")
             f.write(f"**Total Issues Found:** {len(all_issues)}\n")
             f.write(f"**Critical/High Issues:** {len(critical_high)}\n")
-            f.write(f"**Waived Issues:** {len(results) - len(all_issues)}\n\n")
+            f.write(f"**Waived Issues:** {len(results) - len(all_issues) - ignored_count}\n")
+            f.write(f"**Inline Suppressed (nosemgrep):** {ignored_count}\n\n")
             if critical_high:
                 f.write("## 🔴 Critical/High Severity Issues\n\n")
                 for issue in critical_high:
@@ -163,7 +187,8 @@ jobs:
 
         print(f"Total issues: {len(all_issues)}")
         print(f"Critical/high issues: {len(critical_high)}")
-        print(f"Waived issues: {len(results) - len(all_issues)}")
+        print(f"Waived issues: {len(results) - len(all_issues) - ignored_count}")
+        print(f"Inline suppressed (nosemgrep): {ignored_count}")
 
         with open(os.environ['GITHUB_OUTPUT'], 'a') as f:
             f.write(f"critical_high_count={len(critical_high)}\n")
