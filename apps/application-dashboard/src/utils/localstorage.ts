@@ -44,9 +44,7 @@ export const setToLocalStorage = (key: LOCAL_STORAGE_KEYS, value: string) => {
   try {
     window.localStorage.setItem(key, value);
   } catch (error) {
-    const isQuotaError =
-      error instanceof DOMException &&
-      QUOTA_ERROR_NAMES.some((name) => name === error.name);
+    const isQuotaError = error instanceof DOMException && QUOTA_ERROR_NAMES.some((name) => name === error.name);
 
     if (isQuotaError) {
       console.warn(`localStorage quota exceeded for key "${key}". Clearing key and retrying.`);

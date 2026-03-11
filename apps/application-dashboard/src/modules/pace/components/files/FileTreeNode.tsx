@@ -34,6 +34,7 @@ const FileTreeNode = memo(function FileTreeNode({
   onTriggerFileUpload,
   onTriggerFolderUpload,
   onDragOverFolderChange,
+  isSearchActive,
   style,
 }: FileTreeNodeProps) {
   const nodeRef = useRef<HTMLDivElement>(null);
@@ -192,6 +193,7 @@ const FileTreeNode = memo(function FileTreeNode({
           isProtected,
           isUserPrivateFolder,
           isUploading,
+          isSearchActive: !!isSearchActive,
         }}
         rename={{
           value: rename.renameValue,

@@ -221,6 +221,7 @@ const FileTreeContent = ({
                 onTriggerFileUpload={triggerFileUpload}
                 onTriggerFolderUpload={triggerFolderUpload}
                 onDragOverFolderChange={handleDragOverFolderChange}
+                isSearchActive={!!searchQuery}
                 style={{
                   position: 'absolute',
                   top: 0,

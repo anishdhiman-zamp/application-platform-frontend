@@ -31,6 +31,7 @@ interface FileTreeNodeRowState {
   isProtected: boolean;
   isUserPrivateFolder: boolean;
   isUploading: boolean;
+  isSearchActive: boolean;
 }
 
 interface FileTreeNodeRowRename {
@@ -131,9 +132,9 @@ const FileTreeNodeRow = forwardRef<HTMLDivElement, FileTreeNodeRowProps>(
 
         {state.isFolder ? (
           state.isExpanded ? (
-            <FolderOpenedIcon size={20} weight='fill' className='text-BLUE_600 shrink-0' />
+            <FolderOpenedIcon size={16} weight='fill' className='text-BLUE_600 shrink-0' />
           ) : (
-            <FolderClosedIcon size={20} weight='fill' className='text-BLUE_600 shrink-0' />
+            <FolderClosedIcon size={16} weight='fill' className='text-BLUE_600 shrink-0' />
           )
         ) : (
           <FileIcon extension={extension || 'txt'} className='text-GRAY_1000 size-4' />
@@ -173,7 +174,7 @@ const FileTreeNodeRow = forwardRef<HTMLDivElement, FileTreeNodeRowProps>(
           </span>
         )}
 
-        {state.isFolder && !state.isRenaming && (
+        {state.isFolder && !state.isRenaming && !state.isSearchActive && (
           <span className='f-13-450 text-GRAY_700 ml-auto shrink-0 opacity-0 select-none group-hover:opacity-100'>
             {node.children?.length ?? 0} {(node.children?.length ?? 0) === 1 ? 'item' : 'items'}
           </span>
@@ -204,7 +205,10 @@ const FileTreeNodeRow = forwardRef<HTMLDivElement, FileTreeNodeRowProps>(
                 {actions.map((action) => (
                   <DropdownMenuItem
                     key={action.id}
-                    onClick={() => onActionClick(action.id)}
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      onActionClick(action.id);
+                    }}
                     className={cn(
                       'hover:bg-GRAY_100 f-12-500 text-GRAY_900 cursor-pointer rounded-md',
                       action.isDestructive && 'text-red-600 hover:text-red-600',

@@ -154,6 +154,7 @@ export interface FileTreeNodeProps {
   onTriggerFileUpload?: (targetPath: string) => void;
   onTriggerFolderUpload?: (targetPath: string) => void;
   onDragOverFolderChange?: (path: string | null) => void;
+  isSearchActive?: boolean;
   style?: React.CSSProperties;
 }
 
