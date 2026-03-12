@@ -40,6 +40,13 @@ export type ConnectionType = {
   integration_name: string;
 };
 
+export type GetConnectionsByIntegrationNameResponseType = {
+  connections: ConnectionType[];
+  limit: number;
+  page: number;
+  total_count: number;
+};
+
 export type ProcessConnectionMappingResponseType = {
   id: string;
   process_id: string;
