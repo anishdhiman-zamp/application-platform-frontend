@@ -35,9 +35,8 @@ export const ROUTES_PATH = {
   SETTINGS_PEOPLE: '/settings/people',
 
   ONBOARDING: '/onboarding',
-  SETUP_WORKSPACE: '/setup-workspace',
 
-  MACS: '/chat',
+  MACS: '/macs',
 
   CHAT: '/chat',
   CHAT_SKILLS: '/chat/skills',
