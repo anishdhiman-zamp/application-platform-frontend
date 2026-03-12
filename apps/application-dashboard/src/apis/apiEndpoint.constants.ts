@@ -196,7 +196,7 @@ export const API_ENDPOINTS = {
   // Conversations V4
   CREATE_CONVERSATION_V4: `v4/conversations`,
   POST_MESSAGE_V4: `v4/conversations/{{conversationId}}/messages`,
-  LIST_CHAT_MODELS: `v3/conversations/models`,
+  LIST_CHAT_MODELS: `v4/conversations/models`,
   // Conversations V2
   FILTER_CONVERSATIONS_V2_GET: `v2/conversations/filter`,
 
