@@ -15,7 +15,7 @@ export const getAvailableConnections = (
   allConnections: ConnectionType[],
   mappedConnections: ConnectionType[],
 ): ConnectionType[] => {
-  return allConnections.filter(
+  return allConnections?.filter(
     (connection) => !mappedConnections.some((mappedConnection) => mappedConnection.name === connection.name),
   );
 };

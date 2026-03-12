@@ -218,13 +218,13 @@ export const ConnectedChatInput: FC<ConnectedChatInputProps> = ({
     }
   };
 
-const handleStop = useCallback(async () => {
-  try {
-    await chat.stopConversation();
-  } catch {
-    toast.error('Failed to stop generation. Please try again.');
-  }
-}, [chat.stopConversation]);
+  const handleStop = useCallback(async () => {
+    try {
+      await chat.stopConversation();
+    } catch {
+      toast.error('Failed to stop generation. Please try again.');
+    }
+  }, [chat.stopConversation]);
 
   const shouldShowRecorder = useMemo(
     () => isRecording && connectionState === SOCKET_STATES.open,

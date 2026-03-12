@@ -7,9 +7,9 @@ import {
   AuthenticateIntegrationRequestTypeV2,
   AuthenticateIntegrationResponseType,
   AuthenticateIntegrationResponseTypeV2,
-  ConnectionType,
   CreateProcessConnectionMappingRequestType,
   CreateProcessConnectionMappingResponseType,
+  GetConnectionsByIntegrationNameResponseType,
   GetProcessConnectionMappingsResponseType,
   IntegrationCatalogRequestType,
   IntegrationCatalogResponseType,
@@ -18,9 +18,13 @@ import { formRequestUrlWithParams } from '@/utils/common';
 
 export const Integrations = baseApi.injectEndpoints({
   endpoints: (builder) => ({
-    getConnectionsByIntegrationName: builder.query<ConnectionType[], { integration_name: string }>({
-      query: ({ integration_name }) => ({
+    getConnectionsByIntegrationName: builder.query<
+      GetConnectionsByIntegrationNameResponseType,
+      { integration_name: string; params?: { page: number; limit: number } }
+    >({
+      query: ({ integration_name, params }) => ({
         url: formRequestUrlWithParams(API_ENDPOINTS.GET_CONNECTION_BY_INTEGRATION_NAME, { integration_name }),
+        params,
       }),
       providesTags: [APITags.GET_CONNECTION_BY_INTEGRATION_NAME],
     }),
