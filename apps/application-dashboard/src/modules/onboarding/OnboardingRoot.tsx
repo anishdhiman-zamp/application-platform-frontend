@@ -96,6 +96,12 @@ export const OnboardingRoot = () => {
   useEffect(() => {
     if (!ldClient || !session) return;
 
+    if (ldClient === true) {
+      setIsOnboardingEnabled(true);
+
+      return;
+    }
+
     let cancelled = false;
 
     ldClient
