@@ -1,15 +1,18 @@
 'use client';
 
-import { memo, useCallback, useEffect, useState } from 'react';
+import { memo, useCallback, useEffect, useMemo, useState } from 'react';
 import UnsupportedFileView from 'modules/pace/components/file-viewer/viewers/UnsupportedFileView';
 import ImageLoader from '@/components/common/loader/ImageLoader';
+import CommonWrapper from '@/components/commonWrapper';
+import { SkeletonTypes } from '@/components/commonWrapper/commonWrapper.types';
 import { ZAMP_LOGO_LOADER_SVG } from '@/constants/icons';
-import {
-  MilkdownEditor,
-  MonacoCodeEditor,
-  PdfViewer,
-  SpreadsheetViewer,
-} from '@/modules/pace/components/file-viewer/file-viewer.dynamic';
+import { clientOnly } from '@/utils/clientOnly';
+
+const PdfViewer = clientOnly(() => import('./viewers/PdfViewer'));
+const MonacoCodeEditor = clientOnly(() => import('./viewers/MonacoCodeEditor'));
+const MilkdownEditor = clientOnly(() => import('./viewers/MilkdownEditor'));
+const SpreadsheetViewer = clientOnly(() => import('./viewers/spreadsheet/SpreadsheetViewer'));
+
 import type {
   HtmlViewMode,
   MarkdownViewMode,
@@ -77,89 +80,112 @@ const FileViewerContent = memo(
 
     const fallbackMediaUrl = getMediaUrl(filePath);
     const effectiveMediaUrl = mediaUrl || fallbackMediaUrl;
+    const isTextSpreadsheet =
+      fileCategory === FILE_CATEGORY.SPREADSHEET &&
+      (TEXT_SPREADSHEET_EXTENSIONS as readonly string[]).includes(fileExtension.toLowerCase());
+
+    const isContentLoading =
+      (isLoading && isEditable) ||
+      (CONTENT_BASED_CATEGORIES.has(fileCategory) && content === null) ||
+      (isTextSpreadsheet && content === null);
 
     useEffect(() => {
       setMediaError(null);
     }, [filePath, mediaUrl]);
 
-    if (mediaError) {
-      return (
-        <FileViewerError fileName={fileName} type='load-error' description={mediaError.message} onClose={onClose} />
-      );
-    }
+    const renderContent = useMemo(() => {
+      switch (fileCategory) {
+        case FILE_CATEGORY.IMAGE:
+          return <ImageViewer src={effectiveMediaUrl} alt={fileName} onError={handleMediaError} />;
 
-    if (isLoading && isEditable) {
-      return <ImageLoader imageSrc={ZAMP_LOGO_LOADER_SVG} width={140} height={140} />;
-    }
+        case FILE_CATEGORY.AUDIO:
+          return (
+            <AudioViewer src={effectiveMediaUrl} fileName={fileName} isActive={isActive} onError={handleMediaError} />
+          );
 
-    const isTextSpreadsheetRaw =
-      fileCategory === FILE_CATEGORY.SPREADSHEET &&
-      (TEXT_SPREADSHEET_EXTENSIONS as readonly string[]).includes(fileExtension.toLowerCase()) &&
-      spreadsheetViewMode === 'raw';
+        case FILE_CATEGORY.VIDEO:
+          return <VideoViewer src={effectiveMediaUrl} isActive={isActive} onError={handleMediaError} />;
 
-    if ((CONTENT_BASED_CATEGORIES.has(fileCategory) || isTextSpreadsheetRaw) && content === null) {
-      return <ImageLoader imageSrc={ZAMP_LOGO_LOADER_SVG} width={140} height={140} />;
-    }
+        case FILE_CATEGORY.PDF:
+          return (
+            <PdfViewer key={effectiveMediaUrl} src={effectiveMediaUrl} fileName={fileName} onError={handleMediaError} />
+          );
 
-    switch (fileCategory) {
-      case FILE_CATEGORY.IMAGE:
-        return <ImageViewer src={effectiveMediaUrl} alt={fileName} onError={handleMediaError} />;
+        case FILE_CATEGORY.MARKDOWN:
+          if (markdownViewMode === 'raw') {
+            return <MonacoCodeEditor content={content!} language='markdown' onChange={onContentChange} />;
+          }
 
-      case FILE_CATEGORY.AUDIO:
-        return (
-          <AudioViewer src={effectiveMediaUrl} fileName={fileName} isActive={isActive} onError={handleMediaError} />
-        );
+          return <MilkdownEditor content={content!} onChange={onContentChange} />;
 
-      case FILE_CATEGORY.VIDEO:
-        return <VideoViewer src={effectiveMediaUrl} isActive={isActive} onError={handleMediaError} />;
+        case FILE_CATEGORY.HTML:
+          if (htmlViewMode === 'code') {
+            return <MonacoCodeEditor content={content!} language='html' onChange={onContentChange} />;
+          }
 
-      case FILE_CATEGORY.PDF:
-        return (
-          <PdfViewer key={effectiveMediaUrl} src={effectiveMediaUrl} fileName={fileName} onError={handleMediaError} />
-        );
+          return <HtmlPreviewViewer content={content!} />;
 
-      case FILE_CATEGORY.MARKDOWN:
-        if (markdownViewMode === 'raw') {
-          return <MonacoCodeEditor content={content!} language='markdown' onChange={onContentChange} />;
+        case FILE_CATEGORY.SPREADSHEET: {
+          const isTextSpreadsheet = (TEXT_SPREADSHEET_EXTENSIONS as readonly string[]).includes(
+            fileExtension.toLowerCase(),
+          );
+
+          if (isTextSpreadsheet && spreadsheetViewMode === 'raw') {
+            return <MonacoCodeEditor content={content!} language='plaintext' onChange={onContentChange} />;
+          }
+
+          return (
+            <SpreadsheetViewer
+              content={isTextSpreadsheet ? content : undefined}
+              mediaUrl={!isTextSpreadsheet ? effectiveMediaUrl : undefined}
+              fileExtension={fileExtension}
+              onError={handleMediaError}
+            />
+          );
         }
 
-        return <MilkdownEditor content={content!} onChange={onContentChange} />;
+        case FILE_CATEGORY.CODE:
+          return (
+            <MonacoCodeEditor
+              content={content!}
+              language={getMonacoLanguage(fileExtension)}
+              onChange={onContentChange}
+            />
+          );
 
-      case FILE_CATEGORY.HTML:
-        if (htmlViewMode === 'code') {
-          return <MonacoCodeEditor content={content!} language='html' onChange={onContentChange} />;
-        }
-
-        return <HtmlPreviewViewer content={content!} />;
-
-      case FILE_CATEGORY.SPREADSHEET: {
-        const isTextSpreadsheet = (TEXT_SPREADSHEET_EXTENSIONS as readonly string[]).includes(
-          fileExtension.toLowerCase(),
-        );
-
-        if (isTextSpreadsheet && spreadsheetViewMode === 'raw') {
-          return <MonacoCodeEditor content={content!} language='plaintext' onChange={onContentChange} />;
-        }
-
-        return (
-          <SpreadsheetViewer
-            content={isTextSpreadsheet ? content : undefined}
-            mediaUrl={!isTextSpreadsheet ? effectiveMediaUrl : undefined}
-            fileExtension={fileExtension}
-            onError={handleMediaError}
-          />
-        );
+        case FILE_CATEGORY.UNKNOWN:
+        default:
+          return <UnsupportedFileView fileName={fileName} />;
       }
+    }, [
+      fileCategory,
+      effectiveMediaUrl,
+      fileName,
+      handleMediaError,
+      isActive,
+      markdownViewMode,
+      content,
+      onContentChange,
+      htmlViewMode,
+      fileExtension,
+      spreadsheetViewMode,
+    ]);
 
-      case FILE_CATEGORY.CODE:
-        return (
-          <MonacoCodeEditor content={content!} language={getMonacoLanguage(fileExtension)} onChange={onContentChange} />
-        );
-
-      case FILE_CATEGORY.UNKNOWN:
-      default:
-        return <UnsupportedFileView fileName={fileName} />;
-    }
+    return (
+      <CommonWrapper
+        isLoading={isContentLoading}
+        isError={!!mediaError}
+        renderError={
+          <FileViewerError fileName={fileName} type='load-error' description={mediaError?.message} onClose={onClose} />
+        }
+        skeletonType={SkeletonTypes.CUSTOM}
+        loader={<ImageLoader imageSrc={ZAMP_LOGO_LOADER_SVG} width={140} height={140} />}
+        className='flex h-full w-full items-center justify-center'
+        disableAnimation
+      >
+        {renderContent}
+      </CommonWrapper>
+    );
   },
 );
 

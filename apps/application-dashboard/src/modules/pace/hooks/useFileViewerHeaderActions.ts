@@ -1,4 +1,4 @@
-import { useCallback, useState } from 'react';
+import { useCallback, useMemo, useState } from 'react';
 import { captureException } from '@sentry/browser';
 import { toast } from '@zamp-platform/ui';
 import { useFileTabs } from '@/modules/pace/components/dynamic-tabs/useFileTabs';
@@ -69,13 +69,18 @@ export const useFileViewerHeaderActions = ({
     [handleDownload],
   );
 
-  return {
-    handleActionClick,
-    isDeleting,
-    deleteConfirmation: {
+  const deleteConfirmation = useMemo(
+    () => ({
       isOpen: isDeleteDialogOpen,
       onOpenChange: handleDeleteDialogOpenChange,
       onConfirm: handleDeleteConfirm,
-    },
+    }),
+    [isDeleteDialogOpen, handleDeleteDialogOpenChange, handleDeleteConfirm],
+  );
+
+  return {
+    handleActionClick,
+    isDeleting,
+    deleteConfirmation,
   };
 };

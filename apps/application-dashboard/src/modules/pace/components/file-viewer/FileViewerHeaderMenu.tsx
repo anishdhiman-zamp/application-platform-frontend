@@ -1,5 +1,6 @@
 'use client';
 
+import { memo } from 'react';
 import { Button, DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from '@zamp-platform/ui';
 import { cn } from '@zamp-platform/ui/utils';
 import { MoreVertical } from 'lucide-react';
@@ -10,7 +11,7 @@ interface FileViewerHeaderMenuProps {
   disabled?: boolean;
 }
 
-const FileViewerHeaderMenu = ({ onActionClick, disabled = false }: FileViewerHeaderMenuProps) => {
+const FileViewerHeaderMenu = memo(({ onActionClick, disabled = false }: FileViewerHeaderMenuProps) => {
   return (
     <DropdownMenu>
       <DropdownMenuTrigger asChild disabled={disabled}>
@@ -35,6 +36,8 @@ const FileViewerHeaderMenu = ({ onActionClick, disabled = false }: FileViewerHea
       </DropdownMenuContent>
     </DropdownMenu>
   );
-};
+});
+
+FileViewerHeaderMenu.displayName = 'FileViewerHeaderMenu';
 
 export default FileViewerHeaderMenu;
