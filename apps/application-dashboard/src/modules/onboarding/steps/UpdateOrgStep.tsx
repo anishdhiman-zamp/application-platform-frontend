@@ -1,6 +1,6 @@
 'use client';
 
-import { useState } from 'react';
+import { useCallback, useState } from 'react';
 import { AvatarPicker } from 'modules/onboarding/components/AvatarPicker';
 import { OnboardingInputStep } from 'modules/onboarding/components/OnboardingInputStep';
 import { useAvatarState } from 'modules/onboarding/hooks/useAvatarState';
@@ -33,9 +33,25 @@ export const UpdateOrgStep = ({ username, onComplete, onWrongStep, onFlagDisable
     updateSeed(val);
   };
 
+  const submitOrg = useCallback(
+    async (name: string) => {
+      const { type, value } = await uploadImage();
+      const result = await setupOrg({
+        organization_name: name,
+        icon_type: type,
+        icon_value: value,
+      }).unwrap();
+
+      return result;
+    },
+    [uploadImage, setupOrg],
+  );
+
   const handleSubmit = async () => {
-    if (!orgName.trim() || isSubmitting) return;
-    if (orgName.trim().length > VALIDATION.ORG_NAME_MAX) {
+    const trimmed = orgName.trim();
+
+    if (!trimmed || isSubmitting) return;
+    if (trimmed.length > VALIDATION.ORG_NAME_MAX) {
       setError(ERROR_MESSAGES.ORG_NAME_MAX_LENGTH);
 
       return;
@@ -44,12 +60,7 @@ export const UpdateOrgStep = ({ username, onComplete, onWrongStep, onFlagDisable
     setIsSubmitting(true);
 
     try {
-      const { type, value } = await uploadImage();
-      const result = await setupOrg({
-        organization_name: orgName.trim(),
-        icon_type: type,
-        icon_value: value,
-      }).unwrap();
+      const result = await submitOrg(trimmed);
 
       onComplete(result.onboarding_status, result.organization_id);
     } catch (err) {

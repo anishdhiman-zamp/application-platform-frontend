@@ -18,7 +18,9 @@ export const PendingApprovalStep = ({ email, onComplete, onWrongStep, onFlagDisa
   const checkingRef = useRef(false);
   const onCompleteRef = useRef(onComplete);
 
-  onCompleteRef.current = onComplete;
+  useEffect(() => {
+    onCompleteRef.current = onComplete;
+  }, [onComplete]);
 
   const check = useCallback(async () => {
     if (checkingRef.current) return;

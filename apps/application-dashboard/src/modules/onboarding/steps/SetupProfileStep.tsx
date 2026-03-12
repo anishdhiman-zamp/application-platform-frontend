@@ -10,12 +10,18 @@ import { handleOnboardingApiError } from 'modules/onboarding/utils/onboardingErr
 import { useUpdateProfileMutation } from '@/apis/onboarding';
 import { generateAvatarSvg } from '@/utils/pixelArtGenerator';
 
-type Props = OnboardingStepCallbacks & {
+export interface SetupProfileStepInterface extends OnboardingStepCallbacks {
   initialName?: string;
   username: string;
-};
+}
 
-export const SetupProfileStep = ({ initialName = '', username, onComplete, onWrongStep, onFlagDisabled }: Props) => {
+export const SetupProfileStep = ({
+  initialName = '',
+  username,
+  onComplete,
+  onWrongStep,
+  onFlagDisabled,
+}: SetupProfileStepInterface) => {
   const [name, setName] = useState(initialName);
   const [error, setError] = useState<string | null>(null);
   const [isSubmitting, setIsSubmitting] = useState(false);

@@ -51,6 +51,43 @@ export const OnboardingRoot = () => {
     router.replace(getLandingRoute(freshSession?.orgs?.[0]?.product));
   }, [refetchSession, router]);
 
+  const handleStepComplete = (nextStatus: OnboardingStatus, organizationId?: string) => {
+    if (nextStatus === OnboardingStatus.ONBOARDED) {
+      if (isWelcomeSeen()) {
+        redirectToApp();
+
+        return;
+      }
+      // Show welcome animation before entering the app (invited user path)
+    }
+
+    if (organizationId) {
+      setOrgIdFromSetup(organizationId);
+    }
+
+    setWelcomeSeen(isWelcomeSeen());
+    setCurrentStatus(nextStatus);
+  };
+
+  // 400 "wrong step" → re-fetch session to get correct onboarding_status
+  const handleWrongStep = useCallback(async () => {
+    const { data } = await refetchSession();
+
+    if (data?.onboarding_status) {
+      setCurrentStatus(data.onboarding_status);
+    }
+  }, [refetchSession]);
+
+  // 403 "feature flag off" → call skip, then redirect to main app
+  const handleFlagDisabled = useCallback(async () => {
+    try {
+      await skipOnboarding().unwrap();
+    } catch {
+      // Best-effort skip
+    }
+    redirectToApp();
+  }, [skipOnboarding, redirectToApp]);
+
   // Resolve the flag only after fixing LD's context with the real user from whoami.
   // The shared LDProvider initializes with getUserSession() which may have an empty user key,
   // causing "Invalid context". We call identify() with the real session to fix it.
@@ -133,43 +170,6 @@ export const OnboardingRoot = () => {
       .unwrap()
       .catch(() => {});
   }, [currentStatus, orgIdFromSetup, session, ensureProvisioning]);
-
-  const handleStepComplete = (nextStatus: OnboardingStatus, organizationId?: string) => {
-    if (nextStatus === OnboardingStatus.ONBOARDED) {
-      if (isWelcomeSeen()) {
-        redirectToApp();
-
-        return;
-      }
-      // Show welcome animation before entering the app (invited user path)
-    }
-
-    if (organizationId) {
-      setOrgIdFromSetup(organizationId);
-    }
-
-    setWelcomeSeen(isWelcomeSeen());
-    setCurrentStatus(nextStatus);
-  };
-
-  // 400 "wrong step" → re-fetch session to get correct onboarding_status
-  const handleWrongStep = useCallback(async () => {
-    const { data } = await refetchSession();
-
-    if (data?.onboarding_status) {
-      setCurrentStatus(data.onboarding_status);
-    }
-  }, [refetchSession]);
-
-  // 403 "feature flag off" → call skip, then redirect to main app
-  const handleFlagDisabled = useCallback(async () => {
-    try {
-      await skipOnboarding().unwrap();
-    } catch {
-      // Best-effort skip
-    }
-    redirectToApp();
-  }, [skipOnboarding, redirectToApp]);
 
   if (isLoading || isFlagLoading || !currentStatus) {
     return <ImageLoader imageSrc={ZAMP_LOGO_LOADER_SVG} width={140} height={140} />;

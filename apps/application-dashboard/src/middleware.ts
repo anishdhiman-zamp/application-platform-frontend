@@ -68,13 +68,15 @@ const handleAuthenticatedRoutes = async (request: NextRequest) => {
 
   let topLevelSession = null;
 
-  if (
-    pathname !== ROUTES_PATH.MEMBERSHIP_PENDING &&
-    pathname !== ROUTES_PATH.SETUP_WORKSPACE &&
-    pathname !== ROUTES_PATH.LOGIN &&
-    pathname !== ROUTES_PATH.ONBOARDING &&
-    pathname !== ROUTES_PATH.INVITATIONS
-  ) {
+  const isExemptRoute = [
+    ROUTES_PATH.MEMBERSHIP_PENDING,
+    ROUTES_PATH.SETUP_WORKSPACE,
+    ROUTES_PATH.LOGIN,
+    ROUTES_PATH.ONBOARDING,
+    ROUTES_PATH.INVITATIONS,
+  ].includes(pathname);
+
+  if (!isExemptRoute) {
     const userSession = await getUserSession(request);
     const { cached } = userSession;
     let { session } = userSession;

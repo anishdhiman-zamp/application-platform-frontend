@@ -45,14 +45,16 @@ const IMG_TRIGGERS = [
 ];
 
 export const WelcomeStep = ({ nextStatus, onComplete }: Props) => {
-  const [currentIdx, setCurrentIdx] = useState(-1);
   const currentIdxRef = useRef(-1);
-  const [phase, setPhase] = useState<'revealing' | 'done'>('revealing');
   const phaseRef = useRef<'revealing' | 'done'>('revealing');
   const isAnimatingRef = useRef(false);
+  const navigatedRef = useRef(false);
+  const lastAdvanceRef = useRef(0);
+
+  const [currentIdx, setCurrentIdx] = useState(-1);
+  const [phase, setPhase] = useState<'revealing' | 'done'>('revealing');
   const [revealedWords, setRevealedWords] = useState<Record<number, Set<number>>>({});
   const [exitIdx, setExitIdx] = useState<number | null>(null);
-  const navigatedRef = useRef(false);
 
   const handleDone = useCallback(() => {
     if (navigatedRef.current) return;
@@ -78,19 +80,16 @@ export const WelcomeStep = ({ nextStatus, onComplete }: Props) => {
 
     const timers: ReturnType<typeof setTimeout>[] = [];
 
-    for (let wi = 0; wi < wordCount; wi++) {
-      timers.push(
+    timers.push(
+      ...Array.from({ length: wordCount }, (_, wi) =>
         setTimeout(() => {
-          setRevealedWords((prev) => {
-            const next = { ...prev };
-
-            next[idx] = new Set([...(prev[idx] ?? []), wi]);
-
-            return next;
-          });
+          setRevealedWords((prev) => ({
+            ...prev,
+            [idx]: new Set(prev[idx]).add(wi),
+          }));
         }, wi * overlap),
-      );
-    }
+      ),
+    );
 
     const animTime = (wordCount - 1) * overlap + 600;
     const lockTime = Math.max(animTime, 1200);
@@ -104,14 +103,6 @@ export const WelcomeStep = ({ nextStatus, onComplete }: Props) => {
 
     return () => timers.forEach(clearTimeout);
   }, []);
-
-  useEffect(() => {
-    const timer = setTimeout(() => showSection(0), 400);
-
-    return () => clearTimeout(timer);
-  }, []); // eslint-disable-line react-hooks/exhaustive-deps
-
-  const lastAdvanceRef = useRef(0);
 
   const advance = useCallback(() => {
     if (Date.now() - lastAdvanceRef.current < 1500) return;
@@ -129,22 +120,34 @@ export const WelcomeStep = ({ nextStatus, onComplete }: Props) => {
     }
   }, [showSection, handleDone]);
 
-  useEffect(() => {
-    const handleWheel = (e: WheelEvent) => {
+  const handleWheel = useCallback(
+    (e: WheelEvent) => {
       e.preventDefault();
       if (e.deltaY <= 0) return;
       advance();
-    };
+    },
+    [advance],
+  );
 
-    const handleKeyDown = (e: KeyboardEvent) => {
+  const handleKeyDown = useCallback(
+    (e: KeyboardEvent) => {
       if (
         [KEYBOARD_KEYS.ARROW_DOWN, KEYBOARD_KEYS.ARROW_RIGHT, ' ', KEYBOARD_KEYS.ENTER].includes(e.key as KEYBOARD_KEYS)
       ) {
         e.preventDefault();
         advance();
       }
-    };
+    },
+    [advance],
+  );
 
+  useEffect(() => {
+    const timer = setTimeout(() => showSection(0), 400);
+
+    return () => clearTimeout(timer);
+  }, []); // eslint-disable-line react-hooks/exhaustive-deps
+
+  useEffect(() => {
     window.addEventListener('wheel', handleWheel, { passive: false });
     window.addEventListener('keydown', handleKeyDown);
 
@@ -152,7 +155,7 @@ export const WelcomeStep = ({ nextStatus, onComplete }: Props) => {
       window.removeEventListener('wheel', handleWheel);
       window.removeEventListener('keydown', handleKeyDown);
     };
-  }, [advance]);
+  }, [handleWheel, handleKeyDown]);
 
   const getImgState = (imgIdx: number) => {
     const t = IMG_TRIGGERS[imgIdx];
@@ -203,23 +206,17 @@ export const WelcomeStep = ({ nextStatus, onComplete }: Props) => {
         return (
           <div
             key={idx}
-            className='pointer-events-none absolute w-[640px] text-center'
+            className='pointer-events-none absolute top-1/2 left-1/2 z-2 w-160 text-center'
             style={{
-              top: '50%',
-              left: '50%',
               transform: isExiting ? 'translate(-50%, -55%)' : 'translate(-50%, -50%)',
               opacity: isActive ? 1 : 0,
               transition: 'opacity 0.6s cubic-bezier(0.16,1,0.3,1), transform 0.6s cubic-bezier(0.16,1,0.3,1)',
-              zIndex: 2,
             }}
           >
             <div
+              className='text-GRAY_1000 font-funnel-display leading-[1.45] font-light'
               style={{
-                fontFamily: 'var(--font-funnel-display), serif',
                 fontSize: idx === STORY_LINES.length - 1 ? 52 : 44,
-                color: 'var(--GRAY_1000)',
-                lineHeight: 1.45,
-                fontWeight: 300,
               }}
             >
               {words.map((word, wi) => (

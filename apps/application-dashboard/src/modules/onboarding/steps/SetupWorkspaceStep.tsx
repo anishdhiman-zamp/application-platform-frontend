@@ -17,13 +17,15 @@ const POLLING_INTERVAL = 5000;
 const MAX_POLL_ATTEMPTS = 60; // 5 minutes at 5s intervals
 
 export const SetupWorkspaceStep = ({ organizationId, userName, onComplete }: Props) => {
-  const [ensureProvisioning] = useEnsureProvisioningMutation();
-  const [takingLonger, setTakingLonger] = useState(false);
-  const [hasError, setHasError] = useState(false);
-  const [ready, setReady] = useState(false);
   const completedRef = useRef(false);
   const readyRef = useRef(false);
   const attemptsRef = useRef(0);
+
+  const [ensureProvisioning] = useEnsureProvisioningMutation();
+
+  const [takingLonger, setTakingLonger] = useState(false);
+  const [hasError, setHasError] = useState(false);
+  const [ready, setReady] = useState(false);
 
   const handleOnboarded = useCallback(() => {
     if (completedRef.current) return;

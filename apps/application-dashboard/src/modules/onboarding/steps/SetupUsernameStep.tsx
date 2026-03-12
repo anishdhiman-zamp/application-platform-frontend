@@ -9,24 +9,30 @@ import { handleOnboardingApiError } from 'modules/onboarding/utils/onboardingErr
 import { useLazyCheckUsernameQuery, useUpdateProfileMutation } from '@/apis/onboarding';
 import { generateAtIconSvg } from '@/utils/pixelArtGenerator';
 
-type Props = OnboardingStepCallbacks & {
+export interface SetupUsernameStepInterface extends OnboardingStepCallbacks {
   initialUsername?: string;
-};
+}
 
-export const SetupUsernameStep = ({ initialUsername = '', onComplete, onWrongStep, onFlagDisabled }: Props) => {
+export const SetupUsernameStep = ({
+  initialUsername = '',
+  onComplete,
+  onWrongStep,
+  onFlagDisabled,
+}: SetupUsernameStepInterface) => {
+  const debounceRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+
+  const [checkUsername] = useLazyCheckUsernameQuery();
+  const [updateProfile, { isLoading }] = useUpdateProfileMutation();
+
   const [username, setUsername] = useState(initialUsername);
   const [error, setError] = useState<string | null>(null);
   const [checking, setChecking] = useState(false);
   const [available, setAvailable] = useState<boolean | null>(null);
-  const debounceRef = useRef<ReturnType<typeof setTimeout> | null>(null);
-  const [checkUsername] = useLazyCheckUsernameQuery();
-  const [updateProfile, { isLoading }] = useUpdateProfileMutation();
 
   const check = useCallback(
     async (val: string) => {
       if (!val || val.length < VALIDATION.USERNAME_MIN || !VALIDATION.USERNAME_REGEX.test(val)) {
         setAvailable(null);
-        setChecking(false);
 
         return;
       }
@@ -35,8 +41,7 @@ export const SetupUsernameStep = ({ initialUsername = '', onComplete, onWrongSte
         const result = await checkUsername(val).unwrap();
 
         setAvailable(result.available);
-        if (!result.available) setError(ERROR_MESSAGES.USERNAME_TAKEN);
-        else setError(null);
+        setError(result.available ? null : ERROR_MESSAGES.USERNAME_TAKEN);
       } catch {
         setAvailable(null);
       } finally {
@@ -45,11 +50,6 @@ export const SetupUsernameStep = ({ initialUsername = '', onComplete, onWrongSte
     },
     [checkUsername],
   );
-
-  useEffect(() => {
-    if (initialUsername) check(initialUsername);
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []);
 
   const handleChange = (val: string) => {
     setUsername(val);
@@ -60,26 +60,30 @@ export const SetupUsernameStep = ({ initialUsername = '', onComplete, onWrongSte
     debounceRef.current = setTimeout(() => check(val), 400);
   };
 
-  const handleSubmit = async () => {
-    if (!username.trim()) return;
-    if (username.length < VALIDATION.USERNAME_MIN || username.length > VALIDATION.USERNAME_MAX) {
-      setError(ERROR_MESSAGES.USERNAME_LENGTH);
+  const getValidationError = (val: string): string | null => {
+    if (val.length < VALIDATION.USERNAME_MIN || val.length > VALIDATION.USERNAME_MAX)
+      return ERROR_MESSAGES.USERNAME_LENGTH;
+    if (!VALIDATION.USERNAME_REGEX.test(val)) return ERROR_MESSAGES.USERNAME_FORMAT;
+    if (available === false) return ERROR_MESSAGES.USERNAME_TAKEN;
+
+    return null;
+  };
+
+  const handleSubmit = useCallback(async () => {
+    const trimmed = username.trim();
+
+    if (!trimmed) return;
+
+    const validationError = getValidationError(trimmed);
+
+    if (validationError) {
+      setError(validationError);
 
       return;
     }
-    if (!VALIDATION.USERNAME_REGEX.test(username)) {
-      setError(ERROR_MESSAGES.USERNAME_FORMAT);
 
-      return;
-    }
-    if (available === false) {
-      setError(ERROR_MESSAGES.USERNAME_TAKEN);
-
-      return;
-    }
-    setError(null);
     try {
-      const result = await updateProfile({ username: username.trim() }).unwrap();
+      const result = await updateProfile({ username: trimmed }).unwrap();
 
       onComplete(result.onboarding_status);
     } catch (err) {
@@ -87,7 +91,12 @@ export const SetupUsernameStep = ({ initialUsername = '', onComplete, onWrongSte
         setError(ERROR_MESSAGES.GENERIC);
       }
     }
-  };
+  }, [username, available, updateProfile, onComplete, onWrongStep, onFlagDisabled]);
+
+  useEffect(() => {
+    if (initialUsername) check(initialUsername);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
 
   return (
     <OnboardingInputStep

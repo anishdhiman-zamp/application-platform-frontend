@@ -31,10 +31,6 @@ export const OnboardingInputStep = ({
 }: OnboardingInputStepInterface) => {
   const inputRef = useRef<HTMLInputElement>(null);
 
-  useEffect(() => {
-    if (autoFocus) inputRef.current?.focus();
-  }, []);
-
   const handleGlobalKeyDown = useCallback(
     (e: KeyboardEvent) => {
       if (e.key !== KEYBOARD_KEYS.ENTER || disabled) return;
@@ -48,6 +44,10 @@ export const OnboardingInputStep = ({
     },
     [disabled, onSubmit],
   );
+
+  useEffect(() => {
+    if (autoFocus) inputRef.current?.focus();
+  }, []);
 
   useEffect(() => {
     window.addEventListener('keydown', handleGlobalKeyDown);
