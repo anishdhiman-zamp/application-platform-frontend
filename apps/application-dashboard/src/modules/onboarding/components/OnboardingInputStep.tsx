@@ -1,6 +1,7 @@
 import { type ReactNode, useEffect, useRef } from 'react';
 import { Button } from '@zamp-platform/ui';
 import { EnterIcon } from 'modules/onboarding/components/EnterIcon';
+import { KEYBOARD_KEYS } from '@/constants/shortcuts';
 
 type Props = {
   children: ReactNode;
@@ -42,7 +43,7 @@ export const OnboardingInputStep = ({
 
   useEffect(() => {
     const handleGlobalKeyDown = (e: KeyboardEvent) => {
-      if (e.key !== 'Enter' || disabledRef.current) return;
+      if (e.key !== KEYBOARD_KEYS.ENTER || disabledRef.current) return;
 
       // Don't submit if a popover/dialog is open (e.g. avatar picker)
       if (document.querySelector('[data-radix-popper-content-wrapper]') || document.querySelector('[role="dialog"]'))

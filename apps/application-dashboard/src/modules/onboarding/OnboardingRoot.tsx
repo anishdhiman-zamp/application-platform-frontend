@@ -28,17 +28,20 @@ const isWelcomeSeen = () => {
 
 export const OnboardingRoot = () => {
   const containerRef = useRef<HTMLDivElement>(null);
+  const skipCalledRef = useRef(false);
+  const provisioningFiredRef = useRef(false);
+
   const router = useRouter();
   const { data: session, isLoading, refetch: refetchSession } = useWhoAmIQuery();
+  const { ldClient } = useFeatureFlags();
+  const [skipOnboarding] = useSkipOnboardingMutation();
+  const [ensureProvisioning] = useEnsureProvisioningMutation();
+
   const [currentStatus, setCurrentStatus] = useState<OnboardingStatus | null>(null);
   const [orgIdFromSetup, setOrgIdFromSetup] = useState<string | null>(null);
   const [welcomeSeen, setWelcomeSeen] = useState(isWelcomeSeen());
-  const { ldClient } = useFeatureFlags();
   const [isOnboardingEnabled, setIsOnboardingEnabled] = useState<boolean | null>(null);
   const isFlagLoading = isOnboardingEnabled === null;
-  const [skipOnboarding] = useSkipOnboardingMutation();
-  const [ensureProvisioning] = useEnsureProvisioningMutation();
-  const skipCalledRef = useRef(false);
 
   // Refetch session to get fresh org/product data, then redirect to the correct landing page.
   // The cached whoami response may predate org creation, so we must refetch before redirecting.
@@ -119,8 +122,6 @@ export const OnboardingRoot = () => {
 
   // Fire provisioning call early only when welcome animation will play (gives provisioning a head start).
   // Skip if welcome is already seen — SetupWorkspaceStep will call it on mount anyway.
-  const provisioningFiredRef = useRef(false);
-
   useEffect(() => {
     if (currentStatus !== OnboardingStatus.SETUP_WORKSPACE || provisioningFiredRef.current || isWelcomeSeen()) return;
     const resolvedOrgId = orgIdFromSetup || session?.orgs?.[0]?.organization_id;

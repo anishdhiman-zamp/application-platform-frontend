@@ -2,6 +2,7 @@
 
 import { useCallback, useEffect, useRef, useState } from 'react';
 import { OnboardingStatus } from 'modules/onboarding/onboarding.types';
+import { KEYBOARD_KEYS } from '@/constants/shortcuts';
 
 export const WELCOME_SEEN_KEY = 'zamp_welcome_seen';
 
@@ -136,7 +137,9 @@ export const WelcomeStep = ({ nextStatus, onComplete }: Props) => {
     };
 
     const handleKeyDown = (e: KeyboardEvent) => {
-      if (['ArrowDown', 'ArrowRight', ' ', 'Enter'].includes(e.key)) {
+      if (
+        [KEYBOARD_KEYS.ARROW_DOWN, KEYBOARD_KEYS.ARROW_RIGHT, ' ', KEYBOARD_KEYS.ENTER].includes(e.key as KEYBOARD_KEYS)
+      ) {
         e.preventDefault();
         advance();
       }
