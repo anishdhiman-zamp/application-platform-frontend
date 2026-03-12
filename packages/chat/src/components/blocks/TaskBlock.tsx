@@ -139,7 +139,7 @@ const TaskBlock: FC<TaskBlockProps> = ({ payload, conversationId }) => {
         {status === TASK_STATUS.IN_PROGRESS ? (
           <ShimmerText text={toolCall.displayName ?? 'Unknown'} autoAnimate={true} />
         ) : (
-          <span className='text-GRAY_900'>{toolCall.displayName ?? 'Unknown'}</span>
+          <span className='text-GRAY_950'>{toolCall.displayName ?? 'Unknown'}</span>
         )}
       </div>
     );
@@ -184,7 +184,7 @@ const TaskBlock: FC<TaskBlockProps> = ({ payload, conversationId }) => {
                     <div>
                       <div className='flex items-center gap-2'>
                         <ChevronDown size={14} className='text-GRAY_700' />
-                        <span className='f-13-400 text-GRAY_700'>
+                        <span className='f-14-450 text-GRAY_950'>
                           {previousCount} {previousCount === 1 ? 'step' : 'steps'}
                         </span>
                       </div>
@@ -202,7 +202,7 @@ const TaskBlock: FC<TaskBlockProps> = ({ payload, conversationId }) => {
                   )}
 
                   {(toolCalls?.length ?? 0) === 0 && !isLoading && status === TASK_STATUS.IN_PROGRESS && (
-                    <div className='f-13-400 text-GRAY_700 py-2'>
+                    <div className='f-14-450 text-GRAY_700 py-2'>
                       <ShimmerText text='Starting now' autoAnimate={true} />
                     </div>
                   )}
