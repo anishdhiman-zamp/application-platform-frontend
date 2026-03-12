@@ -41,11 +41,13 @@ export const OnboardingRoot = () => {
   const [orgIdFromSetup, setOrgIdFromSetup] = useState<string | null>(null);
   const [welcomeSeen, setWelcomeSeen] = useState(isWelcomeSeen());
   const [isOnboardingEnabled, setIsOnboardingEnabled] = useState<boolean | null>(null);
+  const [redirecting, setRedirecting] = useState(false);
   const isFlagLoading = isOnboardingEnabled === null;
 
   // Refetch session to get fresh org/product data, then redirect to the correct landing page.
   // The cached whoami response may predate org creation, so we must refetch before redirecting.
   const redirectToApp = useCallback(async () => {
+    setRedirecting(true);
     const { data: freshSession } = await refetchSession();
 
     router.replace(getLandingRoute(freshSession?.orgs?.[0]?.product));
@@ -171,7 +173,7 @@ export const OnboardingRoot = () => {
       .catch(() => {});
   }, [currentStatus, orgIdFromSetup, session, ensureProvisioning]);
 
-  if (isLoading || isFlagLoading || !currentStatus) {
+  if (isLoading || isFlagLoading || !currentStatus || redirecting) {
     return <ImageLoader imageSrc={ZAMP_LOGO_LOADER_SVG} width={140} height={140} />;
   }
 
