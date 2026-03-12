@@ -13,7 +13,7 @@ const EmptyState = () => {
           height={150}
         />
       </div>
-      <p className='f-14-400 text-GRAY_700 max-w-[260px] text-center text-wrap break-words'>
+      <p className='f-14-400 text-GRAY_700 max-w-[260px] text-center text-wrap wrap-break-word'>
         Your processes will appear here once you get started
       </p>
     </div>

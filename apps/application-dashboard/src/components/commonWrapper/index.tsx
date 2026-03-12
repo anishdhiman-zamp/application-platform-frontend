@@ -1,5 +1,5 @@
 import { FC, Fragment } from 'react';
-import { COLORS } from 'constants/colors';
+import { COLORS } from '@zamp-platform/ui';
 import { SIZE } from 'constants/common.constants';
 import { cn } from 'utils/common';
 import { Loader } from 'components/common/loader/Loader';

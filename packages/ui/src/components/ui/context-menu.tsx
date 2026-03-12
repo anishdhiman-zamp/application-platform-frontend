@@ -47,7 +47,7 @@ const ContextMenuSubContent = ({
 }: React.ComponentProps<typeof ContextMenuPrimitive.SubContent>) => (
   <ContextMenuPrimitive.SubContent
     className={cn(
-      'bg-popover text-popover-foreground data-[state=open]:animate-in data-[state=closed]:animate-out data-[state=closed]:fade-out-0 data-[state=open]:fade-in-0 data-[state=closed]:zoom-out-95 data-[state=open]:zoom-in-95 data-[side=bottom]:slide-in-from-top-2 data-[side=left]:slide-in-from-right-2 data-[side=right]:slide-in-from-left-2 data-[side=top]:slide-in-from-bottom-2 z-50 min-w-[120px] overflow-hidden rounded-md border p-1 shadow-lg',
+      'bg-BG_WHITE text-GRAY_1000 data-[state=open]:animate-in data-[state=closed]:animate-out data-[state=closed]:fade-out-0 data-[state=open]:fade-in-0 data-[state=closed]:zoom-out-95 data-[state=open]:zoom-in-95 data-[side=bottom]:slide-in-from-top-2 data-[side=left]:slide-in-from-right-2 data-[side=right]:slide-in-from-left-2 data-[side=top]:slide-in-from-bottom-2 z-50 min-w-[120px] overflow-hidden rounded-md border p-1 shadow-lg',
       className,
     )}
     {...props}
@@ -59,7 +59,7 @@ const ContextMenuContent = ({ className, ...props }: React.ComponentProps<typeof
   <ContextMenuPrimitive.Portal>
     <ContextMenuPrimitive.Content
       className={cn(
-        'border-GRAY_400 shadow-menu-shadow data-[state=open]:animate-in data-[state=closed]:animate-out data-[state=closed]:fade-out-0 data-[state=open]:fade-in-0 data-[state=closed]:zoom-out-95 data-[state=open]:zoom-in-95 data-[side=bottom]:slide-in-from-top-2 data-[side=left]:slide-in-from-right-2 data-[side=right]:slide-in-from-left-2 data-[side=top]:slide-in-from-bottom-2 z-50 min-w-[120px] rounded-[6px] border bg-white p-1',
+        'border-border bg-BG_WHITE shadow-menu-shadow data-[state=open]:animate-in data-[state=closed]:animate-out data-[state=closed]:fade-out-0 data-[state=open]:fade-in-0 data-[state=closed]:zoom-out-95 data-[state=open]:zoom-in-95 data-[side=bottom]:slide-in-from-top-2 data-[side=left]:slide-in-from-right-2 data-[side=right]:slide-in-from-left-2 data-[side=top]:slide-in-from-bottom-2 z-50 min-w-[120px] rounded-[6px] border p-1',
         className,
       )}
       {...props}
@@ -95,7 +95,7 @@ const ContextMenuCheckboxItem = ({
 }: React.ComponentProps<typeof ContextMenuPrimitive.CheckboxItem>) => (
   <ContextMenuPrimitive.CheckboxItem
     className={cn(
-      'f-12-500 focus:text-accent-foreground pointer-events-auto relative flex cursor-pointer items-center justify-between gap-x-2 rounded-sm px-2 py-1.5 outline-hidden transition-colors select-none hover:bg-gray-50 focus:bg-gray-50 data-disabled:pointer-events-none data-disabled:opacity-50 data-[state=open]:bg-gray-50',
+      'f-12-500 focus:text-accent-GRAY_1000 hover:bg-accent focus:bg-accent data-[state=open]:bg-accent pointer-events-auto relative flex cursor-pointer items-center justify-between gap-x-2 rounded-sm px-2 py-1.5 outline-hidden transition-colors select-none data-disabled:pointer-events-none data-disabled:opacity-50',
       className,
     )}
     checked={checked}
@@ -120,7 +120,7 @@ const ContextMenuRadioItem = ({
 }: React.ComponentProps<typeof ContextMenuPrimitive.RadioItem>) => (
   <ContextMenuPrimitive.RadioItem
     className={cn(
-      'f-12-500 focus:text-accent-foreground pointer-events-auto relative flex cursor-pointer items-center justify-between gap-x-2 rounded-sm px-2 py-1.5 outline-hidden transition-colors select-none hover:bg-gray-50 focus:bg-gray-50 data-disabled:pointer-events-none data-disabled:opacity-50 data-[state=open]:bg-gray-50',
+      'f-12-500 focus:text-accent-GRAY_1000 hover:bg-accent focus:bg-accent data-[state=open]:bg-accent pointer-events-auto relative flex cursor-pointer items-center justify-between gap-x-2 rounded-sm px-2 py-1.5 outline-hidden transition-colors select-none data-disabled:pointer-events-none data-disabled:opacity-50',
       className,
     )}
     value={value}

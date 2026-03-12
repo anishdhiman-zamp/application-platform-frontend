@@ -15,12 +15,13 @@ import {
   type ConflictResolution,
   type FileConflict,
 } from '@/modules/pace/components/files/file-tree.types';
+import { defaultFnType } from '@/types/commonTypes';
 
 interface FileConflictModalProps {
   isOpen: boolean;
   conflict: FileConflict | null;
   onResolve: (resolution: ConflictResolution) => void;
-  onCancel: () => void;
+  onCancel: defaultFnType;
 }
 
 const FileConflictModal = ({ isOpen, conflict, onResolve, onCancel }: FileConflictModalProps) => {
@@ -33,8 +34,8 @@ const FileConflictModal = ({ isOpen, conflict, onResolve, onCancel }: FileConfli
       <DialogContent size='small' showCloseButton={true} className='w-[460px] rounded-[14px]'>
         <DialogHeader className='h-fit border-b-0 px-5 pt-5 pb-0'>
           <div className='flex items-center gap-3'>
-            <div className='bg-YELLOW_100 flex size-10 items-center justify-center rounded-full'>
-              <AlertTriangle className='text-YELLOW_700 size-5' />
+            <div className='bg-ORANGE_200 flex size-10 items-center justify-center rounded-full'>
+              <AlertTriangle className='text-ORANGE_700 size-5' />
             </div>
             <DialogHeaderTitle className='f-16-600'>Item already exists</DialogHeaderTitle>
           </div>

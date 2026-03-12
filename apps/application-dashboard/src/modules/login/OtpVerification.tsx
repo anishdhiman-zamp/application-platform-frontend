@@ -359,7 +359,7 @@ export const OtpVerification: FC<Props> = ({ email, flow, onEditEmail, onFlowExp
         className={cn(
           'relative h-auto w-full overflow-hidden rounded-2xl px-5 py-3.5 text-sm font-medium transition-all duration-250',
           allFilled && !isBusy
-            ? 'bg-GRAY_1000 hover:bg-GRAY_950 active:bg-GRAY_1000 cursor-pointer text-white active:scale-[0.98]'
+            ? 'bg-GRAY_1000 hover:bg-GRAY_950 active:bg-GRAY_1000 cursor-pointer text-white active:scale-[0.98] dark:text-black'
             : 'bg-GRAY_500 text-GRAY_700 disabled:bg-GRAY_500 disabled:text-GRAY_700 cursor-not-allowed',
         )}
       >

@@ -1,6 +1,5 @@
-import { Button } from '@zamp-platform/ui';
+import { Button, COLORS } from '@zamp-platform/ui';
 import { SvgSpriteLoader } from '@zamp-platform/ui/assets';
-import { COLORS } from '@/constants/colors';
 
 const ProcessConformationPopover = () => {
   return (

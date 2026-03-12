@@ -1,5 +1,5 @@
 import { useCallback, useEffect, useState } from 'react';
-import { Dialog, DialogClose, DialogContent, DialogHeader, DialogHeaderTitle } from '@zamp-platform/ui';
+import { CSS_VARS, Dialog, DialogClose, DialogContent, DialogHeader, DialogHeaderTitle } from '@zamp-platform/ui';
 import { SvgSpriteLoader } from '@zamp-platform/ui/assets';
 import { ICON_SPRITE_TYPES } from '@zamp-platform/ui/types';
 import { cn } from '@zamp-platform/ui/utils';
@@ -8,7 +8,6 @@ import type { DocumentItemType } from 'modules/process/process.types';
 import dynamic from 'next/dynamic';
 import { SIDE_OPTIONS } from 'types/commonTypes';
 import TooltipV2 from '@/components/common/TooltipV2';
-import { COLORS } from '@/constants/colors';
 import { formatPlural } from '@/utils/common';
 
 const PdfArtifact = dynamic(() => import('@/modules/process/artifacts/components/pdf-dataset-artifact/PdfArtifact'), {
@@ -78,7 +77,7 @@ const DocumentPreviewDialog = ({ isOpen, onClose, selectedFile, availableFiles }
               id='x-close'
               iconCategory={ICON_SPRITE_TYPES.GENERAL}
               size={16}
-              color={COLORS.GRAY_1000}
+              color={CSS_VARS.GRAY_1000}
               className='cursor-pointer'
             />
           </DialogClose>
@@ -91,14 +90,14 @@ const DocumentPreviewDialog = ({ isOpen, onClose, selectedFile, availableFiles }
             <SvgSpriteLoader
               id='chevron-left'
               size={12}
-              color={COLORS.GRAY_1000}
+              color={CSS_VARS.GRAY_1000}
               className={cn('cursor-pointer', currentFileIndex === 0 && 'pointer-events-none opacity-50')}
               onClick={handlePreviousFile}
             />
             <SvgSpriteLoader
               id='chevron-right'
               size={12}
-              color={COLORS.GRAY_1000}
+              color={CSS_VARS.GRAY_1000}
               className={cn(
                 'cursor-pointer',
                 currentFileIndex === availableFiles.length - 1 && 'pointer-events-none opacity-50',
@@ -112,7 +111,7 @@ const DocumentPreviewDialog = ({ isOpen, onClose, selectedFile, availableFiles }
 
           {/* File name */}
           <div className='bg-GRAY_100 flex max-w-full min-w-0 items-center gap-1.5 rounded px-1.5 py-1'>
-            <SvgSpriteLoader id='file-02' size={12} color={COLORS.GRAY_1000} className='flex-shrink-0' />
+            <SvgSpriteLoader id='file-02' size={12} color={CSS_VARS.GRAY_1000} className='flex-shrink-0' />
             <p className='f-11-500 text-GRAY_1000 truncate' title={currentFile?.name}>
               {currentFile?.name}
             </p>
@@ -124,7 +123,7 @@ const DocumentPreviewDialog = ({ isOpen, onClose, selectedFile, availableFiles }
               <SvgSpriteLoader
                 id='trash-03'
                 size={16}
-                color={COLORS.GRAY_900}
+                color={CSS_VARS.GRAY_900}
                 className='cursor-not-allowed opacity-50'
               />
             </TooltipV2>

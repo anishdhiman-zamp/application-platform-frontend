@@ -10,7 +10,7 @@ exports[`Switch Component - Functional Tests matches snapshot for checked state 
   value="on"
 >
   <span
-    class="bg-background pointer-events-none block rounded-full shadow-lg ring-0 transition-transform data-[state=unchecked]:translate-x-0 h-4 w-4 data-[state=checked]:translate-x-4"
+    class="bg-BG_WHITE pointer-events-none block rounded-full shadow-lg ring-0 transition-transform data-[state=unchecked]:translate-x-0 h-4 w-4 data-[state=checked]:translate-x-4"
     data-state="checked"
   />
 </button>
@@ -26,7 +26,7 @@ exports[`Switch Component - Functional Tests matches snapshot for default state 
   value="on"
 >
   <span
-    class="bg-background pointer-events-none block rounded-full shadow-lg ring-0 transition-transform data-[state=unchecked]:translate-x-0 h-4 w-4 data-[state=checked]:translate-x-4"
+    class="bg-BG_WHITE pointer-events-none block rounded-full shadow-lg ring-0 transition-transform data-[state=unchecked]:translate-x-0 h-4 w-4 data-[state=checked]:translate-x-4"
     data-state="unchecked"
   />
 </button>
@@ -44,7 +44,7 @@ exports[`Switch Component - Functional Tests matches snapshot for disabled check
   value="on"
 >
   <span
-    class="bg-background pointer-events-none block rounded-full shadow-lg ring-0 transition-transform data-[state=unchecked]:translate-x-0 h-4 w-4 data-[state=checked]:translate-x-4"
+    class="bg-BG_WHITE pointer-events-none block rounded-full shadow-lg ring-0 transition-transform data-[state=unchecked]:translate-x-0 h-4 w-4 data-[state=checked]:translate-x-4"
     data-disabled=""
     data-state="checked"
   />
@@ -63,7 +63,7 @@ exports[`Switch Component - Functional Tests matches snapshot for disabled state
   value="on"
 >
   <span
-    class="bg-background pointer-events-none block rounded-full shadow-lg ring-0 transition-transform data-[state=unchecked]:translate-x-0 h-4 w-4 data-[state=checked]:translate-x-4"
+    class="bg-BG_WHITE pointer-events-none block rounded-full shadow-lg ring-0 transition-transform data-[state=unchecked]:translate-x-0 h-4 w-4 data-[state=checked]:translate-x-4"
     data-disabled=""
     data-state="unchecked"
   />
@@ -80,7 +80,7 @@ exports[`Switch Component - Functional Tests matches snapshot with custom classN
   value="on"
 >
   <span
-    class="bg-background pointer-events-none block rounded-full shadow-lg ring-0 transition-transform data-[state=unchecked]:translate-x-0 h-4 w-4 data-[state=checked]:translate-x-4"
+    class="bg-BG_WHITE pointer-events-none block rounded-full shadow-lg ring-0 transition-transform data-[state=unchecked]:translate-x-0 h-4 w-4 data-[state=checked]:translate-x-4"
     data-state="unchecked"
   />
 </button>

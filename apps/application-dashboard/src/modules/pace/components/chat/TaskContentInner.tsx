@@ -90,7 +90,7 @@ const TaskContentInner = ({ taskId }: TaskContentInnerProps) => {
             hideSenderName
             organizationId={organizationId}
           />
-          <div className='h-12 w-full bg-white' />
+          <div className='bg-BG_WHITE h-12 w-full' />
         </CommonWrapper>
         <div className='sticky bottom-0 z-10 mx-auto w-full max-w-[700px] bg-white pb-3'>
           <Button

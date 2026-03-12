@@ -6,7 +6,7 @@ exports[`ShimmerText matches snapshot with custom classes 1`] = `
 >
   <span
     class="f-13-450 block leading-[13px] custom-base"
-    style="color: rgb(192, 192, 192);"
+    style="color: rgb(143, 143, 143);"
   >
     Snapshot Test
   </span>
@@ -26,7 +26,7 @@ exports[`ShimmerText matches snapshot with default props 1`] = `
 >
   <span
     class="f-13-450 block leading-[13px]"
-    style="color: rgb(192, 192, 192);"
+    style="color: rgb(143, 143, 143);"
   >
     Snapshot Test
   </span>

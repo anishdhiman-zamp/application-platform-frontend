@@ -4,12 +4,11 @@ import {
   RequiredDefaultValueModal,
   useDatasetColumnContextOptional,
 } from '@zamp-platform/dataset-create-edit';
-import { Button, Input, Switch } from '@zamp-platform/ui';
+import { Button, CSS_VARS, Input, Switch } from '@zamp-platform/ui';
 import { SvgSpriteLoader } from '@zamp-platform/ui/assets';
 import { DATE_FORMATS, formatRelativeWithCustomLocale } from '@zamp-platform/utils';
 import { ColDef, ColumnHeaderClickedEvent, ColumnResizedEvent } from 'ag-grid-community';
 import { AgGridReact } from 'ag-grid-react';
-import { COLORS } from 'constants/colors';
 import { PIVOT_HEADER_BG } from 'constants/icons';
 import { format } from 'date-fns';
 import { Asterisk } from 'lucide-react';
@@ -392,8 +391,8 @@ const CustomHeader: FC<CustomHeaderProps> = ({
     <div ref={menuRef} className='relative -mx-4 h-full w-full flex-1'>
       <div
         className={cn(
-          'hover:bg-BACKGROUND_GRAY_1 group flex h-full w-full flex-1 cursor-pointer items-center justify-between overflow-hidden px-2 pt-5 pb-1 capitalize',
-          { 'bg-BACKGROUND_GRAY_1': isMenuOpen },
+          'hover:bg-BG_GRAY_1 group flex h-full w-full flex-1 cursor-pointer items-center justify-between overflow-hidden px-2 pt-5 pb-1 capitalize',
+          { 'bg-BG_GRAY_1': isMenuOpen },
           className,
         )}
       >
@@ -411,16 +410,16 @@ const CustomHeader: FC<CustomHeaderProps> = ({
           {!!sortState && (
             <>
               {sortState === OrderType.ASC && (
-                <SvgSpriteLoader id='arrow-narrow-up' width={12} height={12} color={COLORS.BLUE_700} />
+                <SvgSpriteLoader id='arrow-narrow-up' width={12} height={12} color={CSS_VARS.BLUE_700} />
               )}
               {sortState === OrderType.DESC && (
-                <SvgSpriteLoader id='arrow-narrow-down' width={12} height={12} color={COLORS.BLUE_700} />
+                <SvgSpriteLoader id='arrow-narrow-down' width={12} height={12} color={CSS_VARS.BLUE_700} />
               )}
             </>
           )}
           {isFilterActive && (
             <span>
-              <SvgSpriteLoader id='filter-lines' width={12} height={12} color={COLORS.BLUE_700} />
+              <SvgSpriteLoader id='filter-lines' width={12} height={12} color={CSS_VARS.BLUE_700} />
             </span>
           )}
         </div>
@@ -444,7 +443,7 @@ const CustomHeader: FC<CustomHeaderProps> = ({
               autoFocus
               wrapperClassName='m-2'
               error={!headerName?.trim()}
-              icon={<SvgSpriteLoader id='edit-03' size={16} color={COLORS.GRAY_500} />}
+              icon={<SvgSpriteLoader id='edit-03' size={16} color={CSS_VARS.GRAY_500} />}
               onKeyDown={handleHeaderNameKeyDown}
             />
           )}
@@ -467,7 +466,7 @@ const CustomHeader: FC<CustomHeaderProps> = ({
                 <SvgSpriteLoader
                   id='arrow-narrow-right'
                   size={12}
-                  color={COLORS.GRAY_600}
+                  color={CSS_VARS.GRAY_600}
                   className='hidden group-hover:block'
                 />
               </div>
@@ -493,7 +492,7 @@ const CustomHeader: FC<CustomHeaderProps> = ({
                 <SvgSpriteLoader
                   id='arrow-narrow-right'
                   size={12}
-                  color={COLORS.GRAY_600}
+                  color={CSS_VARS.GRAY_600}
                   className='hidden group-hover:block'
                 />
               </div>
@@ -518,7 +517,7 @@ const CustomHeader: FC<CustomHeaderProps> = ({
               onClick={(e) => e.stopPropagation()}
             >
               <div className='flex items-center gap-1.5'>
-                <Asterisk size={12} color={COLORS.GRAY_900} />
+                <Asterisk size={12} color={CSS_VARS.GRAY_900} />
                 <span className='f-12-500'>Require</span>
               </div>
               <Switch checked={requiredToggleState} onCheckedChange={handleRequiredToggle} size='small' />
@@ -594,7 +593,7 @@ const CustomHeader: FC<CustomHeaderProps> = ({
               className='h-3.5 w-3.5 p-0 [&_svg]:size-3.5'
               onClick={handleDateFormatClose}
             >
-              <SvgSpriteLoader id='arrow-narrow-left' size={14} color={COLORS.GRAY_900} />
+              <SvgSpriteLoader id='arrow-narrow-left' size={14} color={CSS_VARS.GRAY_900} />
             </Button>
             <span className='f-13-500'>Date Format</span>
           </div>
@@ -619,7 +618,7 @@ const CustomHeader: FC<CustomHeaderProps> = ({
                 <SvgSpriteLoader
                   id='check'
                   size={12}
-                  color={COLORS.GRAY_900}
+                  color={CSS_VARS.GRAY_900}
                   className={cn('opacity-0', {
                     'opacity-100':
                       dateFormat === option.value || (!dateFormat && option.value === DATE_FORMATS.ddMMMyyyy),
@@ -640,7 +639,7 @@ const CustomHeader: FC<CustomHeaderProps> = ({
         >
           <div className='mb-3.5 flex items-center gap-1.5 px-2'>
             <Button variant='ghost' size='icon' className='h-3.5 w-3.5 p-0 [&_svg]:size-3.5' onClick={handleTypeClose}>
-              <SvgSpriteLoader id='arrow-narrow-left' size={14} color={COLORS.GRAY_900} />
+              <SvgSpriteLoader id='arrow-narrow-left' size={14} color={CSS_VARS.GRAY_900} />
             </Button>
             <span className='f-13-500'>Display type</span>
           </div>

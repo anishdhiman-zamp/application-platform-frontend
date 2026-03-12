@@ -27,6 +27,9 @@ const btnLoginStyles = `
   height: 1px;
   background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.5), transparent);
   pointer-events: none;
+}
+.dark .btn-login::after {
+  background: linear-gradient(90deg, transparent, rgba(0, 0, 0, 0.15), transparent);
 }`;
 
 export const LoginRoot = () => {
@@ -45,7 +48,7 @@ export const LoginRoot = () => {
             width={68}
             height={15}
             draggable={false}
-            className='select-none'
+            className='select-none dark:invert'
           />
         </div>
         <LoginForm />

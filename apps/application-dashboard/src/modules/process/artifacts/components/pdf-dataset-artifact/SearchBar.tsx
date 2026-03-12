@@ -1,10 +1,9 @@
 import { useEffect, useRef, useState } from 'react';
 import { type TUsePDFSlickStore } from '@pdfslick/react';
-import { Button, Input } from '@zamp-platform/ui';
+import { Button, CSS_VARS, Input } from '@zamp-platform/ui';
 import { SvgSpriteLoader } from '@zamp-platform/ui/assets';
 import { cn } from '@zamp-platform/ui/utils';
 import { useArtifactContextStore } from 'modules/process/artifacts/context/artifact.context';
-import { COLORS } from '@/constants/colors';
 import type { MapAny } from '@/types/commonTypes';
 import { formatPlural } from '@/utils/common';
 
@@ -124,7 +123,7 @@ const SearchBar = ({ usePDFSlickStore }: SearchBarProps) => {
           onKeyDown={handleKeyDown}
           wrapperClassName='flex-1 flex items-center'
           className='focus:border-input focus:ring-0'
-          icon={<SvgSpriteLoader size={16} id='search-sm' color={COLORS.GRAY_700} />}
+          icon={<SvgSpriteLoader size={16} id='search-sm' color={CSS_VARS.GRAY_700} />}
         />
         {term && (
           <Button
@@ -134,7 +133,7 @@ const SearchBar = ({ usePDFSlickStore }: SearchBarProps) => {
             className='absolute top-1/2 right-1 h-7 w-7 -translate-y-1/2 hover:bg-transparent'
             onClick={handleClear}
           >
-            <SvgSpriteLoader size={16} id='x-close' color={COLORS.GRAY_700} />
+            <SvgSpriteLoader size={16} id='x-close' color={CSS_VARS.GRAY_700} />
           </Button>
         )}
       </div>
@@ -151,7 +150,7 @@ const SearchBar = ({ usePDFSlickStore }: SearchBarProps) => {
               <SvgSpriteLoader
                 size={16}
                 id='chevron-up'
-                color={COLORS.GRAY_900}
+                color={CSS_VARS.GRAY_900}
                 onClick={handlePrevious}
                 className={cn('flex-shrink-0 cursor-pointer rounded p-0.5', {
                   '!cursor-not-allowed': searchResults?.total === 0 || searchResults?.current <= 1,
@@ -163,7 +162,7 @@ const SearchBar = ({ usePDFSlickStore }: SearchBarProps) => {
               <SvgSpriteLoader
                 size={16}
                 id='chevron-down'
-                color={COLORS.GRAY_900}
+                color={CSS_VARS.GRAY_900}
                 onClick={handleNext}
                 className={cn('flex-shrink-0 cursor-pointer rounded p-0.5', {
                   '!cursor-not-allowed': searchResults?.total === 0 || searchResults?.current >= searchResults?.total,

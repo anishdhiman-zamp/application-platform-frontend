@@ -37,7 +37,7 @@ export * from './ui/toast';
 export * from './ui/tooltip';
 export * from './ui/DrilldownMenu';
 
-export * from '../constants/constants';
+export * from '../constants/colors';
 
 //Animated Icons
 export * from './ui/animated-dot';

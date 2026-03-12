@@ -5,6 +5,8 @@ import Editor, { loader, type Monaco, type OnMount } from '@monaco-editor/react'
 import { Skeleton } from '@zamp-platform/ui';
 import { cn } from '@zamp-platform/ui/utils';
 import type { editor } from 'monaco-editor';
+import { useTheme } from '@/app/_providers/theme-provider';
+import { THEME_MODE } from '@/modules/general/constants/general.constants';
 import { EXTENSION_TO_MONACO_LANGUAGE } from '@/modules/pace/components/files/files.constants';
 
 // Configure monaco-editor to use version 0.49.0 from CDN
@@ -33,6 +35,9 @@ const MonacoCodeEditor = ({
   readOnly = false,
   className = '',
 }: MonacoCodeEditorProps) => {
+  const { resolvedTheme } = useTheme();
+  const monacoTheme = resolvedTheme === THEME_MODE.DARK ? 'vs-dark' : 'vs-light';
+
   const editorRef = useRef<editor.IStandaloneCodeEditor | null>(null);
   const monacoRef = useRef<Monaco | null>(null);
 
@@ -110,7 +115,7 @@ const MonacoCodeEditor = ({
           cursorSmoothCaretAnimation: 'off',
           padding: { top: 16, bottom: 16 },
         }}
-        theme='vs-light'
+        theme={monacoTheme}
       />
     </div>
   );

@@ -1,5 +1,5 @@
 import { FC, memo, useMemo } from 'react';
-import { Button, Tabs, TabsContent, TabsList, TabsTrigger, toast } from '@zamp-platform/ui';
+import { Button, COLORS, CSS_VARS, Tabs, TabsContent, TabsList, TabsTrigger, toast } from '@zamp-platform/ui';
 import { SvgSpriteLoader } from '@zamp-platform/ui/assets';
 import { cn } from '@zamp-platform/ui/utils';
 import DatasetArtifact from 'modules/process/artifacts/components/pdf-dataset-artifact/DatasetArtifact';
@@ -7,7 +7,6 @@ import { CTA_COMPONENT_TYPE, EmitHITLActionPayload, MissingFieldsConfigType } fr
 import { useEmitHITLActionMutation } from '@/apis/processes';
 import ProgressBar from '@/components/common/RingProgress';
 import TooltipV2 from '@/components/common/TooltipV2';
-import { COLORS } from '@/constants/colors';
 import { useAppSelector } from '@/hooks/toolkit';
 import {
   CompletedFieldsActions,
@@ -141,7 +140,7 @@ const DatasetTabView: FC<DatasetArtifactProps> = ({
               {missingRequiredFieldsCount > 0 && (
                 <div className='flex items-center gap-x-1.5'>
                   <ProgressBar
-                    trackColor={COLORS.GRAY_500}
+                    trackColor={CSS_VARS.GRAY_500}
                     indicatorColor={COLORS.GREEN_300}
                     indicatorWidth={2}
                     trackWidth={2}
@@ -182,7 +181,7 @@ const DatasetTabView: FC<DatasetArtifactProps> = ({
                 key={tab.dataset_id}
                 className='hover:bg-GRAY_50 data-[state=active]:bg-GRAY_100 max-w-[120px] items-center rounded! border-none px-2! py-1!'
               >
-                <SvgSpriteLoader id='coins-stacked-04' color={COLORS.GRAY_900} size={12} />
+                <SvgSpriteLoader id='coins-stacked-04' color={CSS_VARS.GRAY_900} size={12} />
                 <TooltipV2 tooltipBody={tab.dataset_name} side={SIDE_OPTIONS.TOP} showOnlyWhenTruncated asChildTrigger>
                   <p
                     className={cn('f-12-500 ml-1.5 truncate', {

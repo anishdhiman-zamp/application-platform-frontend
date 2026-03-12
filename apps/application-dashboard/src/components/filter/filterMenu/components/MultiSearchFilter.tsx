@@ -242,7 +242,7 @@ const MultiSearchFilter: FC<MultiSearchFilterProps> = ({
       />
 
       <div
-        className='border-BORDER_GRAY_400 shadow-table-filter-menu focus:shadow-input-outline-shadow focus:border-GRAY_600 relative mt-2 w-full overflow-hidden rounded-md border'
+        className='border-GRAY_400 shadow-table-filter-menu focus:shadow-input-outline-shadow focus:border-GRAY_600 relative mt-2 w-full overflow-hidden rounded-md border'
         ref={inputWrapperRef}
       >
         <Input

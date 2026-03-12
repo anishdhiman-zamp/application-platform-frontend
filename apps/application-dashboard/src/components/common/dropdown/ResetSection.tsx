@@ -1,7 +1,7 @@
 import React, { FC } from 'react';
+import { COLORS } from '@zamp-platform/ui';
 import { SvgSpriteLoader } from '@zamp-platform/ui/assets';
 import { ICON_SPRITE_TYPES } from '@zamp-platform/ui/types';
-import { COLORS } from 'constants/colors';
 import { ResetSectionProps } from 'types/common/components/dropdown/dropdown.types';
 import { cn } from 'utils/common';
 

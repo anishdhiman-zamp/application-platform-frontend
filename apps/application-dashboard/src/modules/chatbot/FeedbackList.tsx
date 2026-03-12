@@ -58,7 +58,7 @@ const FeedbackList: FC<FeedbackListProps> = ({
           <Button
             variant='outline'
             size='icon'
-            className='bg-accent text-accent-foreground f-11-500 flex h-5 items-center gap-1 [&_svg]:size-3'
+            className='bg-accent text-accent-GRAY_1000 f-11-500 flex h-5 items-center gap-1 [&_svg]:size-3'
           >
             <MessageSquare />
             <span>{items.length}</span>

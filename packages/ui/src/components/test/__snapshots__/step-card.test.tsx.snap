@@ -8,7 +8,7 @@ exports[`StepCard matches snapshot with default layout 1`] = `
     class="absolute top-0 left-0 h-full w-6 rounded-l-lg bg-gray-100"
   >
     <div
-      class="bg-primary f-12-500 flex h-6 w-6 items-center justify-center rounded-tl-lg text-white"
+      class="bg-GRAY_1000 f-12-500 flex h-6 w-6 items-center justify-center rounded-tl-lg text-white"
     >
       1
     </div>
@@ -55,7 +55,7 @@ exports[`StepCard matches snapshot with remove button and custom class 1`] = `
     class="absolute top-0 left-0 h-full w-6 rounded-l-lg bg-gray-100"
   >
     <div
-      class="bg-primary f-12-500 flex h-6 w-6 items-center justify-center rounded-tl-lg text-white"
+      class="bg-GRAY_1000 f-12-500 flex h-6 w-6 items-center justify-center rounded-tl-lg text-white"
     >
       5
     </div>

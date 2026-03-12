@@ -1,7 +1,7 @@
 'use client';
 
 import { FC, useCallback, useEffect, useMemo, useRef, useState } from 'react';
-import { Tabs, TabsList, TabsTrigger } from '@zamp-platform/ui';
+import { CSS_VARS, Tabs, TabsList, TabsTrigger } from '@zamp-platform/ui';
 import { SvgSpriteLoader } from '@zamp-platform/ui/assets';
 import {
   type CellClickedEvent,
@@ -15,7 +15,6 @@ import {
 } from 'ag-grid-community';
 import { AgGridReact } from 'ag-grid-react';
 import { useGetDatasetFilterConfigQuery, useUpdateDatasetDataMutation } from 'apis/dataset';
-import { COLORS } from 'constants/colors';
 import { useOnClickOutside } from 'hooks';
 import ExportDataset from 'modules/data/components/exportDataset';
 import {
@@ -744,7 +743,7 @@ const DatasetArtifact: FC<DatasetByIdProps> = ({
                 <SvgSpriteLoader
                   id='arrow-narrow-up-right'
                   size={16}
-                  color={COLORS.GRAY_1000}
+                  color={CSS_VARS.GRAY_1000}
                   className='cursor-pointer'
                 />
               </TooltipV2>
@@ -756,7 +755,7 @@ const DatasetArtifact: FC<DatasetByIdProps> = ({
                 className='flex h-6 w-[26px] shrink-0 items-center justify-center p-1.5'
               >
                 <TooltipV2 tooltipBody='Switch to List View'>
-                  <SvgSpriteLoader id='rows-01' size={14} color={COLORS.GRAY_1000} className='cursor-pointer' />
+                  <SvgSpriteLoader id='rows-01' size={14} color={CSS_VARS.GRAY_1000} className='cursor-pointer' />
                 </TooltipV2>
               </TabsTrigger>
               <TabsTrigger
@@ -764,7 +763,12 @@ const DatasetArtifact: FC<DatasetByIdProps> = ({
                 className='flex h-6 w-[26px] shrink-0 items-center justify-center p-1.5'
               >
                 <TooltipV2 tooltipBody='Switch to Table View'>
-                  <SvgSpriteLoader id='layout-grid-02' size={14} color={COLORS.GRAY_1000} className='cursor-pointer' />
+                  <SvgSpriteLoader
+                    id='layout-grid-02'
+                    size={14}
+                    color={CSS_VARS.GRAY_1000}
+                    className='cursor-pointer'
+                  />
                 </TooltipV2>
               </TabsTrigger>
             </TabsList>
@@ -887,7 +891,7 @@ const MissingFieldControl: FC<MissingFieldControlProps> = ({
         <div className='flex items-center gap-x-1.5'>
           <SvgSpriteLoader
             id='chevron-up'
-            color={COLORS.GRAY_900}
+            color={CSS_VARS.GRAY_900}
             size={12}
             onClick={goPrevious}
             className={currentIndex <= 0 ? 'cursor-not-allowed opacity-50' : 'cursor-pointer'}
@@ -897,7 +901,7 @@ const MissingFieldControl: FC<MissingFieldControlProps> = ({
           </span>
           <SvgSpriteLoader
             id='chevron-down'
-            color={COLORS.GRAY_900}
+            color={CSS_VARS.GRAY_900}
             size={12}
             onClick={goNext}
             className={currentIndex >= totalMissingFields - 1 ? 'cursor-not-allowed opacity-50' : 'cursor-pointer'}

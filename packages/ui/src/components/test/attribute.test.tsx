@@ -39,7 +39,7 @@ describe('Attribute Component - Functional Tests', () => {
 describe('Attribute Component - Styling & Compatibility', () => {
   it('renders correct styling classes for label and value', () => {
     const { getByText } = render(<Attribute label='Name' displayValue='John Doe' />);
-    expect(getByText('Name')).toHaveClass('text-secondary-400', 'f-12-400', 'whitespace-nowrap');
+    expect(getByText('Name')).toHaveClass('text-BG_WHITE', 'f-12-400', 'whitespace-nowrap');
     expect(getByText('John Doe')).toHaveClass('f-12-500', 'whitespace-nowrap', 'text-black');
   });
 

@@ -5,7 +5,7 @@ import type { Variants } from 'motion/react';
 import { motion } from 'motion/react';
 import { FC } from 'react';
 
-import { COLORS } from '../../constants/constants';
+import { CSS_VARS } from '../../constants/colors';
 
 const DOT_VARIANTS: Variants = {
   idle: {
@@ -35,8 +35,8 @@ export const AnimatedDot: FC<AnimatedDotProps> = ({
   showAnimation,
   size = 8,
   className,
-  activeColor = COLORS.BLUE_350,
-  completeColor = COLORS.GRAY_700,
+  activeColor = CSS_VARS.BLUE_700,
+  completeColor = CSS_VARS.GRAY_700,
 }) => {
   return (
     <motion.div

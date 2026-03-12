@@ -21,7 +21,7 @@ interface AttachmentItemProps {
 
 const getFileIcon = () => {
   return (
-    <div className='flex h-5 w-6 items-center justify-center rounded-md bg-gray-100 [&_svg]:size-3.5'>
+    <div className='bg-accent flex h-5 w-6 items-center justify-center rounded-md [&_svg]:size-3.5'>
       <FileText />
     </div>
   );
@@ -47,7 +47,7 @@ const AttachmentItem: React.FC<AttachmentItemProps> = ({ attachment, removeAttac
     <div
       key={attachment.file_id || attachment.file_name}
       className={cn(
-        'rounded-2.5 shadow-table-filter-menu group relative flex w-[148px] cursor-pointer items-center gap-2 border border-gray-400 bg-white p-1 pr-3',
+        'rounded-2.5 shadow-table-filter-menu group border-border bg-BG_WHITE relative flex w-[148px] cursor-pointer items-center gap-2 border p-1 pr-3',
       )}
       onClick={handleDownloadFile}
     >
@@ -57,7 +57,7 @@ const AttachmentItem: React.FC<AttachmentItemProps> = ({ attachment, removeAttac
       </div>
       {attachment.file_id && removeAttachment && (
         <Button
-          className='absolute size-4 rounded-full bg-white p-px opacity-0 group-hover:opacity-100 [&_svg]:size-3.5'
+          className='bg-BG_WHITE absolute size-4 rounded-full p-px opacity-0 group-hover:opacity-100 [&_svg]:size-3.5'
           variant='ghost'
           size='icon'
           onClick={(e) => {
@@ -74,7 +74,7 @@ const AttachmentItem: React.FC<AttachmentItemProps> = ({ attachment, removeAttac
       )}
       {((isLoading && !attachment.file_id) || isLoadingFileDownload) && (
         <Button
-          className='absolute size-4 rounded-full border border-gray-400 bg-white [&_svg]:size-3'
+          className='border-border bg-BG_WHITE absolute size-4 rounded-full border [&_svg]:size-3'
           variant='ghost'
           size='icon'
           style={{

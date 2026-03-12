@@ -1,6 +1,6 @@
 import { FC, useRef, useState } from 'react';
+import { COLORS } from '@zamp-platform/ui';
 import { SvgSpriteLoader } from '@zamp-platform/ui/assets';
-import { COLORS } from 'constants/colors';
 import ProgressBar from 'components/common/RingProgress';
 
 type NotificationProps = {

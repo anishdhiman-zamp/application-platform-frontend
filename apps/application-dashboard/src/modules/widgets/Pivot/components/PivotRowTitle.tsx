@@ -77,8 +77,8 @@ const PivotRowTitle: FC<PivotRowTitleProps> = ({
       className={cn(
         'border-b-0.5 border-r-0.5 border-GRAY_400 z-10 flex h-full w-full items-center gap-2',
         allowExpanding && 'cursor-pointer',
-        isLowestLevel && 'bg-BACKGROUND_GRAY_1',
-        isRootLevel && 'bg-BACKGROUND_GRAY_1 justify-end gap-1 border-b-0 pr-3',
+        isLowestLevel && 'bg-BG_GRAY_1',
+        isRootLevel && 'bg-BG_GRAY_1 justify-end gap-1 border-b-0 pr-3',
       )}
       style={{
         paddingLeft,

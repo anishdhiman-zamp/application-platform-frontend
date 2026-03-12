@@ -129,10 +129,10 @@ const ChatHistory = ({ onSelectConversation }: ChatHistoryProps) => {
   }, [conversations, page]);
 
   return (
-    <div className='mx-auto flex min-h-0 w-full flex-1 flex-col overflow-hidden bg-white pt-4'>
+    <div className='mx-auto flex min-h-0 w-full flex-1 flex-col overflow-hidden bg-transparent pt-4'>
       <div className='flex shrink-0 flex-col gap-4 p-3'>
         <div className='flex items-center justify-between'>
-          <p className='f-14-550 text-gray-1000'>Chats</p>
+          <p className='f-14-550 text-GRAY_1000'>Chats</p>
           <Button
             variant='ghost'
             size='icon'
@@ -140,7 +140,7 @@ const ChatHistory = ({ onSelectConversation }: ChatHistoryProps) => {
             className='h-7 w-7'
             data-testid='chat-history-search-toggle'
           >
-            <Search size={16} className='text-gray-900' />
+            <Search size={16} className='text-GRAY_700' />
           </Button>
         </div>
         {isSearchOpen && (
@@ -151,7 +151,7 @@ const ChatHistory = ({ onSelectConversation }: ChatHistoryProps) => {
             onChange={handleSearchChange}
             iconPosition='leading'
             size='small'
-            className='mb-1 w-full pr-8'
+            className='bg-BG_WHITE mb-1 w-full pr-8'
             data-testid='chat-history-search-input'
           />
         )}

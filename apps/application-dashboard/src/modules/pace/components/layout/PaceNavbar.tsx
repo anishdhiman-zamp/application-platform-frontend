@@ -170,11 +170,11 @@ const PaceNavbar = () => {
             variant='ghost'
             size='icon'
             onClick={() => setIsPaceSidebarOpen(true)}
-            className='text-GRAY_700 hover:text-GRAY_1000 hover:bg-GRAY_200 h-7 w-7 shrink-0'
+            className='text-GRAY_700 hover:text-GRAY_1000 hover:bg-accent h-7 w-7 shrink-0'
           >
             <MessageSquareIcon size={16} />
           </Button>
-          <div className='bg-GRAY_300 mx-2 h-4 w-px shrink-0' />
+          <div className='bg-border mx-2 h-4 w-px shrink-0' />
         </>
       )}
 
@@ -185,9 +185,9 @@ const PaceNavbar = () => {
             key={item.id}
             href={getNavItemHref(item.id, item.path)}
             className={cn(
-              'text-GRAY_900 hover:text-GRAY_1000 hover:bg-GRAY_200 flex h-8 w-8 cursor-pointer items-center justify-center rounded-lg p-[7px]',
+              'text-GRAY_700 hover:text-GRAY_1000 hover:bg-accent flex h-8 w-8 cursor-pointer items-center justify-center rounded-lg p-[7px]',
               isNavItemActive(item.id, item.path) &&
-                'border-GRAY_500 text-GRAY_1000 hover:text-GRAY_1000 shadow-tab-shadow border border-[0.75px] bg-white hover:bg-white',
+                'border-GRAY_500 text-GRAY_1000 hover:text-GRAY_1000 shadow-tab-shadow bg-BG_WHITE hover:bg-BG_WHITE border-[0.75px]',
             )}
             role='button'
             tabIndex={0}
@@ -198,7 +198,7 @@ const PaceNavbar = () => {
         ))}
       </div>
 
-      {tabs.length > 0 && <div className='bg-GRAY_300 mx-3 h-4 w-px shrink-0' />}
+      {tabs.length > 0 && <div className='bg-GRAY_400 mx-3 h-4 w-px shrink-0' />}
 
       {tabs.length > 0 && (
         <DndContext

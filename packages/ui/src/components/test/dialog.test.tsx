@@ -493,7 +493,7 @@ describe('Dialog Component - Edge Cases and Backward Compatibility', () => {
       // Verify overlay is rendered with correct classes
       const overlay = document.querySelector('[data-aria-hidden="true"][data-state="open"]');
       expect(overlay).toBeInTheDocument();
-      expect(overlay).toHaveClass('fixed', 'inset-0', 'z-1001', 'bg-black/20');
+      expect(overlay).toHaveClass('fixed', 'inset-0', 'z-1001', 'bg-GRAY_70');
     });
   });
 });

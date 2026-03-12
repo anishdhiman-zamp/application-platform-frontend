@@ -1,10 +1,10 @@
 import { FC, useEffect, useMemo, useRef, useState } from 'react';
+import { TEAMS_COLORS } from '@zamp-platform/ui';
 import {
   usePostAddTeamToAudienceMutation,
   usePostAddTeamToOrganizationMutation,
   useRemoveTeamFromAudienceMutation,
 } from 'apis/people';
-import { COLORS, TEAMS_COLORS } from 'constants/colors';
 import { useOnClickOutside } from 'hooks';
 import { useUserIdentity } from 'hooks/useUserIdentity';
 import CustomTeamsDropdown from 'modules/team/components/members/CustomTeamsDropdown';
@@ -17,12 +17,17 @@ import {
 } from 'modules/team/people.types';
 import { MapAny } from 'types/commonTypes';
 import { cn, cyclicIterator } from 'utils/common';
+import { useTheme } from '@/app/_providers/theme-provider';
 import { KEY_CODES } from '@/components/multiSelectInput/multiSelectInput.types';
+import { THEME_MODE } from '@/modules/general/constants/general.constants';
+import { resolveChipColor } from '@/modules/team/people.utils';
 import { toast } from 'components/common/toast/Toast';
 import MultiSelectInput from 'components/multiSelectInput/MultiSelectInput';
 
 const MembersTeam: FC<MembersTeamPropsType> = ({ userInfo, organizationId, teamsData, userId, userMappedTeams }) => {
   const { isMember } = useUserIdentity();
+  const { resolvedTheme } = useTheme();
+  const isDark = resolvedTheme === THEME_MODE.DARK;
   const teamsRowRef = useRef<HTMLDivElement>(null);
   const teamsRandomColorRef = useRef(cyclicIterator(TEAMS_COLORS));
   const [postAddTeamToOrganization] = usePostAddTeamToOrganizationMutation();
@@ -253,8 +258,8 @@ const MembersTeam: FC<MembersTeamPropsType> = ({ userInfo, organizationId, teams
           {selectedItems.map((item, index) => (
             <span
               key={index}
-              className='f-12-400 text-GRAY_1000 flex w-fit rounded px-1.5 py-0.5 capitalize'
-              style={{ backgroundColor: item?.color ?? COLORS.WHITE }}
+              className='f-12-400 text-GRAY_700 dark:text-GRAY_300 flex w-fit rounded px-1.5 py-0.5 capitalize'
+              style={{ backgroundColor: resolveChipColor(item?.color, isDark) }}
             >
               {item?.label}
             </span>

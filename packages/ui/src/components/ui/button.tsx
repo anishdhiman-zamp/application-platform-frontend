@@ -22,16 +22,15 @@ const buttonVariants = cva(
     variants: {
       variant: {
         default:
-          'bg-primary text-secondary hover:bg-primary/90 active:bg-GRAY_950 disabled:bg-GRAY_100 disabled:text-GRAY_700 disabled:cursor-not-allowed ',
-        destructive: 'bg-destructive text-destructive-foreground hover:bg-destructive/90 ',
+          'bg-GRAY_1000 text-BG_WHITE hover:bg-GRAY_1000/90 active:bg-GRAY_950 disabled:bg-GRAY_100 disabled:text-GRAY_700 disabled:cursor-not-allowed ',
+        destructive: 'bg-destructive text-GRAY_1000 hover:bg-destructive/90 ',
         outline:
-          'border border-input bg-background hover:bg-accent hover:text-accent-foreground disabled:bg-GRAY_100 disabled:text-GRAY_700',
+          'border border-input bg-BG_WHITE hover:bg-accent hover:text-accent-GRAY_1000 disabled:bg-GRAY_100 disabled:text-GRAY_700',
         secondary:
-          'bg-transparent text-primary border border-gray-400 hover:bg-secondary/80 disabled:bg-GRAY_100 disabled:text-GRAY_700',
-        ghost: 'hover:bg-accent hover:text-accent-foreground',
-        link: 'text-primary underline-offset-4 hover:underline',
-        'destructive-outline':
-          'border bg-background border-red-700 text-red-700 hover:border-red-800 hover:text-red-800',
+          'bg-transparent text-GRAY_1000 border border-GRAY_400 hover:bg-GRAY_100/80 disabled:bg-GRAY_100 disabled:text-GRAY_700',
+        ghost: 'hover:bg-accent hover:text-accent-GRAY_1000',
+        link: 'text-GRAY_1000 underline-offset-4 hover:underline',
+        'destructive-outline': 'border bg-BG_WHITE border-red-700 text-red-700 hover:border-red-800 hover:text-red-800',
       },
       size: {
         default: 'h-10 py-3 px-4 f-14-500',
@@ -66,9 +65,9 @@ type IconSize = keyof typeof ICON_SIZE_MAP;
 
 /** Variant-specific classes applied when isLoading is true */
 const LOADING_VARIANT_CLASSES: Record<string, string> = {
-  default: '!bg-primary/90 cursor-not-allowed',
+  default: '!bg-GRAY_1000/90 cursor-not-allowed',
   destructive: '!bg-destructive/90 cursor-not-allowed',
-  outline: '!bg-background cursor-not-allowed',
+  outline: '!bg-BG_WHITE cursor-not-allowed',
   'destructive-outline': '!bg-none cursor-not-allowed',
   secondary: 'cursor-not-allowed !bg-none',
   ghost: 'cursor-not-allowed !bg-none',

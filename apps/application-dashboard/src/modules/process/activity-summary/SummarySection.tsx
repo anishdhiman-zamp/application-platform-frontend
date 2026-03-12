@@ -1,4 +1,5 @@
 import { type FC } from 'react';
+import { CSS_VARS } from '@zamp-platform/ui';
 import { SvgSpriteLoader } from '@zamp-platform/ui/assets';
 import Summary from 'modules/process/activity-summary/components/Summary';
 import ArtifactsSkeleton from 'modules/process/activity-summary/loaders/ArtifactsSkeleton';
@@ -8,7 +9,6 @@ import { useGetActivityArtifactsQuery, useGetActivitySummaryQuery } from '@/apis
 import TooltipV2 from '@/components/common/TooltipV2';
 import CommonWrapper from '@/components/commonWrapper';
 import { SkeletonTypes } from '@/components/commonWrapper/commonWrapper.types';
-import { COLORS } from '@/constants/colors';
 import ArtifactTag from '@/modules/process/common/ArtifactTag';
 import NoWidgetData from '@/modules/widgets/components/NoWidgetData';
 import { defaultFnType } from '@/types/commonTypes';
@@ -71,14 +71,14 @@ const SummarySection: FC<SummarySectionProps> = ({ handleShowArtifacts, isExpand
       >
         <div className='flex w-full items-center justify-between'>
           <div className='flex items-center gap-x-1.5'>
-            <SvgSpriteLoader id='asterisk-02' size={16} color={COLORS.GRAY_1000} />
+            <SvgSpriteLoader id='asterisk-02' size={16} color={CSS_VARS.GRAY_1000} />
             <p className='f-13-550'>Key Details</p>
           </div>
           <TooltipV2 tooltipBody={isExpanded ? 'Collapse' : 'Expand'}>
             <SvgSpriteLoader
               id={isExpanded ? 'minimize-01' : 'expand-01'}
               size={12}
-              color={COLORS.GRAY_1000}
+              color={CSS_VARS.GRAY_1000}
               onClick={onExpand}
               className='animate-opacity cursor-pointer transition-all duration-300'
               key={isExpanded ? 'minimize-01' : 'expand-01'}
@@ -101,7 +101,7 @@ const SummarySection: FC<SummarySectionProps> = ({ handleShowArtifacts, isExpand
         className='border-GRAY_400 flex w-full flex-col items-start justify-start gap-y-2 border-t-[0.5px] px-6 py-5'
       >
         <div className='mb-2 flex items-center gap-x-1.5'>
-          <SvgSpriteLoader id='stand' size={16} color={COLORS.GRAY_1000} />
+          <SvgSpriteLoader id='stand' size={16} color={CSS_VARS.GRAY_1000} />
           <p className='f-13-550'>Artifacts</p>
         </div>
         {artifacts?.artifacts?.map((artifact) => (

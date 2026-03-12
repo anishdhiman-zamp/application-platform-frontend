@@ -35,7 +35,7 @@ const PaginationControls = ({
           <DropdownMenuTrigger asChild>
             <Button variant='ghost' size='xxsmall' className='w-[50px] justify-between gap-1 px-1.5'>
               <span className='f-12-450 text-GRAY_700'>{pageSize}</span>
-              <ChevronDown size={12} className='text-GRAY_600 shrink-0' />
+              <ChevronDown size={12} className='text-GRAY_700 shrink-0' />
             </Button>
           </DropdownMenuTrigger>
           <DropdownMenuContent align='start' className='min-w-[80px]'>
@@ -43,7 +43,7 @@ const PaginationControls = ({
               <DropdownMenuItem
                 key={size}
                 onClick={() => onPageSizeChange(size)}
-                className={cn('f-12-400 hover:bg-GRAY_100 rounded-md', size === pageSize && 'bg-GRAY_200 font-medium')}
+                className={cn('f-12-400 hover:bg-accent rounded-md', size === pageSize && 'bg-accent font-medium')}
               >
                 {size}
               </DropdownMenuItem>
@@ -60,7 +60,7 @@ const PaginationControls = ({
           size='xxsmall'
           onClick={() => onPageChange(pageIndex - 1)}
           disabled={!canPreviousPage}
-          className='disabled:text-GRAY_500 disabled:cursor-not-allowed disabled:opacity-40'
+          className='disabled:text-GRAY_700 disabled:cursor-not-allowed disabled:opacity-40'
         >
           <ChevronLeft size={16} />
         </Button>
@@ -72,7 +72,7 @@ const PaginationControls = ({
           size='xxsmall'
           onClick={() => onPageChange(pageIndex + 1)}
           disabled={!canNextPage}
-          className='disabled:text-GRAY_500 disabled:cursor-not-allowed disabled:opacity-40'
+          className='disabled:text-GRAY_700 disabled:cursor-not-allowed disabled:opacity-40'
         >
           <ChevronRight size={16} />
         </Button>

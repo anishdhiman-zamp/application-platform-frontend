@@ -10,9 +10,9 @@ import {
   SingleValueProps,
   ValueContainerProps,
 } from 'react-select';
+import { COLORS, CSS_VARS } from '@zamp-platform/ui';
 import { SvgSpriteLoader } from '@zamp-platform/ui/assets';
 import { ICON_SPRITE_TYPES } from '@zamp-platform/ui/types';
-import { COLORS } from 'constants/colors';
 import { SIZE_TYPES } from 'types/common/components';
 import { DropdownProps, OptionsType } from 'types/common/components/dropdown/dropdown.types';
 import { defaultFn, MapAny } from 'types/commonTypes';
@@ -70,7 +70,7 @@ export const Dropdown: FC<DropdownProps> = ({
   showLabelInControl = false,
   controlColor = {
     focused: COLORS.DIVIDER_SAIL_2,
-    background: COLORS.WHITE,
+    background: 'var(--BG_WHITE)',
     overrideBackgroundColor: '',
   },
   tooltipBodyClassName = '',
@@ -228,7 +228,7 @@ export const Dropdown: FC<DropdownProps> = ({
                 iconCategory={ICON_SPRITE_TYPES.GENERAL}
                 width={12}
                 height={12}
-                color={COLORS.RED_700}
+                color={CSS_VARS.RED_700}
               />
               Remove
             </span>

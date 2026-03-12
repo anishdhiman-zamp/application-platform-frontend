@@ -42,7 +42,7 @@ export default function LayoutWrapper({ children }: LayoutWrapperProps) {
               className='flex h-full w-full grow flex-col'
             >
               {showTopbar && (
-                <nav className='sticky top-0 z-10'>
+                <nav className='bg-BG_GRAY_1 sticky top-0 z-10'>
                   <Topbar />
                 </nav>
               )}

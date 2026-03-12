@@ -1,8 +1,8 @@
 import { MouseEventHandler } from 'react';
+import { CHIP_COLORS, CUSTOM_FILTER_COLORS } from '@zamp-platform/ui';
 import { cn as cnUI } from '@zamp-platform/ui/utils';
 import { DATE_FILTER_CATEGORIES, DATE_FILTER_OPTIONS } from '@zamp-platform/utils';
 import { type ClassValue } from 'clsx';
-import { CHIP_COLORS, CUSTOM_FILTER_COLORS } from 'constants/colors';
 import { SCREEN_BREAKPOINTS } from 'constants/common.constants';
 import {
   differenceInDays,

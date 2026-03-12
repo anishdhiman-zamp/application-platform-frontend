@@ -1,7 +1,6 @@
-import { Tag } from '@zamp-platform/ui';
+import { CSS_VARS, Tag } from '@zamp-platform/ui';
 import { SvgSpriteLoader } from '@zamp-platform/ui/assets';
 import Image from 'next/image';
-import { COLORS } from '@/constants/colors';
 import { JOINED_DATASET_ICON } from '@/constants/icons';
 import { useAppSelector } from '@/hooks/toolkit';
 import { useUserIdentity } from '@/hooks/useUserIdentity';
@@ -50,14 +49,14 @@ const AudienceMember = ({
           {showAvatar ? (
             isTeam ? (
               <div>
-                <SvgSpriteLoader id='users-02' width={14} height={14} color={COLORS.GRAY_1000} className='mr-0.5' />
+                <SvgSpriteLoader id='users-02' width={14} height={14} color={CSS_VARS.GRAY_1000} className='mr-0.5' />
               </div>
             ) : (
               <div className='w-fit'>
                 <Avatar
                   name={customAvatarWord}
-                  backgroundColor={COLORS.GRAY_1000}
-                  className='f-8-400 flex h-4 w-4 items-center justify-center rounded-full text-white'
+                  backgroundColor={CSS_VARS.GRAY_1000}
+                  className='f-8-400 flex h-4 w-4 items-center justify-center rounded-full text-white dark:text-black'
                 />
               </div>
             )

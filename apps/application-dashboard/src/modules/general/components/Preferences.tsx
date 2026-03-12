@@ -51,7 +51,7 @@ const Preferences = () => {
     <div className='flex flex-col'>
       <h1 className='f-20-600 text-GRAY_1000 pt-6 pb-4'>Preferences</h1>
 
-      <div className='border-GRAY_200 rounded-2xl border'>
+      <div className='border-GRAY_400 rounded-2xl border'>
         <SettingsRow label={PREFERENCES_ROWS[0].label} value={currentLabel} actionNode={themeDropdown} />
         <SettingsRow
           label={PREFERENCES_ROWS[1].label}

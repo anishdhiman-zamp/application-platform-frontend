@@ -35,7 +35,7 @@ const FilesToolbar = ({
   const selectedSortLabel = SORT_OPTIONS.find((opt) => opt.value === sortBy)?.label ?? 'Date modified';
 
   return (
-    <div className='border-GRAY_400 flex flex-col gap-y-2.5 border-b p-3'>
+    <div className='border-GRAY_400 bg-BG_WHITE flex flex-col gap-y-2.5 border-b p-3'>
       {/* Search Input */}
       <Input
         size='small'
@@ -44,7 +44,7 @@ const FilesToolbar = ({
         onChange={(e) => onSearchChange(e.target.value)}
         icon={<SearchIcon className='text-GRAY_500 size-3.5' />}
         iconPosition='leading'
-        className='placeholder:text-GRAY_500 placeholder:f-12-450 f-12-400 h-8 rounded-md bg-white'
+        className='placeholder:text-GRAY_500 placeholder:f-12-450 f-12-400 bg-BG_WHITE h-8 rounded-md'
       />
 
       {/* Sort and Filter Controls */}
@@ -55,7 +55,7 @@ const FilesToolbar = ({
             variant='secondary'
             size='small'
             onClick={onSortDirectionToggle}
-            className='border-GRAY_400 gap-x-[2px] rounded-r-none! border-r-0 bg-white p-1.5! hover:bg-white'
+            className='border-GRAY_400 bg-BG_WHITE hover:bg-BG_WHITE gap-x-[2px] rounded-r-none! border-r-0 p-1.5!'
           >
             <ArrowUp
               className={cn('text-GRAY_1000 size-3.5', sortDirection === SORT_DIRECTION.ASC && 'text-GRAY_300')}
@@ -71,12 +71,12 @@ const FilesToolbar = ({
                 variant='secondary'
                 size='small'
                 trailingIcon={<ChevronDownIcon className='text-GRAY_1000 size-3.5' />}
-                className='border-GRAY_400 rounded-l-none! bg-white px-2.5! py-1.5! hover:bg-white focus-visible:ring-0 focus-visible:ring-offset-0'
+                className='border-GRAY_400 bg-BG_WHITE hover:bg-BG_WHITE rounded-l-none! px-2.5! py-1.5! focus-visible:ring-0 focus-visible:ring-offset-0'
               >
                 {selectedSortLabel}
               </Button>
             </DropdownMenuTrigger>
-            <DropdownMenuContent align='start' className='flex min-w-[170px] flex-col gap-y-[2px]'>
+            <DropdownMenuContent align='start' className='bg-BG_WHITE flex min-w-[170px] flex-col gap-y-[2px]'>
               {SORT_OPTIONS.map((option) => (
                 <DropdownMenuItem
                   key={option.value}
@@ -98,7 +98,7 @@ const FilesToolbar = ({
             variant='secondary'
             size='small'
             onClick={onCollapseAll}
-            className='border-GRAY_400 bg-white px-2.5! hover:bg-white'
+            className='border-GRAY_400 bg-BG_WHITE hover:bg-BG_WHITE px-2.5!'
             title='Collapse all folders'
           >
             <FoldVertical className='text-GRAY_1000 size-3.5' />

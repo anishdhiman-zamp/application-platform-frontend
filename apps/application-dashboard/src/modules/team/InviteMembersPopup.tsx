@@ -1,12 +1,11 @@
 import { Dispatch, FC, SetStateAction, useCallback, useEffect, useMemo, useState } from 'react';
-import { Button } from '@zamp-platform/ui';
+import { Button, CSS_VARS } from '@zamp-platform/ui';
 import { SvgSpriteLoader } from '@zamp-platform/ui/assets';
 import { ICON_SPRITE_TYPES } from '@zamp-platform/ui/types';
 import {
   useGetInvitedAudiencesByOrganisationIdQuery,
   usePostInviteAudiencesByOrganisationIdMutation,
 } from 'apis/people';
-import { COLORS } from 'constants/colors';
 import { TEAM_MEMBERS_PRIVILEGES_LIST } from 'modules/team/people.constants';
 import { InviteMembersPopupPropsType, TEAM_MEMBERS_PRIVILEGES } from 'modules/team/people.types';
 import { extractEmailsFromSearchValue } from 'modules/team/people.utils';
@@ -94,7 +93,7 @@ const InviteMembersPopup: FC<InviteMembersPopupPropsType> = ({ isOpen, onClose, 
         label: value,
         valid: isValid,
         role,
-        color: isValid ? COLORS.WHITE : COLORS.RED_100,
+        color: isValid ? CSS_VARS.BG_WHITE : CSS_VARS.RED_100,
         validationMessage: message,
       });
     });
@@ -168,7 +167,7 @@ const InviteMembersPopup: FC<InviteMembersPopupPropsType> = ({ isOpen, onClose, 
           label: email,
           valid: isValid,
           role: instanceRole,
-          color: isValid ? COLORS.WHITE : COLORS.RED_100,
+          color: isValid ? CSS_VARS.BG_WHITE : CSS_VARS.RED_100,
           validationMessage: message,
         };
       });

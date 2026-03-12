@@ -1,5 +1,6 @@
 'use client';
 
+import { CSS_VARS } from '@zamp-platform/ui';
 import { X } from 'lucide-react';
 import { ARTIFACT_TYPE, type HandleShowArtifactsProps } from 'modules/process/process.types';
 import { getArtifactPrefixIconSrc } from 'modules/process/process.utils';
@@ -10,7 +11,6 @@ import ImageWithFallback from '@/components/common/ImageWithFallback';
 import CommonWrapper from '@/components/commonWrapper';
 import { SkeletonTypes } from '@/components/commonWrapper/commonWrapper.types';
 import SkeletonElement from '@/components/skeletons/SkeletonElement';
-import { COLORS } from '@/constants/colors';
 import { GMAIL, LINK, VERCEL_BLOB_ICON_URL } from '@/constants/icons';
 import { ActivityArtifactsItemType } from '@/types/api/processApi.types';
 import { defaultFnType } from '@/types/commonTypes';
@@ -48,7 +48,7 @@ const AllArtifactsDialog = ({ onClose, onArtifactClick }: AllArtifactsDialogProp
       <div className='animate-opacity flex h-full w-full gap-x-4 overflow-y-auto p-5'>
         {/* Close button */}
         <div onClick={onClose} className='mb-4 cursor-pointer self-start' aria-label='Close'>
-          <X size={16} color={COLORS.GRAY_900} strokeWidth={1.8} />
+          <X size={16} color={CSS_VARS.GRAY_900} strokeWidth={1.8} />
         </div>
 
         <CommonWrapper

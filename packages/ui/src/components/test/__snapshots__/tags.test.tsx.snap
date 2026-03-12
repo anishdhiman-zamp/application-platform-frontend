@@ -2,7 +2,7 @@
 
 exports[`Tag snapshot variants matches snapshot for variant "blue" 1`] = `
 <div
-  class="inline-flex justify-center items-center rounded-sm py-[2.5px] px-[6px] f-12-450 border select-none border-transparent text-primary bg-blue-150"
+  class="inline-flex justify-center items-center rounded-sm py-[2.5px] px-[6px] f-12-450 border select-none border-transparent text-GRAY_1000 bg-blue-150"
 >
   Tag 
   blue
@@ -11,7 +11,7 @@ exports[`Tag snapshot variants matches snapshot for variant "blue" 1`] = `
 
 exports[`Tag snapshot variants matches snapshot for variant "ghost" 1`] = `
 <div
-  class="inline-flex justify-center items-center rounded-sm py-[2.5px] px-[6px] f-12-450 border select-none border-transparent text-primary bg-transparent"
+  class="inline-flex justify-center items-center rounded-sm py-[2.5px] px-[6px] f-12-450 border select-none border-transparent text-GRAY_1000 bg-transparent"
 >
   Tag 
   ghost
@@ -29,7 +29,7 @@ exports[`Tag snapshot variants matches snapshot for variant "gray" 1`] = `
 
 exports[`Tag snapshot variants matches snapshot for variant "green" 1`] = `
 <div
-  class="inline-flex justify-center items-center rounded-sm py-[2.5px] px-[6px] f-12-450 border select-none border-transparent text-primary bg-green-150"
+  class="inline-flex justify-center items-center rounded-sm py-[2.5px] px-[6px] f-12-450 border select-none border-transparent text-GRAY_1000 bg-green-150"
 >
   Tag 
   green
@@ -38,7 +38,7 @@ exports[`Tag snapshot variants matches snapshot for variant "green" 1`] = `
 
 exports[`Tag snapshot variants matches snapshot for variant "orange" 1`] = `
 <div
-  class="inline-flex justify-center items-center rounded-sm py-[2.5px] px-[6px] f-12-450 border select-none border-transparent text-primary bg-orange-200"
+  class="inline-flex justify-center items-center rounded-sm py-[2.5px] px-[6px] f-12-450 border select-none border-transparent text-GRAY_1000 bg-orange-200"
 >
   Tag 
   orange
@@ -47,7 +47,7 @@ exports[`Tag snapshot variants matches snapshot for variant "orange" 1`] = `
 
 exports[`Tag snapshot variants matches snapshot for variant "outline" 1`] = `
 <div
-  class="inline-flex justify-center items-center rounded-sm py-[2.5px] px-[6px] f-12-450 border select-none text-primary bg-transparent border-gray-400"
+  class="inline-flex justify-center items-center rounded-sm py-[2.5px] px-[6px] f-12-450 border select-none text-GRAY_1000 bg-transparent border-gray-400"
 >
   Tag 
   outline
@@ -56,7 +56,7 @@ exports[`Tag snapshot variants matches snapshot for variant "outline" 1`] = `
 
 exports[`Tag snapshot variants matches snapshot for variant "pink" 1`] = `
 <div
-  class="inline-flex justify-center items-center rounded-sm py-[2.5px] px-[6px] f-12-450 border select-none border-transparent text-primary bg-pink-100"
+  class="inline-flex justify-center items-center rounded-sm py-[2.5px] px-[6px] f-12-450 border select-none border-transparent text-GRAY_1000 bg-pink-100"
 >
   Tag 
   pink
@@ -65,7 +65,7 @@ exports[`Tag snapshot variants matches snapshot for variant "pink" 1`] = `
 
 exports[`Tag snapshot variants matches snapshot for variant "violet" 1`] = `
 <div
-  class="inline-flex justify-center items-center rounded-sm py-[2.5px] px-[6px] f-12-450 border select-none border-transparent text-primary bg-violet-100"
+  class="inline-flex justify-center items-center rounded-sm py-[2.5px] px-[6px] f-12-450 border select-none border-transparent text-GRAY_1000 bg-violet-100"
 >
   Tag 
   violet
@@ -74,7 +74,7 @@ exports[`Tag snapshot variants matches snapshot for variant "violet" 1`] = `
 
 exports[`Tag snapshot variants matches snapshot for variant "yellow" 1`] = `
 <div
-  class="inline-flex justify-center items-center rounded-sm py-[2.5px] px-[6px] f-12-450 border select-none border-transparent text-primary bg-yellow-100"
+  class="inline-flex justify-center items-center rounded-sm py-[2.5px] px-[6px] f-12-450 border select-none border-transparent text-GRAY_1000 bg-yellow-100"
 >
   Tag 
   yellow

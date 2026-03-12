@@ -1,6 +1,7 @@
 // Import global styles
 import { SpeedInsights } from '@vercel/speed-insights/next';
 import { Toaster } from '@zamp-platform/ui';
+import { cn } from '@zamp-platform/ui/utils';
 import { FAVICON } from 'constants/icons';
 import type { Metadata, Viewport } from 'next';
 import { Funnel_Display, Inter } from 'next/font/google';
@@ -54,10 +55,10 @@ export default async function RootLayout({ children }: { children: React.ReactNo
   return (
     <html
       lang='en'
-      className={`${inter.className} ${funnelDisplay.variable} overscroll-none ${theme.html}`}
+      className={cn(inter.className, 'overscroll-none', funnelDisplay.variable, theme.html)}
       suppressHydrationWarning
     >
-      <body className={`${theme.body} bg-BACKGROUND_GRAY_1 h-screen antialiased`} suppressHydrationWarning>
+      <body className={cn(theme.body, 'bg-BG_GRAY_1 h-screen antialiased')} suppressHydrationWarning>
         <script dangerouslySetInnerHTML={{ __html: THEME_INIT_SCRIPT }} />
         <ThemeProvider>
           <SpeedInsights />

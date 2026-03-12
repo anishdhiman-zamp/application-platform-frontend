@@ -1,5 +1,5 @@
 import { FC, KeyboardEvent, useCallback, useEffect, useRef, useState } from 'react';
-import { Button, Input, Popover, PopoverContent, PopoverTrigger, toast } from '@zamp-platform/ui';
+import { Button, CSS_VARS, Input, Popover, PopoverContent, PopoverTrigger, toast } from '@zamp-platform/ui';
 import { SvgSpriteLoader } from '@zamp-platform/ui/assets';
 import { cn } from '@zamp-platform/ui/utils';
 import DeleteSheetDialog from 'modules/sheets/DeleteSheetDialog';
@@ -7,7 +7,6 @@ import { useParams } from 'next/navigation';
 import { MenuItem } from 'types/common/components';
 import { useUpdateSheetByPageIdMutation } from '@/apis/pages';
 import PermissionGuard from '@/components/hoc/PermissionGuard';
-import { COLORS } from '@/constants/colors';
 import { KEYBOARD_KEYS } from '@/constants/shortcuts';
 import { PAGE_ACCESS_PRIVILEGES, ResourceType } from '@/modules/shareResource/shareResource.types';
 import { defaultFnType } from '@/types/commonTypes';
@@ -209,7 +208,7 @@ const SheetTab: FC<SheetTabProps> = ({
             resourceId={params?.pageId as string}
             privilege={PAGE_ACCESS_PRIVILEGES.ADMIN}
           >
-            <SvgSpriteLoader id='dots-vertical' size={14} color={isMenuOpen ? COLORS.GRAY_800 : COLORS.GRAY_500} />
+            <SvgSpriteLoader id='dots-vertical' size={14} color={isMenuOpen ? CSS_VARS.GRAY_800 : CSS_VARS.GRAY_500} />
           </PermissionGuard>
         </PopoverTrigger>
         <PopoverContent
@@ -224,7 +223,7 @@ const SheetTab: FC<SheetTabProps> = ({
             placeholder='Sheet'
             value={sheetName}
             onChange={(e) => setSheetName(e.target.value)}
-            icon={<SvgSpriteLoader id='edit-03' size={16} color={COLORS.GRAY_500} />}
+            icon={<SvgSpriteLoader id='edit-03' size={16} color={CSS_VARS.GRAY_500} />}
             autoFocus
             onBlur={handleInputBlur}
             onKeyDown={handleEditKeyDown}

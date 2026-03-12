@@ -1,6 +1,6 @@
 import { useCallback, useEffect, useState } from 'react';
+import { COLORS } from '@zamp-platform/ui';
 import { ArrayListOption } from '@/components/multiSelectInput/multiSelectInput.types';
-import { COLORS } from '@/constants/colors';
 import { PROCESS_ACCESS_PRIVILEGES } from '@/modules/shareResource/shareResource.types';
 
 type AudienceOption = {

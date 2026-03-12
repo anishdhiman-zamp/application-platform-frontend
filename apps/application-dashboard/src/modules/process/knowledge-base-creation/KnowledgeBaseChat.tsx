@@ -318,7 +318,7 @@ const KnowledgeBaseChat: FC<KnowledgeBaseChatProps> = ({
               {status === ProcessStatus.BUILDING && (
                 <ProcessInProcessBanner shouldRedirect={false} className='h-[400px] pb-4' />
               )}
-              {status !== ProcessStatus.BUILDING && <div className='h-12 w-full bg-white' />}
+              {status !== ProcessStatus.BUILDING && <div className='bg-BG_WHITE h-12 w-full' />}
             </MessageContainer>
           )}
           {isSkeletonLoading && (

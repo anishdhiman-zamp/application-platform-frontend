@@ -34,7 +34,7 @@ const PaceSettingsSidebar = () => {
   );
 
   return (
-    <div className='bg-BACKGROUND_GRAY_1 border-GRAY_400 flex h-full w-60 flex-col border-r'>
+    <div className='bg-BG_GRAY_1 border-GRAY_400 flex h-full w-60 flex-col border-r'>
       <div className='flex flex-1 flex-col gap-y-[2px] px-2 pt-2 pb-4'>
         {tabs.map((item) => (
           <Link prefetch href={getHref(item.path)} key={item.id} className='cursor-pointer'>

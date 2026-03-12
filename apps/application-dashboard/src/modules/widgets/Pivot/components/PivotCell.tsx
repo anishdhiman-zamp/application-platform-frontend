@@ -127,7 +127,7 @@ const PivotCell: FC<PivotCellProps> = ({
       className={cn(
         'text-GRAY_950 border-b-0.5 border-b-GRAY_400 border-r-0.5 border-r-GRAY_400 f-13-450 hover:bg-GRAY_100 sensitive flex h-full w-full cursor-pointer items-center justify-end gap-3 px-3 py-2 select-none',
         {
-          'bg-BACKGROUND_GRAY_1': isLastNode || isRootLevel,
+          'bg-BG_GRAY_1': isLastNode || isRootLevel,
           'border-r-0': isLastCell,
           'border-b-0': isRootLevel,
         },

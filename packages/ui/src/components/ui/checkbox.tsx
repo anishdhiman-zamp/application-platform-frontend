@@ -11,13 +11,13 @@ function Checkbox({ className, ...props }: React.ComponentProps<typeof CheckboxP
     <CheckboxPrimitive.Root
       data-slot='checkbox'
       className={cn(
-        'border-GRAY_400 hover:bg-GRAY_400 focus-visible:ring-ring data-[state=checked]:bg-GRAY_1000 data-[state=checked]:border-GRAY_600 peer h-3.5 w-3.5 shrink-0 cursor-pointer rounded-[3px] border focus-visible:ring-1 focus-visible:outline-hidden disabled:cursor-not-allowed disabled:opacity-50',
+        'border-GRAY_500 hover:bg-GRAY_400 focus-visible:ring-ring data-[state=checked]:bg-GRAY_1000 data-[state=checked]:border-GRAY_600 peer h-3.5 w-3.5 shrink-0 cursor-pointer rounded-[3px] border focus-visible:ring-1 focus-visible:outline-hidden disabled:cursor-not-allowed disabled:opacity-50',
         className,
       )}
       {...props}
     >
       <CheckboxPrimitive.Indicator className={cn('flex items-center justify-center text-current')}>
-        <Check className='h-[10px] w-[10px] text-white' />
+        <Check className='text-GRAY_1000 h-[10px] w-[10px]' />
       </CheckboxPrimitive.Indicator>
     </CheckboxPrimitive.Root>
   );

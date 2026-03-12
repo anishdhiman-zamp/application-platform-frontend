@@ -12,7 +12,7 @@ import {
   useChat,
   useFileDragDrop,
 } from '@zamp-platform/chat';
-import { ArrowDownIcon, Button } from '@zamp-platform/ui';
+import { ArrowDownIcon, Button, CSS_VARS } from '@zamp-platform/ui';
 import { cn } from '@zamp-platform/ui/utils';
 import { useFileTabs } from 'modules/pace/components/dynamic-tabs/useFileTabs';
 import { CHAT_CONVERSATION_ID_PARAM } from 'modules/pace/pace.constants';
@@ -53,6 +53,7 @@ const ChatSidebarInner: FC<ChatSidebarInnerProps> = ({
   const router = useRouter();
   const dispatch = useAppDispatch();
   const { openTab } = useFileTabs();
+  const userAvatarBackgroundColor = CSS_VARS.ORANGE_400;
   const organizationId = useAppSelector((state: RootState) => state.user.user?.orgs?.[0]?.organization_id) ?? '';
   const currentUserName = useAppSelector((state: RootState) => state.user.user?.user_name) ?? '';
   const username = useAppSelector((state: RootState) => state.user.user?.username) ?? '';
@@ -149,7 +150,7 @@ const ChatSidebarInner: FC<ChatSidebarInnerProps> = ({
         <div
           ref={scrollContainerRef}
           onScroll={handleScroll}
-          className='relative flex min-h-0 w-full flex-1 flex-col overflow-x-hidden overflow-y-auto overscroll-y-contain [scrollbar-width:none]'
+          className='bg-BG_WHITE relative flex min-h-0 w-full flex-1 flex-col overflow-x-hidden overflow-y-auto overscroll-y-contain [scrollbar-width:none]'
         >
           {isInConversation ? (
             <>
@@ -175,8 +176,9 @@ const ChatSidebarInner: FC<ChatSidebarInnerProps> = ({
                   alignUserRight
                   hideSenderName
                   userAvatarClassName='h-5 min-h-5 w-5 min-w-5 f-11-500 rounded-[7.5px]'
+                  userAvatarBackgroundColor={userAvatarBackgroundColor}
                 />
-                <div className='h-12 w-full bg-white' />
+                <div className='bg-BG_WHITE h-12 w-full' />
               </CommonWrapper>
             </>
           ) : (
@@ -187,7 +189,7 @@ const ChatSidebarInner: FC<ChatSidebarInnerProps> = ({
               </div>
             </div>
           )}
-          <div className={cn('border-GRAY_400 sticky bottom-0 z-10 w-full shrink-0 border-t bg-[#fcfcfc] p-3')}>
+          <div className={cn('border-GRAY_400 bg-BG_GRAY_2 sticky bottom-0 z-10 w-full shrink-0 border-t p-3')}>
             <ConnectedChatInput
               chat={chat}
               conversationId={chat.conversationId ?? ''}
@@ -201,7 +203,7 @@ const ChatSidebarInner: FC<ChatSidebarInnerProps> = ({
               placeholder="Do your life's best work with Pace"
               externalInputValue={inputValue}
               setExternalInputValue={setInputValue}
-              className='bg-white'
+              className='bg-BG_WHITE'
               autoFocus
               onConversationCreated={handleConversationCreated}
               fileDropHandlerRef={fileDropHandlerRef}
@@ -214,13 +216,13 @@ const ChatSidebarInner: FC<ChatSidebarInnerProps> = ({
               onClick={handleScrollToBottomClick}
               variant='ghost'
               className={cn(
-                'bg-gray-1000 hover:bg-gray-1000 absolute -top-10 left-1/2 z-20 h-6 w-6 -translate-x-1/2 rounded-full p-3',
+                'bg-GRAY_1000 hover:bg-GRAY_950 absolute -top-10 left-1/2 z-20 h-6 w-6 -translate-x-1/2 rounded-full p-3',
                 'transition-all duration-200 ease-out',
                 showScrollButton ? 'translate-y-0 opacity-100' : 'pointer-events-none translate-y-2 opacity-0',
               )}
               aria-label='Scroll to bottom'
             >
-              <ArrowDownIcon size={14} className='p-[2px] text-white' />
+              <ArrowDownIcon size={14} className='text-BG_WHITE p-[2px]' />
             </Button>
           </div>
         </div>

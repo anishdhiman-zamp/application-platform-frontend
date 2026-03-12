@@ -13,7 +13,7 @@ const Profile = () => {
   return (
     <div className='flex flex-col'>
       <h1 className='f-20-600 text-GRAY_1000 pb-4'>Profile</h1>
-      <div className='border-GRAY_200 rounded-2xl border'>
+      <div className='border-GRAY_400 rounded-2xl border'>
         <SettingsRow label={PROFILE_ROWS[0].label} value={user?.user_email ?? ''} action={{ text: 'Manage' }} />
         <SettingsRow
           label={PROFILE_ROWS[1].label}

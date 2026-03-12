@@ -1,5 +1,15 @@
 import { FC, KeyboardEvent, useEffect, useState } from 'react';
-import { Button, Checkbox, Input, Popover, PopoverContent, PopoverTrigger, Tag, toast } from '@zamp-platform/ui';
+import {
+  Button,
+  Checkbox,
+  COLORS,
+  Input,
+  Popover,
+  PopoverContent,
+  PopoverTrigger,
+  Tag,
+  toast,
+} from '@zamp-platform/ui';
 import { SvgSpriteLoader } from '@zamp-platform/ui/assets';
 import { MoreHorizontalIcon } from 'lucide-react';
 import { TeamItemProps } from 'modules/team/people.types';
@@ -8,10 +18,12 @@ import {
   useRemoveTeamFromAudienceMutation,
   useUpdateTeamMutation,
 } from '@/apis/people';
+import { useTheme } from '@/app/_providers/theme-provider';
 import { TOAST_MESSAGES } from '@/components/common/toast/toast.constants';
-import { COLORS } from '@/constants/colors';
 import { KEYBOARD_KEYS } from '@/constants/shortcuts';
 import { useAppSelector } from '@/hooks/toolkit';
+import { THEME_MODE } from '@/modules/general/constants/general.constants';
+import { resolveChipColor } from '@/modules/team/people.utils';
 import { RootState } from '@/store';
 import { capitalizeWords, preventAutoFocus } from '@/utils/common';
 
@@ -27,6 +39,8 @@ const TeamItem: FC<TeamItemProps> = ({
   const [isPopoverOpen, setIsPopoverOpen] = useState(false);
   const [isHovered, setIsHovered] = useState(false);
   const organizationId = useAppSelector((state: RootState) => state?.user?.user?.orgs?.[0]?.organization_id) ?? '';
+  const { resolvedTheme } = useTheme();
+  const isDark = resolvedTheme === THEME_MODE.DARK;
 
   const [updateTeam] = useUpdateTeamMutation();
   const [postAddTeamToAudience] = usePostAddTeamToAudienceMutation();
@@ -137,7 +151,10 @@ const TeamItem: FC<TeamItemProps> = ({
           checked={userMappedTeams?.some((t) => t?.teamId === team?.team_id)}
           onCheckedChange={handleCheckboxChange}
         />
-        <Tag style={{ backgroundColor: team?.metadata?.color_hex_code }} className='border-none'>
+        <Tag
+          style={{ backgroundColor: resolveChipColor(team?.metadata?.color_hex_code, isDark) }}
+          className='border-none'
+        >
           {team?.name}
         </Tag>
       </div>
@@ -153,6 +170,7 @@ const TeamItem: FC<TeamItemProps> = ({
             onChange={(e) => setEditedName(e?.target?.value)}
             size='small'
             autoFocus
+            className='bg-BG_WHITE'
             icon={<SvgSpriteLoader id='edit-03' size={14} color={COLORS?.GRAY_500} />}
             onBlur={handleUpdateTeam}
             onKeyDown={handleKeyDown}

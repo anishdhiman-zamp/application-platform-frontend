@@ -11,7 +11,15 @@ import {
   SenderType,
   useChat,
 } from '@zamp-platform/chat';
-import { Button, Popover, PopoverContent, PopoverPortal, PopoverTrigger, ShimmerText } from '@zamp-platform/ui';
+import {
+  Button,
+  CSS_VARS,
+  Popover,
+  PopoverContent,
+  PopoverPortal,
+  PopoverTrigger,
+  ShimmerText,
+} from '@zamp-platform/ui';
 import { MessageSquare } from 'lucide-react';
 import useActionHub from 'modules/chatbot/actionHub';
 import ChatHeader from 'modules/chatbot/ChatHeader';
@@ -68,11 +76,11 @@ const Chatbot = ({
 }: ChatbotProps & { scope?: ScopeType }) => {
   const urlBasedOpenHandled = useRef(false);
   const messagesContainerRef = useRef<HTMLDivElement>(null);
-
   const currentUserEmail = useSelector((state: RootState) => state?.user?.user?.user_email);
   const feedbackState = useSelector((state: RootState) => state?.feedbacks);
   const { mergedFeedbackItems = [] } = feedbackState;
   const searchParams = useSearchParams();
+  const userAvatarBackgroundColor = CSS_VARS.ORANGE_400;
   const conversationIdFromParam = searchParams?.get(CHATBOT_LOCATION_PARAMS.CHATBOT_CONVERSATION_ID);
   const [isOpen, setIsOpen] = useState(showChatbot);
   const [header, setHeader] = useState('');
@@ -293,7 +301,7 @@ const Chatbot = ({
               variant='outline'
               size='icon'
               className={cn(
-                'bg-accent text-accent-foreground f-11-500 flex h-5 items-center gap-1 [&_svg]:size-3',
+                'bg-accent text-accent-GRAY_1000 f-11-500 flex h-5 items-center gap-1 [&_svg]:size-3',
                 isOpen && 'opacity-100',
               )}
               data-comment-button
@@ -350,7 +358,7 @@ const Chatbot = ({
                       >
                         {chat?.messages?.map((message) => (
                           <div key={message.timestamp} className='space-y-2'>
-                            <SenderDetails message={message} />
+                            <SenderDetails message={message} userAvatarBackgroundColor={userAvatarBackgroundColor} />
                             <BlockRenderer
                               message={{ block: message?.message_content?.elements ?? [] }}
                               onAction={handleAction}

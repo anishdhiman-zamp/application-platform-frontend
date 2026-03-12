@@ -1,3 +1,19 @@
+import { COLORS, TEAMS_COLORS, TEAMS_DARK_COLORS } from '@zamp-platform/ui';
+
+/**
+ * Resolves a team chip background color based on the current theme.
+ * Maps light pastel colors to their dark equivalents when in dark mode.
+ */
+const TEAM_COLOR_DARK_MAP: Record<string, string> = Object.fromEntries(
+  TEAMS_COLORS.map((light, i) => [light.toLowerCase(), TEAMS_DARK_COLORS[i]]),
+);
+
+export const resolveChipColor = (color: string | undefined, isDark: boolean): string => {
+  if (!color) return isDark ? COLORS.GRAY_800 : COLORS.WHITE;
+
+  return isDark ? (TEAM_COLOR_DARK_MAP[color.toLowerCase()] ?? color) : color;
+};
+
 /**
  * Extracts email from various formats:
  * - "Name <email@domain.com>" -> "email@domain.com"
