@@ -433,6 +433,52 @@ function handleGlobalMessageEvent(resolver: PayloadResolver, data: BaseEventPayl
   }
 }
 
+/** Updates task block status in streaming state when a task_update SSE event arrives. */
+function handleGlobalTaskUpdate(data: BaseEventPayload): void {
+  try {
+    const sourceId = data.source_id;
+
+    if (!sourceId) return;
+
+    const payload = data.payload as MapAny;
+    const taskId = payload?.task_id as string;
+    const status = (payload?.updated_fields as MapAny)?.status;
+
+    if (!taskId || !status) return;
+
+    streamingStateStore.update(sourceId, (prev) => {
+      if (!prev) return prev;
+
+      const elements = prev.message_content?.elements;
+
+      if (!elements?.length) return prev;
+
+      let hasUpdate = false;
+      const updatedElements = elements.map((el) => {
+        if (el.type === BLOCK_TYPE.TASK && (el as TaskContentBlock).payload.task_id === taskId) {
+          hasUpdate = true;
+
+          return {
+            ...el,
+            payload: { ...(el as TaskContentBlock).payload, status },
+          };
+        }
+
+        return el;
+      });
+
+      if (!hasUpdate) return prev;
+
+      return {
+        ...prev,
+        message_content: { ...prev.message_content, elements: updatedElements },
+      };
+    });
+  } catch (error) {
+    captureException(error);
+  }
+}
+
 interface SSEProviderProps {
   children: ReactNode;
   sseEventBus: EventBusInterface;
@@ -462,11 +508,13 @@ export const SSEProvider: React.FC<SSEProviderProps> = ({ children, sseEventBus 
     const taskSub = sseEventBus.subscribe(EVENT_TYPE.TASK, (data) =>
       handleGlobalMessageEvent(taskPayloadResolver, data),
     );
+    const taskUpdateSub = sseEventBus.subscribe(EVENT_TYPE.TASK_UPDATE, handleGlobalTaskUpdate);
 
     return () => {
       streamSub.unsubscribe();
       convSub.unsubscribe();
       taskSub.unsubscribe();
+      taskUpdateSub.unsubscribe();
     };
   }, [sseEventBus]);
 

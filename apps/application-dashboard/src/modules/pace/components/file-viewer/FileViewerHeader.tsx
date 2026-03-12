@@ -1,5 +1,6 @@
 'use client';
 
+import { memo } from 'react';
 import { FileIcon, Input, Tabs, TabsList, TabsTrigger } from '@zamp-platform/ui';
 import { cn } from '@zamp-platform/ui/utils';
 import TooltipV2 from '@/components/common/TooltipV2';
@@ -29,7 +30,7 @@ const ViewModeToggle = <T extends string>({ value, options, onChange }: ViewMode
         <TabsTrigger
           key={option.value}
           value={option.value}
-          className='flex h-6 w-[26px] shrink-0 items-center justify-center p-1.5'
+          className='flex h-6 w-[26px] shrink-0 items-center justify-center border border-transparent p-1.5'
         >
           {option.icon}
         </TabsTrigger>
@@ -55,117 +56,125 @@ interface FileViewerHeaderProps {
   onSpreadsheetViewModeChange?: (mode: SpreadsheetViewMode) => void;
 }
 
-const FileViewerHeader = ({
-  filePath,
-  fileName,
-  isSaving,
-  lastSavedAt,
-  className = '',
-  isMarkdown = false,
-  isHtml = false,
-  isTextSpreadsheet = false,
-  viewMode = 'milkdown',
-  htmlViewMode = 'preview',
-  spreadsheetViewMode = 'table',
-  onViewModeChange,
-  onHtmlViewModeChange,
-  onSpreadsheetViewModeChange,
-}: FileViewerHeaderProps) => {
-  const extension = getFileExtension(fileName);
-
-  const {
-    isRenaming,
-    renameValue,
-    fileExtension,
-    isRenameLoading,
-    isDuplicateName,
-    startRename,
-    setRenameValue,
-    handleRenameSubmit,
-    handleRenameKeyDown,
-    handleRenameInputRef,
-  } = useFileViewerHeaderRename({
+const FileViewerHeader = memo(
+  ({
     filePath,
     fileName,
-  });
+    isSaving,
+    lastSavedAt,
+    className = '',
+    isMarkdown = false,
+    isHtml = false,
+    isTextSpreadsheet = false,
+    viewMode = 'milkdown',
+    htmlViewMode = 'preview',
+    spreadsheetViewMode = 'table',
+    onViewModeChange,
+    onHtmlViewModeChange,
+    onSpreadsheetViewModeChange,
+  }: FileViewerHeaderProps) => {
+    const extension = getFileExtension(fileName);
 
-  const { handleActionClick, isDeleting, deleteConfirmation } = useFileViewerHeaderActions({
-    filePath,
-    fileName,
-  });
+    const {
+      isRenaming,
+      renameValue,
+      fileExtension,
+      isRenameLoading,
+      isDuplicateName,
+      startRename,
+      setRenameValue,
+      handleRenameSubmit,
+      handleRenameKeyDown,
+      handleRenameInputRef,
+    } = useFileViewerHeaderRename({
+      filePath,
+      fileName,
+    });
 
-  return (
-    <>
-      <DeleteConfirmationDialog
-        open={deleteConfirmation.isOpen}
-        onOpenChange={deleteConfirmation.onOpenChange}
-        itemName={fileName}
-        itemType='file'
-        isDeleting={isDeleting}
-        onConfirm={deleteConfirmation.onConfirm}
-      />
-      <div className={cn('border-GRAY_400 flex items-center justify-between border-b bg-white px-4 py-3', className)}>
-        <div className='flex items-center gap-2'>
-          <FileIcon extension={extension || 'txt'} className='text-GRAY_900 size-6' />
-          <div className='flex items-center gap-x-3'>
-            {isRenaming ? (
-              <div className='flex items-center'>
-                <TooltipV2
-                  tooltipBody='A file or folder with this name already exists.'
-                  side={SIDE_OPTIONS.BOTTOM}
-                  open={isDuplicateName}
-                  delayDuration={0}
-                  tooltipClassName='bg-RED_100 text-RED_700 border-RED_300 border'
-                  asChildTrigger
+    const { handleActionClick, isDeleting, deleteConfirmation } = useFileViewerHeaderActions({
+      filePath,
+      fileName,
+    });
+
+    return (
+      <>
+        {deleteConfirmation.isOpen && (
+          <DeleteConfirmationDialog
+            open
+            onOpenChange={deleteConfirmation.onOpenChange}
+            itemName={fileName}
+            itemType='file'
+            isDeleting={isDeleting}
+            onConfirm={deleteConfirmation.onConfirm}
+          />
+        )}
+        <div className={cn('border-GRAY_400 flex items-center justify-between border-b bg-white px-4 py-3', className)}>
+          <div className='flex items-center gap-2'>
+            <FileIcon extension={extension || 'txt'} className='text-GRAY_900 size-6' />
+            <div className='flex items-center gap-x-3'>
+              {isRenaming ? (
+                <div className='flex items-center'>
+                  <TooltipV2
+                    tooltipBody='A file or folder with this name already exists.'
+                    side={SIDE_OPTIONS.BOTTOM}
+                    open={isDuplicateName}
+                    delayDuration={0}
+                    tooltipClassName='bg-RED_100 text-RED_700 border-RED_300 border'
+                    asChildTrigger
+                  >
+                    <Input
+                      ref={handleRenameInputRef}
+                      autoFocus
+                      value={renameValue}
+                      autoComplete='off'
+                      onChange={(e) => setRenameValue(e.target.value)}
+                      onBlur={handleRenameSubmit}
+                      onKeyDown={handleRenameKeyDown}
+                      disabled={isRenameLoading}
+                      className={cn(
+                        'f-14-500 text-GRAY_1000 h-6 w-auto min-w-[100px] px-1 py-1',
+                        isDuplicateName && 'border-RED_700! focus:shadow-input-error-outline-shadow',
+                      )}
+                    />
+                  </TooltipV2>
+                  {fileExtension && (
+                    <span className='f-14-500 text-GRAY_600 shrink-0 select-none'>{fileExtension}</span>
+                  )}
+                </div>
+              ) : (
+                <span
+                  className='f-14-500 text-GRAY_1000 hover:bg-GRAY_200 inline-flex cursor-pointer items-center rounded-md px-1.5 py-0.5 transition-colors'
+                  onClick={startRename}
                 >
-                  <Input
-                    ref={handleRenameInputRef}
-                    autoFocus
-                    value={renameValue}
-                    autoComplete='off'
-                    onChange={(e) => setRenameValue(e.target.value)}
-                    onBlur={handleRenameSubmit}
-                    onKeyDown={handleRenameKeyDown}
-                    disabled={isRenameLoading}
-                    className={cn(
-                      'f-14-500 text-GRAY_1000 h-6 w-auto min-w-[100px] px-1 py-1',
-                      isDuplicateName && 'border-RED_700! focus:shadow-input-error-outline-shadow',
-                    )}
-                  />
-                </TooltipV2>
-                {fileExtension && <span className='f-14-500 text-GRAY_600 shrink-0 select-none'>{fileExtension}</span>}
-              </div>
-            ) : (
-              <span
-                className='f-14-500 text-GRAY_1000 hover:bg-GRAY_200 inline-flex cursor-pointer items-center rounded-md px-1.5 py-0.5 transition-colors'
-                onClick={startRename}
-              >
-                {fileName}
-              </span>
+                  {fileName}
+                </span>
+              )}
+            </div>
+          </div>
+
+          <div className='flex items-center gap-x-3'>
+            <FileSaveStatus isSaving={isSaving} lastSavedAt={lastSavedAt} />
+            {isMarkdown && onViewModeChange && (
+              <ViewModeToggle value={viewMode} options={MARKDOWN_VIEW_OPTIONS} onChange={onViewModeChange} />
             )}
+            {isHtml && onHtmlViewModeChange && (
+              <ViewModeToggle value={htmlViewMode} options={HTML_VIEW_OPTIONS} onChange={onHtmlViewModeChange} />
+            )}
+            {isTextSpreadsheet && onSpreadsheetViewModeChange && (
+              <ViewModeToggle
+                value={spreadsheetViewMode}
+                options={SPREADSHEET_VIEW_OPTIONS}
+                onChange={onSpreadsheetViewModeChange}
+              />
+            )}
+            <FileViewerHeaderMenu onActionClick={handleActionClick} disabled={isDeleting || isRenaming} />
           </div>
         </div>
+      </>
+    );
+  },
+);
 
-        <div className='flex items-center gap-x-3'>
-          <FileSaveStatus isSaving={isSaving} lastSavedAt={lastSavedAt} />
-          {isMarkdown && onViewModeChange && (
-            <ViewModeToggle value={viewMode} options={MARKDOWN_VIEW_OPTIONS} onChange={onViewModeChange} />
-          )}
-          {isHtml && onHtmlViewModeChange && (
-            <ViewModeToggle value={htmlViewMode} options={HTML_VIEW_OPTIONS} onChange={onHtmlViewModeChange} />
-          )}
-          {isTextSpreadsheet && onSpreadsheetViewModeChange && (
-            <ViewModeToggle
-              value={spreadsheetViewMode}
-              options={SPREADSHEET_VIEW_OPTIONS}
-              onChange={onSpreadsheetViewModeChange}
-            />
-          )}
-          <FileViewerHeaderMenu onActionClick={handleActionClick} disabled={isDeleting || isRenaming} />
-        </div>
-      </div>
-    </>
-  );
-};
+FileViewerHeader.displayName = 'FileViewerHeader';
 
 export default FileViewerHeader;

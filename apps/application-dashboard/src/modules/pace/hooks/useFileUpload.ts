@@ -211,6 +211,7 @@ export const useFileUpload = (): UseFileUploadReturn => {
           setUploadState((prev) => ({
             ...DEFAULT_UPLOAD_STATE,
             uploadingItems: prev.uploadingItems,
+            completedPaths: new Set([targetPath]),
           }));
           toast.success(`${sanitizedName} uploaded successfully`);
         },
@@ -435,6 +436,7 @@ export const useFileUpload = (): UseFileUploadReturn => {
           uploadingItems: keepSuccessful
             ? prev.uploadingItems.filter((item) => prev.completedPaths.has(item.path))
             : prev.uploadingItems,
+          completedPaths: prev.completedPaths,
         }));
 
         if (result.wasCancelled) {
@@ -460,6 +462,7 @@ export const useFileUpload = (): UseFileUploadReturn => {
         setUploadState((prev) => ({
           ...DEFAULT_UPLOAD_STATE,
           uploadingItems: prev.uploadingItems.filter((item) => prev.completedPaths.has(item.path)),
+          completedPaths: prev.completedPaths,
         }));
       } finally {
         abortControllerRef.current = null;
@@ -650,6 +653,7 @@ export const useFileUpload = (): UseFileUploadReturn => {
         setUploadState((prev) => ({
           ...DEFAULT_UPLOAD_STATE,
           uploadingItems: prev.uploadingItems,
+          completedPaths: new Set(prev.uploadingItems.map((item) => item.path)),
         }));
 
         toast.success(`${folderName} uploaded successfully (${totalFiles} files)`);

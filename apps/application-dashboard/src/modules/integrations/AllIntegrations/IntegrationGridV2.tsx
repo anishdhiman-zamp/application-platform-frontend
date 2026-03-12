@@ -27,16 +27,9 @@ const IntegrationGridV2: FC = () => {
 
   const isFetchingRef = useRef(isFetching);
 
-  const enabledNames = useMemo(() => new Set(enabledItems.map((item) => item.name)), [enabledItems]);
-
-  const filteredAvailableItems = useMemo(
-    () => availableItems.filter((item) => !enabledNames.has(item.name)),
-    [availableItems, enabledNames],
-  );
-
   const showEmptyState = useMemo(
-    () => isInitialised && !isFetching && !hasMore && filteredAvailableItems.length === 0,
-    [isInitialised, isFetching, hasMore, filteredAvailableItems.length],
+    () => isInitialised && !isFetching && !hasMore && availableItems.length === 0,
+    [isInitialised, isFetching, hasMore, length],
   );
 
   isFetchingRef.current = isFetching;
@@ -77,9 +70,9 @@ const IntegrationGridV2: FC = () => {
 
       <div className='flex flex-col gap-y-2.5'>
         <SectionTitle title='Available' />
-        {filteredAvailableItems.length > 0 && (
+        {availableItems.length > 0 && (
           <div className={GRID_CLASSES}>
-            {filteredAvailableItems.map((item) => (
+            {availableItems.map((item) => (
               <IntegrationCardV2 key={item.name} integrationItem={item} />
             ))}
           </div>

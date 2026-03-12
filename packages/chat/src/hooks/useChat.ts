@@ -22,7 +22,7 @@ import {
 } from '../api';
 import { getHistoryFormattedMessages } from '../components/block.utils';
 import { streamingStateStore } from '../stores/streamingStateStore';
-import { BLOCK_TYPE } from '../types/block.types';
+import { BLOCK_TYPE, type TaskStatus } from '../types/block.types';
 import {
   ChatMessage,
   ChatMessageType,
@@ -378,6 +378,44 @@ export const useChat = (config: ChatConfig) => {
     });
     return () => sub.unsubscribe();
   }, [handleSSEMessage, _conversationId, sseEventBus, resolvedEventType, isTaskEvent]);
+
+  const handleTaskUpdate = useCallback((data: BaseEventPayload) => {
+    if (data.source_id !== conversationIdRef.current) return;
+
+    const payload = data.payload as MapAny;
+    const taskId = payload?.task_id as string;
+    const status = (payload?.updated_fields as MapAny)?.status as TaskStatus | undefined;
+
+    if (!taskId || !status) return;
+
+    setMessages((prev) =>
+      prev.map((msg) => {
+        const elements = msg.message_content?.elements;
+        if (!elements?.length) return msg;
+
+        let hasUpdate = false;
+        const updatedElements = elements.map((el) => {
+          if (el.type === BLOCK_TYPE.TASK && el.payload.task_id === taskId) {
+            hasUpdate = true;
+            return { ...el, payload: { ...el.payload, status } };
+          }
+          return el;
+        });
+
+        if (!hasUpdate) return msg;
+
+        return {
+          ...msg,
+          message_content: { ...msg.message_content, elements: updatedElements },
+        };
+      }),
+    );
+  }, []);
+
+  useEffect(() => {
+    const sub = sseEventBus.subscribe(EVENT_TYPE.TASK_UPDATE, handleTaskUpdate);
+    return () => sub.unsubscribe();
+  }, [sseEventBus, handleTaskUpdate]);
 
   useEffect(() => {
     if (!isFetchingConversationHistory && conversationHistory) {

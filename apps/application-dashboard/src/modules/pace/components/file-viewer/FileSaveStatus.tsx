@@ -1,6 +1,6 @@
 'use client';
 
-import { useEffect, useRef, useState } from 'react';
+import { memo, useEffect, useRef, useState } from 'react';
 import { Check, Loader2 } from 'lucide-react';
 import { formatRelativeTime } from '@/modules/pace/components/files/file-tree.utils';
 import { SAVE_STATUS, type SaveStatus } from '@/modules/pace/components/files/files.constants';
@@ -10,7 +10,7 @@ interface FileSaveStatusProps {
   lastSavedAt: number | null;
 }
 
-const FileSaveStatus = ({ isSaving, lastSavedAt }: FileSaveStatusProps) => {
+const FileSaveStatus = memo(({ isSaving, lastSavedAt }: FileSaveStatusProps) => {
   const prevIsSavingRef = useRef(isSaving);
   const savedTimeoutRef = useRef<NodeJS.Timeout | null>(null);
 
@@ -81,6 +81,8 @@ const FileSaveStatus = ({ isSaving, lastSavedAt }: FileSaveStatusProps) => {
   }
 
   return null;
-};
+});
+
+FileSaveStatus.displayName = 'FileSaveStatus';
 
 export default FileSaveStatus;

@@ -29,6 +29,7 @@ export const useConnectionManagement = ({ integrationId, mappedConnections = [] 
   const { data: connections } = useGetConnectionsByIntegrationNameQuery(
     {
       integration_name: integrationId,
+      params: { page: 1, limit: 100 },
     },
     { skip: !integrationId, refetchOnMountOrArgChange: false },
   );
@@ -38,7 +39,7 @@ export const useConnectionManagement = ({ integrationId, mappedConnections = [] 
   const connectionsToAdd = useMemo(() => {
     if (!connections) return [];
 
-    return getAvailableConnections(connections, mappedConnections);
+    return getAvailableConnections(connections?.connections || [], mappedConnections);
   }, [connections, mappedConnections]);
 
   const handleConnect = useCallback(
