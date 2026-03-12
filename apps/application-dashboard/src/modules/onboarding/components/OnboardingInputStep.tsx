@@ -1,20 +1,21 @@
-import { type ReactNode, useEffect, useRef } from 'react';
-import { Button } from '@zamp-platform/ui';
+import { type ReactNode, useCallback, useEffect, useRef } from 'react';
+import { Button, Input } from '@zamp-platform/ui';
 import { EnterIcon } from 'modules/onboarding/components/EnterIcon';
 import { KEYBOARD_KEYS } from '@/constants/shortcuts';
+import { type defaultFnType } from '@/types/commonTypes';
 
-type Props = {
+export interface OnboardingInputStepInterface {
   children: ReactNode;
   label: string;
   placeholder: string;
   value: string;
   onChange: (value: string) => void;
-  onSubmit: () => void;
+  onSubmit: defaultFnType;
   disabled?: boolean;
   error?: string | null;
   feedback?: ReactNode;
   autoFocus?: boolean;
-};
+}
 
 export const OnboardingInputStep = ({
   children,
@@ -27,51 +28,50 @@ export const OnboardingInputStep = ({
   error,
   feedback,
   autoFocus = true,
-}: Props) => {
+}: OnboardingInputStepInterface) => {
   const inputRef = useRef<HTMLInputElement>(null);
 
   useEffect(() => {
     if (autoFocus) inputRef.current?.focus();
-  }, [autoFocus]);
+  }, []);
 
-  // Global Enter key listener so submit works even without input focus
-  const onSubmitRef = useRef(onSubmit);
-  const disabledRef = useRef(disabled);
-
-  onSubmitRef.current = onSubmit;
-  disabledRef.current = disabled;
-
-  useEffect(() => {
-    const handleGlobalKeyDown = (e: KeyboardEvent) => {
-      if (e.key !== KEYBOARD_KEYS.ENTER || disabledRef.current) return;
+  const handleGlobalKeyDown = useCallback(
+    (e: KeyboardEvent) => {
+      if (e.key !== KEYBOARD_KEYS.ENTER || disabled) return;
 
       // Don't submit if a popover/dialog is open (e.g. avatar picker)
       if (document.querySelector('[data-radix-popper-content-wrapper]') || document.querySelector('[role="dialog"]'))
         return;
 
       e.preventDefault();
-      onSubmitRef.current();
-    };
+      onSubmit();
+    },
+    [disabled, onSubmit],
+  );
 
+  useEffect(() => {
     window.addEventListener('keydown', handleGlobalKeyDown);
 
     return () => window.removeEventListener('keydown', handleGlobalKeyDown);
-  }, []);
+  }, [handleGlobalKeyDown]);
 
   return (
-    <div className='w-full max-w-[520px]'>
+    <div className='w-full max-w-130'>
       <div className='mb-5'>{children}</div>
 
       <div className='mb-6'>
         <label className='text-GRAY_700 mb-0.5 block text-xs font-normal'>{label}</label>
         <div className='flex items-end gap-3'>
-          <input
-            ref={inputRef}
+          <Input
+            ref={(node) => {
+              inputRef.current = node;
+            }}
             type='text'
             value={value}
             onChange={(e) => onChange(e.target.value)}
             placeholder={placeholder}
-            className='text-GRAY_1000 flex-1 border-none bg-transparent p-0 font-[family-name:var(--font-funnel-display)] text-5xl leading-[1.4] outline-none'
+            wrapperClassName='flex-1'
+            className='!font-funnel-display text-GRAY_1000 !placeholder:text-GRAY_400 !h-auto !rounded-none !border-none !bg-transparent !p-0 !text-5xl !leading-[1.4] shadow-none !outline-none focus:border-transparent focus:ring-0'
           />
           <Button
             variant='ghost'

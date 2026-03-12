@@ -29,6 +29,7 @@ const config = {
           'Helvetica Neue',
           'sans-serif',
         ],
+        'funnel-display': ['var(--font-funnel-display)', 'serif'],
       },
       colors: {
         border: 'hsl(var(--border))',

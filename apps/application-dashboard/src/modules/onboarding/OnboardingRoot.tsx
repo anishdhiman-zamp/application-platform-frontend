@@ -199,7 +199,7 @@ export const OnboardingRoot = () => {
     <div className='bg-GRAY_100 relative flex h-screen w-screen items-center justify-center overflow-hidden'>
       <ProfessionRevealBackground containerRef={containerRef} />
 
-      <div ref={containerRef} className='relative z-2 w-full max-w-[520px] px-6 py-10'>
+      <div ref={containerRef} className='relative z-2 w-full max-w-130 px-6 py-10'>
         <StepContent
           status={currentStatus}
           session={session!}
