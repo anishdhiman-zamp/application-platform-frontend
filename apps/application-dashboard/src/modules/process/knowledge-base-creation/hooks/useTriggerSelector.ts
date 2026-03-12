@@ -34,7 +34,7 @@ export const useTriggerSelector = () => {
 
       // If data is already in cache and fulfilled, use it without making a network call
       if (cachedData?.data && cachedData.status === 'fulfilled') {
-        const connections = cachedData.data;
+        const { connections } = cachedData.data;
 
         if (connections.length > 0) {
           return { type: 'connections' as const, connections };
@@ -51,7 +51,7 @@ export const useTriggerSelector = () => {
         ),
       );
 
-      const connections = await queryResult.unwrap();
+      const { connections } = await queryResult.unwrap();
 
       if (connections.length > 0) {
         return { type: 'connections' as const, connections };
