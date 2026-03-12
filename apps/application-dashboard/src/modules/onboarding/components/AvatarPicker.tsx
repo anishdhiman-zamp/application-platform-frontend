@@ -72,10 +72,11 @@ export const AvatarPicker = ({ avatar, onShuffle, onUpload, onReset }: Props) =>
     e.target.value = '';
   };
 
-  const closePopover = () => {
+  const closePopover = (revokeUrl = true) => {
     setOpen(false);
     // Clean up local state after close animation completes
     setTimeout(() => {
+      if (revokeUrl) revokePreview();
       setPreviewUrl(null);
       setPendingFile(null);
       setFileError(null);
@@ -93,13 +94,12 @@ export const AvatarPicker = ({ avatar, onShuffle, onUpload, onReset }: Props) =>
   const handleSave = () => {
     if (!pendingFile || !previewUrl) return;
     onUpload(pendingFile, previewUrl);
-    // Don't revoke here — the preview URL is now owned by the parent
-    closePopover();
+    // Don't revoke — the preview URL is now owned by the parent
+    closePopover(false);
   };
 
   const handleReset = () => {
     onReset();
-    revokePreview();
     closePopover();
   };
 
@@ -114,7 +114,7 @@ export const AvatarPicker = ({ avatar, onShuffle, onUpload, onReset }: Props) =>
 
       if (activeTabRef.current === 'upload' && pendingFileRef.current && previewUrlRef.current) {
         onUpload(pendingFileRef.current, previewUrlRef.current);
-        closePopover();
+        closePopover(false);
       } else {
         closePopover();
       }

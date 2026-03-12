@@ -87,7 +87,7 @@ export const OnboardingRoot = () => {
     };
 
     doSkip();
-  }, [isFlagLoading, isOnboardingEnabled, skipOnboarding, router, landingRoute]);
+  }, [isFlagLoading, isOnboardingEnabled, skipOnboarding, router]);
 
   useEffect(() => {
     if (!session || isFlagLoading || !isOnboardingEnabled) return;
@@ -101,7 +101,7 @@ export const OnboardingRoot = () => {
     }
 
     setCurrentStatus(status);
-  }, [session, router, isFlagLoading, isOnboardingEnabled, landingRoute]);
+  }, [session, router, isFlagLoading, isOnboardingEnabled]);
 
   // If we reach SETUP_WORKSPACE without orgIdFromSetup (e.g. page reload), refetch session to get fresh org data
   useEffect(() => {
@@ -161,7 +161,7 @@ export const OnboardingRoot = () => {
       // Best-effort skip
     }
     router.replace(landingRoute);
-  }, [skipOnboarding, router, landingRoute]);
+  }, [skipOnboarding, router]);
 
   if (isLoading || isFlagLoading || !currentStatus) {
     return <ImageLoader imageSrc={ZAMP_LOGO_LOADER_SVG} width={140} height={140} />;
