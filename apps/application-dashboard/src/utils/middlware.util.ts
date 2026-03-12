@@ -103,7 +103,7 @@ export async function getUserSession(
         display_name: cachedSessionData.display_name ?? '',
         last_name: cachedSessionData.last_name ?? '',
         username: cachedSessionData.username ?? '',
-        onboarding_status: cachedSessionData.onboarding_status ?? '',
+        onboarding_status: cachedSessionData.onboarding_status as Session['onboarding_status'],
         avatar_type: null,
         avatar_value: null,
       };

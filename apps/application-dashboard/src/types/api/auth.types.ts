@@ -1,3 +1,5 @@
+import { OnboardingStatus } from '@/modules/onboarding/onboarding.types';
+
 export type LogoutFlow = {
   logout_url: string;
   logout_token: string;
@@ -115,7 +117,7 @@ export type Session = {
   last_name: string;
   username: string;
   orgs: Organization[];
-  onboarding_status: string;
+  onboarding_status: OnboardingStatus;
   avatar_type: 'seed' | 'url' | null;
   avatar_value: string | null;
 };
