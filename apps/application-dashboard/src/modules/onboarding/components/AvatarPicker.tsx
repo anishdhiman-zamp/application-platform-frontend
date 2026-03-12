@@ -64,9 +64,10 @@ export const AvatarPicker = ({ avatar, onShuffle, onUpload, onReset }: Props) =>
 
     if (!file) return;
 
+    e.target.value = '';
+
     if (file.size > VALIDATION.AVATAR_MAX_SIZE_BYTES) {
       setFileError(ERROR_MESSAGES.FILE_TOO_LARGE);
-      e.target.value = '';
 
       return;
     }
@@ -77,7 +78,6 @@ export const AvatarPicker = ({ avatar, onShuffle, onUpload, onReset }: Props) =>
 
     setPreviewUrl(url);
     setPendingFile(file);
-    e.target.value = '';
   };
 
   const resetLocalState = useCallback(
