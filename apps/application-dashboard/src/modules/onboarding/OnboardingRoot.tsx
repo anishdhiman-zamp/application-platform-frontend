@@ -15,8 +15,8 @@ import { useEnsureProvisioningMutation, useSkipOnboardingMutation } from '@/apis
 import ImageLoader from '@/components/common/loader/ImageLoader';
 import { FEATURE_FLAGS } from '@/constants/featureFlags';
 import { ZAMP_LOGO_LOADER_SVG } from '@/constants/icons';
-import { ROUTES_PATH } from '@/constants/routeConfig';
 import { useFeatureFlags } from '@/hooks/useFeatureFlags';
+import { getLandingRoute } from '@/utils/route.util';
 
 const isWelcomeSeen = () => {
   try {
@@ -36,10 +36,17 @@ export const OnboardingRoot = () => {
   const { ldClient } = useFeatureFlags();
   const [isOnboardingEnabled, setIsOnboardingEnabled] = useState<boolean | null>(null);
   const isFlagLoading = isOnboardingEnabled === null;
-  const landingRoute = ROUTES_PATH.HOME;
   const [skipOnboarding] = useSkipOnboardingMutation();
   const [ensureProvisioning] = useEnsureProvisioningMutation();
   const skipCalledRef = useRef(false);
+
+  // Refetch session to get fresh org/product data, then redirect to the correct landing page.
+  // The cached whoami response may predate org creation, so we must refetch before redirecting.
+  const redirectToApp = useCallback(async () => {
+    const { data: freshSession } = await refetchSession();
+
+    router.replace(getLandingRoute(freshSession?.orgs?.[0]?.product));
+  }, [refetchSession, router]);
 
   // Resolve the flag only after fixing LD's context with the real user from whoami.
   // The shared LDProvider initializes with getUserSession() which may have an empty user key,
@@ -77,7 +84,7 @@ export const OnboardingRoot = () => {
         const status = result.onboarding_status;
 
         if (status === OnboardingStatus.ONBOARDED) {
-          router.replace(landingRoute);
+          redirectToApp();
         } else {
           setCurrentStatus(status);
         }
@@ -87,7 +94,7 @@ export const OnboardingRoot = () => {
     };
 
     doSkip();
-  }, [isFlagLoading, isOnboardingEnabled, skipOnboarding, router]);
+  }, [isFlagLoading, isOnboardingEnabled, skipOnboarding, redirectToApp]);
 
   useEffect(() => {
     if (!session || isFlagLoading || !isOnboardingEnabled) return;
@@ -95,13 +102,13 @@ export const OnboardingRoot = () => {
     const status = session.onboarding_status;
 
     if (status === OnboardingStatus.ONBOARDED) {
-      router.replace(landingRoute);
+      redirectToApp();
 
       return;
     }
 
     setCurrentStatus(status);
-  }, [session, router, isFlagLoading, isOnboardingEnabled]);
+  }, [session, redirectToApp, isFlagLoading, isOnboardingEnabled]);
 
   // If we reach SETUP_WORKSPACE without orgIdFromSetup (e.g. page reload), refetch session to get fresh org data
   useEffect(() => {
@@ -129,7 +136,7 @@ export const OnboardingRoot = () => {
   const handleStepComplete = (nextStatus: OnboardingStatus, organizationId?: string) => {
     if (nextStatus === OnboardingStatus.ONBOARDED) {
       if (isWelcomeSeen()) {
-        router.replace(landingRoute);
+        redirectToApp();
 
         return;
       }
@@ -160,8 +167,8 @@ export const OnboardingRoot = () => {
     } catch {
       // Best-effort skip
     }
-    router.replace(landingRoute);
-  }, [skipOnboarding, router]);
+    redirectToApp();
+  }, [skipOnboarding, redirectToApp]);
 
   if (isLoading || isFlagLoading || !currentStatus) {
     return <ImageLoader imageSrc={ZAMP_LOGO_LOADER_SVG} width={140} height={140} />;
