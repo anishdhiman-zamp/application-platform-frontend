@@ -5,9 +5,9 @@ import { AvatarImage } from 'modules/onboarding/components/AvatarPicker';
 import { OnboardingInputStep } from 'modules/onboarding/components/OnboardingInputStep';
 import { ERROR_MESSAGES, FEEDBACK_MESSAGES, VALIDATION } from 'modules/onboarding/onboarding.constants';
 import { OnboardingStepCallbacks } from 'modules/onboarding/onboarding.types';
-import { generateAtIconSvg } from 'modules/onboarding/utils/avatarGenerator';
 import { handleOnboardingApiError } from 'modules/onboarding/utils/onboardingErrors';
 import { useLazyCheckUsernameQuery, useUpdateProfileMutation } from '@/apis/onboarding';
+import { generateAtIconSvg } from '@/utils/pixelArtGenerator';
 
 type Props = OnboardingStepCallbacks & {
   initialUsername?: string;

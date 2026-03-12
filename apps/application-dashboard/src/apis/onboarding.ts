@@ -61,6 +61,7 @@ const onboardingApi = baseApi.injectEndpoints({
         url: API_ENDPOINTS.USER_CHECK_USERNAME_GET,
         params: { username },
       }),
+      keepUnusedDataFor: 0,
     }),
   }),
 });

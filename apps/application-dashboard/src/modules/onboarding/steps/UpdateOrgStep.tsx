@@ -6,9 +6,9 @@ import { OnboardingInputStep } from 'modules/onboarding/components/OnboardingInp
 import { useAvatarState } from 'modules/onboarding/hooks/useAvatarState';
 import { ERROR_MESSAGES, VALIDATION } from 'modules/onboarding/onboarding.constants';
 import { OnboardingStepCallbacks, UploadType } from 'modules/onboarding/onboarding.types';
-import { generateOrgIconSvg } from 'modules/onboarding/utils/avatarGenerator';
 import { handleOnboardingApiError } from 'modules/onboarding/utils/onboardingErrors';
 import { useSetupOrgMutation } from '@/apis/onboarding';
+import { generateOrgIconSvg } from '@/utils/pixelArtGenerator';
 
 type Props = OnboardingStepCallbacks & {
   username: string;

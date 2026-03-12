@@ -36,7 +36,7 @@ export const OnboardingRoot = () => {
   const { ldClient } = useFeatureFlags();
   const [isOnboardingEnabled, setIsOnboardingEnabled] = useState<boolean | null>(null);
   const isFlagLoading = isOnboardingEnabled === null;
-  const landingRoute = session?.orgs?.[0]?.product === 'macs' ? ROUTES_PATH.CHAT : ROUTES_PATH.PROCESSES;
+  const landingRoute = ROUTES_PATH.HOME;
   const [skipOnboarding] = useSkipOnboardingMutation();
   const [ensureProvisioning] = useEnsureProvisioningMutation();
   const skipCalledRef = useRef(false);
@@ -101,7 +101,7 @@ export const OnboardingRoot = () => {
     }
 
     setCurrentStatus(status);
-  }, [session, router, isFlagLoading, isOnboardingEnabled]);
+  }, [session, router, isFlagLoading, isOnboardingEnabled, landingRoute]);
 
   // If we reach SETUP_WORKSPACE without orgIdFromSetup (e.g. page reload), refetch session to get fresh org data
   useEffect(() => {

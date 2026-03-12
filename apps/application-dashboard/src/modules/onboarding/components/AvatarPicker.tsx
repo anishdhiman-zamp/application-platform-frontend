@@ -82,6 +82,14 @@ export const AvatarPicker = ({ avatar, onShuffle, onUpload, onReset }: Props) =>
     }, 200);
   };
 
+  const pendingFileRef = useRef<File | null>(null);
+  const previewUrlRef = useRef<string | null>(null);
+  const activeTabRef = useRef(activeTab);
+
+  pendingFileRef.current = pendingFile;
+  previewUrlRef.current = previewUrl;
+  activeTabRef.current = activeTab;
+
   const handleSave = () => {
     if (!pendingFile || !previewUrl) return;
     onUpload(pendingFile, previewUrl);
@@ -104,8 +112,9 @@ export const AvatarPicker = ({ avatar, onShuffle, onUpload, onReset }: Props) =>
       e.preventDefault();
       e.stopImmediatePropagation();
 
-      if (activeTab === 'upload' && pendingFile) {
-        handleSave();
+      if (activeTabRef.current === 'upload' && pendingFileRef.current && previewUrlRef.current) {
+        onUpload(pendingFileRef.current, previewUrlRef.current);
+        closePopover();
       } else {
         closePopover();
       }
@@ -114,7 +123,7 @@ export const AvatarPicker = ({ avatar, onShuffle, onUpload, onReset }: Props) =>
     window.addEventListener('keydown', handleEnter, { capture: true });
 
     return () => window.removeEventListener('keydown', handleEnter, { capture: true });
-  }, [open, activeTab, pendingFile]);
+  }, [open]); // eslint-disable-line react-hooks/exhaustive-deps
 
   return (
     <Popover open={open} onOpenChange={setOpen}>

@@ -13,12 +13,17 @@ type Props = {
   onComplete: (status: OnboardingStatus) => void;
 };
 
+const POLLING_INTERVAL = 5000;
+const MAX_POLL_ATTEMPTS = 60; // 5 minutes at 5s intervals
+
 export const SetupWorkspaceStep = ({ organizationId, userName, onComplete }: Props) => {
   const [ensureProvisioning] = useEnsureProvisioningMutation();
   const [takingLonger, setTakingLonger] = useState(false);
+  const [hasError, setHasError] = useState(false);
   const [ready, setReady] = useState(false);
   const completedRef = useRef(false);
   const readyRef = useRef(false);
+  const attemptsRef = useRef(0);
 
   const handleOnboarded = useCallback(() => {
     if (completedRef.current) return;
@@ -28,6 +33,15 @@ export const SetupWorkspaceStep = ({ organizationId, userName, onComplete }: Pro
 
   const checkStatus = useCallback(async () => {
     if (completedRef.current) return;
+
+    attemptsRef.current++;
+
+    if (attemptsRef.current >= MAX_POLL_ATTEMPTS) {
+      setHasError(true);
+
+      return;
+    }
+
     try {
       const result = await ensureProvisioning({ organization_id: organizationId }).unwrap();
 
@@ -62,16 +76,16 @@ export const SetupWorkspaceStep = ({ organizationId, userName, onComplete }: Pro
     checkStatus();
 
     const poll = setInterval(() => {
-      if (completedRef.current) {
+      if (completedRef.current || hasError) {
         clearInterval(poll);
 
         return;
       }
       checkStatus();
-    }, 5000);
+    }, POLLING_INTERVAL);
 
     return () => clearInterval(poll);
-  }, [checkStatus]);
+  }, [checkStatus, hasError]);
 
   if (!ready)
     return (
@@ -80,5 +94,5 @@ export const SetupWorkspaceStep = ({ organizationId, userName, onComplete }: Pro
       </div>
     );
 
-  return <ProvisioningScreen takingLonger={takingLonger} userName={userName} />;
+  return <ProvisioningScreen takingLonger={takingLonger} hasError={hasError} userName={userName} />;
 };
