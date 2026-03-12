@@ -33,8 +33,8 @@ import { useLazyGetOpenFeedbackQuery } from '@/apis/feedback';
 import SkeletonElement from '@/components/skeletons/SkeletonElement';
 import useActionHub from '@/modules/chatbot/actionHub';
 import { CHATBOT_LOCATION_PARAMS } from '@/modules/chatbot/constants';
-import NewPaceAvatar from '@/modules/chatbot/NewPaceAvatar';
 import StopProcessingFeedback from '@/modules/chatbot/StopProcessingFeedback';
+import NewPaceAvatar from '@/modules/chatbot/ZampAvatar';
 import ChatMessagesSkeleton from '@/modules/pace/components/loaders/ChatMessagesSkeleton';
 import { useChatScroll } from '@/modules/pace/hooks/useChatScroll';
 import { useFileDownload } from '@/modules/pace/hooks/useFileDownload';
@@ -311,7 +311,6 @@ const KnowledgeBaseChat: FC<KnowledgeBaseChatProps> = ({
               showTimestamp={streamingEnabled}
               showCopy={streamingEnabled}
               alignUserRight={streamingEnabled}
-              hideSenderName={streamingEnabled}
               className='flex-1'
               streamingEnabled={streamingEnabled}
             >
@@ -323,12 +322,7 @@ const KnowledgeBaseChat: FC<KnowledgeBaseChatProps> = ({
           )}
           {isSkeletonLoading && (
             <div className='animate-opacity flex h-full w-full justify-center pt-4'>
-              <ChatMessagesSkeleton
-                count={1}
-                className='px-4 py-0'
-                alignUserRight={streamingEnabled}
-                hideSenderName={streamingEnabled}
-              />
+              <ChatMessagesSkeleton count={1} className='px-4 py-0' alignUserRight={streamingEnabled} />
             </div>
           )}
 

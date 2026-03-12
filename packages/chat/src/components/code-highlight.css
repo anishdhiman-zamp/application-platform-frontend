@@ -1,0 +1,73 @@
+/* VS Code Light theme for syntax highlighting (highlight.js "vs" theme).
+   Used by both the Tiptap editor and the MarkdownBlock renderer. */
+
+pre code.hljs {
+  display: block;
+  overflow-x: auto;
+  background: #f2f2f2;
+  color: #171717;
+  padding: 8px 12px;
+  border-radius: 6px;
+  font-family: ui-monospace, SFMono-Regular, 'SF Mono', Menlo, Consolas, 'Liberation Mono', monospace;
+  font-size: 12px;
+  line-height: 1.5;
+}
+
+code.hljs {
+  display: inline;
+}
+
+.hljs-comment,
+.hljs-quote,
+.hljs-variable {
+  color: #008000 !important;
+}
+
+.hljs-keyword,
+.hljs-selector-tag,
+.hljs-built_in,
+.hljs-name,
+.hljs-tag {
+  color: #0000ff !important;
+}
+
+.hljs-string,
+.hljs-title,
+.hljs-section,
+.hljs-attribute,
+.hljs-literal,
+.hljs-template-tag,
+.hljs-template-variable,
+.hljs-type,
+.hljs-addition {
+  color: #a31515 !important;
+}
+
+.hljs-deletion,
+.hljs-selector-attr,
+.hljs-selector-pseudo,
+.hljs-meta {
+  color: #2b91af !important;
+}
+
+.hljs-doctag {
+  color: #808080 !important;
+}
+
+.hljs-attr {
+  color: #ff0000 !important;
+}
+
+.hljs-symbol,
+.hljs-bullet,
+.hljs-link {
+  color: #00b0e8 !important;
+}
+
+.hljs-emphasis {
+  font-style: italic;
+}
+
+.hljs-strong {
+  font-weight: bold;
+}

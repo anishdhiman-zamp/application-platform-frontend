@@ -97,11 +97,11 @@ export const createUserMessagePayload = (
     resource_type: resourceType,
     message_content: {
       text: inputValue,
-      text_type: 'plain_text',
+      text_type: 'markdown',
       elements: [
         {
           id: `m_txt_${Date.now()}`,
-          type: BLOCK_TYPE.PLAIN_TEXT,
+          type: BLOCK_TYPE.MARKDOWN,
           order: 0,
           payload: {
             text: inputValue,
@@ -142,11 +142,11 @@ export const createConversationPayload = (
     annotation_type: annotationType,
     message_content: {
       text: messageText,
-      text_type: 'plain_text',
+      text_type: 'markdown',
       elements: [
         {
           id: 'm_txt_001',
-          type: BLOCK_TYPE.PLAIN_TEXT,
+          type: BLOCK_TYPE.MARKDOWN,
           order: 0,
           payload: {
             text: messageText,

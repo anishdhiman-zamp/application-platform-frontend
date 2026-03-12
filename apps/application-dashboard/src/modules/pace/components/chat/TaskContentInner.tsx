@@ -71,7 +71,7 @@ const TaskContentInner = ({ taskId }: TaskContentInnerProps) => {
           isError={chat?.isErrorConversationHistory}
           refetchFunction={chat?.refetchConversationHistory}
           skeletonType={SkeletonTypes.CUSTOM}
-          loader={<ChatMessagesSkeleton className='px-0' alignUserRight hideSenderName />}
+          loader={<ChatMessagesSkeleton className='px-0' alignUserRight />}
           className='mx-auto flex w-full max-w-[700px] flex-1 flex-col px-4'
           disableAnimation
         >
@@ -85,7 +85,6 @@ const TaskContentInner = ({ taskId }: TaskContentInnerProps) => {
             showFeedback
             showCopy
             alignUserRight
-            hideSenderName
             organizationId={organizationId}
           />
           <div className='h-12 w-full bg-white' />

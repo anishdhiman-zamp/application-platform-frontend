@@ -1,9 +1,8 @@
-import { COLORS, ShimmerText } from '@zamp-platform/ui';
+import { ShimmerText } from '@zamp-platform/ui';
 import { cn } from '@zamp-platform/ui/utils';
 import Image from 'next/image';
 import { FC, ReactNode, useCallback, useEffect, useRef } from 'react';
 
-import Avatar from '@/components/common/avatar';
 import PaceAvatar from '@/modules/chatbot/PaceAvatar';
 
 import { ButtonBlockType } from '../types/block.types';
@@ -27,7 +26,6 @@ interface MessageContainerProps {
   handleAction?: (blockConfig: ButtonBlockType, payload: Record<string, string>) => void | Promise<void>;
   isAnalysing: boolean;
   streamingState?: StreamingState | null;
-  assistantName?: string;
   assistantAvatar?: ReactNode;
   className?: string;
   showTimestamp?: boolean;
@@ -35,8 +33,6 @@ interface MessageContainerProps {
   feedbackDisabled?: boolean;
   showCopy?: boolean;
   alignUserRight?: boolean;
-  hideSenderName?: boolean;
-  userAvatarClassName?: string;
   children?: ReactNode;
   organizationId?: string;
   streamingEnabled?: boolean;
@@ -48,7 +44,6 @@ export const MessageContainer: FC<MessageContainerProps> = ({
   handleAction,
   isAnalysing,
   streamingState,
-  assistantName = 'Pace',
   assistantAvatar,
   className,
   showTimestamp = false,
@@ -56,8 +51,6 @@ export const MessageContainer: FC<MessageContainerProps> = ({
   showCopy = false,
   feedbackDisabled = false,
   alignUserRight = false,
-  hideSenderName = false,
-  userAvatarClassName,
   children,
   organizationId,
   streamingEnabled = true,
@@ -85,28 +78,16 @@ export const MessageContainer: FC<MessageContainerProps> = ({
   }, [messages?.length, scrollToBottom, children]);
 
   return (
-    <div ref={scrollContainerRef} className={cn('flex w-full flex-grow flex-col gap-6 p-4', className)}>
+    <div ref={scrollContainerRef} className={cn('flex w-full grow flex-col gap-6 p-4', className)}>
       {messages?.map((message, index) => (
         <Message
           key={getMessageKey(message, index)}
           message={message}
           onAction={handleAction}
-          assistantName={assistantName}
           assistantAvatar={defaultAssistantAvatar}
           showTimestamp={showTimestamp}
           alignUserRight={alignUserRight}
           conversationId={conversationId}
-          hideSenderName={hideSenderName}
-          userAvatar={(senderName) => (
-            <Avatar
-              name={senderName}
-              backgroundColor={COLORS.YELLOW_300}
-              className={cn(
-                'f-12-500 text-gray-1000 flex h-6 min-h-6 w-6 min-w-6 items-center justify-center rounded-[7.5px] p-1',
-                userAvatarClassName,
-              )}
-            />
-          )}
           showFeedback={showFeedback}
           feedbackDisabled={feedbackDisabled}
           showCopy={showCopy}
@@ -117,12 +98,7 @@ export const MessageContainer: FC<MessageContainerProps> = ({
       ))}
 
       {streamingState && !!streamingState.message_content?.elements?.length && (
-        <StreamingMessage
-          streamingState={streamingState}
-          assistantName={assistantName}
-          assistantAvatar={defaultAssistantAvatar}
-          hideSenderName={hideSenderName}
-        />
+        <StreamingMessage streamingState={streamingState} assistantAvatar={defaultAssistantAvatar} />
       )}
 
       {streamingState && !!streamingState.message_content?.elements?.length && (

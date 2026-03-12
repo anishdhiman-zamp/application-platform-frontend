@@ -47,10 +47,7 @@ const ChatTopbar: FC<ChatTopbarProps> = ({
   });
 
   return (
-    <div
-      className={cn('border-GRAY_400 flex items-center justify-between gap-x-3 border-b p-3', className)}
-      style={style}
-    >
+    <div className={cn('flex items-center justify-between gap-x-3 p-3', className)} style={style}>
       <div className='relative flex h-7 min-w-0 flex-1 items-center'>
         {isEditing ? (
           <Input

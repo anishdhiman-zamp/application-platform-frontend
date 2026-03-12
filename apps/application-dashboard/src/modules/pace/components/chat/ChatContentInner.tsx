@@ -14,14 +14,15 @@ import {
 } from '@zamp-platform/chat';
 import { ArrowDownIcon, Button } from '@zamp-platform/ui';
 import { cn } from '@zamp-platform/ui/utils';
+import ChatHistory from 'modules/pace/components/chat/ChatHistory';
 import CommonWrapper from '@/components/commonWrapper';
 import { SkeletonTypes } from '@/components/commonWrapper/commonWrapper.types';
 import { APITags } from '@/constants/api.constants';
 import { useAppDispatch, useAppSelector } from '@/hooks/toolkit';
-import NewPaceAvatar from '@/modules/chatbot/NewPaceAvatar';
-import ChatHistory from '@/modules/pace/components/chat/ChatHistory';
+import ZampAvatar from '@/modules/chatbot/ZampAvatar';
 import ChatHome from '@/modules/pace/components/chat/ChatHome';
 import ChatTopbar from '@/modules/pace/components/chat/ChatTopbar';
+import ScrollFadeOverlay from '@/modules/pace/components/chat/ScrollFadeOverlay';
 import { useFileTabs } from '@/modules/pace/components/dynamic-tabs/useFileTabs';
 import ChatMessagesSkeleton from '@/modules/pace/components/loaders/ChatMessagesSkeleton';
 import { useChatDraftInput } from '@/modules/pace/hooks/useChatDraftInput';
@@ -89,7 +90,14 @@ const ChatContentInner = ({
   const isLoadingConversation = Boolean(conversationId && chat.isLoadingConversationHistory) || !hasMessages;
   const isInConversation = Boolean(conversationId || chat.conversationId || hasMessages);
 
-  const { scrollContainerRef, showScrollButton, handleScroll, handleScrollToBottomClick } = useChatScroll({
+  const {
+    scrollContainerRef,
+    showScrollButton,
+    canScrollTop,
+    canScrollBottom,
+    handleScroll,
+    handleScrollToBottomClick,
+  } = useChatScroll({
     messagesLength: chat.messages?.length ?? 0,
     isLoading: isLoadingConversation,
     streamingState: chat.streamingState,
@@ -136,69 +144,70 @@ const ChatContentInner = ({
             onStartNewChat={startNewChat}
             onTitleChange={setChatTitle}
           />
-          <div
-            ref={scrollContainerRef}
-            onScroll={handleScroll}
-            className='relative flex min-h-0 w-full flex-1 flex-col overflow-x-hidden overflow-y-auto [scrollbar-width:thin]'
-          >
-            <CommonWrapper
-              isLoading={isLoadingConversation}
-              isError={chat.isErrorConversationHistory}
-              refetchFunction={chat.refetchConversationHistory}
-              skeletonType={SkeletonTypes.CUSTOM}
-              loader={<ChatMessagesSkeleton className='px-0' alignUserRight hideSenderName />}
-              className='mx-auto flex w-full max-w-[700px] flex-1 flex-col px-4'
-              disableAnimation
+          <div className='relative flex min-h-0 w-full flex-1 flex-col overflow-hidden'>
+            <ScrollFadeOverlay canScrollTop={canScrollTop} canScrollBottom={canScrollBottom} />
+            <div
+              ref={scrollContainerRef}
+              onScroll={handleScroll}
+              className='flex min-h-0 w-full flex-1 flex-col overflow-x-hidden overflow-y-auto [scrollbar-width:thin]'
             >
-              <MessageContainer
-                conversationId={conversationId || chat.conversationId || ''}
-                messages={chat.messages}
-                isAnalysing={isAnalysing}
-                streamingState={chat.streamingState}
-                className='gap-4 px-0 [&]:overflow-visible'
-                assistantAvatar={<NewPaceAvatar />}
-                showTimestamp
-                showFeedback
-                showCopy
-                alignUserRight
-                hideSenderName
-                organizationId={organizationId}
-              />
-              <div className='h-12 w-full bg-white' />
-            </CommonWrapper>
-            <div className='sticky bottom-0 z-10 mx-auto w-full max-w-[700px] bg-white pb-3'>
-              <Button
-                onClick={handleScrollToBottomClick}
-                variant='ghost'
-                className={cn(
-                  'bg-gray-1000 hover:bg-gray-1000 absolute -top-10 left-1/2 h-6 w-6 -translate-x-1/2 !rounded-full p-3',
-                  'transition-all duration-200 ease-out',
-                  showScrollButton ? 'translate-y-0 opacity-100' : 'pointer-events-none translate-y-2 opacity-0',
-                )}
-                aria-label='Scroll to bottom'
+              <CommonWrapper
+                isLoading={isLoadingConversation}
+                isError={chat.isErrorConversationHistory}
+                refetchFunction={chat.refetchConversationHistory}
+                skeletonType={SkeletonTypes.CUSTOM}
+                loader={<ChatMessagesSkeleton className='px-0' alignUserRight />}
+                className='mx-auto flex w-full max-w-[700px] flex-1 flex-col px-4'
+                disableAnimation
               >
-                <ArrowDownIcon size={14} className='p-[2px] text-white' />
-              </Button>
-              <ConnectedChatInput
-                chat={chat}
-                autoFocus
-                conversationId={conversationId ?? chat.conversationId ?? ''}
-                resourceType={ResourceType.ORGANIZATION}
-                resourceId={organizationId}
-                scope={ScopeType.ORGANIZATION}
-                scopeId={organizationId}
-                username={username}
-                currentUserName={currentUserName}
-                isDisabled={chat.isStreaming || chat.isCreatingConversationV2}
-                placeholder="Do your life's best work with Pace"
-                externalInputValue={inputValue}
-                setExternalInputValue={setInputValue}
-                fileDropHandlerRef={fileDropHandlerRef}
-                llmModel={selectedModel}
-                showModelSelector
-                modelSelectorSlot={modelSelectorSlot}
-              />
+                <MessageContainer
+                  conversationId={conversationId || chat.conversationId || ''}
+                  messages={chat.messages}
+                  isAnalysing={isAnalysing}
+                  streamingState={chat.streamingState}
+                  className='gap-4 px-0 [&]:overflow-visible'
+                  assistantAvatar={<ZampAvatar />}
+                  showTimestamp
+                  showFeedback
+                  showCopy
+                  alignUserRight
+                  organizationId={organizationId}
+                />
+              </CommonWrapper>
             </div>
+          </div>
+          <div className='relative z-10 mx-auto w-full max-w-[700px] bg-white pb-3'>
+            <Button
+              onClick={handleScrollToBottomClick}
+              variant='ghost'
+              className={cn(
+                'bg-gray-1000 hover:bg-gray-1000 absolute -top-12 left-1/2 h-6 w-6 -translate-x-1/2 !rounded-full p-3',
+                'transition-all duration-200 ease-out',
+                showScrollButton ? 'translate-y-0 opacity-100' : 'pointer-events-none translate-y-2 opacity-0',
+              )}
+              aria-label='Scroll to bottom'
+            >
+              <ArrowDownIcon size={14} className='p-[2px] text-white' />
+            </Button>
+            <ConnectedChatInput
+              chat={chat}
+              autoFocus
+              conversationId={conversationId ?? chat.conversationId ?? ''}
+              resourceType={ResourceType.ORGANIZATION}
+              resourceId={organizationId}
+              scope={ScopeType.ORGANIZATION}
+              scopeId={organizationId}
+              username={username}
+              currentUserName={currentUserName}
+              isDisabled={chat.isStreaming || chat.isCreatingConversationV2}
+              placeholder="Do your life's best work with Pace"
+              externalInputValue={inputValue}
+              setExternalInputValue={setInputValue}
+              fileDropHandlerRef={fileDropHandlerRef}
+              llmModel={selectedModel}
+              showModelSelector
+              modelSelectorSlot={modelSelectorSlot}
+            />
           </div>
         </div>
       </ChatActionsProvider>
@@ -208,7 +217,7 @@ const ChatContentInner = ({
   return (
     <ChatActionsProvider onFileOpen={handleFileOpen}>
       <div
-        className='relative mx-auto flex min-h-0 w-full max-w-[700px] flex-1 flex-col overflow-hidden'
+        className='relative mx-auto flex min-h-0 w-full max-w-[700px] flex-1 flex-col items-center justify-start overflow-hidden pt-[15vh]'
         {...dropZoneProps}
       >
         <DropOverlay isVisible={isDragOver} />
@@ -229,13 +238,14 @@ const ChatContentInner = ({
             setExternalInputValue={setInputValue}
             onConversationCreated={handleConversationCreated}
             fileDropHandlerRef={fileDropHandlerRef}
-            minTextareaHeight={48}
+            minTextareaHeight={18}
             maxTextareaHeight={200}
             llmModel={selectedModel}
             showModelSelector
             modelSelectorSlot={modelSelectorSlot}
           />
         </div>
+
         <ChatHistory onSelectConversation={setConversationId} />
       </div>
     </ChatActionsProvider>

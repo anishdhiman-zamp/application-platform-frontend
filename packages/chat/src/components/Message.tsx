@@ -10,7 +10,7 @@ import { BlockRenderer } from './BlockRenderer';
 import ChatFeedback from './ChatFeedback';
 import CopyMessageButton from './CopyMessageButton';
 import MessageTimestamp from './MessageTimestamp';
-import SenderDetails, { SenderDetailsProps } from './SenderDetails';
+import { SenderDetailsProps } from './SenderDetails';
 
 export interface MessageProps extends Omit<SenderDetailsProps, 'message'> {
   message: ChatMessage;
@@ -20,8 +20,6 @@ export interface MessageProps extends Omit<SenderDetailsProps, 'message'> {
   containerClassName?: string;
   conversationId?: string;
   messageId?: string;
-  senderDetailsClassName?: string;
-  showSenderDetails?: boolean;
   showTimestamp?: boolean;
   showFeedback?: boolean;
   showCopy?: boolean;
@@ -40,18 +38,13 @@ export const Message: FC<MessageProps> = ({
   containerClassName,
   conversationId,
   messageId,
-  assistantName,
   assistantAvatar,
-  userAvatar,
-  senderDetailsClassName,
-  showSenderDetails = true,
   showTimestamp = false,
   showFeedback = false,
   showCopy = false,
   feedbackDisabled = false,
   isLastMessage = false,
   alignUserRight = false,
-  hideSenderName = false,
   organizationId,
   streamingEnabled = true,
 }) => {
@@ -69,17 +62,8 @@ export const Message: FC<MessageProps> = ({
   );
 
   return (
-    <div className={cn('group space-y-2', shouldAlignRight && 'flex flex-col items-end', containerClassName)}>
-      {showSenderDetails && (
-        <SenderDetails
-          message={message}
-          assistantName={assistantName}
-          assistantAvatar={assistantAvatar}
-          hideSenderName={hideSenderName}
-          userAvatar={userAvatar}
-          className={cn(shouldAlignRight && 'flex-row-reverse', senderDetailsClassName)}
-        />
-      )}
+    <div className={cn('group space-y-4', shouldAlignRight && 'flex flex-col items-end', containerClassName)}>
+      {message.sender_type === SenderType.ASSISTANT && assistantAvatar}
 
       <BlockRenderer
         message={{ block: message?.message_content?.elements ?? [] }}
