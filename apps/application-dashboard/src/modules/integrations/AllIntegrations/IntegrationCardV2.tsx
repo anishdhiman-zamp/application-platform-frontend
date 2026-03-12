@@ -41,6 +41,7 @@ const IntegrationCardV2: FC<IntegrationCardProps> = ({ integrationItem, classNam
             redirectUrl={redirectUrl}
             copy={enabled ? 'Add Connection' : 'Connect'}
             buttonClassName='text-GRAY_700 f-11-500 hover:bg-GRAY_100'
+            buttonVariant='secondary'
           />
         </div>
       </div>

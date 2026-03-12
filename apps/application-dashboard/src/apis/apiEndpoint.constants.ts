@@ -186,6 +186,9 @@ export const API_ENDPOINTS = {
   // Conversations V2
   FILTER_CONVERSATIONS_V2_GET: `v2/conversations/filter`,
 
+  //TASKS
+  TASKS_MESSAGES_GET: `tasks/{{conversationId}}/messages`,
+
   // Integrations
   INTEGRATIONS_AUTHENTICATE: `/integrations/authenticate`,
   PROCESS_CONNECTION_MAPPINGS_POST: `process/{{process_id}}/connections`,
@@ -203,10 +206,6 @@ export const API_ENDPOINTS = {
   TRIGGER_SUBSCRIPTIONS_DELETE: `trigger-subscriptions/{{subscription_id}}`,
   // Update Conversation Title
   UPDATE_CONVERSATION_TITLE: `v4/conversations/{{conversationId}}/title`,
-
-  //TASKS
-  TASKS_MESSAGES_GET: `tasks/{{conversationId}}/messages`,
-  GET_CONVERSATION_BY_ID_V4: `v4/conversations/{{conversationId}}`,
 
   //INTEGRATIONS
   INTEGRATIONS_CATALOG_GET: `integrations/catalog`,
