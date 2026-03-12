@@ -30,6 +30,7 @@ export const COLORS = {
 
   ORANGE_300: '#ED6704',
   ORANGE_200: '#FCEDB9',
+  ORANGE_800: '#ED6704',
   ORANGE_150: '#FAE5D6',
 
   DIVIDER_GRAY_1: '#F4F4F4',

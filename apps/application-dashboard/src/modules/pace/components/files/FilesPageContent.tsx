@@ -54,7 +54,7 @@ const FilesPageContent = ({ filePath }: FilesPageContentProps) => {
   }
 
   return (
-    <div className='mx-auto flex h-full w-full max-w-[1024px] flex-col gap-y-4 pt-15'>
+    <div className='mx-auto flex h-full w-full max-w-[1024px] flex-col gap-y-4 px-10 pt-15'>
       <FilesHeader />
       <div className='border-GRAY_400 flex h-full overflow-hidden rounded-t-xl border'>
         <FilesHierarchy

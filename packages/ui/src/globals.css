@@ -2,7 +2,50 @@
 @import 'tw-animate-css';
 @config '../tailwind.config.ts';
 
-@import '@pdfslick/react/dist/pdf_viewer.css' layer(utilities);
+/* Use the up-to-date pdfjs-dist CSS directly instead of the outdated version
+   bundled with @pdfslick/react, which was missing critical CSS variable rules
+   for correct text layer font sizing (--font-height, --scale-x, etc.) */
+@import 'pdfjs-dist/web/pdf_viewer.css' layer(utilities);
+
+/* pdfslick-specific additions (scrollbars, dialog, viewer reset) that are not
+   part of pdfjs-dist's base CSS */
+@layer utilities {
+  .pdfSlickViewer *,
+  .pdfSlickViewer *::before,
+  .pdfSlickViewer *::after {
+    box-sizing: initial !important;
+  }
+
+  .pdfSlick {
+    color-scheme: light;
+    scrollbar-color: rgba(0, 0, 0, 0.2) rgba(0, 0, 0, 0);
+    scrollbar-width: thin;
+  }
+
+  .pdfSlick .page {
+    box-sizing: initial;
+  }
+
+  .pdfSlick *::-webkit-scrollbar {
+    width: 7px;
+    height: 7px;
+  }
+
+  .pdfSlick *::-webkit-scrollbar-button {
+    width: 0;
+    height: 0;
+    display: none;
+  }
+
+  .pdfSlick *::-webkit-scrollbar-corner {
+    background-color: transparent;
+  }
+
+  .pdfSlick *::-webkit-scrollbar-thumb {
+    background-color: rgba(0, 0, 0, 0.2);
+    -webkit-box-shadow: inset 1px 1px 0px rgb(0 0 0 / 10%), inset 0px -1px 0px rgb(0 0 0 / 7%);
+  }
+}
 
 /* Custom PDF Search Highlight Colors */
 @layer utilities {
@@ -22,9 +65,9 @@
   }
 
   .pdfSlick .textLayer {
-    user-select: none !important;
-    -webkit-user-select: none !important;
-    cursor: default !important;
+    user-select: text !important;
+    -webkit-user-select: text !important;
+    cursor: text !important;
   }
 }
 
@@ -44,6 +87,22 @@
   ::file-selector-button {
     border-color: var(--color-gray-200, currentcolor);
   }
+}
+
+@keyframes caret-blink {
+  0%,
+  70%,
+  100% {
+    opacity: 1;
+  }
+  20%,
+  50% {
+    opacity: 0;
+  }
+}
+
+@utility animate-caret-blink {
+  animation: caret-blink 1.2s ease-out infinite;
 }
 
 @utility container-start-90 {

@@ -12,7 +12,7 @@ import {
 import { useFileViewerContext } from '@/modules/pace/context/FileViewerContext';
 
 const AUTO_SAVE_DELAY_MS = 1000;
-const POLL_INTERVAL_MS = 1000;
+const POLL_INTERVAL_MS = 3000;
 
 interface UseFileViewerOptions {
   filePath: string | null;
@@ -47,8 +47,10 @@ export const useFileViewer = ({
   const autoSaveTimerRef = useRef<NodeJS.Timeout | null>(null);
   const isSavingRef = useRef(false);
   const pendingSaveRef = useRef(false);
+  const isPollingRef = useRef(false);
 
   const [mediaMtime, setMediaMtime] = useState<number | null>(null);
+  const mediaMtimeRef = useRef(mediaMtime);
 
   const { getFileState, initFileState, forceUpdateFileState, updateFileContent, markFileSaved } =
     useFileViewerContext();
@@ -176,7 +178,7 @@ export const useFileViewer = ({
         fetchFileContent({ path: filePath }).unwrap(),
       ]);
 
-      initFileState(filePath, contentResult ?? '', metadataResult.mtime_ms);
+      initFileState(filePath, contentResult ?? '', metadataResult?.mtime_ms);
     } catch (err) {
       if (isNotFoundError(err)) {
         setIsFileNotFound(true);
@@ -186,10 +188,35 @@ export const useFileViewer = ({
     }
   }, [filePath, isEditable, fetchFileMetadata, fetchFileContent, getFileState, initFileState, onLoadError]);
 
+  const fetchInitialMediaMetadata = useCallback(async () => {
+    if (!filePath || isEditable || isFileNotFound) return;
+
+    try {
+      const metadata = await fetchFileMetadata({ path: filePath }).unwrap();
+
+      setMediaMtime(metadata.mtime_ms);
+    } catch (err) {
+      if (isNotFoundError(err)) {
+        setIsFileNotFound(true);
+      } else {
+        onLoadError?.(err);
+      }
+    }
+  }, [filePath, isEditable, isFileNotFound, fetchFileMetadata, onLoadError]);
+
   // Load file on mount
   useEffect(() => {
     loadFile();
   }, [loadFile]);
+
+  // Eagerly fetch metadata for media files so mediaMtime is set before the tab becomes active
+  useEffect(() => {
+    fetchInitialMediaMetadata();
+  }, [fetchInitialMediaMetadata]);
+
+  useEffect(() => {
+    mediaMtimeRef.current = mediaMtime;
+  }, [mediaMtime]);
 
   // Cleanup timer on unmount
   useEffect(() => {
@@ -207,9 +234,13 @@ export const useFileViewer = ({
     let stopped = false;
 
     const pollForChanges = async () => {
+      if (isPollingRef.current) return;
+
       const currentState = getFileState(filePath);
 
       if (!currentState || currentState.isDirty) return;
+
+      isPollingRef.current = true;
 
       try {
         const metadata = await fetchFileMetadata({ path: filePath }).unwrap();
@@ -226,6 +257,8 @@ export const useFileViewer = ({
         } else {
           onLoadError?.(err);
         }
+      } finally {
+        isPollingRef.current = false;
       }
     };
 
@@ -253,12 +286,14 @@ export const useFileViewer = ({
     let stopped = false;
 
     const pollForMediaChanges = async () => {
+      if (isPollingRef.current) return;
+
+      isPollingRef.current = true;
+
       try {
         const metadata = await fetchFileMetadata({ path: filePath }).unwrap();
 
-        if (mediaMtime !== null && metadata.mtime_ms !== mediaMtime) {
-          setMediaMtime(metadata.mtime_ms);
-        } else if (mediaMtime === null) {
+        if (metadata.mtime_ms !== mediaMtimeRef.current) {
           setMediaMtime(metadata.mtime_ms);
         }
       } catch (err) {
@@ -268,17 +303,17 @@ export const useFileViewer = ({
         } else {
           onLoadError?.(err);
         }
+      } finally {
+        isPollingRef.current = false;
       }
     };
-
-    pollForMediaChanges();
 
     const intervalId = setInterval(() => {
       if (!stopped) pollForMediaChanges();
     }, POLL_INTERVAL_MS);
 
     return () => clearInterval(intervalId);
-  }, [filePath, isEditable, isActive, isFileNotFound, mediaMtime, fetchFileMetadata, onLoadError]);
+  }, [filePath, isEditable, isActive, isFileNotFound, fetchFileMetadata, onLoadError]);
 
   return {
     content: fileState?.content ?? null,

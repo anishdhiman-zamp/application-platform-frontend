@@ -6,6 +6,7 @@ import { useDisplayDependencies } from '../hooks/useDisplayDependencies';
 import { FieldType, FormField as FormFieldType } from '../types';
 import { EmailAliasField } from './EmailAliasField';
 import { HeaderTextField } from './HeaderTextField';
+import { MultiSelectField } from './MultiSelectField';
 import { RadioField } from './RadioField';
 import { SelectField } from './SelectField';
 import { TextField } from './TextField';
@@ -49,6 +50,8 @@ export const FormField: React.FC<FormFieldProps> = ({ field, name, className, an
               return <EmailAliasField className={className} field={fieldWithConfig} name={name} />;
             case FieldType.SELECT:
               return <SelectField className={className} field={fieldWithConfig} name={name} />;
+            case FieldType.MULTI_SELECT:
+              return <MultiSelectField className={className} field={fieldWithConfig} name={name} />;
             case FieldType.RADIO:
               return (
                 <RadioField className={className} field={fieldWithConfig} name={name} inlineFields={inlineFields} />

@@ -182,7 +182,7 @@ export const API_ENDPOINTS = {
   INTERACTION_DISABLE_POST: `/v2/conversations/{{conversationId}}/messages/{{messageId}}/interactions/disable`,
 
   // MACS
-  CONVERSATION_HISTORY_GET: `v3/conversations`,
+  CONVERSATION_HISTORY_GET: `v4/conversations`,
   // Skills
   SKILLS_LIST_GET: `skills`,
   SKILLS_UPLOAD_POST: `skills`,
@@ -190,12 +190,15 @@ export const API_ENDPOINTS = {
   SKILLS_UPDATE_PUT: `skills/{{skillId}}`,
   SKILLS_STATUS_PATCH: `skills/{{skillId}}/status`,
   SKILLS_DELETE: `skills/{{skillId}}`,
-  // Conversations V3
-  CREATE_CONVERSATION_V3: `v3/conversations`,
-  POST_MESSAGE_V3: `v3/conversations/{{conversationId}}/messages`,
+  // Conversations V4
+  CREATE_CONVERSATION_V4: `v4/conversations`,
+  POST_MESSAGE_V4: `v4/conversations/{{conversationId}}/messages`,
   LIST_CHAT_MODELS: `v3/conversations/models`,
   // Conversations V2
   FILTER_CONVERSATIONS_V2_GET: `v2/conversations/filter`,
+
+  //TASKS
+  TASKS_MESSAGES_GET: `tasks/{{conversationId}}/messages`,
 
   // Integrations
   INTEGRATIONS_AUTHENTICATE: `/integrations/authenticate`,
@@ -213,13 +216,7 @@ export const API_ENDPOINTS = {
   TRIGGER_SUBSCRIPTIONS_GET: `trigger-subscriptions`,
   TRIGGER_SUBSCRIPTIONS_DELETE: `trigger-subscriptions/{{subscription_id}}`,
   // Update Conversation Title
-  UPDATE_CONVERSATION_TITLE: `v3/conversations/{{conversationId}}/title`,
-
-  //TASKS
-  TASKS_MESSAGES_GET: `tasks/{{conversationId}}/messages`,
-  CREATE_CONVERSATION_V4: `v4/conversations`,
-  POST_MESSAGE_V4: `v4/conversations/{{conversationId}}/messages`,
-  GET_CONVERSATION_BY_ID_V4: `v4/conversations/{{conversationId}}`,
+  UPDATE_CONVERSATION_TITLE: `v4/conversations/{{conversationId}}/title`,
 
   //INTEGRATIONS
   INTEGRATIONS_CATALOG_GET: `integrations/catalog`,

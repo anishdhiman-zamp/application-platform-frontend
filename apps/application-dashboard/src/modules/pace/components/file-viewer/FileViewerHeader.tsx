@@ -2,8 +2,18 @@
 
 import { FileIcon, Input, Tabs, TabsList, TabsTrigger } from '@zamp-platform/ui';
 import { cn } from '@zamp-platform/ui/utils';
-import { Code, Eye, FileText, Table } from 'lucide-react';
 import TooltipV2 from '@/components/common/TooltipV2';
+import {
+  HTML_VIEW_OPTIONS,
+  MARKDOWN_VIEW_OPTIONS,
+  SPREADSHEET_VIEW_OPTIONS,
+} from '@/modules/pace/components/file-viewer/file-viewer.constants';
+import type {
+  HtmlViewMode,
+  MarkdownViewMode,
+  SpreadsheetViewMode,
+  ViewModeToggleProps,
+} from '@/modules/pace/components/file-viewer/file-viewer.types';
 import FileSaveStatus from '@/modules/pace/components/file-viewer/FileSaveStatus';
 import FileViewerHeaderMenu from '@/modules/pace/components/file-viewer/FileViewerHeaderMenu';
 import DeleteConfirmationDialog from '@/modules/pace/components/files/DeleteConfirmationDialog';
@@ -12,9 +22,21 @@ import { useFileViewerHeaderActions } from '@/modules/pace/hooks/useFileViewerHe
 import { useFileViewerHeaderRename } from '@/modules/pace/hooks/useFileViewerHeaderRename';
 import { SIDE_OPTIONS } from '@/types/commonTypes';
 
-export type MarkdownViewMode = 'milkdown' | 'raw';
-export type HtmlViewMode = 'preview' | 'code';
-export type SpreadsheetViewMode = 'table' | 'raw';
+const ViewModeToggle = <T extends string>({ value, options, onChange }: ViewModeToggleProps<T>) => (
+  <Tabs value={value} onValueChange={(v) => onChange(v as T)}>
+    <TabsList className='gap-x-1'>
+      {options.map((option) => (
+        <TabsTrigger
+          key={option.value}
+          value={option.value}
+          className='flex h-6 w-[26px] shrink-0 items-center justify-center p-1.5'
+        >
+          {option.icon}
+        </TabsTrigger>
+      ))}
+    </TabsList>
+  </Tabs>
+);
 
 interface FileViewerHeaderProps {
   filePath: string;
@@ -83,9 +105,8 @@ const FileViewerHeader = ({
         onConfirm={deleteConfirmation.onConfirm}
       />
       <div className={cn('border-GRAY_400 flex items-center justify-between border-b bg-white px-4 py-3', className)}>
-        <div className='flex items-center gap-3'>
-          <FileIcon extension={extension || 'txt'} size='sm' />
-
+        <div className='flex items-center gap-2'>
+          <FileIcon extension={extension || 'txt'} className='text-GRAY_900 size-6' />
           <div className='flex items-center gap-x-3'>
             {isRenaming ? (
               <div className='flex items-center'>
@@ -116,7 +137,7 @@ const FileViewerHeader = ({
               </div>
             ) : (
               <span
-                className='f-14-500 text-GRAY_1000 hover:bg-GRAY_200 cursor-pointer rounded-lg p-1'
+                className='f-14-500 text-GRAY_1000 hover:bg-GRAY_200 inline-flex cursor-pointer items-center rounded-md px-1.5 py-0.5 transition-colors'
                 onClick={startRename}
               >
                 {fileName}
@@ -127,44 +148,18 @@ const FileViewerHeader = ({
 
         <div className='flex items-center gap-x-3'>
           <FileSaveStatus isSaving={isSaving} lastSavedAt={lastSavedAt} />
-          {isMarkdown && (
-            <Tabs value={viewMode} onValueChange={(value) => onViewModeChange?.(value as MarkdownViewMode)}>
-              <TabsList className='gap-x-1'>
-                <TabsTrigger value='milkdown' className='flex h-6 w-[26px] shrink-0 items-center justify-center p-1.5'>
-                  <FileText size={14} />
-                </TabsTrigger>
-                <TabsTrigger value='raw' className='flex h-6 w-[26px] shrink-0 items-center justify-center p-1.5'>
-                  <Code size={14} />
-                </TabsTrigger>
-              </TabsList>
-            </Tabs>
+          {isMarkdown && onViewModeChange && (
+            <ViewModeToggle value={viewMode} options={MARKDOWN_VIEW_OPTIONS} onChange={onViewModeChange} />
           )}
-          {isHtml && (
-            <Tabs value={htmlViewMode} onValueChange={(value) => onHtmlViewModeChange?.(value as HtmlViewMode)}>
-              <TabsList className='gap-x-1'>
-                <TabsTrigger value='preview' className='flex h-6 w-[26px] shrink-0 items-center justify-center p-1.5'>
-                  <Eye size={14} />
-                </TabsTrigger>
-                <TabsTrigger value='code' className='flex h-6 w-[26px] shrink-0 items-center justify-center p-1.5'>
-                  <Code size={14} />
-                </TabsTrigger>
-              </TabsList>
-            </Tabs>
+          {isHtml && onHtmlViewModeChange && (
+            <ViewModeToggle value={htmlViewMode} options={HTML_VIEW_OPTIONS} onChange={onHtmlViewModeChange} />
           )}
-          {isTextSpreadsheet && (
-            <Tabs
+          {isTextSpreadsheet && onSpreadsheetViewModeChange && (
+            <ViewModeToggle
               value={spreadsheetViewMode}
-              onValueChange={(value) => onSpreadsheetViewModeChange?.(value as SpreadsheetViewMode)}
-            >
-              <TabsList className='gap-x-1'>
-                <TabsTrigger value='table' className='flex h-6 w-[26px] shrink-0 items-center justify-center p-1.5'>
-                  <Table size={14} />
-                </TabsTrigger>
-                <TabsTrigger value='raw' className='flex h-6 w-[26px] shrink-0 items-center justify-center p-1.5'>
-                  <Code size={14} />
-                </TabsTrigger>
-              </TabsList>
-            </Tabs>
+              options={SPREADSHEET_VIEW_OPTIONS}
+              onChange={onSpreadsheetViewModeChange}
+            />
           )}
           <FileViewerHeaderMenu onActionClick={handleActionClick} disabled={isDeleting || isRenaming} />
         </div>

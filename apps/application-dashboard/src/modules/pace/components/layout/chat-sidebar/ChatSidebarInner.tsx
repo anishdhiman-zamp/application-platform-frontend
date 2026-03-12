@@ -17,7 +17,6 @@ import { cn } from '@zamp-platform/ui/utils';
 import { useFileTabs } from 'modules/pace/components/dynamic-tabs/useFileTabs';
 import { CHAT_CONVERSATION_ID_PARAM } from 'modules/pace/pace.constants';
 import { useRouter } from 'next/navigation';
-import { API_ENDPOINTS } from '@/apis/apiEndpoint.constants';
 import NewPaceIcons from '@/assets/Icons/NewPaceIcons';
 import CommonWrapper from '@/components/commonWrapper';
 import { SkeletonTypes } from '@/components/commonWrapper/commonWrapper.types';
@@ -85,10 +84,6 @@ const ChatSidebarInner: FC<ChatSidebarInnerProps> = ({
     resourceType: ResourceType.ORGANIZATION,
     conversationId: conversationId ?? undefined,
     enableStreaming: true,
-    apiConfig: {
-      sendMessage: API_ENDPOINTS.POST_MESSAGE_V3,
-      createConversation: API_ENDPOINTS.CREATE_CONVERSATION_V3,
-    },
     setHeader: (header: string) => {
       if (!chatTitle) {
         setChatTitle(header);
@@ -173,6 +168,7 @@ const ChatSidebarInner: FC<ChatSidebarInnerProps> = ({
                   streamingState={chat.streamingState}
                   className='gap-4 px-0 [scrollbar-width:none]'
                   assistantAvatar={<NewPaceAvatar />}
+                  conversationId={conversationId ?? chat?.conversationId ?? ''}
                   showTimestamp
                   showFeedback
                   showCopy

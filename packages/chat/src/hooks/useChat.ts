@@ -37,6 +37,7 @@ import { useStreamingState } from './useStreamingState';
 export interface ChatConfig extends Omit<UseSSEOptions, 'url' | 'onMessage' | 'autoConnect'> {
   conversationId?: string;
   eventUrl?: string;
+  eventType?: EVENT_TYPE.CONVERSATION_V2 | EVENT_TYPE.TASK;
   onNewMessage?: (message: ChatMessage) => void;
   onTypingUpdate?: (users: string[]) => void;
   onUserJoin?: (user: { id: string; name: string }) => void;
@@ -249,22 +250,31 @@ export const useChat = (config: ChatConfig) => {
     isNewlyCreatedConversationRef.current = null;
   }, [config.enableStreaming]);
 
-  const handleMessage = useCallback(
+  const resolvedEventType = config.eventType ?? EVENT_TYPE.CONVERSATION_V2;
+  const isTaskEvent = resolvedEventType === EVENT_TYPE.TASK;
+
+  const handleSSEMessage = useCallback(
     (data: MapAny) => {
       try {
-        const convId = (data.payload?.conversation_id as string) || conversationIdRef.current;
+        const convId = isTaskEvent
+          ? (data.payload?.task_id as string) || conversationIdRef.current
+          : (data.payload?.conversation_id as string) || conversationIdRef.current;
 
         switch (data.payload.type) {
           case SSEEventType.MESSAGE:
           case SSEEventType.NEW_CHAT_MESSAGE: {
             const newMessage: ChatMessage = data.payload.message;
 
-            setMessages((prev) => [...prev, { ...newMessage, timestamp: new Date().toISOString() }]);
+            setMessages((prev) => {
+              if (newMessage.id && prev.some((msg) => msg.id === newMessage.id)) {
+                return prev;
+              }
+              return [...prev, { ...newMessage, timestamp: new Date().toISOString() }];
+            });
 
-            if (newMessage.conversation_id && isNewlyCreatedConversationRef.current !== newMessage.conversation_id) {
-              dispatch(
-                chatApi.util.invalidateTags([{ type: APITags.GET_CONVERSATION_BY_ID, id: newMessage.conversation_id }]),
-              );
+            const invalidationId = isTaskEvent ? conversationIdRef.current : newMessage.conversation_id;
+            if (invalidationId && isNewlyCreatedConversationRef.current !== invalidationId) {
+              dispatch(chatApi.util.invalidateTags([{ type: APITags.GET_CONVERSATION_BY_ID, id: invalidationId }]));
             }
             config.onNewMessage?.(newMessage);
             break;
@@ -282,7 +292,6 @@ export const useChat = (config: ChatConfig) => {
             break;
           case SSEEventType.MESSAGE_START:
           case SSEEventType.OUTPUT_FILES:
-            // Handled globally by SSEProvider -> streamingStateStore
             break;
           case SSEEventType.MESSAGE_STOP: {
             if (convId) {
@@ -292,7 +301,7 @@ export const useChat = (config: ChatConfig) => {
                   resource_type: prev.resource_type,
                   resource_id: prev.resource_id,
                   id: prev.id,
-                  conversation_id: prev.conversation_id,
+                  conversation_id: convId,
                   message_type: prev.message_type,
                   metadata: prev.metadata || {},
                   timestamp: prev.timestamp,
@@ -335,6 +344,7 @@ export const useChat = (config: ChatConfig) => {
     },
     [
       dispatch,
+      isTaskEvent,
       _conversationId,
       config.resourceId,
       config.resourceType,
@@ -355,44 +365,56 @@ export const useChat = (config: ChatConfig) => {
     }
   }, [config.conversationId]);
 
-  // Per-conversation CONVERSATION_V2 handler for local messages state and RTK cache
   useEffect(() => {
-    const sub = sseEventBus.subscribe(EVENT_TYPE.CONVERSATION_V2, (data: BaseEventPayload) => {
+    const sub = sseEventBus.subscribe(resolvedEventType, (data: BaseEventPayload) => {
       const payload = data?.payload as MapAny;
-      const conversationId = payload?.conversation_id as string;
-      if (data?.source_id === _conversationId || conversationId === _conversationId) {
-        handleMessage(data);
+      const matches = isTaskEvent
+        ? (payload?.task_id as string) === _conversationId
+        : data?.source_id === _conversationId || (payload?.conversation_id as string) === _conversationId;
+
+      if (matches) {
+        handleSSEMessage(data);
       }
     });
     return () => sub.unsubscribe();
-  }, [handleMessage, _conversationId, sseEventBus]);
+  }, [handleSSEMessage, _conversationId, sseEventBus, resolvedEventType, isTaskEvent]);
 
   useEffect(() => {
-    if (!isFetchingConversationHistory && conversationHistory && conversationHistory?.messages?.length > 0) {
-      const historyMessages: ChatMessage[] = getHistoryFormattedMessages(conversationHistory);
-
-      // Clean up completed streams once DB history is loaded
-      if (config.enableStreaming && conversationIdRef.current) {
-        const currentStreamState = streamingStateStore.get(conversationIdRef.current);
-        if (currentStreamState && !currentStreamState.is_active) {
-          streamingStateStore.delete(conversationIdRef.current);
-        }
+    if (!isFetchingConversationHistory && conversationHistory) {
+      if (conversationHistory?.conversation?.title) {
+        config.setHeader?.(conversationHistory.conversation.title);
       }
 
-      // Merge DB history with any in-flight streaming messages not yet persisted
-      setMessages((prev) => {
-        if (prev.length > 0) {
-          const dbMessageIds = new Set(historyMessages.map((m) => m.id).filter(Boolean));
-          const replayedMessages = prev.filter((m) => m.id && !dbMessageIds.has(m.id));
+      if (conversationHistory?.messages?.length > 0) {
+        const historyMessages: ChatMessage[] = getHistoryFormattedMessages(conversationHistory);
 
-          if (replayedMessages.length > 0) {
-            return [...historyMessages, ...replayedMessages];
+        // Clean up completed streams once DB history is loaded
+        if (config.enableStreaming && conversationIdRef.current) {
+          const currentStreamState = streamingStateStore.get(conversationIdRef.current);
+          if (currentStreamState && !currentStreamState.is_active) {
+            streamingStateStore.delete(conversationIdRef.current);
           }
         }
-        return historyMessages;
-      });
 
-      config.setHeader?.(conversationHistory?.conversation?.title || '');
+        // Merge DB history with any in-flight messages not yet persisted
+        setMessages((prev) => {
+          if (prev.length > 0) {
+            const dbMessageIds = new Set(historyMessages.map((m) => m.id).filter(Boolean));
+            const replayedMessages = prev.filter((m) => {
+              if (!m.id || dbMessageIds.has(m.id)) return false;
+              // When streaming is enabled, streaming/SSE assistant messages use a different ID
+              // than the persisted DB version, so only keep optimistic user messages
+              if (config.enableStreaming) return m.sender_type === SenderType.USER;
+              return true;
+            });
+
+            if (replayedMessages.length > 0) {
+              return [...historyMessages, ...replayedMessages];
+            }
+          }
+          return historyMessages;
+        });
+      }
     }
   }, [conversationHistory, isFetchingConversationHistory, config.enableStreaming]);
 

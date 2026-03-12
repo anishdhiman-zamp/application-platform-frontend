@@ -17,7 +17,7 @@ import FileTreeNode from '@/modules/pace/components/files/FileTreeNode';
 import { useFileConflict } from '@/modules/pace/context/FileConflictContext';
 import { useExpandedPaths } from '@/modules/pace/hooks/useExpandedPaths';
 
-const ROW_HEIGHT = 36;
+const ROW_HEIGHT = 32;
 const OVERSCAN_COUNT = 10;
 
 const FileTreeContent = ({
@@ -221,6 +221,7 @@ const FileTreeContent = ({
                 onTriggerFileUpload={triggerFileUpload}
                 onTriggerFolderUpload={triggerFolderUpload}
                 onDragOverFolderChange={handleDragOverFolderChange}
+                isSearchActive={!!searchQuery}
                 style={{
                   position: 'absolute',
                   top: 0,

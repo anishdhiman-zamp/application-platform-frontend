@@ -17,8 +17,6 @@ import { MEDIA_TYPE, PROVISIONING_STATUS } from '@/modules/setup-workspace/setup
 import { setUser } from '@/store/slices/user';
 import { clearCookie, USER_SESSION_COOKIE } from '@/utils/cookie';
 
-const MAX_REGISTER_RETRIES = 3;
-const REGISTER_RETRY_DELAY = 5000;
 const POLLING_INTERVAL = 5000;
 const MAX_POLL_ATTEMPTS = 60; // 5 minutes at 5s intervals
 
@@ -29,24 +27,15 @@ const deriveOrgName = (displayName: string | undefined, email: string): string =
 };
 
 export const SetupWorkspaceRoot = () => {
-  // Refs
   const containerRef = useRef<HTMLDivElement>(null);
   const startedRef = useRef(false);
   const pollingIntervalRef = useRef<ReturnType<typeof setInterval> | null>(null);
-
-  // Hooks
   const router = useRouter();
   const dispatch = useAppDispatch();
   const { isEnabled: isAutoOrgEnabled, isLoading: isFlagLoading } = useFeatureFlag(FEATURE_FLAGS.AUTO_ORG_CREATION);
-
-  // Derived state
-  const landingRoute = ROUTES_PATH.PROCESSES;
   const flagReady = !isFlagLoading && isAutoOrgEnabled;
-
-  // Local state
   const [takingLonger, setTakingLonger] = useState(false);
-
-  // RTK Query
+  const [hasError, setHasError] = useState(false);
   const { data: session, isLoading: sessionLoading } = useWhoAmIQuery(undefined, { skip: !flagReady });
   const { data: invitationsData, isLoading: invitationsLoading } = useGetMyInvitationsQuery(undefined, {
     skip: !flagReady,
@@ -58,8 +47,8 @@ export const SetupWorkspaceRoot = () => {
 
   const redirectToApp = useCallback(() => {
     clearCookie(USER_SESSION_COOKIE);
-    router.replace(landingRoute);
-  }, [router, landingRoute]);
+    router.replace(ROUTES_PATH.HOME);
+  }, [router]);
 
   const pollProvisioning = useCallback(
     async (orgId: string) => {
@@ -89,11 +78,11 @@ export const SetupWorkspaceRoot = () => {
             return true;
           }
         } catch {
-          // Ignore errors, keep polling — backend self-heals
+          // keep polling — backend self-heals
         }
 
         if (attempts >= MAX_POLL_ATTEMPTS) {
-          setTakingLonger(true);
+          setHasError(true);
 
           return true;
         }
@@ -124,7 +113,7 @@ export const SetupWorkspaceRoot = () => {
       try {
         await acceptInvitation({ invitationId: inv.organization_invitation_id });
       } catch {
-        // Continue even if individual acceptance fails
+        //
       }
     }
 
@@ -137,7 +126,7 @@ export const SetupWorkspaceRoot = () => {
         return true;
       }
     } catch {
-      // Session refresh failed — fall through to org creation
+      //
     }
 
     return false;
@@ -147,38 +136,28 @@ export const SetupWorkspaceRoot = () => {
     async (userId: string, displayName: string | undefined, email: string) => {
       const orgName = deriveOrgName(displayName, email);
 
-      for (let attempt = 0; attempt < MAX_REGISTER_RETRIES; attempt++) {
-        try {
-          const result = await registerOrg({
-            organization_name: orgName,
-            owner_id: userId,
-            icon_type: MEDIA_TYPE.SEED,
-            icon_value: orgName,
-          }).unwrap();
+      try {
+        const result = await registerOrg({
+          organization_name: orgName,
+          owner_id: userId,
+          icon_type: MEDIA_TYPE.SEED,
+          icon_value: orgName,
+        }).unwrap();
 
-          const orgId = result.organization.organization_id;
+        const orgId = result.organization.organization_id;
 
-          const refreshed = await fetchWhoAmI(undefined, false).unwrap();
+        const refreshed = await fetchWhoAmI(undefined, false).unwrap();
 
-          dispatch(setUser(refreshed));
+        dispatch(setUser(refreshed));
 
-          await pollProvisioning(orgId);
-
-          return;
-        } catch {
-          if (attempt < MAX_REGISTER_RETRIES - 1) {
-            await new Promise((r) => setTimeout(r, REGISTER_RETRY_DELAY));
-          }
-        }
+        await pollProvisioning(orgId);
+      } catch {
+        setHasError(true);
       }
-
-      // All retries exhausted — show "taking longer" so user knows to reload
-      setTakingLonger(true);
     },
     [registerOrg, fetchWhoAmI, dispatch, pollProvisioning],
   );
 
-  // Cleanup polling on unmount
   useEffect(() => {
     return () => {
       if (pollingIntervalRef.current) {
@@ -187,7 +166,6 @@ export const SetupWorkspaceRoot = () => {
     };
   }, []);
 
-  // If feature flag is off, redirect to membership-pending
   useEffect(() => {
     if (isFlagLoading) return;
 
@@ -196,7 +174,6 @@ export const SetupWorkspaceRoot = () => {
     }
   }, [isFlagLoading, isAutoOrgEnabled, router]);
 
-  // Resume polling if user already has an unprovisioned org (e.g. closed tab mid-flow)
   useEffect(() => {
     if (startedRef.current) return;
     if (isFlagLoading || !isAutoOrgEnabled) return;
@@ -215,7 +192,6 @@ export const SetupWorkspaceRoot = () => {
     pollProvisioning(org.organization_id);
   }, [session, sessionLoading, dispatch, pollProvisioning, isFlagLoading, isAutoOrgEnabled, redirectToApp]);
 
-  // Main flow: accept invitations → auto-create org
   useEffect(() => {
     if (isFlagLoading || !isAutoOrgEnabled) return;
     if (sessionLoading || invitationsLoading || !session || startedRef.current) return;
@@ -250,7 +226,7 @@ export const SetupWorkspaceRoot = () => {
       <ProfessionRevealBackground containerRef={containerRef} />
 
       <div ref={containerRef} className='relative z-2 w-full max-w-[520px] px-6 py-10'>
-        <ProvisioningScreen takingLonger={takingLonger} userName={session?.user_email || ''} />
+        <ProvisioningScreen takingLonger={takingLonger} hasError={hasError} userName={session?.user_email || ''} />
       </div>
     </div>
   );

@@ -4,7 +4,6 @@ import { useCallback, useEffect, useRef, useState } from 'react';
 import { captureException } from '@sentry/nextjs';
 import { cn } from '@zamp-platform/ui/utils';
 import { LoaderCircle, Music } from 'lucide-react';
-import FileNotFoundError from '@/modules/pace/components/file-viewer/FileNotFoundError';
 import MuteButton from '@/modules/pace/components/file-viewer/viewers/components/MuteButton';
 import PlayButton from '@/modules/pace/components/file-viewer/viewers/components/PlayButton';
 import ProgressBar from '@/modules/pace/components/file-viewer/viewers/components/ProgressBar';
@@ -15,12 +14,11 @@ interface AudioViewerProps {
   fileName?: string;
   className?: string;
   isActive?: boolean;
-  onClose?: () => void;
+  onError?: (message?: string) => void;
 }
 
-const AudioViewer = ({ src, fileName, className = '', isActive = true, onClose }: AudioViewerProps) => {
+const AudioViewer = ({ src, fileName, className = '', isActive = true, onError }: AudioViewerProps) => {
   const audioRef = useRef<HTMLAudioElement>(null);
-  const displayFileName = fileName || decodeURIComponent(src.split('/').pop() || 'audio');
 
   const [isPlaying, setIsPlaying] = useState(false);
   const [currentTime, setCurrentTime] = useState(0);
@@ -37,8 +35,9 @@ const AudioViewer = ({ src, fileName, className = '', isActive = true, onClose }
       captureException(e, {
         extra: { src },
       });
+      onError?.('The audio file could not be played');
     },
-    [src],
+    [src, onError],
   );
 
   const handlePlay = () => setIsPlaying(true);
@@ -94,7 +93,6 @@ const AudioViewer = ({ src, fileName, className = '', isActive = true, onClose }
     setIsMuted(audio.muted);
   };
 
-  // Pause audio when tab becomes inactive
   useEffect(() => {
     const audio = audioRef.current;
 
@@ -147,10 +145,6 @@ const AudioViewer = ({ src, fileName, className = '', isActive = true, onClose }
     };
   }, [handleError, handleSeeked, src]);
 
-  if (error && onClose) {
-    return <FileNotFoundError fileName={displayFileName} onClose={onClose} />;
-  }
-
   return (
     <div className={cn('flex h-full w-full flex-col items-center justify-center p-4', className)}>
       <audio ref={audioRef} src={src} preload='metadata' />
@@ -172,12 +166,7 @@ const AudioViewer = ({ src, fileName, className = '', isActive = true, onClose }
             </div>
           )}
 
-          {error && !onClose ? (
-            <div className='text-center'>
-              <Music size={64} className='text-GRAY_500 mx-auto mb-2' />
-              <p className='f-13-450 text-GRAY_700'>Error loading audio</p>
-            </div>
-          ) : (
+          {!error && (
             <div
               className={cn(
                 'flex flex-col items-center gap-4 transition-opacity duration-300 ease-in-out',

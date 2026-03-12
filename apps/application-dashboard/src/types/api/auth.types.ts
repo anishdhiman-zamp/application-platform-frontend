@@ -83,12 +83,17 @@ export type Workspace = {
   description: string;
 };
 
+export enum ProductMode {
+  CLASSIC = 'classic',
+  MACS = 'macs',
+}
+
 export type Organization = {
   organization_id: string;
   name: string;
   slug: string;
-  product?: 'macs' | 'classic';
   provisioning_status?: string;
+  product?: ProductMode;
   resource_audience_policies: {
     privilege: string;
     resource_audience_type: string;
@@ -128,8 +133,15 @@ export enum UserRoleIdType {
 
 export type UserSessionCache = {
   user_id: string;
+  user_name: string;
+  last_name: string;
   user_email: string;
   org_count: number;
-  default_org_id: string;
+  default_org_id?: string;
   cached_at: number;
+  display_name?: string;
+  username: string;
+  provisioning_status?: string;
+  onboarding_status?: string;
+  product?: ProductMode;
 };
