@@ -108,7 +108,7 @@ const DynamicTabItem = ({
             style={{ minWidth: 0 }}
             className={cn(
               'group text-GRAY_700 hover:text-GRAY_1000 hover:bg-GRAY_200 relative flex h-[30px] w-full cursor-pointer items-center justify-start gap-x-2 rounded-[8px] border-[0.75px] border-transparent p-2 transition-all duration-150 ease-in-out',
-              isActive && 'border-GRAY_500 text-GRAY_1000 border-[0.75px] bg-white hover:bg-white',
+              isActive && 'border-GRAY_500 shadow-tab-shadow text-GRAY_1000 border-[0.75px] bg-white hover:bg-white',
             )}
           >
             {isCompact ? (

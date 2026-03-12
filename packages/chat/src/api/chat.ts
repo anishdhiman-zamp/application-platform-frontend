@@ -88,6 +88,16 @@ const ConversationService = chatApi.injectEndpoints({
       }),
       providesTags: (_result, _error, arg) => [{ type: APITags.GET_CONVERSATION_BY_ID, id: arg.conversationId }],
     }),
+    getTaskMessages: builder.query<GetConversationByIdResponseType, GetConversationByIdRequestType>({
+      query: ({ conversationId, resourceId, resourceType, url }) => ({
+        url: formRequestUrlWithParams(url || API_ENDPOINTS.TASKS_MESSAGES_GET, { conversationId }),
+        params: {
+          resource_id: resourceId,
+          resource_type: resourceType,
+        },
+      }),
+      providesTags: (_result, _error, arg) => [{ type: APITags.GET_CONVERSATION_BY_ID, id: arg.conversationId }],
+    }),
     createConversationV2: builder.mutation<
       CreateConversationResponseType,
       CreateConversationPayloadTypeV2 & { url?: string }
@@ -185,6 +195,8 @@ export const {
   useGetFilesByIdsQuery,
   useLazyGetFileDownloadUrlQuery,
   useLazyGetConversationByIdQuery,
+  useGetTaskMessagesQuery,
+  useLazyGetTaskMessagesQuery,
   useGetSignedUrlMutation,
   usePostFormsSignedUploadAckMutation,
   usePostInteractionMutation,

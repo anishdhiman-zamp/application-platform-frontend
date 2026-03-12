@@ -168,6 +168,7 @@ const ChatSidebarInner: FC<ChatSidebarInnerProps> = ({
                   streamingState={chat.streamingState}
                   className='gap-4 px-0 [scrollbar-width:none]'
                   assistantAvatar={<NewPaceAvatar />}
+                  conversationId={conversationId ?? chat?.conversationId ?? ''}
                   showTimestamp
                   showFeedback
                   showCopy

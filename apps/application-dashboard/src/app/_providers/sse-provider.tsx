@@ -48,6 +48,9 @@ export const useSSEContext = () => {
   return context;
 };
 
+/** Returns SSE context if available, or undefined if outside SSEProvider. */
+export const useOptionalSSEContext = () => useContext(SSEContext);
+
 /** Routes AGENT_STREAMS events to the correct conversation in streamingStateStore. */
 function handleGlobalStreamEvent(data: BaseEventPayload): void {
   try {
@@ -273,33 +276,104 @@ function handleGlobalStreamEvent(data: BaseEventPayload): void {
   }
 }
 
-/** Handles global CONVERSATION_V2 events (MESSAGE_START, OUTPUT_FILES, MESSAGE_STOP). */
-function handleGlobalConversationEvent(data: BaseEventPayload): void {
+/**
+ * Abstracts the payload shape differences between CONVERSATION_V2 (nested `message` object)
+ * and TASK (flat payload with `task_id`).
+ */
+interface PayloadResolver {
+  getConversationId(payload: MapAny, data: BaseEventPayload): string | undefined;
+  getMessageId(payload: MapAny): string;
+  getResourceId(payload: MapAny): string;
+  getSenderType(payload: MapAny): SenderType;
+  getSenderName(payload: MapAny): string;
+  getTimestamp(payload: MapAny): string;
+  getOutputFiles(payload: MapAny): OutputFilesBlockType['payload']['output_files'];
+}
+
+const conversationPayloadResolver: PayloadResolver = {
+  getConversationId(payload, data) {
+    const message = payload.message as MapAny;
+
+    return (message?.conversation_id as string) || (payload.conversation_id as string) || (data.source_id as string);
+  },
+  getMessageId(payload) {
+    const message = payload.message as MapAny;
+
+    return (message?.id as string) || '';
+  },
+  getResourceId(payload) {
+    const message = payload.message as MapAny;
+
+    return (message?.organization_id as string) || '';
+  },
+  getSenderType(payload) {
+    const message = payload.message as MapAny;
+
+    return message?.sender_type === 'ASSISTANT' || message?.sender_type === SenderType.ASSISTANT
+      ? SenderType.ASSISTANT
+      : SenderType.USER;
+  },
+  getSenderName(payload) {
+    const message = payload.message as MapAny;
+
+    return (message?.sender_name as string) || 'assistant';
+  },
+  getTimestamp(payload) {
+    const message = payload.message as MapAny;
+
+    return (message?.created_at as string) || new Date().toISOString();
+  },
+  getOutputFiles(payload) {
+    const message = payload.message as MapAny;
+
+    return message?.output_files as OutputFilesBlockType['payload']['output_files'];
+  },
+};
+
+const taskPayloadResolver: PayloadResolver = {
+  getConversationId(payload) {
+    return payload.task_id as string;
+  },
+  getMessageId(payload) {
+    return (payload.message_id as string) || '';
+  },
+  getResourceId(payload) {
+    return (payload.organization_id as string) || '';
+  },
+  getSenderType() {
+    return SenderType.ASSISTANT;
+  },
+  getSenderName() {
+    return 'assistant';
+  },
+  getTimestamp() {
+    return new Date().toISOString();
+  },
+  getOutputFiles(payload) {
+    return payload.output_files as OutputFilesBlockType['payload']['output_files'];
+  },
+};
+
+/** Generic handler for MESSAGE_START / OUTPUT_FILES / MESSAGE_STOP events. */
+function handleGlobalMessageEvent(resolver: PayloadResolver, data: BaseEventPayload): void {
   try {
     const payload = data.payload as MapAny;
+    const conversationId = resolver.getConversationId(payload, data);
+
+    if (!conversationId) return;
 
     switch (payload?.type) {
       case SSEEventType.MESSAGE_START: {
-        const message = payload.message as MapAny;
-        const conversationId = message?.conversation_id as string;
-
-        if (!conversationId) return;
-
-        const senderType =
-          message.sender_type === 'ASSISTANT' || message.sender_type === SenderType.ASSISTANT
-            ? SenderType.ASSISTANT
-            : SenderType.USER;
-
         const newState: StreamingState = {
           resource_type: ResourceType.ORGANIZATION,
-          resource_id: (message.organization_id as string) || '',
+          resource_id: resolver.getResourceId(payload),
           conversation_id: conversationId,
-          id: message.id as string,
+          id: resolver.getMessageId(payload),
           message_content: { elements: [] },
           message_type: ChatMessageType.SYSTEM,
-          sender_type: senderType,
-          sender_name: (message.sender_name as string) || 'assistant',
-          timestamp: (message.created_at as string) || new Date().toISOString(),
+          sender_type: resolver.getSenderType(payload),
+          sender_name: resolver.getSenderName(payload),
+          timestamp: resolver.getTimestamp(payload),
           metadata: {},
           is_active: true,
         };
@@ -309,11 +383,7 @@ function handleGlobalConversationEvent(data: BaseEventPayload): void {
       }
 
       case SSEEventType.OUTPUT_FILES: {
-        const outputMessage = payload.message as MapAny;
-        const messageId = outputMessage?.id as string;
-        const conversationId = (payload.conversation_id as string) || (data.source_id as string);
-
-        if (!conversationId) return;
+        const messageId = resolver.getMessageId(payload);
 
         streamingStateStore.update(conversationId, (prev) => {
           if (!prev) return prev;
@@ -324,7 +394,7 @@ function handleGlobalConversationEvent(data: BaseEventPayload): void {
             type: BLOCK_TYPE.OUTPUT_FILES,
             order: (prev.message_content?.elements?.length || 0) + 1,
             payload: {
-              output_files: outputMessage.output_files as OutputFilesBlockType['payload']['output_files'],
+              output_files: resolver.getOutputFiles(payload),
             },
           };
 
@@ -340,10 +410,6 @@ function handleGlobalConversationEvent(data: BaseEventPayload): void {
       }
 
       case SSEEventType.MESSAGE_STOP: {
-        const conversationId = (payload.conversation_id as string) || (data.source_id as string);
-
-        if (!conversationId) return;
-
         streamingStateStore.update(conversationId, (prev) => {
           if (!prev) return prev;
 
@@ -390,11 +456,17 @@ export const SSEProvider: React.FC<SSEProviderProps> = ({ children, sseEventBus 
   // Global subscriptions for streaming events across all conversations.
   useEffect(() => {
     const streamSub = sseEventBus.subscribe(EVENT_TYPE.AGENT_STREAMS, handleGlobalStreamEvent);
-    const convSub = sseEventBus.subscribe(EVENT_TYPE.CONVERSATION_V2, handleGlobalConversationEvent);
+    const convSub = sseEventBus.subscribe(EVENT_TYPE.CONVERSATION_V2, (data) =>
+      handleGlobalMessageEvent(conversationPayloadResolver, data),
+    );
+    const taskSub = sseEventBus.subscribe(EVENT_TYPE.TASK, (data) =>
+      handleGlobalMessageEvent(taskPayloadResolver, data),
+    );
 
     return () => {
       streamSub.unsubscribe();
       convSub.unsubscribe();
+      taskSub.unsubscribe();
     };
   }, [sseEventBus]);
 

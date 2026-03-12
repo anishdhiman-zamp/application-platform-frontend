@@ -10,7 +10,6 @@ import {
   type FileTreeNodeProps,
 } from '@/modules/pace/components/files/file-tree.types';
 import { CONTEXT_MENU_ACTION_IDS, CONTEXT_MENU_ACTIONS } from '@/modules/pace/components/files/files.constants';
-import FileTreeNodeContextMenu from '@/modules/pace/components/files/FileTreeNodeContextMenu';
 import FileTreeNodeRow from '@/modules/pace/components/files/FileTreeNodeRow';
 import { useFileUploadContext } from '@/modules/pace/context/FileUploadContext';
 import { useFileTreeContext } from '@/modules/pace/hooks/useFileTreeContext';
@@ -35,10 +34,10 @@ const FileTreeNode = memo(function FileTreeNode({
   onTriggerFileUpload,
   onTriggerFolderUpload,
   onDragOverFolderChange,
+  isSearchActive,
   style,
 }: FileTreeNodeProps) {
   const nodeRef = useRef<HTMLDivElement>(null);
-  const [contextMenuOpen, setContextMenuOpen] = useState(false);
   const [createModalType, setCreateModalType] = useState<CreateItemType | null>(null);
 
   const { clipboard, isProtectedRoot, username } = useFileTreeContext();
@@ -123,7 +122,7 @@ const FileTreeNode = memo(function FileTreeNode({
     onToggleExpand,
     onStartRename: rename.startRename,
     onOpenCreateModal: setCreateModalType,
-    onCloseContextMenu: () => setContextMenuOpen(false),
+    onCloseContextMenu: () => {},
     onFileMoved,
     onFileDeleted,
     onFileCreated,
@@ -178,49 +177,44 @@ const FileTreeNode = memo(function FileTreeNode({
         onConfirm={deleteConfirmation.onConfirm}
       />
 
-      <FileTreeNodeContextMenu
+      <FileTreeNodeRow
+        ref={nodeRef}
+        node={node}
+        depth={depth}
+        state={{
+          isFolder,
+          isExpanded,
+          isSelected,
+          isRenaming: rename.isRenaming,
+          isDuplicateName: rename.isDuplicateName,
+          isDragging: dragDrop.isDragging,
+          isDragOver: dragDrop.isDragOver,
+          isCutItem: actions.isCutItem,
+          isProtected,
+          isUserPrivateFolder,
+          isUploading,
+          isSearchActive: !!isSearchActive,
+        }}
+        rename={{
+          value: rename.renameValue,
+          onChange: rename.setRenameValue,
+          onSubmit: rename.handleRenameSubmit,
+          onKeyDown: rename.handleRenameKeyDown,
+          onInputRef: rename.handleRenameInputRef,
+        }}
+        handlers={{
+          onRowClick: handleClick,
+          onRowDoubleClick: handleDoubleClick,
+          onChevronClick: handleChevronClick,
+          onDragStart: dragDrop.handleDragStart,
+          onDragEnd: dragDrop.handleDragEnd,
+          onDragOver: dragDrop.handleDragOver,
+          onDragLeave: dragDrop.handleDragLeave,
+          onDrop: dragDrop.handleDrop,
+        }}
         actions={filteredActions}
-        disabled={isUploading}
-        onOpenChange={setContextMenuOpen}
         onActionClick={actions.handleActionClick}
-      >
-        <FileTreeNodeRow
-          ref={nodeRef}
-          node={node}
-          depth={depth}
-          state={{
-            isFolder,
-            isExpanded,
-            isSelected,
-            isRenaming: rename.isRenaming,
-            isDuplicateName: rename.isDuplicateName,
-            isDragging: dragDrop.isDragging,
-            isDragOver: dragDrop.isDragOver,
-            isCutItem: actions.isCutItem,
-            isProtected,
-            isUserPrivateFolder,
-            contextMenuOpen,
-            isUploading,
-          }}
-          rename={{
-            value: rename.renameValue,
-            onChange: rename.setRenameValue,
-            onSubmit: rename.handleRenameSubmit,
-            onKeyDown: rename.handleRenameKeyDown,
-            onInputRef: rename.handleRenameInputRef,
-          }}
-          handlers={{
-            onRowClick: handleClick,
-            onRowDoubleClick: handleDoubleClick,
-            onChevronClick: handleChevronClick,
-            onDragStart: dragDrop.handleDragStart,
-            onDragEnd: dragDrop.handleDragEnd,
-            onDragOver: dragDrop.handleDragOver,
-            onDragLeave: dragDrop.handleDragLeave,
-            onDrop: dragDrop.handleDrop,
-          }}
-        />
-      </FileTreeNodeContextMenu>
+      />
     </div>
   );
 });
