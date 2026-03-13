@@ -3,6 +3,7 @@ import { FC, useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { useSelector } from 'react-redux';
 import {
   AnnotationType,
+  API_ENDPOINTS,
   BLOCK_TYPE,
   ButtonBlockType,
   ChatActionsProvider,
@@ -122,6 +123,11 @@ const KnowledgeBaseChat: FC<KnowledgeBaseChatProps> = ({
     conversationId: conversationId,
     enableStreaming: streamingEnabled,
     setHeader: setHeader,
+    apiConfig: {
+      getConversationById: API_ENDPOINTS.GET_CONVERSATION_BY_ID_V3,
+      sendMessage: API_ENDPOINTS.POST_MESSAGE_V3,
+      createConversation: API_ENDPOINTS.CREATE_CONVERSATION_V3,
+    },
   });
 
   const { scrollContainerRef, showScrollButton, handleScroll, handleScrollToBottomClick } = useChatScroll({
@@ -356,6 +362,7 @@ const KnowledgeBaseChat: FC<KnowledgeBaseChatProps> = ({
                 username={username}
                 defaultMessage={isNewConversation ? undefined : defaultMessage}
                 fileDropHandlerRef={fileDropHandlerRef}
+                hideStopButton
               />
               <Button
                 onClick={handleScrollToBottomClick}
