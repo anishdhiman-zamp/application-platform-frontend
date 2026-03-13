@@ -57,7 +57,7 @@ const SheetOverlay = ({ className, ...props }: React.ComponentProps<typeof Sheet
 SheetOverlay.displayName = SheetPrimitive.Overlay.displayName;
 
 const sheetVariants = cva(
-  `fixed bg-background shadow-MENU_SHADOW transition-all duration-[${SHEET_ANIMATION_DURATION}ms]! ease-in-out flex flex-col rounded-lg m-4 z-1001 h-[calc(100vh-2rem)]!`,
+  `fixed bg-BG_WHITE shadow-MENU_SHADOW transition-all duration-[${SHEET_ANIMATION_DURATION}ms]! ease-in-out flex flex-col rounded-lg m-4 z-1001 h-[calc(100vh-2rem)]!`,
   {
     variants: {
       side: {
@@ -107,7 +107,7 @@ const SheetContent = ({
       <SheetPrimitive.Description className='sr-only'>{description || 'Sheet content'}</SheetPrimitive.Description>
       {children}
       {showCloseButton && (
-        <SheetPrimitive.Close className='ring-offset-background focus:ring-ring data-[state=open]:bg-secondary absolute top-4 right-4 rounded-sm opacity-70 transition-opacity hover:opacity-100 focus:ring-2 focus:ring-offset-2 focus:outline-hidden disabled:pointer-events-none'>
+        <SheetPrimitive.Close className='ring-offset-background focus:ring-ring data-[state=open]:bg-GRAY_1000 absolute top-4 right-4 rounded-sm opacity-70 transition-opacity hover:opacity-100 focus:ring-2 focus:ring-offset-2 focus:outline-hidden disabled:pointer-events-none'>
           <X className='h-4 w-4' />
           <span className='sr-only'>Close</span>
         </SheetPrimitive.Close>

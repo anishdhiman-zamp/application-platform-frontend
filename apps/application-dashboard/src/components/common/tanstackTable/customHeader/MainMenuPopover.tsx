@@ -1,8 +1,7 @@
 import { FC, KeyboardEvent } from 'react';
-import { Button, Input } from '@zamp-platform/ui';
+import { Button, CSS_VARS, Input } from '@zamp-platform/ui';
 import { SvgSpriteLoader } from '@zamp-platform/ui/assets';
 import { FILTER_TYPES } from '@/components/filter/filter.types';
-import { COLORS } from '@/constants/colors';
 import type { defaultFnType, MapAny } from '@/types/commonTypes';
 import {
   DateFormatOptions,
@@ -66,7 +65,7 @@ const MainMenuPopover: FC<MainMenuPopoverProps> = ({
         autoFocus
         wrapperClassName='m-2'
         error={!headerName?.trim()}
-        icon={<SvgSpriteLoader id='edit-03' size={16} color={COLORS.GRAY_500} />}
+        icon={<SvgSpriteLoader id='edit-03' size={16} color={CSS_VARS.GRAY_500} />}
         onKeyDown={handleHeaderNameKeyDown}
       />
     )}
@@ -89,7 +88,7 @@ const MainMenuPopover: FC<MainMenuPopoverProps> = ({
           <SvgSpriteLoader
             id='arrow-narrow-right'
             size={12}
-            color={COLORS.GRAY_600}
+            color={CSS_VARS.GRAY_600}
             className='hidden group-hover:block'
           />
         </div>
@@ -114,7 +113,7 @@ const MainMenuPopover: FC<MainMenuPopoverProps> = ({
           <SvgSpriteLoader
             id='arrow-narrow-right'
             size={12}
-            color={COLORS.GRAY_600}
+            color={CSS_VARS.GRAY_600}
             className='hidden group-hover:block'
           />
         </div>

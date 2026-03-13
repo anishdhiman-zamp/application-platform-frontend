@@ -12,7 +12,7 @@
 
 import { cn } from '@zamp-platform/ui/utils';
 import React, { FC, useCallback, useEffect, useRef } from 'react';
-import { COLORS } from '../../constants/constants';
+import { COLORS, CSS_VARS } from '../../constants/colors';
 
 interface ShimmerTextProps {
   text: string;
@@ -32,8 +32,8 @@ export const ShimmerText: FC<ShimmerTextProps> = ({
   className,
   shimmerTextClassName,
   baseTextClassName,
-  baseColor = COLORS.GRAY_450,
-  shimmerColor = COLORS.BLUE_350,
+  baseColor = COLORS.GRAY_700,
+  shimmerColor = CSS_VARS.BLUE_700,
   autoAnimate = true,
   animationDuration = 2000,
 }) => {

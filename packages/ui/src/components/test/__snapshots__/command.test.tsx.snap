@@ -2,7 +2,7 @@
 
 exports[`Command Component - Core Functional Tests matches snapshot for basic command with input and list 1`] = `
 <div
-  class="bg-popover text-popover-foreground flex h-full w-full flex-col overflow-hidden rounded-md"
+  class="bg-BG_WHITE text-GRAY_1000 flex h-full w-full flex-col overflow-hidden rounded-md"
   cmdk-root=""
   tabindex="-1"
 >
@@ -23,7 +23,7 @@ exports[`Command Component - Core Functional Tests matches snapshot for basic co
       aria-labelledby="radix-_r_1r_"
       autocomplete="off"
       autocorrect="off"
-      class="placeholder:text-muted-foreground flex h-10 w-full rounded-md bg-transparent py-3 text-sm outline-hidden disabled:cursor-not-allowed disabled:opacity-50"
+      class="placeholder:text-GRAY_700 flex h-10 w-full rounded-md bg-transparent py-3 text-sm outline-hidden disabled:cursor-not-allowed disabled:opacity-50"
       cmdk-input=""
       id="radix-_r_1s_"
       placeholder="Snapshot..."
@@ -47,7 +47,7 @@ exports[`Command Component - Core Functional Tests matches snapshot for basic co
       <div
         aria-disabled="false"
         aria-selected="true"
-        class="data-[selected=true]:bg-accent data-[selected=true]:text-accent-foreground relative flex cursor-pointer items-center gap-2 rounded-sm px-2 py-1.5 text-sm outline-hidden select-none data-[disabled=true]:pointer-events-none data-[disabled=true]:opacity-50 [&_svg]:pointer-events-none [&_svg]:size-4 [&_svg]:shrink-0"
+        class="data-[selected=true]:bg-accent data-[selected=true]:text-accent-GRAY_1000 relative flex cursor-pointer items-center gap-2 rounded-sm px-2 py-1.5 text-sm outline-hidden select-none data-[disabled=true]:pointer-events-none data-[disabled=true]:opacity-50 [&_svg]:pointer-events-none [&_svg]:size-4 [&_svg]:shrink-0"
         cmdk-item=""
         data-disabled="false"
         data-selected="true"
@@ -60,7 +60,7 @@ exports[`Command Component - Core Functional Tests matches snapshot for basic co
       <div
         aria-disabled="false"
         aria-selected="false"
-        class="data-[selected=true]:bg-accent data-[selected=true]:text-accent-foreground relative flex cursor-pointer items-center gap-2 rounded-sm px-2 py-1.5 text-sm outline-hidden select-none data-[disabled=true]:pointer-events-none data-[disabled=true]:opacity-50 [&_svg]:pointer-events-none [&_svg]:size-4 [&_svg]:shrink-0"
+        class="data-[selected=true]:bg-accent data-[selected=true]:text-accent-GRAY_1000 relative flex cursor-pointer items-center gap-2 rounded-sm px-2 py-1.5 text-sm outline-hidden select-none data-[disabled=true]:pointer-events-none data-[disabled=true]:opacity-50 [&_svg]:pointer-events-none [&_svg]:size-4 [&_svg]:shrink-0"
         cmdk-item=""
         data-disabled="false"
         data-selected="false"
@@ -79,7 +79,7 @@ exports[`Command Component - Core Functional Tests matches snapshot for command 
 
 exports[`Command Component - Core Functional Tests matches snapshot for command item with shortcut 1`] = `
 <div
-  class="bg-popover text-popover-foreground flex h-full w-full flex-col overflow-hidden rounded-md"
+  class="bg-BG_WHITE text-GRAY_1000 flex h-full w-full flex-col overflow-hidden rounded-md"
   cmdk-root=""
   tabindex="-1"
 >
@@ -103,7 +103,7 @@ exports[`Command Component - Core Functional Tests matches snapshot for command 
       <div
         aria-disabled="false"
         aria-selected="true"
-        class="data-[selected=true]:bg-accent data-[selected=true]:text-accent-foreground relative flex cursor-pointer items-center gap-2 rounded-sm px-2 py-1.5 text-sm outline-hidden select-none data-[disabled=true]:pointer-events-none data-[disabled=true]:opacity-50 [&_svg]:pointer-events-none [&_svg]:size-4 [&_svg]:shrink-0"
+        class="data-[selected=true]:bg-accent data-[selected=true]:text-accent-GRAY_1000 relative flex cursor-pointer items-center gap-2 rounded-sm px-2 py-1.5 text-sm outline-hidden select-none data-[disabled=true]:pointer-events-none data-[disabled=true]:opacity-50 [&_svg]:pointer-events-none [&_svg]:size-4 [&_svg]:shrink-0"
         cmdk-item=""
         data-disabled="false"
         data-selected="true"
@@ -113,7 +113,7 @@ exports[`Command Component - Core Functional Tests matches snapshot for command 
       >
         New File
         <span
-          class="text-muted-foreground ml-auto text-xs tracking-widest"
+          class="text-GRAY_700 ml-auto text-xs tracking-widest"
         >
           ⌘N
         </span>
@@ -125,7 +125,7 @@ exports[`Command Component - Core Functional Tests matches snapshot for command 
 
 exports[`Command Component - Core Functional Tests matches snapshot for command with empty state 1`] = `
 <div
-  class="bg-popover text-popover-foreground flex h-full w-full flex-col overflow-hidden rounded-md"
+  class="bg-BG_WHITE text-GRAY_1000 flex h-full w-full flex-col overflow-hidden rounded-md"
   cmdk-root=""
   tabindex="-1"
 >
@@ -147,7 +147,7 @@ exports[`Command Component - Core Functional Tests matches snapshot for command 
 
 exports[`Command Component - Core Functional Tests matches snapshot for command with groups and separators 1`] = `
 <div
-  class="bg-popover text-popover-foreground flex h-full w-full flex-col overflow-hidden rounded-md"
+  class="bg-BG_WHITE text-GRAY_1000 flex h-full w-full flex-col overflow-hidden rounded-md"
   cmdk-root=""
   tabindex="-1"
 >
@@ -169,7 +169,7 @@ exports[`Command Component - Core Functional Tests matches snapshot for command 
       cmdk-list-sizer=""
     >
       <div
-        class="text-foreground [&_[cmdk-group-heading]]:text-muted-foreground overflow-hidden p-1 [&_[cmdk-group-heading]]:px-2 [&_[cmdk-group-heading]]:py-1.5 [&_[cmdk-group-heading]]:text-xs [&_[cmdk-group-heading]]:font-medium"
+        class="text-GRAY_1000 [&_[cmdk-group-heading]]:text-GRAY_700 overflow-hidden p-1 [&_[cmdk-group-heading]]:px-2 [&_[cmdk-group-heading]]:py-1.5 [&_[cmdk-group-heading]]:text-xs [&_[cmdk-group-heading]]:font-medium"
         cmdk-group=""
         data-value="Group"
         role="presentation"
@@ -189,7 +189,7 @@ exports[`Command Component - Core Functional Tests matches snapshot for command 
           <div
             aria-disabled="false"
             aria-selected="true"
-            class="data-[selected=true]:bg-accent data-[selected=true]:text-accent-foreground relative flex cursor-pointer items-center gap-2 rounded-sm px-2 py-1.5 text-sm outline-hidden select-none data-[disabled=true]:pointer-events-none data-[disabled=true]:opacity-50 [&_svg]:pointer-events-none [&_svg]:size-4 [&_svg]:shrink-0"
+            class="data-[selected=true]:bg-accent data-[selected=true]:text-accent-GRAY_1000 relative flex cursor-pointer items-center gap-2 rounded-sm px-2 py-1.5 text-sm outline-hidden select-none data-[disabled=true]:pointer-events-none data-[disabled=true]:opacity-50 [&_svg]:pointer-events-none [&_svg]:size-4 [&_svg]:shrink-0"
             cmdk-item=""
             data-disabled="false"
             data-selected="true"
@@ -209,7 +209,7 @@ exports[`Command Component - Core Functional Tests matches snapshot for command 
       <div
         aria-disabled="false"
         aria-selected="false"
-        class="data-[selected=true]:bg-accent data-[selected=true]:text-accent-foreground relative flex cursor-pointer items-center gap-2 rounded-sm px-2 py-1.5 text-sm outline-hidden select-none data-[disabled=true]:pointer-events-none data-[disabled=true]:opacity-50 [&_svg]:pointer-events-none [&_svg]:size-4 [&_svg]:shrink-0"
+        class="data-[selected=true]:bg-accent data-[selected=true]:text-accent-GRAY_1000 relative flex cursor-pointer items-center gap-2 rounded-sm px-2 py-1.5 text-sm outline-hidden select-none data-[disabled=true]:pointer-events-none data-[disabled=true]:opacity-50 [&_svg]:pointer-events-none [&_svg]:size-4 [&_svg]:shrink-0"
         cmdk-item=""
         data-disabled="false"
         data-selected="false"
@@ -226,7 +226,7 @@ exports[`Command Component - Core Functional Tests matches snapshot for command 
 
 exports[`Command Component - Core Functional Tests matches snapshot for command with loading state 1`] = `
 <div
-  class="bg-popover text-popover-foreground flex h-full w-full flex-col overflow-hidden rounded-md"
+  class="bg-BG_WHITE text-GRAY_1000 flex h-full w-full flex-col overflow-hidden rounded-md"
   cmdk-root=""
   tabindex="-1"
 >

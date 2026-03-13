@@ -1,5 +1,5 @@
 import { type FC, useState } from 'react';
-import { toast } from '@zamp-platform/ui';
+import { CSS_VARS, toast } from '@zamp-platform/ui';
 import { SvgSpriteLoader } from '@zamp-platform/ui/assets';
 import ArtifactLoader from 'modules/process/artifacts/components/ArtifactLoader';
 import EmailDetailsDropdown from 'modules/process/artifacts/components/email-artifact/EmailDetailsDropdown';
@@ -8,7 +8,6 @@ import { ARTIFACT_TYPE } from 'modules/process/process.types';
 import { getEmailDate } from 'modules/process/process.utils';
 import { useParams } from 'next/navigation';
 import { useLazyGetSignedUrlByArtifactIdQuery } from '@/apis/processes';
-import { COLORS } from '@/constants/colors';
 import type { EmailArtifactsResponseType } from '@/types/api/processApi.types';
 import { formatPlural, getFirstLetters } from '@/utils/common';
 
@@ -127,7 +126,7 @@ const EmailArtifact: FC<EmailArtifactProps> = ({ emailArtifact, artifactId }) =>
         {!!emailArtifact?.attachments?.length && (
           <div className='border-GRAY_500 flex w-full items-center justify-start gap-2 overflow-hidden border-t-[0.5px]'>
             <div className='flex shrink-0 items-center justify-start gap-2 py-4 pl-4'>
-              <SvgSpriteLoader id='attachment-01' size={16} color={COLORS.GRAY_900} />
+              <SvgSpriteLoader id='attachment-01' size={16} color={CSS_VARS.GRAY_900} />
               <span className='f-13-400 text-GRAY_900'>
                 {formatPlural(emailArtifact?.attachments?.length ?? 0, 'Attachment')}
               </span>

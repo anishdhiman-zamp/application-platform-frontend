@@ -90,20 +90,20 @@ const TaskContentInner = ({ taskId }: TaskContentInnerProps) => {
             hideSenderName
             organizationId={organizationId}
           />
-          <div className='h-12 w-full bg-white' />
+          <div className='bg-BG_WHITE h-12 w-full' />
         </CommonWrapper>
-        <div className='sticky bottom-0 z-10 mx-auto w-full max-w-[700px] bg-white pb-3'>
+        <div className='bg-BG_WHITE sticky bottom-0 z-10 mx-auto w-full max-w-[700px] pb-3'>
           <Button
             onClick={handleScrollToBottomClick}
             variant='ghost'
             className={cn(
-              'bg-gray-1000 hover:bg-gray-1000 absolute -top-10 left-1/2 h-6 w-6 -translate-x-1/2 !rounded-full p-3',
+              'bg-GRAY_1000 hover:bg-GRAY_950 absolute -top-10 left-1/2 h-6 w-6 -translate-x-1/2 !rounded-full p-3',
               'transition-all duration-200 ease-out',
               showScrollButton ? 'translate-y-0 opacity-100' : 'pointer-events-none translate-y-2 opacity-0',
             )}
             aria-label='Scroll to bottom'
           >
-            <ArrowDownIcon size={14} className='p-0.5 text-white' />
+            <ArrowDownIcon size={14} className='text-BG_WHITE p-0.5' />
           </Button>
         </div>
       </div>

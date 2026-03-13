@@ -17,7 +17,7 @@ export const Attribute = ({ label, displayValue, dataContextId, ...props }: Attr
         props.className,
       )}
     >
-      <span className='text-secondary-400 f-12-400 whitespace-nowrap'>{label}</span>
+      <span className='text-BG_WHITE f-12-400 whitespace-nowrap'>{label}</span>
       <span className='f-12-500 whitespace-nowrap text-black'>{displayValue}</span>
     </button>
   );

@@ -21,7 +21,7 @@ const ChatHome = () => {
   return (
     <div className='mt-[116px] flex w-full flex-col items-center'>
       <div className='flex flex-col items-center gap-3'>
-        <NewPaceIcons width={40} height={40} />
+        <NewPaceIcons width={40} height={40} className='text-GRAY_1000 dark:text-GRAY_950' />
         <h1 className={cn('f-16-550 text-GRAY_1000', isReady ? 'animate-fade-in' : 'opacity-0')}>
           {greeting || 'Hello'}, {userName || 'there'}
         </h1>

@@ -48,7 +48,7 @@ const ChatTopbar: FC<ChatTopbarProps> = ({
 
   return (
     <div
-      className={cn('border-GRAY_400 flex items-center justify-between gap-x-3 border-b p-3', className)}
+      className={cn('border-border bg-BG_WHITE flex items-center justify-between gap-x-3 border-b p-3', className)}
       style={style}
     >
       <div className='relative flex h-7 min-w-0 flex-1 items-center'>
@@ -60,7 +60,7 @@ const ChatTopbar: FC<ChatTopbarProps> = ({
             onChange={handleChange}
             onBlur={handleBlur}
             onKeyDown={handleKeyDown}
-            className='f-13-500 h-7 max-w-[150px] px-1 select-none'
+            className='f-13-500 bg-BG_WHITE h-7 max-w-[150px] px-1 select-none'
             placeholder='Enter title...'
             maxLength={500}
           />

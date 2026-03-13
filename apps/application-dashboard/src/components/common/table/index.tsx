@@ -1,4 +1,5 @@
 import { FC, ReactNode, RefObject, useCallback, useEffect, useMemo, useRef, useState } from 'react';
+import { COLORS } from '@zamp-platform/ui';
 import {
   type CellClickedEvent,
   CellDoubleClickedEvent,
@@ -59,7 +60,6 @@ import {
   StatusBarModule,
 } from 'ag-grid-enterprise';
 import { AgGridReact, CustomStatusPanelProps } from 'ag-grid-react';
-import { COLORS } from 'constants/colors';
 import { MissingFieldItemType } from 'types/api/processApi.types';
 import { MapAny } from 'types/commonTypes';
 import { formatArrayValue } from '@/modules/data/data.utils';

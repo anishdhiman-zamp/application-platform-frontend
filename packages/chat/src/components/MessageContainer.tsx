@@ -37,6 +37,7 @@ interface MessageContainerProps {
   alignUserRight?: boolean;
   hideSenderName?: boolean;
   userAvatarClassName?: string;
+  userAvatarBackgroundColor?: string;
   children?: ReactNode;
   organizationId?: string;
   streamingEnabled?: boolean;
@@ -58,6 +59,7 @@ export const MessageContainer: FC<MessageContainerProps> = ({
   alignUserRight = false,
   hideSenderName = false,
   userAvatarClassName,
+  userAvatarBackgroundColor = COLORS.ORANGE_400,
   children,
   organizationId,
   streamingEnabled = true,
@@ -100,7 +102,7 @@ export const MessageContainer: FC<MessageContainerProps> = ({
           userAvatar={(senderName) => (
             <Avatar
               name={senderName}
-              backgroundColor={COLORS.YELLOW_300}
+              backgroundColor={userAvatarBackgroundColor}
               className={cn(
                 'f-12-500 text-gray-1000 flex h-6 min-h-6 w-6 min-w-6 items-center justify-center rounded-[7.5px] p-1',
                 userAvatarClassName,

@@ -27,7 +27,7 @@ export const StepCard = ({ stepNumber, children, className, onRemove, ...props }
         </div>
       )}
       <div className='absolute top-0 left-0 h-full w-6 rounded-l-lg bg-gray-100'>
-        <div className='bg-primary f-12-500 flex h-6 w-6 items-center justify-center rounded-tl-lg text-white'>
+        <div className='bg-GRAY_1000 f-12-500 flex h-6 w-6 items-center justify-center rounded-tl-lg text-white'>
           {stepNumber}
         </div>
       </div>

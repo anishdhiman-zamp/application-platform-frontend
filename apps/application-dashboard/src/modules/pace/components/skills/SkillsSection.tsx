@@ -73,7 +73,7 @@ const SkillsSection = () => {
           placeholder='Search skills...'
           value={searchQuery}
           onChange={onSearchChange}
-          className='border-GRAY_400 focus:border-GRAY_600 h-8 w-full focus:ring-3'
+          className='border-GRAY_400 focus:border-GRAY_600 bg-BG_WHITE h-8 w-full focus:ring-3'
           wrapperClassName='w-[40%]'
           size='small'
           disabled={isLoading}

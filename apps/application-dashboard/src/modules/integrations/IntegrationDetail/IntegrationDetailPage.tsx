@@ -1,14 +1,13 @@
 'use client';
 
 import { type FC, useRef, useState } from 'react';
-import { Button, toast } from '@zamp-platform/ui';
+import { Button, CSS_VARS, toast } from '@zamp-platform/ui';
 import { ArrowLeft } from 'lucide-react';
 import ShareConnectionPopup from 'modules/integrations/IntegrationDetail/ShareConnectionPopup';
 import { AnimatePresence, motion } from 'motion/react';
 import Link from 'next/link';
 import { useDeleteIntegrationConnectionMutation } from '@/apis/integrations';
 import ImageKitImage from '@/components/ImageKitImage';
-import { COLORS } from '@/constants/colors';
 import { NEEDS_ATTENTION_EMPTY_STATE } from '@/constants/icons';
 import { ROUTES_PATH } from '@/constants/routeConfig';
 import { useScrollDetection } from '@/hooks/useScrollDetection';
@@ -59,7 +58,7 @@ const IntegrationDetailPage: FC<IntegrationDetailPageProps> = ({ integration }) 
           duration: 0.3,
           ease: 'easeInOut',
         }}
-        className='flex flex-shrink-0 items-center justify-center overflow-hidden'
+        className='flex shrink-0 items-center justify-center overflow-hidden'
       >
         <div className='flex h-full w-[700px] flex-col'>
           <Link
@@ -67,7 +66,7 @@ const IntegrationDetailPage: FC<IntegrationDetailPageProps> = ({ integration }) 
             className={cn('flex w-full items-center justify-start py-5', isScrolled && 'border-GRAY_400 border-b')}
             aria-label='Go back'
           >
-            <ArrowLeft size={14} color={COLORS.GRAY_900} />
+            <ArrowLeft size={14} color={CSS_VARS.GRAY_900} />
           </Link>
           <div
             ref={scrollContainerRef}

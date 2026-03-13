@@ -1,10 +1,16 @@
 import { FC, useState } from 'react';
 import { type Editor } from '@tiptap/react';
-import { Button, DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from '@zamp-platform/ui';
+import {
+  Button,
+  CSS_VARS,
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from '@zamp-platform/ui';
 import { SvgSpriteLoader } from '@zamp-platform/ui/assets';
 import Image from 'next/image';
 import TooltipV2 from '@/components/common/TooltipV2';
-import { COLORS } from '@/constants/colors';
 import { ALIGN_CENTER } from '@/constants/icons';
 
 const TextAlignmentSelector: FC<{ editor: Editor | null }> = ({ editor }) => {
@@ -21,7 +27,7 @@ const TextAlignmentSelector: FC<{ editor: Editor | null }> = ({ editor }) => {
         <DropdownMenuTrigger asChild>
           <Button variant='ghost' size='xsmall' className='flex h-6 items-center gap-1 px-1'>
             <SvgSpriteLoader size={17} id={`align-${alignment}`} />
-            <SvgSpriteLoader id='chevron-down' color={COLORS.GRAY_700} size={8} />
+            <SvgSpriteLoader id='chevron-down' color={CSS_VARS.GRAY_700} size={8} />
           </Button>
         </DropdownMenuTrigger>
       </TooltipV2>

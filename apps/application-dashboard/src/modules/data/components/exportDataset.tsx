@@ -1,4 +1,5 @@
 import { type RefObject, useRef, useState } from 'react';
+import { COLORS } from '@zamp-platform/ui';
 import { SvgSpriteLoader } from '@zamp-platform/ui/assets';
 import { cn } from '@zamp-platform/ui/utils';
 import type { AgGridReact } from 'ag-grid-react';
@@ -7,7 +8,6 @@ import {
   useLazyGetDatasetExportQuery,
   useLazyGetDatasetExportsSignedUrlQuery,
 } from 'apis/dataset';
-import { COLORS } from 'constants/colors';
 import { useOnClickOutside } from 'hooks';
 import usePolling from 'hooks/usePolling';
 import LoadingWidthAnimation from 'modules/data/components/LoadingWidthAnimation';

@@ -9,8 +9,11 @@ import {
   UserMappedTeamType,
 } from 'modules/team/people.types';
 import { usePostAddTeamToAudienceMutation, usePostAddTeamToOrganizationMutation } from '@/apis/people';
+import { useTheme } from '@/app/_providers/theme-provider';
 import { useAppSelector } from '@/hooks/toolkit';
 import { useUserIdentity } from '@/hooks/useUserIdentity';
+import { THEME_MODE } from '@/modules/general/constants/general.constants';
+import { resolveChipColor } from '@/modules/team/people.utils';
 import { RootState } from '@/store';
 import { capitalizeWords } from '@/utils/common';
 
@@ -25,6 +28,8 @@ const MembersTeamV2: FC<MembersTeamPropsType> = ({ teamsData, userMappedTeams, u
 
   const organizationId = useAppSelector((state: RootState) => state?.user?.user?.orgs?.[0]?.organization_id) ?? '';
   const { isSystemAdmin } = useUserIdentity();
+  const { resolvedTheme } = useTheme();
+  const isDark = resolvedTheme === THEME_MODE.DARK;
 
   const [postAddTeamToAudience] = usePostAddTeamToAudienceMutation();
   const [postAddTeamToOrganization] = usePostAddTeamToOrganizationMutation();
@@ -161,7 +166,11 @@ const MembersTeamV2: FC<MembersTeamPropsType> = ({ teamsData, userMappedTeams, u
           <div className='flex cursor-pointer flex-wrap gap-1.5 px-2 py-2.5'>
             {userTeams?.length > 0 ? (
               userTeams?.map((team) => (
-                <Tag key={team?.teamId} style={{ backgroundColor: team?.color }} className='border-none'>
+                <Tag
+                  key={team?.teamId}
+                  style={{ backgroundColor: resolveChipColor(team?.color, isDark) }}
+                  className='border-none'
+                >
                   {team?.label}
                 </Tag>
               ))
@@ -172,14 +181,14 @@ const MembersTeamV2: FC<MembersTeamPropsType> = ({ teamsData, userMappedTeams, u
         </PopoverTrigger>
         <PopoverContent
           ref={popoverContentRef}
-          className='max-h-[300px] overflow-y-auto p-2.5 [&::-webkit-scrollbar]:hidden'
+          className='bg-BG_WHITE max-h-[300px] overflow-y-auto p-2.5 [&::-webkit-scrollbar]:hidden'
           sideOffset={-4}
           onScroll={handlePopoverScroll}
         >
           <Input
             placeholder='Search team or create a new one...'
             size='small'
-            className='mb-2 min-w-[220px]'
+            className='bg-BG_WHITE mb-2 min-w-[220px]'
             value={search}
             onChange={handleSearch}
           />
@@ -204,7 +213,7 @@ const MembersTeamV2: FC<MembersTeamPropsType> = ({ teamsData, userMappedTeams, u
               onClick={handleAddTeamToOrg}
             >
               <span className='f-11-400'>Create team: </span>
-              <Tag style={{ backgroundColor: randomColor }}>{search}</Tag>
+              <Tag style={{ backgroundColor: resolveChipColor(randomColor, isDark) }}>{search}</Tag>
             </Button>
           )}
         </PopoverContent>

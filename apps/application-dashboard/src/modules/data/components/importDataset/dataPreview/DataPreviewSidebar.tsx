@@ -1,8 +1,7 @@
 import React, { FC } from 'react';
-import { Button } from '@zamp-platform/ui';
+import { Button, CSS_VARS } from '@zamp-platform/ui';
 import { SvgSpriteLoader } from '@zamp-platform/ui/assets';
 import { usePostAiTransformationConfirmMutation } from 'apis/dataset';
-import { COLORS } from 'constants/colors';
 import {
   AI_TRANSFORMATION_STATUS,
   FILE_IMPORT_STATUS_MSG,
@@ -49,10 +48,10 @@ const DataPreviewSidebar: FC<DataPreviewSidebarPropsType> = ({
         <span className='f-16-600'>Import Data</span>
         <div className='flex w-full flex-col gap-2'>
           <div className='mt-6 flex items-center justify-start gap-1.5'>
-            <SvgSpriteLoader id='file-06' width={14} height={14} color={COLORS.GRAY_1000} />
+            <SvgSpriteLoader id='file-06' width={14} height={14} color={CSS_VARS.GRAY_1000} />
             <div className='flex w-full justify-between'>
               <span className='f-12-400'>{fileName}</span>
-              <SvgSpriteLoader id='check' width={14} height={14} color={COLORS.GREEN_PRIMARY} />
+              <SvgSpriteLoader id='check' width={14} height={14} color={CSS_VARS.GREEN_700} />
             </div>
           </div>
           <div className='bg-GREEN_700 h-1 w-full rounded-lg'></div>

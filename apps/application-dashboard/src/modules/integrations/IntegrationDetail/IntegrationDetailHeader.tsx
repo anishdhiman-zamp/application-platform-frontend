@@ -29,7 +29,7 @@ const IntegrationDetailHeader: FC<IntegrationDetailHeaderProps> = ({
   return (
     <div className='flex items-center justify-between'>
       <div className='flex items-center gap-x-2'>
-        <div className='relative flex h-7 w-7 flex-shrink-0 items-center justify-center'>
+        <div className='relative flex h-7 w-7 shrink-0 items-center justify-center'>
           {imgError || !logo ? (
             <div className='bg-GRAY_200 text-GRAY_700 f-12-550 flex h-full w-full items-center justify-center rounded'>
               {displayName.charAt(0).toUpperCase()}

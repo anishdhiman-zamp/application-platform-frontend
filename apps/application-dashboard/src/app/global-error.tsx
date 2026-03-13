@@ -29,7 +29,7 @@ export default function GlobalError({ error, reset }: GlobalErrorProps) {
 
   return (
     <html lang='en'>
-      <body className='light-mode bg-BACKGROUND_GRAY_1 h-screen antialiased'>
+      <body className='light-mode bg-BG_GRAY_1 h-screen antialiased'>
         <div className='flex h-screen w-full items-center justify-center'>
           <ErrorCard
             title='Something went wrong'

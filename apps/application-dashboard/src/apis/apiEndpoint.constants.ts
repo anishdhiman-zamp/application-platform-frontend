@@ -8,10 +8,24 @@ export const API_ENDPOINTS = {
   CHANGE_AUDIENCE_ROLE_IN_ORGANIZATION_PATCH: `organizations/{{organizationId}}/audiences`,
   DELETE_AUDIENCE_FROM_ORGANIZATION_ACCESS: `organizations/{{organizationId}}/audiences`,
   MEMBERSHIP_REQUESTS_BY_ORGANIZATION_ID_GET: `organizations/{{organizationId}}/requests`,
+  ORGANIZATIONS_REGISTER_POST: `organizations/register`,
+  ORGANIZATIONS_PROVISION_POST: `organizations/{{organizationId}}/provision`,
+
+  // Auth
   AUTH_INITIATE_LOGIN_FLOW_GET: `auth/relay/self-service/login/browser`,
   AUTH_INITIATE_LOGOUT_FLOW_GET: `auth/relay/self-service/logout/browser`,
   AUTH_INITIAL_LOGIN_FLOW_BY_EMAIL_POST: `auth/login/flow/create`,
   USER_WHOAMI_GET: 'auth/whoami',
+  USER_CHECK_USERNAME_GET: 'users/check-username',
+
+  // Onboarding
+  ONBOARDING_APPROVAL_POST: 'onboarding/user/waitlist-check',
+  ONBOARDING_USER_PROFILE_PATCH: 'onboarding/user/profile',
+  ONBOARDING_ORG_SETUP_POST: 'onboarding/org/setup',
+  ONBOARDING_PROVISIONING_POST: 'onboarding/org/provision',
+  ONBOARDING_SKIP_POST: 'onboarding/user/bypass-onboarding',
+  ONBOARDING_UPLOAD_URL_POST: 'onboarding/assets/upload-url',
+
   AUTH_BASE_URL_GET: `auth/api-base-url`,
   AUTH_ERROR_DETAILS_GET: `auth/relay/internal/self-service/errors`,
   TEAMS_BY_ORGANIZATION_ID_GET: `organizations/{{organizationId}}/teams`,
@@ -226,8 +240,4 @@ export const API_ENDPOINTS = {
   FILES_UPLOAD_CHUNK_POST: `files/upload/chunk`,
   FILES_UPLOAD_COMPLETE_POST: `files/upload/complete`,
   FILES_UPLOAD_CANCEL_DELETE: `files/upload/{{upload_id}}`,
-
-  // Organizations - auto org creation
-  ORGANIZATIONS_REGISTER_POST: `organizations/register`,
-  ORGANIZATIONS_PROVISION_POST: `organizations/{{organizationId}}/provision`,
 };

@@ -81,7 +81,7 @@ const MembersRole: FC<MembersRolePropsType> = ({ value, member = false }) => {
             setIsHoveredDropdown={setIsHoveredDropdown}
             parentWrapperClassName='pl-2'
             wrapperClassName='w-[200px]'
-            selectedOptionClassName='!bg-GRAY_100 py-2.5!'
+            selectedOptionClassName='!bg-accent py-2.5!'
           />
         </div>
       ) : (

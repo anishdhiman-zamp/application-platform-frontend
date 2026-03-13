@@ -1,10 +1,16 @@
 import { FC, RefObject, useCallback, useRef, useState } from 'react';
 import { ColumnOrderState, Table, VisibilityState } from '@zamp-platform/tanstack-table';
-import { Button, DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from '@zamp-platform/ui';
+import {
+  Button,
+  CSS_VARS,
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from '@zamp-platform/ui';
 import { SvgSpriteLoader } from '@zamp-platform/ui/assets';
 import { AgGridReact } from 'ag-grid-react';
 import { useOnClickOutside } from 'hooks';
-import { COLORS } from '@/constants/colors';
 import { POSITION } from '@/constants/common.constants';
 import { type MapAny } from '@/types/commonTypes';
 import ColumnListing from 'components/common/table/DisplayOptions/ColumnListing';
@@ -112,7 +118,7 @@ const DisplayOptions: FC<DisplayOptionsProps> = ({
                 variant='ghost'
                 disabled={disabled}
               >
-                <SvgSpriteLoader id='settings-04' color={COLORS.GRAY_900} size={14} />
+                <SvgSpriteLoader id='settings-04' color={CSS_VARS.GRAY_900} size={14} />
               </Button>
             </DropdownMenuTrigger>
           </div>

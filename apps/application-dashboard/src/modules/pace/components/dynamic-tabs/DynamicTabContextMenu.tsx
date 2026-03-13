@@ -57,7 +57,7 @@ const DynamicTabContextMenu = forwardRef<HTMLDivElement, DynamicTabContextMenuPr
             {filteredActions.map((action) => (
               <ContextMenuItem
                 key={action.id}
-                className='hover:bg-GRAY_100 f-12-500 text-GRAY_900 cursor-pointer rounded-md'
+                className='hover:bg-accent f-12-500 text-GRAY_900 cursor-pointer rounded-md'
                 onClick={() => onActionClick(action.id)}
               >
                 {action.label}

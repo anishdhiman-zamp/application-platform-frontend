@@ -268,7 +268,7 @@ const BreadCrumb: FC<BreadCrumbProps> = ({ isDraftProcess = false }) => {
   };
 
   return (
-    <div className='bg-BACKGROUND_GRAY_1 z-1000 flex h-full min-w-0 flex-1 items-center gap-2 transition-all'>
+    <div className='flex h-full min-w-0 flex-1 items-center gap-2 transition-all'>
       {breadcrumbStack?.length > 1 && (
         <div data-breadcrumb-arrow='true'>
           <SvgSpriteLoader

@@ -1,5 +1,5 @@
 import React, { FC, useEffect, useRef } from 'react';
-import { COLORS } from 'constants/colors';
+import { COLORS } from '@zamp-platform/ui';
 import { CustomTeamsDropdownPropsType } from 'modules/team/people.types';
 import { cn } from 'utils/common';
 import CommonWrapper from 'components/commonWrapper';

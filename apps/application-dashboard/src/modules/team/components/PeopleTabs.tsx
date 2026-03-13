@@ -8,7 +8,6 @@ import { TEAM_TABS_TYPES, TeamTabsList } from 'modules/team/people.types';
 import { usePathname, useRouter } from 'next/navigation';
 import { AudiencesByOrganisationIdResponse, InvitedAudiencesByOrganisationIdResponse } from 'types/api/people.types';
 import { useUserIdentity } from '@/hooks/useUserIdentity';
-import { cn } from '@/utils/common';
 
 interface PeopleTabsPropsType {
   filteredTeamMembers: AudiencesByOrganisationIdResponse[];
@@ -54,19 +53,16 @@ const PeopleTabs: FC<PeopleTabsPropsType> = ({
 
   return (
     <Tabs defaultValue={defaultTab} onValueChange={handleTabSelect} className='my-4 h-full w-full'>
-      <TabsList className='gap-x-5 bg-transparent'>
+      <TabsList className='bg-transparent'>
         {TeamTabsList.map((tab) => (
           <TabsTrigger
             key={tab.value}
             value={tab.value}
             data-testid={`tabs-v2-trigger-${tab.value}`}
-            className={cn(
-              'f-12-500 rounded-none !p-0 !px-1 !py-3',
-              'box-border border-0 border-b-2 border-transparent',
-              'data-[state=active]:!border-GRAY_1000 data-[state=active]:text-GRAY_1000 data-[state=active]:!border-0 data-[state=active]:!border-b-2',
-            )}
+            className='f-12-500 data-[state=active]:text-GRAY_1000 group hover:bg-GRAY_100 relative !rounded !border-none !p-0 !px-2 !py-3.5 data-[state=active]:!bg-transparent data-[state=active]:!shadow-none data-[state=active]:!ring-0'
           >
             {tab.label}
+            <div className='bg-GRAY_1000 absolute -bottom-0.5 left-0 hidden h-0.5 w-full group-data-[state=active]:block' />
           </TabsTrigger>
         ))}
       </TabsList>

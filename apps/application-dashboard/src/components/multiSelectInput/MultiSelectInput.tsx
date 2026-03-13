@@ -9,9 +9,9 @@ import React, {
   useRef,
   useState,
 } from 'react';
+import { CSS_VARS } from '@zamp-platform/ui';
 import { SvgSpriteLoader } from '@zamp-platform/ui/assets';
 import { ICON_SPRITE_TYPES } from '@zamp-platform/ui/types';
-import { COLORS } from 'constants/colors';
 import { defaultFn, MapAny } from 'types/commonTypes';
 import { checkObjOrArrType, cn } from 'utils/common';
 import { Dropdown } from 'components/common/dropdown';
@@ -310,8 +310,8 @@ const MultiSelectInput: FC<MultiSelectInputPropsType> = ({
                 key={index}
                 className='flex h-fit w-fit cursor-default items-center gap-1 rounded px-1.5 py-0.5 pr-1'
                 style={{
-                  backgroundColor: item?.valid ? (item?.color ? item?.color : COLORS.GRAY_50) : COLORS.RED_100,
-                  border: `1px solid ${item?.valid ? (item?.color !== COLORS.WHITE ? 'transparent' : COLORS.GRAY_400) : COLORS.RED_200}`,
+                  backgroundColor: item?.valid ? item?.color || CSS_VARS.GRAY_50 : item?.color || CSS_VARS.RED_100,
+                  border: `1px solid ${item?.valid ? 'hsl(var(--border))' : 'hsl(var(--destructive) / 0.4)'}`,
                 }}
               >
                 <span className={cn('f-12-450 text-GRAY_1000', labelCasing)}>{item?.label}</span>
@@ -324,7 +324,7 @@ const MultiSelectInput: FC<MultiSelectInputPropsType> = ({
                     handleRemoveItem(item, index);
                     e.stopPropagation();
                   }}
-                  color={item?.valid ? COLORS.GRAY_700 : COLORS.GRAY_900}
+                  color={item?.valid ? CSS_VARS.GRAY_600 : CSS_VARS.GRAY_800}
                   className='cursor-pointer'
                 />
               </div>
@@ -399,7 +399,7 @@ const MultiSelectInput: FC<MultiSelectInputPropsType> = ({
                   } as Record<string, unknown>,
                 )
               : !!combinedOptions?.length && (
-                  <div className='f-10-500 text-GRAY_700 border-GRAY_400 shadow-table-filter-menu absolute left-0 z-10 mt-1 w-full rounded-md border bg-white p-1'>
+                  <div className='f-10-500 text-GRAY_700 border-GRAY_400 shadow-table-filter-menu bg-BG_WHITE absolute left-0 z-10 mt-1 w-full rounded-md border p-1'>
                     <span className='flex px-1.5 pt-2 pb-1.5'>Select a team or person</span>
                     <div
                       className='flex max-h-[200px] w-full flex-col overflow-y-auto [&::-webkit-scrollbar]:hidden'
@@ -431,8 +431,8 @@ const MultiSelectInput: FC<MultiSelectInputPropsType> = ({
                                 'f-12-400 text-GRAY_1000 flex w-fit rounded border px-1.5 py-0.5 capitalize',
                               )}
                               style={{
-                                backgroundColor: option?.color || COLORS.WHITE,
-                                borderColor: option?.color ? 'transparent' : COLORS.GRAY_400,
+                                backgroundColor: option?.color || CSS_VARS.BG_WHITE,
+                                borderColor: option?.color ? 'transparent' : CSS_VARS.GRAY_400,
                               }}
                             >
                               {transformLabel ? transformLabel(option?.label) : option?.label}

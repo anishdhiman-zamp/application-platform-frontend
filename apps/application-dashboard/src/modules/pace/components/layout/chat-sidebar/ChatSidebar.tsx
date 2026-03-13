@@ -65,7 +65,7 @@ const ChatSidebar: FC<ChatSidebarProps> = ({ className }) => {
           exit={{ width: 0, opacity: 0 }}
           transition={isResizing ? { duration: 0 } : { duration: 0.2, ease: [0.4, 0, 0.2, 1] }}
           className={cn(
-            'border-GRAY_400 relative flex h-full shrink-0 flex-col overflow-hidden border-r bg-white',
+            'border-border bg-BG_WHITE relative flex h-full shrink-0 flex-col overflow-hidden border-r',
             className,
           )}
         >

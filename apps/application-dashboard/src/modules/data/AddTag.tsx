@@ -153,7 +153,7 @@ const AddTag = ({
           {filterStatement?.length > 0 && (
             <>
               <div
-                className='bg-BG_GRAY_2 f-11-400 text-GRAY_1000 border-BORDER_GRAY_400 my-2.5 flex h-[140px] flex-wrap items-center gap-y-2 overflow-y-auto rounded-md border px-3 py-2.5'
+                className='bg-BG_GRAY_2 f-11-400 text-GRAY_1000 border-GRAY_400 my-2.5 flex h-[140px] flex-wrap items-center gap-y-2 overflow-y-auto rounded-md border px-3 py-2.5'
                 style={{ scrollbarWidth: 'none' }}
               >
                 <span className={fieldOperatorClassName}>If</span>
@@ -178,7 +178,7 @@ const AddTag = ({
           )}
         </div>
       </div>
-      <div className='border-BORDER_GRAY_400 flex flex-row-reverse items-center justify-between border-t px-4 py-3'>
+      <div className='border-GRAY_400 flex flex-row-reverse items-center justify-between border-t px-4 py-3'>
         <Button
           size='xsmall'
           testId='add-tag-transactions'

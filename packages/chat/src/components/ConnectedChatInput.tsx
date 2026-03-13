@@ -50,6 +50,7 @@ export interface ConnectedChatInputProps {
   llmModel?: string | null;
   showModelSelector?: boolean;
   modelSelectorSlot?: React.ReactNode;
+  hideStopButton?: boolean;
 }
 
 export const ConnectedChatInput: FC<ConnectedChatInputProps> = ({
@@ -83,6 +84,7 @@ export const ConnectedChatInput: FC<ConnectedChatInputProps> = ({
   llmModel,
   showModelSelector,
   modelSelectorSlot,
+  hideStopButton = false,
 }: ConnectedChatInputProps) => {
   const fileInputRef = useRef<HTMLInputElement>(null);
   const isRejectingRef = useRef(false);
@@ -301,10 +303,10 @@ export const ConnectedChatInput: FC<ConnectedChatInputProps> = ({
         microphoneDisabled={microphoneState === MicrophoneState.SettingUp}
         showSubmitButton
         onSubmit={handleSubmit}
-        isSubmitDisabled={isSubmitDisabled}
-        isStreaming={chat.isStreaming}
-        onStop={handleStop}
-        isStopping={chat.isStopping}
+        isSubmitDisabled={isSubmitDisabled || (hideStopButton && chat.isStreaming)}
+        isStreaming={hideStopButton ? false : chat.isStreaming}
+        onStop={hideStopButton ? undefined : handleStop}
+        isStopping={hideStopButton ? false : chat.isStopping}
         className={className}
         minTextareaHeight={minTextareaHeight}
         maxTextareaHeight={maxTextareaHeight}

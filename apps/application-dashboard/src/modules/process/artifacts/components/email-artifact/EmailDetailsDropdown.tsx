@@ -1,7 +1,6 @@
 import { type FC } from 'react';
-import { DropdownMenu, DropdownMenuContent, DropdownMenuTrigger } from '@zamp-platform/ui';
+import { CSS_VARS, DropdownMenu, DropdownMenuContent, DropdownMenuTrigger } from '@zamp-platform/ui';
 import { SvgSpriteLoader } from '@zamp-platform/ui/assets';
-import { COLORS } from '@/constants/colors';
 import { getEmailDate } from '@/modules/process/process.utils';
 import type { EmailArtifactsResponseType } from '@/types/api/processApi.types';
 
@@ -14,7 +13,7 @@ const EmailDetailsDropdown: FC<EmailDetailsDropdownProps> = ({ emailArtifact }) 
     <DropdownMenu>
       <DropdownMenuTrigger asChild>
         <div className='hover:bg-GRAY_50 flex cursor-pointer items-center justify-center rounded border-none px-1 py-1'>
-          <SvgSpriteLoader id='chevron-down' size={14} color={COLORS.GRAY_700} />
+          <SvgSpriteLoader id='chevron-down' size={14} color={CSS_VARS.GRAY_700} />
         </div>
       </DropdownMenuTrigger>
       <DropdownMenuContent sideOffset={4} align='end' className='z-1001 w-[600px] px-3 py-2'>

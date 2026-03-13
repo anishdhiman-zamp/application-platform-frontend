@@ -1,8 +1,7 @@
 import { type FC, ReactNode, useEffect, useRef } from 'react';
-import { Button, Textarea } from '@zamp-platform/ui';
+import { Button, COLORS, Textarea } from '@zamp-platform/ui';
 import { SvgSpriteLoader } from '@zamp-platform/ui/assets';
 import { MAX_TEXTAREA_HEIGHT } from 'modules/process/process.constant';
-import { COLORS } from '@/constants/colors';
 import { KEYBOARD_KEYS } from '@/constants/shortcuts';
 import PaceIcon from '@/modules/knowledge-based/icons/PaceIcon';
 import type { defaultFnType } from '@/types/commonTypes';

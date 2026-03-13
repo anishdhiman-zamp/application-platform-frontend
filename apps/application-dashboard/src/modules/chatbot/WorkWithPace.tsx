@@ -83,7 +83,7 @@ const WorkWithPace: FC<WorkWithPaceProps> = ({ isProcessLive = false }) => {
       <Button
         variant='outline'
         size='icon'
-        className='bg-accent text-accent-foreground flex h-7 w-[200px] items-center justify-between px-2 py-1.5 [&_svg]:size-3'
+        className='bg-accent text-accent-GRAY_1000 flex h-7 w-[200px] items-center justify-between px-2 py-1.5 [&_svg]:size-3'
       >
         <div className='flex items-center gap-1.5 text-gray-700'>
           <PaceIcon />

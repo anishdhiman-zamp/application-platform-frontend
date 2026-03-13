@@ -7,7 +7,7 @@ import { replaceAll } from '@milkdown/utils';
 import { cn } from '@zamp-platform/ui/utils';
 import '@milkdown/crepe/theme/common/style.css';
 import '@milkdown/crepe/theme/frame.css';
-import 'modules/pace/components/file-viewer/viewers/milkdown-editor.css';
+import '@/styles/milkdown-editor.css';
 
 interface MilkdownEditorProps {
   content: string;

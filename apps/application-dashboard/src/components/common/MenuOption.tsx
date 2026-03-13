@@ -1,8 +1,7 @@
 import React, { FC } from 'react';
-import { Checkbox } from '@zamp-platform/ui';
+import { Checkbox, COLORS, CSS_VARS } from '@zamp-platform/ui';
 import { SvgSpriteLoader } from '@zamp-platform/ui/assets';
 import { ICON_SPRITE_TYPES } from '@zamp-platform/ui/types';
-import { COLORS } from 'constants/colors';
 import { MenuOptionProps } from 'types/common/components/dropdown/dropdown.types';
 import { defaultFn } from 'types/commonTypes';
 import { cn } from 'utils/common';
@@ -47,7 +46,7 @@ export const MenuOption: FC<MenuOptionProps> = ({
         iconCategory={ICON_SPRITE_TYPES.GENERAL}
         width={15}
         height={15}
-        color={isSelected && showSelectedIcon ? COLORS.GRAY_900 : COLORS.TRANSPARENT}
+        color={isSelected && showSelectedIcon ? CSS_VARS.GRAY_900 : COLORS.TRANSPARENT}
       />
     </div>
     <div className={wrapperClass} data-testid={`menu-option-wrapper-${innerProps.id}`}>

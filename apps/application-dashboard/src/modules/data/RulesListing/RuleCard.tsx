@@ -161,7 +161,7 @@ const RuleCard: FC<RuleCardProps> = ({
                 />
               ))}
               <span className='text-GRAY_1000 h-fit py-1 pr-2 pl-1.5'>then apply tag</span>
-              <span className='border-BORDER_GRAY_400 h-fit rounded-md border bg-white py-1 pr-2 pl-1.5 text-nowrap'>
+              <span className='border-GRAY_400 h-fit rounded-md border bg-white py-1 pr-2 pl-1.5 text-nowrap'>
                 {value}
               </span>
             </>

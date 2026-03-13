@@ -1,8 +1,7 @@
-import { Button } from '@zamp-platform/ui';
+import { Button, CSS_VARS } from '@zamp-platform/ui';
 import { SvgSpriteLoader } from '@zamp-platform/ui/assets';
 import { GridApi } from 'ag-grid-community';
 import TooltipV2 from '@/components/common/TooltipV2';
-import { COLORS } from '@/constants/colors';
 
 interface RowHeaderProps {
   selectedRowIndex: number;
@@ -27,7 +26,7 @@ const RowHeader = ({ selectedRowIndex, totalRows, navigateRow, gridApi }: RowHea
             onClick={() => navigateRow(-1)}
             disabled={selectedRowIndex === 0 || !gridApi}
           >
-            <SvgSpriteLoader id='chevron-up' size={14} color={COLORS.GRAY_1000} />
+            <SvgSpriteLoader id='chevron-up' size={14} color={CSS_VARS.GRAY_1000} />
           </Button>
         </TooltipV2>
         <TooltipV2 tooltipBody='Go to next row'>
@@ -37,7 +36,7 @@ const RowHeader = ({ selectedRowIndex, totalRows, navigateRow, gridApi }: RowHea
             onClick={() => navigateRow(+1)}
             disabled={selectedRowIndex === totalRows - 1 || !gridApi}
           >
-            <SvgSpriteLoader id='chevron-down' size={14} color={COLORS.GRAY_1000} />
+            <SvgSpriteLoader id='chevron-down' size={14} color={CSS_VARS.GRAY_1000} />
           </Button>
         </TooltipV2>
       </div>

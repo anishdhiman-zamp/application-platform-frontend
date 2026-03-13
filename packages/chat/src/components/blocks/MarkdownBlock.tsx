@@ -52,7 +52,7 @@ export const MarkdownBlock: React.FC<MarkdownBlockProps> = ({ payload }) => {
 
   return (
     <div
-      className='prose prose-sm f-13-450 text-gray-1000 max-w-none overflow-hidden wrap-break-word [&_pre]:overflow-x-auto [&_table]:block [&_table]:overflow-x-auto'
+      className='prose prose-sm dark:prose-invert f-13-450 text-GRAY_1000 max-w-none overflow-hidden wrap-break-word [&_pre]:overflow-x-auto [&_table]:block [&_table]:overflow-x-auto'
       data-testid='markdown-block'
     >
       <ReactMarkdown
@@ -70,7 +70,7 @@ export const MarkdownBlock: React.FC<MarkdownBlockProps> = ({ payload }) => {
               return (
                 <span
                   onClick={() => handleFileOpen(filePath, fileName)}
-                  className='bg-gray-1000 ml-0.5 inline-flex cursor-pointer items-center rounded-md px-2 py-0.5 text-xs font-medium text-white transition-all duration-150 hover:bg-black hover:shadow-md active:scale-[0.98]'
+                  className='bg-GRAY_1000 text-background ml-0.5 inline-flex cursor-pointer items-center rounded-md px-2 py-0.5 text-xs font-medium transition-all duration-150 hover:opacity-80 hover:shadow-md active:scale-[0.98]'
                 >
                   {fileName}
                 </span>

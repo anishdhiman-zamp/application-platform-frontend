@@ -181,7 +181,7 @@ const SpreadsheetViewer = memo(({ content, mediaUrl, fileExtension, onError }: S
   return (
     <div className='flex h-full w-full flex-col overflow-hidden'>
       {/* Toolbar */}
-      <div className='border-GRAY_400 flex shrink-0 items-center justify-between border-b px-4 py-2'>
+      <div className='border-border flex shrink-0 items-center justify-between border-b px-4 py-2'>
         <div className='max-w-xs flex-1'>
           <Input
             size='small'
@@ -190,6 +190,7 @@ const SpreadsheetViewer = memo(({ content, mediaUrl, fileExtension, onError }: S
             onChange={(e) => setGlobalFilter(e.target.value)}
             icon={<Search size={14} className='text-GRAY_600' />}
             iconPosition='leading'
+            className='bg-BG_WHITE'
           />
         </div>
         <span className='f-12-400 text-GRAY_700'>
@@ -207,11 +208,11 @@ const SpreadsheetViewer = memo(({ content, mediaUrl, fileExtension, onError }: S
                   <th
                     key={header.id}
                     className={cn(
-                      'bg-GRAY_100 border-GRAY_400 f-12-500 text-GRAY_700 border-r border-b px-3 py-2 text-left whitespace-nowrap',
+                      'bg-muted border-border f-12-500 text-GRAY_700 border-r border-b px-3 py-2 text-left whitespace-nowrap',
                       'sticky top-0 z-10',
                       header.column.getCanSort() &&
                         !table.getState().columnSizingInfo.isResizingColumn &&
-                        'hover:bg-GRAY_200 cursor-pointer select-none',
+                        'hover:bg-accent cursor-pointer select-none',
                       header.id === ROW_NUMBER_COLUMN_ID && 'left-0 z-20',
                     )}
                     style={{ width: header.getSize() }}
@@ -254,14 +255,14 @@ const SpreadsheetViewer = memo(({ content, mediaUrl, fileExtension, onError }: S
               </tr>
             ) : (
               rows.map((row, rowIndex) => (
-                <tr key={row.id} className={cn('hover:bg-GRAY_100', rowIndex % 2 === 1 && 'bg-GRAY_50')}>
+                <tr key={row.id} className={cn('hover:bg-accent', rowIndex % 2 === 1 && 'bg-muted/40')}>
                   {row.getVisibleCells().map((cell) => (
                     <td
                       key={cell.id}
                       className={cn(
-                        'border-GRAY_400 f-13-400 text-GRAY_900 truncate overflow-hidden border-r border-b px-3 py-2 whitespace-nowrap',
+                        'border-border f-13-400 text-GRAY_1000 truncate overflow-hidden border-r border-b px-3 py-2 whitespace-nowrap',
                         cell.column.id === ROW_NUMBER_COLUMN_ID &&
-                          'bg-GRAY_100 text-GRAY_600 f-12-400 sticky left-0 z-10 text-center',
+                          'bg-muted text-GRAY_700 f-12-400 sticky left-0 z-10 text-center',
                       )}
                       style={{ width: cell.column.getSize() }}
                     >
@@ -276,7 +277,7 @@ const SpreadsheetViewer = memo(({ content, mediaUrl, fileExtension, onError }: S
       </div>
 
       {/* Footer: Sheet tabs + Pagination */}
-      <div className='border-GRAY_400 flex shrink-0 items-stretch justify-between border-t'>
+      <div className='border-border flex shrink-0 items-stretch justify-between border-t'>
         <SheetTabs
           sheetNames={spreadsheetData.sheetNames}
           activeSheet={activeSheet}

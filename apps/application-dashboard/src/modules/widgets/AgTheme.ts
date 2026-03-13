@@ -1,5 +1,5 @@
+import { CHART_PALETTE, COLORS } from '@zamp-platform/ui';
 import { AgChartTheme } from 'ag-charts-community';
-import { CHART_PALETTE, COLORS } from 'constants/colors';
 
 export const AG_CHART_THEME: AgChartTheme = {
   palette: CHART_PALETTE.palette,

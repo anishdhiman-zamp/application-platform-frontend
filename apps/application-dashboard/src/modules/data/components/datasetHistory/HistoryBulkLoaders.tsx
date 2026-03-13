@@ -1,7 +1,7 @@
 import React, { FC } from 'react';
 import { useDispatch } from 'react-redux';
+import { CSS_VARS } from '@zamp-platform/ui';
 import { SvgSpriteLoader } from '@zamp-platform/ui/assets';
-import { COLORS } from 'constants/colors';
 import { HistoryBulkLoadersPropsType } from 'modules/data/components/importDataset/importData.types';
 import { LOADER_STATUS } from 'modules/data/data.types';
 import { removeDatasetBulkLoader } from 'store/slices/user';
@@ -30,7 +30,7 @@ const HistoryBulkLoaders: FC<HistoryBulkLoadersPropsType> = ({
                   key={index}
                   className={cn(
                     !isHoveredLoaders && 'absolute delay-100 ease-out',
-                    'border-GRAY_500 rounded-2.5 shadow-table-filter-menu flex w-96 items-center justify-between gap-3 border-[0.5px] bg-white px-5 py-3 transition-transform delay-100 duration-300 ease-out',
+                    'border-GRAY_500 rounded-2.5 shadow-table-filter-menu bg-BG_WHITE flex w-96 items-center justify-between gap-3 border-[0.5px] px-5 py-3 transition-transform delay-100 duration-300 ease-out',
                   )}
                   style={{
                     transform: isHoveredLoaders
@@ -52,7 +52,7 @@ const HistoryBulkLoaders: FC<HistoryBulkLoadersPropsType> = ({
                         id='x-close'
                         width={16}
                         height={16}
-                        color={COLORS.GRAY_1000}
+                        color={CSS_VARS.GRAY_1000}
                         className='cursor-pointer'
                         onClick={() => handleRemoveLoader(loader?.id)}
                       />

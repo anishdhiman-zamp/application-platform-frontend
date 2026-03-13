@@ -160,7 +160,7 @@ const FileTreeNodeRow = forwardRef<HTMLDivElement, FileTreeNodeRowProps>(
                 onKeyDown={rename.onKeyDown}
                 size='small'
                 className={cn(
-                  'h-5! min-w-0 flex-1 p-0.5 text-[13px]! leading-4! font-normal!',
+                  'bg-BG_WHITE h-5! min-w-0 flex-1 p-0.5 text-[13px]! leading-4! font-normal!',
                   state.isDuplicateName && 'border-RED_700! focus:shadow-input-error-outline-shadow',
                 )}
                 onClick={(e) => e.stopPropagation()}

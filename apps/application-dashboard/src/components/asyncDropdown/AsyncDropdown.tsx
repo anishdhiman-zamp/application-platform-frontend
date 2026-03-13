@@ -1,7 +1,7 @@
-import { FC, useEffect, useRef, useState } from 'react';
+import { FC, useEffect, useLayoutEffect, useRef, useState } from 'react';
+import { CSS_VARS } from '@zamp-platform/ui';
 import { SvgSpriteLoader } from '@zamp-platform/ui/assets';
 import { ICON_SPRITE_TYPES } from '@zamp-platform/ui/types';
-import { COLORS } from 'constants/colors';
 import { useOnClickOutside } from 'hooks';
 import { cn } from 'utils/common';
 import { AsyncDropdownPropsType } from 'components/asyncDropdown/asyncDropdown.types';
@@ -24,9 +24,9 @@ const AsyncDropdown: FC<AsyncDropdownPropsType> = ({
   selectedOptionClassName,
   isOverflowStyle,
 }) => {
-  const [dropdownTop, setDropdownTop] = useState(0);
   const buttonRef = useRef<HTMLDivElement>(null);
   const dropdownRef = useRef<HTMLDivElement>(null);
+  const [dropdownTop, setDropdownTop] = useState(0);
 
   const handleToggleDropdown = () => {
     if (isOpen) {
@@ -38,7 +38,7 @@ const AsyncDropdown: FC<AsyncDropdownPropsType> = ({
 
   useOnClickOutside(dropdownRef, onClose);
 
-  useEffect(() => {
+  useLayoutEffect(() => {
     if (isOpen && buttonRef?.current) {
       const buttonEl = buttonRef.current;
 
@@ -82,7 +82,7 @@ const AsyncDropdown: FC<AsyncDropdownPropsType> = ({
               iconCategory={ICON_SPRITE_TYPES.ARROWS}
               width={12}
               height={12}
-              color={isHoveredDropdown ? COLORS.GRAY_1000 : COLORS.WHITE}
+              color={isHoveredDropdown ? CSS_VARS.GRAY_1000 : 'transparent'}
             />
           </div>
         )}
@@ -90,7 +90,7 @@ const AsyncDropdown: FC<AsyncDropdownPropsType> = ({
       {isOpen && (
         <div
           className={cn(
-            'border-GRAY_50 shadow-table-filter-menu absolute right-0 z-1000 flex max-w-[170px] min-w-max flex-col rounded-md border bg-white p-1',
+            'border-GRAY_50 shadow-table-filter-menu bg-BG_WHITE absolute right-0 z-1000 flex max-w-[170px] min-w-max flex-col rounded-md border p-1',
             wrapperClassName,
           )}
           style={{
@@ -101,7 +101,7 @@ const AsyncDropdown: FC<AsyncDropdownPropsType> = ({
             <div
               key={role.value}
               className={cn(
-                'hover:bg-GRAY_100 flex cursor-pointer flex-col rounded-md py-2 pr-2 pl-2.5',
+                'hover:bg-accent flex cursor-pointer flex-col rounded-md py-2 pr-2 pl-2.5',
                 role.value === selectedValue?.value && selectedOptionClassName,
               )}
               onClick={() => onChange(role)}
@@ -114,7 +114,7 @@ const AsyncDropdown: FC<AsyncDropdownPropsType> = ({
                     iconCategory={ICON_SPRITE_TYPES.GENERAL}
                     width={14}
                     height={14}
-                    color={COLORS.GRAY_900}
+                    color={CSS_VARS.GRAY_900}
                   />
                 )}
               </span>
@@ -131,7 +131,7 @@ const AsyncDropdown: FC<AsyncDropdownPropsType> = ({
                 iconCategory={ICON_SPRITE_TYPES.GENERAL}
                 width={12}
                 height={12}
-                color={COLORS.RED_700}
+                color={CSS_VARS.RED_700}
               />
               Remove
             </span>

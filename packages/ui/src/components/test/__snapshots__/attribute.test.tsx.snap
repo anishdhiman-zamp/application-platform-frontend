@@ -5,7 +5,7 @@ exports[`Attribute Component - Snapshot Tests matches snapshot for default props
   class="border-GRAY_400 hover:bg-BG_GRAY_2 active:bg-BG_GRAY_2 inline-flex items-center gap-1.5 rounded-md border px-2 py-1"
 >
   <span
-    class="text-secondary-400 f-12-400 whitespace-nowrap"
+    class="text-BG_WHITE f-12-400 whitespace-nowrap"
   >
     Name
   </span>
@@ -23,7 +23,7 @@ exports[`Attribute Component - Snapshot Tests matches snapshot when disabled 1`]
   disabled=""
 >
   <span
-    class="text-secondary-400 f-12-400 whitespace-nowrap"
+    class="text-BG_WHITE f-12-400 whitespace-nowrap"
   >
     Name
   </span>

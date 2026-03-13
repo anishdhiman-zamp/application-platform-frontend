@@ -1,9 +1,8 @@
 import { type FC, useEffect, useMemo, useRef, useState } from 'react';
-import { Button, Textarea, toast } from '@zamp-platform/ui';
+import { Button, COLORS, Textarea, toast } from '@zamp-platform/ui';
 import { SvgSpriteLoader } from '@zamp-platform/ui/assets';
 import { MAX_TEXTAREA_HEIGHT } from 'modules/process/process.constant';
 import { useEmitActivityLogsMutation } from '@/apis/processes';
-import { COLORS } from '@/constants/colors';
 import { KEYBOARD_KEYS } from '@/constants/shortcuts';
 import { useAppSelector } from '@/hooks/toolkit';
 import { useResourceAccess } from '@/hooks/useResourceAccess';

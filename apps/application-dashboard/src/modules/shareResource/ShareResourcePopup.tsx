@@ -1,5 +1,5 @@
 import { FC, useMemo, useState } from 'react';
-import { Button, Popover, PopoverContent, PopoverPortal, PopoverTrigger } from '@zamp-platform/ui';
+import { Button, CSS_VARS, Popover, PopoverContent, PopoverPortal, PopoverTrigger } from '@zamp-platform/ui';
 import { SvgSpriteLoader } from '@zamp-platform/ui/assets';
 import { ICON_SPRITE_TYPES } from '@zamp-platform/ui/types';
 import {
@@ -7,7 +7,6 @@ import {
   usePatchChangeAudienceRoleInResourceMutation,
   usePostShareResourceToAudiencesMutation,
 } from 'apis/collaboration';
-import { COLORS } from 'constants/colors';
 import { useAppSelector } from 'hooks/toolkit';
 import { useUserIdentity } from 'hooks/useUserIdentity';
 import AccessFilters from 'modules/shareResource/AccessFilters';
@@ -19,10 +18,12 @@ import { ResourceAudienceType } from 'types/api/auth.types';
 import { VALIDATION_ERROR_MESSAGES } from 'utils/accessPermission/accessPermission.constants';
 import { getCustomFilterColor, getUserNameFromEmail, validateEmail } from 'utils/common';
 import { useGetAudiencesByOrganisationIdQuery } from '@/apis/people';
+import { useTheme } from '@/app/_providers/theme-provider';
 import { convertToFilterModel } from '@/components/common/table/table.utils';
 import { TOAST_MESSAGES } from '@/components/common/toast/toast.constants';
 import { filtersContextActions, useFiltersContextStore, withFiltersContext } from '@/components/filter/filters.context';
 import { useResourceAccess } from '@/hooks/useResourceAccess';
+import { THEME_MODE } from '@/modules/general/constants/general.constants';
 import CustomiseAccess from '@/modules/shareResource/CustomiseAccess';
 import {
   CombinedOptionListDataType,
@@ -36,6 +37,7 @@ import {
   ShareResourceVersion,
   ValidationResult,
 } from '@/modules/shareResource/shareResource.types';
+import { resolveChipColor } from '@/modules/team/people.utils';
 import { AddAudiencesToResourcePayload } from '@/types/api/collaboration.types';
 import { FilterModelType } from '@/types/components/table.type';
 import { PERMISSION_ROLES } from '@/utils/accessPermission/accessPermission.types';
@@ -70,6 +72,9 @@ const ShareResourcePopup: FC<ShareResourcePopupProps> = (props) => {
   const [openPopup, setOpenPopup] = useState<boolean>(false);
   const [showCustomiseAccess, setShowCustomiseAccess] = useState<boolean>(false);
   const collaborationEndpoints = RESOURCE_COLLABORATION_ENDPOINTS[version ?? ShareResourceVersion.V1];
+  const { resolvedTheme } = useTheme();
+  const isDark = resolvedTheme === THEME_MODE.DARK;
+
   const organizationId = useAppSelector((state: RootState) => state?.user?.user?.orgs?.[0]?.organization_id) ?? '';
 
   const { audiencesData, checkUserPrivilege, allTeamsData, isLoadingAudiencesData, refetchAudiencesData } =
@@ -338,7 +343,7 @@ const ShareResourcePopup: FC<ShareResourcePopupProps> = (props) => {
           label,
           valid: isValid,
           role: selectedRole as string,
-          color: isValid ? (color ? color : COLORS.WHITE) : COLORS.RED_100,
+          color: isValid ? (color ? color : CSS_VARS.BG_WHITE) : CSS_VARS.RED_100,
           team_id,
           resource_audience_type,
           resource_audience_id,
@@ -368,7 +373,7 @@ const ShareResourcePopup: FC<ShareResourcePopupProps> = (props) => {
           value: option?.value,
           label: option?.label,
           valid: isValid,
-          color: isValid ? (option?.color ? option?.color : COLORS.WHITE) : COLORS.RED_100,
+          color: isValid ? (option?.color ? option?.color : CSS_VARS.BG_WHITE) : CSS_VARS.RED_100,
           role: selectedRole as string,
           team_id: option?.team_id,
           resource_audience_type,
@@ -397,7 +402,7 @@ const ShareResourcePopup: FC<ShareResourcePopupProps> = (props) => {
       label: item?.name ?? '',
       value: item?.name ?? '',
       type: ResourceAudienceType.TEAM,
-      color: item?.metadata?.color_hex_code,
+      color: resolveChipColor(item?.metadata?.color_hex_code, isDark),
       team_id: item?.team_id,
     })) || []),
   ];
@@ -448,7 +453,7 @@ const ShareResourcePopup: FC<ShareResourcePopupProps> = (props) => {
         <PopoverPortal>
           <PopoverContent align='end' className='w-[420px] border-none bg-transparent p-0 shadow-none'>
             <div>
-              <div className='border-0.5 border-GRAY_500 rounded-3.5 shadow-table-filter-menu bg-white'>
+              <div className='border-0.5 border-GRAY_500 rounded-3.5 shadow-table-filter-menu bg-BG_WHITE'>
                 <div className='flex w-full items-center justify-between p-5'>
                   <span className='f-16-600 text-GRAY_950'>{title || `Share this ${resourceConfig?.displayName}`}</span>
                   <div className='cursor-pointer p-1' onClick={handleClosePopup}>
@@ -501,7 +506,7 @@ const ShareResourcePopup: FC<ShareResourcePopupProps> = (props) => {
                         iconCategory={ICON_SPRITE_TYPES.GENERAL}
                         width={12}
                         height={12}
-                        color={COLORS.GRAY_1000}
+                        color={CSS_VARS.GRAY_1000}
                       />
                       <CopyToClipboardBrowserUrl />
                     </span>
@@ -517,7 +522,7 @@ const ShareResourcePopup: FC<ShareResourcePopupProps> = (props) => {
                   </div>
                 </div>
               </div>
-              <div className='rounded-3.5 border-0.5 border-GRAY_500 shadow-tableFilterMenu mt-2 bg-white pt-4 pb-2'>
+              <div className='rounded-3.5 border-0.5 border-GRAY_500 shadow-table-filter-menu bg-BG_WHITE mt-2 pt-4 pb-2'>
                 <span className='f-12-500 text-GRAY_700 px-4'>Who has access</span>
                 <motion.div
                   initial={WhoHasAccessLoaderVariants.hidden}

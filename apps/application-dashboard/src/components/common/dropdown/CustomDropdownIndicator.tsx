@@ -1,8 +1,8 @@
 import React, { useMemo } from 'react';
 import { components } from 'react-select';
+import { COLORS, CSS_VARS } from '@zamp-platform/ui';
 import { SvgSpriteLoader } from '@zamp-platform/ui/assets';
 import { ICON_SPRITE_TYPES } from '@zamp-platform/ui/types';
-import { COLORS } from 'constants/colors';
 import { SIZE_TYPES } from 'types/common/components';
 import { CustomDropdownIndicatorProps } from 'types/common/components/dropdown/dropdown.types';
 import { DROPDOWN_SIZE_STYLES } from 'components/common/dropdown/dropdown.constants';
@@ -29,7 +29,7 @@ export const CustomDropdownIndicator = (props: CustomDropdownIndicatorProps) => 
               ? customDropdownIndicatorSize
               : DROPDOWN_SIZE_STYLES[size as SIZE_TYPES].dropdownIndicatorProps.height
           }
-          color={COLORS.GRAY_900}
+          color={CSS_VARS.GRAY_900}
         />
       </div>
     ),
@@ -45,7 +45,7 @@ export const CustomDropdownIndicator = (props: CustomDropdownIndicatorProps) => 
             iconCategory={ICON_SPRITE_TYPES.ARROWS}
             width={12}
             height={12}
-            color={isHoveredDropdown ? COLORS.GRAY_1000 : COLORS.WHITE}
+            color={isHoveredDropdown ? CSS_VARS.GRAY_1000 : COLORS.WHITE}
           />
         </div>
       ) : (

@@ -238,7 +238,7 @@ const OrgSwitcher: FC<OrgSwitcherProps> = ({ isSidebarOpen, menuContentClassName
         <DropdownMenuContent
           align='end'
           className={cn(
-            'z-9999 mr-1 flex w-[229px] flex-col gap-[2px] overflow-y-auto p-1 [scrollbar-width:none]',
+            'bg-BG_WHITE z-9999 mr-1 flex w-[229px] flex-col gap-[2px] overflow-y-auto p-1 [scrollbar-width:none]',
             menuContentClassName,
           )}
           sideOffset={5}
@@ -251,7 +251,7 @@ const OrgSwitcher: FC<OrgSwitcherProps> = ({ isSidebarOpen, menuContentClassName
                 type='text'
                 size='small'
                 placeholder='Search organization...'
-                className='mt-1'
+                className='bg-BG_WHITE mt-1'
                 autoFocus
                 value={searchQuery}
                 onChange={handleSearchChange}

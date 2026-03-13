@@ -1,6 +1,6 @@
+import { COLORS } from '@zamp-platform/ui';
 import { DATE_FORMATS, PERIODICITY_TYPES } from '@zamp-platform/utils';
 import { AgCartesianSeriesTooltipRendererParams, AgChartOptions } from 'ag-charts-community';
-import { COLORS } from 'constants/colors';
 import {
   endOfMonth,
   endOfQuarter,

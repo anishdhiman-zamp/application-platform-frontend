@@ -87,7 +87,7 @@ const ConnectionsPopover: FC<ConnectionsPopoverProps> = ({ integrationName, conn
                   variant='outline'
                   size='xsmall'
                   isLoading={deletingConnectionId === (connection?.id ?? '') && isDeletingConnection}
-                  className='f-11-500 shrink-0 bg-white px-1.5 py-1 hover:bg-white'
+                  className='f-11-500 bg-BG_WHITE hover:bg-BG_WHITE shrink-0 px-1.5 py-1'
                   onClick={(e) => {
                     e.stopPropagation();
                     handleRemoveClick(connection?.id ?? '');

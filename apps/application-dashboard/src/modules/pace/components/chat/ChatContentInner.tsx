@@ -12,7 +12,7 @@ import {
   useChat,
   useFileDragDrop,
 } from '@zamp-platform/chat';
-import { ArrowDownIcon, Button } from '@zamp-platform/ui';
+import { ArrowDownIcon, Button, CSS_VARS } from '@zamp-platform/ui';
 import { cn } from '@zamp-platform/ui/utils';
 import CommonWrapper from '@/components/commonWrapper';
 import { SkeletonTypes } from '@/components/commonWrapper/commonWrapper.types';
@@ -55,6 +55,7 @@ const ChatContentInner = ({
   modelSelectorSlot,
 }: ChatContentInnerProps) => {
   const dispatch = useAppDispatch();
+  const userAvatarBg = CSS_VARS.ORANGE_400;
 
   const currentUserName = useAppSelector((state: RootState) => state.user.user?.user_name) ?? '';
   const { inputValue, setInputValue } = useChatDraftInput({ conversationId });
@@ -127,7 +128,7 @@ const ChatContentInner = ({
   if (isInConversation) {
     return (
       <ChatActionsProvider onFileOpen={handleFileOpen}>
-        <div className='relative flex h-full flex-1 flex-col' {...dropZoneProps}>
+        <div className='bg-BG_WHITE relative flex h-full flex-1 flex-col' {...dropZoneProps}>
           <DropOverlay isVisible={isDragOver} />
           <ChatTopbar
             title={chatTitle || 'Untitled'}
@@ -163,21 +164,22 @@ const ChatContentInner = ({
                 alignUserRight
                 hideSenderName
                 organizationId={organizationId}
+                userAvatarBackgroundColor={userAvatarBg}
               />
-              <div className='h-12 w-full bg-white' />
+              <div className='bg-BG_WHITE h-12 w-full' />
             </CommonWrapper>
-            <div className='sticky bottom-0 z-10 mx-auto w-full max-w-[700px] bg-white pb-3'>
+            <div className='bg-BG_WHITE sticky bottom-0 z-10 mx-auto w-full max-w-[700px] pb-3'>
               <Button
                 onClick={handleScrollToBottomClick}
                 variant='ghost'
                 className={cn(
-                  'bg-gray-1000 hover:bg-gray-1000 absolute -top-10 left-1/2 h-6 w-6 -translate-x-1/2 !rounded-full p-3',
+                  'bg-GRAY_1000 hover:bg-GRAY_950 absolute -top-10 left-1/2 h-6 w-6 -translate-x-1/2 !rounded-full p-3',
                   'transition-all duration-200 ease-out',
                   showScrollButton ? 'translate-y-0 opacity-100' : 'pointer-events-none translate-y-2 opacity-0',
                 )}
                 aria-label='Scroll to bottom'
               >
-                <ArrowDownIcon size={14} className='p-[2px] text-white' />
+                <ArrowDownIcon size={14} className='text-BG_WHITE p-[2px]' />
               </Button>
               <ConnectedChatInput
                 chat={chat}

@@ -59,7 +59,7 @@ export const OtpInput = forwardRef<OtpInputHandle, Props>(
                 key={index}
                 index={index}
                 className={cn(
-                  'h-14 w-12 rounded-xl border bg-white text-center text-[22px] font-semibold caret-transparent outline-none',
+                  'bg-BG_WHITE h-14 w-12 rounded-xl border text-center text-[22px] font-semibold caret-transparent outline-none',
                   isError
                     ? 'border-RED_600 data-[active=true]:border-RED_600 shadow-[0_0_0_3px_rgba(220,38,38,0.08)] data-[active=true]:shadow-[0_0_0_3px_rgba(220,38,38,0.12)]'
                     : digits[index]

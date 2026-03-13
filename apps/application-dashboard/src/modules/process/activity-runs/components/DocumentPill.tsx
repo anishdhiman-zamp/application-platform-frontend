@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from '@zamp-platform/ui';
+import { CSS_VARS, DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from '@zamp-platform/ui';
 import { SvgSpriteLoader } from '@zamp-platform/ui/assets';
 import { ICON_SPRITE_TYPES } from '@zamp-platform/ui/types';
 import { cn } from '@zamp-platform/ui/utils';
@@ -8,7 +8,6 @@ import DocumentPreviewDialog from 'modules/process/activity-runs/components/Docu
 import type { DocumentItemType } from 'modules/process/process.types';
 import { type defaultFnType, SIDE_OPTIONS } from 'types/commonTypes';
 import TooltipV2 from '@/components/common/TooltipV2';
-import { COLORS } from '@/constants/colors';
 
 interface DocumentPillProps extends ICellRendererParams {
   value: DocumentItemType[];
@@ -30,7 +29,7 @@ const DocumentItemPill = ({ item, onClick, maxWidth = '100%' }: DocumentItemPill
       id='file-02'
       iconCategory={ICON_SPRITE_TYPES.FILES}
       size={12}
-      color={COLORS.GRAY_1000}
+      color={CSS_VARS.GRAY_1000}
       className='flex-shrink-0'
     />
     <TooltipV2 tooltipBody={item.name} asChildTrigger showOnlyWhenTruncated>

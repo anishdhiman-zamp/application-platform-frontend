@@ -296,20 +296,20 @@ const ChatFeedback: FC<ChatFeedbackProps> = ({
 
           <DialogBody className='flex flex-col gap-y-4 px-5'>
             <div className='space-y-2'>
-              <label className='text-GRAY_900 f-12-500 block'>What type of issue do you wish to report?</label>
+              <label className='text-GRAY_700 f-12-500 block'>What type of issue do you wish to report?</label>
               <Select
                 options={ISSUE_TYPE_OPTIONS}
                 placeholder='Select...'
                 value={issueType}
                 onValueChange={(value) => setIssueType(value as string)}
-                controlClassName='bg-white border-GRAY_400 h-8'
+                controlClassName='border-GRAY_400 h-8'
                 itemClassName='f-12-450'
                 hideSearch
                 contentClassName='w-(--radix-popover-trigger-width)'
               />
             </div>
             <div className='space-y-2'>
-              <label className='text-GRAY_900 f-12-500 block'>Please provide details:</label>
+              <label className='text-GRAY_700 f-12-500 block'>Please provide details:</label>
 
               {/* Hidden file input */}
               {organizationId && (
@@ -342,8 +342,8 @@ const ChatFeedback: FC<ChatFeedbackProps> = ({
                 onAcceptRecording={handleAcceptRecording}
                 onRejectRecording={handleRejectRecording}
                 microphoneDisabled={microphoneState === MicrophoneState.SettingUp}
-                containerClassName='rounded-lg bg-white shadow-none'
-                textareaClassName='f-12-450 placeholder:text-GRAY_500'
+                containerClassName='rounded-lg bg-BG_WHITE shadow-none'
+                textareaClassName='f-12-450 placeholder:text-GRAY_700'
                 minTextareaHeight={60}
                 maxTextareaHeight={MAX_TEXTAREA_HEIGHT}
               />

@@ -1,6 +1,6 @@
 import { FC, useMemo } from 'react';
 import Select from 'react-select';
-import { COLORS } from 'constants/colors';
+import { COLORS } from '@zamp-platform/ui';
 import { SIZE_TYPES } from 'types/common/components';
 import {
   CustomDropdownIndicatorProps,
@@ -104,13 +104,17 @@ const CustomReactSelect: FC<CustomReactSelectPropsType> = ({
           paddingLeft: '0',
           paddingRight: '8px',
           cursor: 'pointer',
-          backgroundColor: isSelected ? (showSelectedIcon ? 'white' : COLORS.GRAY_100) : 'white',
-          color: isSelected ? COLORS.GRAY_1000 : COLORS.GRAY_900,
+          backgroundColor: isSelected
+            ? showSelectedIcon
+              ? 'var(--BG_WHITE)'
+              : 'hsl(var(--accent))'
+            : 'var(--BG_WHITE)',
+          color: 'hsl(var(--popover-GRAY_1000))',
           ':active': {
-            backgroundColor: COLORS.GRAY_100,
+            backgroundColor: 'hsl(var(--accent))',
           },
           ':hover': {
-            backgroundColor: COLORS.GRAY_100,
+            backgroundColor: 'hsl(var(--accent))',
           },
           ...DROPDOWN_SIZE_STYLES[size].customStyles.option,
           ...customStyles?.option,
@@ -128,7 +132,8 @@ const CustomReactSelect: FC<CustomReactSelectPropsType> = ({
           ...styles,
           fontFamily: 'Inter',
           fontWeight: 500,
-          boxShadow: '0px 4px 15px 0px rgba(166, 166, 166, 0.20);',
+          backgroundColor: 'var(--BG_WHITE)',
+          boxShadow: 'var(--MENU_SHADOW)',
           border: '1px solid var(--GRAY_400)',
           height: 'fit-content',
           cursor: 'pointer',
@@ -143,19 +148,19 @@ const CustomReactSelect: FC<CustomReactSelectPropsType> = ({
           'input:focus': {
             boxShadow: 'none',
           },
-
+          color: 'hsl(var(--GRAY_1000))',
           margin: 0,
           padding: 0,
           ...DROPDOWN_SIZE_STYLES[size].customStyles.input,
           ...customStyles?.input,
         }),
         control: (styles, data) => {
-          let backgroundColor = controlColor?.background;
+          let backgroundColor: string = controlColor?.background ?? 'var(--BG_WHITE)';
 
           if (controlColor?.overrideBackgroundColor) {
             backgroundColor = controlColor?.overrideBackgroundColor;
           } else if (readOnly || disabled) {
-            backgroundColor = COLORS.DIVIDER_GRAY_1;
+            backgroundColor = COLORS.DIVIDER_GRAY;
           }
 
           return {
@@ -221,6 +226,7 @@ const CustomReactSelect: FC<CustomReactSelectPropsType> = ({
         singleValue: (styles) => ({
           ...styles,
           margin: 0,
+          color: 'hsl(var(--GRAY_1000))',
           ...customStyles?.singleValue,
         }),
         valueContainer: (styles) => ({
@@ -263,7 +269,7 @@ const CustomReactSelect: FC<CustomReactSelectPropsType> = ({
           cn(
             `${customClass?.fontSize ? customClass?.fontSize : (customClassNames?.placeholder ?? DROPDOWN_SIZE_STYLES[size].customClassNames.placeholder)}`,
           ),
-        menu: () => cn(`${customClassNames?.menu ?? 'bg-white border-0.5 border-DIVIDER_GRAY'}`),
+        menu: () => cn(`${customClassNames?.menu ?? 'border-0.5 border-DIVIDER_GRAY'}`),
         noOptionsMessage: () => cn(customClassNames?.noOptionsMessage ?? 'h-16 flex items-center justify-center'),
       }}
       onChange={handleChange}

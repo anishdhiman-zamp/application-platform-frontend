@@ -118,7 +118,7 @@ describe('EmailInputToChips - DOM Structure and Attribute Tests', () => {
       // Check for the custom size classes applied by EmailInputToChips
       expect(chip).toHaveClass('h-4', 'w-4');
       // Check for ghost variant classes (hover states)
-      expect(chip).toHaveClass('hover:bg-accent', 'hover:text-accent-foreground');
+      expect(chip).toHaveClass('hover:bg-accent', 'hover:text-accent-GRAY_1000');
     });
 
     // Test chip text content
@@ -172,7 +172,7 @@ describe('EmailInputToChips - DOM Structure and Attribute Tests', () => {
     const removeButtons = screen.getAllByRole('button');
     expect(removeButtons).toHaveLength(1);
     expect(removeButtons[0]).toHaveClass('h-4', 'w-4');
-    expect(removeButtons[0]).toHaveClass('hover:bg-accent', 'hover:text-accent-foreground');
+    expect(removeButtons[0]).toHaveClass('hover:bg-accent', 'hover:text-accent-GRAY_1000');
   });
 
   it('renders correct number of chips based on value prop', () => {
