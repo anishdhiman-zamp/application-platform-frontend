@@ -62,3 +62,16 @@ List findings briefly:
 | 2 | HIGH | SQL injection | db.py:45 |
 
 **Skip low-priority issues. Focus on what matters.**
+
+---
+
+## Known False Positives: Do Not Report
+
+- **Vercel preview URLs**: Not secrets.
+- **`next.config.js` rewrites and redirects**: Not open redirects.
+- **`.env.example` variables**: Example values, not real secrets.
+- **`NEXT_PUBLIC_*` variables**: Intentionally public configuration.
+- **Ory Kratos public endpoint URLs**: Public API endpoints, not secrets.
+- **Tailwind CSS class strings**: Not code injection.
+- **GitHub Actions tokens in CI workflows**: CI/CD secrets, not app vulnerabilities.
+- **Cloudflare protections**: Application sits behind Cloudflare WAF.
