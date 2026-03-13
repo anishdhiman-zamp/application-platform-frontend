@@ -20,8 +20,6 @@ export interface ChatComposerProps {
   value: string;
   onChange: (value: string) => void;
   placeholder?: string;
-  onKeyDown?: (e: React.KeyboardEvent<HTMLTextAreaElement>) => void;
-  onPaste?: (e: React.ClipboardEvent<HTMLTextAreaElement>) => void;
   autoFocus?: boolean;
 
   fileReferences?: UploadedFileType[];
@@ -239,7 +237,7 @@ export const ChatComposer: FC<ChatComposerProps> = ({
                   <Mic />
                 </Button>
               )}
-              {(isStreaming || isStopping || true) && onStop ? (
+              {showSubmitButton && (isStreaming || isStopping) && onStop ? (
                 <Button
                   onClick={onStop}
                   disabled={isStopping}

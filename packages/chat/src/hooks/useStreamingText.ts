@@ -18,29 +18,21 @@ export function useStreamingText(text: string, isStreaming: boolean): string {
   const [displayedLength, setDisplayedLength] = useState(() => (isStreaming ? 0 : text.length));
   const targetLengthRef = useRef(text.length);
   const streamingRef = useRef(isStreaming);
-  const rafRef = useRef<ReturnType<typeof setInterval> | null>(null);
+  const intervalRef = useRef<ReturnType<typeof setInterval> | null>(null);
 
   targetLengthRef.current = text.length;
   streamingRef.current = isStreaming;
 
   useEffect(() => {
-    if (!isStreaming && displayedLength >= text.length) {
-      if (rafRef.current) {
-        clearInterval(rafRef.current);
-        rafRef.current = null;
-      }
-      return;
-    }
+    if (intervalRef.current) return;
 
-    if (rafRef.current) return;
-
-    rafRef.current = setInterval(() => {
+    intervalRef.current = setInterval(() => {
       setDisplayedLength((prev) => {
         const target = targetLengthRef.current;
         if (prev >= target) {
-          if (!streamingRef.current && rafRef.current) {
-            clearInterval(rafRef.current);
-            rafRef.current = null;
+          if (!streamingRef.current && intervalRef.current) {
+            clearInterval(intervalRef.current);
+            intervalRef.current = null;
           }
           return prev;
         }
@@ -49,12 +41,12 @@ export function useStreamingText(text: string, isStreaming: boolean): string {
     }, FRAME_INTERVAL_MS);
 
     return () => {
-      if (rafRef.current) {
-        clearInterval(rafRef.current);
-        rafRef.current = null;
+      if (intervalRef.current) {
+        clearInterval(intervalRef.current);
+        intervalRef.current = null;
       }
     };
-  }, [isStreaming, text.length, displayedLength]);
+  }, [isStreaming, text.length]);
 
   if (!isStreaming && displayedLength >= text.length) return text;
 

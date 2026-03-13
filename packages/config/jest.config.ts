@@ -28,6 +28,7 @@ const config: Config = {
   moduleFileExtensions: ['js', 'jsx', 'ts', 'tsx', 'json'],
 
   moduleNameMapper: {
+    '\\.(css|less|scss|sass)$': '<rootDir>/../../packages/config/css-stub.js',
     '^@zamp-platform/api$': '<rootDir>/../../packages/api/index.ts',
     '^@zamp-platform/utils/(.*)$': '<rootDir>/../../packages/utils/$1',
     '^@zamp-platform/utils$': '<rootDir>/../../packages/utils/index.ts',
@@ -57,6 +58,33 @@ const config: Config = {
 
   testPathIgnorePatterns: ['.*\\.mock\\.(ts|tsx|js)$'],
 
+  transformIgnorePatterns: [
+    'node_modules/(?!(' +
+      'lowlight|devlop|fault|' +
+      'react-markdown|' +
+      'remark-gfm|remark-parse|remark-stringify|remark-rehype|' +
+      'rehype-slug|rehype-raw|' +
+      'unified|bail|trough|vfile|vfile-message|' +
+      'unist-util-visit|unist-util-visit-parents|unist-util-is|unist-util-stringify-position|unist-util-position|unist-util-generated|unist-util-position-from-estree|' +
+      'mdast-util-to-hast|mdast-util-from-markdown|mdast-util-to-markdown|mdast-util-to-string|mdast-util-phrasing|mdast-util-gfm|mdast-util-gfm-table|mdast-util-gfm-task-list-item|mdast-util-gfm-strikethrough|mdast-util-gfm-footnote|mdast-util-gfm-autolink-literal|mdast-util-find-and-replace|' +
+      'micromark|micromark-util-combine-extensions|micromark-util-chunked|micromark-util-decode-numeric-character-reference|micromark-util-encode|micromark-util-sanitize-uri|micromark-util-character|micromark-util-resolve-all|micromark-util-subtokenize|micromark-util-normalize-identifier|micromark-util-decode-string|micromark-util-classify-character|micromark-util-html-tag-name|micromark-util-types|micromark-util-symbol|micromark-extension-gfm|micromark-extension-gfm-table|micromark-extension-gfm-task-list-item|micromark-extension-gfm-strikethrough|micromark-extension-gfm-footnote|micromark-extension-gfm-autolink-literal|micromark-extension-gfm-tagfilter|micromark-factory-space|micromark-factory-destination|micromark-factory-label|micromark-factory-title|micromark-factory-whitespace|micromark-core-commonmark|' +
+      'hast-util-to-jsx-runtime|hast-util-whitespace|hast-util-from-parse5|hast-util-raw|hast-util-to-parse5|hast-util-from-html|hast-util-heading-rank|hast-util-has-property|hast-util-parse-selector|hast-util-is-element|' +
+      'hastscript|' +
+      'property-information|comma-separated-tokens|space-separated-tokens|' +
+      'web-namespaces|' +
+      'html-void-elements|' +
+      'ccount|escape-string-regexp|' +
+      'character-entities|decode-named-character-reference|' +
+      'github-slugger|' +
+      'estree-util-is-identifier-name|' +
+      'zwitch|' +
+      'longest-streak|' +
+      'parse5|' +
+      'trim-lines|' +
+      'style-to-object|inline-style-parser' +
+      ')/)',
+  ],
+
   transform: {
     '^.+\\.(ts|tsx)$': [
       'ts-jest',
@@ -65,6 +93,17 @@ const config: Config = {
         tsconfig: {
           jsx: 'react-jsx',
           esModuleInterop: true,
+        },
+      },
+    ],
+    '^.+\\.jsx?$': [
+      'ts-jest',
+      {
+        useESM: true,
+        tsconfig: {
+          jsx: 'react-jsx',
+          esModuleInterop: true,
+          allowJs: true,
         },
       },
     ],
