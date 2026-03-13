@@ -87,7 +87,7 @@ export const MarkdownBlock: React.FC<MarkdownBlockProps> = ({ payload }) => {
 
   return (
     <div
-      className='max-w-chat-prose text-GRAY_950 overflow-hidden text-[14px] leading-[1.667] font-[420] wrap-break-word'
+      className='max-w-chat-prose text-GRAY_950 overflow-hidden text-sm leading-[1.667] font-[420] wrap-break-word'
       data-testid='markdown-block'
     >
       <ReactMarkdown
@@ -101,25 +101,25 @@ export const MarkdownBlock: React.FC<MarkdownBlockProps> = ({ payload }) => {
             </h1>
           ),
           h2: ({ children }) => (
-            <h2 className='text-GRAY_1000 mt-6 text-[18px] leading-[1.4] font-semibold tracking-[-0.015em] first:mt-0'>
+            <h2 className='text-GRAY_1000 mt-6 text-lg leading-[1.4] font-semibold tracking-[-0.015em] first:mt-0'>
               {children}
             </h2>
           ),
           h3: ({ children }) => (
-            <h3 className='text-GRAY_1000 mt-8 text-[16px] leading-[1.4] font-semibold tracking-[-0.01em] first:mt-0'>
+            <h3 className='text-GRAY_1000 mt-8 text-base leading-[1.4] font-semibold tracking-[-0.01em] first:mt-0'>
               {children}
             </h3>
           ),
           p: ({ children }) => (
-            <p className='text-GRAY_950 mt-3 text-[14px] leading-[1.667] font-[420] first:mt-0'>{children}</p>
+            <p className='text-GRAY_950 mt-3 text-sm leading-[1.667] font-[420] first:mt-0'>{children}</p>
           ),
           ul: ({ children }) => (
-            <ul className='text-GRAY_950 mt-3 list-disc pl-5 text-[14px] leading-[1.667] font-[420] first:mt-0'>
+            <ul className='text-GRAY_950 mt-3 list-disc pl-5 text-sm leading-[1.667] font-[420] first:mt-0'>
               {children}
             </ul>
           ),
           ol: ({ children }) => (
-            <ol className='text-GRAY_950 mt-3 list-decimal pl-5 text-[14px] leading-[1.667] font-[420] first:mt-0'>
+            <ol className='text-GRAY_950 mt-3 list-decimal pl-5 text-sm leading-[1.667] font-[420] first:mt-0'>
               {children}
             </ol>
           ),
@@ -153,7 +153,7 @@ export const MarkdownBlock: React.FC<MarkdownBlockProps> = ({ payload }) => {
 
             if (isInline) {
               return (
-                <code className='bg-PINK_100 text-PINK_600 rounded-[3px] px-1 py-0.5 font-mono text-[12px] font-normal'>
+                <code className='bg-PINK_100 text-PINK_600 rounded-[3px] px-1 py-0.5 font-mono text-xs font-normal'>
                   {children}
                 </code>
               );

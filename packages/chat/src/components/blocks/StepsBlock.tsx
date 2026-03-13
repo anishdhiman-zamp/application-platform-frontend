@@ -120,7 +120,7 @@ export const StepsBlock: FC<StepsBlockProps> = ({ blocks, toolResultsMap }) => {
       return (
         <div className={cn('border-border border-b', isLast && 'border-b-0')}>
           <IntegrationCardV2
-            className='min-h-[0px] border-none'
+            className='min-h-0 border-none'
             integrationItem={integrationItem}
             redirectUrl={toolResultData?.metadata?.redirect_url}
           />
