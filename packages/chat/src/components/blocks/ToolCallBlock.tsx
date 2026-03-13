@@ -14,7 +14,6 @@ import { FC } from 'react';
 import IntegrationCardV2 from '@/modules/integrations/AllIntegrations/IntegrationCardV2';
 import type { IntegrationItem } from '@/types/api/integrations';
 
-import { useStreamingText } from '../../hooks/useStreamingText';
 import type { ToolResultContentBlock, ToolUseDisplayContent } from '../../types/block.types';
 import { buildIntegrationItemFromToolResult } from '../block.utils';
 import { TOOL_NAMES } from '../chat.constants';
@@ -34,15 +33,9 @@ interface ToolCallBlockProps {
     icon?: string;
   };
   is_complete: boolean;
-  isStreaming?: boolean;
   toolResult?: ToolResultContentBlock;
 }
-export const ToolCallBlock: FC<ToolCallBlockProps> = ({
-  payload,
-  is_complete = true,
-  isStreaming = false,
-  toolResult,
-}) => {
+export const ToolCallBlock: FC<ToolCallBlockProps> = ({ payload, is_complete = true, toolResult }) => {
   const toolName = payload?.display_name || 'Unknown';
   const displayContent = safeJsonParse<{ tool_name?: string; icon?: string }>(payload?.display_content?.json_block);
   const name = payload?.name || displayContent?.tool_name;
@@ -55,9 +48,8 @@ export const ToolCallBlock: FC<ToolCallBlockProps> = ({
     [key: string]: unknown;
   }>(toolResult?.payload?.content);
 
-  const rawInputContent =
+  const inputContent =
     payload?.display_content?.json_block || (!payload?.display_content && payload?.partial_json) || payload?.input_json;
-  const inputContent = useStreamingText(rawInputContent || '', isStreaming) || undefined;
 
   if (name === TOOL_NAMES.AUTHENTICATE_INTEGRATION_AND_CREATE_CONNECTION && toolResultData?.title) {
     const integrationItem = buildIntegrationItemFromToolResult(toolResultData) as IntegrationItem;

@@ -11,7 +11,6 @@ import rehypeSlug from 'rehype-slug';
 import remarkGfm from 'remark-gfm';
 
 import { useChatActions } from '../../context/ChatActionsContext';
-import { useStreamingText } from '../../hooks/useStreamingText';
 
 const lowlight = createLowlight(common);
 
@@ -74,12 +73,10 @@ interface MarkdownBlockProps {
   payload: {
     text: string;
   };
-  isStreaming?: boolean;
 }
 
-export const MarkdownBlock: React.FC<MarkdownBlockProps> = ({ payload, isStreaming = false }) => {
+export const MarkdownBlock: React.FC<MarkdownBlockProps> = ({ payload }) => {
   const { onFileOpen } = useChatActions();
-  const displayedText = useStreamingText(payload.text, isStreaming);
 
   const handleFileOpen = (filePath: string, fileName: string) => {
     if (onFileOpen) {
@@ -209,7 +206,7 @@ export const MarkdownBlock: React.FC<MarkdownBlockProps> = ({ payload, isStreami
           },
         }}
       >
-        {displayedText}
+        {payload.text}
       </ReactMarkdown>
     </div>
   );

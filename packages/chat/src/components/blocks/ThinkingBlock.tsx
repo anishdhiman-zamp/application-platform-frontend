@@ -1,7 +1,6 @@
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from '@zamp-platform/ui';
 import { FC } from 'react';
 
-import { useStreamingText } from '../../hooks/useStreamingText';
 import { formatThinkingDuration } from '../block.utils';
 import { StatusLabel } from './StatusLabel';
 
@@ -12,19 +11,16 @@ interface ThinkingBlockProps {
   start_timestamp?: string;
   stop_timestamp?: string;
   is_complete: boolean;
-  isStreaming?: boolean;
 }
 
 export const ThinkingBlock: FC<ThinkingBlockProps> = ({
   payload,
   is_complete = true,
-  isStreaming = false,
   start_timestamp,
   stop_timestamp,
 }) => {
   const thinkingDuration = formatThinkingDuration(start_timestamp, stop_timestamp);
   const completedLabelWithDuration = thinkingDuration ? `Thought for ${thinkingDuration}` : 'Thought';
-  const displayedText = useStreamingText(payload?.thinking || 'Processing...', isStreaming);
 
   return (
     <Accordion type='single' collapsible className='border-border bg-BG_WHITE w-full overflow-hidden rounded-lg border'>
@@ -39,7 +35,7 @@ export const ThinkingBlock: FC<ThinkingBlockProps> = ({
           </div>
         </AccordionTrigger>
         <AccordionContent className='bg-muted f-12-400 text-GRAY_1000 flex max-h-60 w-full overflow-y-auto p-2 whitespace-pre-wrap [scrollbar-width:thin] [&::-webkit-scrollbar]:hidden'>
-          {displayedText}
+          {payload?.thinking || 'Processing...'}
         </AccordionContent>
       </AccordionItem>
     </Accordion>

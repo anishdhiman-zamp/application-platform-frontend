@@ -18,7 +18,6 @@ import React, { FC, useState } from 'react';
 import IntegrationCardV2 from '@/modules/integrations/AllIntegrations/IntegrationCardV2';
 import type { IntegrationItem } from '@/types/api/integrations';
 
-import { useStreamingText } from '../../hooks/useStreamingText';
 import {
   BLOCK_TYPE,
   type ThinkingContentBlock,
@@ -32,18 +31,16 @@ import { StatusLabel } from './StatusLabel';
 
 type StepBlock = ThinkingContentBlock | ToolUseContentBlock;
 
-const StreamingThinkingContent: FC<{ text: string; isStreaming: boolean }> = ({ text, isStreaming }) => {
-  const displayedText = useStreamingText(text, isStreaming);
-  return <div className='f-12-400 text-GRAY_1000 whitespace-pre-wrap'>{displayedText}</div>;
+const ThinkingContent: FC<{ text: string }> = ({ text }) => {
+  return <div className='f-12-400 text-GRAY_1000 whitespace-pre-wrap'>{text}</div>;
 };
 
 interface StepsBlockProps {
   blocks: StepBlock[];
   toolResultsMap: Map<string, ToolResultContentBlock>;
-  isStreaming?: boolean;
 }
 
-export const StepsBlock: FC<StepsBlockProps> = ({ blocks, toolResultsMap, isStreaming = false }) => {
+export const StepsBlock: FC<StepsBlockProps> = ({ blocks, toolResultsMap }) => {
   const [accordionValue, setAccordionValue] = useState<string>('');
 
   const getStepIcon = (block: StepBlock) => {
@@ -137,13 +134,7 @@ export const StepsBlock: FC<StepsBlockProps> = ({ blocks, toolResultsMap, isStre
   const renderStepContent = (block: StepBlock) => {
     if (block.type === BLOCK_TYPE.THINKING) {
       const thinkingBlock = block as ThinkingContentBlock;
-      const isBlockStreaming = isStreaming && thinkingBlock.is_complete === false;
-      return (
-        <StreamingThinkingContent
-          text={thinkingBlock.payload?.thinking || 'Processing...'}
-          isStreaming={isBlockStreaming}
-        />
-      );
+      return <ThinkingContent text={thinkingBlock.payload?.thinking || 'Processing...'} />;
     }
 
     if (block.type === BLOCK_TYPE.TOOL_USE) {
