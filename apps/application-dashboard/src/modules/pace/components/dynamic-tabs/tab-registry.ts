@@ -145,6 +145,9 @@ export const isSameBasePath = (targetPath: string): boolean => {
   return false;
 };
 
+/**
+ * Checks if the current path is on any of the tab base paths.
+ */
 export const isOnAnyTabBasePath = (pathname: string): boolean => {
   for (const [, config] of Object.entries(TAB_TYPE_CONFIG)) {
     if (config.kind === ROUTE_KIND.QUERY && pathname === config.basePath) return true;
