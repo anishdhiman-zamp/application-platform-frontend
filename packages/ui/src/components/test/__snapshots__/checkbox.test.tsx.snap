@@ -3,7 +3,7 @@
 exports[`Checkbox Component - Functional Tests matches snapshot for checked state 1`] = `
 <button
   aria-checked="true"
-  class="border-GRAY_500 hover:bg-GRAY_400 focus-visible:ring-ring data-[state=checked]:bg-GRAY_1000 data-[state=checked]:border-GRAY_600 peer h-3.5 w-3.5 shrink-0 cursor-pointer rounded-[3px] border focus-visible:ring-1 focus-visible:outline-hidden disabled:cursor-not-allowed disabled:opacity-50"
+  class="border-GRAY_500 bg-BG_WHITE hover:bg-GRAY_400 focus-visible:ring-ring data-[state=checked]:bg-GRAY_1000 data-[state=checked]:border-GRAY_600 peer h-3.5 w-3.5 shrink-0 cursor-pointer appearance-none rounded-[3px] border focus-visible:ring-1 focus-visible:outline-hidden disabled:cursor-not-allowed disabled:opacity-50"
   data-slot="checkbox"
   data-state="checked"
   role="checkbox"
@@ -16,7 +16,7 @@ exports[`Checkbox Component - Functional Tests matches snapshot for checked stat
     style="pointer-events: none;"
   >
     <svg
-      class="lucide lucide-check text-GRAY_1000 h-[10px] w-[10px]"
+      class="lucide lucide-check text-BG_WHITE h-[10px] w-[10px]"
       fill="none"
       height="24"
       stroke="currentColor"
@@ -38,7 +38,7 @@ exports[`Checkbox Component - Functional Tests matches snapshot for checked stat
 exports[`Checkbox Component - Functional Tests matches snapshot for default checkbox 1`] = `
 <button
   aria-checked="false"
-  class="border-GRAY_500 hover:bg-GRAY_400 focus-visible:ring-ring data-[state=checked]:bg-GRAY_1000 data-[state=checked]:border-GRAY_600 peer h-3.5 w-3.5 shrink-0 cursor-pointer rounded-[3px] border focus-visible:ring-1 focus-visible:outline-hidden disabled:cursor-not-allowed disabled:opacity-50"
+  class="border-GRAY_500 bg-BG_WHITE hover:bg-GRAY_400 focus-visible:ring-ring data-[state=checked]:bg-GRAY_1000 data-[state=checked]:border-GRAY_600 peer h-3.5 w-3.5 shrink-0 cursor-pointer appearance-none rounded-[3px] border focus-visible:ring-1 focus-visible:outline-hidden disabled:cursor-not-allowed disabled:opacity-50"
   data-slot="checkbox"
   data-state="unchecked"
   role="checkbox"
@@ -50,7 +50,7 @@ exports[`Checkbox Component - Functional Tests matches snapshot for default chec
 exports[`Checkbox Component - Functional Tests matches snapshot for disabled state 1`] = `
 <button
   aria-checked="false"
-  class="border-GRAY_500 hover:bg-GRAY_400 focus-visible:ring-ring data-[state=checked]:bg-GRAY_1000 data-[state=checked]:border-GRAY_600 peer h-3.5 w-3.5 shrink-0 cursor-pointer rounded-[3px] border focus-visible:ring-1 focus-visible:outline-hidden disabled:cursor-not-allowed disabled:opacity-50"
+  class="border-GRAY_500 bg-BG_WHITE hover:bg-GRAY_400 focus-visible:ring-ring data-[state=checked]:bg-GRAY_1000 data-[state=checked]:border-GRAY_600 peer h-3.5 w-3.5 shrink-0 cursor-pointer appearance-none rounded-[3px] border focus-visible:ring-1 focus-visible:outline-hidden disabled:cursor-not-allowed disabled:opacity-50"
   data-disabled=""
   data-slot="checkbox"
   data-state="unchecked"
@@ -64,7 +64,7 @@ exports[`Checkbox Component - Functional Tests matches snapshot for disabled sta
 exports[`Checkbox Component - Functional Tests matches snapshot for indeterminate state 1`] = `
 <button
   aria-checked="mixed"
-  class="border-GRAY_500 hover:bg-GRAY_400 focus-visible:ring-ring data-[state=checked]:bg-GRAY_1000 data-[state=checked]:border-GRAY_600 peer h-3.5 w-3.5 shrink-0 cursor-pointer rounded-[3px] border focus-visible:ring-1 focus-visible:outline-hidden disabled:cursor-not-allowed disabled:opacity-50"
+  class="border-GRAY_500 bg-BG_WHITE hover:bg-GRAY_400 focus-visible:ring-ring data-[state=checked]:bg-GRAY_1000 data-[state=checked]:border-GRAY_600 peer h-3.5 w-3.5 shrink-0 cursor-pointer appearance-none rounded-[3px] border focus-visible:ring-1 focus-visible:outline-hidden disabled:cursor-not-allowed disabled:opacity-50"
   data-slot="checkbox"
   data-state="indeterminate"
   role="checkbox"
@@ -77,7 +77,7 @@ exports[`Checkbox Component - Functional Tests matches snapshot for indeterminat
     style="pointer-events: none;"
   >
     <svg
-      class="lucide lucide-check text-GRAY_1000 h-[10px] w-[10px]"
+      class="lucide lucide-check text-BG_WHITE h-[10px] w-[10px]"
       fill="none"
       height="24"
       stroke="currentColor"

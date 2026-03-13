@@ -62,7 +62,7 @@ const DropdownMenuContent = ({
     <DropdownMenuPrimitive.Content
       sideOffset={sideOffset}
       className={cn(
-        'border-GRAY_400 shadow-menu-shadow data-[state=open]:animate-in data-[state=closed]:animate-out data-[state=closed]:fade-out-0 data-[state=open]:fade-in-0 data-[state=closed]:zoom-out-95 data-[state=open]:zoom-in-95 data-[side=bottom]:slide-in-from-top-2 data-[side=left]:slide-in-from-right-2 data-[side=right]:slide-in-from-left-2 data-[side=top]:slide-in-from-bottom-2 z-50 min-w-[120px] rounded-[6px] border bg-white p-1',
+        'border-GRAY_400 shadow-menu-shadow data-[state=open]:animate-in data-[state=closed]:animate-out data-[state=closed]:fade-out-0 data-[state=open]:fade-in-0 data-[state=closed]:zoom-out-95 data-[state=open]:zoom-in-95 data-[side=bottom]:slide-in-from-top-2 data-[side=left]:slide-in-from-right-2 data-[side=right]:slide-in-from-left-2 data-[side=top]:slide-in-from-bottom-2 bg-BG_WHITE z-50 min-w-[120px] rounded-[6px] border p-1',
         className,
       )}
       {...props}
@@ -98,7 +98,7 @@ const DropdownMenuCheckboxItem = ({
 }: React.ComponentProps<typeof DropdownMenuPrimitive.CheckboxItem>) => (
   <DropdownMenuPrimitive.CheckboxItem
     className={cn(
-      'f-12-500 focus:text-accent-GRAY_1000 pointer-events-auto relative flex cursor-pointer items-center justify-between gap-x-2 rounded-sm px-2 py-1.5 outline-hidden transition-colors select-none hover:bg-gray-50 focus:bg-gray-50 data-disabled:pointer-events-none data-disabled:opacity-50 data-[state=open]:bg-gray-50',
+      'f-12-500 focus:text-accent-GRAY_1000 hover:bg-GRAY_100 focus:bg-GRAY_100 data-[state=open]:bg-GRAY_100 pointer-events-auto relative flex cursor-pointer items-center justify-between gap-x-2 rounded-sm px-2 py-1.5 outline-hidden transition-colors select-none data-disabled:pointer-events-none data-disabled:opacity-50',
       className,
     )}
     checked={checked}
@@ -123,14 +123,14 @@ const DropdownMenuRadioItem = ({
 }: React.ComponentProps<typeof DropdownMenuPrimitive.RadioItem>) => (
   <DropdownMenuPrimitive.RadioItem
     className={cn(
-      'f-12-500 focus:text-accent-GRAY_1000 pointer-events-auto relative flex cursor-pointer items-center justify-between gap-x-2 rounded-sm px-2 py-1.5 outline-hidden transition-colors select-none hover:bg-gray-50 focus:bg-gray-50 data-disabled:pointer-events-none data-disabled:opacity-50 data-[state=open]:bg-gray-50',
+      'f-12-500 focus:text-accent-GRAY_1000 hover:bg-GRAY_100 focus:bg-GRAY_100 data-[state=open]:bg-GRAY_100 pointer-events-auto relative flex cursor-pointer items-center justify-between gap-x-2 rounded-sm px-2 py-1.5 outline-hidden transition-colors select-none data-disabled:pointer-events-none data-disabled:opacity-50',
       className,
     )}
     value={value}
     {...props}
   >
     {children}
-    <div className='flex h-4 w-4 items-center justify-center rounded-full border border-gray-400 hover:bg-gray-100'>
+    <div className='border-GRAY_400 hover:bg-GRAY_100 flex h-4 w-4 items-center justify-center rounded-full border'>
       <DropdownMenuPrimitive.ItemIndicator>
         <Circle className='h-2 w-2 fill-current' />
       </DropdownMenuPrimitive.ItemIndicator>

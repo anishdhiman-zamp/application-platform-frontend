@@ -127,7 +127,7 @@ const ContextMenuRadioItem = ({
     {...props}
   >
     {children}
-    <div className='flex h-4 w-4 items-center justify-center rounded-full border border-gray-400 hover:bg-gray-100'>
+    <div className='border-GRAY_400 hover:bg-GRAY_100 flex h-4 w-4 items-center justify-center rounded-full border'>
       <ContextMenuPrimitive.ItemIndicator>
         <Circle className='h-2 w-2 fill-current' />
       </ContextMenuPrimitive.ItemIndicator>

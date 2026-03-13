@@ -141,7 +141,7 @@ const TeamItem: FC<TeamItemProps> = ({
 
   return (
     <div
-      className='group flex cursor-pointer items-center justify-between rounded-md p-1.5 hover:bg-gray-100'
+      className='group hover:bg-GRAY_100 flex cursor-pointer items-center justify-between rounded-md p-1.5'
       onMouseEnter={() => setIsHovered(true)}
       onMouseLeave={() => setIsHovered(false)}
     >
