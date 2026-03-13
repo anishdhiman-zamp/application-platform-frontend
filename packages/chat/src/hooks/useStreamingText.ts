@@ -1,6 +1,6 @@
 import { useEffect, useRef, useState } from 'react';
 
-const CHARS_PER_FRAME = 2;
+const CHARS_PER_FRAME = 3;
 const FRAME_INTERVAL_MS = 16;
 
 /**
@@ -19,12 +19,14 @@ export function useStreamingText(text: string, isStreaming: boolean): string {
   const targetLengthRef = useRef(text.length);
   const streamingRef = useRef(isStreaming);
   const intervalRef = useRef<ReturnType<typeof setInterval> | null>(null);
+  const displayedLengthRef = useRef(displayedLength);
 
   targetLengthRef.current = text.length;
   streamingRef.current = isStreaming;
 
   useEffect(() => {
     if (intervalRef.current) return;
+    if (!isStreaming && targetLengthRef.current === displayedLengthRef.current) return;
 
     intervalRef.current = setInterval(() => {
       setDisplayedLength((prev) => {
@@ -36,7 +38,9 @@ export function useStreamingText(text: string, isStreaming: boolean): string {
           }
           return prev;
         }
-        return Math.min(prev + CHARS_PER_FRAME, target);
+        const next = Math.min(prev + CHARS_PER_FRAME, target);
+        displayedLengthRef.current = next;
+        return next;
       });
     }, FRAME_INTERVAL_MS);
 

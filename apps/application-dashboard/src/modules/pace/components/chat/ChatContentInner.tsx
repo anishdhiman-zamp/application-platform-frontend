@@ -173,8 +173,8 @@ const ChatContentInner = ({
                   alignUserRight
                   organizationId={organizationId}
                 />
+                <div className='bg-BG_WHITE h-12 w-full' />
               </CommonWrapper>
-              <div className='bg-BG_WHITE h-12 w-full' />
             </div>
           </div>
           <div className='bg-BG_WHITE relative z-10 mx-auto w-full max-w-[700px] pb-3'>
@@ -244,6 +244,7 @@ const ChatContentInner = ({
             llmModel={selectedModel}
             showModelSelector
             modelSelectorSlot={modelSelectorSlot}
+            className='[box-shadow:0_0_16px_0_rgba(0,0,0,0.06)]'
           />
         </div>
 
