@@ -17,6 +17,7 @@ export interface RichTextEditorProps {
   value: string;
   onChange: (value: string) => void;
   placeholder?: string;
+  onPaste?: (e: React.ClipboardEvent<HTMLTextAreaElement>) => void;
   onSubmit?: () => void;
   isSubmitDisabled?: boolean;
   autoFocus?: boolean;
@@ -36,6 +37,7 @@ export const RichTextEditor = forwardRef<RichTextEditorHandle, RichTextEditorPro
     {
       value,
       onChange,
+      onPaste,
       placeholder = 'Ask anything or give feedback...',
       onSubmit,
       isSubmitDisabled,
@@ -50,9 +52,11 @@ export const RichTextEditor = forwardRef<RichTextEditorHandle, RichTextEditorPro
     const isInternalUpdate = useRef(false);
     const onSubmitRef = useRef(onSubmit);
     const isSubmitDisabledRef = useRef(isSubmitDisabled);
+    const onPasteRef = useRef(onPaste);
 
     onSubmitRef.current = onSubmit;
     isSubmitDisabledRef.current = isSubmitDisabled;
+    onPasteRef.current = onPaste;
 
     const editor = useEditor({
       extensions: [
@@ -91,6 +95,10 @@ export const RichTextEditor = forwardRef<RichTextEditorHandle, RichTextEditorPro
               return true;
             }
           }
+          return false;
+        },
+        handlePaste: (_view, event) => {
+          onPasteRef.current?.(event as unknown as React.ClipboardEvent<HTMLTextAreaElement>);
           return false;
         },
       },

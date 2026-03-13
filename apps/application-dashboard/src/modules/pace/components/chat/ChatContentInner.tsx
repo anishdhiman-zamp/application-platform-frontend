@@ -223,7 +223,7 @@ const ChatContentInner = ({
       >
         <DropOverlay isVisible={isDragOver} />
         <ChatHome />
-        <div className='w-full shrink-0 p-3 pt-4'>
+        <div className='mt-7 w-full shrink-0 px-3'>
           <ConnectedChatInput
             chat={chat}
             conversationId={chat.conversationId ?? ''}

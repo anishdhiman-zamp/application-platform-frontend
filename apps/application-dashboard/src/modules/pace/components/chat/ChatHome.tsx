@@ -17,9 +17,9 @@ const ChatHome = () => {
   }, []);
 
   return (
-    <div className='flex flex-col items-center gap-3'>
+    <div className='flex flex-col items-center gap-y-2.5'>
       <NewPaceIcons width={40} height={40} className='text-GRAY_1000 dark:text-GRAY_950' />
-      <h1 className={cn('f-16-550 text-GRAY_1000', isReady ? 'animate-fade-in' : 'opacity-0')}>
+      <h1 className={cn('f-20-500 text-GRAY_1000', isReady ? 'animate-fade-in' : 'opacity-0')}>
         {greeting || 'Hello'}, {userName || 'there'}
       </h1>
     </div>

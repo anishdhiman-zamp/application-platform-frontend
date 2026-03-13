@@ -21,6 +21,7 @@ export interface ChatComposerProps {
   onChange: (value: string) => void;
   placeholder?: string;
   autoFocus?: boolean;
+  onPaste?: (e: React.ClipboardEvent<HTMLTextAreaElement>) => void;
 
   fileReferences?: UploadedFileType[];
   onRemoveFileReference?: (fileId: string) => void;
@@ -67,6 +68,7 @@ export const ChatComposer: FC<ChatComposerProps> = ({
   onChange,
   placeholder = 'Ask anything or give feedback...',
   autoFocus = false,
+  onPaste,
 
   fileReferences,
   onRemoveFileReference,
@@ -129,7 +131,7 @@ export const ChatComposer: FC<ChatComposerProps> = ({
   return (
     <div
       className={cn(
-        'border-GRAY_400 focus-within:border-GRAY_600 relative w-full rounded-xl border shadow-xs transition-all',
+        'border-GRAY_400 focus-within:border-GRAY_300 relative w-full rounded-xl border [box-shadow:0_0_16px_0_rgba(0,0,0,0.06)] transition-all',
         shouldShowRecorder && 'border-gray-400',
         containerClassName,
         className,
@@ -193,6 +195,7 @@ export const ChatComposer: FC<ChatComposerProps> = ({
               ref={editorRef}
               value={value}
               onChange={onChange}
+              onPaste={onPaste}
               placeholder={placeholder}
               onSubmit={onSubmit}
               isSubmitDisabled={isSubmitDisabled}
