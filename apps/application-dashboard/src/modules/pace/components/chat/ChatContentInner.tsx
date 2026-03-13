@@ -19,7 +19,7 @@ import CommonWrapper from '@/components/commonWrapper';
 import { SkeletonTypes } from '@/components/commonWrapper/commonWrapper.types';
 import { APITags } from '@/constants/api.constants';
 import { useAppDispatch, useAppSelector } from '@/hooks/toolkit';
-import ZampAvatar from '@/modules/chatbot/ZampAvatar';
+import NewPaceAvatar from '@/modules/chatbot/NewPaceAvatar';
 import ChatHome from '@/modules/pace/components/chat/ChatHome';
 import ChatTopbar from '@/modules/pace/components/chat/ChatTopbar';
 import ScrollFadeOverlay from '@/modules/pace/components/chat/ScrollFadeOverlay';
@@ -166,7 +166,7 @@ const ChatContentInner = ({
                   isAnalysing={isAnalysing}
                   streamingState={chat.streamingState}
                   className='gap-4 px-0 [&]:overflow-visible'
-                  assistantAvatar={<ZampAvatar />}
+                  assistantAvatar={<NewPaceAvatar />}
                   showTimestamp
                   showFeedback
                   showCopy

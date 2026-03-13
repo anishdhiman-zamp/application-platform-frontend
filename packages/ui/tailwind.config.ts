@@ -676,14 +676,12 @@ const config = {
             opacity: '0',
           },
         },
-        'pulse-scale': {
+        scale: {
           '0%, 100%': {
             transform: 'scale(1)',
-            opacity: '1',
           },
           '50%': {
             transform: 'scale(0.75)',
-            opacity: '0.75',
           },
         },
       },
@@ -706,7 +704,7 @@ const config = {
         'slide-in': 'slideIn 0.5s ease-in-out',
         'fade-in': 'fade-in 0.5s ease-in-out',
         'fade-out': 'fade-out 0.5s ease-in-out 0.3s',
-        'pulse-scale': 'pulse-scale 1.5s ease-in-out infinite',
+        scale: 'scale 1.5s ease-in-out infinite',
       },
     },
   },

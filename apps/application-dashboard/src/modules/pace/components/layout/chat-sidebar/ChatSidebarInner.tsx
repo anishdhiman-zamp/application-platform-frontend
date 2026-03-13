@@ -16,15 +16,14 @@ import { ArrowDownIcon, Button } from '@zamp-platform/ui';
 import { cn } from '@zamp-platform/ui/utils';
 import { useFileTabs } from 'modules/pace/components/dynamic-tabs/useFileTabs';
 import { CHAT_CONVERSATION_ID_PARAM } from 'modules/pace/pace.constants';
-import Image from 'next/image';
 import { useRouter } from 'next/navigation';
+import NewPaceIcons from '@/assets/Icons/NewPaceIcons';
 import CommonWrapper from '@/components/commonWrapper';
 import { SkeletonTypes } from '@/components/commonWrapper/commonWrapper.types';
 import { APITags } from '@/constants/api.constants';
-import { ZAMP_ICON } from '@/constants/icons';
 import { ROUTES_PATH } from '@/constants/routeConfig';
 import { useAppDispatch, useAppSelector } from '@/hooks/toolkit';
-import ZampAvatar from '@/modules/chatbot/ZampAvatar';
+import NewPaceAvatar from '@/modules/chatbot/NewPaceAvatar';
 import ChatTopbar from '@/modules/pace/components/chat/ChatTopbar';
 import ModelSelector from '@/modules/pace/components/chat/ModelSelector';
 import ScrollFadeOverlay from '@/modules/pace/components/chat/ScrollFadeOverlay';
@@ -179,7 +178,7 @@ const ChatSidebarInner: FC<ChatSidebarInnerProps> = ({
                     streamingState={chat.streamingState}
                     className='gap-4 px-0 [scrollbar-width:none]'
                     conversationId={conversationId ?? chat?.conversationId ?? ''}
-                    assistantAvatar={<ZampAvatar />}
+                    assistantAvatar={<NewPaceAvatar />}
                     showTimestamp
                     showFeedback
                     showCopy
@@ -191,14 +190,14 @@ const ChatSidebarInner: FC<ChatSidebarInnerProps> = ({
             ) : (
               <div className='flex flex-1 items-center justify-center'>
                 <div className='flex flex-col items-center gap-4'>
-                  <Image src={ZAMP_ICON} alt='Zamp Logo' height={40} width={40} />
-                  <p className='f-13-400 text-GRAY_600'>Ask Zamp anything</p>
+                  <NewPaceIcons width={40} height={40} />
+                  <p className='f-13-400 text-GRAY_600'>Ask Pace anything</p>
                 </div>
               </div>
             )}
           </div>
         </div>
-        <div className={cn('relative z-10 w-full shrink-0 p-3')}>
+        <div className={cn('bg-BG_WHITE relative z-10 w-full shrink-0 p-3')}>
           <ConnectedChatInput
             chat={chat}
             conversationId={chat.conversationId ?? ''}
@@ -209,10 +208,10 @@ const ChatSidebarInner: FC<ChatSidebarInnerProps> = ({
             username={username}
             currentUserName={currentUserName}
             isDisabled={chat.isStreaming || chat.isCreatingConversationV2}
-            placeholder="Do your life's best work with Zamp"
+            placeholder="Do your life's best work with Pace"
             externalInputValue={inputValue}
             setExternalInputValue={setInputValue}
-            className='bg-white'
+            className='bg-BG_WHITE'
             autoFocus
             onConversationCreated={handleConversationCreated}
             fileDropHandlerRef={fileDropHandlerRef}

@@ -2,7 +2,7 @@
 
 import { Button, LiveWaveform } from '@zamp-platform/ui';
 import { cn } from '@zamp-platform/ui/utils';
-import { ArrowUp, Check, CircleStop, Loader, Loader2, Mic, Paperclip, X } from 'lucide-react';
+import { ArrowUp, Check, Loader, Loader2, Mic, Paperclip, Square, X } from 'lucide-react';
 import React, { FC, useRef } from 'react';
 
 import { UploadedFileType } from '../types/block.types';
@@ -239,7 +239,7 @@ export const ChatComposer: FC<ChatComposerProps> = ({
                   <Mic />
                 </Button>
               )}
-              {showSubmitButton && (isStreaming || isStopping) && onStop ? (
+              {(isStreaming || isStopping || true) && onStop ? (
                 <Button
                   onClick={onStop}
                   disabled={isStopping}
@@ -248,7 +248,11 @@ export const ChatComposer: FC<ChatComposerProps> = ({
                   aria-label='Stop generating'
                   className='bg-GRAY_950 text-BG_WHITE hover:bg-GRAY_950 hover:text-BG_WHITE dark:bg-GRAY_500 dark:hover:bg-GRAY_600 dark:text-GRAY_1000 dark:hover:text-GRAY_1000 size-[26px] rounded-full p-0 [&_svg]:size-3.5'
                 >
-                  {isStopping ? <Loader2 className='animate-spin' /> : <CircleStop />}
+                  {isStopping ? (
+                    <Loader2 className='animate-spin' />
+                  ) : (
+                    <Square fill='currentColor' strokeWidth={0} className='size-2.5!' />
+                  )}
                 </Button>
               ) : (
                 showSubmitButton &&

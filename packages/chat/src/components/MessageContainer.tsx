@@ -1,5 +1,6 @@
-import { COLORS, ShimmerText } from '@zamp-platform/ui';
+import { ShimmerText } from '@zamp-platform/ui';
 import { cn } from '@zamp-platform/ui/utils';
+import Image from 'next/image';
 import { FC, ReactNode, useCallback, useEffect, useRef } from 'react';
 
 import PaceAvatar from '@/modules/chatbot/PaceAvatar';
@@ -100,18 +101,18 @@ export const MessageContainer: FC<MessageContainerProps> = ({
         <StreamingMessage streamingState={streamingState} assistantAvatar={defaultAssistantAvatar} />
       )}
 
-      {/* {streamingState && !!streamingState.message_content?.elements?.length && ( */}
-      {/* <div className='flex w-full items-center'>
-        <div className='animate-pulse-scale'>
-          <Image src='/icons/loaders/zamp-logo-loader.svg' alt='Pace Avatar' height={20} width={20} />
+      {streamingState && !!streamingState.message_content?.elements?.length && (
+        <div className='flex w-full items-center'>
+          <div className='animate-scale dark:brightness-0 dark:invert'>
+            <Image src='/icons/pace/pace-streaming.svg' alt='Pace Avatar' height={20} width={20} />
+          </div>
         </div>
-      </div> */}
-      {/* )} */}
+      )}
 
       {(isAnalysing && !streamingState) || (streamingState && !streamingState.message_content?.elements?.length) ? (
         <div className='flex w-full items-center gap-1.5 text-gray-700'>
           {defaultAssistantAvatar}
-          <ShimmerText text='Analysing...' shimmerColor={COLORS.BLACK} autoAnimate={true} />
+          <ShimmerText text='Analysing...' autoAnimate={true} />
         </div>
       ) : null}
       {children}
