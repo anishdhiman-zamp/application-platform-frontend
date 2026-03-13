@@ -29,6 +29,7 @@ const config = {
           'Helvetica Neue',
           'sans-serif',
         ],
+        mono: ['JetBrains Mono', 'Fira Code', 'ui-monospace', 'SFMono-Regular', 'monospace'],
       },
       colors: {
         border: 'hsl(var(--border))',
@@ -215,6 +216,18 @@ const config = {
           '950': 'var(--RED_950)',
           '1000': 'var(--RED_1000)',
         },
+        chat: {
+          text: 'var(--color-chat-text, #2C2A26)',
+          body: 'var(--color-chat-body, #3D3A34)',
+          secondary: 'var(--color-chat-secondary, #6B6760)',
+          tertiary: 'var(--color-chat-tertiary, #A09D98)',
+          accent: 'var(--color-chat-accent, #1A6B4A)',
+          border: 'var(--color-chat-border, #E8E5E0)',
+          'code-bg': 'var(--color-chat-code-bg, #F8F7F4)',
+          'code-header': 'var(--color-chat-code-header, #F3F1EE)',
+          inline: 'var(--color-chat-inline, #9B4A6B)',
+          'inline-bg': 'var(--color-chat-inline-bg, #FDF4F7)',
+        },
       },
       borderRadius: {
         lg: 'var(--radius)',
@@ -366,12 +379,14 @@ const config = {
       fontWeight: {
         '300': '300',
         '400': '400',
+        '420': '420',
         '450': '450',
         '500': '500',
         '550': '550',
         '600': '600',
         '700': '700',
         '800': '800',
+        'chat-body': '420',
       },
       height: {
         '15': '60px',
@@ -438,6 +453,7 @@ const config = {
         '360': '1440px',
         formLayout: '438px',
         '95.5': '382px',
+        'chat-prose': '620px',
       },
       minWidth: {
         '4': '16px',
@@ -468,6 +484,9 @@ const config = {
       lineHeight: {
         '3.5': '14px',
         '4.5': '18px',
+        'chat-prose': '1.667',
+        'chat-heading': '1.4',
+        'chat-code': '1.5',
       },
       margin: {
         '19': '76px',

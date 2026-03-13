@@ -34,6 +34,7 @@ export const StreamingMessage: FC<StreamingMessageProps> = ({ streamingState, as
         conversationId={streamingState?.conversation_id}
         messageId={streamingState?.id}
         isLoading={false}
+        isStreaming={streamingState?.is_active}
       />
     </div>
   );

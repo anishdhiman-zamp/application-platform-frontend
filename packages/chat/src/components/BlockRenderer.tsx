@@ -33,6 +33,7 @@ interface BlockRendererProps {
   message: BlockMessage;
   onAction?: (blockConfig: ButtonBlockType, payload: Record<string, string>) => void | Promise<void>;
   isLoading?: boolean;
+  isStreaming?: boolean;
   className?: string;
   containerClassName?: string;
   conversationId?: string;
@@ -48,6 +49,7 @@ export const BlockRenderer: React.FC<BlockRendererProps> = ({
   message,
   onAction,
   isLoading = false,
+  isStreaming = false,
   className = '',
   conversationId,
   messageId,
@@ -96,7 +98,7 @@ export const BlockRenderer: React.FC<BlockRendererProps> = ({
   const renderBlock = (block: Block) => {
     switch (block.type) {
       case BLOCK_TYPE.PLAIN_TEXT:
-        return <PlainTextBlock key={block?.id} payload={block?.payload} />;
+        return <PlainTextBlock key={block?.id} payload={block?.payload} isStreaming={isStreaming} />;
 
       case BLOCK_TYPE.THINKING:
         return (
@@ -104,6 +106,7 @@ export const BlockRenderer: React.FC<BlockRendererProps> = ({
             key={block?.id ?? `thinking-${block.order}-${block.start_timestamp}`}
             payload={block?.payload}
             is_complete={block?.is_complete}
+            isStreaming={isStreaming && !block?.is_complete}
             start_timestamp={block?.start_timestamp}
             stop_timestamp={block?.stop_timestamp}
           />
@@ -119,6 +122,7 @@ export const BlockRenderer: React.FC<BlockRendererProps> = ({
             key={block?.id ?? `tool-use-${block.order}-${block.start_timestamp}`}
             payload={block?.payload}
             is_complete={block?.is_complete}
+            isStreaming={isStreaming && !block?.is_complete}
             toolResult={toolResult}
           />
         );
@@ -135,6 +139,7 @@ export const BlockRenderer: React.FC<BlockRendererProps> = ({
           <MarkdownBlock
             key={block?.id ?? `text-${block?.order}-${(block as TextContentBlock)?.start_timestamp}`}
             payload={block?.payload}
+            isStreaming={isStreaming && !(block as TextContentBlock)?.is_complete}
           />
         );
 
@@ -234,6 +239,7 @@ export const BlockRenderer: React.FC<BlockRendererProps> = ({
               key={`steps-group-${groupIndex}`}
               blocks={group.blocks as (ThinkingContentBlock | ToolUseContentBlock)[]}
               toolResultsMap={toolResultsMap}
+              isStreaming={isStreaming}
             />
           );
         }

@@ -158,6 +158,21 @@
 
 @layer base {
   :root {
+    /* Chat design tokens */
+    --color-chat-text: #2C2A26;
+    --color-chat-body: #3D3A34;
+    --color-chat-secondary: #3D3A34;
+    --color-chat-tertiary: #A09D98;
+    --color-chat-accent: #1A6B4A;
+    --color-chat-accent-bg: #F0F9F4;
+    --color-chat-border: #E8E5E0;
+    --color-chat-bg: #FFFFFF;
+    --color-chat-bg-subtle: #FAFAF9;
+    --color-chat-code-bg: #F8F7F4;
+    --color-chat-code-header: #F3F1EE;
+    --color-chat-inline: #9B4A6B;
+    --color-chat-inline-bg: #FDF4F7;
+
     --background: 0 0% 100%;
     --foreground: 0 0% 3.9%;
     --popover: 0 0% 100%;

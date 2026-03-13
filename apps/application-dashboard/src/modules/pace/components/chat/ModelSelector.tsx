@@ -43,7 +43,7 @@ const ModelSelector: FC<ModelSelectorProps> = ({ value, onChange, className }) =
           variant='ghost'
           size='small'
           className={cn(
-            'f-11-500 text-GRAY_600 hover:text-GRAY_900 flex items-center items-stretch gap-0.5 rounded px-1.5',
+            'f-11-500 text-GRAY_600 hover:text-GRAY_900 flex items-center gap-0.5 rounded px-1.5',
             className,
           )}
         >
