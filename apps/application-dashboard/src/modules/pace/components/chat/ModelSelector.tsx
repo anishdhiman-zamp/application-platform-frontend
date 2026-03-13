@@ -67,7 +67,7 @@ const ModelSelector: FC<ModelSelectorProps> = ({ value, onChange, className }) =
                 <span className='f-13-500 text-GRAY_1000'>{model.display_name}</span>
                 <span className='f-11-400 text-GRAY_600'>{model.description}</span>
               </div>
-              {model.id === selectedId && <Check size={14} className='ml-2 shrink-0 text-blue-500' />}
+              {model.id === selectedId && <Check size={14} className='text-GRAY_1000 ml-2 shrink-0' />}
             </Button>
           ))}
         </PopoverContent>

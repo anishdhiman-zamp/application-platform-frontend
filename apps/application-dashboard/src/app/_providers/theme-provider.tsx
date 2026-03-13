@@ -39,7 +39,7 @@ function applyTheme(resolved: ResolvedTheme) {
   body.classList.toggle(THEME_CSS_CLASSES.BODY_LIGHT, resolved === THEME_MODE.LIGHT);
 }
 
-function getStoredTheme(): THEME_MODE {
+function getMacsStoredTheme(): THEME_MODE {
   if (typeof window === 'undefined') return THEME_MODE.LIGHT;
 
   return (
@@ -49,39 +49,32 @@ function getStoredTheme(): THEME_MODE {
   );
 }
 
-function persistTheme(theme: THEME_MODE) {
+function persistMacsTheme(theme: THEME_MODE) {
   localStorage.setItem(LOCAL_STORAGE_KEYS.THEME, theme);
   setCookie(THEME_COOKIE, theme, THEME_COOKIE_MAX_AGE);
 }
 
 export const ThemeProvider = ({ children }: { children: React.ReactNode }) => {
   const pathname = usePathname();
-  const isDarkModeAllowed = DARK_MODE_ROUTES.some((route) => pathname?.startsWith(route));
-  const [theme, setThemeState] = useState<THEME_MODE>(getStoredTheme);
-  const [resolvedTheme, setResolvedTheme] = useState<ResolvedTheme>(() => resolveTheme(getStoredTheme()));
+  const isMacs = DARK_MODE_ROUTES.some((route) => pathname?.startsWith(route));
+  const [theme, setThemeState] = useState<THEME_MODE>(() => (isMacs ? getMacsStoredTheme() : THEME_MODE.LIGHT));
+  const [resolvedTheme, setResolvedTheme] = useState<ResolvedTheme>(() =>
+    resolveTheme(isMacs ? getMacsStoredTheme() : THEME_MODE.LIGHT),
+  );
 
-  const setTheme = useCallback((next: THEME_MODE) => {
-    persistTheme(next);
-    const resolved = resolveTheme(next);
+  const setTheme = useCallback(
+    (next: THEME_MODE) => {
+      if (isMacs) persistMacsTheme(next);
+      const resolved = resolveTheme(next);
 
-    applyTheme(resolved);
-    setThemeState(next);
-    setResolvedTheme(resolved);
-  }, []);
+      applyTheme(resolved);
+      setThemeState(next);
+      setResolvedTheme(resolved);
+    },
+    [isMacs],
+  );
 
   const value = useMemo(() => ({ theme, resolvedTheme, setTheme }), [theme, resolvedTheme, setTheme]);
-
-  function syncFromStorage(
-    setThemeState: (theme: THEME_MODE) => void,
-    setResolvedTheme: (resolved: ResolvedTheme) => void,
-  ) {
-    const next = getStoredTheme();
-    const resolved = resolveTheme(next);
-
-    applyTheme(resolved);
-    setThemeState(next);
-    setResolvedTheme(resolved);
-  }
 
   useEffect(() => {
     applyTheme(resolvedTheme);
@@ -103,14 +96,28 @@ export const ThemeProvider = ({ children }: { children: React.ReactNode }) => {
     return () => colorSchemeQuery.removeEventListener('change', handleColorSchemeChange);
   }, [theme]);
 
-  // Sync theme changes across browser tabs.
+  // Sync MACS theme changes across browser tabs. Classic is always light so no sync needed.
   useEffect(() => {
+    if (!isMacs) return;
+
     const handleStorageChange = (e: StorageEvent) => {
-      if (e.key === LOCAL_STORAGE_KEYS.THEME) syncFromStorage(setThemeState, setResolvedTheme);
+      if (e.key !== LOCAL_STORAGE_KEYS.THEME) return;
+      const next = getMacsStoredTheme();
+      const resolved = resolveTheme(next);
+
+      applyTheme(resolved);
+      setThemeState(next);
+      setResolvedTheme(resolved);
     };
 
     const handleVisibilityChange = () => {
-      if (document.visibilityState === 'visible') syncFromStorage(setThemeState, setResolvedTheme);
+      if (document.visibilityState !== 'visible') return;
+      const next = getMacsStoredTheme();
+      const resolved = resolveTheme(next);
+
+      applyTheme(resolved);
+      setThemeState(next);
+      setResolvedTheme(resolved);
     };
 
     window.addEventListener('storage', handleStorageChange);
@@ -120,15 +127,19 @@ export const ThemeProvider = ({ children }: { children: React.ReactNode }) => {
       window.removeEventListener('storage', handleStorageChange);
       document.removeEventListener('visibilitychange', handleVisibilityChange);
     };
-  }, []);
+  }, [isMacs]);
 
-  // Enforce light mode on routes outside the Pace layout.
+  // When switching product areas, apply the correct theme immediately.
+  // MACS restores its saved preference; Classic is always light.
   useLayoutEffect(() => {
-    if (!isDarkModeAllowed) {
-      persistTheme(THEME_MODE.LIGHT);
-      setTheme(THEME_MODE.LIGHT);
-    }
-  }, [isDarkModeAllowed, setTheme]);
+    const next = isMacs ? getMacsStoredTheme() : THEME_MODE.LIGHT;
+    const resolved = resolveTheme(next);
+
+    if (isMacs) persistMacsTheme(next);
+    applyTheme(resolved);
+    setThemeState(next);
+    setResolvedTheme(resolved);
+  }, [isMacs]);
 
   return <ThemeContext.Provider value={value}>{children}</ThemeContext.Provider>;
 };
