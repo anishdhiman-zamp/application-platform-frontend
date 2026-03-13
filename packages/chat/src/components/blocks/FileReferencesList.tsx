@@ -1,5 +1,5 @@
 import { cn } from '@zamp-platform/ui/utils';
-import React, { FC } from 'react';
+import { FC } from 'react';
 
 import { UploadedFileType } from '../../types/block.types';
 import FileReferenceItem from './FileReferenceItem';
@@ -15,7 +15,7 @@ export const FileReferencesList: FC<FileReferencesListProps> = ({ fileReferences
   return (
     <>
       {fileReferences?.length > 0 && (
-        <div className={cn('flex flex-wrap gap-2 pt-1.5', className)}>
+        <div className={cn('flex flex-wrap gap-2', className)}>
           {[...fileReferences].reverse().map((fileReference) => (
             <FileReferenceItem
               key={fileReference.path || fileReference.name}

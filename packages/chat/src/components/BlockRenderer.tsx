@@ -33,6 +33,7 @@ interface BlockRendererProps {
   message: BlockMessage;
   onAction?: (blockConfig: ButtonBlockType, payload: Record<string, string>) => void | Promise<void>;
   isLoading?: boolean;
+  isStreaming?: boolean;
   className?: string;
   containerClassName?: string;
   conversationId?: string;

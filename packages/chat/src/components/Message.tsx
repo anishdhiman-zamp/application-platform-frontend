@@ -2,7 +2,7 @@
 
 import { cn } from '@zamp-platform/ui/utils';
 import { formatChatTimestamp, formatChatTimestampTooltip, formatTimestampToUTC } from '@zamp-platform/utils';
-import { FC, useMemo } from 'react';
+import { FC, ReactNode, useMemo } from 'react';
 
 import { ButtonBlockType } from '../types/block.types';
 import { ChatMessage, SenderType } from '../types/chat.types';
@@ -10,9 +10,8 @@ import { BlockRenderer } from './BlockRenderer';
 import ChatFeedback from './ChatFeedback';
 import CopyMessageButton from './CopyMessageButton';
 import MessageTimestamp from './MessageTimestamp';
-import SenderDetails, { SenderDetailsProps } from './SenderDetails';
 
-export interface MessageProps extends Omit<SenderDetailsProps, 'message'> {
+export interface MessageProps {
   message: ChatMessage;
   onAction?: (blockConfig: ButtonBlockType, payload: Record<string, string>) => void | Promise<void>;
   isLoading?: boolean;
@@ -20,8 +19,6 @@ export interface MessageProps extends Omit<SenderDetailsProps, 'message'> {
   containerClassName?: string;
   conversationId?: string;
   messageId?: string;
-  senderDetailsClassName?: string;
-  showSenderDetails?: boolean;
   showTimestamp?: boolean;
   showFeedback?: boolean;
   showCopy?: boolean;
@@ -30,6 +27,7 @@ export interface MessageProps extends Omit<SenderDetailsProps, 'message'> {
   alignUserRight?: boolean;
   organizationId?: string;
   streamingEnabled?: boolean;
+  assistantAvatar?: ReactNode;
 }
 
 export const Message: FC<MessageProps> = ({
@@ -40,18 +38,13 @@ export const Message: FC<MessageProps> = ({
   containerClassName,
   conversationId,
   messageId,
-  assistantName,
   assistantAvatar,
-  userAvatar,
-  senderDetailsClassName,
-  showSenderDetails = true,
   showTimestamp = false,
   showFeedback = false,
   showCopy = false,
   feedbackDisabled = false,
   isLastMessage = false,
   alignUserRight = false,
-  hideSenderName = false,
   organizationId,
   streamingEnabled = true,
 }) => {
@@ -69,22 +62,17 @@ export const Message: FC<MessageProps> = ({
   );
 
   return (
-    <div className={cn('group space-y-2', shouldAlignRight && 'flex flex-col items-end', containerClassName)}>
-      {showSenderDetails && (
-        <SenderDetails
-          message={message}
-          assistantName={assistantName}
-          assistantAvatar={assistantAvatar}
-          hideSenderName={hideSenderName}
-          userAvatar={userAvatar}
-          className={cn(shouldAlignRight && 'flex-row-reverse', senderDetailsClassName)}
-        />
-      )}
+    <div className={cn('group space-y-3', shouldAlignRight && 'flex flex-col items-end', containerClassName)}>
+      {message.sender_type === SenderType.ASSISTANT && assistantAvatar}
 
       <BlockRenderer
         message={{ block: message?.message_content?.elements ?? [] }}
         onAction={onAction}
-        className={cn(shouldAlignRight && 'bg-GRAY_100 max-w-[80%] rounded-[10px] px-4 py-3', blockRendererClassName)}
+        className={cn(
+          'max-w-[620px]',
+          shouldAlignRight && 'bg-GRAY_100 max-w-[80%] rounded-[10px] px-4 py-3',
+          blockRendererClassName,
+        )}
         conversationId={conversationId || message?.conversation_id}
         messageId={messageId || message?.id}
         isLoading={isLoading}

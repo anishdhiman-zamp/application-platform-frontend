@@ -1,0 +1,105 @@
+/* Syntax highlighting theme for chat code blocks.
+   Colors match Monaco editor's vs-light / vs-dark (VS Code default themes).
+   Used by both the Tiptap editor and the MarkdownBlock renderer. */
+
+:root {
+  --hl-comment: #008000;
+  --hl-keyword: #0000ff;
+  --hl-string: #a31515;
+  --hl-meta: #267f99;
+  --hl-doctag: #800000;
+  --hl-attr: #e50000;
+  --hl-symbol: #0451a5;
+  --hl-variable: #001080;
+  --hl-number: #098658;
+}
+
+.dark-mode {
+  --hl-comment: #6a9955;
+  --hl-keyword: #569cd6;
+  --hl-string: #ce9178;
+  --hl-meta: #4ec9b0;
+  --hl-doctag: #808080;
+  --hl-attr: #9cdcfe;
+  --hl-symbol: #569cd6;
+  --hl-variable: #9cdcfe;
+  --hl-number: #b5cea8;
+}
+
+pre code.hljs {
+  display: block;
+  overflow-x: auto;
+  background: var(--GRAY_100);
+  color: var(--GRAY_1000);
+  padding: 0;
+  border-radius: 0;
+  font-family: 'JetBrains Mono', 'Fira Code', ui-monospace, SFMono-Regular, monospace;
+  font-size: 13px;
+  line-height: 1.5;
+}
+
+code.hljs {
+  display: inline;
+}
+
+.hljs-comment,
+.hljs-quote {
+  color: var(--hl-comment) !important;
+}
+
+.hljs-keyword,
+.hljs-selector-tag,
+.hljs-built_in,
+.hljs-name,
+.hljs-tag {
+  color: var(--hl-keyword) !important;
+}
+
+.hljs-string,
+.hljs-title,
+.hljs-section,
+.hljs-attribute,
+.hljs-literal,
+.hljs-template-tag,
+.hljs-template-variable,
+.hljs-type,
+.hljs-addition {
+  color: var(--hl-string) !important;
+}
+
+.hljs-variable {
+  color: var(--hl-variable) !important;
+}
+
+.hljs-number {
+  color: var(--hl-number) !important;
+}
+
+.hljs-deletion,
+.hljs-selector-attr,
+.hljs-selector-pseudo,
+.hljs-meta {
+  color: var(--hl-meta) !important;
+}
+
+.hljs-doctag {
+  color: var(--hl-doctag) !important;
+}
+
+.hljs-attr {
+  color: var(--hl-attr) !important;
+}
+
+.hljs-symbol,
+.hljs-bullet,
+.hljs-link {
+  color: var(--hl-symbol) !important;
+}
+
+.hljs-emphasis {
+  font-style: italic;
+}
+
+.hljs-strong {
+  font-weight: bold;
+}

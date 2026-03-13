@@ -58,10 +58,11 @@ const ChatHistory = ({ onSelectConversation }: ChatHistoryProps) => {
   );
 
   const conversations = useMemo(() => conversationHistory?.conversations ?? [], [conversationHistory]);
-  const displayConversations = useMemo(
-    () => (allConversations.length > 0 ? allConversations : conversations),
-    [allConversations, conversations],
-  );
+  const displayConversations = useMemo(() => {
+    const source = allConversations.length > 0 ? allConversations : conversations;
+
+    return [...source].sort((a, b) => new Date(b.updated_at).getTime() - new Date(a.updated_at).getTime());
+  }, [allConversations, conversations]);
   const hasMore = allConversations.length < totalCount;
 
   const fetchNextPage = useCallback(() => {

@@ -31,6 +31,10 @@ import { StatusLabel } from './StatusLabel';
 
 type StepBlock = ThinkingContentBlock | ToolUseContentBlock;
 
+const ThinkingContent: FC<{ text: string }> = ({ text }) => {
+  return <div className='f-12-400 text-GRAY_1000 whitespace-pre-wrap'>{text}</div>;
+};
+
 interface StepsBlockProps {
   blocks: StepBlock[];
   toolResultsMap: Map<string, ToolResultContentBlock>;
@@ -116,7 +120,7 @@ export const StepsBlock: FC<StepsBlockProps> = ({ blocks, toolResultsMap }) => {
       return (
         <div className={cn('border-border border-b', isLast && 'border-b-0')}>
           <IntegrationCardV2
-            className='min-h-[0px] border-none'
+            className='min-h-0 border-none'
             integrationItem={integrationItem}
             redirectUrl={toolResultData?.metadata?.redirect_url}
           />
@@ -130,11 +134,7 @@ export const StepsBlock: FC<StepsBlockProps> = ({ blocks, toolResultsMap }) => {
   const renderStepContent = (block: StepBlock) => {
     if (block.type === BLOCK_TYPE.THINKING) {
       const thinkingBlock = block as ThinkingContentBlock;
-      return (
-        <div className='f-12-400 text-GRAY_1000 whitespace-pre-wrap'>
-          {thinkingBlock.payload?.thinking || 'Processing...'}
-        </div>
-      );
+      return <ThinkingContent text={thinkingBlock.payload?.thinking || 'Processing...'} />;
     }
 
     if (block.type === BLOCK_TYPE.TOOL_USE) {

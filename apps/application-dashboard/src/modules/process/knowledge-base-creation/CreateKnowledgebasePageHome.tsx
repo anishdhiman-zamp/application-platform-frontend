@@ -16,7 +16,7 @@ import { PROCESS_CREATED_EVENT, ProcessCreatedEventDetail } from '@/utils/events
 // Dynamic imports for heavy components
 const KnowledgeBaseChat = dynamic(() => import('@/modules/process/knowledge-base-creation/KnowledgeBaseChat'), {
   ssr: false,
-  loading: () => <ChatMessagesSkeleton count={1} className='px-4' alignUserRight hideSenderName />,
+  loading: () => <ChatMessagesSkeleton count={1} className='px-4' alignUserRight />,
 });
 
 const ProcessCreationKnowledgeBase = dynamic(

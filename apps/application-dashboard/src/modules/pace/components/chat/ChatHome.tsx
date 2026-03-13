@@ -8,24 +8,20 @@ import { getGreeting } from '@/modules/pace/pace.utils';
 
 const ChatHome = () => {
   const user = useAppSelector((state) => state.user.user);
-  const userName = user?.user_name?.split(' ')[0];
+  const userName = user?.user_name ?? '';
   const [greeting, setGreeting] = useState<string>('');
+  const isReady = greeting && userName;
 
   useEffect(() => {
-    // Only calculate greeting on the client side after hydration
     setGreeting(getGreeting());
   }, []);
 
-  const isReady = greeting && userName;
-
   return (
-    <div className='mt-[116px] flex w-full flex-col items-center'>
-      <div className='flex flex-col items-center gap-3'>
-        <NewPaceIcons width={40} height={40} className='text-GRAY_1000 dark:text-GRAY_950' />
-        <h1 className={cn('f-16-550 text-GRAY_1000', isReady ? 'animate-fade-in' : 'opacity-0')}>
-          {greeting || 'Hello'}, {userName || 'there'}
-        </h1>
-      </div>
+    <div className='flex flex-col items-center gap-y-2.5'>
+      <NewPaceIcons width={40} height={40} className='text-GRAY_1000 dark:text-GRAY_950' />
+      <h1 className={cn('f-20-500 text-GRAY_1000', isReady ? 'animate-fade-in' : 'opacity-0')}>
+        {greeting || 'Hello'}, {userName || 'there'}
+      </h1>
     </div>
   );
 };

@@ -84,7 +84,7 @@ const TaskContentInner = ({ taskId }: TaskContentInnerProps) => {
             isError={chat?.isErrorConversationHistory}
             refetchFunction={chat?.refetchConversationHistory}
             skeletonType={SkeletonTypes.CUSTOM}
-            loader={<ChatMessagesSkeleton className='px-0' alignUserRight hideSenderName />}
+            loader={<ChatMessagesSkeleton className='px-0' alignUserRight />}
             className='mx-auto flex w-full max-w-[700px] flex-1 flex-col px-4'
             disableAnimation
           >
@@ -98,7 +98,6 @@ const TaskContentInner = ({ taskId }: TaskContentInnerProps) => {
               showFeedback
               showCopy
               alignUserRight
-              hideSenderName
               organizationId={organizationId}
             />
             <div className='bg-BG_WHITE h-12 w-full' />
@@ -108,7 +107,7 @@ const TaskContentInner = ({ taskId }: TaskContentInnerProps) => {
               onClick={handleScrollToBottomClick}
               variant='ghost'
               className={cn(
-                'bg-GRAY_1000 hover:bg-GRAY_950 absolute -top-10 left-1/2 h-6 w-6 -translate-x-1/2 !rounded-full p-3',
+                'bg-GRAY_1000 hover:bg-GRAY_950 absolute -top-10 left-1/2 h-6 w-6 -translate-x-1/2 rounded-full p-3',
                 'transition-all duration-200 ease-out',
                 showScrollButton ? 'translate-y-0 opacity-100' : 'pointer-events-none translate-y-2 opacity-0',
               )}
