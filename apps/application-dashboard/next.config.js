@@ -28,7 +28,8 @@ const nextConfig = {
     return config;
   },
   experimental: {
-    // Optimize memory usage during builds and hot reload
+    // Cap static-generation workers to avoid OOM on CI (default = os.cpus() - 1).
+    cpus: Math.max(1, Math.min(4, (require('os').cpus()?.length || 2) - 1)),
     optimizePackageImports: [
       'lucide-react',
       '@zamp-platform/ui',
