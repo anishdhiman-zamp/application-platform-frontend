@@ -45,20 +45,20 @@ export const OutputFilesBlock: React.FC<OutputFilesBlockProps> = ({ payload, con
           <div
             key={file?.filename}
             className={cn(
-              'rounded-2.5 shadow-table-filter-menu group relative flex w-[148px] items-center gap-2 border border-gray-400 bg-white p-1 pr-3',
+              'rounded-2.5 shadow-table-filter-menu group border-GRAY_400 bg-BG_WHITE relative flex w-[148px] items-center gap-2 border p-1 pr-3',
               'cursor-pointer',
             )}
             onClick={() => handleDownloadFile(file?.filename)}
           >
             <div className='flex items-center gap-1'>
-              <div className='flex h-5 w-6 items-center justify-center rounded-md bg-gray-100 [&_svg]:size-3.5'>
+              <div className='bg-GRAY_100 flex h-5 w-6 items-center justify-center rounded-md [&_svg]:size-3.5'>
                 <FileText />
               </div>
               <span className='f-12-500 max-w-[104px] truncate'>{file?.filename}</span>
             </div>
             {isDownloading && (
               <Button
-                className='absolute size-4 rounded-full bg-white p-[1px] [&_svg]:size-3.5'
+                className='bg-BG_WHITE absolute size-4 rounded-full p-[1px] [&_svg]:size-3.5'
                 variant='ghost'
                 size='icon'
                 style={{
@@ -66,7 +66,7 @@ export const OutputFilesBlock: React.FC<OutputFilesBlockProps> = ({ payload, con
                   right: '-8px',
                 }}
               >
-                <Loader size={14} className='animate-spin text-gray-900' />
+                <Loader size={14} className='text-GRAY_900 animate-spin' />
               </Button>
             )}
           </div>

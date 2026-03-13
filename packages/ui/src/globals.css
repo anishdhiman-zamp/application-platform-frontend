@@ -43,7 +43,9 @@
 
   .pdfSlick *::-webkit-scrollbar-thumb {
     background-color: rgba(0, 0, 0, 0.2);
-    -webkit-box-shadow: inset 1px 1px 0px rgb(0 0 0 / 10%), inset 0px -1px 0px rgb(0 0 0 / 7%);
+    -webkit-box-shadow:
+      inset 1px 1px 0px rgb(0 0 0 / 10%),
+      inset 0px -1px 0px rgb(0 0 0 / 7%);
   }
 }
 
@@ -313,8 +315,8 @@
 
     /* backgrounds */
     --BG_WHITE: #0f1011; /* Background 1 */
-    --BG_GRAY_1: #141518; /* Background 1 */
-    --BG_GRAY_2: #000000; /* Background 2 */
+    --BG_GRAY_1: #141518; /* Background 2 */
+    --BG_GRAY_2: #000000; /* Background 3 */
 
     --BLUE_100: #190955; /* Blue 100 */
     --BLUE_200: #200978; /* Blue 200 */
@@ -387,7 +389,7 @@
     @apply border-border;
   }
   body {
-    @apply bg-background text-foreground;
+    @apply bg-BG_WHITE text-GRAY_1000;
   }
 }
 
