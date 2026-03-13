@@ -25,10 +25,10 @@ export const CodePreviewBlock: FC<CodePreviewBlockProps> = ({ label, content, is
       <div
         className={cn(
           'overflow-x-auto rounded-lg border p-3',
-          isError ? 'border-red-200 bg-red-50' : 'border-GRAY_200 bg-gray-50',
+          isError ? 'border-destructive/30 bg-destructive/10' : 'border-GRAY_200 bg-BG_WHITE',
         )}
       >
-        <pre className={cn('f-12-400 break-all whitespace-pre-wrap', isError ? 'text-red-700' : 'text-GRAY_700')}>
+        <pre className={cn('f-12-400 break-all whitespace-pre-wrap', isError ? 'text-RED_700' : 'text-GRAY_700')}>
           {formatJson(content)}
         </pre>
       </div>

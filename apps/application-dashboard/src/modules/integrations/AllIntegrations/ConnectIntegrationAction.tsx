@@ -82,9 +82,10 @@ const ConnectIntegrationAction: FC<ConnectIntegrationActionProps> = ({
         size='small'
         onClick={handleConnectClick}
         className={cn(
-          'text-GRAY_700 f-11-500 hover:bg-GRAY_100',
+          'f-11-500',
+          buttonVariant !== 'default' && 'text-GRAY_700 hover:bg-GRAY_100',
+          buttonVariant === 'default' && 'hover:bg-GRAY_1000/90 active:bg-GRAY_950',
           buttonClassName,
-          buttonVariant === 'default' && 'hover:bg-primary/90 active:bg-GRAY_950 text-white',
         )}
       >
         {copy}

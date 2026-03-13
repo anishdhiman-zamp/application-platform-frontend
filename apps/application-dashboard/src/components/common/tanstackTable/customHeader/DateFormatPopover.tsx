@@ -1,10 +1,9 @@
 import { FC } from 'react';
-import { Button } from '@zamp-platform/ui';
+import { Button, CSS_VARS } from '@zamp-platform/ui';
 import { SvgSpriteLoader } from '@zamp-platform/ui/assets';
 import { cn } from '@zamp-platform/ui/utils';
 import { DATE_FORMATS, formatRelativeWithCustomLocale } from '@zamp-platform/utils';
 import { format } from 'date-fns';
-import { COLORS } from '@/constants/colors';
 import { defaultFnType } from '@/types/commonTypes';
 import { DateFormatOptions } from 'components/common/table/CustomHeader/customHeader.constants';
 
@@ -22,7 +21,7 @@ const DateFormatPopover: FC<DateFormatPopoverProps> = ({
   <div className='w-60 px-1 py-3'>
     <div className='mb-3.5 flex items-center gap-1.5 px-2'>
       <Button variant='ghost' size='icon' className='h-3.5 w-3.5 p-0 [&_svg]:size-3.5' onClick={handleDateFormatClose}>
-        <SvgSpriteLoader id='arrow-narrow-left' size={14} color={COLORS.GRAY_900} />
+        <SvgSpriteLoader id='arrow-narrow-left' size={14} color={CSS_VARS.GRAY_900} />
       </Button>
       <span className='f-13-500'>Date Format</span>
     </div>
@@ -46,7 +45,7 @@ const DateFormatPopover: FC<DateFormatPopoverProps> = ({
           <SvgSpriteLoader
             id='check'
             size={12}
-            color={COLORS.GRAY_900}
+            color={CSS_VARS.GRAY_900}
             className={cn('opacity-0', {
               'opacity-100': dateFormat === option.value || (!dateFormat && option.value === DATE_FORMATS.ddMMMyyyy),
             })}

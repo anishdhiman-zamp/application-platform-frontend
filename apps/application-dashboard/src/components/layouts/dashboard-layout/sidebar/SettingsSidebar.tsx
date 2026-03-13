@@ -19,7 +19,7 @@ const SettingsSidebar = () => {
   const { logout, isLoggingOut } = useLogout();
 
   return (
-    <div className='bg-BACKGROUND_GRAY_1 relative z-20 flex transition-all'>
+    <div className='bg-BG_GRAY_1 relative z-20 flex transition-all'>
       <div className={cn('relative transition-all', isSidebarOpen ? 'w-60' : 'invisible w-0 opacity-0')}>
         <div className='flex h-full w-60 flex-col'>
           {/* Back button */}

@@ -1,7 +1,7 @@
 import { useState } from 'react';
 import { useSelector } from 'react-redux';
+import { CSS_VARS } from '@zamp-platform/ui';
 import { SvgSpriteLoader } from '@zamp-platform/ui/assets';
-import { COLORS } from 'constants/colors';
 import ImportFileHistory from 'modules/data/components/datasetHistory/ImportFileHistory';
 import LoadingWidthAnimation from 'modules/data/components/LoadingWidthAnimation';
 import { RootState } from 'store';
@@ -36,7 +36,7 @@ const DatasetHistory = ({ disable }: { disable: boolean }) => {
             )}
             onClick={handleOpenFileImportHistory}
           >
-            <SvgSpriteLoader id='clock-rewind' width={14} height={14} color={COLORS.GRAY_900} />
+            <SvgSpriteLoader id='clock-rewind' width={14} height={14} color={CSS_VARS.GRAY_900} />
           </div>
         </TooltipV2>
         {!!datasetBulkLoaders?.length && (

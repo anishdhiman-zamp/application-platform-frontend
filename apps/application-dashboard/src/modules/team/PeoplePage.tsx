@@ -68,7 +68,7 @@ const PeoplePage: FC<PeoplePageProps> = ({ tab }) => {
   }, [search, debouncedFilterTeamMembers, debouncedFilterInvitedMembers]);
 
   return (
-    <div className='h-full w-full p-10'>
+    <div className='bg-BG_WHITE h-full w-full p-10'>
       <PeopleHeader search={search} setSearch={setSearch} teamMembersData={teamMembersData ?? []} />
 
       <PeopleTabs

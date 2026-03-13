@@ -32,7 +32,7 @@ const ProcessEmptyState: FC<ProcessEmptyStateProps> = ({
         />
       </div>
       <div className='f-14-500 text-GRAY_950 text-center'>{emptyStateData?.title || title}</div>
-      <div className='f-13-400 text-GRAY_800 max-w-[260px] text-center text-wrap break-words'>
+      <div className='f-13-400 text-GRAY_800 max-w-[260px] text-center text-wrap wrap-break-word'>
         {emptyStateData?.description || description}
       </div>
     </div>

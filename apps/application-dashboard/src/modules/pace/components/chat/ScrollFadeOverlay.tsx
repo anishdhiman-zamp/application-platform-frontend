@@ -16,7 +16,7 @@ const ScrollFadeOverlay = ({ canScrollTop, canScrollBottom }: ScrollFadeOverlayP
           canScrollTop ? 'opacity-100' : 'opacity-0',
         )}
         style={{
-          background: 'linear-gradient(180deg, #FFF 0%, rgba(255, 255, 255, 0.00) 100%)',
+          background: 'linear-gradient(180deg, var(--BG_WHITE) 0%, transparent 100%)',
         }}
       />
       <div
@@ -27,7 +27,7 @@ const ScrollFadeOverlay = ({ canScrollTop, canScrollBottom }: ScrollFadeOverlayP
           canScrollBottom ? 'opacity-100' : 'opacity-0',
         )}
         style={{
-          background: 'linear-gradient(0deg, #FFF 0%, rgba(255, 255, 255, 0.00) 100%)',
+          background: 'linear-gradient(0deg, var(--BG_WHITE) 0%, transparent 100%)',
         }}
       />
     </>

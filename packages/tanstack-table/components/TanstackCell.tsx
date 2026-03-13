@@ -24,7 +24,7 @@ const TanstackCellTd: React.FC<{
   <td
     key={cell.id}
     data-testid={`table-cell-${colId}`}
-    className={cn('group-hover:bg-BACKGROUND_GRAY_2', isHighlighted && 'bg-BACKGROUND_GRAY_2', cellClass)}
+    className={cn('group-hover:bg-BG_GRAY_2', isHighlighted && 'bg-BG_GRAY_2', cellClass)}
     style={{
       width: `${cell.column.getSize()}px`,
       minWidth: `${cell.column.getSize()}px`,
@@ -50,8 +50,8 @@ const TanstackCell: React.FC<TanstackCellProps> = ({ cell, ctx, isHighlighted, c
       <TanstackCellTd cell={cell} colId={colId} isHighlighted={isHighlighted} cellClass={cellClass}>
         <span
           className={cn(
-            'group-hover:bg-BACKGROUND_GRAY_2 flex justify-between py-2!',
-            isHighlighted && 'bg-BACKGROUND_GRAY_2',
+            'group-hover:bg-BG_GRAY_2 flex justify-between py-2!',
+            isHighlighted && 'bg-BG_GRAY_2',
             cellClass,
           )}
           style={{
@@ -74,10 +74,7 @@ const TanstackCell: React.FC<TanstackCellProps> = ({ cell, ctx, isHighlighted, c
     return (
       <TanstackCellTd cell={cell} colId={colId} isHighlighted={isHighlighted} cellClass={cellClass}>
         <span
-          className={cn(
-            'text-13 group-hover:bg-BACKGROUND_GRAY_2 text-gray-550 px-4! py-1!',
-            isHighlighted && 'bg-BACKGROUND_GRAY_2',
-          )}
+          className={cn('text-13 group-hover:bg-BG_GRAY_2 text-gray-550 px-4! py-1!', isHighlighted && 'bg-BG_GRAY_2')}
         >
           N/A
         </span>
@@ -86,12 +83,7 @@ const TanstackCell: React.FC<TanstackCellProps> = ({ cell, ctx, isHighlighted, c
   } else {
     return (
       <TanstackCellTd cell={cell} colId={colId} isHighlighted={isHighlighted} cellClass={cellClass}>
-        <span
-          className={cn(
-            'group-hover:bg-BACKGROUND_GRAY_2! truncate px-4! py-1!',
-            isHighlighted && 'bg-BACKGROUND_GRAY_2',
-          )}
-        >
+        <span className={cn('group-hover:bg-BG_GRAY_2! truncate px-4! py-1!', isHighlighted && 'bg-BG_GRAY_2')}>
           {String(raw)}
         </span>
       </TanstackCellTd>

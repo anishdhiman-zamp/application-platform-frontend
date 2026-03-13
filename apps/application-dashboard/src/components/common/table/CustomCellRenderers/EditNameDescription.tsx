@@ -6,6 +6,7 @@ import { getColumnConfigForDataset, setColumnConfigForDataset } from '@zamp-plat
 import { DATASET_TOAST_MESSAGES } from '@zamp-platform/dataset-create-edit/constants';
 import {
   Button,
+  CSS_VARS,
   Dialog,
   DialogClose,
   DialogContent,
@@ -18,7 +19,6 @@ import {
 import { SvgSpriteLoader } from '@zamp-platform/ui/assets';
 import { ICellRendererParams } from 'ag-grid-community';
 import { Dataset } from '@/app/(authenticated)/resources/dataset.resource';
-import { COLORS } from '@/constants/colors';
 import { usePendingDatasetContextOptional } from '@/context/pendingDataset.context';
 import { useResourceAccess } from '@/hooks/useResourceAccess';
 import { DATASET_ACCESS_PRIVILEGES } from '@/modules/shareResource/shareResource.types';
@@ -124,7 +124,7 @@ const EditNameDescription = (props: ICellRendererParams) => {
         <Dialog open={isOpen} onOpenChange={handleOpen}>
           <DialogTrigger asChild>
             <Button variant='ghost' size='xxsmall' id='edit-name-description' className='h-[22px] w-[22px]'>
-              <SvgSpriteLoader id='edit-03' size={14} color={COLORS.GRAY_900} />
+              <SvgSpriteLoader id='edit-03' size={14} color={CSS_VARS.GRAY_900} />
             </Button>
           </DialogTrigger>
           <DialogContent size='medium_small'>

@@ -1,8 +1,8 @@
 import type { FC } from 'react';
 import type { TUsePDFSlickStore } from '@pdfslick/react';
+import { COLORS } from '@zamp-platform/ui';
 import { SvgSpriteLoader } from '@zamp-platform/ui/assets';
 import { cn } from '@zamp-platform/ui/utils';
-import { COLORS } from '@/constants/colors';
 
 interface ToolBarPropsType {
   usePDFSlickStore: TUsePDFSlickStore;

@@ -254,7 +254,6 @@ export const useFileTreeNodeActions = ({
       closeTabsForPath(node.path, isFolder);
       await deleteItem(node.path);
       onFileDeleted?.(node.path);
-      toast.success(isFolder ? FILE_TOAST_MESSAGES.FOLDER_DELETED : FILE_TOAST_MESSAGES.FILE_DELETED);
       setIsDeleteDialogOpen(false);
     } catch (error) {
       captureException(error);

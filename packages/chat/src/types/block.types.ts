@@ -144,6 +144,7 @@ export const TASK_STATUS = {
   COMPLETED: 'COMPLETED',
   IN_PROGRESS: 'IN_PROGRESS',
   FAILED: 'FAILED',
+  NEEDS_INPUT: 'NEEDS_INPUT',
 } as const;
 
 export type TaskStatus = (typeof TASK_STATUS)[keyof typeof TASK_STATUS];

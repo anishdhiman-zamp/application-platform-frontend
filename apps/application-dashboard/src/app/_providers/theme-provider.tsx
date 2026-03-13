@@ -1,10 +1,14 @@
 'use client';
 
-import { createContext, useCallback, useContext, useEffect, useMemo, useState } from 'react';
+import { createContext, useCallback, useContext, useEffect, useLayoutEffect, useMemo, useState } from 'react';
+import { usePathname } from 'next/navigation';
+import { ROUTES_PATH } from '@/constants/routeConfig';
 import { THEME_MODE } from '@/modules/general/constants/general.constants';
 import { getCookie, setCookie, THEME_COOKIE, THEME_COOKIE_MAX_AGE } from '@/utils/cookie';
 import { LOCAL_STORAGE_KEYS } from '@/utils/localstorage';
 import { THEME_CSS_CLASSES } from '@/utils/theme.utils';
+
+const DARK_MODE_ROUTES = [ROUTES_PATH.CHAT];
 
 type ResolvedTheme = THEME_MODE.LIGHT | THEME_MODE.DARK;
 
@@ -51,16 +55,33 @@ function persistTheme(theme: THEME_MODE) {
 }
 
 export const ThemeProvider = ({ children }: { children: React.ReactNode }) => {
+  const pathname = usePathname();
+  const isDarkModeAllowed = DARK_MODE_ROUTES.some((route) => pathname?.startsWith(route));
   const [theme, setThemeState] = useState<THEME_MODE>(getStoredTheme);
   const [resolvedTheme, setResolvedTheme] = useState<ResolvedTheme>(() => resolveTheme(getStoredTheme()));
 
   const setTheme = useCallback((next: THEME_MODE) => {
     persistTheme(next);
+    const resolved = resolveTheme(next);
+
+    applyTheme(resolved);
     setThemeState(next);
-    setResolvedTheme(resolveTheme(next));
+    setResolvedTheme(resolved);
   }, []);
 
   const value = useMemo(() => ({ theme, resolvedTheme, setTheme }), [theme, resolvedTheme, setTheme]);
+
+  function syncFromStorage(
+    setThemeState: (theme: THEME_MODE) => void,
+    setResolvedTheme: (resolved: ResolvedTheme) => void,
+  ) {
+    const next = getStoredTheme();
+    const resolved = resolveTheme(next);
+
+    applyTheme(resolved);
+    setThemeState(next);
+    setResolvedTheme(resolved);
+  }
 
   useEffect(() => {
     applyTheme(resolvedTheme);
@@ -81,6 +102,33 @@ export const ThemeProvider = ({ children }: { children: React.ReactNode }) => {
 
     return () => colorSchemeQuery.removeEventListener('change', handleColorSchemeChange);
   }, [theme]);
+
+  // Sync theme changes across browser tabs.
+  useEffect(() => {
+    const handleStorageChange = (e: StorageEvent) => {
+      if (e.key === LOCAL_STORAGE_KEYS.THEME) syncFromStorage(setThemeState, setResolvedTheme);
+    };
+
+    const handleVisibilityChange = () => {
+      if (document.visibilityState === 'visible') syncFromStorage(setThemeState, setResolvedTheme);
+    };
+
+    window.addEventListener('storage', handleStorageChange);
+    document.addEventListener('visibilitychange', handleVisibilityChange);
+
+    return () => {
+      window.removeEventListener('storage', handleStorageChange);
+      document.removeEventListener('visibilitychange', handleVisibilityChange);
+    };
+  }, []);
+
+  // Enforce light mode on routes outside the Pace layout.
+  useLayoutEffect(() => {
+    if (!isDarkModeAllowed) {
+      persistTheme(THEME_MODE.LIGHT);
+      setTheme(THEME_MODE.LIGHT);
+    }
+  }, [isDarkModeAllowed, setTheme]);
 
   return <ThemeContext.Provider value={value}>{children}</ThemeContext.Provider>;
 };

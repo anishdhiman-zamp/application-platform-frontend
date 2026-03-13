@@ -1,6 +1,6 @@
+import { CSS_VARS } from '@zamp-platform/ui';
 import { SvgSpriteLoader } from '@zamp-platform/ui/assets';
 import { ColDef, ICellRendererParams } from 'ag-grid-community';
-import { COLORS } from 'constants/colors';
 import { DATASET_ICON } from 'constants/icons';
 import { DATASET_ACTION_TYPE } from 'modules/data/data.types';
 import Image from 'next/image';
@@ -79,7 +79,7 @@ export const LISTING_COLUMNS: ColDef[] = [
     cellRenderer: (params: ICellRendererParams) => {
       return (
         <Link href={getDatasetRouteById(params.data.id)} className='flex h-full w-full items-center px-6!'>
-          <SvgSpriteLoader id='arrow-narrow-right' width={14} height={14} color={COLORS.GRAY_900} />
+          <SvgSpriteLoader id='arrow-narrow-right' width={14} height={14} color={CSS_VARS.GRAY_900} />
         </Link>
       );
     },

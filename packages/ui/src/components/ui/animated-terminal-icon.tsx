@@ -3,7 +3,7 @@
 import { cn } from '@zamp-platform/ui/utils';
 import { FC, useEffect, useRef } from 'react';
 
-import { COLORS } from '../../constants/constants';
+import { CSS_VARS } from '../../constants/colors';
 import { TerminalIcon, type TerminalIconHandle } from './terminal';
 
 interface AnimatedTerminalIconProps {
@@ -18,8 +18,8 @@ export const AnimatedTerminalIcon: FC<AnimatedTerminalIconProps> = ({
   showAnimation,
   size = 12,
   className,
-  activeColor = COLORS.BLUE_350,
-  completeColor = COLORS.GRAY_700,
+  activeColor = CSS_VARS.BLUE_700,
+  completeColor = CSS_VARS.GRAY_700,
 }) => {
   const iconRef = useRef<TerminalIconHandle>(null);
 

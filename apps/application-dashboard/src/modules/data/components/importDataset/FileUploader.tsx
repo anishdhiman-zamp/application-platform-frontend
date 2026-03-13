@@ -1,7 +1,6 @@
 import React, { DragEventHandler, FC, KeyboardEvent, useEffect, useMemo, useState } from 'react';
-import { Button } from '@zamp-platform/ui';
+import { Button, CSS_VARS } from '@zamp-platform/ui';
 import { SvgSpriteLoader } from '@zamp-platform/ui/assets';
-import { COLORS } from 'constants/colors';
 import { KEYBOARD_KEYS } from 'constants/shortcuts';
 import { FILE_IMPORT_STATUS_MSG } from 'modules/data/components/importDataset/importData.constants';
 import { FileUploaderPropsType } from 'modules/data/components/importDataset/importData.types';
@@ -55,7 +54,7 @@ const FileUploader: FC<FileUploaderPropsType> = ({
       return (
         <div className='h-full w-3/5'>
           <div className='flex w-full justify-start gap-1.5 py-1'>
-            <SvgSpriteLoader id='file-06' width={14} height={14} color={COLORS.GRAY_700} />
+            <SvgSpriteLoader id='file-06' width={14} height={14} color={CSS_VARS.GRAY_700} />
             <span className='f-12-400 text-GRAY_700'>{fileName}</span>
           </div>
           <span className='bg-GRAY_400 relative mt-2 flex h-1 w-full overflow-hidden rounded-xl'>
@@ -70,10 +69,10 @@ const FileUploader: FC<FileUploaderPropsType> = ({
         <div className='w-3/5'>
           <div className='flex w-full items-center justify-between gap-4'>
             <div className='flex w-full justify-start gap-1.5 py-1'>
-              <SvgSpriteLoader id='file-06' width={14} height={14} color={COLORS.GRAY_1000} />
+              <SvgSpriteLoader id='file-06' width={14} height={14} color={CSS_VARS.GRAY_1000} />
               <span className='f-12-400 text-GRAY_1000'>{fileName}</span>
             </div>
-            <SvgSpriteLoader id='check' width={14} height={14} color={COLORS.GREEN_PRIMARY} />
+            <SvgSpriteLoader id='check' width={14} height={14} color={CSS_VARS.GREEN_700} />
           </div>
           <span className='bg-GREEN_700 mt-2 flex h-1 w-full rounded-xl'></span>
         </div>

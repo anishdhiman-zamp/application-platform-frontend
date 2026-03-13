@@ -32,7 +32,7 @@ const TabsOverflowMenu: FC<TabsOverflowMenuProps> = ({ overflowTabs, handleTabSe
           <DropdownMenuItem
             key={tab.value}
             onClick={() => handleItemClick(tab)}
-            className='hover:bg-accent hover:text-accent-foreground rounded'
+            className='hover:bg-accent hover:text-accent-GRAY_1000 rounded'
             data-testid={`${tab.value}-tabs-overflow-menu-item`}
           >
             <span className='truncate'>{tab.label}</span>

@@ -11,7 +11,7 @@ const SheetTabs = ({ sheetNames, activeSheet, onSheetChange }: SheetTabsProps) =
   if (sheetNames?.length <= 1) return null;
 
   return (
-    <div className='border-GRAY_400 flex items-stretch border-r'>
+    <div className='border-border flex items-stretch border-r'>
       {sheetNames.map((name) => {
         const isActive = activeSheet === name;
 
@@ -23,7 +23,7 @@ const SheetTabs = ({ sheetNames, activeSheet, onSheetChange }: SheetTabsProps) =
             onClick={() => onSheetChange(name)}
             className={cn(
               'f-12-450 relative h-auto rounded-none px-4 py-2',
-              isActive ? 'text-GRAY_1000' : 'text-GRAY_700 hover:text-GRAY_900',
+              isActive ? 'text-GRAY_1000' : 'text-GRAY_700 hover:text-GRAY_1000',
             )}
           >
             {name}

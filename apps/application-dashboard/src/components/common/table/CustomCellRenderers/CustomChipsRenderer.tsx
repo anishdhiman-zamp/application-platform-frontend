@@ -1,5 +1,5 @@
 import { useMemo } from 'react';
-import { COLORS } from '@/constants/colors';
+import { COLORS } from '@zamp-platform/ui';
 import { cn } from '@/utils/common';
 import TagChip from 'components/common/table/CustomCellEditors/CustomTagEditor/TagChip';
 

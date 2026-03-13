@@ -341,21 +341,22 @@ export const useChatInput = ({
   }, []);
 
   const handleSubmit = () => {
-    if (value.trim()) {
-      setValue('');
-    }
+    const trimmedValue = value.trim();
+    if (!trimmedValue) return;
+
+    setValue('');
 
     if (!firstMessage && !conversationId) {
-      setFirstMessage(value);
+      setFirstMessage(trimmedValue);
       setHeader?.('Analysing...');
       return;
     }
 
-    handleSendMessage(value);
+    handleSendMessage(trimmedValue);
   };
 
   const handleSendMessage = async (inputValue: string) => {
-    if (!inputValue.trim()) return;
+    if (!inputValue) return;
 
     const messagePayload = createUserMessagePayload(
       inputValue,
@@ -366,7 +367,6 @@ export const useChatInput = ({
       llmModel,
     );
 
-    setValue('');
     setFileReferences([]);
 
     const lastMessage = chat.messages[chat.messages.length - 1];

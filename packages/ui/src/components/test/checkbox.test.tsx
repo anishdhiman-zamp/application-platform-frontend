@@ -74,7 +74,7 @@ describe('Checkbox Component - Functional Tests', () => {
     const { getByRole } = render(<Checkbox />);
     const checkbox = getByRole('checkbox');
     expect(checkbox).toHaveClass(
-      'border-GRAY_400',
+      'border-GRAY_500',
       'hover:bg-GRAY_400',
       'focus-visible:ring-ring',
       'data-[state=checked]:bg-GRAY_1000',

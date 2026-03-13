@@ -1,7 +1,7 @@
 import { memo, useEffect, useRef, useState } from 'react';
+import { CSS_VARS } from '@zamp-platform/ui';
 import { LOG_STATUS } from 'modules/process/process.types';
 import { motion, useInView } from 'motion/react';
-import { COLORS } from '@/constants/colors';
 
 type LogStatusIndicatorProps = {
   fillColor: string;
@@ -80,9 +80,9 @@ const LogStatusIndicator = ({
           rx={1.875}
           x={(svgSize - svgRectSize) / 2}
           y={(svgSize - svgRectSize) / 2}
-          fill={showBlueStroke ? COLORS.BLUE_100 : fillColor}
+          fill={showBlueStroke ? CSS_VARS.BLUE_100 : fillColor}
           fillOpacity={isErrorShape || isLoadingShape ? '0.1' : '0.6'}
-          stroke={showBlueStroke ? COLORS.BLUE_450 : strokeColor}
+          stroke={showBlueStroke ? CSS_VARS.BLUE_700 : strokeColor}
           strokeWidth={1.25}
           style={{ transition: 'stroke 0.3s ease-in-out' }}
         />

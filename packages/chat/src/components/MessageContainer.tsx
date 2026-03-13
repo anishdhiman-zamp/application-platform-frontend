@@ -1,8 +1,7 @@
-import { ShimmerText } from '@zamp-platform/ui';
+import { COLORS, ShimmerText } from '@zamp-platform/ui';
 import { cn } from '@zamp-platform/ui/utils';
 import { FC, ReactNode, useCallback, useEffect, useRef } from 'react';
 
-import { COLORS } from '@/constants/colors';
 import PaceAvatar from '@/modules/chatbot/PaceAvatar';
 
 import { ButtonBlockType } from '../types/block.types';

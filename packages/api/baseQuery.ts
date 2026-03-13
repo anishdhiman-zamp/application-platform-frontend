@@ -31,7 +31,10 @@ const baseQuery = (timeout = REQUEST_TIMEOUT, domain = API_DOMAIN, orgId: string
     credentials: 'include',
     prepareHeaders: (headers) => {
       headers.set('Accept', 'application/json');
-      headers.set(LOCAL_STORAGE_KEYS.XZAMP_ORGANIZATION_ID, orgId);
+
+      if (orgId) {
+        headers.set(LOCAL_STORAGE_KEYS.XZAMP_ORGANIZATION_ID, orgId);
+      }
 
       return headers;
     },
@@ -49,7 +52,8 @@ const baseQueryWithAuth: BaseQueryFn<CustomFetchArgs, unknown, FetchBaseQueryErr
   const currentOrgId =
     state?.user?.user?.orgs?.[0]?.organization_id ||
     getFromLocalStorage(LOCAL_STORAGE_KEYS.XZAMP_ORGANIZATION_ID) ||
-    defaultOrgId;
+    defaultOrgId ||
+    '';
 
   await mutex.waitForUnlock();
 
@@ -70,7 +74,9 @@ const baseQueryWithAuth: BaseQueryFn<CustomFetchArgs, unknown, FetchBaseQueryErr
   const normalizedPath = path.replace(/\/$/, '');
 
   const shouldSkip401Redirect =
-    normalizedPath === ROUTES_PATH.LOGIN || normalizedPath === ROUTES_PATH.MEMBERSHIP_PENDING;
+    normalizedPath === ROUTES_PATH.LOGIN ||
+    normalizedPath === ROUTES_PATH.MEMBERSHIP_PENDING ||
+    normalizedPath === ROUTES_PATH.SETUP_WORKSPACE;
 
   const error = result?.error;
 

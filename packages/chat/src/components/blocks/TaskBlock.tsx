@@ -12,6 +12,7 @@ import {
   ShimmerText,
 } from '@zamp-platform/ui';
 import { safeJsonParse } from '@zamp-platform/utils';
+import { EVENT_TYPE } from '@zamp-platform/utils/event-bus/event-bus.types';
 import { ArrowUpRight, ChevronDown } from 'lucide-react';
 import { useRouter } from 'next/navigation';
 import React, { type FC, useCallback, useMemo } from 'react';
@@ -50,6 +51,7 @@ const TaskBlock: FC<TaskBlockProps> = ({ payload, conversationId }) => {
     resourceId: organizationId,
     resourceType: ResourceType.ORGANIZATION,
     conversationId: task_id,
+    eventType: EVENT_TYPE.TASK,
     enableStreaming: true,
     apiConfig: {
       getConversationById: API_ENDPOINTS.TASKS_MESSAGES_GET,
@@ -137,7 +139,7 @@ const TaskBlock: FC<TaskBlockProps> = ({ payload, conversationId }) => {
         {status === TASK_STATUS.IN_PROGRESS ? (
           <ShimmerText text={toolCall.displayName ?? 'Unknown'} autoAnimate={true} />
         ) : (
-          <span className='text-GRAY_900'>{toolCall.displayName ?? 'Unknown'}</span>
+          <span className='text-GRAY_950'>{toolCall.displayName ?? 'Unknown'}</span>
         )}
       </div>
     );
@@ -145,7 +147,7 @@ const TaskBlock: FC<TaskBlockProps> = ({ payload, conversationId }) => {
 
   return (
     <div className='border-GRAY_400 w-full overflow-hidden rounded-[10px] border bg-white'>
-      <Accordion type='single' collapsible className='w-full'>
+      <Accordion type='single' collapsible className='w-full' defaultValue='task'>
         <AccordionItem value='task' className='border-none'>
           <AccordionTrigger
             className='w-full overflow-hidden px-4 py-3 hover:no-underline [&>svg]:hidden'
@@ -170,38 +172,44 @@ const TaskBlock: FC<TaskBlockProps> = ({ payload, conversationId }) => {
               </Button>
             </div>
           </AccordionTrigger>
-          <AccordionContent className='bg-BG_GRAY_2 border-GRAY_400 border-t px-4 py-3'>
-            {isLoading ? (
-              <div className='flex items-center justify-center py-4'>
-                <AnimatedDot showAnimation size={8} />
-              </div>
-            ) : (
-              <>
-                {previousCount > 0 && (
-                  <div>
-                    <div className='flex items-center gap-2'>
-                      <ChevronDown size={14} className='text-GRAY_700' />
-                      <span className='f-13-400 text-GRAY_700'>
-                        {previousCount} {previousCount === 1 ? 'step' : 'steps'}
-                      </span>
+          {(toolCalls?.length > 0 || status === TASK_STATUS.IN_PROGRESS) && (
+            <AccordionContent className='bg-BG_GRAY_2 border-GRAY_400 border-t px-4 py-3'>
+              {isLoading ? (
+                <div className='flex items-center justify-center py-4'>
+                  <AnimatedDot showAnimation size={8} />
+                </div>
+              ) : (
+                <>
+                  {previousCount > 0 && (
+                    <div>
+                      <div className='flex items-center gap-2'>
+                        <ChevronDown size={14} className='text-GRAY_700' />
+                        <span className='f-14-450 text-GRAY_950'>
+                          {previousCount} {previousCount === 1 ? 'step' : 'steps'}
+                        </span>
+                      </div>
+                      <div className='border-GRAY_400 ml-[7px] h-4 border-l'></div>
                     </div>
-                    <div className='border-GRAY_400 ml-[7px] h-4 border-l'></div>
-                  </div>
-                )}
+                  )}
 
-                {lastToolCall && (
-                  <div className='flex w-full items-center gap-3 pt-0.5'>
-                    <div className='flex h-4 w-4 shrink-0 items-center justify-center'>{getToolIcon(lastToolCall)}</div>
-                    {renderToolCallTrigger(lastToolCall)}
-                  </div>
-                )}
+                  {lastToolCall && (
+                    <div className='flex w-full items-center gap-3 pt-0.5'>
+                      <div className='flex h-4 w-4 shrink-0 items-center justify-center'>
+                        {getToolIcon(lastToolCall)}
+                      </div>
+                      {renderToolCallTrigger(lastToolCall)}
+                    </div>
+                  )}
 
-                {(toolCalls?.length ?? 0) === 0 && !isLoading && (
-                  <div className='f-13-400 text-GRAY_700 py-2'>No steps yet</div>
-                )}
-              </>
-            )}
-          </AccordionContent>
+                  {(toolCalls?.length ?? 0) === 0 && !isLoading && status === TASK_STATUS.IN_PROGRESS && (
+                    <div className='f-14-450 text-GRAY_700 py-2'>
+                      <ShimmerText text='Starting now' autoAnimate={true} />
+                    </div>
+                  )}
+                </>
+              )}
+            </AccordionContent>
+          )}
         </AccordionItem>
       </Accordion>
     </div>

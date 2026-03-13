@@ -90,7 +90,7 @@ export const MarkdownBlock: React.FC<MarkdownBlockProps> = ({ payload, isStreami
 
   return (
     <div
-      className='max-w-chat-prose text-chat-body overflow-hidden text-[14px] leading-[1.667] font-[420] wrap-break-word'
+      className='max-w-chat-prose text-GRAY_950 overflow-hidden text-[14px] leading-[1.667] font-[420] wrap-break-word'
       data-testid='markdown-block'
     >
       <ReactMarkdown
@@ -99,55 +99,55 @@ export const MarkdownBlock: React.FC<MarkdownBlockProps> = ({ payload, isStreami
         urlTransform={urlTransform}
         components={{
           h1: ({ children }) => (
-            <h1 className='text-chat-text mt-10 mb-2 text-[22px] leading-[1.4] font-semibold tracking-[-0.02em] first:mt-4'>
+            <h1 className='text-GRAY_1000 mt-10 mb-2 text-[22px] leading-[1.4] font-semibold tracking-[-0.02em] first:mt-4'>
               {children}
             </h1>
           ),
           h2: ({ children }) => (
-            <h2 className='text-chat-text mt-6 text-[18px] leading-[1.4] font-semibold tracking-[-0.015em] first:mt-0'>
+            <h2 className='text-GRAY_1000 mt-6 text-[18px] leading-[1.4] font-semibold tracking-[-0.015em] first:mt-0'>
               {children}
             </h2>
           ),
           h3: ({ children }) => (
-            <h3 className='text-chat-text mt-8 text-[16px] leading-[1.4] font-semibold tracking-[-0.01em] first:mt-0'>
+            <h3 className='text-GRAY_1000 mt-8 text-[16px] leading-[1.4] font-semibold tracking-[-0.01em] first:mt-0'>
               {children}
             </h3>
           ),
           p: ({ children }) => (
-            <p className='text-chat-body mt-3 text-[14px] leading-[1.667] font-[420] first:mt-0'>{children}</p>
+            <p className='text-GRAY_950 mt-3 text-[14px] leading-[1.667] font-[420] first:mt-0'>{children}</p>
           ),
           ul: ({ children }) => (
-            <ul className='text-chat-body mt-3 list-disc pl-5 text-[14px] leading-[1.667] font-[420] first:mt-0'>
+            <ul className='text-GRAY_950 mt-3 list-disc pl-5 text-[14px] leading-[1.667] font-[420] first:mt-0'>
               {children}
             </ul>
           ),
           ol: ({ children }) => (
-            <ol className='text-chat-body mt-3 list-decimal pl-5 text-[14px] leading-[1.667] font-[420] first:mt-0'>
+            <ol className='text-GRAY_950 mt-3 list-decimal pl-5 text-[14px] leading-[1.667] font-[420] first:mt-0'>
               {children}
             </ol>
           ),
           li: ({ children }) => <li className='mt-2 first:mt-0'>{children}</li>,
-          hr: () => <hr className='bg-chat-border my-8 h-px border-none' />,
-          strong: ({ children }) => <strong className='text-chat-text font-semibold'>{children}</strong>,
+          hr: () => <hr className='bg-GRAY_300 my-8 h-px border-none' />,
+          strong: ({ children }) => <strong className='text-GRAY_1000 font-semibold'>{children}</strong>,
           blockquote: ({ children }) => (
-            <blockquote className='border-chat-border text-chat-secondary mt-4 border-l-2 pl-4 first:mt-0'>
+            <blockquote className='border-GRAY_300 text-GRAY_900 mt-4 border-l-2 pl-4 first:mt-0'>
               {children}
             </blockquote>
           ),
           pre: ({ children }) => <>{children}</>,
           table: ({ children }) => (
             <div className='mt-4 overflow-x-auto pb-3 first:mt-0'>
-              <table className='text-chat-body w-full border-collapse text-[13px] font-[420]'>{children}</table>
+              <table className='text-GRAY_950 w-full border-collapse text-[13px] font-[420]'>{children}</table>
             </div>
           ),
           thead: ({ children }) => <thead>{children}</thead>,
           th: ({ children }) => (
-            <th className='text-chat-secondary border-b border-[#F0EEEB] pt-1 pr-4 pb-2 text-left text-[11px] font-semibold tracking-[0.04em] uppercase'>
+            <th className='text-GRAY_900 border-GRAY_300 border-b pt-1 pr-4 pb-2 text-left text-[11px] font-semibold tracking-[0.04em] uppercase'>
               {children}
             </th>
           ),
           td: ({ children }) => (
-            <td className='text-chat-body border-b border-[#F0EEEB] py-2.5 pr-4 leading-normal'>{children}</td>
+            <td className='text-GRAY_950 border-GRAY_300 border-b py-2.5 pr-4 leading-normal'>{children}</td>
           ),
           code: ({ className, children, ...props }) => {
             const match = /language-(\w+)/.exec(className || '');
@@ -156,7 +156,7 @@ export const MarkdownBlock: React.FC<MarkdownBlockProps> = ({ payload, isStreami
 
             if (isInline) {
               return (
-                <code className='bg-chat-inline-bg text-chat-inline rounded-[3px] px-1 py-0.5 font-mono text-[12px] font-normal'>
+                <code className='bg-PINK_100 text-PINK_600 rounded-[3px] px-1 py-0.5 font-mono text-[12px] font-normal'>
                   {children}
                 </code>
               );
@@ -165,14 +165,14 @@ export const MarkdownBlock: React.FC<MarkdownBlockProps> = ({ payload, isStreami
             const language = match?.[1];
             return (
               <div className='mt-5 pb-2 first:mt-0'>
-                <div className='border-chat-border overflow-hidden rounded-lg border'>
+                <div className='border-GRAY_300 overflow-hidden rounded-lg border'>
                   {language && (
-                    <div className='border-chat-border bg-chat-code-header text-chat-secondary border-b px-4 py-1.5 font-mono text-[11px] font-medium tracking-normal'>
+                    <div className='border-GRAY_300 bg-BG_GRAY_2 text-GRAY_900 border-b px-4 py-1.5 font-mono text-[11px] font-medium tracking-normal'>
                       {language}
                     </div>
                   )}
-                  <pre className='bg-chat-code-bg m-0 overflow-x-auto px-5 py-4'>
-                    <code className='hljs text-chat-text font-mono text-[13px] leading-normal font-normal' {...props}>
+                  <pre className='bg-GRAY_100 m-0 overflow-x-auto px-5 py-4'>
+                    <code className='hljs text-GRAY_1000 font-mono text-[13px] leading-normal font-normal' {...props}>
                       {highlightCode(codeString, language)}
                     </code>
                   </pre>
@@ -190,7 +190,7 @@ export const MarkdownBlock: React.FC<MarkdownBlockProps> = ({ payload, isStreami
               return (
                 <span
                   onClick={() => handleFileOpen(filePath, fileName)}
-                  className='bg-gray-1000 ml-0.5 inline-flex cursor-pointer items-center rounded-md px-2 py-0.5 text-xs font-medium text-white transition-all duration-150 hover:bg-black hover:shadow-md active:scale-[0.98]'
+                  className='bg-GRAY_1000 text-background ml-0.5 inline-flex cursor-pointer items-center rounded-md px-2 py-0.5 text-xs font-medium transition-all duration-150 hover:opacity-80 hover:shadow-md active:scale-[0.98]'
                 >
                   {fileName}
                 </span>
@@ -201,7 +201,7 @@ export const MarkdownBlock: React.FC<MarkdownBlockProps> = ({ payload, isStreami
               <Link
                 href={href}
                 target='_blank'
-                className='text-chat-accent underline decoration-green-300 underline-offset-2'
+                className='text-GREEN_800 underline decoration-green-300 underline-offset-2'
               >
                 {children}
               </Link>

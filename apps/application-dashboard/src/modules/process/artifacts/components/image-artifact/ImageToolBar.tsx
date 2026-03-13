@@ -1,7 +1,7 @@
 import type { FC } from 'react';
+import { COLORS } from '@zamp-platform/ui';
 import { cn } from '@zamp-platform/ui/utils';
 import { ZoomIn, ZoomOut } from 'lucide-react';
-import { COLORS } from '@/constants/colors';
 
 interface ImageToolBarProps {
   scale: number;

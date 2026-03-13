@@ -5,14 +5,14 @@
   --crepe-font-default: 'Inter Variable', system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
   --crepe-font-code: 'JetBrains Mono', 'Fira Code', Menlo, Monaco, 'Courier New', monospace;
 
-  /* Colors - mapped from product design tokens */
+  /* Colors - light mode */
   --crepe-color-background: #ffffff;
   --crepe-color-on-background: var(--GRAY_1000, #171717);
   --crepe-color-surface: var(--GRAY_70, #0000000d);
   --crepe-color-surface-low: var(--GRAY_100, #f2f2f2);
   --crepe-color-on-surface: var(--GRAY_1000, #171717);
   --crepe-color-on-surface-variant: var(--GRAY_900, #666666);
-  --crepe-color-outline: var(--GRAY_600, #a8a8a8);
+  --crepe-color-outline: var(--GRAY_900, #666666);
   --crepe-color-primary: var(--BLUE_700, #2546f5);
   --crepe-color-secondary: var(--GRAY_200, #ebebeb);
   --crepe-color-on-secondary: var(--GRAY_1000, #171717);
@@ -35,8 +35,6 @@
 .milkdown-editor-wrapper .ProseMirror {
   font-family: var(--crepe-font-default);
 }
-
-
 
 /* Headings use the title font */
 .milkdown-editor-wrapper h1,
@@ -61,8 +59,12 @@
 /* Blockquote styling */
 .milkdown-editor-wrapper blockquote {
   font-family: var(--crepe-font-default);
-  border-left-color: var(--GRAY_400, #ebebeb);
   color: var(--GRAY_900, #666666);
+}
+
+/* Crepe uses a ::before pseudo-element for the blockquote bar, not border-left */
+.milkdown-editor-wrapper .milkdown .ProseMirror blockquote::before {
+  background: var(--GRAY_400, #ebebeb) !important;
 }
 
 /* Code blocks */
@@ -129,9 +131,14 @@
   fill: var(--GRAY_100, #f2f2f2);
 }
 
+/* Active: background highlight instead of blue icon */
+.milkdown-editor-wrapper .milkdown-toolbar .toolbar-item.active {
+  background: var(--GRAY_800, #555555);
+}
+
 .milkdown-editor-wrapper .milkdown-toolbar .toolbar-item.active svg {
-  color: var(--BLUE_500, #5b7fff);
-  fill: var(--BLUE_500, #5b7fff);
+  color: var(--GRAY_100, #f2f2f2);
+  fill: var(--GRAY_100, #f2f2f2);
 }
 
 .milkdown-editor-wrapper .milkdown-toolbar .divider {
@@ -145,7 +152,9 @@
   background: white;
   border: 1px solid var(--GRAY_400, #e5e5e5);
   border-radius: 6px;
-  box-shadow: 0px 4px 6px -1px rgba(0, 0, 0, 0.1), 0px 2px 4px -1px rgba(0, 0, 0, 0.06);
+  box-shadow:
+    0px 4px 6px -1px rgba(0, 0, 0, 0.1),
+    0px 2px 4px -1px rgba(0, 0, 0, 0.06);
   padding: 4px;
   min-width: 180px;
 }
@@ -248,4 +257,183 @@
 .milkdown-editor-wrapper td,
 .milkdown-editor-wrapper th {
   border-color: var(--GRAY_400, #ebebeb);
+}
+
+/* ── Dark mode overrides ─────────────────────────────────────────── */
+
+/*
+ * All of Crepe's internal styles use these CSS variables.
+ * --crepe-color-outline controls: bullet markers, checkbox SVGs, block handle icons,
+ *   slash menu icons, drop cursor, and virtual cursor.
+ * --crepe-color-on-background controls: text color and placeholder (via color-mix).
+ * --crepe-color-primary controls: link color and checked checkbox fill.
+ * Setting these correctly is all that's needed — no element selectors required.
+ */
+
+/* 1. Base background + cursor caret */
+.dark .milkdown-editor-wrapper .milkdown,
+.dark .milkdown-editor-wrapper .milkdown .editor,
+.dark .milkdown-editor-wrapper .ProseMirror,
+.dark .milkdown-editor-wrapper .milkdown-root {
+  background-color: var(--BG_WHITE) !important;
+  caret-color: var(--GRAY_1000);
+}
+
+/* 2. Crepe variable overrides */
+.dark .milkdown-editor-wrapper .milkdown {
+  --crepe-color-background: var(--BG_WHITE);
+  --crepe-color-on-background: var(--GRAY_1000);
+  --crepe-color-surface: var(--GRAY_50);
+  --crepe-color-surface-low: var(--GRAY_100);
+  --crepe-color-on-surface: var(--GRAY_1000);
+  --crepe-color-on-surface-variant: var(--GRAY_900);
+  /* Controls bullet markers, checkboxes, block handle, slash menu icons */
+  --crepe-color-outline: var(--GRAY_1000);
+  /* Controls links + checked checkbox fill */
+  --crepe-color-primary: var(--BLUE_700);
+  --crepe-color-secondary: var(--GRAY_300);
+  --crepe-color-on-secondary: var(--GRAY_1000);
+  --crepe-color-inverse: var(--GRAY_200);
+  --crepe-color-on-inverse: var(--GRAY_1000);
+  --crepe-color-inline-code: var(--RED_700);
+  --crepe-color-error: var(--RED_700);
+  --crepe-color-hover: var(--GRAY_300);
+  --crepe-color-selected: var(--GRAY_400);
+  --crepe-color-inline-area: var(--GRAY_500);
+
+  --crepe-shadow-1: 0px 1px 3px 1px rgba(0, 0, 0, 0.4), 0px 1px 2px 0px rgba(0, 0, 0, 0.5);
+  --crepe-shadow-2: 0px 2px 6px 2px rgba(0, 0, 0, 0.4), 0px 1px 2px 0px rgba(0, 0, 0, 0.5);
+}
+
+/* 3. Headings */
+.dark .milkdown-editor-wrapper h1,
+.dark .milkdown-editor-wrapper h2,
+.dark .milkdown-editor-wrapper h3,
+.dark .milkdown-editor-wrapper h4,
+.dark .milkdown-editor-wrapper h5,
+.dark .milkdown-editor-wrapper h6 {
+  color: var(--GRAY_1000);
+}
+
+/* 4. Body text */
+.dark .milkdown-editor-wrapper p,
+.dark .milkdown-editor-wrapper li,
+.dark .milkdown-editor-wrapper td,
+.dark .milkdown-editor-wrapper th {
+  color: var(--GRAY_1000);
+}
+
+/* 5. Blockquote — grayish bar, not blue */
+.dark .milkdown-editor-wrapper blockquote {
+  color: var(--GRAY_900);
+}
+
+.dark .milkdown-editor-wrapper .milkdown .ProseMirror blockquote::before {
+  background: var(--GRAY_500) !important;
+}
+
+/* 6. Links */
+.dark .milkdown-editor-wrapper a {
+  color: var(--BLUE_700);
+}
+
+.dark .milkdown-editor-wrapper a:hover {
+  color: var(--BLUE_800);
+}
+
+/* 7. Text selection toolbar — grayish bg, white icons, bg-highlight on active */
+.dark .milkdown-editor-wrapper .milkdown-toolbar {
+  background: var(--GRAY_300);
+  box-shadow: 0px 4px 12px rgba(0, 0, 0, 0.5);
+}
+
+.dark .milkdown-editor-wrapper .milkdown-toolbar .toolbar-item svg {
+  color: var(--GRAY_1000);
+  fill: var(--GRAY_1000);
+}
+
+.dark .milkdown-editor-wrapper .milkdown-toolbar .toolbar-item:hover {
+  background: var(--GRAY_400);
+}
+
+.dark .milkdown-editor-wrapper .milkdown-toolbar .toolbar-item:hover svg {
+  color: var(--GRAY_1000);
+  fill: var(--GRAY_1000);
+}
+
+.dark .milkdown-editor-wrapper .milkdown-toolbar .toolbar-item.active {
+  background: var(--GRAY_500);
+}
+
+.dark .milkdown-editor-wrapper .milkdown-toolbar .toolbar-item.active svg {
+  color: var(--GRAY_1000);
+  fill: var(--GRAY_1000);
+}
+
+.dark .milkdown-editor-wrapper .milkdown-toolbar .divider {
+  background: var(--GRAY_500);
+}
+
+/* 8. Slash menu */
+.dark .milkdown-editor-wrapper .milkdown-slash-menu {
+  background: var(--BG_WHITE);
+  border-color: var(--GRAY_400);
+}
+
+.dark .milkdown-editor-wrapper .milkdown-slash-menu .tab-group {
+  border-bottom-color: var(--GRAY_400);
+}
+
+.dark .milkdown-editor-wrapper .milkdown-slash-menu .tab-group ul li {
+  color: var(--GRAY_900);
+}
+
+.dark .milkdown-editor-wrapper .milkdown-slash-menu .tab-group ul li:hover {
+  background: var(--GRAY_300);
+  color: var(--GRAY_1000);
+}
+
+.dark .milkdown-editor-wrapper .milkdown-slash-menu .tab-group ul li.selected {
+  background: var(--GRAY_300);
+  color: var(--GRAY_1000);
+}
+
+.dark .milkdown-editor-wrapper .milkdown-slash-menu .menu-groups .menu-group h6 {
+  color: var(--GRAY_700);
+}
+
+.dark .milkdown-editor-wrapper .milkdown-slash-menu .menu-groups .menu-group li:hover,
+.dark .milkdown-editor-wrapper .milkdown-slash-menu .menu-groups .menu-group li.hover {
+  background: var(--GRAY_300);
+}
+
+.dark .milkdown-editor-wrapper .milkdown-slash-menu .menu-groups .menu-group li.active {
+  background: var(--GRAY_300);
+}
+
+.dark .milkdown-editor-wrapper .milkdown-slash-menu .menu-groups .menu-group li svg {
+  color: var(--GRAY_900);
+  fill: var(--GRAY_900);
+}
+
+.dark .milkdown-editor-wrapper .milkdown-slash-menu .menu-groups .menu-group li > span {
+  color: var(--GRAY_1000);
+}
+
+.dark .milkdown-editor-wrapper .milkdown-slash-menu .menu-groups .menu-group + .menu-group::before {
+  background: var(--GRAY_400);
+}
+
+/* 9. Table */
+.dark .milkdown-editor-wrapper table {
+  border-color: var(--GRAY_400);
+}
+
+.dark .milkdown-editor-wrapper th {
+  background-color: var(--GRAY_200);
+}
+
+.dark .milkdown-editor-wrapper td,
+.dark .milkdown-editor-wrapper th {
+  border-color: var(--GRAY_400);
 }

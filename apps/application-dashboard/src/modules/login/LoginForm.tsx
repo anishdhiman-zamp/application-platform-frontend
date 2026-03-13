@@ -425,18 +425,18 @@ export const LoginForm = () => {
 
       return (
         <div>
-          <p className='text-GRAY_1000 mb-1 text-sm'>
+          <p className='text-GRAY_1000 mb-1 text-center text-sm'>
             Signing in as <span className='font-medium'>{email}</span>
           </p>
-          <p className='text-GRAY_700 f-13-400 mb-6'>Choose how you want to sign in</p>
-          {error && <p className='text-RED_600 mb-4 text-xs'>{error}</p>}
+          <p className='text-GRAY_700 f-13-400 mb-6 text-center'>Choose how you want to sign in</p>
+          {error && <p className='text-RED_600 mb-4 text-center text-xs'>{error}</p>}
           <div className='flex flex-col gap-3'>
             <Button
               type='button'
               disabled={isLoading}
               className={cn(
                 btnBase,
-                'bg-GRAY_1000 hover:bg-GRAY_950 active:bg-GRAY_1000 border-black/10 text-white disabled:opacity-60',
+                'bg-GRAY_1000 hover:bg-GRAY_950 active:bg-GRAY_1000 border-black/10 text-white disabled:opacity-60 dark:border-white/10 dark:text-black',
               )}
               onClick={() => initiateOtpFromPicker()}
             >
@@ -444,7 +444,10 @@ export const LoginForm = () => {
             </Button>
             <Button
               type='button'
-              className={cn(btnBase, 'bg-GRAY_100 text-GRAY_1000 hover:bg-GRAY_200 active:bg-GRAY_100 border-black/12')}
+              className={cn(
+                btnBase,
+                'bg-GRAY_100 text-GRAY_1000 hover:bg-GRAY_200 active:bg-GRAY_100 border-black/12 dark:border-white/12',
+              )}
               onClick={() => {
                 setPasswordFlow(methodPickerFlow);
                 setMethodPickerFlow(null);
@@ -478,7 +481,7 @@ export const LoginForm = () => {
             type='button'
             disabled={isLoading}
             onClick={handleGoogleLogin}
-            className='btn-login bg-GRAY_100 text-GRAY_1000 hover:bg-GRAY_200 active:bg-GRAY_100 disabled:bg-GRAY_100 f-14-500 relative flex h-auto w-full cursor-pointer items-center justify-center gap-2.5 overflow-hidden rounded-2xl border border-black/12 px-5 py-3.5 transition-all duration-250 active:scale-[1] disabled:cursor-not-allowed disabled:opacity-60'
+            className='btn-login bg-GRAY_100 text-GRAY_1000 hover:bg-GRAY_200 active:bg-GRAY_100 disabled:bg-GRAY_100 f-14-500 relative flex h-auto w-full cursor-pointer items-center justify-center gap-2.5 overflow-hidden rounded-2xl border border-black/12 px-5 py-3.5 transition-all duration-250 active:scale-[1] disabled:cursor-not-allowed disabled:opacity-60 dark:border-white/12'
           >
             <GoogleIcon className='relative z-1 h-4 w-4 shrink-0' />
             <span className='relative z-1'>
@@ -487,9 +490,9 @@ export const LoginForm = () => {
           </Button>
 
           <div className='my-6 flex items-center gap-4'>
-            <div className='h-px flex-1 bg-black/8' />
+            <div className='h-px flex-1 bg-black/8 dark:bg-white/8' />
             <span className='text-GRAY_700 text-xs font-medium tracking-wide uppercase'>or</span>
-            <div className='h-px flex-1 bg-black/8' />
+            <div className='h-px flex-1 bg-black/8 dark:bg-white/8' />
           </div>
 
           {/* Email Form */}
@@ -510,10 +513,10 @@ export const LoginForm = () => {
                 noBorders
                 customPaddingClassName='px-3.5 py-3'
                 inputClassName={cn(
-                  'w-full rounded-xl border bg-white px-3.5 py-3 text-sm text-GRAY_1000 transition-all duration-250 outline-none placeholder:text-GRAY_500',
+                  'bg-BG_WHITE w-full rounded-xl border px-3.5 py-3 text-sm text-GRAY_1000 transition-all duration-250 outline-none placeholder:text-GRAY_500',
                   error
                     ? 'border-RED_600 shadow-[0_0_0_3px_rgba(220,38,38,0.08)] focus:border-RED_600 focus:shadow-[0_0_0_3px_rgba(220,38,38,0.12)]'
-                    : 'border-black/10 focus:border-black/25 focus:shadow-[0_0_0_3px_rgba(0,0,0,0.04)]',
+                    : 'border-black/10 dark:border-white/10 focus:border-black/25 dark:focus:border-white/20 focus:shadow-[0_0_0_3px_rgba(0,0,0,0.04)] dark:focus:shadow-[0_0_0_3px_rgba(255,255,255,0.06)]',
                 )}
                 focusClassNames=''
                 inputRoundedClassName=''
@@ -528,8 +531,8 @@ export const LoginForm = () => {
               className={cn(
                 'group btn-login relative mt-1 flex h-auto w-full items-center justify-center overflow-visible rounded-2xl border px-5 py-3.5 text-sm font-medium transition-all duration-250',
                 !isSubmitDisabled
-                  ? 'bg-GRAY_1000 hover:bg-GRAY_950 active:bg-GRAY_1000 cursor-pointer border-black/10 text-white active:scale-[0.98]'
-                  : 'bg-GRAY_500 text-GRAY_700 disabled:bg-GRAY_500 disabled:text-GRAY_700 cursor-not-allowed border-black/3',
+                  ? 'bg-GRAY_1000 hover:bg-GRAY_950 active:bg-GRAY_1000 cursor-pointer border-black/10 text-white active:scale-[0.98] dark:border-white/10 dark:text-black'
+                  : 'bg-GRAY_500 text-GRAY_700 disabled:bg-GRAY_500 disabled:text-GRAY_700 cursor-not-allowed border-black/3 dark:border-white/3',
               )}
             >
               <span className='relative z-1'>

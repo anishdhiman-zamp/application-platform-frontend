@@ -1,4 +1,5 @@
 import { FC, useMemo, useRef } from 'react';
+import { TEAMS_COLORS } from '@zamp-platform/ui';
 import {
   useGetAudiencesByOrganisationIdQuery,
   useGetTeamsByOrganizationIdQuery,
@@ -9,7 +10,6 @@ import TeamMemberCard from 'modules/team/components/members/TeamMemberCard';
 import SkeletonLoaderListing from 'modules/team/components/SkeletonLoaderListing';
 import { TEAM_MEMBERS_LISTING_COLUMN_DEFS } from 'modules/team/people.constants';
 import { TeamMembersListingPropsType } from 'modules/team/people.types';
-import { TEAMS_COLORS } from '@/constants/colors';
 import { useUserIdentity } from '@/hooks/useUserIdentity';
 import { cyclicIterator } from '@/utils/common';
 import CommonWrapper from 'components/commonWrapper';

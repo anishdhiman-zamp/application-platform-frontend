@@ -1,6 +1,6 @@
 import { FC, useRef, useState } from 'react';
+import { CSS_VARS } from '@zamp-platform/ui';
 import { SvgSpriteLoader } from '@zamp-platform/ui/assets';
-import { COLORS } from 'constants/colors';
 import { useOnClickOutside } from 'hooks';
 import { OptionsType } from 'types/common/components/dropdown/dropdown.types';
 import { MapAny } from 'types/commonTypes';
@@ -47,7 +47,7 @@ const DescriptionOperatorsDropdown: FC<DescriptionOperatorsDropdownProps> = ({
       <div className=''>
         <div className='relative flex cursor-pointer items-center' onClick={onToggleDropdown}>
           <div className='text-BLUE_700 f-11-500 mr-1'>{operator?.label ?? CONDITION_OPERATOR_TYPE.ARRAY_CONTAINS}</div>
-          <SvgSpriteLoader id='chevron-down' width={12} height={12} color={COLORS.GRAY_700} />
+          <SvgSpriteLoader id='chevron-down' width={12} height={12} color={CSS_VARS.GRAY_700} />
           {isOpen && (
             <div
               ref={ref}

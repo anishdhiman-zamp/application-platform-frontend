@@ -1,7 +1,7 @@
 import type { FC } from 'react';
+import { CSS_VARS } from '@zamp-platform/ui';
 import { SvgSpriteLoader } from '@zamp-platform/ui/assets';
 import TooltipV2 from '@/components/common/TooltipV2';
-import { COLORS } from '@/constants/colors';
 import { type defaultFnType, SIDE_OPTIONS } from '@/types/commonTypes';
 
 interface ArtifactTopbarProps {
@@ -25,7 +25,7 @@ const ArtifactTopbar: FC<ArtifactTopbarProps> = ({
         <SvgSpriteLoader
           id='menu-03'
           size={14}
-          color={COLORS.GRAY_1000}
+          color={CSS_VARS.GRAY_1000}
           className='cursor-pointer'
           onClick={onOpenAllArtifacts}
         />
@@ -40,7 +40,7 @@ const ArtifactTopbar: FC<ArtifactTopbarProps> = ({
           <SvgSpriteLoader
             id={isExpanded ? 'minimize-01' : 'expand-01'}
             size={12}
-            color={COLORS.GRAY_1000}
+            color={CSS_VARS.GRAY_1000}
             onClick={onExpandArtifacts}
             className='animate-opacity cursor-pointer transition-all duration-300'
             key={isExpanded ? 'minimize-01' : 'expand-01'}
@@ -51,7 +51,7 @@ const ArtifactTopbar: FC<ArtifactTopbarProps> = ({
           <SvgSpriteLoader
             id='x-close'
             size={16}
-            color={COLORS.GRAY_1000}
+            color={CSS_VARS.GRAY_1000}
             onClick={onCloseArtifacts}
             className='cursor-pointer'
           />

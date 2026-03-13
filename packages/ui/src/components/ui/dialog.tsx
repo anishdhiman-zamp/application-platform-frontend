@@ -7,7 +7,7 @@ import { cn } from '@zamp-platform/ui/utils';
 import { cva } from 'class-variance-authority';
 
 const dialogVariants = cva(
-  'fixed left-[50%] top-[50%] z-1001 flex translate-x-[-50%] translate-y-[-50%] flex-col rounded-lg bg-white shadow-lg duration-200 max-h-[60vh]',
+  'fixed left-[50%] top-[50%] z-1001 flex translate-x-[-50%] translate-y-[-50%] flex-col rounded-lg bg-BG_WHITE text-GRAY_1000 shadow-lg duration-200 max-h-[60vh]',
   {
     variants: {
       size: {
@@ -32,7 +32,7 @@ const DialogClose = DialogPrimitive.Close;
 const DialogOverlay = ({ className, ...props }: React.ComponentProps<typeof DialogPrimitive.Overlay>) => (
   <DialogPrimitive.Overlay
     className={cn(
-      'data-[state=open]:animate-in data-[state=closed]:animate-out data-[state=closed]:fade-out-0 data-[state=open]:fade-in-0 fixed inset-0 z-1001 bg-black/20',
+      'data-[state=open]:animate-in data-[state=closed]:animate-out data-[state=closed]:fade-out-0 data-[state=open]:fade-in-0 bg-GRAY_70 fixed inset-0 z-1001 backdrop-blur-[4px]',
       className,
     )}
     {...props}
@@ -63,7 +63,7 @@ const DialogContent = ({
     <DialogPrimitive.Content
       className={cn(
         dialogVariants({ size }),
-        'data-[state=open]:animate-in data-[state=closed]:animate-out data-[state=closed]:fade-out-0 data-[state=open]:fade-in-0 data-[state=closed]:zoom-out-95 data-[state=open]:zoom-in-95 data-[state=closed]:slide-out-to-center data-[state=open]:slide-in-from-center',
+        'border-GRAY_400 data-[state=open]:animate-in data-[state=closed]:animate-out data-[state=closed]:fade-out-0 data-[state=open]:fade-in-0 data-[state=closed]:zoom-out-95 data-[state=open]:zoom-in-95 data-[state=closed]:slide-out-to-center data-[state=open]:slide-in-from-center border',
         className,
       )}
       onCloseAutoFocus={(event) => {

@@ -1,5 +1,5 @@
+import { COLORS } from '@zamp-platform/ui';
 import { CellSelectionOptions, themeQuartz } from 'ag-grid-community';
-import { COLORS } from 'constants/colors';
 import { AggregationFunctionType, LogicalOperatorType } from 'types/components/table.type';
 import { DisplayOptionItemProps } from 'components/common/table/DisplayOptions/DisplayOptionItem';
 import { DISPLAY_OPTIONS } from 'components/common/table/table.types';

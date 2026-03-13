@@ -1,3 +1,5 @@
+import { OnboardingStatus } from '@/modules/onboarding/onboarding.types';
+
 export type LogoutFlow = {
   logout_url: string;
   logout_token: string;
@@ -81,10 +83,17 @@ export type Workspace = {
   description: string;
 };
 
+export enum ProductMode {
+  CLASSIC = 'classic',
+  MACS = 'macs',
+}
+
 export type Organization = {
   organization_id: string;
   name: string;
   slug: string;
+  provisioning_status?: string;
+  product?: ProductMode;
   resource_audience_policies: {
     privilege: string;
     resource_audience_type: string;
@@ -104,9 +113,13 @@ export type Session = {
   organization_id: Workspace;
   user_email: string;
   user_name: string;
+  display_name: string;
   last_name: string;
   username: string;
   orgs: Organization[];
+  onboarding_status: OnboardingStatus;
+  avatar_type: 'seed' | 'url' | null;
+  avatar_value: string | null;
 };
 
 export type loginPayloadType = {
@@ -120,8 +133,15 @@ export enum UserRoleIdType {
 
 export type UserSessionCache = {
   user_id: string;
+  user_name: string;
+  last_name: string;
   user_email: string;
   org_count: number;
-  default_org_id: string;
+  default_org_id?: string;
   cached_at: number;
+  display_name?: string;
+  username: string;
+  provisioning_status?: string;
+  onboarding_status?: string;
+  product?: ProductMode;
 };

@@ -109,7 +109,7 @@ const FeedbackReapplyDialog: FC<FeedbackReapplyDialogProps> = ({
         </DialogHeader>
         <DialogBody className='mt-1 px-5 pb-5'>
           <div className='f-13-400 text-GRAY_700 mb-4'>Reapply from the list if needed.</div>
-          <div className='bg-BACKGROUND_GRAY_2 border-GRAY_400 flex flex-col gap-3 rounded-lg border border-dashed p-4'>
+          <div className='bg-BG_GRAY_2 border-GRAY_400 flex flex-col gap-3 rounded-lg border border-dashed p-4'>
             {selectedFeedbackItems.length > 0 && (
               <div>
                 <Button

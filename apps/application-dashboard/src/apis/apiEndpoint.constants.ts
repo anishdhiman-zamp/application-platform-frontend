@@ -8,10 +8,24 @@ export const API_ENDPOINTS = {
   CHANGE_AUDIENCE_ROLE_IN_ORGANIZATION_PATCH: `organizations/{{organizationId}}/audiences`,
   DELETE_AUDIENCE_FROM_ORGANIZATION_ACCESS: `organizations/{{organizationId}}/audiences`,
   MEMBERSHIP_REQUESTS_BY_ORGANIZATION_ID_GET: `organizations/{{organizationId}}/requests`,
+  ORGANIZATIONS_REGISTER_POST: `organizations/register`,
+  ORGANIZATIONS_PROVISION_POST: `organizations/{{organizationId}}/provision`,
+
+  // Auth
   AUTH_INITIATE_LOGIN_FLOW_GET: `auth/relay/self-service/login/browser`,
   AUTH_INITIATE_LOGOUT_FLOW_GET: `auth/relay/self-service/logout/browser`,
   AUTH_INITIAL_LOGIN_FLOW_BY_EMAIL_POST: `auth/login/flow/create`,
   USER_WHOAMI_GET: 'auth/whoami',
+  USER_CHECK_USERNAME_GET: 'users/check-username',
+
+  // Onboarding
+  ONBOARDING_APPROVAL_POST: 'onboarding/user/waitlist-check',
+  ONBOARDING_USER_PROFILE_PATCH: 'onboarding/user/profile',
+  ONBOARDING_ORG_SETUP_POST: 'onboarding/org/setup',
+  ONBOARDING_PROVISIONING_POST: 'onboarding/org/provision',
+  ONBOARDING_SKIP_POST: 'onboarding/user/bypass-onboarding',
+  ONBOARDING_UPLOAD_URL_POST: 'onboarding/assets/upload-url',
+
   AUTH_BASE_URL_GET: `auth/api-base-url`,
   AUTH_ERROR_DETAILS_GET: `auth/relay/internal/self-service/errors`,
   TEAMS_BY_ORGANIZATION_ID_GET: `organizations/{{organizationId}}/teams`,
@@ -182,9 +196,12 @@ export const API_ENDPOINTS = {
   // Conversations V4
   CREATE_CONVERSATION_V4: `v4/conversations`,
   POST_MESSAGE_V4: `v4/conversations/{{conversationId}}/messages`,
-  LIST_CHAT_MODELS: `v3/conversations/models`,
+  LIST_CHAT_MODELS: `v4/conversations/models`,
   // Conversations V2
   FILTER_CONVERSATIONS_V2_GET: `v2/conversations/filter`,
+
+  //TASKS
+  TASKS_MESSAGES_GET: `tasks/{{conversationId}}/messages`,
 
   // Integrations
   INTEGRATIONS_AUTHENTICATE: `/integrations/authenticate`,
@@ -203,10 +220,6 @@ export const API_ENDPOINTS = {
   TRIGGER_SUBSCRIPTIONS_DELETE: `trigger-subscriptions/{{subscription_id}}`,
   // Update Conversation Title
   UPDATE_CONVERSATION_TITLE: `v4/conversations/{{conversationId}}/title`,
-
-  //TASKS
-  TASKS_MESSAGES_GET: `tasks/{{conversationId}}/messages`,
-  GET_CONVERSATION_BY_ID_V4: `v4/conversations/{{conversationId}}`,
 
   //INTEGRATIONS
   INTEGRATIONS_CATALOG_GET: `integrations/catalog`,

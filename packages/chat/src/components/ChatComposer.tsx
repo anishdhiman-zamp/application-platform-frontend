@@ -159,7 +159,7 @@ export const ChatComposer: FC<ChatComposerProps> = ({
           <Button
             variant='ghost'
             size='icon'
-            className='bg-GRAY_200 hover:bg-GRAY_200 size-[26px] shrink-0 rounded-full [&_svg]:size-3.5'
+            className='bg-accent hover:bg-accent size-[26px] shrink-0 rounded-full [&_svg]:size-3.5'
             aria-label='Reject recording'
             onClick={onRejectRecording}
           >
@@ -185,7 +185,7 @@ export const ChatComposer: FC<ChatComposerProps> = ({
             disabled={isCommitting}
             isLoading={isCommitting}
           >
-            <Check className='text-white' />
+            <Check className='text-GRAY_1000' />
           </Button>
         </div>
       ) : (
@@ -210,7 +210,7 @@ export const ChatComposer: FC<ChatComposerProps> = ({
               <Button
                 variant='ghost'
                 size='icon'
-                className='hover:text-gray-1000 size-[26px] rounded-[6px] p-[2px] text-gray-900 hover:bg-gray-100 [&_svg]:size-3.5'
+                className='hover:text-GRAY_1000 text-GRAY_700 hover:bg-accent size-[26px] rounded-[6px] p-[2px] [&_svg]:size-3.5'
                 aria-label='Attach file'
                 onClick={onAttachClick}
                 disabled={isUploading}
@@ -225,13 +225,13 @@ export const ChatComposer: FC<ChatComposerProps> = ({
               {modelSelectorSlot}
               {isPreparingToRecord ? (
                 <div className='flex size-[26px] items-center justify-center'>
-                  <Loader size={14} className='animate-spin text-gray-900' />
+                  <Loader size={14} className='text-GRAY_700 animate-spin' />
                 </div>
               ) : (
                 <Button
                   variant='ghost'
                   size='icon'
-                  className='hover:text-gray-1000 size-[26px] rounded-[6px] p-[2px] text-gray-900 hover:bg-gray-100 [&_svg]:size-3.5'
+                  className='hover:text-GRAY_1000 text-GRAY_700 hover:bg-accent size-[26px] rounded-[6px] p-[2px] [&_svg]:size-3.5'
                   aria-label='Start recording'
                   onClick={onStartRecording}
                   disabled={microphoneDisabled}
@@ -246,7 +246,7 @@ export const ChatComposer: FC<ChatComposerProps> = ({
                   size='icon'
                   variant='ghost'
                   aria-label='Stop generating'
-                  className='size-[26px] rounded-full bg-black p-0 text-white hover:bg-black hover:text-white [&_svg]:size-3.5'
+                  className='bg-GRAY_950 text-BG_WHITE hover:bg-GRAY_950 hover:text-BG_WHITE dark:bg-GRAY_500 dark:hover:bg-GRAY_600 dark:text-GRAY_1000 dark:hover:text-GRAY_1000 size-[26px] rounded-full p-0 [&_svg]:size-3.5'
                 >
                   {isStopping ? <Loader2 className='animate-spin' /> : <CircleStop />}
                 </Button>
@@ -258,9 +258,11 @@ export const ChatComposer: FC<ChatComposerProps> = ({
                     disabled={isSubmitDisabled}
                     size='icon'
                     aria-label='Send message'
-                    className='disabled:bg-GRAY_300 size-[26px] rounded-full p-[2px] text-white disabled:cursor-not-allowed [&_svg]:size-3.5'
+                    className='disabled:bg-GRAY_300 dark:bg-GRAY_500 dark:hover:bg-GRAY_600 dark:disabled:bg-GRAY_300 size-[26px] rounded-full p-[2px] text-white disabled:cursor-not-allowed [&_svg]:size-3.5'
                   >
-                    <ArrowUp className={cn('text-white', { 'text-GRAY_700': isSubmitDisabled })} />
+                    <ArrowUp
+                      className={cn('text-BG_WHITE dark:text-GRAY_1000', { 'text-GRAY_700': isSubmitDisabled })}
+                    />
                   </Button>
                 )
               )}

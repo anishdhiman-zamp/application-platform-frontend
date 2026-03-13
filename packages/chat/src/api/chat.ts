@@ -45,9 +45,12 @@ export const API_ENDPOINTS = {
   CREATE_CONVERSATION: '/conversations/',
   POST_MESSAGE_V2: 'v2/conversations/{{conversationId}}/messages',
   POST_MESSAGE_V4: 'v4/conversations/{{conversationId}}/messages',
+  POST_MESSAGE_V3: 'v3/conversations/{{conversationId}}/messages',
   GET_CONVERSATION_BY_ID: 'v4/conversations/{{conversationId}}',
   GET_CONVERSATION_BY_ID_V2: 'v2/conversations/{{conversationId}}',
+  GET_CONVERSATION_BY_ID_V3: 'v3/conversations/{{conversationId}}',
   CREATE_CONVERSATION_V2: 'v2/conversations',
+  CREATE_CONVERSATION_V3: 'v3/conversations',
   CREATE_CONVERSATION_V4: 'v4/conversations',
   GET_FILES_BY_IDS: '/file-imports',
   GET_FILE_DOWNLOAD_URL: '/file-imports/{{file_upload_id}}/download-url',
@@ -81,6 +84,16 @@ const ConversationService = chatApi.injectEndpoints({
     getConversationById: builder.query<GetConversationByIdResponseType, GetConversationByIdRequestType>({
       query: ({ conversationId, resourceId, resourceType, url }) => ({
         url: formRequestUrlWithParams(url || API_ENDPOINTS.GET_CONVERSATION_BY_ID, { conversationId }),
+        params: {
+          resource_id: resourceId,
+          resource_type: resourceType,
+        },
+      }),
+      providesTags: (_result, _error, arg) => [{ type: APITags.GET_CONVERSATION_BY_ID, id: arg.conversationId }],
+    }),
+    getTaskMessages: builder.query<GetConversationByIdResponseType, GetConversationByIdRequestType>({
+      query: ({ conversationId, resourceId, resourceType, url }) => ({
+        url: formRequestUrlWithParams(url || API_ENDPOINTS.TASKS_MESSAGES_GET, { conversationId }),
         params: {
           resource_id: resourceId,
           resource_type: resourceType,
@@ -185,6 +198,8 @@ export const {
   useGetFilesByIdsQuery,
   useLazyGetFileDownloadUrlQuery,
   useLazyGetConversationByIdQuery,
+  useGetTaskMessagesQuery,
+  useLazyGetTaskMessagesQuery,
   useGetSignedUrlMutation,
   usePostFormsSignedUploadAckMutation,
   usePostInteractionMutation,

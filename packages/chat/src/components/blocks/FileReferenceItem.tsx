@@ -15,7 +15,7 @@ interface FileReferenceItemProps {
 
 const getFileIcon = () => {
   return (
-    <div className='flex h-5 w-6 items-center justify-center rounded-md bg-gray-100 [&_svg]:size-3.5'>
+    <div className='bg-accent flex h-5 w-6 items-center justify-center rounded-md [&_svg]:size-3.5'>
       <FileText />
     </div>
   );
@@ -37,7 +37,7 @@ const FileReferenceItem: React.FC<FileReferenceItemProps> = ({ fileReference, on
     <span
       key={fileReference.path || fileReference.name}
       className={cn(
-        'rounded-2.5 shadow-table-filter-menu group relative inline-flex w-fit cursor-pointer items-center gap-2 border border-gray-400 bg-white p-1 pr-3',
+        'rounded-2.5 shadow-table-filter-menu group border-border bg-BG_WHITE relative inline-flex w-fit cursor-pointer items-center gap-2 border p-1 pr-3',
         className,
       )}
       onClick={handleClick}
@@ -48,7 +48,7 @@ const FileReferenceItem: React.FC<FileReferenceItemProps> = ({ fileReference, on
       </div>
       {fileReference.path && onRemove && (
         <Button
-          className='absolute -top-2 -right-2 size-4 rounded-full bg-white p-px opacity-0 group-hover:opacity-100 [&_svg]:size-3.5'
+          className='bg-BG_WHITE absolute -top-2 -right-2 size-4 rounded-full p-px opacity-0 group-hover:opacity-100 [&_svg]:size-3.5'
           variant='ghost'
           size='icon'
           onClick={(e) => {
@@ -61,7 +61,7 @@ const FileReferenceItem: React.FC<FileReferenceItemProps> = ({ fileReference, on
       )}
       {isLoading && !fileReference.path && (
         <Button
-          className='absolute -top-2 -right-2 size-4 rounded-full border border-gray-400 bg-white [&_svg]:size-3'
+          className='border-border bg-BG_WHITE absolute -top-2 -right-2 size-4 rounded-full border [&_svg]:size-3'
           variant='ghost'
           size='icon'
         >

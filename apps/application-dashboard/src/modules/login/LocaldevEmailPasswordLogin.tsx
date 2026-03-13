@@ -107,7 +107,7 @@ const LoginForm: FC<LoginFormProps> = ({ loginFlow, setLoginFlow, onBack }) => {
           disabled={formDisabled}
           noBorders
           customPaddingClassName='px-3.5 py-3'
-          inputClassName='w-full rounded-xl border border-black/10 bg-white px-3.5 py-3 text-sm text-GRAY_1000 transition-all duration-250 outline-none placeholder:text-GRAY_500 focus:border-black/25 focus:shadow-[0_0_0_3px_rgba(0,0,0,0.04)]'
+          inputClassName='bg-BG_WHITE w-full rounded-xl border border-black/10 dark:border-white/10 px-3.5 py-3 text-sm text-GRAY_1000 transition-all duration-250 outline-none placeholder:text-GRAY_500 focus:border-black/25 dark:focus:border-white/20 focus:shadow-[0_0_0_3px_rgba(0,0,0,0.04)] dark:focus:shadow-[0_0_0_3px_rgba(255,255,255,0.06)]'
           focusClassNames=''
           inputRoundedClassName=''
         />
@@ -126,10 +126,10 @@ const LoginForm: FC<LoginFormProps> = ({ loginFlow, setLoginFlow, onBack }) => {
             noBorders
             customPaddingClassName='px-3.5 py-3'
             inputClassName={cn(
-              'w-full rounded-xl border bg-white px-3.5 py-3 text-sm text-GRAY_1000 transition-all duration-250 outline-none placeholder:text-GRAY_500',
+              'bg-BG_WHITE w-full rounded-xl border px-3.5 py-3 text-sm text-GRAY_1000 transition-all duration-250 outline-none placeholder:text-GRAY_500',
               error
                 ? 'border-RED_600 shadow-[0_0_0_3px_rgba(220,38,38,0.08)] focus:border-RED_600 focus:shadow-[0_0_0_3px_rgba(220,38,38,0.12)]'
-                : 'border-black/10 focus:border-black/25 focus:shadow-[0_0_0_3px_rgba(0,0,0,0.04)]',
+                : 'border-black/10 dark:border-white/10 focus:border-black/25 dark:focus:border-white/20 focus:shadow-[0_0_0_3px_rgba(0,0,0,0.04)] dark:focus:shadow-[0_0_0_3px_rgba(255,255,255,0.06)]',
             )}
             focusClassNames=''
             inputRoundedClassName=''
@@ -144,8 +144,8 @@ const LoginForm: FC<LoginFormProps> = ({ loginFlow, setLoginFlow, onBack }) => {
           className={cn(
             'group relative mt-1 h-auto w-full overflow-hidden rounded-2xl border px-5 py-3.5 text-sm font-medium transition-all duration-250',
             !(formDisabled || !email.trim() || !password)
-              ? 'bg-GRAY_1000 hover:bg-GRAY_950 active:bg-GRAY_1000 cursor-pointer border-black/10 text-white active:scale-[0.98]'
-              : 'bg-GRAY_500 text-GRAY_700 disabled:bg-GRAY_500 disabled:text-GRAY_700 cursor-not-allowed border-black/3',
+              ? 'bg-GRAY_1000 hover:bg-GRAY_950 active:bg-GRAY_1000 cursor-pointer border-black/10 text-white active:scale-[0.98] dark:border-white/10 dark:text-black'
+              : 'bg-GRAY_500 text-GRAY_700 disabled:bg-GRAY_500 disabled:text-GRAY_700 cursor-not-allowed border-black/3 dark:border-white/3',
           )}
         >
           {loading ? 'Signing in...' : 'Sign in'}

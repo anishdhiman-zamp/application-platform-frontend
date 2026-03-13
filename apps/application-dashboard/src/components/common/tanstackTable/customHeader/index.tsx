@@ -1,8 +1,7 @@
 import { FC, KeyboardEvent, useEffect, useMemo, useRef, useState } from 'react';
 import { SortDirection } from '@zamp-platform/tanstack-table';
-import { Popover, PopoverContent, PopoverPortal, PopoverTrigger } from '@zamp-platform/ui';
+import { CSS_VARS, Popover, PopoverContent, PopoverPortal, PopoverTrigger } from '@zamp-platform/ui';
 import { SvgSpriteLoader } from '@zamp-platform/ui/assets';
-import { COLORS } from 'constants/colors';
 import { PIVOT_HEADER_BG } from 'constants/icons';
 import AddTag from 'modules/data/AddTag';
 import { getColumnOrderingVisibilityForCurrentDataset, updateLocalStorage } from 'modules/data/data.utils';
@@ -224,7 +223,7 @@ const CustomHeaderTk: FC<CustomHeaderProps> = ({
         <PopoverTrigger asChild>
           <div
             className={cn(
-              'hover:bg-BACKGROUND_GRAY_1 group flex h-full w-full flex-1 cursor-pointer items-center justify-between overflow-hidden px-2 pt-5 pb-1 capitalize',
+              'hover:bg-BG_GRAY_1 group flex h-full w-full flex-1 cursor-pointer items-center justify-between overflow-hidden px-2 pt-5 pb-1 capitalize',
               className,
             )}
             onClick={handleHeaderClick}
@@ -243,16 +242,16 @@ const CustomHeaderTk: FC<CustomHeaderProps> = ({
               {!!sortState && (
                 <>
                   {sortState === SortDirection.ASC && (
-                    <SvgSpriteLoader id='arrow-narrow-up' width={12} height={12} color={COLORS.BLUE_700} />
+                    <SvgSpriteLoader id='arrow-narrow-up' width={12} height={12} color={CSS_VARS.BLUE_700} />
                   )}
                   {sortState === SortDirection.DESC && (
-                    <SvgSpriteLoader id='arrow-narrow-down' width={12} height={12} color={COLORS.BLUE_700} />
+                    <SvgSpriteLoader id='arrow-narrow-down' width={12} height={12} color={CSS_VARS.BLUE_700} />
                   )}
                 </>
               )}
               {isFilterActive && (
                 <span>
-                  <SvgSpriteLoader id='filter-lines' width={12} height={12} color={COLORS.BLUE_700} />
+                  <SvgSpriteLoader id='filter-lines' width={12} height={12} color={CSS_VARS.BLUE_700} />
                 </span>
               )}
             </div>

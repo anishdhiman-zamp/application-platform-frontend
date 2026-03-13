@@ -11,9 +11,14 @@ interface ImageLoaderProps extends HTMLAttributes<HTMLDivElement> {
 
 const ImageLoader: FC<ImageLoaderProps> = ({ className, imageSrc, imageClassName, width, height, ...props }) => {
   return (
-    <div className={cn('flex h-full w-full items-center justify-center bg-white', className)} {...props}>
-      {/* eslint-disable-next-line @next/next/no-img-element */}
-      <img src={imageSrc} alt='loader' width={width} height={height} className={imageClassName} />
+    <div className={cn('bg-BG_WHITE flex h-full w-full items-center justify-center', className)} {...props}>
+      <img
+        src={imageSrc}
+        alt='loader'
+        width={width}
+        height={height}
+        className={cn('dark:opacity-50', imageClassName)}
+      />
     </div>
   );
 };

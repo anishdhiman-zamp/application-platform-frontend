@@ -2,7 +2,6 @@
 
 import { forwardRef, useState } from 'react';
 import { ContextMenu, ContextMenuContent, ContextMenuItem, ContextMenuTrigger } from '@zamp-platform/ui';
-import { cn } from '@zamp-platform/ui/utils';
 import {
   TAB_CONTEXT_MENU_ACTION_IDS,
   TAB_CONTEXT_MENU_ACTIONS,
@@ -58,13 +57,9 @@ const DynamicTabContextMenu = forwardRef<HTMLDivElement, DynamicTabContextMenuPr
             {filteredActions.map((action) => (
               <ContextMenuItem
                 key={action.id}
-                className={cn(
-                  'hover:bg-GRAY_100 f-12-500 text-GRAY_900 cursor-pointer rounded-md',
-                  action.isDestructive && 'text-red-600',
-                )}
+                className='hover:bg-accent f-12-500 text-GRAY_900 cursor-pointer rounded-md'
                 onClick={() => onActionClick(action.id)}
               >
-                <action.icon className='size-4' />
                 {action.label}
               </ContextMenuItem>
             ))}

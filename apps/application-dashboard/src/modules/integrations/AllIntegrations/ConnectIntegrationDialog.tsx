@@ -64,7 +64,7 @@ const ConnectIntegrationDialog: FC<ConnectIntegrationDialogProps> = ({
   return (
     <Dialog open={isOpen} onOpenChange={handleOpenChange}>
       <DialogContent
-        className='w-[400px] max-w-[400px]'
+        className='bg-BG_WHITE w-[400px] max-w-[400px]'
         title={`Connect ${integrationTitle}`}
         description='Provide a name and description for this connection'
         showCloseButton
@@ -82,6 +82,7 @@ const ConnectIntegrationDialog: FC<ConnectIntegrationDialogProps> = ({
               placeholder='Enter connection name'
               value={connectionName}
               onChange={(e) => setConnectionName(e.target.value)}
+              className='bg-BG_WHITE'
             />
           </div>
           <div className='flex flex-col gap-y-1.5'>
@@ -93,6 +94,7 @@ const ConnectIntegrationDialog: FC<ConnectIntegrationDialogProps> = ({
               placeholder='Enter description'
               value={connectionDescription}
               onChange={(e) => setConnectionDescription(e.target.value)}
+              className='bg-BG_WHITE'
             />
           </div>
         </DialogBody>

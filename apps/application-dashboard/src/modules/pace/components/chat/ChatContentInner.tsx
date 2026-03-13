@@ -135,7 +135,7 @@ const ChatContentInner = ({
   if (isInConversation) {
     return (
       <ChatActionsProvider onFileOpen={handleFileOpen}>
-        <div className='relative flex h-full flex-1 flex-col' {...dropZoneProps}>
+        <div className='bg-BG_WHITE relative flex h-full flex-1 flex-col' {...dropZoneProps}>
           <DropOverlay isVisible={isDragOver} />
           <ChatTopbar
             title={chatTitle || 'Untitled'}
@@ -149,7 +149,7 @@ const ChatContentInner = ({
             <div
               ref={scrollContainerRef}
               onScroll={handleScroll}
-              className='flex min-h-0 w-full flex-1 flex-col overflow-x-hidden overflow-y-auto [scrollbar-width:thin]'
+              className='bg-BG_WHITE flex min-h-0 w-full flex-1 flex-col overflow-x-hidden overflow-y-auto [scrollbar-width:thin]'
             >
               <CommonWrapper
                 isLoading={isLoadingConversation}
@@ -174,20 +174,21 @@ const ChatContentInner = ({
                   organizationId={organizationId}
                 />
               </CommonWrapper>
+              <div className='bg-BG_WHITE h-12 w-full' />
             </div>
           </div>
-          <div className='relative z-10 mx-auto w-full max-w-[700px] bg-white pb-3'>
+          <div className='bg-BG_WHITE relative z-10 mx-auto w-full max-w-[700px] pb-3'>
             <Button
               onClick={handleScrollToBottomClick}
               variant='ghost'
               className={cn(
-                'bg-gray-1000 hover:bg-gray-1000 absolute -top-12 left-1/2 h-6 w-6 -translate-x-1/2 !rounded-full p-3',
+                'bg-GRAY_1000 hover:bg-GRAY_950 absolute -top-10 left-1/2 z-20 h-6 w-6 -translate-x-1/2 rounded-full p-3',
                 'transition-all duration-200 ease-out',
                 showScrollButton ? 'translate-y-0 opacity-100' : 'pointer-events-none translate-y-2 opacity-0',
               )}
               aria-label='Scroll to bottom'
             >
-              <ArrowDownIcon size={14} className='p-[2px] text-white' />
+              <ArrowDownIcon size={14} className='text-BG_WHITE p-[2px]' />
             </Button>
             <ConnectedChatInput
               chat={chat}

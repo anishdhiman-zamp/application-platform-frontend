@@ -1,9 +1,9 @@
 import type { FC } from 'react';
+import { CSS_VARS } from '@zamp-platform/ui';
 import { SvgSpriteLoader } from '@zamp-platform/ui/assets';
 import { CTA_COMPONENT_TYPE_ICON_MAPPING } from 'modules/process/process.constant';
 import type { CTA_COMPONENT_TYPE } from 'modules/process/process.types';
 import { motion } from 'motion/react';
-import { COLORS } from '@/constants/colors';
 import { cn } from '@/utils/common';
 
 type ActionCommentProps = {
@@ -32,7 +32,7 @@ const ActionComment: FC<ActionCommentProps> = ({ action_comment, isLastLog, stag
           ] ?? 'check'
         }
         size={12}
-        color={COLORS.GRAY_600}
+        color={CSS_VARS.GRAY_600}
       />
       <span className='f-11-450 text-GRAY_600'>{action_comment?.comment}</span>
     </motion.div>

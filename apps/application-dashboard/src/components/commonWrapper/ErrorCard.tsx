@@ -1,9 +1,8 @@
 import { FC, useState } from 'react';
-import { Button } from '@zamp-platform/ui';
+import { Button, CSS_VARS } from '@zamp-platform/ui';
 import { SvgSpriteLoader } from '@zamp-platform/ui/assets';
 import { ICON_SPRITE_TYPES } from '@zamp-platform/ui/types';
 import { ERROR_BUTTON_TEXT } from 'constants/auth.constants';
-import { COLORS } from 'constants/colors';
 import { cn } from 'utils/common';
 import { ErrorCardPropTypes, ErrorCardTypes } from 'components/commonWrapper/commonWrapper.types';
 
@@ -34,10 +33,10 @@ const ErrorCard: FC<ErrorCardPropTypes> = ({
               <SvgSpriteLoader
                 id='alert-triangle'
                 iconCategory={ICON_SPRITE_TYPES.ALERTS_AND_FEEDBACK}
-                color={COLORS.RED_800}
+                color={CSS_VARS.RED_800}
               />
               <div className='flex flex-col items-center justify-center gap-1'>
-                <span className='f-13-600 text-black'>{title}</span>
+                <span className='f-13-600 text-TEXT_PRIMARY'>{title}</span>
                 <span className='f-11-400 text-GRAY_900'>{subtitle}</span>
               </div>
               <div className='flex items-center justify-center gap-1.5'>
@@ -88,7 +87,7 @@ const ErrorCard: FC<ErrorCardPropTypes> = ({
               <SvgSpriteLoader
                 id='alert-triangle'
                 iconCategory={ICON_SPRITE_TYPES.ALERTS_AND_FEEDBACK}
-                color={COLORS.RED_800}
+                color={CSS_VARS.RED_800}
               />
               <span className='f-13-400 text-GRAY_900'>
                 <span className='f-13-400 text-GRAY_900'>Something&rsquo;s wrong</span>
@@ -100,7 +99,7 @@ const ErrorCard: FC<ErrorCardPropTypes> = ({
                 iconCategory={ICON_SPRITE_TYPES.ARROWS}
                 height={16}
                 width={16}
-                color={COLORS.GRAY_1000}
+                color={CSS_VARS.GRAY_1000}
               />
             </div>
           </div>

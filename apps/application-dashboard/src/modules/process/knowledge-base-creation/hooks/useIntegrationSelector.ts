@@ -25,10 +25,11 @@ export const useIntegrationSelector = ({ mappedIntegrations }: UseIntegrationSel
       setSelectedIntegration(integration);
       const { data: connections } = await getConnectionsByIntegrationName({
         integration_name: integration.id,
+        params: { page: 1, limit: 100 },
       });
 
-      if (connections && connections.length > 0) {
-        openConnectionsDialog(connections);
+      if (connections && connections.connections.length > 0) {
+        openConnectionsDialog(connections.connections);
       } else {
         openCreateDialog();
       }

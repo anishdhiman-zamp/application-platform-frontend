@@ -38,7 +38,7 @@ const TanstackRow: React.FC<TanstackRowProps> = ({
     data-index={virtualRow.index}
     ref={(node) => rowVirtualizer?.measureElement?.(node)}
     key={row?.id}
-    className={cn('group absolute flex cursor-pointer', isHighlighted && 'bg-BACKGROUND_GRAY_2')}
+    className={cn('group absolute flex cursor-pointer', isHighlighted && 'bg-BG_GRAY_2')}
     style={{
       transform: `translateY(${virtualRow.start}px)`,
       width: '100%',

@@ -4,6 +4,7 @@ import { useMemo, useState } from 'react';
 import { MessageContainer, ResourceType, SenderType, useChat } from '@zamp-platform/chat';
 import { ArrowDownIcon, Button } from '@zamp-platform/ui';
 import { cn } from '@zamp-platform/ui/utils';
+import { EVENT_TYPE } from '@zamp-platform/utils/event-bus/event-bus.types';
 import { API_ENDPOINTS } from '@/apis/apiEndpoint.constants';
 import CommonWrapper from '@/components/commonWrapper';
 import { SkeletonTypes } from '@/components/commonWrapper/commonWrapper.types';
@@ -25,6 +26,7 @@ const TaskContentInner = ({ taskId }: TaskContentInnerProps) => {
     resourceId: organizationId,
     resourceType: ResourceType.ORGANIZATION,
     conversationId: taskId ?? undefined,
+    eventType: EVENT_TYPE.TASK,
     enableStreaming: true,
     apiConfig: {
       sendMessage: API_ENDPOINTS.POST_MESSAGE_V4,
@@ -87,7 +89,7 @@ const TaskContentInner = ({ taskId }: TaskContentInnerProps) => {
             alignUserRight
             organizationId={organizationId}
           />
-          <div className='h-12 w-full bg-white' />
+          <div className='bg-BG_WHITE h-12 w-full' />
         </CommonWrapper>
         <div className='sticky bottom-0 z-10 mx-auto w-full max-w-[700px] bg-white pb-3'>
           <Button

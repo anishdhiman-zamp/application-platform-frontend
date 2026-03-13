@@ -1,9 +1,10 @@
 // Import global styles
 import { SpeedInsights } from '@vercel/speed-insights/next';
 import { Toaster } from '@zamp-platform/ui';
+import { cn } from '@zamp-platform/ui/utils';
 import { FAVICON } from 'constants/icons';
 import type { Metadata, Viewport } from 'next';
-import { Inter } from 'next/font/google';
+import { Funnel_Display, Inter } from 'next/font/google';
 import { cookies, headers } from 'next/headers';
 import { ThemeProvider } from '@/app/_providers/theme-provider';
 import NetworkStatus from '@/components/NetWorkStatus';
@@ -27,6 +28,12 @@ const inter = Inter({
   display: 'swap',
 });
 
+const funnelDisplay = Funnel_Display({
+  subsets: ['latin'],
+  variable: '--font-funnel-display',
+  display: 'swap',
+});
+
 export const metadata: Metadata = {
   title: 'Zamp',
   description: 'Zamp AI',
@@ -47,8 +54,12 @@ export default async function RootLayout({ children }: { children: React.ReactNo
   const theme = getThemeClasses(themePreference as THEME_MODE, osColorScheme);
 
   return (
-    <html lang='en' className={`${inter.className} overscroll-none ${theme.html}`} suppressHydrationWarning>
-      <body className={`${theme.body} bg-BACKGROUND_GRAY_1 h-screen antialiased`} suppressHydrationWarning>
+    <html
+      lang='en'
+      className={cn(inter.className, 'overscroll-none', funnelDisplay.variable, theme.html)}
+      suppressHydrationWarning
+    >
+      <body className={cn(theme.body, 'bg-BG_GRAY_1 h-screen antialiased')} suppressHydrationWarning>
         <script dangerouslySetInnerHTML={{ __html: THEME_INIT_SCRIPT }} />
         <ThemeProvider>
           <SpeedInsights />

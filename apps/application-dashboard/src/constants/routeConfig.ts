@@ -27,11 +27,14 @@ export const ROUTES_PATH = {
   WIDGET_CREATE: '/widgets/create',
   INVALID_SCREEN_SIZE: '/invalid-screen-size',
   MEMBERSHIP_PENDING: '/membership-pending',
+  SETUP_WORKSPACE: '/setup-workspace',
 
   SETTINGS: '/settings',
   INTEGRATIONS: '/settings/integrations',
   INTEGRATION_DETAIL: '/settings/integrations/:integrationId',
   SETTINGS_PEOPLE: '/settings/people',
+
+  ONBOARDING: '/onboarding',
 
   MACS: '/macs',
 

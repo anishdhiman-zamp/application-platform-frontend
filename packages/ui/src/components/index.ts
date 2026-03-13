@@ -15,6 +15,7 @@ export * from './ui/email-input-to-chips';
 export * from './ui/file-icon';
 export * from './ui/image-with-fallback';
 export * from './ui/input';
+export * from './ui/search-input';
 export * from './ui/input-otp';
 export * from './ui/label';
 export * from './ui/list-card';
@@ -36,7 +37,7 @@ export * from './ui/toast';
 export * from './ui/tooltip';
 export * from './ui/DrilldownMenu';
 
-export * from '../constants/constants';
+export * from '../constants/colors';
 
 //Animated Icons
 export * from './ui/animated-dot';

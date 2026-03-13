@@ -10,7 +10,10 @@ const RowViewLoader: FC = () => (
       </div>
       <div className='flex items-center gap-1.5'>
         {Array.from({ length: 2 }).map((_, i) => (
-          <div key={i} className='border-GRAY_400 flex size-5 items-center justify-center rounded-md border bg-white'>
+          <div
+            key={i}
+            className='border-GRAY_400 bg-BG_WHITE flex size-5 items-center justify-center rounded-md border'
+          >
             <div className='bg-GRAY_300 h-3 w-3 animate-pulse rounded' />
           </div>
         ))}

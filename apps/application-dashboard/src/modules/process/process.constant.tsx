@@ -1,4 +1,5 @@
 import React from 'react';
+import { COLORS } from '@zamp-platform/ui';
 import {
   Calendar,
   Database,
@@ -24,7 +25,6 @@ import {
   LOG_STATUS,
   PDF_DATASET_TAB,
 } from 'modules/process/process.types';
-import { COLORS } from '@/constants/colors';
 import { DONE_EMPTY_STATE, IN_PROGRESS_EMPTY_STATE, NEEDS_ATTENTION_EMPTY_STATE } from '@/constants/icons';
 
 export const STATUS_ICON_COLOR_MAPPING = {
@@ -70,7 +70,7 @@ export const STATUS_ICON_COLOR_MAPPING = {
   },
   [ACTIVITY_RUN_STATUS.DONE]: {
     tabStatusIcon: {
-      fillColor: COLORS.GREEN_200,
+      fillColor: COLORS.GREEN_2,
       strokeColor: COLORS.GREEN_300,
     },
     tableStatusIcon: {
@@ -80,11 +80,11 @@ export const STATUS_ICON_COLOR_MAPPING = {
   },
   [ACTIVITY_RUN_STATUS.PAUSED]: {
     tabStatusIcon: {
-      fillColor: COLORS.YELLOW_200,
-      strokeColor: COLORS.YELLOW_200,
+      fillColor: COLORS.ORANGE_400,
+      strokeColor: COLORS.ORANGE_400,
     },
     tableStatusIcon: {
-      color: COLORS.YELLOW_200,
+      color: COLORS.ORANGE_400,
     },
     label: 'Paused',
   },
@@ -159,16 +159,16 @@ export const LOG_STATUS_ICON_COLOR_MAPPING = {
     strokeColor: COLORS.GREEN_400,
   },
   [LOG_STATUS.SUCCESS]: {
-    fillColor: COLORS.GREEN_400_ALPHA,
-    strokeColor: COLORS.GREEN_400,
+    fillColor: COLORS.GREEN_2,
+    strokeColor: COLORS.GREEN_1,
   },
   [LOG_STATUS.MESSAGE_FROM_USER]: {
     fillColor: COLORS.BLUE_200,
     strokeColor: COLORS.BLUE_500,
   },
   [LOG_STATUS.MESSAGE_FROM_ADAM]: {
-    fillColor: COLORS.VIOLET_200,
-    strokeColor: COLORS.VIOLET_300,
+    fillColor: COLORS.PURPLE_2,
+    strokeColor: COLORS.PURPLE_1,
   },
   [LOG_STATUS.VOID]: {
     fillColor: COLORS.GRAY_400,

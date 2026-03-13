@@ -20,13 +20,13 @@ export const DropOverlay: FC<DropOverlayProps> = ({
   return (
     <div
       className={cn(
-        'pointer-events-none fixed inset-0 z-50 flex h-screen w-screen items-center justify-center bg-white/80 backdrop-blur-[4px]',
+        'bg-BG_WHITE/80 pointer-events-none fixed inset-0 z-50 flex h-screen w-screen items-center justify-center backdrop-blur-[4px]',
         className,
       )}
     >
       <div className='flex flex-col items-center gap-3'>
         <Folders />
-        <p className='f-14-550 text-black'>{title}</p>
+        <p className='f-14-550 text-GRAY_1000'>{title}</p>
       </div>
     </div>
   );

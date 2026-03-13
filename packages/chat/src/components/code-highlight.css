@@ -1,11 +1,36 @@
 /* Syntax highlighting theme for chat code blocks.
+   Colors match Monaco editor's vs-light / vs-dark (VS Code default themes).
    Used by both the Tiptap editor and the MarkdownBlock renderer. */
+
+:root {
+  --hl-comment: #008000;
+  --hl-keyword: #0000ff;
+  --hl-string: #a31515;
+  --hl-meta: #267f99;
+  --hl-doctag: #800000;
+  --hl-attr: #e50000;
+  --hl-symbol: #0451a5;
+  --hl-variable: #001080;
+  --hl-number: #098658;
+}
+
+.dark-mode {
+  --hl-comment: #6a9955;
+  --hl-keyword: #569cd6;
+  --hl-string: #ce9178;
+  --hl-meta: #4ec9b0;
+  --hl-doctag: #808080;
+  --hl-attr: #9cdcfe;
+  --hl-symbol: #569cd6;
+  --hl-variable: #9cdcfe;
+  --hl-number: #b5cea8;
+}
 
 pre code.hljs {
   display: block;
   overflow-x: auto;
-  background: var(--color-chat-code-bg, #f8f7f4);
-  color: var(--color-chat-text, #2c2a26);
+  background: var(--GRAY_100);
+  color: var(--GRAY_1000);
   padding: 0;
   border-radius: 0;
   font-family: 'JetBrains Mono', 'Fira Code', ui-monospace, SFMono-Regular, monospace;
@@ -18,9 +43,8 @@ code.hljs {
 }
 
 .hljs-comment,
-.hljs-quote,
-.hljs-variable {
-  color: #008000 !important;
+.hljs-quote {
+  color: var(--hl-comment) !important;
 }
 
 .hljs-keyword,
@@ -28,7 +52,7 @@ code.hljs {
 .hljs-built_in,
 .hljs-name,
 .hljs-tag {
-  color: #0000ff !important;
+  color: var(--hl-keyword) !important;
 }
 
 .hljs-string,
@@ -40,28 +64,36 @@ code.hljs {
 .hljs-template-variable,
 .hljs-type,
 .hljs-addition {
-  color: #a31515 !important;
+  color: var(--hl-string) !important;
+}
+
+.hljs-variable {
+  color: var(--hl-variable) !important;
+}
+
+.hljs-number {
+  color: var(--hl-number) !important;
 }
 
 .hljs-deletion,
 .hljs-selector-attr,
 .hljs-selector-pseudo,
 .hljs-meta {
-  color: #2b91af !important;
+  color: var(--hl-meta) !important;
 }
 
 .hljs-doctag {
-  color: #808080 !important;
+  color: var(--hl-doctag) !important;
 }
 
 .hljs-attr {
-  color: #ff0000 !important;
+  color: var(--hl-attr) !important;
 }
 
 .hljs-symbol,
 .hljs-bullet,
 .hljs-link {
-  color: #00b0e8 !important;
+  color: var(--hl-symbol) !important;
 }
 
 .hljs-emphasis {

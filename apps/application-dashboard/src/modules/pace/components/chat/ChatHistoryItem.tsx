@@ -22,11 +22,11 @@ const ChatHistoryItem: FC<ChatHistoryItemProps> = ({ conversation, onSelect, isS
       onClick={handleClick}
       className='flex h-auto w-full cursor-pointer items-center justify-start gap-2.5 rounded-lg px-3 py-2.5'
     >
-      <MessagesSquare size={16} className='shrink-0 text-gray-500' />
-      <p className='f-13-500 text-gray-1000 line-clamp-1 text-left first-letter:uppercase'>
+      <MessagesSquare size={16} className='text-GRAY_700 shrink-0' />
+      <p className='f-13-500 text-GRAY_1000 line-clamp-1 text-left first-letter:uppercase'>
         {conversation?.title || 'Untitled conversation'}
       </p>
-      {isStreaming && <Loader size={14} className='ml-auto shrink-0 animate-spin text-gray-500' />}
+      {isStreaming && <Loader size={14} className='text-GRAY_700 ml-auto shrink-0 animate-spin' />}
     </Button>
   );
 };

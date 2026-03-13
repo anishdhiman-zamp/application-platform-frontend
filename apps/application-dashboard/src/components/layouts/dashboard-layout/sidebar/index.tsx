@@ -1,6 +1,7 @@
 'use client';
 
 import { memo, Suspense } from 'react';
+import { CSS_VARS } from '@zamp-platform/ui';
 import { ZAMP_ICON } from 'constants/icons';
 import { ROUTES_PATH } from 'constants/routeConfig';
 import { AnimatePresence, motion } from 'framer-motion';
@@ -12,7 +13,6 @@ import { RootState } from 'store';
 import { toggleSidebar } from 'store/slices/layout-configs';
 import { cn } from 'utils/common';
 import FlexAlignRight from '@/assets/Icons/FlexAlignRight';
-import { COLORS } from '@/constants/colors';
 import { SETTINGS_ID } from '@/constants/sidebar.constants';
 import { useFilteredSidebarItems } from '@/hooks/useFilteredSidebarItems';
 import useGlobalShortcuts from '@/hooks/useGlobalShortcuts';
@@ -69,7 +69,7 @@ const Sidebar = () => {
             className='absolute top-0 left-0 z-30 flex h-12 w-12 items-center justify-center bg-transparent'
             aria-label='Toggle sidebar'
           >
-            <FlexAlignRight height={16} width={16} color={COLORS.GRAY_700} className='cursor-pointer' />
+            <FlexAlignRight height={16} width={16} color={CSS_VARS.GRAY_700} className='cursor-pointer' />
           </motion.button>
         )}
       </AnimatePresence>
@@ -86,7 +86,7 @@ const Sidebar = () => {
           willChange: 'transform',
         }}
         className={cn(
-          'bg-BACKGROUND_GRAY_1 fixed top-0 left-0 z-20 flex h-screen w-60 flex-col overflow-hidden',
+          'bg-BG_GRAY_1 fixed top-0 left-0 z-20 flex h-screen w-60 flex-col overflow-hidden',
           !isSidebarOpen && 'pointer-events-none',
         )}
       >
@@ -105,7 +105,7 @@ const Sidebar = () => {
             <FlexAlignRight
               height={16}
               width={16}
-              color={COLORS.GRAY_700}
+              color={CSS_VARS.GRAY_700}
               className='cursor-pointer'
               onClick={handleSidebarToggle}
             />

@@ -105,7 +105,7 @@ export function CopyToClipboard({
             }}
             className={cn(
               'pointer-events-none z-[9999] overflow-hidden rounded-md px-3 py-1.5 text-xs',
-              'bg-primary text-primary-foreground',
+              'bg-GRAY_1000 text-GRAY_1000',
               'transition-all duration-200 ease-out',
               visible ? 'translate-y-0 scale-100 opacity-100' : 'translate-y-1 scale-95 opacity-0',
             )}

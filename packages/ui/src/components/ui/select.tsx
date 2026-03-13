@@ -49,7 +49,7 @@ export interface SelectProps {
 }
 
 const selectVariants = cva(
-  'f-13-400 border-input flex w-full cursor-pointer items-center rounded-md border bg-white px-3 outline-hidden placeholder:text-gray-700 focus:border-gray-600 focus:ring-2 focus:ring-gray-400 disabled:cursor-not-allowed disabled:opacity-50',
+  'f-13-400 border-input flex w-full cursor-pointer items-center rounded-md border bg-BG_WHITE text-GRAY_1000 px-3 outline-hidden placeholder:text-GRAY_700 focus:border-gray-600 focus:ring-2 focus:ring-gray-400 disabled:cursor-not-allowed disabled:opacity-50',
   {
     variants: {
       variant: {
@@ -177,19 +177,19 @@ const Select = ({
         contentClassName={contentClassName}
       >
         <div
-          className={cn(value ? 'text-primary' : 'text-gray-700', selectVariants({ variant }), controlClassName)}
+          className={cn(value ? 'text-GRAY_1000' : 'text-GRAY_700', selectVariants({ variant }), controlClassName)}
           data-testid={id ? `${id}-select-trigger` : 'select-trigger'}
         >
           <span
             className={cn(
               'flex-1 truncate',
-              !(selectedOption?.display_value || selectedOption?.label) && 'text-GRAY_500',
+              !(selectedOption?.display_value || selectedOption?.label) && 'text-GRAY_700',
             )}
           >
             {selectedOption?.display_value || selectedOption?.label || placeholder}
           </span>
           <ChevronDown
-            className={cn('h-4 w-4 text-gray-900 opacity-50 transition-transform duration-200', isOpen && 'rotate-180')}
+            className={cn('text-GRAY_700 h-4 w-4 opacity-50 transition-transform duration-200', isOpen && 'rotate-180')}
           />
         </div>
       </Combobox>

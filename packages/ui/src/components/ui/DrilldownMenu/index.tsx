@@ -66,7 +66,7 @@ export const DrilldownMenu = ({
           <div className='flex items-center gap-2 px-2 py-1'>
             <button
               onClick={menu.goBack}
-              className='f-12-450 text-muted-foreground hover:text-foreground flex cursor-pointer items-center'
+              className='f-12-450 text-GRAY_700 hover:text-GRAY_1000 flex cursor-pointer items-center'
             >
               <ArrowLeft className='mr-1' size={12} /> {menu.backText}
             </button>

@@ -10,7 +10,6 @@ import {
   removeFromLocalStorage,
   setToLocalStorage,
 } from '@zamp-platform/utils';
-import { usePathname, useRouter } from 'next/navigation';
 import { useGetBaseUrlQuery } from '@/apis/auth';
 import { useGetOrganizationsQuery } from '@/apis/people';
 import { useSSEContext } from '@/app/_providers/sse-provider';
@@ -22,11 +21,12 @@ import OrgCard from '@/components/layouts/dashboard-layout/components/OrgCard';
 import SkeletonLoaderSidebarPages from '@/components/layouts/dashboard-layout/components/SkeletonLoaderSidebarPages';
 import SkeletonElement from '@/components/skeletons/SkeletonElement';
 import { ORG_COLORS } from '@/constants/common.constants';
-import { ROUTES_PATH } from '@/constants/routeConfig';
 import { KEYBOARD_KEYS } from '@/constants/shortcuts';
 import { useAppDispatch, useAppSelector } from '@/hooks/toolkit';
 import { setIsOrgSwitchIsInProgress } from '@/store/slices/user';
 import type { Organization } from '@/types/api/auth.types';
+import { ACTIVE_ORG_ID_COOKIE, clearCookie, setCookie, USER_SESSION_COOKIE } from '@/utils/cookie';
+import { getLandingRoute } from '@/utils/route.util';
 import { syncOrganizationIdToSW } from '@/utils/serviceWorker';
 
 type OrgSwitcherProps = {
@@ -39,8 +39,6 @@ const OrgSwitcher: FC<OrgSwitcherProps> = ({ isSidebarOpen, menuContentClassName
   const itemRefs = useRef<(HTMLDivElement | null)[]>([]);
   const [searchInputEl, setSearchInputEl] = useState<HTMLInputElement | null>(null);
   const { isOrgSwitchIsInProgress, user } = useAppSelector((state) => state.user);
-  const router = useRouter();
-  const pathname = usePathname();
   const dispatch = useAppDispatch();
   const { disconnect: disconnectSSE } = useSSEContext();
 
@@ -71,18 +69,14 @@ const OrgSwitcher: FC<OrgSwitcherProps> = ({ isSidebarOpen, menuContentClassName
     // Disconnect SSE gracefully before org switch to prevent readyState 2 errors
     // This avoids spurious errors when the page reloads during org switch
     disconnectSSE();
-
     dispatch(setIsOrgSwitchIsInProgress(true));
 
-    setSelectedOrg(org);
     removeFromLocalStorage(LOCAL_STORAGE_KEYS.PACE_OPEN_DYNAMIC_TABS);
     setToLocalStorage(LOCAL_STORAGE_KEYS.XZAMP_ORGANIZATION_ID, org.organization_id);
+    setCookie(ACTIVE_ORG_ID_COOKIE, org.organization_id);
+    clearCookie(USER_SESSION_COOKIE);
     syncOrganizationIdToSW();
-    if (pathname?.includes(ROUTES_PATH.CHAT)) {
-      router.push(ROUTES_PATH.CHAT_SETTINGS_PEOPLE);
-    } else {
-      router.push(ROUTES_PATH.PROCESSES);
-    }
+    window.location.href = getLandingRoute(org.product);
   };
 
   const handleRegionChange = (region: { region: string; url: string }) => {
@@ -184,10 +178,14 @@ const OrgSwitcher: FC<OrgSwitcherProps> = ({ isSidebarOpen, menuContentClassName
       const isValidOrgId = organizations?.some((org: Organization) => org.organization_id === orgId);
 
       if (orgId && isValidOrgId) {
-        setSelectedOrg(organizations?.find((org: Organization) => org.organization_id === orgId));
+        const activeOrg = organizations?.find((org: Organization) => org.organization_id === orgId);
+
+        setSelectedOrg(activeOrg);
+        setCookie(ACTIVE_ORG_ID_COOKIE, activeOrg?.organization_id ?? '');
       } else {
         setSelectedOrg(organizations?.[0]);
         setToLocalStorage(LOCAL_STORAGE_KEYS.XZAMP_ORGANIZATION_ID, organizations?.[0]?.organization_id);
+        setCookie(ACTIVE_ORG_ID_COOKIE, organizations?.[0]?.organization_id ?? '');
       }
       syncOrganizationIdToSW();
     }
@@ -240,7 +238,7 @@ const OrgSwitcher: FC<OrgSwitcherProps> = ({ isSidebarOpen, menuContentClassName
         <DropdownMenuContent
           align='end'
           className={cn(
-            'z-9999 mr-1 flex w-[229px] flex-col gap-[2px] overflow-y-auto p-1 [scrollbar-width:none]',
+            'bg-BG_WHITE z-9999 mr-1 flex w-[229px] flex-col gap-[2px] overflow-y-auto p-1 [scrollbar-width:none]',
             menuContentClassName,
           )}
           sideOffset={5}
@@ -253,7 +251,7 @@ const OrgSwitcher: FC<OrgSwitcherProps> = ({ isSidebarOpen, menuContentClassName
                 type='text'
                 size='small'
                 placeholder='Search organization...'
-                className='mt-1'
+                className='bg-BG_WHITE mt-1'
                 autoFocus
                 value={searchQuery}
                 onChange={handleSearchChange}
@@ -265,7 +263,6 @@ const OrgSwitcher: FC<OrgSwitcherProps> = ({ isSidebarOpen, menuContentClassName
           <div
             className={cn(
               'flex max-h-[150px] flex-col gap-1 overflow-y-auto [scrollbar-width:none]',
-              showSearchBox && 'min-h-[240px]',
               showSearchBox && 'min-h-[150px]',
             )}
           >
@@ -287,7 +284,7 @@ const OrgSwitcher: FC<OrgSwitcherProps> = ({ isSidebarOpen, menuContentClassName
                       <OrgCard
                         isSelected={false}
                         name={`${item.region.toUpperCase()} - Region`}
-                        className={ORG_COLORS[organizations?.length ?? 0 + 1 + idx]}
+                        className={ORG_COLORS[(organizations?.length ?? 0) + 1 + idx]}
                       />
                     </DropdownMenuItem>
                   ))
