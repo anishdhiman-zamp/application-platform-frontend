@@ -13,6 +13,14 @@ import { Markdown } from 'tiptap-markdown';
 
 const lowlight = createLowlight(common);
 
+const KEYBOARD_KEYS = {
+  ENTER: 'Enter',
+} as const;
+
+const TIPTAP_NODE_TYPES = {
+  LIST_ITEM: 'listItem',
+} as const;
+
 export interface RichTextEditorProps {
   value: string;
   onChange: (value: string) => void;
@@ -87,18 +95,35 @@ export const RichTextEditor = forwardRef<RichTextEditorHandle, RichTextEditorPro
                 .join(';')
             : '',
         },
-        handleKeyDown: (_view, event) => {
-          if (event.key === 'Enter' && !event.shiftKey && !event.metaKey && !event.ctrlKey) {
+        handleKeyDown: (view, event) => {
+          if (event.key === KEYBOARD_KEYS.ENTER && !event.shiftKey && !event.metaKey && !event.ctrlKey) {
             if (!isSubmitDisabledRef.current && onSubmitRef.current) {
               event.preventDefault();
               onSubmitRef.current();
               return true;
             }
           }
+
+          if (event.key === KEYBOARD_KEYS.ENTER && event.shiftKey) {
+            const ed = view.state;
+            const { $from } = ed.selection;
+            const isInList = $from.node(-1)?.type.name === TIPTAP_NODE_TYPES.LIST_ITEM;
+
+            if (isInList) {
+              event.preventDefault();
+              editor?.commands.splitListItem(TIPTAP_NODE_TYPES.LIST_ITEM);
+              return true;
+            }
+          }
+
           return false;
         },
         handlePaste: (_view, event) => {
-          onPasteRef.current?.(event as unknown as React.ClipboardEvent<HTMLTextAreaElement>);
+          if (onPasteRef.current) {
+            const hasFiles = (event.clipboardData?.files?.length ?? 0) > 0;
+            onPasteRef.current(event as unknown as React.ClipboardEvent<HTMLTextAreaElement>);
+            if (hasFiles) return true;
+          }
           return false;
         },
       },
