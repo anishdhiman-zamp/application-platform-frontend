@@ -124,7 +124,7 @@ const KnowledgeBaseChat: FC<KnowledgeBaseChatProps> = ({
     enableStreaming: streamingEnabled,
     setHeader: setHeader,
     apiConfig: {
-      getConversationById: API_ENDPOINTS.GET_CONVERSATION_BY_ID_V3,
+      getConversationById: API_ENDPOINTS.GET_CONVERSATION_BY_ID_V2,
       sendMessage: API_ENDPOINTS.POST_MESSAGE_V3,
       createConversation: API_ENDPOINTS.CREATE_CONVERSATION_V3,
     },
