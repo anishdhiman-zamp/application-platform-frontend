@@ -65,43 +65,8 @@ const useUrlChangeListener = (onUrlChange: () => void) => {
 };
 
 /**
- * A hook that returns all URLSearchParams and stays in sync with URL changes
- * (including pushState/replaceState and browser back/forward).
- *
- * Unlike Next.js's useSearchParams(), this hook immediately reflects
- * URL changes made via window.history.pushState/replaceState.
- */
-export const useSyncedSearchParams = (): URLSearchParams | null => {
-  const getSearchParams = useCallback(() => {
-    if (typeof window === 'undefined') return null;
-
-    return new URLSearchParams(window.location.search);
-  }, []);
-
-  const [searchParams, setSearchParams] = useState<URLSearchParams | null>(getSearchParams);
-
-  useUrlChangeListener(() => {
-    setSearchParams(getSearchParams());
-  });
-
-  useEffect(() => {
-    const current = getSearchParams();
-
-    if (current?.toString() !== searchParams?.toString()) {
-      setSearchParams(current);
-    }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [getSearchParams]);
-
-  return searchParams;
-};
-
-/**
  * A hook that reads a single search param directly from window.location.search
  * and stays in sync with URL changes (including pushState/replaceState).
- *
- * Use this when you only need one specific param.
- * Use `useSyncedSearchParams` when you need to read multiple params.
  */
 export const useSyncedUrlParam = (paramName: string): string | null => {
   const getParamValue = useCallback(() => {

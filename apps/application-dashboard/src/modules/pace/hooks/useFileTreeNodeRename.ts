@@ -2,10 +2,11 @@ import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { captureException } from '@sentry/browser';
 import { toast } from '@zamp-platform/ui';
 import { useFileActions } from 'modules/pace/hooks/useFileActions';
-import { useFileTabs } from '@/modules/pace/components/dynamic-tabs/useFileTabs';
+import { useDynamicTabs } from '@/modules/pace/components/dynamic-tabs/useDynamicTabs';
 import { FILE_TYPE, type FileItem, type TreeNode } from '@/modules/pace/components/files/file-tree.types';
 import { buildFullPath, getParentPath } from '@/modules/pace/components/files/file-tree.utils';
 import { FILE_TOAST_MESSAGES } from '@/modules/pace/components/files/files.constants';
+import { TAB_TYPE } from '@/modules/pace/pace.types';
 
 const getFileNameParts = (name: string, isFile: boolean): { baseName: string; extension: string } => {
   if (!isFile) {
@@ -57,7 +58,7 @@ export const useFileTreeNodeRename = ({
   const renameInputRef = useRef<HTMLInputElement | null>(null);
 
   const { renameItem } = useFileActions();
-  const { updateTab, updateTabsForFolderMove } = useFileTabs();
+  const { updateTab, updateTabsForFolderMove } = useDynamicTabs({ type: TAB_TYPE.FILE });
 
   const fullNewName = useMemo(() => {
     const trimmed = renameValue.trim();

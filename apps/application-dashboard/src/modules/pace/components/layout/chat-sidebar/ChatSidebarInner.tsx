@@ -14,7 +14,7 @@ import {
 } from '@zamp-platform/chat';
 import { ArrowDownIcon, Button, CSS_VARS } from '@zamp-platform/ui';
 import { cn } from '@zamp-platform/ui/utils';
-import { useFileTabs } from 'modules/pace/components/dynamic-tabs/useFileTabs';
+import { useDynamicTabs } from 'modules/pace/components/dynamic-tabs/useDynamicTabs';
 import { CHAT_CONVERSATION_ID_PARAM } from 'modules/pace/pace.constants';
 import { useRouter } from 'next/navigation';
 import NewPaceIcons from '@/assets/Icons/NewPaceIcons';
@@ -30,6 +30,7 @@ import ChatMessagesSkeleton from '@/modules/pace/components/loaders/ChatMessages
 import { useChatDraftInput } from '@/modules/pace/hooks/useChatDraftInput';
 import { useChatScroll } from '@/modules/pace/hooks/useChatScroll';
 import { usePaceContext } from '@/modules/pace/pace.context';
+import { TAB_TYPE } from '@/modules/pace/pace.types';
 import { baseApi } from '@/services/baseApi';
 import type { RootState } from '@/store';
 
@@ -52,7 +53,7 @@ const ChatSidebarInner: FC<ChatSidebarInnerProps> = ({
 }) => {
   const router = useRouter();
   const dispatch = useAppDispatch();
-  const { openTab } = useFileTabs();
+  const { openTab } = useDynamicTabs({ type: TAB_TYPE.FILE });
   const userAvatarBackgroundColor = CSS_VARS.ORANGE_400;
   const organizationId = useAppSelector((state: RootState) => state.user.user?.orgs?.[0]?.organization_id) ?? '';
   const currentUserName = useAppSelector((state: RootState) => state.user.user?.user_name) ?? '';

@@ -1,7 +1,7 @@
 import { type RefObject, useRef, useState } from 'react';
 import { captureException } from '@sentry/browser';
 import { toast } from '@zamp-platform/ui';
-import { useFileTabs } from '@/modules/pace/components/dynamic-tabs/useFileTabs';
+import { useDynamicTabs } from '@/modules/pace/components/dynamic-tabs/useDynamicTabs';
 import {
   CLIPBOARD_OPERATION,
   FILE_TYPE,
@@ -11,6 +11,7 @@ import {
 import { executeMoveOrCopy, parseDragData } from '@/modules/pace/components/files/file-tree.utils';
 import { FILE_TOAST_MESSAGES } from '@/modules/pace/components/files/files.constants';
 import { useFileTreeContext } from '@/modules/pace/hooks/useFileTreeContext';
+import { TAB_TYPE } from '@/modules/pace/pace.types';
 
 interface UseFileTreeNodeDragDropProps {
   node: TreeNode;
@@ -57,7 +58,7 @@ export const useFileTreeNodeDragDrop = ({
   const expandTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 
   const { copyItem, moveItem, setConflict, isProtectedRoot, isInvalidCrossMove } = useFileTreeContext();
-  const { updateTab, updateTabsForFolderMove } = useFileTabs();
+  const { updateTab, updateTabsForFolderMove } = useDynamicTabs({ type: TAB_TYPE.FILE });
 
   const clearExpandTimeout = () => {
     if (expandTimeoutRef.current) {

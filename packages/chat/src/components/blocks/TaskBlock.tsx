@@ -117,8 +117,8 @@ const TaskBlock: FC<TaskBlockProps> = ({ payload, conversationId }) => {
   const previousCount = previousToolCalls?.length ?? 0;
 
   const handleOpenTask = useCallback(() => {
-    router.push(getChatTaskRoute(task_id, conversationId ?? ''));
-  }, [router, task_id, conversationId]);
+    router.push(getChatTaskRoute(task_id, conversationId ?? '', title));
+  }, [router, task_id, conversationId, title]);
 
   const getToolIcon = (toolCall: ToolCallInfo | null | undefined) => {
     if (!toolCall) {
