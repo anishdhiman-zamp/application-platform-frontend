@@ -57,7 +57,7 @@ export const RichTextEditor = forwardRef<RichTextEditorHandle, RichTextEditorPro
     },
     ref,
   ) => {
-    const isInternalUpdate = useRef(false);
+    const lastEditorMarkdown = useRef(value || '');
     const onSubmitRef = useRef(onSubmit);
     const isSubmitDisabledRef = useRef(isSubmitDisabled);
     const onPasteRef = useRef(onPaste);
@@ -67,6 +67,7 @@ export const RichTextEditor = forwardRef<RichTextEditorHandle, RichTextEditorPro
     onPasteRef.current = onPaste;
 
     const editor = useEditor({
+      immediatelyRender: true,
       extensions: [
         StarterKit.configure({
           codeBlock: false,
@@ -128,8 +129,8 @@ export const RichTextEditor = forwardRef<RichTextEditorHandle, RichTextEditorPro
         },
       },
       onUpdate: ({ editor: ed }) => {
-        isInternalUpdate.current = true;
         const md = ed.storage.markdown.getMarkdown() as string;
+        lastEditorMarkdown.current = md;
         onChange(md);
       },
     });
@@ -137,26 +138,22 @@ export const RichTextEditor = forwardRef<RichTextEditorHandle, RichTextEditorPro
     useImperativeHandle(ref, () => ({
       focus: () => editor?.commands.focus(),
       clear: () => {
+        lastEditorMarkdown.current = '';
         editor?.commands.clearContent(true);
       },
     }));
 
-    // Sync external value changes (e.g. clearing on submit, transcript injection)
     useEffect(() => {
       if (!editor) return;
 
-      if (isInternalUpdate.current) {
-        isInternalUpdate.current = false;
-        return;
-      }
+      if (value === lastEditorMarkdown.current) return;
 
-      const currentMd = editor.storage.markdown.getMarkdown() as string;
-      if (currentMd !== value) {
-        if (!value) {
-          editor.commands.clearContent(false);
-        } else {
-          editor.commands.setContent(value);
-        }
+      if (!value) {
+        lastEditorMarkdown.current = '';
+        editor.commands.clearContent(false);
+      } else {
+        lastEditorMarkdown.current = value;
+        editor.commands.setContent(value);
       }
     }, [value, editor]);
 
