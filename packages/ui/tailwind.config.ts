@@ -690,7 +690,7 @@ const config = {
         'accordion-up': 'accordion-up 0.2s ease-out',
         'slide-in-from-center': 'slide-in-from-center 0.2s ease-out',
         'slide-out-to-center': 'slide-out-to-center 0.2s ease-out',
-        opacity: 'opacity 0.3s ease-in-out',
+        opacity: 'opacity 0.15s ease-in-out',
         'file-upload': 'file-upload 0.5s linear ',
         'reverse-spin': 'reverse-spin 1.5s linear infinite',
         'right-side-drawer-mount': 'rightSideDrawerTransition 0.4s normal forwards ease-out',

@@ -38,8 +38,8 @@ export const TAB_TYPE_CONFIG: Record<DynamicTabType, DynamicTabRouteConfig> = {
   },
   [TAB_TYPE.TASK]: {
     kind: ROUTE_KIND.DYNAMIC,
-    basePath: '/chat/tasks',
-    buildPath: (id: string) => `/chat/tasks/${encodeURIComponent(id)}`,
+    basePath: `${ROUTES_PATH.CHAT}/task`,
+    buildPath: (id: string) => `${ROUTES_PATH.CHAT}/task/${encodeURIComponent(id)}`,
     fallbackPath: ROUTES_PATH.CHAT,
   },
 };
@@ -66,39 +66,90 @@ export const buildTabRoute = (id: string, type?: DynamicTabType): string => {
 export const getTabFallbackPath = (type?: DynamicTabType): string => {
   const config = getTabTypeConfig(type);
 
+  if (config.kind === ROUTE_KIND.DYNAMIC) {
+    return config.fallbackPath;
+  }
+
   return preserveSidebarParam(config.fallbackPath);
 };
 
-export const isOnSameBasePath = (type?: DynamicTabType): boolean => {
-  if (typeof window === 'undefined') return false;
-
-  const config = getTabTypeConfig(type);
-  const currentPath = window.location.pathname;
-
-  if (config.kind === ROUTE_KIND.QUERY) {
-    return currentPath === config.basePath;
-  }
-
-  return currentPath.startsWith(config.basePath);
-};
-
-export const getActiveTabIdFromUrl = (type: DynamicTabType): string | null => {
-  if (typeof window === 'undefined') return null;
-
+export const getActiveTabIdFromUrl = (pathname: string, search: string, type: DynamicTabType): string | null => {
   const config = TAB_TYPE_CONFIG[type];
 
-  if (config?.kind === ROUTE_KIND.QUERY) {
-    const params = new URLSearchParams(window.location.search);
-
-    return params.get(config.paramName);
+  if (config.kind === ROUTE_KIND.QUERY) {
+    return new URLSearchParams(search).get(config.paramName) ?? null;
   }
 
-  const pathSegments = window.location.pathname.split('/');
   const baseSegments = config.basePath.split('/').filter(Boolean);
+  const pathSegments = pathname.split('/').filter(Boolean);
 
-  if (pathSegments.length > baseSegments.length + 1) {
-    return decodeURIComponent(pathSegments[baseSegments.length + 1]);
+  if (pathSegments.length > baseSegments.length) {
+    return decodeURIComponent(pathSegments[baseSegments.length]);
   }
 
   return null;
+};
+
+export const getActiveTabIdFromAllConfigsUrl = (pathname: string, search: string): string | null => {
+  const params = new URLSearchParams(search);
+
+  for (const [, config] of Object.entries(TAB_TYPE_CONFIG)) {
+    if (config.kind === ROUTE_KIND.QUERY) {
+      if (pathname === config.basePath || pathname.startsWith(config.basePath + '/')) {
+        const paramValue = params.get(config.paramName);
+
+        if (paramValue) return paramValue;
+      }
+    } else if (config.kind === ROUTE_KIND.DYNAMIC) {
+      if (pathname.startsWith(config.basePath + '/')) {
+        const baseSegments = config.basePath.split('/').filter(Boolean);
+        const pathSegments = pathname.split('/').filter(Boolean);
+
+        if (pathSegments.length > baseSegments.length) {
+          return decodeURIComponent(pathSegments[baseSegments.length]);
+        }
+      }
+    }
+  }
+
+  return null;
+};
+
+export const isOnBasePath = (pathname: string, type: DynamicTabType): boolean => {
+  const config = getTabTypeConfig(type);
+
+  if (config.kind === ROUTE_KIND.QUERY) {
+    return pathname === config.basePath;
+  }
+
+  return pathname.startsWith(config.basePath);
+};
+
+export const isSameBasePath = (targetPath: string): boolean => {
+  const currentPathname = window.location.pathname;
+  const targetUrl = new URL(targetPath, window.location.origin);
+
+  for (const [, config] of Object.entries(TAB_TYPE_CONFIG)) {
+    const onCurrentBase =
+      config.kind === ROUTE_KIND.QUERY
+        ? currentPathname === config.basePath
+        : currentPathname.startsWith(config.basePath);
+    const onTargetBase =
+      config.kind === ROUTE_KIND.QUERY
+        ? targetUrl.pathname === config.basePath
+        : targetUrl.pathname.startsWith(config.basePath);
+
+    if (onCurrentBase && onTargetBase) return true;
+  }
+
+  return false;
+};
+
+export const isOnAnyTabBasePath = (pathname: string): boolean => {
+  for (const [, config] of Object.entries(TAB_TYPE_CONFIG)) {
+    if (config.kind === ROUTE_KIND.QUERY && pathname === config.basePath) return true;
+    if (config.kind === ROUTE_KIND.DYNAMIC && pathname.startsWith(config.basePath)) return true;
+  }
+
+  return false;
 };

@@ -23,12 +23,13 @@ import NewPaceAvatar from '@/modules/chatbot/NewPaceAvatar';
 import ChatHome from '@/modules/pace/components/chat/ChatHome';
 import ChatTopbar from '@/modules/pace/components/chat/ChatTopbar';
 import ScrollFadeOverlay from '@/modules/pace/components/chat/ScrollFadeOverlay';
-import { useFileTabs } from '@/modules/pace/components/dynamic-tabs/useFileTabs';
+import { useDynamicTabs } from '@/modules/pace/components/dynamic-tabs/useDynamicTabs';
 import ChatMessagesSkeleton from '@/modules/pace/components/loaders/ChatMessagesSkeleton';
 import { useChatDraftInput } from '@/modules/pace/hooks/useChatDraftInput';
 import { useChatScroll } from '@/modules/pace/hooks/useChatScroll';
 import { SIDEBAR_CONVERSATION_ID_PARAM } from '@/modules/pace/pace.constants';
 import { usePaceContext } from '@/modules/pace/pace.context';
+import { TAB_TYPE } from '@/modules/pace/pace.types';
 import { baseApi } from '@/services/baseApi';
 import { RootState } from '@/store';
 
@@ -62,7 +63,7 @@ const ChatContentInner = ({
 
   const fileDropHandlerRef = useRef<((files: FileList) => void) | null>(null);
 
-  const { openTab } = useFileTabs();
+  const { openTab } = useDynamicTabs({ type: TAB_TYPE.FILE });
   const { setIsPaceSidebarOpen } = usePaceContext();
 
   const handleConversationCreated = () => {

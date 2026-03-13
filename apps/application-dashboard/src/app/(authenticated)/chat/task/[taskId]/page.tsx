@@ -1,11 +1,12 @@
+'use client';
+
 import TaskContentInner from '@/modules/pace/components/chat/TaskContentInner';
+import { useDynamicTabs } from '@/modules/pace/components/dynamic-tabs/useDynamicTabs';
+import { TAB_TYPE } from '@/modules/pace/pace.types';
 
-interface ChatTaskPageProps {
-  params: Promise<{ taskId: string }>;
-}
-
-const ChatTaskPage = async ({ params }: ChatTaskPageProps) => {
-  const { taskId } = await params;
+const ChatTaskPage = () => {
+  const { activeTab } = useDynamicTabs({ type: TAB_TYPE.TASK });
+  const taskId = activeTab?.id ?? '';
 
   return <TaskContentInner taskId={taskId} />;
 };
