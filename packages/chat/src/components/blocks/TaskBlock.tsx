@@ -146,7 +146,7 @@ const TaskBlock: FC<TaskBlockProps> = ({ payload, conversationId }) => {
   };
 
   return (
-    <div className='border-GRAY_400 w-full overflow-hidden rounded-[10px] border bg-white'>
+    <div className='border-GRAY_400 bg-BG_WHITE w-full overflow-hidden rounded-[10px] border'>
       <Accordion type='single' collapsible className='w-full' defaultValue='task'>
         <AccordionItem value='task' className='border-none'>
           <AccordionTrigger

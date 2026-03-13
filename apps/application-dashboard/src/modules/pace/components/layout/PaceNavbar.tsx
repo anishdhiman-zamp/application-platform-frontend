@@ -138,6 +138,10 @@ const PaceNavbar = () => {
       return false;
     }
 
+    if (id === PaceNavbarItemId.SETTINGS) {
+      return pathname?.startsWith(ROUTES_PATH.CHAT_SETTINGS) ?? false;
+    }
+
     return pathname?.includes(path) ?? false;
   };
 
@@ -163,7 +167,7 @@ const PaceNavbar = () => {
   };
 
   return (
-    <div className='flex h-[42px] items-center overflow-hidden px-2 pt-1.5 pb-1.5'>
+    <div className='bg-BG_GRAY_2 flex h-[42px] items-center overflow-hidden px-2 pt-1.5 pb-1.5'>
       {!isPaceSidebarOpen && pathname !== ROUTES_PATH.CHAT && (
         <>
           <Button
