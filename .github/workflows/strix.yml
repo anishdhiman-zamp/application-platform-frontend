@@ -1,15 +1,15 @@
 name: Strix Security Scan
 
 # =============================================================================
-# Strix Security Scanner
+# Strix Security Scanner for Application Platform Frontend
 # =============================================================================
 #
 # Triggers:
-#   1. Weekly scheduled scan - Full scan (Sundays 2 AM UTC)
-#   2. Manual - On-demand scan (quick or full)
+#   1. Weekly scheduled scan - Full scan (Mondays 2 AM UTC)
+#   2. Manual - On-demand scan (quick, standard, or deep)
 #
 # Requirements:
-#   - Repository secrets: STRIX_LLM, LLM_API_KEY
+#   - Repository secrets: STRIX_LLM (set to anthropic/claude-sonnet-4-6), LLM_API_KEY
 #   - Docker (pre-installed on GitHub runners)
 #
 # Docs: https://github.com/usestrix/strix
@@ -18,18 +18,19 @@ name: Strix Security Scan
 on:
   # Weekly scheduled full scan
   schedule:
-    - cron: '0 2 * * 0'  # Every Sunday at 2 AM UTC
+    - cron: '0 2 * * 1'  # Every Monday at 2 AM UTC
 
   # Manual trigger for on-demand scans
   workflow_dispatch:
     inputs:
       scan_mode:
-        description: "Scan mode (quick=fast checks, deep=comprehensive)"
+        description: "Scan mode (quick=fast checks, standard=balanced, deep=comprehensive)"
         required: false
         default: "deep"
         type: choice
         options:
           - quick
+          - standard
           - deep
       instruction_file:
         description: "Instruction file to use"
@@ -39,6 +40,7 @@ on:
         options:
           - full-scan.md
           - quick-scan.md
+          - frontend-security.md
 
 jobs:
   strix-scan:
@@ -59,11 +61,21 @@ jobs:
             echo "trigger_type=manual" >> $GITHUB_OUTPUT
             echo "instruction_file=${{ github.event.inputs.instruction_file }}" >> $GITHUB_OUTPUT
             echo "scan_mode=${{ github.event.inputs.scan_mode }}" >> $GITHUB_OUTPUT
+
+            SCAN_MODE="${{ github.event.inputs.scan_mode }}"
+            if [ "$SCAN_MODE" = "quick" ]; then
+              echo "scan_timeout=60" >> $GITHUB_OUTPUT
+            elif [ "$SCAN_MODE" = "deep" ]; then
+              echo "scan_timeout=180" >> $GITHUB_OUTPUT
+            else
+              echo "scan_timeout=120" >> $GITHUB_OUTPUT
+            fi
           else
             echo "Trigger: Scheduled (weekly full scan)"
             echo "trigger_type=scheduled" >> $GITHUB_OUTPUT
             echo "instruction_file=full-scan.md" >> $GITHUB_OUTPUT
             echo "scan_mode=deep" >> $GITHUB_OUTPUT
+            echo "scan_timeout=180" >> $GITHUB_OUTPUT
           fi
 
       # =========================================================================
@@ -106,9 +118,11 @@ jobs:
       # =========================================================================
       - name: "🔍 Run Strix scan"
         id: scan
+        timeout-minutes: ${{ fromJSON(steps.config.outputs.scan_timeout) }}
         env:
           STRIX_LLM: ${{ secrets.STRIX_LLM }}
           LLM_API_KEY: ${{ secrets.LLM_API_KEY }}
+          STRIX_REASONING_EFFORT: ${{ steps.config.outputs.scan_mode == 'deep' && 'high' || 'medium' }}
         run: |
           set -e
 
@@ -123,6 +137,8 @@ jobs:
           echo "Trigger:      ${{ steps.config.outputs.trigger_type }}"
           echo "Scan Mode:    $SCAN_MODE"
           echo "Instructions: $INSTRUCTION_PATH"
+          echo "Reasoning:    $STRIX_REASONING_EFFORT"
+          echo "Timeout:      ${{ steps.config.outputs.scan_timeout }} minutes"
           echo "=============================================="
 
           CMD="strix -n --target ."
@@ -162,6 +178,8 @@ jobs:
       # =========================================================================
       - name: "📊 Generate report"
         if: always()
+        env:
+          STRIX_REASONING_EFFORT: ${{ steps.config.outputs.scan_mode == 'deep' && 'high' || 'medium' }}
         run: |
           REPORT_FILE="STRIX_REPORT.md"
 
@@ -182,6 +200,7 @@ jobs:
             echo "|---------|-------|"
             echo "| Instruction File | \`${{ steps.config.outputs.instruction_file }}\` |"
             echo "| Scan Mode | \`${{ steps.config.outputs.scan_mode }}\` |"
+            echo "| Reasoning Effort | \`$STRIX_REASONING_EFFORT\` |"
             echo "| Vulnerabilities Found | ${{ steps.scan.outputs.vulnerabilities_found }} |"
             echo "| Exit Code | ${{ steps.scan.outputs.exit_code }} |"
             echo ""
@@ -222,6 +241,8 @@ jobs:
       # =========================================================================
       - name: "📋 Job summary"
         if: always()
+        env:
+          STRIX_REASONING_EFFORT: ${{ steps.config.outputs.scan_mode == 'deep' && 'high' || 'medium' }}
         run: |
           echo "## 🦉 Strix Security Scan Results" >> $GITHUB_STEP_SUMMARY
           echo "" >> $GITHUB_STEP_SUMMARY
@@ -231,6 +252,7 @@ jobs:
           echo "| Trigger | ${{ steps.config.outputs.trigger_type }} |" >> $GITHUB_STEP_SUMMARY
           echo "| Instruction File | ${{ steps.config.outputs.instruction_file }} |" >> $GITHUB_STEP_SUMMARY
           echo "| Scan Mode | ${{ steps.config.outputs.scan_mode }} |" >> $GITHUB_STEP_SUMMARY
+          echo "| Reasoning Effort | $STRIX_REASONING_EFFORT |" >> $GITHUB_STEP_SUMMARY
           echo "| Vulnerabilities Found | ${{ steps.scan.outputs.vulnerabilities_found }} |" >> $GITHUB_STEP_SUMMARY
           echo "" >> $GITHUB_STEP_SUMMARY
           echo "📥 Download the full report from the Artifacts section." >> $GITHUB_STEP_SUMMARY

@@ -249,6 +249,21 @@ if (returnUrl?.startsWith('/')) {
 
 ---
 
+## Known False Positives: Do Not Report
+
+The following patterns are expected in this codebase and should NOT be flagged:
+
+- **Vercel preview URL environment variables**: Not secrets, used for preview deployments.
+- **`next.config.js` rewrites and redirects**: Backend API proxying configuration, not open redirects.
+- **Development-only environment variables in `.env.example`**: Example values, not real secrets.
+- **Public API base URLs (`NEXT_PUBLIC_*`)**: Intentionally public client-side configuration.
+- **Ory Kratos public endpoint URLs**: Public identity API endpoints, not secrets.
+- **Tailwind CSS class strings**: Not code injection.
+- **GitHub Actions tokens in CI workflows**: CI/CD secrets, not application vulnerabilities.
+- **Cloudflare protections**: Application sits behind Cloudflare WAF.
+
+---
+
 ## How to Report Findings
 
 For each issue, provide:
