@@ -115,13 +115,10 @@ export const RichTextEditor = forwardRef<RichTextEditorHandle, RichTextEditorPro
       ],
       content: value || '',
       autofocus: autoFocus,
+      editorProps: {
+        attributes: {
           class: className || '',
           style: style
-            ? Object.entries(style)
-                .map(([k, v]) => `${k.replace(/([A-Z])/g, '-$1').toLowerCase()}:${v}`)
-                .join(';')
-            : '',
-          ...editorAttributes,
             ? Object.entries(style)
                 .map(([k, v]) => `${k.replace(/([A-Z])/g, '-$1').toLowerCase()}:${v}`)
                 .join(';')
