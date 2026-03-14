@@ -36,6 +36,7 @@ yarn-error.log*
 #cert
 cert
 .env
+.env.local
 tsconfig.tsbuildinfo
 local-build
 
@@ -45,6 +46,7 @@ local-build
 
 coverage
 apps/application-dashboard/coverage
+apps/application-dashboard/.env.local
 # Sentry Config File
 .env.sentry-build-plugin
 
