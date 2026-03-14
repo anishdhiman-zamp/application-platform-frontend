@@ -2,6 +2,7 @@
 
 import '../code-highlight.css';
 
+import { Book } from '@zamp-platform/ui';
 import type { Element, RootContent } from 'hast';
 import { common, createLowlight } from 'lowlight';
 import Link from 'next/link';
@@ -187,9 +188,11 @@ export const MarkdownBlock: React.FC<MarkdownBlockProps> = ({ payload }) => {
               return (
                 <span
                   onClick={() => handleFileOpen(filePath, fileName)}
-                  className='bg-GRAY_1000 text-background ml-0.5 inline-flex cursor-pointer items-center rounded-md px-2 py-0.5 text-xs font-medium transition-all duration-150 hover:opacity-80 hover:shadow-md active:scale-[0.98]'
+                  role='button'
+                  className='text-GRAY_1000 inline-flex cursor-pointer items-center gap-x-1 align-middle'
                 >
-                  {fileName}
+                  <Book size={14} className='shrink-0' />
+                  <span className='f-14-550'>{fileName}</span>
                 </span>
               );
             }

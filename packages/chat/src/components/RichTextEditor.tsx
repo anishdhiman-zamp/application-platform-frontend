@@ -117,13 +117,13 @@ export const RichTextEditor = forwardRef<RichTextEditorHandle, RichTextEditorPro
       autofocus: autoFocus,
       editorProps: {
         attributes: {
-          ...editorAttributes,
           class: className || '',
           style: style
             ? Object.entries(style)
                 .map(([k, v]) => `${k.replace(/([A-Z])/g, '-$1').toLowerCase()}:${v}`)
                 .join(';')
             : '',
+          ...editorAttributes,
         },
         handleKeyDown: (_view, event) => {
           if (event.key === KEYBOARD_KEYS.ENTER && !event.shiftKey && !event.metaKey && !event.ctrlKey) {
