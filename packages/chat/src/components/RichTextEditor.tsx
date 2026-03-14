@@ -3,7 +3,10 @@
 import './code-highlight.css';
 import './rich-text-editor.css';
 
+import { Extension } from '@tiptap/core';
 import CodeBlockLowlight from '@tiptap/extension-code-block-lowlight';
+import ListItem from '@tiptap/extension-list-item';
+import ListKeymap from '@tiptap/extension-list-keymap';
 import Placeholder from '@tiptap/extension-placeholder';
 import { EditorContent, useEditor } from '@tiptap/react';
 import StarterKit from '@tiptap/starter-kit';
@@ -15,10 +18,6 @@ const lowlight = createLowlight(common);
 
 const KEYBOARD_KEYS = {
   ENTER: 'Enter',
-} as const;
-
-const TIPTAP_NODE_TYPES = {
-  LIST_ITEM: 'listItem',
 } as const;
 
 export interface RichTextEditorProps {
@@ -33,6 +32,7 @@ export interface RichTextEditorProps {
   style?: React.CSSProperties;
   minHeight?: number;
   maxHeight?: number;
+  editorAttributes?: Record<string, string>;
 }
 
 export interface RichTextEditorHandle {
@@ -54,6 +54,7 @@ export const RichTextEditor = forwardRef<RichTextEditorHandle, RichTextEditorPro
       style,
       minHeight,
       maxHeight = 200,
+      editorAttributes,
     },
     ref,
   ) => {
@@ -66,11 +67,38 @@ export const RichTextEditor = forwardRef<RichTextEditorHandle, RichTextEditorPro
     isSubmitDisabledRef.current = isSubmitDisabled;
     onPasteRef.current = onPaste;
 
+    const editorRef = useRef<ReturnType<typeof useEditor>>(null);
+
     const editor = useEditor({
       immediatelyRender: true,
       extensions: [
         StarterKit.configure({
           codeBlock: false,
+          listItem: false,
+        }),
+        ListItem.extend({
+          addKeyboardShortcuts() {
+            return {
+              Tab: () => this.editor.commands.sinkListItem(this.name),
+              'Shift-Tab': () => this.editor.commands.liftListItem(this.name),
+            };
+          },
+        }),
+        ListKeymap,
+        Extension.create({
+          name: 'shiftEnterNewline',
+          addKeyboardShortcuts() {
+            return {
+              'Shift-Enter': () =>
+                this.editor.commands.first(({ commands }) => [
+                  () => commands.newlineInCode(),
+                  () => commands.splitListItem('listItem'),
+                  () => commands.createParagraphNear(),
+                  () => commands.liftEmptyBlock(),
+                  () => commands.splitBlock(),
+                ]),
+            };
+          },
         }),
         CodeBlockLowlight.configure({
           lowlight,
@@ -89,6 +117,7 @@ export const RichTextEditor = forwardRef<RichTextEditorHandle, RichTextEditorPro
       autofocus: autoFocus,
       editorProps: {
         attributes: {
+          ...editorAttributes,
           class: className || '',
           style: style
             ? Object.entries(style)
@@ -96,23 +125,16 @@ export const RichTextEditor = forwardRef<RichTextEditorHandle, RichTextEditorPro
                 .join(';')
             : '',
         },
-        handleKeyDown: (view, event) => {
-          if (event.key === KEYBOARD_KEYS.ENTER && !event.shiftKey && !event.metaKey && !event.ctrlKey) {
+        handleKeyDown: (_view, event) => {
+          if (event.key === KEYBOARD_KEYS.ENTER && !event.shiftKey) {
+            const ed = editorRef.current;
+            if (ed?.isActive('bulletList') || ed?.isActive('orderedList') || ed?.isActive('codeBlock')) {
+              return false;
+            }
+
             if (!isSubmitDisabledRef.current && onSubmitRef.current) {
               event.preventDefault();
               onSubmitRef.current();
-              return true;
-            }
-          }
-
-          if (event.key === KEYBOARD_KEYS.ENTER && event.shiftKey) {
-            const ed = view.state;
-            const { $from } = ed.selection;
-            const isInList = $from.node(-1)?.type.name === TIPTAP_NODE_TYPES.LIST_ITEM;
-
-            if (isInList) {
-              event.preventDefault();
-              editor?.commands.splitListItem(TIPTAP_NODE_TYPES.LIST_ITEM);
               return true;
             }
           }
@@ -135,6 +157,8 @@ export const RichTextEditor = forwardRef<RichTextEditorHandle, RichTextEditorPro
       },
     });
 
+    editorRef.current = editor;
+
     useImperativeHandle(ref, () => ({
       focus: () => editor?.commands.focus(),
       clear: () => {
@@ -156,16 +180,6 @@ export const RichTextEditor = forwardRef<RichTextEditorHandle, RichTextEditorPro
         editor.commands.setContent(value);
       }
     }, [value, editor]);
-
-    // Auto-focus effect
-    useEffect(() => {
-      if (autoFocus && editor) {
-        const timeoutId = setTimeout(() => {
-          editor.commands.focus();
-        }, 100);
-        return () => clearTimeout(timeoutId);
-      }
-    }, [autoFocus, editor]);
 
     if (!editor) return null;
 

@@ -208,7 +208,11 @@ export const useChatInput = ({
   const [firstMessage, setFirstMessage] = useState('');
   const externalFilePathsRef = useRef<Set<string>>(new Set());
 
-  const isSubmitDisabled = useMemo(() => isDisabled || isUploading || !value.trim(), [isDisabled, isUploading, value]);
+  const hasContent = value.trim().length > 0 || fileReferences.length > 0;
+  const isSubmitDisabled = useMemo(
+    () => isDisabled || isUploading || !hasContent,
+    [isDisabled, isUploading, hasContent],
+  );
 
   const init = async () => {
     const payload = createConversationPayload(
@@ -339,12 +343,12 @@ export const useChatInput = ({
 
   const handleSubmit = () => {
     const trimmedValue = value.trim();
-    if (!trimmedValue) return;
+    if (!trimmedValue && fileReferences.length === 0) return;
 
     setValue('');
 
     if (!firstMessage && !conversationId) {
-      setFirstMessage(trimmedValue);
+      setFirstMessage(trimmedValue || ' ');
       setHeader?.('Analysing...');
       return;
     }
@@ -353,7 +357,7 @@ export const useChatInput = ({
   };
 
   const handleSendMessage = async (inputValue: string) => {
-    if (!inputValue) return;
+    if (!inputValue && fileReferences.length === 0) return;
 
     const messagePayload = createUserMessagePayload(
       inputValue,
