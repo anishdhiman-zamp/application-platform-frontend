@@ -80,7 +80,7 @@ export const Message: FC<MessageProps> = ({
       {streamingEnabled && (
         <div
           className={cn(
-            'mt-3 flex items-center',
+            'flex items-center',
             isLastMessage ? 'visible' : 'invisible group-hover:visible',
             shouldAlignRight && 'mt-0',
           )}
