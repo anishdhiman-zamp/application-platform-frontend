@@ -5,7 +5,7 @@
   "scripts": {
     "dev": "next dev -p 2000 --turbopack --experimental-https -H local.zamp.ai",
     "dev-coder": "next dev -p 2000 --turbopack -H 0.0.0.0",
-    "build": "NODE_OPTIONS='--max-old-space-size=8192' next build --webpack",
+    "build": "NODE_OPTIONS='--max-old-space-size=6144' next build --webpack",
     "start": "next start",
     "start-coder": "next start -H 0.0.0.0",
     "lint": "ESLINT_USE_FLAT_CONFIG=false eslint --fix . --ext .ts,.tsx,.js,.jsx",
@@ -89,7 +89,7 @@
     "zod": "^3.25.76"
   },
   "peerDependencies": {
-    "next": "^16.1.4",
+    "next": "^16.1.6",
     "react": "^19.2.3",
     "react-dom": "^19.2.3"
   },
