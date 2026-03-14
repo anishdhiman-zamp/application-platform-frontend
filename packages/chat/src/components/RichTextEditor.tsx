@@ -126,7 +126,7 @@ export const RichTextEditor = forwardRef<RichTextEditorHandle, RichTextEditorPro
             : '',
         },
         handleKeyDown: (_view, event) => {
-          if (event.key === KEYBOARD_KEYS.ENTER && !event.shiftKey) {
+          if (event.key === KEYBOARD_KEYS.ENTER && !event.shiftKey && !event.metaKey && !event.ctrlKey) {
             const ed = editorRef.current;
             if (ed?.isActive('bulletList') || ed?.isActive('orderedList') || ed?.isActive('codeBlock')) {
               return false;
