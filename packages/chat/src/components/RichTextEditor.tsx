@@ -156,7 +156,6 @@ export const RichTextEditor = forwardRef<RichTextEditorHandle, RichTextEditorPro
         onChange(md);
       },
     });
-
     editorRef.current = editor;
 
     useImperativeHandle(ref, () => ({
