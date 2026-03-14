@@ -69,23 +69,23 @@ const CopyMessageButton: FC<CopyMessageButtonProps> = ({ messageContent, classNa
               size='icon'
               onClick={handleCopyMessage}
               className={cn(
-                'hover:bg-GRAY_100 active:bg-GRAY_300 hover:text-GRAY_600 relative h-5 w-5 rounded-sm p-1',
+                'hover:bg-GRAY_100 active:bg-GRAY_300 hover:text-GRAY_700 size-[26px] rounded-[6px] p-[2px] [&_svg]:size-3.5',
                 className,
               )}
               aria-label='Copy message'
             >
               <span className='relative flex h-full w-full items-center justify-center'>
                 <Copy
-                  size={12}
+                  size={14}
                   className={cn(
-                    'text-GRAY_500 absolute transition-transform duration-200 ease-in-out',
+                    'text-GRAY_700 absolute transition-transform duration-200 ease-in-out',
                     isCopied ? 'scale-50 opacity-0' : 'scale-100 opacity-100',
                   )}
                 />
                 <Check
-                  size={12}
+                  size={14}
                   className={cn(
-                    'text-GRAY_500 absolute transition-transform duration-200 ease-in-out',
+                    'text-GRAY_700 absolute transition-transform duration-200 ease-in-out',
                     isCopied ? 'scale-100 opacity-100' : 'scale-50 opacity-0',
                   )}
                 />

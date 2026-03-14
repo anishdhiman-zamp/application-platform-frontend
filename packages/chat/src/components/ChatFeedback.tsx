@@ -265,13 +265,13 @@ const ChatFeedback: FC<ChatFeedbackProps> = ({
                 onClick={handleDislikeClick}
                 disabled={feedbackGiven || disabled}
                 className={cn(
-                  'hover:bg-GRAY_100 active:bg-GRAY_300 hover:text-GRAY_600 h-5 w-5 rounded-sm p-1',
+                  'hover:bg-GRAY_100 active:bg-GRAY_300 hover:text-GRAY_700 size-[26px] rounded-[6px] p-[2px] [&_svg]:size-3.5',
                   feedbackGiven && 'bg-none',
                   className,
                 )}
                 aria-label='Bad response'
               >
-                <ThumbsDown size={12} className={cn('text-GRAY_500', feedbackGiven && 'text-black')} />
+                <ThumbsDown className={cn('text-GRAY_700', feedbackGiven && 'text-black')} />
               </Button>
             </span>
           </TooltipTrigger>
