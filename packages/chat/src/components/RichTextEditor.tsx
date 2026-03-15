@@ -4,15 +4,14 @@ import './code-highlight.css';
 import './rich-text-editor.css';
 
 import { Extension } from '@tiptap/core';
-import CodeBlockLowlight from '@tiptap/extension-code-block-lowlight';
-import ListItem from '@tiptap/extension-list-item';
-import ListKeymap from '@tiptap/extension-list-keymap';
-import Placeholder from '@tiptap/extension-placeholder';
+import { CodeBlockLowlight } from '@tiptap/extension-code-block-lowlight';
+import { ListItem } from '@tiptap/extension-list';
+import { Placeholder } from '@tiptap/extensions';
+import { Markdown } from '@tiptap/markdown';
 import { EditorContent, useEditor } from '@tiptap/react';
-import StarterKit from '@tiptap/starter-kit';
+import { StarterKit } from '@tiptap/starter-kit';
 import { common, createLowlight } from 'lowlight';
 import React, { forwardRef, useEffect, useImperativeHandle, useRef } from 'react';
-import { Markdown } from 'tiptap-markdown';
 
 const lowlight = createLowlight(common);
 
@@ -75,16 +74,19 @@ export const RichTextEditor = forwardRef<RichTextEditorHandle, RichTextEditorPro
         StarterKit.configure({
           codeBlock: false,
           listItem: false,
+          trailingNode: {
+            notAfter: ['paragraph', 'bulletList', 'orderedList', 'heading', 'blockquote'],
+          },
         }),
         ListItem.extend({
           addKeyboardShortcuts() {
             return {
+              ...this.parent?.(),
               Tab: () => this.editor.commands.sinkListItem(this.name),
               'Shift-Tab': () => this.editor.commands.liftListItem(this.name),
             };
           },
         }),
-        ListKeymap,
         Extension.create({
           name: 'shiftEnterNewline',
           addKeyboardShortcuts() {
@@ -107,13 +109,10 @@ export const RichTextEditor = forwardRef<RichTextEditorHandle, RichTextEditorPro
           placeholder,
           emptyEditorClass: 'is-editor-empty',
         }),
-        Markdown.configure({
-          html: false,
-          transformPastedText: true,
-          transformCopiedText: true,
-        }),
+        Markdown,
       ],
       content: value || '',
+      contentType: 'markdown',
       autofocus: autoFocus,
       editorProps: {
         attributes: {
@@ -151,7 +150,7 @@ export const RichTextEditor = forwardRef<RichTextEditorHandle, RichTextEditorPro
         },
       },
       onUpdate: ({ editor: ed }) => {
-        const md = ed.storage.markdown.getMarkdown() as string;
+        const md = ed.getMarkdown().replace(/(\s|&nbsp;|\u00A0)+$/, '');
         lastEditorMarkdown.current = md;
         onChange(md);
       },
@@ -176,7 +175,7 @@ export const RichTextEditor = forwardRef<RichTextEditorHandle, RichTextEditorPro
         editor.commands.clearContent(false);
       } else {
         lastEditorMarkdown.current = value;
-        editor.commands.setContent(value);
+        editor.commands.setContent(value, { contentType: 'markdown' });
       }
     }, [value, editor]);
 

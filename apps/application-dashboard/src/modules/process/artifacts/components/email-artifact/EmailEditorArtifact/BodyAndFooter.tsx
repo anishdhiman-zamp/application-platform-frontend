@@ -1,7 +1,6 @@
 import { type FC, Fragment, useCallback, useMemo } from 'react';
 import { Color } from '@tiptap/extension-color';
 import { TextAlign } from '@tiptap/extension-text-align';
-import { Underline } from '@tiptap/extension-underline';
 import { EditorContent, useEditor } from '@tiptap/react';
 import { StarterKit } from '@tiptap/starter-kit';
 import { Button } from '@zamp-platform/ui';
@@ -41,7 +40,6 @@ const BodyAndFooter: FC<BodyAndFooterProps> = ({
     extensions: [
       StarterKit,
       TextStyleWithBackground,
-      Underline,
       FontSize,
       Color,
       TextAlign.configure({
