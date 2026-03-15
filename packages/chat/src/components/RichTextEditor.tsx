@@ -154,16 +154,6 @@ export const RichTextEditor = forwardRef<RichTextEditorHandle, RichTextEditorPro
       }
     }, [value, editor]);
 
-    // Auto-focus effect
-    useEffect(() => {
-      if (autoFocus && editor) {
-        const timeoutId = setTimeout(() => {
-          editor.commands.focus();
-        }, 100);
-        return () => clearTimeout(timeoutId);
-      }
-    }, [autoFocus, editor]);
-
     if (!editor) return null;
 
     return (
