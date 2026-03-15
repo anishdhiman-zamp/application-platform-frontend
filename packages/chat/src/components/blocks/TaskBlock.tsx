@@ -1,17 +1,7 @@
 'use client';
 
-import {
-  Accordion,
-  AccordionContent,
-  AccordionItem,
-  AccordionTrigger,
-  AnimatedDot,
-  AnimatedTerminalIcon,
-  Button,
-  ImageWithFallback,
-  ShimmerText,
-} from '@zamp-platform/ui';
-import { safeJsonParse } from '@zamp-platform/utils';
+import { AnimatedDot, AnimatedTerminalIcon, ImageWithFallback, ShimmerText } from '@zamp-platform/ui';
+import { formatPlural, safeJsonParse } from '@zamp-platform/utils';
 import { EVENT_TYPE } from '@zamp-platform/utils/event-bus/event-bus.types';
 import { ArrowUpRight, ChevronDown } from 'lucide-react';
 import { useRouter } from 'next/navigation';
@@ -60,8 +50,9 @@ const TaskBlock: FC<TaskBlockProps> = ({ payload, conversationId }) => {
 
   const isLoading = chat?.isLoadingConversationHistory ?? false;
 
-  const { toolCalls } = useMemo(() => {
+  const { toolCalls, markdownStepsBeforeLastTool } = useMemo(() => {
     const calls: ToolCallInfo[] = [];
+    const elementTypes: string[] = [];
 
     const messages = chat?.messages ?? [];
     const assistantMessages = messages.filter((msg) => msg?.sender_type === SenderType.ASSISTANT);
@@ -70,6 +61,8 @@ const TaskBlock: FC<TaskBlockProps> = ({ payload, conversationId }) => {
       const elements = message?.message_content?.elements ?? [];
 
       for (const element of elements) {
+        elementTypes.push(element?.type);
+
         if (element?.type === BLOCK_TYPE.TOOL_USE) {
           const toolUseBlock = element as ToolUseContentBlock;
           const displayContent = safeJsonParse<{ tool_name?: string; icon?: string }>(
@@ -91,6 +84,8 @@ const TaskBlock: FC<TaskBlockProps> = ({ payload, conversationId }) => {
 
     const streamingElements = chat?.streamingState?.message_content?.elements ?? [];
     for (const element of streamingElements) {
+      elementTypes.push(element?.type);
+
       if (element?.type === BLOCK_TYPE.TOOL_USE) {
         const toolUseBlock = element as ToolUseContentBlock;
         const displayContent = safeJsonParse<{ tool_name?: string; icon?: string }>(
@@ -109,16 +104,44 @@ const TaskBlock: FC<TaskBlockProps> = ({ payload, conversationId }) => {
       }
     }
 
-    return { toolCalls: calls };
+    let lastToolIndex = -1;
+    for (let i = elementTypes?.length - 1; i >= 0; i--) {
+      if (elementTypes[i] === BLOCK_TYPE.TOOL_USE) {
+        lastToolIndex = i;
+        break;
+      }
+    }
+
+    const isTextLike = (type: string) =>
+      type === BLOCK_TYPE.TEXT || type === BLOCK_TYPE.MARKDOWN || type === BLOCK_TYPE.THINKING;
+
+    let mdCount = 0;
+    if (lastToolIndex === -1) {
+      for (const type of elementTypes) {
+        if (isTextLike(type)) mdCount++;
+      }
+      mdCount = Math.max(0, mdCount - 1);
+    } else {
+      for (let i = 0; i < lastToolIndex; i++) {
+        if (isTextLike(elementTypes[i])) mdCount++;
+      }
+    }
+
+    return { toolCalls: calls, markdownStepsBeforeLastTool: mdCount };
   }, [chat?.messages, chat?.streamingState]);
 
   const previousToolCalls = toolCalls?.slice(0, -1) ?? [];
   const lastToolCall = toolCalls?.length > 0 ? toolCalls[toolCalls.length - 1] : null;
-  const previousCount = previousToolCalls?.length ?? 0;
+  const previousCount = (previousToolCalls?.length ?? 0) + markdownStepsBeforeLastTool;
 
   const handleOpenTask = useCallback(() => {
     router.push(getChatTaskRoute(task_id, conversationId ?? '', title));
   }, [router, task_id, conversationId, title]);
+
+  const hasNoToolCalls = (toolCalls?.length ?? 0) === 0 && previousCount === 0;
+  const isStartingTask = hasNoToolCalls && !isLoading && status === TASK_STATUS.IN_PROGRESS;
+
+  const hasToolCallContent = isLoading || !!lastToolCall || isStartingTask;
 
   const getToolIcon = (toolCall: ToolCallInfo | null | undefined) => {
     if (!toolCall) {
@@ -139,79 +162,63 @@ const TaskBlock: FC<TaskBlockProps> = ({ payload, conversationId }) => {
         {status === TASK_STATUS.IN_PROGRESS ? (
           <ShimmerText text={toolCall.displayName ?? 'Unknown'} autoAnimate={true} />
         ) : (
-          <span className='text-GRAY_950'>{toolCall.displayName ?? 'Unknown'}</span>
+          <span className='text-GRAY_950 f-14-450'>{toolCall.displayName ?? 'Unknown'}</span>
         )}
       </div>
     );
   };
 
   return (
-    <div className='border-GRAY_400 bg-BG_WHITE w-full overflow-hidden rounded-[10px] border'>
-      <Accordion type='single' collapsible className='w-full' defaultValue='task'>
-        <AccordionItem value='task' className='border-none'>
-          <AccordionTrigger
-            className='w-full overflow-hidden px-4 py-3 hover:no-underline [&>svg]:hidden'
-            icon={ChevronDown}
-            iconRotation={180}
-          >
-            <div className='flex w-full min-w-0 items-center gap-3'>
-              <TaskStatusIcon status={status} />
-              <span className='f-13-550 text-GRAY_1000 min-w-0 flex-1 truncate text-left' title={title}>
-                {title}
-              </span>
-              <Button
-                variant='ghost'
-                size='icon'
-                className='h-6 w-6 shrink-0 p-0'
-                onClick={(e) => {
-                  e.stopPropagation();
-                  handleOpenTask();
-                }}
-              >
-                <ArrowUpRight size={14} className='text-GRAY_700' strokeWidth={1.5} />
-              </Button>
+    <div
+      className='border-GRAY_400 bg-BG_WHITE hover:bg-BG_GRAY_2 w-full cursor-pointer overflow-hidden rounded-[10px] border transition-colors'
+      onClick={handleOpenTask}
+      role='button'
+      tabIndex={0}
+    >
+      <div className='px-4 py-3'>
+        <div className='flex w-full min-w-0 items-center gap-3'>
+          <TaskStatusIcon status={status} />
+          <span className='f-13-550 text-GRAY_1000 min-w-0 flex-1 truncate text-left' title={title}>
+            {title}
+          </span>
+          <ArrowUpRight size={14} className='text-GRAY_700 shrink-0' strokeWidth={1.5} />
+        </div>
+      </div>
+
+      {hasToolCallContent && (
+        <div className='bg-BG_GRAY_2 border-GRAY_400 f-14-450 border-t px-4 py-3'>
+          {isLoading ? (
+            <div className='flex items-center justify-center py-4'>
+              <AnimatedDot showAnimation size={8} />
             </div>
-          </AccordionTrigger>
-          {(toolCalls?.length > 0 || status === TASK_STATUS.IN_PROGRESS) && (
-            <AccordionContent className='bg-BG_GRAY_2 border-GRAY_400 border-t px-4 py-3'>
-              {isLoading ? (
-                <div className='flex items-center justify-center py-4'>
-                  <AnimatedDot showAnimation size={8} />
+          ) : (
+            <>
+              {previousCount > 0 && (
+                <div>
+                  <div className='flex items-center gap-2'>
+                    <ChevronDown size={14} className='text-GRAY_700' />
+                    <span className='f-14-450 text-GRAY_950'>{formatPlural(previousCount, 'step', 'steps')}</span>
+                  </div>
+                  {lastToolCall && <div className='border-GRAY_400 ml-[7px] h-4 border-l' />}
                 </div>
-              ) : (
-                <>
-                  {previousCount > 0 && (
-                    <div>
-                      <div className='flex items-center gap-2'>
-                        <ChevronDown size={14} className='text-GRAY_700' />
-                        <span className='f-14-450 text-GRAY_950'>
-                          {previousCount} {previousCount === 1 ? 'step' : 'steps'}
-                        </span>
-                      </div>
-                      <div className='border-GRAY_400 ml-[7px] h-4 border-l'></div>
-                    </div>
-                  )}
-
-                  {lastToolCall && (
-                    <div className='flex w-full items-center gap-3 pt-0.5'>
-                      <div className='flex h-4 w-4 shrink-0 items-center justify-center'>
-                        {getToolIcon(lastToolCall)}
-                      </div>
-                      {renderToolCallTrigger(lastToolCall)}
-                    </div>
-                  )}
-
-                  {(toolCalls?.length ?? 0) === 0 && !isLoading && status === TASK_STATUS.IN_PROGRESS && (
-                    <div className='f-14-450 text-GRAY_700 py-2'>
-                      <ShimmerText text='Starting now' autoAnimate={true} />
-                    </div>
-                  )}
-                </>
               )}
-            </AccordionContent>
+
+              {lastToolCall && (
+                <div className='flex w-full items-center gap-2 pt-0.5'>
+                  <div className='flex h-4 w-4 shrink-0 items-center justify-center'>{getToolIcon(lastToolCall)}</div>
+                  {renderToolCallTrigger(lastToolCall)}
+                </div>
+              )}
+
+              {isStartingTask && (
+                <div className='f-14-450 text-GRAY_700 py-2'>
+                  <ShimmerText text='Starting now' autoAnimate={true} />
+                </div>
+              )}
+            </>
           )}
-        </AccordionItem>
-      </Accordion>
+        </div>
+      )}
     </div>
   );
 };

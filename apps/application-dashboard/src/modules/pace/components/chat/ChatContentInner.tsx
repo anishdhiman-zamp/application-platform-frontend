@@ -1,6 +1,6 @@
 'use client';
 
-import { useCallback, useEffect, useMemo, useRef } from 'react';
+import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import {
   ChatActionsProvider,
   ConnectedChatInput,
@@ -23,6 +23,7 @@ import NewPaceAvatar from '@/modules/chatbot/NewPaceAvatar';
 import ChatHome from '@/modules/pace/components/chat/ChatHome';
 import ChatTopbar from '@/modules/pace/components/chat/ChatTopbar';
 import ScrollFadeOverlay from '@/modules/pace/components/chat/ScrollFadeOverlay';
+import TaskStatusCounts from '@/modules/pace/components/chat/TaskStatusCounts';
 import { useDynamicTabs } from '@/modules/pace/components/dynamic-tabs/useDynamicTabs';
 import ChatMessagesSkeleton from '@/modules/pace/components/loaders/ChatMessagesSkeleton';
 import { useChatDraftInput } from '@/modules/pace/hooks/useChatDraftInput';
@@ -62,6 +63,8 @@ const ChatContentInner = ({
   const { inputValue, setInputValue } = useChatDraftInput({ conversationId });
 
   const fileDropHandlerRef = useRef<((files: FileList) => void) | null>(null);
+  const inputContainerRef = useRef<HTMLDivElement>(null);
+  const [isTaskPopoverOpen, setIsTaskPopoverOpen] = useState(false);
 
   const { openTab } = useDynamicTabs({ type: TAB_TYPE.FILE });
   const { setIsPaceSidebarOpen } = usePaceContext();
@@ -146,11 +149,14 @@ const ChatContentInner = ({
             onTitleChange={setChatTitle}
           />
           <div className='relative flex min-h-0 w-full flex-1 flex-col overflow-hidden'>
-            <ScrollFadeOverlay canScrollTop={canScrollTop} canScrollBottom={canScrollBottom} />
+            {!isTaskPopoverOpen && <ScrollFadeOverlay canScrollTop={canScrollTop} canScrollBottom={canScrollBottom} />}
             <div
               ref={scrollContainerRef}
               onScroll={handleScroll}
-              className='bg-BG_WHITE flex min-h-0 w-full flex-1 flex-col overflow-x-hidden overflow-y-auto [scrollbar-width:thin]'
+              className={cn(
+                'bg-BG_WHITE flex min-h-0 w-full flex-1 flex-col overflow-x-hidden [scrollbar-width:thin]',
+                isTaskPopoverOpen ? 'overflow-y-hidden' : 'overflow-y-auto',
+              )}
             >
               <CommonWrapper
                 isLoading={isLoadingConversation}
@@ -178,7 +184,7 @@ const ChatContentInner = ({
               </CommonWrapper>
             </div>
           </div>
-          <div className='bg-BG_WHITE relative z-10 mx-auto w-full max-w-[700px] pb-3'>
+          <div ref={inputContainerRef} className='bg-BG_WHITE sticky bottom-0 z-10 mx-auto w-full max-w-[700px] pb-3'>
             <Button
               onClick={handleScrollToBottomClick}
               variant='ghost'
@@ -191,6 +197,13 @@ const ChatContentInner = ({
             >
               <ArrowDownIcon size={14} className='text-BG_WHITE p-[2px]' />
             </Button>
+            <TaskStatusCounts
+              messages={chat.messages}
+              streamingState={chat.streamingState}
+              conversationId={conversationId ?? chat.conversationId ?? ''}
+              containerRef={inputContainerRef}
+              onOpenChange={setIsTaskPopoverOpen}
+            />
             <ConnectedChatInput
               chat={chat}
               autoFocus

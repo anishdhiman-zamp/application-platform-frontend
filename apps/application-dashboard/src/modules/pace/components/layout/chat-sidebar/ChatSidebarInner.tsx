@@ -27,6 +27,7 @@ import NewPaceAvatar from '@/modules/chatbot/NewPaceAvatar';
 import ChatTopbar from '@/modules/pace/components/chat/ChatTopbar';
 import ModelSelector from '@/modules/pace/components/chat/ModelSelector';
 import ScrollFadeOverlay from '@/modules/pace/components/chat/ScrollFadeOverlay';
+import TaskStatusCounts from '@/modules/pace/components/chat/TaskStatusCounts';
 import ChatMessagesSkeleton from '@/modules/pace/components/loaders/ChatMessagesSkeleton';
 import { useChatDraftInput } from '@/modules/pace/hooks/useChatDraftInput';
 import { useChatScroll } from '@/modules/pace/hooks/useChatScroll';
@@ -61,6 +62,8 @@ const ChatSidebarInner: FC<ChatSidebarInnerProps> = ({
 
   const fileDropHandlerRef = useRef<((files: FileList) => void) | null>(null);
   const addFileReferenceRef = useRef<((ref: { path: string; name: string }) => void) | null>(null);
+  const inputContainerRef = useRef<HTMLDivElement>(null);
+  const [isTaskPopoverOpen, setIsTaskPopoverOpen] = useState(false);
   const { inputValue, setInputValue } = useChatDraftInput({ conversationId });
   const [selectedModel, setSelectedModel] = useState<string | null>(null);
   const { pendingFileReference, clearPendingFileReference } = usePaceContext();
@@ -156,11 +159,14 @@ const ChatSidebarInner: FC<ChatSidebarInnerProps> = ({
           onTitleChange={setChatTitle}
         />
         <div className='relative flex min-h-0 w-full flex-1 flex-col overflow-hidden'>
-          <ScrollFadeOverlay canScrollTop={canScrollTop} canScrollBottom={canScrollBottom} />
+          {!isTaskPopoverOpen && <ScrollFadeOverlay canScrollTop={canScrollTop} canScrollBottom={canScrollBottom} />}
           <div
             ref={scrollContainerRef}
             onScroll={handleScroll}
-            className='bg-BG_WHITE flex min-h-0 w-full flex-1 flex-col overflow-x-hidden overflow-y-auto overscroll-y-contain [scrollbar-width:none]'
+            className={cn(
+              'bg-BG_WHITE flex min-h-0 w-full flex-1 flex-col overflow-x-hidden overscroll-y-contain [scrollbar-width:none]',
+              isTaskPopoverOpen ? 'overflow-y-hidden' : 'overflow-y-auto',
+            )}
           >
             {isInConversation ? (
               <>
@@ -198,7 +204,17 @@ const ChatSidebarInner: FC<ChatSidebarInnerProps> = ({
             )}
           </div>
         </div>
-        <div className={cn('bg-BG_WHITE relative z-10 w-full shrink-0 p-3')}>
+        <div
+          ref={inputContainerRef}
+          className={cn('border-GRAY_400 bg-BG_GRAY_2 sticky bottom-0 z-10 w-full shrink-0 border-t p-3')}
+        >
+          <TaskStatusCounts
+            messages={chat.messages}
+            streamingState={chat.streamingState}
+            conversationId={conversationId ?? chat.conversationId ?? ''}
+            containerRef={inputContainerRef}
+            onOpenChange={setIsTaskPopoverOpen}
+          />
           <ConnectedChatInput
             chat={chat}
             conversationId={chat.conversationId ?? ''}
