@@ -154,7 +154,7 @@ export const ChatComposer: FC<ChatComposerProps> = ({
         />
       )}
 
-      {!shouldShowRecorder ? (
+      {shouldShowRecorder ? (
         <div className='flex w-full items-center justify-between gap-2 p-2.5'>
           <Button
             variant='ghost'
