@@ -204,10 +204,7 @@ const ChatSidebarInner: FC<ChatSidebarInnerProps> = ({
             )}
           </div>
         </div>
-        <div
-          ref={inputContainerRef}
-          className={cn('border-GRAY_400 bg-BG_GRAY_2 sticky bottom-0 z-10 w-full shrink-0 border-t p-3')}
-        >
+        <div ref={inputContainerRef} className={cn('bg-BG_WHITE sticky bottom-0 z-10 w-full shrink-0 p-3')}>
           <TaskStatusCounts
             messages={chat.messages}
             streamingState={chat.streamingState}
