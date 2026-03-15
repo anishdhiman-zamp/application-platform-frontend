@@ -192,7 +192,7 @@ export const MarkdownBlock: React.FC<MarkdownBlockProps> = ({ payload }) => {
                   className='text-GRAY_1000 inline-flex cursor-pointer items-center gap-x-1 align-middle'
                 >
                   <Book size={14} className='shrink-0' />
-                  <span className='f-14-550'>{fileName}</span>
+                  <span className='f-14-550 decoration-GRAY_700 underline underline-offset-2'>{fileName}</span>
                 </span>
               );
             }
@@ -201,7 +201,7 @@ export const MarkdownBlock: React.FC<MarkdownBlockProps> = ({ payload }) => {
               <Link
                 href={href}
                 target='_blank'
-                className='text-GREEN_800 underline decoration-green-300 underline-offset-2'
+                className='text-BLUE_700 decoration-BLUE_700 underline underline-offset-2'
               >
                 {children}
               </Link>
