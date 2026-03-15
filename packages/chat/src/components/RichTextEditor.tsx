@@ -3,13 +3,13 @@
 import './code-highlight.css';
 import './rich-text-editor.css';
 
-import CodeBlockLowlight from '@tiptap/extension-code-block-lowlight';
-import Placeholder from '@tiptap/extension-placeholder';
+import { CodeBlockLowlight } from '@tiptap/extension-code-block-lowlight';
+import { Placeholder } from '@tiptap/extensions';
+import { Markdown } from '@tiptap/markdown';
 import { EditorContent, useEditor } from '@tiptap/react';
-import StarterKit from '@tiptap/starter-kit';
+import { StarterKit } from '@tiptap/starter-kit';
 import { common, createLowlight } from 'lowlight';
 import React, { forwardRef, useEffect, useImperativeHandle, useRef } from 'react';
-import { Markdown } from 'tiptap-markdown';
 
 const lowlight = createLowlight(common);
 
@@ -79,13 +79,10 @@ export const RichTextEditor = forwardRef<RichTextEditorHandle, RichTextEditorPro
           placeholder,
           emptyEditorClass: 'is-editor-empty',
         }),
-        Markdown.configure({
-          html: false,
-          transformPastedText: true,
-          transformCopiedText: true,
-        }),
+        Markdown,
       ],
       content: value || '',
+      contentType: 'markdown',
       autofocus: autoFocus,
       editorProps: {
         attributes: {
@@ -129,7 +126,7 @@ export const RichTextEditor = forwardRef<RichTextEditorHandle, RichTextEditorPro
         },
       },
       onUpdate: ({ editor: ed }) => {
-        const md = ed.storage.markdown.getMarkdown() as string;
+        const md = ed.getMarkdown();
         lastEditorMarkdown.current = md;
         onChange(md);
       },
@@ -153,7 +150,7 @@ export const RichTextEditor = forwardRef<RichTextEditorHandle, RichTextEditorPro
         editor.commands.clearContent(false);
       } else {
         lastEditorMarkdown.current = value;
-        editor.commands.setContent(value);
+        editor.commands.setContent(value, { contentType: 'markdown' });
       }
     }, [value, editor]);
 
