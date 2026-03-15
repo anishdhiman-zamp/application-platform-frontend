@@ -62,6 +62,7 @@ const config: Config = {
     'node_modules/(?!(' +
       'lowlight|devlop|fault|' +
       'react-markdown|' +
+      '@tiptap/markdown|marked|' +
       'remark-gfm|remark-parse|remark-stringify|remark-rehype|' +
       'rehype-slug|rehype-raw|' +
       'unified|bail|trough|vfile|vfile-message|' +

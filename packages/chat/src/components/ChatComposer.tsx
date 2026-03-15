@@ -204,6 +204,16 @@ export const ChatComposer: FC<ChatComposerProps> = ({
               style={textareaStyle}
               minHeight={minTextareaHeight}
               maxHeight={maxTextareaHeight}
+              editorAttributes={{
+                role: 'textbox',
+                enterkeyhint: 'enter',
+                'data-testid': 'chat-input',
+                'aria-label': placeholder,
+                'aria-multiline': 'true',
+                'aria-required': 'false',
+                'aria-invalid': 'false',
+                translate: 'no',
+              }}
             />
           </div>
           <div className='flex items-center justify-between py-2.5 pr-2.5 pl-2'>
