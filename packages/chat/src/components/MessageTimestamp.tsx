@@ -15,7 +15,7 @@ const MessageTimestamp: FC<MessageTimestampProps> = ({ formattedTimestamp, toolt
     <TooltipProvider delayDuration={500}>
       <Tooltip>
         <TooltipTrigger asChild>
-          <div className='text-GRAY_600 f-10-450 ml-1.5 w-fit cursor-default'>{formattedTimestamp}</div>
+          <div className='text-GRAY_700 f-10-450 ml-1.5 w-fit cursor-default'>{formattedTimestamp}</div>
         </TooltipTrigger>
         <TooltipContent side='bottom' align='center' className='f-10-450 p-1.5' sideOffset={12}>
           <p>{tooltipTimestamp}</p>

@@ -154,7 +154,7 @@ export const ChatComposer: FC<ChatComposerProps> = ({
         />
       )}
 
-      {shouldShowRecorder ? (
+      {!shouldShowRecorder ? (
         <div className='flex w-full items-center justify-between gap-2 p-2.5'>
           <Button
             variant='ghost'
@@ -185,7 +185,7 @@ export const ChatComposer: FC<ChatComposerProps> = ({
             disabled={isCommitting}
             isLoading={isCommitting}
           >
-            <Check className='text-GRAY_1000' />
+            <Check />
           </Button>
         </div>
       ) : (
