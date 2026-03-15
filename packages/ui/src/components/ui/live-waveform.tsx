@@ -363,9 +363,7 @@ export const LiveWaveform = ({
         barColor ||
         (() => {
           const style = getComputedStyle(canvas);
-          // Try to get the computed color value directly
-          const color = style.color;
-          return color || '#000';
+          return style.color || '#000';
         })();
 
       const step = barWidth + barGap;
@@ -383,9 +381,13 @@ export const LiveWaveform = ({
               ? staticBarsRef.current
               : [];
 
-        for (let i = 0; i < barCount && i < dataToRender.length; i++) {
+        const renderCount = Math.min(barCount, dataToRender.length);
+        const totalBarsWidth = renderCount * barWidth + (renderCount - 1) * barGap;
+        const offsetX = (rect.width - totalBarsWidth) / 2;
+
+        for (let i = 0; i < renderCount; i++) {
           const value = dataToRender[i] || 0.1;
-          const x = i * step;
+          const x = offsetX + i * step;
           const barHeight = Math.max(baseBarHeight, value * rect.height * 0.8);
           const y = centerY - barHeight / 2;
 

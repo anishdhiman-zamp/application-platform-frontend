@@ -185,7 +185,7 @@ export const ChatComposer: FC<ChatComposerProps> = ({
             disabled={isCommitting}
             isLoading={isCommitting}
           >
-            <Check className='text-GRAY_1000' />
+            <Check />
           </Button>
         </div>
       ) : (

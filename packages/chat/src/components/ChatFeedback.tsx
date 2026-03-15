@@ -331,6 +331,7 @@ const ChatFeedback: FC<ChatFeedbackProps> = ({
                 onPaste={organizationId ? handlePaste : undefined}
                 attachments={attachments}
                 removeAttachment={removeFile}
+                autoFocus
                 isUploading={isUploading}
                 onAttachClick={handleAttachClick}
                 showAttachButton={!!organizationId}
