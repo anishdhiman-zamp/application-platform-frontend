@@ -69,7 +69,7 @@ const CopyMessageButton: FC<CopyMessageButtonProps> = ({ messageContent, classNa
               size='icon'
               onClick={handleCopyMessage}
               className={cn(
-                'hover:bg-GRAY_100 active:bg-GRAY_300 hover:text-GRAY_700 size-[26px] rounded-[6px] p-[2px] [&_svg]:size-3.5',
+                'hover:bg-GRAY_100 active:bg-GRAY_300 hover:text-GRAY_700 size-[26px] rounded-md p-[2px]',
                 className,
               )}
               aria-label='Copy message'
