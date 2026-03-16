@@ -20,6 +20,7 @@ interface DeleteConversationDialogProps {
   isOpen: boolean;
   onOpenChange: (open: boolean) => void;
   onDeleteSuccess?: () => void;
+  onDeleteFailure?: () => void;
 }
 
 const DeleteConversationDialog: FC<DeleteConversationDialogProps> = ({
@@ -28,6 +29,7 @@ const DeleteConversationDialog: FC<DeleteConversationDialogProps> = ({
   isOpen,
   onOpenChange,
   onDeleteSuccess,
+  onDeleteFailure,
 }) => {
   const [deleteConversation] = useDeleteConversationMutation();
 
@@ -38,6 +40,7 @@ const DeleteConversationDialog: FC<DeleteConversationDialogProps> = ({
     deleteConversation({ conversationId })
       .unwrap()
       .catch(() => {
+        onDeleteFailure?.();
         toast.error('Failed to delete conversation');
       });
   };

@@ -14,6 +14,7 @@ interface ChatHistoryItemProps {
   isStreaming?: boolean;
   organizationId: string;
   onDelete?: (id: string) => void;
+  onDeleteFailure?: (conversation: FeedbackItemType) => void;
   onRename?: (id: string, newTitle: string) => void;
 }
 
@@ -23,6 +24,7 @@ const ChatHistoryItem: FC<ChatHistoryItemProps> = ({
   isStreaming,
   organizationId,
   onDelete,
+  onDeleteFailure,
   onRename,
 }) => {
   const [isDeleteOpen, setIsDeleteOpen] = useState(false);
@@ -42,6 +44,10 @@ const ChatHistoryItem: FC<ChatHistoryItemProps> = ({
   const handleDeleteSuccess = useCallback(() => {
     onDelete?.(conversation?.id);
   }, [onDelete, conversation?.id]);
+
+  const handleDeleteFailure = useCallback(() => {
+    onDeleteFailure?.(conversation);
+  }, [onDeleteFailure, conversation]);
 
   const handleRenameSuccess = useCallback(
     (newTitle: string) => {
@@ -125,6 +131,7 @@ const ChatHistoryItem: FC<ChatHistoryItemProps> = ({
         isOpen={isDeleteOpen}
         onOpenChange={setIsDeleteOpen}
         onDeleteSuccess={handleDeleteSuccess}
+        onDeleteFailure={handleDeleteFailure}
       />
     </div>
   );

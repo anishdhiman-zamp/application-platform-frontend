@@ -114,6 +114,11 @@ const ChatHistory = ({ onSelectConversation, onDeleteConversation }: ChatHistory
     [onDeleteConversation],
   );
 
+  const handleDeleteConversationFailure = useCallback((conversation: FeedbackItemType) => {
+    setAllConversations((prev) => [...prev, conversation]);
+    setTotalCount((prev) => prev + 1);
+  }, []);
+
   const handleRenameConversation = useCallback((id: string, newTitle: string) => {
     setAllConversations((prev) => prev.map((c) => (c.id === id ? { ...c, title: newTitle } : c)));
   }, []);
@@ -200,6 +205,7 @@ const ChatHistory = ({ onSelectConversation, onDeleteConversation }: ChatHistory
                 isStreaming={activeStreamingIds.has(conversation?.id)}
                 organizationId={organizationId}
                 onDelete={handleDeleteConversation}
+                onDeleteFailure={handleDeleteConversationFailure}
                 onRename={handleRenameConversation}
               />
             ))}
