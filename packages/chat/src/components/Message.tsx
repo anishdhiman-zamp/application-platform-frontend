@@ -79,8 +79,7 @@ export const Message: FC<MessageProps> = ({
         isLoading={isLoading}
       />
       {streamingEnabled && (
-        <AnimatePresence>
-          <motion.div
+        <motion.div
             initial={isLastMessage ? { opacity: 0 } : false}
             animate={{ opacity: 1 }}
             transition={{ duration: 0.3, ease: 'easeOut' }}
@@ -103,7 +102,6 @@ export const Message: FC<MessageProps> = ({
               />
             )}
           </motion.div>
-        </AnimatePresence>
       )}
     </div>
   );
