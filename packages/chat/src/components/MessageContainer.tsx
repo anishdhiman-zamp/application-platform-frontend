@@ -1,7 +1,7 @@
 import { ShimmerText } from '@zamp-platform/ui';
 import { cn } from '@zamp-platform/ui/utils';
 import Image from 'next/image';
-import { FC, ReactNode, useCallback, useEffect, useRef } from 'react';
+import { FC, ReactNode, useCallback, useEffect, useRef, useState } from 'react';
 
 import PaceAvatar from '@/modules/chatbot/PaceAvatar';
 
@@ -59,6 +59,7 @@ export const MessageContainer: FC<MessageContainerProps> = ({
   const defaultAssistantAvatar = assistantAvatar ?? <PaceAvatar />;
   const isInitialScrollRef = useRef(true);
   const scrollContainerRef = useRef<HTMLDivElement>(null);
+  const [animatedLength, setAnimatedLength] = useState(messages?.length ?? 0);
 
   const scrollToBottom = useCallback((behavior: ScrollBehavior = 'smooth') => {
     if (scrollContainerRef.current) {
@@ -77,6 +78,17 @@ export const MessageContainer: FC<MessageContainerProps> = ({
     }
   }, [messages?.length, scrollToBottom, children]);
 
+  const lastMessage = messages?.[messages.length - 1];
+  const isNewUserMessage = lastMessage?.sender_type === 'USER' && messages.length > animatedLength;
+
+  useEffect(() => {
+    if (isNewUserMessage) {
+      const timer = setTimeout(() => setAnimatedLength(messages.length), 600);
+
+      return () => clearTimeout(timer);
+    }
+  }, [isNewUserMessage, messages.length]);
+
   return (
     <div ref={scrollContainerRef} className={cn('flex w-full grow flex-col gap-6 p-4', className)}>
       {messages?.map((message, index) => (
@@ -92,6 +104,7 @@ export const MessageContainer: FC<MessageContainerProps> = ({
           feedbackDisabled={feedbackDisabled}
           showCopy={showCopy}
           isLastMessage={index === messages.length - 1}
+          shouldAnimate={index === messages.length - 1 && isNewUserMessage}
           organizationId={organizationId}
           streamingEnabled={streamingEnabled}
         />

@@ -11,11 +11,17 @@ interface UseChatScrollOptions {
   streamingState?: unknown;
   /** Distance from bottom (in px) to consider "at bottom" */
   bottomThreshold?: number;
+  /** Sender type of the last message - when 'USER', scrolls so the new message appears at the top of the viewport */
+  lastMessageSenderType?: string;
+  /** Ref to the bottom spacer div - its height is controlled dynamically so response fills viewport from top */
+  emptyDivRef?: React.RefObject<HTMLDivElement | null>;
 }
 
 interface UseChatScrollReturn {
   /** Ref to attach to the scrollable container */
   scrollContainerRef: React.RefObject<HTMLDivElement | null>;
+  /** Callback ref to attach to the messages content wrapper — fires ResizeObserver on mount/unmount */
+  contentRef: React.RefCallback<HTMLDivElement>;
   /** Whether to show the scroll-to-bottom button */
   showScrollButton: boolean;
   /** Whether the container has scrollable content above the viewport */
@@ -30,24 +36,34 @@ interface UseChatScrollReturn {
   scrollToBottom: (behavior?: ScrollBehavior) => void;
 }
 
+/** Visual padding (px) above the user message when scrolled to top */
+const USER_MESSAGE_TOP_PADDING = 20;
+
 export const useChatScroll = ({
   messagesLength,
   isLoading,
   streamingState,
   bottomThreshold = 100,
+  lastMessageSenderType,
+  emptyDivRef,
 }: UseChatScrollOptions): UseChatScrollReturn => {
   const scrollContainerRef = useRef<HTMLDivElement>(null);
   const [showScrollButton, setShowScrollButton] = useState(false);
   const [canScrollTop, setCanScrollTop] = useState(false);
   const [canScrollBottom, setCanScrollBottom] = useState(false);
   const isInitialScrollRef = useRef(true);
+  const lastUserScrollLengthRef = useRef(0);
+  const wasLoadingRef = useRef(false);
+  /** Content-absolute top position of the last user message — captured once in scrollToLastUserMessage */
+  const anchorTopRef = useRef<number | null>(null);
+  /** Persists the ResizeObserver so we can disconnect it when the content node unmounts */
+  const contentObserverRef = useRef<ResizeObserver | null>(null);
 
   const checkIfScrolledToBottom = useCallback(() => {
     if (scrollContainerRef.current) {
       const { scrollTop, scrollHeight, clientHeight } = scrollContainerRef.current;
-      const distanceFromBottom = scrollHeight - scrollTop - clientHeight;
 
-      return distanceFromBottom < bottomThreshold;
+      return scrollHeight - scrollTop - clientHeight < bottomThreshold;
     }
 
     return true;
@@ -63,6 +79,43 @@ export const useChatScroll = ({
     setCanScrollBottom(scrollHeight - scrollTop - clientHeight > 1);
   }, []);
 
+  /**
+   * Computes and sets the spacer height using the anchor position stored in anchorTopRef.
+   *
+   * The anchor is set once in scrollToLastUserMessage (the content-absolute top of the
+   * last user message). Using a stored value avoids a DOM query on every streaming tick
+   * and ResizeObserver callback.
+   *
+   * Formula:
+   *   contentFromAnchor = contentHeight - anchorTop
+   *   spacer            = max(0, clientHeight - contentFromAnchor - 20)
+   *
+   * This keeps scrollHeight = anchorTop + clientHeight - 20 (constant), so scrollTop
+   * is never clamped and the user message stays pinned.
+   */
+  const updateSpacerHeight = useCallback(() => {
+    const container = scrollContainerRef.current;
+    const spacer = emptyDivRef?.current;
+    const anchorTop = anchorTopRef.current;
+
+    if (!container || !spacer || anchorTop === null) return;
+
+    const spacerCurrentHeight = spacer.offsetHeight;
+    const contentHeight = container.scrollHeight - spacerCurrentHeight;
+    const contentFromAnchor = Math.max(0, contentHeight - anchorTop);
+    const newSpacerHeight = Math.max(0, container.clientHeight - contentFromAnchor - USER_MESSAGE_TOP_PADDING);
+
+    spacer.style.height = `${newSpacerHeight}px`;
+  }, [emptyDivRef]);
+
+  const resetSpacer = useCallback(() => {
+    const spacer = emptyDivRef?.current;
+
+    if (!spacer) return;
+    spacer.style.height = '';
+    spacer.style.minHeight = '';
+  }, [emptyDivRef]);
+
   const scrollToBottom = useCallback((behavior: ScrollBehavior = 'smooth') => {
     if (scrollContainerRef.current) {
       scrollContainerRef.current.scrollTo({
@@ -72,11 +125,56 @@ export const useChatScroll = ({
     }
   }, []);
 
+  /**
+   * Scrolls the last user message to the top of the viewport.
+   * Uses direct scrollTop (not scrollIntoView) so it works with overflow-y:hidden.
+   *
+   * Sets the spacer to container.clientHeight first — this guarantees scrollHeight is
+   * always large enough that scrollTop = userMessage.offsetTop is never clamped.
+   * After scrolling, updateSpacerHeight shrinks the spacer to the exact correct size
+   * while keeping scrollHeight constant (so no jump occurs).
+   */
+  const scrollToLastUserMessage = useCallback(
+    (isInitial = false) => {
+      const container = scrollContainerRef.current;
+      const spacer = emptyDivRef?.current;
+
+      if (!container) return;
+
+      // Set spacer to full clientHeight so there is always enough scrollable room
+      if (spacer) {
+        spacer.style.minHeight = '0px';
+        spacer.style.height = `${container.clientHeight}px`;
+      }
+
+      const userMessages = container.querySelectorAll<HTMLElement>('[data-sender-type="USER"]');
+      const lastUserMessage = userMessages[userMessages.length - 1];
+
+      if (!lastUserMessage) {
+        anchorTopRef.current = null;
+        container.scrollTo({ top: container.scrollHeight, behavior: isInitial ? 'instant' : 'smooth' });
+      } else {
+        const containerRect = container.getBoundingClientRect();
+        const msgRect = lastUserMessage.getBoundingClientRect();
+        const anchorTop = msgRect.top - containerRect.top + container.scrollTop;
+
+        anchorTopRef.current = anchorTop;
+        container.scrollTo({
+          top: anchorTop - USER_MESSAGE_TOP_PADDING,
+          behavior: isInitial ? 'instant' : 'smooth',
+        });
+      }
+
+      // Shrink spacer to exact size — scrollHeight stays constant so scrollTop won't clamp
+      updateSpacerHeight();
+    },
+    [emptyDivRef, updateSpacerHeight],
+  );
+
   const handleScroll = useCallback(() => {
     if (scrollContainerRef.current) {
       const isAtBottom = checkIfScrolledToBottom();
 
-      // Don't show button during initial scroll on page load
       if (isInitialScrollRef.current) {
         if (isAtBottom) {
           isInitialScrollRef.current = false;
@@ -93,33 +191,99 @@ export const useChatScroll = ({
   }, [checkIfScrolledToBottom, updateScrollFadeState]);
 
   const handleScrollToBottomClick = useCallback(() => {
+    anchorTopRef.current = null;
+    resetSpacer();
     scrollToBottom('smooth');
-  }, [scrollToBottom]);
+  }, [scrollToBottom, resetSpacer]);
 
-  // Scroll to bottom when messages change
+  // Reset state when a new conversation starts loading
+  useEffect(() => {
+    if (isLoading && !wasLoadingRef.current) {
+      isInitialScrollRef.current = true;
+      lastUserScrollLengthRef.current = 0;
+      anchorTopRef.current = null;
+      resetSpacer();
+    }
+    wasLoadingRef.current = isLoading;
+  }, [isLoading, resetSpacer]);
+
   useEffect(() => {
     if (messagesLength > 0 && !isLoading) {
-      const behavior = isInitialScrollRef.current ? 'instant' : 'smooth';
+      const isInitial = isInitialScrollRef.current;
 
-      requestAnimationFrame(() => {
-        scrollToBottom(behavior);
-        updateScrollFadeState();
-      });
+      if (isInitial) {
+        isInitialScrollRef.current = false;
+        requestAnimationFrame(() => {
+          scrollToLastUserMessage(true);
+          updateScrollFadeState();
+        });
+
+        return;
+      }
+
+      if (lastMessageSenderType === 'USER') {
+        if (lastUserScrollLengthRef.current !== messagesLength) {
+          lastUserScrollLengthRef.current = messagesLength;
+          requestAnimationFrame(() => {
+            scrollToLastUserMessage();
+            updateScrollFadeState();
+          });
+        }
+      } else {
+        lastUserScrollLengthRef.current = 0;
+        requestAnimationFrame(() => {
+          updateSpacerHeight();
+          updateScrollFadeState();
+        });
+      }
     }
-  }, [messagesLength, isLoading, scrollToBottom, updateScrollFadeState]);
+  }, [
+    messagesLength,
+    isLoading,
+    scrollToLastUserMessage,
+    updateScrollFadeState,
+    lastMessageSenderType,
+    updateSpacerHeight,
+  ]);
 
-  // Check for scroll button visibility when streaming state changes
+  // During streaming: keep shrinking the spacer as response grows
   useEffect(() => {
     if (!isInitialScrollRef.current) {
       const isAtBottom = checkIfScrolledToBottom();
 
       setShowScrollButton(!isAtBottom);
+      updateSpacerHeight();
     }
+
     updateScrollFadeState();
-  }, [streamingState, checkIfScrolledToBottom, updateScrollFadeState]);
+  }, [streamingState, checkIfScrolledToBottom, updateScrollFadeState, updateSpacerHeight]);
+
+  // Callback ref: sets up (and tears down) the ResizeObserver the moment the
+  // content element is actually attached to the DOM, not just on first render.
+  // This avoids the stale-ref problem where useEffect ran before CommonWrapper
+  // finished loading and the element was still null.
+  const contentRef = useCallback<React.RefCallback<HTMLDivElement>>(
+    (node) => {
+      contentObserverRef.current?.disconnect();
+      contentObserverRef.current = null;
+
+      if (!node) return;
+
+      const observer = new ResizeObserver(() => {
+        if (!isInitialScrollRef.current) {
+          updateSpacerHeight();
+        }
+      });
+
+      observer.observe(node);
+      contentObserverRef.current = observer;
+    },
+    [updateSpacerHeight],
+  );
 
   return {
     scrollContainerRef,
+    contentRef,
     showScrollButton,
     canScrollTop,
     canScrollBottom,

@@ -2,6 +2,7 @@
 
 import { cn } from '@zamp-platform/ui/utils';
 import { formatChatTimestamp, formatChatTimestampTooltip, formatTimestampToUTC } from '@zamp-platform/utils';
+import { motion } from 'motion/react';
 import { FC, ReactNode, useMemo } from 'react';
 
 import { ButtonBlockType } from '../types/block.types';
@@ -24,6 +25,8 @@ export interface MessageProps {
   showCopy?: boolean;
   feedbackDisabled?: boolean;
   isLastMessage?: boolean;
+  /** Whether to play the entrance animation (controlled by parent to avoid re-triggering on remount) */
+  shouldAnimate?: boolean;
   alignUserRight?: boolean;
   organizationId?: string;
   streamingEnabled?: boolean;
@@ -44,6 +47,7 @@ export const Message: FC<MessageProps> = ({
   showCopy = false,
   feedbackDisabled = false,
   isLastMessage = false,
+  shouldAnimate = false,
   alignUserRight = false,
   organizationId,
   streamingEnabled = true,
@@ -61,8 +65,18 @@ export const Message: FC<MessageProps> = ({
     [message.timestamp],
   );
 
+  const Component = shouldAnimate ? motion.div : 'div';
+
   return (
-    <div className={cn('group space-y-3', shouldAlignRight && 'flex flex-col items-end', containerClassName)}>
+    <Component
+      data-sender-type={message.sender_type}
+      className={cn('group space-y-3', shouldAlignRight && 'flex flex-col items-end', containerClassName)}
+      {...(shouldAnimate && {
+        initial: { opacity: 0, y: 20 },
+        animate: { opacity: 1, y: 0 },
+        transition: { duration: 0.3, ease: 'easeOut', delay: 0.3 },
+      })}
+    >
       {message.sender_type === SenderType.ASSISTANT && assistantAvatar}
 
       <BlockRenderer
@@ -99,7 +113,7 @@ export const Message: FC<MessageProps> = ({
           )}
         </div>
       )}
-    </div>
+    </Component>
   );
 };
 
