@@ -3,6 +3,7 @@ import { API_ENDPOINTS } from 'apis/apiEndpoint.constants';
 import { APITags } from '@/constants/api.constants';
 import { baseApi } from '@/services/baseApi';
 import type {
+  DeleteConversationResponse,
   OpenFeedbackResponseType,
   UpdateConversationTitleRequest,
   UpdateConversationTitleResponse,
@@ -154,6 +155,14 @@ const MACS = baseApi.injectEndpoints({
       invalidatesTags: [APITags.GET_CONVERSATION_HISTORY],
     }),
 
+    deleteConversation: builder.mutation<DeleteConversationResponse, { conversationId: string }>({
+      query: ({ conversationId }) => ({
+        url: formRequestUrlWithParams(API_ENDPOINTS.CONVERSATION_DELETE, { conversationId }),
+        method: REQUEST_TYPES.DELETE,
+      }),
+      invalidatesTags: [APITags.GET_CONVERSATION_HISTORY],
+    }),
+
     listChatModels: builder.query<ListChatModelsResponse, void>({
       query: () => ({
         url: API_ENDPOINTS.LIST_CHAT_MODELS,
@@ -173,5 +182,6 @@ export const {
   useUpdateSkillStatusMutation,
   useDeleteSkillMutation,
   useUpdateConversationTitleMutation,
+  useDeleteConversationMutation,
   useListChatModelsQuery,
 } = MACS;

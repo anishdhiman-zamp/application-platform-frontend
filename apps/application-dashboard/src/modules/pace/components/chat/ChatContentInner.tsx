@@ -17,8 +17,7 @@ import { cn } from '@zamp-platform/ui/utils';
 import ChatHistory from 'modules/pace/components/chat/ChatHistory';
 import CommonWrapper from '@/components/commonWrapper';
 import { SkeletonTypes } from '@/components/commonWrapper/commonWrapper.types';
-import { APITags } from '@/constants/api.constants';
-import { useAppDispatch, useAppSelector } from '@/hooks/toolkit';
+import { useAppSelector } from '@/hooks/toolkit';
 import NewPaceAvatar from '@/modules/chatbot/NewPaceAvatar';
 import ChatHome from '@/modules/pace/components/chat/ChatHome';
 import ChatTopbar from '@/modules/pace/components/chat/ChatTopbar';
@@ -31,7 +30,6 @@ import { useChatScroll } from '@/modules/pace/hooks/useChatScroll';
 import { SIDEBAR_CONVERSATION_ID_PARAM } from '@/modules/pace/pace.constants';
 import { usePaceContext } from '@/modules/pace/pace.context';
 import { TAB_TYPE } from '@/modules/pace/pace.types';
-import { baseApi } from '@/services/baseApi';
 import { RootState } from '@/store';
 
 interface ChatContentInnerProps {
@@ -57,8 +55,6 @@ const ChatContentInner = ({
   selectedModel,
   modelSelectorSlot,
 }: ChatContentInnerProps) => {
-  const dispatch = useAppDispatch();
-
   const currentUserName = useAppSelector((state: RootState) => state.user.user?.user_name) ?? '';
   const { inputValue, setInputValue } = useChatDraftInput({ conversationId });
 
@@ -68,10 +64,6 @@ const ChatContentInner = ({
 
   const { openTab } = useDynamicTabs({ type: TAB_TYPE.FILE });
   const { setIsPaceSidebarOpen } = usePaceContext();
-
-  const handleConversationCreated = () => {
-    dispatch(baseApi.util.invalidateTags([APITags.GET_CONVERSATION_HISTORY]));
-  };
 
   const chat = useChat({
     resourceId: organizationId,
@@ -117,6 +109,15 @@ const ChatContentInner = ({
       setConversationId(chat.conversationId);
     }
   }, [chat.conversationId, conversationId, setConversationId]);
+
+  const handleDeleteConversation = useCallback(
+    (deletedId: string) => {
+      if (conversationId === deletedId) {
+        startNewChat();
+      }
+    },
+    [conversationId, startNewChat],
+  );
 
   const handleFileOpen = useCallback(
     (path: string, name: string) => {
@@ -251,7 +252,6 @@ const ChatContentInner = ({
             placeholder="Do your life's best work with Pace"
             externalInputValue={inputValue}
             setExternalInputValue={setInputValue}
-            onConversationCreated={handleConversationCreated}
             fileDropHandlerRef={fileDropHandlerRef}
             minTextareaHeight={18}
             maxTextareaHeight={200}
@@ -262,7 +262,7 @@ const ChatContentInner = ({
           />
         </div>
 
-        <ChatHistory onSelectConversation={setConversationId} />
+        <ChatHistory onSelectConversation={setConversationId} onDeleteConversation={handleDeleteConversation} />
       </div>
     </ChatActionsProvider>
   );

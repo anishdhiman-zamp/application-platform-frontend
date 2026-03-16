@@ -64,3 +64,9 @@ export interface UpdateConversationTitleResponse {
   conversation_id: string;
   title: string;
 }
+
+export interface DeleteConversationResponse {
+  success: boolean;
+  conversation_id: string;
+  message: string;
+}

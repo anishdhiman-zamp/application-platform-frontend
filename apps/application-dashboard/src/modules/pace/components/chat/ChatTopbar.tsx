@@ -1,10 +1,11 @@
 'use client';
 
-import type { FC } from 'react';
-import { Button, Input, Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@zamp-platform/ui';
+import { type FC, useCallback, useState } from 'react';
+import { Button } from '@zamp-platform/ui';
 import { cn } from '@zamp-platform/ui/utils';
 import { Expand, Minus, Plus } from 'lucide-react';
-import { useEditableTitle } from '@/modules/pace/hooks/useEditableTitle';
+import RenameConversationPopover from '@/modules/pace/components/chat/RenameConversationPopover';
+import { DEFAULT_CHAT_TITLE } from '@/modules/pace/pace.constants';
 
 interface ChatTopbarProps {
   className?: string;
@@ -29,52 +30,35 @@ const ChatTopbar: FC<ChatTopbarProps> = ({
   onExpand,
   onTitleChange,
 }) => {
-  const {
-    displayTitle,
-    isEditing,
-    editValue,
-    canEdit,
-    handleTitleClick,
-    handleChange,
-    handleKeyDown,
-    handleBlur,
-    inputRefCallback,
-  } = useEditableTitle({
-    title,
-    conversationId,
-    organizationId,
-    onTitleChange,
-  });
+  const [isRenameOpen, setIsRenameOpen] = useState(false);
+  const displayTitle = title || DEFAULT_CHAT_TITLE;
+  const canEdit = Boolean(conversationId && organizationId);
+
+  const handleRenameSuccess = useCallback(
+    (newTitle: string) => {
+      onTitleChange?.(newTitle);
+    },
+    [onTitleChange],
+  );
 
   return (
     <div className={cn('bg-BG_WHITE flex items-center justify-between gap-x-3 p-3', className)} style={style}>
       <div className='relative flex h-7 min-w-0 flex-1 items-center'>
-        {isEditing ? (
-          <Input
-            ref={inputRefCallback}
-            type='text'
-            value={editValue}
-            onChange={handleChange}
-            onBlur={handleBlur}
-            onKeyDown={handleKeyDown}
-            className='f-13-500 bg-BG_WHITE h-7 max-w-[150px] px-1 select-none'
-            placeholder='Enter title...'
-            maxLength={500}
-          />
-        ) : (
-          <TooltipProvider>
-            <Tooltip>
-              <TooltipTrigger asChild>
-                <span className={cn('f-13-500 block truncate', canEdit && 'cursor-pointer')} onClick={handleTitleClick}>
-                  {displayTitle}
-                </span>
-              </TooltipTrigger>
-              <TooltipContent side='bottom' align='start'>
-                Rename
-              </TooltipContent>
-            </Tooltip>
-          </TooltipProvider>
-        )}
+        <RenameConversationPopover
+          open={isRenameOpen}
+          onOpenChange={setIsRenameOpen}
+          conversationId={conversationId ?? ''}
+          organizationId={organizationId ?? ''}
+          currentTitle={displayTitle}
+          onSuccess={handleRenameSuccess}
+        >
+          <span
+            className={cn('f-13-500 block max-w-full truncate first-letter:uppercase', canEdit && 'cursor-pointer')}
+            onClick={() => canEdit && setIsRenameOpen(true)}
+          >
+            {displayTitle}
+          </span>
+        </RenameConversationPopover>
       </div>
       <div className='flex items-center gap-1.5'>
         {onStartNewChat && (

@@ -20,9 +20,8 @@ import { useRouter } from 'next/navigation';
 import NewPaceIcons from '@/assets/Icons/NewPaceIcons';
 import CommonWrapper from '@/components/commonWrapper';
 import { SkeletonTypes } from '@/components/commonWrapper/commonWrapper.types';
-import { APITags } from '@/constants/api.constants';
 import { ROUTES_PATH } from '@/constants/routeConfig';
-import { useAppDispatch, useAppSelector } from '@/hooks/toolkit';
+import { useAppSelector } from '@/hooks/toolkit';
 import NewPaceAvatar from '@/modules/chatbot/NewPaceAvatar';
 import ChatTopbar from '@/modules/pace/components/chat/ChatTopbar';
 import ModelSelector from '@/modules/pace/components/chat/ModelSelector';
@@ -33,7 +32,6 @@ import { useChatDraftInput } from '@/modules/pace/hooks/useChatDraftInput';
 import { useChatScroll } from '@/modules/pace/hooks/useChatScroll';
 import { usePaceContext } from '@/modules/pace/pace.context';
 import { TAB_TYPE } from '@/modules/pace/pace.types';
-import { baseApi } from '@/services/baseApi';
 import type { RootState } from '@/store';
 
 interface ChatSidebarInnerProps {
@@ -54,7 +52,6 @@ const ChatSidebarInner: FC<ChatSidebarInnerProps> = ({
   chatTitle,
 }) => {
   const router = useRouter();
-  const dispatch = useAppDispatch();
   const { openTab } = useDynamicTabs({ type: TAB_TYPE.FILE });
   const organizationId = useAppSelector((state: RootState) => state.user.user?.orgs?.[0]?.organization_id) ?? '';
   const currentUserName = useAppSelector((state: RootState) => state.user.user?.user_name) ?? '';
@@ -79,10 +76,6 @@ const ChatSidebarInner: FC<ChatSidebarInnerProps> = ({
     () => <ModelSelector value={selectedModel} onChange={setSelectedModel} />,
     [selectedModel],
   );
-
-  const handleConversationCreated = () => {
-    dispatch(baseApi.util.invalidateTags([APITags.GET_CONVERSATION_HISTORY]));
-  };
 
   const chat = useChat({
     resourceId: organizationId,
@@ -227,7 +220,6 @@ const ChatSidebarInner: FC<ChatSidebarInnerProps> = ({
             setExternalInputValue={setInputValue}
             className='bg-BG_WHITE'
             autoFocus
-            onConversationCreated={handleConversationCreated}
             fileDropHandlerRef={fileDropHandlerRef}
             addFileReferenceRef={addFileReferenceRef}
             llmModel={selectedModel}

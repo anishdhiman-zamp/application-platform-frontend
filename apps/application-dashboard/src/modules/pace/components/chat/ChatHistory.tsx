@@ -21,9 +21,10 @@ const SEARCH_DEBOUNCE_MS = 300;
 
 interface ChatHistoryProps {
   onSelectConversation: (id: string | null, title?: string) => void;
+  onDeleteConversation?: (id: string) => void;
 }
 
-const ChatHistory = ({ onSelectConversation }: ChatHistoryProps) => {
+const ChatHistory = ({ onSelectConversation, onDeleteConversation }: ChatHistoryProps) => {
   const organizationId = useAppSelector((state: RootState) => state?.user?.user?.orgs?.[0]?.organization_id) ?? '';
   const containerRef = useRef<HTMLDivElement>(null);
   const activeStreamingIds = useActiveStreamingIds();
@@ -53,7 +54,7 @@ const ChatHistory = ({ onSelectConversation }: ChatHistoryProps) => {
     },
     {
       skip: !organizationId,
-      refetchOnMountOrArgChange: false,
+      refetchOnMountOrArgChange: true,
     },
   );
 
@@ -103,6 +104,19 @@ const ChatHistory = ({ onSelectConversation }: ChatHistoryProps) => {
       setSearchTerm('');
     }
   }, [isSearchOpen]);
+
+  const handleDeleteConversation = useCallback(
+    (id: string) => {
+      setAllConversations((prev) => prev.filter((c) => c.id !== id));
+      setTotalCount((prev) => Math.max(0, prev - 1));
+      onDeleteConversation?.(id);
+    },
+    [onDeleteConversation],
+  );
+
+  const handleRenameConversation = useCallback((id: string, newTitle: string) => {
+    setAllConversations((prev) => prev.map((c) => (c.id === id ? { ...c, title: newTitle } : c)));
+  }, []);
 
   useEffect(() => {
     setPage(1);
@@ -184,6 +198,9 @@ const ChatHistory = ({ onSelectConversation }: ChatHistoryProps) => {
                 conversation={conversation}
                 onSelect={onSelectConversation}
                 isStreaming={activeStreamingIds.has(conversation?.id)}
+                organizationId={organizationId}
+                onDelete={handleDeleteConversation}
+                onRename={handleRenameConversation}
               />
             ))}
           </div>
