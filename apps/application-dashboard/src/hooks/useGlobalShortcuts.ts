@@ -2,6 +2,7 @@
 
 import { useCallback, useEffect, useRef, useState } from 'react';
 import { useRouter } from 'next/navigation';
+import { useTheme } from '@/app/_providers/theme-provider';
 import { FEATURE_FLAGS } from '@/constants/featureFlags';
 import { getProcessRouteById, ROUTES_PATH } from '@/constants/routeConfig';
 import { KEYBOARD_KEYS } from '@/constants/shortcuts';
@@ -10,6 +11,7 @@ import { useAppDispatch } from '@/hooks/toolkit';
 import { useFeatureFlags } from '@/hooks/useFeatureFlags';
 import useKeyDown from '@/hooks/useKeyDown';
 import { useLogout } from '@/hooks/useLogout';
+import { THEME_MODE } from '@/modules/general/constants/general.constants';
 import { toggleSidebar } from '@/store/slices/layout-configs';
 
 const NUMBER_KEY_MAP: Record<string, number> = {
@@ -39,6 +41,7 @@ const NUMBER_KEY_MAP: Record<string, number> = {
 const MONITOR_KEYS = [
   KEYBOARD_KEYS.SLASH,
   KEYBOARD_KEYS.D,
+  KEYBOARD_KEYS.F,
   KEYBOARD_KEYS.L,
   KEYBOARD_KEYS.P,
   // Number keys
@@ -71,6 +74,7 @@ const MONITOR_KEYS = [
  * - `/` (Slash): Toggle sidebar collapse
  * - `Option + D`: Navigate to datasets page
  * - `Option + P`: Navigate to people page
+ * - `Cmd + Shift + D`: Toggle dark/light theme
  * - `Cmd + Shift + L`: Logout
  * - `P` + number (1-9): Navigate to process at that index (hold P and press numbers)
  */
@@ -79,6 +83,7 @@ const useGlobalShortcuts = () => {
   const dispatch = useAppDispatch();
   const { processes } = useProcesses();
   const { logout, isLoggingOut } = useLogout();
+  const { resolvedTheme, setTheme } = useTheme();
   const { evaluate, ldClient } = useFeatureFlags();
   const [isZampInternalEnabled, setIsZampInternalEnabled] = useState(false);
   // Use refs to avoid stale closure issues (updated directly, no useEffect needed)
@@ -87,6 +92,8 @@ const useGlobalShortcuts = () => {
   const dispatchRef = useRef(dispatch);
   const logoutRef = useRef(logout);
   const isLoggingOutRef = useRef(isLoggingOut);
+  const resolvedThemeRef = useRef(resolvedTheme);
+  const setThemeRef = useRef(setTheme);
 
   // Keep refs updated directly during render
   processesRef.current = processes;
@@ -94,6 +101,8 @@ const useGlobalShortcuts = () => {
   dispatchRef.current = dispatch;
   logoutRef.current = logout;
   isLoggingOutRef.current = isLoggingOut;
+  resolvedThemeRef.current = resolvedTheme;
+  setThemeRef.current = setTheme;
 
   // Track P key held state for P+number sequence
   const pKeyHeldRef = useRef(false);
@@ -105,6 +114,16 @@ const useGlobalShortcuts = () => {
       }
 
       const { code, altKey, ctrlKey, metaKey, shiftKey } = event;
+
+      // Cmd + Shift + F: Toggle dark/light theme
+      if (metaKey && shiftKey && code === KEYBOARD_KEYS.F) {
+        event.preventDefault();
+        const nextTheme = resolvedThemeRef.current === THEME_MODE.DARK ? THEME_MODE.LIGHT : THEME_MODE.DARK;
+
+        setThemeRef.current(nextTheme);
+
+        return;
+      }
 
       // Cmd + Shift + L: Logout
       if (metaKey && shiftKey && code === KEYBOARD_KEYS.L) {
