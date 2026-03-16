@@ -71,7 +71,7 @@ const MONITOR_KEYS = [
  * Global keyboard shortcuts handler
  *
  * Shortcuts:
- * - `/` (Slash): Toggle sidebar collapse
+ * - `Cmd + Shift + /`: Toggle sidebar collapse
  * - `Option + D`: Navigate to datasets page
  * - `Option + P`: Navigate to people page
  * - `Cmd + Shift + D`: Toggle dark/light theme
@@ -149,8 +149,8 @@ const useGlobalShortcuts = () => {
         return;
       }
 
-      // Slash: Toggle sidebar (only when no modifier keys)
-      if (code === KEYBOARD_KEYS.SLASH && !altKey && !ctrlKey && !metaKey) {
+      // Cmd + Shift + /: Toggle sidebar
+      if (metaKey && shiftKey && code === KEYBOARD_KEYS.SLASH) {
         event.preventDefault();
         dispatchRef.current(toggleSidebar());
 
