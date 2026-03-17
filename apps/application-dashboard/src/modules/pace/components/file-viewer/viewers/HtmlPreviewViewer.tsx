@@ -21,7 +21,7 @@ const HtmlPreviewViewer = memo(({ content }: HtmlPreviewViewerProps) => {
       srcDoc={srcDoc}
       title='HTML Preview'
       className='bg-BG_WHITE h-full w-full border-0'
-      sandbox='allow-scripts allow-same-origin'
+      sandbox='allow-scripts'
     />
   );
 });
