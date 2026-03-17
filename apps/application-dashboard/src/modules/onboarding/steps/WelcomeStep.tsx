@@ -22,7 +22,8 @@ export const isWelcomeSeenForUser = (userId: string): boolean => {
 export const markWelcomeSeenForUser = (userId: string): void => {
   try {
     const raw = localStorage.getItem(WELCOME_SEEN_KEY);
-    const seen: string[] = raw ? JSON.parse(raw) : [];
+    const parsed = raw ? JSON.parse(raw) : null;
+    const seen: string[] = Array.isArray(parsed) ? parsed : [];
 
     if (!seen.includes(userId)) {
       seen.push(userId);
@@ -178,6 +179,7 @@ export const WelcomeStep = ({ nextStatus, onComplete, userId }: Props) => {
 
   const handleKeyDown = useCallback(
     (e: KeyboardEvent) => {
+      if (e.metaKey || e.ctrlKey || e.altKey || e.key === 'Escape') return;
       e.preventDefault();
       advance();
     },
