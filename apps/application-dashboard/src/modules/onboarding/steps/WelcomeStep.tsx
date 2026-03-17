@@ -1,14 +1,42 @@
 'use client';
 
 import { useCallback, useEffect, useRef, useState } from 'react';
+import { Progress } from '@zamp-platform/ui';
 import { OnboardingStatus } from 'modules/onboarding/onboarding.types';
-import { KEYBOARD_KEYS } from '@/constants/shortcuts';
 
 export const WELCOME_SEEN_KEY = 'zamp_welcome_seen';
+
+export const isWelcomeSeenForUser = (userId: string): boolean => {
+  try {
+    const raw = localStorage.getItem(WELCOME_SEEN_KEY);
+
+    if (!raw) return false;
+    const seen: string[] = JSON.parse(raw);
+
+    return Array.isArray(seen) && seen.includes(userId);
+  } catch {
+    return false;
+  }
+};
+
+export const markWelcomeSeenForUser = (userId: string): void => {
+  try {
+    const raw = localStorage.getItem(WELCOME_SEEN_KEY);
+    const seen: string[] = raw ? JSON.parse(raw) : [];
+
+    if (!seen.includes(userId)) {
+      seen.push(userId);
+    }
+    localStorage.setItem(WELCOME_SEEN_KEY, JSON.stringify(seen));
+  } catch {
+    // localStorage may be unavailable
+  }
+};
 
 type Props = {
   nextStatus: OnboardingStatus;
   onComplete: (status: OnboardingStatus) => void;
+  userId: string;
 };
 
 const STORY_LINES = [
@@ -44,12 +72,16 @@ const IMG_TRIGGERS = [
   { showAt: 5, expandAt: 9 },
 ];
 
-export const WelcomeStep = ({ nextStatus, onComplete }: Props) => {
+const AUTO_ADVANCE_DELAY = 500;
+
+export const WelcomeStep = ({ nextStatus, onComplete, userId }: Props) => {
   const currentIdxRef = useRef(-1);
   const phaseRef = useRef<'revealing' | 'done'>('revealing');
   const isAnimatingRef = useRef(false);
   const navigatedRef = useRef(false);
   const lastAdvanceRef = useRef(0);
+  const autoAdvanceTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const advanceRef = useRef<() => void>(() => {});
 
   const [currentIdx, setCurrentIdx] = useState(-1);
   const [phase, setPhase] = useState<'revealing' | 'done'>('revealing');
@@ -60,7 +92,7 @@ export const WelcomeStep = ({ nextStatus, onComplete }: Props) => {
     if (navigatedRef.current) return;
     navigatedRef.current = true;
     try {
-      localStorage.setItem(WELCOME_SEEN_KEY, 'true');
+      markWelcomeSeenForUser(userId);
     } catch {
       // localStorage may be unavailable
     }
@@ -98,6 +130,13 @@ export const WelcomeStep = ({ nextStatus, onComplete }: Props) => {
       setTimeout(() => {
         setExitIdx(null);
         isAnimatingRef.current = false;
+
+        // Schedule auto-advance after animation completes
+        if (autoAdvanceTimerRef.current) clearTimeout(autoAdvanceTimerRef.current);
+        autoAdvanceTimerRef.current = setTimeout(() => {
+          autoAdvanceTimerRef.current = null;
+          advanceRef.current();
+        }, AUTO_ADVANCE_DELAY);
       }, lockTime),
     );
 
@@ -105,8 +144,14 @@ export const WelcomeStep = ({ nextStatus, onComplete }: Props) => {
   }, []);
 
   const advance = useCallback(() => {
-    if (Date.now() - lastAdvanceRef.current < 1500) return;
+    if (Date.now() - lastAdvanceRef.current < 100) return;
     if (phaseRef.current !== 'revealing') return;
+
+    // Clear any pending auto-advance
+    if (autoAdvanceTimerRef.current) {
+      clearTimeout(autoAdvanceTimerRef.current);
+      autoAdvanceTimerRef.current = null;
+    }
 
     const next = currentIdxRef.current + 1;
 
@@ -120,6 +165,8 @@ export const WelcomeStep = ({ nextStatus, onComplete }: Props) => {
     }
   }, [showSection, handleDone]);
 
+  advanceRef.current = advance;
+
   const handleWheel = useCallback(
     (e: WheelEvent) => {
       e.preventDefault();
@@ -131,12 +178,8 @@ export const WelcomeStep = ({ nextStatus, onComplete }: Props) => {
 
   const handleKeyDown = useCallback(
     (e: KeyboardEvent) => {
-      if (
-        [KEYBOARD_KEYS.ARROW_DOWN, KEYBOARD_KEYS.ARROW_RIGHT, ' ', KEYBOARD_KEYS.ENTER].includes(e.key as KEYBOARD_KEYS)
-      ) {
-        e.preventDefault();
-        advance();
-      }
+      e.preventDefault();
+      advance();
     },
     [advance],
   );
@@ -154,6 +197,7 @@ export const WelcomeStep = ({ nextStatus, onComplete }: Props) => {
     return () => {
       window.removeEventListener('wheel', handleWheel);
       window.removeEventListener('keydown', handleKeyDown);
+      if (autoAdvanceTimerRef.current) clearTimeout(autoAdvanceTimerRef.current);
     };
   }, [handleWheel, handleKeyDown]);
 
@@ -168,7 +212,10 @@ export const WelcomeStep = ({ nextStatus, onComplete }: Props) => {
   };
 
   return (
-    <div className='bg-GRAY_100 fixed inset-0 z-[150] flex items-center justify-center overflow-hidden'>
+    <div
+      className='bg-GRAY_100 fixed inset-0 z-[150] flex items-center justify-center overflow-hidden'
+      onClick={advance}
+    >
       {/* Floating image panels */}
       {FLOAT_POSITIONS.map((pos, i) => {
         const state = getImgState(i);
@@ -240,14 +287,13 @@ export const WelcomeStep = ({ nextStatus, onComplete }: Props) => {
         );
       })}
 
-      {/* Scroll hint */}
+      {/* Progress bar */}
       {currentIdx >= 0 && phase !== 'done' && (
-        <div
-          className='absolute bottom-10 text-xs'
-          style={{ color: 'var(--GRAY_600)', fontFamily: 'Inter, sans-serif', letterSpacing: '0.05em' }}
-        >
-          scroll to continue
-        </div>
+        <Progress
+          value={((currentIdx + 1) / STORY_LINES.length) * 100}
+          className='absolute bottom-10 w-30'
+          indicatorClassName='bg-black'
+        />
       )}
     </div>
   );
