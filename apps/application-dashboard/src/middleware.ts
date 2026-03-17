@@ -123,9 +123,18 @@ const handleAuthenticatedRoutes = async (request: NextRequest) => {
     const prevRoute = getServerSideCookie(request, PREV_ROUTE_COOKIE);
 
     if (prevRoute) {
-      const response = NextResponse.redirect(new URL(prevRoute, request.url));
-
       const domain = ENVIRONMENT === ENVIRONMENT_TYPES.PRODUCTION ? '.zamp.ai' : '.zamp.dev';
+      const landingRoute = getActiveLandingRoute(request, session);
+      const decodedPrevRoute = decodeURIComponent(prevRoute);
+
+      // Validate prev route is compatible with the current org's product mode.
+      // E.g. a MACS user shouldn't be sent to /processes from a previous classic session.
+      const isChatRoute = decodedPrevRoute.startsWith(ROUTES_PATH.CHAT);
+      const isLandingChat = landingRoute === ROUTES_PATH.CHAT;
+      const isCompatible = isChatRoute === isLandingChat;
+
+      const redirectUrl = isCompatible ? decodedPrevRoute : landingRoute;
+      const response = NextResponse.redirect(new URL(redirectUrl, request.url));
 
       clearServerSideCookie(response, PREV_ROUTE_COOKIE, domain);
 

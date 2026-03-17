@@ -3,7 +3,7 @@
 import { useMemo } from 'react';
 import { FEATURE_FLAGS } from '@/constants/featureFlags';
 import { SIDEBAR_ITEMS } from '@/constants/sidebar.constants';
-import { useFeatureFlag } from '@/hooks/useFeatureFlag';
+import { useIsPaceChatEnabled } from '@/hooks/useIsPaceChatEnabled';
 import type { NavigationItemSchema } from '@/types/config';
 
 /**
@@ -11,7 +11,7 @@ import type { NavigationItemSchema } from '@/types/config';
  * @returns {Object} An object containing the filtered sidebar items and a loading state
  */
 export const useFilteredSidebarItems = () => {
-  const { isEnabled: isPaceChatEnabled, isLoading } = useFeatureFlag(FEATURE_FLAGS.ZAMP_INTERNAL);
+  const { isEnabled: isPaceChatEnabled, isLoading } = useIsPaceChatEnabled();
 
   const filteredItems = useMemo<NavigationItemSchema[]>(() => {
     if (isLoading) {

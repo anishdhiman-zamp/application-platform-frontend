@@ -1,9 +1,9 @@
-import type { UserSessionCache } from '@/types/api/auth.types';
+import { ProductMode, type UserSessionCache } from '@/types/api/auth.types';
 
-export const THEME_COOKIE = 'zamp_theme';
 export const PREV_ROUTE_COOKIE = 'zamp_prev_route';
 export const ORY_KRATOS_SESSION_COOKIE = 'ory_kratos_session';
 export const USER_SESSION_COOKIE = 'zamp_user_session_v2';
+export const THEME_COOKIE = 'zamp-theme';
 export const ACTIVE_ORG_ID_COOKIE = 'zamp_active_org_id';
 export const SESSION_CACHE_MAX_AGE = 60 * 5;
 export const COOKIE_MAX_AGE = 60 * 60 * 24; // 24 hours
@@ -48,4 +48,8 @@ export const getUserSession = (): UserSessionCache | null => {
   } catch {
     return null;
   }
+};
+
+export const isMacsProduct = (): boolean => {
+  return getUserSession()?.product === ProductMode.MACS;
 };
