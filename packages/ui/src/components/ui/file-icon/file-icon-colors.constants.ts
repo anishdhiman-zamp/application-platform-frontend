@@ -1,5 +1,3 @@
-'use client';
-
 export interface FileTypeColors {
   bg: string;
   primary: string;

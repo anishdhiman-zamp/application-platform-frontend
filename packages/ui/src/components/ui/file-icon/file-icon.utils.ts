@@ -1,5 +1,3 @@
-'use client';
-
 import type { Icon } from '@phosphor-icons/react';
 import { FILE_EXTENSION_ICON_MAP, DEFAULT_FILE_ICON } from './file-icon.constants';
 import { FILE_TYPE_COLORS, DEFAULT_FILE_COLORS, type FileTypeColors } from './file-icon-colors.constants';

@@ -35,6 +35,7 @@ export const FileIcon: React.FC<FileIconProps> = ({ extension, className, iconCl
       style={{ backgroundColor: colors.bg }}
       data-testid='file-icon'
       aria-label={`${extension} file`}
+      role='img'
     >
       <IconComponent weight='regular' className={iconClassName} style={{ color: colors.primary }} />
     </div>

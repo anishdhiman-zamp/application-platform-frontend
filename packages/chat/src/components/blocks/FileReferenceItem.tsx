@@ -13,14 +13,8 @@ interface FileReferenceItemProps {
   className?: string;
 }
 
-const getFileExtension = (filename: string): string => {
-  const lastDot = filename.lastIndexOf('.');
-  return lastDot !== -1 ? filename.slice(lastDot + 1).toLowerCase() : '';
-};
-
 const FileReferenceItem: React.FC<FileReferenceItemProps> = ({ fileReference, onRemove, isLoading, className }) => {
   const { onFileOpen } = useChatActions();
-  const extension = getFileExtension(fileReference.name);
 
   const handleClick = () => {
     if (!fileReference.path) return;
@@ -41,7 +35,7 @@ const FileReferenceItem: React.FC<FileReferenceItemProps> = ({ fileReference, on
       onClick={handleClick}
     >
       <div className='flex items-center gap-1'>
-        <FileIcon extension={extension || 'txt'} className='size-5 rounded-md' iconClassName='size-4' />
+        <FileIcon extension={fileReference.name || 'txt'} className='size-5 rounded-md' iconClassName='size-4' />
         <span className='f-12-500 max-w-[104px] truncate'>{fileReference.name}</span>
       </div>
       {fileReference.path && onRemove && (
