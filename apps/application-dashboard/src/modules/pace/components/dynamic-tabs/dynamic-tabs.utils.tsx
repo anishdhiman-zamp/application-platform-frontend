@@ -11,11 +11,11 @@ export const getDefaultIcon = (tab: DynamicTab): ReactNode => {
     case TAB_TYPE.FILE: {
       const fileExtension = getFileExtension(tab.name);
 
-      return <FileIcon extension={fileExtension || 'txt'} className='size-4' />;
+      return <FileIcon extension={fileExtension || 'txt'} className='size-5 rounded-md' iconClassName='size-4' />;
     }
     case TAB_TYPE.TASK:
       return <Zap size={14} className='shrink-0' />;
     default:
-      return <FileIcon extension='txt' className='size-4' />;
+      return <FileIcon extension='txt' className='size-5 rounded-md' iconClassName='size-4' />;
   }
 };

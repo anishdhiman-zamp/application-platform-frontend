@@ -2,6 +2,7 @@
 
 import type { Icon } from '@phosphor-icons/react';
 import { FILE_EXTENSION_ICON_MAP, DEFAULT_FILE_ICON } from './file-icon.constants';
+import { FILE_TYPE_COLORS, DEFAULT_FILE_COLORS, type FileTypeColors } from './file-icon-colors.constants';
 
 /**
  * Normalizes a file extension by extracting from filename if needed and converting to lowercase
@@ -21,4 +22,14 @@ export const normalizeExtension = (extension: string): string => {
 export const getIconForExtension = (extension: string): Icon => {
   const normalized = normalizeExtension(extension);
   return FILE_EXTENSION_ICON_MAP[normalized] ?? DEFAULT_FILE_ICON;
+};
+
+/**
+ * Returns the color pair (bg and primary) for a given file extension
+ * @example getColorsForExtension('pdf') // { bg: '#FAEAEA', primary: '#C0392B' }
+ * @example getColorsForExtension('.docx') // { bg: '#E8F0FE', primary: '#2B5FBF' }
+ */
+export const getColorsForExtension = (extension: string): FileTypeColors => {
+  const normalized = normalizeExtension(extension);
+  return FILE_TYPE_COLORS[normalized] ?? DEFAULT_FILE_COLORS;
 };
