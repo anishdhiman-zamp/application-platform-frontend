@@ -1,10 +1,11 @@
 'use client';
 
-import type { FC } from 'react';
-import { Button, Input, Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@zamp-platform/ui';
+import { type FC, useCallback } from 'react';
+import { Button } from '@zamp-platform/ui';
 import { cn } from '@zamp-platform/ui/utils';
 import { Expand, Minus, Plus } from 'lucide-react';
-import { useEditableTitle } from '@/modules/pace/hooks/useEditableTitle';
+import ConversationActions from '@/modules/pace/components/chat/ConversationActions';
+import { DEFAULT_CHAT_TITLE } from '@/modules/pace/pace.constants';
 
 interface ChatTopbarProps {
   className?: string;
@@ -16,6 +17,7 @@ interface ChatTopbarProps {
   onClose?: () => void;
   onExpand?: () => void;
   onTitleChange?: (newTitle: string) => void;
+  onDeleteConversation?: () => void;
 }
 
 const ChatTopbar: FC<ChatTopbarProps> = ({
@@ -28,55 +30,34 @@ const ChatTopbar: FC<ChatTopbarProps> = ({
   onClose,
   onExpand,
   onTitleChange,
+  onDeleteConversation,
 }) => {
-  const {
-    displayTitle,
-    isEditing,
-    editValue,
-    canEdit,
-    handleTitleClick,
-    handleChange,
-    handleKeyDown,
-    handleBlur,
-    inputRefCallback,
-  } = useEditableTitle({
-    title,
-    conversationId,
-    organizationId,
-    onTitleChange,
-  });
+  const displayTitle = title || DEFAULT_CHAT_TITLE;
+  const canEdit = Boolean(conversationId && organizationId);
+
+  const handleRenameSuccess = useCallback(
+    (newTitle: string) => {
+      onTitleChange?.(newTitle);
+    },
+    [onTitleChange],
+  );
 
   return (
     <div className={cn('bg-BG_WHITE flex items-center justify-between gap-x-3 p-3', className)} style={style}>
-      <div className='relative flex h-7 min-w-0 flex-1 items-center'>
-        {isEditing ? (
-          <Input
-            ref={inputRefCallback}
-            type='text'
-            value={editValue}
-            onChange={handleChange}
-            onBlur={handleBlur}
-            onKeyDown={handleKeyDown}
-            className='f-13-500 bg-BG_WHITE h-7 max-w-[150px] px-1 select-none'
-            placeholder='Enter title...'
-            maxLength={500}
-          />
-        ) : (
-          <TooltipProvider>
-            <Tooltip>
-              <TooltipTrigger asChild>
-                <span className={cn('f-13-500 block truncate', canEdit && 'cursor-pointer')} onClick={handleTitleClick}>
-                  {displayTitle}
-                </span>
-              </TooltipTrigger>
-              <TooltipContent side='bottom' align='start'>
-                Rename
-              </TooltipContent>
-            </Tooltip>
-          </TooltipProvider>
-        )}
+      <div className='flex h-7 min-w-0 flex-1 items-center'>
+        <span className='f-13-500 block max-w-full truncate first-letter:uppercase'>{displayTitle}</span>
       </div>
       <div className='flex items-center gap-1.5'>
+        {canEdit && (
+          <ConversationActions
+            conversationId={conversationId ?? ''}
+            organizationId={organizationId ?? ''}
+            conversationTitle={displayTitle}
+            onRenameSuccess={handleRenameSuccess}
+            onDeleteSuccess={onDeleteConversation}
+            triggerClassName='rounded p-2 text-gray-900 hover:text-gray-900'
+          />
+        )}
         {onStartNewChat && (
           <Button
             variant='ghost'
