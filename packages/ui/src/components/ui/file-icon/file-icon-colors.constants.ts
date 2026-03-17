@@ -296,8 +296,8 @@ export const FILE_TYPE_COLORS: Record<string, FileTypeColors> = {
   gitattributes: { bg: '#EEF4EC', primary: '#3A6830' },
 
   // Config & Infrastructure - Package manifests (use purple tones)
-  // Note: package.json, composer.json, Gemfile are matched by full filename, not extension
-  // These are handled as special cases
+  // Note: files like package.json and Gemfile are handled by their extension ('json')
+  // or default colors if they have no extension.
 
   // Communication & Notebooks
   eml: { bg: '#E8EEF8', primary: '#3050A0' },
