@@ -131,7 +131,7 @@ export const ChatComposer: FC<ChatComposerProps> = ({
   return (
     <div
       className={cn(
-        'border-GRAY_400 focus-within:border-GRAY_300 relative w-full rounded-xl border transition-all',
+        'border-GRAY_400 focus-within:border-GRAY_300 shadow-chatbot-shadow relative w-full rounded-xl border transition-all',
         shouldShowRecorder && 'border-gray-400',
         containerClassName,
         className,

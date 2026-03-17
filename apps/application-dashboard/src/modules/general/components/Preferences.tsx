@@ -12,7 +12,7 @@ const Preferences = () => {
   const { theme, setTheme } = useTheme();
   const [open, setOpen] = useState(false);
 
-  const currentLabel = THEME_OPTIONS.find((themeOption) => themeOption.value === theme)?.label ?? THEME_MODE.LIGHT;
+  const currentLabel = THEME_OPTIONS.find((themeOption) => themeOption.value === theme)?.label ?? THEME_MODE.SYSTEM;
 
   const themeDropdown = (
     <DropdownMenu open={open} onOpenChange={setOpen}>

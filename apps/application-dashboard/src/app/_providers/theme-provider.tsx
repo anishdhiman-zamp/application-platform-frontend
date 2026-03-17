@@ -40,12 +40,12 @@ function applyTheme(resolved: ResolvedTheme) {
 }
 
 function getMacsStoredTheme(): THEME_MODE {
-  if (typeof window === 'undefined') return THEME_MODE.LIGHT;
+  if (typeof window === 'undefined') return THEME_MODE.SYSTEM;
 
   return (
     (getCookie(THEME_COOKIE) as THEME_MODE) ||
     (localStorage.getItem(LOCAL_STORAGE_KEYS.THEME) as THEME_MODE) ||
-    THEME_MODE.LIGHT
+    THEME_MODE.SYSTEM
   );
 }
 
