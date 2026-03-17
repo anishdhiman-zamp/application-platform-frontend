@@ -2,6 +2,7 @@
 
 import { cn } from '@zamp-platform/ui/utils';
 import { formatChatTimestamp, formatChatTimestampTooltip, formatTimestampToUTC } from '@zamp-platform/utils';
+import { AnimatePresence, motion } from 'motion/react';
 import { FC, ReactNode, useMemo } from 'react';
 
 import { ButtonBlockType } from '../types/block.types';
@@ -78,26 +79,29 @@ export const Message: FC<MessageProps> = ({
         isLoading={isLoading}
       />
       {streamingEnabled && (
-        <div
-          className={cn(
-            'flex items-center',
-            isLastMessage ? 'visible' : 'invisible group-hover:visible',
-            shouldAlignRight && 'mt-0',
-          )}
-        >
-          {showCopy && <CopyMessageButton messageContent={message.message_content} />}
-          {showTimestamp && message.sender_type === SenderType.USER && (
-            <MessageTimestamp formattedTimestamp={formattedTimestamp} tooltipTimestamp={tooltipTimestamp} />
-          )}
-          {showFeedback && message.sender_type === SenderType.ASSISTANT && (
-            <ChatFeedback
-              messageId={messageId || message?.id}
-              conversationId={conversationId || message?.conversation_id}
-              disabled={feedbackDisabled || isLoading}
-              organizationId={organizationId}
-            />
-          )}
-        </div>
+        <motion.div
+            initial={isLastMessage ? { opacity: 0 } : false}
+            animate={{ opacity: 1 }}
+            transition={{ duration: 0.3, ease: 'easeOut' }}
+            className={cn(
+              'flex items-center',
+              isLastMessage ? 'visible' : 'invisible group-hover:visible',
+              shouldAlignRight && 'mt-0',
+            )}
+          >
+            {showCopy && <CopyMessageButton messageContent={message.message_content} />}
+            {showTimestamp && message.sender_type === SenderType.USER && (
+              <MessageTimestamp formattedTimestamp={formattedTimestamp} tooltipTimestamp={tooltipTimestamp} />
+            )}
+            {showFeedback && message.sender_type === SenderType.ASSISTANT && (
+              <ChatFeedback
+                messageId={messageId || message?.id}
+                conversationId={conversationId || message?.conversation_id}
+                disabled={feedbackDisabled || isLoading}
+                organizationId={organizationId}
+              />
+            )}
+          </motion.div>
       )}
     </div>
   );

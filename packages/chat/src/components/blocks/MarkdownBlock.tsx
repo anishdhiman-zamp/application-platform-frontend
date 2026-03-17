@@ -2,9 +2,10 @@
 
 import '../code-highlight.css';
 
-import { Book } from '@zamp-platform/ui';
+import { Book, CopyToClipboard } from '@zamp-platform/ui';
 import type { Element, RootContent } from 'hast';
 import { common, createLowlight } from 'lowlight';
+import { Copy } from 'lucide-react';
 import Link from 'next/link';
 import React, { Children, isValidElement, ReactNode } from 'react';
 import ReactMarkdown from 'react-markdown';
@@ -164,11 +165,18 @@ export const MarkdownBlock: React.FC<MarkdownBlockProps> = ({ payload }) => {
             return (
               <div className='mt-5 pb-2 first:mt-0'>
                 <div className='border-GRAY_300 overflow-hidden rounded-lg border'>
-                  {language && (
-                    <div className='border-GRAY_300 bg-BG_GRAY_2 text-GRAY_900 border-b px-4 py-1.5 font-mono text-[11px] font-medium tracking-normal'>
-                      {language}
-                    </div>
-                  )}
+                  <div className='border-GRAY_300 bg-BG_GRAY_2 flex items-center justify-between border-b px-4 py-1.5'>
+                    {language ? (
+                      <span className='text-GRAY_900 font-mono text-[11px] font-medium tracking-normal'>
+                        {language}
+                      </span>
+                    ) : (
+                      <span />
+                    )}
+                    <CopyToClipboard text={codeString} tooltipText='Copy code'>
+                      <Copy size={14} className='text-GRAY_700 hover:text-GRAY_1000 transition-colors' />
+                    </CopyToClipboard>
+                  </div>
                   <pre className='bg-GRAY_100 m-0 overflow-x-auto px-5 py-4'>
                     <code className='hljs text-GRAY_1000 font-mono text-[13px] leading-normal font-normal' {...props}>
                       {highlightCode(codeString, language)}

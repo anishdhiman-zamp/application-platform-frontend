@@ -66,7 +66,7 @@ exports[`Button Component - Critical Variant Tests renders all variants with def
 
 exports[`Button Component - Critical Variant Tests renders all variants with default size correctly 2`] = `
 <button
-  class="cursor-pointer inline-flex items-center justify-center whitespace-nowrap rounded-md text-sm font-medium ring-offset-background transition-colors focus-visible:outline-hidden focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 [&_svg]:pointer-events-none [&_svg]:shrink-0 bg-destructive text-GRAY_1000 hover:bg-destructive/90 h-10 py-3 px-4 f-14-500"
+  class="cursor-pointer inline-flex items-center justify-center whitespace-nowrap rounded-md text-sm font-medium ring-offset-background transition-colors focus-visible:outline-hidden focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 [&_svg]:pointer-events-none [&_svg]:shrink-0 bg-destructive text-BG_WHITE hover:bg-destructive/90 h-10 py-3 px-4 f-14-500"
 >
   destructive
 </button>
@@ -114,7 +114,7 @@ exports[`Button Component - Functional Tests matches snapshot for default button
 
 exports[`Button Component - Functional Tests matches snapshot for destructive variant 1`] = `
 <button
-  class="cursor-pointer inline-flex items-center justify-center whitespace-nowrap rounded-md text-sm font-medium ring-offset-background transition-colors focus-visible:outline-hidden focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 [&_svg]:pointer-events-none [&_svg]:shrink-0 bg-destructive text-GRAY_1000 hover:bg-destructive/90 h-10 py-3 px-4 f-14-500"
+  class="cursor-pointer inline-flex items-center justify-center whitespace-nowrap rounded-md text-sm font-medium ring-offset-background transition-colors focus-visible:outline-hidden focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 [&_svg]:pointer-events-none [&_svg]:shrink-0 bg-destructive text-BG_WHITE hover:bg-destructive/90 h-10 py-3 px-4 f-14-500"
 >
   Delete
 </button>
