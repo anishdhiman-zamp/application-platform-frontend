@@ -94,7 +94,12 @@ const RenameConversationDialog: FC<RenameConversationDialogProps> = ({
 
   return (
     <Dialog open={open} onOpenChange={isLoading ? undefined : onOpenChange}>
-      <DialogContent size='small' showCloseButton={!isLoading} className='w-[400px] outline-none'>
+      <DialogContent
+        size='small'
+        showCloseButton={!isLoading}
+        className='w-[400px] outline-none'
+        data-slot='rename-conversation-dialog'
+      >
         <DialogHeader>
           <DialogHeaderTitle>Rename conversation</DialogHeaderTitle>
         </DialogHeader>
