@@ -47,7 +47,12 @@ const DeleteConversationDialog: FC<DeleteConversationDialogProps> = ({
 
   return (
     <Dialog open={isOpen} onOpenChange={onOpenChange}>
-      <DialogContent size='small' showCloseButton className='w-[400px] outline-none'>
+      <DialogContent
+        size='small'
+        showCloseButton
+        className='w-[400px] outline-none'
+        data-slot='delete-conversation-dialog'
+      >
         <DialogHeader>
           <DialogHeaderTitle>Delete conversation</DialogHeaderTitle>
         </DialogHeader>

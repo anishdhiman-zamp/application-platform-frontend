@@ -1,6 +1,6 @@
 'use client';
 
-import { type FC, useCallback, useState } from 'react';
+import { type FC, useCallback, useEffect, useState } from 'react';
 import { Button, DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from '@zamp-platform/ui';
 import { cn } from '@zamp-platform/ui/utils';
 import { MoreVertical, Pencil, Trash2 } from 'lucide-react';
@@ -15,10 +15,8 @@ interface ConversationActionsProps {
   onDeleteSuccess?: () => void;
   onDeleteFailure?: () => void;
   triggerClassName?: string;
-  /** Additional props spread onto the trigger button */
   triggerProps?: React.ComponentPropsWithoutRef<typeof Button>;
-  /** Expose dropdown open state to parent */
-  onDropdownOpenChange?: (open: boolean) => void;
+  onOpenChange?: (open: boolean) => void;
   align?: 'start' | 'end';
 }
 
@@ -31,30 +29,27 @@ const ConversationActions: FC<ConversationActionsProps> = ({
   onDeleteFailure,
   triggerClassName,
   triggerProps,
-  onDropdownOpenChange,
+  onOpenChange,
   align = 'end',
 }) => {
   const [isDropdownOpen, setIsDropdownOpen] = useState(false);
   const [isRenameOpen, setIsRenameOpen] = useState(false);
   const [isDeleteOpen, setIsDeleteOpen] = useState(false);
 
-  const handleDropdownOpenChange = useCallback(
-    (open: boolean) => {
-      setIsDropdownOpen(open);
-      onDropdownOpenChange?.(open);
-    },
-    [onDropdownOpenChange],
-  );
+  const isAnyOpen = isDropdownOpen || isRenameOpen || isDeleteOpen;
+
+  useEffect(() => {
+    onOpenChange?.(isAnyOpen);
+  }, [isAnyOpen, onOpenChange]);
 
   const handleRenameClick = useCallback(() => {
     setIsDropdownOpen(false);
-    onDropdownOpenChange?.(false);
     setIsRenameOpen(true);
-  }, [onDropdownOpenChange]);
+  }, []);
 
   return (
     <>
-      <DropdownMenu open={isDropdownOpen} onOpenChange={handleDropdownOpenChange}>
+      <DropdownMenu open={isDropdownOpen} onOpenChange={setIsDropdownOpen}>
         <DropdownMenuTrigger asChild>
           <Button
             variant='ghost'

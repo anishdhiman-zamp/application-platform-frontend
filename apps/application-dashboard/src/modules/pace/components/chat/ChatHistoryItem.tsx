@@ -6,6 +6,13 @@ import { Loader, MessagesSquare } from 'lucide-react';
 import ConversationActions from '@/modules/pace/components/chat/ConversationActions';
 import type { FeedbackItemType } from '@/types/api/feedbacks.types';
 
+const INTERACTIVE_SELECTORS = [
+  '[data-slot="dropdown-trigger"]',
+  '[role="menu"]',
+  '[data-slot="rename-conversation-dialog"]',
+  '[data-slot="delete-conversation-dialog"]',
+];
+
 interface ChatHistoryItemProps {
   conversation: FeedbackItemType;
   onSelect: (id: string | null, title?: string) => void;
@@ -29,11 +36,18 @@ const ChatHistoryItem: FC<ChatHistoryItemProps> = ({
 
   const handleClick = useCallback(
     (e: React.MouseEvent) => {
-      if ((e.target as HTMLElement).closest('[data-slot="dropdown-trigger"]')) return;
-      if (isActionsOpen) return;
+      const target = e.target as HTMLElement;
+
+      if (INTERACTIVE_SELECTORS.some((selector) => target.closest(selector))) {
+        e.preventDefault();
+        e.stopPropagation();
+
+        return;
+      }
+
       onSelect(conversation?.id, conversation?.title);
     },
-    [conversation?.id, conversation?.title, onSelect, isActionsOpen],
+    [conversation?.id, conversation?.title, onSelect],
   );
 
   const handleDeleteSuccess = useCallback(() => {
@@ -75,7 +89,7 @@ const ChatHistoryItem: FC<ChatHistoryItemProps> = ({
           onRenameSuccess={handleRenameSuccess}
           onDeleteSuccess={handleDeleteSuccess}
           onDeleteFailure={handleDeleteFailure}
-          onDropdownOpenChange={setIsActionsOpen}
+          onOpenChange={setIsActionsOpen}
           triggerClassName={cn(
             'transition-opacity group-hover:opacity-100 hover:bg-transparent data-[state=open]:opacity-100',
             isActionsOpen ? 'opacity-100' : 'opacity-0',
