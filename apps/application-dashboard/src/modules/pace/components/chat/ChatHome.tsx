@@ -10,17 +10,16 @@ const ChatHome = () => {
   const user = useAppSelector((state) => state.user.user);
   const userName = user?.user_name ?? '';
   const [greeting, setGreeting] = useState<string>('');
-  const isReady = greeting && userName;
 
   useEffect(() => {
-    setGreeting(getGreeting());
-  }, []);
+    setGreeting(getGreeting(userName));
+  }, [userName]);
 
   return (
     <div className='flex flex-col items-center gap-y-2.5'>
       <NewPaceIcons width={40} height={40} className='text-GRAY_1000 dark:text-GRAY_950' />
-      <h1 className={cn('f-20-500 text-GRAY_1000', isReady ? 'animate-fade-in' : 'opacity-0')}>
-        {greeting || 'Hello'}, {userName || 'there'}
+      <h1 className={cn('f-20-500 text-GRAY_1000', greeting ? 'animate-fade-in' : 'opacity-0')}>
+        {greeting || 'Hello'}
       </h1>
     </div>
   );
