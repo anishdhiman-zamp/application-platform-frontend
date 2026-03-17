@@ -129,7 +129,7 @@ const handleAuthenticatedRoutes = async (request: NextRequest) => {
 
       // Validate prev route is compatible with the current org's product mode.
       // E.g. a MACS user shouldn't be sent to /processes from a previous classic session.
-      const isChatRoute = decodedPrevRoute.startsWith(ROUTES_PATH.CHAT);
+      const isChatRoute = decodedPrevRoute === ROUTES_PATH.CHAT || decodedPrevRoute.startsWith(ROUTES_PATH.CHAT + '/');
       const isLandingChat = landingRoute === ROUTES_PATH.CHAT;
       const isCompatible = isChatRoute === isLandingChat;
 
