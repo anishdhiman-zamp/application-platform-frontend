@@ -1,10 +1,10 @@
 'use client';
 
-import { type FC, useCallback, useState } from 'react';
+import { type FC, useCallback } from 'react';
 import { Button } from '@zamp-platform/ui';
 import { cn } from '@zamp-platform/ui/utils';
 import { Expand, Minus, Plus } from 'lucide-react';
-import RenameConversationPopover from '@/modules/pace/components/chat/RenameConversationPopover';
+import ConversationActions from '@/modules/pace/components/chat/ConversationActions';
 import { DEFAULT_CHAT_TITLE } from '@/modules/pace/pace.constants';
 
 interface ChatTopbarProps {
@@ -17,6 +17,7 @@ interface ChatTopbarProps {
   onClose?: () => void;
   onExpand?: () => void;
   onTitleChange?: (newTitle: string) => void;
+  onDeleteConversation?: () => void;
 }
 
 const ChatTopbar: FC<ChatTopbarProps> = ({
@@ -29,8 +30,8 @@ const ChatTopbar: FC<ChatTopbarProps> = ({
   onClose,
   onExpand,
   onTitleChange,
+  onDeleteConversation,
 }) => {
-  const [isRenameOpen, setIsRenameOpen] = useState(false);
   const displayTitle = title || DEFAULT_CHAT_TITLE;
   const canEdit = Boolean(conversationId && organizationId);
 
@@ -43,24 +44,20 @@ const ChatTopbar: FC<ChatTopbarProps> = ({
 
   return (
     <div className={cn('bg-BG_WHITE flex items-center justify-between gap-x-3 p-3', className)} style={style}>
-      <div className='relative flex h-7 min-w-0 flex-1 items-center'>
-        <RenameConversationPopover
-          open={isRenameOpen}
-          onOpenChange={setIsRenameOpen}
-          conversationId={conversationId ?? ''}
-          organizationId={organizationId ?? ''}
-          currentTitle={displayTitle}
-          onSuccess={handleRenameSuccess}
-        >
-          <span
-            className={cn('f-13-500 block max-w-full truncate first-letter:uppercase', canEdit && 'cursor-pointer')}
-            onClick={() => canEdit && setIsRenameOpen(true)}
-          >
-            {displayTitle}
-          </span>
-        </RenameConversationPopover>
+      <div className='flex h-7 min-w-0 flex-1 items-center'>
+        <span className='f-13-500 block max-w-full truncate first-letter:uppercase'>{displayTitle}</span>
       </div>
       <div className='flex items-center gap-1.5'>
+        {canEdit && (
+          <ConversationActions
+            conversationId={conversationId ?? ''}
+            organizationId={organizationId ?? ''}
+            conversationTitle={displayTitle}
+            onRenameSuccess={handleRenameSuccess}
+            onDeleteSuccess={onDeleteConversation}
+            triggerClassName='rounded p-2 text-gray-900 hover:text-gray-900'
+          />
+        )}
         {onStartNewChat && (
           <Button
             variant='ghost'

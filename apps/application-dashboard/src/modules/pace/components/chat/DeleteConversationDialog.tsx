@@ -1,6 +1,6 @@
 'use client';
 
-import type { FC } from 'react';
+import { type FC, useCallback } from 'react';
 import {
   Button,
   Dialog,
@@ -33,7 +33,7 @@ const DeleteConversationDialog: FC<DeleteConversationDialogProps> = ({
 }) => {
   const [deleteConversation] = useDeleteConversationMutation();
 
-  const handleDelete = () => {
+  const handleDelete = useCallback(() => {
     onOpenChange(false);
     onDeleteSuccess?.();
 
@@ -43,11 +43,11 @@ const DeleteConversationDialog: FC<DeleteConversationDialogProps> = ({
         onDeleteFailure?.();
         toast.error('Failed to delete conversation');
       });
-  };
+  }, [deleteConversation, conversationId, onOpenChange, onDeleteSuccess, onDeleteFailure]);
 
   return (
     <Dialog open={isOpen} onOpenChange={onOpenChange}>
-      <DialogContent size='small' showCloseButton className='w-[400px]'>
+      <DialogContent size='small' showCloseButton className='w-[400px] outline-none'>
         <DialogHeader>
           <DialogHeaderTitle>Delete conversation</DialogHeaderTitle>
         </DialogHeader>
