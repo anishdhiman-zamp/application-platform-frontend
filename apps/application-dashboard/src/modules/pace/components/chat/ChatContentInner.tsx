@@ -259,7 +259,7 @@ const ChatContentInner = ({
             llmModel={selectedModel}
             showModelSelector
             modelSelectorSlot={modelSelectorSlot}
-            className='[box-shadow:0_0_16px_0_rgba(0,0,0,0.06)]'
+            className='shadow-chatbot-shadow'
           />
         </div>
 

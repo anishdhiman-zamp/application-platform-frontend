@@ -4,7 +4,7 @@ import Image from 'next/image';
 // downtime banner
 const DashboardDowntime = () => {
   return (
-    <div className='fixed z-1000 flex h-screen w-screen items-center justify-center bg-white p-6'>
+    <div className='bg-BG_WHITE text-GRAY_1000 fixed z-1000 flex h-screen w-screen items-center justify-center p-6'>
       <Image
         width={115}
         height={28}
