@@ -3,6 +3,7 @@
 import { useCallback, useEffect, useRef, useState } from 'react';
 import { Progress } from '@zamp-platform/ui';
 import { OnboardingStatus } from 'modules/onboarding/onboarding.types';
+import { KEYBOARD_KEYS } from '@/constants/shortcuts';
 
 export const WELCOME_SEEN_KEY = 'zamp_welcome_seen';
 
@@ -166,7 +167,9 @@ export const WelcomeStep = ({ nextStatus, onComplete, userId }: Props) => {
     }
   }, [showSection, handleDone]);
 
-  advanceRef.current = advance;
+  useEffect(() => {
+    advanceRef.current = advance;
+  }, [advance]);
 
   const handleWheel = useCallback(
     (e: WheelEvent) => {
@@ -179,7 +182,7 @@ export const WelcomeStep = ({ nextStatus, onComplete, userId }: Props) => {
 
   const handleKeyDown = useCallback(
     (e: KeyboardEvent) => {
-      if (e.metaKey || e.ctrlKey || e.altKey || e.key === 'Escape') return;
+      if (e.metaKey || e.ctrlKey || e.altKey || e.key === KEYBOARD_KEYS.ESCAPE) return;
       e.preventDefault();
       advance();
     },
