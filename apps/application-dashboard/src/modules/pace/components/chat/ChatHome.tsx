@@ -1,18 +1,22 @@
 'use client';
 
-import { useEffect, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { cn } from '@zamp-platform/ui/utils';
 import NewPaceIcons from '@/assets/Icons/NewPaceIcons';
 import { useAppSelector } from '@/hooks/toolkit';
 import { getGreeting } from '@/modules/pace/pace.utils';
 
 const ChatHome = () => {
+  const greetingSet = useRef(false);
   const user = useAppSelector((state) => state.user.user);
   const userName = user?.user_name ?? '';
   const [greeting, setGreeting] = useState<string>('');
 
   useEffect(() => {
-    setGreeting(getGreeting(userName));
+    if (!greetingSet.current) {
+      greetingSet.current = true;
+      setGreeting(getGreeting(userName));
+    }
   }, [userName]);
 
   return (

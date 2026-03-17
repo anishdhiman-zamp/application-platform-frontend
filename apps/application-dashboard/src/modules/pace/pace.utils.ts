@@ -45,7 +45,7 @@ const NIGHT_GREETINGS: Greeting[] = [
  */
 export const getGreeting = (userName?: string): string => {
   const hour = new Date().getHours();
-  const randomIndex = Math.floor(Math.random() * 5);
+  const randomIndex = Math.floor(Math.random() * MORNING_GREETINGS.length);
 
   let greeting: Greeting;
 
