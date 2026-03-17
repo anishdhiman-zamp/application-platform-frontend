@@ -70,7 +70,6 @@ export interface UseChatInputReturn {
   value: string;
   setValue: Dispatch<SetStateAction<string>>;
   handleSubmit: () => void;
-  handleKeyDown: (e: React.KeyboardEvent<HTMLTextAreaElement>) => void;
   fileReferences: UploadedFile[];
   handleFileSelect: (files: FileList | null) => Promise<void>;
   removeFileReference: (fileId: string) => void;
@@ -97,11 +96,11 @@ export const createUserMessagePayload = (
     resource_type: resourceType,
     message_content: {
       text: inputValue,
-      text_type: 'plain_text',
+      text_type: 'markdown',
       elements: [
         {
           id: `m_txt_${Date.now()}`,
-          type: BLOCK_TYPE.PLAIN_TEXT,
+          type: BLOCK_TYPE.MARKDOWN,
           order: 0,
           payload: {
             text: inputValue,
@@ -142,11 +141,11 @@ export const createConversationPayload = (
     annotation_type: annotationType,
     message_content: {
       text: messageText,
-      text_type: 'plain_text',
+      text_type: 'markdown',
       elements: [
         {
           id: 'm_txt_001',
-          type: BLOCK_TYPE.PLAIN_TEXT,
+          type: BLOCK_TYPE.MARKDOWN,
           order: 0,
           payload: {
             text: messageText,
@@ -164,8 +163,6 @@ export const createConversationPayload = (
     ...(llmModel ? { llm_model: llmModel } : {}),
   };
 };
-
-const KEYBOARD_KEY_ENTER = 'Enter';
 
 /**
  * Hook to manage chat input state and behavior
@@ -398,13 +395,6 @@ export const useChatInput = ({
     }
   };
 
-  const handleKeyDown = (e: React.KeyboardEvent<HTMLTextAreaElement>) => {
-    if (e.key === KEYBOARD_KEY_ENTER && !e.shiftKey && !isSubmitDisabled) {
-      e.preventDefault();
-      handleSubmit();
-    }
-  };
-
   useEffect(() => {
     if (firstMessage && !conversationId) {
       init();
@@ -415,7 +405,6 @@ export const useChatInput = ({
     value,
     setValue,
     handleSubmit,
-    handleKeyDown,
     fileReferences,
     handleFileSelect,
     removeFileReference,

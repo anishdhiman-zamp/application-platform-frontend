@@ -317,7 +317,6 @@ const KnowledgeBaseChat: FC<KnowledgeBaseChatProps> = ({
               showTimestamp={streamingEnabled}
               showCopy={streamingEnabled}
               alignUserRight={streamingEnabled}
-              hideSenderName={streamingEnabled}
               className='flex-1'
               streamingEnabled={streamingEnabled}
             >
@@ -329,12 +328,7 @@ const KnowledgeBaseChat: FC<KnowledgeBaseChatProps> = ({
           )}
           {isSkeletonLoading && (
             <div className='animate-opacity flex h-full w-full justify-center pt-4'>
-              <ChatMessagesSkeleton
-                count={1}
-                className='px-4 py-0'
-                alignUserRight={streamingEnabled}
-                hideSenderName={streamingEnabled}
-              />
+              <ChatMessagesSkeleton count={1} className='px-4 py-0' alignUserRight={streamingEnabled} />
             </div>
           )}
 
@@ -368,7 +362,7 @@ const KnowledgeBaseChat: FC<KnowledgeBaseChatProps> = ({
                 onClick={handleScrollToBottomClick}
                 variant='ghost'
                 className={cn(
-                  'bg-gray-1000 hover:bg-gray-1000 absolute -top-10 left-1/2 z-20 h-6 w-6 -translate-x-1/2 !rounded-full p-3',
+                  'bg-gray-1000 hover:bg-gray-1000 absolute -top-10 left-1/2 z-20 h-6 w-6 -translate-x-1/2 rounded-full p-3',
                   'transition-all duration-200 ease-out',
                   showScrollButton ? 'translate-y-0 opacity-100' : 'pointer-events-none translate-y-2 opacity-0',
                 )}

@@ -18,6 +18,10 @@ interface UseChatScrollReturn {
   scrollContainerRef: React.RefObject<HTMLDivElement | null>;
   /** Whether to show the scroll-to-bottom button */
   showScrollButton: boolean;
+  /** Whether the container has scrollable content above the viewport */
+  canScrollTop: boolean;
+  /** Whether the container has scrollable content below the viewport */
+  canScrollBottom: boolean;
   /** Handler for scroll events - attach to onScroll */
   handleScroll: () => void;
   /** Click handler for the scroll-to-bottom button */
@@ -34,6 +38,8 @@ export const useChatScroll = ({
 }: UseChatScrollOptions): UseChatScrollReturn => {
   const scrollContainerRef = useRef<HTMLDivElement>(null);
   const [showScrollButton, setShowScrollButton] = useState(false);
+  const [canScrollTop, setCanScrollTop] = useState(false);
+  const [canScrollBottom, setCanScrollBottom] = useState(false);
   const isInitialScrollRef = useRef(true);
 
   const checkIfScrolledToBottom = useCallback(() => {
@@ -46,6 +52,16 @@ export const useChatScroll = ({
 
     return true;
   }, [bottomThreshold]);
+
+  const updateScrollFadeState = useCallback(() => {
+    const el = scrollContainerRef.current;
+
+    if (!el) return;
+    const { scrollTop, scrollHeight, clientHeight } = el;
+
+    setCanScrollTop(scrollTop > 0);
+    setCanScrollBottom(scrollHeight - scrollTop - clientHeight > 1);
+  }, []);
 
   const scrollToBottom = useCallback((behavior: ScrollBehavior = 'smooth') => {
     if (scrollContainerRef.current) {
@@ -66,12 +82,15 @@ export const useChatScroll = ({
           isInitialScrollRef.current = false;
         }
 
+        updateScrollFadeState();
+
         return;
       }
 
       setShowScrollButton(!isAtBottom);
+      updateScrollFadeState();
     }
-  }, [checkIfScrolledToBottom]);
+  }, [checkIfScrolledToBottom, updateScrollFadeState]);
 
   const handleScrollToBottomClick = useCallback(() => {
     scrollToBottom('smooth');
@@ -80,15 +99,14 @@ export const useChatScroll = ({
   // Scroll to bottom when messages change
   useEffect(() => {
     if (messagesLength > 0 && !isLoading) {
-      // Use instant scroll on first load, smooth scroll for subsequent updates
       const behavior = isInitialScrollRef.current ? 'instant' : 'smooth';
 
-      // Small delay to ensure DOM has updated
       requestAnimationFrame(() => {
         scrollToBottom(behavior);
+        updateScrollFadeState();
       });
     }
-  }, [messagesLength, isLoading, scrollToBottom]);
+  }, [messagesLength, isLoading, scrollToBottom, updateScrollFadeState]);
 
   // Check for scroll button visibility when streaming state changes
   useEffect(() => {
@@ -97,11 +115,14 @@ export const useChatScroll = ({
 
       setShowScrollButton(!isAtBottom);
     }
-  }, [streamingState, checkIfScrolledToBottom]);
+    updateScrollFadeState();
+  }, [streamingState, checkIfScrolledToBottom, updateScrollFadeState]);
 
   return {
     scrollContainerRef,
     showScrollButton,
+    canScrollTop,
+    canScrollBottom,
     handleScroll,
     handleScrollToBottomClick,
     scrollToBottom,

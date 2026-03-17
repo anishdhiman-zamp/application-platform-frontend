@@ -120,7 +120,6 @@ export const ConnectedChatInput: FC<ConnectedChatInputProps> = ({
     value,
     setValue,
     handleSubmit,
-    handleKeyDown,
     fileReferences,
     handleFileSelect,
     removeFileReference,
@@ -285,7 +284,6 @@ export const ConnectedChatInput: FC<ConnectedChatInputProps> = ({
         value={value}
         onChange={setValue}
         placeholder={placeholder}
-        onKeyDown={handleKeyDown}
         onPaste={disableAttachments ? undefined : handlePaste}
         autoFocus={autoFocus}
         fileReferences={fileReferences}

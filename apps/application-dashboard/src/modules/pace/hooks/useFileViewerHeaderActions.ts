@@ -1,10 +1,11 @@
 import { useCallback, useMemo, useState } from 'react';
 import { captureException } from '@sentry/browser';
 import { toast } from '@zamp-platform/ui';
-import { useFileTabs } from '@/modules/pace/components/dynamic-tabs/useFileTabs';
+import { useDynamicTabs } from '@/modules/pace/components/dynamic-tabs/useDynamicTabs';
 import { FILE_TOAST_MESSAGES, FILE_VIEWER_HEADER_ACTION_IDS } from '@/modules/pace/components/files/files.constants';
 import { useFileActions } from '@/modules/pace/hooks/useFileActions';
 import { useFileDownload } from '@/modules/pace/hooks/useFileDownload';
+import { TAB_TYPE } from '@/modules/pace/pace.types';
 
 interface UseFileViewerHeaderActionsProps {
   filePath: string;
@@ -27,7 +28,7 @@ export const useFileViewerHeaderActions = ({
 }: UseFileViewerHeaderActionsProps): UseFileViewerHeaderActionsReturn => {
   const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState(false);
   const { deleteItem, isDeleting } = useFileActions();
-  const { closeTabsForPath } = useFileTabs();
+  const { closeTabsForPath } = useDynamicTabs({ type: TAB_TYPE.FILE });
   const { downloadFile } = useFileDownload();
 
   const handleDownload = useCallback(async () => {

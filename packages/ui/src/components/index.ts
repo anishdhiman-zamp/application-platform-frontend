@@ -50,3 +50,5 @@ export * from './ui/activity';
 export * from './ui/shapes';
 export * from './ui/folder-open';
 export * from './ui/message-square';
+
+export * from './ui/lucide-icons';

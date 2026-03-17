@@ -28,8 +28,12 @@ const nextConfig = {
     return config;
   },
   experimental: {
-    // Cap static-generation workers to avoid OOM on CI (default = os.cpus() - 1).
-    cpus: Math.max(1, Math.min(4, (require('os').cpus()?.length || 2) - 1)),
+    // Cap static-generation workers to avoid OOM on CI.
+    // Each worker inherits NODE_OPTIONS (--max-old-space-size=6144), so
+    // main + N workers can consume up to (N+1)*6 GB.  Keep N=2 in CI
+    // (total ≈18 GB, fits in a 30 GB runner) and N≤4 locally.
+    cpus: process.env.CI === 'true' ? 2 : Math.max(1, Math.min(4, (require('os').cpus()?.length || 2) - 1)),
+    webpackMemoryOptimizations: true,
     optimizePackageImports: [
       'lucide-react',
       '@zamp-platform/ui',
@@ -50,8 +54,9 @@ const nextConfig = {
     NEXT_PUBLIC_IMAGEKIT_URL_ENDPOINT: process.env.NEXT_PUBLIC_IMAGEKIT_URL_ENDPOINT || '',
   },
   transpilePackages: ['@zamp-platform/ui', '@zamp-platform/form-builder', '@zamp-platform/chat'],
-  // Only enable source maps in production builds, not during development
-  productionBrowserSourceMaps: !isDev,
+  // Source maps consume significant memory during build. Disable in CI to
+  // prevent OOM; Sentry can upload them separately via its CLI/plugin.
+  productionBrowserSourceMaps: !isDev && process.env.CI !== 'true',
   images: {
     remotePatterns: [
       {

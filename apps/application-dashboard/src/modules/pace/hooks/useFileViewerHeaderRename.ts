@@ -2,7 +2,7 @@ import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { captureException } from '@sentry/browser';
 import { toast } from '@zamp-platform/ui';
 import { KEYBOARD_KEYS } from '@/constants/shortcuts';
-import { useFileTabs } from '@/modules/pace/components/dynamic-tabs/useFileTabs';
+import { useDynamicTabs } from '@/modules/pace/components/dynamic-tabs/useDynamicTabs';
 import {
   buildFullPath,
   checkDuplicateName,
@@ -13,6 +13,7 @@ import { FILE_TOAST_MESSAGES } from '@/modules/pace/components/files/files.const
 import { useFileViewerContext } from '@/modules/pace/context/FileViewerContext';
 import { useFileActions } from '@/modules/pace/hooks/useFileActions';
 import { useSiblingNames } from '@/modules/pace/hooks/useSiblingNames';
+import { TAB_TYPE } from '@/modules/pace/pace.types';
 import { defaultFnType } from '@/types/commonTypes';
 
 interface UseFileViewerHeaderRenameProps {
@@ -45,7 +46,7 @@ export const useFileViewerHeaderRename = ({
 
   const { renameItem, isRenaming: isRenameLoading } = useFileActions();
   const { updateFileStatePath } = useFileViewerContext();
-  const { updateTab } = useFileTabs();
+  const { updateTab } = useDynamicTabs({ type: TAB_TYPE.FILE });
   const { siblingNames } = useSiblingNames({ filePath });
 
   const fullNewName = useMemo(() => {

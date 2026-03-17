@@ -7,12 +7,12 @@ import { X } from 'lucide-react';
 import { TAB_CONTEXT_MENU_ACTION_IDS } from 'modules/pace/components/dynamic-tabs/dynamic-tabs.constants';
 import { getDefaultIcon } from 'modules/pace/components/dynamic-tabs/dynamic-tabs.utils';
 import DynamicTabContextMenu from 'modules/pace/components/dynamic-tabs/DynamicTabContextMenu';
-import { isOnSameBasePath, preserveSidebarParam } from 'modules/pace/components/dynamic-tabs/tab-registry';
+import { isSameBasePath, preserveSidebarParam } from 'modules/pace/components/dynamic-tabs/tab-registry';
 import { useIsCompact } from 'modules/pace/components/dynamic-tabs/useIsCompact';
 import { useRouter } from 'next/navigation';
 import TooltipV2 from '@/components/common/TooltipV2';
 import { usePaceContext } from '@/modules/pace/pace.context';
-import { DynamicTab, TAB_TYPE } from '@/modules/pace/pace.types';
+import { DynamicTab } from '@/modules/pace/pace.types';
 import { defaultFnType, SIDE_OPTIONS } from '@/types/commonTypes';
 
 export interface DynamicTabItemProps {
@@ -50,14 +50,12 @@ const DynamicTabItem = ({
   const handleClick = () => {
     if (isActive) return;
 
-    const tabType = tab.type ?? TAB_TYPE.FILE;
-    const canUseFastSwitch = isOnSameBasePath(tabType);
     const tabPath = preserveSidebarParam(tab.path);
 
     setActiveTabId(tab.id);
 
-    if (canUseFastSwitch) {
-      window.history.pushState({ tabId: tab.id, tabType }, '', tabPath);
+    if (isSameBasePath(tabPath)) {
+      window.history.pushState(null, '', tabPath);
     } else {
       router.push(tabPath);
     }

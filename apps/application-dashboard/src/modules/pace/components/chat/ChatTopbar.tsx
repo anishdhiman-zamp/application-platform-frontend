@@ -47,10 +47,7 @@ const ChatTopbar: FC<ChatTopbarProps> = ({
   });
 
   return (
-    <div
-      className={cn('border-border bg-BG_WHITE flex items-center justify-between gap-x-3 border-b p-3', className)}
-      style={style}
-    >
+    <div className={cn('bg-BG_WHITE flex items-center justify-between gap-x-3 p-3', className)} style={style}>
       <div className='relative flex h-7 min-w-0 flex-1 items-center'>
         {isEditing ? (
           <Input
@@ -84,7 +81,7 @@ const ChatTopbar: FC<ChatTopbarProps> = ({
           <Button
             variant='ghost'
             size='icon'
-            className='h-6 w-6 rounded p-2 text-gray-900 hover:text-gray-900 disabled:opacity-50'
+            className='h-6 w-6 rounded p-2 text-gray-900 hover:text-gray-900 disabled:cursor-not-allowed disabled:opacity-50'
             onClick={onStartNewChat}
             disabled={!conversationId}
             title='Start new chat'
@@ -96,7 +93,7 @@ const ChatTopbar: FC<ChatTopbarProps> = ({
           <Button
             variant='ghost'
             size='icon'
-            className='h-6 w-6 rounded p-2 text-gray-900 hover:text-gray-900 disabled:opacity-50'
+            className='h-6 w-6 rounded p-2 text-gray-900 hover:text-gray-900 disabled:cursor-not-allowed disabled:opacity-50'
             onClick={onExpand}
             title='Open in full page'
           >
@@ -107,7 +104,7 @@ const ChatTopbar: FC<ChatTopbarProps> = ({
           <Button
             variant='ghost'
             size='icon'
-            className='h-6 w-6 rounded p-2 text-gray-900 hover:text-gray-900'
+            className='h-6 w-6 rounded p-2 text-gray-900 hover:text-gray-900 disabled:cursor-not-allowed'
             onClick={onClose}
             title='Close chat'
           >

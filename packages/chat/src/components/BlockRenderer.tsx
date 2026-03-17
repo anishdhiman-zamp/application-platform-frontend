@@ -33,6 +33,7 @@ interface BlockRendererProps {
   message: BlockMessage;
   onAction?: (blockConfig: ButtonBlockType, payload: Record<string, string>) => void | Promise<void>;
   isLoading?: boolean;
+  isStreaming?: boolean;
   className?: string;
   containerClassName?: string;
   conversationId?: string;
@@ -185,8 +186,15 @@ export const BlockRenderer: React.FC<BlockRendererProps> = ({
       case BLOCK_TYPE.OUTPUT_FILES:
         return <OutputFilesBlock key={block?.id} payload={block?.payload} conversationId={conversationId} />;
 
-      case BLOCK_TYPE.TASK:
-        return <TaskBlock key={block?.id} payload={block?.payload} conversationId={conversationId} />;
+      case BLOCK_TYPE.TASK: {
+        return (
+          <TaskBlock
+            key={block?.payload?.task_id ?? block?.id}
+            payload={block?.payload}
+            conversationId={conversationId}
+          />
+        );
+      }
 
       default:
         return null;

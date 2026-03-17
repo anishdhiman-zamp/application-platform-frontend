@@ -1,5 +1,5 @@
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from '@zamp-platform/ui';
-import React, { FC } from 'react';
+import { FC } from 'react';
 
 import { formatThinkingDuration } from '../block.utils';
 import { StatusLabel } from './StatusLabel';

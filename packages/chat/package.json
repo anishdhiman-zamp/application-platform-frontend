@@ -6,12 +6,21 @@
   "types": "index.ts",
   "dependencies": {
     "@elevenlabs/react": "^0.11.0",
+    "@tiptap/core": "^3.20.1",
+    "@tiptap/extension-code-block-lowlight": "^3.20.1",
+    "@tiptap/extension-list": "^3.20.1",
+    "@tiptap/extensions": "^3.20.1",
+    "@tiptap/pm": "^3.20.1",
+    "@tiptap/react": "^3.20.1",
+    "@tiptap/starter-kit": "^3.20.1",
+    "@zamp-platform/ui": "*",
     "@zamp-platform/utils": "*",
+    "lowlight": "^3.2.0",
     "react": "^19.2.3",
     "react-markdown": "^10.1.0",
     "rehype-slug": "^6.0.0",
     "remark-gfm": "^4.0.1",
-    "@zamp-platform/ui": "*"
+    "@tiptap/markdown": "^3.20.1"
   },
   "peerDependencies": {
     "next": "^16.1.4"

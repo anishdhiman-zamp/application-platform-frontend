@@ -1,0 +1,145 @@
+.rich-text-editor-wrapper {
+  scrollbar-width: none;
+}
+
+.rich-text-editor-wrapper::-webkit-scrollbar {
+  display: none;
+}
+
+.rich-text-editor-wrapper .tiptap {
+  outline: none;
+  font-size: 14px;
+  font-weight: 420;
+  line-height: 18px;
+  caret-color: currentColor;
+}
+
+.rich-text-editor-wrapper > div {
+  min-height: 0 !important;
+  height: auto !important;
+}
+
+.rich-text-editor-wrapper .tiptap[contenteditable] {
+  min-height: 0;
+}
+
+.rich-text-editor-wrapper .tiptap p {
+  margin: 0;
+}
+
+/* Placeholder */
+.rich-text-editor-wrapper .tiptap p.is-editor-empty:first-child::before {
+  content: attr(data-placeholder);
+  color: var(--GRAY_700, #8f8f8f);
+  pointer-events: none;
+  float: left;
+  position: absolute;
+}
+
+/* Prevent blue selection flash on empty editor paragraphs */
+.rich-text-editor-wrapper .tiptap p.is-editor-empty::selection {
+  background: transparent;
+}
+
+.rich-text-editor-wrapper .tiptap p.is-editor-empty *::selection {
+  background: transparent;
+}
+
+/* Lists */
+.rich-text-editor-wrapper .tiptap ul {
+  list-style-type: disc;
+  padding-left: 1.25em;
+  margin: 2px 0;
+}
+
+.rich-text-editor-wrapper .tiptap ol {
+  list-style-type: decimal;
+  padding-left: 1.25em;
+  margin: 2px 0;
+}
+
+.rich-text-editor-wrapper .tiptap li {
+  margin: 1px 0;
+}
+
+.rich-text-editor-wrapper .tiptap li p {
+  margin: 0;
+}
+
+/* Headings */
+.rich-text-editor-wrapper .tiptap h1 {
+  font-size: 1.25em;
+  font-weight: 700;
+  margin: 4px 0 2px;
+}
+
+.rich-text-editor-wrapper .tiptap h2 {
+  font-size: 1.125em;
+  font-weight: 600;
+  margin: 4px 0 2px;
+}
+
+.rich-text-editor-wrapper .tiptap h3 {
+  font-size: 1em;
+  font-weight: 600;
+  margin: 4px 0 2px;
+}
+
+/* Code blocks */
+.rich-text-editor-wrapper .tiptap pre {
+  background-color: var(--GRAY_100);
+  border-radius: 6px;
+  padding: 8px 12px;
+  margin: 4px 0;
+  overflow-x: auto;
+  font-family: ui-monospace, SFMono-Regular, 'SF Mono', Menlo, Consolas, 'Liberation Mono', monospace;
+  font-size: 12px;
+  line-height: 1.5;
+}
+
+.rich-text-editor-wrapper .tiptap pre code {
+  background: none;
+  padding: 0;
+  border-radius: 0;
+  font-size: inherit;
+  color: inherit;
+}
+
+/* Inline code */
+.rich-text-editor-wrapper .tiptap code {
+  background-color: var(--GRAY_100);
+  border-radius: 3px;
+  padding: 1px 4px;
+  font-family: ui-monospace, SFMono-Regular, 'SF Mono', Menlo, Consolas, 'Liberation Mono', monospace;
+  font-size: 0.9em;
+}
+
+/* Blockquote */
+.rich-text-editor-wrapper .tiptap blockquote {
+  border-left: 3px solid var(--GRAY_400);
+  padding-left: 12px;
+  margin: 4px 0;
+  color: var(--GRAY_700);
+}
+
+/* Horizontal rule */
+.rich-text-editor-wrapper .tiptap hr {
+  border: none;
+  border-top: 1px solid var(--GRAY_400);
+  margin: 8px 0;
+}
+
+/* Bold, italic, strikethrough */
+.rich-text-editor-wrapper .tiptap strong {
+  font-weight: 600;
+}
+
+.rich-text-editor-wrapper .tiptap em {
+  font-style: italic;
+}
+
+.rich-text-editor-wrapper .tiptap s {
+  text-decoration: line-through;
+}
+
+/* Syntax highlighting colors are in code-highlight.css (shared with MarkdownBlock) */

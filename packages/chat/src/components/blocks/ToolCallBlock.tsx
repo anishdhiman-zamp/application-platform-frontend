@@ -9,7 +9,7 @@ import {
 } from '@zamp-platform/ui';
 import { safeJsonParse } from '@zamp-platform/utils';
 import { AlertCircle } from 'lucide-react';
-import React, { FC } from 'react';
+import { FC } from 'react';
 
 import IntegrationCardV2 from '@/modules/integrations/AllIntegrations/IntegrationCardV2';
 import type { IntegrationItem } from '@/types/api/integrations';

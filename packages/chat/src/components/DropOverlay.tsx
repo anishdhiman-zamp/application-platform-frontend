@@ -20,7 +20,7 @@ export const DropOverlay: FC<DropOverlayProps> = ({
   return (
     <div
       className={cn(
-        'bg-BG_WHITE/80 pointer-events-none fixed inset-0 z-50 flex h-screen w-screen items-center justify-center backdrop-blur-[4px]',
+        'bg-BG_WHITE/80 pointer-events-none fixed inset-0 z-100 flex h-screen w-screen items-center justify-center backdrop-blur-[4px]',
         className,
       )}
     >

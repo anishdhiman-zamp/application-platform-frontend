@@ -121,10 +121,16 @@ export const getChatFileRoute = (filePath: string) => {
   return `${ROUTES_PATH.CHAT_FILES}?f=${encodeURIComponent(filePath)}`;
 };
 
-export const getChatTaskRoute = (taskId: string, conversationId?: string) => {
+export const getChatTaskRoute = (taskId: string, conversationId?: string, taskTitle?: string) => {
   const basePath = ROUTES_PATH.CHAT_TASK.replace(':taskId', taskId);
+  const params = new URLSearchParams();
 
-  return conversationId ? `${basePath}?s=${conversationId}` : basePath;
+  if (conversationId) params.set('s', conversationId);
+  if (taskTitle) params.set('title', taskTitle);
+
+  const query = params.toString();
+
+  return query ? `${basePath}?${query}` : basePath;
 };
 
 export const LOGIN_URLS = [ROUTES_PATH.LOGIN];

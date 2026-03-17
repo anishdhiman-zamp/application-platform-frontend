@@ -265,13 +265,13 @@ const ChatFeedback: FC<ChatFeedbackProps> = ({
                 onClick={handleDislikeClick}
                 disabled={feedbackGiven || disabled}
                 className={cn(
-                  'hover:bg-GRAY_100 active:bg-GRAY_300 hover:text-GRAY_600 h-5 w-5 rounded-sm p-1',
+                  'hover:bg-GRAY_100 active:bg-GRAY_300 hover:text-GRAY_700 size-[26px] rounded-md p-[2px]',
                   feedbackGiven && 'bg-none',
                   className,
                 )}
                 aria-label='Bad response'
               >
-                <ThumbsDown size={12} className={cn('text-GRAY_500', feedbackGiven && 'text-black')} />
+                <ThumbsDown size={14} className={cn('text-GRAY_700', feedbackGiven && 'text-black')} />
               </Button>
             </span>
           </TooltipTrigger>
@@ -331,6 +331,7 @@ const ChatFeedback: FC<ChatFeedbackProps> = ({
                 onPaste={organizationId ? handlePaste : undefined}
                 attachments={attachments}
                 removeAttachment={removeFile}
+                autoFocus
                 isUploading={isUploading}
                 onAttachClick={handleAttachClick}
                 showAttachButton={!!organizationId}

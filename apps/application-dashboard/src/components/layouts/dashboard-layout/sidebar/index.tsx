@@ -1,6 +1,6 @@
 'use client';
 
-import { memo, Suspense } from 'react';
+import { memo } from 'react';
 import { CSS_VARS } from '@zamp-platform/ui';
 import { ZAMP_ICON } from 'constants/icons';
 import { ROUTES_PATH } from 'constants/routeConfig';
@@ -15,21 +15,9 @@ import { cn } from 'utils/common';
 import FlexAlignRight from '@/assets/Icons/FlexAlignRight';
 import { SETTINGS_ID } from '@/constants/sidebar.constants';
 import { useFilteredSidebarItems } from '@/hooks/useFilteredSidebarItems';
-import useGlobalShortcuts from '@/hooks/useGlobalShortcuts';
 import OrgSwitcher from 'components/layouts/dashboard-layout/components/OrgSwitcher';
 import SidebarTab from 'components/layouts/dashboard-layout/components/SidebarTab';
 import SidebarDynamicNavItems from 'components/layouts/dashboard-layout/sidebar/SidebarDynamicNavItems';
-
-/**
- * Component that initializes global keyboard shortcuts.
- * Wrapped in Suspense because useGlobalShortcuts depends on useLogout,
- * which uses useSearchParams() that requires a Suspense boundary.
- */
-const GlobalShortcuts = () => {
-  useGlobalShortcuts();
-
-  return null;
-};
 
 const Sidebar = () => {
   const { isSidebarOpen } = useAppSelector((state: RootState) => state.layoutConfig);
@@ -53,10 +41,6 @@ const Sidebar = () => {
 
   return (
     <>
-      {/* Global keyboard shortcuts - wrapped in Suspense for useSearchParams compatibility */}
-      <Suspense fallback={null}>
-        <GlobalShortcuts />
-      </Suspense>
       {/* Toggle button in top-left corner - only visible when sidebar is closed */}
       <AnimatePresence>
         {!isSidebarOpen && (

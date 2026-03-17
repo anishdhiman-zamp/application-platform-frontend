@@ -30,6 +30,7 @@ const config = {
           'Helvetica Neue',
           'sans-serif',
         ],
+        mono: ['JetBrains Mono', 'Fira Code', 'ui-monospace', 'SFMono-Regular', 'monospace'],
         'funnel-display': ['var(--font-funnel-display)', 'serif'],
       },
       colors: {
@@ -130,6 +131,8 @@ const config = {
         PURPLE_2: 'var(--PURPLE_2)',
         GREEN_1: 'var(--GREEN_1)',
         GREEN_2: 'var(--GREEN_2)',
+        PINK_100: 'var(--PINK_100)',
+        PINK_600: 'var(--PINK_600)',
         gray: {
           '20': 'var(--GRAY_20)',
           '50': 'var(--GRAY_50)',
@@ -367,12 +370,14 @@ const config = {
       fontWeight: {
         '300': '300',
         '400': '400',
+        '420': '420',
         '450': '450',
         '500': '500',
         '550': '550',
         '600': '600',
         '700': '700',
         '800': '800',
+        'chat-body': '420',
       },
       height: {
         '15': '60px',
@@ -439,6 +444,7 @@ const config = {
         '360': '1440px',
         formLayout: '438px',
         '95.5': '382px',
+        'chat-prose': '620px',
       },
       minWidth: {
         '4': '16px',
@@ -469,6 +475,9 @@ const config = {
       lineHeight: {
         '3.5': '14px',
         '4.5': '18px',
+        'chat-prose': '1.667',
+        'chat-heading': '1.4',
+        'chat-code': '1.5',
       },
       margin: {
         '19': '76px',
@@ -667,14 +676,12 @@ const config = {
             opacity: '0',
           },
         },
-        'pulse-scale': {
+        scale: {
           '0%, 100%': {
             transform: 'scale(1)',
-            opacity: '1',
           },
           '50%': {
             transform: 'scale(0.75)',
-            opacity: '0.75',
           },
         },
       },
@@ -683,7 +690,7 @@ const config = {
         'accordion-up': 'accordion-up 0.2s ease-out',
         'slide-in-from-center': 'slide-in-from-center 0.2s ease-out',
         'slide-out-to-center': 'slide-out-to-center 0.2s ease-out',
-        opacity: 'opacity 0.3s ease-in-out',
+        opacity: 'opacity 0.15s ease-in-out',
         'file-upload': 'file-upload 0.5s linear ',
         'reverse-spin': 'reverse-spin 1.5s linear infinite',
         'right-side-drawer-mount': 'rightSideDrawerTransition 0.4s normal forwards ease-out',
@@ -697,7 +704,7 @@ const config = {
         'slide-in': 'slideIn 0.5s ease-in-out',
         'fade-in': 'fade-in 0.5s ease-in-out',
         'fade-out': 'fade-out 0.5s ease-in-out 0.3s',
-        'pulse-scale': 'pulse-scale 1.5s ease-in-out infinite',
+        scale: 'scale 1.5s ease-in-out infinite',
       },
     },
   },

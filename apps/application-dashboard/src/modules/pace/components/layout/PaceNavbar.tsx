@@ -14,7 +14,7 @@ import {
 import { arrayMove, horizontalListSortingStrategy, SortableContext } from '@dnd-kit/sortable';
 import { Button, MessageSquareIcon } from '@zamp-platform/ui';
 import { cn } from '@zamp-platform/ui/utils';
-import { DynamicTab, PaceNavbarItemId, TAB_TYPE } from 'modules/pace/pace.types';
+import { DynamicTab, PaceNavbarItemId } from 'modules/pace/pace.types';
 import Link from 'next/link';
 import { usePathname, useRouter, useSearchParams } from 'next/navigation';
 import { ROUTES_PATH } from '@/constants/routeConfig';
@@ -26,8 +26,8 @@ import {
 import DynamicTabItem from '@/modules/pace/components/dynamic-tabs/DynamicTabItem';
 import OverflowTabsPopover from '@/modules/pace/components/dynamic-tabs/OverflowTabsPopover';
 import SortableDynamicTabItem from '@/modules/pace/components/dynamic-tabs/SortableDynamicTabItem';
-import { isOnSameBasePath, preserveSidebarParam } from '@/modules/pace/components/dynamic-tabs/tab-registry';
-import { useNavbarTabs } from '@/modules/pace/components/dynamic-tabs/useNavbarTabs';
+import { isSameBasePath, preserveSidebarParam } from '@/modules/pace/components/dynamic-tabs/tab-registry';
+import { useDynamicTabs } from '@/modules/pace/components/dynamic-tabs/useDynamicTabs';
 import { useVisibleTabCount } from '@/modules/pace/components/dynamic-tabs/useVisibleTabCount';
 import { PACE_NAVBAR_ITEMS } from '@/modules/pace/pace.constants';
 import { usePaceContext } from '@/modules/pace/pace.context';
@@ -46,7 +46,7 @@ const PaceNavbar = () => {
     closeTabsToRight,
     closeAllTabs,
     reorderTabs,
-  } = useNavbarTabs();
+  } = useDynamicTabs();
   const tabsContainerRef = useRef<HTMLDivElement>(null);
 
   const { isMacsFileSystemEnabled } = useIsMacsFileSystemEnabled();
@@ -114,14 +114,12 @@ const PaceNavbar = () => {
         reorderTabs(newOrder);
       }
 
-      setActiveTabId(selectedTab.id);
-
-      const tabType = selectedTab.type ?? TAB_TYPE.FILE;
-      const canUseFastSwitch = isOnSameBasePath(tabType);
       const tabPath = preserveSidebarParam(selectedTab.path);
 
-      if (canUseFastSwitch) {
-        window.history.pushState({ tabId: selectedTab.id, tabType }, '', tabPath);
+      setActiveTabId(selectedTab.id);
+
+      if (isSameBasePath(tabPath)) {
+        window.history.pushState(null, '', tabPath);
       } else {
         router.push(tabPath);
       }

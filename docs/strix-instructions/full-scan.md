@@ -36,6 +36,7 @@ Perform a comprehensive security assessment of the entire repository.
 ### 1. Cross-Site Scripting (XSS) (Critical)
 
 **Dangerous HTML Rendering:**
+
 - Search for: `dangerouslySetInnerHTML`, `innerHTML`, `v-html`
 - Check if user input flows into these
 - Look for unsanitized HTML rendering
@@ -51,6 +52,7 @@ import DOMPurify from 'dompurify';
 ```
 
 **URL Handling:**
+
 - Check `href` attributes with user input
 - Look for `javascript:` URL injection
 - Verify URL validation
@@ -68,20 +70,22 @@ const safeUrl = userUrl.startsWith('https://') ? userUrl : '#';
 ### 2. Sensitive Data in Frontend (Critical)
 
 **Hardcoded Secrets:**
+
 - Search for: `api_key`, `secret`, `password`, `token`, `private_key`
 - Check for secrets in source code (not just env vars)
 - Look for API keys in client-side code
 
 ```typescript
 // BAD: Exposed API key
-const API_KEY = "sk-1234567890abcdef";
-const stripe = Stripe("pk_live_xxx");  // Live key in source!
+const API_KEY = 'sk-1234567890abcdef';
+const stripe = Stripe('pk_live_xxx'); // Live key in source!
 
 // GOOD: Use environment variables, never commit secrets
 const API_KEY = process.env.NEXT_PUBLIC_API_KEY;
 ```
 
 **Sensitive Data in localStorage/sessionStorage:**
+
 - Search for: `localStorage.setItem`, `sessionStorage.setItem`
 - Check what data is being stored
 - Look for tokens, passwords, PII in storage
@@ -99,6 +103,7 @@ localStorage.setItem('user_password', password);
 ### 3. Authentication & Authorization (High)
 
 **Client-Side Auth Bypass:**
+
 - Check if authorization is enforced only on frontend
 - Look for routes protected only by client-side checks
 - Verify API calls include proper auth headers
@@ -115,6 +120,7 @@ await fetch('/api/admin/delete-user', { method: 'POST' });
 ```
 
 **Token Handling:**
+
 - Check how auth tokens are stored and transmitted
 - Look for tokens in URL parameters (visible in logs)
 - Verify token refresh logic
@@ -124,10 +130,12 @@ await fetch('/api/admin/delete-user', { method: 'POST' });
 ### 4. Insecure API Calls (High)
 
 **Missing CSRF Protection:**
+
 - Check if state-changing requests include CSRF tokens
 - Look for credentials: 'include' without CSRF
 
 **Sensitive Data in URLs:**
+
 - Search for query parameters with sensitive data
 - Check if tokens/passwords appear in URLs
 
@@ -137,7 +145,7 @@ fetch(`/api/data?token=${authToken}`);
 
 // GOOD: Token in header
 fetch('/api/data', {
-  headers: { 'Authorization': `Bearer ${authToken}` }
+  headers: { Authorization: `Bearer ${authToken}` },
 });
 ```
 
@@ -146,11 +154,13 @@ fetch('/api/data', {
 ### 5. Dependency Vulnerabilities (High)
 
 **Package Security:**
+
 - Check `package.json` for known vulnerable packages
 - Look for outdated dependencies
 - Note any packages with security advisories
 
 **Third-Party Scripts:**
+
 - Check for external scripts loaded from CDNs
 - Look for script integrity attributes (SRI)
 - Verify trusted sources
@@ -160,6 +170,7 @@ fetch('/api/data', {
 ### 6. Content Security Policy (Medium)
 
 **CSP Headers:**
+
 - Check if CSP is configured
 - Look for overly permissive policies: `unsafe-inline`, `unsafe-eval`
 - Verify script-src restrictions
@@ -169,6 +180,7 @@ fetch('/api/data', {
 ### 7. Insecure Direct Object References (Medium)
 
 **Client-Side ID Usage:**
+
 - Check if object IDs from client are trusted
 - Look for enumerable IDs in URLs
 - Verify backend validates access to referenced objects
@@ -186,15 +198,18 @@ const data = await fetch(`/api/users/${userId}/private-data`);
 ### 8. Information Disclosure (Medium)
 
 **Error Messages:**
+
 - Check if detailed errors are shown to users
 - Look for stack traces in production
 - Verify error boundaries don't leak info
 
 **Source Maps:**
+
 - Check if source maps are deployed to production
 - Look for `.map` files in build output
 
 **Console Logging:**
+
 - Search for `console.log` with sensitive data
 - Check for debugging code left in production
 
@@ -214,6 +229,7 @@ if (process.env.NODE_ENV === 'development') {
 ### 9. Prototype Pollution (Medium)
 
 **Object Manipulation:**
+
 - Search for: `Object.assign`, spread operators with user input
 - Check for `__proto__` or `constructor` in user data
 - Look for deep merge functions
@@ -231,6 +247,7 @@ const config = { ...defaultConfig, ...userInput };
 ### 10. Open Redirects (Low-Medium)
 
 **Redirect Handling:**
+
 - Search for: `window.location`, `router.push`, `navigate`
 - Check if redirect URLs come from user input
 - Look for returnUrl, redirect, next parameters
@@ -238,7 +255,7 @@ const config = { ...defaultConfig, ...userInput };
 ```typescript
 // BAD: Open redirect
 const returnUrl = searchParams.get('returnUrl');
-router.push(returnUrl);  // Could redirect to malicious site
+router.push(returnUrl); // Could redirect to malicious site
 
 // GOOD: Validate redirect is internal
 const returnUrl = searchParams.get('returnUrl');

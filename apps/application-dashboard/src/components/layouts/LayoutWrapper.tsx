@@ -1,5 +1,6 @@
 'use client';
 
+import { Suspense } from 'react';
 import { motion } from 'framer-motion';
 import { useAppSelector } from 'hooks/toolkit';
 import { usePathname } from 'next/navigation';
@@ -7,12 +8,24 @@ import { RootState } from 'store';
 import { getLayoutConfig } from 'utils/layout.config';
 import { PendingDatasetProvider } from '@/context/pendingDataset.context';
 import { ProcessesProvider } from '@/contexts/ProcessesContext';
+import useGlobalShortcuts from '@/hooks/useGlobalShortcuts';
 // eslint-disable-next-line import/no-named-as-default
 import usePostHogHeartbeat from '@/hooks/usePostHogHeartbeat';
 import Sidebar from 'components/layouts/dashboard-layout/sidebar';
 import Topbar from 'components/layouts/dashboard-layout/topbar/TopBar';
 import LayoutChildren from 'components/layouts/LayoutChildren';
 import '@/app/(authenticated)/resources';
+
+/**
+ * Initializes global keyboard shortcuts on all authenticated pages.
+ * Wrapped in Suspense because useGlobalShortcuts depends on useLogout,
+ * which uses useSearchParams() that requires a Suspense boundary.
+ */
+const GlobalShortcuts = () => {
+  useGlobalShortcuts();
+
+  return null;
+};
 
 interface LayoutWrapperProps {
   children: React.ReactNode;
@@ -27,6 +40,9 @@ export default function LayoutWrapper({ children }: LayoutWrapperProps) {
   return (
     <ProcessesProvider>
       <PendingDatasetProvider>
+        <Suspense fallback={null}>
+          <GlobalShortcuts />
+        </Suspense>
         <div className='relative'>
           <div className='relative flex h-full w-full min-w-[768px]'>
             {showSidebar && <Sidebar />}

@@ -20,8 +20,8 @@ const HtmlPreviewViewer = memo(({ content }: HtmlPreviewViewerProps) => {
     <iframe
       srcDoc={srcDoc}
       title='HTML Preview'
-      className='h-full w-full border-0 bg-white'
-      sandbox='allow-scripts allow-same-origin'
+      className='bg-BG_WHITE h-full w-full border-0'
+      sandbox='allow-scripts'
     />
   );
 });

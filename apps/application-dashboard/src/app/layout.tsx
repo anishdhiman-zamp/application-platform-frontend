@@ -23,6 +23,7 @@ import 'styles/tanstack-styles.css';
 
 const inter = Inter({
   subsets: ['latin'],
+  axes: ['opsz'],
   variable: '--font-inter',
   display: 'swap',
 });
