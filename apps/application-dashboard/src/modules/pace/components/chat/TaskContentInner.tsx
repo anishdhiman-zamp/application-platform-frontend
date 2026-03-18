@@ -102,7 +102,7 @@ const TaskContentInner = ({ taskId }: TaskContentInnerProps) => {
             />
             <div className='bg-BG_WHITE h-12 w-full' />
           </CommonWrapper>
-          <div className='bg-BG_WHITE sticky bottom-0 z-10 mx-auto w-full max-w-[700px] pb-3'>
+          <div className='bg-BG_WHITE sticky bottom-0 z-10 mx-auto w-full max-w-[700px]'>
             <Button
               onClick={handleScrollToBottomClick}
               variant='ghost'

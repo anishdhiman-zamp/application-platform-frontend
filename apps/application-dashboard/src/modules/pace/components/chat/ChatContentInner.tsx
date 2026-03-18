@@ -157,7 +157,7 @@ const ChatContentInner = ({
               onScroll={handleScroll}
               className={cn(
                 'bg-BG_WHITE flex min-h-0 w-full flex-1 flex-col overflow-x-hidden [scrollbar-width:thin]',
-                isTaskPopoverOpen ? 'overflow-y-hidden' : 'overflow-y-auto',
+                isTaskPopoverOpen ? 'overflow-y-hidden' : 'overflow-y-scroll',
               )}
             >
               <CommonWrapper
