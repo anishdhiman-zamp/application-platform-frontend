@@ -60,6 +60,8 @@ export const MessageContainer: FC<MessageContainerProps> = ({
   const isInitialScrollRef = useRef(true);
   const scrollContainerRef = useRef<HTMLDivElement>(null);
   const [animatedLength, setAnimatedLength] = useState(messages?.length ?? 0);
+  const lastMessage = messages?.[messages.length - 1];
+  const isNewUserMessage = lastMessage?.sender_type === 'USER' && messages.length > animatedLength;
 
   const scrollToBottom = useCallback((behavior: ScrollBehavior = 'smooth') => {
     if (scrollContainerRef.current) {
@@ -77,9 +79,6 @@ export const MessageContainer: FC<MessageContainerProps> = ({
       scrollToBottom(behavior);
     }
   }, [messages?.length, scrollToBottom, children]);
-
-  const lastMessage = messages?.[messages.length - 1];
-  const isNewUserMessage = lastMessage?.sender_type === 'USER' && messages.length > animatedLength;
 
   useEffect(() => {
     if (isNewUserMessage) {
