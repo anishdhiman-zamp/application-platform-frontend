@@ -1,7 +1,7 @@
 'use client';
 
 import { cn } from '@zamp-platform/ui/utils';
-import { FC, ReactNode } from 'react';
+import React, { FC, ReactNode } from 'react';
 
 import { StreamingState } from '../types/chat.types';
 import { BlockRenderer } from './BlockRenderer';

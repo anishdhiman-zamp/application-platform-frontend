@@ -36,7 +36,7 @@ export const AnimatedDot: FC<AnimatedDotProps> = ({
   size = 8,
   className,
   activeColor = CSS_VARS.BLUE_700,
-  completeColor = CSS_VARS.GRAY_700,
+  completeColor = CSS_VARS.GRAY_1000,
 }) => {
   return (
     <motion.div
