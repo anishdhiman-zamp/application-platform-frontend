@@ -39,6 +39,9 @@ interface UseChatScrollReturn {
 /** Visual padding (px) above the user message when scrolled to top */
 const USER_MESSAGE_TOP_PADDING = 40;
 
+/** Extra offset (px) on initial load so previous messages are partially visible above the last user message */
+const INITIAL_SCROLL_EXTRA_OFFSET = 60;
+
 export const useChatScroll = ({
   messagesLength,
   isLoading,
@@ -159,8 +162,10 @@ export const useChatScroll = ({
         const anchorTop = msgRect.top - containerRect.top + container.scrollTop;
 
         anchorTopRef.current = anchorTop;
+        const topPadding = USER_MESSAGE_TOP_PADDING + (isInitial ? INITIAL_SCROLL_EXTRA_OFFSET : 0);
+
         container.scrollTo({
-          top: anchorTop - USER_MESSAGE_TOP_PADDING,
+          top: anchorTop - topPadding,
           behavior: isInitial ? 'instant' : 'smooth',
         });
       }
