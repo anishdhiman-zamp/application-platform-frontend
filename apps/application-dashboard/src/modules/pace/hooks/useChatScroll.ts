@@ -50,13 +50,13 @@ export const useChatScroll = ({
   lastMessageSenderType,
   emptyDivRef,
 }: UseChatScrollOptions): UseChatScrollReturn => {
-  const wasLoadingRef = useRef(false);
-  const isInitialScrollRef = useRef(true);
-  const lastUserScrollLengthRef = useRef(0);
-  /** Persists the ResizeObserver so we can disconnect it when the content node unmounts */
-  const contentObserverRef = useRef<ResizeObserver | null>(null);
+  const previousIsLoadingRef = useRef<boolean>(false);
+  const isInitialScrollRef = useRef<boolean>(true);
+  const lastUserScrollLengthRef = useRef<number | null>(null);
+  /*  Holds the ResizeObserver instance that watches the MessageContainer wrapper div for height changes */
+  const responseDivRef = useRef<ResizeObserver | null>(null);
   /** Content-absolute top position of the last user message — captured once in scrollToLastUserMessage */
-  const anchorTopRef = useRef<number | null>(null);
+  const userMsgAnchorRef = useRef<number | null>(null);
   const scrollContainerRef = useRef<HTMLDivElement>(null);
   const [showScrollButton, setShowScrollButton] = useState(false);
   const [canScrollTop, setCanScrollTop] = useState(false);
@@ -83,7 +83,7 @@ export const useChatScroll = ({
   }, []);
 
   /**
-   * Computes and sets the spacer height using the anchor position stored in anchorTopRef.
+   * Computes and sets the spacer height using the anchor position stored in userMsgAnchorRef.
    *
    * The anchor is set once in scrollToLastUserMessage (the content-absolute top of the
    * last user message). Using a stored value avoids a DOM query on every streaming tick
@@ -99,7 +99,7 @@ export const useChatScroll = ({
   const updateSpacerHeight = useCallback(() => {
     const container = scrollContainerRef.current;
     const spacer = emptyDivRef?.current;
-    const anchorTop = anchorTopRef.current;
+    const anchorTop = userMsgAnchorRef.current;
 
     if (!container || !spacer || anchorTop === null) return;
 
@@ -154,14 +154,14 @@ export const useChatScroll = ({
       const lastUserMessage = userMessages[userMessages.length - 1];
 
       if (!lastUserMessage) {
-        anchorTopRef.current = null;
+        userMsgAnchorRef.current = null;
         container.scrollTo({ top: container.scrollHeight, behavior: isInitial ? 'instant' : 'smooth' });
       } else {
         const containerRect = container.getBoundingClientRect();
         const msgRect = lastUserMessage.getBoundingClientRect();
         const anchorTop = msgRect.top - containerRect.top + container.scrollTop;
 
-        anchorTopRef.current = anchorTop;
+        userMsgAnchorRef.current = anchorTop;
         const topPadding = USER_MESSAGE_TOP_PADDING + (isInitial ? INITIAL_SCROLL_EXTRA_OFFSET : 0);
 
         container.scrollTo({
@@ -196,20 +196,20 @@ export const useChatScroll = ({
   }, [checkIfScrolledToBottom, updateScrollFadeState]);
 
   const handleScrollToBottomClick = useCallback(() => {
-    anchorTopRef.current = null;
+    userMsgAnchorRef.current = null;
     resetSpacer();
     scrollToBottom('smooth');
   }, [scrollToBottom, resetSpacer]);
 
   // Reset state when a new conversation starts loading
   useEffect(() => {
-    if (isLoading && !wasLoadingRef.current) {
+    if (isLoading && !previousIsLoadingRef.current) {
       isInitialScrollRef.current = true;
       lastUserScrollLengthRef.current = 0;
-      anchorTopRef.current = null;
+      userMsgAnchorRef.current = null;
       resetSpacer();
     }
-    wasLoadingRef.current = isLoading;
+    previousIsLoadingRef.current = isLoading;
   }, [isLoading, resetSpacer]);
 
   useEffect(() => {
@@ -269,8 +269,8 @@ export const useChatScroll = ({
   // finished loading and the element was still null.
   const contentRef = useCallback<React.RefCallback<HTMLDivElement>>(
     (node) => {
-      contentObserverRef.current?.disconnect();
-      contentObserverRef.current = null;
+      responseDivRef.current?.disconnect();
+      responseDivRef.current = null;
 
       if (!node) return;
 
@@ -281,7 +281,7 @@ export const useChatScroll = ({
       });
 
       observer.observe(node);
-      contentObserverRef.current = observer;
+      responseDivRef.current = observer;
     },
     [updateSpacerHeight],
   );

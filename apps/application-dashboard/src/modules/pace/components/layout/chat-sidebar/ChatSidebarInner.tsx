@@ -60,6 +60,7 @@ const ChatSidebarInner: FC<ChatSidebarInnerProps> = ({
   const currentUserName = useAppSelector((state: RootState) => state.user.user?.user_name) ?? '';
   const username = useAppSelector((state: RootState) => state.user.user?.username) ?? '';
 
+  const emptyDivRef = useRef<HTMLDivElement>(null);
   const fileDropHandlerRef = useRef<((files: FileList) => void) | null>(null);
   const addFileReferenceRef = useRef<((ref: { path: string; name: string }) => void) | null>(null);
   const inputContainerRef = useRef<HTMLDivElement>(null);
@@ -97,8 +98,6 @@ const ChatSidebarInner: FC<ChatSidebarInnerProps> = ({
   });
 
   const hasMessages = useMemo(() => chat.messages.length > 0, [chat.messages]);
-
-  const emptyDivRef = useRef<HTMLDivElement>(null);
 
   const isAnalysing = useMemo(() => {
     return chat.messages.length > 0 && chat.messages[chat.messages.length - 1]?.sender_type === SenderType.USER;
