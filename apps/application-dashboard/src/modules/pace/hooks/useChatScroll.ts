@@ -43,7 +43,7 @@ export const useChatScroll = ({
   messagesLength,
   isLoading,
   streamingState,
-  bottomThreshold = 100,
+  bottomThreshold = 600,
   lastMessageSenderType,
   emptyDivRef,
 }: UseChatScrollOptions): UseChatScrollReturn => {

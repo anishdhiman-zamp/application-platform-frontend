@@ -11,7 +11,8 @@ import { Markdown } from '@tiptap/markdown';
 import { EditorContent, useEditor } from '@tiptap/react';
 import { StarterKit } from '@tiptap/starter-kit';
 import { common, createLowlight } from 'lowlight';
-import React, { forwardRef, useEffect, useImperativeHandle, useRef } from 'react';
+import { motion } from 'motion/react';
+import React, { forwardRef, useEffect, useImperativeHandle, useRef, useState } from 'react';
 
 const lowlight = createLowlight(common);
 
@@ -57,14 +58,39 @@ export const RichTextEditor = forwardRef<RichTextEditorHandle, RichTextEditorPro
     },
     ref,
   ) => {
-    const lastEditorMarkdown = useRef(value || '');
-    const onSubmitRef = useRef(onSubmit);
-    const isSubmitDisabledRef = useRef(isSubmitDisabled);
     const onPasteRef = useRef(onPaste);
+    const onSubmitRef = useRef(onSubmit);
+    const lastEditorMarkdown = useRef(value || '');
+    const wrapperRef = useRef<HTMLDivElement>(null);
+    const isSubmitDisabledRef = useRef(isSubmitDisabled);
+    const clearTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 
     onSubmitRef.current = onSubmit;
     isSubmitDisabledRef.current = isSubmitDisabled;
     onPasteRef.current = onPaste;
+
+    const [isClearing, setIsClearing] = useState(false);
+    const isClearingRef = useRef(false);
+
+    const handleAnimatedSubmitRef = useRef(() => {});
+    handleAnimatedSubmitRef.current = () => {
+      if (isSubmitDisabledRef.current || !onSubmitRef.current || isClearingRef.current) return;
+      isClearingRef.current = true;
+      setIsClearing(true);
+      clearTimerRef.current = setTimeout(() => {
+        onSubmitRef.current?.();
+        requestAnimationFrame(() => {
+          isClearingRef.current = false;
+          setIsClearing(false);
+        });
+      }, 100);
+    };
+
+    useEffect(() => {
+      return () => {
+        if (clearTimerRef.current) clearTimeout(clearTimerRef.current);
+      };
+    }, []);
 
     const editorRef = useRef<ReturnType<typeof useEditor>>(null);
 
@@ -133,7 +159,7 @@ export const RichTextEditor = forwardRef<RichTextEditorHandle, RichTextEditorPro
 
             if (!isSubmitDisabledRef.current && onSubmitRef.current) {
               event.preventDefault();
-              onSubmitRef.current();
+              handleAnimatedSubmitRef.current();
               return true;
             }
           }
@@ -171,8 +197,24 @@ export const RichTextEditor = forwardRef<RichTextEditorHandle, RichTextEditorPro
       if (value === lastEditorMarkdown.current) return;
 
       if (!value) {
+        const wrapper = wrapperRef.current;
+        const oldHeight = wrapper?.offsetHeight ?? 0;
+
         lastEditorMarkdown.current = '';
         editor.commands.clearContent(false);
+
+        const newHeight = wrapper?.offsetHeight ?? 0;
+
+        if (wrapper && oldHeight !== newHeight) {
+          wrapper.style.height = `${newHeight}px`;
+          const anim = wrapper.animate([{ height: `${oldHeight}px` }, { height: `${newHeight}px` }], {
+            duration: 200,
+            easing: 'ease-in-out',
+          });
+          anim.onfinish = () => {
+            wrapper.style.height = '';
+          };
+        }
       } else {
         lastEditorMarkdown.current = value;
         editor.commands.setContent(value, { contentType: 'markdown' });
@@ -183,14 +225,34 @@ export const RichTextEditor = forwardRef<RichTextEditorHandle, RichTextEditorPro
 
     return (
       <div
+        ref={wrapperRef}
         className='rich-text-editor-wrapper'
         style={{
           ...(minHeight != null && { minHeight: `${minHeight}px` }),
           maxHeight: `${maxHeight}px`,
-          overflowY: 'auto',
         }}
       >
-        <EditorContent editor={editor} />
+        <motion.div
+          initial={false}
+          variants={{
+            visible: {
+              opacity: 1,
+              y: 0,
+              transition: {
+                opacity: { duration: 0.25, ease: 'easeInOut', delay: 0.2 },
+                y: { duration: 0 },
+              },
+            },
+            clearing: {
+              opacity: 0,
+              y: -30,
+              transition: { duration: 0.1, ease: [0.3, 0.0, 1.0, 1.0] },
+            },
+          }}
+          animate={isClearing ? 'clearing' : 'visible'}
+        >
+          <EditorContent editor={editor} />
+        </motion.div>
       </div>
     );
   },

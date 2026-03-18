@@ -1,5 +1,6 @@
 import { ShimmerText } from '@zamp-platform/ui';
 import { cn } from '@zamp-platform/ui/utils';
+import { motion } from 'motion/react';
 import Image from 'next/image';
 import { FC, ReactNode, useCallback, useEffect, useRef, useState } from 'react';
 
@@ -62,6 +63,9 @@ export const MessageContainer: FC<MessageContainerProps> = ({
   const [animatedLength, setAnimatedLength] = useState(messages?.length ?? 0);
   const lastMessage = messages?.[messages.length - 1];
   const isNewUserMessage = lastMessage?.sender_type === 'USER' && messages.length > animatedLength;
+  const [showAnalysing, setShowAnalysing] = useState(false);
+  const isNewUserMessageRef = useRef(isNewUserMessage);
+  isNewUserMessageRef.current = isNewUserMessage;
 
   const scrollToBottom = useCallback((behavior: ScrollBehavior = 'smooth') => {
     if (scrollContainerRef.current) {
@@ -87,6 +91,16 @@ export const MessageContainer: FC<MessageContainerProps> = ({
       return () => clearTimeout(timer);
     }
   }, [isNewUserMessage, messages.length]);
+
+  useEffect(() => {
+    if (!isAnalysing) {
+      setShowAnalysing(false);
+      return;
+    }
+    const delay = isNewUserMessageRef.current ? 600 : 0;
+    const timer = setTimeout(() => setShowAnalysing(true), delay);
+    return () => clearTimeout(timer);
+  }, [isAnalysing]);
 
   return (
     <div ref={scrollContainerRef} className={cn('flex w-full grow flex-col gap-6 p-4', className)}>
@@ -121,11 +135,17 @@ export const MessageContainer: FC<MessageContainerProps> = ({
         </div>
       )}
 
-      {(isAnalysing && !streamingState) || (streamingState && !streamingState.message_content?.elements?.length) ? (
-        <div className='flex w-full items-center gap-1.5 text-gray-700'>
+      {showAnalysing &&
+      ((isAnalysing && !streamingState) || (streamingState && !streamingState.message_content?.elements?.length)) ? (
+        <motion.div
+          initial={{ opacity: 0, clipPath: 'inset(0 100% 0 0)' }}
+          animate={{ opacity: 1, clipPath: 'inset(0 0% 0 0)' }}
+          transition={{ duration: 0.4, ease: [0.0, 0.0, 0.2, 1.0] }}
+          className='flex w-full items-center gap-1.5 text-gray-700'
+        >
           {defaultAssistantAvatar}
           <ShimmerText text='Analysing...' autoAnimate={true} />
-        </div>
+        </motion.div>
       ) : null}
       {children}
     </div>
