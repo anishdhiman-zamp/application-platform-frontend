@@ -37,7 +37,7 @@ interface UseChatScrollReturn {
 }
 
 /** Visual padding (px) above the user message when scrolled to top */
-const USER_MESSAGE_TOP_PADDING = 20;
+const USER_MESSAGE_TOP_PADDING = 40;
 
 export const useChatScroll = ({
   messagesLength,
@@ -47,17 +47,17 @@ export const useChatScroll = ({
   lastMessageSenderType,
   emptyDivRef,
 }: UseChatScrollOptions): UseChatScrollReturn => {
+  const wasLoadingRef = useRef(false);
+  const isInitialScrollRef = useRef(true);
+  const lastUserScrollLengthRef = useRef(0);
+  /** Persists the ResizeObserver so we can disconnect it when the content node unmounts */
+  const contentObserverRef = useRef<ResizeObserver | null>(null);
+  /** Content-absolute top position of the last user message — captured once in scrollToLastUserMessage */
+  const anchorTopRef = useRef<number | null>(null);
   const scrollContainerRef = useRef<HTMLDivElement>(null);
   const [showScrollButton, setShowScrollButton] = useState(false);
   const [canScrollTop, setCanScrollTop] = useState(false);
   const [canScrollBottom, setCanScrollBottom] = useState(false);
-  const isInitialScrollRef = useRef(true);
-  const lastUserScrollLengthRef = useRef(0);
-  const wasLoadingRef = useRef(false);
-  /** Content-absolute top position of the last user message — captured once in scrollToLastUserMessage */
-  const anchorTopRef = useRef<number | null>(null);
-  /** Persists the ResizeObserver so we can disconnect it when the content node unmounts */
-  const contentObserverRef = useRef<ResizeObserver | null>(null);
 
   const checkIfScrolledToBottom = useCallback(() => {
     if (scrollContainerRef.current) {

@@ -98,15 +98,20 @@ const ChatSidebarInner: FC<ChatSidebarInnerProps> = ({
 
   const hasMessages = useMemo(() => chat.messages.length > 0, [chat.messages]);
 
+  const emptyDivRef = useRef<HTMLDivElement>(null);
+
   const isAnalysing = useMemo(() => {
     return chat.messages.length > 0 && chat.messages[chat.messages.length - 1]?.sender_type === SenderType.USER;
   }, [chat.messages]);
+
+  const lastMessageSenderType = useMemo(() => chat.messages[chat.messages.length - 1]?.sender_type, [chat.messages]);
 
   const isLoadingConversation = Boolean(conversationId && chat.isLoadingConversationHistory) || !hasMessages;
   const isInConversation = Boolean(conversationId || chat.conversationId || hasMessages);
 
   const {
     scrollContainerRef,
+    contentRef,
     showScrollButton,
     canScrollTop,
     canScrollBottom,
@@ -116,6 +121,8 @@ const ChatSidebarInner: FC<ChatSidebarInnerProps> = ({
     messagesLength: chat.messages?.length ?? 0,
     isLoading: isLoadingConversation,
     streamingState: chat.streamingState,
+    lastMessageSenderType,
+    emptyDivRef,
   });
 
   const { isDragOver, dropZoneProps } = useFileDragDrop({
@@ -164,7 +171,7 @@ const ChatSidebarInner: FC<ChatSidebarInnerProps> = ({
             ref={scrollContainerRef}
             onScroll={handleScroll}
             className={cn(
-              'bg-BG_WHITE flex min-h-0 w-full flex-1 flex-col overflow-x-hidden overscroll-y-contain [scrollbar-width:none]',
+              'bg-BG_WHITE flex min-h-0 w-full flex-1 flex-col overflow-x-hidden overscroll-y-contain [overflow-anchor:none] [scrollbar-width:none]',
               isTaskPopoverOpen ? 'overflow-y-hidden' : 'overflow-y-auto',
             )}
           >
@@ -179,19 +186,21 @@ const ChatSidebarInner: FC<ChatSidebarInnerProps> = ({
                   className='mx-auto flex w-full flex-1 flex-col px-4'
                   disableAnimation
                 >
-                  <MessageContainer
-                    messages={chat.messages}
-                    isAnalysing={isAnalysing}
-                    streamingState={chat.streamingState}
-                    className='gap-4 px-0 [scrollbar-width:none]'
-                    conversationId={conversationId ?? chat?.conversationId ?? ''}
-                    assistantAvatar={<NewPaceAvatar />}
-                    showTimestamp
-                    showFeedback
-                    showCopy
-                    alignUserRight
-                  />
-                  <div className='bg-BG_WHITE h-12 w-full' />
+                  <div ref={contentRef}>
+                    <MessageContainer
+                      messages={chat.messages}
+                      isAnalysing={isAnalysing}
+                      streamingState={chat.streamingState}
+                      className='gap-4 px-0 [scrollbar-width:none]'
+                      conversationId={conversationId ?? chat?.conversationId ?? ''}
+                      assistantAvatar={<NewPaceAvatar />}
+                      showTimestamp
+                      showFeedback
+                      showCopy
+                      alignUserRight
+                    />
+                  </div>
+                  <div ref={emptyDivRef} className='w-full shrink-0' />
                 </CommonWrapper>
               </>
             ) : (
