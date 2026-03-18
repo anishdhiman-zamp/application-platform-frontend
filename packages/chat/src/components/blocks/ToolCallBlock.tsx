@@ -5,6 +5,7 @@ import {
   AccordionTrigger,
   AnimatedTerminalIcon,
   ImageWithFallback,
+  ScrollContainer,
   ShimmerText,
 } from '@zamp-platform/ui';
 import { cn } from '@zamp-platform/ui/utils';
@@ -132,15 +133,17 @@ export const ToolCallBlock: FC<ToolCallBlockProps> = ({
             className={`bg-border pointer-events-none absolute left-[6.5px] z-0 w-px ${resolvedIsAccordionOpen ? 'top-[28px] bottom-0' : 'top-[28px] h-[14px]'}`}
           />
         )}
-        <AccordionContent className='max-h-60 space-y-4 overflow-y-scroll pt-0 pr-2 pb-2 pl-5 [scrollbar-width:thin]'>
-          <CodePreviewBlock label='Input' content={inputContent} />
-          {toolResult && (
-            <CodePreviewBlock
-              label='Output'
-              content={toolResult.payload?.content}
-              isError={toolResult.payload?.is_error}
-            />
-          )}
+        <AccordionContent className='pt-0 pb-2'>
+          <ScrollContainer className='max-h-60' scrollClassName='space-y-4 pr-2 pl-5'>
+            <CodePreviewBlock label='Input' content={inputContent} />
+            {toolResult && (
+              <CodePreviewBlock
+                label='Output'
+                content={toolResult.payload?.content}
+                isError={toolResult.payload?.is_error}
+              />
+            )}
+          </ScrollContainer>
         </AccordionContent>
       </AccordionItem>
     </Accordion>

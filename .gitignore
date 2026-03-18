@@ -24,6 +24,7 @@ yarn-error.log*
 .pnpm-debug.log*
 
 # local env files
+.env.local
 .env.development.local
 .env.test.local
 .env.production.local
@@ -61,3 +62,4 @@ apps/application-dashboard/tests/test-results/
 .next-docs/
 apps/application-dashboard/.next-env.d.ts
 apps/application-dashboard/.env.local
+next-env.d.ts
