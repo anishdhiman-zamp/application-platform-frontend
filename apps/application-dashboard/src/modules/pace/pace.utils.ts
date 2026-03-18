@@ -1,69 +1,26 @@
+import {
+  AFTERNOON_GREETINGS,
+  EVENING_GREETINGS,
+  MORNING_GREETINGS,
+  NIGHT_GREETINGS,
+} from '@/modules/pace/pace.constants';
 import type { SkillApiError } from '@/types/api/skills.types';
 
-interface Greeting {
-  text: string;
-  includeName: boolean;
-}
-
-const MORNING_GREETINGS: Greeting[] = [
-  { text: 'Good morning', includeName: true },
-  { text: "Let's get things done today", includeName: false },
-  { text: 'Ready when you are', includeName: false },
-  { text: 'What can I help you with?', includeName: false },
-  { text: "Let's make today productive", includeName: false },
-];
-
-const AFTERNOON_GREETINGS: Greeting[] = [
-  { text: 'Good afternoon', includeName: true },
-  { text: 'How can I help?', includeName: false },
-  { text: 'Ready to assist', includeName: false },
-  { text: "What's on your mind?", includeName: false },
-  { text: "Let's keep the momentum going", includeName: false },
-];
-
-const EVENING_GREETINGS: Greeting[] = [
-  { text: 'Good evening', includeName: true },
-  { text: 'Still here for you', includeName: false },
-  { text: 'How can I help?', includeName: false },
-  { text: 'Ready when you are', includeName: false },
-  { text: "Let's wrap up some tasks", includeName: false },
-];
-
-const NIGHT_GREETINGS: Greeting[] = [
-  { text: "I'm here whenever you need", includeName: false },
-  { text: 'Always on, always ready', includeName: false },
-  { text: 'Working around the clock', includeName: false },
-  { text: 'How can I help tonight?', includeName: false },
-  { text: 'Ready to assist', includeName: false },
-];
+/** Returns a random element from the given array */
+const pickRandom = (arr: string[]) => arr[Math.floor(Math.random() * arr.length)];
 
 /**
  * Returns a varied greeting based on time of day
  * Morning: 5am - 12pm | Afternoon: 12pm - 5pm | Evening: 5pm - 9pm | Night: 9pm - 5am
- * @param userName - Optional user name to include in greeting
- * @returns string - A complete greeting phrase
  */
-export const getGreeting = (userName?: string): string => {
+export const getGreeting = (): string => {
   const hour = new Date().getHours();
-  const randomIndex = Math.floor(Math.random() * MORNING_GREETINGS.length);
 
-  let greeting: Greeting;
+  if (hour >= 5 && hour < 12) return pickRandom(MORNING_GREETINGS);
+  if (hour >= 12 && hour < 17) return pickRandom(AFTERNOON_GREETINGS);
+  if (hour >= 17 && hour < 21) return pickRandom(EVENING_GREETINGS);
 
-  if (hour >= 5 && hour < 12) {
-    greeting = MORNING_GREETINGS[randomIndex];
-  } else if (hour >= 12 && hour < 17) {
-    greeting = AFTERNOON_GREETINGS[randomIndex];
-  } else if (hour >= 17 && hour < 21) {
-    greeting = EVENING_GREETINGS[randomIndex];
-  } else {
-    greeting = NIGHT_GREETINGS[randomIndex];
-  }
-
-  if (greeting.includeName && userName) {
-    return `${greeting.text}, ${userName}`;
-  }
-
-  return greeting.text;
+  return pickRandom(NIGHT_GREETINGS);
 };
 
 /**
