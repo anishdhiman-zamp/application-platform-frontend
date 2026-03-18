@@ -5,11 +5,13 @@ import {
   AccordionTrigger,
   AnimatedTerminalIcon,
   ImageWithFallback,
+  ScrollContainer,
   ShimmerText,
 } from '@zamp-platform/ui';
+import { cn } from '@zamp-platform/ui/utils';
 import { safeJsonParse } from '@zamp-platform/utils';
 import { AlertCircle } from 'lucide-react';
-import { FC } from 'react';
+import React, { FC, useState } from 'react';
 
 import IntegrationCardV2 from '@/modules/integrations/AllIntegrations/IntegrationCardV2';
 import type { IntegrationItem } from '@/types/api/integrations';
@@ -34,8 +36,23 @@ interface ToolCallBlockProps {
   };
   is_complete: boolean;
   toolResult?: ToolResultContentBlock;
+  isAccordionOpen?: boolean;
+  onAccordionOpenChange?: (isOpen: boolean) => void;
+  showConnectorFromPrevious?: boolean;
+  showConnectorToNext?: boolean;
 }
-export const ToolCallBlock: FC<ToolCallBlockProps> = ({ payload, is_complete = true, toolResult }) => {
+export const ToolCallBlock: FC<ToolCallBlockProps> = ({
+  payload,
+  is_complete = true,
+  toolResult,
+  isAccordionOpen,
+  onAccordionOpenChange,
+  showConnectorFromPrevious = false,
+  showConnectorToNext = false,
+}) => {
+  const [internalAccordionOpen, setInternalAccordionOpen] = useState<boolean>(false);
+  const isControlled = typeof isAccordionOpen === 'boolean';
+  const resolvedIsAccordionOpen = isControlled ? isAccordionOpen : internalAccordionOpen;
   const toolName = payload?.display_name || 'Unknown';
   const displayContent = safeJsonParse<{ tool_name?: string; icon?: string }>(payload?.display_content?.json_block);
   const name = payload?.name || displayContent?.tool_name;
@@ -51,6 +68,15 @@ export const ToolCallBlock: FC<ToolCallBlockProps> = ({ payload, is_complete = t
   const inputContent =
     payload?.display_content?.json_block || (!payload?.display_content && payload?.partial_json) || payload?.input_json;
 
+  const handleValueChange = (value: string) => {
+    const nextIsOpen = value === 'tool-use';
+    onAccordionOpenChange?.(nextIsOpen);
+
+    if (!isControlled) {
+      setInternalAccordionOpen(nextIsOpen);
+    }
+  };
+
   if (name === TOOL_NAMES.AUTHENTICATE_INTEGRATION_AND_CREATE_CONNECTION && toolResultData?.title) {
     const integrationItem = buildIntegrationItemFromToolResult(toolResultData) as IntegrationItem;
     return (
@@ -63,21 +89,36 @@ export const ToolCallBlock: FC<ToolCallBlockProps> = ({ payload, is_complete = t
   }
 
   return (
-    <Accordion type='single' collapsible className='border-border bg-BG_WHITE w-full overflow-hidden rounded-lg border'>
-      <AccordionItem value='tool-use' className='border-none'>
-        <AccordionTrigger className='f-12-450 text-GRAY_1000 hover:bg-accent w-full cursor-pointer gap-x-2 py-2 pr-2 pl-3 [&[data-state=closed]>svg]:rotate-90 [&[data-state=open]>svg]:-rotate-90'>
+    <Accordion
+      type='single'
+      collapsible
+      value={resolvedIsAccordionOpen ? 'tool-use' : ''}
+      onValueChange={handleValueChange}
+      className='bg-BG_WHITE w-full overflow-hidden'
+    >
+      <AccordionItem value='tool-use' className='relative border-none'>
+        {showConnectorFromPrevious && (
+          <div className='bg-border pointer-events-none absolute top-0 left-[6.5px] z-0 h-2 w-px' />
+        )}
+        <AccordionTrigger className='font-420 text-GRAY_1000 w-full cursor-pointer gap-x-2 py-2 text-[13px] [&[data-state=closed]>svg]:rotate-90 [&[data-state=open]>svg]:-rotate-90'>
           <div className='flex flex-1 items-center gap-3'>
-            <div className='flex items-center gap-2'>
-              {icon?.length ? (
-                <ImageWithFallback src={icon} alt={toolName} className='h-4 w-4' />
-              ) : (
-                <AnimatedTerminalIcon showAnimation={!is_complete} size={12} />
-              )}
+            <div className='flex items-center gap-x-2'>
+              <div className='flex h-3.5 w-3.5 items-center justify-center'>
+                {icon?.length ? (
+                  <ImageWithFallback src={icon} alt={toolName} className='h-3 w-3' />
+                ) : (
+                  <AnimatedTerminalIcon showAnimation={!is_complete} size={14} />
+                )}
+              </div>
 
               {!is_complete ? (
                 <ShimmerText text={toolName} autoAnimate={true} />
               ) : (
-                <span className='text-GRAY_1000'>{toolName}</span>
+                <span
+                  className={cn('font-420 text-[13px]', resolvedIsAccordionOpen ? 'text-GRAY_1000' : 'text-GRAY_950')}
+                >
+                  {toolName}
+                </span>
               )}
             </div>
             {toolResult && toolResult.payload?.is_error && (
@@ -87,15 +128,22 @@ export const ToolCallBlock: FC<ToolCallBlockProps> = ({ payload, is_complete = t
             )}
           </div>
         </AccordionTrigger>
-        <AccordionContent className='bg-muted max-h-60 space-y-4 overflow-y-auto px-2 py-2 [scrollbar-width:thin]'>
-          <CodePreviewBlock label='Input' content={inputContent} />
-          {toolResult && (
-            <CodePreviewBlock
-              label='Output'
-              content={toolResult.payload?.content}
-              isError={toolResult.payload?.is_error}
-            />
-          )}
+        {showConnectorToNext && (
+          <div
+            className={`bg-border pointer-events-none absolute left-[6.5px] z-0 w-px ${resolvedIsAccordionOpen ? 'top-[28px] bottom-0' : 'top-[28px] h-[14px]'}`}
+          />
+        )}
+        <AccordionContent className='pt-0 pb-2'>
+          <ScrollContainer className='max-h-60' scrollClassName='space-y-4 pr-2 pl-5'>
+            <CodePreviewBlock label='Input' content={inputContent} />
+            {toolResult && (
+              <CodePreviewBlock
+                label='Output'
+                content={toolResult.payload?.content}
+                isError={toolResult.payload?.is_error}
+              />
+            )}
+          </ScrollContainer>
         </AccordionContent>
       </AccordionItem>
     </Accordion>

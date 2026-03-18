@@ -22,10 +22,11 @@ const SEARCH_DEBOUNCE_MS = 300;
 
 interface ChatHistoryProps {
   onSelectConversation: (id: string | null, title?: string) => void;
+  onDeleteConversation?: (id: string) => void;
   compact?: boolean;
 }
 
-const ChatHistory = ({ onSelectConversation, compact = false }: ChatHistoryProps) => {
+const ChatHistory = ({ onSelectConversation, onDeleteConversation, compact = false }: ChatHistoryProps) => {
   const organizationId = useAppSelector((state: RootState) => state?.user?.user?.orgs?.[0]?.organization_id) ?? '';
   const containerRef = useRef<HTMLDivElement>(null);
   const activeStreamingIds = useActiveStreamingIds();
@@ -55,7 +56,7 @@ const ChatHistory = ({ onSelectConversation, compact = false }: ChatHistoryProps
     },
     {
       skip: !organizationId,
-      refetchOnMountOrArgChange: false,
+      refetchOnMountOrArgChange: true,
     },
   );
 
@@ -105,6 +106,24 @@ const ChatHistory = ({ onSelectConversation, compact = false }: ChatHistoryProps
       setSearchTerm('');
     }
   }, [isSearchOpen]);
+
+  const handleDeleteConversation = useCallback(
+    (id: string) => {
+      setAllConversations((prev) => prev.filter((c) => c.id !== id));
+      setTotalCount((prev) => Math.max(0, prev - 1));
+      onDeleteConversation?.(id);
+    },
+    [onDeleteConversation],
+  );
+
+  const handleDeleteConversationFailure = useCallback((conversation: FeedbackItemType) => {
+    setAllConversations((prev) => [...prev, conversation]);
+    setTotalCount((prev) => prev + 1);
+  }, []);
+
+  const handleRenameConversation = useCallback((id: string, newTitle: string) => {
+    setAllConversations((prev) => prev.map((c) => (c.id === id ? { ...c, title: newTitle } : c)));
+  }, []);
 
   useEffect(() => {
     setPage(1);
@@ -190,6 +209,10 @@ const ChatHistory = ({ onSelectConversation, compact = false }: ChatHistoryProps
                 conversation={conversation}
                 onSelect={onSelectConversation}
                 isStreaming={activeStreamingIds.has(conversation?.id)}
+                organizationId={organizationId}
+                onDelete={handleDeleteConversation}
+                onDeleteFailure={handleDeleteConversationFailure}
+                onRename={handleRenameConversation}
               />
             ))}
           </div>

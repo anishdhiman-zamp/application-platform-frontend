@@ -2,7 +2,7 @@
 
 import { ReactNode, useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { DropdownMenu, DropdownMenuTrigger, DropdownMenuContent, DropdownMenuItem } from '@zamp-platform/ui';
+import { DropdownMenu, DropdownMenuTrigger, DropdownMenuContent, DropdownMenuItem } from '../dropdown-menu';
 import { ArrowLeft } from 'lucide-react';
 import useDrilldownMenu from './hooks/useDrilldownMenu';
 import { DrilldownStateOutput } from './hooks/useDrilldownState';

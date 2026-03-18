@@ -47,6 +47,34 @@ export const PACE_SETTINGS_TABS: PaceSettingsTabSchema[] = [
   },
 ];
 
+export const MORNING_GREETINGS = [
+  "The day's just opened its doors.",
+  "Light's in. Let's begin.",
+  'First move of the day?',
+  "Everything's waiting where you left it.",
+];
+
+export const AFTERNOON_GREETINGS = [
+  'Right in the middle of it now.',
+  'Things are moving.',
+  'The pieces are on the board.',
+  "You've got momentum.",
+];
+
+export const EVENING_GREETINGS = [
+  'Time to bring it together.',
+  'The edges are starting to meet.',
+  "Let's close a few loops.",
+  'Almost all in place.',
+];
+
+export const NIGHT_GREETINGS = [
+  "The world's quiet. Perfect.",
+  'After hours. Clear mind.',
+  "Let's finish what we started.",
+  'Last stretch under quiet skies.',
+];
+
 export const ACCEPTED_SKILLFILE_TYPES = ['.zip', '.skill'];
 
 export const SKILL_FILE_REQUIREMENTS = [

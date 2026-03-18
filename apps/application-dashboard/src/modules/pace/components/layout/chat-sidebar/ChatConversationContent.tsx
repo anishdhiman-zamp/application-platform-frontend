@@ -12,7 +12,7 @@ import {
   useChat,
   useFileDragDrop,
 } from '@zamp-platform/chat';
-import { ArrowDownIcon, Button } from '@zamp-platform/ui';
+import { ScrollContainer } from '@zamp-platform/ui';
 import { cn } from '@zamp-platform/ui/utils';
 import ChatHistory from 'modules/pace/components/chat/ChatHistory';
 import ChatHome from 'modules/pace/components/chat/ChatHome';
@@ -23,10 +23,8 @@ import { SkeletonTypes } from '@/components/commonWrapper/commonWrapper.types';
 import { APITags } from '@/constants/api.constants';
 import { useAppDispatch } from '@/hooks/toolkit';
 import NewPaceAvatar from '@/modules/chatbot/NewPaceAvatar';
-import ScrollFadeOverlay from '@/modules/pace/components/chat/ScrollFadeOverlay';
 import TaskStatusCounts from '@/modules/pace/components/chat/TaskStatusCounts';
 import ChatMessagesSkeleton from '@/modules/pace/components/loaders/ChatMessagesSkeleton';
-import { useChatScroll } from '@/modules/pace/hooks/useChatScroll';
 import { usePaceContext } from '@/modules/pace/pace.context';
 import { baseApi } from '@/services/baseApi';
 
@@ -88,19 +86,6 @@ const ChatConversationContent: FC<ChatConversationContentProps> = ({
     dispatch(baseApi.util.invalidateTags([APITags.GET_CONVERSATION_HISTORY]));
   }, [dispatch]);
 
-  const {
-    scrollContainerRef,
-    showScrollButton,
-    canScrollTop,
-    canScrollBottom,
-    handleScroll,
-    handleScrollToBottomClick,
-  } = useChatScroll({
-    messagesLength: chat.messages?.length ?? 0,
-    isLoading: isLoadingConversation,
-    streamingState: chat.streamingState,
-  });
-
   const { isDragOver, dropZoneProps } = useFileDragDrop({
     onFileDrop: (files) => fileDropHandlerRef.current?.(files),
     disabled: chat.isStreaming || chat.isCreatingConversationV2,
@@ -161,14 +146,11 @@ const ChatConversationContent: FC<ChatConversationContentProps> = ({
     <ChatActionsProvider onFileOpen={onFileOpen} onTaskOpen={onTaskOpen}>
       <div className='relative flex min-h-0 w-full flex-1 flex-col overflow-hidden' {...dropZoneProps}>
         <DropOverlay isVisible={isDragOver} />
-        {!isTaskPopoverOpen && <ScrollFadeOverlay canScrollTop={canScrollTop} canScrollBottom={canScrollBottom} />}
-        <div
-          ref={scrollContainerRef}
-          onScroll={handleScroll}
-          className={cn(
-            'bg-BG_WHITE flex min-h-0 w-full flex-1 flex-col overflow-x-hidden [scrollbar-width:thin]',
-            isTaskPopoverOpen ? 'overflow-y-hidden' : 'overflow-y-auto',
-          )}
+        <ScrollContainer
+          showScrollToBottom
+          scrollTrigger={chat.messages?.length}
+          disableFadeOverlay={isTaskPopoverOpen}
+          scrollClassName={cn('bg-BG_WHITE', isTaskPopoverOpen ? 'overflow-y-hidden' : 'overflow-y-scroll')}
         >
           {isInConversation ? (
             <CommonWrapper
@@ -201,25 +183,12 @@ const ChatConversationContent: FC<ChatConversationContentProps> = ({
               </div>
             </div>
           )}
-        </div>
+        </ScrollContainer>
       </div>
-
       <div
         ref={taskStatusContainerRef}
         className='bg-BG_WHITE sticky bottom-0 z-10 mx-auto w-full max-w-[700px] px-3 pb-3'
       >
-        <Button
-          onClick={handleScrollToBottomClick}
-          variant='ghost'
-          className={cn(
-            'bg-GRAY_1000 hover:bg-GRAY_950 absolute -top-10 left-1/2 z-20 h-6 w-6 -translate-x-1/2 rounded-full p-3',
-            'transition-all duration-200 ease-out',
-            showScrollButton ? 'translate-y-0 opacity-100' : 'pointer-events-none translate-y-2 opacity-0',
-          )}
-          aria-label='Scroll to bottom'
-        >
-          <ArrowDownIcon size={14} className='text-BG_WHITE p-[2px]' />
-        </Button>
         <TaskStatusCounts
           messages={chat.messages}
           streamingState={chat.streamingState}

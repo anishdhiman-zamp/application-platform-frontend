@@ -8,7 +8,7 @@ import { SetupProfileStep } from 'modules/onboarding/steps/SetupProfileStep';
 import { SetupUsernameStep } from 'modules/onboarding/steps/SetupUsernameStep';
 import { SetupWorkspaceStep } from 'modules/onboarding/steps/SetupWorkspaceStep';
 import { UpdateOrgStep } from 'modules/onboarding/steps/UpdateOrgStep';
-import { WELCOME_SEEN_KEY, WelcomeStep } from 'modules/onboarding/steps/WelcomeStep';
+import { isWelcomeSeenForUser, WelcomeStep } from 'modules/onboarding/steps/WelcomeStep';
 import { useRouter } from 'next/navigation';
 import { useWhoAmIQuery } from '@/apis/auth';
 import { useEnsureProvisioningMutation, useSkipOnboardingMutation } from '@/apis/onboarding';
@@ -16,15 +16,8 @@ import ImageLoader from '@/components/common/loader/ImageLoader';
 import { FEATURE_FLAGS } from '@/constants/featureFlags';
 import { ZAMP_LOGO_LOADER_SVG } from '@/constants/icons';
 import { useFeatureFlags } from '@/hooks/useFeatureFlags';
+import { clearCookie, USER_SESSION_COOKIE } from '@/utils/cookie';
 import { getLandingRoute } from '@/utils/route.util';
-
-const isWelcomeSeen = () => {
-  try {
-    return localStorage.getItem(WELCOME_SEEN_KEY) === 'true';
-  } catch {
-    return false;
-  }
-};
 
 export const OnboardingRoot = () => {
   const containerRef = useRef<HTMLDivElement>(null);
@@ -39,23 +32,26 @@ export const OnboardingRoot = () => {
 
   const [currentStatus, setCurrentStatus] = useState<OnboardingStatus | null>(null);
   const [orgIdFromSetup, setOrgIdFromSetup] = useState<string | null>(null);
-  const [welcomeSeen, setWelcomeSeen] = useState(isWelcomeSeen());
+  const [welcomeSeen, setWelcomeSeen] = useState(false);
   const [isOnboardingEnabled, setIsOnboardingEnabled] = useState<boolean | null>(null);
   const [redirecting, setRedirecting] = useState(false);
   const isFlagLoading = isOnboardingEnabled === null;
 
   // Refetch session to get fresh org/product data, then redirect to the correct landing page.
-  // The cached whoami response may predate org creation, so we must refetch before redirecting.
+  // Clear the stale session cookie so the middleware is forced to re-fetch and rebuild it
+  // with up-to-date fields (e.g. product mode after org creation).
   const redirectToApp = useCallback(async () => {
     setRedirecting(true);
     const { data: freshSession } = await refetchSession();
+
+    clearCookie(USER_SESSION_COOKIE);
 
     router.replace(getLandingRoute(freshSession?.orgs?.[0]?.product));
   }, [refetchSession, router]);
 
   const handleStepComplete = (nextStatus: OnboardingStatus, organizationId?: string) => {
     if (nextStatus === OnboardingStatus.ONBOARDED) {
-      if (isWelcomeSeen()) {
+      if (session?.user_id && isWelcomeSeenForUser(session.user_id)) {
         redirectToApp();
 
         return;
@@ -67,7 +63,7 @@ export const OnboardingRoot = () => {
       setOrgIdFromSetup(organizationId);
     }
 
-    setWelcomeSeen(isWelcomeSeen());
+    setWelcomeSeen(session?.user_id ? isWelcomeSeenForUser(session.user_id) : false);
     setCurrentStatus(nextStatus);
   };
 
@@ -96,7 +92,7 @@ export const OnboardingRoot = () => {
   useEffect(() => {
     if (!ldClient || !session) return;
 
-    if (ldClient === true) {
+    if (typeof ldClient === 'boolean') {
       setIsOnboardingEnabled(true);
 
       return;
@@ -120,6 +116,13 @@ export const OnboardingRoot = () => {
       cancelled = true;
     };
   }, [ldClient, session]);
+
+  // Set welcomeSeen once session is available
+  useEffect(() => {
+    if (session?.user_id) {
+      setWelcomeSeen(isWelcomeSeenForUser(session.user_id));
+    }
+  }, [session?.user_id]);
 
   // If feature flag is off, call POST /onboarding/skip to force-complete, then redirect.
   useEffect(() => {
@@ -168,7 +171,7 @@ export const OnboardingRoot = () => {
   // Fire provisioning call early only when welcome animation will play (gives provisioning a head start).
   // Skip if welcome is already seen — SetupWorkspaceStep will call it on mount anyway.
   useEffect(() => {
-    if (currentStatus !== OnboardingStatus.SETUP_WORKSPACE || provisioningFiredRef.current || isWelcomeSeen()) return;
+    if (currentStatus !== OnboardingStatus.SETUP_WORKSPACE || provisioningFiredRef.current || welcomeSeen) return;
     const resolvedOrgId = orgIdFromSetup || session?.orgs?.[0]?.organization_id;
 
     if (!resolvedOrgId) return;
@@ -189,7 +192,7 @@ export const OnboardingRoot = () => {
     !welcomeSeen;
 
   if (showWelcomeAnimation) {
-    return <WelcomeStep nextStatus={currentStatus} onComplete={handleStepComplete} />;
+    return <WelcomeStep nextStatus={currentStatus} onComplete={handleStepComplete} userId={session?.user_id ?? ''} />;
   }
 
   if (currentStatus === OnboardingStatus.PENDING_APPROVAL) {
