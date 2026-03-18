@@ -121,7 +121,7 @@ export const MarkdownBlock: React.FC<MarkdownBlockProps> = ({ payload }) => {
             </ul>
           ),
           ol: ({ children }) => (
-            <ol className='text-GRAY_950 mt-3 list-decimal pl-5 text-sm leading-[1.667] font-[420] first:mt-0'>
+            <ol className='text-GRAY_950 mt-3 list-decimal pl-7 text-sm leading-[1.667] font-[420] first:mt-0'>
               {children}
             </ol>
           ),
