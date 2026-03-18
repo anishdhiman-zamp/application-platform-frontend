@@ -246,7 +246,10 @@ export const RichTextEditor = forwardRef<RichTextEditorHandle, RichTextEditorPro
             clearing: {
               opacity: 0,
               y: -30,
-              transition: { duration: 0.1, ease: [0.3, 0.0, 1.0, 1.0] },
+              transition: {
+                opacity: { duration: 0.1, ease: 'easeOut' },
+                y: { duration: 0.1, ease: [0.3, 0.0, 1.0, 1.0] },
+              },
             },
           }}
           animate={isClearing ? 'clearing' : 'visible'}
