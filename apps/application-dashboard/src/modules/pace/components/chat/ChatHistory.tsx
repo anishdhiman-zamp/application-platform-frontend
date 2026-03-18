@@ -4,6 +4,7 @@ import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { ResourceType, useActiveStreamingIds } from '@zamp-platform/chat';
 import { useInfiniteScroll } from '@zamp-platform/tanstack-table';
 import { Button, Input } from '@zamp-platform/ui';
+import { cn } from '@zamp-platform/ui/utils';
 import { Search } from 'lucide-react';
 import { useGetConversationHistoryQuery } from '@/apis/pace';
 import CommonWrapper from '@/components/commonWrapper';
@@ -21,9 +22,10 @@ const SEARCH_DEBOUNCE_MS = 300;
 
 interface ChatHistoryProps {
   onSelectConversation: (id: string | null, title?: string) => void;
+  compact?: boolean;
 }
 
-const ChatHistory = ({ onSelectConversation }: ChatHistoryProps) => {
+const ChatHistory = ({ onSelectConversation, compact = false }: ChatHistoryProps) => {
   const organizationId = useAppSelector((state: RootState) => state?.user?.user?.orgs?.[0]?.organization_id) ?? '';
   const containerRef = useRef<HTMLDivElement>(null);
   const activeStreamingIds = useActiveStreamingIds();
@@ -130,29 +132,33 @@ const ChatHistory = ({ onSelectConversation }: ChatHistoryProps) => {
   }, [conversations, page]);
 
   return (
-    <div className='mx-auto flex min-h-0 w-full flex-1 flex-col overflow-hidden bg-transparent pt-4'>
-      <div className='flex shrink-0 flex-col gap-4 p-3'>
-        <div className='flex items-center justify-between'>
-          <p className='f-14-550 text-GRAY_1000'>Chats</p>
-          <Button
-            variant='ghost'
-            size='icon'
-            onClick={handleToggleSearch}
-            className='h-7 w-7'
-            data-testid='chat-history-search-toggle'
-          >
-            <Search size={16} className='text-GRAY_700' />
-          </Button>
-        </div>
-        {isSearchOpen && (
+    <div
+      className={cn('mx-auto flex min-h-0 w-full flex-1 flex-col overflow-hidden bg-transparent', !compact && 'pt-4')}
+    >
+      <div className={cn('flex shrink-0 flex-col', compact ? 'gap-0 p-2' : 'gap-4 p-3')}>
+        {!compact && (
+          <div className='flex items-center justify-between'>
+            <p className='f-14-550 text-GRAY_1000'>Chats</p>
+            <Button
+              variant='ghost'
+              size='icon'
+              onClick={handleToggleSearch}
+              className='h-7 w-7'
+              data-testid='chat-history-search-toggle'
+            >
+              <Search size={16} className='text-GRAY_700' />
+            </Button>
+          </div>
+        )}
+        {(isSearchOpen || compact) && (
           <Input
-            placeholder='Search conversations...'
+            placeholder='Search...'
             value={searchTerm}
-            autoFocus
+            autoFocus={compact}
             onChange={handleSearchChange}
             iconPosition='leading'
             size='small'
-            className='bg-BG_WHITE mb-1 w-full pr-8'
+            className={cn('bg-BG_WHITE w-full pr-8', compact ? 'mb-0' : 'mb-1')}
             data-testid='chat-history-search-input'
           />
         )}

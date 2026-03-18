@@ -183,6 +183,7 @@ export const useChatInput = ({
   isDisabled,
   llmModel,
 }: UseChatInputProps): UseChatInputReturn => {
+  const prevConversationIdRef = useRef(conversationId);
   const currentUserName = adapter.getCurrentUserName();
   const resourceId = adapter.getResourceId();
   const scopeId = adapter.getScopeId();
@@ -394,6 +395,13 @@ export const useChatInput = ({
       adapter.onError?.(error);
     }
   };
+
+  useEffect(() => {
+    if (prevConversationIdRef.current !== conversationId) {
+      prevConversationIdRef.current = conversationId;
+      setFirstMessage('');
+    }
+  }, [conversationId]);
 
   useEffect(() => {
     if (firstMessage && !conversationId) {

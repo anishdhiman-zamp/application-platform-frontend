@@ -12,7 +12,7 @@ import { useIsCompact } from 'modules/pace/components/dynamic-tabs/useIsCompact'
 import { useRouter } from 'next/navigation';
 import TooltipV2 from '@/components/common/TooltipV2';
 import { usePaceContext } from '@/modules/pace/pace.context';
-import { DynamicTab } from '@/modules/pace/pace.types';
+import { CHAT_SIDEBAR_STATE, DynamicTab } from '@/modules/pace/pace.types';
 import { defaultFnType, SIDE_OPTIONS } from '@/types/commonTypes';
 
 export interface DynamicTabItemProps {
@@ -42,7 +42,7 @@ const DynamicTabItem = ({
   onCloseAll,
   renderIcon,
 }: DynamicTabItemProps) => {
-  const { setActiveTabId } = usePaceContext();
+  const { setActiveTabId, chatSidebarState, setChatSidebarState } = usePaceContext();
   const router = useRouter();
   const containerRef = useRef<HTMLDivElement>(null);
   const isCompact = useIsCompact(containerRef, COMPACT_THRESHOLD_PX);
@@ -51,13 +51,18 @@ const DynamicTabItem = ({
     if (isActive) return;
 
     const tabPath = preserveSidebarParam(tab.path);
+    const willChangeBase = !isSameBasePath(tabPath);
+
+    if (chatSidebarState === CHAT_SIDEBAR_STATE.EXPANDED && !willChangeBase) {
+      setChatSidebarState(CHAT_SIDEBAR_STATE.COLLAPSED);
+    }
 
     setActiveTabId(tab.id);
 
-    if (isSameBasePath(tabPath)) {
-      window.history.pushState(null, '', tabPath);
-    } else {
+    if (willChangeBase) {
       router.push(tabPath);
+    } else {
+      window.history.pushState(null, '', tabPath);
     }
   };
 

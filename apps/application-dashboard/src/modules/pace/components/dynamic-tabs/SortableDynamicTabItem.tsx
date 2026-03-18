@@ -4,10 +4,18 @@ import { type CSSProperties } from 'react';
 import { useSortable } from '@dnd-kit/sortable';
 import { CSS } from '@dnd-kit/utilities';
 import { cn } from '@zamp-platform/ui/utils';
+import { motion } from 'framer-motion';
 import DynamicTabItem from 'modules/pace/components/dynamic-tabs/DynamicTabItem';
 import { DynamicTab } from '@/modules/pace/pace.types';
 
 const CLOSE_BUTTON_SELECTOR = '#dynamic-tab-close-button';
+
+const TAB_MAX_WIDTH = 172;
+
+const NEW_TAB_OPEN_TRANSITION = {
+  duration: 0.25,
+  ease: [0, 0, 0.4, 1],
+} as const;
 
 interface SortableDynamicTabItemProps {
   tab: DynamicTab;
@@ -15,6 +23,7 @@ interface SortableDynamicTabItemProps {
   isAnyDragging: boolean;
   tabIndex: number;
   totalTabs: number;
+  skipAnimation?: boolean;
   onClose: (e: React.MouseEvent, id: string) => void;
   onCloseOthers: (id: string) => void;
   onCloseToRight: (id: string) => void;
@@ -27,6 +36,7 @@ const SortableDynamicTabItem = ({
   isAnyDragging,
   tabIndex,
   totalTabs,
+  skipAnimation = false,
   onClose,
   onCloseOthers,
   onCloseToRight,
@@ -42,12 +52,16 @@ const SortableDynamicTabItem = ({
   };
 
   return (
-    <div
+    <motion.div
       ref={setNodeRef}
       style={style}
+      initial={skipAnimation ? false : { maxWidth: 0 }}
+      animate={{ maxWidth: TAB_MAX_WIDTH }}
+      exit={{ maxWidth: 0 }}
+      transition={NEW_TAB_OPEN_TRANSITION}
       {...attributes}
       {...listeners}
-      className={cn('max-w-[172px] min-w-[32px] flex-1 select-none', { 'opacity-50': isDragging })}
+      className={cn('min-w-0 flex-1 overflow-hidden select-none', { 'opacity-50': isDragging })}
       onClick={(e) => {
         const target = e.target as HTMLElement;
 
@@ -68,7 +82,7 @@ const SortableDynamicTabItem = ({
         onCloseToRight={onCloseToRight}
         onCloseAll={onCloseAll}
       />
-    </div>
+    </motion.div>
   );
 };
 
