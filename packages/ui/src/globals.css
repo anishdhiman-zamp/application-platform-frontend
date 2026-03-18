@@ -294,9 +294,11 @@
     --MENU_SHADOW: 1px 2px 10px 0px var(--GRAY_70);
   }
 
-  .dark-mode {
-    
+  .dark-mode [data-file-icon] {
+    background-color: color-mix(in srgb, var(--file-icon-primary) 15%, transparent) !important;
+  }
 
+  .dark-mode {
     /* gray */
     --GRAY_20: #0000004d; /* Gray 20 */
     --GRAY_50: #ffffff14; /* Gray 50 */
