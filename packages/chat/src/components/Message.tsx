@@ -1,9 +1,10 @@
 'use client';
 
+import { useScrollRef } from '@zamp-platform/ui';
 import { cn } from '@zamp-platform/ui/utils';
 import { formatChatTimestamp, formatChatTimestampTooltip, formatTimestampToUTC } from '@zamp-platform/utils';
 import { motion } from 'motion/react';
-import React, { FC, ReactNode, useMemo } from 'react';
+import React, { FC, ReactNode, useEffect, useMemo, useRef, useState } from 'react';
 
 import { ButtonBlockType } from '../types/block.types';
 import { ChatMessage, SenderType } from '../types/chat.types';
@@ -55,6 +56,54 @@ export const Message: FC<MessageProps> = ({
   const isUserMessage = message.sender_type === SenderType.USER;
   const shouldAlignRight = alignUserRight && isUserMessage;
   const sharedClassName = cn('group space-y-3', shouldAlignRight && 'flex flex-col items-end', containerClassName);
+
+  const scrollRef = useScrollRef();
+  const [animationReady, setAnimationReady] = useState(false);
+  const cleanupRef = useRef<(() => void) | null>(null);
+
+  useEffect(() => {
+    // Clean up any previous subscription
+    cleanupRef.current?.();
+    cleanupRef.current = null;
+
+    if (!shouldAnimate) {
+      setAnimationReady(false);
+      return;
+    }
+
+    const el = scrollRef.current;
+
+    if (!el) {
+      // No scroll container context — start immediately
+      setAnimationReady(true);
+      return;
+    }
+
+    setAnimationReady(false);
+
+    const handleScrollEnd = () => {
+      setAnimationReady(true);
+    };
+
+    // Fallback: if chatScrollEnd never fires (e.g. very fast scroll or
+    // browsers that don't support scrollend), start after 800 ms.
+    const fallback = setTimeout(() => {
+      el.removeEventListener('chatScrollEnd', handleScrollEnd);
+      setAnimationReady(true);
+    }, 800);
+
+    el.addEventListener('chatScrollEnd', handleScrollEnd, { once: true });
+
+    cleanupRef.current = () => {
+      el.removeEventListener('chatScrollEnd', handleScrollEnd);
+      clearTimeout(fallback);
+    };
+
+    return () => {
+      cleanupRef.current?.();
+      cleanupRef.current = null;
+    };
+  }, [shouldAnimate, scrollRef]);
 
   const formattedTimestamp = useMemo(
     () => (message.timestamp ? formatChatTimestamp(formatTimestampToUTC(message.timestamp)) : ''),
@@ -110,14 +159,20 @@ export const Message: FC<MessageProps> = ({
     </>
   );
 
-  if (isUserMessage && isLastMessage) {
+  // User messages always use motion.div so the element type never changes —
+  // switching between motion.div and div remounts the subtree, causing the
+  // copy/timestamp bar to blink (e.g. when isLastMessage changes as the AI
+  // response starts streaming in).
+  // animationReady gates the animation so it only starts after the anchor
+  // scroll finishes (via the chatScrollEnd event from ScrollContainer).
+  if (isUserMessage) {
     return (
       <motion.div
         data-sender-type={message.sender_type}
         className={sharedClassName}
         initial={shouldAnimate ? { opacity: 0, y: 20 } : false}
-        animate={{ opacity: 1, y: 0 }}
-        transition={{ duration: 0.3, ease: 'easeOut', delay: 0.3 }}
+        animate={!shouldAnimate || animationReady ? { opacity: 1, y: 0 } : { opacity: 0, y: 20 }}
+        transition={{ duration: 0.3, ease: 'easeOut' }}
       >
         {innerContent}
       </motion.div>

@@ -1,8 +1,8 @@
-import { ShimmerText } from '@zamp-platform/ui';
+import { ShimmerText, useScrollRef } from '@zamp-platform/ui';
 import { cn } from '@zamp-platform/ui/utils';
 import { motion } from 'motion/react';
 import Image from 'next/image';
-import { FC, ReactNode, useCallback, useEffect, useRef, useState } from 'react';
+import React, { FC, ReactNode, useCallback, useEffect, useRef, useState } from 'react';
 
 import PaceAvatar from '@/modules/chatbot/PaceAvatar';
 
@@ -60,12 +60,23 @@ export const MessageContainer: FC<MessageContainerProps> = ({
   const defaultAssistantAvatar = assistantAvatar ?? <PaceAvatar />;
   const isInitialScrollRef = useRef(true);
   const scrollContainerRef = useRef<HTMLDivElement>(null);
-  const [animatedLength, setAnimatedLength] = useState(messages?.length ?? 0);
+  // When mounting with a pending user message (isAnalysing=true, no AI response yet),
+  // initialise one behind the current length so isNewUserMessage fires and the
+  // entrance animation plays for the first message.
+  const [animatedLength, setAnimatedLength] = useState(() => {
+    const len = messages?.length ?? 0;
+    return isAnalysing ? Math.max(0, len - 1) : len;
+  });
   const lastMessage = messages?.[messages.length - 1];
   const isNewUserMessage = lastMessage?.sender_type === 'USER' && messages.length > animatedLength;
   const [showAnalysing, setShowAnalysing] = useState(false);
+  const scrollRef = useScrollRef();
   const isNewUserMessageRef = useRef(isNewUserMessage);
   isNewUserMessageRef.current = isNewUserMessage;
+
+  // Track the previous conversationId to distinguish between a new conversation
+  // getting its first ID assigned (null → id) vs actually switching conversations.
+  const previousConversationIdRef = useRef(conversationId);
 
   const scrollToBottom = useCallback((behavior: ScrollBehavior = 'smooth') => {
     if (scrollContainerRef.current) {
@@ -77,8 +88,16 @@ export const MessageContainer: FC<MessageContainerProps> = ({
   }, []);
 
   useEffect(() => {
-    setAnimatedLength(messages?.length ?? 0);
-  }, [conversationId]);
+    const prevId = previousConversationIdRef.current;
+    previousConversationIdRef.current = conversationId;
+
+    // Only reset when switching between two real conversations, not when a new
+    // conversationId is first assigned (null → id). Resetting during the
+    // null → id transition cancels the first-message entrance animation.
+    if (prevId && prevId !== conversationId) {
+      setAnimatedLength(messages?.length ?? 0);
+    }
+  }, [conversationId, messages?.length]);
 
   useEffect(() => {
     if (messages?.length > 0) {
@@ -101,10 +120,40 @@ export const MessageContainer: FC<MessageContainerProps> = ({
       setShowAnalysing(false);
       return;
     }
-    const delay = isNewUserMessageRef.current ? 600 : 0;
-    const timer = setTimeout(() => setShowAnalysing(true), delay);
-    return () => clearTimeout(timer);
-  }, [isAnalysing]);
+
+    if (!isNewUserMessageRef.current) {
+      setShowAnalysing(true);
+      return;
+    }
+
+    // Wait for the scroll to finish (chatScrollEnd event from ScrollContainer),
+    // then wait for the 300ms message entrance animation before showing Analysing.
+    const el = scrollRef.current;
+
+    let animTimer: ReturnType<typeof setTimeout> | null = null;
+
+    const show = () => {
+      animTimer = setTimeout(() => setShowAnalysing(true), 300);
+    };
+
+    if (el) {
+      el.addEventListener('chatScrollEnd', show, { once: true });
+    } else {
+      show();
+    }
+
+    // Fallback — if chatScrollEnd never fires, show after 1200ms
+    const fallback = setTimeout(() => {
+      if (el) el.removeEventListener('chatScrollEnd', show);
+      setShowAnalysing(true);
+    }, 1200);
+
+    return () => {
+      if (el) el.removeEventListener('chatScrollEnd', show);
+      if (animTimer) clearTimeout(animTimer);
+      clearTimeout(fallback);
+    };
+  }, [isAnalysing, scrollRef]);
 
   return (
     <div ref={scrollContainerRef} className={cn('flex w-full grow flex-col gap-6 p-4', className)}>

@@ -1,10 +1,28 @@
 'use client';
 
-import React, { forwardRef, useCallback, useEffect, useImperativeHandle, useRef, useState } from 'react';
+import React, {
+  createContext,
+  forwardRef,
+  useCallback,
+  useContext,
+  useEffect,
+  useImperativeHandle,
+  useRef,
+  useState,
+} from 'react';
 import { cn } from '@zamp-platform/ui/utils';
 
 import { ArrowDownIcon } from './arrow-down';
 import { Button } from './button';
+
+/**
+ * Provides the scroll container's DOM element to descendants (e.g. Message)
+ * so they can listen for the `chatScrollEnd` custom event and sequence
+ * their entrance animation after the anchor scroll completes.
+ */
+export const ScrollRefContext = createContext<React.RefObject<HTMLDivElement | null>>({ current: null });
+
+export const useScrollRef = () => useContext(ScrollRefContext);
 
 export interface ScrollContainerRef {
   scrollToBottom: (behavior?: ScrollBehavior) => void;
@@ -132,6 +150,17 @@ const ScrollContainer = forwardRef<ScrollContainerRef, ScrollContainerProps>(
       spacer.style.minHeight = '';
     }, []);
 
+    // Timer ref for the chatScrollEnd fallback (cleared when scrollend fires first)
+    const scrollEndTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+
+    const dispatchScrollEnd = useCallback(() => {
+      if (scrollEndTimerRef.current) {
+        clearTimeout(scrollEndTimerRef.current);
+        scrollEndTimerRef.current = null;
+      }
+      scrollRef.current?.dispatchEvent(new CustomEvent('chatScrollEnd', { bubbles: false }));
+    }, []);
+
     const scrollToLastUserMessage = useCallback(
       (isInitial = false) => {
         const container = scrollRef.current;
@@ -163,8 +192,32 @@ const ScrollContainer = forwardRef<ScrollContainerRef, ScrollContainerProps>(
         }
 
         updateSpacerHeight();
+
+        // Notify Message components when the scroll finishes so they can
+        // start their entrance animation. For instant scrolls the event fires
+        // immediately; for smooth scrolls we wait for `scrollend`.
+        //
+        // The `scrollend` listener is added in a rAF (one frame after
+        // updateSpacerHeight changes scrollHeight). Without this delay,
+        // Chrome fires `scrollend` prematurely when scrollHeight changes
+        // mid-scroll, making the message appear before scrolling is done.
+        if (isInitial) {
+          requestAnimationFrame(dispatchScrollEnd);
+        } else {
+          requestAnimationFrame(() => {
+            const handleScrollEnd = () => {
+              container.removeEventListener('scrollend', handleScrollEnd);
+              dispatchScrollEnd();
+            };
+            container.addEventListener('scrollend', handleScrollEnd, { once: true });
+            scrollEndTimerRef.current = setTimeout(() => {
+              container.removeEventListener('scrollend', handleScrollEnd);
+              dispatchScrollEnd();
+            }, 1500);
+          });
+        }
       },
-      [updateSpacerHeight],
+      [updateSpacerHeight, dispatchScrollEnd],
     );
 
     // --- Common functions ---
@@ -355,6 +408,29 @@ const ScrollContainer = forwardRef<ScrollContainerRef, ScrollContainerProps>(
       };
     }, [autoScrollToBottom]);
 
+    // --- ResizeObserver for container size changes (anchor mode) ---
+    // Fires when the scroll container's clientHeight changes (e.g. input box
+    // shrinks after a large message is sent). Without this, the spacer stays
+    // sized for the old clientHeight and maxScrollTop shrinks, causing the
+    // anchor scroll target to be clamped and the message to appear too low.
+    useEffect(() => {
+      if (!enableAnchorScroll) return;
+
+      const el = scrollRef.current;
+
+      if (!el) return;
+
+      const observer = new ResizeObserver(() => {
+        if (!isInitialScrollRef.current) {
+          updateSpacerHeight();
+        }
+      });
+
+      observer.observe(el);
+
+      return () => observer.disconnect();
+    }, [enableAnchorScroll, updateSpacerHeight]);
+
     // --- ResizeObserver for content changes (anchor mode) ---
     useEffect(() => {
       if (!enableAnchorScroll) return;
@@ -389,73 +465,75 @@ const ScrollContainer = forwardRef<ScrollContainerRef, ScrollContainerProps>(
     const showOverlays = showFadeOverlay && !disableFadeOverlay;
 
     return (
-      <div className={cn('relative flex min-h-0 flex-1 flex-col overflow-hidden', className)}>
-        {showOverlays && (
-          <>
-            <div
-              aria-hidden
-              className={cn(
-                'pointer-events-none absolute inset-x-0 top-0 z-20',
-                fadeHeight,
-                'transition-opacity duration-200',
-                canScrollTop ? 'opacity-100' : 'opacity-0',
-              )}
-              style={{
-                background: 'linear-gradient(180deg, var(--BG_WHITE) 0%, transparent 100%)',
-              }}
-            />
-            <div
-              aria-hidden
-              className={cn(
-                'pointer-events-none absolute inset-x-0 bottom-0 z-20',
-                fadeHeight,
-                'transition-opacity duration-200',
-                canScrollBottom ? 'opacity-100' : 'opacity-0',
-              )}
-              style={{
-                background: 'linear-gradient(0deg, var(--BG_WHITE) 0%, transparent 100%)',
-              }}
-            />
-          </>
-        )}
-
-        <div
-          ref={scrollRef}
-          onScroll={handleScroll}
-          className={cn(
-            'flex min-h-0 w-full flex-1 flex-col overflow-x-hidden overflow-y-auto [overflow-anchor:none]',
-            scrollbarStyle === 'thin' ? '[scrollbar-width:thin]' : '[scrollbar-width:none]',
-            scrollClassName,
-          )}
-        >
-          {enableAnchorScroll ? (
+      <ScrollRefContext.Provider value={scrollRef}>
+        <div className={cn('relative flex min-h-0 flex-1 flex-col overflow-hidden', className)}>
+          {showOverlays && (
             <>
-              <div ref={contentWrapperRef} className='flex w-full flex-1 flex-col'>
-                {children}
-              </div>
-              <div ref={spacerRef} className='w-full shrink-0' />
+              <div
+                aria-hidden
+                className={cn(
+                  'pointer-events-none absolute inset-x-0 top-0 z-20',
+                  fadeHeight,
+                  'transition-opacity duration-200',
+                  canScrollTop ? 'opacity-100' : 'opacity-0',
+                )}
+                style={{
+                  background: 'linear-gradient(180deg, var(--BG_WHITE) 0%, transparent 100%)',
+                }}
+              />
+              <div
+                aria-hidden
+                className={cn(
+                  'pointer-events-none absolute inset-x-0 bottom-0 z-20',
+                  fadeHeight,
+                  'transition-opacity duration-200',
+                  canScrollBottom ? 'opacity-100' : 'opacity-0',
+                )}
+                style={{
+                  background: 'linear-gradient(0deg, var(--BG_WHITE) 0%, transparent 100%)',
+                }}
+              />
             </>
-          ) : (
-            children
+          )}
+
+          <div
+            ref={scrollRef}
+            onScroll={handleScroll}
+            className={cn(
+              'flex min-h-0 w-full flex-1 flex-col overflow-x-hidden overflow-y-auto [overflow-anchor:none]',
+              scrollbarStyle === 'thin' ? '[scrollbar-width:thin]' : '[scrollbar-width:none]',
+              scrollClassName,
+            )}
+          >
+            {enableAnchorScroll ? (
+              <>
+                <div ref={contentWrapperRef} className='flex w-full flex-1 flex-col'>
+                  {children}
+                </div>
+                <div ref={spacerRef} className='w-full shrink-0' />
+              </>
+            ) : (
+              children
+            )}
+          </div>
+
+          {showScrollToBottom && (
+            <Button
+              onClick={handleScrollToBottomClick}
+              variant='ghost'
+              className={cn(
+                'bg-GRAY_1000 hover:bg-GRAY_950 absolute bottom-2 left-1/2 z-20 h-6 w-6 -translate-x-1/2 rounded-full p-3',
+                'transition-all duration-200 ease-out',
+                showButton ? '-translate-y-2 opacity-100' : 'pointer-events-none translate-y-2 opacity-0',
+                scrollToBottomClassName,
+              )}
+              aria-label='Scroll to bottom'
+            >
+              <ArrowDownIcon size={14} className='text-BG_WHITE p-[2px]' />
+            </Button>
           )}
         </div>
-
-        {showScrollToBottom && (
-          <Button
-            onClick={handleScrollToBottomClick}
-            variant='ghost'
-            className={cn(
-              'bg-GRAY_1000 hover:bg-GRAY_950 absolute bottom-2 left-1/2 z-20 h-6 w-6 -translate-x-1/2 rounded-full p-3',
-              'transition-all duration-200 ease-out',
-              showButton ? '-translate-y-2 opacity-100' : 'pointer-events-none translate-y-2 opacity-0',
-              scrollToBottomClassName,
-            )}
-            aria-label='Scroll to bottom'
-          >
-            <ArrowDownIcon size={14} className='text-BG_WHITE p-[2px]' />
-          </Button>
-        )}
-      </div>
+      </ScrollRefContext.Provider>
     );
   },
 );
