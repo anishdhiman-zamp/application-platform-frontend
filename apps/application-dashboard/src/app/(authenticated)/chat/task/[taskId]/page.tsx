@@ -8,7 +8,7 @@ const ChatTaskPage = () => {
   const { activeTab } = useDynamicTabs({ type: TAB_TYPE.TASK });
   const taskId = activeTab?.id ?? '';
 
-  return <TaskContentInner taskId={taskId} />;
+  return <TaskContentInner key={taskId} taskId={taskId} />;
 };
 
 export default ChatTaskPage;
