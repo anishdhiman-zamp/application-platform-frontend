@@ -9,6 +9,7 @@ const MembersName: FC<MembersNamePropsType> = ({ name = '', value = '', member =
   const { isCurrentUserEmail } = useUserIdentity();
   const isCurrentUser = isCurrentUserEmail(value);
   const showCurrentUser = isCurrentUser && member;
+  const displayName = convertEmailUsernameToName(getUserNameFromEmail(name));
 
   return (
     !!name && (
@@ -19,11 +20,8 @@ const MembersName: FC<MembersNamePropsType> = ({ name = '', value = '', member =
           className='f-8-400 flex h-4 w-4 shrink-0 items-center justify-center rounded-full text-white dark:text-black'
         />
         <div className='flex min-w-0 items-center gap-1'>
-          <span
-            className='f-12-400 text-GRAY_1000 truncate'
-            title={convertEmailUsernameToName(getUserNameFromEmail(name))}
-          >
-            {convertEmailUsernameToName(getUserNameFromEmail(name))}
+          <span className='f-12-400 text-GRAY_1000 truncate' title={displayName}>
+            {displayName}
           </span>
           {showCurrentUser && <span className='f-12-400 text-GRAY_700 shrink-0'>(You)</span>}
         </div>
