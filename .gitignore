@@ -30,6 +30,9 @@ yarn-error.log*
 .env.production.local
 .env.local
 
+# auto-generated next.js type declarations
+next-env.d.ts
+
 
 # turbo
 .turbo

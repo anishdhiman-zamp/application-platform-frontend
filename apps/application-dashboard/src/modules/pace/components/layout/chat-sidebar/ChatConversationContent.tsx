@@ -40,6 +40,8 @@ export interface ChatConversationContentProps {
   onChatStateChange: (state: ChatState) => void;
   fileDropHandlerRef: React.RefObject<((files: FileList) => void) | null>;
   addFileReferenceRef: React.RefObject<((ref: { path: string; name: string }) => void) | null>;
+  currentUserName: string;
+  username: string;
 }
 
 const ChatConversationContent: FC<ChatConversationContentProps> = ({
@@ -54,6 +56,8 @@ const ChatConversationContent: FC<ChatConversationContentProps> = ({
   onChatStateChange,
   fileDropHandlerRef,
   addFileReferenceRef,
+  currentUserName,
+  username,
 }) => {
   const { pendingFileReference, clearPendingFileReference } = usePaceContext();
   const dispatch = useAppDispatch();
@@ -95,7 +99,7 @@ const ChatConversationContent: FC<ChatConversationContentProps> = ({
     if (chat.conversationId && chat.conversationId !== conversationId) {
       setConversationId(chat.conversationId, chatTitle);
     }
-  }, [chat.conversationId, setConversationId]);
+  }, [chat.conversationId, setConversationId, chatTitle, conversationId]);
 
   useEffect(() => {
     if (pendingFileReference && addFileReferenceRef.current) {
@@ -125,8 +129,8 @@ const ChatConversationContent: FC<ChatConversationContentProps> = ({
               autoFocus
               scope={ScopeType.ORGANIZATION}
               scopeId={organizationId}
-              username=''
-              currentUserName=''
+              username={username}
+              currentUserName={currentUserName}
               placeholder="Do your life's best work with Pace"
               conversationId={chat.conversationId ?? ''}
               onConversationCreated={handleConversationCreated}
