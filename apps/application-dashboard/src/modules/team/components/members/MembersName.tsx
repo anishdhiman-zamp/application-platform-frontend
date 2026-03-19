@@ -12,15 +12,20 @@ const MembersName: FC<MembersNamePropsType> = ({ name = '', value = '', member =
 
   return (
     !!name && (
-      <div className='flex h-full w-full items-center justify-start gap-1 px-2 py-3 text-left'>
+      <div className='flex h-full w-full min-w-0 items-center justify-start gap-1 px-2 py-3 text-left'>
         <Avatar
           name={name}
           backgroundColor={CSS_VARS.GRAY_1000}
-          className='f-8-400 flex h-4 w-4 items-center justify-center rounded-full text-white dark:text-black'
+          className='f-8-400 flex h-4 w-4 shrink-0 items-center justify-center rounded-full text-white dark:text-black'
         />
-        <div className='flex items-center justify-center gap-1'>
-          <span className='f-12-400 text-GRAY_1000'>{convertEmailUsernameToName(getUserNameFromEmail(name))}</span>
-          {showCurrentUser && <span className='f-12-400 text-GRAY_700'>(You)</span>}
+        <div className='flex min-w-0 items-center gap-1'>
+          <span
+            className='f-12-400 text-GRAY_1000 truncate'
+            title={convertEmailUsernameToName(getUserNameFromEmail(name))}
+          >
+            {convertEmailUsernameToName(getUserNameFromEmail(name))}
+          </span>
+          {showCurrentUser && <span className='f-12-400 text-GRAY_700 shrink-0'>(You)</span>}
         </div>
       </div>
     )
