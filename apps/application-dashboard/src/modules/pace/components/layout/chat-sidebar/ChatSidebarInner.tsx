@@ -117,6 +117,8 @@ const ChatSidebarInner: FC<ChatSidebarInnerProps> = ({
         onChatStateChange={handleChatStateChange}
         fileDropHandlerRef={fileDropHandlerRef}
         addFileReferenceRef={addFileReferenceRef}
+        currentUserName={currentUserName}
+        username={username}
       />
       {chatState && !chatState.showHomeView && (
         <div className='bg-BG_WHITE sticky bottom-0 z-10 mx-auto w-full max-w-[700px] px-3 pb-3'>
