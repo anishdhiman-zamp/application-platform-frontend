@@ -136,8 +136,11 @@ const ChatHistory = ({ onSelectConversation, onDeleteConversation }: ChatHistory
   }, [conversationHistory?.count]);
 
   useEffect(() => {
+    // fetchMoreOnBottomReached intentionally omitted from deps: we only want
+    // to re-trigger when the displayed list grows, not on every isFetching toggle.
+    // eslint-disable-next-line react-hooks/exhaustive-deps
     fetchMoreOnBottomReached(containerRef.current);
-  }, [fetchMoreOnBottomReached, displayConversations.length]);
+  }, [displayConversations.length]);
 
   useEffect(() => {
     if (page === 1) {
