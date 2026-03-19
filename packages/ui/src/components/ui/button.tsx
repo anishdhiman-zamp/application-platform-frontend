@@ -23,7 +23,7 @@ const buttonVariants = cva(
       variant: {
         default:
           'bg-GRAY_1000 text-BG_WHITE hover:bg-GRAY_1000/90 active:bg-GRAY_950 disabled:bg-GRAY_100 disabled:text-GRAY_700 disabled:cursor-not-allowed ',
-        destructive: 'bg-destructive text-GRAY_1000 hover:bg-destructive/90 ',
+        destructive: 'bg-destructive text-BG_WHITE hover:bg-destructive/90 ',
         outline:
           'border border-input bg-BG_WHITE hover:bg-accent hover:text-accent-GRAY_1000 disabled:bg-GRAY_100 disabled:text-GRAY_700',
         secondary:

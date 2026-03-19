@@ -220,6 +220,7 @@ export const API_ENDPOINTS = {
   TRIGGER_SUBSCRIPTIONS_DELETE: `trigger-subscriptions/{{subscription_id}}`,
   // Update Conversation Title
   UPDATE_CONVERSATION_TITLE: `v4/conversations/{{conversationId}}/title`,
+  CONVERSATION_DELETE: `v4/conversations/{{conversationId}}`,
 
   //INTEGRATIONS
   INTEGRATIONS_CATALOG_GET: `integrations/catalog`,

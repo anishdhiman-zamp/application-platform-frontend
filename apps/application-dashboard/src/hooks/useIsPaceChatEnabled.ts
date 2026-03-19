@@ -1,0 +1,16 @@
+'use client';
+
+import { FEATURE_FLAGS } from '@/constants/featureFlags';
+import { useFeatureFlag } from '@/hooks/useFeatureFlag';
+import { isMacsProduct } from '@/utils/cookie';
+
+export const useIsPaceChatEnabled = () => {
+  const { isEnabled, isLoading } = useFeatureFlag(FEATURE_FLAGS.ZAMP_INTERNAL);
+  const isMacs = isMacsProduct();
+
+  if (isMacs) {
+    return { isEnabled: true, isLoading: false };
+  }
+
+  return { isEnabled, isLoading };
+};

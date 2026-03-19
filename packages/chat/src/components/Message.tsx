@@ -92,7 +92,10 @@ export const Message: FC<MessageProps> = ({
         isLoading={isLoading}
       />
       {streamingEnabled && (
-        <div
+        <motion.div
+          initial={isLastMessage ? { opacity: 0 } : false}
+          animate={{ opacity: 1 }}
+          transition={{ duration: 0.3, ease: 'easeOut' }}
           className={cn(
             'flex items-center',
             isLastMessage ? 'visible' : 'invisible group-hover:visible',
@@ -111,7 +114,7 @@ export const Message: FC<MessageProps> = ({
               organizationId={organizationId}
             />
           )}
-        </div>
+        </motion.div>
       )}
     </Component>
   );
