@@ -1,6 +1,7 @@
 'use client';
 
 import { useCallback, useEffect, useRef, useState } from 'react';
+import { SenderType } from '@zamp-platform/chat';
 
 interface UseChatScrollOptions {
   /** Number of messages to trigger scroll behavior */
@@ -11,8 +12,8 @@ interface UseChatScrollOptions {
   streamingState?: unknown;
   /** Distance from bottom (in px) to consider "at bottom" */
   bottomThreshold?: number;
-  /** Sender type of the last message - when 'USER', scrolls so the new message appears at the top of the viewport */
-  lastMessageSenderType?: string;
+  /** Sender type of the last message - when SenderType.USER, scrolls so the new message appears at the top of the viewport */
+  lastMessageSenderType?: SenderType;
   /** Ref to the bottom spacer div - its height is controlled dynamically so response fills viewport from top */
   emptyDivRef?: React.RefObject<HTMLDivElement | null>;
 }
@@ -220,7 +221,7 @@ export const useChatScroll = ({
         return;
       }
 
-      if (lastMessageSenderType === 'USER') {
+      if (lastMessageSenderType === SenderType.USER) {
         if (lastUserScrollLengthRef.current !== messagesLength) {
           lastUserScrollLengthRef.current = messagesLength;
           requestAnimationFrame(() => {

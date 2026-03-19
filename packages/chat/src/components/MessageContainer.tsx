@@ -77,6 +77,10 @@ export const MessageContainer: FC<MessageContainerProps> = ({
   }, []);
 
   useEffect(() => {
+    setAnimatedLength(messages?.length ?? 0);
+  }, [conversationId]);
+
+  useEffect(() => {
     if (messages?.length > 0) {
       // Use instant scroll on first load, smooth scroll for subsequent updates
       const behavior = isInitialScrollRef.current ? 'instant' : 'smooth';
