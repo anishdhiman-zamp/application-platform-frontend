@@ -43,6 +43,7 @@ export const ROUTES_PATH = {
   CHAT_FILES: '/chat/files',
   CHAT_SETTINGS: '/chat/settings',
   CHAT_SETTINGS_PEOPLE: '/chat/settings/people',
+  CHAT_TASKS: '/chat/task',
   CHAT_SETTINGS_INTEGRATIONS: '/chat/settings/integrations',
   CHAT_SETTINGS_GENERAL: '/chat/settings/general',
   CHAT_TASK: '/chat/task/:taskId',

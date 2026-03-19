@@ -11,7 +11,7 @@ interface StatusConfig {
 const STATUS_ICON_CONFIG: Record<TaskStatus, StatusConfig> = {
   [TASK_STATUS.COMPLETED]: { fill: CSS_VARS.GREEN_100, stroke: CSS_VARS.GREEN_800 },
   [TASK_STATUS.IN_PROGRESS]: { fill: CSS_VARS.BLUE_100, stroke: CSS_VARS.BLUE_700 },
-  [TASK_STATUS.FAILED]: { fill: 'transparent', stroke: CSS_VARS.RED_300, isDiamond: true },
+  [TASK_STATUS.FAILED]: { fill: CSS_VARS.RED_100, stroke: CSS_VARS.RED_800, isDiamond: true },
   [TASK_STATUS.NEEDS_INPUT]: { fill: CSS_VARS.ORANGE_200, stroke: CSS_VARS.ORANGE_800, isDiamond: true },
 };
 
