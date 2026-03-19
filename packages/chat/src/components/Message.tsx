@@ -3,7 +3,7 @@
 import { cn } from '@zamp-platform/ui/utils';
 import { formatChatTimestamp, formatChatTimestampTooltip, formatTimestampToUTC } from '@zamp-platform/utils';
 import { motion } from 'motion/react';
-import { FC, ReactNode, useMemo } from 'react';
+import React, { FC, ReactNode, useMemo } from 'react';
 
 import { ButtonBlockType } from '../types/block.types';
 import { ChatMessage, SenderType } from '../types/chat.types';
@@ -54,6 +54,7 @@ export const Message: FC<MessageProps> = ({
 }) => {
   const isUserMessage = message.sender_type === SenderType.USER;
   const shouldAlignRight = alignUserRight && isUserMessage;
+  const sharedClassName = cn('group space-y-3', shouldAlignRight && 'flex flex-col items-end', containerClassName);
 
   const formattedTimestamp = useMemo(
     () => (message.timestamp ? formatChatTimestamp(formatTimestampToUTC(message.timestamp)) : ''),
@@ -65,18 +66,8 @@ export const Message: FC<MessageProps> = ({
     [message.timestamp],
   );
 
-  const Component = shouldAnimate ? motion.div : 'div';
-
-  return (
-    <Component
-      data-sender-type={message.sender_type}
-      className={cn('group space-y-3', shouldAlignRight && 'flex flex-col items-end', containerClassName)}
-      {...(shouldAnimate && {
-        initial: { opacity: 0, y: 20 },
-        animate: { opacity: 1, y: 0 },
-        transition: { duration: 0.3, ease: 'easeOut', delay: 0.3 },
-      })}
-    >
+  const innerContent = (
+    <>
       {message.sender_type === SenderType.ASSISTANT && assistantAvatar}
 
       <BlockRenderer
@@ -116,7 +107,27 @@ export const Message: FC<MessageProps> = ({
           )}
         </motion.div>
       )}
-    </Component>
+    </>
+  );
+
+  if (isUserMessage && isLastMessage) {
+    return (
+      <motion.div
+        data-sender-type={message.sender_type}
+        className={sharedClassName}
+        initial={shouldAnimate ? { opacity: 0, y: 20 } : false}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ duration: 0.3, ease: 'easeOut', delay: 0.3 }}
+      >
+        {innerContent}
+      </motion.div>
+    );
+  }
+
+  return (
+    <div data-sender-type={message.sender_type} className={sharedClassName}>
+      {innerContent}
+    </div>
   );
 };
 
