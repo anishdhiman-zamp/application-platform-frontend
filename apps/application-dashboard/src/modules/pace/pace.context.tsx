@@ -88,15 +88,7 @@ export const PaceProvider = ({ children }: { children: ReactNode }) => {
     setPendingFileReference(null);
   }, []);
 
-  const toggleFilesPanel = useCallback(() => {
-    if (filesPanelPinned) {
-      setFilesPanelPinned(false);
-      setFilesPanelOpen(false);
-
-      return;
-    }
-    setFilesPanelOpen((prev) => !prev);
-  }, [filesPanelPinned]);
+  }, [filesPanelPinned, setFilesPanelPinned]);
 
   const closeFilesPanel = useCallback(() => {
     setFilesPanelOpen(false);
