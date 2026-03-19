@@ -83,7 +83,7 @@ export const RichTextEditor = forwardRef<RichTextEditorHandle, RichTextEditorPro
           isClearingRef.current = false;
           setIsClearing(false);
         });
-      }, 100);
+      }, 150);
     };
 
     useEffect(() => {
@@ -247,8 +247,8 @@ export const RichTextEditor = forwardRef<RichTextEditorHandle, RichTextEditorPro
               opacity: 0,
               y: -30,
               transition: {
-                opacity: { duration: 0.1, ease: 'easeOut' },
-                y: { duration: 0.1, ease: [0.3, 0.0, 1.0, 1.0] },
+                opacity: { duration: 0.15, ease: 'easeOut' },
+                y: { duration: 0.15, ease: [0.3, 0.0, 1.0, 1.0] },
               },
             },
           }}
