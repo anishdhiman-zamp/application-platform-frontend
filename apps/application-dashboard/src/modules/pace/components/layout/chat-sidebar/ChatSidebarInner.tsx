@@ -47,7 +47,7 @@ const ChatSidebarInner: FC<ChatSidebarInnerProps> = ({
   const { chatSidebarState, setChatSidebarState } = usePaceContext();
   const { inputValue, setInputValue } = useChatDraftInput({ conversationId });
 
-  const isOnChatRoute = pathname === ROUTES_PATH.CHAT && searchParams?.size === 0;
+  const isOnChatRoute = pathname === ROUTES_PATH.CHAT && !searchParams?.has('f');
 
   const organizationId = useAppSelector((state: RootState) => state.user.user?.orgs?.[0]?.organization_id) ?? '';
   const currentUserName = useAppSelector((state: RootState) => state.user.user?.user_name) ?? '';
