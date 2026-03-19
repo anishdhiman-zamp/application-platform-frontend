@@ -16,7 +16,7 @@ import EmptyStateListing from '@/modules/team/components/EmptyStateListing';
 import type { RootState } from '@/store';
 import type { FeedbackItemType } from '@/types/api/feedbacks.types';
 
-const PAGE_SIZE = 20;
+const PAGE_SIZE = 30;
 const SEARCH_DEBOUNCE_MS = 300;
 
 interface ChatHistoryProps {
@@ -136,6 +136,13 @@ const ChatHistory = ({ onSelectConversation, onDeleteConversation }: ChatHistory
   }, [conversationHistory?.count]);
 
   useEffect(() => {
+    // fetchMoreOnBottomReached intentionally omitted from deps: we only want
+    // to re-trigger when the displayed list grows, not on every isFetching toggle.
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+    fetchMoreOnBottomReached(containerRef.current);
+  }, [displayConversations.length]);
+
+  useEffect(() => {
     if (page === 1) {
       setAllConversations(conversations);
     } else if (conversations.length > 0) {
@@ -192,10 +199,10 @@ const ChatHistory = ({ onSelectConversation, onDeleteConversation }: ChatHistory
             className='h-full flex-col items-center justify-center py-12 text-center'
           />
         }
-        className='min-h-0 flex-1 pb-4'
+        className='flex min-h-0 flex-1 flex-col overflow-hidden pb-4'
         disableAnimation
       >
-        <div ref={containerRef} className='h-full overflow-y-auto [scrollbar-width:none]' onScroll={handleScroll}>
+        <div ref={containerRef} className='flex-1 overflow-y-auto [scrollbar-width:none]' onScroll={handleScroll}>
           <div className='w-full space-y-0.5 pr-3'>
             {displayConversations.map((conversation) => (
               <ChatHistoryItem
