@@ -13,6 +13,11 @@ export interface ScrollContainerRef {
   getScrollElement: () => HTMLDivElement | null;
 }
 
+const enum SenderType {
+  USER = 'USER',
+  ASSISTANT = 'ASSISTANT',
+}
+
 interface ScrollContainerProps {
   children: React.ReactNode;
   className?: string;
@@ -28,9 +33,19 @@ interface ScrollContainerProps {
   bottomThreshold?: number;
   scrollToBottomClassName?: string;
   scrollbarStyle?: 'thin' | 'none';
+  /** Enable user-message-to-top scroll anchoring with dynamic spacer */
+  enableAnchorScroll?: boolean;
+  /** Sender type of the last message — drives anchor scroll vs spacer update */
+  lastMessageSenderType?: string;
+  /** Whether conversation data is loading — resets anchor state on conversation switch */
+  isLoading?: boolean;
+  /** Streaming state — triggers spacer recalculation as response grows */
+  streamingState?: unknown;
 }
 
 const SNAP_BOTTOM_THRESHOLD = 2;
+/** Visual padding (px) above the user message when anchored to top */
+const USER_MESSAGE_TOP_PADDING = 100;
 
 const ScrollContainer = forwardRef<ScrollContainerRef, ScrollContainerProps>(
   (
@@ -44,9 +59,13 @@ const ScrollContainer = forwardRef<ScrollContainerRef, ScrollContainerProps>(
       showScrollToBottom = false,
       scrollTrigger,
       autoScrollToBottom = false,
-      bottomThreshold = 100,
+      bottomThreshold = 600,
       scrollToBottomClassName,
       scrollbarStyle = 'thin',
+      enableAnchorScroll = false,
+      lastMessageSenderType,
+      isLoading = false,
+      streamingState,
     },
     ref,
   ) => {
@@ -57,6 +76,14 @@ const ScrollContainer = forwardRef<ScrollContainerRef, ScrollContainerProps>(
     const isInitialScrollRef = useRef(true);
     const isProgrammaticScrollRef = useRef(false);
     const isAutoScrollActiveRef = useRef(true);
+
+    // Anchor mode refs
+    const spacerRef = useRef<HTMLDivElement>(null);
+    const contentWrapperRef = useRef<HTMLDivElement>(null);
+    const previousIsLoadingRef = useRef(false);
+    const lastUserScrollLengthRef = useRef<number | null>(null);
+    const resizeObserverRef = useRef<ResizeObserver | null>(null);
+    const userMsgAnchorRef = useRef<number | null>(null);
 
     const updateScrollState = useCallback(() => {
       const el = scrollRef.current;
@@ -79,6 +106,68 @@ const ScrollContainer = forwardRef<ScrollContainerRef, ScrollContainerProps>(
       },
       [bottomThreshold],
     );
+
+    // --- Anchor mode functions ---
+
+    const updateSpacerHeight = useCallback(() => {
+      const container = scrollRef.current;
+      const spacer = spacerRef.current;
+      const anchorTop = userMsgAnchorRef.current;
+
+      if (!container || !spacer || anchorTop === null) return;
+
+      const spacerCurrentHeight = spacer.offsetHeight;
+      const contentHeight = container.scrollHeight - spacerCurrentHeight;
+      const contentFromAnchor = Math.max(0, contentHeight - anchorTop);
+      const newSpacerHeight = Math.max(0, container.clientHeight - contentFromAnchor - USER_MESSAGE_TOP_PADDING);
+
+      spacer.style.height = `${newSpacerHeight}px`;
+    }, []);
+
+    const resetSpacer = useCallback(() => {
+      const spacer = spacerRef.current;
+
+      if (!spacer) return;
+      spacer.style.height = '';
+      spacer.style.minHeight = '';
+    }, []);
+
+    const scrollToLastUserMessage = useCallback(
+      (isInitial = false) => {
+        const container = scrollRef.current;
+        const spacer = spacerRef.current;
+
+        if (!container) return;
+
+        if (spacer) {
+          spacer.style.minHeight = '0px';
+          spacer.style.height = `${container.clientHeight}px`;
+        }
+
+        const userMessages = container.querySelectorAll<HTMLElement>('[data-sender-type="USER"]');
+        const lastUserMessage = userMessages[userMessages.length - 1];
+
+        if (!lastUserMessage) {
+          userMsgAnchorRef.current = null;
+          container.scrollTo({ top: container.scrollHeight, behavior: isInitial ? 'instant' : 'smooth' });
+        } else {
+          const containerRect = container.getBoundingClientRect();
+          const msgRect = lastUserMessage.getBoundingClientRect();
+          const anchorTop = msgRect.top - containerRect.top + container.scrollTop;
+
+          userMsgAnchorRef.current = anchorTop;
+          container.scrollTo({
+            top: anchorTop - USER_MESSAGE_TOP_PADDING,
+            behavior: isInitial ? 'instant' : 'smooth',
+          });
+        }
+
+        updateSpacerHeight();
+      },
+      [updateSpacerHeight],
+    );
+
+    // --- Common functions ---
 
     const handleScroll = useCallback(() => {
       if (isProgrammaticScrollRef.current) {
@@ -139,6 +228,7 @@ const ScrollContainer = forwardRef<ScrollContainerRef, ScrollContainerProps>(
       [scrollToBottom, scrollToTop, checkIfAtBottom],
     );
 
+    // --- Scroll trigger effect (handles both anchor and default modes) ---
     useEffect(() => {
       if (scrollTrigger === undefined) return;
 
@@ -146,6 +236,39 @@ const ScrollContainer = forwardRef<ScrollContainerRef, ScrollContainerProps>(
 
       if (!el) return;
 
+      if (enableAnchorScroll && !isLoading && scrollTrigger > 0) {
+        const isInitial = isInitialScrollRef.current;
+
+        if (isInitial) {
+          isInitialScrollRef.current = false;
+          requestAnimationFrame(() => {
+            scrollToLastUserMessage(true);
+            updateScrollState();
+          });
+
+          return;
+        }
+
+        if (lastMessageSenderType === SenderType.USER) {
+          if (lastUserScrollLengthRef.current !== scrollTrigger) {
+            lastUserScrollLengthRef.current = scrollTrigger;
+            requestAnimationFrame(() => {
+              scrollToLastUserMessage();
+              updateScrollState();
+            });
+          }
+        } else {
+          lastUserScrollLengthRef.current = 0;
+          requestAnimationFrame(() => {
+            updateSpacerHeight();
+            updateScrollState();
+          });
+        }
+
+        return;
+      }
+
+      // Default mode: scroll to bottom
       const behavior: ScrollBehavior = isInitialScrollRef.current ? 'instant' : 'smooth';
 
       isAutoScrollActiveRef.current = true;
@@ -157,8 +280,44 @@ const ScrollContainer = forwardRef<ScrollContainerRef, ScrollContainerProps>(
         }
         isProgrammaticScrollRef.current = false;
       });
-    }, [scrollTrigger]);
+    }, [
+      scrollTrigger,
+      enableAnchorScroll,
+      isLoading,
+      lastMessageSenderType,
+      scrollToLastUserMessage,
+      updateSpacerHeight,
+      updateScrollState,
+    ]);
 
+    // --- Loading reset (anchor mode) ---
+    useEffect(() => {
+      if (!enableAnchorScroll) return;
+
+      if (isLoading && !previousIsLoadingRef.current) {
+        isInitialScrollRef.current = true;
+        lastUserScrollLengthRef.current = 0;
+        userMsgAnchorRef.current = null;
+        resetSpacer();
+      }
+      previousIsLoadingRef.current = isLoading;
+    }, [isLoading, enableAnchorScroll, resetSpacer]);
+
+    // --- Streaming spacer update (anchor mode) ---
+    useEffect(() => {
+      if (!enableAnchorScroll) return;
+
+      if (!isInitialScrollRef.current) {
+        const isAtBottom = checkIfAtBottom();
+
+        setShowButton(!isAtBottom);
+        updateSpacerHeight();
+      }
+
+      updateScrollState();
+    }, [streamingState, enableAnchorScroll, checkIfAtBottom, updateScrollState, updateSpacerHeight]);
+
+    // --- Auto scroll to bottom (default mode) ---
     useEffect(() => {
       if (!autoScrollToBottom) return;
 
@@ -196,10 +355,36 @@ const ScrollContainer = forwardRef<ScrollContainerRef, ScrollContainerProps>(
       };
     }, [autoScrollToBottom]);
 
+    // --- ResizeObserver for content changes (anchor mode) ---
+    useEffect(() => {
+      if (!enableAnchorScroll) return;
+
+      const node = contentWrapperRef.current;
+
+      if (!node) return;
+
+      const observer = new ResizeObserver(() => {
+        if (!isInitialScrollRef.current) {
+          updateSpacerHeight();
+        }
+      });
+
+      observer.observe(node);
+      resizeObserverRef.current = observer;
+
+      return () => {
+        observer.disconnect();
+        resizeObserverRef.current = null;
+      };
+    }, [enableAnchorScroll, updateSpacerHeight]);
+
     const handleScrollToBottomClick = useCallback(() => {
+      if (enableAnchorScroll) {
+        userMsgAnchorRef.current = null;
+      }
       isAutoScrollActiveRef.current = true;
       scrollToBottom('smooth');
-    }, [scrollToBottom]);
+    }, [scrollToBottom, enableAnchorScroll]);
 
     const showOverlays = showFadeOverlay && !disableFadeOverlay;
 
@@ -238,12 +423,21 @@ const ScrollContainer = forwardRef<ScrollContainerRef, ScrollContainerProps>(
           ref={scrollRef}
           onScroll={handleScroll}
           className={cn(
-            'flex min-h-0 w-full flex-1 flex-col overflow-x-hidden overflow-y-auto',
+            'flex min-h-0 w-full flex-1 flex-col overflow-x-hidden overflow-y-auto [overflow-anchor:none]',
             scrollbarStyle === 'thin' ? '[scrollbar-width:thin]' : '[scrollbar-width:none]',
             scrollClassName,
           )}
         >
-          {children}
+          {enableAnchorScroll ? (
+            <>
+              <div ref={contentWrapperRef} className='flex w-full flex-1 flex-col'>
+                {children}
+              </div>
+              <div ref={spacerRef} className='w-full shrink-0' />
+            </>
+          ) : (
+            children
+          )}
         </div>
 
         {showScrollToBottom && (
