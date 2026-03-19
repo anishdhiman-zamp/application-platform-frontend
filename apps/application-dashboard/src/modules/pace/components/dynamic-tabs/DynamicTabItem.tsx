@@ -1,7 +1,6 @@
 'use client';
 
 import { type ReactNode, useCallback, useRef, useState } from 'react';
-import { Button } from '@zamp-platform/ui';
 import { cn } from '@zamp-platform/ui/utils';
 import { X } from 'lucide-react';
 import { TAB_CONTEXT_MENU_ACTION_IDS } from 'modules/pace/components/dynamic-tabs/dynamic-tabs.constants';
@@ -105,12 +104,13 @@ const DynamicTabItem = ({
           onOpenChange={setIsContextMenuOpen}
           onActionClick={handleContextMenuAction}
         >
-          <Button
-            variant='ghost'
+          <div
+            role='button'
+            tabIndex={0}
             onClick={handleClick}
             style={{ minWidth: 0 }}
             className={cn(
-              'group text-GRAY_700 hover:text-GRAY_1000 hover:bg-GRAY_200 relative flex h-[30px] w-full cursor-pointer items-center justify-start gap-x-2 rounded-[8px] border-[0.75px] border-transparent p-1.5 transition-all duration-150 ease-in-out',
+              'group text-GRAY_700 hover:text-GRAY_1000 hover:bg-GRAY_200 relative flex h-[30px] w-full cursor-pointer items-center justify-start gap-x-2 rounded-[8px] border-[0.75px] border-transparent p-1.5 transition-colors duration-150 ease-in-out',
               isActive &&
                 'border-GRAY_500 shadow-tab-shadow text-GRAY_1000 bg-BG_WHITE hover:bg-BG_WHITE border-[0.75px]',
             )}
@@ -118,32 +118,32 @@ const DynamicTabItem = ({
             {isCompact ? (
               <span className='relative flex size-4 shrink-0 items-center justify-center'>
                 <span className='flex items-center justify-center group-hover:hidden'>{icon}</span>
-                <Button
+                <div
                   id='dynamic-tab-close-button'
-                  variant='ghost'
-                  size='xxsmall'
+                  role='button'
+                  tabIndex={0}
                   onClick={(e) => onClose(e, tab.id)}
-                  className='absolute inset-0 hidden h-4 w-4 items-center justify-center p-0 group-hover:flex'
+                  className='hover:bg-accent absolute inset-0 hidden h-4 w-4 cursor-pointer items-center justify-center rounded-sm p-0 group-hover:flex'
                 >
                   <X size={12} className='text-GRAY_700' />
-                </Button>
+                </div>
               </span>
             ) : (
               icon
             )}
             <span className='f-13-500 min-w-0 flex-1 truncate text-left'>{tab.name}</span>
             {!isCompact && (
-              <Button
+              <div
                 id='dynamic-tab-close-button'
-                variant='ghost'
-                size='xxsmall'
+                role='button'
+                tabIndex={0}
                 onClick={(e) => onClose(e, tab.id)}
-                className='ml-0.5 h-4 w-4 shrink-0 p-0 opacity-0 group-hover:opacity-100'
+                className='hover:bg-accent ml-0.5 flex h-4 w-4 cursor-pointer items-center justify-center rounded-sm p-0 opacity-0 group-hover:opacity-100'
               >
                 <X size={12} className='text-GRAY_700' />
-              </Button>
+              </div>
             )}
-          </Button>
+          </div>
         </DynamicTabContextMenu>
       </div>
     </TooltipV2>

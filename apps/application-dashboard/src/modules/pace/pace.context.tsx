@@ -7,6 +7,7 @@ import { getRouteSignificantUrl, getStoredTabs, setStoredTabs } from 'modules/pa
 import { usePathname, useSearchParams } from 'next/navigation';
 import { ROUTES_PATH } from '@/constants/routeConfig';
 import { defaultFnType } from '@/types/commonTypes';
+import { getFromLocalStorage, LOCAL_STORAGE_KEYS, setToLocalStorage } from '@/utils/localstorage';
 
 export interface PendingFileReference {
   path: string;
@@ -35,6 +36,12 @@ interface PaceContextType {
   pendingFileReference: PendingFileReference | null;
   setPendingFileReference: (ref: PendingFileReference | null) => void;
   clearPendingFileReference: defaultFnType;
+
+  filesPanelOpen: boolean;
+  filesPanelPinned: boolean;
+  toggleFilesPanel: defaultFnType;
+  setFilesPanelPinned: (pinned: boolean) => void;
+  closeFilesPanel: defaultFnType;
 }
 
 const PaceContext = createContext<PaceContextType | null>(null);
@@ -50,6 +57,8 @@ export const PaceProvider = ({ children }: { children: ReactNode }) => {
   const [isDynamicTabsHydrated, setIsDynamicTabsHydrated] = useState(false);
   const [activeTabId, setActiveTabId] = useState<string | null>(null);
   const [pendingFileReference, setPendingFileReference] = useState<PendingFileReference | null>(null);
+  const [filesPanelOpen, setFilesPanelOpen] = useState(false);
+  const [filesPanelPinned, setFilesPanelPinnedRaw] = useState(false);
 
   const routeUrl = getRouteSignificantUrl(pathname, searchParams);
   const prevRouteUrlRef = useRef(routeUrl);
@@ -57,6 +66,7 @@ export const PaceProvider = ({ children }: { children: ReactNode }) => {
 
   chatSidebarStateRef.current = chatSidebarState;
   const isOnChatRoute = pathname === ROUTES_PATH.CHAT;
+  const hasFileParam = searchParams?.has('f') ?? false;
 
   const setChatSidebarStateInternal = useCallback((next: ChatSidebarState) => {
     setChatSidebarStateRaw((prev) => {
@@ -78,18 +88,38 @@ export const PaceProvider = ({ children }: { children: ReactNode }) => {
     setPendingFileReference(null);
   }, []);
 
+  const toggleFilesPanel = useCallback(() => {
+    if (filesPanelPinned) {
+      setFilesPanelPinned(false);
+      setFilesPanelOpen(false);
+
+      return;
+    }
+    setFilesPanelOpen((prev) => !prev);
+  }, [filesPanelPinned]);
+
+  const closeFilesPanel = useCallback(() => {
+    setFilesPanelOpen(false);
+  }, []);
+
+  const setFilesPanelPinned = useCallback((pinned: boolean) => {
+    setFilesPanelPinnedRaw(pinned);
+    setFilesPanelOpen(true);
+    setToLocalStorage(LOCAL_STORAGE_KEYS.PACE_FILES_PANEL_PINNED, JSON.stringify(pinned));
+  }, []);
+
   useEffect(() => {
     if (prevRouteUrlRef.current === routeUrl) {
       return;
     }
     prevRouteUrlRef.current = routeUrl;
 
-    if (isOnChatRoute) {
+    if (isOnChatRoute && !hasFileParam) {
       setChatSidebarStateInternal(CHAT_SIDEBAR_STATE.EXPANDED);
     } else if (chatSidebarStateRef.current === CHAT_SIDEBAR_STATE.EXPANDED) {
       setChatSidebarStateInternal(CHAT_SIDEBAR_STATE.COLLAPSED);
     }
-  }, [routeUrl, isOnChatRoute]);
+  }, [routeUrl, isOnChatRoute, hasFileParam]);
 
   useEffect(() => {
     const storedTabs = getStoredTabs();
@@ -97,11 +127,24 @@ export const PaceProvider = ({ children }: { children: ReactNode }) => {
     setDynamicTabs(storedTabs);
     setIsDynamicTabsHydrated(true);
 
-    const currentPath = window.location.pathname;
-    const isChatPath = currentPath === ROUTES_PATH.CHAT;
-    const hasSidebarConversation = new URLSearchParams(window.location.search).has(SIDEBAR_CONVERSATION_ID_PARAM);
+    const storedPinned = getFromLocalStorage(LOCAL_STORAGE_KEYS.PACE_FILES_PANEL_PINNED);
 
-    if (isChatPath) {
+    if (storedPinned) {
+      const pinned = JSON.parse(storedPinned);
+
+      setFilesPanelPinnedRaw(pinned);
+      if (pinned) {
+        setFilesPanelOpen(true);
+      }
+    }
+
+    const currentPath = window.location.pathname;
+    const currentSearch = new URLSearchParams(window.location.search);
+    const isChatPath = currentPath === ROUTES_PATH.CHAT;
+    const hasFileParamOnMount = currentSearch.has('f');
+    const hasSidebarConversation = currentSearch.has(SIDEBAR_CONVERSATION_ID_PARAM);
+
+    if (isChatPath && !hasFileParamOnMount) {
       setChatSidebarStateInternal(CHAT_SIDEBAR_STATE.EXPANDED);
     } else if (hasSidebarConversation) {
       setChatSidebarStateInternal(CHAT_SIDEBAR_STATE.SIDEBAR);
@@ -205,6 +248,12 @@ export const PaceProvider = ({ children }: { children: ReactNode }) => {
       pendingFileReference,
       setPendingFileReference,
       clearPendingFileReference,
+
+      filesPanelOpen,
+      filesPanelPinned,
+      toggleFilesPanel,
+      setFilesPanelPinned,
+      closeFilesPanel,
     }),
     [
       chatSidebarState,
@@ -226,6 +275,12 @@ export const PaceProvider = ({ children }: { children: ReactNode }) => {
 
       pendingFileReference,
       clearPendingFileReference,
+
+      filesPanelOpen,
+      filesPanelPinned,
+      toggleFilesPanel,
+      setFilesPanelPinned,
+      closeFilesPanel,
     ],
   );
 

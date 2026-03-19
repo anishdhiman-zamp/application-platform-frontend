@@ -116,7 +116,7 @@ const DynamicTabsBar = () => {
 
   return (
     <>
-      <div className='bg-GRAY_400 mx-3 h-4 w-px shrink-0' />
+      <div className='bg-GRAY_400 mr-2 ml-1 h-4 w-px shrink-0' />
       <DndContext
         sensors={sensors}
         collisionDetection={closestCenter}

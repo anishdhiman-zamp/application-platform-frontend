@@ -26,12 +26,18 @@ export const COLLAPSED_SIDEBAR_BEZIER = {
 };
 
 export const TAB_CHANGE_FADE = {
-  duration: 0.15,
+  duration: 0.45,
   ease: 'easeInOut',
 } as const;
 
 export const NO_ANIMATION = {
   duration: 0,
+} as const;
+
+export const FILES_PANEL_SPACER_TRANSITION = {
+  type: 'spring',
+  stiffness: 400,
+  damping: 30,
 } as const;
 
 export type SidebarTransitionDirection =

@@ -81,3 +81,11 @@ export interface DynamicTab {
   icon?: string;
   metadata?: Record<string, unknown>;
 }
+
+export const FILES_PANEL_STATE = {
+  CLOSED: 'closed',
+  DRAWER: 'drawer',
+  PINNED: 'pinned',
+} as const;
+
+export type FilesPanelState = (typeof FILES_PANEL_STATE)[keyof typeof FILES_PANEL_STATE];

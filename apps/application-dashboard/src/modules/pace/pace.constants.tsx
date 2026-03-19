@@ -1,4 +1,4 @@
-import { FolderOpenIcon, SettingsIcon } from '@zamp-platform/ui';
+import { SettingsIcon } from '@zamp-platform/ui';
 import { Link2, UserPen } from 'lucide-react';
 import { PaceNavbarItemId, PaceNavbarItemSchema, PaceSettingsTabSchema } from 'modules/pace/pace.types';
 import Users02 from '@/assets/Icons/Users02';
@@ -10,15 +10,11 @@ export const ACCEPTED_FILE_TYPES = `${INPUT_FILE_FORMATS.TXT},${INPUT_FILE_FORMA
 export const DEFAULT_CHAT_TITLE = 'Untitled';
 export const DEBOUNCE_DELAY_MS = 300;
 export const NEW_CONVERSATION_ID = 'null_thread';
-export const SIDEBAR_WIDTH = 524;
+export const SIDEBAR_WIDTH = 450;
 export const SIDEBAR_CONVERSATION_ID_PARAM = 's';
+export const FILES_PANEL_WIDTH = 325;
 
 export const PACE_NAVBAR_ITEMS: PaceNavbarItemSchema[] = [
-  {
-    id: PaceNavbarItemId.FILES,
-    iconComponent: FolderOpenIcon,
-    path: ROUTES_PATH.CHAT_FILES,
-  },
   {
     id: PaceNavbarItemId.SETTINGS,
     iconComponent: SettingsIcon,
