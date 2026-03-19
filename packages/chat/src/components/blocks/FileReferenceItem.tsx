@@ -1,6 +1,6 @@
-import { Button } from '@zamp-platform/ui';
+import { Button, FileIcon } from '@zamp-platform/ui';
 import { cn } from '@zamp-platform/ui/utils';
-import { CircleX, FileText, LoaderCircle } from 'lucide-react';
+import { CircleX, LoaderCircle } from 'lucide-react';
 import React from 'react';
 
 import { useChatActions } from '../../context/ChatActionsContext';
@@ -12,14 +12,6 @@ interface FileReferenceItemProps {
   isLoading?: boolean;
   className?: string;
 }
-
-const getFileIcon = () => {
-  return (
-    <div className='bg-accent flex h-5 w-6 items-center justify-center rounded-md [&_svg]:size-3.5'>
-      <FileText />
-    </div>
-  );
-};
 
 const FileReferenceItem: React.FC<FileReferenceItemProps> = ({ fileReference, onRemove, isLoading, className }) => {
   const { onFileOpen } = useChatActions();
@@ -43,7 +35,7 @@ const FileReferenceItem: React.FC<FileReferenceItemProps> = ({ fileReference, on
       onClick={handleClick}
     >
       <div className='flex items-center gap-1'>
-        {getFileIcon()}
+        <FileIcon extension={fileReference.name || 'txt'} className='size-5 rounded-md' iconClassName='size-4' />
         <span className='f-12-500 max-w-[104px] truncate'>{fileReference.name}</span>
       </div>
       {fileReference.path && onRemove && (

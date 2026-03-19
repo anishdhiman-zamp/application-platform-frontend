@@ -1,16 +1,26 @@
+import {
+  AFTERNOON_GREETINGS,
+  EVENING_GREETINGS,
+  MORNING_GREETINGS,
+  NIGHT_GREETINGS,
+} from '@/modules/pace/pace.constants';
 import type { SkillApiError } from '@/types/api/skills.types';
 
+/** Returns a random element from the given array */
+const pickRandom = (arr: string[]) => arr[Math.floor(Math.random() * arr.length)];
+
 /**
- * function to return the greeting based on the hour
- * @returns string
+ * Returns a varied greeting based on time of day
+ * Morning: 5am - 12pm | Afternoon: 12pm - 5pm | Evening: 5pm - 9pm | Night: 9pm - 5am
  */
 export const getGreeting = (): string => {
   const hour = new Date().getHours();
 
-  if (hour < 12) return 'Morning';
-  if (hour < 17) return 'Afternoon';
+  if (hour >= 5 && hour < 12) return pickRandom(MORNING_GREETINGS);
+  if (hour >= 12 && hour < 17) return pickRandom(AFTERNOON_GREETINGS);
+  if (hour >= 17 && hour < 21) return pickRandom(EVENING_GREETINGS);
 
-  return 'Evening';
+  return pickRandom(NIGHT_GREETINGS);
 };
 
 /**

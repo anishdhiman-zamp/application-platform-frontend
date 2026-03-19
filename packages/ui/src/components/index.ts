@@ -24,6 +24,7 @@ export * from './ui/popover';
 export * from './ui/progress';
 export * from './ui/radio';
 export * from './ui/resizable';
+export * from './ui/scroll-container';
 export * from './ui/select';
 export * from './ui/select-button';
 export * from './ui/sheet';

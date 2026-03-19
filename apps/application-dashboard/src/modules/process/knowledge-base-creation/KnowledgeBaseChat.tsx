@@ -22,7 +22,7 @@ import {
   useChat,
   useFileDragDrop,
 } from '@zamp-platform/chat';
-import { ArrowDownIcon, Button } from '@zamp-platform/ui';
+import { ScrollContainer } from '@zamp-platform/ui';
 import { cn } from '@zamp-platform/ui/utils';
 import { CirclePlus, EllipsisVertical } from 'lucide-react';
 import ProcessInProcessBanner from 'modules/process/knowledge-base-creation/ProcessInProcessBanner';
@@ -37,7 +37,6 @@ import { CHATBOT_LOCATION_PARAMS } from '@/modules/chatbot/constants';
 import NewPaceAvatar from '@/modules/chatbot/NewPaceAvatar';
 import StopProcessingFeedback from '@/modules/chatbot/StopProcessingFeedback';
 import ChatMessagesSkeleton from '@/modules/pace/components/loaders/ChatMessagesSkeleton';
-import { useChatScroll } from '@/modules/pace/hooks/useChatScroll';
 import { useFileDownload } from '@/modules/pace/hooks/useFileDownload';
 import { RootState } from '@/store';
 import { ProcessStatus } from '@/types/api/processApi.types';
@@ -130,12 +129,6 @@ const KnowledgeBaseChat: FC<KnowledgeBaseChatProps> = ({
     },
   });
 
-  const { scrollContainerRef, showScrollButton, handleScroll, handleScrollToBottomClick } = useChatScroll({
-    messagesLength: chat.messages?.length ?? 0,
-    isLoading: chat?.isLoadingConversationHistory || isLoadingFilterConversations,
-    streamingState: chat.streamingState,
-  });
-
   const { isDragOver, dropZoneProps } = useFileDragDrop({
     onFileDrop: (files) => fileDropHandlerRef.current?.(files),
     disabled: chat.isStreaming || chat.isCreatingConversationV2,
@@ -216,7 +209,6 @@ const KnowledgeBaseChat: FC<KnowledgeBaseChatProps> = ({
     }
   }, [chat?.conversationId, setConversationId, getOpenFeedback, processId]);
 
-  // Reset isNewConversation when switching to a different conversation
   useEffect(() => {
     if (conversationId) {
       setIsNewConversation(false);
@@ -224,11 +216,9 @@ const KnowledgeBaseChat: FC<KnowledgeBaseChatProps> = ({
     }
   }, [conversationId, getOpenFeedback, processId]);
 
-  // Check for creator-sop.md file in the latest assistant message with output files
   useEffect(() => {
     if (!chat?.messages?.length || !onOutputSopFileFound || !conversationId || !onMarkdownSopFileFound) return;
 
-    // Find the latest assistant message that has an output files block with creator-sop.md
     for (let i = chat.messages.length - 1; i >= 0; i--) {
       const message = chat.messages[i];
 
@@ -300,10 +290,12 @@ const KnowledgeBaseChat: FC<KnowledgeBaseChatProps> = ({
             onClick={handleNewConversation}
           />
         </div>
-        <div
-          ref={scrollContainerRef}
-          onScroll={handleScroll}
-          className='relative flex min-h-0 w-full flex-1 flex-col overflow-x-hidden overflow-y-auto [scrollbar-width:none]'
+        <ScrollContainer
+          showFadeOverlay={false}
+          showScrollToBottom
+          autoScrollToBottom
+          scrollTrigger={chat.messages?.length}
+          scrollbarStyle='none'
         >
           {(!chat.isLoadingConversationHistory || !isLoadingFilterConversations) && !isSkeletonLoading && (
             <MessageContainer
@@ -358,21 +350,9 @@ const KnowledgeBaseChat: FC<KnowledgeBaseChatProps> = ({
                 fileDropHandlerRef={fileDropHandlerRef}
                 hideStopButton
               />
-              <Button
-                onClick={handleScrollToBottomClick}
-                variant='ghost'
-                className={cn(
-                  'bg-gray-1000 hover:bg-gray-1000 absolute -top-10 left-1/2 z-20 h-6 w-6 -translate-x-1/2 rounded-full p-3',
-                  'transition-all duration-200 ease-out',
-                  showScrollButton ? 'translate-y-0 opacity-100' : 'pointer-events-none translate-y-2 opacity-0',
-                )}
-                aria-label='Scroll to bottom'
-              >
-                <ArrowDownIcon size={14} className='p-[2px] text-white' />
-              </Button>
             </div>
           )}
-        </div>
+        </ScrollContainer>
         <StopProcessingFeedback
           isOpen={!!stopProcessingConfig}
           onOpenChange={handleOpenChangeForStopProcessing}

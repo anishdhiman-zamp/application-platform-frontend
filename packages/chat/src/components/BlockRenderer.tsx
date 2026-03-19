@@ -10,7 +10,6 @@ import {
   ButtonBlockType,
   FileReferencesBlockType,
   type TextContentBlock,
-  type ThinkingContentBlock,
   type ToolResultContentBlock,
   type ToolUseContentBlock,
 } from '../types/block.types';
@@ -23,7 +22,6 @@ import {
   PlainTextBlock,
   QuestionGroupBlock,
   SingleSelectBlock,
-  StepsBlock,
   TaskBlock,
   ThinkingBlock,
   ToolCallBlock,
@@ -40,11 +38,6 @@ interface BlockRendererProps {
   messageId?: string;
 }
 
-const enum BLOCK_GROUP_TYPE {
-  STEPS = 'steps',
-  SINGLE = 'single',
-}
-
 export const BlockRenderer: React.FC<BlockRendererProps> = ({
   message,
   onAction,
@@ -52,7 +45,9 @@ export const BlockRenderer: React.FC<BlockRendererProps> = ({
   className = '',
   conversationId,
   messageId,
+  isStreaming = false,
 }) => {
+  const [openAccordionId, setOpenAccordionId] = useState<string | null>(null);
   const [elementValues, setElementValues] = useState<
     Record<string, { label: string; value: string; optionType: 'plain_text' | 'markdown' }>
   >(
@@ -94,7 +89,28 @@ export const BlockRenderer: React.FC<BlockRendererProps> = ({
     }
   };
 
-  const renderBlock = (block: Block) => {
+  const isThinkingOrToolUseBlock = (block?: Block) => {
+    return block?.type === BLOCK_TYPE.THINKING || block?.type === BLOCK_TYPE.TOOL_USE;
+  };
+
+  const getBlockAccordionId = (block: Block) => {
+    const startTimestamp = 'start_timestamp' in block ? block.start_timestamp : undefined;
+    return block?.id ?? `${block.type}-${block.order}-${startTimestamp ?? 'no-start-timestamp'}`;
+  };
+
+  const { messageBlocks, size } = useMemo(() => {
+    const messageBlocks = [...message?.block]
+      ?.sort((a, b) => a?.order - b?.order)
+      .filter((block) => block.type !== BLOCK_TYPE.TOOL_RESULT);
+    return { messageBlocks, size: messageBlocks.length };
+  }, [message.block]);
+
+  const renderBlock = (block: Block, nextBlock?: Block, previousBlock?: Block) => {
+    const showConnectorToNext = isThinkingOrToolUseBlock(block) && isThinkingOrToolUseBlock(nextBlock);
+    const showConnectorFromPrevious = isThinkingOrToolUseBlock(block) && isThinkingOrToolUseBlock(previousBlock);
+    const accordionId = getBlockAccordionId(block);
+    const isAccordionOpen = openAccordionId === accordionId;
+
     switch (block.type) {
       case BLOCK_TYPE.PLAIN_TEXT:
         return <PlainTextBlock key={block?.id} payload={block?.payload} />;
@@ -107,6 +123,18 @@ export const BlockRenderer: React.FC<BlockRendererProps> = ({
             is_complete={block?.is_complete}
             start_timestamp={block?.start_timestamp}
             stop_timestamp={block?.stop_timestamp}
+            isAccordionOpen={isAccordionOpen}
+            onAccordionOpenChange={(isOpen) =>
+              setOpenAccordionId((currentId) => {
+                if (isOpen) {
+                  return accordionId;
+                }
+
+                return currentId === accordionId ? null : currentId;
+              })
+            }
+            showConnectorFromPrevious={showConnectorFromPrevious}
+            showConnectorToNext={showConnectorToNext}
           />
         );
 
@@ -119,8 +147,20 @@ export const BlockRenderer: React.FC<BlockRendererProps> = ({
           <ToolCallBlock
             key={block?.id ?? `tool-use-${block.order}-${block.start_timestamp}`}
             payload={block?.payload}
-            is_complete={block?.is_complete}
+            is_complete={!nextBlock && isStreaming ? false : block?.is_complete}
             toolResult={toolResult}
+            isAccordionOpen={isAccordionOpen}
+            onAccordionOpenChange={(isOpen) =>
+              setOpenAccordionId((currentId) => {
+                if (isOpen) {
+                  return accordionId;
+                }
+
+                return currentId === accordionId ? null : currentId;
+              })
+            }
+            showConnectorFromPrevious={showConnectorFromPrevious}
+            showConnectorToNext={showConnectorToNext}
           />
         );
       }
@@ -201,52 +241,21 @@ export const BlockRenderer: React.FC<BlockRendererProps> = ({
     }
   };
 
-  // Group consecutive thinking and tool_use blocks together
-  const groupedBlocks = useMemo(() => {
-    const sortedBlocks = [...message?.block]?.sort((a, b) => a?.order - b?.order);
-    const groups: Array<{ type: BLOCK_GROUP_TYPE; blocks: Block[] }> = [];
-
-    let currentStepsGroup: Block[] = [];
-
-    const isStepBlock = (block: Block) => block.type === BLOCK_TYPE.THINKING || block.type === BLOCK_TYPE.TOOL_USE;
-
-    for (const block of sortedBlocks) {
-      if (block.type === BLOCK_TYPE.TOOL_RESULT) {
-        continue;
-      }
-
-      if (isStepBlock(block)) {
-        currentStepsGroup.push(block);
-      } else {
-        if (currentStepsGroup.length > 0) {
-          groups.push({ type: BLOCK_GROUP_TYPE.STEPS, blocks: currentStepsGroup });
-          currentStepsGroup = [];
-        }
-        groups.push({ type: BLOCK_GROUP_TYPE.SINGLE, blocks: [block] });
-      }
-    }
-
-    if (currentStepsGroup.length > 0) {
-      groups.push({ type: BLOCK_GROUP_TYPE.STEPS, blocks: currentStepsGroup });
-    }
-
-    return groups;
-  }, [message.block]);
-
   return (
-    <div className={cn('space-y-3', className)}>
-      {groupedBlocks.map((group, groupIndex) => {
-        if (group.type === BLOCK_GROUP_TYPE.STEPS && group.blocks.length > 1) {
-          return (
-            <StepsBlock
-              key={`steps-group-${groupIndex}`}
-              blocks={group.blocks as (ThinkingContentBlock | ToolUseContentBlock)[]}
-              toolResultsMap={toolResultsMap}
-            />
-          );
-        }
+    <div className={cn(className)}>
+      {messageBlocks.map((block, index) => {
+        const previousBlock = index > 0 ? messageBlocks[index - 1] : undefined;
+        const nextBlock = messageBlocks[index + 1];
+        const shouldRemoveSpacing = isThinkingOrToolUseBlock(block) && isThinkingOrToolUseBlock(nextBlock);
 
-        return group.blocks.map((block) => renderBlock(block));
+        return (
+          <div
+            key={block.id ?? `${block.type}-${block.order}`}
+            className={cn(!shouldRemoveSpacing && size > 1 && 'mb-3')}
+          >
+            {renderBlock(block, nextBlock, previousBlock)}
+          </div>
+        );
       })}
     </div>
   );
