@@ -61,11 +61,6 @@ const nextConfig = {
     remotePatterns: [
       {
         protocol: 'https',
-        hostname: process.env.NEXT_PUBLIC_VERCEL_BLOB_BASE_URL?.replace('https://', '') || '',
-        pathname: '/**',
-      },
-      {
-        protocol: 'https',
         hostname: 'ik.imagekit.io',
         pathname: '/**',
       },

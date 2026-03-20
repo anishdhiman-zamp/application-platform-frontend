@@ -191,8 +191,7 @@ export const WIDGET_LOADER_SVG = '/loaders/widget-loader.svg';
 //Files
 export const FILE_EMPTY_STATE = IMAGE_PREFIX + '/images/files/file-empty-state.png';
 
-export const VERCEL_BLOB_BASE_URL = process.env.NEXT_PUBLIC_VERCEL_BLOB_BASE_URL;
-export const VERCEL_BLOB_ICON_URL = `${VERCEL_BLOB_BASE_URL}/icons`;
+export const ARTIFACT_ICON_URL = IMAGE_PREFIX + '/icons';
 
 export enum SUPPORT_INFO_TYPES {
   GUIDE = 'GUIDE',
