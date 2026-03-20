@@ -58,17 +58,27 @@ export const useOrgAvatarState = ({ initialValue, generateSvg, uploadType, defau
 
   const uploadImage = useCallback(async (): Promise<{ type: MediaType; value: string | null }> => {
     if (avatar.type === MediaType.URL && pendingFile) {
-      const contentType = pendingFile.type === 'image/jpeg' ? ImageContentType.JPEG : ImageContentType.PNG;
+      const contentType =
+        pendingFile.type === 'image/jpeg'
+          ? ImageContentType.JPEG
+          : pendingFile.type === 'image/png'
+            ? ImageContentType.PNG
+            : null;
+
+      if (!contentType) throw new Error('Unsupported image type. Please upload a JPEG or PNG.');
+
       const { upload_url, s3_uri } = await getOrgUploadUrl({
         upload_type: uploadType,
         content_type: contentType,
       }).unwrap();
 
-      await fetch(upload_url, {
+      const uploadResponse = await fetch(upload_url, {
         method: 'PUT',
         headers: { 'Content-Type': pendingFile.type },
         body: pendingFile,
       });
+
+      if (!uploadResponse.ok) throw new Error('Failed to upload image. Please try again.');
 
       return { type: avatar.type, value: s3_uri };
     }

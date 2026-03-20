@@ -169,6 +169,8 @@ const CreateOrgModal: FC<CreateOrgModalProps> = ({ open, onClose, orgToProvision
         try {
           const result = await provisionOrg(org.organization_id).unwrap();
 
+          setError(null);
+
           if (result.is_completed || result.provisioning_status === PROVISIONING_STATUS.COMPLETED) {
             stopPolling();
             await refreshSession();
