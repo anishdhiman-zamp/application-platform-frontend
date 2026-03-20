@@ -1,5 +1,6 @@
 import { REQUEST_TYPES } from '@zamp-platform/api';
 import { API_ENDPOINTS } from 'apis/apiEndpoint.constants';
+import { UploadUrlRequest, UploadUrlResponse } from 'modules/onboarding/onboarding.types';
 import {
   EnsureOrgProvisioningResponse,
   OrgProvisioningStatusResponse,
@@ -10,6 +11,13 @@ import { baseApi } from '@/services/baseApi';
 
 const setupWorkspaceApi = baseApi.injectEndpoints({
   endpoints: (builder) => ({
+    getOrgUploadUrl: builder.mutation<UploadUrlResponse, UploadUrlRequest>({
+      query: (body) => ({
+        url: API_ENDPOINTS.ORGANIZATIONS_UPLOAD_URL_POST,
+        method: REQUEST_TYPES.POST,
+        body,
+      }),
+    }),
     registerOrg: builder.mutation<RegisterOrgResponse, RegisterOrgRequest>({
       query: (body) => ({
         url: API_ENDPOINTS.ORGANIZATIONS_REGISTER_POST,
@@ -27,4 +35,4 @@ const setupWorkspaceApi = baseApi.injectEndpoints({
   }),
 });
 
-export const { useRegisterOrgMutation, useProvisionOrgMutation } = setupWorkspaceApi;
+export const { useGetOrgUploadUrlMutation, useRegisterOrgMutation, useProvisionOrgMutation } = setupWorkspaceApi;
