@@ -16,14 +16,15 @@ import EmptyStateListing from '@/modules/team/components/EmptyStateListing';
 import type { RootState } from '@/store';
 import type { FeedbackItemType } from '@/types/api/feedbacks.types';
 
-const PAGE_SIZE = 20;
+const PAGE_SIZE = 30;
 const SEARCH_DEBOUNCE_MS = 300;
 
 interface ChatHistoryProps {
   onSelectConversation: (id: string | null, title?: string) => void;
+  onDeleteConversation?: (id: string) => void;
 }
 
-const ChatHistory = ({ onSelectConversation }: ChatHistoryProps) => {
+const ChatHistory = ({ onSelectConversation, onDeleteConversation }: ChatHistoryProps) => {
   const organizationId = useAppSelector((state: RootState) => state?.user?.user?.orgs?.[0]?.organization_id) ?? '';
   const containerRef = useRef<HTMLDivElement>(null);
   const activeStreamingIds = useActiveStreamingIds();
@@ -53,7 +54,7 @@ const ChatHistory = ({ onSelectConversation }: ChatHistoryProps) => {
     },
     {
       skip: !organizationId,
-      refetchOnMountOrArgChange: false,
+      refetchOnMountOrArgChange: true,
     },
   );
 
@@ -104,6 +105,24 @@ const ChatHistory = ({ onSelectConversation }: ChatHistoryProps) => {
     }
   }, [isSearchOpen]);
 
+  const handleDeleteConversation = useCallback(
+    (id: string) => {
+      setAllConversations((prev) => prev.filter((c) => c.id !== id));
+      setTotalCount((prev) => Math.max(0, prev - 1));
+      onDeleteConversation?.(id);
+    },
+    [onDeleteConversation],
+  );
+
+  const handleDeleteConversationFailure = useCallback((conversation: FeedbackItemType) => {
+    setAllConversations((prev) => [...prev, conversation]);
+    setTotalCount((prev) => prev + 1);
+  }, []);
+
+  const handleRenameConversation = useCallback((id: string, newTitle: string) => {
+    setAllConversations((prev) => prev.map((c) => (c.id === id ? { ...c, title: newTitle } : c)));
+  }, []);
+
   useEffect(() => {
     setPage(1);
     setAllConversations([]);
@@ -115,6 +134,13 @@ const ChatHistory = ({ onSelectConversation }: ChatHistoryProps) => {
       setTotalCount(conversationHistory.count);
     }
   }, [conversationHistory?.count]);
+
+  useEffect(() => {
+    // fetchMoreOnBottomReached intentionally omitted from deps: we only want
+    // to re-trigger when the displayed list grows, not on every isFetching toggle.
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+    fetchMoreOnBottomReached(containerRef.current);
+  }, [displayConversations.length]);
 
   useEffect(() => {
     if (page === 1) {
@@ -173,10 +199,10 @@ const ChatHistory = ({ onSelectConversation }: ChatHistoryProps) => {
             className='h-full flex-col items-center justify-center py-12 text-center'
           />
         }
-        className='min-h-0 flex-1 pb-4'
+        className='flex min-h-0 flex-1 flex-col overflow-hidden pb-4'
         disableAnimation
       >
-        <div ref={containerRef} className='h-full overflow-y-auto [scrollbar-width:none]' onScroll={handleScroll}>
+        <div ref={containerRef} className='flex-1 overflow-y-auto [scrollbar-width:none]' onScroll={handleScroll}>
           <div className='w-full space-y-0.5 pr-3'>
             {displayConversations.map((conversation) => (
               <ChatHistoryItem
@@ -184,6 +210,10 @@ const ChatHistory = ({ onSelectConversation }: ChatHistoryProps) => {
                 conversation={conversation}
                 onSelect={onSelectConversation}
                 isStreaming={activeStreamingIds.has(conversation?.id)}
+                organizationId={organizationId}
+                onDelete={handleDeleteConversation}
+                onDeleteFailure={handleDeleteConversationFailure}
+                onRename={handleRenameConversation}
               />
             ))}
           </div>

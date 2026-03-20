@@ -137,7 +137,7 @@ const FileTreeNodeRow = forwardRef<HTMLDivElement, FileTreeNodeRowProps>(
             <FolderClosedIcon size={16} weight='fill' className='text-BLUE_600 shrink-0' />
           )
         ) : (
-          <FileIcon extension={extension || 'txt'} className='text-GRAY_1000 size-4' />
+          <FileIcon extension={extension || 'txt'} className='size-5 rounded-sm' iconClassName='size-4' />
         )}
 
         {state.isRenaming ? (

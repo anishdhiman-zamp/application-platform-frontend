@@ -39,7 +39,7 @@ const FilesPreview = ({ selectedFile }: FilesPreviewProps) => {
   return (
     <div className='flex w-3/5 flex-col gap-y-6 overflow-y-auto p-3'>
       <div className='border-GRAY_400 bg-BG_GRAY_2 flex h-1/2 items-center justify-center rounded-[10px] border p-3'>
-        <FileIcon extension={extension || 'txt'} className='text-GRAY_900 size-25' />
+        <FileIcon extension={extension || 'txt'} className='size-26 rounded-[20px]' iconClassName='size-20' />
       </div>
       <div className='flex flex-col gap-y-5 px-8'>
         <div className='flex flex-col gap-1'>

@@ -12,26 +12,22 @@ import {
   useChat,
   useFileDragDrop,
 } from '@zamp-platform/chat';
-import { ArrowDownIcon, Button } from '@zamp-platform/ui';
+import { ScrollContainer } from '@zamp-platform/ui';
 import { cn } from '@zamp-platform/ui/utils';
 import ChatHistory from 'modules/pace/components/chat/ChatHistory';
 import CommonWrapper from '@/components/commonWrapper';
 import { SkeletonTypes } from '@/components/commonWrapper/commonWrapper.types';
-import { APITags } from '@/constants/api.constants';
-import { useAppDispatch, useAppSelector } from '@/hooks/toolkit';
+import { useAppSelector } from '@/hooks/toolkit';
 import NewPaceAvatar from '@/modules/chatbot/NewPaceAvatar';
 import ChatHome from '@/modules/pace/components/chat/ChatHome';
 import ChatTopbar from '@/modules/pace/components/chat/ChatTopbar';
-import ScrollFadeOverlay from '@/modules/pace/components/chat/ScrollFadeOverlay';
 import TaskStatusCounts from '@/modules/pace/components/chat/TaskStatusCounts';
 import { useDynamicTabs } from '@/modules/pace/components/dynamic-tabs/useDynamicTabs';
 import ChatMessagesSkeleton from '@/modules/pace/components/loaders/ChatMessagesSkeleton';
 import { useChatDraftInput } from '@/modules/pace/hooks/useChatDraftInput';
-import { useChatScroll } from '@/modules/pace/hooks/useChatScroll';
 import { SIDEBAR_CONVERSATION_ID_PARAM } from '@/modules/pace/pace.constants';
 import { usePaceContext } from '@/modules/pace/pace.context';
 import { TAB_TYPE } from '@/modules/pace/pace.types';
-import { baseApi } from '@/services/baseApi';
 import { RootState } from '@/store';
 
 interface ChatContentInnerProps {
@@ -57,8 +53,6 @@ const ChatContentInner = ({
   selectedModel,
   modelSelectorSlot,
 }: ChatContentInnerProps) => {
-  const dispatch = useAppDispatch();
-
   const currentUserName = useAppSelector((state: RootState) => state.user.user?.user_name) ?? '';
   const { inputValue, setInputValue } = useChatDraftInput({ conversationId });
 
@@ -68,10 +62,6 @@ const ChatContentInner = ({
 
   const { openTab } = useDynamicTabs({ type: TAB_TYPE.FILE });
   const { setIsPaceSidebarOpen } = usePaceContext();
-
-  const handleConversationCreated = () => {
-    dispatch(baseApi.util.invalidateTags([APITags.GET_CONVERSATION_HISTORY]));
-  };
 
   const chat = useChat({
     resourceId: organizationId,
@@ -94,19 +84,6 @@ const ChatContentInner = ({
   const isLoadingConversation = Boolean(conversationId && chat.isLoadingConversationHistory) || !hasMessages;
   const isInConversation = Boolean(conversationId || chat.conversationId || hasMessages);
 
-  const {
-    scrollContainerRef,
-    showScrollButton,
-    canScrollTop,
-    canScrollBottom,
-    handleScroll,
-    handleScrollToBottomClick,
-  } = useChatScroll({
-    messagesLength: chat.messages?.length ?? 0,
-    isLoading: isLoadingConversation,
-    streamingState: chat.streamingState,
-  });
-
   const { isDragOver, dropZoneProps } = useFileDragDrop({
     onFileDrop: (files) => fileDropHandlerRef.current?.(files),
     disabled: chat.isStreaming || chat.isCreatingConversationV2,
@@ -117,6 +94,15 @@ const ChatContentInner = ({
       setConversationId(chat.conversationId);
     }
   }, [chat.conversationId, conversationId, setConversationId]);
+
+  const handleDeleteConversation = useCallback(
+    (deletedId: string) => {
+      if (conversationId === deletedId) {
+        startNewChat();
+      }
+    },
+    [conversationId, startNewChat],
+  );
 
   const handleFileOpen = useCallback(
     (path: string, name: string) => {
@@ -147,56 +133,40 @@ const ChatContentInner = ({
             organizationId={organizationId}
             onStartNewChat={startNewChat}
             onTitleChange={setChatTitle}
+            onDeleteConversation={startNewChat}
           />
-          <div className='relative flex min-h-0 w-full flex-1 flex-col overflow-hidden'>
-            {!isTaskPopoverOpen && <ScrollFadeOverlay canScrollTop={canScrollTop} canScrollBottom={canScrollBottom} />}
-            <div
-              ref={scrollContainerRef}
-              onScroll={handleScroll}
-              className={cn(
-                'bg-BG_WHITE flex min-h-0 w-full flex-1 flex-col overflow-x-hidden [scrollbar-width:thin]',
-                isTaskPopoverOpen ? 'overflow-y-hidden' : 'overflow-y-auto',
-              )}
+          <ScrollContainer
+            showScrollToBottom
+            scrollTrigger={chat.messages?.length}
+            disableFadeOverlay={isTaskPopoverOpen}
+            scrollClassName={cn('bg-BG_WHITE', isTaskPopoverOpen ? 'overflow-y-hidden' : 'overflow-y-scroll')}
+          >
+            <CommonWrapper
+              isLoading={isLoadingConversation}
+              isError={chat.isErrorConversationHistory}
+              refetchFunction={chat.refetchConversationHistory}
+              skeletonType={SkeletonTypes.CUSTOM}
+              loader={<ChatMessagesSkeleton className='px-0' alignUserRight />}
+              className='mx-auto flex w-full max-w-[700px] flex-1 flex-col px-4'
+              disableAnimation
             >
-              <CommonWrapper
-                isLoading={isLoadingConversation}
-                isError={chat.isErrorConversationHistory}
-                refetchFunction={chat.refetchConversationHistory}
-                skeletonType={SkeletonTypes.CUSTOM}
-                loader={<ChatMessagesSkeleton className='px-0' alignUserRight />}
-                className='mx-auto flex w-full max-w-[700px] flex-1 flex-col px-4'
-                disableAnimation
-              >
-                <MessageContainer
-                  conversationId={conversationId || chat.conversationId || ''}
-                  messages={chat.messages}
-                  isAnalysing={isAnalysing}
-                  streamingState={chat.streamingState}
-                  className='gap-4 px-0 [&]:overflow-visible'
-                  assistantAvatar={<NewPaceAvatar />}
-                  showTimestamp
-                  showFeedback
-                  showCopy
-                  alignUserRight
-                  organizationId={organizationId}
-                />
-                <div className='bg-BG_WHITE h-12 w-full' />
-              </CommonWrapper>
-            </div>
-          </div>
+              <MessageContainer
+                conversationId={conversationId || chat.conversationId || ''}
+                messages={chat.messages}
+                isAnalysing={isAnalysing}
+                streamingState={chat.streamingState}
+                className='gap-4 px-0 [&]:overflow-visible'
+                assistantAvatar={<NewPaceAvatar />}
+                showTimestamp
+                showFeedback
+                showCopy
+                alignUserRight
+                organizationId={organizationId}
+              />
+              <div className='bg-BG_WHITE h-12 w-full' />
+            </CommonWrapper>
+          </ScrollContainer>
           <div ref={inputContainerRef} className='bg-BG_WHITE sticky bottom-0 z-10 mx-auto w-full max-w-[700px] pb-3'>
-            <Button
-              onClick={handleScrollToBottomClick}
-              variant='ghost'
-              className={cn(
-                'bg-GRAY_1000 hover:bg-GRAY_950 absolute -top-10 left-1/2 z-20 h-6 w-6 -translate-x-1/2 rounded-full p-3',
-                'transition-all duration-200 ease-out',
-                showScrollButton ? 'translate-y-0 opacity-100' : 'pointer-events-none translate-y-2 opacity-0',
-              )}
-              aria-label='Scroll to bottom'
-            >
-              <ArrowDownIcon size={14} className='text-BG_WHITE p-[2px]' />
-            </Button>
             <TaskStatusCounts
               messages={chat.messages}
               streamingState={chat.streamingState}
@@ -251,7 +221,6 @@ const ChatContentInner = ({
             placeholder="Do your life's best work with Pace"
             externalInputValue={inputValue}
             setExternalInputValue={setInputValue}
-            onConversationCreated={handleConversationCreated}
             fileDropHandlerRef={fileDropHandlerRef}
             minTextareaHeight={18}
             maxTextareaHeight={200}
@@ -262,7 +231,7 @@ const ChatContentInner = ({
           />
         </div>
 
-        <ChatHistory onSelectConversation={setConversationId} />
+        <ChatHistory onSelectConversation={setConversationId} onDeleteConversation={handleDeleteConversation} />
       </div>
     </ChatActionsProvider>
   );

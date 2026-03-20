@@ -1,0 +1,113 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`ScrollContainer - Snapshots matches snapshot with all features enabled 1`] = `
+<div
+  class="relative flex min-h-0 flex-1 flex-col overflow-hidden"
+>
+  <div
+    aria-hidden="true"
+    class="pointer-events-none absolute inset-x-0 top-0 z-20 h-6 transition-opacity duration-200 opacity-0"
+  />
+  <div
+    aria-hidden="true"
+    class="pointer-events-none absolute inset-x-0 bottom-0 z-20 h-6 transition-opacity duration-200 opacity-0"
+  />
+  <div
+    class="flex min-h-0 w-full flex-1 flex-col overflow-x-hidden overflow-y-auto [scrollbar-width:none]"
+  >
+    <div>
+      Full-featured content
+    </div>
+  </div>
+  <button
+    aria-label="Scroll to bottom"
+    class="cursor-pointer inline-flex items-center justify-center whitespace-nowrap text-sm font-medium ring-offset-background focus-visible:outline-hidden focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 [&_svg]:pointer-events-none [&_svg]:shrink-0 hover:text-accent-GRAY_1000 f-14-500 bg-GRAY_1000 hover:bg-GRAY_950 absolute bottom-2 left-1/2 z-20 h-6 w-6 -translate-x-1/2 rounded-full p-3 transition-all duration-200 ease-out pointer-events-none translate-y-2 opacity-0"
+  >
+    <div
+      class="text-BG_WHITE p-[2px]"
+    >
+      <svg
+        fill="none"
+        height="14"
+        stroke="currentColor"
+        stroke-linecap="round"
+        stroke-linejoin="round"
+        stroke-width="2"
+        viewBox="0 0 24 24"
+        width="14"
+        xmlns="http://www.w3.org/2000/svg"
+      >
+        <path
+          d="m19 12-7 7-7-7"
+        />
+        <path
+          d="M12 5v14"
+        />
+      </svg>
+    </div>
+  </button>
+</div>
+`;
+
+exports[`ScrollContainer - Snapshots matches snapshot with default props 1`] = `
+<div
+  class="relative flex min-h-0 flex-1 flex-col overflow-hidden"
+>
+  <div
+    aria-hidden="true"
+    class="pointer-events-none absolute inset-x-0 top-0 z-20 h-6 transition-opacity duration-200 opacity-0"
+  />
+  <div
+    aria-hidden="true"
+    class="pointer-events-none absolute inset-x-0 bottom-0 z-20 h-6 transition-opacity duration-200 opacity-0"
+  />
+  <div
+    class="flex min-h-0 w-full flex-1 flex-col overflow-x-hidden overflow-y-auto [scrollbar-width:thin]"
+  >
+    <div>
+      Default content
+    </div>
+  </div>
+</div>
+`;
+
+exports[`ScrollContainer - Snapshots matches snapshot with overlays disabled 1`] = `
+<div
+  class="relative flex min-h-0 flex-1 flex-col overflow-hidden"
+>
+  <div
+    class="flex min-h-0 w-full flex-1 flex-col overflow-x-hidden overflow-y-auto [scrollbar-width:thin]"
+  >
+    <div>
+      No overlays content
+    </div>
+  </div>
+  <button
+    aria-label="Scroll to bottom"
+    class="cursor-pointer inline-flex items-center justify-center whitespace-nowrap text-sm font-medium ring-offset-background focus-visible:outline-hidden focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 [&_svg]:pointer-events-none [&_svg]:shrink-0 hover:text-accent-GRAY_1000 f-14-500 bg-GRAY_1000 hover:bg-GRAY_950 absolute bottom-2 left-1/2 z-20 h-6 w-6 -translate-x-1/2 rounded-full p-3 transition-all duration-200 ease-out pointer-events-none translate-y-2 opacity-0"
+  >
+    <div
+      class="text-BG_WHITE p-[2px]"
+    >
+      <svg
+        fill="none"
+        height="14"
+        stroke="currentColor"
+        stroke-linecap="round"
+        stroke-linejoin="round"
+        stroke-width="2"
+        viewBox="0 0 24 24"
+        width="14"
+        xmlns="http://www.w3.org/2000/svg"
+      >
+        <path
+          d="m19 12-7 7-7-7"
+        />
+        <path
+          d="M12 5v14"
+        />
+      </svg>
+    </div>
+  </button>
+</div>
+`;
