@@ -88,16 +88,24 @@ export const PaceProvider = ({ children }: { children: ReactNode }) => {
     setPendingFileReference(null);
   }, []);
 
-  }, [filesPanelPinned, setFilesPanelPinned]);
-
-  const closeFilesPanel = useCallback(() => {
-    setFilesPanelOpen(false);
-  }, []);
-
   const setFilesPanelPinned = useCallback((pinned: boolean) => {
     setFilesPanelPinnedRaw(pinned);
     setFilesPanelOpen(true);
     setToLocalStorage(LOCAL_STORAGE_KEYS.PACE_FILES_PANEL_PINNED, JSON.stringify(pinned));
+  }, []);
+
+  const toggleFilesPanel = useCallback(() => {
+    if (filesPanelPinned) {
+      setFilesPanelPinned(false);
+      setFilesPanelOpen(false);
+
+      return;
+    }
+    setFilesPanelOpen((prev) => !prev);
+  }, [filesPanelPinned, setFilesPanelPinned]);
+
+  const closeFilesPanel = useCallback(() => {
+    setFilesPanelOpen(false);
   }, []);
 
   useEffect(() => {

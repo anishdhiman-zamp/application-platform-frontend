@@ -1,6 +1,7 @@
 'use client';
 
 import { type ReactNode, useCallback, useRef, useState } from 'react';
+import { Button } from '@zamp-platform/ui';
 import { cn } from '@zamp-platform/ui/utils';
 import { X } from 'lucide-react';
 import { TAB_CONTEXT_MENU_ACTION_IDS } from 'modules/pace/components/dynamic-tabs/dynamic-tabs.constants';
@@ -104,9 +105,8 @@ const DynamicTabItem = ({
           onOpenChange={setIsContextMenuOpen}
           onActionClick={handleContextMenuAction}
         >
-          <div
-            role='button'
-            tabIndex={0}
+          <Button
+            variant='ghost'
             onClick={handleClick}
             style={{ minWidth: 0 }}
             className={cn(
@@ -118,32 +118,46 @@ const DynamicTabItem = ({
             {isCompact ? (
               <span className='relative flex size-4 shrink-0 items-center justify-center'>
                 <span className='flex items-center justify-center group-hover:hidden'>{icon}</span>
-                <div
+                <span
                   id='dynamic-tab-close-button'
                   role='button'
                   tabIndex={0}
                   onClick={(e) => onClose(e, tab.id)}
+                  onKeyDown={(e) => {
+                    if (e.key === 'Enter' || e.key === ' ') {
+                      e.preventDefault();
+                      e.stopPropagation();
+                      onClose(e as unknown as React.MouseEvent, tab.id);
+                    }
+                  }}
                   className='hover:bg-accent absolute inset-0 hidden h-4 w-4 cursor-pointer items-center justify-center rounded-sm p-0 group-hover:flex'
                 >
                   <X size={12} className='text-GRAY_700' />
-                </div>
+                </span>
               </span>
             ) : (
               icon
             )}
             <span className='f-13-500 min-w-0 flex-1 truncate text-left'>{tab.name}</span>
             {!isCompact && (
-              <div
+              <span
                 id='dynamic-tab-close-button'
                 role='button'
                 tabIndex={0}
                 onClick={(e) => onClose(e, tab.id)}
+                onKeyDown={(e) => {
+                  if (e.key === 'Enter' || e.key === ' ') {
+                    e.preventDefault();
+                    e.stopPropagation();
+                    onClose(e as unknown as React.MouseEvent, tab.id);
+                  }
+                }}
                 className='hover:bg-accent ml-0.5 flex h-4 w-4 cursor-pointer items-center justify-center rounded-sm p-0 opacity-0 group-hover:opacity-100'
               >
                 <X size={12} className='text-GRAY_700' />
-              </div>
+              </span>
             )}
-          </div>
+          </Button>
         </DynamicTabContextMenu>
       </div>
     </TooltipV2>

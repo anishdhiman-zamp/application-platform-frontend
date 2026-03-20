@@ -40,11 +40,7 @@ const FilesPanel = () => {
 
       if (relatedTarget?.closest?.(PORTAL_SELECTORS)) return;
 
-      leaveTimerRef.current = setTimeout(() => {
-        if (document.querySelector(PORTAL_SELECTORS)) return;
-
-        closeFilesPanel();
-      }, MOUSE_LEAVE_DELAY_MS);
+      leaveTimerRef.current = setTimeout(closeFilesPanel, MOUSE_LEAVE_DELAY_MS);
     },
     [filesPanelPinned, closeFilesPanel],
   );

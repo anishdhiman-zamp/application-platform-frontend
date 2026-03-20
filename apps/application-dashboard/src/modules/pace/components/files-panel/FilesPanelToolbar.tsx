@@ -17,6 +17,7 @@ import { usePaceContext } from '@/modules/pace/pace.context';
 interface FilesPanelToolbarProps {
   searchQuery: string;
   onSearchChange: (value: string) => void;
+  onDebouncedSearchChange: (value: string) => void;
   sortBy: SortOption;
   onSortByChange: (value: SortOption) => void;
   sortDirection: SortDirection;
@@ -27,6 +28,7 @@ interface FilesPanelToolbarProps {
 const FilesPanelToolbar = ({
   searchQuery,
   onSearchChange,
+  onDebouncedSearchChange,
   sortBy,
   onSortByChange,
   sortDirection,
@@ -45,6 +47,7 @@ const FilesPanelToolbar = ({
         showSearchIcon
         debounceMs={500}
         onChange={onSearchChange}
+        onDebouncedChange={onDebouncedSearchChange}
         size='small'
         wrapperClassName='min-w-0 flex-1'
         className='placeholder:text-GRAY_500 placeholder:f-12-450 f-12-400 bg-BG_WHITE h-8 rounded-md'

@@ -17,8 +17,6 @@ import { useFilesystemStatus } from '@/modules/pace/hooks/useFilesystemStatus';
 import { TAB_TYPE } from '@/modules/pace/pace.types';
 import { defaultFnType } from '@/types/commonTypes';
 
-const SEARCH_DEBOUNCE_MS = 300;
-
 const FilesPanelContent = () => {
   const collapseAllRef = useRef<defaultFnType | null>(null);
   const { uploadFiles, uploadFolder, uploadingItems, clearUploadingItems } = useFileUploadContext();
@@ -95,14 +93,6 @@ const FilesPanelContent = () => {
   );
 
   useEffect(() => {
-    const timer = setTimeout(() => {
-      setDebouncedSearchQuery(searchInput);
-    }, SEARCH_DEBOUNCE_MS);
-
-    return () => clearTimeout(timer);
-  }, [searchInput]);
-
-  useEffect(() => {
     if (uploadingItems.length === 0) return;
 
     const allExist = uploadingItems.every((item) => files?.files?.some((f) => f.path === item.path));
@@ -142,6 +132,7 @@ const FilesPanelContent = () => {
       <FilesPanelToolbar
         searchQuery={searchInput}
         onSearchChange={setSearchInput}
+        onDebouncedSearchChange={setDebouncedSearchQuery}
         sortBy={sortBy}
         onSortByChange={setSortBy}
         sortDirection={sortDirection}
