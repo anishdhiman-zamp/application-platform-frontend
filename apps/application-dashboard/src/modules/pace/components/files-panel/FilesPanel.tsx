@@ -32,17 +32,25 @@ const FilesPanel = () => {
     }
   }, []);
 
+  const isPortalOpen = useCallback(() => {
+    return document.querySelector(PORTAL_SELECTORS) !== null;
+  }, []);
+
   const handleMouseLeave = useCallback(
     (e: React.MouseEvent) => {
       if (filesPanelPinned) return;
 
       const relatedTarget = e.relatedTarget as HTMLElement | null;
 
-      if (relatedTarget?.closest?.(PORTAL_SELECTORS)) return;
+      if (relatedTarget?.closest?.(PORTAL_SELECTORS) || isPortalOpen()) {
+        clearLeaveTimer();
+
+        return;
+      }
 
       leaveTimerRef.current = setTimeout(closeFilesPanel, MOUSE_LEAVE_DELAY_MS);
     },
-    [filesPanelPinned, closeFilesPanel],
+    [filesPanelPinned, closeFilesPanel, clearLeaveTimer, isPortalOpen],
   );
 
   const handleMouseEnter = useCallback(() => {

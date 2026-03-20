@@ -35,9 +35,8 @@ export const NO_ANIMATION = {
 } as const;
 
 export const FILES_PANEL_SPACER_TRANSITION = {
-  type: 'spring',
-  stiffness: 400,
-  damping: 30,
+  duration: 0.3,
+  ease: [0.6, 0, 0.2, 1] as [number, number, number, number],
 } as const;
 
 export type SidebarTransitionDirection =

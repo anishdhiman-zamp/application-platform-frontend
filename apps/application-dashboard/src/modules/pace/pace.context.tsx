@@ -7,7 +7,12 @@ import { getRouteSignificantUrl, getStoredTabs, setStoredTabs } from 'modules/pa
 import { usePathname, useSearchParams } from 'next/navigation';
 import { ROUTES_PATH } from '@/constants/routeConfig';
 import { defaultFnType } from '@/types/commonTypes';
-import { getFromLocalStorage, LOCAL_STORAGE_KEYS, setToLocalStorage } from '@/utils/localstorage';
+import {
+  getFromLocalStorage,
+  LOCAL_STORAGE_KEYS,
+  removeFromLocalStorage,
+  setToLocalStorage,
+} from '@/utils/localstorage';
 
 export interface PendingFileReference {
   path: string;
@@ -130,11 +135,15 @@ export const PaceProvider = ({ children }: { children: ReactNode }) => {
     const storedPinned = getFromLocalStorage(LOCAL_STORAGE_KEYS.PACE_FILES_PANEL_PINNED);
 
     if (storedPinned) {
-      const pinned = JSON.parse(storedPinned);
+      try {
+        const pinned = JSON.parse(storedPinned);
 
-      setFilesPanelPinnedRaw(pinned);
-      if (pinned) {
-        setFilesPanelOpen(true);
+        setFilesPanelPinnedRaw(pinned);
+        if (pinned) {
+          setFilesPanelOpen(true);
+        }
+      } catch {
+        removeFromLocalStorage(LOCAL_STORAGE_KEYS.PACE_FILES_PANEL_PINNED);
       }
     }
 
