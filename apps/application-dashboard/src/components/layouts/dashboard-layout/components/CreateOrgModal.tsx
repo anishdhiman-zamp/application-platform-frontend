@@ -144,11 +144,14 @@ const CreateOrgModal: FC<CreateOrgModalProps> = ({ open, onClose, orgToProvision
     defaultName: `${username}_org`,
   });
 
-  const pollTimerRef = useRef<ReturnType<typeof setInterval> | null>(null);
+  const pollTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const isPollingRef = useRef(false);
 
   const stopPolling = useCallback(() => {
+    isPollingRef.current = false;
+
     if (pollTimerRef.current) {
-      clearInterval(pollTimerRef.current);
+      clearTimeout(pollTimerRef.current);
       pollTimerRef.current = null;
     }
   }, []);
@@ -164,8 +167,17 @@ const CreateOrgModal: FC<CreateOrgModalProps> = ({ open, onClose, orgToProvision
       setDisplayName(org.name);
       setStep(ModalStep.PROVISIONING);
       setError(null);
+      isPollingRef.current = true;
+
+      const scheduleNext = () => {
+        if (!isPollingRef.current) return;
+
+        pollTimerRef.current = setTimeout(() => void pollOnce(), PROVISIONING_POLL_INTERVAL_MS);
+      };
 
       const pollOnce = async () => {
+        if (!isPollingRef.current) return;
+
         try {
           const result = await provisionOrg(org.organization_id).unwrap();
 
@@ -193,12 +205,11 @@ const CreateOrgModal: FC<CreateOrgModalProps> = ({ open, onClose, orgToProvision
         } catch {
           setError(ERROR_MESSAGES.GENERIC);
         }
+
+        scheduleNext();
       };
 
       await pollOnce();
-
-      stopPolling();
-      pollTimerRef.current = setInterval(pollOnce, PROVISIONING_POLL_INTERVAL_MS);
     },
     [onOrgReady, provisionOrg, refreshSession, stopPolling],
   );
