@@ -1,7 +1,7 @@
 'use client';
 
 import { type FC, useCallback, useState } from 'react';
-import { Button, SearchInput, Tabs, TabsList, TabsTrigger } from '@zamp-platform/ui';
+import { Button, Input, Tabs, TabsList, TabsTrigger } from '@zamp-platform/ui';
 import { Search, X } from 'lucide-react';
 import { TAB_CONFIG } from 'modules/pace/components/tasks/task-listing.constants';
 import type { TaskListingTab } from 'modules/pace/components/tasks/task-listing.types';
@@ -24,6 +24,13 @@ const TaskActionBar: FC<TaskActionBarProps> = ({ activeTab, onTabChange, searchT
     });
   }, [onSearchChange]);
 
+  const handleSearchInputChange = useCallback(
+    (e: React.ChangeEvent<HTMLInputElement>) => {
+      onSearchChange(e.target.value);
+    },
+    [onSearchChange],
+  );
+
   return (
     <div className='border-GRAY_400 flex h-[47px] items-end justify-between overflow-hidden border-b pl-4'>
       <Tabs value={activeTab} onValueChange={(value) => onTabChange(value as TaskListingTab)}>
@@ -35,7 +42,7 @@ const TaskActionBar: FC<TaskActionBarProps> = ({ activeTab, onTabChange, searchT
               <TabsTrigger
                 key={tab.id}
                 value={tab.id}
-                className='f-12-500 text-GRAY_700 data-[state=active]:text-GRAY_1000 group relative h-7 gap-1.5 rounded-none border-none bg-transparent px-1 pt-0 pb-[8.5px] shadow-none ring-0 hover:bg-transparent data-[state=active]:bg-transparent data-[state=active]:shadow-none data-[state=active]:ring-0'
+                className='f-12-500 text-GRAY_700 data-[state=active]:text-GRAY_1000 group relative h-[29px] gap-1.5 rounded-none border-none bg-transparent px-1 pt-0 pb-[8.5px] shadow-none ring-0 hover:bg-transparent data-[state=active]:bg-transparent data-[state=active]:shadow-none data-[state=active]:ring-0'
               >
                 <Icon size={14} />
                 <span className='whitespace-nowrap'>{tab.label}</span>
@@ -48,13 +55,14 @@ const TaskActionBar: FC<TaskActionBarProps> = ({ activeTab, onTabChange, searchT
 
       <div className='flex h-full items-center gap-1.5 p-4'>
         {isSearchOpen && (
-          <SearchInput
+          <Input
             placeholder='Search tasks...'
             value={searchTerm}
-            onChange={onSearchChange}
-            size='small'
             autoFocus
+            onChange={handleSearchInputChange}
+            size='small'
             className='bg-BG_WHITE h-7 w-56'
+            data-testid='task-listing-search-input'
           />
         )}
         <Button

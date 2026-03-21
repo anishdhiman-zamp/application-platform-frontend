@@ -7,7 +7,7 @@ import { NEEDS_ACTION_STATUSES, STATUS_DISPLAY_ORDER } from 'modules/pace/compon
 import { TASK_LISTING_TAB, type TaskListingTab } from 'modules/pace/components/tasks/task-listing.types';
 import TaskAccordionSection from 'modules/pace/components/tasks/TaskAccordionSection';
 import TaskListingSkeleton from 'modules/pace/components/tasks/TaskListingSkeleton';
-import { useGetTaskCountsQuery } from '@/apis/task';
+import { useMockTaskCounts } from 'modules/pace/components/tasks/useTaskListingMockData';
 
 interface TaskAccordionGroupProps {
   activeTab: TaskListingTab;
@@ -15,7 +15,7 @@ interface TaskAccordionGroupProps {
 }
 
 const TaskAccordionGroup: FC<TaskAccordionGroupProps> = ({ activeTab, search }) => {
-  const { data: countsData, isLoading } = useGetTaskCountsQuery();
+  const { data: countsData, isLoading } = useMockTaskCounts(search);
 
   const countMap = useMemo(() => {
     const map = new Map<TaskStatus, number>();
