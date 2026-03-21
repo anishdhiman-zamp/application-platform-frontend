@@ -1,5 +1,5 @@
 import { useGetFilesystemStatusQuery, useListFilesQuery } from '@/apis/filesystem';
-import { FETCH_DEPTH } from '@/modules/pace/hooks/useLazyFileTree';
+import { LAZY_FILE_TREE_FETCH_DEPTH as FETCH_DEPTH } from '@/modules/pace/hooks/lazy-file-tree.utils';
 import { FILESYSTEM_STATUS } from '@/types/api/filesystem.types';
 const FILESYSTEM_POLL_INTERVAL_MS = 3000;
 
