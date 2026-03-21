@@ -3,6 +3,10 @@
 import { forwardRef, useState } from 'react';
 import {
   Button,
+  ContextMenu,
+  ContextMenuContent,
+  ContextMenuItem,
+  ContextMenuTrigger,
   DropdownMenu,
   DropdownMenuContent,
   DropdownMenuItem,
@@ -15,6 +19,7 @@ import {
 import { cn } from '@zamp-platform/ui/utils';
 import { ChevronRight, Loader, MoreVertical } from 'lucide-react';
 import TooltipV2 from '@/components/common/TooltipV2';
+import { KEYBOARD_KEYS } from '@/constants/shortcuts';
 import type { ContextMenuAction, TreeNode } from '@/modules/pace/components/files/file-tree.types';
 import { getFileExtension } from '@/modules/pace/components/files/file-tree.utils';
 import { SIDE_OPTIONS } from '@/types/commonTypes';
@@ -56,6 +61,8 @@ interface FileTreeNodeRowHandlers {
 interface FileTreeNodeRowProps extends React.HTMLAttributes<HTMLDivElement> {
   node: TreeNode;
   depth: number;
+  ancestorIsLast: boolean[];
+  isLastChild: boolean;
   state: FileTreeNodeRowState;
   rename: FileTreeNodeRowRename;
   handlers: FileTreeNodeRowHandlers;
@@ -63,17 +70,76 @@ interface FileTreeNodeRowProps extends React.HTMLAttributes<HTMLDivElement> {
   onActionClick: (actionId: string) => void;
 }
 
+const INDENT_SIZE = 24;
+const BASE_PADDING = 8;
+const MENU_CONTENT_CLASS = 'flex min-w-[180px] flex-col gap-y-[2px]';
+
+const TreeConnectorLines = ({ depth }: { depth: number }) => {
+  if (depth === 0) return null;
+
+  return (
+    <div className='pointer-events-none absolute inset-0'>
+      {Array.from({ length: depth }, (_, level) => (
+        <div
+          key={level}
+          className='bg-GRAY_400 absolute'
+          style={{ left: level * INDENT_SIZE + BASE_PADDING + 8, top: 0, width: 1, bottom: 0 }}
+        />
+      ))}
+    </div>
+  );
+};
+
+const ActionMenuItems = ({
+  actions,
+  onActionClick,
+  as: MenuItem,
+}: {
+  actions: ContextMenuAction[];
+  onActionClick: (actionId: string) => void;
+  as: React.ComponentType<{ className?: string; onClick?: (e: React.MouseEvent) => void; children?: React.ReactNode }>;
+}) =>
+  actions.map((action) => (
+    <MenuItem
+      key={action.id}
+      onClick={(e) => {
+        e.stopPropagation();
+        onActionClick(action.id);
+      }}
+      className={cn(
+        'hover:bg-GRAY_100 f-12-500 text-GRAY_900 cursor-pointer rounded-md',
+        action.isDestructive && 'text-red-600 hover:text-red-600',
+      )}
+    >
+      <action.icon className='size-4' />
+      {action.label}
+    </MenuItem>
+  ));
+
 const FileTreeNodeRow = forwardRef<HTMLDivElement, FileTreeNodeRowProps>(
   (
-    { node, depth, state, rename, handlers, actions, onActionClick, className: externalClassName, ...restProps },
+    {
+      node,
+      depth,
+      ancestorIsLast,
+      isLastChild,
+      state,
+      rename,
+      handlers,
+      actions,
+      onActionClick,
+      className: externalClassName,
+      ...restProps
+    },
     ref,
   ) => {
     const extension = state.isFolder ? '' : getFileExtension(node.name);
     const isDisabled = state.isUploading;
     const isEmptyFolder = state.isFolder && (!node.children || node.children.length === 0);
     const [dropdownOpen, setDropdownOpen] = useState(false);
+    const hasActions = !state.isRenaming && actions.length > 0;
 
-    return (
+    const row = (
       <div
         ref={ref}
         role='button'
@@ -92,14 +158,14 @@ const FileTreeNodeRow = forwardRef<HTMLDivElement, FileTreeNodeRowProps>(
             : (e) => {
                 if (state.isRenaming) return;
 
-                if (e.key === 'Enter' || e.key === ' ') {
+                if (e.key === KEYBOARD_KEYS.ENTER || e.key === KEYBOARD_KEYS.SPACE) {
                   handlers.onRowClick();
                 }
               }
         }
         {...restProps}
         className={cn(
-          'hover:bg-GRAY_100 group flex h-8 cursor-pointer items-center gap-2 rounded-md pr-1 transition-colors',
+          'hover:bg-GRAY_100 group relative flex h-8 cursor-pointer items-center gap-2 rounded-md pr-1 transition-colors',
           dropdownOpen && (state.isFolder || !state.isSelected) && 'bg-GRAY_100',
           state.isSelected && !state.isFolder && 'bg-GRAY_300 hover:bg-GRAY_300',
           (state.isDragging || state.isCutItem || state.isUploading) && 'opacity-50',
@@ -107,8 +173,9 @@ const FileTreeNodeRow = forwardRef<HTMLDivElement, FileTreeNodeRowProps>(
           (isDisabled || isEmptyFolder) && 'cursor-default',
           externalClassName,
         )}
-        style={{ paddingLeft: `${depth * 24 + 8}px` }}
+        style={{ paddingLeft: `${depth * INDENT_SIZE + BASE_PADDING}px` }}
       >
+        <TreeConnectorLines depth={depth} />
         {state.isFolder ? (
           <Button
             variant='ghost'
@@ -183,8 +250,7 @@ const FileTreeNodeRow = forwardRef<HTMLDivElement, FileTreeNodeRowProps>(
         {state.isUploading ? (
           <Loader className='text-GRAY_600 ml-auto size-3.5 shrink-0 animate-spin' />
         ) : (
-          !state.isRenaming &&
-          actions.length > 0 && (
+          hasActions && (
             <DropdownMenu onOpenChange={setDropdownOpen}>
               <DropdownMenuTrigger asChild>
                 <div
@@ -201,28 +267,24 @@ const FileTreeNodeRow = forwardRef<HTMLDivElement, FileTreeNodeRowProps>(
                   <MoreVertical size={14} className='text-GRAY_700' />
                 </div>
               </DropdownMenuTrigger>
-              <DropdownMenuContent align='start' className='flex min-w-[180px] flex-col gap-y-[2px]'>
-                {actions.map((action) => (
-                  <DropdownMenuItem
-                    key={action.id}
-                    onClick={(e) => {
-                      e.stopPropagation();
-                      onActionClick(action.id);
-                    }}
-                    className={cn(
-                      'hover:bg-GRAY_100 f-12-500 text-GRAY_900 cursor-pointer rounded-md',
-                      action.isDestructive && 'text-red-600 hover:text-red-600',
-                    )}
-                  >
-                    <action.icon className='size-4' />
-                    {action.label}
-                  </DropdownMenuItem>
-                ))}
+              <DropdownMenuContent align='start' className={MENU_CONTENT_CLASS}>
+                <ActionMenuItems actions={actions} onActionClick={onActionClick} as={DropdownMenuItem} />
               </DropdownMenuContent>
             </DropdownMenu>
           )
         )}
       </div>
+    );
+
+    if (!hasActions) return row;
+
+    return (
+      <ContextMenu>
+        <ContextMenuTrigger asChild>{row}</ContextMenuTrigger>
+        <ContextMenuContent className={MENU_CONTENT_CLASS}>
+          <ActionMenuItems actions={actions} onActionClick={onActionClick} as={ContextMenuItem} />
+        </ContextMenuContent>
+      </ContextMenu>
     );
   },
 );

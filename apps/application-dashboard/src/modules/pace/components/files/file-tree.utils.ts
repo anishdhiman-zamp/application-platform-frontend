@@ -321,21 +321,28 @@ export function filterTreeNodes(nodes: TreeNode[], searchQuery: string): TreeNod
 /**
  * Flattens a hierarchical tree into a flat array for virtualized rendering.
  * Only includes children of expanded folders.
+ * Tracks ancestry "is last child" info for drawing tree connector lines.
  */
 export function flattenTree(
   nodes: TreeNode[],
   expandedPaths: Set<string>,
   depth = 0,
   parentPath: string | null = null,
+  ancestorIsLast: boolean[] = [],
 ): FlatNode[] {
   const result: FlatNode[] = [];
   const siblingNames = nodes.map((n) => n.name);
 
-  for (const node of nodes) {
-    result.push({ ...node, depth, siblingNames, parentPath });
+  for (let i = 0; i < nodes.length; i++) {
+    const node = nodes[i];
+    const isLastChild = i === nodes.length - 1;
+
+    result.push({ ...node, depth, siblingNames, parentPath, ancestorIsLast, isLastChild });
 
     if (node.children && expandedPaths.has(node.path)) {
-      result.push(...flattenTree(node.children, expandedPaths, depth + 1, node.path));
+      const childAncestorIsLast = [...ancestorIsLast, isLastChild];
+
+      result.push(...flattenTree(node.children, expandedPaths, depth + 1, node.path, childAncestorIsLast));
     }
   }
 
