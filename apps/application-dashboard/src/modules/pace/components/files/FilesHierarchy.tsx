@@ -139,11 +139,11 @@ const FilesHierarchy = ({
         disableAnimation
       >
         <LazyFileTreeProvider
-          addOptimistic={addOptimistic}
-          removeOptimistic={removeOptimistic}
-          confirmAddition={confirmAddition}
-          confirmDeletion={confirmDeletion}
-          loadFolder={loadFolder}
+          onAddOptimistic={addOptimistic}
+          onRemoveOptimistic={removeOptimistic}
+          onConfirmAddition={confirmAddition}
+          onConfirmDeletion={confirmDeletion}
+          onLoadFolder={loadFolder}
         >
           <FileTree
             files={files}
@@ -162,7 +162,7 @@ const FilesHierarchy = ({
             onCollapseAllChange={handleCollapseAllChange}
             loadingFolders={loadingFolders}
             loadedFolders={loadedFolders}
-            loadFolder={loadFolder}
+            onLoadFolder={loadFolder}
           />
         </LazyFileTreeProvider>
       </CommonWrapper>

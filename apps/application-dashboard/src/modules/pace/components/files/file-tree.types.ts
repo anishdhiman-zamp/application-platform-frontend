@@ -135,7 +135,7 @@ export interface FileTreeProps {
   onCollapseAllChange?: (collapseAll: defaultFnType) => void;
   loadingFolders?: Set<string>;
   loadedFolders?: Set<string>;
-  loadFolder?: (path: string, options?: { silent?: boolean }) => Promise<boolean>;
+  onLoadFolder?: (path: string, options?: { silent?: boolean }) => Promise<boolean>;
 }
 
 /**

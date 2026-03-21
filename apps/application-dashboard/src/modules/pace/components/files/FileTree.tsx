@@ -36,7 +36,7 @@ const FileTreeContent = ({
   onCollapseAllChange,
   loadingFolders,
   loadedFolders,
-  loadFolder,
+  onLoadFolder,
 }: FileTreeProps) => {
   // State
   const [internalSelectedPath, setInternalSelectedPath] = useState<string | null>(null);
@@ -154,13 +154,13 @@ const FileTreeContent = ({
 
       toggleExpand(path);
 
-      if (!isCollapsing && loadFolder && loadedFolders && loadingFolders) {
+      if (!isCollapsing && onLoadFolder && loadedFolders && loadingFolders) {
         if (!loadedFolders.has(path) && !loadingFolders.has(path)) {
-          loadFolder(path);
+          onLoadFolder(path);
         }
       }
     },
-    [toggleExpand, expandedPaths, loadFolder, loadedFolders, loadingFolders],
+    [toggleExpand, expandedPaths, onLoadFolder, loadedFolders, loadingFolders],
   );
 
   const handleSelect = useCallback(

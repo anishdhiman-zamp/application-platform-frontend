@@ -15,21 +15,36 @@ import { useLazyFileTreeContext } from '@/modules/pace/context/LazyFileTreeConte
 import type { AppDispatch, RootState } from '@/store';
 import type { FileInfo, ListFilesRequest } from '@/types/api/filesystem.types';
 
+interface PatchUndo {
+  undo: () => void;
+}
+
 function patchListFilesCache(
   dispatch: AppDispatch,
   getState: () => RootState,
   updater: (files: FileInfo[]) => FileInfo[],
-) {
+): PatchUndo[] {
   const entries = FilesystemApi.util.selectInvalidatedBy(getState(), [{ type: APITags.GET_FILES_LIST }]);
+  const patches: PatchUndo[] = [];
 
   for (const { endpointName, originalArgs } of entries) {
     if (endpointName !== FILESYSTEM_ENDPOINT_NAMES.LIST_FILES) continue;
 
-    dispatch(
-      FilesystemApi.util.updateQueryData('listFiles', originalArgs as ListFilesRequest, (draft) => {
-        draft.files = updater(draft.files as FileInfo[]);
-      }),
+    patches.push(
+      dispatch(
+        FilesystemApi.util.updateQueryData('listFiles', originalArgs as ListFilesRequest, (draft) => {
+          draft.files = updater(draft.files as FileInfo[]);
+        }),
+      ),
     );
+  }
+
+  return patches;
+}
+
+function undoPatches(patches: PatchUndo[]) {
+  for (const patch of patches) {
+    patch.undo();
   }
 }
 
@@ -115,7 +130,7 @@ export const useFileActions = (): UseFileActionsReturn => {
     async (path: string) => {
       lazyTree?.removeOptimistic(path);
 
-      patchListFilesCache(store.dispatch as AppDispatch, store.getState, (files) =>
+      const patches = patchListFilesCache(store.dispatch as AppDispatch, store.getState, (files) =>
         files.filter((f) => f.path !== path && !f.path.startsWith(path + '/')),
       );
 
@@ -127,6 +142,7 @@ export const useFileActions = (): UseFileActionsReturn => {
           if (success) lazyTree?.confirmDeletion(path);
         });
       } catch (error) {
+        undoPatches(patches);
         lazyTree?.confirmDeletion(path);
         throw error;
       }
@@ -152,7 +168,7 @@ export const useFileActions = (): UseFileActionsReturn => {
         });
       }
 
-      patchListFilesCache(store.dispatch as AppDispatch, store.getState, (files) =>
+      const patches = patchListFilesCache(store.dispatch as AppDispatch, store.getState, (files) =>
         files.map((f) => {
           if (f.path === oldPath) {
             return { ...f, path: destination, name: newName, mtime_ms: Date.now() };
@@ -175,6 +191,7 @@ export const useFileActions = (): UseFileActionsReturn => {
           }
         });
       } catch (error) {
+        undoPatches(patches);
         lazyTree?.confirmDeletion(oldPath);
         if (sourceItem) lazyTree?.confirmAddition(destination);
         throw error;

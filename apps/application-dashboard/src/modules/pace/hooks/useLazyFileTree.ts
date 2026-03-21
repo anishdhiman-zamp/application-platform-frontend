@@ -59,6 +59,9 @@ export const useLazyFileTree = ({
   const hasInitializedRef = useRef(false);
   const hasSeededFromCacheRef = useRef(cacheSnapshot.hasCachedData);
   const searchAbortRef = useRef(0);
+  const loadingFoldersRef = useRef(loadingFolders);
+
+  loadingFoldersRef.current = loadingFolders;
 
   const markFolderLoading = useCallback((path: string, loading: boolean) => {
     setLoadingFolders((prev) => {
@@ -119,7 +122,7 @@ export const useLazyFileTree = ({
 
   const loadFolder = useCallback(
     async (path: string, { silent = false }: { silent?: boolean } = {}): Promise<boolean> => {
-      if (loadingFolders.has(path)) return false;
+      if (loadingFoldersRef.current.has(path)) return false;
 
       if (!silent) {
         markFolderLoading(path, true);
@@ -146,7 +149,7 @@ export const useLazyFileTree = ({
         }
       }
     },
-    [trigger, mergeServerFiles, markLoadedFolders, markFolderLoading, loadingFolders],
+    [trigger, mergeServerFiles, markLoadedFolders, markFolderLoading],
   );
 
   const restoreExpandedFolders = useCallback(

@@ -15,24 +15,30 @@ const LazyFileTreeContext = createContext<LazyFileTreeContextValue | null>(null)
 
 interface LazyFileTreeProviderProps {
   children: ReactNode;
-  addOptimistic: (items: FileItem | FileItem[]) => void;
-  removeOptimistic: (path: string) => void;
-  confirmAddition: (path: string) => void;
-  confirmDeletion: (path: string) => void;
-  loadFolder: (path: string, options?: { silent?: boolean }) => Promise<boolean>;
+  onAddOptimistic: (items: FileItem | FileItem[]) => void;
+  onRemoveOptimistic: (path: string) => void;
+  onConfirmAddition: (path: string) => void;
+  onConfirmDeletion: (path: string) => void;
+  onLoadFolder: (path: string, options?: { silent?: boolean }) => Promise<boolean>;
 }
 
 export const LazyFileTreeProvider = ({
   children,
-  addOptimistic,
-  removeOptimistic,
-  confirmAddition,
-  confirmDeletion,
-  loadFolder,
+  onAddOptimistic,
+  onRemoveOptimistic,
+  onConfirmAddition,
+  onConfirmDeletion,
+  onLoadFolder,
 }: LazyFileTreeProviderProps) => {
   const value = useMemo<LazyFileTreeContextValue>(
-    () => ({ addOptimistic, removeOptimistic, confirmAddition, confirmDeletion, loadFolder }),
-    [addOptimistic, removeOptimistic, confirmAddition, confirmDeletion, loadFolder],
+    () => ({
+      addOptimistic: onAddOptimistic,
+      removeOptimistic: onRemoveOptimistic,
+      confirmAddition: onConfirmAddition,
+      confirmDeletion: onConfirmDeletion,
+      loadFolder: onLoadFolder,
+    }),
+    [onAddOptimistic, onRemoveOptimistic, onConfirmAddition, onConfirmDeletion, onLoadFolder],
   );
 
   return <LazyFileTreeContext.Provider value={value}>{children}</LazyFileTreeContext.Provider>;
