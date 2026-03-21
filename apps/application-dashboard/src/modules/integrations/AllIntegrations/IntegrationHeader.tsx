@@ -34,7 +34,7 @@ const IntegrationHeader: FC = () => {
           onChange={handleChange}
           onDebouncedChange={handleDebouncedChange}
           debounceMs={DEBOUNCE_MS}
-          className='w-[300px]'
+          className='w-full max-w-[300px]'
           aria-label='Search integrations'
         />
       </div>
