@@ -36,8 +36,7 @@ const FilesPanelToolbar = ({
   onCollapseAll,
 }: FilesPanelToolbarProps) => {
   const { filesPanelPinned, setFilesPanelPinned } = usePaceContext();
-
-  const selectedSortLabel = SORT_OPTIONS.find((opt) => opt.value === sortBy)?.label ?? 'Date modified';
+  const selectedSortLabel = SORT_OPTIONS.find((opt) => opt.value === sortBy)?.label;
 
   return (
     <div className='border-GRAY_400 flex flex-col gap-y-2.5 border-b p-3'>

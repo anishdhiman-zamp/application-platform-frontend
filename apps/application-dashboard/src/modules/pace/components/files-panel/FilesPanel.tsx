@@ -15,9 +15,10 @@ const PANEL_ANIMATION = {
 } as const;
 
 const MOUSE_LEAVE_DELAY_MS = 200;
-
 const PORTAL_SELECTORS =
   '[role="menu"], [role="listbox"], [role="dialog"], [data-radix-popper-content-wrapper], [data-radix-menu-content]';
+
+const isPortalOpen = () => document.querySelector(PORTAL_SELECTORS) !== null;
 
 const FilesPanel = () => {
   const { filesPanelOpen, filesPanelPinned, closeFilesPanel } = usePaceContext();
@@ -25,16 +26,12 @@ const FilesPanel = () => {
   const panelRef = useRef<HTMLDivElement>(null);
   const leaveTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 
-  const clearLeaveTimer = useCallback(() => {
+  const clearLeaveTimer = () => {
     if (leaveTimerRef.current) {
       clearTimeout(leaveTimerRef.current);
       leaveTimerRef.current = null;
     }
-  }, []);
-
-  const isPortalOpen = useCallback(() => {
-    return document.querySelector(PORTAL_SELECTORS) !== null;
-  }, []);
+  };
 
   const handleMouseLeave = useCallback(
     (e: React.MouseEvent) => {
@@ -50,16 +47,16 @@ const FilesPanel = () => {
 
       leaveTimerRef.current = setTimeout(closeFilesPanel, MOUSE_LEAVE_DELAY_MS);
     },
-    [filesPanelPinned, closeFilesPanel, clearLeaveTimer, isPortalOpen],
+    [filesPanelPinned, closeFilesPanel],
   );
 
-  const handleMouseEnter = useCallback(() => {
+  const handleMouseEnter = () => {
     clearLeaveTimer();
-  }, [clearLeaveTimer]);
+  };
 
   useEffect(() => {
     return () => clearLeaveTimer();
-  }, [clearLeaveTimer]);
+  }, []);
 
   return (
     <AnimatePresence>

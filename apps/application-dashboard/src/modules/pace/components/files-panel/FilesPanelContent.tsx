@@ -1,6 +1,6 @@
 'use client';
 
-import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
+import { useEffect, useMemo, useRef, useState } from 'react';
 import { useListFilesQuery } from '@/apis/filesystem';
 import ImageLoader from '@/components/common/loader/ImageLoader';
 import CommonWrapper from '@/components/commonWrapper';
@@ -57,43 +57,26 @@ const FilesPanelContent = () => {
     return [...fileList, ...newItems];
   }, [files?.files, uploadingItems]);
 
-  const toggleSortDirection = useCallback(() => {
+  const toggleSortDirection = () => {
     setSortDirection((prev) => (prev === SORT_DIRECTION.ASC ? SORT_DIRECTION.DESC : SORT_DIRECTION.ASC));
-  }, []);
+  };
 
-  const handleCollapseAllChange = useCallback((collapseAll: () => void) => {
+  const handleCollapseAllChange = (collapseAll: () => void) => {
     collapseAllRef.current = collapseAll;
-  }, []);
+  };
 
-  const handleCollapseAll = useCallback(() => {
+  const handleCollapseAll = () => {
     collapseAllRef.current?.();
-  }, []);
+  };
 
-  const handleSelectFile = useCallback(
-    (file: FileItem | null) => {
-      if (!file || file.type === FILE_TYPE.DIRECTORY) return;
+  const handleSelectFile = (file: FileItem | null) => {
+    if (!file || file.type === FILE_TYPE.DIRECTORY) return;
 
-      openTab(file.path, file.name);
-    },
-    [openTab],
-  );
-
-  const handleUploadFiles = useCallback(
-    (fileList: FileList, targetPath: string) => {
-      uploadFiles(fileList, targetPath);
-    },
-    [uploadFiles],
-  );
-
-  const handleUploadFolder = useCallback(
-    (fileList: FileList, targetPath: string) => {
-      uploadFolder(fileList, targetPath);
-    },
-    [uploadFolder],
-  );
+    openTab(file.path, file.name);
+  };
 
   useEffect(() => {
-    if (uploadingItems.length === 0) return;
+    if (uploadingItems?.length === 0) return;
 
     const allExist = uploadingItems.every((item) => files?.files?.some((f) => f.path === item.path));
 
@@ -157,8 +140,8 @@ const FilesPanelContent = () => {
           sortDirection={sortDirection}
           selectedPath={null}
           onSelectFile={handleSelectFile}
-          onUploadFiles={handleUploadFiles}
-          onUploadFolder={handleUploadFolder}
+          onUploadFiles={uploadFiles}
+          onUploadFolder={uploadFolder}
           onCollapseAllChange={handleCollapseAllChange}
         />
       </CommonWrapper>

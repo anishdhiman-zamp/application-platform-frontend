@@ -186,9 +186,10 @@ const PaceNavbar = () => {
           size='icon'
           className={cn(
             'text-GRAY_700 hover:text-GRAY_900 hover:bg-accent h-7.5 w-7.5 rounded-lg border-[0.75px] border-transparent p-[7px]',
-            filesPanelOpen &&
-              !filesPanelPinned &&
-              'border-GRAY_500 text-GRAY_900 hover:text-GRAY_900 shadow-tab-shadow bg-BG_WHITE hover:bg-BG_WHITE',
+            {
+              'border-GRAY_500 text-GRAY_900 hover:text-GRAY_900 shadow-tab-shadow bg-BG_WHITE hover:bg-BG_WHITE':
+                filesPanelOpen && !filesPanelPinned,
+            },
           )}
           onClick={toggleFilesPanel}
           title='Files'

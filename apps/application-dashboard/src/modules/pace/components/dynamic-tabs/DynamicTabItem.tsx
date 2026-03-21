@@ -11,6 +11,7 @@ import { isSameBasePath, preserveSidebarParam } from 'modules/pace/components/dy
 import { useIsCompact } from 'modules/pace/components/dynamic-tabs/useIsCompact';
 import { useRouter } from 'next/navigation';
 import TooltipV2 from '@/components/common/TooltipV2';
+import { KEYBOARD_KEYS } from '@/constants/shortcuts';
 import { usePaceContext } from '@/modules/pace/pace.context';
 import { CHAT_SIDEBAR_STATE, DynamicTab } from '@/modules/pace/pace.types';
 import { defaultFnType, SIDE_OPTIONS } from '@/types/commonTypes';
@@ -146,7 +147,7 @@ const DynamicTabItem = ({
                 tabIndex={0}
                 onClick={(e) => onClose(e, tab.id)}
                 onKeyDown={(e) => {
-                  if (e.key === 'Enter' || e.key === ' ') {
+                  if (e.key === KEYBOARD_KEYS.ENTER || e.key === KEYBOARD_KEYS.SPACE) {
                     e.preventDefault();
                     e.stopPropagation();
                     onClose(e as unknown as React.MouseEvent, tab.id);
