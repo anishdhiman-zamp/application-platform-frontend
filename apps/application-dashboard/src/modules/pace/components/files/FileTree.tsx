@@ -96,7 +96,7 @@ const FileTreeContent = ({
     return sortTreeNodes(filtered, sortBy, sortDirection);
   }, [sortedRawTree, searchQuery, sortBy, sortDirection]);
 
-  const flatNodes = useMemo(() => flattenTree(treeData, expandedPaths, ROW_HEIGHT), [treeData, expandedPaths]);
+  const flatNodes = useMemo(() => flattenTree(treeData, expandedPaths), [treeData, expandedPaths]);
   const rootSiblingNames = useMemo(() => treeData.map((node) => node.name), [treeData]);
 
   const dragOverlayBounds = useMemo(() => {
@@ -134,7 +134,7 @@ const FileTreeContent = ({
 
   const virtualItems = virtualizer.getVirtualItems();
   const visibleStart = virtualItems.length > 0 ? virtualItems[0].index : 0;
-  const visibleEnd = virtualItems.length > 0 ? virtualItems[virtualItems.length - 1].index : 0;
+  const visibleEnd = virtualItems.length > 0 ? virtualItems[virtualItems.length - 1].index : flatNodes.length - 1;
 
   const handleToggleExpand = useCallback(
     (path: string) => {

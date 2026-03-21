@@ -319,22 +319,6 @@ export function filterTreeNodes(nodes: TreeNode[], searchQuery: string): TreeNod
 }
 
 /**
- * Computes the total visible row count for a tree node,
- * including itself and all expanded descendants.
- */
-export function computeVisibleDescendantCount(node: TreeNode, expandedPaths: Set<string>): number {
-  let count = 1;
-
-  if (node.children && expandedPaths.has(node.path)) {
-    for (const child of node.children) {
-      count += computeVisibleDescendantCount(child, expandedPaths);
-    }
-  }
-
-  return count;
-}
-
-/**
  * Pre-computes a map of path -> visible descendant count for all nodes in the tree.
  * Avoids redundant O(n) traversals during rendering.
  */
@@ -365,31 +349,21 @@ export function buildDescendantCountMap(nodes: TreeNode[], expandedPaths: Set<st
 /**
  * Flattens a hierarchical tree into a flat array for virtualized rendering.
  * Only includes children of expanded folders.
- * Tracks ancestry "is last child" info for drawing tree connector lines.
- * Each node includes totalHeight (in px) covering itself + all visible descendants.
  */
 export function flattenTree(
   nodes: TreeNode[],
   expandedPaths: Set<string>,
-  rowHeight: number,
   depth = 0,
   parentPath: string | null = null,
-  ancestorIsLast: boolean[] = [],
 ): FlatNode[] {
   const result: FlatNode[] = [];
   const siblingNames = nodes.map((n) => n.name);
 
-  for (let i = 0; i < nodes.length; i++) {
-    const node = nodes[i];
-    const isLastChild = i === nodes.length - 1;
-    const totalHeight = computeVisibleDescendantCount(node, expandedPaths) * rowHeight;
-
-    result.push({ ...node, depth, siblingNames, parentPath, ancestorIsLast, isLastChild, totalHeight });
+  for (const node of nodes) {
+    result.push({ ...node, depth, siblingNames, parentPath });
 
     if (node.children && expandedPaths.has(node.path)) {
-      const childAncestorIsLast = [...ancestorIsLast, isLastChild];
-
-      result.push(...flattenTree(node.children, expandedPaths, rowHeight, depth + 1, node.path, childAncestorIsLast));
+      result.push(...flattenTree(node.children, expandedPaths, depth + 1, node.path));
     }
   }
 

@@ -65,7 +65,6 @@ function renderSiblings(
   ctx: RenderContext,
   depth: number,
   parentPath: string | null,
-  ancestorIsLast: boolean[],
   flatIndexStart: number,
 ): React.ReactNode[] {
   const result: React.ReactNode[] = [];
@@ -73,9 +72,7 @@ function renderSiblings(
   let runningTop = 0;
   let flatIndex = flatIndexStart;
 
-  for (let i = 0; i < nodes.length; i++) {
-    const node = nodes[i];
-    const isLastChild = i === nodes.length - 1;
+  for (const node of nodes) {
     const descendantCount = ctx.descendantCounts.get(node.path) ?? 1;
     const totalHeight = descendantCount * ctx.rowHeight;
     const nodeStartIndex = flatIndex;
@@ -90,8 +87,6 @@ function renderSiblings(
 
     const isFolder = node.type === FILE_TYPE.DIRECTORY && node.children && node.children.length > 0;
     const isExpanded = isFolder && ctx.expandedPaths.has(node.path);
-
-    const childAncestorIsLast = isFolder ? [...ancestorIsLast, isLastChild] : ancestorIsLast;
     const childFlatIndexStart = nodeStartIndex + 1;
 
     result.push(
@@ -120,8 +115,6 @@ function renderSiblings(
           <FileTreeNode
             node={node}
             depth={depth}
-            ancestorIsLast={ancestorIsLast}
-            isLastChild={isLastChild}
             expandedPaths={ctx.expandedPaths}
             selectedPath={ctx.selectedPath}
             originalNodeMap={ctx.originalNodeMap}
@@ -149,7 +142,7 @@ function renderSiblings(
               height: totalHeight - ctx.rowHeight,
             }}
           >
-            {renderSiblings(node.children!, ctx, depth + 1, node.path, childAncestorIsLast, childFlatIndexStart)}
+            {renderSiblings(node.children!, ctx, depth + 1, node.path, childFlatIndexStart)}
           </div>
         )}
       </div>,
@@ -225,7 +218,7 @@ const StickyNestedTree = memo(function StickyNestedTree(props: StickyNestedTreeP
     ],
   );
 
-  return <>{renderSiblings(treeData, ctx, 0, null, [], 0)}</>;
+  return <>{renderSiblings(treeData, ctx, 0, null, 0)}</>;
 });
 
 export default StickyNestedTree;

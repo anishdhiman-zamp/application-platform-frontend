@@ -106,9 +106,6 @@ export interface FlatNode extends TreeNode {
   depth: number;
   siblingNames: string[];
   parentPath: string | null;
-  ancestorIsLast: boolean[];
-  isLastChild: boolean;
-  totalHeight: number;
 }
 
 /**
@@ -142,8 +139,6 @@ export interface FilesPreviewProps {
 export interface FileTreeNodeProps {
   node: TreeNode;
   depth: number;
-  ancestorIsLast: boolean[];
-  isLastChild: boolean;
   expandedPaths: Set<string>;
   selectedPath: string | null;
   originalNodeMap: Map<string, TreeNode>;

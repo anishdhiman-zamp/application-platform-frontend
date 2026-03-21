@@ -61,8 +61,6 @@ interface FileTreeNodeRowHandlers {
 interface FileTreeNodeRowProps extends React.HTMLAttributes<HTMLDivElement> {
   node: TreeNode;
   depth: number;
-  ancestorIsLast: boolean[];
-  isLastChild: boolean;
   state: FileTreeNodeRowState;
   rename: FileTreeNodeRowRename;
   handlers: FileTreeNodeRowHandlers;
@@ -118,19 +116,7 @@ const ActionMenuItems = ({
 
 const FileTreeNodeRow = forwardRef<HTMLDivElement, FileTreeNodeRowProps>(
   (
-    {
-      node,
-      depth,
-      ancestorIsLast,
-      isLastChild,
-      state,
-      rename,
-      handlers,
-      actions,
-      onActionClick,
-      className: externalClassName,
-      ...restProps
-    },
+    { node, depth, state, rename, handlers, actions, onActionClick, className: externalClassName, ...restProps },
     ref,
   ) => {
     const extension = state.isFolder ? '' : getFileExtension(node.name);

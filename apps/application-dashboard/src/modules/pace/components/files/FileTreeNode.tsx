@@ -21,8 +21,6 @@ import { TAB_TYPE } from '@/modules/pace/pace.types';
 const FileTreeNode = memo(function FileTreeNode({
   node,
   depth,
-  ancestorIsLast,
-  isLastChild,
   expandedPaths,
   selectedPath,
   originalNodeMap,
@@ -184,8 +182,6 @@ const FileTreeNode = memo(function FileTreeNode({
         ref={nodeRef}
         node={node}
         depth={depth}
-        ancestorIsLast={ancestorIsLast}
-        isLastChild={isLastChild}
         state={{
           isFolder,
           isExpanded,
