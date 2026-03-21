@@ -202,6 +202,8 @@ export const API_ENDPOINTS = {
 
   //TASKS
   TASKS_MESSAGES_GET: `tasks/{{conversationId}}/messages`,
+  TASKS_COUNTS_GET: `tasks/counts`,
+  TASKS_LIST_GET: `tasks/list`,
 
   // Integrations
   INTEGRATIONS_AUTHENTICATE: `/integrations/authenticate`,

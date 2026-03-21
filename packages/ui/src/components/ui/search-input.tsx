@@ -20,6 +20,7 @@ interface SearchInputProps {
   size?: SizeType;
   className?: string;
   wrapperClassName?: string;
+  autoFocus?: boolean;
   'aria-label'?: string;
 }
 
@@ -32,6 +33,7 @@ const SearchInput = ({
   size = 'small',
   className,
   wrapperClassName,
+  autoFocus,
   'aria-label': ariaLabel,
 }: SearchInputProps) => {
   const isControlled = controlledValue !== undefined;
@@ -82,6 +84,7 @@ const SearchInput = ({
         className={cn('border-GRAY_400 focus:border-GRAY_600 pr-8 focus:ring-3', className)}
         size={size}
         iconPosition='leading'
+        autoFocus={autoFocus}
         aria-label={ariaLabel ?? placeholder}
       />
       {inputValue && (

@@ -4,25 +4,23 @@ export interface SubTask {
   id: string;
   title: string;
   status: TaskStatus;
-  total_subtasks?: number;
-  completed_subtasks?: number;
   subtasks?: SubTask[];
 }
 
 export interface TaskCreator {
   id: string;
   name: string;
-  avatar_url?: string;
+  avatar_type?: string;
+  avatar_value?: string;
 }
 
 export interface TaskListItem {
   id: string;
   title: string;
-  description: string;
+  description: string | null;
   status: TaskStatus;
-  total_subtasks: number;
-  completed_subtasks: number;
   subtasks: SubTask[];
+  skills_invoked_count: number;
   created_by: TaskCreator;
   created_at: string;
 }
