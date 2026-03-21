@@ -88,80 +88,34 @@ function renderSiblings(
       continue;
     }
 
-    const isExpandedFolder =
-      node.type === FILE_TYPE.DIRECTORY &&
-      node.children &&
-      node.children.length > 0 &&
-      ctx.expandedPaths.has(node.path);
+    const isFolder = node.type === FILE_TYPE.DIRECTORY && node.children && node.children.length > 0;
+    const isExpanded = isFolder && ctx.expandedPaths.has(node.path);
 
-    if (isExpandedFolder) {
-      const childAncestorIsLast = [...ancestorIsLast, isLastChild];
-      const childFlatIndexStart = nodeStartIndex + 1;
+    const childAncestorIsLast = isFolder ? [...ancestorIsLast, isLastChild] : ancestorIsLast;
+    const childFlatIndexStart = nodeStartIndex + 1;
 
-      result.push(
+    result.push(
+      <div
+        key={node.path}
+        style={{
+          position: 'absolute',
+          top: runningTop,
+          height: totalHeight,
+          width: '100%',
+        }}
+      >
         <div
-          key={node.path}
-          style={{
-            position: 'absolute',
-            top: runningTop,
-            height: totalHeight,
-            width: '100%',
-          }}
-        >
-          <div
-            className='bg-BG_GRAY_2 sticky-folder-row'
-            style={{
-              position: 'sticky',
-              top: depth * ctx.rowHeight,
-              zIndex: MAX_STICKY_Z_INDEX - depth,
-              height: ctx.rowHeight,
-            }}
-          >
-            <FileTreeNode
-              node={node}
-              depth={depth}
-              ancestorIsLast={ancestorIsLast}
-              isLastChild={isLastChild}
-              expandedPaths={ctx.expandedPaths}
-              selectedPath={ctx.selectedPath}
-              originalNodeMap={ctx.originalNodeMap}
-              siblingNames={siblingNames}
-              parentPath={parentPath}
-              onToggleExpand={ctx.onToggleExpand}
-              onSelect={ctx.onSelect}
-              onFileMoved={ctx.onFileMoved}
-              onFileDeleted={ctx.onFileDeleted}
-              onFileCreated={ctx.onFileCreated}
-              onUploadFiles={ctx.onUploadFiles}
-              onTriggerFileUpload={ctx.onTriggerFileUpload}
-              onTriggerFolderUpload={ctx.onTriggerFolderUpload}
-              onDragOverFolderChange={ctx.onDragOverFolderChange}
-              isSearchActive={ctx.isSearchActive}
-              style={{ height: ctx.rowHeight }}
-            />
-          </div>
-          <div
-            style={{
-              position: 'absolute',
-              top: ctx.rowHeight,
-              width: '100%',
-              height: totalHeight - ctx.rowHeight,
-            }}
-          >
-            {renderSiblings(node.children!, ctx, depth + 1, node.path, childAncestorIsLast, childFlatIndexStart)}
-          </div>
-        </div>,
-      );
-    } else {
-      result.push(
-        <div
-          key={node.path}
-          style={{
-            position: 'absolute',
-            top: runningTop,
-            width: '100%',
-            height: ctx.rowHeight,
-          }}
+          className={isExpanded ? 'bg-BG_GRAY_2 sticky-folder-row' : undefined}
+          style={
+            isExpanded
+              ? {
+                  position: 'sticky',
+                  top: depth * ctx.rowHeight,
+                  zIndex: MAX_STICKY_Z_INDEX - depth,
+                  height: ctx.rowHeight,
+                }
+              : { height: ctx.rowHeight }
+          }
         >
           <FileTreeNode
             node={node}
@@ -185,9 +139,21 @@ function renderSiblings(
             isSearchActive={ctx.isSearchActive}
             style={{ height: ctx.rowHeight }}
           />
-        </div>,
-      );
-    }
+        </div>
+        {isExpanded && (
+          <div
+            style={{
+              position: 'absolute',
+              top: ctx.rowHeight,
+              width: '100%',
+              height: totalHeight - ctx.rowHeight,
+            }}
+          >
+            {renderSiblings(node.children!, ctx, depth + 1, node.path, childAncestorIsLast, childFlatIndexStart)}
+          </div>
+        )}
+      </div>,
+    );
 
     runningTop += totalHeight;
   }
