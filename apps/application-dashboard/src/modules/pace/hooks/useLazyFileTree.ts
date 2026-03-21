@@ -2,13 +2,18 @@
 
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { useStore } from 'react-redux';
-import { FilesystemApi, useLazyListFilesQuery } from '@/apis/filesystem';
+import { useLazyListFilesQuery } from '@/apis/filesystem';
 import { FILE_TYPE, type FileItem } from '@/modules/pace/components/files/file-tree.types';
+import {
+  buildCacheSnapshot,
+  getDirectParent,
+  getPathDepth,
+  groupByDepth,
+  isChildOf,
+  LAZY_FILE_TREE_FETCH_DEPTH,
+} from '@/modules/pace/hooks/lazy-file-tree.utils';
 import type { RootState } from '@/store';
-import type { ListFilesRequest, ListFilesResponse } from '@/types/api/filesystem.types';
 import { getStoredExpandedPaths } from '@/utils/localstorage';
-
-const FETCH_DEPTH = 2;
 
 interface UseLazyFileTreeOptions {
   uploadingItems?: FileItem[];
@@ -29,108 +34,6 @@ interface UseLazyFileTreeReturn {
   removeOptimistic: (path: string) => void;
   confirmAddition: (path: string) => void;
   confirmDeletion: (path: string) => void;
-}
-
-function getPathDepth(path: string): number {
-  if (!path) return 0;
-
-  return path.split('/').length;
-}
-
-function groupByDepth(paths: string[]): Map<number, string[]> {
-  const map = new Map<number, string[]>();
-
-  for (const p of paths) {
-    const depth = getPathDepth(p);
-    const existing = map.get(depth) ?? [];
-
-    existing.push(p);
-    map.set(depth, existing);
-  }
-
-  return new Map([...map.entries()].sort(([a], [b]) => a - b));
-}
-
-function isChildOf(childPath: string, parentPath: string): boolean {
-  if (!parentPath) return !childPath.includes('/');
-
-  return childPath.startsWith(parentPath + '/');
-}
-
-function getDirectParent(path: string): string {
-  const idx = path.lastIndexOf('/');
-
-  return idx === -1 ? '' : path.slice(0, idx);
-}
-
-function selectCachedListFiles(state: RootState, args: ListFilesRequest): ListFilesResponse | undefined {
-  const result = FilesystemApi.endpoints.listFiles.select(args)(state);
-
-  return result?.data;
-}
-
-function buildCacheSnapshot(state: RootState): {
-  files: FileItem[];
-  loadedFolders: Set<string>;
-  hasCachedData: boolean;
-} {
-  const rootData = selectCachedListFiles(state, { depth: FETCH_DEPTH });
-
-  if (!rootData) {
-    return { files: [], loadedFolders: new Set(), hasCachedData: false };
-  }
-
-  const allFiles: FileItem[] = [...(rootData.files as FileItem[])];
-  const loadedFolders = new Set<string>();
-
-  loadedFolders.add('');
-
-  const rootDirs = rootData.files.filter((f) => f.type === FILE_TYPE.DIRECTORY && getPathDepth(f.path) <= FETCH_DEPTH);
-
-  for (const dir of rootDirs) {
-    loadedFolders.add(dir.path);
-  }
-
-  const storedPaths = getStoredExpandedPaths();
-
-  if (storedPaths.length > 0) {
-    const byDepth = groupByDepth(storedPaths);
-
-    for (const [, paths] of byDepth) {
-      for (const p of paths) {
-        if (loadedFolders.has(p)) continue;
-
-        const parent = getDirectParent(p);
-
-        if (!loadedFolders.has(parent)) continue;
-
-        const subData = selectCachedListFiles(state, { depth: FETCH_DEPTH, path: p });
-
-        if (!subData) continue;
-
-        const subFiles = subData.files as FileItem[];
-        const existingPaths = new Set(allFiles.map((f) => f.path));
-
-        for (const file of subFiles) {
-          if (!existingPaths.has(file.path)) {
-            allFiles.push(file);
-          }
-        }
-
-        loadedFolders.add(p);
-
-        const subDirs = subFiles.filter(
-          (f) => f.type === FILE_TYPE.DIRECTORY && getPathDepth(f.path) <= getPathDepth(p) + FETCH_DEPTH,
-        );
-
-        for (const dir of subDirs) {
-          loadedFolders.add(dir.path);
-        }
-      }
-    }
-  }
-
-  return { files: allFiles, loadedFolders, hasCachedData: true };
 }
 
 export const useLazyFileTree = ({
@@ -175,7 +78,7 @@ export const useLazyFileTree = ({
     setServerFiles((prev) => {
       const fetchedPathsSet = new Set(fetchedFiles.map((f) => f.path));
       const fetchedPathDepth = fetchedPath ? getPathDepth(fetchedPath) : 0;
-      const coveredDepth = fetchedPathDepth + FETCH_DEPTH + 1;
+      const coveredDepth = fetchedPathDepth + LAZY_FILE_TREE_FETCH_DEPTH + 1;
 
       const filtered = prev.filter((existing) => {
         if (fetchedPathsSet.has(existing.path)) return false;
@@ -200,7 +103,7 @@ export const useLazyFileTree = ({
       next.add(fetchedPath);
 
       const fetchedPathDepth = fetchedPath ? getPathDepth(fetchedPath) : 0;
-      const maxLoadedDepth = fetchedPathDepth + FETCH_DEPTH;
+      const maxLoadedDepth = fetchedPathDepth + LAZY_FILE_TREE_FETCH_DEPTH;
 
       const directories = fetchedFiles.filter((f) => f.type === FILE_TYPE.DIRECTORY);
 
@@ -224,7 +127,7 @@ export const useLazyFileTree = ({
 
       try {
         const result = await trigger({
-          depth: FETCH_DEPTH,
+          depth: LAZY_FILE_TREE_FETCH_DEPTH,
           path: path || undefined,
         }).unwrap();
 
@@ -257,7 +160,7 @@ export const useLazyFileTree = ({
 
       currentLoaded.add('');
       const rootLoadedDirs = rootFiles.filter(
-        (f) => f.type === FILE_TYPE.DIRECTORY && getPathDepth(f.path) <= FETCH_DEPTH,
+        (f) => f.type === FILE_TYPE.DIRECTORY && getPathDepth(f.path) <= LAZY_FILE_TREE_FETCH_DEPTH,
       );
 
       for (const folder of rootLoadedDirs) {
@@ -282,7 +185,7 @@ export const useLazyFileTree = ({
             }
 
             try {
-              const res = await trigger({ depth: FETCH_DEPTH, path: p }).unwrap();
+              const res = await trigger({ depth: LAZY_FILE_TREE_FETCH_DEPTH, path: p }).unwrap();
 
               return { path: p, files: res.files };
             } finally {
@@ -300,7 +203,7 @@ export const useLazyFileTree = ({
           currentLoaded.add(fetchedPath);
           const fetchedDepth = getPathDepth(fetchedPath);
           const loadedDirs = fetchedFiles.filter(
-            (f) => f.type === FILE_TYPE.DIRECTORY && getPathDepth(f.path) <= fetchedDepth + FETCH_DEPTH,
+            (f) => f.type === FILE_TYPE.DIRECTORY && getPathDepth(f.path) <= fetchedDepth + LAZY_FILE_TREE_FETCH_DEPTH,
           );
 
           for (const folder of loadedDirs) {
@@ -323,7 +226,7 @@ export const useLazyFileTree = ({
       }
 
       try {
-        const rootResult = await trigger({ depth: FETCH_DEPTH }).unwrap();
+        const rootResult = await trigger({ depth: LAZY_FILE_TREE_FETCH_DEPTH }).unwrap();
 
         mergeServerFiles('', rootResult.files);
         markLoadedFolders('', rootResult.files);

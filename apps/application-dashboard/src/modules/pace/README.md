@@ -22,11 +22,11 @@ The `/files` route subtree unmounts on tab switch, destroying all local React st
 
 ### Changed Files
 
-| File | Change |
-|------|--------|
-| `hooks/useLazyFileTree.ts` | Added `buildCacheSnapshot()` that reads cached root data and expanded folder data from the Redux store. `useState` lazy initializers seed `serverFiles`, `loadedFolders`, and `isInitialLoading` from the snapshot. Background refresh runs silently after mount. |
-| `hooks/useExpandedPaths.ts` | Persists expanded paths to `localStorage` so they survive unmount/remount. |
-| `packages/utils/localstorage/index.ts` | Added helper for reading/writing expanded paths. |
+| File                                   | Change                                                                                                                                                                                                                                                            |
+| -------------------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `hooks/useLazyFileTree.ts`             | Added `buildCacheSnapshot()` that reads cached root data and expanded folder data from the Redux store. `useState` lazy initializers seed `serverFiles`, `loadedFolders`, and `isInitialLoading` from the snapshot. Background refresh runs silently after mount. |
+| `hooks/useExpandedPaths.ts`            | Persists expanded paths to `localStorage` so they survive unmount/remount.                                                                                                                                                                                        |
+| `packages/utils/localstorage/index.ts` | Added helper for reading/writing expanded paths.                                                                                                                                                                                                                  |
 
 ---
 
@@ -45,13 +45,13 @@ The `/files` route subtree unmounts on tab switch, destroying all local React st
 
 ### Changed Files
 
-| File | Change |
-|------|--------|
+| File                                 | Change                                                                                                                                                                             |
+| ------------------------------------ | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
 | `hooks/useFileViewerHeaderRename.ts` | Made rename optimistic: `updateFileStatePath` + `updateTab` before `await renameItem()`. On catch, rolls back with reverse calls. Removed `markPathRenaming`/`unmarkPathRenaming`. |
-| `hooks/useFileTreeNodeRename.ts` | Removed `markPathRenaming`/`unmarkPathRenaming` calls (was already optimistic). |
-| `context/FileViewerContext.tsx` | Removed `renamingPathsRef`, `isPathBeingRenamed`, `markPathRenaming`, `unmarkPathRenaming` from interface and provider. |
-| `hooks/useFileViewer.ts` | Removed `filePathRef` and `isPathBeingRenamed` from polling guards. Simplified polling cleanup to use the `stopped` flag set by the effect cleanup function. |
-| `hooks/useSiblingNames.ts` | Switched to lazy query with `refetchSiblings()` for on-demand fresh data. |
+| `hooks/useFileTreeNodeRename.ts`     | Removed `markPathRenaming`/`unmarkPathRenaming` calls (was already optimistic).                                                                                                    |
+| `context/FileViewerContext.tsx`      | Removed `renamingPathsRef`, `isPathBeingRenamed`, `markPathRenaming`, `unmarkPathRenaming` from interface and provider.                                                            |
+| `hooks/useFileViewer.ts`             | Removed `filePathRef` and `isPathBeingRenamed` from polling guards. Simplified polling cleanup to use the `stopped` flag set by the effect cleanup function.                       |
+| `hooks/useSiblingNames.ts`           | Switched to lazy query with `refetchSiblings()` for on-demand fresh data.                                                                                                          |
 
 ---
 
@@ -71,14 +71,14 @@ The frontend now sends the search query to the server and displays the results.
 
 ### Changed Files
 
-| File | Change |
-|------|--------|
-| `types/api/filesystem.types.ts` | Added `query?: string` to `ListFilesRequest`. |
-| `apis/filesystem.ts` | Passes `query` parameter in `listFiles` endpoint params. |
-| `hooks/useLazyFileTree.ts` | Added `searchQuery` option. When non-empty, fires `listFiles({ query })` and exposes `searchResults` and `isSearching`. Uses a request ID counter for race condition handling. |
-| `components/files/FilesHierarchy.tsx` | Passes `searchQuery: debouncedSearchQuery` to `useLazyFileTree`. Forwards `searchResults` and `isSearching` to `FileTree`. |
-| `components/files/file-tree.types.ts` | Added `searchResults` and `isSearching` to `FileTreeProps`. |
-| `components/files/FileTree.tsx` | When `searchResults` is available, builds the tree from server results instead of using client-side `filterTreeNodes`. Shows "Searching..." state during API call. |
+| File                                  | Change                                                                                                                                                                         |
+| ------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
+| `types/api/filesystem.types.ts`       | Added `query?: string` to `ListFilesRequest`.                                                                                                                                  |
+| `apis/filesystem.ts`                  | Passes `query` parameter in `listFiles` endpoint params.                                                                                                                       |
+| `hooks/useLazyFileTree.ts`            | Added `searchQuery` option. When non-empty, fires `listFiles({ query })` and exposes `searchResults` and `isSearching`. Uses a request ID counter for race condition handling. |
+| `components/files/FilesHierarchy.tsx` | Passes `searchQuery: debouncedSearchQuery` to `useLazyFileTree`. Forwards `searchResults` and `isSearching` to `FileTree`.                                                     |
+| `components/files/file-tree.types.ts` | Added `searchResults` and `isSearching` to `FileTreeProps`.                                                                                                                    |
+| `components/files/FileTree.tsx`       | When `searchResults` is available, builds the tree from server results instead of using client-side `filterTreeNodes`. Shows "Searching..." state during API call.             |
 
 ### Search Flow
 
@@ -103,16 +103,17 @@ When right-clicking a folder whose children hadn't been fetched (not yet expande
 ### Solution
 
 When the create modal opens, `FileTreeNode` now:
+
 1. Fetches the folder's children from the server via `useLazyListFilesQuery({ depth: 1 })`.
 2. Merges fetched names with locally-known `childrenNames` into `createModalExistingNames`.
 3. Expands the folder in the background so children load in parallel with the user typing.
 
 ### Changed Files
 
-| File | Change |
-|------|--------|
+| File                                | Change                                                                                                                                                                       |
+| ----------------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
 | `components/files/FileTreeNode.tsx` | Added `useLazyListFilesQuery`, `fetchedChildrenNames` state, `openCreateModal` handler that fetches + expands. `CreateItemModal` receives merged `createModalExistingNames`. |
-| `hooks/useFileTreeNodeActions.ts` | Removed redundant `onToggleExpand` from `handleCreate` (now handled when modal opens). |
+| `hooks/useFileTreeNodeActions.ts`   | Removed redundant `onToggleExpand` from `handleCreate` (now handled when modal opens).                                                                                       |
 
 ---
 
