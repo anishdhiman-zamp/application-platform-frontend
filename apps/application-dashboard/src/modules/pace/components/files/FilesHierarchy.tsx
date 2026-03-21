@@ -1,7 +1,6 @@
 'use client';
 
-import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
-import { useListFilesQuery } from '@/apis/filesystem';
+import { useCallback, useEffect, useRef, useState } from 'react';
 import ImageLoader from '@/components/common/loader/ImageLoader';
 import CommonWrapper from '@/components/commonWrapper';
 import { SkeletonTypes } from '@/components/commonWrapper/commonWrapper.types';
@@ -12,6 +11,8 @@ import FilesEmptyState from '@/modules/pace/components/files/FilesEmptyState';
 import FilesToolbar from '@/modules/pace/components/files/FilesToolbar';
 import FileTree from '@/modules/pace/components/files/FileTree';
 import { useFileUploadContext } from '@/modules/pace/context/FileUploadContext';
+import { LazyFileTreeProvider } from '@/modules/pace/context/LazyFileTreeContext';
+import { useLazyFileTree } from '@/modules/pace/hooks/useLazyFileTree';
 import { defaultFnType } from '@/types/commonTypes';
 
 const SEARCH_DEBOUNCE_MS = 300;
@@ -31,37 +32,31 @@ const FilesHierarchy = ({
   onFileDeleted,
   onFileCreated,
 }: FilesHierarchyProps) => {
+  // State
   const collapseAllRef = useRef<defaultFnType | null>(null);
-  const { uploadFiles, uploadFolder, uploadingItems, clearUploadingItems } = useFileUploadContext();
-
   const [searchInput, setSearchInput] = useState('');
   const [debouncedSearchQuery, setDebouncedSearchQuery] = useState('');
   const [sortBy, setSortBy] = useState<SortOption>(SORT_OPTION.NAME);
   const [sortDirection, setSortDirection] = useState<SortDirection>(SORT_DIRECTION.DESC);
 
+  // Hooks
+  const { uploadFiles, uploadFolder, uploadingItems, clearUploadingItems, registerLoadFolder } = useFileUploadContext();
+
   const {
-    data: files,
-    isLoading: isLoadingFiles,
-    isError: isErrorFiles,
-    refetch: refetchFiles,
-  } = useListFilesQuery({ depth: -1 }, { refetchOnMountOrArgChange: false });
-
-  const filesWithUploading = useMemo(() => {
-    const fileList = files?.files ?? [];
-
-    if (uploadingItems?.length === 0) {
-      return fileList;
-    }
-
-    const existingPaths = new Set(fileList.map((f) => f.path));
-    const newItems = uploadingItems.filter((item) => !existingPaths.has(item.path));
-
-    if (newItems.length === 0) {
-      return fileList;
-    }
-
-    return [...fileList, ...newItems];
-  }, [files?.files, uploadingItems]);
+    files,
+    searchResults,
+    isSearching,
+    isInitialLoading,
+    isError,
+    loadingFolders,
+    loadedFolders,
+    loadFolder,
+    refetch,
+    addOptimistic,
+    removeOptimistic,
+    confirmAddition,
+    confirmDeletion,
+  } = useLazyFileTree({ uploadingItems, searchQuery: debouncedSearchQuery });
 
   const toggleSortDirection = useCallback(() => {
     setSortDirection((prev) => (prev === SORT_DIRECTION.ASC ? SORT_DIRECTION.DESC : SORT_DIRECTION.ASC));
@@ -90,14 +85,18 @@ const FilesHierarchy = ({
   );
 
   useEffect(() => {
-    if (!selectedFile || !files?.files || !onSelectFile) return;
+    registerLoadFolder(loadFolder);
+  }, [registerLoadFolder, loadFolder]);
 
-    const updatedFile = files.files.find((f) => f.path === selectedFile.path);
+  useEffect(() => {
+    if (!selectedFile || files.length === 0 || !onSelectFile) return;
+
+    const updatedFile = files.find((f) => f.path === selectedFile.path);
 
     if (updatedFile && updatedFile.mtime_ms !== selectedFile.mtime_ms) {
       onSelectFile(updatedFile);
     }
-  }, [files?.files, selectedFile, onSelectFile]);
+  }, [files, selectedFile, onSelectFile]);
 
   useEffect(() => {
     const timer = setTimeout(() => {
@@ -110,12 +109,12 @@ const FilesHierarchy = ({
   useEffect(() => {
     if (uploadingItems.length === 0) return;
 
-    const allExist = uploadingItems.every((item) => files?.files?.some((f) => f.path === item.path));
+    const allExist = uploadingItems.every((item) => files.some((f) => f.path === item.path && f.owner !== ''));
 
     if (allExist) {
       clearUploadingItems();
     }
-  }, [files?.files, uploadingItems, clearUploadingItems]);
+  }, [files, uploadingItems, clearUploadingItems]);
 
   return (
     <div className='bg-BG_GRAY_2 border-GRAY_400 relative flex w-2/5 flex-col border-r'>
@@ -129,30 +128,43 @@ const FilesHierarchy = ({
         onCollapseAll={handleCollapseAll}
       />
       <CommonWrapper
-        isLoading={isLoadingFiles}
-        isError={isErrorFiles}
-        refetchFunction={refetchFiles}
-        isNoData={filesWithUploading.length === 0}
+        isLoading={isInitialLoading}
+        isError={isError}
+        refetchFunction={refetch}
+        isNoData={files.length === 0}
         noDataBanner={<FilesEmptyState />}
         skeletonType={SkeletonTypes.CUSTOM}
         loader={<ImageLoader imageSrc={ZAMP_LOGO_LOADER_SVG} width={150} height={150} className='bg-BG_GRAY_2' />}
         className='flex-1 overflow-y-auto [scrollbar-width:none]'
         disableAnimation
       >
-        <FileTree
-          files={filesWithUploading}
-          searchQuery={debouncedSearchQuery}
-          sortBy={sortBy}
-          sortDirection={sortDirection}
-          selectedPath={selectedFile?.path ?? null}
-          onSelectFile={onSelectFile}
-          onFileMoved={onFileMoved}
-          onFileDeleted={onFileDeleted}
-          onFileCreated={onFileCreated}
-          onUploadFiles={handleUploadFiles}
-          onUploadFolder={handleUploadFolder}
-          onCollapseAllChange={handleCollapseAllChange}
-        />
+        <LazyFileTreeProvider
+          addOptimistic={addOptimistic}
+          removeOptimistic={removeOptimistic}
+          confirmAddition={confirmAddition}
+          confirmDeletion={confirmDeletion}
+          loadFolder={loadFolder}
+        >
+          <FileTree
+            files={files}
+            searchQuery={debouncedSearchQuery}
+            searchResults={searchResults}
+            isSearching={isSearching}
+            sortBy={sortBy}
+            sortDirection={sortDirection}
+            selectedPath={selectedFile?.path ?? null}
+            onSelectFile={onSelectFile}
+            onFileMoved={onFileMoved}
+            onFileDeleted={onFileDeleted}
+            onFileCreated={onFileCreated}
+            onUploadFiles={handleUploadFiles}
+            onUploadFolder={handleUploadFolder}
+            onCollapseAllChange={handleCollapseAllChange}
+            loadingFolders={loadingFolders}
+            loadedFolders={loadedFolders}
+            loadFolder={loadFolder}
+          />
+        </LazyFileTreeProvider>
       </CommonWrapper>
     </div>
   );

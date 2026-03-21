@@ -86,6 +86,13 @@ export interface FileItem {
   owner: string;
 }
 
+export interface SourceItemInfo {
+  name: string;
+  type: FileType;
+  size: number | null;
+  owner: string;
+}
+
 /**
  * Tree node structure for hierarchical display
  */
@@ -114,6 +121,8 @@ export interface FlatNode extends TreeNode {
 export interface FileTreeProps {
   files: FileItem[];
   searchQuery: string;
+  searchResults?: FileItem[] | null;
+  isSearching?: boolean;
   sortBy: SortOption;
   sortDirection: SortDirection;
   selectedPath?: string | null;
@@ -124,6 +133,9 @@ export interface FileTreeProps {
   onUploadFiles?: (files: FileList, targetPath: string) => void;
   onUploadFolder?: (files: FileList, targetPath: string) => void;
   onCollapseAllChange?: (collapseAll: defaultFnType) => void;
+  loadingFolders?: Set<string>;
+  loadedFolders?: Set<string>;
+  loadFolder?: (path: string, options?: { silent?: boolean }) => Promise<boolean>;
 }
 
 /**
@@ -155,6 +167,7 @@ export interface FileTreeNodeProps {
   onTriggerFolderUpload?: (targetPath: string) => void;
   onDragOverFolderChange?: (path: string | null) => void;
   isSearchActive?: boolean;
+  isLoadingChildren?: boolean;
   style?: React.CSSProperties;
 }
 

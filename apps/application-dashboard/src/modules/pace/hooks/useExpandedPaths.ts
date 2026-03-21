@@ -1,7 +1,7 @@
 'use client';
 
 import { useCallback, useEffect, useRef, useState } from 'react';
-import type { FileItem } from '@/modules/pace/components/files/file-tree.types';
+import { FILE_TYPE, type FileItem } from '@/modules/pace/components/files/file-tree.types';
 import { getStoredExpandedPaths, setStoredExpandedPaths } from '@/utils/localstorage';
 
 const DEBOUNCE_DELAY_MS = 300;
@@ -26,7 +26,6 @@ const getInitialExpandedPaths = (): Set<string> => {
 
 export const useExpandedPaths = ({ files }: UseExpandedPathsOptions): UseExpandedPathsReturn => {
   const [expandedPaths, setExpandedPaths] = useState<Set<string>>(getInitialExpandedPaths);
-  const hasValidatedRef = useRef(false);
 
   const pendingPathsRef = useRef<string[] | null>(null);
   const saveTimeoutRef = useRef<NodeJS.Timeout | null>(null);
@@ -53,6 +52,14 @@ export const useExpandedPaths = ({ files }: UseExpandedPathsOptions): UseExpande
 
         if (newSet.has(path)) {
           newSet.delete(path);
+
+          const prefix = path + '/';
+
+          for (const p of prev) {
+            if (p.startsWith(prefix)) {
+              newSet.delete(p);
+            }
+          }
         } else {
           newSet.add(path);
         }
@@ -74,28 +81,38 @@ export const useExpandedPaths = ({ files }: UseExpandedPathsOptions): UseExpande
     setStoredExpandedPaths([]);
   }, []);
 
-  // Validate expanded paths against actual files (remove stale paths)
+  // Progressively validate: remove expanded paths for items that are
+  // now known to not be directories (only check paths present in files).
   useEffect(() => {
-    if (hasValidatedRef.current || files.length === 0) return;
+    if (files.length === 0) return;
 
-    hasValidatedRef.current = true;
+    const filePathMap = new Map(files.map((f) => [f.path, f]));
 
     setExpandedPaths((prev) => {
       if (prev.size === 0) return prev;
 
-      const validPaths = Array.from(prev).filter((path) =>
-        files.some((file) => file.path === path && file.type === 'directory'),
-      );
+      let changed = false;
+      const newSet = new Set<string>();
 
-      if (validPaths.length !== prev.size) {
-        setStoredExpandedPaths(validPaths);
+      for (const path of prev) {
+        const file = filePathMap.get(path);
 
-        return new Set(validPaths);
+        if (file && file.type !== FILE_TYPE.DIRECTORY) {
+          changed = true;
+        } else {
+          newSet.add(path);
+        }
+      }
+
+      if (changed) {
+        debouncedSave(Array.from(newSet));
+
+        return newSet;
       }
 
       return prev;
     });
-  }, [files]);
+  }, [files, debouncedSave]);
 
   // Cleanup on unmount - save any pending changes
   useEffect(() => {
