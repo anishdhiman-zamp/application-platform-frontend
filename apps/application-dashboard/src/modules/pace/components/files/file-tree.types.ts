@@ -108,6 +108,7 @@ export interface FlatNode extends TreeNode {
   parentPath: string | null;
   ancestorIsLast: boolean[];
   isLastChild: boolean;
+  totalHeight: number;
 }
 
 /**

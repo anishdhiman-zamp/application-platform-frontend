@@ -13,7 +13,7 @@ import {
 } from '@/modules/pace/components/files/file-tree.utils';
 import FileConflictModal from '@/modules/pace/components/files/FileConflictModal';
 import FileTreeEmptyState from '@/modules/pace/components/files/FileTreeEmptyState';
-import FileTreeNode from '@/modules/pace/components/files/FileTreeNode';
+import StickyNestedTree from '@/modules/pace/components/files/StickyNestedTree';
 import { useFileConflict } from '@/modules/pace/context/FileConflictContext';
 import { useExpandedPaths } from '@/modules/pace/hooks/useExpandedPaths';
 
@@ -96,7 +96,7 @@ const FileTreeContent = ({
     return sortTreeNodes(filtered, sortBy, sortDirection);
   }, [sortedRawTree, searchQuery, sortBy, sortDirection]);
 
-  const flatNodes = useMemo(() => flattenTree(treeData, expandedPaths), [treeData, expandedPaths]);
+  const flatNodes = useMemo(() => flattenTree(treeData, expandedPaths, ROW_HEIGHT), [treeData, expandedPaths]);
   const rootSiblingNames = useMemo(() => treeData.map((node) => node.name), [treeData]);
 
   const dragOverlayBounds = useMemo(() => {
@@ -131,6 +131,10 @@ const FileTreeContent = ({
     estimateSize: () => ROW_HEIGHT,
     overscan: OVERSCAN_COUNT,
   });
+
+  const virtualItems = virtualizer.getVirtualItems();
+  const visibleStart = virtualItems.length > 0 ? virtualItems[0].index : 0;
+  const visibleEnd = virtualItems.length > 0 ? virtualItems[virtualItems.length - 1].index : 0;
 
   const handleToggleExpand = useCallback(
     (path: string) => {
@@ -190,7 +194,7 @@ const FileTreeContent = ({
         onChange={handleFolderInputChange}
         {...({ webkitdirectory: '', directory: '' } as React.InputHTMLAttributes<HTMLInputElement>)}
       />
-      <div ref={containerRef} className='min-h-0 flex-1 overflow-auto px-3 py-2' onDragLeave={handleContainerDragLeave}>
+      <div ref={containerRef} className='min-h-0 flex-1 overflow-auto px-3' onDragLeave={handleContainerDragLeave}>
         <div
           style={{
             height: virtualizer.getTotalSize(),
@@ -198,43 +202,25 @@ const FileTreeContent = ({
             position: 'relative',
           }}
         >
-          {virtualizer.getVirtualItems().map((virtualRow) => {
-            const node = flatNodes[virtualRow.index];
-
-            return (
-              <FileTreeNode
-                key={node.path}
-                node={node}
-                depth={node.depth}
-                ancestorIsLast={node.ancestorIsLast}
-                isLastChild={node.isLastChild}
-                expandedPaths={expandedPaths}
-                selectedPath={selectedPath}
-                originalNodeMap={originalNodeMap}
-                siblingNames={node.siblingNames}
-                parentPath={node.parentPath}
-                onToggleExpand={handleToggleExpand}
-                onSelect={handleSelect}
-                onFileMoved={onFileMoved}
-                onFileDeleted={onFileDeleted}
-                onFileCreated={onFileCreated}
-                onUploadFiles={onUploadFiles}
-                onUploadFolder={onUploadFolder}
-                onTriggerFileUpload={triggerFileUpload}
-                onTriggerFolderUpload={triggerFolderUpload}
-                onDragOverFolderChange={handleDragOverFolderChange}
-                isSearchActive={!!searchQuery}
-                style={{
-                  position: 'absolute',
-                  top: 0,
-                  left: 0,
-                  width: '100%',
-                  height: `${virtualRow.size}px`,
-                  transform: `translateY(${virtualRow.start}px)`,
-                }}
-              />
-            );
-          })}
+          <StickyNestedTree
+            treeData={treeData}
+            expandedPaths={expandedPaths}
+            selectedPath={selectedPath}
+            originalNodeMap={originalNodeMap}
+            rowHeight={ROW_HEIGHT}
+            visibleStart={visibleStart}
+            visibleEnd={visibleEnd}
+            onToggleExpand={handleToggleExpand}
+            onSelect={handleSelect}
+            onFileMoved={onFileMoved}
+            onFileDeleted={onFileDeleted}
+            onFileCreated={onFileCreated}
+            onUploadFiles={onUploadFiles}
+            onTriggerFileUpload={triggerFileUpload}
+            onTriggerFolderUpload={triggerFolderUpload}
+            onDragOverFolderChange={handleDragOverFolderChange}
+            isSearchActive={!!searchQuery}
+          />
           {dragOverlayBounds && (
             <div
               className='border-GRAY_700 pointer-events-none absolute right-0 left-0 rounded-md border-2 border-dotted'
