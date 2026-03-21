@@ -11,7 +11,7 @@ import { isSameBasePath, preserveSidebarParam } from 'modules/pace/components/dy
 import { useIsCompact } from 'modules/pace/components/dynamic-tabs/useIsCompact';
 import { useRouter } from 'next/navigation';
 import TooltipV2 from '@/components/common/TooltipV2';
-import { KEYBOARD_KEYS } from '@/constants/shortcuts';
+import { handleActivationKeyDown } from '@/constants/shortcuts';
 import { usePaceContext } from '@/modules/pace/pace.context';
 import { CHAT_SIDEBAR_STATE, DynamicTab } from '@/modules/pace/pace.types';
 import { defaultFnType, SIDE_OPTIONS } from '@/types/commonTypes';
@@ -124,13 +124,7 @@ const DynamicTabItem = ({
                   role='button'
                   tabIndex={0}
                   onClick={(e) => onClose(e, tab.id)}
-                  onKeyDown={(e) => {
-                    if (e.key === 'Enter' || e.key === ' ') {
-                      e.preventDefault();
-                      e.stopPropagation();
-                      onClose(e as unknown as React.MouseEvent, tab.id);
-                    }
-                  }}
+                  onKeyDown={(e) => handleActivationKeyDown(e, () => onClose(e as unknown as React.MouseEvent, tab.id))}
                   className='hover:bg-accent absolute inset-0 hidden h-4 w-4 cursor-pointer items-center justify-center rounded-sm p-0 group-hover:flex'
                 >
                   <X size={12} className='text-GRAY_700' />
@@ -146,13 +140,7 @@ const DynamicTabItem = ({
                 role='button'
                 tabIndex={0}
                 onClick={(e) => onClose(e, tab.id)}
-                onKeyDown={(e) => {
-                  if (e.key === KEYBOARD_KEYS.ENTER || e.key === KEYBOARD_KEYS.SPACE) {
-                    e.preventDefault();
-                    e.stopPropagation();
-                    onClose(e as unknown as React.MouseEvent, tab.id);
-                  }
-                }}
+                onKeyDown={(e) => handleActivationKeyDown(e, () => onClose(e as unknown as React.MouseEvent, tab.id))}
                 className='hover:bg-accent ml-0.5 flex h-4 w-4 cursor-pointer items-center justify-center rounded-sm p-0 opacity-0 group-hover:opacity-100'
               >
                 <X size={12} className='text-GRAY_700' />
