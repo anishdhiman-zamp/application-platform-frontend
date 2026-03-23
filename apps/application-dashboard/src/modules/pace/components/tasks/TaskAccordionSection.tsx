@@ -5,10 +5,11 @@ import type { TaskStatus } from '@zamp-platform/chat';
 import { TaskStatusIcon } from '@zamp-platform/chat';
 import { useInfiniteScroll } from '@zamp-platform/tanstack-table';
 import { AccordionContent, AccordionItem, AccordionTrigger } from '@zamp-platform/ui';
-import { ChevronRight } from 'lucide-react';
+import { Play } from 'lucide-react';
 import { STATUS_LABELS } from 'modules/pace/components/tasks/task-listing.constants';
 import TaskRow from 'modules/pace/components/tasks/TaskRow';
-import { useMockTasksByStatus } from 'modules/pace/components/tasks/useTaskListingMockData';
+import TaskRowSkeleton from 'modules/pace/components/tasks/TaskRowSkeleton';
+import { useTasksByStatus } from 'modules/pace/components/tasks/useTasksByStatus';
 
 interface TaskAccordionSectionProps {
   status: TaskStatus;
@@ -16,9 +17,13 @@ interface TaskAccordionSectionProps {
   search?: string;
 }
 
+const FilledPlayIcon = ({ className }: { className?: string }) => (
+  <Play className={className} fill='currentColor' strokeWidth={0} />
+);
+
 const TaskAccordionSection: FC<TaskAccordionSectionProps> = ({ status, count, search }) => {
   const containerRef = useRef<HTMLDivElement>(null);
-  const { tasks, totalCount, fetchNextPage, isFetching } = useMockTasksByStatus(status, search);
+  const { tasks, totalCount, fetchNextPage, isFetching } = useTasksByStatus({ status, search });
 
   const { fetchMoreOnBottomReached } = useInfiniteScroll({
     fetchNextPage,
@@ -36,15 +41,15 @@ const TaskAccordionSection: FC<TaskAccordionSectionProps> = ({ status, count, se
   return (
     <AccordionItem value={status} className='border-GRAY_400'>
       <AccordionTrigger
-        icon={ChevronRight}
+        icon={FilledPlayIcon}
         iconRotation={90}
-        className='bg-BG_GRAY_1 border-GRAY_400 justify-start! gap-1.5 px-3 py-2.5 data-[state=open]:border-b data-[state=open]:bg-[rgba(166,166,166,0.1)] [&>svg]:order-first [&>svg]:h-3 [&>svg]:w-3'
+        className='bg-BG_GRAY_1 border-GRAY_400 data-[state=open]:bg-GRAY_50 [&>svg]:text-GRAY_1000 [&[data-state=open]>svg]:text-GRAY_600 justify-start! gap-1.5 px-3 py-2.5 [&>svg]:order-first [&>svg]:h-2 [&>svg]:w-2 [&>svg]:transition-all [&>svg]:duration-300'
       >
         <div className='flex items-center gap-2'>
           <TaskStatusIcon status={status} />
           <span className='f-13-500 text-GRAY_950 truncate'>{STATUS_LABELS[status]}</span>
         </div>
-        <span className='f-13-500 text-GRAY_600 truncate'>{count}</span>
+        <span className='f-13-500 text-GRAY_600 truncate'>{search ? totalCount : count}</span>
       </AccordionTrigger>
       <AccordionContent className='p-0'>
         <div
@@ -55,11 +60,7 @@ const TaskAccordionSection: FC<TaskAccordionSectionProps> = ({ status, count, se
           {tasks.map((task) => (
             <TaskRow key={task.id} task={task} />
           ))}
-          {isFetching && (
-            <div className='flex items-center justify-center py-3'>
-              <span className='f-12-400 text-GRAY_600'>Loading more...</span>
-            </div>
-          )}
+          {isFetching && <TaskRowSkeleton />}
         </div>
       </AccordionContent>
     </AccordionItem>

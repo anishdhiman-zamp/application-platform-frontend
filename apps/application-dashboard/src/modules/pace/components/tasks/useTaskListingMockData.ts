@@ -1,5 +1,6 @@
 import { useCallback, useMemo, useState } from 'react';
 import { TASK_STATUS, type TaskStatus } from '@zamp-platform/chat';
+import { TASKS_PAGE_SIZE } from 'modules/pace/components/tasks/task-listing.constants';
 import type {
   TaskCreator,
   TaskListingCountsResponse,
@@ -140,7 +141,7 @@ export function useMockTasksByStatus(
   hasMore: boolean;
 } {
   const [page, setPage] = useState(1);
-  const pageSize = 20;
+  const pageSize = TASKS_PAGE_SIZE;
 
   const allFiltered = useMemo(() => {
     const all = ALL_MOCK_TASKS[status] ?? [];
