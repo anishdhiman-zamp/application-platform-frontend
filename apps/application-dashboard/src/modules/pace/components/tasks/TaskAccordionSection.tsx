@@ -38,6 +38,8 @@ const TaskAccordionSection: FC<TaskAccordionSectionProps> = ({ status, count, se
     fetchMoreOnBottomReached(containerRef.current);
   }, [fetchMoreOnBottomReached]);
 
+  if (search && !isFetching && totalCount === 0) return null;
+
   return (
     <AccordionItem value={status} className='border-GRAY_400'>
       <AccordionTrigger
