@@ -2,8 +2,6 @@ import { ROUTES_PATH } from '@/constants/routeConfig';
 import { DynamicTabRouteConfig, DynamicTabType, ROUTE_KIND, TAB_TYPE } from '@/modules/pace/pace.types';
 import { preserveSidebarParam } from '@/modules/pace/pace.utils';
 
-export { preserveSidebarParam };
-
 export const TAB_TYPE_CONFIG: Record<DynamicTabType, DynamicTabRouteConfig> = {
   [TAB_TYPE.FILE]: {
     kind: ROUTE_KIND.QUERY,
