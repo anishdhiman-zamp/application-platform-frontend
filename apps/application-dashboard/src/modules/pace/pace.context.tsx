@@ -3,9 +3,10 @@
 import { createContext, type ReactNode, useCallback, useContext, useEffect, useMemo, useRef, useState } from 'react';
 import { SIDEBAR_CONVERSATION_ID_PARAM } from 'modules/pace/pace.constants';
 import { CHAT_SIDEBAR_STATE, type ChatSidebarState, DynamicTab, TAB_TYPE } from 'modules/pace/pace.types';
-import { getRouteSignificantUrl, getStoredTabs, setStoredTabs } from 'modules/pace/pace.utils';
-import { usePathname, useSearchParams } from 'next/navigation';
+import { getStoredTabs, setStoredTabs } from 'modules/pace/pace.utils';
+import { usePathname } from 'next/navigation';
 import { ROUTES_PATH } from '@/constants/routeConfig';
+import { useSyncedPathname, useSyncedUrlParam } from '@/modules/pace/hooks/useSyncedSearchParam';
 import { defaultFnType } from '@/types/commonTypes';
 import {
   getFromLocalStorage,
@@ -52,8 +53,9 @@ interface PaceContextType {
 const PaceContext = createContext<PaceContextType | null>(null);
 
 export const PaceProvider = ({ children }: { children: ReactNode }) => {
-  const pathname = usePathname();
-  const searchParams = useSearchParams();
+  const nextPathname = usePathname();
+  const syncedPathname = useSyncedPathname();
+  const fileParam = useSyncedUrlParam('f');
   const startNewChatRef = useRef<defaultFnType | null>(null);
 
   const [dynamicTabs, setDynamicTabs] = useState<DynamicTab[]>([]);
@@ -65,13 +67,14 @@ export const PaceProvider = ({ children }: { children: ReactNode }) => {
   const [filesPanelOpen, setFilesPanelOpen] = useState(false);
   const [filesPanelPinned, setFilesPanelPinnedRaw] = useState(false);
 
-  const routeUrl = getRouteSignificantUrl(pathname, searchParams);
+  const pathname = syncedPathname || nextPathname;
+  const hasFileParam = fileParam !== null;
+  const routeUrl = hasFileParam ? `${pathname}?f=${fileParam}` : pathname;
   const prevRouteUrlRef = useRef(routeUrl);
   const chatSidebarStateRef = useRef(chatSidebarState);
 
   chatSidebarStateRef.current = chatSidebarState;
   const isOnChatRoute = pathname === ROUTES_PATH.CHAT;
-  const hasFileParam = searchParams?.has('f') ?? false;
 
   const setChatSidebarStateInternal = useCallback((next: ChatSidebarState) => {
     setChatSidebarStateRaw((prev) => {
