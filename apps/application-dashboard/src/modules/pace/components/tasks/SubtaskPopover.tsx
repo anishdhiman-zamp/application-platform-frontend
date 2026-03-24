@@ -6,6 +6,7 @@ import { Button, Popover, PopoverContent, PopoverTrigger } from '@zamp-platform/
 import { ArrowUpRight } from 'lucide-react';
 import ProgressWheel from 'modules/pace/components/tasks/ProgressWheel';
 import type { SubTask } from 'modules/pace/components/tasks/task-listing.types';
+import { withSidebarConversationParam } from 'modules/pace/pace.utils';
 import { useRouter } from 'next/navigation';
 import { getChatTaskRoute } from '@/constants/routeConfig';
 
@@ -23,8 +24,10 @@ const SubtaskItem = ({ subtask }: SubtaskItemProps) => {
   const router = useRouter();
 
   const handleClick = useCallback(() => {
-    router.push(getChatTaskRoute(subtask?.id || ''));
-  }, [router, subtask?.id]);
+    const taskRoute = getChatTaskRoute(subtask?.id || '', '', subtask?.title || '');
+
+    router.push(withSidebarConversationParam(taskRoute));
+  }, [router, subtask?.id, subtask?.title]);
 
   return (
     <Button
