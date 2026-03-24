@@ -32,9 +32,9 @@ export const preserveSidebarParam = (path: string): string => {
 export const TAB_TYPE_CONFIG: Record<DynamicTabType, DynamicTabRouteConfig> = {
   [TAB_TYPE.FILE]: {
     kind: ROUTE_KIND.QUERY,
-    basePath: ROUTES_PATH.CHAT_FILES,
+    basePath: ROUTES_PATH.CHAT,
     paramName: 'f',
-    fallbackPath: ROUTES_PATH.CHAT_FILES,
+    fallbackPath: ROUTES_PATH.CHAT,
   },
   [TAB_TYPE.TASK]: {
     kind: ROUTE_KIND.DYNAMIC,
@@ -122,7 +122,7 @@ export const isOnBasePath = (pathname: string, type: DynamicTabType): boolean =>
     return pathname === config.basePath;
   }
 
-  return pathname.startsWith(config.basePath);
+  return pathname.startsWith(`${config.basePath}/`);
 };
 
 export const isSameBasePath = (targetPath: string): boolean => {
@@ -133,11 +133,11 @@ export const isSameBasePath = (targetPath: string): boolean => {
     const onCurrentBase =
       config.kind === ROUTE_KIND.QUERY
         ? currentPathname === config.basePath
-        : currentPathname.startsWith(config.basePath);
+        : currentPathname.startsWith(`${config.basePath}/`);
     const onTargetBase =
       config.kind === ROUTE_KIND.QUERY
         ? targetUrl.pathname === config.basePath
-        : targetUrl.pathname.startsWith(config.basePath);
+        : targetUrl.pathname.startsWith(`${config.basePath}/`);
 
     if (onCurrentBase && onTargetBase) return true;
   }
@@ -151,7 +151,7 @@ export const isSameBasePath = (targetPath: string): boolean => {
 export const isOnAnyTabBasePath = (pathname: string): boolean => {
   for (const [, config] of Object.entries(TAB_TYPE_CONFIG)) {
     if (config.kind === ROUTE_KIND.QUERY && pathname === config.basePath) return true;
-    if (config.kind === ROUTE_KIND.DYNAMIC && pathname.startsWith(config.basePath)) return true;
+    if (config.kind === ROUTE_KIND.DYNAMIC && pathname.startsWith(`${config.basePath}/`)) return true;
   }
 
   return false;

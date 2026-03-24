@@ -88,7 +88,7 @@ const TeamMemberCard = ({
   };
 
   return (
-    <div className='border-b-0.5 border-DIVIDER_GRAY group relative grid grid-cols-4 gap-4'>
+    <div className='border-b-0.5 border-DIVIDER_GRAY group relative grid grid-cols-4 gap-4 *:min-w-0'>
       <MembersName name={row?.name || row?.email} value={row?.email} member />
       <MembersEmail value={row?.email} />
       <MembersRole value={{ user_id: row?.user_id, privilege: row?.privilege, userEmail: row?.email }} member />

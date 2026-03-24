@@ -1,6 +1,6 @@
 'use client';
 
-import { type RefObject, useEffect, useState } from 'react';
+import { type RefObject, useCallback, useEffect, useRef, useState } from 'react';
 
 const TAB_GAP_PX = 4;
 
@@ -15,7 +15,32 @@ export const useVisibleTabCount = (
   minTabWidthPx: number,
   overflowButtonWidthPx = 0,
 ): number => {
-  const [maxVisible, setMaxVisible] = useState(totalTabs);
+  const totalTabsRef = useRef(totalTabs);
+  const [maxVisible, setMaxVisible] = useState(() => {
+    const el = containerRef.current;
+
+    if (!el) return totalTabs;
+
+    return computeMaxVisible(el.getBoundingClientRect().width, totalTabs, minTabWidthPx, overflowButtonWidthPx);
+  });
+
+  const compute = useCallback(
+    (containerWidth: number) =>
+      computeMaxVisible(containerWidth, totalTabsRef.current, minTabWidthPx, overflowButtonWidthPx),
+    [minTabWidthPx, overflowButtonWidthPx],
+  );
+
+  useEffect(() => {
+    totalTabsRef.current = totalTabs;
+  }, [totalTabs]);
+
+  useEffect(() => {
+    const el = containerRef.current;
+
+    if (!el) return;
+
+    setMaxVisible(compute(el.getBoundingClientRect().width));
+  }, [totalTabs, compute, containerRef]);
 
   useEffect(() => {
     const el = containerRef.current;
@@ -26,25 +51,30 @@ export const useVisibleTabCount = (
       if (!entry) return;
 
       const boxSize = Array.isArray(entry.contentBoxSize) ? entry.contentBoxSize[0] : entry.contentBoxSize;
-      const containerWidth = boxSize.inlineSize;
-      const perTab = minTabWidthPx + TAB_GAP_PX;
 
-      const allFit = Math.floor(containerWidth / perTab) >= totalTabs;
-
-      if (allFit) {
-        setMaxVisible(totalTabs);
-      } else {
-        const usableWidth = containerWidth - overflowButtonWidthPx - TAB_GAP_PX;
-        const count = Math.max(1, Math.floor(usableWidth / perTab));
-
-        setMaxVisible(count);
-      }
+      setMaxVisible(compute(boxSize.inlineSize));
     });
 
     observer.observe(el);
 
     return () => observer.disconnect();
-  }, [containerRef, minTabWidthPx, totalTabs, overflowButtonWidthPx]);
+  }, [containerRef, compute]);
 
   return Math.min(maxVisible, totalTabs);
+};
+
+const computeMaxVisible = (
+  containerWidth: number,
+  totalTabs: number,
+  minTabWidthPx: number,
+  overflowButtonWidthPx: number,
+): number => {
+  const perTab = minTabWidthPx + TAB_GAP_PX;
+  const allFit = Math.floor(containerWidth / perTab) >= totalTabs;
+
+  if (allFit) return totalTabs;
+
+  const usableWidth = containerWidth - overflowButtonWidthPx - TAB_GAP_PX;
+
+  return Math.max(1, Math.floor(usableWidth / perTab));
 };

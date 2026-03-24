@@ -40,7 +40,6 @@ export const ROUTES_PATH = {
 
   CHAT: '/chat',
   CHAT_SKILLS: '/chat/skills',
-  CHAT_FILES: '/chat/files',
   CHAT_SETTINGS: '/chat/settings',
   CHAT_SETTINGS_PEOPLE: '/chat/settings/people',
   CHAT_TASKS: '/chat/task',
@@ -119,7 +118,7 @@ export const getIntegrationDetailRoute = (integrationId: string) => {
 };
 
 export const getChatFileRoute = (filePath: string) => {
-  return `${ROUTES_PATH.CHAT_FILES}?f=${encodeURIComponent(filePath)}`;
+  return `${ROUTES_PATH.CHAT}?f=${encodeURIComponent(filePath)}`;
 };
 
 export const getChatTaskRoute = (taskId: string, conversationId?: string, taskTitle?: string) => {
