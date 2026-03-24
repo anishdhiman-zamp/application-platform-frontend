@@ -54,23 +54,27 @@ export const normalizeUrlPath = (str: string): string => {
 };
 
 /**
- * Appends the current sidebar conversation ID from the URL to the given route path.
- * Preserves any existing query params on the route and avoids duplicating the sidebar param.
+ * Syncs the sidebar conversation param with the current URL state.
+ * - Strips any stale sidebar param from the given path
+ * - Adds the current sidebar param from the URL (if present)
  * Safe to call server-side (returns the path unchanged when `window` is unavailable).
  */
-export const withSidebarConversationParam = (route: string): string => {
-  if (typeof window === 'undefined') return route;
+export const preserveSidebarParam = (path: string): string => {
+  if (typeof window === 'undefined') return path;
 
+  const [basePath, existingQuery] = path.split('?');
+  const params = new URLSearchParams(existingQuery || '');
   const currentSidebarId = new URLSearchParams(window.location.search).get(SIDEBAR_CONVERSATION_ID_PARAM);
 
-  if (!currentSidebarId) return route;
+  params.delete(SIDEBAR_CONVERSATION_ID_PARAM);
 
-  const [basePath, existingQuery] = route.split('?');
-  const params = new URLSearchParams(existingQuery || '');
+  if (currentSidebarId) {
+    params.set(SIDEBAR_CONVERSATION_ID_PARAM, currentSidebarId);
+  }
 
-  params.set(SIDEBAR_CONVERSATION_ID_PARAM, currentSidebarId);
+  const query = params.toString();
 
-  return `${basePath}?${params.toString()}`;
+  return query ? `${basePath}?${query}` : basePath;
 };
 
 /**
