@@ -6,6 +6,8 @@ import { formatChatTimestamp, formatChatTimestampTooltip, formatTimestampToUTC }
 import { motion } from 'motion/react';
 import React, { FC, ReactNode, useEffect, useMemo, useRef, useState } from 'react';
 
+import { defaultFnType } from '@/types/commonTypes';
+
 import { ButtonBlockType } from '../types/block.types';
 import { ChatMessage, SenderType } from '../types/chat.types';
 import { BlockRenderer } from './BlockRenderer';
@@ -53,13 +55,12 @@ export const Message: FC<MessageProps> = ({
   organizationId,
   streamingEnabled = true,
 }) => {
+  const scrollRef = useScrollRef();
+  const cleanupRef = useRef<defaultFnType | null>(null);
+  const [animationReady, setAnimationReady] = useState(false);
   const isUserMessage = message.sender_type === SenderType.USER;
   const shouldAlignRight = alignUserRight && isUserMessage;
   const sharedClassName = cn('group space-y-3', shouldAlignRight && 'flex flex-col items-end', containerClassName);
-
-  const scrollRef = useScrollRef();
-  const [animationReady, setAnimationReady] = useState(false);
-  const cleanupRef = useRef<(() => void) | null>(null);
 
   useEffect(() => {
     // Clean up any previous subscription
@@ -159,12 +160,6 @@ export const Message: FC<MessageProps> = ({
     </>
   );
 
-  // User messages always use motion.div so the element type never changes —
-  // switching between motion.div and div remounts the subtree, causing the
-  // copy/timestamp bar to blink (e.g. when isLastMessage changes as the AI
-  // response starts streaming in).
-  // animationReady gates the animation so it only starts after the anchor
-  // scroll finishes (via the chatScrollEnd event from ScrollContainer).
   if (isUserMessage) {
     return (
       <motion.div

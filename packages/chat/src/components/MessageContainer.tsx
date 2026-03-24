@@ -57,28 +57,20 @@ export const MessageContainer: FC<MessageContainerProps> = ({
   streamingEnabled = true,
   conversationId,
 }) => {
-  const defaultAssistantAvatar = assistantAvatar ?? <PaceAvatar />;
   const isInitialScrollRef = useRef(true);
   const scrollContainerRef = useRef<HTMLDivElement>(null);
-  // When mounting with a pending user message for a brand-new conversation
-  // (isAnalysing=true and no conversationId yet), initialise one behind the
-  // current length so isNewUserMessage fires and the entrance animation plays.
-  // We must NOT do this when re-mounting an existing conversation (conversationId
-  // is already set) — that would re-trigger the animation on back-navigation.
+  const previousConversationIdRef = useRef(conversationId);
   const [animatedLength, setAnimatedLength] = useState(() => {
     const len = messages?.length ?? 0;
     return isAnalysing && !conversationId ? Math.max(0, len - 1) : len;
   });
+  const defaultAssistantAvatar = assistantAvatar ?? <PaceAvatar />;
   const lastMessage = messages?.[messages.length - 1];
   const isNewUserMessage = lastMessage?.sender_type === 'USER' && messages.length > animatedLength;
   const [showAnalysing, setShowAnalysing] = useState(false);
   const scrollRef = useScrollRef();
   const isNewUserMessageRef = useRef(isNewUserMessage);
   isNewUserMessageRef.current = isNewUserMessage;
-
-  // Track the previous conversationId to distinguish between a new conversation
-  // getting its first ID assigned (null → id) vs actually switching conversations.
-  const previousConversationIdRef = useRef(conversationId);
 
   const scrollToBottom = useCallback((behavior: ScrollBehavior = 'smooth') => {
     if (scrollContainerRef.current) {
@@ -93,9 +85,6 @@ export const MessageContainer: FC<MessageContainerProps> = ({
     const prevId = previousConversationIdRef.current;
     previousConversationIdRef.current = conversationId;
 
-    // Only reset when switching between two real conversations, not when a new
-    // conversationId is first assigned (null → id). Resetting during the
-    // null → id transition cancels the first-message entrance animation.
     if (prevId && prevId !== conversationId) {
       setAnimatedLength(messages?.length ?? 0);
     }

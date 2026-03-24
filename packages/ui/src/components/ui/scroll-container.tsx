@@ -200,20 +200,12 @@ const ScrollContainer = forwardRef<ScrollContainerRef, ScrollContainerProps>(
         if (isInitial) {
           updateSpacerHeight();
         } else {
-          // Lock the spacer at full clientHeight for new user messages so
-          // ResizeObservers don't immediately shrink it to 0. The lock is
-          // released when the AI response starts arriving.
+          // Lock the spacer at full clientHeight for new user messages
           spacerLockedRef.current = true;
         }
 
         // Notify Message components when the scroll finishes so they can
-        // start their entrance animation. For instant scrolls the event fires
-        // immediately; for smooth scrolls we wait for `scrollend`.
-        //
-        // The `scrollend` listener is added in a rAF (one frame after
-        // updateSpacerHeight changes scrollHeight). Without this delay,
-        // Chrome fires `scrollend` prematurely when scrollHeight changes
-        // mid-scroll, making the message appear before scrolling is done.
+        // start their entrance animation.
         if (isInitial) {
           requestAnimationFrame(dispatchScrollEnd);
         } else {
@@ -424,10 +416,6 @@ const ScrollContainer = forwardRef<ScrollContainerRef, ScrollContainerProps>(
     }, [autoScrollToBottom]);
 
     // --- ResizeObserver for container size changes (anchor mode) ---
-    // Fires when the scroll container's clientHeight changes (e.g. input box
-    // shrinks after a large message is sent). Without this, the spacer stays
-    // sized for the old clientHeight and maxScrollTop shrinks, causing the
-    // anchor scroll target to be clamped and the message to appear too low.
     useEffect(() => {
       if (!enableAnchorScroll) return;
 

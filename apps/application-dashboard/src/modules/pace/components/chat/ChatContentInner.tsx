@@ -82,7 +82,6 @@ const ChatContentInner = ({
   }, [chat.messages]);
 
   const lastMessageSenderType = useMemo(() => chat.messages[chat.messages.length - 1]?.sender_type, [chat.messages]);
-
   const isLoadingConversation = Boolean(conversationId && chat.isLoadingConversationHistory) || !hasMessages;
   const isInConversation = Boolean(conversationId || chat.conversationId || hasMessages);
 
