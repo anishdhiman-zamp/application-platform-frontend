@@ -9,7 +9,7 @@ import SubtaskPopover from 'modules/pace/components/tasks/SubtaskPopover';
 import type { TaskListItem } from 'modules/pace/components/tasks/task-listing.types';
 import { useRouter } from 'next/navigation';
 import Avatar from '@/components/common/avatar';
-import { ROUTES_PATH } from '@/constants/routeConfig';
+import { getChatTaskRoute } from '@/constants/routeConfig';
 import { KEYBOARD_KEYS } from '@/constants/shortcuts';
 
 interface TaskRowProps {
@@ -20,8 +20,8 @@ const TaskRow = ({ task }: TaskRowProps) => {
   const router = useRouter();
 
   const handleRowClick = useCallback(() => {
-    router.push(ROUTES_PATH.CHAT_TASK.replace(':taskId', task.id));
-  }, [router, task.id]);
+    router.push(getChatTaskRoute(task?.id || '', '', task?.title || ''));
+  }, [router, task?.id, task?.title]);
 
   const totalSubtasks = task.subtasks.length;
   const completedSubtasks = useMemo(
