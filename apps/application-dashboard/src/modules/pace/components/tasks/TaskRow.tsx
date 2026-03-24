@@ -21,7 +21,7 @@ const TaskRow = ({ task }: TaskRowProps) => {
   const router = useRouter();
 
   const handleRowClick = useCallback(() => {
-    const taskRoute = getChatTaskRoute(task?.id || '', '', task?.title || '');
+    const taskRoute = getChatTaskRoute({ taskId: task?.id || '', taskTitle: task?.title || '' });
 
     router.push(preserveSidebarParam(taskRoute));
   }, [router, task?.id, task?.title]);

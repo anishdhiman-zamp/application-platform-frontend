@@ -24,7 +24,7 @@ const SubtaskItem = ({ subtask }: SubtaskItemProps) => {
   const router = useRouter();
 
   const handleClick = useCallback(() => {
-    const taskRoute = getChatTaskRoute(subtask?.id || '', '', subtask?.title || '');
+    const taskRoute = getChatTaskRoute({ taskId: subtask?.id || '', taskTitle: subtask?.title || '' });
 
     router.push(preserveSidebarParam(taskRoute));
   }, [router, subtask?.id, subtask?.title]);
