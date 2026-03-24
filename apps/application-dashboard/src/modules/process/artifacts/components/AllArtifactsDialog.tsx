@@ -11,7 +11,7 @@ import ImageWithFallback from '@/components/common/ImageWithFallback';
 import CommonWrapper from '@/components/commonWrapper';
 import { SkeletonTypes } from '@/components/commonWrapper/commonWrapper.types';
 import SkeletonElement from '@/components/skeletons/SkeletonElement';
-import { GMAIL, LINK, VERCEL_BLOB_ICON_URL } from '@/constants/icons';
+import { ARTIFACT_ICON_URL, GMAIL, LINK } from '@/constants/icons';
 import { ActivityArtifactsItemType } from '@/types/api/processApi.types';
 import { defaultFnType } from '@/types/commonTypes';
 
@@ -99,7 +99,7 @@ const ArtifactItem = ({ artifact, onClick }: { artifact: ActivityArtifactsItemTy
     if (isExternalLink) {
       return (
         <ImageWithFallback
-          src={`${VERCEL_BLOB_ICON_URL}/${icon_identifier}`}
+          src={`${ARTIFACT_ICON_URL}/${icon_identifier}`}
           fallback={LINK}
           alt={display_name}
           width={14}
