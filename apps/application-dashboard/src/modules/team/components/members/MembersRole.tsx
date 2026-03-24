@@ -65,7 +65,7 @@ const MembersRole: FC<MembersRolePropsType> = ({ value, member = false }) => {
   useOnClickOutside(dropdownRef, handleCloseChangeRoleDropdown);
 
   return (
-    <div className='h-full w-full text-left'>
+    <div className='h-full w-full min-w-0 text-left'>
       {checkPermission ? (
         <div className='relative w-fit'>
           <AsyncDropdown

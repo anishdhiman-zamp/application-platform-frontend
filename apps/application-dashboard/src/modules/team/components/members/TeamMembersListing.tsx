@@ -73,31 +73,35 @@ const TeamMembersListing: FC<TeamMembersListingPropsType> = ({ data, isLoadingTe
 
   return hasAudiencesData || isLoadingTeamMembersData ? (
     <>
-      <div className='border-b-0.5 border-DIVIDER_GRAY grid grid-cols-4 gap-4'>
-        {TEAM_MEMBERS_LISTING_COLUMN_DEFS.map((column, index) => (
-          <div key={index} className='px-2 py-2'>
-            <span className='f-11-400 text-GRAY_700 text-left'>{column.headerName}</span>
+      <div className='overflow-x-auto [scrollbar-width:none]'>
+        <div className='min-w-[600px]'>
+          <div className='border-b-0.5 border-DIVIDER_GRAY grid grid-cols-4 gap-4'>
+            {TEAM_MEMBERS_LISTING_COLUMN_DEFS.map((column, index) => (
+              <div key={index} className='px-2 py-2'>
+                <span className='f-11-400 text-GRAY_700 text-left'>{column.headerName}</span>
+              </div>
+            ))}
           </div>
-        ))}
+          <CommonWrapper
+            isLoading={isLoadingTeamMembersData}
+            skeletonType={SkeletonTypes.CUSTOM}
+            loader={<SkeletonLoaderListing columns={4} length={12} />}
+            className='h-[calc(100vh-270px)] overflow-y-auto [&::-webkit-scrollbar]:hidden'
+          >
+            {allAudiencesAndTeamsData?.map((row, index) => (
+              <TeamMemberCard
+                key={`${row?.user_id}-${index}`}
+                member
+                row={row}
+                teamsData={teamsData ?? []}
+                organizationId={organizationId}
+                teamsRandomColorRef={teamsRandomColorRef}
+                value={{ user_id: row?.user_id, privilege: row?.privilege, userEmail: row?.email }}
+              />
+            ))}
+          </CommonWrapper>
+        </div>
       </div>
-      <CommonWrapper
-        isLoading={isLoadingTeamMembersData}
-        skeletonType={SkeletonTypes.CUSTOM}
-        loader={<SkeletonLoaderListing columns={4} length={12} />}
-        className='h-[calc(100vh-270px)] overflow-x-hidden overflow-y-auto [&::-webkit-scrollbar]:hidden'
-      >
-        {allAudiencesAndTeamsData?.map((row, index) => (
-          <TeamMemberCard
-            key={`${row?.user_id}-${index}`}
-            member
-            row={row}
-            teamsData={teamsData ?? []}
-            organizationId={organizationId}
-            teamsRandomColorRef={teamsRandomColorRef}
-            value={{ user_id: row?.user_id, privilege: row?.privilege, userEmail: row?.email }}
-          />
-        ))}
-      </CommonWrapper>
     </>
   ) : (
     <EmptyStateListing title='No team members were added' />

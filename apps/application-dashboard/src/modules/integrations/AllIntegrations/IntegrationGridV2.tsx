@@ -7,7 +7,7 @@ import { useIntegrationsContext } from '@/modules/integrations/AllIntegrations/I
 import ProcessEmptyState from '@/modules/process/activity-runs/components/ProcessEmptyState';
 
 const SKELETON_COUNT = 12;
-const GRID_CLASSES = 'grid grid-cols-1 gap-2 sm:grid-cols-2 lg:grid-cols-2 xl:grid-cols-4';
+const GRID_CLASSES = 'grid grid-cols-1 gap-2 @sm:grid-cols-2 @3xl:grid-cols-3 @5xl:grid-cols-4';
 
 const SectionTitle: FC<{ title: string }> = ({ title }) => (
   <h3 className='text-GRAY_700 f-11-500 uppercase'>{title}</h3>

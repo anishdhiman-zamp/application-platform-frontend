@@ -27,7 +27,7 @@ const InvitedMemberCard: FC<InvitedMemberCardProps> = ({ row, organizationId }) 
   };
 
   return (
-    <div className='border-b-0.5 border-DIVIDER_GRAY group relative grid grid-cols-3 gap-4'>
+    <div className='border-b-0.5 border-DIVIDER_GRAY group relative grid grid-cols-3 gap-4 *:min-w-0'>
       <MembersName name={row?.name ?? row?.email} value={row?.email} />
       <MembersEmail value={row?.email} />
       <MembersRole value={{ user_id: '', privilege: row?.privilege }} />
