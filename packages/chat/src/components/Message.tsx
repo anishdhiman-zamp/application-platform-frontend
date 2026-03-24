@@ -3,7 +3,6 @@
 import { useScrollRef } from '@zamp-platform/ui';
 import { cn } from '@zamp-platform/ui/utils';
 import { formatChatTimestamp, formatChatTimestampTooltip, formatTimestampToUTC } from '@zamp-platform/utils';
-import { ChevronDown, ChevronUp } from 'lucide-react';
 import { motion } from 'motion/react';
 import React, { FC, ReactNode, useCallback, useEffect, useMemo, useRef, useState } from 'react';
 
@@ -56,7 +55,7 @@ export const Message: FC<MessageProps> = ({
   organizationId,
   streamingEnabled = true,
 }) => {
-  const USER_MESSAGE_MAX_HEIGHT = 300;
+  const USER_MESSAGE_MAX_HEIGHT = 240;
 
   const scrollRef = useScrollRef();
   const cleanupRef = useRef<defaultFnType | null>(null);
@@ -144,13 +143,12 @@ export const Message: FC<MessageProps> = ({
     <>
       {message.sender_type === SenderType.ASSISTANT && assistantAvatar}
 
-      <div className={cn(isUserMessage && 'relative', 'max-w-[620px]', shouldAlignRight && 'max-w-[80%]')}>
+      <div
+        className={cn('relative max-w-[620px]', shouldAlignRight && 'bg-GRAY_100 max-w-[80%] rounded-[10px] px-4 py-3')}
+      >
         <div
           ref={contentRef}
-          className={cn(
-            shouldAlignRight && 'bg-GRAY_100 rounded-[10px] px-4 py-3',
-            isUserMessage && !isExpanded && 'overflow-hidden',
-          )}
+          className={cn(isUserMessage && !isExpanded && 'overflow-hidden')}
           style={isUserMessage && !isExpanded ? { maxHeight: USER_MESSAGE_MAX_HEIGHT } : undefined}
         >
           <BlockRenderer
@@ -163,23 +161,15 @@ export const Message: FC<MessageProps> = ({
           />
         </div>
         {isUserMessage && isOverflowing && !isExpanded && (
-          <div className='pointer-events-none absolute right-0 bottom-0 left-0 h-16 bg-linear-to-t from-white to-transparent dark:from-gray-900' />
+          <div className='from-GRAY_100 pointer-events-none absolute inset-x-0 bottom-0 h-16 rounded-b-[10px] bg-linear-to-t from-10% to-transparent' />
         )}
         {isUserMessage && isOverflowing && (
-          <button
+          <div
             onClick={toggleExpanded}
-            className='text-GRAY_700 hover:text-GRAY_1000 mt-1 flex items-center gap-0.5 text-xs font-medium transition-colors'
+            className='text-GRAY_900 hover:text-GRAY_1000 relative z-10 mt-2 flex cursor-pointer items-center gap-0.5 text-xs font-medium transition-colors'
           >
-            {isExpanded ? (
-              <>
-                See less <ChevronUp size={14} />
-              </>
-            ) : (
-              <>
-                See more <ChevronDown size={14} />
-              </>
-            )}
-          </button>
+            {isExpanded ? 'See less ' : 'See more'}
+          </div>
         )}
       </div>
       {streamingEnabled && (
