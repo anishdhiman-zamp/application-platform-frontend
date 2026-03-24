@@ -39,6 +39,18 @@ export const FILES_PANEL_SPACER_TRANSITION = {
   ease: [0.6, 0, 0.2, 1] as [number, number, number, number],
 } as const;
 
+/** Files right sidebar slide-in: cubic-bezier(0, 0, 0.1, 1), 350ms */
+export const FILES_PANEL_ENTER_TRANSITION = {
+  duration: 0.35,
+  ease: [0, 0, 0.1, 1] as [number, number, number, number],
+} as const;
+
+/** Files right sidebar slide-out: cubic-bezier(0.3, 0, 1, 1), 250ms */
+export const FILES_PANEL_EXIT_TRANSITION = {
+  duration: 0.25,
+  ease: [0.3, 0, 1, 1] as [number, number, number, number],
+} as const;
+
 export type SidebarTransitionDirection =
   | 'fullscreen-to-sidebar'
   | 'sidebar-to-fullscreen'

@@ -129,7 +129,7 @@ const FilesPanelContent = () => {
         isNoData={filesWithUploading.length === 0}
         noDataBanner={<FilesEmptyState />}
         skeletonType={SkeletonTypes.CUSTOM}
-        loader={<ImageLoader imageSrc={ZAMP_LOGO_LOADER_SVG} width={100} height={100} className='bg-white' />}
+        loader={<ImageLoader imageSrc={ZAMP_LOGO_LOADER_SVG} width={100} height={100} />}
         className='flex-1 overflow-y-auto px-3 pt-1.5 pb-3 [scrollbar-width:none]'
         disableAnimation
       >
