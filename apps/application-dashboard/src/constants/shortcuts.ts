@@ -87,3 +87,16 @@ export const SHORTCUTS_TABS = [
     id: ROUTES_PATH.DATA,
   },
 ];
+
+/**
+ * Handles keyboard activation for interactive non-button elements (e.g. `role="button"`).
+ * Triggers the callback on Enter or Space, with `preventDefault` and `stopPropagation`
+ * to mirror native button behavior.
+ */
+export const handleActivationKeyDown = (e: React.KeyboardEvent, callback: (e: React.KeyboardEvent) => void) => {
+  if (e.key === KEYBOARD_KEYS.ENTER || e.key === KEYBOARD_KEYS.SPACE) {
+    e.preventDefault();
+    e.stopPropagation();
+    callback(e);
+  }
+};

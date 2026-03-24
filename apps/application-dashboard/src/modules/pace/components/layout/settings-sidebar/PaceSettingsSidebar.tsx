@@ -7,7 +7,7 @@ import { usePathname, useSearchParams } from 'next/navigation';
 import OrgSwitcher from '@/components/layouts/dashboard-layout/components/OrgSwitcher';
 import { FEATURE_FLAGS } from '@/constants/featureFlags';
 import { useFeatureFlag } from '@/hooks/useFeatureFlag';
-import { PACE_SETTINGS_TABS } from '@/modules/pace/pace.constants';
+import { PACE_SETTINGS_TABS, SIDEBAR_CONVERSATION_ID_PARAM } from '@/modules/pace/pace.constants';
 import SidebarTab from 'components/layouts/dashboard-layout/components/SidebarTab';
 
 const PaceSettingsSidebar = () => {
@@ -22,7 +22,7 @@ const PaceSettingsSidebar = () => {
 
   const getHref = useCallback(
     (path: string) => {
-      const sParam = searchParams?.get('s');
+      const sParam = searchParams?.get(SIDEBAR_CONVERSATION_ID_PARAM);
 
       if (sParam) {
         return `${path}?s=${sParam}`;

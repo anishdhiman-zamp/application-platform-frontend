@@ -2,6 +2,7 @@
 
 import { useCallback, useEffect, useRef, useState } from 'react';
 import { SIDEBAR_CONVERSATION_ID_PARAM } from 'modules/pace/pace.constants';
+import { CHAT_SIDEBAR_STATE } from 'modules/pace/pace.types';
 import { usePaceContext } from '@/modules/pace/pace.context';
 
 interface UseChatSidebarStateProps {
@@ -9,7 +10,7 @@ interface UseChatSidebarStateProps {
 }
 
 export const useChatSidebarState = ({ initialConversationId }: UseChatSidebarStateProps) => {
-  const { isPaceSidebarOpen, setIsPaceSidebarOpen } = usePaceContext();
+  const { chatSidebarState, setChatSidebarState } = usePaceContext();
 
   const prevInitialConversationIdRef = useRef(initialConversationId);
 
@@ -18,7 +19,6 @@ export const useChatSidebarState = ({ initialConversationId }: UseChatSidebarSta
   const [chatKey, setChatKey] = useState(0);
 
   const handleConversationIdUpdate = useCallback(() => {
-    // Remove conversation ID from URL
     const params = new URLSearchParams(window.location.search);
 
     params.delete(SIDEBAR_CONVERSATION_ID_PARAM);
@@ -30,7 +30,13 @@ export const useChatSidebarState = ({ initialConversationId }: UseChatSidebarSta
   }, []);
 
   const setConversationId = useCallback((id: string | null, title?: string) => {
-    setConversationIdState(id);
+    setConversationIdState((prev) => {
+      if (prev && id && prev !== id) {
+        setChatKey((k) => k + 1);
+      }
+
+      return id;
+    });
     setChatTitle(title || '');
 
     const params = new URLSearchParams(window.location.search);
@@ -41,7 +47,6 @@ export const useChatSidebarState = ({ initialConversationId }: UseChatSidebarSta
       params.delete(SIDEBAR_CONVERSATION_ID_PARAM);
     }
 
-    // Keep the current pathname, only update the query params
     const currentPath = window.location.pathname;
     const newUrl = params.toString() ? `${currentPath}?${params.toString()}` : currentPath;
 
@@ -55,33 +60,28 @@ export const useChatSidebarState = ({ initialConversationId }: UseChatSidebarSta
     handleConversationIdUpdate();
   }, []);
 
-  const handleClose = useCallback(() => {
-    setIsPaceSidebarOpen(false);
-  }, [setIsPaceSidebarOpen]);
-
-  // Sync state with URL when initialConversationId changes (e.g., browser back/forward)
   useEffect(() => {
     if (prevInitialConversationIdRef.current !== initialConversationId) {
       prevInitialConversationIdRef.current = initialConversationId;
       setConversationIdState(initialConversationId);
 
       if (initialConversationId) {
-        setIsPaceSidebarOpen(true);
+        if (chatSidebarState === CHAT_SIDEBAR_STATE.COLLAPSED) {
+          setChatSidebarState(CHAT_SIDEBAR_STATE.SIDEBAR);
+        }
       } else {
         setChatTitle('');
         setChatKey((prev) => prev + 1);
       }
     }
-  }, [initialConversationId, setIsPaceSidebarOpen]);
+  }, [initialConversationId, chatSidebarState, setChatSidebarState]);
 
   return {
-    isPaceSidebarOpen,
     chatTitle,
     setChatTitle,
     conversationId,
     setConversationId,
     chatKey,
     startNewChat,
-    handleClose,
   };
 };

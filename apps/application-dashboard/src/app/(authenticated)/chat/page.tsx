@@ -1,14 +1,16 @@
 'use client';
 
-import { CHAT_CONVERSATION_ID_PARAM } from 'modules/pace/pace.constants';
-import { useSearchParams } from 'next/navigation';
-import ChatContent from '@/modules/pace/components/chat/ChatContent';
+import FileTabsContainer from 'modules/pace/components/file-viewer/FileTabsContainer';
+import { useSyncedUrlParam } from '@/modules/pace/hooks/useSyncedSearchParam';
 
 const ChatPage = () => {
-  const searchParams = useSearchParams();
-  const conversationId = searchParams?.get(CHAT_CONVERSATION_ID_PARAM) ?? null;
+  const filePath = useSyncedUrlParam('f');
 
-  return <ChatContent initialConversationId={conversationId} />;
+  if (filePath) {
+    return <FileTabsContainer />;
+  }
+
+  return null;
 };
 
 export default ChatPage;
