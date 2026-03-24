@@ -102,6 +102,10 @@ const ScrollContainer = forwardRef<ScrollContainerRef, ScrollContainerProps>(
     const lastUserScrollLengthRef = useRef<number | null>(null);
     const resizeObserverRef = useRef<ResizeObserver | null>(null);
     const userMsgAnchorRef = useRef<number | null>(null);
+    // When true, updateSpacerHeight is a no-op. Set after a new user message
+    // anchors the spacer at full clientHeight; cleared when the AI response
+    // starts arriving so the spacer can shrink progressively.
+    const spacerLockedRef = useRef(false);
 
     const updateScrollState = useCallback(() => {
       const el = scrollRef.current;
@@ -128,6 +132,8 @@ const ScrollContainer = forwardRef<ScrollContainerRef, ScrollContainerProps>(
     // --- Anchor mode functions ---
 
     const updateSpacerHeight = useCallback(() => {
+      if (spacerLockedRef.current) return;
+
       const container = scrollRef.current;
       const spacer = spacerRef.current;
       const anchorTop = userMsgAnchorRef.current;
@@ -191,7 +197,14 @@ const ScrollContainer = forwardRef<ScrollContainerRef, ScrollContainerProps>(
           });
         }
 
-        updateSpacerHeight();
+        if (isInitial) {
+          updateSpacerHeight();
+        } else {
+          // Lock the spacer at full clientHeight for new user messages so
+          // ResizeObservers don't immediately shrink it to 0. The lock is
+          // released when the AI response starts arriving.
+          spacerLockedRef.current = true;
+        }
 
         // Notify Message components when the scroll finishes so they can
         // start their entrance animation. For instant scrolls the event fires
@@ -311,6 +324,7 @@ const ScrollContainer = forwardRef<ScrollContainerRef, ScrollContainerProps>(
             });
           }
         } else {
+          spacerLockedRef.current = false;
           lastUserScrollLengthRef.current = 0;
           requestAnimationFrame(() => {
             updateSpacerHeight();
@@ -351,6 +365,7 @@ const ScrollContainer = forwardRef<ScrollContainerRef, ScrollContainerProps>(
         isInitialScrollRef.current = true;
         lastUserScrollLengthRef.current = 0;
         userMsgAnchorRef.current = null;
+        spacerLockedRef.current = false;
         resetSpacer();
       }
       previousIsLoadingRef.current = isLoading;

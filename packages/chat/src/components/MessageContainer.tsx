@@ -60,12 +60,14 @@ export const MessageContainer: FC<MessageContainerProps> = ({
   const defaultAssistantAvatar = assistantAvatar ?? <PaceAvatar />;
   const isInitialScrollRef = useRef(true);
   const scrollContainerRef = useRef<HTMLDivElement>(null);
-  // When mounting with a pending user message (isAnalysing=true, no AI response yet),
-  // initialise one behind the current length so isNewUserMessage fires and the
-  // entrance animation plays for the first message.
+  // When mounting with a pending user message for a brand-new conversation
+  // (isAnalysing=true and no conversationId yet), initialise one behind the
+  // current length so isNewUserMessage fires and the entrance animation plays.
+  // We must NOT do this when re-mounting an existing conversation (conversationId
+  // is already set) — that would re-trigger the animation on back-navigation.
   const [animatedLength, setAnimatedLength] = useState(() => {
     const len = messages?.length ?? 0;
-    return isAnalysing ? Math.max(0, len - 1) : len;
+    return isAnalysing && !conversationId ? Math.max(0, len - 1) : len;
   });
   const lastMessage = messages?.[messages.length - 1];
   const isNewUserMessage = lastMessage?.sender_type === 'USER' && messages.length > animatedLength;
