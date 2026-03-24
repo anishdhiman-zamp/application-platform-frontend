@@ -36,6 +36,8 @@ export interface MessageProps {
   assistantAvatar?: ReactNode;
 }
 
+export const USER_MESSAGE_MAX_HEIGHT = 240;
+
 export const Message: FC<MessageProps> = ({
   message,
   onAction,
@@ -55,8 +57,6 @@ export const Message: FC<MessageProps> = ({
   organizationId,
   streamingEnabled = true,
 }) => {
-  const USER_MESSAGE_MAX_HEIGHT = 240;
-
   const scrollRef = useScrollRef();
   const cleanupRef = useRef<defaultFnType | null>(null);
   const [animationReady, setAnimationReady] = useState(false);
@@ -64,6 +64,22 @@ export const Message: FC<MessageProps> = ({
   const [isOverflowing, setIsOverflowing] = useState(false);
   const contentRef = useRef<HTMLDivElement>(null);
   const isUserMessage = message.sender_type === SenderType.USER;
+
+  const toggleExpanded = useCallback(() => {
+    setIsExpanded((prev) => !prev);
+  }, []);
+  const shouldAlignRight = alignUserRight && isUserMessage;
+  const sharedClassName = cn('group space-y-3', shouldAlignRight && 'flex flex-col items-end', containerClassName);
+
+  const formattedTimestamp = useMemo(
+    () => (message.timestamp ? formatChatTimestamp(formatTimestampToUTC(message.timestamp)) : ''),
+    [message.timestamp],
+  );
+
+  const tooltipTimestamp = useMemo(
+    () => (message.timestamp ? formatChatTimestampTooltip(formatTimestampToUTC(message.timestamp)) : ''),
+    [message.timestamp],
+  );
 
   useEffect(() => {
     const el = contentRef.current;
@@ -78,12 +94,6 @@ export const Message: FC<MessageProps> = ({
 
     return () => observer.disconnect();
   }, [isUserMessage]);
-
-  const toggleExpanded = useCallback(() => {
-    setIsExpanded((prev) => !prev);
-  }, []);
-  const shouldAlignRight = alignUserRight && isUserMessage;
-  const sharedClassName = cn('group space-y-3', shouldAlignRight && 'flex flex-col items-end', containerClassName);
 
   useEffect(() => {
     // Clean up any previous subscription
@@ -128,16 +138,6 @@ export const Message: FC<MessageProps> = ({
       cleanupRef.current = null;
     };
   }, [shouldAnimate, scrollRef]);
-
-  const formattedTimestamp = useMemo(
-    () => (message.timestamp ? formatChatTimestamp(formatTimestampToUTC(message.timestamp)) : ''),
-    [message.timestamp],
-  );
-
-  const tooltipTimestamp = useMemo(
-    () => (message.timestamp ? formatChatTimestampTooltip(formatTimestampToUTC(message.timestamp)) : ''),
-    [message.timestamp],
-  );
 
   const innerContent = (
     <>

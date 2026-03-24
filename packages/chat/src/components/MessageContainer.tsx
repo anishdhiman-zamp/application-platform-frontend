@@ -8,16 +8,9 @@ import PaceAvatar from '@/modules/chatbot/PaceAvatar';
 
 import { ButtonBlockType } from '../types/block.types';
 import { ChatMessage, StreamingState } from '../types/chat.types';
+import { getMessageKey } from '../utils/message.utils';
 import Message from './Message';
 import { StreamingMessage } from './StreamingMessage';
-
-/**
- * Generates a unique key for a message, ensuring no duplicates
- * Uses message.id if available, otherwise falls back to timestamp with index
- */
-const getMessageKey = (message: ChatMessage, index: number): string => {
-  return `${message.timestamp || message.id || 'msg'}-${index}`;
-};
 
 interface MessageContainerProps {
   messages: ChatMessage[];
