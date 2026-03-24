@@ -9,13 +9,9 @@ import DynamicTabItem from 'modules/pace/components/dynamic-tabs/DynamicTabItem'
 import { DynamicTab } from '@/modules/pace/pace.types';
 
 const CLOSE_BUTTON_SELECTOR = '#dynamic-tab-close-button';
-
 const TAB_MAX_WIDTH = 172;
-
-const NEW_TAB_OPEN_TRANSITION = {
-  duration: 0.25,
-  ease: [0, 0, 0.4, 1],
-} as const;
+const TAB_ENTER_TRANSITION = { duration: 0.2, ease: [0.2, 0, 0, 1] } as const;
+const TAB_EXIT_TRANSITION = { duration: 0.2, ease: [0.4, 0, 1, 1] } as const;
 
 interface SortableDynamicTabItemProps {
   tab: DynamicTab;
@@ -49,16 +45,18 @@ const SortableDynamicTabItem = ({
   const style: CSSProperties = {
     transform: CSS.Transform.toString(transform),
     transition,
+    maxWidth: TAB_MAX_WIDTH,
   };
 
   return (
     <motion.div
       ref={setNodeRef}
       style={style}
-      initial={skipAnimation ? false : { maxWidth: 0 }}
-      animate={{ maxWidth: TAB_MAX_WIDTH }}
-      exit={{ maxWidth: 0 }}
-      transition={NEW_TAB_OPEN_TRANSITION}
+      initial={skipAnimation ? false : { maxWidth: 0, opacity: 0 }}
+      animate={skipAnimation ? false : { maxWidth: TAB_MAX_WIDTH, opacity: 1 }}
+      exit={{ maxWidth: 0, opacity: 0, transition: TAB_EXIT_TRANSITION }}
+      transition={TAB_ENTER_TRANSITION}
+      layout={false}
       {...attributes}
       {...listeners}
       className={cn('min-w-0 flex-1 overflow-hidden select-none', { 'opacity-50': isDragging })}

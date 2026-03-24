@@ -80,7 +80,7 @@ const ChatHistory = ({ onSelectConversation, onDeleteConversation, compact = fal
     totalFetched: allConversations.length,
     totalRowCount: totalCount,
     hasDataSource: !!organizationId,
-    threshold: 500,
+    threshold: compact ? 100 : 500,
   });
 
   const handleScroll = useCallback(() => {
@@ -205,11 +205,11 @@ const ChatHistory = ({ onSelectConversation, onDeleteConversation, compact = fal
             className='h-full flex-col items-center justify-center py-12 text-center'
           />
         }
-        className='flex min-h-0 flex-1 flex-col overflow-hidden pb-4'
+        className='flex min-h-0 flex-1 flex-col overflow-hidden pb-2'
         disableAnimation
       >
         <div ref={containerRef} className='flex-1 overflow-y-auto [scrollbar-width:none]' onScroll={handleScroll}>
-          <div className='w-full space-y-0.5 pr-3'>
+          <div className='w-full space-y-0.5 px-2'>
             {displayConversations.map((conversation) => (
               <ChatHistoryItem
                 key={conversation?.id}

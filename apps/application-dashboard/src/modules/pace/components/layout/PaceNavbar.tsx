@@ -1,10 +1,10 @@
 'use client';
 
 import { useCallback, useMemo, useRef } from 'react';
-import { Button, MessageSquareIcon } from '@zamp-platform/ui';
+import { Button, FolderOpenIcon, MessageSquareIcon } from '@zamp-platform/ui';
 import { cn } from '@zamp-platform/ui/utils';
 import { motion } from 'framer-motion';
-import { PanelRightClose } from 'lucide-react';
+import { PanelRightOpen } from 'lucide-react';
 import { getNavbarAnimations } from 'modules/pace/pace.animations';
 import type { AnimatedIconHandle } from 'modules/pace/pace.types';
 import { CHAT_SIDEBAR_STATE, PaceNavbarItemId } from 'modules/pace/pace.types';
@@ -20,7 +20,15 @@ const PaceNavbar = () => {
   const pathname = usePathname();
   const router = useRouter();
   const searchParams = useSearchParams();
-  const { chatSidebarState, prevChatSidebarState, setChatSidebarState, collapseSidebar } = usePaceContext();
+  const {
+    chatSidebarState,
+    prevChatSidebarState,
+    setChatSidebarState,
+    collapseSidebar,
+    filesPanelOpen,
+    filesPanelPinned,
+    toggleFilesPanel,
+  } = usePaceContext();
   const { isOnAnyDynamicTab } = useDynamicTabs();
 
   const chatIconRef = useRef<AnimatedIconHandle>(null);
@@ -85,9 +93,6 @@ const PaceNavbar = () => {
       if (targetRouteUrl === currentRouteUrl) {
         collapseSidebar();
       }
-      // When the route actually changes, the routeUrl effect in PaceProvider
-      // handles the EXPANDED → COLLAPSED transition after the new content is
-      // ready, avoiding a flash of stale content.
     },
     [isExpanded, collapseSidebar],
   );
@@ -110,7 +115,7 @@ const PaceNavbar = () => {
             onClick={collapseSidebar}
             title='Close sidebar'
           >
-            <PanelRightClose size={16} />
+            <PanelRightOpen size={16} />
           </Button>
         </motion.div>
         <motion.div
@@ -165,7 +170,33 @@ const PaceNavbar = () => {
         ))}
       </motion.div>
 
-      <DynamicTabsBar />
+      <motion.div
+        key={`dynamic-tabs-bar-${chatSidebarState}`}
+        initial={navAnimations.navItems.initial}
+        animate={{ opacity: 1 }}
+        transition={navAnimations.navItems.transition}
+        className='flex min-w-0 flex-1 items-center'
+      >
+        <DynamicTabsBar />
+      </motion.div>
+
+      <div className='ml-auto shrink-0 pl-2'>
+        <Button
+          variant='ghost'
+          size='icon'
+          className={cn(
+            'text-GRAY_700 hover:text-GRAY_900 hover:bg-accent h-7.5 w-7.5 rounded-lg border-[0.75px] border-transparent p-[7px]',
+            {
+              'border-GRAY_500 text-GRAY_900 hover:text-GRAY_900 shadow-tab-shadow bg-BG_WHITE hover:bg-BG_WHITE':
+                filesPanelOpen && !filesPanelPinned,
+            },
+          )}
+          onClick={toggleFilesPanel}
+          title='Files'
+        >
+          <FolderOpenIcon size={16} className='pointer-events-none' />
+        </Button>
+      </div>
     </div>
   );
 };

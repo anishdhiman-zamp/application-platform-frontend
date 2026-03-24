@@ -132,9 +132,9 @@ const FileTreeNodeRow = forwardRef<HTMLDivElement, FileTreeNodeRowProps>(
 
         {state.isFolder ? (
           state.isExpanded ? (
-            <FolderOpenedIcon size={16} weight='fill' className='text-BLUE_600 shrink-0' />
+            <FolderOpenedIcon size={16} weight='fill' className='text-BLUE_600 shrink-0 dark:opacity-70' />
           ) : (
-            <FolderClosedIcon size={16} weight='fill' className='text-BLUE_600 shrink-0' />
+            <FolderClosedIcon size={16} weight='fill' className='text-BLUE_600 shrink-0 dark:opacity-70' />
           )
         ) : (
           <FileIcon extension={extension || 'txt'} className='size-5 rounded-sm' iconClassName='size-4' />

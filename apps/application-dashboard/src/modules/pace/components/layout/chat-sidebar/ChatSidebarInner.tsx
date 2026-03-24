@@ -5,7 +5,7 @@ import type { useChat } from '@zamp-platform/chat';
 import { ConnectedChatInput, ResourceType, ScopeType } from '@zamp-platform/chat';
 import { useDynamicTabs } from 'modules/pace/components/dynamic-tabs/useDynamicTabs';
 import ChatConversationContent from 'modules/pace/components/layout/chat-sidebar/ChatConversationContent';
-import { usePathname } from 'next/navigation';
+import { usePathname, useSearchParams } from 'next/navigation';
 import { APITags } from '@/constants/api.constants';
 import { ROUTES_PATH } from '@/constants/routeConfig';
 import { useAppDispatch, useAppSelector } from '@/hooks/toolkit';
@@ -41,12 +41,13 @@ const ChatSidebarInner: FC<ChatSidebarInnerProps> = ({
   chatKey,
 }) => {
   const pathname = usePathname();
+  const searchParams = useSearchParams();
   const dispatch = useAppDispatch();
   const { openTab } = useDynamicTabs({ type: TAB_TYPE.FILE });
   const { chatSidebarState, setChatSidebarState } = usePaceContext();
   const { inputValue, setInputValue } = useChatDraftInput({ conversationId });
 
-  const isOnChatRoute = pathname === ROUTES_PATH.CHAT;
+  const isOnChatRoute = pathname === ROUTES_PATH.CHAT && !searchParams?.has('f');
 
   const organizationId = useAppSelector((state: RootState) => state.user.user?.orgs?.[0]?.organization_id) ?? '';
   const currentUserName = useAppSelector((state: RootState) => state.user.user?.user_name) ?? '';
