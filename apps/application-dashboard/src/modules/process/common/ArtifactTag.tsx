@@ -7,7 +7,7 @@ import { getArtifactPrefixIconSrc } from 'modules/process/process.utils';
 import Image from 'next/image';
 import ImageWithFallback from '@/components/common/ImageWithFallback';
 import TooltipV2 from '@/components/common/TooltipV2';
-import { GMAIL, LINK, VERCEL_BLOB_ICON_URL } from '@/constants/icons';
+import { ARTIFACT_ICON_URL, GMAIL, LINK } from '@/constants/icons';
 import type { defaultFnType } from '@/types/commonTypes';
 
 interface ArtifactTagProps {
@@ -39,7 +39,7 @@ const ArtifactTag: FC<ArtifactTagProps> = ({
     if (isExternalLink) {
       return (
         <ImageWithFallback
-          src={iconIdentifier ? `${VERCEL_BLOB_ICON_URL}/${iconIdentifier}` : LINK}
+          src={iconIdentifier ? `${ARTIFACT_ICON_URL}/${iconIdentifier}` : LINK}
           fallback={LINK}
           alt={displayName}
           width={12}
