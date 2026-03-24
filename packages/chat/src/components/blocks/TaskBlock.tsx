@@ -137,8 +137,8 @@ const TaskBlock: FC<TaskBlockProps> = ({ payload, conversationId }) => {
   const previousCount = (previousToolCalls?.length ?? 0) + markdownStepsBeforeLastTool;
 
   const handleOpenTask = useCallback(() => {
-    onTaskOpen?.(title, getChatTaskRoute(task_id, conversationId ?? '', title));
-    router.push(getChatTaskRoute(task_id, conversationId ?? '', title));
+    onTaskOpen?.(title, getChatTaskRoute({ taskId: task_id, conversationId: conversationId ?? '', taskTitle: title }));
+    router.push(getChatTaskRoute({ taskId: task_id, conversationId: conversationId ?? '', taskTitle: title }));
   }, [router, task_id, conversationId, title, onTaskOpen]);
 
   const hasNoToolCalls = (toolCalls?.length ?? 0) === 0 && previousCount === 0;

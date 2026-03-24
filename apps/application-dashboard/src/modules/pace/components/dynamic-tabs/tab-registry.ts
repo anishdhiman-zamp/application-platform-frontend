@@ -1,33 +1,6 @@
-import { SIDEBAR_CONVERSATION_ID_PARAM } from 'modules/pace/pace.constants';
 import { ROUTES_PATH } from '@/constants/routeConfig';
 import { DynamicTabRouteConfig, DynamicTabType, ROUTE_KIND, TAB_TYPE } from '@/modules/pace/pace.types';
-
-const buildUrl = (basePath: string, params: URLSearchParams): string => {
-  const query = params.toString();
-
-  return query ? `${basePath}?${query}` : basePath;
-};
-
-/**
- * Syncs the sidebar conversation param with the current URL state.
- * - Strips any stale sidebar param from the stored path
- * - Adds the current sidebar param from URL (if open)
- */
-export const preserveSidebarParam = (path: string): string => {
-  if (typeof window === 'undefined') return path;
-
-  const [basePath, existingQuery] = path.split('?');
-  const params = new URLSearchParams(existingQuery || '');
-  const currentSidebarId = new URLSearchParams(window.location.search).get(SIDEBAR_CONVERSATION_ID_PARAM);
-
-  params.delete(SIDEBAR_CONVERSATION_ID_PARAM);
-
-  if (currentSidebarId) {
-    params.set(SIDEBAR_CONVERSATION_ID_PARAM, currentSidebarId);
-  }
-
-  return buildUrl(basePath, params);
-};
+import { preserveSidebarParam } from '@/modules/pace/pace.utils';
 
 export const TAB_TYPE_CONFIG: Record<DynamicTabType, DynamicTabRouteConfig> = {
   [TAB_TYPE.FILE]: {
