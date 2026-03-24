@@ -40,7 +40,7 @@ export const FileIcon = ({ extension, className = 'size-5 rounded-md', iconClass
 
   return (
     <div
-      className={cn('flex shrink-0 items-center justify-center', className)}
+      className={cn('flex items-center justify-center', className)}
       style={{ ...cssVars, backgroundColor: 'var(--file-icon-bg)' }}
       data-file-icon
       data-testid='file-icon'

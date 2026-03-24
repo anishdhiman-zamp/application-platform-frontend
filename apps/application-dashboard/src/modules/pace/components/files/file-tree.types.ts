@@ -139,13 +139,6 @@ export interface FileTreeProps {
 }
 
 /**
- * Props for the FilesPreview component
- */
-export interface FilesPreviewProps {
-  selectedFile: FileItem | null;
-}
-
-/**
  * Props for the FileTreeNode component
  */
 export interface FileTreeNodeProps {

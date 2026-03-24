@@ -207,7 +207,7 @@ const FileTreeContent = ({
     );
   }
 
-  if (treeData.length === 0 && searchQuery) {
+  if (treeData?.length === 0 && searchQuery) {
     return <FileTreeEmptyState />;
   }
 

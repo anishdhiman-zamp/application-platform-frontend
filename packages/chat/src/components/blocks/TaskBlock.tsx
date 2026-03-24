@@ -5,13 +5,14 @@ import { formatPlural, safeJsonParse } from '@zamp-platform/utils';
 import { EVENT_TYPE } from '@zamp-platform/utils/event-bus/event-bus.types';
 import { ArrowUpRight, ChevronDown } from 'lucide-react';
 import { useRouter } from 'next/navigation';
-import React, { type FC, useCallback, useMemo } from 'react';
+import { type FC, useCallback, useMemo } from 'react';
 
 import { getChatTaskRoute } from '@/constants/routeConfig';
 import { useAppSelector } from '@/hooks/toolkit';
 import type { RootState } from '@/store';
 
 import { API_ENDPOINTS } from '../../api';
+import { useChatActions } from '../../context/ChatActionsContext';
 import { useChat } from '../../hooks/useChat';
 import { BLOCK_TYPE, TASK_STATUS, type TaskBlockType, type ToolUseContentBlock } from '../../types/block.types';
 import { ResourceType, SenderType } from '../../types/chat.types';
@@ -34,6 +35,7 @@ interface ToolCallInfo {
 const TaskBlock: FC<TaskBlockProps> = ({ payload, conversationId }) => {
   const router = useRouter();
   const organizationId = useAppSelector((state: RootState) => state.user.user?.orgs?.[0]?.organization_id) ?? '';
+  const { onTaskOpen } = useChatActions();
 
   const { title, task_id, status = TASK_STATUS.IN_PROGRESS } = payload;
 
@@ -135,8 +137,9 @@ const TaskBlock: FC<TaskBlockProps> = ({ payload, conversationId }) => {
   const previousCount = (previousToolCalls?.length ?? 0) + markdownStepsBeforeLastTool;
 
   const handleOpenTask = useCallback(() => {
+    onTaskOpen?.(title, getChatTaskRoute(task_id, conversationId ?? '', title));
     router.push(getChatTaskRoute(task_id, conversationId ?? '', title));
-  }, [router, task_id, conversationId, title]);
+  }, [router, task_id, conversationId, title, onTaskOpen]);
 
   const hasNoToolCalls = (toolCalls?.length ?? 0) === 0 && previousCount === 0;
   const isStartingTask = hasNoToolCalls && !isLoading && status === TASK_STATUS.IN_PROGRESS;

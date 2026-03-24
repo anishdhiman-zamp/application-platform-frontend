@@ -32,9 +32,9 @@ export const preserveSidebarParam = (path: string): string => {
 export const TAB_TYPE_CONFIG: Record<DynamicTabType, DynamicTabRouteConfig> = {
   [TAB_TYPE.FILE]: {
     kind: ROUTE_KIND.QUERY,
-    basePath: ROUTES_PATH.CHAT_FILES,
+    basePath: ROUTES_PATH.CHAT,
     paramName: 'f',
-    fallbackPath: ROUTES_PATH.CHAT_FILES,
+    fallbackPath: ROUTES_PATH.CHAT,
   },
   [TAB_TYPE.TASK]: {
     kind: ROUTE_KIND.DYNAMIC,

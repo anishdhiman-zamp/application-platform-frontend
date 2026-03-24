@@ -17,10 +17,10 @@ const PeopleHeader: FC<PeopleHeaderPropsType> = ({ search, setSearch, teamMember
   return (
     <>
       <div className='f-20-600 text-GRAY_1000'>People</div>
-      <div className='mt-5 flex w-full items-center justify-between'>
+      <div className='mt-5 flex w-full items-center justify-between gap-3'>
         <SearchInput
           placeholder='Search team members'
-          className='w-80'
+          className='w-full max-w-80'
           value={search}
           onChange={setSearch}
           aria-label='Search team members'
@@ -28,7 +28,7 @@ const PeopleHeader: FC<PeopleHeaderPropsType> = ({ search, setSearch, teamMember
         <Dialog open={isInviteMembersPopupOpen} onOpenChange={setIsInviteMembersPopupOpen}>
           <DialogTrigger asChild>
             <Button
-              className='f-12-500 hover:bg-GRAY_1000/90 active:bg-GRAY_950 flex h-7 cursor-pointer items-center gap-1 overflow-clip rounded-md px-3 py-[7px]'
+              className='f-12-500 hover:bg-GRAY_1000/90 active:bg-GRAY_950 flex h-7 shrink-0 cursor-pointer items-center gap-1 overflow-clip rounded-md px-3 py-[7px]'
               data-testid='invite-user-btn'
               disabled={isMember}
             >
