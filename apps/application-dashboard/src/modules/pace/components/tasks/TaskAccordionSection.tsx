@@ -1,6 +1,6 @@
 'use client';
 
-import { type FC, useCallback, useRef } from 'react';
+import { useCallback, useRef } from 'react';
 import type { TaskStatus } from '@zamp-platform/chat';
 import { TaskStatusIcon } from '@zamp-platform/chat';
 import { useInfiniteScroll } from '@zamp-platform/tanstack-table';
@@ -17,11 +17,11 @@ interface TaskAccordionSectionProps {
   search?: string;
 }
 
-const FilledPlayIcon = ({ className }: { className?: string }) => (
+const PlayIcon = ({ className }: { className?: string }) => (
   <Play className={className} fill='currentColor' strokeWidth={0} />
 );
 
-const TaskAccordionSection: FC<TaskAccordionSectionProps> = ({ status, count, search }) => {
+const TaskAccordionSection = ({ status, count, search }: TaskAccordionSectionProps) => {
   const containerRef = useRef<HTMLDivElement>(null);
   const { tasks, totalCount, fetchNextPage, isFetching } = useTasksByStatus({ status, search });
 
@@ -43,7 +43,7 @@ const TaskAccordionSection: FC<TaskAccordionSectionProps> = ({ status, count, se
   return (
     <AccordionItem value={status} className='border-GRAY_400'>
       <AccordionTrigger
-        icon={FilledPlayIcon}
+        icon={PlayIcon}
         iconRotation={90}
         className='bg-BG_GRAY_1 border-GRAY_400 data-[state=open]:bg-GRAY_50 [&>svg]:text-GRAY_1000 [&[data-state=open]>svg]:text-GRAY_600 justify-start! gap-1.5 px-3 py-2.5 [&>svg]:order-first [&>svg]:h-2 [&>svg]:w-2 [&>svg]:transition-all [&>svg]:duration-300'
       >

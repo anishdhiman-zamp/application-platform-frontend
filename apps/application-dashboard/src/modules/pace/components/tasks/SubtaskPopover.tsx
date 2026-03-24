@@ -8,7 +8,6 @@ import ProgressWheel from 'modules/pace/components/tasks/ProgressWheel';
 import type { SubTask } from 'modules/pace/components/tasks/task-listing.types';
 import { useRouter } from 'next/navigation';
 import { getChatTaskRoute } from '@/constants/routeConfig';
-import { KEYBOARD_KEYS } from '@/constants/shortcuts';
 
 interface SubtaskPopoverProps {
   subtasks: SubTask[];
@@ -28,27 +27,24 @@ const SubtaskItem = ({ subtask }: SubtaskItemProps) => {
   }, [router, subtask?.id]);
 
   return (
-    <div
-      tabIndex={0}
+    <Button
+      variant='ghost'
       onClick={handleClick}
-      onKeyDown={(e) => {
-        if (e.key === KEYBOARD_KEYS.ENTER || e.key === KEYBOARD_KEYS.SPACE) handleClick();
-      }}
-      className='hover:bg-BG_GRAY_2 group flex h-10 cursor-pointer items-center justify-between rounded-md px-3'
+      className='hover:bg-BG_GRAY_2 group flex h-10 w-full cursor-pointer items-center justify-between rounded-md px-3'
     >
       <div className='flex min-w-0 flex-1 items-center gap-2'>
         <TaskStatusIcon status={subtask?.status} />
         <span className='f-13-450 text-GRAY_1000 min-w-0 flex-1 truncate leading-[1.4]'>{subtask?.title}</span>
       </div>
       <ArrowUpRight size={10} className='text-GRAY_700 shrink-0 opacity-0 group-hover:opacity-100' />
-    </div>
+    </Button>
   );
 };
 
 const SubtaskPopover = ({ subtasks, completedCount, totalCount }: SubtaskPopoverProps) => {
   const [isOpen, setIsOpen] = useState(false);
 
-  const handleOpenChange = useCallback((open: boolean) => setIsOpen(open), []);
+  const handleOpenChange = (open: boolean) => setIsOpen(open);
 
   useEffect(() => {
     if (!isOpen) return;
@@ -65,7 +61,7 @@ const SubtaskPopover = ({ subtasks, completedCount, totalCount }: SubtaskPopover
       <PopoverTrigger asChild>
         <Button variant='outline' size='xsmall' className='h-auto w-auto gap-1.5 rounded-full px-2 py-1.5'>
           <ProgressWheel completed={completedCount} total={totalCount} />
-          <span className='f-12-450 text-GRAY_1000 leading-[11px] tabular-nums'>
+          <span className='f-12-450 text-GRAY_1000 tabular-nums'>
             {completedCount}/{totalCount}
           </span>
         </Button>

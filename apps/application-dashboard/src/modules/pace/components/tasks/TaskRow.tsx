@@ -1,6 +1,6 @@
 'use client';
 
-import { type FC, useCallback, useMemo } from 'react';
+import { useCallback, useMemo } from 'react';
 import { TASK_STATUS, TaskStatusIcon } from '@zamp-platform/chat';
 import { CSS_VARS } from '@zamp-platform/ui';
 import { format } from 'date-fns';
@@ -16,7 +16,7 @@ interface TaskRowProps {
   task: TaskListItem;
 }
 
-const TaskRow: FC<TaskRowProps> = ({ task }) => {
+const TaskRow = ({ task }: TaskRowProps) => {
   const router = useRouter();
 
   const handleRowClick = useCallback(() => {
@@ -35,7 +35,7 @@ const TaskRow: FC<TaskRowProps> = ({ task }) => {
       tabIndex={0}
       onClick={handleRowClick}
       onKeyDown={(e) => {
-        if (e.key === KEYBOARD_KEYS.ENTER || e.key === ' ') handleRowClick();
+        if (e.key === KEYBOARD_KEYS.ENTER || e.key === KEYBOARD_KEYS.SPACE) handleRowClick();
       }}
       className='hover:bg-BG_GRAY_2 flex h-[42px] w-full cursor-pointer items-center'
     >

@@ -1,6 +1,6 @@
 'use client';
 
-import { type FC, useCallback, useState } from 'react';
+import { useCallback, useState } from 'react';
 import { Button, SearchInput, Tabs, TabsList, TabsTrigger } from '@zamp-platform/ui';
 import { Search, X } from 'lucide-react';
 import { TAB_CONFIG } from 'modules/pace/components/tasks/task-listing.constants';
@@ -13,7 +13,7 @@ interface TaskActionBarProps {
   onSearchChange: (value: string) => void;
 }
 
-const TaskActionBar: FC<TaskActionBarProps> = ({ activeTab, onTabChange, searchTerm, onSearchChange }) => {
+const TaskActionBar = ({ activeTab, onTabChange, searchTerm, onSearchChange }: TaskActionBarProps) => {
   const [isSearchOpen, setIsSearchOpen] = useState(false);
 
   const handleToggleSearch = useCallback(() => {
@@ -35,7 +35,7 @@ const TaskActionBar: FC<TaskActionBarProps> = ({ activeTab, onTabChange, searchT
               <TabsTrigger
                 key={tab.id}
                 value={tab.id}
-                className='f-12-500 text-GRAY_700 data-[state=active]:text-GRAY_1000 group relative h-7 gap-1.5 rounded-none border-none bg-transparent px-1 pt-0 pb-[8.5px] shadow-none ring-0 hover:bg-transparent data-[state=active]:bg-transparent data-[state=active]:shadow-none data-[state=active]:ring-0'
+                className='f-12-500 text-GRAY_700 data-[state=active]:text-GRAY_1000 group relative h-7 gap-1.5 rounded-none border-none bg-transparent px-1 pt-0 pb-2 shadow-none ring-0 hover:bg-transparent data-[state=active]:bg-transparent data-[state=active]:shadow-none data-[state=active]:ring-0'
               >
                 <Icon size={14} />
                 <span className='whitespace-nowrap'>{tab.label}</span>
