@@ -2,7 +2,7 @@ import { ShimmerText, useScrollRef } from '@zamp-platform/ui';
 import { cn } from '@zamp-platform/ui/utils';
 import { motion } from 'motion/react';
 import Image from 'next/image';
-import React, { FC, ReactNode, useCallback, useEffect, useRef, useState } from 'react';
+import React, { FC, ReactNode, useEffect, useRef, useState } from 'react';
 
 import PaceAvatar from '@/modules/chatbot/PaceAvatar';
 
@@ -16,10 +16,7 @@ import { StreamingMessage } from './StreamingMessage';
  * Uses message.id if available, otherwise falls back to timestamp with index
  */
 const getMessageKey = (message: ChatMessage, index: number): string => {
-  if (message.id) {
-    return message.id;
-  }
-  return `${message.timestamp || 'msg'}-${index}`;
+  return `${message.timestamp || message.id || 'msg'}-${index}`;
 };
 
 interface MessageContainerProps {
@@ -57,8 +54,6 @@ export const MessageContainer: FC<MessageContainerProps> = ({
   streamingEnabled = true,
   conversationId,
 }) => {
-  const isInitialScrollRef = useRef(true);
-  const scrollContainerRef = useRef<HTMLDivElement>(null);
   const previousConversationIdRef = useRef(conversationId);
   const [animatedLength, setAnimatedLength] = useState(() => {
     const len = messages?.length ?? 0;
@@ -72,15 +67,6 @@ export const MessageContainer: FC<MessageContainerProps> = ({
   const isNewUserMessageRef = useRef(isNewUserMessage);
   isNewUserMessageRef.current = isNewUserMessage;
 
-  const scrollToBottom = useCallback((behavior: ScrollBehavior = 'smooth') => {
-    if (scrollContainerRef.current) {
-      scrollContainerRef.current.scrollTo({
-        top: scrollContainerRef.current.scrollHeight,
-        behavior,
-      });
-    }
-  }, []);
-
   useEffect(() => {
     const prevId = previousConversationIdRef.current;
     previousConversationIdRef.current = conversationId;
@@ -89,14 +75,6 @@ export const MessageContainer: FC<MessageContainerProps> = ({
       setAnimatedLength(messages?.length ?? 0);
     }
   }, [conversationId, messages?.length]);
-
-  useEffect(() => {
-    if (messages?.length > 0) {
-      // Use instant scroll on first load, smooth scroll for subsequent updates
-      const behavior = isInitialScrollRef.current ? 'instant' : 'smooth';
-      scrollToBottom(behavior);
-    }
-  }, [messages?.length, scrollToBottom, children]);
 
   useEffect(() => {
     if (isNewUserMessage) {
@@ -147,7 +125,7 @@ export const MessageContainer: FC<MessageContainerProps> = ({
   }, [isAnalysing, scrollRef]);
 
   return (
-    <div ref={scrollContainerRef} className={cn('flex w-full grow flex-col gap-6 p-4', className)}>
+    <div className={cn('flex w-full grow flex-col gap-6 p-4', className)}>
       {messages?.map((message, index) => (
         <Message
           key={getMessageKey(message, index)}

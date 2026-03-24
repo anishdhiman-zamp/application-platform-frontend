@@ -82,7 +82,12 @@ const ChatContentInner = ({
   }, [chat.messages]);
 
   const lastMessageSenderType = useMemo(() => chat.messages[chat.messages.length - 1]?.sender_type, [chat.messages]);
-  const isLoadingConversation = Boolean(conversationId && chat.isLoadingConversationHistory) || !hasMessages;
+  // Only show loading skeleton when we don't have messages yet. During a
+  // refetch (e.g., after sending a message), isLoadingConversationHistory
+  // may briefly be true — but we already have cached messages so showing
+  // a skeleton would remove them from the DOM and break scroll anchoring.
+  const isLoadingConversation =
+    !hasMessages || Boolean(conversationId && chat.isLoadingConversationHistory && !hasMessages);
   const isInConversation = Boolean(conversationId || chat.conversationId || hasMessages);
 
   const { isDragOver, dropZoneProps } = useFileDragDrop({

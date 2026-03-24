@@ -102,10 +102,6 @@ const ScrollContainer = forwardRef<ScrollContainerRef, ScrollContainerProps>(
     const lastUserScrollLengthRef = useRef<number | null>(null);
     const resizeObserverRef = useRef<ResizeObserver | null>(null);
     const userMsgAnchorRef = useRef<number | null>(null);
-    // When true, updateSpacerHeight is a no-op. Set after a new user message
-    // anchors the spacer at full clientHeight; cleared when the AI response
-    // starts arriving so the spacer can shrink progressively.
-    const spacerLockedRef = useRef(false);
 
     const updateScrollState = useCallback(() => {
       const el = scrollRef.current;
@@ -132,20 +128,40 @@ const ScrollContainer = forwardRef<ScrollContainerRef, ScrollContainerProps>(
     // --- Anchor mode functions ---
 
     const updateSpacerHeight = useCallback(() => {
-      if (spacerLockedRef.current) return;
-
       const container = scrollRef.current;
       const spacer = spacerRef.current;
       const anchorTop = userMsgAnchorRef.current;
 
       if (!container || !spacer || anchorTop === null) return;
 
+      if (container.querySelector('[data-msg-expanded]')) return;
+
       const spacerCurrentHeight = spacer.offsetHeight;
       const contentHeight = container.scrollHeight - spacerCurrentHeight;
       const contentFromAnchor = Math.max(0, contentHeight - anchorTop);
       const newSpacerHeight = Math.max(0, container.clientHeight - contentFromAnchor - USER_MESSAGE_TOP_PADDING);
 
+      console.log('[updateSpacerHeight]', {
+        anchorTop,
+        spacerCurrentHeight,
+        contentHeight,
+        contentFromAnchor,
+        newSpacerHeight,
+        scrollTop: container.scrollTop,
+        scrollHeight: container.scrollHeight,
+        clientHeight: container.clientHeight,
+        caller: new Error().stack?.split('\n')[2]?.trim(),
+      });
+
       spacer.style.height = `${newSpacerHeight}px`;
+
+      if (newSpacerHeight > spacerCurrentHeight) {
+        const targetScrollTop = anchorTop - USER_MESSAGE_TOP_PADDING;
+
+        if (Math.abs(container.scrollTop - targetScrollTop) < container.clientHeight * 0.5) {
+          container.scrollTop = targetScrollTop;
+        }
+      }
     }, []);
 
     const resetSpacer = useCallback(() => {
@@ -174,16 +190,18 @@ const ScrollContainer = forwardRef<ScrollContainerRef, ScrollContainerProps>(
 
         if (!container) return;
 
-        if (spacer) {
-          spacer.style.minHeight = '0px';
-          spacer.style.height = `${container.clientHeight}px`;
-        }
-
+        // Message positions are unaffected by spacer height (spacer is after
+        // content in the DOM), so we can query positions with any spacer value.
         const userMessages = container.querySelectorAll<HTMLElement>('[data-sender-type="USER"]');
         const lastUserMessage = userMessages[userMessages.length - 1];
 
         if (!lastUserMessage) {
           userMsgAnchorRef.current = null;
+
+          if (spacer) {
+            spacer.style.minHeight = '0px';
+            spacer.style.height = '0px';
+          }
           container.scrollTo({ top: container.scrollHeight, behavior: isInitial ? 'instant' : 'smooth' });
         } else {
           const containerRect = container.getBoundingClientRect();
@@ -191,38 +209,43 @@ const ScrollContainer = forwardRef<ScrollContainerRef, ScrollContainerProps>(
           const anchorTop = msgRect.top - containerRect.top + container.scrollTop;
 
           userMsgAnchorRef.current = anchorTop;
+
+          const spacerCurrentHeight = spacer?.offsetHeight ?? 0;
+          const contentHeight = container.scrollHeight - spacerCurrentHeight;
+          const contentFromAnchor = Math.max(0, contentHeight - anchorTop);
+          const newSpacerHeight = Math.max(0, container.clientHeight - contentFromAnchor - USER_MESSAGE_TOP_PADDING);
+
+          console.log('[scrollToLastUserMessage]', {
+            isInitial,
+            anchorTop,
+            spacerCurrentHeight,
+            contentHeight,
+            contentFromAnchor,
+            newSpacerHeight,
+            scrollTarget: anchorTop - USER_MESSAGE_TOP_PADDING,
+            scrollHeight: container.scrollHeight,
+            clientHeight: container.clientHeight,
+            maxScrollTop: contentHeight + newSpacerHeight - container.clientHeight,
+          });
+
+          if (spacer) {
+            spacer.style.minHeight = '0px';
+            spacer.style.height = `${newSpacerHeight}px`;
+          }
+
           container.scrollTo({
             top: anchorTop - USER_MESSAGE_TOP_PADDING,
             behavior: isInitial ? 'instant' : 'smooth',
           });
+
+          console.log('[scrollToLastUserMessage] after scrollTo, scrollTop =', container.scrollTop);
         }
 
-        if (isInitial) {
-          updateSpacerHeight();
-        } else {
-          // Lock the spacer at full clientHeight for new user messages
-          spacerLockedRef.current = true;
-        }
-
-        // Notify Message components when the scroll finishes so they can
-        // start their entrance animation.
-        if (isInitial) {
-          requestAnimationFrame(dispatchScrollEnd);
-        } else {
-          requestAnimationFrame(() => {
-            const handleScrollEnd = () => {
-              container.removeEventListener('scrollend', handleScrollEnd);
-              dispatchScrollEnd();
-            };
-            container.addEventListener('scrollend', handleScrollEnd, { once: true });
-            scrollEndTimerRef.current = setTimeout(() => {
-              container.removeEventListener('scrollend', handleScrollEnd);
-              dispatchScrollEnd();
-            }, 1500);
-          });
-        }
+        // Dispatch chatScrollEnd in the next frame so Message components
+        // can start their entrance animation.
+        requestAnimationFrame(dispatchScrollEnd);
       },
-      [updateSpacerHeight, dispatchScrollEnd],
+      [dispatchScrollEnd],
     );
 
     // --- Common functions ---
@@ -288,13 +311,27 @@ const ScrollContainer = forwardRef<ScrollContainerRef, ScrollContainerProps>(
 
     // --- Scroll trigger effect (handles both anchor and default modes) ---
     useEffect(() => {
+      console.log('[scrollTriggerEffect]', {
+        scrollTrigger,
+        enableAnchorScroll,
+        isLoading,
+        lastMessageSenderType,
+        isInitial: isInitialScrollRef.current,
+        lastUserScrollLength: lastUserScrollLengthRef.current,
+      });
+
       if (scrollTrigger === undefined) return;
 
       const el = scrollRef.current;
 
       if (!el) return;
 
-      if (enableAnchorScroll && !isLoading && scrollTrigger > 0) {
+      if (enableAnchorScroll) {
+        if (isLoading || scrollTrigger <= 0) {
+          console.log('[scrollTriggerEffect] anchor mode — skipped (isLoading or no trigger)');
+          return;
+        }
+
         const isInitial = isInitialScrollRef.current;
 
         if (isInitial) {
@@ -316,7 +353,6 @@ const ScrollContainer = forwardRef<ScrollContainerRef, ScrollContainerProps>(
             });
           }
         } else {
-          spacerLockedRef.current = false;
           lastUserScrollLengthRef.current = 0;
           requestAnimationFrame(() => {
             updateSpacerHeight();
@@ -327,7 +363,8 @@ const ScrollContainer = forwardRef<ScrollContainerRef, ScrollContainerProps>(
         return;
       }
 
-      // Default mode: scroll to bottom
+      // Default mode (non-anchor): scroll to bottom
+      console.log('[scrollTriggerEffect] DEFAULT MODE — scrolling to bottom!');
       const behavior: ScrollBehavior = isInitialScrollRef.current ? 'instant' : 'smooth';
 
       isAutoScrollActiveRef.current = true;
@@ -357,7 +394,6 @@ const ScrollContainer = forwardRef<ScrollContainerRef, ScrollContainerProps>(
         isInitialScrollRef.current = true;
         lastUserScrollLengthRef.current = 0;
         userMsgAnchorRef.current = null;
-        spacerLockedRef.current = false;
         resetSpacer();
       }
       previousIsLoadingRef.current = isLoading;

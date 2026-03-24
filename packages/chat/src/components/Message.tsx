@@ -3,8 +3,9 @@
 import { useScrollRef } from '@zamp-platform/ui';
 import { cn } from '@zamp-platform/ui/utils';
 import { formatChatTimestamp, formatChatTimestampTooltip, formatTimestampToUTC } from '@zamp-platform/utils';
+import { ChevronDown, ChevronUp } from 'lucide-react';
 import { motion } from 'motion/react';
-import React, { FC, ReactNode, useEffect, useMemo, useRef, useState } from 'react';
+import React, { FC, ReactNode, useCallback, useEffect, useMemo, useRef, useState } from 'react';
 
 import { defaultFnType } from '@/types/commonTypes';
 
@@ -55,10 +56,33 @@ export const Message: FC<MessageProps> = ({
   organizationId,
   streamingEnabled = true,
 }) => {
+  const USER_MESSAGE_MAX_HEIGHT = 300;
+
   const scrollRef = useScrollRef();
   const cleanupRef = useRef<defaultFnType | null>(null);
   const [animationReady, setAnimationReady] = useState(false);
+  const [isExpanded, setIsExpanded] = useState(false);
+  const [isOverflowing, setIsOverflowing] = useState(false);
+  const contentRef = useRef<HTMLDivElement>(null);
   const isUserMessage = message.sender_type === SenderType.USER;
+
+  useEffect(() => {
+    const el = contentRef.current;
+
+    if (!el || !isUserMessage) return;
+
+    const observer = new ResizeObserver(() => {
+      setIsOverflowing(el.scrollHeight > USER_MESSAGE_MAX_HEIGHT);
+    });
+
+    observer.observe(el);
+
+    return () => observer.disconnect();
+  }, [isUserMessage]);
+
+  const toggleExpanded = useCallback(() => {
+    setIsExpanded((prev) => !prev);
+  }, []);
   const shouldAlignRight = alignUserRight && isUserMessage;
   const sharedClassName = cn('group space-y-3', shouldAlignRight && 'flex flex-col items-end', containerClassName);
 
@@ -120,23 +144,46 @@ export const Message: FC<MessageProps> = ({
     <>
       {message.sender_type === SenderType.ASSISTANT && assistantAvatar}
 
-      <BlockRenderer
-        message={{ block: message?.message_content?.elements ?? [] }}
-        onAction={onAction}
-        className={cn(
-          'max-w-[620px]',
-          shouldAlignRight && 'bg-GRAY_100 max-w-[80%] rounded-[10px] px-4 py-3',
-          blockRendererClassName,
+      <div className={cn(isUserMessage && 'relative', 'max-w-[620px]', shouldAlignRight && 'max-w-[80%]')}>
+        <div
+          ref={contentRef}
+          className={cn(
+            shouldAlignRight && 'bg-GRAY_100 rounded-[10px] px-4 py-3',
+            isUserMessage && !isExpanded && 'overflow-hidden',
+          )}
+          style={isUserMessage && !isExpanded ? { maxHeight: USER_MESSAGE_MAX_HEIGHT } : undefined}
+        >
+          <BlockRenderer
+            message={{ block: message?.message_content?.elements ?? [] }}
+            onAction={onAction}
+            className={cn(blockRendererClassName)}
+            conversationId={conversationId || message?.conversation_id}
+            messageId={messageId || message?.id}
+            isLoading={isLoading}
+          />
+        </div>
+        {isUserMessage && isOverflowing && !isExpanded && (
+          <div className='pointer-events-none absolute right-0 bottom-0 left-0 h-16 bg-linear-to-t from-white to-transparent dark:from-gray-900' />
         )}
-        conversationId={conversationId || message?.conversation_id}
-        messageId={messageId || message?.id}
-        isLoading={isLoading}
-      />
+        {isUserMessage && isOverflowing && (
+          <button
+            onClick={toggleExpanded}
+            className='text-GRAY_700 hover:text-GRAY_1000 mt-1 flex items-center gap-0.5 text-xs font-medium transition-colors'
+          >
+            {isExpanded ? (
+              <>
+                See less <ChevronUp size={14} />
+              </>
+            ) : (
+              <>
+                See more <ChevronDown size={14} />
+              </>
+            )}
+          </button>
+        )}
+      </div>
       {streamingEnabled && (
-        <motion.div
-          initial={isLastMessage ? { opacity: 0 } : false}
-          animate={{ opacity: 1 }}
-          transition={{ duration: 0.3, ease: 'easeOut' }}
+        <div
           className={cn(
             'flex items-center',
             isLastMessage ? 'visible' : 'invisible group-hover:visible',
@@ -155,7 +202,7 @@ export const Message: FC<MessageProps> = ({
               organizationId={organizationId}
             />
           )}
-        </motion.div>
+        </div>
       )}
     </>
   );
@@ -164,6 +211,7 @@ export const Message: FC<MessageProps> = ({
     return (
       <motion.div
         data-sender-type={message.sender_type}
+        data-msg-expanded={isExpanded || undefined}
         className={sharedClassName}
         initial={shouldAnimate ? { opacity: 0, y: 20 } : false}
         animate={!shouldAnimate || animationReady ? { opacity: 1, y: 0 } : { opacity: 0, y: 20 }}
