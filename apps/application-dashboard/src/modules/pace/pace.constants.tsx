@@ -1,5 +1,5 @@
 import { FolderOpenIcon, HomeIcon, SettingsIcon } from '@zamp-platform/ui';
-import { Link2, UserPen } from 'lucide-react';
+import { Activity, Link2, UserPen } from 'lucide-react';
 import { PaceNavbarItemId, PaceNavbarItemSchema, PaceSettingsTabSchema } from 'modules/pace/pace.types';
 import Users02 from '@/assets/Icons/Users02';
 import { ROUTES_PATH } from '@/constants/routeConfig';
@@ -21,6 +21,11 @@ export const PACE_NAVBAR_ITEMS: PaceNavbarItemSchema[] = [
     id: PaceNavbarItemId.HOME,
     iconComponent: <HomeIcon size={16} />,
     path: ROUTES_PATH.CHAT,
+  },
+  {
+    id: PaceNavbarItemId.TASKS,
+    iconComponent: <Activity size={16} />,
+    path: ROUTES_PATH.CHAT_TASKS,
   },
   {
     id: PaceNavbarItemId.FILES,
