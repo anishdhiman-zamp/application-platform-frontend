@@ -20,7 +20,12 @@ interface SearchInputProps {
   size?: SizeType;
   className?: string;
   wrapperClassName?: string;
+  autoFocus?: boolean;
+  allowClear?: boolean;
   'aria-label'?: string;
+  showSearchIcon?: boolean;
+  clearButtonClassName?: string;
+  testId?: string;
 }
 
 const SearchInput = ({
@@ -32,7 +37,12 @@ const SearchInput = ({
   size = 'small',
   className,
   wrapperClassName,
+  autoFocus,
+  allowClear = true,
   'aria-label': ariaLabel,
+  showSearchIcon = false,
+  clearButtonClassName,
+  testId,
 }: SearchInputProps) => {
   const isControlled = controlledValue !== undefined;
   const [internalValue, setInternalValue] = useState('');
@@ -78,22 +88,28 @@ const SearchInput = ({
       <Input
         placeholder={placeholder}
         value={inputValue}
+        icon={showSearchIcon ? <Search className='text-GRAY_500 size-3.5' /> : undefined}
         onChange={handleChange}
         className={cn('border-GRAY_400 focus:border-GRAY_600 pr-8 focus:ring-3', className)}
         size={size}
         iconPosition='leading'
+        autoFocus={autoFocus}
         aria-label={ariaLabel ?? placeholder}
+        data-testid={testId}
       />
-      {inputValue && (
+      {allowClear && inputValue && (
         <Button
           type='button'
           variant='ghost'
           size='icon'
-          className='absolute top-1/2 right-1 h-7 w-7 -translate-y-1/2 hover:bg-transparent'
+          className={cn(
+            'text-GRAY_700 absolute top-1/2 right-1 h-7 w-7 -translate-y-1/2 hover:bg-transparent',
+            clearButtonClassName,
+          )}
           onClick={handleClear}
           aria-label='Clear search'
         >
-          <X size={16} className='text-GRAY_700' />
+          <X size={16} />
         </Button>
       )}
     </div>

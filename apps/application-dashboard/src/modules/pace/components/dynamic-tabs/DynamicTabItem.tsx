@@ -7,12 +7,14 @@ import { X } from 'lucide-react';
 import { TAB_CONTEXT_MENU_ACTION_IDS } from 'modules/pace/components/dynamic-tabs/dynamic-tabs.constants';
 import { getDefaultIcon } from 'modules/pace/components/dynamic-tabs/dynamic-tabs.utils';
 import DynamicTabContextMenu from 'modules/pace/components/dynamic-tabs/DynamicTabContextMenu';
-import { isSameBasePath, preserveSidebarParam } from 'modules/pace/components/dynamic-tabs/tab-registry';
+import { isSameBasePath } from 'modules/pace/components/dynamic-tabs/tab-registry';
 import { useIsCompact } from 'modules/pace/components/dynamic-tabs/useIsCompact';
+import { preserveSidebarParam } from 'modules/pace/pace.utils';
 import { useRouter } from 'next/navigation';
 import TooltipV2 from '@/components/common/TooltipV2';
+import { handleActivationKeyDown } from '@/constants/shortcuts';
 import { usePaceContext } from '@/modules/pace/pace.context';
-import { DynamicTab } from '@/modules/pace/pace.types';
+import { CHAT_SIDEBAR_STATE, DynamicTab } from '@/modules/pace/pace.types';
 import { defaultFnType, SIDE_OPTIONS } from '@/types/commonTypes';
 
 export interface DynamicTabItemProps {
@@ -42,7 +44,7 @@ const DynamicTabItem = ({
   onCloseAll,
   renderIcon,
 }: DynamicTabItemProps) => {
-  const { setActiveTabId } = usePaceContext();
+  const { setActiveTabId, chatSidebarState, setChatSidebarState } = usePaceContext();
   const router = useRouter();
   const containerRef = useRef<HTMLDivElement>(null);
   const isCompact = useIsCompact(containerRef, COMPACT_THRESHOLD_PX);
@@ -51,13 +53,18 @@ const DynamicTabItem = ({
     if (isActive) return;
 
     const tabPath = preserveSidebarParam(tab.path);
+    const willChangeBase = !isSameBasePath(tabPath);
+
+    if (chatSidebarState === CHAT_SIDEBAR_STATE.EXPANDED && !willChangeBase) {
+      setChatSidebarState(CHAT_SIDEBAR_STATE.COLLAPSED);
+    }
 
     setActiveTabId(tab.id);
 
-    if (isSameBasePath(tabPath)) {
-      window.history.pushState(null, '', tabPath);
-    } else {
+    if (willChangeBase) {
       router.push(tabPath);
+    } else {
+      window.history.pushState(null, '', tabPath);
     }
   };
 
@@ -105,7 +112,7 @@ const DynamicTabItem = ({
             onClick={handleClick}
             style={{ minWidth: 0 }}
             className={cn(
-              'group text-GRAY_700 hover:text-GRAY_1000 hover:bg-GRAY_200 relative flex h-[30px] w-full cursor-pointer items-center justify-start gap-x-2 rounded-[8px] border-[0.75px] border-transparent p-1.5 transition-all duration-150 ease-in-out',
+              'group text-GRAY_700 hover:text-GRAY_1000 hover:bg-GRAY_200 relative flex h-[30px] w-full cursor-pointer items-center justify-start gap-x-2 rounded-[8px] border-[0.75px] border-transparent p-1.5 transition-colors duration-150 ease-in-out',
               isActive &&
                 'border-GRAY_500 shadow-tab-shadow text-GRAY_1000 bg-BG_WHITE hover:bg-BG_WHITE border-[0.75px]',
             )}
@@ -113,30 +120,32 @@ const DynamicTabItem = ({
             {isCompact ? (
               <span className='relative flex size-4 shrink-0 items-center justify-center'>
                 <span className='flex items-center justify-center group-hover:hidden'>{icon}</span>
-                <Button
+                <span
                   id='dynamic-tab-close-button'
-                  variant='ghost'
-                  size='xxsmall'
+                  role='button'
+                  tabIndex={0}
                   onClick={(e) => onClose(e, tab.id)}
-                  className='absolute inset-0 hidden h-4 w-4 items-center justify-center p-0 group-hover:flex'
+                  onKeyDown={(e) => handleActivationKeyDown(e, () => onClose(e as unknown as React.MouseEvent, tab.id))}
+                  className='hover:bg-accent absolute inset-0 hidden h-4 w-4 cursor-pointer items-center justify-center rounded-sm p-0 group-hover:flex'
                 >
                   <X size={12} className='text-GRAY_700' />
-                </Button>
+                </span>
               </span>
             ) : (
               icon
             )}
             <span className='f-13-500 min-w-0 flex-1 truncate text-left'>{tab.name}</span>
             {!isCompact && (
-              <Button
+              <span
                 id='dynamic-tab-close-button'
-                variant='ghost'
-                size='xxsmall'
+                role='button'
+                tabIndex={0}
                 onClick={(e) => onClose(e, tab.id)}
-                className='ml-0.5 h-4 w-4 shrink-0 p-0 opacity-0 group-hover:opacity-100'
+                onKeyDown={(e) => handleActivationKeyDown(e, () => onClose(e as unknown as React.MouseEvent, tab.id))}
+                className='hover:bg-accent ml-0.5 flex h-4 w-4 cursor-pointer items-center justify-center rounded-sm p-0 opacity-0 group-hover:opacity-100'
               >
                 <X size={12} className='text-GRAY_700' />
-              </Button>
+              </span>
             )}
           </Button>
         </DynamicTabContextMenu>

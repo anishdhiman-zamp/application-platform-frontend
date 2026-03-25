@@ -1,7 +1,8 @@
 import '@testing-library/jest-dom';
 import { createRef } from 'react';
 import { render, screen } from '@testing-library/react';
-import { ScrollContainer, type ScrollContainerRef } from '../ui/scroll-container';
+import { ScrollContainer } from '../ui/scroll-container';
+import type { ScrollContainerRef } from '../ui/scroll-container';
 
 describe('ScrollContainer - Rendering', () => {
   it('renders children', () => {

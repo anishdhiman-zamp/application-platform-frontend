@@ -11,6 +11,7 @@ import {
   type FlatNode,
   type SortDirection,
   type SortOption,
+  type SourceItemInfo,
   type TreeNode,
 } from '@/modules/pace/components/files/file-tree.types';
 import {
@@ -418,17 +419,26 @@ export function getParentPath(path: string): string {
 /**
  * Generates a duplicate name by appending _copy before the extension
  */
-export function generateDuplicateName(name: string): string {
+export function generateDuplicateName(name: string, existingNames: string[] = []): string {
   const lastDotIndex = name.lastIndexOf('.');
+  const hasExtension = lastDotIndex !== -1;
+  const baseName = hasExtension ? name.slice(0, lastDotIndex) : name;
+  const extension = hasExtension ? name.slice(lastDotIndex) : '';
 
-  if (lastDotIndex === -1) {
-    return `${name}_copy`;
+  let candidate = `${baseName}_copy${extension}`;
+
+  if (!existingNames.includes(candidate)) return candidate;
+
+  let counter = 2;
+
+  candidate = `${baseName}_copy_${counter}${extension}`;
+
+  while (existingNames.includes(candidate)) {
+    counter++;
+    candidate = `${baseName}_copy_${counter}${extension}`;
   }
 
-  const baseName = name.slice(0, lastDotIndex);
-  const extension = name.slice(lastDotIndex);
-
-  return `${baseName}_copy${extension}`;
+  return candidate;
 }
 
 /**
@@ -441,11 +451,11 @@ export function generateKeepBothName(name: string, existingNames: string[]): str
   const extension = hasExtension ? name.slice(lastDotIndex) : '';
 
   let counter = 2;
-  let newName = `${baseName} ${counter}${extension}`;
+  let newName = `${baseName}_${counter}${extension}`;
 
   while (existingNames.includes(newName)) {
     counter++;
-    newName = `${baseName} ${counter}${extension}`;
+    newName = `${baseName}_${counter}${extension}`;
   }
 
   return newName;
@@ -502,8 +512,8 @@ export function isChildOfProtectedFolder(path: string, orgSlug: string, username
 }
 
 export interface FileActions {
-  copyItem: (sourcePath: string, destinationPath: string) => Promise<void>;
-  moveItem: (sourcePath: string, destinationPath: string) => Promise<void>;
+  copyItem: (sourcePath: string, destinationPath: string, sourceItem?: SourceItemInfo) => Promise<void>;
+  moveItem: (sourcePath: string, destinationPath: string, sourceItem?: SourceItemInfo) => Promise<void>;
   deleteItem: (path: string) => Promise<void>;
 }
 
@@ -527,16 +537,16 @@ export async function executeConflictResolution(
   const { copyItem, moveItem, deleteItem } = actions;
   const { clearClipboard, onFileMoved } = callbacks;
 
+  const sourceInfo: SourceItemInfo = { name: sourceName, type: sourceType, size: sourceSize, owner: sourceOwner };
+
   if (resolution === CONFLICT_RESOLUTION.KEEP_BOTH) {
     const newName = generateKeepBothName(sourceName, siblingNames);
     const parentPath = destinationPath.includes('/') ? destinationPath.slice(0, destinationPath.lastIndexOf('/')) : '';
     const newDestinationPath = parentPath ? `${parentPath}/${newName}` : newName;
 
     if (operation === CLIPBOARD_OPERATION.COPY) {
-      await copyItem(sourcePath, newDestinationPath);
+      await copyItem(sourcePath, newDestinationPath, { ...sourceInfo, name: newName });
     } else {
-      await moveItem(sourcePath, newDestinationPath);
-
       if (operation === CLIPBOARD_OPERATION.CUT) {
         clearClipboard?.();
       }
@@ -551,15 +561,14 @@ export async function executeConflictResolution(
       };
 
       onFileMoved?.(sourcePath, newFile);
+      await moveItem(sourcePath, newDestinationPath, { ...sourceInfo, name: newName });
     }
   } else if (resolution === CONFLICT_RESOLUTION.REPLACE) {
     await deleteItem(destinationPath);
 
     if (operation === CLIPBOARD_OPERATION.COPY) {
-      await copyItem(sourcePath, destinationPath);
+      await copyItem(sourcePath, destinationPath, sourceInfo);
     } else {
-      await moveItem(sourcePath, destinationPath);
-
       if (operation === CLIPBOARD_OPERATION.CUT) {
         clearClipboard?.();
       }
@@ -574,6 +583,7 @@ export async function executeConflictResolution(
       };
 
       onFileMoved?.(sourcePath, newFile);
+      await moveItem(sourcePath, destinationPath, sourceInfo);
     }
   }
 }
@@ -647,12 +657,11 @@ export async function executeMoveOrCopy({
   onFileMoved,
 }: ExecuteMoveOrCopyParams): Promise<void> {
   const { copyItem, moveItem } = actions;
+  const sourceInfo: SourceItemInfo = { name: sourceName, type: sourceType, size: sourceSize, owner: sourceOwner };
 
   if (isCopy) {
-    await copyItem(sourcePath, destinationPath);
+    await copyItem(sourcePath, destinationPath, sourceInfo);
   } else {
-    await moveItem(sourcePath, destinationPath);
-
     const newFile: FileItem = {
       path: destinationPath,
       name: sourceName,
@@ -663,6 +672,7 @@ export async function executeMoveOrCopy({
     };
 
     onFileMoved?.(sourcePath, newFile);
+    await moveItem(sourcePath, destinationPath, sourceInfo);
   }
 }
 

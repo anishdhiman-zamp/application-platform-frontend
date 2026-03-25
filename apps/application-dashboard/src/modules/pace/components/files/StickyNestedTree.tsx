@@ -25,6 +25,7 @@ interface StickyNestedTreeProps {
   onTriggerFolderUpload: (targetPath: string) => void;
   onDragOverFolderChange: (path: string | null) => void;
   isSearchActive: boolean;
+  isLoadingChildren: boolean;
 }
 
 interface RenderContext {
@@ -45,6 +46,7 @@ interface RenderContext {
   onTriggerFolderUpload: (targetPath: string) => void;
   onDragOverFolderChange: (path: string | null) => void;
   isSearchActive: boolean;
+  isLoadingChildren: boolean;
 }
 
 function getSiblingNames(nodes: TreeNode[]): string[] {
@@ -173,6 +175,7 @@ const StickyNestedTree = memo(function StickyNestedTree(props: StickyNestedTreeP
     onTriggerFolderUpload,
     onDragOverFolderChange,
     isSearchActive,
+    isLoadingChildren,
   } = props;
 
   const descendantCounts = useMemo(() => buildDescendantCountMap(treeData, expandedPaths), [treeData, expandedPaths]);
@@ -196,6 +199,7 @@ const StickyNestedTree = memo(function StickyNestedTree(props: StickyNestedTreeP
       onTriggerFolderUpload,
       onDragOverFolderChange,
       isSearchActive,
+      isLoadingChildren,
     }),
     [
       expandedPaths,
@@ -215,6 +219,7 @@ const StickyNestedTree = memo(function StickyNestedTree(props: StickyNestedTreeP
       onTriggerFolderUpload,
       onDragOverFolderChange,
       isSearchActive,
+      isLoadingChildren,
     ],
   );
 
