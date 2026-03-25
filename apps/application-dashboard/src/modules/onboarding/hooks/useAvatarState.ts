@@ -73,7 +73,7 @@ export const useAvatarState = ({ initialValue, generateSvg, uploadType, defaultN
     }
 
     return { type: avatar.type, value: avatar.value || null };
-  }, [avatar, pendingFile, getUploadUrl, uploadType]);
+  }, [avatar, pendingFile, getUploadUrl, uploadType, defaultName]);
 
   return {
     display,
