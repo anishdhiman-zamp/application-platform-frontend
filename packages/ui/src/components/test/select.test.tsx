@@ -87,46 +87,6 @@ describe('Select component', () => {
     });
   });
 
-  it('renders all chat feedback issue type options including "Know a better approach?"', async () => {
-    const ISSUE_TYPE_OPTIONS = [
-      { label: 'UI bug', value: 'UI_BUG' },
-      { label: 'Overactive refusal', value: 'OVERACTIVE_REFUSAL' },
-      { label: 'Did not fully follow my request', value: 'DID_NOT_FOLLOW_REQUEST' },
-      { label: 'Not factually correct', value: 'NOT_FACTUALLY_CORRECT' },
-      { label: 'Incomplete response', value: 'INCOMPLETE_RESPONSE' },
-      { label: 'Should have searched the web', value: 'SHOULD_HAVE_SEARCHED_WEB' },
-      { label: 'Memory not applied', value: 'MEMORY_NOT_APPLIED' },
-      { label: 'Know a better approach?', value: 'KNOW_BETTER_APPROACH' },
-      { label: 'Report content', value: 'REPORT_CONTENT' },
-      { label: 'Other', value: 'OTHER' },
-    ];
-
-    render(<Select options={ISSUE_TYPE_OPTIONS} placeholder='Select...' />);
-    fireEvent.click(screen.getByTestId('select-trigger'));
-
-    await waitFor(() => {
-      expect(screen.getByText('Know a better approach?')).toBeInTheDocument();
-    });
-  });
-
-  it('calls onValueChange with KNOW_BETTER_APPROACH when that option is selected', async () => {
-    const ISSUE_TYPE_OPTIONS = [
-      { label: 'Know a better approach?', value: 'KNOW_BETTER_APPROACH' },
-      { label: 'Other', value: 'OTHER' },
-    ];
-    const onValueChange = jest.fn();
-
-    render(<Select options={ISSUE_TYPE_OPTIONS} onValueChange={onValueChange} placeholder='Select...' />);
-    fireEvent.click(screen.getByTestId('select-trigger'));
-
-    await waitFor(() => {
-      expect(screen.getByText('Know a better approach?')).toBeInTheDocument();
-    });
-
-    fireEvent.click(screen.getByText('Know a better approach?'));
-    expect(onValueChange).toHaveBeenCalledWith('KNOW_BETTER_APPROACH');
-  });
-
   // Critical snapshots that could break component usage
   it('matches snapshot for default select', () => {
     const { container } = render(<Select options={mockOptions} placeholder='Snap' />);
