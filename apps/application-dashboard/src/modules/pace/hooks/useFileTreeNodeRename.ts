@@ -51,15 +51,18 @@ export const useFileTreeNodeRename = ({
   onFileMoved,
 }: UseFileTreeNodeRenameProps): UseFileTreeNodeRenameReturn => {
   const isFile = node.type === FILE_TYPE.FILE;
-  const { baseName, extension } = useMemo(() => getFileNameParts(node.name, isFile), [node.name, isFile]);
 
+  // State
+  const { baseName, extension } = useMemo(() => getFileNameParts(node.name, isFile), [node.name, isFile]);
   const [isRenaming, setIsRenaming] = useState(false);
   const [renameValue, setRenameValue] = useState(baseName);
   const renameInputRef = useRef<HTMLInputElement | null>(null);
 
+  // Hooks
   const { renameItem } = useFileActions();
   const { updateTab, updateTabsForFolderMove } = useDynamicTabs({ type: TAB_TYPE.FILE });
 
+  // Derived State
   const fullNewName = useMemo(() => {
     const trimmed = renameValue.trim();
 
@@ -88,7 +91,6 @@ export const useFileTreeNodeRename = ({
     }
 
     try {
-      await renameItem(node.path, fullNewName);
       setIsRenaming(false);
 
       const parentPath = getParentPath(node.path);
@@ -109,6 +111,12 @@ export const useFileTreeNodeRename = ({
       }
 
       onFileMoved?.(node.path, newFile);
+      await renameItem(node.path, fullNewName, {
+        name: node.name,
+        type: node.type,
+        size: node.size,
+        owner: node.owner,
+      });
     } catch (error) {
       captureException(error);
       toast.error(FILE_TOAST_MESSAGES.FAILED_TO_RENAME);

@@ -1,16 +1,17 @@
 'use client';
 
 import { createContext, type ReactNode, useContext } from 'react';
+import type { SourceItemInfo } from '@/modules/pace/components/files/file-tree.types';
 import { useFileActions } from '@/modules/pace/hooks/useFileActions';
 
 interface UseFileActionsReturn {
   createFile: (name: string, parentPath: string) => Promise<void>;
   createFolder: (name: string, parentPath: string) => Promise<void>;
   deleteItem: (path: string) => Promise<void>;
-  renameItem: (oldPath: string, newName: string) => Promise<void>;
-  moveItem: (sourcePath: string, destinationPath: string) => Promise<void>;
-  copyItem: (sourcePath: string, destinationPath: string) => Promise<void>;
-  duplicateItem: (path: string) => Promise<void>;
+  renameItem: (oldPath: string, newName: string, sourceItem?: SourceItemInfo) => Promise<void>;
+  moveItem: (sourcePath: string, destinationPath: string, sourceItem?: SourceItemInfo) => Promise<void>;
+  copyItem: (sourcePath: string, destinationPath: string, sourceItem?: SourceItemInfo) => Promise<void>;
+  duplicateItem: (path: string, sourceItem?: SourceItemInfo, siblingNames?: string[]) => Promise<void>;
   isCreating: boolean;
   isDeleting: boolean;
   isRenaming: boolean;

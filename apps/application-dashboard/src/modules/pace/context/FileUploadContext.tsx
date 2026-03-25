@@ -1,6 +1,6 @@
 'use client';
 
-import { createContext, type ReactNode, useContext, useMemo } from 'react';
+import { createContext, type ReactNode, useCallback, useContext, useMemo, useRef } from 'react';
 import type { FileItem, FolderUploadProgress, UploadProgress } from '@/modules/pace/components/files/file-tree.types';
 import { useFileUpload } from '@/modules/pace/hooks/useFileUpload';
 import { defaultFnType } from '@/types/commonTypes';
@@ -35,6 +35,7 @@ interface FileUploadContextValue {
   uploadingPath: string | null;
   uploadingItems: FileItem[];
   uploadingPaths: Set<string>;
+  registerLoadFolder: (fn: (path: string) => Promise<boolean>) => void;
 }
 
 const FileUploadContext = createContext<FileUploadContextValue | null>(null);
@@ -44,8 +45,20 @@ interface FileUploadProviderProps {
 }
 
 export const FileUploadProvider = ({ children }: FileUploadProviderProps) => {
+  const loadFolderRef = useRef<((path: string) => Promise<boolean>) | null>(null);
+
+  const onUploadComplete = useCallback(async (targetPath: string) => {
+    if (loadFolderRef.current) {
+      await loadFolderRef.current(targetPath);
+    }
+  }, []);
+
+  const registerLoadFolder = useCallback((fn: (path: string) => Promise<boolean>) => {
+    loadFolderRef.current = fn;
+  }, []);
+
   const { uploadState, uploadFile, uploadFiles, uploadFolder, cancelUpload, clearUploadingItems, isUploading } =
-    useFileUpload();
+    useFileUpload({ onUploadComplete });
 
   const uploadingPaths = useMemo(
     () =>
@@ -67,6 +80,7 @@ export const FileUploadProvider = ({ children }: FileUploadProviderProps) => {
       uploadingPath: uploadState.uploadingPath,
       uploadingItems: uploadState.uploadingItems,
       uploadingPaths,
+      registerLoadFolder,
     }),
     [
       uploadState,
@@ -77,6 +91,7 @@ export const FileUploadProvider = ({ children }: FileUploadProviderProps) => {
       clearUploadingItems,
       isUploading,
       uploadingPaths,
+      registerLoadFolder,
     ],
   );
 

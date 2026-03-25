@@ -63,6 +63,11 @@ export const CONTEXT_MENU_ACTION_IDS = {
   DELETE: 'delete',
 } as const;
 
+export const SEARCH_ALLOWED_ACTIONS: Set<string> = new Set([
+  CONTEXT_MENU_ACTION_IDS.OPEN_IN_TAB,
+  CONTEXT_MENU_ACTION_IDS.REFERENCE_IN_CHAT,
+]);
+
 export const FILE_VIEWER_HEADER_ACTION_IDS = {
   DOWNLOAD: 'download',
   DELETE: 'delete',
