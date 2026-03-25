@@ -59,7 +59,7 @@ const ChatConversationContent: FC<ChatConversationContentProps> = ({
   currentUserName,
   username,
 }) => {
-  const { pendingFileReference, clearPendingFileReference } = usePaceContext();
+  const { pendingFileReference, clearPendingFileReference, openLiveStreamingPanel } = usePaceContext();
   const dispatch = useAppDispatch();
 
   const taskStatusContainerRef = useRef<HTMLDivElement>(null);
@@ -92,6 +92,14 @@ const ChatConversationContent: FC<ChatConversationContentProps> = ({
     dispatch(baseApi.util.invalidateTags([APITags.GET_CONVERSATION_HISTORY]));
   }, [dispatch]);
 
+  const handleWatchStream = useCallback(() => {
+    const activeConversationId = conversationId ?? chat.conversationId;
+
+    if (activeConversationId) {
+      openLiveStreamingPanel({ conversationId: activeConversationId });
+    }
+  }, [conversationId, chat.conversationId, openLiveStreamingPanel]);
+
   const { isDragOver, dropZoneProps } = useFileDragDrop({
     onFileDrop: (files) => fileDropHandlerRef.current?.(files),
     disabled: chat.isStreaming || chat.isCreatingConversationV2,
@@ -116,7 +124,7 @@ const ChatConversationContent: FC<ChatConversationContentProps> = ({
 
   if (showHomeView) {
     return (
-      <ChatActionsProvider onFileOpen={onFileOpen} onTaskOpen={onTaskOpen}>
+      <ChatActionsProvider onFileOpen={onFileOpen} onTaskOpen={onTaskOpen} onWatchStream={handleWatchStream}>
         <div
           className='relative mx-auto flex min-h-0 w-full max-w-[700px] flex-1 flex-col items-center justify-start overflow-hidden pt-[15vh]'
           {...dropZoneProps}
@@ -149,7 +157,7 @@ const ChatConversationContent: FC<ChatConversationContentProps> = ({
   }
 
   return (
-    <ChatActionsProvider onFileOpen={onFileOpen} onTaskOpen={onTaskOpen}>
+    <ChatActionsProvider onFileOpen={onFileOpen} onTaskOpen={onTaskOpen} onWatchStream={handleWatchStream}>
       <div className='relative flex min-h-0 w-full flex-1 flex-col overflow-hidden' {...dropZoneProps}>
         <DropOverlay isVisible={isDragOver} />
         <ScrollContainer
