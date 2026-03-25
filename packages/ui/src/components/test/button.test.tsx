@@ -72,6 +72,28 @@ describe('Button Component - Functional Tests', () => {
     const { container } = render(<Button size='icon'>🔍</Button>);
     expect(container.firstChild).toMatchSnapshot();
   });
+
+  it('does not cause infinite re-renders when toggling isLoading', () => {
+    // Regression test for: "Maximum update depth exceeded" (Sentry: APPLICATION-PLATFORM-DASHBOARD-BC)
+    // The useLayoutEffect was calling setMinWidth unconditionally, causing an infinite loop
+    // when isLoading toggled and triggered re-renders that re-ran the effect.
+    const renderSpy = jest.fn();
+
+    const TestWrapper = ({ isLoading }: { isLoading: boolean }) => {
+      renderSpy();
+      return <Button isLoading={isLoading}>Submit</Button>;
+    };
+
+    const { rerender } = render(<TestWrapper isLoading={false} />);
+    const initialRenderCount = renderSpy.mock.calls.length;
+
+    rerender(<TestWrapper isLoading={true} />);
+    rerender(<TestWrapper isLoading={false} />);
+
+    // Allow a small number of renders for legitimate state updates (minWidth capture),
+    // but not an unbounded number that would indicate an infinite loop.
+    expect(renderSpy.mock.calls.length).toBeLessThan(initialRenderCount + 10);
+  });
 });
 
 // Removed excessive variant/size combinations - keeping only critical ones

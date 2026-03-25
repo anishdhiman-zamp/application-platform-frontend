@@ -183,7 +183,7 @@ function Button({
     if (buttonRef && 'current' in buttonRef && buttonRef.current && !isLoading) {
       const width = buttonRef.current.offsetWidth;
       if (width > 0) {
-        setMinWidth(width);
+        setMinWidth((prev) => (prev === width ? prev : width));
       }
     }
   }, [children, leadingIcon, trailingIcon, size, buttonRef, isLoading]);
