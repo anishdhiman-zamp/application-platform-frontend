@@ -21,15 +21,15 @@ const TaskRow = ({ task }: TaskRowProps) => {
   const router = useRouter();
 
   const handleRowClick = useCallback(() => {
-    const taskRoute = getChatTaskRoute({ taskId: task?.id || '', taskTitle: task?.title || '' });
+    const taskRoute = getChatTaskRoute({ taskId: task.id, taskTitle: task.title });
 
     router.push(preserveSidebarParam(taskRoute));
-  }, [router, task?.id, task?.title]);
+  }, [router, task.id, task.title]);
 
   const totalSubtasks = task.subtasks.length;
   const completedSubtasks = useMemo(
-    () => task?.subtasks?.filter((s) => s?.status === TASK_STATUS.COMPLETED).length || 0,
-    [task?.subtasks],
+    () => task?.subtasks.filter((s) => s.status === TASK_STATUS.COMPLETED).length,
+    [task.subtasks],
   );
 
   return (
