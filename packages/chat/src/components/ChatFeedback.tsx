@@ -299,7 +299,7 @@ const ChatFeedback: FC<ChatFeedbackProps> = ({
                 )}
                 aria-label='Good response'
               >
-                <ThumbsUp size={14} className={cn('text-GRAY_700', likeGiven && 'text-black')} />
+                <ThumbsUp size={14} className={cn('text-GRAY_700', likeGiven && 'text-GRAY_1000')} />
               </Button>
             </span>
           </TooltipTrigger>
@@ -325,7 +325,7 @@ const ChatFeedback: FC<ChatFeedbackProps> = ({
                 )}
                 aria-label='Bad response'
               >
-                <ThumbsDown size={14} className={cn('text-GRAY_700', feedbackGiven && 'text-black')} />
+                <ThumbsDown size={14} className={cn('text-GRAY_700', feedbackGiven && 'text-GRAY_1000')} />
               </Button>
             </span>
           </TooltipTrigger>
