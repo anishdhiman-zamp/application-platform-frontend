@@ -7,13 +7,12 @@ import { type FileItem, type FileTreeProps } from '@/modules/pace/components/fil
 import {
   buildFileTree,
   buildNodeMap,
-  filterTreeNodes,
   flattenTree,
   sortTreeNodes,
 } from '@/modules/pace/components/files/file-tree.utils';
 import FileConflictModal from '@/modules/pace/components/files/FileConflictModal';
 import FileTreeEmptyState from '@/modules/pace/components/files/FileTreeEmptyState';
-import FileTreeNode from '@/modules/pace/components/files/FileTreeNode';
+import StickyNestedTree from '@/modules/pace/components/files/StickyNestedTree';
 import { useFileConflict } from '@/modules/pace/context/FileConflictContext';
 import { useExpandedPaths } from '@/modules/pace/hooks/useExpandedPaths';
 
@@ -23,6 +22,8 @@ const OVERSCAN_COUNT = 10;
 const FileTreeContent = ({
   files,
   searchQuery,
+  searchResults,
+  isSearching,
   sortBy,
   sortDirection,
   selectedPath: controlledSelectedPath,
@@ -33,10 +34,11 @@ const FileTreeContent = ({
   onUploadFiles,
   onUploadFolder,
   onCollapseAllChange,
+  loadingFolders,
+  loadedFolders,
+  onLoadFolder,
 }: FileTreeProps) => {
-  const { conflict, resolveConflict, cancelConflict } = useFileConflict();
-  const { expandedPaths, toggleExpand, collapseAll } = useExpandedPaths({ files });
-
+  // State
   const [internalSelectedPath, setInternalSelectedPath] = useState<string | null>(null);
   const [uploadTargetPath, setUploadTargetPath] = useState<string>('');
   const [dragOverFolderPath, setDragOverFolderPath] = useState<string | null>(null);
@@ -44,57 +46,40 @@ const FileTreeContent = ({
   const fileInputRef = useRef<HTMLInputElement>(null);
   const folderInputRef = useRef<HTMLInputElement>(null);
 
+  // Hooks
+  const { conflict, resolveConflict, cancelConflict } = useFileConflict();
+  const { expandedPaths, toggleExpand, collapseAll } = useExpandedPaths({ files });
+
+  // Derived State
   const selectedPath = controlledSelectedPath ?? internalSelectedPath;
-
-  const triggerFileUpload = useCallback((targetPath: string) => {
-    setUploadTargetPath(targetPath);
-    fileInputRef.current?.click();
-  }, []);
-
-  const triggerFolderUpload = useCallback((targetPath: string) => {
-    setUploadTargetPath(targetPath);
-    folderInputRef.current?.click();
-  }, []);
-
-  const handleFileInputChange = useCallback(
-    (e: React.ChangeEvent<HTMLInputElement>) => {
-      if (e.target.files?.length && onUploadFiles) {
-        onUploadFiles(e.target.files, uploadTargetPath);
-      }
-      e.target.value = '';
-    },
-    [uploadTargetPath, onUploadFiles],
-  );
-
-  const handleFolderInputChange = useCallback(
-    (e: React.ChangeEvent<HTMLInputElement>) => {
-      if (e.target.files?.length && onUploadFolder) {
-        onUploadFolder(e.target.files, uploadTargetPath);
-      }
-      e.target.value = '';
-    },
-    [uploadTargetPath, onUploadFolder],
-  );
+  const isServerSearch = !!searchQuery && searchResults !== undefined && searchResults !== null;
 
   const filesMap = useMemo(() => {
     const map = new Map<string, FileItem>();
 
     files.forEach((file) => map.set(file.path, file));
+    searchResults?.forEach((file) => {
+      if (!map.has(file.path)) map.set(file.path, file);
+    });
 
     return map;
-  }, [files]);
+  }, [files, searchResults]);
 
   const rawTree = useMemo(() => buildFileTree(files), [files]);
-
   const sortedRawTree = useMemo(() => sortTreeNodes(rawTree, sortBy, sortDirection), [rawTree, sortBy, sortDirection]);
-
   const originalNodeMap = useMemo(() => buildNodeMap(sortedRawTree), [sortedRawTree]);
 
-  const treeData = useMemo(() => {
-    const filtered = filterTreeNodes(sortedRawTree, searchQuery);
+  const searchTree = useMemo(() => {
+    if (!isServerSearch || !searchResults) return [];
 
-    return sortTreeNodes(filtered, sortBy, sortDirection);
-  }, [sortedRawTree, searchQuery, sortBy, sortDirection]);
+    return sortTreeNodes(buildFileTree(searchResults), sortBy, sortDirection);
+  }, [isServerSearch, searchResults, sortBy, sortDirection]);
+
+  const treeData = useMemo(() => {
+    if (isServerSearch) return searchTree;
+
+    return sortedRawTree;
+  }, [isServerSearch, searchTree, sortedRawTree]);
 
   const flatNodes = useMemo(() => flattenTree(treeData, expandedPaths), [treeData, expandedPaths]);
   const rootSiblingNames = useMemo(() => treeData.map((node) => node.name), [treeData]);
@@ -132,11 +117,54 @@ const FileTreeContent = ({
     overscan: OVERSCAN_COUNT,
   });
 
+  const virtualItems = virtualizer.getVirtualItems();
+  const visibleStart = virtualItems.length > 0 ? virtualItems[0].index : 0;
+  const visibleEnd = virtualItems.length > 0 ? virtualItems[virtualItems.length - 1].index : flatNodes.length - 1;
+
+  // Handlers
+  const triggerFileUpload = useCallback((targetPath: string) => {
+    setUploadTargetPath(targetPath);
+    fileInputRef.current?.click();
+  }, []);
+
+  const triggerFolderUpload = useCallback((targetPath: string) => {
+    setUploadTargetPath(targetPath);
+    folderInputRef.current?.click();
+  }, []);
+
+  const handleFileInputChange = useCallback(
+    (e: React.ChangeEvent<HTMLInputElement>) => {
+      if (e.target.files?.length && onUploadFiles) {
+        onUploadFiles(e.target.files, uploadTargetPath);
+      }
+      e.target.value = '';
+    },
+    [uploadTargetPath, onUploadFiles],
+  );
+
+  const handleFolderInputChange = useCallback(
+    (e: React.ChangeEvent<HTMLInputElement>) => {
+      if (e.target.files?.length && onUploadFolder) {
+        onUploadFolder(e.target.files, uploadTargetPath);
+      }
+      e.target.value = '';
+    },
+    [uploadTargetPath, onUploadFolder],
+  );
+
   const handleToggleExpand = useCallback(
     (path: string) => {
+      const isCollapsing = expandedPaths.has(path);
+
       toggleExpand(path);
+
+      if (!isCollapsing && onLoadFolder && loadedFolders && loadingFolders) {
+        if (!loadedFolders.has(path) && !loadingFolders.has(path)) {
+          onLoadFolder(path);
+        }
+      }
     },
-    [toggleExpand],
+    [toggleExpand, expandedPaths, onLoadFolder, loadedFolders, loadingFolders],
   );
 
   const handleSelect = useCallback(
@@ -175,7 +203,15 @@ const FileTreeContent = ({
     }
   }, [onCollapseAllChange, collapseAll]);
 
-  if (treeData.length === 0 && searchQuery) {
+  if (isSearching) {
+    return (
+      <div className='flex h-full items-center justify-center'>
+        <div className='text-GRAY_500 f-12-400'>Searching...</div>
+      </div>
+    );
+  }
+
+  if (treeData?.length === 0 && searchQuery) {
     return <FileTreeEmptyState />;
   }
 
@@ -190,7 +226,7 @@ const FileTreeContent = ({
         onChange={handleFolderInputChange}
         {...({ webkitdirectory: '', directory: '' } as React.InputHTMLAttributes<HTMLInputElement>)}
       />
-      <div ref={containerRef} className='min-h-0 flex-1 overflow-auto px-3 py-2' onDragLeave={handleContainerDragLeave}>
+      <div ref={containerRef} className='min-h-0 flex-1 overflow-auto' onDragLeave={handleContainerDragLeave}>
         <div
           style={{
             height: virtualizer.getTotalSize(),
@@ -198,41 +234,26 @@ const FileTreeContent = ({
             position: 'relative',
           }}
         >
-          {virtualizer.getVirtualItems().map((virtualRow) => {
-            const node = flatNodes[virtualRow.index];
-
-            return (
-              <FileTreeNode
-                key={node.path}
-                node={node}
-                depth={node.depth}
-                expandedPaths={expandedPaths}
-                selectedPath={selectedPath}
-                originalNodeMap={originalNodeMap}
-                siblingNames={node.siblingNames}
-                parentPath={node.parentPath}
-                onToggleExpand={handleToggleExpand}
-                onSelect={handleSelect}
-                onFileMoved={onFileMoved}
-                onFileDeleted={onFileDeleted}
-                onFileCreated={onFileCreated}
-                onUploadFiles={onUploadFiles}
-                onUploadFolder={onUploadFolder}
-                onTriggerFileUpload={triggerFileUpload}
-                onTriggerFolderUpload={triggerFolderUpload}
-                onDragOverFolderChange={handleDragOverFolderChange}
-                isSearchActive={!!searchQuery}
-                style={{
-                  position: 'absolute',
-                  top: 0,
-                  left: 0,
-                  width: '100%',
-                  height: `${virtualRow.size}px`,
-                  transform: `translateY(${virtualRow.start}px)`,
-                }}
-              />
-            );
-          })}
+          <StickyNestedTree
+            treeData={treeData}
+            expandedPaths={expandedPaths}
+            selectedPath={selectedPath}
+            originalNodeMap={originalNodeMap}
+            rowHeight={ROW_HEIGHT}
+            visibleStart={visibleStart}
+            visibleEnd={visibleEnd}
+            onToggleExpand={handleToggleExpand}
+            onSelect={handleSelect}
+            onFileMoved={onFileMoved}
+            onFileDeleted={onFileDeleted}
+            onFileCreated={onFileCreated}
+            onUploadFiles={onUploadFiles}
+            onTriggerFileUpload={triggerFileUpload}
+            onTriggerFolderUpload={triggerFolderUpload}
+            onDragOverFolderChange={handleDragOverFolderChange}
+            isSearchActive={!!searchQuery}
+            loadingFolders={loadingFolders}
+          />
           {dragOverlayBounds && (
             <div
               className='border-GRAY_700 pointer-events-none absolute right-0 left-0 rounded-md border-2 border-dotted'

@@ -1,40 +1,13 @@
-import { SIDEBAR_CONVERSATION_ID_PARAM } from 'modules/pace/pace.constants';
 import { ROUTES_PATH } from '@/constants/routeConfig';
 import { DynamicTabRouteConfig, DynamicTabType, ROUTE_KIND, TAB_TYPE } from '@/modules/pace/pace.types';
-
-const buildUrl = (basePath: string, params: URLSearchParams): string => {
-  const query = params.toString();
-
-  return query ? `${basePath}?${query}` : basePath;
-};
-
-/**
- * Syncs the sidebar conversation param with the current URL state.
- * - Strips any stale sidebar param from the stored path
- * - Adds the current sidebar param from URL (if open)
- */
-export const preserveSidebarParam = (path: string): string => {
-  if (typeof window === 'undefined') return path;
-
-  const [basePath, existingQuery] = path.split('?');
-  const params = new URLSearchParams(existingQuery || '');
-  const currentSidebarId = new URLSearchParams(window.location.search).get(SIDEBAR_CONVERSATION_ID_PARAM);
-
-  params.delete(SIDEBAR_CONVERSATION_ID_PARAM);
-
-  if (currentSidebarId) {
-    params.set(SIDEBAR_CONVERSATION_ID_PARAM, currentSidebarId);
-  }
-
-  return buildUrl(basePath, params);
-};
+import { preserveSidebarParam } from '@/modules/pace/pace.utils';
 
 export const TAB_TYPE_CONFIG: Record<DynamicTabType, DynamicTabRouteConfig> = {
   [TAB_TYPE.FILE]: {
     kind: ROUTE_KIND.QUERY,
-    basePath: ROUTES_PATH.CHAT_FILES,
+    basePath: ROUTES_PATH.CHAT,
     paramName: 'f',
-    fallbackPath: ROUTES_PATH.CHAT_FILES,
+    fallbackPath: ROUTES_PATH.CHAT,
   },
   [TAB_TYPE.TASK]: {
     kind: ROUTE_KIND.DYNAMIC,
@@ -122,7 +95,7 @@ export const isOnBasePath = (pathname: string, type: DynamicTabType): boolean =>
     return pathname === config.basePath;
   }
 
-  return pathname.startsWith(config.basePath);
+  return pathname.startsWith(`${config.basePath}/`);
 };
 
 export const isSameBasePath = (targetPath: string): boolean => {
@@ -133,11 +106,11 @@ export const isSameBasePath = (targetPath: string): boolean => {
     const onCurrentBase =
       config.kind === ROUTE_KIND.QUERY
         ? currentPathname === config.basePath
-        : currentPathname.startsWith(config.basePath);
+        : currentPathname.startsWith(`${config.basePath}/`);
     const onTargetBase =
       config.kind === ROUTE_KIND.QUERY
         ? targetUrl.pathname === config.basePath
-        : targetUrl.pathname.startsWith(config.basePath);
+        : targetUrl.pathname.startsWith(`${config.basePath}/`);
 
     if (onCurrentBase && onTargetBase) return true;
   }
@@ -151,7 +124,7 @@ export const isSameBasePath = (targetPath: string): boolean => {
 export const isOnAnyTabBasePath = (pathname: string): boolean => {
   for (const [, config] of Object.entries(TAB_TYPE_CONFIG)) {
     if (config.kind === ROUTE_KIND.QUERY && pathname === config.basePath) return true;
-    if (config.kind === ROUTE_KIND.DYNAMIC && pathname.startsWith(config.basePath)) return true;
+    if (config.kind === ROUTE_KIND.DYNAMIC && pathname.startsWith(`${config.basePath}/`)) return true;
   }
 
   return false;

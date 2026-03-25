@@ -52,6 +52,7 @@ const TaskActionBar = ({ activeTab, onTabChange, searchTerm, onSearchChange }: T
             placeholder='Search tasks...'
             value={searchTerm}
             onChange={onSearchChange}
+            allowClear={false}
             size='small'
             autoFocus
             className='bg-BG_WHITE h-7 w-56'

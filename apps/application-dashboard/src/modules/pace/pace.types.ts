@@ -1,4 +1,5 @@
-import { ReactNode } from 'react';
+import type { ComponentType, ReactNode } from 'react';
+import type { defaultFnType } from '@/types/commonTypes';
 
 export const enum PaceNavbarItemId {
   HOME = 'home',
@@ -11,15 +12,37 @@ export const enum PaceNavbarItemId {
   TASKS = 'task',
 }
 
+export interface AnimatedIconHandle {
+  startAnimation: defaultFnType;
+  stopAnimation: defaultFnType;
+}
+
+export interface AnimatedIconProps {
+  size?: number;
+  className?: string;
+}
+
 export interface PaceNavbarItemSchema {
   id: PaceNavbarItemId;
-  iconComponent: ReactNode;
+  iconComponent: ComponentType<AnimatedIconProps & { ref?: React.Ref<AnimatedIconHandle> }>;
   path: string;
 }
 
-export interface PaceSettingsTabSchema extends PaceNavbarItemSchema {
+export interface PaceSettingsTabSchema {
+  id: PaceNavbarItemId;
+  iconComponent: ReactNode;
   name: string;
+  heading?: string;
+  path: string;
 }
+
+export const CHAT_SIDEBAR_STATE = {
+  EXPANDED: 'expanded',
+  COLLAPSED: 'collapsed',
+  SIDEBAR: 'sidebar',
+} as const;
+
+export type ChatSidebarState = (typeof CHAT_SIDEBAR_STATE)[keyof typeof CHAT_SIDEBAR_STATE];
 
 export const TAB_TYPE = {
   FILE: 'file',

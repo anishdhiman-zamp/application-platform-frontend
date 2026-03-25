@@ -4,7 +4,7 @@ import Profile from '@/modules/general/components/Profile';
 
 const GeneralPage = () => {
   return (
-    <div className='bg-BG_WHITE h-full w-full p-10'>
+    <div className='bg-BG_WHITE flex h-full w-full flex-1 flex-col overflow-auto p-10'>
       <div className='flex h-full w-full flex-col'>
         <Profile />
         <Preferences />

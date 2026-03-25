@@ -1,4 +1,7 @@
 .rich-text-editor-wrapper {
+  position: relative;
+  overflow: hidden;
+  overflow-y: auto;
   scrollbar-width: none;
 }
 

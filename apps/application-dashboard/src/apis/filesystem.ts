@@ -40,11 +40,12 @@ const FilesystemApi = baseApi.injectEndpoints({
 
     // List Files (Recursive)
     listFiles: builder.query<ListFilesResponse, ListFilesRequest>({
-      query: ({ depth = -1, path }) => ({
+      query: ({ depth = 2, path, query }) => ({
         url: API_ENDPOINTS.FILES_LIST_GET,
         params: {
           depth,
           path: path || undefined,
+          query: query || undefined,
         },
       }),
       providesTags: [APITags.GET_FILES_LIST],
@@ -79,29 +80,6 @@ const FilesystemApi = baseApi.injectEndpoints({
         method: REQUEST_TYPES.PUT,
         body: { type, content: '' },
       }),
-      async onQueryStarted({ path, type, owner }, { dispatch, queryFulfilled }) {
-        const name = path.split('/').pop() || path;
-
-        const patchResult = dispatch(
-          FilesystemApi.util.updateQueryData('listFiles', { depth: -1 }, (draft) => {
-            draft.files.push({
-              path,
-              name,
-              type,
-              size: 0,
-              owner: owner || 'user',
-              mtime_ms: Date.now(),
-            });
-            draft.total_count += 1;
-          }),
-        );
-
-        try {
-          await queryFulfilled;
-        } catch {
-          patchResult.undo();
-        }
-      },
     }),
 
     // Write File Content
@@ -123,49 +101,6 @@ const FilesystemApi = baseApi.injectEndpoints({
         method: REQUEST_TYPES.POST,
         body: { source, destination },
       }),
-      async onQueryStarted({ source, destination }, { dispatch, queryFulfilled }) {
-        const patchResult = dispatch(
-          FilesystemApi.util.updateQueryData('listFiles', { depth: -1 }, (draft) => {
-            const sourceItem = draft.files.find((f) => f.path === source);
-
-            if (sourceItem) {
-              const destName = destination.split('/').pop() || destination;
-
-              draft.files.push({
-                path: destination,
-                name: destName,
-                type: sourceItem.type,
-                size: sourceItem.size,
-                mtime_ms: Date.now(),
-                owner: sourceItem.owner,
-              });
-              draft.total_count += 1;
-
-              if (sourceItem.type === 'directory') {
-                const childFiles = draft.files.filter((f) => f.path.startsWith(source + '/') && f.path !== source);
-
-                childFiles.forEach((child) => {
-                  const relativePath = child.path.slice(source.length);
-                  const newChildPath = destination + relativePath;
-
-                  draft.files.push({
-                    ...child,
-                    path: newChildPath,
-                    mtime_ms: Date.now(),
-                  });
-                  draft.total_count += 1;
-                });
-              }
-            }
-          }),
-        );
-
-        try {
-          await queryFulfilled;
-        } catch {
-          patchResult.undo();
-        }
-      },
     }),
 
     // Move/Rename File or Directory
@@ -175,38 +110,6 @@ const FilesystemApi = baseApi.injectEndpoints({
         method: REQUEST_TYPES.POST,
         body: { source, destination },
       }),
-      async onQueryStarted({ source, destination }, { dispatch, queryFulfilled }) {
-        const patchResult = dispatch(
-          FilesystemApi.util.updateQueryData('listFiles', { depth: -1 }, (draft) => {
-            const sourceIndex = draft.files.findIndex((f) => f.path === source);
-
-            if (sourceIndex !== -1) {
-              const destName = destination.split('/').pop() || destination;
-
-              draft.files[sourceIndex].path = destination;
-              draft.files[sourceIndex].name = destName;
-              draft.files[sourceIndex].mtime_ms = Date.now();
-
-              if (draft.files[sourceIndex].type === 'directory') {
-                draft.files.forEach((file) => {
-                  if (file.path.startsWith(source + '/')) {
-                    const relativePath = file.path.slice(source.length);
-
-                    file.path = destination + relativePath;
-                    file.mtime_ms = Date.now();
-                  }
-                });
-              }
-            }
-          }),
-        );
-
-        try {
-          await queryFulfilled;
-        } catch {
-          patchResult.undo();
-        }
-      },
     }),
 
     // Delete File or Directory
@@ -215,22 +118,6 @@ const FilesystemApi = baseApi.injectEndpoints({
         url: formRequestUrlWithParams(API_ENDPOINTS.FILES_DELETE, { path }),
         method: REQUEST_TYPES.DELETE,
       }),
-      async onQueryStarted({ path }, { dispatch, queryFulfilled }) {
-        const patchResult = dispatch(
-          FilesystemApi.util.updateQueryData('listFiles', { depth: -1 }, (draft) => {
-            const initialCount = draft.files.length;
-
-            draft.files = draft.files.filter((file) => file.path !== path && !file.path.startsWith(path + '/'));
-            draft.total_count -= initialCount - draft.files.length;
-          }),
-        );
-
-        try {
-          await queryFulfilled;
-        } catch {
-          patchResult.undo();
-        }
-      },
     }),
 
     // Direct Upload (Small Files <= 1MB)
@@ -247,7 +134,6 @@ const FilesystemApi = baseApi.injectEndpoints({
           body: formData,
         };
       },
-      invalidatesTags: (_result, _error, { skipInvalidation }) => (skipInvalidation ? [] : [APITags.GET_FILES_LIST]),
     }),
 
     // Initialize Chunked Upload
@@ -274,7 +160,6 @@ const FilesystemApi = baseApi.injectEndpoints({
         method: REQUEST_TYPES.POST,
         body: { upload_id },
       }),
-      invalidatesTags: (_result, _error, { skipInvalidation }) => (skipInvalidation ? [] : [APITags.GET_FILES_LIST]),
     }),
 
     // Cancel Chunked Upload
@@ -311,3 +196,7 @@ export const {
 } = FilesystemApi;
 
 export { FilesystemApi };
+
+export const FILESYSTEM_ENDPOINT_NAMES = {
+  LIST_FILES: 'listFiles',
+} as const;

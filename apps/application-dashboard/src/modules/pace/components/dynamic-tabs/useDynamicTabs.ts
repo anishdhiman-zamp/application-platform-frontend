@@ -10,8 +10,8 @@ import {
   isOnAnyTabBasePath,
   isOnBasePath,
   isSameBasePath,
-  preserveSidebarParam,
 } from 'modules/pace/components/dynamic-tabs/tab-registry';
+import { preserveSidebarParam } from 'modules/pace/pace.utils';
 import { usePathname, useRouter } from 'next/navigation';
 import { usePaceContext } from '@/modules/pace/pace.context';
 import { DynamicTab, DynamicTabType, TAB_TYPE } from '@/modules/pace/pace.types';
@@ -150,7 +150,7 @@ export const useDynamicTabs = (config: UseDynamicTabsConfig = {}): UseDynamicTab
 
   /**
    * Full Next.js navigation — triggers route transition.
-   * Use for cross-layout navigations (e.g., /chat → /chat/files).
+   * Use for cross-layout navigations (e.g., /chat → /chat/task/:id).
    */
   const routeNavigate = useCallback(
     (tabId: string | null, path: string, method: 'push' | 'replace' = 'push') => {
@@ -193,7 +193,7 @@ export const useDynamicTabs = (config: UseDynamicTabsConfig = {}): UseDynamicTab
         metadata,
       });
 
-      // Opening a new tab may cross layout boundaries (e.g., /chat → /chat/files),
+      // Opening a new tab may cross layout boundaries (e.g., /chat/settings → /chat),
       // so always use the smart navigator that picks history vs router.
       navigateAndSetActive(id, tabPath);
     },

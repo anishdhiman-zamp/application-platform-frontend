@@ -33,9 +33,15 @@ type OrgSwitcherProps = {
   isSidebarOpen: boolean;
   menuContentClassName?: string;
   menuTriggerClassName?: string;
+  macs?: boolean;
 };
 
-const OrgSwitcher: FC<OrgSwitcherProps> = ({ isSidebarOpen, menuContentClassName, menuTriggerClassName }) => {
+const OrgSwitcher: FC<OrgSwitcherProps> = ({
+  isSidebarOpen,
+  menuContentClassName,
+  menuTriggerClassName,
+  macs = false,
+}) => {
   const itemRefs = useRef<(HTMLDivElement | null)[]>([]);
   const [searchInputEl, setSearchInputEl] = useState<HTMLInputElement | null>(null);
   const { isOrgSwitchIsInProgress, user } = useAppSelector((state) => state.user);
@@ -72,6 +78,7 @@ const OrgSwitcher: FC<OrgSwitcherProps> = ({ isSidebarOpen, menuContentClassName
     dispatch(setIsOrgSwitchIsInProgress(true));
 
     removeFromLocalStorage(LOCAL_STORAGE_KEYS.PACE_OPEN_DYNAMIC_TABS);
+    removeFromLocalStorage(LOCAL_STORAGE_KEYS.PACE_FILE_TREE_EXPANDED_PATHS);
     setToLocalStorage(LOCAL_STORAGE_KEYS.XZAMP_ORGANIZATION_ID, org.organization_id);
     setCookie(ACTIVE_ORG_ID_COOKIE, org.organization_id);
     clearCookie(USER_SESSION_COOKIE);
@@ -197,7 +204,8 @@ const OrgSwitcher: FC<OrgSwitcherProps> = ({ isSidebarOpen, menuContentClassName
         <DropdownMenuTrigger asChild>
           <div
             className={cn(
-              'border-GRAY_400 bg-BG_GRAY_1 flex h-[57px] w-full cursor-pointer items-center gap-2.5 border-t px-4 py-3',
+              'border-GRAY_400 bg-BG_GRAY_1 flex h-[57px] w-full cursor-pointer items-center gap-2.5 px-4 py-3',
+              macs ? 'border-b' : 'border-t',
               menuTriggerClassName,
             )}
             data-testid='org-switcher-trigger'
@@ -236,12 +244,13 @@ const OrgSwitcher: FC<OrgSwitcherProps> = ({ isSidebarOpen, menuContentClassName
           </div>
         </DropdownMenuTrigger>
         <DropdownMenuContent
-          align='end'
+          align={macs ? 'center' : 'end'}
           className={cn(
-            'bg-BG_WHITE z-9999 mr-1 flex w-[229px] flex-col gap-[2px] overflow-y-auto p-1 [scrollbar-width:none]',
+            'bg-BG_WHITE z-9999 flex flex-col gap-[2px] overflow-y-auto p-1 [scrollbar-width:none]',
             menuContentClassName,
+            macs ? 'w-60' : 'mr-1 w-[230px]',
           )}
-          sideOffset={5}
+          sideOffset={macs ? -50 : 5}
           onMouseMove={() => showSearchBox && searchInputEl?.focus()}
         >
           {showSearchBox && (
@@ -291,7 +300,7 @@ const OrgSwitcher: FC<OrgSwitcherProps> = ({ isSidebarOpen, menuContentClassName
                 : null}
             </CommonWrapper>
           </div>
-          <LogoutButton />
+          {!macs && <LogoutButton />}
         </DropdownMenuContent>
       </DropdownMenu>
     </div>

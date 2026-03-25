@@ -273,10 +273,12 @@ export const ChatComposer: FC<ChatComposerProps> = ({
                     disabled={isSubmitDisabled}
                     size='icon'
                     aria-label='Send message'
-                    className='disabled:bg-GRAY_300 dark:bg-GRAY_500 dark:hover:bg-GRAY_600 dark:disabled:bg-GRAY_300 size-[26px] rounded-full p-[2px] text-white disabled:cursor-not-allowed [&_svg]:size-3.5'
+                    className='disabled:bg-GRAY_300 dark:hover:bg-GRAY_600 dark:disabled:bg-GRAY_300 size-[26px] rounded-full p-[2px] text-white disabled:cursor-not-allowed dark:bg-white [&_svg]:size-3.5'
                   >
                     <ArrowUp
-                      className={cn('text-BG_WHITE dark:text-GRAY_1000', { 'text-GRAY_700': isSubmitDisabled })}
+                      className={cn('text-BG_WHITE dark:text-BG_WHITE', {
+                        'text-GRAY_700 dark:text-GRAY_600': isSubmitDisabled,
+                      })}
                     />
                   </Button>
                 )

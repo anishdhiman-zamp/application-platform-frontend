@@ -4,7 +4,6 @@ import { useCallback, useRef, useState } from 'react';
 import { captureException } from '@sentry/browser';
 import { toast } from '@zamp-platform/ui';
 import {
-  FilesystemApi,
   useCancelUploadMutation,
   useCompleteUploadMutation,
   useDeleteFileMutation,
@@ -12,8 +11,6 @@ import {
   useInitChunkedUploadMutation,
   useUploadChunkMutation,
 } from '@/apis/filesystem';
-import { APITags } from '@/constants/api.constants';
-import { useAppDispatch } from '@/hooks/toolkit';
 import {
   FILE_TYPE,
   type FileItem,
@@ -59,6 +56,10 @@ interface UploadState {
   completedPaths: Set<string>;
 }
 
+interface UseFileUploadOptions {
+  onUploadComplete?: (targetPath: string) => Promise<void>;
+}
+
 interface UseFileUploadReturn {
   uploadState: UploadState;
   uploadFile: (file: File, targetPath: string) => Promise<void>;
@@ -81,8 +82,7 @@ const DEFAULT_UPLOAD_STATE: UploadState = {
   completedPaths: new Set(),
 };
 
-export const useFileUpload = (): UseFileUploadReturn => {
-  const dispatch = useAppDispatch();
+export const useFileUpload = ({ onUploadComplete }: UseFileUploadOptions = {}): UseFileUploadReturn => {
   const [uploadState, setUploadState] = useState<UploadState>(DEFAULT_UPLOAD_STATE);
 
   const abortControllerRef = useRef<AbortController | null>(null);
@@ -95,9 +95,14 @@ export const useFileUpload = (): UseFileUploadReturn => {
   const [cancelUploadMutation] = useCancelUploadMutation();
   const [deleteFile] = useDeleteFileMutation();
 
-  const invalidateFilesList = useCallback(() => {
-    dispatch(FilesystemApi.util.invalidateTags([APITags.GET_FILES_LIST]));
-  }, [dispatch]);
+  const refreshFolder = useCallback(
+    async (targetPath: string) => {
+      if (onUploadComplete) {
+        await onUploadComplete(targetPath);
+      }
+    },
+    [onUploadComplete],
+  );
 
   const deleteFolderSilently = useCallback(
     async (folderPath: string) => {
@@ -106,9 +111,11 @@ export const useFileUpload = (): UseFileUploadReturn => {
       } catch (error) {
         captureException(error);
       }
-      invalidateFilesList();
+      const parentPath = folderPath.includes('/') ? folderPath.slice(0, folderPath.lastIndexOf('/')) : '';
+
+      await refreshFolder(parentPath);
     },
-    [deleteFile, invalidateFilesList],
+    [deleteFile, refreshFolder],
   );
 
   const mutations: UploadMutations = {
@@ -229,6 +236,9 @@ export const useFileUpload = (): UseFileUploadReturn => {
 
       try {
         await uploadFileUtil(file, targetPath, mutations, callbacks, abortControllerRef.current.signal);
+        const parentPath = targetPath.includes('/') ? targetPath.slice(0, targetPath.lastIndexOf('/')) : '';
+
+        refreshFolder(parentPath);
       } catch (error) {
         if (!(error instanceof Error && error.message === 'Upload cancelled')) {
           captureException(error);
@@ -427,7 +437,7 @@ export const useFileUpload = (): UseFileUploadReturn => {
           { continueOnError: true },
         );
 
-        invalidateFilesList();
+        await refreshFolder(basePath);
 
         const keepSuccessful = result.wasCancelled || result.totalFailed > 0;
 
@@ -458,7 +468,7 @@ export const useFileUpload = (): UseFileUploadReturn => {
           }
         }
       } catch {
-        invalidateFilesList();
+        await refreshFolder(basePath);
         setUploadState((prev) => ({
           ...DEFAULT_UPLOAD_STATE,
           uploadingItems: prev.uploadingItems.filter((item) => prev.completedPaths.has(item.path)),
@@ -468,7 +478,7 @@ export const useFileUpload = (): UseFileUploadReturn => {
         abortControllerRef.current = null;
       }
     },
-    [uploadFile, mutations, invalidateFilesList],
+    [uploadFile, mutations, refreshFolder],
   );
 
   const uploadFolder = useCallback(
@@ -648,7 +658,7 @@ export const useFileUpload = (): UseFileUploadReturn => {
           abortControllerRef.current.signal,
         );
 
-        invalidateFilesList();
+        await refreshFolder(basePath);
 
         setUploadState((prev) => ({
           ...DEFAULT_UPLOAD_STATE,
@@ -672,7 +682,7 @@ export const useFileUpload = (): UseFileUploadReturn => {
         abortControllerRef.current = null;
       }
     },
-    [mutations, invalidateFilesList, deleteFolderSilently],
+    [mutations, refreshFolder, deleteFolderSilently],
   );
 
   const cancelUpload = useCallback(() => {
