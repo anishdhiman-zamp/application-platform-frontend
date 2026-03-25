@@ -32,6 +32,7 @@ export interface PaceSettingsTabSchema {
   id: PaceNavbarItemId;
   iconComponent: ReactNode;
   name: string;
+  heading?: string;
   path: string;
 }
 
