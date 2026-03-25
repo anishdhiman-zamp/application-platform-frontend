@@ -55,18 +55,21 @@ export const useAvatarState = ({ initialValue, generateSvg, uploadType, defaultN
   const uploadImage = useCallback(async (): Promise<{ type: MediaType; value: string | null }> => {
     if (avatar.type === MediaType.URL && pendingFile) {
       const contentType = pendingFile.type === 'image/jpeg' ? ImageContentType.JPEG : ImageContentType.PNG;
-      const { upload_url, s3_uri } = await getUploadUrl({
+      const { upload_url, asset_value, media_type } = await getUploadUrl({
         upload_type: uploadType,
         content_type: contentType,
+        seed_hint: avatar.value || defaultName,
       }).unwrap();
 
-      await fetch(upload_url, {
-        method: 'PUT',
-        headers: { 'Content-Type': pendingFile.type },
-        body: pendingFile,
-      });
+      if (upload_url) {
+        await fetch(upload_url, {
+          method: 'PUT',
+          headers: { 'Content-Type': pendingFile.type },
+          body: pendingFile,
+        });
+      }
 
-      return { type: avatar.type, value: s3_uri };
+      return { type: media_type, value: asset_value };
     }
 
     return { type: avatar.type, value: avatar.value || null };
