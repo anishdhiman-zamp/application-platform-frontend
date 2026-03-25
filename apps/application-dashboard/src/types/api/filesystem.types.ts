@@ -31,6 +31,7 @@ interface BaseReadResponse {
 export interface ListFilesRequest {
   depth?: number;
   path?: string;
+  query?: string;
 }
 
 export interface ListFilesResponse {

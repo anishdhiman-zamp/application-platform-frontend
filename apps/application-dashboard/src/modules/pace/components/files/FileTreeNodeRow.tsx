@@ -15,6 +15,7 @@ import {
 import { cn } from '@zamp-platform/ui/utils';
 import { ChevronRight, Loader, MoreVertical } from 'lucide-react';
 import TooltipV2 from '@/components/common/TooltipV2';
+import { KEYBOARD_KEYS } from '@/constants/shortcuts';
 import type { ContextMenuAction, TreeNode } from '@/modules/pace/components/files/file-tree.types';
 import { getFileExtension } from '@/modules/pace/components/files/file-tree.utils';
 import { SIDE_OPTIONS } from '@/types/commonTypes';
@@ -32,6 +33,7 @@ interface FileTreeNodeRowState {
   isUserPrivateFolder: boolean;
   isUploading: boolean;
   isSearchActive: boolean;
+  isLoadingChildren: boolean;
 }
 
 interface FileTreeNodeRowRename {
@@ -70,7 +72,7 @@ const FileTreeNodeRow = forwardRef<HTMLDivElement, FileTreeNodeRowProps>(
   ) => {
     const extension = state.isFolder ? '' : getFileExtension(node.name);
     const isDisabled = state.isUploading;
-    const isEmptyFolder = state.isFolder && (!node.children || node.children.length === 0);
+    const isDragDisabled = isDisabled || state.isSearchActive;
     const [dropdownOpen, setDropdownOpen] = useState(false);
 
     return (
@@ -78,54 +80,58 @@ const FileTreeNodeRow = forwardRef<HTMLDivElement, FileTreeNodeRowProps>(
         ref={ref}
         role='button'
         tabIndex={isDisabled || state.isRenaming ? -1 : 0}
-        draggable={!state.isRenaming && !state.isProtected && !isDisabled}
-        onClick={isDisabled || isEmptyFolder ? undefined : handlers.onRowClick}
+        draggable={!state.isRenaming && !state.isProtected && !isDragDisabled}
+        onClick={isDisabled ? undefined : handlers.onRowClick}
         onDoubleClick={isDisabled ? undefined : handlers.onRowDoubleClick}
-        onDragStart={isDisabled ? undefined : handlers.onDragStart}
-        onDragEnd={isDisabled ? undefined : handlers.onDragEnd}
-        onDragOver={isDisabled ? undefined : handlers.onDragOver}
-        onDragLeave={isDisabled ? undefined : handlers.onDragLeave}
-        onDrop={isDisabled ? undefined : handlers.onDrop}
+        onDragStart={isDragDisabled ? undefined : handlers.onDragStart}
+        onDragEnd={isDragDisabled ? undefined : handlers.onDragEnd}
+        onDragOver={isDragDisabled ? undefined : handlers.onDragOver}
+        onDragLeave={isDragDisabled ? undefined : handlers.onDragLeave}
+        onDrop={isDragDisabled ? undefined : handlers.onDrop}
         onKeyDown={
-          isDisabled || isEmptyFolder
+          isDisabled
             ? undefined
             : (e) => {
                 if (state.isRenaming) return;
 
-                if (e.key === 'Enter' || e.key === ' ') {
+                if (e.key === KEYBOARD_KEYS.ENTER || e.key === KEYBOARD_KEYS.SPACE) {
                   handlers.onRowClick();
                 }
               }
         }
         {...restProps}
         className={cn(
-          'hover:bg-GRAY_100 group flex h-8 cursor-pointer items-center gap-2 rounded-md pr-1 transition-colors',
+          'hover:bg-GRAY_100 group flex h-8 cursor-pointer items-center gap-2 pr-1 transition-colors',
           dropdownOpen && (state.isFolder || !state.isSelected) && 'bg-GRAY_100',
           state.isSelected && !state.isFolder && 'bg-GRAY_300 hover:bg-GRAY_300',
           (state.isDragging || state.isCutItem || state.isUploading) && 'opacity-50',
           state.isDragOver && 'bg-GRAY_200',
-          (isDisabled || isEmptyFolder) && 'cursor-default',
+          isDisabled && 'cursor-default',
           externalClassName,
         )}
         style={{ paddingLeft: `${depth * 24 + 8}px` }}
       >
         {state.isFolder ? (
-          <Button
-            variant='ghost'
-            size='xxsmall'
-            onClick={isEmptyFolder ? undefined : handlers.onChevronClick}
-            disabled={isEmptyFolder}
-            className={cn('size-4 shrink-0 p-0! hover:bg-transparent', isEmptyFolder && 'cursor-default')}
-            aria-label={state.isExpanded ? 'Collapse folder' : 'Expand folder'}
-          >
-            <ChevronRight
-              className={cn(
-                'size-3.5 transition-transform duration-100',
-                isEmptyFolder ? 'text-GRAY_500' : 'text-GRAY_700 group-hover:text-GRAY_1000',
-                state.isExpanded && 'rotate-90',
-              )}
-            />
-          </Button>
+          state.isLoadingChildren ? (
+            <span className='flex size-4 shrink-0 items-center justify-center'>
+              <Loader className='text-GRAY_600 size-3 animate-spin' />
+            </span>
+          ) : (
+            <Button
+              variant='ghost'
+              size='xxsmall'
+              onClick={handlers.onChevronClick}
+              className='size-4 shrink-0 p-0! hover:bg-transparent'
+              aria-label={state.isExpanded ? 'Collapse folder' : 'Expand folder'}
+            >
+              <ChevronRight
+                className={cn(
+                  'text-GRAY_700 group-hover:text-GRAY_1000 size-3.5 transition-transform duration-100',
+                  state.isExpanded && 'rotate-90',
+                )}
+              />
+            </Button>
+          )
         ) : (
           <span className='size-4 shrink-0' />
         )}
@@ -171,12 +177,6 @@ const FileTreeNodeRow = forwardRef<HTMLDivElement, FileTreeNodeRowProps>(
         ) : (
           <span className='f-13-450 text-GRAY_1000 min-w-0 flex-1 truncate select-none'>
             {state.isUserPrivateFolder ? `${node.name} (Private)` : node.name}
-          </span>
-        )}
-
-        {state.isFolder && !state.isRenaming && !state.isSearchActive && (
-          <span className='f-13-450 text-GRAY_700 ml-auto shrink-0 opacity-0 select-none group-hover:opacity-100'>
-            {node.children?.length ?? 0} {(node.children?.length ?? 0) === 1 ? 'item' : 'items'}
           </span>
         )}
 

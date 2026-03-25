@@ -121,7 +121,15 @@ export const getChatFileRoute = (filePath: string) => {
   return `${ROUTES_PATH.CHAT}?f=${encodeURIComponent(filePath)}`;
 };
 
-export const getChatTaskRoute = (taskId: string, conversationId?: string, taskTitle?: string) => {
+export const getChatTaskRoute = ({
+  taskId,
+  conversationId,
+  taskTitle,
+}: {
+  taskId: string;
+  conversationId?: string;
+  taskTitle?: string;
+}) => {
   const basePath = ROUTES_PATH.CHAT_TASK.replace(':taskId', taskId);
   const params = new URLSearchParams();
 

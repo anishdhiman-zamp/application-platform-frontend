@@ -1,6 +1,7 @@
 'use client';
 
 import { memo, useCallback, useMemo, useRef, useState } from 'react';
+import { useLazyListFilesQuery } from '@/apis/filesystem';
 import { useDynamicTabs } from '@/modules/pace/components/dynamic-tabs/useDynamicTabs';
 import CreateItemModal from '@/modules/pace/components/files/CreateItemModal';
 import DeleteConfirmationDialog from '@/modules/pace/components/files/DeleteConfirmationDialog';
@@ -9,7 +10,12 @@ import {
   FILE_TYPE,
   type FileTreeNodeProps,
 } from '@/modules/pace/components/files/file-tree.types';
-import { CONTEXT_MENU_ACTION_IDS, CONTEXT_MENU_ACTIONS } from '@/modules/pace/components/files/files.constants';
+import { getParentPath } from '@/modules/pace/components/files/file-tree.utils';
+import {
+  CONTEXT_MENU_ACTION_IDS,
+  CONTEXT_MENU_ACTIONS,
+  SEARCH_ALLOWED_ACTIONS,
+} from '@/modules/pace/components/files/files.constants';
 import FileTreeNodeRow from '@/modules/pace/components/files/FileTreeNodeRow';
 import { useFileUploadContext } from '@/modules/pace/context/FileUploadContext';
 import { useFileTreeContext } from '@/modules/pace/hooks/useFileTreeContext';
@@ -36,15 +42,21 @@ const FileTreeNode = memo(function FileTreeNode({
   onTriggerFolderUpload,
   onDragOverFolderChange,
   isSearchActive,
+  isLoadingChildren,
   style,
 }: FileTreeNodeProps) {
+  // State
   const nodeRef = useRef<HTMLDivElement>(null);
   const [createModalType, setCreateModalType] = useState<CreateItemType | null>(null);
+  const [fetchedChildrenNames, setFetchedChildrenNames] = useState<string[]>([]);
+  const [triggerListFiles] = useLazyListFilesQuery();
 
+  // Hooks
   const { clipboard, isProtectedRoot, username } = useFileTreeContext();
   const { uploadingPaths } = useFileUploadContext();
   const { openTab } = useDynamicTabs({ type: TAB_TYPE.FILE });
 
+  // Derived State
   const isFolder = node.type === FILE_TYPE.DIRECTORY;
   const isExpanded = expandedPaths.has(node.path);
   const isSelected = !isFolder && selectedPath === node.path;
@@ -56,9 +68,19 @@ const FileTreeNode = memo(function FileTreeNode({
   const childrenToRender = originalNode?.children ?? node.children;
 
   const childrenNames = useMemo(() => childrenToRender?.map((child) => child.name) ?? [], [childrenToRender]);
+
+  const createModalExistingNames = useMemo(() => {
+    const localNames = new Set(childrenNames);
+
+    fetchedChildrenNames.forEach((name) => localNames.add(name));
+
+    return Array.from(localNames);
+  }, [childrenNames, fetchedChildrenNames]);
+
   const filteredActions = useMemo(
     () =>
       CONTEXT_MENU_ACTIONS.filter((action) => {
+        if (isSearchActive && !SEARCH_ALLOWED_ACTIONS.has(action.id)) return false;
         if (action.fileOnly && isFolder) return false;
         if (action.folderOnly && !isFolder) return false;
         if (action.id === CONTEXT_MENU_ACTION_IDS.PASTE && !clipboard) return false;
@@ -73,7 +95,41 @@ const FileTreeNode = memo(function FileTreeNode({
 
         return true;
       }),
-    [isFolder, clipboard, isProtected],
+    [isFolder, clipboard, isProtected, isSearchActive],
+  );
+
+  // Handlers (defined before hooks that consume them)
+  const openCreateModal = useCallback(
+    (type: CreateItemType) => {
+      setCreateModalType(type);
+
+      if (!expandedPaths.has(node.path)) {
+        onToggleExpand(node.path);
+      }
+
+      const parentDir = node.path === '/' ? '' : node.path;
+
+      triggerListFiles({ depth: 1, path: parentDir || undefined })
+        .unwrap()
+        .then((result) => {
+          const targetPath = node.path;
+          const isRoot = targetPath === '/';
+
+          const names = result.files
+            .filter((file) => {
+              if (isRoot) return !file.path.includes('/');
+
+              return getParentPath(file.path) === targetPath;
+            })
+            .map((file) => file.name);
+
+          setFetchedChildrenNames(names);
+        })
+        .catch(() => {
+          setFetchedChildrenNames([]);
+        });
+    },
+    [node.path, expandedPaths, onToggleExpand, triggerListFiles],
   );
 
   const handleTriggerFileUpload = useCallback(() => {
@@ -84,13 +140,6 @@ const FileTreeNode = memo(function FileTreeNode({
     onTriggerFolderUpload?.(node.path);
   }, [onTriggerFolderUpload, node.path]);
 
-  const rename = useFileTreeNodeRename({
-    node,
-    siblingNames,
-    isProtected,
-    onFileMoved,
-  });
-
   const handleExternalFileDrop = useCallback(
     (files: FileList, targetPath: string) => {
       if (onUploadFiles) {
@@ -99,6 +148,14 @@ const FileTreeNode = memo(function FileTreeNode({
     },
     [onUploadFiles],
   );
+
+  // Hooks (depend on handlers above)
+  const rename = useFileTreeNodeRename({
+    node,
+    siblingNames,
+    isProtected,
+    onFileMoved,
+  });
 
   const dragDrop = useFileTreeNodeDragDrop({
     node,
@@ -119,10 +176,11 @@ const FileTreeNode = memo(function FileTreeNode({
     node,
     isExpanded,
     childrenNames,
+    siblingNames,
     isProtected,
     onToggleExpand,
     onStartRename: rename.startRename,
-    onOpenCreateModal: setCreateModalType,
+    onOpenCreateModal: openCreateModal,
     onCloseContextMenu: () => {},
     onFileMoved,
     onFileDeleted,
@@ -131,6 +189,7 @@ const FileTreeNode = memo(function FileTreeNode({
     onTriggerFolderUpload: handleTriggerFolderUpload,
   });
 
+  // Handlers
   const handleClick = useCallback(() => {
     if (rename.isRenaming) return;
 
@@ -162,10 +221,15 @@ const FileTreeNode = memo(function FileTreeNode({
       {createModalType && (
         <CreateItemModal
           isOpen={!!createModalType}
-          onOpenChange={(open) => !open && setCreateModalType(null)}
+          onOpenChange={(open) => {
+            if (!open) {
+              setCreateModalType(null);
+              setFetchedChildrenNames([]);
+            }
+          }}
           itemType={createModalType}
           onCreate={(name) => actions.handleCreate(name, node.path, createModalType)}
-          existingNames={childrenNames}
+          existingNames={createModalExistingNames}
         />
       )}
 
@@ -195,6 +259,7 @@ const FileTreeNode = memo(function FileTreeNode({
           isUserPrivateFolder,
           isUploading,
           isSearchActive: !!isSearchActive,
+          isLoadingChildren: !!isLoadingChildren,
         }}
         rename={{
           value: rename.renameValue,

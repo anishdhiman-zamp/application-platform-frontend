@@ -25,6 +25,7 @@ interface UseFileTreeNodeActionsProps {
   node: TreeNode;
   isExpanded: boolean;
   childrenNames: string[];
+  siblingNames: string[];
   isProtected?: boolean;
   onToggleExpand: (path: string) => void;
   onStartRename: () => void;
@@ -53,6 +54,7 @@ export const useFileTreeNodeActions = ({
   node,
   isExpanded,
   childrenNames,
+  siblingNames,
   isProtected = false,
   onToggleExpand,
   onStartRename,
@@ -114,7 +116,11 @@ export const useFileTreeNodeActions = ({
           break;
         }
         case CONTEXT_MENU_ACTION_IDS.DUPLICATE:
-          await duplicateItem(node.path);
+          await duplicateItem(
+            node.path,
+            { name: node.name, type: node.type, size: node.size, owner: node.owner },
+            siblingNames,
+          );
           break;
         case CONTEXT_MENU_ACTION_IDS.COPY:
           setCopyClipboard(node.path, node.name, node.type, node.size, node.owner);
@@ -219,9 +225,21 @@ export const useFileTreeNodeActions = ({
   };
 
   const handleCreate = async (name: string, parentPath: string, createModalType: CreateItemType | null) => {
-    if (!isExpanded) {
-      onToggleExpand(node.path);
+    const fullPath = buildFullPath(parentPath, name);
+    const newFile: FileItem = {
+      path: fullPath,
+      name,
+      type: createModalType === CREATE_ITEM_TYPE.FILE ? FILE_TYPE.FILE : FILE_TYPE.DIRECTORY,
+      size: 0,
+      mtime_ms: Date.now(),
+      owner: username ?? 'user',
+    };
+
+    if (createModalType === CREATE_ITEM_TYPE.FILE) {
+      openTab(fullPath, name);
     }
+
+    onFileCreated?.(newFile);
 
     try {
       if (createModalType === CREATE_ITEM_TYPE.FILE) {
@@ -229,18 +247,6 @@ export const useFileTreeNodeActions = ({
       } else {
         await createFolder(name, parentPath);
       }
-
-      const fullPath = buildFullPath(parentPath, name);
-      const newFile: FileItem = {
-        path: fullPath,
-        name,
-        type: createModalType === CREATE_ITEM_TYPE.FILE ? FILE_TYPE.FILE : FILE_TYPE.DIRECTORY,
-        size: 0,
-        mtime_ms: Date.now(),
-        owner: username ?? 'user',
-      };
-
-      onFileCreated?.(newFile);
     } catch (error) {
       captureException(error);
       toast.error(FILE_TOAST_MESSAGES.FAILED_TO_CREATE_ITEM);
@@ -251,11 +257,12 @@ export const useFileTreeNodeActions = ({
     const isFolder = node.type === FILE_TYPE.DIRECTORY;
 
     setIsDeleting(true);
+    closeTabsForPath(node.path, isFolder);
+    onFileDeleted?.(node.path);
+    setIsDeleteDialogOpen(false);
+
     try {
-      closeTabsForPath(node.path, isFolder);
       await deleteItem(node.path);
-      onFileDeleted?.(node.path);
-      setIsDeleteDialogOpen(false);
     } catch (error) {
       captureException(error);
       toast.error(FILE_TOAST_MESSAGES.FAILED_TO_DELETE_ITEM);

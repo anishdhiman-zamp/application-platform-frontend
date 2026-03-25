@@ -21,6 +21,7 @@ interface SearchInputProps {
   className?: string;
   wrapperClassName?: string;
   autoFocus?: boolean;
+  allowClear?: boolean;
   'aria-label'?: string;
   showSearchIcon?: boolean;
   clearButtonClassName?: string;
@@ -37,6 +38,7 @@ const SearchInput = ({
   className,
   wrapperClassName,
   autoFocus,
+  allowClear = true,
   'aria-label': ariaLabel,
   showSearchIcon = false,
   clearButtonClassName,
@@ -95,7 +97,7 @@ const SearchInput = ({
         aria-label={ariaLabel ?? placeholder}
         data-testid={testId}
       />
-      {inputValue && (
+      {allowClear && inputValue && (
         <Button
           type='button'
           variant='ghost'

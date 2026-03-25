@@ -8,6 +8,7 @@ import { TASK_LISTING_TAB, type TaskListingTab } from 'modules/pace/components/t
 import TaskAccordionSection from 'modules/pace/components/tasks/TaskAccordionSection';
 import TaskListingSkeleton from 'modules/pace/components/tasks/TaskListingSkeleton';
 import { useGetTaskCountsQuery } from '@/apis/task';
+import ProcessEmptyState from '@/modules/process/activity-runs/components/ProcessEmptyState';
 import CommonWrapper from 'components/commonWrapper';
 import { SkeletonTypes } from 'components/commonWrapper/commonWrapper.types';
 
@@ -17,14 +18,10 @@ interface TaskAccordionGroupProps {
 }
 
 const NoDataBanner = ({ search }: { search?: string }) => (
-  <div className='flex flex-1 items-center justify-center py-20'>
-    <div className='text-center'>
-      <p className='f-14-450 text-GRAY_700'>No tasks found</p>
-      <p className='f-12-400 text-GRAY_500 mt-1'>
-        {search ? 'Try adjusting your search query' : 'Tasks will appear here when created'}
-      </p>
-    </div>
-  </div>
+  <ProcessEmptyState
+    title='No tasks found'
+    description={search ? 'Try adjusting your search query' : 'Tasks will appear here when created'}
+  />
 );
 
 const TaskAccordionGroup = ({ activeTab, search }: TaskAccordionGroupProps) => {
@@ -48,26 +45,47 @@ const TaskAccordionGroup = ({ activeTab, search }: TaskAccordionGroupProps) => {
 
   const defaultOpenValue = useMemo(() => visibleStatuses[0], [visibleStatuses]);
 
+  const accordionContent = (
+    <>
+      {visibleStatuses.map((status) => (
+        <TaskAccordionSection key={status} status={status} count={countMap.get(status) ?? 0} search={search} />
+      ))}
+      {search && (
+        <div className='hidden only:block'>
+          <NoDataBanner search={search} />
+        </div>
+      )}
+    </>
+  );
+
   return (
     <CommonWrapper
       isLoading={isLoading}
       skeletonType={SkeletonTypes.CUSTOM}
       loader={<TaskListingSkeleton />}
       isNoData={!isLoading && visibleStatuses.length === 0}
-      noDataBanner={<NoDataBanner search={search} />}
-      className='flex-1'
+      noDataBanner={<NoDataBanner />}
+      className='flex min-h-0 flex-1 flex-col'
       disableAnimation
     >
-      <Accordion
-        type='single'
-        defaultValue={defaultOpenValue}
-        collapsible
-        className='flex-1 overflow-y-auto [scrollbar-width:thin]'
-      >
-        {visibleStatuses.map((status) => (
-          <TaskAccordionSection key={status} status={status} count={countMap.get(status) ?? 0} search={search} />
-        ))}
-      </Accordion>
+      {search ? (
+        <Accordion
+          type='multiple'
+          defaultValue={[...visibleStatuses]}
+          className='flex-1 overflow-y-auto [scrollbar-width:thin]'
+        >
+          {accordionContent}
+        </Accordion>
+      ) : (
+        <Accordion
+          type='single'
+          defaultValue={defaultOpenValue}
+          collapsible
+          className='flex min-h-0 flex-1 flex-col overflow-hidden'
+        >
+          {accordionContent}
+        </Accordion>
+      )}
     </CommonWrapper>
   );
 };

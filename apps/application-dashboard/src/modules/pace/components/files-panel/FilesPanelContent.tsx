@@ -1,7 +1,9 @@
 'use client';
 
-import { useEffect, useMemo, useRef, useState } from 'react';
-import { useListFilesQuery } from '@/apis/filesystem';
+import { useCallback, useEffect, useRef, useState } from 'react';
+import { SEARCH_DEBOUNCE_MS } from 'modules/pace/components/tasks/task-listing.constants';
+import { LazyFileTreeProvider } from 'modules/pace/context/LazyFileTreeContext';
+import { useLazyFileTree } from 'modules/pace/hooks/useLazyFileTree';
 import ImageLoader from '@/components/common/loader/ImageLoader';
 import CommonWrapper from '@/components/commonWrapper';
 import { SkeletonTypes } from '@/components/commonWrapper/commonWrapper.types';
@@ -13,20 +15,13 @@ import FilesEmptyState from '@/modules/pace/components/files/FilesEmptyState';
 import FileTree from '@/modules/pace/components/files/FileTree';
 import FilesPanelToolbar from '@/modules/pace/components/files-panel/FilesPanelToolbar';
 import { useFileUploadContext } from '@/modules/pace/context/FileUploadContext';
-import { useFilesystemStatus } from '@/modules/pace/hooks/useFilesystemStatus';
 import { TAB_TYPE } from '@/modules/pace/pace.types';
 import { defaultFnType } from '@/types/commonTypes';
 
 const FilesPanelContent = () => {
   const collapseAllRef = useRef<defaultFnType | null>(null);
-  const { uploadFiles, uploadFolder, uploadingItems, clearUploadingItems } = useFileUploadContext();
+  const { uploadFiles, uploadFolder, uploadingItems, clearUploadingItems, registerLoadFolder } = useFileUploadContext();
   const { openTab } = useDynamicTabs({ type: TAB_TYPE.FILE });
-  const {
-    isFilesystemActive,
-    isFilesystemStatusLoading,
-    isFilesystemError,
-    refetch: refetchStatus,
-  } = useFilesystemStatus();
 
   const [searchInput, setSearchInput] = useState('');
   const [debouncedSearchQuery, setDebouncedSearchQuery] = useState('');
@@ -34,28 +29,20 @@ const FilesPanelContent = () => {
   const [sortDirection, setSortDirection] = useState<SortDirection>(SORT_DIRECTION.DESC);
 
   const {
-    data: files,
-    isLoading: isLoadingFiles,
-    isError: isErrorFiles,
-    refetch: refetchFiles,
-  } = useListFilesQuery({ depth: -1 }, { refetchOnMountOrArgChange: false });
-
-  const filesWithUploading = useMemo(() => {
-    const fileList = files?.files ?? [];
-
-    if (uploadingItems?.length === 0) {
-      return fileList;
-    }
-
-    const existingPaths = new Set(fileList.map((f) => f.path));
-    const newItems = uploadingItems.filter((item) => !existingPaths.has(item.path));
-
-    if (newItems.length === 0) {
-      return fileList;
-    }
-
-    return [...fileList, ...newItems];
-  }, [files?.files, uploadingItems]);
+    files,
+    searchResults,
+    isSearching,
+    isInitialLoading,
+    isError,
+    loadingFolders,
+    loadedFolders,
+    loadFolder,
+    refetch,
+    addOptimistic,
+    removeOptimistic,
+    confirmAddition,
+    confirmDeletion,
+  } = useLazyFileTree({ uploadingItems, searchQuery: debouncedSearchQuery });
 
   const toggleSortDirection = () => {
     setSortDirection((prev) => (prev === SORT_DIRECTION.ASC ? SORT_DIRECTION.DESC : SORT_DIRECTION.ASC));
@@ -75,40 +62,41 @@ const FilesPanelContent = () => {
     openTab(file.path, file.name);
   };
 
-  useEffect(() => {
-    if (uploadingItems?.length === 0) return;
+  const handleUploadFiles = useCallback(
+    (fileList: FileList, targetPath: string) => {
+      uploadFiles(fileList, targetPath);
+    },
+    [uploadFiles],
+  );
 
-    const allExist = uploadingItems.every((item) => files?.files?.some((f) => f.path === item.path));
+  const handleUploadFolder = useCallback(
+    (fileList: FileList, targetPath: string) => {
+      uploadFolder(fileList, targetPath);
+    },
+    [uploadFolder],
+  );
+
+  useEffect(() => {
+    registerLoadFolder(loadFolder);
+  }, [registerLoadFolder, loadFolder]);
+
+  useEffect(() => {
+    const timer = setTimeout(() => {
+      setDebouncedSearchQuery(searchInput);
+    }, SEARCH_DEBOUNCE_MS);
+
+    return () => clearTimeout(timer);
+  }, [searchInput]);
+
+  useEffect(() => {
+    if (uploadingItems.length === 0) return;
+
+    const allExist = uploadingItems.every((item) => files.some((f) => f.path === item.path && f.owner !== ''));
 
     if (allExist) {
       clearUploadingItems();
     }
-  }, [files?.files, uploadingItems, clearUploadingItems]);
-
-  if (isFilesystemStatusLoading || (!isFilesystemActive && !isFilesystemError)) {
-    return (
-      <div className='flex flex-1 items-center justify-center'>
-        <ImageLoader imageSrc={ZAMP_LOGO_LOADER_SVG} width={100} height={100} />
-      </div>
-    );
-  }
-
-  if (isFilesystemError) {
-    return (
-      <div className='flex flex-1 items-center justify-center p-4'>
-        <CommonWrapper
-          isError
-          refetchFunction={refetchStatus}
-          skeletonType={SkeletonTypes.CUSTOM}
-          loader={null}
-          className='flex-1'
-          disableAnimation
-        >
-          {null}
-        </CommonWrapper>
-      </div>
-    );
-  }
+  }, [files, uploadingItems, clearUploadingItems]);
 
   return (
     <div className='flex min-h-0 flex-1 flex-col'>
@@ -122,29 +110,41 @@ const FilesPanelContent = () => {
         onSortToggle={toggleSortDirection}
         onCollapseAll={handleCollapseAll}
       />
-      <CommonWrapper
-        isLoading={isLoadingFiles}
-        isError={isErrorFiles}
-        refetchFunction={refetchFiles}
-        isNoData={filesWithUploading.length === 0}
-        noDataBanner={<FilesEmptyState />}
-        skeletonType={SkeletonTypes.CUSTOM}
-        loader={<ImageLoader imageSrc={ZAMP_LOGO_LOADER_SVG} width={100} height={100} />}
-        className='flex-1 overflow-y-auto px-3 pt-1.5 pb-3 [scrollbar-width:none]'
-        disableAnimation
+      <LazyFileTreeProvider
+        onAddOptimistic={addOptimistic}
+        onRemoveOptimistic={removeOptimistic}
+        onConfirmAddition={confirmAddition}
+        onConfirmDeletion={confirmDeletion}
+        onLoadFolder={loadFolder}
       >
-        <FileTree
-          files={filesWithUploading}
-          searchQuery={debouncedSearchQuery}
-          sortBy={sortBy}
-          sortDirection={sortDirection}
-          selectedPath={null}
-          onSelectFile={handleSelectFile}
-          onUploadFiles={uploadFiles}
-          onUploadFolder={uploadFolder}
-          onCollapseAllChange={handleCollapseAllChange}
-        />
-      </CommonWrapper>
+        <CommonWrapper
+          isLoading={isInitialLoading}
+          isError={isError}
+          refetchFunction={refetch}
+          isNoData={files.length === 0}
+          noDataBanner={<FilesEmptyState />}
+          skeletonType={SkeletonTypes.CUSTOM}
+          loader={<ImageLoader imageSrc={ZAMP_LOGO_LOADER_SVG} width={150} height={150} className='bg-BG_GRAY_2' />}
+          className='flex-1 overflow-y-auto [scrollbar-width:none]'
+          disableAnimation
+        >
+          <FileTree
+            files={files}
+            searchQuery={debouncedSearchQuery}
+            searchResults={searchResults}
+            isSearching={isSearching}
+            sortBy={sortBy}
+            sortDirection={sortDirection}
+            onUploadFiles={handleUploadFiles}
+            onUploadFolder={handleUploadFolder}
+            onCollapseAllChange={handleCollapseAllChange}
+            onSelectFile={handleSelectFile}
+            loadingFolders={loadingFolders}
+            loadedFolders={loadedFolders}
+            onLoadFolder={loadFolder}
+          />
+        </CommonWrapper>
+      </LazyFileTreeProvider>
     </div>
   );
 };

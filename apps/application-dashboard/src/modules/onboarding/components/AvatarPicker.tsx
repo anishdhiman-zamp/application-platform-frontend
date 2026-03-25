@@ -14,6 +14,7 @@ import {
 } from '@zamp-platform/ui';
 import { Pencil, Shuffle, Upload } from 'lucide-react';
 import { ERROR_MESSAGES, VALIDATION } from 'modules/onboarding/onboarding.constants';
+import { MediaType } from 'modules/onboarding/onboarding.types';
 import { KEYBOARD_KEYS } from '@/constants/shortcuts';
 
 export type AvatarDisplay = { type: 'seed'; svg: string } | { type: 'url'; src: string };
@@ -32,7 +33,7 @@ type Props = {
 };
 
 export const AvatarImage = ({ avatar, size }: { avatar: AvatarDisplay; size: number }) => {
-  if (avatar.type === 'url') {
+  if (avatar.type === MediaType.URL) {
     return (
       <div className='overflow-hidden rounded-lg' style={{ width: size, height: size }}>
         <img src={avatar.src} alt='avatar' className='h-full w-full object-cover' />

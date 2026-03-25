@@ -3,6 +3,7 @@ import { captureException } from '@sentry/browser';
 import { toast } from '@zamp-platform/ui';
 import { KEYBOARD_KEYS } from '@/constants/shortcuts';
 import { useDynamicTabs } from '@/modules/pace/components/dynamic-tabs/useDynamicTabs';
+import { FILE_TYPE } from '@/modules/pace/components/files/file-tree.types';
 import {
   buildFullPath,
   checkDuplicateName,
@@ -38,16 +39,17 @@ export const useFileViewerHeaderRename = ({
   filePath,
   fileName,
 }: UseFileViewerHeaderRenameProps): UseFileViewerHeaderRenameReturn => {
+  // State
   const renameInputRef = useRef<HTMLInputElement | null>(null);
   const { baseName, extension } = useMemo(() => getFileNameParts(fileName, true), [fileName]);
-
   const [isRenaming, setIsRenaming] = useState(false);
   const [renameValue, setRenameValue] = useState(baseName);
 
+  // Hooks
   const { renameItem, isRenaming: isRenameLoading } = useFileActions();
   const { updateFileStatePath } = useFileViewerContext();
   const { updateTab } = useDynamicTabs({ type: TAB_TYPE.FILE });
-  const { siblingNames } = useSiblingNames({ filePath });
+  const { siblingNames, refetchSiblings } = useSiblingNames({ filePath });
 
   const fullNewName = useMemo(() => {
     const trimmed = renameValue.trim();
@@ -64,7 +66,8 @@ export const useFileViewerHeaderRename = ({
   const startRename = useCallback(() => {
     setRenameValue(baseName);
     setIsRenaming(true);
-  }, [baseName]);
+    refetchSiblings();
+  }, [baseName, refetchSiblings]);
 
   const handleRenameSubmit = useCallback(async () => {
     if (!fullNewName || fullNewName === fileName || isDuplicateName) {
@@ -76,20 +79,26 @@ export const useFileViewerHeaderRename = ({
 
     setIsRenaming(false);
 
+    const parentPath = getParentPath(filePath);
+    const newPath = buildFullPath(parentPath, fullNewName);
+
+    updateFileStatePath(filePath, newPath);
+    updateTab(filePath, newPath, fullNewName);
+
     try {
-      await renameItem(filePath, fullNewName);
-
-      const parentPath = getParentPath(filePath);
-      const newPath = buildFullPath(parentPath, fullNewName);
-
-      updateFileStatePath(filePath, newPath);
-
-      updateTab(filePath, newPath, fullNewName);
+      await renameItem(filePath, fullNewName, {
+        name: fileName,
+        type: FILE_TYPE.FILE,
+        size: null,
+        owner: '',
+      });
     } catch (error) {
       captureException(error);
       toast.error(FILE_TOAST_MESSAGES.FAILED_TO_RENAME);
+
+      updateFileStatePath(newPath, filePath);
+      updateTab(newPath, filePath, fileName);
       setRenameValue(baseName);
-      setIsRenaming(false);
     }
   }, [fullNewName, fileName, baseName, filePath, isDuplicateName, renameItem, updateFileStatePath, updateTab]);
 

@@ -44,23 +44,23 @@ export const useFileViewer = ({
   onSaveError,
   onLoadError,
 }: UseFileViewerOptions): UseFileViewerReturn => {
+  // State
   const autoSaveTimerRef = useRef<NodeJS.Timeout | null>(null);
   const isSavingRef = useRef(false);
   const pendingSaveRef = useRef(false);
   const isPollingRef = useRef(false);
-
   const [mediaMtime, setMediaMtime] = useState<number | null>(null);
   const mediaMtimeRef = useRef(mediaMtime);
+  const [isFileNotFound, setIsFileNotFound] = useState(false);
 
+  // Hooks
   const { getFileState, initFileState, forceUpdateFileState, updateFileContent, markFileSaved } =
     useFileViewerContext();
-
   const [fetchFileMetadata] = useLazyReadFileQuery();
   const [fetchFileContent, { isLoading }] = useLazyReadFileContentQuery();
   const [writeFile, { isLoading: isSaving }] = useWriteFileMutation();
 
-  const [isFileNotFound, setIsFileNotFound] = useState(false);
-
+  // Derived State
   const fileState = filePath ? getFileState(filePath) : undefined;
 
   const fileCategory = useMemo(() => {
@@ -204,6 +204,10 @@ export const useFileViewer = ({
     }
   }, [filePath, isEditable, isFileNotFound, fetchFileMetadata, onLoadError]);
 
+  useEffect(() => {
+    setIsFileNotFound(false);
+  }, [filePath]);
+
   // Load file on mount
   useEffect(() => {
     loadFile();
@@ -232,23 +236,28 @@ export const useFileViewer = ({
     if (!filePath || !isEditable || !isActive || isFileNotFound) return;
 
     let stopped = false;
+    const polledPath = filePath;
 
     const pollForChanges = async () => {
       if (isPollingRef.current) return;
 
-      const currentState = getFileState(filePath);
+      const currentState = getFileState(polledPath);
 
       if (!currentState || currentState.isDirty) return;
 
       isPollingRef.current = true;
 
       try {
-        const metadata = await fetchFileMetadata({ path: filePath }).unwrap();
+        const metadata = await fetchFileMetadata({ path: polledPath }).unwrap();
+
+        if (stopped) return;
 
         if (metadata.mtime_ms !== currentState.mtime_ms) {
-          const content = await fetchFileContent({ path: filePath }).unwrap();
+          const content = await fetchFileContent({ path: polledPath }).unwrap();
 
-          forceUpdateFileState(filePath, content ?? '', metadata.mtime_ms);
+          if (stopped) return;
+
+          forceUpdateFileState(polledPath, content ?? '', metadata.mtime_ms);
         }
       } catch (err) {
         if (isNotFoundError(err)) {
@@ -266,7 +275,10 @@ export const useFileViewer = ({
       if (!stopped) pollForChanges();
     }, POLL_INTERVAL_MS);
 
-    return () => clearInterval(intervalId);
+    return () => {
+      stopped = true;
+      clearInterval(intervalId);
+    };
   }, [
     filePath,
     isEditable,
@@ -284,6 +296,7 @@ export const useFileViewer = ({
     if (!filePath || isEditable || !isActive || isFileNotFound) return;
 
     let stopped = false;
+    const polledPath = filePath;
 
     const pollForMediaChanges = async () => {
       if (isPollingRef.current) return;
@@ -291,7 +304,9 @@ export const useFileViewer = ({
       isPollingRef.current = true;
 
       try {
-        const metadata = await fetchFileMetadata({ path: filePath }).unwrap();
+        const metadata = await fetchFileMetadata({ path: polledPath }).unwrap();
+
+        if (stopped) return;
 
         if (metadata.mtime_ms !== mediaMtimeRef.current) {
           setMediaMtime(metadata.mtime_ms);
@@ -312,7 +327,10 @@ export const useFileViewer = ({
       if (!stopped) pollForMediaChanges();
     }, POLL_INTERVAL_MS);
 
-    return () => clearInterval(intervalId);
+    return () => {
+      stopped = true;
+      clearInterval(intervalId);
+    };
   }, [filePath, isEditable, isActive, isFileNotFound, fetchFileMetadata, onLoadError]);
 
   return {

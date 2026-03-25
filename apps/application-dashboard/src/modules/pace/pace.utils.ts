@@ -54,6 +54,30 @@ export const normalizeUrlPath = (str: string): string => {
 };
 
 /**
+ * Syncs the sidebar conversation param with the current URL state.
+ * - Strips any stale sidebar param from the given path
+ * - Adds the current sidebar param from the URL (if present)
+ * Safe to call server-side (returns the path unchanged when `window` is unavailable).
+ */
+export const preserveSidebarParam = (path: string): string => {
+  if (typeof window === 'undefined') return path;
+
+  const [basePath, existingQuery] = path.split('?');
+  const params = new URLSearchParams(existingQuery || '');
+  const currentSidebarId = new URLSearchParams(window.location.search).get(SIDEBAR_CONVERSATION_ID_PARAM);
+
+  params.delete(SIDEBAR_CONVERSATION_ID_PARAM);
+
+  if (currentSidebarId) {
+    params.set(SIDEBAR_CONVERSATION_ID_PARAM, currentSidebarId);
+  }
+
+  const query = params.toString();
+
+  return query ? `${basePath}?${query}` : basePath;
+};
+
+/**
  * Builds a URL string from the pathname and search params, excluding the sidebar conversation ID param.
  * Used to track meaningful route changes without reacting to sidebar-only navigation.
  * @param pathname - The current route pathname

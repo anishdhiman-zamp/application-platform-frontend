@@ -214,35 +214,6 @@ const CreateOrgModal: FC<CreateOrgModalProps> = ({ open, onClose, orgToProvision
     [onOrgReady, provisionOrg, refreshSession, stopPolling],
   );
 
-  useEffect(() => {
-    return () => {
-      stopPolling();
-    };
-  }, [stopPolling]);
-
-  useEffect(() => {
-    if (!open) {
-      stopPolling();
-
-      return;
-    }
-
-    setStep(ModalStep.INPUT);
-    setOrgName('');
-    setError(null);
-    setIsSubmitting(false);
-    setDisplayName('');
-    setExpectedSecs(null);
-    setActiveOrgToProvision(orgToProvision ?? null);
-    handleReset();
-
-    if (!orgToProvision?.organization_id || orgToProvision.provisioning_status === PROVISIONING_STATUS.COMPLETED) {
-      return;
-    }
-
-    void runProvisionPoll(orgToProvision);
-  }, [open, orgToProvision, handleReset, runProvisionPoll, stopPolling]);
-
   const handleSubmitCreate = async () => {
     const trimmed = orgName.trim();
 
@@ -309,6 +280,35 @@ const CreateOrgModal: FC<CreateOrgModalProps> = ({ open, onClose, orgToProvision
     setError(null);
     updateSeed(value);
   };
+
+  useEffect(() => {
+    return () => {
+      stopPolling();
+    };
+  }, [stopPolling]);
+
+  useEffect(() => {
+    if (!open) {
+      stopPolling();
+
+      return;
+    }
+
+    setStep(ModalStep.INPUT);
+    setOrgName('');
+    setError(null);
+    setIsSubmitting(false);
+    setDisplayName('');
+    setExpectedSecs(null);
+    setActiveOrgToProvision(orgToProvision ?? null);
+    handleReset();
+
+    if (!orgToProvision?.organization_id || orgToProvision.provisioning_status === PROVISIONING_STATUS.COMPLETED) {
+      return;
+    }
+
+    void runProvisionPoll(orgToProvision);
+  }, [open, orgToProvision, handleReset, runProvisionPoll, stopPolling]);
 
   const isProvisioning = step === ModalStep.PROVISIONING || step === ModalStep.TAKING_LONGER;
   const isLocked = step === ModalStep.PROVISIONING && !error;
