@@ -15,7 +15,7 @@ import {
   TooltipTrigger,
 } from '@zamp-platform/ui';
 import { cn } from '@zamp-platform/ui/utils';
-import { ThumbsDown } from 'lucide-react';
+import { ThumbsDown, ThumbsUp } from 'lucide-react';
 import React, { FC, useCallback, useMemo, useRef, useState } from 'react';
 import { toast } from 'sonner';
 
@@ -25,7 +25,7 @@ import { useLazyGetSpeechToTextAccessTokenQuery, useSubmitChatFeedbackMutation }
 import { useFileUpload } from '../hooks/useFileUpload';
 import { MicrophoneState } from '../hooks/useMicrophoneRecorder';
 import { useTranscription } from '../hooks/useTranscription';
-import { ChatFeedbackCategory } from '../types/chat.types';
+import { ChatFeedbackCategory, FeedbackSentiment } from '../types/chat.types';
 import { SOCKET_STATES, TranscriptionAdapter } from '../types/transcription.types';
 import { filesToFileList, filterPastedFiles } from '../utils/fileUpload';
 import { FileMimeType } from './chat.constants';
@@ -49,6 +49,7 @@ const ISSUE_TYPE_OPTIONS = [
   { label: 'Incomplete response', value: 'INCOMPLETE_RESPONSE' },
   { label: 'Should have searched the web', value: 'SHOULD_HAVE_SEARCHED_WEB' },
   { label: 'Memory not applied', value: 'MEMORY_NOT_APPLIED' },
+  { label: 'Know a better approach?', value: 'KNOW_BETTER_APPROACH' },
   { label: 'Report content', value: 'REPORT_CONTENT' },
   { label: 'Other', value: 'OTHER' },
 ];
@@ -76,6 +77,7 @@ const ChatFeedback: FC<ChatFeedbackProps> = ({
   const [issueType, setIssueType] = useState<string>('');
   const [details, setDetails] = useState('');
   const [feedbackGiven, setFeedbackGiven] = useState(false);
+  const [likeGiven, setLikeGiven] = useState(false);
 
   const [submitChatFeedback, { isLoading: isSubmitting }] = useSubmitChatFeedbackMutation();
   const [getSpeechToTextAccessToken] = useLazyGetSpeechToTextAccessTokenQuery({});
@@ -174,8 +176,28 @@ const ChatFeedback: FC<ChatFeedbackProps> = ({
 
   const isFormValid = issueType && details.trim();
 
+  const handleLikeClick = async () => {
+    if (likeGiven || feedbackGiven || disabled || !conversationId || !messageId) return;
+
+    try {
+      await submitChatFeedback({
+        conversationId,
+        messageId,
+        body: {
+          category: ChatFeedbackCategory.HELPFUL,
+          description: 'Helpful response',
+          sentiment: FeedbackSentiment.THUMBS_UP,
+        },
+      }).unwrap();
+
+      setLikeGiven(true);
+    } catch {
+      toast.error('Failed to submit feedback');
+    }
+  };
+
   const handleDislikeClick = () => {
-    if (feedbackGiven || disabled) return;
+    if (feedbackGiven || likeGiven || disabled) return;
     setIsModalOpen(true);
   };
 
@@ -192,6 +214,7 @@ const ChatFeedback: FC<ChatFeedbackProps> = ({
           category: issueType as ChatFeedbackCategory,
           description: details.trim(),
           file_upload_ids: fileUploadIds,
+          sentiment: FeedbackSentiment.THUMBS_DOWN,
         },
       }).unwrap();
 
@@ -262,8 +285,35 @@ const ChatFeedback: FC<ChatFeedbackProps> = ({
               <Button
                 variant='ghost'
                 size='icon'
+                onClick={handleLikeClick}
+                disabled={likeGiven || feedbackGiven || disabled}
+                isLoading={isSubmitting && likeGiven}
+                className={cn(
+                  'hover:bg-GRAY_100 active:bg-GRAY_300 hover:text-GRAY_700 size-[26px] rounded-md p-[2px]',
+                  likeGiven && 'bg-none',
+                  className,
+                )}
+                aria-label='Good response'
+              >
+                <ThumbsUp size={14} className={cn('text-GRAY_700', likeGiven && 'text-black')} />
+              </Button>
+            </span>
+          </TooltipTrigger>
+          <TooltipContent side='bottom' align='center' className='f-10-450 p-1.5' sideOffset={4}>
+            <p>Give positive feedback</p>
+          </TooltipContent>
+        </Tooltip>
+      </TooltipProvider>
+
+      <TooltipProvider delayDuration={500}>
+        <Tooltip>
+          <TooltipTrigger asChild>
+            <span className='inline-flex'>
+              <Button
+                variant='ghost'
+                size='icon'
                 onClick={handleDislikeClick}
-                disabled={feedbackGiven || disabled}
+                disabled={feedbackGiven || likeGiven || disabled}
                 className={cn(
                   'hover:bg-GRAY_100 active:bg-GRAY_300 hover:text-GRAY_700 size-[26px] rounded-md p-[2px]',
                   feedbackGiven && 'bg-none',
