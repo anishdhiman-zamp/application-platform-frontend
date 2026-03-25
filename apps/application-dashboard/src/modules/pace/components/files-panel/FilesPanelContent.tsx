@@ -15,7 +15,6 @@ import FilesEmptyState from '@/modules/pace/components/files/FilesEmptyState';
 import FileTree from '@/modules/pace/components/files/FileTree';
 import FilesPanelToolbar from '@/modules/pace/components/files-panel/FilesPanelToolbar';
 import { useFileUploadContext } from '@/modules/pace/context/FileUploadContext';
-import { useFilesystemStatus } from '@/modules/pace/hooks/useFilesystemStatus';
 import { TAB_TYPE } from '@/modules/pace/pace.types';
 import { defaultFnType } from '@/types/commonTypes';
 
@@ -23,12 +22,6 @@ const FilesPanelContent = () => {
   const collapseAllRef = useRef<defaultFnType | null>(null);
   const { uploadFiles, uploadFolder, uploadingItems, clearUploadingItems, registerLoadFolder } = useFileUploadContext();
   const { openTab } = useDynamicTabs({ type: TAB_TYPE.FILE });
-  const {
-    isFilesystemActive,
-    isFilesystemStatusLoading,
-    isFilesystemError,
-    refetch: refetchStatus,
-  } = useFilesystemStatus();
 
   const [searchInput, setSearchInput] = useState('');
   const [debouncedSearchQuery, setDebouncedSearchQuery] = useState('');
@@ -104,31 +97,6 @@ const FilesPanelContent = () => {
       clearUploadingItems();
     }
   }, [files, uploadingItems, clearUploadingItems]);
-
-  if (isFilesystemStatusLoading || (!isFilesystemActive && !isFilesystemError)) {
-    return (
-      <div className='flex flex-1 items-center justify-center'>
-        <ImageLoader imageSrc={ZAMP_LOGO_LOADER_SVG} width={100} height={100} />
-      </div>
-    );
-  }
-
-  if (isFilesystemError) {
-    return (
-      <div className='flex flex-1 items-center justify-center p-4'>
-        <CommonWrapper
-          isError
-          refetchFunction={refetchStatus}
-          skeletonType={SkeletonTypes.CUSTOM}
-          loader={null}
-          className='flex-1'
-          disableAnimation
-        >
-          {null}
-        </CommonWrapper>
-      </div>
-    );
-  }
 
   return (
     <div className='flex min-h-0 flex-1 flex-col'>

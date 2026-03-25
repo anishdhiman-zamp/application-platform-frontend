@@ -6,8 +6,6 @@ import { useSyncedUrlParam } from '@/modules/pace/hooks/useSyncedSearchParam';
 const ChatPage = () => {
   const filePath = useSyncedUrlParam('f');
 
-  console.log('filePath', filePath);
-
   if (filePath) {
     return <FileTabsContainer />;
   }

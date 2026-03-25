@@ -7,6 +7,7 @@ import { format } from 'date-fns';
 import { BookText } from 'lucide-react';
 import SubtaskPopover from 'modules/pace/components/tasks/SubtaskPopover';
 import type { TaskListItem } from 'modules/pace/components/tasks/task-listing.types';
+import { preserveSidebarParam } from 'modules/pace/pace.utils';
 import { useRouter } from 'next/navigation';
 import Avatar from '@/components/common/avatar';
 import { getChatTaskRoute } from '@/constants/routeConfig';
@@ -20,7 +21,9 @@ const TaskRow = ({ task }: TaskRowProps) => {
   const router = useRouter();
 
   const handleRowClick = useCallback(() => {
-    router.push(getChatTaskRoute(task?.id || '', '', task?.title || ''));
+    const taskRoute = getChatTaskRoute({ taskId: task?.id || '', taskTitle: task?.title || '' });
+
+    router.push(preserveSidebarParam(taskRoute));
   }, [router, task?.id, task?.title]);
 
   const totalSubtasks = task.subtasks.length;
