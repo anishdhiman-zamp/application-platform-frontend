@@ -75,24 +75,23 @@ describe('Button Component - Functional Tests', () => {
 
   it('does not cause infinite re-renders when toggling isLoading', () => {
     // Regression test for: "Maximum update depth exceeded" (Sentry: APPLICATION-PLATFORM-DASHBOARD-BC)
-    // The useLayoutEffect was calling setMinWidth unconditionally, causing an infinite loop
-    // when isLoading toggled and triggered re-renders that re-ran the effect.
-    const renderSpy = jest.fn();
+    // Mock offsetWidth to non-zero so the setMinWidth code path is actually exercised.
+    // Without this, jsdom returns 0 and the `if (width > 0)` guard skips the buggy path entirely.
+    Object.defineProperty(HTMLElement.prototype, 'offsetWidth', {
+      configurable: true,
+      get: jest.fn(() => 100),
+    });
 
-    const TestWrapper = ({ isLoading }: { isLoading: boolean }) => {
-      renderSpy();
-      return <Button isLoading={isLoading}>Submit</Button>;
-    };
+    expect(() => {
+      const { rerender } = render(<Button isLoading={false}>Submit</Button>);
+      rerender(<Button isLoading={true}>Submit</Button>);
+      rerender(<Button isLoading={false}>Submit</Button>);
+    }).not.toThrow(); // 'Maximum update depth exceeded' would throw here without the fix
 
-    const { rerender } = render(<TestWrapper isLoading={false} />);
-    const initialRenderCount = renderSpy.mock.calls.length;
-
-    rerender(<TestWrapper isLoading={true} />);
-    rerender(<TestWrapper isLoading={false} />);
-
-    // Allow a small number of renders for legitimate state updates (minWidth capture),
-    // but not an unbounded number that would indicate an infinite loop.
-    expect(renderSpy.mock.calls.length).toBeLessThan(initialRenderCount + 10);
+    Object.defineProperty(HTMLElement.prototype, 'offsetWidth', {
+      configurable: true,
+      get: () => 0,
+    });
   });
 });
 
