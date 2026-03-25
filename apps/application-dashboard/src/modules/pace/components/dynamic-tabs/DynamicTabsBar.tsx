@@ -23,10 +23,11 @@ import {
 import DynamicTabItem from '@/modules/pace/components/dynamic-tabs/DynamicTabItem';
 import OverflowTabsPopover from '@/modules/pace/components/dynamic-tabs/OverflowTabsPopover';
 import SortableDynamicTabItem from '@/modules/pace/components/dynamic-tabs/SortableDynamicTabItem';
-import { isSameBasePath, preserveSidebarParam } from '@/modules/pace/components/dynamic-tabs/tab-registry';
+import { isSameBasePath } from '@/modules/pace/components/dynamic-tabs/tab-registry';
 import { useDynamicTabs } from '@/modules/pace/components/dynamic-tabs/useDynamicTabs';
 import { useVisibleTabCount } from '@/modules/pace/components/dynamic-tabs/useVisibleTabCount';
 import { usePaceContext } from '@/modules/pace/pace.context';
+import { preserveSidebarParam } from '@/modules/pace/pace.utils';
 
 const DynamicTabsBar = () => {
   const router = useRouter();

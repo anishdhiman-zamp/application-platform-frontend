@@ -10,8 +10,8 @@ import {
   isOnAnyTabBasePath,
   isOnBasePath,
   isSameBasePath,
-  preserveSidebarParam,
 } from 'modules/pace/components/dynamic-tabs/tab-registry';
+import { preserveSidebarParam } from 'modules/pace/pace.utils';
 import { usePathname, useRouter } from 'next/navigation';
 import { usePaceContext } from '@/modules/pace/pace.context';
 import { DynamicTab, DynamicTabType, TAB_TYPE } from '@/modules/pace/pace.types';
