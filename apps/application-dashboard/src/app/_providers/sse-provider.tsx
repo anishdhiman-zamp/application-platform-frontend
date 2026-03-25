@@ -510,11 +510,26 @@ export const SSEProvider: React.FC<SSEProviderProps> = ({ children, sseEventBus 
     );
     const taskUpdateSub = sseEventBus.subscribe(EVENT_TYPE.TASK_UPDATE, handleGlobalTaskUpdate);
 
+    const browserLiveAvailableSub = sseEventBus.subscribe(
+      EVENT_TYPE.BROWSER_LIVE_VIEW_AVAILABLE,
+      (data: BaseEventPayload) => {
+        window.dispatchEvent(new MessageEvent('sse:browser_live_view_available', { data: JSON.stringify(data) }));
+      },
+    );
+    const browserLiveUnavailableSub = sseEventBus.subscribe(
+      EVENT_TYPE.BROWSER_LIVE_VIEW_UNAVAILABLE,
+      (data: BaseEventPayload) => {
+        window.dispatchEvent(new MessageEvent('sse:browser_live_view_unavailable', { data: JSON.stringify(data) }));
+      },
+    );
+
     return () => {
       streamSub.unsubscribe();
       convSub.unsubscribe();
       taskSub.unsubscribe();
       taskUpdateSub.unsubscribe();
+      browserLiveAvailableSub.unsubscribe();
+      browserLiveUnavailableSub.unsubscribe();
     };
   }, [sseEventBus]);
 

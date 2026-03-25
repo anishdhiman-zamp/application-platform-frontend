@@ -1,6 +1,9 @@
 export const TOOL_NAMES = {
   AUTHENTICATE_INTEGRATION_AND_CREATE_CONNECTION: 'authenticate_integration_and_create_connection',
+  EXECUTE_BROWSER_COMMAND: 'execute_browser_command',
 } as const;
+
+export const BROWSER_TOOL_DISPLAY_NAMES = ['Execute browser command', 'Using Browser', 'Browser'] as const;
 
 export enum FILE_MIME {
   APPLICATION_PDF = 'application/pdf',

@@ -77,6 +77,8 @@ export const enum SSEEventType {
   MESSAGE_STOP = 'message_stop',
   OUTPUT_FILES = 'output_files',
   TITLE_UPDATED = 'title_updated',
+  BROWSER_LIVE_VIEW_AVAILABLE = 'browser_live_view_available',
+  BROWSER_LIVE_VIEW_UNAVAILABLE = 'browser_live_view_unavailable',
 }
 
 export const enum ChatMessageType {
@@ -303,6 +305,18 @@ export interface GetFileDownloadUrlResponseType {
 export interface GetOutputFileDownloadRequestType {
   conversationId: string;
   filename: string;
+}
+
+export interface GetBrowserLiveViewNovncRequestType {
+  conversationId: string;
+  sessionId: string;
+}
+
+export interface BrowserLiveViewNovncResponseType {
+  novnc_url: string;
+  /** Same-origin Pantheon proxy for iframes; falls back to novnc_url if absent. */
+  proxy_iframe_url?: string | null;
+  expires_in_seconds: number;
 }
 
 /**

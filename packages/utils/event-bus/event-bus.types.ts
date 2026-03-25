@@ -57,4 +57,6 @@ export const enum EVENT_TYPE {
   DATASET = 'dataset',
   PROCESS = 'process',
   CONNECTION_UPDATE = 'connection_update',
+  BROWSER_LIVE_VIEW_AVAILABLE = 'browser_live_view_available',
+  BROWSER_LIVE_VIEW_UNAVAILABLE = 'browser_live_view_unavailable',
 }
