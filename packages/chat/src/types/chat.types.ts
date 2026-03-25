@@ -419,7 +419,7 @@ export const enum ChatFeedbackCategory {
   OTHER = 'OTHER',
 }
 
-export enum FeedbackSentiment {
+export const enum FeedbackSentiment {
   THUMBS_UP = 'thumbs_up',
   THUMBS_DOWN = 'thumbs_down',
 }

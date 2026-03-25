@@ -95,6 +95,57 @@ describe('Button Component - Functional Tests', () => {
   });
 });
 
+describe('Button Component - Chat Feedback thumbs up/down behaviour', () => {
+  it('thumbs-up button is disabled after being clicked (feedback locked)', () => {
+    const handleLike = jest.fn();
+    const { rerender, getByRole } = render(
+      <Button variant='ghost' size='icon' onClick={handleLike} aria-label='Good response'>
+        👍
+      </Button>,
+    );
+
+    const btn = getByRole('button', { name: 'Good response' });
+    fireEvent.click(btn);
+    expect(handleLike).toHaveBeenCalledTimes(1);
+
+    rerender(
+      <Button variant='ghost' size='icon' onClick={handleLike} disabled aria-label='Good response'>
+        👍
+      </Button>,
+    );
+
+    expect(getByRole('button', { name: 'Good response' })).toBeDisabled();
+  });
+
+  it('thumbs-down button is disabled after thumbs-up is clicked (mutual exclusion)', () => {
+    const { getByRole } = render(
+      <>
+        <Button variant='ghost' size='icon' disabled aria-label='Good response'>
+          👍
+        </Button>
+        <Button variant='ghost' size='icon' disabled aria-label='Bad response'>
+          👎
+        </Button>
+      </>,
+    );
+
+    expect(getByRole('button', { name: 'Good response' })).toBeDisabled();
+    expect(getByRole('button', { name: 'Bad response' })).toBeDisabled();
+  });
+
+  it('thumbs-up button does not fire click when disabled', () => {
+    const handleLike = jest.fn();
+    const { getByRole } = render(
+      <Button variant='ghost' size='icon' onClick={handleLike} disabled aria-label='Good response'>
+        👍
+      </Button>,
+    );
+
+    fireEvent.click(getByRole('button', { name: 'Good response' }));
+    expect(handleLike).not.toHaveBeenCalled();
+  });
+});
+
 // Removed excessive variant/size combinations - keeping only critical ones
 describe('Button Component - Critical Variant Tests', () => {
   it('renders all variants with default size correctly', () => {
