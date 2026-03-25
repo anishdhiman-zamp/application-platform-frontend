@@ -252,7 +252,7 @@ const FileTreeContent = ({
             onTriggerFolderUpload={triggerFolderUpload}
             onDragOverFolderChange={handleDragOverFolderChange}
             isSearchActive={!!searchQuery}
-            isLoadingChildren={(loadingFolders?.size ?? 0) > 0}
+            loadingFolders={loadingFolders}
           />
           {dragOverlayBounds && (
             <div

@@ -25,7 +25,7 @@ interface StickyNestedTreeProps {
   onTriggerFolderUpload: (targetPath: string) => void;
   onDragOverFolderChange: (path: string | null) => void;
   isSearchActive: boolean;
-  isLoadingChildren: boolean;
+  loadingFolders?: Set<string>;
 }
 
 interface RenderContext {
@@ -46,7 +46,7 @@ interface RenderContext {
   onTriggerFolderUpload: (targetPath: string) => void;
   onDragOverFolderChange: (path: string | null) => void;
   isSearchActive: boolean;
-  isLoadingChildren: boolean;
+  loadingFolders?: Set<string>;
 }
 
 function getSiblingNames(nodes: TreeNode[]): string[] {
@@ -102,7 +102,7 @@ function renderSiblings(
         }}
       >
         <div
-          className={isExpanded ? 'bg-BG_GRAY_2 sticky-folder-row' : undefined}
+          className={isExpanded ? 'sticky-folder-row' : undefined}
           style={
             isExpanded
               ? {
@@ -110,6 +110,7 @@ function renderSiblings(
                   top: depth * ctx.rowHeight,
                   zIndex: MAX_STICKY_Z_INDEX - depth,
                   height: ctx.rowHeight,
+                  backgroundColor: 'var(--BG_WHITE)',
                 }
               : { height: ctx.rowHeight }
           }
@@ -132,6 +133,7 @@ function renderSiblings(
             onTriggerFolderUpload={ctx.onTriggerFolderUpload}
             onDragOverFolderChange={ctx.onDragOverFolderChange}
             isSearchActive={ctx.isSearchActive}
+            isLoadingChildren={ctx.loadingFolders?.has(node.path) ?? false}
             style={{ height: ctx.rowHeight }}
           />
         </div>
@@ -175,7 +177,7 @@ const StickyNestedTree = memo(function StickyNestedTree(props: StickyNestedTreeP
     onTriggerFolderUpload,
     onDragOverFolderChange,
     isSearchActive,
-    isLoadingChildren,
+    loadingFolders,
   } = props;
 
   const descendantCounts = useMemo(() => buildDescendantCountMap(treeData, expandedPaths), [treeData, expandedPaths]);
@@ -199,7 +201,7 @@ const StickyNestedTree = memo(function StickyNestedTree(props: StickyNestedTreeP
       onTriggerFolderUpload,
       onDragOverFolderChange,
       isSearchActive,
-      isLoadingChildren,
+      loadingFolders,
     }),
     [
       expandedPaths,
@@ -219,7 +221,7 @@ const StickyNestedTree = memo(function StickyNestedTree(props: StickyNestedTreeP
       onTriggerFolderUpload,
       onDragOverFolderChange,
       isSearchActive,
-      isLoadingChildren,
+      loadingFolders,
     ],
   );
 
