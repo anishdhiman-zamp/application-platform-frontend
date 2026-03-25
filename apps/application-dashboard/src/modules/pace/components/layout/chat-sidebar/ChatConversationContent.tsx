@@ -82,9 +82,11 @@ const ChatConversationContent: FC<ChatConversationContentProps> = ({
   const isAnalysing = useMemo(() => {
     return chat.messages.length > 0 && chat.messages[chat.messages.length - 1]?.sender_type === SenderType.USER;
   }, [chat.messages]);
-  const isLoadingConversation = Boolean(conversationId && chat.isLoadingConversationHistory) || !hasMessages;
   const isInConversation = Boolean(conversationId || chat.conversationId || hasMessages);
   const showHomeView = isOnChatRoute && !isInConversation;
+  const lastMessageSenderType = useMemo(() => chat.messages[chat.messages.length - 1]?.sender_type, [chat.messages]);
+  const isLoadingConversation =
+    !hasMessages || Boolean(conversationId && chat.isLoadingConversationHistory && !hasMessages);
 
   const handleConversationCreated = useCallback(() => {
     dispatch(baseApi.util.invalidateTags([APITags.GET_CONVERSATION_HISTORY]));
@@ -152,6 +154,10 @@ const ChatConversationContent: FC<ChatConversationContentProps> = ({
         <DropOverlay isVisible={isDragOver} />
         <ScrollContainer
           showScrollToBottom
+          enableAnchorScroll
+          lastMessageSenderType={lastMessageSenderType}
+          isLoading={isLoadingConversation}
+          streamingState={chat.streamingState}
           scrollTrigger={chat.messages?.length}
           disableFadeOverlay={isTaskPopoverOpen}
           scrollClassName={cn('bg-BG_WHITE', isTaskPopoverOpen ? 'overflow-y-hidden' : 'overflow-y-scroll')}
