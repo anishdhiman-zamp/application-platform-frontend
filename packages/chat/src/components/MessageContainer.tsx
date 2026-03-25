@@ -7,7 +7,7 @@ import React, { FC, ReactNode, useEffect, useRef, useState } from 'react';
 import PaceAvatar from '@/modules/chatbot/PaceAvatar';
 
 import { ButtonBlockType } from '../types/block.types';
-import { ChatMessage, StreamingState } from '../types/chat.types';
+import { ChatMessage, SenderType, StreamingState } from '../types/chat.types';
 import { getMessageKey } from '../utils/message.utils';
 import Message from './Message';
 import { StreamingMessage } from './StreamingMessage';
@@ -54,7 +54,7 @@ export const MessageContainer: FC<MessageContainerProps> = ({
   });
   const defaultAssistantAvatar = assistantAvatar ?? <PaceAvatar />;
   const lastMessage = messages?.[messages.length - 1];
-  const isNewUserMessage = lastMessage?.sender_type === 'USER' && messages.length > animatedLength;
+  const isNewUserMessage = lastMessage?.sender_type === SenderType.USER && messages.length > animatedLength;
   const [showAnalysing, setShowAnalysing] = useState(false);
   const scrollRef = useScrollRef();
   const isNewUserMessageRef = useRef(isNewUserMessage);
@@ -92,10 +92,10 @@ export const MessageContainer: FC<MessageContainerProps> = ({
     // then wait for the 300ms message entrance animation before showing Analysing.
     const el = scrollRef.current;
 
-    let animTimer: ReturnType<typeof setTimeout> | null = null;
+    let showAnalysingTimer: ReturnType<typeof setTimeout> | null = null;
 
     const show = () => {
-      animTimer = setTimeout(() => setShowAnalysing(true), 300);
+      showAnalysingTimer = setTimeout(() => setShowAnalysing(true), 300);
     };
 
     if (el) {
@@ -112,7 +112,7 @@ export const MessageContainer: FC<MessageContainerProps> = ({
 
     return () => {
       if (el) el.removeEventListener('chatScrollEnd', show);
-      if (animTimer) clearTimeout(animTimer);
+      if (showAnalysingTimer) clearTimeout(showAnalysingTimer);
       clearTimeout(fallback);
     };
   }, [isAnalysing, scrollRef]);

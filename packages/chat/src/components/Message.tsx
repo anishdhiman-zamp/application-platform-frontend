@@ -28,7 +28,6 @@ export interface MessageProps {
   showCopy?: boolean;
   feedbackDisabled?: boolean;
   isLastMessage?: boolean;
-  /** Whether to play the entrance animation (controlled by parent to avoid re-triggering on remount) */
   shouldAnimate?: boolean;
   alignUserRight?: boolean;
   organizationId?: string;
@@ -57,20 +56,19 @@ export const Message: FC<MessageProps> = ({
   organizationId,
   streamingEnabled = true,
 }) => {
-  const scrollRef = useScrollRef();
   const cleanupRef = useRef<defaultFnType | null>(null);
+  const contentRef = useRef<HTMLDivElement>(null);
+  const scrollRef = useScrollRef();
+
   const [animationReady, setAnimationReady] = useState(false);
   const [isExpanded, setIsExpanded] = useState(false);
   const [isOverflowing, setIsOverflowing] = useState(false);
-  const contentRef = useRef<HTMLDivElement>(null);
-  const isUserMessage = message.sender_type === SenderType.USER;
 
-  const toggleExpanded = useCallback(() => {
-    setIsExpanded((prev) => !prev);
-  }, []);
+  const isUserMessage = message.sender_type === SenderType.USER;
   const shouldAlignRight = alignUserRight && isUserMessage;
   const sharedClassName = cn('group space-y-3', shouldAlignRight && 'flex flex-col items-end', containerClassName);
 
+  const toggleExpanded = () => setIsExpanded((prev) => !prev);
   const formattedTimestamp = useMemo(
     () => (message.timestamp ? formatChatTimestamp(formatTimestampToUTC(message.timestamp)) : ''),
     [message.timestamp],
@@ -80,6 +78,24 @@ export const Message: FC<MessageProps> = ({
     () => (message.timestamp ? formatChatTimestampTooltip(formatTimestampToUTC(message.timestamp)) : ''),
     [message.timestamp],
   );
+
+  const subscribeToScrollEnd = useCallback((el: HTMLElement) => {
+    const handleScrollEnd = () => setAnimationReady(true);
+
+    // Fallback: if chatScrollEnd never fires (e.g. very fast scroll or
+    // browsers that don't support scrollend), start after 800 ms.
+    const fallback = setTimeout(() => {
+      el.removeEventListener('chatScrollEnd', handleScrollEnd);
+      setAnimationReady(true);
+    }, 800);
+
+    el.addEventListener('chatScrollEnd', handleScrollEnd, { once: true });
+
+    return () => {
+      el.removeEventListener('chatScrollEnd', handleScrollEnd);
+      clearTimeout(fallback);
+    };
+  }, []);
 
   useEffect(() => {
     const el = contentRef.current;
@@ -114,30 +130,13 @@ export const Message: FC<MessageProps> = ({
     }
 
     setAnimationReady(false);
-
-    const handleScrollEnd = () => {
-      setAnimationReady(true);
-    };
-
-    // Fallback: if chatScrollEnd never fires (e.g. very fast scroll or
-    // browsers that don't support scrollend), start after 800 ms.
-    const fallback = setTimeout(() => {
-      el.removeEventListener('chatScrollEnd', handleScrollEnd);
-      setAnimationReady(true);
-    }, 800);
-
-    el.addEventListener('chatScrollEnd', handleScrollEnd, { once: true });
-
-    cleanupRef.current = () => {
-      el.removeEventListener('chatScrollEnd', handleScrollEnd);
-      clearTimeout(fallback);
-    };
+    cleanupRef.current = subscribeToScrollEnd(el);
 
     return () => {
       cleanupRef.current?.();
       cleanupRef.current = null;
     };
-  }, [shouldAnimate, scrollRef]);
+  }, [shouldAnimate, scrollRef, subscribeToScrollEnd]);
 
   const innerContent = (
     <>
