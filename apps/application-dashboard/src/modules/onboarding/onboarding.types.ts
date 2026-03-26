@@ -94,31 +94,6 @@ export type CheckUsernameResponse = {
   username: string;
 };
 
-// POST /organizations/register
-export type RegisterOrgRequest = {
-  organization_name: string;
-  owner_id: string;
-  icon_type?: MediaType | null;
-  icon_value?: string | null;
-};
-
-export type RegisterOrgResponse = {
-  organization: {
-    organization_id: string;
-    name: string;
-    slug: string;
-  };
-  user_id: string;
-};
-
-// POST /organizations/{organization_id}/provision
-export type OrgProvisioningStatusResponse = {
-  provisioning_status: ProvisioningStatus;
-  started_at: string | null;
-  expected_completion_seconds: number | null;
-  is_completed: boolean;
-};
-
 export type AvatarState = {
   type: MediaType;
   value: string;
