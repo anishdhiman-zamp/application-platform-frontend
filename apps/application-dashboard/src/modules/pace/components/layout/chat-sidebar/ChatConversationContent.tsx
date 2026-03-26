@@ -204,10 +204,7 @@ const ChatConversationContent: FC<ChatConversationContentProps> = ({
           )}
         </ScrollContainer>
       </div>
-      <div
-        ref={taskStatusContainerRef}
-        className='bg-BG_WHITE sticky bottom-0 z-10 mx-auto w-full max-w-[700px] px-3 pb-3'
-      >
+      <div ref={taskStatusContainerRef} className='bg-BG_WHITE sticky bottom-0 z-10 mx-auto w-full max-w-[700px] px-3'>
         <TaskStatusCounts
           messages={chat.messages}
           streamingState={chat.streamingState}
