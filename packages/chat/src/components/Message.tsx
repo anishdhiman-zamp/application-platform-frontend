@@ -160,12 +160,12 @@ export const Message: FC<MessageProps> = ({
           />
         </div>
         {isUserMessage && isOverflowing && !isExpanded && (
-          <div className='from-GRAY_100 pointer-events-none absolute inset-x-0 bottom-0 h-16 rounded-b-[10px] bg-linear-to-t from-10% to-transparent' />
+          <div className='from-GRAY_100 pointer-events-none absolute inset-x-0 bottom-0 h-16 rounded-b-[10px] bg-linear-to-t from-20% to-transparent' />
         )}
         {isUserMessage && isOverflowing && (
           <div
             onClick={toggleExpanded}
-            className='text-GRAY_900 hover:text-GRAY_1000 relative z-10 mt-2 flex cursor-pointer items-center gap-0.5 text-xs font-medium transition-colors'
+            className='text-GRAY_900 hover:text-GRAY_1000 relative z-10 mt-1 flex cursor-pointer items-center gap-0.5 text-xs font-medium transition-colors'
           >
             {isExpanded ? 'See less ' : 'See more'}
           </div>
