@@ -9,6 +9,7 @@ export const enum PaceNavbarItemId {
   INTEGRATIONS = 'integrations',
   FILES = 'files',
   GENERAL = 'general',
+  DATASETS = 'datasets',
   TASKS = 'task',
 }
 
