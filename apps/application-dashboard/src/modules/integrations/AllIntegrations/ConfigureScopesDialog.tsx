@@ -118,6 +118,7 @@ const ConfigureScopesDialog: FC<ConfigureScopesDialogProps> = ({
                   <button
                     type='button'
                     onClick={() => handleRemoveScope(scope)}
+                    aria-label={`Remove scope ${scope}`}
                     className='text-GRAY_600 ml-2 shrink-0 cursor-pointer transition-colors hover:text-red-600'
                   >
                     <Trash2 className='h-3.5 w-3.5' />

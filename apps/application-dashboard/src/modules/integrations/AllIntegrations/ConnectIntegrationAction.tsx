@@ -59,6 +59,7 @@ const ConnectIntegrationAction: FC<ConnectIntegrationActionProps> = ({
       }
 
       setIsDialogOpen(false);
+      setScopes([]);
     } catch {
       toast.error('Failed to connect integration');
     }
@@ -121,7 +122,7 @@ const ConnectIntegrationAction: FC<ConnectIntegrationActionProps> = ({
         isOpen={isEmailForwardingDialogOpen}
         onClose={() => setIsEmailForwardingDialogOpen(false)}
       />
-      {supportsScopes && (
+      {supportsScopes && !redirectUrl && (
         <ConfigureScopesDialog
           integrationTitle={title}
           isOpen={isScopesDialogOpen}
