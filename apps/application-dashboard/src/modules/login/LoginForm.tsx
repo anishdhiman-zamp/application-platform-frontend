@@ -93,6 +93,8 @@ async function triggerLinkingOtp(flow: LoginFlow): Promise<LoginFlow | null> {
     }),
   });
 
+  if (!resp.ok) return null;
+
   const data = await resp.json();
 
   if (!data.ui) return null;
@@ -384,6 +386,8 @@ export const LoginForm = () => {
 
       if (nodes.length === 1 && nodes[0]?.group === LOGIN_GROUPS.OIDC) {
         await initiateOidcLogin(flow!.ui.action, flow!.ui.method, nodes[0].attributes.value as LOGIN_PROVIDERS, email);
+
+        return new Promise<LoginFlow>(() => {});
       }
 
       return null;
