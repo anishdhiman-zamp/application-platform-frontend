@@ -163,7 +163,7 @@ const TaskBlock: FC<TaskBlockProps> = ({ payload, conversationId }) => {
     return (
       <div className='flex flex-1 items-center gap-3'>
         {status === TASK_STATUS.IN_PROGRESS ? (
-          <ShimmerText text={toolCall.displayName ?? 'Unknown'} autoAnimate={true} />
+          <ShimmerText className='f-14-450' text={toolCall.displayName ?? 'Unknown'} autoAnimate={true} />
         ) : (
           <span className='text-GRAY_950 f-14-450'>{toolCall.displayName ?? 'Unknown'}</span>
         )}
