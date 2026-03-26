@@ -84,6 +84,8 @@ export const ToolCallBlock: FC<ToolCallBlockProps> = ({
         className='my-6'
         integrationItem={integrationItem}
         redirectUrl={toolResultData?.metadata?.redirect_url}
+        buttonVariant='default'
+        isToolCallBlock
       />
     );
   }

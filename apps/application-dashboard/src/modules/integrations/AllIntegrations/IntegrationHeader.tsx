@@ -10,7 +10,7 @@ const IntegrationHeader: FC = () => {
   const ctx = useOptionalIntegrationsContext();
   const setSearchQuery = ctx?.setSearchQuery;
 
-  const [inputValue, setInputValue] = useState('');
+  const [inputValue, setInputValue] = useState(ctx?.searchQuery ?? '');
 
   const handleChange = useCallback((value: string) => {
     setInputValue(value);

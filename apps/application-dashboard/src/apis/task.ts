@@ -16,9 +16,12 @@ interface GetTasksByStatusParams {
 
 const taskApi = baseApi.injectEndpoints({
   endpoints: (builder) => ({
-    getTaskCounts: builder.query<TaskListingCountsResponse, void>({
-      query: () => ({
+    getTaskCounts: builder.query<TaskListingCountsResponse, { search?: string } | void>({
+      query: (args) => ({
         url: API_ENDPOINTS.TASKS_COUNTS_GET,
+        params: {
+          search: (args && 'search' in args && args.search) || undefined,
+        },
       }),
       providesTags: [APITags.GET_TASK_COUNTS],
     }),

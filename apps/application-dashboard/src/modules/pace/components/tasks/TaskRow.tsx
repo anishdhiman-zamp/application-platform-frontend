@@ -2,7 +2,7 @@
 
 import { useCallback, useMemo } from 'react';
 import { TASK_STATUS, TaskStatusIcon } from '@zamp-platform/chat';
-import { CSS_VARS } from '@zamp-platform/ui';
+import { CSS_VARS, Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@zamp-platform/ui';
 import { format } from 'date-fns';
 import { BookText } from 'lucide-react';
 import SubtaskPopover from 'modules/pace/components/tasks/SubtaskPopover';
@@ -51,9 +51,12 @@ const TaskRow = ({ task }: TaskRowProps) => {
         {totalSubtasks > 0 && (
           <SubtaskPopover subtasks={task.subtasks} completedCount={completedSubtasks} totalCount={totalSubtasks} />
         )}
-        <div className='bg-GRAY_400 h-px w-[5px] shrink-0' />
-
-        {task?.description && <p className='f-13-450 text-GRAY_700 min-w-0 flex-1 truncate'>{task?.description}</p>}
+        {task?.description && (
+          <>
+            <div className='bg-GRAY_400 h-px w-[5px] shrink-0' />
+            <p className='f-13-450 text-GRAY_700 min-w-0 flex-1 truncate'>{task.description}</p>
+          </>
+        )}
       </div>
 
       <div className='flex shrink-0 items-center gap-3.5 px-4 py-2.5'>
@@ -64,11 +67,20 @@ const TaskRow = ({ task }: TaskRowProps) => {
           </span>
         </div>
 
-        <Avatar
-          name={task?.created_by?.name || ''}
-          backgroundColor={CSS_VARS.ORANGE_400}
-          className='f-12-300 text-GRAY_1000 h-5 min-w-5 text-[9px]! font-medium!'
-        />
+        <TooltipProvider delayDuration={100}>
+          <Tooltip>
+            <TooltipTrigger>
+              <Avatar
+                name={task?.created_by?.name || ''}
+                backgroundColor={CSS_VARS.ORANGE_400}
+                className='f-12-300 text-GRAY_1000 h-5 min-w-5 text-[9px]! font-medium!'
+              />
+            </TooltipTrigger>
+            <TooltipContent side='top' sideOffset={8}>
+              Created by {task?.created_by?.name}
+            </TooltipContent>
+          </Tooltip>
+        </TooltipProvider>
         <span className='f-13-450 text-GRAY_700 w-[52px] text-right whitespace-nowrap'>
           {format(new Date(task?.created_at), 'MMM d')}
         </span>

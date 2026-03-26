@@ -25,7 +25,8 @@ const NoDataBanner = ({ search }: { search?: string }) => (
 );
 
 const TaskAccordionGroup = ({ activeTab, search }: TaskAccordionGroupProps) => {
-  const { data: countsData, isLoading } = useGetTaskCountsQuery();
+  const { data: countsData, isLoading } = useGetTaskCountsQuery(search ? { search } : undefined);
+  const scrollContainerRef = useRef<HTMLDivElement>(null);
 
   const countMap = useMemo(() => {
     const map = new Map<TaskStatus, number>();
@@ -43,10 +44,6 @@ const TaskAccordionGroup = ({ activeTab, search }: TaskAccordionGroupProps) => {
     return allowedStatuses.filter((status) => (countMap.get(status) ?? 0) > 0);
   }, [activeTab, countMap]);
 
-  const defaultOpenValue = useMemo(() => visibleStatuses[0], [visibleStatuses]);
-
-  const searchScrollRef = useRef<HTMLDivElement>(null);
-
   return (
     <CommonWrapper
       isLoading={isLoading}
@@ -57,38 +54,23 @@ const TaskAccordionGroup = ({ activeTab, search }: TaskAccordionGroupProps) => {
       className='flex min-h-0 flex-1 flex-col'
       disableAnimation
     >
-      {search ? (
-        <Accordion
-          ref={searchScrollRef}
-          type='multiple'
-          defaultValue={[...visibleStatuses]}
-          className='flex-1 overflow-y-auto [scrollbar-width:thin]'
-        >
-          {visibleStatuses.map((status) => (
-            <TaskAccordionSection
-              key={status}
-              status={status}
-              count={countMap.get(status) ?? 0}
-              search={search}
-              scrollContainerRef={searchScrollRef}
-            />
-          ))}
-          <div className='hidden only:block'>
-            <NoDataBanner search={search} />
-          </div>
-        </Accordion>
-      ) : (
-        <Accordion
-          type='single'
-          defaultValue={defaultOpenValue}
-          collapsible
-          className='flex min-h-0 flex-1 flex-col overflow-hidden'
-        >
-          {visibleStatuses.map((status) => (
-            <TaskAccordionSection key={status} status={status} count={countMap.get(status) ?? 0} />
-          ))}
-        </Accordion>
-      )}
+      <Accordion
+        key={visibleStatuses.join(',')}
+        ref={scrollContainerRef}
+        type='multiple'
+        defaultValue={[...visibleStatuses]}
+        className='flex-1 overflow-y-auto [scrollbar-width:thin]'
+      >
+        {visibleStatuses.map((status) => (
+          <TaskAccordionSection
+            key={status}
+            status={status}
+            count={countMap.get(status) ?? 0}
+            search={search}
+            scrollContainerRef={scrollContainerRef}
+          />
+        ))}
+      </Accordion>
     </CommonWrapper>
   );
 };
