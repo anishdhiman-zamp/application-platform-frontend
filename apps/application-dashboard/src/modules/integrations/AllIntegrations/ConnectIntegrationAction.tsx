@@ -1,10 +1,11 @@
 'use client';
 
-import { type FC, useState } from 'react';
+import { type FC, useCallback, useMemo, useState } from 'react';
 import { Button, ButtonVariant, toast } from '@zamp-platform/ui';
 import { cn } from '@zamp-platform/ui/utils';
 import { useAuthenticateIntegrationV2Mutation } from '@/apis/integrations';
 import EmailForwardingDialog from '@/modules/integrations/AllIntegrations/components/EmailForwardingDialoge';
+import ConfigureScopesDialog from '@/modules/integrations/AllIntegrations/ConfigureScopesDialog';
 import ConnectIntegrationDialog from '@/modules/integrations/AllIntegrations/ConnectIntegrationDialog';
 import { AUTH_TYPE } from '@/modules/integrations/types/integrations.types';
 import type { IntegrationItem } from '@/types/api/integrations';
@@ -27,7 +28,13 @@ const ConnectIntegrationAction: FC<ConnectIntegrationActionProps> = ({
   const { name, title, auth } = integrationItem;
   const [isDialogOpen, setIsDialogOpen] = useState(false);
   const [isEmailForwardingDialogOpen, setIsEmailForwardingDialogOpen] = useState(false);
+  const [isScopesDialogOpen, setIsScopesDialogOpen] = useState(false);
+  const [scopes, setScopes] = useState<string[]>([]);
   const [authenticateIntegrationV2, { isLoading: isAuthenticating }] = useAuthenticateIntegrationV2Mutation();
+
+  const primaryAuth = auth[0];
+  const catalogDefaultScopes = useMemo(() => primaryAuth?.default_scopes ?? [], [primaryAuth]);
+  const supportsScopes = catalogDefaultScopes.length > 0;
 
   const handleConnect = async (payload?: { name?: string; description?: string }) => {
     if (redirectUrl) {
@@ -35,8 +42,6 @@ const ConnectIntegrationAction: FC<ConnectIntegrationActionProps> = ({
 
       return;
     }
-
-    const primaryAuth = auth[0];
 
     if (!primaryAuth) return;
 
@@ -46,6 +51,7 @@ const ConnectIntegrationAction: FC<ConnectIntegrationActionProps> = ({
         auth_type: primaryAuth.auth_type,
         name: payload?.name ?? '',
         description: payload?.description ?? '',
+        scopes: scopes.length > 0 ? scopes : undefined,
       }).unwrap();
 
       if (result.metadata.redirect_url) {
@@ -65,8 +71,6 @@ const ConnectIntegrationAction: FC<ConnectIntegrationActionProps> = ({
       return;
     }
 
-    const primaryAuth = auth[0];
-
     if (primaryAuth?.auth_type === AUTH_TYPE.CUSTOM) {
       setIsEmailForwardingDialogOpen(true);
 
@@ -74,6 +78,12 @@ const ConnectIntegrationAction: FC<ConnectIntegrationActionProps> = ({
     }
     setIsDialogOpen(true);
   };
+
+  const handleScopesChanged = useCallback((newScopes: string[]) => {
+    setScopes(newScopes);
+    setIsScopesDialogOpen(false);
+    setIsDialogOpen(true);
+  }, []);
 
   return (
     <>
@@ -98,6 +108,12 @@ const ConnectIntegrationAction: FC<ConnectIntegrationActionProps> = ({
           isLoading={isAuthenticating}
           onOpenChange={setIsDialogOpen}
           onConnect={handleConnect}
+          scopesCount={scopes.length}
+          onConfigureScopes={() => {
+            setIsDialogOpen(false);
+            setIsScopesDialogOpen(true);
+          }}
+          showScopesOption={supportsScopes}
         />
       )}
       <EmailForwardingDialog
@@ -105,6 +121,19 @@ const ConnectIntegrationAction: FC<ConnectIntegrationActionProps> = ({
         isOpen={isEmailForwardingDialogOpen}
         onClose={() => setIsEmailForwardingDialogOpen(false)}
       />
+      {supportsScopes && (
+        <ConfigureScopesDialog
+          integrationTitle={title}
+          isOpen={isScopesDialogOpen}
+          onOpenChange={(open) => {
+            setIsScopesDialogOpen(open);
+            if (!open) setIsDialogOpen(true);
+          }}
+          onScopesChanged={handleScopesChanged}
+          defaultScopes={catalogDefaultScopes}
+          initialScopes={scopes.length > 0 ? scopes : undefined}
+        />
+      )}
     </>
   );
 };

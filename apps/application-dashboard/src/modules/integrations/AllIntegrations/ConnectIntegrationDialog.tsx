@@ -11,6 +11,7 @@ import {
   DialogHeaderTitle,
   Input,
 } from '@zamp-platform/ui';
+import { Settings2 } from 'lucide-react';
 
 interface ConnectIntegrationDialogProps {
   integrationName: string;
@@ -19,6 +20,9 @@ interface ConnectIntegrationDialogProps {
   isLoading: boolean;
   onOpenChange: (open: boolean) => void;
   onConnect: (payload: { name: string; description: string }) => void;
+  scopesCount?: number;
+  onConfigureScopes?: () => void;
+  showScopesOption?: boolean;
 }
 
 const ConnectIntegrationDialog: FC<ConnectIntegrationDialogProps> = ({
@@ -28,6 +32,9 @@ const ConnectIntegrationDialog: FC<ConnectIntegrationDialogProps> = ({
   isLoading,
   onOpenChange,
   onConnect,
+  scopesCount = 0,
+  onConfigureScopes,
+  showScopesOption = false,
 }) => {
   const [connectionName, setConnectionName] = useState('');
   const [connectionDescription, setConnectionDescription] = useState('');
@@ -97,6 +104,16 @@ const ConnectIntegrationDialog: FC<ConnectIntegrationDialogProps> = ({
               className='bg-BG_WHITE'
             />
           </div>
+          {showScopesOption && onConfigureScopes && (
+            <button
+              type='button'
+              onClick={onConfigureScopes}
+              className='text-GRAY_600 hover:text-GRAY_900 f-12-400 flex cursor-pointer items-center gap-1.5 self-start transition-colors'
+            >
+              <Settings2 className='h-3.5 w-3.5' />
+              {scopesCount > 0 ? `${scopesCount} scope${scopesCount !== 1 ? 's' : ''} configured` : 'Configure scopes'}
+            </button>
+          )}
         </DialogBody>
         <DialogFooter>
           <Button variant='outline' size='small' onClick={() => handleOpenChange(false)}>
