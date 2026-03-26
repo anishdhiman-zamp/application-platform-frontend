@@ -44,7 +44,7 @@ export const PACE_SETTINGS_TABS: PaceSettingsTabSchema[] = [
   },
   {
     id: PaceNavbarItemId.DATASETS,
-    name: 'Datsasets',
+    name: 'Datasets',
     iconComponent: <Database width={16} height={16} />,
     path: ROUTES_PATH.CHAT_SETTINGS_DATASETS,
     heading: 'Data',

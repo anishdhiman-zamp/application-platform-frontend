@@ -142,4 +142,8 @@ export const getChatTaskRoute = ({
   return query ? `${basePath}?${query}` : basePath;
 };
 
+export const getChatDatasetDetailRoute = (tableName: string) => {
+  return `${ROUTES_PATH.CHAT_SETTINGS_DATASETS}/${encodeURIComponent(tableName)}`;
+};
+
 export const LOGIN_URLS = [ROUTES_PATH.LOGIN];
