@@ -46,6 +46,7 @@ export const ROUTES_PATH = {
   CHAT_SETTINGS_INTEGRATIONS: '/chat/settings/integrations',
   CHAT_SETTINGS_GENERAL: '/chat/settings/general',
   CHAT_SETTINGS_DATASETS: '/chat/settings/datasets',
+  CHAT_SETTINGS_DATASET_DETAIL: '/chat/settings/datasets/:tableName',
   CHAT_TASK: '/chat/task/:taskId',
 };
 
@@ -142,8 +143,8 @@ export const getChatTaskRoute = ({
   return query ? `${basePath}?${query}` : basePath;
 };
 
-export const getChatDatasetDetailRoute = (tableName: string) => {
-  return `${ROUTES_PATH.CHAT_SETTINGS_DATASETS}/${encodeURIComponent(tableName)}`;
+export const getDatasetDetailRoute = (tableName: string) => {
+  return `${ROUTES_PATH.CHAT_SETTINGS_DATASET_DETAIL.replace(':tableName', tableName)}`;
 };
 
 export const LOGIN_URLS = [ROUTES_PATH.LOGIN];

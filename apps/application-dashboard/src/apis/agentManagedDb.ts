@@ -13,7 +13,19 @@ export interface AgentDbQueryResponse {
 
 const AgentManagedDb = baseApi.injectEndpoints({
   endpoints: (builder) => ({
-    executeAgentDbQuery: builder.mutation<AgentDbQueryResponse, AgentDbQueryRequest>({
+    // Read-only query (SELECT, COUNT, information_schema lookups). Uses RTK Query
+    // caching and deduplication so identical reads aren't re-fetched.
+    agentDbRead: builder.query<AgentDbQueryResponse, AgentDbQueryRequest>({
+      query: ({ query }) => ({
+        url: API_ENDPOINTS.AGENT_MANAGED_DB_QUERY_POST,
+        method: REQUEST_TYPES.POST,
+        body: { query },
+      }),
+    }),
+
+    // Write operations (INSERT, UPDATE, DELETE). Mutation avoids caching so each
+    // call always hits the server and side-effects are never skipped.
+    agentDbWrite: builder.mutation<AgentDbQueryResponse, AgentDbQueryRequest>({
       query: ({ query }) => ({
         url: API_ENDPOINTS.AGENT_MANAGED_DB_QUERY_POST,
         method: REQUEST_TYPES.POST,
@@ -23,4 +35,4 @@ const AgentManagedDb = baseApi.injectEndpoints({
   }),
 });
 
-export const { useExecuteAgentDbQueryMutation } = AgentManagedDb;
+export const { useAgentDbReadQuery, useLazyAgentDbReadQuery, useAgentDbWriteMutation } = AgentManagedDb;

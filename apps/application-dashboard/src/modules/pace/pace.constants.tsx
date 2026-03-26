@@ -37,7 +37,7 @@ export const PACE_SETTINGS_TABS: PaceSettingsTabSchema[] = [
   },
   {
     id: PaceNavbarItemId.PEOPLE,
-    name: 'Test',
+    name: 'People',
     iconComponent: <Users02 width={16} height={16} />,
     path: ROUTES_PATH.CHAT_SETTINGS_PEOPLE,
     heading: 'Organisation',
@@ -47,7 +47,6 @@ export const PACE_SETTINGS_TABS: PaceSettingsTabSchema[] = [
     name: 'Datasets',
     iconComponent: <Database width={16} height={16} />,
     path: ROUTES_PATH.CHAT_SETTINGS_DATASETS,
-    heading: 'Data',
   },
   {
     id: PaceNavbarItemId.INTEGRATIONS,

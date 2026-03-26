@@ -3,41 +3,47 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { ColDef, IServerSideDatasource } from 'ag-grid-community';
 import { ArrowLeft } from 'lucide-react';
-import PaceColumnHeader from 'modules/pace/datasets/PaceColumnHeader';
+import ColumnHeader from 'modules/pace/components/datasets/ColumnHeader';
 import {
   buildCountQuery,
   buildFilterClauses,
   buildSelectTableQuery,
+  buildTableColumnsQuery,
   DETAIL_PAGE_SIZE,
-  PACE_DATASET_THEME_PARAMS,
-} from 'modules/pace/datasets/paceDatasets.constants';
+} from 'modules/pace/components/datasets/datasets.constants';
 import Link from 'next/link';
-import { useExecuteAgentDbQueryMutation } from '@/apis/agentManagedDb';
+import { useLazyAgentDbReadQuery } from '@/apis/agentManagedDb';
 import { ROUTES_PATH } from '@/constants/routeConfig';
 import DatasetTable from 'components/common/table/DatasetTable';
-import { getDataTableTheme } from 'components/common/table/table.utils';
 
-interface PaceDatasetDetailProps {
+interface DatasetDetailProps {
   tableName: string;
 }
 
-const PaceDatasetDetail = ({ tableName }: PaceDatasetDetailProps) => {
-  const [executeQuery] = useExecuteAgentDbQueryMutation();
+const DatasetDetail = ({ tableName }: DatasetDetailProps) => {
+  const [executeQuery] = useLazyAgentDbReadQuery();
   const [columns, setColumns] = useState<ColDef[] | null>(null);
   const [totalRows, setTotalRows] = useState<number | null>(null);
 
   const totalRowsRef = useRef<number | undefined>(undefined);
-  const columnsFetchedRef = useRef(false);
-
-  const customTheme = useMemo(() => getDataTableTheme(PACE_DATASET_THEME_PARAMS), []);
+  const lastFilterClausesRef = useRef<string | undefined>(undefined);
+  const initRef = useRef(false);
+  const prefetchRef = useRef<{
+    dataPromise: Promise<{ rows: Record<string, unknown>[]; count: number }>;
+    countPromise: Promise<{ rows: Record<string, unknown>[]; count: number }>;
+    consumed: boolean;
+  } | null>(null);
 
   useEffect(() => {
-    if (columnsFetchedRef.current) return;
-    columnsFetchedRef.current = true;
+    if (initRef.current) return;
+    initRef.current = true;
 
-    const query = `SELECT column_name FROM information_schema.columns WHERE table_schema = 'public' AND table_name = '${tableName}' ORDER BY ordinal_position`;
+    const dataPromise = executeQuery({ query: buildSelectTableQuery(tableName, DETAIL_PAGE_SIZE, 0) }).unwrap();
+    const countPromise = executeQuery({ query: buildCountQuery(tableName) }).unwrap();
 
-    executeQuery({ query })
+    prefetchRef.current = { dataPromise, countPromise, consumed: false };
+
+    executeQuery({ query: buildTableColumnsQuery(tableName) })
       .unwrap()
       .then((result) => {
         const cols = (result.rows ?? []).map((row: Record<string, unknown>) => ({
@@ -53,11 +59,35 @@ const PaceDatasetDetail = ({ tableName }: PaceDatasetDetailProps) => {
   const getRows: IServerSideDatasource['getRows'] = useCallback(
     async (params) => {
       const { startRow = 0, endRow = DETAIL_PAGE_SIZE, sortModel, filterModel } = params.request;
+
+      const prefetch = prefetchRef.current;
+      const hasFilters = filterModel && Object.keys(filterModel).length > 0;
+
+      if (prefetch && !prefetch.consumed && startRow === 0 && !sortModel?.length && !hasFilters) {
+        prefetch.consumed = true;
+        try {
+          const [selectResult, countResult] = await Promise.all([prefetch.dataPromise, prefetch.countPromise]);
+          const total = Number(countResult.rows[0]?.total ?? 0);
+
+          totalRowsRef.current = total;
+          setTotalRows(total);
+          params.success({ rowData: selectResult.rows ?? [], rowCount: total });
+        } catch {
+          params.fail();
+        }
+
+        return;
+      }
+
       const limit = endRow - startRow;
       const offset = startRow;
       const filterClauses = filterModel
         ? buildFilterClauses(filterModel as Record<string, Record<string, unknown>>)
         : undefined;
+
+      const filterChanged = filterClauses !== lastFilterClausesRef.current;
+
+      lastFilterClausesRef.current = filterClauses;
 
       try {
         const selectPromise = executeQuery({
@@ -66,7 +96,7 @@ const PaceDatasetDetail = ({ tableName }: PaceDatasetDetailProps) => {
 
         let countPromise: Promise<{ rows: Record<string, unknown>[]; count: number }> | undefined;
 
-        if (startRow === 0) {
+        if (filterChanged) {
           totalRowsRef.current = undefined;
           countPromise = executeQuery({
             query: buildCountQuery(tableName, filterClauses),
@@ -105,7 +135,6 @@ const PaceDatasetDetail = ({ tableName }: PaceDatasetDetailProps) => {
           <ArrowLeft width={18} height={18} className='text-GRAY_700 hover:text-GRAY_1000 transition-colors' />
         </Link>
         <h1 className='f-18-500'>{tableName}</h1>
-        {totalRows !== null && <span className='text-GRAY_700 f-12-400'>({totalRows.toLocaleString()} rows)</span>}
       </div>
       <div className='grid flex-1 overflow-hidden'>
         {columns && (
@@ -113,15 +142,15 @@ const PaceDatasetDetail = ({ tableName }: PaceDatasetDetailProps) => {
             columns={columns}
             serverSideDatasource={serverSideDatasource}
             gridStyle={{ height: '100%', width: '100%' }}
-            customTheme={customTheme}
             columnConfig={{
-              headerComponent: PaceColumnHeader,
+              headerComponent: ColumnHeader,
               sortable: true,
               filter: 'agTextColumnFilter',
               flex: 1,
               minWidth: 150,
             }}
-            showStatusBar={false}
+            showStatusBar
+            totalRows={totalRows ?? undefined}
           />
         )}
       </div>
@@ -129,4 +158,4 @@ const PaceDatasetDetail = ({ tableName }: PaceDatasetDetailProps) => {
   );
 };
 
-export default PaceDatasetDetail;
+export default DatasetDetail;

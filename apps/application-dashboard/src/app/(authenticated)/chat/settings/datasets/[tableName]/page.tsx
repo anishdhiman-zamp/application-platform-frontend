@@ -1,7 +1,7 @@
 'use client';
 
 import { useParams } from 'next/navigation';
-import PaceDatasetDetail from '@/modules/pace/datasets/PaceDatasetDetail';
+import DatasetDetail from '@/modules/pace/components/datasets/DatasetDetail';
 
 const DatasetDetailPage = () => {
   const params = useParams<{ tableName: string }>();
@@ -10,7 +10,7 @@ const DatasetDetailPage = () => {
 
   const tableName = decodeURIComponent(params.tableName);
 
-  return <PaceDatasetDetail tableName={tableName} />;
+  return <DatasetDetail tableName={tableName} />;
 };
 
 export default DatasetDetailPage;

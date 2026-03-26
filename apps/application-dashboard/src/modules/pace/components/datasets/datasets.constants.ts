@@ -11,33 +11,8 @@ ORDER BY t.table_name
 
 export const DETAIL_PAGE_SIZE = 100;
 
-export const PACE_DATASET_THEME_PARAMS = {
-  fontFamily: { googleFont: 'Inter' },
-  headerFontSize: 12,
-  headerFontWeight: 600,
-  rowHeight: 32,
-  headerHeight: 48,
-  wrapperBorderRadius: 0,
-  iconSize: 12,
-  backgroundColor: 'var(--BG_WHITE)',
-  foregroundColor: 'var(--GRAY_1000)',
-  headerBackgroundColor: 'var(--BG_WHITE)',
-  headerTextColor: 'var(--GRAY_1000)',
-  headerRowBorder: { style: 'solid' as const, width: 1, color: 'var(--GRAY_400)' },
-  headerColumnBorder: { style: 'solid' as const, width: 1, color: 'var(--GRAY_100)' },
-  headerColumnResizeHandleColor: 'var(--BG_WHITE)',
-  rowBorder: { style: 'solid' as const, width: 1, color: 'var(--GRAY_100)' },
-  columnBorder: { style: 'solid' as const, width: 1, color: 'var(--GRAY_100)' },
-  rowHoverColor: 'var(--BG_GRAY_1)',
-  rowLoadingSkeletonEffectColor: 'var(--GRAY_50)',
-  selectCellBorder: { style: 'solid' as const, width: 1.5, color: 'var(--BLUE_700)' },
-  rangeSelectionBorderColor: 'var(--BLUE_700)',
-  cellEditingBorder: { style: 'solid' as const, width: 1.5, color: 'var(--BLUE_700)' },
-  wrapperBorder: { width: 1, style: 'solid' as const, color: 'var(--GRAY_400)' },
-  menuBorder: { style: 'solid' as const, width: 1, color: 'var(--GRAY_500)' },
-  menuBackgroundColor: 'var(--BG_WHITE)',
-  borderColor: 'var(--GRAY_400)',
-};
+export const buildTableColumnsQuery = (tableName: string): string =>
+  `SELECT column_name FROM information_schema.columns WHERE table_schema = 'public' AND table_name = '${tableName}' ORDER BY ordinal_position`;
 
 const escapeSqlString = (value: string): string => value.replace(/'/g, "''");
 

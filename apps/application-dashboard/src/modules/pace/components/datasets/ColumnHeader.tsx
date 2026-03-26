@@ -21,7 +21,7 @@ const MENU_OPTIONS = [
   { label: 'Filter', value: 'filter', iconId: 'filter-lines' },
 ];
 
-const PaceColumnHeader: FC<IHeaderParams> = (props) => {
+const ColumnHeader: FC<IHeaderParams> = (props) => {
   const { column, api, displayName } = props;
   const colId = column.getColId();
 
@@ -32,9 +32,21 @@ const PaceColumnHeader: FC<IHeaderParams> = (props) => {
   const [filterOperator, setFilterOperator] = useState<FilterOperator>('contains');
   const [filterValue, setFilterValue] = useState('');
   const [isOperatorOpen, setIsOperatorOpen] = useState(false);
+  const [sortState, setSortState] = useState(column.getSort());
+  const [isFilterActive, setIsFilterActive] = useState(column.isFilterActive());
 
-  const sortState = column.getSort();
-  const isFilterActive = column.isFilterActive();
+  useEffect(() => {
+    const onSortChanged = () => setSortState(column.getSort());
+    const onFilterChanged = () => setIsFilterActive(column.isFilterActive());
+
+    api.addEventListener('sortChanged', onSortChanged);
+    api.addEventListener('filterChanged', onFilterChanged);
+
+    return () => {
+      api.removeEventListener('sortChanged', onSortChanged);
+      api.removeEventListener('filterChanged', onFilterChanged);
+    };
+  }, [api, column]);
 
   const updateMenuPosition = useCallback(() => {
     if (!menuRef.current) return;
@@ -117,6 +129,7 @@ const PaceColumnHeader: FC<IHeaderParams> = (props) => {
 
   useEffect(() => {
     if (filterOperator === 'blank') return;
+    if (!filterValue.trim()) return;
     const timer = setTimeout(() => {
       applyFilter(filterOperator, filterValue);
     }, 300);
@@ -247,4 +260,4 @@ const PaceColumnHeader: FC<IHeaderParams> = (props) => {
   );
 };
 
-export default PaceColumnHeader;
+export default ColumnHeader;

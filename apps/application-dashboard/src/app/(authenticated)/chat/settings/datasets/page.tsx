@@ -1,7 +1,7 @@
-import PaceDatasetsListing from '@/modules/pace/datasets/PaceDatasetsListing';
+import DatasetsListing from '@/modules/pace/components/datasets/DatasetsListing';
 
 const DatasetsPage = () => {
-  return <PaceDatasetsListing />;
+  return <DatasetsListing />;
 };
 
 export default DatasetsPage;

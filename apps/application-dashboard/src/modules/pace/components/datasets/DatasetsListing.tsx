@@ -1,22 +1,19 @@
 'use client';
 
-import { useEffect, useMemo } from 'react';
+import { useMemo } from 'react';
 import { ChevronRight, Database } from 'lucide-react';
-import { LIST_TABLES_QUERY } from 'modules/pace/datasets/paceDatasets.constants';
+import { LIST_TABLES_QUERY } from 'modules/pace/components/datasets/datasets.constants';
 import Link from 'next/link';
-import { useExecuteAgentDbQueryMutation } from '@/apis/agentManagedDb';
+import { useAgentDbReadQuery } from '@/apis/agentManagedDb';
 import ImageLoader from '@/components/common/loader/ImageLoader';
 import CommonWrapper from '@/components/commonWrapper';
 import { SkeletonTypes } from '@/components/commonWrapper/commonWrapper.types';
-import { ZAMP_LOGO_LOADER_SVG } from '@/constants/icons';
-import { getChatDatasetDetailRoute } from '@/constants/routeConfig';
+import EmptyState from '@/components/EmptyState';
+import { DONE_EMPTY_STATE, ZAMP_LOGO_LOADER_SVG } from '@/constants/icons';
+import { getDatasetDetailRoute } from '@/constants/routeConfig';
 
-const PaceDatasetsListing = () => {
-  const [executeQuery, { data, isLoading }] = useExecuteAgentDbQueryMutation();
-
-  useEffect(() => {
-    executeQuery({ query: LIST_TABLES_QUERY });
-  }, [executeQuery]);
+const DatasetsListing = () => {
+  const { data, isLoading } = useAgentDbReadQuery({ query: LIST_TABLES_QUERY });
 
   const rows = useMemo(() => {
     if (!data?.rows) return [];
@@ -39,6 +36,15 @@ const PaceDatasetsListing = () => {
           loader={<ImageLoader imageSrc={ZAMP_LOGO_LOADER_SVG} width={140} height={140} />}
           skeletonType={SkeletonTypes.CUSTOM}
           className='h-full'
+          isNoData={!isLoading && rows.length === 0}
+          noDataBanner={
+            <EmptyState
+              imageSrc={DONE_EMPTY_STATE}
+              imageAlt='No datasets'
+              title='No datasets found'
+              description='Datasets will appear here when available.'
+            />
+          }
         >
           <table className='w-full'>
             <thead>
@@ -52,7 +58,7 @@ const PaceDatasetsListing = () => {
               {rows.map((row) => (
                 <tr key={row.id} className='border-GRAY_400 hover:bg-BG_GRAY_1 group border-b transition-colors'>
                   <td className='px-10 py-4'>
-                    <Link href={getChatDatasetDetailRoute(row.id)} className='f-13-500 flex items-center gap-2.5'>
+                    <Link href={getDatasetDetailRoute(row.id)} className='f-13-500 flex items-center gap-2.5'>
                       <Database width={16} height={16} className='text-GRAY_700 shrink-0' />
                       {row.title}
                     </Link>
@@ -75,4 +81,4 @@ const PaceDatasetsListing = () => {
   );
 };
 
-export default PaceDatasetsListing;
+export default DatasetsListing;
