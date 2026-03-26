@@ -14,7 +14,13 @@ import {
   LOGIN_GROUPS,
   VALID_SESSION_DETECTED_ERROR_MSG,
 } from 'modules/login/login.constants';
-import { actionUrlWithOrigin, flowHasCodeNodes, flowHasPasswordNodes } from 'modules/login/login.utils';
+import {
+  actionUrlWithOrigin,
+  collectHiddenNodeValues,
+  flowHasCodeNodes,
+  flowHasPasswordNodes,
+  getCsrfToken,
+} from 'modules/login/login.utils';
 import LoginFooter from 'modules/login/LoginFooter';
 import { OtpVerification } from 'modules/login/OtpVerification';
 import { FlowNode, LoginFlow } from 'types/api/auth.types';
@@ -55,6 +61,41 @@ function normalizeFlowActionOrigin(flow: LoginFlow, apiBaseUrl: string): LoginFl
     ...flow,
     ui: { ...flow.ui, action: actionUrlWithOrigin(flow.ui.action, apiBaseUrl) },
   };
+}
+
+async function fetchLoginFlowById(apiBaseUrl: string, flowId: string): Promise<LoginFlow | null> {
+  const resp = await fetch(`${apiBaseUrl}/auth/relay/self-service/login/flows?id=${flowId}`, {
+    method: 'GET',
+    headers: { Accept: 'application/json' },
+    credentials: 'include',
+  });
+
+  if (!resp.ok) return null;
+
+  return resp.json();
+}
+
+/**
+ * Triggers Kratos to send the OTP code for an account-linking flow, then returns
+ * the updated flow (now in "sent_email" state) ready for the OTP verification UI.
+ */
+async function triggerLinkingOtp(flow: LoginFlow): Promise<LoginFlow | null> {
+  const resp = await fetch(flow.ui.action, {
+    method: flow.ui.method,
+    credentials: 'include',
+    headers: { 'Content-Type': 'application/json', Accept: 'application/json' },
+    body: JSON.stringify({
+      method: 'code',
+      csrf_token: getCsrfToken(flow.ui.nodes),
+      ...collectHiddenNodeValues(flow.ui.nodes),
+    }),
+  });
+
+  const data = await resp.json();
+
+  if (!data.ui) return null;
+
+  return { ...flow, ...data, ui: { ...data.ui, action: flow.ui.action } };
 }
 
 export const LoginForm = () => {
@@ -129,6 +170,48 @@ export const LoginForm = () => {
 
     return regions?.length > 0 ? regions[0]?.url : BASE_API_URL;
   }
+
+  // ── Account Linking (flow param in URL) ────────────────────────
+
+  const handleAccountLinkingFlow = async (flowId: string) => {
+    try {
+      setLoadingAction(LOADING_ACTION.EMAIL);
+
+      const flow = await fetchLoginFlowById(BASE_API_URL, flowId);
+
+      if (!flow) return;
+
+      const normalized = normalizeFlowActionOrigin(flow, BASE_API_URL);
+
+      const identifierNode = normalized.ui.nodes.find(
+        (n: FlowNode) => n.attributes.name === 'identifier' && n.attributes.type === 'hidden',
+      );
+
+      if (identifierNode?.attributes.value) {
+        setEmail(identifierNode.attributes.value);
+      }
+
+      if (flowHasCodeNodes(normalized)) {
+        const otpReadyFlow = await triggerLinkingOtp(normalized);
+
+        if (otpReadyFlow) {
+          setOtpFlow(otpReadyFlow);
+        }
+      } else if (flowHasPasswordNodes(normalized)) {
+        setPasswordFlow(normalized);
+      }
+    } catch {
+      // Fall through to default login view
+    } finally {
+      resetLoadingState();
+
+      const url = new URL(window.location.href);
+
+      url.searchParams.delete('flow');
+      url.searchParams.delete('no_org_ui');
+      window.history.replaceState({}, '', url.toString());
+    }
+  };
 
   // ── OIDC / SSO ─────────────────────────────────────────────────
 
@@ -344,6 +427,15 @@ export const LoginForm = () => {
         : ACTIVE_VIEW.EMAIL_ENTRY;
 
   useEffect(() => {
+    const params = new URLSearchParams(window.location.search);
+    const flowId = params.get('flow');
+
+    if (flowId) {
+      handleAccountLinkingFlow(flowId);
+
+      return;
+    }
+
     const lastLoginInfoFromLocalStorage = getFromLocalStorage(LOCAL_STORAGE_KEYS.LAST_LOGIN_INFO);
 
     if (lastLoginInfoFromLocalStorage) {
