@@ -3,6 +3,7 @@
 import { type FC, useEffect, useState } from 'react';
 import {
   Button,
+  Checkbox,
   Dialog,
   DialogBody,
   DialogContent,
@@ -10,9 +11,10 @@ import {
   DialogHeader,
   DialogHeaderTitle,
   Input,
+  ScrollContainer,
   toast,
 } from '@zamp-platform/ui';
-import { RotateCcw, Trash2 } from 'lucide-react';
+import { RotateCcw } from 'lucide-react';
 import { KEYBOARD_KEYS } from '@/constants/shortcuts';
 
 interface ConfigureScopesDialogProps {
@@ -32,11 +34,22 @@ const ConfigureScopesDialog: FC<ConfigureScopesDialogProps> = ({
   defaultScopes,
   initialScopes,
 }) => {
-  const [scopes, setScopes] = useState<string[]>([]);
+  const [allScopes, setAllScopes] = useState<string[]>([]);
+  const [selectedScopes, setSelectedScopes] = useState<Set<string>>(new Set());
   const [newScope, setNewScope] = useState('');
 
-  const handleResetToDefaults = () => {
-    setScopes([...defaultScopes]);
+  const handleToggleScope = (scope: string) => {
+    setSelectedScopes((prev) => {
+      const next = new Set(prev);
+
+      if (next.has(scope)) {
+        next.delete(scope);
+      } else {
+        next.add(scope);
+      }
+
+      return next;
+    });
   };
 
   const handleAddScope = () => {
@@ -44,17 +57,21 @@ const ConfigureScopesDialog: FC<ConfigureScopesDialogProps> = ({
 
     if (!trimmed) return;
 
-    if (scopes.includes(trimmed)) {
-      toast.error('Scope already exists');
+    if (allScopes.includes(trimmed)) {
+      if (!selectedScopes.has(trimmed)) {
+        setSelectedScopes((prev) => new Set(prev).add(trimmed));
+      } else {
+        toast.error('Scope already exists');
+      }
+
+      setNewScope('');
 
       return;
     }
-    setScopes((prev) => [...prev, trimmed]);
-    setNewScope('');
-  };
 
-  const handleRemoveScope = (scope: string) => {
-    setScopes((prev) => prev.filter((s) => s !== scope));
+    setAllScopes((prev) => [...prev, trimmed]);
+    setSelectedScopes((prev) => new Set(prev).add(trimmed));
+    setNewScope('');
   };
 
   const handleKeyDown = (e: React.KeyboardEvent) => {
@@ -64,13 +81,26 @@ const ConfigureScopesDialog: FC<ConfigureScopesDialogProps> = ({
     }
   };
 
+  const handleResetToDefaults = () => {
+    setAllScopes([...defaultScopes]);
+    setSelectedScopes(new Set(defaultScopes));
+  };
+
   const handleSave = () => {
-    onScopesChanged(scopes);
+    onScopesChanged(allScopes.filter((s) => selectedScopes.has(s)));
   };
 
   useEffect(() => {
     if (isOpen) {
-      setScopes(initialScopes && initialScopes.length > 0 ? initialScopes : [...defaultScopes]);
+      if (initialScopes && initialScopes.length > 0) {
+        const merged = Array.from(new Set([...defaultScopes, ...initialScopes]));
+
+        setAllScopes(merged);
+        setSelectedScopes(new Set(initialScopes));
+      } else {
+        setAllScopes([...defaultScopes]);
+        setSelectedScopes(new Set(defaultScopes));
+      }
     } else {
       setNewScope('');
     }
@@ -81,7 +111,7 @@ const ConfigureScopesDialog: FC<ConfigureScopesDialogProps> = ({
       <DialogContent
         className='bg-BG_WHITE w-115 max-w-115'
         title={`Manage Scopes — ${integrationTitle}`}
-        description='Add or remove OAuth scopes for this integration'
+        description='Select which OAuth scopes to request for this integration'
         showCloseButton
       >
         <DialogHeader>
@@ -90,7 +120,7 @@ const ConfigureScopesDialog: FC<ConfigureScopesDialogProps> = ({
         <DialogBody className='flex flex-col gap-y-3 p-4'>
           <div className='flex items-center gap-2'>
             <Input
-              placeholder='Enter a scope to add'
+              placeholder='Add a custom scope'
               value={newScope}
               onChange={(e) => setNewScope(e.target.value)}
               onKeyDown={handleKeyDown}
@@ -98,37 +128,42 @@ const ConfigureScopesDialog: FC<ConfigureScopesDialogProps> = ({
               wrapperClassName='flex-1'
               className='bg-BG_WHITE'
             />
-            <Button variant='outline' size='small' onClick={handleAddScope} disabled={!newScope.trim()}>
+            <Button variant='outline' size='small' onClick={handleAddScope} disabled={!newScope.trim()} className='h-8'>
               Add
             </Button>
           </div>
 
-          {scopes.length === 0 && (
-            <p className='f-12-400 text-GRAY_600 py-2'>No scopes configured. Add scopes above.</p>
+          {allScopes.length === 0 && (
+            <p className='f-12-400 text-GRAY_600 py-2'>No scopes available. Add a custom scope above.</p>
           )}
 
-          {scopes.length > 0 && (
-            <div className='max-h-70 overflow-y-auto'>
-              <div className='flex flex-col gap-y-1'>
-                {scopes.map((scope) => (
-                  <div
-                    key={scope}
-                    className='border-GRAY_400 bg-BG_WHITE hover:bg-BG_GRAY_2 flex h-8 items-center justify-between rounded border px-3'
-                  >
-                    <span className='f-12-400 text-GRAY_1000 min-w-0 flex-1 truncate'>{scope}</span>
-                    <Button
-                      variant='ghost'
-                      size='icon'
-                      onClick={() => handleRemoveScope(scope)}
-                      aria-label={`Remove scope ${scope}`}
-                      className='text-GRAY_600 ml-2 h-6 w-6 shrink-0 hover:text-red-600'
+          {allScopes.length > 0 && (
+            <>
+              <label className='flex cursor-pointer items-center gap-2 px-1'>
+                <Checkbox
+                  checked={selectedScopes.size === allScopes.length}
+                  onCheckedChange={(checked) => {
+                    setSelectedScopes(checked ? new Set(allScopes) : new Set());
+                  }}
+                />
+                <span className='f-12-500 text-GRAY_700'>
+                  {selectedScopes.size === allScopes.length ? 'Deselect all' : 'Select all'}
+                </span>
+              </label>
+              <ScrollContainer className='max-h-70' scrollbarStyle='thin'>
+                <div className='flex flex-col gap-y-1'>
+                  {allScopes.map((scope) => (
+                    <label
+                      key={scope}
+                      className='border-GRAY_400 bg-BG_WHITE hover:bg-BG_GRAY_2 flex h-8 cursor-pointer items-center gap-2.5 rounded border px-3'
                     >
-                      <Trash2 className='h-3.5 w-3.5' />
-                    </Button>
-                  </div>
-                ))}
-              </div>
-            </div>
+                      <Checkbox checked={selectedScopes.has(scope)} onCheckedChange={() => handleToggleScope(scope)} />
+                      <span className='f-12-400 text-GRAY_1000 min-w-0 flex-1 truncate'>{scope}</span>
+                    </label>
+                  ))}
+                </div>
+              </ScrollContainer>
+            </>
           )}
         </DialogBody>
         <DialogFooter className='justify-between'>
