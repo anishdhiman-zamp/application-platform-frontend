@@ -111,11 +111,14 @@ const OrgSwitcher: FC<OrgSwitcherProps> = ({
     setOrgToProvision(null);
   };
 
-  const handleNewOrgReady = (org: Organization) => {
-    setShowCreateOrgModal(false);
-    setOrgToProvision(null);
-    performOrgSwitch(org);
-  };
+  const handleNewOrgReady = useCallback(
+    (org: Organization) => {
+      setShowCreateOrgModal(false);
+      setOrgToProvision(null);
+      performOrgSwitch(org);
+    },
+    [performOrgSwitch],
+  );
 
   const handleRegionChange = (region: { region: string; url: string }) => {
     window.open(`https://app-${region.region}.zamp.ai`, '_blank');

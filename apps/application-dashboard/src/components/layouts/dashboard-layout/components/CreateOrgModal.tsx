@@ -331,7 +331,7 @@ const CreateOrgModal: FC<CreateOrgModalProps> = ({ open, onClose, orgToProvision
       >
         <DialogHeader className='f-16-600 text-GRAY_950'>{title}</DialogHeader>
         <DialogBody className='px-6 py-8'>
-          {step === ModalStep.INPUT && !orgToProvision && !activeOrgToProvision && (
+          {step === ModalStep.INPUT && !orgToProvision && !activeOrgToProvision ? (
             <OrgNameInputBody
               display={display}
               orgName={orgName}
@@ -342,8 +342,7 @@ const CreateOrgModal: FC<CreateOrgModalProps> = ({ open, onClose, orgToProvision
               onUpload={handleUpload}
               onReset={handleReset}
             />
-          )}
-          {isProvisioning && (
+          ) : isProvisioning ? (
             <ProvisioningBody
               step={step as ModalStep.PROVISIONING | ModalStep.TAKING_LONGER}
               display={display}
@@ -351,7 +350,11 @@ const CreateOrgModal: FC<CreateOrgModalProps> = ({ open, onClose, orgToProvision
               expectedSecs={expectedSecs}
               error={error}
             />
-          )}
+          ) : orgToProvision || activeOrgToProvision ? (
+            <div className='flex justify-center py-8'>
+              <Loader size={SIZE.SMALL} />
+            </div>
+          ) : null}
         </DialogBody>
         {step === ModalStep.INPUT && (
           <DialogFooter>

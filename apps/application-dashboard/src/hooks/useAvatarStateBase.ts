@@ -77,20 +77,22 @@ export const useAvatarStateBase = ({
 
       if (!contentType) throw new Error('Unsupported image type. Please upload a JPEG or PNG.');
 
-      const { upload_url, s3_uri } = await getUploadUrl({
+      const { upload_url, asset_value, media_type } = await getUploadUrl({
         upload_type: uploadType,
         content_type: contentType,
       });
 
-      const uploadResponse = await fetch(upload_url, {
-        method: 'PUT',
-        headers: { 'Content-Type': pendingFile.type },
-        body: pendingFile,
-      });
+      if (upload_url) {
+        const uploadResponse = await fetch(upload_url, {
+          method: 'PUT',
+          headers: { 'Content-Type': pendingFile.type },
+          body: pendingFile,
+        });
 
-      if (!uploadResponse.ok) throw new Error('Failed to upload image. Please try again.');
+        if (!uploadResponse.ok) throw new Error('Failed to upload image. Please try again.');
+      }
 
-      return { type: avatar.type, value: s3_uri };
+      return { type: media_type, value: asset_value };
     }
 
     return { type: avatar.type, value: avatar.value || null };
