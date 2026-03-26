@@ -12,8 +12,9 @@ import {
   TabsList,
   TabsTrigger,
 } from '@zamp-platform/ui';
-import { Shuffle, Upload } from 'lucide-react';
+import { Pencil, Shuffle, Upload } from 'lucide-react';
 import { ERROR_MESSAGES, VALIDATION } from 'modules/onboarding/onboarding.constants';
+import { MediaType } from 'modules/onboarding/onboarding.types';
 import { KEYBOARD_KEYS } from '@/constants/shortcuts';
 
 export type AvatarDisplay = { type: 'seed'; svg: string } | { type: 'url'; src: string };
@@ -28,25 +29,28 @@ type Props = {
   onShuffle: () => void;
   onUpload: (file: File, previewUrl: string) => void;
   onReset: () => void;
+  triggerSize?: number;
 };
 
 export const AvatarImage = ({ avatar, size }: { avatar: AvatarDisplay; size: number }) => {
-  const style = { width: size, height: size, borderRadius: 8, overflow: 'hidden' } as const;
-
-  if (avatar.type === 'url') {
+  if (avatar.type === MediaType.URL) {
     return (
-      <div style={style}>
-        <img src={avatar.src} alt='avatar' className='h-full w-full rounded-lg object-cover' />
+      <div className='overflow-hidden rounded-lg' style={{ width: size, height: size }}>
+        <img src={avatar.src} alt='avatar' className='h-full w-full object-cover' />
       </div>
     );
   }
 
   return (
-    <div className='[&_svg]:h-full [&_svg]:w-full' style={style} dangerouslySetInnerHTML={{ __html: avatar.svg }} />
+    <div
+      className='overflow-hidden rounded-lg [&_svg]:h-full [&_svg]:w-full'
+      style={{ width: size, height: size }}
+      dangerouslySetInnerHTML={{ __html: avatar.svg }}
+    />
   );
 };
 
-export const AvatarPicker = ({ avatar, onShuffle, onUpload, onReset }: Props) => {
+export const AvatarPicker = ({ avatar, onShuffle, onUpload, onReset, triggerSize = 63 }: Props) => {
   const fileInputRef = useRef<HTMLInputElement>(null);
 
   const [open, setOpen] = useState(false);
@@ -136,8 +140,11 @@ export const AvatarPicker = ({ avatar, onShuffle, onUpload, onReset }: Props) =>
   return (
     <Popover open={open} onOpenChange={setOpen}>
       <PopoverTrigger asChild>
-        <div className='cursor-pointer'>
-          <AvatarImage avatar={avatar} size={63} />
+        <div className='relative inline-block cursor-pointer' style={{ width: triggerSize, height: triggerSize }}>
+          <AvatarImage avatar={avatar} size={triggerSize} />
+          <div className='bg-GRAY_500 border-GRAY_50 absolute -top-1 -right-1 flex h-4 w-4 items-center justify-center rounded-full border'>
+            <Pencil className='text-white' size={7} strokeWidth={2} />
+          </div>
         </div>
       </PopoverTrigger>
 

@@ -1,8 +1,8 @@
+import { PROVISIONING_STATUS } from 'modules/setup-workspace/setup-workspace.constants';
 import type { NextRequest, NextResponse } from 'next/server';
 import { Session, type UserSessionCache } from 'types/api/auth.types';
 import { API_ENDPOINTS } from '@/apis/apiEndpoint.constants';
 import { ROUTES_PATH } from '@/constants/routeConfig';
-import { PROVISIONING_STATUS } from '@/modules/setup-workspace/setup-workspace.types';
 import { ACTIVE_ORG_ID_COOKIE, ORY_KRATOS_SESSION_COOKIE, USER_SESSION_COOKIE } from '@/utils/cookie';
 import { getLandingRoute } from '@/utils/route.util';
 
