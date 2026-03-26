@@ -34,14 +34,6 @@ const ConfigureScopesDialog: FC<ConfigureScopesDialogProps> = ({
   const [scopes, setScopes] = useState<string[]>([]);
   const [newScope, setNewScope] = useState('');
 
-  useEffect(() => {
-    if (isOpen) {
-      setScopes(initialScopes && initialScopes.length > 0 ? initialScopes : [...defaultScopes]);
-    } else {
-      setNewScope('');
-    }
-  }, [isOpen, initialScopes, defaultScopes]);
-
   const handleResetToDefaults = useCallback(() => {
     setScopes([...defaultScopes]);
   }, [defaultScopes]);
@@ -78,10 +70,18 @@ const ConfigureScopesDialog: FC<ConfigureScopesDialogProps> = ({
     onScopesChanged(scopes);
   }, [scopes, onScopesChanged]);
 
+  useEffect(() => {
+    if (isOpen) {
+      setScopes(initialScopes && initialScopes.length > 0 ? initialScopes : [...defaultScopes]);
+    } else {
+      setNewScope('');
+    }
+  }, [isOpen, initialScopes, defaultScopes]);
+
   return (
     <Dialog open={isOpen} onOpenChange={onOpenChange}>
       <DialogContent
-        className='bg-BG_WHITE w-[460px] max-w-[460px]'
+        className='bg-BG_WHITE w-115 max-w-115'
         title={`Manage Scopes — ${integrationTitle}`}
         description='Add or remove OAuth scopes for this integration'
         showCloseButton
@@ -96,7 +96,9 @@ const ConfigureScopesDialog: FC<ConfigureScopesDialogProps> = ({
               value={newScope}
               onChange={(e) => setNewScope(e.target.value)}
               onKeyDown={handleKeyDown}
-              className='bg-BG_WHITE flex-1'
+              size='small'
+              wrapperClassName='flex-1'
+              className='bg-BG_WHITE'
             />
             <Button variant='outline' size='small' onClick={handleAddScope} disabled={!newScope.trim()}>
               Add
@@ -108,23 +110,26 @@ const ConfigureScopesDialog: FC<ConfigureScopesDialogProps> = ({
           )}
 
           {scopes.length > 0 && (
-            <div className='flex max-h-[280px] flex-col gap-y-1 overflow-y-auto'>
-              {scopes.map((scope) => (
-                <div
-                  key={scope}
-                  className='border-GRAY_400 bg-BG_WHITE hover:bg-BG_GRAY_2 flex items-center justify-between rounded border px-3 py-2'
-                >
-                  <span className='f-12-400 text-GRAY_1000 min-w-0 flex-1 truncate'>{scope}</span>
-                  <button
-                    type='button'
-                    onClick={() => handleRemoveScope(scope)}
-                    aria-label={`Remove scope ${scope}`}
-                    className='text-GRAY_600 ml-2 shrink-0 cursor-pointer transition-colors hover:text-red-600'
+            <div className='max-h-70 overflow-y-auto'>
+              <div className='flex flex-col gap-y-1'>
+                {scopes.map((scope) => (
+                  <div
+                    key={scope}
+                    className='border-GRAY_400 bg-BG_WHITE hover:bg-BG_GRAY_2 flex h-8 items-center justify-between rounded border px-3'
                   >
-                    <Trash2 className='h-3.5 w-3.5' />
-                  </button>
-                </div>
-              ))}
+                    <span className='f-12-400 text-GRAY_1000 min-w-0 flex-1 truncate'>{scope}</span>
+                    <Button
+                      variant='ghost'
+                      size='icon'
+                      onClick={() => handleRemoveScope(scope)}
+                      aria-label={`Remove scope ${scope}`}
+                      className='text-GRAY_600 ml-2 h-6 w-6 shrink-0 hover:text-red-600'
+                    >
+                      <Trash2 className='h-3.5 w-3.5' />
+                    </Button>
+                  </div>
+                ))}
+              </div>
             </div>
           )}
         </DialogBody>
