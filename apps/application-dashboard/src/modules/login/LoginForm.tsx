@@ -2,7 +2,7 @@
 
 import { ChangeEvent, type SubmitEvent, useEffect, useRef, useState } from 'react';
 import { BASE_API_URL, getApiDomainAndRegions, reinitializeApiDomain, REQUEST_TYPES } from '@zamp-platform/api';
-import { Button, ImageWithFallback } from '@zamp-platform/ui';
+import { Button, ImageWithFallback, toast } from '@zamp-platform/ui';
 import { cn } from '@zamp-platform/ui/utils';
 import { getFromLocalStorage, LOCAL_STORAGE_KEYS, removeFromLocalStorage, safeJsonParse } from '@zamp-platform/utils';
 import { LOGIN_METHODS, LOGIN_PROVIDERS } from 'constants/auth.constants';
@@ -26,6 +26,8 @@ import { OtpVerification } from 'modules/login/OtpVerification';
 import { FlowNode, LoginFlow } from 'types/api/auth.types';
 import { getDomainFromEmail, isValidEmail } from 'utils/common';
 import { API_ENDPOINTS } from '@/apis/apiEndpoint.constants';
+import ImageLoader from '@/components/common/loader/ImageLoader';
+import { ZAMP_LOGO_LOADER_SVG } from '@/constants/icons';
 import { AnimatedDitherArrow } from '@/modules/login/AnimatedDitherArrow';
 import { LOGIN_ERROR_TEXT } from '@/modules/login/constants';
 import { GoogleIcon } from '@/modules/login/GoogleIcon';
@@ -108,7 +110,11 @@ export const LoginForm = () => {
   const [otpFlow, setOtpFlow] = useState<LoginFlow | null>(null);
   const [passwordFlow, setPasswordFlow] = useState<LoginFlow | null>(null);
   const [methodPickerFlow, setMethodPickerFlow] = useState<LoginFlow | null>(null);
-  const [loadingAction, setLoadingAction] = useState<LOADING_ACTION>(LOADING_ACTION.IDLE);
+  const initialFlowId = typeof window !== 'undefined' ? new URLSearchParams(window.location.search).get('flow') : null;
+  const [isAccountLinking, setIsAccountLinking] = useState(!!initialFlowId);
+  const [loadingAction, setLoadingAction] = useState<LOADING_ACTION>(
+    initialFlowId ? LOADING_ACTION.EMAIL : LOADING_ACTION.IDLE,
+  );
   const isLoading = loadingAction !== LOADING_ACTION.IDLE;
 
   // ── Helpers ─────────────────────────────────────────────────────
@@ -196,6 +202,7 @@ export const LoginForm = () => {
 
         if (otpReadyFlow) {
           setOtpFlow(otpReadyFlow);
+          toast.info("Verify your email to link SSO to your account. You won't need to do this again.");
         }
       } else if (flowHasPasswordNodes(normalized)) {
         setPasswordFlow(normalized);
@@ -203,6 +210,7 @@ export const LoginForm = () => {
     } catch {
       // Fall through to default login view
     } finally {
+      setIsAccountLinking(false);
       resetLoadingState();
 
       const url = new URL(window.location.href);
@@ -479,6 +487,10 @@ export const LoginForm = () => {
 
     return () => el.removeEventListener('input', syncValue);
   }, [activeView]);
+
+  if (isAccountLinking && !otpFlow && !passwordFlow) {
+    return <ImageLoader imageSrc={ZAMP_LOGO_LOADER_SVG} width={80} height={80} className='bg-transparent py-12' />;
+  }
 
   switch (activeView) {
     case ACTIVE_VIEW.OTP:
