@@ -183,11 +183,13 @@ export const LoginForm = () => {
     try {
       setLoadingAction(LOADING_ACTION.EMAIL);
 
-      const flow = await fetchLoginFlowById(BASE_API_URL, flowId);
+      const apiBaseUrl = await resolveApiBaseUrl();
+
+      const flow = await fetchLoginFlowById(apiBaseUrl, flowId);
 
       if (!flow) return;
 
-      const normalized = normalizeFlowActionOrigin(flow, BASE_API_URL);
+      const normalized = normalizeFlowActionOrigin(flow, apiBaseUrl);
 
       const identifierNode = normalized.ui.nodes.find(
         (n: FlowNode) => n.attributes.name === 'identifier' && n.attributes.type === 'hidden',
@@ -204,8 +206,6 @@ export const LoginForm = () => {
           setOtpFlow(otpReadyFlow);
           toast.info("Verify your email to link SSO to your account. You won't need to do this again.");
         }
-      } else if (flowHasPasswordNodes(normalized)) {
-        setPasswordFlow(normalized);
       }
     } catch {
       // Fall through to default login view
@@ -379,6 +379,13 @@ export const LoginForm = () => {
         return normalized;
       }
 
+      // SSO-only flow (e.g. account linking expired) — restart SSO automatically
+      const nodes = flow?.ui?.nodes ?? [];
+
+      if (nodes.length === 1 && nodes[0]?.group === LOGIN_GROUPS.OIDC) {
+        await initiateOidcLogin(flow!.ui.action, flow!.ui.method, nodes[0].attributes.value as LOGIN_PROVIDERS, email);
+      }
+
       return null;
     } catch {
       return null;
@@ -489,7 +496,11 @@ export const LoginForm = () => {
   }, [activeView]);
 
   if (isAccountLinking && !otpFlow && !passwordFlow) {
-    return <ImageLoader imageSrc={ZAMP_LOGO_LOADER_SVG} width={80} height={80} className='bg-transparent py-12' />;
+    return (
+      <div className='bg-GRAY_100 fixed inset-0 z-50'>
+        <ImageLoader imageSrc={ZAMP_LOGO_LOADER_SVG} width={140} height={140} />
+      </div>
+    );
   }
 
   switch (activeView) {
