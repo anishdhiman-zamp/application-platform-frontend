@@ -11,13 +11,14 @@ ORDER BY t.table_name
 
 export const DETAIL_PAGE_SIZE = 100;
 
-export const buildTableColumnsQuery = (tableName: string): string =>
-  `SELECT column_name FROM information_schema.columns WHERE table_schema = 'public' AND table_name = '${tableName}' ORDER BY ordinal_position`;
-
 const escapeSqlString = (value: string): string => value.replace(/'/g, "''");
+const escapeSqlIdentifier = (name: string): string => name.replace(/"/g, '""');
+
+export const buildTableColumnsQuery = (tableName: string): string =>
+  `SELECT column_name FROM information_schema.columns WHERE table_schema = 'public' AND table_name = '${escapeSqlString(tableName)}' ORDER BY ordinal_position`;
 
 const buildSingleFilterClause = (colId: string, condition: Record<string, unknown>): string | undefined => {
-  const col = `"${colId}"`;
+  const col = `"${escapeSqlIdentifier(colId)}"`;
   const value = escapeSqlString(String(condition.filter ?? ''));
 
   switch (condition.type) {
@@ -73,11 +74,11 @@ export const buildSelectTableQuery = (
   sortModel?: { colId: string; sort: string }[],
   filterClauses?: string,
 ): string => {
-  let query = `SELECT * FROM "${tableName}"`;
+  let query = `SELECT * FROM "${escapeSqlIdentifier(tableName)}"`;
 
   if (filterClauses) query += ` WHERE ${filterClauses}`;
   if (sortModel?.length) {
-    query += ` ORDER BY ${sortModel.map((s) => `"${s.colId}" ${s.sort === 'desc' ? 'DESC' : 'ASC'}`).join(', ')}`;
+    query += ` ORDER BY ${sortModel.map((s) => `"${escapeSqlIdentifier(s.colId)}" ${s.sort === 'desc' ? 'DESC' : 'ASC'}`).join(', ')}`;
   } else {
     query += ' ORDER BY 1';
   }
@@ -87,7 +88,7 @@ export const buildSelectTableQuery = (
 };
 
 export const buildCountQuery = (tableName: string, filterClauses?: string): string => {
-  let query = `SELECT COUNT(*) AS total FROM "${tableName}"`;
+  let query = `SELECT COUNT(*) AS total FROM "${escapeSqlIdentifier(tableName)}"`;
 
   if (filterClauses) query += ` WHERE ${filterClauses}`;
 
