@@ -10,6 +10,7 @@ import {
   TEXT_SPREADSHEET_EXTENSIONS,
 } from '@/modules/pace/components/files/files.constants';
 import { useFileViewerContext } from '@/modules/pace/context/FileViewerContext';
+import { isFileCreationPending, onFileCreated } from '@/modules/pace/hooks/pendingFileCreation';
 
 const AUTO_SAVE_DELAY_MS = 1000;
 const POLL_INTERVAL_MS = 3000;
@@ -208,15 +209,31 @@ export const useFileViewer = ({
     setIsFileNotFound(false);
   }, [filePath]);
 
-  // Load file on mount
+  // Load file on mount — defer if the file is still being created
   useEffect(() => {
-    loadFile();
-  }, [loadFile]);
+    if (!filePath || !isFileCreationPending(filePath)) {
+      loadFile();
+
+      return;
+    }
+
+    return onFileCreated(filePath, () => {
+      loadFile();
+    });
+  }, [filePath, loadFile]);
 
   // Eagerly fetch metadata for media files so mediaMtime is set before the tab becomes active
   useEffect(() => {
-    fetchInitialMediaMetadata();
-  }, [fetchInitialMediaMetadata]);
+    if (!filePath || !isFileCreationPending(filePath)) {
+      fetchInitialMediaMetadata();
+
+      return;
+    }
+
+    return onFileCreated(filePath, () => {
+      fetchInitialMediaMetadata();
+    });
+  }, [filePath, fetchInitialMediaMetadata]);
 
   useEffect(() => {
     mediaMtimeRef.current = mediaMtime;

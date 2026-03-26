@@ -13,6 +13,7 @@ fi
 # Construct the API URL
 NEXT_PUBLIC_BASE_API_URL="https://${API_SERVICE}--main--${CODER_WORKSPACE_NAME}--${WORKSPACE_USER}.coder-live.zamp.dev"
 NEXT_SERVER_API_URL="http://localhost:${PORT}"
+NEXT_PUBLIC_ENVIRONMENT="development"
 
 update_env_file() {
     local env_file=$1
@@ -41,10 +42,19 @@ update_env_file() {
             echo "NEXT_SERVER_API_URL=$NEXT_SERVER_API_URL" >> "$env_file"
             echo "➕ Added NEXT_SERVER_API_URL to $env_file"
         fi
+
+        if grep -q "^NEXT_PUBLIC_ENVIRONMENT=" "$env_file"; then
+            sed -i "s|^NEXT_PUBLIC_ENVIRONMENT=.*|NEXT_PUBLIC_ENVIRONMENT=$NEXT_PUBLIC_ENVIRONMENT|" "$env_file"
+            echo "🔄 Updated existing NEXT_PUBLIC_ENVIRONMENT in $env_file"
+        else
+            echo "NEXT_PUBLIC_ENVIRONMENT=$NEXT_PUBLIC_ENVIRONMENT" >> "$env_file"
+            echo "➕ Added NEXT_PUBLIC_ENVIRONMENT to $env_file"
+        fi
     else
         # Create new file
         echo "NEXT_PUBLIC_BASE_API_URL=$NEXT_PUBLIC_BASE_API_URL" > "$env_file"
         echo "NEXT_SERVER_API_URL=$NEXT_SERVER_API_URL" >> "$env_file"
+        echo "NEXT_PUBLIC_ENVIRONMENT=$NEXT_PUBLIC_ENVIRONMENT" >> "$env_file"
         echo "📝 Created new $env_file"
     fi
     

@@ -72,6 +72,27 @@ describe('Button Component - Functional Tests', () => {
     const { container } = render(<Button size='icon'>🔍</Button>);
     expect(container.firstChild).toMatchSnapshot();
   });
+
+  it('does not cause infinite re-renders when toggling isLoading', () => {
+    // Regression test for: "Maximum update depth exceeded" (Sentry: APPLICATION-PLATFORM-DASHBOARD-BC)
+    // Mock offsetWidth to non-zero so the setMinWidth code path is actually exercised.
+    // Without this, jsdom returns 0 and the `if (width > 0)` guard skips the buggy path entirely.
+    Object.defineProperty(HTMLElement.prototype, 'offsetWidth', {
+      configurable: true,
+      get: jest.fn(() => 100),
+    });
+
+    expect(() => {
+      const { rerender } = render(<Button isLoading={false}>Submit</Button>);
+      rerender(<Button isLoading={true}>Submit</Button>);
+      rerender(<Button isLoading={false}>Submit</Button>);
+    }).not.toThrow(); // 'Maximum update depth exceeded' would throw here without the fix
+
+    Object.defineProperty(HTMLElement.prototype, 'offsetWidth', {
+      configurable: true,
+      get: () => 0,
+    });
+  });
 });
 
 // Removed excessive variant/size combinations - keeping only critical ones

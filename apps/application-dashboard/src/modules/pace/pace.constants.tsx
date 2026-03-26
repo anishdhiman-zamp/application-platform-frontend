@@ -31,22 +31,24 @@ export const PACE_NAVBAR_ITEMS: PaceNavbarItemSchema[] = [
 
 export const PACE_SETTINGS_TABS: PaceSettingsTabSchema[] = [
   {
+    id: PaceNavbarItemId.GENERAL,
+    name: 'General',
+    iconComponent: <UserPen width={16} height={16} />,
+    path: ROUTES_PATH.CHAT_SETTINGS_GENERAL,
+    heading: 'Account',
+  },
+  {
     id: PaceNavbarItemId.PEOPLE,
     name: 'People',
     iconComponent: <Users02 width={16} height={16} />,
     path: ROUTES_PATH.CHAT_SETTINGS_PEOPLE,
+    heading: 'Organisation',
   },
   {
     id: PaceNavbarItemId.INTEGRATIONS,
     name: 'Integrations',
     iconComponent: <Link2 width={16} height={16} className='-rotate-45' />,
     path: ROUTES_PATH.CHAT_SETTINGS_INTEGRATIONS,
-  },
-  {
-    id: PaceNavbarItemId.GENERAL,
-    name: 'General',
-    iconComponent: <UserPen width={16} height={16} />,
-    path: ROUTES_PATH.CHAT_SETTINGS_GENERAL,
   },
 ];
 

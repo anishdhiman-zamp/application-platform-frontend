@@ -2,7 +2,7 @@
 
 import { useCallback, useMemo } from 'react';
 import { TASK_STATUS, TaskStatusIcon } from '@zamp-platform/chat';
-import { CSS_VARS } from '@zamp-platform/ui';
+import { CSS_VARS, Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@zamp-platform/ui';
 import { format } from 'date-fns';
 import { BookText } from 'lucide-react';
 import SubtaskPopover from 'modules/pace/components/tasks/SubtaskPopover';
@@ -21,15 +21,15 @@ const TaskRow = ({ task }: TaskRowProps) => {
   const router = useRouter();
 
   const handleRowClick = useCallback(() => {
-    const taskRoute = getChatTaskRoute({ taskId: task?.id || '', taskTitle: task?.title || '' });
+    const taskRoute = getChatTaskRoute({ taskId: task.id, taskTitle: task.title });
 
     router.push(preserveSidebarParam(taskRoute));
-  }, [router, task?.id, task?.title]);
+  }, [router, task.id, task.title]);
 
   const totalSubtasks = task.subtasks.length;
   const completedSubtasks = useMemo(
-    () => task?.subtasks?.filter((s) => s?.status === TASK_STATUS.COMPLETED).length || 0,
-    [task?.subtasks],
+    () => task?.subtasks.filter((s) => s.status === TASK_STATUS.COMPLETED).length,
+    [task.subtasks],
   );
 
   return (
@@ -64,11 +64,20 @@ const TaskRow = ({ task }: TaskRowProps) => {
           </span>
         </div>
 
-        <Avatar
-          name={task?.created_by?.name || ''}
-          backgroundColor={CSS_VARS.ORANGE_400}
-          className='f-12-300 text-GRAY_1000 h-5 min-w-5 text-[9px]! font-medium!'
-        />
+        <TooltipProvider delayDuration={100}>
+          <Tooltip>
+            <TooltipTrigger>
+              <Avatar
+                name={task?.created_by?.name || ''}
+                backgroundColor={CSS_VARS.ORANGE_400}
+                className='f-12-300 text-GRAY_1000 h-5 min-w-5 text-[9px]! font-medium!'
+              />
+            </TooltipTrigger>
+            <TooltipContent side='top' sideOffset={8}>
+              Created by {task?.created_by?.name}
+            </TooltipContent>
+          </Tooltip>
+        </TooltipProvider>
         <span className='f-13-450 text-GRAY_700 w-[52px] text-right whitespace-nowrap'>
           {format(new Date(task?.created_at), 'MMM d')}
         </span>

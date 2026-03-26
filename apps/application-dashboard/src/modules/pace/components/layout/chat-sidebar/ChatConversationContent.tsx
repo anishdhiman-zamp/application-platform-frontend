@@ -36,6 +36,7 @@ export interface ChatConversationContentProps {
   organizationId: string;
   onFileOpen: (path: string, name: string) => void;
   onTaskOpen?: (name: string, path: string) => void;
+  onTaskPopoverOpenChange?: (open: boolean) => void;
   isOnChatRoute: boolean;
   onChatStateChange: (state: ChatState) => void;
   fileDropHandlerRef: React.RefObject<((files: FileList) => void) | null>;
@@ -54,6 +55,7 @@ const ChatConversationContent: FC<ChatConversationContentProps> = ({
   organizationId,
   onFileOpen,
   onTaskOpen,
+  onTaskPopoverOpenChange,
   isOnChatRoute,
   onChatStateChange,
   fileDropHandlerRef,
@@ -69,6 +71,11 @@ const ChatConversationContent: FC<ChatConversationContentProps> = ({
   const taskStatusContainerRef = useRef<HTMLDivElement>(null);
 
   const [isTaskPopoverOpen, setIsTaskPopoverOpen] = useState(false);
+
+  const handleTaskPopoverOpenChange = (open: boolean) => {
+    setIsTaskPopoverOpen(open);
+    onTaskPopoverOpenChange?.(open);
+  };
 
   const chat = useChat({
     resourceId: organizationId,
@@ -167,8 +174,10 @@ const ChatConversationContent: FC<ChatConversationContentProps> = ({
           isLoading={isLoadingConversation}
           streamingState={chat.streamingState}
           scrollTrigger={chat.messages?.length}
-          disableFadeOverlay={isTaskPopoverOpen}
-          scrollClassName={cn('bg-BG_WHITE', isTaskPopoverOpen ? 'overflow-y-hidden' : 'overflow-y-scroll')}
+          scrollClassName={cn(
+            'bg-BG_WHITE transition-[filter] duration-200',
+            isTaskPopoverOpen ? 'overflow-y-hidden blur-sm pointer-events-none' : 'overflow-y-scroll',
+          )}
         >
           {isInConversation ? (
             <CommonWrapper
@@ -203,16 +212,13 @@ const ChatConversationContent: FC<ChatConversationContentProps> = ({
           )}
         </ScrollContainer>
       </div>
-      <div
-        ref={taskStatusContainerRef}
-        className='bg-BG_WHITE sticky bottom-0 z-10 mx-auto w-full max-w-[700px] px-3 pb-3'
-      >
+      <div ref={taskStatusContainerRef} className='bg-BG_WHITE sticky bottom-0 z-10 mx-auto w-full max-w-[700px] px-3'>
         <TaskStatusCounts
           messages={chat.messages}
           streamingState={chat.streamingState}
           conversationId={conversationId ?? chat.conversationId ?? ''}
           containerRef={taskStatusContainerRef}
-          onOpenChange={setIsTaskPopoverOpen}
+          onOpenChange={handleTaskPopoverOpenChange}
         />
       </div>
     </ChatActionsProvider>

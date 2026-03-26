@@ -120,7 +120,7 @@ export function buildCacheSnapshot(state: RootState): LazyFileTreeCacheSnapshot 
         loadedFolders.add(p);
 
         const subDirs = subFiles.filter(
-          (f) => f.type === FILE_TYPE.DIRECTORY && getPathDepth(f.path) <= getPathDepth(p) + LAZY_FILE_TREE_FETCH_DEPTH,
+          (f) => f.type === FILE_TYPE.DIRECTORY && getPathDepth(f.path) < getPathDepth(p) + LAZY_FILE_TREE_FETCH_DEPTH,
         );
 
         for (const dir of subDirs) {

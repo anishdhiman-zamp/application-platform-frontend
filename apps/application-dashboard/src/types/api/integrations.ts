@@ -67,11 +67,12 @@ export type IntegrationCatalogRequestType = {
 };
 
 // Represents one authentication method for an integration
-interface IntegrationAuth {
+export interface IntegrationAuth {
   auth_type: AUTH_TYPE;
   title: string | null;
   description?: string | null;
   fields: Record<string, FormField>;
+  default_scopes?: string[];
 }
 
 // Represents a single connection (currently empty but extendable)
@@ -107,6 +108,7 @@ export type AuthenticateIntegrationRequestTypeV2 = {
   auth_type: string;
   name: string;
   description: string;
+  scopes?: string[];
 };
 
 export type AuthenticateIntegrationResponseTypeV2 = {

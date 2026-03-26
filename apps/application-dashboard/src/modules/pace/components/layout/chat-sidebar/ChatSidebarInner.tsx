@@ -3,6 +3,7 @@
 import { FC, useCallback, useMemo, useRef, useState } from 'react';
 import type { useChat } from '@zamp-platform/chat';
 import { ConnectedChatInput, ResourceType, ScopeType } from '@zamp-platform/chat';
+import { cn } from '@zamp-platform/ui/utils';
 import { useDynamicTabs } from 'modules/pace/components/dynamic-tabs/useDynamicTabs';
 import ChatConversationContent from 'modules/pace/components/layout/chat-sidebar/ChatConversationContent';
 import { usePathname } from 'next/navigation';
@@ -59,6 +60,7 @@ const ChatSidebarInner: FC<ChatSidebarInnerProps> = ({
 
   const [selectedModel, setSelectedModel] = useState<string | null>(null);
   const [chatState, setChatState] = useState<ChatState | null>(null);
+  const [isTaskPopoverOpen, setIsTaskPopoverOpen] = useState(false);
 
   const handleExpand = useCallback(() => {
     setChatSidebarState(CHAT_SIDEBAR_STATE.EXPANDED);
@@ -96,15 +98,17 @@ const ChatSidebarInner: FC<ChatSidebarInnerProps> = ({
   return (
     <div className='bg-BG_WHITE relative mx-auto flex h-full w-full flex-1 flex-col'>
       {!chatState?.showHomeView && (
-        <ChatTopbar
-          title={chatTitle || 'Start a new chat'}
-          conversationId={conversationId}
-          organizationId={organizationId}
-          onStartNewChat={startNewChat}
-          onTitleChange={setChatTitle}
-          onSelectConversation={setConversationId}
-          onExpand={chatSidebarState !== CHAT_SIDEBAR_STATE.EXPANDED ? handleExpand : undefined}
-        />
+        <div className={cn('transition-[filter] duration-200', isTaskPopoverOpen && 'pointer-events-none blur-sm')}>
+          <ChatTopbar
+            title={chatTitle || 'Start a new chat'}
+            conversationId={conversationId}
+            organizationId={organizationId}
+            onStartNewChat={startNewChat}
+            onTitleChange={setChatTitle}
+            onSelectConversation={setConversationId}
+            onExpand={chatSidebarState !== CHAT_SIDEBAR_STATE.EXPANDED ? handleExpand : undefined}
+          />
+        </div>
       )}
       <ChatConversationContent
         key={chatKey}
@@ -115,6 +119,7 @@ const ChatSidebarInner: FC<ChatSidebarInnerProps> = ({
         organizationId={organizationId}
         onFileOpen={handleFileOpen}
         onTaskOpen={handleTaskOpen}
+        onTaskPopoverOpenChange={setIsTaskPopoverOpen}
         isOnChatRoute={isOnChatRoute}
         onChatStateChange={handleChatStateChange}
         fileDropHandlerRef={fileDropHandlerRef}

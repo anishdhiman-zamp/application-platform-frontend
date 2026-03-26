@@ -8,9 +8,10 @@ import { useLogout } from '@/hooks/useLogout';
 
 interface LogoutButtonProps {
   className?: string;
+  macs?: boolean;
 }
 
-const LogoutButton: FC<LogoutButtonProps> = ({ className }) => {
+const LogoutButton: FC<LogoutButtonProps> = ({ className, macs = false }) => {
   const { logout, isLoggingOut } = useLogout();
 
   return (
@@ -21,7 +22,10 @@ const LogoutButton: FC<LogoutButtonProps> = ({ className }) => {
         size='large'
         disabled={isLoggingOut}
         leadingIcon={<LogOut width={14} height={14} />}
-        className='text-GRAY_700 hover:bg-GRAY_100 h-8 w-full justify-start gap-2 rounded-md p-1'
+        className={cn(
+          'hover:bg-GRAY_100 h-8 w-full justify-start rounded-md p-1',
+          macs ? 'text-GRAY_900 gap-3.5' : 'text-GRAY_700 gap-2',
+        )}
       >
         <div className='flex w-full items-center gap-2'>
           <div className='f-12-450 flex-1 text-left select-none'>Logout</div>

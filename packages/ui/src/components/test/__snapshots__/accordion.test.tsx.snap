@@ -47,7 +47,7 @@ exports[`Accordion Component - Functional Tests matches snapshot for collapsible
     </h3>
     <div
       aria-labelledby="radix-_r_c_"
-      class="data-[state=closed]:animate-accordion-up data-[state=open]:animate-accordion-down overflow-hidden text-sm"
+      class="overflow-hidden text-sm data-[state=closed]:animate-accordion-up data-[state=open]:animate-accordion-down"
       data-orientation="vertical"
       data-slot="accordion-content"
       data-state="open"
@@ -113,7 +113,7 @@ exports[`Accordion Component - Functional Tests matches snapshot for default acc
     </h3>
     <div
       aria-labelledby="radix-_r_6_"
-      class="data-[state=closed]:animate-accordion-up data-[state=open]:animate-accordion-down overflow-hidden text-sm"
+      class="overflow-hidden text-sm data-[state=closed]:animate-accordion-up data-[state=open]:animate-accordion-down"
       data-orientation="vertical"
       data-slot="accordion-content"
       data-state="open"
@@ -178,7 +178,7 @@ exports[`Accordion Component - Functional Tests matches snapshot for multiple ty
     </h3>
     <div
       aria-labelledby="radix-_r_8_"
-      class="data-[state=closed]:animate-accordion-up data-[state=open]:animate-accordion-down overflow-hidden text-sm"
+      class="overflow-hidden text-sm data-[state=closed]:animate-accordion-up data-[state=open]:animate-accordion-down"
       data-orientation="vertical"
       data-slot="accordion-content"
       data-state="open"
@@ -236,7 +236,7 @@ exports[`Accordion Component - Functional Tests matches snapshot for multiple ty
     </h3>
     <div
       aria-labelledby="radix-_r_a_"
-      class="data-[state=closed]:animate-accordion-up data-[state=open]:animate-accordion-down overflow-hidden text-sm"
+      class="overflow-hidden text-sm data-[state=closed]:animate-accordion-up data-[state=open]:animate-accordion-down"
       data-orientation="vertical"
       data-slot="accordion-content"
       data-state="closed"
