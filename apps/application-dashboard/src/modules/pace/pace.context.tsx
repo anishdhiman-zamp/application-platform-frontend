@@ -20,11 +20,6 @@ export interface PendingFileReference {
   name: string;
 }
 
-export interface LiveStreamingPanelData {
-  conversationId: string;
-  toolName?: string;
-}
-
 interface PaceContextType {
   chatSidebarState: ChatSidebarState;
   prevChatSidebarState: ChatSidebarState;
@@ -53,10 +48,6 @@ interface PaceContextType {
   toggleFilesPanel: defaultFnType;
   setFilesPanelPinned: (pinned: boolean) => void;
   closeFilesPanel: defaultFnType;
-
-  liveStreamingPanel: LiveStreamingPanelData | null;
-  openLiveStreamingPanel: (data: LiveStreamingPanelData) => void;
-  closeLiveStreamingPanel: defaultFnType;
 }
 
 const PaceContext = createContext<PaceContextType | null>(null);
@@ -75,7 +66,6 @@ export const PaceProvider = ({ children }: { children: ReactNode }) => {
   const [pendingFileReference, setPendingFileReference] = useState<PendingFileReference | null>(null);
   const [filesPanelOpen, setFilesPanelOpen] = useState(false);
   const [filesPanelPinned, setFilesPanelPinnedRaw] = useState(false);
-  const [liveStreamingPanel, setLiveStreamingPanel] = useState<LiveStreamingPanelData | null>(null);
 
   const pathname = syncedPathname || nextPathname;
   const hasFileParam = fileParam !== null;
@@ -124,14 +114,6 @@ export const PaceProvider = ({ children }: { children: ReactNode }) => {
 
   const closeFilesPanel = useCallback(() => {
     setFilesPanelOpen(false);
-  }, []);
-
-  const openLiveStreamingPanel = useCallback((data: LiveStreamingPanelData) => {
-    setLiveStreamingPanel(data);
-  }, []);
-
-  const closeLiveStreamingPanel = useCallback(() => {
-    setLiveStreamingPanel(null);
   }, []);
 
   useEffect(() => {
@@ -284,10 +266,6 @@ export const PaceProvider = ({ children }: { children: ReactNode }) => {
       toggleFilesPanel,
       setFilesPanelPinned,
       closeFilesPanel,
-
-      liveStreamingPanel,
-      openLiveStreamingPanel,
-      closeLiveStreamingPanel,
     }),
     [
       chatSidebarState,
@@ -315,10 +293,6 @@ export const PaceProvider = ({ children }: { children: ReactNode }) => {
       toggleFilesPanel,
       setFilesPanelPinned,
       closeFilesPanel,
-
-      liveStreamingPanel,
-      openLiveStreamingPanel,
-      closeLiveStreamingPanel,
     ],
   );
 

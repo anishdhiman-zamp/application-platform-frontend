@@ -36,6 +36,7 @@ export interface ChatConversationContentProps {
   organizationId: string;
   onFileOpen: (path: string, name: string) => void;
   onTaskOpen?: (name: string, path: string) => void;
+  onBrowserOpen?: (conversationId: string) => void;
   onTaskPopoverOpenChange?: (open: boolean) => void;
   isOnChatRoute: boolean;
   onChatStateChange: (state: ChatState) => void;
@@ -53,6 +54,7 @@ const ChatConversationContent: FC<ChatConversationContentProps> = ({
   organizationId,
   onFileOpen,
   onTaskOpen,
+  onBrowserOpen,
   onTaskPopoverOpenChange,
   isOnChatRoute,
   onChatStateChange,
@@ -61,7 +63,7 @@ const ChatConversationContent: FC<ChatConversationContentProps> = ({
   currentUserName,
   username,
 }) => {
-  const { pendingFileReference, clearPendingFileReference, openLiveStreamingPanel } = usePaceContext();
+  const { pendingFileReference, clearPendingFileReference } = usePaceContext();
   const dispatch = useAppDispatch();
 
   const taskStatusContainerRef = useRef<HTMLDivElement>(null);
@@ -103,9 +105,9 @@ const ChatConversationContent: FC<ChatConversationContentProps> = ({
     const activeConversationId = conversationId ?? chat.conversationId;
 
     if (activeConversationId) {
-      openLiveStreamingPanel({ conversationId: activeConversationId });
+      onBrowserOpen?.(activeConversationId);
     }
-  }, [conversationId, chat.conversationId, openLiveStreamingPanel]);
+  }, [conversationId, chat.conversationId, onBrowserOpen]);
 
   const { isDragOver, dropZoneProps } = useFileDragDrop({
     onFileDrop: (files) => fileDropHandlerRef.current?.(files),

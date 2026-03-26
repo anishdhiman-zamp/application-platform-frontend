@@ -8,7 +8,6 @@ import PaceNavbar from 'modules/pace/components/layout/PaceNavbar';
 import { FILES_PANEL_SPACER_TRANSITION } from 'modules/pace/pace.animations';
 import { CHAT_SIDEBAR_STATE } from 'modules/pace/pace.types';
 import FilesPanel from '@/modules/pace/components/files-panel/FilesPanel';
-import LiveStreamingPanel from '@/modules/pace/components/live-streaming-panel/LiveStreamingPanel';
 import UploadProgressToast from '@/modules/pace/components/progress-toast/UploadProgressToast';
 import { FileUploadProvider, useFileUploadContext } from '@/modules/pace/context/FileUploadContext';
 import { FILES_PANEL_WIDTH } from '@/modules/pace/pace.constants';
@@ -46,7 +45,6 @@ const PaceLayoutContentInner: FC<PaceLayoutContentProps> = ({ children }) => {
         />
       </div>
       <FilesPanel />
-      <LiveStreamingPanel />
       <UploadProgressToast uploadState={uploadState} onCancel={cancelUpload} />
     </div>
   );

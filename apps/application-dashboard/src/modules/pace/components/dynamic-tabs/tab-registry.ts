@@ -15,6 +15,12 @@ export const TAB_TYPE_CONFIG: Record<DynamicTabType, DynamicTabRouteConfig> = {
     buildPath: (id: string) => `${ROUTES_PATH.CHAT}/task/${encodeURIComponent(id)}`,
     fallbackPath: ROUTES_PATH.CHAT,
   },
+  [TAB_TYPE.BROWSER]: {
+    kind: ROUTE_KIND.QUERY,
+    basePath: ROUTES_PATH.CHAT,
+    paramName: 'b',
+    fallbackPath: ROUTES_PATH.CHAT,
+  },
 };
 
 const DEFAULT_TAB_TYPE: DynamicTabType = TAB_TYPE.FILE;
