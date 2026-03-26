@@ -203,19 +203,6 @@ const ScrollContainer = forwardRef<ScrollContainerRef, ScrollContainerProps>(
           const contentFromAnchor = Math.max(0, contentHeight - anchorTop);
           const newSpacerHeight = Math.max(0, container.clientHeight - contentFromAnchor - USER_MESSAGE_TOP_PADDING);
 
-          console.log('[scrollToLastUserMessage]', {
-            isInitial,
-            anchorTop,
-            spacerCurrentHeight,
-            contentHeight,
-            contentFromAnchor,
-            newSpacerHeight,
-            scrollTarget: anchorTop - USER_MESSAGE_TOP_PADDING,
-            scrollHeight: container.scrollHeight,
-            clientHeight: container.clientHeight,
-            maxScrollTop: contentHeight + newSpacerHeight - container.clientHeight,
-          });
-
           if (spacer) {
             spacer.style.minHeight = '0px';
             spacer.style.height = `${newSpacerHeight}px`;
@@ -225,8 +212,6 @@ const ScrollContainer = forwardRef<ScrollContainerRef, ScrollContainerProps>(
             top: anchorTop - USER_MESSAGE_TOP_PADDING,
             behavior: isInitial ? 'instant' : 'smooth',
           });
-
-          console.log('[scrollToLastUserMessage] after scrollTo, scrollTop =', container.scrollTop);
         }
 
         // Dispatch chatScrollEnd in the next frame so Message components
@@ -299,15 +284,6 @@ const ScrollContainer = forwardRef<ScrollContainerRef, ScrollContainerProps>(
 
     // --- Scroll trigger effect (handles both anchor and default modes) ---
     useEffect(() => {
-      console.log('[scrollTriggerEffect]', {
-        scrollTrigger,
-        enableAnchorScroll,
-        isLoading,
-        lastMessageSenderType,
-        isInitial: isInitialScrollRef.current,
-        lastUserScrollLength: lastUserScrollLengthRef.current,
-      });
-
       if (scrollTrigger === undefined) return;
 
       const el = scrollRef.current;
@@ -316,7 +292,6 @@ const ScrollContainer = forwardRef<ScrollContainerRef, ScrollContainerProps>(
 
       if (enableAnchorScroll) {
         if (isLoading || scrollTrigger <= 0) {
-          console.log('[scrollTriggerEffect] anchor mode — skipped (isLoading or no trigger)');
           return;
         }
 
@@ -352,7 +327,6 @@ const ScrollContainer = forwardRef<ScrollContainerRef, ScrollContainerProps>(
       }
 
       // Default mode (non-anchor): scroll to bottom
-      console.log('[scrollTriggerEffect] DEFAULT MODE — scrolling to bottom!');
       const behavior: ScrollBehavior = isInitialScrollRef.current ? 'instant' : 'smooth';
 
       isAutoScrollActiveRef.current = true;
