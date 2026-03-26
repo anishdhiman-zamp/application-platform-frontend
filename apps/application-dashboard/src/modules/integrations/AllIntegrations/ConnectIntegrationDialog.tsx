@@ -1,6 +1,6 @@
 'use client';
 
-import { type FC, useCallback, useEffect, useState } from 'react';
+import { type FC, useCallback, useState } from 'react';
 import {
   Button,
   Dialog,
@@ -61,12 +61,6 @@ const ConnectIntegrationDialog: FC<ConnectIntegrationDialogProps> = ({
       description: connectionDescription.trim(),
     });
   }, [onConnect, connectionName, connectionDescription]);
-
-  useEffect(() => {
-    if (!isOpen) {
-      resetFields();
-    }
-  }, [isOpen, resetFields]);
 
   return (
     <Dialog open={isOpen} onOpenChange={handleOpenChange}>
