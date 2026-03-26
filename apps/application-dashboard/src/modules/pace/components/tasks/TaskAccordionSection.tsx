@@ -1,6 +1,6 @@
 'use client';
 
-import { useCallback, useRef } from 'react';
+import { useCallback, useEffect, useRef } from 'react';
 import type { TaskStatus } from '@zamp-platform/chat';
 import { TaskStatusIcon } from '@zamp-platform/chat';
 import { useInfiniteScroll } from '@zamp-platform/tanstack-table';
@@ -16,14 +16,15 @@ interface TaskAccordionSectionProps {
   status: TaskStatus;
   count: number;
   search?: string;
+  scrollContainerRef?: React.RefObject<HTMLDivElement | null>;
 }
 
 const PlayIcon = ({ className }: { className?: string }) => (
   <Play className={className} fill='currentColor' strokeWidth={0} />
 );
 
-const TaskAccordionSection = ({ status, count, search }: TaskAccordionSectionProps) => {
-  const containerRef = useRef<HTMLDivElement>(null);
+const TaskAccordionSection = ({ status, count, search, scrollContainerRef }: TaskAccordionSectionProps) => {
+  const itemRef = useRef<HTMLDivElement>(null);
   const { tasks, totalCount, fetchNextPage, isFetching } = useTasksByStatus({ status, search });
 
   const { fetchMoreOnBottomReached } = useInfiniteScroll({
@@ -36,16 +37,29 @@ const TaskAccordionSection = ({ status, count, search }: TaskAccordionSectionPro
   });
 
   const handleScroll = useCallback(() => {
-    fetchMoreOnBottomReached(containerRef.current);
-  }, [fetchMoreOnBottomReached]);
+    const ref = search ? scrollContainerRef : itemRef;
+
+    fetchMoreOnBottomReached(ref?.current);
+  }, [fetchMoreOnBottomReached, search, scrollContainerRef]);
+
+  useEffect(() => {
+    if (!search || !scrollContainerRef?.current) return;
+
+    const el = scrollContainerRef.current;
+    const onScroll = () => fetchMoreOnBottomReached(el);
+
+    el.addEventListener('scroll', onScroll, { passive: true });
+
+    return () => el.removeEventListener('scroll', onScroll);
+  }, [search, scrollContainerRef, fetchMoreOnBottomReached]);
 
   if (search && !isFetching && totalCount === 0) return null;
 
   return (
     <AccordionItem
-      ref={containerRef}
+      ref={itemRef}
       value={status}
-      onScroll={handleScroll}
+      onScroll={!search ? handleScroll : undefined}
       className={cn(
         'border-GRAY_400 bg-GRAY_1 shrink-0',
         !search &&

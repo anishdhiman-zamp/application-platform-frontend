@@ -1,6 +1,6 @@
 'use client';
 
-import { useMemo } from 'react';
+import { useMemo, useRef } from 'react';
 import type { TaskStatus } from '@zamp-platform/chat';
 import { Accordion } from '@zamp-platform/ui';
 import { NEEDS_ACTION_STATUSES, STATUS_DISPLAY_ORDER } from 'modules/pace/components/tasks/task-listing.constants';
@@ -45,18 +45,7 @@ const TaskAccordionGroup = ({ activeTab, search }: TaskAccordionGroupProps) => {
 
   const defaultOpenValue = useMemo(() => visibleStatuses[0], [visibleStatuses]);
 
-  const accordionContent = (
-    <>
-      {visibleStatuses.map((status) => (
-        <TaskAccordionSection key={status} status={status} count={countMap.get(status) ?? 0} search={search} />
-      ))}
-      {search && (
-        <div className='hidden only:block'>
-          <NoDataBanner search={search} />
-        </div>
-      )}
-    </>
-  );
+  const searchScrollRef = useRef<HTMLDivElement>(null);
 
   return (
     <CommonWrapper
@@ -64,17 +53,29 @@ const TaskAccordionGroup = ({ activeTab, search }: TaskAccordionGroupProps) => {
       skeletonType={SkeletonTypes.CUSTOM}
       loader={<TaskListingSkeleton />}
       isNoData={!isLoading && visibleStatuses.length === 0}
-      noDataBanner={<NoDataBanner />}
+      noDataBanner={<NoDataBanner search={search} />}
       className='flex min-h-0 flex-1 flex-col'
       disableAnimation
     >
       {search ? (
         <Accordion
+          ref={searchScrollRef}
           type='multiple'
           defaultValue={[...visibleStatuses]}
           className='flex-1 overflow-y-auto [scrollbar-width:thin]'
         >
-          {accordionContent}
+          {visibleStatuses.map((status) => (
+            <TaskAccordionSection
+              key={status}
+              status={status}
+              count={countMap.get(status) ?? 0}
+              search={search}
+              scrollContainerRef={searchScrollRef}
+            />
+          ))}
+          <div className='hidden only:block'>
+            <NoDataBanner search={search} />
+          </div>
         </Accordion>
       ) : (
         <Accordion
@@ -83,7 +84,9 @@ const TaskAccordionGroup = ({ activeTab, search }: TaskAccordionGroupProps) => {
           collapsible
           className='flex min-h-0 flex-1 flex-col overflow-hidden'
         >
-          {accordionContent}
+          {visibleStatuses.map((status) => (
+            <TaskAccordionSection key={status} status={status} count={countMap.get(status) ?? 0} />
+          ))}
         </Accordion>
       )}
     </CommonWrapper>

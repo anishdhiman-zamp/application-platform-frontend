@@ -320,6 +320,34 @@ export function filterTreeNodes(nodes: TreeNode[], searchQuery: string): TreeNod
 }
 
 /**
+ * Pre-computes a map of path -> visible descendant count for all nodes in the tree.
+ * Avoids redundant O(n) traversals during rendering.
+ */
+export function buildDescendantCountMap(nodes: TreeNode[], expandedPaths: Set<string>): Map<string, number> {
+  const map = new Map<string, number>();
+
+  function compute(node: TreeNode): number {
+    let count = 1;
+
+    if (node.children && expandedPaths.has(node.path)) {
+      for (const child of node.children) {
+        count += compute(child);
+      }
+    }
+
+    map.set(node.path, count);
+
+    return count;
+  }
+
+  for (const node of nodes) {
+    compute(node);
+  }
+
+  return map;
+}
+
+/**
  * Flattens a hierarchical tree into a flat array for virtualized rendering.
  * Only includes children of expanded folders.
  */

@@ -406,6 +406,7 @@ export interface StreamingState extends ChatMessage {
  * Chat Feedback API Types
  */
 export const enum ChatFeedbackCategory {
+  HELPFUL = 'HELPFUL',
   UI_BUG = 'UI_BUG',
   OVERACTIVE_REFUSAL = 'OVERACTIVE_REFUSAL',
   DID_NOT_FOLLOW_REQUEST = 'DID_NOT_FOLLOW_REQUEST',
@@ -413,8 +414,14 @@ export const enum ChatFeedbackCategory {
   INCOMPLETE_RESPONSE = 'INCOMPLETE_RESPONSE',
   SHOULD_HAVE_SEARCHED_WEB = 'SHOULD_HAVE_SEARCHED_WEB',
   MEMORY_NOT_APPLIED = 'MEMORY_NOT_APPLIED',
+  KNOW_BETTER_APPROACH = 'KNOW_BETTER_APPROACH',
   REPORT_CONTENT = 'REPORT_CONTENT',
   OTHER = 'OTHER',
+}
+
+export const enum FeedbackSentiment {
+  THUMBS_UP = 'thumbs_up',
+  THUMBS_DOWN = 'thumbs_down',
 }
 
 export interface SubmitChatFeedbackRequestType {
@@ -424,6 +431,7 @@ export interface SubmitChatFeedbackRequestType {
     category: ChatFeedbackCategory;
     description: string;
     file_upload_ids?: string[];
+    sentiment?: FeedbackSentiment;
   };
 }
 

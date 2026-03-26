@@ -46,7 +46,6 @@ const TaskStatusCounts: FC<TaskStatusCountsProps> = ({
   const [isOpen, setIsOpen] = useState(false);
   const [searchQuery, setSearchQuery] = useState('');
   const [containerWidth, setContainerWidth] = useState(0);
-  const [containerPaddingX, setContainerPaddingX] = useState(0);
 
   const visiblePillStatuses = useMemo(() => PILL_STATUS_ORDER.filter((s) => counts[s] > 0), [counts]);
 
@@ -67,9 +66,6 @@ const TaskStatusCounts: FC<TaskStatusCountsProps> = ({
     const observer = new ResizeObserver((entries) => {
       for (const entry of entries) {
         setContainerWidth(entry.contentRect.width);
-        const paddingLeft = parseFloat(getComputedStyle(entry.target).paddingLeft) || 0;
-
-        setContainerPaddingX(paddingLeft);
       }
     });
 
@@ -82,12 +78,6 @@ const TaskStatusCounts: FC<TaskStatusCountsProps> = ({
 
   return (
     <div className='relative'>
-      {isOpen && (
-        <div
-          className='pointer-events-none absolute bottom-full h-screen backdrop-blur-sm'
-          style={{ left: -containerPaddingX, right: -containerPaddingX }}
-        />
-      )}
       <Popover
         open={isOpen}
         onOpenChange={(open) => {
@@ -112,7 +102,7 @@ const TaskStatusCounts: FC<TaskStatusCountsProps> = ({
           align='start'
           sideOffset={8}
           avoidCollisions={false}
-          className='flex h-[600px] flex-col !rounded-[20px] p-0'
+          className='flex max-h-[calc(100vh-250px)] min-h-[400px] flex-col !rounded-[20px] p-0'
           style={
             containerWidth ? { width: containerWidth, minWidth: containerWidth, maxWidth: containerWidth } : undefined
           }
@@ -127,7 +117,7 @@ const TaskStatusCounts: FC<TaskStatusCountsProps> = ({
             />
           </div>
 
-          <div className='flex-1 overflow-y-auto px-4 pt-4 [scrollbar-width:thin]'>
+          <div className='flex-1 overflow-y-auto px-4 pt-4 pb-4 [scrollbar-width:thin]'>
             <div className='flex flex-col gap-3'>
               {sortedAndFilteredTasks.map((task) => (
                 <TaskBlock

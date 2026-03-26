@@ -13,7 +13,6 @@ import {
   useEffect,
   useLayoutEffect,
   useRef,
-  useState,
 } from 'react';
 
 const buttonVariants = cva(
@@ -160,7 +159,7 @@ function Button({
   const Comp = asChild ? Slot : 'button';
   const internalRef = useRef<HTMLButtonElement>(null);
   const buttonRef = ref ?? internalRef;
-  const [minWidth, setMinWidth] = useState<number | undefined>(undefined);
+  const measuredWidthRef = useRef<number | undefined>(undefined);
 
   const iconSize = ICON_SIZE_MAP[(size as IconSize) ?? 'default'];
 
@@ -178,12 +177,14 @@ function Button({
     }
   };
 
-  // Capture button width on mount and when children change (but not during loading)
+  // Capture the natural button width so we can preserve it when isLoading
+  // replaces children with a spinner. We store in a ref to avoid re-render
+  // loops — the value is only read when computing the inline style.
   useLayoutEffect(() => {
-    if (buttonRef && 'current' in buttonRef && buttonRef.current && !isLoading) {
+    if (!isLoading && buttonRef && 'current' in buttonRef && buttonRef.current) {
       const width = buttonRef.current.offsetWidth;
       if (width > 0) {
-        setMinWidth(width);
+        measuredWidthRef.current = width;
       }
     }
   }, [children, leadingIcon, trailingIcon, size, buttonRef, isLoading]);
@@ -209,6 +210,9 @@ function Button({
     );
   };
 
+  // Only apply minWidth when loading to prevent width collapse from spinner
+  const loadingMinWidth = isLoading && measuredWidthRef.current ? `${measuredWidthRef.current}px` : undefined;
+
   return (
     <Comp
       ref={buttonRef}
@@ -217,7 +221,7 @@ function Button({
         isLoading && LOADING_VARIANT_CLASSES[variant ?? 'default'],
         (leadingIcon || trailingIcon) && 'gap-1.5',
       )}
-      style={{ minWidth: minWidth ? `${minWidth}px` : undefined, ...style }}
+      style={{ minWidth: loadingMinWidth, ...style }}
       disabled={disabled || isLoading}
       onClick={handleClick}
       data-testid={testId ? `btn-${testId}` : undefined}
