@@ -80,11 +80,13 @@ export type EnsureProvisioningResponse = {
 export type UploadUrlRequest = {
   upload_type: UploadType;
   content_type: ImageContentType;
+  seed_hint?: string;
 };
 
 export type UploadUrlResponse = {
-  upload_url: string;
-  s3_uri: string;
+  upload_url: string | null;
+  asset_value: string;
+  media_type: MediaType;
 };
 
 export type CheckUsernameResponse = {
