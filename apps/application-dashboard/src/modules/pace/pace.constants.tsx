@@ -11,6 +11,8 @@ export const DEFAULT_CHAT_TITLE = 'Untitled';
 export const DEBOUNCE_DELAY_MS = 300;
 export const NEW_CONVERSATION_ID = 'null_thread';
 export const SIDEBAR_WIDTH = 450;
+export const SIDEBAR_MIN_WIDTH = 300;
+export const SIDEBAR_MAX_WIDTH = 700;
 export const SIDEBAR_CONVERSATION_ID_PARAM = 's';
 export const FILES_PANEL_WIDTH = 325;
 

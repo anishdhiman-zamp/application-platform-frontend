@@ -222,7 +222,11 @@ const FileTreeContent = ({
         onChange={handleFolderInputChange}
         {...({ webkitdirectory: '', directory: '' } as React.InputHTMLAttributes<HTMLInputElement>)}
       />
-      <div ref={containerRef} className='min-h-0 flex-1 overflow-auto' onDragLeave={handleContainerDragLeave}>
+      <div
+        ref={containerRef}
+        className='min-h-0 flex-1 overflow-x-hidden overflow-y-auto [scrollbar-width:thin]'
+        onDragLeave={handleContainerDragLeave}
+      >
         <div
           style={{
             height: virtualizer.getTotalSize(),

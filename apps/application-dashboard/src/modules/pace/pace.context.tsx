@@ -1,7 +1,13 @@
 'use client';
 
 import { createContext, type ReactNode, useCallback, useContext, useEffect, useMemo, useRef, useState } from 'react';
-import { SIDEBAR_CONVERSATION_ID_PARAM } from 'modules/pace/pace.constants';
+import {
+  FILES_PANEL_WIDTH,
+  SIDEBAR_CONVERSATION_ID_PARAM,
+  SIDEBAR_MAX_WIDTH,
+  SIDEBAR_MIN_WIDTH,
+  SIDEBAR_WIDTH,
+} from 'modules/pace/pace.constants';
 import { CHAT_SIDEBAR_STATE, type ChatSidebarState, DynamicTab, TAB_TYPE } from 'modules/pace/pace.types';
 import { getStoredTabs, setStoredTabs } from 'modules/pace/pace.utils';
 import { usePathname } from 'next/navigation';
@@ -48,6 +54,13 @@ interface PaceContextType {
   toggleFilesPanel: defaultFnType;
   setFilesPanelPinned: (pinned: boolean) => void;
   closeFilesPanel: defaultFnType;
+  scheduleFilesPanelClose: defaultFnType;
+  cancelFilesPanelClose: defaultFnType;
+
+  sidebarWidth: number;
+  setSidebarWidth: (width: number) => void;
+  isSidebarResizing: boolean;
+  setIsSidebarResizing: (resizing: boolean) => void;
 }
 
 const PaceContext = createContext<PaceContextType | null>(null);
@@ -56,6 +69,7 @@ export const PaceProvider = ({ children }: { children: ReactNode }) => {
   const nextPathname = usePathname();
   const syncedPathname = useSyncedPathname();
   const fileParam = useSyncedUrlParam('f');
+  const filesPanelLeaveTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   const startNewChatRef = useRef<defaultFnType | null>(null);
 
   const [dynamicTabs, setDynamicTabs] = useState<DynamicTab[]>([]);
@@ -66,6 +80,8 @@ export const PaceProvider = ({ children }: { children: ReactNode }) => {
   const [pendingFileReference, setPendingFileReference] = useState<PendingFileReference | null>(null);
   const [filesPanelOpen, setFilesPanelOpen] = useState(false);
   const [filesPanelPinned, setFilesPanelPinnedRaw] = useState(false);
+  const [sidebarWidth, setSidebarWidthRaw] = useState(SIDEBAR_WIDTH);
+  const [isSidebarResizing, setIsSidebarResizing] = useState(false);
 
   const pathname = syncedPathname || nextPathname;
   const hasFileParam = fileParam !== null;
@@ -102,6 +118,13 @@ export const PaceProvider = ({ children }: { children: ReactNode }) => {
     setToLocalStorage(LOCAL_STORAGE_KEYS.PACE_FILES_PANEL_PINNED, JSON.stringify(pinned));
   }, []);
 
+  const setSidebarWidth = useCallback((width: number) => {
+    const clamped = Math.min(SIDEBAR_MAX_WIDTH, Math.max(SIDEBAR_MIN_WIDTH, width));
+
+    setSidebarWidthRaw(clamped);
+    setToLocalStorage(LOCAL_STORAGE_KEYS.PACE_SIDEBAR_WIDTH, String(clamped));
+  }, []);
+
   const toggleFilesPanel = useCallback(() => {
     if (filesPanelPinned) {
       setFilesPanelPinned(false);
@@ -116,52 +139,20 @@ export const PaceProvider = ({ children }: { children: ReactNode }) => {
     setFilesPanelOpen(false);
   }, []);
 
-  useEffect(() => {
-    if (prevRouteUrlRef.current === routeUrl) {
-      return;
-    }
-    prevRouteUrlRef.current = routeUrl;
-
-    if (isOnChatRoute && !hasFileParam) {
-      setChatSidebarStateInternal(CHAT_SIDEBAR_STATE.EXPANDED);
-    } else if (chatSidebarStateRef.current === CHAT_SIDEBAR_STATE.EXPANDED) {
-      setChatSidebarStateInternal(CHAT_SIDEBAR_STATE.COLLAPSED);
-    }
-  }, [routeUrl, isOnChatRoute, hasFileParam]);
-
-  useEffect(() => {
-    const storedTabs = getStoredTabs();
-
-    setDynamicTabs(storedTabs);
-    setIsDynamicTabsHydrated(true);
-
-    const storedPinned = getFromLocalStorage(LOCAL_STORAGE_KEYS.PACE_FILES_PANEL_PINNED);
-
-    if (storedPinned) {
-      try {
-        const pinned = JSON.parse(storedPinned);
-
-        setFilesPanelPinnedRaw(pinned);
-        if (pinned) {
-          setFilesPanelOpen(true);
-        }
-      } catch {
-        removeFromLocalStorage(LOCAL_STORAGE_KEYS.PACE_FILES_PANEL_PINNED);
-      }
-    }
-
-    const currentPath = window.location.pathname;
-    const currentSearch = new URLSearchParams(window.location.search);
-    const isChatPath = currentPath === ROUTES_PATH.CHAT;
-    const hasFileParamOnMount = currentSearch.has('f');
-    const hasSidebarConversation = currentSearch.has(SIDEBAR_CONVERSATION_ID_PARAM);
-
-    if (isChatPath && !hasFileParamOnMount) {
-      setChatSidebarStateInternal(CHAT_SIDEBAR_STATE.EXPANDED);
-    } else if (hasSidebarConversation) {
-      setChatSidebarStateInternal(CHAT_SIDEBAR_STATE.SIDEBAR);
+  const cancelFilesPanelClose = useCallback(() => {
+    if (filesPanelLeaveTimerRef.current) {
+      clearTimeout(filesPanelLeaveTimerRef.current);
+      filesPanelLeaveTimerRef.current = null;
     }
   }, []);
+
+  const scheduleFilesPanelClose = useCallback(() => {
+    cancelFilesPanelClose();
+    filesPanelLeaveTimerRef.current = setTimeout(() => {
+      setFilesPanelOpen(false);
+      filesPanelLeaveTimerRef.current = null;
+    }, 200);
+  }, [cancelFilesPanelClose]);
 
   const registerStartNewChat = useCallback((callback: defaultFnType) => {
     startNewChatRef.current = callback;
@@ -237,6 +228,81 @@ export const PaceProvider = ({ children }: { children: ReactNode }) => {
     });
   }, []);
 
+  useEffect(() => {
+    if (prevRouteUrlRef.current === routeUrl) {
+      return;
+    }
+    prevRouteUrlRef.current = routeUrl;
+
+    if (isOnChatRoute && !hasFileParam) {
+      setChatSidebarStateInternal(CHAT_SIDEBAR_STATE.EXPANDED);
+    } else if (chatSidebarStateRef.current === CHAT_SIDEBAR_STATE.EXPANDED) {
+      setChatSidebarStateInternal(CHAT_SIDEBAR_STATE.COLLAPSED);
+    }
+  }, [routeUrl, isOnChatRoute, hasFileParam]);
+
+  useEffect(() => {
+    if (!(filesPanelOpen && filesPanelPinned)) return;
+    if (chatSidebarStateRef.current !== CHAT_SIDEBAR_STATE.SIDEBAR) return;
+
+    const containerWidth = window.innerWidth - 16;
+    const filesPanelSpace = FILES_PANEL_WIDTH + 8;
+    const available = containerWidth - 8 - 100 - filesPanelSpace;
+    const effectiveMax = Math.min(SIDEBAR_MAX_WIDTH, Math.max(SIDEBAR_MIN_WIDTH, available));
+
+    setSidebarWidthRaw((prev) => {
+      if (prev <= effectiveMax) return prev;
+
+      setToLocalStorage(LOCAL_STORAGE_KEYS.PACE_SIDEBAR_WIDTH, String(effectiveMax));
+
+      return effectiveMax;
+    });
+  }, [filesPanelOpen, filesPanelPinned]);
+
+  useEffect(() => {
+    const storedTabs = getStoredTabs();
+
+    setDynamicTabs(storedTabs);
+    setIsDynamicTabsHydrated(true);
+
+    const storedPinned = getFromLocalStorage(LOCAL_STORAGE_KEYS.PACE_FILES_PANEL_PINNED);
+
+    if (storedPinned) {
+      try {
+        const pinned = JSON.parse(storedPinned);
+
+        setFilesPanelPinnedRaw(pinned);
+        if (pinned) {
+          setFilesPanelOpen(true);
+        }
+      } catch {
+        removeFromLocalStorage(LOCAL_STORAGE_KEYS.PACE_FILES_PANEL_PINNED);
+      }
+    }
+
+    const storedSidebarWidth = getFromLocalStorage(LOCAL_STORAGE_KEYS.PACE_SIDEBAR_WIDTH);
+
+    if (storedSidebarWidth) {
+      const parsed = Number(storedSidebarWidth);
+
+      if (!Number.isNaN(parsed)) {
+        setSidebarWidthRaw(Math.min(SIDEBAR_MAX_WIDTH, Math.max(SIDEBAR_MIN_WIDTH, parsed)));
+      }
+    }
+
+    const currentPath = window.location.pathname;
+    const currentSearch = new URLSearchParams(window.location.search);
+    const isChatPath = currentPath === ROUTES_PATH.CHAT;
+    const hasFileParamOnMount = currentSearch.has('f');
+    const hasSidebarConversation = currentSearch.has(SIDEBAR_CONVERSATION_ID_PARAM);
+
+    if (isChatPath && !hasFileParamOnMount) {
+      setChatSidebarStateInternal(CHAT_SIDEBAR_STATE.EXPANDED);
+    } else if (hasSidebarConversation) {
+      setChatSidebarStateInternal(CHAT_SIDEBAR_STATE.SIDEBAR);
+    }
+  }, []);
+
   const value: PaceContextType = useMemo(
     () => ({
       chatSidebarState,
@@ -266,6 +332,13 @@ export const PaceProvider = ({ children }: { children: ReactNode }) => {
       toggleFilesPanel,
       setFilesPanelPinned,
       closeFilesPanel,
+      scheduleFilesPanelClose,
+      cancelFilesPanelClose,
+
+      sidebarWidth,
+      setSidebarWidth,
+      isSidebarResizing,
+      setIsSidebarResizing,
     }),
     [
       chatSidebarState,
@@ -293,6 +366,12 @@ export const PaceProvider = ({ children }: { children: ReactNode }) => {
       toggleFilesPanel,
       setFilesPanelPinned,
       closeFilesPanel,
+      scheduleFilesPanelClose,
+      cancelFilesPanelClose,
+
+      sidebarWidth,
+      setSidebarWidth,
+      isSidebarResizing,
     ],
   );
 

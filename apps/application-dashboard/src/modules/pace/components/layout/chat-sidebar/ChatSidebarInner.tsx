@@ -5,13 +5,14 @@ import type { useChat } from '@zamp-platform/chat';
 import { ConnectedChatInput, ResourceType, ScopeType } from '@zamp-platform/chat';
 import { useDynamicTabs } from 'modules/pace/components/dynamic-tabs/useDynamicTabs';
 import ChatConversationContent from 'modules/pace/components/layout/chat-sidebar/ChatConversationContent';
-import { usePathname, useSearchParams } from 'next/navigation';
+import { usePathname } from 'next/navigation';
 import { APITags } from '@/constants/api.constants';
 import { ROUTES_PATH } from '@/constants/routeConfig';
 import { useAppDispatch, useAppSelector } from '@/hooks/toolkit';
 import ChatTopbar from '@/modules/pace/components/chat/ChatTopbar';
 import ModelSelector from '@/modules/pace/components/chat/ModelSelector';
 import { useChatDraftInput } from '@/modules/pace/hooks/useChatDraftInput';
+import { useSyncedUrlParam } from '@/modules/pace/hooks/useSyncedSearchParam';
 import { usePaceContext } from '@/modules/pace/pace.context';
 import { CHAT_SIDEBAR_STATE, TAB_TYPE } from '@/modules/pace/pace.types';
 import { baseApi } from '@/services/baseApi';
@@ -41,13 +42,13 @@ const ChatSidebarInner: FC<ChatSidebarInnerProps> = ({
   chatKey,
 }) => {
   const pathname = usePathname();
-  const searchParams = useSearchParams();
+  const fParam = useSyncedUrlParam('f');
   const dispatch = useAppDispatch();
   const { openTab } = useDynamicTabs({ type: TAB_TYPE.FILE });
   const { chatSidebarState, setChatSidebarState } = usePaceContext();
   const { inputValue, setInputValue } = useChatDraftInput({ conversationId });
 
-  const isOnChatRoute = pathname === ROUTES_PATH.CHAT && !searchParams?.has('f');
+  const isOnChatRoute = pathname === ROUTES_PATH.CHAT && !fParam;
 
   const organizationId = useAppSelector((state: RootState) => state.user.user?.orgs?.[0]?.organization_id) ?? '';
   const currentUserName = useAppSelector((state: RootState) => state.user.user?.user_name) ?? '';
@@ -119,6 +120,8 @@ const ChatSidebarInner: FC<ChatSidebarInnerProps> = ({
         fileDropHandlerRef={fileDropHandlerRef}
         addFileReferenceRef={addFileReferenceRef}
         currentUserName={currentUserName}
+        llmModel={selectedModel}
+        modelSelectorSlot={modelSelectorSlot}
         username={username}
       />
       {chatState && !chatState.showHomeView && (

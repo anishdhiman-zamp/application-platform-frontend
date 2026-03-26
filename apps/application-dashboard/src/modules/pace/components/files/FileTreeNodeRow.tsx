@@ -175,7 +175,7 @@ const FileTreeNodeRow = forwardRef<HTMLDivElement, FileTreeNodeRowProps>(
             {extension && <span className='f-13-450 text-GRAY_600 shrink-0 select-none'>.{extension}</span>}
           </div>
         ) : (
-          <span className='f-13-450 text-GRAY_1000 min-w-0 flex-1 truncate select-none'>
+          <span className='f-13-450 text-GRAY_1000 min-w-0 truncate select-none'>
             {state.isUserPrivateFolder ? `${node.name} (Private)` : node.name}
           </span>
         )}
@@ -191,8 +191,7 @@ const FileTreeNodeRow = forwardRef<HTMLDivElement, FileTreeNodeRowProps>(
                   role='button'
                   tabIndex={0}
                   className={cn(
-                    'flex size-5 shrink-0 cursor-pointer items-center justify-center rounded opacity-0 outline-none group-hover:opacity-100',
-                    !state.isFolder && 'ml-auto',
+                    'ml-auto flex size-5 shrink-0 cursor-pointer items-center justify-center rounded opacity-0 outline-none group-hover:opacity-100',
                     dropdownOpen && 'opacity-100',
                   )}
                   onClick={(e) => e.stopPropagation()}

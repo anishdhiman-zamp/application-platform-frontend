@@ -41,7 +41,9 @@ export interface ChatConversationContentProps {
   fileDropHandlerRef: React.RefObject<((files: FileList) => void) | null>;
   addFileReferenceRef: React.RefObject<((ref: { path: string; name: string }) => void) | null>;
   currentUserName: string;
+  llmModel: string | null;
   username: string;
+  modelSelectorSlot: React.ReactNode;
 }
 
 const ChatConversationContent: FC<ChatConversationContentProps> = ({
@@ -57,7 +59,9 @@ const ChatConversationContent: FC<ChatConversationContentProps> = ({
   fileDropHandlerRef,
   addFileReferenceRef,
   currentUserName,
+  llmModel,
   username,
+  modelSelectorSlot,
 }) => {
   const { pendingFileReference, clearPendingFileReference } = usePaceContext();
   const dispatch = useAppDispatch();
@@ -140,6 +144,10 @@ const ChatConversationContent: FC<ChatConversationContentProps> = ({
               maxTextareaHeight={200}
               className='[box-shadow:0_0_16px_0_rgba(0,0,0,0.06)]'
               fileDropHandlerRef={fileDropHandlerRef}
+              addFileReferenceRef={addFileReferenceRef}
+              showModelSelector
+              modelSelectorSlot={modelSelectorSlot}
+              llmModel={llmModel}
             />
           </div>
           <ChatHistory onSelectConversation={setConversationId} />

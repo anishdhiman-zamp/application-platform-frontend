@@ -13,7 +13,7 @@ import { ROUTES_PATH } from '@/constants/routeConfig';
 import DynamicTabsBar from '@/modules/pace/components/dynamic-tabs/DynamicTabsBar';
 import { useDynamicTabs } from '@/modules/pace/components/dynamic-tabs/useDynamicTabs';
 import NavbarIconLink from '@/modules/pace/components/layout/NavbarIconLink';
-import { PACE_NAVBAR_ITEMS, SIDEBAR_CONVERSATION_ID_PARAM, SIDEBAR_WIDTH } from '@/modules/pace/pace.constants';
+import { PACE_NAVBAR_ITEMS, SIDEBAR_CONVERSATION_ID_PARAM } from '@/modules/pace/pace.constants';
 import { usePaceContext } from '@/modules/pace/pace.context';
 
 const PaceNavbar = () => {
@@ -27,7 +27,11 @@ const PaceNavbar = () => {
     collapseSidebar,
     filesPanelOpen,
     filesPanelPinned,
+    setFilesPanelPinned,
     toggleFilesPanel,
+    cancelFilesPanelClose,
+    sidebarWidth,
+    isSidebarResizing,
   } = usePaceContext();
   const { isOnAnyDynamicTab } = useDynamicTabs();
 
@@ -146,8 +150,8 @@ const PaceNavbar = () => {
       {/* Spacer: animates width to push content when sidebar is open */}
       <motion.div
         initial={false}
-        animate={{ width: isSidebar ? SIDEBAR_WIDTH - 30 : 0 }}
-        transition={navAnimations.spacer}
+        animate={{ width: isSidebar ? sidebarWidth - 30 : 0 }}
+        transition={isSidebarResizing ? { duration: 0 } : navAnimations.spacer}
         className='shrink-0 overflow-hidden'
       />
 
@@ -188,11 +192,15 @@ const PaceNavbar = () => {
             'text-GRAY_700 hover:text-GRAY_900 hover:bg-accent h-7.5 w-7.5 rounded-lg border-[0.75px] border-transparent p-[7px]',
             {
               'border-GRAY_500 text-GRAY_900 hover:text-GRAY_900 shadow-tab-shadow bg-BG_WHITE hover:bg-BG_WHITE':
-                filesPanelOpen && !filesPanelPinned,
+                filesPanelOpen && filesPanelPinned,
             },
           )}
-          onClick={toggleFilesPanel}
-          title='Files'
+          onClick={() => setFilesPanelPinned(!filesPanelPinned)}
+          onMouseEnter={() => {
+            cancelFilesPanelClose();
+            if (!filesPanelPinned && !filesPanelOpen) toggleFilesPanel();
+          }}
+          title={filesPanelPinned ? 'Unpin files panel' : 'Files'}
         >
           <FolderOpenIcon size={16} className='pointer-events-none' />
         </Button>

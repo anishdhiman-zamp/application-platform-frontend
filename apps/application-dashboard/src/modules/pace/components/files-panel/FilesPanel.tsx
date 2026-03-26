@@ -21,49 +21,55 @@ const PANEL_ANIMATION = {
   },
 } as const;
 
-const MOUSE_LEAVE_DELAY_MS = 200;
 const PORTAL_SELECTORS =
   '[role="menu"], [role="listbox"], [role="dialog"], [data-radix-popper-content-wrapper], [data-radix-menu-content]';
 
 const isPortalOpen = () => document.querySelector(PORTAL_SELECTORS) !== null;
 
 const FilesPanel = () => {
-  const { filesPanelOpen, filesPanelPinned, closeFilesPanel } = usePaceContext();
+  const { filesPanelOpen, filesPanelPinned, scheduleFilesPanelClose, cancelFilesPanelClose } = usePaceContext();
 
   const panelRef = useRef<HTMLDivElement>(null);
-  const leaveTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const isInsideZoneRef = useRef(false);
 
-  const clearLeaveTimer = () => {
-    if (leaveTimerRef.current) {
-      clearTimeout(leaveTimerRef.current);
-      leaveTimerRef.current = null;
-    }
-  };
+  const isInPanelColumn = useCallback((clientX: number) => {
+    const panel = panelRef.current;
 
-  const handleMouseLeave = useCallback(
-    (e: React.MouseEvent) => {
-      if (filesPanelPinned) return;
+    if (!panel) return false;
 
-      const relatedTarget = e.relatedTarget as HTMLElement | null;
+    const rect = panel.getBoundingClientRect();
 
-      if (relatedTarget?.closest?.(PORTAL_SELECTORS) || isPortalOpen()) {
-        clearLeaveTimer();
-
-        return;
-      }
-
-      leaveTimerRef.current = setTimeout(closeFilesPanel, MOUSE_LEAVE_DELAY_MS);
-    },
-    [filesPanelPinned, closeFilesPanel],
-  );
+    return clientX >= rect.left && clientX <= rect.right;
+  }, []);
 
   const handleMouseEnter = () => {
-    clearLeaveTimer();
+    cancelFilesPanelClose();
   };
 
   useEffect(() => {
-    return () => clearLeaveTimer();
-  }, []);
+    if (!filesPanelOpen || filesPanelPinned) return;
+
+    const handleDocumentMouseMove = (e: MouseEvent) => {
+      if (isPortalOpen()) return;
+
+      const inside = isInPanelColumn(e.clientX);
+
+      if (inside && !isInsideZoneRef.current) {
+        isInsideZoneRef.current = true;
+        cancelFilesPanelClose();
+      } else if (!inside && isInsideZoneRef.current) {
+        isInsideZoneRef.current = false;
+        scheduleFilesPanelClose();
+      }
+    };
+
+    document.addEventListener('mousemove', handleDocumentMouseMove);
+
+    return () => {
+      document.removeEventListener('mousemove', handleDocumentMouseMove);
+      isInsideZoneRef.current = false;
+    };
+  }, [filesPanelOpen, filesPanelPinned, isInPanelColumn, scheduleFilesPanelClose, cancelFilesPanelClose]);
 
   return (
     <AnimatePresence>
@@ -75,7 +81,6 @@ const FilesPanel = () => {
           exit={PANEL_ANIMATION.exit}
           style={{ width: FILES_PANEL_WIDTH }}
           className='border-GRAY_400 bg-BG_WHITE shadow-side-drawer-inner absolute top-[42px] right-2 bottom-0 z-50 flex flex-col overflow-hidden rounded-t-xl border'
-          onMouseLeave={handleMouseLeave}
           onMouseEnter={handleMouseEnter}
         >
           <FilesPanelContent />

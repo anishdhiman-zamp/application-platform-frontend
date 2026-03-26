@@ -8,6 +8,7 @@ import PaceNavbar from 'modules/pace/components/layout/PaceNavbar';
 import { FILES_PANEL_SPACER_TRANSITION } from 'modules/pace/pace.animations';
 import { CHAT_SIDEBAR_STATE } from 'modules/pace/pace.types';
 import FilesPanel from '@/modules/pace/components/files-panel/FilesPanel';
+import SidebarResizeHandle from '@/modules/pace/components/layout/SidebarResizeHandle';
 import UploadProgressToast from '@/modules/pace/components/progress-toast/UploadProgressToast';
 import { FileUploadProvider, useFileUploadContext } from '@/modules/pace/context/FileUploadContext';
 import { FILES_PANEL_WIDTH } from '@/modules/pace/pace.constants';
@@ -23,6 +24,7 @@ const PaceLayoutContentInner: FC<PaceLayoutContentProps> = ({ children }) => {
 
   const isExpanded = chatSidebarState === CHAT_SIDEBAR_STATE.EXPANDED;
   const isCollapsed = chatSidebarState === CHAT_SIDEBAR_STATE.COLLAPSED;
+  const isSidebar = chatSidebarState === CHAT_SIDEBAR_STATE.SIDEBAR;
   const isPinned = filesPanelOpen && filesPanelPinned;
 
   return (
@@ -30,8 +32,9 @@ const PaceLayoutContentInner: FC<PaceLayoutContentProps> = ({ children }) => {
       <PaceNavbar />
       <div className='flex min-h-0 flex-1 overflow-hidden px-2'>
         <ChatSidebar />
+        {isSidebar && <SidebarResizeHandle />}
         {!isExpanded && (
-          <main className={cn('flex min-h-0 flex-1 flex-col', !isCollapsed && 'ml-2')}>
+          <main className={cn('flex min-h-0 min-w-0 flex-1 flex-col', !isCollapsed && !isSidebar && 'ml-2')}>
             <section className='border-border bg-BG_WHITE flex min-h-0 w-full flex-1 flex-col overflow-hidden rounded-t-xl border'>
               {children}
             </section>

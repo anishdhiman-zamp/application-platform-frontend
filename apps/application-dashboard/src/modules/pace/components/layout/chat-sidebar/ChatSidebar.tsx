@@ -4,7 +4,7 @@ import { useEffect, useMemo, useState } from 'react';
 import { cn } from '@zamp-platform/ui/utils';
 import { motion } from 'framer-motion';
 import { getSidebarTransitionDirection, getSidebarTransitions, NO_ANIMATION } from 'modules/pace/pace.animations';
-import { FILES_PANEL_WIDTH, SIDEBAR_CONVERSATION_ID_PARAM, SIDEBAR_WIDTH } from 'modules/pace/pace.constants';
+import { FILES_PANEL_WIDTH, SIDEBAR_CONVERSATION_ID_PARAM } from 'modules/pace/pace.constants';
 import { CHAT_SIDEBAR_STATE } from 'modules/pace/pace.types';
 import ChatSidebarInner from '@/modules/pace/components/layout/chat-sidebar/ChatSidebarInner';
 import { useChatSidebarState } from '@/modules/pace/hooks/useChatSidebarState';
@@ -12,8 +12,15 @@ import { useSyncedUrlParam } from '@/modules/pace/hooks/useSyncedSearchParam';
 import { usePaceContext } from '@/modules/pace/pace.context';
 
 const ChatSidebar = () => {
-  const { registerStartNewChat, chatSidebarState, prevChatSidebarState, filesPanelOpen, filesPanelPinned } =
-    usePaceContext();
+  const {
+    registerStartNewChat,
+    chatSidebarState,
+    prevChatSidebarState,
+    filesPanelOpen,
+    filesPanelPinned,
+    sidebarWidth,
+    isSidebarResizing,
+  } = usePaceContext();
   const initialConversationId = useSyncedUrlParam(SIDEBAR_CONVERSATION_ID_PARAM);
   const { chatTitle, setChatTitle, conversationId, setConversationId, chatKey, startNewChat } = useChatSidebarState({
     initialConversationId,
@@ -25,14 +32,15 @@ const ChatSidebar = () => {
   const isExpanded = chatSidebarState === CHAT_SIDEBAR_STATE.EXPANDED;
   const isPinnedFilesPanel = filesPanelOpen && filesPanelPinned;
   const expandedWidth = isPinnedFilesPanel ? `calc(100% - ${FILES_PANEL_WIDTH + 8}px)` : '100%';
-  const targetWidth = isCollapsed ? 0 : isExpanded ? expandedWidth : SIDEBAR_WIDTH;
+  const targetWidth = isCollapsed ? 0 : isExpanded ? expandedWidth : sidebarWidth;
   const direction = getSidebarTransitionDirection(prevChatSidebarState, chatSidebarState);
 
   const transitions = useMemo(() => {
     if (!isHydrated) return { width: NO_ANIMATION, opacity: NO_ANIMATION };
+    if (isSidebarResizing) return { width: NO_ANIMATION, opacity: NO_ANIMATION };
 
     return getSidebarTransitions(direction);
-  }, [direction, isHydrated]);
+  }, [direction, isHydrated, isSidebarResizing]);
 
   useEffect(() => {
     registerStartNewChat(startNewChat);
