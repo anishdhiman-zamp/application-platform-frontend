@@ -232,6 +232,7 @@ export const API_ENDPOINTS = {
   INTEGRATIONS_AUTHENTICATE_V2_POST: `integrations/authenticate`,
   // Filesystem API
   FILESYSTEM_STATUS_GET: `filesystem/status`,
+  FILESYSTEM_PROVISION_POST: `filesystem/provision`,
   FILES_LIST_GET: `files`,
   FILES_CREATE_PUT: `files/{{path}}`,
   FILES_WRITE_POST: `files/{{path}}`,
