@@ -141,18 +141,6 @@ const ScrollContainer = forwardRef<ScrollContainerRef, ScrollContainerProps>(
       const contentFromAnchor = Math.max(0, contentHeight - anchorTop);
       const newSpacerHeight = Math.max(0, container.clientHeight - contentFromAnchor - USER_MESSAGE_TOP_PADDING);
 
-      console.log('[updateSpacerHeight]', {
-        anchorTop,
-        spacerCurrentHeight,
-        contentHeight,
-        contentFromAnchor,
-        newSpacerHeight,
-        scrollTop: container.scrollTop,
-        scrollHeight: container.scrollHeight,
-        clientHeight: container.clientHeight,
-        caller: new Error().stack?.split('\n')[2]?.trim(),
-      });
-
       spacer.style.height = `${newSpacerHeight}px`;
 
       if (newSpacerHeight > spacerCurrentHeight) {
