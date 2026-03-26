@@ -93,11 +93,9 @@ async function triggerLinkingOtp(flow: LoginFlow): Promise<LoginFlow | null> {
     }),
   });
 
-  if (!resp.ok) return null;
+  const data = await resp.json().catch(() => null);
 
-  const data = await resp.json();
-
-  if (!data.ui) return null;
+  if (!data?.ui) return null;
 
   return { ...flow, ...data, ui: { ...data.ui, action: flow.ui.action } };
 }
