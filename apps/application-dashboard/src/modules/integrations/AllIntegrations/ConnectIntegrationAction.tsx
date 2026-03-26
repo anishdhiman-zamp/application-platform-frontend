@@ -1,6 +1,6 @@
 'use client';
 
-import { type FC, useCallback, useMemo, useState } from 'react';
+import { type FC, useMemo, useState } from 'react';
 import { Button, ButtonVariant, toast } from '@zamp-platform/ui';
 import { cn } from '@zamp-platform/ui/utils';
 import { useAuthenticateIntegrationV2Mutation } from '@/apis/integrations';
@@ -80,11 +80,11 @@ const ConnectIntegrationAction: FC<ConnectIntegrationActionProps> = ({
     setIsDialogOpen(true);
   };
 
-  const handleScopesChanged = useCallback((newScopes: string[]) => {
+  const handleScopesChanged = (newScopes: string[]) => {
     setScopes(newScopes);
     setIsScopesDialogOpen(false);
     setIsDialogOpen(true);
-  }, []);
+  };
 
   return (
     <>

@@ -1,6 +1,6 @@
 'use client';
 
-import { type FC, useCallback, useEffect, useState } from 'react';
+import { type FC, useEffect, useState } from 'react';
 import {
   Button,
   Dialog,
@@ -13,6 +13,7 @@ import {
   toast,
 } from '@zamp-platform/ui';
 import { RotateCcw, Trash2 } from 'lucide-react';
+import { KEYBOARD_KEYS } from '@/constants/shortcuts';
 
 interface ConfigureScopesDialogProps {
   integrationTitle: string;
@@ -34,11 +35,11 @@ const ConfigureScopesDialog: FC<ConfigureScopesDialogProps> = ({
   const [scopes, setScopes] = useState<string[]>([]);
   const [newScope, setNewScope] = useState('');
 
-  const handleResetToDefaults = useCallback(() => {
+  const handleResetToDefaults = () => {
     setScopes([...defaultScopes]);
-  }, [defaultScopes]);
+  };
 
-  const handleAddScope = useCallback(() => {
+  const handleAddScope = () => {
     const trimmed = newScope.trim();
 
     if (!trimmed) return;
@@ -50,25 +51,22 @@ const ConfigureScopesDialog: FC<ConfigureScopesDialogProps> = ({
     }
     setScopes((prev) => [...prev, trimmed]);
     setNewScope('');
-  }, [newScope, scopes]);
+  };
 
-  const handleRemoveScope = useCallback((scope: string) => {
+  const handleRemoveScope = (scope: string) => {
     setScopes((prev) => prev.filter((s) => s !== scope));
-  }, []);
+  };
 
-  const handleKeyDown = useCallback(
-    (e: React.KeyboardEvent) => {
-      if (e.key === 'Enter') {
-        e.preventDefault();
-        handleAddScope();
-      }
-    },
-    [handleAddScope],
-  );
+  const handleKeyDown = (e: React.KeyboardEvent) => {
+    if (e.key === KEYBOARD_KEYS.ENTER) {
+      e.preventDefault();
+      handleAddScope();
+    }
+  };
 
-  const handleSave = useCallback(() => {
+  const handleSave = () => {
     onScopesChanged(scopes);
-  }, [scopes, onScopesChanged]);
+  };
 
   useEffect(() => {
     if (isOpen) {
