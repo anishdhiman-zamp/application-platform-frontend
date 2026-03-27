@@ -3,7 +3,13 @@ import type { NextRequest, NextResponse } from 'next/server';
 import { Session, type UserSessionCache } from 'types/api/auth.types';
 import { API_ENDPOINTS } from '@/apis/apiEndpoint.constants';
 import { ROUTES_PATH } from '@/constants/routeConfig';
-import { ACTIVE_ORG_ID_COOKIE, ORY_KRATOS_SESSION_COOKIE, USER_SESSION_COOKIE } from '@/utils/cookie';
+import { ProductMode } from '@/types/api/auth.types';
+import {
+  ACTIVE_ORG_ID_COOKIE,
+  LAST_VISITED_PRODUCT_MODE_COOKIE,
+  ORY_KRATOS_SESSION_COOKIE,
+  USER_SESSION_COOKIE,
+} from '@/utils/cookie';
 import { getLandingRoute } from '@/utils/route.util';
 
 export function buildSessionCache(request: NextRequest, session: Session): UserSessionCache {
@@ -204,9 +210,16 @@ export function validateSession(request: NextRequest): boolean {
 }
 
 /**
- * Returns the correct landing route based on the active org's product mode.
+ * Returns the correct landing route. Prefers the user's last visited product mode
+ * (stored in cookie) over the active org's product mode from BE.
  */
 export function getActiveLandingRoute(request: NextRequest, session: Session | null): string {
+  const lastVisitedMode = getServerSideCookie(request, LAST_VISITED_PRODUCT_MODE_COOKIE);
+
+  if (lastVisitedMode === ProductMode.MACS || lastVisitedMode === ProductMode.CLASSIC) {
+    return getLandingRoute(lastVisitedMode as ProductMode);
+  }
+
   const activeOrg = getActiveOrg(request, session);
 
   return getLandingRoute(activeOrg?.product);
