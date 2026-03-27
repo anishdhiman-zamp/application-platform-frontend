@@ -14,7 +14,7 @@ const OrgCard: FC<OrgCardProps> = ({ isSelected, name, className }) => {
     <div className='hover:bg-GRAY_100 text-GRAY_1000 flex w-full items-center gap-2 rounded-md p-1'>
       <div
         className={cn(
-          'f-10-500 border-BG_WHITE flex h-6 w-6 shrink-0 items-center justify-center rounded-sm border',
+          'f-10-500 light:border-white dark:border-GRAY_600 flex h-6 w-6 shrink-0 items-center justify-center rounded-sm border',
           className,
         )}
       >
