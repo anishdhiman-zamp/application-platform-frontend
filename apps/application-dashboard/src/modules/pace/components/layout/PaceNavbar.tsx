@@ -43,7 +43,10 @@ const PaceNavbar = () => {
   const isCollapsed = chatSidebarState === CHAT_SIDEBAR_STATE.COLLAPSED;
   const isExpanded = chatSidebarState === CHAT_SIDEBAR_STATE.EXPANDED;
   const isPinned = filesPanelOpen && filesPanelPinned;
-  const filesPanelSpacerWidth = isPinned ? filesPanelWidth - 28 : 0;
+  // Folder button occupies pl-2 (8px) + w-7.5 (30px) = 38px; subtract it so the spacer
+  // stops where the button begins, keeping the button visually inside the files-panel column.
+  const FOLDER_BUTTON_WIDTH_PX = 38;
+  const filesPanelSpacerWidth = isPinned ? Math.max(0, filesPanelWidth - FOLDER_BUTTON_WIDTH_PX) : 0;
 
   const navAnimations = useMemo(
     () => getNavbarAnimations(prevChatSidebarState, chatSidebarState),

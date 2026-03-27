@@ -74,6 +74,7 @@ const FilesPanelResizeHandle = () => {
     return () => {
       document.removeEventListener('mousemove', handleMouseMove);
       document.removeEventListener('mouseup', handleMouseUp);
+      setIsFilesPanelResizing(false);
     };
   }, [isDragging, setFilesPanelWidth, setIsFilesPanelResizing]);
 

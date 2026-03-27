@@ -7,6 +7,7 @@ import FilesPanelResizeHandle from '@/modules/pace/components/layout/FilesPanelR
 import {
   FILES_PANEL_ENTER_TRANSITION,
   FILES_PANEL_EXIT_TRANSITION,
+  FILES_PANEL_SPACER_TRANSITION,
   NO_ANIMATION,
 } from '@/modules/pace/pace.animations';
 import { FILES_PANEL_MAX_WIDTH } from '@/modules/pace/pace.constants';
@@ -16,11 +17,6 @@ const PORTAL_SELECTORS =
   '[role="menu"], [role="listbox"], [role="dialog"], [data-radix-popper-content-wrapper], [data-radix-menu-content]';
 
 const isPortalOpen = () => document.querySelector(PORTAL_SELECTORS) !== null;
-
-const PIN_TRANSITION = {
-  duration: 0.3,
-  ease: [0.6, 0, 0.2, 1] as [number, number, number, number],
-} as const;
 
 const FilesPanel = () => {
   const {
@@ -92,7 +88,7 @@ const FilesPanel = () => {
             transition: {
               x: FILES_PANEL_ENTER_TRANSITION,
               opacity: FILES_PANEL_ENTER_TRANSITION,
-              width: isFilesPanelResizing ? NO_ANIMATION : PIN_TRANSITION,
+              width: isFilesPanelResizing ? NO_ANIMATION : FILES_PANEL_SPACER_TRANSITION,
             },
           }}
           exit={{
