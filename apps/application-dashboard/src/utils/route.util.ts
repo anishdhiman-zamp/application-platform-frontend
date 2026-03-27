@@ -3,7 +3,7 @@ import { ROUTES_PATH } from '@/constants/routeConfig';
 import { ProductMode } from '@/types/api/auth.types';
 
 export function getLandingRoute(product?: ProductMode): string {
-  return product === ProductMode.MACS ? ROUTES_PATH.CHAT : ROUTES_PATH.PROCESSES;
+  return product === ProductMode.MACS ? ROUTES_PATH.CHAT_SETTINGS_GENERAL : ROUTES_PATH.PROCESSES;
 }
 
 export function getProductModeFromPath(pathname: string): ProductMode {
@@ -24,7 +24,7 @@ export function getLastVisitedLandingRoute(): string {
   const savedMode = getFromLocalStorage(LOCAL_STORAGE_KEYS.LAST_VISITED_PRODUCT_MODE);
 
   if (savedMode === ProductMode.MACS) {
-    return ROUTES_PATH.CHAT;
+    return ROUTES_PATH.CHAT_SETTINGS_GENERAL;
   }
 
   if (savedMode === ProductMode.CLASSIC) {
