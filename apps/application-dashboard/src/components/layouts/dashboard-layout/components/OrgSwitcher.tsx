@@ -24,7 +24,7 @@ import LogoutButton from '@/components/layouts/dashboard-layout/components/Logou
 import OrgCard from '@/components/layouts/dashboard-layout/components/OrgCard';
 import SkeletonLoaderSidebarPages from '@/components/layouts/dashboard-layout/components/SkeletonLoaderSidebarPages';
 import SkeletonElement from '@/components/skeletons/SkeletonElement';
-import { ORG_COLORS } from '@/constants/common.constants';
+import { ENVIRONMENT, ENVIRONMENT_TYPES, ORG_COLORS } from '@/constants/common.constants';
 import { KEYBOARD_KEYS } from '@/constants/shortcuts';
 import { useAppDispatch, useAppSelector } from '@/hooks/toolkit';
 import { setIsOrgSwitchIsInProgress } from '@/store/slices/user';
@@ -89,9 +89,7 @@ const OrgSwitcher: FC<OrgSwitcherProps> = ({
   const defaultOrgName = user?.orgs?.[0]?.name ?? '';
 
   const performOrgSwitch = useCallback(
-    (org: Organization) => {
-      // Disconnect SSE gracefully before org switch to prevent readyState 2 errors
-      // This avoids spurious errors when the page reloads during org switch
+    (org: Organization, overrideRoute?: string) => {
       disconnectSSE();
       dispatch(setIsOrgSwitchIsInProgress(true));
 
@@ -101,7 +99,7 @@ const OrgSwitcher: FC<OrgSwitcherProps> = ({
       setCookie(ACTIVE_ORG_ID_COOKIE, org.organization_id);
       clearCookie(USER_SESSION_COOKIE);
       syncOrganizationIdToSW();
-      window.location.href = getLandingRoute(org.product);
+      window.location.href = overrideRoute ?? getLandingRoute(org.product);
     },
     [disconnectSSE, dispatch],
   );
@@ -117,19 +115,13 @@ const OrgSwitcher: FC<OrgSwitcherProps> = ({
       return;
     }
 
-    performOrgSwitch(org);
     saveLastVisitedProductMode(pathname || '/');
     const currentMode = getProductModeFromPath(pathname || '/');
+    const domain = ENVIRONMENT === ENVIRONMENT_TYPES.PRODUCTION ? '.zamp.ai' : '.zamp.dev';
 
-    setCookie(LAST_VISITED_PRODUCT_MODE_COOKIE, currentMode);
+    setCookie(LAST_VISITED_PRODUCT_MODE_COOKIE, currentMode, undefined, domain);
 
-    removeFromLocalStorage(LOCAL_STORAGE_KEYS.PACE_OPEN_DYNAMIC_TABS);
-    removeFromLocalStorage(LOCAL_STORAGE_KEYS.PACE_FILE_TREE_EXPANDED_PATHS);
-    setToLocalStorage(LOCAL_STORAGE_KEYS.XZAMP_ORGANIZATION_ID, org.organization_id);
-    setCookie(ACTIVE_ORG_ID_COOKIE, org.organization_id);
-    clearCookie(USER_SESSION_COOKIE);
-    syncOrganizationIdToSW();
-    window.location.href = getLastVisitedLandingRoute();
+    performOrgSwitch(org, getLastVisitedLandingRoute());
   };
 
   const handleCreateOrgModalClose = () => {
