@@ -4,7 +4,7 @@ import { useEffect, useMemo, useState } from 'react';
 import { cn } from '@zamp-platform/ui/utils';
 import { motion } from 'framer-motion';
 import { getSidebarTransitionDirection, getSidebarTransitions, NO_ANIMATION } from 'modules/pace/pace.animations';
-import { FILES_PANEL_WIDTH, SIDEBAR_CONVERSATION_ID_PARAM } from 'modules/pace/pace.constants';
+import { SIDEBAR_CONVERSATION_ID_PARAM } from 'modules/pace/pace.constants';
 import { CHAT_SIDEBAR_STATE } from 'modules/pace/pace.types';
 import ChatSidebarInner from '@/modules/pace/components/layout/chat-sidebar/ChatSidebarInner';
 import { useChatSidebarState } from '@/modules/pace/hooks/useChatSidebarState';
@@ -18,6 +18,7 @@ const ChatSidebar = () => {
     prevChatSidebarState,
     filesPanelOpen,
     filesPanelPinned,
+    filesPanelWidth,
     sidebarWidth,
     isSidebarResizing,
   } = usePaceContext();
@@ -31,7 +32,7 @@ const ChatSidebar = () => {
   const isCollapsed = chatSidebarState === CHAT_SIDEBAR_STATE.COLLAPSED;
   const isExpanded = chatSidebarState === CHAT_SIDEBAR_STATE.EXPANDED;
   const isPinnedFilesPanel = filesPanelOpen && filesPanelPinned;
-  const expandedWidth = isPinnedFilesPanel ? `calc(100% - ${FILES_PANEL_WIDTH + 8}px)` : '100%';
+  const expandedWidth = isPinnedFilesPanel ? `calc(100% - ${filesPanelWidth + 8}px)` : '100%';
   const targetWidth = isCollapsed ? 0 : isExpanded ? expandedWidth : sidebarWidth;
   const direction = getSidebarTransitionDirection(prevChatSidebarState, chatSidebarState);
 

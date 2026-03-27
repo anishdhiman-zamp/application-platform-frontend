@@ -5,7 +5,7 @@ import { Button, FolderOpenIcon, MessageSquareIcon } from '@zamp-platform/ui';
 import { cn } from '@zamp-platform/ui/utils';
 import { motion } from 'framer-motion';
 import { PanelRightOpen } from 'lucide-react';
-import { getNavbarAnimations } from 'modules/pace/pace.animations';
+import { FILES_PANEL_SPACER_TRANSITION, getNavbarAnimations, NO_ANIMATION } from 'modules/pace/pace.animations';
 import type { AnimatedIconHandle } from 'modules/pace/pace.types';
 import { CHAT_SIDEBAR_STATE, PaceNavbarItemId } from 'modules/pace/pace.types';
 import { usePathname, useRouter, useSearchParams } from 'next/navigation';
@@ -32,6 +32,8 @@ const PaceNavbar = () => {
     cancelFilesPanelClose,
     sidebarWidth,
     isSidebarResizing,
+    filesPanelWidth,
+    isFilesPanelResizing,
   } = usePaceContext();
   const { isOnAnyDynamicTab } = useDynamicTabs();
 
@@ -40,6 +42,8 @@ const PaceNavbar = () => {
   const isSidebar = chatSidebarState === CHAT_SIDEBAR_STATE.SIDEBAR;
   const isCollapsed = chatSidebarState === CHAT_SIDEBAR_STATE.COLLAPSED;
   const isExpanded = chatSidebarState === CHAT_SIDEBAR_STATE.EXPANDED;
+  const isPinned = filesPanelOpen && filesPanelPinned;
+  const filesPanelSpacerWidth = isPinned ? filesPanelWidth - 28 : 0;
 
   const navAnimations = useMemo(
     () => getNavbarAnimations(prevChatSidebarState, chatSidebarState),
@@ -184,7 +188,13 @@ const PaceNavbar = () => {
         <DynamicTabsBar />
       </motion.div>
 
-      <div className='ml-auto shrink-0 pl-2'>
+      <motion.div
+        initial={false}
+        animate={{ width: filesPanelSpacerWidth }}
+        transition={isFilesPanelResizing ? NO_ANIMATION : FILES_PANEL_SPACER_TRANSITION}
+        className='shrink-0'
+      />
+      <div className='shrink-0 pl-2'>
         <Button
           variant='ghost'
           size='icon'

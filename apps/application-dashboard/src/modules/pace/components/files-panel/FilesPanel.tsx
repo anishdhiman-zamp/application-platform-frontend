@@ -3,34 +3,41 @@
 import { useCallback, useEffect, useRef } from 'react';
 import { AnimatePresence, motion } from 'framer-motion';
 import FilesPanelContent from '@/modules/pace/components/files-panel/FilesPanelContent';
-import { FILES_PANEL_ENTER_TRANSITION, FILES_PANEL_EXIT_TRANSITION } from '@/modules/pace/pace.animations';
-import { FILES_PANEL_WIDTH } from '@/modules/pace/pace.constants';
+import FilesPanelResizeHandle from '@/modules/pace/components/layout/FilesPanelResizeHandle';
+import {
+  FILES_PANEL_ENTER_TRANSITION,
+  FILES_PANEL_EXIT_TRANSITION,
+  NO_ANIMATION,
+} from '@/modules/pace/pace.animations';
+import { FILES_PANEL_MAX_WIDTH } from '@/modules/pace/pace.constants';
 import { usePaceContext } from '@/modules/pace/pace.context';
-
-const PANEL_ANIMATION = {
-  initial: { x: FILES_PANEL_WIDTH, opacity: 0 },
-  animate: {
-    x: 0,
-    opacity: 1,
-    transition: FILES_PANEL_ENTER_TRANSITION,
-  },
-  exit: {
-    x: FILES_PANEL_WIDTH,
-    opacity: 0,
-    transition: FILES_PANEL_EXIT_TRANSITION,
-  },
-} as const;
 
 const PORTAL_SELECTORS =
   '[role="menu"], [role="listbox"], [role="dialog"], [data-radix-popper-content-wrapper], [data-radix-menu-content]';
 
 const isPortalOpen = () => document.querySelector(PORTAL_SELECTORS) !== null;
 
+const PIN_TRANSITION = {
+  duration: 0.3,
+  ease: [0.6, 0, 0.2, 1] as [number, number, number, number],
+} as const;
+
 const FilesPanel = () => {
-  const { filesPanelOpen, filesPanelPinned, scheduleFilesPanelClose, cancelFilesPanelClose } = usePaceContext();
+  const {
+    filesPanelOpen,
+    filesPanelPinned,
+    filesPanelWidth,
+    isFilesPanelResizing,
+    scheduleFilesPanelClose,
+    cancelFilesPanelClose,
+  } = usePaceContext();
 
   const panelRef = useRef<HTMLDivElement>(null);
   const isInsideZoneRef = useRef(false);
+  const isResizingRef = useRef(isFilesPanelResizing);
+
+  isResizingRef.current = isFilesPanelResizing;
+  const isFloating = filesPanelOpen && !filesPanelPinned;
 
   const isInPanelColumn = useCallback((clientX: number) => {
     const panel = panelRef.current;
@@ -38,8 +45,9 @@ const FilesPanel = () => {
     if (!panel) return false;
 
     const rect = panel.getBoundingClientRect();
+    const handlePadding = 8;
 
-    return clientX >= rect.left && clientX <= rect.right;
+    return clientX >= rect.left - handlePadding && clientX <= rect.right;
   }, []);
 
   const handleMouseEnter = () => {
@@ -47,10 +55,10 @@ const FilesPanel = () => {
   };
 
   useEffect(() => {
-    if (!filesPanelOpen || filesPanelPinned) return;
+    if (!isFloating) return;
 
     const handleDocumentMouseMove = (e: MouseEvent) => {
-      if (isPortalOpen()) return;
+      if (isPortalOpen() || isResizingRef.current) return;
 
       const inside = isInPanelColumn(e.clientX);
 
@@ -69,21 +77,40 @@ const FilesPanel = () => {
       document.removeEventListener('mousemove', handleDocumentMouseMove);
       isInsideZoneRef.current = false;
     };
-  }, [filesPanelOpen, filesPanelPinned, isInPanelColumn, scheduleFilesPanelClose, cancelFilesPanelClose]);
+  }, [isFloating, isInPanelColumn, scheduleFilesPanelClose, cancelFilesPanelClose]);
 
   return (
     <AnimatePresence>
       {filesPanelOpen && (
         <motion.div
           ref={panelRef}
-          initial={PANEL_ANIMATION.initial}
-          animate={PANEL_ANIMATION.animate}
-          exit={PANEL_ANIMATION.exit}
-          style={{ width: FILES_PANEL_WIDTH }}
-          className='border-GRAY_400 bg-BG_WHITE shadow-side-drawer-inner absolute top-[42px] right-2 bottom-0 z-50 flex flex-col overflow-hidden rounded-t-xl border'
-          onMouseEnter={handleMouseEnter}
+          initial={{ x: FILES_PANEL_MAX_WIDTH, opacity: 0, width: filesPanelWidth }}
+          animate={{
+            x: 0,
+            opacity: 1,
+            width: filesPanelWidth,
+            transition: {
+              x: FILES_PANEL_ENTER_TRANSITION,
+              opacity: FILES_PANEL_ENTER_TRANSITION,
+              width: isFilesPanelResizing ? NO_ANIMATION : PIN_TRANSITION,
+            },
+          }}
+          exit={{
+            x: FILES_PANEL_MAX_WIDTH,
+            opacity: 0,
+            transition: FILES_PANEL_EXIT_TRANSITION,
+          }}
+          className='absolute top-[42px] right-2 bottom-0 z-50 flex shrink-0 flex-col'
+          onMouseEnter={isFloating ? handleMouseEnter : undefined}
         >
-          <FilesPanelContent />
+          {isFloating && (
+            <div className='absolute top-0 bottom-0 -left-2 z-10 w-2'>
+              <FilesPanelResizeHandle />
+            </div>
+          )}
+          <div className='border-GRAY_400 bg-BG_WHITE shadow-side-drawer-inner flex min-w-0 flex-1 flex-col overflow-hidden rounded-t-xl border'>
+            <FilesPanelContent />
+          </div>
         </motion.div>
       )}
     </AnimatePresence>

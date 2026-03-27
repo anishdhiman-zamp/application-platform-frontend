@@ -1,8 +1,10 @@
 'use client';
 
-import { type FC, useCallback, useState } from 'react';
+import { type FC, useCallback, useMemo, useState } from 'react';
 import { cn } from '@zamp-platform/ui/utils';
-import { Loader, MessagesSquare } from 'lucide-react';
+import { formatTimestampToUTC } from '@zamp-platform/utils/date';
+import { formatDistanceToNow } from 'date-fns';
+import { Loader } from 'lucide-react';
 import ConversationActions from '@/modules/pace/components/chat/ConversationActions';
 import type { FeedbackItemType } from '@/types/api/feedbacks.types';
 
@@ -33,6 +35,14 @@ const ChatHistoryItem: FC<ChatHistoryItemProps> = ({
   onRename,
 }) => {
   const [isActionsOpen, setIsActionsOpen] = useState(false);
+
+  const relativeTime = useMemo(() => {
+    const timestamp = conversation?.updated_at || conversation?.created_at;
+
+    if (!timestamp) return null;
+
+    return formatDistanceToNow(new Date(formatTimestampToUTC(timestamp)), { addSuffix: true });
+  }, [conversation?.updated_at, conversation?.created_at]);
 
   const handleClick = useCallback(
     (e: React.MouseEvent) => {
@@ -74,11 +84,11 @@ const ChatHistoryItem: FC<ChatHistoryItemProps> = ({
       onClick={handleClick}
     >
       <div className='flex h-auto w-full items-center justify-start gap-2.5 px-3 py-2.5 pr-9'>
-        <MessagesSquare size={16} className='text-GRAY_700 shrink-0' />
-        <p className='f-13-500 text-GRAY_1000 line-clamp-1 text-left first-letter:uppercase'>
+        <p className='f-13-500 text-GRAY_1000 min-w-0 flex-1 truncate text-left first-letter:uppercase'>
           {conversation?.title || 'Untitled conversation'}
         </p>
-        {isStreaming && <Loader size={14} className='text-GRAY_700 ml-auto shrink-0 animate-spin' />}
+        {relativeTime && <span className='f-12-400 text-GRAY_600 shrink-0 whitespace-nowrap'>{relativeTime}</span>}
+        {isStreaming && <Loader size={14} className='text-GRAY_700 shrink-0 animate-spin' />}
       </div>
 
       <div className='absolute right-1'>

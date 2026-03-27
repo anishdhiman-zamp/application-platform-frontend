@@ -2,6 +2,8 @@
 
 import { createContext, type ReactNode, useCallback, useContext, useEffect, useMemo, useRef, useState } from 'react';
 import {
+  FILES_PANEL_MAX_WIDTH,
+  FILES_PANEL_MIN_WIDTH,
   FILES_PANEL_WIDTH,
   SIDEBAR_CONVERSATION_ID_PARAM,
   SIDEBAR_MAX_WIDTH,
@@ -61,6 +63,11 @@ interface PaceContextType {
   setSidebarWidth: (width: number) => void;
   isSidebarResizing: boolean;
   setIsSidebarResizing: (resizing: boolean) => void;
+
+  filesPanelWidth: number;
+  setFilesPanelWidth: (width: number) => void;
+  isFilesPanelResizing: boolean;
+  setIsFilesPanelResizing: (resizing: boolean) => void;
 }
 
 const PaceContext = createContext<PaceContextType | null>(null);
@@ -82,6 +89,8 @@ export const PaceProvider = ({ children }: { children: ReactNode }) => {
   const [filesPanelPinned, setFilesPanelPinnedRaw] = useState(false);
   const [sidebarWidth, setSidebarWidthRaw] = useState(SIDEBAR_WIDTH);
   const [isSidebarResizing, setIsSidebarResizing] = useState(false);
+  const [filesPanelWidth, setFilesPanelWidthRaw] = useState(FILES_PANEL_WIDTH);
+  const [isFilesPanelResizing, setIsFilesPanelResizing] = useState(false);
 
   const pathname = syncedPathname || nextPathname;
   const hasFileParam = fileParam !== null;
@@ -123,6 +132,13 @@ export const PaceProvider = ({ children }: { children: ReactNode }) => {
 
     setSidebarWidthRaw(clamped);
     setToLocalStorage(LOCAL_STORAGE_KEYS.PACE_SIDEBAR_WIDTH, String(clamped));
+  }, []);
+
+  const setFilesPanelWidth = useCallback((width: number) => {
+    const clamped = Math.min(FILES_PANEL_MAX_WIDTH, Math.max(FILES_PANEL_MIN_WIDTH, width));
+
+    setFilesPanelWidthRaw(clamped);
+    setToLocalStorage(LOCAL_STORAGE_KEYS.PACE_FILES_PANEL_WIDTH, String(clamped));
   }, []);
 
   const toggleFilesPanel = useCallback(() => {
@@ -246,7 +262,7 @@ export const PaceProvider = ({ children }: { children: ReactNode }) => {
     if (chatSidebarStateRef.current !== CHAT_SIDEBAR_STATE.SIDEBAR) return;
 
     const containerWidth = window.innerWidth - 16;
-    const filesPanelSpace = FILES_PANEL_WIDTH + 8;
+    const filesPanelSpace = filesPanelWidth + 8;
     const available = containerWidth - 8 - 100 - filesPanelSpace;
     const effectiveMax = Math.min(SIDEBAR_MAX_WIDTH, Math.max(SIDEBAR_MIN_WIDTH, available));
 
@@ -257,7 +273,25 @@ export const PaceProvider = ({ children }: { children: ReactNode }) => {
 
       return effectiveMax;
     });
-  }, [filesPanelOpen, filesPanelPinned]);
+  }, [filesPanelOpen, filesPanelPinned, filesPanelWidth]);
+
+  useEffect(() => {
+    if (!(filesPanelOpen && filesPanelPinned)) return;
+    if (chatSidebarStateRef.current !== CHAT_SIDEBAR_STATE.SIDEBAR) return;
+
+    const containerWidth = window.innerWidth - 16;
+    const sidebarSpace = sidebarWidth + 8;
+    const available = containerWidth - 8 - 100 - sidebarSpace;
+    const effectiveMax = Math.min(FILES_PANEL_MAX_WIDTH, Math.max(FILES_PANEL_MIN_WIDTH, available));
+
+    setFilesPanelWidthRaw((prev) => {
+      if (prev <= effectiveMax) return prev;
+
+      setToLocalStorage(LOCAL_STORAGE_KEYS.PACE_FILES_PANEL_WIDTH, String(effectiveMax));
+
+      return effectiveMax;
+    });
+  }, [filesPanelOpen, filesPanelPinned, sidebarWidth]);
 
   useEffect(() => {
     const storedTabs = getStoredTabs();
@@ -287,6 +321,16 @@ export const PaceProvider = ({ children }: { children: ReactNode }) => {
 
       if (!Number.isNaN(parsed)) {
         setSidebarWidthRaw(Math.min(SIDEBAR_MAX_WIDTH, Math.max(SIDEBAR_MIN_WIDTH, parsed)));
+      }
+    }
+
+    const storedFilesPanelWidth = getFromLocalStorage(LOCAL_STORAGE_KEYS.PACE_FILES_PANEL_WIDTH);
+
+    if (storedFilesPanelWidth) {
+      const parsed = Number(storedFilesPanelWidth);
+
+      if (!Number.isNaN(parsed)) {
+        setFilesPanelWidthRaw(Math.min(FILES_PANEL_MAX_WIDTH, Math.max(FILES_PANEL_MIN_WIDTH, parsed)));
       }
     }
 
@@ -339,6 +383,11 @@ export const PaceProvider = ({ children }: { children: ReactNode }) => {
       setSidebarWidth,
       isSidebarResizing,
       setIsSidebarResizing,
+
+      filesPanelWidth,
+      setFilesPanelWidth,
+      isFilesPanelResizing,
+      setIsFilesPanelResizing,
     }),
     [
       chatSidebarState,
@@ -372,6 +421,10 @@ export const PaceProvider = ({ children }: { children: ReactNode }) => {
       sidebarWidth,
       setSidebarWidth,
       isSidebarResizing,
+
+      filesPanelWidth,
+      setFilesPanelWidth,
+      isFilesPanelResizing,
     ],
   );
 
