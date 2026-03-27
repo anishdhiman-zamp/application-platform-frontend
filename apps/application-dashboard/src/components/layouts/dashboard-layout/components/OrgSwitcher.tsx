@@ -270,7 +270,7 @@ const OrgSwitcher: FC<OrgSwitcherProps> = ({
               <div
                 className={cn(
                   selectedOrgColor,
-                  'f-10-500 flex h-6 w-6 items-center justify-center rounded-sm border-white',
+                  'f-10-500 flex h-6 w-6 shrink-0 items-center justify-center rounded-sm border-white',
                 )}
                 data-testid='dummy'
               >
