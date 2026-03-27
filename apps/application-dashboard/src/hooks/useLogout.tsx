@@ -14,7 +14,7 @@ import {
   USER_SESSION_COOKIE,
 } from '@/utils/cookie';
 import { resetPostHog } from '@/utils/postHog';
-import { getProductModeFromPath, saveLastVisitedProductMode } from '@/utils/route.util';
+import { getProductModeFromPath } from '@/utils/route.util';
 
 export const useLogout = () => {
   const sseContext = useOptionalSSEContext();
@@ -28,23 +28,22 @@ export const useLogout = () => {
   // Memoize the full path calculation
   const fullPath = useMemo(() => {
     if (searchParams && searchParams.toString()) {
-      return `${pathname || '/'}?${searchParams.toString()}`;
+      return `${pathname || ROUTES_PATH.HOME}?${searchParams.toString()}`;
     }
 
-    return pathname || '/';
+    return pathname || ROUTES_PATH.HOME;
   }, [pathname, searchParams]);
 
   const handleLogout = useCallback(async () => {
     // Disconnect SSE gracefully before logout to prevent readyState 2 errors
     sseContext?.disconnect();
 
-    saveLastVisitedProductMode(pathname || '/');
-    const currentMode = getProductModeFromPath(pathname || '/');
+    const currentMode = getProductModeFromPath(pathname || ROUTES_PATH.HOME);
     const domain = ENVIRONMENT === ENVIRONMENT_TYPES.PRODUCTION ? '.zamp.ai' : '.zamp.dev';
 
     setCookie(LAST_VISITED_PRODUCT_MODE_COOKIE, currentMode, undefined, domain);
 
-    if (fullPath && fullPath !== '/') {
+    if (fullPath && fullPath !== ROUTES_PATH.HOME) {
       setCookie(PREV_ROUTE_COOKIE, encodeURIComponent(fullPath), undefined, domain);
     }
 

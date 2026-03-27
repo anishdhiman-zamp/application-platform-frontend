@@ -25,6 +25,7 @@ import OrgCard from '@/components/layouts/dashboard-layout/components/OrgCard';
 import SkeletonLoaderSidebarPages from '@/components/layouts/dashboard-layout/components/SkeletonLoaderSidebarPages';
 import SkeletonElement from '@/components/skeletons/SkeletonElement';
 import { ENVIRONMENT, ENVIRONMENT_TYPES, ORG_COLORS } from '@/constants/common.constants';
+import { ROUTES_PATH } from '@/constants/routeConfig';
 import { KEYBOARD_KEYS } from '@/constants/shortcuts';
 import { useAppDispatch, useAppSelector } from '@/hooks/toolkit';
 import { setIsOrgSwitchIsInProgress } from '@/store/slices/user';
@@ -36,12 +37,7 @@ import {
   setCookie,
   USER_SESSION_COOKIE,
 } from '@/utils/cookie';
-import {
-  getLandingRoute,
-  getLastVisitedLandingRoute,
-  getProductModeFromPath,
-  saveLastVisitedProductMode,
-} from '@/utils/route.util';
+import { getLandingRoute, getLastVisitedLandingRoute, getProductModeFromPath } from '@/utils/route.util';
 import { syncOrganizationIdToSW } from '@/utils/serviceWorker';
 
 type OrgSwitcherProps = {
@@ -90,6 +86,7 @@ const OrgSwitcher: FC<OrgSwitcherProps> = ({
 
   const performOrgSwitch = useCallback(
     (org: Organization, overrideRoute?: string) => {
+      // Disconnect SSE gracefully before org switch to prevent readyState 2 errors
       disconnectSSE();
       dispatch(setIsOrgSwitchIsInProgress(true));
 
@@ -115,8 +112,7 @@ const OrgSwitcher: FC<OrgSwitcherProps> = ({
       return;
     }
 
-    saveLastVisitedProductMode(pathname || '/');
-    const currentMode = getProductModeFromPath(pathname || '/');
+    const currentMode = getProductModeFromPath(pathname || ROUTES_PATH.HOME);
     const domain = ENVIRONMENT === ENVIRONMENT_TYPES.PRODUCTION ? '.zamp.ai' : '.zamp.dev';
 
     setCookie(LAST_VISITED_PRODUCT_MODE_COOKIE, currentMode, undefined, domain);
