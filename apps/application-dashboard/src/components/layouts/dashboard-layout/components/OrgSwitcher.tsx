@@ -68,6 +68,7 @@ const OrgSwitcher: FC<OrgSwitcherProps> = ({
     data: organizations,
     isLoading: loading,
     isError: error,
+    refetch: refetchOrganizations,
   } = useGetOrganizationsQuery(undefined, {
     refetchOnMountOrArgChange: false,
   });
@@ -109,6 +110,7 @@ const OrgSwitcher: FC<OrgSwitcherProps> = ({
   const handleCreateOrgModalClose = () => {
     setShowCreateOrgModal(false);
     setOrgToProvision(null);
+    refetchOrganizations();
   };
 
   const handleNewOrgReady = useCallback(
