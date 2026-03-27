@@ -12,6 +12,7 @@ import {
 } from '@zamp-platform/utils';
 import { Plus } from 'lucide-react';
 import { PROVISIONING_STATUS } from 'modules/setup-workspace/setup-workspace.constants';
+import { usePathname } from 'next/navigation';
 import { useGetBaseUrlQuery } from '@/apis/auth';
 import { useGetOrganizationsQuery } from '@/apis/people';
 import { useSSEContext } from '@/app/_providers/sse-provider';
@@ -28,8 +29,19 @@ import { KEYBOARD_KEYS } from '@/constants/shortcuts';
 import { useAppDispatch, useAppSelector } from '@/hooks/toolkit';
 import { setIsOrgSwitchIsInProgress } from '@/store/slices/user';
 import type { Organization } from '@/types/api/auth.types';
-import { ACTIVE_ORG_ID_COOKIE, clearCookie, setCookie, USER_SESSION_COOKIE } from '@/utils/cookie';
-import { getLandingRoute } from '@/utils/route.util';
+import {
+  ACTIVE_ORG_ID_COOKIE,
+  clearCookie,
+  LAST_VISITED_PRODUCT_MODE_COOKIE,
+  setCookie,
+  USER_SESSION_COOKIE,
+} from '@/utils/cookie';
+import {
+  getLandingRoute,
+  getLastVisitedLandingRoute,
+  getProductModeFromPath,
+  saveLastVisitedProductMode,
+} from '@/utils/route.util';
 import { syncOrganizationIdToSW } from '@/utils/serviceWorker';
 
 type OrgSwitcherProps = {
@@ -50,6 +62,7 @@ const OrgSwitcher: FC<OrgSwitcherProps> = ({
   const { isOrgSwitchIsInProgress, user } = useAppSelector((state) => state.user);
   const dispatch = useAppDispatch();
   const { disconnect: disconnectSSE } = useSSEContext();
+  const pathname = usePathname();
 
   const [isOrgSwitcherMenuOpen, setIsOrgSwitcherMenuOpen] = useState(false);
   const [selectedOrg, setSelectedOrg] = useState<Organization>();
@@ -105,6 +118,18 @@ const OrgSwitcher: FC<OrgSwitcherProps> = ({
     }
 
     performOrgSwitch(org);
+    saveLastVisitedProductMode(pathname || '/');
+    const currentMode = getProductModeFromPath(pathname || '/');
+
+    setCookie(LAST_VISITED_PRODUCT_MODE_COOKIE, currentMode);
+
+    removeFromLocalStorage(LOCAL_STORAGE_KEYS.PACE_OPEN_DYNAMIC_TABS);
+    removeFromLocalStorage(LOCAL_STORAGE_KEYS.PACE_FILE_TREE_EXPANDED_PATHS);
+    setToLocalStorage(LOCAL_STORAGE_KEYS.XZAMP_ORGANIZATION_ID, org.organization_id);
+    setCookie(ACTIVE_ORG_ID_COOKIE, org.organization_id);
+    clearCookie(USER_SESSION_COOKIE);
+    syncOrganizationIdToSW();
+    window.location.href = getLastVisitedLandingRoute();
   };
 
   const handleCreateOrgModalClose = () => {
