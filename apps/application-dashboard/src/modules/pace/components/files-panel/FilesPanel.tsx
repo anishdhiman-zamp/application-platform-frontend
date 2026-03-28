@@ -46,10 +46,8 @@ const FilesPanel = () => {
     cancelFilesPanelClose();
   };
 
-  useEffect(() => {
-    if (!filesPanelOpen || filesPanelPinned) return;
-
-    const handleDocumentMouseMove = (e: MouseEvent) => {
+  const handleDocumentMouseMove = useCallback(
+    (e: MouseEvent) => {
       if (isPortalOpen()) return;
 
       const inside = isInPanelColumn(e.clientX);
@@ -61,7 +59,12 @@ const FilesPanel = () => {
         isInsideZoneRef.current = false;
         scheduleFilesPanelClose();
       }
-    };
+    },
+    [isInPanelColumn, cancelFilesPanelClose, scheduleFilesPanelClose],
+  );
+
+  useEffect(() => {
+    if (!filesPanelOpen || filesPanelPinned) return;
 
     document.addEventListener('mousemove', handleDocumentMouseMove);
 
@@ -69,7 +72,7 @@ const FilesPanel = () => {
       document.removeEventListener('mousemove', handleDocumentMouseMove);
       isInsideZoneRef.current = false;
     };
-  }, [filesPanelOpen, filesPanelPinned, isInPanelColumn, scheduleFilesPanelClose, cancelFilesPanelClose]);
+  }, [filesPanelOpen, filesPanelPinned, handleDocumentMouseMove]);
 
   return (
     <AnimatePresence>
