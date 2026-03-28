@@ -166,19 +166,43 @@ export const RichTextEditor = forwardRef<RichTextEditorHandle, RichTextEditorPro
 
           return false;
         },
-        handlePaste: (_view, event) => {
+        handlePaste: (view, event) => {
           if (onPasteRef.current) {
             const hasFiles = (event.clipboardData?.files?.length ?? 0) > 0;
             onPasteRef.current(event as unknown as React.ClipboardEvent<HTMLTextAreaElement>);
             if (hasFiles) return true;
           }
+
+          // If there's no HTML clipboard data, insert as plain text directly.
+          // This avoids the @tiptap/markdown extension trying to parse pasted content
+          // as markdown — URLs with special characters (%, =, &, _) can cause the
+          // markdown serializer/parser to hang or crash.
+          // When HTML is present (e.g. copying from a rich editor), fall through to
+          // let tiptap handle it so formatting is preserved.
+          const plainText = event.clipboardData?.getData('text/plain') ?? '';
+          const hasHtml = !!event.clipboardData?.getData('text/html');
+          if (plainText && !hasHtml) {
+            event.preventDefault();
+            const { state, dispatch } = view;
+            const { from, to } = state.selection;
+            const tr = state.tr.insertText(plainText, from, to).scrollIntoView();
+            dispatch(tr);
+            return true;
+          }
+
           return false;
         },
       },
       onUpdate: ({ editor: ed }) => {
-        const md = ed.getMarkdown().replace(/(\s|&nbsp;|\u00A0)+$/, '');
-        lastEditorMarkdown.current = md;
-        onChange(md);
+        try {
+          const md = ed.getMarkdown().replace(/(\s|&nbsp;|\u00A0)+$/, '');
+          lastEditorMarkdown.current = md;
+          onChange(md);
+        } catch {
+          const fallback = ed.getText();
+          lastEditorMarkdown.current = fallback;
+          onChange(fallback);
+        }
       },
     });
     editorRef.current = editor;
