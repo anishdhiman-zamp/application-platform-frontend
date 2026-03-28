@@ -3,6 +3,11 @@
 import { useCallback, useEffect, useRef, useState } from 'react';
 import { ProfessionRevealBackground } from 'modules/login/ProfessionRevealBackground';
 import { ProvisioningScreen } from 'modules/setup-workspace/components/ProvisioningScreen';
+import {
+  MEDIA_TYPE,
+  PROVISIONING_POLL_INTERVAL_MS,
+  PROVISIONING_STATUS,
+} from 'modules/setup-workspace/setup-workspace.constants';
 import { useRouter } from 'next/navigation';
 import { useLazyWhoAmIQuery, useWhoAmIQuery } from '@/apis/auth';
 import { useAcceptInvitationMutation, useGetMyInvitationsQuery } from '@/apis/people';
@@ -13,11 +18,9 @@ import { ZAMP_LOGO_LOADER_SVG } from '@/constants/icons';
 import { ROUTES_PATH } from '@/constants/routeConfig';
 import { useAppDispatch } from '@/hooks/toolkit';
 import { useFeatureFlag } from '@/hooks/useFeatureFlag';
-import { MEDIA_TYPE, PROVISIONING_STATUS } from '@/modules/setup-workspace/setup-workspace.types';
 import { setUser } from '@/store/slices/user';
 import { clearCookie, USER_SESSION_COOKIE } from '@/utils/cookie';
 
-const POLLING_INTERVAL = 5000;
 const MAX_POLL_ATTEMPTS = 60; // 5 minutes at 5s intervals
 
 const deriveOrgName = (displayName: string | undefined, email: string): string => {
@@ -99,7 +102,7 @@ export const SetupWorkspaceRoot = () => {
           }
           pollingIntervalRef.current = null;
         }
-      }, POLLING_INTERVAL);
+      }, PROVISIONING_POLL_INTERVAL_MS);
     },
     [provisionOrg, redirectToApp],
   );

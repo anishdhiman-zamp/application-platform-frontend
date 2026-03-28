@@ -43,10 +43,8 @@ const SidebarResizeHandle = () => {
     [sidebarWidth, setIsSidebarResizing, computeEffectiveMax],
   );
 
-  useEffect(() => {
-    if (!isDragging) return;
-
-    const handleMouseMove = (e: MouseEvent) => {
+  const handleMouseMove = useCallback(
+    (e: MouseEvent) => {
       const delta = e.clientX - dragStartXRef.current;
       const newWidth = Math.min(
         effectiveMaxWidthRef.current,
@@ -54,12 +52,17 @@ const SidebarResizeHandle = () => {
       );
 
       setSidebarWidth(newWidth);
-    };
+    },
+    [setSidebarWidth],
+  );
 
-    const handleMouseUp = () => {
-      setIsDragging(false);
-      setIsSidebarResizing(false);
-    };
+  const handleMouseUp = useCallback(() => {
+    setIsDragging(false);
+    setIsSidebarResizing(false);
+  }, [setIsSidebarResizing]);
+
+  useEffect(() => {
+    if (!isDragging) return;
 
     document.addEventListener('mousemove', handleMouseMove);
     document.addEventListener('mouseup', handleMouseUp);
@@ -68,7 +71,7 @@ const SidebarResizeHandle = () => {
       document.removeEventListener('mousemove', handleMouseMove);
       document.removeEventListener('mouseup', handleMouseUp);
     };
-  }, [isDragging, setSidebarWidth, setIsSidebarResizing]);
+  }, [isDragging, handleMouseMove, handleMouseUp]);
 
   return (
     <div

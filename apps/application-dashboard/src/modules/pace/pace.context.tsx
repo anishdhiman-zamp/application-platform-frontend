@@ -261,7 +261,7 @@ export const PaceProvider = ({ children }: { children: ReactNode }) => {
     }
   }, [routeUrl, isOnChatRoute, hasFileParam]);
 
-  useEffect(() => {
+  const clampSidebarWidthToFilesPanel = useCallback(() => {
     if (!(filesPanelOpen && filesPanelPinned)) return;
     if (chatSidebarStateRef.current !== CHAT_SIDEBAR_STATE.SIDEBAR) return;
 
@@ -296,6 +296,10 @@ export const PaceProvider = ({ children }: { children: ReactNode }) => {
       return effectiveMax;
     });
   }, [filesPanelOpen, filesPanelPinned, sidebarWidth]);
+
+  useEffect(() => {
+    clampSidebarWidthToFilesPanel();
+  }, [clampSidebarWidthToFilesPanel]);
 
   useEffect(() => {
     const storedTabs = getStoredTabs();

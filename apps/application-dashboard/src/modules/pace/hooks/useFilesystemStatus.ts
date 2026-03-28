@@ -1,5 +1,5 @@
-import { useGetFilesystemStatusQuery, useListFilesQuery } from '@/apis/filesystem';
-import { LAZY_FILE_TREE_FETCH_DEPTH as FETCH_DEPTH } from '@/modules/pace/hooks/lazy-file-tree.utils';
+import { useEffect } from 'react';
+import { useGetFilesystemStatusQuery, useProvisionFilesystemMutation } from '@/apis/filesystem';
 import { FILESYSTEM_STATUS } from '@/types/api/filesystem.types';
 const FILESYSTEM_POLL_INTERVAL_MS = 3000;
 
@@ -10,10 +10,7 @@ export const useFilesystemStatus = () => {
     isError: isStatusError,
     refetch: refetchStatus,
   } = useGetFilesystemStatusQuery();
-  const { isError: isFilesError, refetch: refetchFiles } = useListFilesQuery(
-    { depth: FETCH_DEPTH },
-    { refetchOnMountOrArgChange: false },
-  );
+  const [provisionFilesystem, { isError: isFilesError }] = useProvisionFilesystemMutation();
 
   const isActive = filesystemStatus?.status === FILESYSTEM_STATUS.ACTIVE;
   const pollingInterval = isActive || isStatusError || isFilesError ? 0 : FILESYSTEM_POLL_INTERVAL_MS;
@@ -25,8 +22,12 @@ export const useFilesystemStatus = () => {
 
   const refetch = () => {
     refetchStatus();
-    refetchFiles();
+    provisionFilesystem();
   };
+
+  useEffect(() => {
+    provisionFilesystem();
+  }, [provisionFilesystem]);
 
   return {
     isFilesystemActive: isActive,

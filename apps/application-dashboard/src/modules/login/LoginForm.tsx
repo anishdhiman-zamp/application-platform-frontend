@@ -2,7 +2,7 @@
 
 import { ChangeEvent, type SubmitEvent, useEffect, useRef, useState } from 'react';
 import { BASE_API_URL, getApiDomainAndRegions, reinitializeApiDomain, REQUEST_TYPES } from '@zamp-platform/api';
-import { Button, ImageWithFallback } from '@zamp-platform/ui';
+import { Button, ImageWithFallback, toast } from '@zamp-platform/ui';
 import { cn } from '@zamp-platform/ui/utils';
 import { getFromLocalStorage, LOCAL_STORAGE_KEYS, removeFromLocalStorage, safeJsonParse } from '@zamp-platform/utils';
 import { LOGIN_METHODS, LOGIN_PROVIDERS } from 'constants/auth.constants';
@@ -14,12 +14,20 @@ import {
   LOGIN_GROUPS,
   VALID_SESSION_DETECTED_ERROR_MSG,
 } from 'modules/login/login.constants';
-import { actionUrlWithOrigin, flowHasCodeNodes, flowHasPasswordNodes } from 'modules/login/login.utils';
+import {
+  actionUrlWithOrigin,
+  collectHiddenNodeValues,
+  flowHasCodeNodes,
+  flowHasPasswordNodes,
+  getCsrfToken,
+} from 'modules/login/login.utils';
 import LoginFooter from 'modules/login/LoginFooter';
 import { OtpVerification } from 'modules/login/OtpVerification';
 import { FlowNode, LoginFlow } from 'types/api/auth.types';
 import { getDomainFromEmail, isValidEmail } from 'utils/common';
 import { API_ENDPOINTS } from '@/apis/apiEndpoint.constants';
+import ImageLoader from '@/components/common/loader/ImageLoader';
+import { ZAMP_LOGO_LOADER_SVG } from '@/constants/icons';
 import { AnimatedDitherArrow } from '@/modules/login/AnimatedDitherArrow';
 import { LOGIN_ERROR_TEXT } from '@/modules/login/constants';
 import { GoogleIcon } from '@/modules/login/GoogleIcon';
@@ -57,6 +65,41 @@ function normalizeFlowActionOrigin(flow: LoginFlow, apiBaseUrl: string): LoginFl
   };
 }
 
+async function fetchLoginFlowById(apiBaseUrl: string, flowId: string): Promise<LoginFlow | null> {
+  const resp = await fetch(`${apiBaseUrl}/auth/relay/self-service/login/flows?id=${flowId}`, {
+    method: 'GET',
+    headers: { Accept: 'application/json' },
+    credentials: 'include',
+  });
+
+  if (!resp.ok) return null;
+
+  return resp.json();
+}
+
+/**
+ * Triggers Kratos to send the OTP code for an account-linking flow, then returns
+ * the updated flow (now in "sent_email" state) ready for the OTP verification UI.
+ */
+async function triggerLinkingOtp(flow: LoginFlow): Promise<LoginFlow | null> {
+  const resp = await fetch(flow.ui.action, {
+    method: flow.ui.method,
+    credentials: 'include',
+    headers: { 'Content-Type': 'application/json', Accept: 'application/json' },
+    body: JSON.stringify({
+      method: 'code',
+      csrf_token: getCsrfToken(flow.ui.nodes),
+      ...collectHiddenNodeValues(flow.ui.nodes),
+    }),
+  });
+
+  const data = await resp.json().catch(() => null);
+
+  if (!data?.ui) return null;
+
+  return { ...flow, ...data, ui: { ...data.ui, action: flow.ui.action } };
+}
+
 export const LoginForm = () => {
   const logoPromiseRef = useRef<Promise<void> | null>(null);
   const emailInputRef = useRef<HTMLInputElement | null>(null);
@@ -67,7 +110,11 @@ export const LoginForm = () => {
   const [otpFlow, setOtpFlow] = useState<LoginFlow | null>(null);
   const [passwordFlow, setPasswordFlow] = useState<LoginFlow | null>(null);
   const [methodPickerFlow, setMethodPickerFlow] = useState<LoginFlow | null>(null);
-  const [loadingAction, setLoadingAction] = useState<LOADING_ACTION>(LOADING_ACTION.IDLE);
+  const initialFlowId = typeof window !== 'undefined' ? new URLSearchParams(window.location.search).get('flow') : null;
+  const [isAccountLinking, setIsAccountLinking] = useState(!!initialFlowId);
+  const [loadingAction, setLoadingAction] = useState<LOADING_ACTION>(
+    initialFlowId ? LOADING_ACTION.EMAIL : LOADING_ACTION.IDLE,
+  );
   const isLoading = loadingAction !== LOADING_ACTION.IDLE;
 
   // ── Helpers ─────────────────────────────────────────────────────
@@ -129,6 +176,50 @@ export const LoginForm = () => {
 
     return regions?.length > 0 ? regions[0]?.url : BASE_API_URL;
   }
+
+  // ── Account Linking (flow param in URL) ────────────────────────
+
+  const handleAccountLinkingFlow = async (flowId: string) => {
+    try {
+      setLoadingAction(LOADING_ACTION.EMAIL);
+
+      const apiBaseUrl = await resolveApiBaseUrl();
+
+      const flow = await fetchLoginFlowById(apiBaseUrl, flowId);
+
+      if (!flow) return;
+
+      const normalized = normalizeFlowActionOrigin(flow, apiBaseUrl);
+
+      const identifierNode = normalized.ui.nodes.find(
+        (n: FlowNode) => n.attributes.name === 'identifier' && n.attributes.type === 'hidden',
+      );
+
+      if (identifierNode?.attributes.value) {
+        setEmail(identifierNode.attributes.value);
+      }
+
+      if (flowHasCodeNodes(normalized)) {
+        const otpReadyFlow = await triggerLinkingOtp(normalized);
+
+        if (otpReadyFlow) {
+          setOtpFlow(otpReadyFlow);
+          toast.info("Verify your email to link SSO to your account. You won't need to do this again.");
+        }
+      }
+    } catch {
+      // Fall through to default login view
+    } finally {
+      setIsAccountLinking(false);
+      resetLoadingState();
+
+      const url = new URL(window.location.href);
+
+      url.searchParams.delete('flow');
+      url.searchParams.delete('no_org_ui');
+      window.history.replaceState({}, '', url.toString());
+    }
+  };
 
   // ── OIDC / SSO ─────────────────────────────────────────────────
 
@@ -288,6 +379,15 @@ export const LoginForm = () => {
         return normalized;
       }
 
+      // SSO-only flow (e.g. account linking expired) — restart SSO automatically
+      const nodes = flow?.ui?.nodes ?? [];
+
+      if (nodes.length === 1 && nodes[0]?.group === LOGIN_GROUPS.OIDC) {
+        await initiateOidcLogin(flow!.ui.action, flow!.ui.method, nodes[0].attributes.value as LOGIN_PROVIDERS, email);
+
+        return new Promise<LoginFlow>(() => {});
+      }
+
       return null;
     } catch {
       return null;
@@ -344,6 +444,15 @@ export const LoginForm = () => {
         : ACTIVE_VIEW.EMAIL_ENTRY;
 
   useEffect(() => {
+    const params = new URLSearchParams(window.location.search);
+    const flowId = params.get('flow');
+
+    if (flowId) {
+      handleAccountLinkingFlow(flowId);
+
+      return;
+    }
+
     const lastLoginInfoFromLocalStorage = getFromLocalStorage(LOCAL_STORAGE_KEYS.LAST_LOGIN_INFO);
 
     if (lastLoginInfoFromLocalStorage) {
@@ -387,6 +496,14 @@ export const LoginForm = () => {
 
     return () => el.removeEventListener('input', syncValue);
   }, [activeView]);
+
+  if (isAccountLinking && !otpFlow && !passwordFlow) {
+    return (
+      <div className='bg-GRAY_100 fixed inset-0 z-50'>
+        <ImageLoader imageSrc={ZAMP_LOGO_LOADER_SVG} width={140} height={140} />
+      </div>
+    );
+  }
 
   switch (activeView) {
     case ACTIVE_VIEW.OTP:

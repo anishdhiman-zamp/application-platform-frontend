@@ -50,11 +50,9 @@ const FilesPanel = () => {
     cancelFilesPanelClose();
   };
 
-  useEffect(() => {
-    if (!isFloating) return;
-
-    const handleDocumentMouseMove = (e: MouseEvent) => {
-      if (isPortalOpen() || isResizingRef.current) return;
+  const handleDocumentMouseMove = useCallback(
+    (e: MouseEvent) => {
+      if (isPortalOpen()) return;
 
       const inside = isInPanelColumn(e.clientX);
 
@@ -65,7 +63,12 @@ const FilesPanel = () => {
         isInsideZoneRef.current = false;
         scheduleFilesPanelClose();
       }
-    };
+    },
+    [isInPanelColumn, cancelFilesPanelClose, scheduleFilesPanelClose],
+  );
+
+  useEffect(() => {
+    if (!filesPanelOpen || filesPanelPinned) return;
 
     document.addEventListener('mousemove', handleDocumentMouseMove);
 
@@ -73,7 +76,7 @@ const FilesPanel = () => {
       document.removeEventListener('mousemove', handleDocumentMouseMove);
       isInsideZoneRef.current = false;
     };
-  }, [isFloating, isInPanelColumn, scheduleFilesPanelClose, cancelFilesPanelClose]);
+  }, [filesPanelOpen, filesPanelPinned, handleDocumentMouseMove]);
 
   return (
     <AnimatePresence>
