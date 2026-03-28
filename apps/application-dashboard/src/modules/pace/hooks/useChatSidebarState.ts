@@ -56,6 +56,7 @@ export const useChatSidebarState = ({ initialConversationId }: UseChatSidebarSta
   }, []);
 
   const startNewChat = useCallback(() => {
+    internalUpdateRef.current = true;
     setChatTitle('');
     setConversationIdState(null);
     setChatKey((prev) => prev + 1);

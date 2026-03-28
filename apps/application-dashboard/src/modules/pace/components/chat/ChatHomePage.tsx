@@ -15,7 +15,6 @@ import { useAppSelector } from '@/hooks/toolkit';
 import ChatHistory from '@/modules/pace/components/chat/ChatHistory';
 import ChatHome from '@/modules/pace/components/chat/ChatHome';
 import ModelSelector from '@/modules/pace/components/chat/ModelSelector';
-import { SIDEBAR_CONVERSATION_ID_PARAM } from '@/modules/pace/pace.constants';
 import { usePaceContext } from '@/modules/pace/pace.context';
 import { CHAT_SIDEBAR_STATE } from '@/modules/pace/pace.types';
 import type { RootState } from '@/store';
@@ -27,6 +26,8 @@ const ChatHomePage: FC = () => {
     setPendingConversationPayload,
     pendingFileReference,
     clearPendingFileReference,
+    startNewChat,
+    selectConversation,
   } = usePaceContext();
 
   const organizationId = useAppSelector((state: RootState) => state.user.user?.orgs?.[0]?.organization_id) ?? '';
@@ -50,6 +51,8 @@ const ChatHomePage: FC = () => {
       createConversationV2: async (payload: CreateConversationPayloadTypeV2) => {
         const fileRefs = payload.message_content?.file_references;
 
+        startNewChat();
+
         setPendingConversationPayload({
           message: payload.message_content?.text || '',
           fileReferences: fileRefs?.map((ref) => ({ path: ref.path, name: ref.name })),
@@ -61,7 +64,7 @@ const ChatHomePage: FC = () => {
         return { conversation_id: 'pending', status_message: '', title: '' };
       },
     };
-  }, [chat, setPendingConversationPayload, setChatSidebarState]);
+  }, [chat, startNewChat, setPendingConversationPayload, setChatSidebarState]);
 
   const { isDragOver, dropZoneProps } = useFileDragDrop({
     onFileDrop: (files) => fileDropHandlerRef.current?.(files),
@@ -72,14 +75,10 @@ const ChatHomePage: FC = () => {
     (id: string | null) => {
       if (!id) return;
 
-      const params = new URLSearchParams(window.location.search);
-
-      params.set(SIDEBAR_CONVERSATION_ID_PARAM, id);
-      window.history.replaceState(null, '', `${window.location.pathname}?${params.toString()}`);
-
+      selectConversation(id);
       setChatSidebarState(CHAT_SIDEBAR_STATE.EXPANDED);
     },
-    [setChatSidebarState],
+    [selectConversation, setChatSidebarState],
   );
 
   const modelSelectorSlot = useMemo(

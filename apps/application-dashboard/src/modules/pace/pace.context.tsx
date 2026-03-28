@@ -43,6 +43,9 @@ interface PaceContextType {
   registerStartNewChat: (callback: defaultFnType) => void;
   startNewChat: defaultFnType;
 
+  registerSelectConversation: (callback: (id: string) => void) => void;
+  selectConversation: (id: string) => void;
+
   dynamicTabs: DynamicTab[];
   isDynamicTabsHydrated: boolean;
   openDynamicTab: (tab: Omit<DynamicTab, 'stableKey'>) => void;
@@ -84,6 +87,7 @@ export const PaceProvider = ({ children }: { children: ReactNode }) => {
   const fileParam = useSyncedUrlParam('f');
   const filesPanelLeaveTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   const startNewChatRef = useRef<defaultFnType | null>(null);
+  const selectConversationRef = useRef<((id: string) => void) | null>(null);
 
   const [dynamicTabs, setDynamicTabs] = useState<DynamicTab[]>([]);
   const [prevChatSidebarState, setPrevChatSidebarState] = useState<ChatSidebarState>(CHAT_SIDEBAR_STATE.COLLAPSED);
@@ -182,6 +186,14 @@ export const PaceProvider = ({ children }: { children: ReactNode }) => {
 
   const startNewChat = useCallback(() => {
     startNewChatRef.current?.();
+  }, []);
+
+  const registerSelectConversation = useCallback((callback: (id: string) => void) => {
+    selectConversationRef.current = callback;
+  }, []);
+
+  const selectConversation = useCallback((id: string) => {
+    selectConversationRef.current?.(id);
   }, []);
 
   const openDynamicTab = useCallback((tab: Omit<DynamicTab, 'stableKey'>) => {
@@ -365,6 +377,9 @@ export const PaceProvider = ({ children }: { children: ReactNode }) => {
       registerStartNewChat,
       startNewChat,
 
+      registerSelectConversation,
+      selectConversation,
+
       dynamicTabs,
       isDynamicTabsHydrated,
       openDynamicTab,
@@ -405,6 +420,9 @@ export const PaceProvider = ({ children }: { children: ReactNode }) => {
 
       registerStartNewChat,
       startNewChat,
+
+      registerSelectConversation,
+      selectConversation,
 
       dynamicTabs,
       isDynamicTabsHydrated,

@@ -16,6 +16,8 @@ import { usePaceContext } from '@/modules/pace/pace.context';
 const PORTAL_SELECTORS =
   '[role="menu"], [role="listbox"], [role="dialog"], [data-radix-popper-content-wrapper], [data-radix-menu-content]';
 
+const EDGE_TRIGGER_WIDTH_PX = 6;
+
 const isPortalOpen = () => document.querySelector(PORTAL_SELECTORS) !== null;
 
 const FilesPanel = () => {
@@ -24,6 +26,7 @@ const FilesPanel = () => {
     filesPanelPinned,
     filesPanelWidth,
     isFilesPanelResizing,
+    toggleFilesPanel,
     scheduleFilesPanelClose,
     cancelFilesPanelClose,
   } = usePaceContext();
@@ -67,6 +70,12 @@ const FilesPanel = () => {
     [isInPanelColumn, cancelFilesPanelClose, scheduleFilesPanelClose],
   );
 
+  const handleEdgeEnter = useCallback(() => {
+    if (filesPanelOpen || filesPanelPinned) return;
+
+    toggleFilesPanel();
+  }, [filesPanelOpen, filesPanelPinned, toggleFilesPanel]);
+
   useEffect(() => {
     if (!filesPanelOpen || filesPanelPinned) return;
 
@@ -78,41 +87,52 @@ const FilesPanel = () => {
     };
   }, [filesPanelOpen, filesPanelPinned, handleDocumentMouseMove]);
 
+  const showEdgeTrigger = !filesPanelOpen && !filesPanelPinned;
+
   return (
-    <AnimatePresence>
-      {filesPanelOpen && (
-        <motion.div
-          ref={panelRef}
-          initial={{ x: FILES_PANEL_MAX_WIDTH, opacity: 0, width: filesPanelWidth }}
-          animate={{
-            x: 0,
-            opacity: 1,
-            width: filesPanelWidth,
-            transition: {
-              x: FILES_PANEL_ENTER_TRANSITION,
-              opacity: FILES_PANEL_ENTER_TRANSITION,
-              width: isFilesPanelResizing ? NO_ANIMATION : FILES_PANEL_SPACER_TRANSITION,
-            },
-          }}
-          exit={{
-            x: FILES_PANEL_MAX_WIDTH,
-            opacity: 0,
-            transition: FILES_PANEL_EXIT_TRANSITION,
-          }}
-          className='absolute top-[42px] right-2 bottom-0 z-50 flex shrink-0 flex-col'
-          onMouseEnter={isFloating ? handleMouseEnter : undefined}
-        >
-          {isFloating && (
-            <div className='absolute top-0 bottom-0 -left-2 z-10 w-2'>
-              <FilesPanelResizeHandle />
-            </div>
-          )}
-          <div className='border-GRAY_400 bg-BG_WHITE shadow-side-drawer-inner flex min-w-0 flex-1 flex-col overflow-hidden rounded-t-xl border'>
-            <FilesPanelContent />
-          </div>
-        </motion.div>
+    <>
+      {showEdgeTrigger && (
+        <div
+          className='fixed top-0 right-0 bottom-0 z-50'
+          style={{ width: EDGE_TRIGGER_WIDTH_PX }}
+          onMouseEnter={handleEdgeEnter}
+        />
       )}
-    </AnimatePresence>
+      <AnimatePresence>
+        {filesPanelOpen && (
+          <motion.div
+            ref={panelRef}
+            initial={{ x: FILES_PANEL_MAX_WIDTH, opacity: 0, width: filesPanelWidth }}
+            animate={{
+              x: 0,
+              opacity: 1,
+              width: filesPanelWidth,
+              transition: {
+                x: FILES_PANEL_ENTER_TRANSITION,
+                opacity: FILES_PANEL_ENTER_TRANSITION,
+                width: isFilesPanelResizing ? NO_ANIMATION : FILES_PANEL_SPACER_TRANSITION,
+              },
+            }}
+            exit={{
+              x: FILES_PANEL_MAX_WIDTH,
+              opacity: 0,
+              transition: FILES_PANEL_EXIT_TRANSITION,
+            }}
+            className='absolute top-[42px] right-2 bottom-0 z-50 flex shrink-0 flex-col'
+            onMouseEnter={isFloating ? handleMouseEnter : undefined}
+          >
+            {isFloating && (
+              <div className='absolute top-0 bottom-0 -left-2 z-10 w-2'>
+                <FilesPanelResizeHandle />
+              </div>
+            )}
+            <div className='border-GRAY_400 bg-BG_WHITE shadow-side-drawer-inner flex min-w-0 flex-1 flex-col overflow-hidden rounded-t-xl border'>
+              <FilesPanelContent />
+            </div>
+          </motion.div>
+        )}
+      </AnimatePresence>
+    </>
   );
 };
 

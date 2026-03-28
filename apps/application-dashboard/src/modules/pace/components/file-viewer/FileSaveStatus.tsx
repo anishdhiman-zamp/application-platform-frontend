@@ -44,10 +44,10 @@ const FileSaveStatus = memo(({ isSaving, lastSavedAt }: FileSaveStatusProps) => 
 
   useEffect(() => {
     if (lastSavedAt && status === SAVE_STATUS.IDLE) {
-      setRelativeTime(formatRelativeTime(lastSavedAt));
+      setRelativeTime(formatRelativeTime(lastSavedAt, true));
 
       const interval = setInterval(() => {
-        setRelativeTime(formatRelativeTime(lastSavedAt));
+        setRelativeTime(formatRelativeTime(lastSavedAt, true));
       }, 60000);
 
       return () => clearInterval(interval);
