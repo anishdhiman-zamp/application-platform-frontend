@@ -72,6 +72,13 @@ export interface DynamicRouteConfig {
 
 export type DynamicTabRouteConfig = QueryRouteConfig | DynamicRouteConfig;
 
+export const NAV_METHOD = {
+  PUSH: 'push',
+  REPLACE: 'replace',
+} as const;
+
+export type NavMethod = (typeof NAV_METHOD)[keyof typeof NAV_METHOD];
+
 export interface DynamicTab {
   stableKey: string;
   id: string;

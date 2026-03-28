@@ -64,11 +64,7 @@ const ChatTopbar: FC<ChatTopbarProps> = ({
               className={cn('text-GRAY_1000 shrink-0 transition-transform', isHistoryOpen && 'rotate-180')}
             />
           </PopoverTrigger>
-          <PopoverContent
-            align='start'
-            sideOffset={8}
-            className='flex h-[400px] w-[320px] flex-col overflow-hidden p-0'
-          >
+          <PopoverContent align='start' sideOffset={8} className='flex h-100 w-80 flex-col overflow-hidden p-0'>
             <ChatHistory
               onSelectConversation={handleSelectConversation}
               activeConversationId={conversationId}

@@ -1,6 +1,6 @@
 'use client';
 
-import { FC, useCallback, useMemo, useRef, useState } from 'react';
+import { FC, useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import {
   ChatActionsProvider,
   ConnectedChatInput,
@@ -11,19 +11,23 @@ import {
   useChat,
   useFileDragDrop,
 } from '@zamp-platform/chat';
-import { APITags } from '@/constants/api.constants';
-import { useAppDispatch, useAppSelector } from '@/hooks/toolkit';
+import { useAppSelector } from '@/hooks/toolkit';
 import ChatHistory from '@/modules/pace/components/chat/ChatHistory';
 import ChatHome from '@/modules/pace/components/chat/ChatHome';
 import ModelSelector from '@/modules/pace/components/chat/ModelSelector';
+import { SIDEBAR_CONVERSATION_ID_PARAM } from '@/modules/pace/pace.constants';
 import { usePaceContext } from '@/modules/pace/pace.context';
 import { CHAT_SIDEBAR_STATE } from '@/modules/pace/pace.types';
-import { baseApi } from '@/services/baseApi';
 import type { RootState } from '@/store';
 
 const ChatHomePage: FC = () => {
-  const dispatch = useAppDispatch();
-  const { setChatSidebarState, chatSidebarState, setPendingConversationPayload } = usePaceContext();
+  const {
+    setChatSidebarState,
+    chatSidebarState,
+    setPendingConversationPayload,
+    pendingFileReference,
+    clearPendingFileReference,
+  } = usePaceContext();
 
   const organizationId = useAppSelector((state: RootState) => state.user.user?.orgs?.[0]?.organization_id) ?? '';
   const currentUserName = useAppSelector((state: RootState) => state.user.user?.user_name) ?? '';
@@ -59,10 +63,6 @@ const ChatHomePage: FC = () => {
     };
   }, [chat, setPendingConversationPayload, setChatSidebarState]);
 
-  const handleConversationCreated = useCallback(() => {
-    dispatch(baseApi.util.invalidateTags([APITags.GET_CONVERSATION_HISTORY]));
-  }, [dispatch]);
-
   const { isDragOver, dropZoneProps } = useFileDragDrop({
     onFileDrop: (files) => fileDropHandlerRef.current?.(files),
     disabled: chat.isStreaming || chat.isCreatingConversationV2,
@@ -74,7 +74,7 @@ const ChatHomePage: FC = () => {
 
       const params = new URLSearchParams(window.location.search);
 
-      params.set('s', id);
+      params.set(SIDEBAR_CONVERSATION_ID_PARAM, id);
       window.history.replaceState(null, '', `${window.location.pathname}?${params.toString()}`);
 
       setChatSidebarState(CHAT_SIDEBAR_STATE.EXPANDED);
@@ -86,6 +86,13 @@ const ChatHomePage: FC = () => {
     () => <ModelSelector value={selectedModel} onChange={setSelectedModel} />,
     [selectedModel],
   );
+
+  useEffect(() => {
+    if (pendingFileReference && addFileReferenceRef.current) {
+      addFileReferenceRef.current(pendingFileReference);
+      clearPendingFileReference();
+    }
+  }, [pendingFileReference, clearPendingFileReference]);
 
   const isExpanded = chatSidebarState === CHAT_SIDEBAR_STATE.EXPANDED;
 
@@ -113,10 +120,9 @@ const ChatHomePage: FC = () => {
             currentUserName={currentUserName}
             placeholder="Do your life's best work with Pace"
             conversationId={chat.conversationId ?? ''}
-            onConversationCreated={handleConversationCreated}
             minTextareaHeight={18}
             maxTextareaHeight={200}
-            className='[box-shadow:0_0_16px_0_rgba(0,0,0,0.06)]'
+            className='shadow-chatbot-shadow'
             fileDropHandlerRef={fileDropHandlerRef}
             addFileReferenceRef={addFileReferenceRef}
             showModelSelector

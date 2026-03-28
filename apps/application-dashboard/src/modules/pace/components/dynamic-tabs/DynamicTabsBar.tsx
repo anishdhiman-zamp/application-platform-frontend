@@ -26,12 +26,12 @@ import { useVisibleTabCount } from '@/modules/pace/components/dynamic-tabs/useVi
 import { usePaceContext } from '@/modules/pace/pace.context';
 
 const DynamicTabsBar = () => {
+  const hasMountedRef = useRef(false);
+  const tabsContainerRef = useRef<HTMLDivElement>(null);
+
   const { chatSidebarState } = usePaceContext();
   const { tabs, isTabActive, navigateToTab, closeTab, closeOtherTabs, closeTabsToRight, closeAllTabs, reorderTabs } =
     useDynamicTabs();
-
-  const tabsContainerRef = useRef<HTMLDivElement>(null);
-  const hasMountedRef = useRef(false);
 
   const maxVisibleTabs = useVisibleTabCount(tabsContainerRef, tabs.length, MIN_TAB_WIDTH_PX, OVERFLOW_BUTTON_WIDTH_PX);
   const sensors = useSensors(useSensor(PointerSensor, { activationConstraint: { distance: 5 } }));

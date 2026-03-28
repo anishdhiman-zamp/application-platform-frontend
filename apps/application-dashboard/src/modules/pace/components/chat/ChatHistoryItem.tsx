@@ -92,7 +92,7 @@ const ChatHistoryItem: FC<ChatHistoryItemProps> = ({
             <Check size={14} className='text-GRAY_1000' />
           ) : isStreaming ? (
             <span className='relative flex h-2 w-2'>
-              <span className='absolute inline-flex h-full w-full animate-ping rounded-full bg-blue-500 opacity-75' />
+              <span className='bg-BLUE_500 absolute inline-flex h-full w-full animate-ping rounded-full opacity-75' />
               <span className='relative inline-flex h-2 w-2 rounded-full bg-blue-500' />
             </span>
           ) : null}

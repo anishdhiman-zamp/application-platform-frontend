@@ -54,6 +54,7 @@ const ChatConversationContent: FC<ChatConversationContentProps> = ({
   addFileReferenceRef,
   currentUserName,
 }) => {
+  const pendingPayloadConsumedRef = useRef(false);
   const { pendingFileReference, clearPendingFileReference, pendingConversationPayload, setPendingConversationPayload } =
     usePaceContext();
 
@@ -77,36 +78,7 @@ const ChatConversationContent: FC<ChatConversationContentProps> = ({
       }
     },
   });
-
-  const pendingPayloadConsumedRef = useRef(false);
-
-  useEffect(() => {
-    if (pendingConversationPayload && !pendingPayloadConsumedRef.current && !conversationId) {
-      pendingPayloadConsumedRef.current = true;
-      const payload = createConversationPayload(
-        organizationId,
-        ResourceType.ORGANIZATION,
-        organizationId,
-        pendingConversationPayload.message,
-        currentUserName,
-        pendingConversationPayload.fileReferences,
-        ScopeType.ORGANIZATION,
-        undefined,
-        undefined,
-        pendingConversationPayload.llmModel,
-      );
-
-      setPendingConversationPayload(null);
-      chat.createConversationV2(payload);
-    }
-  }, [
-    pendingConversationPayload,
-    conversationId,
-    organizationId,
-    currentUserName,
-    chat,
-    setPendingConversationPayload,
-  ]);
+  const chatRef = useRef(chat);
 
   const hasMessages = useMemo(() => chat.messages.length > 0, [chat.messages]);
   const isAnalysing = useMemo(() => {
@@ -139,6 +111,38 @@ const ChatConversationContent: FC<ChatConversationContentProps> = ({
   useEffect(() => {
     onChatStateChange({ chat, isInConversation, showHomeView });
   }, [chat, isInConversation, showHomeView, onChatStateChange]);
+
+  useEffect(() => {
+    if (pendingConversationPayload && !pendingPayloadConsumedRef.current && !conversationId) {
+      pendingPayloadConsumedRef.current = true;
+      const payload = createConversationPayload(
+        organizationId,
+        ResourceType.ORGANIZATION,
+        organizationId,
+        pendingConversationPayload.message,
+        currentUserName,
+        pendingConversationPayload.fileReferences,
+        ScopeType.ORGANIZATION,
+        undefined,
+        undefined,
+        pendingConversationPayload.llmModel,
+      );
+
+      setPendingConversationPayload(null);
+      chat.createConversationV2(payload);
+    }
+  }, [
+    pendingConversationPayload,
+    conversationId,
+    organizationId,
+    currentUserName,
+    chat,
+    setPendingConversationPayload,
+  ]);
+
+  useEffect(() => {
+    chatRef.current = chat;
+  });
 
   return (
     <ChatActionsProvider onFileOpen={onFileOpen} onTaskOpen={onTaskOpen}>

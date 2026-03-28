@@ -13,7 +13,14 @@ import { useRouter } from 'next/navigation';
 import { ROUTES_PATH } from '@/constants/routeConfig';
 import { useSyncedPathname, useSyncedUrlParam } from '@/modules/pace/hooks/useSyncedSearchParam';
 import { usePaceContext } from '@/modules/pace/pace.context';
-import { CHAT_SIDEBAR_STATE, DynamicTab, DynamicTabType, TAB_TYPE } from '@/modules/pace/pace.types';
+import {
+  CHAT_SIDEBAR_STATE,
+  DynamicTab,
+  DynamicTabType,
+  NAV_METHOD,
+  NavMethod,
+  TAB_TYPE,
+} from '@/modules/pace/pace.types';
 interface UseDynamicTabsConfig {
   type?: DynamicTabType;
   onTabClose?: (id: string) => void;
@@ -133,8 +140,8 @@ export const useDynamicTabs = (config: UseDynamicTabsConfig = {}): UseDynamicTab
    * Synchronous URL update via History API — no Next.js transition, no flash.
    * Use for same-layout tab switches where the content is already mounted.
    */
-  const historyNavigate = useCallback((path: string, method: 'push' | 'replace' = 'push') => {
-    if (method === 'replace') {
+  const historyNavigate = useCallback((path: string, method: NavMethod = NAV_METHOD.PUSH) => {
+    if (method === NAV_METHOD.REPLACE) {
       window.history.replaceState(null, '', path);
     } else {
       window.history.pushState(null, '', path);
@@ -146,8 +153,8 @@ export const useDynamicTabs = (config: UseDynamicTabsConfig = {}): UseDynamicTab
    * Use for cross-layout navigations (e.g., /chat → /chat/task/:id).
    */
   const routeNavigate = useCallback(
-    (path: string, method: 'push' | 'replace' = 'push') => {
-      if (method === 'replace') {
+    (path: string, method: NavMethod = NAV_METHOD.PUSH) => {
+      if (method === NAV_METHOD.REPLACE) {
         router.replace(path);
       } else {
         router.push(path);
@@ -161,7 +168,7 @@ export const useDynamicTabs = (config: UseDynamicTabsConfig = {}): UseDynamicTab
    * on the same base path (same layout), full router navigation otherwise.
    */
   const navigateTo = useCallback(
-    (path: string, method: 'push' | 'replace' = 'push') => {
+    (path: string, method: NavMethod = NAV_METHOD.PUSH) => {
       if (isSameBasePath(path)) {
         historyNavigate(path, method);
       } else {
@@ -306,7 +313,7 @@ export const useDynamicTabs = (config: UseDynamicTabsConfig = {}): UseDynamicTab
       });
 
       if (isCurrentlyActive) {
-        navigateTo(newTabPath, 'replace');
+        navigateTo(newTabPath, NAV_METHOD.REPLACE);
       }
     },
     [tabs, activeTabId, updateDynamicTab, onTabUpdate, navigateTo],
@@ -341,7 +348,7 @@ export const useDynamicTabs = (config: UseDynamicTabsConfig = {}): UseDynamicTab
       });
 
       if (activeTabNewPath) {
-        navigateTo(activeTabNewPath, 'replace');
+        navigateTo(activeTabNewPath, NAV_METHOD.REPLACE);
       }
     },
     [tabs, activeTabId, updateDynamicTab, onFolderMove, navigateTo],
@@ -418,10 +425,6 @@ export const useDynamicTabs = (config: UseDynamicTabsConfig = {}): UseDynamicTab
     },
     [reorderDynamicTabs],
   );
-
-  // --- URL sync for browser back/forward and tab auto-registration ---
-  // Same-layout tab switches use window.history directly (bypassing Next.js router),
-  // so we listen to popstate to auto-register tabs that arrive via deep-link or back/forward.
 
   useEffect(() => {
     if (!isHydrated || !type) return;
