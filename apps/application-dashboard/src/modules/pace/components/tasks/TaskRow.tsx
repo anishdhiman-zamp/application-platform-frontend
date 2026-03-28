@@ -51,9 +51,12 @@ const TaskRow = ({ task }: TaskRowProps) => {
         {totalSubtasks > 0 && (
           <SubtaskPopover subtasks={task.subtasks} completedCount={completedSubtasks} totalCount={totalSubtasks} />
         )}
-        <div className='bg-GRAY_400 h-px w-[5px] shrink-0' />
-
-        {task?.description && <p className='f-13-450 text-GRAY_700 min-w-0 flex-1 truncate'>{task?.description}</p>}
+        {task?.description && (
+          <>
+            <div className='bg-GRAY_400 h-px w-[5px] shrink-0' />
+            <p className='f-13-450 text-GRAY_700 min-w-0 flex-1 truncate'>{task.description}</p>
+          </>
+        )}
       </div>
 
       <div className='flex shrink-0 items-center gap-3.5 px-4 py-2.5'>
