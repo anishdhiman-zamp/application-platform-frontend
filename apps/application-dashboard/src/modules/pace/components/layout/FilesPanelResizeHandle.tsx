@@ -50,10 +50,8 @@ const FilesPanelResizeHandle = () => {
     [filesPanelWidth, setIsFilesPanelResizing, cancelFilesPanelClose, computeEffectiveMax],
   );
 
-  useEffect(() => {
-    if (!isDragging) return;
-
-    const handleMouseMove = (e: MouseEvent) => {
+  const handleMouseMove = useCallback(
+    (e: MouseEvent) => {
       const delta = e.clientX - dragStartXRef.current;
       const newWidth = Math.min(
         effectiveMaxWidthRef.current,
@@ -61,12 +59,17 @@ const FilesPanelResizeHandle = () => {
       );
 
       setFilesPanelWidth(newWidth);
-    };
+    },
+    [setFilesPanelWidth],
+  );
 
-    const handleMouseUp = () => {
-      setIsDragging(false);
-      setIsFilesPanelResizing(false);
-    };
+  const handleMouseUp = useCallback(() => {
+    setIsDragging(false);
+    setIsFilesPanelResizing(false);
+  }, [setIsFilesPanelResizing]);
+
+  useEffect(() => {
+    if (!isDragging) return;
 
     document.addEventListener('mousemove', handleMouseMove);
     document.addEventListener('mouseup', handleMouseUp);
@@ -76,7 +79,7 @@ const FilesPanelResizeHandle = () => {
       document.removeEventListener('mouseup', handleMouseUp);
       setIsFilesPanelResizing(false);
     };
-  }, [isDragging, setFilesPanelWidth, setIsFilesPanelResizing]);
+  }, [isDragging, handleMouseMove, handleMouseUp, setIsFilesPanelResizing]);
 
   return (
     <div

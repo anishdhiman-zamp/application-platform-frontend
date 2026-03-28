@@ -57,7 +57,7 @@ const ChatTopbar: FC<ChatTopbarProps> = ({
     <div className={cn('bg-BG_WHITE flex items-center justify-between gap-x-3 p-3', className)} style={style}>
       <div className='min-w-0 flex-1'>
         <Popover open={isHistoryOpen} onOpenChange={setIsHistoryOpen}>
-          <PopoverTrigger className='flex h-7 max-w-full cursor-pointer items-center gap-x-1 rounded rounded-md pr-1 pl-1.5 transition-colors hover:bg-gray-100'>
+          <PopoverTrigger className='hover:bg-GRAY_100 flex h-7 max-w-full cursor-pointer items-center gap-x-1 rounded-md pr-1 pl-1.5 transition-colors'>
             <span className='f-14-550 block min-w-0 truncate first-letter:uppercase'>{displayTitle}</span>
             <ChevronDown
               size={14}

@@ -45,7 +45,6 @@ const PaceNavbar = () => {
   const isPinned = filesPanelOpen && filesPanelPinned;
 
   // Folder button occupies w-7.5 (30px); subtract it so the spacer
-  // stops where the button begins, keeping the button visually inside the files-panel column.
   const FOLDER_BUTTON_WIDTH_PX = 30;
   const filesPanelSpacerWidth = isPinned ? Math.max(0, filesPanelWidth - FOLDER_BUTTON_WIDTH_PX) : 0;
 

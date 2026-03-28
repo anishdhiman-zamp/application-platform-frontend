@@ -13,11 +13,12 @@ const SidebarResizeHandle = () => {
   const { sidebarWidth, setSidebarWidth, setIsSidebarResizing, filesPanelOpen, filesPanelPinned, filesPanelWidth } =
     usePaceContext();
 
-  const [isDragging, setIsDragging] = useState(false);
   const dragStartXRef = useRef<number>(0);
   const dragStartWidthRef = useRef<number>(sidebarWidth);
   const effectiveMaxWidthRef = useRef<number>(SIDEBAR_MAX_WIDTH);
   const handleRef = useRef<HTMLDivElement>(null);
+
+  const [isDragging, setIsDragging] = useState(false);
 
   const computeEffectiveMax = useCallback(() => {
     const isPinned = filesPanelOpen && filesPanelPinned;
