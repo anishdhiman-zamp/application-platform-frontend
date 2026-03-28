@@ -28,6 +28,7 @@ interface MessageContainerProps {
   organizationId?: string;
   streamingEnabled?: boolean;
   conversationId?: string;
+  showMarkdownConnectors?: boolean;
 }
 
 export const MessageContainer: FC<MessageContainerProps> = ({
@@ -46,6 +47,7 @@ export const MessageContainer: FC<MessageContainerProps> = ({
   organizationId,
   streamingEnabled = true,
   conversationId,
+  showMarkdownConnectors = false,
 }) => {
   const previousConversationIdRef = useRef(conversationId);
   const [animatedLength, setAnimatedLength] = useState(() => {
@@ -135,6 +137,7 @@ export const MessageContainer: FC<MessageContainerProps> = ({
           shouldAnimate={index === messages.length - 1 && isNewUserMessage}
           organizationId={organizationId}
           streamingEnabled={streamingEnabled}
+          showMarkdownConnectors={showMarkdownConnectors}
         />
       ))}
 

@@ -1,5 +1,6 @@
 'use client';
 
+import { AnimatedDot } from '@zamp-platform/ui';
 import { cn } from '@zamp-platform/ui/utils';
 import React, { useMemo, useState } from 'react';
 
@@ -36,6 +37,7 @@ interface BlockRendererProps {
   containerClassName?: string;
   conversationId?: string;
   messageId?: string;
+  showMarkdownConnectors?: boolean;
 }
 
 export const BlockRenderer: React.FC<BlockRendererProps> = ({
@@ -46,6 +48,7 @@ export const BlockRenderer: React.FC<BlockRendererProps> = ({
   conversationId,
   messageId,
   isStreaming = false,
+  showMarkdownConnectors = false,
 }) => {
   const [openAccordionId, setOpenAccordionId] = useState<string | null>(null);
   const [elementValues, setElementValues] = useState<
@@ -93,6 +96,17 @@ export const BlockRenderer: React.FC<BlockRendererProps> = ({
     return block?.type === BLOCK_TYPE.THINKING || block?.type === BLOCK_TYPE.TOOL_USE;
   };
 
+  const isMarkdownBlock = (block?: Block) => {
+    return block?.type === BLOCK_TYPE.MARKDOWN || block?.type === BLOCK_TYPE.TEXT;
+  };
+
+  const isConnectedBlock = (block?: Block, isLastBlock?: boolean) => {
+    if (!block) return false;
+    if (isThinkingOrToolUseBlock(block)) return true;
+    if (showMarkdownConnectors && isMarkdownBlock(block) && !isLastBlock) return true;
+    return false;
+  };
+
   const getBlockAccordionId = (block: Block) => {
     const startTimestamp = 'start_timestamp' in block ? block.start_timestamp : undefined;
     return block?.id ?? `${block.type}-${block.order}-${startTimestamp ?? 'no-start-timestamp'}`;
@@ -105,9 +119,15 @@ export const BlockRenderer: React.FC<BlockRendererProps> = ({
     return { messageBlocks, size: messageBlocks.length };
   }, [message.block]);
 
-  const renderBlock = (block: Block, nextBlock?: Block, previousBlock?: Block) => {
-    const showConnectorToNext = isThinkingOrToolUseBlock(block) && isThinkingOrToolUseBlock(nextBlock);
-    const showConnectorFromPrevious = isThinkingOrToolUseBlock(block) && isThinkingOrToolUseBlock(previousBlock);
+  const renderBlock = (block: Block, index: number, nextBlock?: Block, previousBlock?: Block) => {
+    const isLastBlock = index === size - 1;
+    const isNextLast = index + 1 === size - 1;
+    const currentConnected = isConnectedBlock(block, isLastBlock);
+    const nextConnected = isConnectedBlock(nextBlock, isNextLast);
+    const prevConnected = isConnectedBlock(previousBlock, false);
+
+    const showConnectorToNext = currentConnected && nextConnected;
+    const showConnectorFromPrevious = currentConnected && prevConnected;
     const accordionId = getBlockAccordionId(block);
     const isAccordionOpen = openAccordionId === accordionId;
 
@@ -166,12 +186,37 @@ export const BlockRenderer: React.FC<BlockRendererProps> = ({
       }
 
       case BLOCK_TYPE.TOOL_RESULT:
-        // Tool results are rendered with their corresponding tool use blocks
-        // Skip rendering them separately
         return null;
 
       case BLOCK_TYPE.MARKDOWN:
       case BLOCK_TYPE.TEXT:
+        if (showMarkdownConnectors && !isLastBlock) {
+          return (
+            <div
+              className='relative'
+              key={block?.id ?? `text-${block?.order}-${(block as TextContentBlock)?.start_timestamp}`}
+            >
+              {showConnectorFromPrevious && (
+                <div
+                  className='bg-border pointer-events-none absolute top-0 left-[6.5px] h-2 w-px'
+                  style={{ zIndex: 0 }}
+                />
+              )}
+              <div className='flex items-start gap-2 py-2'>
+                <div className='mt-0.5 flex h-3.5 w-3.5 shrink-0 items-center justify-center'>
+                  <AnimatedDot showAnimation={false} size={4} />
+                </div>
+                <MarkdownBlock payload={block?.payload} />
+              </div>
+              {showConnectorToNext && (
+                <div
+                  className='bg-border pointer-events-none absolute top-[24px] bottom-0 left-[6.5px] w-px'
+                  style={{ zIndex: 0 }}
+                />
+              )}
+            </div>
+          );
+        }
         return (
           <MarkdownBlock
             key={block?.id ?? `text-${block?.order}-${(block as TextContentBlock)?.start_timestamp}`}
@@ -246,14 +291,16 @@ export const BlockRenderer: React.FC<BlockRendererProps> = ({
       {messageBlocks.map((block, index) => {
         const previousBlock = index > 0 ? messageBlocks[index - 1] : undefined;
         const nextBlock = messageBlocks[index + 1];
-        const shouldRemoveSpacing = isThinkingOrToolUseBlock(block) && isThinkingOrToolUseBlock(nextBlock);
+        const isLastBlock = index === size - 1;
+        const isNextLast = index + 1 === size - 1;
+        const shouldRemoveSpacing = isConnectedBlock(block, isLastBlock) && isConnectedBlock(nextBlock, isNextLast);
 
         return (
           <div
             key={block.id ?? `${block.type}-${block.order}`}
             className={cn(!shouldRemoveSpacing && size > 1 && 'mb-3')}
           >
-            {renderBlock(block, nextBlock, previousBlock)}
+            {renderBlock(block, index, nextBlock, previousBlock)}
           </div>
         );
       })}
