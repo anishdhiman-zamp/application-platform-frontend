@@ -1,5 +1,5 @@
 import { ActivityIcon, SettingsIcon } from '@zamp-platform/ui';
-import { Link2, UserPen } from 'lucide-react';
+import { Link2, Settings2, UserPen } from 'lucide-react';
 import { PaceNavbarItemId, PaceNavbarItemSchema, PaceSettingsTabSchema } from 'modules/pace/pace.types';
 import Users02 from '@/assets/Icons/Users02';
 import { ROUTES_PATH } from '@/constants/routeConfig';
@@ -36,10 +36,10 @@ export const PACE_SETTINGS_TABS: PaceSettingsTabSchema[] = [
     heading: 'Account',
   },
   {
-    id: PaceNavbarItemId.PEOPLE,
-    name: 'People',
-    iconComponent: <Users02 width={16} height={16} />,
-    path: ROUTES_PATH.CHAT_SETTINGS_PEOPLE,
+    id: PaceNavbarItemId.ORG_SETTINGS,
+    name: 'Organisation settings',
+    iconComponent: <Settings2 width={16} height={16} />,
+    path: ROUTES_PATH.CHAT_SETTINGS_ORG_SETTINGS,
     heading: 'Organisation',
   },
   {
@@ -47,6 +47,12 @@ export const PACE_SETTINGS_TABS: PaceSettingsTabSchema[] = [
     name: 'Integrations',
     iconComponent: <Link2 width={16} height={16} className='-rotate-45' />,
     path: ROUTES_PATH.CHAT_SETTINGS_INTEGRATIONS,
+  },
+  {
+    id: PaceNavbarItemId.PEOPLE,
+    name: 'People',
+    iconComponent: <Users02 width={16} height={16} />,
+    path: ROUTES_PATH.CHAT_SETTINGS_PEOPLE,
   },
 ];
 

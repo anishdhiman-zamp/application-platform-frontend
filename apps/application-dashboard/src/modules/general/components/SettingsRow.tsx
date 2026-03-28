@@ -20,11 +20,12 @@ export const SettingsRow = ({ label, value, action, actionNode, className }: Set
   <div className={cn('border-GRAY_400 flex items-center justify-between gap-4 border-b px-6 py-4', className)}>
     <div className='flex min-w-0 flex-col gap-3'>
       <span className='f-12-400 text-GRAY_700'>{label}</span>
-      {value ? (
-        <span className='f-12-500 text-GRAY_1000 wrap-break-word'>{value}</span>
-      ) : (
-        <Skeleton className='h-3.5 w-40' />
-      )}
+      {value !== undefined &&
+        (value ? (
+          <span className='f-12-500 text-GRAY_1000 wrap-break-word'>{value}</span>
+        ) : (
+          <Skeleton className='h-3.5 w-40' />
+        ))}
     </div>
     <div className='shrink-0'>
       {actionNode ??
