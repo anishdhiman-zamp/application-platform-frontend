@@ -33,5 +33,6 @@ export enum APITags {
   GET_FILES_LIST = 'GET_FILES_LIST',
   GET_TASK_COUNTS = 'GET_TASK_COUNTS',
   GET_TASK_LIST = 'GET_TASK_LIST',
+  GET_DATASET_ROLES = 'GET_DATASET_ROLES',
 }
 export const API_TAGS = Object.values(APITags);

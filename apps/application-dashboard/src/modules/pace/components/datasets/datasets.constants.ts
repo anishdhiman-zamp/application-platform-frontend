@@ -1,18 +1,17 @@
 export const LIST_TABLES_QUERY = `
-SELECT t.table_name,
-       pg_catalog.obj_description(c.oid, 'pg_class') AS description
-FROM information_schema.tables t
-LEFT JOIN pg_catalog.pg_class c ON c.relname = t.table_name
-  AND c.relnamespace = (SELECT oid FROM pg_catalog.pg_namespace WHERE nspname = t.table_schema)
-WHERE t.table_schema = 'public'
-  AND t.table_type = 'BASE TABLE'
-ORDER BY t.table_name
+SELECT table_name, description FROM _accessible_tables ORDER BY table_name
 `.trim();
 
 export const DETAIL_PAGE_SIZE = 100;
 
-const escapeSqlString = (value: string): string => value.replace(/'/g, "''");
-const escapeSqlIdentifier = (name: string): string => name.replace(/"/g, '""');
+export const escapeSqlString = (value: string): string => value.replace(/'/g, "''");
+export const escapeSqlIdentifier = (name: string): string => name.replace(/"/g, '""');
+
+export const buildRenameTableQuery = (oldName: string, newName: string): string =>
+  `ALTER TABLE "${escapeSqlIdentifier(oldName)}" RENAME TO "${escapeSqlIdentifier(newName)}"`;
+
+export const buildCommentOnTableQuery = (tableName: string, comment: string): string =>
+  `COMMENT ON TABLE "${escapeSqlIdentifier(tableName)}" IS '${escapeSqlString(comment)}'`;
 
 export const buildTableColumnsQuery = (tableName: string): string =>
   `SELECT column_name FROM information_schema.columns WHERE table_schema = 'public' AND table_name = '${escapeSqlString(tableName)}' ORDER BY ordinal_position`;

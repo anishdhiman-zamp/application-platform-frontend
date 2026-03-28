@@ -246,4 +246,6 @@ export const API_ENDPOINTS = {
 
   // Agent Managed DB
   AGENT_MANAGED_DB_QUERY_POST: `query`,
+  DATASET_ROLES_GET: `roles`,
+  DATASET_ROLES_POST: `roles`,
 };

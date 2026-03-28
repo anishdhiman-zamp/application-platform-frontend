@@ -11,6 +11,7 @@ import {
   buildTableColumnsQuery,
   DETAIL_PAGE_SIZE,
 } from 'modules/pace/components/datasets/datasets.constants';
+import ShareDatasetNeonPopup from 'modules/pace/components/datasets/ShareDatasetNeonPopup';
 import Link from 'next/link';
 import { useLazyAgentDbReadQuery } from '@/apis/agentManagedDb';
 import { ROUTES_PATH } from '@/constants/routeConfig';
@@ -134,7 +135,8 @@ const DatasetDetail = ({ tableName }: DatasetDetailProps) => {
         <Link href={ROUTES_PATH.CHAT_SETTINGS_DATASETS}>
           <ArrowLeft width={18} height={18} className='text-GRAY_700 hover:text-GRAY_1000 transition-colors' />
         </Link>
-        <h1 className='f-18-500'>{tableName}</h1>
+        <h1 className='f-18-500 flex-1'>{tableName}</h1>
+        <ShareDatasetNeonPopup tableName={tableName} />
       </div>
       <div className='grid flex-1 overflow-hidden'>
         {columns && (

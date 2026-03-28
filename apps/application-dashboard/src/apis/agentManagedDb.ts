@@ -1,5 +1,6 @@
 import { REQUEST_TYPES } from '@zamp-platform/api';
 import { API_ENDPOINTS } from 'apis/apiEndpoint.constants';
+import { APITags } from '@/constants/api.constants';
 import { baseApi } from '@/services/baseApi';
 
 export interface AgentDbQueryRequest {
@@ -11,10 +12,29 @@ export interface AgentDbQueryResponse {
   count: number;
 }
 
+export type DatasetRoleValue = 'admin' | 'viewer' | 'editor';
+
+export interface DatasetRoleEntry {
+  user_id: string;
+  table_name: string;
+  role: DatasetRoleValue;
+  granted_by: string;
+  granted_at: string | null;
+}
+
+export interface DatasetRolesResponse {
+  roles: DatasetRoleEntry[];
+}
+
+export interface ManageDatasetRoleRequest {
+  table_name: string;
+  user_id: string;
+  role?: DatasetRoleValue;
+  action: 'grant' | 'revoke';
+}
+
 const AgentManagedDb = baseApi.injectEndpoints({
   endpoints: (builder) => ({
-    // Read-only query (SELECT, COUNT, information_schema lookups). Uses RTK Query
-    // caching and deduplication so identical reads aren't re-fetched.
     agentDbRead: builder.query<AgentDbQueryResponse, AgentDbQueryRequest>({
       query: ({ query }) => ({
         url: API_ENDPOINTS.AGENT_MANAGED_DB_QUERY_POST,
@@ -23,8 +43,6 @@ const AgentManagedDb = baseApi.injectEndpoints({
       }),
     }),
 
-    // Write operations (INSERT, UPDATE, DELETE). Mutation avoids caching so each
-    // call always hits the server and side-effects are never skipped.
     agentDbWrite: builder.mutation<AgentDbQueryResponse, AgentDbQueryRequest>({
       query: ({ query }) => ({
         url: API_ENDPOINTS.AGENT_MANAGED_DB_QUERY_POST,
@@ -32,7 +50,30 @@ const AgentManagedDb = baseApi.injectEndpoints({
         body: { query },
       }),
     }),
+
+    getDatasetRoles: builder.query<DatasetRolesResponse, { tableName?: string }>({
+      query: ({ tableName }) => ({
+        url: API_ENDPOINTS.DATASET_ROLES_GET,
+        params: tableName ? { table_name: tableName } : undefined,
+      }),
+      providesTags: [APITags.GET_DATASET_ROLES],
+    }),
+
+    manageDatasetRole: builder.mutation<DatasetRolesResponse, ManageDatasetRoleRequest>({
+      query: (body) => ({
+        url: API_ENDPOINTS.DATASET_ROLES_POST,
+        method: REQUEST_TYPES.POST,
+        body,
+      }),
+      invalidatesTags: [APITags.GET_DATASET_ROLES],
+    }),
   }),
 });
 
-export const { useAgentDbReadQuery, useLazyAgentDbReadQuery, useAgentDbWriteMutation } = AgentManagedDb;
+export const {
+  useAgentDbReadQuery,
+  useLazyAgentDbReadQuery,
+  useAgentDbWriteMutation,
+  useGetDatasetRolesQuery,
+  useManageDatasetRoleMutation,
+} = AgentManagedDb;
