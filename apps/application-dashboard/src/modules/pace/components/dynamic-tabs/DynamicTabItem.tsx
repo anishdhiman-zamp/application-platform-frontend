@@ -7,14 +7,10 @@ import { X } from 'lucide-react';
 import { TAB_CONTEXT_MENU_ACTION_IDS } from 'modules/pace/components/dynamic-tabs/dynamic-tabs.constants';
 import { getDefaultIcon } from 'modules/pace/components/dynamic-tabs/dynamic-tabs.utils';
 import DynamicTabContextMenu from 'modules/pace/components/dynamic-tabs/DynamicTabContextMenu';
-import { isSameBasePath } from 'modules/pace/components/dynamic-tabs/tab-registry';
 import { useIsCompact } from 'modules/pace/components/dynamic-tabs/useIsCompact';
-import { preserveSidebarParam } from 'modules/pace/pace.utils';
-import { useRouter } from 'next/navigation';
 import TooltipV2 from '@/components/common/TooltipV2';
 import { handleActivationKeyDown } from '@/constants/shortcuts';
-import { usePaceContext } from '@/modules/pace/pace.context';
-import { CHAT_SIDEBAR_STATE, DynamicTab } from '@/modules/pace/pace.types';
+import { DynamicTab } from '@/modules/pace/pace.types';
 import { defaultFnType, SIDE_OPTIONS } from '@/types/commonTypes';
 
 export interface DynamicTabItemProps {
@@ -23,6 +19,7 @@ export interface DynamicTabItemProps {
   isDragging?: boolean;
   tabIndex: number;
   totalTabs: number;
+  onNavigate: (tab: DynamicTab) => void;
   onClose: (e: React.MouseEvent, id: string) => void;
   onCloseOthers: (id: string) => void;
   onCloseToRight: (id: string) => void;
@@ -38,34 +35,20 @@ const DynamicTabItem = ({
   isDragging = false,
   tabIndex,
   totalTabs,
+  onNavigate,
   onClose,
   onCloseOthers,
   onCloseToRight,
   onCloseAll,
   renderIcon,
 }: DynamicTabItemProps) => {
-  const { setActiveTabId, chatSidebarState, setChatSidebarState } = usePaceContext();
-  const router = useRouter();
   const containerRef = useRef<HTMLDivElement>(null);
   const isCompact = useIsCompact(containerRef, COMPACT_THRESHOLD_PX);
 
   const handleClick = () => {
     if (isActive) return;
 
-    const tabPath = preserveSidebarParam(tab.path);
-    const willChangeBase = !isSameBasePath(tabPath);
-
-    if (chatSidebarState === CHAT_SIDEBAR_STATE.EXPANDED && !willChangeBase) {
-      setChatSidebarState(CHAT_SIDEBAR_STATE.COLLAPSED);
-    }
-
-    setActiveTabId(tab.id);
-
-    if (willChangeBase) {
-      router.push(tabPath);
-    } else {
-      window.history.pushState(null, '', tabPath);
-    }
+    onNavigate(tab);
   };
 
   const handleContextMenuAction = useCallback(

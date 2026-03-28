@@ -72,7 +72,7 @@ export const useFileTreeNodeActions = ({
 
   const { openTab, closeTabsForPath, updateTab, updateTabsForFolderMove } = useDynamicTabs({ type: TAB_TYPE.FILE });
   const { downloadFile } = useFileDownload();
-  const { setPendingFileReference, setChatSidebarState } = usePaceContext();
+  const { setPendingFileReference, setChatSidebarState, chatSidebarState } = usePaceContext();
   const {
     createFile,
     createFolder,
@@ -191,7 +191,9 @@ export const useFileTreeNodeActions = ({
         }
         case CONTEXT_MENU_ACTION_IDS.REFERENCE_IN_CHAT: {
           setPendingFileReference({ path: node.path, name: node.name });
-          setChatSidebarState(CHAT_SIDEBAR_STATE.SIDEBAR);
+          if (chatSidebarState === CHAT_SIDEBAR_STATE.COLLAPSED) {
+            setChatSidebarState(CHAT_SIDEBAR_STATE.SIDEBAR);
+          }
           break;
         }
         case CONTEXT_MENU_ACTION_IDS.DOWNLOAD: {
