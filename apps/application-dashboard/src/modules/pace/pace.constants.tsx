@@ -1,4 +1,4 @@
-import { ActivityIcon, SettingsIcon } from '@zamp-platform/ui';
+import { ActivityIcon, HomeIcon, SettingsIcon } from '@zamp-platform/ui';
 import { Link2, UserPen } from 'lucide-react';
 import { PaceNavbarItemId, PaceNavbarItemSchema, PaceSettingsTabSchema } from 'modules/pace/pace.types';
 import Users02 from '@/assets/Icons/Users02';
@@ -19,6 +19,11 @@ export const FILES_PANEL_MIN_WIDTH = 300;
 export const FILES_PANEL_MAX_WIDTH = 700;
 
 export const PACE_NAVBAR_ITEMS: PaceNavbarItemSchema[] = [
+  {
+    id: PaceNavbarItemId.HOME,
+    iconComponent: HomeIcon,
+    path: ROUTES_PATH.CHAT,
+  },
   {
     id: PaceNavbarItemId.TASKS,
     iconComponent: ActivityIcon,

@@ -69,8 +69,8 @@ interface FileTreeNodeRowProps extends React.HTMLAttributes<HTMLDivElement> {
   onActionClick: (actionId: string) => void;
 }
 
-const INDENT_SIZE = 24;
-const BASE_PADDING = 8;
+const INDENT_SIZE = 16;
+const BASE_PADDING = 4;
 const MENU_CONTENT_CLASS = 'flex min-w-[180px] flex-col gap-y-[2px]';
 
 const TreeConnectorLines = ({ depth }: { depth: number }) => {
@@ -81,7 +81,7 @@ const TreeConnectorLines = ({ depth }: { depth: number }) => {
       {Array.from({ length: depth }, (_, level) => (
         <div
           key={level}
-          className='bg-GRAY_400 absolute'
+          className='bg-GRAY_200 absolute'
           style={{ left: level * INDENT_SIZE + BASE_PADDING + 8, top: 0, width: 1, bottom: 0 }}
         />
       ))}

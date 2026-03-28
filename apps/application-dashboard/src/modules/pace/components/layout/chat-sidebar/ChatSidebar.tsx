@@ -34,6 +34,7 @@ const ChatSidebar = () => {
   const isPinnedFilesPanel = filesPanelOpen && filesPanelPinned;
   const expandedWidth = isPinnedFilesPanel ? `calc(100% - ${filesPanelWidth + 8}px)` : '100%';
   const targetWidth = isCollapsed ? 0 : isExpanded ? expandedWidth : sidebarWidth;
+  const innerWidth = isExpanded ? '100%' : sidebarWidth;
   const direction = getSidebarTransitionDirection(prevChatSidebarState, chatSidebarState);
 
   const transitions = useMemo(() => {
@@ -74,14 +75,16 @@ const ChatSidebar = () => {
         !isCollapsed && 'border-border border',
       )}
     >
-      <ChatSidebarInner
-        conversationId={conversationId}
-        setConversationId={setConversationId}
-        setChatTitle={setChatTitle}
-        startNewChat={startNewChat}
-        chatTitle={chatTitle}
-        chatKey={chatKey}
-      />
+      <div className='flex h-full flex-col' style={{ width: innerWidth, minWidth: innerWidth }}>
+        <ChatSidebarInner
+          conversationId={conversationId}
+          setConversationId={setConversationId}
+          setChatTitle={setChatTitle}
+          startNewChat={startNewChat}
+          chatTitle={chatTitle}
+          chatKey={chatKey}
+        />
+      </div>
     </motion.div>
   );
 };

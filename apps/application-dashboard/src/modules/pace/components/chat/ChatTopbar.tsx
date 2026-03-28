@@ -69,7 +69,11 @@ const ChatTopbar: FC<ChatTopbarProps> = ({
             sideOffset={8}
             className='flex h-[400px] w-[320px] flex-col overflow-hidden p-0'
           >
-            <ChatHistory onSelectConversation={handleSelectConversation} compact />
+            <ChatHistory
+              onSelectConversation={handleSelectConversation}
+              activeConversationId={conversationId}
+              compact
+            />
           </PopoverContent>
         </Popover>
       </div>

@@ -97,19 +97,18 @@ const ChatSidebarInner: FC<ChatSidebarInnerProps> = ({
 
   return (
     <div className='bg-BG_WHITE relative mx-auto flex h-full w-full flex-1 flex-col'>
-      {!chatState?.showHomeView && (
-        <div className={cn('transition-[filter] duration-200', isTaskPopoverOpen && 'pointer-events-none blur-sm')}>
-          <ChatTopbar
-            title={chatTitle || 'Start a new chat'}
-            conversationId={conversationId}
-            organizationId={organizationId}
-            onStartNewChat={startNewChat}
-            onTitleChange={setChatTitle}
-            onSelectConversation={setConversationId}
-            onExpand={chatSidebarState !== CHAT_SIDEBAR_STATE.EXPANDED ? handleExpand : undefined}
-          />
-        </div>
-      )}
+      <div className={cn('transition-[filter] duration-200', isTaskPopoverOpen && 'pointer-events-none blur-sm')}>
+        <ChatTopbar
+          title={chatTitle || 'Start a new chat'}
+          conversationId={conversationId}
+          organizationId={organizationId}
+          onStartNewChat={startNewChat}
+          onTitleChange={setChatTitle}
+          onSelectConversation={setConversationId}
+          onExpand={chatSidebarState !== CHAT_SIDEBAR_STATE.EXPANDED ? handleExpand : undefined}
+        />
+      </div>
+
       <ChatConversationContent
         key={chatKey}
         conversationId={conversationId}
@@ -125,11 +124,8 @@ const ChatSidebarInner: FC<ChatSidebarInnerProps> = ({
         fileDropHandlerRef={fileDropHandlerRef}
         addFileReferenceRef={addFileReferenceRef}
         currentUserName={currentUserName}
-        llmModel={selectedModel}
-        modelSelectorSlot={modelSelectorSlot}
-        username={username}
       />
-      {chatState && !chatState.showHomeView && (
+      {chatState && (
         <div className='bg-BG_WHITE sticky bottom-0 z-10 mx-auto w-full max-w-[700px] px-3 pb-3'>
           <ConnectedChatInput
             chat={chatState.chat}

@@ -62,14 +62,12 @@ export interface QueryRouteConfig {
   kind: typeof ROUTE_KIND.QUERY;
   basePath: string;
   paramName: string;
-  fallbackPath: string;
 }
 
 export interface DynamicRouteConfig {
   kind: typeof ROUTE_KIND.DYNAMIC;
   basePath: string;
   buildPath: (id: string) => string;
-  fallbackPath: string;
 }
 
 export type DynamicTabRouteConfig = QueryRouteConfig | DynamicRouteConfig;

@@ -28,6 +28,12 @@ export interface PendingFileReference {
   name: string;
 }
 
+export interface PendingConversationPayload {
+  message: string;
+  fileReferences?: { path: string; name: string }[];
+  llmModel?: string | null;
+}
+
 interface PaceContextType {
   chatSidebarState: ChatSidebarState;
   prevChatSidebarState: ChatSidebarState;
@@ -44,12 +50,12 @@ interface PaceContextType {
   updateDynamicTab: (oldId: string, newTab: Omit<DynamicTab, 'stableKey'>) => void;
   reorderDynamicTabs: (newOrder: string[]) => void;
 
-  activeTabId: string | null;
-  setActiveTabId: (id: string | null) => void;
-
   pendingFileReference: PendingFileReference | null;
   setPendingFileReference: (ref: PendingFileReference | null) => void;
   clearPendingFileReference: defaultFnType;
+
+  pendingConversationPayload: PendingConversationPayload | null;
+  setPendingConversationPayload: (payload: PendingConversationPayload | null) => void;
 
   filesPanelOpen: boolean;
   filesPanelPinned: boolean;
@@ -83,8 +89,8 @@ export const PaceProvider = ({ children }: { children: ReactNode }) => {
   const [prevChatSidebarState, setPrevChatSidebarState] = useState<ChatSidebarState>(CHAT_SIDEBAR_STATE.COLLAPSED);
   const [chatSidebarState, setChatSidebarStateRaw] = useState<ChatSidebarState>(CHAT_SIDEBAR_STATE.COLLAPSED);
   const [isDynamicTabsHydrated, setIsDynamicTabsHydrated] = useState(false);
-  const [activeTabId, setActiveTabId] = useState<string | null>(null);
   const [pendingFileReference, setPendingFileReference] = useState<PendingFileReference | null>(null);
+  const [pendingConversationPayload, setPendingConversationPayload] = useState<PendingConversationPayload | null>(null);
   const [filesPanelOpen, setFilesPanelOpen] = useState(false);
   const [filesPanelPinned, setFilesPanelPinnedRaw] = useState(false);
   const [sidebarWidth, setSidebarWidthRaw] = useState(SIDEBAR_WIDTH);
@@ -250,9 +256,7 @@ export const PaceProvider = ({ children }: { children: ReactNode }) => {
     }
     prevRouteUrlRef.current = routeUrl;
 
-    if (isOnChatRoute && !hasFileParam) {
-      setChatSidebarStateInternal(CHAT_SIDEBAR_STATE.EXPANDED);
-    } else if (chatSidebarStateRef.current === CHAT_SIDEBAR_STATE.EXPANDED) {
+    if (chatSidebarStateRef.current === CHAT_SIDEBAR_STATE.EXPANDED) {
       setChatSidebarStateInternal(CHAT_SIDEBAR_STATE.COLLAPSED);
     }
   }, [routeUrl, isOnChatRoute, hasFileParam]);
@@ -340,7 +344,7 @@ export const PaceProvider = ({ children }: { children: ReactNode }) => {
     const hasFileParamOnMount = currentSearch.has('f');
     const hasSidebarConversation = currentSearch.has(SIDEBAR_CONVERSATION_ID_PARAM);
 
-    if (isChatPath && !hasFileParamOnMount) {
+    if (isChatPath && !hasFileParamOnMount && hasSidebarConversation) {
       setChatSidebarStateInternal(CHAT_SIDEBAR_STATE.EXPANDED);
     } else if (hasSidebarConversation) {
       setChatSidebarStateInternal(CHAT_SIDEBAR_STATE.SIDEBAR);
@@ -364,12 +368,12 @@ export const PaceProvider = ({ children }: { children: ReactNode }) => {
       updateDynamicTab,
       reorderDynamicTabs,
 
-      activeTabId,
-      setActiveTabId,
-
       pendingFileReference,
       setPendingFileReference,
       clearPendingFileReference,
+
+      pendingConversationPayload,
+      setPendingConversationPayload,
 
       filesPanelOpen,
       filesPanelPinned,
@@ -405,10 +409,10 @@ export const PaceProvider = ({ children }: { children: ReactNode }) => {
       updateDynamicTab,
       reorderDynamicTabs,
 
-      activeTabId,
-
       pendingFileReference,
       clearPendingFileReference,
+
+      pendingConversationPayload,
 
       filesPanelOpen,
       filesPanelPinned,

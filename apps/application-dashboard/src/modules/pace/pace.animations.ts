@@ -54,7 +54,8 @@ export const FILES_PANEL_EXIT_TRANSITION = {
 export type SidebarTransitionDirection =
   | 'fullscreen-to-sidebar'
   | 'sidebar-to-fullscreen'
-  | 'collapsed-to-open'
+  | 'collapsed-to-sidebar'
+  | 'collapsed-to-expanded'
   | 'sidebar-to-collapsed'
   | 'expanded-to-collapsed'
   | 'same';
@@ -73,9 +74,10 @@ export const getSidebarTransitionDirection = (
   if (prev === CHAT_SIDEBAR_STATE.SIDEBAR && current === CHAT_SIDEBAR_STATE.EXPANDED) return 'sidebar-to-fullscreen';
   if (prev === CHAT_SIDEBAR_STATE.EXPANDED && current === CHAT_SIDEBAR_STATE.COLLAPSED) return 'expanded-to-collapsed';
   if (prev === CHAT_SIDEBAR_STATE.SIDEBAR && current === CHAT_SIDEBAR_STATE.COLLAPSED) return 'sidebar-to-collapsed';
-  if (prev === CHAT_SIDEBAR_STATE.COLLAPSED && current !== CHAT_SIDEBAR_STATE.COLLAPSED) return 'collapsed-to-open';
+  if (prev === CHAT_SIDEBAR_STATE.COLLAPSED && current === CHAT_SIDEBAR_STATE.EXPANDED) return 'collapsed-to-expanded';
+  if (prev === CHAT_SIDEBAR_STATE.COLLAPSED && current === CHAT_SIDEBAR_STATE.SIDEBAR) return 'collapsed-to-sidebar';
 
-  return 'collapsed-to-open';
+  return 'collapsed-to-sidebar';
 };
 
 export const getSidebarTransitions = (direction: SidebarTransitionDirection): SidebarTransitions => {
@@ -84,14 +86,16 @@ export const getSidebarTransitions = (direction: SidebarTransitionDirection): Si
       return { width: FULLSCREEN_SIDEBAR_BEZIER, opacity: { duration: 0.15, ease: 'easeInOut' } };
     case 'sidebar-to-fullscreen':
       return { width: FULLSCREEN_SIDEBAR_SPRING, opacity: { duration: 0.15, ease: 'easeInOut' } };
-    case 'collapsed-to-open':
+    case 'collapsed-to-sidebar':
       return { width: COLLAPSED_SIDEBAR_SPRING, opacity: { duration: 0.15, ease: 'easeInOut' } };
+    case 'collapsed-to-expanded':
+      return { width: NO_ANIMATION, opacity: { duration: 0.25, ease: 'easeInOut' } };
     case 'sidebar-to-collapsed':
       return { width: COLLAPSED_SIDEBAR_BEZIER, opacity: { duration: 0.15, ease: 'easeOut' } };
     case 'expanded-to-collapsed':
-      return { width: NO_ANIMATION, opacity: { duration: 0.15, ease: 'easeOut' } };
+      return { width: NO_ANIMATION, opacity: NO_ANIMATION };
     default:
-      return { width: COLLAPSED_SIDEBAR_SPRING, opacity: { duration: 0.15, ease: 'easeInOut' } };
+      return { width: NO_ANIMATION, opacity: NO_ANIMATION };
   }
 };
 
@@ -147,7 +151,7 @@ export const getNavbarAnimations = (prev: ChatSidebarState, current: ChatSidebar
         spacer: NO_ANIMATION,
         collapseIcon: TAB_CHANGE_FADE,
         chatIcon: TAB_CHANGE_FADE,
-        navItems: { initial: { opacity: 0 }, transition: TAB_CHANGE_FADE },
+        navItems: { initial: false, transition: NO_ANIMATION },
       };
 
     default:
