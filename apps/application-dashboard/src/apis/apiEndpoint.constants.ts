@@ -245,7 +245,7 @@ export const API_ENDPOINTS = {
   FILES_UPLOAD_CANCEL_DELETE: `files/upload/{{upload_id}}`,
 
   // Agent Managed DB
-  AGENT_MANAGED_DB_QUERY_POST: `query`,
-  DATASET_ROLES_GET: `roles`,
-  DATASET_ROLES_POST: `roles`,
+  AGENT_MANAGED_DB_QUERY_POST: `agent-db/query`,
+  DATASET_ROLES_GET: `agent-db/roles`,
+  DATASET_ROLES_POST: `agent-db/roles`,
 };
