@@ -7,7 +7,7 @@ import { cn } from '@zamp-platform/ui/utils';
 import { cva } from 'class-variance-authority';
 
 const dialogVariants = cva(
-  'fixed left-[50%] top-[50%] z-1001 flex translate-x-[-50%] translate-y-[-50%] flex-col rounded-lg bg-BG_WHITE text-GRAY_1000 shadow-lg duration-200 max-h-[60vh]',
+  'fixed left-[50%] top-[50%] z-1001 flex translate-x-[-50%] translate-y-[-50%] flex-col rounded-lg bg-BG_WHITE text-GRAY_1000 shadow-lg duration-200 max-h-[60vh] outline-none',
   {
     variants: {
       size: {
@@ -83,7 +83,7 @@ const DialogContent = ({
       {showCloseButton && (
         <DialogClose
           className={cn(
-            'ring-offset-background focus:ring-ring absolute top-4 right-4 z-1002 cursor-pointer rounded-sm opacity-70 transition-opacity hover:opacity-100 focus:ring-2 focus:ring-offset-2 focus:outline-hidden disabled:pointer-events-none',
+            'ring-offset-background focus:ring-ring absolute top-4 right-4 z-1002 cursor-pointer rounded-sm opacity-70 transition-opacity outline-none hover:opacity-100 focus:ring-2 focus:ring-offset-2 focus:outline-hidden disabled:pointer-events-none',
             closeButtonClassName,
           )}
         >

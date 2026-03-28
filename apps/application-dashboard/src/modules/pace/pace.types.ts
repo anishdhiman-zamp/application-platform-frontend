@@ -10,6 +10,7 @@ export const enum PaceNavbarItemId {
   FILES = 'files',
   GENERAL = 'general',
   TASKS = 'task',
+  ORG_SETTINGS = 'org-settings',
 }
 
 export interface AnimatedIconHandle {

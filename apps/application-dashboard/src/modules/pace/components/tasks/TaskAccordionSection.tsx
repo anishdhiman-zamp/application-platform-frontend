@@ -8,7 +8,6 @@ import { AccordionContent, AccordionItem, AccordionTrigger } from '@zamp-platfor
 import { Play } from 'lucide-react';
 import { STATUS_LABELS } from 'modules/pace/components/tasks/task-listing.constants';
 import TaskRow from 'modules/pace/components/tasks/TaskRow';
-import TaskRowSkeleton from 'modules/pace/components/tasks/TaskRowSkeleton';
 import { useTasksByStatus } from 'modules/pace/components/tasks/useTasksByStatus';
 
 interface TaskAccordionSectionProps {
@@ -61,14 +60,13 @@ const TaskAccordionSection = ({ status, count, search, scrollContainerRef }: Tas
           <TaskStatusIcon status={status} />
           <span className='f-13-500 text-GRAY_950 truncate'>{STATUS_LABELS[status]}</span>
         </div>
-        <span className='f-13-500 text-GRAY_600 truncate'>{search ? totalCount : count}</span>
+        <span className='f-13-500 text-GRAY_600 truncate'>{count}</span>
       </AccordionTrigger>
       <AccordionContent className='p-0' disableAnimation>
         <div>
           {tasks.map((task) => (
             <TaskRow key={task.id} task={task} />
           ))}
-          {isFetching && <TaskRowSkeleton />}
         </div>
       </AccordionContent>
     </AccordionItem>
