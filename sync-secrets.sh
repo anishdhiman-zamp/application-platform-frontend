@@ -11,7 +11,7 @@ if [ -z "$CODER_WORKSPACE_NAME" ]; then
 fi
 
 # Construct the API URL
-NEXT_PUBLIC_BASE_API_URL="https://${API_SERVICE}--main--${CODER_WORKSPACE_NAME}--${WORKSPACE_USER}.coder-live.zamp.dev"
+NEXT_PUBLIC_BASE_API_URL="https://${API_SERVICE}--main--${CODER_WORKSPACE_NAME}--${WORKSPACE_USER}.${CODER_DOMAIN:-coder.dev-mum.internal.zamp.dev}"
 NEXT_SERVER_API_URL="http://localhost:${PORT}"
 NEXT_PUBLIC_ENVIRONMENT="development"
 
