@@ -185,7 +185,7 @@ export const RichTextEditor = forwardRef<RichTextEditorHandle, RichTextEditorPro
             event.preventDefault();
             const { state, dispatch } = view;
             const { from, to } = state.selection;
-            const tr = state.tr.insertText(plainText, from, to);
+            const tr = state.tr.insertText(plainText, from, to).scrollIntoView();
             dispatch(tr);
             return true;
           }
@@ -195,10 +195,7 @@ export const RichTextEditor = forwardRef<RichTextEditorHandle, RichTextEditorPro
       },
       onUpdate: ({ editor: ed }) => {
         try {
-          const md = ed
-            .getMarkdown()
-            .replace(/[\s\u00A0]+$/, '')
-            .replace(/&nbsp;$/, '');
+          const md = ed.getMarkdown().replace(/(\s|&nbsp;|\u00A0)+$/, '');
           lastEditorMarkdown.current = md;
           onChange(md);
         } catch {
