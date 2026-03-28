@@ -62,17 +62,22 @@ export interface QueryRouteConfig {
   kind: typeof ROUTE_KIND.QUERY;
   basePath: string;
   paramName: string;
-  fallbackPath: string;
 }
 
 export interface DynamicRouteConfig {
   kind: typeof ROUTE_KIND.DYNAMIC;
   basePath: string;
   buildPath: (id: string) => string;
-  fallbackPath: string;
 }
 
 export type DynamicTabRouteConfig = QueryRouteConfig | DynamicRouteConfig;
+
+export const NAV_METHOD = {
+  PUSH: 'push',
+  REPLACE: 'replace',
+} as const;
+
+export type NavMethod = (typeof NAV_METHOD)[keyof typeof NAV_METHOD];
 
 export interface DynamicTab {
   stableKey: string;

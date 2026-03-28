@@ -8,18 +8,21 @@ import { PanelRightOpen } from 'lucide-react';
 import { FILES_PANEL_SPACER_TRANSITION, getNavbarAnimations, NO_ANIMATION } from 'modules/pace/pace.animations';
 import type { AnimatedIconHandle } from 'modules/pace/pace.types';
 import { CHAT_SIDEBAR_STATE, PaceNavbarItemId } from 'modules/pace/pace.types';
-import { usePathname, useRouter, useSearchParams } from 'next/navigation';
+import { usePathname, useSearchParams } from 'next/navigation';
 import { ROUTES_PATH } from '@/constants/routeConfig';
 import DynamicTabsBar from '@/modules/pace/components/dynamic-tabs/DynamicTabsBar';
+import { isOnAnyTabBasePath } from '@/modules/pace/components/dynamic-tabs/tab-registry';
 import { useDynamicTabs } from '@/modules/pace/components/dynamic-tabs/useDynamicTabs';
 import NavbarIconLink from '@/modules/pace/components/layout/NavbarIconLink';
+import { useSyncedUrlParam } from '@/modules/pace/hooks/useSyncedSearchParam';
 import { PACE_NAVBAR_ITEMS, SIDEBAR_CONVERSATION_ID_PARAM } from '@/modules/pace/pace.constants';
 import { usePaceContext } from '@/modules/pace/pace.context';
 
 const PaceNavbar = () => {
   const pathname = usePathname();
-  const router = useRouter();
   const searchParams = useSearchParams();
+  const fParam = useSyncedUrlParam('f');
+
   const {
     chatSidebarState,
     prevChatSidebarState,
@@ -53,12 +56,18 @@ const PaceNavbar = () => {
     [prevChatSidebarState, chatSidebarState],
   );
 
+  const isOnChatHome = pathname === ROUTES_PATH.CHAT && !fParam;
+
   const isNavItemActive = (id: PaceNavbarItemId, path: string) => {
-    if (isExpanded) {
+    if (id === PaceNavbarItemId.HOME) {
+      return isOnChatHome && !isExpanded;
+    }
+
+    if (isOnChatHome || isExpanded || isOnAnyDynamicTab()) {
       return false;
     }
 
-    if (isOnAnyDynamicTab()) {
+    if (pathname && isOnAnyTabBasePath(pathname)) {
       return false;
     }
 
@@ -69,7 +78,11 @@ const PaceNavbar = () => {
     return pathname?.includes(path) ?? false;
   };
 
-  const getNavItemHref = (path: string) => {
+  const getNavItemHref = (id: PaceNavbarItemId, path: string) => {
+    if (id === PaceNavbarItemId.HOME) {
+      return path;
+    }
+
     const sParam = searchParams?.get(SIDEBAR_CONVERSATION_ID_PARAM);
 
     if (sParam) {
@@ -85,12 +98,8 @@ const PaceNavbar = () => {
     }
   }, [isCollapsed, setChatSidebarState]);
 
-  const handleChatIconDoubleClick = useCallback(() => {
-    router.push(ROUTES_PATH.CHAT);
-  }, [router]);
-
   const handleNavItemClick = useCallback(
-    (e: React.MouseEvent<HTMLAnchorElement>) => {
+    (e: React.MouseEvent<HTMLAnchorElement>, id: PaceNavbarItemId) => {
       if (!isExpanded) return;
 
       const href = e.currentTarget.getAttribute('href');
@@ -98,10 +107,24 @@ const PaceNavbar = () => {
       if (!href) return;
 
       const targetUrl = new URL(href, window.location.origin);
+
       const targetRouteUrl = targetUrl.pathname + (targetUrl.search || '');
       const currentRouteUrl = window.location.pathname + (window.location.search || '');
+      const isSameRoute = targetRouteUrl === currentRouteUrl;
 
-      if (targetRouteUrl === currentRouteUrl) {
+      if (id === PaceNavbarItemId.HOME) {
+        if (targetUrl.pathname === window.location.pathname) {
+          e.preventDefault();
+          collapseSidebar();
+          if (!isSameRoute) {
+            window.history.pushState(null, '', href);
+          }
+        }
+
+        return;
+      }
+
+      if (isSameRoute) {
         collapseSidebar();
       }
     },
@@ -145,7 +168,6 @@ const PaceNavbar = () => {
                 'border-GRAY_500 text-GRAY_900 hover:text-GRAY_900 shadow-tab-shadow bg-BG_WHITE hover:bg-BG_WHITE',
             )}
             onClick={handleChatIconClick}
-            onDoubleClick={handleChatIconDoubleClick}
             onMouseEnter={() => chatIconRef.current?.startAnimation()}
             onMouseLeave={() => chatIconRef.current?.stopAnimation()}
           >
@@ -174,9 +196,9 @@ const PaceNavbar = () => {
           <NavbarIconLink
             key={item.id}
             item={item}
-            href={getNavItemHref(item.path)}
+            href={getNavItemHref(item.id, item.path)}
             isActive={isNavItemActive(item.id, item.path)}
-            onClick={handleNavItemClick}
+            onClick={(e) => handleNavItemClick(e, item.id)}
           />
         ))}
       </motion.div>

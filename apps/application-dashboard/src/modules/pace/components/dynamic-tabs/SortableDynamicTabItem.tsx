@@ -20,6 +20,7 @@ interface SortableDynamicTabItemProps {
   tabIndex: number;
   totalTabs: number;
   skipAnimation?: boolean;
+  onNavigate: (tab: DynamicTab) => void;
   onClose: (e: React.MouseEvent, id: string) => void;
   onCloseOthers: (id: string) => void;
   onCloseToRight: (id: string) => void;
@@ -33,6 +34,7 @@ const SortableDynamicTabItem = ({
   tabIndex,
   totalTabs,
   skipAnimation = false,
+  onNavigate,
   onClose,
   onCloseOthers,
   onCloseToRight,
@@ -75,6 +77,7 @@ const SortableDynamicTabItem = ({
         isDragging={isAnyDragging}
         tabIndex={tabIndex}
         totalTabs={totalTabs}
+        onNavigate={onNavigate}
         onClose={onClose}
         onCloseOthers={onCloseOthers}
         onCloseToRight={onCloseToRight}
