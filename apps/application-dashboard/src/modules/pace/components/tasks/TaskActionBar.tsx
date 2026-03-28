@@ -3,18 +3,42 @@
 import { useCallback, useState } from 'react';
 import { Button, SearchInput, Tabs, TabsList, TabsTrigger } from '@zamp-platform/ui';
 import { Search, X } from 'lucide-react';
-import { TAB_CONFIG } from 'modules/pace/components/tasks/task-listing.constants';
-import type { TaskListingTab } from 'modules/pace/components/tasks/task-listing.types';
+import { TAB_CONFIG, VALID_TABS } from 'modules/pace/components/tasks/task-listing.constants';
+import { TASK_LISTING_TAB, type TaskListingTab } from 'modules/pace/components/tasks/task-listing.types';
+import { usePathname, useRouter, useSearchParams } from 'next/navigation';
 
 interface TaskActionBarProps {
-  activeTab: TaskListingTab;
-  onTabChange: (tab: TaskListingTab) => void;
   searchTerm: string;
   onSearchChange: (value: string) => void;
 }
 
-const TaskActionBar = ({ activeTab, onTabChange, searchTerm, onSearchChange }: TaskActionBarProps) => {
+const TaskActionBar = ({ searchTerm, onSearchChange }: TaskActionBarProps) => {
+  const router = useRouter();
+  const pathname = usePathname();
+  const searchParams = useSearchParams();
+
+  const tabParam = searchParams?.get('tab');
+  const activeTab: TaskListingTab =
+    tabParam && VALID_TABS.has(tabParam) ? (tabParam as TaskListingTab) : TASK_LISTING_TAB.ALL;
+
   const [isSearchOpen, setIsSearchOpen] = useState(false);
+
+  const handleTabChange = useCallback(
+    (tab: TaskListingTab) => {
+      const params = new URLSearchParams(searchParams?.toString());
+
+      if (tab === TASK_LISTING_TAB.ALL) {
+        params.delete('tab');
+      } else {
+        params.set('tab', tab);
+      }
+
+      const query = params.toString();
+
+      router.replace(`${pathname}${query ? `?${query}` : ''}`, { scroll: false });
+    },
+    [router, pathname, searchParams],
+  );
 
   const handleToggleSearch = useCallback(() => {
     setIsSearchOpen((prev) => {
@@ -26,7 +50,7 @@ const TaskActionBar = ({ activeTab, onTabChange, searchTerm, onSearchChange }: T
 
   return (
     <div className='border-GRAY_400 flex h-[47px] items-end justify-between overflow-hidden border-b pl-4'>
-      <Tabs value={activeTab} onValueChange={(value) => onTabChange(value as TaskListingTab)}>
+      <Tabs value={activeTab} onValueChange={(value) => handleTabChange(value as TaskListingTab)}>
         <TabsList className='h-auto gap-8 bg-transparent p-0'>
           {TAB_CONFIG.map((tab) => {
             const Icon = tab.icon;

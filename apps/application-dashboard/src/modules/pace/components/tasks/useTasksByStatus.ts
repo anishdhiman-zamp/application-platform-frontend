@@ -33,8 +33,6 @@ export function useTasksByStatus({ status, search }: UseTasksByStatusOptions) {
 
   useEffect(() => {
     setPage(1);
-    setAllTasks([]);
-    setTotalCount(0);
   }, [status, search]);
 
   useEffect(() => {
