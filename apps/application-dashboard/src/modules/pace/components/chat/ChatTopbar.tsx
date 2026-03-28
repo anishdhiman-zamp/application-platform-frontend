@@ -57,30 +57,26 @@ const ChatTopbar: FC<ChatTopbarProps> = ({
 
   return (
     <div className={cn('bg-BG_WHITE flex items-center justify-between gap-x-3 p-3', className)} style={style}>
-      <div className='min-w-0 flex-1'>
-        {showHistory ? (
+      {showHistory && (
+        <div className='min-w-0 flex-1'>
           <Popover open={isHistoryOpen} onOpenChange={setIsHistoryOpen}>
-            <PopoverTrigger className='flex h-7 max-w-full cursor-pointer items-center gap-x-1 rounded rounded-md px-1 transition-colors hover:bg-gray-100'>
+            <PopoverTrigger className='hover:bg-GRAY_100 flex h-7 max-w-full cursor-pointer items-center gap-x-1 rounded-md pr-1 pl-1.5 transition-colors'>
               <span className='f-14-550 block min-w-0 truncate first-letter:uppercase'>{displayTitle}</span>
               <ChevronDown
                 size={14}
                 className={cn('text-GRAY_1000 shrink-0 transition-transform', isHistoryOpen && 'rotate-180')}
               />
             </PopoverTrigger>
-            <PopoverContent
-              align='start'
-              sideOffset={8}
-              className='flex h-[400px] w-[320px] flex-col overflow-hidden p-0'
-            >
-              <ChatHistory onSelectConversation={handleSelectConversation} compact />
+            <PopoverContent align='start' sideOffset={8} className='flex h-100 w-80 flex-col overflow-hidden p-0'>
+              <ChatHistory
+                onSelectConversation={handleSelectConversation}
+                activeConversationId={conversationId}
+                compact
+              />
             </PopoverContent>
           </Popover>
-        ) : (
-          <div className='flex h-7 max-w-full items-center px-1'>
-            <span className='f-14-550 block min-w-0 truncate first-letter:uppercase'>{displayTitle}</span>
-          </div>
-        )}
-      </div>
+        </div>
+      )}
       <div className='flex items-center gap-1.5'>
         {onStartNewChat && (
           <Button

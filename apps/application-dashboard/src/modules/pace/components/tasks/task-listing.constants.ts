@@ -24,5 +24,7 @@ export const TAB_CONFIG: { id: TaskListingTab; label: string; icon: LucideIcon }
   { id: TASK_LISTING_TAB.NEEDS_ACTION, label: 'Needs Action', icon: TrafficCone },
 ];
 
+export const VALID_TABS = new Set<string>(Object.values(TASK_LISTING_TAB));
+
 export const TASKS_PAGE_SIZE = 40;
 export const SEARCH_DEBOUNCE_MS = 300;

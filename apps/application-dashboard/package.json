@@ -3,8 +3,8 @@
   "version": "0.1.0",
   "private": true,
   "scripts": {
-    "dev": "next dev -p 2000 --turbopack --experimental-https -H local.zamp.ai",
-    "dev-coder": "next dev -p 2000 --turbopack -H 0.0.0.0",
+    "dev": "NODE_OPTIONS='--max-old-space-size=8192' next dev -p 2000 --turbopack --experimental-https -H local.zamp.ai",
+    "dev-coder": "NODE_OPTIONS='--max-old-space-size=8192' next dev -p 2000 --turbopack -H 0.0.0.0",
     "build": "NODE_OPTIONS='--max-old-space-size=10240' next build --webpack",
     "start": "next start",
     "start-coder": "next start -H 0.0.0.0",
