@@ -199,10 +199,7 @@ export const BlockRenderer: React.FC<BlockRendererProps> = ({
               key={block?.id ?? `text-${block?.order}-${(block as TextContentBlock)?.start_timestamp}`}
             >
               {showConnectorFromPrevious && (
-                <div
-                  className='bg-border pointer-events-none absolute top-0 left-[6.5px] h-2 w-px'
-                  style={{ zIndex: 0 }}
-                />
+                <div className='bg-border pointer-events-none absolute top-0 left-[6.5px] z-0 h-2 w-px' />
               )}
               <div
                 className={cn(
@@ -217,10 +214,7 @@ export const BlockRenderer: React.FC<BlockRendererProps> = ({
                 <MarkdownBlock payload={block?.payload} />
               </div>
               {showConnectorToNext && (
-                <div
-                  className='bg-border pointer-events-none absolute top-[24px] bottom-0 left-[6.5px] w-px'
-                  style={{ zIndex: 0 }}
-                />
+                <div className='bg-border pointer-events-none absolute top-[24px] bottom-0 left-[6.5px] z-0 w-px' />
               )}
             </div>
           );
