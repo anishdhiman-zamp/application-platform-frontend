@@ -64,7 +64,6 @@
     "ag-grid-community": "^34.0.0",
     "ag-grid-enterprise": "^34.0.0",
     "ag-grid-react": "^34.0.0",
-    "chart.js": "^4.5.1",
     "clsx": "^2.1.1",
     "date-fns": "2.30.0",
     "docx-preview": "^0.3.7",

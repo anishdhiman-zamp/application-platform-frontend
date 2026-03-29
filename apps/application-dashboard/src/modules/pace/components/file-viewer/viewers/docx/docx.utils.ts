@@ -1,7 +1,7 @@
 import { PUA_TO_UNICODE } from 'modules/pace/components/file-viewer/viewers/docx/docx.constants';
 
 function mapPuaChar(ch: string): string {
-  return PUA_TO_UNICODE[ch.charCodeAt(0)] ?? '\u2022';
+  return PUA_TO_UNICODE[ch.charCodeAt(0)] ?? ch;
 }
 
 export function replacePuaChars(text: string): string {

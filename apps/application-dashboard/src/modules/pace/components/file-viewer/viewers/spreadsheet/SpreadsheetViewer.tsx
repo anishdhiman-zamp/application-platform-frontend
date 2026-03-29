@@ -53,7 +53,6 @@ const SpreadsheetViewer = memo(({ content, mediaUrl, fileExtension, onError }: S
     const rowNumCol: ColumnDef<Record<string, string>> = {
       id: ROW_NUMBER_COLUMN_ID,
       header: '',
-      cell: ({ row }) => row.index + 1,
       size: 40,
       enableSorting: false,
       enableGlobalFilter: false,
@@ -292,7 +291,9 @@ const SpreadsheetViewer = memo(({ content, mediaUrl, fileExtension, onError }: S
                           )}
                           style={{ width: cell.column.getSize(), maxWidth: cell.column.getSize() }}
                         >
-                          {flexRender(cell.column.columnDef.cell, cell.getContext())}
+                          {cell.column.id === ROW_NUMBER_COLUMN_ID
+                            ? virtualRow.index + 1
+                            : flexRender(cell.column.columnDef.cell, cell.getContext())}
                         </td>
                       ))}
                     </tr>

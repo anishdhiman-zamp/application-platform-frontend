@@ -38,11 +38,11 @@ const DocxViewer = memo(({ mediaUrl, fileExtension, onError }: DocxViewerProps) 
   const isLegacyFormat = fileExtension.toLowerCase() === LEGACY_DOC_EXTENSION;
 
   const loadDocument = useCallback(
-    async (container: HTMLDivElement, styleContainer: HTMLDivElement, signal: { aborted: boolean }) => {
+    async (container: HTMLDivElement, styleContainer: HTMLDivElement, signal: AbortSignal) => {
       try {
         setIsLoading(true);
 
-        const response = await fetch(mediaUrl, { credentials: 'include' });
+        const response = await fetch(mediaUrl, { credentials: 'include', signal });
 
         if (!response.ok) {
           throw new Error(`Failed to fetch document: ${response.statusText}`);
@@ -78,6 +78,8 @@ const DocxViewer = memo(({ mediaUrl, fileExtension, onError }: DocxViewerProps) 
           setIsLoading(false);
         }
       } catch (err) {
+        if (err instanceof Error && err.name === 'AbortError') return;
+
         if (!signal.aborted) {
           const message = err instanceof Error ? err.message : 'Failed to load document';
 
@@ -102,12 +104,12 @@ const DocxViewer = memo(({ mediaUrl, fileExtension, onError }: DocxViewerProps) 
 
     if (!container || !styleContainer) return;
 
-    const signal = { aborted: false };
+    const controller = new AbortController();
 
-    loadDocument(container, styleContainer, signal);
+    loadDocument(container, styleContainer, controller.signal);
 
     return () => {
-      signal.aborted = true;
+      controller.abort();
     };
   }, [isLegacyFormat, loadDocument]);
 
