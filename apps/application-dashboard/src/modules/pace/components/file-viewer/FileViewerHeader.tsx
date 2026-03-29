@@ -1,8 +1,9 @@
 'use client';
 
 import { memo } from 'react';
-import { FileIcon, Input, Tabs, TabsList, TabsTrigger } from '@zamp-platform/ui';
+import { Button, FileIcon, Input, Tabs, TabsList, TabsTrigger } from '@zamp-platform/ui';
 import { cn } from '@zamp-platform/ui/utils';
+import { Download, Trash2 } from 'lucide-react';
 import TooltipV2 from '@/components/common/TooltipV2';
 import {
   HTML_VIEW_OPTIONS,
@@ -16,9 +17,9 @@ import type {
   ViewModeToggleProps,
 } from '@/modules/pace/components/file-viewer/file-viewer.types';
 import FileSaveStatus from '@/modules/pace/components/file-viewer/FileSaveStatus';
-import FileViewerHeaderMenu from '@/modules/pace/components/file-viewer/FileViewerHeaderMenu';
 import DeleteConfirmationDialog from '@/modules/pace/components/files/DeleteConfirmationDialog';
 import { getFileExtension } from '@/modules/pace/components/files/file-tree.utils';
+import { FILE_VIEWER_HEADER_ACTION_IDS } from '@/modules/pace/components/files/files.constants';
 import { useFileViewerHeaderActions } from '@/modules/pace/hooks/useFileViewerHeaderActions';
 import { useFileViewerHeaderRename } from '@/modules/pace/hooks/useFileViewerHeaderRename';
 import { SIDE_OPTIONS } from '@/types/commonTypes';
@@ -154,7 +155,7 @@ const FileViewerHeader = memo(
             </div>
           </div>
 
-          <div className='flex items-center gap-x-3'>
+          <div className='flex items-center gap-x-2'>
             <FileSaveStatus isSaving={isSaving} lastSavedAt={lastSavedAt} />
             {isMarkdown && onViewModeChange && (
               <ViewModeToggle value={viewMode} options={MARKDOWN_VIEW_OPTIONS} onChange={onViewModeChange} />
@@ -169,7 +170,28 @@ const FileViewerHeader = memo(
                 onChange={onSpreadsheetViewModeChange}
               />
             )}
-            <FileViewerHeaderMenu onActionClick={handleActionClick} disabled={isDeleting || isRenaming} />
+            <TooltipV2 tooltipBody='Download' side={SIDE_OPTIONS.BOTTOM} delayDuration={300} asChildTrigger>
+              <Button
+                variant='ghost'
+                size='icon'
+                onClick={() => handleActionClick(FILE_VIEWER_HEADER_ACTION_IDS.DOWNLOAD)}
+                disabled={isDeleting || isRenaming}
+                className='h-6 w-6 shrink-0'
+              >
+                <Download size={14} className='text-GRAY_700' />
+              </Button>
+            </TooltipV2>
+            <TooltipV2 tooltipBody='Delete' side={SIDE_OPTIONS.BOTTOM} delayDuration={300} asChildTrigger>
+              <Button
+                variant='ghost'
+                size='icon'
+                onClick={() => handleActionClick(FILE_VIEWER_HEADER_ACTION_IDS.DELETE)}
+                disabled={isDeleting || isRenaming}
+                className='text-destructive hover:text-destructive h-6 w-6 shrink-0'
+              >
+                <Trash2 size={14} />
+              </Button>
+            </TooltipV2>
           </div>
         </div>
       </>

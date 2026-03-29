@@ -6,13 +6,14 @@ import { ConnectedChatInput, ResourceType, ScopeType } from '@zamp-platform/chat
 import { cn } from '@zamp-platform/ui/utils';
 import { useDynamicTabs } from 'modules/pace/components/dynamic-tabs/useDynamicTabs';
 import ChatConversationContent from 'modules/pace/components/layout/chat-sidebar/ChatConversationContent';
-import { usePathname, useSearchParams } from 'next/navigation';
+import { usePathname } from 'next/navigation';
 import { APITags } from '@/constants/api.constants';
 import { ROUTES_PATH } from '@/constants/routeConfig';
 import { useAppDispatch, useAppSelector } from '@/hooks/toolkit';
 import ChatTopbar from '@/modules/pace/components/chat/ChatTopbar';
 import ModelSelector from '@/modules/pace/components/chat/ModelSelector';
 import { useChatDraftInput } from '@/modules/pace/hooks/useChatDraftInput';
+import { useSyncedUrlParam } from '@/modules/pace/hooks/useSyncedSearchParam';
 import { usePaceContext } from '@/modules/pace/pace.context';
 import { CHAT_SIDEBAR_STATE, TAB_TYPE } from '@/modules/pace/pace.types';
 import { baseApi } from '@/services/baseApi';
@@ -42,13 +43,13 @@ const ChatSidebarInner: FC<ChatSidebarInnerProps> = ({
   chatKey,
 }) => {
   const pathname = usePathname();
-  const searchParams = useSearchParams();
+  const fParam = useSyncedUrlParam('f');
   const dispatch = useAppDispatch();
   const { openTab } = useDynamicTabs({ type: TAB_TYPE.FILE });
   const { chatSidebarState, setChatSidebarState } = usePaceContext();
   const { inputValue, setInputValue } = useChatDraftInput({ conversationId });
 
-  const isOnChatRoute = pathname === ROUTES_PATH.CHAT && !searchParams?.has('f');
+  const isOnChatRoute = pathname === ROUTES_PATH.CHAT && !fParam;
 
   const organizationId = useAppSelector((state: RootState) => state.user.user?.orgs?.[0]?.organization_id) ?? '';
   const currentUserName = useAppSelector((state: RootState) => state.user.user?.user_name) ?? '';
@@ -96,19 +97,18 @@ const ChatSidebarInner: FC<ChatSidebarInnerProps> = ({
 
   return (
     <div className='bg-BG_WHITE relative mx-auto flex h-full w-full flex-1 flex-col'>
-      {!chatState?.showHomeView && (
-        <div className={cn('transition-[filter] duration-200', isTaskPopoverOpen && 'pointer-events-none blur-sm')}>
-          <ChatTopbar
-            title={chatTitle || 'Start a new chat'}
-            conversationId={conversationId}
-            organizationId={organizationId}
-            onStartNewChat={startNewChat}
-            onTitleChange={setChatTitle}
-            onSelectConversation={setConversationId}
-            onExpand={chatSidebarState !== CHAT_SIDEBAR_STATE.EXPANDED ? handleExpand : undefined}
-          />
-        </div>
-      )}
+      <div className={cn('transition-[filter] duration-200', isTaskPopoverOpen && 'pointer-events-none blur-sm')}>
+        <ChatTopbar
+          title={chatTitle || 'Start a new chat'}
+          conversationId={conversationId}
+          organizationId={organizationId}
+          onStartNewChat={startNewChat}
+          onTitleChange={setChatTitle}
+          onSelectConversation={setConversationId}
+          onExpand={chatSidebarState !== CHAT_SIDEBAR_STATE.EXPANDED ? handleExpand : undefined}
+        />
+      </div>
+
       <ChatConversationContent
         key={chatKey}
         conversationId={conversationId}
@@ -124,9 +124,8 @@ const ChatSidebarInner: FC<ChatSidebarInnerProps> = ({
         fileDropHandlerRef={fileDropHandlerRef}
         addFileReferenceRef={addFileReferenceRef}
         currentUserName={currentUserName}
-        username={username}
       />
-      {chatState && !chatState.showHomeView && (
+      {chatState && (
         <div className='bg-BG_WHITE sticky bottom-0 z-10 mx-auto w-full max-w-[700px] px-3 pb-3'>
           <ConnectedChatInput
             chat={chatState.chat}

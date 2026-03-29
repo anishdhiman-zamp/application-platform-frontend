@@ -1,9 +1,11 @@
 'use client';
 
-import { type FC, useCallback, useState } from 'react';
+import { type FC, useCallback, useMemo, useState } from 'react';
 import { cn } from '@zamp-platform/ui/utils';
-import { Loader, MessagesSquare } from 'lucide-react';
+import { formatTimestampToUTC } from '@zamp-platform/utils/date';
+import { Check } from 'lucide-react';
 import ConversationActions from '@/modules/pace/components/chat/ConversationActions';
+import { formatRelativeTime } from '@/modules/pace/components/files/file-tree.utils';
 import type { FeedbackItemType } from '@/types/api/feedbacks.types';
 
 const INTERACTIVE_SELECTORS = [
@@ -17,6 +19,7 @@ interface ChatHistoryItemProps {
   conversation: FeedbackItemType;
   onSelect: (id: string | null, title?: string) => void;
   isStreaming?: boolean;
+  isSelected?: boolean;
   organizationId: string;
   onDelete?: (id: string) => void;
   onDeleteFailure?: (conversation: FeedbackItemType) => void;
@@ -27,12 +30,21 @@ const ChatHistoryItem: FC<ChatHistoryItemProps> = ({
   conversation,
   onSelect,
   isStreaming,
+  isSelected,
   organizationId,
   onDelete,
   onDeleteFailure,
   onRename,
 }) => {
   const [isActionsOpen, setIsActionsOpen] = useState(false);
+
+  const relativeTime = useMemo(() => {
+    const timestamp = conversation?.updated_at || conversation?.created_at;
+
+    if (!timestamp) return null;
+
+    return formatRelativeTime(new Date(formatTimestampToUTC(timestamp)).getTime());
+  }, [conversation?.updated_at, conversation?.created_at]);
 
   const handleClick = useCallback(
     (e: React.MouseEvent) => {
@@ -69,16 +81,26 @@ const ChatHistoryItem: FC<ChatHistoryItemProps> = ({
     <div
       className={cn(
         'group hover:bg-accent relative flex cursor-pointer items-center rounded-lg',
+        isSelected && 'bg-GRAY_200',
         isActionsOpen && 'bg-accent',
       )}
       onClick={handleClick}
     >
       <div className='flex h-auto w-full items-center justify-start gap-2.5 px-3 py-2.5 pr-9'>
-        <MessagesSquare size={16} className='text-GRAY_700 shrink-0' />
-        <p className='f-13-500 text-GRAY_1000 line-clamp-1 text-left first-letter:uppercase'>
+        <span className='flex h-4 w-4 shrink-0 items-center justify-center'>
+          {isSelected ? (
+            <Check size={14} className='text-GRAY_1000' />
+          ) : isStreaming ? (
+            <span className='relative flex h-2 w-2'>
+              <span className='bg-BLUE_500 absolute inline-flex h-full w-full animate-ping rounded-full opacity-75' />
+              <span className='relative inline-flex h-2 w-2 rounded-full bg-blue-500' />
+            </span>
+          ) : null}
+        </span>
+        <p className='f-13-500 text-GRAY_1000 min-w-0 flex-1 truncate text-left first-letter:uppercase'>
           {conversation?.title || 'Untitled conversation'}
         </p>
-        {isStreaming && <Loader size={14} className='text-GRAY_700 ml-auto shrink-0 animate-spin' />}
+        {relativeTime && <span className='f-12-400 text-GRAY_600 shrink-0 whitespace-nowrap'>{relativeTime}</span>}
       </div>
 
       <div className='absolute right-1'>

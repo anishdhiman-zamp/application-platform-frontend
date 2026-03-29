@@ -1,14 +1,12 @@
 'use client';
 
-import { useEffect } from 'react';
+import { useCallback, useEffect, useRef } from 'react';
 import type { TaskStatus } from '@zamp-platform/chat';
 import { TaskStatusIcon } from '@zamp-platform/chat';
-import { useInfiniteScroll } from '@zamp-platform/tanstack-table';
 import { AccordionContent, AccordionItem, AccordionTrigger } from '@zamp-platform/ui';
 import { Play } from 'lucide-react';
 import { STATUS_LABELS } from 'modules/pace/components/tasks/task-listing.constants';
 import TaskRow from 'modules/pace/components/tasks/TaskRow';
-import TaskRowSkeleton from 'modules/pace/components/tasks/TaskRowSkeleton';
 import { useTasksByStatus } from 'modules/pace/components/tasks/useTasksByStatus';
 
 interface TaskAccordionSectionProps {
@@ -23,27 +21,41 @@ const PlayIcon = ({ className }: { className?: string }) => (
 );
 
 const TaskAccordionSection = ({ status, count, search, scrollContainerRef }: TaskAccordionSectionProps) => {
-  const { tasks, totalCount, fetchNextPage, isFetching } = useTasksByStatus({ status, search });
+  const sentinelNodeRef = useRef<HTMLDivElement | null>(null);
+  const isFetchingRef = useRef(false);
 
-  const { fetchMoreOnBottomReached } = useInfiniteScroll({
-    fetchNextPage,
-    isFetching,
-    totalFetched: tasks.length,
-    totalRowCount: totalCount,
-    hasDataSource: true,
-    threshold: 300,
-  });
+  const { tasks, totalCount, fetchNextPage, isFetching, hasMore } = useTasksByStatus({ status, search });
+
+  isFetchingRef.current = isFetching;
+
+  const handleIntersect = useCallback(
+    (entries: IntersectionObserverEntry[]) => {
+      if (entries[0]?.isIntersecting && !isFetchingRef.current && hasMore) {
+        fetchNextPage();
+      }
+    },
+    [fetchNextPage, hasMore],
+  );
+
+  const sentinelRef = useCallback((node: HTMLDivElement | null) => {
+    sentinelNodeRef.current = node;
+  }, []);
 
   useEffect(() => {
-    if (!scrollContainerRef?.current) return;
+    const sentinel = sentinelNodeRef.current;
+    const root = scrollContainerRef?.current;
 
-    const el = scrollContainerRef.current;
-    const onScroll = () => fetchMoreOnBottomReached(el);
+    if (!sentinel) return;
 
-    el.addEventListener('scroll', onScroll, { passive: true });
+    const observer = new IntersectionObserver(handleIntersect, {
+      root: root ?? null,
+      rootMargin: '0px 0px 300px 0px',
+    });
 
-    return () => el.removeEventListener('scroll', onScroll);
-  }, [scrollContainerRef, fetchMoreOnBottomReached]);
+    observer.observe(sentinel);
+
+    return () => observer.disconnect();
+  }, [scrollContainerRef, handleIntersect]);
 
   if (search && !isFetching && totalCount === 0) return null;
 
@@ -61,14 +73,14 @@ const TaskAccordionSection = ({ status, count, search, scrollContainerRef }: Tas
           <TaskStatusIcon status={status} />
           <span className='f-13-500 text-GRAY_950 truncate'>{STATUS_LABELS[status]}</span>
         </div>
-        <span className='f-13-500 text-GRAY_600 truncate'>{search ? totalCount : count}</span>
+        <span className='f-13-500 text-GRAY_600 truncate'>{count}</span>
       </AccordionTrigger>
       <AccordionContent className='p-0' disableAnimation>
         <div>
           {tasks.map((task) => (
             <TaskRow key={task.id} task={task} />
           ))}
-          {isFetching && <TaskRowSkeleton />}
+          {hasMore && <div ref={sentinelRef} className='h-px' />}
         </div>
       </AccordionContent>
     </AccordionItem>

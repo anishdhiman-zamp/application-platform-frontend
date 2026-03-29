@@ -7,13 +7,11 @@ export const TAB_TYPE_CONFIG: Record<DynamicTabType, DynamicTabRouteConfig> = {
     kind: ROUTE_KIND.QUERY,
     basePath: ROUTES_PATH.CHAT,
     paramName: 'f',
-    fallbackPath: ROUTES_PATH.CHAT,
   },
   [TAB_TYPE.TASK]: {
     kind: ROUTE_KIND.DYNAMIC,
     basePath: `${ROUTES_PATH.CHAT}/task`,
     buildPath: (id: string) => `${ROUTES_PATH.CHAT}/task/${encodeURIComponent(id)}`,
-    fallbackPath: ROUTES_PATH.CHAT,
   },
 };
 
@@ -36,37 +34,15 @@ export const buildTabRoute = (id: string, type?: DynamicTabType): string => {
   return preserveSidebarParam(path);
 };
 
-export const getTabFallbackPath = (type?: DynamicTabType): string => {
-  const config = getTabTypeConfig(type);
-
-  if (config.kind === ROUTE_KIND.DYNAMIC) {
-    return config.fallbackPath;
-  }
-
-  return preserveSidebarParam(config.fallbackPath);
-};
-
-export const getActiveTabIdFromUrl = (pathname: string, search: string, type: DynamicTabType): string | null => {
-  const config = TAB_TYPE_CONFIG[type];
-
-  if (config.kind === ROUTE_KIND.QUERY) {
-    return new URLSearchParams(search).get(config.paramName) ?? null;
-  }
-
-  const baseSegments = config.basePath.split('/').filter(Boolean);
-  const pathSegments = pathname.split('/').filter(Boolean);
-
-  if (pathSegments.length > baseSegments.length) {
-    return decodeURIComponent(pathSegments[baseSegments.length]);
-  }
-
-  return null;
-};
-
-export const getActiveTabIdFromAllConfigsUrl = (pathname: string, search: string): string | null => {
+/**
+ * Extracts the active tab ID from the URL. When `type` is provided, only checks
+ * the config for that type. Otherwise checks all tab type configs.
+ */
+export const getActiveTabIdFromUrl = (pathname: string, search: string, type?: DynamicTabType): string | null => {
+  const configs = type ? [[type, TAB_TYPE_CONFIG[type]] as const] : Object.entries(TAB_TYPE_CONFIG);
   const params = new URLSearchParams(search);
 
-  for (const [, config] of Object.entries(TAB_TYPE_CONFIG)) {
+  for (const [, config] of configs) {
     if (config.kind === ROUTE_KIND.QUERY) {
       if (pathname === config.basePath || pathname.startsWith(config.basePath + '/')) {
         const paramValue = params.get(config.paramName);
@@ -86,16 +62,6 @@ export const getActiveTabIdFromAllConfigsUrl = (pathname: string, search: string
   }
 
   return null;
-};
-
-export const isOnBasePath = (pathname: string, type: DynamicTabType): boolean => {
-  const config = getTabTypeConfig(type);
-
-  if (config.kind === ROUTE_KIND.QUERY) {
-    return pathname === config.basePath;
-  }
-
-  return pathname.startsWith(`${config.basePath}/`);
 };
 
 export const isSameBasePath = (targetPath: string): boolean => {
@@ -118,9 +84,6 @@ export const isSameBasePath = (targetPath: string): boolean => {
   return false;
 };
 
-/**
- * Checks if the current path is on any of the tab base paths.
- */
 export const isOnAnyTabBasePath = (pathname: string): boolean => {
   for (const [, config] of Object.entries(TAB_TYPE_CONFIG)) {
     if (config.kind === ROUTE_KIND.QUERY && pathname === config.basePath) return true;
