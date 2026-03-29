@@ -14,6 +14,7 @@ const FilesPanelResizeHandle = () => {
   const {
     filesPanelWidth,
     setFilesPanelWidth,
+    persistFilesPanelWidth,
     setIsFilesPanelResizing,
     cancelFilesPanelClose,
     sidebarWidth,
@@ -63,10 +64,20 @@ const FilesPanelResizeHandle = () => {
     [setFilesPanelWidth],
   );
 
-  const handleMouseUp = useCallback(() => {
-    setIsDragging(false);
-    setIsFilesPanelResizing(false);
-  }, [setIsFilesPanelResizing]);
+  const handleMouseUp = useCallback(
+    (e: MouseEvent) => {
+      const delta = e.clientX - dragStartXRef.current;
+      const finalWidth = Math.min(
+        effectiveMaxWidthRef.current,
+        Math.max(FILES_PANEL_MIN_WIDTH, dragStartWidthRef.current - delta),
+      );
+
+      persistFilesPanelWidth(finalWidth);
+      setIsDragging(false);
+      setIsFilesPanelResizing(false);
+    },
+    [persistFilesPanelWidth, setIsFilesPanelResizing],
+  );
 
   useEffect(() => {
     if (!isDragging) return;

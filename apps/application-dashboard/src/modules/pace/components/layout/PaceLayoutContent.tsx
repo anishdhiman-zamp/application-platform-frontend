@@ -20,8 +20,16 @@ interface PaceLayoutContentProps {
 
 const PaceLayoutContentInner: FC<PaceLayoutContentProps> = ({ children }) => {
   const { uploadState, cancelUpload } = useFileUploadContext();
-  const { chatSidebarState, filesPanelOpen, filesPanelPinned, filesPanelWidth, isFilesPanelResizing } =
-    usePaceContext();
+  const {
+    chatSidebarState,
+    filesPanelOpen,
+    filesPanelPinned,
+    filesPanelWidth,
+    isFilesPanelResizing,
+    isSidebarResizing,
+  } = usePaceContext();
+
+  const isResizing = isFilesPanelResizing || isSidebarResizing;
 
   const isExpanded = chatSidebarState === CHAT_SIDEBAR_STATE.EXPANDED;
   const isCollapsed = chatSidebarState === CHAT_SIDEBAR_STATE.COLLAPSED;
@@ -32,6 +40,7 @@ const PaceLayoutContentInner: FC<PaceLayoutContentProps> = ({ children }) => {
 
   return (
     <div className='bg-BG_GRAY_2 relative flex h-full w-full flex-col overflow-hidden overscroll-none'>
+      {isResizing && <div className='absolute inset-0 z-50 cursor-col-resize' />}
       <PaceNavbar />
       <div className='flex min-h-0 flex-1 overflow-hidden px-2'>
         <ChatSidebar />
