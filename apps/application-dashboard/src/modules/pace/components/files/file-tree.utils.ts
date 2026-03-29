@@ -131,30 +131,32 @@ export function formatDate(timestamp: number): string {
 }
 
 /**
- * Formats timestamp to compact relative time string (e.g., "just now", "5m ago", "2h ago")
+ * Formats timestamp to compact relative time string (e.g., "just now", "5m", "2h")
+ * When showAgo is true, appends " ago" suffix (e.g., "5m ago", "2h ago")
  */
-export function formatRelativeTime(timestamp: number): string {
+export function formatRelativeTime(timestamp: number, showAgo = false): string {
   const diffMs = Date.now() - timestamp;
   const minutes = Math.floor(diffMs / 60_000);
+  const suffix = showAgo ? ' ago' : '';
 
   if (minutes < 1) return 'just now';
-  if (minutes < 60) return `${minutes}m`;
+  if (minutes < 60) return `${minutes}m${suffix}`;
 
   const hours = Math.floor(minutes / 60);
 
-  if (hours < 24) return `${hours}h`;
+  if (hours < 24) return `${hours}h${suffix}`;
 
   const days = Math.floor(hours / 24);
 
-  if (days < 30) return `${days}d`;
+  if (days < 30) return `${days}d${suffix}`;
 
   const months = Math.floor(days / 30);
 
-  if (months < 12) return `${months}mo`;
+  if (months < 12) return `${months}mo${suffix}`;
 
   const years = Math.floor(days / 365);
 
-  return `${years}y`;
+  return `${years}y${suffix}`;
 }
 
 /**

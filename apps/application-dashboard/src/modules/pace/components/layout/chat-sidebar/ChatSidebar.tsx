@@ -14,6 +14,7 @@ import { usePaceContext } from '@/modules/pace/pace.context';
 const ChatSidebar = () => {
   const {
     registerStartNewChat,
+    registerSelectConversation,
     chatSidebarState,
     prevChatSidebarState,
     filesPanelOpen,
@@ -34,8 +35,8 @@ const ChatSidebar = () => {
   const isPinnedFilesPanel = filesPanelOpen && filesPanelPinned;
   const expandedWidth = isPinnedFilesPanel ? `calc(100% - ${filesPanelWidth + 8}px)` : '100%';
   const targetWidth = isCollapsed ? 0 : isExpanded ? expandedWidth : sidebarWidth;
-  const innerWidth = isExpanded ? '100%' : sidebarWidth;
   const direction = getSidebarTransitionDirection(prevChatSidebarState, chatSidebarState);
+  const innerWidth = direction === 'sidebar-to-collapsed' ? sidebarWidth : '100%';
 
   const transitions = useMemo(() => {
     if (!isHydrated) return { width: NO_ANIMATION, opacity: NO_ANIMATION };
@@ -47,6 +48,10 @@ const ChatSidebar = () => {
   useEffect(() => {
     registerStartNewChat(startNewChat);
   }, [registerStartNewChat, startNewChat]);
+
+  useEffect(() => {
+    registerSelectConversation(setConversationId);
+  }, [registerSelectConversation, setConversationId]);
 
   useEffect(() => {
     const raf = requestAnimationFrame(() => {

@@ -11,7 +11,7 @@ import {
 import { preserveSidebarParam } from 'modules/pace/pace.utils';
 import { useRouter } from 'next/navigation';
 import { ROUTES_PATH } from '@/constants/routeConfig';
-import { useSyncedPathname, useSyncedUrlParam } from '@/modules/pace/hooks/useSyncedSearchParam';
+import { useSyncedPathname, useSyncedSearch } from '@/modules/pace/hooks/useSyncedSearchParam';
 import { usePaceContext } from '@/modules/pace/pace.context';
 import {
   CHAT_SIDEBAR_STATE,
@@ -57,7 +57,7 @@ export const useDynamicTabs = (config: UseDynamicTabsConfig = {}): UseDynamicTab
 
   const router = useRouter();
   const syncedPathname = useSyncedPathname();
-  const fParam = useSyncedUrlParam('f');
+  const syncedSearch = useSyncedSearch();
 
   const {
     dynamicTabs: allTabs,
@@ -90,8 +90,8 @@ export const useDynamicTabs = (config: UseDynamicTabsConfig = {}): UseDynamicTab
   tabMapsRef.current = tabMaps;
 
   const activeTabId = useMemo(
-    () => getActiveTabIdFromUrl(syncedPathname, fParam ? `?f=${fParam}` : ''),
-    [syncedPathname, fParam],
+    () => getActiveTabIdFromUrl(syncedPathname, syncedSearch),
+    [syncedPathname, syncedSearch],
   );
 
   const activeTab = useMemo(() => {
