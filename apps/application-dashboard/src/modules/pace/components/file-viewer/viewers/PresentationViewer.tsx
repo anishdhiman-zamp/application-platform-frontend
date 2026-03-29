@@ -9,61 +9,23 @@ import UnsupportedPptFormat from 'modules/pace/components/file-viewer/viewers/co
 import ImageLoader from '@/components/common/loader/ImageLoader';
 import { ZAMP_LOGO_LOADER_SVG } from '@/constants/icons';
 
-// Must outlast the longest sidebar animation (spring ~400ms) to avoid firing mid-transition.
-const RESIZE_SETTLE_MS = 500;
-// Minimum pixel change that warrants a slide re-render; filters out sub-pixel jitter.
-const RESIZE_WIDTH_THRESHOLD_PX = 2;
-
 interface PresentationViewerProps {
   mediaUrl: string;
   fileExtension: string;
   onError?: (message?: string) => void;
 }
 
-type ViewerInternals = Record<string, unknown> & {
-  resizeObserver?: ResizeObserver;
-  windowResizeHandler?: EventListener;
-  lastMeasuredContainerWidth?: number;
-  handleContainerResize?: () => void;
-};
-
-/**
- * Disconnect the library's built-in ResizeObserver so it never triggers a
- * destructive re-render (innerHTML = "") on every frame during continuous
- * resize (e.g. sidebar animation). We replace it with our own debounced
- * observer that triggers a single re-render after resizing settles.
- */
-const disableBuiltInResize = (viewer: PptxViewer) => {
-  const viewerInternals = viewer as unknown as ViewerInternals;
-
-  if (viewerInternals.resizeObserver instanceof ResizeObserver) {
-    viewerInternals.resizeObserver.disconnect();
-    viewerInternals.resizeObserver = undefined;
-  }
-
-  if (typeof viewerInternals.windowResizeHandler === 'function') {
-    window.removeEventListener('resize', viewerInternals.windowResizeHandler);
-    viewerInternals.windowResizeHandler = undefined;
-  }
-};
-
-const triggerResize = (viewer: PptxViewer) => {
-  const viewerInternals = viewer as unknown as ViewerInternals;
-
-  viewerInternals.handleContainerResize?.();
-};
-
 const PresentationViewer = memo(({ mediaUrl, fileExtension, onError }: PresentationViewerProps) => {
-  const containerRef = useRef<HTMLDivElement>(null);
+  const outerRef = useRef<HTMLDivElement>(null);
+  const innerRef = useRef<HTMLDivElement>(null);
   const viewerRef = useRef<PptxViewer | null>(null);
-  const resizeTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
-  const lastWidthRef = useRef<number>(0);
+  const renderWidthRef = useRef<number>(0);
 
   const [isLoading, setIsLoading] = useState(true);
   const isLegacyFormat = fileExtension.toLowerCase() === LEGACY_PPT_EXTENSION;
 
   const loadPresentation = useCallback(
-    async (container: HTMLDivElement, signal: AbortSignal) => {
+    async (outer: HTMLDivElement, inner: HTMLDivElement, signal: AbortSignal) => {
       try {
         setIsLoading(true);
 
@@ -84,9 +46,16 @@ const PresentationViewer = memo(({ mediaUrl, fileExtension, onError }: Presentat
 
         if (signal.aborted) return;
 
-        const viewer = await PptxViewer.open(arrayBuffer, container, {
+        // Fix the render width so the library never re-renders on container resize.
+        const fixedWidth = outer.clientWidth || 960;
+
+        renderWidthRef.current = fixedWidth;
+        inner.style.width = `${fixedWidth}px`;
+
+        const viewer = await PptxViewer.open(arrayBuffer, inner, {
+          width: fixedWidth,
           fitMode: 'contain',
-          scrollContainer: container,
+          scrollContainer: outer,
           renderMode: 'list',
           listOptions: {
             windowed: true,
@@ -101,7 +70,6 @@ const PresentationViewer = memo(({ mediaUrl, fileExtension, onError }: Presentat
           },
         });
 
-        disableBuiltInResize(viewer);
         viewerRef.current = viewer;
         setIsLoading(false);
       } catch (err) {
@@ -123,13 +91,14 @@ const PresentationViewer = memo(({ mediaUrl, fileExtension, onError }: Presentat
       return;
     }
 
-    const container = containerRef.current;
+    const outer = outerRef.current;
+    const inner = innerRef.current;
 
-    if (!container) return;
+    if (!outer || !inner) return;
 
     const controller = new AbortController();
 
-    loadPresentation(container, controller.signal);
+    loadPresentation(outer, inner, controller.signal);
 
     return () => {
       controller.abort();
@@ -138,41 +107,36 @@ const PresentationViewer = memo(({ mediaUrl, fileExtension, onError }: Presentat
     };
   }, [isLegacyFormat, loadPresentation]);
 
-  // Debounced resize: re-render slides only once after resizing settles.
+  // Scale the fixed-width inner div to fit the container on resize.
   useEffect(() => {
     if (isLoading || isLegacyFormat) return;
 
-    const container = containerRef.current;
+    const outer = outerRef.current;
+    const inner = innerRef.current;
 
-    if (!container) return;
+    if (!outer || !inner) return;
 
-    lastWidthRef.current = container.offsetWidth;
+    inner.style.transformOrigin = 'top left';
 
-    const observer = new ResizeObserver(() => {
-      const newWidth = container.offsetWidth;
+    const applyScale = () => {
+      const containerWidth = outer.clientWidth;
 
-      // Skip sub-pixel and height-only changes — they don't need a slide re-render.
-      if (Math.abs(newWidth - lastWidthRef.current) < RESIZE_WIDTH_THRESHOLD_PX) return;
+      if (!containerWidth || !renderWidthRef.current) return;
 
-      if (resizeTimerRef.current) clearTimeout(resizeTimerRef.current);
-      resizeTimerRef.current = setTimeout(() => {
-        const settledWidth = container.offsetWidth;
+      const scale = containerWidth / renderWidthRef.current;
 
-        // Re-check after debounce — skip if width ended up the same (e.g. sidebar snapped back).
-        if (Math.abs(settledWidth - lastWidthRef.current) < RESIZE_WIDTH_THRESHOLD_PX) return;
-
-        lastWidthRef.current = settledWidth;
-
-        if (viewerRef.current) triggerResize(viewerRef.current);
-      }, RESIZE_SETTLE_MS);
-    });
-
-    observer.observe(container);
-
-    return () => {
-      observer.disconnect();
-      if (resizeTimerRef.current) clearTimeout(resizeTimerRef.current);
+      inner.style.transform = `scale(${scale})`;
+      // Reset before reading scrollHeight so the browser computes from content, not the previous explicit height.
+      inner.style.height = '';
+      // Keep scroll height in sync with the scaled content.
+      inner.style.height = `${inner.scrollHeight * scale}px`;
     };
+
+    const observer = new ResizeObserver(applyScale);
+
+    observer.observe(outer);
+
+    return () => observer.disconnect();
   }, [isLoading, isLegacyFormat]);
 
   if (isLegacyFormat) {
@@ -189,7 +153,9 @@ const PresentationViewer = memo(({ mediaUrl, fileExtension, onError }: Presentat
       >
         <ImageLoader imageSrc={ZAMP_LOGO_LOADER_SVG} width={140} height={140} />
       </div>
-      <div ref={containerRef} className='h-full w-full overflow-auto [scrollbar-width:none]' />
+      <div ref={outerRef} className='h-full w-full overflow-auto [scrollbar-width:none]'>
+        <div ref={innerRef} />
+      </div>
     </div>
   );
 });
