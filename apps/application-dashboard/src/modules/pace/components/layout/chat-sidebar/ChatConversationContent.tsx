@@ -1,9 +1,9 @@
 'use client';
 
-import { FC, useCallback, useEffect, useMemo, useRef, useState } from 'react';
+import { FC, useEffect, useMemo, useRef, useState } from 'react';
 import {
   ChatActionsProvider,
-  ConnectedChatInput,
+  createConversationPayload,
   DropOverlay,
   MessageContainer,
   ResourceType,
@@ -14,19 +14,14 @@ import {
 } from '@zamp-platform/chat';
 import { ScrollContainer } from '@zamp-platform/ui';
 import { cn } from '@zamp-platform/ui/utils';
-import ChatHistory from 'modules/pace/components/chat/ChatHistory';
-import ChatHome from 'modules/pace/components/chat/ChatHome';
 import type { ChatState } from 'modules/pace/components/layout/chat-sidebar/ChatSidebarInner';
 import NewPaceIcons from '@/assets/Icons/NewPaceIcons';
 import CommonWrapper from '@/components/commonWrapper';
 import { SkeletonTypes } from '@/components/commonWrapper/commonWrapper.types';
-import { APITags } from '@/constants/api.constants';
-import { useAppDispatch } from '@/hooks/toolkit';
 import NewPaceAvatar from '@/modules/chatbot/NewPaceAvatar';
 import TaskStatusCounts from '@/modules/pace/components/chat/TaskStatusCounts';
 import ChatMessagesSkeleton from '@/modules/pace/components/loaders/ChatMessagesSkeleton';
 import { usePaceContext } from '@/modules/pace/pace.context';
-import { baseApi } from '@/services/baseApi';
 
 export interface ChatConversationContentProps {
   conversationId: string | null;
@@ -42,7 +37,6 @@ export interface ChatConversationContentProps {
   fileDropHandlerRef: React.RefObject<((files: FileList) => void) | null>;
   addFileReferenceRef: React.RefObject<((ref: { path: string; name: string }) => void) | null>;
   currentUserName: string;
-  username: string;
 }
 
 const ChatConversationContent: FC<ChatConversationContentProps> = ({
@@ -59,10 +53,10 @@ const ChatConversationContent: FC<ChatConversationContentProps> = ({
   fileDropHandlerRef,
   addFileReferenceRef,
   currentUserName,
-  username,
 }) => {
-  const { pendingFileReference, clearPendingFileReference } = usePaceContext();
-  const dispatch = useAppDispatch();
+  const pendingPayloadConsumedRef = useRef(false);
+  const { pendingFileReference, clearPendingFileReference, pendingConversationPayload, setPendingConversationPayload } =
+    usePaceContext();
 
   const taskStatusContainerRef = useRef<HTMLDivElement>(null);
 
@@ -84,6 +78,7 @@ const ChatConversationContent: FC<ChatConversationContentProps> = ({
       }
     },
   });
+  const chatRef = useRef(chat);
 
   const hasMessages = useMemo(() => chat.messages.length > 0, [chat.messages]);
   const isAnalysing = useMemo(() => {
@@ -94,10 +89,6 @@ const ChatConversationContent: FC<ChatConversationContentProps> = ({
   const lastMessageSenderType = useMemo(() => chat.messages[chat.messages.length - 1]?.sender_type, [chat.messages]);
   const isLoadingConversation =
     !hasMessages || Boolean(conversationId && chat.isLoadingConversationHistory && !hasMessages);
-
-  const handleConversationCreated = useCallback(() => {
-    dispatch(baseApi.util.invalidateTags([APITags.GET_CONVERSATION_HISTORY]));
-  }, [dispatch]);
 
   const { isDragOver, dropZoneProps } = useFileDragDrop({
     onFileDrop: (files) => fileDropHandlerRef.current?.(files),
@@ -121,39 +112,37 @@ const ChatConversationContent: FC<ChatConversationContentProps> = ({
     onChatStateChange({ chat, isInConversation, showHomeView });
   }, [chat, isInConversation, showHomeView, onChatStateChange]);
 
-  if (showHomeView) {
-    return (
-      <ChatActionsProvider onFileOpen={onFileOpen} onTaskOpen={onTaskOpen}>
-        <div
-          className='relative mx-auto flex min-h-0 w-full max-w-[700px] flex-1 flex-col items-center justify-start overflow-hidden pt-[15vh]'
-          {...dropZoneProps}
-        >
-          <DropOverlay isVisible={isDragOver} />
-          <ChatHome />
-          <div className='mt-7 w-full shrink-0 px-3'>
-            <ConnectedChatInput
-              chat={chat}
-              resourceType={ResourceType.ORGANIZATION}
-              resourceId={organizationId}
-              autoFocus
-              scope={ScopeType.ORGANIZATION}
-              scopeId={organizationId}
-              username={username}
-              currentUserName={currentUserName}
-              placeholder="Do your life's best work with Pace"
-              conversationId={chat.conversationId ?? ''}
-              onConversationCreated={handleConversationCreated}
-              minTextareaHeight={18}
-              maxTextareaHeight={200}
-              className='[box-shadow:0_0_16px_0_rgba(0,0,0,0.06)]'
-              fileDropHandlerRef={fileDropHandlerRef}
-            />
-          </div>
-          <ChatHistory onSelectConversation={setConversationId} />
-        </div>
-      </ChatActionsProvider>
-    );
-  }
+  useEffect(() => {
+    if (pendingConversationPayload && !pendingPayloadConsumedRef.current && !conversationId) {
+      pendingPayloadConsumedRef.current = true;
+      const payload = createConversationPayload(
+        organizationId,
+        ResourceType.ORGANIZATION,
+        organizationId,
+        pendingConversationPayload.message,
+        currentUserName,
+        pendingConversationPayload.fileReferences,
+        ScopeType.ORGANIZATION,
+        undefined,
+        undefined,
+        pendingConversationPayload.llmModel,
+      );
+
+      setPendingConversationPayload(null);
+      chat.createConversationV2(payload);
+    }
+  }, [
+    pendingConversationPayload,
+    conversationId,
+    organizationId,
+    currentUserName,
+    chat,
+    setPendingConversationPayload,
+  ]);
+
+  useEffect(() => {
+    chatRef.current = chat;
+  });
 
   return (
     <ChatActionsProvider onFileOpen={onFileOpen} onTaskOpen={onTaskOpen}>
@@ -204,10 +193,7 @@ const ChatConversationContent: FC<ChatConversationContentProps> = ({
           )}
         </ScrollContainer>
       </div>
-      <div
-        ref={taskStatusContainerRef}
-        className='bg-BG_WHITE sticky bottom-0 z-10 mx-auto w-full max-w-[700px] px-3 pb-3'
-      >
+      <div ref={taskStatusContainerRef} className='bg-BG_WHITE sticky bottom-0 z-10 mx-auto w-full max-w-[700px] px-3'>
         <TaskStatusCounts
           messages={chat.messages}
           streamingState={chat.streamingState}

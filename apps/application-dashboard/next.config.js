@@ -7,9 +7,11 @@ const isDev = process.env.NODE_ENV === 'development';
 /** @type {import('next').NextConfig} */
 const nextConfig = {
   reactStrictMode: true,
+  allowedDevOrigins: ['*.coder.dev-mum.internal.zamp.dev', '*.coder.app'],
   reactCompiler: true,
   output: 'standalone',
   assetPrefix: process.env.NEXT_PUBLIC_ASSET_PREFIX || '',
+  allowedDevOrigins: ['*.internal.zamp.dev', '*.coder.dev-mum.internal.zamp.dev', '*.coder.app'],
   // Skip type checking ONLY in CI (they run separately there)
   // Enable them for local development for immediate feedback
   typescript: {
@@ -42,11 +44,25 @@ const nextConfig = {
       'date-fns',
       '@tiptap/core',
       '@tiptap/react',
+      '@tiptap/starter-kit',
       '@dnd-kit/core',
       '@dnd-kit/sortable',
       'ag-grid-react',
+      'ag-grid-community',
+      'ag-grid-enterprise',
       'ag-charts-react',
+      'ag-charts-community',
+      'ag-charts-enterprise',
       'motion',
+      'framer-motion',
+      '@milkdown/crepe',
+      '@milkdown/kit',
+      '@milkdown/react',
+      'monaco-editor',
+      '@monaco-editor/react',
+      'react-markdown',
+      'xlsx',
+      'zod',
     ],
   },
   env: {

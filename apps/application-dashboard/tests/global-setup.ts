@@ -134,7 +134,7 @@ async function globalSetup(config: FullConfig) {
     if (
       currentURL.includes(
         isSeleniumLocalBrowser && !isLocalhost
-          ? 'coder-live.zamp.dev'
+          ? 'coder.dev-mum.internal.zamp.dev'
           : isSeleniumLocalBrowser
             ? 'app-dev.zamp.ai'
             : 'app-stg.zamp.ai',

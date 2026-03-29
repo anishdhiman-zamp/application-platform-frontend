@@ -68,5 +68,5 @@ export enum DEVICE_TYPES {
 
 export const enum LOCAL_DEVELOPMENT_URLS {
   LOCAL = 'local.zamp.ai',
-  CODER = 'coder-live.zamp.dev',
+  CODER = 'coder.dev-mum.internal.zamp.dev',
 }

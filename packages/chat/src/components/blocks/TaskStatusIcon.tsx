@@ -73,7 +73,7 @@ const TaskStatusIcon = ({ status }: TaskStatusIconProps) => {
           stroke={stroke}
         />
       ) : (
-        <rect x='1' y='1' width='8' height='8' rx='2' fill={fill} stroke={stroke} strokeWidth='1.5' />
+        <rect x='1' y='1' width='6' height='6' rx='1' fill={fill} stroke={stroke} strokeWidth='1.1' />
       )}
     </svg>
   );

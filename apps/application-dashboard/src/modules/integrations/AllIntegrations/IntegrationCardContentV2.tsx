@@ -5,9 +5,15 @@ interface IntegrationCardContentProps {
   logo: string;
   displayName: string;
   description: string;
+  showArrow?: boolean;
 }
 
-const IntegrationCardContentV2: FC<IntegrationCardContentProps> = ({ logo, displayName, description }) => {
+const IntegrationCardContentV2: FC<IntegrationCardContentProps> = ({
+  logo,
+  displayName,
+  description,
+  showArrow = true,
+}) => {
   const [imgError, setImgError] = useState(false);
 
   return (
@@ -25,10 +31,12 @@ const IntegrationCardContentV2: FC<IntegrationCardContentProps> = ({ logo, displ
           </div>
           <span className='f-14-550 text-GRAY_1000'>{displayName}</span>
         </div>
-        <ArrowRight
-          size={14}
-          className='text-GRAY_700 shrink-0 -translate-x-1 opacity-0 transition-all duration-200 ease-out group-hover:translate-x-0 group-hover:opacity-100'
-        />
+        {showArrow && (
+          <ArrowRight
+            size={14}
+            className='text-GRAY_700 shrink-0 -translate-x-1 opacity-0 transition-all duration-200 ease-out group-hover:translate-x-0 group-hover:opacity-100'
+          />
+        )}
       </div>
       <p className='f-12-450 text-GRAY_700 line-clamp-3'>{description}</p>
     </div>

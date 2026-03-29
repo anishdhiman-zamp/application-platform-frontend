@@ -1,5 +1,5 @@
-import { ActivityIcon, SettingsIcon } from '@zamp-platform/ui';
-import { Database, Link2, UserPen } from 'lucide-react';
+import { ActivityIcon, HomeIcon, SettingsIcon } from '@zamp-platform/ui';
+import { Database, Link2, Settings2, UserPen } from 'lucide-react';
 import { PaceNavbarItemId, PaceNavbarItemSchema, PaceSettingsTabSchema } from 'modules/pace/pace.types';
 import Users02 from '@/assets/Icons/Users02';
 import { ROUTES_PATH } from '@/constants/routeConfig';
@@ -11,10 +11,19 @@ export const DEFAULT_CHAT_TITLE = 'Untitled';
 export const DEBOUNCE_DELAY_MS = 300;
 export const NEW_CONVERSATION_ID = 'null_thread';
 export const SIDEBAR_WIDTH = 450;
+export const SIDEBAR_MIN_WIDTH = 345;
+export const SIDEBAR_MAX_WIDTH = 700;
 export const SIDEBAR_CONVERSATION_ID_PARAM = 's';
-export const FILES_PANEL_WIDTH = 325;
+export const FILES_PANEL_WIDTH = 345;
+export const FILES_PANEL_MIN_WIDTH = 300;
+export const FILES_PANEL_MAX_WIDTH = 700;
 
 export const PACE_NAVBAR_ITEMS: PaceNavbarItemSchema[] = [
+  {
+    id: PaceNavbarItemId.HOME,
+    iconComponent: HomeIcon,
+    path: ROUTES_PATH.CHAT,
+  },
   {
     id: PaceNavbarItemId.TASKS,
     iconComponent: ActivityIcon,
@@ -36,10 +45,10 @@ export const PACE_SETTINGS_TABS: PaceSettingsTabSchema[] = [
     heading: 'Account',
   },
   {
-    id: PaceNavbarItemId.PEOPLE,
-    name: 'People',
-    iconComponent: <Users02 width={16} height={16} />,
-    path: ROUTES_PATH.CHAT_SETTINGS_PEOPLE,
+    id: PaceNavbarItemId.ORG_SETTINGS,
+    name: 'Organisation settings',
+    iconComponent: <Settings2 width={16} height={16} />,
+    path: ROUTES_PATH.CHAT_SETTINGS_ORG_SETTINGS,
     heading: 'Organisation',
   },
   {
@@ -53,6 +62,12 @@ export const PACE_SETTINGS_TABS: PaceSettingsTabSchema[] = [
     name: 'Integrations',
     iconComponent: <Link2 width={16} height={16} className='-rotate-45' />,
     path: ROUTES_PATH.CHAT_SETTINGS_INTEGRATIONS,
+  },
+  {
+    id: PaceNavbarItemId.PEOPLE,
+    name: 'People',
+    iconComponent: <Users02 width={16} height={16} />,
+    path: ROUTES_PATH.CHAT_SETTINGS_PEOPLE,
   },
 ];
 

@@ -65,6 +65,7 @@ const TaskContentInner = ({ taskId }: TaskContentInnerProps) => {
           conversationId={taskId ?? chat?.conversationId}
           organizationId={organizationId}
           onTitleChange={setChatTitle}
+          showHistory={false}
         />
         <ScrollContainer showFadeOverlay={false} autoScrollToBottom scrollTrigger={chat?.messages?.length}>
           <CommonWrapper

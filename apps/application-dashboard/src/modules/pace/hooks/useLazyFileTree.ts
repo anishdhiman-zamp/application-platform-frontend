@@ -60,8 +60,10 @@ export const useLazyFileTree = ({
   const hasSeededFromCacheRef = useRef(cacheSnapshot.hasCachedData);
   const searchAbortRef = useRef(0);
   const loadingFoldersRef = useRef(loadingFolders);
+  const serverFilesRef = useRef(serverFiles);
 
   loadingFoldersRef.current = loadingFolders;
+  serverFilesRef.current = serverFiles;
 
   const markFolderLoading = useCallback((path: string, loading: boolean) => {
     setLoadingFolders((prev) => {
@@ -81,7 +83,7 @@ export const useLazyFileTree = ({
     setServerFiles((prev) => {
       const fetchedPathsSet = new Set(fetchedFiles.map((f) => f.path));
       const fetchedPathDepth = fetchedPath ? getPathDepth(fetchedPath) : 0;
-      const coveredDepth = fetchedPathDepth + LAZY_FILE_TREE_FETCH_DEPTH + 1;
+      const coveredDepth = fetchedPathDepth + LAZY_FILE_TREE_FETCH_DEPTH + (fetchedPath ? 0 : 1);
 
       const filtered = prev.filter((existing) => {
         if (fetchedPathsSet.has(existing.path)) return false;
@@ -111,7 +113,9 @@ export const useLazyFileTree = ({
       const directories = fetchedFiles.filter((f) => f.type === FILE_TYPE.DIRECTORY);
 
       for (const dir of directories) {
-        if (getPathDepth(dir.path) <= maxLoadedDepth) {
+        const dirDepth = getPathDepth(dir.path);
+
+        if (fetchedPath ? dirDepth < maxLoadedDepth : dirDepth <= maxLoadedDepth) {
           next.add(dir.path);
         }
       }
@@ -153,7 +157,7 @@ export const useLazyFileTree = ({
   );
 
   const restoreExpandedFolders = useCallback(
-    async (rootFiles: FileItem[], { silent = false }: { silent?: boolean } = {}) => {
+    async (rootFiles: FileItem[]) => {
       const storedPaths = getStoredExpandedPaths();
 
       if (storedPaths.length === 0) return;
@@ -183,18 +187,14 @@ export const useLazyFileTree = ({
 
         const results = await Promise.all(
           needsFetch.map(async (p) => {
-            if (!silent) {
-              markFolderLoading(p, true);
-            }
+            markFolderLoading(p, true);
 
             try {
               const res = await trigger({ depth: LAZY_FILE_TREE_FETCH_DEPTH, path: p }).unwrap();
 
               return { path: p, files: res.files };
             } finally {
-              if (!silent) {
-                markFolderLoading(p, false);
-              }
+              markFolderLoading(p, false);
             }
           }),
         );
@@ -206,7 +206,7 @@ export const useLazyFileTree = ({
           currentLoaded.add(fetchedPath);
           const fetchedDepth = getPathDepth(fetchedPath);
           const loadedDirs = fetchedFiles.filter(
-            (f) => f.type === FILE_TYPE.DIRECTORY && getPathDepth(f.path) <= fetchedDepth + LAZY_FILE_TREE_FETCH_DEPTH,
+            (f) => f.type === FILE_TYPE.DIRECTORY && getPathDepth(f.path) < fetchedDepth + LAZY_FILE_TREE_FETCH_DEPTH,
           );
 
           for (const folder of loadedDirs) {
@@ -229,14 +229,87 @@ export const useLazyFileTree = ({
       }
 
       try {
-        const rootResult = await trigger({ depth: LAZY_FILE_TREE_FETCH_DEPTH }).unwrap();
+        const rootPromise = trigger({ depth: LAZY_FILE_TREE_FETCH_DEPTH }).unwrap();
 
-        mergeServerFiles('', rootResult.files);
-        markLoadedFolders('', rootResult.files);
-        setIsError(false);
-        setIsInitialLoading(false);
+        if (skipRootLoader) {
+          const storedPaths = getStoredExpandedPaths();
 
-        restoreExpandedFolders(rootResult.files, { silent: skipRootLoader });
+          const rootCoveredLoaded = new Set<string>(['']);
+          const cachedDirs = cacheSnapshot.files.filter(
+            (f) => f.type === FILE_TYPE.DIRECTORY && getPathDepth(f.path) <= LAZY_FILE_TREE_FETCH_DEPTH,
+          );
+
+          for (const dir of cachedDirs) {
+            rootCoveredLoaded.add(dir.path);
+          }
+
+          const byDepth = groupByDepth(storedPaths);
+          const planLoaded = new Set(rootCoveredLoaded);
+          const pathsToPreFetch: string[] = [];
+
+          for (const [, paths] of byDepth) {
+            const needed = paths.filter((p) => !planLoaded.has(p) && planLoaded.has(getDirectParent(p)));
+
+            pathsToPreFetch.push(...needed);
+
+            for (const p of needed) {
+              planLoaded.add(p);
+
+              const pDepth = getPathDepth(p);
+              const coveredDirs = cacheSnapshot.files.filter(
+                (f) =>
+                  f.type === FILE_TYPE.DIRECTORY &&
+                  isChildOf(f.path, p) &&
+                  getPathDepth(f.path) < pDepth + LAZY_FILE_TREE_FETCH_DEPTH,
+              );
+
+              for (const dir of coveredDirs) {
+                planLoaded.add(dir.path);
+              }
+            }
+          }
+
+          const currentFiles = serverFilesRef.current;
+
+          const sequentialFetch = async () => {
+            for (const p of pathsToPreFetch) {
+              const hasCachedChildren = currentFiles.some((f) => isChildOf(f.path, p));
+
+              if (!hasCachedChildren) {
+                markFolderLoading(p, true);
+              }
+
+              try {
+                const res = await trigger({ depth: LAZY_FILE_TREE_FETCH_DEPTH, path: p }).unwrap();
+
+                mergeServerFiles(p, res.files);
+                markLoadedFolders(p, res.files);
+              } catch {
+                // skip failed folder
+              } finally {
+                if (!hasCachedChildren) {
+                  markFolderLoading(p, false);
+                }
+              }
+            }
+          };
+
+          const [rootResult] = await Promise.all([rootPromise, sequentialFetch()]);
+
+          mergeServerFiles('', rootResult.files);
+          markLoadedFolders('', rootResult.files);
+          setIsError(false);
+          setIsInitialLoading(false);
+        } else {
+          const rootResult = await rootPromise;
+
+          mergeServerFiles('', rootResult.files);
+          markLoadedFolders('', rootResult.files);
+          setIsError(false);
+          setIsInitialLoading(false);
+
+          restoreExpandedFolders(rootResult.files);
+        }
       } catch {
         if (!skipRootLoader) {
           setIsError(true);

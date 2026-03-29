@@ -9,6 +9,7 @@ export const API_ENDPOINTS = {
   DELETE_AUDIENCE_FROM_ORGANIZATION_ACCESS: `organizations/{{organizationId}}/audiences`,
   MEMBERSHIP_REQUESTS_BY_ORGANIZATION_ID_GET: `organizations/{{organizationId}}/requests`,
   ORGANIZATIONS_REGISTER_POST: `organizations/register`,
+  ORGANIZATIONS_UPLOAD_URL_POST: `organizations/assets/upload-url`,
   ORGANIZATIONS_PROVISION_POST: `organizations/{{organizationId}}/provision`,
 
   // Auth
@@ -231,6 +232,7 @@ export const API_ENDPOINTS = {
   INTEGRATIONS_AUTHENTICATE_V2_POST: `integrations/authenticate`,
   // Filesystem API
   FILESYSTEM_STATUS_GET: `filesystem/status`,
+  FILESYSTEM_PROVISION_POST: `filesystem/provision`,
   FILES_LIST_GET: `files`,
   FILES_CREATE_PUT: `files/{{path}}`,
   FILES_WRITE_POST: `files/{{path}}`,

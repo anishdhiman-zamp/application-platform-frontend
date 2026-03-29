@@ -3,20 +3,17 @@
 import { useCallback, useEffect, useRef } from 'react';
 import type { TaskStatus } from '@zamp-platform/chat';
 import { TaskStatusIcon } from '@zamp-platform/chat';
-import { useInfiniteScroll } from '@zamp-platform/tanstack-table';
 import { AccordionContent, AccordionItem, AccordionTrigger } from '@zamp-platform/ui';
-import { cn } from '@zamp-platform/ui/utils';
 import { Play } from 'lucide-react';
 import { STATUS_LABELS } from 'modules/pace/components/tasks/task-listing.constants';
 import TaskRow from 'modules/pace/components/tasks/TaskRow';
-import TaskRowSkeleton from 'modules/pace/components/tasks/TaskRowSkeleton';
 import { useTasksByStatus } from 'modules/pace/components/tasks/useTasksByStatus';
 
 interface TaskAccordionSectionProps {
   status: TaskStatus;
   count: number;
   search?: string;
-  scrollContainerRef?: React.RefObject<HTMLDivElement | null>;
+  scrollContainerRef: React.RefObject<HTMLDivElement | null>;
 }
 
 const PlayIcon = ({ className }: { className?: string }) => (
@@ -24,65 +21,66 @@ const PlayIcon = ({ className }: { className?: string }) => (
 );
 
 const TaskAccordionSection = ({ status, count, search, scrollContainerRef }: TaskAccordionSectionProps) => {
-  const itemRef = useRef<HTMLDivElement>(null);
-  const { tasks, totalCount, fetchNextPage, isFetching } = useTasksByStatus({ status, search });
+  const sentinelNodeRef = useRef<HTMLDivElement | null>(null);
+  const isFetchingRef = useRef(false);
 
-  const { fetchMoreOnBottomReached } = useInfiniteScroll({
-    fetchNextPage,
-    isFetching,
-    totalFetched: tasks.length,
-    totalRowCount: totalCount,
-    hasDataSource: true,
-    threshold: 300,
-  });
+  const { tasks, totalCount, fetchNextPage, isFetching, hasMore } = useTasksByStatus({ status, search });
 
-  const handleScroll = useCallback(() => {
-    const ref = search ? scrollContainerRef : itemRef;
+  isFetchingRef.current = isFetching;
 
-    fetchMoreOnBottomReached(ref?.current);
-  }, [fetchMoreOnBottomReached, search, scrollContainerRef]);
+  const handleIntersect = useCallback(
+    (entries: IntersectionObserverEntry[]) => {
+      if (entries[0]?.isIntersecting && !isFetchingRef.current && hasMore) {
+        fetchNextPage();
+      }
+    },
+    [fetchNextPage, hasMore],
+  );
+
+  const sentinelRef = useCallback((node: HTMLDivElement | null) => {
+    sentinelNodeRef.current = node;
+  }, []);
 
   useEffect(() => {
-    if (!search || !scrollContainerRef?.current) return;
+    const sentinel = sentinelNodeRef.current;
+    const root = scrollContainerRef?.current;
 
-    const el = scrollContainerRef.current;
-    const onScroll = () => fetchMoreOnBottomReached(el);
+    if (!sentinel) return;
 
-    el.addEventListener('scroll', onScroll, { passive: true });
+    const observer = new IntersectionObserver(handleIntersect, {
+      root: root ?? null,
+      rootMargin: '0px 0px 300px 0px',
+    });
 
-    return () => el.removeEventListener('scroll', onScroll);
-  }, [search, scrollContainerRef, fetchMoreOnBottomReached]);
+    observer.observe(sentinel);
+
+    return () => observer.disconnect();
+  }, [scrollContainerRef, handleIntersect]);
 
   if (search && !isFetching && totalCount === 0) return null;
 
   return (
     <AccordionItem
-      ref={itemRef}
       value={status}
-      onScroll={!search ? handleScroll : undefined}
-      className={cn(
-        'border-GRAY_400 bg-GRAY_1 shrink-0',
-        !search &&
-          '[&[data-state=open]>*:first-child]:bg-GRAY_50 data-[state=open]:min-h-0 data-[state=open]:shrink data-[state=open]:overflow-y-auto data-[state=open]:[scrollbar-width:thin] [&[data-state=open]>*:first-child]:sticky [&[data-state=open]>*:first-child]:top-0 [&[data-state=open]>*:first-child]:z-10',
-      )}
+      className='border-GRAY_400 bg-GRAY_1 [&>*:first-child]:bg-BG_GRAY_1 [&>*:first-child]:sticky [&>*:first-child]:top-0 [&>*:first-child]:z-10'
     >
       <AccordionTrigger
         icon={PlayIcon}
         iconRotation={90}
-        className='border-GRAY_400 data-[state=open]:bg-GRAY_100 [&>svg]:text-GRAY_1000 [&[data-state=open]>svg]:text-GRAY_600 cursor-pointer justify-start! gap-1.5 px-3 py-2.5 [&>svg]:order-first [&>svg]:h-2 [&>svg]:w-2 [&>svg]:transition-all [&>svg]:duration-300'
+        className='border-GRAY_400 data-[state=open]:bg-GRAY_100 [&>svg]:text-GRAY_1000 [&[data-state=open]>svg]:text-GRAY_600 cursor-pointer justify-start! gap-1.5 px-3 py-2.5 [&>svg]:order-first [&>svg]:h-2 [&>svg]:w-2'
       >
         <div className='flex items-center gap-2'>
           <TaskStatusIcon status={status} />
           <span className='f-13-500 text-GRAY_950 truncate'>{STATUS_LABELS[status]}</span>
         </div>
-        <span className='f-13-500 text-GRAY_600 truncate'>{search ? totalCount : count}</span>
+        <span className='f-13-500 text-GRAY_600 truncate'>{count}</span>
       </AccordionTrigger>
-      <AccordionContent className='p-0'>
+      <AccordionContent className='p-0' disableAnimation>
         <div>
           {tasks.map((task) => (
             <TaskRow key={task.id} task={task} />
           ))}
-          {isFetching && <TaskRowSkeleton />}
+          {hasMore && <div ref={sentinelRef} className='h-px' />}
         </div>
       </AccordionContent>
     </AccordionItem>
