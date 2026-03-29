@@ -3,8 +3,9 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { DatasetEditPreviewTab, DatasetTabsTypes, PREVIEW_DATASET_ID } from '@zamp-platform/dataset-create-edit';
 import { Button, toast } from '@zamp-platform/ui';
-import { ColDef, IServerSideDatasource } from 'ag-grid-community';
+import { CellEditRequestEvent, ColDef, FillEndEvent, IServerSideDatasource } from 'ag-grid-community';
 import { AgGridReact } from 'ag-grid-react';
+import { useUserIdentity } from 'hooks/useUserIdentity';
 import { ArrowLeft, Clock, Download, Loader2, Upload } from 'lucide-react';
 import ColumnHeader from 'modules/pace/components/datasets/ColumnHeader';
 import DatasetBlueprintEditor from 'modules/pace/components/datasets/DatasetBlueprintEditor';
@@ -18,18 +19,22 @@ import {
   buildFilterClauses,
   buildSelectTableQuery,
   buildTableColumnsDetailQuery,
+  buildUpdateCellQuery,
+  buildUpdateFillQuery,
   type ColumnModification,
   DETAIL_PAGE_SIZE,
   downloadCsvBlob,
   escapeSqlIdentifier,
   EXPORT_CHUNK_SIZE,
+  getCellEditorForPgType,
   pgTypeToColumnType,
   rowsToCsv,
   sanitizeColumnName,
+  ZAMP_ROW_ID_COLUMN,
 } from 'modules/pace/components/datasets/datasets.constants';
 import ShareDatasetNeonPopup from 'modules/pace/components/datasets/ShareDatasetNeonPopup';
 import Link from 'next/link';
-import { useAgentDbWriteMutation, useLazyAgentDbReadQuery } from '@/apis/agentManagedDb';
+import { useAgentDbWriteMutation, useGetDatasetRolesQuery, useLazyAgentDbReadQuery } from '@/apis/agentManagedDb';
 import { ROUTES_PATH } from '@/constants/routeConfig';
 import DatasetTable from 'components/common/table/DatasetTable';
 import DisplayOptions from 'components/common/table/DisplayOptions';
@@ -56,6 +61,17 @@ const DatasetDetailInner = ({ tableName }: DatasetDetailProps) => {
   const [isExporting, setIsExporting] = useState(false);
   const [gridReady, setGridReady] = useState(false);
 
+  const { userId, isSystemAdmin } = useUserIdentity();
+  const { data: rolesData } = useGetDatasetRolesQuery({ tableName });
+
+  const canEditData = useMemo(() => {
+    if (isSystemAdmin) return true;
+    if (!rolesData?.roles || !userId) return false;
+    const userRole = rolesData.roles.find((r) => r.user_id === userId && r.table_name === tableName);
+
+    return userRole?.role === 'admin' || userRole?.role === 'editor';
+  }, [rolesData, userId, tableName, isSystemAdmin]);
+
   const {
     dispatch: filterDispatch,
     state: { selectedFilters, filtersConfig: contextFiltersConfig },
@@ -75,12 +91,19 @@ const DatasetDetailInner = ({ tableName }: DatasetDetailProps) => {
   const loadSchema = useCallback(async () => {
     try {
       const result = await executeQuery({ query: buildTableColumnsDetailQuery(tableName) }).unwrap();
-      const rows = result.rows ?? [];
+      const allRows = result.rows ?? [];
+      const userRows = allRows.filter((r) => String(r.column_name) !== ZAMP_ROW_ID_COLUMN);
 
-      const gridCols = rows.map((row: Record<string, unknown>) => ({
-        field: String(row.column_name),
-        headerName: String(row.column_name),
-      }));
+      const gridCols: ColDef[] = userRows.map((row: Record<string, unknown>) => {
+        const field = String(row.column_name);
+        const pgType = String(row.data_type);
+
+        return {
+          field,
+          headerName: field,
+          ...getCellEditorForPgType(pgType),
+        };
+      });
 
       setColumns(gridCols);
 
@@ -94,7 +117,7 @@ const DatasetDetailInner = ({ tableName }: DatasetDetailProps) => {
 
       filterDispatch({ type: filtersContextActions.SET_FILTERS_CONFIG, payload: { filtersConfig: config } });
 
-      const bpCols: BlueprintColumn[] = rows.map((row: Record<string, unknown>) => ({
+      const bpCols: BlueprintColumn[] = userRows.map((row: Record<string, unknown>) => ({
         id: String(row.column_name),
         name: String(row.column_name),
         type: pgTypeToColumnType(String(row.data_type)),
@@ -118,6 +141,10 @@ const DatasetDetailInner = ({ tableName }: DatasetDetailProps) => {
     prefetchRef.current = { dataPromise, countPromise, consumed: false };
     loadSchema();
   }, [tableName, executeQuery, loadSchema]);
+
+  useEffect(() => {
+    tableRef.current?.api?.refreshHeader();
+  }, [canEditData]);
 
   const handleSaveBlueprint = useCallback(async () => {
     const originalMap = new Map(originalBlueprintColumns.map((c) => [c.id, c]));
@@ -272,6 +299,73 @@ const DatasetDetailInner = ({ tableName }: DatasetDetailProps) => {
     [blueprintColumns],
   );
 
+  const handleCellEditRequest = useCallback(
+    async (event: CellEditRequestEvent) => {
+      const { colDef, newValue, data, node, oldValue, source } = event;
+      const field = colDef.field;
+
+      if (!field || newValue === oldValue) return;
+
+      if (source !== 'edit' && source !== 'api') return;
+
+      node.setData({ ...data, [field]: newValue });
+
+      const rowId = data?._zamp_row_id;
+
+      if (!rowId) return;
+
+      try {
+        await executeMutation({
+          query: buildUpdateCellQuery(tableName, field, newValue, rowId),
+        }).unwrap();
+      } catch {
+        node.setData({ ...data, [field]: oldValue });
+        toast.error('Failed to update cell');
+      }
+    },
+    [tableName, executeMutation],
+  );
+
+  const handleFillEnd = useCallback(
+    async (event: FillEndEvent) => {
+      const { finalRange, initialRange, api } = event;
+
+      if (!finalRange?.startRow || !finalRange?.endRow || !initialRange?.startRow) return;
+
+      const colId = finalRange.columns[0]?.getColId();
+
+      if (!colId) return;
+
+      const srcIdx = initialRange.startRow.rowIndex;
+      const fillValue = api.getDisplayedRowAtIndex(srcIdx)?.data?.[colId];
+
+      const affectedNodes: { node: any; oldData: any }[] = [];
+      const rowIds: string[] = [];
+
+      for (let i = finalRange.startRow.rowIndex; i <= finalRange.endRow.rowIndex; i++) {
+        const node = api.getDisplayedRowAtIndex(i);
+        const rid = node?.data?._zamp_row_id;
+
+        if (rid && i !== srcIdx) {
+          rowIds.push(rid as string);
+          affectedNodes.push({ node, oldData: { ...node.data } });
+          node.setData({ ...node.data, [colId]: fillValue });
+        }
+      }
+      if (!rowIds.length) return;
+
+      try {
+        await executeMutation({
+          query: buildUpdateFillQuery(tableName, colId, fillValue, rowIds),
+        }).unwrap();
+      } catch {
+        affectedNodes.forEach(({ node, oldData }) => node.setData(oldData));
+        toast.error('Failed to update cells');
+      }
+    },
+    [tableName, executeMutation],
+  );
+
   const hasBlueprintChanges = useMemo(() => {
     const originalMap = new Map(originalBlueprintColumns.map((c) => [c.id, c]));
     const currentIds = new Set(blueprintColumns.map((c) => c.id));
@@ -311,7 +405,7 @@ const DatasetDetailInner = ({ tableName }: DatasetDetailProps) => {
         const chunk = await executeQuery({
           query: buildSelectTableQuery(tableName, EXPORT_CHUNK_SIZE, offset, sortModel, filterClauses),
         }).unwrap();
-        const rows = chunk.rows ?? [];
+        const rows = (chunk.rows ?? []).map(({ _zamp_row_id: _, ...rest }) => rest);
 
         if (rows.length === 0) break;
         csvChunks.push(rowsToCsv(rows, offset === 0));
@@ -506,18 +600,24 @@ const DatasetDetailInner = ({ tableName }: DatasetDetailProps) => {
               columnConfig={{
                 headerComponent: ColumnHeader,
                 headerComponentParams: {
-                  onColumnRename: handleColumnRename,
-                  onColumnRequiredChange: handleColumnRequiredChange,
+                  onColumnRename: canEditData ? handleColumnRename : undefined,
+                  onColumnRequiredChange: canEditData ? handleColumnRequiredChange : undefined,
                   getColumnInfo,
                 },
                 sortable: true,
                 width: 200,
                 minWidth: 150,
                 resizable: true,
+                editable: canEditData,
+                suppressFillHandle: !canEditData,
               }}
               showStatusBar
               totalRows={totalRows ?? undefined}
               onGridReady={() => setGridReady(true)}
+              onCellEditRequest={canEditData ? handleCellEditRequest : undefined}
+              onFillEnd={canEditData ? handleFillEnd : undefined}
+              enableCellSelection={canEditData}
+              useGetRowId
             />
           )}
         </div>
@@ -530,10 +630,14 @@ const DatasetDetailInner = ({ tableName }: DatasetDetailProps) => {
           ) : (
             <>
               <div className='flex-1 overflow-hidden'>
-                <DatasetBlueprintEditor columns={blueprintColumns} onChange={handleBlueprintChange} canEdit />
+                <DatasetBlueprintEditor
+                  columns={blueprintColumns}
+                  onChange={handleBlueprintChange}
+                  canEdit={canEditData}
+                />
               </div>
-              {hasBlueprintChanges && (
-                <div className='border-GRAY_200 sticky bottom-0 z-10 flex justify-end border-t bg-white p-3'>
+              {canEditData && hasBlueprintChanges && (
+                <div className='border-GRAY_200 bg-BG_WHITE sticky bottom-0 z-10 flex justify-end border-t p-3'>
                   <Button onClick={handleSaveBlueprint} disabled={isSaving}>
                     {isSaving ? 'Saving...' : 'Save'}
                   </Button>

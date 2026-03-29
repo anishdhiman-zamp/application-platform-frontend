@@ -33,7 +33,7 @@ const DatasetsListing = () => {
     const editable = new Set<string>();
 
     for (const role of rolesData.roles) {
-      if (role.user_id === userId && role.role === 'admin') {
+      if (role.user_id === userId && (role.role === 'admin' || role.role === 'editor')) {
         editable.add(role.table_name);
       }
     }

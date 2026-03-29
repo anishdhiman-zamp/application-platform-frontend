@@ -166,6 +166,55 @@ export const buildTableColumnsQuery = (tableName: string): string =>
 export const buildTableColumnsDetailQuery = (tableName: string): string =>
   `SELECT column_name, data_type, is_nullable FROM information_schema.columns WHERE table_schema = 'public' AND table_name = '${escapeSqlString(tableName)}' ORDER BY ordinal_position`;
 
+// --- Row identity (backend auto-injects this into CREATE TABLE) ---
+
+export const ZAMP_ROW_ID_COLUMN = '_zamp_row_id';
+
+// --- Cell editor mapping (Postgres type -> AG Grid editor) ---
+
+export const getCellEditorForPgType = (
+  pgType: string,
+): { cellEditor: string; cellEditorParams?: Record<string, unknown> } => {
+  const colType = pgTypeToColumnType(pgType);
+
+  switch (colType) {
+    case DatasetColumnTypes.INTEGER:
+    case DatasetColumnTypes.FLOAT:
+    case DatasetColumnTypes.DOUBLE:
+    case DatasetColumnTypes.DOUBLE_PRECISION:
+      return { cellEditor: 'agNumberCellEditor' };
+    case DatasetColumnTypes.BOOLEAN:
+      return {
+        cellEditor: 'agRichSelectCellEditor',
+        cellEditorParams: { values: ['', 'true', 'false'], allowTyping: true, filterList: true },
+      };
+    default:
+      return { cellEditor: 'agTextCellEditor' };
+  }
+};
+
+// --- UPDATE query builders ---
+
+export const buildUpdateCellQuery = (tableName: string, column: string, newValue: unknown, rowId: string): string => {
+  const val =
+    newValue === null || newValue === undefined || newValue === '' ? 'NULL' : `'${escapeSqlString(String(newValue))}'`;
+
+  return `UPDATE "${escapeSqlIdentifier(tableName)}" SET "${escapeSqlIdentifier(column)}" = ${val} WHERE "${ZAMP_ROW_ID_COLUMN}" = '${escapeSqlString(rowId)}'`;
+};
+
+export const buildUpdateFillQuery = (
+  tableName: string,
+  column: string,
+  newValue: unknown,
+  rowIds: string[],
+): string => {
+  const val =
+    newValue === null || newValue === undefined || newValue === '' ? 'NULL' : `'${escapeSqlString(String(newValue))}'`;
+  const ids = rowIds.map((id) => `'${escapeSqlString(id)}'`).join(', ');
+
+  return `UPDATE "${escapeSqlIdentifier(tableName)}" SET "${escapeSqlIdentifier(column)}" = ${val} WHERE "${ZAMP_ROW_ID_COLUMN}" IN (${ids})`;
+};
+
 // --- DML query builders ---
 
 const buildSingleFilterClause = (colId: string, condition: Record<string, unknown>): string | undefined => {

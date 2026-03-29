@@ -23,7 +23,7 @@ const CustomStatusBar = (props: CustomStatusPanelProps & { totalRows?: number; c
   }, [props?.api, handleColumnHeaderClicked]);
 
   return (
-    <div className='f-11-500 flex gap-2 py-2'>
+    <div className='f-11-500 flex items-center gap-2 py-2'>
       {statusBar ? (
         <>
           {Object.entries(statusBar).map(([key, value]) => {
