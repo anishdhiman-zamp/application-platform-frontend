@@ -60,6 +60,10 @@ const TaskAccordionGroup = ({ search }: TaskAccordionGroupProps) => {
   const openValuesRef = useRef<string[]>([...visibleStatuses]);
 
   useEffect(() => {
+    openValuesRef.current = [...visibleStatuses];
+  }, [visibleStatuses]);
+
+  useEffect(() => {
     if (countsData) {
       prevCountsRef.current = countsData;
       setHasLoadedOnce(true);

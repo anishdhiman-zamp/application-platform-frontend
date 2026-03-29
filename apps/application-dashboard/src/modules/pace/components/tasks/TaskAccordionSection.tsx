@@ -21,9 +21,10 @@ const PlayIcon = ({ className }: { className?: string }) => (
 );
 
 const TaskAccordionSection = ({ status, count, search, scrollContainerRef }: TaskAccordionSectionProps) => {
+  const sentinelNodeRef = useRef<HTMLDivElement | null>(null);
+  const isFetchingRef = useRef(false);
+
   const { tasks, totalCount, fetchNextPage, isFetching, hasMore } = useTasksByStatus({ status, search });
-  const sentinelRef = useRef<HTMLDivElement>(null);
-  const isFetchingRef = useRef(isFetching);
 
   isFetchingRef.current = isFetching;
 
@@ -36,8 +37,12 @@ const TaskAccordionSection = ({ status, count, search, scrollContainerRef }: Tas
     [fetchNextPage, hasMore],
   );
 
+  const sentinelRef = useCallback((node: HTMLDivElement | null) => {
+    sentinelNodeRef.current = node;
+  }, []);
+
   useEffect(() => {
-    const sentinel = sentinelRef.current;
+    const sentinel = sentinelNodeRef.current;
     const root = scrollContainerRef?.current;
 
     if (!sentinel) return;
