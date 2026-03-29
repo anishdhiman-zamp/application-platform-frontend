@@ -17,6 +17,7 @@ import {
 import {
   AUDIO_EXTENSIONS,
   DATE_FORMAT,
+  DOCUMENT_EXTENSIONS,
   FILE_CATEGORY,
   FILE_TYPE_LABELS,
   type FileCategory,
@@ -25,6 +26,7 @@ import {
   MARKDOWN_EXTENSIONS,
   MONACO_EDITABLE_EXTENSIONS,
   PDF_EXTENSIONS,
+  PRESENTATION_EXTENSIONS,
   SPREADSHEET_EXTENSIONS,
   VIDEO_EXTENSIONS,
 } from '@/modules/pace/components/files/files.constants';
@@ -204,6 +206,14 @@ export function getFileCategory(filename: string): FileCategory {
 
   if ((SPREADSHEET_EXTENSIONS as readonly string[]).includes(ext)) {
     return FILE_CATEGORY.SPREADSHEET;
+  }
+
+  if ((PRESENTATION_EXTENSIONS as readonly string[]).includes(ext)) {
+    return FILE_CATEGORY.PRESENTATION;
+  }
+
+  if ((DOCUMENT_EXTENSIONS as readonly string[]).includes(ext)) {
+    return FILE_CATEGORY.DOCUMENT;
   }
 
   if ((MONACO_EDITABLE_EXTENSIONS as readonly string[]).includes(ext)) {

@@ -12,6 +12,8 @@ const PdfViewer = clientOnly(() => import('./viewers/PdfViewer'));
 const MonacoCodeEditor = clientOnly(() => import('./viewers/MonacoCodeEditor'));
 const MilkdownEditor = clientOnly(() => import('./viewers/MilkdownEditor'));
 const SpreadsheetViewer = clientOnly(() => import('./viewers/spreadsheet/SpreadsheetViewer'));
+const DocxViewer = clientOnly(() => import('./viewers/DocxViewer'));
+const PresentationViewer = clientOnly(() => import('./viewers/PresentationViewer'));
 
 import type {
   HtmlViewMode,
@@ -143,6 +145,14 @@ const FileViewerContent = memo(
             />
           );
         }
+
+        case FILE_CATEGORY.DOCUMENT:
+          return <DocxViewer mediaUrl={effectiveMediaUrl} fileExtension={fileExtension} onError={handleMediaError} />;
+
+        case FILE_CATEGORY.PRESENTATION:
+          return (
+            <PresentationViewer mediaUrl={effectiveMediaUrl} fileExtension={fileExtension} onError={handleMediaError} />
+          );
 
         case FILE_CATEGORY.CODE:
           return (

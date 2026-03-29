@@ -102,7 +102,7 @@ const ChatHomePage: FC = () => {
   return (
     <ChatActionsProvider>
       <div
-        className='relative mx-auto flex min-h-0 w-full max-w-[700px] flex-1 flex-col items-center justify-start overflow-hidden pt-[15vh]'
+        className='relative mx-auto flex min-h-0 w-full max-w-[700px] flex-1 flex-col items-center justify-start overflow-hidden pt-[22vh]'
         {...dropZoneProps}
       >
         <DropOverlay isVisible={isDragOver} />

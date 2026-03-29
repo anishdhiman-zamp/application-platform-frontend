@@ -26,6 +26,11 @@ const nextConfig = {
         __VUE_PROD_HYDRATION_MISMATCH_DETAILS__: JSON.stringify(false),
       }),
     );
+    config.module.rules.push({
+      test: /[\\/]node_modules[\\/]@aiden0z[\\/]pptx-renderer[\\/]/,
+      parser: { url: false },
+    });
+
     return config;
   },
   experimental: {
