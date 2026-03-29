@@ -50,7 +50,6 @@ const disableBuiltInResize = (viewer: PptxViewer) => {
 const triggerResize = (viewer: PptxViewer) => {
   const viewerInternals = viewer as unknown as ViewerInternals;
 
-  viewerInternals.lastMeasuredContainerWidth = 0;
   viewerInternals.handleContainerResize?.();
 };
 
