@@ -142,7 +142,11 @@ export const MessageContainer: FC<MessageContainerProps> = ({
       ))}
 
       {streamingState && !!streamingState.message_content?.elements?.length && (
-        <StreamingMessage streamingState={streamingState} assistantAvatar={defaultAssistantAvatar} />
+        <StreamingMessage
+          streamingState={streamingState}
+          assistantAvatar={defaultAssistantAvatar}
+          showMarkdownConnectors={showMarkdownConnectors}
+        />
       )}
 
       {streamingState && !!streamingState.message_content?.elements?.length && (

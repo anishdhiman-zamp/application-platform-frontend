@@ -103,7 +103,9 @@ export const BlockRenderer: React.FC<BlockRendererProps> = ({
   const isConnectedBlock = (block?: Block, isLastBlock?: boolean) => {
     if (!block) return false;
     if (isThinkingOrToolUseBlock(block)) return true;
-    if (showMarkdownConnectors && isMarkdownBlock(block) && !isLastBlock) return true;
+    const effectivelyLast = isLastBlock && !isStreaming;
+
+    if (showMarkdownConnectors && isMarkdownBlock(block) && !effectivelyLast) return true;
     return false;
   };
 
@@ -190,7 +192,7 @@ export const BlockRenderer: React.FC<BlockRendererProps> = ({
 
       case BLOCK_TYPE.MARKDOWN:
       case BLOCK_TYPE.TEXT:
-        if (showMarkdownConnectors && !isLastBlock) {
+        if (showMarkdownConnectors && (!isLastBlock || isStreaming)) {
           return (
             <div
               className='relative'
@@ -202,7 +204,13 @@ export const BlockRenderer: React.FC<BlockRendererProps> = ({
                   style={{ zIndex: 0 }}
                 />
               )}
-              <div className='flex items-start gap-2 py-2'>
+              <div
+                className={cn(
+                  'flex items-start gap-2 py-2',
+                  showConnectorFromPrevious &&
+                    '[&_div]:text-[13px] [&_ol]:text-[13px] [&_p]:text-[13px] [&_ul]:text-[13px]',
+                )}
+              >
                 <div className='mt-0.5 flex h-3.5 w-3.5 shrink-0 items-center justify-center'>
                   <AnimatedDot showAnimation={false} size={4} />
                 </div>

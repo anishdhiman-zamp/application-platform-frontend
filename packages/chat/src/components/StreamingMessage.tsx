@@ -12,13 +12,19 @@ export interface StreamingMessageProps {
   className?: string;
   thinkingLabel?: string;
   toolUseLabel?: string;
+  showMarkdownConnectors?: boolean;
 }
 
 /**
  * StreamingMessage component renders the streaming state from agent_streams SSE events.
  * It displays thinking, text, and tool_use content blocks as they stream in.
  */
-export const StreamingMessage: FC<StreamingMessageProps> = ({ streamingState, assistantAvatar, className }) => {
+export const StreamingMessage: FC<StreamingMessageProps> = ({
+  streamingState,
+  assistantAvatar,
+  className,
+  showMarkdownConnectors = false,
+}) => {
   const messageElements = streamingState?.message_content?.elements || [];
 
   if (!streamingState || messageElements.length === 0) {
@@ -35,6 +41,7 @@ export const StreamingMessage: FC<StreamingMessageProps> = ({ streamingState, as
         messageId={streamingState?.id}
         isLoading={false}
         isStreaming={streamingState?.is_active}
+        showMarkdownConnectors={showMarkdownConnectors}
       />
     </div>
   );
