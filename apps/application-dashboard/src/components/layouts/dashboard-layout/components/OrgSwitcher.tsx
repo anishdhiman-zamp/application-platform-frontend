@@ -61,6 +61,7 @@ const OrgSwitcher: FC<OrgSwitcherProps> = ({
   const pathname = usePathname();
 
   const [isOrgSwitcherMenuOpen, setIsOrgSwitcherMenuOpen] = useState(false);
+  const [itemsInteractive, setItemsInteractive] = useState(true);
   const [selectedOrg, setSelectedOrg] = useState<Organization>();
   const [searchQuery, setSearchQuery] = useState('');
   const [highlightedIndex, setHighlightedIndex] = useState(-1);
@@ -150,13 +151,16 @@ const OrgSwitcher: FC<OrgSwitcherProps> = ({
 
   const showSearchBox = (organizations?.length ?? 0) > 5;
 
-  const handleOpenChange = (open: boolean) => {
+  const handleOpenChange = useCallback((open: boolean) => {
     setIsOrgSwitcherMenuOpen(open);
-    if (!open) {
+    if (open) {
+      setItemsInteractive(false);
+    } else {
       setSearchQuery('');
       setHighlightedIndex(-1);
+      setItemsInteractive(true);
     }
-  };
+  }, []);
 
   const handleSearchChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     setSearchQuery(e.target.value);
@@ -213,7 +217,7 @@ const OrgSwitcher: FC<OrgSwitcherProps> = ({
           ref={(el) => {
             itemRefs.current[idx] = el;
           }}
-          className={cn('p-0', isHighlighted && 'bg-GRAY_200')}
+          className={cn('p-0', !itemsInteractive && 'pointer-events-none', isHighlighted && 'bg-GRAY_200')}
           onClick={() => handleOrgChange(item)}
           key={item?.organization_id}
           data-testid={`org-switcher-item-${item?.name?.toLowerCase()}`}
@@ -246,6 +250,16 @@ const OrgSwitcher: FC<OrgSwitcherProps> = ({
       syncOrganizationIdToSW();
     }
   }, [organizations]);
+
+  useEffect(() => {
+    if (!isOrgSwitcherMenuOpen || itemsInteractive) return;
+
+    const enable = () => setItemsInteractive(true);
+
+    window.addEventListener('pointerup', enable, { once: true });
+
+    return () => window.removeEventListener('pointerup', enable);
+  }, [isOrgSwitcherMenuOpen, itemsInteractive]);
 
   return (
     <div>
@@ -334,7 +348,7 @@ const OrgSwitcher: FC<OrgSwitcherProps> = ({
               {regionList?.length
                 ? regionList?.map((item, idx) => (
                     <DropdownMenuItem
-                      className='p-0'
+                      className={cn('p-0', !itemsInteractive && 'pointer-events-none')}
                       data-testid={`region-switcher-item-${item?.region?.toLowerCase()}`}
                       key={item.region}
                       onClick={() => handleRegionChange(item)}
@@ -350,7 +364,7 @@ const OrgSwitcher: FC<OrgSwitcherProps> = ({
             </CommonWrapper>
           </div>
           <DropdownMenuItem
-            className='p-0'
+            className={cn('p-0', !itemsInteractive && 'pointer-events-none')}
             data-testid='org-switcher-new-organization'
             onClick={() => {
               setOrgToProvision(null);

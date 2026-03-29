@@ -11,6 +11,7 @@ const nextConfig = {
   reactCompiler: true,
   output: 'standalone',
   assetPrefix: process.env.NEXT_PUBLIC_ASSET_PREFIX || '',
+  allowedDevOrigins: ['*.coder-live.dev', '*.coder-live.zamp.dev', '*.coder.app'],
   // Skip type checking ONLY in CI (they run separately there)
   // Enable them for local development for immediate feedback
   typescript: {

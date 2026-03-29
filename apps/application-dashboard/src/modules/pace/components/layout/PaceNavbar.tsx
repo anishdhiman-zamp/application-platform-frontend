@@ -8,7 +8,7 @@ import { PanelRightOpen } from 'lucide-react';
 import { FILES_PANEL_SPACER_TRANSITION, getNavbarAnimations, NO_ANIMATION } from 'modules/pace/pace.animations';
 import type { AnimatedIconHandle } from 'modules/pace/pace.types';
 import { CHAT_SIDEBAR_STATE, PaceNavbarItemId } from 'modules/pace/pace.types';
-import { usePathname, useSearchParams } from 'next/navigation';
+import { usePathname } from 'next/navigation';
 import { ROUTES_PATH } from '@/constants/routeConfig';
 import DynamicTabsBar from '@/modules/pace/components/dynamic-tabs/DynamicTabsBar';
 import { isOnAnyTabBasePath } from '@/modules/pace/components/dynamic-tabs/tab-registry';
@@ -20,8 +20,8 @@ import { usePaceContext } from '@/modules/pace/pace.context';
 
 const PaceNavbar = () => {
   const pathname = usePathname();
-  const searchParams = useSearchParams();
   const fParam = useSyncedUrlParam('f');
+  const sParam = useSyncedUrlParam(SIDEBAR_CONVERSATION_ID_PARAM);
 
   const {
     chatSidebarState,
@@ -82,9 +82,6 @@ const PaceNavbar = () => {
     if (id === PaceNavbarItemId.HOME) {
       return path;
     }
-
-    const sParam = searchParams?.get(SIDEBAR_CONVERSATION_ID_PARAM);
-
     if (sParam) {
       return `${path}?s=${sParam}`;
     }
