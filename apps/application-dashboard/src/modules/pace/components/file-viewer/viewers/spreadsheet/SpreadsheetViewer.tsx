@@ -53,10 +53,11 @@ const SpreadsheetViewer = memo(({ content, mediaUrl, fileExtension, onError }: S
     const rowNumCol: ColumnDef<Record<string, string>> = {
       id: ROW_NUMBER_COLUMN_ID,
       header: '',
-      size: 40,
+      size: 60,
+      minSize: 60,
       enableSorting: false,
       enableGlobalFilter: false,
-      enableResizing: false,
+      enableResizing: true,
     };
 
     const dataCols: ColumnDef<Record<string, string>>[] = spreadsheetData.headers.map((header) => ({
