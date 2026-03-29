@@ -88,6 +88,7 @@ const TaskContentInner = ({ taskId }: TaskContentInnerProps) => {
               showCopy
               alignUserRight
               organizationId={organizationId}
+              showMarkdownConnectors
             />
             <div className='bg-BG_WHITE h-12 w-full' />
           </CommonWrapper>
