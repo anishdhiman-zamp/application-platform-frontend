@@ -1,14 +1,12 @@
 'use client';
 
 import TaskContentInner from '@/modules/pace/components/chat/TaskContentInner';
-import { useSyncedPathname } from '@/modules/pace/hooks/useSyncedSearchParam';
-import { usePathname } from 'next/navigation';
+import { useDynamicTabs } from '@/modules/pace/components/dynamic-tabs/useDynamicTabs';
+import { TAB_TYPE } from '@/modules/pace/pace.types';
 
 const ChatTaskPage = () => {
-  const pathname = usePathname();
-  const taskId = decodeURIComponent(pathname?.split('/').pop() ?? '') ?? '';
-
-  console.log('taskId', taskId, pathname);
+  const { activeTab } = useDynamicTabs({ type: TAB_TYPE.TASK });
+  const taskId = activeTab?.id ?? '';
 
   return <TaskContentInner key={taskId} taskId={taskId} />;
 };
