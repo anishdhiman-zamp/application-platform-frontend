@@ -59,17 +59,6 @@ const TaskAccordionGroup = ({ search }: TaskAccordionGroupProps) => {
 
   const openValuesRef = useRef<string[]>([...visibleStatuses]);
 
-  useEffect(() => {
-    openValuesRef.current = [...visibleStatuses];
-  }, [visibleStatuses]);
-
-  useEffect(() => {
-    if (countsData) {
-      prevCountsRef.current = countsData;
-      setHasLoadedOnce(true);
-    }
-  }, [countsData]);
-
   const handleValueChange = useCallback(
     (newValues: string[]) => {
       const prevValues = openValuesRef.current;
@@ -99,6 +88,17 @@ const TaskAccordionGroup = ({ search }: TaskAccordionGroupProps) => {
     },
     [visibleStatuses],
   );
+
+  useEffect(() => {
+    openValuesRef.current = [...visibleStatuses];
+  }, [visibleStatuses]);
+
+  useEffect(() => {
+    if (countsData) {
+      prevCountsRef.current = countsData;
+      setHasLoadedOnce(true);
+    }
+  }, [countsData]);
 
   return (
     <CommonWrapper
