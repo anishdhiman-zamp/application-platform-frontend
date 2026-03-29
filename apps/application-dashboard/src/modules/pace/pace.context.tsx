@@ -70,11 +70,13 @@ interface PaceContextType {
 
   sidebarWidth: number;
   setSidebarWidth: (width: number) => void;
+  persistSidebarWidth: (width: number) => void;
   isSidebarResizing: boolean;
   setIsSidebarResizing: (resizing: boolean) => void;
 
   filesPanelWidth: number;
   setFilesPanelWidth: (width: number) => void;
+  persistFilesPanelWidth: (width: number) => void;
   isFilesPanelResizing: boolean;
   setIsFilesPanelResizing: (resizing: boolean) => void;
 }
@@ -141,6 +143,11 @@ export const PaceProvider = ({ children }: { children: ReactNode }) => {
     const clamped = Math.min(SIDEBAR_MAX_WIDTH, Math.max(SIDEBAR_MIN_WIDTH, width));
 
     setSidebarWidthRaw(clamped);
+  }, []);
+
+  const persistSidebarWidth = useCallback((width: number) => {
+    const clamped = Math.min(SIDEBAR_MAX_WIDTH, Math.max(SIDEBAR_MIN_WIDTH, width));
+
     setToLocalStorage(LOCAL_STORAGE_KEYS.PACE_SIDEBAR_WIDTH, String(clamped));
   }, []);
 
@@ -148,6 +155,11 @@ export const PaceProvider = ({ children }: { children: ReactNode }) => {
     const clamped = Math.min(FILES_PANEL_MAX_WIDTH, Math.max(FILES_PANEL_MIN_WIDTH, width));
 
     setFilesPanelWidthRaw(clamped);
+  }, []);
+
+  const persistFilesPanelWidth = useCallback((width: number) => {
+    const clamped = Math.min(FILES_PANEL_MAX_WIDTH, Math.max(FILES_PANEL_MIN_WIDTH, width));
+
     setToLocalStorage(LOCAL_STORAGE_KEYS.PACE_FILES_PANEL_WIDTH, String(clamped));
   }, []);
 
@@ -404,11 +416,13 @@ export const PaceProvider = ({ children }: { children: ReactNode }) => {
 
       sidebarWidth,
       setSidebarWidth,
+      persistSidebarWidth,
       isSidebarResizing,
       setIsSidebarResizing,
 
       filesPanelWidth,
       setFilesPanelWidth,
+      persistFilesPanelWidth,
       isFilesPanelResizing,
       setIsFilesPanelResizing,
     }),
@@ -446,10 +460,12 @@ export const PaceProvider = ({ children }: { children: ReactNode }) => {
 
       sidebarWidth,
       setSidebarWidth,
+      persistSidebarWidth,
       isSidebarResizing,
 
       filesPanelWidth,
       setFilesPanelWidth,
+      persistFilesPanelWidth,
       isFilesPanelResizing,
     ],
   );

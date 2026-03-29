@@ -10,8 +10,15 @@ const PADDING = 16;
 const MIN_MAIN_WIDTH = 100;
 
 const SidebarResizeHandle = () => {
-  const { sidebarWidth, setSidebarWidth, setIsSidebarResizing, filesPanelOpen, filesPanelPinned, filesPanelWidth } =
-    usePaceContext();
+  const {
+    sidebarWidth,
+    setSidebarWidth,
+    persistSidebarWidth,
+    setIsSidebarResizing,
+    filesPanelOpen,
+    filesPanelPinned,
+    filesPanelWidth,
+  } = usePaceContext();
 
   const dragStartXRef = useRef<number>(0);
   const dragStartWidthRef = useRef<number>(sidebarWidth);
@@ -56,10 +63,20 @@ const SidebarResizeHandle = () => {
     [setSidebarWidth],
   );
 
-  const handleMouseUp = useCallback(() => {
-    setIsDragging(false);
-    setIsSidebarResizing(false);
-  }, [setIsSidebarResizing]);
+  const handleMouseUp = useCallback(
+    (e: MouseEvent) => {
+      const delta = e.clientX - dragStartXRef.current;
+      const finalWidth = Math.min(
+        effectiveMaxWidthRef.current,
+        Math.max(SIDEBAR_MIN_WIDTH, dragStartWidthRef.current + delta),
+      );
+
+      persistSidebarWidth(finalWidth);
+      setIsDragging(false);
+      setIsSidebarResizing(false);
+    },
+    [persistSidebarWidth, setIsSidebarResizing],
+  );
 
   useEffect(() => {
     if (!isDragging) return;
