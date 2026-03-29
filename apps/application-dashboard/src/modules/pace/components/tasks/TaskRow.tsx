@@ -12,6 +12,8 @@ import { useRouter } from 'next/navigation';
 import Avatar from '@/components/common/avatar';
 import { getChatTaskRoute } from '@/constants/routeConfig';
 import { KEYBOARD_KEYS } from '@/constants/shortcuts';
+import { useDynamicTabs } from '../dynamic-tabs/useDynamicTabs';
+import { TAB_TYPE } from '../../pace.types';
 
 interface TaskRowProps {
   task: TaskListItem;
@@ -20,11 +22,17 @@ interface TaskRowProps {
 const TaskRow = ({ task }: TaskRowProps) => {
   const router = useRouter();
 
-  const handleRowClick = useCallback(() => {
-    const taskRoute = getChatTaskRoute({ taskId: task.id, taskTitle: task.title });
+  // const handleRowClick = useCallback(() => {
+  //   const taskRoute = getChatTaskRoute({ taskId: task.id, taskTitle: task.title });
 
-    router.push(preserveSidebarParam(taskRoute));
-  }, [router, task.id, task.title]);
+  //   router.push(preserveSidebarParam(taskRoute));
+  // }, [router, task.id, task.title]);
+
+  const { openTab } = useDynamicTabs({ type: TAB_TYPE.TASK })
+
+  const handleRowClick = useCallback(() => {
+    openTab(task?.id || '', task?.title || task?.id || '');
+  }, [openTab, task?.id, task?.title]);
 
   const totalSubtasks = task.subtasks.length;
   const completedSubtasks = useMemo(
