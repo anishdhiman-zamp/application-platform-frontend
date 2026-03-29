@@ -15,7 +15,6 @@ import { usePaceContext } from '@/modules/pace/pace.context';
 
 const PORTAL_SELECTORS =
   '[role="menu"], [role="listbox"], [role="dialog"], [data-radix-popper-content-wrapper], [data-radix-menu-content]';
-
 const EDGE_TRIGGER_WIDTH_PX = 6;
 
 const isPortalOpen = () => document.querySelector(PORTAL_SELECTORS) !== null;
@@ -37,6 +36,7 @@ const FilesPanel = () => {
 
   isResizingRef.current = isFilesPanelResizing;
   const isFloating = filesPanelOpen && !filesPanelPinned;
+  const showEdgeTrigger = !filesPanelOpen && !filesPanelPinned;
 
   const isInPanelColumn = useCallback((clientX: number) => {
     const panel = panelRef.current;
@@ -86,8 +86,6 @@ const FilesPanel = () => {
       isInsideZoneRef.current = false;
     };
   }, [filesPanelOpen, filesPanelPinned, handleDocumentMouseMove]);
-
-  const showEdgeTrigger = !filesPanelOpen && !filesPanelPinned;
 
   return (
     <>
