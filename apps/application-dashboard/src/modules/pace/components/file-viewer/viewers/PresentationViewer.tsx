@@ -147,6 +147,8 @@ const PresentationViewer = memo(({ mediaUrl, fileExtension, onError }: Presentat
 
     if (!container) return;
 
+    lastWidthRef.current = container.offsetWidth;
+
     const observer = new ResizeObserver(() => {
       const newWidth = container.offsetWidth;
 
