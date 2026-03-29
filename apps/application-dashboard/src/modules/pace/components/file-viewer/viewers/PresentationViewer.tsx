@@ -4,32 +4,18 @@ import { memo, useCallback, useEffect, useRef, useState } from 'react';
 import type { PptxViewer } from '@aiden0z/pptx-renderer';
 import { captureException } from '@sentry/nextjs';
 import { cn } from '@zamp-platform/ui/utils';
-import { Presentation } from 'lucide-react';
 import { LEGACY_PPT_EXTENSION } from 'modules/pace/components/file-viewer/file-viewer.constants';
+import UnsupportedPptFormat from 'modules/pace/components/file-viewer/viewers/components/UnsupportedPptFormat';
 import ImageLoader from '@/components/common/loader/ImageLoader';
 import { ZAMP_LOGO_LOADER_SVG } from '@/constants/icons';
+
+const RESIZE_SETTLE_MS = 300;
 
 interface PresentationViewerProps {
   mediaUrl: string;
   fileExtension: string;
   onError?: (message?: string) => void;
 }
-
-const UnsupportedPptFormat = ({ fileExtension }: { fileExtension: string }) => (
-  <div className='flex h-full w-full flex-col items-center justify-center gap-4 p-8'>
-    <Presentation size={48} className='text-muted-foreground' />
-    <div className='text-center'>
-      <p className='text-foreground text-sm font-medium'>
-        .{fileExtension.toUpperCase()} format is not supported for preview
-      </p>
-      <p className='text-muted-foreground mt-1 text-xs'>
-        Only .pptx files can be previewed. Please download the file to view it.
-      </p>
-    </div>
-  </div>
-);
-
-const RESIZE_SETTLE_MS = 300;
 
 type ViewerInternals = Record<string, unknown> & {
   resizeObserver?: ResizeObserver;
@@ -45,24 +31,24 @@ type ViewerInternals = Record<string, unknown> & {
  * observer that triggers a single re-render after resizing settles.
  */
 const disableBuiltInResize = (viewer: PptxViewer) => {
-  const v = viewer as unknown as ViewerInternals;
+  const viewerInternals = viewer as unknown as ViewerInternals;
 
-  if (v.resizeObserver instanceof ResizeObserver) {
-    v.resizeObserver.disconnect();
-    v.resizeObserver = undefined;
+  if (viewerInternals.resizeObserver instanceof ResizeObserver) {
+    viewerInternals.resizeObserver.disconnect();
+    viewerInternals.resizeObserver = undefined;
   }
 
-  if (typeof v.windowResizeHandler === 'function') {
-    window.removeEventListener('resize', v.windowResizeHandler);
-    v.windowResizeHandler = undefined;
+  if (typeof viewerInternals.windowResizeHandler === 'function') {
+    window.removeEventListener('resize', viewerInternals.windowResizeHandler);
+    viewerInternals.windowResizeHandler = undefined;
   }
 };
 
 const triggerResize = (viewer: PptxViewer) => {
-  const v = viewer as unknown as ViewerInternals;
+  const viewerInternals = viewer as unknown as ViewerInternals;
 
-  v.lastMeasuredContainerWidth = 0;
-  v.handleContainerResize?.();
+  viewerInternals.lastMeasuredContainerWidth = 0;
+  viewerInternals.handleContainerResize?.();
 };
 
 const PresentationViewer = memo(({ mediaUrl, fileExtension, onError }: PresentationViewerProps) => {
