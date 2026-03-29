@@ -112,7 +112,7 @@ function isFileApiRequest(url) {
 
     // Match /files/ path on allowed API domains
     const allowedHosts = ['api-us.zamp.ai', 'api-me.zamp.ai', 'api-dev.zamp.ai', 'api-stg.zamp.ai'];
-    const isAllowedHost = allowedHosts.includes(hostname) || hostname.endsWith('.coder-live.zamp.dev');
+    const isAllowedHost = allowedHosts.includes(hostname) || hostname.endsWith('.coder.dev-mum.internal.zamp.dev');
 
     return isAllowedHost && urlObj.pathname.startsWith('/files/');
   } catch {

@@ -71,7 +71,7 @@ BROWSER_URL="${VSCODE_PROXY_URI//\{\{port\}\}/2000}"
 **Method 3** - From individual Coder variables (any terminal):
 
 ```bash
-echo "https://2000--${CODER_WORKSPACE_AGENT_NAME}--${CODER_WORKSPACE_NAME}--${CODER_WORKSPACE_OWNER_NAME}.coder-live.zamp.dev"
+echo "https://2000--${CODER_WORKSPACE_AGENT_NAME}--${CODER_WORKSPACE_NAME}--${CODER_WORKSPACE_OWNER_NAME}.coder.dev-mum.internal.zamp.dev"
 ```
 
 ## Test Credentials
@@ -126,7 +126,7 @@ zamp dev-stop
 Use individual Coder variables:
 
 ```bash
-echo "https://2000--${CODER_WORKSPACE_AGENT_NAME}--${CODER_WORKSPACE_NAME}--${CODER_WORKSPACE_OWNER_NAME}.coder-live.zamp.dev"
+echo "https://2000--${CODER_WORKSPACE_AGENT_NAME}--${CODER_WORKSPACE_NAME}--${CODER_WORKSPACE_OWNER_NAME}.coder.dev-mum.internal.zamp.dev"
 ```
 
 ## Files Reference

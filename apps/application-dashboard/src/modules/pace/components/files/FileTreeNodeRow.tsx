@@ -69,8 +69,8 @@ interface FileTreeNodeRowProps extends React.HTMLAttributes<HTMLDivElement> {
   onActionClick: (actionId: string) => void;
 }
 
-const INDENT_SIZE = 24;
-const BASE_PADDING = 8;
+const INDENT_SIZE = 16;
+const BASE_PADDING = 4;
 const MENU_CONTENT_CLASS = 'flex min-w-[180px] flex-col gap-y-[2px]';
 
 const TreeConnectorLines = ({ depth }: { depth: number }) => {
@@ -81,7 +81,7 @@ const TreeConnectorLines = ({ depth }: { depth: number }) => {
       {Array.from({ length: depth }, (_, level) => (
         <div
           key={level}
-          className='bg-GRAY_400 absolute'
+          className='bg-GRAY_200 absolute'
           style={{ left: level * INDENT_SIZE + BASE_PADDING + 8, top: 0, width: 1, bottom: 0 }}
         />
       ))}
@@ -227,7 +227,7 @@ const FileTreeNodeRow = forwardRef<HTMLDivElement, FileTreeNodeRowProps>(
             {extension && <span className='f-13-450 text-GRAY_600 shrink-0 select-none'>.{extension}</span>}
           </div>
         ) : (
-          <span className='f-13-450 text-GRAY_1000 min-w-0 flex-1 truncate select-none'>
+          <span className='f-13-450 text-GRAY_1000 min-w-0 truncate select-none'>
             {state.isUserPrivateFolder ? `${node.name} (Private)` : node.name}
           </span>
         )}
@@ -242,8 +242,7 @@ const FileTreeNodeRow = forwardRef<HTMLDivElement, FileTreeNodeRowProps>(
                   role='button'
                   tabIndex={0}
                   className={cn(
-                    'flex size-5 shrink-0 cursor-pointer items-center justify-center rounded opacity-0 outline-none group-hover:opacity-100',
-                    !state.isFolder && 'ml-auto',
+                    'ml-auto flex size-5 shrink-0 cursor-pointer items-center justify-center rounded opacity-0 outline-none group-hover:opacity-100',
                     dropdownOpen && 'opacity-100',
                   )}
                   onClick={(e) => e.stopPropagation()}

@@ -9,10 +9,9 @@ import {
   SearchInput,
 } from '@zamp-platform/ui';
 import { cn } from '@zamp-platform/ui/utils';
-import { ArrowDown, ArrowUp, ChevronDownIcon, FoldVertical, Pin } from 'lucide-react';
+import { ArrowDown, ArrowUp, ChevronDownIcon, FoldVertical } from 'lucide-react';
 import { SORT_DIRECTION, SortDirection, SortOption } from '@/modules/pace/components/files/file-tree.types';
 import { SORT_OPTIONS } from '@/modules/pace/components/files/files.constants';
-import { usePaceContext } from '@/modules/pace/pace.context';
 
 interface FilesPanelToolbarProps {
   searchQuery: string;
@@ -35,7 +34,6 @@ const FilesPanelToolbar = ({
   onSortToggle,
   onCollapseAll,
 }: FilesPanelToolbarProps) => {
-  const { filesPanelPinned, setFilesPanelPinned } = usePaceContext();
   const selectedSortLabel = SORT_OPTIONS.find((opt) => opt.value === sortBy)?.label;
 
   return (
@@ -97,27 +95,15 @@ const FilesPanelToolbar = ({
               </DropdownMenuContent>
             </DropdownMenu>
           </div>
-          <Button
-            variant='secondary'
-            size='small'
-            onClick={onCollapseAll}
-            className='border-GRAY_400 bg-BG_WHITE hover:bg-BG_WHITE size-[25px] p-1.5!'
-            title='Collapse all'
-          >
-            <FoldVertical className='text-GRAY_1000 size-3.5' />
-          </Button>
         </div>
         <Button
           variant='secondary'
           size='small'
-          onClick={() => setFilesPanelPinned(!filesPanelPinned)}
-          className={cn(
-            'border-GRAY_400 bg-BG_WHITE hover:bg-BG_WHITE size-[25px] p-1.5!',
-            filesPanelPinned && 'bg-GRAY_200 hover:bg-GRAY_200',
-          )}
-          title={filesPanelPinned ? 'Unpin sidebar' : 'Pin as sidebar'}
+          onClick={onCollapseAll}
+          className='border-GRAY_400 bg-BG_WHITE hover:bg-BG_WHITE size-[25px] p-1.5!'
+          title='Collapse all'
         >
-          <Pin className={cn('text-GRAY_1000 size-3', filesPanelPinned && 'fill-current')} />
+          <FoldVertical className='text-GRAY_1000 size-3.5' />
         </Button>
       </div>
     </div>

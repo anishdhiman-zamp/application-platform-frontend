@@ -40,7 +40,7 @@ cd /path/to/zamp/services/application-platform-frontend
 This outputs a URL like:
 
 ```
-https://2000--main--{workspace}--{username}.coder-live.zamp.dev
+https://2000--main--{workspace}--{username}.coder.dev-mum.internal.zamp.dev
 ```
 
 ### 3. Tell the AI Agent

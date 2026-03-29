@@ -114,3 +114,23 @@ export const useSyncedPathname = (): string => {
 
   return pathname;
 };
+
+/**
+ * A hook that tracks the raw search string (e.g. "?f=foo&bar=baz") and stays
+ * in sync with URL changes. Returns the raw string to avoid decode/re-encode issues.
+ */
+export const useSyncedSearch = (): string => {
+  const getSearch = useCallback(() => {
+    if (typeof window === 'undefined') return '';
+
+    return window.location.search;
+  }, []);
+
+  const [search, setSearch] = useState<string>(getSearch);
+
+  useUrlChangeListener(() => {
+    setSearch(getSearch());
+  });
+
+  return search;
+};

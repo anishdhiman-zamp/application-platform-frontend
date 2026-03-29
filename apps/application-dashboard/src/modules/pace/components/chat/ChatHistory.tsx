@@ -23,10 +23,16 @@ const SEARCH_DEBOUNCE_MS = 300;
 interface ChatHistoryProps {
   onSelectConversation: (id: string | null, title?: string) => void;
   onDeleteConversation?: (id: string) => void;
+  activeConversationId?: string | null;
   compact?: boolean;
 }
 
-const ChatHistory = ({ onSelectConversation, onDeleteConversation, compact = false }: ChatHistoryProps) => {
+const ChatHistory = ({
+  onSelectConversation,
+  onDeleteConversation,
+  activeConversationId,
+  compact = false,
+}: ChatHistoryProps) => {
   const organizationId = useAppSelector((state: RootState) => state?.user?.user?.orgs?.[0]?.organization_id) ?? '';
   const containerRef = useRef<HTMLDivElement>(null);
   const activeStreamingIds = useActiveStreamingIds();
@@ -138,9 +144,6 @@ const ChatHistory = ({ onSelectConversation, onDeleteConversation, compact = fal
   }, [conversationHistory?.count]);
 
   useEffect(() => {
-    // fetchMoreOnBottomReached intentionally omitted from deps: we only want
-    // to re-trigger when the displayed list grows, not on every isFetching toggle.
-    // eslint-disable-next-line react-hooks/exhaustive-deps
     fetchMoreOnBottomReached(containerRef.current);
   }, [displayConversations.length]);
 
@@ -216,6 +219,7 @@ const ChatHistory = ({ onSelectConversation, onDeleteConversation, compact = fal
                 conversation={conversation}
                 onSelect={onSelectConversation}
                 isStreaming={activeStreamingIds.has(conversation?.id)}
+                isSelected={activeConversationId === conversation?.id}
                 organizationId={organizationId}
                 onDelete={handleDeleteConversation}
                 onDeleteFailure={handleDeleteConversationFailure}
