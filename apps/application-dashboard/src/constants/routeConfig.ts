@@ -46,6 +46,7 @@ export const ROUTES_PATH = {
   CHAT_SETTINGS_INTEGRATIONS: '/chat/settings/integrations',
   CHAT_SETTINGS_GENERAL: '/chat/settings/general',
   CHAT_SETTINGS_DATASETS: '/chat/settings/datasets',
+  CHAT_SETTINGS_DATASETS_NEW: '/chat/settings/datasets/new',
   CHAT_SETTINGS_DATASET_DETAIL: '/chat/settings/datasets/:tableName',
   CHAT_TASK: '/chat/task/:taskId',
 };

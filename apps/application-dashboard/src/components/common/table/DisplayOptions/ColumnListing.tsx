@@ -245,6 +245,7 @@ const ColumnListing: FC<ColumnListingProps> = ({
 
   const handleColumnClick = (e: MouseEvent<HTMLDivElement>, column?: Column) => {
     e.stopPropagation();
+    if ((e.target as HTMLElement).closest('[role="checkbox"]')) return;
     handleCheckBoxClick(column);
   };
 

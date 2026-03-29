@@ -1,52 +1,84 @@
 'use client';
 
-import { FC, useCallback, useEffect, useMemo, useRef, useState } from 'react';
-import { CSS_VARS } from '@zamp-platform/ui';
+import { FC, KeyboardEvent, useCallback, useEffect, useMemo, useRef, useState } from 'react';
+import { RequiredDefaultValueModal } from '@zamp-platform/dataset-create-edit';
+import { CSS_VARS, Input, Switch } from '@zamp-platform/ui';
 import { SvgSpriteLoader } from '@zamp-platform/ui/assets';
 import { ColumnHeaderClickedEvent, IHeaderParams } from 'ag-grid-community';
+import { Asterisk, EyeOff } from 'lucide-react';
+import type { BlueprintColumn } from 'modules/pace/components/datasets/datasets.constants';
 import { cn } from 'utils/common';
 import PositionedMenuWrapper from 'components/common/PositionedMenuWrapper';
+import { CONDITION_OPERATOR_TYPE } from 'components/filter/filters.constants';
+import { filtersContextActions, useFiltersContextStore } from 'components/filter/filters.context';
 
-type FilterOperator = 'contains' | 'notContains' | 'blank';
+type FilterOperator = 'contains' | 'ncontains' | 'eq' | 'neq' | 'startswith' | 'endswith' | 'blank';
 
 const FILTER_OPERATORS: { label: string; value: FilterOperator }[] = [
   { label: 'contains', value: 'contains' },
-  { label: 'does not contain', value: 'notContains' },
+  { label: 'does not contain', value: 'ncontains' },
+  { label: 'equals', value: 'eq' },
+  { label: 'not equal', value: 'neq' },
+  { label: 'begins with', value: 'startswith' },
+  { label: 'ends with', value: 'endswith' },
   { label: 'is blank', value: 'blank' },
 ];
 
-const MENU_OPTIONS = [
-  { label: 'Sort Ascending', value: 'sort_asc', iconId: 'arrow-up' },
-  { label: 'Sort Descending', value: 'sort_desc', iconId: 'arrow-down' },
-  { label: 'Filter', value: 'filter', iconId: 'filter-lines' },
-];
+interface ColumnHeaderParams {
+  onColumnRename?: (colId: string, newName: string) => void;
+  onColumnRequiredChange?: (colId: string, required: boolean, defaultValue?: string | null) => void;
+  getColumnInfo?: (colId: string) => BlueprintColumn | undefined;
+}
 
-const ColumnHeader: FC<IHeaderParams> = (props) => {
-  const { column, api, displayName } = props;
+const ColumnHeader: FC<IHeaderParams & ColumnHeaderParams> = (props) => {
+  const { column, api, displayName, onColumnRename, onColumnRequiredChange, getColumnInfo } = props;
   const colId = column.getColId();
 
+  const {
+    dispatch,
+    state: { selectedFilters },
+  } = useFiltersContextStore();
+
   const menuRef = useRef<HTMLDivElement>(null);
+  const wasRequiredFalseRef = useRef(false);
+  const renameSubmittedRef = useRef(false);
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const [isFilterOpen, setIsFilterOpen] = useState(false);
+  const [isRequiredModalOpen, setIsRequiredModalOpen] = useState(false);
   const [menuPosition, setMenuPosition] = useState({ top: 0, left: 0 });
   const [filterOperator, setFilterOperator] = useState<FilterOperator>('contains');
   const [filterValue, setFilterValue] = useState('');
   const [isOperatorOpen, setIsOperatorOpen] = useState(false);
   const [sortState, setSortState] = useState(column.getSort());
-  const [isFilterActive, setIsFilterActive] = useState(column.isFilterActive());
+  const [headerName, setHeaderName] = useState(displayName);
+
+  const columnInfo = getColumnInfo?.(colId);
+  const requiredState = columnInfo?.required ?? false;
+  const columnType = columnInfo?.type ?? 'text';
+
+  const hasActiveFilter = !!(
+    selectedFilters?.[colId] &&
+    typeof selectedFilters[colId] === 'object' &&
+    ('filter' in (selectedFilters[colId] as Record<string, unknown>) ||
+      (selectedFilters[colId] as Record<string, unknown>).type === 'blank')
+  );
 
   useEffect(() => {
     const onSortChanged = () => setSortState(column.getSort());
-    const onFilterChanged = () => setIsFilterActive(column.isFilterActive());
 
     api.addEventListener('sortChanged', onSortChanged);
-    api.addEventListener('filterChanged', onFilterChanged);
 
     return () => {
       api.removeEventListener('sortChanged', onSortChanged);
-      api.removeEventListener('filterChanged', onFilterChanged);
     };
   }, [api, column]);
+
+  useEffect(() => {
+    if (isMenuOpen) {
+      setHeaderName(displayName);
+      renameSubmittedRef.current = false;
+    }
+  }, [isMenuOpen, displayName]);
 
   const updateMenuPosition = useCallback(() => {
     if (!menuRef.current) return;
@@ -59,25 +91,35 @@ const ColumnHeader: FC<IHeaderParams> = (props) => {
   }, []);
 
   const handleClose = useCallback(() => {
+    if (isRequiredModalOpen) return;
     setIsMenuOpen(false);
     setIsFilterOpen(false);
     setIsOperatorOpen(false);
-  }, []);
+  }, [isRequiredModalOpen]);
 
   const applyFilter = useCallback(
     (operator: FilterOperator, value: string) => {
-      let model: Record<string, unknown> | null = null;
-
       if (operator === 'blank') {
-        model = { filterType: 'text', type: 'blank' };
+        dispatch({
+          type: filtersContextActions.SET_SELECTED_FILTERS,
+          payload: {
+            selectedFilters: {
+              [colId]: { filterType: 'search', type: CONDITION_OPERATOR_TYPE.IS_NULL, filter: '' },
+            },
+          },
+        });
       } else if (value.trim()) {
-        model = { filterType: 'text', type: operator, filter: value };
+        dispatch({
+          type: filtersContextActions.SET_SELECTED_FILTERS,
+          payload: {
+            selectedFilters: {
+              [colId]: { filterType: 'search', type: operator, filter: value },
+            },
+          },
+        });
       }
-      api.setColumnFilterModel(colId, model).then(() => {
-        api.onFilterChanged();
-      });
     },
-    [api, colId],
+    [dispatch, colId],
   );
 
   const handleMenuOptionClick = useCallback(
@@ -100,20 +142,84 @@ const ColumnHeader: FC<IHeaderParams> = (props) => {
           updateMenuPosition();
           setIsFilterOpen(true);
           break;
+        case 'hide_column':
+          api.setColumnsVisible([colId], false);
+          handleClose();
+          break;
       }
     },
     [api, colId, handleClose, updateMenuPosition],
   );
 
   const menuOptions = useMemo(() => {
-    const options = [...MENU_OPTIONS];
+    const options = [
+      { label: 'Sort Ascending', value: 'sort_asc', iconId: 'arrow-up' },
+      { label: 'Sort Descending', value: 'sort_desc', iconId: 'arrow-down' },
+    ];
 
     if (sortState) {
-      options.splice(2, 0, { label: 'Remove Sort', value: 'remove_sort', iconId: 'x-close' });
+      options.push({ label: 'Remove Sort', value: 'remove_sort', iconId: 'x-close' });
     }
+    options.push({ label: 'Filter', value: 'filter', iconId: 'filter-lines' });
 
     return options;
   }, [sortState]);
+
+  const handleHeaderNameBlur = useCallback(() => {
+    if (renameSubmittedRef.current) return;
+    const trimmed = headerName?.trim() ?? '';
+
+    if (!trimmed || trimmed === displayName) return;
+    renameSubmittedRef.current = true;
+    onColumnRename?.(colId, trimmed);
+  }, [headerName, displayName, colId, onColumnRename]);
+
+  const handleHeaderNameKeyDown = useCallback(
+    (e: KeyboardEvent<HTMLInputElement>) => {
+      if (e.key === 'Enter') {
+        e.preventDefault();
+        e.stopPropagation();
+        handleHeaderNameBlur();
+      }
+    },
+    [handleHeaderNameBlur],
+  );
+
+  const handleRequiredToggle = useCallback(
+    (checked: boolean) => {
+      if (checked) {
+        wasRequiredFalseRef.current = !requiredState;
+        setIsRequiredModalOpen(true);
+      } else {
+        onColumnRequiredChange?.(colId, false, null);
+      }
+    },
+    [colId, requiredState, onColumnRequiredChange],
+  );
+
+  const handleRequiredModalConfirm = useCallback(
+    (defaultValue: string) => {
+      onColumnRequiredChange?.(colId, true, defaultValue);
+      setIsRequiredModalOpen(false);
+      setIsMenuOpen(false);
+      wasRequiredFalseRef.current = false;
+    },
+    [colId, onColumnRequiredChange],
+  );
+
+  const handleRequiredModalClose = useCallback(() => {
+    if (wasRequiredFalseRef.current) {
+      wasRequiredFalseRef.current = false;
+    }
+    setIsRequiredModalOpen(false);
+    setIsMenuOpen(false);
+  }, []);
+
+  const handleRequiredModalDismiss = useCallback(() => {
+    onColumnRequiredChange?.(colId, false, null);
+    setIsRequiredModalOpen(false);
+    setIsMenuOpen(false);
+  }, [colId, onColumnRequiredChange]);
 
   const handleFilterOperatorChange = useCallback(
     (operator: FilterOperator) => {
@@ -168,7 +274,7 @@ const ColumnHeader: FC<IHeaderParams> = (props) => {
           {sortState === 'desc' && (
             <SvgSpriteLoader id='arrow-narrow-down' width={12} height={12} color={CSS_VARS.BLUE_700} />
           )}
-          {isFilterActive && <SvgSpriteLoader id='filter-lines' width={12} height={12} color={CSS_VARS.BLUE_700} />}
+          {hasActiveFilter && <SvgSpriteLoader id='filter-lines' width={12} height={12} color={CSS_VARS.BLUE_700} />}
         </div>
         <SvgSpriteLoader id='chevron-down' width={12} height={12} className='ml-2.5' />
       </div>
@@ -181,6 +287,20 @@ const ColumnHeader: FC<IHeaderParams> = (props) => {
           menuPosition={menuPosition}
           onClose={handleClose}
         >
+          {onColumnRename && (
+            <Input
+              size='small'
+              placeholder='Column name'
+              value={headerName}
+              onChange={(e) => setHeaderName(e.target.value)}
+              onBlur={handleHeaderNameBlur}
+              autoFocus
+              wrapperClassName='m-2'
+              error={!headerName?.trim()}
+              icon={<SvgSpriteLoader id='edit-03' size={16} color={CSS_VARS.GRAY_500} />}
+              onKeyDown={handleHeaderNameKeyDown}
+            />
+          )}
           {menuOptions.map((option) => (
             <div
               key={option.value}
@@ -194,6 +314,28 @@ const ColumnHeader: FC<IHeaderParams> = (props) => {
               <div className='f-12-500'>{option.label}</div>
             </div>
           ))}
+          <div
+            className='hover:bg-GRAY_100 flex cursor-pointer items-center gap-1.5 rounded-md px-2.5 py-2'
+            onClick={(e) => {
+              e.stopPropagation();
+              handleMenuOptionClick('hide_column');
+            }}
+          >
+            <EyeOff size={12} />
+            <div className='f-12-500'>Hide column</div>
+          </div>
+          {onColumnRequiredChange && (
+            <div
+              className='hover:bg-GRAY_100 flex cursor-pointer items-center justify-between rounded-md px-2.5 py-2'
+              onClick={(e) => e.stopPropagation()}
+            >
+              <div className='flex items-center gap-1.5'>
+                <Asterisk size={12} color={CSS_VARS.GRAY_900} />
+                <span className='f-12-500'>Require</span>
+              </div>
+              <Switch checked={requiredState} onCheckedChange={handleRequiredToggle} size='small' />
+            </div>
+          )}
         </PositionedMenuWrapper>
       )}
 
@@ -207,8 +349,9 @@ const ColumnHeader: FC<IHeaderParams> = (props) => {
           onReset={() => {
             setFilterValue('');
             setFilterOperator('contains');
-            api.setColumnFilterModel(colId, null).then(() => {
-              api.onFilterChanged();
+            dispatch({
+              type: filtersContextActions.REMOVE_FILTER,
+              payload: { filterKey: colId },
             });
           }}
         >
@@ -256,6 +399,15 @@ const ColumnHeader: FC<IHeaderParams> = (props) => {
           )}
         </PositionedMenuWrapper>
       )}
+
+      <RequiredDefaultValueModal
+        isOpen={isRequiredModalOpen}
+        onClose={handleRequiredModalClose}
+        onDismiss={handleRequiredModalDismiss}
+        onConfirm={handleRequiredModalConfirm}
+        columnType={columnType}
+        initialDefaultValue={columnInfo?.defaultValue}
+      />
     </div>
   );
 };
