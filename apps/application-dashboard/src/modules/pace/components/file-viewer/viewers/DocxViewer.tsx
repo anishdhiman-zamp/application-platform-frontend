@@ -125,7 +125,7 @@ const DocxViewer = memo(({ mediaUrl, fileExtension, onError }: DocxViewerProps) 
       <div ref={styleRef} />
       <div
         ref={containerRef}
-        className='docx-viewer-container bg-BG_GRAY_2 h-full w-full overflow-auto [scrollbar-width:thin]'
+        className='docx-viewer-container bg-BG_GRAY_2 h-full w-full overflow-auto [scrollbar-width:none]'
       />
     </div>
   );

@@ -36,7 +36,8 @@ const ChatSidebar = () => {
   const expandedWidth = isPinnedFilesPanel ? `calc(100% - ${filesPanelWidth + 8}px)` : '100%';
   const targetWidth = isCollapsed ? 0 : isExpanded ? expandedWidth : sidebarWidth;
   const direction = getSidebarTransitionDirection(prevChatSidebarState, chatSidebarState);
-  const innerWidth = direction === 'sidebar-to-collapsed' ? sidebarWidth : '100%';
+  const innerWidth =
+    direction === 'sidebar-to-collapsed' || direction === 'collapsed-to-sidebar' ? sidebarWidth : '100%';
 
   const transitions = useMemo(() => {
     if (!isHydrated) return { width: NO_ANIMATION, opacity: NO_ANIMATION };
@@ -76,7 +77,7 @@ const ChatSidebar = () => {
       }}
       style={{ willChange: 'width, opacity, transform' }}
       className={cn(
-        'bg-BG_WHITE relative flex h-full min-w-0 shrink-0 flex-col overflow-hidden rounded-t-xl',
+        'bg-BG_WHITE relative flex h-full min-w-0 shrink-0 flex-col overflow-hidden rounded-t-xl border border-transparent',
         !isCollapsed && 'border-border border',
       )}
     >

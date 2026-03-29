@@ -147,23 +147,11 @@ const FileViewerContent = memo(
         }
 
         case FILE_CATEGORY.DOCUMENT:
-          return (
-            <DocxViewer
-              key={effectiveMediaUrl}
-              mediaUrl={effectiveMediaUrl}
-              fileExtension={fileExtension}
-              onError={handleMediaError}
-            />
-          );
+          return <DocxViewer mediaUrl={effectiveMediaUrl} fileExtension={fileExtension} onError={handleMediaError} />;
 
         case FILE_CATEGORY.PRESENTATION:
           return (
-            <PresentationViewer
-              key={effectiveMediaUrl}
-              mediaUrl={effectiveMediaUrl}
-              fileExtension={fileExtension}
-              onError={handleMediaError}
-            />
+            <PresentationViewer mediaUrl={effectiveMediaUrl} fileExtension={fileExtension} onError={handleMediaError} />
           );
 
         case FILE_CATEGORY.CODE:
