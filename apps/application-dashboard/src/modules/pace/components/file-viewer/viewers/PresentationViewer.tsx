@@ -50,7 +50,11 @@ const disableBuiltInResize = (viewer: PptxViewer) => {
 const triggerResize = (viewer: PptxViewer) => {
   const viewerInternals = viewer as unknown as ViewerInternals;
 
-  viewerInternals.lastMeasuredContainerWidth = 0;
+  // Call the library's own resize handler directly without zeroing
+  // lastMeasuredContainerWidth. The library already guards against re-renders
+  // when the width hasn't changed, so this is a no-op if the container settled
+  // at the same size. Zeroing the field forced a destructive innerHTML wipe
+  // every time, which was the source of the flash.
   viewerInternals.handleContainerResize?.();
 };
 
