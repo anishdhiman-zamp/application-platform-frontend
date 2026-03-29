@@ -116,6 +116,8 @@ const PresentationViewer = memo(({ mediaUrl, fileExtension, onError }: Presentat
 
     if (!outer || !inner) return;
 
+    inner.style.transformOrigin = 'top left';
+
     const applyScale = () => {
       const containerWidth = outer.clientWidth;
 
@@ -124,7 +126,8 @@ const PresentationViewer = memo(({ mediaUrl, fileExtension, onError }: Presentat
       const scale = containerWidth / renderWidthRef.current;
 
       inner.style.transform = `scale(${scale})`;
-      inner.style.transformOrigin = 'top left';
+      // Reset before reading scrollHeight so the browser computes from content, not the previous explicit height.
+      inner.style.height = '';
       // Keep scroll height in sync with the scaled content.
       inner.style.height = `${inner.scrollHeight * scale}px`;
     };
