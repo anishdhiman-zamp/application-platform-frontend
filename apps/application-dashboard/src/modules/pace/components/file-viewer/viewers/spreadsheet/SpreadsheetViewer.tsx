@@ -7,18 +7,17 @@ import {
   flexRender,
   getCoreRowModel,
   getFilteredRowModel,
-  getPaginationRowModel,
   getSortedRowModel,
   type SortingState,
   useReactTable,
 } from '@tanstack/react-table';
+import { useVirtualizer } from '@tanstack/react-virtual';
 import { Input } from '@zamp-platform/ui';
 import { cn } from '@zamp-platform/ui/utils';
 import { Search } from 'lucide-react';
 import * as XLSX from 'xlsx';
 import EmptyState from '@/components/EmptyState';
 import { SHEET_EMPTY_STATE } from '@/constants/icons';
-import PaginationControls from '@/modules/pace/components/file-viewer/viewers/spreadsheet/PaginationControls';
 import SheetTabs from '@/modules/pace/components/file-viewer/viewers/spreadsheet/SheetTabs';
 import SortIcon from '@/modules/pace/components/file-viewer/viewers/spreadsheet/SortIcon';
 import {
@@ -30,8 +29,12 @@ import {
 import { parseWorkbook } from '@/modules/pace/components/file-viewer/viewers/spreadsheet/spreadsheet.utils';
 import SpreadsheetViewerLoading from '@/modules/pace/components/file-viewer/viewers/spreadsheet/SpreadsheetViewerLoading';
 
+const ROW_HEIGHT = 36;
+
 const SpreadsheetViewer = memo(({ content, mediaUrl, fileExtension, onError }: SpreadsheetViewerProps) => {
   const hasLoadedOnce = useRef(false);
+  const tableContainerRef = useRef<HTMLDivElement>(null);
+
   const [spreadsheetData, setSpreadsheetData] = useState<SpreadsheetData | null>(null);
   const [activeSheet, setActiveSheet] = useState<string>('');
   const [isLoading, setIsLoading] = useState(true);
@@ -50,12 +53,7 @@ const SpreadsheetViewer = memo(({ content, mediaUrl, fileExtension, onError }: S
     const rowNumCol: ColumnDef<Record<string, string>> = {
       id: ROW_NUMBER_COLUMN_ID,
       header: '',
-      cell: ({ row, table: t }) => {
-        const { pageIndex, pageSize } = t.getState().pagination;
-        const visualIndex = t.getPaginationRowModel().rows.findIndex((r) => r.id === row.id);
-
-        return pageIndex * pageSize + visualIndex + 1;
-      },
+      cell: ({ row }) => row.index + 1,
       size: 40,
       enableSorting: false,
       enableGlobalFilter: false,
@@ -89,9 +87,21 @@ const SpreadsheetViewer = memo(({ content, mediaUrl, fileExtension, onError }: S
     getCoreRowModel: getCoreRowModel(),
     getFilteredRowModel: getFilteredRowModel(),
     getSortedRowModel: getSortedRowModel(),
-    getPaginationRowModel: getPaginationRowModel(),
-    initialState: { pagination: { pageSize: 25 } },
   });
+
+  const { rows } = table.getRowModel();
+
+  const rowVirtualizer = useVirtualizer({
+    count: rows.length,
+    getScrollElement: () => tableContainerRef.current,
+    estimateSize: () => ROW_HEIGHT,
+    overscan: 10,
+  });
+
+  const virtualRows = rowVirtualizer.getVirtualItems();
+  const totalSize = rowVirtualizer.getTotalSize();
+  const paddingTop = virtualRows.length > 0 ? (virtualRows[0]?.start ?? 0) : 0;
+  const paddingBottom = virtualRows.length > 0 ? totalSize - (virtualRows[virtualRows.length - 1]?.end ?? 0) : 0;
 
   const handleSheetChange = useCallback(
     (sheetName: string) => {
@@ -175,9 +185,6 @@ const SpreadsheetViewer = memo(({ content, mediaUrl, fileExtension, onError }: S
     return <EmptyState imageSrc={SHEET_EMPTY_STATE} imageAlt='No data available' title='No data available' />;
   }
 
-  const { rows } = table.getRowModel();
-  const totalFilteredRows = table.getFilteredRowModel().rows.length;
-
   return (
     <div className='flex h-full w-full flex-col overflow-hidden'>
       {/* Toolbar */}
@@ -194,13 +201,16 @@ const SpreadsheetViewer = memo(({ content, mediaUrl, fileExtension, onError }: S
           />
         </div>
         <span className='f-12-400 text-GRAY_700'>
-          {spreadsheetData?.rows?.length ?? 0} rows × {spreadsheetData?.headers?.length ?? 0} columns
+          {rows.length} / {spreadsheetData?.rows?.length ?? 0} rows × {spreadsheetData?.headers?.length ?? 0} columns
         </span>
       </div>
 
       {/* Table */}
-      <div className='min-h-0 flex-1 overflow-auto [scrollbar-width:thin]'>
-        <table className='w-full border-collapse' style={{ minWidth: table.getCenterTotalSize() }}>
+      <div ref={tableContainerRef} className='min-h-0 flex-1 overflow-auto [scrollbar-width:thin]'>
+        <table
+          className='w-full border-collapse'
+          style={{ minWidth: table.getCenterTotalSize(), tableLayout: 'fixed' }}
+        >
           <thead>
             {table.getHeaderGroups().map((headerGroup) => (
               <tr key={headerGroup.id}>
@@ -208,7 +218,7 @@ const SpreadsheetViewer = memo(({ content, mediaUrl, fileExtension, onError }: S
                   <th
                     key={header.id}
                     className={cn(
-                      'bg-muted border-border f-12-500 text-GRAY_700 border-r border-b px-3 py-2 text-left whitespace-nowrap',
+                      'bg-muted border-border f-12-500 text-GRAY_700 relative border-r border-b px-3 py-2 text-left whitespace-nowrap',
                       'sticky top-0 z-10',
                       header.column.getCanSort() &&
                         !table.getState().columnSizingInfo.isResizingColumn &&
@@ -254,49 +264,61 @@ const SpreadsheetViewer = memo(({ content, mediaUrl, fileExtension, onError }: S
                 </td>
               </tr>
             ) : (
-              rows.map((row, rowIndex) => (
-                <tr key={row.id} className={cn('hover:bg-accent', rowIndex % 2 === 1 && 'bg-muted/40')}>
-                  {row.getVisibleCells().map((cell) => (
-                    <td
-                      key={cell.id}
-                      className={cn(
-                        'border-border f-13-400 text-GRAY_1000 truncate overflow-hidden border-r border-b px-3 py-2 whitespace-nowrap',
-                        cell.column.id === ROW_NUMBER_COLUMN_ID &&
-                          'bg-muted text-GRAY_700 f-12-400 sticky left-0 z-10 text-center',
-                      )}
-                      style={{ width: cell.column.getSize() }}
+              <>
+                {paddingTop > 0 && (
+                  <tr>
+                    <td style={{ height: paddingTop }} />
+                  </tr>
+                )}
+                {virtualRows.map((virtualRow) => {
+                  const row = rows[virtualRow.index];
+
+                  if (!row) return null;
+
+                  return (
+                    <tr
+                      key={row.id}
+                      data-index={virtualRow.index}
+                      ref={rowVirtualizer.measureElement}
+                      className={cn('hover:bg-accent', virtualRow.index % 2 === 1 && 'bg-muted/40')}
                     >
-                      {flexRender(cell.column.columnDef.cell, cell.getContext())}
-                    </td>
-                  ))}
-                </tr>
-              ))
+                      {row.getVisibleCells().map((cell) => (
+                        <td
+                          key={cell.id}
+                          className={cn(
+                            'border-border f-13-400 text-GRAY_1000 truncate overflow-hidden border-r border-b px-3 py-2 whitespace-nowrap',
+                            cell.column.id === ROW_NUMBER_COLUMN_ID &&
+                              'bg-muted text-GRAY_700 f-12-400 sticky left-0 z-10 text-center',
+                          )}
+                          style={{ width: cell.column.getSize(), maxWidth: cell.column.getSize() }}
+                        >
+                          {flexRender(cell.column.columnDef.cell, cell.getContext())}
+                        </td>
+                      ))}
+                    </tr>
+                  );
+                })}
+                {paddingBottom > 0 && (
+                  <tr>
+                    <td style={{ height: paddingBottom }} />
+                  </tr>
+                )}
+              </>
             )}
           </tbody>
         </table>
       </div>
 
-      {/* Footer: Sheet tabs + Pagination */}
-      <div className='border-border flex shrink-0 items-stretch justify-between border-t'>
-        <SheetTabs
-          sheetNames={spreadsheetData.sheetNames}
-          activeSheet={activeSheet}
-          onSheetChange={handleSheetChange}
-        />
-        <PaginationControls
-          pageIndex={table.getState().pagination.pageIndex}
-          pageSize={table.getState().pagination.pageSize}
-          pageCount={table.getPageCount()}
-          totalRows={totalFilteredRows}
-          canPreviousPage={table.getCanPreviousPage()}
-          canNextPage={table.getCanNextPage()}
-          onPageChange={(page) => table.setPageIndex(page)}
-          onPageSizeChange={(size) => {
-            table.setPageSize(size);
-            table.setPageIndex(0);
-          }}
-        />
-      </div>
+      {/* Footer: Sheet tabs */}
+      {(spreadsheetData.sheetNames?.length ?? 0) > 1 && (
+        <div className='border-border shrink-0 border-t'>
+          <SheetTabs
+            sheetNames={spreadsheetData.sheetNames}
+            activeSheet={activeSheet}
+            onSheetChange={handleSheetChange}
+          />
+        </div>
+      )}
     </div>
   );
 });
