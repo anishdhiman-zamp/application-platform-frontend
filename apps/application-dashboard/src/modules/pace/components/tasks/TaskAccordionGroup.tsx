@@ -1,6 +1,6 @@
 'use client';
 
-import { useEffect, useMemo, useRef, useState } from 'react';
+import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import type { TaskStatus } from '@zamp-platform/chat';
 import { Accordion } from '@zamp-platform/ui';
 import {
@@ -57,6 +57,42 @@ const TaskAccordionGroup = ({ search }: TaskAccordionGroupProps) => {
     return allowedStatuses.filter((status) => (countMap.get(status) ?? 0) > 0);
   }, [activeTab, countMap]);
 
+  const openValuesRef = useRef<string[]>([...visibleStatuses]);
+
+  const handleValueChange = useCallback(
+    (newValues: string[]) => {
+      const prevValues = openValuesRef.current;
+
+      openValuesRef.current = newValues;
+
+      const closedValue = prevValues.find((v) => !newValues.includes(v));
+
+      if (!closedValue) return;
+
+      const container = scrollContainerRef.current;
+
+      if (!container) return;
+
+      const closedIndex = visibleStatuses.indexOf(closedValue as TaskStatus);
+      const items = container.querySelectorAll<HTMLElement>('[data-slot="accordion-item"]');
+      const closedItem = items[closedIndex];
+
+      if (!closedItem) return;
+
+      const containerRect = container.getBoundingClientRect();
+      const itemRect = closedItem.getBoundingClientRect();
+
+      container.scrollTo({
+        top: itemRect.top - containerRect.top + container.scrollTop,
+      });
+    },
+    [visibleStatuses],
+  );
+
+  useEffect(() => {
+    openValuesRef.current = [...visibleStatuses];
+  }, [visibleStatuses]);
+
   useEffect(() => {
     if (countsData) {
       prevCountsRef.current = countsData;
@@ -80,6 +116,7 @@ const TaskAccordionGroup = ({ search }: TaskAccordionGroupProps) => {
         type='multiple'
         defaultValue={[...visibleStatuses]}
         className='flex-1 overflow-y-auto [scrollbar-width:thin]'
+        onValueChange={handleValueChange}
       >
         {visibleStatuses.map((status) => (
           <TaskAccordionSection
