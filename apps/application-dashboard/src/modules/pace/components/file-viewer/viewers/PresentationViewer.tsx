@@ -9,7 +9,10 @@ import UnsupportedPptFormat from 'modules/pace/components/file-viewer/viewers/co
 import ImageLoader from '@/components/common/loader/ImageLoader';
 import { ZAMP_LOGO_LOADER_SVG } from '@/constants/icons';
 
-const RESIZE_SETTLE_MS = 300;
+// Must outlast the longest sidebar animation (spring ~400ms) to avoid firing mid-transition.
+const RESIZE_SETTLE_MS = 500;
+// Minimum pixel change that warrants a slide re-render; filters out sub-pixel jitter.
+const RESIZE_WIDTH_THRESHOLD_PX = 2;
 
 interface PresentationViewerProps {
   mediaUrl: string;
@@ -55,6 +58,7 @@ const PresentationViewer = memo(({ mediaUrl, fileExtension, onError }: Presentat
   const containerRef = useRef<HTMLDivElement>(null);
   const viewerRef = useRef<PptxViewer | null>(null);
   const resizeTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const lastWidthRef = useRef<number>(0);
 
   const [isLoading, setIsLoading] = useState(true);
   const isLegacyFormat = fileExtension.toLowerCase() === LEGACY_PPT_EXTENSION;
@@ -144,8 +148,20 @@ const PresentationViewer = memo(({ mediaUrl, fileExtension, onError }: Presentat
     if (!container) return;
 
     const observer = new ResizeObserver(() => {
+      const newWidth = container.offsetWidth;
+
+      // Skip sub-pixel and height-only changes — they don't need a slide re-render.
+      if (Math.abs(newWidth - lastWidthRef.current) < RESIZE_WIDTH_THRESHOLD_PX) return;
+
       if (resizeTimerRef.current) clearTimeout(resizeTimerRef.current);
       resizeTimerRef.current = setTimeout(() => {
+        const settledWidth = container.offsetWidth;
+
+        // Re-check after debounce — skip if width ended up the same (e.g. sidebar snapped back).
+        if (Math.abs(settledWidth - lastWidthRef.current) < RESIZE_WIDTH_THRESHOLD_PX) return;
+
+        lastWidthRef.current = settledWidth;
+
         if (viewerRef.current) triggerResize(viewerRef.current);
       }, RESIZE_SETTLE_MS);
     });
@@ -166,7 +182,7 @@ const PresentationViewer = memo(({ mediaUrl, fileExtension, onError }: Presentat
     <div className='relative h-full w-full overflow-hidden'>
       <div
         className={cn(
-          'absolute inset-0 z-10 flex items-center justify-center transition-opacity duration-300',
+          'absolute inset-0 z-10 flex items-center justify-center transition-opacity duration-200',
           isLoading ? 'opacity-100' : 'pointer-events-none opacity-0',
         )}
       >
