@@ -49,7 +49,7 @@ const ShareDatasetNeonPopup: FC<ShareDatasetNeonPopupProps> = ({ tableName }) =>
   const [showValidationError, setShowValidationError] = useState(false);
   const [validationErrorText, setValidationErrorText] = useState('');
 
-  const { userId, userEmail, organizationId, isAdmin: isOrgAdmin } = useUserIdentity();
+  const { userId, userEmail, organizationId } = useUserIdentity();
   const { data: orgMembers } = useGetAudiencesByOrganisationIdQuery(
     { organizationId },
     { skip: !organizationId || !open },
@@ -74,7 +74,7 @@ const ShareDatasetNeonPopup: FC<ShareDatasetNeonPopupProps> = ({ tableName }) =>
   const existingUserIds = useMemo(() => new Set(rolesData?.roles?.map((r) => r.user_id) ?? []), [rolesData]);
 
   const currentUserRole = useMemo(() => rolesData?.roles?.find((r) => r.user_id === userId)?.role, [rolesData, userId]);
-  const canManageAccess = currentUserRole === 'admin' || isOrgAdmin;
+  const canManageAccess = currentUserRole === 'admin';
   const isResourceSharable = !showValidationError && selectedItems.length > 0 && canManageAccess;
 
   const audienceAccessList = useMemo(

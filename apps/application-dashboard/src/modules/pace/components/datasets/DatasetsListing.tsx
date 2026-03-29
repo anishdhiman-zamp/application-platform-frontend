@@ -22,12 +22,11 @@ const DatasetsListing = () => {
   const router = useRouter();
   const { data, isLoading } = useAgentDbReadQuery(LISTING_QUERY_ARG);
   const { data: rolesData } = useGetDatasetRolesQuery({});
-  const { userId, isSystemAdmin } = useUserIdentity();
+  const { userId } = useUserIdentity();
 
   const [editTarget, setEditTarget] = useState<{ tableName: string; description: string } | null>(null);
 
   const editableTableNames = useMemo(() => {
-    if (isSystemAdmin) return null;
     if (!rolesData?.roles || !userId) return new Set<string>();
 
     const editable = new Set<string>();
@@ -39,16 +38,9 @@ const DatasetsListing = () => {
     }
 
     return editable;
-  }, [rolesData, userId, isSystemAdmin]);
+  }, [rolesData, userId]);
 
-  const canEdit = useCallback(
-    (tableName: string) => {
-      if (editableTableNames === null) return true;
-
-      return editableTableNames.has(tableName);
-    },
-    [editableTableNames],
-  );
+  const canEdit = useCallback((tableName: string) => editableTableNames.has(tableName), [editableTableNames]);
 
   const rows = useMemo(() => {
     if (!data?.rows) return [];

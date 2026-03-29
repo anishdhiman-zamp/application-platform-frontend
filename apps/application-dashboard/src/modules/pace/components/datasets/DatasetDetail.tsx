@@ -6,7 +6,7 @@ import { Button, toast } from '@zamp-platform/ui';
 import { CellEditRequestEvent, ColDef, FillEndEvent, IServerSideDatasource } from 'ag-grid-community';
 import { AgGridReact } from 'ag-grid-react';
 import { useUserIdentity } from 'hooks/useUserIdentity';
-import { ArrowLeft, Clock, Download, Loader2, Upload } from 'lucide-react';
+import { ArrowLeft, Download, Loader2 } from 'lucide-react';
 import ColumnHeader from 'modules/pace/components/datasets/ColumnHeader';
 import DatasetBlueprintEditor from 'modules/pace/components/datasets/DatasetBlueprintEditor';
 import {
@@ -61,16 +61,15 @@ const DatasetDetailInner = ({ tableName }: DatasetDetailProps) => {
   const [isExporting, setIsExporting] = useState(false);
   const [gridReady, setGridReady] = useState(false);
 
-  const { userId, isSystemAdmin } = useUserIdentity();
+  const { userId } = useUserIdentity();
   const { data: rolesData } = useGetDatasetRolesQuery({ tableName });
 
   const canEditData = useMemo(() => {
-    if (isSystemAdmin) return true;
     if (!rolesData?.roles || !userId) return false;
     const userRole = rolesData.roles.find((r) => r.user_id === userId && r.table_name === tableName);
 
     return userRole?.role === 'admin' || userRole?.role === 'editor';
-  }, [rolesData, userId, tableName, isSystemAdmin]);
+  }, [rolesData, userId, tableName]);
 
   const {
     dispatch: filterDispatch,
@@ -560,30 +559,6 @@ const DatasetDetailInner = ({ tableName }: DatasetDetailProps) => {
           </Button>
         </TooltipV2>
 
-        {/* Import Data (disabled) */}
-        <TooltipV2 tooltipBody='Import data (coming soon)' className='cursor-pointer' asChildTrigger>
-          <Button
-            size='small'
-            variant='ghost'
-            className='text-GRAY_400 flex h-5.5 w-5.5 items-center justify-center p-1'
-            disabled
-          >
-            <Upload className='h-3.5 w-3.5' />
-          </Button>
-        </TooltipV2>
-
-        {/* Activity (placeholder) */}
-        <TooltipV2 tooltipBody='Activity log (coming soon)' className='cursor-pointer' asChildTrigger>
-          <Button
-            size='small'
-            variant='ghost'
-            className='text-GRAY_400 flex h-5.5 w-5.5 items-center justify-center p-1'
-            disabled
-          >
-            <Clock className='h-3.5 w-3.5' />
-          </Button>
-        </TooltipV2>
-
         {/* Display Options */}
         <DisplayOptions tableRef={tableRef} datasetId={PREVIEW_DATASET_ID} isGroupByDisabled />
       </div>
@@ -605,8 +580,10 @@ const DatasetDetailInner = ({ tableName }: DatasetDetailProps) => {
                   getColumnInfo,
                 },
                 sortable: true,
+                flex: 0,
                 width: 200,
                 minWidth: 150,
+                maxWidth: 400,
                 resizable: true,
                 editable: canEditData,
                 suppressFillHandle: !canEditData,
