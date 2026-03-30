@@ -13,11 +13,11 @@ import { useAppDispatch, useAppSelector } from '@/hooks/toolkit';
 import ChatTopbar from '@/modules/pace/components/chat/ChatTopbar';
 import ModelSelector from '@/modules/pace/components/chat/ModelSelector';
 import { useChatDraftInput } from '@/modules/pace/hooks/useChatDraftInput';
-import { useSyncedUrlParam } from '@/modules/pace/hooks/useSyncedSearchParam';
 import { usePaceContext } from '@/modules/pace/pace.context';
 import { CHAT_SIDEBAR_STATE, TAB_TYPE } from '@/modules/pace/pace.types';
 import { baseApi } from '@/services/baseApi';
 import type { RootState } from '@/store';
+import { selectActiveTabId } from '@/store/slices/dynamic-tabs.slice';
 
 export interface ChatState {
   chat: ReturnType<typeof useChat>;
@@ -43,13 +43,13 @@ const ChatSidebarInner: FC<ChatSidebarInnerProps> = ({
   chatKey,
 }) => {
   const pathname = usePathname();
-  const fParam = useSyncedUrlParam('f');
+  const activeTabId = useAppSelector(selectActiveTabId);
   const dispatch = useAppDispatch();
   const { openTab } = useDynamicTabs({ type: TAB_TYPE.FILE });
   const { chatSidebarState, setChatSidebarState } = usePaceContext();
   const { inputValue, setInputValue } = useChatDraftInput({ conversationId });
 
-  const isOnChatRoute = pathname === ROUTES_PATH.CHAT && !fParam;
+  const isOnChatRoute = pathname === ROUTES_PATH.CHAT && !activeTabId;
 
   const organizationId = useAppSelector((state: RootState) => state.user.user?.orgs?.[0]?.organization_id) ?? '';
   const currentUserName = useAppSelector((state: RootState) => state.user.user?.user_name) ?? '';

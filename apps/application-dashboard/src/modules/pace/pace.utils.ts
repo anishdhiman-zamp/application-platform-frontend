@@ -5,9 +5,7 @@ import {
   NIGHT_GREETINGS,
   SIDEBAR_CONVERSATION_ID_PARAM,
 } from 'modules/pace/pace.constants';
-import { DynamicTab, TAB_TYPE } from 'modules/pace/pace.types';
 import type { SkillApiError } from '@/types/api/skills.types';
-import { getFromLocalStorage, LOCAL_STORAGE_KEYS, setToLocalStorage } from '@/utils/localstorage';
 
 /** Returns a random element from the given array */
 const pickRandom = (arr: string[]) => arr[Math.floor(Math.random() * arr.length)];
@@ -95,40 +93,4 @@ export const getRouteSignificantUrl = (pathname: string | null, searchParams: UR
   const query = filtered.toString();
 
   return query ? `${path}?${query}` : path;
-};
-
-/**
- * Retrieves persisted dynamic tabs from local storage, ensuring each tab
- * has a stable key and a default type.
- * @returns The array of stored dynamic tabs, or an empty array on failure
- */
-export const getStoredTabs = (): DynamicTab[] => {
-  try {
-    const stored = getFromLocalStorage(LOCAL_STORAGE_KEYS.PACE_OPEN_DYNAMIC_TABS);
-
-    if (!stored) return [];
-    const tabs = JSON.parse(stored) as DynamicTab[];
-
-    return tabs.map((tab) => ({
-      ...tab,
-      stableKey: tab.stableKey || crypto.randomUUID(),
-      type: tab.type ?? TAB_TYPE.FILE,
-    }));
-  } catch (error) {
-    console.error('Error getting stored tabs:', error);
-
-    return [];
-  }
-};
-
-/**
- * Persists the current dynamic tabs array to local storage.
- * @param tabs - The dynamic tabs to store
- */
-export const setStoredTabs = (tabs: DynamicTab[]) => {
-  try {
-    setToLocalStorage(LOCAL_STORAGE_KEYS.PACE_OPEN_DYNAMIC_TABS, JSON.stringify(tabs));
-  } catch (error) {
-    console.error('Error setting stored tabs:', error);
-  }
 };
