@@ -15,16 +15,25 @@ import { KEYBOARD_KEYS } from '@/constants/shortcuts';
 
 interface TaskRowProps {
   task: TaskListItem;
+  index?: number;
+  totalCount?: number;
+  status?: string;
 }
 
-const TaskRow = ({ task }: TaskRowProps) => {
+const TaskRow = ({ task, index, totalCount, status }: TaskRowProps) => {
   const router = useRouter();
 
   const handleRowClick = useCallback(() => {
-    const taskRoute = getChatTaskRoute({ taskId: task.id, taskTitle: task.title });
+    const taskRoute = getChatTaskRoute({
+      taskId: task.id,
+      taskTitle: task.title,
+      status,
+      currentIndex: index,
+      totalRows: totalCount,
+    });
 
     router.push(preserveSidebarParam(taskRoute));
-  }, [router, task.id, task.title]);
+  }, [router, task.id, task.title, status, index, totalCount]);
 
   const totalSubtasks = task.subtasks.length;
   const completedSubtasks = useMemo(

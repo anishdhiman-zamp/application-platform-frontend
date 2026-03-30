@@ -57,22 +57,6 @@ export const ROUTE_KIND = {
   DYNAMIC: 'dynamic',
 } as const;
 
-export type RouteKind = (typeof ROUTE_KIND)[keyof typeof ROUTE_KIND];
-
-export interface QueryRouteConfig {
-  kind: typeof ROUTE_KIND.QUERY;
-  basePath: string;
-  paramName: string;
-}
-
-export interface DynamicRouteConfig {
-  kind: typeof ROUTE_KIND.DYNAMIC;
-  basePath: string;
-  buildPath: (id: string) => string;
-}
-
-export type DynamicTabRouteConfig = QueryRouteConfig | DynamicRouteConfig;
-
 export const NAV_METHOD = {
   PUSH: 'push',
   REPLACE: 'replace',

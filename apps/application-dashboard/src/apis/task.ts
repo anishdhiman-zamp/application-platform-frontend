@@ -41,4 +41,9 @@ const taskApi = baseApi.injectEndpoints({
   }),
 });
 
-export const { useGetTaskCountsQuery, useGetTasksByStatusQuery } = taskApi;
+export const {
+  useGetTaskCountsQuery,
+  useLazyGetTaskCountsQuery,
+  useGetTasksByStatusQuery,
+  useLazyGetTasksByStatusQuery,
+} = taskApi;

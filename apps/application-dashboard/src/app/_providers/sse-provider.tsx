@@ -25,6 +25,9 @@ import {
   type EventBusInterface,
 } from '@zamp-platform/utils/event-bus/event-bus.types';
 import { API_ENDPOINTS } from '@/apis/apiEndpoint.constants';
+import { APITags } from '@/constants/api.constants';
+import { baseApi } from '@/services/baseApi';
+import { store } from '@/store';
 import type { MapAny } from '@/types/commonTypes';
 
 interface SSEContextType {
@@ -354,6 +357,10 @@ const taskPayloadResolver: PayloadResolver = {
   },
 };
 
+function invalidateTaskCaches(): void {
+  store.dispatch(baseApi.util.invalidateTags([APITags.GET_TASK_COUNTS, APITags.GET_TASK_LIST]));
+}
+
 /** Generic handler for MESSAGE_START / OUTPUT_FILES / MESSAGE_STOP events. */
 function handleGlobalMessageEvent(resolver: PayloadResolver, data: BaseEventPayload): void {
   try {
@@ -446,6 +453,8 @@ function handleGlobalTaskUpdate(data: BaseEventPayload): void {
 
     if (!taskId || !status) return;
 
+    invalidateTaskCaches();
+
     streamingStateStore.update(sourceId, (prev) => {
       if (!prev) return prev;
 
@@ -505,9 +514,15 @@ export const SSEProvider: React.FC<SSEProviderProps> = ({ children, sseEventBus 
     const convSub = sseEventBus.subscribe(EVENT_TYPE.CONVERSATION_V2, (data) =>
       handleGlobalMessageEvent(conversationPayloadResolver, data),
     );
-    const taskSub = sseEventBus.subscribe(EVENT_TYPE.TASK, (data) =>
-      handleGlobalMessageEvent(taskPayloadResolver, data),
-    );
+    const taskSub = sseEventBus.subscribe(EVENT_TYPE.TASK, (data) => {
+      handleGlobalMessageEvent(taskPayloadResolver, data);
+
+      const payload = data.payload as MapAny;
+
+      if (payload?.type === SSEEventType.MESSAGE_STOP) {
+        invalidateTaskCaches();
+      }
+    });
     const taskUpdateSub = sseEventBus.subscribe(EVENT_TYPE.TASK_UPDATE, handleGlobalTaskUpdate);
 
     return () => {

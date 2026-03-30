@@ -77,8 +77,8 @@ const TaskAccordionSection = ({ status, count, search, scrollContainerRef }: Tas
       </AccordionTrigger>
       <AccordionContent className='p-0' disableAnimation>
         <div>
-          {tasks.map((task) => (
-            <TaskRow key={task.id} task={task} />
+          {tasks.map((task, index) => (
+            <TaskRow key={task.id} task={task} index={index} totalCount={totalCount} status={status} />
           ))}
           {hasMore && <div ref={sentinelRef} className='h-px' />}
         </div>

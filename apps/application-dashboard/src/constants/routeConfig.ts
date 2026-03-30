@@ -126,16 +126,25 @@ export const getChatTaskRoute = ({
   taskId,
   conversationId,
   taskTitle,
+  status,
+  currentIndex,
+  totalRows,
 }: {
   taskId: string;
   conversationId?: string;
   taskTitle?: string;
+  status?: string;
+  currentIndex?: number;
+  totalRows?: number;
 }) => {
   const basePath = ROUTES_PATH.CHAT_TASK.replace(':taskId', taskId);
   const params = new URLSearchParams();
 
   if (conversationId) params.set('s', conversationId);
   if (taskTitle) params.set('title', taskTitle);
+  if (status) params.set('status', status);
+  if (currentIndex !== undefined) params.set('currentIndex', String(currentIndex + 1));
+  if (totalRows !== undefined) params.set('totalRows', String(totalRows));
 
   const query = params.toString();
 

@@ -6,6 +6,7 @@ import sheetFiltersSliceReducer from 'store/slices/sheet-filters';
 import tableStateSliceReducer from 'store/slices/table-state';
 import userSliceReducer from 'store/slices/user';
 import { baseApi } from '@/services/baseApi';
+import dynamicTabsSliceReducer, { dynamicTabsListenerMiddleware } from '@/store/slices/dynamic-tabs.slice';
 import feedbacksSliceReducer from '@/store/slices/feedback.slice';
 
 const reducer = combineReducers({
@@ -16,11 +17,15 @@ const reducer = combineReducers({
   sheetFilters: sheetFiltersSliceReducer,
   tableState: tableStateSliceReducer,
   feedbacks: feedbacksSliceReducer,
+  dynamicTabs: dynamicTabsSliceReducer,
 });
 
 export const store = configureStore({
   reducer: reducer,
-  middleware: (getDefaultMiddleware) => getDefaultMiddleware().concat(baseApi.middleware, chatApi.middleware),
+  middleware: (getDefaultMiddleware) =>
+    getDefaultMiddleware()
+      .prepend(dynamicTabsListenerMiddleware.middleware)
+      .concat(baseApi.middleware, chatApi.middleware),
 });
 
 setupListeners(store.dispatch);
