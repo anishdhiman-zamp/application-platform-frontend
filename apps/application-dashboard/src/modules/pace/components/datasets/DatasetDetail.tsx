@@ -65,12 +65,14 @@ const DatasetDetailInner = ({ tableName }: DatasetDetailProps) => {
   const { userId } = useUserIdentity();
   const { data: rolesData } = useGetDatasetRolesQuery({ tableName });
 
-  const canEditData = useMemo(() => {
-    if (!rolesData?.roles || !userId) return false;
-    const userRole = rolesData.roles.find((r) => r.user_id === userId && r.table_name === tableName);
+  const userRole = useMemo(() => {
+    if (!rolesData?.roles || !userId) return undefined;
 
-    return userRole?.role === 'admin' || userRole?.role === 'editor';
+    return rolesData.roles.find((r) => r.user_id === userId && r.table_name === tableName)?.role;
   }, [rolesData, userId, tableName]);
+
+  const canEditData = userRole === 'admin' || userRole === 'editor';
+  const canEditBlueprint = userRole === 'admin';
 
   const {
     dispatch: filterDispatch,
@@ -576,8 +578,8 @@ const DatasetDetailInner = ({ tableName }: DatasetDetailProps) => {
               columnConfig={{
                 headerComponent: ColumnHeader,
                 headerComponentParams: {
-                  onColumnRename: canEditData ? handleColumnRename : undefined,
-                  onColumnRequiredChange: canEditData ? handleColumnRequiredChange : undefined,
+                  onColumnRename: canEditBlueprint ? handleColumnRename : undefined,
+                  onColumnRequiredChange: canEditBlueprint ? handleColumnRequiredChange : undefined,
                   getColumnInfo,
                 },
                 sortable: true,
@@ -611,10 +613,10 @@ const DatasetDetailInner = ({ tableName }: DatasetDetailProps) => {
                 <DatasetBlueprintEditor
                   columns={blueprintColumns}
                   onChange={handleBlueprintChange}
-                  canEdit={canEditData}
+                  canEdit={canEditBlueprint}
                 />
               </div>
-              {canEditData && hasBlueprintChanges && (
+              {canEditBlueprint && hasBlueprintChanges && (
                 <div className='border-GRAY_200 bg-BG_WHITE sticky bottom-0 z-10 flex justify-end border-t p-3'>
                   <Button onClick={handleSaveBlueprint} disabled={isSaving}>
                     {isSaving ? 'Saving...' : 'Save'}
