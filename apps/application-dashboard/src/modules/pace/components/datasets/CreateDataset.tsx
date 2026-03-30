@@ -11,6 +11,7 @@ import {
   LIST_TABLES_QUERY,
   sanitizeTableName,
 } from 'modules/pace/components/datasets/datasets.constants';
+import { preserveSidebarParam } from 'modules/pace/pace.utils';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import { useAgentDbReadQuery, useAgentDbWriteMutation } from '@/apis/agentManagedDb';
@@ -79,7 +80,7 @@ const CreateDataset = () => {
     try {
       await executeMutation({ query: sql }).unwrap();
       toast.success('Dataset created successfully');
-      router.push(getDatasetDetailRoute(tableName));
+      router.push(preserveSidebarParam(getDatasetDetailRoute(tableName)));
     } catch {
       toast.error('Failed to create dataset');
     }
@@ -106,7 +107,7 @@ const CreateDataset = () => {
     <div className='bg-BG_WHITE flex h-full w-full flex-1 flex-col'>
       {/* Header */}
       <div className='border-GRAY_400 flex items-center gap-3 border-b px-10 pt-10 pb-8'>
-        <Link href={ROUTES_PATH.CHAT_SETTINGS_DATASETS}>
+        <Link href={preserveSidebarParam(ROUTES_PATH.CHAT_SETTINGS_DATASETS)}>
           <ArrowLeft width={18} height={18} className='text-GRAY_700 hover:text-GRAY_1000 transition-colors' />
         </Link>
         {isEditingTitle ? (
