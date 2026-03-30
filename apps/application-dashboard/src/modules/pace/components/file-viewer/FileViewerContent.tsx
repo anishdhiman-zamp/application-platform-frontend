@@ -1,6 +1,6 @@
 'use client';
 
-import { memo, useCallback, useEffect, useMemo, useState } from 'react';
+import { memo, useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import UnsupportedFileView from 'modules/pace/components/file-viewer/viewers/UnsupportedFileView';
 import ImageLoader from '@/components/common/loader/ImageLoader';
 import CommonWrapper from '@/components/commonWrapper';
@@ -15,6 +15,7 @@ const SpreadsheetViewer = clientOnly(() => import('./viewers/spreadsheet/Spreads
 const DocxViewer = clientOnly(() => import('./viewers/DocxViewer'));
 const PresentationViewer = clientOnly(() => import('./viewers/PresentationViewer'));
 
+import { MILKDOWN_SIZE_LIMIT } from '@/modules/pace/components/file-viewer/file-viewer.constants';
 import type {
   HtmlViewMode,
   MarkdownViewMode,
@@ -24,7 +25,7 @@ import FileViewerError from '@/modules/pace/components/file-viewer/FileViewerErr
 import AudioViewer from '@/modules/pace/components/file-viewer/viewers/AudioViewer';
 import HtmlPreviewViewer from '@/modules/pace/components/file-viewer/viewers/HtmlPreviewViewer';
 import ImageViewer from '@/modules/pace/components/file-viewer/viewers/ImageViewer';
-import { getMonacoLanguage } from '@/modules/pace/components/file-viewer/viewers/MonacoCodeEditor';
+import { getMonacoLanguage } from '@/modules/pace/components/file-viewer/viewers/monaco.utils';
 import VideoViewer from '@/modules/pace/components/file-viewer/viewers/VideoViewer';
 import { getMediaUrl } from '@/modules/pace/components/files/file-tree.utils';
 import {
@@ -57,6 +58,19 @@ interface FileViewerContentProps {
   spreadsheetViewMode?: SpreadsheetViewMode;
 }
 
+/**
+ * Wrapper that passes isActive to Audio/Video viewers via a ref so the
+ * parent useMemo doesn't need isActive as a dependency (which would
+ * recreate every viewer's JSX on each tab switch).
+ */
+const ActiveMediaWrapper = memo(
+  ({ isActive, children }: { isActive: boolean; children: (active: boolean) => React.ReactNode }) => {
+    return <>{children(isActive)}</>;
+  },
+);
+
+ActiveMediaWrapper.displayName = 'ActiveMediaWrapper';
+
 const FileViewerContent = memo(
   ({
     filePath,
@@ -75,21 +89,25 @@ const FileViewerContent = memo(
     spreadsheetViewMode = 'table',
   }: FileViewerContentProps) => {
     const [mediaError, setMediaError] = useState<{ message?: string } | null>(null);
+    const isActiveRef = useRef(isActive);
 
-    const handleMediaError = useCallback((message?: string) => {
-      setMediaError({ message });
-    }, []);
+    isActiveRef.current = isActive;
 
     const fallbackMediaUrl = getMediaUrl(filePath);
     const effectiveMediaUrl = mediaUrl || fallbackMediaUrl;
+
     const isTextSpreadsheet =
       fileCategory === FILE_CATEGORY.SPREADSHEET &&
       (TEXT_SPREADSHEET_EXTENSIONS as readonly string[]).includes(fileExtension.toLowerCase());
-
     const isContentLoading =
       (isLoading && isEditable) ||
       (CONTENT_BASED_CATEGORIES.has(fileCategory) && content === null) ||
       (isTextSpreadsheet && content === null);
+    const needsActiveState = fileCategory === FILE_CATEGORY.AUDIO || fileCategory === FILE_CATEGORY.VIDEO;
+
+    const handleMediaError = useCallback((message?: string) => {
+      setMediaError({ message });
+    }, []);
 
     useEffect(() => {
       setMediaError(null);
@@ -101,12 +119,8 @@ const FileViewerContent = memo(
           return <ImageViewer src={effectiveMediaUrl} alt={fileName} onError={handleMediaError} />;
 
         case FILE_CATEGORY.AUDIO:
-          return (
-            <AudioViewer src={effectiveMediaUrl} fileName={fileName} isActive={isActive} onError={handleMediaError} />
-          );
-
         case FILE_CATEGORY.VIDEO:
-          return <VideoViewer src={effectiveMediaUrl} isActive={isActive} onError={handleMediaError} />;
+          return null;
 
         case FILE_CATEGORY.PDF:
           return (
@@ -114,7 +128,7 @@ const FileViewerContent = memo(
           );
 
         case FILE_CATEGORY.MARKDOWN:
-          if (markdownViewMode === 'raw') {
+          if (markdownViewMode === 'raw' || (content && content.length > MILKDOWN_SIZE_LIMIT)) {
             return <MonacoCodeEditor content={content!} language='markdown' onChange={onContentChange} />;
           }
 
@@ -141,6 +155,7 @@ const FileViewerContent = memo(
               content={isTextSpreadsheet ? content : undefined}
               mediaUrl={!isTextSpreadsheet ? effectiveMediaUrl : undefined}
               fileExtension={fileExtension}
+              isActive={isActiveRef.current}
               onError={handleMediaError}
             />
           );
@@ -184,7 +199,6 @@ const FileViewerContent = memo(
       effectiveMediaUrl,
       fileName,
       handleMediaError,
-      isActive,
       markdownViewMode,
       content,
       onContentChange,
@@ -192,6 +206,18 @@ const FileViewerContent = memo(
       fileExtension,
       spreadsheetViewMode,
     ]);
+
+    const mediaContent = needsActiveState ? (
+      <ActiveMediaWrapper isActive={isActive}>
+        {(active) =>
+          fileCategory === FILE_CATEGORY.AUDIO ? (
+            <AudioViewer src={effectiveMediaUrl} fileName={fileName} isActive={active} onError={handleMediaError} />
+          ) : (
+            <VideoViewer src={effectiveMediaUrl} isActive={active} onError={handleMediaError} />
+          )
+        }
+      </ActiveMediaWrapper>
+    ) : null;
 
     return (
       <CommonWrapper
@@ -205,7 +231,7 @@ const FileViewerContent = memo(
         className='flex h-full w-full items-center justify-center'
         disableAnimation
       >
-        {renderContent}
+        {needsActiveState ? mediaContent : renderContent}
       </CommonWrapper>
     );
   },
