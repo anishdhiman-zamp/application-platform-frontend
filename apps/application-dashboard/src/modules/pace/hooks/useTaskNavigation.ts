@@ -187,6 +187,25 @@ export const useTaskNavigation = (taskId?: string) => {
 
   const { sseEventBus } = useEventBus();
 
+  const fetchPageTasks = useCallback(
+    async (pageNumber: number, fetchStatus?: TaskStatus): Promise<TaskListItem[]> => {
+      const targetStatus = fetchStatus ?? status;
+
+      if (!targetStatus) return [];
+
+      try {
+        const { data } = await triggerFetchPage({ status: targetStatus, page: pageNumber, limit: TASKS_PAGE_SIZE });
+
+        return data?.tasks || [];
+      } catch (err) {
+        captureException(err);
+
+        return [];
+      }
+    },
+    [status, triggerFetchPage],
+  );
+
   useEffect(() => {
     if (liveTotal === undefined || liveTotal === urlTotal || urlIndex === -1) return;
 
@@ -294,27 +313,10 @@ export const useTaskNavigation = (taskId?: string) => {
       cancelled = true;
       sub.unsubscribe();
     };
+    // fetchPageTasks is intentionally excluded from deps to avoid re-subscribing on status changes;
+    // status is already in the dep array and fetchPageTasks uses the current status via closure
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [taskId, urlIndex, status]);
-
-  const fetchPageTasks = useCallback(
-    async (pageNumber: number, fetchStatus?: TaskStatus): Promise<TaskListItem[]> => {
-      const targetStatus = fetchStatus ?? status;
-
-      if (!targetStatus) return [];
-
-      try {
-        const { data } = await triggerFetchPage({ status: targetStatus, page: pageNumber, limit: TASKS_PAGE_SIZE });
-
-        return data?.tasks || [];
-      } catch (err) {
-        captureException(err);
-
-        return [];
-      }
-    },
-    [status, triggerFetchPage],
-  );
 
   const navigateToTask = useCallback(
     async (direction: 'next' | 'previous') => {

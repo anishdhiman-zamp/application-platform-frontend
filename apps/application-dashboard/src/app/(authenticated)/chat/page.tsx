@@ -16,6 +16,7 @@ const ChatPage = () => {
   }
 
   if (isNonFileTab) {
+    // Non-file tabs (e.g. TASK) render their own Next.js route; show nothing here.
     return null;
   }
 

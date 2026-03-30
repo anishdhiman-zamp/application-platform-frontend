@@ -24,18 +24,9 @@ import { SkeletonTypes } from '@/components/commonWrapper/commonWrapper.types';
 import { ROUTES_PATH } from '@/constants/routeConfig';
 import { useAppSelector } from '@/hooks/toolkit';
 import ChatTopbar from '@/modules/pace/components/chat/ChatTopbar';
+import { getActiveTabIdFromUrl } from '@/modules/pace/components/dynamic-tabs/tab-type-registry';
 import ChatMessagesSkeleton from '@/modules/pace/components/loaders/ChatMessagesSkeleton';
 import type { RootState } from '@/store';
-
-const TASK_BASE_PATH = '/chat/task/';
-
-function extractTaskIdFromPath(pathname: string): string {
-  if (!pathname.startsWith(TASK_BASE_PATH)) return '';
-
-  const segment = pathname.slice(TASK_BASE_PATH.length).split('/')[0];
-
-  return segment ? decodeURIComponent(segment) : '';
-}
 
 interface TaskContentInnerProps {
   taskId: string;
@@ -48,8 +39,8 @@ interface TaskNavigationProps {
   hasPrevious: boolean;
   isLoading: boolean;
   isBootstrapping: boolean;
-  goToNextTask: () => void;
-  goToPreviousTask: () => void;
+  onGoToNextTask: () => void;
+  onGoToPreviousTask: () => void;
 }
 
 const TaskNavigation = memo(
@@ -60,8 +51,8 @@ const TaskNavigation = memo(
     hasPrevious,
     isLoading,
     isBootstrapping,
-    goToNextTask,
-    goToPreviousTask,
+    onGoToNextTask,
+    onGoToPreviousTask,
   }: TaskNavigationProps) => {
     if (isBootstrapping) {
       return (
@@ -91,7 +82,7 @@ const TaskNavigation = memo(
             )}
             onClick={() => {
               if (isLoading || !hasNext) return;
-              goToNextTask();
+              onGoToNextTask();
             }}
           />
         </TooltipV2>
@@ -106,7 +97,7 @@ const TaskNavigation = memo(
             )}
             onClick={() => {
               if (isLoading || !hasPrevious) return;
-              goToPreviousTask();
+              onGoToPreviousTask();
             }}
           />
         </TooltipV2>
@@ -191,8 +182,8 @@ const TaskContentChat = ({ taskId }: { taskId: string }) => {
               hasPrevious={hasPrevious}
               isLoading={isLoading}
               isBootstrapping={isBootstrapping}
-              goToNextTask={goToNextTask}
-              goToPreviousTask={goToPreviousTask}
+              onGoToNextTask={goToNextTask}
+              onGoToPreviousTask={goToPreviousTask}
             />
           }
         />
@@ -229,7 +220,7 @@ const TaskContentChat = ({ taskId }: { taskId: string }) => {
 
 const TaskContentInner = ({ taskId: propTaskId }: TaskContentInnerProps) => {
   const nextPathname = usePathname();
-  const urlTaskId = useMemo(() => extractTaskIdFromPath(nextPathname ?? ''), [nextPathname]);
+  const urlTaskId = useMemo(() => getActiveTabIdFromUrl(nextPathname ?? '', '', TAB_TYPE.TASK) ?? '', [nextPathname]);
   const taskId = urlTaskId || propTaskId;
 
   return <TaskContentChat key={taskId} taskId={taskId} />;

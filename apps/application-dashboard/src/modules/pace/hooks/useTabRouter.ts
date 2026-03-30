@@ -55,9 +55,7 @@ export const useTabRouter = (config: UseTabRouterConfig = {}): UseTabRouterRetur
 
   const navigateTo = useCallback(
     (path: string, method: NavMethod = NAV_METHOD.PUSH) => {
-      const fullPath = preserveSidebarParam(path);
-
-      if (isSameBasePath(fullPath)) {
+      if (isSameBasePath(path)) {
         historyNavigate(path, method);
       } else {
         routeNavigate(path, method);
