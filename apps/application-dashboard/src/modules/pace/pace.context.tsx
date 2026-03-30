@@ -10,11 +10,11 @@ import {
   SIDEBAR_MIN_WIDTH,
   SIDEBAR_WIDTH,
 } from 'modules/pace/pace.constants';
-import { CHAT_SIDEBAR_STATE, type ChatSidebarState, DynamicTab, TAB_TYPE } from 'modules/pace/pace.types';
-import { getStoredTabs, setStoredTabs } from 'modules/pace/pace.utils';
+import { CHAT_SIDEBAR_STATE, type ChatSidebarState } from 'modules/pace/pace.types';
 import { usePathname } from 'next/navigation';
 import { ROUTES_PATH } from '@/constants/routeConfig';
-import { useSyncedPathname, useSyncedUrlParam } from '@/modules/pace/hooks/useSyncedSearchParam';
+import { useAppSelector } from '@/hooks/toolkit';
+import { selectActiveTabId } from '@/store/slices/dynamic-tabs.slice';
 import { defaultFnType } from '@/types/commonTypes';
 import {
   getFromLocalStorage,
@@ -45,13 +45,6 @@ interface PaceContextType {
 
   registerSelectConversation: (callback: (id: string) => void) => void;
   selectConversation: (id: string) => void;
-
-  dynamicTabs: DynamicTab[];
-  isDynamicTabsHydrated: boolean;
-  openDynamicTab: (tab: Omit<DynamicTab, 'stableKey'>) => void;
-  closeDynamicTab: (id: string) => void;
-  updateDynamicTab: (oldId: string, newTab: Omit<DynamicTab, 'stableKey'>) => void;
-  reorderDynamicTabs: (newOrder: string[]) => void;
 
   pendingFileReference: PendingFileReference | null;
   setPendingFileReference: (ref: PendingFileReference | null) => void;
@@ -84,17 +77,14 @@ interface PaceContextType {
 const PaceContext = createContext<PaceContextType | null>(null);
 
 export const PaceProvider = ({ children }: { children: ReactNode }) => {
-  const nextPathname = usePathname();
-  const syncedPathname = useSyncedPathname();
-  const fileParam = useSyncedUrlParam('f');
+  const pathname = usePathname();
+  const activeTabId = useAppSelector(selectActiveTabId);
   const filesPanelLeaveTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   const startNewChatRef = useRef<defaultFnType | null>(null);
   const selectConversationRef = useRef<((id: string) => void) | null>(null);
 
-  const [dynamicTabs, setDynamicTabs] = useState<DynamicTab[]>([]);
   const [prevChatSidebarState, setPrevChatSidebarState] = useState<ChatSidebarState>(CHAT_SIDEBAR_STATE.COLLAPSED);
   const [chatSidebarState, setChatSidebarStateRaw] = useState<ChatSidebarState>(CHAT_SIDEBAR_STATE.COLLAPSED);
-  const [isDynamicTabsHydrated, setIsDynamicTabsHydrated] = useState(false);
   const [pendingFileReference, setPendingFileReference] = useState<PendingFileReference | null>(null);
   const [pendingConversationPayload, setPendingConversationPayload] = useState<PendingConversationPayload | null>(null);
   const [filesPanelOpen, setFilesPanelOpen] = useState(false);
@@ -104,14 +94,11 @@ export const PaceProvider = ({ children }: { children: ReactNode }) => {
   const [filesPanelWidth, setFilesPanelWidthRaw] = useState(FILES_PANEL_WIDTH);
   const [isFilesPanelResizing, setIsFilesPanelResizing] = useState(false);
 
-  const pathname = syncedPathname || nextPathname;
-  const hasFileParam = fileParam !== null;
-  const routeUrl = hasFileParam ? `${pathname}?f=${fileParam}` : pathname;
-  const prevRouteUrlRef = useRef(routeUrl);
+  const routeSignature = activeTabId ? `${pathname}:${activeTabId}` : pathname;
+  const prevRouteSignatureRef = useRef(routeSignature);
   const chatSidebarStateRef = useRef(chatSidebarState);
 
   chatSidebarStateRef.current = chatSidebarState;
-  const isOnChatRoute = pathname === ROUTES_PATH.CHAT;
 
   const setChatSidebarStateInternal = useCallback((next: ChatSidebarState) => {
     setChatSidebarStateRaw((prev) => {
@@ -208,82 +195,16 @@ export const PaceProvider = ({ children }: { children: ReactNode }) => {
     selectConversationRef.current?.(id);
   }, []);
 
-  const openDynamicTab = useCallback((tab: Omit<DynamicTab, 'stableKey'>) => {
-    setDynamicTabs((prev) => {
-      const exists = prev.some((t) => t.id === tab.id && t.type === (tab.type ?? TAB_TYPE.FILE));
-
-      if (exists) return prev;
-
-      const newTab: DynamicTab = {
-        ...tab,
-        type: tab.type ?? TAB_TYPE.FILE,
-        stableKey: crypto.randomUUID(),
-      };
-
-      const newTabs = [...prev, newTab];
-
-      setStoredTabs(newTabs);
-
-      return newTabs;
-    });
-  }, []);
-
-  const closeDynamicTab = useCallback((id: string) => {
-    setDynamicTabs((prev) => {
-      const newTabs = prev.filter((tab) => tab.id !== id);
-
-      setStoredTabs(newTabs);
-
-      return newTabs;
-    });
-  }, []);
-
-  const updateDynamicTab = useCallback((oldId: string, newTab: Omit<DynamicTab, 'stableKey'>) => {
-    setDynamicTabs((prev) => {
-      const tabIndex = prev.findIndex((tab) => tab.id === oldId);
-
-      if (tabIndex === -1) return prev;
-
-      const existingTab = prev[tabIndex];
-      const newTabs = [...prev];
-
-      newTabs[tabIndex] = {
-        ...newTab,
-        type: newTab.type ?? existingTab.type ?? TAB_TYPE.FILE,
-        stableKey: existingTab.stableKey,
-      };
-      setStoredTabs(newTabs);
-
-      return newTabs;
-    });
-  }, []);
-
-  const reorderDynamicTabs = useCallback((newOrder: string[]) => {
-    setDynamicTabs((prev) => {
-      const tabMap = new Map(prev.map((tab) => [tab.id, tab]));
-
-      const reorderedTabs = newOrder.map((id) => tabMap.get(id)).filter((tab): tab is DynamicTab => tab !== undefined);
-
-      if (reorderedTabs.length !== prev.length) {
-        return prev;
-      }
-
-      setStoredTabs(reorderedTabs);
-
-      return reorderedTabs;
-    });
-  }, []);
-
   useEffect(() => {
-    if (prevRouteUrlRef.current === routeUrl) {
+    if (prevRouteSignatureRef.current === routeSignature) {
       return;
     }
-    prevRouteUrlRef.current = routeUrl;
+    prevRouteSignatureRef.current = routeSignature;
 
     if (chatSidebarStateRef.current === CHAT_SIDEBAR_STATE.EXPANDED) {
       setChatSidebarStateInternal(CHAT_SIDEBAR_STATE.COLLAPSED);
     }
-  }, [routeUrl, isOnChatRoute, hasFileParam]);
+  }, [routeSignature]);
 
   const clampSidebarWidthToFilesPanel = useCallback(() => {
     if (!(filesPanelOpen && filesPanelPinned)) return;
@@ -326,11 +247,6 @@ export const PaceProvider = ({ children }: { children: ReactNode }) => {
   }, [clampSidebarWidthToFilesPanel]);
 
   useEffect(() => {
-    const storedTabs = getStoredTabs();
-
-    setDynamicTabs(storedTabs);
-    setIsDynamicTabsHydrated(true);
-
     const storedPinned = getFromLocalStorage(LOCAL_STORAGE_KEYS.PACE_FILES_PANEL_PINNED);
 
     if (storedPinned) {
@@ -392,13 +308,6 @@ export const PaceProvider = ({ children }: { children: ReactNode }) => {
       registerSelectConversation,
       selectConversation,
 
-      dynamicTabs,
-      isDynamicTabsHydrated,
-      openDynamicTab,
-      closeDynamicTab,
-      updateDynamicTab,
-      reorderDynamicTabs,
-
       pendingFileReference,
       setPendingFileReference,
       clearPendingFileReference,
@@ -437,13 +346,6 @@ export const PaceProvider = ({ children }: { children: ReactNode }) => {
 
       registerSelectConversation,
       selectConversation,
-
-      dynamicTabs,
-      isDynamicTabsHydrated,
-      openDynamicTab,
-      closeDynamicTab,
-      updateDynamicTab,
-      reorderDynamicTabs,
 
       pendingFileReference,
       clearPendingFileReference,

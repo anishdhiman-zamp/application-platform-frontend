@@ -6,9 +6,9 @@ import { motion } from 'framer-motion';
 import { getSidebarTransitionDirection, getSidebarTransitions, NO_ANIMATION } from 'modules/pace/pace.animations';
 import { SIDEBAR_CONVERSATION_ID_PARAM } from 'modules/pace/pace.constants';
 import { CHAT_SIDEBAR_STATE } from 'modules/pace/pace.types';
+import { useSearchParams } from 'next/navigation';
 import ChatSidebarInner from '@/modules/pace/components/layout/chat-sidebar/ChatSidebarInner';
 import { useChatSidebarState } from '@/modules/pace/hooks/useChatSidebarState';
-import { useSyncedUrlParam } from '@/modules/pace/hooks/useSyncedSearchParam';
 import { usePaceContext } from '@/modules/pace/pace.context';
 
 const ChatSidebar = () => {
@@ -23,7 +23,8 @@ const ChatSidebar = () => {
     sidebarWidth,
     isSidebarResizing,
   } = usePaceContext();
-  const initialConversationId = useSyncedUrlParam(SIDEBAR_CONVERSATION_ID_PARAM);
+  const searchParams = useSearchParams();
+  const initialConversationId = searchParams?.get(SIDEBAR_CONVERSATION_ID_PARAM) ?? null;
   const { chatTitle, setChatTitle, conversationId, setConversationId, chatKey, startNewChat } = useChatSidebarState({
     initialConversationId,
   });

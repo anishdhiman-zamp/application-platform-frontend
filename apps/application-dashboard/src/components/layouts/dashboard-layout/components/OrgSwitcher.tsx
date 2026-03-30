@@ -28,6 +28,7 @@ import { ENVIRONMENT, ENVIRONMENT_TYPES, ORG_COLORS } from '@/constants/common.c
 import { ROUTES_PATH } from '@/constants/routeConfig';
 import { KEYBOARD_KEYS } from '@/constants/shortcuts';
 import { useAppDispatch, useAppSelector } from '@/hooks/toolkit';
+import { dynamicTabsActions } from '@/store/slices/dynamic-tabs.slice';
 import { setIsOrgSwitchIsInProgress } from '@/store/slices/user';
 import type { Organization } from '@/types/api/auth.types';
 import {
@@ -91,7 +92,7 @@ const OrgSwitcher: FC<OrgSwitcherProps> = ({
       disconnectSSE();
       dispatch(setIsOrgSwitchIsInProgress(true));
 
-      removeFromLocalStorage(LOCAL_STORAGE_KEYS.PACE_OPEN_DYNAMIC_TABS);
+      dispatch(dynamicTabsActions.clearAllTabs());
       removeFromLocalStorage(LOCAL_STORAGE_KEYS.PACE_FILE_TREE_EXPANDED_PATHS);
       setToLocalStorage(LOCAL_STORAGE_KEYS.XZAMP_ORGANIZATION_ID, org.organization_id);
       setCookie(ACTIVE_ORG_ID_COOKIE, org.organization_id);

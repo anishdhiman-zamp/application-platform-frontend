@@ -1,6 +1,6 @@
 'use client';
 
-import { useCallback, useMemo, useRef } from 'react';
+import { useCallback, useEffect, useMemo, useRef } from 'react';
 import { Button, FolderOpenIcon, MessageSquareIcon } from '@zamp-platform/ui';
 import { cn } from '@zamp-platform/ui/utils';
 import { motion } from 'framer-motion';
@@ -8,20 +8,24 @@ import { PanelRightOpen } from 'lucide-react';
 import { FILES_PANEL_SPACER_TRANSITION, getNavbarAnimations, NO_ANIMATION } from 'modules/pace/pace.animations';
 import type { AnimatedIconHandle } from 'modules/pace/pace.types';
 import { CHAT_SIDEBAR_STATE, PaceNavbarItemId } from 'modules/pace/pace.types';
-import { usePathname } from 'next/navigation';
+import { usePathname, useSearchParams } from 'next/navigation';
 import { ROUTES_PATH } from '@/constants/routeConfig';
+import { useAppDispatch, useAppSelector } from '@/hooks/toolkit';
 import DynamicTabsBar from '@/modules/pace/components/dynamic-tabs/DynamicTabsBar';
-import { isOnAnyTabBasePath } from '@/modules/pace/components/dynamic-tabs/tab-registry';
+import { getActiveTabIdFromUrl, isOnAnyTabBasePath } from '@/modules/pace/components/dynamic-tabs/tab-type-registry';
 import { useDynamicTabs } from '@/modules/pace/components/dynamic-tabs/useDynamicTabs';
 import NavbarIconLink from '@/modules/pace/components/layout/NavbarIconLink';
-import { useSyncedUrlParam } from '@/modules/pace/hooks/useSyncedSearchParam';
 import { PACE_NAVBAR_ITEMS, SIDEBAR_CONVERSATION_ID_PARAM } from '@/modules/pace/pace.constants';
 import { usePaceContext } from '@/modules/pace/pace.context';
+import { dynamicTabsActions, selectActiveTabId } from '@/store/slices/dynamic-tabs.slice';
 
 const PaceNavbar = () => {
   const pathname = usePathname();
-  const fParam = useSyncedUrlParam('f');
-  const sParam = useSyncedUrlParam(SIDEBAR_CONVERSATION_ID_PARAM);
+  const searchParams = useSearchParams();
+  const dispatch = useAppDispatch();
+  const activeTabId = useAppSelector(selectActiveTabId);
+  const fParam = activeTabId;
+  const sParam = searchParams?.get(SIDEBAR_CONVERSATION_ID_PARAM) ?? null;
 
   const {
     chatSidebarState,
@@ -56,6 +60,7 @@ const PaceNavbar = () => {
     [prevChatSidebarState, chatSidebarState],
   );
 
+  const searchString = searchParams?.toString() ?? '';
   const isOnChatHome = pathname === ROUTES_PATH.CHAT && !fParam;
 
   const isNavItemActive = (id: PaceNavbarItemId, path: string) => {
@@ -127,6 +132,16 @@ const PaceNavbar = () => {
     },
     [isExpanded, collapseSidebar],
   );
+
+  useEffect(() => {
+    if (!activeTabId || !pathname) return;
+
+    const urlTabId = getActiveTabIdFromUrl(pathname, searchString);
+
+    if (!urlTabId) {
+      dispatch(dynamicTabsActions.setActiveTab(null));
+    }
+  }, [pathname, searchString, dispatch]); // eslint-disable-line react-hooks/exhaustive-deps -- only react to URL changes, not activeTabId changes
 
   return (
     <div className='bg-BG_GRAY_2 flex h-[42px] items-center overflow-hidden px-2 pt-1.5 pb-1.5'>

@@ -1,14 +1,23 @@
 'use client';
 
 import FileTabsContainer from 'modules/pace/components/file-viewer/FileTabsContainer';
+import { useAppSelector } from '@/hooks/toolkit';
 import ChatHomePage from '@/modules/pace/components/chat/ChatHomePage';
-import { useSyncedUrlParam } from '@/modules/pace/hooks/useSyncedSearchParam';
+import { TAB_TYPE } from '@/modules/pace/pace.types';
+import { selectActiveTab } from '@/store/slices/dynamic-tabs.slice';
 
 const ChatPage = () => {
-  const filePath = useSyncedUrlParam('f');
+  const activeTab = useAppSelector(selectActiveTab);
+  const isFileTab = activeTab && (activeTab.type ?? TAB_TYPE.FILE) === TAB_TYPE.FILE;
+  const isNonFileTab = activeTab && !isFileTab;
 
-  if (filePath) {
+  if (isFileTab) {
     return <FileTabsContainer />;
+  }
+
+  if (isNonFileTab) {
+    // Non-file tabs (e.g. TASK) render their own Next.js route; show nothing here.
+    return null;
   }
 
   return <ChatHomePage />;
