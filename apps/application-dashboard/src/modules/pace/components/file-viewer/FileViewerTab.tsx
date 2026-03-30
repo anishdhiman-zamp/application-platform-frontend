@@ -3,6 +3,7 @@
 import { memo, useCallback, useState } from 'react';
 import { captureException } from '@sentry/browser';
 import { toast } from 'sonner';
+import { MILKDOWN_SIZE_LIMIT } from '@/modules/pace/components/file-viewer/file-viewer.constants';
 import type {
   HtmlViewMode,
   MarkdownViewMode,
@@ -67,7 +68,8 @@ const FileViewerTab = memo(({ filePath, isActive, onCloseTab }: FileViewerTabPro
   });
 
   const fileName = filePath.split('/').pop() || filePath;
-  const isMarkdown = fileCategory === FILE_CATEGORY.MARKDOWN;
+  const isLargeMarkdown = fileCategory === FILE_CATEGORY.MARKDOWN && (content?.length ?? 0) > MILKDOWN_SIZE_LIMIT;
+  const isMarkdown = fileCategory === FILE_CATEGORY.MARKDOWN && !isLargeMarkdown;
   const isHtml = fileCategory === FILE_CATEGORY.HTML;
   const isTextSpreadsheet =
     fileCategory === FILE_CATEGORY.SPREADSHEET &&

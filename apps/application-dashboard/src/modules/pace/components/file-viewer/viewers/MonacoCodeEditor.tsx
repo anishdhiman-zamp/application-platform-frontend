@@ -7,8 +7,6 @@ import { cn } from '@zamp-platform/ui/utils';
 import type { editor } from 'monaco-editor';
 import { useTheme } from '@/app/_providers/theme-provider';
 import { THEME_MODE } from '@/modules/general/constants/general.constants';
-import { EXTENSION_TO_MONACO_LANGUAGE } from '@/modules/pace/components/files/files.constants';
-
 // Configure monaco-editor to use version 0.49.0 from CDN
 loader.config({
   paths: {
@@ -23,10 +21,6 @@ interface MonacoCodeEditorProps {
   readOnly?: boolean;
   className?: string;
 }
-
-export const getMonacoLanguage = (extension: string): string => {
-  return EXTENSION_TO_MONACO_LANGUAGE[extension.toLowerCase()] || 'plaintext';
-};
 
 const MonacoCodeEditor = ({
   content,

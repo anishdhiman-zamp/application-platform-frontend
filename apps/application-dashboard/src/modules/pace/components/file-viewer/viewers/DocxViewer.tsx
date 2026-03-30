@@ -110,6 +110,9 @@ const DocxViewer = memo(({ mediaUrl, fileExtension, onError }: DocxViewerProps) 
 
     return () => {
       controller.abort();
+
+      if (container) container.innerHTML = '';
+      if (styleContainer) styleContainer.innerHTML = '';
     };
   }, [isLegacyFormat, loadDocument]);
 

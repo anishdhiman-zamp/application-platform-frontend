@@ -11,6 +11,7 @@ export interface SpreadsheetViewerProps {
   content?: string | null;
   mediaUrl?: string | null;
   fileExtension: string;
+  isActive?: boolean;
   onError?: (message?: string) => void;
 }
 
