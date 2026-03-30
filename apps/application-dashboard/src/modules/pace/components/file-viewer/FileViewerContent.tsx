@@ -1,6 +1,6 @@
 'use client';
 
-import { memo, useCallback, useEffect, useMemo, useRef, useState } from 'react';
+import { memo, useCallback, useEffect, useMemo, useState } from 'react';
 import UnsupportedFileView from 'modules/pace/components/file-viewer/viewers/UnsupportedFileView';
 import ImageLoader from '@/components/common/loader/ImageLoader';
 import CommonWrapper from '@/components/commonWrapper';
@@ -89,9 +89,6 @@ const FileViewerContent = memo(
     spreadsheetViewMode = 'table',
   }: FileViewerContentProps) => {
     const [mediaError, setMediaError] = useState<{ message?: string } | null>(null);
-    const isActiveRef = useRef(isActive);
-
-    isActiveRef.current = isActive;
 
     const fallbackMediaUrl = getMediaUrl(filePath);
     const effectiveMediaUrl = mediaUrl || fallbackMediaUrl;
@@ -104,6 +101,8 @@ const FileViewerContent = memo(
       (CONTENT_BASED_CATEGORIES.has(fileCategory) && content === null) ||
       (isTextSpreadsheet && content === null);
     const needsActiveState = fileCategory === FILE_CATEGORY.AUDIO || fileCategory === FILE_CATEGORY.VIDEO;
+    const isSpreadsheetTable =
+      fileCategory === FILE_CATEGORY.SPREADSHEET && !(isTextSpreadsheet && spreadsheetViewMode === 'raw');
 
     const handleMediaError = useCallback((message?: string) => {
       setMediaError({ message });
@@ -150,15 +149,7 @@ const FileViewerContent = memo(
             return <MonacoCodeEditor content={content!} language='plaintext' onChange={onContentChange} />;
           }
 
-          return (
-            <SpreadsheetViewer
-              content={isTextSpreadsheet ? content : undefined}
-              mediaUrl={!isTextSpreadsheet ? effectiveMediaUrl : undefined}
-              fileExtension={fileExtension}
-              isActive={isActiveRef.current}
-              onError={handleMediaError}
-            />
-          );
+          return null;
         }
 
         case FILE_CATEGORY.DOCUMENT:
@@ -219,6 +210,18 @@ const FileViewerContent = memo(
       </ActiveMediaWrapper>
     ) : null;
 
+    const spreadsheetContent = isSpreadsheetTable ? (
+      <SpreadsheetViewer
+        content={isTextSpreadsheet ? content : undefined}
+        mediaUrl={!isTextSpreadsheet ? effectiveMediaUrl : undefined}
+        fileExtension={fileExtension}
+        isActive={isActive}
+        onError={handleMediaError}
+      />
+    ) : null;
+
+    const resolvedContent = needsActiveState ? mediaContent : isSpreadsheetTable ? spreadsheetContent : renderContent;
+
     return (
       <CommonWrapper
         isLoading={isContentLoading}
@@ -231,7 +234,7 @@ const FileViewerContent = memo(
         className='flex h-full w-full items-center justify-center'
         disableAnimation
       >
-        {needsActiveState ? mediaContent : renderContent}
+        {resolvedContent}
       </CommonWrapper>
     );
   },

@@ -1,7 +1,7 @@
 import { useCallback, useMemo, useRef } from 'react';
 import type { DynamicTab } from '@/modules/pace/pace.types';
 
-const MAX_MOUNTED_TABS = 3;
+const MAX_MOUNTED_TABS = 5;
 
 /**
  * Tracks which tabs should be mounted using a "mount-on-first-activate" strategy.

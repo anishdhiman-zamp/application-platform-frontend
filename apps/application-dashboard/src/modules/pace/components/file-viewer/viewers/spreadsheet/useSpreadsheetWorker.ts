@@ -37,6 +37,7 @@ export function useSpreadsheetWorker() {
     worker.onerror = () => {
       pendingRef.current.forEach(({ reject }) => reject(new Error('Worker crashed')));
       pendingRef.current.clear();
+      workerRef.current = null;
     };
 
     workerRef.current = worker;
