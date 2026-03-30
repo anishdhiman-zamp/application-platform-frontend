@@ -7,7 +7,6 @@ import { ArrowLeft } from 'lucide-react';
 import DatasetBlueprintEditor, { createDefaultColumn } from 'modules/pace/components/datasets/DatasetBlueprintEditor';
 import {
   type BlueprintColumn,
-  buildCommentOnTableQuery,
   buildCreateTableQuery,
   LIST_TABLES_QUERY,
   sanitizeTableName,
@@ -79,7 +78,6 @@ const CreateDataset = () => {
 
     try {
       await executeMutation({ query: sql }).unwrap();
-      await executeMutation({ query: buildCommentOnTableQuery(tableName, 'New dataset') }).unwrap();
       toast.success('Dataset created successfully');
       router.push(getDatasetDetailRoute(tableName));
     } catch {

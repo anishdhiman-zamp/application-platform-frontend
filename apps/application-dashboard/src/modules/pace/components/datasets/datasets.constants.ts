@@ -1,8 +1,6 @@
 import { DatasetColumnTypes } from '@zamp-platform/dataset-create-edit';
 
-export const LIST_TABLES_QUERY = `
-SELECT table_name, description FROM _accessible_tables ORDER BY table_name
-`.trim();
+export const LIST_TABLES_QUERY = `SELECT table_name FROM _accessible_tables ORDER BY table_name`;
 
 export const DETAIL_PAGE_SIZE = 100;
 export const EXPORT_CHUNK_SIZE = 5000;
@@ -152,12 +150,6 @@ export const buildAlterTableBatchQuery = (
 export const buildBackfillNullsQuery = (tableName: string, columnName: string, defaultValue: string): string =>
   `UPDATE "${escapeSqlIdentifier(tableName)}" SET "${escapeSqlIdentifier(columnName)}" = '${escapeSqlString(defaultValue)}' WHERE "${escapeSqlIdentifier(columnName)}" IS NULL`;
 
-export const buildRenameTableQuery = (oldName: string, newName: string): string =>
-  `ALTER TABLE "${escapeSqlIdentifier(oldName)}" RENAME TO "${escapeSqlIdentifier(newName)}"`;
-
-export const buildCommentOnTableQuery = (tableName: string, comment: string): string =>
-  `COMMENT ON TABLE "${escapeSqlIdentifier(tableName)}" IS '${escapeSqlString(comment)}'`;
-
 // --- Schema introspection queries ---
 
 export const buildTableColumnsQuery = (tableName: string): string =>
@@ -286,7 +278,7 @@ export const buildSelectTableQuery = (
   if (sortModel?.length) {
     query += ` ORDER BY ${sortModel.map((s) => `"${escapeSqlIdentifier(s.colId)}" ${s.sort === 'desc' ? 'DESC' : 'ASC'}`).join(', ')}`;
   } else {
-    query += ' ORDER BY 1';
+    query += ` ORDER BY "_zamp_row_id"`;
   }
   query += ` LIMIT ${limit} OFFSET ${offset}`;
 
