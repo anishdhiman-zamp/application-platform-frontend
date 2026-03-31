@@ -277,8 +277,6 @@ export const buildSelectTableQuery = (
   if (filterClauses) query += ` WHERE ${filterClauses}`;
   if (sortModel?.length) {
     query += ` ORDER BY ${sortModel.map((s) => `"${escapeSqlIdentifier(s.colId)}" ${s.sort === 'desc' ? 'DESC' : 'ASC'}`).join(', ')}`;
-  } else {
-    query += ` ORDER BY "_zamp_row_id"`;
   }
   query += ` LIMIT ${limit} OFFSET ${offset}`;
 

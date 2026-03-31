@@ -72,7 +72,7 @@ const DatasetDetailInner = ({ tableName }: DatasetDetailProps) => {
   }, [rolesData, userId, tableName]);
 
   const canEditData = userRole === 'admin' || userRole === 'editor';
-  const canEditBlueprint = userRole === 'admin';
+  const canEditBlueprint = userRole === 'admin' || userRole === 'editor';
 
   const {
     dispatch: filterDispatch,
