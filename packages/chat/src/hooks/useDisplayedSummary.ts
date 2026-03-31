@@ -4,41 +4,33 @@ import { useCallback, useEffect, useRef, useState } from 'react';
 import { useEventBus } from '@/app/_providers/sse-provider';
 import type { MapAny } from '@/types/commonTypes';
 
-import { useLazyGetTaskMessagesQuery } from '../api';
-import type { ConversationSummary } from '../types/chat.types';
-import { ResourceType, SummaryStatus } from '../types/chat.types';
-
 const CHAR_INTERVAL_MS = 12;
+
+// Module-level cache so summary text accumulated by one component instance
+// (e.g. TaskBlock in the sidebar) is immediately available when another instance
+// mounts mid-stream (e.g. TaskContentInner after navigation).
+const summaryTextCache = new Map<string, string>();
 
 interface UseDisplayedSummaryParams {
   taskId: string;
   sourceId: string;
   isAgentActive: boolean;
-  hasSummary: string | boolean | undefined;
-  summaryContent: string | undefined;
+  summaryContent?: string | null;
   taskStatus: string | undefined;
 }
 
-export function useDisplayedSummary({
-  taskId,
-  sourceId,
-  isAgentActive,
-  hasSummary,
-  summaryContent,
-  taskStatus,
-}: UseDisplayedSummaryParams) {
+export function useDisplayedSummary({ taskId, sourceId, isAgentActive, summaryContent }: UseDisplayedSummaryParams) {
   const { sseEventBus } = useEventBus();
-  const [displayedText, setDisplayedText] = useState('');
-  const initialFetchDoneRef = useRef(false);
+
+  // Seed initial state from cache so mid-stream navigation shows accumulated content
+  const [displayedText, setDisplayedText] = useState(() => summaryTextCache.get(taskId) ?? '');
 
   // Full target text that we animate towards
-  const targetTextRef = useRef('');
+  const targetTextRef = useRef(summaryTextCache.get(taskId) ?? '');
   // How many characters we've revealed so far
-  const revealedCountRef = useRef(0);
+  const revealedCountRef = useRef(targetTextRef.current.length);
   // RAF / interval ID for the typing animation
   const animationRef = useRef<ReturnType<typeof setInterval> | null>(null);
-
-  const [fetchTaskMessages] = useLazyGetTaskMessagesQuery();
 
   const stopAnimation = useCallback(() => {
     if (animationRef.current !== null) {
@@ -64,6 +56,9 @@ export function useDisplayedSummary({
 
   const setTargetText = useCallback(
     (text: string, resetAnimation: boolean) => {
+      // Update module-level cache so other instances can seed from it
+      summaryTextCache.set(taskId, text);
+
       if (resetAnimation) {
         stopAnimation();
         revealedCountRef.current = 0;
@@ -72,7 +67,7 @@ export function useDisplayedSummary({
       targetTextRef.current = text;
       startAnimation();
     },
-    [stopAnimation, startAnimation],
+    [taskId, stopAnimation, startAnimation],
   );
 
   const handleTaskSummaryEvent = useCallback(
@@ -91,38 +86,13 @@ export function useDisplayedSummary({
     [sourceId, setTargetText],
   );
 
-  // Fetch initial summary content on mount when task is IN_PROGRESS
-  useEffect(() => {
-    if (initialFetchDoneRef.current || !taskId || !sourceId || taskStatus !== 'IN_PROGRESS') return;
-    initialFetchDoneRef.current = true;
-
-    fetchTaskMessages({
-      conversationId: taskId,
-      resourceId: sourceId,
-      resourceType: ResourceType.ORGANIZATION,
-    })
-      .unwrap()
-      .then((data) => {
-        const summary = data?.conversation?.summary as ConversationSummary | null | undefined;
-        if (summary?.status === SummaryStatus.IN_PROGRESS && summary.content) {
-          // Show fetched content immediately, no animation for old content
-          targetTextRef.current = summary.content;
-          revealedCountRef.current = summary.content.length;
-          setDisplayedText(summary.content);
-        }
-      })
-      .catch(() => {
-        // Silently ignore fetch errors - streaming will pick up
-      });
-  }, [taskId, sourceId, taskStatus, fetchTaskMessages]);
-
   // Reset state when taskId changes
   useEffect(() => {
+    const cached = summaryTextCache.get(taskId) ?? '';
     stopAnimation();
-    setDisplayedText('');
-    targetTextRef.current = '';
-    revealedCountRef.current = 0;
-    initialFetchDoneRef.current = false;
+    targetTextRef.current = cached;
+    revealedCountRef.current = cached.length;
+    setDisplayedText(cached);
   }, [taskId, stopAnimation]);
 
   // Cleanup on unmount
@@ -138,5 +108,5 @@ export function useDisplayedSummary({
     return displayedText || '';
   }
 
-  return hasSummary ? summaryContent : displayedText || '';
+  return summaryContent ? summaryContent : displayedText || '';
 }

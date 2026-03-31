@@ -10,7 +10,9 @@ import type { AnimatedIconHandle } from 'modules/pace/pace.types';
 import { CHAT_SIDEBAR_STATE, PaceNavbarItemId } from 'modules/pace/pace.types';
 import { usePathname, useSearchParams } from 'next/navigation';
 import { ROUTES_PATH } from '@/constants/routeConfig';
+import { KEYBOARD_KEYS } from '@/constants/shortcuts';
 import { useAppDispatch, useAppSelector } from '@/hooks/toolkit';
+import useKeyDown from '@/hooks/useKeyDown';
 import DynamicTabsBar from '@/modules/pace/components/dynamic-tabs/DynamicTabsBar';
 import { getActiveTabIdFromUrl, isOnAnyTabBasePath } from '@/modules/pace/components/dynamic-tabs/tab-type-registry';
 import { useDynamicTabs } from '@/modules/pace/components/dynamic-tabs/useDynamicTabs';
@@ -146,6 +148,23 @@ const PaceNavbar = () => {
       dispatch(dynamicTabsActions.setActiveTab(null));
     }
   }, [pathname, searchString, dispatch]); // eslint-disable-line react-hooks/exhaustive-deps -- only react to URL changes, not activeTabId changes
+
+  // Cmd + /: Toggle chat sidebar collapse/expand
+  const handleCmdSlash = useCallback(
+    (event: KeyboardEvent) => {
+      if (event.metaKey && !event.shiftKey && event.code === KEYBOARD_KEYS.SLASH) {
+        event.preventDefault();
+        if (isSidebar) {
+          collapseSidebar();
+        } else {
+          setChatSidebarState(CHAT_SIDEBAR_STATE.SIDEBAR);
+        }
+      }
+    },
+    [isSidebar, collapseSidebar, setChatSidebarState],
+  );
+
+  useKeyDown(handleCmdSlash, [KEYBOARD_KEYS.SLASH]);
 
   return (
     <div className='bg-BG_GRAY_2 flex h-[42px] items-center overflow-hidden px-2 pt-1.5 pb-1.5'>

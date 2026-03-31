@@ -18,8 +18,9 @@ export function getStepCount(messages: ChatMessage[], streamingState: StreamingS
 
 export function getProcessedMessages(messages: ChatMessage[]) {
   const assistantMessages = messages.filter((m) => m.sender_type === SenderType.ASSISTANT);
+  let lastSummaryText = null;
 
-  return assistantMessages.map((msg) => {
+  const processedMessages = assistantMessages.map((msg, index) => {
     const elements = msg.message_content?.elements ?? [];
     const lastMarkdownIdx = elements.findLastIndex((el) => el.type === BLOCK_TYPE.MARKDOWN);
 
@@ -31,8 +32,14 @@ export function getProcessedMessages(messages: ChatMessage[]) {
     const trimmedElements = elements.filter((_, i) => i !== lastMarkdownIdx);
     const trimmedMsg = { ...msg, message_content: { ...msg.message_content, elements: trimmedElements } };
 
+    if (index === assistantMessages.length - 1) {
+      lastSummaryText = markdownEl.payload.text;
+    }
+
     return { message: trimmedMsg, summaryText: markdownEl.payload.text };
   });
+
+  return { processedMessages, lastSummaryText };
 }
 
 export function getStatusLabel(isAgentActive: boolean, taskStatus: string | undefined): string {

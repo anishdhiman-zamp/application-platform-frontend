@@ -49,6 +49,9 @@ interface TaskContentInnerProps {
 }
 
 const TaskContentChat = ({ taskId }: { taskId: string }) => {
+  // Track whether streaming has ever been active to avoid re-showing the loader after stream ends
+  const hadStreamingRef = useRef(false);
+
   const { openTab } = useDynamicTabs({ type: TAB_TYPE.FILE });
   const organizationId = useAppSelector((state: RootState) => state.user.user?.orgs?.[0]?.organization_id) ?? '';
   const searchParams = useSearchParams();
@@ -96,22 +99,25 @@ const TaskContentChat = ({ taskId }: { taskId: string }) => {
   const hasMessages = chat.messages.length > 0;
   const isAnalysing = hasMessages && chat.messages[chat.messages.length - 1]?.sender_type === SenderType.USER;
 
-  const isLoadingConversation =
-    Boolean(taskId && chat?.isLoadingConversationHistory) || (!hasMessages && !chat?.streamingState);
+  if (chat.streamingState) hadStreamingRef.current = true;
 
+  const isLoadingConversation =
+    Boolean(taskId && chat?.isLoadingConversationHistory) ||
+    (!hasMessages && !chat?.streamingState && !hadStreamingRef.current);
+
+  const { processedMessages, lastSummaryText } = useMemo(() => getProcessedMessages(chat.messages), [chat.messages]);
   const conversationData = chat.conversationData;
   const summary = conversationData?.summary as ConversationSummary | null | undefined;
   const taskStatus = (conversationData as unknown as Record<string, unknown>)?.status as string | undefined;
   const isTaskDone = taskStatus && !chat.streamingState ? COMPLETED_STATUSES.has(taskStatus) : false;
-  const hasSummary = isTaskDone && summary?.status === SummaryStatus.COMPLETED && summary?.content;
+  const summaryContent = isTaskDone ? (summary?.status === SummaryStatus.COMPLETED ? lastSummaryText : null) : null;
   const isAgentActive = Boolean(chat.streamingState?.is_active) || isAnalysing;
 
   const displayedSummary = useDisplayedSummary({
     taskId,
     sourceId: organizationId,
     isAgentActive,
-    hasSummary,
-    summaryContent: summary?.content,
+    summaryContent,
     taskStatus,
   });
 
@@ -123,8 +129,6 @@ const TaskContentChat = ({ taskId }: { taskId: string }) => {
     () => getStepCount(chat.messages, chat.streamingState),
     [chat.messages, chat.streamingState],
   );
-
-  const processedMessages = useMemo(() => getProcessedMessages(chat.messages), [chat.messages]);
 
   useEffect(() => {
     if (summaryScrollRef.current) {
@@ -238,7 +242,7 @@ const TaskContentChat = ({ taskId }: { taskId: string }) => {
                   </ResizableSummaryBox>
                 ) : isAgentActive ? (
                   <div className='border-GRAY_400 rounded-[18px] border px-4 py-4'>
-                    <ShimmerText text='Analysing...' autoAnimate />
+                    <ShimmerText text='Starting now' autoAnimate />
                   </div>
                 ) : null)}
 
@@ -280,8 +284,8 @@ const TaskContentChat = ({ taskId }: { taskId: string }) => {
                   )}
                   {isAgentActive &&
                     (displayedSummary ? (
-                      <div className='relative pt-2'>
-                        <div className='bg-border absolute -top-3 left-[6.5px] h-3 w-px' />
+                      <div className='relative pt-4'>
+                        <div className='bg-border absolute -top-0 left-[6.5px] h-3 w-px' />
                         <ResizableSummaryBox
                           borderRadius='rounded-[12px]'
                           contentClassName='px-4 pt-3 pb-1'

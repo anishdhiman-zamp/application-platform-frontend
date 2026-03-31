@@ -79,6 +79,10 @@ const TaskAccordionGroup = ({ search }: TaskAccordionGroupProps) => {
 
       if (!closedItem) return;
 
+      // Only scroll when the accordion item is at the top of the current scroll area
+      // (i.e. its natural position has been scrolled past)
+      if (closedItem.offsetTop > container.scrollTop) return;
+
       const containerRect = container.getBoundingClientRect();
       const itemRect = closedItem.getBoundingClientRect();
 

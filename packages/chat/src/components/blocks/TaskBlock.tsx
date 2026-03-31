@@ -5,10 +5,13 @@ import { formatPlural, safeJsonParse } from '@zamp-platform/utils';
 import { EVENT_TYPE } from '@zamp-platform/utils/event-bus/event-bus.types';
 import { ArrowUpRight, ChevronDown } from 'lucide-react';
 import { useRouter } from 'next/navigation';
+import React from 'react';
 import { type FC, useCallback, useMemo } from 'react';
 
 import { getChatTaskRoute } from '@/constants/routeConfig';
 import { useAppSelector } from '@/hooks/toolkit';
+import { usePaceContext } from '@/modules/pace/pace.context';
+import { CHAT_SIDEBAR_STATE } from '@/modules/pace/pace.types';
 import type { RootState } from '@/store';
 
 import { API_ENDPOINTS } from '../../api';
@@ -16,7 +19,7 @@ import { useChatActions } from '../../context/ChatActionsContext';
 import { useChat } from '../../hooks/useChat';
 import { useDisplayedSummary } from '../../hooks/useDisplayedSummary';
 import { BLOCK_TYPE, TASK_STATUS, type TaskBlockType, type ToolUseContentBlock } from '../../types/block.types';
-import { type ConversationSummary, ResourceType, SenderType, SummaryStatus } from '../../types/chat.types';
+import { ResourceType, SenderType } from '../../types/chat.types';
 import TaskStatusIcon from './TaskStatusIcon';
 
 interface TaskBlockProps {
@@ -37,6 +40,7 @@ const TaskBlock: FC<TaskBlockProps> = ({ payload, conversationId }) => {
   const router = useRouter();
   const organizationId = useAppSelector((state: RootState) => state.user.user?.orgs?.[0]?.organization_id) ?? '';
   const { onTaskOpen } = useChatActions();
+  const { setChatSidebarState } = usePaceContext();
 
   const { title, task_id, status = TASK_STATUS.IN_PROGRESS } = payload;
 
@@ -57,16 +61,13 @@ const TaskBlock: FC<TaskBlockProps> = ({ payload, conversationId }) => {
   const isAnalysing = hasMessages && chat?.messages[chat.messages.length - 1]?.sender_type === SenderType.USER;
   const isAgentActive = Boolean(chat?.streamingState?.is_active) || isAnalysing;
   const conversationData = chat?.conversationData;
-  const summary = conversationData?.summary as ConversationSummary | null | undefined;
   const taskStatus = (conversationData as unknown as Record<string, unknown>)?.status as string | undefined;
-  const hasSummary = summary?.status === SummaryStatus.COMPLETED && summary?.content;
 
   const displayedSummary = useDisplayedSummary({
     taskId: task_id,
     sourceId: organizationId,
     isAgentActive,
-    hasSummary,
-    summaryContent: summary?.content,
+    summaryContent: null,
     taskStatus: taskStatus ?? status,
   });
 
@@ -155,9 +156,10 @@ const TaskBlock: FC<TaskBlockProps> = ({ payload, conversationId }) => {
   const previousCount = (previousToolCalls?.length ?? 0) + markdownStepsBeforeLastTool;
 
   const handleOpenTask = useCallback(() => {
+    setChatSidebarState(CHAT_SIDEBAR_STATE.SIDEBAR);
     onTaskOpen?.(title, getChatTaskRoute({ taskId: task_id, conversationId: conversationId ?? '', taskTitle: title }));
     router.push(getChatTaskRoute({ taskId: task_id, conversationId: conversationId ?? '', taskTitle: title }));
-  }, [router, task_id, conversationId, title, onTaskOpen]);
+  }, [router, task_id, conversationId, title, onTaskOpen, setChatSidebarState]);
 
   const isInProgress = status === TASK_STATUS.IN_PROGRESS;
   const hasNoToolCalls = (toolCalls?.length ?? 0) === 0 && previousCount === 0;
