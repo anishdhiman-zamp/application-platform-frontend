@@ -11,10 +11,12 @@ import {
   useChat,
   useFileDragDrop,
 } from '@zamp-platform/chat';
+import { AnimatePresence, motion } from 'framer-motion';
 import { useAppSelector } from '@/hooks/toolkit';
 import ChatHistory from '@/modules/pace/components/chat/ChatHistory';
 import ChatHome from '@/modules/pace/components/chat/ChatHome';
 import ModelSelector from '@/modules/pace/components/chat/ModelSelector';
+import { NO_ANIMATION } from '@/modules/pace/pace.animations';
 import { usePaceContext } from '@/modules/pace/pace.context';
 import { CHAT_SIDEBAR_STATE } from '@/modules/pace/pace.types';
 import type { RootState } from '@/store';
@@ -95,43 +97,48 @@ const ChatHomePage: FC = () => {
 
   const isExpanded = chatSidebarState === CHAT_SIDEBAR_STATE.EXPANDED;
 
-  if (isExpanded) {
-    return null;
-  }
-
   return (
-    <ChatActionsProvider>
-      <div
-        className='relative mx-auto flex min-h-0 w-full max-w-[700px] flex-1 flex-col items-center justify-start overflow-hidden pt-[22vh]'
-        {...dropZoneProps}
-      >
-        <DropOverlay isVisible={isDragOver} />
-        <ChatHome />
-        <div className='mt-7 w-full shrink-0 px-3'>
-          <ConnectedChatInput
-            chat={interceptedChat}
-            resourceType={ResourceType.ORGANIZATION}
-            resourceId={organizationId}
-            autoFocus
-            scope={ScopeType.ORGANIZATION}
-            scopeId={organizationId}
-            username={username}
-            currentUserName={currentUserName}
-            placeholder="Do your life's best work with Pace"
-            conversationId={chat.conversationId ?? ''}
-            minTextareaHeight={18}
-            maxTextareaHeight={200}
-            className='shadow-chatbot-shadow'
-            fileDropHandlerRef={fileDropHandlerRef}
-            addFileReferenceRef={addFileReferenceRef}
-            showModelSelector
-            modelSelectorSlot={modelSelectorSlot}
-            llmModel={selectedModel}
-          />
-        </div>
-        <ChatHistory onSelectConversation={handleSelectConversation} />
-      </div>
-    </ChatActionsProvider>
+    <AnimatePresence>
+      {!isExpanded && (
+        <ChatActionsProvider>
+          <motion.div
+            key='chat-home-page'
+            initial={false}
+            animate={{ opacity: 1, transition: NO_ANIMATION }}
+            exit={{ opacity: 0, transition: { duration: 0.25, ease: 'easeInOut' } }}
+            className='relative mx-auto flex min-h-0 w-full max-w-[700px] flex-1 flex-col items-center justify-start overflow-hidden pt-[22vh]'
+            style={{ willChange: 'opacity' }}
+            {...dropZoneProps}
+          >
+            <DropOverlay isVisible={isDragOver} />
+            <ChatHome />
+            <div className='mt-7 w-full shrink-0 px-3'>
+              <ConnectedChatInput
+                chat={interceptedChat}
+                resourceType={ResourceType.ORGANIZATION}
+                resourceId={organizationId}
+                autoFocus
+                scope={ScopeType.ORGANIZATION}
+                scopeId={organizationId}
+                username={username}
+                currentUserName={currentUserName}
+                placeholder="Do your life's best work with Pace"
+                conversationId={chat.conversationId ?? ''}
+                minTextareaHeight={18}
+                maxTextareaHeight={200}
+                className='shadow-chatbot-shadow'
+                fileDropHandlerRef={fileDropHandlerRef}
+                addFileReferenceRef={addFileReferenceRef}
+                showModelSelector
+                modelSelectorSlot={modelSelectorSlot}
+                llmModel={selectedModel}
+              />
+            </div>
+            <ChatHistory onSelectConversation={handleSelectConversation} />
+          </motion.div>
+        </ChatActionsProvider>
+      )}
+    </AnimatePresence>
   );
 };
 

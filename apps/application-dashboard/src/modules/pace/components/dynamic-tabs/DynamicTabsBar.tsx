@@ -1,6 +1,6 @@
 'use client';
 
-import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
+import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import {
   closestCenter,
   DndContext,
@@ -29,9 +29,17 @@ const DynamicTabsBar = () => {
   const hasMountedRef = useRef(false);
   const tabsContainerRef = useRef<HTMLDivElement>(null);
 
-  const { chatSidebarState } = usePaceContext();
-  const { tabs, isTabActive, navigateToTab, closeTab, closeOtherTabs, closeTabsToRight, closeAllTabs, reorderTabs } =
-    useDynamicTabs();
+  const { chatSidebarState, setChatSidebarState, scheduleCollapseOnRouteChange } = usePaceContext();
+  const {
+    tabs,
+    isTabActive,
+    navigateToTab: rawNavigateToTab,
+    closeTab: rawCloseTab,
+    closeOtherTabs,
+    closeTabsToRight,
+    closeAllTabs: rawCloseAllTabs,
+    reorderTabs,
+  } = useDynamicTabs();
 
   const maxVisibleTabs = useVisibleTabCount(tabsContainerRef, tabs.length, MIN_TAB_WIDTH_PX, OVERFLOW_BUTTON_WIDTH_PX);
   const sensors = useSensors(useSensor(PointerSensor, { activationConstraint: { distance: 5 } }));
@@ -39,12 +47,40 @@ const DynamicTabsBar = () => {
   const [activeId, setActiveId] = useState<string | null>(null);
 
   const isExpanded = chatSidebarState === CHAT_SIDEBAR_STATE.EXPANDED;
+  const isCollapsed = chatSidebarState === CHAT_SIDEBAR_STATE.COLLAPSED;
 
   const hasOverflow = tabs.length > maxVisibleTabs;
   const visibleTabs = hasOverflow ? tabs.slice(0, maxVisibleTabs) : tabs;
   const overflowTabs = hasOverflow ? tabs.slice(maxVisibleTabs) : [];
   const tabStableKeys = useMemo(() => visibleTabs.map((tab) => tab.stableKey), [visibleTabs]);
   const draggedTab = useMemo(() => visibleTabs.find((tab) => tab.stableKey === activeId), [visibleTabs, activeId]);
+
+  const navigateToTab = useCallback(
+    (tab: DynamicTab) => {
+      if (isExpanded) {
+        setChatSidebarState(CHAT_SIDEBAR_STATE.SIDEBAR);
+      }
+      rawNavigateToTab(tab);
+    },
+    [rawNavigateToTab, isExpanded, setChatSidebarState],
+  );
+
+  const closeAllTabs = useCallback(() => {
+    if (!isCollapsed) {
+      scheduleCollapseOnRouteChange();
+    }
+    rawCloseAllTabs();
+  }, [rawCloseAllTabs, isCollapsed, scheduleCollapseOnRouteChange]);
+
+  const closeTab = useCallback(
+    (e: React.MouseEvent, id: string) => {
+      if (tabs.length === 1 && !isCollapsed) {
+        scheduleCollapseOnRouteChange();
+      }
+      rawCloseTab(e, id);
+    },
+    [rawCloseTab, tabs.length, isCollapsed, scheduleCollapseOnRouteChange],
+  );
 
   const handleDragStart = (event: DragStartEvent) => {
     setActiveId(event.active.id as string);

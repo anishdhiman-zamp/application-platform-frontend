@@ -19,7 +19,7 @@ interface UseTabRouterConfig {
 }
 
 interface UseTabRouterReturn {
-  navigateTo: (path: string, method?: NavMethod) => void;
+  navigateTo: (path: string, method?: NavMethod, skipSidebarParam?: boolean) => void;
   navigateToTab: (tabId: string, tabType?: DynamicTabType) => void;
   syncFromUrl: () => void;
 }
@@ -30,8 +30,8 @@ export const useTabRouter = (config: UseTabRouterConfig = {}): UseTabRouterRetur
   const dispatch = useAppDispatch();
   const isMountedRef = useRef(false);
 
-  const historyNavigate = useCallback((path: string, method: NavMethod = NAV_METHOD.PUSH) => {
-    const fullPath = preserveSidebarParam(path);
+  const historyNavigate = useCallback((path: string, method: NavMethod = NAV_METHOD.PUSH, skipSidebarParam = false) => {
+    const fullPath = skipSidebarParam ? path : preserveSidebarParam(path);
 
     if (method === NAV_METHOD.REPLACE) {
       window.history.replaceState(null, '', fullPath);
@@ -41,8 +41,8 @@ export const useTabRouter = (config: UseTabRouterConfig = {}): UseTabRouterRetur
   }, []);
 
   const routeNavigate = useCallback(
-    (path: string, method: NavMethod = NAV_METHOD.PUSH) => {
-      const fullPath = preserveSidebarParam(path);
+    (path: string, method: NavMethod = NAV_METHOD.PUSH, skipSidebarParam = false) => {
+      const fullPath = skipSidebarParam ? path : preserveSidebarParam(path);
 
       if (method === NAV_METHOD.REPLACE) {
         router.replace(fullPath);
@@ -54,11 +54,11 @@ export const useTabRouter = (config: UseTabRouterConfig = {}): UseTabRouterRetur
   );
 
   const navigateTo = useCallback(
-    (path: string, method: NavMethod = NAV_METHOD.PUSH) => {
-      if (isSameBasePath(path)) {
-        historyNavigate(path, method);
+    (path: string, method: NavMethod = NAV_METHOD.PUSH, skipSidebarParam = false) => {
+      if (!skipSidebarParam && isSameBasePath(path)) {
+        historyNavigate(path, method, skipSidebarParam);
       } else {
-        routeNavigate(path, method);
+        routeNavigate(path, method, skipSidebarParam);
       }
     },
     [historyNavigate, routeNavigate],
