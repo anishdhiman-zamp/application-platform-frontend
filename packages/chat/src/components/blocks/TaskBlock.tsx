@@ -14,8 +14,9 @@ import type { RootState } from '@/store';
 import { API_ENDPOINTS } from '../../api';
 import { useChatActions } from '../../context/ChatActionsContext';
 import { useChat } from '../../hooks/useChat';
+import { useDisplayedSummary } from '../../hooks/useDisplayedSummary';
 import { BLOCK_TYPE, TASK_STATUS, type TaskBlockType, type ToolUseContentBlock } from '../../types/block.types';
-import { ResourceType, SenderType } from '../../types/chat.types';
+import { type ConversationSummary, ResourceType, SenderType, SummaryStatus } from '../../types/chat.types';
 import TaskStatusIcon from './TaskStatusIcon';
 
 interface TaskBlockProps {
@@ -51,6 +52,23 @@ const TaskBlock: FC<TaskBlockProps> = ({ payload, conversationId }) => {
   });
 
   const isLoading = chat?.isLoadingConversationHistory ?? false;
+
+  const hasMessages = (chat?.messages?.length ?? 0) > 0;
+  const isAnalysing = hasMessages && chat?.messages[chat.messages.length - 1]?.sender_type === SenderType.USER;
+  const isAgentActive = Boolean(chat?.streamingState?.is_active) || isAnalysing;
+  const conversationData = chat?.conversationData;
+  const summary = conversationData?.summary as ConversationSummary | null | undefined;
+  const taskStatus = (conversationData as unknown as Record<string, unknown>)?.status as string | undefined;
+  const hasSummary = summary?.status === SummaryStatus.COMPLETED && summary?.content;
+
+  const displayedSummary = useDisplayedSummary({
+    taskId: task_id,
+    sourceId: organizationId,
+    isAgentActive,
+    hasSummary,
+    summaryContent: summary?.content,
+    taskStatus: taskStatus ?? status,
+  });
 
   const { toolCalls, markdownStepsBeforeLastTool } = useMemo(() => {
     const calls: ToolCallInfo[] = [];
@@ -141,8 +159,9 @@ const TaskBlock: FC<TaskBlockProps> = ({ payload, conversationId }) => {
     router.push(getChatTaskRoute({ taskId: task_id, conversationId: conversationId ?? '', taskTitle: title }));
   }, [router, task_id, conversationId, title, onTaskOpen]);
 
+  const isInProgress = status === TASK_STATUS.IN_PROGRESS;
   const hasNoToolCalls = (toolCalls?.length ?? 0) === 0 && previousCount === 0;
-  const isStartingTask = hasNoToolCalls && !isLoading && status === TASK_STATUS.IN_PROGRESS;
+  const isStartingTask = hasNoToolCalls && !isLoading && isInProgress;
 
   const hasToolCallContent = isLoading || !!lastToolCall || isStartingTask;
 
@@ -188,12 +207,22 @@ const TaskBlock: FC<TaskBlockProps> = ({ payload, conversationId }) => {
         </div>
       </div>
 
-      {hasToolCallContent && (
+      {(hasToolCallContent || (isInProgress && displayedSummary)) && (
         <div className='bg-BG_GRAY_2 border-GRAY_400 f-14-450 border-t px-4 py-3'>
           {isLoading ? (
             <div className='flex items-center justify-center py-4'>
               <AnimatedDot showAnimation size={8} />
             </div>
+          ) : isInProgress ? (
+            displayedSummary ? (
+              <div className='f-14-450 text-GRAY_950 line-clamp-2'>
+                <ShimmerText text={displayedSummary} autoAnimate={true} />
+              </div>
+            ) : (
+              <div className='f-14-450 text-GRAY_700 py-2'>
+                <ShimmerText text='Starting now' autoAnimate={true} />
+              </div>
+            )
           ) : (
             <>
               {previousCount > 0 && (
@@ -210,12 +239,6 @@ const TaskBlock: FC<TaskBlockProps> = ({ payload, conversationId }) => {
                 <div className='flex w-full items-center gap-2 pt-0.5'>
                   <div className='flex h-4 w-4 shrink-0 items-center justify-center'>{getToolIcon(lastToolCall)}</div>
                   {renderToolCallTrigger(lastToolCall)}
-                </div>
-              )}
-
-              {isStartingTask && (
-                <div className='f-14-450 text-GRAY_700 py-2'>
-                  <ShimmerText text='Starting now' autoAnimate={true} />
                 </div>
               )}
             </>

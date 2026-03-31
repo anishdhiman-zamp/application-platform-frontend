@@ -14,6 +14,7 @@ export * from './src/hooks/useActiveStreamingIds';
 export * from './src/hooks/useChat';
 export * from './src/hooks/useChatAdapters';
 export * from './src/hooks/useChatInput';
+export * from './src/hooks/useDisplayedSummary';
 export * from './src/hooks/useElevenlabsConnection';
 export * from './src/hooks/useFileDragDrop';
 export * from './src/hooks/useFilesystemMutations';

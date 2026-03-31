@@ -34,6 +34,8 @@ export interface MessageProps {
   streamingEnabled?: boolean;
   assistantAvatar?: ReactNode;
   showMarkdownConnectors?: boolean;
+  showConnectorToLastBlock?: boolean;
+  showConnectorToNextBlock?: boolean;
 }
 
 export const USER_MESSAGE_MAX_HEIGHT = 240;
@@ -57,6 +59,8 @@ export const Message: FC<MessageProps> = ({
   organizationId,
   streamingEnabled = true,
   showMarkdownConnectors = false,
+  showConnectorToLastBlock = false,
+  showConnectorToNextBlock = false,
 }) => {
   const cleanupRef = useRef<defaultFnType | null>(null);
   const contentRef = useRef<HTMLDivElement>(null);
@@ -160,6 +164,8 @@ export const Message: FC<MessageProps> = ({
             messageId={messageId || message?.id}
             isLoading={isLoading}
             showMarkdownConnectors={showMarkdownConnectors}
+            showConnectorToLastBlock={showConnectorToLastBlock}
+            showConnectorToNextBlock={showConnectorToNextBlock}
           />
         </div>
         {isUserMessage && isOverflowing && !isExpanded && (

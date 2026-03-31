@@ -13,6 +13,8 @@ export interface StreamingMessageProps {
   thinkingLabel?: string;
   toolUseLabel?: string;
   showMarkdownConnectors?: boolean;
+  showConnectorToLastBlock?: boolean;
+  showConnectorToNextBlock?: boolean;
 }
 
 /**
@@ -24,6 +26,8 @@ export const StreamingMessage: FC<StreamingMessageProps> = ({
   assistantAvatar,
   className,
   showMarkdownConnectors = false,
+  showConnectorToLastBlock = false,
+  showConnectorToNextBlock = false,
 }) => {
   const messageElements = streamingState?.message_content?.elements || [];
 
@@ -42,6 +46,8 @@ export const StreamingMessage: FC<StreamingMessageProps> = ({
         isLoading={false}
         isStreaming={streamingState?.is_active}
         showMarkdownConnectors={showMarkdownConnectors}
+        showConnectorToLastBlock={showConnectorToLastBlock}
+        showConnectorToNextBlock={showConnectorToNextBlock}
       />
     </div>
   );

@@ -220,6 +220,19 @@ export interface AnnotationLocationDataType {
   log_id?: string;
 }
 
+export enum SummaryStatus {
+  IN_PROGRESS = 'in_progress',
+  COMPLETED = 'completed',
+}
+
+export interface ConversationSummary {
+  status: SummaryStatus;
+  content?: string;
+  live_lines?: string[];
+  generated_at?: string;
+  updated_at?: string;
+}
+
 export interface ConversationType {
   id: string;
   organization_id: string;
@@ -237,6 +250,7 @@ export interface ConversationType {
   resource_id: string;
   resource_type: ResourceType;
   title: string;
+  summary?: ConversationSummary | null;
 }
 
 export interface ConversationMessageContentType {

@@ -38,6 +38,8 @@ interface BlockRendererProps {
   conversationId?: string;
   messageId?: string;
   showMarkdownConnectors?: boolean;
+  showConnectorToLastBlock?: boolean;
+  showConnectorToNextBlock?: boolean;
 }
 
 export const BlockRenderer: React.FC<BlockRendererProps> = ({
@@ -49,6 +51,8 @@ export const BlockRenderer: React.FC<BlockRendererProps> = ({
   messageId,
   isStreaming = false,
   showMarkdownConnectors = false,
+  showConnectorToLastBlock = false,
+  showConnectorToNextBlock = false,
 }) => {
   const [openAccordionId, setOpenAccordionId] = useState<string | null>(null);
   const [elementValues, setElementValues] = useState<
@@ -128,8 +132,8 @@ export const BlockRenderer: React.FC<BlockRendererProps> = ({
     const nextConnected = isConnectedBlock(nextBlock, isNextLast);
     const prevConnected = isConnectedBlock(previousBlock, false);
 
-    const showConnectorToNext = currentConnected && nextConnected;
-    const showConnectorFromPrevious = currentConnected && prevConnected;
+    const showConnectorToNext = (currentConnected && nextConnected) || showConnectorToNextBlock;
+    const showConnectorFromPrevious = (currentConnected && prevConnected) || showConnectorToLastBlock;
     const accordionId = getBlockAccordionId(block);
     const isAccordionOpen = openAccordionId === accordionId;
 
