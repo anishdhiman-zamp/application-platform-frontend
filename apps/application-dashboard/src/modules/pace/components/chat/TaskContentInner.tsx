@@ -26,6 +26,7 @@ import { useAppSelector } from '@/hooks/toolkit';
 import ChatTopbar from '@/modules/pace/components/chat/ChatTopbar';
 import { getActiveTabIdFromUrl } from '@/modules/pace/components/dynamic-tabs/tab-type-registry';
 import ChatMessagesSkeleton from '@/modules/pace/components/loaders/ChatMessagesSkeleton';
+import { preserveSidebarParam } from '@/modules/pace/pace.utils';
 import type { RootState } from '@/store';
 
 interface TaskContentInnerProps {
@@ -172,7 +173,7 @@ const TaskContentChat = ({ taskId }: { taskId: string }) => {
           showHistory={false}
           showBackButton
           showActions={false}
-          onBack={() => router.push(ROUTES_PATH.CHAT_TASKS)}
+          onBack={() => router.push(preserveSidebarParam(ROUTES_PATH.CHAT_TASKS))}
           titleIcon={status ? <TaskStatusIcon status={status} /> : undefined}
           navigationSlot={
             <TaskNavigation
