@@ -76,12 +76,6 @@ const ChatSidebarInner: FC<ChatSidebarInnerProps> = ({
     [openTab, chatSidebarState, setChatSidebarState],
   );
 
-  const handleTaskOpen = useCallback(() => {
-    if (chatSidebarState === CHAT_SIDEBAR_STATE.EXPANDED) {
-      setChatSidebarState(CHAT_SIDEBAR_STATE.SIDEBAR);
-    }
-  }, [chatSidebarState, setChatSidebarState]);
-
   const handleChatStateChange = useCallback((state: ChatState) => {
     setChatState(state);
   }, []);
@@ -117,7 +111,6 @@ const ChatSidebarInner: FC<ChatSidebarInnerProps> = ({
         chatTitle={chatTitle}
         organizationId={organizationId}
         onFileOpen={handleFileOpen}
-        onTaskOpen={handleTaskOpen}
         onTaskPopoverOpenChange={setIsTaskPopoverOpen}
         isOnChatRoute={isOnChatRoute}
         onChatStateChange={handleChatStateChange}

@@ -32,6 +32,7 @@ const PaceNavbar = () => {
     prevChatSidebarState,
     setChatSidebarState,
     collapseSidebar,
+    scheduleCollapseOnRouteChange,
     filesPanelOpen,
     filesPanelPinned,
     setFilesPanelPinned,
@@ -94,14 +95,29 @@ const PaceNavbar = () => {
     return path;
   };
 
+  const isChatIconDisabled = isOnChatHome && !isExpanded;
+
   const handleChatIconClick = useCallback(() => {
+    if (isChatIconDisabled) return;
     if (isCollapsed) {
       setChatSidebarState(CHAT_SIDEBAR_STATE.SIDEBAR);
     }
-  }, [isCollapsed, setChatSidebarState]);
+  }, [isCollapsed, isChatIconDisabled, setChatSidebarState]);
 
   const handleNavItemClick = useCallback(
     (e: React.MouseEvent<HTMLAnchorElement>, id: PaceNavbarItemId) => {
+      if (id === PaceNavbarItemId.HOME) {
+        if (!isCollapsed) {
+          if (isOnChatHome) {
+            collapseSidebar();
+          } else {
+            scheduleCollapseOnRouteChange();
+          }
+        }
+
+        return;
+      }
+
       if (!isExpanded) return;
 
       const href = e.currentTarget.getAttribute('href');
@@ -114,23 +130,11 @@ const PaceNavbar = () => {
       const currentRouteUrl = window.location.pathname + (window.location.search || '');
       const isSameRoute = targetRouteUrl === currentRouteUrl;
 
-      if (id === PaceNavbarItemId.HOME) {
-        if (targetUrl.pathname === window.location.pathname) {
-          e.preventDefault();
-          collapseSidebar();
-          if (!isSameRoute) {
-            window.history.pushState(null, '', href);
-          }
-        }
-
-        return;
-      }
-
       if (isSameRoute) {
-        collapseSidebar();
+        setChatSidebarState(CHAT_SIDEBAR_STATE.SIDEBAR);
       }
     },
-    [isExpanded, collapseSidebar],
+    [isExpanded, isCollapsed, isOnChatHome, collapseSidebar, scheduleCollapseOnRouteChange, setChatSidebarState],
   );
 
   useEffect(() => {
@@ -175,10 +179,12 @@ const PaceNavbar = () => {
             variant='ghost'
             size='icon'
             className={cn(
-              'text-GRAY_700 hover:text-GRAY_900 hover:bg-accent h-7.5 w-7.5 rounded-lg border-[0.75px] border-transparent p-[7px]',
+              'text-GRAY_700 hover:text-GRAY_900 hover:bg-accent h-7.5 w-7.5 rounded-lg border-[0.75px] border-transparent p-[7px] transition-colors duration-150',
               isExpanded &&
                 'border-GRAY_500 text-GRAY_900 hover:text-GRAY_900 shadow-tab-shadow bg-BG_WHITE hover:bg-BG_WHITE',
+              isChatIconDisabled && 'cursor-default opacity-50 hover:bg-transparent',
             )}
+            disabled={isChatIconDisabled}
             onClick={handleChatIconClick}
             onMouseEnter={() => chatIconRef.current?.startAnimation()}
             onMouseLeave={() => chatIconRef.current?.stopAnimation()}

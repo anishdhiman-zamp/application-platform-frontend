@@ -162,7 +162,7 @@ export const useDynamicTabs = (config: UseDynamicTabsConfig = {}): UseDynamicTab
           navigateTo(buildTabRoute(target.id, target.type));
         } else {
           dispatch(dynamicTabsActions.setActiveTab(null));
-          navigateTo(ROUTES_PATH.CHAT);
+          navigateTo(ROUTES_PATH.CHAT, NAV_METHOD.PUSH, true);
         }
       }
     },
@@ -204,7 +204,7 @@ export const useDynamicTabs = (config: UseDynamicTabsConfig = {}): UseDynamicTab
             navigateTo(buildTabRoute(target.id, target.type));
           } else {
             dispatch(dynamicTabsActions.setActiveTab(null));
-            navigateTo(ROUTES_PATH.CHAT);
+            navigateTo(ROUTES_PATH.CHAT, NAV_METHOD.PUSH, true);
           }
         } else {
           dispatch(dynamicTabsActions.setActiveTab(null));
@@ -351,7 +351,7 @@ export const useDynamicTabs = (config: UseDynamicTabsConfig = {}): UseDynamicTab
 
   const closeAllTabs = useCallback(() => {
     dispatch(dynamicTabsActions.clearAllTabs());
-    navigateTo(ROUTES_PATH.CHAT);
+    navigateTo(ROUTES_PATH.CHAT, NAV_METHOD.PUSH, true);
   }, [dispatch, navigateTo]);
 
   const reorderTabs = useCallback(
