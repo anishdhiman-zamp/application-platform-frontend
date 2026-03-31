@@ -74,12 +74,12 @@ const DynamicTabsBar = () => {
 
   const closeTab = useCallback(
     (e: React.MouseEvent, id: string) => {
-      if (tabs.length === 1 && !isCollapsed) {
+      if (tabs.length === 1 && isTabActive(tabs[0]) && !isCollapsed) {
         scheduleCollapseOnRouteChange();
       }
       rawCloseTab(e, id);
     },
-    [rawCloseTab, tabs.length, isCollapsed, scheduleCollapseOnRouteChange],
+    [rawCloseTab, tabs, isCollapsed, isTabActive, scheduleCollapseOnRouteChange],
   );
 
   const handleDragStart = (event: DragStartEvent) => {
