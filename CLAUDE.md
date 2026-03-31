@@ -86,25 +86,55 @@ make sync-from-main   # Stash changes, checkout main, pull, sync secrets, instal
 
 ### Next.js 16 Specifics
 
+<<<<<<< HEAD
+
 - **React 19.2** with React Compiler enabled (auto-memoization)
 - **Turbopack** for dev, webpack for production builds (`npm run build` uses `--webpack`)
 - **Output: standalone** for Docker containerization
 - **Async params/searchParams** — In server components, `params` and `searchParams` must be awaited (Next.js 16 breaking change)
 - **No middleware.ts** — Use proxy.ts pattern instead
+- # **`'use client'`** — Only when necessary; prefer Server Components
+- **React 19.2** with React Compiler enabled (auto-memoization, `reactCompiler: true` in next.config)
+- **Turbopack** is default for dev; webpack for production builds (`npm run build` uses `--webpack`)
+- **Output: standalone** for Docker containerization
+- **Async params/searchParams** — In server components, `params` and `searchParams` must be awaited (Next.js 16 breaking change). All request APIs are async: `await cookies()`, `await headers()`, `await draftMode()`
+- **No middleware.ts** — Deprecated in Next.js 16; use `proxy.ts` pattern instead
 - **`'use client'`** — Only when necessary; prefer Server Components
+- **Removed features** — AMP support, `next lint` (use ESLint directly), `serverRuntimeConfig`/`publicRuntimeConfig`, `next/legacy/image`
+- **Caching** — `use cache` directive with `cacheTag()`, `updateTag()`, `revalidateTag()`, `refresh()` (stable, no `unstable_` prefix)
+  > > > > > > > 04806939d99d88184d82eabc30823440eea455e2
 
 ### TypeScript
 
 - Strict mode required, no `any` types
-- `interface` over `type` for object shapes
+- `interface` over `type` for object shapes; `type` for unions/intersections
 - Path alias: `@/*` maps to `src/*`
 - Naming: PascalCase components, camelCase functions, SCREAMING_SNAKE_CASE constants/enums
+- Suffix type definitions with `Type` (e.g., `WidgetDataType`), props interfaces with `Props`
+- Use discriminated unions for widget types and API responses
+- Prefix event handlers with `handle` (e.g., `handleClick`, `handleSubmit`)
+- Prefix boolean variables with auxiliary verbs (`isLoading`, `hasError`)
+
+### Component Internal Structure
+
+Follow this order within React components:
+
+1. **State** — `useState`, `useRef`
+2. **Derived State** — `useMemo`, computed values, context
+3. **Hooks** — Custom hooks
+4. **Handlers** — `useCallback` wrapped event handlers
+5. **Render** — Early returns, JSX
+
+### useEffect Convention
+
+When a `useEffect` has more than a single statement, extract the logic into a named `useCallback` function and call it from the effect. Single-statement effects are fine inline.
 
 ### Styling
 
 - Tailwind CSS v4 with `cva` (class variance authority) for component variants
 - Use semantic color tokens (kebab-case: `bg-gray-400`)
 - Prettier plugin sorts Tailwind classes (print width 120, single quotes)
+- Animations: use `motion` (framer-motion v12+), docs at motion.dev
 
 ### Component Placement
 
@@ -114,7 +144,7 @@ make sync-from-main   # Stash changes, checkout main, pull, sync secrets, instal
 
 ### API Pattern
 
-All API endpoints use RTK Query's `injectEndpoints()` with cache tags and `transformResponse` for normalization. Endpoint constants centralized in `apiEndpoint.constants.ts`.
+All API endpoints use RTK Query's `injectEndpoints()` with cache tags and `transformResponse` for normalization. Endpoint constants centralized in `apiEndpoint.constants.ts`. Use template variables (`{{organizationId}}`, `{{widgetId}}`) with `formRequestUrlWithParams`.
 
 ### Git & PR Workflow
 

@@ -1,7 +1,8 @@
 ---
 description: Convention for React useEffect hooks — extract logic into named functions
-globs: "**/*.{ts,tsx}"
-alwaysApply: false
+paths:
+  - '**/*.ts'
+  - '**/*.tsx'
 ---
 
 # useEffect: Extract Logic Into Named Functions

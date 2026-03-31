@@ -1,7 +1,10 @@
 {
-  "plugins": {
-    "superpowers": {
-      "enabled": true
-    }
+  "enableAllProjectMcpServers": true,
+  "enabledPlugins": {
+    "frontend-design@claude-plugins-official": true,
+    "superpowers@claude-plugins-official": true,
+    "serena@claude-plugins-official": true,
+    "github@claude-plugins-official": true,
+    "context7@claude-plugins-official": true
   }
 }

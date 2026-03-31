@@ -1,8 +1,7 @@
 ---
-description: 
-globs: 
-alwaysApply: true
+description: Project-wide coding standards, component architecture, styling, and TypeScript conventions
 ---
+
 Prompt Generation Rules:
 
 - Analyze the component requirements thoroughly
