@@ -11,6 +11,7 @@ import { APITags } from '@/constants/api.constants';
 import { ROUTES_PATH } from '@/constants/routeConfig';
 import { useAppDispatch, useAppSelector } from '@/hooks/toolkit';
 import ChatTopbar from '@/modules/pace/components/chat/ChatTopbar';
+import ExpectationsToggle from '@/modules/pace/components/chat/ExpectationsToggle';
 import ModelSelector from '@/modules/pace/components/chat/ModelSelector';
 import { useChatDraftInput } from '@/modules/pace/hooks/useChatDraftInput';
 import { usePaceContext } from '@/modules/pace/pace.context';
@@ -59,6 +60,7 @@ const ChatSidebarInner: FC<ChatSidebarInnerProps> = ({
   const addFileReferenceRef = useRef<((ref: { path: string; name: string }) => void) | null>(null);
 
   const [selectedModel, setSelectedModel] = useState<string | null>(null);
+  const [pevEnabled, setPevEnabled] = useState(false);
   const [chatState, setChatState] = useState<ChatState | null>(null);
   const [isTaskPopoverOpen, setIsTaskPopoverOpen] = useState(false);
 
@@ -87,6 +89,11 @@ const ChatSidebarInner: FC<ChatSidebarInnerProps> = ({
   const modelSelectorSlot = useMemo(
     () => <ModelSelector value={selectedModel} onChange={setSelectedModel} />,
     [selectedModel],
+  );
+
+  const expectationsToggleSlot = useMemo(
+    () => <ExpectationsToggle enabled={pevEnabled} onChange={setPevEnabled} />,
+    [pevEnabled],
   );
 
   return (
@@ -134,8 +141,10 @@ const ChatSidebarInner: FC<ChatSidebarInnerProps> = ({
             setExternalInputValue={setInputValue}
             fileDropHandlerRef={fileDropHandlerRef}
             llmModel={selectedModel}
+            pevEnabled={pevEnabled}
             showModelSelector
             modelSelectorSlot={modelSelectorSlot}
+            leftSlot={expectationsToggleSlot}
             conversationId={conversationId ?? chatState.chat.conversationId ?? ''}
             onConversationCreated={handleConversationCreated}
             isDisabled={chatState.chat.isStreaming || chatState.chat.isCreatingConversationV2}

@@ -15,6 +15,7 @@ import { AnimatePresence, motion } from 'framer-motion';
 import { useAppSelector } from '@/hooks/toolkit';
 import ChatHistory from '@/modules/pace/components/chat/ChatHistory';
 import ChatHome from '@/modules/pace/components/chat/ChatHome';
+import ExpectationsToggle from '@/modules/pace/components/chat/ExpectationsToggle';
 import ModelSelector from '@/modules/pace/components/chat/ModelSelector';
 import { NO_ANIMATION } from '@/modules/pace/pace.animations';
 import { usePaceContext } from '@/modules/pace/pace.context';
@@ -40,6 +41,7 @@ const ChatHomePage: FC = () => {
   const addFileReferenceRef = useRef<((ref: { path: string; name: string }) => void) | null>(null);
 
   const [selectedModel, setSelectedModel] = useState<string | null>(null);
+  const [pevEnabled, setPevEnabled] = useState(false);
 
   const chat = useChat({
     resourceId: organizationId,
@@ -59,6 +61,7 @@ const ChatHomePage: FC = () => {
           message: payload.message_content?.text || '',
           fileReferences: fileRefs?.map((ref) => ({ path: ref.path, name: ref.name })),
           llmModel: payload.llm_model,
+          pevEnabled: payload.pev_enabled,
         });
 
         setChatSidebarState(CHAT_SIDEBAR_STATE.EXPANDED);
@@ -86,6 +89,11 @@ const ChatHomePage: FC = () => {
   const modelSelectorSlot = useMemo(
     () => <ModelSelector value={selectedModel} onChange={setSelectedModel} />,
     [selectedModel],
+  );
+
+  const expectationsToggleSlot = useMemo(
+    () => <ExpectationsToggle enabled={pevEnabled} onChange={setPevEnabled} />,
+    [pevEnabled],
   );
 
   useEffect(() => {
@@ -131,7 +139,9 @@ const ChatHomePage: FC = () => {
                 addFileReferenceRef={addFileReferenceRef}
                 showModelSelector
                 modelSelectorSlot={modelSelectorSlot}
+                leftSlot={expectationsToggleSlot}
                 llmModel={selectedModel}
+                pevEnabled={pevEnabled}
               />
             </div>
             <ChatHistory onSelectConversation={handleSelectConversation} />

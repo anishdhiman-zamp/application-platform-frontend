@@ -126,6 +126,7 @@ const ChatConversationContent: FC<ChatConversationContentProps> = ({
         undefined,
         undefined,
         pendingConversationPayload.llmModel,
+        pendingConversationPayload.pevEnabled,
       );
 
       setPendingConversationPayload(null);

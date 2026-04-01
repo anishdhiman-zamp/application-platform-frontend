@@ -61,6 +61,7 @@ export interface ChatComposerProps {
   maxTextareaHeight?: number;
 
   modelSelectorSlot?: React.ReactNode;
+  leftSlot?: React.ReactNode;
 }
 
 export const ChatComposer: FC<ChatComposerProps> = ({
@@ -106,6 +107,7 @@ export const ChatComposer: FC<ChatComposerProps> = ({
   maxTextareaHeight = 200,
 
   modelSelectorSlot,
+  leftSlot,
 }) => {
   const editorRef = useRef<RichTextEditorHandle>(null);
 
@@ -217,20 +219,21 @@ export const ChatComposer: FC<ChatComposerProps> = ({
             />
           </div>
           <div className='flex items-center justify-between py-2.5 pr-2.5 pl-2'>
-            {showAttachButton && onAttachClick ? (
-              <Button
-                variant='ghost'
-                size='icon'
-                className='hover:text-GRAY_1000 text-GRAY_700 hover:bg-accent size-[26px] rounded-[6px] p-[2px] [&_svg]:size-3.5'
-                aria-label='Attach file'
-                onClick={onAttachClick}
-                disabled={isUploading}
-              >
-                <Paperclip />
-              </Button>
-            ) : (
-              <div />
-            )}
+            <div className='flex items-center gap-x-2'>
+              {showAttachButton && onAttachClick ? (
+                <Button
+                  variant='ghost'
+                  size='icon'
+                  className='hover:text-GRAY_1000 text-GRAY_700 hover:bg-accent size-[26px] rounded-[6px] p-[2px] [&_svg]:size-3.5'
+                  aria-label='Attach file'
+                  onClick={onAttachClick}
+                  disabled={isUploading}
+                >
+                  <Paperclip />
+                </Button>
+              ) : null}
+              {leftSlot}
+            </div>
 
             <div className='flex items-center gap-x-2'>
               {modelSelectorSlot}
