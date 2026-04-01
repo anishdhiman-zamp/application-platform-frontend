@@ -21,16 +21,16 @@ interface UseDisplayedSummaryParams {
 
 export function useDisplayedSummary({ taskId, sourceId, isAgentActive, summaryContent }: UseDisplayedSummaryParams) {
   const { sseEventBus } = useEventBus();
-
-  // Seed initial state from cache so mid-stream navigation shows accumulated content
-  const [displayedText, setDisplayedText] = useState(() => summaryTextCache.get(taskId) ?? '');
-
+  const prevIsAgentActiveRef = useRef(isAgentActive);
   // Full target text that we animate towards
   const targetTextRef = useRef(summaryTextCache.get(taskId) ?? '');
   // How many characters we've revealed so far
   const revealedCountRef = useRef(targetTextRef.current.length);
   // RAF / interval ID for the typing animation
   const animationRef = useRef<ReturnType<typeof setInterval> | null>(null);
+
+  // Seed initial state from cache so mid-stream navigation shows accumulated content
+  const [displayedText, setDisplayedText] = useState(() => summaryTextCache.get(taskId) ?? '');
 
   const stopAnimation = useCallback(() => {
     if (animationRef.current !== null) {
@@ -75,15 +75,17 @@ export function useDisplayedSummary({ taskId, sourceId, isAgentActive, summaryCo
       if (data.source_id !== sourceId) return;
 
       const payload = data.payload as MapAny;
-      if (!payload || payload.type !== 'content_block') return;
+      if (!payload || payload?.type !== 'content_block') return;
 
-      const text = payload.text as string;
+      if (payload?.streaming_id !== taskId) return;
+
+      const text = payload?.text as string;
       if (typeof text !== 'string') return;
 
       // Each content_block replaces the previous summary — animate the new text
       setTargetText(text, true);
     },
-    [sourceId, setTargetText],
+    [sourceId, taskId, setTargetText],
   );
 
   // Reset state when taskId changes
@@ -94,6 +96,18 @@ export function useDisplayedSummary({ taskId, sourceId, isAgentActive, summaryCo
     revealedCountRef.current = cached.length;
     setDisplayedText(cached);
   }, [taskId, stopAnimation]);
+
+  // Clear stale summary when a new stream begins (isAgentActive: false → true)
+  useEffect(() => {
+    if (isAgentActive && !prevIsAgentActiveRef.current) {
+      stopAnimation();
+      summaryTextCache.delete(taskId);
+      targetTextRef.current = '';
+      revealedCountRef.current = 0;
+      setDisplayedText('');
+    }
+    prevIsAgentActiveRef.current = isAgentActive;
+  }, [isAgentActive, taskId, stopAnimation]);
 
   // Cleanup on unmount
   useEffect(() => stopAnimation, [stopAnimation]);
