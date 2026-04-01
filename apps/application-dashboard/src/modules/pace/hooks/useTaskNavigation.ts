@@ -172,15 +172,9 @@ export const useTaskNavigation = (taskId?: string) => {
   const taskIdRef = useRef<string | undefined>(taskId);
 
   taskIdRef.current = taskId;
-  const urlIndexRef = useRef(urlIndex);
-
-  urlIndexRef.current = urlIndex;
   const statusRef = useRef<TaskStatus | null>(status);
 
   statusRef.current = status;
-  const nextStatusRef = useRef<TaskStatus | null>(null);
-
-  nextStatusRef.current = nextStatus;
   const conversationIdRef = useRef<string | undefined>(conversationId);
 
   conversationIdRef.current = conversationId;
@@ -231,77 +225,52 @@ export const useTaskNavigation = (taskId?: string) => {
 
       if (newStatus === statusRef.current) return;
 
-      const currentIndex = urlIndexRef.current;
-      const currentStatus = statusRef.current!;
-
       try {
-        const pageNumber = Math.floor(currentIndex / TASKS_PAGE_SIZE) + 1;
-        const { data: pageData } = await triggerFetchPage({
-          status: currentStatus,
-          page: pageNumber,
-          limit: TASKS_PAGE_SIZE,
-        });
+        const { data: freshCounts } = await triggerFetchCounts();
 
         if (cancelled) return;
 
-        const newTotal = pageData?.count ?? 0;
+        const newStatusCount = freshCounts?.counts.find((c) => c.status === newStatus)?.count ?? 0;
 
-        if (newTotal <= 0) {
-          const ns = nextStatusRef.current;
+        // Do not navigate if count is stale
+        if (newStatusCount === 0) return;
 
-          if (!ns) return;
+        // Find the task's position within the new status list
+        let foundIndex: number | undefined = undefined;
+        const totalPages = Math.ceil(newStatusCount / TASKS_PAGE_SIZE);
 
-          const { data: freshCounts } = await triggerFetchCounts();
+        for (let page = 1; page <= totalPages && !cancelled; page++) {
+          const { data: pageData } = await triggerFetchPage({
+            status: newStatus,
+            page,
+            limit: TASKS_PAGE_SIZE,
+          });
 
           if (cancelled) return;
 
-          const nsTotal = freshCounts?.counts.find((c) => c.status === ns)?.count ?? 0;
+          const idxInPage = pageData?.tasks?.findIndex((t) => t.id === taskIdRef.current) ?? -1;
 
-          if (nsTotal === 0) return;
-
-          const tasks = await fetchPageTasks(1, ns);
-
-          if (cancelled) return;
-
-          const targetTask = tasks[0];
-
-          if (targetTask) {
-            router.replace(
-              getChatTaskRoute({
-                taskId: targetTask.id,
-                conversationId: conversationIdRef.current,
-                taskTitle: targetTask.title,
-                status: ns,
-                currentIndex: 0,
-                totalRows: nsTotal,
-              }),
-            );
+          if (idxInPage !== -1) {
+            foundIndex = (page - 1) * TASKS_PAGE_SIZE + idxInPage;
+            break;
           }
-
-          return;
         }
 
-        const targetIndex = Math.min(currentIndex, newTotal - 1);
-        const targetPage = Math.floor(targetIndex / TASKS_PAGE_SIZE) + 1;
-        const pageTasks =
-          targetPage === pageNumber ? (pageData?.tasks ?? []) : await fetchPageTasks(targetPage, currentStatus);
+        if (cancelled || foundIndex === undefined) return;
 
-        if (cancelled) return;
+        const currentParams = new URLSearchParams(window.location.search);
+        const urlTitle = currentParams.get('title') ?? undefined;
 
-        const targetTask = pageTasks[targetIndex % TASKS_PAGE_SIZE];
-
-        if (targetTask) {
-          router.replace(
-            getChatTaskRoute({
-              taskId: targetTask.id,
-              conversationId: conversationIdRef.current,
-              taskTitle: targetTask.title,
-              status: currentStatus,
-              currentIndex: targetIndex,
-              totalRows: newTotal,
-            }),
-          );
-        }
+        router.replace(
+          getChatTaskRoute({
+            taskId: taskIdRef.current!,
+            conversationId: conversationIdRef.current,
+            taskTitle: urlTitle,
+            status: newStatus,
+            currentIndex: foundIndex,
+            totalRows: newStatusCount,
+          }),
+        );
       } catch (err) {
         captureException(err);
       }
@@ -313,8 +282,6 @@ export const useTaskNavigation = (taskId?: string) => {
       cancelled = true;
       sub.unsubscribe();
     };
-    // fetchPageTasks is intentionally excluded from deps to avoid re-subscribing on status changes;
-    // status is already in the dep array and fetchPageTasks uses the current status via closure
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [taskId, urlIndex, status]);
 
