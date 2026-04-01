@@ -13,6 +13,7 @@ const STATUS_ICON_CONFIG: Record<Exclude<TaskStatus, 'IN_PROGRESS'>, StatusConfi
   [TASK_STATUS.COMPLETED]: { fill: CSS_VARS.GREEN_100, stroke: CSS_VARS.GREEN_800 },
   [TASK_STATUS.FAILED]: { fill: CSS_VARS.RED_100, stroke: CSS_VARS.RED_800, isDiamond: true },
   [TASK_STATUS.NEEDS_INPUT]: { fill: CSS_VARS.ORANGE_200, stroke: CSS_VARS.ORANGE_800, isDiamond: true },
+  [TASK_STATUS.CANCELED]: { fill: CSS_VARS.GRAY_200, stroke: CSS_VARS.GRAY_800, isDiamond: true },
 };
 
 const InProgressIcon = () => {
