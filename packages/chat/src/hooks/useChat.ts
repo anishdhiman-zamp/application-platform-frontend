@@ -556,5 +556,6 @@ export const useChat = (config: ChatConfig) => {
     isErrorConversationHistory,
     refetchConversationHistory: refetchConversationHistory,
     conversationData: conversationHistory?.conversation,
+    inputsRequired: conversationHistory?.inputs_required,
   };
 };

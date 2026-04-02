@@ -6,6 +6,7 @@ import { FAVICON } from 'constants/icons';
 import type { Metadata, Viewport } from 'next';
 import { Funnel_Display, Inter } from 'next/font/google';
 import { cookies, headers } from 'next/headers';
+import Script from 'next/script';
 import { ThemeProvider } from '@/app/_providers/theme-provider';
 import NetworkStatus from '@/components/NetWorkStatus';
 import { THEME_MODE } from '@/modules/general/constants/general.constants';
@@ -59,8 +60,10 @@ export default async function RootLayout({ children }: { children: React.ReactNo
       className={cn(inter.className, 'overscroll-none', funnelDisplay.variable, theme.html)}
       suppressHydrationWarning
     >
+      <head>
+        <Script id='theme-init' strategy='beforeInteractive' dangerouslySetInnerHTML={{ __html: THEME_INIT_SCRIPT }} />
+      </head>
       <body className={cn(theme.body, 'bg-BG_GRAY_1 h-screen antialiased')} suppressHydrationWarning>
-        <script dangerouslySetInnerHTML={{ __html: THEME_INIT_SCRIPT }} />
         <ThemeProvider>
           <SpeedInsights />
           <NetworkStatus />
