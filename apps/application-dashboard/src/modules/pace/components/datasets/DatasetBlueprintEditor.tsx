@@ -100,7 +100,12 @@ interface ColumnRowProps {
 /* eslint-disable react/prop-types */
 const ColumnRow: FC<ColumnRowProps> = memo(
   ({ column, allColumns, canEdit, onChangeName, onChangeType, onChangeRequired, onDelete }) => {
-    const { attributes, listeners, setNodeRef, transform, transition, isDragging } = useSortable({ id: column.id });
+    const isFrozen = column.frozen === true;
+    const isEditable = canEdit && !isFrozen;
+    const { attributes, listeners, setNodeRef, transform, transition, isDragging } = useSortable({
+      id: column.id,
+      disabled: isFrozen,
+    });
     const style = { transform: CSS.Transform.toString(transform), transition, opacity: isDragging ? 0.5 : 1 };
 
     const [localName, setLocalName] = useState(column.name);
@@ -156,7 +161,7 @@ const ColumnRow: FC<ColumnRowProps> = memo(
           <div
             className={cn(
               'border-GRAY_100 bg-BG_WHITE flex items-center justify-between border-b py-2.5 pr-8 pl-4',
-              !canEdit && 'opacity-60',
+              !isEditable && 'opacity-60',
             )}
           >
             <div className='flex w-full flex-col items-start'>
@@ -180,7 +185,7 @@ const ColumnRow: FC<ColumnRowProps> = memo(
                     error={!!nameError}
                     value={localName}
                     onChange={handleNameChange}
-                    disabled={!canEdit}
+                    disabled={!isEditable}
                     onKeyDown={(e) => e.stopPropagation()}
                   />
                 </div>
@@ -208,7 +213,7 @@ const ColumnRow: FC<ColumnRowProps> = memo(
                     checked={column.required}
                     onCheckedChange={handleRequiredToggle}
                     size='medium'
-                    disabled={!canEdit}
+                    disabled={!isEditable}
                   />
                 </div>
 
@@ -222,7 +227,7 @@ const ColumnRow: FC<ColumnRowProps> = memo(
                           onClick={() => {
                             if (allColumns.length > 1) setIsDeleteDialogOpen(true);
                           }}
-                          disabled={!canEdit}
+                          disabled={!isEditable}
                           className={cn(
                             'text-GRAY_600 flex cursor-pointer items-center gap-1.5 pr-4 pl-2 transition-colors disabled:cursor-not-allowed',
                             allColumns.length === 1

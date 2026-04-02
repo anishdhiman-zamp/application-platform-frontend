@@ -86,7 +86,6 @@ const DatasetDetailInner = ({ tableName }: DatasetDetailProps) => {
   const totalRowsRef = useRef<number | undefined>(undefined);
   const lastFilterClausesRef = useRef<string | undefined>(undefined);
   const activeFilterClausesRef = useRef<string | undefined>(undefined);
-  const firstColumnRef = useRef<string | undefined>(undefined);
   const initRef = useRef(false);
   const prefetchRef = useRef<{
     dataPromise: Promise<{ rows: Record<string, unknown>[]; count: number }>;
@@ -105,23 +104,31 @@ const DatasetDetailInner = ({ tableName }: DatasetDetailProps) => {
       const allRows = result.rows ?? [];
       const pkRows = pkResult.rows ?? [];
 
-      setPkColumn(pkRows.length > 0 ? String(pkRows[0].column_name) : null);
+      const detectedPk = pkRows.length > 0 ? String(pkRows[0].column_name) : null;
 
-      const userRows = allRows;
+      setPkColumn(detectedPk);
 
-      const gridCols: ColDef[] = userRows.map((row: Record<string, unknown>) => {
-        const field = String(row.column_name);
-        const pgType = String(row.data_type);
+      // Keep id column in grid but hide by default (user can enable via Display Options)
+      const userRows = allRows.filter((r) => String(r.column_name) !== 'id');
 
-        return {
-          field,
-          headerName: field,
-          ...getCellEditorForPgType(pgType),
-        };
-      });
+      const gridCols: ColDef[] = [
+        // id column: hidden by default, non-editable, shown in Display Options
+        ...(allRows.some((r) => String(r.column_name) === 'id')
+          ? [{ field: 'id', headerName: 'id', hide: true, editable: false, suppressFillHandle: true }]
+          : []),
+        ...userRows.map((row: Record<string, unknown>) => {
+          const field = String(row.column_name);
+          const pgType = String(row.data_type);
+
+          return {
+            field,
+            headerName: field,
+            ...getCellEditorForPgType(pgType),
+          };
+        }),
+      ];
 
       setColumns(gridCols);
-      firstColumnRef.current = gridCols[0]?.field;
 
       const config = gridCols.map((c) => ({
         key: c.field as string,
@@ -133,12 +140,17 @@ const DatasetDetailInner = ({ tableName }: DatasetDetailProps) => {
 
       filterDispatch({ type: filtersContextActions.SET_FILTERS_CONFIG, payload: { filtersConfig: config } });
 
-      const bpCols: BlueprintColumn[] = userRows.map((row: Record<string, unknown>) => ({
-        id: String(row.column_name),
-        name: String(row.column_name),
-        type: pgTypeToColumnType(String(row.data_type)),
-        required: String(row.is_nullable) === 'NO',
-      }));
+      const bpCols: BlueprintColumn[] = allRows.map((row: Record<string, unknown>) => {
+        const colName = String(row.column_name);
+
+        return {
+          id: colName,
+          name: colName,
+          type: pgTypeToColumnType(String(row.data_type)),
+          required: String(row.is_nullable) === 'NO',
+          frozen: colName === 'id',
+        };
+      });
 
       setBlueprintColumns(bpCols);
       setOriginalBlueprintColumns(bpCols);
@@ -151,7 +163,9 @@ const DatasetDetailInner = ({ tableName }: DatasetDetailProps) => {
     if (initRef.current) return;
     initRef.current = true;
 
-    const dataPromise = executeQuery({ query: buildSelectTableQuery(tableName, DETAIL_PAGE_SIZE, 0) }).unwrap();
+    const dataPromise = executeQuery({
+      query: buildSelectTableQuery(tableName, DETAIL_PAGE_SIZE, 0, undefined, undefined, 'id'),
+    }).unwrap();
     const countPromise = executeQuery({ query: buildCountQuery(tableName) }).unwrap();
 
     prefetchRef.current = { dataPromise, countPromise, consumed: false };
@@ -242,7 +256,9 @@ const DatasetDetailInner = ({ tableName }: DatasetDetailProps) => {
       // Reload schema (headers + blueprint) and preview data in one pass
       setColumns(null);
       prefetchRef.current = null;
-      const dataPromise = executeQuery({ query: buildSelectTableQuery(tableName, DETAIL_PAGE_SIZE, 0) }).unwrap();
+      const dataPromise = executeQuery({
+        query: buildSelectTableQuery(tableName, DETAIL_PAGE_SIZE, 0, undefined, undefined, 'id'),
+      }).unwrap();
       const countPromise = executeQuery({ query: buildCountQuery(tableName) }).unwrap();
 
       prefetchRef.current = { dataPromise, countPromise, consumed: false };
@@ -262,7 +278,9 @@ const DatasetDetailInner = ({ tableName }: DatasetDetailProps) => {
   const reloadSchemaAndData = useCallback(async () => {
     setColumns(null);
     prefetchRef.current = null;
-    const dataPromise = executeQuery({ query: buildSelectTableQuery(tableName, DETAIL_PAGE_SIZE, 0) }).unwrap();
+    const dataPromise = executeQuery({
+      query: buildSelectTableQuery(tableName, DETAIL_PAGE_SIZE, 0, undefined, undefined, 'id'),
+    }).unwrap();
     const countPromise = executeQuery({ query: buildCountQuery(tableName) }).unwrap();
 
     prefetchRef.current = { dataPromise, countPromise, consumed: false };
@@ -497,7 +515,7 @@ const DatasetDetailInner = ({ tableName }: DatasetDetailProps) => {
 
       try {
         const selectPromise = executeQuery({
-          query: buildSelectTableQuery(tableName, limit, offset, sortModel, filterClauses, firstColumnRef.current),
+          query: buildSelectTableQuery(tableName, limit, offset, sortModel, filterClauses, 'id'),
         }).unwrap();
 
         let countPromise: Promise<{ rows: Record<string, unknown>[]; count: number }> | undefined;

@@ -61,6 +61,7 @@ export interface BlueprintColumn {
   type: DatasetColumnTypes;
   required: boolean;
   defaultValue?: string | null;
+  frozen?: boolean;
 }
 
 // --- DDL query builders ---
