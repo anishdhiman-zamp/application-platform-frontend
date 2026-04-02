@@ -147,6 +147,8 @@ const TaskContentChat = ({ taskId }: { taskId: string }) => {
     }
   }, [displayedSummary]);
 
+  console.log('cprocessedMessages', processedMessages);
+
   return (
     <ChatActionsProvider onFileOpen={openTab}>
       <div className='relative flex h-full flex-1 flex-col'>
@@ -240,8 +242,18 @@ const TaskContentChat = ({ taskId }: { taskId: string }) => {
                           />
                         </div>
                         {summaryText && (
-                          <div className={cn('relative px-2 pt-2', index > 0 && 'mt-5')}>
-                            <div className='bg-border pointer-events-none absolute -top-3 left-[14.5px] h-3 w-px' />
+                          <div
+                            className={cn(
+                              'relative px-2 pt-2',
+                              index > 0 ? (processedMessages[index - 1].summaryText ? 'mt-5' : 'mt-3') : null,
+                            )}
+                          >
+                            <div
+                              className={cn(
+                                'bg-border pointer-events-none absolute left-[14.5px] h-3 w-px',
+                                index > 0 && processedMessages[index - 1].summaryText ? '-top-3' : '-top-2',
+                              )}
+                            />
                             <ResizableSummaryBox borderRadius='rounded-[18px]' contentClassName='px-4 pt-3 pb-1'>
                               <SummaryMarkdown text={summaryText} shimmerLast={false} />
                             </ResizableSummaryBox>

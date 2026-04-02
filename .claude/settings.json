@@ -1,6 +1,6 @@
 {
   "permissions": {
-    "allow": ["Bash(git add:*)", "Bash(git commit:*)", "Bash(git push:*)"]
+    "allow": ["Bash(git add:*)", "Bash(git commit:*)", "Bash(git push:*)", "Bash(npm run:*)"]
   },
   "enableAllProjectMcpServers": true,
   "enabledPlugins": {

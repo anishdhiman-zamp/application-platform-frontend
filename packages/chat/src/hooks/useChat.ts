@@ -419,12 +419,41 @@ export const useChat = (config: ChatConfig) => {
 
   const handleInputRequiredSse = useCallback(
     (data: BaseEventPayload) => {
-      if (data.source_id !== _conversationId || !_conversationId) {
+      if (!_conversationId) return;
+
+      const payload = data.payload as MapAny | undefined;
+      const matchesConversation =
+        data.source_id === _conversationId ||
+        payload?.conversation_id === _conversationId ||
+        (isTaskEvent && payload?.task_id === _conversationId);
+
+      if (!matchesConversation) {
         return;
       }
-      void refetchConversationHistory();
+
+      dispatch(chatApi.util.invalidateTags([{ type: APITags.GET_CONVERSATION_BY_ID, id: _conversationId }]));
+
+      if (config.resourceId && config.resourceType) {
+        void triggerGetConversation({
+          conversationId: _conversationId,
+          resourceId: config.resourceId,
+          resourceType: config.resourceType,
+          url: config.apiConfig?.getConversationById,
+        });
+      } else {
+        void refetchConversationHistory();
+      }
     },
-    [_conversationId, refetchConversationHistory],
+    [
+      _conversationId,
+      isTaskEvent,
+      dispatch,
+      config.resourceId,
+      config.resourceType,
+      config.apiConfig?.getConversationById,
+      triggerGetConversation,
+      refetchConversationHistory,
+    ],
   );
 
   useEffect(() => {
