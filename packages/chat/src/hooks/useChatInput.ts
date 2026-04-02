@@ -64,6 +64,7 @@ export interface UseChatInputProps {
   onConversationCreated?: (conversationId: string) => void;
   isDisabled?: boolean;
   llmModel?: string | null;
+  autoLoopEnabled?: boolean;
 }
 
 export interface UseChatInputReturn {
@@ -90,6 +91,7 @@ export const createUserMessagePayload = (
   senderName: string,
   fileReferences?: FileReference[],
   llmModel?: string | null,
+  autoLoopEnabled?: boolean,
 ): ChatMessage => {
   return {
     resource_id: resourceId,
@@ -115,6 +117,7 @@ export const createUserMessagePayload = (
     metadata: {},
     sender_name: senderName,
     ...(llmModel ? { llm_model: llmModel } : {}),
+    ...(autoLoopEnabled != null ? { pev_enabled: autoLoopEnabled } : {}),
   };
 };
 
@@ -132,6 +135,7 @@ export const createConversationPayload = (
   annotationLocation?: LocationData,
   annotationType?: AnnotationType,
   llmModel?: string | null,
+  autoLoopEnabled?: boolean,
 ) => {
   return {
     resource_id: resourceId,
@@ -161,6 +165,7 @@ export const createConversationPayload = (
     }),
     sender_name: senderName,
     ...(llmModel ? { llm_model: llmModel } : {}),
+    ...(autoLoopEnabled != null ? { pev_enabled: autoLoopEnabled } : {}),
   };
 };
 
@@ -182,6 +187,7 @@ export const useChatInput = ({
   onConversationCreated,
   isDisabled,
   llmModel,
+  autoLoopEnabled,
 }: UseChatInputProps): UseChatInputReturn => {
   const prevConversationIdRef = useRef(conversationId);
   const currentUserName = adapter.getCurrentUserName();
@@ -223,6 +229,7 @@ export const useChatInput = ({
       annotationLocation,
       annotationType,
       llmModel,
+      autoLoopEnabled,
     );
 
     setFileReferences([]);
@@ -363,6 +370,7 @@ export const useChatInput = ({
       currentUserName || '',
       fileReferences.length > 0 ? fileReferences.map((ref) => ({ path: ref.path, name: ref.name })) : undefined,
       llmModel,
+      autoLoopEnabled,
     );
 
     setFileReferences([]);

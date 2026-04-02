@@ -121,6 +121,7 @@ export interface ChatMessage {
   id?: string;
   conversation_id?: string;
   llm_model?: string;
+  pev_enabled?: boolean;
 }
 
 export interface ChatState {
@@ -209,6 +210,7 @@ export interface CreateConversationPayloadTypeV2 {
   message_content: MessageContentType;
   sender_name?: string;
   llm_model?: string;
+  pev_enabled?: boolean;
 }
 
 export interface AnnotationLocationDataType {

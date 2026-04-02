@@ -35,6 +35,7 @@ export * from './ui/tabs';
 export * from './ui/tags';
 export * from './ui/textarea';
 export * from './ui/toast';
+export * from './ui/toggle';
 export * from './ui/tooltip';
 export * from './ui/DrilldownMenu';
 

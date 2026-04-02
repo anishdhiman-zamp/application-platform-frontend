@@ -22,6 +22,7 @@ import NewPaceAvatar from '@/modules/chatbot/NewPaceAvatar';
 import TaskStatusCounts from '@/modules/pace/components/chat/TaskStatusCounts';
 import ChatMessagesSkeleton from '@/modules/pace/components/loaders/ChatMessagesSkeleton';
 import { usePaceContext } from '@/modules/pace/pace.context';
+import { addAutoLoopLockedConversation } from '@/modules/pace/utils/autoLoopStorage';
 
 export interface ChatConversationContentProps {
   conversationId: string | null;
@@ -125,10 +126,17 @@ const ChatConversationContent: FC<ChatConversationContentProps> = ({
         undefined,
         undefined,
         pendingConversationPayload.llmModel,
+        pendingConversationPayload.autoLoopEnabled,
       );
 
+      const shouldLockAutoLoop = pendingConversationPayload.autoLoopEnabled;
+
       setPendingConversationPayload(null);
-      chat.createConversationV2(payload);
+      chat.createConversationV2(payload).then((response) => {
+        if (shouldLockAutoLoop && response?.conversation_id) {
+          addAutoLoopLockedConversation(response.conversation_id);
+        }
+      });
     }
   }, [
     pendingConversationPayload,
