@@ -36,6 +36,8 @@ import ShareDatasetNeonPopup from 'modules/pace/components/datasets/ShareDataset
 import { preserveSidebarParam } from 'modules/pace/pace.utils';
 import Link from 'next/link';
 import { useAgentDbWriteMutation, useGetDatasetRolesQuery, useLazyAgentDbReadQuery } from '@/apis/agentManagedDb';
+import ImageLoader from '@/components/common/loader/ImageLoader';
+import { ZAMP_LOGO_LOADER_SVG } from '@/constants/icons';
 import { ROUTES_PATH } from '@/constants/routeConfig';
 import DatasetTable from 'components/common/table/DatasetTable';
 import DisplayOptions from 'components/common/table/DisplayOptions';
@@ -520,7 +522,7 @@ const DatasetDetailInner = ({ tableName }: DatasetDetailProps) => {
   return (
     <div className='bg-BG_WHITE flex h-full w-full flex-1 flex-col'>
       {/* Header */}
-      <div className='border-GRAY_400 flex items-center gap-3 border-b px-10 pt-10 pb-4'>
+      <div className='border-GRAY_400 flex items-center gap-3 border-b px-6 pt-10 pb-8'>
         <Link href={preserveSidebarParam(ROUTES_PATH.CHAT_SETTINGS_DATASETS)}>
           <ArrowLeft width={18} height={18} className='text-GRAY_700 hover:text-GRAY_1000 transition-colors' />
         </Link>
@@ -529,10 +531,10 @@ const DatasetDetailInner = ({ tableName }: DatasetDetailProps) => {
       </div>
 
       {/* Toolbar + Filter in one row */}
-      <div className='border-GRAY_400 flex items-center gap-2.5 border-b py-2 pr-8'>
+      <div className='border-GRAY_400 flex items-center gap-2.5 border-b px-6 py-2'>
         {activeTab === DatasetTabsTypes.PREVIEW && contextFiltersConfig && contextFiltersConfig.length > 0 && (
           <div className='flex flex-1 items-center'>
-            <FiltersWrapper label='Filter' filterConfig={contextFiltersConfig} />
+            <FiltersWrapper label='Filter' filterConfig={contextFiltersConfig} className='px-0' />
           </div>
         )}
         {(activeTab !== DatasetTabsTypes.PREVIEW || !contextFiltersConfig?.length) && <div className='flex-1' />}
@@ -569,6 +571,11 @@ const DatasetDetailInner = ({ tableName }: DatasetDetailProps) => {
       {/* Content — both tabs stay mounted, visibility toggled via CSS to avoid re-fetching */}
       <div className='grid flex-1 overflow-hidden'>
         <div className={activeTab === DatasetTabsTypes.PREVIEW ? 'grid overflow-hidden' : 'hidden'}>
+          {!columns && (
+            <div className='flex h-full items-center justify-center'>
+              <ImageLoader imageSrc={ZAMP_LOGO_LOADER_SVG} width={140} height={140} />
+            </div>
+          )}
           {columns && (
             <DatasetTable
               tableRef={tableRef}

@@ -419,7 +419,7 @@ const ColumnListing: FC<ColumnListingProps> = ({
           {columns?.map((column, index) => (
             <div
               key={column?.getColId()}
-              className='hover:!bg-GRAY_100 flex w-full items-center gap-2.5 rounded-md bg-white p-2'
+              className='hover:!bg-GRAY_100 bg-BG_WHITE flex w-full items-center gap-2.5 rounded-md p-2'
             >
               <div className='drag-handle min-w-[14px] cursor-grab'>
                 <Image src={DRAG_ICON} width={14} height={14} alt='drag icon' />

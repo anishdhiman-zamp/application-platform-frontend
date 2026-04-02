@@ -162,6 +162,9 @@ export const buildTableColumnsDetailQuery = (tableName: string): string =>
 
 export const ZAMP_ROW_ID_COLUMN = '_zamp_row_id';
 
+export const buildPrimaryKeyQuery = (tableName: string): string =>
+  `SELECT a.attname AS column_name FROM pg_index i JOIN pg_attribute a ON a.attrelid = i.indrelid AND a.attnum = ANY(i.indkey) WHERE i.indrelid = '"${escapeSqlString(tableName)}"'::regclass AND i.indisprimary LIMIT 1`;
+
 // --- Cell editor mapping (Postgres type -> AG Grid editor) ---
 
 export const getCellEditorForPgType = (
@@ -187,11 +190,17 @@ export const getCellEditorForPgType = (
 
 // --- UPDATE query builders ---
 
-export const buildUpdateCellQuery = (tableName: string, column: string, newValue: unknown, rowId: string): string => {
+export const buildUpdateCellQuery = (
+  tableName: string,
+  column: string,
+  newValue: unknown,
+  rowId: string,
+  pkColumn: string = ZAMP_ROW_ID_COLUMN,
+): string => {
   const val =
     newValue === null || newValue === undefined || newValue === '' ? 'NULL' : `'${escapeSqlString(String(newValue))}'`;
 
-  return `UPDATE "${escapeSqlIdentifier(tableName)}" SET "${escapeSqlIdentifier(column)}" = ${val} WHERE "${ZAMP_ROW_ID_COLUMN}" = '${escapeSqlString(rowId)}'`;
+  return `UPDATE "${escapeSqlIdentifier(tableName)}" SET "${escapeSqlIdentifier(column)}" = ${val} WHERE "${escapeSqlIdentifier(pkColumn)}" = '${escapeSqlString(String(rowId))}'`;
 };
 
 export const buildUpdateFillQuery = (
@@ -199,12 +208,13 @@ export const buildUpdateFillQuery = (
   column: string,
   newValue: unknown,
   rowIds: string[],
+  pkColumn: string = ZAMP_ROW_ID_COLUMN,
 ): string => {
   const val =
     newValue === null || newValue === undefined || newValue === '' ? 'NULL' : `'${escapeSqlString(String(newValue))}'`;
-  const ids = rowIds.map((id) => `'${escapeSqlString(id)}'`).join(', ');
+  const ids = rowIds.map((id) => `'${escapeSqlString(String(id))}'`).join(', ');
 
-  return `UPDATE "${escapeSqlIdentifier(tableName)}" SET "${escapeSqlIdentifier(column)}" = ${val} WHERE "${ZAMP_ROW_ID_COLUMN}" IN (${ids})`;
+  return `UPDATE "${escapeSqlIdentifier(tableName)}" SET "${escapeSqlIdentifier(column)}" = ${val} WHERE "${escapeSqlIdentifier(pkColumn)}" IN (${ids})`;
 };
 
 // --- DML query builders ---

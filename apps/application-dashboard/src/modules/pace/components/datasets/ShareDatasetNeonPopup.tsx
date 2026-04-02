@@ -200,6 +200,7 @@ const ShareDatasetNeonPopup: FC<ShareDatasetNeonPopupProps> = ({ tableName }) =>
       setSelectedItems([]);
       refetchRoles();
       toast.success('Dataset shared successfully');
+      handleClosePopup();
     } catch (err: unknown) {
       const apiErr = err as { data?: { detail?: string } };
 

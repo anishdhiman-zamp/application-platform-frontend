@@ -45,7 +45,7 @@ const FilterDropdownControl: FC<FilterDropdownControlProps> = ({
     >
       <div
         className={cn(
-          'hover:border-DIVIDER_SAIL_4 border-DIVIDER_SAIL_3 flex h-[26px] w-fit items-center gap-1.5 rounded border bg-white px-1.5 py-1.5 select-none',
+          'hover:border-DIVIDER_SAIL_4 border-DIVIDER_SAIL_3 bg-BG_WHITE flex h-[26px] w-fit items-center gap-1.5 rounded border px-1.5 py-1.5 select-none',
           isMenuDropdownOpen ? 'border-DIVIDER_SAIL_4' : '',
           controlClassName,
           { 'shadow-chart-highlight': isHighlighted },

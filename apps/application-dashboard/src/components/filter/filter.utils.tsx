@@ -241,7 +241,7 @@ export const getTagParents = (tag: string) => {
   return parents?.length ? parents?.join(' / ') : null;
 };
 
-const fieldValueClassName = 'border-GRAY_400 border bg-white rounded-md pl-1.5 pr-2 py-1 text-nowrap h-fit';
+const fieldValueClassName = 'border-GRAY_400 border bg-BG_WHITE rounded-md pl-1.5 pr-2 py-1 text-nowrap h-fit';
 const fieldOperatorClassName = 'text-GRAY_1000 pl-1.5 pr-2 py-1 text-nowrap h-fit';
 
 export const getFilterStatementValues = (filter: RuleFilters | null): React.JSX.Element[] => {

@@ -230,7 +230,7 @@ const MultiSearchFilter: FC<MultiSearchFilterProps> = ({
   return (
     <div
       className={cn(
-        'border-0.5 border-GRAY_400 shadow-table-filter-menu w-[218px] max-w-[360px] min-w-[300px] rounded-md bg-white px-2.5 py-2',
+        'border-0.5 border-GRAY_400 shadow-table-filter-menu bg-BG_WHITE w-[218px] max-w-[360px] min-w-[300px] rounded-md px-2.5 py-2',
         className,
       )}
     >
@@ -259,7 +259,7 @@ const MultiSearchFilter: FC<MultiSearchFilterProps> = ({
           onKeyPress={handleDescriptionInputKeyPress}
           onKeyDown={handleDescriptionInputKeyDown}
           onDeleteTag={onDeleteDescriptionInputTag}
-          overrideInputBgClassName='bg-white!'
+          overrideInputBgClassName='bg-BG_WHITE!'
           value={(descriptionValue ? descriptionValue : descriptionPropertySearch) as string}
           onChange={onDescriptionInputChange}
           inputClassName='w-full min-w-[160px]! flex-1 outline-hidden border-none focus:shadow-none! shadow-none!'

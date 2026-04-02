@@ -87,7 +87,7 @@ const SingleSelectFilter: FC<SingleSelectFilterProps> = ({
   return (
     <div
       className={cn(
-        'border-GRAY_400 shadow-table-filter-menu flex max-h-[330px] w-[218px] min-w-[218px] flex-col gap-2 rounded-md border bg-white pt-2 pb-1',
+        'border-GRAY_400 shadow-table-filter-menu bg-BG_WHITE flex max-h-[330px] w-[218px] min-w-[218px] flex-col gap-2 rounded-md border pt-2 pb-1',
         className,
       )}
     >

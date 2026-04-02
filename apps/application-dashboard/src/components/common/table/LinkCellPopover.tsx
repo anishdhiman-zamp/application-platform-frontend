@@ -95,7 +95,7 @@ const LinkCellPopover: FC<LinkCellPopoverProps> = ({ url, cellRect, gridRect, on
       initial={{ opacity: 0, y: -4 }}
       animate={{ opacity: 1, y: 0 }}
       transition={{ duration: 0.15, ease: 'easeOut' }}
-      className='group border-GRAY_400 hover:bg-BG_GRAY_2 fixed z-[1300] flex h-8 max-w-[240px] items-center gap-2 rounded-md border bg-white px-2.5 py-2'
+      className='group border-GRAY_400 hover:bg-BG_GRAY_2 bg-BG_WHITE fixed z-[1300] flex h-8 max-w-[240px] items-center gap-2 rounded-md border px-2.5 py-2'
       style={{ top }}
     >
       <LinkIcon size={14} className='text-BLUE_700 shrink-0' />
