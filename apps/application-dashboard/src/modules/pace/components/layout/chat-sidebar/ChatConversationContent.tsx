@@ -90,7 +90,6 @@ const ChatConversationContent: FC<ChatConversationContentProps> = ({
   const lastMessageSenderType = useMemo(() => chat.messages[chat.messages.length - 1]?.sender_type, [chat.messages]);
   const isLoadingConversation =
     !hasMessages || Boolean(conversationId && chat.isLoadingConversationHistory && !hasMessages);
-
   const { isDragOver, dropZoneProps } = useFileDragDrop({
     onFileDrop: (files) => fileDropHandlerRef.current?.(files),
     disabled: chat.isStreaming || chat.isCreatingConversationV2,
@@ -110,8 +109,8 @@ const ChatConversationContent: FC<ChatConversationContentProps> = ({
   }, [pendingFileReference, clearPendingFileReference, addFileReferenceRef]);
 
   useEffect(() => {
-    onChatStateChange({ chat, isInConversation, showHomeView });
-  }, [chat, isInConversation, showHomeView, onChatStateChange]);
+    onChatStateChange({ chat, isInConversation, showHomeView, inputsRequired: chat.inputsRequired });
+  }, [chat, isInConversation, showHomeView, onChatStateChange, chat.inputsRequired]);
 
   useEffect(() => {
     if (pendingConversationPayload && !pendingPayloadConsumedRef.current && !conversationId) {

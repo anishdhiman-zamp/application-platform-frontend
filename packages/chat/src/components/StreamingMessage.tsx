@@ -36,7 +36,7 @@ export const StreamingMessage: FC<StreamingMessageProps> = ({
   }
 
   return (
-    <div className={cn('space-y-4', className)}>
+    <div className={cn('space-y-4 px-2', className)}>
       {assistantAvatar}
       <BlockRenderer
         message={{ block: messageElements }}

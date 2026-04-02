@@ -8,7 +8,7 @@ import React, { FC, ReactNode, useCallback, useEffect, useMemo, useRef, useState
 
 import { defaultFnType } from '@/types/commonTypes';
 
-import { ButtonBlockType } from '../types/block.types';
+import { BLOCK_TYPE, ButtonBlockType } from '../types/block.types';
 import { ChatMessage, SenderType } from '../types/chat.types';
 import { BlockRenderer } from './BlockRenderer';
 import ChatFeedback from './ChatFeedback';
@@ -149,7 +149,11 @@ export const Message: FC<MessageProps> = ({
       {message.sender_type === SenderType.ASSISTANT && assistantAvatar}
 
       <div
-        className={cn('relative max-w-[620px]', shouldAlignRight && 'bg-GRAY_100 max-w-[80%] rounded-[10px] px-4 py-3')}
+        className={cn(
+          'relative w-full max-w-[min(100%,700px)] min-w-0',
+          shouldAlignRight && message?.message_content?.elements?.[0]?.type === BLOCK_TYPE.MARKDOWN && 'bg-GRAY_100',
+          shouldAlignRight && 'max-w-[80%] rounded-[10px] px-4 py-3',
+        )}
       >
         <div
           ref={contentRef}

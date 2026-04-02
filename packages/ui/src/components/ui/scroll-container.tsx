@@ -502,7 +502,9 @@ const ScrollContainer = forwardRef<ScrollContainerRef, ScrollContainerProps>(
             onScroll={handleScroll}
             className={cn(
               'flex min-h-0 w-full flex-1 flex-col overflow-x-hidden overflow-y-auto [overflow-anchor:none]',
-              scrollbarStyle === 'thin' ? '[scrollbar-width:thin]' : '[scrollbar-width:none]',
+              scrollbarStyle === 'thin'
+                ? '[scrollbar-width:thin]'
+                : '[-ms-overflow-style:none] [scrollbar-width:none] [&::-webkit-scrollbar]:hidden',
               scrollClassName,
             )}
           >

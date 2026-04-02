@@ -15,6 +15,7 @@ import {
   GetFilesByIdsRequestType,
   GetFilesByIdsResponseType,
   GetOutputFileDownloadRequestType,
+  HITLRespondPayloadType,
   PostInteractionDisablePayloadType,
   PostInteractionPayloadType,
   PostInteractionResponseType,
@@ -63,6 +64,7 @@ export const API_ENDPOINTS = {
   SUBMIT_CHAT_FEEDBACK: 'v4/conversations/{{conversationId}}/messages/{{messageId}}/chat-feedback',
   TASKS_MESSAGES_GET: 'tasks/{{conversationId}}/messages',
   STOP_CONVERSATION: 'v4/conversations/{{conversationId}}/stop',
+  HITL_RESPOND: 'hitl/respond',
 };
 
 const ConversationService = chatApi.injectEndpoints({
@@ -186,6 +188,13 @@ const ConversationService = chatApi.injectEndpoints({
         method: REQUEST_TYPES.POST,
       }),
     }),
+    hitlRespond: builder.mutation<void, HITLRespondPayloadType>({
+      query: (body) => ({
+        url: API_ENDPOINTS.HITL_RESPOND,
+        method: REQUEST_TYPES.POST,
+        body,
+      }),
+    }),
   }),
 });
 
@@ -209,4 +218,5 @@ export const {
   useLazyGetOutputFileDownloadQuery,
   useSubmitChatFeedbackMutation,
   useStopConversationMutation,
+  useHitlRespondMutation,
 } = ConversationService;

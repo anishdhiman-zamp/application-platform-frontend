@@ -5,7 +5,7 @@ const ChatHome = () => {
   const greeting = getGreeting();
 
   return (
-    <div className='flex flex-col items-center gap-y-2.5'>
+    <div className='flex snap-mandatory flex-col items-center gap-y-2.5 pt-4.5'>
       <NewPaceIcons width={40} height={40} className='text-GRAY_1000 dark:text-GRAY_950' />
       <h1 className='f-20-500 text-GRAY_1000'>{greeting}</h1>
     </div>

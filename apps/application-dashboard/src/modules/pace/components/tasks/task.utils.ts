@@ -1,51 +1,134 @@
-import { BLOCK_TYPE, type ChatMessage, SenderType, type StreamingState } from '@zamp-platform/chat';
+import {
+  BLOCK_TYPE,
+  type ChatMessage,
+  type ConversationInputRequiredItem,
+  HITL_INPUT_TYPE,
+  type HITLQuestionWithEntity,
+  SenderType,
+  type StreamingState,
+} from '@zamp-platform/chat';
 import { STATUS_DISPLAY } from 'modules/pace/components/tasks/task-listing.constants';
 
-export function getStepCount(messages: ChatMessage[], streamingState: StreamingState | null | undefined): number {
-  const messageCount = messages
-    .filter((m) => m.sender_type === SenderType.ASSISTANT)
-    .reduce((count, msg) => {
-      const elements = msg.message_content?.elements ?? [];
+const messageContributesToSteps = (msg: ChatMessage): boolean => {
+  if (msg.sender_type === SenderType.ASSISTANT) return true;
+  const elements = msg.message_content?.elements ?? [];
 
-      return count + elements.filter((el) => el.type !== BLOCK_TYPE.TOOL_RESULT).length;
-    }, 0);
+  return msg.sender_type === SenderType.USER && elements.some((el) => el.type === BLOCK_TYPE.INPUTS_RESPONDED);
+};
+
+export const getStepCount = (messages: ChatMessage[], streamingState: StreamingState | null | undefined): number => {
+  const messageCount = messages.filter(messageContributesToSteps).reduce((count, msg) => {
+    const elements = msg.message_content?.elements ?? [];
+
+    return count + elements.filter((el) => el.type !== BLOCK_TYPE.TOOL_RESULT).length;
+  }, 0);
 
   const streamingElements = streamingState?.message_content?.elements ?? [];
   const streamingCount = streamingElements.filter((el) => el.type !== BLOCK_TYPE.TOOL_RESULT).length;
 
   return messageCount + streamingCount;
-}
+};
 
-export function getProcessedMessages(messages: ChatMessage[]) {
-  const assistantMessages = messages.filter((m) => m.sender_type === SenderType.ASSISTANT);
-  let lastSummaryText = null;
+export const getProcessedMessages = (messages: ChatMessage[]) => {
+  let lastSummaryText: string | null = null;
 
-  const processedMessages = assistantMessages.map((msg, index) => {
-    const elements = msg.message_content?.elements ?? [];
-    const lastMarkdownIdx = elements.findLastIndex((el) => el.type === BLOCK_TYPE.MARKDOWN);
-
-    if (lastMarkdownIdx === -1) {
-      return { message: msg, summaryText: null };
+  const lastAssistantIndex = (() => {
+    for (let i = messages.length - 1; i >= 0; i -= 1) {
+      if (messages[i].sender_type === SenderType.ASSISTANT) return i;
     }
 
-    const markdownEl = elements[lastMarkdownIdx] as { payload: { text: string } };
-    const trimmedElements = elements.filter((_, i) => i !== lastMarkdownIdx);
-    const trimmedMsg = { ...msg, message_content: { ...msg.message_content, elements: trimmedElements } };
+    return -1;
+  })();
 
-    if (index === assistantMessages.length - 1) {
-      lastSummaryText = markdownEl.payload.text;
-    }
+  const processedMessages = messages.reduce<Array<{ message: ChatMessage; summaryText: string | null }>>(
+    (acc, msg, index) => {
+      if (msg.sender_type === SenderType.ASSISTANT) {
+        const elements = msg.message_content?.elements ?? [];
+        const lastMarkdownIdx = elements.findLastIndex((el) => el.type === BLOCK_TYPE.MARKDOWN);
 
-    return { message: trimmedMsg, summaryText: markdownEl.payload.text };
-  });
+        if (lastMarkdownIdx === -1) {
+          acc.push({ message: msg, summaryText: null });
+
+          return acc;
+        }
+
+        const markdownEl = elements[lastMarkdownIdx] as { payload: { text: string } };
+        const trimmedElements = elements.filter((_, i) => i !== lastMarkdownIdx);
+        const trimmedMsg = { ...msg, message_content: { ...msg.message_content, elements: trimmedElements } };
+
+        if (index === lastAssistantIndex) {
+          lastSummaryText = markdownEl.payload.text;
+        }
+
+        acc.push({ message: trimmedMsg, summaryText: markdownEl.payload.text });
+
+        return acc;
+      }
+
+      if (msg.sender_type === SenderType.USER) {
+        const elements = msg.message_content?.elements ?? [];
+
+        if (elements.some((el) => el.type === BLOCK_TYPE.INPUTS_RESPONDED)) {
+          acc.push({ message: msg, summaryText: null });
+        }
+      }
+
+      return acc;
+    },
+    [],
+  );
 
   return { processedMessages, lastSummaryText };
-}
+};
 
-export function getStatusLabel(isAgentActive: boolean, taskStatus: string | undefined): string {
+export const getStatusLabel = (isAgentActive: boolean, taskStatus: string | undefined): string => {
   return isAgentActive ? 'In progress' : (STATUS_DISPLAY[taskStatus ?? ''] ?? taskStatus ?? '');
-}
+};
 
-export function getDisplayTitle(urlTitle: string | null, chatTitle: string): string {
+export const getDisplayTitle = (urlTitle: string | null, chatTitle: string): string => {
   return urlTitle || chatTitle || 'Untitled';
-}
+};
+
+export const mapInputsRequiredToHitlQuestions = (items: ConversationInputRequiredItem[]): HITLQuestionWithEntity[] => {
+  const result: HITLQuestionWithEntity[] = [];
+
+  for (const item of items) {
+    const data = item.input_required_data;
+
+    if (!data) continue;
+
+    if (data.input_type === HITL_INPUT_TYPE.APPROVAL) {
+      result.push({
+        id: item.entity_id,
+        entity_id: item.entity_id,
+        entity_type: item.entity_type,
+        question: data.question ?? '',
+        options: null,
+        input_type: HITL_INPUT_TYPE.APPROVAL,
+        is_multi_select: false,
+        allow_custom_input: data.allow_custom_input ?? false,
+      });
+      continue;
+    }
+
+    if (!data.options?.length) continue;
+
+    result.push({
+      id: item.entity_id,
+      entity_id: item.entity_id,
+      entity_type: item.entity_type,
+      question: data.question ?? '',
+      options: data.options.map((opt) => ({
+        id: opt.id,
+        label: opt.label,
+        title: opt.title ?? opt.label,
+        description: opt.description,
+      })),
+      input_type: data.input_type,
+      is_multi_select: data.input_type === HITL_INPUT_TYPE.MULTI_SELECT,
+      allow_custom_input: data.allow_custom_input ?? false,
+    });
+  }
+
+  return result;
+};

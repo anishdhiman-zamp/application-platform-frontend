@@ -12,6 +12,7 @@ export const enum BLOCK_TYPE {
   THINKING = 'thinking',
   OUTPUT_FILES = 'output_files',
   TASK = 'task',
+  INPUTS_RESPONDED = 'inputs_responded',
 }
 
 export const enum ActionType {
@@ -162,6 +163,87 @@ export interface TaskBlockType {
   };
 }
 
+export interface HITLOption {
+  id: string;
+  label: string;
+  title?: string;
+  description: string;
+}
+
+/** `input_type` on `input_required` / HITL question payloads (API contract). */
+export const HITL_INPUT_TYPE = {
+  SELECT_ONE: 'select_one',
+  MULTI_SELECT: 'multi-select',
+  APPROVAL: 'approval',
+} as const;
+
+export type HITLInputType = (typeof HITL_INPUT_TYPE)[keyof typeof HITL_INPUT_TYPE];
+
+export interface HITLQuestion {
+  id: string;
+  text?: string;
+  question?: string;
+  /** Null/empty when `input_type` is {@link HITL_INPUT_TYPE.APPROVAL}. */
+  options: HITLOption[] | null;
+  is_multi_select?: boolean;
+  input_type?: HITLInputType;
+  allow_custom_input?: boolean;
+}
+
+/** Discriminator strings for HITL respond and `inputs_responded` payloads (API contract). */
+export const HITL_RESPONSE_TYPE = {
+  SELECT_ONE: 'select_one',
+  FREE_TEXT: 'free_text',
+  APPROVAL: 'approval',
+} as const;
+
+export interface InputRequiredPayload {
+  question: string;
+  /** Null when `input_type` is {@link HITL_INPUT_TYPE.APPROVAL}. */
+  options: HITLOption[] | null;
+  input_type: HITLInputType;
+  allow_custom_input: boolean;
+  entity_id?: string;
+  entity_type?: string;
+}
+
+/** Answer shape for a single row inside `inputs_responded` (mirrors HITL respond payload) */
+export interface InputsRespondedSelectOne {
+  type: typeof HITL_RESPONSE_TYPE.SELECT_ONE;
+  selected_option: string;
+}
+
+export interface InputsRespondedFreeText {
+  type: typeof HITL_RESPONSE_TYPE.FREE_TEXT;
+  free_text: string;
+}
+
+export interface InputsRespondedApproval {
+  type: typeof HITL_RESPONSE_TYPE.APPROVAL;
+  approved: boolean;
+}
+
+export type InputsRespondedAnswer = InputsRespondedSelectOne | InputsRespondedFreeText | InputsRespondedApproval;
+
+export interface InputsRespondedItemPayload {
+  response: InputsRespondedAnswer;
+  entity_id: string;
+  entity_type: string;
+  input_required: InputRequiredPayload;
+}
+
+export interface InputsRespondedBlockType {
+  id: string;
+  type: BLOCK_TYPE.INPUTS_RESPONDED;
+  order: number;
+  payload: {
+    responses: InputsRespondedItemPayload[];
+  };
+  action?: null;
+  interaction?: null;
+  metadata?: null;
+}
+
 export enum TEXT_TYPE {
   PLAIN_TEXT = 'plain_text',
   MARKDOWN = 'markdown',
@@ -177,6 +259,7 @@ export type Block =
   | FileReferencesBlockType
   | OutputFilesBlockType
   | TaskBlockType
+  | InputsRespondedBlockType
   | ThinkingContentBlock
   | TextContentBlock
   | ToolUseContentBlock
