@@ -1,15 +1,16 @@
 import { useCallback, useEffect, useMemo, useState } from 'react';
 import type { TaskStatus } from '@zamp-platform/chat';
-import { TASKS_PAGE_SIZE } from 'modules/pace/components/tasks/task-listing.constants';
-import type { TaskListItem } from 'modules/pace/components/tasks/task-listing.types';
 import { useGetTasksByStatusQuery } from '@/apis/task';
+import { TASKS_PAGE_SIZE } from '@/modules/pace/components/tasks/constants/tasks.constants';
+import type { CreationSource, TaskListItem } from '@/modules/pace/components/tasks/types/tasks.types';
 
 interface UseTasksByStatusOptions {
   status: TaskStatus;
   search?: string;
+  creationSource?: CreationSource;
 }
 
-export function useTasksByStatus({ status, search }: UseTasksByStatusOptions) {
+export function useTasksByStatus({ status, search, creationSource }: UseTasksByStatusOptions) {
   const [page, setPage] = useState(1);
   const [allTasks, setAllTasks] = useState<TaskListItem[]>([]);
   const [totalCount, setTotalCount] = useState(0);
@@ -19,6 +20,8 @@ export function useTasksByStatus({ status, search }: UseTasksByStatusOptions) {
     search: search || undefined,
     page,
     limit: TASKS_PAGE_SIZE,
+    creation_source_type: creationSource?.type,
+    creation_source_id: creationSource?.id,
   });
 
   const tasks = useMemo(() => data?.tasks ?? [], [data]);
@@ -33,7 +36,7 @@ export function useTasksByStatus({ status, search }: UseTasksByStatusOptions) {
 
   useEffect(() => {
     setPage(1);
-  }, [status, search]);
+  }, [status, search, creationSource?.type, creationSource?.id]);
 
   useEffect(() => {
     if (data?.count !== undefined) {

@@ -1,3 +1,5 @@
+import type { SiblingTask, TaskBreadcrumb } from '@zamp-platform/chat';
+
 export const ROUTES_PATH = {
   HOME: '/',
   LOGIN: '/login',
@@ -122,6 +124,11 @@ export const getChatFileRoute = (filePath: string) => {
   return `${ROUTES_PATH.CHAT}?f=${encodeURIComponent(filePath)}`;
 };
 
+export const TASK_QUERY_PARAMS = {
+  PARENT_TASKS: 'parentTasks',
+  SIBLINGS: 'siblings',
+} as const;
+
 export const getChatTaskRoute = ({
   taskId,
   conversationId,
@@ -129,6 +136,8 @@ export const getChatTaskRoute = ({
   status,
   currentIndex,
   totalRows,
+  parentTasks,
+  siblings,
 }: {
   taskId: string;
   conversationId?: string;
@@ -136,6 +145,8 @@ export const getChatTaskRoute = ({
   status?: string;
   currentIndex?: number;
   totalRows?: number;
+  parentTasks?: TaskBreadcrumb[];
+  siblings?: SiblingTask[];
 }) => {
   const basePath = ROUTES_PATH.CHAT_TASK.replace(':taskId', taskId);
   const params = new URLSearchParams();
@@ -145,6 +156,8 @@ export const getChatTaskRoute = ({
   if (status) params.set('status', status);
   if (currentIndex !== undefined) params.set('currentIndex', String(currentIndex + 1));
   if (totalRows !== undefined) params.set('totalRows', String(totalRows));
+  if (parentTasks && parentTasks.length > 0) params.set(TASK_QUERY_PARAMS.PARENT_TASKS, JSON.stringify(parentTasks));
+  if (siblings && siblings.length > 0) params.set(TASK_QUERY_PARAMS.SIBLINGS, JSON.stringify(siblings));
 
   const query = params.toString();
 

@@ -1,7 +1,7 @@
 import { TASK_STATUS, type TaskStatus } from '@zamp-platform/chat';
 import type { LucideIcon } from 'lucide-react';
 import { List, TrafficCone } from 'lucide-react';
-import { TASK_LISTING_TAB, type TaskListingTab } from 'modules/pace/components/tasks/task-listing.types';
+import { TASK_LISTING_TAB, type TaskListingTab } from '@/modules/pace/components/tasks/types/tasks.types';
 
 export const STATUS_DISPLAY_ORDER: TaskStatus[] = [
   TASK_STATUS.NEEDS_INPUT,
