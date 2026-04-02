@@ -1,10 +1,4 @@
 {
-  "permissions": {
-    "allow": [
-      "mcp__figma__get_design_context",
-      "Bash(make -C /home/coder/zamp/services/application-platform-frontend health)"
-    ]
-  },
   "enableAllProjectMcpServers": true,
   "enabledPlugins": {
     "frontend-design@claude-plugins-official": true,

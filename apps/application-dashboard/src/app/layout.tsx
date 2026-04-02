@@ -60,10 +60,8 @@ export default async function RootLayout({ children }: { children: React.ReactNo
       className={cn(inter.className, 'overscroll-none', funnelDisplay.variable, theme.html)}
       suppressHydrationWarning
     >
-      <head>
-        <Script id='theme-init' strategy='beforeInteractive' dangerouslySetInnerHTML={{ __html: THEME_INIT_SCRIPT }} />
-      </head>
       <body className={cn(theme.body, 'bg-BG_GRAY_1 h-screen antialiased')} suppressHydrationWarning>
+        <Script id='theme-init' strategy='beforeInteractive' dangerouslySetInnerHTML={{ __html: THEME_INIT_SCRIPT }} />
         <ThemeProvider>
           <SpeedInsights />
           <NetworkStatus />
