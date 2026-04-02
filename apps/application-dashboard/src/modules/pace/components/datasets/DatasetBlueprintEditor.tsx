@@ -155,7 +155,7 @@ const ColumnRow: FC<ColumnRowProps> = memo(
         <div ref={setNodeRef} style={{ ...style, zIndex: isDragging ? 999 : undefined }}>
           <div
             className={cn(
-              'border-GRAY_100 flex items-center justify-between border-b bg-white py-2.5 pr-8 pl-4',
+              'border-GRAY_100 bg-BG_WHITE flex items-center justify-between border-b py-2.5 pr-8 pl-4',
               !canEdit && 'opacity-60',
             )}
           >

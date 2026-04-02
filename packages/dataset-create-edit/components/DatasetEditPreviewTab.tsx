@@ -22,7 +22,7 @@ const DatasetEditPreviewTab: FC<DatasetEditPreviewTabProps> = ({ selectedTab, ha
                   className={cn(
                     'f-13-450 text-GRAY_900 flex cursor-pointer items-center gap-1.5 rounded p-0 px-2 py-1.5',
                     selectedTab === tab.value
-                      ? 'text-GRAY_1000 border-GRAY_400 scale-105 border bg-white'
+                      ? 'text-GRAY_1000 border-GRAY_400 bg-BG_WHITE scale-105 border'
                       : 'bg-GRAY_100 border-none',
                   )}
                   onClick={() => handleTabSelect(tab.value)}

@@ -41,7 +41,7 @@ const ColumnTypeDropdown: FC<IColumnDropdownProps> = ({
           size='medium'
           disabled={disabled}
           className={cn(
-            'f-12-500 text-gray-1000 border-GRAY_400 hover:bg-GRAY_100 active:bg-GRAY_50 flex cursor-pointer items-center gap-1 rounded-md border bg-white px-3 py-1.5 text-sm font-medium focus:outline-none focus-visible:ring-0 focus-visible:ring-offset-0',
+            'f-12-500 text-GRAY_1000 border-GRAY_400 hover:bg-GRAY_100 active:bg-GRAY_50 bg-BG_WHITE flex cursor-pointer items-center gap-1 rounded-md border px-3 py-1.5 text-sm font-medium focus:outline-none focus-visible:ring-0 focus-visible:ring-offset-0',
             triggerClassName,
             isDropdownOpen && 'bg-GRAY_50',
             selectedType && 'border-GRAY_300 bg-GRAY_100',
@@ -62,7 +62,7 @@ const ColumnTypeDropdown: FC<IColumnDropdownProps> = ({
           )}
         </Button>
       </DropdownMenuTrigger>
-      <DropdownMenuContent className='mt-1.5 w-40 bg-white' align='start'>
+      <DropdownMenuContent className='bg-BG_WHITE mt-1.5 w-40' align='start'>
         {DATASET_COLUMN_TYPES_LIST.map((type) => (
           <DropdownMenuItem
             key={type?.value}

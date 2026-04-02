@@ -147,7 +147,7 @@ const CreateDataset = () => {
       </div>
 
       {/* Footer */}
-      <div className='border-GRAY_200 sticky bottom-0 z-10 flex justify-end border-t bg-white p-3'>
+      <div className='border-GRAY_200 bg-BG_WHITE sticky bottom-0 z-10 flex justify-end border-t p-3'>
         <Button onClick={handleCreate} disabled={isCreating}>
           {isCreating ? 'Creating...' : 'Create Dataset'}
         </Button>
