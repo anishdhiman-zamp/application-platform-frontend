@@ -278,10 +278,11 @@ const ColumnListing: FC<ColumnListingProps> = ({
     // Get columns based on dataset type
     const getMovableColumns = (): Column[] => {
       if (isPreviewDataset) {
-        // For preview, get columns in their CURRENT DISPLAY ORDER from the grid
-        const displayedColumns = tableRef?.current?.api?.getAllDisplayedColumns() ?? [];
+        // For preview, use getColumns() to include ALL columns (even hidden ones)
+        // so users can re-enable them from the column picker.
+        const allColumns = tableRef?.current?.api?.getColumns() ?? [];
 
-        return displayedColumns.filter((column) => {
+        return allColumns.filter((column) => {
           const colDef = column?.getColDef();
 
           return !colDef?.suppressMovable && !colDef?.headerComponentParams?.metadata?.is_hidden;
