@@ -22,7 +22,7 @@ const DatasetEditPreviewTab: FC<DatasetEditPreviewTabProps> = ({ selectedTab, ha
                   className={cn(
                     'f-13-450 text-GRAY_900 flex cursor-pointer items-center gap-1.5 rounded p-0 px-2 py-1.5',
                     selectedTab === tab.value
-                      ? 'text-GRAY_1000 border-GRAY_400 bg-BG_WHITE scale-105 border'
+                      ? 'text-GRAY_1000 border-GRAY_400 bg-BG_WHITE border'
                       : 'bg-GRAY_100 border-none',
                   )}
                   onClick={() => handleTabSelect(tab.value)}
@@ -31,8 +31,8 @@ const DatasetEditPreviewTab: FC<DatasetEditPreviewTabProps> = ({ selectedTab, ha
                 </div>
               </TooltipTrigger>
               <TooltipContent side='bottom' className='mt-2 flex max-w-40 flex-col gap-1 p-3 text-left'>
-                <p className='f-10-500 text-white'>{tab.label}</p>
-                <p className='text-GRAY_700 f-10-400'>{tab.description}</p>
+                <p className='f-10-500 text-BG_WHITE'>{tab.label}</p>
+                <p className='text-BG_WHITE/70 f-10-400'>{tab.description}</p>
               </TooltipContent>
             </Tooltip>
           );

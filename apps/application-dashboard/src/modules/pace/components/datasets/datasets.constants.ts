@@ -75,7 +75,7 @@ export const buildCreateTableQuery = (tableName: string, columns: BlueprintColum
     return `"${colName}" ${pgType}${notNull}`;
   });
 
-  return `CREATE TABLE "${safeName}" (${colDefs.join(', ')})`;
+  return `CREATE TABLE "${safeName}" ("id" SERIAL PRIMARY KEY, ${colDefs.join(', ')})`;
 };
 
 export const buildAlterTableAddColumnQuery = (
@@ -158,9 +158,7 @@ export const buildTableColumnsQuery = (tableName: string): string =>
 export const buildTableColumnsDetailQuery = (tableName: string): string =>
   `SELECT column_name, data_type, is_nullable FROM information_schema.columns WHERE table_schema = 'public' AND table_name = '${escapeSqlString(tableName)}' ORDER BY ordinal_position`;
 
-// --- Row identity (backend auto-injects this into CREATE TABLE) ---
-
-export const ZAMP_ROW_ID_COLUMN = '_zamp_row_id';
+// --- Primary key detection ---
 
 export const buildPrimaryKeyQuery = (tableName: string): string =>
   `SELECT a.attname AS column_name FROM pg_index i JOIN pg_attribute a ON a.attrelid = i.indrelid AND a.attnum = ANY(i.indkey) WHERE i.indrelid = '"${escapeSqlString(tableName)}"'::regclass AND i.indisprimary LIMIT 1`;
@@ -195,7 +193,7 @@ export const buildUpdateCellQuery = (
   column: string,
   newValue: unknown,
   rowId: string,
-  pkColumn: string = ZAMP_ROW_ID_COLUMN,
+  pkColumn: string,
 ): string => {
   const val =
     newValue === null || newValue === undefined || newValue === '' ? 'NULL' : `'${escapeSqlString(String(newValue))}'`;
@@ -208,7 +206,7 @@ export const buildUpdateFillQuery = (
   column: string,
   newValue: unknown,
   rowIds: string[],
-  pkColumn: string = ZAMP_ROW_ID_COLUMN,
+  pkColumn: string,
 ): string => {
   const val =
     newValue === null || newValue === undefined || newValue === '' ? 'NULL' : `'${escapeSqlString(String(newValue))}'`;
@@ -281,12 +279,15 @@ export const buildSelectTableQuery = (
   offset: number,
   sortModel?: { colId: string; sort: string }[],
   filterClauses?: string,
+  defaultSortColumn?: string,
 ): string => {
   let query = `SELECT * FROM "${escapeSqlIdentifier(tableName)}"`;
 
   if (filterClauses) query += ` WHERE ${filterClauses}`;
   if (sortModel?.length) {
     query += ` ORDER BY ${sortModel.map((s) => `"${escapeSqlIdentifier(s.colId)}" ${s.sort === 'desc' ? 'DESC' : 'ASC'}`).join(', ')}`;
+  } else if (defaultSortColumn) {
+    query += ` ORDER BY "${escapeSqlIdentifier(defaultSortColumn)}" ASC`;
   }
   query += ` LIMIT ${limit} OFFSET ${offset}`;
 

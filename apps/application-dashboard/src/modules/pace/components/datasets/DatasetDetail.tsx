@@ -17,6 +17,7 @@ import {
   buildBackfillNullsQuery,
   buildCountQuery,
   buildFilterClauses,
+  buildPrimaryKeyQuery,
   buildSelectTableQuery,
   buildTableColumnsDetailQuery,
   buildUpdateCellQuery,
@@ -30,7 +31,6 @@ import {
   pgTypeToColumnType,
   rowsToCsv,
   sanitizeColumnName,
-  ZAMP_ROW_ID_COLUMN,
 } from 'modules/pace/components/datasets/datasets.constants';
 import ShareDatasetNeonPopup from 'modules/pace/components/datasets/ShareDatasetNeonPopup';
 import { preserveSidebarParam } from 'modules/pace/pace.utils';
@@ -63,6 +63,7 @@ const DatasetDetailInner = ({ tableName }: DatasetDetailProps) => {
   const [isSaving, setIsSaving] = useState(false);
   const [isExporting, setIsExporting] = useState(false);
   const [gridReady, setGridReady] = useState(false);
+  const [pkColumn, setPkColumn] = useState<string | null>(null);
 
   const { userId } = useUserIdentity();
   const { data: rolesData } = useGetDatasetRolesQuery({ tableName });
@@ -73,7 +74,7 @@ const DatasetDetailInner = ({ tableName }: DatasetDetailProps) => {
     return rolesData.roles.find((r) => r.user_id === userId && r.table_name === tableName)?.role;
   }, [rolesData, userId, tableName]);
 
-  const canEditData = userRole === 'admin' || userRole === 'editor';
+  const canEditData = (userRole === 'admin' || userRole === 'editor') && pkColumn !== null;
   const canEditBlueprint = userRole === 'admin' || userRole === 'editor';
 
   const {
@@ -85,6 +86,7 @@ const DatasetDetailInner = ({ tableName }: DatasetDetailProps) => {
   const totalRowsRef = useRef<number | undefined>(undefined);
   const lastFilterClausesRef = useRef<string | undefined>(undefined);
   const activeFilterClausesRef = useRef<string | undefined>(undefined);
+  const firstColumnRef = useRef<string | undefined>(undefined);
   const initRef = useRef(false);
   const prefetchRef = useRef<{
     dataPromise: Promise<{ rows: Record<string, unknown>[]; count: number }>;
@@ -94,9 +96,18 @@ const DatasetDetailInner = ({ tableName }: DatasetDetailProps) => {
 
   const loadSchema = useCallback(async () => {
     try {
-      const result = await executeQuery({ query: buildTableColumnsDetailQuery(tableName) }).unwrap();
+      const [result, pkResult] = await Promise.all([
+        executeQuery({ query: buildTableColumnsDetailQuery(tableName) }).unwrap(),
+        executeQuery({ query: buildPrimaryKeyQuery(tableName) })
+          .unwrap()
+          .catch(() => ({ rows: [] })),
+      ]);
       const allRows = result.rows ?? [];
-      const userRows = allRows.filter((r) => String(r.column_name) !== ZAMP_ROW_ID_COLUMN);
+      const pkRows = pkResult.rows ?? [];
+
+      setPkColumn(pkRows.length > 0 ? String(pkRows[0].column_name) : null);
+
+      const userRows = allRows;
 
       const gridCols: ColDef[] = userRows.map((row: Record<string, unknown>) => {
         const field = String(row.column_name);
@@ -110,6 +121,7 @@ const DatasetDetailInner = ({ tableName }: DatasetDetailProps) => {
       });
 
       setColumns(gridCols);
+      firstColumnRef.current = gridCols[0]?.field;
 
       const config = gridCols.map((c) => ({
         key: c.field as string,
@@ -312,22 +324,24 @@ const DatasetDetailInner = ({ tableName }: DatasetDetailProps) => {
 
       if (source !== 'edit' && source !== 'api') return;
 
+      if (!pkColumn) return;
+
       node.setData({ ...data, [field]: newValue });
 
-      const rowId = data?._zamp_row_id;
+      const rowId = data?.[pkColumn];
 
-      if (!rowId) return;
+      if (rowId === undefined || rowId === null) return;
 
       try {
         await executeMutation({
-          query: buildUpdateCellQuery(tableName, field, newValue, rowId),
+          query: buildUpdateCellQuery(tableName, field, newValue, String(rowId), pkColumn),
         }).unwrap();
       } catch {
         node.setData({ ...data, [field]: oldValue });
         toast.error('Failed to update cell');
       }
     },
-    [tableName, executeMutation],
+    [tableName, executeMutation, pkColumn],
   );
 
   const handleFillEnd = useCallback(
@@ -335,6 +349,7 @@ const DatasetDetailInner = ({ tableName }: DatasetDetailProps) => {
       const { finalRange, initialRange, api } = event;
 
       if (!finalRange?.startRow || !finalRange?.endRow || !initialRange?.startRow) return;
+      if (!pkColumn) return;
 
       const colId = finalRange.columns[0]?.getColId();
 
@@ -348,10 +363,10 @@ const DatasetDetailInner = ({ tableName }: DatasetDetailProps) => {
 
       for (let i = finalRange.startRow.rowIndex; i <= finalRange.endRow.rowIndex; i++) {
         const node = api.getDisplayedRowAtIndex(i);
-        const rid = node?.data?._zamp_row_id;
+        const rid = node?.data?.[pkColumn];
 
-        if (rid && i !== srcIdx) {
-          rowIds.push(rid as string);
+        if (rid !== undefined && rid !== null && i !== srcIdx) {
+          rowIds.push(String(rid));
           affectedNodes.push({ node, oldData: { ...node.data } });
           node.setData({ ...node.data, [colId]: fillValue });
         }
@@ -360,14 +375,14 @@ const DatasetDetailInner = ({ tableName }: DatasetDetailProps) => {
 
       try {
         await executeMutation({
-          query: buildUpdateFillQuery(tableName, colId, fillValue, rowIds),
+          query: buildUpdateFillQuery(tableName, colId, fillValue, rowIds, pkColumn),
         }).unwrap();
       } catch {
         affectedNodes.forEach(({ node, oldData }) => node.setData(oldData));
         toast.error('Failed to update cells');
       }
     },
-    [tableName, executeMutation],
+    [tableName, executeMutation, pkColumn],
   );
 
   const hasBlueprintChanges = useMemo(() => {
@@ -409,7 +424,7 @@ const DatasetDetailInner = ({ tableName }: DatasetDetailProps) => {
         const chunk = await executeQuery({
           query: buildSelectTableQuery(tableName, EXPORT_CHUNK_SIZE, offset, sortModel, filterClauses),
         }).unwrap();
-        const rows = (chunk.rows ?? []).map(({ _zamp_row_id: _, ...rest }) => rest);
+        const rows = chunk.rows ?? [];
 
         if (rows.length === 0) break;
         csvChunks.push(rowsToCsv(rows, offset === 0));
@@ -482,7 +497,7 @@ const DatasetDetailInner = ({ tableName }: DatasetDetailProps) => {
 
       try {
         const selectPromise = executeQuery({
-          query: buildSelectTableQuery(tableName, limit, offset, sortModel, filterClauses),
+          query: buildSelectTableQuery(tableName, limit, offset, sortModel, filterClauses, firstColumnRef.current),
         }).unwrap();
 
         let countPromise: Promise<{ rows: Record<string, unknown>[]; count: number }> | undefined;
