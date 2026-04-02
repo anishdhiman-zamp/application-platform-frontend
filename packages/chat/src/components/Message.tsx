@@ -9,7 +9,7 @@ import React, { FC, ReactNode, useCallback, useEffect, useMemo, useRef, useState
 import { defaultFnType } from '@/types/commonTypes';
 
 import { BLOCK_TYPE, ButtonBlockType } from '../types/block.types';
-import { ChatMessage, HITLEntityType, SenderType } from '../types/chat.types';
+import { ChatMessage, SenderType } from '../types/chat.types';
 import { BlockRenderer } from './BlockRenderer';
 import ChatFeedback from './ChatFeedback';
 import CopyMessageButton from './CopyMessageButton';
@@ -36,7 +36,6 @@ export interface MessageProps {
   showMarkdownConnectors?: boolean;
   showConnectorToLastBlock?: boolean;
   showConnectorToNextBlock?: boolean;
-  sourceEntityType?: HITLEntityType;
 }
 
 export const USER_MESSAGE_MAX_HEIGHT = 240;
@@ -62,7 +61,6 @@ export const Message: FC<MessageProps> = ({
   showMarkdownConnectors = false,
   showConnectorToLastBlock = false,
   showConnectorToNextBlock = false,
-  sourceEntityType,
 }) => {
   const cleanupRef = useRef<defaultFnType | null>(null);
   const contentRef = useRef<HTMLDivElement>(null);
@@ -172,7 +170,6 @@ export const Message: FC<MessageProps> = ({
             showMarkdownConnectors={showMarkdownConnectors}
             showConnectorToLastBlock={showConnectorToLastBlock}
             showConnectorToNextBlock={showConnectorToNextBlock}
-            sourceEntityType={sourceEntityType}
           />
         </div>
         {isUserMessage && isOverflowing && !isExpanded && (

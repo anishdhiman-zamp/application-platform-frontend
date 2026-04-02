@@ -9,12 +9,12 @@ export interface TaskChatTitleHeaderProps {
   taskStatus: string | undefined;
 }
 
-export function TaskChatTitleHeader({
+export const TaskChatTitleHeader = ({
   displayTitle,
   statusLabel,
   isAgentActive,
   taskStatus,
-}: TaskChatTitleHeaderProps) {
+}: TaskChatTitleHeaderProps) => {
   return (
     <div className='flex flex-col gap-1.5'>
       <div className='flex items-center gap-2.5'>
@@ -41,4 +41,4 @@ export function TaskChatTitleHeader({
       </div>
     </div>
   );
-}
+};

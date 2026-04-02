@@ -19,7 +19,7 @@ export const HITLQuestionsFooter = ({ onSkip, onSubmit, submitDisabled, isSubmit
             type='button'
             variant='ghost'
             size='xsmall'
-            className='h-auto px-2.5 py-1.5 hover:opacity-70'
+            className='hidden h-auto px-2.5 py-1.5 hover:opacity-70'
             onClick={onSkip}
             testId='hitl-questions-skip'
           >

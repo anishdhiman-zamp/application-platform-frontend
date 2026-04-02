@@ -7,7 +7,7 @@ import React, { FC, ReactNode, useEffect, useRef, useState } from 'react';
 import PaceAvatar from '@/modules/chatbot/PaceAvatar';
 
 import { ButtonBlockType } from '../types/block.types';
-import { ChatMessage, HITLEntityType, SenderType, StreamingState } from '../types/chat.types';
+import { ChatMessage, SenderType, StreamingState } from '../types/chat.types';
 import { getMessageKey } from '../utils/message.utils';
 import Message from './Message';
 import { StreamingMessage } from './StreamingMessage';
@@ -30,7 +30,6 @@ interface MessageContainerProps {
   conversationId?: string;
   showMarkdownConnectors?: boolean;
   showStreamingAvatar?: boolean;
-  sourceEntityType?: HITLEntityType;
 }
 
 export const MessageContainer: FC<MessageContainerProps> = ({
@@ -51,7 +50,6 @@ export const MessageContainer: FC<MessageContainerProps> = ({
   conversationId,
   showMarkdownConnectors = false,
   showStreamingAvatar = true,
-  sourceEntityType,
 }) => {
   const previousConversationIdRef = useRef(conversationId);
   const [animatedLength, setAnimatedLength] = useState(() => {
@@ -142,7 +140,6 @@ export const MessageContainer: FC<MessageContainerProps> = ({
           organizationId={organizationId}
           streamingEnabled={streamingEnabled}
           showMarkdownConnectors={showMarkdownConnectors}
-          sourceEntityType={sourceEntityType}
         />
       ))}
 

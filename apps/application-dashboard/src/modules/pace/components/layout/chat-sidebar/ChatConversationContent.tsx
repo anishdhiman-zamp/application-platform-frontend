@@ -5,7 +5,6 @@ import {
   ChatActionsProvider,
   createConversationPayload,
   DropOverlay,
-  HITLEntityType,
   MessageContainer,
   ResourceType,
   ScopeType,
@@ -180,7 +179,6 @@ const ChatConversationContent: FC<ChatConversationContentProps> = ({
                 showFeedback
                 showCopy
                 alignUserRight
-                sourceEntityType={HITLEntityType.CONVERSATION}
               />
               <div className='bg-BG_WHITE h-12 w-full' />
             </CommonWrapper>

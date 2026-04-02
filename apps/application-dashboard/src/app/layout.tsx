@@ -48,7 +48,7 @@ export const viewport: Viewport = {
   initialScale: 1.0,
 };
 
-export default async function RootLayout({ children }: { children: React.ReactNode }) {
+const RootLayout = async ({ children }: { children: React.ReactNode }) => {
   const [cookieStore, requestHeaders] = await Promise.all([cookies(), headers()]);
   const themePreference = cookieStore.get(THEME_COOKIE)?.value || THEME_MODE.LIGHT;
   const osColorScheme = requestHeaders.get(COLOR_SCHEME_HEADER) ?? undefined;
@@ -71,4 +71,6 @@ export default async function RootLayout({ children }: { children: React.ReactNo
       </body>
     </html>
   );
-}
+};
+
+export default RootLayout;
