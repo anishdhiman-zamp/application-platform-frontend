@@ -18,7 +18,6 @@ import {
   streamingStateStore,
   type TaskContentBlock,
 } from '@zamp-platform/chat';
-import { ConversationEventType } from '@zamp-platform/conversation-stream';
 import { EventBus, SSEConnectionState, useSSE } from '@zamp-platform/utils';
 import {
   type BaseEventPayload,
@@ -138,6 +137,9 @@ function handleGlobalStreamEvent(data: BaseEventPayload): void {
             };
         }
 
+        // Safe guard: SSE protocol guarantees MESSAGE_START (which calls streamingStateStore.set())
+        // always precedes CONTENT_BLOCK_START/DELTA/STOP. A null prev indicates an out-of-order
+        // event that should be ignored.
         streamingStateStore.update(conversationId, (prev) => {
           if (!prev) return prev;
 
@@ -514,18 +516,12 @@ export const SSEProvider: React.FC<SSEProviderProps> = ({ children, sseEventBus 
       }
     });
     const taskUpdateSub = sseEventBus.subscribe(EVENT_TYPE.TASK_UPDATE, handleGlobalTaskUpdate);
-    const convCreatedSub = sseEventBus.subscribe(
-      ConversationEventType.CONVERSATION_CREATED as unknown as EVENT_TYPE,
-      () => {
-        store.dispatch(baseApi.util.invalidateTags([APITags.GET_CONVERSATION_HISTORY]));
-      },
-    );
-    const titleUpdatedSub = sseEventBus.subscribe(
-      ConversationEventType.CONVERSATION_TITLE_UPDATED as unknown as EVENT_TYPE,
-      () => {
-        store.dispatch(baseApi.util.invalidateTags([APITags.GET_CONVERSATION_HISTORY]));
-      },
-    );
+    const convCreatedSub = sseEventBus.subscribe(EVENT_TYPE.CONVERSATION_CREATED, () => {
+      store.dispatch(baseApi.util.invalidateTags([APITags.GET_CONVERSATION_HISTORY]));
+    });
+    const titleUpdatedSub = sseEventBus.subscribe(EVENT_TYPE.CONVERSATION_TITLE_UPDATED, () => {
+      store.dispatch(baseApi.util.invalidateTags([APITags.GET_CONVERSATION_HISTORY]));
+    });
 
     return () => {
       streamSub.unsubscribe();

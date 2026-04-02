@@ -259,7 +259,7 @@ export const useChatInput = ({
           resourceType,
         });
       }
-      await chatActions.sendMessage(messagePayload, true);
+      await chatActions.sendMessage(messagePayload);
     } catch (error) {
       adapter.onError?.(error);
     }

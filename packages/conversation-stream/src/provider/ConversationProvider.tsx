@@ -103,7 +103,7 @@ export const ConversationProvider: React.FC<ConversationProviderProps> = ({
   useEffect(() => {
     if (!resourceId || !resourceType) return;
 
-    conversationSSERegistry.setOnBackgroundStop((convId) => {
+    return conversationSSERegistry.setOnBackgroundStop((convId) => {
       triggerGetConversation({
         conversationId: convId,
         resourceId,

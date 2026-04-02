@@ -117,16 +117,17 @@ class ConversationSSERegistry {
     return (entry?.callbacks.size ?? 0) > 0;
   }
 
-  private onBackgroundStop: ((conversationId: string) => void) | null = null;
+  private backgroundStopListeners = new Set<(conversationId: string) => void>();
 
-  /** Register a callback invoked when a background stream completes (no provider mounted). */
-  setOnBackgroundStop(cb: (conversationId: string) => void): void {
-    this.onBackgroundStop = cb;
+  /** Register a callback invoked when a background stream completes (no provider mounted). Returns a cleanup function. */
+  setOnBackgroundStop(cb: (conversationId: string) => void): () => void {
+    this.backgroundStopListeners.add(cb);
+    return () => this.backgroundStopListeners.delete(cb);
   }
 
   /** Called by conversationEventHandler on background MESSAGE_STOP. */
   notifyBackgroundStop(conversationId: string): void {
-    this.onBackgroundStop?.(conversationId);
+    for (const cb of this.backgroundStopListeners) cb(conversationId);
   }
 
   /**

@@ -4,7 +4,7 @@ import type { ChatMessage, CreateConversationPayloadTypeV2 } from '@zamp-platfor
 import { createContext } from 'react';
 
 export interface ConversationActions {
-  sendMessage: (payload: ChatMessage, useV2Api?: boolean) => Promise<unknown>;
+  sendMessage: (payload: ChatMessage) => Promise<unknown>;
   createConversationV2: (payload: CreateConversationPayloadTypeV2) => Promise<{
     conversation_id: string;
     status_message: string;

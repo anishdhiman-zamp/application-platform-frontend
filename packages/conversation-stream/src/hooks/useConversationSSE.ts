@@ -37,6 +37,7 @@ export function useConversationSSE({
 }: UseConversationSSEConfig): UseConversationSSEReturn {
   const [isConnected, setIsConnected] = useState(false);
   const [isConnecting, setIsConnecting] = useState(false);
+  const controllerRef = useRef<AbortController | null>(null);
 
   // Params and callbacks in refs so they don't re-trigger the effect.
   const paramsRef = useRef({ organizationId, isNewConversation, streamingMessageId });
@@ -51,13 +52,19 @@ export function useConversationSSE({
   onOpenRef.current = onOpen;
   onCloseRef.current = onClose;
 
-  const cleanup = useCallback(() => {}, []);
+  const close = useCallback(() => {
+    controllerRef.current?.abort();
+    controllerRef.current = null;
+    setIsConnected(false);
+    setIsConnecting(false);
+  }, []);
 
   useEffect(() => {
     if (!enabled || !conversationId) return;
 
     const { organizationId: orgId, isNewConversation: isNew, streamingMessageId: msgId } = paramsRef.current;
     const controller = new AbortController();
+    controllerRef.current = controller;
     setIsConnecting(true);
 
     openSSEConnection(
@@ -84,12 +91,9 @@ export function useConversationSSE({
     );
 
     return () => {
-      controller.abort();
-      cleanup();
-      setIsConnected(false);
-      setIsConnecting(false);
+      close();
     };
-  }, [enabled, conversationId, cleanup]);
+  }, [enabled, conversationId, close]);
 
-  return { isConnected, isConnecting, close: cleanup };
+  return { isConnected, isConnecting, close };
 }

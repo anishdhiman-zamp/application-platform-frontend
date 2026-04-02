@@ -65,6 +65,15 @@ const ChatTopbar: FC<ChatTopbarProps> = ({
     [onSelectConversation],
   );
 
+  const handleRenameFromHistory = useCallback(
+    (id: string, newTitle: string) => {
+      if (id === conversationId) {
+        onTitleChange?.(newTitle);
+      }
+    },
+    [conversationId, onTitleChange],
+  );
+
   return (
     <div className={cn('bg-BG_WHITE flex items-center justify-between gap-x-3 p-3', className)} style={style}>
       <div className='flex min-w-0 flex-1 items-center gap-x-1'>
@@ -91,6 +100,7 @@ const ChatTopbar: FC<ChatTopbarProps> = ({
             <PopoverContent align='start' sideOffset={8} className='flex h-100 w-80 flex-col overflow-hidden p-0'>
               <ChatHistory
                 onSelectConversation={handleSelectConversation}
+                onRenameConversation={handleRenameFromHistory}
                 activeConversationId={conversationId}
                 compact
               />

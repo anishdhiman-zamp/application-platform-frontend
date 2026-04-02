@@ -23,6 +23,7 @@ const SEARCH_DEBOUNCE_MS = 300;
 interface ChatHistoryProps {
   onSelectConversation: (id: string | null, title?: string) => void;
   onDeleteConversation?: (id: string) => void;
+  onRenameConversation?: (id: string, newTitle: string) => void;
   activeConversationId?: string | null;
   compact?: boolean;
 }
@@ -30,6 +31,7 @@ interface ChatHistoryProps {
 const ChatHistory = ({
   onSelectConversation,
   onDeleteConversation,
+  onRenameConversation,
   activeConversationId,
   compact = false,
 }: ChatHistoryProps) => {
@@ -135,9 +137,13 @@ const ChatHistory = ({
     setTotalCount((prev) => prev + 1);
   }, []);
 
-  const handleRenameConversation = useCallback((id: string, newTitle: string) => {
-    setAllConversations((prev) => prev.map((c) => (c.id === id ? { ...c, title: newTitle } : c)));
-  }, []);
+  const handleRenameConversation = useCallback(
+    (id: string, newTitle: string) => {
+      setAllConversations((prev) => prev.map((c) => (c.id === id ? { ...c, title: newTitle } : c)));
+      onRenameConversation?.(id, newTitle);
+    },
+    [onRenameConversation],
+  );
 
   useEffect(() => {
     setPage(1);

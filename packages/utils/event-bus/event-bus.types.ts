@@ -57,4 +57,6 @@ export const enum EVENT_TYPE {
   DATASET = 'dataset',
   PROCESS = 'process',
   CONNECTION_UPDATE = 'connection_update',
+  CONVERSATION_CREATED = 'conversation_created',
+  CONVERSATION_TITLE_UPDATED = 'conversation_title_updated',
 }

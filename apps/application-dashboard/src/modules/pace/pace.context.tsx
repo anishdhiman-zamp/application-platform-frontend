@@ -43,8 +43,8 @@ interface PaceContextType {
   registerStartNewChat: (callback: defaultFnType) => void;
   startNewChat: defaultFnType;
 
-  registerSelectConversation: (callback: (id: string) => void) => void;
-  selectConversation: (id: string) => void;
+  registerSelectConversation: (callback: (id: string, title?: string) => void) => void;
+  selectConversation: (id: string, title?: string) => void;
 
   pendingFileReference: PendingFileReference | null;
   setPendingFileReference: (ref: PendingFileReference | null) => void;
@@ -76,15 +76,27 @@ interface PaceContextType {
 
 const PaceContext = createContext<PaceContextType | null>(null);
 
+const getInitialSidebarState = (): ChatSidebarState => {
+  if (typeof window === 'undefined') return CHAT_SIDEBAR_STATE.COLLAPSED;
+
+  const search = new URLSearchParams(window.location.search);
+
+  if (!search.has(SIDEBAR_CONVERSATION_ID_PARAM)) return CHAT_SIDEBAR_STATE.COLLAPSED;
+
+  const isChatRoot = window.location.pathname === ROUTES_PATH.CHAT && !search.has('f');
+
+  return isChatRoot ? CHAT_SIDEBAR_STATE.EXPANDED : CHAT_SIDEBAR_STATE.SIDEBAR;
+};
+
 export const PaceProvider = ({ children }: { children: ReactNode }) => {
   const pathname = usePathname();
   const activeTabId = useAppSelector(selectActiveTabId);
   const filesPanelLeaveTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   const startNewChatRef = useRef<defaultFnType | null>(null);
-  const selectConversationRef = useRef<((id: string) => void) | null>(null);
+  const selectConversationRef = useRef<((id: string, title?: string) => void) | null>(null);
 
-  const [prevChatSidebarState, setPrevChatSidebarState] = useState<ChatSidebarState>(CHAT_SIDEBAR_STATE.COLLAPSED);
-  const [chatSidebarState, setChatSidebarStateRaw] = useState<ChatSidebarState>(CHAT_SIDEBAR_STATE.COLLAPSED);
+  const [chatSidebarState, setChatSidebarStateRaw] = useState<ChatSidebarState>(getInitialSidebarState);
+  const [prevChatSidebarState, setPrevChatSidebarState] = useState<ChatSidebarState>(chatSidebarState);
   const [pendingFileReference, setPendingFileReference] = useState<PendingFileReference | null>(null);
   const [pendingConversationPayload, setPendingConversationPayload] = useState<PendingConversationPayload | null>(null);
   const [filesPanelOpen, setFilesPanelOpen] = useState(false);
@@ -187,12 +199,12 @@ export const PaceProvider = ({ children }: { children: ReactNode }) => {
     startNewChatRef.current?.();
   }, []);
 
-  const registerSelectConversation = useCallback((callback: (id: string) => void) => {
+  const registerSelectConversation = useCallback((callback: (id: string, title?: string) => void) => {
     selectConversationRef.current = callback;
   }, []);
 
-  const selectConversation = useCallback((id: string) => {
-    selectConversationRef.current?.(id);
+  const selectConversation = useCallback((id: string, title?: string) => {
+    selectConversationRef.current?.(id, title);
   }, []);
 
   useEffect(() => {
@@ -280,18 +292,6 @@ export const PaceProvider = ({ children }: { children: ReactNode }) => {
       if (!Number.isNaN(parsed)) {
         setFilesPanelWidthRaw(Math.min(FILES_PANEL_MAX_WIDTH, Math.max(FILES_PANEL_MIN_WIDTH, parsed)));
       }
-    }
-
-    const currentPath = window.location.pathname;
-    const currentSearch = new URLSearchParams(window.location.search);
-    const isChatPath = currentPath === ROUTES_PATH.CHAT;
-    const hasFileParamOnMount = currentSearch.has('f');
-    const hasSidebarConversation = currentSearch.has(SIDEBAR_CONVERSATION_ID_PARAM);
-
-    if (isChatPath && !hasFileParamOnMount && hasSidebarConversation) {
-      setChatSidebarStateInternal(CHAT_SIDEBAR_STATE.EXPANDED);
-    } else if (hasSidebarConversation) {
-      setChatSidebarStateInternal(CHAT_SIDEBAR_STATE.SIDEBAR);
     }
   }, []);
 
