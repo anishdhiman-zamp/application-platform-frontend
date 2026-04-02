@@ -12,10 +12,13 @@ import {
   useFileDragDrop,
 } from '@zamp-platform/chat';
 import { AnimatePresence, motion } from 'framer-motion';
+import { FEATURE_FLAGS } from '@/constants/featureFlags';
 import { useAppSelector } from '@/hooks/toolkit';
+import { useFeatureFlag } from '@/hooks/useFeatureFlag';
+import AutoLoopConfirmDialog from '@/modules/pace/components/chat/AutoLoopConfirmDialog';
+import AutoLoopToggle from '@/modules/pace/components/chat/AutoLoopToggle';
 import ChatHistory from '@/modules/pace/components/chat/ChatHistory';
 import ChatHome from '@/modules/pace/components/chat/ChatHome';
-import ExpectationsToggle from '@/modules/pace/components/chat/ExpectationsToggle';
 import ModelSelector from '@/modules/pace/components/chat/ModelSelector';
 import { NO_ANIMATION } from '@/modules/pace/pace.animations';
 import { usePaceContext } from '@/modules/pace/pace.context';
@@ -36,12 +39,14 @@ const ChatHomePage: FC = () => {
   const organizationId = useAppSelector((state: RootState) => state.user.user?.orgs?.[0]?.organization_id) ?? '';
   const currentUserName = useAppSelector((state: RootState) => state.user.user?.user_name) ?? '';
   const username = useAppSelector((state: RootState) => state.user.user?.username) ?? '';
+  const { isEnabled: isZampInternalUser } = useFeatureFlag(FEATURE_FLAGS.ZAMP_INTERNAL);
 
   const fileDropHandlerRef = useRef<((files: FileList) => void) | null>(null);
   const addFileReferenceRef = useRef<((ref: { path: string; name: string }) => void) | null>(null);
 
   const [selectedModel, setSelectedModel] = useState<string | null>(null);
   const [pevEnabled, setPevEnabled] = useState(false);
+  const [isConfirmDialogOpen, setIsConfirmDialogOpen] = useState(false);
 
   const chat = useChat({
     resourceId: organizationId,
@@ -86,14 +91,29 @@ const ChatHomePage: FC = () => {
     [selectConversation, setChatSidebarState],
   );
 
+  const handleAutoLoopToggle = useCallback((pressed: boolean) => {
+    if (pressed) {
+      setIsConfirmDialogOpen(true);
+    }
+  }, []);
+
+  const handleAutoLoopConfirm = useCallback(() => {
+    setPevEnabled(true);
+    // No localStorage lock here — conversationId doesn't exist yet.
+    // Lock is applied in ChatConversationContent when the conversation is created.
+  }, []);
+
   const modelSelectorSlot = useMemo(
     () => <ModelSelector value={selectedModel} onChange={setSelectedModel} />,
     [selectedModel],
   );
 
-  const expectationsToggleSlot = useMemo(
-    () => <ExpectationsToggle enabled={pevEnabled} onChange={setPevEnabled} />,
-    [pevEnabled],
+  const autoLoopToggleSlot = useMemo(
+    () =>
+      isZampInternalUser ? (
+        <AutoLoopToggle enabled={pevEnabled} onChange={handleAutoLoopToggle} disabled={pevEnabled} />
+      ) : undefined,
+    [pevEnabled, isZampInternalUser, handleAutoLoopToggle],
   );
 
   useEffect(() => {
@@ -106,49 +126,56 @@ const ChatHomePage: FC = () => {
   const isExpanded = chatSidebarState === CHAT_SIDEBAR_STATE.EXPANDED;
 
   return (
-    <AnimatePresence>
-      {!isExpanded && (
-        <ChatActionsProvider>
-          <motion.div
-            key='chat-home-page'
-            initial={false}
-            animate={{ opacity: 1, transition: NO_ANIMATION }}
-            exit={{ opacity: 0, transition: { duration: 0.25, ease: 'easeInOut' } }}
-            className='relative mx-auto flex min-h-0 w-full max-w-[700px] flex-1 flex-col items-center justify-start overflow-hidden pt-[22vh]'
-            style={{ willChange: 'opacity' }}
-            {...dropZoneProps}
-          >
-            <DropOverlay isVisible={isDragOver} />
-            <ChatHome />
-            <div className='mt-7 w-full shrink-0 px-3'>
-              <ConnectedChatInput
-                chat={interceptedChat}
-                resourceType={ResourceType.ORGANIZATION}
-                resourceId={organizationId}
-                autoFocus
-                scope={ScopeType.ORGANIZATION}
-                scopeId={organizationId}
-                username={username}
-                currentUserName={currentUserName}
-                placeholder="Do your life's best work with Pace"
-                conversationId={chat.conversationId ?? ''}
-                minTextareaHeight={18}
-                maxTextareaHeight={200}
-                className='shadow-chatbot-shadow'
-                fileDropHandlerRef={fileDropHandlerRef}
-                addFileReferenceRef={addFileReferenceRef}
-                showModelSelector
-                modelSelectorSlot={modelSelectorSlot}
-                leftSlot={expectationsToggleSlot}
-                llmModel={selectedModel}
-                pevEnabled={pevEnabled}
-              />
-            </div>
-            <ChatHistory onSelectConversation={handleSelectConversation} />
-          </motion.div>
-        </ChatActionsProvider>
-      )}
-    </AnimatePresence>
+    <>
+      <AnimatePresence>
+        {!isExpanded && (
+          <ChatActionsProvider>
+            <motion.div
+              key='chat-home-page'
+              initial={false}
+              animate={{ opacity: 1, transition: NO_ANIMATION }}
+              exit={{ opacity: 0, transition: { duration: 0.25, ease: 'easeInOut' } }}
+              className='relative mx-auto flex min-h-0 w-full max-w-[700px] flex-1 flex-col items-center justify-start overflow-hidden pt-[22vh]'
+              style={{ willChange: 'opacity' }}
+              {...dropZoneProps}
+            >
+              <DropOverlay isVisible={isDragOver} />
+              <ChatHome />
+              <div className='mt-7 w-full shrink-0 px-3'>
+                <ConnectedChatInput
+                  chat={interceptedChat}
+                  resourceType={ResourceType.ORGANIZATION}
+                  resourceId={organizationId}
+                  autoFocus
+                  scope={ScopeType.ORGANIZATION}
+                  scopeId={organizationId}
+                  username={username}
+                  currentUserName={currentUserName}
+                  placeholder="Do your life's best work with Pace"
+                  conversationId={chat.conversationId ?? ''}
+                  minTextareaHeight={18}
+                  maxTextareaHeight={200}
+                  className='shadow-chatbot-shadow'
+                  fileDropHandlerRef={fileDropHandlerRef}
+                  addFileReferenceRef={addFileReferenceRef}
+                  showModelSelector
+                  modelSelectorSlot={modelSelectorSlot}
+                  leftSlot={autoLoopToggleSlot}
+                  llmModel={selectedModel}
+                  pevEnabled={pevEnabled}
+                />
+              </div>
+              <ChatHistory onSelectConversation={handleSelectConversation} />
+            </motion.div>
+          </ChatActionsProvider>
+        )}
+      </AnimatePresence>
+      <AutoLoopConfirmDialog
+        isOpen={isConfirmDialogOpen}
+        onOpenChange={setIsConfirmDialogOpen}
+        onConfirm={handleAutoLoopConfirm}
+      />
+    </>
   );
 };
 

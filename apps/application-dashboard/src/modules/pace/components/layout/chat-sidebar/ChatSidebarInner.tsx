@@ -1,6 +1,6 @@
 'use client';
 
-import { FC, useCallback, useMemo, useRef, useState } from 'react';
+import { FC, useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import type { useChat } from '@zamp-platform/chat';
 import { ConnectedChatInput, ResourceType, ScopeType } from '@zamp-platform/chat';
 import { cn } from '@zamp-platform/ui/utils';
@@ -8,10 +8,13 @@ import { useDynamicTabs } from 'modules/pace/components/dynamic-tabs/useDynamicT
 import ChatConversationContent from 'modules/pace/components/layout/chat-sidebar/ChatConversationContent';
 import { usePathname } from 'next/navigation';
 import { APITags } from '@/constants/api.constants';
+import { FEATURE_FLAGS } from '@/constants/featureFlags';
 import { ROUTES_PATH } from '@/constants/routeConfig';
 import { useAppDispatch, useAppSelector } from '@/hooks/toolkit';
+import { useFeatureFlag } from '@/hooks/useFeatureFlag';
+import AutoLoopConfirmDialog from '@/modules/pace/components/chat/AutoLoopConfirmDialog';
+import AutoLoopToggle from '@/modules/pace/components/chat/AutoLoopToggle';
 import ChatTopbar from '@/modules/pace/components/chat/ChatTopbar';
-import ExpectationsToggle from '@/modules/pace/components/chat/ExpectationsToggle';
 import ModelSelector from '@/modules/pace/components/chat/ModelSelector';
 import { useChatDraftInput } from '@/modules/pace/hooks/useChatDraftInput';
 import { usePaceContext } from '@/modules/pace/pace.context';
@@ -19,6 +22,32 @@ import { CHAT_SIDEBAR_STATE, TAB_TYPE } from '@/modules/pace/pace.types';
 import { baseApi } from '@/services/baseApi';
 import type { RootState } from '@/store';
 import { selectActiveTabId } from '@/store/slices/dynamic-tabs.slice';
+import { getFromLocalStorage, LOCAL_STORAGE_KEYS, setToLocalStorage } from '@/utils/localstorage';
+
+const getPevLockedConversations = (): Set<string> => {
+  try {
+    const stored = getFromLocalStorage(LOCAL_STORAGE_KEYS.PEV_LOCKED_CONVERSATIONS);
+
+    if (!stored) return new Set();
+
+    return new Set(JSON.parse(stored) as string[]);
+  } catch {
+    return new Set();
+  }
+};
+
+export const addPevLockedConversation = (id: string) => {
+  const locked = getPevLockedConversations();
+
+  locked.add(id);
+  setToLocalStorage(LOCAL_STORAGE_KEYS.PEV_LOCKED_CONVERSATIONS, JSON.stringify([...locked]));
+};
+
+const isConversationPevLocked = (id: string | null): boolean => {
+  if (!id) return false;
+
+  return getPevLockedConversations().has(id);
+};
 
 export interface ChatState {
   chat: ReturnType<typeof useChat>;
@@ -55,14 +84,25 @@ const ChatSidebarInner: FC<ChatSidebarInnerProps> = ({
   const organizationId = useAppSelector((state: RootState) => state.user.user?.orgs?.[0]?.organization_id) ?? '';
   const currentUserName = useAppSelector((state: RootState) => state.user.user?.user_name) ?? '';
   const username = useAppSelector((state: RootState) => state.user.user?.username) ?? '';
+  const { isEnabled: isZampInternalUser } = useFeatureFlag(FEATURE_FLAGS.ZAMP_INTERNAL);
 
   const fileDropHandlerRef = useRef<((files: FileList) => void) | null>(null);
   const addFileReferenceRef = useRef<((ref: { path: string; name: string }) => void) | null>(null);
 
   const [selectedModel, setSelectedModel] = useState<string | null>(null);
   const [pevEnabled, setPevEnabled] = useState(false);
+  const [isAutoLoopLocked, setIsAutoLoopLocked] = useState(false);
+  const [isConfirmDialogOpen, setIsConfirmDialogOpen] = useState(false);
   const [chatState, setChatState] = useState<ChatState | null>(null);
   const [isTaskPopoverOpen, setIsTaskPopoverOpen] = useState(false);
+
+  // Sync pevEnabled and lock state when conversationId changes
+  useEffect(() => {
+    const locked = isConversationPevLocked(conversationId);
+
+    setIsAutoLoopLocked(locked);
+    setPevEnabled(locked);
+  }, [conversationId]);
 
   const handleExpand = useCallback(() => {
     setChatSidebarState(CHAT_SIDEBAR_STATE.EXPANDED);
@@ -86,14 +126,31 @@ const ChatSidebarInner: FC<ChatSidebarInnerProps> = ({
     dispatch(baseApi.util.invalidateTags([APITags.GET_CONVERSATION_HISTORY]));
   }, [dispatch]);
 
+  const handleAutoLoopToggle = useCallback((pressed: boolean) => {
+    if (pressed) {
+      setIsConfirmDialogOpen(true);
+    }
+  }, []);
+
+  const handleAutoLoopConfirm = useCallback(() => {
+    setPevEnabled(true);
+    setIsAutoLoopLocked(true);
+    if (conversationId) {
+      addPevLockedConversation(conversationId);
+    }
+  }, [conversationId]);
+
   const modelSelectorSlot = useMemo(
     () => <ModelSelector value={selectedModel} onChange={setSelectedModel} />,
     [selectedModel],
   );
 
-  const expectationsToggleSlot = useMemo(
-    () => <ExpectationsToggle enabled={pevEnabled} onChange={setPevEnabled} />,
-    [pevEnabled],
+  const autoLoopToggleSlot = useMemo(
+    () =>
+      isZampInternalUser ? (
+        <AutoLoopToggle enabled={pevEnabled} onChange={handleAutoLoopToggle} disabled={isAutoLoopLocked} />
+      ) : undefined,
+    [pevEnabled, isZampInternalUser, isAutoLoopLocked, handleAutoLoopToggle],
   );
 
   return (
@@ -144,7 +201,7 @@ const ChatSidebarInner: FC<ChatSidebarInnerProps> = ({
             pevEnabled={pevEnabled}
             showModelSelector
             modelSelectorSlot={modelSelectorSlot}
-            leftSlot={expectationsToggleSlot}
+            leftSlot={autoLoopToggleSlot}
             conversationId={conversationId ?? chatState.chat.conversationId ?? ''}
             onConversationCreated={handleConversationCreated}
             isDisabled={chatState.chat.isStreaming || chatState.chat.isCreatingConversationV2}
@@ -152,6 +209,11 @@ const ChatSidebarInner: FC<ChatSidebarInnerProps> = ({
           />
         </div>
       )}
+      <AutoLoopConfirmDialog
+        isOpen={isConfirmDialogOpen}
+        onOpenChange={setIsConfirmDialogOpen}
+        onConfirm={handleAutoLoopConfirm}
+      />
     </div>
   );
 };

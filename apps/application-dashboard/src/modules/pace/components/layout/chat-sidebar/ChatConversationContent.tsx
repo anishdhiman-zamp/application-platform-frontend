@@ -15,6 +15,7 @@ import {
 import { ScrollContainer } from '@zamp-platform/ui';
 import { cn } from '@zamp-platform/ui/utils';
 import type { ChatState } from 'modules/pace/components/layout/chat-sidebar/ChatSidebarInner';
+import { addPevLockedConversation } from 'modules/pace/components/layout/chat-sidebar/ChatSidebarInner';
 import NewPaceIcons from '@/assets/Icons/NewPaceIcons';
 import CommonWrapper from '@/components/commonWrapper';
 import { SkeletonTypes } from '@/components/commonWrapper/commonWrapper.types';
@@ -129,8 +130,14 @@ const ChatConversationContent: FC<ChatConversationContentProps> = ({
         pendingConversationPayload.pevEnabled,
       );
 
+      const shouldLockPev = pendingConversationPayload.pevEnabled;
+
       setPendingConversationPayload(null);
-      chat.createConversationV2(payload);
+      chat.createConversationV2(payload).then((response) => {
+        if (shouldLockPev && response?.conversation_id) {
+          addPevLockedConversation(response.conversation_id);
+        }
+      });
     }
   }, [
     pendingConversationPayload,
