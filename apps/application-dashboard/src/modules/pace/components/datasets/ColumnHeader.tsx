@@ -238,10 +238,11 @@ const ColumnHeader: FC<IHeaderParams & ColumnHeaderParams> = (props) => {
     if (!filterValue.trim()) return;
     const timer = setTimeout(() => {
       applyFilter(filterOperator, filterValue);
-    }, 300);
+    }, 500);
 
     return () => clearTimeout(timer);
-  }, [filterValue, filterOperator, applyFilter]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [filterValue, filterOperator]);
 
   useEffect(() => {
     const handler = (event: ColumnHeaderClickedEvent) => {

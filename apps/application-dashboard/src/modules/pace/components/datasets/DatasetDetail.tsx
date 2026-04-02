@@ -35,6 +35,7 @@ import {
 import ShareDatasetNeonPopup from 'modules/pace/components/datasets/ShareDatasetNeonPopup';
 import { preserveSidebarParam } from 'modules/pace/pace.utils';
 import Link from 'next/link';
+import { cn } from 'utils/common';
 import { useAgentDbWriteMutation, useGetDatasetRolesQuery, useLazyAgentDbReadQuery } from '@/apis/agentManagedDb';
 import ImageLoader from '@/components/common/loader/ImageLoader';
 import { ZAMP_LOGO_LOADER_SVG } from '@/constants/icons';
@@ -63,6 +64,7 @@ const DatasetDetailInner = ({ tableName }: DatasetDetailProps) => {
   const [isSaving, setIsSaving] = useState(false);
   const [isExporting, setIsExporting] = useState(false);
   const [gridReady, setGridReady] = useState(false);
+  const [initialDataLoaded, setInitialDataLoaded] = useState(false);
   const [schemaError, setSchemaError] = useState<string | null>(null);
   const [pkColumn, setPkColumn] = useState<string | null>(null);
 
@@ -501,8 +503,10 @@ const DatasetDetailInner = ({ tableName }: DatasetDetailProps) => {
           totalRowsRef.current = total;
           setTotalRows(total);
           params.success({ rowData: selectResult.rows ?? [], rowCount: total });
+          setInitialDataLoaded(true);
         } catch {
           params.fail();
+          setInitialDataLoaded(true);
         }
 
         return;
@@ -545,8 +549,10 @@ const DatasetDetailInner = ({ tableName }: DatasetDetailProps) => {
           rowData: selectResult.rows ?? [],
           rowCount: totalRowsRef.current,
         });
+        setInitialDataLoaded(true);
       } catch {
         params.fail();
+        setInitialDataLoaded(true);
       }
     },
     [tableName, executeQuery],
@@ -566,7 +572,12 @@ const DatasetDetailInner = ({ tableName }: DatasetDetailProps) => {
       </div>
 
       {/* Toolbar + Filter in one row */}
-      <div className='border-GRAY_400 flex items-center gap-2.5 border-b px-6 py-2'>
+      <div
+        className={cn(
+          'border-GRAY_400 flex items-center gap-2.5 border-b px-6 py-2 transition-opacity duration-300',
+          initialDataLoaded ? 'opacity-100' : 'opacity-0',
+        )}
+      >
         {activeTab === DatasetTabsTypes.PREVIEW && contextFiltersConfig && contextFiltersConfig.length > 0 && (
           <div className='flex flex-1 items-center'>
             <FiltersWrapper label='Filter' filterConfig={contextFiltersConfig} className='px-0' />
@@ -605,12 +616,7 @@ const DatasetDetailInner = ({ tableName }: DatasetDetailProps) => {
 
       {/* Content — both tabs stay mounted, visibility toggled via CSS to avoid re-fetching */}
       <div className='grid flex-1 overflow-hidden'>
-        <div className={activeTab === DatasetTabsTypes.PREVIEW ? 'grid overflow-hidden' : 'hidden'}>
-          {!columns && !schemaError && (
-            <div className='flex h-full items-center justify-center'>
-              <ImageLoader imageSrc={ZAMP_LOGO_LOADER_SVG} width={140} height={140} />
-            </div>
-          )}
+        <div className={activeTab === DatasetTabsTypes.PREVIEW ? 'relative grid overflow-hidden' : 'hidden'}>
           {schemaError && (
             <div className='flex h-full flex-col items-center justify-center gap-3'>
               <AlertTriangle className='text-GRAY_600 h-10 w-10' />
@@ -623,6 +629,7 @@ const DatasetDetailInner = ({ tableName }: DatasetDetailProps) => {
                 onClick={() => {
                   setSchemaError(null);
                   setColumns(null);
+                  setInitialDataLoaded(false);
                   loadSchema();
                 }}
               >
@@ -630,6 +637,14 @@ const DatasetDetailInner = ({ tableName }: DatasetDetailProps) => {
               </Button>
             </div>
           )}
+          <div
+            className={cn(
+              'bg-BG_WHITE absolute inset-0 z-10 flex items-center justify-center transition-opacity duration-300',
+              !initialDataLoaded && !schemaError ? 'opacity-100' : 'pointer-events-none opacity-0',
+            )}
+          >
+            <ImageLoader imageSrc={ZAMP_LOGO_LOADER_SVG} width={140} height={140} />
+          </div>
           {columns && !schemaError && (
             <DatasetTable
               tableRef={tableRef}
