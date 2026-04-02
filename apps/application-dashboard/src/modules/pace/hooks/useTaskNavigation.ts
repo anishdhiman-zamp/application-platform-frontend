@@ -1,8 +1,7 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { captureException } from '@sentry/browser';
-import type { TaskStatus } from '@zamp-platform/chat';
+import type { SiblingTask, TaskBreadcrumb, TaskStatus } from '@zamp-platform/chat';
 import { type BaseEventPayload, EVENT_TYPE } from '@zamp-platform/utils/event-bus/event-bus.types';
-import { STATUS_DISPLAY_ORDER, TASKS_PAGE_SIZE } from 'modules/pace/components/tasks/task-listing.constants';
 import { parseIntSafely } from 'modules/process/process.utils';
 import { useRouter, useSearchParams } from 'next/navigation';
 import {
@@ -12,11 +11,16 @@ import {
   useLazyGetTasksByStatusQuery,
 } from '@/apis/task';
 import { useEventBus } from '@/app/_providers/sse-provider';
-import { getChatTaskRoute } from '@/constants/routeConfig';
-import type { TaskListItem } from '@/modules/pace/components/tasks/task-listing.types';
+import { getChatTaskRoute, TASK_QUERY_PARAMS } from '@/constants/routeConfig';
+import { STATUS_DISPLAY_ORDER, TASKS_PAGE_SIZE } from '@/modules/pace/components/tasks/constants/tasks.constants';
+import type { CreationSource, TaskListItem } from '@/modules/pace/components/tasks/types/tasks.types';
 import type { MapAny } from '@/types/commonTypes';
 
-export const useTaskNavigation = (taskId?: string) => {
+interface UseTaskNavigationOptions {
+  creationSource?: CreationSource;
+}
+
+export const useTaskNavigation = (taskId?: string, options?: UseTaskNavigationOptions) => {
   const searchParams = useSearchParams();
   const router = useRouter();
 
@@ -26,12 +30,24 @@ export const useTaskNavigation = (taskId?: string) => {
   const status = searchParams?.get('status') as TaskStatus | null;
   const conversationId = searchParams?.get('s') ?? undefined;
 
+  // Build creation source API params for scoping task queries
+  const sourceParams = useMemo(
+    () =>
+      options?.creationSource
+        ? {
+            creation_source_type: options.creationSource.type,
+            creation_source_id: options.creationSource.id,
+          }
+        : {},
+    [options?.creationSource],
+  );
+
   const currentPage = useMemo(() => {
     return urlIndex !== -1 ? Math.floor(urlIndex / TASKS_PAGE_SIZE) + 1 : 1;
   }, [urlIndex]);
 
   const { data: initialData, isLoading: isInitialLoading } = useGetTasksByStatusQuery(
-    { status: status!, page: currentPage, limit: TASKS_PAGE_SIZE },
+    { status: status!, page: currentPage, limit: TASKS_PAGE_SIZE, ...sourceParams },
     {
       skip: urlIndex === -1 || urlTotal === 0 || !status,
       refetchOnMountOrArgChange: false,
@@ -41,9 +57,12 @@ export const useTaskNavigation = (taskId?: string) => {
   const [triggerFetchPage, { isLoading: isLoadingOtherPage }] = useLazyGetTasksByStatusQuery();
   const [triggerFetchCounts] = useLazyGetTaskCountsQuery();
 
-  const { data: countsData, isLoading: isCountsLoading } = useGetTaskCountsQuery(undefined, {
-    skip: urlIndex === -1 || !status,
-  });
+  const { data: countsData, isLoading: isCountsLoading } = useGetTaskCountsQuery(
+    Object.keys(sourceParams).length > 0 ? sourceParams : undefined,
+    {
+      skip: urlIndex === -1 || !status,
+    },
+  );
 
   const [isBootstrapping, setIsBootstrapping] = useState(false);
   const [liveStatus, setLiveStatus] = useState<TaskStatus | null>(null);
@@ -63,7 +82,9 @@ export const useTaskNavigation = (taskId?: string) => {
       let found = false;
 
       try {
-        const { data: counts } = await triggerFetchCounts();
+        const { data: counts } = await triggerFetchCounts(
+          Object.keys(sourceParams).length > 0 ? sourceParams : undefined,
+        );
 
         if (!counts || cancelled) return;
 
@@ -77,7 +98,7 @@ export const useTaskNavigation = (taskId?: string) => {
           const totalPages = Math.ceil(count / TASKS_PAGE_SIZE);
 
           for (let page = 1; page <= totalPages && !cancelled; page++) {
-            const { data } = await triggerFetchPage({ status: s, page, limit: TASKS_PAGE_SIZE });
+            const { data } = await triggerFetchPage({ status: s, page, limit: TASKS_PAGE_SIZE, ...sourceParams });
 
             if (cancelled) return;
 
@@ -188,7 +209,12 @@ export const useTaskNavigation = (taskId?: string) => {
       if (!targetStatus) return [];
 
       try {
-        const { data } = await triggerFetchPage({ status: targetStatus, page: pageNumber, limit: TASKS_PAGE_SIZE });
+        const { data } = await triggerFetchPage({
+          status: targetStatus,
+          page: pageNumber,
+          limit: TASKS_PAGE_SIZE,
+          ...sourceParams,
+        });
 
         return data?.tasks || [];
       } catch (err) {
@@ -197,7 +223,7 @@ export const useTaskNavigation = (taskId?: string) => {
         return [];
       }
     },
-    [status, triggerFetchPage],
+    [status, triggerFetchPage, sourceParams],
   );
 
   useEffect(() => {
@@ -226,7 +252,9 @@ export const useTaskNavigation = (taskId?: string) => {
       if (newStatus === statusRef.current) return;
 
       try {
-        const { data: freshCounts } = await triggerFetchCounts();
+        const { data: freshCounts } = await triggerFetchCounts(
+          Object.keys(sourceParams).length > 0 ? sourceParams : undefined,
+        );
 
         if (cancelled) return;
 
@@ -244,6 +272,7 @@ export const useTaskNavigation = (taskId?: string) => {
             status: newStatus,
             page,
             limit: TASKS_PAGE_SIZE,
+            ...sourceParams,
           });
 
           if (cancelled) return;
@@ -302,16 +331,16 @@ export const useTaskNavigation = (taskId?: string) => {
 
         if (!targetTask) return;
 
-        router.replace(
-          getChatTaskRoute({
-            taskId: targetTask.id,
-            conversationId,
-            taskTitle: targetTask.title,
-            status: nextStatus,
-            currentIndex: 0,
-            totalRows: nextStatusTotal,
-          }),
-        );
+        const route = getChatTaskRoute({
+          taskId: targetTask.id,
+          conversationId,
+          taskTitle: targetTask.title,
+          status: nextStatus,
+          currentIndex: 0,
+          totalRows: nextStatusTotal,
+        });
+
+        router.replace(route);
 
         return;
       }
@@ -329,16 +358,16 @@ export const useTaskNavigation = (taskId?: string) => {
 
         if (!targetTask) return;
 
-        router.replace(
-          getChatTaskRoute({
-            taskId: targetTask.id,
-            conversationId,
-            taskTitle: targetTask.title,
-            status: previousStatus,
-            currentIndex: lastIndex,
-            totalRows: prevStatusTotal,
-          }),
-        );
+        const route = getChatTaskRoute({
+          taskId: targetTask.id,
+          conversationId,
+          taskTitle: targetTask.title,
+          status: previousStatus,
+          currentIndex: lastIndex,
+          totalRows: prevStatusTotal,
+        });
+
+        router.replace(route);
 
         return;
       }
@@ -374,7 +403,6 @@ export const useTaskNavigation = (taskId?: string) => {
     },
     [
       initialData,
-      router,
       status,
       urlIndex,
       effectiveTotal,
@@ -383,13 +411,194 @@ export const useTaskNavigation = (taskId?: string) => {
       previousStatus,
       statusCountMap,
       conversationId,
+      router,
     ],
   );
+
+  const currentTask = useMemo(() => initialData?.tasks?.find((t) => t.id === taskId), [initialData, taskId]);
+
+  const allSiblings: SiblingTask[] = useMemo(() => {
+    const raw = searchParams?.get(TASK_QUERY_PARAMS.SIBLINGS);
+
+    if (!raw) return [];
+
+    try {
+      return JSON.parse(raw) as SiblingTask[];
+    } catch {
+      return [];
+    }
+  }, [searchParams]);
+
+  // Group siblings by status in display order
+  const siblingsByStatus = useMemo(() => {
+    const map = new Map<string, SiblingTask[]>();
+
+    for (const s of allSiblings) {
+      const list = map.get(s.status) ?? [];
+
+      list.push(s);
+      map.set(s.status, list);
+    }
+
+    return map;
+  }, [allSiblings]);
+
+  const statusSiblings = useMemo(
+    () => (status ? (siblingsByStatus.get(status) ?? []) : []),
+    [siblingsByStatus, status],
+  );
+
+  // Find next/previous status groups with items (for cross-status nav)
+  const siblingNextStatus = useMemo(() => {
+    if (!status) return null;
+
+    const idx = STATUS_DISPLAY_ORDER.indexOf(status);
+
+    if (idx === -1) return null;
+
+    for (let i = idx + 1; i < STATUS_DISPLAY_ORDER.length; i++) {
+      if ((siblingsByStatus.get(STATUS_DISPLAY_ORDER[i])?.length ?? 0) > 0) return STATUS_DISPLAY_ORDER[i];
+    }
+
+    return null;
+  }, [status, siblingsByStatus]);
+
+  const siblingPrevStatus = useMemo(() => {
+    if (!status) return null;
+
+    const idx = STATUS_DISPLAY_ORDER.indexOf(status);
+
+    if (idx === -1) return null;
+
+    for (let i = idx - 1; i >= 0; i--) {
+      if ((siblingsByStatus.get(STATUS_DISPLAY_ORDER[i])?.length ?? 0) > 0) return STATUS_DISPLAY_ORDER[i];
+    }
+
+    return null;
+  }, [status, siblingsByStatus]);
+
+  const isSiblingNav = allSiblings.length > 0 && urlIndex !== -1 && status;
+
+  const getParsedParentTasks = useCallback((): TaskBreadcrumb[] | undefined => {
+    const raw = new URLSearchParams(window.location.search).get(TASK_QUERY_PARAMS.PARENT_TASKS);
+
+    if (!raw) return undefined;
+
+    try {
+      const parsed = JSON.parse(raw) as TaskBreadcrumb[];
+
+      return parsed.length > 0 ? parsed : undefined;
+    } catch {
+      return undefined;
+    }
+  }, []);
+
+  const navigateToSibling = useCallback(
+    (direction: 'next' | 'previous') => {
+      const targetIndex = direction === 'next' ? urlIndex + 1 : urlIndex - 1;
+      const parsedParentTasks = getParsedParentTasks();
+
+      // Cross-status: next beyond current status group
+      if (direction === 'next' && targetIndex >= statusSiblings.length) {
+        if (!siblingNextStatus) return;
+
+        const nextGroup = siblingsByStatus.get(siblingNextStatus) ?? [];
+        const target = nextGroup[0];
+
+        if (!target) return;
+
+        const route = getChatTaskRoute({
+          taskId: target.id,
+          conversationId,
+          taskTitle: target.title,
+          status: target.status,
+          currentIndex: 0,
+          totalRows: nextGroup.length,
+          parentTasks: parsedParentTasks,
+          siblings: allSiblings,
+        });
+
+        router.replace(route);
+
+        return;
+      }
+
+      // Cross-status: previous before current status group
+      if (direction === 'previous' && targetIndex < 0) {
+        if (!siblingPrevStatus) return;
+
+        const prevGroup = siblingsByStatus.get(siblingPrevStatus) ?? [];
+        const lastIndex = prevGroup.length - 1;
+        const target = prevGroup[lastIndex];
+
+        if (!target) return;
+
+        const route = getChatTaskRoute({
+          taskId: target.id,
+          conversationId,
+          taskTitle: target.title,
+          status: target.status,
+          currentIndex: lastIndex,
+          totalRows: prevGroup.length,
+          parentTasks: parsedParentTasks,
+          siblings: allSiblings,
+        });
+
+        router.replace(route);
+
+        return;
+      }
+
+      // Within same status group
+      if (targetIndex < 0 || targetIndex >= statusSiblings.length) return;
+
+      const target = statusSiblings[targetIndex];
+      const route = getChatTaskRoute({
+        taskId: target.id,
+        conversationId,
+        taskTitle: target.title,
+        status: target.status,
+        currentIndex: targetIndex,
+        totalRows: statusSiblings.length,
+        parentTasks: parsedParentTasks,
+        siblings: allSiblings,
+      });
+
+      router.replace(route);
+    },
+    [
+      urlIndex,
+      statusSiblings,
+      siblingsByStatus,
+      siblingNextStatus,
+      siblingPrevStatus,
+      allSiblings,
+      router,
+      conversationId,
+      getParsedParentTasks,
+    ],
+  );
+
+  if (isSiblingNav) {
+    return {
+      currentIndex: urlIndex,
+      totalCount: statusSiblings.length,
+      status: liveStatus ?? status,
+      subtasks: currentTask?.subtasks ?? [],
+      hasNext: urlIndex < statusSiblings.length - 1 || !!siblingNextStatus,
+      hasPrevious: urlIndex > 0 || !!siblingPrevStatus,
+      isLoading: false,
+      isBootstrapping: false,
+      goToNextTask: () => navigateToSibling('next'),
+      goToPreviousTask: () => navigateToSibling('previous'),
+    };
+  }
 
   return {
     currentIndex: urlIndex,
     totalCount: effectiveTotal,
     status: liveStatus ?? status,
+    subtasks: currentTask?.subtasks ?? [],
     hasNext: urlIndex !== -1 && (urlIndex < effectiveTotal - 1 || !!nextStatus || isCountsLoading),
     hasPrevious: urlIndex > 0 || (urlIndex === 0 && (!!previousStatus || isCountsLoading)),
     isLoading: isInitialLoading || isLoadingOtherPage,

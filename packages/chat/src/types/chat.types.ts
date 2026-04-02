@@ -456,6 +456,20 @@ export interface SubmitChatFeedbackResponseType {
   message: string;
 }
 
+/** Breadcrumb entry for parent-child task navigation */
+export interface TaskBreadcrumb {
+  id: string;
+  title: string;
+  status?: string;
+}
+
+/** Sibling task entry for subtask pagination */
+export interface SiblingTask {
+  id: string;
+  title: string;
+  status: string;
+}
+
 export enum HITLEntityType {
   CONVERSATION = 'CONVERSATION',
   TASK = 'TASK',

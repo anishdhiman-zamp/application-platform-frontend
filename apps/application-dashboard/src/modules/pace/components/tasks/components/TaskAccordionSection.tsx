@@ -5,26 +5,38 @@ import type { TaskStatus } from '@zamp-platform/chat';
 import { TaskStatusIcon } from '@zamp-platform/chat';
 import { AccordionContent, AccordionItem, AccordionTrigger } from '@zamp-platform/ui';
 import { Play } from 'lucide-react';
-import { STATUS_LABELS } from 'modules/pace/components/tasks/task-listing.constants';
-import TaskRow from 'modules/pace/components/tasks/TaskRow';
-import { useTasksByStatus } from 'modules/pace/components/tasks/useTasksByStatus';
+import TaskRow from '@/modules/pace/components/tasks/components/TaskRow';
+import { STATUS_LABELS } from '@/modules/pace/components/tasks/constants/tasks.constants';
+import { useTasksByStatus } from '@/modules/pace/components/tasks/hooks/useTasksByStatus';
+import type { CreationSource } from '@/modules/pace/components/tasks/types/tasks.types';
 
 interface TaskAccordionSectionProps {
   status: TaskStatus;
   count: number;
   search?: string;
   scrollContainerRef: React.RefObject<HTMLDivElement | null>;
+  creationSource?: CreationSource;
 }
 
 const PlayIcon = ({ className }: { className?: string }) => (
   <Play className={className} fill='currentColor' strokeWidth={0} />
 );
 
-const TaskAccordionSection = ({ status, count, search, scrollContainerRef }: TaskAccordionSectionProps) => {
+const TaskAccordionSection = ({
+  status,
+  count,
+  search,
+  scrollContainerRef,
+  creationSource,
+}: TaskAccordionSectionProps) => {
   const sentinelNodeRef = useRef<HTMLDivElement | null>(null);
   const isFetchingRef = useRef(false);
 
-  const { tasks, totalCount, fetchNextPage, isFetching, hasMore } = useTasksByStatus({ status, search });
+  const { tasks, totalCount, fetchNextPage, isFetching, hasMore } = useTasksByStatus({
+    status,
+    search,
+    creationSource,
+  });
 
   isFetchingRef.current = isFetching;
 

@@ -12,6 +12,7 @@ import { getChatTaskRoute } from '@/constants/routeConfig';
 import { useAppSelector } from '@/hooks/toolkit';
 import { usePaceContext } from '@/modules/pace/pace.context';
 import { CHAT_SIDEBAR_STATE } from '@/modules/pace/pace.types';
+import { preserveSidebarParam } from '@/modules/pace/pace.utils';
 import type { RootState } from '@/store';
 
 import { API_ENDPOINTS } from '../../api';
@@ -39,7 +40,7 @@ interface ToolCallInfo {
 const TaskBlock: FC<TaskBlockProps> = ({ payload, conversationId }) => {
   const router = useRouter();
   const organizationId = useAppSelector((state: RootState) => state.user.user?.orgs?.[0]?.organization_id) ?? '';
-  const { onTaskOpen } = useChatActions();
+  const { onTaskOpen, parentTasks, siblings } = useChatActions();
   const { setChatSidebarState } = usePaceContext();
 
   const { title, task_id, status = TASK_STATUS.IN_PROGRESS } = payload;
@@ -157,9 +158,41 @@ const TaskBlock: FC<TaskBlockProps> = ({ payload, conversationId }) => {
 
   const handleOpenTask = useCallback(() => {
     setChatSidebarState(CHAT_SIDEBAR_STATE.SIDEBAR);
-    onTaskOpen?.(title, getChatTaskRoute({ taskId: task_id, conversationId: conversationId ?? '', taskTitle: title }));
-    router.push(getChatTaskRoute({ taskId: task_id, conversationId: conversationId ?? '', taskTitle: title }));
-  }, [router, task_id, conversationId, title, onTaskOpen, setChatSidebarState]);
+
+    // Use live status from conversation data if available, fallback to payload status
+    const effectiveStatus = taskStatus ?? status;
+
+    // Compute status-based index within siblings for pagination
+    const sameStatusSiblings = siblings?.filter((s) => s.status === effectiveStatus) ?? [];
+    const statusIndex = sameStatusSiblings.findIndex((s) => s.id === task_id);
+
+    const route = getChatTaskRoute({
+      taskId: task_id,
+      conversationId: conversationId ?? '',
+      taskTitle: title,
+      parentTasks: parentTasks?.length ? parentTasks : undefined,
+      siblings: siblings?.length ? siblings : undefined,
+      status: siblings?.length ? effectiveStatus : undefined,
+      currentIndex: statusIndex !== -1 ? statusIndex : undefined,
+      totalRows: sameStatusSiblings.length > 0 ? sameStatusSiblings.length : undefined,
+    });
+
+    const fullRoute = preserveSidebarParam(route);
+
+    onTaskOpen?.(title, fullRoute);
+    router.push(fullRoute);
+  }, [
+    router,
+    task_id,
+    conversationId,
+    title,
+    status,
+    taskStatus,
+    onTaskOpen,
+    setChatSidebarState,
+    parentTasks,
+    siblings,
+  ]);
 
   const isInProgress = status === TASK_STATUS.IN_PROGRESS;
   const hasNoToolCalls = (toolCalls?.length ?? 0) === 0 && previousCount === 0;

@@ -7,7 +7,7 @@ import {
   SenderType,
   type StreamingState,
 } from '@zamp-platform/chat';
-import { STATUS_DISPLAY } from 'modules/pace/components/tasks/task-listing.constants';
+import { STATUS_DISPLAY } from '@/modules/pace/components/tasks/constants/tasks.constants';
 
 const messageContributesToSteps = (msg: ChatMessage): boolean => {
   if (msg.sender_type === SenderType.ASSISTANT) return true;
