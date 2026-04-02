@@ -1,7 +1,7 @@
 'use client';
 
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
-import { ResourceType, useActiveStreamingIds } from '@zamp-platform/chat';
+import { ResourceType, unreadStore, useActiveStreamingIds, useUnreadConversations } from '@zamp-platform/chat';
 import { useInfiniteScroll } from '@zamp-platform/tanstack-table';
 import { Button, Input } from '@zamp-platform/ui';
 import { cn } from '@zamp-platform/ui/utils';
@@ -36,6 +36,7 @@ const ChatHistory = ({
   const organizationId = useAppSelector((state: RootState) => state?.user?.user?.orgs?.[0]?.organization_id) ?? '';
   const containerRef = useRef<HTMLDivElement>(null);
   const activeStreamingIds = useActiveStreamingIds();
+  const unreadIds = useUnreadConversations();
 
   const [page, setPage] = useState(1);
   const [allConversations, setAllConversations] = useState<FeedbackItemType[]>([]);
@@ -62,7 +63,6 @@ const ChatHistory = ({
     },
     {
       skip: !organizationId,
-      refetchOnMountOrArgChange: true,
     },
   );
 
@@ -101,6 +101,14 @@ const ChatHistory = ({
     setIsSearchOpen(false);
     refetchConversationHistory();
   }, [refetchConversationHistory]);
+
+  const handleSelectConversation = useCallback(
+    (id: string | null, title?: string) => {
+      if (id) unreadStore.markRead(id);
+      onSelectConversation(id, title);
+    },
+    [onSelectConversation],
+  );
 
   const handleSearchChange = useCallback((e: React.ChangeEvent<HTMLInputElement>) => {
     setSearchTerm(e.target.value);
@@ -194,8 +202,9 @@ const ChatHistory = ({
       </div>
       <CommonWrapper
         isLoading={
-          ((isLoadingConversationHistory || isUninitializedConversationHistory) && page === 1) ||
-          (isFetchingConversationHistory && !!debouncedSearch && page === 1)
+          displayConversations.length === 0 &&
+          (isLoadingConversationHistory || isUninitializedConversationHistory) &&
+          page === 1
         }
         skeletonType={SkeletonTypes.CUSTOM}
         loader={<ChatHistorySkeleton />}
@@ -217,9 +226,10 @@ const ChatHistory = ({
               <ChatHistoryItem
                 key={conversation?.id}
                 conversation={conversation}
-                onSelect={onSelectConversation}
+                onSelect={handleSelectConversation}
                 isStreaming={activeStreamingIds.has(conversation?.id)}
                 isSelected={activeConversationId === conversation?.id}
+                isUnread={unreadIds.has(conversation?.id)}
                 organizationId={organizationId}
                 onDelete={handleDeleteConversation}
                 onDeleteFailure={handleDeleteConversationFailure}

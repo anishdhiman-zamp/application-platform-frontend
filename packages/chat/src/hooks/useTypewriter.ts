@@ -1,0 +1,102 @@
+'use client';
+
+import { useEffect, useRef, useState } from 'react';
+
+/**
+ * Adaptive-speed typewriter that decouples receiving from rendering.
+ * Accelerates when backlog grows to stay close to the incoming text head.
+ * Drains remaining text at a fast animated pace after stream ends.
+ * Returns fullText immediately (no animation) for history/refresh messages.
+ *
+ * @param fullText  - Accumulated text from the streaming store
+ * @param baseSpeed - Base ms-per-char (default 33ms ≈ 30 chars/sec)
+ * @param active    - Whether streaming is currently active
+ */
+
+export interface TypewriterResult {
+  text: string;
+  isAnimating: boolean;
+}
+
+/** Backlog (chars) above which adaptive acceleration kicks in. */
+const CATCH_UP_THRESHOLD = 40;
+/** Minimum ms-per-char the adaptive algorithm will use. */
+const MIN_SPEED = 4;
+/** ms-per-char used when draining remaining text after stream ends. */
+const DRAIN_SPEED = 8;
+
+export function useTypewriter(fullText: string, baseSpeed = 33, active = true): TypewriterResult {
+  const wasEverActiveRef = useRef(active);
+  if (active) wasEverActiveRef.current = true;
+
+  // Start at fullText.length so text already in the store (e.g. from a background stream) shows immediately.
+  const [displayed, setDisplayed] = useState(fullText.length);
+  const displayedRef = useRef(fullText.length);
+  const fullTextRef = useRef(fullText);
+  const rafRef = useRef<number>(0);
+  const lastFrameTimeRef = useRef<number>(0);
+  const prevFullTextRef = useRef(fullText);
+  const activeRef = useRef(active);
+
+  fullTextRef.current = fullText;
+  activeRef.current = active;
+
+  // fullText shrinking means the store was reset for a new message.
+  if (fullText.length < prevFullTextRef.current.length) {
+    displayedRef.current = 0;
+  }
+  prevFullTextRef.current = fullText;
+
+  useEffect(() => {
+    if (!wasEverActiveRef.current) return;
+
+    const tick = (now: number) => {
+      const target = fullTextRef.current.length;
+      const current = displayedRef.current;
+
+      if (current > target) {
+        // fullText shrank — snap back to start.
+        displayedRef.current = 0;
+        lastFrameTimeRef.current = now;
+        setDisplayed(0);
+      } else if (current < target) {
+        const elapsed = lastFrameTimeRef.current === 0 ? 0 : now - lastFrameTimeRef.current;
+        lastFrameTimeRef.current = now;
+
+        const backlog = target - current;
+        let effectiveSpeed: number;
+
+        if (!activeRef.current) {
+          effectiveSpeed = DRAIN_SPEED;
+        } else if (backlog > CATCH_UP_THRESHOLD) {
+          // Lerp from baseSpeed down to MIN_SPEED as backlog grows past threshold.
+          const excess = backlog - CATCH_UP_THRESHOLD;
+          const t = Math.min(1, excess / 200);
+          effectiveSpeed = baseSpeed - t * (baseSpeed - MIN_SPEED);
+        } else {
+          effectiveSpeed = baseSpeed;
+        }
+
+        const charsThisFrame = Math.max(1, Math.floor(elapsed / effectiveSpeed));
+        const next = Math.min(current + charsThisFrame, target);
+        displayedRef.current = next;
+        setDisplayed(next);
+      } else {
+        lastFrameTimeRef.current = now;
+      }
+
+      rafRef.current = requestAnimationFrame(tick);
+    };
+
+    rafRef.current = requestAnimationFrame(tick);
+    return () => cancelAnimationFrame(rafRef.current);
+  }, []);
+
+  if (!wasEverActiveRef.current) {
+    return { text: fullText, isAnimating: false };
+  }
+
+  const isAnimating = displayed < fullText.length;
+
+  return { text: fullText.slice(0, displayed), isAnimating };
+}

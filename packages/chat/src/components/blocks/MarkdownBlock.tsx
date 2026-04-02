@@ -13,6 +13,7 @@ import rehypeSlug from 'rehype-slug';
 import remarkGfm from 'remark-gfm';
 
 import { useChatActions } from '../../context/ChatActionsContext';
+import { useTypewriter } from '../../hooks/useTypewriter';
 
 const lowlight = createLowlight(common);
 
@@ -75,9 +76,10 @@ interface MarkdownBlockProps {
   payload: {
     text: string;
   };
+  isStreaming?: boolean;
 }
 
-export const MarkdownBlock: React.FC<MarkdownBlockProps> = ({ payload }) => {
+export const MarkdownBlock: React.FC<MarkdownBlockProps> = ({ payload, isStreaming = false }) => {
   const { onFileOpen } = useChatActions();
 
   const handleFileOpen = (filePath: string, fileName: string) => {
@@ -86,6 +88,8 @@ export const MarkdownBlock: React.FC<MarkdownBlockProps> = ({ payload }) => {
       onFileOpen(normalizedPath, fileName);
     }
   };
+
+  const { text } = useTypewriter(payload.text, undefined, isStreaming);
 
   return (
     <div
@@ -217,7 +221,7 @@ export const MarkdownBlock: React.FC<MarkdownBlockProps> = ({ payload }) => {
           },
         }}
       >
-        {payload.text}
+        {text}
       </ReactMarkdown>
     </div>
   );

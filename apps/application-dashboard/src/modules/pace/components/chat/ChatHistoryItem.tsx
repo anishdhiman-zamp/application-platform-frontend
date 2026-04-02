@@ -3,7 +3,6 @@
 import { type FC, useCallback, useMemo, useState } from 'react';
 import { cn } from '@zamp-platform/ui/utils';
 import { formatTimestampToUTC } from '@zamp-platform/utils/date';
-import { Check } from 'lucide-react';
 import ConversationActions from '@/modules/pace/components/chat/ConversationActions';
 import { formatRelativeTime } from '@/modules/pace/components/files/file-tree.utils';
 import type { FeedbackItemType } from '@/types/api/feedbacks.types';
@@ -20,6 +19,7 @@ interface ChatHistoryItemProps {
   onSelect: (id: string | null, title?: string) => void;
   isStreaming?: boolean;
   isSelected?: boolean;
+  isUnread?: boolean;
   organizationId: string;
   onDelete?: (id: string) => void;
   onDeleteFailure?: (conversation: FeedbackItemType) => void;
@@ -31,6 +31,7 @@ const ChatHistoryItem: FC<ChatHistoryItemProps> = ({
   onSelect,
   isStreaming,
   isSelected,
+  isUnread,
   organizationId,
   onDelete,
   onDeleteFailure,
@@ -87,19 +88,19 @@ const ChatHistoryItem: FC<ChatHistoryItemProps> = ({
       onClick={handleClick}
     >
       <div className='flex h-auto w-full items-center justify-start gap-2.5 px-3 py-2.5 pr-9'>
-        <span className='flex h-4 w-4 shrink-0 items-center justify-center'>
-          {isSelected ? (
-            <Check size={14} className='text-GRAY_1000' />
-          ) : isStreaming ? (
-            <span className='relative flex h-2 w-2'>
-              <span className='bg-BLUE_500 absolute inline-flex h-full w-full animate-ping rounded-full opacity-75' />
-              <span className='relative inline-flex h-2 w-2 rounded-full bg-blue-500' />
-            </span>
-          ) : null}
-        </span>
         <p className='f-13-500 text-GRAY_1000 min-w-0 flex-1 truncate text-left first-letter:uppercase'>
           {conversation?.title || 'Untitled conversation'}
         </p>
+        <span className='flex h-4 w-4 shrink-0 items-center justify-center'>
+          {isStreaming ? (
+            <span className='relative flex h-2 w-2'>
+              <span className='bg-BLUE_500 absolute inline-flex h-full w-full animate-ping rounded-full opacity-75' />
+              <span className='bg-BLUE_700 relative inline-flex h-2 w-2 rounded-full' />
+            </span>
+          ) : isUnread ? (
+            <span className='bg-GREEN_700 inline-flex h-2 w-2 rounded-full' />
+          ) : null}
+        </span>
         {relativeTime && <span className='f-12-400 text-GRAY_600 shrink-0 whitespace-nowrap'>{relativeTime}</span>}
       </div>
 

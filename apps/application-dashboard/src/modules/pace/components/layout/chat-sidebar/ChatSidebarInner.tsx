@@ -1,29 +1,18 @@
 'use client';
 
 import { FC, useCallback, useMemo, useRef, useState } from 'react';
-import type { useChat } from '@zamp-platform/chat';
-import { ConnectedChatInput, ResourceType, ScopeType } from '@zamp-platform/chat';
+import { ResourceType, ScopeType } from '@zamp-platform/chat';
+import { ConnectedChatInput, ConversationProvider } from '@zamp-platform/conversation-stream';
 import { cn } from '@zamp-platform/ui/utils';
 import { useDynamicTabs } from 'modules/pace/components/dynamic-tabs/useDynamicTabs';
 import ChatConversationContent from 'modules/pace/components/layout/chat-sidebar/ChatConversationContent';
-import { usePathname } from 'next/navigation';
-import { APITags } from '@/constants/api.constants';
-import { ROUTES_PATH } from '@/constants/routeConfig';
-import { useAppDispatch, useAppSelector } from '@/hooks/toolkit';
+import { useAppSelector } from '@/hooks/toolkit';
 import ChatTopbar from '@/modules/pace/components/chat/ChatTopbar';
 import ModelSelector from '@/modules/pace/components/chat/ModelSelector';
 import { useChatDraftInput } from '@/modules/pace/hooks/useChatDraftInput';
 import { usePaceContext } from '@/modules/pace/pace.context';
 import { CHAT_SIDEBAR_STATE, TAB_TYPE } from '@/modules/pace/pace.types';
-import { baseApi } from '@/services/baseApi';
 import type { RootState } from '@/store';
-import { selectActiveTabId } from '@/store/slices/dynamic-tabs.slice';
-
-export interface ChatState {
-  chat: ReturnType<typeof useChat>;
-  isInConversation: boolean;
-  showHomeView: boolean;
-}
 
 interface ChatSidebarInnerProps {
   conversationId: string | null;
@@ -42,14 +31,9 @@ const ChatSidebarInner: FC<ChatSidebarInnerProps> = ({
   chatTitle,
   chatKey,
 }) => {
-  const pathname = usePathname();
-  const activeTabId = useAppSelector(selectActiveTabId);
-  const dispatch = useAppDispatch();
   const { openTab } = useDynamicTabs({ type: TAB_TYPE.FILE });
   const { chatSidebarState, setChatSidebarState } = usePaceContext();
   const { inputValue, setInputValue } = useChatDraftInput({ conversationId });
-
-  const isOnChatRoute = pathname === ROUTES_PATH.CHAT && !activeTabId;
 
   const organizationId = useAppSelector((state: RootState) => state.user.user?.orgs?.[0]?.organization_id) ?? '';
   const currentUserName = useAppSelector((state: RootState) => state.user.user?.user_name) ?? '';
@@ -59,7 +43,6 @@ const ChatSidebarInner: FC<ChatSidebarInnerProps> = ({
   const addFileReferenceRef = useRef<((ref: { path: string; name: string }) => void) | null>(null);
 
   const [selectedModel, setSelectedModel] = useState<string | null>(null);
-  const [chatState, setChatState] = useState<ChatState | null>(null);
   const [isTaskPopoverOpen, setIsTaskPopoverOpen] = useState(false);
 
   const handleExpand = useCallback(() => {
@@ -82,13 +65,14 @@ const ChatSidebarInner: FC<ChatSidebarInnerProps> = ({
     }
   }, [chatSidebarState, setChatSidebarState]);
 
-  const handleChatStateChange = useCallback((state: ChatState) => {
-    setChatState(state);
-  }, []);
-
-  const handleConversationCreated = useCallback(() => {
-    dispatch(baseApi.util.invalidateTags([APITags.GET_CONVERSATION_HISTORY]));
-  }, [dispatch]);
+  const handleConversationIdChange = useCallback(
+    (id: string | null) => {
+      if (id && id !== conversationId) {
+        setConversationId(id, chatTitle);
+      }
+    },
+    [setConversationId, chatTitle, conversationId],
+  );
 
   const modelSelectorSlot = useMemo(
     () => <ModelSelector value={selectedModel} onChange={setSelectedModel} />,
@@ -96,39 +80,46 @@ const ChatSidebarInner: FC<ChatSidebarInnerProps> = ({
   );
 
   return (
-    <div className='bg-BG_WHITE relative mx-auto flex h-full w-full flex-1 flex-col'>
-      <div className={cn('transition-[filter] duration-200', isTaskPopoverOpen && 'pointer-events-none blur-sm')}>
-        <ChatTopbar
-          title={chatTitle || 'Start a new chat'}
+    <ConversationProvider
+      key={chatKey}
+      conversationId={conversationId}
+      resourceId={organizationId}
+      resourceType={ResourceType.ORGANIZATION}
+      enableStreaming
+      usePerConversationSSE
+      setHeader={(header: string) => {
+        if (!chatTitle) {
+          setChatTitle(header);
+        }
+      }}
+      onConversationIdChange={handleConversationIdChange}
+    >
+      <div className='bg-BG_WHITE relative mx-auto flex h-full w-full flex-1 flex-col'>
+        <div className={cn('transition-[filter] duration-200', isTaskPopoverOpen && 'pointer-events-none blur-sm')}>
+          <ChatTopbar
+            title={chatTitle || 'Start a new chat'}
+            conversationId={conversationId}
+            organizationId={organizationId}
+            onStartNewChat={startNewChat}
+            onTitleChange={setChatTitle}
+            onSelectConversation={setConversationId}
+            onExpand={chatSidebarState !== CHAT_SIDEBAR_STATE.EXPANDED ? handleExpand : undefined}
+          />
+        </div>
+
+        <ChatConversationContent
           conversationId={conversationId}
           organizationId={organizationId}
-          onStartNewChat={startNewChat}
-          onTitleChange={setChatTitle}
-          onSelectConversation={setConversationId}
-          onExpand={chatSidebarState !== CHAT_SIDEBAR_STATE.EXPANDED ? handleExpand : undefined}
+          onFileOpen={handleFileOpen}
+          onTaskOpen={handleTaskOpen}
+          onTaskPopoverOpenChange={setIsTaskPopoverOpen}
+          fileDropHandlerRef={fileDropHandlerRef}
+          addFileReferenceRef={addFileReferenceRef}
+          currentUserName={currentUserName}
         />
-      </div>
 
-      <ChatConversationContent
-        key={chatKey}
-        conversationId={conversationId}
-        setConversationId={setConversationId}
-        setChatTitle={setChatTitle}
-        chatTitle={chatTitle}
-        organizationId={organizationId}
-        onFileOpen={handleFileOpen}
-        onTaskOpen={handleTaskOpen}
-        onTaskPopoverOpenChange={setIsTaskPopoverOpen}
-        isOnChatRoute={isOnChatRoute}
-        onChatStateChange={handleChatStateChange}
-        fileDropHandlerRef={fileDropHandlerRef}
-        addFileReferenceRef={addFileReferenceRef}
-        currentUserName={currentUserName}
-      />
-      {chatState && (
         <div className='bg-BG_WHITE sticky bottom-0 z-10 mx-auto w-full max-w-[700px] px-3 pb-3'>
           <ConnectedChatInput
-            chat={chatState.chat}
             resourceType={ResourceType.ORGANIZATION}
             resourceId={organizationId}
             autoFocus
@@ -143,14 +134,13 @@ const ChatSidebarInner: FC<ChatSidebarInnerProps> = ({
             llmModel={selectedModel}
             showModelSelector
             modelSelectorSlot={modelSelectorSlot}
-            conversationId={conversationId ?? chatState.chat.conversationId ?? ''}
-            onConversationCreated={handleConversationCreated}
-            isDisabled={chatState.chat.isStreaming || chatState.chat.isCreatingConversationV2}
+            conversationId={conversationId ?? ''}
+            isDisabled={false}
             addFileReferenceRef={addFileReferenceRef}
           />
         </div>
-      )}
-    </div>
+      </div>
+    </ConversationProvider>
   );
 };
 

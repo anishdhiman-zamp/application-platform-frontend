@@ -18,6 +18,7 @@ import {
   streamingStateStore,
   type TaskContentBlock,
 } from '@zamp-platform/chat';
+import { ConversationEventType } from '@zamp-platform/conversation-stream';
 import { EventBus, SSEConnectionState, useSSE } from '@zamp-platform/utils';
 import {
   type BaseEventPayload,
@@ -138,19 +139,8 @@ function handleGlobalStreamEvent(data: BaseEventPayload): void {
         }
 
         streamingStateStore.update(conversationId, (prev) => {
-          if (!prev) {
-            return {
-              resource_type: ResourceType.ORGANIZATION,
-              resource_id: '',
-              conversation_id: conversationId,
-              message_content: { elements: [newBlock] },
-              message_type: ChatMessageType.SYSTEM,
-              sender_type: SenderType.ASSISTANT,
-              timestamp: new Date().toISOString(),
-              metadata: {},
-              is_active: true,
-            };
-          }
+          if (!prev) return prev;
+
           const existingBlocks = prev.message_content?.elements ?? [];
 
           return {
@@ -524,12 +514,26 @@ export const SSEProvider: React.FC<SSEProviderProps> = ({ children, sseEventBus 
       }
     });
     const taskUpdateSub = sseEventBus.subscribe(EVENT_TYPE.TASK_UPDATE, handleGlobalTaskUpdate);
+    const convCreatedSub = sseEventBus.subscribe(
+      ConversationEventType.CONVERSATION_CREATED as unknown as EVENT_TYPE,
+      () => {
+        store.dispatch(baseApi.util.invalidateTags([APITags.GET_CONVERSATION_HISTORY]));
+      },
+    );
+    const titleUpdatedSub = sseEventBus.subscribe(
+      ConversationEventType.CONVERSATION_TITLE_UPDATED as unknown as EVENT_TYPE,
+      () => {
+        store.dispatch(baseApi.util.invalidateTags([APITags.GET_CONVERSATION_HISTORY]));
+      },
+    );
 
     return () => {
       streamSub.unsubscribe();
       convSub.unsubscribe();
       taskSub.unsubscribe();
       taskUpdateSub.unsubscribe();
+      convCreatedSub.unsubscribe();
+      titleUpdatedSub.unsubscribe();
     };
   }, [sseEventBus]);
 

@@ -1,5 +1,6 @@
 export * from './src/api';
 export * from './src/components/AudioVisualizer';
+export * from './src/components/block.utils';
 export * from './src/components/BlockRenderer';
 export * from './src/components/blocks';
 export * from './src/components/ChatComposer';
@@ -21,7 +22,10 @@ export * from './src/hooks/useFileUpload';
 export * from './src/hooks/useMicrophoneRecorder';
 export * from './src/hooks/useStreamingState';
 export * from './src/hooks/useTranscription';
+export * from './src/hooks/useTypewriter';
+export * from './src/hooks/useUnreadConversations';
 export * from './src/stores/streamingStateStore';
+export * from './src/stores/unreadStore';
 export * from './src/types/block.types';
 export * from './src/types/chat.types';
 export * from './src/types/transcription.types';

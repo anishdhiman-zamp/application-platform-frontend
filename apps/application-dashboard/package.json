@@ -51,6 +51,7 @@
     "@zamp-platform/api": "*",
     "@zamp-platform/battalion": "*",
     "@zamp-platform/chat": "*",
+    "@zamp-platform/conversation-stream": "*",
     "@zamp-platform/config": "*",
     "@zamp-platform/dataset-create-edit": "*",
     "@zamp-platform/form-builder": "*",

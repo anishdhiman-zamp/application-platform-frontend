@@ -2,7 +2,13 @@ import { captureException } from '@sentry/browser';
 
 import { toast } from '../../../ui/src/components/ui/toast';
 import { Block, BLOCK_TYPE } from '../types/block.types';
-import { ChatMessage, ChatMessageType, GetConversationByIdResponseType, SenderType } from '../types/chat.types';
+import {
+  ChatMessage,
+  ChatMessageType,
+  GetConversationByIdResponseType,
+  MessageState,
+  SenderType,
+} from '../types/chat.types';
 
 /**
  * Extracts initial values from blocks that support initial values
@@ -34,18 +40,37 @@ export const extractInitialValues = (blocks: Block[]): Record<string, { label: s
 };
 
 export const getHistoryFormattedMessages = (conversationHistory: GetConversationByIdResponseType): ChatMessage[] => {
-  return conversationHistory.messages.map((message) => ({
-    resource_type: conversationHistory?.conversation?.resource_type,
-    resource_id: conversationHistory?.conversation?.resource_id,
-    message_content: message.content,
-    message_type: ChatMessageType.TEXT,
-    sender_type: message.sender_type as SenderType,
-    metadata: {},
-    timestamp: message.created_at,
-    sender_name: message.sender_name,
-    id: message.id,
-    conversation_id: message?.conversation_id,
-  }));
+  return conversationHistory.messages
+    .filter((message) => message.state !== MessageState.STREAMING)
+    .map((message) => ({
+      resource_type: conversationHistory?.conversation?.resource_type,
+      resource_id: conversationHistory?.conversation?.resource_id,
+      message_content: message.content,
+      message_type: ChatMessageType.TEXT,
+      sender_type: message.sender_type as SenderType,
+      metadata: {},
+      timestamp: message.created_at,
+      sender_name: message.sender_name,
+      id: message.id,
+      conversation_id: message?.conversation_id,
+      state: message.state,
+    }));
+};
+
+/**
+ * Returns the ID of the last assistant message if its state is STREAMING, or null.
+ * Using the last assistant message avoids false positives from stale STREAMING states
+ * on earlier messages and matches the actual in-progress message the server is generating.
+ */
+export const getStreamingMessageId = (conversationHistory: GetConversationByIdResponseType): string | null => {
+  const messages = conversationHistory.messages;
+  for (let i = messages.length - 1; i >= 0; i--) {
+    const message = messages[i];
+    if (message.sender_type === SenderType.ASSISTANT) {
+      return message.state === MessageState.STREAMING ? message.id : null;
+    }
+  }
+  return null;
 };
 
 /**

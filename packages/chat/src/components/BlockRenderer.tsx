@@ -223,6 +223,7 @@ export const BlockRenderer: React.FC<BlockRendererProps> = ({
           <MarkdownBlock
             key={block?.id ?? `text-${block?.order}-${(block as TextContentBlock)?.start_timestamp}`}
             payload={block?.payload}
+            isStreaming={isStreaming}
           />
         );
 

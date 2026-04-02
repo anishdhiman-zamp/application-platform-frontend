@@ -189,6 +189,8 @@ const ConversationService = chatApi.injectEndpoints({
   }),
 });
 
+export { ConversationService };
+
 export const {
   useSendMessageMutation,
   useCreateConversationMutation,
