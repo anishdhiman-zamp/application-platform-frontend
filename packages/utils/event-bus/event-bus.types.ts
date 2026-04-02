@@ -49,6 +49,7 @@ export const enum EVENT_TYPE {
   TASK = 'task',
   TASK_UPDATE = 'task_update',
   TASK_SUMMARY = 'task_summary',
+  INPUT_REQUIRED = 'input_required',
   FEEDBACK = 'feedback',
   AGENT_STREAMS = 'agent_streams',
   TEST = 'test',

@@ -1,8 +1,8 @@
 'use client';
 
 import { FC, useCallback, useMemo, useRef, useState } from 'react';
-import type { useChat } from '@zamp-platform/chat';
-import { ConnectedChatInput, ResourceType, ScopeType } from '@zamp-platform/chat';
+import type { ConversationInputRequiredItem, useChat } from '@zamp-platform/chat';
+import { ConnectedChatInput, HITLEntityType, HITLQuestionsBlock, ResourceType, ScopeType } from '@zamp-platform/chat';
 import { cn } from '@zamp-platform/ui/utils';
 import { useDynamicTabs } from 'modules/pace/components/dynamic-tabs/useDynamicTabs';
 import ChatConversationContent from 'modules/pace/components/layout/chat-sidebar/ChatConversationContent';
@@ -13,6 +13,7 @@ import { useAppDispatch, useAppSelector } from '@/hooks/toolkit';
 import ChatTopbar from '@/modules/pace/components/chat/ChatTopbar';
 import ModelSelector from '@/modules/pace/components/chat/ModelSelector';
 import { useChatDraftInput } from '@/modules/pace/hooks/useChatDraftInput';
+import { useHitlQuestions } from '@/modules/pace/hooks/useHitlQuestions';
 import { usePaceContext } from '@/modules/pace/pace.context';
 import { CHAT_SIDEBAR_STATE, TAB_TYPE } from '@/modules/pace/pace.types';
 import { baseApi } from '@/services/baseApi';
@@ -23,6 +24,7 @@ export interface ChatState {
   chat: ReturnType<typeof useChat>;
   isInConversation: boolean;
   showHomeView: boolean;
+  inputsRequired?: ConversationInputRequiredItem[];
 }
 
 interface ChatSidebarInnerProps {
@@ -89,6 +91,14 @@ const ChatSidebarInner: FC<ChatSidebarInnerProps> = ({
     [selectedModel],
   );
 
+  const { hitlQuestions, hitlQuestionsKey } = useHitlQuestions(chatState?.inputsRequired);
+
+  const handleHitlRespondComplete = useCallback(() => {
+    void chatState?.chat.refetchConversationHistory();
+  }, [chatState?.chat]);
+
+  const hasInputsRequired = (chatState?.inputsRequired?.length ?? 0) > 0;
+
   return (
     <div className='bg-BG_WHITE relative mx-auto flex h-full w-full flex-1 flex-col'>
       <div className={cn('transition-[filter] duration-200', isTaskPopoverOpen && 'pointer-events-none blur-sm')}>
@@ -120,27 +130,37 @@ const ChatSidebarInner: FC<ChatSidebarInnerProps> = ({
       />
       {chatState && (
         <div className='bg-BG_WHITE sticky bottom-0 z-10 mx-auto w-full max-w-[700px] px-3 pb-3'>
-          <ConnectedChatInput
-            chat={chatState.chat}
-            resourceType={ResourceType.ORGANIZATION}
-            resourceId={organizationId}
-            autoFocus
-            scope={ScopeType.ORGANIZATION}
-            scopeId={organizationId}
-            username={username}
-            currentUserName={currentUserName}
-            placeholder="Do your life's best work with Pace"
-            externalInputValue={inputValue}
-            setExternalInputValue={setInputValue}
-            fileDropHandlerRef={fileDropHandlerRef}
-            llmModel={selectedModel}
-            showModelSelector
-            modelSelectorSlot={modelSelectorSlot}
-            conversationId={conversationId ?? chatState.chat.conversationId ?? ''}
-            onConversationCreated={handleConversationCreated}
-            isDisabled={chatState.chat.isStreaming || chatState.chat.isCreatingConversationV2}
-            addFileReferenceRef={addFileReferenceRef}
-          />
+          {hasInputsRequired ? (
+            <HITLQuestionsBlock
+              key={hitlQuestionsKey}
+              payload={{ questions: hitlQuestions }}
+              onSubmit={handleHitlRespondComplete}
+              sourceEntityId={conversationId ?? chatState.chat.conversationId ?? ''}
+              sourceEntityType={HITLEntityType.CONVERSATION}
+            />
+          ) : (
+            <ConnectedChatInput
+              chat={chatState.chat}
+              resourceType={ResourceType.ORGANIZATION}
+              resourceId={organizationId}
+              autoFocus
+              scope={ScopeType.ORGANIZATION}
+              scopeId={organizationId}
+              username={username}
+              currentUserName={currentUserName}
+              placeholder="Do your life's best work with Pace"
+              externalInputValue={inputValue}
+              setExternalInputValue={setInputValue}
+              fileDropHandlerRef={fileDropHandlerRef}
+              llmModel={selectedModel}
+              showModelSelector
+              modelSelectorSlot={modelSelectorSlot}
+              conversationId={conversationId ?? chatState.chat.conversationId ?? ''}
+              onConversationCreated={handleConversationCreated}
+              isDisabled={chatState.chat.isStreaming || chatState.chat.isCreatingConversationV2}
+              addFileReferenceRef={addFileReferenceRef}
+            />
+          )}
         </div>
       )}
     </div>
