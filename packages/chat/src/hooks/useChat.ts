@@ -417,6 +417,21 @@ export const useChat = (config: ChatConfig) => {
     return () => sub.unsubscribe();
   }, [sseEventBus, handleTaskUpdate]);
 
+  const handleInputRequiredSse = useCallback(
+    (data: BaseEventPayload) => {
+      if (data.source_id !== _conversationId || !_conversationId) {
+        return;
+      }
+      void refetchConversationHistory();
+    },
+    [_conversationId, refetchConversationHistory],
+  );
+
+  useEffect(() => {
+    const sub = sseEventBus.subscribe(EVENT_TYPE.INPUT_REQUIRED, handleInputRequiredSse);
+    return () => sub.unsubscribe();
+  }, [sseEventBus, handleInputRequiredSse]);
+
   useEffect(() => {
     if (!isFetchingConversationHistory && conversationHistory) {
       if (conversationHistory?.conversation?.title) {
