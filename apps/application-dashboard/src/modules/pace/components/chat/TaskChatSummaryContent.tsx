@@ -45,19 +45,19 @@ export const TaskChatSummaryContent = ({
     );
   }
 
-  if (displayedSummary) {
-    return (
-      <ResizableSummaryBox borderRadius='rounded-[18px]' contentClassName='px-4 pt-4 pb-1' scrollRef={summaryScrollRef}>
-        <SummaryMarkdown text={displayedSummary} shimmerLast={isAgentActive} />
-      </ResizableSummaryBox>
-    );
-  }
-
   if (isAgentActive) {
     return (
       <div className='border-GRAY_400 rounded-[18px] border px-4 py-4'>
-        <ShimmerText text='Starting now' autoAnimate />
+        <ShimmerText text={displayedSummary || 'Starting now'} autoAnimate />
       </div>
+    );
+  }
+
+  if (displayedSummary) {
+    return (
+      <ResizableSummaryBox borderRadius='rounded-[18px]' contentClassName='px-4 pt-4 pb-1' scrollRef={summaryScrollRef}>
+        <SummaryMarkdown text={displayedSummary} />
+      </ResizableSummaryBox>
     );
   }
 
