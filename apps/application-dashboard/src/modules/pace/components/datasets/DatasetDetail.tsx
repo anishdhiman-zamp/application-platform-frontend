@@ -6,7 +6,7 @@ import { Button, toast } from '@zamp-platform/ui';
 import { CellEditRequestEvent, ColDef, FillEndEvent, IServerSideDatasource } from 'ag-grid-community';
 import { AgGridReact } from 'ag-grid-react';
 import { useUserIdentity } from 'hooks/useUserIdentity';
-import { ArrowLeft, Download, Loader2 } from 'lucide-react';
+import { AlertTriangle, ArrowLeft, Download, Loader2 } from 'lucide-react';
 import ColumnHeader from 'modules/pace/components/datasets/ColumnHeader';
 import DatasetBlueprintEditor from 'modules/pace/components/datasets/DatasetBlueprintEditor';
 import {
@@ -63,6 +63,7 @@ const DatasetDetailInner = ({ tableName }: DatasetDetailProps) => {
   const [isSaving, setIsSaving] = useState(false);
   const [isExporting, setIsExporting] = useState(false);
   const [gridReady, setGridReady] = useState(false);
+  const [schemaError, setSchemaError] = useState<string | null>(null);
   const [pkColumn, setPkColumn] = useState<string | null>(null);
 
   const { userId } = useUserIdentity();
@@ -156,6 +157,7 @@ const DatasetDetailInner = ({ tableName }: DatasetDetailProps) => {
       setOriginalBlueprintColumns(bpCols);
     } catch {
       setColumns([]);
+      setSchemaError('Failed to load dataset schema. The table may not exist or you may not have access.');
     }
   }, [executeQuery, tableName, filterDispatch]);
 
@@ -604,12 +606,31 @@ const DatasetDetailInner = ({ tableName }: DatasetDetailProps) => {
       {/* Content — both tabs stay mounted, visibility toggled via CSS to avoid re-fetching */}
       <div className='grid flex-1 overflow-hidden'>
         <div className={activeTab === DatasetTabsTypes.PREVIEW ? 'grid overflow-hidden' : 'hidden'}>
-          {!columns && (
+          {!columns && !schemaError && (
             <div className='flex h-full items-center justify-center'>
               <ImageLoader imageSrc={ZAMP_LOGO_LOADER_SVG} width={140} height={140} />
             </div>
           )}
-          {columns && (
+          {schemaError && (
+            <div className='flex h-full flex-col items-center justify-center gap-3'>
+              <AlertTriangle className='text-GRAY_600 h-10 w-10' />
+              <p className='f-14-500 text-GRAY_700'>Unable to load dataset</p>
+              <p className='f-12-400 text-GRAY_600 max-w-[300px] text-center'>{schemaError}</p>
+              <Button
+                size='small'
+                variant='outline'
+                className='mt-2'
+                onClick={() => {
+                  setSchemaError(null);
+                  setColumns(null);
+                  loadSchema();
+                }}
+              >
+                Try again
+              </Button>
+            </div>
+          )}
+          {columns && !schemaError && (
             <DatasetTable
               tableRef={tableRef}
               columns={columns}
