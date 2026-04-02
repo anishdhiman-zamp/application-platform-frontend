@@ -32,7 +32,7 @@ export interface PendingConversationPayload {
   message: string;
   fileReferences?: { path: string; name: string }[];
   llmModel?: string | null;
-  pevEnabled?: boolean;
+  autoLoopEnabled?: boolean;
 }
 
 interface PaceContextType {

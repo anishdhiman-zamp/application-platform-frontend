@@ -15,7 +15,6 @@ import {
 import { ScrollContainer } from '@zamp-platform/ui';
 import { cn } from '@zamp-platform/ui/utils';
 import type { ChatState } from 'modules/pace/components/layout/chat-sidebar/ChatSidebarInner';
-import { addPevLockedConversation } from 'modules/pace/components/layout/chat-sidebar/ChatSidebarInner';
 import NewPaceIcons from '@/assets/Icons/NewPaceIcons';
 import CommonWrapper from '@/components/commonWrapper';
 import { SkeletonTypes } from '@/components/commonWrapper/commonWrapper.types';
@@ -23,6 +22,7 @@ import NewPaceAvatar from '@/modules/chatbot/NewPaceAvatar';
 import TaskStatusCounts from '@/modules/pace/components/chat/TaskStatusCounts';
 import ChatMessagesSkeleton from '@/modules/pace/components/loaders/ChatMessagesSkeleton';
 import { usePaceContext } from '@/modules/pace/pace.context';
+import { addAutoLoopLockedConversation } from '@/modules/pace/utils/autoLoopStorage';
 
 export interface ChatConversationContentProps {
   conversationId: string | null;
@@ -127,15 +127,15 @@ const ChatConversationContent: FC<ChatConversationContentProps> = ({
         undefined,
         undefined,
         pendingConversationPayload.llmModel,
-        pendingConversationPayload.pevEnabled,
+        pendingConversationPayload.autoLoopEnabled,
       );
 
-      const shouldLockPev = pendingConversationPayload.pevEnabled;
+      const shouldLockAutoLoop = pendingConversationPayload.autoLoopEnabled;
 
       setPendingConversationPayload(null);
       chat.createConversationV2(payload).then((response) => {
-        if (shouldLockPev && response?.conversation_id) {
-          addPevLockedConversation(response.conversation_id);
+        if (shouldLockAutoLoop && response?.conversation_id) {
+          addAutoLoopLockedConversation(response.conversation_id);
         }
       });
     }

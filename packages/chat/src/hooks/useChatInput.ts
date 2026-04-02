@@ -64,7 +64,7 @@ export interface UseChatInputProps {
   onConversationCreated?: (conversationId: string) => void;
   isDisabled?: boolean;
   llmModel?: string | null;
-  pevEnabled?: boolean;
+  autoLoopEnabled?: boolean;
 }
 
 export interface UseChatInputReturn {
@@ -91,7 +91,7 @@ export const createUserMessagePayload = (
   senderName: string,
   fileReferences?: FileReference[],
   llmModel?: string | null,
-  pevEnabled?: boolean,
+  autoLoopEnabled?: boolean,
 ): ChatMessage => {
   return {
     resource_id: resourceId,
@@ -117,7 +117,7 @@ export const createUserMessagePayload = (
     metadata: {},
     sender_name: senderName,
     ...(llmModel ? { llm_model: llmModel } : {}),
-    ...(pevEnabled != null ? { pev_enabled: pevEnabled } : {}),
+    ...(autoLoopEnabled != null ? { pev_enabled: autoLoopEnabled } : {}),
   };
 };
 
@@ -135,7 +135,7 @@ export const createConversationPayload = (
   annotationLocation?: LocationData,
   annotationType?: AnnotationType,
   llmModel?: string | null,
-  pevEnabled?: boolean,
+  autoLoopEnabled?: boolean,
 ) => {
   return {
     resource_id: resourceId,
@@ -165,7 +165,7 @@ export const createConversationPayload = (
     }),
     sender_name: senderName,
     ...(llmModel ? { llm_model: llmModel } : {}),
-    ...(pevEnabled != null ? { pev_enabled: pevEnabled } : {}),
+    ...(autoLoopEnabled != null ? { pev_enabled: autoLoopEnabled } : {}),
   };
 };
 
@@ -187,7 +187,7 @@ export const useChatInput = ({
   onConversationCreated,
   isDisabled,
   llmModel,
-  pevEnabled,
+  autoLoopEnabled,
 }: UseChatInputProps): UseChatInputReturn => {
   const prevConversationIdRef = useRef(conversationId);
   const currentUserName = adapter.getCurrentUserName();
@@ -229,7 +229,7 @@ export const useChatInput = ({
       annotationLocation,
       annotationType,
       llmModel,
-      pevEnabled,
+      autoLoopEnabled,
     );
 
     setFileReferences([]);
@@ -370,7 +370,7 @@ export const useChatInput = ({
       currentUserName || '',
       fileReferences.length > 0 ? fileReferences.map((ref) => ({ path: ref.path, name: ref.name })) : undefined,
       llmModel,
-      pevEnabled,
+      autoLoopEnabled,
     );
 
     setFileReferences([]);

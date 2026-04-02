@@ -61,7 +61,7 @@ export interface ChatComposerProps {
   maxTextareaHeight?: number;
 
   modelSelectorSlot?: React.ReactNode;
-  leftSlot?: React.ReactNode;
+  autoLoopToggleSlot?: React.ReactNode;
 }
 
 export const ChatComposer: FC<ChatComposerProps> = ({
@@ -107,7 +107,7 @@ export const ChatComposer: FC<ChatComposerProps> = ({
   maxTextareaHeight = 200,
 
   modelSelectorSlot,
-  leftSlot,
+  autoLoopToggleSlot,
 }) => {
   const editorRef = useRef<RichTextEditorHandle>(null);
 
@@ -232,7 +232,7 @@ export const ChatComposer: FC<ChatComposerProps> = ({
                   <Paperclip />
                 </Button>
               ) : null}
-              {leftSlot}
+              {autoLoopToggleSlot}
             </div>
 
             <div className='flex items-center gap-x-2'>

@@ -45,7 +45,7 @@ const ChatHomePage: FC = () => {
   const addFileReferenceRef = useRef<((ref: { path: string; name: string }) => void) | null>(null);
 
   const [selectedModel, setSelectedModel] = useState<string | null>(null);
-  const [pevEnabled, setPevEnabled] = useState(false);
+  const [autoLoopEnabled, setAutoLoopEnabled] = useState(false);
   const [isConfirmDialogOpen, setIsConfirmDialogOpen] = useState(false);
 
   const chat = useChat({
@@ -66,7 +66,7 @@ const ChatHomePage: FC = () => {
           message: payload.message_content?.text || '',
           fileReferences: fileRefs?.map((ref) => ({ path: ref.path, name: ref.name })),
           llmModel: payload.llm_model,
-          pevEnabled: payload.pev_enabled,
+          autoLoopEnabled: payload.pev_enabled,
         });
 
         setChatSidebarState(CHAT_SIDEBAR_STATE.EXPANDED);
@@ -91,29 +91,22 @@ const ChatHomePage: FC = () => {
     [selectConversation, setChatSidebarState],
   );
 
-  const handleAutoLoopToggle = useCallback((pressed: boolean) => {
-    if (pressed) {
-      setIsConfirmDialogOpen(true);
-    }
-  }, []);
-
-  const handleAutoLoopConfirm = useCallback(() => {
-    setPevEnabled(true);
-    // No localStorage lock here — conversationId doesn't exist yet.
-    // Lock is applied in ChatConversationContent when the conversation is created.
-  }, []);
-
   const modelSelectorSlot = useMemo(
     () => <ModelSelector value={selectedModel} onChange={setSelectedModel} />,
     [selectedModel],
   );
 
   const autoLoopToggleSlot = useMemo(
-    () =>
-      isZampInternalUser ? (
-        <AutoLoopToggle enabled={pevEnabled} onChange={handleAutoLoopToggle} disabled={pevEnabled} />
-      ) : undefined,
-    [pevEnabled, isZampInternalUser, handleAutoLoopToggle],
+    () => (
+      <AutoLoopToggle
+        enabled={autoLoopEnabled}
+        onChange={(pressed) => {
+          if (pressed) setIsConfirmDialogOpen(true);
+        }}
+        disabled={autoLoopEnabled}
+      />
+    ),
+    [autoLoopEnabled],
   );
 
   useEffect(() => {
@@ -160,9 +153,9 @@ const ChatHomePage: FC = () => {
                   addFileReferenceRef={addFileReferenceRef}
                   showModelSelector
                   modelSelectorSlot={modelSelectorSlot}
-                  leftSlot={autoLoopToggleSlot}
+                  {...(isZampInternalUser && { autoLoopToggleSlot })}
                   llmModel={selectedModel}
-                  pevEnabled={pevEnabled}
+                  autoLoopEnabled={autoLoopEnabled}
                 />
               </div>
               <ChatHistory onSelectConversation={handleSelectConversation} />
@@ -173,7 +166,7 @@ const ChatHomePage: FC = () => {
       <AutoLoopConfirmDialog
         isOpen={isConfirmDialogOpen}
         onOpenChange={setIsConfirmDialogOpen}
-        onConfirm={handleAutoLoopConfirm}
+        onConfirm={() => setAutoLoopEnabled(true)}
       />
     </>
   );
