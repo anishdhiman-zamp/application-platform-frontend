@@ -5,13 +5,13 @@ import { TASK_STATUS, TaskStatusIcon } from '@zamp-platform/chat';
 import { CSS_VARS, Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@zamp-platform/ui';
 import { format } from 'date-fns';
 import { BookText } from 'lucide-react';
-import SubtaskPopover from 'modules/pace/components/tasks/SubtaskPopover';
-import type { TaskListItem } from 'modules/pace/components/tasks/task-listing.types';
 import { preserveSidebarParam } from 'modules/pace/pace.utils';
 import { useRouter } from 'next/navigation';
 import Avatar from '@/components/common/avatar';
 import { getChatTaskRoute } from '@/constants/routeConfig';
 import { KEYBOARD_KEYS } from '@/constants/shortcuts';
+import SubtaskPopover from '@/modules/pace/components/tasks/components/SubtaskPopover';
+import type { TaskListItem } from '@/modules/pace/components/tasks/types/tasks.types';
 
 interface TaskRowProps {
   task: TaskListItem;
@@ -58,7 +58,21 @@ const TaskRow = ({ task, index, totalCount, status }: TaskRowProps) => {
         </div>
 
         {totalSubtasks > 0 && (
-          <SubtaskPopover subtasks={task.subtasks} completedCount={completedSubtasks} totalCount={totalSubtasks} />
+          // eslint-disable-next-line jsx-a11y/click-events-have-key-events, jsx-a11y/no-static-element-interactions
+          <div
+            onClick={(e) => {
+              e.preventDefault();
+              e.stopPropagation();
+            }}
+            onMouseDown={(e) => e.stopPropagation()}
+          >
+            <SubtaskPopover
+              subtasks={task.subtasks}
+              completedCount={completedSubtasks}
+              totalCount={totalSubtasks}
+              parentTasks={[{ id: task.id, title: task.title, status: task.status }]}
+            />
+          </div>
         )}
         {task?.description && (
           <>

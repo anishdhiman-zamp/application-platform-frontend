@@ -3,9 +3,9 @@
 import { useCallback, useState } from 'react';
 import { Button, SearchInput, Tabs, TabsList, TabsTrigger } from '@zamp-platform/ui';
 import { Search, X } from 'lucide-react';
-import { TAB_CONFIG, VALID_TABS } from 'modules/pace/components/tasks/task-listing.constants';
-import { TASK_LISTING_TAB, type TaskListingTab } from 'modules/pace/components/tasks/task-listing.types';
 import { usePathname, useRouter, useSearchParams } from 'next/navigation';
+import { TAB_CONFIG, VALID_TABS } from '@/modules/pace/components/tasks/constants/tasks.constants';
+import { TASK_LISTING_TAB, type TaskListingTab } from '@/modules/pace/components/tasks/types/tasks.types';
 
 interface TaskActionBarProps {
   searchTerm: string;
