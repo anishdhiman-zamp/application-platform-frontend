@@ -29,6 +29,7 @@ interface MessageContainerProps {
   streamingEnabled?: boolean;
   conversationId?: string;
   showMarkdownConnectors?: boolean;
+  showStreamingAvatar?: boolean;
 }
 
 export const MessageContainer: FC<MessageContainerProps> = ({
@@ -48,6 +49,7 @@ export const MessageContainer: FC<MessageContainerProps> = ({
   streamingEnabled = true,
   conversationId,
   showMarkdownConnectors = false,
+  showStreamingAvatar = true,
 }) => {
   const previousConversationIdRef = useRef(conversationId);
   const [animatedLength, setAnimatedLength] = useState(() => {
@@ -149,7 +151,7 @@ export const MessageContainer: FC<MessageContainerProps> = ({
         />
       )}
 
-      {streamingState && !!streamingState.message_content?.elements?.length && (
+      {showStreamingAvatar && streamingState && !!streamingState.message_content?.elements?.length && (
         <div className='flex w-full items-center'>
           <div className='animate-scale dark:brightness-0 dark:invert'>
             <Image src='/icons/pace/pace-streaming.svg' alt='Pace Avatar' height={20} width={20} />

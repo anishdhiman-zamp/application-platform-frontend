@@ -86,6 +86,14 @@ make sync-from-main   # Stash changes, checkout main, pull, sync secrets, instal
 
 ### Next.js 16 Specifics
 
+<<<<<<< HEAD
+
+- **React 19.2** with React Compiler enabled (auto-memoization)
+- **Turbopack** for dev, webpack for production builds (`npm run build` uses `--webpack`)
+- **Output: standalone** for Docker containerization
+- **Async params/searchParams** — In server components, `params` and `searchParams` must be awaited (Next.js 16 breaking change)
+- **No middleware.ts** — Use proxy.ts pattern instead
+- # **`'use client'`** — Only when necessary; prefer Server Components
 - **React 19.2** with React Compiler enabled (auto-memoization, `reactCompiler: true` in next.config)
 - **Turbopack** is default for dev; webpack for production builds (`npm run build` uses `--webpack`)
 - **Output: standalone** for Docker containerization
@@ -94,6 +102,7 @@ make sync-from-main   # Stash changes, checkout main, pull, sync secrets, instal
 - **`'use client'`** — Only when necessary; prefer Server Components
 - **Removed features** — AMP support, `next lint` (use ESLint directly), `serverRuntimeConfig`/`publicRuntimeConfig`, `next/legacy/image`
 - **Caching** — `use cache` directive with `cacheTag()`, `updateTag()`, `revalidateTag()`, `refresh()` (stable, no `unstable_` prefix)
+  > > > > > > > 04806939d99d88184d82eabc30823440eea455e2
 
 ### TypeScript
 

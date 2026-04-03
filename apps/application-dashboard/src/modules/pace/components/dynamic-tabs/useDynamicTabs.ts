@@ -159,10 +159,10 @@ export const useDynamicTabs = (config: UseDynamicTabsConfig = {}): UseDynamicTab
 
         if (hasRemainingItems && target) {
           dispatch(dynamicTabsActions.setActiveTab(target.id));
-          navigateTo(buildTabRoute(target.id, target.type));
+          navigateTo(target.path ?? buildTabRoute(target.id, target.type));
         } else {
           dispatch(dynamicTabsActions.setActiveTab(null));
-          navigateTo(ROUTES_PATH.CHAT);
+          navigateTo(ROUTES_PATH.CHAT, NAV_METHOD.PUSH, true);
         }
       }
     },
@@ -201,10 +201,10 @@ export const useDynamicTabs = (config: UseDynamicTabsConfig = {}): UseDynamicTab
 
           if (!isTargetClosed) {
             dispatch(dynamicTabsActions.setActiveTab(target.id));
-            navigateTo(buildTabRoute(target.id, target.type));
+            navigateTo(target.path ?? buildTabRoute(target.id, target.type));
           } else {
             dispatch(dynamicTabsActions.setActiveTab(null));
-            navigateTo(ROUTES_PATH.CHAT);
+            navigateTo(ROUTES_PATH.CHAT, NAV_METHOD.PUSH, true);
           }
         } else {
           dispatch(dynamicTabsActions.setActiveTab(null));
@@ -309,7 +309,7 @@ export const useDynamicTabs = (config: UseDynamicTabsConfig = {}): UseDynamicTab
       dispatch(dynamicTabsActions.setActiveTab(id));
 
       if (shouldNavigate) {
-        navigateTo(buildTabRoute(tabToKeep.id, tabToKeep.type));
+        navigateTo(tabToKeep.path ?? buildTabRoute(tabToKeep.id, tabToKeep.type));
       }
     },
     [dispatch, navigateTo],
@@ -333,7 +333,7 @@ export const useDynamicTabs = (config: UseDynamicTabsConfig = {}): UseDynamicTab
         if (activeTabIndex > tabIndex) {
           const anchorTab = currentTabs[tabIndex];
 
-          targetPath = buildTabRoute(anchorTab.id, anchorTab.type);
+          targetPath = anchorTab.path ?? buildTabRoute(anchorTab.id, anchorTab.type);
           dispatch(dynamicTabsActions.setActiveTab(anchorTab.id));
         }
       }
@@ -351,7 +351,7 @@ export const useDynamicTabs = (config: UseDynamicTabsConfig = {}): UseDynamicTab
 
   const closeAllTabs = useCallback(() => {
     dispatch(dynamicTabsActions.clearAllTabs());
-    navigateTo(ROUTES_PATH.CHAT);
+    navigateTo(ROUTES_PATH.CHAT, NAV_METHOD.PUSH, true);
   }, [dispatch, navigateTo]);
 
   const reorderTabs = useCallback(

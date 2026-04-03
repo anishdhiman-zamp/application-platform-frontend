@@ -42,6 +42,36 @@ export interface TaskListingCountsResponse {
   total: number;
 }
 
+export interface TaskListByStatusRequest {
+  status: TaskStatus;
+  search?: string;
+  page?: number;
+  limit?: number;
+  creation_source_type?: CreationSourceType;
+  creation_source_id?: string;
+}
+
+export enum CREATION_SOURCE_TYPE {
+  CONVERSATION = 'CONVERSATION',
+  TASK = 'TASK',
+}
+
+export type CreationSourceType = CREATION_SOURCE_TYPE;
+
+export type GetTaskCountsRequest =
+  | {
+      search?: string;
+      creation_source_type?: CreationSourceType;
+      creation_source_id?: string;
+    }
+  | void
+  | TaskListByStatusRequest;
+
+export interface CreationSource {
+  type: CreationSourceType;
+  id: string;
+}
+
 export const TASK_LISTING_TAB = {
   ALL: 'all',
   NEEDS_ACTION: 'needs_action',

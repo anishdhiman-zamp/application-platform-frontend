@@ -10,7 +10,15 @@ import {
   BlockMessage,
   ButtonBlockType,
   FileReferencesBlockType,
+  type InputsRespondedBlockType,
+  type MarkdownBlockType,
+  type OutputFilesBlockType,
+  type PlainTextBlockType,
+  type QuestionGroupBlockType,
+  type SingleSelectBlockType,
+  type TaskBlockType,
   type TextContentBlock,
+  type ThinkingContentBlock,
   type ToolResultContentBlock,
   type ToolUseContentBlock,
 } from '../types/block.types';
@@ -18,6 +26,7 @@ import { extractInitialValues } from './block.utils';
 import {
   ButtonBlock,
   FileReferencesList,
+  InputsRespondedBlock,
   MarkdownBlock,
   OutputFilesBlock,
   PlainTextBlock,
@@ -38,6 +47,8 @@ interface BlockRendererProps {
   conversationId?: string;
   messageId?: string;
   showMarkdownConnectors?: boolean;
+  showConnectorToLastBlock?: boolean;
+  showConnectorToNextBlock?: boolean;
 }
 
 export const BlockRenderer: React.FC<BlockRendererProps> = ({
@@ -49,6 +60,8 @@ export const BlockRenderer: React.FC<BlockRendererProps> = ({
   messageId,
   isStreaming = false,
   showMarkdownConnectors = false,
+  showConnectorToLastBlock = false,
+  showConnectorToNextBlock = false,
 }) => {
   const [openAccordionId, setOpenAccordionId] = useState<string | null>(null);
   const [elementValues, setElementValues] = useState<
@@ -65,8 +78,11 @@ export const BlockRenderer: React.FC<BlockRendererProps> = ({
   const toolResultsMap = useMemo(() => {
     const map = new Map<string, ToolResultContentBlock>();
     message.block.forEach((block) => {
-      if (block.type === BLOCK_TYPE.TOOL_RESULT && block.payload.tool_call_id) {
-        map.set(block.payload.tool_call_id, block);
+      if (block.type !== BLOCK_TYPE.TOOL_RESULT) return;
+      const toolResult = block as ToolResultContentBlock;
+      const callId = toolResult.payload.tool_call_id;
+      if (callId) {
+        map.set(callId, toolResult);
       }
     });
     return map;
@@ -100,11 +116,16 @@ export const BlockRenderer: React.FC<BlockRendererProps> = ({
     return block?.type === BLOCK_TYPE.MARKDOWN || block?.type === BLOCK_TYPE.TEXT;
   };
 
+  const isInputsRespondedTimelineBlock = (block?: Block) => {
+    return block?.type === BLOCK_TYPE.INPUTS_RESPONDED;
+  };
+
   const isConnectedBlock = (block?: Block, isLastBlock?: boolean) => {
     if (!block) return false;
     if (isThinkingOrToolUseBlock(block)) return true;
     const effectivelyLast = isLastBlock && !isStreaming;
 
+    if (showMarkdownConnectors && isInputsRespondedTimelineBlock(block) && !effectivelyLast) return true;
     if (showMarkdownConnectors && isMarkdownBlock(block) && !effectivelyLast) return true;
     return false;
   };
@@ -128,23 +149,26 @@ export const BlockRenderer: React.FC<BlockRendererProps> = ({
     const nextConnected = isConnectedBlock(nextBlock, isNextLast);
     const prevConnected = isConnectedBlock(previousBlock, false);
 
-    const showConnectorToNext = currentConnected && nextConnected;
-    const showConnectorFromPrevious = currentConnected && prevConnected;
+    const showConnectorToNext = (currentConnected && nextConnected) || showConnectorToNextBlock;
+    const showConnectorFromPrevious = (currentConnected && prevConnected) || showConnectorToLastBlock;
     const accordionId = getBlockAccordionId(block);
     const isAccordionOpen = openAccordionId === accordionId;
 
     switch (block.type) {
-      case BLOCK_TYPE.PLAIN_TEXT:
-        return <PlainTextBlock key={block?.id} payload={block?.payload} />;
+      case BLOCK_TYPE.PLAIN_TEXT: {
+        const plain = block as PlainTextBlockType;
+        return <PlainTextBlock key={plain.id} payload={plain.payload} />;
+      }
 
-      case BLOCK_TYPE.THINKING:
+      case BLOCK_TYPE.THINKING: {
+        const thinking = block as ThinkingContentBlock;
         return (
           <ThinkingBlock
-            key={block?.id ?? `thinking-${block.order}-${block.start_timestamp}`}
-            payload={block?.payload}
-            is_complete={block?.is_complete}
-            start_timestamp={block?.start_timestamp}
-            stop_timestamp={block?.stop_timestamp}
+            key={thinking.id ?? `thinking-${thinking.order}-${thinking.start_timestamp}`}
+            payload={thinking.payload}
+            is_complete={thinking.is_complete}
+            start_timestamp={thinking.start_timestamp}
+            stop_timestamp={thinking.stop_timestamp}
             isAccordionOpen={isAccordionOpen}
             onAccordionOpenChange={(isOpen) =>
               setOpenAccordionId((currentId) => {
@@ -159,17 +183,18 @@ export const BlockRenderer: React.FC<BlockRendererProps> = ({
             showConnectorToNext={showConnectorToNext}
           />
         );
+      }
 
       case BLOCK_TYPE.TOOL_USE: {
         const toolUseBlock = block as ToolUseContentBlock;
-        const toolCallId = toolUseBlock?.payload?.tool_call_id || toolUseBlock?.id;
+        const toolCallId = toolUseBlock.payload?.tool_call_id || toolUseBlock.id;
         const toolResult = toolCallId ? toolResultsMap.get(toolCallId) : undefined;
 
         return (
           <ToolCallBlock
-            key={block?.id ?? `tool-use-${block.order}-${block.start_timestamp}`}
-            payload={block?.payload}
-            is_complete={!nextBlock && isStreaming ? false : block?.is_complete}
+            key={toolUseBlock.id ?? `tool-use-${toolUseBlock.order}-${toolUseBlock.start_timestamp}`}
+            payload={toolUseBlock.payload}
+            is_complete={!nextBlock && isStreaming ? false : toolUseBlock.is_complete}
             toolResult={toolResult}
             isAccordionOpen={isAccordionOpen}
             onAccordionOpenChange={(isOpen) =>
@@ -191,13 +216,14 @@ export const BlockRenderer: React.FC<BlockRendererProps> = ({
         return null;
 
       case BLOCK_TYPE.MARKDOWN:
-      case BLOCK_TYPE.TEXT:
+      case BLOCK_TYPE.TEXT: {
+        const textBlock = block as MarkdownBlockType | TextContentBlock;
+        const textStartTs = 'start_timestamp' in textBlock ? textBlock.start_timestamp : undefined;
+        const textKey = textBlock.id ?? `text-${textBlock.order}-${textStartTs ?? 'no-start-timestamp'}`;
+
         if (showMarkdownConnectors && (!isLastBlock || isStreaming)) {
           return (
-            <div
-              className='relative'
-              key={block?.id ?? `text-${block?.order}-${(block as TextContentBlock)?.start_timestamp}`}
-            >
+            <div className='relative' key={textKey}>
               {showConnectorFromPrevious && (
                 <div className='bg-border pointer-events-none absolute top-0 left-[6.5px] z-0 h-2 w-px' />
               )}
@@ -211,7 +237,7 @@ export const BlockRenderer: React.FC<BlockRendererProps> = ({
                 <div className='mt-0.5 flex h-3.5 w-3.5 shrink-0 items-center justify-center'>
                   <AnimatedDot showAnimation={false} size={4} />
                 </div>
-                <MarkdownBlock payload={block?.payload} />
+                <MarkdownBlock payload={textBlock.payload} />
               </div>
               {showConnectorToNext && (
                 <div className='bg-border pointer-events-none absolute top-[24px] bottom-0 left-[6.5px] z-0 w-px' />
@@ -219,46 +245,60 @@ export const BlockRenderer: React.FC<BlockRendererProps> = ({
             </div>
           );
         }
-        return (
-          <MarkdownBlock
-            key={block?.id ?? `text-${block?.order}-${(block as TextContentBlock)?.start_timestamp}`}
-            payload={block?.payload}
-            isStreaming={isStreaming}
-          />
-        );
+        return <MarkdownBlock key={textKey} payload={textBlock.payload} isStreaming={isStreaming} />;
+      }
 
-      case BLOCK_TYPE.SINGLE_SELECT:
+      case BLOCK_TYPE.SINGLE_SELECT: {
+        const selectBlock = block as SingleSelectBlockType;
+        const selectBlockId = selectBlock.id;
         return (
           <SingleSelectBlock
-            key={block?.id}
-            payload={block?.payload}
-            blockId={block?.id}
-            value={elementValues[block?.id]?.value || ''}
+            key={selectBlockId}
+            payload={selectBlock.payload}
+            blockId={selectBlockId}
+            value={elementValues[selectBlockId]?.value ?? ''}
             onChange={(value) =>
-              handleElementChange(block?.id, {
-                label: block.payload.options.find((option) => option.id === value)?.label || '',
+              handleElementChange(selectBlockId, {
+                label: selectBlock.payload.options.find((option) => option.id === value)?.label ?? '',
                 value,
-                optionType: block.payload.options.find((option) => option.id === value)?.type || 'plain_text',
+                optionType: selectBlock.payload.options.find((option) => option.id === value)?.type ?? 'plain_text',
               })
             }
           />
         );
+      }
 
-      case BLOCK_TYPE.BUTTON:
+      case BLOCK_TYPE.BUTTON: {
+        const buttonBlock = block as ButtonBlockType;
         return (
           <ButtonBlock
-            key={block?.id}
+            key={buttonBlock.id}
             elementValues={elementValues}
             onAction={handleAction}
             isLoading={isLoading}
-            blockConfig={block}
+            blockConfig={buttonBlock}
             conversationId={conversationId}
             messageId={messageId}
           />
         );
+      }
 
-      case BLOCK_TYPE.QUESTION_GROUP:
-        return <QuestionGroupBlock key={block?.id} payload={block?.payload} />;
+      case BLOCK_TYPE.QUESTION_GROUP: {
+        const questionGroup = block as QuestionGroupBlockType;
+        return <QuestionGroupBlock key={questionGroup.id} payload={questionGroup.payload} />;
+      }
+
+      case BLOCK_TYPE.INPUTS_RESPONDED: {
+        const inputsResponded = block as InputsRespondedBlockType;
+        return (
+          <InputsRespondedBlock
+            key={inputsResponded.id ?? `inputs-responded-${inputsResponded.order}`}
+            payload={inputsResponded.payload}
+            showConnectorFromPrevious={showConnectorFromPrevious}
+            showConnectorToNext={showConnectorToNext}
+          />
+        );
+      }
 
       case BLOCK_TYPE.FILE_REFERENCES:
         return (
@@ -271,14 +311,17 @@ export const BlockRenderer: React.FC<BlockRendererProps> = ({
           />
         );
 
-      case BLOCK_TYPE.OUTPUT_FILES:
-        return <OutputFilesBlock key={block?.id} payload={block?.payload} conversationId={conversationId} />;
+      case BLOCK_TYPE.OUTPUT_FILES: {
+        const outputFiles = block as OutputFilesBlockType;
+        return <OutputFilesBlock key={outputFiles.id} payload={outputFiles.payload} conversationId={conversationId} />;
+      }
 
       case BLOCK_TYPE.TASK: {
+        const taskBlock = block as TaskBlockType;
         return (
           <TaskBlock
-            key={block?.payload?.task_id ?? block?.id}
-            payload={block?.payload}
+            key={taskBlock.payload.task_id ?? taskBlock.id}
+            payload={taskBlock.payload}
             conversationId={conversationId}
           />
         );

@@ -1,4 +1,4 @@
-import { Block } from '../..';
+import { type Block, HITL_RESPONSE_TYPE, type InputRequiredPayload } from './block.types';
 
 export interface PostMessagePayloadType {
   conversationId: string;
@@ -122,6 +122,7 @@ export interface ChatMessage {
   conversation_id?: string;
   llm_model?: string;
   state?: MessageState;
+  pev_enabled?: boolean;
 }
 
 export interface ChatState {
@@ -210,6 +211,7 @@ export interface CreateConversationPayloadTypeV2 {
   message_content: MessageContentType;
   sender_name?: string;
   llm_model?: string;
+  pev_enabled?: boolean;
 }
 
 export interface AnnotationLocationDataType {
@@ -219,6 +221,19 @@ export interface AnnotationLocationDataType {
   dataset_row_id?: string;
   dataset_field_id?: string;
   log_id?: string;
+}
+
+export enum SummaryStatus {
+  IN_PROGRESS = 'in_progress',
+  COMPLETED = 'completed',
+}
+
+export interface ConversationSummary {
+  status: SummaryStatus;
+  content?: string;
+  live_lines?: string[];
+  generated_at?: string;
+  updated_at?: string;
 }
 
 export interface ConversationType {
@@ -238,6 +253,7 @@ export interface ConversationType {
   resource_id: string;
   resource_type: ResourceType;
   title: string;
+  summary?: ConversationSummary | null;
 }
 
 export interface ConversationMessageContentType {
@@ -265,6 +281,8 @@ export interface ConversationMessageType {
 export interface GetConversationByIdResponseType {
   conversation: ConversationType;
   messages: ConversationMessageType[];
+  /** Pending input gates (e.g. select_one) keyed per entity; from GET conversation API */
+  inputs_required?: ConversationInputRequiredItem[];
 }
 
 export interface GetConversationByIdRequestType {
@@ -446,4 +464,65 @@ export interface SubmitChatFeedbackRequestType {
 export interface SubmitChatFeedbackResponseType {
   success: boolean;
   message: string;
+}
+
+/** Breadcrumb entry for parent-child task navigation */
+export interface TaskBreadcrumb {
+  id: string;
+  title: string;
+  status?: string;
+}
+
+/** Sibling task entry for subtask pagination */
+export interface SiblingTask {
+  id: string;
+  title: string;
+  status: string;
+}
+
+export enum HITLEntityType {
+  CONVERSATION = 'CONVERSATION',
+  TASK = 'TASK',
+}
+
+/** Shape of `input_required_data` on GET conversation `inputs_required[]` items */
+export type ConversationInputRequiredData = Omit<InputRequiredPayload, 'entity_id' | 'entity_type'>;
+
+export interface ConversationInputRequiredItem {
+  entity_id: string;
+  entity_type: HITLEntityType;
+  input_required_data: ConversationInputRequiredData;
+}
+
+export interface HITLSourceEntity {
+  entity_type: HITLEntityType;
+  entity_id: string;
+}
+
+export interface HITLResponseSelectOne {
+  type: typeof HITL_RESPONSE_TYPE.SELECT_ONE;
+  selected_option: string;
+}
+
+export interface HITLResponseFreeText {
+  type: typeof HITL_RESPONSE_TYPE.FREE_TEXT;
+  free_text: string;
+}
+
+export interface HITLResponseApproval {
+  type: typeof HITL_RESPONSE_TYPE.APPROVAL;
+  approved: boolean;
+}
+
+export type HITLResponse = HITLResponseSelectOne | HITLResponseFreeText | HITLResponseApproval;
+
+export interface HITLResponseItem {
+  entity_type: string;
+  entity_id: string;
+  response: HITLResponse;
+}
+
+export interface HITLRespondPayloadType {
+  source_entity: HITLSourceEntity;
+  responses: HITLResponseItem[];
 }

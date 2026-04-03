@@ -46,13 +46,18 @@ const PaceLayoutContentInner: FC<PaceLayoutContentProps> = ({ children }) => {
       <div className='flex min-h-0 flex-1 overflow-hidden px-2'>
         <ChatSidebar />
         {isSidebar && <SidebarResizeHandle />}
-        {!isExpanded && (
-          <main className={cn('flex min-h-0 min-w-0 flex-1 flex-col', !isCollapsed && !isSidebar && 'ml-2')}>
-            <section className='border-border bg-BG_WHITE flex min-h-0 w-full flex-1 flex-col overflow-hidden rounded-t-xl border'>
-              {children}
-            </section>
-          </main>
-        )}
+        <main
+          className={cn(
+            'flex min-h-0 min-w-0 flex-1 flex-col',
+            !isExpanded && !isCollapsed && !isSidebar && 'ml-2',
+            isExpanded && 'pointer-events-none invisible w-0 min-w-0 flex-none overflow-hidden',
+          )}
+          aria-hidden={isExpanded}
+        >
+          <section className='border-border bg-BG_WHITE flex min-h-0 w-full flex-1 flex-col overflow-hidden rounded-t-xl border'>
+            {children}
+          </section>
+        </main>
         {isPinned && <FilesPanelResizeHandle />}
         <motion.div
           initial={false}

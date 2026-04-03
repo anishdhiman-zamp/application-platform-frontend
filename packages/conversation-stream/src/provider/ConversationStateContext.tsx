@@ -1,6 +1,6 @@
 'use client';
 
-import type { ChatMessage } from '@zamp-platform/chat';
+import type { ChatMessage, ConversationInputRequiredItem } from '@zamp-platform/chat';
 import { createContext } from 'react';
 
 export interface ConversationState {
@@ -17,6 +17,7 @@ export interface ConversationState {
   sendMessageError: unknown;
   sendMessageV2Error: unknown;
   createConversationV2Error: unknown;
+  inputsRequired: ConversationInputRequiredItem[] | undefined;
 }
 
 export const ConversationStateContext = createContext<ConversationState | null>(null);

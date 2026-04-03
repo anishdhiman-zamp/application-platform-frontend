@@ -3,22 +3,27 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import type { TaskStatus } from '@zamp-platform/chat';
 import { Accordion } from '@zamp-platform/ui';
+import { useSearchParams } from 'next/navigation';
+import { useGetTaskCountsQuery } from '@/apis/task';
+import TaskAccordionSection from '@/modules/pace/components/tasks/components/TaskAccordionSection';
 import {
   NEEDS_ACTION_STATUSES,
   STATUS_DISPLAY_ORDER,
   VALID_TABS,
-} from 'modules/pace/components/tasks/task-listing.constants';
-import { TASK_LISTING_TAB, type TaskListingTab } from 'modules/pace/components/tasks/task-listing.types';
-import TaskAccordionSection from 'modules/pace/components/tasks/TaskAccordionSection';
-import TaskListingSkeleton from 'modules/pace/components/tasks/TaskListingSkeleton';
-import { useSearchParams } from 'next/navigation';
-import { useGetTaskCountsQuery } from '@/apis/task';
+} from '@/modules/pace/components/tasks/constants/tasks.constants';
+import TaskListingSkeleton from '@/modules/pace/components/tasks/loaders/TaskListingSkeleton';
+import {
+  type CreationSource,
+  TASK_LISTING_TAB,
+  type TaskListingTab,
+} from '@/modules/pace/components/tasks/types/tasks.types';
 import ProcessEmptyState from '@/modules/process/activity-runs/components/ProcessEmptyState';
 import CommonWrapper from 'components/commonWrapper';
 import { SkeletonTypes } from 'components/commonWrapper/commonWrapper.types';
 
 interface TaskAccordionGroupProps {
   search?: string;
+  creationSource?: CreationSource;
 }
 
 const NoDataBanner = ({ search }: { search?: string }) => (
@@ -28,13 +33,25 @@ const NoDataBanner = ({ search }: { search?: string }) => (
   />
 );
 
-const TaskAccordionGroup = ({ search }: TaskAccordionGroupProps) => {
+const TaskAccordionGroup = ({ search, creationSource }: TaskAccordionGroupProps) => {
   const searchParams = useSearchParams();
   const tabParam = searchParams?.get('tab');
   const activeTab: TaskListingTab =
     tabParam && VALID_TABS.has(tabParam) ? (tabParam as TaskListingTab) : TASK_LISTING_TAB.ALL;
 
-  const { data: countsData, isLoading, isFetching } = useGetTaskCountsQuery(search ? { search } : undefined);
+  const {
+    data: countsData,
+    isLoading,
+    isFetching,
+  } = useGetTaskCountsQuery(
+    search || creationSource
+      ? {
+          search: search || undefined,
+          creation_source_type: creationSource?.type,
+          creation_source_id: creationSource?.id,
+        }
+      : undefined,
+  );
   const scrollContainerRef = useRef<HTMLDivElement>(null);
   const [hasLoadedOnce, setHasLoadedOnce] = useState(false);
   const prevCountsRef = useRef(countsData);
@@ -78,6 +95,10 @@ const TaskAccordionGroup = ({ search }: TaskAccordionGroupProps) => {
       const closedItem = items[closedIndex];
 
       if (!closedItem) return;
+
+      // Only scroll when the accordion item is at the top of the current scroll area
+      // (i.e. its natural position has been scrolled past)
+      if (closedItem.offsetTop > container.scrollTop) return;
 
       const containerRect = container.getBoundingClientRect();
       const itemRect = closedItem.getBoundingClientRect();
@@ -125,6 +146,7 @@ const TaskAccordionGroup = ({ search }: TaskAccordionGroupProps) => {
             count={countMap.get(status) ?? 0}
             search={search}
             scrollContainerRef={scrollContainerRef}
+            creationSource={creationSource}
           />
         ))}
       </Accordion>

@@ -26,6 +26,7 @@ export interface PendingConversationPayload {
   message: string;
   fileReferences?: { path: string; name: string }[];
   llmModel?: string | null;
+  autoLoopEnabled?: boolean;
 }
 
 interface PaceContextType {
@@ -33,6 +34,7 @@ interface PaceContextType {
   prevChatSidebarState: ChatSidebarState;
   setChatSidebarState: (state: ChatSidebarState) => void;
   collapseSidebar: defaultFnType;
+  scheduleCollapseOnRouteChange: defaultFnType;
 
   registerStartNewChat: (callback: defaultFnType) => void;
   startNewChat: defaultFnType;
@@ -93,6 +95,7 @@ export const PaceProvider = ({ children }: { children: ReactNode }) => {
   const pathname = usePathname();
   const activeTabId = useAppSelector(selectActiveTabId);
   const filesPanelLeaveTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const pendingCollapseRef = useRef(false);
   const startNewChatRef = useRef<defaultFnType | null>(null);
   const selectConversationRef = useRef<((id: string, title?: string) => void) | null>(null);
 
@@ -138,6 +141,10 @@ export const PaceProvider = ({ children }: { children: ReactNode }) => {
 
   const collapseSidebar = useCallback(() => {
     setChatSidebarStateInternal(CHAT_SIDEBAR_STATE.COLLAPSED);
+  }, []);
+
+  const scheduleCollapseOnRouteChange = useCallback(() => {
+    pendingCollapseRef.current = true;
   }, []);
 
   const clearPendingFileReference = useCallback(() => {
@@ -225,8 +232,15 @@ export const PaceProvider = ({ children }: { children: ReactNode }) => {
     }
     prevRouteSignatureRef.current = routeSignature;
 
-    if (chatSidebarStateRef.current === CHAT_SIDEBAR_STATE.EXPANDED) {
+    if (pendingCollapseRef.current) {
+      pendingCollapseRef.current = false;
       setChatSidebarStateInternal(CHAT_SIDEBAR_STATE.COLLAPSED);
+
+      return;
+    }
+
+    if (chatSidebarStateRef.current === CHAT_SIDEBAR_STATE.EXPANDED) {
+      setChatSidebarStateInternal(CHAT_SIDEBAR_STATE.SIDEBAR);
     }
   }, [routeSignature]);
 
@@ -280,6 +294,7 @@ export const PaceProvider = ({ children }: { children: ReactNode }) => {
       prevChatSidebarState,
       setChatSidebarState,
       collapseSidebar,
+      scheduleCollapseOnRouteChange,
 
       registerStartNewChat,
       startNewChat,
@@ -320,6 +335,7 @@ export const PaceProvider = ({ children }: { children: ReactNode }) => {
       prevChatSidebarState,
       setChatSidebarState,
       collapseSidebar,
+      scheduleCollapseOnRouteChange,
 
       registerStartNewChat,
       startNewChat,

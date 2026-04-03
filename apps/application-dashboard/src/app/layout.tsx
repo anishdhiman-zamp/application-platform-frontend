@@ -6,6 +6,7 @@ import { FAVICON } from 'constants/icons';
 import type { Metadata, Viewport } from 'next';
 import { Funnel_Display, Inter } from 'next/font/google';
 import { cookies, headers } from 'next/headers';
+import Script from 'next/script';
 import { ThemeProvider } from '@/app/_providers/theme-provider';
 import NetworkStatus from '@/components/NetWorkStatus';
 import { THEME_MODE } from '@/modules/general/constants/general.constants';
@@ -47,7 +48,7 @@ export const viewport: Viewport = {
   initialScale: 1.0,
 };
 
-export default async function RootLayout({ children }: { children: React.ReactNode }) {
+const RootLayout = async ({ children }: { children: React.ReactNode }) => {
   const [cookieStore, requestHeaders] = await Promise.all([cookies(), headers()]);
   const themePreference = cookieStore.get(THEME_COOKIE)?.value || THEME_MODE.LIGHT;
   const osColorScheme = requestHeaders.get(COLOR_SCHEME_HEADER) ?? undefined;
@@ -60,7 +61,7 @@ export default async function RootLayout({ children }: { children: React.ReactNo
       suppressHydrationWarning
     >
       <body className={cn(theme.body, 'bg-BG_GRAY_1 h-screen antialiased')} suppressHydrationWarning>
-        <script dangerouslySetInnerHTML={{ __html: THEME_INIT_SCRIPT }} />
+        <Script id='theme-init' strategy='beforeInteractive' dangerouslySetInnerHTML={{ __html: THEME_INIT_SCRIPT }} />
         <ThemeProvider>
           <SpeedInsights />
           <NetworkStatus />
@@ -70,4 +71,6 @@ export default async function RootLayout({ children }: { children: React.ReactNo
       </body>
     </html>
   );
-}
+};
+
+export default RootLayout;

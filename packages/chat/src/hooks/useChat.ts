@@ -422,6 +422,50 @@ export const useChat = (config: ChatConfig) => {
     return () => sub.unsubscribe();
   }, [sseEventBus, handleTaskUpdate]);
 
+  const handleInputRequiredSse = useCallback(
+    (data: BaseEventPayload) => {
+      if (!_conversationId) return;
+
+      const payload = data.payload as MapAny | undefined;
+      const matchesConversation =
+        data.source_id === _conversationId ||
+        payload?.conversation_id === _conversationId ||
+        (isTaskEvent && payload?.task_id === _conversationId);
+
+      if (!matchesConversation) {
+        return;
+      }
+
+      dispatch(chatApi.util.invalidateTags([{ type: APITags.GET_CONVERSATION_BY_ID, id: _conversationId }]));
+
+      if (config.resourceId && config.resourceType) {
+        void triggerGetConversation({
+          conversationId: _conversationId,
+          resourceId: config.resourceId,
+          resourceType: config.resourceType,
+          url: config.apiConfig?.getConversationById,
+        });
+      } else {
+        void refetchConversationHistory();
+      }
+    },
+    [
+      _conversationId,
+      isTaskEvent,
+      dispatch,
+      config.resourceId,
+      config.resourceType,
+      config.apiConfig?.getConversationById,
+      triggerGetConversation,
+      refetchConversationHistory,
+    ],
+  );
+
+  useEffect(() => {
+    const sub = sseEventBus.subscribe(EVENT_TYPE.INPUT_REQUIRED, handleInputRequiredSse);
+    return () => sub.unsubscribe();
+  }, [sseEventBus, handleInputRequiredSse]);
+
   useEffect(() => {
     if (!isFetchingConversationHistory && conversationHistory) {
       if (conversationHistory?.conversation?.title) {
@@ -560,5 +604,7 @@ export const useChat = (config: ChatConfig) => {
     isUninitializedConversationHistory,
     isErrorConversationHistory,
     refetchConversationHistory: refetchConversationHistory,
+    conversationData: conversationHistory?.conversation,
+    inputsRequired: conversationHistory?.inputs_required,
   };
 };

@@ -693,6 +693,7 @@ export const ConversationProvider: React.FC<ConversationProviderProps> = ({
       sendMessageError: null,
       sendMessageV2Error,
       createConversationV2Error,
+      inputsRequired: conversationHistory?.inputs_required,
     }),
     [
       messages,
@@ -707,6 +708,7 @@ export const ConversationProvider: React.FC<ConversationProviderProps> = ({
       isUninitializedConversationHistory,
       sendMessageV2Error,
       createConversationV2Error,
+      conversationHistory?.inputs_required,
     ],
   );
 

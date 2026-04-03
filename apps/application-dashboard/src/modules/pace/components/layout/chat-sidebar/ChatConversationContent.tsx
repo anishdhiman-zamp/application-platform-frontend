@@ -22,6 +22,7 @@ import NewPaceAvatar from '@/modules/chatbot/NewPaceAvatar';
 import TaskStatusCounts from '@/modules/pace/components/chat/TaskStatusCounts';
 import ChatMessagesSkeleton from '@/modules/pace/components/loaders/ChatMessagesSkeleton';
 import { usePaceContext } from '@/modules/pace/pace.context';
+import { addAutoLoopLockedConversation } from '@/modules/pace/utils/autoLoopStorage';
 
 export interface ChatConversationContentProps {
   conversationId: string | null;
@@ -45,18 +46,10 @@ const ChatConversationContent: FC<ChatConversationContentProps> = ({
   currentUserName,
 }) => {
   const pendingPayloadConsumedRef = useRef(false);
+  const taskStatusContainerRef = useRef<HTMLDivElement>(null);
+
   const { pendingFileReference, clearPendingFileReference, pendingConversationPayload, setPendingConversationPayload } =
     usePaceContext();
-
-  const taskStatusContainerRef = useRef<HTMLDivElement>(null);
-  const [isTaskPopoverOpen, setIsTaskPopoverOpen] = useState(false);
-
-  const handleTaskPopoverOpenChange = (open: boolean) => {
-    setIsTaskPopoverOpen(open);
-    onTaskPopoverOpenChange?.(open);
-  };
-
-  // Read from contexts — no useChat needed
   const {
     messages,
     conversationId: ctxConversationId,
@@ -68,13 +61,14 @@ const ChatConversationContent: FC<ChatConversationContentProps> = ({
   const { createConversationV2, refetchConversationHistory } = useConversationActions();
   const streamingState = useStreamingState(conversationId ?? ctxConversationId);
 
+  const [isTaskPopoverOpen, setIsTaskPopoverOpen] = useState(false);
+
   const hasMessages = useMemo(() => messages.length > 0, [messages]);
   const isAnalysing = useMemo(() => {
     return messages.length > 0 && messages[messages.length - 1]?.sender_type === SenderType.USER;
   }, [messages]);
   const isInConversation = Boolean(conversationId || ctxConversationId || hasMessages || streamingState?.is_active);
   const lastMessageSenderType = useMemo(() => messages[messages.length - 1]?.sender_type, [messages]);
-  // Don't show skeleton when a background stream is already active — streamingState has the content.
   const isLoadingConversation =
     !streamingState?.is_active &&
     (!hasMessages || Boolean(conversationId && isLoadingConversationHistory && !hasMessages));
@@ -84,7 +78,11 @@ const ChatConversationContent: FC<ChatConversationContentProps> = ({
     disabled: isStreaming || isCreatingConversationV2,
   });
 
-  // Forward pending file references
+  const handleTaskPopoverOpenChange = (open: boolean) => {
+    setIsTaskPopoverOpen(open);
+    onTaskPopoverOpenChange?.(open);
+  };
+
   useEffect(() => {
     if (pendingFileReference && addFileReferenceRef.current) {
       addFileReferenceRef.current(pendingFileReference);
@@ -92,7 +90,6 @@ const ChatConversationContent: FC<ChatConversationContentProps> = ({
     }
   }, [pendingFileReference, clearPendingFileReference, addFileReferenceRef]);
 
-  // Consume pending conversation payload from ChatHomePage
   useEffect(() => {
     if (pendingConversationPayload && !pendingPayloadConsumedRef.current && !conversationId) {
       pendingPayloadConsumedRef.current = true;
@@ -107,10 +104,17 @@ const ChatConversationContent: FC<ChatConversationContentProps> = ({
         undefined,
         undefined,
         pendingConversationPayload.llmModel,
+        pendingConversationPayload.autoLoopEnabled,
       );
 
+      const shouldLockAutoLoop = pendingConversationPayload.autoLoopEnabled;
+
       setPendingConversationPayload(null);
-      createConversationV2(payload);
+      createConversationV2(payload).then((response) => {
+        if (shouldLockAutoLoop && response?.conversation_id) {
+          addAutoLoopLockedConversation(response.conversation_id);
+        }
+      });
     }
   }, [
     pendingConversationPayload,
