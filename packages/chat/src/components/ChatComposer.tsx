@@ -62,6 +62,7 @@ export interface ChatComposerProps {
 
   modelSelectorSlot?: React.ReactNode;
   autoLoopToggleSlot?: React.ReactNode;
+  voiceChatSlot?: React.ReactNode;
 }
 
 export const ChatComposer: FC<ChatComposerProps> = ({
@@ -108,6 +109,7 @@ export const ChatComposer: FC<ChatComposerProps> = ({
 
   modelSelectorSlot,
   autoLoopToggleSlot,
+  voiceChatSlot,
 }) => {
   const editorRef = useRef<RichTextEditorHandle>(null);
 
@@ -237,6 +239,7 @@ export const ChatComposer: FC<ChatComposerProps> = ({
 
             <div className='flex items-center gap-x-2'>
               {modelSelectorSlot}
+              {voiceChatSlot}
               {isPreparingToRecord ? (
                 <div className='flex size-[26px] items-center justify-center'>
                   <Loader size={14} className='text-GRAY_700 animate-spin' />

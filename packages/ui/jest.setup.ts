@@ -1,7 +1,16 @@
 import '@testing-library/dom';
 import '@testing-library/jest-dom';
 import '@testing-library/react';
+import { TextDecoder, TextEncoder } from 'util';
 import { createElement } from 'react';
+
+// livekit-client (via jose) expects Web TextEncoder in some Jest environments
+if (typeof globalThis.TextEncoder === 'undefined') {
+  globalThis.TextEncoder = TextEncoder as unknown as typeof globalThis.TextEncoder;
+}
+if (typeof globalThis.TextDecoder === 'undefined') {
+  globalThis.TextDecoder = TextDecoder as unknown as typeof globalThis.TextDecoder;
+}
 
 // Mock framer-motion AnimatePresence to render children immediately without animation delays
 // This prevents flaky tests caused by animation timing in CI environments
