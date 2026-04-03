@@ -12,11 +12,11 @@ import {
   useFileDragDrop,
 } from '@zamp-platform/chat';
 import { AnimatePresence, motion } from 'framer-motion';
-import { FEATURE_FLAGS } from '@/constants/featureFlags';
+// import { FEATURE_FLAGS } from '@/constants/featureFlags';
 import { useAppSelector } from '@/hooks/toolkit';
-import { useFeatureFlag } from '@/hooks/useFeatureFlag';
+// import { useFeatureFlag } from '@/hooks/useFeatureFlag';
 import AutoLoopConfirmDialog from '@/modules/pace/components/chat/AutoLoopConfirmDialog';
-import AutoLoopToggle from '@/modules/pace/components/chat/AutoLoopToggle';
+// import AutoLoopToggle from '@/modules/pace/components/chat/AutoLoopToggle';
 import ChatHistory from '@/modules/pace/components/chat/ChatHistory';
 import ChatHome from '@/modules/pace/components/chat/ChatHome';
 import ModelSelector from '@/modules/pace/components/chat/ModelSelector';
@@ -39,7 +39,7 @@ const ChatHomePage: FC = () => {
   const organizationId = useAppSelector((state: RootState) => state.user.user?.orgs?.[0]?.organization_id) ?? '';
   const currentUserName = useAppSelector((state: RootState) => state.user.user?.user_name) ?? '';
   const username = useAppSelector((state: RootState) => state.user.user?.username) ?? '';
-  const { isEnabled: isZampInternalUser } = useFeatureFlag(FEATURE_FLAGS.ZAMP_INTERNAL);
+  // const { isEnabled: isZampInternalUser } = useFeatureFlag(FEATURE_FLAGS.ZAMP_INTERNAL);
 
   const fileDropHandlerRef = useRef<((files: FileList) => void) | null>(null);
   const addFileReferenceRef = useRef<((ref: { path: string; name: string }) => void) | null>(null);
@@ -96,18 +96,18 @@ const ChatHomePage: FC = () => {
     [selectedModel],
   );
 
-  const autoLoopToggleSlot = useMemo(
-    () => (
-      <AutoLoopToggle
-        enabled={autoLoopEnabled}
-        onChange={(pressed) => {
-          if (pressed) setIsConfirmDialogOpen(true);
-        }}
-        disabled={autoLoopEnabled}
-      />
-    ),
-    [autoLoopEnabled],
-  );
+  // const autoLoopToggleSlot = useMemo(
+  //   () => (
+  //     <AutoLoopToggle
+  //       enabled={autoLoopEnabled}
+  //       onChange={(pressed) => {
+  //         if (pressed) setIsConfirmDialogOpen(true);
+  //       }}
+  //       disabled={autoLoopEnabled}
+  //     />
+  //   ),
+  //   [autoLoopEnabled],
+  // );
 
   useEffect(() => {
     if (pendingFileReference && addFileReferenceRef.current) {
@@ -153,7 +153,7 @@ const ChatHomePage: FC = () => {
                   addFileReferenceRef={addFileReferenceRef}
                   showModelSelector
                   modelSelectorSlot={modelSelectorSlot}
-                  {...(isZampInternalUser && { autoLoopToggleSlot })}
+                  // {...(isZampInternalUser && { autoLoopToggleSlot })}
                   llmModel={selectedModel}
                   autoLoopEnabled={autoLoopEnabled}
                 />
