@@ -1,6 +1,6 @@
 'use client';
 
-import { FC, useCallback, useMemo, useRef, useState } from 'react';
+import { FC, useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import type { ConversationInputRequiredItem, useChat } from '@zamp-platform/chat';
 import { ConnectedChatInput, HITLEntityType, HITLQuestionsBlock, ResourceType, ScopeType } from '@zamp-platform/chat';
 import { cn } from '@zamp-platform/ui/utils';
@@ -8,14 +8,19 @@ import { useDynamicTabs } from 'modules/pace/components/dynamic-tabs/useDynamicT
 import ChatConversationContent from 'modules/pace/components/layout/chat-sidebar/ChatConversationContent';
 import { usePathname } from 'next/navigation';
 import { APITags } from '@/constants/api.constants';
+import { FEATURE_FLAGS } from '@/constants/featureFlags';
 import { ROUTES_PATH } from '@/constants/routeConfig';
 import { useAppDispatch, useAppSelector } from '@/hooks/toolkit';
+import { useFeatureFlag } from '@/hooks/useFeatureFlag';
+import AutoLoopConfirmDialog from '@/modules/pace/components/chat/AutoLoopConfirmDialog';
+import AutoLoopToggle from '@/modules/pace/components/chat/AutoLoopToggle';
 import ChatTopbar from '@/modules/pace/components/chat/ChatTopbar';
 import ModelSelector from '@/modules/pace/components/chat/ModelSelector';
 import { useChatDraftInput } from '@/modules/pace/hooks/useChatDraftInput';
 import { useHitlQuestions } from '@/modules/pace/hooks/useHitlQuestions';
 import { usePaceContext } from '@/modules/pace/pace.context';
 import { CHAT_SIDEBAR_STATE, TAB_TYPE } from '@/modules/pace/pace.types';
+import { addAutoLoopLockedConversation, isConversationAutoLoopLocked } from '@/modules/pace/utils/autoLoopStorage';
 import { baseApi } from '@/services/baseApi';
 import type { RootState } from '@/store';
 import { selectActiveTabId } from '@/store/slices/dynamic-tabs.slice';
@@ -56,11 +61,15 @@ const ChatSidebarInner: FC<ChatSidebarInnerProps> = ({
   const organizationId = useAppSelector((state: RootState) => state.user.user?.orgs?.[0]?.organization_id) ?? '';
   const currentUserName = useAppSelector((state: RootState) => state.user.user?.user_name) ?? '';
   const username = useAppSelector((state: RootState) => state.user.user?.username) ?? '';
+  const { isEnabled: isZampInternalUser } = useFeatureFlag(FEATURE_FLAGS.ZAMP_INTERNAL);
 
   const fileDropHandlerRef = useRef<((files: FileList) => void) | null>(null);
   const addFileReferenceRef = useRef<((ref: { path: string; name: string }) => void) | null>(null);
 
   const [selectedModel, setSelectedModel] = useState<string | null>(null);
+  const [autoLoopEnabled, setAutoLoopEnabled] = useState(false);
+  const [isAutoLoopLocked, setIsAutoLoopLocked] = useState(false);
+  const [isConfirmDialogOpen, setIsConfirmDialogOpen] = useState(false);
   const [chatState, setChatState] = useState<ChatState | null>(null);
   const [isTaskPopoverOpen, setIsTaskPopoverOpen] = useState(false);
 
@@ -91,6 +100,19 @@ const ChatSidebarInner: FC<ChatSidebarInnerProps> = ({
     [selectedModel],
   );
 
+  const autoLoopToggleSlot = useMemo(
+    () => (
+      <AutoLoopToggle
+        enabled={autoLoopEnabled}
+        onChange={(pressed) => {
+          if (pressed) setIsConfirmDialogOpen(true);
+        }}
+        disabled={isAutoLoopLocked}
+      />
+    ),
+    [autoLoopEnabled, isAutoLoopLocked],
+  );
+
   const { hitlQuestions, hitlQuestionsKey } = useHitlQuestions(chatState?.inputsRequired);
 
   const handleHitlRespondComplete = useCallback(() => {
@@ -98,6 +120,13 @@ const ChatSidebarInner: FC<ChatSidebarInnerProps> = ({
   }, [chatState?.chat]);
 
   const hasInputsRequired = (chatState?.inputsRequired?.length ?? 0) > 0;
+
+  useEffect(() => {
+    const locked = isConversationAutoLoopLocked(conversationId);
+
+    setIsAutoLoopLocked(locked);
+    setAutoLoopEnabled(locked);
+  }, [conversationId]);
 
   return (
     <div className='bg-BG_WHITE relative mx-auto flex h-full w-full flex-1 flex-col'>
@@ -153,8 +182,10 @@ const ChatSidebarInner: FC<ChatSidebarInnerProps> = ({
               setExternalInputValue={setInputValue}
               fileDropHandlerRef={fileDropHandlerRef}
               llmModel={selectedModel}
+              autoLoopEnabled={autoLoopEnabled}
               showModelSelector
               modelSelectorSlot={modelSelectorSlot}
+              {...(isZampInternalUser && { autoLoopToggleSlot })}
               conversationId={conversationId ?? chatState.chat.conversationId ?? ''}
               onConversationCreated={handleConversationCreated}
               isDisabled={chatState.chat.isStreaming || chatState.chat.isCreatingConversationV2}
@@ -163,6 +194,17 @@ const ChatSidebarInner: FC<ChatSidebarInnerProps> = ({
           )}
         </div>
       )}
+      <AutoLoopConfirmDialog
+        isOpen={isConfirmDialogOpen}
+        onOpenChange={setIsConfirmDialogOpen}
+        onConfirm={() => {
+          setAutoLoopEnabled(true);
+          setIsAutoLoopLocked(true);
+          if (conversationId) {
+            addAutoLoopLockedConversation(conversationId);
+          }
+        }}
+      />
     </div>
   );
 };
