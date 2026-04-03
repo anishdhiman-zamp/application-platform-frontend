@@ -7,7 +7,7 @@
 export function formatExpectedDuration(seconds: number): string {
   if (seconds <= 60) return 'less than a minute';
 
-  const minutes = Math.ceil(seconds / 60);
+  const minutes = Math.floor(seconds / 60) + 1;
 
-  return `less than ${minutes} minute${minutes === 1 ? '' : 's'}`;
+  return `less than ${minutes} minutes`;
 }
