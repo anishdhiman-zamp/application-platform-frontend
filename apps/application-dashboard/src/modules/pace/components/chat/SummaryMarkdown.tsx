@@ -17,10 +17,10 @@ const markdownComponents = {
 
 interface SummaryMarkdownProps {
   text: string;
-  shimmerLast: boolean;
+  shimmerLast?: boolean;
 }
 
-const SummaryMarkdown = ({ text, shimmerLast }: SummaryMarkdownProps) => {
+const SummaryMarkdown = ({ text, shimmerLast = false }: SummaryMarkdownProps) => {
   if (!shimmerLast) {
     return <MarkdownBlock payload={{ text }} />;
   }

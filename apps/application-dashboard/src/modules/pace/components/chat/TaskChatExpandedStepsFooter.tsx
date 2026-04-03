@@ -51,7 +51,7 @@ export const TaskChatExpandedStepsFooter = ({
 
   if (displayedSummary) {
     return (
-      <div className={cn('relative pt-4', displayedSummary && isFirst && '-mt-3')}>
+      <div className={cn('relative px-2 pt-4', displayedSummary && isFirst && '-mt-3')}>
         <div className='bg-border absolute top-0 left-[14.5px] h-3 w-px' />
         <ResizableSummaryBox borderRadius='rounded-[18px]!' contentClassName='p-4 pb-1' scrollRef={summaryScrollRef}>
           <SummaryMarkdown text={displayedSummary} shimmerLast={isAgentActive} />
@@ -61,8 +61,11 @@ export const TaskChatExpandedStepsFooter = ({
   }
 
   return (
-    <div className='border-GRAY_400 mt-2 rounded-[18px]! border px-4 py-3'>
-      <ShimmerText text='Starting now' autoAnimate />
+    <div className='relative px-2'>
+      <div className='bg-border absolute -top-1 left-[14.5px] w-px' />
+      <div className='border-GRAY_400 mt-2 rounded-[18px]! border p-4'>
+        <ShimmerText text='Starting now' autoAnimate />
+      </div>
     </div>
   );
 };

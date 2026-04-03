@@ -74,6 +74,24 @@ export const Message: FC<MessageProps> = ({
   const shouldAlignRight = alignUserRight && isUserMessage;
   const sharedClassName = cn('group space-y-3', shouldAlignRight && 'flex flex-col items-end', containerClassName);
 
+  const primaryBlockType = message?.message_content?.elements?.[0]?.type;
+  const isUserMarkdownBubble = isUserMessage && primaryBlockType === BLOCK_TYPE.MARKDOWN;
+  const isUserInputsRespondedBubble = isUserMessage && primaryBlockType === BLOCK_TYPE.INPUTS_RESPONDED;
+
+  const userBubbleLayoutClassName = useMemo(() => {
+    if (!isUserMessage) return '';
+
+    if (isUserMarkdownBubble) {
+      return cn('relative min-w-0 w-auto', shouldAlignRight ? 'max-w-[80%]' : 'max-w-[min(100%,700px)]');
+    }
+
+    if (isUserInputsRespondedBubble) {
+      return cn('relative min-w-0 w-full', shouldAlignRight ? 'max-w-[80%]' : 'max-w-[min(100%,700px)]');
+    }
+
+    return cn('relative min-w-0 w-full', shouldAlignRight ? 'max-w-[80%]' : 'max-w-[min(100%,700px)]');
+  }, [isUserMessage, isUserMarkdownBubble, isUserInputsRespondedBubble, shouldAlignRight]);
+
   const toggleExpanded = () => setIsExpanded((prev) => !prev);
   const formattedTimestamp = useMemo(
     () => (message.timestamp ? formatChatTimestamp(formatTimestampToUTC(message.timestamp)) : ''),
@@ -150,20 +168,29 @@ export const Message: FC<MessageProps> = ({
 
       <div
         className={cn(
-          'relative w-full max-w-[min(100%,700px)] min-w-0',
-          shouldAlignRight && message?.message_content?.elements?.[0]?.type === BLOCK_TYPE.MARKDOWN && 'bg-GRAY_100',
-          shouldAlignRight && 'max-w-[80%] rounded-[10px] px-4 py-3',
+          message.sender_type === SenderType.ASSISTANT && 'relative w-full max-w-[min(100%,700px)] min-w-0',
+          isUserMessage && userBubbleLayoutClassName,
+          shouldAlignRight && primaryBlockType === BLOCK_TYPE.MARKDOWN && 'bg-GRAY_100',
+          shouldAlignRight && isUserMessage && 'rounded-[10px] px-4 py-3',
         )}
       >
         <div
           ref={contentRef}
-          className={cn(isUserMessage && !isExpanded && 'overflow-hidden')}
+          className={cn(
+            isUserMessage && !isExpanded && 'overflow-hidden',
+            isUserMarkdownBubble && 'flex w-fit max-w-full min-w-0 flex-col',
+            isUserInputsRespondedBubble && 'w-full min-w-0',
+          )}
           style={isUserMessage && !isExpanded ? { maxHeight: USER_MESSAGE_MAX_HEIGHT } : undefined}
         >
           <BlockRenderer
             message={{ block: message?.message_content?.elements ?? [] }}
             onAction={onAction}
-            className={cn(blockRendererClassName)}
+            className={cn(
+              blockRendererClassName,
+              isUserMarkdownBubble && 'w-auto',
+              isUserInputsRespondedBubble && 'w-full',
+            )}
             conversationId={conversationId || message?.conversation_id}
             messageId={messageId || message?.id}
             isLoading={isLoading}
