@@ -26,6 +26,7 @@ const PaceLayoutContentInner: FC<PaceLayoutContentProps> = ({ children }) => {
     filesPanelPinned,
     filesPanelWidth,
     isFilesPanelResizing,
+    isFilesPanelHydrated,
     isSidebarResizing,
   } = usePaceContext();
 
@@ -56,7 +57,7 @@ const PaceLayoutContentInner: FC<PaceLayoutContentProps> = ({ children }) => {
         <motion.div
           initial={false}
           animate={{ width: spacerWidth }}
-          transition={isFilesPanelResizing ? NO_ANIMATION : FILES_PANEL_SPACER_TRANSITION}
+          transition={!isFilesPanelHydrated || isFilesPanelResizing ? NO_ANIMATION : FILES_PANEL_SPACER_TRANSITION}
           className='shrink-0'
         />
       </div>

@@ -5,23 +5,17 @@ import {
   FILES_PANEL_MAX_WIDTH,
   FILES_PANEL_MIN_WIDTH,
   FILES_PANEL_WIDTH,
-  SIDEBAR_CONVERSATION_ID_PARAM,
   SIDEBAR_MAX_WIDTH,
   SIDEBAR_MIN_WIDTH,
   SIDEBAR_WIDTH,
 } from 'modules/pace/pace.constants';
 import { CHAT_SIDEBAR_STATE, type ChatSidebarState } from 'modules/pace/pace.types';
+import { getInitialSidebarState, getInitialWidth } from 'modules/pace/pace.utils';
 import { usePathname } from 'next/navigation';
-import { ROUTES_PATH } from '@/constants/routeConfig';
 import { useAppSelector } from '@/hooks/toolkit';
 import { selectActiveTabId } from '@/store/slices/dynamic-tabs.slice';
 import { defaultFnType } from '@/types/commonTypes';
-import {
-  getFromLocalStorage,
-  LOCAL_STORAGE_KEYS,
-  removeFromLocalStorage,
-  setToLocalStorage,
-} from '@/utils/localstorage';
+import { LOCAL_STORAGE_KEYS, setToLocalStorage } from '@/utils/localstorage';
 
 export interface PendingFileReference {
   path: string;
@@ -55,6 +49,7 @@ interface PaceContextType {
 
   filesPanelOpen: boolean;
   filesPanelPinned: boolean;
+  isFilesPanelHydrated: boolean;
   toggleFilesPanel: defaultFnType;
   setFilesPanelPinned: (pinned: boolean) => void;
   closeFilesPanel: defaultFnType;
@@ -76,16 +71,22 @@ interface PaceContextType {
 
 const PaceContext = createContext<PaceContextType | null>(null);
 
-const getInitialSidebarState = (): ChatSidebarState => {
-  if (typeof window === 'undefined') return CHAT_SIDEBAR_STATE.COLLAPSED;
+interface InitialFilesPanelState {
+  open: boolean;
+  pinned: boolean;
+}
 
-  const search = new URLSearchParams(window.location.search);
+const getInitialFilesPanelState = (): InitialFilesPanelState => {
+  if (typeof window === 'undefined') return { open: false, pinned: false };
 
-  if (!search.has(SIDEBAR_CONVERSATION_ID_PARAM)) return CHAT_SIDEBAR_STATE.COLLAPSED;
+  try {
+    const stored = localStorage.getItem(LOCAL_STORAGE_KEYS.PACE_FILES_PANEL_PINNED);
+    const pinned = stored ? (JSON.parse(stored) as boolean) : false;
 
-  const isChatRoot = window.location.pathname === ROUTES_PATH.CHAT && !search.has('f');
-
-  return isChatRoot ? CHAT_SIDEBAR_STATE.EXPANDED : CHAT_SIDEBAR_STATE.SIDEBAR;
+    return { open: pinned, pinned };
+  } catch {
+    return { open: false, pinned: false };
+  }
 };
 
 export const PaceProvider = ({ children }: { children: ReactNode }) => {
@@ -99,11 +100,22 @@ export const PaceProvider = ({ children }: { children: ReactNode }) => {
   const [prevChatSidebarState, setPrevChatSidebarState] = useState<ChatSidebarState>(chatSidebarState);
   const [pendingFileReference, setPendingFileReference] = useState<PendingFileReference | null>(null);
   const [pendingConversationPayload, setPendingConversationPayload] = useState<PendingConversationPayload | null>(null);
-  const [filesPanelOpen, setFilesPanelOpen] = useState(false);
-  const [filesPanelPinned, setFilesPanelPinnedRaw] = useState(false);
-  const [sidebarWidth, setSidebarWidthRaw] = useState(SIDEBAR_WIDTH);
+  const initialFilesPanelState = useRef(getInitialFilesPanelState());
+  const [filesPanelOpen, setFilesPanelOpen] = useState(initialFilesPanelState.current.open);
+  const [filesPanelPinned, setFilesPanelPinnedRaw] = useState(initialFilesPanelState.current.pinned);
+  const [isFilesPanelHydrated, setIsFilesPanelHydrated] = useState(false);
+  const [sidebarWidth, setSidebarWidthRaw] = useState(() =>
+    getInitialWidth(LOCAL_STORAGE_KEYS.PACE_SIDEBAR_WIDTH, SIDEBAR_MIN_WIDTH, SIDEBAR_MAX_WIDTH, SIDEBAR_WIDTH),
+  );
   const [isSidebarResizing, setIsSidebarResizing] = useState(false);
-  const [filesPanelWidth, setFilesPanelWidthRaw] = useState(FILES_PANEL_WIDTH);
+  const [filesPanelWidth, setFilesPanelWidthRaw] = useState(() =>
+    getInitialWidth(
+      LOCAL_STORAGE_KEYS.PACE_FILES_PANEL_WIDTH,
+      FILES_PANEL_MIN_WIDTH,
+      FILES_PANEL_MAX_WIDTH,
+      FILES_PANEL_WIDTH,
+    ),
+  );
   const [isFilesPanelResizing, setIsFilesPanelResizing] = useState(false);
 
   const routeSignature = activeTabId ? `${pathname}:${activeTabId}` : pathname;
@@ -259,40 +271,7 @@ export const PaceProvider = ({ children }: { children: ReactNode }) => {
   }, [clampSidebarWidthToFilesPanel]);
 
   useEffect(() => {
-    const storedPinned = getFromLocalStorage(LOCAL_STORAGE_KEYS.PACE_FILES_PANEL_PINNED);
-
-    if (storedPinned) {
-      try {
-        const pinned = JSON.parse(storedPinned);
-
-        setFilesPanelPinnedRaw(pinned);
-        if (pinned) {
-          setFilesPanelOpen(true);
-        }
-      } catch {
-        removeFromLocalStorage(LOCAL_STORAGE_KEYS.PACE_FILES_PANEL_PINNED);
-      }
-    }
-
-    const storedSidebarWidth = getFromLocalStorage(LOCAL_STORAGE_KEYS.PACE_SIDEBAR_WIDTH);
-
-    if (storedSidebarWidth) {
-      const parsed = Number(storedSidebarWidth);
-
-      if (!Number.isNaN(parsed)) {
-        setSidebarWidthRaw(Math.min(SIDEBAR_MAX_WIDTH, Math.max(SIDEBAR_MIN_WIDTH, parsed)));
-      }
-    }
-
-    const storedFilesPanelWidth = getFromLocalStorage(LOCAL_STORAGE_KEYS.PACE_FILES_PANEL_WIDTH);
-
-    if (storedFilesPanelWidth) {
-      const parsed = Number(storedFilesPanelWidth);
-
-      if (!Number.isNaN(parsed)) {
-        setFilesPanelWidthRaw(Math.min(FILES_PANEL_MAX_WIDTH, Math.max(FILES_PANEL_MIN_WIDTH, parsed)));
-      }
-    }
+    setIsFilesPanelHydrated(true);
   }, []);
 
   const value: PaceContextType = useMemo(
@@ -317,6 +296,7 @@ export const PaceProvider = ({ children }: { children: ReactNode }) => {
 
       filesPanelOpen,
       filesPanelPinned,
+      isFilesPanelHydrated,
       toggleFilesPanel,
       setFilesPanelPinned,
       closeFilesPanel,
@@ -354,6 +334,7 @@ export const PaceProvider = ({ children }: { children: ReactNode }) => {
 
       filesPanelOpen,
       filesPanelPinned,
+      isFilesPanelHydrated,
       toggleFilesPanel,
       setFilesPanelPinned,
       closeFilesPanel,
