@@ -154,7 +154,7 @@ const ChatConversationContent: FC<ChatConversationContentProps> = ({
                 messages={messages}
                 isAnalysing={isAnalysing}
                 streamingState={streamingState}
-                className='gap-4 px-0 [scrollbar-width:none]'
+                className='gap-3 px-0 [scrollbar-width:none]'
                 conversationId={conversationId ?? ctxConversationId ?? ''}
                 assistantAvatar={<NewPaceAvatar />}
                 showTimestamp

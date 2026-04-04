@@ -1,6 +1,5 @@
 'use client';
 
-import { type UnknownAction } from '@reduxjs/toolkit';
 import { captureException, withScope } from '@sentry/browser';
 import {
   APITags,
@@ -8,13 +7,9 @@ import {
   chatApi,
   type ChatMessage,
   ChatMessageType,
-  type ConversationMessageType,
-  ConversationService,
   type CreateConversationPayloadTypeV2,
-  type GetConversationByIdRequestType,
   getHistoryFormattedMessages,
   getStreamingMessageId,
-  MessageState,
   type ResourceType,
   SenderType,
   SSEEventType,
@@ -180,17 +175,21 @@ export const ConversationProvider: React.FC<ConversationProviderProps> = ({
   }, []);
 
   const handlePerConvMessageStop = useCallback(
-    (finalMessage: ChatMessage | null) => {
+    (finalMessage: ChatMessage | null, conversationId: string) => {
       if (finalMessage) {
         setMessages((prev) => {
           if (finalMessage.id && prev.some((msg) => msg.id === finalMessage.id)) return prev;
           return [...prev, finalMessage];
         });
       }
+      if (conversationId && isNewlyCreatedConversationRef.current !== conversationId) {
+        dispatch(chatApi.util.invalidateTags([{ type: APITags.GET_CONVERSATION_BY_ID, id: conversationId }]));
+      }
+
       clearStoppingTimer();
       setIsStopping(false);
     },
-    [clearStoppingTimer],
+    [clearStoppingTimer, dispatch],
   );
 
   const handlePerConvTitleUpdated = useCallback((title: string) => {
@@ -405,53 +404,6 @@ export const ConversationProvider: React.FC<ConversationProviderProps> = ({
     ],
   );
 
-  const appendUserMessageToCache = useCallback(
-    (conversationId: string, messagePayload: ChatMessage) => {
-      if (!resourceId || !resourceType) return;
-
-      const cacheMessage: ConversationMessageType = {
-        id: messagePayload.id || `optimistic-${Date.now()}`,
-        organization_id: messagePayload.resource_id || '',
-        conversation_id: conversationId,
-        sender_id: '',
-        sender_type: messagePayload.sender_type,
-        sender_name: messagePayload.sender_name || '',
-        state: MessageState.DONE,
-        intent: null,
-        content: { elements: messagePayload.message_content?.elements || [] },
-        created_at: messagePayload.timestamp || new Date().toISOString(),
-        deleted_at: null,
-      };
-
-      const queryArgs: GetConversationByIdRequestType = {
-        conversationId,
-        resourceId,
-        resourceType,
-        url: apiConfig?.getConversationById,
-      };
-
-      // updateQueryData returns a ThunkAction typed against the app's RootState.
-      // This package's dispatch doesn't carry that RootState type, so we cast
-      // the thunk to UnknownAction — the runtime behavior is identical.
-      try {
-        dispatch(
-          ConversationService.util.updateQueryData('getConversationById', queryArgs, (draft) => {
-            if (!draft.messages.some((m) => m.id === cacheMessage.id)) {
-              draft.messages.push(cacheMessage);
-            }
-          }) as unknown as UnknownAction,
-        );
-      } catch (error) {
-        withScope((scope) => {
-          scope.setTag('operation', 'append_user_message_cache');
-          scope.setContext('conversation', { conversationId, messageId: cacheMessage.id });
-          captureException(error instanceof Error ? error : new Error(String(error)));
-        });
-      }
-    },
-    [dispatch, resourceId, resourceType, apiConfig?.getConversationById],
-  );
-
   const sendMessage = useCallback(
     async (messagePayload: ChatMessage) => {
       if (!_conversationId) {
@@ -460,30 +412,27 @@ export const ConversationProvider: React.FC<ConversationProviderProps> = ({
 
       const previousMessageCount = messagesRef.current.length;
 
-      if (messagePayload?.message_content?.file_references?.length) {
-        const messageWithFileReferences: ChatMessage = {
-          ...messagePayload,
-          message_content: {
-            ...messagePayload.message_content,
-            elements: [
-              ...(messagePayload.message_content.elements || []),
-              {
-                id: 'element_2',
-                type: BLOCK_TYPE.FILE_REFERENCES,
-                order: 2,
-                payload: {
-                  file_references: messagePayload.message_content.file_references,
+      const messageToShow: ChatMessage = messagePayload?.message_content?.file_references?.length
+        ? {
+            ...messagePayload,
+            message_content: {
+              ...messagePayload.message_content,
+              elements: [
+                ...(messagePayload.message_content.elements || []),
+                {
+                  id: 'element_2',
+                  type: BLOCK_TYPE.FILE_REFERENCES,
+                  order: 2,
+                  payload: {
+                    file_references: messagePayload.message_content.file_references,
+                  },
                 },
-              },
-            ],
-          },
-        };
-        setMessages((prev) => [...prev, messageWithFileReferences]);
-        appendUserMessageToCache(_conversationId, messageWithFileReferences);
-      } else {
-        setMessages((prev) => [...prev, messagePayload]);
-        appendUserMessageToCache(_conversationId, messagePayload);
-      }
+              ],
+            },
+          }
+        : messagePayload;
+
+      setMessages((prev) => [...prev, messageToShow]);
 
       try {
         const response = await sendMessageV2Mutation({
@@ -503,7 +452,7 @@ export const ConversationProvider: React.FC<ConversationProviderProps> = ({
         throw new Error('Failed to send message. Please try again.');
       }
     },
-    [_conversationId, sendMessageV2Mutation, apiConfig?.sendMessage, appendUserMessageToCache],
+    [_conversationId, sendMessageV2Mutation, apiConfig?.sendMessage],
   );
 
   // Global SSE event handler (used when usePerConvSSE is false).
