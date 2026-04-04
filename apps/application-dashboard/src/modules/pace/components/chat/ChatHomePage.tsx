@@ -39,7 +39,7 @@ const ChatHomePage: FC = () => {
   const organizationId = useAppSelector((state: RootState) => state.user.user?.orgs?.[0]?.organization_id) ?? '';
   const currentUserName = useAppSelector((state: RootState) => state.user.user?.user_name) ?? '';
   const username = useAppSelector((state: RootState) => state.user.user?.username) ?? '';
-  const { isEnabled: isZampInternalUser } = useFeatureFlag(FEATURE_FLAGS.AUTO_LOOP_BTN_ENABLED);
+  const { isEnabled: isAutoLoopBtnEnabled } = useFeatureFlag(FEATURE_FLAGS.AUTO_LOOP_BTN_ENABLED);
 
   const fileDropHandlerRef = useRef<((files: FileList) => void) | null>(null);
   const addFileReferenceRef = useRef<((ref: { path: string; name: string }) => void) | null>(null);
@@ -153,7 +153,7 @@ const ChatHomePage: FC = () => {
                   addFileReferenceRef={addFileReferenceRef}
                   showModelSelector
                   modelSelectorSlot={modelSelectorSlot}
-                  {...(isZampInternalUser && { autoLoopToggleSlot })}
+                  {...(isAutoLoopBtnEnabled && { autoLoopToggleSlot })}
                   llmModel={selectedModel}
                   autoLoopEnabled={autoLoopEnabled}
                 />
