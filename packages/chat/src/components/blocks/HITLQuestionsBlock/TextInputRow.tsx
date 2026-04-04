@@ -27,7 +27,7 @@ export const TextInputRow: React.FC<TextInputRowProps> = ({ value, isFocused, in
           </div>
 
           {isFocused ? (
-            <div className='bg-BG_WHITE relative flex h-8 flex-1 items-start rounded-md'>
+            <div className='relative flex h-8 flex-1 items-start rounded-md'>
               <div
                 aria-hidden='true'
                 className='border-GRAY_200 pointer-events-none absolute inset-[-3px] rounded-[9px] border-[3px]'
@@ -59,7 +59,7 @@ export const TextInputRow: React.FC<TextInputRowProps> = ({ value, isFocused, in
               </div>
             </div>
           ) : (
-            <div className='bg-BG_WHITE flex h-8 min-h-px min-w-px flex-1 flex-col items-start overflow-clip rounded-md'>
+            <div className='flex h-8 min-h-px min-w-px flex-1 flex-col items-start overflow-clip rounded-md'>
               <div className='relative h-full w-full rounded-md'>
                 <div
                   aria-hidden='true'
