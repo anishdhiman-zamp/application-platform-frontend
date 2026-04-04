@@ -226,7 +226,6 @@ export function handleContentBlockEvent(conversationId: string, type: string, in
         const stopTimestamp = (payload.stop_timestamp ?? (payload.content_block as MapAny)?.stop_timestamp) as
           | string
           | undefined;
-
         streamingStateStore.update(conversationId, (prev) => {
           if (!prev) return prev;
           const existingBlocks = prev.message_content?.elements ?? [];

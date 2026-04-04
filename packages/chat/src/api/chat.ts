@@ -67,7 +67,7 @@ export const API_ENDPOINTS = {
   TASKS_MESSAGES_GET: 'tasks/{{conversationId}}/messages',
   STOP_CONVERSATION: 'v4/conversations/{{conversationId}}/stop',
   HITL_RESPOND: 'hitl/respond',
-  BROWSER_LIVE_VIEW_NOVNC: 'v3/conversations/{{conversationId}}/browser-live-view-novnc',
+  BROWSER_LIVE_VIEW_NOVNC: 'browser/streaming/{{conversationId}}/browser-streaming-novnc',
 };
 
 const ConversationService = chatApi.injectEndpoints({
