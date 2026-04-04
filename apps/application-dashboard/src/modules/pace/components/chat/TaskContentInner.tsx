@@ -231,7 +231,7 @@ const TaskContentChat = ({ taskId }: { taskId: string }) => {
             isError={chat?.isErrorConversationHistory}
             refetchFunction={chat?.refetchConversationHistory}
             skeletonType={SkeletonTypes.CUSTOM}
-            loader={<ChatMessagesSkeleton className='px-0' alignUserRight />}
+            loader={<ChatMessagesSkeleton className='mx-auto w-full max-w-[700px] px-0' alignUserRight />}
             className='flex min-h-0 w-full min-w-0 flex-1 flex-col pt-12'
             disableAnimation
           >
