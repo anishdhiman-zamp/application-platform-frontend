@@ -19,6 +19,9 @@ type MapAny = Record<string, unknown>;
  * Works for both flat (per-conversation SSE) and wrapped (global SSE) formats —
  * caller provides the conversationId and the inner payload.
  *
+ * On page-refresh the backend replays from message_start, so content_block_start
+ * is always guaranteed to arrive before any content_block_delta for a given block.
+ *
  * Uses bufferDelta() for content_block_delta (RAF-batched, smooth 60fps).
  * Uses synchronous update() for start/stop (infrequent, need immediate notification).
  */
@@ -139,46 +142,8 @@ export function handleContentBlockEvent(conversationId: string, type: string, in
           const elements = draft.message_content?.elements;
           if (!elements) return;
 
-          let block = elements.find((b) => b.order === index);
-
-          // On page-refresh replay, content_block_start may have been sent before the replay point.
-          // Auto-create the block from the delta type so content isn't dropped.
-          if (!block) {
-            let newBlock: Block | null = null;
-
-            switch (deltaType) {
-              case StreamingContentBlockDeltaType.THINKING_DELTA:
-                newBlock = { type: BLOCK_TYPE.THINKING, order: index, payload: { thinking: '' }, is_complete: false };
-                break;
-              case StreamingContentBlockDeltaType.TEXT_DELTA:
-                newBlock = { type: BLOCK_TYPE.TEXT, order: index, payload: { text: '' }, is_complete: false };
-                break;
-              case StreamingContentBlockDeltaType.INPUT_JSON_DELTA:
-              case StreamingContentBlockDeltaType.TOOL_USE_BLOCK_UPDATE_DELTA:
-                newBlock = {
-                  type: BLOCK_TYPE.TOOL_USE,
-                  order: index,
-                  id: '',
-                  name: '',
-                  payload: { partial_json: '', tool_call_id: '' },
-                  is_complete: false,
-                };
-                break;
-              case StreamingContentBlockDeltaType.TOOL_RESULT_DELTA:
-                newBlock = {
-                  type: BLOCK_TYPE.TOOL_RESULT,
-                  order: index,
-                  id: '',
-                  payload: { content: '', is_error: false, tool_call_id: '' },
-                  is_complete: false,
-                };
-                break;
-            }
-
-            if (!newBlock) return;
-            elements.push(newBlock);
-            block = newBlock;
-          }
+          const block = elements.find((b) => b.order === index);
+          if (!block) return;
 
           switch (deltaType) {
             case StreamingContentBlockDeltaType.THINKING_DELTA:

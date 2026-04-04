@@ -172,6 +172,7 @@ export const BlockRenderer: React.FC<BlockRendererProps> = ({
 
       case BLOCK_TYPE.THINKING: {
         const thinking = block as ThinkingContentBlock;
+
         return (
           <ThinkingBlock
             key={thinking.id ?? `thinking-${thinking.order}-${thinking.start_timestamp}`}
