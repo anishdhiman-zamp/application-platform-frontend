@@ -29,4 +29,5 @@ export enum FEATURE_FLAGS {
   AUTO_ORG_CREATION = 'auto-org-creation',
   ENABLE_ONBOARDING_FLOW = 'enable_onboarding_flow',
   ORG_SETTINGS = 'ORG_SETTINGS',
+  AUTO_LOOP_BTN_ENABLED = 'auto-loop-btn-enabled',
 }
