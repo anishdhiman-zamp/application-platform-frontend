@@ -128,12 +128,7 @@ export const useChat = (config: ChatConfig) => {
     }
   }, [_conversationId, stopConversationMutation, isStopping, clearStoppingTimer]);
 
-  const shouldSkipConversationFetch =
-    !config.resourceId ||
-    !config.resourceType ||
-    !config.conversationId ||
-    isNewlyCreatedConversationRef.current === config.conversationId ||
-    isNewlyCreatedConversationRef.current === _conversationId;
+  const shouldSkipConversationFetch = !config.resourceId || !config.resourceType || !config.conversationId;
 
   const {
     data: conversationHistory,
@@ -463,6 +458,16 @@ export const useChat = (config: ChatConfig) => {
 
   useEffect(() => {
     if (!isFetchingConversationHistory && conversationHistory) {
+      const loadedConvId = conversationHistory.conversation?.id;
+      if (
+        loadedConvId &&
+        _conversationId &&
+        loadedConvId === _conversationId &&
+        isNewlyCreatedConversationRef.current === _conversationId
+      ) {
+        isNewlyCreatedConversationRef.current = null;
+      }
+
       if (conversationHistory?.conversation?.title) {
         config.setHeader?.(conversationHistory.conversation.title);
       }
@@ -498,7 +503,7 @@ export const useChat = (config: ChatConfig) => {
         });
       }
     }
-  }, [conversationHistory, isFetchingConversationHistory, config.enableStreaming]);
+  }, [conversationHistory, isFetchingConversationHistory, config.enableStreaming, _conversationId]);
 
   const sendMessage = useCallback(
     async (messagePayload: ChatMessage, useV2Api?: boolean) => {

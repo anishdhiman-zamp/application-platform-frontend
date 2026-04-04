@@ -10,23 +10,36 @@ import {
   type InputsRespondedItemPayload,
 } from '../../types/block.types';
 
+const SKIPPED_DISPLAY = 'Prefer to skip';
+
 const freeTextLooksSkipped = (freeText: string): boolean => {
   const t = freeText.trim().toLowerCase();
   return t === '' || t === 'no preference' || t.includes('no preference');
 };
 
 const isSkippedResponse = (response: InputsRespondedAnswer): boolean => {
-  return response.type === HITL_RESPONSE_TYPE.FREE_TEXT && freeTextLooksSkipped(response.free_text);
+  if (response.type === HITL_RESPONSE_TYPE.FREE_TEXT) {
+    return freeTextLooksSkipped(response.free_text);
+  }
+  return response.is_skipped === true;
 };
 
 const getResponseDisposition = (response: InputsRespondedAnswer): 'answered' | 'skipped' => {
   switch (response.type) {
+    case HITL_RESPONSE_TYPE.APPROVAL:
+      return response.is_skipped ? 'skipped' : 'answered';
+    case HITL_RESPONSE_TYPE.SELECT_ONE: {
+      if (response.is_skipped) return 'skipped';
+      const hasAnswer =
+        (response.selected_option != null && response.selected_option !== '') || Boolean(response.custom_input?.trim());
+      return hasAnswer ? 'answered' : 'skipped';
+    }
+    case HITL_RESPONSE_TYPE.MULTIPLE_CHOICE: {
+      if (response.is_skipped) return 'skipped';
+      return (response.selected_options?.length ?? 0) > 0 ? 'answered' : 'skipped';
+    }
     case HITL_RESPONSE_TYPE.FREE_TEXT:
       return freeTextLooksSkipped(response.free_text) ? 'skipped' : 'answered';
-    case HITL_RESPONSE_TYPE.APPROVAL:
-      return 'answered';
-    case HITL_RESPONSE_TYPE.SELECT_ONE:
-      return response.selected_option?.length ? 'answered' : 'skipped';
     default: {
       const _exhaustive: never = response;
       return _exhaustive;
@@ -50,17 +63,29 @@ const summarizeResponses = (responses: InputsRespondedItemPayload[]): { answered
   return { answered, skipped };
 };
 
+/** Short label for the collapsed card header (aggregate of how many prompts were answered vs skipped). */
 const formatSummaryLabel = (answered: number, skipped: number): string => {
-  const answeredPart = answered === 1 ? '1 answered' : `${answered} answered`;
-  const skippedPart = skipped === 1 ? '1 skipped' : `${skipped} skipped`;
-  return `${answeredPart} and ${skippedPart}`;
+  const parts: string[] = [];
+  if (answered > 0) {
+    parts.push(`${answered} answered`);
+  }
+  if (skipped > 0) {
+    parts.push(`${skipped} skipped`);
+  }
+  if (parts.length === 0) {
+    return 'Responses';
+  }
+  if (parts.length === 1) {
+    return parts[0];
+  }
+  return `${parts[0]} and ${parts[1]}`;
 };
 
 const formatAnswerLine = (item: InputsRespondedItemPayload): string => {
   const { response, input_required } = item;
 
   if (isSkippedResponse(response)) {
-    return 'No preference, Question was skipped';
+    return SKIPPED_DISPLAY;
   }
 
   switch (response.type) {
@@ -68,8 +93,28 @@ const formatAnswerLine = (item: InputsRespondedItemPayload): string => {
       return response.approved ? 'Approved' : 'Rejected';
     case HITL_RESPONSE_TYPE.SELECT_ONE: {
       const opts = input_required.options ?? [];
-      const opt = opts.find((o) => o.id === response.selected_option);
-      return opt?.title ?? opt?.label ?? response.selected_option;
+      const custom = response.custom_input?.trim();
+      if (custom) {
+        return custom;
+      }
+      if (response.selected_option != null && response.selected_option !== '') {
+        const opt = opts.find((o) => o.id === response.selected_option);
+        return opt?.title ?? opt?.label ?? response.selected_option;
+      }
+      return '';
+    }
+    case HITL_RESPONSE_TYPE.MULTIPLE_CHOICE: {
+      const opts = input_required.options ?? [];
+      const labels = (response.selected_options ?? []).map((id) => {
+        const opt = opts.find((o) => o.id === id);
+        return opt?.title ?? opt?.label ?? id;
+      });
+      const base = labels.join(', ');
+      const extra = response.custom_input?.trim();
+      if (extra) {
+        return base ? `${base} — ${extra}` : extra;
+      }
+      return base;
     }
     case HITL_RESPONSE_TYPE.FREE_TEXT:
       return response.free_text;

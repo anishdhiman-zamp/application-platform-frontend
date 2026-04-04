@@ -11,6 +11,8 @@ export interface OptionRowProps {
   isFocused: boolean;
   isSelected: boolean;
   isMultiSelect: boolean;
+  /** Badge text for single-select rows (e.g. A, B, C). Ignored when `isMultiSelect`. */
+  singleSelectBadge?: string;
   onMouseEnter: () => void;
   onClick: () => void;
 }
@@ -20,6 +22,7 @@ export const OptionRow: React.FC<OptionRowProps> = ({
   isFocused,
   isSelected,
   isMultiSelect,
+  singleSelectBadge,
   onMouseEnter,
   onClick,
 }) => {
@@ -48,7 +51,7 @@ export const OptionRow: React.FC<OptionRowProps> = ({
               <span
                 className={cn(`text-center text-[11px] font-medium`, isSelected ? 'text-BG_WHITE' : 'text-gray-950')}
               >
-                {option?.label[0]}
+                {singleSelectBadge ?? '?'}
               </span>
             )}
           </div>

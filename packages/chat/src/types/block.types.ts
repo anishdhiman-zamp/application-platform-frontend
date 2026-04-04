@@ -173,11 +173,18 @@ export interface HITLOption {
 /** `input_type` on `input_required` / HITL question payloads (API contract). */
 export const HITL_INPUT_TYPE = {
   SELECT_ONE: 'select_one',
-  MULTI_SELECT: 'multi-select',
+  MULTIPLE_CHOICE: 'multiple_choice',
   APPROVAL: 'approval',
 } as const;
 
-export type HITLInputType = (typeof HITL_INPUT_TYPE)[keyof typeof HITL_INPUT_TYPE];
+/** Legacy `input_type` from older APIs; treat as {@link HITL_INPUT_TYPE.MULTIPLE_CHOICE}. */
+export const HITL_INPUT_TYPE_LEGACY = {
+  MULTI_SELECT: 'multi-select',
+} as const;
+
+export type HITLInputType =
+  | (typeof HITL_INPUT_TYPE)[keyof typeof HITL_INPUT_TYPE]
+  | (typeof HITL_INPUT_TYPE_LEGACY)[keyof typeof HITL_INPUT_TYPE_LEGACY];
 
 export interface HITLQuestion {
   id: string;
@@ -190,11 +197,13 @@ export interface HITLQuestion {
   allow_custom_input?: boolean;
 }
 
-/** Discriminator strings for HITL respond and `inputs_responded` payloads (API contract). */
+/** Discriminator strings for HITL `/hitl/respond` and `inputs_responded` payloads (API contract). */
 export const HITL_RESPONSE_TYPE = {
   SELECT_ONE: 'select_one',
-  FREE_TEXT: 'free_text',
+  MULTIPLE_CHOICE: 'multiple_choice',
   APPROVAL: 'approval',
+  /** Legacy `inputs_responded` rows only; do not send on `/hitl/respond`. */
+  FREE_TEXT: 'free_text',
 } as const;
 
 export interface InputRequiredPayload {
@@ -207,28 +216,44 @@ export interface InputRequiredPayload {
   entity_type?: string;
 }
 
-/** Answer shape for a single row inside `inputs_responded` (mirrors HITL respond payload) */
+/** Answer shape for a single row inside `inputs_responded` (mirrors HITL respond payload). */
 export interface InputsRespondedSelectOne {
   type: typeof HITL_RESPONSE_TYPE.SELECT_ONE;
-  selected_option: string;
+  selected_option: string | null;
+  custom_input?: string | null;
+  is_skipped?: boolean;
 }
 
-export interface InputsRespondedFreeText {
-  type: typeof HITL_RESPONSE_TYPE.FREE_TEXT;
-  free_text: string;
+export interface InputsRespondedMultipleChoice {
+  type: typeof HITL_RESPONSE_TYPE.MULTIPLE_CHOICE;
+  selected_options: string[];
+  custom_input?: string | null;
+  is_skipped?: boolean;
 }
 
 export interface InputsRespondedApproval {
   type: typeof HITL_RESPONSE_TYPE.APPROVAL;
   approved: boolean;
+  is_skipped?: boolean;
 }
 
-export type InputsRespondedAnswer = InputsRespondedSelectOne | InputsRespondedFreeText | InputsRespondedApproval;
+/** Legacy `inputs_responded` rows from older APIs. */
+export interface InputsRespondedFreeText {
+  type: typeof HITL_RESPONSE_TYPE.FREE_TEXT;
+  free_text: string;
+}
+
+export type InputsRespondedAnswer =
+  | InputsRespondedSelectOne
+  | InputsRespondedMultipleChoice
+  | InputsRespondedApproval
+  | InputsRespondedFreeText;
 
 export interface InputsRespondedItemPayload {
   response: InputsRespondedAnswer;
   entity_id: string;
   entity_type: string;
+  sender_name?: string;
   input_required: InputRequiredPayload;
 }
 

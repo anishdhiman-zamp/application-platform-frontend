@@ -3,6 +3,7 @@ import {
   type ChatMessage,
   type ConversationInputRequiredItem,
   HITL_INPUT_TYPE,
+  HITL_INPUT_TYPE_LEGACY,
   type HITLQuestionWithEntity,
   SenderType,
   type StreamingState,
@@ -124,8 +125,10 @@ export const mapInputsRequiredToHitlQuestions = (items: ConversationInputRequire
         title: opt.title ?? opt.label,
         description: opt.description,
       })),
-      input_type: data.input_type,
-      is_multi_select: data.input_type === HITL_INPUT_TYPE.MULTI_SELECT,
+      input_type:
+        data.input_type === HITL_INPUT_TYPE_LEGACY.MULTI_SELECT ? HITL_INPUT_TYPE.MULTIPLE_CHOICE : data.input_type,
+      is_multi_select:
+        data.input_type === HITL_INPUT_TYPE.MULTIPLE_CHOICE || data.input_type === HITL_INPUT_TYPE_LEGACY.MULTI_SELECT,
       allow_custom_input: data.allow_custom_input ?? false,
     });
   }

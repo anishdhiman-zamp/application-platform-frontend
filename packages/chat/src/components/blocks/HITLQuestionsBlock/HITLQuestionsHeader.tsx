@@ -5,7 +5,6 @@ import { ChevronDown, ChevronUp, CircleHelp } from 'lucide-react';
 import React from 'react';
 
 export interface HITLQuestionsHeaderProps {
-  visibleQuestionIndex: number;
   questionCount: number;
   currentQuestionIndex: number;
   onPrev: () => void;
@@ -13,7 +12,6 @@ export interface HITLQuestionsHeaderProps {
 }
 
 export const HITLQuestionsHeader: React.FC<HITLQuestionsHeaderProps> = ({
-  visibleQuestionIndex,
   questionCount,
   currentQuestionIndex,
   onPrev,
@@ -40,7 +38,7 @@ export const HITLQuestionsHeader: React.FC<HITLQuestionsHeaderProps> = ({
             <ChevronUp className='text-gray-900' size={14} strokeWidth={1.5} />
           </Button>
           <span className='text-xs font-[450] text-gray-900'>
-            {visibleQuestionIndex + 1} of {questionCount}
+            {currentQuestionIndex + 1} of {questionCount}
           </span>
           <Button
             type='button'

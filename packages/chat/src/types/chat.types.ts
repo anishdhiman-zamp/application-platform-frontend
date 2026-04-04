@@ -493,20 +493,25 @@ export interface HITLSourceEntity {
 
 export interface HITLResponseSelectOne {
   type: typeof HITL_RESPONSE_TYPE.SELECT_ONE;
-  selected_option: string;
+  selected_option: string | null;
+  custom_input?: string | null;
+  is_skipped?: boolean;
 }
 
-export interface HITLResponseFreeText {
-  type: typeof HITL_RESPONSE_TYPE.FREE_TEXT;
-  free_text: string;
+export interface HITLResponseMultipleChoice {
+  type: typeof HITL_RESPONSE_TYPE.MULTIPLE_CHOICE;
+  selected_options: string[];
+  custom_input?: string | null;
+  is_skipped?: boolean;
 }
 
 export interface HITLResponseApproval {
   type: typeof HITL_RESPONSE_TYPE.APPROVAL;
   approved: boolean;
+  is_skipped?: boolean;
 }
 
-export type HITLResponse = HITLResponseSelectOne | HITLResponseFreeText | HITLResponseApproval;
+export type HITLResponse = HITLResponseSelectOne | HITLResponseMultipleChoice | HITLResponseApproval;
 
 export interface HITLResponseItem {
   entity_type: string;
