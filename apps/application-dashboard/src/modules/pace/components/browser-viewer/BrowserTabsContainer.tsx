@@ -1,6 +1,6 @@
 'use client';
 
-import { memo, useCallback, useEffect, useState } from 'react';
+import { memo, useCallback, useEffect, useRef, useState } from 'react';
 import { useLazyGetBrowserLiveViewNovncQuery } from '@zamp-platform/chat';
 import { cn } from '@zamp-platform/ui/utils';
 import { Globe } from 'lucide-react';
@@ -39,6 +39,8 @@ const BrowserViewerTab = ({ conversationId, isActive }: BrowserViewerTabProps) =
   const [fetchNovnc, { isFetching }] = useLazyGetBrowserLiveViewNovncQuery();
   const [iframeSrc, setIframeSrc] = useState<string | null>(null);
   const [hasError, setHasError] = useState(false);
+  const [isStreamLoading, setIsStreamLoading] = useState(true);
+  const iframeRef = useRef<HTMLIFrameElement>(null);
 
   const fetchStream = useCallback(async () => {
     if (!conversationId) return;
@@ -59,6 +61,10 @@ const BrowserViewerTab = ({ conversationId, isActive }: BrowserViewerTabProps) =
       setIframeSrc(null);
     }
   }, [conversationId, fetchNovnc]);
+
+  const handleIframeLoad = useCallback(() => {
+    setIsStreamLoading(false);
+  }, []);
 
   useEffect(() => {
     if (isActive) {
@@ -92,12 +98,21 @@ const BrowserViewerTab = ({ conversationId, isActive }: BrowserViewerTabProps) =
 
   if (iframeSrc) {
     return (
-      <iframe
-        src={iframeSrc}
-        className='h-full w-full bg-white'
-        title='Browser live view'
-        referrerPolicy='no-referrer-when-downgrade'
-      />
+      <div className='relative h-full w-full'>
+        {isStreamLoading && (
+          <div className='absolute inset-0 z-10 flex items-center justify-center bg-white'>
+            <ImageLoader imageSrc={ZAMP_LOGO_LOADER_SVG} width={140} height={140} />
+          </div>
+        )}
+        <iframe
+          ref={iframeRef}
+          src={iframeSrc}
+          className='h-full w-full'
+          title='Browser live view'
+          referrerPolicy='no-referrer-when-downgrade'
+          onLoad={handleIframeLoad}
+        />
+      </div>
     );
   }
 
