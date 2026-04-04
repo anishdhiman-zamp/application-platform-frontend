@@ -18,6 +18,7 @@ import {
   isApprovalQuestion,
   isMultipleChoiceQuestion,
   isQuestionAnswerComplete,
+  isTextQuestion,
   lastOptionFocusIndex,
   optionCountForQuestion,
 } from './utils';
@@ -129,6 +130,15 @@ export const HITLQuestionsBlock = ({
 
   const handleCustomInputChange = useCallback(
     (value: string) => {
+      if (isTextQuestion(currentQuestion)) {
+        setCustomInputs((prev) => ({ ...prev, [currentQuestion.id]: value }));
+        setAnswers((prev) => ({
+          ...prev,
+          [currentQuestion.id]: { optionIds: [], customText: value, isSkipped: false },
+        }));
+        return;
+      }
+
       setCustomInputs((prev) => ({ ...prev, [currentQuestion.id]: value }));
       setAnswers((prev) => {
         const currentAns = prev[currentQuestion.id] || { optionIds: [], customText: '' };
@@ -199,6 +209,13 @@ export const HITLQuestionsBlock = ({
           preventUnlessTextField();
           if (isApprovalQuestion(q)) {
             selectApprovalAnswer(q.id, qIdx, optIdx === 0);
+          } else if (isTextQuestion(q)) {
+            e.preventDefault();
+            const text = (inputs[q.id] || '').trim();
+            if (text && qIdx < lastQuestionIdx) {
+              setCurrentQuestionIndex((p) => p + 1);
+              setFocusedOptionIndex(0);
+            }
           } else if (optIdx === lastOptionIdx) {
             selectAnswer(q.id, qIdx, CUSTOM_OPTION_ID, inputs[q.id] || '');
           } else {
@@ -212,7 +229,15 @@ export const HITLQuestionsBlock = ({
           skipQuestion(q.id, qIdx);
           break;
         default:
-          if (targetIsTextField || isApprovalQuestion(q) || e.key.length !== 1 || e.ctrlKey || e.metaKey || e.altKey) {
+          if (
+            targetIsTextField ||
+            isApprovalQuestion(q) ||
+            isTextQuestion(q) ||
+            e.key.length !== 1 ||
+            e.ctrlKey ||
+            e.metaKey ||
+            e.altKey
+          ) {
             return;
           }
           setFocusedOptionIndex(lastOptionIdx);
@@ -233,6 +258,9 @@ export const HITLQuestionsBlock = ({
       const buildSkippedResponse = (): HITLResponse => {
         if (isApprovalQuestion(question)) {
           return { type: HITL_RESPONSE_TYPE.APPROVAL, approved: false, is_skipped: true };
+        }
+        if (isTextQuestion(question)) {
+          return { type: HITL_RESPONSE_TYPE.TEXT, text: '', is_skipped: true };
         }
         if (isMultipleChoiceQuestion(question)) {
           return { type: HITL_RESPONSE_TYPE.MULTIPLE_CHOICE, selected_options: [], is_skipped: true };
@@ -256,6 +284,14 @@ export const HITLQuestionsBlock = ({
           entity_type,
           entity_id,
           response: { type: HITL_RESPONSE_TYPE.APPROVAL, approved },
+        };
+      }
+
+      if (isTextQuestion(question)) {
+        return {
+          entity_type,
+          entity_id,
+          response: { type: HITL_RESPONSE_TYPE.TEXT, text: answer?.customText?.trim() ?? '', is_skipped: false },
         };
       }
 

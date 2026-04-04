@@ -112,6 +112,20 @@ export const mapInputsRequiredToHitlQuestions = (items: ConversationInputRequire
       continue;
     }
 
+    if (data.input_type === HITL_INPUT_TYPE.TEXT) {
+      result.push({
+        id: item.entity_id,
+        entity_id: item.entity_id,
+        entity_type: item.entity_type,
+        question: data.question ?? '',
+        options: null,
+        input_type: HITL_INPUT_TYPE.TEXT,
+        is_multi_select: false,
+        allow_custom_input: false,
+      });
+      continue;
+    }
+
     if (!data.options?.length) continue;
 
     result.push({

@@ -175,6 +175,7 @@ export const HITL_INPUT_TYPE = {
   SELECT_ONE: 'select_one',
   MULTIPLE_CHOICE: 'multiple_choice',
   APPROVAL: 'approval',
+  TEXT: 'text',
 } as const;
 
 /** Legacy `input_type` from older APIs; treat as {@link HITL_INPUT_TYPE.MULTIPLE_CHOICE}. */
@@ -202,6 +203,7 @@ export const HITL_RESPONSE_TYPE = {
   SELECT_ONE: 'select_one',
   MULTIPLE_CHOICE: 'multiple_choice',
   APPROVAL: 'approval',
+  TEXT: 'text',
   /** Legacy `inputs_responded` rows only; do not send on `/hitl/respond`. */
   FREE_TEXT: 'free_text',
 } as const;
@@ -237,6 +239,12 @@ export interface InputsRespondedApproval {
   is_skipped?: boolean;
 }
 
+export interface InputsRespondedText {
+  type: typeof HITL_RESPONSE_TYPE.TEXT;
+  text: string;
+  is_skipped?: boolean;
+}
+
 /** Legacy `inputs_responded` rows from older APIs. */
 export interface InputsRespondedFreeText {
   type: typeof HITL_RESPONSE_TYPE.FREE_TEXT;
@@ -247,6 +255,7 @@ export type InputsRespondedAnswer =
   | InputsRespondedSelectOne
   | InputsRespondedMultipleChoice
   | InputsRespondedApproval
+  | InputsRespondedText
   | InputsRespondedFreeText;
 
 export interface InputsRespondedItemPayload {

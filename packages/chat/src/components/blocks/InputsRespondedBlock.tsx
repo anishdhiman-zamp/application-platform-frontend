@@ -21,6 +21,9 @@ const isSkippedResponse = (response: InputsRespondedAnswer): boolean => {
   if (response.type === HITL_RESPONSE_TYPE.FREE_TEXT) {
     return freeTextLooksSkipped(response.free_text);
   }
+  if (response.type === HITL_RESPONSE_TYPE.TEXT) {
+    return response.is_skipped === true || !response.text?.trim();
+  }
   return response.is_skipped === true;
 };
 
@@ -37,6 +40,10 @@ const getResponseDisposition = (response: InputsRespondedAnswer): 'answered' | '
     case HITL_RESPONSE_TYPE.MULTIPLE_CHOICE: {
       if (response.is_skipped) return 'skipped';
       return (response.selected_options?.length ?? 0) > 0 ? 'answered' : 'skipped';
+    }
+    case HITL_RESPONSE_TYPE.TEXT: {
+      if (response.is_skipped) return 'skipped';
+      return response.text?.trim() ? 'answered' : 'skipped';
     }
     case HITL_RESPONSE_TYPE.FREE_TEXT:
       return freeTextLooksSkipped(response.free_text) ? 'skipped' : 'answered';
@@ -116,6 +123,8 @@ const formatAnswerLine = (item: InputsRespondedItemPayload): string => {
       }
       return base;
     }
+    case HITL_RESPONSE_TYPE.TEXT:
+      return response.text;
     case HITL_RESPONSE_TYPE.FREE_TEXT:
       return response.free_text;
     default: {

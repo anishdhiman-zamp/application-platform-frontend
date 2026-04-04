@@ -7,8 +7,15 @@ import React from 'react';
 import { CUSTOM_OPTION_ID } from './constants';
 import { CustomInputRow } from './CustomInputRow';
 import { OptionRow } from './OptionRow';
+import { TextInputRow } from './TextInputRow';
 import type { HITLQuestionWithEntity } from './types';
-import { type HITLAnswerValue, isApprovalQuestion, isMultipleChoiceQuestion, optionCountForQuestion } from './utils';
+import {
+  type HITLAnswerValue,
+  isApprovalQuestion,
+  isMultipleChoiceQuestion,
+  isTextQuestion,
+  optionCountForQuestion,
+} from './utils';
 
 export type { HITLAnswerValue as AnswerState };
 
@@ -192,6 +199,13 @@ export const HITLQuestionItem = ({
               Reject
             </Button>
           </div>
+        ) : isTextQuestion(question) ? (
+          <TextInputRow
+            value={customInputs[question.id] || ''}
+            isFocused={qIndex === currentQuestionIndex && focusedOptionIndex === 0}
+            inputRef={qIndex === currentQuestionIndex ? customInputRef : undefined}
+            onChange={onCustomInputChange}
+          />
         ) : (
           <SelectOptions
             question={question}
