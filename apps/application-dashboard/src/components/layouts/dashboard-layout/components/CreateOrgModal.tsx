@@ -22,6 +22,7 @@ import { useAppDispatch, useAppSelector } from '@/hooks/toolkit';
 import { setUser } from '@/store/slices/user';
 import type { Organization } from '@/types/api/auth.types';
 import { generateOrgIconSvg } from '@/utils/pixelArtGenerator';
+import { formatExpectedDuration } from '@/utils/common';
 
 enum ModalStep {
   INPUT = 'input',
@@ -111,7 +112,7 @@ const ProvisioningBody: FC<ProvisioningBodyProps> = ({ step, display, displayNam
             <p className='f-13-400 text-GRAY_600'>{"We'll drop you an email once it's done."}</p>
           ) : (
             expectedSecs != null && (
-              <p className='f-13-400 text-GRAY_600'>{`This usually takes less than ${expectedSecs} seconds.`}</p>
+              <p className='f-13-400 text-GRAY_600'>{`This usually takes ${formatExpectedDuration(expectedSecs)}.`}</p>
             )
           )}
         </div>
