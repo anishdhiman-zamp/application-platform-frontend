@@ -4,7 +4,7 @@ import { useScrollRef } from '@zamp-platform/ui';
 import { cn } from '@zamp-platform/ui/utils';
 import { formatChatTimestamp, formatChatTimestampTooltip, formatTimestampToUTC } from '@zamp-platform/utils';
 import { motion } from 'motion/react';
-import React, { FC, ReactNode, useCallback, useEffect, useMemo, useRef, useState } from 'react';
+import { FC, ReactNode, useCallback, useEffect, useMemo, useRef, useState } from 'react';
 
 import { defaultFnType } from '@/types/commonTypes';
 
@@ -214,8 +214,10 @@ export const Message: FC<MessageProps> = ({
       {streamingEnabled && (
         <div
           className={cn(
-            'flex items-center',
-            isLastMessage ? 'visible' : 'invisible group-hover:visible',
+            'flex items-center transition-opacity duration-200',
+            isLastMessage && message.sender_type === SenderType.ASSISTANT
+              ? 'opacity-100'
+              : 'opacity-0 group-hover:opacity-100',
             shouldAlignRight && 'mt-0',
           )}
         >

@@ -1,5 +1,5 @@
 import { fetchEventSource } from '@microsoft/fetch-event-source';
-import { captureException, withScope } from '@sentry/browser';
+import { captureException } from '@sentry/browser';
 import { API_DOMAIN } from '@zamp-platform/api';
 
 const CONNECTION_TIMEOUT_MS = 10_000;
@@ -41,9 +41,6 @@ export function openSSEConnection(
     onDead(error);
   };
 
-  // Abort hanging fetch if onopen hasn't fired within the timeout.
-  // Without this, a network-down retry can hang indefinitely waiting for
-  // the browser's TCP timeout (30-60s+), preventing further retry attempts.
   const timeoutId = setTimeout(() => {
     if (!signal.aborted) {
       markDead(new Error('SSE connection timeout'));
@@ -54,7 +51,7 @@ export function openSSEConnection(
     signal,
     credentials: 'include',
     headers,
-    openWhenHidden: true, // lifecycle managed externally
+    openWhenHidden: true,
 
     onopen: async (response) => {
       clearTimeout(timeoutId);
@@ -74,22 +71,14 @@ export function openSSEConnection(
         const data = JSON.parse(event.data) as Record<string, unknown> & { type: string };
         onEvent(data, event.id);
       } catch (error) {
-        withScope((scope) => {
-          scope.setTag('operation', 'sse_parse_message');
-          scope.setContext('sse', { conversationId, rawData: event.data?.slice(0, 200) });
-          captureException(error instanceof Error ? error : new Error(String(error)));
-        });
+        captureException(error instanceof Error ? error : new Error(String(error)));
       }
     },
 
     onerror: (error) => {
       clearTimeout(timeoutId);
       if (signal.aborted) return;
-      withScope((scope) => {
-        scope.setTag('operation', 'sse_connection_error');
-        scope.setContext('sse', { conversationId, url });
-        captureException(error instanceof Error ? error : new Error(String(error)));
-      });
+      captureException(error instanceof Error ? error : new Error(String(error)));
       markDead(error);
       throw error; // stops fetchEventSource's internal retry
     },

@@ -1,7 +1,7 @@
 'use client';
 
 import { cn } from '@zamp-platform/ui/utils';
-import React, { FC, ReactNode } from 'react';
+import { FC, ReactNode } from 'react';
 
 import { StreamingState } from '../types/chat.types';
 import { BlockRenderer } from './BlockRenderer';
@@ -36,7 +36,7 @@ export const StreamingMessage: FC<StreamingMessageProps> = ({
   }
 
   return (
-    <div className={cn('space-y-4 px-2', className)}>
+    <div className={cn('space-y-3', className)}>
       {assistantAvatar}
       <BlockRenderer
         message={{ block: messageElements }}
