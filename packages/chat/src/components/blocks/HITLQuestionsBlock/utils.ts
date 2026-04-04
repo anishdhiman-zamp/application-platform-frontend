@@ -44,11 +44,19 @@ export const isMultipleChoiceQuestion = (question: HITLQuestionWithEntity | unde
   );
 };
 
+export const isTextQuestion = (question: HITLQuestionWithEntity | undefined): boolean => {
+  return question?.input_type === HITL_INPUT_TYPE.TEXT;
+};
+
 export const isQuestionAnswerComplete = (
   question: HITLQuestionWithEntity,
   answer: HITLAnswerValue | undefined,
 ): boolean => {
   if (answer?.isSkipped) return true;
+
+  if (isTextQuestion(question)) {
+    return (answer?.customText ?? '').trim().length > 0;
+  }
 
   if (isApprovalQuestion(question)) {
     const ids = answer?.optionIds ?? [];
@@ -77,6 +85,7 @@ export const isQuestionAnswerComplete = (
 };
 
 export const optionCountForQuestion = (question: HITLQuestionWithEntity): number => {
+  if (isTextQuestion(question)) return 1;
   if (isApprovalQuestion(question)) return 2;
   const opts = question.options ?? [];
   const allowCustom = question.allow_custom_input ?? false;

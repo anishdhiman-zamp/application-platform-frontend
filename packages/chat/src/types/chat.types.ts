@@ -511,7 +511,13 @@ export interface HITLResponseApproval {
   is_skipped?: boolean;
 }
 
-export type HITLResponse = HITLResponseSelectOne | HITLResponseMultipleChoice | HITLResponseApproval;
+export interface HITLResponseText {
+  type: typeof HITL_RESPONSE_TYPE.TEXT;
+  text: string;
+  is_skipped?: boolean;
+}
+
+export type HITLResponse = HITLResponseSelectOne | HITLResponseMultipleChoice | HITLResponseApproval | HITLResponseText;
 
 export interface HITLResponseItem {
   entity_type: string;
