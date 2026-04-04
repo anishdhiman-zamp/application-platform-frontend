@@ -47,6 +47,18 @@ export const TAB_TYPE_REGISTRY: Record<DynamicTabType, TabTypeDefinition> = {
     },
     getDefaultName: (id: string) => id,
   },
+  [TAB_TYPE.BROWSER]: {
+    kind: ROUTE_KIND.QUERY,
+    basePath: ROUTES_PATH.CHAT,
+    paramName: 'b',
+    buildPath: (id: string) => `${ROUTES_PATH.CHAT}?b=${encodeURIComponent(id)}`,
+    parseId: (pathname: string, search: string) => {
+      if (pathname !== ROUTES_PATH.CHAT) return null;
+
+      return new URLSearchParams(search).get('b');
+    },
+    getDefaultName: () => 'Browser',
+  },
 };
 
 /**

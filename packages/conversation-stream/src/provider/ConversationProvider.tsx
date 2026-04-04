@@ -72,6 +72,7 @@ export const ConversationProvider: React.FC<ConversationProviderProps> = ({
   const [isStopping, setIsStopping] = useState(false);
   const [isHistoryLoaded, setIsHistoryLoaded] = useState(false);
   const [mountRefetchDone, setMountRefetchDone] = useState(false);
+  const [isBrowserStreamingAvailable, setIsBrowserStreamingAvailable] = useState(false);
 
   // True only for newly created conversations — permanent skip, not a transient resourceId gap.
   const isNewConversationSkip =
@@ -153,9 +154,19 @@ export const ConversationProvider: React.FC<ConversationProviderProps> = ({
     setHeaderRef.current?.(title);
   }, []);
 
+  const handleBrowserStreamingAvailable = useCallback(() => {
+    setIsBrowserStreamingAvailable(true);
+  }, []);
+
+  const handleBrowserStreamingUnavailable = useCallback(() => {
+    setIsBrowserStreamingAvailable(false);
+  }, []);
+
   const perConvCallbacks = useRef<ConversationEventCallbacks>({
     onTitleUpdated: handlePerConvTitleUpdated,
     onMessageStop: handlePerConvMessageStop,
+    onBrowserStreamingAvailable: handleBrowserStreamingAvailable,
+    onBrowserStreamingUnavailable: handleBrowserStreamingUnavailable,
   });
 
   const setConversationId = useCallback(
@@ -369,6 +380,7 @@ export const ConversationProvider: React.FC<ConversationProviderProps> = ({
       sendMessageV2Error,
       createConversationV2Error,
       inputsRequired: conversationHistory?.inputs_required,
+      isBrowserStreamingAvailable,
     }),
     [
       messages,
@@ -384,6 +396,7 @@ export const ConversationProvider: React.FC<ConversationProviderProps> = ({
       sendMessageV2Error,
       createConversationV2Error,
       conversationHistory?.inputs_required,
+      isBrowserStreamingAvailable,
     ],
   );
 
@@ -399,8 +412,15 @@ export const ConversationProvider: React.FC<ConversationProviderProps> = ({
     perConvCallbacks.current = {
       onTitleUpdated: handlePerConvTitleUpdated,
       onMessageStop: handlePerConvMessageStop,
+      onBrowserStreamingAvailable: handleBrowserStreamingAvailable,
+      onBrowserStreamingUnavailable: handleBrowserStreamingUnavailable,
     };
-  }, [handlePerConvTitleUpdated, handlePerConvMessageStop]);
+  }, [
+    handlePerConvTitleUpdated,
+    handlePerConvMessageStop,
+    handleBrowserStreamingAvailable,
+    handleBrowserStreamingUnavailable,
+  ]);
 
   useEffect(() => {
     const newId = externalConversationId || null;

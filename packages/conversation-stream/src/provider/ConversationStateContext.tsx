@@ -18,6 +18,7 @@ export interface ConversationState {
   sendMessageV2Error: unknown;
   createConversationV2Error: unknown;
   inputsRequired: ConversationInputRequiredItem[] | undefined;
+  isBrowserStreamingAvailable: boolean;
 }
 
 export const ConversationStateContext = createContext<ConversationState | null>(null);

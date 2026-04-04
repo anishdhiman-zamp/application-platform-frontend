@@ -22,6 +22,8 @@ export interface ConversationEventCallbacks {
   onConversationCreated?: (conversationId: string) => void;
   /** Invoked when the SSE connection is lost and all retry attempts have been exhausted. */
   onDisconnected?: () => void;
+  onBrowserStreamingAvailable?: (conversationId: string) => void;
+  onBrowserStreamingUnavailable?: (conversationId: string) => void;
 }
 
 /**
@@ -106,6 +108,14 @@ export function handleConversationSSEEvent(
       case ConversationEventType.CONTENT_BLOCK_DELTA:
       case ConversationEventType.CONTENT_BLOCK_STOP:
         handleContentBlockEvent(conversationId, event.type as string, event.index as number, event);
+        break;
+
+      case ConversationEventType.BROWSER_STREAMING_AVAILABLE:
+        callbacks.onBrowserStreamingAvailable?.(conversationId);
+        break;
+
+      case ConversationEventType.BROWSER_STREAMING_UNAVAILABLE:
+        callbacks.onBrowserStreamingUnavailable?.(conversationId);
         break;
     }
   } catch (error) {

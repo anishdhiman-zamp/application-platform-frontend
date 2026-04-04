@@ -331,6 +331,18 @@ export interface GetOutputFileDownloadRequestType {
   filename: string;
 }
 
+export interface GetBrowserLiveViewNovncRequestType {
+  conversationId: string;
+  sessionId: string;
+}
+
+export interface BrowserLiveViewNovncResponseType {
+  novnc_url: string;
+  /** Same-origin Pantheon proxy for iframes; falls back to novnc_url if absent. */
+  proxy_iframe_url?: string | null;
+  expires_in_seconds: number;
+}
+
 /**
  * File Upload API Types
  */

@@ -2,11 +2,21 @@
 
 import { createContext, ReactNode, useContext, useMemo } from 'react';
 
+import type { ToolResultContentBlock } from '../types/block.types';
 import type { SiblingTask, TaskBreadcrumb } from '../types/chat.types';
+
+export interface LiveStreamingData {
+  toolName: string;
+  screenshotUrl?: string;
+  toolResult?: ToolResultContentBlock;
+  isComplete: boolean;
+}
 
 interface ChatActionsContextType {
   onFileOpen?: (path: string, name: string) => void;
   onTaskOpen?: (name: string, path: string) => void;
+  onWatchStream?: (data: LiveStreamingData | null) => void;
+  isBrowserStreamingAvailable?: boolean;
   parentTasks?: TaskBreadcrumb[];
   siblings?: SiblingTask[];
 }
@@ -17,6 +27,8 @@ interface ChatActionsProviderProps {
   children: ReactNode;
   onFileOpen?: (path: string, name: string) => void;
   onTaskOpen?: (name: string, path: string) => void;
+  onWatchStream?: (data: LiveStreamingData | null) => void;
+  isBrowserStreamingAvailable?: boolean;
   parentTasks?: TaskBreadcrumb[];
   siblings?: SiblingTask[];
 }
@@ -25,12 +37,14 @@ export const ChatActionsProvider = ({
   children,
   onFileOpen,
   onTaskOpen,
+  onWatchStream,
+  isBrowserStreamingAvailable,
   parentTasks,
   siblings,
 }: ChatActionsProviderProps) => {
   const value = useMemo(
-    () => ({ onFileOpen, onTaskOpen, parentTasks, siblings }),
-    [onFileOpen, onTaskOpen, parentTasks, siblings],
+    () => ({ onFileOpen, onTaskOpen, onWatchStream, isBrowserStreamingAvailable, parentTasks, siblings }),
+    [onFileOpen, onTaskOpen, onWatchStream, isBrowserStreamingAvailable, parentTasks, siblings],
   );
 
   return <ChatActionsContext.Provider value={value}>{children}</ChatActionsContext.Provider>;
