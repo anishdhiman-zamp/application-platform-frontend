@@ -22,7 +22,7 @@ import { useAppDispatch, useAppSelector } from '@/hooks/toolkit';
 import { setUser } from '@/store/slices/user';
 import type { Organization } from '@/types/api/auth.types';
 import { generateOrgIconSvg } from '@/utils/pixelArtGenerator';
-import { formatExpectedDuration } from '@/utils/time.utils';
+import { formatExpectedDuration } from '@/utils/common';
 
 enum ModalStep {
   INPUT = 'input',
