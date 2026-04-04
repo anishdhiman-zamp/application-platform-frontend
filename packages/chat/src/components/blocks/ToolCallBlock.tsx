@@ -11,7 +11,7 @@ import {
 import { cn } from '@zamp-platform/ui/utils';
 import { safeJsonParse } from '@zamp-platform/utils';
 import { AlertCircle, Play } from 'lucide-react';
-import React, { FC, useCallback, useMemo, useState } from 'react';
+import React, { FC, useCallback, useState } from 'react';
 
 import IntegrationCardV2 from '@/modules/integrations/AllIntegrations/IntegrationCardV2';
 import type { IntegrationItem } from '@/types/api/integrations';
@@ -19,7 +19,7 @@ import type { IntegrationItem } from '@/types/api/integrations';
 import { useChatActions } from '../../context/ChatActionsContext';
 import type { ToolResultContentBlock, ToolUseDisplayContent } from '../../types/block.types';
 import { buildIntegrationItemFromToolResult } from '../block.utils';
-import { BROWSER_TOOL_DISPLAY_NAMES, TOOL_NAMES } from '../chat.constants';
+import { TOOL_NAMES } from '../chat.constants';
 import { CodePreviewBlock } from './CodePreviewBlock';
 
 interface ToolCallBlockProps {
@@ -39,6 +39,7 @@ interface ToolCallBlockProps {
   showConnectorFromPrevious?: boolean;
   showConnectorToNext?: boolean;
   conversationId?: string;
+  showWatchButton?: boolean;
 }
 export const ToolCallBlock: FC<ToolCallBlockProps> = ({
   payload,
@@ -48,6 +49,7 @@ export const ToolCallBlock: FC<ToolCallBlockProps> = ({
   onAccordionOpenChange,
   showConnectorFromPrevious = false,
   showConnectorToNext = false,
+  showWatchButton = false,
 }) => {
   const [internalAccordionOpen, setInternalAccordionOpen] = useState<boolean>(false);
   const isControlled = typeof isAccordionOpen === 'boolean';
@@ -57,11 +59,6 @@ export const ToolCallBlock: FC<ToolCallBlockProps> = ({
   const name = payload?.name || displayContent?.tool_name;
   const icon = payload?.icon || displayContent?.icon;
   const { onWatchStream, isBrowserStreamingAvailable } = useChatActions();
-
-  const isBrowserTool = useMemo(
-    () => BROWSER_TOOL_DISPLAY_NAMES.some((n) => toolName.toLowerCase().includes(n.toLowerCase())),
-    [toolName],
-  );
 
   const toolResultData = safeJsonParse<{
     title?: string;
@@ -141,7 +138,7 @@ export const ToolCallBlock: FC<ToolCallBlockProps> = ({
               )}
             </div>
 
-            {isBrowserTool && onWatchStream && isBrowserStreamingAvailable && (
+            {showWatchButton && onWatchStream && isBrowserStreamingAvailable && (
               <button
                 onClick={handleWatchToggle}
                 className='text-GRAY_900 hover:bg-GRAY_50 ml-auto flex items-center gap-1 rounded-full px-1.5 py-1 transition-colors'
@@ -151,7 +148,7 @@ export const ToolCallBlock: FC<ToolCallBlockProps> = ({
               </button>
             )}
 
-            {toolResult && toolResult.payload?.is_error && !isBrowserTool && (
+            {toolResult && toolResult.payload?.is_error && !showWatchButton && (
               <div className='ml-auto flex items-center gap-1.5'>
                 <AlertCircle className='text-destructive h-3.5 w-3.5' />
               </div>
