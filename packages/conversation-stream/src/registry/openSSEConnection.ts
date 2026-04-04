@@ -21,7 +21,7 @@ export function openSSEConnection(
   onDead: (error?: unknown) => void,
   lastEventId?: string | null,
 ): void {
-  let url = `${API_DOMAIN}/v4/conversations/${conversationId}/events`;
+  let url = `${API_DOMAIN}/streaming/conversation/${conversationId}/events`;
   if (streamingMessageId) url += `?message_id=${streamingMessageId}`;
 
   const headers: Record<string, string> = {};

@@ -98,5 +98,23 @@ export function useTypewriter(fullText: string, baseSpeed = 33, active = true): 
 
   const isAnimating = displayed < fullText.length;
 
-  return { text: fullText.slice(0, displayed), isAnimating };
+  // Snap to word boundary to avoid partial words that cause line-wrap reflow.
+  // During fast streaming, characters appear rapidly; showing partial words
+  // (e.g. "curi" → "curio" → "curious") causes text to jump between lines
+  // as the word grows. Snapping back to the previous whitespace keeps layout
+  // stable — whole words appear at once.
+  let sliceEnd = displayed;
+  if (isAnimating && sliceEnd < fullText.length && sliceEnd > 0) {
+    // If we're in the middle of a word, backtrack to the last whitespace.
+    if (fullText[sliceEnd] !== ' ' && fullText[sliceEnd] !== '\n') {
+      const lastSpace = fullText.lastIndexOf(' ', sliceEnd);
+      const lastNewline = fullText.lastIndexOf('\n', sliceEnd);
+      const boundary = Math.max(lastSpace, lastNewline);
+      if (boundary > 0) {
+        sliceEnd = boundary;
+      }
+    }
+  }
+
+  return { text: fullText.slice(0, sliceEnd), isAnimating };
 }
