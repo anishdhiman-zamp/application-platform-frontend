@@ -225,17 +225,17 @@ const TaskContentChat = ({ taskId }: { taskId: string }) => {
             />
           }
         />
-        <div className='flex min-h-0 flex-1'>
+        <div className='flex min-h-0 w-full min-w-0 flex-1'>
           <CommonWrapper
             isLoading={isLoadingConversation}
             isError={chat?.isErrorConversationHistory}
             refetchFunction={chat?.refetchConversationHistory}
             skeletonType={SkeletonTypes.CUSTOM}
             loader={<ChatMessagesSkeleton className='px-0' alignUserRight />}
-            className='mx-auto flex min-h-0 w-full max-w-[700px] flex-1 flex-col px-4 pt-12'
+            className='flex min-h-0 w-full min-w-0 flex-1 flex-col pt-12'
             disableAnimation
           >
-            <div className='mx-auto w-full max-w-[700px]'>
+            <div className='mx-auto w-full max-w-[700px] px-4'>
               <TaskChatTitleHeader
                 displayTitle={displayTitle}
                 statusLabel={statusLabel}
@@ -246,7 +246,7 @@ const TaskContentChat = ({ taskId }: { taskId: string }) => {
 
             {/* Steps Section */}
             <div className='mt-[30px] flex min-h-0 w-full flex-1 flex-col'>
-              <div className='mx-auto w-full max-w-[700px]'>
+              <div className='mx-auto w-full max-w-[700px] px-4'>
                 <TaskChatStepsToggleHeader
                   showSteps={showSteps}
                   onToggle={handleToggleSteps}
@@ -257,14 +257,14 @@ const TaskContentChat = ({ taskId }: { taskId: string }) => {
               </div>
 
               <ScrollContainer
-                className='min-h-0 w-full flex-1'
+                className='min-h-0 w-full min-w-0 flex-1'
                 showScrollToBottom
                 ref={scrollContainerRef}
                 showFadeOverlay
                 scrollbarStyle='none'
                 scrollClassName='!overflow-y-scroll'
               >
-                <div className='mx-auto flex min-h-0 w-full max-w-[700px] flex-1 flex-col'>
+                <div className='mx-auto flex min-h-0 w-full max-w-[700px] flex-1 flex-col px-4'>
                   <div className='px-2'>
                     <TaskChatSummaryContent
                       showSteps={showSteps}
