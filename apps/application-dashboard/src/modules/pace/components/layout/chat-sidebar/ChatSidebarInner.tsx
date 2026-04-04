@@ -8,12 +8,12 @@ import { useDynamicTabs } from 'modules/pace/components/dynamic-tabs/useDynamicT
 import ChatConversationContent from 'modules/pace/components/layout/chat-sidebar/ChatConversationContent';
 import { usePathname } from 'next/navigation';
 import { APITags } from '@/constants/api.constants';
-// import { FEATURE_FLAGS } from '@/constants/featureFlags';
+import { FEATURE_FLAGS } from '@/constants/featureFlags';
 import { ROUTES_PATH } from '@/constants/routeConfig';
 import { useAppDispatch, useAppSelector } from '@/hooks/toolkit';
-// import { useFeatureFlag } from '@/hooks/useFeatureFlag';
+import { useFeatureFlag } from '@/hooks/useFeatureFlag';
 import AutoLoopConfirmDialog from '@/modules/pace/components/chat/AutoLoopConfirmDialog';
-// import AutoLoopToggle from '@/modules/pace/components/chat/AutoLoopToggle';
+import AutoLoopToggle from '@/modules/pace/components/chat/AutoLoopToggle';
 import ChatTopbar from '@/modules/pace/components/chat/ChatTopbar';
 import ModelSelector from '@/modules/pace/components/chat/ModelSelector';
 import { useChatDraftInput } from '@/modules/pace/hooks/useChatDraftInput';
@@ -61,14 +61,14 @@ const ChatSidebarInner: FC<ChatSidebarInnerProps> = ({
   const organizationId = useAppSelector((state: RootState) => state.user.user?.orgs?.[0]?.organization_id) ?? '';
   const currentUserName = useAppSelector((state: RootState) => state.user.user?.user_name) ?? '';
   const username = useAppSelector((state: RootState) => state.user.user?.username) ?? '';
-  // const { isEnabled: isZampInternalUser } = useFeatureFlag(FEATURE_FLAGS.ZAMP_INTERNAL);
+  const { isEnabled: isAutoLoopBtnEnabled } = useFeatureFlag(FEATURE_FLAGS.AUTO_LOOP_BTN_ENABLED);
 
   const fileDropHandlerRef = useRef<((files: FileList) => void) | null>(null);
   const addFileReferenceRef = useRef<((ref: { path: string; name: string }) => void) | null>(null);
 
   const [selectedModel, setSelectedModel] = useState<string | null>(null);
   const [autoLoopEnabled, setAutoLoopEnabled] = useState(false);
-  // const [isAutoLoopLocked, setIsAutoLoopLocked] = useState(false);
+  const [isAutoLoopLocked, setIsAutoLoopLocked] = useState(false);
   const [isConfirmDialogOpen, setIsConfirmDialogOpen] = useState(false);
   const [chatState, setChatState] = useState<ChatState | null>(null);
   const [isTaskPopoverOpen, setIsTaskPopoverOpen] = useState(false);
@@ -100,18 +100,18 @@ const ChatSidebarInner: FC<ChatSidebarInnerProps> = ({
     [selectedModel],
   );
 
-  // const autoLoopToggleSlot = useMemo(
-  //   () => (
-  //     <AutoLoopToggle
-  //       enabled={autoLoopEnabled}
-  //       onChange={(pressed) => {
-  //         if (pressed) setIsConfirmDialogOpen(true);
-  //       }}
-  //       disabled={isAutoLoopLocked}
-  //     />
-  //   ),
-  //   [autoLoopEnabled, isAutoLoopLocked],
-  // );
+  const autoLoopToggleSlot = useMemo(
+    () => (
+      <AutoLoopToggle
+        enabled={autoLoopEnabled}
+        onChange={(pressed) => {
+          if (pressed) setIsConfirmDialogOpen(true);
+        }}
+        disabled={isAutoLoopLocked}
+      />
+    ),
+    [autoLoopEnabled, isAutoLoopLocked],
+  );
 
   const { hitlQuestions, hitlQuestionsKey } = useHitlQuestions(chatState?.inputsRequired);
 
@@ -124,7 +124,7 @@ const ChatSidebarInner: FC<ChatSidebarInnerProps> = ({
   useEffect(() => {
     const locked = isConversationAutoLoopLocked(conversationId);
 
-    // setIsAutoLoopLocked(locked);
+    setIsAutoLoopLocked(locked);
     setAutoLoopEnabled(locked);
   }, [conversationId]);
 
@@ -185,7 +185,7 @@ const ChatSidebarInner: FC<ChatSidebarInnerProps> = ({
               autoLoopEnabled={autoLoopEnabled}
               showModelSelector
               modelSelectorSlot={modelSelectorSlot}
-              // {...(isZampInternalUser && { autoLoopToggleSlot })}
+              {...(isAutoLoopBtnEnabled && { autoLoopToggleSlot })}
               conversationId={conversationId ?? chatState.chat.conversationId ?? ''}
               onConversationCreated={handleConversationCreated}
               isDisabled={chatState.chat.isStreaming || chatState.chat.isCreatingConversationV2}
@@ -199,7 +199,7 @@ const ChatSidebarInner: FC<ChatSidebarInnerProps> = ({
         onOpenChange={setIsConfirmDialogOpen}
         onConfirm={() => {
           setAutoLoopEnabled(true);
-          // setIsAutoLoopLocked(true);
+          setIsAutoLoopLocked(true);
           if (conversationId) {
             addAutoLoopLockedConversation(conversationId);
           }
