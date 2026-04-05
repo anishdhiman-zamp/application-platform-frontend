@@ -45,6 +45,7 @@ export const TaskProvider: React.FC<TaskProviderProps> = ({
   apiConfig,
 }) => {
   const [messages, setMessages] = useState<ChatMessage[]>([]);
+  const [taskSummaryText, setTaskSummaryText] = useState<string | null>(null);
   const [isHistoryLoaded, setIsHistoryLoaded] = useState(false);
   const [mountRefetchDone, setMountRefetchDone] = useState(false);
   const mountRefetchFiredRef = useRef(false);
@@ -99,9 +100,14 @@ export const TaskProvider: React.FC<TaskProviderProps> = ({
     dispatch(chatApi.util.invalidateTags([{ type: APITags.GET_CONVERSATION_BY_ID, id: taskId }]));
   }, [dispatch, taskId]);
 
+  const handleTaskSummary = useCallback((_taskId: string, text: string) => {
+    setTaskSummaryText(text);
+  }, []);
+
   const perTaskCallbacks = useRef<TaskEventCallbacks>({
     onMessageStop: handleMessageStop,
     onTaskUpdate: handleTaskUpdate,
+    onTaskSummary: handleTaskSummary,
     onInputRequired: handleInputRequired,
   });
 
@@ -109,9 +115,10 @@ export const TaskProvider: React.FC<TaskProviderProps> = ({
     perTaskCallbacks.current = {
       onMessageStop: handleMessageStop,
       onTaskUpdate: handleTaskUpdate,
+      onTaskSummary: handleTaskSummary,
       onInputRequired: handleInputRequired,
     };
-  }, [handleMessageStop, handleTaskUpdate, handleInputRequired]);
+  }, [handleMessageStop, handleTaskUpdate, handleTaskSummary, handleInputRequired]);
 
   // --- Clear stale streaming state on mount ---
   useEffect(() => {
@@ -245,8 +252,9 @@ export const TaskProvider: React.FC<TaskProviderProps> = ({
       isErrorHistory,
       conversationData: taskHistory?.conversation,
       inputsRequired: taskHistory?.inputs_required,
+      taskSummaryText,
     }),
-    [messages, taskId, isStreaming, isLoadingHistory, isFetchingHistory, isErrorHistory, taskHistory],
+    [messages, taskId, isStreaming, isLoadingHistory, isFetchingHistory, isErrorHistory, taskHistory, taskSummaryText],
   );
 
   return (

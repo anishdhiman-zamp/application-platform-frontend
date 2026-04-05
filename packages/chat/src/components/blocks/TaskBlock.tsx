@@ -39,7 +39,7 @@ interface ToolCallInfo {
 const TaskBlock: FC<TaskBlockProps> = ({ payload, conversationId }) => {
   const router = useRouter();
   const organizationId = useAppSelector((state: RootState) => state.user.user?.orgs?.[0]?.organization_id) ?? '';
-  const { onTaskOpen, parentTasks, siblings } = useChatActions();
+  const { onTaskOpen, parentTasks, siblings, taskSummaries } = useChatActions();
   const { setChatSidebarState } = usePaceContext();
 
   const { title, task_id, status = TASK_STATUS.IN_PROGRESS } = payload;
@@ -65,10 +65,10 @@ const TaskBlock: FC<TaskBlockProps> = ({ payload, conversationId }) => {
 
   const displayedSummary = useDisplayedSummary({
     taskId: task_id,
-    sourceId: organizationId,
     isAgentActive,
     summaryContent: null,
     taskStatus: taskStatus ?? status,
+    streamingSummaryText: taskSummaries?.[task_id] ?? null,
   });
 
   const { toolCalls, markdownStepsBeforeLastTool } = useMemo(() => {

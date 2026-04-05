@@ -73,6 +73,7 @@ export const ConversationProvider: React.FC<ConversationProviderProps> = ({
   const [isHistoryLoaded, setIsHistoryLoaded] = useState(false);
   const [mountRefetchDone, setMountRefetchDone] = useState(false);
   const [isBrowserStreamingAvailable, setIsBrowserStreamingAvailable] = useState(false);
+  const [taskSummaries, setTaskSummaries] = useState<Record<string, string>>({});
 
   // True only for newly created conversations — permanent skip, not a transient resourceId gap.
   const isNewConversationSkip =
@@ -193,12 +194,17 @@ export const ConversationProvider: React.FC<ConversationProviderProps> = ({
     }
   }, [_conversationId, dispatch]);
 
+  const handlePerConvTaskSummary = useCallback((taskId: string, text: string) => {
+    setTaskSummaries((prev) => ({ ...prev, [taskId]: text }));
+  }, []);
+
   const perConvCallbacks = useRef<ConversationEventCallbacks>({
     onTitleUpdated: handlePerConvTitleUpdated,
     onMessageStop: handlePerConvMessageStop,
     onBrowserStreamingAvailable: handleBrowserStreamingAvailable,
     onBrowserStreamingUnavailable: handleBrowserStreamingUnavailable,
     onTaskUpdate: handlePerConvTaskUpdate,
+    onTaskSummary: handlePerConvTaskSummary,
     onInputRequired: handlePerConvInputRequired,
   });
 
@@ -414,6 +420,7 @@ export const ConversationProvider: React.FC<ConversationProviderProps> = ({
       createConversationV2Error,
       inputsRequired: conversationHistory?.inputs_required,
       isBrowserStreamingAvailable,
+      taskSummaries,
     }),
     [
       messages,
@@ -430,6 +437,7 @@ export const ConversationProvider: React.FC<ConversationProviderProps> = ({
       createConversationV2Error,
       conversationHistory?.inputs_required,
       isBrowserStreamingAvailable,
+      taskSummaries,
     ],
   );
 
@@ -448,6 +456,7 @@ export const ConversationProvider: React.FC<ConversationProviderProps> = ({
       onBrowserStreamingAvailable: handleBrowserStreamingAvailable,
       onBrowserStreamingUnavailable: handleBrowserStreamingUnavailable,
       onTaskUpdate: handlePerConvTaskUpdate,
+      onTaskSummary: handlePerConvTaskSummary,
       onInputRequired: handlePerConvInputRequired,
     };
   }, [
@@ -456,6 +465,7 @@ export const ConversationProvider: React.FC<ConversationProviderProps> = ({
     handleBrowserStreamingAvailable,
     handleBrowserStreamingUnavailable,
     handlePerConvTaskUpdate,
+    handlePerConvTaskSummary,
     handlePerConvInputRequired,
   ]);
 

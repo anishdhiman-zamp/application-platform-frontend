@@ -29,6 +29,7 @@ export interface ConversationEventCallbacks {
   onTaskMessageStart?: (taskId: string, messageId: string) => void;
   onTaskMessageStop?: (taskId: string, messageId: string) => void;
   onTaskUpdate?: (taskId: string, updatedFields: Record<string, unknown>) => void;
+  onTaskSummary?: (taskId: string, text: string) => void;
   onInputRequired?: (entityId: string, entityType: string, data: unknown) => void;
 }
 
@@ -66,6 +67,15 @@ export function handleConversationSSEEvent(
       const entityId = event.entity_id as string;
       const entityType = event.entity_type as string;
       callbacks.onInputRequired?.(entityId, entityType, event.input_required_data);
+      return;
+    }
+
+    if (eventType === TaskSSEEventType.TASK_SUMMARY) {
+      const taskId = (event.task_id as string) || (event.streaming_id as string);
+      const text = event.text as string;
+      if (taskId && typeof text === 'string') {
+        callbacks.onTaskSummary?.(taskId, text);
+      }
       return;
     }
 

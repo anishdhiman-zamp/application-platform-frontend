@@ -1,8 +1,4 @@
-import { type BaseEventPayload, EVENT_TYPE } from '@zamp-platform/utils/event-bus/event-bus.types';
 import { useCallback, useEffect, useRef, useState } from 'react';
-
-import { useEventBus } from '@/app/_providers/sse-provider';
-import type { MapAny } from '@/types/commonTypes';
 
 const CHAR_INTERVAL_MS = 12;
 
@@ -13,14 +9,19 @@ const summaryTextCache = new Map<string, string>();
 
 interface UseDisplayedSummaryParams {
   taskId: string;
-  sourceId: string;
   isAgentActive: boolean;
   summaryContent?: string | null;
   taskStatus: string | undefined;
+  /** Live summary text pushed from the per-task or per-conversation SSE channel via the provider. */
+  streamingSummaryText?: string | null;
 }
 
-export function useDisplayedSummary({ taskId, sourceId, isAgentActive, summaryContent }: UseDisplayedSummaryParams) {
-  const { sseEventBus } = useEventBus();
+export function useDisplayedSummary({
+  taskId,
+  isAgentActive,
+  summaryContent,
+  streamingSummaryText,
+}: UseDisplayedSummaryParams) {
   const prevIsAgentActiveRef = useRef(isAgentActive);
   // Full target text that we animate towards
   const targetTextRef = useRef(summaryTextCache.get(taskId) ?? '');
@@ -70,24 +71,6 @@ export function useDisplayedSummary({ taskId, sourceId, isAgentActive, summaryCo
     [taskId, stopAnimation, startAnimation],
   );
 
-  const handleTaskSummaryEvent = useCallback(
-    (data: BaseEventPayload) => {
-      if (data.source_id !== sourceId) return;
-
-      const payload = data.payload as MapAny;
-      if (!payload || payload?.type !== 'content_block') return;
-
-      if (payload?.streaming_id !== taskId) return;
-
-      const text = payload?.text as string;
-      if (typeof text !== 'string') return;
-
-      // Each content_block replaces the previous summary — animate the new text
-      setTargetText(text, true);
-    },
-    [sourceId, taskId, setTargetText],
-  );
-
   // Reset state when taskId changes
   useEffect(() => {
     const cached = summaryTextCache.get(taskId) ?? '';
@@ -112,11 +95,12 @@ export function useDisplayedSummary({ taskId, sourceId, isAgentActive, summaryCo
   // Cleanup on unmount
   useEffect(() => stopAnimation, [stopAnimation]);
 
-  // Subscribe to task_summary SSE events
+  // React to new summary text arriving from the provider (per-task or per-conversation SSE)
   useEffect(() => {
-    const subscription = sseEventBus.subscribe<BaseEventPayload>(EVENT_TYPE.TASK_SUMMARY, handleTaskSummaryEvent);
-    return () => subscription.unsubscribe();
-  }, [sseEventBus, handleTaskSummaryEvent]);
+    if (typeof streamingSummaryText === 'string' && streamingSummaryText !== targetTextRef.current) {
+      setTargetText(streamingSummaryText, true);
+    }
+  }, [streamingSummaryText, setTargetText]);
 
   if (isAgentActive) {
     return displayedText || '';
