@@ -113,6 +113,11 @@ export const ConversationProvider: React.FC<ConversationProviderProps> = ({
     [enableStreaming, streamingState?.is_active],
   );
 
+  const isAnalysing = useMemo(
+    () => messages.length > 0 && messages[messages.length - 1]?.sender_type === SenderType.USER,
+    [messages],
+  );
+
   const streamingMessageId = useMemo(
     () => (conversationHistory ? getStreamingMessageId(conversationHistory) : null),
     [conversationHistory],
@@ -365,6 +370,7 @@ export const ConversationProvider: React.FC<ConversationProviderProps> = ({
       isSendingMessage,
       isErrorConversationHistory,
       isUninitializedConversationHistory,
+      isAnalysing,
       sendMessageError: null,
       sendMessageV2Error,
       createConversationV2Error,
@@ -381,6 +387,7 @@ export const ConversationProvider: React.FC<ConversationProviderProps> = ({
       isSendingMessage,
       isErrorConversationHistory,
       isUninitializedConversationHistory,
+      isAnalysing,
       sendMessageV2Error,
       createConversationV2Error,
       conversationHistory?.inputs_required,

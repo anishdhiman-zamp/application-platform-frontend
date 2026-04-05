@@ -1,6 +1,6 @@
 'use client';
 
-import { useEffect, useRef, useState } from 'react';
+import { useCallback, useEffect, useRef, useState } from 'react';
 
 /**
  * Adaptive-speed typewriter that decouples receiving from rendering.
@@ -27,16 +27,17 @@ const DRAIN_SPEED = 8;
 
 export function useTypewriter(fullText: string, baseSpeed = 33, active = true): TypewriterResult {
   const wasEverActiveRef = useRef(active);
-  if (active) wasEverActiveRef.current = true;
-
-  // Start at fullText.length so text already in the store (e.g. from a background stream) shows immediately.
-  const [displayed, setDisplayed] = useState(fullText.length);
   const displayedRef = useRef(fullText.length);
   const fullTextRef = useRef(fullText);
   const rafRef = useRef<number>(0);
   const lastFrameTimeRef = useRef<number>(0);
   const prevFullTextRef = useRef(fullText);
   const activeRef = useRef(active);
+
+  if (active) wasEverActiveRef.current = true;
+
+  // Start at fullText.length so text already in the store (e.g. from a background stream) shows immediately.
+  const [displayed, setDisplayed] = useState(fullText.length);
 
   fullTextRef.current = fullText;
   activeRef.current = active;
@@ -47,10 +48,8 @@ export function useTypewriter(fullText: string, baseSpeed = 33, active = true): 
   }
   prevFullTextRef.current = fullText;
 
-  useEffect(() => {
-    if (!wasEverActiveRef.current) return;
-
-    const tick = (now: number) => {
+  const tick = useCallback(
+    (now: number) => {
       const target = fullTextRef.current.length;
       const current = displayedRef.current;
 
@@ -86,11 +85,16 @@ export function useTypewriter(fullText: string, baseSpeed = 33, active = true): 
       }
 
       rafRef.current = requestAnimationFrame(tick);
-    };
+    },
+    [baseSpeed],
+  );
+
+  useEffect(() => {
+    if (!wasEverActiveRef.current) return;
 
     rafRef.current = requestAnimationFrame(tick);
     return () => cancelAnimationFrame(rafRef.current);
-  }, []);
+  }, [tick]);
 
   if (!wasEverActiveRef.current) {
     return { text: fullText, isAnimating: false };

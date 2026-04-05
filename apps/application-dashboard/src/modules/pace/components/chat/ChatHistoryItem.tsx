@@ -1,6 +1,6 @@
 'use client';
 
-import { type FC, useCallback, useMemo, useState } from 'react';
+import { useCallback, useMemo, useState } from 'react';
 import { AnimatedDot } from '@zamp-platform/ui';
 import { cn } from '@zamp-platform/ui/utils';
 import { formatTimestampToUTC } from '@zamp-platform/utils/date';
@@ -28,7 +28,7 @@ interface ChatHistoryItemProps {
   onRename?: (id: string, newTitle: string) => void;
 }
 
-const ChatHistoryItem: FC<ChatHistoryItemProps> = ({
+const ChatHistoryItem = ({
   conversation,
   onSelect,
   isStreaming,
@@ -38,8 +38,15 @@ const ChatHistoryItem: FC<ChatHistoryItemProps> = ({
   onDelete,
   onDeleteFailure,
   onRename,
-}) => {
+}: ChatHistoryItemProps) => {
   const [isActionsOpen, setIsActionsOpen] = useState(false);
+
+  const renderStatusIcon = () => {
+    if (isStreaming) return <Loader2 className='text-BLUE_700 h-3 w-3 shrink-0 animate-spin' />;
+    if (isUnread) return <AnimatedDot showAnimation className='shrink-0' size={7} />;
+
+    return null;
+  };
 
   const relativeTime = useMemo(() => {
     const timestamp = conversation?.updated_at || conversation?.created_at;
@@ -90,13 +97,7 @@ const ChatHistoryItem: FC<ChatHistoryItemProps> = ({
       onClick={handleClick}
     >
       <div className='flex h-auto w-full items-center justify-start gap-2.5 px-3 py-2.5 pr-9'>
-        <span className='flex h-4 w-4 shrink-0 items-center justify-center'>
-          {isStreaming ? (
-            <Loader2 className='text-BLUE_700 h-3 w-3 shrink-0 animate-spin' />
-          ) : isUnread ? (
-            <AnimatedDot showAnimation className='shrink-0' size={7} />
-          ) : null}
-        </span>
+        <span className='flex h-4 w-4 shrink-0 items-center justify-center'>{renderStatusIcon()}</span>
         <p className='f-13-500 text-GRAY_1000 min-w-0 flex-1 truncate text-left first-letter:uppercase'>
           {conversation?.title || 'Untitled conversation'}
         </p>

@@ -14,6 +14,7 @@ export interface ConversationState {
   isSendingMessage: boolean;
   isErrorConversationHistory: boolean;
   isUninitializedConversationHistory: boolean;
+  isAnalysing: boolean;
   sendMessageError: unknown;
   sendMessageV2Error: unknown;
   createConversationV2Error: unknown;

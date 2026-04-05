@@ -1,6 +1,6 @@
 'use client';
 
-import { FC, useEffect, useMemo, useRef, useState } from 'react';
+import { useEffect, useMemo, useRef, useState } from 'react';
 import {
   ChatActionsProvider,
   createConversationPayload,
@@ -8,7 +8,6 @@ import {
   MessageContainer,
   ResourceType,
   ScopeType,
-  SenderType,
   useFileDragDrop,
   useStreamingState,
 } from '@zamp-platform/chat';
@@ -35,7 +34,7 @@ export interface ChatConversationContentProps {
   currentUserName: string;
 }
 
-const ChatConversationContent: FC<ChatConversationContentProps> = ({
+const ChatConversationContent = ({
   conversationId,
   organizationId,
   onFileOpen,
@@ -44,7 +43,7 @@ const ChatConversationContent: FC<ChatConversationContentProps> = ({
   fileDropHandlerRef,
   addFileReferenceRef,
   currentUserName,
-}) => {
+}: ChatConversationContentProps) => {
   const pendingPayloadConsumedRef = useRef(false);
   const taskStatusContainerRef = useRef<HTMLDivElement>(null);
 
@@ -57,6 +56,7 @@ const ChatConversationContent: FC<ChatConversationContentProps> = ({
     isLoadingConversationHistory,
     isErrorConversationHistory,
     isStreaming,
+    isAnalysing,
   } = useConversationState();
   const { createConversationV2, refetchConversationHistory } = useConversationActions();
   const streamingState = useStreamingState(conversationId ?? ctxConversationId);
@@ -64,9 +64,6 @@ const ChatConversationContent: FC<ChatConversationContentProps> = ({
   const [isTaskPopoverOpen, setIsTaskPopoverOpen] = useState(false);
 
   const hasMessages = useMemo(() => messages.length > 0, [messages]);
-  const isAnalysing = useMemo(() => {
-    return messages.length > 0 && messages[messages.length - 1]?.sender_type === SenderType.USER;
-  }, [messages]);
   const isInConversation = Boolean(conversationId || ctxConversationId || hasMessages || streamingState?.is_active);
   const lastMessageSenderType = useMemo(() => messages[messages.length - 1]?.sender_type, [messages]);
   const isLoadingConversation =

@@ -15,7 +15,6 @@ import { SOCKET_STATES } from '@zamp-platform/chat';
 import { toast } from '@zamp-platform/ui';
 import React, {
   type Dispatch,
-  type FC,
   type RefObject,
   type SetStateAction,
   useCallback,
@@ -68,7 +67,7 @@ export interface ConnectedChatInputProps {
   hideStopButton?: boolean;
 }
 
-export const ConnectedChatInput: FC<ConnectedChatInputProps> = ({
+export const ConnectedChatInput = ({
   annotationLocation,
   resourceType,
   conversationId: conversationIdProp,
@@ -101,18 +100,16 @@ export const ConnectedChatInput: FC<ConnectedChatInputProps> = ({
   autoLoopEnabled,
   autoLoopToggleSlot,
   hideStopButton = false,
-}) => {
+}: ConnectedChatInputProps) => {
   const fileInputRef = useRef<HTMLInputElement>(null);
   const isRejectingRef = useRef(false);
   const transcriptInsertionIndexRef = useRef(-1);
 
-  // Read from contexts — no chat prop needed
   const actions = useConversationActions();
   const { isStreaming, isStopping, conversationId: ctxConversationId, messages } = useConversationState();
 
   const resolvedConversationId = conversationIdProp ?? ctxConversationId ?? '';
 
-  // Build slim ChatInputActions interface
   const chatInputActions: ChatInputActions = useMemo(
     () => ({
       sendMessage: actions.sendMessage,
@@ -192,22 +189,37 @@ export const ConnectedChatInput: FC<ConnectedChatInputProps> = ({
       onTranscriptChunk: handleTranscriptChunk,
     });
 
-  const handleAttachClick = () => fileInputRef.current?.click();
+  const shouldShowRecorder = useMemo(
+    () => isRecording && connectionState === SOCKET_STATES.open,
+    [isRecording, connectionState],
+  );
+  const isPreparingToRecord = useMemo(
+    () => isRecording && connectionState !== SOCKET_STATES.open,
+    [isRecording, connectionState],
+  );
 
-  const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    handleFileSelect(e.target.files);
-    if (fileInputRef.current) fileInputRef.current.value = '';
-  };
+  const handleAttachClick = useCallback(() => fileInputRef.current?.click(), []);
 
-  const handlePaste = (e: React.ClipboardEvent<HTMLTextAreaElement>) => {
-    const files = e.clipboardData?.files;
-    if (files && files.length > 0) {
-      e.preventDefault();
-      handleFileSelect(files);
-    }
-  };
+  const handleFileChange = useCallback(
+    (e: React.ChangeEvent<HTMLInputElement>) => {
+      handleFileSelect(e.target.files);
+      if (fileInputRef.current) fileInputRef.current.value = '';
+    },
+    [handleFileSelect],
+  );
 
-  const handleStartRecording = async () => {
+  const handlePaste = useCallback(
+    (e: React.ClipboardEvent<HTMLTextAreaElement>) => {
+      const files = e.clipboardData?.files;
+      if (files && files.length > 0) {
+        e.preventDefault();
+        handleFileSelect(files);
+      }
+    },
+    [handleFileSelect],
+  );
+
+  const handleStartRecording = useCallback(async () => {
     if (microphoneState === MicrophoneState.Error) {
       onMicrophoneError?.();
       toast.error('Microphone unavailable. Please check browser permissions and try again.');
@@ -216,18 +228,18 @@ export const ConnectedChatInput: FC<ConnectedChatInputProps> = ({
     isRejectingRef.current = false;
     transcriptInsertionIndexRef.current = -1;
     await startRecording();
-  };
+  }, [microphoneState, onMicrophoneError, startRecording]);
 
-  const handleAccept = () => {
+  const handleAccept = useCallback(() => {
     try {
       stopRecording();
     } catch {
       toast.error('Failed to stop recording. Please try again.');
       onRecordingError?.();
     }
-  };
+  }, [stopRecording, onRecordingError]);
 
-  const handleReject = () => {
+  const handleReject = useCallback(() => {
     try {
       isRejectingRef.current = true;
       setValue((prev) => {
@@ -240,7 +252,7 @@ export const ConnectedChatInput: FC<ConnectedChatInputProps> = ({
       toast.error('Failed to stop recording. Please try again.');
       onRecordingError?.();
     }
-  };
+  }, [setValue, stopRecording, onRecordingError]);
 
   const handleStop = useCallback(async () => {
     try {
@@ -250,22 +262,12 @@ export const ConnectedChatInput: FC<ConnectedChatInputProps> = ({
     }
   }, [actions.stopConversation]);
 
-  const shouldShowRecorder = useMemo(
-    () => isRecording && connectionState === SOCKET_STATES.open,
-    [isRecording, connectionState],
-  );
-  const isPreparingToRecord = useMemo(
-    () => isRecording && connectionState !== SOCKET_STATES.open,
-    [isRecording, connectionState],
-  );
-
   useEffect(() => {
     if (setFirstMessage && defaultMessage) {
       setFirstMessage(defaultMessage);
     }
   }, [defaultMessage, setFirstMessage]);
 
-  // Expose handleFileSelect to parent for external drag and drop
   useEffect(() => {
     if (fileDropHandlerRef && !disableAttachments && !isDisabled) {
       fileDropHandlerRef.current = handleFileSelect;
@@ -275,7 +277,6 @@ export const ConnectedChatInput: FC<ConnectedChatInputProps> = ({
     };
   }, [fileDropHandlerRef, handleFileSelect, disableAttachments, isDisabled]);
 
-  // Expose addFileReference to parent for external file references
   useEffect(() => {
     if (addFileReferenceRef && !isDisabled) {
       addFileReferenceRef.current = addFileReference;
