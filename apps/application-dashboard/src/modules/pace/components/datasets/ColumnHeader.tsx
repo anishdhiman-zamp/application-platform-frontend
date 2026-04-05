@@ -4,7 +4,7 @@ import { FC, KeyboardEvent, ReactNode, useCallback, useEffect, useMemo, useRef, 
 import { RequiredDefaultValueModal } from '@zamp-platform/dataset-create-edit';
 import { Input, Switch } from '@zamp-platform/ui';
 import { ColumnHeaderClickedEvent, IHeaderParams } from 'ag-grid-community';
-import { ArrowDown, ArrowUp, Asterisk, ChevronDown, ChevronUp, EyeOff, Filter, Pencil, XIcon } from 'lucide-react';
+import { ArrowDown, ArrowUp, Asterisk, ChevronDown, ChevronUp, Filter, Pencil, XIcon } from 'lucide-react';
 import type { BlueprintColumn } from 'modules/pace/components/datasets/datasets.constants';
 import { cn } from 'utils/common';
 import { KEYBOARD_KEYS } from '@/constants/shortcuts';
@@ -154,10 +154,6 @@ const ColumnHeader: FC<IHeaderParams & ColumnHeaderParams> = (props) => {
           setIsMenuOpen(false);
           updateMenuPosition();
           setIsFilterOpen(true);
-          break;
-        case 'hide_column':
-          api.setColumnsVisible([colId], false);
-          handleClose();
           break;
       }
     },
@@ -328,16 +324,6 @@ const ColumnHeader: FC<IHeaderParams & ColumnHeaderParams> = (props) => {
               <div className='f-12-500'>{option.label}</div>
             </div>
           ))}
-          <div
-            className='hover:bg-GRAY_100 flex cursor-pointer items-center gap-1.5 rounded-md px-2.5 py-2'
-            onClick={(e) => {
-              e.stopPropagation();
-              handleMenuOptionClick('hide_column');
-            }}
-          >
-            <EyeOff size={12} />
-            <div className='f-12-500'>Hide column</div>
-          </div>
           {onColumnRequiredChange && (
             <div
               className='hover:bg-GRAY_100 flex cursor-pointer items-center justify-between rounded-md px-2.5 py-2'

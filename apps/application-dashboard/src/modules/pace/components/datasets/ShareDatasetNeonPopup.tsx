@@ -49,7 +49,7 @@ const ShareDatasetNeonPopup: FC<ShareDatasetNeonPopupProps> = ({ tableName }) =>
   const [open, setOpen] = useState(false);
   const [search, setSearch] = useState('');
   const [selectedItems, setSelectedItems] = useState<ArrayListOption[]>([]);
-  const [selectedRole, setSelectedRole] = useState<string>(NEON_DATASET_ROLES[1]?.value ?? 'viewer');
+  const [selectedRole, setSelectedRole] = useState<string>(NEON_DATASET_ROLES[0]?.value ?? 'admin');
   const [showValidationError, setShowValidationError] = useState(false);
   const [validationErrorText, setValidationErrorText] = useState('');
 

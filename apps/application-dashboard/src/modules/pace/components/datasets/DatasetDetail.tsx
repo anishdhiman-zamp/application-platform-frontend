@@ -5,8 +5,9 @@ import { DatasetEditPreviewTab, DatasetTabsTypes, PREVIEW_DATASET_ID } from '@za
 import { Button, toast } from '@zamp-platform/ui';
 import { CellEditRequestEvent, ColDef, FillEndEvent, IRowNode, IServerSideDatasource } from 'ag-grid-community';
 import { AgGridReact } from 'ag-grid-react';
+import usePolling from 'hooks/usePolling';
 import { useUserIdentity } from 'hooks/useUserIdentity';
-import { AlertTriangle, ArrowLeft, Download, Loader2 } from 'lucide-react';
+import { AlertTriangle, ArrowLeft, Download, Loader2, ShieldOff } from 'lucide-react';
 import ColumnHeader from 'modules/pace/components/datasets/ColumnHeader';
 import DatasetBlueprintEditor from 'modules/pace/components/datasets/DatasetBlueprintEditor';
 import {
@@ -24,12 +25,9 @@ import {
   buildUpdateFillQuery,
   type ColumnModification,
   DETAIL_PAGE_SIZE,
-  downloadCsvBlob,
   escapeSqlIdentifier,
-  EXPORT_CHUNK_SIZE,
   getCellEditorForPgType,
   pgTypeToColumnType,
-  rowsToCsv,
   sanitizeColumnName,
 } from 'modules/pace/components/datasets/datasets.constants';
 import ShareDatasetNeonPopup from 'modules/pace/components/datasets/ShareDatasetNeonPopup';
@@ -39,8 +37,10 @@ import { cn } from 'utils/common';
 import {
   DatasetRoleValue,
   useAgentDbWriteMutation,
+  useExportAgentDbTableMutation,
   useGetDatasetRolesQuery,
   useLazyAgentDbReadQuery,
+  useLazyGetAgentDbExportStatusQuery,
 } from '@/apis/agentManagedDb';
 import ImageLoader from '@/components/common/loader/ImageLoader';
 import { ZAMP_LOGO_LOADER_SVG } from '@/constants/icons';
@@ -73,7 +73,10 @@ const DatasetDetailInner = ({ tableName }: DatasetDetailProps) => {
   const { userId } = useUserIdentity();
   const [executeQuery] = useLazyAgentDbReadQuery();
   const [executeMutation] = useAgentDbWriteMutation();
-  const { data: rolesData } = useGetDatasetRolesQuery({ tableName });
+  const [exportTable] = useExportAgentDbTableMutation();
+  const [getExportStatus] = useLazyGetAgentDbExportStatusQuery();
+  const { startPolling } = usePolling();
+  const { data: rolesData, isLoading: isLoadingRoles } = useGetDatasetRolesQuery({ tableName });
   const {
     dispatch: filterDispatch,
     state: { selectedFilters, filtersConfig: contextFiltersConfig },
@@ -98,6 +101,8 @@ const DatasetDetailInner = ({ tableName }: DatasetDetailProps) => {
 
     return rolesData.roles.find((r) => r?.user_id === userId && r?.table_name === tableName)?.role;
   }, [rolesData, userId, tableName]);
+
+  const accessDenied = !isLoadingRoles && !!userId && !!rolesData && userRole === undefined;
 
   const canEditData =
     (userRole === DatasetRoleValue.ADMIN || userRole === DatasetRoleValue.EDITOR) && pkColumn !== null;
@@ -400,41 +405,47 @@ const DatasetDetailInner = ({ tableName }: DatasetDetailProps) => {
   }, [blueprintColumns, originalBlueprintColumns]);
 
   const handleExportCsv = useCallback(async () => {
+    if (isExporting) return;
     setIsExporting(true);
     try {
-      const filterClauses = activeFilterClausesRef.current;
-      const colState = tableRef.current?.api?.getColumnState();
-      const sortModel = colState?.filter((c) => c.sort).map((c) => ({ colId: c.colId, sort: c.sort as string }));
+      const whereClause = activeFilterClausesRef.current;
+      const { workflow_id } = await exportTable({
+        table_name: tableName,
+        ...(whereClause ? { where_clause: whereClause } : {}),
+      }).unwrap();
 
-      const countResult = await executeQuery({ query: buildCountQuery(tableName, filterClauses) }).unwrap();
-      const total = Number(countResult.rows[0]?.total ?? 0);
+      const finalResult = await startPolling({
+        fn: () => getExportStatus({ workflowId: workflow_id }),
+        validate: (res: { status: string } | undefined) => res?.status === 'COMPLETED' || res?.status === 'FAILED',
+        interval: 3000,
+        maxAttempts: 100,
+        isExponential: true,
+        backoffFactor: 2,
+        maxInterval: 20000,
+      });
 
-      if (total === 0) {
-        toast.info('No data to export');
+      if (finalResult?.status === 'COMPLETED' && finalResult?.signed_url) {
+        const response = await fetch(finalResult.signed_url);
+        const blob = await response.blob();
+        const url = URL.createObjectURL(blob);
+        const link = document.createElement('a');
 
-        return;
+        link.href = url;
+        link.download = `${tableName}.csv`;
+        document.body.appendChild(link);
+        link.click();
+        document.body.removeChild(link);
+        URL.revokeObjectURL(url);
+        toast.success(`Exported ${finalResult.row_count?.toLocaleString() ?? ''} rows`);
+      } else {
+        toast.error('Export failed. Please try again.');
       }
-
-      const csvChunks: string[] = [];
-
-      for (let offset = 0; offset < total; offset += EXPORT_CHUNK_SIZE) {
-        const chunk = await executeQuery({
-          query: buildSelectTableQuery(tableName, EXPORT_CHUNK_SIZE, offset, sortModel, filterClauses),
-        }).unwrap();
-        const rows = chunk.rows ?? [];
-
-        if (rows.length === 0) break;
-        csvChunks.push(rowsToCsv(rows, offset === 0));
-      }
-
-      downloadCsvBlob(csvChunks.join('\n'), `${tableName}.csv`);
-      toast.success(`Exported ${total.toLocaleString()} rows`);
     } catch {
-      toast.error('Failed to export data');
+      toast.error('Export failed. Please try again.');
     } finally {
       setIsExporting(false);
     }
-  }, [tableName, executeQuery]);
+  }, [tableName, isExporting, exportTable, getExportStatus, startPolling]);
 
   const getRows: IServerSideDatasource['getRows'] = useCallback(
     async (params) => {
@@ -454,7 +465,10 @@ const DatasetDetailInner = ({ tableName }: DatasetDetailProps) => {
           setTotalRows(total);
           params.success({ rowData: selectResult.rows ?? [], rowCount: total });
           setInitialDataLoaded(true);
-        } catch {
+        } catch (err: any) {
+          if (err?.status === 403) {
+            setSchemaError('Access denied: insufficient privileges on this table.');
+          }
           params.fail();
           setInitialDataLoaded(true);
         }
@@ -500,7 +514,10 @@ const DatasetDetailInner = ({ tableName }: DatasetDetailProps) => {
           rowCount: totalRowsRef.current,
         });
         setInitialDataLoaded(true);
-      } catch {
+      } catch (err: any) {
+        if (err?.status === 403) {
+          setSchemaError('Access denied: insufficient privileges on this table.');
+        }
         params.fail();
         setInitialDataLoaded(true);
       }
@@ -552,6 +569,31 @@ const DatasetDetailInner = ({ tableName }: DatasetDetailProps) => {
     activeFilterClausesRef.current = clauses;
     tableRef.current?.api?.refreshServerSide({ purge: true });
   }, [selectedFilters, gridReady]);
+
+  if (accessDenied) {
+    return (
+      <div className='bg-BG_WHITE flex h-full w-full flex-1 flex-col'>
+        <div className='border-GRAY_400 flex items-center gap-3 border-b px-6 pt-10 pb-8'>
+          <Link href={preserveSidebarParam(ROUTES_PATH.CHAT_SETTINGS_DATASETS)}>
+            <ArrowLeft width={18} height={18} className='text-GRAY_700 hover:text-GRAY_1000 transition-colors' />
+          </Link>
+          <h1 className='f-18-500 flex-1'>{tableName}</h1>
+        </div>
+        <div className='flex flex-1 flex-col items-center justify-center gap-3'>
+          <ShieldOff className='text-GRAY_500 h-10 w-10' />
+          <p className='f-14-500 text-GRAY_700'>Access denied</p>
+          <p className='f-12-400 text-GRAY_600 max-w-[300px] text-center'>
+            You don&apos;t have permission to view this dataset. Ask an admin to share it with you.
+          </p>
+          <Link href={preserveSidebarParam(ROUTES_PATH.CHAT_SETTINGS_DATASETS)}>
+            <Button size='small' variant='outline' className='mt-2'>
+              Back to datasets
+            </Button>
+          </Link>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className='bg-BG_WHITE flex h-full w-full flex-1 flex-col'>

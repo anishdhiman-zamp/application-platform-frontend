@@ -250,4 +250,6 @@ export const API_ENDPOINTS = {
   AGENT_MANAGED_DB_QUERY_POST: `agent-db/query`,
   DATASET_ROLES_GET: `agent-db/roles`,
   DATASET_ROLES_POST: `agent-db/roles`,
+  AGENT_DB_EXPORT_POST: `agent-db/export`,
+  AGENT_DB_EXPORT_STATUS_GET: `agent-db/export/{{workflowId}}/status`,
 };
