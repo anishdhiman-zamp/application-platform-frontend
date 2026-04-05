@@ -11,7 +11,6 @@ export interface CustomInputRowProps {
   isMultiSelect: boolean;
   value: string;
   inputRef?: React.RefObject<HTMLInputElement | null>;
-  onMouseEnter: () => void;
   onClick: () => void;
   onChange: (value: string) => void;
 }
@@ -22,17 +21,16 @@ export const CustomInputRow: React.FC<CustomInputRowProps> = ({
   isMultiSelect,
   value,
   inputRef,
-  onMouseEnter,
   onClick,
   onChange,
 }) => {
   return (
     <div
+      data-hitl-focused={isFocused || undefined}
       className={cn(
         'w-full shrink-0 cursor-pointer rounded-[10px] transition-colors duration-200',
         isFocused ? 'bg-GRAY_50' : 'hover:bg-GRAY_20',
       )}
-      onMouseEnter={onMouseEnter}
       onClick={onClick}
     >
       <div className='flex w-full items-center px-3 py-2.5'>
