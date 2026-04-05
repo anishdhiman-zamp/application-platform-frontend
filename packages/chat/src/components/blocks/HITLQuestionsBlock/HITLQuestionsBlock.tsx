@@ -1,12 +1,14 @@
 'use client';
 
 import { captureException } from '@sentry/browser';
+import { ScrollContainer, type ScrollContainerRef } from '@zamp-platform/ui';
 import { KEYBOARD_KEYS } from '@zamp-platform/utils';
 import React, { useCallback, useEffect, useRef, useState } from 'react';
 
 import { useHitlRespondMutation } from '../../../api/chat';
 import { HITL_RESPONSE_TYPE } from '../../../types/block.types';
 import type { HITLRespondPayloadType, HITLResponse } from '../../../types/chat.types';
+import { APPROVAL_ACTION } from './ApprovalQuestionBody';
 import { CUSTOM_OPTION_ID, HITL_APPROVAL_NO, HITL_APPROVAL_YES, HITL_QUESTIONS_LAYOUT } from './constants';
 import { HITLQuestionItem } from './HITLQuestionItem';
 import { HITLQuestionsFooter } from './HITLQuestionsFooter';
@@ -30,7 +32,7 @@ export const HITLQuestionsBlock = ({
   sourceEntityType,
 }: HITLQuestionsBlockProps) => {
   const { questions } = payload;
-  const scrollContainerRef = useRef<HTMLDivElement>(null);
+  const scrollContainerRef = useRef<ScrollContainerRef>(null);
   const customInputRef = useRef<HTMLInputElement>(null);
   const containerRef = useRef<HTMLDivElement>(null);
   const questionRefs = useRef<(HTMLDivElement | null)[]>([]);
@@ -39,12 +41,16 @@ export const HITLQuestionsBlock = ({
 
   const [currentQuestionIndex, setCurrentQuestionIndex] = useState(0);
   const [focusedOptionIndex, setFocusedOptionIndex] = useState(0);
+  const scrollDirectionRef = useRef<'up' | 'down'>('down');
+  const submitRef = useRef<(() => void) | null>(null);
   const [answers, setAnswers] = useState<HITLAnswersState>({});
+  const [approvalAction, setApprovalAction] = useState<'approve' | 'reject' | null>(null);
   const [customInputs, setCustomInputs] = useState<Record<string, string>>({});
 
   const currentQuestion = questions[currentQuestionIndex];
   const totalOptions = currentQuestion ? optionCountForQuestion(currentQuestion) : 1;
   const allQuestionsAnswered = questions.every((q) => isQuestionAnswerComplete(q, answers[q.id]));
+  const isAllApproval = questions.every(isApprovalQuestion);
 
   const stateRef = useRef({
     currentQuestionIndex,
@@ -57,6 +63,7 @@ export const HITLQuestionsBlock = ({
 
   const selectApprovalAnswer = useCallback(
     (questionId: string, qIndex: number, approved: boolean) => {
+      setApprovalAction(approved ? APPROVAL_ACTION.APPROVE : APPROVAL_ACTION.REJECT);
       setAnswers((prev) => ({
         ...prev,
         [questionId]: {
@@ -111,23 +118,6 @@ export const HITLQuestionsBlock = ({
     [questions],
   );
 
-  const skipQuestion = useCallback(
-    (qId: string, qIdx: number) => {
-      const q = questions[qIdx];
-      setCustomInputs((prev) => ({ ...prev, [qId]: '' }));
-      setAnswers((prev) => ({
-        ...prev,
-        [qId]: { optionIds: [], customText: '', isSkipped: true },
-      }));
-      const isMulti = isMultipleChoiceQuestion(q);
-      if (qIdx < questions.length - 1 && !isMulti) {
-        setCurrentQuestionIndex(qIdx + 1);
-        setFocusedOptionIndex(0);
-      }
-    },
-    [questions],
-  );
-
   const handleCustomInputChange = useCallback(
     (value: string) => {
       if (isTextQuestion(currentQuestion)) {
@@ -157,8 +147,27 @@ export const HITLQuestionsBlock = ({
     [currentQuestion],
   );
 
+  const handleSkipToCustomInput = useCallback(
+    (questionId: string) => {
+      setCustomInputs((prev) => ({ ...prev, [questionId]: 'No preference' }));
+      setAnswers((prev) => ({
+        ...prev,
+        [questionId]: {
+          optionIds: [CUSTOM_OPTION_ID],
+          customText: 'No preference',
+          isSkipped: false,
+        },
+      }));
+      setFocusedOptionIndex(totalOptions - 1);
+      requestAnimationFrame(() => customInputRef.current?.focus());
+    },
+    [totalOptions],
+  );
+
   const handleKeyDown = useCallback(
     (e: KeyboardEvent) => {
+      if (!containerRef.current?.contains(document.activeElement)) return;
+
       const {
         currentQuestionIndex: qIdx,
         focusedOptionIndex: optIdx,
@@ -182,6 +191,7 @@ export const HITLQuestionsBlock = ({
       switch (e.key) {
         case KEYBOARD_KEYS.ARROW_DOWN: {
           preventUnlessTextField();
+          scrollDirectionRef.current = 'down';
           if (optIdx === lastOptionIdx) {
             if (qIdx < lastQuestionIdx) {
               setCurrentQuestionIndex((p) => p + 1);
@@ -194,6 +204,7 @@ export const HITLQuestionsBlock = ({
         }
         case KEYBOARD_KEYS.ARROW_UP: {
           preventUnlessTextField();
+          scrollDirectionRef.current = 'up';
           if (optIdx === 0) {
             if (qIdx > 0) {
               const prevIdx = qIdx - 1;
@@ -206,6 +217,11 @@ export const HITLQuestionsBlock = ({
           break;
         }
         case KEYBOARD_KEYS.ENTER: {
+          if (e.metaKey || e.ctrlKey) {
+            e.preventDefault();
+            submitRef.current?.();
+            return;
+          }
           preventUnlessTextField();
           if (isApprovalQuestion(q)) {
             selectApprovalAnswer(q.id, qIdx, optIdx === 0);
@@ -224,10 +240,12 @@ export const HITLQuestionsBlock = ({
           }
           break;
         }
-        case KEYBOARD_KEYS.ESCAPE:
+        case KEYBOARD_KEYS.ESCAPE: {
+          if (isApprovalQuestion(q)) return;
           e.preventDefault();
-          skipQuestion(q.id, qIdx);
+          handleSkipToCustomInput(q.id);
           break;
+        }
         default:
           if (
             targetIsTextField ||
@@ -244,7 +262,7 @@ export const HITLQuestionsBlock = ({
           appendPrintableToCustomInput(q.id, e.key, setCustomInputs, setAnswers);
       }
     },
-    [questions, selectAnswer, selectApprovalAnswer, skipQuestion],
+    [questions, selectAnswer, selectApprovalAnswer, handleSkipToCustomInput],
   );
 
   const handleSubmit = useCallback(async () => {
@@ -303,7 +321,7 @@ export const HITLQuestionsBlock = ({
           type: HITL_RESPONSE_TYPE.MULTIPLE_CHOICE,
           selected_options,
         };
-        if (question.allow_custom_input && customTrimmed) {
+        if (customTrimmed) {
           response.custom_input = customTrimmed;
         }
         return { entity_type, entity_id, response };
@@ -355,19 +373,27 @@ export const HITLQuestionsBlock = ({
     onSubmit,
   ]);
 
-  useEffect(() => {
-    const container = containerRef.current;
-    if (!container) return;
+  submitRef.current = () => void handleSubmit();
 
-    container.addEventListener('keydown', handleKeyDown);
-    return () => container.removeEventListener('keydown', handleKeyDown);
+  const hasAutoSubmittedRef = useRef(false);
+
+  const handleAutoSubmitApproval = useCallback(() => {
+    if (isAllApproval && allQuestionsAnswered && !hasAutoSubmittedRef.current) {
+      hasAutoSubmittedRef.current = true;
+      submitRef.current?.();
+    }
+  }, [isAllApproval, allQuestionsAnswered]);
+
+  useEffect(() => {
+    handleAutoSubmitApproval();
+  }, [handleAutoSubmitApproval]);
+
+  useEffect(() => {
+    document.addEventListener('keydown', handleKeyDown);
+    return () => document.removeEventListener('keydown', handleKeyDown);
   }, [handleKeyDown]);
 
-  useEffect(() => {
-    containerRef.current?.focus();
-  }, []);
-
-  useEffect(() => {
+  const syncStateRef = useCallback(() => {
     stateRef.current = {
       currentQuestionIndex,
       focusedOptionIndex,
@@ -379,11 +405,42 @@ export const HITLQuestionsBlock = ({
   }, [currentQuestionIndex, focusedOptionIndex, customInputs, totalOptions, currentQuestion, answers]);
 
   useEffect(() => {
-    if (!isApprovalQuestion(currentQuestion) && focusedOptionIndex === totalOptions - 1 && customInputRef.current) {
-      customInputRef.current.focus({ preventScroll: true });
-      customInputRef.current.select();
+    syncStateRef();
+  }, [syncStateRef]);
+
+  const handleFocusAndScroll = useCallback(() => {
+    const customInput = customInputRef.current;
+    const isOnCustomInput =
+      !isApprovalQuestion(currentQuestion) && focusedOptionIndex === totalOptions - 1 && customInput;
+
+    if (isOnCustomInput) {
+      customInput.focus({ preventScroll: true });
+      customInput.select();
+    } else {
+      containerRef.current?.focus({ preventScroll: true });
     }
-  }, [currentQuestion, focusedOptionIndex, totalOptions, currentQuestionIndex]);
+
+    const rafId = requestAnimationFrame(() => {
+      const scrollEl = scrollContainerRef.current?.getScrollElement();
+      const focusedEl = scrollEl?.querySelector<HTMLElement>('[data-hitl-focused]');
+      if (!scrollEl || !focusedEl) return;
+
+      const scrollRect = scrollEl.getBoundingClientRect();
+      const elRect = focusedEl.getBoundingClientRect();
+      const isFullyVisible = elRect.top >= scrollRect.top && elRect.bottom <= scrollRect.bottom;
+
+      if (!isFullyVisible) {
+        const block = scrollDirectionRef.current === 'down' ? 'start' : 'end';
+        focusedEl.scrollIntoView({ block, behavior: 'smooth' });
+      }
+    });
+
+    return () => cancelAnimationFrame(rafId);
+  }, [currentQuestion, focusedOptionIndex, totalOptions]);
+
+  useEffect(() => {
+    return handleFocusAndScroll();
+  }, [handleFocusAndScroll, currentQuestionIndex]);
 
   if (!questions.length) return null;
 
@@ -403,7 +460,7 @@ export const HITLQuestionsBlock = ({
           className='bg-BG_WHITE shadow-table-filter-menu relative flex flex-col overflow-hidden rounded-xl border border-gray-300'
           style={{ maxHeight: HITL_QUESTIONS_LAYOUT.PANEL_MAX_HEIGHT_PX }}
         >
-          <div ref={scrollContainerRef} className='min-h-0 w-full flex-1 overflow-y-auto'>
+          <ScrollContainer ref={scrollContainerRef} className='min-h-0 flex-1' scrollbarStyle='thin'>
             {questions.map((question, qIndex) => (
               <HITLQuestionItem
                 key={question.id}
@@ -424,17 +481,19 @@ export const HITLQuestionsBlock = ({
                 selectApprovalAnswer={selectApprovalAnswer}
                 selectAnswer={selectAnswer}
                 onCustomInputChange={handleCustomInputChange}
+                approvalAction={isHitlRespondLoading ? approvalAction : null}
               />
             ))}
-            <div className='shrink-0' style={{ height: HITL_QUESTIONS_LAYOUT.BOTTOM_INSET_PX }} />
-          </div>
+          </ScrollContainer>
 
-          <HITLQuestionsFooter
-            onSkip={() => skipQuestion(currentQuestion.id, currentQuestionIndex)}
-            onSubmit={() => void handleSubmit()}
-            submitDisabled={!allQuestionsAnswered}
-            isSubmitting={isHitlRespondLoading}
-          />
+          {!isAllApproval && (
+            <HITLQuestionsFooter
+              onSkip={() => handleSkipToCustomInput(currentQuestion.id)}
+              onSubmit={() => void handleSubmit()}
+              submitDisabled={!allQuestionsAnswered}
+              isSubmitting={isHitlRespondLoading}
+            />
+          )}
         </div>
       </div>
     </div>
