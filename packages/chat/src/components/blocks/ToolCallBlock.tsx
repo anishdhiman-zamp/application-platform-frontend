@@ -4,6 +4,7 @@ import {
   AccordionItem,
   AccordionTrigger,
   AnimatedTerminalIcon,
+  Button,
   ImageWithFallback,
   ScrollContainer,
   ShimmerText,
@@ -11,7 +12,7 @@ import {
 import { cn } from '@zamp-platform/ui/utils';
 import { safeJsonParse } from '@zamp-platform/utils';
 import { AlertCircle, Play } from 'lucide-react';
-import React, { FC, useCallback, useState } from 'react';
+import React, { useCallback, useState } from 'react';
 
 import IntegrationCardV2 from '@/modules/integrations/AllIntegrations/IntegrationCardV2';
 import type { IntegrationItem } from '@/types/api/integrations';
@@ -44,7 +45,7 @@ interface ToolCallBlockProps {
   /** Flat transparent shell (e.g. nested in a muted panel); keeps icons/connectors unlike `embedded`. */
   quietSurface?: boolean;
 }
-export const ToolCallBlock: FC<ToolCallBlockProps> = ({
+export const ToolCallBlock = ({
   payload,
   is_complete = true,
   toolResult,
@@ -55,7 +56,7 @@ export const ToolCallBlock: FC<ToolCallBlockProps> = ({
   embedded = false,
   quietSurface = false,
   showWatchButton = false,
-}) => {
+}: ToolCallBlockProps) => {
   const flatShell = embedded || quietSurface;
   const [internalAccordionOpen, setInternalAccordionOpen] = useState<boolean>(false);
   const isControlled = typeof isAccordionOpen === 'boolean';
@@ -155,13 +156,15 @@ export const ToolCallBlock: FC<ToolCallBlockProps> = ({
             </div>
 
             {showWatchButton && onWatchStream && isBrowserStreamingAvailable && (
-              <button
+              <Button
+                variant='ghost'
+                size='xsmall'
                 onClick={handleWatchToggle}
-                className='text-GRAY_900 hover:bg-GRAY_50 ml-auto flex items-center gap-1 rounded-full px-1.5 py-1 transition-colors'
+                className='ml-auto gap-1 rounded-full'
+                leadingIcon={<Play size={10} className='fill-current' />}
               >
-                <Play size={10} className='fill-current' />
-                <span className='f-11-500 whitespace-nowrap'>Watch</span>
-              </button>
+                Watch
+              </Button>
             )}
 
             {toolResult && toolResult.payload?.is_error && !showWatchButton && (
