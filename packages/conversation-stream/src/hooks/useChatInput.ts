@@ -244,7 +244,7 @@ export const useChatInput = ({
     ],
   );
 
-  const init = useCallback(async () => {
+  const init = async () => {
     const payload = createConversationPayload(
       resourceId,
       resourceType,
@@ -267,21 +267,7 @@ export const useChatInput = ({
     }
 
     onConversationCreated?.(response.conversation_id);
-  }, [
-    resourceId,
-    resourceType,
-    scopeId,
-    firstMessage,
-    currentUserName,
-    fileReferences,
-    scope,
-    annotationLocation,
-    annotationType,
-    llmModel,
-    autoLoopEnabled,
-    chatActions,
-    onConversationCreated,
-  ]);
+  };
 
   const handleSubmit = useCallback(() => {
     const trimmedValue = value.trim();
@@ -309,7 +295,7 @@ export const useChatInput = ({
     if (firstMessage && !conversationId) {
       init();
     }
-  }, [firstMessage, conversationId, init]);
+  }, [firstMessage, conversationId]);
 
   return {
     value,
