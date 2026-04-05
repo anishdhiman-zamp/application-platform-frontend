@@ -66,8 +66,7 @@ export const isQuestionAnswerComplete = (
   if (isMultipleChoiceQuestion(question)) {
     const realIds = (answer?.optionIds ?? []).filter((id) => id !== CUSTOM_OPTION_ID);
     const customText = (answer?.customText ?? '').trim();
-    const hasCustomAnswer = Boolean(question.allow_custom_input && customText.length > 0);
-    return realIds.length > 0 || hasCustomAnswer;
+    return realIds.length > 0 || customText.length > 0;
   }
 
   const ids = answer?.optionIds ?? [];
@@ -75,12 +74,8 @@ export const isQuestionAnswerComplete = (
   const customText = (answer?.customText ?? '').trim();
   const realIds = ids.filter((id) => id !== CUSTOM_OPTION_ID);
 
-  if (hasCustom && customText.length > 0) {
-    return question.allow_custom_input !== false;
-  }
-  if (!hasCustom && realIds.length === 1) {
-    return true;
-  }
+  if (hasCustom && customText.length > 0) return true;
+  if (!hasCustom && realIds.length === 1) return true;
   return false;
 };
 
@@ -88,8 +83,7 @@ export const optionCountForQuestion = (question: HITLQuestionWithEntity): number
   if (isTextQuestion(question)) return 1;
   if (isApprovalQuestion(question)) return 2;
   const opts = question.options ?? [];
-  const allowCustom = question.allow_custom_input ?? false;
-  return opts.length + (allowCustom ? 1 : 0);
+  return opts.length + 1;
 };
 
 export const lastOptionFocusIndex = (question: HITLQuestionWithEntity): number => {
