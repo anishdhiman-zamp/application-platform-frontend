@@ -10,6 +10,7 @@ import { useIsPaceChatEnabled } from '@/hooks/useIsPaceChatEnabled';
 import PaceLayoutContent from '@/modules/pace/components/layout/PaceLayoutContent';
 import { FileViewerProvider } from '@/modules/pace/context/FileViewerContext';
 import useDataPrefetch from '@/modules/pace/hooks/useDataPrefetch';
+import { useFilesystemStatus } from '@/modules/pace/hooks/useFilesystemStatus';
 import { PaceProvider } from '@/modules/pace/pace.context';
 
 interface PaceLayoutProps {
@@ -18,22 +19,22 @@ interface PaceLayoutProps {
 
 const PaceLayout: FC<PaceLayoutProps> = ({ children }) => {
   const { isEnabled: isPaceChatEnabled, isLoading } = useIsPaceChatEnabled();
-  // const {
-  //   isFilesystemActive,
-  //   isFilesystemStatusLoading,
-  //   isFilesystemError,
-  //   refetch: refetchStatus,
-  // } = useFilesystemStatus();
+  const {
+    isFilesystemActive,
+    isFilesystemStatusLoading,
+    isFilesystemError,
+    refetch: refetchStatus,
+  } = useFilesystemStatus();
 
   useDataPrefetch();
 
-  const isPageLoading = isLoading;
+  const isPageLoading = isLoading || isFilesystemStatusLoading || (!isFilesystemActive && !isFilesystemError);
 
   return (
     <CommonWrapper
       isLoading={isPageLoading}
-      isError={false}
-      refetchFunction={() => {}}
+      isError={isFilesystemError}
+      refetchFunction={refetchStatus}
       skeletonType={SkeletonTypes.CUSTOM}
       loader={<ImageLoader imageSrc={ZAMP_LOGO_LOADER_SVG} width={140} height={140} />}
       className='h-full'
