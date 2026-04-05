@@ -51,6 +51,7 @@ const ChatConversationContent = ({
     usePaceContext();
   const {
     messages,
+    hasMessages,
     conversationId: ctxConversationId,
     isCreatingConversationV2,
     isLoadingConversationHistory,
@@ -63,7 +64,6 @@ const ChatConversationContent = ({
 
   const [isTaskPopoverOpen, setIsTaskPopoverOpen] = useState(false);
 
-  const hasMessages = useMemo(() => messages.length > 0, [messages]);
   const isInConversation = Boolean(conversationId || ctxConversationId || hasMessages || streamingState?.is_active);
   const lastMessageSenderType = useMemo(() => messages[messages.length - 1]?.sender_type, [messages]);
   const isLoadingConversation =

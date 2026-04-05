@@ -361,6 +361,7 @@ export const ConversationProvider: React.FC<ConversationProviderProps> = ({
   const stateValue: ConversationState = useMemo(
     () => ({
       messages,
+      hasMessages: messages.length > 0,
       conversationId: _conversationId,
       isStreaming,
       isStopping,
