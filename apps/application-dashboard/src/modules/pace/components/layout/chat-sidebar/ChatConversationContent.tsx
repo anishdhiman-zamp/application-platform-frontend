@@ -1,6 +1,6 @@
 'use client';
 
-import { FC, useEffect, useMemo, useRef, useState } from 'react';
+import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import {
   ChatActionsProvider,
   createConversationPayload,
@@ -8,13 +8,12 @@ import {
   MessageContainer,
   ResourceType,
   ScopeType,
-  SenderType,
-  useChat,
   useFileDragDrop,
+  useStreamingState,
 } from '@zamp-platform/chat';
+import { useConversationActions, useConversationState } from '@zamp-platform/conversation-stream';
 import { ScrollContainer } from '@zamp-platform/ui';
 import { cn } from '@zamp-platform/ui/utils';
-import type { ChatState } from 'modules/pace/components/layout/chat-sidebar/ChatSidebarInner';
 import NewPaceIcons from '@/assets/Icons/NewPaceIcons';
 import CommonWrapper from '@/components/commonWrapper';
 import { SkeletonTypes } from '@/components/commonWrapper/commonWrapper.types';
@@ -26,80 +25,72 @@ import { addAutoLoopLockedConversation } from '@/modules/pace/utils/autoLoopStor
 
 export interface ChatConversationContentProps {
   conversationId: string | null;
-  setConversationId: (id: string | null, title?: string) => void;
-  setChatTitle: (title: string) => void;
-  chatTitle: string;
   organizationId: string;
   onFileOpen: (path: string, name: string) => void;
   onTaskOpen?: (name: string, path: string) => void;
+  onBrowserOpen?: (conversationId: string) => void;
   onTaskPopoverOpenChange?: (open: boolean) => void;
-  isOnChatRoute: boolean;
-  onChatStateChange: (state: ChatState) => void;
   fileDropHandlerRef: React.RefObject<((files: FileList) => void) | null>;
   addFileReferenceRef: React.RefObject<((ref: { path: string; name: string }) => void) | null>;
   currentUserName: string;
 }
 
-const ChatConversationContent: FC<ChatConversationContentProps> = ({
+const ChatConversationContent = ({
   conversationId,
-  setConversationId,
-  setChatTitle,
-  chatTitle,
   organizationId,
   onFileOpen,
   onTaskOpen,
+  onBrowserOpen,
   onTaskPopoverOpenChange,
-  isOnChatRoute,
-  onChatStateChange,
   fileDropHandlerRef,
   addFileReferenceRef,
   currentUserName,
-}) => {
+}: ChatConversationContentProps) => {
   const pendingPayloadConsumedRef = useRef(false);
-  const { pendingFileReference, clearPendingFileReference, pendingConversationPayload, setPendingConversationPayload } =
-    usePaceContext();
-
   const taskStatusContainerRef = useRef<HTMLDivElement>(null);
 
+  const { pendingFileReference, clearPendingFileReference, pendingConversationPayload, setPendingConversationPayload } =
+    usePaceContext();
+  const {
+    messages,
+    hasMessages,
+    conversationId: ctxConversationId,
+    isCreatingConversationV2,
+    isLoadingConversationHistory,
+    isErrorConversationHistory,
+    isStreaming,
+    isBrowserStreamingAvailable,
+    taskSummaries,
+    isAnalysing,
+  } = useConversationState();
+  const { createConversationV2, refetchConversationHistory } = useConversationActions();
+  const streamingState = useStreamingState(conversationId ?? ctxConversationId);
+
   const [isTaskPopoverOpen, setIsTaskPopoverOpen] = useState(false);
+
+  const isInConversation = Boolean(conversationId || ctxConversationId || hasMessages || streamingState?.is_active);
+  const lastMessageSenderType = useMemo(() => messages[messages.length - 1]?.sender_type, [messages]);
+  const isLoadingConversation =
+    !streamingState?.is_active &&
+    (!hasMessages || Boolean(conversationId && isLoadingConversationHistory && !hasMessages));
+
+  const { isDragOver, dropZoneProps } = useFileDragDrop({
+    onFileDrop: (files) => fileDropHandlerRef.current?.(files),
+    disabled: isStreaming || isCreatingConversationV2,
+  });
+
+  const handleWatchStream = useCallback(() => {
+    const activeConversationId = conversationId ?? ctxConversationId;
+
+    if (activeConversationId) {
+      onBrowserOpen?.(activeConversationId);
+    }
+  }, [conversationId, ctxConversationId, onBrowserOpen]);
 
   const handleTaskPopoverOpenChange = (open: boolean) => {
     setIsTaskPopoverOpen(open);
     onTaskPopoverOpenChange?.(open);
   };
-
-  const chat = useChat({
-    resourceId: organizationId,
-    resourceType: ResourceType.ORGANIZATION,
-    conversationId: conversationId ?? undefined,
-    enableStreaming: true,
-    setHeader: (header: string) => {
-      if (!chatTitle) {
-        setChatTitle(header);
-      }
-    },
-  });
-  const chatRef = useRef(chat);
-
-  const hasMessages = useMemo(() => chat.messages.length > 0, [chat.messages]);
-  const isAnalysing = useMemo(() => {
-    return chat.messages.length > 0 && chat.messages[chat.messages.length - 1]?.sender_type === SenderType.USER;
-  }, [chat.messages]);
-  const isInConversation = Boolean(conversationId || chat.conversationId || hasMessages);
-  const showHomeView = isOnChatRoute && !isInConversation;
-  const lastMessageSenderType = useMemo(() => chat.messages[chat.messages.length - 1]?.sender_type, [chat.messages]);
-  const isLoadingConversation =
-    !hasMessages || Boolean(conversationId && chat.isLoadingConversationHistory && !hasMessages);
-  const { isDragOver, dropZoneProps } = useFileDragDrop({
-    onFileDrop: (files) => fileDropHandlerRef.current?.(files),
-    disabled: chat.isStreaming || chat.isCreatingConversationV2,
-  });
-
-  useEffect(() => {
-    if (chat.conversationId && chat.conversationId !== conversationId) {
-      setConversationId(chat.conversationId, chatTitle);
-    }
-  }, [chat.conversationId, setConversationId, chatTitle, conversationId]);
 
   useEffect(() => {
     if (pendingFileReference && addFileReferenceRef.current) {
@@ -107,10 +98,6 @@ const ChatConversationContent: FC<ChatConversationContentProps> = ({
       clearPendingFileReference();
     }
   }, [pendingFileReference, clearPendingFileReference, addFileReferenceRef]);
-
-  useEffect(() => {
-    onChatStateChange({ chat, isInConversation, showHomeView, inputsRequired: chat.inputsRequired });
-  }, [chat, isInConversation, showHomeView, onChatStateChange, chat.inputsRequired]);
 
   useEffect(() => {
     if (pendingConversationPayload && !pendingPayloadConsumedRef.current && !conversationId) {
@@ -132,7 +119,7 @@ const ChatConversationContent: FC<ChatConversationContentProps> = ({
       const shouldLockAutoLoop = pendingConversationPayload.autoLoopEnabled;
 
       setPendingConversationPayload(null);
-      chat.createConversationV2(payload).then((response) => {
+      createConversationV2(payload).then((response) => {
         if (shouldLockAutoLoop && response?.conversation_id) {
           addAutoLoopLockedConversation(response.conversation_id);
         }
@@ -143,16 +130,18 @@ const ChatConversationContent: FC<ChatConversationContentProps> = ({
     conversationId,
     organizationId,
     currentUserName,
-    chat,
+    createConversationV2,
     setPendingConversationPayload,
   ]);
 
-  useEffect(() => {
-    chatRef.current = chat;
-  });
-
   return (
-    <ChatActionsProvider onFileOpen={onFileOpen} onTaskOpen={onTaskOpen}>
+    <ChatActionsProvider
+      onFileOpen={onFileOpen}
+      onTaskOpen={onTaskOpen}
+      onWatchStream={handleWatchStream}
+      isBrowserStreamingAvailable={isBrowserStreamingAvailable}
+      taskSummaries={taskSummaries}
+    >
       <div className='relative flex min-h-0 w-full flex-1 flex-col overflow-hidden' {...dropZoneProps}>
         <DropOverlay isVisible={isDragOver} />
         <ScrollContainer
@@ -160,8 +149,8 @@ const ChatConversationContent: FC<ChatConversationContentProps> = ({
           enableAnchorScroll
           lastMessageSenderType={lastMessageSenderType}
           isLoading={isLoadingConversation}
-          streamingState={chat.streamingState}
-          scrollTrigger={chat.messages?.length}
+          streamingState={streamingState}
+          scrollTrigger={messages?.length}
           scrollClassName={cn(
             'bg-BG_WHITE transition-[filter] duration-200',
             isTaskPopoverOpen ? 'overflow-y-hidden blur-sm pointer-events-none' : 'overflow-y-scroll',
@@ -170,18 +159,18 @@ const ChatConversationContent: FC<ChatConversationContentProps> = ({
           {isInConversation ? (
             <CommonWrapper
               isLoading={isLoadingConversation}
-              isError={chat.isErrorConversationHistory}
-              refetchFunction={chat.refetchConversationHistory}
+              isError={isErrorConversationHistory}
+              refetchFunction={refetchConversationHistory}
               skeletonType={SkeletonTypes.CUSTOM}
               loader={<ChatMessagesSkeleton className='px-0' />}
               className='mx-auto flex w-full max-w-[700px] flex-1 flex-col px-3'
             >
               <MessageContainer
-                messages={chat.messages}
+                messages={messages}
                 isAnalysing={isAnalysing}
-                streamingState={chat.streamingState}
-                className='gap-4 px-0 [scrollbar-width:none]'
-                conversationId={conversationId ?? chat.conversationId ?? ''}
+                streamingState={streamingState}
+                className='gap-3 px-0 [scrollbar-width:none]'
+                conversationId={conversationId ?? ctxConversationId ?? ''}
                 assistantAvatar={<NewPaceAvatar />}
                 showTimestamp
                 showFeedback
@@ -202,9 +191,9 @@ const ChatConversationContent: FC<ChatConversationContentProps> = ({
       </div>
       <div ref={taskStatusContainerRef} className='bg-BG_WHITE sticky bottom-0 z-10 mx-auto w-full max-w-[700px] px-3'>
         <TaskStatusCounts
-          messages={chat.messages}
-          streamingState={chat.streamingState}
-          conversationId={conversationId ?? chat.conversationId ?? ''}
+          messages={messages}
+          streamingState={streamingState}
+          conversationId={conversationId ?? ctxConversationId ?? ''}
           containerRef={taskStatusContainerRef}
           onOpenChange={handleTaskPopoverOpenChange}
         />

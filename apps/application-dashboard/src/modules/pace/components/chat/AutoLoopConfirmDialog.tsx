@@ -28,10 +28,10 @@ const AutoLoopConfirmDialog: FC<AutoLoopConfirmDialogProps> = ({ isOpen, onOpenC
     <Dialog open={isOpen} onOpenChange={onOpenChange}>
       <DialogContent size='small' showCloseButton className='w-[400px] outline-none'>
         <DialogHeader>
-          <DialogHeaderTitle>Enable Auto-loop</DialogHeaderTitle>
+          <DialogHeaderTitle>Enable Autopilot</DialogHeaderTitle>
         </DialogHeader>
         <DialogBody className='f-14-400 p-5'>
-          This will switch the conversation to Auto-loop mode. Once enabled, it stays on for the rest of this chat and
+          This will switch the conversation to Autopilot mode. Once enabled, it stays on for the rest of this chat and
           cannot be turned off. You can start a new conversation at any time to go back to the default mode.
         </DialogBody>
         <DialogFooter className='flex justify-end gap-2.5'>

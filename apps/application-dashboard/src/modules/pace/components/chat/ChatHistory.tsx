@@ -1,7 +1,7 @@
 'use client';
 
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
-import { ResourceType, useActiveStreamingIds } from '@zamp-platform/chat';
+import { ResourceType, unreadStore, useActiveStreamingIds, useUnreadConversations } from '@zamp-platform/chat';
 import { useInfiniteScroll } from '@zamp-platform/tanstack-table';
 import { Button, Input } from '@zamp-platform/ui';
 import { cn } from '@zamp-platform/ui/utils';
@@ -23,6 +23,7 @@ const SEARCH_DEBOUNCE_MS = 300;
 interface ChatHistoryProps {
   onSelectConversation: (id: string | null, title?: string) => void;
   onDeleteConversation?: (id: string) => void;
+  onRenameConversation?: (id: string, newTitle: string) => void;
   activeConversationId?: string | null;
   compact?: boolean;
 }
@@ -30,12 +31,14 @@ interface ChatHistoryProps {
 const ChatHistory = ({
   onSelectConversation,
   onDeleteConversation,
+  onRenameConversation,
   activeConversationId,
   compact = false,
 }: ChatHistoryProps) => {
   const organizationId = useAppSelector((state: RootState) => state?.user?.user?.orgs?.[0]?.organization_id) ?? '';
   const containerRef = useRef<HTMLDivElement>(null);
   const activeStreamingIds = useActiveStreamingIds();
+  const unreadIds = useUnreadConversations();
 
   const [page, setPage] = useState(1);
   const [allConversations, setAllConversations] = useState<FeedbackItemType[]>([]);
@@ -62,17 +65,21 @@ const ChatHistory = ({
     },
     {
       skip: !organizationId,
-      refetchOnMountOrArgChange: true,
     },
   );
 
   const conversations = useMemo(() => conversationHistory?.conversations ?? [], [conversationHistory]);
-  const displayConversations = useMemo(() => {
-    const source = allConversations.length > 0 ? allConversations : conversations;
-
-    return [...source].sort((a, b) => new Date(b.updated_at).getTime() - new Date(a.updated_at).getTime());
-  }, [allConversations, conversations]);
+  const displayConversations = useMemo(
+    () => (allConversations.length > 0 ? allConversations : conversations),
+    [allConversations, conversations],
+  );
   const hasMore = allConversations.length < totalCount;
+  const isInitialLoading =
+    displayConversations.length === 0 &&
+    (isLoadingConversationHistory || isUninitializedConversationHistory) &&
+    page === 1;
+  const isEmptyState =
+    displayConversations.length === 0 && !isLoadingConversationHistory && !isFetchingConversationHistory;
 
   const fetchNextPage = useCallback(() => {
     if (!isFetchingConversationHistory && hasMore) {
@@ -102,6 +109,14 @@ const ChatHistory = ({
     refetchConversationHistory();
   }, [refetchConversationHistory]);
 
+  const handleSelectConversation = useCallback(
+    (id: string | null, title?: string) => {
+      if (id) unreadStore.markRead(id);
+      onSelectConversation(id, title);
+    },
+    [onSelectConversation],
+  );
+
   const handleSearchChange = useCallback((e: React.ChangeEvent<HTMLInputElement>) => {
     setSearchTerm(e.target.value);
   }, []);
@@ -115,7 +130,7 @@ const ChatHistory = ({
 
   const handleDeleteConversation = useCallback(
     (id: string) => {
-      setAllConversations((prev) => prev.filter((c) => c.id !== id));
+      setAllConversations((prev) => prev.filter((conversation) => conversation.id !== id));
       setTotalCount((prev) => Math.max(0, prev - 1));
       onDeleteConversation?.(id);
     },
@@ -127,9 +142,15 @@ const ChatHistory = ({
     setTotalCount((prev) => prev + 1);
   }, []);
 
-  const handleRenameConversation = useCallback((id: string, newTitle: string) => {
-    setAllConversations((prev) => prev.map((c) => (c.id === id ? { ...c, title: newTitle } : c)));
-  }, []);
+  const handleRenameConversation = useCallback(
+    (id: string, newTitle: string) => {
+      setAllConversations((prev) =>
+        prev.map((conversation) => (conversation.id === id ? { ...conversation, title: newTitle } : conversation)),
+      );
+      onRenameConversation?.(id, newTitle);
+    },
+    [onRenameConversation],
+  );
 
   useEffect(() => {
     setPage(1);
@@ -193,15 +214,12 @@ const ChatHistory = ({
         )}
       </div>
       <CommonWrapper
-        isLoading={
-          ((isLoadingConversationHistory || isUninitializedConversationHistory) && page === 1) ||
-          (isFetchingConversationHistory && !!debouncedSearch && page === 1)
-        }
+        isLoading={isInitialLoading}
         skeletonType={SkeletonTypes.CUSTOM}
         loader={<ChatHistorySkeleton />}
         refetchFunction={handleRefetch}
         isError={isErrorConversationHistory}
-        isNoData={displayConversations.length === 0 && !isLoadingConversationHistory && !isFetchingConversationHistory}
+        isNoData={isEmptyState}
         noDataBanner={
           <EmptyStateListing
             title={debouncedSearch ? 'No matching conversations' : 'No conversations found'}
@@ -217,9 +235,10 @@ const ChatHistory = ({
               <ChatHistoryItem
                 key={conversation?.id}
                 conversation={conversation}
-                onSelect={onSelectConversation}
+                onSelect={handleSelectConversation}
                 isStreaming={activeStreamingIds.has(conversation?.id)}
                 isSelected={activeConversationId === conversation?.id}
+                isUnread={unreadIds.has(conversation?.id)}
                 organizationId={organizationId}
                 onDelete={handleDeleteConversation}
                 onDeleteFailure={handleDeleteConversationFailure}

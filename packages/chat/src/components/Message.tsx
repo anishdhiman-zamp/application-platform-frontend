@@ -4,7 +4,7 @@ import { useScrollRef } from '@zamp-platform/ui';
 import { cn } from '@zamp-platform/ui/utils';
 import { formatChatTimestamp, formatChatTimestampTooltip, formatTimestampToUTC } from '@zamp-platform/utils';
 import { motion } from 'motion/react';
-import React, { FC, ReactNode, useCallback, useEffect, useMemo, useRef, useState } from 'react';
+import { FC, ReactNode, useCallback, useEffect, useMemo, useRef, useState } from 'react';
 
 import { defaultFnType } from '@/types/commonTypes';
 
@@ -36,6 +36,7 @@ export interface MessageProps {
   showMarkdownConnectors?: boolean;
   showConnectorToLastBlock?: boolean;
   showConnectorToNextBlock?: boolean;
+  embeddedInStepSummary?: boolean;
 }
 
 export const USER_MESSAGE_MAX_HEIGHT = 240;
@@ -61,6 +62,7 @@ export const Message: FC<MessageProps> = ({
   showMarkdownConnectors = false,
   showConnectorToLastBlock = false,
   showConnectorToNextBlock = false,
+  embeddedInStepSummary = false,
 }) => {
   const cleanupRef = useRef<defaultFnType | null>(null);
   const contentRef = useRef<HTMLDivElement>(null);
@@ -168,7 +170,10 @@ export const Message: FC<MessageProps> = ({
 
       <div
         className={cn(
-          message.sender_type === SenderType.ASSISTANT && 'relative w-full max-w-[min(100%,700px)] min-w-0',
+          message.sender_type === SenderType.ASSISTANT &&
+            (embeddedInStepSummary
+              ? 'relative w-full max-w-none min-w-0'
+              : 'relative w-full max-w-[min(100%,700px)] min-w-0'),
           isUserMessage && userBubbleLayoutClassName,
           shouldAlignRight && primaryBlockType === BLOCK_TYPE.MARKDOWN && 'bg-GRAY_100',
           shouldAlignRight && isUserMessage && 'rounded-[10px] px-4 py-3',
@@ -197,6 +202,7 @@ export const Message: FC<MessageProps> = ({
             showMarkdownConnectors={showMarkdownConnectors}
             showConnectorToLastBlock={showConnectorToLastBlock}
             showConnectorToNextBlock={showConnectorToNextBlock}
+            embeddedInStepSummary={embeddedInStepSummary}
           />
         </div>
         {isUserMessage && isOverflowing && !isExpanded && (
@@ -214,8 +220,10 @@ export const Message: FC<MessageProps> = ({
       {streamingEnabled && (
         <div
           className={cn(
-            'flex items-center',
-            isLastMessage ? 'visible' : 'invisible group-hover:visible',
+            'flex items-center transition-opacity duration-200',
+            isLastMessage && message.sender_type === SenderType.ASSISTANT
+              ? 'opacity-100'
+              : 'opacity-0 group-hover:opacity-100',
             shouldAlignRight && 'mt-0',
           )}
         >

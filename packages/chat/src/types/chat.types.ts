@@ -121,6 +121,7 @@ export interface ChatMessage {
   id?: string;
   conversation_id?: string;
   llm_model?: string;
+  state?: MessageState;
   pev_enabled?: boolean;
 }
 
@@ -227,12 +228,23 @@ export enum SummaryStatus {
   COMPLETED = 'completed',
 }
 
+/** One grouped step summary for a slice of message elements (HITL / task summary `step_groups`). */
+export interface ConversationSummaryStepGroup {
+  summary: string;
+  element_ids: string[];
+}
+
 export interface ConversationSummary {
   status: SummaryStatus;
   content?: string;
   live_lines?: string[];
   generated_at?: string;
   updated_at?: string;
+  /**
+   * Step groups keyed by assistant message id. Each value lists groups for that message only.
+   * Legacy shape: a flat array (all groups, any message) — see `resolveStepGroups` in the app.
+   */
+  step_groups?: Record<string, ConversationSummaryStepGroup[]> | ConversationSummaryStepGroup[];
 }
 
 export interface ConversationType {
@@ -258,6 +270,12 @@ export interface ConversationType {
 export interface ConversationMessageContentType {
   elements: Block[];
 }
+
+export const enum MessageState {
+  STREAMING = 'STREAMING',
+  DONE = 'DONE',
+}
+
 export interface ConversationMessageType {
   id: string;
   organization_id: string;
@@ -265,6 +283,7 @@ export interface ConversationMessageType {
   sender_id: string;
   sender_type: SenderType;
   sender_name: string;
+  state: MessageState;
   intent: string | null;
   content: ConversationMessageContentType;
   created_at: string;
@@ -321,6 +340,18 @@ export interface GetFileDownloadUrlResponseType {
 export interface GetOutputFileDownloadRequestType {
   conversationId: string;
   filename: string;
+}
+
+export interface GetBrowserLiveViewNovncRequestType {
+  conversationId: string;
+  sessionId: string;
+}
+
+export interface BrowserLiveViewNovncResponseType {
+  novnc_url: string;
+  /** Same-origin Pantheon proxy for iframes; falls back to novnc_url if absent. */
+  proxy_iframe_url?: string | null;
+  expires_in_seconds: number;
 }
 
 /**
@@ -493,20 +524,31 @@ export interface HITLSourceEntity {
 
 export interface HITLResponseSelectOne {
   type: typeof HITL_RESPONSE_TYPE.SELECT_ONE;
-  selected_option: string;
+  selected_option: string | null;
+  custom_input?: string | null;
+  is_skipped?: boolean;
 }
 
-export interface HITLResponseFreeText {
-  type: typeof HITL_RESPONSE_TYPE.FREE_TEXT;
-  free_text: string;
+export interface HITLResponseMultipleChoice {
+  type: typeof HITL_RESPONSE_TYPE.MULTIPLE_CHOICE;
+  selected_options: string[];
+  custom_input?: string | null;
+  is_skipped?: boolean;
 }
 
 export interface HITLResponseApproval {
   type: typeof HITL_RESPONSE_TYPE.APPROVAL;
   approved: boolean;
+  is_skipped?: boolean;
 }
 
-export type HITLResponse = HITLResponseSelectOne | HITLResponseFreeText | HITLResponseApproval;
+export interface HITLResponseText {
+  type: typeof HITL_RESPONSE_TYPE.TEXT;
+  text: string;
+  is_skipped?: boolean;
+}
+
+export type HITLResponse = HITLResponseSelectOne | HITLResponseMultipleChoice | HITLResponseApproval | HITLResponseText;
 
 export interface HITLResponseItem {
   entity_type: string;

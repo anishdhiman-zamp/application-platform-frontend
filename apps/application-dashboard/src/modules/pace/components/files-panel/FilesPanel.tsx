@@ -25,6 +25,7 @@ const FilesPanel = () => {
     filesPanelPinned,
     filesPanelWidth,
     isFilesPanelResizing,
+    isFilesPanelHydrated,
     toggleFilesPanel,
     scheduleFilesPanelClose,
     cancelFilesPanelClose,
@@ -100,7 +101,7 @@ const FilesPanel = () => {
         {filesPanelOpen && (
           <motion.div
             ref={panelRef}
-            initial={{ x: FILES_PANEL_MAX_WIDTH, opacity: 0, width: filesPanelWidth }}
+            initial={isFilesPanelHydrated ? { x: FILES_PANEL_MAX_WIDTH, opacity: 0, width: filesPanelWidth } : false}
             animate={{
               x: 0,
               opacity: 1,

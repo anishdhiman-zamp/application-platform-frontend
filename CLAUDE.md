@@ -86,14 +86,6 @@ make sync-from-main   # Stash changes, checkout main, pull, sync secrets, instal
 
 ### Next.js 16 Specifics
 
-<<<<<<< HEAD
-
-- **React 19.2** with React Compiler enabled (auto-memoization)
-- **Turbopack** for dev, webpack for production builds (`npm run build` uses `--webpack`)
-- **Output: standalone** for Docker containerization
-- **Async params/searchParams** — In server components, `params` and `searchParams` must be awaited (Next.js 16 breaking change)
-- **No middleware.ts** — Use proxy.ts pattern instead
-- # **`'use client'`** — Only when necessary; prefer Server Components
 - **React 19.2** with React Compiler enabled (auto-memoization, `reactCompiler: true` in next.config)
 - **Turbopack** is default for dev; webpack for production builds (`npm run build` uses `--webpack`)
 - **Output: standalone** for Docker containerization
@@ -102,7 +94,6 @@ make sync-from-main   # Stash changes, checkout main, pull, sync secrets, instal
 - **`'use client'`** — Only when necessary; prefer Server Components
 - **Removed features** — AMP support, `next lint` (use ESLint directly), `serverRuntimeConfig`/`publicRuntimeConfig`, `next/legacy/image`
 - **Caching** — `use cache` directive with `cacheTag()`, `updateTag()`, `revalidateTag()`, `refresh()` (stable, no `unstable_` prefix)
-  > > > > > > > 04806939d99d88184d82eabc30823440eea455e2
 
 ### TypeScript
 
@@ -114,6 +105,10 @@ make sync-from-main   # Stash changes, checkout main, pull, sync secrets, instal
 - Use discriminated unions for widget types and API responses
 - Prefix event handlers with `handle` (e.g., `handleClick`, `handleSubmit`)
 - Prefix boolean variables with auxiliary verbs (`isLoading`, `hasError`)
+
+### Component Typing
+
+- Do not use `React.FC` or `React.FunctionComponent` to type components; type props inline via the props interface (e.g. `({ prop }: Props) => { ... }`)
 
 ### Component Internal Structure
 
@@ -145,6 +140,73 @@ When a `useEffect` has more than a single statement, extract the logic into a na
 ### API Pattern
 
 All API endpoints use RTK Query's `injectEndpoints()` with cache tags and `transformResponse` for normalization. Endpoint constants centralized in `apiEndpoint.constants.ts`. Use template variables (`{{organizationId}}`, `{{widgetId}}`) with `formRequestUrlWithParams`.
+
+### End-to-End QA with browser-use
+
+After building any user-facing feature, **always** run a full end-to-end integration test using the `browser-use` CLI skill before marking the work as done. This is not optional — visual inspection alone is insufficient.
+
+**Setup:**
+
+```bash
+pip install --break-system-packages browser-use playwright
+playwright install chromium
+playwright install-deps chromium
+```
+
+**Coder workspace URL:** Construct from environment variables:
+
+```
+https://3000--${CODER_WORKSPACE_AGENT_NAME}--${CODER_WORKSPACE_NAME}--${CODER_WORKSPACE_OWNER_NAME}.${CODER_DOMAIN}
+```
+
+> **If the port-forwarded URL (port 3000) is not accessible**, ask the user to configure it in their Coder workspace settings. This is a manual step that only the user can perform — you cannot set up port forwarding.
+
+**Login flow (must complete before testing authenticated pages):**
+
+```bash
+browser-use open "<coder-url>/login"
+browser-use state                          # Find email input index
+browser-use input <idx> "admin@zamp.ai"
+browser-use eval "document.querySelector('button[type=submit]').click(); 'ok'"
+# Wait for method selection, click "Sign in with Password"
+browser-use click <password-btn-idx>
+# Fill email + password, click submit
+browser-use input <email-idx> "admin@zamp.ai"
+browser-use input <pwd-idx> 'Zamp@123Zamp@!@#'
+browser-use eval "document.querySelector('button[type=submit]').click(); 'ok'"
+# Wait 8s for redirect, then navigate to target page
+```
+
+**QA checklist — test ALL of these for every feature:**
+
+1. **Page renders** — `browser-use screenshot` + verify title, key elements via `browser-use state`
+2. **All interactive elements present** — buttons, inputs, dropdowns, tabs all appear in `browser-use state`
+3. **Full interaction flow** — don't just verify elements exist, actually interact:
+   - Fill every input field (`browser-use input <idx> "value"`)
+   - Click every button (`browser-use click <idx>`)
+   - Verify the result (screenshot + state check)
+4. **Form submission** — fill form → submit → verify success (dialog closes, list updates, toast appears)
+5. **Dark mode** — toggle via `browser-use eval "document.documentElement.classList.add('dark'); document.body.classList.add('dark-mode')"` and screenshot
+6. **Error states** — test with invalid input, verify error messages appear
+7. **Empty states** — verify empty state messaging when no data exists
+8. **API integration** — verify API calls succeed by checking that data appears after creation
+
+**Critical rule:** Never mark QA as "done" after only visual checks. The #1 failure mode is verifying a modal opens but not testing the full submit flow.
+
+**browser-use commands reference:**
+
+```bash
+browser-use open <url>              # Navigate
+browser-use state                   # Get interactive elements with indices
+browser-use click <index>           # Click element
+browser-use input <index> "text"    # Fill input
+browser-use type "text"             # Type into focused element
+browser-use keys "Enter"            # Press key
+browser-use screenshot [path.png]   # Take screenshot
+browser-use eval "js code"          # Execute JavaScript
+browser-use get title               # Page title
+browser-use close                   # Close browser
+```
 
 ### Git & PR Workflow
 

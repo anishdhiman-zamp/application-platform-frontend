@@ -1,18 +1,21 @@
 'use client';
 
 import '../code-highlight.css';
+import '../streaming-reveal.css';
 
 import { Book, CopyToClipboard } from '@zamp-platform/ui';
 import type { Element, RootContent } from 'hast';
 import { common, createLowlight } from 'lowlight';
 import { Copy } from 'lucide-react';
 import Link from 'next/link';
-import React, { Children, isValidElement, ReactNode } from 'react';
+import React, { Children, isValidElement, ReactNode, useMemo } from 'react';
 import ReactMarkdown from 'react-markdown';
 import rehypeSlug from 'rehype-slug';
 import remarkGfm from 'remark-gfm';
 
 import { useChatActions } from '../../context/ChatActionsContext';
+import { useTypewriter } from '../../hooks/useTypewriter';
+import { rehypeStreamReveal } from '../../plugins/rehypeStreamReveal';
 
 const lowlight = createLowlight(common);
 
@@ -75,9 +78,10 @@ interface MarkdownBlockProps {
   payload: {
     text: string;
   };
+  isStreaming?: boolean;
 }
 
-export const MarkdownBlock: React.FC<MarkdownBlockProps> = ({ payload }) => {
+export const MarkdownBlock: React.FC<MarkdownBlockProps> = ({ payload, isStreaming = false }) => {
   const { onFileOpen } = useChatActions();
 
   const handleFileOpen = (filePath: string, fileName: string) => {
@@ -87,6 +91,13 @@ export const MarkdownBlock: React.FC<MarkdownBlockProps> = ({ payload }) => {
     }
   };
 
+  const { text, isAnimating } = useTypewriter(payload.text, undefined, isStreaming);
+
+  const rehypePlugins = useMemo(
+    () => (isStreaming || isAnimating ? [rehypeSlug, rehypeStreamReveal] : [rehypeSlug]),
+    [isStreaming, isAnimating],
+  );
+
   return (
     <div
       className='max-w-chat-prose text-GRAY_950 overflow-hidden text-sm leading-[1.667] font-[420] wrap-break-word'
@@ -94,7 +105,7 @@ export const MarkdownBlock: React.FC<MarkdownBlockProps> = ({ payload }) => {
     >
       <ReactMarkdown
         remarkPlugins={[remarkGfm]}
-        rehypePlugins={[rehypeSlug]}
+        rehypePlugins={rehypePlugins}
         urlTransform={urlTransform}
         components={{
           h1: ({ children }) => (
@@ -217,7 +228,7 @@ export const MarkdownBlock: React.FC<MarkdownBlockProps> = ({ payload }) => {
           },
         }}
       >
-        {payload.text}
+        {text}
       </ReactMarkdown>
     </div>
   );

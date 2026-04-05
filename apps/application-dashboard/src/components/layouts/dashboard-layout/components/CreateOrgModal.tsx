@@ -21,8 +21,8 @@ import { KEYBOARD_KEYS } from '@/constants/shortcuts';
 import { useAppDispatch, useAppSelector } from '@/hooks/toolkit';
 import { setUser } from '@/store/slices/user';
 import type { Organization } from '@/types/api/auth.types';
+import { formatExpectedDuration } from '@/utils/common';
 import { generateOrgIconSvg } from '@/utils/pixelArtGenerator';
-import { formatExpectedDuration } from '@/utils/time.utils';
 
 enum ModalStep {
   INPUT = 'input',

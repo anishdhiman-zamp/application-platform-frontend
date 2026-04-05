@@ -1,5 +1,6 @@
 'use client';
 
+import BrowserTabsContainer from 'modules/pace/components/browser-viewer/BrowserTabsContainer';
 import FileTabsContainer from 'modules/pace/components/file-viewer/FileTabsContainer';
 import { useAppSelector } from '@/hooks/toolkit';
 import ChatHomePage from '@/modules/pace/components/chat/ChatHomePage';
@@ -8,14 +9,17 @@ import { selectActiveTab } from '@/store/slices/dynamic-tabs.slice';
 
 const ChatPage = () => {
   const activeTab = useAppSelector(selectActiveTab);
-  const isFileTab = activeTab && (activeTab.type ?? TAB_TYPE.FILE) === TAB_TYPE.FILE;
-  const isNonFileTab = activeTab && !isFileTab;
+  const tabType = activeTab?.type ?? TAB_TYPE.FILE;
 
-  if (isFileTab) {
+  if (activeTab && tabType === TAB_TYPE.FILE) {
     return <FileTabsContainer />;
   }
 
-  if (isNonFileTab) {
+  if (activeTab && tabType === TAB_TYPE.BROWSER) {
+    return <BrowserTabsContainer />;
+  }
+
+  if (activeTab) {
     return null;
   }
 

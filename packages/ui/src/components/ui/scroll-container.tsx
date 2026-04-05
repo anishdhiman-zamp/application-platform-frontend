@@ -7,6 +7,7 @@ import React, {
   useContext,
   useEffect,
   useImperativeHandle,
+  useLayoutEffect,
   useRef,
   useState,
 } from 'react';
@@ -464,6 +465,45 @@ const ScrollContainer = forwardRef<ScrollContainerRef, ScrollContainerProps>(
     }, [scrollToBottom, enableAnchorScroll]);
 
     const showOverlays = showFadeOverlay && !disableFadeOverlay;
+
+    /** Fade overlays read `canScrollTop` / `canScrollBottom`; sync on mount and when content/size changes (not only after `scroll`). */
+    useLayoutEffect(() => {
+      if (!showOverlays) return;
+
+      const el = scrollRef.current;
+
+      if (!el) return;
+
+      let rafId: number | null = null;
+
+      const scheduleSync = () => {
+        if (rafId !== null) return;
+        rafId = requestAnimationFrame(() => {
+          rafId = null;
+          updateScrollState();
+        });
+      };
+
+      scheduleSync();
+
+      const resizeObserver = new ResizeObserver(scheduleSync);
+
+      resizeObserver.observe(el);
+
+      const mutationObserver = new MutationObserver(scheduleSync);
+
+      mutationObserver.observe(el, {
+        childList: true,
+        subtree: true,
+        characterData: true,
+      });
+
+      return () => {
+        if (rafId !== null) cancelAnimationFrame(rafId);
+        resizeObserver.disconnect();
+        mutationObserver.disconnect();
+      };
+    }, [showOverlays, updateScrollState]);
 
     return (
       <ScrollRefContext.Provider value={scrollRef}>

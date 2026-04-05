@@ -36,6 +36,7 @@ import {
   ThinkingBlock,
   ToolCallBlock,
 } from './blocks';
+import { BROWSER_TOOL_DISPLAY_NAMES } from './chat.constants';
 
 interface BlockRendererProps {
   message: BlockMessage;
@@ -49,6 +50,11 @@ interface BlockRendererProps {
   showMarkdownConnectors?: boolean;
   showConnectorToLastBlock?: boolean;
   showConnectorToNextBlock?: boolean;
+  embeddedInStepSummary?: boolean;
+  /** Thinking/tool blocks use a transparent shell so they sit flush on muted panels. */
+  quietSurface?: boolean;
+  /** With `showMarkdownConnectors`, still render the timeline dot on the last/only markdown block (e.g. step group accordion). */
+  alwaysShowMarkdownTimelineDot?: boolean;
 }
 
 export const BlockRenderer: React.FC<BlockRendererProps> = ({
@@ -62,6 +68,9 @@ export const BlockRenderer: React.FC<BlockRendererProps> = ({
   showMarkdownConnectors = false,
   showConnectorToLastBlock = false,
   showConnectorToNextBlock = false,
+  embeddedInStepSummary = false,
+  quietSurface = false,
+  alwaysShowMarkdownTimelineDot = false,
 }) => {
   const [openAccordionId, setOpenAccordionId] = useState<string | null>(null);
   const [elementValues, setElementValues] = useState<
@@ -122,6 +131,7 @@ export const BlockRenderer: React.FC<BlockRendererProps> = ({
 
   const isConnectedBlock = (block?: Block, isLastBlock?: boolean) => {
     if (!block) return false;
+    if (embeddedInStepSummary) return false;
     if (isThinkingOrToolUseBlock(block)) return true;
     const effectivelyLast = isLastBlock && !isStreaming;
 
@@ -141,6 +151,15 @@ export const BlockRenderer: React.FC<BlockRendererProps> = ({
       .filter((block) => block.type !== BLOCK_TYPE.TOOL_RESULT);
     return { messageBlocks, size: messageBlocks.length };
   }, [message.block]);
+
+  const firstBrowserToolOrder = useMemo(() => {
+    const block = messageBlocks.find((b) => {
+      if (b.type !== BLOCK_TYPE.TOOL_USE) return false;
+      const displayName = (b as ToolUseContentBlock).payload?.display_name || '';
+      return BROWSER_TOOL_DISPLAY_NAMES.some((n) => displayName.toLowerCase().includes(n.toLowerCase()));
+    });
+    return block?.order ?? -1;
+  }, [messageBlocks]);
 
   const renderBlock = (block: Block, index: number, nextBlock?: Block, previousBlock?: Block) => {
     const isLastBlock = index === size - 1;
@@ -162,6 +181,7 @@ export const BlockRenderer: React.FC<BlockRendererProps> = ({
 
       case BLOCK_TYPE.THINKING: {
         const thinking = block as ThinkingContentBlock;
+
         return (
           <ThinkingBlock
             key={thinking.id ?? `thinking-${thinking.order}-${thinking.start_timestamp}`}
@@ -170,6 +190,8 @@ export const BlockRenderer: React.FC<BlockRendererProps> = ({
             start_timestamp={thinking.start_timestamp}
             stop_timestamp={thinking.stop_timestamp}
             isAccordionOpen={isAccordionOpen}
+            embedded={embeddedInStepSummary}
+            quietSurface={quietSurface}
             onAccordionOpenChange={(isOpen) =>
               setOpenAccordionId((currentId) => {
                 if (isOpen) {
@@ -197,6 +219,8 @@ export const BlockRenderer: React.FC<BlockRendererProps> = ({
             is_complete={!nextBlock && isStreaming ? false : toolUseBlock.is_complete}
             toolResult={toolResult}
             isAccordionOpen={isAccordionOpen}
+            embedded={embeddedInStepSummary}
+            quietSurface={quietSurface}
             onAccordionOpenChange={(isOpen) =>
               setOpenAccordionId((currentId) => {
                 if (isOpen) {
@@ -208,6 +232,7 @@ export const BlockRenderer: React.FC<BlockRendererProps> = ({
             }
             showConnectorFromPrevious={showConnectorFromPrevious}
             showConnectorToNext={showConnectorToNext}
+            showWatchButton={toolUseBlock.order === firstBrowserToolOrder}
           />
         );
       }
@@ -221,7 +246,7 @@ export const BlockRenderer: React.FC<BlockRendererProps> = ({
         const textStartTs = 'start_timestamp' in textBlock ? textBlock.start_timestamp : undefined;
         const textKey = textBlock.id ?? `text-${textBlock.order}-${textStartTs ?? 'no-start-timestamp'}`;
 
-        if (showMarkdownConnectors && (!isLastBlock || isStreaming)) {
+        if (showMarkdownConnectors && (!isLastBlock || isStreaming || alwaysShowMarkdownTimelineDot)) {
           return (
             <div className='relative' key={textKey}>
               {showConnectorFromPrevious && (
@@ -245,7 +270,7 @@ export const BlockRenderer: React.FC<BlockRendererProps> = ({
             </div>
           );
         }
-        return <MarkdownBlock key={textKey} payload={textBlock.payload} />;
+        return <MarkdownBlock key={textKey} payload={textBlock.payload} isStreaming={isStreaming} />;
       }
 
       case BLOCK_TYPE.SINGLE_SELECT: {
