@@ -39,7 +39,7 @@ const StepGroupItem = ({ group }: StepGroupItemProps) => {
           </p>
           <div className='flex shrink-0 items-center'>
             <div className='text-GRAY_700 mr-1 text-[13px] leading-[1.667] font-[420] whitespace-nowrap'>
-              {group.stepCount} {formatPlural(group.stepCount, 'Step', 'Steps')}
+              {formatPlural(group.stepCount, 'Step', 'Steps')}
             </div>
             <ChevronDown className='step-chevron text-GRAY_700 size-3.5 shrink-0 transition-transform duration-200' />
           </div>
