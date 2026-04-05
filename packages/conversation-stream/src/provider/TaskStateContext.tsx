@@ -12,6 +12,8 @@ export interface TaskState {
   isErrorHistory: boolean;
   conversationData: unknown;
   inputsRequired: ConversationInputRequiredItem[] | undefined;
+  /** Latest summary text received from the per-task SSE channel. */
+  taskSummaryText: string | null;
 }
 
 export const TaskStateContext = createContext<TaskState | null>(null);

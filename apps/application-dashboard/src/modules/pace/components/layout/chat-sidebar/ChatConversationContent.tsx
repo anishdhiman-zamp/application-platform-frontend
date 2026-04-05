@@ -60,6 +60,7 @@ const ChatConversationContent: FC<ChatConversationContentProps> = ({
     isErrorConversationHistory,
     isStreaming,
     isBrowserStreamingAvailable,
+    taskSummaries,
   } = useConversationState();
   const { createConversationV2, refetchConversationHistory } = useConversationActions();
   const streamingState = useStreamingState(conversationId ?? ctxConversationId);
@@ -142,6 +143,7 @@ const ChatConversationContent: FC<ChatConversationContentProps> = ({
       onTaskOpen={onTaskOpen}
       onWatchStream={handleWatchStream}
       isBrowserStreamingAvailable={isBrowserStreamingAvailable}
+      taskSummaries={taskSummaries}
     >
       <div className='relative flex min-h-0 w-full flex-1 flex-col overflow-hidden' {...dropZoneProps}>
         <DropOverlay isVisible={isDragOver} />

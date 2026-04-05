@@ -90,11 +90,22 @@ export function handleTaskSSEEvent(taskId: string, event: AnyEvent, callbacks: T
 
       default:
         // Handle task-specific event_type field
-        if (eventType === TaskSSEEventType.TASK_UPDATE) {
-          const updatedFields = (event.updated_fields as Record<string, unknown>) || {};
-          callbacks.onTaskUpdate?.(taskId, updatedFields);
-        } else if (eventType === TaskSSEEventType.INPUT_REQUIRED) {
-          callbacks.onInputRequired?.(taskId, event.input_required_data);
+        switch (eventType) {
+          case TaskSSEEventType.TASK_UPDATE: {
+            const updatedFields = (event.updated_fields as Record<string, unknown>) || {};
+            callbacks.onTaskUpdate?.(taskId, updatedFields);
+            break;
+          }
+          case TaskSSEEventType.TASK_SUMMARY: {
+            const text = event.text as string;
+            if (typeof text === 'string') {
+              callbacks.onTaskSummary?.(taskId, text);
+            }
+            break;
+          }
+          case TaskSSEEventType.INPUT_REQUIRED:
+            callbacks.onInputRequired?.(taskId, event.input_required_data);
+            break;
         }
         break;
     }

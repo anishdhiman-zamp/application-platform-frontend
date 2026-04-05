@@ -59,7 +59,6 @@ const TaskContentChat = ({ taskId }: { taskId: string }) => {
   const hadStreamingRef = useRef(false);
 
   const { openTab } = useDynamicTabs({ type: TAB_TYPE.FILE });
-  const organizationId = useAppSelector((state: RootState) => state.user.user?.orgs?.[0]?.organization_id) ?? '';
   const searchParams = useSearchParams();
   const urlTitle = searchParams?.get('title') ?? null;
   const [chatTitle, setChatTitle] = useState(urlTitle ?? '');
@@ -109,8 +108,8 @@ const TaskContentChat = ({ taskId }: { taskId: string }) => {
     [subtasks],
   );
 
-  // --- Use TaskProvider context ---
-  const { messages, isLoadingHistory, isErrorHistory, conversationData, inputsRequired } = useTaskState();
+  const { messages, isLoadingHistory, isErrorHistory, conversationData, inputsRequired, taskSummaryText } =
+    useTaskState();
   const { refetchHistory } = useTaskActions();
   const streamingState = useStreamingState(taskId);
 
@@ -147,10 +146,9 @@ const TaskContentChat = ({ taskId }: { taskId: string }) => {
 
   const displayedSummary = useDisplayedSummary({
     taskId,
-    sourceId: organizationId,
     isAgentActive,
     summaryContent,
-    taskStatus,
+    streamingSummaryText: taskSummaryText,
   });
 
   const { hitlQuestions, hitlQuestionsKey } = useHitlQuestions(inputsRequired);

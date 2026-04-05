@@ -15,12 +15,14 @@ export const enum TaskSSEEventType {
   CONTENT_BLOCK_STOP = 'content_block_stop',
   TASK = 'task',
   TASK_UPDATE = 'task_update',
+  TASK_SUMMARY = 'task_summary',
   INPUT_REQUIRED = 'input_required',
 }
 
 export interface TaskEventCallbacks {
   onMessageStop: (finalMessage: ChatMessage | null, taskId: string) => void;
   onTaskUpdate?: (taskId: string, updatedFields: Record<string, unknown>) => void;
+  onTaskSummary?: (taskId: string, text: string) => void;
   onInputRequired?: (taskId: string, data: unknown) => void;
   /** Invoked when the SSE connection is lost and all retry attempts have been exhausted. */
   onDisconnected?: () => void;

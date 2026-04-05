@@ -45,6 +45,7 @@ export const TaskProvider = ({ children, taskId, organizationId, resourceType, a
   const messagesRef = useRef<ChatMessage[]>([]);
 
   const [messages, setMessages] = useState<ChatMessage[]>([]);
+  const [taskSummaryText, setTaskSummaryText] = useState<string | null>(null);
   const [isHistoryLoaded, setIsHistoryLoaded] = useState(false);
   const [mountRefetchDone, setMountRefetchDone] = useState(false);
 
@@ -80,8 +81,9 @@ export const TaskProvider = ({ children, taskId, organizationId, resourceType, a
       isErrorHistory,
       conversationData: taskHistory?.conversation,
       inputsRequired: taskHistory?.inputs_required,
+      taskSummaryText,
     }),
-    [messages, taskId, isStreaming, isLoadingHistory, isFetchingHistory, isErrorHistory, taskHistory],
+    [messages, taskId, isStreaming, isLoadingHistory, isFetchingHistory, isErrorHistory, taskHistory, taskSummaryText],
   );
 
   const handleMessageStop = useCallback(
@@ -105,9 +107,14 @@ export const TaskProvider = ({ children, taskId, organizationId, resourceType, a
     dispatch(chatApi.util.invalidateTags([{ type: APITags.GET_CONVERSATION_BY_ID, id: taskId }]));
   }, [dispatch, taskId]);
 
+  const handleTaskSummary = useCallback((_taskId: string, text: string) => {
+    setTaskSummaryText(text);
+  }, []);
+
   const perTaskCallbacks = useRef<TaskEventCallbacks>({
     onMessageStop: handleMessageStop,
     onTaskUpdate: handleTaskUpdate,
+    onTaskSummary: handleTaskSummary,
     onInputRequired: handleInputRequired,
   });
 
