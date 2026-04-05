@@ -608,6 +608,10 @@ export const ConversationProvider: React.FC<ConversationProviderProps> = ({
     }
   }, [conversationHistory, enableStreaming]);
 
+  useEffect(() => {
+    setTaskSummaries({});
+  }, [_conversationId]);
+
   return (
     <ConversationActionsContext.Provider value={actionsValue}>
       <ConversationStateContext.Provider value={stateValue}>{children}</ConversationStateContext.Provider>

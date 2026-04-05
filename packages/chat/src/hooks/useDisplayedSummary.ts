@@ -11,8 +11,6 @@ interface UseDisplayedSummaryParams {
   taskId: string;
   isAgentActive: boolean;
   summaryContent?: string | null;
-  taskStatus: string | undefined;
-  /** Live summary text pushed from the per-task or per-conversation SSE channel via the provider. */
   streamingSummaryText?: string | null;
 }
 
