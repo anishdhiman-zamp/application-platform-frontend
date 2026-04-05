@@ -61,7 +61,7 @@ const DatasetsListing = () => {
             <thead>
               <tr className='border-GRAY_400 border-b'>
                 <th className='text-GRAY_700 f-11-450 px-10 py-2.5 text-left font-normal'>Datasets</th>
-                <th className='w-[108px]' />
+                <th className='w-27' />
               </tr>
             </thead>
             <tbody>
@@ -77,7 +77,7 @@ const DatasetsListing = () => {
                       {row.title}
                     </span>
                   </td>
-                  <td className='w-[108px] px-6'>
+                  <td className='w-27 px-6'>
                     <div className='opacity-0 transition-opacity group-hover:opacity-100'>
                       <ChevronRight width={14} height={14} className='text-GRAY_700' />
                     </div>

@@ -1,13 +1,13 @@
 'use client';
 
-import { FC, KeyboardEvent, useCallback, useEffect, useMemo, useRef, useState } from 'react';
+import { FC, KeyboardEvent, ReactNode, useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { RequiredDefaultValueModal } from '@zamp-platform/dataset-create-edit';
-import { CSS_VARS, Input, Switch } from '@zamp-platform/ui';
-import { SvgSpriteLoader } from '@zamp-platform/ui/assets';
+import { Input, Switch } from '@zamp-platform/ui';
 import { ColumnHeaderClickedEvent, IHeaderParams } from 'ag-grid-community';
-import { Asterisk, EyeOff } from 'lucide-react';
+import { ArrowDown, ArrowUp, Asterisk, ChevronDown, ChevronUp, EyeOff, Filter, Pencil, XIcon } from 'lucide-react';
 import type { BlueprintColumn } from 'modules/pace/components/datasets/datasets.constants';
 import { cn } from 'utils/common';
+import { KEYBOARD_KEYS } from '@/constants/shortcuts';
 import PositionedMenuWrapper from 'components/common/PositionedMenuWrapper';
 import { CONDITION_OPERATOR_TYPE } from 'components/filter/filters.constants';
 import { filtersContextActions, useFiltersContextStore } from 'components/filter/filters.context';
@@ -24,6 +24,12 @@ const FILTER_OPERATORS: { label: string; value: FilterOperator }[] = [
   { label: 'is blank', value: 'blank' },
 ];
 
+interface MenuOption {
+  label: string;
+  value: string;
+  icon: ReactNode;
+}
+
 interface ColumnHeaderParams {
   onColumnRename?: (colId: string, newName: string) => void;
   onColumnRequiredChange?: (colId: string, required: boolean, defaultValue?: string | null) => void;
@@ -34,14 +40,18 @@ const ColumnHeader: FC<IHeaderParams & ColumnHeaderParams> = (props) => {
   const { column, api, displayName, onColumnRename, onColumnRequiredChange, getColumnInfo } = props;
   const colId = column.getColId();
 
+  // --- Refs ---
+  const menuRef = useRef<HTMLDivElement>(null);
+  const wasRequiredFalseRef = useRef(false);
+  const renameSubmittedRef = useRef(false);
+
+  // --- Hooks ---
   const {
     dispatch,
     state: { selectedFilters },
   } = useFiltersContextStore();
 
-  const menuRef = useRef<HTMLDivElement>(null);
-  const wasRequiredFalseRef = useRef(false);
-  const renameSubmittedRef = useRef(false);
+  // --- State ---
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const [isFilterOpen, setIsFilterOpen] = useState(false);
   const [isRequiredModalOpen, setIsRequiredModalOpen] = useState(false);
@@ -52,34 +62,37 @@ const ColumnHeader: FC<IHeaderParams & ColumnHeaderParams> = (props) => {
   const [sortState, setSortState] = useState(column.getSort());
   const [headerName, setHeaderName] = useState(displayName);
 
+  // --- Memo ---
   const columnInfo = getColumnInfo?.(colId);
   const requiredState = columnInfo?.required ?? false;
   const columnType = columnInfo?.type ?? 'text';
 
-  const hasActiveFilter = !!(
-    selectedFilters?.[colId] &&
-    typeof selectedFilters[colId] === 'object' &&
-    ('filter' in (selectedFilters[colId] as Record<string, unknown>) ||
-      (selectedFilters[colId] as Record<string, unknown>).type === 'blank')
+  const hasActiveFilter = useMemo(
+    () =>
+      !!(
+        selectedFilters?.[colId] &&
+        typeof selectedFilters[colId] === 'object' &&
+        ('filter' in (selectedFilters[colId] as Record<string, unknown>) ||
+          (selectedFilters[colId] as Record<string, unknown>).type === 'blank')
+      ),
+    [selectedFilters, colId],
   );
 
-  useEffect(() => {
-    const onSortChanged = () => setSortState(column.getSort());
+  const menuOptions: MenuOption[] = useMemo(() => {
+    const options: MenuOption[] = [
+      { label: 'Sort Ascending', value: 'sort_asc', icon: <ArrowUp size={12} /> },
+      { label: 'Sort Descending', value: 'sort_desc', icon: <ArrowDown size={12} /> },
+    ];
 
-    api.addEventListener('sortChanged', onSortChanged);
-
-    return () => {
-      api.removeEventListener('sortChanged', onSortChanged);
-    };
-  }, [api, column]);
-
-  useEffect(() => {
-    if (isMenuOpen) {
-      setHeaderName(displayName);
-      renameSubmittedRef.current = false;
+    if (sortState) {
+      options.push({ label: 'Remove Sort', value: 'remove_sort', icon: <XIcon size={12} /> });
     }
-  }, [isMenuOpen, displayName]);
+    options.push({ label: 'Filter', value: 'filter', icon: <Filter size={12} /> });
 
+    return options;
+  }, [sortState]);
+
+  // --- Callbacks ---
   const updateMenuPosition = useCallback(() => {
     if (!menuRef.current) return;
     const rect = menuRef.current.getBoundingClientRect();
@@ -151,20 +164,6 @@ const ColumnHeader: FC<IHeaderParams & ColumnHeaderParams> = (props) => {
     [api, colId, handleClose, updateMenuPosition],
   );
 
-  const menuOptions = useMemo(() => {
-    const options = [
-      { label: 'Sort Ascending', value: 'sort_asc', iconId: 'arrow-up' },
-      { label: 'Sort Descending', value: 'sort_desc', iconId: 'arrow-down' },
-    ];
-
-    if (sortState) {
-      options.push({ label: 'Remove Sort', value: 'remove_sort', iconId: 'x-close' });
-    }
-    options.push({ label: 'Filter', value: 'filter', iconId: 'filter-lines' });
-
-    return options;
-  }, [sortState]);
-
   const handleHeaderNameBlur = useCallback(() => {
     if (renameSubmittedRef.current) return;
     const trimmed = headerName?.trim() ?? '';
@@ -176,7 +175,7 @@ const ColumnHeader: FC<IHeaderParams & ColumnHeaderParams> = (props) => {
 
   const handleHeaderNameKeyDown = useCallback(
     (e: KeyboardEvent<HTMLInputElement>) => {
-      if (e.key === 'Enter') {
+      if (e.key === KEYBOARD_KEYS.ENTER) {
         e.preventDefault();
         e.stopPropagation();
         handleHeaderNameBlur();
@@ -233,6 +232,24 @@ const ColumnHeader: FC<IHeaderParams & ColumnHeaderParams> = (props) => {
     [applyFilter],
   );
 
+  // --- Effects ---
+  useEffect(() => {
+    const onSortChanged = () => setSortState(column.getSort());
+
+    api.addEventListener('sortChanged', onSortChanged);
+
+    return () => {
+      api.removeEventListener('sortChanged', onSortChanged);
+    };
+  }, [api, column]);
+
+  useEffect(() => {
+    if (isMenuOpen) {
+      setHeaderName(displayName);
+      renameSubmittedRef.current = false;
+    }
+  }, [isMenuOpen, displayName]);
+
   useEffect(() => {
     if (filterOperator === 'blank') return;
     if (!filterValue.trim()) return;
@@ -269,15 +286,11 @@ const ColumnHeader: FC<IHeaderParams & ColumnHeaderParams> = (props) => {
       >
         <div className='flex flex-auto items-center gap-1 self-stretch truncate'>
           <span className='truncate'>{displayName}</span>
-          {sortState === 'asc' && (
-            <SvgSpriteLoader id='arrow-narrow-up' width={12} height={12} color={CSS_VARS.BLUE_700} />
-          )}
-          {sortState === 'desc' && (
-            <SvgSpriteLoader id='arrow-narrow-down' width={12} height={12} color={CSS_VARS.BLUE_700} />
-          )}
-          {hasActiveFilter && <SvgSpriteLoader id='filter-lines' width={12} height={12} color={CSS_VARS.BLUE_700} />}
+          {sortState === 'asc' && <ArrowUp size={12} className='text-BLUE_700' />}
+          {sortState === 'desc' && <ArrowDown size={12} className='text-BLUE_700' />}
+          {hasActiveFilter && <Filter size={12} className='text-BLUE_700' />}
         </div>
-        <SvgSpriteLoader id='chevron-down' width={12} height={12} className='ml-2.5' />
+        <ChevronDown size={12} className='ml-2.5' />
       </div>
 
       {isMenuOpen && (
@@ -298,7 +311,7 @@ const ColumnHeader: FC<IHeaderParams & ColumnHeaderParams> = (props) => {
               autoFocus
               wrapperClassName='m-2'
               error={!headerName?.trim()}
-              icon={<SvgSpriteLoader id='edit-03' size={16} color={CSS_VARS.GRAY_500} />}
+              icon={<Pencil size={16} className='text-GRAY_500' />}
               onKeyDown={handleHeaderNameKeyDown}
             />
           )}
@@ -311,7 +324,7 @@ const ColumnHeader: FC<IHeaderParams & ColumnHeaderParams> = (props) => {
                 handleMenuOptionClick(option.value);
               }}
             >
-              <SvgSpriteLoader id={option.iconId} width={12} height={12} />
+              {option.icon}
               <div className='f-12-500'>{option.label}</div>
             </div>
           ))}
@@ -331,7 +344,7 @@ const ColumnHeader: FC<IHeaderParams & ColumnHeaderParams> = (props) => {
               onClick={(e) => e.stopPropagation()}
             >
               <div className='flex items-center gap-1.5'>
-                <Asterisk size={12} color={CSS_VARS.GRAY_900} />
+                <Asterisk size={12} className='text-GRAY_900' />
                 <span className='f-12-500'>Require</span>
               </div>
               <Switch checked={requiredState} onCheckedChange={handleRequiredToggle} size='small' />
@@ -365,12 +378,11 @@ const ColumnHeader: FC<IHeaderParams & ColumnHeaderParams> = (props) => {
               <span className='text-BLUE_700 f-12-500'>
                 {FILTER_OPERATORS.find((op) => op.value === filterOperator)?.label}
               </span>
-              <SvgSpriteLoader
-                id={isOperatorOpen ? 'chevron-up' : 'chevron-down'}
-                width={10}
-                height={10}
-                color={CSS_VARS.BLUE_700}
-              />
+              {isOperatorOpen ? (
+                <ChevronUp size={10} className='text-BLUE_700' />
+              ) : (
+                <ChevronDown size={10} className='text-BLUE_700' />
+              )}
             </div>
           </div>
           {isOperatorOpen && (
@@ -389,9 +401,8 @@ const ColumnHeader: FC<IHeaderParams & ColumnHeaderParams> = (props) => {
             </div>
           )}
           {filterOperator !== 'blank' && (
-            <input
-              type='text'
-              className='border-GRAY_400 bg-BG_WHITE text-GRAY_1000 placeholder:text-GRAY_700 f-12-400 w-full rounded-md border px-2.5 py-1.5 outline-none'
+            <Input
+              size='small'
               placeholder='type a value...'
               value={filterValue}
               onChange={(e) => setFilterValue(e.target.value)}

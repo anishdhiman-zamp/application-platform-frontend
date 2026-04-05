@@ -2,7 +2,7 @@
 
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { DatasetColumnTypes } from '@zamp-platform/dataset-create-edit';
-import { Button, toast, Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@zamp-platform/ui';
+import { Button, Input, toast, Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@zamp-platform/ui';
 import { ArrowLeft } from 'lucide-react';
 import DatasetBlueprintEditor, { createDefaultColumn } from 'modules/pace/components/datasets/DatasetBlueprintEditor';
 import {
@@ -16,20 +16,17 @@ import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import { useAgentDbReadQuery, useAgentDbWriteMutation } from '@/apis/agentManagedDb';
 import { getDatasetDetailRoute, ROUTES_PATH } from '@/constants/routeConfig';
+import { KEYBOARD_KEYS } from '@/constants/shortcuts';
 
 const CreateDataset = () => {
   const router = useRouter();
   const [title, setTitle] = useState('Untitled Dataset');
   const [isEditingTitle, setIsEditingTitle] = useState(true);
-  const inputRef = useRef<HTMLInputElement>(null);
-  const [columns, setColumns] = useState<BlueprintColumn[]>(() => [createDefaultColumn(DatasetColumnTypes.TEXT, 1)]);
-
-  useEffect(() => {
-    if (inputRef.current) {
-      inputRef.current.focus();
-      inputRef.current.select();
-    }
+  const inputElRef = useRef<HTMLInputElement | null>(null);
+  const inputRef = useCallback((el: HTMLInputElement | null) => {
+    inputElRef.current = el;
   }, []);
+  const [columns, setColumns] = useState<BlueprintColumn[]>(() => [createDefaultColumn(DatasetColumnTypes.TEXT, 1)]);
 
   const { data: tablesData } = useAgentDbReadQuery({ query: LIST_TABLES_QUERY });
   const [executeMutation, { isLoading: isCreating }] = useAgentDbWriteMutation();
@@ -88,20 +85,23 @@ const CreateDataset = () => {
 
   const handleTitleClick = useCallback(() => {
     setIsEditingTitle(true);
-    requestAnimationFrame(() => inputRef.current?.focus());
-  }, []);
-
-  const handleTitleBlur = useCallback(() => {
-    setIsEditingTitle(false);
+    requestAnimationFrame(() => inputElRef.current?.focus());
   }, []);
 
   const handleTitleKeyDown = useCallback((e: React.KeyboardEvent) => {
-    if (e.key === 'Enter') {
+    if (e.key === KEYBOARD_KEYS.ENTER) {
       setIsEditingTitle(false);
     }
   }, []);
 
   const displayTitle = title.trim() || 'Untitled Dataset';
+
+  useEffect(() => {
+    if (inputElRef.current) {
+      inputElRef.current.focus();
+      inputElRef.current.select();
+    }
+  }, []);
 
   return (
     <div className='bg-BG_WHITE flex h-full w-full flex-1 flex-col'>
@@ -111,12 +111,12 @@ const CreateDataset = () => {
           <ArrowLeft width={18} height={18} className='text-GRAY_700 hover:text-GRAY_1000 transition-colors' />
         </Link>
         {isEditingTitle ? (
-          <input
+          <Input
             ref={inputRef}
             autoFocus
             value={title}
             onChange={(e) => setTitle(e.target.value)}
-            onBlur={handleTitleBlur}
+            onBlur={() => setIsEditingTitle(false)}
             onKeyDown={handleTitleKeyDown}
             placeholder='Untitled Dataset'
             className='f-18-600 text-GRAY_1000 h-auto flex-1 border-none bg-transparent px-0 py-0 shadow-none outline-none'

@@ -2,15 +2,19 @@
 
 import { FC, useMemo, useState } from 'react';
 import { Button, CSS_VARS, Popover, PopoverContent, PopoverPortal, PopoverTrigger } from '@zamp-platform/ui';
-import { SvgSpriteLoader } from '@zamp-platform/ui/assets';
-import { ICON_SPRITE_TYPES } from '@zamp-platform/ui/types';
 import { useUserIdentity } from 'hooks/useUserIdentity';
+import { LinkIcon, XIcon } from 'lucide-react';
 import AudienceAccess from 'modules/shareResource/AudienceAccess';
 import { motion } from 'motion/react';
 import { ResourceAudienceType } from 'types/api/auth.types';
 import { VALIDATION_ERROR_MESSAGES } from 'utils/accessPermission/accessPermission.constants';
 import { getUserNameFromEmail } from 'utils/common';
-import { DatasetRoleValue, useGetDatasetRolesQuery, useManageDatasetRoleMutation } from '@/apis/agentManagedDb';
+import {
+  DatasetRoleValue,
+  RoleAction,
+  useGetDatasetRolesQuery,
+  useManageDatasetRoleMutation,
+} from '@/apis/agentManagedDb';
 import { useGetAudiencesByOrganisationIdQuery } from '@/apis/people';
 import { TOAST_MESSAGES } from '@/components/common/toast/toast.constants';
 import {
@@ -27,14 +31,14 @@ import { ArrayListOption } from 'components/multiSelectInput/multiSelectInput.ty
 import WhoHasAccessSkeletonLoader from 'components/skeletons/WhoHasAccessSkeletonLoader';
 
 const NEON_DATASET_ROLES: ResourcePrivilege[] = [
-  { kind: ResourceType.DATASET, label: 'Admin', value: 'admin', desc: 'Can manage and share dataset' },
-  { kind: ResourceType.DATASET, label: 'Viewer', value: 'viewer', desc: 'Can read data only' },
-  { kind: ResourceType.DATASET, label: 'Editor', value: 'editor', desc: 'Can update existing data' },
+  { kind: ResourceType.DATASET, label: 'Admin', value: DatasetRoleValue.ADMIN, desc: 'Can manage and share dataset' },
+  { kind: ResourceType.DATASET, label: 'Viewer', value: DatasetRoleValue.VIEWER, desc: 'Can read data only' },
+  { kind: ResourceType.DATASET, label: 'Editor', value: DatasetRoleValue.EDITOR, desc: 'Can update existing data' },
 ];
 
 const WhoHasAccessLoaderVariants = {
-  hidden: { opacity: 0, overflow: 'hidden' },
-  visible: { opacity: 1, height: 'auto', overflow: 'auto' },
+  hidden: { opacity: 0, overflow: 'hidden' as const },
+  visible: { opacity: 1, height: 'auto' as const, overflow: 'auto' as const },
 };
 
 type ShareDatasetNeonPopupProps = {
@@ -65,7 +69,9 @@ const ShareDatasetNeonPopup: FC<ShareDatasetNeonPopupProps> = ({ tableName }) =>
     const map = new Map<string, { name: string; email: string }>();
 
     orgMembers?.forEach((m) => {
-      map.set(m.user.user_id, { name: m.user.name, email: m.user.email });
+      if (m?.user?.user_id) {
+        map.set(m.user.user_id, { name: m.user.name ?? '', email: m.user.email ?? '' });
+      }
     });
 
     return map;
@@ -74,7 +80,7 @@ const ShareDatasetNeonPopup: FC<ShareDatasetNeonPopupProps> = ({ tableName }) =>
   const existingUserIds = useMemo(() => new Set(rolesData?.roles?.map((r) => r.user_id) ?? []), [rolesData]);
 
   const currentUserRole = useMemo(() => rolesData?.roles?.find((r) => r.user_id === userId)?.role, [rolesData, userId]);
-  const canManageAccess = currentUserRole === 'admin';
+  const canManageAccess = currentUserRole === DatasetRoleValue.ADMIN;
   const isResourceSharable = !showValidationError && selectedItems.length > 0 && canManageAccess;
 
   const audienceAccessList = useMemo(
@@ -99,11 +105,13 @@ const ShareDatasetNeonPopup: FC<ShareDatasetNeonPopupProps> = ({ tableName }) =>
 
   const combinedOptionListsData: CombinedOptionListDataType[] = useMemo(
     () =>
-      (orgMembers ?? []).map((member) => ({
-        label: member.user.name || getUserNameFromEmail(member.user.email ?? '') || '',
-        value: member.user.email ?? '',
-        type: member.resource_audience_type ?? '',
-      })),
+      (orgMembers ?? [])
+        .filter((member) => member?.user != null)
+        .map((member) => ({
+          label: member.user.name || getUserNameFromEmail(member.user.email ?? '') || '',
+          value: member.user.email ?? '',
+          type: member.resource_audience_type ?? '',
+        })),
     [orgMembers],
   );
 
@@ -194,7 +202,7 @@ const ShareDatasetNeonPopup: FC<ShareDatasetNeonPopupProps> = ({ tableName }) =>
           table_name: tableName,
           user_id: item.resource_audience_id,
           role: selectedRole as DatasetRoleValue,
-          action: 'grant',
+          action: RoleAction.GRANT,
         }).unwrap();
       }
       setSelectedItems([]);
@@ -214,7 +222,7 @@ const ShareDatasetNeonPopup: FC<ShareDatasetNeonPopupProps> = ({ tableName }) =>
         table_name: tableName,
         user_id: resourceAudienceId,
         role: role as DatasetRoleValue,
-        action: 'grant',
+        action: RoleAction.GRANT,
       }).unwrap();
       refetchRoles();
       toast.success(TOAST_MESSAGES.SUCCESS_AUDIENCE_ROLE_CHANGED);
@@ -234,7 +242,7 @@ const ShareDatasetNeonPopup: FC<ShareDatasetNeonPopupProps> = ({ tableName }) =>
       await manageRole({
         table_name: tableName,
         user_id: resourceAudienceId,
-        action: 'revoke',
+        action: RoleAction.REVOKE,
       }).unwrap();
       refetchRoles();
       toast.success(`Removed ${userName} successfully`);
@@ -260,13 +268,7 @@ const ShareDatasetNeonPopup: FC<ShareDatasetNeonPopupProps> = ({ tableName }) =>
                 <div className='flex w-full items-center justify-between p-5'>
                   <span className='f-16-600 text-GRAY_950'>Share this dataset</span>
                   <div className='cursor-pointer p-1' onClick={handleClosePopup}>
-                    <SvgSpriteLoader
-                      id='x-close'
-                      iconCategory={ICON_SPRITE_TYPES.GENERAL}
-                      width={16}
-                      height={16}
-                      className='text-GRAY_800 hover:text-GRAY_1000'
-                    />
+                    <XIcon size={16} className='text-GRAY_800 hover:text-GRAY_1000' />
                   </div>
                 </div>
                 <div className='rounded-b-3.5 flex w-full flex-col'>
@@ -298,13 +300,7 @@ const ShareDatasetNeonPopup: FC<ShareDatasetNeonPopupProps> = ({ tableName }) =>
                   )}
                   <div className='border-t-0.5 border-GRAY_500 flex w-full items-center justify-between px-5 py-4'>
                     <span className='f-11-500 flex cursor-not-allowed items-center justify-center gap-1.5'>
-                      <SvgSpriteLoader
-                        id='link-03'
-                        iconCategory={ICON_SPRITE_TYPES.GENERAL}
-                        width={12}
-                        height={12}
-                        color={CSS_VARS.GRAY_1000}
-                      />
+                      <LinkIcon size={12} className='text-GRAY_1000' />
                       <CopyToClipboardBrowserUrl />
                     </span>
                     {canManageAccess && (

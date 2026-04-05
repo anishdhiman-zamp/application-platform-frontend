@@ -1,6 +1,6 @@
 'use client';
 
-import { FC, memo, useCallback, useRef, useState } from 'react';
+import { FC, memo, useCallback, useMemo, useRef, useState } from 'react';
 import {
   closestCenter,
   DndContext,
@@ -38,9 +38,7 @@ import {
 } from '@zamp-platform/ui';
 import { cn } from '@zamp-platform/ui/utils';
 import { GripVertical, Trash2 } from 'lucide-react';
-import type { BlueprintColumn } from 'modules/pace/components/datasets/datasets.constants';
-
-const COL_PREFIX = 'col_';
+import { type BlueprintColumn, COL_PREFIX } from 'modules/pace/components/datasets/datasets.constants';
 
 const HEADERS: ReadonlyArray<{ label: string; key: string; width?: number }> = [
   { label: '', key: 'grip', width: 30 },
@@ -59,7 +57,7 @@ interface DeleteConfirmDialogProps {
 
 const DeleteConfirmDialog: FC<DeleteConfirmDialogProps> = ({ isOpen, columnName, onOpenChange, onConfirm }) => (
   <Dialog open={isOpen} onOpenChange={onOpenChange}>
-    <DialogContent size='small' showCloseButton className='w-[400px]'>
+    <DialogContent size='small' showCloseButton className='w-100'>
       <DialogHeader>
         <DialogHeaderTitle>Delete column &apos;{columnName}&apos;</DialogHeaderTitle>
       </DialogHeader>
@@ -112,7 +110,7 @@ const ColumnRow: FC<ColumnRowProps> = memo(
     const [isRequiredModalOpen, setIsRequiredModalOpen] = useState(false);
     const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState(false);
 
-    const nameError = (() => {
+    const nameError = useMemo(() => {
       const trimmed = localName.trim();
 
       if (!trimmed) return 'Column name cannot be empty';
@@ -125,7 +123,7 @@ const ColumnRow: FC<ColumnRowProps> = memo(
       if (dupes.length > 1 && dupes[dupes.length - 1].id === column.id) return 'Column names must be unique';
 
       return null;
-    })();
+    }, [localName, column.id, allColumns]);
 
     const handleNameChange = (e: React.ChangeEvent<HTMLInputElement>) => {
       setLocalName(e.target.value);

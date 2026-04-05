@@ -3,7 +3,7 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { DatasetEditPreviewTab, DatasetTabsTypes, PREVIEW_DATASET_ID } from '@zamp-platform/dataset-create-edit';
 import { Button, toast } from '@zamp-platform/ui';
-import { CellEditRequestEvent, ColDef, FillEndEvent, IServerSideDatasource } from 'ag-grid-community';
+import { CellEditRequestEvent, ColDef, FillEndEvent, IRowNode, IServerSideDatasource } from 'ag-grid-community';
 import { AgGridReact } from 'ag-grid-react';
 import { useUserIdentity } from 'hooks/useUserIdentity';
 import { AlertTriangle, ArrowLeft, Download, Loader2 } from 'lucide-react';
@@ -36,7 +36,12 @@ import ShareDatasetNeonPopup from 'modules/pace/components/datasets/ShareDataset
 import { preserveSidebarParam } from 'modules/pace/pace.utils';
 import Link from 'next/link';
 import { cn } from 'utils/common';
-import { useAgentDbWriteMutation, useGetDatasetRolesQuery, useLazyAgentDbReadQuery } from '@/apis/agentManagedDb';
+import {
+  DatasetRoleValue,
+  useAgentDbWriteMutation,
+  useGetDatasetRolesQuery,
+  useLazyAgentDbReadQuery,
+} from '@/apis/agentManagedDb';
 import ImageLoader from '@/components/common/loader/ImageLoader';
 import { ZAMP_LOGO_LOADER_SVG } from '@/constants/icons';
 import { ROUTES_PATH } from '@/constants/routeConfig';
@@ -52,39 +57,7 @@ interface DatasetDetailProps {
 }
 
 const DatasetDetailInner = ({ tableName }: DatasetDetailProps) => {
-  const [executeQuery] = useLazyAgentDbReadQuery();
-  const [executeMutation] = useAgentDbWriteMutation();
-  const [columns, setColumns] = useState<ColDef[] | null>(null);
-  const [totalRows, setTotalRows] = useState<number | null>(null);
-  const [activeTab, setActiveTab] = useState<DatasetTabsTypes>(DatasetTabsTypes.PREVIEW);
-
-  const [blueprintColumns, setBlueprintColumns] = useState<BlueprintColumn[]>([]);
-  const [originalBlueprintColumns, setOriginalBlueprintColumns] = useState<BlueprintColumn[]>([]);
-  const [isBlueprintLoading] = useState(false);
-  const [isSaving, setIsSaving] = useState(false);
-  const [isExporting, setIsExporting] = useState(false);
-  const [gridReady, setGridReady] = useState(false);
-  const [initialDataLoaded, setInitialDataLoaded] = useState(false);
-  const [schemaError, setSchemaError] = useState<string | null>(null);
-  const [pkColumn, setPkColumn] = useState<string | null>(null);
-
-  const { userId } = useUserIdentity();
-  const { data: rolesData } = useGetDatasetRolesQuery({ tableName });
-
-  const userRole = useMemo(() => {
-    if (!rolesData?.roles || !userId) return undefined;
-
-    return rolesData.roles.find((r) => r.user_id === userId && r.table_name === tableName)?.role;
-  }, [rolesData, userId, tableName]);
-
-  const canEditData = (userRole === 'admin' || userRole === 'editor') && pkColumn !== null;
-  const canEditBlueprint = userRole === 'admin' || userRole === 'editor';
-
-  const {
-    dispatch: filterDispatch,
-    state: { selectedFilters, filtersConfig: contextFiltersConfig },
-  } = useFiltersContextStore();
-
+  // --- Refs ---
   const tableRef = useRef<AgGridReact | null>(null);
   const totalRowsRef = useRef<number | undefined>(undefined);
   const lastFilterClausesRef = useRef<string | undefined>(undefined);
@@ -95,6 +68,40 @@ const DatasetDetailInner = ({ tableName }: DatasetDetailProps) => {
     countPromise: Promise<{ rows: Record<string, unknown>[]; count: number }>;
     consumed: boolean;
   } | null>(null);
+
+  // --- Hooks ---
+  const { userId } = useUserIdentity();
+  const [executeQuery] = useLazyAgentDbReadQuery();
+  const [executeMutation] = useAgentDbWriteMutation();
+  const { data: rolesData } = useGetDatasetRolesQuery({ tableName });
+  const {
+    dispatch: filterDispatch,
+    state: { selectedFilters, filtersConfig: contextFiltersConfig },
+  } = useFiltersContextStore();
+
+  // --- State ---
+  const [columns, setColumns] = useState<ColDef[] | null>(null);
+  const [totalRows, setTotalRows] = useState<number | null>(null);
+  const [activeTab, setActiveTab] = useState<DatasetTabsTypes>(DatasetTabsTypes.PREVIEW);
+  const [blueprintColumns, setBlueprintColumns] = useState<BlueprintColumn[]>([]);
+  const [originalBlueprintColumns, setOriginalBlueprintColumns] = useState<BlueprintColumn[]>([]);
+  const [isSaving, setIsSaving] = useState(false);
+  const [isExporting, setIsExporting] = useState(false);
+  const [gridReady, setGridReady] = useState(false);
+  const [initialDataLoaded, setInitialDataLoaded] = useState(false);
+  const [schemaError, setSchemaError] = useState<string | null>(null);
+  const [pkColumn, setPkColumn] = useState<string | null>(null);
+
+  // --- Memo ---
+  const userRole = useMemo(() => {
+    if (!rolesData?.roles?.length || !userId) return undefined;
+
+    return rolesData.roles.find((r) => r?.user_id === userId && r?.table_name === tableName)?.role;
+  }, [rolesData, userId, tableName]);
+
+  const canEditData =
+    (userRole === DatasetRoleValue.ADMIN || userRole === DatasetRoleValue.EDITOR) && pkColumn !== null;
+  const canEditBlueprint = userRole === DatasetRoleValue.ADMIN || userRole === DatasetRoleValue.EDITOR;
 
   const loadSchema = useCallback(async () => {
     try {
@@ -163,22 +170,17 @@ const DatasetDetailInner = ({ tableName }: DatasetDetailProps) => {
     }
   }, [executeQuery, tableName, filterDispatch]);
 
-  useEffect(() => {
-    if (initRef.current) return;
-    initRef.current = true;
-
+  const reloadSchemaAndData = useCallback(async () => {
+    setColumns(null);
+    prefetchRef.current = null;
     const dataPromise = executeQuery({
       query: buildSelectTableQuery(tableName, DETAIL_PAGE_SIZE, 0, undefined, undefined, 'id'),
     }).unwrap();
     const countPromise = executeQuery({ query: buildCountQuery(tableName) }).unwrap();
 
     prefetchRef.current = { dataPromise, countPromise, consumed: false };
-    loadSchema();
-  }, [tableName, executeQuery, loadSchema]);
-
-  useEffect(() => {
-    tableRef.current?.api?.refreshHeader();
-  }, [canEditData]);
+    await loadSchema();
+  }, [executeQuery, tableName, loadSchema]);
 
   const handleSaveBlueprint = useCallback(async () => {
     const originalMap = new Map(originalBlueprintColumns.map((c) => [c.id, c]));
@@ -256,40 +258,13 @@ const DatasetDetailInner = ({ tableName }: DatasetDetailProps) => {
       }
 
       toast.success('Schema updated successfully');
-
-      // Reload schema (headers + blueprint) and preview data in one pass
-      setColumns(null);
-      prefetchRef.current = null;
-      const dataPromise = executeQuery({
-        query: buildSelectTableQuery(tableName, DETAIL_PAGE_SIZE, 0, undefined, undefined, 'id'),
-      }).unwrap();
-      const countPromise = executeQuery({ query: buildCountQuery(tableName) }).unwrap();
-
-      prefetchRef.current = { dataPromise, countPromise, consumed: false };
-
-      await loadSchema();
+      await reloadSchemaAndData();
     } catch {
       toast.error('Failed to update schema');
     } finally {
       setIsSaving(false);
     }
-  }, [blueprintColumns, originalBlueprintColumns, tableName, executeMutation, executeQuery, loadSchema]);
-
-  const handleBlueprintChange = useCallback((cols: BlueprintColumn[]) => {
-    setBlueprintColumns(cols);
-  }, []);
-
-  const reloadSchemaAndData = useCallback(async () => {
-    setColumns(null);
-    prefetchRef.current = null;
-    const dataPromise = executeQuery({
-      query: buildSelectTableQuery(tableName, DETAIL_PAGE_SIZE, 0, undefined, undefined, 'id'),
-    }).unwrap();
-    const countPromise = executeQuery({ query: buildCountQuery(tableName) }).unwrap();
-
-    prefetchRef.current = { dataPromise, countPromise, consumed: false };
-    await loadSchema();
-  }, [executeQuery, tableName, loadSchema]);
+  }, [blueprintColumns, originalBlueprintColumns, tableName, executeMutation, reloadSchemaAndData]);
 
   const handleColumnRename = useCallback(
     async (colId: string, newName: string) => {
@@ -380,14 +355,14 @@ const DatasetDetailInner = ({ tableName }: DatasetDetailProps) => {
       const srcIdx = initialRange.startRow.rowIndex;
       const fillValue = api.getDisplayedRowAtIndex(srcIdx)?.data?.[colId];
 
-      const affectedNodes: { node: any; oldData: any }[] = [];
+      const affectedNodes: { node: IRowNode; oldData: Record<string, unknown> }[] = [];
       const rowIds: string[] = [];
 
       for (let i = finalRange.startRow.rowIndex; i <= finalRange.endRow.rowIndex; i++) {
         const node = api.getDisplayedRowAtIndex(i);
         const rid = node?.data?.[pkColumn];
 
-        if (rid !== undefined && rid !== null && i !== srcIdx) {
+        if (node && rid !== undefined && rid !== null && i !== srcIdx) {
           rowIds.push(String(rid));
           affectedNodes.push({ node, oldData: { ...node.data } });
           node.setData({ ...node.data, [colId]: fillValue });
@@ -460,31 +435,6 @@ const DatasetDetailInner = ({ tableName }: DatasetDetailProps) => {
       setIsExporting(false);
     }
   }, [tableName, executeQuery]);
-
-  useEffect(() => {
-    if (!gridReady || !selectedFilters) return;
-
-    const model: Record<string, Record<string, unknown>> = {};
-
-    for (const [key, value] of Object.entries(selectedFilters)) {
-      if (value && typeof value === 'object') {
-        const v = value as Record<string, unknown>;
-        const filterVal = v.filter;
-        const hasNonEmptyValue = filterVal !== undefined && filterVal !== null && String(filterVal).trim() !== '';
-        const isBlankOperator = v.type === 'blank' || v.type === 'notBlank' || v.type === 'is_null';
-
-        if (hasNonEmptyValue || isBlankOperator) {
-          model[key] = v;
-        }
-      }
-    }
-
-    const clauses = Object.keys(model).length > 0 ? buildFilterClauses(model) : undefined;
-
-    if (clauses === activeFilterClausesRef.current) return;
-    activeFilterClausesRef.current = clauses;
-    tableRef.current?.api?.refreshServerSide({ purge: true });
-  }, [selectedFilters, gridReady]);
 
   const getRows: IServerSideDatasource['getRows'] = useCallback(
     async (params) => {
@@ -559,6 +509,49 @@ const DatasetDetailInner = ({ tableName }: DatasetDetailProps) => {
   );
 
   const serverSideDatasource: IServerSideDatasource = useMemo(() => ({ getRows }), [getRows]);
+
+  // --- Effects ---
+  useEffect(() => {
+    if (initRef.current) return;
+    initRef.current = true;
+
+    const dataPromise = executeQuery({
+      query: buildSelectTableQuery(tableName, DETAIL_PAGE_SIZE, 0, undefined, undefined, 'id'),
+    }).unwrap();
+    const countPromise = executeQuery({ query: buildCountQuery(tableName) }).unwrap();
+
+    prefetchRef.current = { dataPromise, countPromise, consumed: false };
+    loadSchema();
+  }, [tableName, executeQuery, loadSchema]);
+
+  useEffect(() => {
+    tableRef.current?.api?.refreshHeader();
+  }, [canEditData]);
+
+  useEffect(() => {
+    if (!gridReady || !selectedFilters) return;
+
+    const model: Record<string, Record<string, unknown>> = {};
+
+    for (const [key, value] of Object.entries(selectedFilters)) {
+      if (value && typeof value === 'object') {
+        const v = value as Record<string, unknown>;
+        const filterVal = v.filter;
+        const hasNonEmptyValue = filterVal !== undefined && filterVal !== null && String(filterVal).trim() !== '';
+        const isBlankOperator = v.type === 'blank' || v.type === 'notBlank' || v.type === 'is_null';
+
+        if (hasNonEmptyValue || isBlankOperator) {
+          model[key] = v;
+        }
+      }
+    }
+
+    const clauses = Object.keys(model).length > 0 ? buildFilterClauses(model) : undefined;
+
+    if (clauses === activeFilterClausesRef.current) return;
+    activeFilterClausesRef.current = clauses;
+    tableRef.current?.api?.refreshServerSide({ purge: true });
+  }, [selectedFilters, gridReady]);
 
   return (
     <div className='bg-BG_WHITE flex h-full w-full flex-1 flex-col'>
@@ -679,27 +672,19 @@ const DatasetDetailInner = ({ tableName }: DatasetDetailProps) => {
         </div>
 
         <div className={activeTab === DatasetTabsTypes.BLUEPRINT ? 'flex h-full flex-col overflow-hidden' : 'hidden'}>
-          {isBlueprintLoading ? (
-            <div className='flex flex-1 items-center justify-center'>
-              <span className='text-GRAY_700 f-13-400'>Loading schema...</span>
+          <div className='flex-1 overflow-hidden'>
+            <DatasetBlueprintEditor
+              columns={blueprintColumns}
+              onChange={setBlueprintColumns}
+              canEdit={canEditBlueprint}
+            />
+          </div>
+          {canEditBlueprint && hasBlueprintChanges && (
+            <div className='border-GRAY_200 bg-BG_WHITE sticky bottom-0 z-10 flex justify-end border-t p-3'>
+              <Button onClick={handleSaveBlueprint} disabled={isSaving}>
+                {isSaving ? 'Saving...' : 'Save'}
+              </Button>
             </div>
-          ) : (
-            <>
-              <div className='flex-1 overflow-hidden'>
-                <DatasetBlueprintEditor
-                  columns={blueprintColumns}
-                  onChange={handleBlueprintChange}
-                  canEdit={canEditBlueprint}
-                />
-              </div>
-              {canEditBlueprint && hasBlueprintChanges && (
-                <div className='border-GRAY_200 bg-BG_WHITE sticky bottom-0 z-10 flex justify-end border-t p-3'>
-                  <Button onClick={handleSaveBlueprint} disabled={isSaving}>
-                    {isSaving ? 'Saving...' : 'Save'}
-                  </Button>
-                </div>
-              )}
-            </>
           )}
         </div>
       </div>

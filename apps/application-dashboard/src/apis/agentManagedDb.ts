@@ -12,7 +12,16 @@ export interface AgentDbQueryResponse {
   count: number;
 }
 
-export type DatasetRoleValue = 'admin' | 'viewer' | 'editor';
+export enum DatasetRoleValue {
+  ADMIN = 'admin',
+  VIEWER = 'viewer',
+  EDITOR = 'editor',
+}
+
+export enum RoleAction {
+  GRANT = 'grant',
+  REVOKE = 'revoke',
+}
 
 export interface DatasetRoleEntry {
   user_id: string;
@@ -28,7 +37,7 @@ export interface ManageDatasetRoleRequest {
   table_name: string;
   user_id: string;
   role?: DatasetRoleValue;
-  action: 'grant' | 'revoke';
+  action: RoleAction;
 }
 
 const AgentManagedDb = baseApi.injectEndpoints({
