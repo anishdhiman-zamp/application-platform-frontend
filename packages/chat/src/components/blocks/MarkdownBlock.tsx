@@ -1,19 +1,21 @@
 'use client';
 
 import '../code-highlight.css';
+import '../streaming-reveal.css';
 
 import { Book, CopyToClipboard } from '@zamp-platform/ui';
 import type { Element, RootContent } from 'hast';
 import { common, createLowlight } from 'lowlight';
 import { Copy } from 'lucide-react';
 import Link from 'next/link';
-import React, { Children, isValidElement, ReactNode } from 'react';
+import React, { Children, isValidElement, ReactNode, useMemo } from 'react';
 import ReactMarkdown from 'react-markdown';
 import rehypeSlug from 'rehype-slug';
 import remarkGfm from 'remark-gfm';
 
 import { useChatActions } from '../../context/ChatActionsContext';
 import { useTypewriter } from '../../hooks/useTypewriter';
+import { rehypeStreamReveal } from '../../plugins/rehypeStreamReveal';
 
 const lowlight = createLowlight(common);
 
@@ -89,7 +91,12 @@ export const MarkdownBlock: React.FC<MarkdownBlockProps> = ({ payload, isStreami
     }
   };
 
-  const { text } = useTypewriter(payload.text, undefined, isStreaming);
+  const { text, isAnimating } = useTypewriter(payload.text, undefined, isStreaming);
+
+  const rehypePlugins = useMemo(
+    () => (isStreaming || isAnimating ? [rehypeSlug, rehypeStreamReveal] : [rehypeSlug]),
+    [isStreaming, isAnimating],
+  );
 
   return (
     <div
@@ -98,7 +105,7 @@ export const MarkdownBlock: React.FC<MarkdownBlockProps> = ({ payload, isStreami
     >
       <ReactMarkdown
         remarkPlugins={[remarkGfm]}
-        rehypePlugins={[rehypeSlug]}
+        rehypePlugins={rehypePlugins}
         urlTransform={urlTransform}
         components={{
           h1: ({ children }) => (

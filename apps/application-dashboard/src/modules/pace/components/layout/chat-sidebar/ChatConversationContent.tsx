@@ -1,6 +1,6 @@
 'use client';
 
-import { useEffect, useMemo, useRef, useState } from 'react';
+import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import {
   ChatActionsProvider,
   createConversationPayload,
@@ -28,6 +28,7 @@ export interface ChatConversationContentProps {
   organizationId: string;
   onFileOpen: (path: string, name: string) => void;
   onTaskOpen?: (name: string, path: string) => void;
+  onBrowserOpen?: (conversationId: string) => void;
   onTaskPopoverOpenChange?: (open: boolean) => void;
   fileDropHandlerRef: React.RefObject<((files: FileList) => void) | null>;
   addFileReferenceRef: React.RefObject<((ref: { path: string; name: string }) => void) | null>;
@@ -39,6 +40,7 @@ const ChatConversationContent = ({
   organizationId,
   onFileOpen,
   onTaskOpen,
+  onBrowserOpen,
   onTaskPopoverOpenChange,
   fileDropHandlerRef,
   addFileReferenceRef,
@@ -57,6 +59,8 @@ const ChatConversationContent = ({
     isLoadingConversationHistory,
     isErrorConversationHistory,
     isStreaming,
+    isBrowserStreamingAvailable,
+    taskSummaries,
     isAnalysing,
   } = useConversationState();
   const { createConversationV2, refetchConversationHistory } = useConversationActions();
@@ -74,6 +78,14 @@ const ChatConversationContent = ({
     onFileDrop: (files) => fileDropHandlerRef.current?.(files),
     disabled: isStreaming || isCreatingConversationV2,
   });
+
+  const handleWatchStream = useCallback(() => {
+    const activeConversationId = conversationId ?? ctxConversationId;
+
+    if (activeConversationId) {
+      onBrowserOpen?.(activeConversationId);
+    }
+  }, [conversationId, ctxConversationId, onBrowserOpen]);
 
   const handleTaskPopoverOpenChange = (open: boolean) => {
     setIsTaskPopoverOpen(open);
@@ -123,7 +135,13 @@ const ChatConversationContent = ({
   ]);
 
   return (
-    <ChatActionsProvider onFileOpen={onFileOpen} onTaskOpen={onTaskOpen}>
+    <ChatActionsProvider
+      onFileOpen={onFileOpen}
+      onTaskOpen={onTaskOpen}
+      onWatchStream={handleWatchStream}
+      isBrowserStreamingAvailable={isBrowserStreamingAvailable}
+      taskSummaries={taskSummaries}
+    >
       <div className='relative flex min-h-0 w-full flex-1 flex-col overflow-hidden' {...dropZoneProps}>
         <DropOverlay isVisible={isDragOver} />
         <ScrollContainer

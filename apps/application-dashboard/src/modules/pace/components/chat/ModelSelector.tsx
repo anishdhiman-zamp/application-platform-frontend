@@ -29,7 +29,7 @@ const ModelSelector: FC<ModelSelectorProps> = ({ value, onChange, className }) =
   }, [value, defaultModel, onChange]);
 
   if (isLoading) {
-    return <Skeleton className='h-5 w-16 rounded' />;
+    return <Skeleton className='h-7 w-16 rounded' />;
   }
 
   if (models.length === 0) {

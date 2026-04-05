@@ -3,14 +3,12 @@ import { streamingStateStore } from '@zamp-platform/chat';
 import { toast } from 'sonner';
 
 import { type ConversationEventCallbacks, handleConversationSSEEvent } from '../handlers/conversationEventHandler';
-import { openSSEConnection } from './openSSEConnection';
-
-const MAX_RETRIES = 10;
-const MAX_BACKOFF_MS = 30_000;
+import { SSE_MAX_BACKOFF_MS, SSE_MAX_RETRIES } from '../types/sse.types';
+import { openSSEConnection, SSE_SOURCE_TYPE } from './openSSEConnection';
 
 /** Exponential backoff: min(1000 * 2^attempt, 30000) + jitter(0-500ms) */
 function getRetryDelay(retryCount: number): number {
-  return Math.min(1000 * Math.pow(2, retryCount), MAX_BACKOFF_MS) + Math.random() * 500;
+  return Math.min(1000 * Math.pow(2, retryCount), SSE_MAX_BACKOFF_MS) + Math.random() * 500;
 }
 
 // No-op callbacks used when no ConversationProvider is mounted.
@@ -39,7 +37,7 @@ interface RegistryEntry {
  * closeConnection() + no provider → close immediately (background stream done)
  * closeConnection() + provider mounted → keep open until provider unmounts
  *
- * On network blip (onDead), automatically retries up to MAX_RETRIES times
+ * On network blip (onDead), automatically retries up to SSE_MAX_RETRIES times
  * with exponential backoff while a provider is mounted. After exhausting
  * retries, invokes onDisconnected on all mounted callbacks.
  */
@@ -157,6 +155,7 @@ class ConversationSSERegistry {
     this.connections.set(conversationId, entry);
 
     openSSEConnection(
+      SSE_SOURCE_TYPE.CONVERSATION,
       conversationId,
       organizationId,
       isNewConversation,
@@ -190,12 +189,12 @@ class ConversationSSERegistry {
     );
   }
 
-  /** Schedules a reconnection attempt or gives up after MAX_RETRIES. */
+  /** Schedules a reconnection attempt or gives up after SSE_MAX_RETRIES. */
   private scheduleRetry(conversationId: string, entry: RegistryEntry): void {
     // No provider mounted — no point retrying
     if (entry.callbacks.size === 0) return;
 
-    if (entry.retryCount >= MAX_RETRIES) {
+    if (entry.retryCount >= SSE_MAX_RETRIES) {
       toast.error('Unable to connect. Please check your internet connection and try again.');
       // Notify all providers
       for (const cb of entry.callbacks) {

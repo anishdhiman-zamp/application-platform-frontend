@@ -23,6 +23,7 @@ class StreamingStateStore {
     } else {
       this.states.set(conversationId, state);
     }
+    this.drafts.delete(conversationId);
     this.scheduleNotify(conversationId);
   }
 

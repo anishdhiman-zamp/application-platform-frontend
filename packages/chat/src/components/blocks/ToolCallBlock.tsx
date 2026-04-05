@@ -4,26 +4,25 @@ import {
   AccordionItem,
   AccordionTrigger,
   AnimatedTerminalIcon,
+  Button,
   ImageWithFallback,
   ScrollContainer,
   ShimmerText,
 } from '@zamp-platform/ui';
 import { cn } from '@zamp-platform/ui/utils';
 import { safeJsonParse } from '@zamp-platform/utils';
-import { AlertCircle } from 'lucide-react';
-import React, { FC, useState } from 'react';
+import { AlertCircle, Play } from 'lucide-react';
+import React, { useCallback, useState } from 'react';
 
 import IntegrationCardV2 from '@/modules/integrations/AllIntegrations/IntegrationCardV2';
 import type { IntegrationItem } from '@/types/api/integrations';
 
+import { useChatActions } from '../../context/ChatActionsContext';
 import type { ToolResultContentBlock, ToolUseDisplayContent } from '../../types/block.types';
 import { buildIntegrationItemFromToolResult } from '../block.utils';
 import { TOOL_NAMES } from '../chat.constants';
 import { CodePreviewBlock } from './CodePreviewBlock';
 
-/**
- * Component to render a tool use content block with optional tool result using Accordion
- */
 interface ToolCallBlockProps {
   payload: {
     display_content?: ToolUseDisplayContent;
@@ -40,11 +39,13 @@ interface ToolCallBlockProps {
   onAccordionOpenChange?: (isOpen: boolean) => void;
   showConnectorFromPrevious?: boolean;
   showConnectorToNext?: boolean;
+  conversationId?: string;
+  showWatchButton?: boolean;
   embedded?: boolean;
   /** Flat transparent shell (e.g. nested in a muted panel); keeps icons/connectors unlike `embedded`. */
   quietSurface?: boolean;
 }
-export const ToolCallBlock: FC<ToolCallBlockProps> = ({
+export const ToolCallBlock = ({
   payload,
   is_complete = true,
   toolResult,
@@ -54,7 +55,8 @@ export const ToolCallBlock: FC<ToolCallBlockProps> = ({
   showConnectorToNext = false,
   embedded = false,
   quietSurface = false,
-}) => {
+  showWatchButton = false,
+}: ToolCallBlockProps) => {
   const flatShell = embedded || quietSurface;
   const [internalAccordionOpen, setInternalAccordionOpen] = useState<boolean>(false);
   const isControlled = typeof isAccordionOpen === 'boolean';
@@ -63,6 +65,7 @@ export const ToolCallBlock: FC<ToolCallBlockProps> = ({
   const displayContent = safeJsonParse<{ tool_name?: string; icon?: string }>(payload?.display_content?.json_block);
   const name = payload?.name || displayContent?.tool_name;
   const icon = payload?.icon || displayContent?.icon;
+  const { onWatchStream, isBrowserStreamingAvailable } = useChatActions();
 
   const toolResultData = safeJsonParse<{
     title?: string;
@@ -82,6 +85,18 @@ export const ToolCallBlock: FC<ToolCallBlockProps> = ({
       setInternalAccordionOpen(nextIsOpen);
     }
   };
+
+  const handleWatchToggle = useCallback(
+    (e: React.MouseEvent) => {
+      e.stopPropagation();
+      onWatchStream?.({
+        toolName,
+        toolResult,
+        isComplete: is_complete,
+      });
+    },
+    [onWatchStream, toolName, toolResult, is_complete],
+  );
 
   if (name === TOOL_NAMES.AUTHENTICATE_INTEGRATION_AND_CREATE_CONNECTION && toolResultData?.title) {
     const integrationItem = buildIntegrationItemFromToolResult(toolResultData) as IntegrationItem;
@@ -139,7 +154,20 @@ export const ToolCallBlock: FC<ToolCallBlockProps> = ({
                 </span>
               )}
             </div>
-            {toolResult && toolResult.payload?.is_error && (
+
+            {showWatchButton && onWatchStream && isBrowserStreamingAvailable && (
+              <Button
+                variant='ghost'
+                size='xsmall'
+                onClick={handleWatchToggle}
+                className='ml-auto gap-1 rounded-full'
+                leadingIcon={<Play size={10} className='fill-current' />}
+              >
+                Watch
+              </Button>
+            )}
+
+            {toolResult && toolResult.payload?.is_error && !showWatchButton && (
               <div className='ml-auto flex items-center gap-1.5'>
                 <AlertCircle className='text-destructive h-3.5 w-3.5' />
               </div>

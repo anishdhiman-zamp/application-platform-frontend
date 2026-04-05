@@ -3,11 +3,13 @@ import { REQUEST_TYPES } from '@zamp-platform/api/constants';
 import { formRequestUrlWithParams } from '@zamp-platform/utils';
 
 import {
+  BrowserLiveViewNovncResponseType,
   CreateConversationPayloadType,
   CreateConversationPayloadTypeV2,
   CreateConversationResponseType,
   GenerateSpeechToTextAccessTokenRequest,
   GenerateSpeechToTextAccessTokenResponse,
+  GetBrowserLiveViewNovncRequestType,
   GetConversationByIdRequestType,
   GetConversationByIdResponseType,
   GetFileDownloadUrlRequestType,
@@ -65,6 +67,7 @@ export const API_ENDPOINTS = {
   TASKS_MESSAGES_GET: 'tasks/{{conversationId}}/messages',
   STOP_CONVERSATION: 'v4/conversations/{{conversationId}}/stop',
   HITL_RESPOND: 'hitl/respond',
+  BROWSER_LIVE_VIEW_NOVNC: 'browser/streaming/{{conversationId}}/browser-streaming-novnc',
 };
 
 const ConversationService = chatApi.injectEndpoints({
@@ -175,6 +178,12 @@ const ConversationService = chatApi.injectEndpoints({
         url: formRequestUrlWithParams(API_ENDPOINTS.GET_OUTPUT_FILE_DOWNLOAD, { conversationId, filename }),
       }),
     }),
+    getBrowserLiveViewNovnc: builder.query<BrowserLiveViewNovncResponseType, GetBrowserLiveViewNovncRequestType>({
+      query: ({ conversationId, sessionId }) => ({
+        url: formRequestUrlWithParams(API_ENDPOINTS.BROWSER_LIVE_VIEW_NOVNC, { conversationId }),
+        params: { session_id: sessionId },
+      }),
+    }),
     submitChatFeedback: builder.mutation<SubmitChatFeedbackResponseType, SubmitChatFeedbackRequestType>({
       query: ({ conversationId, messageId, body }) => ({
         url: formRequestUrlWithParams(API_ENDPOINTS.SUBMIT_CHAT_FEEDBACK, { conversationId, messageId }),
@@ -218,6 +227,7 @@ export const {
   useGetSpeechToTextAccessTokenQuery,
   useLazyGetSpeechToTextAccessTokenQuery,
   useLazyGetOutputFileDownloadQuery,
+  useLazyGetBrowserLiveViewNovncQuery,
   useSubmitChatFeedbackMutation,
   useStopConversationMutation,
   useHitlRespondMutation,

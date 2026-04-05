@@ -3,7 +3,7 @@
 import { type FC, useCallback, useState } from 'react';
 import { Button, Popover, PopoverContent, PopoverTrigger } from '@zamp-platform/ui';
 import { cn } from '@zamp-platform/ui/utils';
-import { ArrowLeft, ChevronDown, MoveDiagonal, Plus } from 'lucide-react';
+import { ChevronDown, MoveDiagonal, Plus } from 'lucide-react';
 import ChatHistory from '@/modules/pace/components/chat/ChatHistory';
 import ConversationActions from '@/modules/pace/components/chat/ConversationActions';
 import { DEFAULT_CHAT_TITLE } from '@/modules/pace/pace.constants';
@@ -19,13 +19,6 @@ interface ChatTopbarProps {
   onTitleChange?: (newTitle: string) => void;
   onDeleteConversation?: () => void;
   onSelectConversation?: (id: string | null, title?: string) => void;
-  showHistory?: boolean;
-  showBackButton?: boolean;
-  showActions?: boolean;
-  onBack?: () => void;
-  navigationSlot?: React.ReactNode;
-  titleIcon?: React.ReactNode;
-  titleSlot?: React.ReactNode;
 }
 
 const ChatTopbar: FC<ChatTopbarProps> = ({
@@ -39,13 +32,6 @@ const ChatTopbar: FC<ChatTopbarProps> = ({
   onTitleChange,
   onDeleteConversation,
   onSelectConversation,
-  showHistory = true,
-  showBackButton = false,
-  showActions = true,
-  onBack,
-  navigationSlot,
-  titleIcon,
-  titleSlot,
 }) => {
   const displayTitle = title || DEFAULT_CHAT_TITLE;
   const canEdit = Boolean(conversationId && organizationId);
@@ -79,49 +65,25 @@ const ChatTopbar: FC<ChatTopbarProps> = ({
   return (
     <div className={cn('bg-BG_WHITE flex items-center justify-between gap-x-3 p-3', className)} style={style}>
       <div className='flex min-w-0 flex-1 items-center gap-x-1'>
-        {titleSlot ? (
-          titleSlot
-        ) : (
-          <>
-            {showBackButton && (
-              <div
-                className='text-GRAY_700 hover:text-GRAY_1000 h-7 w-7 shrink-0 cursor-pointer rounded p-1'
-                onClick={onBack}
-                aria-label='Go back'
-                role='button'
-              >
-                <ArrowLeft size={16} />
-              </div>
-            )}
-            {showHistory ? (
-              <Popover open={isHistoryOpen} onOpenChange={setIsHistoryOpen}>
-                <PopoverTrigger className='hover:bg-GRAY_100 flex h-7 max-w-full cursor-pointer items-center gap-x-1 rounded-md pr-1 pl-1.5 transition-colors'>
-                  <span className='f-14-550 block min-w-0 truncate first-letter:uppercase'>{displayTitle}</span>
-                  <ChevronDown
-                    size={14}
-                    className={cn('text-GRAY_1000 shrink-0 transition-transform', isHistoryOpen && 'rotate-180')}
-                  />
-                </PopoverTrigger>
-                <PopoverContent align='start' sideOffset={8} className='flex h-100 w-80 flex-col overflow-hidden p-0'>
-                  <ChatHistory
-                    onSelectConversation={handleSelectConversation}
-                    onRenameConversation={handleRenameFromHistory}
-                    activeConversationId={conversationId}
-                    compact
-                  />
-                </PopoverContent>
-              </Popover>
-            ) : (
-              <div className='flex h-7 max-w-full items-center gap-x-1.5 px-1'>
-                {titleIcon}
-                <span className='f-14-550 block min-w-0 truncate first-letter:uppercase'>{displayTitle}</span>
-              </div>
-            )}
-          </>
-        )}
+        <Popover open={isHistoryOpen} onOpenChange={setIsHistoryOpen}>
+          <PopoverTrigger className='hover:bg-GRAY_100 flex h-7 max-w-full cursor-pointer items-center gap-x-1 rounded-md pr-1 pl-1.5 transition-colors'>
+            <span className='f-14-550 block min-w-0 truncate first-letter:uppercase'>{displayTitle}</span>
+            <ChevronDown
+              size={14}
+              className={cn('text-GRAY_1000 shrink-0 transition-transform', isHistoryOpen && 'rotate-180')}
+            />
+          </PopoverTrigger>
+          <PopoverContent align='start' sideOffset={8} className='flex h-100 w-80 flex-col overflow-hidden p-0'>
+            <ChatHistory
+              onSelectConversation={handleSelectConversation}
+              onRenameConversation={handleRenameFromHistory}
+              activeConversationId={conversationId}
+              compact
+            />
+          </PopoverContent>
+        </Popover>
       </div>
       <div className='flex items-center gap-1.5'>
-        {navigationSlot}
         {onStartNewChat && (
           <Button
             variant='ghost'
@@ -145,7 +107,7 @@ const ChatTopbar: FC<ChatTopbarProps> = ({
             <MoveDiagonal size={16} />
           </Button>
         )}
-        {showActions && canEdit && (
+        {canEdit && (
           <ConversationActions
             conversationId={conversationId ?? ''}
             organizationId={organizationId ?? ''}
