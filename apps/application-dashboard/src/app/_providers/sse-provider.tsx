@@ -137,20 +137,12 @@ function handleGlobalStreamEvent(data: BaseEventPayload): void {
             };
         }
 
+        // Safe guard: SSE protocol guarantees MESSAGE_START (which calls streamingStateStore.set())
+        // always precedes CONTENT_BLOCK_START/DELTA/STOP. A null prev indicates an out-of-order
+        // event that should be ignored.
         streamingStateStore.update(conversationId, (prev) => {
-          if (!prev) {
-            return {
-              resource_type: ResourceType.ORGANIZATION,
-              resource_id: '',
-              conversation_id: conversationId,
-              message_content: { elements: [newBlock] },
-              message_type: ChatMessageType.SYSTEM,
-              sender_type: SenderType.ASSISTANT,
-              timestamp: new Date().toISOString(),
-              metadata: {},
-              is_active: true,
-            };
-          }
+          if (!prev) return prev;
+
           const existingBlocks = prev.message_content?.elements ?? [];
 
           return {
@@ -524,12 +516,20 @@ export const SSEProvider: React.FC<SSEProviderProps> = ({ children, sseEventBus 
       }
     });
     const taskUpdateSub = sseEventBus.subscribe(EVENT_TYPE.TASK_UPDATE, handleGlobalTaskUpdate);
+    const convCreatedSub = sseEventBus.subscribe(EVENT_TYPE.CONVERSATION_CREATED, () => {
+      store.dispatch(baseApi.util.invalidateTags([APITags.GET_CONVERSATION_HISTORY]));
+    });
+    const titleUpdatedSub = sseEventBus.subscribe(EVENT_TYPE.CONVERSATION_TITLE_UPDATED, () => {
+      store.dispatch(baseApi.util.invalidateTags([APITags.GET_CONVERSATION_HISTORY]));
+    });
 
     return () => {
       streamSub.unsubscribe();
       convSub.unsubscribe();
       taskSub.unsubscribe();
       taskUpdateSub.unsubscribe();
+      convCreatedSub.unsubscribe();
+      titleUpdatedSub.unsubscribe();
     };
   }, [sseEventBus]);
 

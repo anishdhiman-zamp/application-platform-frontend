@@ -1,6 +1,6 @@
 import { type ReactNode } from 'react';
 import { FileIcon } from '@zamp-platform/ui';
-import { Zap } from 'lucide-react';
+import { Globe, Zap } from 'lucide-react';
 import { getFileExtension } from '@/modules/pace/components/files/file-tree.utils';
 import { DynamicTab, DynamicTabType, TAB_TYPE } from '@/modules/pace/pace.types';
 
@@ -15,6 +15,8 @@ export const getDefaultIcon = (tab: DynamicTab): ReactNode => {
     }
     case TAB_TYPE.TASK:
       return <Zap size={14} className='shrink-0' />;
+    case TAB_TYPE.BROWSER:
+      return <Globe size={14} className='shrink-0' />;
     default:
       return <FileIcon extension='txt' className='size-5 rounded-sm' iconClassName='size-4' />;
   }

@@ -1,36 +1,11 @@
 'use client';
 
-import { FC, useCallback, useEffect, useMemo, useRef, useState } from 'react';
-import type { ConversationInputRequiredItem, useChat } from '@zamp-platform/chat';
-import { ConnectedChatInput, HITLEntityType, HITLQuestionsBlock, ResourceType, ScopeType } from '@zamp-platform/chat';
-import { cn } from '@zamp-platform/ui/utils';
-import { useDynamicTabs } from 'modules/pace/components/dynamic-tabs/useDynamicTabs';
-import ChatConversationContent from 'modules/pace/components/layout/chat-sidebar/ChatConversationContent';
-import { usePathname } from 'next/navigation';
-import { APITags } from '@/constants/api.constants';
-import { FEATURE_FLAGS } from '@/constants/featureFlags';
-import { ROUTES_PATH } from '@/constants/routeConfig';
-import { useAppDispatch, useAppSelector } from '@/hooks/toolkit';
-import { useFeatureFlag } from '@/hooks/useFeatureFlag';
-import AutoLoopConfirmDialog from '@/modules/pace/components/chat/AutoLoopConfirmDialog';
-import AutoLoopToggle from '@/modules/pace/components/chat/AutoLoopToggle';
-import ChatTopbar from '@/modules/pace/components/chat/ChatTopbar';
-import ModelSelector from '@/modules/pace/components/chat/ModelSelector';
-import { useChatDraftInput } from '@/modules/pace/hooks/useChatDraftInput';
-import { useHitlQuestions } from '@/modules/pace/hooks/useHitlQuestions';
-import { usePaceContext } from '@/modules/pace/pace.context';
-import { CHAT_SIDEBAR_STATE, TAB_TYPE } from '@/modules/pace/pace.types';
-import { addAutoLoopLockedConversation, isConversationAutoLoopLocked } from '@/modules/pace/utils/autoLoopStorage';
-import { baseApi } from '@/services/baseApi';
+import { useCallback } from 'react';
+import { ResourceType } from '@zamp-platform/chat';
+import { ConversationProvider } from '@zamp-platform/conversation-stream';
+import ChatSidebarContent from 'modules/pace/components/layout/chat-sidebar/ChatSidebarContent';
+import { useAppSelector } from '@/hooks/toolkit';
 import type { RootState } from '@/store';
-import { selectActiveTabId } from '@/store/slices/dynamic-tabs.slice';
-
-export interface ChatState {
-  chat: ReturnType<typeof useChat>;
-  isInConversation: boolean;
-  showHomeView: boolean;
-  inputsRequired?: ConversationInputRequiredItem[];
-}
 
 interface ChatSidebarInnerProps {
   conversationId: string | null;
@@ -41,171 +16,54 @@ interface ChatSidebarInnerProps {
   chatKey: number;
 }
 
-const ChatSidebarInner: FC<ChatSidebarInnerProps> = ({
+const ChatSidebarInner = ({
   conversationId,
   setConversationId,
   setChatTitle,
   startNewChat,
   chatTitle,
   chatKey,
-}) => {
-  const pathname = usePathname();
-  const activeTabId = useAppSelector(selectActiveTabId);
-  const dispatch = useAppDispatch();
-  const { openTab } = useDynamicTabs({ type: TAB_TYPE.FILE });
-  const { chatSidebarState, setChatSidebarState } = usePaceContext();
-  const { inputValue, setInputValue } = useChatDraftInput({ conversationId });
-
-  const isOnChatRoute = pathname === ROUTES_PATH.CHAT && !activeTabId;
-
+}: ChatSidebarInnerProps) => {
   const organizationId = useAppSelector((state: RootState) => state.user.user?.orgs?.[0]?.organization_id) ?? '';
   const currentUserName = useAppSelector((state: RootState) => state.user.user?.user_name) ?? '';
   const username = useAppSelector((state: RootState) => state.user.user?.username) ?? '';
-  const { isEnabled: isAutoLoopBtnEnabled } = useFeatureFlag(FEATURE_FLAGS.AUTO_LOOP_BTN_ENABLED);
 
-  const fileDropHandlerRef = useRef<((files: FileList) => void) | null>(null);
-  const addFileReferenceRef = useRef<((ref: { path: string; name: string }) => void) | null>(null);
-
-  const [selectedModel, setSelectedModel] = useState<string | null>(null);
-  const [autoLoopEnabled, setAutoLoopEnabled] = useState(false);
-  const [isAutoLoopLocked, setIsAutoLoopLocked] = useState(false);
-  const [isConfirmDialogOpen, setIsConfirmDialogOpen] = useState(false);
-  const [chatState, setChatState] = useState<ChatState | null>(null);
-  const [isTaskPopoverOpen, setIsTaskPopoverOpen] = useState(false);
-
-  const handleExpand = useCallback(() => {
-    setChatSidebarState(CHAT_SIDEBAR_STATE.EXPANDED);
-  }, [setChatSidebarState]);
-
-  const handleFileOpen = useCallback(
-    (path: string, name: string) => {
-      if (chatSidebarState === CHAT_SIDEBAR_STATE.EXPANDED) {
-        setChatSidebarState(CHAT_SIDEBAR_STATE.SIDEBAR);
+  const handleConversationIdChange = useCallback(
+    (id: string | null) => {
+      if (id && id !== conversationId) {
+        setConversationId(id, chatTitle);
       }
-      openTab(path, name);
     },
-    [openTab, chatSidebarState, setChatSidebarState],
+    [setConversationId, chatTitle, conversationId],
   );
-
-  const handleChatStateChange = useCallback((state: ChatState) => {
-    setChatState(state);
-  }, []);
-
-  const handleConversationCreated = useCallback(() => {
-    dispatch(baseApi.util.invalidateTags([APITags.GET_CONVERSATION_HISTORY]));
-  }, [dispatch]);
-
-  const modelSelectorSlot = useMemo(
-    () => <ModelSelector value={selectedModel} onChange={setSelectedModel} />,
-    [selectedModel],
-  );
-
-  const autoLoopToggleSlot = useMemo(
-    () => (
-      <AutoLoopToggle
-        enabled={autoLoopEnabled}
-        onChange={(pressed) => {
-          if (pressed) setIsConfirmDialogOpen(true);
-        }}
-        disabled={isAutoLoopLocked}
-      />
-    ),
-    [autoLoopEnabled, isAutoLoopLocked],
-  );
-
-  const { hitlQuestions, hitlQuestionsKey } = useHitlQuestions(chatState?.inputsRequired);
-
-  const handleHitlRespondComplete = useCallback(() => {
-    void chatState?.chat.refetchConversationHistory();
-  }, [chatState?.chat]);
-
-  const hasInputsRequired = (chatState?.inputsRequired?.length ?? 0) > 0;
-
-  useEffect(() => {
-    const locked = isConversationAutoLoopLocked(conversationId);
-
-    setIsAutoLoopLocked(locked);
-    setAutoLoopEnabled(locked);
-  }, [conversationId]);
 
   return (
-    <div className='bg-BG_WHITE relative mx-auto flex h-full w-full flex-1 flex-col'>
-      <div className={cn('transition-[filter] duration-200', isTaskPopoverOpen && 'pointer-events-none blur-sm')}>
-        <ChatTopbar
-          title={chatTitle || 'Start a new chat'}
-          conversationId={conversationId}
-          organizationId={organizationId}
-          onStartNewChat={startNewChat}
-          onTitleChange={setChatTitle}
-          onSelectConversation={setConversationId}
-          onExpand={chatSidebarState !== CHAT_SIDEBAR_STATE.EXPANDED ? handleExpand : undefined}
-        />
-      </div>
-
-      <ChatConversationContent
-        key={chatKey}
+    <ConversationProvider
+      key={chatKey}
+      conversationId={conversationId}
+      resourceId={organizationId}
+      resourceType={ResourceType.ORGANIZATION}
+      enableStreaming
+      usePerConversationSSE
+      setHeader={(header: string) => {
+        if (!chatTitle) {
+          setChatTitle(header);
+        }
+      }}
+      onConversationIdChange={handleConversationIdChange}
+    >
+      <ChatSidebarContent
         conversationId={conversationId}
         setConversationId={setConversationId}
         setChatTitle={setChatTitle}
+        startNewChat={startNewChat}
         chatTitle={chatTitle}
+        chatKey={chatKey}
         organizationId={organizationId}
-        onFileOpen={handleFileOpen}
-        onTaskPopoverOpenChange={setIsTaskPopoverOpen}
-        isOnChatRoute={isOnChatRoute}
-        onChatStateChange={handleChatStateChange}
-        fileDropHandlerRef={fileDropHandlerRef}
-        addFileReferenceRef={addFileReferenceRef}
         currentUserName={currentUserName}
+        username={username}
       />
-      {chatState && (
-        <div className='bg-BG_WHITE sticky bottom-0 z-10 mx-auto w-full max-w-[700px] px-3 pb-3'>
-          {hasInputsRequired ? (
-            <HITLQuestionsBlock
-              key={hitlQuestionsKey}
-              payload={{ questions: hitlQuestions }}
-              onSubmit={handleHitlRespondComplete}
-              sourceEntityId={conversationId ?? chatState.chat.conversationId ?? ''}
-              sourceEntityType={HITLEntityType.CONVERSATION}
-            />
-          ) : (
-            <ConnectedChatInput
-              chat={chatState.chat}
-              resourceType={ResourceType.ORGANIZATION}
-              resourceId={organizationId}
-              autoFocus
-              scope={ScopeType.ORGANIZATION}
-              scopeId={organizationId}
-              username={username}
-              currentUserName={currentUserName}
-              placeholder="Do your life's best work with Pace"
-              externalInputValue={inputValue}
-              setExternalInputValue={setInputValue}
-              fileDropHandlerRef={fileDropHandlerRef}
-              llmModel={selectedModel}
-              autoLoopEnabled={autoLoopEnabled}
-              showModelSelector
-              modelSelectorSlot={modelSelectorSlot}
-              {...(isAutoLoopBtnEnabled && { autoLoopToggleSlot })}
-              conversationId={conversationId ?? chatState.chat.conversationId ?? ''}
-              onConversationCreated={handleConversationCreated}
-              isDisabled={chatState.chat.isStreaming || chatState.chat.isCreatingConversationV2}
-              addFileReferenceRef={addFileReferenceRef}
-            />
-          )}
-        </div>
-      )}
-      <AutoLoopConfirmDialog
-        isOpen={isConfirmDialogOpen}
-        onOpenChange={setIsConfirmDialogOpen}
-        onConfirm={() => {
-          setAutoLoopEnabled(true);
-          setIsAutoLoopLocked(true);
-          if (conversationId) {
-            addAutoLoopLockedConversation(conversationId);
-          }
-        }}
-      />
-    </div>
+    </ConversationProvider>
   );
 };
 

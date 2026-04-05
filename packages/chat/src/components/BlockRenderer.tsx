@@ -36,6 +36,7 @@ import {
   ThinkingBlock,
   ToolCallBlock,
 } from './blocks';
+import { BROWSER_TOOL_DISPLAY_NAMES } from './chat.constants';
 
 interface BlockRendererProps {
   message: BlockMessage;
@@ -151,6 +152,15 @@ export const BlockRenderer: React.FC<BlockRendererProps> = ({
     return { messageBlocks, size: messageBlocks.length };
   }, [message.block]);
 
+  const firstBrowserToolOrder = useMemo(() => {
+    const block = messageBlocks.find((b) => {
+      if (b.type !== BLOCK_TYPE.TOOL_USE) return false;
+      const displayName = (b as ToolUseContentBlock).payload?.display_name || '';
+      return BROWSER_TOOL_DISPLAY_NAMES.some((n) => displayName.toLowerCase().includes(n.toLowerCase()));
+    });
+    return block?.order ?? -1;
+  }, [messageBlocks]);
+
   const renderBlock = (block: Block, index: number, nextBlock?: Block, previousBlock?: Block) => {
     const isLastBlock = index === size - 1;
     const isNextLast = index + 1 === size - 1;
@@ -171,6 +181,7 @@ export const BlockRenderer: React.FC<BlockRendererProps> = ({
 
       case BLOCK_TYPE.THINKING: {
         const thinking = block as ThinkingContentBlock;
+
         return (
           <ThinkingBlock
             key={thinking.id ?? `thinking-${thinking.order}-${thinking.start_timestamp}`}
@@ -221,6 +232,7 @@ export const BlockRenderer: React.FC<BlockRendererProps> = ({
             }
             showConnectorFromPrevious={showConnectorFromPrevious}
             showConnectorToNext={showConnectorToNext}
+            showWatchButton={toolUseBlock.order === firstBrowserToolOrder}
           />
         );
       }
@@ -258,7 +270,7 @@ export const BlockRenderer: React.FC<BlockRendererProps> = ({
             </div>
           );
         }
-        return <MarkdownBlock key={textKey} payload={textBlock.payload} />;
+        return <MarkdownBlock key={textKey} payload={textBlock.payload} isStreaming={isStreaming} />;
       }
 
       case BLOCK_TYPE.SINGLE_SELECT: {

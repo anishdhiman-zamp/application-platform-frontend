@@ -121,6 +121,7 @@ export interface ChatMessage {
   id?: string;
   conversation_id?: string;
   llm_model?: string;
+  state?: MessageState;
   pev_enabled?: boolean;
 }
 
@@ -269,6 +270,12 @@ export interface ConversationType {
 export interface ConversationMessageContentType {
   elements: Block[];
 }
+
+export const enum MessageState {
+  STREAMING = 'STREAMING',
+  DONE = 'DONE',
+}
+
 export interface ConversationMessageType {
   id: string;
   organization_id: string;
@@ -276,6 +283,7 @@ export interface ConversationMessageType {
   sender_id: string;
   sender_type: SenderType;
   sender_name: string;
+  state: MessageState;
   intent: string | null;
   content: ConversationMessageContentType;
   created_at: string;
@@ -332,6 +340,18 @@ export interface GetFileDownloadUrlResponseType {
 export interface GetOutputFileDownloadRequestType {
   conversationId: string;
   filename: string;
+}
+
+export interface GetBrowserLiveViewNovncRequestType {
+  conversationId: string;
+  sessionId: string;
+}
+
+export interface BrowserLiveViewNovncResponseType {
+  novnc_url: string;
+  /** Same-origin Pantheon proxy for iframes; falls back to novnc_url if absent. */
+  proxy_iframe_url?: string | null;
+  expires_in_seconds: number;
 }
 
 /**

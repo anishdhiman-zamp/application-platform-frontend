@@ -55,6 +55,11 @@ export interface ChatConfig extends Omit<UseSSEOptions, 'url' | 'onMessage' | 'a
   showThinkingContent?: boolean;
 }
 
+/**
+ * @deprecated Use ConversationProvider + useConversationActions/useConversationState
+ * from @zamp-platform/conversation-stream instead. This hook is kept for backward
+ * compatibility with non-PACE consumers (Chatbot, KnowledgeBase, TaskContentInner).
+ */
 export const useChat = (config: ChatConfig) => {
   const dispatch = useDispatch();
   const [messages, setMessages] = useState<ChatMessage[]>([]);

@@ -82,10 +82,10 @@ const ChatHomePage: FC = () => {
   });
 
   const handleSelectConversation = useCallback(
-    (id: string | null) => {
+    (id: string | null, title?: string) => {
       if (!id) return;
 
-      selectConversation(id);
+      selectConversation(id, title);
       setChatSidebarState(CHAT_SIDEBAR_STATE.EXPANDED);
     },
     [selectConversation, setChatSidebarState],

@@ -101,16 +101,17 @@ export const useChatDraftInput = ({ conversationId }: UseChatDraftInputProps): U
         messageSentFromNewChatRef.current = true;
       }
 
+      const capturedDraftId = draftIdRef.current;
+
       debounceTimerRef.current = setTimeout(() => {
-        const currentDraftId = draftIdRef.current;
         const drafts = getDraftsFromStorage();
 
         if (nextValue) {
-          const updatedDrafts = upsertDraft(drafts, currentDraftId, nextValue);
+          const updatedDrafts = upsertDraft(drafts, capturedDraftId, nextValue);
 
           saveDraftsToStorage(updatedDrafts);
         } else {
-          const updatedDrafts = removeDraft(drafts, currentDraftId);
+          const updatedDrafts = removeDraft(drafts, capturedDraftId);
 
           saveDraftsToStorage(updatedDrafts);
         }
