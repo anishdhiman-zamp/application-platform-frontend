@@ -5,6 +5,7 @@ import { createContext } from 'react';
 
 export interface ConversationState {
   messages: ChatMessage[];
+  hasMessages: boolean;
   conversationId: string | null;
   isStreaming: boolean;
   isStopping: boolean;
@@ -14,6 +15,7 @@ export interface ConversationState {
   isSendingMessage: boolean;
   isErrorConversationHistory: boolean;
   isUninitializedConversationHistory: boolean;
+  isAnalysing: boolean;
   sendMessageError: unknown;
   sendMessageV2Error: unknown;
   createConversationV2Error: unknown;

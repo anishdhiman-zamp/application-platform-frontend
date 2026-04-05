@@ -69,12 +69,17 @@ const ChatHistory = ({
   );
 
   const conversations = useMemo(() => conversationHistory?.conversations ?? [], [conversationHistory]);
-  const displayConversations = useMemo(() => {
-    const source = allConversations.length > 0 ? allConversations : conversations;
-
-    return [...source].sort((a, b) => new Date(b.updated_at).getTime() - new Date(a.updated_at).getTime());
-  }, [allConversations, conversations]);
+  const displayConversations = useMemo(
+    () => (allConversations.length > 0 ? allConversations : conversations),
+    [allConversations, conversations],
+  );
   const hasMore = allConversations.length < totalCount;
+  const isInitialLoading =
+    displayConversations.length === 0 &&
+    (isLoadingConversationHistory || isUninitializedConversationHistory) &&
+    page === 1;
+  const isEmptyState =
+    displayConversations.length === 0 && !isLoadingConversationHistory && !isFetchingConversationHistory;
 
   const fetchNextPage = useCallback(() => {
     if (!isFetchingConversationHistory && hasMore) {
@@ -125,7 +130,7 @@ const ChatHistory = ({
 
   const handleDeleteConversation = useCallback(
     (id: string) => {
-      setAllConversations((prev) => prev.filter((c) => c.id !== id));
+      setAllConversations((prev) => prev.filter((conversation) => conversation.id !== id));
       setTotalCount((prev) => Math.max(0, prev - 1));
       onDeleteConversation?.(id);
     },
@@ -139,7 +144,9 @@ const ChatHistory = ({
 
   const handleRenameConversation = useCallback(
     (id: string, newTitle: string) => {
-      setAllConversations((prev) => prev.map((c) => (c.id === id ? { ...c, title: newTitle } : c)));
+      setAllConversations((prev) =>
+        prev.map((conversation) => (conversation.id === id ? { ...conversation, title: newTitle } : conversation)),
+      );
       onRenameConversation?.(id, newTitle);
     },
     [onRenameConversation],
@@ -207,16 +214,12 @@ const ChatHistory = ({
         )}
       </div>
       <CommonWrapper
-        isLoading={
-          displayConversations.length === 0 &&
-          (isLoadingConversationHistory || isUninitializedConversationHistory) &&
-          page === 1
-        }
+        isLoading={isInitialLoading}
         skeletonType={SkeletonTypes.CUSTOM}
         loader={<ChatHistorySkeleton />}
         refetchFunction={handleRefetch}
         isError={isErrorConversationHistory}
-        isNoData={displayConversations.length === 0 && !isLoadingConversationHistory && !isFetchingConversationHistory}
+        isNoData={isEmptyState}
         noDataBanner={
           <EmptyStateListing
             title={debouncedSearch ? 'No matching conversations' : 'No conversations found'}

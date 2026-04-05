@@ -32,47 +32,47 @@ export function handleContentBlockEvent(conversationId: string, type: string, in
         const contentBlock = payload.content_block as MapAny;
         const blockType = contentBlock?.type as string;
 
+        const blockBase = {
+          order: index,
+          start_timestamp: contentBlock?.start_timestamp as string | undefined,
+          is_complete: false,
+        };
+
         let newBlock: Block;
 
         switch (blockType) {
           case BLOCK_TYPE.THINKING:
             newBlock = {
+              ...blockBase,
               type: BLOCK_TYPE.THINKING,
-              order: index,
               payload: { thinking: '' },
-              start_timestamp: contentBlock?.start_timestamp as string | undefined,
-              is_complete: false,
             };
             break;
           case BLOCK_TYPE.TEXT:
             newBlock = {
+              ...blockBase,
               type: BLOCK_TYPE.TEXT,
-              order: index,
               payload: { text: '' },
-              start_timestamp: contentBlock?.start_timestamp as string | undefined,
-              is_complete: false,
             };
             break;
           case BLOCK_TYPE.TOOL_RESULT: {
             const toolCallId = (contentBlock?.tool_call_id || contentBlock?.id) as string;
             newBlock = {
+              ...blockBase,
               type: BLOCK_TYPE.TOOL_RESULT,
-              order: index,
               id: contentBlock?.id as string,
               payload: {
                 content: '',
                 is_error: false,
                 tool_call_id: toolCallId,
               },
-              start_timestamp: contentBlock?.start_timestamp as string | undefined,
-              is_complete: false,
             };
             break;
           }
           case BLOCK_TYPE.TASK:
             newBlock = {
+              ...blockBase,
               type: BLOCK_TYPE.TASK,
-              order: index,
               id: contentBlock?.id as string,
               payload: {
                 id: (contentBlock?.id as string) || '',
@@ -80,14 +80,12 @@ export function handleContentBlockEvent(conversationId: string, type: string, in
                 task_id: (contentBlock?.task_id as string) || (contentBlock?.id as string) || '',
                 status: contentBlock?.status,
               },
-              start_timestamp: contentBlock?.start_timestamp as string | undefined,
-              is_complete: false,
             } as TaskContentBlock;
             break;
           default:
             newBlock = {
+              ...blockBase,
               type: BLOCK_TYPE.TOOL_USE,
-              order: index,
               id: contentBlock?.id as string,
               name: contentBlock?.name as string,
               payload: {
@@ -95,8 +93,6 @@ export function handleContentBlockEvent(conversationId: string, type: string, in
                 tool_call_id: contentBlock?.id as string,
                 display_name: contentBlock?.display_name as string,
               },
-              start_timestamp: contentBlock?.start_timestamp as string | undefined,
-              is_complete: false,
             };
         }
 

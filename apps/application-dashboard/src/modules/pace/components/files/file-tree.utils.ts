@@ -141,7 +141,7 @@ export function formatRelativeTime(timestamp: number, showAgo = false): string {
   const minutes = Math.floor(diffMs / 60_000);
   const suffix = showAgo ? ' ago' : '';
 
-  if (minutes < 1) return `0m${suffix}`;
+  if (minutes < 1) return showAgo ? 'just now' : '0m';
   if (minutes < 60) return `${minutes}m${suffix}`;
 
   const hours = Math.floor(minutes / 60);

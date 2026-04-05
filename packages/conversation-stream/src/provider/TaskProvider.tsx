@@ -195,9 +195,10 @@ export const TaskProvider = ({ children, taskId, organizationId, resourceType, a
     perTaskCallbacks.current = {
       onMessageStop: handleMessageStop,
       onTaskUpdate: handleTaskUpdate,
+      onTaskSummary: handleTaskSummary,
       onInputRequired: handleInputRequired,
     };
-  }, [handleMessageStop, handleTaskUpdate, handleInputRequired]);
+  }, [handleMessageStop, handleTaskUpdate, handleTaskSummary, handleInputRequired]);
 
   useEffect(() => {
     handleClearStaleStreamingState();

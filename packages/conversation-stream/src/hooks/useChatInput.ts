@@ -105,87 +105,6 @@ export const useChatInput = ({
 
   const isSubmitDisabled = useMemo(() => isDisabled || isUploading || !value.trim(), [isDisabled, isUploading, value]);
 
-  const init = async () => {
-    const payload = createConversationPayload(
-      resourceId,
-      resourceType,
-      scopeId,
-      firstMessage || 'Hello, how are you?',
-      currentUserName || '',
-      fileReferences.length > 0 ? fileReferences.map((ref) => ({ path: ref.path, name: ref.name })) : undefined,
-      scope,
-      annotationLocation,
-      annotationType,
-      llmModel,
-      autoLoopEnabled,
-    );
-
-    setFileReferences([]);
-    const response = await chatActions.createConversationV2(payload);
-
-    if (!response?.conversation_id) {
-      throw new Error('Failed to create conversation');
-    }
-
-    onConversationCreated?.(response.conversation_id);
-  };
-
-  const handleFileSelect = async (files: FileList | null) => {
-    if (!files || files.length === 0) return;
-
-    const username = adapter.getUsername();
-    if (!username) {
-      adapter.onError?.(new Error('Username is required for file uploads'));
-      return;
-    }
-
-    const uploadingFiles = Array.from(files).map((file) => ({
-      path: '',
-      name: sanitizeFileName(file.name),
-      file_type: file.type,
-      file: file,
-    }));
-
-    setIsUploading(true);
-    setFileReferences((prev) => [...prev, ...uploadingFiles]);
-
-    const { successful, failed } = await handleFilesystemUploads(files, username, adapter.uploadMutations);
-    const failedFileNames = new Set(failed.map((f) => sanitizeFileName(f.file.name)));
-
-    setFileReferences((prev) => {
-      const updated = prev.filter((att) => {
-        if (att.path !== '') return true;
-        if (failedFileNames.has(att.name)) return false;
-        return true;
-      });
-
-      const updatedTempEntriesMap = new Map<string, number>();
-      updated.forEach((item, index) => {
-        if (item.path === '' && !updatedTempEntriesMap.has(item.name)) {
-          updatedTempEntriesMap.set(item.name, index);
-        }
-      });
-
-      successful.forEach((uploadedFile) => {
-        const index = updatedTempEntriesMap.get(uploadedFile.name);
-        if (index !== undefined) {
-          updated[index] = uploadedFile;
-        } else {
-          updated.push(uploadedFile);
-        }
-      });
-
-      return updated;
-    });
-
-    if (failed?.length) {
-      const failedNames = failed.map((f) => f?.file?.name).join(', ');
-      adapter.onError?.(new Error(`Failed to upload ${formatPlural(failed.length, 'file')}: ${failedNames}`));
-    }
-
-    setIsUploading(false);
-  };
-
   const removeFileReference = useCallback(
     (fileId: string) => {
       setFileReferences((prev) => prev.filter((ref) => ref.path !== fileId));
@@ -210,7 +129,161 @@ export const useChatInput = ({
     });
   }, []);
 
-  const handleSubmit = () => {
+  const handleFileSelect = useCallback(
+    async (files: FileList | null) => {
+      if (!files || files.length === 0) return;
+
+      const username = adapter.getUsername();
+      if (!username) {
+        adapter.onError?.(new Error('Username is required for file uploads'));
+        return;
+      }
+
+      const uploadingFiles = Array.from(files).map((file) => ({
+        path: '',
+        name: sanitizeFileName(file.name),
+        file_type: file.type,
+        file: file,
+      }));
+
+      setIsUploading(true);
+      setFileReferences((prev) => [...prev, ...uploadingFiles]);
+
+      const { successful, failed } = await handleFilesystemUploads(files, username, adapter.uploadMutations);
+      const failedFileNames = new Set(failed.map((f) => sanitizeFileName(f.file.name)));
+
+      setFileReferences((prev) => {
+        const updated = prev.filter((att) => {
+          if (att.path !== '') return true;
+          if (failedFileNames.has(att.name)) return false;
+          return true;
+        });
+
+        const updatedTempEntriesMap = new Map<string, number>();
+        updated.forEach((item, index) => {
+          if (item.path === '' && !updatedTempEntriesMap.has(item.name)) {
+            updatedTempEntriesMap.set(item.name, index);
+          }
+        });
+
+        successful.forEach((uploadedFile) => {
+          const index = updatedTempEntriesMap.get(uploadedFile.name);
+          if (index !== undefined) {
+            updated[index] = uploadedFile;
+          } else {
+            updated.push(uploadedFile);
+          }
+        });
+
+        return updated;
+      });
+
+      if (failed?.length) {
+        const failedNames = failed.map((f) => f?.file?.name).join(', ');
+        adapter.onError?.(new Error(`Failed to upload ${formatPlural(failed.length, 'file')}: ${failedNames}`));
+      }
+
+      setIsUploading(false);
+    },
+    [adapter],
+  );
+
+  const handleSendMessage = useCallback(
+    async (inputValue: string) => {
+      if (!inputValue) return;
+
+      const messagePayload = createUserMessagePayload(
+        inputValue,
+        resourceId,
+        resourceType,
+        currentUserName || '',
+        fileReferences.length > 0 ? fileReferences.map((ref) => ({ path: ref.path, name: ref.name })) : undefined,
+        llmModel,
+        autoLoopEnabled,
+      );
+
+      setFileReferences([]);
+
+      const lastMessage = chatActions.messages[chatActions.messages.length - 1];
+      let messageId = '';
+      if (lastMessage?.message_content?.elements) {
+        for (const element of lastMessage.message_content.elements) {
+          if (
+            element?.type === BLOCK_TYPE.BUTTON &&
+            (element as ButtonBlockType)?.action?.type === ActionType.INTERNAL_API
+          ) {
+            messageId = lastMessage.id || '';
+          }
+        }
+      }
+
+      try {
+        if (messageId && adapter.disableInteraction) {
+          adapter.disableInteraction({
+            conversationId: conversationId || '',
+            messageId,
+            resourceId,
+            resourceType,
+          });
+        }
+        await chatActions.sendMessage(messagePayload);
+      } catch (error) {
+        adapter.onError?.(error);
+      }
+    },
+    [
+      adapter,
+      chatActions,
+      conversationId,
+      currentUserName,
+      fileReferences,
+      resourceId,
+      resourceType,
+      llmModel,
+      autoLoopEnabled,
+    ],
+  );
+
+  const init = useCallback(async () => {
+    const payload = createConversationPayload(
+      resourceId,
+      resourceType,
+      scopeId,
+      firstMessage || 'Hello, how are you?',
+      currentUserName || '',
+      fileReferences.length > 0 ? fileReferences.map((ref) => ({ path: ref.path, name: ref.name })) : undefined,
+      scope,
+      annotationLocation,
+      annotationType,
+      llmModel,
+      autoLoopEnabled,
+    );
+
+    setFileReferences([]);
+    const response = await chatActions.createConversationV2(payload);
+
+    if (!response?.conversation_id) {
+      throw new Error('Failed to create conversation');
+    }
+
+    onConversationCreated?.(response.conversation_id);
+  }, [
+    resourceId,
+    resourceType,
+    scopeId,
+    firstMessage,
+    currentUserName,
+    fileReferences,
+    scope,
+    annotationLocation,
+    annotationType,
+    llmModel,
+    autoLoopEnabled,
+    chatActions,
+    onConversationCreated,
+  ]);
+
+  const handleSubmit = useCallback(() => {
     const trimmedValue = value.trim();
     if (!trimmedValue) return;
 
@@ -223,51 +296,7 @@ export const useChatInput = ({
     }
 
     handleSendMessage(trimmedValue);
-  };
-
-  const handleSendMessage = async (inputValue: string) => {
-    if (!inputValue) return;
-
-    const messagePayload = createUserMessagePayload(
-      inputValue,
-      resourceId,
-      resourceType,
-      currentUserName || '',
-      fileReferences.length > 0 ? fileReferences.map((ref) => ({ path: ref.path, name: ref.name })) : undefined,
-      llmModel,
-      autoLoopEnabled,
-    );
-
-    setFileReferences([]);
-
-    // Check for INTERNAL_API buttons on last message
-    const lastMessage = chatActions.messages[chatActions.messages.length - 1];
-    let messageId = '';
-    if (lastMessage?.message_content?.elements) {
-      for (const element of lastMessage.message_content.elements) {
-        if (
-          element?.type === BLOCK_TYPE.BUTTON &&
-          (element as ButtonBlockType)?.action?.type === ActionType.INTERNAL_API
-        ) {
-          messageId = lastMessage.id || '';
-        }
-      }
-    }
-
-    try {
-      if (messageId && adapter.disableInteraction) {
-        adapter.disableInteraction({
-          conversationId: conversationId || '',
-          messageId,
-          resourceId,
-          resourceType,
-        });
-      }
-      await chatActions.sendMessage(messagePayload);
-    } catch (error) {
-      adapter.onError?.(error);
-    }
-  };
+  }, [value, firstMessage, conversationId, setValue, setHeader, handleSendMessage]);
 
   useEffect(() => {
     if (prevConversationIdRef.current !== conversationId) {
@@ -280,7 +309,7 @@ export const useChatInput = ({
     if (firstMessage && !conversationId) {
       init();
     }
-  }, [firstMessage, conversationId]);
+  }, [firstMessage, conversationId, init]);
 
   return {
     value,
