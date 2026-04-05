@@ -148,7 +148,6 @@ const TaskContentChat = ({ taskId }: { taskId: string }) => {
     taskId,
     isAgentActive,
     summaryContent,
-    taskStatus,
     streamingSummaryText: taskSummaryText,
   });
 
