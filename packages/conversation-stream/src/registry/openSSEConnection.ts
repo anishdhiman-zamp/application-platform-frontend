@@ -2,16 +2,19 @@ import { fetchEventSource } from '@microsoft/fetch-event-source';
 import { captureException } from '@sentry/browser';
 import { API_DOMAIN } from '@zamp-platform/api';
 
-const CONNECTION_TIMEOUT_MS = 10_000;
+import type { SSESourceType } from '../types/sse.types';
+export { SSE_CONNECTION_TIMEOUT_MS, SSE_SOURCE_TYPE, type SSESourceType } from '../types/sse.types';
+import { SSE_CONNECTION_TIMEOUT_MS } from '../types/sse.types';
 
 /**
- * Opens a single SSE connection for a conversation.
+ * Opens a single SSE connection for a conversation or task.
  * Throws in onerror/onclose to prevent fetchEventSource's built-in retry;
  * reconnect decisions are delegated to the caller (registry or hook).
  * `onDead` is called when the connection dies so the registry can mark it stale.
  */
 export function openSSEConnection(
-  conversationId: string,
+  sourceType: SSESourceType,
+  sourceId: string,
   organizationId: string | undefined,
   isNewConversation: boolean,
   streamingMessageId: string | null | undefined,
@@ -21,8 +24,8 @@ export function openSSEConnection(
   onDead: (error?: unknown) => void,
   lastEventId?: string | null,
 ): void {
-  let url = `${API_DOMAIN}/v4/conversations/${conversationId}/events`;
-  if (streamingMessageId) url += `?message_id=${streamingMessageId}`;
+  let url = `${API_DOMAIN}/streaming?source_type=${sourceType}&source_id=${sourceId}`;
+  if (streamingMessageId) url += `&message_id=${streamingMessageId}`;
 
   const headers: Record<string, string> = {};
   if (lastEventId) {
@@ -45,7 +48,7 @@ export function openSSEConnection(
     if (!signal.aborted) {
       markDead(new Error('SSE connection timeout'));
     }
-  }, CONNECTION_TIMEOUT_MS);
+  }, SSE_CONNECTION_TIMEOUT_MS);
 
   fetchEventSource(url, {
     signal,

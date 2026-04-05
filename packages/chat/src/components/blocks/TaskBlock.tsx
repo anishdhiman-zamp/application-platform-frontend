@@ -5,7 +5,6 @@ import { formatPlural, safeJsonParse } from '@zamp-platform/utils';
 import { EVENT_TYPE } from '@zamp-platform/utils/event-bus/event-bus.types';
 import { ArrowUpRight, ChevronDown } from 'lucide-react';
 import { useRouter } from 'next/navigation';
-import React from 'react';
 import { type FC, useCallback, useMemo } from 'react';
 
 import { getChatTaskRoute } from '@/constants/routeConfig';

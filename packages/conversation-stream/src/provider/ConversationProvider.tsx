@@ -162,11 +162,44 @@ export const ConversationProvider: React.FC<ConversationProviderProps> = ({
     setIsBrowserStreamingAvailable(false);
   }, []);
 
+  const handlePerConvTaskUpdate = useCallback((taskId: string, updatedFields: Record<string, unknown>) => {
+    const status = updatedFields?.status as TaskStatus | undefined;
+    if (!taskId || !status) return;
+
+    setMessages((prev) =>
+      prev.map((msg) => {
+        const elements = msg.message_content?.elements;
+        if (!elements?.length) return msg;
+
+        let hasUpdate = false;
+        const updatedElements = elements.map((el) => {
+          if (el.type === BLOCK_TYPE.TASK && el.payload.task_id === taskId) {
+            hasUpdate = true;
+            return { ...el, payload: { ...el.payload, status } };
+          }
+          return el;
+        });
+
+        if (!hasUpdate) return msg;
+        return { ...msg, message_content: { ...msg.message_content, elements: updatedElements } };
+      }),
+    );
+  }, []);
+
+  // Handle input_required events arriving on the per-conversation SSE channel.
+  const handlePerConvInputRequired = useCallback(() => {
+    if (_conversationId) {
+      dispatch(chatApi.util.invalidateTags([{ type: APITags.GET_CONVERSATION_BY_ID, id: _conversationId }]));
+    }
+  }, [_conversationId, dispatch]);
+
   const perConvCallbacks = useRef<ConversationEventCallbacks>({
     onTitleUpdated: handlePerConvTitleUpdated,
     onMessageStop: handlePerConvMessageStop,
     onBrowserStreamingAvailable: handleBrowserStreamingAvailable,
     onBrowserStreamingUnavailable: handleBrowserStreamingUnavailable,
+    onTaskUpdate: handlePerConvTaskUpdate,
+    onInputRequired: handlePerConvInputRequired,
   });
 
   const setConversationId = useCallback(
@@ -414,12 +447,16 @@ export const ConversationProvider: React.FC<ConversationProviderProps> = ({
       onMessageStop: handlePerConvMessageStop,
       onBrowserStreamingAvailable: handleBrowserStreamingAvailable,
       onBrowserStreamingUnavailable: handleBrowserStreamingUnavailable,
+      onTaskUpdate: handlePerConvTaskUpdate,
+      onInputRequired: handlePerConvInputRequired,
     };
   }, [
     handlePerConvTitleUpdated,
     handlePerConvMessageStop,
     handleBrowserStreamingAvailable,
     handleBrowserStreamingUnavailable,
+    handlePerConvTaskUpdate,
+    handlePerConvInputRequired,
   ]);
 
   useEffect(() => {

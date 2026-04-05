@@ -11,32 +11,29 @@ import {
   SummaryStatus,
   TASK_STATUS,
   TaskBreadcrumb,
-  TaskStatusIcon,
-  useChat,
   useDisplayedSummary,
+  useStreamingState,
 } from '@zamp-platform/chat';
+import { TaskProvider, useTaskActions, useTaskState } from '@zamp-platform/conversation-stream';
 import { ScrollContainer, type ScrollContainerRef } from '@zamp-platform/ui';
 import { cn } from '@zamp-platform/ui/utils';
-import { EVENT_TYPE } from '@zamp-platform/utils/event-bus/event-bus.types';
 import { useDynamicTabs } from 'modules/pace/components/dynamic-tabs/useDynamicTabs';
 import { useTaskNavigation } from 'modules/pace/hooks/useTaskNavigation';
 import { TAB_TYPE } from 'modules/pace/pace.types';
-import { usePathname, useRouter, useSearchParams } from 'next/navigation';
+import { usePathname, useSearchParams } from 'next/navigation';
 import { API_ENDPOINTS } from '@/apis/apiEndpoint.constants';
 import CommonWrapper from '@/components/commonWrapper';
 import { SkeletonTypes } from '@/components/commonWrapper/commonWrapper.types';
-import { getChatTaskRoute, ROUTES_PATH } from '@/constants/routeConfig';
 import { useAppSelector } from '@/hooks/toolkit';
-import ChatTopbar from '@/modules/pace/components/chat/ChatTopbar';
 import ResizableSummaryBox from '@/modules/pace/components/chat/ResizableSummaryBox';
 import SummaryMarkdown from '@/modules/pace/components/chat/SummaryMarkdown';
-import TaskBreadcrumbNav from '@/modules/pace/components/chat/TaskBreadcrumb';
 import { TaskChatExpandedStepsFooter } from '@/modules/pace/components/chat/TaskChatExpandedStepsFooter';
 import { TaskChatStepMessage } from '@/modules/pace/components/chat/TaskChatStepMessage';
 import { TaskChatStepsToggleHeader } from '@/modules/pace/components/chat/TaskChatStepsToggleHeader';
 import { TaskChatSummaryContent } from '@/modules/pace/components/chat/TaskChatSummaryContent';
 import { TaskChatTitleHeader } from '@/modules/pace/components/chat/TaskChatTitleHeader';
 import TaskNavigation from '@/modules/pace/components/chat/TaskNavigation';
+import TaskTopbar from '@/modules/pace/components/chat/TaskTopbar';
 import { getActiveTabIdFromUrl } from '@/modules/pace/components/dynamic-tabs/tab-type-registry';
 import ChatMessagesSkeleton from '@/modules/pace/components/loaders/ChatMessagesSkeleton';
 import SubtaskPanel from '@/modules/pace/components/tasks/components/SubtaskPanel';
@@ -47,7 +44,6 @@ import {
   getStepCount,
 } from '@/modules/pace/components/tasks/utils/tasks.utils';
 import { useHitlQuestions } from '@/modules/pace/hooks/useHitlQuestions';
-import { preserveSidebarParam } from '@/modules/pace/pace.utils';
 import type { RootState } from '@/store';
 
 interface TaskContentInnerProps {
@@ -55,7 +51,6 @@ interface TaskContentInnerProps {
 }
 
 const TaskContentChat = ({ taskId }: { taskId: string }) => {
-  // Track whether streaming has ever been active to avoid re-showing the loader after stream ends
   const hadStreamingRef = useRef(false);
 
   const { openTab } = useDynamicTabs({ type: TAB_TYPE.FILE });
@@ -68,7 +63,6 @@ const TaskContentChat = ({ taskId }: { taskId: string }) => {
     const raw = searchParams?.get('parentTasks');
 
     if (!raw) return [];
-
     try {
       return JSON.parse(raw) as TaskBreadcrumb[];
     } catch {
@@ -86,11 +80,6 @@ const TaskContentChat = ({ taskId }: { taskId: string }) => {
     setShowSteps((prev) => !prev);
   }, []);
 
-  const handleSetHeader = useCallback((header: string) => {
-    setChatTitle((prev) => prev || header);
-  }, []);
-  const router = useRouter();
-
   const {
     currentIndex,
     totalCount,
@@ -104,7 +93,6 @@ const TaskContentChat = ({ taskId }: { taskId: string }) => {
     goToPreviousTask,
   } = useTaskNavigation(taskId);
 
-  // Build breadcrumb chain for subtask panel: current parents + this task (with status)
   const subtaskPanelParents: TaskBreadcrumb[] = useMemo(
     () => [...parentTasks, { id: taskId, title: chatTitle || urlTitle || 'Untitled', status: status ?? undefined }],
     [parentTasks, taskId, chatTitle, urlTitle, status],
@@ -115,36 +103,37 @@ const TaskContentChat = ({ taskId }: { taskId: string }) => {
     [subtasks],
   );
 
-  const chat = useChat({
-    resourceId: organizationId,
-    resourceType: ResourceType.ORGANIZATION,
-    conversationId: taskId ?? undefined,
-    eventType: EVENT_TYPE.TASK,
-    enableStreaming: true,
-    apiConfig: {
-      sendMessage: API_ENDPOINTS.POST_MESSAGE_V4,
-      createConversation: API_ENDPOINTS.CREATE_CONVERSATION_V4,
-      getConversationById: API_ENDPOINTS.TASKS_MESSAGES_GET,
-    },
-    setHeader: handleSetHeader,
-  });
+  // --- Use TaskProvider context ---
+  const { messages, isLoadingHistory, isErrorHistory, conversationData, inputsRequired } = useTaskState();
+  const { refetchHistory } = useTaskActions();
+  const streamingState = useStreamingState(taskId);
 
-  const hasMessages = chat.messages.length > 0;
-  const isAnalysing = hasMessages && chat.messages[chat.messages.length - 1]?.sender_type === SenderType.USER;
+  // Set title from conversation data
+  useEffect(() => {
+    const title = (conversationData as Record<string, unknown> | undefined)?.title as string | undefined;
 
-  if (chat.streamingState) hadStreamingRef.current = true;
+    if (title) {
+      setChatTitle((prev) => prev || title);
+    }
+  }, [conversationData]);
+
+  const hasMessages = messages.length > 0;
+  const isAnalysing = hasMessages && messages[messages.length - 1]?.sender_type === SenderType.USER;
+
+  if (streamingState) hadStreamingRef.current = true;
 
   const isLoadingConversation =
-    Boolean(taskId && chat?.isLoadingConversationHistory) ||
-    (!hasMessages && !chat?.streamingState && !hadStreamingRef.current);
+    Boolean(taskId && isLoadingHistory) || (!hasMessages && !streamingState && !hadStreamingRef.current);
 
-  const { processedMessages, lastSummaryText } = useMemo(() => getProcessedMessages(chat.messages), [chat.messages]);
-  const conversationData = chat.conversationData;
-  const summary = conversationData?.summary as ConversationSummary | null | undefined;
-  const taskStatus = (conversationData as unknown as Record<string, unknown>)?.status as string | undefined;
-  const isTaskDone = taskStatus && !chat.streamingState ? taskStatus === TASK_STATUS.COMPLETED : false;
+  const { processedMessages, lastSummaryText } = useMemo(() => getProcessedMessages(messages), [messages]);
+  const summary = (conversationData as Record<string, unknown> | undefined)?.summary as
+    | ConversationSummary
+    | null
+    | undefined;
+  const taskStatus = (conversationData as Record<string, unknown> | undefined)?.status as string | undefined;
+  const isTaskDone = taskStatus && !streamingState ? taskStatus === TASK_STATUS.COMPLETED : false;
   const summaryContent = isTaskDone ? (summary?.status === SummaryStatus.COMPLETED ? lastSummaryText : null) : null;
-  const isAgentActive = Boolean(chat.streamingState?.is_active) || isAnalysing;
+  const isAgentActive = Boolean(streamingState?.is_active) || isAnalysing;
 
   const displayedSummary = useDisplayedSummary({
     taskId,
@@ -154,23 +143,19 @@ const TaskContentChat = ({ taskId }: { taskId: string }) => {
     taskStatus,
   });
 
-  const { hitlQuestions, hitlQuestionsKey } = useHitlQuestions(chat.inputsRequired);
+  const { hitlQuestions, hitlQuestionsKey } = useHitlQuestions(inputsRequired);
 
   const handleHitlRespondComplete = useCallback(() => {
-    void chat.refetchConversationHistory?.();
-  }, [chat]);
+    refetchHistory();
+  }, [refetchHistory]);
 
   const isNeedsInput = taskStatus === TASK_STATUS.NEEDS_INPUT;
   const hasHitlQuestions = hitlQuestions.length > 0;
 
   const displayTitle = getDisplayTitle(urlTitle, chatTitle);
-
   const statusLabel = getStatusLabel(isAgentActive, taskStatus);
 
-  const stepCount = useMemo(
-    () => getStepCount(chat.messages, chat.streamingState),
-    [chat.messages, chat.streamingState],
-  );
+  const stepCount = useMemo(() => getStepCount(messages, streamingState), [messages, streamingState]);
 
   useEffect(() => {
     if (summaryScrollRef.current) {
@@ -181,37 +166,12 @@ const TaskContentChat = ({ taskId }: { taskId: string }) => {
   return (
     <ChatActionsProvider onFileOpen={openTab} parentTasks={subtaskPanelParents} siblings={siblingsMemo}>
       <div className='relative flex h-full flex-1 flex-col'>
-        <ChatTopbar
+        <TaskTopbar
           className='border-GRAY_100 border-b'
           title={chatTitle || 'Untitled'}
-          conversationId={taskId ?? chat?.conversationId}
-          organizationId={organizationId}
-          onTitleChange={setChatTitle}
-          showHistory={false}
-          showBackButton={!isSubtask}
-          showActions={false}
-          onBack={() => router.push(preserveSidebarParam(ROUTES_PATH.CHAT_TASKS))}
-          titleIcon={status ? <TaskStatusIcon status={status} /> : undefined}
-          titleSlot={
-            isSubtask ? (
-              <TaskBreadcrumbNav
-                currentTitle={chatTitle || urlTitle || 'Untitled'}
-                currentStatus={status ?? undefined}
-                parentTasks={parentTasks}
-                onBack={() => {
-                  const lastParent = parentTasks[parentTasks.length - 1];
-                  const ancestorsAbove = parentTasks.slice(0, -1);
-                  const route = getChatTaskRoute({
-                    taskId: lastParent.id,
-                    taskTitle: lastParent.title,
-                    parentTasks: ancestorsAbove.length > 0 ? ancestorsAbove : undefined,
-                  });
-
-                  router.push(preserveSidebarParam(route));
-                }}
-              />
-            ) : undefined
-          }
+          status={status ?? undefined}
+          isSubtask={isSubtask}
+          parentTasks={parentTasks}
           navigationSlot={
             <TaskNavigation
               currentIndex={currentIndex}
@@ -228,8 +188,8 @@ const TaskContentChat = ({ taskId }: { taskId: string }) => {
         <div className='flex min-h-0 flex-1'>
           <CommonWrapper
             isLoading={isLoadingConversation}
-            isError={chat?.isErrorConversationHistory}
-            refetchFunction={chat?.refetchConversationHistory}
+            isError={isErrorHistory}
+            refetchFunction={refetchHistory}
             skeletonType={SkeletonTypes.CUSTOM}
             loader={<ChatMessagesSkeleton className='px-0' alignUserRight />}
             className='mx-auto flex min-h-0 w-full max-w-[700px] flex-1 flex-col px-4 pt-12'
@@ -314,9 +274,9 @@ const TaskContentChat = ({ taskId }: { taskId: string }) => {
                         </div>
                       ))}
 
-                      {chat.streamingState && !!chat.streamingState.message_content?.elements?.length && (
+                      {streamingState && !!streamingState.message_content?.elements?.length && (
                         <StreamingMessage
-                          streamingState={chat.streamingState}
+                          streamingState={streamingState}
                           assistantAvatar={<></>}
                           showMarkdownConnectors
                           showConnectorToLastBlock
@@ -353,8 +313,19 @@ const TaskContentInner = ({ taskId: propTaskId }: TaskContentInnerProps) => {
   const nextPathname = usePathname();
   const urlTaskId = useMemo(() => getActiveTabIdFromUrl(nextPathname ?? '', '', TAB_TYPE.TASK) ?? '', [nextPathname]);
   const taskId = urlTaskId || propTaskId;
+  const organizationId = useAppSelector((state: RootState) => state.user.user?.orgs?.[0]?.organization_id) ?? '';
 
-  return <TaskContentChat key={taskId} taskId={taskId} />;
+  return (
+    <TaskProvider
+      key={taskId}
+      taskId={taskId}
+      organizationId={organizationId}
+      resourceType={ResourceType.ORGANIZATION}
+      apiConfig={{ getTaskMessages: API_ENDPOINTS.TASKS_MESSAGES_GET }}
+    >
+      <TaskContentChat key={taskId} taskId={taskId} />
+    </TaskProvider>
+  );
 };
 
 export default TaskContentInner;
