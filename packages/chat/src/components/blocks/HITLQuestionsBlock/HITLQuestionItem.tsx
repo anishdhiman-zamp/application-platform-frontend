@@ -4,17 +4,20 @@ import { Button } from '@zamp-platform/ui';
 import { cn } from '@zamp-platform/ui/utils';
 import React from 'react';
 
-import { HITL_INPUT_TYPE } from '../../../types/block.types';
 import { CUSTOM_OPTION_ID } from './constants';
 import { CustomInputRow } from './CustomInputRow';
 import { OptionRow } from './OptionRow';
+import { TextInputRow } from './TextInputRow';
 import type { HITLQuestionWithEntity } from './types';
-import { isApprovalQuestion, optionCountForQuestion } from './utils';
+import {
+  type HITLAnswerValue,
+  isApprovalQuestion,
+  isMultipleChoiceQuestion,
+  isTextQuestion,
+  optionCountForQuestion,
+} from './utils';
 
-export interface AnswerState {
-  optionIds: string[];
-  customText?: string;
-}
+export type { HITLAnswerValue as AnswerState };
 
 export interface HITLQuestionItemProps {
   question: HITLQuestionWithEntity;
@@ -22,7 +25,7 @@ export interface HITLQuestionItemProps {
   questionsLength: number;
   currentQuestionIndex: number;
   focusedOptionIndex: number;
-  answers: Record<string, AnswerState>;
+  answers: Record<string, HITLAnswerValue>;
   customInputs: Record<string, string>;
   customInputRef: React.RefObject<HTMLInputElement | null>;
   containerRef: React.RefObject<HTMLDivElement | null>;
@@ -34,12 +37,15 @@ export interface HITLQuestionItemProps {
   onCustomInputChange: (value: string) => void;
 }
 
+const getSingleSelectOptionBadge = (index: number): string =>
+  index < 26 ? String.fromCharCode(65 + index) : String(index + 1);
+
 interface SelectOptionsProps {
   question: HITLQuestionWithEntity;
   qIndex: number;
   currentQuestionIndex: number;
   focusedOptionIndex: number;
-  answers: Record<string, AnswerState>;
+  answers: Record<string, HITLAnswerValue>;
   customInputs: Record<string, string>;
   customInputRef: React.RefObject<HTMLInputElement | null>;
   containerRef: React.RefObject<HTMLDivElement | null>;
@@ -63,7 +69,7 @@ const SelectOptions = ({
   selectAnswer,
   onCustomInputChange,
 }: SelectOptionsProps) => {
-  const isMultiSelect = question?.is_multi_select || question?.input_type === HITL_INPUT_TYPE.MULTI_SELECT;
+  const isMultiSelect = isMultipleChoiceQuestion(question);
   const showCustomInput = question.allow_custom_input ?? true;
   const options = question.options ?? [];
   const optionCount = optionCountForQuestion(question);
@@ -88,6 +94,7 @@ const SelectOptions = ({
           isFocused={qIndex === currentQuestionIndex && focusedOptionIndex === optIndex}
           isSelected={answers[question.id]?.optionIds.includes(option.id) ?? false}
           isMultiSelect={isMultiSelect ?? false}
+          singleSelectBadge={isMultiSelect ? undefined : getSingleSelectOptionBadge(optIndex)}
           onMouseEnter={() => {
             setCurrentQuestionIndex(qIndex);
             setFocusedOptionIndex(optIndex);
@@ -142,7 +149,7 @@ export const HITLQuestionItem = ({
   };
 
   return (
-    <div ref={setQuestionEl} className='relative w-full shrink-0 snap-start'>
+    <div ref={setQuestionEl} className='relative w-full shrink-0'>
       <div className='flex w-full items-center justify-center'>
         <div className='flex w-full items-center justify-center px-4 pt-4.5 pb-2.5'>
           <div className='text-GRAY_1000 flex flex-1 gap-2 text-sm leading-normal font-[550]'>
@@ -192,6 +199,13 @@ export const HITLQuestionItem = ({
               Reject
             </Button>
           </div>
+        ) : isTextQuestion(question) ? (
+          <TextInputRow
+            value={customInputs[question.id] || ''}
+            isFocused={qIndex === currentQuestionIndex && focusedOptionIndex === 0}
+            inputRef={qIndex === currentQuestionIndex ? customInputRef : undefined}
+            onChange={onCustomInputChange}
+          />
         ) : (
           <SelectOptions
             question={question}

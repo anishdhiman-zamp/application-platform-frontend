@@ -1,6 +1,6 @@
 'use client';
 
-import { FC, useCallback, useMemo, useRef, useState } from 'react';
+import { FC, useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { HITLEntityType, HITLQuestionsBlock, ResourceType, ScopeType } from '@zamp-platform/chat';
 import {
   ConnectedChatInput,
@@ -11,13 +11,20 @@ import {
 import { cn } from '@zamp-platform/ui/utils';
 import { useDynamicTabs } from 'modules/pace/components/dynamic-tabs/useDynamicTabs';
 import ChatConversationContent from 'modules/pace/components/layout/chat-sidebar/ChatConversationContent';
-import { useAppSelector } from '@/hooks/toolkit';
+import { APITags } from '@/constants/api.constants';
+import { FEATURE_FLAGS } from '@/constants/featureFlags';
+import { useAppDispatch, useAppSelector } from '@/hooks/toolkit';
+import { useFeatureFlag } from '@/hooks/useFeatureFlag';
+import AutoLoopConfirmDialog from '@/modules/pace/components/chat/AutoLoopConfirmDialog';
+import AutoLoopToggle from '@/modules/pace/components/chat/AutoLoopToggle';
 import ChatTopbar from '@/modules/pace/components/chat/ChatTopbar';
 import ModelSelector from '@/modules/pace/components/chat/ModelSelector';
 import { useChatDraftInput } from '@/modules/pace/hooks/useChatDraftInput';
 import { useHitlQuestions } from '@/modules/pace/hooks/useHitlQuestions';
 import { usePaceContext } from '@/modules/pace/pace.context';
 import { CHAT_SIDEBAR_STATE, TAB_TYPE } from '@/modules/pace/pace.types';
+import { addAutoLoopLockedConversation, isConversationAutoLoopLocked } from '@/modules/pace/utils/autoLoopStorage';
+import { baseApi } from '@/services/baseApi';
 import type { RootState } from '@/store';
 
 interface ChatSidebarInnerProps {
@@ -45,16 +52,21 @@ const ChatSidebarContent: FC<ChatSidebarContentProps> = ({
   currentUserName,
   username,
 }) => {
+  const dispatch = useAppDispatch();
   const { openTab } = useDynamicTabs({ type: TAB_TYPE.FILE });
   const { chatSidebarState, setChatSidebarState } = usePaceContext();
   const { inputValue, setInputValue } = useChatDraftInput({ conversationId });
-  const { inputsRequired } = useConversationState();
+  const { inputsRequired, isStreaming } = useConversationState();
   const { refetchConversationHistory } = useConversationActions();
+  const { isEnabled: isAutoLoopBtnEnabled } = useFeatureFlag(FEATURE_FLAGS.AUTO_LOOP_BTN_ENABLED);
 
   const fileDropHandlerRef = useRef<((files: FileList) => void) | null>(null);
   const addFileReferenceRef = useRef<((ref: { path: string; name: string }) => void) | null>(null);
 
   const [selectedModel, setSelectedModel] = useState<string | null>(null);
+  const [autoLoopEnabled, setAutoLoopEnabled] = useState(false);
+  const [isAutoLoopLocked, setIsAutoLoopLocked] = useState(false);
+  const [isConfirmDialogOpen, setIsConfirmDialogOpen] = useState(false);
   const [isTaskPopoverOpen, setIsTaskPopoverOpen] = useState(false);
 
   const { hitlQuestions, hitlQuestionsKey } = useHitlQuestions(inputsRequired);
@@ -84,10 +96,34 @@ const ChatSidebarContent: FC<ChatSidebarContentProps> = ({
     void refetchConversationHistory();
   }, [refetchConversationHistory]);
 
+  const handleConversationCreated = useCallback(() => {
+    dispatch(baseApi.util.invalidateTags([APITags.GET_CONVERSATION_HISTORY]));
+  }, [dispatch]);
+
   const modelSelectorSlot = useMemo(
     () => <ModelSelector value={selectedModel} onChange={setSelectedModel} />,
     [selectedModel],
   );
+
+  const autoLoopToggleSlot = useMemo(
+    () => (
+      <AutoLoopToggle
+        enabled={autoLoopEnabled}
+        onChange={(pressed) => {
+          if (pressed) setIsConfirmDialogOpen(true);
+        }}
+        disabled={isAutoLoopLocked}
+      />
+    ),
+    [autoLoopEnabled, isAutoLoopLocked],
+  );
+
+  useEffect(() => {
+    const locked = isConversationAutoLoopLocked(conversationId);
+
+    setIsAutoLoopLocked(locked);
+    setAutoLoopEnabled(locked);
+  }, [conversationId]);
 
   return (
     <div className='bg-BG_WHITE relative mx-auto flex h-full w-full flex-1 flex-col'>
@@ -137,14 +173,28 @@ const ChatSidebarContent: FC<ChatSidebarContentProps> = ({
             setExternalInputValue={setInputValue}
             fileDropHandlerRef={fileDropHandlerRef}
             llmModel={selectedModel}
+            autoLoopEnabled={autoLoopEnabled}
             showModelSelector
             modelSelectorSlot={modelSelectorSlot}
+            {...(isAutoLoopBtnEnabled && { autoLoopToggleSlot })}
             conversationId={conversationId ?? ''}
-            isDisabled={false}
+            onConversationCreated={handleConversationCreated}
+            isDisabled={isStreaming}
             addFileReferenceRef={addFileReferenceRef}
           />
         )}
       </div>
+      <AutoLoopConfirmDialog
+        isOpen={isConfirmDialogOpen}
+        onOpenChange={setIsConfirmDialogOpen}
+        onConfirm={() => {
+          setAutoLoopEnabled(true);
+          setIsAutoLoopLocked(true);
+          if (conversationId) {
+            addAutoLoopLockedConversation(conversationId);
+          }
+        }}
+      />
     </div>
   );
 };

@@ -63,6 +63,8 @@ export interface ConnectedChatInputProps {
   llmModel?: string | null;
   showModelSelector?: boolean;
   modelSelectorSlot?: React.ReactNode;
+  autoLoopEnabled?: boolean;
+  autoLoopToggleSlot?: React.ReactNode;
   hideStopButton?: boolean;
 }
 
@@ -96,6 +98,8 @@ export const ConnectedChatInput: FC<ConnectedChatInputProps> = ({
   llmModel,
   showModelSelector,
   modelSelectorSlot,
+  autoLoopEnabled,
+  autoLoopToggleSlot,
   hideStopButton = false,
 }) => {
   const fileInputRef = useRef<HTMLInputElement>(null);
@@ -166,6 +170,7 @@ export const ConnectedChatInput: FC<ConnectedChatInputProps> = ({
     onConversationCreated,
     isDisabled,
     llmModel,
+    autoLoopEnabled,
   });
 
   const handleTranscriptChunk = useCallback(
@@ -319,6 +324,7 @@ export const ConnectedChatInput: FC<ConnectedChatInputProps> = ({
         minTextareaHeight={minTextareaHeight}
         maxTextareaHeight={maxTextareaHeight}
         modelSelectorSlot={showModelSelector ? modelSelectorSlot : undefined}
+        autoLoopToggleSlot={autoLoopToggleSlot}
       />
     </div>
   );

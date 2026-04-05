@@ -5,14 +5,21 @@ import { BlockRenderer } from '@zamp-platform/chat';
 
 export interface TaskChatStepMessageProps {
   message: ChatMessage;
-  isLastMessage: boolean;
+  /** Use inside muted panels (e.g. step group card): no white card on thinking/tool rows. */
+  quietSurface?: boolean;
+  /** Step group accordion: show timeline dot even when this message is a single markdown block. */
+  alwaysShowMarkdownTimelineDot?: boolean;
 }
 
 /**
  * Task “show steps” timeline row: connector-aligned blocks, with user markdown bubbles
  * right-aligned and `inputs_responded` rows left-aligned like assistant steps.
  */
-export const TaskChatStepMessage = ({ message }: TaskChatStepMessageProps) => {
+export const TaskChatStepMessage = ({
+  message,
+  quietSurface = false,
+  alwaysShowMarkdownTimelineDot = false,
+}: TaskChatStepMessageProps) => {
   const elements = message.message_content?.elements ?? [];
 
   return (
@@ -24,8 +31,10 @@ export const TaskChatStepMessage = ({ message }: TaskChatStepMessageProps) => {
           conversationId={message.conversation_id}
           messageId={message.id}
           showMarkdownConnectors
-          showConnectorToLastBlock
-          showConnectorToNextBlock
+          showConnectorToLastBlock={false}
+          showConnectorToNextBlock={false}
+          quietSurface={quietSurface}
+          alwaysShowMarkdownTimelineDot={alwaysShowMarkdownTimelineDot}
         />
       </div>
     </div>
