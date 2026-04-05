@@ -87,6 +87,9 @@ const ChatHistoryItem = ({
     [onRename, conversation?.id],
   );
 
+  const statusIcon = renderStatusIcon();
+  const hasStatusIcon = Boolean(statusIcon);
+
   return (
     <div
       className={cn(
@@ -97,7 +100,6 @@ const ChatHistoryItem = ({
       onClick={handleClick}
     >
       <div className='flex h-auto w-full items-center justify-start gap-2.5 px-3 py-2.5 pr-9'>
-        <span className='flex h-4 w-4 shrink-0 items-center justify-center'>{renderStatusIcon()}</span>
         <p className='f-13-500 text-GRAY_1000 min-w-0 flex-1 truncate text-left first-letter:uppercase'>
           {conversation?.title || 'Untitled conversation'}
         </p>
@@ -105,7 +107,17 @@ const ChatHistoryItem = ({
         {relativeTime && <span className='f-12-400 text-GRAY_600 shrink-0 whitespace-nowrap'>{relativeTime}</span>}
       </div>
 
-      <div className='absolute right-1'>
+      <div className='absolute right-1 flex items-center justify-center'>
+        {hasStatusIcon && (
+          <span
+            className={cn(
+              'flex h-6 w-6 items-center justify-center transition-opacity',
+              isActionsOpen ? 'opacity-0' : 'group-hover:opacity-0',
+            )}
+          >
+            {statusIcon}
+          </span>
+        )}
         <ConversationActions
           conversationId={conversation?.id}
           organizationId={organizationId}
@@ -115,8 +127,10 @@ const ChatHistoryItem = ({
           onDeleteFailure={handleDeleteFailure}
           onOpenChange={setIsActionsOpen}
           triggerClassName={cn(
-            'transition-opacity group-hover:opacity-100 hover:bg-transparent data-[state=open]:opacity-100',
-            isActionsOpen ? 'opacity-100' : 'opacity-0',
+            'hover:bg-transparent data-[state=open]:opacity-100',
+            hasStatusIcon
+              ? cn('absolute transition-opacity', isActionsOpen ? 'opacity-100' : 'opacity-0 group-hover:opacity-100')
+              : cn('transition-opacity', isActionsOpen ? 'opacity-100' : 'opacity-0 group-hover:opacity-100'),
           )}
           triggerProps={{ onClick: (e) => e.stopPropagation() }}
         />
