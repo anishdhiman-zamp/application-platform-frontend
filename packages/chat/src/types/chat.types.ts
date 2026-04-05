@@ -227,12 +227,23 @@ export enum SummaryStatus {
   COMPLETED = 'completed',
 }
 
+/** One grouped step summary for a slice of message elements (HITL / task summary `step_groups`). */
+export interface ConversationSummaryStepGroup {
+  summary: string;
+  element_ids: string[];
+}
+
 export interface ConversationSummary {
   status: SummaryStatus;
   content?: string;
   live_lines?: string[];
   generated_at?: string;
   updated_at?: string;
+  /**
+   * Step groups keyed by assistant message id. Each value lists groups for that message only.
+   * Legacy shape: a flat array (all groups, any message) — see `resolveStepGroups` in the app.
+   */
+  step_groups?: Record<string, ConversationSummaryStepGroup[]> | ConversationSummaryStepGroup[];
 }
 
 export interface ConversationType {

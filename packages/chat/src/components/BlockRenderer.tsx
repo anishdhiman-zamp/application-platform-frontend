@@ -49,6 +49,11 @@ interface BlockRendererProps {
   showMarkdownConnectors?: boolean;
   showConnectorToLastBlock?: boolean;
   showConnectorToNextBlock?: boolean;
+  embeddedInStepSummary?: boolean;
+  /** Thinking/tool blocks use a transparent shell so they sit flush on muted panels. */
+  quietSurface?: boolean;
+  /** With `showMarkdownConnectors`, still render the timeline dot on the last/only markdown block (e.g. step group accordion). */
+  alwaysShowMarkdownTimelineDot?: boolean;
 }
 
 export const BlockRenderer: React.FC<BlockRendererProps> = ({
@@ -62,6 +67,9 @@ export const BlockRenderer: React.FC<BlockRendererProps> = ({
   showMarkdownConnectors = false,
   showConnectorToLastBlock = false,
   showConnectorToNextBlock = false,
+  embeddedInStepSummary = false,
+  quietSurface = false,
+  alwaysShowMarkdownTimelineDot = false,
 }) => {
   const [openAccordionId, setOpenAccordionId] = useState<string | null>(null);
   const [elementValues, setElementValues] = useState<
@@ -122,6 +130,7 @@ export const BlockRenderer: React.FC<BlockRendererProps> = ({
 
   const isConnectedBlock = (block?: Block, isLastBlock?: boolean) => {
     if (!block) return false;
+    if (embeddedInStepSummary) return false;
     if (isThinkingOrToolUseBlock(block)) return true;
     const effectivelyLast = isLastBlock && !isStreaming;
 
@@ -170,6 +179,8 @@ export const BlockRenderer: React.FC<BlockRendererProps> = ({
             start_timestamp={thinking.start_timestamp}
             stop_timestamp={thinking.stop_timestamp}
             isAccordionOpen={isAccordionOpen}
+            embedded={embeddedInStepSummary}
+            quietSurface={quietSurface}
             onAccordionOpenChange={(isOpen) =>
               setOpenAccordionId((currentId) => {
                 if (isOpen) {
@@ -197,6 +208,8 @@ export const BlockRenderer: React.FC<BlockRendererProps> = ({
             is_complete={!nextBlock && isStreaming ? false : toolUseBlock.is_complete}
             toolResult={toolResult}
             isAccordionOpen={isAccordionOpen}
+            embedded={embeddedInStepSummary}
+            quietSurface={quietSurface}
             onAccordionOpenChange={(isOpen) =>
               setOpenAccordionId((currentId) => {
                 if (isOpen) {
@@ -221,7 +234,7 @@ export const BlockRenderer: React.FC<BlockRendererProps> = ({
         const textStartTs = 'start_timestamp' in textBlock ? textBlock.start_timestamp : undefined;
         const textKey = textBlock.id ?? `text-${textBlock.order}-${textStartTs ?? 'no-start-timestamp'}`;
 
-        if (showMarkdownConnectors && (!isLastBlock || isStreaming)) {
+        if (showMarkdownConnectors && (!isLastBlock || isStreaming || alwaysShowMarkdownTimelineDot)) {
           return (
             <div className='relative' key={textKey}>
               {showConnectorFromPrevious && (

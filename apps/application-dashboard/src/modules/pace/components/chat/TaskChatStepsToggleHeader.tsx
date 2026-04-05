@@ -2,7 +2,7 @@
 
 import { type ReactNode, useMemo } from 'react';
 import { TASK_STATUS } from '@zamp-platform/chat';
-import { Button } from '@zamp-platform/ui';
+import { Button, Switch } from '@zamp-platform/ui';
 import { ChevronsDownUp, ChevronsUpDown, CircleCheck } from 'lucide-react';
 import Image from 'next/image';
 
@@ -12,6 +12,10 @@ export interface TaskChatStepsToggleHeaderProps {
   stepCount: number;
   isTaskDone: boolean;
   taskStatus: string | undefined;
+  /** When true, shows the “Show Summary” control (step groups summary vs per-message view). */
+  showSummaryControl?: boolean;
+  showSummary?: boolean;
+  onShowSummaryChange?: (checked: boolean) => void;
 }
 
 const TASK_PROCESS_LABELS = {
@@ -27,6 +31,9 @@ export const TaskChatStepsToggleHeader = ({
   stepCount,
   isTaskDone,
   taskStatus,
+  showSummaryControl = false,
+  showSummary = true,
+  onShowSummaryChange,
 }: TaskChatStepsToggleHeaderProps) => {
   const { taskProcessLabel, taskProcessLabelIcon } = useMemo(() => {
     let label = TASK_PROCESS_LABELS.STEPS_COMPLETED(stepCount);
@@ -57,23 +64,31 @@ export const TaskChatStepsToggleHeader = ({
 
   return (
     <div className='bg-BG_WHITE z-[3] flex flex-col'>
-      <Button
-        variant='ghost'
-        onClick={onToggle}
-        className='flex h-auto w-auto items-center gap-1 self-start px-0 py-0 transition-colors hover:bg-transparent'
-      >
-        <div className='flex h-5 w-7.5 items-center justify-center'>{taskProcessLabelIcon}</div>
-        <div className='flex items-center gap-2'>
-          <span className='f-13-450 text-GRAY_800 whitespace-nowrap'>{taskProcessLabel}</span>
-          {showSteps ? (
-            <ChevronsDownUp size={14} className='text-GRAY_700' />
-          ) : (
-            <ChevronsUpDown size={14} className='text-GRAY_700' />
-          )}
-        </div>
-      </Button>
-      <div className='flex h-[15px] w-7.5 justify-center'>
-        <div className='border-GRAY_400 h-full w-0 border-l' />
+      <div className='flex w-full min-w-0 items-center justify-between gap-3'>
+        <Button
+          variant='ghost'
+          onClick={onToggle}
+          className='flex h-auto min-w-0 flex-1 items-center justify-start gap-1 self-start px-0 py-0 transition-colors hover:bg-transparent'
+        >
+          <div className='flex h-5 w-[30px] shrink-0 items-center justify-center'>{taskProcessLabelIcon}</div>
+          <div className='flex min-w-0 items-center gap-2'>
+            <span className='f-13-450 text-GRAY_700 truncate'>{taskProcessLabel}</span>
+            {showSteps ? (
+              <ChevronsDownUp size={14} className='text-GRAY_700 shrink-0' />
+            ) : (
+              <ChevronsUpDown size={14} className='text-GRAY_700 shrink-0' />
+            )}
+          </div>
+        </Button>
+        {showSummaryControl && onShowSummaryChange ? (
+          <label className='bg-BG_WHITE flex shrink-0 cursor-pointer items-center gap-1 rounded-full py-0.5 pr-1 pl-2'>
+            <span className='f-12-500 text-GRAY_1000 whitespace-nowrap'>Summarise</span>
+            <Switch size='medium' checked={showSummary} onCheckedChange={onShowSummaryChange} />
+          </label>
+        ) : null}
+      </div>
+      <div className='flex h-[15px] w-[30px] shrink-0 justify-center'>
+        <div className='bg-border h-full w-px shrink-0' />
       </div>
     </div>
   );

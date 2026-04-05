@@ -10,6 +10,11 @@ import {
 } from '@zamp-platform/chat';
 import { STATUS_DISPLAY } from '@/modules/pace/components/tasks/constants/tasks.constants';
 
+export interface ProcessedMessage {
+  message: ChatMessage;
+  summaryText: string | null;
+}
+
 const messageContributesToSteps = (msg: ChatMessage): boolean => {
   if (msg.sender_type === SenderType.ASSISTANT) return true;
   const elements = msg.message_content?.elements ?? [];
@@ -80,6 +85,19 @@ export const getProcessedMessages = (messages: ChatMessage[]) => {
   );
 
   return { processedMessages, lastSummaryText };
+};
+
+/** Last markdown block text on an assistant message, if any. */
+export const getLastMarkdownTextFromMessage = (msg: ChatMessage): string | null => {
+  if (msg.sender_type !== SenderType.ASSISTANT) return null;
+  const elements = msg.message_content?.elements ?? [];
+  const lastMarkdownIdx = elements.findLastIndex((el) => el.type === BLOCK_TYPE.MARKDOWN);
+
+  if (lastMarkdownIdx === -1) return null;
+
+  const markdownEl = elements[lastMarkdownIdx] as { payload: { text: string } };
+
+  return markdownEl.payload?.text ?? null;
 };
 
 export const getStatusLabel = (isAgentActive: boolean, taskStatus: string | undefined): string => {
