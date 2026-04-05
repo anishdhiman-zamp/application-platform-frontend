@@ -2,58 +2,32 @@
 
 import { Input } from '@zamp-platform/ui';
 import { cn } from '@zamp-platform/ui/utils';
-import { Check, PenLine } from 'lucide-react';
+import { PenLine } from 'lucide-react';
 import React from 'react';
 
-export interface CustomInputRowProps {
-  isFocused: boolean;
-  isSelected: boolean;
-  isMultiSelect: boolean;
+export interface TextInputRowProps {
   value: string;
+  isFocused: boolean;
   inputRef?: React.RefObject<HTMLInputElement | null>;
-  onClick: () => void;
   onChange: (value: string) => void;
 }
 
-export const CustomInputRow: React.FC<CustomInputRowProps> = ({
-  isFocused,
-  isSelected,
-  isMultiSelect,
-  value,
-  inputRef,
-  onClick,
-  onChange,
-}) => {
+export const TextInputRow: React.FC<TextInputRowProps> = ({ value, isFocused, inputRef, onChange }) => {
   return (
-    <div
-      data-hitl-focused={isFocused || undefined}
-      className={cn(
-        'w-full shrink-0 cursor-pointer rounded-[10px] transition-colors duration-200',
-        isFocused ? 'bg-GRAY_50' : 'hover:bg-GRAY_20',
-      )}
-      onClick={onClick}
-    >
+    <div className='w-full shrink-0 rounded-[10px]'>
       <div className='flex w-full items-center px-3 py-2.5'>
         <div className='flex min-h-px min-w-px flex-1 items-center gap-2.5'>
           <div
             className={cn(
               'flex h-5 w-5 shrink-0 items-center justify-center overflow-clip rounded-md transition-colors',
-              isSelected ? 'bg-GRAY_1000' : 'bg-GRAY_50',
+              value ? 'bg-GRAY_1000' : 'bg-GRAY_50',
             )}
           >
-            {isMultiSelect ? (
-              isSelected ? (
-                <Check className='text-BG_WHITE' size={14} strokeWidth={3} />
-              ) : (
-                <PenLine className='text-GRAY_950' size={12} strokeWidth={1} />
-              )
-            ) : (
-              <PenLine className={cn(isSelected ? 'text-BG_WHITE' : 'text-GRAY_950')} size={12} strokeWidth={1} />
-            )}
+            <PenLine className={cn(value ? 'text-BG_WHITE' : 'text-GRAY_950')} size={12} strokeWidth={1} />
           </div>
 
           {isFocused ? (
-            <div className='bg-BG_WHITE relative flex h-8 flex-1 items-start rounded-md'>
+            <div className='relative flex h-8 flex-1 items-start rounded-md'>
               <div
                 aria-hidden='true'
                 className='border-GRAY_200 pointer-events-none absolute inset-[-3px] rounded-[9px] border-[3px]'
@@ -79,13 +53,13 @@ export const CustomInputRow: React.FC<CustomInputRowProps> = ({
                     'focus:border-0 focus:ring-0',
                     'text-GRAY_1000 placeholder:text-GRAY_400 text-xs font-[450] outline-none',
                   )}
-                  placeholder='Type something else...'
+                  placeholder='Type your answer...'
                   style={{ caretColor: 'var(--GRAY_1000)' }}
                 />
               </div>
             </div>
           ) : (
-            <div className='bg-BG_WHITE flex h-8 min-h-px min-w-px flex-1 flex-col items-start overflow-clip rounded-md'>
+            <div className='flex h-8 min-h-px min-w-px flex-1 flex-col items-start overflow-clip rounded-md'>
               <div className='relative h-full w-full rounded-md'>
                 <div
                   aria-hidden='true'
@@ -99,7 +73,7 @@ export const CustomInputRow: React.FC<CustomInputRowProps> = ({
                         value ? 'text-GRAY_1000' : 'text-GRAY_400',
                       )}
                     >
-                      {value || 'Type something else...'}
+                      {value || 'Type your answer...'}
                     </span>
                   </div>
                 </div>

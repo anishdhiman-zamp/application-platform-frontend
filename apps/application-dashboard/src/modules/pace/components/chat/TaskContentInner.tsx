@@ -26,6 +26,11 @@ import CommonWrapper from '@/components/commonWrapper';
 import { SkeletonTypes } from '@/components/commonWrapper/commonWrapper.types';
 import { useAppSelector } from '@/hooks/toolkit';
 import ResizableSummaryBox from '@/modules/pace/components/chat/ResizableSummaryBox';
+import {
+  resolveMessageStepGroupSections,
+  stepGroupsLegacyToSections,
+} from '@/modules/pace/components/chat/step-groups.utils';
+import StepGroupsSummaryView from '@/modules/pace/components/chat/StepGroupsSummaryView';
 import SummaryMarkdown from '@/modules/pace/components/chat/SummaryMarkdown';
 import { TaskChatExpandedStepsFooter } from '@/modules/pace/components/chat/TaskChatExpandedStepsFooter';
 import { TaskChatStepMessage } from '@/modules/pace/components/chat/TaskChatStepMessage';
@@ -73,6 +78,7 @@ const TaskContentChat = ({ taskId }: { taskId: string }) => {
   const isSubtask = parentTasks.length > 0;
 
   const [showSteps, setShowSteps] = useState(false);
+  const [showSummary, setShowSummary] = useState(false);
   const scrollContainerRef = useRef<ScrollContainerRef>(null);
   const summaryScrollRef = useRef<HTMLDivElement>(null);
 
@@ -132,7 +138,11 @@ const TaskContentChat = ({ taskId }: { taskId: string }) => {
     | undefined;
   const taskStatus = (conversationData as Record<string, unknown> | undefined)?.status as string | undefined;
   const isTaskDone = taskStatus && !streamingState ? taskStatus === TASK_STATUS.COMPLETED : false;
-  const summaryContent = isTaskDone ? (summary?.status === SummaryStatus.COMPLETED ? lastSummaryText : null) : null;
+  const summaryContent = isTaskDone
+    ? summary?.status === SummaryStatus.COMPLETED
+      ? (summary?.content ?? lastSummaryText ?? null)
+      : null
+    : null;
   const isAgentActive = Boolean(streamingState?.is_active) || isAnalysing;
 
   const displayedSummary = useDisplayedSummary({
@@ -156,6 +166,28 @@ const TaskContentChat = ({ taskId }: { taskId: string }) => {
   const statusLabel = getStatusLabel(isAgentActive, taskStatus);
 
   const stepCount = useMemo(() => getStepCount(messages, streamingState), [messages, streamingState]);
+  const stepGroupsRaw = isTaskDone ? summary?.step_groups : undefined;
+
+  const stepGroupSections = useMemo(() => {
+    if (!stepGroupsRaw) return [];
+    if (Array.isArray(stepGroupsRaw)) {
+      return stepGroupsLegacyToSections(stepGroupsRaw, messages);
+    }
+
+    return resolveMessageStepGroupSections(stepGroupsRaw, messages);
+  }, [stepGroupsRaw, messages]);
+
+  const hasStepGroups = stepGroupSections.length > 0;
+
+  const handleToggleSummary = useCallback((checked: boolean) => {
+    setShowSummary(checked);
+  }, []);
+
+  useEffect(() => {
+    if (streamingState?.is_active) {
+      setShowSummary(false);
+    }
+  }, [streamingState?.is_active]);
 
   useEffect(() => {
     if (summaryScrollRef.current) {
@@ -185,17 +217,17 @@ const TaskContentChat = ({ taskId }: { taskId: string }) => {
             />
           }
         />
-        <div className='flex min-h-0 flex-1'>
+        <div className='flex min-h-0 w-full min-w-0 flex-1'>
           <CommonWrapper
             isLoading={isLoadingConversation}
             isError={isErrorHistory}
             refetchFunction={refetchHistory}
             skeletonType={SkeletonTypes.CUSTOM}
-            loader={<ChatMessagesSkeleton className='px-0' alignUserRight />}
-            className='mx-auto flex min-h-0 w-full max-w-[700px] flex-1 flex-col px-4 pt-12'
+            loader={<ChatMessagesSkeleton className='mx-auto w-full max-w-[700px] px-4' alignUserRight />}
+            className='flex min-h-0 w-full min-w-0 flex-1 flex-col pt-12'
             disableAnimation
           >
-            <div className='mx-auto w-full max-w-[700px]'>
+            <div className='mx-auto w-full max-w-[700px] px-4'>
               <TaskChatTitleHeader
                 displayTitle={displayTitle}
                 statusLabel={statusLabel}
@@ -206,25 +238,28 @@ const TaskContentChat = ({ taskId }: { taskId: string }) => {
 
             {/* Steps Section */}
             <div className='mt-[30px] flex min-h-0 w-full flex-1 flex-col'>
-              <div className='mx-auto w-full max-w-[700px]'>
+              <div className='mx-auto w-full max-w-[700px] px-4'>
                 <TaskChatStepsToggleHeader
                   showSteps={showSteps}
                   onToggle={handleToggleSteps}
                   stepCount={stepCount}
                   isTaskDone={isTaskDone}
                   taskStatus={taskStatus}
+                  showSummaryControl={hasStepGroups && showSteps && !isAgentActive}
+                  showSummary={showSummary}
+                  onShowSummaryChange={handleToggleSummary}
                 />
               </div>
 
               <ScrollContainer
-                className='min-h-0 w-full flex-1'
+                className='min-h-0 w-full min-w-0 flex-1'
                 showScrollToBottom
                 ref={scrollContainerRef}
                 showFadeOverlay
                 scrollbarStyle='none'
                 scrollClassName='!overflow-y-scroll'
               >
-                <div className='mx-auto flex min-h-0 w-full max-w-[700px] flex-1 flex-col'>
+                <div className='mx-auto flex min-h-0 w-full max-w-[700px] flex-1 flex-col px-4'>
                   <div className='px-2'>
                     <TaskChatSummaryContent
                       showSteps={showSteps}
@@ -240,16 +275,15 @@ const TaskContentChat = ({ taskId }: { taskId: string }) => {
                     />
                   </div>
 
+                  {showSteps && hasStepGroups && showSummary && <StepGroupsSummaryView sections={stepGroupSections} />}
+
                   {/* Expanded: Per-message blocks + summary boxes */}
-                  {showSteps && (
+                  {showSteps && (!hasStepGroups || !showSummary) && (
                     <div className='-mt-1 flex flex-col'>
                       {processedMessages.map(({ message, summaryText }, index) => (
                         <div key={message.id ?? index} className={cn(index !== 0 && 'mt-0')}>
                           <div className='px-2'>
-                            <TaskChatStepMessage
-                              message={message}
-                              isLastMessage={index === processedMessages.length - 1}
-                            />
+                            <TaskChatStepMessage message={message} />
                           </div>
                           {summaryText && (
                             <div
