@@ -37,13 +37,7 @@ export interface TaskProviderProps {
   };
 }
 
-export const TaskProvider: React.FC<TaskProviderProps> = ({
-  children,
-  taskId,
-  organizationId,
-  resourceType,
-  apiConfig,
-}) => {
+export const TaskProvider = ({ children, taskId, organizationId, resourceType, apiConfig }: TaskProviderProps) => {
   const dispatch = useDispatch();
   const { sseEventBus } = useEventBus();
 

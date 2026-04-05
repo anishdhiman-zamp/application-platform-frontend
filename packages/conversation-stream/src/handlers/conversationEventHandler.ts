@@ -44,29 +44,31 @@ export function handleConversationSSEEvent(
   try {
     const eventType = event.event_type as string | undefined;
 
-    if (eventType === TaskSSEEventType.TASK) {
-      const taskId = event.task_id as string;
-      const messageId = event.message_id as string;
-      if (event.type === ConversationEventType.MESSAGE_START) {
-        callbacks.onTaskMessageStart?.(taskId, messageId);
-      } else if (event.type === ConversationEventType.MESSAGE_STOP) {
-        callbacks.onTaskMessageStop?.(taskId, messageId);
+    switch (eventType) {
+      case TaskSSEEventType.TASK: {
+        const taskId = event.task_id as string;
+        const messageId = event.message_id as string;
+        if (event.type === ConversationEventType.MESSAGE_START) {
+          callbacks.onTaskMessageStart?.(taskId, messageId);
+        } else if (event.type === ConversationEventType.MESSAGE_STOP) {
+          callbacks.onTaskMessageStop?.(taskId, messageId);
+        }
+        return;
       }
-      return;
-    }
 
-    if (eventType === TaskSSEEventType.TASK_UPDATE) {
-      const taskId = event.task_id as string;
-      const updatedFields = (event.updated_fields as Record<string, unknown>) || {};
-      callbacks.onTaskUpdate?.(taskId, updatedFields);
-      return;
-    }
+      case TaskSSEEventType.TASK_UPDATE: {
+        const taskId = event.task_id as string;
+        const updatedFields = (event.updated_fields as Record<string, unknown>) || {};
+        callbacks.onTaskUpdate?.(taskId, updatedFields);
+        return;
+      }
 
-    if (eventType === TaskSSEEventType.INPUT_REQUIRED) {
-      const entityId = event.entity_id as string;
-      const entityType = event.entity_type as string;
-      callbacks.onInputRequired?.(entityId, entityType, event.input_required_data);
-      return;
+      case TaskSSEEventType.INPUT_REQUIRED: {
+        const entityId = event.entity_id as string;
+        const entityType = event.entity_type as string;
+        callbacks.onInputRequired?.(entityId, entityType, event.input_required_data);
+        return;
+      }
     }
 
     switch (event.type) {
