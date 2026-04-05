@@ -11,7 +11,8 @@ export interface OptionRowProps {
   isFocused: boolean;
   isSelected: boolean;
   isMultiSelect: boolean;
-  onMouseEnter: () => void;
+  /** Badge text for single-select rows (e.g. A, B, C). Ignored when `isMultiSelect`. */
+  singleSelectBadge?: string;
   onClick: () => void;
 }
 
@@ -20,16 +21,16 @@ export const OptionRow: React.FC<OptionRowProps> = ({
   isFocused,
   isSelected,
   isMultiSelect,
-  onMouseEnter,
+  singleSelectBadge,
   onClick,
 }) => {
   return (
     <div
+      data-hitl-focused={isFocused || undefined}
       className={cn(
         'w-full shrink-0 cursor-pointer rounded-[10px] transition-colors duration-200',
         isFocused ? 'bg-GRAY_50' : 'hover:bg-GRAY_20',
       )}
-      onMouseEnter={onMouseEnter}
       onClick={onClick}
     >
       <div className='flex w-full items-center p-2.5'>
@@ -48,7 +49,7 @@ export const OptionRow: React.FC<OptionRowProps> = ({
               <span
                 className={cn(`text-center text-[11px] font-medium`, isSelected ? 'text-BG_WHITE' : 'text-gray-950')}
               >
-                {option?.label[0]}
+                {singleSelectBadge ?? '?'}
               </span>
             )}
           </div>
@@ -58,7 +59,7 @@ export const OptionRow: React.FC<OptionRowProps> = ({
               <span className='text-sm leading-[1.4] font-medium text-gray-950'>{option?.title ?? option?.label}</span>
               {isFocused && (
                 <div className='bg-BG_WHITE flex h-3.5 w-3.5 shrink-0 items-center justify-center rounded border border-gray-300 p-0.5'>
-                  <CornerDownLeft className='text-gray-700' size={9} strokeWidth={0.5625} />
+                  <CornerDownLeft className='text-gray-700' size={9} />
                 </div>
               )}
             </div>

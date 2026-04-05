@@ -3,11 +3,17 @@ import {
   type ChatMessage,
   type ConversationInputRequiredItem,
   HITL_INPUT_TYPE,
+  HITL_INPUT_TYPE_LEGACY,
   type HITLQuestionWithEntity,
   SenderType,
   type StreamingState,
 } from '@zamp-platform/chat';
 import { STATUS_DISPLAY } from '@/modules/pace/components/tasks/constants/tasks.constants';
+
+export interface ProcessedMessage {
+  message: ChatMessage;
+  summaryText: string | null;
+}
 
 const messageContributesToSteps = (msg: ChatMessage): boolean => {
   if (msg.sender_type === SenderType.ASSISTANT) return true;
@@ -81,6 +87,19 @@ export const getProcessedMessages = (messages: ChatMessage[]) => {
   return { processedMessages, lastSummaryText };
 };
 
+/** Last markdown block text on an assistant message, if any. */
+export const getLastMarkdownTextFromMessage = (msg: ChatMessage): string | null => {
+  if (msg.sender_type !== SenderType.ASSISTANT) return null;
+  const elements = msg.message_content?.elements ?? [];
+  const lastMarkdownIdx = elements.findLastIndex((el) => el.type === BLOCK_TYPE.MARKDOWN);
+
+  if (lastMarkdownIdx === -1) return null;
+
+  const markdownEl = elements[lastMarkdownIdx] as { payload: { text: string } };
+
+  return markdownEl.payload?.text ?? null;
+};
+
 export const getStatusLabel = (isAgentActive: boolean, taskStatus: string | undefined): string => {
   return isAgentActive ? 'In progress' : (STATUS_DISPLAY[taskStatus ?? ''] ?? taskStatus ?? '');
 };
@@ -111,6 +130,20 @@ export const mapInputsRequiredToHitlQuestions = (items: ConversationInputRequire
       continue;
     }
 
+    if (data.input_type === HITL_INPUT_TYPE.TEXT) {
+      result.push({
+        id: item.entity_id,
+        entity_id: item.entity_id,
+        entity_type: item.entity_type,
+        question: data.question ?? '',
+        options: null,
+        input_type: HITL_INPUT_TYPE.TEXT,
+        is_multi_select: false,
+        allow_custom_input: false,
+      });
+      continue;
+    }
+
     if (!data.options?.length) continue;
 
     result.push({
@@ -124,8 +157,10 @@ export const mapInputsRequiredToHitlQuestions = (items: ConversationInputRequire
         title: opt.title ?? opt.label,
         description: opt.description,
       })),
-      input_type: data.input_type,
-      is_multi_select: data.input_type === HITL_INPUT_TYPE.MULTI_SELECT,
+      input_type:
+        data.input_type === HITL_INPUT_TYPE_LEGACY.MULTI_SELECT ? HITL_INPUT_TYPE.MULTIPLE_CHOICE : data.input_type,
+      is_multi_select:
+        data.input_type === HITL_INPUT_TYPE.MULTIPLE_CHOICE || data.input_type === HITL_INPUT_TYPE_LEGACY.MULTI_SELECT,
       allow_custom_input: data.allow_custom_input ?? false,
     });
   }
