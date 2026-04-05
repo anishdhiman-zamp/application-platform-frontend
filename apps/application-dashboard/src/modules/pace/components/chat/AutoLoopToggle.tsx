@@ -16,7 +16,7 @@ interface AutoLoopToggleProps {
 const AutoLoopToggle: FC<AutoLoopToggleProps> = ({ enabled, onChange, disabled, className }) => {
   return (
     <TooltipV2
-      tooltipBody='Explain your expectation, Zamp runs on autopilot until the expectation is met'
+      tooltipBody="Set your expectation. Zamp runs until it's met."
       tooltipClassName='f-12-300 px-3 py-1.5 rounded-md whitespace-nowrap z-999 bg-black text-white'
       asChildTrigger
       delayDuration={300}
