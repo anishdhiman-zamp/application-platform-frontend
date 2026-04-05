@@ -1,11 +1,10 @@
 'use client';
 
-import { memo } from 'react';
-import { cn } from '@zamp-platform/ui/utils';
 import FileViewerTab from 'modules/pace/components/file-viewer/FileViewerTab';
 import { useMountedTabs } from 'modules/pace/components/file-viewer/useMountedTabs';
 import ImageLoader from '@/components/common/loader/ImageLoader';
 import { ZAMP_LOGO_LOADER_SVG } from '@/constants/icons';
+import TabWrapper from '@/modules/pace/components/dynamic-tabs/TabWrapper';
 import { useDynamicTabs } from '@/modules/pace/components/dynamic-tabs/useDynamicTabs';
 import { useFileViewerContext } from '@/modules/pace/context/FileViewerContext';
 import { TAB_TYPE } from '@/modules/pace/pace.types';
@@ -41,18 +40,5 @@ const FileTabsContainer = () => {
     </div>
   );
 };
-
-const TabWrapper = memo(({ isActive, children }: { isActive: boolean; children: React.ReactNode }) => (
-  <div
-    className={cn(
-      'absolute inset-0',
-      isActive ? 'pointer-events-auto visible z-1' : 'pointer-events-none invisible z-0',
-    )}
-  >
-    {children}
-  </div>
-));
-
-TabWrapper.displayName = 'TabWrapper';
 
 export default FileTabsContainer;

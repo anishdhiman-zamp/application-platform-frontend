@@ -16,6 +16,9 @@ interface ThinkingBlockProps {
   onAccordionOpenChange?: (isOpen: boolean) => void;
   showConnectorFromPrevious?: boolean;
   showConnectorToNext?: boolean;
+  embedded?: boolean;
+  /** Flat transparent shell (e.g. nested in a muted panel); keeps dots/connectors unlike `embedded`. */
+  quietSurface?: boolean;
 }
 
 export const ThinkingBlock: FC<ThinkingBlockProps> = ({
@@ -27,7 +30,10 @@ export const ThinkingBlock: FC<ThinkingBlockProps> = ({
   onAccordionOpenChange,
   showConnectorFromPrevious = false,
   showConnectorToNext = false,
+  embedded = false,
+  quietSurface = false,
 }) => {
+  const flatShell = embedded || quietSurface;
   const [internalAccordionOpen, setInternalAccordionOpen] = useState<boolean>(false);
   const isControlled = typeof isAccordionOpen === 'boolean';
   const resolvedIsAccordionOpen = isControlled ? isAccordionOpen : internalAccordionOpen;
@@ -49,17 +55,27 @@ export const ThinkingBlock: FC<ThinkingBlockProps> = ({
       collapsible
       value={resolvedIsAccordionOpen ? 'thinking' : ''}
       onValueChange={handleValueChange}
-      className='bg-BG_WHITE w-full overflow-hidden rounded-lg'
+      className={cn(
+        'w-full overflow-hidden',
+        flatShell ? 'rounded-none border-none bg-transparent shadow-none' : 'bg-BG_WHITE rounded-lg',
+      )}
     >
       <AccordionItem value='thinking' className='relative border-none'>
         {showConnectorFromPrevious && (
           <div className='bg-border pointer-events-none absolute top-0 left-[6.5px] h-2 w-px' style={{ zIndex: 0 }} />
         )}
-        <AccordionTrigger className='f-12-450 text-GRAY_1000 w-full cursor-pointer gap-x-2 py-2 [&[data-state=closed]>svg]:rotate-90 [&[data-state=open]>svg]:-rotate-90'>
+        <AccordionTrigger
+          className={cn(
+            'f-12-450 text-GRAY_1000 w-full cursor-pointer gap-x-2 [&[data-state=closed]>svg]:rotate-90 [&[data-state=open]>svg]:-rotate-90',
+            embedded ? 'py-1.5' : 'py-2',
+          )}
+        >
           <div className='flex flex-1 items-center gap-2'>
-            <div className='flex h-3.5 w-3.5 items-center justify-center'>
-              <AnimatedDot showAnimation={!is_complete} size={4} />
-            </div>
+            {!embedded && (
+              <div className='flex h-3.5 w-3.5 items-center justify-center'>
+                <AnimatedDot showAnimation={!is_complete} size={4} />
+              </div>
+            )}
             <StatusLabel
               isComplete={is_complete}
               loadingText='Thinking...'
@@ -76,7 +92,12 @@ export const ThinkingBlock: FC<ThinkingBlockProps> = ({
             )}
           />
         )}
-        <AccordionContent className='f-13-400 text-GRAY_900 flex max-h-60 w-full overflow-y-auto p-2 pt-0 pl-5 whitespace-pre-wrap [scrollbar-width:thin] [&::-webkit-scrollbar]:hidden'>
+        <AccordionContent
+          className={cn(
+            'f-13-400 text-GRAY_900 flex max-h-60 w-full overflow-y-auto whitespace-pre-wrap [scrollbar-width:thin] [&::-webkit-scrollbar]:hidden',
+            embedded ? 'p-2 pt-0 pl-3' : 'p-2 pt-0 pl-5',
+          )}
+        >
           {payload?.thinking || 'Processing...'}
         </AccordionContent>
       </AccordionItem>

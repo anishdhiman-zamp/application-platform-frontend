@@ -107,6 +107,7 @@ export const ChatComposer: FC<ChatComposerProps> = ({
   maxTextareaHeight = 200,
 
   modelSelectorSlot,
+  autoLoopToggleSlot,
 }) => {
   const editorRef = useRef<RichTextEditorHandle>(null);
 
@@ -231,7 +232,7 @@ export const ChatComposer: FC<ChatComposerProps> = ({
                   <Paperclip />
                 </Button>
               ) : null}
-              {/* {autoLoopToggleSlot} */}
+              {autoLoopToggleSlot}
             </div>
 
             <div className='flex items-center gap-x-2'>

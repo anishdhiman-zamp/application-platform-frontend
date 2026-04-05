@@ -228,12 +228,23 @@ export enum SummaryStatus {
   COMPLETED = 'completed',
 }
 
+/** One grouped step summary for a slice of message elements (HITL / task summary `step_groups`). */
+export interface ConversationSummaryStepGroup {
+  summary: string;
+  element_ids: string[];
+}
+
 export interface ConversationSummary {
   status: SummaryStatus;
   content?: string;
   live_lines?: string[];
   generated_at?: string;
   updated_at?: string;
+  /**
+   * Step groups keyed by assistant message id. Each value lists groups for that message only.
+   * Legacy shape: a flat array (all groups, any message) — see `resolveStepGroups` in the app.
+   */
+  step_groups?: Record<string, ConversationSummaryStepGroup[]> | ConversationSummaryStepGroup[];
 }
 
 export interface ConversationType {
@@ -513,20 +524,31 @@ export interface HITLSourceEntity {
 
 export interface HITLResponseSelectOne {
   type: typeof HITL_RESPONSE_TYPE.SELECT_ONE;
-  selected_option: string;
+  selected_option: string | null;
+  custom_input?: string | null;
+  is_skipped?: boolean;
 }
 
-export interface HITLResponseFreeText {
-  type: typeof HITL_RESPONSE_TYPE.FREE_TEXT;
-  free_text: string;
+export interface HITLResponseMultipleChoice {
+  type: typeof HITL_RESPONSE_TYPE.MULTIPLE_CHOICE;
+  selected_options: string[];
+  custom_input?: string | null;
+  is_skipped?: boolean;
 }
 
 export interface HITLResponseApproval {
   type: typeof HITL_RESPONSE_TYPE.APPROVAL;
   approved: boolean;
+  is_skipped?: boolean;
 }
 
-export type HITLResponse = HITLResponseSelectOne | HITLResponseFreeText | HITLResponseApproval;
+export interface HITLResponseText {
+  type: typeof HITL_RESPONSE_TYPE.TEXT;
+  text: string;
+  is_skipped?: boolean;
+}
+
+export type HITLResponse = HITLResponseSelectOne | HITLResponseMultipleChoice | HITLResponseApproval | HITLResponseText;
 
 export interface HITLResponseItem {
   entity_type: string;

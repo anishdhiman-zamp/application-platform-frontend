@@ -466,6 +466,7 @@ const config = {
       },
       minHeight: {
         '4': '16px',
+        '3': '12px',
         '5': '20px',
         '6': '24px',
         '8': '32px',
