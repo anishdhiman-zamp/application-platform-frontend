@@ -44,14 +44,15 @@ export const TaskProvider: React.FC<TaskProviderProps> = ({
   resourceType,
   apiConfig,
 }) => {
-  const [messages, setMessages] = useState<ChatMessage[]>([]);
-  const [isHistoryLoaded, setIsHistoryLoaded] = useState(false);
-  const [mountRefetchDone, setMountRefetchDone] = useState(false);
+  const dispatch = useDispatch();
+  const { sseEventBus } = useEventBus();
+
   const mountRefetchFiredRef = useRef(false);
   const messagesRef = useRef<ChatMessage[]>([]);
 
-  const dispatch = useDispatch();
-  const { sseEventBus } = useEventBus();
+  const [messages, setMessages] = useState<ChatMessage[]>([]);
+  const [isHistoryLoaded, setIsHistoryLoaded] = useState(false);
+  const [mountRefetchDone, setMountRefetchDone] = useState(false);
 
   const {
     data: taskHistory,
@@ -72,12 +73,23 @@ export const TaskProvider: React.FC<TaskProviderProps> = ({
 
   const streamingState = useStreamingState(taskId);
   const isStreaming = useMemo(() => streamingState?.is_active ?? false, [streamingState?.is_active]);
-
   const streamingMessageId = useMemo(() => (taskHistory ? getStreamingMessageId(taskHistory) : null), [taskHistory]);
-
   const sseEnabled = Boolean(taskId) && Boolean(organizationId) && isHistoryLoaded;
+  const actionsValue: TaskActions = useMemo(() => ({ refetchHistory }), [refetchHistory]);
+  const stateValue: TaskState = useMemo(
+    () => ({
+      messages,
+      taskId,
+      isStreaming,
+      isLoadingHistory,
+      isFetchingHistory,
+      isErrorHistory,
+      conversationData: taskHistory?.conversation,
+      inputsRequired: taskHistory?.inputs_required,
+    }),
+    [messages, taskId, isStreaming, isLoadingHistory, isFetchingHistory, isErrorHistory, taskHistory],
+  );
 
-  // --- SSE Callbacks ---
   const handleMessageStop = useCallback(
     (finalMessage: ChatMessage | null, stoppedTaskId: string) => {
       if (finalMessage) {
@@ -105,27 +117,16 @@ export const TaskProvider: React.FC<TaskProviderProps> = ({
     onInputRequired: handleInputRequired,
   });
 
-  useEffect(() => {
-    perTaskCallbacks.current = {
-      onMessageStop: handleMessageStop,
-      onTaskUpdate: handleTaskUpdate,
-      onInputRequired: handleInputRequired,
-    };
-  }, [handleMessageStop, handleTaskUpdate, handleInputRequired]);
-
-  // --- Clear stale streaming state on mount ---
-  useEffect(() => {
-    if (taskId) {
-      const hasLiveConnection =
-        taskSSERegistry.isConnected(taskId) && streamingStateStore.get(taskId)?.is_active === true;
-      if (!hasLiveConnection) {
-        streamingStateStore.delete(taskId);
-      }
+  const handleClearStaleStreamingState = useCallback(() => {
+    if (!taskId) return;
+    const hasLiveConnection =
+      taskSSERegistry.isConnected(taskId) && streamingStateStore.get(taskId)?.is_active === true;
+    if (!hasLiveConnection) {
+      streamingStateStore.delete(taskId);
     }
-  }, []);
+  }, [taskId]);
 
-  // --- Fetch fresh history on mount ---
-  useEffect(() => {
+  const handleMountRefetch = useCallback(() => {
     if (mountRefetchFiredRef.current) return;
     if (!organizationId || !taskId) return;
 
@@ -143,29 +144,15 @@ export const TaskProvider: React.FC<TaskProviderProps> = ({
       .finally(() => {
         setMountRefetchDone(true);
       });
-  }, [organizationId, taskId]);
+  }, [organizationId, taskId, refetchHistory]);
 
-  // --- Open SSE gate once history is loaded ---
-  useEffect(() => {
+  const handleOpenSSEGate = useCallback(() => {
     if (!mountRefetchDone) return;
     if (!isFetchingHistory && !isUninitializedHistory && taskHistory !== undefined) {
       setIsHistoryLoaded(true);
     }
   }, [mountRefetchDone, isFetchingHistory, isUninitializedHistory, taskHistory]);
 
-  // --- Register with task SSE registry ---
-  useEffect(() => {
-    if (!sseEnabled || !taskId) return;
-
-    const callbacks = perTaskCallbacks.current;
-    taskSSERegistry.register(taskId, organizationId, streamingMessageId, callbacks);
-
-    return () => {
-      taskSSERegistry.deregister(taskId, callbacks);
-    };
-  }, [sseEnabled, taskId]);
-
-  // --- Handle global TASK_UPDATE events for task block status updates in messages ---
   const handleGlobalTaskUpdate = useCallback(
     (data: BaseEventPayload) => {
       if (data.source_id !== taskId) return;
@@ -199,16 +186,42 @@ export const TaskProvider: React.FC<TaskProviderProps> = ({
   );
 
   useEffect(() => {
+    handleOpenSSEGate();
+    handleMountRefetch();
+  }, [handleOpenSSEGate, handleMountRefetch]);
+
+  useEffect(() => {
+    perTaskCallbacks.current = {
+      onMessageStop: handleMessageStop,
+      onTaskUpdate: handleTaskUpdate,
+      onInputRequired: handleInputRequired,
+    };
+  }, [handleMessageStop, handleTaskUpdate, handleInputRequired]);
+
+  useEffect(() => {
+    handleClearStaleStreamingState();
+  }, []);
+
+  useEffect(() => {
+    if (!sseEnabled || !taskId) return;
+
+    const callbacks = perTaskCallbacks.current;
+    taskSSERegistry.register(taskId, organizationId, streamingMessageId, callbacks);
+
+    return () => {
+      taskSSERegistry.deregister(taskId, callbacks);
+    };
+  }, [sseEnabled, taskId, organizationId, streamingMessageId]);
+
+  useEffect(() => {
     const sub = sseEventBus.subscribe(EVENT_TYPE.TASK_UPDATE, handleGlobalTaskUpdate);
     return () => sub.unsubscribe();
   }, [sseEventBus, handleGlobalTaskUpdate]);
 
-  // --- Sync messages ref ---
   useEffect(() => {
     messagesRef.current = messages;
   }, [messages]);
 
-  // --- Apply history data ---
   useEffect(() => {
     if (!taskHistory) return;
 
@@ -231,23 +244,6 @@ export const TaskProvider: React.FC<TaskProviderProps> = ({
       });
     }
   }, [taskHistory]);
-
-  // --- Context values ---
-  const actionsValue: TaskActions = useMemo(() => ({ refetchHistory }), [refetchHistory]);
-
-  const stateValue: TaskState = useMemo(
-    () => ({
-      messages,
-      taskId,
-      isStreaming,
-      isLoadingHistory,
-      isFetchingHistory,
-      isErrorHistory,
-      conversationData: taskHistory?.conversation,
-      inputsRequired: taskHistory?.inputs_required,
-    }),
-    [messages, taskId, isStreaming, isLoadingHistory, isFetchingHistory, isErrorHistory, taskHistory],
-  );
 
   return (
     <TaskActionsContext.Provider value={actionsValue}>

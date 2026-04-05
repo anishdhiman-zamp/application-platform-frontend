@@ -1,6 +1,6 @@
 'use client';
 
-import { type FC } from 'react';
+import { type FC, useCallback } from 'react';
 import { type TaskBreadcrumb, type TaskStatus, TaskStatusIcon } from '@zamp-platform/chat';
 import { cn } from '@zamp-platform/ui/utils';
 import { ArrowLeft } from 'lucide-react';
@@ -22,8 +22,8 @@ const TaskTopbar: FC<TaskTopbarProps> = ({ className, title, status, isSubtask, 
   const router = useRouter();
   const displayTitle = title || 'Untitled';
 
-  const handleBack = () => {
-    if (isSubtask) {
+  const handleBack = useCallback(() => {
+    if (isSubtask && parentTasks.length > 0) {
       const lastParent = parentTasks[parentTasks.length - 1];
       const ancestorsAbove = parentTasks.slice(0, -1);
       const route = getChatTaskRoute({
@@ -36,7 +36,7 @@ const TaskTopbar: FC<TaskTopbarProps> = ({ className, title, status, isSubtask, 
     } else {
       router.push(preserveSidebarParam(ROUTES_PATH.CHAT_TASKS));
     }
-  };
+  }, [isSubtask, parentTasks, router]);
 
   return (
     <div className={cn('bg-BG_WHITE flex items-center justify-between gap-x-3 p-3', className)}>
