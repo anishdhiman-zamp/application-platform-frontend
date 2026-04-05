@@ -106,6 +106,10 @@ make sync-from-main   # Stash changes, checkout main, pull, sync secrets, instal
 - Prefix event handlers with `handle` (e.g., `handleClick`, `handleSubmit`)
 - Prefix boolean variables with auxiliary verbs (`isLoading`, `hasError`)
 
+### Component Typing
+
+- Do not use `React.FC` or `React.FunctionComponent` to type components; type props inline via the props interface (e.g. `({ prop }: Props) => { ... }`)
+
 ### Component Internal Structure
 
 Follow this order within React components:

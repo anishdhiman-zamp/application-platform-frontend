@@ -19,6 +19,8 @@ interface ChatActionsContextType {
   isBrowserStreamingAvailable?: boolean;
   parentTasks?: TaskBreadcrumb[];
   siblings?: SiblingTask[];
+  /** Per-task summary text received from the per-conversation SSE channel. */
+  taskSummaries?: Record<string, string>;
 }
 
 const ChatActionsContext = createContext<ChatActionsContextType>({});
@@ -31,6 +33,7 @@ interface ChatActionsProviderProps {
   isBrowserStreamingAvailable?: boolean;
   parentTasks?: TaskBreadcrumb[];
   siblings?: SiblingTask[];
+  taskSummaries?: Record<string, string>;
 }
 
 export const ChatActionsProvider = ({
@@ -41,10 +44,19 @@ export const ChatActionsProvider = ({
   isBrowserStreamingAvailable,
   parentTasks,
   siblings,
+  taskSummaries,
 }: ChatActionsProviderProps) => {
   const value = useMemo(
-    () => ({ onFileOpen, onTaskOpen, onWatchStream, isBrowserStreamingAvailable, parentTasks, siblings }),
-    [onFileOpen, onTaskOpen, onWatchStream, isBrowserStreamingAvailable, parentTasks, siblings],
+    () => ({
+      onFileOpen,
+      onTaskOpen,
+      onWatchStream,
+      isBrowserStreamingAvailable,
+      parentTasks,
+      siblings,
+      taskSummaries,
+    }),
+    [onFileOpen, onTaskOpen, onWatchStream, isBrowserStreamingAvailable, parentTasks, siblings, taskSummaries],
   );
 
   return <ChatActionsContext.Provider value={value}>{children}</ChatActionsContext.Provider>;

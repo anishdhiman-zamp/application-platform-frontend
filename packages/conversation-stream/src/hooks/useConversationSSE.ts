@@ -3,7 +3,7 @@
 import { captureException } from '@sentry/browser';
 import { useCallback, useEffect, useRef, useState } from 'react';
 
-import { openSSEConnection } from '../registry/openSSEConnection';
+import { openSSEConnection, SSE_SOURCE_TYPE } from '../registry/openSSEConnection';
 
 export interface UseConversationSSEConfig {
   conversationId: string | null;
@@ -68,6 +68,7 @@ export function useConversationSSE({
     setIsConnecting(true);
 
     openSSEConnection(
+      SSE_SOURCE_TYPE.CONVERSATION,
       conversationId,
       orgId,
       isNew,

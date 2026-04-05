@@ -19,6 +19,8 @@ export interface ConversationState {
   createConversationV2Error: unknown;
   inputsRequired: ConversationInputRequiredItem[] | undefined;
   isBrowserStreamingAvailable: boolean;
+  /** Latest summary text per child task, received from the per-conversation SSE channel. */
+  taskSummaries: Record<string, string>;
 }
 
 export const ConversationStateContext = createContext<ConversationState | null>(null);

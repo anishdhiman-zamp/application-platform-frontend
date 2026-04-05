@@ -11,6 +11,7 @@ import {
 
 import { conversationSSERegistry } from '../registry/conversationSSERegistry';
 import { ConversationEventType } from '../types/conversation-sse.types';
+import { TaskSSEEventType } from '../types/task-sse.types';
 import { handleContentBlockEvent } from './streamingBlockHandler';
 
 type MapAny = Record<string, unknown>;
@@ -24,6 +25,12 @@ export interface ConversationEventCallbacks {
   onDisconnected?: () => void;
   onBrowserStreamingAvailable?: (conversationId: string) => void;
   onBrowserStreamingUnavailable?: (conversationId: string) => void;
+  /** Task lifecycle events on the conversation channel (Section 3.2) */
+  onTaskMessageStart?: (taskId: string, messageId: string) => void;
+  onTaskMessageStop?: (taskId: string, messageId: string) => void;
+  onTaskUpdate?: (taskId: string, updatedFields: Record<string, unknown>) => void;
+  onTaskSummary?: (taskId: string, text: string) => void;
+  onInputRequired?: (entityId: string, entityType: string, data: unknown) => void;
 }
 
 /**
@@ -36,6 +43,44 @@ export function handleConversationSSEEvent(
   callbacks: ConversationEventCallbacks,
 ): void {
   try {
+    const eventType = event.event_type as string | undefined;
+
+    switch (eventType) {
+      case TaskSSEEventType.TASK: {
+        const taskId = event.task_id as string;
+        const messageId = event.message_id as string;
+        if (event.type === ConversationEventType.MESSAGE_START) {
+          callbacks.onTaskMessageStart?.(taskId, messageId);
+        } else if (event.type === ConversationEventType.MESSAGE_STOP) {
+          callbacks.onTaskMessageStop?.(taskId, messageId);
+        }
+        return;
+      }
+
+      case TaskSSEEventType.TASK_UPDATE: {
+        const taskId = event.task_id as string;
+        const updatedFields = (event.updated_fields as Record<string, unknown>) || {};
+        callbacks.onTaskUpdate?.(taskId, updatedFields);
+        return;
+      }
+
+      case TaskSSEEventType.INPUT_REQUIRED: {
+        const entityId = event.entity_id as string;
+        const entityType = event.entity_type as string;
+        callbacks.onInputRequired?.(entityId, entityType, event.input_required_data);
+        return;
+      }
+    }
+
+    if (eventType === TaskSSEEventType.TASK_SUMMARY) {
+      const taskId = (event.task_id as string) || (event.streaming_id as string);
+      const text = event.text as string;
+      if (taskId && typeof text === 'string') {
+        callbacks.onTaskSummary?.(taskId, text);
+      }
+      return;
+    }
+
     switch (event.type) {
       case ConversationEventType.INIT_STREAM:
       case ConversationEventType.KEEPALIVE:
