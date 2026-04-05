@@ -67,7 +67,6 @@ const TaskBlock: FC<TaskBlockProps> = ({ payload, conversationId }) => {
     taskId: task_id,
     isAgentActive,
     summaryContent: null,
-    taskStatus: taskStatus ?? status,
     streamingSummaryText: taskSummaries?.[task_id] ?? null,
   });
 

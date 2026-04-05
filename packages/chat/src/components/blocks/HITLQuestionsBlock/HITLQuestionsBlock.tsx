@@ -44,7 +44,7 @@ export const HITLQuestionsBlock = ({
   const scrollDirectionRef = useRef<'up' | 'down'>('down');
   const submitRef = useRef<(() => void) | null>(null);
   const [answers, setAnswers] = useState<HITLAnswersState>({});
-  const [approvalAction, setApprovalAction] = useState<'approve' | 'reject' | null>(null);
+  const [approvalAction, setApprovalAction] = useState<APPROVAL_ACTION | null>(null);
   const [customInputs, setCustomInputs] = useState<Record<string, string>>({});
 
   const currentQuestion = questions[currentQuestionIndex];
