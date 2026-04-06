@@ -4,6 +4,7 @@ import { FC, useMemo, useState } from 'react';
 import { Button, CSS_VARS, Popover, PopoverContent, PopoverPortal, PopoverTrigger } from '@zamp-platform/ui';
 import { useUserIdentity } from 'hooks/useUserIdentity';
 import { LinkIcon, XIcon } from 'lucide-react';
+import { NEON_DATASET_ROLES } from 'modules/pace/components/datasets/datasets.constants';
 import AudienceAccess from 'modules/shareResource/AudienceAccess';
 import { motion } from 'motion/react';
 import { ResourceAudienceType } from 'types/api/auth.types';
@@ -17,11 +18,7 @@ import {
 } from '@/apis/agentManagedDb';
 import { useGetAudiencesByOrganisationIdQuery } from '@/apis/people';
 import { TOAST_MESSAGES } from '@/components/common/toast/toast.constants';
-import {
-  CombinedOptionListDataType,
-  ResourcePrivilege,
-  ResourceType,
-} from '@/modules/shareResource/shareResource.types';
+import { CombinedOptionListDataType, ResourceType } from '@/modules/shareResource/shareResource.types';
 import { toast } from 'components/common/toast/Toast';
 import CommonWrapper from 'components/commonWrapper';
 import { SkeletonTypes } from 'components/commonWrapper/commonWrapper.types';
@@ -29,12 +26,6 @@ import CopyToClipboardBrowserUrl from 'components/CopyToClipboardBrowserUrl';
 import MultiSelectInput from 'components/multiSelectInput/MultiSelectInput';
 import { ArrayListOption } from 'components/multiSelectInput/multiSelectInput.types';
 import WhoHasAccessSkeletonLoader from 'components/skeletons/WhoHasAccessSkeletonLoader';
-
-const NEON_DATASET_ROLES: ResourcePrivilege[] = [
-  { kind: ResourceType.DATASET, label: 'Admin', value: DatasetRoleValue.ADMIN, desc: 'Can manage and share dataset' },
-  { kind: ResourceType.DATASET, label: 'Viewer', value: DatasetRoleValue.VIEWER, desc: 'Can read data only' },
-  { kind: ResourceType.DATASET, label: 'Editor', value: DatasetRoleValue.EDITOR, desc: 'Can update existing data' },
-];
 
 const WhoHasAccessLoaderVariants = {
   hidden: { opacity: 0, overflow: 'hidden' as const },
@@ -108,8 +99,8 @@ const ShareDatasetNeonPopup: FC<ShareDatasetNeonPopupProps> = ({ tableName }) =>
       (orgMembers ?? [])
         .filter((member) => member?.user != null)
         .map((member) => ({
-          label: member.user.name || getUserNameFromEmail(member.user.email ?? '') || '',
-          value: member.user.email ?? '',
+          label: member.user?.name || getUserNameFromEmail(member.user?.email ?? '') || '',
+          value: member.user?.email ?? '',
           type: member.resource_audience_type ?? '',
         })),
     [orgMembers],
@@ -119,8 +110,8 @@ const ShareDatasetNeonPopup: FC<ShareDatasetNeonPopupProps> = ({ tableName }) =>
     () =>
       combinedOptionListsData.filter(
         (item) =>
-          !selectedItems.some((selected) => selected.value === item.value) &&
-          !audienceAccessList.some((a) => a.user.email === item.value),
+          !selectedItems.some((selected) => selected?.value === item?.value) &&
+          !audienceAccessList.some((a) => a?.user?.email === item?.value),
       ),
     [combinedOptionListsData, selectedItems, audienceAccessList],
   );

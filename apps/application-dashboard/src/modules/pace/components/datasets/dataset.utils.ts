@@ -94,6 +94,25 @@ export const getCellEditorForPgType = (
   }
 };
 
+// --- Column ordering helpers ---
+
+/**
+ * Given a new field order from AG Grid and the current blueprint columns,
+ * returns a reordered BlueprintColumn array that matches the grid order,
+ * appending any columns not present in the grid at the end.
+ */
+export const reorderBlueprintColumns = <T extends { id: string }>(
+  newFieldOrder: string[],
+  blueprintColumns: T[],
+): T[] => {
+  const colMap = new Map(blueprintColumns.map((c) => [c.id, c]));
+  const reordered = newFieldOrder.map((f) => colMap.get(f)).filter((c): c is T => c !== undefined);
+  const inGrid = new Set(newFieldOrder);
+  const extra = blueprintColumns.filter((c) => !inGrid.has(c.id));
+
+  return [...reordered, ...extra];
+};
+
 // --- CSV export helpers ---
 
 const escapeCsvValue = (value: unknown): string => {

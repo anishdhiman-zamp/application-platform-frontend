@@ -46,6 +46,7 @@ import {
   escapeSqlIdentifier,
   getCellEditorForPgType,
   pgTypeToColumnType,
+  reorderBlueprintColumns,
   sanitizeColumnName,
 } from 'modules/pace/components/datasets/datasets.constants';
 import ShareDatasetNeonPopup from 'modules/pace/components/datasets/ShareDatasetNeonPopup';
@@ -95,6 +96,8 @@ const DatasetDetailInner = ({ tableName }: DatasetDetailProps) => {
   // Cache of the last successfully fetched raw rows — used to re-serve augmented data
   // when blueprint has unsaved changes, avoiding redundant API calls on tab switches.
   const cachedRowsRef = useRef<Record<string, unknown>[]>([]);
+  // Set to true while we programmatically move columns in AG Grid to avoid feedback loops
+  const isProgrammaticMoveRef = useRef(false);
 
   // --- Hooks ---
   const { userId } = useUserIdentity();
@@ -112,8 +115,6 @@ const DatasetDetailInner = ({ tableName }: DatasetDetailProps) => {
   // --- State ---
   const [columns, setColumns] = useState<ColDef[] | null>(null);
   const [totalRows, setTotalRows] = useState<number | null>(null);
-  // Set to true while we programmatically move columns in AG Grid to avoid feedback loops
-  const isProgrammaticMoveRef = useRef(false);
 
   const [activeTab, setActiveTab] = useState<DatasetTabsTypes>(() => {
     const saved = getFromLocalStorage(`${LOCAL_STORAGE_KEYS.DATASET_ACTIVE_TAB}_${tableName}` as LOCAL_STORAGE_KEYS);
@@ -303,7 +304,7 @@ const DatasetDetailInner = ({ tableName }: DatasetDetailProps) => {
     }
 
     for (const col of addedColumns) {
-      if (!col.name.trim()) {
+      if (!col.name?.trim()) {
         toast.error('Column name cannot be empty');
 
         return;
@@ -318,7 +319,7 @@ const DatasetDetailInner = ({ tableName }: DatasetDetailProps) => {
       if (backfills.length > 0) {
         await Promise.all(
           backfills.map((m) =>
-            executeMutation({ query: buildBackfillNullsQuery(tableName, m.oldName, m.defaultValue!) }).unwrap(),
+            executeMutation({ query: buildBackfillNullsQuery(tableName, m.oldName, m.defaultValue ?? '') }).unwrap(),
           ),
         );
       }
@@ -483,14 +484,7 @@ const DatasetDetailInner = ({ tableName }: DatasetDetailProps) => {
       if (!allCols?.length) return;
       // Build new ordered field list from AG Grid's current column state
       const newFieldOrder = allCols.map((c) => c.getColId());
-      // For saved columns id === field name, so map directly
-      const colMap = new Map(blueprintColumns.map((c) => [c.id, c]));
-      const reordered = newFieldOrder.map((f) => colMap.get(f)).filter((c): c is BlueprintColumn => c !== undefined);
-
-      // Preserve any blueprint columns not in grid (shouldn't happen when no changes, but be safe)
-      const inGrid = new Set(newFieldOrder);
-      const extra = blueprintColumns.filter((c) => !inGrid.has(c.id));
-      const final = [...reordered, ...extra];
+      const final = reorderBlueprintColumns(newFieldOrder, blueprintColumns);
 
       setBlueprintColumns(final);
       setToLocalStorage(columnOrderKey, JSON.stringify(final.map((c) => c.id)));
