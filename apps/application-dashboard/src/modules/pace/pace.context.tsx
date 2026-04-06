@@ -22,7 +22,7 @@ export interface PendingFileReference {
   name: string;
 }
 
-export interface PendingConversationPayload {
+export interface ChatMessageIntent {
   message: string;
   fileReferences?: { path: string; name: string }[];
   llmModel?: string | null;
@@ -54,8 +54,8 @@ interface PaceContextType {
   setPendingFileReference: (ref: PendingFileReference | null) => void;
   clearPendingFileReference: defaultFnType;
 
-  pendingConversationPayload: PendingConversationPayload | null;
-  setPendingConversationPayload: (payload: PendingConversationPayload | null) => void;
+  chatMessageIntent: ChatMessageIntent | null;
+  setChatMessageIntent: (payload: ChatMessageIntent | null) => void;
 
   activeAgentInfo: ActiveAgentInfo | null;
   setActiveAgentInfo: (info: ActiveAgentInfo | null) => void;
@@ -113,7 +113,7 @@ export const PaceProvider = ({ children }: { children: ReactNode }) => {
   const [chatSidebarState, setChatSidebarStateRaw] = useState<ChatSidebarState>(getInitialSidebarState);
   const [prevChatSidebarState, setPrevChatSidebarState] = useState<ChatSidebarState>(chatSidebarState);
   const [pendingFileReference, setPendingFileReference] = useState<PendingFileReference | null>(null);
-  const [pendingConversationPayload, setPendingConversationPayload] = useState<PendingConversationPayload | null>(null);
+  const [chatMessageIntent, setChatMessageIntent] = useState<ChatMessageIntent | null>(null);
   const [activeAgentInfo, setActiveAgentInfo] = useState<ActiveAgentInfo | null>(null);
   const initialFilesPanelState = useRef(getInitialFilesPanelState());
   const [filesPanelOpen, setFilesPanelOpen] = useState(initialFilesPanelState.current.open);
@@ -318,8 +318,8 @@ export const PaceProvider = ({ children }: { children: ReactNode }) => {
       setPendingFileReference,
       clearPendingFileReference,
 
-      pendingConversationPayload,
-      setPendingConversationPayload,
+      chatMessageIntent,
+      setChatMessageIntent,
 
       activeAgentInfo,
       setActiveAgentInfo,
@@ -361,7 +361,7 @@ export const PaceProvider = ({ children }: { children: ReactNode }) => {
       pendingFileReference,
       clearPendingFileReference,
 
-      pendingConversationPayload,
+      chatMessageIntent,
 
       activeAgentInfo,
 

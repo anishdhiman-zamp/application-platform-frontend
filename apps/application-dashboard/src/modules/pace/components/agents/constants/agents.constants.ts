@@ -131,6 +131,23 @@ export const POLICY_TO_PERMISSION: Record<string, ToolPermissionType> = {
   blocked: TOOL_PERMISSION.BLOCKED,
 };
 
+export const RANDOM_AGENT_TITLES = [
+  'Summarize my weekly PRs by teammate and theme',
+  'Send me a daily news digest every morning',
+  'Monitor Slack for urgent messages and alert me',
+  'Track competitor pricing and email me changes',
+  'Generate a weekly report of completed tasks',
+  'Remind me to review pull requests every afternoon',
+  'Fetch top headlines and send via email daily',
+  'Notify me when a new issue is assigned to me',
+  'Compile a daily standup summary from Slack',
+  'Alert me when server costs exceed threshold',
+] as const;
+
+export const getRandomAgentTitle = (): string => {
+  return RANDOM_AGENT_TITLES[Math.floor(Math.random() * RANDOM_AGENT_TITLES.length)];
+};
+
 export const RANDOM_AGENT_NAMES = [
   'Sprint Crusader',
   'Pixel Pioneer',

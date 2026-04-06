@@ -36,7 +36,7 @@ const AgentTestCard: FC<AgentTestCardProps> = ({
   onClick,
   onTriggerSelected,
 }) => {
-  const { setPendingConversationPayload, startNewChat, setChatSidebarState } = usePaceContext();
+  const { setChatMessageIntent, startNewChat, setChatSidebarState } = usePaceContext();
   const [isExpanded, setIsExpanded] = useState(false);
   const [triggers, setTriggers] = useState<AgentTriggerType[]>([]);
   const [fetchTriggers, { isFetching: isLoadingTriggers }] = useLazyGetAgentTriggersQuery();
@@ -84,13 +84,13 @@ const AgentTestCard: FC<AgentTestCardProps> = ({
         startNewChat();
       }
 
-      setPendingConversationPayload({
-        message: `Run trigger: ${trigger.title}`,
-        metadata: { agent_id: agentId, trigger_id: trigger.id },
+      setChatMessageIntent({
+        message: `Run trigger: ${trigger?.title}`,
+        metadata: { agent_id: agentId, trigger_id: trigger?.id },
       });
       setChatSidebarState(CHAT_SIDEBAR_STATE.SIDEBAR);
     },
-    [agentId, startNewChat, setPendingConversationPayload, setChatSidebarState, onTriggerSelected],
+    [agentId, startNewChat, setChatMessageIntent, setChatSidebarState, onTriggerSelected],
   );
 
   return (

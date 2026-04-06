@@ -6,6 +6,7 @@ import {
   BLOCK_TYPE,
   ChatActionsProvider,
   createConversationPayload,
+  createUserMessagePayload,
   DropOverlay,
   MessageContainer,
   ResourceType,
@@ -60,15 +61,15 @@ const ChatConversationContent = ({
   addFileReferenceRef,
   currentUserName,
 }: ChatConversationContentProps) => {
-  const pendingPayloadConsumedRef = useRef(false);
+  const intentConsumedRef = useRef(false);
   const taskStatusContainerRef = useRef<HTMLDivElement>(null);
   const router = useRouter();
 
   const {
     pendingFileReference,
     clearPendingFileReference,
-    pendingConversationPayload,
-    setPendingConversationPayload,
+    chatMessageIntent,
+    setChatMessageIntent,
     activeAgentInfo,
     setActiveAgentInfo,
     startNewChat,
@@ -88,7 +89,7 @@ const ChatConversationContent = ({
     taskSummaries,
     isAnalysing,
   } = useConversationState();
-  const { createConversationV2, refetchConversationHistory } = useConversationActions();
+  const { createConversationV2, sendMessage, refetchConversationHistory } = useConversationActions();
   const streamingState = useStreamingState(conversationId ?? ctxConversationId);
 
   const [isTaskPopoverOpen, setIsTaskPopoverOpen] = useState(false);
@@ -154,42 +155,6 @@ const ChatConversationContent = ({
     }
   }, [agentInfoFromMessages, activeAgentInfo, setActiveAgentInfo]);
 
-  useEffect(() => {
-    if (pendingConversationPayload && !pendingPayloadConsumedRef.current && !conversationId) {
-      pendingPayloadConsumedRef.current = true;
-      const payload = createConversationPayload(
-        organizationId,
-        ResourceType.ORGANIZATION,
-        organizationId,
-        pendingConversationPayload.message,
-        currentUserName,
-        pendingConversationPayload.fileReferences,
-        ScopeType.ORGANIZATION,
-        undefined,
-        undefined,
-        pendingConversationPayload.llmModel,
-        pendingConversationPayload.metadata,
-        pendingConversationPayload.autoLoopEnabled,
-      );
-
-      const shouldLockAutoLoop = pendingConversationPayload.autoLoopEnabled;
-
-      setPendingConversationPayload(null);
-      createConversationV2(payload).then((response: { conversation_id?: string } | undefined) => {
-        if (shouldLockAutoLoop && response?.conversation_id) {
-          addAutoLoopLockedConversation(response.conversation_id);
-        }
-      });
-    }
-  }, [
-    pendingConversationPayload,
-    conversationId,
-    organizationId,
-    currentUserName,
-    createConversationV2,
-    setPendingConversationPayload,
-  ]);
-
   const handleAgentClick = useCallback(
     (agentId: string, agentName: string, agentDescription?: string, avatarKey?: string) => {
       const tabPath = buildTabRoute(agentId, TAB_TYPE.AGENT);
@@ -214,7 +179,7 @@ const ChatConversationContent = ({
 
   const handleAgentTest = useCallback(
     (agentId: string, agentName: string) => {
-      setPendingConversationPayload({
+      setChatMessageIntent({
         message: `${PrefixMessage.TEST_AGENT} **${agentName}**`,
         metadata: { agent_id: agentId },
       });
@@ -223,7 +188,7 @@ const ChatConversationContent = ({
         startNewChat();
       }
     },
-    [conversationId, startNewChat, setPendingConversationPayload],
+    [conversationId, startNewChat, setChatMessageIntent],
   );
 
   const renderAgentBlock = useCallback(
@@ -243,6 +208,61 @@ const ChatConversationContent = ({
     },
     [handleAgentClick],
   );
+
+  // Reset consumed flag when a new payload arrives
+  useEffect(() => {
+    if (chatMessageIntent) {
+      intentConsumedRef.current = false;
+    }
+  }, [chatMessageIntent]);
+
+  useEffect(() => {
+    if (chatMessageIntent && !intentConsumedRef.current && conversationId) {
+      intentConsumedRef.current = true;
+
+      // Send message to existing conversation
+      const messagePayload = createUserMessagePayload(
+        chatMessageIntent.message,
+        organizationId,
+        ResourceType.ORGANIZATION,
+        currentUserName,
+        chatMessageIntent.fileReferences,
+        chatMessageIntent.llmModel,
+      );
+
+      setChatMessageIntent(null);
+      sendMessage(messagePayload);
+    }
+  }, [chatMessageIntent, conversationId, organizationId, currentUserName, sendMessage, setChatMessageIntent]);
+
+  useEffect(() => {
+    if (chatMessageIntent && !intentConsumedRef.current && !conversationId) {
+      intentConsumedRef.current = true;
+      const payload = createConversationPayload(
+        organizationId,
+        ResourceType.ORGANIZATION,
+        organizationId,
+        chatMessageIntent.message,
+        currentUserName,
+        chatMessageIntent.fileReferences,
+        ScopeType.ORGANIZATION,
+        undefined,
+        undefined,
+        chatMessageIntent.llmModel,
+        chatMessageIntent.metadata,
+        chatMessageIntent.autoLoopEnabled,
+      );
+
+      const shouldLockAutoLoop = chatMessageIntent.autoLoopEnabled;
+
+      setChatMessageIntent(null);
+      createConversationV2(payload).then((response: { conversation_id?: string } | undefined) => {
+        if (shouldLockAutoLoop && response?.conversation_id) {
+          addAutoLoopLockedConversation(response.conversation_id);
+        }
+      });
+    }
+  }, [chatMessageIntent, conversationId, organizationId, currentUserName, createConversationV2, setChatMessageIntent]);
 
   return (
     <ChatActionsProvider

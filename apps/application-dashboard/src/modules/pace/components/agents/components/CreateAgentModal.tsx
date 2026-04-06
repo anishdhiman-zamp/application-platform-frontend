@@ -18,6 +18,7 @@ import {
   type AgentAvatarConfig,
   getAgentAvatar,
   getRandomAgentName,
+  getRandomAgentTitle,
   PrefixMessage,
 } from 'modules/pace/components/agents/constants/agents.constants';
 import ImageKitImage from '@/components/ImageKitImage';
@@ -38,6 +39,7 @@ const CreateAgentModal = ({ open, onOpenChange, onAgentCreated }: CreateAgentMod
   const fileDropHandlerRef = useRef<((files: FileList) => void) | null>(null);
 
   const [agentName, setAgentName] = useState('');
+  const [randomTitle, setRandomTitle] = useState(() => getRandomAgentTitle());
   const agentDescription = AGENT_DEFAULT_DESCRIPTION;
   const [agentAvatar, setAgentAvatar] = useState<AgentAvatarConfig>(() => getAgentAvatar(''));
 
@@ -45,7 +47,7 @@ const CreateAgentModal = ({ open, onOpenChange, onAgentCreated }: CreateAgentMod
   const currentUserName = useAppSelector((state: RootState) => state.user.user?.user_name) ?? '';
   const organizationId = useAppSelector((state: RootState) => state.user.user?.orgs?.[0]?.organization_id) ?? '';
 
-  const { setChatSidebarState, startNewChat, setPendingConversationPayload, setActiveAgentInfo } = usePaceContext();
+  const { setChatSidebarState, startNewChat, setChatMessageIntent, setActiveAgentInfo } = usePaceContext();
 
   const chat = useChat({
     resourceId: organizationId,
@@ -58,26 +60,27 @@ const CreateAgentModal = ({ open, onOpenChange, onAgentCreated }: CreateAgentMod
       ...chat,
       createConversationV2: async (payload: CreateConversationPayloadTypeV2) => {
         const tempId = crypto.randomUUID();
-        const rawText = payload.message_content?.text || '';
-        const messageText = rawText ? `${PrefixMessage.OPTIMISTIC_AGENT_CREATION} ${rawText}` : '';
+        const rawText = payload.message_content?.text || randomTitle;
+        const messageText = `${PrefixMessage.OPTIMISTIC_AGENT_CREATION} ${rawText}`;
         const fileRefs = payload.message_content?.file_references;
+        const resolvedName = agentName.trim() || getRandomAgentName();
 
         startNewChat();
 
-        setPendingConversationPayload({
+        setChatMessageIntent({
           message: messageText,
           fileReferences: fileRefs?.map((ref) => ({ path: ref.path, name: ref.name })),
           llmModel: payload.llm_model,
           metadata: {
             agent_id: tempId,
-            name: agentName,
+            name: resolvedName,
             description: agentDescription,
             avatar: agentAvatar.key,
           },
         });
 
-        setActiveAgentInfo({ id: tempId, name: agentName });
-        onAgentCreated(tempId, agentName, agentDescription, agentAvatar.key);
+        setActiveAgentInfo({ id: tempId, name: resolvedName });
+        onAgentCreated(tempId, resolvedName, agentDescription, agentAvatar.key);
         setChatSidebarState(CHAT_SIDEBAR_STATE.SIDEBAR);
         onOpenChange(false);
 
@@ -88,8 +91,9 @@ const CreateAgentModal = ({ open, onOpenChange, onAgentCreated }: CreateAgentMod
       chat,
       agentName,
       agentAvatar,
+      randomTitle,
       startNewChat,
-      setPendingConversationPayload,
+      setChatMessageIntent,
       setActiveAgentInfo,
       setChatSidebarState,
       onAgentCreated,
@@ -114,6 +118,7 @@ const CreateAgentModal = ({ open, onOpenChange, onAgentCreated }: CreateAgentMod
       const name = getRandomAgentName();
 
       setAgentAvatar(getAgentAvatar(name));
+      setRandomTitle(getRandomAgentTitle());
       const timerId = setTimeout(() => nameInputRef.current?.select(), 100);
 
       return () => clearTimeout(timerId);
@@ -173,7 +178,7 @@ const CreateAgentModal = ({ open, onOpenChange, onAgentCreated }: CreateAgentMod
                 scopeId={organizationId}
                 username={username}
                 currentUserName={currentUserName}
-                placeholder='Instruct me'
+                placeholder={randomTitle}
                 conversationId={chat.conversationId ?? ''}
                 minTextareaHeight={18}
                 maxTextareaHeight={120}
