@@ -15,7 +15,6 @@ import remarkGfm from 'remark-gfm';
 
 import { useChatActions } from '../../context/ChatActionsContext';
 import { useTypewriter } from '../../hooks/useTypewriter';
-import { rehypeStreamReveal } from '../../plugins/rehypeStreamReveal';
 
 const lowlight = createLowlight(common);
 
@@ -91,11 +90,13 @@ export const MarkdownBlock: React.FC<MarkdownBlockProps> = ({ payload, isStreami
     }
   };
 
-  const { text, isAnimating } = useTypewriter(payload.text, undefined, isStreaming);
+  const { text } = useTypewriter(payload.text, undefined, isStreaming);
 
   const rehypePlugins = useMemo(
-    () => (isStreaming || isAnimating ? [rehypeSlug, rehypeStreamReveal] : [rehypeSlug]),
-    [isStreaming, isAnimating],
+    // () => (isStreaming || isAnimating ? [rehypeSlug, rehypeStreamReveal] : [rehypeSlug]),
+    () => [rehypeSlug],
+    // [isStreaming, isAnimating],
+    [],
   );
 
   return (
