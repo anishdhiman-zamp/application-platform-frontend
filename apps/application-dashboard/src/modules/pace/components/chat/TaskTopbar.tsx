@@ -51,21 +51,21 @@ const TaskTopbar: FC<TaskTopbarProps> = ({ className, title, status, isSubtask, 
         ) : (
           <>
             <div
-              className='text-GRAY_700 hover:text-GRAY_1000 h-7 w-7 shrink-0 cursor-pointer rounded p-1'
+              className='text-GRAY_700 hover:text-GRAY_1000 flex h-7 w-7 shrink-0 cursor-pointer items-center justify-center rounded'
               onClick={handleBack}
               aria-label='Go back'
               role='button'
             >
               <ArrowLeft size={16} />
             </div>
-            <div className='flex h-7 max-w-full items-center gap-x-1.5 px-1'>
+            <div className='flex h-7 min-w-0 flex-1 items-center gap-x-1.5 px-1'>
               {status && <TaskStatusIcon status={status} />}
               <span className='f-14-550 block min-w-0 truncate first-letter:uppercase'>{displayTitle}</span>
             </div>
           </>
         )}
       </div>
-      <div className='flex items-center gap-1.5'>{navigationSlot}</div>
+      <div className='flex items-center gap-1.5 pl-10'>{navigationSlot}</div>
     </div>
   );
 };

@@ -17,8 +17,8 @@ export const TaskChatTitleHeader = ({
 }: TaskChatTitleHeaderProps) => {
   return (
     <div className='flex flex-col gap-1.5'>
-      <div className='flex items-center gap-2.5'>
-        <h1 className='f-18-550 text-GRAY_1000 whitespace-nowrap'>{displayTitle}</h1>
+      <div className='flex items-start gap-2.5'>
+        <h1 className='f-18-550 text-GRAY_1000'>{displayTitle}</h1>
         {statusLabel && (
           <div className='bg-BG_GRAY_2 border-GRAY_400 flex h-6 shrink-0 items-center gap-1.5 rounded-full border px-2 py-1'>
             <div className='flex size-3 items-center justify-center'>
