@@ -33,7 +33,7 @@ export const HITLQuestionsBlock = ({
 }: HITLQuestionsBlockProps) => {
   const { questions } = payload;
   const scrollContainerRef = useRef<ScrollContainerRef>(null);
-  const customInputRef = useRef<HTMLInputElement>(null);
+  const customInputRef = useRef<HTMLTextAreaElement>(null);
   const containerRef = useRef<HTMLDivElement>(null);
   const questionRefs = useRef<(HTMLDivElement | null)[]>([]);
 
@@ -166,7 +166,9 @@ export const HITLQuestionsBlock = ({
 
   const handleKeyDown = useCallback(
     (e: KeyboardEvent) => {
-      if (!containerRef.current?.contains(document.activeElement)) return;
+      const active = document.activeElement;
+      const isBodyOrNull = !active || active === document.body;
+      if (!isBodyOrNull && !containerRef.current?.contains(active)) return;
 
       const {
         currentQuestionIndex: qIdx,
@@ -389,6 +391,10 @@ export const HITLQuestionsBlock = ({
   }, [handleAutoSubmitApproval]);
 
   useEffect(() => {
+    containerRef.current?.focus({ preventScroll: true });
+  }, []);
+
+  useEffect(() => {
     document.addEventListener('keydown', handleKeyDown);
     return () => document.removeEventListener('keydown', handleKeyDown);
   }, [handleKeyDown]);
@@ -422,8 +428,18 @@ export const HITLQuestionsBlock = ({
 
     const rafId = requestAnimationFrame(() => {
       const scrollEl = scrollContainerRef.current?.getScrollElement();
-      const focusedEl = scrollEl?.querySelector<HTMLElement>('[data-hitl-focused]');
-      if (!scrollEl || !focusedEl) return;
+      if (!scrollEl) return;
+
+      if (focusedOptionIndex === 0) {
+        const questionEl = questionRefs.current[currentQuestionIndex];
+        if (questionEl) {
+          questionEl.scrollIntoView({ block: 'start', behavior: 'smooth' });
+        }
+        return;
+      }
+
+      const focusedEl = scrollEl.querySelector<HTMLElement>('[data-hitl-focused]');
+      if (!focusedEl) return;
 
       const scrollRect = scrollEl.getBoundingClientRect();
       const elRect = focusedEl.getBoundingClientRect();
@@ -436,7 +452,7 @@ export const HITLQuestionsBlock = ({
     });
 
     return () => cancelAnimationFrame(rafId);
-  }, [currentQuestion, focusedOptionIndex, totalOptions]);
+  }, [currentQuestion, currentQuestionIndex, focusedOptionIndex, totalOptions]);
 
   useEffect(() => {
     return handleFocusAndScroll();
@@ -450,10 +466,18 @@ export const HITLQuestionsBlock = ({
         <HITLQuestionsHeader
           questionCount={questions.length}
           currentQuestionIndex={currentQuestionIndex}
-          onPrev={() => currentQuestionIndex > 0 && setCurrentQuestionIndex(currentQuestionIndex - 1)}
-          onNext={() =>
-            currentQuestionIndex < questions.length - 1 && setCurrentQuestionIndex(currentQuestionIndex + 1)
-          }
+          onPrev={() => {
+            if (currentQuestionIndex > 0) {
+              setFocusedOptionIndex(0);
+              setCurrentQuestionIndex(currentQuestionIndex - 1);
+            }
+          }}
+          onNext={() => {
+            if (currentQuestionIndex < questions.length - 1) {
+              setFocusedOptionIndex(0);
+              setCurrentQuestionIndex(currentQuestionIndex + 1);
+            }
+          }}
         />
 
         <div

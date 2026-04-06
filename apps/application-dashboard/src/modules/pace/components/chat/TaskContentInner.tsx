@@ -40,7 +40,7 @@ import { TaskChatTitleHeader } from '@/modules/pace/components/chat/TaskChatTitl
 import TaskNavigation from '@/modules/pace/components/chat/TaskNavigation';
 import TaskTopbar from '@/modules/pace/components/chat/TaskTopbar';
 import { getActiveTabIdFromUrl } from '@/modules/pace/components/dynamic-tabs/tab-type-registry';
-import ChatMessagesSkeleton from '@/modules/pace/components/loaders/ChatMessagesSkeleton';
+import TaskContentSkeleton from '@/modules/pace/components/loaders/TaskContentSkeleton';
 import SubtaskPanel from '@/modules/pace/components/tasks/components/SubtaskPanel';
 import {
   getDisplayTitle,
@@ -220,7 +220,7 @@ const TaskContentChat = ({ taskId }: { taskId: string }) => {
             isError={isErrorHistory}
             refetchFunction={refetchHistory}
             skeletonType={SkeletonTypes.CUSTOM}
-            loader={<ChatMessagesSkeleton className='mx-auto w-full max-w-[700px] px-4' alignUserRight />}
+            loader={<TaskContentSkeleton />}
             className='flex min-h-0 w-full min-w-0 flex-1 flex-col pt-12'
             disableAnimation
           >
