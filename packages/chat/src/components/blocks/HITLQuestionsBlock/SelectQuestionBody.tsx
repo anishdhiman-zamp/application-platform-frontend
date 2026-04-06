@@ -17,7 +17,7 @@ interface SelectQuestionBodyProps {
   focusedOptionIndex: number;
   selectedOptionIds: string[];
   customInputValue: string;
-  customInputRef: React.RefObject<HTMLInputElement | null>;
+  customInputRef: React.RefObject<HTMLTextAreaElement | null>;
   onOptionClick: (optionId: string) => void;
   onCustomInputClick: () => void;
   onCustomInputChange: (value: string) => void;

@@ -18,7 +18,7 @@ export interface HITLQuestionItemProps {
   focusedOptionIndex: number;
   answers: Record<string, HITLAnswerValue>;
   customInputs: Record<string, string>;
-  customInputRef: React.RefObject<HTMLInputElement | null>;
+  customInputRef: React.RefObject<HTMLTextAreaElement | null>;
   containerRef: React.RefObject<HTMLDivElement | null>;
   setQuestionEl: (el: HTMLDivElement | null) => void;
   setCurrentQuestionIndex: (i: number) => void;
