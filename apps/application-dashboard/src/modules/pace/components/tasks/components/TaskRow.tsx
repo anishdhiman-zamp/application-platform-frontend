@@ -52,9 +52,11 @@ const TaskRow = ({ task, index, totalCount, status }: TaskRowProps) => {
       className='hover:bg-BG_GRAY_2 flex h-[42px] w-full cursor-pointer items-center'
     >
       <div className='flex min-w-0 flex-1 items-center gap-3 py-2.5 pr-4 pl-6.5'>
-        <div className='flex shrink-0 items-center gap-2'>
-          <TaskStatusIcon status={task?.status} />
-          <span className='f-13-500 text-GRAY_1000 truncate whitespace-nowrap'>{task?.title}</span>
+        <div className='flex min-w-0 items-center gap-2'>
+          <div className='shrink-0'>
+            <TaskStatusIcon status={task?.status} />
+          </div>
+          <span className='f-13-500 text-GRAY_1000 truncate'>{task?.title}</span>
         </div>
 
         {totalSubtasks > 0 && (

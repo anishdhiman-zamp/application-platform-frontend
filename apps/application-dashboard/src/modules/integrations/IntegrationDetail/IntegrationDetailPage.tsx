@@ -6,6 +6,7 @@ import { ArrowLeft } from 'lucide-react';
 import ShareConnectionPopup from 'modules/integrations/IntegrationDetail/ShareConnectionPopup';
 import { AnimatePresence, motion } from 'motion/react';
 import Link from 'next/link';
+import { useSearchParams } from 'next/navigation';
 import { useDeleteIntegrationConnectionMutation } from '@/apis/integrations';
 import ImageKitImage from '@/components/ImageKitImage';
 import { NEEDS_ATTENTION_EMPTY_STATE } from '@/constants/icons';
@@ -26,6 +27,7 @@ const IntegrationDetailPage: FC<IntegrationDetailPageProps> = ({ integration }) 
   const contentRef = useRef<HTMLDivElement>(null);
   const { guide, display_name, logo, description, what_possible, connectionMetadata } = integration;
   const { ref: scrollContainerRef, isScrolled } = useScrollDetection();
+  const searchParams = useSearchParams();
   const [deleteIntegrationConnection] = useDeleteIntegrationConnectionMutation();
   const [showGuide, setShowGuide] = useState<boolean>(false);
   const [isConnectionModalOpen, setIsConnectionModalOpen] = useState<boolean>(false);
@@ -62,7 +64,7 @@ const IntegrationDetailPage: FC<IntegrationDetailPageProps> = ({ integration }) 
       >
         <div className='flex h-full w-[700px] flex-col'>
           <Link
-            href={ROUTES_PATH.CHAT_SETTINGS_INTEGRATIONS}
+            href={`${ROUTES_PATH.CHAT_SETTINGS_INTEGRATIONS}${searchParams?.toString() ? `?${searchParams.toString()}` : ''}`}
             className={cn('flex w-full items-center justify-start py-5', isScrolled && 'border-GRAY_400 border-b')}
             aria-label='Go back'
           >

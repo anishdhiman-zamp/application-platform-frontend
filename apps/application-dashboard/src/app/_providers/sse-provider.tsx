@@ -4,9 +4,11 @@ import React, { createContext, ReactNode, useContext, useEffect } from 'react';
 import { captureException } from '@sentry/nextjs';
 import { API_DOMAIN } from '@zamp-platform/api';
 import {
+  type AgentContentBlock,
   type Block,
   BLOCK_TYPE,
   ChatMessageType,
+  type InstructionsUpdatedContentBlock,
   type OutputFilesBlockType,
   ResourceType,
   SenderType,
@@ -17,6 +19,7 @@ import {
   type StreamingState,
   streamingStateStore,
   type TaskContentBlock,
+  type TriggerContentBlock,
 } from '@zamp-platform/chat';
 import { EventBus, SSEConnectionState, useSSE } from '@zamp-platform/utils';
 import {
@@ -113,13 +116,56 @@ function handleGlobalStreamEvent(data: BaseEventPayload): void {
               id: content_block?.id,
               payload: {
                 id: content_block?.id || '',
-                title: (content_block as MapAny)?.title || '',
-                task_id: (content_block as MapAny)?.task_id || content_block?.id || '',
-                status: (content_block as MapAny)?.status,
+                title: content_block?.title || '',
+                task_id: content_block?.task_id || content_block?.id || '',
+                status: content_block?.status,
               },
               start_timestamp: content_block?.start_timestamp,
               is_complete: false,
             } as TaskContentBlock;
+            break;
+          case BLOCK_TYPE.AGENT:
+            newBlock = {
+              type: BLOCK_TYPE.AGENT,
+              order: index,
+              id: content_block?.id,
+              payload: {
+                agent_id: content_block?.agent_id || '',
+                name: content_block?.name || '',
+                description: content_block?.description || '',
+                colour: content_block?.colour || '',
+                avatar: content_block?.avatar || undefined,
+              },
+              start_timestamp: content_block?.start_timestamp,
+              is_complete: false,
+            } as AgentContentBlock;
+            break;
+          case BLOCK_TYPE.TRIGGER:
+            newBlock = {
+              type: BLOCK_TYPE.TRIGGER,
+              order: index,
+              id: content_block?.id,
+              payload: {
+                trigger_id: content_block?.trigger_id || '',
+                title: content_block?.title || '',
+                status: content_block?.status || '',
+                agent_id: content_block?.agent_id || '',
+              },
+              start_timestamp: content_block?.start_timestamp,
+              is_complete: false,
+            } as TriggerContentBlock;
+            break;
+          case BLOCK_TYPE.INSTRUCTIONS_UPDATED:
+            newBlock = {
+              type: BLOCK_TYPE.INSTRUCTIONS_UPDATED,
+              order: index,
+              id: content_block?.id,
+              payload: {
+                agent_id: content_block?.agent_id || '',
+              },
+              start_timestamp: content_block?.start_timestamp,
+              is_complete: false,
+            } as InstructionsUpdatedContentBlock;
             break;
           default:
             newBlock = {
@@ -244,6 +290,21 @@ function handleGlobalStreamEvent(data: BaseEventPayload): void {
       case StreamingContentBlockType.CONTENT_BLOCK_STOP: {
         const { index, stop_timestamp } = payload;
 
+        const prevState = streamingStateStore.get(conversationId);
+        const stoppedBlock = prevState?.message_content?.elements?.find((b) => b.order === index);
+
+        if (stoppedBlock?.type === BLOCK_TYPE.INSTRUCTIONS_UPDATED) {
+          const agentId = (stoppedBlock as InstructionsUpdatedContentBlock).payload.agent_id;
+
+          if (agentId) {
+            store.dispatch(baseApi.util.invalidateTags([{ type: APITags.GET_AGENT_INSTRUCTIONS, id: agentId }]));
+          }
+        }
+
+        if (stoppedBlock?.type === BLOCK_TYPE.TRIGGER) {
+          store.dispatch(baseApi.util.invalidateTags([APITags.GET_AGENT_TRIGGERS]));
+        }
+
         streamingStateStore.update(conversationId, (prev) => {
           if (!prev) return prev;
 
@@ -350,7 +411,9 @@ const taskPayloadResolver: PayloadResolver = {
 };
 
 function invalidateTaskCaches(): void {
-  store.dispatch(baseApi.util.invalidateTags([APITags.GET_TASK_COUNTS, APITags.GET_TASK_LIST]));
+  store.dispatch(
+    baseApi.util.invalidateTags([APITags.GET_TASK_COUNTS, APITags.GET_TASK_LIST, APITags.GET_AGENT_TASKS]),
+  );
 }
 
 /** Generic handler for MESSAGE_START / OUTPUT_FILES / MESSAGE_STOP events. */

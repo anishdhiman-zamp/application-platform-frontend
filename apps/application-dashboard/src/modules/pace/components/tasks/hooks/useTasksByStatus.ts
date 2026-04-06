@@ -1,5 +1,6 @@
 import { useCallback, useEffect, useMemo, useState } from 'react';
 import type { TaskStatus } from '@zamp-platform/chat';
+import { useGetAgentTasksByStatusQuery } from '@/apis/agents';
 import { useGetTasksByStatusQuery } from '@/apis/task';
 import { TASKS_PAGE_SIZE } from '@/modules/pace/components/tasks/constants/tasks.constants';
 import type { CreationSource, TaskListItem } from '@/modules/pace/components/tasks/types/tasks.types';
@@ -7,22 +8,33 @@ import type { CreationSource, TaskListItem } from '@/modules/pace/components/tas
 interface UseTasksByStatusOptions {
   status: TaskStatus;
   search?: string;
+  agentId?: string;
   creationSource?: CreationSource;
 }
 
-export function useTasksByStatus({ status, search, creationSource }: UseTasksByStatusOptions) {
+export function useTasksByStatus({ status, search, agentId, creationSource }: UseTasksByStatusOptions) {
   const [page, setPage] = useState(1);
   const [allTasks, setAllTasks] = useState<TaskListItem[]>([]);
   const [totalCount, setTotalCount] = useState(0);
 
-  const { data, isFetching } = useGetTasksByStatusQuery({
-    status,
-    search: search || undefined,
-    page,
-    limit: TASKS_PAGE_SIZE,
-    creation_source_type: creationSource?.type,
-    creation_source_id: creationSource?.id,
-  });
+  const globalTasksResult = useGetTasksByStatusQuery(
+    {
+      status,
+      search: search || undefined,
+      page,
+      limit: TASKS_PAGE_SIZE,
+      creation_source_type: creationSource?.type,
+      creation_source_id: creationSource?.id,
+    },
+    { skip: !!agentId },
+  );
+
+  const agentTasksResult = useGetAgentTasksByStatusQuery(
+    { agentId: agentId!, status, search: search || undefined, page, limit: TASKS_PAGE_SIZE },
+    { skip: !agentId },
+  );
+
+  const { data, isFetching } = agentId ? agentTasksResult : globalTasksResult;
 
   const tasks = useMemo(() => data?.tasks ?? [], [data]);
 

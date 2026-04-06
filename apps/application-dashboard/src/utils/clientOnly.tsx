@@ -10,9 +10,11 @@ const DynamicLoader = () => <ImageLoader imageSrc={ZAMP_LOGO_LOADER_SVG} width={
  *
  * Usage:
  *   const PdfViewer = clientOnly(() => import('./viewers/PdfViewer'));
+ *   const Editor = clientOnly(() => import('./Editor'), () => <MySkeleton />);
  */
 export function clientOnly<T extends ComponentType<any>>(
   importFn: () => Promise<{ default: T }>,
+  loading?: () => React.JSX.Element | null,
 ): React.ComponentType<React.ComponentProps<T>> {
-  return dynamic(importFn, { ssr: false, loading: DynamicLoader });
+  return dynamic(importFn, { ssr: false, loading: loading ?? DynamicLoader });
 }

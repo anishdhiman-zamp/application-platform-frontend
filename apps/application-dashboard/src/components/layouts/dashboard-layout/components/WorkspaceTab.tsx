@@ -2,7 +2,7 @@ import React from 'react';
 import { SvgSpriteLoader } from '@zamp-platform/ui/assets';
 import { ICON_SPRITE_TYPES } from '@zamp-platform/ui/types';
 import { defaultFnType } from 'types/commonTypes';
-import { cn } from 'utils/common';
+import { cn, getNameInitial } from 'utils/common';
 
 interface WorkspaceTabProps {
   label: string;
@@ -30,7 +30,7 @@ const WorkspaceTab = ({ label, isSelected, onClick, className, color }: Workspac
         className={cn('f-9-600 mr-1.5 flex h-3.5 w-3.5 items-center justify-center rounded-sm text-white')}
         style={{ backgroundColor: color }}
       >
-        {label.charAt(0).toUpperCase()}
+        {getNameInitial(label)}
       </div>
       <div className='flex-1'>{label}</div>
       {isSelected && (

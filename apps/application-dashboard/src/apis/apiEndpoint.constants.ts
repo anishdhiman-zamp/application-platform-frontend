@@ -206,6 +206,28 @@ export const API_ENDPOINTS = {
   TASKS_COUNTS_GET: `tasks/counts`,
   TASKS_LIST_GET: `tasks/list`,
 
+  // Agents
+  AGENTS_LIST_GET: `agents`,
+  AGENT_GET: `agents/{{agentId}}`,
+  AGENT_PATCH: `agents/{{agentId}}`,
+  AGENT_TASKS_GET: `agents/{{agentId}}/tasks`,
+  AGENT_TRIGGERS_GET: `agents/{{agentId}}/triggers`,
+  AGENT_TRIGGER_TOGGLE: `agents/{{agentId}}/triggers/{{triggerId}}/toggle`,
+  AGENT_FILE_ACCESS_GET: `agents/{{agentId}}/file-access`,
+  AGENT_FILE_ACCESS_POST: `agents/{{agentId}}/file-access`,
+  AGENT_CONNECTIONS_GET: `agents/{{agentId}}/connections`,
+  AGENT_INTEGRATION_DELETE: `agents/{{agentId}}/integrations/{{integrationName}}`,
+  AGENT_MEMBERS_GET: `agents/{{agentId}}/members`,
+  AGENT_MEMBERS_POST: `agents/{{agentId}}/members`,
+  AGENT_MEMBERS_DELETE: `agents/{{agentId}}/members/{{userId}}`,
+  AGENT_INSTRUCTIONS_GET: `agents/{{agentId}}/instructions`,
+  AGENT_INSTRUCTIONS_PUT: `agents/{{agentId}}/instructions`,
+  CONNECTION_TOOL_POLICIES_GET: `connections/{{connectionId}}/tool-policies`,
+  CONNECTION_TOOL_POLICIES_PUT: `connections/{{connectionId}}/tool-policies`,
+  CONNECTION_AUDIENCES_POST: `access-control/connection/{{connectionId}}/audiences`,
+  CONNECTION_AUDIENCES_DELETE: `access-control/connection/{{connectionId}}/audiences`,
+  INTEGRATION_TOOLS_GET: `integrations/{{integrationName}}/tools`,
+
   // Integrations
   INTEGRATIONS_AUTHENTICATE: `/integrations/authenticate`,
   PROCESS_CONNECTION_MAPPINGS_POST: `process/{{process_id}}/connections`,

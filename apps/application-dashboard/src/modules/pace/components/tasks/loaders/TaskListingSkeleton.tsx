@@ -9,7 +9,7 @@ interface TaskListingSkeletonProps {
 
 const TaskListingSkeleton: FC<TaskListingSkeletonProps> = ({ rowCount = 8 }) => {
   return (
-    <div className='flex flex-col'>
+    <div className='border-GRAY_400 flex flex-1 flex-col rounded-xl border'>
       {Array.from({ length: 3 }, (_, groupIndex) => (
         <div key={groupIndex} className='mb-2'>
           <div className='flex items-center gap-2 px-4 py-3'>

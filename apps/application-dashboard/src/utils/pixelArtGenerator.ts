@@ -1,6 +1,8 @@
 // Pixel-art SVG generator for avatars and org icons
 // Generates deterministic pixel art from seed strings using Zamp brand colors
 
+import { getNameInitial } from '@/utils/common';
+
 export const ZAMP_COLORS = ['#C5C5B5', '#3B673B', '#848484', '#682C4B', '#D0DDA3', '#005eff'];
 
 const BLUES = ['#005eff'];
@@ -501,7 +503,7 @@ function buildLetterPills(key: string, seed: string): Pill[] {
 
 export function generateOrgIconSvg(name: string): string {
   if (!name) return renderPillsToSvg(buildLetterPills('HOME', 'home'), 16, 16, 14, 0.38);
-  const ch = name.charAt(0).toUpperCase();
+  const ch = getNameInitial(name);
 
   return renderPillsToSvg(buildLetterPills(ch in PIXEL_LETTERS ? ch : 'HOME', name), 16, 16, 14, 0.38);
 }

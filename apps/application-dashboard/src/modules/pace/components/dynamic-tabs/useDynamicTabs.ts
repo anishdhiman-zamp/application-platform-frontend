@@ -5,7 +5,7 @@ import { getNextNavigationTarget, NAVIGATION_STRATEGY } from '@zamp-platform/uti
 import { ROUTES_PATH } from '@/constants/routeConfig';
 import { useAppDispatch, useAppSelector } from '@/hooks/toolkit';
 import { buildTabRoute } from '@/modules/pace/components/dynamic-tabs/tab-type-registry';
-import { useTabRouter } from '@/modules/pace/hooks/useTabRouter';
+import { markTabAsClosed, useTabRouter } from '@/modules/pace/hooks/useTabRouter';
 import { DynamicTab, DynamicTabType, NAV_METHOD, TAB_TYPE } from '@/modules/pace/pace.types';
 import { store } from '@/store/index';
 import { dynamicTabsActions, selectActiveTabId, selectDynamicTabs } from '@/store/slices/dynamic-tabs.slice';
@@ -25,7 +25,7 @@ interface UseDynamicTabsReturn {
   openTab: (id: string, name: string, metadata?: Record<string, unknown>) => void;
   closeTab: (e: React.MouseEvent, id: string) => void;
   closeTabsForPath: (path: string, isFolder: boolean) => void;
-  updateTab: (oldId: string, newId: string, newName: string) => void;
+  updateTab: (oldId: string, newId: string, newName: string, metadata?: Record<string, unknown>) => void;
   updateTabsForFolderMove: (oldFolderPath: string, newFolderPath: string) => void;
 
   closeOtherTabs: (id: string) => void;
@@ -146,6 +146,7 @@ export const useDynamicTabs = (config: UseDynamicTabsConfig = {}): UseDynamicTab
       const isClosingActiveTab = closingTab.id === currentActiveId;
 
       onTabClose?.(closingTab.id);
+      markTabAsClosed(id);
 
       dispatch(dynamicTabsActions.closeTab(id));
 
@@ -185,6 +186,7 @@ export const useDynamicTabs = (config: UseDynamicTabsConfig = {}): UseDynamicTab
 
       tabsToClose.forEach((tab) => {
         onTabClose?.(tab.id);
+        markTabAsClosed(tab.id);
         dispatch(dynamicTabsActions.closeTab(tab.id));
       });
 
@@ -216,7 +218,7 @@ export const useDynamicTabs = (config: UseDynamicTabsConfig = {}): UseDynamicTab
   );
 
   const updateTab = useCallback(
-    (oldId: string, newId: string, newName: string) => {
+    (oldId: string, newId: string, newName: string, metadata?: Record<string, unknown>) => {
       const currentTabs = store.getState().dynamicTabs.tabs;
       const tabToUpdate = currentTabs.find((tab) => tab.id === oldId);
 
@@ -236,7 +238,7 @@ export const useDynamicTabs = (config: UseDynamicTabsConfig = {}): UseDynamicTab
             name: newName,
             path: newTabPath,
             type: tabToUpdate.type,
-            metadata: tabToUpdate.metadata,
+            metadata: metadata ? { ...tabToUpdate.metadata, ...metadata } : tabToUpdate.metadata,
           },
         }),
       );
@@ -303,6 +305,7 @@ export const useDynamicTabs = (config: UseDynamicTabsConfig = {}): UseDynamicTab
       const tabsToClose = currentTabs.filter((tab) => tab.id !== id);
 
       tabsToClose.forEach((tab) => {
+        markTabAsClosed(tab.id);
         dispatch(dynamicTabsActions.closeTab(tab.id));
       });
 
@@ -339,6 +342,7 @@ export const useDynamicTabs = (config: UseDynamicTabsConfig = {}): UseDynamicTab
       }
 
       tabsToClose.forEach((tab) => {
+        markTabAsClosed(tab.id);
         dispatch(dynamicTabsActions.closeTab(tab.id));
       });
 
@@ -350,6 +354,9 @@ export const useDynamicTabs = (config: UseDynamicTabsConfig = {}): UseDynamicTab
   );
 
   const closeAllTabs = useCallback(() => {
+    const currentTabs = store.getState().dynamicTabs.tabs;
+
+    currentTabs.forEach((tab) => markTabAsClosed(tab.id));
     dispatch(dynamicTabsActions.clearAllTabs());
     navigateTo(ROUTES_PATH.CHAT, NAV_METHOD.PUSH, true);
   }, [dispatch, navigateTo]);

@@ -1,3 +1,4 @@
+export { default as AgentBlock } from './AgentBlock';
 export { AttachmentsList } from './AttachmentsList';
 export { ButtonBlock } from './ButtonBlock';
 export { CodePreviewBlock } from './CodePreviewBlock';

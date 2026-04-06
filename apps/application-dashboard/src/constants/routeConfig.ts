@@ -49,6 +49,8 @@ export const ROUTES_PATH = {
   CHAT_SETTINGS_GENERAL: '/chat/settings/general',
   CHAT_SETTINGS_ORG_SETTINGS: '/chat/settings/organisation-settings',
   CHAT_TASK: '/chat/task/:taskId',
+  CHAT_AGENTS: '/chat/agents',
+  CHAT_AGENT: '/chat/agents/:agentId',
 };
 
 export const getPageRouteById = (pageId: string, sheetId?: string) => {

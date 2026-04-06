@@ -5,6 +5,7 @@ import { BookOpen } from 'lucide-react';
 import ConnectIntegrationAction from '@/modules/integrations/AllIntegrations/ConnectIntegrationAction';
 import type { IntegrationItem } from '@/types/api/integrations';
 import type { defaultFnType } from '@/types/commonTypes';
+import { getNameInitial } from '@/utils/common';
 
 interface IntegrationDetailHeaderProps {
   displayName: string;
@@ -32,7 +33,7 @@ const IntegrationDetailHeader: FC<IntegrationDetailHeaderProps> = ({
         <div className='relative flex h-7 w-7 shrink-0 items-center justify-center'>
           {imgError || !logo ? (
             <div className='bg-GRAY_200 text-GRAY_700 f-12-550 flex h-full w-full items-center justify-center rounded'>
-              {displayName.charAt(0).toUpperCase()}
+              {getNameInitial(displayName)}
             </div>
           ) : (
             <img src={logo} alt={displayName} className='object-contain' onError={() => setImgError(true)} />

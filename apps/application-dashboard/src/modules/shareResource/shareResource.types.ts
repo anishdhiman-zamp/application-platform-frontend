@@ -8,6 +8,7 @@ export enum ResourceType {
   PROCESS = 'process',
   ORGANIZATION = 'organization',
   CONNECTION = 'connection',
+  AGENT = 'agent',
 }
 
 export type TeamInfoType = {
@@ -80,6 +81,8 @@ export type ShareResourcePopupProps = {
   title?: string;
   disable?: boolean;
   version?: ShareResourceVersion;
+  additionalOptions?: CombinedOptionListDataType[];
+  forceAdminAccess?: boolean;
 };
 
 /**
@@ -146,6 +149,12 @@ export enum PROCESS_ACCESS_PRIVILEGES {
 }
 
 export enum CONNECTION_ACCESS_PRIVILEGES {
+  ADMIN = 'admin',
+  VIEWER = 'viewer',
+}
+
+export enum AGENT_ACCESS_PRIVILEGES {
+  OWNER = 'owner',
   ADMIN = 'admin',
   VIEWER = 'viewer',
 }

@@ -47,6 +47,26 @@ export const TAB_TYPE_REGISTRY: Record<DynamicTabType, TabTypeDefinition> = {
     },
     getDefaultName: (id: string) => id,
   },
+  [TAB_TYPE.AGENT]: {
+    kind: ROUTE_KIND.DYNAMIC,
+    basePath: ROUTES_PATH.CHAT_AGENTS,
+    buildPath: (id: string) => `${ROUTES_PATH.CHAT_AGENTS}/${encodeURIComponent(id)}`,
+    parseId: (pathname: string) => {
+      const basePath = ROUTES_PATH.CHAT_AGENTS;
+
+      if (!pathname.startsWith(basePath + '/')) return null;
+
+      const baseSegments = basePath.split('/').filter(Boolean);
+      const pathSegments = pathname.split('/').filter(Boolean);
+
+      if (pathSegments.length > baseSegments.length) {
+        return decodeURIComponent(pathSegments[baseSegments.length]);
+      }
+
+      return null;
+    },
+    getDefaultName: (id: string) => id,
+  },
   [TAB_TYPE.BROWSER]: {
     kind: ROUTE_KIND.QUERY,
     basePath: ROUTES_PATH.CHAT,

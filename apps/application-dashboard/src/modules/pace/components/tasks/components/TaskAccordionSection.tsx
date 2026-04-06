@@ -14,6 +14,7 @@ interface TaskAccordionSectionProps {
   status: TaskStatus;
   count: number;
   search?: string;
+  agentId?: string;
   scrollContainerRef: React.RefObject<HTMLDivElement | null>;
   creationSource?: CreationSource;
 }
@@ -26,6 +27,7 @@ const TaskAccordionSection = ({
   status,
   count,
   search,
+  agentId,
   scrollContainerRef,
   creationSource,
 }: TaskAccordionSectionProps) => {
@@ -35,6 +37,7 @@ const TaskAccordionSection = ({
   const { tasks, totalCount, fetchNextPage, isFetching, hasMore } = useTasksByStatus({
     status,
     search,
+    agentId,
     creationSource,
   });
 

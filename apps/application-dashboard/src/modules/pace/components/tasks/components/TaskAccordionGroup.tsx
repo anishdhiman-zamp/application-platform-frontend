@@ -3,7 +3,9 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import type { TaskStatus } from '@zamp-platform/chat';
 import { Accordion } from '@zamp-platform/ui';
+import { cn } from '@zamp-platform/ui/utils';
 import { useSearchParams } from 'next/navigation';
+import { useGetAgentTaskCountsQuery } from '@/apis/agents';
 import { useGetTaskCountsQuery } from '@/apis/task';
 import TaskAccordionSection from '@/modules/pace/components/tasks/components/TaskAccordionSection';
 import {
@@ -23,27 +25,41 @@ import { SkeletonTypes } from 'components/commonWrapper/commonWrapper.types';
 
 interface TaskAccordionGroupProps {
   search?: string;
+  agentId?: string;
+  isActive?: boolean;
+  skipFetch?: boolean;
   creationSource?: CreationSource;
 }
 
 const NoDataBanner = ({ search }: { search?: string }) => (
-  <ProcessEmptyState
-    title='No tasks found'
-    description={search ? 'Try adjusting your search query' : 'Tasks will appear here when created'}
-  />
+  <div className='border-GRAY_400 flex flex-1 items-center justify-center rounded-xl border [&>div]:min-h-0'>
+    <ProcessEmptyState
+      title='No tasks found'
+      description={search ? 'Try adjusting your search query' : 'Tasks will appear here when created'}
+    />
+  </div>
 );
 
-const TaskAccordionGroup = ({ search, creationSource }: TaskAccordionGroupProps) => {
+const TaskAccordionGroup = ({
+  search,
+  agentId,
+  isActive = true,
+  skipFetch = false,
+  creationSource,
+}: TaskAccordionGroupProps) => {
+  const hasBeenActiveRef = useRef(isActive);
+  const isFirstVisit = !hasBeenActiveRef.current && isActive;
+
+  if (isActive) hasBeenActiveRef.current = true;
+
+  const shouldSkip = !hasBeenActiveRef.current || skipFetch;
+
   const searchParams = useSearchParams();
   const tabParam = searchParams?.get('tab');
   const activeTab: TaskListingTab =
     tabParam && VALID_TABS.has(tabParam) ? (tabParam as TaskListingTab) : TASK_LISTING_TAB.ALL;
 
-  const {
-    data: countsData,
-    isLoading,
-    isFetching,
-  } = useGetTaskCountsQuery(
+  const globalCountsResult = useGetTaskCountsQuery(
     search || creationSource
       ? {
           search: search || undefined,
@@ -51,7 +67,27 @@ const TaskAccordionGroup = ({ search, creationSource }: TaskAccordionGroupProps)
           creation_source_id: creationSource?.id,
         }
       : undefined,
+    { skip: !!agentId || shouldSkip },
   );
+
+  const agentCountsResult = useGetAgentTaskCountsQuery(
+    { agentId: agentId!, search: search || undefined },
+    { skip: !agentId || shouldSkip },
+  );
+
+  const {
+    data: countsData,
+    isLoading,
+    isFetching,
+    isError,
+    refetch,
+  } = agentId ? agentCountsResult : globalCountsResult;
+
+  // eslint-disable-next-line react-hooks/exhaustive-deps -- isFirstVisit reads a ref; refetch is a stable RTK identity
+  useEffect(() => {
+    if (isActive && !isFirstVisit && !skipFetch) refetch();
+  }, [isActive, skipFetch]);
+
   const scrollContainerRef = useRef<HTMLDivElement>(null);
   const [hasLoadedOnce, setHasLoadedOnce] = useState(false);
   const prevCountsRef = useRef(countsData);
@@ -96,8 +132,6 @@ const TaskAccordionGroup = ({ search, creationSource }: TaskAccordionGroupProps)
 
       if (!closedItem) return;
 
-      // Only scroll when the accordion item is at the top of the current scroll area
-      // (i.e. its natural position has been scrolled past)
       if (closedItem.offsetTop > container.scrollTop) return;
 
       const containerRect = container.getBoundingClientRect();
@@ -124,6 +158,8 @@ const TaskAccordionGroup = ({ search, creationSource }: TaskAccordionGroupProps)
   return (
     <CommonWrapper
       isLoading={isLoading && !hasLoadedOnce}
+      isError={isError}
+      refetchFunction={refetch}
       skeletonType={SkeletonTypes.CUSTOM}
       loader={<TaskListingSkeleton />}
       isNoData={!isFetching && visibleStatuses.length === 0}
@@ -136,7 +172,11 @@ const TaskAccordionGroup = ({ search, creationSource }: TaskAccordionGroupProps)
         ref={scrollContainerRef}
         type='multiple'
         defaultValue={[...visibleStatuses]}
-        className='flex-1 overflow-y-auto [scrollbar-width:thin]'
+        className={cn(
+          'overflow-y-auto [scrollbar-width:thin] [&_[data-slot=accordion-item]:last-child]:border-b-0',
+          visibleStatuses.length > 0 && 'border-GRAY_400 border',
+          agentId ? 'rounded-xl' : '',
+        )}
         onValueChange={handleValueChange}
       >
         {visibleStatuses.map((status) => (
@@ -145,6 +185,7 @@ const TaskAccordionGroup = ({ search, creationSource }: TaskAccordionGroupProps)
             status={status}
             count={countMap.get(status) ?? 0}
             search={search}
+            agentId={agentId}
             scrollContainerRef={scrollContainerRef}
             creationSource={creationSource}
           />

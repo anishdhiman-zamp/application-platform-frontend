@@ -12,6 +12,9 @@ export const enum BLOCK_TYPE {
   THINKING = 'thinking',
   OUTPUT_FILES = 'output_files',
   TASK = 'task',
+  AGENT = 'agent',
+  TRIGGER = 'trigger',
+  INSTRUCTIONS_UPDATED = 'instructions_updated',
   INPUTS_RESPONDED = 'inputs_responded',
 }
 
@@ -163,6 +166,19 @@ export interface TaskBlockType {
   };
 }
 
+export interface AgentBlockType {
+  id: string;
+  order: number;
+  type: BLOCK_TYPE.AGENT;
+  payload: {
+    agent_id: string;
+    name: string;
+    description: string;
+    colour: string;
+    avatar?: string;
+  };
+}
+
 export interface HITLOption {
   id: string;
   label: string;
@@ -293,12 +309,16 @@ export type Block =
   | FileReferencesBlockType
   | OutputFilesBlockType
   | TaskBlockType
+  | AgentBlockType
   | InputsRespondedBlockType
   | ThinkingContentBlock
   | TextContentBlock
   | ToolUseContentBlock
   | ToolResultContentBlock
-  | TaskContentBlock;
+  | TaskContentBlock
+  | AgentContentBlock
+  | TriggerContentBlock
+  | InstructionsUpdatedContentBlock;
 export interface BlockMessage {
   block: Block[];
 }
@@ -392,6 +412,34 @@ export interface TaskContentBlock extends StreamingContentBlockBase {
   };
 }
 
+export interface AgentContentBlock extends StreamingContentBlockBase {
+  type: BLOCK_TYPE.AGENT;
+  payload: {
+    agent_id: string;
+    name: string;
+    description: string;
+    colour: string;
+    avatar?: string;
+  };
+}
+
+export interface TriggerContentBlock extends StreamingContentBlockBase {
+  type: BLOCK_TYPE.TRIGGER;
+  payload: {
+    trigger_id: string;
+    title: string;
+    status: string;
+    agent_id: string;
+  };
+}
+
+export interface InstructionsUpdatedContentBlock extends StreamingContentBlockBase {
+  type: BLOCK_TYPE.INSTRUCTIONS_UPDATED;
+  payload: {
+    agent_id: string;
+  };
+}
+
 export interface StreamEventContentBlockStart {
   type: StreamingContentBlockType.CONTENT_BLOCK_START;
   index: number;
@@ -402,6 +450,17 @@ export interface StreamEventContentBlockStart {
     start_timestamp?: string;
     tool_call_id?: string;
     display_name?: string;
+    // Agent block fields
+    agent_id?: string;
+    description?: string;
+    colour?: string;
+    avatar?: string;
+    // Task block fields
+    title?: string;
+    task_id?: string;
+    status?: TaskStatus;
+    // Trigger block fields
+    trigger_id?: string;
   };
 }
 
