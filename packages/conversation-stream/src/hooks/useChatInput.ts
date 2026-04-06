@@ -199,6 +199,7 @@ export const useChatInput = ({
         currentUserName || '',
         fileReferences.length > 0 ? fileReferences.map((ref) => ({ path: ref.path, name: ref.name })) : undefined,
         llmModel,
+        undefined,
         autoLoopEnabled,
       );
 
@@ -256,6 +257,7 @@ export const useChatInput = ({
       annotationLocation,
       annotationType,
       llmModel,
+      undefined,
       autoLoopEnabled,
     );
 

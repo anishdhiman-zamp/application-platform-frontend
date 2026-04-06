@@ -9,9 +9,11 @@ import { FILES_PANEL_SPACER_TRANSITION, getNavbarAnimations, NO_ANIMATION } from
 import type { AnimatedIconHandle } from 'modules/pace/pace.types';
 import { CHAT_SIDEBAR_STATE, PaceNavbarItemId } from 'modules/pace/pace.types';
 import { usePathname, useSearchParams } from 'next/navigation';
+import { FEATURE_FLAGS } from '@/constants/featureFlags';
 import { ROUTES_PATH } from '@/constants/routeConfig';
 import { KEYBOARD_KEYS } from '@/constants/shortcuts';
 import { useAppDispatch, useAppSelector } from '@/hooks/toolkit';
+import { useFeatureFlag } from '@/hooks/useFeatureFlag';
 import useKeyDown from '@/hooks/useKeyDown';
 import DynamicTabsBar from '@/modules/pace/components/dynamic-tabs/DynamicTabsBar';
 import { getActiveTabIdFromUrl, isOnAnyTabBasePath } from '@/modules/pace/components/dynamic-tabs/tab-type-registry';
@@ -46,6 +48,12 @@ const PaceNavbar = () => {
     isFilesPanelResizing,
   } = usePaceContext();
   const { isOnAnyDynamicTab } = useDynamicTabs();
+  const { isEnabled: isAgentsFe } = useFeatureFlag(FEATURE_FLAGS.AGENTS_FE);
+
+  const navbarItems = useMemo(
+    () => PACE_NAVBAR_ITEMS.filter((item) => item.id !== PaceNavbarItemId.AGENTS || isAgentsFe),
+    [isAgentsFe],
+  );
 
   const navbarItems = PACE_NAVBAR_ITEMS;
 
