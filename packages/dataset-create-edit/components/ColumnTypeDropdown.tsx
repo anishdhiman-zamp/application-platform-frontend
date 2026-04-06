@@ -35,7 +35,7 @@ const ColumnTypeDropdown: FC<IColumnDropdownProps> = ({
   const selectedItem = DATASET_COLUMN_TYPES_LIST.find((type) => type.value === selectedType);
 
   return (
-    <DropdownMenu onOpenChange={setIsDropdownOpen} open={isDropdownOpen}>
+    <DropdownMenu onOpenChange={(open) => !disabled && setIsDropdownOpen(open)} open={isDropdownOpen}>
       <DropdownMenuTrigger asChild>
         <Button
           size='medium'

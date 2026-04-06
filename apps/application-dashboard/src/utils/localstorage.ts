@@ -27,6 +27,8 @@ export enum LOCAL_STORAGE_KEYS {
   PACE_SIDEBAR_WIDTH = 'PACE_SIDEBAR_WIDTH',
   PACE_FILES_PANEL_WIDTH = 'PACE_FILES_PANEL_WIDTH',
   THEME = 'ZAMP_THEME',
+  DATASET_BLUEPRINT_DRAFT = 'dataset_blueprint_draft',
+  DATASET_ACTIVE_TAB = 'dataset_active_tab',
 }
 
 const QUOTA_ERROR_NAMES: readonly string[] = ['QuotaExceededError', 'NS_ERROR_DOM_QUOTA_REACHED'];

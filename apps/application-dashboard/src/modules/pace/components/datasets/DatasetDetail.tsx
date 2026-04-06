@@ -56,6 +56,12 @@ import {
 import ImageLoader from '@/components/common/loader/ImageLoader';
 import { ZAMP_LOGO_LOADER_SVG } from '@/constants/icons';
 import { ROUTES_PATH } from '@/constants/routeConfig';
+import {
+  getFromLocalStorage,
+  LOCAL_STORAGE_KEYS,
+  removeFromLocalStorage,
+  setToLocalStorage,
+} from '@/utils/localstorage';
 import DatasetTable from 'components/common/table/DatasetTable';
 import DisplayOptions from 'components/common/table/DisplayOptions';
 import TooltipV2 from 'components/common/TooltipV2';
@@ -99,7 +105,11 @@ const DatasetDetailInner = ({ tableName }: DatasetDetailProps) => {
   // --- State ---
   const [columns, setColumns] = useState<ColDef[] | null>(null);
   const [totalRows, setTotalRows] = useState<number | null>(null);
-  const [activeTab, setActiveTab] = useState<DatasetTabsTypes>(DatasetTabsTypes.PREVIEW);
+  const [activeTab, setActiveTab] = useState<DatasetTabsTypes>(() => {
+    const saved = getFromLocalStorage(`${LOCAL_STORAGE_KEYS.DATASET_ACTIVE_TAB}_${tableName}` as LOCAL_STORAGE_KEYS);
+
+    return saved === DatasetTabsTypes.BLUEPRINT ? DatasetTabsTypes.BLUEPRINT : DatasetTabsTypes.PREVIEW;
+  });
   const [blueprintColumns, setBlueprintColumns] = useState<BlueprintColumn[]>([]);
   const [originalBlueprintColumns, setOriginalBlueprintColumns] = useState<BlueprintColumn[]>([]);
   const [isSaving, setIsSaving] = useState(false);
@@ -184,8 +194,23 @@ const DatasetDetailInner = ({ tableName }: DatasetDetailProps) => {
         };
       });
 
-      setBlueprintColumns(bpCols);
       setOriginalBlueprintColumns(bpCols);
+
+      // Restore any unsaved draft from localStorage
+      const draftKey = `${LOCAL_STORAGE_KEYS.DATASET_BLUEPRINT_DRAFT}_${tableName}` as LOCAL_STORAGE_KEYS;
+      const raw = getFromLocalStorage(draftKey);
+
+      if (raw) {
+        try {
+          const draft = JSON.parse(raw) as BlueprintColumn[];
+
+          setBlueprintColumns(draft);
+        } catch {
+          setBlueprintColumns(bpCols);
+        }
+      } else {
+        setBlueprintColumns(bpCols);
+      }
     } catch {
       setColumns([]);
       setSchemaError('Failed to load dataset schema. The table may not exist or you may not have access.');
@@ -196,6 +221,7 @@ const DatasetDetailInner = ({ tableName }: DatasetDetailProps) => {
     setColumns(null);
     prefetchRef.current = null;
     cachedRowsRef.current = [];
+    removeFromLocalStorage(`${LOCAL_STORAGE_KEYS.DATASET_BLUEPRINT_DRAFT}_${tableName}` as LOCAL_STORAGE_KEYS);
     const dataPromise = executeQuery({
       query: buildSelectTableQuery(tableName, DETAIL_PAGE_SIZE, 0, undefined, undefined, 'id'),
     }).unwrap();
@@ -530,10 +556,11 @@ const DatasetDetailInner = ({ tableName }: DatasetDetailProps) => {
     const href = pendingNavRef.current;
 
     pendingNavRef.current = null;
-    // Reset blueprint to original so the guard is lifted before navigating
+    // Clear draft and reset blueprint so guard is lifted before navigating
+    removeFromLocalStorage(`${LOCAL_STORAGE_KEYS.DATASET_BLUEPRINT_DRAFT}_${tableName}` as LOCAL_STORAGE_KEYS);
     setBlueprintColumns(originalBlueprintColumns);
     if (href) window.location.href = href;
-  }, [originalBlueprintColumns]);
+  }, [originalBlueprintColumns, tableName]);
 
   const handleModalSave = useCallback(async () => {
     await handleSaveBlueprint();
@@ -731,6 +758,34 @@ const DatasetDetailInner = ({ tableName }: DatasetDetailProps) => {
     }
     prevTabRef.current = activeTab;
   }, [activeTab]);
+
+  // --- Draft persistence ---
+  // Persist active tab so refresh lands on the same tab
+  // Skip the initial mount render — only save when the user actually switches tabs
+  const isFirstTabRender = useRef(true);
+
+  useEffect(() => {
+    if (isFirstTabRender.current) {
+      isFirstTabRender.current = false;
+
+      return;
+    }
+    setToLocalStorage(`${LOCAL_STORAGE_KEYS.DATASET_ACTIVE_TAB}_${tableName}` as LOCAL_STORAGE_KEYS, activeTab);
+  }, [activeTab, tableName]);
+
+  // Save blueprint draft to localStorage whenever there are unsaved changes.
+  // Only run after schema has loaded (originalBlueprintColumns is non-empty)
+  // to avoid wiping the draft on initial mount before loadSchema completes.
+  useEffect(() => {
+    if (originalBlueprintColumns.length === 0) return;
+    const draftKey = `${LOCAL_STORAGE_KEYS.DATASET_BLUEPRINT_DRAFT}_${tableName}` as LOCAL_STORAGE_KEYS;
+
+    if (hasBlueprintChanges) {
+      setToLocalStorage(draftKey, JSON.stringify(blueprintColumns));
+    } else {
+      removeFromLocalStorage(draftKey);
+    }
+  }, [blueprintColumns, hasBlueprintChanges, tableName, originalBlueprintColumns.length]);
 
   // --- Navigation guard ---
   useEffect(() => {

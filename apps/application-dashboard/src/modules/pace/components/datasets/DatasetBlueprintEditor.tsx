@@ -200,7 +200,7 @@ const ColumnRow: FC<ColumnRowProps> = memo(
                       onTypeSelect={handleTypeChange}
                       selectedClassName='bg-GRAY_50 border-none'
                       triggerClassName='px-1.5 py-1 h-6 f-12-450 text-GRAY_1000'
-                      disabled
+                      disabled={!isEditable || !column.id.startsWith(COL_PREFIX)}
                     />
                   </div>
                 </div>
