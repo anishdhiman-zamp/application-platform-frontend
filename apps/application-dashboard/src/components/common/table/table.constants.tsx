@@ -40,7 +40,7 @@ export const myTheme = themeQuartz.withParams({
   selectCellBorder: { style: 'solid', width: 1.5, color: CSS_VARS.BLUE_700 },
   rangeSelectionBorderColor: CSS_VARS.BLUE_700,
   cellEditingBorder: { style: 'solid', width: 1.5, color: CSS_VARS.BLUE_700 },
-  cellEditingBackgroundColor: CSS_VARS.BG_WHITE,
+  cellBatchEditBackgroundColor: CSS_VARS.BG_WHITE,
   menuShadow: 'var(--MENU_SHADOW)',
 });
 
