@@ -147,6 +147,10 @@ class TaskSSERegistry {
     if (entry.callbacks.size === 0) return;
 
     if (entry.retryCount >= SSE_MAX_RETRIES) {
+      // Persistent failure after all retries — this is worth reporting to Sentry.
+      captureException(new Error(`SSE task connection failed after ${SSE_MAX_RETRIES} retries`), {
+        extra: { taskId },
+      });
       toast.error('Unable to connect. Please check your internet connection and try again.');
       for (const cb of entry.callbacks) {
         try {
