@@ -52,7 +52,8 @@ const CreateDataset = () => {
       const n = col.name.trim();
 
       if (!n) return 'Column name cannot be empty';
-      if (/[^a-zA-Z0-9 ]/.test(n)) return 'Column name can only contain alphabets, numbers, and spaces';
+      if (!/^[a-zA-Z_][a-zA-Z0-9_]*$/.test(n))
+        return 'Column name must not contain spaces or special characters, and must not start with a number';
     }
 
     const names = columns.map((c) => c.name.trim().toLowerCase());

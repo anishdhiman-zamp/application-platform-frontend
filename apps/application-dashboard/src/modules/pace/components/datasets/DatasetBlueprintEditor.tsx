@@ -1,6 +1,6 @@
 'use client';
 
-import { FC, memo, useCallback, useMemo, useRef, useState } from 'react';
+import { FC, memo, useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import {
   closestCenter,
   DndContext,
@@ -114,8 +114,8 @@ const ColumnRow: FC<ColumnRowProps> = memo(
       const trimmed = localName.trim();
 
       if (!trimmed) return 'Column name cannot be empty';
-      if (column.id.startsWith(COL_PREFIX) && /[^a-zA-Z0-9 ]/.test(trimmed)) {
-        return 'Column name can only contain alphabets, numbers, and spaces';
+      if (column.id.startsWith(COL_PREFIX) && !/^[a-zA-Z_][a-zA-Z0-9_]*$/.test(trimmed)) {
+        return 'Column name must not contain spaces or special characters, and must not start with a number';
       }
       const normalised = trimmed.toLowerCase();
       const dupes = allColumns.filter((c) => c.name.trim().toLowerCase() === normalised);
@@ -123,7 +123,7 @@ const ColumnRow: FC<ColumnRowProps> = memo(
       if (dupes.length > 1 && dupes[dupes.length - 1].id === column.id) return 'Column names must be unique';
 
       return null;
-    }, [localName, column.id, allColumns]);
+    }, [localName, allColumns, column.id]);
 
     const handleNameChange = (e: React.ChangeEvent<HTMLInputElement>) => {
       setLocalName(e.target.value);
@@ -287,7 +287,7 @@ export const createDefaultColumn = (
   index?: number,
 ): BlueprintColumn => ({
   id: generateColumnId(),
-  name: index != null ? `Column ${index}` : '',
+  name: index != null ? `column_${index}` : '',
   type,
   required: false,
 });
@@ -296,10 +296,34 @@ interface DatasetBlueprintEditorProps {
   columns: BlueprintColumn[];
   onChange: (columns: BlueprintColumn[]) => void;
   canEdit?: boolean;
+  onHasErrors?: (hasErrors: boolean) => void;
 }
 
-const DatasetBlueprintEditor: FC<DatasetBlueprintEditorProps> = ({ columns, onChange, canEdit = true }) => {
+const DatasetBlueprintEditor: FC<DatasetBlueprintEditorProps> = ({
+  columns,
+  onChange,
+  canEdit = true,
+  onHasErrors,
+}) => {
   const scrollContainerRef = useRef<HTMLDivElement>(null);
+
+  const hasErrors = useMemo(() => {
+    const names = columns.map((c) => c.name.trim().toLowerCase());
+
+    return columns.some((c) => {
+      const trimmed = c.name.trim();
+
+      if (!trimmed) return true;
+      if (c.id.startsWith(COL_PREFIX) && !/^[a-zA-Z_][a-zA-Z0-9_]*$/.test(trimmed)) return true;
+      const dupes = names.filter((n) => n === trimmed.toLowerCase());
+
+      return dupes.length > 1;
+    });
+  }, [columns]);
+
+  useEffect(() => {
+    onHasErrors?.(hasErrors);
+  }, [hasErrors, onHasErrors]);
 
   const sensors = useSensors(
     useSensor(PointerSensor),
