@@ -1,4 +1,4 @@
-import { ActivityIcon, AgentNavIcon, HomeIcon, SettingsIcon } from '@zamp-platform/ui';
+import { AgentNavIcon, HomeIcon, RouteIcon, SettingsIcon } from '@zamp-platform/ui';
 import { Link2, Settings2, UserPen } from 'lucide-react';
 import { PaceNavbarItemId, PaceNavbarItemSchema, PaceSettingsTabSchema } from 'modules/pace/pace.types';
 import Users02 from '@/assets/Icons/Users02';
@@ -26,7 +26,7 @@ export const PACE_NAVBAR_ITEMS: PaceNavbarItemSchema[] = [
   },
   {
     id: PaceNavbarItemId.TASKS,
-    iconComponent: ActivityIcon,
+    iconComponent: RouteIcon,
     path: ROUTES_PATH.CHAT_TASKS,
   },
   {
