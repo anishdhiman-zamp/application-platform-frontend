@@ -55,8 +55,6 @@ const PaceNavbar = () => {
     [isAgentsFe],
   );
 
-  const navbarItems = PACE_NAVBAR_ITEMS;
-
   const chatIconRef = useRef<AnimatedIconHandle>(null);
 
   const isSidebar = chatSidebarState === CHAT_SIDEBAR_STATE.SIDEBAR;
