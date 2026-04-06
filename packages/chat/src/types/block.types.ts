@@ -12,6 +12,10 @@ export const enum BLOCK_TYPE {
   THINKING = 'thinking',
   OUTPUT_FILES = 'output_files',
   TASK = 'task',
+  AGENT = 'agent',
+  TRIGGER = 'trigger',
+  INSTRUCTIONS_UPDATED = 'instructions_updated',
+  INPUTS_RESPONDED = 'inputs_responded',
 }
 
 export const enum ActionType {
@@ -145,6 +149,7 @@ export const TASK_STATUS = {
   IN_PROGRESS: 'IN_PROGRESS',
   FAILED: 'FAILED',
   NEEDS_INPUT: 'NEEDS_INPUT',
+  CANCELED: 'CANCELED',
 } as const;
 
 export type TaskStatus = (typeof TASK_STATUS)[keyof typeof TASK_STATUS];
@@ -159,6 +164,134 @@ export interface TaskBlockType {
     task_id: string;
     status?: TaskStatus;
   };
+}
+
+export interface AgentBlockType {
+  id: string;
+  order: number;
+  type: BLOCK_TYPE.AGENT;
+  payload: {
+    agent_id: string;
+    name: string;
+    description: string;
+    colour: string;
+    avatar?: string;
+  };
+}
+
+export interface HITLOption {
+  id: string;
+  label: string;
+  title?: string;
+  description: string;
+}
+
+/** `input_type` on `input_required` / HITL question payloads (API contract). */
+export const HITL_INPUT_TYPE = {
+  SELECT_ONE: 'select_one',
+  MULTIPLE_CHOICE: 'multiple_choice',
+  APPROVAL: 'approval',
+  TEXT: 'text',
+} as const;
+
+/** Legacy `input_type` from older APIs; treat as {@link HITL_INPUT_TYPE.MULTIPLE_CHOICE}. */
+export const HITL_INPUT_TYPE_LEGACY = {
+  MULTI_SELECT: 'multi-select',
+} as const;
+
+export type HITLInputType =
+  | (typeof HITL_INPUT_TYPE)[keyof typeof HITL_INPUT_TYPE]
+  | (typeof HITL_INPUT_TYPE_LEGACY)[keyof typeof HITL_INPUT_TYPE_LEGACY];
+
+export interface HITLQuestion {
+  id: string;
+  text?: string;
+  question?: string;
+  /** Null/empty when `input_type` is {@link HITL_INPUT_TYPE.APPROVAL}. */
+  options: HITLOption[] | null;
+  is_multi_select?: boolean;
+  input_type?: HITLInputType;
+  allow_custom_input?: boolean;
+}
+
+/** Discriminator strings for HITL `/hitl/respond` and `inputs_responded` payloads (API contract). */
+export const HITL_RESPONSE_TYPE = {
+  SELECT_ONE: 'select_one',
+  MULTIPLE_CHOICE: 'multiple_choice',
+  APPROVAL: 'approval',
+  TEXT: 'text',
+  /** Legacy `inputs_responded` rows only; do not send on `/hitl/respond`. */
+  FREE_TEXT: 'free_text',
+} as const;
+
+export interface InputRequiredPayload {
+  question: string;
+  /** Null when `input_type` is {@link HITL_INPUT_TYPE.APPROVAL}. */
+  options: HITLOption[] | null;
+  input_type: HITLInputType;
+  allow_custom_input: boolean;
+  entity_id?: string;
+  entity_type?: string;
+}
+
+/** Answer shape for a single row inside `inputs_responded` (mirrors HITL respond payload). */
+export interface InputsRespondedSelectOne {
+  type: typeof HITL_RESPONSE_TYPE.SELECT_ONE;
+  selected_option: string | null;
+  custom_input?: string | null;
+  is_skipped?: boolean;
+}
+
+export interface InputsRespondedMultipleChoice {
+  type: typeof HITL_RESPONSE_TYPE.MULTIPLE_CHOICE;
+  selected_options: string[];
+  custom_input?: string | null;
+  is_skipped?: boolean;
+}
+
+export interface InputsRespondedApproval {
+  type: typeof HITL_RESPONSE_TYPE.APPROVAL;
+  approved: boolean;
+  is_skipped?: boolean;
+}
+
+export interface InputsRespondedText {
+  type: typeof HITL_RESPONSE_TYPE.TEXT;
+  text: string;
+  is_skipped?: boolean;
+}
+
+/** Legacy `inputs_responded` rows from older APIs. */
+export interface InputsRespondedFreeText {
+  type: typeof HITL_RESPONSE_TYPE.FREE_TEXT;
+  free_text: string;
+}
+
+export type InputsRespondedAnswer =
+  | InputsRespondedSelectOne
+  | InputsRespondedMultipleChoice
+  | InputsRespondedApproval
+  | InputsRespondedText
+  | InputsRespondedFreeText;
+
+export interface InputsRespondedItemPayload {
+  response: InputsRespondedAnswer;
+  entity_id: string;
+  entity_type: string;
+  sender_name?: string;
+  input_required: InputRequiredPayload;
+}
+
+export interface InputsRespondedBlockType {
+  id: string;
+  type: BLOCK_TYPE.INPUTS_RESPONDED;
+  order: number;
+  payload: {
+    responses: InputsRespondedItemPayload[];
+  };
+  action?: null;
+  interaction?: null;
+  metadata?: null;
 }
 
 export enum TEXT_TYPE {
@@ -176,11 +309,16 @@ export type Block =
   | FileReferencesBlockType
   | OutputFilesBlockType
   | TaskBlockType
+  | AgentBlockType
+  | InputsRespondedBlockType
   | ThinkingContentBlock
   | TextContentBlock
   | ToolUseContentBlock
   | ToolResultContentBlock
-  | TaskContentBlock;
+  | TaskContentBlock
+  | AgentContentBlock
+  | TriggerContentBlock
+  | InstructionsUpdatedContentBlock;
 export interface BlockMessage {
   block: Block[];
 }
@@ -274,6 +412,34 @@ export interface TaskContentBlock extends StreamingContentBlockBase {
   };
 }
 
+export interface AgentContentBlock extends StreamingContentBlockBase {
+  type: BLOCK_TYPE.AGENT;
+  payload: {
+    agent_id: string;
+    name: string;
+    description: string;
+    colour: string;
+    avatar?: string;
+  };
+}
+
+export interface TriggerContentBlock extends StreamingContentBlockBase {
+  type: BLOCK_TYPE.TRIGGER;
+  payload: {
+    trigger_id: string;
+    title: string;
+    status: string;
+    agent_id: string;
+  };
+}
+
+export interface InstructionsUpdatedContentBlock extends StreamingContentBlockBase {
+  type: BLOCK_TYPE.INSTRUCTIONS_UPDATED;
+  payload: {
+    agent_id: string;
+  };
+}
+
 export interface StreamEventContentBlockStart {
   type: StreamingContentBlockType.CONTENT_BLOCK_START;
   index: number;
@@ -284,6 +450,17 @@ export interface StreamEventContentBlockStart {
     start_timestamp?: string;
     tool_call_id?: string;
     display_name?: string;
+    // Agent block fields
+    agent_id?: string;
+    description?: string;
+    colour?: string;
+    avatar?: string;
+    // Task block fields
+    title?: string;
+    task_id?: string;
+    status?: TaskStatus;
+    // Trigger block fields
+    trigger_id?: string;
   };
 }
 

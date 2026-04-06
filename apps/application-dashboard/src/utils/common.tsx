@@ -163,6 +163,10 @@ export const capitalizeFirstLetter = (str: string) => {
   return str.charAt(0).toUpperCase() + str.slice(1);
 };
 
+export const getNameInitial = (str?: string | null): string => {
+  return str?.charAt(0)?.toUpperCase() ?? '';
+};
+
 export const getColorValue = () => Math.floor(Math.random() * 64) + 80;
 
 export const getRandomColor = () => `rgb(${getColorValue()}, ${getColorValue()}, ${getColorValue()}`;
@@ -624,3 +628,17 @@ export const findTimeDifference = (updated_at: string): string => {
 
   return `${formatPlural(differenceInMonthsValue, 'month')} ago`;
 };
+
+/**
+ * Converts a duration in seconds to a human-readable upper-bound string.
+ * e.g. 45  → "less than a minute"
+ *      90  → "less than 2 minutes"
+ *      180 → "less than 4 minutes"
+ */
+export function formatExpectedDuration(seconds: number): string {
+  if (seconds <= 60) return 'less than a minute';
+
+  const minutes = Math.floor(seconds / 60) + 1;
+
+  return `less than ${minutes} minutes`;
+}

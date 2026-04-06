@@ -11,6 +11,7 @@ export const enum PaceNavbarItemId {
   GENERAL = 'general',
   DATASETS = 'datasets',
   TASKS = 'task',
+  AGENTS = 'agents',
   ORG_SETTINGS = 'org-settings',
 }
 
@@ -49,6 +50,8 @@ export type ChatSidebarState = (typeof CHAT_SIDEBAR_STATE)[keyof typeof CHAT_SID
 export const TAB_TYPE = {
   FILE: 'file',
   TASK: 'task',
+  AGENT: 'agent',
+  BROWSER: 'browser',
 } as const;
 
 export type DynamicTabType = (typeof TAB_TYPE)[keyof typeof TAB_TYPE];

@@ -1,0 +1,167 @@
+---
+description: Project-wide coding standards, component architecture, styling, and TypeScript conventions
+---
+
+Prompt Generation Rules:
+
+- Analyze the component requirements thoroughly
+- Include specific shadcn-ui and radix-ui component suggestions
+- Any new generic component should be added in packages/ui
+- Specify desired Tailwind CSS classes for styling and read variables from tailwind.config.ts
+- Mention any required TypeScript types or interfaces
+- Include instructions for responsive design
+- Suggest appropriate Next.js features if applicable and especially the ones to improve performance
+- Specify any necessary state management or hooks
+- Include accessibility considerations
+- Mention any required icons or assets
+- Suggest error handling and loading states
+- Include instructions for animations or transitions if needed
+- For animations requirement use framer-motion which is renamed as motion
+- Refer the docs of motion at https://motion.dev/docs/react-animation for any new animation requirements
+- Specify any required API integrations or data fetching
+- Mention performance optimization techniques if applicable
+- Include instructions for testing the component and for a new component always create a test case file
+- Suggest documentation requirements for the component
+
+## Styling and components
+
+### TailwindCSS Rules:
+
+- Use TailwindCSS utility classes for styling
+- Avoid custom CSS unless absolutely necessary
+- Maintain consistent order of utility classes
+- Use Tailwind's responsive variants for adaptive designs
+- Leverage Shadcn-UI components for rapid development and create them in packages/ui
+- Customise only when absolutely necessary
+- Define and use design tokens in packages/ui/tailwind.config.ts
+
+## CI and CD
+
+### Development Process:
+
+- Conduct thorough code reviews via Pull Requests
+- Include clear PR descriptions with context and screenshots
+- Implement comprehensive automated testing (unit, integration, e2e)
+- Prioritize meaningful tests over high coverage numbers
+- Use Conventional Commits for commit messages (feat:, fix:, docs:, chore:)
+- Make small, incremental commits for easier review and debugging
+
+## Code Style and Structure
+
+### General Principles
+
+- Write concise, readable TypeScript code
+- Use functional and declarative programming patterns
+- Follow DRY (Don't Repeat Yourself) principle
+- Implement early returns for better readability
+- Structure components logically: exports, subcomponents, helpers, types
+- General presentational components should be created in packages/ui
+- Prioritize reusability and modularity
+- Ensure consistent naming conventions
+- Follow React best practices and patterns
+- Implement proper prop validation
+- Consider internationalization requirements
+- Optimize for SEO when applicable
+
+### Naming Conventions
+
+- Use descriptive names with auxiliary verbs (isLoading, hasError)
+- Prefix event handlers with "handle" (handleClick, handleSubmit)
+- Use lowercase with dashes for directories (components/auth-wizard)
+- Favor named exports for components
+
+### Next Usage
+
+- Use dynamic routes with bracket notation ([id].tsx)
+- Validate and sanitize route parameters
+- Prefer flat, descriptive routes
+- Use getServerSideProps for dynamic data, getStaticProps/getStaticPaths for static
+- Implement Incremental Static Regeneration (ISR) where appropriate
+- Use next/image for optimized images
+- Configure image layout, priority, sizes, and srcSet attributes
+
+### API data fetching and global state management
+
+- Use features of RTK query to cache data and invalidate cache when needed
+
+### TypeScript Usage
+
+- Use TypeScript for all code
+- Prefer interfaces over types
+- Avoid enums; use const maps instead
+- Implement proper type safety and inference
+- Use `satisfies` operator for type validation
+- Enable all strict mode options in tsconfig.json
+- Explicitly type all variables, parameters, and return values
+- Use utility types, mapped types, and conditional types
+- Prefer 'interface' for extendable object shapes
+- Use 'type' for unions, intersections, and primitive compositions
+- Document complex types with JSDoc
+- Avoid ambiguous union types, use discriminated unions when necessary
+
+## React 19 and Next.js 15 Best Practices
+
+### Component Architecture
+
+- Favor React Server Components (RSC) where possible
+- Minimize 'use client' directives
+- Implement proper error boundaries
+- Use Suspense for async operations
+- Optimize for performance and Web Vitals
+
+### Component Internal Structure
+
+Follow this order within React components for consistency and readability:
+
+1. **State** - useState, useRef declarations
+2. **Derived State** - useMemo, computed values, context values
+3. **Hooks** - Custom hooks (useFileActions, useFileClipboard, etc.)
+4. **Handlers** - useCallback wrapped event handlers
+5. **Render** - Early returns, JSX
+
+```typescript
+const MyComponent = ({ prop1, prop2 }: Props) => {
+  // State
+  const [value, setValue] = useState(false);
+  const ref = useRef<HTMLDivElement>(null);
+
+  // Derived State
+  const computedValue = useMemo(() => /* ... */, [dep]);
+  const { contextValue } = useMyContext();
+
+  // Hooks
+  const { action1, action2 } = useMyCustomHook({ /* ... */ });
+
+  // Handlers
+  const handleClick = useCallback(() => { /* ... */ }, []);
+
+  // Render
+  if (loading) return <Spinner />;
+
+  return <div>...</div>;
+};
+```
+
+- Memoize handlers with useCallback when passed to child components
+- Group related props into objects (state, handlers, etc.) for cleaner APIs
+- Extract complex logic into custom hooks for reusability and testability
+
+### State Management
+
+- Use `useActionState` instead of deprecated `useFormState`
+- Leverage enhanced `useFormStatus` with new properties (data, method, action)
+- Implement URL state management with 'nuqs'
+- Minimize client-side state
+
+### Async Request APIs
+
+```typescript
+// Always use async versions of runtime APIs
+const cookieStore = await cookies();
+const headersList = await headers();
+const { isEnabled } = await draftMode();
+
+// Handle async params in layouts/pages
+const params = await props.params;
+const searchParams = await props.searchParams;
+```

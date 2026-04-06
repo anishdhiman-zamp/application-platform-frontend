@@ -5,7 +5,7 @@ exports[`Combobox Component - Snapshot matches snapshot for open state with opti
   aria-controls="radix-_r_2b_"
   aria-expanded="true"
   aria-haspopup="dialog"
-  class=""
+  class="outline-none"
   data-slot="popover-trigger"
   data-state="open"
   type="button"

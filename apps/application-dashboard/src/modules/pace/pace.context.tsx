@@ -5,33 +5,36 @@ import {
   FILES_PANEL_MAX_WIDTH,
   FILES_PANEL_MIN_WIDTH,
   FILES_PANEL_WIDTH,
-  SIDEBAR_CONVERSATION_ID_PARAM,
   SIDEBAR_MAX_WIDTH,
   SIDEBAR_MIN_WIDTH,
   SIDEBAR_WIDTH,
 } from 'modules/pace/pace.constants';
-import { CHAT_SIDEBAR_STATE, type ChatSidebarState, DynamicTab, TAB_TYPE } from 'modules/pace/pace.types';
-import { getStoredTabs, setStoredTabs } from 'modules/pace/pace.utils';
+import { CHAT_SIDEBAR_STATE, type ChatSidebarState } from 'modules/pace/pace.types';
+import { getInitialSidebarState, getInitialWidth } from 'modules/pace/pace.utils';
 import { usePathname } from 'next/navigation';
-import { ROUTES_PATH } from '@/constants/routeConfig';
-import { useSyncedPathname, useSyncedUrlParam } from '@/modules/pace/hooks/useSyncedSearchParam';
+import { useAppSelector } from '@/hooks/toolkit';
+import { selectActiveTabId } from '@/store/slices/dynamic-tabs.slice';
 import { defaultFnType } from '@/types/commonTypes';
-import {
-  getFromLocalStorage,
-  LOCAL_STORAGE_KEYS,
-  removeFromLocalStorage,
-  setToLocalStorage,
-} from '@/utils/localstorage';
+import { LOCAL_STORAGE_KEYS, setToLocalStorage } from '@/utils/localstorage';
 
 export interface PendingFileReference {
   path: string;
   name: string;
 }
 
-export interface PendingConversationPayload {
+export interface ChatMessageIntent {
   message: string;
   fileReferences?: { path: string; name: string }[];
   llmModel?: string | null;
+  metadata?: Record<string, unknown>;
+  autoLoopEnabled?: boolean;
+}
+
+export interface ActiveAgentInfo {
+  id: string;
+  name: string;
+  avatar?: string;
+  autoLoopEnabled?: boolean;
 }
 
 interface PaceContextType {
@@ -39,29 +42,27 @@ interface PaceContextType {
   prevChatSidebarState: ChatSidebarState;
   setChatSidebarState: (state: ChatSidebarState) => void;
   collapseSidebar: defaultFnType;
+  scheduleCollapseOnRouteChange: defaultFnType;
 
   registerStartNewChat: (callback: defaultFnType) => void;
   startNewChat: defaultFnType;
 
-  registerSelectConversation: (callback: (id: string) => void) => void;
-  selectConversation: (id: string) => void;
-
-  dynamicTabs: DynamicTab[];
-  isDynamicTabsHydrated: boolean;
-  openDynamicTab: (tab: Omit<DynamicTab, 'stableKey'>) => void;
-  closeDynamicTab: (id: string) => void;
-  updateDynamicTab: (oldId: string, newTab: Omit<DynamicTab, 'stableKey'>) => void;
-  reorderDynamicTabs: (newOrder: string[]) => void;
+  registerSelectConversation: (callback: (id: string, title?: string) => void) => void;
+  selectConversation: (id: string, title?: string) => void;
 
   pendingFileReference: PendingFileReference | null;
   setPendingFileReference: (ref: PendingFileReference | null) => void;
   clearPendingFileReference: defaultFnType;
 
-  pendingConversationPayload: PendingConversationPayload | null;
-  setPendingConversationPayload: (payload: PendingConversationPayload | null) => void;
+  chatMessageIntent: ChatMessageIntent | null;
+  setChatMessageIntent: (payload: ChatMessageIntent | null) => void;
+
+  activeAgentInfo: ActiveAgentInfo | null;
+  setActiveAgentInfo: (info: ActiveAgentInfo | null) => void;
 
   filesPanelOpen: boolean;
   filesPanelPinned: boolean;
+  isFilesPanelHydrated: boolean;
   toggleFilesPanel: defaultFnType;
   setFilesPanelPinned: (pinned: boolean) => void;
   closeFilesPanel: defaultFnType;
@@ -70,46 +71,73 @@ interface PaceContextType {
 
   sidebarWidth: number;
   setSidebarWidth: (width: number) => void;
+  persistSidebarWidth: (width: number) => void;
   isSidebarResizing: boolean;
   setIsSidebarResizing: (resizing: boolean) => void;
 
   filesPanelWidth: number;
   setFilesPanelWidth: (width: number) => void;
+  persistFilesPanelWidth: (width: number) => void;
   isFilesPanelResizing: boolean;
   setIsFilesPanelResizing: (resizing: boolean) => void;
 }
 
 const PaceContext = createContext<PaceContextType | null>(null);
 
-export const PaceProvider = ({ children }: { children: ReactNode }) => {
-  const nextPathname = usePathname();
-  const syncedPathname = useSyncedPathname();
-  const fileParam = useSyncedUrlParam('f');
-  const filesPanelLeaveTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
-  const startNewChatRef = useRef<defaultFnType | null>(null);
-  const selectConversationRef = useRef<((id: string) => void) | null>(null);
+interface InitialFilesPanelState {
+  open: boolean;
+  pinned: boolean;
+}
 
-  const [dynamicTabs, setDynamicTabs] = useState<DynamicTab[]>([]);
-  const [prevChatSidebarState, setPrevChatSidebarState] = useState<ChatSidebarState>(CHAT_SIDEBAR_STATE.COLLAPSED);
-  const [chatSidebarState, setChatSidebarStateRaw] = useState<ChatSidebarState>(CHAT_SIDEBAR_STATE.COLLAPSED);
-  const [isDynamicTabsHydrated, setIsDynamicTabsHydrated] = useState(false);
+const getInitialFilesPanelState = (): InitialFilesPanelState => {
+  if (typeof window === 'undefined') return { open: false, pinned: false };
+
+  try {
+    const stored = localStorage.getItem(LOCAL_STORAGE_KEYS.PACE_FILES_PANEL_PINNED);
+    const pinned = stored ? (JSON.parse(stored) as boolean) : false;
+
+    return { open: pinned, pinned };
+  } catch {
+    return { open: false, pinned: false };
+  }
+};
+
+export const PaceProvider = ({ children }: { children: ReactNode }) => {
+  const pathname = usePathname();
+  const activeTabId = useAppSelector(selectActiveTabId);
+  const filesPanelLeaveTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const pendingCollapseRef = useRef(false);
+  const startNewChatRef = useRef<defaultFnType | null>(null);
+  const selectConversationRef = useRef<((id: string, title?: string) => void) | null>(null);
+
+  const [chatSidebarState, setChatSidebarStateRaw] = useState<ChatSidebarState>(getInitialSidebarState);
+  const [prevChatSidebarState, setPrevChatSidebarState] = useState<ChatSidebarState>(chatSidebarState);
   const [pendingFileReference, setPendingFileReference] = useState<PendingFileReference | null>(null);
-  const [pendingConversationPayload, setPendingConversationPayload] = useState<PendingConversationPayload | null>(null);
-  const [filesPanelOpen, setFilesPanelOpen] = useState(false);
-  const [filesPanelPinned, setFilesPanelPinnedRaw] = useState(false);
-  const [sidebarWidth, setSidebarWidthRaw] = useState(SIDEBAR_WIDTH);
+  const [chatMessageIntent, setChatMessageIntent] = useState<ChatMessageIntent | null>(null);
+  const [activeAgentInfo, setActiveAgentInfo] = useState<ActiveAgentInfo | null>(null);
+  const initialFilesPanelState = useRef(getInitialFilesPanelState());
+  const [filesPanelOpen, setFilesPanelOpen] = useState(initialFilesPanelState.current.open);
+  const [filesPanelPinned, setFilesPanelPinnedRaw] = useState(initialFilesPanelState.current.pinned);
+  const [isFilesPanelHydrated, setIsFilesPanelHydrated] = useState(false);
+  const [sidebarWidth, setSidebarWidthRaw] = useState(() =>
+    getInitialWidth(LOCAL_STORAGE_KEYS.PACE_SIDEBAR_WIDTH, SIDEBAR_MIN_WIDTH, SIDEBAR_MAX_WIDTH, SIDEBAR_WIDTH),
+  );
   const [isSidebarResizing, setIsSidebarResizing] = useState(false);
-  const [filesPanelWidth, setFilesPanelWidthRaw] = useState(FILES_PANEL_WIDTH);
+  const [filesPanelWidth, setFilesPanelWidthRaw] = useState(() =>
+    getInitialWidth(
+      LOCAL_STORAGE_KEYS.PACE_FILES_PANEL_WIDTH,
+      FILES_PANEL_MIN_WIDTH,
+      FILES_PANEL_MAX_WIDTH,
+      FILES_PANEL_WIDTH,
+    ),
+  );
   const [isFilesPanelResizing, setIsFilesPanelResizing] = useState(false);
 
-  const pathname = syncedPathname || nextPathname;
-  const hasFileParam = fileParam !== null;
-  const routeUrl = hasFileParam ? `${pathname}?f=${fileParam}` : pathname;
-  const prevRouteUrlRef = useRef(routeUrl);
+  const routeSignature = activeTabId ? `${pathname}:${activeTabId}` : pathname;
+  const prevRouteSignatureRef = useRef(routeSignature);
   const chatSidebarStateRef = useRef(chatSidebarState);
 
   chatSidebarStateRef.current = chatSidebarState;
-  const isOnChatRoute = pathname === ROUTES_PATH.CHAT;
 
   const setChatSidebarStateInternal = useCallback((next: ChatSidebarState) => {
     setChatSidebarStateRaw((prev) => {
@@ -127,6 +155,10 @@ export const PaceProvider = ({ children }: { children: ReactNode }) => {
     setChatSidebarStateInternal(CHAT_SIDEBAR_STATE.COLLAPSED);
   }, []);
 
+  const scheduleCollapseOnRouteChange = useCallback(() => {
+    pendingCollapseRef.current = true;
+  }, []);
+
   const clearPendingFileReference = useCallback(() => {
     setPendingFileReference(null);
   }, []);
@@ -141,6 +173,11 @@ export const PaceProvider = ({ children }: { children: ReactNode }) => {
     const clamped = Math.min(SIDEBAR_MAX_WIDTH, Math.max(SIDEBAR_MIN_WIDTH, width));
 
     setSidebarWidthRaw(clamped);
+  }, []);
+
+  const persistSidebarWidth = useCallback((width: number) => {
+    const clamped = Math.min(SIDEBAR_MAX_WIDTH, Math.max(SIDEBAR_MIN_WIDTH, width));
+
     setToLocalStorage(LOCAL_STORAGE_KEYS.PACE_SIDEBAR_WIDTH, String(clamped));
   }, []);
 
@@ -148,6 +185,11 @@ export const PaceProvider = ({ children }: { children: ReactNode }) => {
     const clamped = Math.min(FILES_PANEL_MAX_WIDTH, Math.max(FILES_PANEL_MIN_WIDTH, width));
 
     setFilesPanelWidthRaw(clamped);
+  }, []);
+
+  const persistFilesPanelWidth = useCallback((width: number) => {
+    const clamped = Math.min(FILES_PANEL_MAX_WIDTH, Math.max(FILES_PANEL_MIN_WIDTH, width));
+
     setToLocalStorage(LOCAL_STORAGE_KEYS.PACE_FILES_PANEL_WIDTH, String(clamped));
   }, []);
 
@@ -188,90 +230,31 @@ export const PaceProvider = ({ children }: { children: ReactNode }) => {
     startNewChatRef.current?.();
   }, []);
 
-  const registerSelectConversation = useCallback((callback: (id: string) => void) => {
+  const registerSelectConversation = useCallback((callback: (id: string, title?: string) => void) => {
     selectConversationRef.current = callback;
   }, []);
 
-  const selectConversation = useCallback((id: string) => {
-    selectConversationRef.current?.(id);
-  }, []);
-
-  const openDynamicTab = useCallback((tab: Omit<DynamicTab, 'stableKey'>) => {
-    setDynamicTabs((prev) => {
-      const exists = prev.some((t) => t.id === tab.id && t.type === (tab.type ?? TAB_TYPE.FILE));
-
-      if (exists) return prev;
-
-      const newTab: DynamicTab = {
-        ...tab,
-        type: tab.type ?? TAB_TYPE.FILE,
-        stableKey: crypto.randomUUID(),
-      };
-
-      const newTabs = [...prev, newTab];
-
-      setStoredTabs(newTabs);
-
-      return newTabs;
-    });
-  }, []);
-
-  const closeDynamicTab = useCallback((id: string) => {
-    setDynamicTabs((prev) => {
-      const newTabs = prev.filter((tab) => tab.id !== id);
-
-      setStoredTabs(newTabs);
-
-      return newTabs;
-    });
-  }, []);
-
-  const updateDynamicTab = useCallback((oldId: string, newTab: Omit<DynamicTab, 'stableKey'>) => {
-    setDynamicTabs((prev) => {
-      const tabIndex = prev.findIndex((tab) => tab.id === oldId);
-
-      if (tabIndex === -1) return prev;
-
-      const existingTab = prev[tabIndex];
-      const newTabs = [...prev];
-
-      newTabs[tabIndex] = {
-        ...newTab,
-        type: newTab.type ?? existingTab.type ?? TAB_TYPE.FILE,
-        stableKey: existingTab.stableKey,
-      };
-      setStoredTabs(newTabs);
-
-      return newTabs;
-    });
-  }, []);
-
-  const reorderDynamicTabs = useCallback((newOrder: string[]) => {
-    setDynamicTabs((prev) => {
-      const tabMap = new Map(prev.map((tab) => [tab.id, tab]));
-
-      const reorderedTabs = newOrder.map((id) => tabMap.get(id)).filter((tab): tab is DynamicTab => tab !== undefined);
-
-      if (reorderedTabs.length !== prev.length) {
-        return prev;
-      }
-
-      setStoredTabs(reorderedTabs);
-
-      return reorderedTabs;
-    });
+  const selectConversation = useCallback((id: string, title?: string) => {
+    selectConversationRef.current?.(id, title);
   }, []);
 
   useEffect(() => {
-    if (prevRouteUrlRef.current === routeUrl) {
+    if (prevRouteSignatureRef.current === routeSignature) {
       return;
     }
-    prevRouteUrlRef.current = routeUrl;
+    prevRouteSignatureRef.current = routeSignature;
+
+    if (pendingCollapseRef.current) {
+      pendingCollapseRef.current = false;
+      setChatSidebarStateInternal(CHAT_SIDEBAR_STATE.COLLAPSED);
+
+      return;
+    }
 
     if (chatSidebarStateRef.current === CHAT_SIDEBAR_STATE.EXPANDED) {
-      setChatSidebarStateInternal(CHAT_SIDEBAR_STATE.COLLAPSED);
+      setChatSidebarStateInternal(CHAT_SIDEBAR_STATE.SIDEBAR);
     }
-  }, [routeUrl, isOnChatRoute, hasFileParam]);
+  }, [routeSignature]);
 
   const clampSidebarWidthToFilesPanel = useCallback(() => {
     if (!(filesPanelOpen && filesPanelPinned)) return;
@@ -314,57 +297,7 @@ export const PaceProvider = ({ children }: { children: ReactNode }) => {
   }, [clampSidebarWidthToFilesPanel]);
 
   useEffect(() => {
-    const storedTabs = getStoredTabs();
-
-    setDynamicTabs(storedTabs);
-    setIsDynamicTabsHydrated(true);
-
-    const storedPinned = getFromLocalStorage(LOCAL_STORAGE_KEYS.PACE_FILES_PANEL_PINNED);
-
-    if (storedPinned) {
-      try {
-        const pinned = JSON.parse(storedPinned);
-
-        setFilesPanelPinnedRaw(pinned);
-        if (pinned) {
-          setFilesPanelOpen(true);
-        }
-      } catch {
-        removeFromLocalStorage(LOCAL_STORAGE_KEYS.PACE_FILES_PANEL_PINNED);
-      }
-    }
-
-    const storedSidebarWidth = getFromLocalStorage(LOCAL_STORAGE_KEYS.PACE_SIDEBAR_WIDTH);
-
-    if (storedSidebarWidth) {
-      const parsed = Number(storedSidebarWidth);
-
-      if (!Number.isNaN(parsed)) {
-        setSidebarWidthRaw(Math.min(SIDEBAR_MAX_WIDTH, Math.max(SIDEBAR_MIN_WIDTH, parsed)));
-      }
-    }
-
-    const storedFilesPanelWidth = getFromLocalStorage(LOCAL_STORAGE_KEYS.PACE_FILES_PANEL_WIDTH);
-
-    if (storedFilesPanelWidth) {
-      const parsed = Number(storedFilesPanelWidth);
-
-      if (!Number.isNaN(parsed)) {
-        setFilesPanelWidthRaw(Math.min(FILES_PANEL_MAX_WIDTH, Math.max(FILES_PANEL_MIN_WIDTH, parsed)));
-      }
-    }
-
-    const currentPath = window.location.pathname;
-    const currentSearch = new URLSearchParams(window.location.search);
-    const isChatPath = currentPath === ROUTES_PATH.CHAT;
-    const hasFileParamOnMount = currentSearch.has('f');
-    const hasSidebarConversation = currentSearch.has(SIDEBAR_CONVERSATION_ID_PARAM);
-
-    if (isChatPath && !hasFileParamOnMount && hasSidebarConversation) {
-      setChatSidebarStateInternal(CHAT_SIDEBAR_STATE.EXPANDED);
-    } else if (hasSidebarConversation) {
-      setChatSidebarStateInternal(CHAT_SIDEBAR_STATE.SIDEBAR);
-    }
+    setIsFilesPanelHydrated(true);
   }, []);
 
   const value: PaceContextType = useMemo(
@@ -373,6 +306,7 @@ export const PaceProvider = ({ children }: { children: ReactNode }) => {
       prevChatSidebarState,
       setChatSidebarState,
       collapseSidebar,
+      scheduleCollapseOnRouteChange,
 
       registerStartNewChat,
       startNewChat,
@@ -380,22 +314,19 @@ export const PaceProvider = ({ children }: { children: ReactNode }) => {
       registerSelectConversation,
       selectConversation,
 
-      dynamicTabs,
-      isDynamicTabsHydrated,
-      openDynamicTab,
-      closeDynamicTab,
-      updateDynamicTab,
-      reorderDynamicTabs,
-
       pendingFileReference,
       setPendingFileReference,
       clearPendingFileReference,
 
-      pendingConversationPayload,
-      setPendingConversationPayload,
+      chatMessageIntent,
+      setChatMessageIntent,
+
+      activeAgentInfo,
+      setActiveAgentInfo,
 
       filesPanelOpen,
       filesPanelPinned,
+      isFilesPanelHydrated,
       toggleFilesPanel,
       setFilesPanelPinned,
       closeFilesPanel,
@@ -404,11 +335,13 @@ export const PaceProvider = ({ children }: { children: ReactNode }) => {
 
       sidebarWidth,
       setSidebarWidth,
+      persistSidebarWidth,
       isSidebarResizing,
       setIsSidebarResizing,
 
       filesPanelWidth,
       setFilesPanelWidth,
+      persistFilesPanelWidth,
       isFilesPanelResizing,
       setIsFilesPanelResizing,
     }),
@@ -417,6 +350,7 @@ export const PaceProvider = ({ children }: { children: ReactNode }) => {
       prevChatSidebarState,
       setChatSidebarState,
       collapseSidebar,
+      scheduleCollapseOnRouteChange,
 
       registerStartNewChat,
       startNewChat,
@@ -424,20 +358,16 @@ export const PaceProvider = ({ children }: { children: ReactNode }) => {
       registerSelectConversation,
       selectConversation,
 
-      dynamicTabs,
-      isDynamicTabsHydrated,
-      openDynamicTab,
-      closeDynamicTab,
-      updateDynamicTab,
-      reorderDynamicTabs,
-
       pendingFileReference,
       clearPendingFileReference,
 
-      pendingConversationPayload,
+      chatMessageIntent,
+
+      activeAgentInfo,
 
       filesPanelOpen,
       filesPanelPinned,
+      isFilesPanelHydrated,
       toggleFilesPanel,
       setFilesPanelPinned,
       closeFilesPanel,
@@ -446,10 +376,12 @@ export const PaceProvider = ({ children }: { children: ReactNode }) => {
 
       sidebarWidth,
       setSidebarWidth,
+      persistSidebarWidth,
       isSidebarResizing,
 
       filesPanelWidth,
       setFilesPanelWidth,
+      persistFilesPanelWidth,
       isFilesPanelResizing,
     ],
   );

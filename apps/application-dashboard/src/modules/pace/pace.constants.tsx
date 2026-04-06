@@ -1,4 +1,4 @@
-import { ActivityIcon, HomeIcon, SettingsIcon } from '@zamp-platform/ui';
+import { AgentNavIcon, HomeIcon, RouteIcon, SettingsIcon } from '@zamp-platform/ui';
 import { Database, Link2, Settings2, UserPen } from 'lucide-react';
 import { PaceNavbarItemId, PaceNavbarItemSchema, PaceSettingsTabSchema } from 'modules/pace/pace.types';
 import Users02 from '@/assets/Icons/Users02';
@@ -7,7 +7,7 @@ import { INPUT_FILE_FORMATS } from '@/types/common/mime';
 
 export const ACCEPTED_FILE_TYPES = `${INPUT_FILE_FORMATS.TXT},${INPUT_FILE_FORMATS.PDF},${INPUT_FILE_FORMATS.JPEG},${INPUT_FILE_FORMATS.JPG},${INPUT_FILE_FORMATS.PNG},${INPUT_FILE_FORMATS.BMP}`;
 
-export const DEFAULT_CHAT_TITLE = 'Untitled';
+export const DEFAULT_CHAT_TITLE = 'Start a new chat';
 export const DEBOUNCE_DELAY_MS = 300;
 export const NEW_CONVERSATION_ID = 'null_thread';
 export const SIDEBAR_WIDTH = 450;
@@ -26,8 +26,13 @@ export const PACE_NAVBAR_ITEMS: PaceNavbarItemSchema[] = [
   },
   {
     id: PaceNavbarItemId.TASKS,
-    iconComponent: ActivityIcon,
+    iconComponent: RouteIcon,
     path: ROUTES_PATH.CHAT_TASKS,
+  },
+  {
+    id: PaceNavbarItemId.AGENTS,
+    iconComponent: AgentNavIcon,
+    path: ROUTES_PATH.CHAT_AGENTS,
   },
   {
     id: PaceNavbarItemId.SETTINGS,

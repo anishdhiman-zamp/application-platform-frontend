@@ -1,7 +1,7 @@
 'use client';
 
 import { cn } from '@zamp-platform/ui/utils';
-import React, { FC, ReactNode } from 'react';
+import { FC, ReactNode } from 'react';
 
 import { StreamingState } from '../types/chat.types';
 import { BlockRenderer } from './BlockRenderer';
@@ -12,13 +12,23 @@ export interface StreamingMessageProps {
   className?: string;
   thinkingLabel?: string;
   toolUseLabel?: string;
+  showMarkdownConnectors?: boolean;
+  showConnectorToLastBlock?: boolean;
+  showConnectorToNextBlock?: boolean;
 }
 
 /**
  * StreamingMessage component renders the streaming state from agent_streams SSE events.
  * It displays thinking, text, and tool_use content blocks as they stream in.
  */
-export const StreamingMessage: FC<StreamingMessageProps> = ({ streamingState, assistantAvatar, className }) => {
+export const StreamingMessage: FC<StreamingMessageProps> = ({
+  streamingState,
+  assistantAvatar,
+  className,
+  showMarkdownConnectors = false,
+  showConnectorToLastBlock = false,
+  showConnectorToNextBlock = false,
+}) => {
   const messageElements = streamingState?.message_content?.elements || [];
 
   if (!streamingState || messageElements.length === 0) {
@@ -26,7 +36,7 @@ export const StreamingMessage: FC<StreamingMessageProps> = ({ streamingState, as
   }
 
   return (
-    <div className={cn('space-y-4', className)}>
+    <div className={cn('space-y-3', className)}>
       {assistantAvatar}
       <BlockRenderer
         message={{ block: messageElements }}
@@ -35,6 +45,9 @@ export const StreamingMessage: FC<StreamingMessageProps> = ({ streamingState, as
         messageId={streamingState?.id}
         isLoading={false}
         isStreaming={streamingState?.is_active}
+        showMarkdownConnectors={showMarkdownConnectors}
+        showConnectorToLastBlock={showConnectorToLastBlock}
+        showConnectorToNextBlock={showConnectorToNextBlock}
       />
     </div>
   );

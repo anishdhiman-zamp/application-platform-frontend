@@ -109,6 +109,7 @@ Prompt Generation Rules:
 - Implement proper error boundaries
 - Use Suspense for async operations
 - Optimize for performance and Web Vitals
+- Do not use `React.FC` or `React.FunctionComponent` for typing components; instead, type props inline using the props interface directly (e.g. `({ prop }: Props) => { ... }`)
 
 ### Component Internal Structure
 

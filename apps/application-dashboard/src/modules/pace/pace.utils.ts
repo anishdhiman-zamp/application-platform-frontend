@@ -5,9 +5,48 @@ import {
   NIGHT_GREETINGS,
   SIDEBAR_CONVERSATION_ID_PARAM,
 } from 'modules/pace/pace.constants';
-import { DynamicTab, TAB_TYPE } from 'modules/pace/pace.types';
+import { CHAT_SIDEBAR_STATE, type ChatSidebarState } from 'modules/pace/pace.types';
+import { ROUTES_PATH } from '@/constants/routeConfig';
 import type { SkillApiError } from '@/types/api/skills.types';
-import { getFromLocalStorage, LOCAL_STORAGE_KEYS, setToLocalStorage } from '@/utils/localstorage';
+import { LOCAL_STORAGE_KEYS } from '@/utils/localstorage';
+
+/**
+ * Reads a numeric value from localStorage and clamps it within [min, max].
+ * Falls back to `fallback` if the value is missing, NaN, or non-positive.
+ * Safe to call server-side — returns `fallback` when `window` is unavailable.
+ * @param key - The localStorage key to read
+ * @param min - Minimum allowed value
+ * @param max - Maximum allowed value
+ * @param fallback - Default value when nothing is stored or the value is invalid
+ */
+export const getInitialWidth = (key: LOCAL_STORAGE_KEYS, min: number, max: number, fallback: number): number => {
+  if (typeof window === 'undefined') return fallback;
+  const stored = Number(localStorage.getItem(key));
+
+  return !Number.isNaN(stored) && stored > 0 ? Math.min(max, Math.max(min, stored)) : fallback;
+};
+
+/**
+ * Derives the correct chat sidebar state from the current URL on first render,
+ * avoiding the COLLAPSED → open flash that occurs when state is corrected in a useEffect.
+ * Safe to call server-side — returns COLLAPSED when `window` is unavailable.
+ *
+ * Rules:
+ * - No sidebar conversation param → COLLAPSED
+ * - `/chat` root with no file param (`f`) → EXPANDED (full-screen)
+ * - Any other route with sidebar param → SIDEBAR
+ */
+export const getInitialSidebarState = (): ChatSidebarState => {
+  if (typeof window === 'undefined') return CHAT_SIDEBAR_STATE.COLLAPSED;
+
+  const search = new URLSearchParams(window.location.search);
+
+  if (!search.has(SIDEBAR_CONVERSATION_ID_PARAM)) return CHAT_SIDEBAR_STATE.COLLAPSED;
+
+  const isChatRoot = window.location.pathname === ROUTES_PATH.CHAT && !search.has('f');
+
+  return isChatRoot ? CHAT_SIDEBAR_STATE.EXPANDED : CHAT_SIDEBAR_STATE.SIDEBAR;
+};
 
 /** Returns a random element from the given array */
 const pickRandom = (arr: string[]) => arr[Math.floor(Math.random() * arr.length)];
@@ -95,40 +134,4 @@ export const getRouteSignificantUrl = (pathname: string | null, searchParams: UR
   const query = filtered.toString();
 
   return query ? `${path}?${query}` : path;
-};
-
-/**
- * Retrieves persisted dynamic tabs from local storage, ensuring each tab
- * has a stable key and a default type.
- * @returns The array of stored dynamic tabs, or an empty array on failure
- */
-export const getStoredTabs = (): DynamicTab[] => {
-  try {
-    const stored = getFromLocalStorage(LOCAL_STORAGE_KEYS.PACE_OPEN_DYNAMIC_TABS);
-
-    if (!stored) return [];
-    const tabs = JSON.parse(stored) as DynamicTab[];
-
-    return tabs.map((tab) => ({
-      ...tab,
-      stableKey: tab.stableKey || crypto.randomUUID(),
-      type: tab.type ?? TAB_TYPE.FILE,
-    }));
-  } catch (error) {
-    console.error('Error getting stored tabs:', error);
-
-    return [];
-  }
-};
-
-/**
- * Persists the current dynamic tabs array to local storage.
- * @param tabs - The dynamic tabs to store
- */
-export const setStoredTabs = (tabs: DynamicTab[]) => {
-  try {
-    setToLocalStorage(LOCAL_STORAGE_KEYS.PACE_OPEN_DYNAMIC_TABS, JSON.stringify(tabs));
-  } catch (error) {
-    console.error('Error setting stored tabs:', error);
-  }
 };

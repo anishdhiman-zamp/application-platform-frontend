@@ -2,7 +2,7 @@ import { ShimmerText, useScrollRef } from '@zamp-platform/ui';
 import { cn } from '@zamp-platform/ui/utils';
 import { motion } from 'motion/react';
 import Image from 'next/image';
-import React, { FC, ReactNode, useEffect, useRef, useState } from 'react';
+import { FC, ReactNode, useEffect, useRef, useState } from 'react';
 
 import PaceAvatar from '@/modules/chatbot/PaceAvatar';
 
@@ -28,6 +28,8 @@ interface MessageContainerProps {
   organizationId?: string;
   streamingEnabled?: boolean;
   conversationId?: string;
+  showMarkdownConnectors?: boolean;
+  showStreamingAvatar?: boolean;
 }
 
 export const MessageContainer: FC<MessageContainerProps> = ({
@@ -46,6 +48,8 @@ export const MessageContainer: FC<MessageContainerProps> = ({
   organizationId,
   streamingEnabled = true,
   conversationId,
+  showMarkdownConnectors = false,
+  showStreamingAvatar = true,
 }) => {
   const previousConversationIdRef = useRef(conversationId);
   const [animatedLength, setAnimatedLength] = useState(() => {
@@ -135,14 +139,19 @@ export const MessageContainer: FC<MessageContainerProps> = ({
           shouldAnimate={index === messages.length - 1 && isNewUserMessage}
           organizationId={organizationId}
           streamingEnabled={streamingEnabled}
+          showMarkdownConnectors={showMarkdownConnectors}
         />
       ))}
 
       {streamingState && !!streamingState.message_content?.elements?.length && (
-        <StreamingMessage streamingState={streamingState} assistantAvatar={defaultAssistantAvatar} />
+        <StreamingMessage
+          streamingState={streamingState}
+          assistantAvatar={defaultAssistantAvatar}
+          showMarkdownConnectors={showMarkdownConnectors}
+        />
       )}
 
-      {streamingState && !!streamingState.message_content?.elements?.length && (
+      {showStreamingAvatar && streamingState && !!streamingState.message_content?.elements?.length && (
         <div className='flex w-full items-center'>
           <div className='animate-scale dark:brightness-0 dark:invert'>
             <Image src='/icons/pace/pace-streaming.svg' alt='Pace Avatar' height={20} width={20} />

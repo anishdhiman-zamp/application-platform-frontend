@@ -1,7 +1,11 @@
+export { default as AgentBlock } from './AgentBlock';
 export { AttachmentsList } from './AttachmentsList';
 export { ButtonBlock } from './ButtonBlock';
 export { CodePreviewBlock } from './CodePreviewBlock';
 export { FileReferencesList } from './FileReferencesList';
+export type { HITLQuestionWithEntity } from './HITLQuestionsBlock';
+export { HITLQuestionsBlock } from './HITLQuestionsBlock';
+export { InputsRespondedBlock } from './InputsRespondedBlock';
 export { MarkdownBlock } from './MarkdownBlock';
 export { OutputFilesBlock } from './OutputFilesBlock';
 export { PlainTextBlock } from './PlainTextBlock';

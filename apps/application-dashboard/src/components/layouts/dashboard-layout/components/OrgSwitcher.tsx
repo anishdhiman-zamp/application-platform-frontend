@@ -25,9 +25,12 @@ import OrgCard from '@/components/layouts/dashboard-layout/components/OrgCard';
 import SkeletonLoaderSidebarPages from '@/components/layouts/dashboard-layout/components/SkeletonLoaderSidebarPages';
 import SkeletonElement from '@/components/skeletons/SkeletonElement';
 import { ENVIRONMENT, ENVIRONMENT_TYPES, ORG_COLORS } from '@/constants/common.constants';
+import { FEATURE_FLAGS } from '@/constants/featureFlags';
 import { ROUTES_PATH } from '@/constants/routeConfig';
 import { KEYBOARD_KEYS } from '@/constants/shortcuts';
 import { useAppDispatch, useAppSelector } from '@/hooks/toolkit';
+import { useFeatureFlag } from '@/hooks/useFeatureFlag';
+import { dynamicTabsActions } from '@/store/slices/dynamic-tabs.slice';
 import { setIsOrgSwitchIsInProgress } from '@/store/slices/user';
 import type { Organization } from '@/types/api/auth.types';
 import {
@@ -68,6 +71,8 @@ const OrgSwitcher: FC<OrgSwitcherProps> = ({
   const [showCreateOrgModal, setShowCreateOrgModal] = useState(false);
   const [orgToProvision, setOrgToProvision] = useState<Organization | null>(null);
 
+  const { isEnabled: isNewOrgCreationEnabled } = useFeatureFlag(FEATURE_FLAGS.NEW_ORG_CREATION);
+
   const { data: baseUrlData } = useGetBaseUrlQuery(
     { email: user?.user_email ?? '' },
     { refetchOnMountOrArgChange: false, skip: !user?.user_email },
@@ -91,7 +96,7 @@ const OrgSwitcher: FC<OrgSwitcherProps> = ({
       disconnectSSE();
       dispatch(setIsOrgSwitchIsInProgress(true));
 
-      removeFromLocalStorage(LOCAL_STORAGE_KEYS.PACE_OPEN_DYNAMIC_TABS);
+      dispatch(dynamicTabsActions.clearAllTabs());
       removeFromLocalStorage(LOCAL_STORAGE_KEYS.PACE_FILE_TREE_EXPANDED_PATHS);
       setToLocalStorage(LOCAL_STORAGE_KEYS.XZAMP_ORGANIZATION_ID, org.organization_id);
       setCookie(ACTIVE_ORG_ID_COOKIE, org.organization_id);
@@ -363,20 +368,22 @@ const OrgSwitcher: FC<OrgSwitcherProps> = ({
                 : null}
             </CommonWrapper>
           </div>
-          <DropdownMenuItem
-            className={cn('p-0', !itemsInteractive && 'pointer-events-none')}
-            data-testid='org-switcher-new-organization'
-            onClick={() => {
-              setOrgToProvision(null);
-              setShowCreateOrgModal(true);
-              setIsOrgSwitcherMenuOpen(false);
-            }}
-          >
-            <div className='hover:bg-GRAY_100 text-GRAY_1000 flex w-full items-center gap-2 rounded-md p-2'>
-              <Plus className='text-GRAY_700 h-4 w-4 shrink-0' aria-hidden />
-              <span className='f-12-450'>New organization</span>
-            </div>
-          </DropdownMenuItem>
+          {isNewOrgCreationEnabled && (
+            <DropdownMenuItem
+              className={cn('p-0', !itemsInteractive && 'pointer-events-none')}
+              data-testid='org-switcher-new-organization'
+              onClick={() => {
+                setOrgToProvision(null);
+                setShowCreateOrgModal(true);
+                setIsOrgSwitcherMenuOpen(false);
+              }}
+            >
+              <div className='hover:bg-GRAY_100 text-GRAY_1000 flex w-full items-center gap-2 rounded-md p-2'>
+                <Plus className='text-GRAY_700 h-4 w-4 shrink-0' aria-hidden />
+                <span className='f-12-450'>New organization</span>
+              </div>
+            </DropdownMenuItem>
+          )}
           {!macs && <LogoutButton />}
         </DropdownMenuContent>
       </DropdownMenu>

@@ -4,26 +4,25 @@ import {
   AccordionItem,
   AccordionTrigger,
   AnimatedTerminalIcon,
+  Button,
   ImageWithFallback,
   ScrollContainer,
   ShimmerText,
 } from '@zamp-platform/ui';
 import { cn } from '@zamp-platform/ui/utils';
 import { safeJsonParse } from '@zamp-platform/utils';
-import { AlertCircle } from 'lucide-react';
-import React, { FC, useState } from 'react';
+import { AlertCircle, Play } from 'lucide-react';
+import React, { useCallback, useState } from 'react';
 
 import IntegrationCardV2 from '@/modules/integrations/AllIntegrations/IntegrationCardV2';
 import type { IntegrationItem } from '@/types/api/integrations';
 
+import { useChatActions } from '../../context/ChatActionsContext';
 import type { ToolResultContentBlock, ToolUseDisplayContent } from '../../types/block.types';
 import { buildIntegrationItemFromToolResult } from '../block.utils';
 import { TOOL_NAMES } from '../chat.constants';
 import { CodePreviewBlock } from './CodePreviewBlock';
 
-/**
- * Component to render a tool use content block with optional tool result using Accordion
- */
 interface ToolCallBlockProps {
   payload: {
     display_content?: ToolUseDisplayContent;
@@ -40,8 +39,13 @@ interface ToolCallBlockProps {
   onAccordionOpenChange?: (isOpen: boolean) => void;
   showConnectorFromPrevious?: boolean;
   showConnectorToNext?: boolean;
+  conversationId?: string;
+  showWatchButton?: boolean;
+  embedded?: boolean;
+  /** Flat transparent shell (e.g. nested in a muted panel); keeps icons/connectors unlike `embedded`. */
+  quietSurface?: boolean;
 }
-export const ToolCallBlock: FC<ToolCallBlockProps> = ({
+export const ToolCallBlock = ({
   payload,
   is_complete = true,
   toolResult,
@@ -49,7 +53,11 @@ export const ToolCallBlock: FC<ToolCallBlockProps> = ({
   onAccordionOpenChange,
   showConnectorFromPrevious = false,
   showConnectorToNext = false,
-}) => {
+  embedded = false,
+  quietSurface = false,
+  showWatchButton = false,
+}: ToolCallBlockProps) => {
+  const flatShell = embedded || quietSurface;
   const [internalAccordionOpen, setInternalAccordionOpen] = useState<boolean>(false);
   const isControlled = typeof isAccordionOpen === 'boolean';
   const resolvedIsAccordionOpen = isControlled ? isAccordionOpen : internalAccordionOpen;
@@ -57,6 +65,7 @@ export const ToolCallBlock: FC<ToolCallBlockProps> = ({
   const displayContent = safeJsonParse<{ tool_name?: string; icon?: string }>(payload?.display_content?.json_block);
   const name = payload?.name || displayContent?.tool_name;
   const icon = payload?.icon || displayContent?.icon;
+  const { onWatchStream, isBrowserStreamingAvailable } = useChatActions();
 
   const toolResultData = safeJsonParse<{
     title?: string;
@@ -77,6 +86,18 @@ export const ToolCallBlock: FC<ToolCallBlockProps> = ({
     }
   };
 
+  const handleWatchToggle = useCallback(
+    (e: React.MouseEvent) => {
+      e.stopPropagation();
+      onWatchStream?.({
+        toolName,
+        toolResult,
+        isComplete: is_complete,
+      });
+    },
+    [onWatchStream, toolName, toolResult, is_complete],
+  );
+
   if (name === TOOL_NAMES.AUTHENTICATE_INTEGRATION_AND_CREATE_CONNECTION && toolResultData?.title) {
     const integrationItem = buildIntegrationItemFromToolResult(toolResultData) as IntegrationItem;
     return (
@@ -96,22 +117,32 @@ export const ToolCallBlock: FC<ToolCallBlockProps> = ({
       collapsible
       value={resolvedIsAccordionOpen ? 'tool-use' : ''}
       onValueChange={handleValueChange}
-      className='bg-BG_WHITE w-full overflow-hidden'
+      className={cn(
+        'w-full overflow-hidden',
+        flatShell ? 'rounded-none border-none bg-transparent shadow-none' : 'bg-BG_WHITE',
+      )}
     >
       <AccordionItem value='tool-use' className='relative border-none'>
         {showConnectorFromPrevious && (
           <div className='bg-border pointer-events-none absolute top-0 left-[6.5px] z-0 h-2 w-px' />
         )}
-        <AccordionTrigger className='font-420 text-GRAY_1000 w-full cursor-pointer gap-x-2 py-2 text-[13px] [&[data-state=closed]>svg]:rotate-90 [&[data-state=open]>svg]:-rotate-90'>
+        <AccordionTrigger
+          className={cn(
+            'font-420 text-GRAY_1000 w-full cursor-pointer gap-x-2 text-[13px] [&[data-state=closed]>svg]:rotate-90 [&[data-state=open]>svg]:-rotate-90',
+            embedded ? 'py-1.5' : 'py-2',
+          )}
+        >
           <div className='flex flex-1 items-center gap-3'>
             <div className='flex items-center gap-x-2'>
-              <div className='flex h-3.5 w-3.5 items-center justify-center'>
-                {icon?.length ? (
-                  <ImageWithFallback src={icon} alt={toolName} className='h-3 w-3' />
-                ) : (
-                  <AnimatedTerminalIcon showAnimation={!is_complete} size={14} />
-                )}
-              </div>
+              {!embedded && (
+                <div className='flex h-3.5 w-3.5 items-center justify-center'>
+                  {icon?.length ? (
+                    <ImageWithFallback src={icon} alt={toolName} className='h-3 w-3' />
+                  ) : (
+                    <AnimatedTerminalIcon showAnimation={!is_complete} size={14} />
+                  )}
+                </div>
+              )}
 
               {!is_complete ? (
                 <ShimmerText text={toolName} autoAnimate={true} />
@@ -123,7 +154,20 @@ export const ToolCallBlock: FC<ToolCallBlockProps> = ({
                 </span>
               )}
             </div>
-            {toolResult && toolResult.payload?.is_error && (
+
+            {showWatchButton && onWatchStream && isBrowserStreamingAvailable && (
+              <Button
+                variant='ghost'
+                size='xsmall'
+                onClick={handleWatchToggle}
+                className='ml-auto gap-1 rounded-full'
+                leadingIcon={<Play size={10} className='fill-current' />}
+              >
+                Watch
+              </Button>
+            )}
+
+            {toolResult && toolResult.payload?.is_error && !showWatchButton && (
               <div className='ml-auto flex items-center gap-1.5'>
                 <AlertCircle className='text-destructive h-3.5 w-3.5' />
               </div>
@@ -136,7 +180,11 @@ export const ToolCallBlock: FC<ToolCallBlockProps> = ({
           />
         )}
         <AccordionContent className='pt-0 pb-2'>
-          <ScrollContainer className='max-h-60' scrollClassName='space-y-4 pr-2 pl-5'>
+          <ScrollContainer
+            className='max-h-60'
+            scrollbarStyle='none'
+            scrollClassName={cn('space-y-4 pr-2', embedded ? 'pl-3' : 'pl-5')}
+          >
             <CodePreviewBlock label='Input' content={inputContent} />
             {toolResult && (
               <CodePreviewBlock

@@ -19,7 +19,6 @@ interface ChatTopbarProps {
   onTitleChange?: (newTitle: string) => void;
   onDeleteConversation?: () => void;
   onSelectConversation?: (id: string | null, title?: string) => void;
-  showHistory?: boolean;
 }
 
 const ChatTopbar: FC<ChatTopbarProps> = ({
@@ -33,7 +32,6 @@ const ChatTopbar: FC<ChatTopbarProps> = ({
   onTitleChange,
   onDeleteConversation,
   onSelectConversation,
-  showHistory = true,
 }) => {
   const displayTitle = title || DEFAULT_CHAT_TITLE;
   const canEdit = Boolean(conversationId && organizationId);
@@ -55,28 +53,36 @@ const ChatTopbar: FC<ChatTopbarProps> = ({
     [onSelectConversation],
   );
 
+  const handleRenameFromHistory = useCallback(
+    (id: string, newTitle: string) => {
+      if (id === conversationId) {
+        onTitleChange?.(newTitle);
+      }
+    },
+    [conversationId, onTitleChange],
+  );
+
   return (
     <div className={cn('bg-BG_WHITE flex items-center justify-between gap-x-3 p-3', className)} style={style}>
-      {showHistory && (
-        <div className='min-w-0 flex-1'>
-          <Popover open={isHistoryOpen} onOpenChange={setIsHistoryOpen}>
-            <PopoverTrigger className='hover:bg-GRAY_100 flex h-7 max-w-full cursor-pointer items-center gap-x-1 rounded-md pr-1 pl-1.5 transition-colors'>
-              <span className='f-14-550 block min-w-0 truncate first-letter:uppercase'>{displayTitle}</span>
-              <ChevronDown
-                size={14}
-                className={cn('text-GRAY_1000 shrink-0 transition-transform', isHistoryOpen && 'rotate-180')}
-              />
-            </PopoverTrigger>
-            <PopoverContent align='start' sideOffset={8} className='flex h-100 w-80 flex-col overflow-hidden p-0'>
-              <ChatHistory
-                onSelectConversation={handleSelectConversation}
-                activeConversationId={conversationId}
-                compact
-              />
-            </PopoverContent>
-          </Popover>
-        </div>
-      )}
+      <div className='flex min-w-0 flex-1 items-center gap-x-1'>
+        <Popover open={isHistoryOpen} onOpenChange={setIsHistoryOpen}>
+          <PopoverTrigger className='hover:bg-GRAY_100 flex h-7 max-w-full cursor-pointer items-center gap-x-1 rounded-md pr-1 pl-1.5 transition-colors'>
+            <span className='f-14-550 block min-w-0 truncate first-letter:uppercase'>{displayTitle}</span>
+            <ChevronDown
+              size={14}
+              className={cn('text-GRAY_1000 shrink-0 transition-transform', isHistoryOpen && 'rotate-180')}
+            />
+          </PopoverTrigger>
+          <PopoverContent align='start' sideOffset={8} className='flex h-100 w-80 flex-col overflow-hidden p-0'>
+            <ChatHistory
+              onSelectConversation={handleSelectConversation}
+              onRenameConversation={handleRenameFromHistory}
+              activeConversationId={conversationId}
+              compact
+            />
+          </PopoverContent>
+        </Popover>
+      </div>
       <div className='flex items-center gap-1.5'>
         {onStartNewChat && (
           <Button

@@ -7,6 +7,9 @@ import type {
   ViewModeOption,
 } from '@/modules/pace/components/file-viewer/file-viewer.types';
 
+export const LEGACY_PPT_EXTENSION = 'ppt';
+export const LEGACY_DOC_EXTENSION = 'doc';
+export const MILKDOWN_SIZE_LIMIT = 75_000;
 const ICON_SIZE = 14;
 
 export const MARKDOWN_VIEW_OPTIONS: [ViewModeOption<MarkdownViewMode>, ViewModeOption<MarkdownViewMode>] = [

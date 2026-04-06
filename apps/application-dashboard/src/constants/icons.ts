@@ -143,6 +143,21 @@ export const WILMINGTON_TRUST = IMAGE_PREFIX + '/icons/bank-icons/wilmington_tru
 export const ZID = IMAGE_PREFIX + '/icons/bank-icons/zid.svg';
 
 export const HAND_ICON = IMAGE_PREFIX + '/icons/hand.svg';
+
+// Agent Avatars
+export const AGENT_AVATAR = IMAGE_PREFIX + '/icons/agents/agent-avatar.svg';
+export const AGENT_AVATAR_PREFIX = IMAGE_PREFIX + '/images/agents';
+export const AGENT_AVATAR_1 = AGENT_AVATAR_PREFIX + '/agent_icon_1.png';
+export const AGENT_AVATAR_2 = AGENT_AVATAR_PREFIX + '/agent_icon_2.png';
+export const AGENT_AVATAR_3 = AGENT_AVATAR_PREFIX + '/agent_icon_3.png';
+export const AGENT_AVATAR_4 = AGENT_AVATAR_PREFIX + '/agent_icon_4.png';
+export const AGENT_AVATAR_5 = AGENT_AVATAR_PREFIX + '/agent_icon_5.png';
+export const AGENT_AVATAR_6 = AGENT_AVATAR_PREFIX + '/agent_icon_6.png';
+export const AGENT_AVATAR_7 = AGENT_AVATAR_PREFIX + '/agent_icon_7.png';
+export const AGENT_AVATAR_8 = AGENT_AVATAR_PREFIX + '/agent_icon_8.png';
+export const AGENT_AVATAR_9 = AGENT_AVATAR_PREFIX + '/agent_icon_9.png';
+export const AGENT_AVATAR_10 = AGENT_AVATAR_PREFIX + '/agent_icon_10.png';
+export const AGENT_AVATAR_11 = AGENT_AVATAR_PREFIX + '/agent_icon_11.png';
 export const ADAM_ICON = IMAGE_PREFIX + '/icons/agents/adam-icon.svg';
 export const ACCORDION_LIST = IMAGE_PREFIX + '/icons/agents/accordion-list.svg';
 export const ACCORDION_CONTENT_BG = IMAGE_PREFIX + '/icons/agents/accordion-content-bg.svg';

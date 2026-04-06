@@ -4,9 +4,11 @@ import React, { createContext, ReactNode, useContext, useEffect } from 'react';
 import { captureException } from '@sentry/nextjs';
 import { API_DOMAIN } from '@zamp-platform/api';
 import {
+  type AgentContentBlock,
   type Block,
   BLOCK_TYPE,
   ChatMessageType,
+  type InstructionsUpdatedContentBlock,
   type OutputFilesBlockType,
   ResourceType,
   SenderType,
@@ -17,6 +19,7 @@ import {
   type StreamingState,
   streamingStateStore,
   type TaskContentBlock,
+  type TriggerContentBlock,
 } from '@zamp-platform/chat';
 import { EventBus, SSEConnectionState, useSSE } from '@zamp-platform/utils';
 import {
@@ -25,6 +28,9 @@ import {
   type EventBusInterface,
 } from '@zamp-platform/utils/event-bus/event-bus.types';
 import { API_ENDPOINTS } from '@/apis/apiEndpoint.constants';
+import { APITags } from '@/constants/api.constants';
+import { baseApi } from '@/services/baseApi';
+import { store } from '@/store';
 import type { MapAny } from '@/types/commonTypes';
 
 interface SSEContextType {
@@ -110,13 +116,56 @@ function handleGlobalStreamEvent(data: BaseEventPayload): void {
               id: content_block?.id,
               payload: {
                 id: content_block?.id || '',
-                title: (content_block as MapAny)?.title || '',
-                task_id: (content_block as MapAny)?.task_id || content_block?.id || '',
-                status: (content_block as MapAny)?.status,
+                title: content_block?.title || '',
+                task_id: content_block?.task_id || content_block?.id || '',
+                status: content_block?.status,
               },
               start_timestamp: content_block?.start_timestamp,
               is_complete: false,
             } as TaskContentBlock;
+            break;
+          case BLOCK_TYPE.AGENT:
+            newBlock = {
+              type: BLOCK_TYPE.AGENT,
+              order: index,
+              id: content_block?.id,
+              payload: {
+                agent_id: content_block?.agent_id || '',
+                name: content_block?.name || '',
+                description: content_block?.description || '',
+                colour: content_block?.colour || '',
+                avatar: content_block?.avatar || undefined,
+              },
+              start_timestamp: content_block?.start_timestamp,
+              is_complete: false,
+            } as AgentContentBlock;
+            break;
+          case BLOCK_TYPE.TRIGGER:
+            newBlock = {
+              type: BLOCK_TYPE.TRIGGER,
+              order: index,
+              id: content_block?.id,
+              payload: {
+                trigger_id: content_block?.trigger_id || '',
+                title: content_block?.title || '',
+                status: content_block?.status || '',
+                agent_id: content_block?.agent_id || '',
+              },
+              start_timestamp: content_block?.start_timestamp,
+              is_complete: false,
+            } as TriggerContentBlock;
+            break;
+          case BLOCK_TYPE.INSTRUCTIONS_UPDATED:
+            newBlock = {
+              type: BLOCK_TYPE.INSTRUCTIONS_UPDATED,
+              order: index,
+              id: content_block?.id,
+              payload: {
+                agent_id: content_block?.agent_id || '',
+              },
+              start_timestamp: content_block?.start_timestamp,
+              is_complete: false,
+            } as InstructionsUpdatedContentBlock;
             break;
           default:
             newBlock = {
@@ -134,20 +183,12 @@ function handleGlobalStreamEvent(data: BaseEventPayload): void {
             };
         }
 
+        // Safe guard: SSE protocol guarantees MESSAGE_START (which calls streamingStateStore.set())
+        // always precedes CONTENT_BLOCK_START/DELTA/STOP. A null prev indicates an out-of-order
+        // event that should be ignored.
         streamingStateStore.update(conversationId, (prev) => {
-          if (!prev) {
-            return {
-              resource_type: ResourceType.ORGANIZATION,
-              resource_id: '',
-              conversation_id: conversationId,
-              message_content: { elements: [newBlock] },
-              message_type: ChatMessageType.SYSTEM,
-              sender_type: SenderType.ASSISTANT,
-              timestamp: new Date().toISOString(),
-              metadata: {},
-              is_active: true,
-            };
-          }
+          if (!prev) return prev;
+
           const existingBlocks = prev.message_content?.elements ?? [];
 
           return {
@@ -248,6 +289,21 @@ function handleGlobalStreamEvent(data: BaseEventPayload): void {
 
       case StreamingContentBlockType.CONTENT_BLOCK_STOP: {
         const { index, stop_timestamp } = payload;
+
+        const prevState = streamingStateStore.get(conversationId);
+        const stoppedBlock = prevState?.message_content?.elements?.find((b) => b.order === index);
+
+        if (stoppedBlock?.type === BLOCK_TYPE.INSTRUCTIONS_UPDATED) {
+          const agentId = (stoppedBlock as InstructionsUpdatedContentBlock).payload.agent_id;
+
+          if (agentId) {
+            store.dispatch(baseApi.util.invalidateTags([{ type: APITags.GET_AGENT_INSTRUCTIONS, id: agentId }]));
+          }
+        }
+
+        if (stoppedBlock?.type === BLOCK_TYPE.TRIGGER) {
+          store.dispatch(baseApi.util.invalidateTags([APITags.GET_AGENT_TRIGGERS]));
+        }
 
         streamingStateStore.update(conversationId, (prev) => {
           if (!prev) return prev;
@@ -354,6 +410,12 @@ const taskPayloadResolver: PayloadResolver = {
   },
 };
 
+function invalidateTaskCaches(): void {
+  store.dispatch(
+    baseApi.util.invalidateTags([APITags.GET_TASK_COUNTS, APITags.GET_TASK_LIST, APITags.GET_AGENT_TASKS]),
+  );
+}
+
 /** Generic handler for MESSAGE_START / OUTPUT_FILES / MESSAGE_STOP events. */
 function handleGlobalMessageEvent(resolver: PayloadResolver, data: BaseEventPayload): void {
   try {
@@ -446,6 +508,8 @@ function handleGlobalTaskUpdate(data: BaseEventPayload): void {
 
     if (!taskId || !status) return;
 
+    invalidateTaskCaches();
+
     streamingStateStore.update(sourceId, (prev) => {
       if (!prev) return prev;
 
@@ -505,16 +569,30 @@ export const SSEProvider: React.FC<SSEProviderProps> = ({ children, sseEventBus 
     const convSub = sseEventBus.subscribe(EVENT_TYPE.CONVERSATION_V2, (data) =>
       handleGlobalMessageEvent(conversationPayloadResolver, data),
     );
-    const taskSub = sseEventBus.subscribe(EVENT_TYPE.TASK, (data) =>
-      handleGlobalMessageEvent(taskPayloadResolver, data),
-    );
+    const taskSub = sseEventBus.subscribe(EVENT_TYPE.TASK, (data) => {
+      handleGlobalMessageEvent(taskPayloadResolver, data);
+
+      const payload = data.payload as MapAny;
+
+      if (payload?.type === SSEEventType.MESSAGE_STOP) {
+        invalidateTaskCaches();
+      }
+    });
     const taskUpdateSub = sseEventBus.subscribe(EVENT_TYPE.TASK_UPDATE, handleGlobalTaskUpdate);
+    const convCreatedSub = sseEventBus.subscribe(EVENT_TYPE.CONVERSATION_CREATED, () => {
+      store.dispatch(baseApi.util.invalidateTags([APITags.GET_CONVERSATION_HISTORY]));
+    });
+    const titleUpdatedSub = sseEventBus.subscribe(EVENT_TYPE.CONVERSATION_TITLE_UPDATED, () => {
+      store.dispatch(baseApi.util.invalidateTags([APITags.GET_CONVERSATION_HISTORY]));
+    });
 
     return () => {
       streamSub.unsubscribe();
       convSub.unsubscribe();
       taskSub.unsubscribe();
       taskUpdateSub.unsubscribe();
+      convCreatedSub.unsubscribe();
+      titleUpdatedSub.unsubscribe();
     };
   }, [sseEventBus]);
 

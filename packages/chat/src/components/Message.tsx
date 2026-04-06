@@ -4,11 +4,11 @@ import { useScrollRef } from '@zamp-platform/ui';
 import { cn } from '@zamp-platform/ui/utils';
 import { formatChatTimestamp, formatChatTimestampTooltip, formatTimestampToUTC } from '@zamp-platform/utils';
 import { motion } from 'motion/react';
-import React, { FC, ReactNode, useCallback, useEffect, useMemo, useRef, useState } from 'react';
+import { FC, ReactNode, useCallback, useEffect, useMemo, useRef, useState } from 'react';
 
 import { defaultFnType } from '@/types/commonTypes';
 
-import { ButtonBlockType } from '../types/block.types';
+import { BLOCK_TYPE, ButtonBlockType } from '../types/block.types';
 import { ChatMessage, SenderType } from '../types/chat.types';
 import { BlockRenderer } from './BlockRenderer';
 import ChatFeedback from './ChatFeedback';
@@ -33,6 +33,10 @@ export interface MessageProps {
   organizationId?: string;
   streamingEnabled?: boolean;
   assistantAvatar?: ReactNode;
+  showMarkdownConnectors?: boolean;
+  showConnectorToLastBlock?: boolean;
+  showConnectorToNextBlock?: boolean;
+  embeddedInStepSummary?: boolean;
 }
 
 export const USER_MESSAGE_MAX_HEIGHT = 240;
@@ -55,6 +59,10 @@ export const Message: FC<MessageProps> = ({
   alignUserRight = false,
   organizationId,
   streamingEnabled = true,
+  showMarkdownConnectors = false,
+  showConnectorToLastBlock = false,
+  showConnectorToNextBlock = false,
+  embeddedInStepSummary = false,
 }) => {
   const cleanupRef = useRef<defaultFnType | null>(null);
   const contentRef = useRef<HTMLDivElement>(null);
@@ -67,6 +75,24 @@ export const Message: FC<MessageProps> = ({
   const isUserMessage = message.sender_type === SenderType.USER;
   const shouldAlignRight = alignUserRight && isUserMessage;
   const sharedClassName = cn('group space-y-3', shouldAlignRight && 'flex flex-col items-end', containerClassName);
+
+  const primaryBlockType = message?.message_content?.elements?.[0]?.type;
+  const isUserMarkdownBubble = isUserMessage && primaryBlockType === BLOCK_TYPE.MARKDOWN;
+  const isUserInputsRespondedBubble = isUserMessage && primaryBlockType === BLOCK_TYPE.INPUTS_RESPONDED;
+
+  const userBubbleLayoutClassName = useMemo(() => {
+    if (!isUserMessage) return '';
+
+    if (isUserMarkdownBubble) {
+      return cn('relative min-w-0 w-auto', shouldAlignRight ? 'max-w-[80%]' : 'max-w-[min(100%,700px)]');
+    }
+
+    if (isUserInputsRespondedBubble) {
+      return cn('relative min-w-0 w-full', shouldAlignRight ? 'max-w-[80%]' : 'max-w-[min(100%,700px)]');
+    }
+
+    return cn('relative min-w-0 w-full', shouldAlignRight ? 'max-w-[80%]' : 'max-w-[min(100%,700px)]');
+  }, [isUserMessage, isUserMarkdownBubble, isUserInputsRespondedBubble, shouldAlignRight]);
 
   const toggleExpanded = () => setIsExpanded((prev) => !prev);
   const formattedTimestamp = useMemo(
@@ -143,20 +169,40 @@ export const Message: FC<MessageProps> = ({
       {message.sender_type === SenderType.ASSISTANT && assistantAvatar}
 
       <div
-        className={cn('relative max-w-[620px]', shouldAlignRight && 'bg-GRAY_100 max-w-[80%] rounded-[10px] px-4 py-3')}
+        className={cn(
+          message.sender_type === SenderType.ASSISTANT &&
+            (embeddedInStepSummary
+              ? 'relative w-full max-w-none min-w-0'
+              : 'relative w-full max-w-[min(100%,700px)] min-w-0'),
+          isUserMessage && userBubbleLayoutClassName,
+          shouldAlignRight && primaryBlockType === BLOCK_TYPE.MARKDOWN && 'bg-GRAY_100',
+          shouldAlignRight && isUserMessage && 'rounded-[10px] px-4 py-3',
+        )}
       >
         <div
           ref={contentRef}
-          className={cn(isUserMessage && !isExpanded && 'overflow-hidden')}
+          className={cn(
+            isUserMessage && !isExpanded && 'overflow-hidden',
+            isUserMarkdownBubble && 'flex w-fit max-w-full min-w-0 flex-col',
+            isUserInputsRespondedBubble && 'w-full min-w-0',
+          )}
           style={isUserMessage && !isExpanded ? { maxHeight: USER_MESSAGE_MAX_HEIGHT } : undefined}
         >
           <BlockRenderer
             message={{ block: message?.message_content?.elements ?? [] }}
             onAction={onAction}
-            className={cn(blockRendererClassName)}
+            className={cn(
+              blockRendererClassName,
+              isUserMarkdownBubble && 'w-auto',
+              isUserInputsRespondedBubble && 'w-full',
+            )}
             conversationId={conversationId || message?.conversation_id}
             messageId={messageId || message?.id}
             isLoading={isLoading}
+            showMarkdownConnectors={showMarkdownConnectors}
+            showConnectorToLastBlock={showConnectorToLastBlock}
+            showConnectorToNextBlock={showConnectorToNextBlock}
+            embeddedInStepSummary={embeddedInStepSummary}
           />
         </div>
         {isUserMessage && isOverflowing && !isExpanded && (
@@ -174,8 +220,10 @@ export const Message: FC<MessageProps> = ({
       {streamingEnabled && (
         <div
           className={cn(
-            'flex items-center',
-            isLastMessage ? 'visible' : 'invisible group-hover:visible',
+            'flex items-center transition-opacity duration-200',
+            isLastMessage && message.sender_type === SenderType.ASSISTANT
+              ? 'opacity-100'
+              : 'opacity-0 group-hover:opacity-100',
             shouldAlignRight && 'mt-0',
           )}
         >

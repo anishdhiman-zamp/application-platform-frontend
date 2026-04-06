@@ -5,7 +5,7 @@ import type { ButtonVariant } from '@zamp-platform/ui';
 import ConnectIntegrationAction from 'modules/integrations/AllIntegrations/ConnectIntegrationAction';
 import ConnectionsPopover from 'modules/integrations/AllIntegrations/ConnectionsPopover';
 import IntegrationCardContentV2 from 'modules/integrations/AllIntegrations/IntegrationCardContentV2';
-import { usePathname, useRouter } from 'next/navigation';
+import { usePathname, useRouter, useSearchParams } from 'next/navigation';
 import type { IntegrationItem } from '@/types/api/integrations';
 import { cn } from '@/utils/common';
 
@@ -29,9 +29,13 @@ const IntegrationCardV2: FC<IntegrationCardProps> = ({
   const { name, title, description, icon, connections } = integrationItem;
   const router = useRouter();
   const pathname = usePathname();
+  const searchParams = useSearchParams();
 
   const handleCardClick = () => {
-    router.push(`${pathname}/${name}`);
+    const query = searchParams?.toString();
+    const url = query ? `${pathname}/${name}?${query}` : `${pathname}/${name}`;
+
+    router.push(url);
   };
 
   return (

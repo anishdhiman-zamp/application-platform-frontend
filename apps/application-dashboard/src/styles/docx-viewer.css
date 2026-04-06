@@ -1,0 +1,17 @@
+.docx-viewer-container .docx-preview-wrapper {
+  background: var(--BG_GRAY_2, #fafafa) !important;
+  padding: 16px 0;
+}
+
+.docx-viewer-container .docx-preview-wrapper > section.docx-preview {
+  margin: 0 auto 16px;
+  background: white;
+  box-shadow:
+    0 2px 8px rgba(0, 0, 0, 0.08),
+    0 1px 3px rgba(0, 0, 0, 0.12);
+  border-radius: 2px;
+}
+
+.docx-viewer-container .docx-preview-wrapper > section.docx-preview:last-child {
+  margin-bottom: 0;
+}

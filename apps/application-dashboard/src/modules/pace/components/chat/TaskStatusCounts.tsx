@@ -1,6 +1,6 @@
 'use client';
 
-import { type FC, type RefObject, useEffect, useMemo, useState } from 'react';
+import { type FC, type RefObject, useEffect, useMemo, useRef, useState } from 'react';
 import {
   type ChatMessage,
   type StreamingState,
@@ -46,6 +46,7 @@ const TaskStatusCounts: FC<TaskStatusCountsProps> = ({
   const [isOpen, setIsOpen] = useState(false);
   const [searchQuery, setSearchQuery] = useState('');
   const [containerWidth, setContainerWidth] = useState(0);
+  const triggerRef = useRef<HTMLDivElement>(null);
 
   const visiblePillStatuses = useMemo(() => PILL_STATUS_ORDER.filter((s) => counts[s] > 0), [counts]);
 
@@ -87,7 +88,10 @@ const TaskStatusCounts: FC<TaskStatusCountsProps> = ({
         }}
       >
         <PopoverTrigger asChild>
-          <div className='border-GRAY_400 bg-BG_GRAY_2 hover:bg-GRAY_200 mb-2 flex w-fit cursor-pointer items-center gap-3 rounded-[8px] border p-2 transition-colors'>
+          <div
+            ref={triggerRef}
+            className='border-GRAY_400 bg-BG_GRAY_2 hover:bg-GRAY_200 flex w-fit cursor-pointer items-center gap-3 rounded-[8px] border p-2 transition-colors'
+          >
             {visiblePillStatuses.map((status) => (
               <div key={status} className='flex items-center gap-1.5'>
                 <TaskStatusIcon status={status} />
@@ -101,6 +105,14 @@ const TaskStatusCounts: FC<TaskStatusCountsProps> = ({
           side='top'
           align='start'
           sideOffset={8}
+          alignOffset={(() => {
+            const trigger = triggerRef.current;
+            const container = containerRef.current;
+
+            if (!trigger || !container) return 0;
+
+            return container.getBoundingClientRect().left - trigger.getBoundingClientRect().left + 12;
+          })()}
           avoidCollisions={false}
           className='flex max-h-[calc(100vh-250px)] min-h-[400px] flex-col !rounded-[20px] p-0'
           style={

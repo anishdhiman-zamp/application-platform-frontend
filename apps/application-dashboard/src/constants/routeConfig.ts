@@ -1,3 +1,5 @@
+import type { SiblingTask, TaskBreadcrumb } from '@zamp-platform/chat';
+
 export const ROUTES_PATH = {
   HOME: '/',
   LOGIN: '/login',
@@ -50,6 +52,8 @@ export const ROUTES_PATH = {
   CHAT_SETTINGS_DATASET_DETAIL: '/chat/settings/datasets/:tableName',
   CHAT_SETTINGS_ORG_SETTINGS: '/chat/settings/organisation-settings',
   CHAT_TASK: '/chat/task/:taskId',
+  CHAT_AGENTS: '/chat/agents',
+  CHAT_AGENT: '/chat/agents/:agentId',
 };
 
 export const getPageRouteById = (pageId: string, sheetId?: string) => {
@@ -125,20 +129,40 @@ export const getChatFileRoute = (filePath: string) => {
   return `${ROUTES_PATH.CHAT}?f=${encodeURIComponent(filePath)}`;
 };
 
+export const TASK_QUERY_PARAMS = {
+  PARENT_TASKS: 'parentTasks',
+  SIBLINGS: 'siblings',
+} as const;
+
 export const getChatTaskRoute = ({
   taskId,
   conversationId,
   taskTitle,
+  status,
+  currentIndex,
+  totalRows,
+  parentTasks,
+  siblings,
 }: {
   taskId: string;
   conversationId?: string;
   taskTitle?: string;
+  status?: string;
+  currentIndex?: number;
+  totalRows?: number;
+  parentTasks?: TaskBreadcrumb[];
+  siblings?: SiblingTask[];
 }) => {
   const basePath = ROUTES_PATH.CHAT_TASK.replace(':taskId', taskId);
   const params = new URLSearchParams();
 
   if (conversationId) params.set('s', conversationId);
   if (taskTitle) params.set('title', taskTitle);
+  if (status) params.set('status', status);
+  if (currentIndex !== undefined) params.set('currentIndex', String(currentIndex + 1));
+  if (totalRows !== undefined) params.set('totalRows', String(totalRows));
+  if (parentTasks && parentTasks.length > 0) params.set(TASK_QUERY_PARAMS.PARENT_TASKS, JSON.stringify(parentTasks));
+  if (siblings && siblings.length > 0) params.set(TASK_QUERY_PARAMS.SIBLINGS, JSON.stringify(siblings));
 
   const query = params.toString();
 

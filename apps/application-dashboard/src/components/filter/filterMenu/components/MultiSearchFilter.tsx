@@ -1,4 +1,5 @@
 import { ChangeEvent, FC, KeyboardEvent, useCallback, useEffect, useRef, useState } from 'react';
+import { cn } from '@zamp-platform/ui/utils';
 import Input from '@/components/common/input';
 import { FILTER_TYPES } from '@/components/filter/filter.types';
 import DescriptionOperatorsDropdown from '@/components/filter/filterMenu/components/DescriptionOperatorsDropdown';
@@ -7,7 +8,7 @@ import { CONDITION_OPERATOR_TYPE, OPERATOR } from '@/components/filter/filters.c
 import { KEYBOARD_KEYS } from '@/constants/shortcuts';
 import { SIZE_TYPES } from '@/types/common/components';
 import { MapAny } from '@/types/commonTypes';
-import { camelCaseToNormalText, cn, debounce } from '@/utils/common';
+import { camelCaseToNormalText, debounce } from '@/utils/common';
 
 export interface MultiSearchFilterProps {
   filterKey: string;
@@ -135,7 +136,7 @@ const MultiSearchFilter: FC<MultiSearchFilterProps> = ({
     const currentValue = (event?.target as HTMLInputElement)?.value.trim();
 
     if (
-      ![KEYBOARD_KEYS.COMMA, KEYBOARD_KEYS.ENTER].includes(event?.code as KEYBOARD_KEYS) ||
+      (event.code !== KEYBOARD_KEYS.COMMA && event.code !== KEYBOARD_KEYS.ENTER) ||
       !isContainsOperator ||
       (!currentValue && searchTags?.length)
     ) {

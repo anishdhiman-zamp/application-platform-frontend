@@ -17,6 +17,7 @@ import {
 import {
   AUDIO_EXTENSIONS,
   DATE_FORMAT,
+  DOCUMENT_EXTENSIONS,
   FILE_CATEGORY,
   FILE_TYPE_LABELS,
   type FileCategory,
@@ -25,6 +26,7 @@ import {
   MARKDOWN_EXTENSIONS,
   MONACO_EDITABLE_EXTENSIONS,
   PDF_EXTENSIONS,
+  PRESENTATION_EXTENSIONS,
   SPREADSHEET_EXTENSIONS,
   VIDEO_EXTENSIONS,
 } from '@/modules/pace/components/files/files.constants';
@@ -131,7 +133,7 @@ export function formatDate(timestamp: number): string {
 }
 
 /**
- * Formats timestamp to compact relative time string (e.g., "just now", "5m", "2h")
+ * Formats timestamp to compact relative time string (e.g., "0m", "5m", "2h")
  * When showAgo is true, appends " ago" suffix (e.g., "5m ago", "2h ago")
  */
 export function formatRelativeTime(timestamp: number, showAgo = false): string {
@@ -139,7 +141,7 @@ export function formatRelativeTime(timestamp: number, showAgo = false): string {
   const minutes = Math.floor(diffMs / 60_000);
   const suffix = showAgo ? ' ago' : '';
 
-  if (minutes < 1) return 'just now';
+  if (minutes < 1) return showAgo ? 'just now' : '0m';
   if (minutes < 60) return `${minutes}m${suffix}`;
 
   const hours = Math.floor(minutes / 60);
@@ -204,6 +206,14 @@ export function getFileCategory(filename: string): FileCategory {
 
   if ((SPREADSHEET_EXTENSIONS as readonly string[]).includes(ext)) {
     return FILE_CATEGORY.SPREADSHEET;
+  }
+
+  if ((PRESENTATION_EXTENSIONS as readonly string[]).includes(ext)) {
+    return FILE_CATEGORY.PRESENTATION;
+  }
+
+  if ((DOCUMENT_EXTENSIONS as readonly string[]).includes(ext)) {
+    return FILE_CATEGORY.DOCUMENT;
   }
 
   if ((MONACO_EDITABLE_EXTENSIONS as readonly string[]).includes(ext)) {

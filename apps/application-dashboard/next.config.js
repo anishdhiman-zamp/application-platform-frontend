@@ -7,11 +7,16 @@ const isDev = process.env.NODE_ENV === 'development';
 /** @type {import('next').NextConfig} */
 const nextConfig = {
   reactStrictMode: true,
-  allowedDevOrigins: ['*.coder.dev-mum.internal.zamp.dev', '*.coder.app'],
   reactCompiler: true,
   output: 'standalone',
   assetPrefix: process.env.NEXT_PUBLIC_ASSET_PREFIX || '',
-  allowedDevOrigins: ['*.internal.zamp.dev', '*.coder.dev-mum.internal.zamp.dev', '*.coder.app'],
+  allowedDevOrigins: [
+    '*.internal.zamp.dev',
+    '*.coder.dev-mum.internal.zamp.dev',
+    '*.coder-live.dev',
+    '*.coder-live.zamp.dev',
+    '*.coder.app',
+  ],
   // Skip type checking ONLY in CI (they run separately there)
   // Enable them for local development for immediate feedback
   typescript: {
@@ -27,6 +32,11 @@ const nextConfig = {
         __VUE_PROD_HYDRATION_MISMATCH_DETAILS__: JSON.stringify(false),
       }),
     );
+    config.module.rules.push({
+      test: /[\\/]node_modules[\\/]@aiden0z[\\/]pptx-renderer[\\/]/,
+      parser: { url: false },
+    });
+
     return config;
   },
   experimental: {

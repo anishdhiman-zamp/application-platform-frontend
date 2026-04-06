@@ -1,5 +1,6 @@
 import { type FC, useState } from 'react';
 import { ArrowRight } from 'lucide-react';
+import { getNameInitial } from '@/utils/common';
 
 interface IntegrationCardContentProps {
   logo: string;
@@ -23,7 +24,7 @@ const IntegrationCardContentV2: FC<IntegrationCardContentProps> = ({
           <div className='relative flex h-6 w-6 flex-shrink-0 items-center justify-center'>
             {imgError || !logo ? (
               <div className='bg-GRAY_200 text-GRAY_700 f-12-550 flex h-full w-full items-center justify-center rounded'>
-                {displayName?.charAt(0)?.toUpperCase()}
+                {getNameInitial(displayName)}
               </div>
             ) : (
               <img src={logo} alt={displayName} className='object-contain' onError={() => setImgError(true)} />
