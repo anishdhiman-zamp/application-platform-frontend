@@ -102,7 +102,7 @@ export const HITLQuestionItem = ({
       <div className='flex w-full items-center justify-center'>
         <div className='flex w-full items-center justify-center px-4 pt-4.5 pb-2.5'>
           <div className='text-GRAY_1000 flex flex-1 gap-2 text-sm leading-normal font-[550]'>
-            <span className='shrink-0'>{qIndex + 1}.</span>
+            {questionsLength > 1 && <span className='shrink-0'>{qIndex + 1}.</span>}
             <span className='leading-normal whitespace-pre-wrap'>{question?.question ?? question?.text}</span>
           </div>
         </div>

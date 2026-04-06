@@ -306,13 +306,15 @@ const TaskContentChat = ({ taskId }: { taskId: string }) => {
                       ))}
 
                       {streamingState && !!streamingState.message_content?.elements?.length && (
-                        <StreamingMessage
-                          streamingState={streamingState}
-                          assistantAvatar={<></>}
-                          showMarkdownConnectors
-                          showConnectorToLastBlock
-                          showConnectorToNextBlock
-                        />
+                        <div className='px-2'>
+                          <StreamingMessage
+                            streamingState={streamingState}
+                            assistantAvatar={<></>}
+                            showMarkdownConnectors
+                            showConnectorToLastBlock
+                            showConnectorToNextBlock
+                          />
+                        </div>
                       )}
                       <TaskChatExpandedStepsFooter
                         isFirst={processedMessages.length === 0}
