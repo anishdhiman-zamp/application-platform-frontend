@@ -170,7 +170,7 @@ class ConversationSSERegistry {
           try {
             handleConversationSSEEvent(conversationId, event, cb);
           } catch (error) {
-            captureException(error instanceof Error ? error : new Error(String(error)));
+            console.error('Error handling conversation SSE event', error);
           }
         }
       },
