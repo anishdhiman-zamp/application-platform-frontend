@@ -2,61 +2,27 @@ import { REQUEST_TYPES } from '@zamp-platform/api';
 import { API_ENDPOINTS } from 'apis/apiEndpoint.constants';
 import { APITags } from '@/constants/api.constants';
 import { baseApi } from '@/services/baseApi';
+import type {
+  AgentDbExportRequest,
+  AgentDbExportResponse,
+  AgentDbExportStatusResponse,
+  AgentDbQueryRequest,
+  AgentDbQueryResponse,
+  DatasetRolesResponse,
+  ManageDatasetRoleRequest,
+} from '@/types/api/agentManagedDb.types';
 import { formRequestUrlWithParams } from '@/utils/common';
 
-export interface AgentDbQueryRequest {
-  query: string;
-}
-
-export interface AgentDbQueryResponse {
-  rows: Record<string, unknown>[];
-  count: number;
-}
-
-export enum DatasetRoleValue {
-  ADMIN = 'admin',
-  VIEWER = 'viewer',
-  EDITOR = 'editor',
-}
-
-export enum RoleAction {
-  GRANT = 'grant',
-  REVOKE = 'revoke',
-}
-
-export interface DatasetRoleEntry {
-  user_id: string;
-  table_name: string;
-  role: DatasetRoleValue;
-}
-
-export interface DatasetRolesResponse {
-  roles: DatasetRoleEntry[];
-}
-
-export interface ManageDatasetRoleRequest {
-  table_name: string;
-  user_id: string;
-  role?: DatasetRoleValue;
-  action: RoleAction;
-}
-
-export interface AgentDbExportRequest {
-  table_name: string;
-  where_clause?: string;
-}
-
-export interface AgentDbExportResponse {
-  workflow_id: string;
-}
-
-export interface AgentDbExportStatusResponse {
-  workflow_id: string;
-  status: 'RUNNING' | 'COMPLETED' | 'FAILED';
-  signed_url?: string;
-  row_count?: number;
-  error_message?: string;
-}
+export type {
+  AgentDbExportRequest,
+  AgentDbExportResponse,
+  AgentDbExportStatusResponse,
+  AgentDbQueryRequest,
+  AgentDbQueryResponse,
+  DatasetRolesResponse,
+  ManageDatasetRoleRequest,
+};
+export { DatasetRoleValue, RoleAction } from '@/types/api/agentManagedDb.types';
 
 const AgentManagedDb = baseApi.injectEndpoints({
   endpoints: (builder) => ({
