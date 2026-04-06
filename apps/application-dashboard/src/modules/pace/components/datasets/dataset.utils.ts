@@ -14,6 +14,26 @@ export const sanitizeSqlName = (name: string): string =>
 
 // --- Type mappings ---
 
+// Postgres wire-type names returned by information_schema / pg_catalog
+enum PgColumnType {
+  TEXT = 'text',
+  CHARACTER_VARYING = 'character varying',
+  TIMESTAMP = 'timestamp',
+  TIMESTAMPTZ = 'timestamptz',
+  INTEGER = 'integer',
+  INT4 = 'int4',
+  BIGINT = 'bigint',
+  SMALLINT = 'smallint',
+  BOOLEAN = 'boolean',
+  BOOL = 'bool',
+  REAL = 'real',
+  FLOAT4 = 'float4',
+  DOUBLE_PRECISION = 'double precision',
+  FLOAT8 = 'float8',
+  JSONB = 'jsonb',
+  JSON = 'json',
+}
+
 export const COLUMN_TYPE_TO_PG: Record<string, string> = {
   [DatasetColumnTypes.TEXT]: 'TEXT',
   [DatasetColumnTypes.TIMESTAMP]: 'TIMESTAMPTZ',
@@ -26,17 +46,27 @@ export const COLUMN_TYPE_TO_PG: Record<string, string> = {
 };
 
 export const pgTypeToColumnType = (pgType: string): DatasetColumnTypes => {
-  const normalized = pgType.toLowerCase();
+  const normalized = pgType.toLowerCase() as PgColumnType;
 
-  if (normalized === 'text' || normalized === 'character varying' || normalized.startsWith('varchar'))
+  if (
+    normalized === PgColumnType.TEXT ||
+    normalized === PgColumnType.CHARACTER_VARYING ||
+    normalized.startsWith('varchar')
+  )
     return DatasetColumnTypes.TEXT;
-  if (normalized.includes('timestamp')) return DatasetColumnTypes.TIMESTAMP;
-  if (normalized === 'integer' || normalized === 'int4' || normalized === 'bigint' || normalized === 'smallint')
+  if (normalized.includes(PgColumnType.TIMESTAMP)) return DatasetColumnTypes.TIMESTAMP;
+  if (
+    normalized === PgColumnType.INTEGER ||
+    normalized === PgColumnType.INT4 ||
+    normalized === PgColumnType.BIGINT ||
+    normalized === PgColumnType.SMALLINT
+  )
     return DatasetColumnTypes.INTEGER;
-  if (normalized === 'boolean' || normalized === 'bool') return DatasetColumnTypes.BOOLEAN;
-  if (normalized === 'real' || normalized === 'float4') return DatasetColumnTypes.FLOAT;
-  if (normalized === 'double precision' || normalized === 'float8') return DatasetColumnTypes.DOUBLE;
-  if (normalized === 'jsonb' || normalized === 'json') return DatasetColumnTypes.JSON;
+  if (normalized === PgColumnType.BOOLEAN || normalized === PgColumnType.BOOL) return DatasetColumnTypes.BOOLEAN;
+  if (normalized === PgColumnType.REAL || normalized === PgColumnType.FLOAT4) return DatasetColumnTypes.FLOAT;
+  if (normalized === PgColumnType.DOUBLE_PRECISION || normalized === PgColumnType.FLOAT8)
+    return DatasetColumnTypes.DOUBLE;
+  if (normalized === PgColumnType.JSONB || normalized === PgColumnType.JSON) return DatasetColumnTypes.JSON;
 
   return DatasetColumnTypes.TEXT;
 };
