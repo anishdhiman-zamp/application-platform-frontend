@@ -123,7 +123,7 @@ class TaskSSERegistry {
           try {
             handleTaskSSEEvent(taskId, event, cb);
           } catch (error) {
-            console.error('Error handling task SSE event', error);
+            captureException(error instanceof Error ? error : new Error(String(error)));
           }
         }
       },
