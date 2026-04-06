@@ -1,5 +1,5 @@
 import { AgentNavIcon, HomeIcon, RouteIcon, SettingsIcon } from '@zamp-platform/ui';
-import { Link2, Settings2, UserPen } from 'lucide-react';
+import { Database, Link2, Settings2, UserPen } from 'lucide-react';
 import { PaceNavbarItemId, PaceNavbarItemSchema, PaceSettingsTabSchema } from 'modules/pace/pace.types';
 import Users02 from '@/assets/Icons/Users02';
 import { ROUTES_PATH } from '@/constants/routeConfig';
@@ -55,6 +55,12 @@ export const PACE_SETTINGS_TABS: PaceSettingsTabSchema[] = [
     iconComponent: <Settings2 width={16} height={16} />,
     path: ROUTES_PATH.CHAT_SETTINGS_ORG_SETTINGS,
     heading: 'Organisation',
+  },
+  {
+    id: PaceNavbarItemId.DATASETS,
+    name: 'Datasets',
+    iconComponent: <Database width={16} height={16} />,
+    path: ROUTES_PATH.CHAT_SETTINGS_DATASETS,
   },
   {
     id: PaceNavbarItemId.INTEGRATIONS,

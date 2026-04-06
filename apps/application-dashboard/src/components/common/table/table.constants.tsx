@@ -1,4 +1,4 @@
-import { COLORS } from '@zamp-platform/ui';
+import { CSS_VARS } from '@zamp-platform/ui';
 import { CellSelectionOptions, themeQuartz } from 'ag-grid-community';
 import { AggregationFunctionType, LogicalOperatorType } from 'types/components/table.type';
 import { DisplayOptionItemProps } from 'components/common/table/DisplayOptions/DisplayOptionItem';
@@ -10,31 +10,38 @@ export const myTheme = themeQuartz.withParams({
   headerFontSize: 12,
   headerFontWeight: 600,
   rowHeight: 32,
-  rowBorder: { style: 'solid', width: 1, color: COLORS.GRAY_100 },
-  columnBorder: { style: 'solid', width: 1, color: COLORS.GRAY_100 },
+  rowBorder: { style: 'solid', width: 1, color: CSS_VARS.GRAY_100 },
+  columnBorder: { style: 'solid', width: 1, color: CSS_VARS.GRAY_100 },
   headerHeight: 48,
-  headerRowBorder: { style: 'solid', width: 1, color: COLORS.GRAY_400 },
-  headerColumnBorder: { style: 'solid', width: 1, color: COLORS.GRAY_100 },
-  headerBackgroundColor: COLORS.WHITE,
+  headerRowBorder: { style: 'solid', width: 1, color: CSS_VARS.GRAY_400 },
+  headerColumnBorder: { style: 'solid', width: 1, color: CSS_VARS.GRAY_100 },
+  headerBackgroundColor: CSS_VARS.BG_WHITE,
+  headerTextColor: CSS_VARS.GRAY_1000,
+  backgroundColor: CSS_VARS.BG_WHITE,
+  foregroundColor: CSS_VARS.GRAY_1000,
+  borderColor: CSS_VARS.GRAY_100,
   wrapperBorderRadius: 0,
   iconSize: 12,
-  rowHoverColor: COLORS.BACKGROUND_GRAY_1,
+  rowHoverColor: CSS_VARS.BG_GRAY_1,
+  oddRowBackgroundColor: CSS_VARS.BG_WHITE,
   checkboxBorderRadius: 2,
-  checkboxCheckedBackgroundColor: COLORS.GRAY_1000,
-  checkboxCheckedBorderColor: COLORS.GRAY_600,
-  checkboxCheckedShapeColor: COLORS.WHITE,
-  checkboxUncheckedBackgroundColor: COLORS.WHITE,
-  checkboxUncheckedBorderColor: COLORS.GRAY_400,
-  sideBarBackgroundColor: COLORS.WHITE,
-  headerColumnResizeHandleColor: COLORS.WHITE,
-  menuBorder: { style: 'solid', width: 1, color: COLORS.GRAY_500 },
-  menuBackgroundColor: COLORS.WHITE,
-  wrapperBorder: { width: 1, style: 'solid', color: COLORS.GRAY_400 },
-  rowLoadingSkeletonEffectColor: COLORS.GRAY_50,
-  selectCellBorder: { style: 'solid', width: 1.5, color: COLORS.BLUE_700 },
-  rangeSelectionBorderColor: COLORS.BLUE_700,
-  cellEditingBorder: { style: 'solid', width: 1.5, color: COLORS.BLUE_700 },
-  menuShadow: '1px 2px 20px 0px #0000001A',
+  checkboxCheckedBackgroundColor: CSS_VARS.GRAY_1000,
+  checkboxCheckedBorderColor: CSS_VARS.GRAY_600,
+  checkboxCheckedShapeColor: CSS_VARS.BG_WHITE,
+  checkboxUncheckedBackgroundColor: CSS_VARS.BG_WHITE,
+  checkboxUncheckedBorderColor: CSS_VARS.GRAY_400,
+  sideBarBackgroundColor: CSS_VARS.BG_WHITE,
+  headerColumnResizeHandleColor: CSS_VARS.BG_WHITE,
+  menuBorder: { style: 'solid', width: 1, color: CSS_VARS.GRAY_500 },
+  menuBackgroundColor: CSS_VARS.BG_WHITE,
+  menuTextColor: CSS_VARS.GRAY_1000,
+  wrapperBorder: { width: 1, style: 'solid', color: CSS_VARS.GRAY_400 },
+  rowLoadingSkeletonEffectColor: CSS_VARS.GRAY_50,
+  selectCellBorder: { style: 'solid', width: 1.5, color: CSS_VARS.BLUE_700 },
+  rangeSelectionBorderColor: CSS_VARS.BLUE_700,
+  cellEditingBorder: { style: 'solid', width: 1.5, color: CSS_VARS.BLUE_700 },
+  cellEditingBackgroundColor: CSS_VARS.BG_WHITE,
+  menuShadow: 'var(--MENU_SHADOW)',
 });
 
 export const myThemeWithProcess = myTheme.withParams({
@@ -42,38 +49,38 @@ export const myThemeWithProcess = myTheme.withParams({
   headerFontSize: 12,
   headerFontWeight: 600,
   rowHeight: 44,
-  rowBorder: { style: 'solid', width: 0, color: COLORS.GRAY_100 },
-  columnBorder: { style: 'solid', width: 0, color: COLORS.GRAY_100 },
+  rowBorder: { style: 'solid', width: 0, color: CSS_VARS.GRAY_100 },
+  columnBorder: { style: 'solid', width: 0, color: CSS_VARS.GRAY_100 },
   headerHeight: 31,
-  headerRowBorder: { style: 'solid', width: 1, color: COLORS.GRAY_400 },
-  headerColumnBorder: { style: 'solid', width: 0, color: COLORS.GRAY_100 },
-  headerBackgroundColor: COLORS.WHITE,
+  headerRowBorder: { style: 'solid', width: 1, color: CSS_VARS.GRAY_400 },
+  headerColumnBorder: { style: 'solid', width: 0, color: CSS_VARS.GRAY_100 },
+  headerBackgroundColor: CSS_VARS.BG_WHITE,
   wrapperBorderRadius: 0,
   iconSize: 12,
-  rowHoverColor: COLORS.BACKGROUND_GRAY_2,
-  headerColumnResizeHandleColor: COLORS.WHITE,
-  menuBorder: { style: 'solid', width: 1, color: COLORS.GRAY_500 },
-  menuBackgroundColor: COLORS.WHITE,
-  wrapperBorder: { width: 1, style: 'solid', color: COLORS.GRAY_400 },
-  rowLoadingSkeletonEffectColor: COLORS.GRAY_50,
-  menuShadow: '1px 2px 20px 0px #0000001A',
+  rowHoverColor: CSS_VARS.BG_GRAY_2,
+  headerColumnResizeHandleColor: CSS_VARS.BG_WHITE,
+  menuBorder: { style: 'solid', width: 1, color: CSS_VARS.GRAY_500 },
+  menuBackgroundColor: CSS_VARS.BG_WHITE,
+  wrapperBorder: { width: 1, style: 'solid', color: CSS_VARS.GRAY_400 },
+  rowLoadingSkeletonEffectColor: CSS_VARS.GRAY_50,
+  menuShadow: 'var(--MENU_SHADOW)',
 });
 
 export const myIcons = {
   groupExpanded: `<svg width="12" height="12" viewBox="0 0 12 12" fill="none" xmlns="http://www.w3.org/2000/svg">
-<path d="M3 4.5L6 7.5L9 4.5" fill="#8F8F8F"/>
+<path d="M3 4.5L6 7.5L9 4.5" fill="currentColor"/>
 </svg>
 `,
   groupContracted: `<svg width="12" height="12" viewBox="0 0 12 12" fill="none" xmlns="http://www.w3.org/2000/svg">
-<path d="M4.5 9L7.5 6L4.5 3" fill="#8F8F8F"/>
+<path d="M4.5 9L7.5 6L4.5 3" fill="currentColor"/>
 </svg>
 `,
   sortDescending: `<svg width="12" height="12" viewBox="0 0 12 12" fill="none" xmlns="http://www.w3.org/2000/svg">
-<path d="M6 2V10M6 10L9 7M6 10L3 7" stroke="#2546F5" stroke-linecap="round" stroke-linejoin="round"/>
+<path d="M6 2V10M6 10L9 7M6 10L3 7" stroke="var(--BLUE_700)" stroke-linecap="round" stroke-linejoin="round"/>
 </svg>
 `,
   sortAscending: `<svg width="12" height="12" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-<path d="M12 20V4M12 4L6 10M12 4L18 10" stroke="#2546F5" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+<path d="M12 20V4M12 4L6 10M12 4L18 10" stroke="var(--BLUE_700)" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
 </svg>
 `,
 };
@@ -101,18 +108,20 @@ export const DATA_TABLE_THEME_PARAMS = {
   wrapperBorder: { width: 0 },
   headerFontSize: 11,
   headerFontWeight: 400,
-  headerTextColor: '#8F8F8F',
+  headerTextColor: CSS_VARS.GRAY_700,
   headerHeight: 36,
-  headerRowBorder: { style: 'solid', width: 0.5, color: '#EBEBEB' },
+  headerRowBorder: { style: 'solid', width: 0.5, color: CSS_VARS.GRAY_200 },
   headerColumnBorder: { width: 0 },
   headerColumnResizeHandleWidth: 0,
-  headerBackgroundColor: COLORS.WHITE,
+  headerBackgroundColor: CSS_VARS.BG_WHITE,
+  backgroundColor: CSS_VARS.BG_WHITE,
+  foregroundColor: CSS_VARS.GRAY_1000,
   rowHeight: 60,
-  rowBorder: { style: 'solid', width: 0.5, color: '#EBEBEB' },
-  rowHoverColor: '#FBFBFB',
+  rowBorder: { style: 'solid', width: 0.5, color: CSS_VARS.GRAY_200 },
+  rowHoverColor: CSS_VARS.BG_GRAY_1,
   columnBorder: { width: 0 },
   cellHorizontalPadding: 24,
-  rowLoadingSkeletonEffectColor: COLORS.GRAY_50,
+  rowLoadingSkeletonEffectColor: CSS_VARS.GRAY_50,
 };
 
 export const DATA_TABLE_CONFIG = {

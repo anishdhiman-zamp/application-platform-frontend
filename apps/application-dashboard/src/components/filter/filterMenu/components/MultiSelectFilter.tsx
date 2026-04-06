@@ -160,7 +160,7 @@ const MultiSelectFilter: FC<MultiSelectFilterProps> = ({
   return (
     <div
       className={cn(
-        'border-0.5 border-GRAY_500 shadow-table-filter-menu flex max-h-[330px] w-[218px] min-w-[230px] flex-col gap-2 rounded-md bg-white pt-2 pb-1',
+        'border-0.5 border-GRAY_500 shadow-table-filter-menu bg-BG_WHITE flex max-h-[330px] w-[218px] min-w-[230px] flex-col gap-2 rounded-md pt-2 pb-1',
         className,
       )}
     >
@@ -185,7 +185,7 @@ const MultiSelectFilter: FC<MultiSelectFilterProps> = ({
             width={12}
           />
           {isConditionOpen && (
-            <div className='text-GRAY_900 border-GRAY_400 shadow-table-filter-menu absolute top-full left-0 z-10 rounded-md border bg-white p-1'>
+            <div className='text-GRAY_900 border-GRAY_400 shadow-table-filter-menu bg-BG_WHITE absolute top-full left-0 z-10 rounded-md border p-1'>
               {operatorOptions.map((option) => (
                 <div
                   className='hover:bg-GRAY_100 f-12-500 rounded-md px-2.5 py-2 whitespace-nowrap'

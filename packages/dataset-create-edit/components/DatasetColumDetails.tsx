@@ -107,10 +107,15 @@ const DatasetColumDetails: FC<IDatasetColumDetailsProps> = memo(
 
     const columnNameError = getColumnNameError();
 
-    // Handle required toggle - always opens modal when clicked
-    // The actual state change only happens when user confirms or dismisses
+    // Handle required toggle - only show modal when enabling (need default value).
+    // When disabling, just clear required + default directly.
     const handleRequiredToggle = () => {
-      setIsModalOpen(true);
+      if (columnData?.required) {
+        onChange(columnData?.id, DatasetColumnHeaderTypes.REQUIRED, false);
+        onChange(columnData?.id, 'default' as DatasetColumnHeaderTypes, null);
+      } else {
+        setIsModalOpen(true);
+      }
     };
 
     // Handle modal confirm - set required to true with default value
@@ -178,7 +183,7 @@ const DatasetColumDetails: FC<IDatasetColumDetailsProps> = memo(
             onTypeSelect={handleTypeChange}
             selectedClassName='bg-GRAY_50 border-none'
             triggerClassName='px-1.5 py-1 h-6 f-12-450 text-GRAY_1000'
-            // disabled={!canEdit}
+            disabled={!columnData?.id?.startsWith(NEW_COLUMN_PREFIX.COL_)}
           />
         </div>
       ),

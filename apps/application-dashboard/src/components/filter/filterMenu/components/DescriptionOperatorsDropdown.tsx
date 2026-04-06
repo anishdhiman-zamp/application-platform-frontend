@@ -51,7 +51,7 @@ const DescriptionOperatorsDropdown: FC<DescriptionOperatorsDropdownProps> = ({
           {isOpen && (
             <div
               ref={ref}
-              className='text-GRAY_900 border-GRAY_400 shadow-table-filter-menu absolute top-full left-0 z-10 min-w-[120px] rounded-md border bg-white p-1'
+              className='text-GRAY_900 border-GRAY_400 shadow-table-filter-menu bg-BG_WHITE absolute top-full left-0 z-10 min-w-[120px] rounded-md border p-1'
             >
               {operatorOptions.map((option) => (
                 <div
