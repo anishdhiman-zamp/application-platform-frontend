@@ -9,7 +9,10 @@ import { Dialog, DialogContent } from './dialog';
 
 const Command = ({ className, ...props }: React.ComponentProps<typeof CommandPrimitive>) => (
   <CommandPrimitive
-    className={cn('bg-BG_WHITE text-GRAY_1000 flex h-full w-full flex-col overflow-hidden rounded-md', className)}
+    className={cn(
+      'bg-BG_WHITE dark:bg-popover text-GRAY_1000 dark:text-popover-foreground flex h-full w-full flex-col overflow-hidden rounded-md',
+      className,
+    )}
     {...props}
   />
 );
@@ -31,7 +34,7 @@ const CommandInput = ({ className, ...props }: React.ComponentProps<typeof Comma
   <div className='flex items-center px-3' cmdk-input-wrapper=''>
     <CommandPrimitive.Input
       className={cn(
-        'placeholder:text-GRAY_700 flex h-10 w-full rounded-md bg-transparent py-3 text-sm outline-hidden disabled:cursor-not-allowed disabled:opacity-50',
+        'placeholder:text-GRAY_700 dark:placeholder:text-muted-foreground flex h-10 w-full rounded-md bg-transparent py-3 text-sm outline-hidden disabled:cursor-not-allowed disabled:opacity-50',
         className,
       )}
       {...props}

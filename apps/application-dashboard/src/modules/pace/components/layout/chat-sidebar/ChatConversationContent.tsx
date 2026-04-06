@@ -21,6 +21,8 @@ import { useRouter } from 'next/navigation';
 import NewPaceIcons from '@/assets/Icons/NewPaceIcons';
 import CommonWrapper from '@/components/commonWrapper';
 import { SkeletonTypes } from '@/components/commonWrapper/commonWrapper.types';
+import { APITags } from '@/constants/api.constants';
+import { useAppDispatch } from '@/hooks/toolkit';
 import NewPaceAvatar from '@/modules/chatbot/NewPaceAvatar';
 import AgentPill from '@/modules/pace/components/agents/components/AgentPill';
 import AgentTestCard from '@/modules/pace/components/agents/components/AgentTestCard';
@@ -37,6 +39,7 @@ import { type ActiveAgentInfo, usePaceContext } from '@/modules/pace/pace.contex
 import { TAB_TYPE } from '@/modules/pace/pace.types';
 import { preserveSidebarParam } from '@/modules/pace/pace.utils';
 import { addAutoLoopLockedConversation } from '@/modules/pace/utils/autoLoopStorage';
+import { baseApi } from '@/services/baseApi';
 
 export interface ChatConversationContentProps {
   conversationId: string | null;
@@ -61,9 +64,11 @@ const ChatConversationContent = ({
   addFileReferenceRef,
   currentUserName,
 }: ChatConversationContentProps) => {
+  const router = useRouter();
+  const dispatch = useAppDispatch();
   const intentConsumedRef = useRef(false);
   const taskStatusContainerRef = useRef<HTMLDivElement>(null);
-  const router = useRouter();
+  const prevAgentInfoRef = useRef<ActiveAgentInfo | null>(null);
 
   const {
     pendingFileReference,
@@ -208,6 +213,18 @@ const ChatConversationContent = ({
     },
     [handleAgentClick],
   );
+
+  // Refresh agents list when an agent block appears in chat
+  const handleAgentInfoChange = useCallback(() => {
+    if (agentInfoFromMessages && agentInfoFromMessages !== prevAgentInfoRef.current) {
+      prevAgentInfoRef.current = agentInfoFromMessages;
+      dispatch(baseApi.util.invalidateTags([APITags.GET_AGENTS_LIST]));
+    }
+  }, [agentInfoFromMessages, dispatch]);
+
+  useEffect(() => {
+    handleAgentInfoChange();
+  }, [handleAgentInfoChange]);
 
   // Reset consumed flag when a new payload arrives
   useEffect(() => {

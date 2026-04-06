@@ -40,11 +40,16 @@ export const AGENT_DEFAULT_DESCRIPTION = "Hi, I'm your new agent! Let me know wh
 export const enum PrefixMessage {
   OPTIMISTIC_AGENT_CREATION = 'Create an agent which can',
   ADD_TRIGGER = 'I want to add a trigger for agent',
-  ADD_NEW_TRIGGER = 'I want to add a new trigger',
   TEST_AGENT = 'I want to add some triggers for',
-  ADD_NEW_CONNECTION_P = 'I want to give ',
-  ADD_NEW_CONNECTION_S = ' access to one of my connections',
 }
+
+export const getAddTriggerMessage = (agentName: string) =>
+  `I want to add a trigger to **${agentName}**. Ask me which type of trigger I'd like (e.g., on a schedule like daily/hourly, or when something specific happens?) then collect the details needed to set it up.`;
+
+export const getAddConnectionMessage = (agentName: string) =>
+  `I want to grant **${agentName}** access to my connections. List all my connections for me — I'll pick.`;
+
+export const getAddInstructionsMessage = (agentName: string) => `I want to add to **${agentName}**'s instructions.`;
 
 export const AGENT_GREETING_MESSAGE = "Let's collaborate — chat, add triggers, or edit me";
 

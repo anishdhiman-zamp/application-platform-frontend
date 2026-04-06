@@ -1,11 +1,12 @@
 'use client';
 
-import { useCallback, useMemo, useState } from 'react';
+import { useCallback, useEffect, useMemo, useState } from 'react';
 import { Button, ScrollContainer } from '@zamp-platform/ui';
 import { Plus } from 'lucide-react';
 import AgentActionBar from 'modules/pace/components/agents/components/AgentActionBar';
 import AgentCard from 'modules/pace/components/agents/components/AgentCard';
 import AgentCardSkeleton from 'modules/pace/components/agents/components/AgentCardSkeleton';
+import AgentEmptyState from 'modules/pace/components/agents/components/AgentEmptyState';
 import CreateAgentModal from 'modules/pace/components/agents/components/CreateAgentModal';
 import { AGENT_SEARCH_DEBOUNCE_MS } from 'modules/pace/components/agents/constants/agents.constants';
 import {
@@ -37,14 +38,24 @@ const AgentListingPage = () => {
   const debouncedSearch = useDebounce(searchTerm, AGENT_SEARCH_DEBOUNCE_MS);
 
   const tabQueries = {
-    [AGENT_LISTING_TAB.ALL]: useGetAgentsListQuery({ filter: AGENT_FILTER_VALUE[AGENT_LISTING_TAB.ALL] }),
-    [AGENT_LISTING_TAB.MY_AGENTS]: useGetAgentsListQuery({ filter: AGENT_FILTER_VALUE[AGENT_LISTING_TAB.MY_AGENTS] }),
-    [AGENT_LISTING_TAB.SHARED_WITH_ME]: useGetAgentsListQuery({
-      filter: AGENT_FILTER_VALUE[AGENT_LISTING_TAB.SHARED_WITH_ME],
-    }),
+    [AGENT_LISTING_TAB.ALL]: useGetAgentsListQuery(
+      { filter: AGENT_FILTER_VALUE[AGENT_LISTING_TAB.ALL] },
+      { refetchOnMountOrArgChange: true },
+    ),
+    [AGENT_LISTING_TAB.MY_AGENTS]: useGetAgentsListQuery(
+      { filter: AGENT_FILTER_VALUE[AGENT_LISTING_TAB.MY_AGENTS] },
+      { refetchOnMountOrArgChange: true },
+    ),
+    [AGENT_LISTING_TAB.SHARED_WITH_ME]: useGetAgentsListQuery(
+      { filter: AGENT_FILTER_VALUE[AGENT_LISTING_TAB.SHARED_WITH_ME] },
+      { refetchOnMountOrArgChange: true },
+    ),
   };
 
   const { data: activeData, isLoading, isError, refetch } = tabQueries[activeTab];
+  const { data: allAgentsData, isLoading: isAllAgentsLoading } = tabQueries[AGENT_LISTING_TAB.ALL];
+
+  const hasNoAgents = !isAllAgentsLoading && (allAgentsData?.agents?.length ?? 0) === 0;
 
   const filteredAgents = useMemo(() => {
     if (!activeData?.agents) return [];
@@ -111,6 +122,24 @@ const AgentListingPage = () => {
     },
     [openTab, router],
   );
+
+  // refetch when switching tabs
+  useEffect(() => {
+    refetch();
+  }, [activeTab, refetch]);
+
+  if (hasNoAgents) {
+    return (
+      <>
+        <AgentEmptyState onNewAgent={handleOpenCreateModal} />
+        <CreateAgentModal
+          open={isCreateModalOpen}
+          onOpenChange={setIsCreateModalOpen}
+          onAgentCreated={handleAgentCreated}
+        />
+      </>
+    );
+  }
 
   return (
     <div className='flex h-full flex-col overflow-hidden'>
