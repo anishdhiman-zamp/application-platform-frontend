@@ -29,6 +29,7 @@ export enum LOCAL_STORAGE_KEYS {
   THEME = 'ZAMP_THEME',
   DATASET_BLUEPRINT_DRAFT = 'dataset_blueprint_draft',
   DATASET_ACTIVE_TAB = 'dataset_active_tab',
+  DATASET_COLUMN_ORDER = 'dataset_column_order',
 }
 
 const QUOTA_ERROR_NAMES: readonly string[] = ['QuotaExceededError', 'NS_ERROR_DOM_QUOTA_REACHED'];

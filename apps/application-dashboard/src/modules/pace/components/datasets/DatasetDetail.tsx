@@ -13,7 +13,14 @@ import {
   DialogHeaderTitle,
   toast,
 } from '@zamp-platform/ui';
-import { CellEditRequestEvent, ColDef, FillEndEvent, IRowNode, IServerSideDatasource } from 'ag-grid-community';
+import {
+  CellEditRequestEvent,
+  ColDef,
+  ColumnMovedEvent,
+  FillEndEvent,
+  IRowNode,
+  IServerSideDatasource,
+} from 'ag-grid-community';
 import { AgGridReact } from 'ag-grid-react';
 import usePolling from 'hooks/usePolling';
 import { useUserIdentity } from 'hooks/useUserIdentity';
@@ -105,6 +112,9 @@ const DatasetDetailInner = ({ tableName }: DatasetDetailProps) => {
   // --- State ---
   const [columns, setColumns] = useState<ColDef[] | null>(null);
   const [totalRows, setTotalRows] = useState<number | null>(null);
+  // Set to true while we programmatically move columns in AG Grid to avoid feedback loops
+  const isProgrammaticMoveRef = useRef(false);
+
   const [activeTab, setActiveTab] = useState<DatasetTabsTypes>(() => {
     const saved = getFromLocalStorage(`${LOCAL_STORAGE_KEYS.DATASET_ACTIVE_TAB}_${tableName}` as LOCAL_STORAGE_KEYS);
 
@@ -135,6 +145,33 @@ const DatasetDetailInner = ({ tableName }: DatasetDetailProps) => {
     (userRole === DatasetRoleValue.ADMIN || userRole === DatasetRoleValue.EDITOR) && pkColumn !== null;
   const canEditBlueprint = userRole === DatasetRoleValue.ADMIN || userRole === DatasetRoleValue.EDITOR;
 
+  const columnOrderKey = `${LOCAL_STORAGE_KEYS.DATASET_COLUMN_ORDER}_${tableName}` as LOCAL_STORAGE_KEYS;
+
+  // Apply a saved column id order to a BlueprintColumn array.
+  // Known columns are sorted by the saved order; any new/unknown columns are appended at the end.
+  const applyColumnOrder = useCallback(
+    (cols: BlueprintColumn[]): BlueprintColumn[] => {
+      const raw = getFromLocalStorage(columnOrderKey);
+
+      if (!raw) return cols;
+      try {
+        const order = JSON.parse(raw) as string[];
+        const orderMap = new Map(order.map((id, i) => [id, i]));
+        const sorted = [...cols].sort((a, b) => {
+          const ai = orderMap.has(a.id) ? orderMap.get(a.id)! : Infinity;
+          const bi = orderMap.has(b.id) ? orderMap.get(b.id)! : Infinity;
+
+          return ai - bi;
+        });
+
+        return sorted;
+      } catch {
+        return cols;
+      }
+    },
+    [columnOrderKey],
+  );
+
   const loadSchema = useCallback(async () => {
     try {
       const [result, pkResult] = await Promise.all([
@@ -150,39 +187,7 @@ const DatasetDetailInner = ({ tableName }: DatasetDetailProps) => {
 
       setPkColumn(detectedPk);
 
-      // Keep id column in grid but hide by default (user can enable via Display Options)
-      const userRows = allRows.filter((r) => String(r.column_name) !== 'id');
-
-      const gridCols: ColDef[] = [
-        // id column: hidden by default, non-editable, shown in Display Options
-        ...(allRows.some((r) => String(r.column_name) === 'id')
-          ? [{ field: 'id', headerName: 'id', hide: true, editable: false, suppressFillHandle: true }]
-          : []),
-        ...userRows.map((row: Record<string, unknown>) => {
-          const field = String(row.column_name);
-          const pgType = String(row.data_type);
-
-          return {
-            field,
-            headerName: field,
-            ...getCellEditorForPgType(pgType),
-          };
-        }),
-      ];
-
-      setColumns(gridCols);
-
-      const config = gridCols.map((c) => ({
-        key: c.field as string,
-        label: c.headerName as string,
-        values: [],
-        type: FILTER_TYPES.SEARCH,
-        datatype: 'string',
-      }));
-
-      filterDispatch({ type: filtersContextActions.SET_FILTERS_CONFIG, payload: { filtersConfig: config } });
-
-      const bpCols: BlueprintColumn[] = allRows.map((row: Record<string, unknown>) => {
+      const bpColsRaw: BlueprintColumn[] = allRows.map((row: Record<string, unknown>) => {
         const colName = String(row.column_name);
 
         return {
@@ -194,7 +199,39 @@ const DatasetDetailInner = ({ tableName }: DatasetDetailProps) => {
         };
       });
 
+      // Apply saved column order — frozen 'id' always stays first
+      const bpCols = applyColumnOrder(bpColsRaw);
+
       setOriginalBlueprintColumns(bpCols);
+
+      // Build grid ColDefs in the same order as bpCols
+      const gridCols: ColDef[] = bpCols.map((bp) => {
+        const dbRow = allRows.find((r) => String(r.column_name) === bp.id);
+
+        if (bp.frozen) {
+          return { field: bp.id, headerName: bp.id, hide: true, editable: false, suppressFillHandle: true };
+        }
+
+        return {
+          field: bp.id,
+          headerName: bp.id,
+          ...(dbRow ? getCellEditorForPgType(String(dbRow.data_type)) : {}),
+        };
+      });
+
+      setColumns(gridCols);
+
+      const config = gridCols
+        .filter((c) => !c.hide)
+        .map((c) => ({
+          key: c.field as string,
+          label: c.headerName as string,
+          values: [],
+          type: FILTER_TYPES.SEARCH,
+          datatype: 'string',
+        }));
+
+      filterDispatch({ type: filtersContextActions.SET_FILTERS_CONFIG, payload: { filtersConfig: config } });
 
       // Restore any unsaved draft from localStorage
       const draftKey = `${LOCAL_STORAGE_KEYS.DATASET_BLUEPRINT_DRAFT}_${tableName}` as LOCAL_STORAGE_KEYS;
@@ -215,7 +252,7 @@ const DatasetDetailInner = ({ tableName }: DatasetDetailProps) => {
       setColumns([]);
       setSchemaError('Failed to load dataset schema. The table may not exist or you may not have access.');
     }
-  }, [executeQuery, tableName, filterDispatch]);
+  }, [executeQuery, tableName, filterDispatch, applyColumnOrder]);
 
   const reloadSchemaAndData = useCallback(async () => {
     setColumns(null);
@@ -431,6 +468,35 @@ const DatasetDetailInner = ({ tableName }: DatasetDetailProps) => {
     [tableName, executeMutation, pkColumn],
   );
 
+  // When the user reorders columns in the Preview grid, sync the order back to blueprintColumns
+  // and persist to localStorage so Blueprint tab reflects the same order.
+  // Only active when there are no unsaved blueprint changes (otherwise preview shows pending columns
+  // with col_ ids that don't map back cleanly to saved field names).
+  const handleColumnMoved = useCallback(
+    (event: ColumnMovedEvent) => {
+      if (!event.finished || event.source !== 'uiColumnMoved') return;
+      if (hasBlueprintChangesRef.current) return;
+      if (isProgrammaticMoveRef.current) return;
+      const allCols = event.api.getAllGridColumns();
+
+      if (!allCols?.length) return;
+      // Build new ordered field list from AG Grid's current column state
+      const newFieldOrder = allCols.map((c) => c.getColId());
+      // For saved columns id === field name, so map directly
+      const colMap = new Map(blueprintColumns.map((c) => [c.id, c]));
+      const reordered = newFieldOrder.map((f) => colMap.get(f)).filter((c): c is BlueprintColumn => c !== undefined);
+
+      // Preserve any blueprint columns not in grid (shouldn't happen when no changes, but be safe)
+      const inGrid = new Set(newFieldOrder);
+      const extra = blueprintColumns.filter((c) => !inGrid.has(c.id));
+      const final = [...reordered, ...extra];
+
+      setBlueprintColumns(final);
+      setToLocalStorage(columnOrderKey, JSON.stringify(final.map((c) => c.id)));
+    },
+    [blueprintColumns, columnOrderKey],
+  );
+
   const hasBlueprintChanges = useMemo(() => {
     const originalMap = new Map(originalBlueprintColumns.map((c) => [c.id, c]));
     const currentIds = new Set(blueprintColumns.map((c) => c.id));
@@ -458,8 +524,8 @@ const DatasetDetailInner = ({ tableName }: DatasetDetailProps) => {
   // based on the pending blueprint, so the Preview tab reflects those changes immediately.
   const previewColumns = useMemo<ColDef[] | null>(() => {
     if (!columns) return null;
-    if (!hasBlueprintChanges) return columns;
 
+    const colMap = new Map(columns.map((c) => [c.field, c]));
     const originalMap = new Map(originalBlueprintColumns.map((c) => [c.id, c]));
     const droppedIds = new Set(
       originalBlueprintColumns.filter((c) => !blueprintColumns.find((b) => b.id === c.id)).map((c) => c.id),
@@ -469,41 +535,44 @@ const DatasetDetailInner = ({ tableName }: DatasetDetailProps) => {
 
     for (const bpCol of blueprintColumns) {
       if (bpCol.frozen) {
-        // Keep the frozen id column as-is (hidden)
-        const existing = columns.find((c) => c.field === bpCol.id);
+        const existing = colMap.get(bpCol.id);
 
         if (existing) result.push(existing);
         continue;
       }
 
       const isNew = !originalMap.has(bpCol.id) || bpCol.id.startsWith(COL_PREFIX);
-      // For new columns, the field name will be the sanitized name
-      const fieldName = isNew ? sanitizeColumnName(bpCol.name) || bpCol.name : bpCol.id;
-
-      const existing = columns.find((c) => c.field === bpCol.id);
+      const existing = colMap.get(bpCol.id);
 
       if (existing && !droppedIds.has(bpCol.id)) {
-        // Existing column — may have been renamed in blueprint; update headerName
-        const sanitizedName = sanitizeColumnName(bpCol.name);
+        if (hasBlueprintChanges) {
+          // Reflect any pending rename
+          const sanitizedName = sanitizeColumnName(bpCol.name);
+
+          result.push({
+            ...existing,
+            headerName: sanitizedName || bpCol.name,
+            editable: false,
+            suppressFillHandle: true,
+          });
+        } else {
+          // No unsaved changes — use existing ColDef as-is (preserves editor config etc.)
+          result.push(existing);
+        }
+      } else if (isNew && hasBlueprintChanges) {
+        // New column pending save — non-editable in preview
+        const fieldName = sanitizeColumnName(bpCol.name) || bpCol.name;
 
         result.push({
-          ...existing,
-          headerName: sanitizedName || bpCol.name,
-          editable: false,
-          suppressFillHandle: true,
-        });
-      } else if (isNew) {
-        // New column pending save — non-editable in preview
-        result.push({
           field: fieldName,
-          headerName: sanitizeColumnName(bpCol.name) || bpCol.name,
+          headerName: fieldName,
           editable: false,
           suppressFillHandle: true,
         });
       }
     }
 
-    return result;
+    return result.length > 0 ? result : columns;
   }, [columns, hasBlueprintChanges, blueprintColumns, originalBlueprintColumns]);
 
   // Maps new COL_PREFIX column id → sanitized field name, used to augment rows
@@ -749,6 +818,32 @@ const DatasetDetailInner = ({ tableName }: DatasetDetailProps) => {
     tableRef.current?.api?.refreshServerSide({ purge: true });
   }, [previewColumns, gridReady]);
 
+  // Sync blueprintColumns order into AG Grid whenever it changes.
+  // AG Grid maintains its own internal column order; passing a new columnDefs array doesn't
+  // reorder columns — we must call moveColumns() explicitly.
+  const prevBlueprintOrderRef = useRef<string>('');
+
+  useEffect(() => {
+    if (!gridReady) return;
+    const newOrder = blueprintColumns.map((c) => c.id).join(',');
+
+    if (newOrder === prevBlueprintOrderRef.current) return;
+    prevBlueprintOrderRef.current = newOrder;
+
+    const api = tableRef.current?.api;
+
+    if (!api) return;
+    // Move each column to its desired position, guarded against feedback loop
+    isProgrammaticMoveRef.current = true;
+    blueprintColumns.forEach((bpCol, targetIndex) => {
+      const col = api.getColumn(bpCol.id);
+
+      if (!col) return;
+      api.moveColumns([bpCol.id], targetIndex);
+    });
+    isProgrammaticMoveRef.current = false;
+  }, [blueprintColumns, gridReady]);
+
   // When switching to Preview from Blueprint, always purge and re-fetch
   const prevTabRef = useRef<DatasetTabsTypes>(DatasetTabsTypes.PREVIEW);
 
@@ -773,7 +868,7 @@ const DatasetDetailInner = ({ tableName }: DatasetDetailProps) => {
     setToLocalStorage(`${LOCAL_STORAGE_KEYS.DATASET_ACTIVE_TAB}_${tableName}` as LOCAL_STORAGE_KEYS, activeTab);
   }, [activeTab, tableName]);
 
-  // Save blueprint draft to localStorage whenever there are unsaved changes.
+  // Save blueprint draft + column order to localStorage whenever columns change.
   // Only run after schema has loaded (originalBlueprintColumns is non-empty)
   // to avoid wiping the draft on initial mount before loadSchema completes.
   useEffect(() => {
@@ -785,7 +880,9 @@ const DatasetDetailInner = ({ tableName }: DatasetDetailProps) => {
     } else {
       removeFromLocalStorage(draftKey);
     }
-  }, [blueprintColumns, hasBlueprintChanges, tableName, originalBlueprintColumns.length]);
+    // Always persist the current column order (Blueprint DnD or Preview column move)
+    setToLocalStorage(columnOrderKey, JSON.stringify(blueprintColumns.map((c) => c.id)));
+  }, [blueprintColumns, hasBlueprintChanges, tableName, originalBlueprintColumns.length, columnOrderKey]);
 
   // --- Navigation guard ---
   useEffect(() => {
@@ -1092,6 +1189,7 @@ const DatasetDetailInner = ({ tableName }: DatasetDetailProps) => {
                 onGridReady={() => setGridReady(true)}
                 onCellEditRequest={canEditData && !hasBlueprintChanges ? handleCellEditRequest : undefined}
                 onFillEnd={canEditData && !hasBlueprintChanges ? handleFillEnd : undefined}
+                onColumnMoved={handleColumnMoved}
                 enableCellSelection={canEditData && !hasBlueprintChanges}
                 useGetRowId
               />
@@ -1100,7 +1198,56 @@ const DatasetDetailInner = ({ tableName }: DatasetDetailProps) => {
         </div>
 
         <div className={activeTab === DatasetTabsTypes.BLUEPRINT ? 'flex h-full flex-col overflow-hidden' : 'hidden'}>
-          <div className='flex-1 overflow-hidden'>
+          {columns === null && (
+            <div className='flex h-full flex-col'>
+              {/* Header — matches DatasetBlueprintEditor header: pt-4 pr-8 pl-4 py-2.5 */}
+              <div className='border-GRAY_100 flex items-center justify-between border-b pt-4 pr-8 pl-4'>
+                {/* grip: w-30 */}
+                <div style={{ width: 30, flex: 'none' }} className='py-2.5' />
+                {/* Column Name: w-380 */}
+                <div style={{ width: 380, flex: 'none' }} className='py-2.5 pr-12'>
+                  <div className='bg-GRAY_100 h-3 w-24 animate-pulse rounded' />
+                </div>
+                {/* Column Type: w-200 */}
+                <div style={{ width: 200, flex: 'none' }} className='py-2.5'>
+                  <div className='bg-GRAY_100 h-3 w-20 animate-pulse rounded' />
+                </div>
+                {/* Required: flex-1 */}
+                <div className='flex-1 py-2.5'>
+                  <div className='bg-GRAY_100 h-3 w-14 animate-pulse rounded' />
+                </div>
+                {/* Actions: w-20 */}
+                <div style={{ width: 20, flex: 'none' }} />
+              </div>
+
+              {/* Row skeletons — matches ColumnRow: border-b py-2.5 pr-8 pl-4 */}
+              {Array.from({ length: 10 }).map((_, i) => (
+                <div key={i} className='border-GRAY_100 flex items-center justify-between border-b py-2.5 pr-8 pl-4'>
+                  {/* grip */}
+                  <div style={{ width: 30, flex: 'none' }}>
+                    <div className='bg-GRAY_100 h-4 w-4 animate-pulse rounded' />
+                  </div>
+                  {/* name input */}
+                  <div style={{ width: 380, flex: 'none' }} className='pr-12'>
+                    <div className='bg-GRAY_100 h-8 w-full animate-pulse rounded' />
+                  </div>
+                  {/* type pill */}
+                  <div style={{ width: 200, flex: 'none' }} className='pr-4'>
+                    <div className='bg-GRAY_100 h-6 w-24 animate-pulse rounded-md' />
+                  </div>
+                  {/* required toggle */}
+                  <div className='flex-1'>
+                    <div className='bg-GRAY_100 h-5 w-9 animate-pulse rounded-full' />
+                  </div>
+                  {/* delete icon */}
+                  <div style={{ width: 20, flex: 'none' }}>
+                    <div className='bg-GRAY_100 h-4 w-4 animate-pulse rounded' />
+                  </div>
+                </div>
+              ))}
+            </div>
+          )}
+          <div className={cn('flex-1 overflow-hidden', columns === null ? 'hidden' : '')}>
             <DatasetBlueprintEditor
               columns={blueprintColumns}
               onChange={setBlueprintColumns}
