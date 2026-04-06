@@ -75,11 +75,16 @@ export function resolveMessageStepGroupSections(
 
     if (!id || msg.sender_type !== SenderType.ASSISTANT) continue;
 
+    const lastMarkdownText = getLastMarkdownTextFromMessage(msg);
     const groups = stepGroupsByMessageId[id];
 
-    if (!groups?.length) continue;
+    if (!groups?.length) {
+      if (lastMarkdownText) {
+        sections.push({ messageId: id, groups: [], lastMarkdownText });
+      }
+      continue;
+    }
 
-    const lastMarkdownText = getLastMarkdownTextFromMessage(msg);
     const resolvedGroups: ResolvedStepGroup[] = [];
 
     for (let i = 0; i < groups.length; i++) {
@@ -107,9 +112,7 @@ export function resolveMessageStepGroupSections(
       });
     }
 
-    if (resolvedGroups.length > 0) {
-      sections.push({ messageId: id, groups: resolvedGroups, lastMarkdownText });
-    }
+    sections.push({ messageId: id, groups: resolvedGroups, lastMarkdownText });
   }
 
   return sections;
