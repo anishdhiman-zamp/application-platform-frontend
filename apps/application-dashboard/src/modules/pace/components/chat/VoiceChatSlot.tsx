@@ -1,34 +1,16 @@
 'use client';
 
-import { FC, useCallback } from 'react';
+import { FC } from 'react';
 import { Button } from '@zamp-platform/ui';
-import { useVoiceChat } from '@zamp-platform/ui/hooks/useVoiceChat';
 import { VOICE_CHAT_STATE } from '@zamp-platform/ui/types';
 import { cn } from '@zamp-platform/ui/utils';
 import { HeadphoneOff, Headphones, Loader2, X } from 'lucide-react';
-import { useVoiceJoinMutation } from '@/apis/voiceAgents';
+import { useVoiceChatContext } from '@/contexts/VoiceChatContext';
 
 const toolbarBtnClass = 'hover:text-GRAY_1000 hover:bg-accent size-[26px] rounded-[6px] p-[2px] [&_svg]:size-3.5';
 
 const VoiceChatSlot: FC = () => {
-  const [triggerVoiceJoin] = useVoiceJoinMutation();
-  const fetchVoiceJoin = useCallback(
-    async (body: Parameters<typeof triggerVoiceJoin>[0]) => {
-      const result = await triggerVoiceJoin(body);
-
-      if ('error' in result) {
-        const err = result.error;
-        const detail = err && 'status' in err ? String(err.status) : (err as { message?: string })?.message;
-
-        throw new Error(`Voice join failed${detail ? `: ${detail}` : ''}`);
-      }
-
-      return result.data;
-    },
-    [triggerVoiceJoin],
-  );
-
-  const { start, stop, toggleMic, isMicEnabled, state } = useVoiceChat({ fetchJoin: fetchVoiceJoin });
+  const { start, stop, toggleMic, isMicEnabled, state } = useVoiceChatContext();
 
   const isVoiceActive = state === VOICE_CHAT_STATE.Active;
   const isVoiceConnecting = state === VOICE_CHAT_STATE.Connecting || state === VOICE_CHAT_STATE.Ready;

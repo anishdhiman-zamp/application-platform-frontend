@@ -17,6 +17,7 @@ import {
 } from '@zamp-platform/conversation-stream';
 import { AnimatePresence, motion } from 'framer-motion';
 import { FEATURE_FLAGS } from '@/constants/featureFlags';
+import { useVoiceChatContext } from '@/contexts/VoiceChatContext';
 import { useAppSelector } from '@/hooks/toolkit';
 import { useFeatureFlag } from '@/hooks/useFeatureFlag';
 import AutoLoopConfirmDialog from '@/modules/pace/components/chat/AutoLoopConfirmDialog';
@@ -60,7 +61,7 @@ const ChatHomePage = () => {
   const [autoLoopEnabled, setAutoLoopEnabled] = useState(false);
   const [isConfirmDialogOpen, setIsConfirmDialogOpen] = useState(false);
 
-  const { isEnabled: isVoiceChatEnabled } = useFeatureFlag(FEATURE_FLAGS.VOICE_CHAT);
+  const { isVoiceChatEnabled } = useVoiceChatContext();
 
   const { isDragOver, dropZoneProps } = useFileDragDrop({
     onFileDrop: (files) => fileDropHandlerRef.current?.(files),
