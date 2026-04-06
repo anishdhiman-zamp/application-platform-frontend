@@ -282,9 +282,9 @@ const ColumnHeader: FC<IHeaderParams & ColumnHeaderParams> = (props) => {
       >
         <div className='flex flex-auto items-center gap-1 self-stretch truncate'>
           <span className='truncate'>{displayName}</span>
-          {sortState === 'asc' && <ArrowUp size={12} className='text-BLUE_700' />}
-          {sortState === 'desc' && <ArrowDown size={12} className='text-BLUE_700' />}
-          {hasActiveFilter && <Filter size={12} className='text-BLUE_700' />}
+          {sortState === 'asc' && <ArrowUp size={12} className='text-GRAY_700' />}
+          {sortState === 'desc' && <ArrowDown size={12} className='text-GRAY_700' />}
+          {hasActiveFilter && <Filter size={12} className='text-GRAY_700' />}
         </div>
         <ChevronDown size={12} className='ml-2.5' />
       </div>
@@ -306,6 +306,7 @@ const ColumnHeader: FC<IHeaderParams & ColumnHeaderParams> = (props) => {
               onBlur={handleHeaderNameBlur}
               autoFocus
               wrapperClassName='m-2'
+              className='focus:border-gray-600 focus:ring-gray-400 focus-visible:outline-none'
               error={!headerName?.trim()}
               icon={<Pencil size={16} className='text-GRAY_500' />}
               onKeyDown={handleHeaderNameKeyDown}
@@ -361,13 +362,13 @@ const ColumnHeader: FC<IHeaderParams & ColumnHeaderParams> = (props) => {
               className='relative flex cursor-pointer items-center gap-0.5'
               onClick={() => setIsOperatorOpen((prev) => !prev)}
             >
-              <span className='text-BLUE_700 f-12-500'>
+              <span className='text-GRAY_700 f-12-500'>
                 {FILTER_OPERATORS.find((op) => op.value === filterOperator)?.label}
               </span>
               {isOperatorOpen ? (
-                <ChevronUp size={10} className='text-BLUE_700' />
+                <ChevronUp size={10} className='text-GRAY_700' />
               ) : (
-                <ChevronDown size={10} className='text-BLUE_700' />
+                <ChevronDown size={10} className='text-GRAY_700' />
               )}
             </div>
           </div>

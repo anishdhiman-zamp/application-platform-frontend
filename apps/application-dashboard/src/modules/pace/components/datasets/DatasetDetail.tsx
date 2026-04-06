@@ -1,7 +1,7 @@
 'use client';
 
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
-import { DatasetEditPreviewTab, DatasetTabsTypes, PREVIEW_DATASET_ID } from '@zamp-platform/dataset-create-edit';
+import { DatasetEditPreviewTab, DatasetTabsTypes } from '@zamp-platform/dataset-create-edit';
 import {
   Button,
   Dialog,
@@ -1127,7 +1127,7 @@ const DatasetDetailInner = ({ tableName }: DatasetDetailProps) => {
         </TooltipV2>
 
         {/* Display Options */}
-        <DisplayOptions tableRef={tableRef} datasetId={PREVIEW_DATASET_ID} isGroupByDisabled />
+        <DisplayOptions tableRef={tableRef} datasetId={tableName} isGroupByDisabled />
       </div>
 
       {/* Content — both tabs stay mounted, visibility toggled via CSS to avoid re-fetching */}
