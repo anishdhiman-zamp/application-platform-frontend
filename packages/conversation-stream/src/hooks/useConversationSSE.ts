@@ -1,6 +1,5 @@
 'use client';
 
-import { captureException } from '@sentry/browser';
 import { useCallback, useEffect, useRef, useState } from 'react';
 
 import { openSSEConnection, SSE_SOURCE_TYPE } from '../registry/openSSEConnection';
@@ -84,7 +83,6 @@ export function useConversationSSE({
         setIsConnected(false);
         setIsConnecting(false);
         if (error !== undefined) {
-          captureException(error instanceof Error ? error : new Error(String(error)));
           onErrorRef.current?.(error);
         }
         onCloseRef.current?.();

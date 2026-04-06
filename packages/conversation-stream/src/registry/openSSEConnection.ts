@@ -81,7 +81,15 @@ export function openSSEConnection(
     onerror: (error) => {
       clearTimeout(timeoutId);
       if (signal.aborted) return;
-      captureException(error instanceof Error ? error : new Error(String(error)));
+      // Network blips and server-closed connections are expected and handled by the
+      // registry's retry/backoff logic — don't capture those as Sentry errors.
+      // Only capture unexpected errors (e.g. non-TypeError thrown by fetchEventSource itself).
+      const isNetworkError =
+        error instanceof TypeError ||
+        (error instanceof Error && (error.message.includes('network') || error.message.includes('fetch')));
+      if (!isNetworkError) {
+        captureException(error instanceof Error ? error : new Error(String(error)));
+      }
       markDead(error);
       throw error; // stops fetchEventSource's internal retry
     },
