@@ -46,7 +46,8 @@ const ChatSidebarContent = ({
   const dispatch = useAppDispatch();
   const { openTab } = useDynamicTabs({ type: TAB_TYPE.FILE });
   const { openTab: openBrowserTab } = useDynamicTabs({ type: TAB_TYPE.BROWSER });
-  const { chatSidebarState, setChatSidebarState, selectedModel, setSelectedModel } = usePaceContext();
+  const { chatSidebarState, setChatSidebarState, setActiveAgentInfo, selectedModel, setSelectedModel } =
+    usePaceContext();
   const { inputValue, setInputValue } = useChatDraftInput({ conversationId });
   const { inputsRequired, isStreaming } = useConversationState();
   const { refetchConversationHistory } = useConversationActions();
@@ -97,6 +98,14 @@ const ChatSidebarContent = ({
     void refetchConversationHistory();
   }, [refetchConversationHistory]);
 
+  const handleSelectConversation = useCallback(
+    (id: string | null, title?: string) => {
+      setActiveAgentInfo(null);
+      setConversationId(id, title);
+    },
+    [setActiveAgentInfo, setConversationId],
+  );
+
   const handleConversationCreated = useCallback(() => {
     dispatch(baseApi.util.invalidateTags([APITags.GET_CONVERSATION_HISTORY]));
   }, [dispatch]);
@@ -135,7 +144,7 @@ const ChatSidebarContent = ({
           organizationId={organizationId}
           onStartNewChat={startNewChat}
           onTitleChange={setChatTitle}
-          onSelectConversation={setConversationId}
+          onSelectConversation={handleSelectConversation}
           onDeleteConversation={startNewChat}
           onExpand={chatSidebarState !== CHAT_SIDEBAR_STATE.EXPANDED ? handleExpand : undefined}
         />

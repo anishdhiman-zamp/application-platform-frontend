@@ -1,7 +1,7 @@
 'use client';
 
 import { useCallback, useEffect, useRef } from 'react';
-import { Skeleton } from '@zamp-platform/ui';
+import { Button, Skeleton } from '@zamp-platform/ui';
 import { useGetAgentInstructionsQuery, useUpdateAgentInstructionsMutation } from '@/apis/agents';
 import CommonWrapper from '@/components/commonWrapper';
 import { SkeletonTypes } from '@/components/commonWrapper/commonWrapper.types';
@@ -40,9 +40,16 @@ interface AgentInstructionsProps {
   isActive?: boolean;
   skipFetch?: boolean;
   onUpdating?: (updating: boolean) => void;
+  onAddInstructions?: () => void;
 }
 
-const AgentInstructions = ({ agentId, isActive = true, skipFetch = false, onUpdating }: AgentInstructionsProps) => {
+const AgentInstructions = ({
+  agentId,
+  isActive = true,
+  skipFetch = false,
+  onUpdating,
+  onAddInstructions,
+}: AgentInstructionsProps) => {
   const prevFetchingRef = useRef(false);
   const containerRef = useRef<HTMLDivElement>(null);
   const autoSaveTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
@@ -96,8 +103,19 @@ const AgentInstructions = ({ agentId, isActive = true, skipFetch = false, onUpda
       refetchFunction={refetch}
       isNoData={!isLoading && !instructions}
       noDataBanner={
-        <div className='border-GRAY_400 flex min-h-75 items-center justify-center rounded-xl border'>
-          <p className='f-13-450 text-GRAY_700'>No instructions found</p>
+        <div className='border-GRAY_400 flex min-h-75 items-center justify-between gap-10 rounded-xl border px-25'>
+          <span className='f-13-450 text-GRAY_700 flex items-center'>
+            📋<span className='ml-1'>🤖</span>
+            <span className='ml-1.5'>Define what your agent should do every time it runs</span>
+          </span>
+          <Button
+            variant='outline'
+            size='small'
+            className='shrink-0 rounded-lg px-3 text-xs'
+            onClick={onAddInstructions}
+          >
+            Add instructions
+          </Button>
         </div>
       }
       skeletonType={SkeletonTypes.CUSTOM}

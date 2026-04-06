@@ -29,7 +29,7 @@ const ChatHomePage: FC = () => {
   const {
     setChatSidebarState,
     chatSidebarState,
-    setPendingConversationPayload,
+    setChatMessageIntent,
     pendingFileReference,
     clearPendingFileReference,
     startNewChat,
@@ -63,7 +63,7 @@ const ChatHomePage: FC = () => {
 
         startNewChat();
 
-        setPendingConversationPayload({
+        setChatMessageIntent({
           message: payload.message_content?.text || '',
           fileReferences: fileRefs?.map((ref) => ({ path: ref.path, name: ref.name })),
           llmModel: payload.llm_model,
@@ -75,7 +75,7 @@ const ChatHomePage: FC = () => {
         return { conversation_id: 'pending', status_message: '', title: '' };
       },
     };
-  }, [chat, startNewChat, setPendingConversationPayload, setChatSidebarState]);
+  }, [chat, startNewChat, setChatMessageIntent, setChatSidebarState]);
 
   const { isDragOver, dropZoneProps } = useFileDragDrop({
     onFileDrop: (files) => fileDropHandlerRef.current?.(files),

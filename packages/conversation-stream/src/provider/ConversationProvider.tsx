@@ -193,8 +193,10 @@ export const ConversationProvider: React.FC<ConversationProviderProps> = ({
   }, []);
 
   // Handle input_required events arriving on the per-conversation SSE channel.
+  // Clear the "new conversation" skip flag so the query can refetch with inputs_required.
   const handlePerConvInputRequired = useCallback(() => {
     if (_conversationId) {
+      isNewlyCreatedConversationRef.current = null;
       dispatch(chatApi.util.invalidateTags([{ type: APITags.GET_CONVERSATION_BY_ID, id: _conversationId }]));
     }
   }, [_conversationId, dispatch]);

@@ -13,9 +13,11 @@ import BarrelCounter from 'modules/pace/components/agents/components/BarrelCount
 import ShareAgentPopup from 'modules/pace/components/agents/components/ShareAgentPopup';
 import {
   AGENT_DETAIL_TAB_CONFIG,
+  getAddConnectionMessage,
+  getAddInstructionsMessage,
+  getAddTriggerMessage,
   getAgentAvatar,
   getAgentAvatarByKey,
-  PrefixMessage,
 } from 'modules/pace/components/agents/constants/agents.constants';
 import { AGENT_DETAIL_TAB, type AgentDetailTabType } from 'modules/pace/components/agents/types/agents.types';
 import { motion } from 'motion/react';
@@ -41,6 +43,7 @@ const VALID_TABS = new Set<string>(Object.values(AGENT_DETAIL_TAB));
 
 const AgentDetailPage = ({ agentId, agentName, agentDescription = '', avatarKey = '' }: AgentDetailPageProps) => {
   const router = useRouter();
+  const hasSyncedRef = useRef(false);
   const debounceTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 
   const { updateTab, getTabById } = useDynamicTabs({ type: TAB_TYPE.AGENT });
@@ -111,15 +114,17 @@ const AgentDetailPage = ({ agentId, agentName, agentDescription = '', avatarKey 
   const { triggerChatMessage } = useTriggerChatMessageFromButton({ agentId, agentName: displayName });
 
   const syncAgentData = useCallback(() => {
-    if (!agentData) return;
+    if (!agentData || hasSyncedRef.current) return;
 
-    if (agentData.name) setEditName(agentData.name);
-    if (agentData.description) setEditDescription(agentData.description);
+    hasSyncedRef.current = true;
+
+    if (agentData?.name) setEditName(agentData?.name);
+    if (agentData?.description) setEditDescription(agentData?.description);
 
     if (agentData.avatar) {
-      updateTab(agentId, agentId, agentData.name || editName, {
-        description: agentData.description || editDescription,
-        avatarKey: agentData.avatar,
+      updateTab(agentId, agentId, agentData?.name || editName, {
+        description: agentData?.description || editDescription,
+        avatarKey: agentData?.avatar,
       });
     }
   }, [agentData, agentId, editName, editDescription, updateTab]);
@@ -138,8 +143,8 @@ const AgentDetailPage = ({ agentId, agentName, agentDescription = '', avatarKey 
           updateTab(agentId, agentId, tabName, { description: tabDescription });
         } catch {
           // Revert to last known good values on failure
-          if (agentData?.name) setEditName(agentData.name);
-          if (agentData?.description) setEditDescription(agentData.description);
+          if (agentData?.name) setEditName(agentData?.name);
+          if (agentData?.description) setEditDescription(agentData?.description);
         }
       }, 800);
     },
@@ -175,13 +180,15 @@ const AgentDetailPage = ({ agentId, agentName, agentDescription = '', avatarKey 
   }, [router]);
 
   const handleAddNewTrigger = useCallback(() => {
-    triggerChatMessage(`${PrefixMessage.ADD_NEW_TRIGGER} for **${displayName}**`);
+    triggerChatMessage(getAddTriggerMessage(displayName));
+  }, [triggerChatMessage, displayName]);
+
+  const handleAddInstructions = useCallback(() => {
+    triggerChatMessage(getAddInstructionsMessage(displayName));
   }, [triggerChatMessage, displayName]);
 
   const handleAddNewConnection = useCallback(() => {
-    triggerChatMessage(
-      `${PrefixMessage.ADD_NEW_CONNECTION_P} **${displayName}** ${PrefixMessage.ADD_NEW_CONNECTION_S}`,
-    );
+    triggerChatMessage(getAddConnectionMessage(displayName));
   }, [triggerChatMessage, displayName]);
 
   const handleInstructionsUpdating = useCallback((updating: boolean) => {
@@ -216,6 +223,7 @@ const AgentDetailPage = ({ agentId, agentName, agentDescription = '', avatarKey 
           isActive={activeDetailTab === AGENT_DETAIL_TAB.INSTRUCTIONS}
           skipFetch={skipFetch}
           onUpdating={handleInstructionsUpdating}
+          onAddInstructions={handleAddInstructions}
         />
       ),
       [AGENT_DETAIL_TAB.FILES]: (
@@ -230,7 +238,15 @@ const AgentDetailPage = ({ agentId, agentName, agentDescription = '', avatarKey 
         />
       ),
     }),
-    [agentId, activeDetailTab, skipFetch, handleInstructionsUpdating, handleAddNewTrigger, handleAddNewConnection],
+    [
+      agentId,
+      activeDetailTab,
+      skipFetch,
+      handleInstructionsUpdating,
+      handleAddNewTrigger,
+      handleAddInstructions,
+      handleAddNewConnection,
+    ],
   );
 
   if (isAgentError) {

@@ -1,7 +1,7 @@
 'use client';
 
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
-import { Skeleton, toast } from '@zamp-platform/ui';
+import { Button, Skeleton, toast } from '@zamp-platform/ui';
 import IntegrationDetail from 'modules/pace/components/agents/components/IntegrationDetail';
 import IntegrationList from 'modules/pace/components/agents/components/IntegrationList';
 import {
@@ -512,8 +512,14 @@ const AgentToolsAccess = ({ agentId, isActive = true, skipFetch = false, onAddCo
 
   if (integrations.length === 0) {
     return (
-      <div className='border-GRAY_400 flex h-full items-center justify-center rounded-xl border'>
-        <p className='f-13-450 text-GRAY_700'>No integrations configured</p>
+      <div className='border-GRAY_400 flex h-full items-center justify-start gap-10 rounded-xl border px-25'>
+        <span className='f-13-450 text-GRAY_700 flex items-center'>
+          🔗<span className='ml-1'>🤖</span>
+          <span className='ml-1.5'>Explicitly grant connections access to your agent</span>
+        </span>
+        <Button variant='outline' size='small' className='shrink-0 rounded-lg px-3 text-xs' onClick={onAddConnection}>
+          Add connection
+        </Button>
       </div>
     );
   }

@@ -91,11 +91,19 @@ const AgentTriggerList = ({
       noDataBanner={
         <div
           className={cn(
-            'border-GRAY_400 flex h-full items-center justify-center rounded-xl border',
+            'border-GRAY_400 flex h-full items-center justify-between gap-10 rounded-xl border px-25',
             onTriggerClick && 'min-h-33',
           )}
         >
-          <p className='f-13-450 text-GRAY_700'>No Triggers Configured</p>
+          <span className='f-13-450 text-GRAY_700 flex items-center'>
+            🔔<span className='ml-1'>🤖</span>
+            <span className='ml-1.5'>Run your agent in the background via triggers</span>
+          </span>
+          {!onTriggerClick && (
+            <Button variant='outline' size='small' className='shrink-0 rounded-lg px-3 text-xs' onClick={onAddTrigger}>
+              Add trigger
+            </Button>
+          )}
         </div>
       }
       skeletonType={SkeletonTypes.CUSTOM}

@@ -40,11 +40,16 @@ export const AGENT_DEFAULT_DESCRIPTION = "Hi, I'm your new agent! Let me know wh
 export const enum PrefixMessage {
   OPTIMISTIC_AGENT_CREATION = 'Create an agent which can',
   ADD_TRIGGER = 'I want to add a trigger for agent',
-  ADD_NEW_TRIGGER = 'I want to add a new trigger',
   TEST_AGENT = 'I want to add some triggers for',
-  ADD_NEW_CONNECTION_P = 'I want to give ',
-  ADD_NEW_CONNECTION_S = ' access to one of my connections',
 }
+
+export const getAddTriggerMessage = (agentName: string) =>
+  `I want to add a trigger to **${agentName}**. Ask me which type of trigger I'd like (e.g., on a schedule like daily/hourly, or when something specific happens?) then collect the details needed to set it up.`;
+
+export const getAddConnectionMessage = (agentName: string) =>
+  `I want to grant **${agentName}** access to my connections. List all my connections for me — I'll pick.`;
+
+export const getAddInstructionsMessage = (agentName: string) => `I want to add to **${agentName}**'s instructions.`;
 
 export const AGENT_GREETING_MESSAGE = "Let's collaborate — chat, add triggers, or edit me";
 
@@ -129,6 +134,23 @@ export const POLICY_TO_PERMISSION: Record<string, ToolPermissionType> = {
   always_allow: TOOL_PERMISSION.ALLOWED,
   needs_approval: TOOL_PERMISSION.ASK,
   blocked: TOOL_PERMISSION.BLOCKED,
+};
+
+export const RANDOM_AGENT_TITLES = [
+  'Summarize my weekly PRs by teammate and theme',
+  'Send me a daily news digest every morning',
+  'Monitor Slack for urgent messages and alert me',
+  'Track competitor pricing and email me changes',
+  'Generate a weekly report of completed tasks',
+  'Remind me to review pull requests every afternoon',
+  'Fetch top headlines and send via email daily',
+  'Notify me when a new issue is assigned to me',
+  'Compile a daily standup summary from Slack',
+  'Alert me when server costs exceed threshold',
+] as const;
+
+export const getRandomAgentTitle = (): string => {
+  return RANDOM_AGENT_TITLES[Math.floor(Math.random() * RANDOM_AGENT_TITLES.length)];
 };
 
 export const RANDOM_AGENT_NAMES = [

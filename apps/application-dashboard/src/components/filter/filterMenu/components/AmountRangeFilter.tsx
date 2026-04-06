@@ -112,7 +112,7 @@ const AmountRangeFilter: FC<AmountRangeFilterProps> = ({
 
   return (
     <div
-      className={`border-0.5 border-GRAY_500 shadow-table-filter-menu w-[250px] min-w-[250px] rounded-md bg-white px-2.5 py-2 ${className}`}
+      className={`border-0.5 border-GRAY_500 shadow-table-filter-menu bg-BG_WHITE w-[250px] min-w-[250px] rounded-md px-2.5 py-2 ${className}`}
     >
       <div className='text-GRAY_600 z-80 mb-2 flex w-full items-center gap-1'>
         <div className='f-11-400 text-GRAY_700 overflow-hidden text-ellipsis whitespace-nowrap'>
@@ -129,7 +129,7 @@ const AmountRangeFilter: FC<AmountRangeFilterProps> = ({
           {isOpen && (
             <div
               ref={ref}
-              className='text-GRAY_900 border-GRAY_400 shadow-table-filter-menu absolute top-full left-0 z-10 w-[256px] rounded-md border bg-white p-1'
+              className='text-GRAY_900 border-GRAY_400 shadow-table-filter-menu bg-BG_WHITE absolute top-full left-0 z-10 w-[256px] rounded-md border p-1'
             >
               {AMOUNT_RANGE_FILTER_OPTIONS.map((option) => (
                 <div

@@ -9,7 +9,7 @@ interface UseTriggerChatMessageFromButtonParams {
 }
 
 export const useTriggerChatMessageFromButton = ({ agentId, agentName }: UseTriggerChatMessageFromButtonParams) => {
-  const { chatSidebarState, setChatSidebarState, startNewChat, setPendingConversationPayload, setActiveAgentInfo } =
+  const { chatSidebarState, setChatSidebarState, startNewChat, setChatMessageIntent, setActiveAgentInfo } =
     usePaceContext();
 
   const triggerChatMessage = useCallback(
@@ -22,7 +22,7 @@ export const useTriggerChatMessageFromButton = ({ agentId, agentName }: UseTrigg
         setActiveAgentInfo({ id: agentId, name: agentName });
       }
 
-      setPendingConversationPayload({
+      setChatMessageIntent({
         message,
         metadata: { agent_id: agentId },
       });
@@ -31,15 +31,7 @@ export const useTriggerChatMessageFromButton = ({ agentId, agentName }: UseTrigg
         setChatSidebarState(CHAT_SIDEBAR_STATE.SIDEBAR);
       }
     },
-    [
-      agentId,
-      agentName,
-      chatSidebarState,
-      startNewChat,
-      setPendingConversationPayload,
-      setActiveAgentInfo,
-      setChatSidebarState,
-    ],
+    [agentId, agentName, chatSidebarState, startNewChat, setChatMessageIntent, setActiveAgentInfo, setChatSidebarState],
   );
 
   return { triggerChatMessage };
