@@ -8,7 +8,7 @@ import {
 import { CHAT_SIDEBAR_STATE, type ChatSidebarState } from 'modules/pace/pace.types';
 import { ROUTES_PATH } from '@/constants/routeConfig';
 import type { SkillApiError } from '@/types/api/skills.types';
-import { LOCAL_STORAGE_KEYS } from '@/utils/localstorage';
+import { getFromSessionStorage, LOCAL_STORAGE_KEYS, SESSION_STORAGE_KEYS } from '@/utils/localstorage';
 
 /**
  * Reads a numeric value from localStorage and clamps it within [min, max].
@@ -34,6 +34,7 @@ export const getInitialWidth = (key: LOCAL_STORAGE_KEYS, min: number, max: numbe
  * Rules:
  * - No sidebar conversation param → COLLAPSED
  * - `/chat` root with no file param (`f`) → EXPANDED (full-screen)
+ * - Persisted EXPANDED state with sidebar param → EXPANDED (survives refresh on non-chat routes)
  * - Any other route with sidebar param → SIDEBAR
  */
 export const getInitialSidebarState = (): ChatSidebarState => {
@@ -45,7 +46,13 @@ export const getInitialSidebarState = (): ChatSidebarState => {
 
   const isChatRoot = window.location.pathname === ROUTES_PATH.CHAT && !search.has('f');
 
-  return isChatRoot ? CHAT_SIDEBAR_STATE.EXPANDED : CHAT_SIDEBAR_STATE.SIDEBAR;
+  if (isChatRoot) return CHAT_SIDEBAR_STATE.EXPANDED;
+
+  const persisted = getFromSessionStorage(SESSION_STORAGE_KEYS.PACE_SIDEBAR_STATE);
+
+  if (persisted === CHAT_SIDEBAR_STATE.EXPANDED) return CHAT_SIDEBAR_STATE.EXPANDED;
+
+  return CHAT_SIDEBAR_STATE.SIDEBAR;
 };
 
 /** Returns a random element from the given array */

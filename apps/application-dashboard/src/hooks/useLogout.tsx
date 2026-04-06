@@ -13,6 +13,7 @@ import {
   setCookie,
   USER_SESSION_COOKIE,
 } from '@/utils/cookie';
+import { removeFromSessionStorage, SESSION_STORAGE_KEYS } from '@/utils/localstorage';
 import { resetPostHog } from '@/utils/postHog';
 import { getProductModeFromPath } from '@/utils/route.util';
 
@@ -49,6 +50,7 @@ export const useLogout = () => {
 
     // Clear USER_SESSION_COOKIE on client side
     clearCookie(USER_SESSION_COOKIE);
+    removeFromSessionStorage(SESSION_STORAGE_KEYS.PACE_SIDEBAR_STATE);
 
     logOut(logoutFlow?.logout_url ?? '')
       .then(() => {

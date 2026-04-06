@@ -28,6 +28,11 @@ export enum LOCAL_STORAGE_KEYS {
   PACE_FILES_PANEL_WIDTH = 'PACE_FILES_PANEL_WIDTH',
   THEME = 'ZAMP_THEME',
   PEV_LOCKED_CONVERSATIONS = 'PEV_LOCKED_CONVERSATIONS',
+  PACE_SELECTED_MODEL = 'PACE_SELECTED_MODEL',
+}
+
+export enum SESSION_STORAGE_KEYS {
+  PACE_SIDEBAR_STATE = 'PACE_SIDEBAR_STATE',
 }
 
 const QUOTA_ERROR_NAMES: readonly string[] = ['QuotaExceededError', 'NS_ERROR_DOM_QUOTA_REACHED'];
@@ -90,4 +95,38 @@ export const setStoredExpandedPaths = (paths: string[]) => {
   } catch {
     // silent error
   }
+};
+
+export const getFromSessionStorage = (key: SESSION_STORAGE_KEYS): string | null => {
+  if (typeof window === 'undefined') return null;
+
+  return window.sessionStorage.getItem(key);
+};
+
+export const setToSessionStorage = (key: SESSION_STORAGE_KEYS, value: string) => {
+  if (typeof window === 'undefined') return;
+
+  try {
+    window.sessionStorage.setItem(key, value);
+  } catch (error) {
+    const isQuotaError = error instanceof DOMException && QUOTA_ERROR_NAMES.some((name) => name === error.name);
+
+    if (isQuotaError) {
+      console.warn(`sessionStorage quota exceeded for key "${key}". Clearing key and retrying.`);
+      try {
+        window.sessionStorage.removeItem(key);
+        window.sessionStorage.setItem(key, value);
+      } catch {
+        captureException(new Error(`sessionStorage quota exceeded for key "${key}" even after clearing`));
+      }
+    } else {
+      captureException(error);
+    }
+  }
+};
+
+export const removeFromSessionStorage = (key: SESSION_STORAGE_KEYS) => {
+  if (typeof window === 'undefined') return;
+
+  window.sessionStorage.removeItem(key);
 };

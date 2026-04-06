@@ -34,6 +34,8 @@ const ChatHomePage: FC = () => {
     clearPendingFileReference,
     startNewChat,
     selectConversation,
+    selectedModel,
+    setSelectedModel,
   } = usePaceContext();
 
   const organizationId = useAppSelector((state: RootState) => state.user.user?.orgs?.[0]?.organization_id) ?? '';
@@ -44,7 +46,6 @@ const ChatHomePage: FC = () => {
   const fileDropHandlerRef = useRef<((files: FileList) => void) | null>(null);
   const addFileReferenceRef = useRef<((ref: { path: string; name: string }) => void) | null>(null);
 
-  const [selectedModel, setSelectedModel] = useState<string | null>(null);
   const [autoLoopEnabled, setAutoLoopEnabled] = useState(false);
   const [isConfirmDialogOpen, setIsConfirmDialogOpen] = useState(false);
 
