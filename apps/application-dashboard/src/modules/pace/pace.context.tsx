@@ -5,6 +5,7 @@ import {
   FILES_PANEL_MAX_WIDTH,
   FILES_PANEL_MIN_WIDTH,
   FILES_PANEL_WIDTH,
+  SIDEBAR_CONVERSATION_ID_PARAM,
   SIDEBAR_MAX_WIDTH,
   SIDEBAR_MIN_WIDTH,
   SIDEBAR_WIDTH,
@@ -12,10 +13,11 @@ import {
 import { CHAT_SIDEBAR_STATE, type ChatSidebarState } from 'modules/pace/pace.types';
 import { getInitialSidebarState, getInitialWidth } from 'modules/pace/pace.utils';
 import { usePathname } from 'next/navigation';
+import { ROUTES_PATH } from '@/constants/routeConfig';
 import { useAppSelector } from '@/hooks/toolkit';
 import { selectActiveTabId } from '@/store/slices/dynamic-tabs.slice';
 import { defaultFnType } from '@/types/commonTypes';
-import { LOCAL_STORAGE_KEYS, setToLocalStorage } from '@/utils/localstorage';
+import { getFromLocalStorage, LOCAL_STORAGE_KEYS, setToLocalStorage } from '@/utils/localstorage';
 
 export interface PendingFileReference {
   path: string;
@@ -80,6 +82,9 @@ interface PaceContextType {
   persistFilesPanelWidth: (width: number) => void;
   isFilesPanelResizing: boolean;
   setIsFilesPanelResizing: (resizing: boolean) => void;
+
+  selectedModel: string | null;
+  setSelectedModel: (modelId: string | null) => void;
 }
 
 const PaceContext = createContext<PaceContextType | null>(null);
@@ -132,9 +137,14 @@ export const PaceProvider = ({ children }: { children: ReactNode }) => {
     ),
   );
   const [isFilesPanelResizing, setIsFilesPanelResizing] = useState(false);
+  const [selectedModel, setSelectedModelRaw] = useState<string | null>(
+    getFromLocalStorage(LOCAL_STORAGE_KEYS.PACE_SELECTED_MODEL),
+  );
 
   const routeSignature = activeTabId ? `${pathname}:${activeTabId}` : pathname;
   const prevRouteSignatureRef = useRef(routeSignature);
+  const prevPathnameRef = useRef(pathname);
+  const prevActiveTabIdRef = useRef(activeTabId);
   const chatSidebarStateRef = useRef(chatSidebarState);
 
   chatSidebarStateRef.current = chatSidebarState;
@@ -145,6 +155,7 @@ export const PaceProvider = ({ children }: { children: ReactNode }) => {
 
       return next;
     });
+    setToLocalStorage(LOCAL_STORAGE_KEYS.PACE_SIDEBAR_STATE, next);
   }, []);
 
   const setChatSidebarState = useCallback((state: ChatSidebarState) => {
@@ -222,6 +233,14 @@ export const PaceProvider = ({ children }: { children: ReactNode }) => {
     }, 200);
   }, [cancelFilesPanelClose]);
 
+  const setSelectedModel = useCallback((modelId: string | null) => {
+    setSelectedModelRaw(modelId);
+
+    if (modelId) {
+      setToLocalStorage(LOCAL_STORAGE_KEYS.PACE_SELECTED_MODEL, modelId);
+    }
+  }, []);
+
   const registerStartNewChat = useCallback((callback: defaultFnType) => {
     startNewChatRef.current = callback;
   }, []);
@@ -237,24 +256,6 @@ export const PaceProvider = ({ children }: { children: ReactNode }) => {
   const selectConversation = useCallback((id: string, title?: string) => {
     selectConversationRef.current?.(id, title);
   }, []);
-
-  useEffect(() => {
-    if (prevRouteSignatureRef.current === routeSignature) {
-      return;
-    }
-    prevRouteSignatureRef.current = routeSignature;
-
-    if (pendingCollapseRef.current) {
-      pendingCollapseRef.current = false;
-      setChatSidebarStateInternal(CHAT_SIDEBAR_STATE.COLLAPSED);
-
-      return;
-    }
-
-    if (chatSidebarStateRef.current === CHAT_SIDEBAR_STATE.EXPANDED) {
-      setChatSidebarStateInternal(CHAT_SIDEBAR_STATE.SIDEBAR);
-    }
-  }, [routeSignature]);
 
   const clampSidebarWidthToFilesPanel = useCallback(() => {
     if (!(filesPanelOpen && filesPanelPinned)) return;
@@ -273,6 +274,68 @@ export const PaceProvider = ({ children }: { children: ReactNode }) => {
       return effectiveMax;
     });
   }, [filesPanelOpen, filesPanelPinned, filesPanelWidth]);
+
+  const handlePendingCollapse = useCallback(
+    (isTabIdOnlyChange: boolean) => {
+      pendingCollapseRef.current = false;
+
+      const hasSidebarConversation = new URLSearchParams(window.location.search).has(SIDEBAR_CONVERSATION_ID_PARAM);
+
+      if (isTabIdOnlyChange && hasSidebarConversation) return;
+
+      setChatSidebarStateInternal(CHAT_SIDEBAR_STATE.COLLAPSED);
+    },
+    [setChatSidebarStateInternal],
+  );
+
+  const reconcileSidebarWithRoute = useCallback(() => {
+    const hasSidebarConversation = new URLSearchParams(window.location.search).has(SIDEBAR_CONVERSATION_ID_PARAM);
+    const isChatRoot = pathname === ROUTES_PATH.CHAT && !activeTabId;
+
+    if (isChatRoot && hasSidebarConversation) {
+      if (chatSidebarStateRef.current !== CHAT_SIDEBAR_STATE.EXPANDED) {
+        setChatSidebarStateInternal(CHAT_SIDEBAR_STATE.EXPANDED);
+      }
+
+      return;
+    }
+
+    if (chatSidebarStateRef.current === CHAT_SIDEBAR_STATE.EXPANDED) {
+      setChatSidebarStateInternal(CHAT_SIDEBAR_STATE.SIDEBAR);
+    }
+  }, [pathname, activeTabId, setChatSidebarStateInternal]);
+
+  const handleRouteChange = useCallback(() => {
+    if (prevRouteSignatureRef.current === routeSignature) {
+      prevPathnameRef.current = pathname;
+      prevActiveTabIdRef.current = activeTabId;
+
+      return;
+    }
+
+    const prevPathname = prevPathnameRef.current;
+    const prevActiveTab = prevActiveTabIdRef.current;
+
+    prevRouteSignatureRef.current = routeSignature;
+    prevPathnameRef.current = pathname;
+    prevActiveTabIdRef.current = activeTabId;
+
+    const isTabIdOnlyChange = prevPathname === pathname && prevActiveTab !== activeTabId;
+
+    if (pendingCollapseRef.current) {
+      handlePendingCollapse(isTabIdOnlyChange);
+
+      return;
+    }
+
+    if (isTabIdOnlyChange) return;
+
+    reconcileSidebarWithRoute();
+  }, [routeSignature, pathname, activeTabId, handlePendingCollapse, reconcileSidebarWithRoute]);
+
+  useEffect(() => {
+    handleRouteChange();
+  }, [handleRouteChange]);
 
   useEffect(() => {
     if (!(filesPanelOpen && filesPanelPinned)) return;
@@ -344,6 +407,9 @@ export const PaceProvider = ({ children }: { children: ReactNode }) => {
       persistFilesPanelWidth,
       isFilesPanelResizing,
       setIsFilesPanelResizing,
+
+      selectedModel,
+      setSelectedModel,
     }),
     [
       chatSidebarState,
@@ -383,6 +449,9 @@ export const PaceProvider = ({ children }: { children: ReactNode }) => {
       setFilesPanelWidth,
       persistFilesPanelWidth,
       isFilesPanelResizing,
+
+      selectedModel,
+      setSelectedModel,
     ],
   );
 

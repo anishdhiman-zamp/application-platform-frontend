@@ -91,7 +91,7 @@ export const AGENT_AVATARS: AgentAvatarConfig[] = [
   { src: AGENT_AVATAR_5, alt: 'Agent avatar 5', key: 'agent_5' },
   { src: AGENT_AVATAR_6, alt: 'Agent avatar 6', key: 'agent_6' },
   { src: AGENT_AVATAR_7, alt: 'Agent avatar 7', key: 'agent_7' },
-  { src: AGENT_AVATAR_8, alt: 'Agent avatar 8', key: 'agent_8' },
+  { src: AGENT_AVATAR_8, alt: 'Agent avatar 8', key: 'agent_8_v2' },
   { src: AGENT_AVATAR_9, alt: 'Agent avatar 9', key: 'agent_9' },
   { src: AGENT_AVATAR_10, alt: 'Agent avatar 10', key: 'agent_10' },
   { src: AGENT_AVATAR_11, alt: 'Agent avatar 11', key: 'agent_11' },

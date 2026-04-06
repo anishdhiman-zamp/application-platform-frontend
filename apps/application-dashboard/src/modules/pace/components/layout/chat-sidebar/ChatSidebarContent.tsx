@@ -46,7 +46,8 @@ const ChatSidebarContent = ({
   const dispatch = useAppDispatch();
   const { openTab } = useDynamicTabs({ type: TAB_TYPE.FILE });
   const { openTab: openBrowserTab } = useDynamicTabs({ type: TAB_TYPE.BROWSER });
-  const { chatSidebarState, setChatSidebarState, setActiveAgentInfo } = usePaceContext();
+  const { chatSidebarState, setChatSidebarState, setActiveAgentInfo, selectedModel, setSelectedModel } =
+    usePaceContext();
   const { inputValue, setInputValue } = useChatDraftInput({ conversationId });
   const { inputsRequired, isStreaming } = useConversationState();
   const { refetchConversationHistory } = useConversationActions();
@@ -55,7 +56,6 @@ const ChatSidebarContent = ({
   const fileDropHandlerRef = useRef<((files: FileList) => void) | null>(null);
   const addFileReferenceRef = useRef<((ref: { path: string; name: string }) => void) | null>(null);
 
-  const [selectedModel, setSelectedModel] = useState<string | null>(null);
   const [autoLoopEnabled, setAutoLoopEnabled] = useState(false);
   const [isAutoLoopLocked, setIsAutoLoopLocked] = useState(false);
   const [isConfirmDialogOpen, setIsConfirmDialogOpen] = useState(false);
@@ -145,6 +145,7 @@ const ChatSidebarContent = ({
           onStartNewChat={startNewChat}
           onTitleChange={setChatTitle}
           onSelectConversation={handleSelectConversation}
+          onDeleteConversation={startNewChat}
           onExpand={chatSidebarState !== CHAT_SIDEBAR_STATE.EXPANDED ? handleExpand : undefined}
         />
       </div>

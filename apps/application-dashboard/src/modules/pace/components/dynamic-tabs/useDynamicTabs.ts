@@ -163,7 +163,7 @@ export const useDynamicTabs = (config: UseDynamicTabsConfig = {}): UseDynamicTab
           navigateTo(target.path ?? buildTabRoute(target.id, target.type));
         } else {
           dispatch(dynamicTabsActions.setActiveTab(null));
-          navigateTo(ROUTES_PATH.CHAT, NAV_METHOD.PUSH, true);
+          navigateTo(ROUTES_PATH.CHAT, NAV_METHOD.PUSH);
         }
       }
     },
@@ -206,7 +206,7 @@ export const useDynamicTabs = (config: UseDynamicTabsConfig = {}): UseDynamicTab
             navigateTo(target.path ?? buildTabRoute(target.id, target.type));
           } else {
             dispatch(dynamicTabsActions.setActiveTab(null));
-            navigateTo(ROUTES_PATH.CHAT, NAV_METHOD.PUSH, true);
+            navigateTo(ROUTES_PATH.CHAT, NAV_METHOD.PUSH);
           }
         } else {
           dispatch(dynamicTabsActions.setActiveTab(null));
@@ -358,7 +358,7 @@ export const useDynamicTabs = (config: UseDynamicTabsConfig = {}): UseDynamicTab
 
     currentTabs.forEach((tab) => markTabAsClosed(tab.id));
     dispatch(dynamicTabsActions.clearAllTabs());
-    navigateTo(ROUTES_PATH.CHAT, NAV_METHOD.PUSH, true);
+    navigateTo(ROUTES_PATH.CHAT, NAV_METHOD.PUSH);
   }, [dispatch, navigateTo]);
 
   const reorderTabs = useCallback(

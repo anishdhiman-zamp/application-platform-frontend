@@ -313,6 +313,12 @@ const AgentToolsAccess = ({ agentId, isActive = true, skipFetch = false, onAddCo
         setIntegrations([]);
       }
 
+      // If both queries have resolved but there are no catalog items, stop loading
+      if (!isLoadingCatalog && !isLoadingAgentConnections) {
+        setIsLoadingTools(false);
+        isInitialLoadRef.current = false;
+      }
+
       return;
     }
 
