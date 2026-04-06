@@ -2,6 +2,8 @@
 
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import {
+  type AgentBlockType,
+  BLOCK_TYPE,
   ChatActionsProvider,
   createConversationPayload,
   DropOverlay,
@@ -14,13 +16,25 @@ import {
 import { useConversationActions, useConversationState } from '@zamp-platform/conversation-stream';
 import { ScrollContainer } from '@zamp-platform/ui';
 import { cn } from '@zamp-platform/ui/utils';
+import { useRouter } from 'next/navigation';
 import NewPaceIcons from '@/assets/Icons/NewPaceIcons';
 import CommonWrapper from '@/components/commonWrapper';
 import { SkeletonTypes } from '@/components/commonWrapper/commonWrapper.types';
 import NewPaceAvatar from '@/modules/chatbot/NewPaceAvatar';
+import AgentPill from '@/modules/pace/components/agents/components/AgentPill';
+import AgentTestCard from '@/modules/pace/components/agents/components/AgentTestCard';
+import {
+  getAgentAvatar,
+  getAgentAvatarByKey,
+  PrefixMessage,
+} from '@/modules/pace/components/agents/constants/agents.constants';
 import TaskStatusCounts from '@/modules/pace/components/chat/TaskStatusCounts';
+import { buildTabRoute } from '@/modules/pace/components/dynamic-tabs/tab-type-registry';
+import { useDynamicTabs } from '@/modules/pace/components/dynamic-tabs/useDynamicTabs';
 import ChatMessagesSkeleton from '@/modules/pace/components/loaders/ChatMessagesSkeleton';
-import { usePaceContext } from '@/modules/pace/pace.context';
+import { type ActiveAgentInfo, usePaceContext } from '@/modules/pace/pace.context';
+import { TAB_TYPE } from '@/modules/pace/pace.types';
+import { preserveSidebarParam } from '@/modules/pace/pace.utils';
 import { addAutoLoopLockedConversation } from '@/modules/pace/utils/autoLoopStorage';
 
 export interface ChatConversationContentProps {
@@ -48,9 +62,20 @@ const ChatConversationContent = ({
 }: ChatConversationContentProps) => {
   const pendingPayloadConsumedRef = useRef(false);
   const taskStatusContainerRef = useRef<HTMLDivElement>(null);
+  const router = useRouter();
 
-  const { pendingFileReference, clearPendingFileReference, pendingConversationPayload, setPendingConversationPayload } =
-    usePaceContext();
+  const {
+    pendingFileReference,
+    clearPendingFileReference,
+    pendingConversationPayload,
+    setPendingConversationPayload,
+    activeAgentInfo,
+    setActiveAgentInfo,
+    startNewChat,
+  } = usePaceContext();
+
+  const { openTab } = useDynamicTabs({ type: TAB_TYPE.AGENT });
+
   const {
     messages,
     hasMessages,
@@ -79,6 +104,30 @@ const ChatConversationContent = ({
     disabled: isStreaming || isCreatingConversationV2,
   });
 
+  const agentInfoFromMessages = useMemo((): ActiveAgentInfo | null => {
+    for (let i = messages.length - 1; i >= 0; i--) {
+      const elements = messages[i]?.message_content?.elements;
+
+      if (!elements) continue;
+
+      for (const el of elements) {
+        if (el.type === BLOCK_TYPE.AGENT && 'payload' in el) {
+          const payload = (el as AgentBlockType).payload;
+
+          return {
+            id: payload.agent_id,
+            name: payload.name,
+            avatar: payload.avatar,
+          };
+        }
+      }
+    }
+
+    return null;
+  }, [messages]);
+
+  const currentAgentInfo = activeAgentInfo ?? agentInfoFromMessages;
+
   const handleWatchStream = useCallback(() => {
     const activeConversationId = conversationId ?? ctxConversationId;
 
@@ -100,6 +149,12 @@ const ChatConversationContent = ({
   }, [pendingFileReference, clearPendingFileReference, addFileReferenceRef]);
 
   useEffect(() => {
+    if (agentInfoFromMessages && !activeAgentInfo) {
+      setActiveAgentInfo(agentInfoFromMessages);
+    }
+  }, [agentInfoFromMessages, activeAgentInfo, setActiveAgentInfo]);
+
+  useEffect(() => {
     if (pendingConversationPayload && !pendingPayloadConsumedRef.current && !conversationId) {
       pendingPayloadConsumedRef.current = true;
       const payload = createConversationPayload(
@@ -113,13 +168,14 @@ const ChatConversationContent = ({
         undefined,
         undefined,
         pendingConversationPayload.llmModel,
+        pendingConversationPayload.metadata,
         pendingConversationPayload.autoLoopEnabled,
       );
 
       const shouldLockAutoLoop = pendingConversationPayload.autoLoopEnabled;
 
       setPendingConversationPayload(null);
-      createConversationV2(payload).then((response) => {
+      createConversationV2(payload).then((response: { conversation_id?: string } | undefined) => {
         if (shouldLockAutoLoop && response?.conversation_id) {
           addAutoLoopLockedConversation(response.conversation_id);
         }
@@ -134,10 +190,67 @@ const ChatConversationContent = ({
     setPendingConversationPayload,
   ]);
 
+  const handleAgentClick = useCallback(
+    (agentId: string, agentName: string, agentDescription?: string, avatarKey?: string) => {
+      const tabPath = buildTabRoute(agentId, TAB_TYPE.AGENT);
+      const params = new URLSearchParams({ title: agentName });
+
+      if (agentDescription && agentDescription !== 'None') {
+        params.set('description', agentDescription);
+      }
+
+      const cleanPath = `${tabPath}?${params.toString()}`;
+
+      const metadata: Record<string, string> = {};
+
+      if (agentDescription && agentDescription !== 'None') metadata.description = agentDescription;
+      if (avatarKey) metadata.avatarKey = avatarKey;
+
+      openTab(agentId, agentName, Object.keys(metadata).length > 0 ? metadata : undefined);
+      router.push(preserveSidebarParam(cleanPath));
+    },
+    [openTab, router],
+  );
+
+  const handleAgentTest = useCallback(
+    (agentId: string, agentName: string) => {
+      setPendingConversationPayload({
+        message: `${PrefixMessage.TEST_AGENT} **${agentName}**`,
+        metadata: { agent_id: agentId },
+      });
+
+      if (!conversationId) {
+        startNewChat();
+      }
+    },
+    [conversationId, startNewChat, setPendingConversationPayload],
+  );
+
+  const renderAgentBlock = useCallback(
+    (payload: { agent_id: string; name: string; description: string; avatar?: string }) => {
+      const avatarKey = payload.avatar;
+      const avatar = (avatarKey && getAgentAvatarByKey(avatarKey)) || getAgentAvatar(payload.name);
+
+      return (
+        <AgentTestCard
+          agentId={payload.agent_id}
+          agentName={payload.name}
+          avatar={avatar}
+          className='border-GRAY_400 bg-GRAY_100 overflow-hidden rounded-xl border'
+          onClick={() => handleAgentClick(payload.agent_id, payload.name, payload.description, payload.avatar)}
+        />
+      );
+    },
+    [handleAgentClick],
+  );
+
   return (
     <ChatActionsProvider
       onFileOpen={onFileOpen}
       onTaskOpen={onTaskOpen}
+      onAgentClick={handleAgentClick}
+      onAgentTest={handleAgentTest}
+      renderAgentBlock={renderAgentBlock}
       onWatchStream={handleWatchStream}
       isBrowserStreamingAvailable={isBrowserStreamingAvailable}
       taskSummaries={taskSummaries}
@@ -189,14 +302,28 @@ const ChatConversationContent = ({
           )}
         </ScrollContainer>
       </div>
-      <div ref={taskStatusContainerRef} className='bg-BG_WHITE sticky bottom-0 z-10 mx-auto w-full max-w-[700px] px-3'>
-        <TaskStatusCounts
-          messages={messages}
-          streamingState={streamingState}
-          conversationId={conversationId ?? ctxConversationId ?? ''}
-          containerRef={taskStatusContainerRef}
-          onOpenChange={handleTaskPopoverOpenChange}
-        />
+      <div
+        ref={taskStatusContainerRef}
+        className='bg-BG_WHITE/80 sticky bottom-0 z-10 mx-auto w-full max-w-[700px] px-3 backdrop-blur-md'
+      >
+        <div className='flex flex-wrap items-center gap-2 pb-2'>
+          {currentAgentInfo && (
+            <AgentPill
+              agentId={currentAgentInfo.id}
+              agentName={currentAgentInfo.name}
+              avatarKey={currentAgentInfo.avatar}
+              containerRef={taskStatusContainerRef}
+              onOpenChange={handleTaskPopoverOpenChange}
+            />
+          )}
+          <TaskStatusCounts
+            messages={messages}
+            streamingState={streamingState}
+            conversationId={conversationId ?? ctxConversationId ?? ''}
+            containerRef={taskStatusContainerRef}
+            onOpenChange={handleTaskPopoverOpenChange}
+          />
+        </div>
       </div>
     </ChatActionsProvider>
   );

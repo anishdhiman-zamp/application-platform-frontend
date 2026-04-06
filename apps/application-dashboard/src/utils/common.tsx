@@ -163,6 +163,10 @@ export const capitalizeFirstLetter = (str: string) => {
   return str.charAt(0).toUpperCase() + str.slice(1);
 };
 
+export const getNameInitial = (str?: string | null): string => {
+  return str?.charAt(0)?.toUpperCase() ?? '';
+};
+
 export const getColorValue = () => Math.floor(Math.random() * 64) + 80;
 
 export const getRandomColor = () => `rgb(${getColorValue()}, ${getColorValue()}, ${getColorValue()}`;

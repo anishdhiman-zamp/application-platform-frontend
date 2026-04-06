@@ -107,6 +107,7 @@ export enum ResourceAudienceType {
   ORGANIZATION = 'organization',
   USER = 'user',
   TEAM = 'team',
+  AGENT = 'service_account',
 }
 
 export type Session = {

@@ -24,6 +24,16 @@ interface UseTabRouterReturn {
   syncFromUrl: () => void;
 }
 
+// Track recently closed tab IDs to prevent syncFromUrl from re-creating them
+// during async navigation transitions.
+const recentlyClosedTabIds = new Set<string>();
+
+export const markTabAsClosed = (id: string) => {
+  recentlyClosedTabIds.add(id);
+  // Auto-clear after 500ms — enough time for navigation to complete
+  setTimeout(() => recentlyClosedTabIds.delete(id), 500);
+};
+
 export const useTabRouter = (config: UseTabRouterConfig = {}): UseTabRouterReturn => {
   const { type } = config;
   const router = useRouter();
@@ -121,6 +131,9 @@ export const useTabRouter = (config: UseTabRouterConfig = {}): UseTabRouterRetur
     const titleFromUrl = urlParams.get('title');
 
     if (!existingTab) {
+      // Don't re-create a tab that was just intentionally closed
+      if (recentlyClosedTabIds.has(urlTabId)) return;
+
       const fileName = titleFromUrl || urlTabId.split('/').pop() || urlTabId;
       // Store full path with query params so subtask navigation state
       // (parentTasks, siblings, pagination) survives tab switches.

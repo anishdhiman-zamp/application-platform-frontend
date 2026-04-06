@@ -65,6 +65,7 @@ export interface UseChatInputProps {
   isDisabled?: boolean;
   llmModel?: string | null;
   autoLoopEnabled?: boolean;
+  metadata?: Record<string, unknown>;
 }
 
 export interface UseChatInputReturn {
@@ -91,6 +92,7 @@ export const createUserMessagePayload = (
   senderName: string,
   fileReferences?: FileReference[],
   llmModel?: string | null,
+  metadata?: Record<string, unknown>,
   autoLoopEnabled?: boolean,
 ): ChatMessage => {
   return {
@@ -114,7 +116,7 @@ export const createUserMessagePayload = (
     message_type: ChatMessageType.TEXT,
     sender_type: SenderType.USER,
     timestamp: new Date().toISOString(),
-    metadata: {},
+    metadata: metadata ?? {},
     sender_name: senderName,
     ...(llmModel ? { llm_model: llmModel } : {}),
     ...(autoLoopEnabled != null ? { pev_enabled: autoLoopEnabled } : {}),
@@ -135,6 +137,7 @@ export const createConversationPayload = (
   annotationLocation?: LocationData,
   annotationType?: AnnotationType,
   llmModel?: string | null,
+  metadata?: Record<string, unknown>,
   autoLoopEnabled?: boolean,
 ) => {
   return {
@@ -165,6 +168,7 @@ export const createConversationPayload = (
     }),
     sender_name: senderName,
     ...(llmModel ? { llm_model: llmModel } : {}),
+    ...(metadata ? { metadata } : {}),
     ...(autoLoopEnabled != null ? { pev_enabled: autoLoopEnabled } : {}),
   };
 };
@@ -188,6 +192,7 @@ export const useChatInput = ({
   isDisabled,
   llmModel,
   autoLoopEnabled,
+  metadata,
 }: UseChatInputProps): UseChatInputReturn => {
   const prevConversationIdRef = useRef(conversationId);
   const currentUserName = adapter.getCurrentUserName();
@@ -229,6 +234,7 @@ export const useChatInput = ({
       annotationLocation,
       annotationType,
       llmModel,
+      metadata,
       autoLoopEnabled,
     );
 
@@ -370,6 +376,7 @@ export const useChatInput = ({
       currentUserName || '',
       fileReferences.length > 0 ? fileReferences.map((ref) => ({ path: ref.path, name: ref.name })) : undefined,
       llmModel,
+      metadata,
       autoLoopEnabled,
     );
 

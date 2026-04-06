@@ -47,6 +47,8 @@ const PaceNavbar = () => {
   } = usePaceContext();
   const { isOnAnyDynamicTab } = useDynamicTabs();
 
+  const navbarItems = PACE_NAVBAR_ITEMS;
+
   const chatIconRef = useRef<AnimatedIconHandle>(null);
 
   const isSidebar = chatSidebarState === CHAT_SIDEBAR_STATE.SIDEBAR;
@@ -229,7 +231,7 @@ const PaceNavbar = () => {
         transition={navAnimations.navItems.transition}
         className='flex shrink-0 items-center gap-x-2'
       >
-        {PACE_NAVBAR_ITEMS.map((item) => (
+        {navbarItems.map((item) => (
           <NavbarIconLink
             key={item.id}
             item={item}
@@ -241,8 +243,7 @@ const PaceNavbar = () => {
       </motion.div>
 
       <motion.div
-        key={`dynamic-tabs-bar-${chatSidebarState}`}
-        initial={navAnimations.navItems.initial}
+        initial={false}
         animate={{ opacity: 1 }}
         transition={navAnimations.navItems.transition}
         className='flex min-w-0 flex-1 items-center'

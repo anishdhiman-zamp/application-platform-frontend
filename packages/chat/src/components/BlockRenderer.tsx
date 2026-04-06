@@ -4,6 +4,7 @@ import { AnimatedDot } from '@zamp-platform/ui';
 import { cn } from '@zamp-platform/ui/utils';
 import React, { useMemo, useState } from 'react';
 
+import { useChatActions } from '../context/ChatActionsContext';
 import {
   Block,
   BLOCK_TYPE,
@@ -24,6 +25,7 @@ import {
 } from '../types/block.types';
 import { extractInitialValues } from './block.utils';
 import {
+  AgentBlock,
   ButtonBlock,
   FileReferencesList,
   InputsRespondedBlock,
@@ -72,6 +74,7 @@ export const BlockRenderer: React.FC<BlockRendererProps> = ({
   quietSurface = false,
   alwaysShowMarkdownTimelineDot = false,
 }) => {
+  const { renderAgentBlock } = useChatActions();
   const [openAccordionId, setOpenAccordionId] = useState<string | null>(null);
   const [elementValues, setElementValues] = useState<
     Record<string, { label: string; value: string; optionType: 'plain_text' | 'markdown' }>
@@ -350,6 +353,18 @@ export const BlockRenderer: React.FC<BlockRendererProps> = ({
             conversationId={conversationId}
           />
         );
+      }
+
+      case BLOCK_TYPE.AGENT: {
+        if (renderAgentBlock) {
+          return (
+            <React.Fragment key={block?.payload?.agent_id ?? block?.id}>
+              {renderAgentBlock(block?.payload)}
+            </React.Fragment>
+          );
+        }
+
+        return <AgentBlock key={block?.payload?.agent_id ?? block?.id} payload={block?.payload} />;
       }
 
       default:

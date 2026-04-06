@@ -211,6 +211,7 @@ export interface CreateConversationPayloadTypeV2 {
   message_content: MessageContentType;
   sender_name?: string;
   llm_model?: string;
+  metadata?: Record<string, unknown>;
   pev_enabled?: boolean;
 }
 

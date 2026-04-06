@@ -172,6 +172,30 @@ export const MarkdownBlock: React.FC<MarkdownBlockProps> = ({ payload, isStreami
               );
             }
 
+            // Detect agent creation code block
+            try {
+              const parsed = JSON.parse(codeString);
+              if (
+                parsed &&
+                typeof parsed === 'object' &&
+                'agent_id' in parsed &&
+                'name' in parsed &&
+                'colour' in parsed &&
+                'description' in parsed
+              ) {
+                return (
+                  <div className='mt-5 rounded-lg bg-red-500 px-4 py-3 text-white first:mt-0'>
+                    <p className='text-xs font-semibold tracking-wide uppercase opacity-75'>Agent Created</p>
+                    <p className='mt-1 text-sm font-semibold'>{parsed.name}</p>
+                    {parsed.description && <p className='mt-0.5 text-xs opacity-80'>{parsed.description}</p>}
+                    <p className='mt-1 font-mono text-xs opacity-60'>{parsed.agent_id}</p>
+                  </div>
+                );
+              }
+            } catch {
+              // not JSON, fall through to normal rendering
+            }
+
             const language = match?.[1];
             return (
               <div className='mt-5 pb-2 first:mt-0'>

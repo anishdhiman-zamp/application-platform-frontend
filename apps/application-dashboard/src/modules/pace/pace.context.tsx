@@ -26,6 +26,14 @@ export interface PendingConversationPayload {
   message: string;
   fileReferences?: { path: string; name: string }[];
   llmModel?: string | null;
+  metadata?: Record<string, unknown>;
+  autoLoopEnabled?: boolean;
+}
+
+export interface ActiveAgentInfo {
+  id: string;
+  name: string;
+  avatar?: string;
   autoLoopEnabled?: boolean;
 }
 
@@ -48,6 +56,9 @@ interface PaceContextType {
 
   pendingConversationPayload: PendingConversationPayload | null;
   setPendingConversationPayload: (payload: PendingConversationPayload | null) => void;
+
+  activeAgentInfo: ActiveAgentInfo | null;
+  setActiveAgentInfo: (info: ActiveAgentInfo | null) => void;
 
   filesPanelOpen: boolean;
   filesPanelPinned: boolean;
@@ -103,6 +114,7 @@ export const PaceProvider = ({ children }: { children: ReactNode }) => {
   const [prevChatSidebarState, setPrevChatSidebarState] = useState<ChatSidebarState>(chatSidebarState);
   const [pendingFileReference, setPendingFileReference] = useState<PendingFileReference | null>(null);
   const [pendingConversationPayload, setPendingConversationPayload] = useState<PendingConversationPayload | null>(null);
+  const [activeAgentInfo, setActiveAgentInfo] = useState<ActiveAgentInfo | null>(null);
   const initialFilesPanelState = useRef(getInitialFilesPanelState());
   const [filesPanelOpen, setFilesPanelOpen] = useState(initialFilesPanelState.current.open);
   const [filesPanelPinned, setFilesPanelPinnedRaw] = useState(initialFilesPanelState.current.pinned);
@@ -309,6 +321,9 @@ export const PaceProvider = ({ children }: { children: ReactNode }) => {
       pendingConversationPayload,
       setPendingConversationPayload,
 
+      activeAgentInfo,
+      setActiveAgentInfo,
+
       filesPanelOpen,
       filesPanelPinned,
       isFilesPanelHydrated,
@@ -347,6 +362,8 @@ export const PaceProvider = ({ children }: { children: ReactNode }) => {
       clearPendingFileReference,
 
       pendingConversationPayload,
+
+      activeAgentInfo,
 
       filesPanelOpen,
       filesPanelPinned,

@@ -113,7 +113,6 @@ const TaskContentChat = ({ taskId }: { taskId: string }) => {
   const { refetchHistory } = useTaskActions();
   const streamingState = useStreamingState(taskId);
 
-  // Set title from conversation data
   useEffect(() => {
     const title = (conversationData as Record<string, unknown> | undefined)?.title as string | undefined;
 

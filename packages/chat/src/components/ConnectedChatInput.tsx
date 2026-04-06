@@ -53,6 +53,7 @@ export interface ConnectedChatInputProps {
   modelSelectorSlot?: React.ReactNode;
   autoLoopToggleSlot?: React.ReactNode;
   hideStopButton?: boolean;
+  metadata?: Record<string, unknown>;
 }
 
 export const ConnectedChatInput: FC<ConnectedChatInputProps> = ({
@@ -89,6 +90,7 @@ export const ConnectedChatInput: FC<ConnectedChatInputProps> = ({
   modelSelectorSlot,
   autoLoopToggleSlot,
   hideStopButton = false,
+  metadata,
 }: ConnectedChatInputProps) => {
   const fileInputRef = useRef<HTMLInputElement>(null);
   const isRejectingRef = useRef(false);
@@ -145,6 +147,7 @@ export const ConnectedChatInput: FC<ConnectedChatInputProps> = ({
     isDisabled,
     llmModel,
     autoLoopEnabled,
+    metadata,
   });
 
   const handleTranscriptChunk = useCallback(

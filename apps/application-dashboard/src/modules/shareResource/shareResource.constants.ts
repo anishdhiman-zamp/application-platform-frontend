@@ -1,5 +1,6 @@
 import { API_ENDPOINTS } from 'apis/apiEndpoint.constants';
 import {
+  AGENT_ACCESS_PRIVILEGES,
   DATASET_ACCESS_PRIVILEGES,
   PAGE_ACCESS_PRIVILEGES,
   PAYMENT_ACCESS_PRIVILEGES,
@@ -90,6 +91,18 @@ export const CHANGE_ACCESS_PRIVILEGES_LIST: ResourcePrivilege[] = [
     value: 'viewer',
     desc: 'Can view connection only',
   },
+  {
+    kind: ResourceType.AGENT,
+    label: 'Admin',
+    value: AGENT_ACCESS_PRIVILEGES.ADMIN,
+    desc: 'Can manage and share agent',
+  },
+  {
+    kind: ResourceType.AGENT,
+    label: 'Viewer',
+    value: AGENT_ACCESS_PRIVILEGES.VIEWER,
+    desc: 'Can view agent only',
+  },
 ];
 
 export const resourcePrivilegeRank = {
@@ -121,6 +134,7 @@ export const RESOURCE_PRIVILEGES: Record<ResourceType, ResourcePrivilege[]> = {
   [ResourceType.CONNECTION]: CHANGE_ACCESS_PRIVILEGES_LIST.filter(
     (privilege) => privilege.kind === ResourceType.CONNECTION,
   ),
+  [ResourceType.AGENT]: CHANGE_ACCESS_PRIVILEGES_LIST.filter((privilege) => privilege.kind === ResourceType.AGENT),
 };
 
 /**
@@ -176,6 +190,16 @@ export const connectionConfig: ShareResourceConfig = {
   },
 };
 
+export const agentConfig: ShareResourceConfig = {
+  type: ResourceType.AGENT,
+  accessPrivilegesList: RESOURCE_PRIVILEGES[ResourceType.AGENT],
+  displayName: 'agent',
+  toastMessages: {
+    success: 'Agent shared successfully',
+    failed: 'Failed to share agent',
+  },
+};
+
 export const resourceTypeRouteMap = {
   [ResourceType.DATASET]: 'datasets',
   [ResourceType.PAGE]: 'pages',
@@ -183,6 +207,7 @@ export const resourceTypeRouteMap = {
   [ResourceType.PROCESS]: 'processes',
   [ResourceType.ORGANIZATION]: 'organizations',
   [ResourceType.CONNECTION]: 'connection',
+  [ResourceType.AGENT]: 'agent',
 };
 
 export const ACCESS_MESSAGES_ADMIN_ROLE = 'Admin will have access to all data';

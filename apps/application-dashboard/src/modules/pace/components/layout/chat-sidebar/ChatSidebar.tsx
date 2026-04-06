@@ -1,6 +1,6 @@
 'use client';
 
-import { useEffect, useMemo, useState } from 'react';
+import { useCallback, useEffect, useMemo, useState } from 'react';
 import { cn } from '@zamp-platform/ui/utils';
 import { motion } from 'framer-motion';
 import { getSidebarTransitionDirection, getSidebarTransitions, NO_ANIMATION } from 'modules/pace/pace.animations';
@@ -22,6 +22,7 @@ const ChatSidebar = () => {
     filesPanelWidth,
     sidebarWidth,
     isSidebarResizing,
+    setActiveAgentInfo,
   } = usePaceContext();
   const searchParams = useSearchParams();
   const initialConversationId = searchParams?.get(SIDEBAR_CONVERSATION_ID_PARAM) ?? null;
@@ -47,9 +48,14 @@ const ChatSidebar = () => {
     return getSidebarTransitions(direction);
   }, [direction, isHydrated, isSidebarResizing]);
 
+  const handleStartNewChat = useCallback(() => {
+    setActiveAgentInfo(null);
+    startNewChat();
+  }, [startNewChat, setActiveAgentInfo]);
+
   useEffect(() => {
-    registerStartNewChat(startNewChat);
-  }, [registerStartNewChat, startNewChat]);
+    registerStartNewChat(handleStartNewChat);
+  }, [registerStartNewChat, handleStartNewChat]);
 
   useEffect(() => {
     registerSelectConversation(setConversationId);
@@ -87,7 +93,7 @@ const ChatSidebar = () => {
           conversationId={conversationId}
           setConversationId={setConversationId}
           setChatTitle={setChatTitle}
-          startNewChat={startNewChat}
+          startNewChat={handleStartNewChat}
           chatTitle={chatTitle}
           chatKey={chatKey}
         />

@@ -26,6 +26,7 @@ import { useResourceAccess } from '@/hooks/useResourceAccess';
 import { THEME_MODE } from '@/modules/general/constants/general.constants';
 import CustomiseAccess from '@/modules/shareResource/CustomiseAccess';
 import {
+  AGENT_ACCESS_PRIVILEGES,
   CombinedOptionListDataType,
   CONNECTION_ACCESS_PRIVILEGES,
   DATASET_ACCESS_PRIVILEGES,
@@ -62,7 +63,16 @@ const WhoHasAccessLoaderVariants = {
 };
 
 const ShareResourcePopup: FC<ShareResourcePopupProps> = (props) => {
-  const { resourceType, resourceConfig, isCustomiseAccess = false, title, disable, version } = props;
+  const {
+    resourceType,
+    resourceConfig,
+    isCustomiseAccess = false,
+    title,
+    disable,
+    version,
+    additionalOptions,
+    forceAdminAccess = false,
+  } = props;
   const resourceId = props.resourceId || '';
   const [selectedRole, setSelectedRole] = useState<string>(resourceConfig.accessPrivilegesList[0]?.value ?? '');
   const [search, setSearch] = useState<string>('');
@@ -107,6 +117,8 @@ const ShareResourcePopup: FC<ShareResourcePopupProps> = (props) => {
   const userPrivilege =
     (audiencesData || [])?.find((audience) => audience?.user?.email === user_email)?.privilege ?? user_role ?? '';
   const currentUserHasAdminAccess = useMemo(() => {
+    if (forceAdminAccess) return true;
+
     switch (resourceType) {
       case ResourceType.DATASET:
         return checkUserPrivilege(DATASET_ACCESS_PRIVILEGES.ADMIN);
@@ -118,10 +130,12 @@ const ShareResourcePopup: FC<ShareResourcePopupProps> = (props) => {
         return checkUserPrivilege(PROCESS_ACCESS_PRIVILEGES.ADMIN);
       case ResourceType.CONNECTION:
         return checkUserPrivilege(CONNECTION_ACCESS_PRIVILEGES.ADMIN);
+      case ResourceType.AGENT:
+        return checkUserPrivilege(AGENT_ACCESS_PRIVILEGES.ADMIN) || checkUserPrivilege(AGENT_ACCESS_PRIVILEGES.OWNER);
       default:
         return false;
     }
-  }, [checkUserPrivilege, resourceType]);
+  }, [forceAdminAccess, checkUserPrivilege, resourceType]);
 
   const isResourceSharable = !showValidationError && selectedItems?.length > 0 && currentUserHasAdminAccess;
   const orgName = useAppSelector((state: RootState) => state?.user?.user?.orgs?.[0]?.name);
@@ -149,8 +163,22 @@ const ShareResourcePopup: FC<ShareResourcePopupProps> = (props) => {
         ?.map((audience) => {
           const matchingTeam = allTeamsData?.find((team) => team?.team_id === audience?.resource_audience_id);
 
+          // Enrich agent entries with agent name from additionalOptions
+          let enrichedUser = audience?.user;
+          const matchingAgent = additionalOptions?.find((opt) => opt?.value === audience?.resource_audience_id);
+
+          if (matchingAgent) {
+            enrichedUser = {
+              ...(audience?.user ?? {}),
+              name: matchingAgent?.label,
+              email: audience?.user?.email ?? '',
+              user_id: audience?.resource_audience_id,
+            };
+          }
+
           return {
             ...audience,
+            user: enrichedUser,
             team_name: matchingTeam?.name ?? '',
             team_color: matchingTeam?.metadata?.color_hex_code ?? '',
             fgac_color: audienceFgacColorMap[JSON.stringify(audience?.metadata?.fgac_filters)] ?? '',
@@ -158,14 +186,15 @@ const ShareResourcePopup: FC<ShareResourcePopupProps> = (props) => {
         })
         .filter(
           (item, index, self) =>
+            !(item.resource_audience_type === ResourceAudienceType.AGENT && !item.user) &&
             index ===
-            self.findIndex(
-              (t) =>
-                t.resource_audience_type === item.resource_audience_type &&
-                t.resource_audience_id === item.resource_audience_id,
-            ),
+              self.findIndex(
+                (t) =>
+                  t.resource_audience_type === item.resource_audience_type &&
+                  t.resource_audience_id === item.resource_audience_id,
+              ),
         ),
-    [userAccessToResourceList, allTeamsData, audienceFgacColorMap],
+    [userAccessToResourceList, allTeamsData, audienceFgacColorMap, additionalOptions],
   );
 
   const emptyFiltersTitle = useMemo(() => {
@@ -197,7 +226,8 @@ const ShareResourcePopup: FC<ShareResourcePopupProps> = (props) => {
   const handleShareResource = () => {
     const shareData: AddAudiencesToResourcePayload = {
       audiences: selectedItems?.map((item) => ({
-        audience_type: item?.resource_audience_type ?? '',
+        audience_type:
+          item?.resource_audience_type === ResourceAudienceType.AGENT ? 'user' : (item?.resource_audience_type ?? ''),
         audience_id: (item?.resource_audience_id || item?.team_id) ?? '',
         role: (selectedRole as string) ?? item?.role,
         fgac_filters: convertToFilterModel(selectedFilters),
@@ -286,6 +316,10 @@ const ShareResourcePopup: FC<ShareResourcePopupProps> = (props) => {
 
     if (type === ResourceAudienceType.TEAM) {
       return { isValid: true, resource_audience_type: ResourceAudienceType.TEAM };
+    }
+
+    if (type === ResourceAudienceType.AGENT) {
+      return { isValid: true, resource_audience_type: ResourceAudienceType.AGENT, resource_audience_id: value };
     }
 
     const isOrgAlreadyInvited = userAccessToResourceList?.some(
@@ -393,11 +427,13 @@ const ShareResourcePopup: FC<ShareResourcePopupProps> = (props) => {
 
   const combinedOptionListsData: CombinedOptionListDataType[] = [
     { label: orgLabel ?? '', value: orgName ?? '', type: ResourceAudienceType.ORGANIZATION, color: '' },
-    ...(teamMembersData?.map((member) => ({
-      label: member?.user?.name || getUserNameFromEmail(member?.user?.email ?? '') || '',
-      value: member?.user?.email ?? '',
-      type: member?.resource_audience_type ?? '',
-    })) || []),
+    ...(teamMembersData
+      ?.filter((member) => member?.resource_audience_type !== ResourceAudienceType.AGENT)
+      .map((member) => ({
+        label: member?.user?.name || getUserNameFromEmail(member?.user?.email ?? '') || '',
+        value: member?.user?.email ?? '',
+        type: member?.resource_audience_type ?? '',
+      })) || []),
     ...(allTeamsData?.map((item) => ({
       label: item?.name ?? '',
       value: item?.name ?? '',
@@ -405,6 +441,7 @@ const ShareResourcePopup: FC<ShareResourcePopupProps> = (props) => {
       color: resolveChipColor(item?.metadata?.color_hex_code, isDark),
       team_id: item?.team_id,
     })) || []),
+    ...(additionalOptions ?? []),
   ];
 
   const filteredOptionListsData = [
@@ -412,7 +449,9 @@ const ShareResourcePopup: FC<ShareResourcePopupProps> = (props) => {
       ?.filter(
         (item) =>
           !selectedItems?.some((selected) => selected?.value === item?.value) &&
-          !audiencesData?.some((audience) => audience?.user?.email === item?.value) &&
+          !audiencesData?.some(
+            (audience) => audience?.user?.email === item?.value || audience?.resource_audience_id === item?.value,
+          ) &&
           !updatedUserAccessList?.some((team) => team?.resource_audience_id === item?.team_id),
       )
       .map((member) => ({
