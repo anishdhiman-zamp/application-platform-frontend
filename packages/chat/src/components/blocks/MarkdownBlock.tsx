@@ -90,12 +90,13 @@ export const MarkdownBlock: React.FC<MarkdownBlockProps> = ({ payload, isStreami
     }
   };
 
-  const { text, isAnimating } = useTypewriter(payload.text, undefined, isStreaming);
+  const { text } = useTypewriter(payload.text, undefined, isStreaming);
 
   const rehypePlugins = useMemo(
     // () => (isStreaming || isAnimating ? [rehypeSlug, rehypeStreamReveal] : [rehypeSlug]),
     () => [rehypeSlug],
-    [isStreaming, isAnimating],
+    // [isStreaming, isAnimating],
+    [],
   );
 
   return (
