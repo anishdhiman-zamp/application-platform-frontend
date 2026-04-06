@@ -137,18 +137,12 @@ const ColumnRow: FC<ColumnRowProps> = memo(
       onChangeType(column.id, type as DatasetColumnTypes);
     };
 
-    const handleRequiredToggle = (checked: boolean) => {
-      if (checked) {
-        setIsRequiredModalOpen(true);
-      } else {
-        onChangeRequired(column.id, false, null);
-      }
-    };
     const handleRequiredConfirm = (defaultValue: string) => {
       onChangeRequired(column.id, true, defaultValue);
       setIsRequiredModalOpen(false);
     };
     const handleRequiredDismiss = () => {
+      // Dismiss = remove required
       onChangeRequired(column.id, false, null);
       setIsRequiredModalOpen(false);
     };
@@ -207,12 +201,15 @@ const ColumnRow: FC<ColumnRowProps> = memo(
 
                 {/* Required */}
                 <div className='f-12-450 text-GRAY_700 min-w-0 flex-1'>
-                  <Switch
-                    checked={column.required}
-                    onCheckedChange={handleRequiredToggle}
-                    size='medium'
-                    disabled={!isEditable}
-                  />
+                  <div
+                    role='button'
+                    tabIndex={isEditable ? 0 : -1}
+                    onClick={() => isEditable && setIsRequiredModalOpen(true)}
+                    onKeyDown={(e) => e.key === ' ' && isEditable && setIsRequiredModalOpen(true)}
+                    className='inline-flex'
+                  >
+                    <Switch checked={column.required} size='medium' disabled={!isEditable} tabIndex={-1} />
+                  </div>
                 </div>
 
                 {/* Actions (delete) */}
@@ -254,6 +251,7 @@ const ColumnRow: FC<ColumnRowProps> = memo(
           onDismiss={handleRequiredDismiss}
           onConfirm={handleRequiredConfirm}
           columnType={column.type}
+          initialDefaultValue={column.defaultValue}
         />
 
         <DeleteConfirmDialog
@@ -270,7 +268,9 @@ const ColumnRow: FC<ColumnRowProps> = memo(
     prev.column.name === next.column.name &&
     prev.column.type === next.column.type &&
     prev.column.required === next.column.required &&
+    prev.column.defaultValue === next.column.defaultValue &&
     prev.canEdit === next.canEdit &&
+    prev.onChangeRequired === next.onChangeRequired &&
     prev.allColumns.length === next.allColumns.length &&
     JSON.stringify(prev.allColumns.map((c) => c.name.toLowerCase().trim()).sort()) ===
       JSON.stringify(next.allColumns.map((c) => c.name.toLowerCase().trim()).sort()),

@@ -344,6 +344,7 @@ const DatasetDetailInner = ({ tableName }: DatasetDetailProps) => {
       }
 
       toast.success('Schema updated successfully');
+      setActiveTab(DatasetTabsTypes.PREVIEW);
       await reloadSchemaAndData();
     } catch {
       toast.error('Failed to update schema');
