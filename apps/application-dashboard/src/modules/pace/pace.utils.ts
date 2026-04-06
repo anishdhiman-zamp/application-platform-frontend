@@ -8,7 +8,7 @@ import {
 import { CHAT_SIDEBAR_STATE, type ChatSidebarState } from 'modules/pace/pace.types';
 import { ROUTES_PATH } from '@/constants/routeConfig';
 import type { SkillApiError } from '@/types/api/skills.types';
-import { getFromSessionStorage, LOCAL_STORAGE_KEYS, SESSION_STORAGE_KEYS } from '@/utils/localstorage';
+import { getFromLocalStorage, LOCAL_STORAGE_KEYS } from '@/utils/localstorage';
 
 /**
  * Reads a numeric value from localStorage and clamps it within [min, max].
@@ -48,7 +48,7 @@ export const getInitialSidebarState = (): ChatSidebarState => {
 
   if (isChatRoot) return CHAT_SIDEBAR_STATE.EXPANDED;
 
-  const persisted = getFromSessionStorage(SESSION_STORAGE_KEYS.PACE_SIDEBAR_STATE);
+  const persisted = getFromLocalStorage(LOCAL_STORAGE_KEYS.PACE_SIDEBAR_STATE);
 
   if (persisted === CHAT_SIDEBAR_STATE.EXPANDED) return CHAT_SIDEBAR_STATE.EXPANDED;
 

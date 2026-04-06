@@ -40,7 +40,6 @@ import {
   setCookie,
   USER_SESSION_COOKIE,
 } from '@/utils/cookie';
-import { removeFromSessionStorage, SESSION_STORAGE_KEYS } from '@/utils/localstorage';
 import { getLandingRoute, getLastVisitedLandingRoute, getProductModeFromPath } from '@/utils/route.util';
 import { syncOrganizationIdToSW } from '@/utils/serviceWorker';
 
@@ -99,7 +98,7 @@ const OrgSwitcher: FC<OrgSwitcherProps> = ({
 
       dispatch(dynamicTabsActions.clearAllTabs());
       removeFromLocalStorage(LOCAL_STORAGE_KEYS.PACE_FILE_TREE_EXPANDED_PATHS);
-      removeFromSessionStorage(SESSION_STORAGE_KEYS.PACE_SIDEBAR_STATE);
+      removeFromLocalStorage(LOCAL_STORAGE_KEYS.PACE_SIDEBAR_STATE);
       setToLocalStorage(LOCAL_STORAGE_KEYS.XZAMP_ORGANIZATION_ID, org.organization_id);
       setCookie(ACTIVE_ORG_ID_COOKIE, org.organization_id);
       clearCookie(USER_SESSION_COOKIE);

@@ -17,13 +17,7 @@ import { ROUTES_PATH } from '@/constants/routeConfig';
 import { useAppSelector } from '@/hooks/toolkit';
 import { selectActiveTabId } from '@/store/slices/dynamic-tabs.slice';
 import { defaultFnType } from '@/types/commonTypes';
-import {
-  getFromLocalStorage,
-  LOCAL_STORAGE_KEYS,
-  SESSION_STORAGE_KEYS,
-  setToLocalStorage,
-  setToSessionStorage,
-} from '@/utils/localstorage';
+import { getFromLocalStorage, LOCAL_STORAGE_KEYS, setToLocalStorage } from '@/utils/localstorage';
 
 export interface PendingFileReference {
   path: string;
@@ -161,7 +155,7 @@ export const PaceProvider = ({ children }: { children: ReactNode }) => {
 
       return next;
     });
-    setToSessionStorage(SESSION_STORAGE_KEYS.PACE_SIDEBAR_STATE, next);
+    setToLocalStorage(LOCAL_STORAGE_KEYS.PACE_SIDEBAR_STATE, next);
   }, []);
 
   const setChatSidebarState = useCallback((state: ChatSidebarState) => {
@@ -281,7 +275,37 @@ export const PaceProvider = ({ children }: { children: ReactNode }) => {
     });
   }, [filesPanelOpen, filesPanelPinned, filesPanelWidth]);
 
-  useEffect(() => {
+  const handlePendingCollapse = useCallback(
+    (isTabIdOnlyChange: boolean) => {
+      pendingCollapseRef.current = false;
+
+      const hasSidebarConversation = new URLSearchParams(window.location.search).has(SIDEBAR_CONVERSATION_ID_PARAM);
+
+      if (isTabIdOnlyChange && hasSidebarConversation) return;
+
+      setChatSidebarStateInternal(CHAT_SIDEBAR_STATE.COLLAPSED);
+    },
+    [setChatSidebarStateInternal],
+  );
+
+  const reconcileSidebarWithRoute = useCallback(() => {
+    const hasSidebarConversation = new URLSearchParams(window.location.search).has(SIDEBAR_CONVERSATION_ID_PARAM);
+    const isChatRoot = pathname === ROUTES_PATH.CHAT && !activeTabId;
+
+    if (isChatRoot && hasSidebarConversation) {
+      if (chatSidebarStateRef.current !== CHAT_SIDEBAR_STATE.EXPANDED) {
+        setChatSidebarStateInternal(CHAT_SIDEBAR_STATE.EXPANDED);
+      }
+
+      return;
+    }
+
+    if (chatSidebarStateRef.current === CHAT_SIDEBAR_STATE.EXPANDED) {
+      setChatSidebarStateInternal(CHAT_SIDEBAR_STATE.SIDEBAR);
+    }
+  }, [pathname, activeTabId, setChatSidebarStateInternal]);
+
+  const handleRouteChange = useCallback(() => {
     if (prevRouteSignatureRef.current === routeSignature) {
       prevPathnameRef.current = pathname;
       prevActiveTabIdRef.current = activeTabId;
@@ -299,38 +323,19 @@ export const PaceProvider = ({ children }: { children: ReactNode }) => {
     const isTabIdOnlyChange = prevPathname === pathname && prevActiveTab !== activeTabId;
 
     if (pendingCollapseRef.current) {
-      pendingCollapseRef.current = false;
-
-      const hasSidebarConversation = new URLSearchParams(window.location.search).has(SIDEBAR_CONVERSATION_ID_PARAM);
-
-      if (isTabIdOnlyChange && hasSidebarConversation) {
-        return;
-      }
-
-      setChatSidebarStateInternal(CHAT_SIDEBAR_STATE.COLLAPSED);
+      handlePendingCollapse(isTabIdOnlyChange);
 
       return;
     }
 
-    if (isTabIdOnlyChange) {
-      return;
-    }
+    if (isTabIdOnlyChange) return;
 
-    const hasSidebarConversation = new URLSearchParams(window.location.search).has(SIDEBAR_CONVERSATION_ID_PARAM);
-    const isChatRoot = pathname === ROUTES_PATH.CHAT && !activeTabId;
+    reconcileSidebarWithRoute();
+  }, [routeSignature, pathname, activeTabId, handlePendingCollapse, reconcileSidebarWithRoute]);
 
-    if (isChatRoot && hasSidebarConversation) {
-      if (chatSidebarStateRef.current !== CHAT_SIDEBAR_STATE.EXPANDED) {
-        setChatSidebarStateInternal(CHAT_SIDEBAR_STATE.EXPANDED);
-      }
-
-      return;
-    }
-
-    if (chatSidebarStateRef.current === CHAT_SIDEBAR_STATE.EXPANDED) {
-      setChatSidebarStateInternal(CHAT_SIDEBAR_STATE.SIDEBAR);
-    }
-  }, [routeSignature, pathname, activeTabId]);
+  useEffect(() => {
+    handleRouteChange();
+  }, [handleRouteChange]);
 
   useEffect(() => {
     if (!(filesPanelOpen && filesPanelPinned)) return;
