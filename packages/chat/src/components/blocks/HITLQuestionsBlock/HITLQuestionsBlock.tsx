@@ -462,7 +462,7 @@ export const HITLQuestionsBlock = ({
 
   return (
     <div ref={containerRef} className='w-full max-w-[659px] outline-none' tabIndex={-1}>
-      <div className='bg-GRAY_20 shadow-table-filter-menu relative flex w-full flex-col overflow-hidden rounded-xl'>
+      <div className='bg-GRAY_100 shadow-table-filter-menu relative flex w-full flex-col overflow-hidden rounded-xl'>
         <HITLQuestionsHeader
           questionCount={questions.length}
           currentQuestionIndex={currentQuestionIndex}
