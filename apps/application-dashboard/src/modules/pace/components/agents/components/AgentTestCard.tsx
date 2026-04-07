@@ -117,7 +117,8 @@ const AgentTestCard: FC<AgentTestCardProps> = ({
           size='small'
           isLoading={isLoadingTriggers}
           disabled={disabled}
-          className='ml-2 h-7 shrink-0 rounded-lg px-3 text-xs focus:ring-0 focus:outline-none focus-visible:ring-0 focus-visible:outline-none'
+          tabIndex={-1}
+          className='ml-2 h-7 shrink-0 rounded-lg px-3 text-xs'
           onClick={handleTestClick}
         >
           Test

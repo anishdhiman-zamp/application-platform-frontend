@@ -67,6 +67,7 @@ const ChatConversationContent = ({
   const router = useRouter();
   const dispatch = useAppDispatch();
   const intentConsumedRef = useRef(false);
+  const consumedIntentRef = useRef<unknown>(null);
   const taskStatusContainerRef = useRef<HTMLDivElement>(null);
   const prevAgentInfoRef = useRef<ActiveAgentInfo | null>(null);
 
@@ -226,18 +227,10 @@ const ChatConversationContent = ({
     handleAgentInfoChange();
   }, [handleAgentInfoChange]);
 
-  // Reset consumed flag when a new payload arrives
-  useEffect(() => {
-    if (chatMessageIntent) {
-      intentConsumedRef.current = false;
-    }
-  }, [chatMessageIntent]);
-
-  useEffect(() => {
-    if (chatMessageIntent && !intentConsumedRef.current && conversationId) {
-      intentConsumedRef.current = true;
-
-      // Send message to existing conversation
+  // Send message to existing conversation via intent
+  const handleSendIntentToExistingConversation = useCallback(() => {
+    if (chatMessageIntent && conversationId && consumedIntentRef.current !== chatMessageIntent) {
+      consumedIntentRef.current = chatMessageIntent;
       const messagePayload = createUserMessagePayload(
         chatMessageIntent.message,
         organizationId,
@@ -253,6 +246,11 @@ const ChatConversationContent = ({
   }, [chatMessageIntent, conversationId, organizationId, currentUserName, sendMessage, setChatMessageIntent]);
 
   useEffect(() => {
+    handleSendIntentToExistingConversation();
+  }, [handleSendIntentToExistingConversation]);
+
+  // Create new conversation via intent (e.g. home screen input)
+  const handleCreateConversationFromIntent = useCallback(() => {
     if (chatMessageIntent && !intentConsumedRef.current && !conversationId) {
       intentConsumedRef.current = true;
       const payload = createConversationPayload(
@@ -280,6 +278,10 @@ const ChatConversationContent = ({
       });
     }
   }, [chatMessageIntent, conversationId, organizationId, currentUserName, createConversationV2, setChatMessageIntent]);
+
+  useEffect(() => {
+    handleCreateConversationFromIntent();
+  }, [handleCreateConversationFromIntent]);
 
   return (
     <ChatActionsProvider

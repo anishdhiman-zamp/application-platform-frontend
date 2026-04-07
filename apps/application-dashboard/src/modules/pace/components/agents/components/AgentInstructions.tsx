@@ -1,7 +1,8 @@
 'use client';
 
 import { useCallback, useEffect, useRef } from 'react';
-import { Button, Skeleton } from '@zamp-platform/ui';
+import { Skeleton } from '@zamp-platform/ui';
+import AgentTabEmptyState from 'modules/pace/components/agents/components/AgentTabEmptyState';
 import { useGetAgentInstructionsQuery, useUpdateAgentInstructionsMutation } from '@/apis/agents';
 import CommonWrapper from '@/components/commonWrapper';
 import { SkeletonTypes } from '@/components/commonWrapper/commonWrapper.types';
@@ -37,6 +38,7 @@ const MilkdownEditor = clientOnly(
 
 interface AgentInstructionsProps {
   agentId: string;
+  agentAvatarSrc?: string;
   isActive?: boolean;
   skipFetch?: boolean;
   onUpdating?: (updating: boolean) => void;
@@ -45,6 +47,7 @@ interface AgentInstructionsProps {
 
 const AgentInstructions = ({
   agentId,
+  agentAvatarSrc,
   isActive = true,
   skipFetch = false,
   onUpdating,
@@ -103,20 +106,12 @@ const AgentInstructions = ({
       refetchFunction={refetch}
       isNoData={!isLoading && !instructions}
       noDataBanner={
-        <div className='border-GRAY_400 flex min-h-75 items-center justify-between gap-10 rounded-xl border px-25'>
-          <span className='f-13-450 text-GRAY_700 flex items-center'>
-            📋<span className='ml-1'>🤖</span>
-            <span className='ml-1.5'>Define what your agent should do every time it runs</span>
-          </span>
-          <Button
-            variant='outline'
-            size='small'
-            className='shrink-0 rounded-lg px-3 text-xs'
-            onClick={onAddInstructions}
-          >
-            Add instructions
-          </Button>
-        </div>
+        <AgentTabEmptyState
+          agentAvatarSrc={agentAvatarSrc}
+          description='Define what your agent should do every time it runs'
+          actionLabel='Add instructions'
+          onAction={onAddInstructions}
+        />
       }
       skeletonType={SkeletonTypes.CUSTOM}
       loader={<InstructionsSkeleton />}

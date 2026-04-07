@@ -145,7 +145,7 @@ export const ZID = IMAGE_PREFIX + '/icons/bank-icons/zid.svg';
 export const HAND_ICON = IMAGE_PREFIX + '/icons/hand.svg';
 
 // Agent Avatars
-export const AGENT_AVATAR = IMAGE_PREFIX + '/icons/agents/agent-avatar.svg';
+export const AGENT_EMPTY_STATE = IMAGE_PREFIX + '/images/agents/agents_empty_state.svg';
 export const AGENT_AVATAR_PREFIX = IMAGE_PREFIX + '/images/agents';
 export const AGENT_AVATAR_1 = AGENT_AVATAR_PREFIX + '/agent_icon_1.png';
 export const AGENT_AVATAR_2 = AGENT_AVATAR_PREFIX + '/agent_icon_2.png';

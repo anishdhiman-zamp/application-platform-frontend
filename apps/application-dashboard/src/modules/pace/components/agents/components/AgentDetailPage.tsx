@@ -94,7 +94,7 @@ const AgentDetailPage = ({ agentId, agentName, agentDescription = '', avatarKey 
   const agentListEntry = agentsListData?.agents?.find((a) => a.id === agentId);
   const triggerCount = triggersData?.triggers?.length ?? 0;
 
-  const initialName = agentData?.name || agentListEntry?.name || agentName || agentId;
+  const initialName = agentData?.name || agentListEntry?.name || agentName || '';
   const initialDescription = agentData?.description || agentListEntry?.description || agentDescription;
 
   const [updateAgent] = useUpdateAgentMutation();
@@ -106,7 +106,7 @@ const AgentDetailPage = ({ agentId, agentName, agentDescription = '', avatarKey 
 
   const skipFetch = !agentExists;
 
-  const displayName = editName || agentName || agentId;
+  const displayName = editName || agentName || '';
   const resolvedAvatarKey = agentData?.avatar || avatarKey;
   const avatar =
     (resolvedAvatarKey && getAgentAvatarByKey(resolvedAvatarKey)) || getAgentAvatar(agentData?.name || agentName || '');
@@ -175,6 +175,10 @@ const AgentDetailPage = ({ agentId, agentName, agentDescription = '', avatarKey 
     }
   }, [chatSidebarState, setChatSidebarState]);
 
+  const handleChatWithAgent = useCallback(() => {
+    triggerChatMessage(`I want to collaborate with ${displayName}`);
+  }, [triggerChatMessage, displayName]);
+
   const handleBackToAgents = useCallback(() => {
     router.push(preserveSidebarParam(ROUTES_PATH.CHAT_AGENTS));
   }, [router]);
@@ -212,6 +216,7 @@ const AgentDetailPage = ({ agentId, agentName, agentDescription = '', avatarKey 
       [AGENT_DETAIL_TAB.TRIGGERS]: (
         <AgentTriggerList
           agentId={agentId}
+          agentAvatarSrc={avatar.src}
           isActive={activeDetailTab === AGENT_DETAIL_TAB.TRIGGERS}
           skipFetch={skipFetch}
           onAddTrigger={handleAddNewTrigger}
@@ -220,6 +225,7 @@ const AgentDetailPage = ({ agentId, agentName, agentDescription = '', avatarKey 
       [AGENT_DETAIL_TAB.INSTRUCTIONS]: (
         <AgentInstructions
           agentId={agentId}
+          agentAvatarSrc={avatar.src}
           isActive={activeDetailTab === AGENT_DETAIL_TAB.INSTRUCTIONS}
           skipFetch={skipFetch}
           onUpdating={handleInstructionsUpdating}
@@ -227,11 +233,17 @@ const AgentDetailPage = ({ agentId, agentName, agentDescription = '', avatarKey 
         />
       ),
       [AGENT_DETAIL_TAB.FILES]: (
-        <AgentFileList agentId={agentId} isActive={activeDetailTab === AGENT_DETAIL_TAB.FILES} skipFetch={skipFetch} />
+        <AgentFileList
+          agentId={agentId}
+          agentAvatarSrc={avatar.src}
+          isActive={activeDetailTab === AGENT_DETAIL_TAB.FILES}
+          skipFetch={skipFetch}
+        />
       ),
       [AGENT_DETAIL_TAB.TOOLS_AND_ACCESS]: (
         <AgentToolsAccess
           agentId={agentId}
+          agentAvatarSrc={avatar.src}
           isActive={activeDetailTab === AGENT_DETAIL_TAB.TOOLS_AND_ACCESS}
           skipFetch={skipFetch}
           onAddConnection={handleAddNewConnection}
@@ -309,16 +321,24 @@ const AgentDetailPage = ({ agentId, agentName, agentDescription = '', avatarKey 
               className='size-full object-contain'
             />
           </motion.div>
-          <AgentGreeting onChat={handleOpenSidebar} isAvatarHovered={isAvatarHovered} />
+          <AgentGreeting
+            onChat={handleChatWithAgent}
+            onAddTrigger={handleAddNewTrigger}
+            isAvatarHovered={isAvatarHovered}
+          />
           <ShareAgentPopup agentId={agentId} />
         </div>
 
-        <input
-          value={editName}
-          onChange={(e) => handleNameChange(e.target.value)}
-          className='text-GRAY_1000 f-26-550 placeholder:text-GRAY_500 mb-2 w-full shrink-0 border-none bg-transparent outline-none'
-          placeholder='Agent name'
-        />
+        {isLoadingAgent && !editName ? (
+          <Skeleton className='mb-2 h-8 w-60' />
+        ) : (
+          <input
+            value={editName}
+            onChange={(e) => handleNameChange(e.target.value)}
+            className='text-GRAY_1000 f-26-550 placeholder:text-GRAY_500 mb-2 w-full shrink-0 border-none bg-transparent outline-none'
+            placeholder='Agent name'
+          />
+        )}
         {isLoadingAgent && !editDescription ? (
           <Skeleton className='mb-6 h-5 w-80' />
         ) : (
