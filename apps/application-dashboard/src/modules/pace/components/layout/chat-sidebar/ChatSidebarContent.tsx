@@ -107,11 +107,15 @@ const ChatSidebarContent = ({
     dispatch(baseApi.util.invalidateTags([APITags.GET_CONVERSATION_HISTORY]));
   }, [dispatch]);
 
-  useEffect(() => {
+  const handleAutoLoopSync = useCallback(() => {
     const locked = isConversationAutoLoopLocked(conversationId);
 
     setAutoLoopEnabled(locked);
   }, [conversationId]);
+
+  useEffect(() => {
+    handleAutoLoopSync();
+  }, [handleAutoLoopSync]);
 
   return (
     <div className='bg-BG_WHITE relative mx-auto flex h-full w-full flex-1 flex-col'>
