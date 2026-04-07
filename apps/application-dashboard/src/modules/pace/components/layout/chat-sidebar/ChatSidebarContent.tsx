@@ -48,7 +48,9 @@ const ChatSidebarContent = ({
   const { openTab: openBrowserTab } = useDynamicTabs({ type: TAB_TYPE.BROWSER });
   const { chatSidebarState, setChatSidebarState, setActiveAgentInfo, selectedModel, setSelectedModel } =
     usePaceContext();
-  const { inputValue, setInputValue } = useChatDraftInput({ conversationId });
+  const { inputValue, setInputValue, draftFileReferences, setDraftFileReferences } = useChatDraftInput({
+    conversationId,
+  });
   const { inputsRequired, isStreaming } = useConversationState();
   const { refetchConversationHistory } = useConversationActions();
   const { isEnabled: isAutoLoopBtnEnabled } = useFeatureFlag(FEATURE_FLAGS.AUTO_LOOP_BTN_ENABLED);
@@ -63,6 +65,24 @@ const ChatSidebarContent = ({
 
   const { hitlQuestions, hitlQuestionsKey } = useHitlQuestions(inputsRequired);
   const hasInputsRequired = (inputsRequired?.length ?? 0) > 0;
+
+  const modelSelectorSlot = useMemo(
+    () => <ModelSelector value={selectedModel} onChange={setSelectedModel} />,
+    [selectedModel],
+  );
+
+  const autoLoopToggleSlot = useMemo(
+    () => (
+      <AutoLoopToggle
+        enabled={autoLoopEnabled}
+        onChange={(pressed) => {
+          if (pressed) setIsConfirmDialogOpen(true);
+        }}
+        disabled={isAutoLoopLocked}
+      />
+    ),
+    [autoLoopEnabled, isAutoLoopLocked],
+  );
 
   const handleExpand = useCallback(() => {
     setChatSidebarState(CHAT_SIDEBAR_STATE.EXPANDED);
@@ -110,22 +130,11 @@ const ChatSidebarContent = ({
     dispatch(baseApi.util.invalidateTags([APITags.GET_CONVERSATION_HISTORY]));
   }, [dispatch]);
 
-  const modelSelectorSlot = useMemo(
-    () => <ModelSelector value={selectedModel} onChange={setSelectedModel} />,
-    [selectedModel],
-  );
-
-  const autoLoopToggleSlot = useMemo(
-    () => (
-      <AutoLoopToggle
-        enabled={autoLoopEnabled}
-        onChange={(pressed) => {
-          if (pressed) setIsConfirmDialogOpen(true);
-        }}
-        disabled={isAutoLoopLocked}
-      />
-    ),
-    [autoLoopEnabled, isAutoLoopLocked],
+  const handleFileReferencesChange = useCallback(
+    (refs: { path: string; name: string }[]) => {
+      setDraftFileReferences(refs);
+    },
+    [setDraftFileReferences],
   );
 
   useEffect(() => {
@@ -133,6 +142,12 @@ const ChatSidebarContent = ({
 
     setIsAutoLoopLocked(locked);
     setAutoLoopEnabled(locked);
+  }, [conversationId]);
+
+  useEffect(() => {
+    if (draftFileReferences.length === 0 || !addFileReferenceRef.current) return;
+
+    draftFileReferences.forEach((ref) => addFileReferenceRef.current?.({ path: ref.path, name: ref.name }));
   }, [conversationId]);
 
   return (
@@ -193,6 +208,7 @@ const ChatSidebarContent = ({
             onConversationCreated={handleConversationCreated}
             isDisabled={isStreaming}
             addFileReferenceRef={addFileReferenceRef}
+            onFileReferencesChange={handleFileReferencesChange}
           />
         )}
       </div>

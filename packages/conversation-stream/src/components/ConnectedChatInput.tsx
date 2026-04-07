@@ -57,6 +57,7 @@ export interface ConnectedChatInputProps {
   onConversationCreated?: (conversationId: string) => void;
   fileDropHandlerRef?: FileDropHandlerRef;
   addFileReferenceRef?: AddFileReferenceRef;
+  onFileReferencesChange?: (refs: { path: string; name: string }[]) => void;
   minTextareaHeight?: number;
   maxTextareaHeight?: number;
   llmModel?: string | null;
@@ -92,6 +93,7 @@ export const ConnectedChatInput = ({
   onConversationCreated,
   fileDropHandlerRef,
   addFileReferenceRef,
+  onFileReferencesChange,
   minTextareaHeight,
   maxTextareaHeight,
   llmModel,
@@ -285,6 +287,10 @@ export const ConnectedChatInput = ({
       if (addFileReferenceRef) addFileReferenceRef.current = null;
     };
   }, [addFileReferenceRef, addFileReference, isDisabled]);
+
+  useEffect(() => {
+    onFileReferencesChange?.(fileReferences.map((ref) => ({ path: ref.path, name: ref.name })));
+  }, [fileReferences, onFileReferencesChange]);
 
   return (
     <div className='w-full'>

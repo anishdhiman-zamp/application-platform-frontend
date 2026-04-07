@@ -6,10 +6,16 @@ import { getFromLocalStorage, LOCAL_STORAGE_KEYS, setToLocalStorage } from '@/ut
 
 const MAX_DRAFTS = 10;
 
+export interface DraftFileReference {
+  path: string;
+  name: string;
+}
+
 interface ChatDraft {
   id: string;
   content: string;
   timestamp: number;
+  fileReferences?: DraftFileReference[];
 }
 
 interface UseChatDraftInputProps {
@@ -19,6 +25,8 @@ interface UseChatDraftInputProps {
 interface UseChatDraftInputReturn {
   inputValue: string;
   setInputValue: Dispatch<SetStateAction<string>>;
+  draftFileReferences: DraftFileReference[];
+  setDraftFileReferences: (refs: DraftFileReference[]) => void;
 }
 
 const getDraftsFromStorage = (): ChatDraft[] => {
@@ -50,9 +58,14 @@ const getDraftById = (drafts: ChatDraft[], id: string): ChatDraft | undefined =>
   return drafts.find((draft) => draft.id === id);
 };
 
-const upsertDraft = (drafts: ChatDraft[], id: string, content: string): ChatDraft[] => {
+const upsertDraft = (
+  drafts: ChatDraft[],
+  id: string,
+  content: string,
+  fileReferences?: DraftFileReference[],
+): ChatDraft[] => {
   const existingIndex = drafts.findIndex((draft) => draft.id === id);
-  const newDraft: ChatDraft = { id, content, timestamp: Date.now() };
+  const newDraft: ChatDraft = { id, content, timestamp: Date.now(), fileReferences };
 
   if (existingIndex >= 0) {
     const updated = [...drafts];
@@ -79,6 +92,7 @@ export const useChatDraftInput = ({ conversationId }: UseChatDraftInputProps): U
   const draftIdRef = useRef(draftId);
   const debounceTimerRef = useRef<NodeJS.Timeout | null>(null);
   const messageSentFromNewChatRef = useRef(false);
+  const fileReferencesRef = useRef<DraftFileReference[]>([]);
 
   draftIdRef.current = draftId;
 
@@ -89,37 +103,71 @@ export const useChatDraftInput = ({ conversationId }: UseChatDraftInputProps): U
     return draft?.content || '';
   });
 
-  const setInputValue = useCallback((newValue: SetStateAction<string>) => {
-    setInputValueState((prev) => {
-      const nextValue = typeof newValue === 'function' ? newValue(prev) : newValue;
+  const [draftFileReferences, setDraftFileReferencesState] = useState<DraftFileReference[]>(() => {
+    const drafts = getDraftsFromStorage();
+    const draft = getDraftById(drafts, draftId);
+
+    return draft?.fileReferences ?? [];
+  });
+
+  fileReferencesRef.current = draftFileReferences;
+
+  const persistDraft = useCallback((capturedDraftId: string, content: string, fileRefs: DraftFileReference[]) => {
+    const drafts = getDraftsFromStorage();
+
+    if (content || fileRefs.length > 0) {
+      const updatedDrafts = upsertDraft(drafts, capturedDraftId, content, fileRefs);
+
+      saveDraftsToStorage(updatedDrafts);
+    } else {
+      const updatedDrafts = removeDraft(drafts, capturedDraftId);
+
+      saveDraftsToStorage(updatedDrafts);
+    }
+  }, []);
+
+  const setInputValue = useCallback(
+    (newValue: SetStateAction<string>) => {
+      setInputValueState((prev) => {
+        const nextValue = typeof newValue === 'function' ? newValue(prev) : newValue;
+
+        if (debounceTimerRef.current) {
+          clearTimeout(debounceTimerRef.current);
+        }
+
+        if (!nextValue && draftIdRef.current === NEW_CONVERSATION_ID && prev) {
+          messageSentFromNewChatRef.current = true;
+        }
+
+        const capturedDraftId = draftIdRef.current;
+        const capturedFileRefs = fileReferencesRef.current;
+
+        debounceTimerRef.current = setTimeout(() => {
+          persistDraft(capturedDraftId, nextValue, capturedFileRefs);
+        }, DEBOUNCE_DELAY_MS);
+
+        return nextValue;
+      });
+    },
+    [persistDraft],
+  );
+
+  const setDraftFileReferences = useCallback(
+    (refs: DraftFileReference[]) => {
+      setDraftFileReferencesState(refs);
 
       if (debounceTimerRef.current) {
         clearTimeout(debounceTimerRef.current);
       }
 
-      if (!nextValue && draftIdRef.current === NEW_CONVERSATION_ID && prev) {
-        messageSentFromNewChatRef.current = true;
-      }
-
       const capturedDraftId = draftIdRef.current;
 
       debounceTimerRef.current = setTimeout(() => {
-        const drafts = getDraftsFromStorage();
-
-        if (nextValue) {
-          const updatedDrafts = upsertDraft(drafts, capturedDraftId, nextValue);
-
-          saveDraftsToStorage(updatedDrafts);
-        } else {
-          const updatedDrafts = removeDraft(drafts, capturedDraftId);
-
-          saveDraftsToStorage(updatedDrafts);
-        }
+        persistDraft(capturedDraftId, inputValue, refs);
       }, DEBOUNCE_DELAY_MS);
-
-      return nextValue;
-    });
-  }, []);
+    },
+    [inputValue, persistDraft],
+  );
 
   useEffect(() => {
     if (messageSentFromNewChatRef.current && draftId !== NEW_CONVERSATION_ID) {
@@ -134,6 +182,7 @@ export const useChatDraftInput = ({ conversationId }: UseChatDraftInputProps): U
     const draft = getDraftById(drafts, draftId);
 
     setInputValueState(draft?.content || '');
+    setDraftFileReferencesState(draft?.fileReferences ?? []);
   }, [draftId]);
 
   useEffect(() => {
@@ -147,5 +196,7 @@ export const useChatDraftInput = ({ conversationId }: UseChatDraftInputProps): U
   return {
     inputValue,
     setInputValue,
+    draftFileReferences,
+    setDraftFileReferences,
   };
 };

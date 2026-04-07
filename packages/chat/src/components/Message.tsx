@@ -176,8 +176,8 @@ export const Message: FC<MessageProps> = ({
         <div
           ref={contentRef}
           className={cn(
-            'flex w-fit max-w-full min-w-0 flex-col',
             isUserMessage && !isExpanded && 'overflow-hidden',
+            isUserMessage && 'flex w-fit max-w-full min-w-0 flex-col',
             isUserInputsRespondedBubble && 'w-full min-w-0',
           )}
           style={isUserMessage && !isExpanded ? { maxHeight: USER_MESSAGE_MAX_HEIGHT } : undefined}

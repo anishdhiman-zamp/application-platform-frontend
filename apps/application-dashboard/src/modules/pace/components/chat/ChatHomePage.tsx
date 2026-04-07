@@ -20,6 +20,7 @@ import AutoLoopToggle from '@/modules/pace/components/chat/AutoLoopToggle';
 import ChatHistory from '@/modules/pace/components/chat/ChatHistory';
 import ChatHome from '@/modules/pace/components/chat/ChatHome';
 import ModelSelector from '@/modules/pace/components/chat/ModelSelector';
+import { useChatDraftInput } from '@/modules/pace/hooks/useChatDraftInput';
 import { NO_ANIMATION } from '@/modules/pace/pace.animations';
 import { usePaceContext } from '@/modules/pace/pace.context';
 import { CHAT_SIDEBAR_STATE } from '@/modules/pace/pace.types';
@@ -45,6 +46,10 @@ const ChatHomePage: FC = () => {
 
   const fileDropHandlerRef = useRef<((files: FileList) => void) | null>(null);
   const addFileReferenceRef = useRef<((ref: { path: string; name: string }) => void) | null>(null);
+
+  const { draftFileReferences, setDraftFileReferences, inputValue, setInputValue } = useChatDraftInput({
+    conversationId: null,
+  });
 
   const [autoLoopEnabled, setAutoLoopEnabled] = useState(false);
   const [isConfirmDialogOpen, setIsConfirmDialogOpen] = useState(false);
@@ -82,15 +87,7 @@ const ChatHomePage: FC = () => {
     disabled: chat.isStreaming || chat.isCreatingConversationV2,
   });
 
-  const handleSelectConversation = useCallback(
-    (id: string | null, title?: string) => {
-      if (!id) return;
-
-      selectConversation(id, title);
-      setChatSidebarState(CHAT_SIDEBAR_STATE.EXPANDED);
-    },
-    [selectConversation, setChatSidebarState],
-  );
+  const isExpanded = chatSidebarState === CHAT_SIDEBAR_STATE.EXPANDED;
 
   const modelSelectorSlot = useMemo(
     () => <ModelSelector value={selectedModel} onChange={setSelectedModel} />,
@@ -110,6 +107,23 @@ const ChatHomePage: FC = () => {
     [autoLoopEnabled],
   );
 
+  const handleSelectConversation = useCallback(
+    (id: string | null, title?: string) => {
+      if (!id) return;
+
+      selectConversation(id, title);
+      setChatSidebarState(CHAT_SIDEBAR_STATE.EXPANDED);
+    },
+    [selectConversation, setChatSidebarState],
+  );
+
+  const handleFileReferencesChange = useCallback(
+    (refs: { path: string; name: string }[]) => {
+      setDraftFileReferences(refs);
+    },
+    [setDraftFileReferences],
+  );
+
   useEffect(() => {
     if (pendingFileReference && addFileReferenceRef.current) {
       addFileReferenceRef.current(pendingFileReference);
@@ -117,7 +131,11 @@ const ChatHomePage: FC = () => {
     }
   }, [pendingFileReference, clearPendingFileReference]);
 
-  const isExpanded = chatSidebarState === CHAT_SIDEBAR_STATE.EXPANDED;
+  useEffect(() => {
+    if (draftFileReferences.length === 0 || !addFileReferenceRef.current) return;
+
+    draftFileReferences.forEach((ref) => addFileReferenceRef.current?.({ path: ref.path, name: ref.name }));
+  }, []);
 
   return (
     <>
@@ -150,8 +168,11 @@ const ChatHomePage: FC = () => {
                   minTextareaHeight={18}
                   maxTextareaHeight={200}
                   className='shadow-chatbot-shadow'
+                  externalInputValue={inputValue}
+                  setExternalInputValue={setInputValue}
                   fileDropHandlerRef={fileDropHandlerRef}
                   addFileReferenceRef={addFileReferenceRef}
+                  onFileReferencesChange={handleFileReferencesChange}
                   showModelSelector
                   modelSelectorSlot={modelSelectorSlot}
                   {...(isAutoLoopBtnEnabled && { autoLoopToggleSlot })}
