@@ -89,37 +89,44 @@ export const useChatDraftInput = ({ conversationId }: UseChatDraftInputProps): U
     return draft?.content || '';
   });
 
-  const setInputValue = useCallback((newValue: SetStateAction<string>) => {
-    setInputValueState((prev) => {
-      const nextValue = typeof newValue === 'function' ? newValue(prev) : newValue;
+  const persistDraft = useCallback((capturedDraftId: string, content: string) => {
+    const drafts = getDraftsFromStorage();
 
-      if (debounceTimerRef.current) {
-        clearTimeout(debounceTimerRef.current);
-      }
+    if (content) {
+      const updatedDrafts = upsertDraft(drafts, capturedDraftId, content);
 
-      if (!nextValue && draftIdRef.current === NEW_CONVERSATION_ID && prev) {
-        messageSentFromNewChatRef.current = true;
-      }
+      saveDraftsToStorage(updatedDrafts);
+    } else {
+      const updatedDrafts = removeDraft(drafts, capturedDraftId);
 
-      const capturedDraftId = draftIdRef.current;
-
-      debounceTimerRef.current = setTimeout(() => {
-        const drafts = getDraftsFromStorage();
-
-        if (nextValue) {
-          const updatedDrafts = upsertDraft(drafts, capturedDraftId, nextValue);
-
-          saveDraftsToStorage(updatedDrafts);
-        } else {
-          const updatedDrafts = removeDraft(drafts, capturedDraftId);
-
-          saveDraftsToStorage(updatedDrafts);
-        }
-      }, DEBOUNCE_DELAY_MS);
-
-      return nextValue;
-    });
+      saveDraftsToStorage(updatedDrafts);
+    }
   }, []);
+
+  const setInputValue = useCallback(
+    (newValue: SetStateAction<string>) => {
+      setInputValueState((prev) => {
+        const nextValue = typeof newValue === 'function' ? newValue(prev) : newValue;
+
+        if (debounceTimerRef.current) {
+          clearTimeout(debounceTimerRef.current);
+        }
+
+        if (!nextValue && draftIdRef.current === NEW_CONVERSATION_ID && prev) {
+          messageSentFromNewChatRef.current = true;
+        }
+
+        const capturedDraftId = draftIdRef.current;
+
+        debounceTimerRef.current = setTimeout(() => {
+          persistDraft(capturedDraftId, nextValue);
+        }, DEBOUNCE_DELAY_MS);
+
+        return nextValue;
+      });
+    },
+    [persistDraft],
+  );
 
   useEffect(() => {
     if (messageSentFromNewChatRef.current && draftId !== NEW_CONVERSATION_ID) {

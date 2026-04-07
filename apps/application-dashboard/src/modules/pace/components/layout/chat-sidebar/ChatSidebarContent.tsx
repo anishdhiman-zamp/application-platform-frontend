@@ -48,7 +48,9 @@ const ChatSidebarContent = ({
   const { openTab: openBrowserTab } = useDynamicTabs({ type: TAB_TYPE.BROWSER });
   const { chatSidebarState, setChatSidebarState, setActiveAgentInfo, selectedModel, setSelectedModel } =
     usePaceContext();
-  const { inputValue, setInputValue } = useChatDraftInput({ conversationId });
+  const { inputValue, setInputValue } = useChatDraftInput({
+    conversationId,
+  });
   const { inputsRequired, isStreaming } = useConversationState();
   const { refetchConversationHistory } = useConversationActions();
   const { isEnabled: isAutoLoopBtnEnabled } = useFeatureFlag(FEATURE_FLAGS.AUTO_LOOP_BTN_ENABLED);
@@ -63,6 +65,24 @@ const ChatSidebarContent = ({
 
   const { hitlQuestions, hitlQuestionsKey } = useHitlQuestions(inputsRequired);
   const hasInputsRequired = (inputsRequired?.length ?? 0) > 0;
+
+  const modelSelectorSlot = useMemo(
+    () => <ModelSelector value={selectedModel} onChange={setSelectedModel} />,
+    [selectedModel],
+  );
+
+  const autoLoopToggleSlot = useMemo(
+    () => (
+      <AutoLoopToggle
+        enabled={autoLoopEnabled}
+        onChange={(pressed) => {
+          if (pressed) setIsConfirmDialogOpen(true);
+        }}
+        disabled={isAutoLoopLocked}
+      />
+    ),
+    [autoLoopEnabled, isAutoLoopLocked],
+  );
 
   const handleExpand = useCallback(() => {
     setChatSidebarState(CHAT_SIDEBAR_STATE.EXPANDED);
@@ -109,24 +129,6 @@ const ChatSidebarContent = ({
   const handleConversationCreated = useCallback(() => {
     dispatch(baseApi.util.invalidateTags([APITags.GET_CONVERSATION_HISTORY]));
   }, [dispatch]);
-
-  const modelSelectorSlot = useMemo(
-    () => <ModelSelector value={selectedModel} onChange={setSelectedModel} />,
-    [selectedModel],
-  );
-
-  const autoLoopToggleSlot = useMemo(
-    () => (
-      <AutoLoopToggle
-        enabled={autoLoopEnabled}
-        onChange={(pressed) => {
-          if (pressed) setIsConfirmDialogOpen(true);
-        }}
-        disabled={isAutoLoopLocked}
-      />
-    ),
-    [autoLoopEnabled, isAutoLoopLocked],
-  );
 
   useEffect(() => {
     const locked = isConversationAutoLoopLocked(conversationId);

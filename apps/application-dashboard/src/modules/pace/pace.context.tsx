@@ -280,12 +280,19 @@ export const PaceProvider = ({ children }: { children: ReactNode }) => {
       pendingCollapseRef.current = false;
 
       const hasSidebarConversation = new URLSearchParams(window.location.search).has(SIDEBAR_CONVERSATION_ID_PARAM);
+      const isChatRoot = pathname === ROUTES_PATH.CHAT && !activeTabId;
+
+      if (isChatRoot && hasSidebarConversation) {
+        setChatSidebarStateInternal(CHAT_SIDEBAR_STATE.EXPANDED);
+
+        return;
+      }
 
       if (isTabIdOnlyChange && hasSidebarConversation) return;
 
       setChatSidebarStateInternal(CHAT_SIDEBAR_STATE.COLLAPSED);
     },
-    [setChatSidebarStateInternal],
+    [pathname, activeTabId, setChatSidebarStateInternal],
   );
 
   const reconcileSidebarWithRoute = useCallback(() => {
