@@ -47,7 +47,7 @@ const ChatHomePage: FC = () => {
   const fileDropHandlerRef = useRef<((files: FileList) => void) | null>(null);
   const addFileReferenceRef = useRef<((ref: { path: string; name: string }) => void) | null>(null);
 
-  const { draftFileReferences, setDraftFileReferences, inputValue, setInputValue } = useChatDraftInput({
+  const { inputValue, setInputValue } = useChatDraftInput({
     conversationId: null,
   });
 
@@ -117,25 +117,12 @@ const ChatHomePage: FC = () => {
     [selectConversation, setChatSidebarState],
   );
 
-  const handleFileReferencesChange = useCallback(
-    (refs: { path: string; name: string }[]) => {
-      setDraftFileReferences(refs);
-    },
-    [setDraftFileReferences],
-  );
-
   useEffect(() => {
     if (pendingFileReference && addFileReferenceRef.current) {
       addFileReferenceRef.current(pendingFileReference);
       clearPendingFileReference();
     }
   }, [pendingFileReference, clearPendingFileReference]);
-
-  useEffect(() => {
-    if (draftFileReferences.length === 0 || !addFileReferenceRef.current) return;
-
-    draftFileReferences.forEach((ref) => addFileReferenceRef.current?.({ path: ref.path, name: ref.name }));
-  }, []);
 
   return (
     <>
@@ -172,7 +159,6 @@ const ChatHomePage: FC = () => {
                   setExternalInputValue={setInputValue}
                   fileDropHandlerRef={fileDropHandlerRef}
                   addFileReferenceRef={addFileReferenceRef}
-                  onFileReferencesChange={handleFileReferencesChange}
                   showModelSelector
                   modelSelectorSlot={modelSelectorSlot}
                   {...(isAutoLoopBtnEnabled && { autoLoopToggleSlot })}

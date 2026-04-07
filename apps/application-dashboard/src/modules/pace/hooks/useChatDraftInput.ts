@@ -6,16 +6,10 @@ import { getFromLocalStorage, LOCAL_STORAGE_KEYS, setToLocalStorage } from '@/ut
 
 const MAX_DRAFTS = 10;
 
-export interface DraftFileReference {
-  path: string;
-  name: string;
-}
-
 interface ChatDraft {
   id: string;
   content: string;
   timestamp: number;
-  fileReferences?: DraftFileReference[];
 }
 
 interface UseChatDraftInputProps {
@@ -25,8 +19,6 @@ interface UseChatDraftInputProps {
 interface UseChatDraftInputReturn {
   inputValue: string;
   setInputValue: Dispatch<SetStateAction<string>>;
-  draftFileReferences: DraftFileReference[];
-  setDraftFileReferences: (refs: DraftFileReference[]) => void;
 }
 
 const getDraftsFromStorage = (): ChatDraft[] => {
@@ -58,14 +50,9 @@ const getDraftById = (drafts: ChatDraft[], id: string): ChatDraft | undefined =>
   return drafts.find((draft) => draft.id === id);
 };
 
-const upsertDraft = (
-  drafts: ChatDraft[],
-  id: string,
-  content: string,
-  fileReferences?: DraftFileReference[],
-): ChatDraft[] => {
+const upsertDraft = (drafts: ChatDraft[], id: string, content: string): ChatDraft[] => {
   const existingIndex = drafts.findIndex((draft) => draft.id === id);
-  const newDraft: ChatDraft = { id, content, timestamp: Date.now(), fileReferences };
+  const newDraft: ChatDraft = { id, content, timestamp: Date.now() };
 
   if (existingIndex >= 0) {
     const updated = [...drafts];
@@ -92,7 +79,6 @@ export const useChatDraftInput = ({ conversationId }: UseChatDraftInputProps): U
   const draftIdRef = useRef(draftId);
   const debounceTimerRef = useRef<NodeJS.Timeout | null>(null);
   const messageSentFromNewChatRef = useRef(false);
-  const fileReferencesRef = useRef<DraftFileReference[]>([]);
 
   draftIdRef.current = draftId;
 
@@ -103,20 +89,11 @@ export const useChatDraftInput = ({ conversationId }: UseChatDraftInputProps): U
     return draft?.content || '';
   });
 
-  const [draftFileReferences, setDraftFileReferencesState] = useState<DraftFileReference[]>(() => {
-    const drafts = getDraftsFromStorage();
-    const draft = getDraftById(drafts, draftId);
-
-    return draft?.fileReferences ?? [];
-  });
-
-  fileReferencesRef.current = draftFileReferences;
-
-  const persistDraft = useCallback((capturedDraftId: string, content: string, fileRefs: DraftFileReference[]) => {
+  const persistDraft = useCallback((capturedDraftId: string, content: string) => {
     const drafts = getDraftsFromStorage();
 
-    if (content || fileRefs.length > 0) {
-      const updatedDrafts = upsertDraft(drafts, capturedDraftId, content, fileRefs);
+    if (content) {
+      const updatedDrafts = upsertDraft(drafts, capturedDraftId, content);
 
       saveDraftsToStorage(updatedDrafts);
     } else {
@@ -140,33 +117,15 @@ export const useChatDraftInput = ({ conversationId }: UseChatDraftInputProps): U
         }
 
         const capturedDraftId = draftIdRef.current;
-        const capturedFileRefs = fileReferencesRef.current;
 
         debounceTimerRef.current = setTimeout(() => {
-          persistDraft(capturedDraftId, nextValue, capturedFileRefs);
+          persistDraft(capturedDraftId, nextValue);
         }, DEBOUNCE_DELAY_MS);
 
         return nextValue;
       });
     },
     [persistDraft],
-  );
-
-  const setDraftFileReferences = useCallback(
-    (refs: DraftFileReference[]) => {
-      setDraftFileReferencesState(refs);
-
-      if (debounceTimerRef.current) {
-        clearTimeout(debounceTimerRef.current);
-      }
-
-      const capturedDraftId = draftIdRef.current;
-
-      debounceTimerRef.current = setTimeout(() => {
-        persistDraft(capturedDraftId, inputValue, refs);
-      }, DEBOUNCE_DELAY_MS);
-    },
-    [inputValue, persistDraft],
   );
 
   useEffect(() => {
@@ -182,7 +141,6 @@ export const useChatDraftInput = ({ conversationId }: UseChatDraftInputProps): U
     const draft = getDraftById(drafts, draftId);
 
     setInputValueState(draft?.content || '');
-    setDraftFileReferencesState(draft?.fileReferences ?? []);
   }, [draftId]);
 
   useEffect(() => {
@@ -196,7 +154,5 @@ export const useChatDraftInput = ({ conversationId }: UseChatDraftInputProps): U
   return {
     inputValue,
     setInputValue,
-    draftFileReferences,
-    setDraftFileReferences,
   };
 };

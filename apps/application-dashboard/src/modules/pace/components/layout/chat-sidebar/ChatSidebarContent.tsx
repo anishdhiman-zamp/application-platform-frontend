@@ -48,7 +48,7 @@ const ChatSidebarContent = ({
   const { openTab: openBrowserTab } = useDynamicTabs({ type: TAB_TYPE.BROWSER });
   const { chatSidebarState, setChatSidebarState, setActiveAgentInfo, selectedModel, setSelectedModel } =
     usePaceContext();
-  const { inputValue, setInputValue, draftFileReferences, setDraftFileReferences } = useChatDraftInput({
+  const { inputValue, setInputValue } = useChatDraftInput({
     conversationId,
   });
   const { inputsRequired, isStreaming } = useConversationState();
@@ -130,24 +130,11 @@ const ChatSidebarContent = ({
     dispatch(baseApi.util.invalidateTags([APITags.GET_CONVERSATION_HISTORY]));
   }, [dispatch]);
 
-  const handleFileReferencesChange = useCallback(
-    (refs: { path: string; name: string }[]) => {
-      setDraftFileReferences(refs);
-    },
-    [setDraftFileReferences],
-  );
-
   useEffect(() => {
     const locked = isConversationAutoLoopLocked(conversationId);
 
     setIsAutoLoopLocked(locked);
     setAutoLoopEnabled(locked);
-  }, [conversationId]);
-
-  useEffect(() => {
-    if (draftFileReferences.length === 0 || !addFileReferenceRef.current) return;
-
-    draftFileReferences.forEach((ref) => addFileReferenceRef.current?.({ path: ref.path, name: ref.name }));
   }, [conversationId]);
 
   return (
@@ -208,7 +195,6 @@ const ChatSidebarContent = ({
             onConversationCreated={handleConversationCreated}
             isDisabled={isStreaming}
             addFileReferenceRef={addFileReferenceRef}
-            onFileReferencesChange={handleFileReferencesChange}
           />
         )}
       </div>
