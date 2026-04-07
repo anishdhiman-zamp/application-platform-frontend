@@ -64,6 +64,7 @@ const PaceNavbar = () => {
   );
 
   const chatIconRef = useRef<AnimatedIconHandle>(null);
+  const folderIconRef = useRef<AnimatedIconHandle>(null);
 
   const isSidebar = chatSidebarState === CHAT_SIDEBAR_STATE.SIDEBAR;
   const isCollapsed = chatSidebarState === CHAT_SIDEBAR_STATE.COLLAPSED;
@@ -295,11 +296,13 @@ const PaceNavbar = () => {
                 )}
                 onClick={handleFolderButtonClick}
                 onMouseEnter={() => {
+                  folderIconRef.current?.startAnimation();
                   cancelFilesPanelClose();
                   if (!filesPanelPinned && !filesPanelOpen) toggleFilesPanel();
                 }}
+                onMouseLeave={() => folderIconRef.current?.stopAnimation()}
               >
-                <FolderOpenIcon size={16} className='pointer-events-none' />
+                <FolderOpenIcon ref={folderIconRef} size={16} className='pointer-events-none' />
               </Button>
             </TooltipTrigger>
             {filesPanelOpen && (

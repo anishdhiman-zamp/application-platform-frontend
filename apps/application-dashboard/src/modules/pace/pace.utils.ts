@@ -34,8 +34,10 @@ export const getInitialWidth = (key: LOCAL_STORAGE_KEYS, min: number, max: numbe
  * Rules:
  * - No sidebar conversation param → COLLAPSED
  * - `/chat` root with no file param (`f`) → EXPANDED (full-screen)
+ * - `/chat` root with sidebar param and persisted COLLAPSED → SIDEBAR (conversation is open)
+ * - Non-chat-root routes → always respect persisted state (COLLAPSED stays COLLAPSED)
  * - Persisted EXPANDED state with sidebar param → EXPANDED (survives refresh on non-chat routes)
- * - Any other route with sidebar param → SIDEBAR
+ * - Any other route with sidebar param and no persisted state → SIDEBAR
  */
 export const getInitialSidebarState = (): ChatSidebarState => {
   if (typeof window === 'undefined') return CHAT_SIDEBAR_STATE.COLLAPSED;
@@ -48,11 +50,11 @@ export const getInitialSidebarState = (): ChatSidebarState => {
 
   if (isChatRoot) return CHAT_SIDEBAR_STATE.EXPANDED;
 
-  const persisted = getFromLocalStorage(LOCAL_STORAGE_KEYS.PACE_SIDEBAR_STATE);
+  const persistedChatSidebarState = getFromLocalStorage(
+    LOCAL_STORAGE_KEYS.PACE_SIDEBAR_STATE,
+  ) as ChatSidebarState | null;
 
-  if (persisted === CHAT_SIDEBAR_STATE.EXPANDED) return CHAT_SIDEBAR_STATE.EXPANDED;
-
-  return CHAT_SIDEBAR_STATE.SIDEBAR;
+  return persistedChatSidebarState || CHAT_SIDEBAR_STATE.SIDEBAR;
 };
 
 /** Returns a random element from the given array */

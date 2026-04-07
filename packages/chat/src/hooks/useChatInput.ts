@@ -216,20 +216,31 @@ export const useChatInput = ({
   );
 
   const [fileReferences, setFileReferences] = useState<UploadedFile[]>([]);
+  const fileReferencesRef = useRef<UploadedFile[]>([]);
   const [isUploading, setIsUploading] = useState(false);
   const [firstMessage, setFirstMessage] = useState('');
+  const [pendingInit, setPendingInit] = useState(false);
   const externalFilePathsRef = useRef<Set<string>>(new Set());
 
-  const isSubmitDisabled = useMemo(() => isDisabled || isUploading || !value.trim(), [isDisabled, isUploading, value]);
+  // Keep ref in sync so init() always reads the latest file references regardless of closure timing
+  useEffect(() => {
+    fileReferencesRef.current = fileReferences;
+  }, [fileReferences]);
+
+  const isSubmitDisabled = useMemo(
+    () => isDisabled || isUploading || (!value.trim() && fileReferences.length === 0),
+    [isDisabled, isUploading, value, fileReferences],
+  );
 
   const init = async () => {
+    const currentFileRefs = fileReferencesRef.current;
     const payload = createConversationPayload(
       resourceId,
       resourceType,
       scopeId,
-      firstMessage || 'Hello, how are you?',
+      firstMessage || '',
       currentUserName || '',
-      fileReferences.length > 0 ? fileReferences.map((ref) => ({ path: ref.path, name: ref.name })) : undefined,
+      currentFileRefs.length > 0 ? currentFileRefs.map((ref) => ({ path: ref.path, name: ref.name })) : undefined,
       scope,
       annotationLocation,
       annotationType,
@@ -353,12 +364,16 @@ export const useChatInput = ({
 
   const handleSubmit = () => {
     const trimmedValue = value.trim();
-    if (!trimmedValue) return;
+    if (!trimmedValue && fileReferences.length === 0) return;
 
     setValue('');
 
     if (!firstMessage && !conversationId) {
-      setFirstMessage(trimmedValue);
+      if (trimmedValue) {
+        setFirstMessage(trimmedValue);
+      } else {
+        setPendingInit(true);
+      }
       setHeader?.('Analysing...');
       return;
     }
@@ -367,7 +382,7 @@ export const useChatInput = ({
   };
 
   const handleSendMessage = async (inputValue: string) => {
-    if (!inputValue) return;
+    if (!inputValue && fileReferences.length === 0) return;
 
     const messagePayload = createUserMessagePayload(
       inputValue,
@@ -415,6 +430,7 @@ export const useChatInput = ({
     if (prevConversationIdRef.current !== conversationId) {
       prevConversationIdRef.current = conversationId;
       setFirstMessage('');
+      setPendingInit(false);
     }
   }, [conversationId]);
 
@@ -423,6 +439,13 @@ export const useChatInput = ({
       init();
     }
   }, [firstMessage, conversationId]);
+
+  useEffect(() => {
+    if (pendingInit && !conversationId) {
+      setPendingInit(false);
+      init();
+    }
+  }, [pendingInit, conversationId]);
 
   return {
     value,

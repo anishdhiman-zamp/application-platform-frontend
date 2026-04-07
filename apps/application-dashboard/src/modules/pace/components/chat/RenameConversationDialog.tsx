@@ -101,7 +101,7 @@ const RenameConversationDialog: FC<RenameConversationDialogProps> = ({
         data-slot='rename-conversation-dialog'
       >
         <DialogHeader>
-          <DialogHeaderTitle>Rename conversation</DialogHeaderTitle>
+          <DialogHeaderTitle>Rename chat</DialogHeaderTitle>
         </DialogHeader>
         <DialogBody className='p-5'>
           <Input
