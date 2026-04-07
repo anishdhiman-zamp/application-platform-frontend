@@ -55,7 +55,7 @@ const ResizableSummaryBox = ({ children, borderRadius, contentClassName, scrollR
 
   return (
     <div
-      className={cn('border-GRAY_400 flex flex-col overflow-hidden border', borderRadius)}
+      className={cn('border-GRAY_400 bg-BG_WHITE flex flex-col overflow-hidden border', borderRadius)}
       style={{ maxHeight: maxH }}
     >
       <div ref={scrollRef} className={cn('flex-1 overflow-y-auto [scrollbar-width:thin]', contentClassName)}>
