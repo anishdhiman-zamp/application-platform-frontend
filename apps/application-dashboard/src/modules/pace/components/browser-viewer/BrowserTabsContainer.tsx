@@ -1,13 +1,11 @@
 'use client';
 
-import { useCallback, useEffect, useState } from 'react';
-import { useLazyGetBrowserLiveViewNovncQuery } from '@zamp-platform/chat';
+import { useCallback, useEffect, useRef, useState, useSyncExternalStore } from 'react';
+import { useLazyGetBrowserStreamingNovncQuery } from '@zamp-platform/chat';
+import { browserSessionStore } from '@zamp-platform/conversation-stream';
 import { Button } from '@zamp-platform/ui';
 import { Globe } from 'lucide-react';
-import {
-  coerceIframeSrcForSecurePage,
-  expectedChromeSessionIdForConversation,
-} from 'modules/pace/components/browser-viewer/browserViewer.utils';
+import { coerceIframeSrcForSecurePage } from 'modules/pace/components/browser-viewer/browserViewer.utils';
 import ImageLoader from '@/components/common/loader/ImageLoader';
 import CommonWrapper from '@/components/commonWrapper';
 import { SkeletonTypes } from '@/components/commonWrapper/commonWrapper.types';
@@ -27,7 +25,22 @@ const BrowserViewerTab = ({ conversationId, isActive }: BrowserViewerTabProps) =
   const [hasFetched, setHasFetched] = useState(false);
   const [isStreamLoading, setIsStreamLoading] = useState(true);
 
-  const [fetchNovnc, { isFetching }] = useLazyGetBrowserLiveViewNovncQuery();
+  const subscribeRef = useRef((onStoreChange: () => void) =>
+    browserSessionStore.subscribe(conversationId, onStoreChange),
+  );
+  const getSnapshotRef = useRef(() => browserSessionStore.get(conversationId));
+
+  useEffect(() => {
+    subscribeRef.current = (onStoreChange: () => void) => browserSessionStore.subscribe(conversationId, onStoreChange);
+    getSnapshotRef.current = () => browserSessionStore.get(conversationId);
+  }, [conversationId]);
+
+  const storeSessionId = useSyncExternalStore(
+    useCallback((cb: () => void) => subscribeRef.current(cb), []),
+    useCallback(() => getSnapshotRef.current(), []),
+  );
+
+  const [fetchNovnc, { isFetching }] = useLazyGetBrowserStreamingNovncQuery();
 
   const fetchStream = useCallback(async () => {
     if (!conversationId) return;
@@ -36,7 +49,7 @@ const BrowserViewerTab = ({ conversationId, isActive }: BrowserViewerTabProps) =
       setHasError(false);
       const res = await fetchNovnc({
         conversationId,
-        sessionId: expectedChromeSessionIdForConversation(conversationId),
+        sessionId: storeSessionId || '',
       }).unwrap();
       const direct = res?.novnc_url ?? null;
       const rawEmbedded = (res?.proxy_iframe_url?.trim() || direct) ?? null;
@@ -48,7 +61,7 @@ const BrowserViewerTab = ({ conversationId, isActive }: BrowserViewerTabProps) =
       setHasError(true);
       setIframeSrc(null);
     }
-  }, [conversationId, fetchNovnc]);
+  }, [conversationId, fetchNovnc, storeSessionId]);
 
   useEffect(() => {
     if (isActive) {

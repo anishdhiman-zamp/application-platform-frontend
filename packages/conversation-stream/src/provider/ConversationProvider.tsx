@@ -30,6 +30,7 @@ import type { MapAny } from '@/types/commonTypes';
 
 import { type ConversationEventCallbacks } from '../handlers/conversationEventHandler';
 import { conversationSSERegistry } from '../registry/conversationSSERegistry';
+import { browserSessionStore } from '../stores/browserSessionStore';
 import { type ConversationActions, ConversationActionsContext } from './ConversationActionsContext';
 import { type ConversationState, ConversationStateContext } from './ConversationStateContext';
 
@@ -73,6 +74,7 @@ export const ConversationProvider: React.FC<ConversationProviderProps> = ({
   const [isHistoryLoaded, setIsHistoryLoaded] = useState(false);
   const [mountRefetchDone, setMountRefetchDone] = useState(false);
   const [isBrowserStreamingAvailable, setIsBrowserStreamingAvailable] = useState(false);
+  const [browserSessionId, setBrowserSessionId] = useState<string | undefined>(undefined);
   const [taskSummaries, setTaskSummaries] = useState<Record<string, string>>({});
 
   // True only for newly created conversations — permanent skip, not a transient resourceId gap.
@@ -160,12 +162,21 @@ export const ConversationProvider: React.FC<ConversationProviderProps> = ({
     setHeaderRef.current?.(title);
   }, []);
 
-  const handleBrowserStreamingAvailable = useCallback(() => {
+  const handleBrowserStreamingAvailable = useCallback((convId: string, sessionId?: string) => {
     setIsBrowserStreamingAvailable(true);
+    setBrowserSessionId(sessionId);
+    if (sessionId) {
+      browserSessionStore.set(convId, sessionId);
+    }
   }, []);
 
   const handleBrowserStreamingUnavailable = useCallback(() => {
     setIsBrowserStreamingAvailable(false);
+    setBrowserSessionId(undefined);
+    const cid = conversationIdRef.current;
+    if (cid) {
+      browserSessionStore.delete(cid);
+    }
   }, []);
 
   const handlePerConvTaskUpdate = useCallback((taskId: string, updatedFields: Record<string, unknown>) => {
@@ -429,6 +440,7 @@ export const ConversationProvider: React.FC<ConversationProviderProps> = ({
       createConversationV2Error,
       inputsRequired: conversationHistory?.inputs_required,
       isBrowserStreamingAvailable,
+      browserSessionId,
       taskSummaries,
     }),
     [
@@ -447,6 +459,7 @@ export const ConversationProvider: React.FC<ConversationProviderProps> = ({
       createConversationV2Error,
       conversationHistory?.inputs_required,
       isBrowserStreamingAvailable,
+      browserSessionId,
       taskSummaries,
     ],
   );

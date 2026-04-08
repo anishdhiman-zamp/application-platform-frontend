@@ -3,17 +3,9 @@
 import { Button } from '@zamp-platform/ui';
 import React, { FC, useCallback, useEffect, useState } from 'react';
 
-import { useLazyGetBrowserLiveViewNovncQuery } from '../../api';
+import { useLazyGetBrowserStreamingNovncQuery } from '../../api';
+import { SSEEventType } from '../../types/chat.types';
 import { TOOL_NAMES } from '../chat.constants';
-
-const A2A_TASK_CONVERSATION_ID_PREFIX = 'a2a-task-';
-
-function expectedChromeSessionIdForConversation(conversationId: string): string {
-  const pathKey = conversationId.startsWith(A2A_TASK_CONVERSATION_ID_PREFIX)
-    ? conversationId.slice(A2A_TASK_CONVERSATION_ID_PREFIX.length)
-    : conversationId;
-  return `chrome-${pathKey}`;
-}
 
 /** Coerce http:// → https:// when the page is served over HTTPS (avoids mixed-content blocks). */
 function coerceIframeSrcForSecurePage(url: string): string {
@@ -36,30 +28,38 @@ interface BrowserLiveWatchSectionProps {
  * browser session is available for this conversation.
  *
  * Visibility is driven by two SSE events published by Pantheon:
- *   - browser_live_view_available   → show the button
- *   - browser_live_view_unavailable → hide the button (session ended / not started yet)
+ *   - browser_streaming_available   → show the button
+ *   - browser_streaming_unavailable → hide the button (session ended / not started yet)
  *
- * Clicking "Watch" calls GET /v3/conversations/{id}/browser-live-view-novnc which returns
+ * Clicking "Watch" calls GET /browser/streaming/{id}/browser-streaming-novnc which returns
  * a same-origin proxy URL (proxy_iframe_url) that is embedded in an <iframe>.
  */
 export const BrowserLiveWatchSection: FC<BrowserLiveWatchSectionProps> = ({ conversationId, toolName }) => {
-  const [fetchNovnc, { isFetching }] = useLazyGetBrowserLiveViewNovncQuery();
+  const [fetchNovnc, { isFetching }] = useLazyGetBrowserStreamingNovncQuery();
   const [iframeSrc, setIframeSrc] = useState<string | null>(null);
   const [directNovncUrl, setDirectNovncUrl] = useState<string | null>(null);
   const [isAvailable, setIsAvailable] = useState(false);
+  const [sessionId, setSessionId] = useState<string | null>(null);
 
-  const handleBrowserLiveViewEvent = useCallback(
+  const handleBrowserStreamingEvent = useCallback(
     (event: MessageEvent) => {
       try {
         const data = JSON.parse(event.data);
-        const eventConversationId: string | undefined = data?.payload?.conversation_id ?? data?.conversation_id;
+        // payload may be an array (from the SSE envelope) or a flat object
+        const payloadItem = Array.isArray(data?.payload) ? data.payload[0] : data?.payload;
+        const eventConversationId: string | undefined = payloadItem?.conversation_id ?? data?.conversation_id;
 
         if (eventConversationId && eventConversationId !== conversationId) return;
 
-        if (data?.type === 'browser_live_view_available') {
+        const eventType: string | undefined = payloadItem?.type ?? data?.type;
+
+        if (eventType === SSEEventType.BROWSER_STREAMING_AVAILABLE) {
+          const eventSessionId: string | undefined = payloadItem?.session_id ?? data?.session_id;
           setIsAvailable(true);
-        } else if (data?.type === 'browser_live_view_unavailable') {
+          if (eventSessionId) setSessionId(eventSessionId);
+        } else if (eventType === SSEEventType.BROWSER_STREAMING_UNAVAILABLE) {
           setIsAvailable(false);
+          setSessionId(null);
           setIframeSrc(null);
           setDirectNovncUrl(null);
         }
@@ -76,15 +76,15 @@ export const BrowserLiveWatchSection: FC<BrowserLiveWatchSectionProps> = ({ conv
     // Subscribe to the global SSE EventSource via the window-level custom event that
     // sse-provider publishes, or fall back to listening on the EventSource directly.
     // We use a CustomEvent bridge so this component stays decoupled from the provider.
-    const handler = (e: Event) => handleBrowserLiveViewEvent(e as MessageEvent);
-    window.addEventListener('sse:browser_live_view_available', handler);
-    window.addEventListener('sse:browser_live_view_unavailable', handler);
+    const handler = (e: Event) => handleBrowserStreamingEvent(e as MessageEvent);
+    window.addEventListener('sse:browser_streaming_available', handler);
+    window.addEventListener('sse:browser_streaming_unavailable', handler);
 
     return () => {
-      window.removeEventListener('sse:browser_live_view_available', handler);
-      window.removeEventListener('sse:browser_live_view_unavailable', handler);
+      window.removeEventListener('sse:browser_streaming_available', handler);
+      window.removeEventListener('sse:browser_streaming_unavailable', handler);
     };
-  }, [conversationId, handleBrowserLiveViewEvent]);
+  }, [conversationId, handleBrowserStreamingEvent]);
 
   if (!conversationId || toolName !== TOOL_NAMES.EXECUTE_BROWSER_COMMAND) {
     return null;
@@ -98,7 +98,7 @@ export const BrowserLiveWatchSection: FC<BrowserLiveWatchSectionProps> = ({ conv
     try {
       const res = await fetchNovnc({
         conversationId,
-        sessionId: expectedChromeSessionIdForConversation(conversationId),
+        sessionId: sessionId || '',
       }).unwrap();
       const direct = res?.novnc_url ?? null;
       const rawEmbedded = (res?.proxy_iframe_url?.trim() || direct) ?? null;

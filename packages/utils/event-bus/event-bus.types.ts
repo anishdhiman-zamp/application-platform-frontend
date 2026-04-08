@@ -59,8 +59,8 @@ export const enum EVENT_TYPE {
   DATASET = 'dataset',
   PROCESS = 'process',
   CONNECTION_UPDATE = 'connection_update',
-  BROWSER_LIVE_VIEW_AVAILABLE = 'browser_live_view_available',
-  BROWSER_LIVE_VIEW_UNAVAILABLE = 'browser_live_view_unavailable',
+  BROWSER_STREAMING_AVAILABLE = 'browser_streaming_available',
+  BROWSER_STREAMING_UNAVAILABLE = 'browser_streaming_unavailable',
   CONVERSATION_CREATED = 'conversation_created',
   CONVERSATION_TITLE_UPDATED = 'conversation_title_updated',
 }

@@ -82,6 +82,7 @@ export type ContentBlockStopEvent = StreamEventContentBlockStop & {
 export interface BrowserStreamingAvailableEvent {
   type: ConversationEventType.BROWSER_STREAMING_AVAILABLE;
   conversation_id: string;
+  session_id?: string;
 }
 
 export interface BrowserStreamingUnavailableEvent {

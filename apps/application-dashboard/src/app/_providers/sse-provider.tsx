@@ -586,16 +586,16 @@ export const SSEProvider: React.FC<SSEProviderProps> = ({ children, sseEventBus 
       store.dispatch(baseApi.util.invalidateTags([APITags.GET_CONVERSATION_HISTORY]));
     });
 
-    const browserLiveAvailableSub = sseEventBus.subscribe(
-      EVENT_TYPE.BROWSER_LIVE_VIEW_AVAILABLE,
+    const browserStreamingAvailableSub = sseEventBus.subscribe(
+      EVENT_TYPE.BROWSER_STREAMING_AVAILABLE,
       (data: BaseEventPayload) => {
-        window.dispatchEvent(new MessageEvent('sse:browser_live_view_available', { data: JSON.stringify(data) }));
+        window.dispatchEvent(new MessageEvent('sse:browser_streaming_available', { data: JSON.stringify(data) }));
       },
     );
-    const browserLiveUnavailableSub = sseEventBus.subscribe(
-      EVENT_TYPE.BROWSER_LIVE_VIEW_UNAVAILABLE,
+    const browserStreamingUnavailableSub = sseEventBus.subscribe(
+      EVENT_TYPE.BROWSER_STREAMING_UNAVAILABLE,
       (data: BaseEventPayload) => {
-        window.dispatchEvent(new MessageEvent('sse:browser_live_view_unavailable', { data: JSON.stringify(data) }));
+        window.dispatchEvent(new MessageEvent('sse:browser_streaming_unavailable', { data: JSON.stringify(data) }));
       },
     );
 
@@ -604,8 +604,8 @@ export const SSEProvider: React.FC<SSEProviderProps> = ({ children, sseEventBus 
       convSub.unsubscribe();
       taskSub.unsubscribe();
       taskUpdateSub.unsubscribe();
-      browserLiveAvailableSub.unsubscribe();
-      browserLiveUnavailableSub.unsubscribe();
+      browserStreamingAvailableSub.unsubscribe();
+      browserStreamingUnavailableSub.unsubscribe();
       convCreatedSub.unsubscribe();
       titleUpdatedSub.unsubscribe();
     };
