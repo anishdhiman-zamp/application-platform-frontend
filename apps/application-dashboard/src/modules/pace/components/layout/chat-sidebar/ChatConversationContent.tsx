@@ -45,7 +45,7 @@ export interface ChatConversationContentProps {
   organizationId: string;
   onFileOpen: (path: string, name: string) => void;
   onTaskOpen?: (name: string, path: string) => void;
-  onBrowserOpen?: (conversationId: string) => void;
+  onBrowserOpen?: (conversationId: string, sessionId?: string) => void;
   onTaskPopoverOpenChange?: (open: boolean) => void;
   fileDropHandlerRef: React.RefObject<((files: FileList) => void) | null>;
   addFileReferenceRef: React.RefObject<((ref: { path: string; name: string }) => void) | null>;
@@ -91,6 +91,7 @@ const ChatConversationContent = ({
     isErrorConversationHistory,
     isStreaming,
     isBrowserStreamingAvailable,
+    browserSessionId,
     taskSummaries,
     isAnalysing,
   } = useConversationState();
@@ -138,9 +139,9 @@ const ChatConversationContent = ({
     const activeConversationId = conversationId ?? ctxConversationId;
 
     if (activeConversationId) {
-      onBrowserOpen?.(activeConversationId);
+      onBrowserOpen?.(activeConversationId, browserSessionId);
     }
-  }, [conversationId, ctxConversationId, onBrowserOpen]);
+  }, [conversationId, ctxConversationId, onBrowserOpen, browserSessionId]);
 
   const handleTaskPopoverOpenChange = (open: boolean) => {
     setIsTaskPopoverOpen(open);

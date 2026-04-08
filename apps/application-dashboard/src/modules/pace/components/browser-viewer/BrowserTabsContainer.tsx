@@ -34,10 +34,11 @@ const BROWSER_VIEWER_STATE_CONFIG: Record<
 
 interface BrowserViewerTabProps {
   conversationId: string;
+  sessionId?: string;
   isActive: boolean;
 }
 
-const BrowserViewerTab = ({ conversationId, isActive }: BrowserViewerTabProps) => {
+const BrowserViewerTab = ({ conversationId, sessionId, isActive }: BrowserViewerTabProps) => {
   const [iframeSrc, setIframeSrc] = useState<string | null>(null);
   const [hasError, setHasError] = useState(false);
   const [isStreamLoading, setIsStreamLoading] = useState(true);
@@ -51,7 +52,7 @@ const BrowserViewerTab = ({ conversationId, isActive }: BrowserViewerTabProps) =
       setHasError(false);
       const res = await fetchNovnc({
         conversationId,
-        sessionId: '',
+        sessionId: sessionId || '',
       }).unwrap();
       const direct = res?.novnc_url ?? null;
       const rawEmbedded = (res?.proxy_iframe_url?.trim() || direct) ?? null;
@@ -62,7 +63,7 @@ const BrowserViewerTab = ({ conversationId, isActive }: BrowserViewerTabProps) =
       setHasError(true);
       setIframeSrc(null);
     }
-  }, [conversationId, fetchNovnc]);
+  }, [conversationId, sessionId, fetchNovnc]);
 
   useEffect(() => {
     if (isActive) {
@@ -135,7 +136,11 @@ const BrowserTabsContainer = () => {
 
         return (
           <TabWrapper key={tab.stableKey} isActive={isActive}>
-            <BrowserViewerTab conversationId={tab.id} isActive={isActive} />
+            <BrowserViewerTab
+              conversationId={tab.id}
+              sessionId={tab.metadata?.sessionId as string | undefined}
+              isActive={isActive}
+            />
           </TabWrapper>
         );
       })}

@@ -105,11 +105,11 @@ const ChatSidebarContent = ({
   }, [chatSidebarState, setChatSidebarState]);
 
   const handleBrowserOpen = useCallback(
-    (browserConversationId: string) => {
+    (browserConversationId: string, sessionId?: string) => {
       if (chatSidebarState === CHAT_SIDEBAR_STATE.EXPANDED) {
         setChatSidebarState(CHAT_SIDEBAR_STATE.SIDEBAR);
       }
-      openBrowserTab(browserConversationId, 'Browser');
+      openBrowserTab(browserConversationId, 'Browser', sessionId ? { sessionId } : undefined);
     },
     [openBrowserTab, chatSidebarState, setChatSidebarState],
   );
