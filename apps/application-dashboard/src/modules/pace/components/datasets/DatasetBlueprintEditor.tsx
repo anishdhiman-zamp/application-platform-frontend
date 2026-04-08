@@ -313,14 +313,15 @@ const DatasetBlueprintEditor: FC<DatasetBlueprintEditorProps> = ({
   const scrollContainerRef = useRef<HTMLDivElement>(null);
 
   const hasErrors = useMemo(() => {
-    const names = columns.map((c) => c.name.trim().toLowerCase());
+    const sanitizedNames = columns.map((c) => sanitizeColumnName(c.name));
 
     return columns.some((c) => {
       const trimmed = c.name.trim();
 
       if (!trimmed) return true;
-      if (c.id.startsWith(COL_PREFIX) && !/^[a-zA-Z_][a-zA-Z0-9_]*$/.test(trimmed)) return true;
-      const dupes = names.filter((n) => n === trimmed.toLowerCase());
+      if (!/^[a-zA-Z][a-zA-Z0-9_ ]*$/.test(trimmed)) return true;
+      const sanitized = sanitizeColumnName(trimmed);
+      const dupes = sanitizedNames.filter((n) => n === sanitized);
 
       return dupes.length > 1;
     });
