@@ -7,6 +7,7 @@ import { DATASETS_POLL_INTERVAL_MS, LIST_TABLES_QUERY } from 'modules/pace/compo
 import { preserveSidebarParam } from 'modules/pace/pace.utils';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
+import { snakeCaseToSentenceCase } from 'utils/common';
 import { type AgentDbQueryRequest, useAgentDbReadQuery } from '@/apis/agentManagedDb';
 import ImageLoader from '@/components/common/loader/ImageLoader';
 import CommonWrapper from '@/components/commonWrapper';
@@ -28,7 +29,7 @@ const DatasetsListing = () => {
 
     return data.rows.map((row) => ({
       id: row.table_name as string,
-      title: row.table_name as string,
+      title: snakeCaseToSentenceCase(row.table_name as string),
     }));
   }, [data]);
 

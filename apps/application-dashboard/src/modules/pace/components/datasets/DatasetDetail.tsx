@@ -54,7 +54,7 @@ import ShareDatasetNeonPopup from 'modules/pace/components/datasets/ShareDataset
 import { preserveSidebarParam } from 'modules/pace/pace.utils';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
-import { cn } from 'utils/common';
+import { cn, snakeCaseToSentenceCase } from 'utils/common';
 import {
   DatasetRoleValue,
   useAgentDbWriteMutation,
@@ -218,12 +218,18 @@ const DatasetDetailInner = ({ tableName }: DatasetDetailProps) => {
         const dbRow = allRows.find((r) => String(r.column_name) === bp.id);
 
         if (bp.frozen) {
-          return { field: bp.id, headerName: bp.id, hide: true, editable: false, suppressFillHandle: true };
+          return {
+            field: bp.id,
+            headerName: snakeCaseToSentenceCase(bp.id),
+            hide: true,
+            editable: false,
+            suppressFillHandle: true,
+          };
         }
 
         return {
           field: bp.id,
-          headerName: bp.id,
+          headerName: snakeCaseToSentenceCase(bp.id),
           ...(dbRow ? getCellEditorForPgType(String(dbRow.data_type)) : {}),
         };
       });
@@ -554,7 +560,7 @@ const DatasetDetailInner = ({ tableName }: DatasetDetailProps) => {
 
           result.push({
             ...existing,
-            headerName: sanitizedName || bpCol.name,
+            headerName: snakeCaseToSentenceCase(sanitizedName || bpCol.name),
             editable: false,
             suppressFillHandle: true,
           });
@@ -568,7 +574,7 @@ const DatasetDetailInner = ({ tableName }: DatasetDetailProps) => {
 
         result.push({
           field: fieldName,
-          headerName: fieldName,
+          headerName: snakeCaseToSentenceCase(fieldName),
           editable: false,
           suppressFillHandle: true,
         });
@@ -1024,7 +1030,7 @@ const DatasetDetailInner = ({ tableName }: DatasetDetailProps) => {
           <Link href={preserveSidebarParam(ROUTES_PATH.CHAT_SETTINGS_DATASETS)}>
             <ArrowLeft width={18} height={18} className='text-GRAY_700 hover:text-GRAY_1000 transition-colors' />
           </Link>
-          <h1 className='f-18-500 flex-1'>{tableName}</h1>
+          <h1 className='f-18-500 flex-1'>{snakeCaseToSentenceCase(tableName)}</h1>
         </div>
         <div className='flex flex-1 flex-col items-center justify-center gap-3'>
           <ShieldOff className='text-GRAY_500 h-10 w-10' />
@@ -1075,7 +1081,7 @@ const DatasetDetailInner = ({ tableName }: DatasetDetailProps) => {
         >
           <ArrowLeft width={18} height={18} />
         </button>
-        <h1 className='f-18-500 flex-1'>{tableName}</h1>
+        <h1 className='f-18-500 flex-1'>{snakeCaseToSentenceCase(tableName)}</h1>
         <ShareDatasetNeonPopup tableName={tableName} />
       </div>
 
