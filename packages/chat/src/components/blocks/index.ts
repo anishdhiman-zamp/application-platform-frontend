@@ -7,7 +7,6 @@ export { FileReferencesList } from './FileReferencesList';
 export type { HITLQuestionWithEntity } from './HITLQuestionsBlock';
 export { HITLQuestionsBlock } from './HITLQuestionsBlock';
 export { InputsRespondedBlock } from './InputsRespondedBlock';
-export { LiveStreamingView } from './LiveStreamingView';
 export { MarkdownBlock } from './MarkdownBlock';
 export { OutputFilesBlock } from './OutputFilesBlock';
 export { PlainTextBlock } from './PlainTextBlock';
