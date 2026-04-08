@@ -1,9 +1,31 @@
+import type { ConversationState } from '@zamp-platform/conversation-stream';
 import { AgentNavIcon, HomeIcon, RouteIcon, SettingsIcon } from '@zamp-platform/ui';
 import { Database, Link2, Settings2, UserPen } from 'lucide-react';
 import { PaceNavbarItemId, PaceNavbarItemSchema, PaceSettingsTabSchema } from 'modules/pace/pace.types';
 import Users02 from '@/assets/Icons/Users02';
 import { ROUTES_PATH } from '@/constants/routeConfig';
 import { INPUT_FILE_FORMATS } from '@/types/common/mime';
+
+export const STUB_CONVERSATION_STATE: ConversationState = {
+  messages: [],
+  hasMessages: false,
+  conversationId: null,
+  isStreaming: false,
+  isStopping: false,
+  isLoadingConversationHistory: false,
+  isFetchingConversationHistory: false,
+  isCreatingConversationV2: false,
+  isSendingMessage: false,
+  isErrorConversationHistory: false,
+  isUninitializedConversationHistory: true,
+  isAnalysing: false,
+  sendMessageError: null,
+  sendMessageV2Error: null,
+  createConversationV2Error: null,
+  inputsRequired: undefined,
+  isBrowserStreamingAvailable: false,
+  taskSummaries: {},
+};
 
 export const ACCEPTED_FILE_TYPES = `${INPUT_FILE_FORMATS.TXT},${INPUT_FILE_FORMATS.PDF},${INPUT_FILE_FORMATS.JPEG},${INPUT_FILE_FORMATS.JPG},${INPUT_FILE_FORMATS.PNG},${INPUT_FILE_FORMATS.BMP}`;
 

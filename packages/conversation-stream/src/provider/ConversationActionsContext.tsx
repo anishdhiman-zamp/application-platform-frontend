@@ -16,4 +16,19 @@ export interface ConversationActions {
   refetchConversationHistory: () => void;
 }
 
+const NOOP_ACTIONS: ConversationActions = {
+  sendMessage: async () => {},
+  createConversationV2: async () => ({ conversation_id: '', status_message: '', title: '' }),
+  stopConversation: async () => {},
+  clearMessages: () => {},
+  setConversationId: () => {},
+  refetchConversationHistory: () => {},
+};
+
+/** Merge partial overrides with no-op defaults to produce a full ConversationActions. */
+export const createConversationActions = (overrides: Partial<ConversationActions>): ConversationActions => ({
+  ...NOOP_ACTIONS,
+  ...overrides,
+});
+
 export const ConversationActionsContext = createContext<ConversationActions | null>(null);

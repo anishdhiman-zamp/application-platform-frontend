@@ -202,7 +202,10 @@ export const ConversationProvider: React.FC<ConversationProviderProps> = ({
   }, [_conversationId, dispatch]);
 
   const handlePerConvTaskSummary = useCallback((taskId: string, text: string) => {
-    setTaskSummaries((prev) => ({ ...prev, [taskId]: text }));
+    setTaskSummaries((prev) => {
+      if (prev[taskId] === text) return prev;
+      return { ...prev, [taskId]: text };
+    });
   }, []);
 
   const perConvCallbacks = useRef<ConversationEventCallbacks>({
@@ -485,6 +488,14 @@ export const ConversationProvider: React.FC<ConversationProviderProps> = ({
     conversationIdRef.current = newId;
     if (newId !== prevId) {
       _setConversationId(newId);
+      setMessages([]);
+      setTaskSummaries({});
+      setIsBrowserStreamingAvailable(false);
+      setIsHistoryLoaded(false);
+      setMountRefetchDone(false);
+      setIsStopping(false);
+      isNewlyCreatedConversationRef.current = null;
+      mountRefetchFiredRef.current = false;
     }
   }, [externalConversationId]);
 
