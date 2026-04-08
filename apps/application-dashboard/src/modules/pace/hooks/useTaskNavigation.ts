@@ -14,6 +14,7 @@ import { useEventBus } from '@/app/_providers/sse-provider';
 import { getChatTaskRoute, TASK_QUERY_PARAMS } from '@/constants/routeConfig';
 import { STATUS_DISPLAY_ORDER, TASKS_PAGE_SIZE } from '@/modules/pace/components/tasks/constants/tasks.constants';
 import type { CreationSource, TaskListItem } from '@/modules/pace/components/tasks/types/tasks.types';
+import { markNavAsReplace } from '@/modules/pace/hooks/useTabRouter';
 import type { MapAny } from '@/types/commonTypes';
 
 interface UseTaskNavigationOptions {
@@ -23,6 +24,16 @@ interface UseTaskNavigationOptions {
 export const useTaskNavigation = (taskId?: string, options?: UseTaskNavigationOptions) => {
   const searchParams = useSearchParams();
   const router = useRouter();
+
+  // Wrapper that signals the tab system to update the active tab in-place
+  // (pagination) rather than creating a new tab.
+  const replaceRoute = useCallback(
+    (url: string, opts?: { scroll?: boolean }) => {
+      markNavAsReplace();
+      router.replace(url, opts);
+    },
+    [router],
+  );
 
   const rawUrlIndex = parseIntSafely(searchParams?.get('currentIndex'), 0);
   const urlIndex = rawUrlIndex > 0 ? rawUrlIndex - 1 : -1;
@@ -109,7 +120,7 @@ export const useTaskNavigation = (taskId?: string, options?: UseTaskNavigationOp
 
               found = true;
 
-              router.replace(
+              replaceRoute(
                 getChatTaskRoute({
                   taskId,
                   conversationId: urlConversationId,
@@ -232,7 +243,7 @@ export const useTaskNavigation = (taskId?: string, options?: UseTaskNavigationOp
     const params = new URLSearchParams(window.location.search);
 
     params.set('totalRows', String(liveTotal));
-    router.replace(`${window.location.pathname}?${params.toString()}`, { scroll: false });
+    replaceRoute(`${window.location.pathname}?${params.toString()}`, { scroll: false });
   }, [liveTotal, urlTotal, urlIndex, router]);
 
   useEffect(() => {
@@ -290,7 +301,7 @@ export const useTaskNavigation = (taskId?: string, options?: UseTaskNavigationOp
         const currentParams = new URLSearchParams(window.location.search);
         const urlTitle = currentParams.get('title') ?? undefined;
 
-        router.replace(
+        replaceRoute(
           getChatTaskRoute({
             taskId: taskIdRef.current!,
             conversationId: conversationIdRef.current,
@@ -340,7 +351,7 @@ export const useTaskNavigation = (taskId?: string, options?: UseTaskNavigationOp
           totalRows: nextStatusTotal,
         });
 
-        router.replace(route);
+        replaceRoute(route);
 
         return;
       }
@@ -367,7 +378,7 @@ export const useTaskNavigation = (taskId?: string, options?: UseTaskNavigationOp
           totalRows: prevStatusTotal,
         });
 
-        router.replace(route);
+        replaceRoute(route);
 
         return;
       }
@@ -399,7 +410,7 @@ export const useTaskNavigation = (taskId?: string, options?: UseTaskNavigationOp
         totalRows: effectiveTotal,
       });
 
-      router.replace(route);
+      replaceRoute(route);
     },
     [
       initialData,
@@ -518,7 +529,7 @@ export const useTaskNavigation = (taskId?: string, options?: UseTaskNavigationOp
           siblings: allSiblings,
         });
 
-        router.replace(route);
+        replaceRoute(route);
 
         return;
       }
@@ -544,7 +555,7 @@ export const useTaskNavigation = (taskId?: string, options?: UseTaskNavigationOp
           siblings: allSiblings,
         });
 
-        router.replace(route);
+        replaceRoute(route);
 
         return;
       }
@@ -564,7 +575,7 @@ export const useTaskNavigation = (taskId?: string, options?: UseTaskNavigationOp
         siblings: allSiblings,
       });
 
-      router.replace(route);
+      replaceRoute(route);
     },
     [
       urlIndex,
