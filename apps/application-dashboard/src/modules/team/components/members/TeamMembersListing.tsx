@@ -86,7 +86,7 @@ const TeamMembersListing: FC<TeamMembersListingPropsType> = ({ data, isLoadingTe
             isLoading={isLoadingTeamMembersData}
             skeletonType={SkeletonTypes.CUSTOM}
             loader={<SkeletonLoaderListing columns={4} length={12} />}
-            className='h-[calc(100vh-270px)] overflow-y-auto [&::-webkit-scrollbar]:hidden'
+            className='h-[calc(100vh-250px)] overflow-y-auto [&::-webkit-scrollbar]:hidden'
           >
             {allAudiencesAndTeamsData?.map((row, index) => (
               <TeamMemberCard

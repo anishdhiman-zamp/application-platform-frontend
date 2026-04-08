@@ -51,7 +51,7 @@ export const getAddConnectionMessage = (agentName: string) =>
 
 export const getAddInstructionsMessage = (agentName: string) => `I want to add to **${agentName}**'s instructions.`;
 
-export const AGENT_GREETING_MESSAGE = "Let's collaborate — chat, add triggers, or edit me";
+export const AGENT_GREETING_MESSAGE = "@ Let's collaborate — chat, add triggers, or edit me";
 
 export const AGENT_DETAIL_TAB_CONFIG: { id: AgentDetailTabType; label: string }[] = [
   { id: AGENT_DETAIL_TAB.TASKS, label: 'Tasks' },

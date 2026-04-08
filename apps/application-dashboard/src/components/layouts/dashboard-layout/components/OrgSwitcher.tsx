@@ -273,8 +273,8 @@ const OrgSwitcher: FC<OrgSwitcherProps> = ({
         <DropdownMenuTrigger asChild>
           <div
             className={cn(
-              'border-GRAY_400 bg-BG_GRAY_1 flex h-[57px] w-full cursor-pointer items-center gap-2.5 px-4 py-3',
-              macs ? 'border-b' : 'border-t',
+              'border-GRAY_400 bg-BG_GRAY_1 flex w-full cursor-pointer items-center gap-2.5',
+              macs ? 'rounded-md border-none px-2.5 py-2' : 'h-[57px] border-t px-4 py-3',
               menuTriggerClassName,
             )}
             data-testid='org-switcher-trigger'

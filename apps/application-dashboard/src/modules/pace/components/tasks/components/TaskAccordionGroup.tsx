@@ -4,7 +4,7 @@ import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import type { TaskStatus } from '@zamp-platform/chat';
 import { Accordion } from '@zamp-platform/ui';
 import { cn } from '@zamp-platform/ui/utils';
-import { useSearchParams } from 'next/navigation';
+import { usePathname, useSearchParams } from 'next/navigation';
 import { useGetAgentTaskCountsQuery } from '@/apis/agents';
 import { useGetTaskCountsQuery } from '@/apis/task';
 import TaskAccordionSection from '@/modules/pace/components/tasks/components/TaskAccordionSection';
@@ -54,7 +54,16 @@ const TaskAccordionGroup = ({
 
   const shouldSkip = !hasBeenActiveRef.current || skipFetch;
 
+  const pathname = usePathname();
   const searchParams = useSearchParams();
+
+  // When tasks are viewed from an agent detail page, pass the current URL as referrer
+  const referrer = useMemo(() => {
+    if (!agentId || !pathname) return undefined;
+    const query = searchParams?.toString();
+
+    return query ? `${pathname}?${query}` : pathname;
+  }, [agentId, pathname, searchParams]);
   const tabParam = searchParams?.get('tab');
   const activeTab: TaskListingTab =
     tabParam && VALID_TABS.has(tabParam) ? (tabParam as TaskListingTab) : TASK_LISTING_TAB.ALL;
@@ -188,6 +197,7 @@ const TaskAccordionGroup = ({
             agentId={agentId}
             scrollContainerRef={scrollContainerRef}
             creationSource={creationSource}
+            referrer={referrer}
           />
         ))}
       </Accordion>
