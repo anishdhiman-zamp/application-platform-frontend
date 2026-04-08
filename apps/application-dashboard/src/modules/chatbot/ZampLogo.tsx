@@ -8,7 +8,7 @@ const ZampLogo = ({ size = 24, color = 'currentColor', className }: ZampLogoProp
   return (
     <svg
       height={size}
-      width='auto'
+      width={size}
       viewBox='0 0 66 53'
       fill='none'
       xmlns='http://www.w3.org/2000/svg'

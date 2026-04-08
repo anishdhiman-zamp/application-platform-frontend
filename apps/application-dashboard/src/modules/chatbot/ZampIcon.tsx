@@ -1,5 +1,5 @@
 import { cn } from '@zamp-platform/ui/utils';
-import ZampLogo from 'modules/chatbot/ZampLogo';
+import ZampLogo from '@/modules/chatbot/ZampLogo';
 
 interface ZampIconProps {
   size?: number;
@@ -12,7 +12,7 @@ const ZampIcon = ({ size = 24, className }: ZampIconProps) => {
       className={cn('grid place-items-center', className)}
       style={{ height: size, minHeight: size, width: size, minWidth: size }}
     >
-      <ZampLogo size={size} color='currentColor' className='text-foreground' />
+      <ZampLogo size={size} className='text-foreground' />
     </div>
   );
 };
