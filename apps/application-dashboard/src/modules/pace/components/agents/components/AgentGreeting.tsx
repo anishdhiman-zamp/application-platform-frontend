@@ -1,12 +1,11 @@
 'use client';
 
 import { useEffect, useState } from 'react';
+import { cn } from '@zamp-platform/ui/utils';
 import { motion } from 'framer-motion';
 import { Zap } from 'lucide-react';
 import { AGENT_GREETING_MESSAGE } from '@/modules/pace/components/agents/constants/agents.constants';
 import { useTypingAnimation } from '@/modules/pace/components/agents/hooks/useTypingAnimation';
-
-const EASE_CURVE = [0.25, 0.1, 0.25, 1] as const;
 
 interface AgentGreetingProps {
   onChat: () => void;
@@ -42,76 +41,69 @@ const AgentGreeting = ({ onChat, onAddTrigger, isAvatarHovered = false }: AgentG
       <motion.div
         className='border-GRAY_400 hover:bg-BG_GRAY_2 f-12-500 flex w-fit cursor-pointer items-center overflow-hidden rounded-[20px] rounded-bl-none border py-2 whitespace-nowrap transition-colors'
         onClick={onChat}
-        initial={{ opacity: 0, maxWidth: 34, paddingLeft: 8, paddingRight: 8 }}
+        initial={{ opacity: 0, maxWidth: 20, paddingLeft: 10, paddingRight: 10 }}
         animate={{
           opacity: main.isVisible ? 1 : 0,
-          maxWidth: main.isVisible && showText ? 500 : 34,
-          paddingLeft: main.isVisible && showText ? 12 : 8,
-          paddingRight: main.isVisible && showText ? 12 : 8,
+          maxWidth: main.isVisible && showText ? 500 : isCollapsed ? 34 : 20,
+          paddingLeft: main.isVisible && showText ? 12 : 10,
+          paddingRight: main.isVisible && showText ? 12 : 10,
         }}
         transition={{
-          opacity: { duration: 0.4, ease: 'easeInOut' },
-          maxWidth: { duration: 0.7, ease: EASE_CURVE, delay: expanding ? 0.15 : 0 },
-          paddingLeft: { duration: 0.7, ease: EASE_CURVE, delay: expanding ? 0.15 : 0 },
-          paddingRight: { duration: 0.7, ease: EASE_CURVE, delay: expanding ? 0.15 : 0 },
+          opacity: { duration: 0.4, ease: 'easeOut' },
+          maxWidth: { duration: 0.7, ease: 'easeOut', delay: expanding ? 0.1 : 0 },
+          paddingLeft: { duration: 0.7, ease: 'easeOut', delay: expanding ? 0.1 : 0 },
+          paddingRight: { duration: 0.7, ease: 'easeOut', delay: expanding ? 0.1 : 0 },
         }}
         onMouseEnter={() => setIsHovered(true)}
         onMouseLeave={() => setIsHovered(false)}
       >
         <motion.span
-          className='inline-block overflow-hidden'
-          animate={{ opacity: main.isVisible && showText ? 1 : 0, width: main.isVisible && showText ? 'auto' : 0 }}
+          className={cn('inline-block overflow-hidden', isCollapsed && 'text-GRAY_700')}
+          animate={{
+            opacity: main.isVisible ? 1 : 0,
+            width: main.isVisible && showText ? 'auto' : isCollapsed ? 15 : 0,
+          }}
           transition={{
-            width: { duration: 0.5, ease: EASE_CURVE },
-            opacity: { duration: 0.4, ease: 'easeInOut', delay: expanding ? 0.2 : 0 },
+            width: { duration: 0.7, ease: 'easeOut', delay: expanding ? 0.1 : 0 },
+            opacity: { duration: 0.4, ease: 'easeInOut' },
           }}
         >
           {main.displayedText || '\u00A0'}
         </motion.span>
-        <motion.span
-          className='text-GRAY_700 f-12-500 flex items-center justify-center overflow-hidden'
-          animate={{ opacity: main.isVisible && showText ? 0 : 1 }}
-          transition={{ opacity: { duration: 0.2, ease: 'easeInOut', delay: main.isVisible && showText ? 0 : 0.4 } }}
-        >
-          @
-        </motion.span>
       </motion.div>
 
       <motion.div
-        className='border-GRAY_400 hover:bg-BG_GRAY_2 f-12-500 flex cursor-pointer items-center overflow-hidden rounded-full border py-2 whitespace-nowrap transition-colors'
+        className={cn(
+          'border-GRAY_400 hover:bg-BG_GRAY_2 f-12-500 flex w-fit cursor-pointer items-center overflow-hidden rounded-full border py-2 whitespace-nowrap transition-colors',
+          isCollapsed && 'text-GRAY_700',
+        )}
         onClick={onAddTrigger}
-        initial={{ opacity: 0 }}
+        initial={{ opacity: 0, maxWidth: 20, paddingLeft: 10, paddingRight: 10 }}
         animate={{
           opacity: main.isComplete ? 1 : 0,
           maxWidth: isTriggerHovered ? 300 : 34,
-          paddingLeft: isTriggerHovered ? 12 : 8,
-          paddingRight: isTriggerHovered ? 12 : 8,
+          paddingLeft: isTriggerHovered ? 12 : 10,
+          paddingRight: isTriggerHovered ? 12 : 10,
         }}
         transition={{
-          opacity: { duration: 0.4, ease: 'easeInOut', delay: main.isComplete ? 0.3 : 0 },
-          maxWidth: { duration: 0.7, ease: EASE_CURVE },
-          paddingLeft: { duration: 0.7, ease: EASE_CURVE },
-          paddingRight: { duration: 0.7, ease: EASE_CURVE },
+          opacity: { duration: 0.4, ease: 'easeOut', delay: main.isComplete ? 0.3 : 0 },
+          maxWidth: { duration: 0.7, ease: 'easeOut' },
+          paddingLeft: { duration: 0.7, ease: 'easeOut' },
+          paddingRight: { duration: 0.7, ease: 'easeOut' },
         }}
         onMouseEnter={() => setIsTriggerHovered(true)}
         onMouseLeave={() => setIsTriggerHovered(false)}
       >
+        <Zap size={14} className='shrink-0' />
         <motion.span
           className='inline-block overflow-hidden'
-          animate={{ opacity: isTriggerHovered ? 1 : 0, width: isTriggerHovered ? 'auto' : 0 }}
+          animate={{ opacity: main.isComplete ? 1 : 0, width: isTriggerHovered ? 'auto' : 0 }}
           transition={{
-            width: { duration: 0.5, ease: EASE_CURVE },
-            opacity: { duration: 0.4, ease: 'easeInOut', delay: isTriggerHovered ? 0.2 : 0 },
+            width: { duration: 0.7, ease: 'easeOut' },
+            opacity: { duration: 0.4, ease: 'easeInOut' },
           }}
         >
-          Add a trigger
-        </motion.span>
-        <motion.span
-          className='text-GRAY_700 flex items-center justify-center overflow-hidden'
-          animate={{ opacity: isTriggerHovered ? 0 : 1 }}
-          transition={{ opacity: { duration: 0.2, ease: 'easeInOut', delay: isTriggerHovered ? 0 : 0.4 } }}
-        >
-          <Zap size={14} />
+          <span className='ml-1.5'>Add a trigger</span>
         </motion.span>
       </motion.div>
     </div>

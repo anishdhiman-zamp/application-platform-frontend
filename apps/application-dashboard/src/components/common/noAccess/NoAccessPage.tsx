@@ -1,8 +1,8 @@
-import React, { FC } from 'react';
+import { FC } from 'react';
 import { useSelector } from 'react-redux';
 import { Button } from '@zamp-platform/ui';
 import { useInitiateLogoutFlowQuery, useLazyLogoutQuery } from 'apis/auth';
-import { ZAMP_ICON } from 'constants/icons';
+import { ZAMP_BLACK_ICON } from 'constants/icons';
 import { ROUTES_PATH } from 'constants/routeConfig';
 import Image from 'next/image';
 import { useRouter } from 'next/navigation';
@@ -37,7 +37,7 @@ const NoAccessPage: FC<NoAccessPagePropsType> = ({ type }) => {
           height={60}
           alt='zamp logo'
           className='w-8 cursor-pointer align-middle'
-          src={ZAMP_ICON}
+          src={ZAMP_BLACK_ICON}
           priority={true}
         />
       </div>

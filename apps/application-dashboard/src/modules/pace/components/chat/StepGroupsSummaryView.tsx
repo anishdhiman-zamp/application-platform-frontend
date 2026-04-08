@@ -1,11 +1,11 @@
 'use client';
 
+import { MarkdownBlock } from '@zamp-platform/chat';
 import { Accordion } from '@zamp-platform/ui';
 import { cn } from '@zamp-platform/ui/utils';
 import type { MessageStepGroupsSection } from 'modules/pace/components/chat/step-groups.types';
 import ResizableSummaryBox from '@/modules/pace/components/chat/ResizableSummaryBox';
 import StepGroupItem from '@/modules/pace/components/chat/StepGroupItem';
-import SummaryMarkdown from '@/modules/pace/components/chat/SummaryMarkdown';
 
 interface StepGroupsSummaryViewProps {
   sections: MessageStepGroupsSection[];
@@ -33,9 +33,9 @@ const StepGroupsSummaryView = ({ sections }: StepGroupsSummaryViewProps) => {
           )}
 
           {section.lastMarkdownText ? (
-            <div className={cn('bg-BG_WHITE relative z-1 py-1', section.groups.length === 0 && 'mt-4!')}>
+            <div className={cn('bg-BG_WHITE relative z-1', section.groups.length === 0 && 'mt-4!')}>
               <ResizableSummaryBox borderRadius='rounded-[18px]' contentClassName='px-4 pt-3 pb-1'>
-                <SummaryMarkdown text={section.lastMarkdownText} shimmerLast={false} />
+                <MarkdownBlock payload={{ text: section?.lastMarkdownText }} />
               </ResizableSummaryBox>
             </div>
           ) : null}

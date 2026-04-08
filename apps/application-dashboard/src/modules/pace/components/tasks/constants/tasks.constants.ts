@@ -6,8 +6,8 @@ import { TASK_LISTING_TAB, type TaskListingTab } from '@/modules/pace/components
 export const STATUS_DISPLAY_ORDER: TaskStatus[] = [
   TASK_STATUS.NEEDS_INPUT,
   TASK_STATUS.IN_PROGRESS,
-  TASK_STATUS.FAILED,
   TASK_STATUS.COMPLETED,
+  TASK_STATUS.FAILED,
   TASK_STATUS.CANCELED,
 ];
 

@@ -142,8 +142,7 @@ export interface InputsRespondedBlockProps {
   showConnectorToNext?: boolean;
 }
 
-const SHELL_CLASS =
-  'box-border w-full min-w-0 overflow-hidden rounded-xl bg-GRAY_50 shadow-[1px_2px_10px_0px_rgba(166,166,166,0.1)]';
+const SHELL_CLASS = 'box-border w-full min-w-0 overflow-hidden rounded-xl bg-GRAY_100 ';
 
 export const InputsRespondedBlock: React.FC<InputsRespondedBlockProps> = ({
   payload,
@@ -220,11 +219,8 @@ export const InputsRespondedBlock: React.FC<InputsRespondedBlockProps> = ({
   }
 
   return (
-    <div className='relative mt-2 w-full min-w-0 self-stretch'>
-      {showConnectorFromPrevious && (
-        <div className='bg-border pointer-events-none absolute -top-1 left-[6.5px] z-0 h-2 w-px' />
-      )}
-      <div className='flex w-full min-w-0 items-start gap-2 pt-2 pb-1'>
+    <div className='bg-BG_WHITE relative mt-4 mb-3 w-full min-w-0 self-stretch'>
+      <div className='flex w-full min-w-0 items-start gap-2 pt-1 pb-1'>
         <div className='w-full min-w-0 flex-1'>{card}</div>
       </div>
     </div>

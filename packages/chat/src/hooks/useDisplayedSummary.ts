@@ -1,13 +1,9 @@
 import { useCallback, useEffect, useRef, useState } from 'react';
 
 const CHAR_INTERVAL_MS = 12;
-// Short debounce so rapid SSE replays (e.g. on refresh) collapse into one update
-// and only the final summary gets animated.
-const SUMMARY_DEBOUNCE_MS = 80;
+const SUMMARY_DEBOUNCE_MS = 300;
 
-// Module-level cache so summary text accumulated by one component instance
-// (e.g. TaskBlock in the sidebar) is immediately available when another instance
-// mounts mid-stream (e.g. TaskContentInner after navigation).
+// Module-level cache so summary text is shared across component instances (e.g. TaskBlock ↔ TaskContentInner)
 const summaryTextCache = new Map<string, string>();
 
 interface UseDisplayedSummaryParams {
@@ -24,16 +20,11 @@ export function useDisplayedSummary({
   streamingSummaryText,
 }: UseDisplayedSummaryParams) {
   const prevIsAgentActiveRef = useRef(isAgentActive);
-  // Full target text that we animate towards
   const targetTextRef = useRef(summaryTextCache.get(taskId) ?? '');
-  // How many characters we've revealed so far
   const revealedCountRef = useRef(targetTextRef.current.length);
-  // RAF / interval ID for the typing animation
   const animationRef = useRef<ReturnType<typeof setInterval> | null>(null);
-  // Debounce timer for incoming streaming summary text
   const debounceRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 
-  // Seed initial state from cache so mid-stream navigation shows accumulated content
   const [displayedText, setDisplayedText] = useState(() => summaryTextCache.get(taskId) ?? '');
 
   const stopAnimation = useCallback(() => {
@@ -44,12 +35,10 @@ export function useDisplayedSummary({
   }, []);
 
   const startAnimation = useCallback(() => {
-    // Already running
     if (animationRef.current !== null) return;
 
     animationRef.current = setInterval(() => {
       if (revealedCountRef.current >= targetTextRef.current.length) {
-        // Caught up — pause until new content arrives
         stopAnimation();
         return;
       }
@@ -60,21 +49,16 @@ export function useDisplayedSummary({
 
   const setTargetText = useCallback(
     (text: string) => {
-      // Update module-level cache so other instances can seed from it
       summaryTextCache.set(taskId, text);
 
       const isExtension = targetTextRef.current.length > 0 && text.startsWith(targetTextRef.current);
 
       if (isExtension) {
-        // Cumulative streaming: new text extends the current target.
-        // Keep revealed count and displayed text as-is; the animation
-        // will pick up and reveal only the newly appended characters.
         targetTextRef.current = text;
         startAnimation();
         return;
       }
 
-      // Completely new summary — animate from scratch.
       stopAnimation();
       revealedCountRef.current = 0;
       setDisplayedText('');
@@ -84,7 +68,6 @@ export function useDisplayedSummary({
     [taskId, stopAnimation, startAnimation],
   );
 
-  // Reset state when taskId changes
   useEffect(() => {
     const cached = summaryTextCache.get(taskId) ?? '';
     stopAnimation();
@@ -93,7 +76,7 @@ export function useDisplayedSummary({
     setDisplayedText(cached);
   }, [taskId, stopAnimation]);
 
-  // Clear stale summary when a new stream begins (isAgentActive: false → true)
+  // Clear summary when a new stream begins (isAgentActive: false → true)
   useEffect(() => {
     if (isAgentActive && !prevIsAgentActiveRef.current) {
       stopAnimation();
@@ -105,7 +88,6 @@ export function useDisplayedSummary({
     prevIsAgentActiveRef.current = isAgentActive;
   }, [isAgentActive, taskId, stopAnimation]);
 
-  // Cleanup on unmount
   useEffect(
     () => () => {
       stopAnimation();
@@ -116,21 +98,32 @@ export function useDisplayedSummary({
     [stopAnimation],
   );
 
-  // React to new summary text arriving from the provider (per-task or per-conversation SSE).
-  // Debounced so that rapid replays on refresh collapse — only the last summary animates.
-  useEffect(() => {
+  // When inactive (replay / completed task), show text immediately to avoid flash/snap.
+  // When active (live streaming), debounce non-extension updates so rapid replays collapse.
+  const handleStreamingSummaryChange = useCallback(() => {
     if (typeof streamingSummaryText !== 'string' || streamingSummaryText === targetTextRef.current) {
       return;
     }
 
-    // If new text extends the current target, apply immediately (live streaming).
+    if (!isAgentActive) {
+      if (debounceRef.current !== null) {
+        clearTimeout(debounceRef.current);
+        debounceRef.current = null;
+      }
+      stopAnimation();
+      summaryTextCache.set(taskId, streamingSummaryText);
+      targetTextRef.current = streamingSummaryText;
+      revealedCountRef.current = streamingSummaryText.length;
+      setDisplayedText(streamingSummaryText);
+      return;
+    }
+
     const isExtension = targetTextRef.current.length > 0 && streamingSummaryText.startsWith(targetTextRef.current);
     if (isExtension) {
       setTargetText(streamingSummaryText);
       return;
     }
 
-    // Non-extension: debounce so only the final replayed summary is animated.
     if (debounceRef.current !== null) {
       clearTimeout(debounceRef.current);
     }
@@ -138,7 +131,11 @@ export function useDisplayedSummary({
       debounceRef.current = null;
       setTargetText(streamingSummaryText);
     }, SUMMARY_DEBOUNCE_MS);
-  }, [streamingSummaryText, setTargetText]);
+  }, [streamingSummaryText, isAgentActive, setTargetText, taskId, stopAnimation]);
+
+  useEffect(() => {
+    handleStreamingSummaryChange();
+  }, [handleStreamingSummaryChange]);
 
   if (isAgentActive) {
     return displayedText || '';

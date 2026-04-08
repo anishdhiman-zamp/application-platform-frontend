@@ -108,7 +108,7 @@ export const TaskProvider = ({ children, taskId, organizationId, resourceType, a
   }, [dispatch, taskId]);
 
   const handleTaskSummary = useCallback((_taskId: string, text: string) => {
-    setTaskSummaryText(text);
+    setTaskSummaryText((prev) => (prev === text ? prev : text));
   }, []);
 
   const perTaskCallbacks = useRef<TaskEventCallbacks>({

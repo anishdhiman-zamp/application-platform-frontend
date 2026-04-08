@@ -4,8 +4,8 @@ import { type FC, useCallback } from 'react';
 import { type TaskBreadcrumb, type TaskStatus, TaskStatusIcon } from '@zamp-platform/chat';
 import { cn } from '@zamp-platform/ui/utils';
 import { ArrowLeft } from 'lucide-react';
-import { useRouter } from 'next/navigation';
-import { getChatTaskRoute, ROUTES_PATH } from '@/constants/routeConfig';
+import { useRouter, useSearchParams } from 'next/navigation';
+import { getChatTaskRoute, ROUTES_PATH, TASK_QUERY_PARAMS } from '@/constants/routeConfig';
 import TaskBreadcrumbNav from '@/modules/pace/components/chat/TaskBreadcrumb';
 import { preserveSidebarParam } from '@/modules/pace/pace.utils';
 
@@ -20,6 +20,8 @@ interface TaskTopbarProps {
 
 const TaskTopbar: FC<TaskTopbarProps> = ({ className, title, status, isSubtask, parentTasks, navigationSlot }) => {
   const router = useRouter();
+  const searchParams = useSearchParams();
+  const referrer = searchParams?.get(TASK_QUERY_PARAMS.REFERRER);
   const displayTitle = title || 'Untitled';
 
   const handleBack = useCallback(() => {
@@ -33,10 +35,12 @@ const TaskTopbar: FC<TaskTopbarProps> = ({ className, title, status, isSubtask, 
       });
 
       router.push(preserveSidebarParam(route));
+    } else if (referrer && referrer.startsWith('/')) {
+      router.push(referrer);
     } else {
       router.push(preserveSidebarParam(ROUTES_PATH.CHAT_TASKS));
     }
-  }, [isSubtask, parentTasks, router]);
+  }, [isSubtask, parentTasks, router, referrer]);
 
   return (
     <div className={cn('bg-BG_WHITE flex items-center justify-between gap-x-3 p-3', className)}>
@@ -59,7 +63,11 @@ const TaskTopbar: FC<TaskTopbarProps> = ({ className, title, status, isSubtask, 
               <ArrowLeft size={16} />
             </div>
             <div className='flex h-7 min-w-0 flex-1 items-center gap-x-1.5 px-1'>
-              {status && <TaskStatusIcon status={status} />}
+              {status && (
+                <span className='shrink-0'>
+                  <TaskStatusIcon status={status} />
+                </span>
+              )}
               <span className='f-14-550 block min-w-0 truncate first-letter:uppercase'>{displayTitle}</span>
             </div>
           </>

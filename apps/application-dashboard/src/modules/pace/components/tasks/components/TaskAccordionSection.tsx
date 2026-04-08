@@ -17,6 +17,7 @@ interface TaskAccordionSectionProps {
   agentId?: string;
   scrollContainerRef: React.RefObject<HTMLDivElement | null>;
   creationSource?: CreationSource;
+  referrer?: string;
 }
 
 const PlayIcon = ({ className }: { className?: string }) => (
@@ -30,6 +31,7 @@ const TaskAccordionSection = ({
   agentId,
   scrollContainerRef,
   creationSource,
+  referrer,
 }: TaskAccordionSectionProps) => {
   const sentinelNodeRef = useRef<HTMLDivElement | null>(null);
   const isFetchingRef = useRef(false);
@@ -93,7 +95,14 @@ const TaskAccordionSection = ({
       <AccordionContent className='p-0' disableAnimation>
         <div>
           {tasks.map((task, index) => (
-            <TaskRow key={task.id} task={task} index={index} totalCount={totalCount} status={status} />
+            <TaskRow
+              key={task.id}
+              task={task}
+              index={index}
+              totalCount={totalCount}
+              status={status}
+              referrer={referrer}
+            />
           ))}
           {hasMore && <div ref={sentinelRef} className='h-px' />}
         </div>
