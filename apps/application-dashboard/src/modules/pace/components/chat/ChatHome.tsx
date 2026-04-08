@@ -1,4 +1,4 @@
-import NewPaceIcons from '@/assets/Icons/NewPaceIcons';
+import ZampIcon from '@/modules/chatbot/ZampIcon';
 import { getGreeting } from '@/modules/pace/pace.utils';
 
 const ChatHome = () => {
@@ -6,7 +6,7 @@ const ChatHome = () => {
 
   return (
     <div className='flex snap-mandatory flex-col items-center gap-y-2.5 pt-4.5'>
-      <NewPaceIcons width={40} height={40} className='text-GRAY_1000 dark:text-GRAY_950' />
+      <ZampIcon size={32} />
       <h1 className='f-20-500 text-GRAY_1000'>{greeting}</h1>
     </div>
   );

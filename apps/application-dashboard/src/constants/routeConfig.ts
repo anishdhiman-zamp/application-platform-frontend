@@ -132,6 +132,7 @@ export const getChatFileRoute = (filePath: string) => {
 export const TASK_QUERY_PARAMS = {
   PARENT_TASKS: 'parentTasks',
   SIBLINGS: 'siblings',
+  REFERRER: 'referrer',
 } as const;
 
 export const getChatTaskRoute = ({
@@ -143,6 +144,7 @@ export const getChatTaskRoute = ({
   totalRows,
   parentTasks,
   siblings,
+  referrer,
 }: {
   taskId: string;
   conversationId?: string;
@@ -152,6 +154,7 @@ export const getChatTaskRoute = ({
   totalRows?: number;
   parentTasks?: TaskBreadcrumb[];
   siblings?: SiblingTask[];
+  referrer?: string;
 }) => {
   const basePath = ROUTES_PATH.CHAT_TASK.replace(':taskId', taskId);
   const params = new URLSearchParams();
@@ -163,6 +166,7 @@ export const getChatTaskRoute = ({
   if (totalRows !== undefined) params.set('totalRows', String(totalRows));
   if (parentTasks && parentTasks.length > 0) params.set(TASK_QUERY_PARAMS.PARENT_TASKS, JSON.stringify(parentTasks));
   if (siblings && siblings.length > 0) params.set(TASK_QUERY_PARAMS.SIBLINGS, JSON.stringify(siblings));
+  if (referrer) params.set(TASK_QUERY_PARAMS.REFERRER, referrer);
 
   const query = params.toString();
 

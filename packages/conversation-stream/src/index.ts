@@ -4,7 +4,7 @@ export type { TaskEventCallbacks } from './types/task-sse.types';
 
 // Provider — Conversation
 export type { ConversationActions } from './provider/ConversationActionsContext';
-export { ConversationActionsContext } from './provider/ConversationActionsContext';
+export { ConversationActionsContext, createConversationActions } from './provider/ConversationActionsContext';
 export type { ConversationProviderProps } from './provider/ConversationProvider';
 export { ConversationProvider } from './provider/ConversationProvider';
 export type { ConversationState } from './provider/ConversationStateContext';

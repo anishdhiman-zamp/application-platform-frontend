@@ -4,7 +4,6 @@ import { memo, useCallback, useMemo } from 'react';
 import { PaceNavbarItemId } from 'modules/pace/pace.types';
 import Link from 'next/link';
 import { usePathname, useSearchParams } from 'next/navigation';
-import LogoutButton from '@/components/layouts/dashboard-layout/components/LogoutButton';
 import OrgSwitcher from '@/components/layouts/dashboard-layout/components/OrgSwitcher';
 import { FEATURE_FLAGS } from '@/constants/featureFlags';
 import { useFeatureFlag } from '@/hooks/useFeatureFlag';
@@ -40,7 +39,7 @@ const PaceSettingsSidebar = () => {
   );
 
   return (
-    <div className='bg-BG_GRAY_1 border-GRAY_400 flex h-full w-60 flex-col border-r'>
+    <div className='flex h-full w-[200px] shrink-0 flex-col'>
       <OrgSwitcher isSidebarOpen={true} macs />
       <div className='flex flex-1 flex-col px-2 pt-2 pb-4'>
         {tabs.map((item) => (
@@ -56,7 +55,6 @@ const PaceSettingsSidebar = () => {
           </div>
         ))}
       </div>
-      <LogoutButton className='px-1.5 py-2' macs />
     </div>
   );
 };

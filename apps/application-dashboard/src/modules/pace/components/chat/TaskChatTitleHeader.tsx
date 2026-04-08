@@ -7,6 +7,7 @@ export interface TaskChatTitleHeaderProps {
   statusLabel: string;
   isAgentActive: boolean;
   taskStatus: string | undefined;
+  description?: string | null;
 }
 
 export const TaskChatTitleHeader = ({
@@ -14,6 +15,7 @@ export const TaskChatTitleHeader = ({
   statusLabel,
   isAgentActive,
   taskStatus,
+  description,
 }: TaskChatTitleHeaderProps) => {
   return (
     <div className='flex flex-col gap-1.5'>
@@ -39,6 +41,7 @@ export const TaskChatTitleHeader = ({
           </div>
         )}
       </div>
+      {description && <p className='f-13-450 text-GRAY_700 leading-[1.4]'>{description}</p>}
     </div>
   );
 };

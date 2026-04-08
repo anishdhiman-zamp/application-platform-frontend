@@ -7,12 +7,14 @@ import { Check, ChevronDown } from 'lucide-react';
 import { SettingsRow } from 'modules/general/components/SettingsRow';
 import { PREFERENCES_ROWS, THEME_MODE, THEME_OPTIONS } from 'modules/general/constants/general.constants';
 import { useTheme } from '@/app/_providers/theme-provider';
+import { getTimezoneDisplay } from '@/modules/general/utils/general.utils';
 
 const Preferences = () => {
   const { theme, setTheme } = useTheme();
   const [open, setOpen] = useState(false);
 
   const currentLabel = THEME_OPTIONS.find((themeOption) => themeOption.value === theme)?.label ?? THEME_MODE.SYSTEM;
+  const timezoneDisplay = getTimezoneDisplay();
 
   const themeDropdown = (
     <DropdownMenu open={open} onOpenChange={setOpen}>
@@ -53,12 +55,7 @@ const Preferences = () => {
 
       <div className='border-GRAY_400 rounded-2xl border'>
         <SettingsRow label={PREFERENCES_ROWS[0].label} value={currentLabel} actionNode={themeDropdown} />
-        <SettingsRow
-          label={PREFERENCES_ROWS[1].label}
-          value={PREFERENCES_ROWS[1].value}
-          className='border-none'
-          action={{ text: 'Change' }}
-        />
+        <SettingsRow label={PREFERENCES_ROWS[1].label} value={timezoneDisplay} className='border-none' />
       </div>
     </div>
   );

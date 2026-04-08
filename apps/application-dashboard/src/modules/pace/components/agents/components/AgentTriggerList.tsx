@@ -105,7 +105,7 @@ const AgentTriggerList = ({
       disableAnimation
     >
       <p className='text-GRAY_700 f-14-450 mb-4 ml-2.5 shrink-0'>What should this agent run?</p>
-      <div className='border-GRAY_400 flex flex-col rounded-xl border'>
+      <div className='border-GRAY_400 flex flex-col overflow-hidden rounded-xl border'>
         {triggers.map((trigger, index) => {
           const content = (
             <div className='flex items-center gap-3'>
@@ -150,11 +150,22 @@ const AgentTriggerList = ({
           );
         })}
         {!onTriggerClick && (
-          <div className='border-GRAY_400 border-t px-3.5 py-3'>
-            <Button variant='ghost' size='small' className='text-GRAY_700 gap-1 text-sm' onClick={onAddTrigger}>
+          <div
+            role='button'
+            tabIndex={0}
+            className='border-GRAY_400 hover:bg-GRAY_100 cursor-pointer border-t px-3.5 py-3 transition-colors'
+            onClick={onAddTrigger}
+            onKeyDown={(e) => {
+              if (e.key === 'Enter' || e.key === ' ') {
+                e.preventDefault();
+                onAddTrigger?.();
+              }
+            }}
+          >
+            <div className='text-GRAY_700 f-13-500 flex items-center gap-1'>
               <Plus size={14} />
               <span>Add trigger</span>
-            </Button>
+            </div>
           </div>
         )}
       </div>

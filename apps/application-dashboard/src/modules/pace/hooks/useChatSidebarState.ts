@@ -32,13 +32,7 @@ export const useChatSidebarState = ({ initialConversationId }: UseChatSidebarSta
 
   const setConversationId = useCallback((id: string | null, title?: string) => {
     internalUpdateRef.current = true;
-    setConversationIdState((prev) => {
-      if (prev && id && prev !== id) {
-        setChatKey((k) => k + 1);
-      }
-
-      return id;
-    });
+    setConversationIdState(id);
     setChatTitle(title || '');
 
     const params = new URLSearchParams(window.location.search);

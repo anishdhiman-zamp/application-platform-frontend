@@ -18,9 +18,10 @@ interface TaskRowProps {
   index?: number;
   totalCount?: number;
   status?: string;
+  referrer?: string;
 }
 
-const TaskRow = ({ task, index, totalCount, status }: TaskRowProps) => {
+const TaskRow = ({ task, index, totalCount, status, referrer }: TaskRowProps) => {
   const router = useRouter();
 
   const handleRowClick = useCallback(() => {
@@ -30,10 +31,11 @@ const TaskRow = ({ task, index, totalCount, status }: TaskRowProps) => {
       status,
       currentIndex: index,
       totalRows: totalCount,
+      referrer,
     });
 
     router.push(preserveSidebarParam(taskRoute));
-  }, [router, task.id, task.title, status, index, totalCount]);
+  }, [router, task.id, task.title, status, index, totalCount, referrer]);
 
   const totalSubtasks = task.subtasks.length;
   const completedSubtasks = useMemo(

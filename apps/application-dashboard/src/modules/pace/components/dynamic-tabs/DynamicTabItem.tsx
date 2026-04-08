@@ -77,6 +77,7 @@ const DynamicTabItem = ({
   return (
     <TooltipV2
       tooltipBody={tab.name}
+      tooltipClassName='max-w-[400px] [display:-webkit-box!important] [-webkit-line-clamp:2] [-webkit-box-orient:vertical] overflow-hidden'
       side={SIDE_OPTIONS.BOTTOM}
       delayDuration={500}
       asChildTrigger
