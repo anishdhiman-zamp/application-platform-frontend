@@ -1,7 +1,8 @@
 'use client';
 
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
-import { Button, Skeleton, toast } from '@zamp-platform/ui';
+import { Skeleton, toast } from '@zamp-platform/ui';
+import AgentTabEmptyState from 'modules/pace/components/agents/components/AgentTabEmptyState';
 import IntegrationDetail from 'modules/pace/components/agents/components/IntegrationDetail';
 import IntegrationList from 'modules/pace/components/agents/components/IntegrationList';
 import {
@@ -31,6 +32,7 @@ import CommonWrapper from '@/components/commonWrapper';
 
 interface AgentToolsAccessProps {
   agentId: string;
+  agentAvatarSrc?: string;
   isActive?: boolean;
   skipFetch?: boolean;
   onAddConnection?: () => void;
@@ -47,7 +49,13 @@ const deriveAccessLevel = (tools?: { permission: ToolPermissionType }[]): Access
   return ACCESS_LEVEL_OPTIONS.find((opt) => opt?.permission === first)?.value ?? ACCESS_LEVEL.CUSTOM;
 };
 
-const AgentToolsAccess = ({ agentId, isActive = true, skipFetch = false, onAddConnection }: AgentToolsAccessProps) => {
+const AgentToolsAccess = ({
+  agentId,
+  agentAvatarSrc,
+  isActive = true,
+  skipFetch = false,
+  onAddConnection,
+}: AgentToolsAccessProps) => {
   const hasBeenActiveRef = useRef(isActive);
   const isFirstVisit = !hasBeenActiveRef.current && isActive;
 
@@ -518,15 +526,12 @@ const AgentToolsAccess = ({ agentId, isActive = true, skipFetch = false, onAddCo
 
   if (integrations.length === 0) {
     return (
-      <div className='border-GRAY_400 flex h-full items-center justify-start gap-10 rounded-xl border px-25'>
-        <span className='f-13-450 text-GRAY_700 flex items-center'>
-          🔗<span className='ml-1'>🤖</span>
-          <span className='ml-1.5'>Explicitly grant connections access to your agent</span>
-        </span>
-        <Button variant='outline' size='small' className='shrink-0 rounded-lg px-3 text-xs' onClick={onAddConnection}>
-          Add connection
-        </Button>
-      </div>
+      <AgentTabEmptyState
+        agentAvatarSrc={agentAvatarSrc}
+        description='Explicitly grant connections access to your agent'
+        actionLabel='Add connection'
+        onAction={onAddConnection}
+      />
     );
   }
 

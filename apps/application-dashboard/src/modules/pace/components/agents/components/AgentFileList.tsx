@@ -3,6 +3,7 @@
 import { useEffect, useMemo, useRef, useState } from 'react';
 import { FolderClosedIcon, Skeleton, Switch, toast } from '@zamp-platform/ui';
 import { cn } from '@zamp-platform/ui/utils';
+import AgentTabEmptyState from 'modules/pace/components/agents/components/AgentTabEmptyState';
 import { FILE_TYPE } from 'modules/pace/components/files/file-tree.types';
 import { useGetAgentFileAccessQuery, useToggleAgentFileAccessMutation } from '@/apis/agents';
 import { useListFilesQuery } from '@/apis/filesystem';
@@ -30,11 +31,12 @@ const FileListSkeleton = () => (
 
 interface AgentFileListProps {
   agentId: string;
+  agentAvatarSrc?: string;
   isActive?: boolean;
   skipFetch?: boolean;
 }
 
-const AgentFileList = ({ agentId, isActive = true, skipFetch = false }: AgentFileListProps) => {
+const AgentFileList = ({ agentId, agentAvatarSrc, isActive = true, skipFetch = false }: AgentFileListProps) => {
   const hasBeenActiveRef = useRef(isActive);
   const isFirstVisit = !hasBeenActiveRef.current && isActive;
 
@@ -122,15 +124,11 @@ const AgentFileList = ({ agentId, isActive = true, skipFetch = false }: AgentFil
 
   return (
     <CommonWrapper
-      isLoading={isLoading}
+      isLoading={shouldSkip || isLoading}
       isError={isError}
       refetchFunction={refetch}
       isNoData={!isLoading && files?.length === 0}
-      noDataBanner={
-        <div className='border-GRAY_400 flex h-full items-center justify-center rounded-xl border'>
-          <p className='f-13-450 text-GRAY_700'>No Files Found</p>
-        </div>
-      }
+      noDataBanner={<AgentTabEmptyState agentAvatarSrc={agentAvatarSrc} description='No Files Found' />}
       skeletonType={SkeletonTypes.CUSTOM}
       loader={<FileListSkeleton />}
       className='flex min-h-0 flex-1 flex-col'

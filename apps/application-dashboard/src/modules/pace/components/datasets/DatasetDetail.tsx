@@ -52,6 +52,7 @@ import {
 import ShareDatasetNeonPopup from 'modules/pace/components/datasets/ShareDatasetNeonPopup';
 import { preserveSidebarParam } from 'modules/pace/pace.utils';
 import Link from 'next/link';
+import { useRouter } from 'next/navigation';
 import { cn } from 'utils/common';
 import {
   DatasetRoleValue,
@@ -100,6 +101,7 @@ const DatasetDetailInner = ({ tableName }: DatasetDetailProps) => {
   const isProgrammaticMoveRef = useRef(false);
 
   // --- Hooks ---
+  const router = useRouter();
   const { userId } = useUserIdentity();
   const [executeQuery] = useLazyAgentDbReadQuery();
   const [executeMutation] = useAgentDbWriteMutation();
@@ -609,10 +611,10 @@ const DatasetDetailInner = ({ tableName }: DatasetDetailProps) => {
         pendingNavRef.current = href;
         setShowUnsavedModal(true);
       } else {
-        window.location.href = href;
+        router.push(href);
       }
     },
-    [hasBlueprintChanges],
+    [hasBlueprintChanges, router],
   );
 
   const handleModalDiscard = useCallback(() => {
@@ -623,8 +625,8 @@ const DatasetDetailInner = ({ tableName }: DatasetDetailProps) => {
     // Clear draft and reset blueprint so guard is lifted before navigating
     removeFromLocalStorage(`${LOCAL_STORAGE_KEYS.DATASET_BLUEPRINT_DRAFT}_${tableName}` as LOCAL_STORAGE_KEYS);
     setBlueprintColumns(originalBlueprintColumns);
-    if (href) window.location.href = href;
-  }, [originalBlueprintColumns, tableName]);
+    if (href) router.push(href);
+  }, [originalBlueprintColumns, tableName, router]);
 
   const handleModalSave = useCallback(async () => {
     await handleSaveBlueprint();
@@ -632,8 +634,8 @@ const DatasetDetailInner = ({ tableName }: DatasetDetailProps) => {
     const href = pendingNavRef.current;
 
     pendingNavRef.current = null;
-    if (href) window.location.href = href;
-  }, [handleSaveBlueprint]);
+    if (href) router.push(href);
+  }, [handleSaveBlueprint, router]);
 
   const handleExportCsv = useCallback(async () => {
     if (isExporting) return;

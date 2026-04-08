@@ -62,7 +62,7 @@ const IntegrationDetailPage: FC<IntegrationDetailPageProps> = ({ integration }) 
         }}
         className='flex shrink-0 items-center justify-center overflow-hidden'
       >
-        <div className='flex h-full w-[700px] flex-col'>
+        <div className='flex h-full w-full max-w-[700px] flex-col px-4'>
           <Link
             href={`${ROUTES_PATH.CHAT_SETTINGS_INTEGRATIONS}${searchParams?.toString() ? `?${searchParams.toString()}` : ''}`}
             className={cn('flex w-full items-center justify-start py-5', isScrolled && 'border-GRAY_400 border-b')}

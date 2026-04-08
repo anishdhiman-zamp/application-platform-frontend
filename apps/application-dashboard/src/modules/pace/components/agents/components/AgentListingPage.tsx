@@ -4,9 +4,6 @@ import { useCallback, useEffect, useMemo, useState } from 'react';
 import { Button, ScrollContainer } from '@zamp-platform/ui';
 import { Plus } from 'lucide-react';
 import AgentActionBar from 'modules/pace/components/agents/components/AgentActionBar';
-import AgentCard from 'modules/pace/components/agents/components/AgentCard';
-import AgentCardSkeleton from 'modules/pace/components/agents/components/AgentCardSkeleton';
-import AgentEmptyState from 'modules/pace/components/agents/components/AgentEmptyState';
 import CreateAgentModal from 'modules/pace/components/agents/components/CreateAgentModal';
 import { AGENT_SEARCH_DEBOUNCE_MS } from 'modules/pace/components/agents/constants/agents.constants';
 import {
@@ -20,6 +17,11 @@ import { useGetAgentsListQuery } from '@/apis/agents';
 import CommonWrapper from '@/components/commonWrapper';
 import { SkeletonTypes } from '@/components/commonWrapper/commonWrapper.types';
 import { useDebounce } from '@/hooks';
+import AgentEmptyState from '@/modules/pace/components/agents/empty-states/AgentEmptyState';
+import AgentsEmptyState from '@/modules/pace/components/agents/empty-states/AgentsEmptyState';
+import AgentCard from '@/modules/pace/components/agents/skeletons/AgentCard';
+import AgentCardSkeleton from '@/modules/pace/components/agents/skeletons/AgentCardSkeleton';
+import AgentListingHeaderSkeleton from '@/modules/pace/components/agents/skeletons/AgentListingHeaderSkeleton';
 import { buildTabRoute } from '@/modules/pace/components/dynamic-tabs/tab-type-registry';
 import { useDynamicTabs } from '@/modules/pace/components/dynamic-tabs/useDynamicTabs';
 import { usePaceContext } from '@/modules/pace/pace.context';
@@ -144,37 +146,38 @@ const AgentListingPage = () => {
   return (
     <div className='flex h-full flex-col overflow-hidden'>
       <div className='mx-auto w-full max-w-200'>
-        <div className='bg-BG_WHITE flex shrink-0 items-center justify-between pt-6 pr-3 pb-3 pl-4'>
-          <h1 className='text-GRAY_1000 f-20-500'>Agents</h1>
-          <Button size='small' className='gap-1 rounded-md px-3 py-1.5' onClick={handleOpenCreateModal}>
-            <Plus size={14} />
-            <span className='f-12-500'>New Agent</span>
-          </Button>
-        </div>
-
-        <AgentActionBar
-          searchTerm={searchTerm}
-          onSearchChange={handleSearchChange}
-          activeTab={activeTab}
-          onTabChange={handleTabChange}
-        />
+        {isLoading ? (
+          <AgentListingHeaderSkeleton />
+        ) : (
+          <>
+            <div className='bg-BG_WHITE flex shrink-0 items-center justify-between pt-6 pr-3 pb-3 pl-4'>
+              <h1 className='text-GRAY_1000 f-20-500'>Agents</h1>
+              <Button size='small' className='gap-1 rounded-md px-3 py-1.5' onClick={handleOpenCreateModal}>
+                <Plus size={14} />
+                <span className='f-12-500'>New Agent</span>
+              </Button>
+            </div>
+            <AgentActionBar
+              searchTerm={searchTerm}
+              onSearchChange={handleSearchChange}
+              activeTab={activeTab}
+              onTabChange={handleTabChange}
+            />
+          </>
+        )}
       </div>
 
       <ScrollContainer className='flex-1'>
-        <div className='mx-auto w-full max-w-200 px-4 pt-1 pb-4'>
+        <div className='@container mx-auto w-full max-w-200 px-4 pt-1 pb-4'>
           <CommonWrapper
             isLoading={isLoading}
             isError={isError}
             refetchFunction={refetch}
             isNoData={!isLoading && filteredAgents.length === 0}
-            noDataBanner={
-              <div className='text-GRAY_700 flex h-[calc(100vh-250px)] items-center justify-center text-sm'>
-                No agents found
-              </div>
-            }
+            noDataBanner={<AgentsEmptyState />}
             skeletonType={SkeletonTypes.CUSTOM}
             loader={
-              <div className='grid grid-cols-3 gap-4'>
+              <div className='grid grid-cols-1 gap-4 @sm:grid-cols-2 @3xl:grid-cols-3'>
                 {Array.from({ length: 9 }).map((_, i) => (
                   <AgentCardSkeleton key={i} />
                 ))}
@@ -183,7 +186,7 @@ const AgentListingPage = () => {
             height={500}
             disableAnimation
           >
-            <div className='grid grid-cols-3 gap-4'>
+            <div className='grid grid-cols-1 gap-4 @sm:grid-cols-2 @3xl:grid-cols-3'>
               {filteredAgents.map((agent) => (
                 <AgentCard key={agent.id} agent={agent} onClick={handleAgentClick} />
               ))}

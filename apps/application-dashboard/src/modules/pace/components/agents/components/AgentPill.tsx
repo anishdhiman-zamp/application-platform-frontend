@@ -1,8 +1,7 @@
 'use client';
 
 import { type FC, type RefObject, useCallback, useEffect, useRef, useState } from 'react';
-import { Popover, PopoverContent, PopoverTrigger, SearchInput } from '@zamp-platform/ui';
-import { cn } from '@zamp-platform/ui/utils';
+import { Popover, PopoverContent, PopoverTrigger } from '@zamp-platform/ui';
 import { getAgentAvatar, getAgentAvatarByKey } from 'modules/pace/components/agents/constants/agents.constants';
 import { useRouter } from 'next/navigation';
 import ImageKitImage from '@/components/ImageKitImage';
@@ -11,7 +10,6 @@ import { buildTabRoute } from '@/modules/pace/components/dynamic-tabs/tab-type-r
 import { useDynamicTabs } from '@/modules/pace/components/dynamic-tabs/useDynamicTabs';
 import { TAB_TYPE } from '@/modules/pace/pace.types';
 import { preserveSidebarParam } from '@/modules/pace/pace.utils';
-import ProcessEmptyState from '@/modules/process/activity-runs/components/ProcessEmptyState';
 
 interface AgentPillProps {
   agentId: string;
@@ -29,7 +27,6 @@ const AgentPill: FC<AgentPillProps> = ({ agentId, agentName, avatarKey, containe
   const avatar = (storedAvatarKey && getAgentAvatarByKey(storedAvatarKey)) || getAgentAvatar(agentName);
   const [isOpen, setIsOpen] = useState(false);
   const [alignOffset, setAlignOffset] = useState(0);
-  const [searchQuery, setSearchQuery] = useState('');
   const [containerWidth, setContainerWidth] = useState(0);
 
   useEffect(() => {
@@ -52,9 +49,6 @@ const AgentPill: FC<AgentPillProps> = ({ agentId, agentName, avatarKey, containe
     (open: boolean) => {
       setIsOpen(open);
       onOpenChange?.(open);
-      if (!open) {
-        setSearchQuery('');
-      }
     },
     [onOpenChange],
   );
@@ -72,9 +66,6 @@ const AgentPill: FC<AgentPillProps> = ({ agentId, agentName, avatarKey, containe
     openTab(agentId, agentName, Object.keys(metadata).length > 0 ? metadata : undefined);
     router.push(preserveSidebarParam(pathWithTitle));
   }, [agentId, agentName, storedAvatarKey, openTab, router, handleOpenChange]);
-
-  const isMatch = agentName.toLowerCase().includes(searchQuery.toLowerCase().trim());
-  const showEmpty = !isMatch && searchQuery.trim().length > 0;
 
   useEffect(() => {
     const trigger = triggerRef.current;
@@ -117,33 +108,16 @@ const AgentPill: FC<AgentPillProps> = ({ agentId, agentName, avatarKey, containe
             containerWidth ? { width: containerWidth, minWidth: containerWidth, maxWidth: containerWidth } : undefined
           }
         >
-          <div className='shrink-0 px-3 pt-4'>
-            <SearchInput
-              placeholder='Search agents'
-              value={searchQuery}
-              onChange={setSearchQuery}
-              wrapperClassName='w-full'
-              className='border-none! shadow-none! ring-0! focus:border-none! focus:ring-0!'
-            />
-          </div>
-
-          <div className='flex flex-1 flex-col gap-0.5 overflow-y-auto px-4 pt-4 pb-4 [scrollbar-width:thin]'>
-            {isMatch && (
-              <div className={cn('border-GRAY_400 bg-GRAY_100 overflow-hidden rounded-xl border')}>
-                <AgentTestCard
-                  agentId={agentId}
-                  agentName={agentName}
-                  avatar={avatar}
-                  onClick={handleOpenTab}
-                  onTriggerSelected={() => handleOpenChange(false)}
-                />
-              </div>
-            )}
-            {showEmpty && (
-              <div className='flex flex-1 items-center justify-center [&>div]:min-h-0!'>
-                <ProcessEmptyState title='No agents found' description='' />
-              </div>
-            )}
+          <div className='flex flex-1 flex-col gap-0.5 overflow-y-auto px-4 py-4 [scrollbar-width:thin]'>
+            <div className='border-GRAY_400 bg-GRAY_100 overflow-hidden rounded-xl border'>
+              <AgentTestCard
+                agentId={agentId}
+                agentName={agentName}
+                avatar={avatar}
+                onClick={handleOpenTab}
+                onTriggerSelected={() => handleOpenChange(false)}
+              />
+            </div>
           </div>
         </PopoverContent>
       </Popover>
