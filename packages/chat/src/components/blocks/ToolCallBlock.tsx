@@ -44,6 +44,8 @@ interface ToolCallBlockProps {
   embedded?: boolean;
   /** Flat transparent shell (e.g. nested in a muted panel); keeps icons/connectors unlike `embedded`. */
   quietSurface?: boolean;
+  /** Remove bottom padding — use on the last ToolCallBlock in a message. */
+  isLastToolCall?: boolean;
 }
 export const ToolCallBlock = ({
   payload,
@@ -56,6 +58,7 @@ export const ToolCallBlock = ({
   embedded = false,
   quietSurface = false,
   showWatchButton = false,
+  isLastToolCall = false,
 }: ToolCallBlockProps) => {
   const flatShell = embedded || quietSurface;
   const [internalAccordionOpen, setInternalAccordionOpen] = useState<boolean>(false);
@@ -130,8 +133,7 @@ export const ToolCallBlock = ({
           className={cn(
             'font-420 text-GRAY_1000 w-full cursor-pointer gap-x-2 text-[13px] [&[data-state=closed]>svg]:rotate-90 [&[data-state=open]>svg]:-rotate-90',
             embedded ? 'py-1.5' : 'py-2',
-            !showConnectorFromPrevious && 'pt-0',
-            !showConnectorToNext && 'pb-0',
+            isLastToolCall && 'pb-0',
           )}
         >
           <div className='flex flex-1 items-center gap-3'>

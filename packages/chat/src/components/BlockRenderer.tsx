@@ -164,6 +164,16 @@ export const BlockRenderer: React.FC<BlockRendererProps> = ({
     return block?.order ?? -1;
   }, [messageBlocks]);
 
+  const lastToolCallOrder = useMemo(() => {
+    const toolUseBlocks = messageBlocks.filter((b) => b.type === BLOCK_TYPE.TOOL_USE);
+    return toolUseBlocks[toolUseBlocks.length - 1]?.order ?? -1;
+  }, [messageBlocks]);
+
+  const lastThinkingBlockOrder = useMemo(() => {
+    const thinkingBlocks = messageBlocks.filter((b) => b.type === BLOCK_TYPE.THINKING);
+    return thinkingBlocks[thinkingBlocks.length - 1]?.order ?? -1;
+  }, [messageBlocks]);
+
   const renderBlock = (block: Block, index: number, nextBlock?: Block, previousBlock?: Block) => {
     const isLastBlock = index === size - 1;
     const isNextLast = index + 1 === size - 1;
@@ -206,6 +216,7 @@ export const BlockRenderer: React.FC<BlockRendererProps> = ({
             }
             showConnectorFromPrevious={showConnectorFromPrevious}
             showConnectorToNext={showConnectorToNext}
+            isLastThinkingBlock={thinking.order === lastThinkingBlockOrder && isLastBlock}
           />
         );
       }
@@ -236,6 +247,7 @@ export const BlockRenderer: React.FC<BlockRendererProps> = ({
             showConnectorFromPrevious={showConnectorFromPrevious}
             showConnectorToNext={showConnectorToNext}
             showWatchButton={toolUseBlock.order === firstBrowserToolOrder}
+            isLastToolCall={toolUseBlock.order === lastToolCallOrder && isLastBlock}
           />
         );
       }

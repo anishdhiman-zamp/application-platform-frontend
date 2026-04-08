@@ -6,7 +6,7 @@ const ChatHome = () => {
 
   return (
     <div className='flex snap-mandatory flex-col items-center gap-y-2.5 pt-4.5'>
-      <ZampIcon size={40} />
+      <ZampIcon size={32} />
       <h1 className='f-20-500 text-GRAY_1000'>{greeting}</h1>
     </div>
   );
