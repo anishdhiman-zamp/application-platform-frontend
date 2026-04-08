@@ -586,26 +586,11 @@ export const SSEProvider: React.FC<SSEProviderProps> = ({ children, sseEventBus 
       store.dispatch(baseApi.util.invalidateTags([APITags.GET_CONVERSATION_HISTORY]));
     });
 
-    const browserStreamingAvailableSub = sseEventBus.subscribe(
-      EVENT_TYPE.BROWSER_STREAMING_AVAILABLE,
-      (data: BaseEventPayload) => {
-        window.dispatchEvent(new MessageEvent('sse:browser_streaming_available', { data: JSON.stringify(data) }));
-      },
-    );
-    const browserStreamingUnavailableSub = sseEventBus.subscribe(
-      EVENT_TYPE.BROWSER_STREAMING_UNAVAILABLE,
-      (data: BaseEventPayload) => {
-        window.dispatchEvent(new MessageEvent('sse:browser_streaming_unavailable', { data: JSON.stringify(data) }));
-      },
-    );
-
     return () => {
       streamSub.unsubscribe();
       convSub.unsubscribe();
       taskSub.unsubscribe();
       taskUpdateSub.unsubscribe();
-      browserStreamingAvailableSub.unsubscribe();
-      browserStreamingUnavailableSub.unsubscribe();
       convCreatedSub.unsubscribe();
       titleUpdatedSub.unsubscribe();
     };
