@@ -22,6 +22,7 @@ const DatasetsListing = () => {
   const router = useRouter();
   const { data, isLoading } = useAgentDbReadQuery(LISTING_QUERY_ARG, {
     pollingInterval: DATASETS_POLL_INTERVAL_MS,
+    skipPollingIfUnfocused: true,
   });
 
   const rows = useMemo(() => {

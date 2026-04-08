@@ -119,8 +119,8 @@ const ColumnRow: FC<ColumnRowProps> = memo(
       const trimmed = localName.trim();
 
       if (!trimmed) return 'Column name cannot be empty';
-      if (!/^[a-zA-Z_ ][a-zA-Z0-9_ ]*$/.test(trimmed)) {
-        return 'Column name invalid';
+      if (!/^[a-zA-Z][a-zA-Z0-9_ ]*$/.test(trimmed)) {
+        return 'Column name must start with a letter and contain only letters, numbers or spaces';
       }
       const sanitized = sanitizeColumnName(trimmed);
       const dupes = allColumns.filter((c) => sanitizeColumnName(c.name) === sanitized);

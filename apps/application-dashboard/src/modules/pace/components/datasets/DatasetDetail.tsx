@@ -113,6 +113,7 @@ const DatasetDetailInner = ({ tableName }: DatasetDetailProps) => {
     { tableName },
     {
       pollingInterval: DATASETS_POLL_INTERVAL_MS,
+      skipPollingIfUnfocused: true,
     },
   );
   const {
