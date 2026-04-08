@@ -1,6 +1,6 @@
 'use client';
 
-import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
+import { useCallback, useEffect, useMemo, useRef } from 'react';
 import {
   ChatActionsProvider,
   type CreateConversationPayloadTypeV2,
@@ -16,11 +16,7 @@ import {
   createConversationActions,
 } from '@zamp-platform/conversation-stream';
 import { AnimatePresence, motion } from 'framer-motion';
-import { FEATURE_FLAGS } from '@/constants/featureFlags';
 import { useAppSelector } from '@/hooks/toolkit';
-import { useFeatureFlag } from '@/hooks/useFeatureFlag';
-import AutoLoopConfirmDialog from '@/modules/pace/components/chat/AutoLoopConfirmDialog';
-import AutoLoopToggle from '@/modules/pace/components/chat/AutoLoopToggle';
 import ChatHistory from '@/modules/pace/components/chat/ChatHistory';
 import ChatHome from '@/modules/pace/components/chat/ChatHome';
 import ModelSelector from '@/modules/pace/components/chat/ModelSelector';
@@ -47,7 +43,6 @@ const ChatHomePage = () => {
   const organizationId = useAppSelector((state: RootState) => state.user.user?.orgs?.[0]?.organization_id) ?? '';
   const currentUserName = useAppSelector((state: RootState) => state.user.user?.user_name) ?? '';
   const username = useAppSelector((state: RootState) => state.user.user?.username) ?? '';
-  const { isEnabled: isAutoLoopBtnEnabled } = useFeatureFlag(FEATURE_FLAGS.AUTO_LOOP_BTN_ENABLED);
 
   const fileDropHandlerRef = useRef<((files: FileList) => void) | null>(null);
   const addFileReferenceRef = useRef<((ref: { path: string; name: string }) => void) | null>(null);
@@ -55,9 +50,6 @@ const ChatHomePage = () => {
   const { inputValue, setInputValue } = useChatDraftInput({
     conversationId: null,
   });
-
-  const [autoLoopEnabled, setAutoLoopEnabled] = useState(false);
-  const [isConfirmDialogOpen, setIsConfirmDialogOpen] = useState(false);
 
   const { isDragOver, dropZoneProps } = useFileDragDrop({
     onFileDrop: (files) => fileDropHandlerRef.current?.(files),
@@ -69,19 +61,6 @@ const ChatHomePage = () => {
   const modelSelectorSlot = useMemo(
     () => <ModelSelector value={selectedModel} onChange={setSelectedModel} />,
     [selectedModel],
-  );
-
-  const autoLoopToggleSlot = useMemo(
-    () => (
-      <AutoLoopToggle
-        enabled={autoLoopEnabled}
-        onChange={(pressed) => {
-          if (pressed) setIsConfirmDialogOpen(true);
-        }}
-        disabled={autoLoopEnabled}
-      />
-    ),
-    [autoLoopEnabled],
   );
 
   const handleSelectConversation = useCallback(
@@ -161,9 +140,7 @@ const ChatHomePage = () => {
                       addFileReferenceRef={addFileReferenceRef}
                       showModelSelector
                       modelSelectorSlot={modelSelectorSlot}
-                      {...(isAutoLoopBtnEnabled && { autoLoopToggleSlot })}
                       llmModel={selectedModel}
-                      autoLoopEnabled={autoLoopEnabled}
                     />
                   </div>
                   <ChatHistory onSelectConversation={handleSelectConversation} />
@@ -171,11 +148,6 @@ const ChatHomePage = () => {
               </ChatActionsProvider>
             )}
           </AnimatePresence>
-          <AutoLoopConfirmDialog
-            isOpen={isConfirmDialogOpen}
-            onOpenChange={setIsConfirmDialogOpen}
-            onConfirm={() => setAutoLoopEnabled(true)}
-          />
         </>
       </ConversationActionsContext.Provider>
     </ConversationStateContext.Provider>
