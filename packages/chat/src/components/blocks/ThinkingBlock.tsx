@@ -19,6 +19,8 @@ interface ThinkingBlockProps {
   embedded?: boolean;
   /** Flat transparent shell (e.g. nested in a muted panel); keeps dots/connectors unlike `embedded`. */
   quietSurface?: boolean;
+  /** Remove bottom padding — use on the last ThinkingBlock when it is also the last block in the message. */
+  isLastThinkingBlock?: boolean;
 }
 
 export const ThinkingBlock: FC<ThinkingBlockProps> = ({
@@ -32,6 +34,7 @@ export const ThinkingBlock: FC<ThinkingBlockProps> = ({
   showConnectorToNext = false,
   embedded = false,
   quietSurface = false,
+  isLastThinkingBlock = false,
 }) => {
   const flatShell = embedded || quietSurface;
   const [internalAccordionOpen, setInternalAccordionOpen] = useState<boolean>(false);
@@ -96,6 +99,7 @@ export const ThinkingBlock: FC<ThinkingBlockProps> = ({
           className={cn(
             'f-13-400 text-GRAY_900 flex max-h-60 w-full overflow-y-auto whitespace-pre-wrap [scrollbar-width:thin] [&::-webkit-scrollbar]:hidden',
             embedded ? 'p-2 pt-0 pl-3' : 'p-2 pt-0 pl-5',
+            isLastThinkingBlock && 'pb-0',
           )}
         >
           {payload?.thinking || 'Processing...'}

@@ -18,7 +18,6 @@ import { useConversationActions, useConversationState } from '@zamp-platform/con
 import { ScrollContainer } from '@zamp-platform/ui';
 import { cn } from '@zamp-platform/ui/utils';
 import { useRouter } from 'next/navigation';
-import NewPaceIcons from '@/assets/Icons/NewPaceIcons';
 import CommonWrapper from '@/components/commonWrapper';
 import { SkeletonTypes } from '@/components/commonWrapper/commonWrapper.types';
 import { APITags } from '@/constants/api.constants';
@@ -334,7 +333,7 @@ const ChatConversationContent = ({
           ) : (
             <div className='flex flex-1 items-center justify-center'>
               <div className='flex flex-col items-center gap-4'>
-                <NewPaceIcons width={40} height={40} />
+                <ZampIcon size={40} className='opacity-50' />
                 <p className='f-13-400 text-GRAY_600'>Ask Pace anything</p>
               </div>
             </div>
