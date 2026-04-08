@@ -30,7 +30,6 @@ import type { MapAny } from '@/types/commonTypes';
 
 import { type ConversationEventCallbacks } from '../handlers/conversationEventHandler';
 import { conversationSSERegistry } from '../registry/conversationSSERegistry';
-import { browserSessionStore } from '../stores/browserSessionStore';
 import { type ConversationActions, ConversationActionsContext } from './ConversationActionsContext';
 import { type ConversationState, ConversationStateContext } from './ConversationStateContext';
 
@@ -162,21 +161,14 @@ export const ConversationProvider: React.FC<ConversationProviderProps> = ({
     setHeaderRef.current?.(title);
   }, []);
 
-  const handleBrowserStreamingAvailable = useCallback((convId: string, sessionId?: string) => {
+  const handleBrowserStreamingAvailable = useCallback((_convId: string, sessionId?: string) => {
     setIsBrowserStreamingAvailable(true);
     setBrowserSessionId(sessionId);
-    if (sessionId) {
-      browserSessionStore.set(convId, sessionId);
-    }
   }, []);
 
   const handleBrowserStreamingUnavailable = useCallback(() => {
     setIsBrowserStreamingAvailable(false);
     setBrowserSessionId(undefined);
-    const cid = conversationIdRef.current;
-    if (cid) {
-      browserSessionStore.markEnded(cid);
-    }
   }, []);
 
   const handlePerConvTaskUpdate = useCallback((taskId: string, updatedFields: Record<string, unknown>) => {

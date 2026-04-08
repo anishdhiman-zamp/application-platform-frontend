@@ -41,10 +41,6 @@ export { handleConversationSSEEvent } from './handlers/conversationEventHandler'
 export { handleContentBlockEvent } from './handlers/streamingBlockHandler';
 export { handleTaskSSEEvent } from './handlers/taskEventHandler';
 
-// Stores
-export type { BrowserSessionState, BrowserSessionStatus } from './stores/browserSessionStore';
-export { browserSessionStore } from './stores/browserSessionStore';
-
 // Registry
 export { conversationSSERegistry } from './registry/conversationSSERegistry';
 export type { SSESourceType } from './registry/openSSEConnection';

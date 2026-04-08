@@ -1,8 +1,7 @@
 'use client';
 
-import { useCallback, useEffect, useRef, useState, useSyncExternalStore } from 'react';
+import { useCallback, useEffect, useState } from 'react';
 import { useLazyGetBrowserStreamingNovncQuery } from '@zamp-platform/chat';
-import { type BrowserSessionState, browserSessionStore } from '@zamp-platform/conversation-stream';
 import { Button } from '@zamp-platform/ui';
 import { coerceIframeSrcForSecurePage } from 'modules/pace/components/browser-viewer/browserViewer.utils';
 import ImageLoader from '@/components/common/loader/ImageLoader';
@@ -14,7 +13,7 @@ import TabWrapper from '@/modules/pace/components/dynamic-tabs/TabWrapper';
 import { useDynamicTabs } from '@/modules/pace/components/dynamic-tabs/useDynamicTabs';
 import { TAB_TYPE } from '@/modules/pace/pace.types';
 
-type BrowserViewerDisplayState = 'waiting' | 'ended' | 'error';
+type BrowserViewerDisplayState = 'waiting' | 'error';
 
 const BROWSER_VIEWER_STATE_CONFIG: Record<
   BrowserViewerDisplayState,
@@ -24,11 +23,6 @@ const BROWSER_VIEWER_STATE_CONFIG: Record<
     title: 'Waiting for browser stream...',
     imageSrc: DONE_EMPTY_STATE,
     imageAlt: 'Waiting for stream',
-  },
-  ended: {
-    title: 'Live streaming has ended',
-    imageSrc: DONE_EMPTY_STATE,
-    imageAlt: 'Stream ended',
   },
   error: {
     title: 'Failed to connect to browser stream',
@@ -46,26 +40,7 @@ interface BrowserViewerTabProps {
 const BrowserViewerTab = ({ conversationId, isActive }: BrowserViewerTabProps) => {
   const [iframeSrc, setIframeSrc] = useState<string | null>(null);
   const [hasError, setHasError] = useState(false);
-  const [hasFetched, setHasFetched] = useState(false);
   const [isStreamLoading, setIsStreamLoading] = useState(true);
-
-  const subscribeRef = useRef((onStoreChange: () => void) =>
-    browserSessionStore.subscribe(conversationId, onStoreChange),
-  );
-  const getSnapshotRef = useRef(() => browserSessionStore.get(conversationId));
-
-  useEffect(() => {
-    subscribeRef.current = (onStoreChange: () => void) => browserSessionStore.subscribe(conversationId, onStoreChange);
-    getSnapshotRef.current = () => browserSessionStore.get(conversationId);
-  }, [conversationId]);
-
-  const storeState: BrowserSessionState | undefined = useSyncExternalStore(
-    useCallback((cb: () => void) => subscribeRef.current(cb), []),
-    useCallback(() => getSnapshotRef.current(), []),
-  );
-
-  const isEnded = storeState?.status === 'ended';
-  const storeSessionId = storeState?.sessionId;
 
   const [fetchNovnc, { isFetching }] = useLazyGetBrowserStreamingNovncQuery();
 
@@ -76,32 +51,24 @@ const BrowserViewerTab = ({ conversationId, isActive }: BrowserViewerTabProps) =
       setHasError(false);
       const res = await fetchNovnc({
         conversationId,
-        sessionId: storeSessionId || '',
+        sessionId: '',
       }).unwrap();
       const direct = res?.novnc_url ?? null;
       const rawEmbedded = (res?.proxy_iframe_url?.trim() || direct) ?? null;
       const embedded = rawEmbedded ? coerceIframeSrcForSecurePage(rawEmbedded) : null;
 
       setIframeSrc(embedded);
-      setHasFetched(true);
     } catch {
       setHasError(true);
       setIframeSrc(null);
     }
-  }, [conversationId, fetchNovnc, storeSessionId]);
+  }, [conversationId, fetchNovnc]);
 
   useEffect(() => {
-    if (isActive && !isEnded) {
+    if (isActive) {
       fetchStream();
     }
-  }, [isActive, isEnded, fetchStream]);
-
-  useEffect(() => {
-    if (isEnded) {
-      setIframeSrc(null);
-      setIsStreamLoading(true);
-    }
-  }, [isEnded]);
+  }, [isActive, fetchStream]);
 
   const renderPlaceholder = (state: BrowserViewerDisplayState) => {
     const config = BROWSER_VIEWER_STATE_CONFIG[state];
@@ -121,10 +88,6 @@ const BrowserViewerTab = ({ conversationId, isActive }: BrowserViewerTabProps) =
       </EmptyState>
     );
   };
-
-  if (isEnded) {
-    return renderPlaceholder('ended');
-  }
 
   return (
     <CommonWrapper
@@ -152,7 +115,7 @@ const BrowserViewerTab = ({ conversationId, isActive }: BrowserViewerTabProps) =
           />
         </div>
       ) : (
-        renderPlaceholder(hasFetched ? 'ended' : 'waiting')
+        renderPlaceholder('waiting')
       )}
     </CommonWrapper>
   );
