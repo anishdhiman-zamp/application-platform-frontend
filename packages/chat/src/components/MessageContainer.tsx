@@ -153,8 +153,8 @@ export const MessageContainer: FC<MessageContainerProps> = ({
 
       {showStreamingAvatar && streamingState && !!streamingState.message_content?.elements?.length && (
         <div className='flex w-full items-center'>
-          <div className='animate-scale dark:brightness-0 dark:invert'>
-            <Image src='/icons/pace/pace-streaming.svg' alt='Pace Avatar' height={20} width={20} />
+          <div className='dark:brightness-0 dark:invert'>
+            <Image src='/loaders/zamp-logo-cropped-loader.svg' alt='Zamp Logo' height={20} width={20} />
           </div>
         </div>
       )}

@@ -1,5 +1,5 @@
 import { Button } from '@zamp-platform/ui';
-import { ZAMP_ICON } from 'constants/icons';
+import { ZAMP_BLACK_ICON } from 'constants/icons';
 import Image from 'next/image';
 import { defaultFnType } from 'types/commonTypes';
 
@@ -24,7 +24,7 @@ export const MembershipRequested = (props: MembershipRequestedProps) => {
           height={60}
           alt='zamp logo'
           className='w-8 cursor-pointer align-middle'
-          src={ZAMP_ICON}
+          src={ZAMP_BLACK_ICON}
           priority={true}
         />
       </div>

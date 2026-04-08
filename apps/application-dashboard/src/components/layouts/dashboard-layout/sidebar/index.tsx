@@ -2,7 +2,7 @@
 
 import { memo } from 'react';
 import { CSS_VARS } from '@zamp-platform/ui';
-import { ZAMP_ICON } from 'constants/icons';
+import { ZAMP_BLACK_ICON } from 'constants/icons';
 import { ROUTES_PATH } from 'constants/routeConfig';
 import { AnimatePresence, motion } from 'framer-motion';
 import { useAppDispatch, useAppSelector } from 'hooks/toolkit';
@@ -81,7 +81,7 @@ const Sidebar = () => {
               height={16}
               alt='zamp logo'
               className='w-4 cursor-pointer align-middle'
-              src={ZAMP_ICON}
+              src={ZAMP_BLACK_ICON}
               priority
             />
           </div>
