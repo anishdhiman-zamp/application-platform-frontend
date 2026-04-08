@@ -4,6 +4,7 @@ import type { HITLEntityType } from '../../../types/chat.types';
 export interface HITLQuestionWithEntity extends HITLQuestion {
   entity_id?: string;
   entity_type?: string;
+  input_id?: string;
 }
 
 export interface HITLQuestionsBlockProps {
