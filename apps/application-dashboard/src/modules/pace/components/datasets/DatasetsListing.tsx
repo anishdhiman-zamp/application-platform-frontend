@@ -3,7 +3,7 @@
 import { useMemo } from 'react';
 import { Button } from '@zamp-platform/ui';
 import { ChevronRight, Database, Plus } from 'lucide-react';
-import { LIST_TABLES_QUERY } from 'modules/pace/components/datasets/datasets.constants';
+import { DATASETS_POLL_INTERVAL_MS, LIST_TABLES_QUERY } from 'modules/pace/components/datasets/datasets.constants';
 import { preserveSidebarParam } from 'modules/pace/pace.utils';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
@@ -19,7 +19,9 @@ const LISTING_QUERY_ARG: AgentDbQueryRequest = { query: LIST_TABLES_QUERY };
 
 const DatasetsListing = () => {
   const router = useRouter();
-  const { data, isLoading } = useAgentDbReadQuery(LISTING_QUERY_ARG);
+  const { data, isLoading } = useAgentDbReadQuery(LISTING_QUERY_ARG, {
+    pollingInterval: DATASETS_POLL_INTERVAL_MS,
+  });
 
   const rows = useMemo(() => {
     if (!data?.rows) return [];

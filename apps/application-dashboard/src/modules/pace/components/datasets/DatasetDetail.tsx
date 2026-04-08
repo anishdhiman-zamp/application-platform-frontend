@@ -42,6 +42,7 @@ import {
   buildUpdateFillQuery,
   COL_PREFIX,
   type ColumnModification,
+  DATASETS_POLL_INTERVAL_MS,
   DETAIL_PAGE_SIZE,
   escapeSqlIdentifier,
   getCellEditorForPgType,
@@ -108,7 +109,12 @@ const DatasetDetailInner = ({ tableName }: DatasetDetailProps) => {
   const [exportTable] = useExportAgentDbTableMutation();
   const [getExportStatus] = useLazyGetAgentDbExportStatusQuery();
   const { startPolling } = usePolling();
-  const { data: rolesData, isLoading: isLoadingRoles } = useGetDatasetRolesQuery({ tableName });
+  const { data: rolesData, isLoading: isLoadingRoles } = useGetDatasetRolesQuery(
+    { tableName },
+    {
+      pollingInterval: DATASETS_POLL_INTERVAL_MS,
+    },
+  );
   const {
     dispatch: filterDispatch,
     state: { selectedFilters, filtersConfig: contextFiltersConfig },
