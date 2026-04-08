@@ -335,8 +335,6 @@ export const PaceProvider = ({ children }: { children: ReactNode }) => {
       return;
     }
 
-    if (isTabIdOnlyChange) return;
-
     reconcileSidebarWithRoute();
   }, [routeSignature, pathname, activeTabId, handlePendingCollapse, reconcileSidebarWithRoute]);
 
