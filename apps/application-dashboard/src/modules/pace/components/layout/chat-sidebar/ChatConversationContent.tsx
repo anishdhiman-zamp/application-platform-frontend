@@ -17,20 +17,20 @@ import {
 import { useConversationActions, useConversationState } from '@zamp-platform/conversation-stream';
 import { ScrollContainer } from '@zamp-platform/ui';
 import { cn } from '@zamp-platform/ui/utils';
+import AgentPill from 'modules/pace/components/agents/components/AgentPill';
+import TaskStatusCounts from 'modules/pace/components/chat/TaskStatusCounts';
 import { useRouter } from 'next/navigation';
 import CommonWrapper from '@/components/commonWrapper';
 import { SkeletonTypes } from '@/components/commonWrapper/commonWrapper.types';
 import { APITags } from '@/constants/api.constants';
 import { useAppDispatch } from '@/hooks/toolkit';
 import ZampIcon from '@/modules/chatbot/ZampIcon';
-import AgentPill from '@/modules/pace/components/agents/components/AgentPill';
 import AgentTestCard from '@/modules/pace/components/agents/components/AgentTestCard';
 import {
   getAgentAvatar,
   getAgentAvatarByKey,
   PrefixMessage,
 } from '@/modules/pace/components/agents/constants/agents.constants';
-import TaskStatusCounts from '@/modules/pace/components/chat/TaskStatusCounts';
 import { buildTabRoute } from '@/modules/pace/components/dynamic-tabs/tab-type-registry';
 import { useDynamicTabs } from '@/modules/pace/components/dynamic-tabs/useDynamicTabs';
 import ChatMessagesSkeleton from '@/modules/pace/components/loaders/ChatMessagesSkeleton';
@@ -302,6 +302,7 @@ const ChatConversationContent = ({
           isLoading={isLoadingConversation}
           streamingState={streamingState}
           scrollTrigger={messages?.length}
+          scrollbarStyle='none'
           scrollClassName={cn(
             'bg-BG_WHITE transition-[filter] duration-200',
             isTaskPopoverOpen ? 'overflow-y-hidden blur-sm pointer-events-none' : 'overflow-y-scroll',
@@ -320,7 +321,7 @@ const ChatConversationContent = ({
                 messages={messages}
                 isAnalysing={isAnalysing}
                 streamingState={streamingState}
-                className='gap-3 px-0 [scrollbar-width:none]'
+                className='gap-4 px-0 [scrollbar-width:none]'
                 conversationId={conversationId ?? ctxConversationId ?? ''}
                 assistantAvatar={<ZampIcon />}
                 showTimestamp
