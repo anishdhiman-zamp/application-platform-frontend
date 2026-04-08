@@ -35,8 +35,8 @@ const DatasetsListing = () => {
   }, [data]);
 
   return (
-    <div className='bg-BG_WHITE flex h-full w-full flex-1 flex-col'>
-      <div className='border-GRAY_400 flex items-center border-b px-10 pt-10 pb-8'>
+    <div className='flex h-full w-full flex-1 flex-col'>
+      <div className='border-GRAY_400 flex items-center border-b pb-8'>
         <h1 className='f-18-500 flex-1'>Datasets</h1>
         <Link href={preserveSidebarParam(ROUTES_PATH.CHAT_SETTINGS_DATASETS_NEW)}>
           <Button size='medium' className='flex items-center gap-1.5'>
@@ -64,7 +64,7 @@ const DatasetsListing = () => {
           <table className='w-full'>
             <thead>
               <tr className='border-GRAY_400 border-b'>
-                <th className='text-GRAY_700 f-11-450 px-10 py-2.5 text-left font-normal'>Datasets</th>
+                <th className='text-GRAY_700 f-11-450 px-6 py-2.5 text-left font-normal'>Datasets</th>
                 <th className='w-27' />
               </tr>
             </thead>
@@ -75,7 +75,7 @@ const DatasetsListing = () => {
                   className='border-GRAY_400 hover:bg-BG_GRAY_1 group cursor-pointer border-b transition-colors'
                   onClick={() => router.push(preserveSidebarParam(getDatasetDetailRoute(row.id)))}
                 >
-                  <td className='px-10 py-4'>
+                  <td className='px-6 py-4'>
                     <span className='f-13-500 flex items-center gap-2.5'>
                       <Database width={16} height={16} className='text-GRAY_700 shrink-0' />
                       {row.title}

@@ -27,7 +27,6 @@ export const StreamingMessage: FC<StreamingMessageProps> = ({
   className,
   showMarkdownConnectors = false,
   showConnectorToLastBlock = false,
-  showConnectorToNextBlock = false,
 }) => {
   const messageElements = streamingState?.message_content?.elements || [];
 
@@ -44,10 +43,9 @@ export const StreamingMessage: FC<StreamingMessageProps> = ({
         conversationId={streamingState?.conversation_id}
         messageId={streamingState?.id}
         isLoading={false}
-        isStreaming={streamingState?.is_active}
+        isStreaming
         showMarkdownConnectors={showMarkdownConnectors}
         showConnectorToLastBlock={showConnectorToLastBlock}
-        showConnectorToNextBlock={showConnectorToNextBlock}
       />
     </div>
   );

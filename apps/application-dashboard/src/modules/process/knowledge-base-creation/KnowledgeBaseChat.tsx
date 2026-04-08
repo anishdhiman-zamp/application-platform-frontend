@@ -34,8 +34,8 @@ import { useLazyGetOpenFeedbackQuery } from '@/apis/feedback';
 import SkeletonElement from '@/components/skeletons/SkeletonElement';
 import useActionHub from '@/modules/chatbot/actionHub';
 import { CHATBOT_LOCATION_PARAMS } from '@/modules/chatbot/constants';
-import NewPaceAvatar from '@/modules/chatbot/NewPaceAvatar';
 import StopProcessingFeedback from '@/modules/chatbot/StopProcessingFeedback';
+import ZampIcon from '@/modules/chatbot/ZampIcon';
 import ChatMessagesSkeleton from '@/modules/pace/components/loaders/ChatMessagesSkeleton';
 import { useFileDownload } from '@/modules/pace/hooks/useFileDownload';
 import { RootState } from '@/store';
@@ -305,7 +305,7 @@ const KnowledgeBaseChat: FC<KnowledgeBaseChatProps> = ({
               handleAction={handleAction}
               isAnalysing={isAnalysing}
               streamingState={streamingEnabled ? chat.streamingState : undefined}
-              assistantAvatar={streamingEnabled ? <NewPaceAvatar /> : undefined}
+              assistantAvatar={streamingEnabled ? <ZampIcon /> : undefined}
               showTimestamp={streamingEnabled}
               showCopy={streamingEnabled}
               alignUserRight={streamingEnabled}

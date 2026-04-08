@@ -89,7 +89,7 @@ export const HITLQuestionItem = ({
             onCustomInputClick={() => {
               setCurrentQuestionIndex(qIndex);
               setFocusedOptionIndex(optionCountForQuestion(question) - 1);
-              customInputRef.current?.focus();
+              customInputRef.current?.focus({ preventScroll: true });
             }}
             onCustomInputChange={onCustomInputChange}
           />

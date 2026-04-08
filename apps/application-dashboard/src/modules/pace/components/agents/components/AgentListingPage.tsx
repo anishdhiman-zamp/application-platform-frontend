@@ -58,6 +58,7 @@ const AgentListingPage = () => {
   const { data: allAgentsData, isLoading: isAllAgentsLoading } = tabQueries[AGENT_LISTING_TAB.ALL];
 
   const hasNoAgents = !isAllAgentsLoading && (allAgentsData?.agents?.length ?? 0) === 0;
+  const isInitialLoading = isAllAgentsLoading || isLoading;
 
   const filteredAgents = useMemo(() => {
     if (!activeData?.agents) return [];
@@ -146,7 +147,7 @@ const AgentListingPage = () => {
   return (
     <div className='flex h-full flex-col overflow-hidden'>
       <div className='mx-auto w-full max-w-200'>
-        {isLoading ? (
+        {isInitialLoading ? (
           <AgentListingHeaderSkeleton />
         ) : (
           <>
@@ -170,10 +171,10 @@ const AgentListingPage = () => {
       <ScrollContainer className='flex-1'>
         <div className='@container mx-auto w-full max-w-200 px-4 pt-1 pb-4'>
           <CommonWrapper
-            isLoading={isLoading}
+            isLoading={isInitialLoading}
             isError={isError}
             refetchFunction={refetch}
-            isNoData={!isLoading && filteredAgents.length === 0}
+            isNoData={!isInitialLoading && filteredAgents.length === 0}
             noDataBanner={<AgentsEmptyState />}
             skeletonType={SkeletonTypes.CUSTOM}
             loader={

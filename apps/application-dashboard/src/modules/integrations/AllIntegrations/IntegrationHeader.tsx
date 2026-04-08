@@ -24,7 +24,7 @@ const IntegrationHeader: FC = () => {
   );
 
   return (
-    <div className='bg-BG_WHITE flex flex-col items-start gap-y-5 px-10'>
+    <div className='flex flex-col items-start gap-y-5'>
       <h1 className='f-20-600 text-GRAY_1000'>Integrations</h1>
 
       <div className='flex w-full items-center justify-between'>

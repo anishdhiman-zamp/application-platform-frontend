@@ -42,6 +42,7 @@ export const HITLQuestionsBlock = ({
   const [currentQuestionIndex, setCurrentQuestionIndex] = useState(0);
   const [focusedOptionIndex, setFocusedOptionIndex] = useState(0);
   const scrollDirectionRef = useRef<'up' | 'down'>('down');
+  const shouldScrollRef = useRef(false);
   const submitRef = useRef<(() => void) | null>(null);
   const [answers, setAnswers] = useState<HITLAnswersState>({});
   const [approvalAction, setApprovalAction] = useState<APPROVAL_ACTION | null>(null);
@@ -180,6 +181,8 @@ export const HITLQuestionsBlock = ({
 
       if (!currentQuestion) return;
 
+      shouldScrollRef.current = true;
+
       const targetIsTextField = e.target instanceof HTMLInputElement || e.target instanceof HTMLTextAreaElement;
 
       const preventUnlessTextField = () => {
@@ -274,6 +277,7 @@ export const HITLQuestionsBlock = ({
       const answer = answers[question.id];
       const entity_type = question.entity_type ?? (sourceEntityType as string);
       const entity_id = question.entity_id ?? question.id;
+      const input_id = question.input_id;
 
       const buildSkippedResponse = (): HITLResponse => {
         if (isApprovalQuestion(question)) {
@@ -294,7 +298,7 @@ export const HITLQuestionsBlock = ({
       };
 
       if (answer?.isSkipped) {
-        return { entity_type, entity_id, response: buildSkippedResponse() };
+        return { entity_type, entity_id, input_id, response: buildSkippedResponse() };
       }
 
       if (isApprovalQuestion(question)) {
@@ -303,6 +307,7 @@ export const HITLQuestionsBlock = ({
         return {
           entity_type,
           entity_id,
+          input_id,
           response: { type: HITL_RESPONSE_TYPE.APPROVAL, approved },
         };
       }
@@ -311,6 +316,7 @@ export const HITLQuestionsBlock = ({
         return {
           entity_type,
           entity_id,
+          input_id,
           response: { type: HITL_RESPONSE_TYPE.TEXT, text: answer?.customText?.trim() ?? '', is_skipped: false },
         };
       }
@@ -326,7 +332,7 @@ export const HITLQuestionsBlock = ({
         if (customTrimmed) {
           response.custom_input = customTrimmed;
         }
-        return { entity_type, entity_id, response };
+        return { entity_type, entity_id, input_id, response };
       }
 
       const isCustom = answer?.optionIds.includes(CUSTOM_OPTION_ID);
@@ -334,6 +340,7 @@ export const HITLQuestionsBlock = ({
         return {
           entity_type,
           entity_id,
+          input_id,
           response: {
             type: HITL_RESPONSE_TYPE.SELECT_ONE,
             selected_option: null,
@@ -345,6 +352,7 @@ export const HITLQuestionsBlock = ({
       return {
         entity_type,
         entity_id,
+        input_id,
         response: {
           type: HITL_RESPONSE_TYPE.SELECT_ONE,
           selected_option: answer?.optionIds[0] ?? null,
@@ -426,6 +434,11 @@ export const HITLQuestionsBlock = ({
       containerRef.current?.focus({ preventScroll: true });
     }
 
+    const shouldScroll = shouldScrollRef.current;
+    shouldScrollRef.current = false;
+
+    if (!shouldScroll) return;
+
     const rafId = requestAnimationFrame(() => {
       const scrollEl = scrollContainerRef.current?.getScrollElement();
       if (!scrollEl) return;
@@ -468,12 +481,14 @@ export const HITLQuestionsBlock = ({
           currentQuestionIndex={currentQuestionIndex}
           onPrev={() => {
             if (currentQuestionIndex > 0) {
+              shouldScrollRef.current = true;
               setFocusedOptionIndex(0);
               setCurrentQuestionIndex(currentQuestionIndex - 1);
             }
           }}
           onNext={() => {
             if (currentQuestionIndex < questions.length - 1) {
+              shouldScrollRef.current = true;
               setFocusedOptionIndex(0);
               setCurrentQuestionIndex(currentQuestionIndex + 1);
             }

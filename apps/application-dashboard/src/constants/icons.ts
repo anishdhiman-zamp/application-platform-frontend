@@ -34,11 +34,11 @@ export const getAssetUrl = (path: string): string => {
   return publicPath;
 };
 
-export const ZAMP_ICON = IMAGE_PREFIX + '/icons/zamp-icon.svg';
+export const ZAMP_BLACK_ICON = IMAGE_PREFIX + '/icons/zamp-black-icon.svg';
+export const ZAMP_WHITE_ICON = IMAGE_PREFIX + '/icons/zamp-white-icon.svg';
 export const FAVICON = IMAGE_PREFIX + '/icons/favicon.png';
 export const NOTEBOOK_ICON = IMAGE_PREFIX + '/icons/notebook.svg';
 export const GLOBE_ICON = IMAGE_PREFIX + '/icons/globe-01.svg';
-export const ZAMP_ICON_BLACK = IMAGE_PREFIX + '/icons/zamp-icon-black.svg';
 export const GOOGLE_ICON = IMAGE_PREFIX + '/icons/google.svg';
 export const DRAG_ICON = IMAGE_PREFIX + '/icons/drag-icon.svg';
 export const ERROR_WITH_BORDER = IMAGE_PREFIX + '/icons/error-with-border.svg';

@@ -1,10 +1,10 @@
 'use client';
 
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
-import type { TaskStatus } from '@zamp-platform/chat';
+import { TASK_STATUS, type TaskStatus } from '@zamp-platform/chat';
 import { Accordion } from '@zamp-platform/ui';
 import { cn } from '@zamp-platform/ui/utils';
-import { useSearchParams } from 'next/navigation';
+import { usePathname, useSearchParams } from 'next/navigation';
 import { useGetAgentTaskCountsQuery } from '@/apis/agents';
 import { useGetTaskCountsQuery } from '@/apis/task';
 import TaskAccordionSection from '@/modules/pace/components/tasks/components/TaskAccordionSection';
@@ -32,7 +32,7 @@ interface TaskAccordionGroupProps {
 }
 
 const NoDataBanner = ({ search }: { search?: string }) => (
-  <div className='border-GRAY_400 flex flex-1 items-center justify-center rounded-xl border [&>div]:min-h-0'>
+  <div className='flex flex-1 items-center justify-center [&>div]:min-h-0'>
     <ProcessEmptyState
       title='No tasks found'
       description={search ? 'Try adjusting your search query' : 'Tasks will appear here when created'}
@@ -54,7 +54,16 @@ const TaskAccordionGroup = ({
 
   const shouldSkip = !hasBeenActiveRef.current || skipFetch;
 
+  const pathname = usePathname();
   const searchParams = useSearchParams();
+
+  // When tasks are viewed from an agent detail page, pass the current URL as referrer
+  const referrer = useMemo(() => {
+    if (!agentId || !pathname) return undefined;
+    const query = searchParams?.toString();
+
+    return query ? `${pathname}?${query}` : pathname;
+  }, [agentId, pathname, searchParams]);
   const tabParam = searchParams?.get('tab');
   const activeTab: TaskListingTab =
     tabParam && VALID_TABS.has(tabParam) ? (tabParam as TaskListingTab) : TASK_LISTING_TAB.ALL;
@@ -157,26 +166,22 @@ const TaskAccordionGroup = ({
 
   return (
     <CommonWrapper
-      isLoading={isLoading && !hasLoadedOnce}
+      isLoading={(isLoading || skipFetch) && !hasLoadedOnce}
       isError={isError}
       refetchFunction={refetch}
       skeletonType={SkeletonTypes.CUSTOM}
       loader={<TaskListingSkeleton />}
-      isNoData={!isFetching && visibleStatuses.length === 0}
+      isNoData={!isFetching && !skipFetch && visibleStatuses.length === 0}
       noDataBanner={<NoDataBanner search={search} />}
-      className='flex min-h-0 flex-1 flex-col'
+      className={cn('flex min-h-0 flex-1 flex-col', agentId && 'border-GRAY_400 rounded-xl border')}
       disableAnimation
     >
       <Accordion
         key={visibleStatuses.join(',')}
         ref={scrollContainerRef}
         type='multiple'
-        defaultValue={[...visibleStatuses]}
-        className={cn(
-          'overflow-y-auto [scrollbar-width:thin] [&_[data-slot=accordion-item]:last-child]:border-b-0',
-          visibleStatuses.length > 0 && 'border-GRAY_400 border',
-          agentId ? 'rounded-xl' : '',
-        )}
+        defaultValue={[TASK_STATUS.COMPLETED]}
+        className='overflow-y-auto [scrollbar-width:thin] [&_[data-slot=accordion-item]:last-child]:border-b-0'
         onValueChange={handleValueChange}
       >
         {visibleStatuses.map((status) => (
@@ -188,6 +193,7 @@ const TaskAccordionGroup = ({
             agentId={agentId}
             scrollContainerRef={scrollContainerRef}
             creationSource={creationSource}
+            referrer={referrer}
           />
         ))}
       </Accordion>

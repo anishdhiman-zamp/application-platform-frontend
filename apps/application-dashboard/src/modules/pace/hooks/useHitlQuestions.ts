@@ -7,7 +7,7 @@ export const useHitlQuestions = (inputsRequired: ConversationInputRequiredItem[]
   const hitlQuestions = useMemo(() => mapInputsRequiredToHitlQuestions(inputsRequired ?? []), [inputsRequired]);
 
   const hitlQuestionsKey = useMemo(
-    () => inputsRequired?.map((i) => i.entity_id).join(KEYS_DELIMITER) ?? '',
+    () => inputsRequired?.map((i) => i.input_id ?? i.entity_id).join(KEYS_DELIMITER) ?? '',
     [inputsRequired],
   );
 
