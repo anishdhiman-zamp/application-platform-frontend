@@ -42,6 +42,7 @@ export { handleContentBlockEvent } from './handlers/streamingBlockHandler';
 export { handleTaskSSEEvent } from './handlers/taskEventHandler';
 
 // Stores
+export type { BrowserSessionState, BrowserSessionStatus } from './stores/browserSessionStore';
 export { browserSessionStore } from './stores/browserSessionStore';
 
 // Registry

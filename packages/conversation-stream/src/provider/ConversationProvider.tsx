@@ -175,7 +175,7 @@ export const ConversationProvider: React.FC<ConversationProviderProps> = ({
     setBrowserSessionId(undefined);
     const cid = conversationIdRef.current;
     if (cid) {
-      browserSessionStore.delete(cid);
+      browserSessionStore.markEnded(cid);
     }
   }, []);
 

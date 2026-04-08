@@ -2,17 +2,41 @@
 
 import { useCallback, useEffect, useRef, useState, useSyncExternalStore } from 'react';
 import { useLazyGetBrowserStreamingNovncQuery } from '@zamp-platform/chat';
-import { browserSessionStore } from '@zamp-platform/conversation-stream';
+import { type BrowserSessionState, browserSessionStore } from '@zamp-platform/conversation-stream';
 import { Button } from '@zamp-platform/ui';
-import { Globe } from 'lucide-react';
 import { coerceIframeSrcForSecurePage } from 'modules/pace/components/browser-viewer/browserViewer.utils';
 import ImageLoader from '@/components/common/loader/ImageLoader';
 import CommonWrapper from '@/components/commonWrapper';
 import { SkeletonTypes } from '@/components/commonWrapper/commonWrapper.types';
-import { ZAMP_LOGO_LOADER_SVG } from '@/constants/icons';
+import EmptyState from '@/components/EmptyState';
+import { DONE_EMPTY_STATE, ZAMP_LOGO_LOADER_SVG } from '@/constants/icons';
 import TabWrapper from '@/modules/pace/components/dynamic-tabs/TabWrapper';
 import { useDynamicTabs } from '@/modules/pace/components/dynamic-tabs/useDynamicTabs';
 import { TAB_TYPE } from '@/modules/pace/pace.types';
+
+type BrowserViewerDisplayState = 'waiting' | 'ended' | 'error';
+
+const BROWSER_VIEWER_STATE_CONFIG: Record<
+  BrowserViewerDisplayState,
+  { title: string; description?: string; imageSrc: string; imageAlt: string; showRetry?: boolean }
+> = {
+  waiting: {
+    title: 'Waiting for browser stream...',
+    imageSrc: DONE_EMPTY_STATE,
+    imageAlt: 'Waiting for stream',
+  },
+  ended: {
+    title: 'Live streaming has ended',
+    imageSrc: DONE_EMPTY_STATE,
+    imageAlt: 'Stream ended',
+  },
+  error: {
+    title: 'Failed to connect to browser stream',
+    imageSrc: DONE_EMPTY_STATE,
+    imageAlt: 'Connection error',
+    showRetry: true,
+  },
+};
 
 interface BrowserViewerTabProps {
   conversationId: string;
@@ -35,10 +59,13 @@ const BrowserViewerTab = ({ conversationId, isActive }: BrowserViewerTabProps) =
     getSnapshotRef.current = () => browserSessionStore.get(conversationId);
   }, [conversationId]);
 
-  const storeSessionId = useSyncExternalStore(
+  const storeState: BrowserSessionState | undefined = useSyncExternalStore(
     useCallback((cb: () => void) => subscribeRef.current(cb), []),
     useCallback(() => getSnapshotRef.current(), []),
   );
+
+  const isEnded = storeState?.status === 'ended';
+  const storeSessionId = storeState?.sessionId;
 
   const [fetchNovnc, { isFetching }] = useLazyGetBrowserStreamingNovncQuery();
 
@@ -64,10 +91,40 @@ const BrowserViewerTab = ({ conversationId, isActive }: BrowserViewerTabProps) =
   }, [conversationId, fetchNovnc, storeSessionId]);
 
   useEffect(() => {
-    if (isActive) {
+    if (isActive && !isEnded) {
       fetchStream();
     }
-  }, [isActive, fetchStream]);
+  }, [isActive, isEnded, fetchStream]);
+
+  useEffect(() => {
+    if (isEnded) {
+      setIframeSrc(null);
+      setIsStreamLoading(true);
+    }
+  }, [isEnded]);
+
+  const renderPlaceholder = (state: BrowserViewerDisplayState) => {
+    const config = BROWSER_VIEWER_STATE_CONFIG[state];
+
+    return (
+      <EmptyState
+        imageSrc={config.imageSrc}
+        imageAlt={config.imageAlt}
+        title={config.title}
+        description={config.description}
+      >
+        {config.showRetry && (
+          <Button variant='link' size='small' onClick={fetchStream}>
+            Retry
+          </Button>
+        )}
+      </EmptyState>
+    );
+  };
+
+  if (isEnded) {
+    return renderPlaceholder('ended');
+  }
 
   return (
     <CommonWrapper
@@ -76,19 +133,7 @@ const BrowserViewerTab = ({ conversationId, isActive }: BrowserViewerTabProps) =
       skeletonType={SkeletonTypes.CUSTOM}
       loader={<ImageLoader imageSrc={ZAMP_LOGO_LOADER_SVG} width={140} height={140} />}
       className='flex h-full w-full items-center justify-center'
-      renderError={
-        <div className='flex h-full w-full items-center justify-center'>
-          <div className='text-center'>
-            <div className='bg-GRAY_100 mx-auto mb-3 flex h-12 w-12 items-center justify-center rounded-full'>
-              <Globe size={20} className='text-GRAY_700' />
-            </div>
-            <p className='f-13-450 text-GRAY_700'>Failed to connect to browser stream</p>
-            <Button variant='link' size='small' onClick={fetchStream} className='mt-2'>
-              Retry
-            </Button>
-          </div>
-        </div>
-      }
+      renderError={renderPlaceholder('error')}
       disableAnimation
     >
       {iframeSrc ? (
@@ -107,16 +152,7 @@ const BrowserViewerTab = ({ conversationId, isActive }: BrowserViewerTabProps) =
           />
         </div>
       ) : (
-        <div className='flex h-full w-full items-center justify-center'>
-          <div className='text-center'>
-            <div className='bg-GRAY_100 mx-auto mb-3 flex h-12 w-12 items-center justify-center rounded-full'>
-              <Globe size={20} className='text-GRAY_700' />
-            </div>
-            <p className='f-13-450 text-GRAY_700'>
-              {hasFetched ? 'Live stream has ended' : 'Waiting for browser stream...'}
-            </p>
-          </div>
-        </div>
+        renderPlaceholder(hasFetched ? 'ended' : 'waiting')
       )}
     </CommonWrapper>
   );

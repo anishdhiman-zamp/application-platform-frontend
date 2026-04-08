@@ -1,23 +1,41 @@
 type Listener = () => void;
 
+export type BrowserSessionStatus = 'active' | 'ended';
+
+export interface BrowserSessionState {
+  sessionId: string;
+  status: BrowserSessionStatus;
+}
+
 /**
- * Lightweight global store mapping conversationId → browser session ID.
+ * Lightweight global store mapping conversationId → browser session state.
  *
  * Written by ConversationProvider when the per-conversation SSE delivers a
- * browser_streaming_available event. Read by BrowserViewerTab (which renders
- * outside the ConversationProvider tree) to attach the session_id to the
- * noVNC proxy request.
+ * browser_streaming_available / browser_streaming_unavailable event.
+ * Read by BrowserViewerTab (which renders outside the ConversationProvider tree)
+ * to attach the session_id to the noVNC proxy request and to show the correct
+ * UI state when streaming ends.
  */
 class BrowserSessionStore {
-  private sessions = new Map<string, string>();
+  private sessions = new Map<string, BrowserSessionState>();
   private listeners = new Map<string, Set<Listener>>();
 
-  get(conversationId: string): string | undefined {
+  get(conversationId: string): BrowserSessionState | undefined {
     return this.sessions.get(conversationId);
   }
 
   set(conversationId: string, sessionId: string): void {
-    this.sessions.set(conversationId, sessionId);
+    this.sessions.set(conversationId, { sessionId, status: 'active' });
+    this.notify(conversationId);
+  }
+
+  markEnded(conversationId: string): void {
+    const existing = this.sessions.get(conversationId);
+    if (existing) {
+      this.sessions.set(conversationId, { ...existing, status: 'ended' });
+    } else {
+      this.sessions.set(conversationId, { sessionId: '', status: 'ended' });
+    }
     this.notify(conversationId);
   }
 
