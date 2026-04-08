@@ -137,7 +137,7 @@ export const ToolCallBlock = ({
           <div className='flex flex-1 items-center gap-3'>
             <div className='flex items-center gap-x-2'>
               {!embedded && (
-                <div className='flex h-3.5 w-3.5 items-center justify-center'>
+                <div className='bg-BG_WHITE flex h-3.5 w-3.5 items-center justify-center'>
                   {icon?.length ? (
                     <ImageWithFallback src={icon} alt={toolName} className='h-3 w-3' />
                   ) : (

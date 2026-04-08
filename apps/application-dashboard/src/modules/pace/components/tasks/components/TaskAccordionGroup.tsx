@@ -1,7 +1,7 @@
 'use client';
 
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
-import type { TaskStatus } from '@zamp-platform/chat';
+import { TASK_STATUS, type TaskStatus } from '@zamp-platform/chat';
 import { Accordion } from '@zamp-platform/ui';
 import { cn } from '@zamp-platform/ui/utils';
 import { usePathname, useSearchParams } from 'next/navigation';
@@ -32,7 +32,7 @@ interface TaskAccordionGroupProps {
 }
 
 const NoDataBanner = ({ search }: { search?: string }) => (
-  <div className='border-GRAY_400 flex flex-1 items-center justify-center rounded-xl border [&>div]:min-h-0'>
+  <div className='border-GRAY_400 flex flex-1 items-center justify-center [&>div]:min-h-0'>
     <ProcessEmptyState
       title='No tasks found'
       description={search ? 'Try adjusting your search query' : 'Tasks will appear here when created'}
@@ -180,10 +180,9 @@ const TaskAccordionGroup = ({
         key={visibleStatuses.join(',')}
         ref={scrollContainerRef}
         type='multiple'
-        defaultValue={[...visibleStatuses]}
+        defaultValue={[TASK_STATUS.COMPLETED]}
         className={cn(
           'overflow-y-auto [scrollbar-width:thin] [&_[data-slot=accordion-item]:last-child]:border-b-0',
-          visibleStatuses.length > 0 && 'border-GRAY_400 border',
           agentId ? 'rounded-xl' : '',
         )}
         onValueChange={handleValueChange}

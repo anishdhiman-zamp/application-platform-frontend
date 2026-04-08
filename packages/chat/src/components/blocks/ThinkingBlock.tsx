@@ -72,7 +72,7 @@ export const ThinkingBlock: FC<ThinkingBlockProps> = ({
         >
           <div className='flex flex-1 items-center gap-2'>
             {!embedded && (
-              <div className='flex h-3.5 w-3.5 items-center justify-center'>
+              <div className='bg-BG_WHITE flex h-3.5 w-3.5 items-center justify-center'>
                 <AnimatedDot showAnimation={!is_complete} size={4} />
               </div>
             )}

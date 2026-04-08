@@ -12,15 +12,16 @@ export interface TaskChatStepsToggleHeaderProps {
   stepCount: number;
   isTaskDone: boolean;
   taskStatus: string | undefined;
-  /** When true, shows the “Show Summary” control (step groups summary vs per-message view). */
+  /** When true, shows the "Show Summary" control (step groups summary vs per-message view). */
   showSummaryControl?: boolean;
   showSummary?: boolean;
   onShowSummaryChange?: (checked: boolean) => void;
+  showConnector?: boolean;
 }
 
 const TASK_PROCESS_LABELS = {
   STARTING: 'Starting now',
-  ALL_DONE: 'All done!',
+  ALL_DONE: 'All done',
   WAITING_FOR_RESPONSE: 'Waiting for response...',
   STEPS_COMPLETED: (count: number) => `${count} steps completed`,
 } as const;
@@ -33,6 +34,7 @@ export const TaskChatStepsToggleHeader = ({
   taskStatus,
   showSummaryControl = false,
   showSummary = true,
+  showConnector = true,
   onShowSummaryChange,
 }: TaskChatStepsToggleHeaderProps) => {
   const { taskProcessLabel, taskProcessLabelIcon } = useMemo(() => {
@@ -87,9 +89,11 @@ export const TaskChatStepsToggleHeader = ({
           </label>
         ) : null}
       </div>
-      <div className='flex h-[15px] w-[30px] shrink-0 justify-center'>
-        <div className='bg-border h-full w-px shrink-0' />
-      </div>
+      {showConnector && (
+        <div className='flex h-[15px] w-[30px] shrink-0 justify-center'>
+          <div className='bg-border h-full w-px shrink-0' />
+        </div>
+      )}
     </div>
   );
 };

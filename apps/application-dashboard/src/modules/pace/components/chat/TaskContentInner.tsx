@@ -4,6 +4,7 @@ import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import type { ConversationSummary } from '@zamp-platform/chat';
 import {
   ChatActionsProvider,
+  MarkdownBlock,
   ResourceType,
   SenderType,
   SiblingTask,
@@ -15,7 +16,7 @@ import {
   useStreamingState,
 } from '@zamp-platform/chat';
 import { TaskProvider, useTaskActions, useTaskState } from '@zamp-platform/conversation-stream';
-import { ScrollContainer, type ScrollContainerRef } from '@zamp-platform/ui';
+import { ScrollContainer, type ScrollContainerRef, ShimmerText } from '@zamp-platform/ui';
 import { cn } from '@zamp-platform/ui/utils';
 import { useDynamicTabs } from 'modules/pace/components/dynamic-tabs/useDynamicTabs';
 import { useTaskNavigation } from 'modules/pace/hooks/useTaskNavigation';
@@ -31,17 +32,15 @@ import {
   stepGroupsLegacyToSections,
 } from '@/modules/pace/components/chat/step-groups.utils';
 import StepGroupsSummaryView from '@/modules/pace/components/chat/StepGroupsSummaryView';
-import SummaryMarkdown from '@/modules/pace/components/chat/SummaryMarkdown';
 import { TaskChatExpandedStepsFooter } from '@/modules/pace/components/chat/TaskChatExpandedStepsFooter';
 import { TaskChatStepMessage } from '@/modules/pace/components/chat/TaskChatStepMessage';
 import { TaskChatStepsToggleHeader } from '@/modules/pace/components/chat/TaskChatStepsToggleHeader';
-import { TaskChatSummaryContent } from '@/modules/pace/components/chat/TaskChatSummaryContent';
 import { TaskChatTitleHeader } from '@/modules/pace/components/chat/TaskChatTitleHeader';
 import TaskNavigation from '@/modules/pace/components/chat/TaskNavigation';
 import TaskTopbar from '@/modules/pace/components/chat/TaskTopbar';
 import { getActiveTabIdFromUrl } from '@/modules/pace/components/dynamic-tabs/tab-type-registry';
 import TaskContentSkeleton from '@/modules/pace/components/loaders/TaskContentSkeleton';
-import SubtaskPanel from '@/modules/pace/components/tasks/components/SubtaskPanel';
+import InlineSubtaskSection from '@/modules/pace/components/tasks/components/InlineSubtaskSection';
 import {
   getDisplayTitle,
   getProcessedMessages,
@@ -80,6 +79,7 @@ const TaskContentChat = ({ taskId }: { taskId: string }) => {
   const [showSummary, setShowSummary] = useState(false);
   const scrollContainerRef = useRef<ScrollContainerRef>(null);
   const summaryScrollRef = useRef<HTMLDivElement>(null);
+  const shimmerScrollRef = useRef<HTMLDivElement>(null);
 
   const handleToggleSteps = useCallback(() => {
     setShowSteps((prev) => !prev);
@@ -135,6 +135,10 @@ const TaskContentChat = ({ taskId }: { taskId: string }) => {
     | null
     | undefined;
   const taskStatus = (conversationData as Record<string, unknown> | undefined)?.status as string | undefined;
+  const description = (conversationData as Record<string, unknown> | undefined)?.description as
+    | string
+    | null
+    | undefined;
   const isTaskDone = taskStatus && !streamingState ? taskStatus === TASK_STATUS.COMPLETED : false;
   const summaryContent = isTaskDone
     ? summary?.status === SummaryStatus.COMPLETED
@@ -164,6 +168,7 @@ const TaskContentChat = ({ taskId }: { taskId: string }) => {
 
   const stepCount = useMemo(() => getStepCount(messages, streamingState), [messages, streamingState]);
   const stepGroupsRaw = isTaskDone ? summary?.step_groups : undefined;
+  const isStreaming = streamingState && !!streamingState.message_content?.elements?.length;
 
   const stepGroupSections = useMemo(() => {
     if (!stepGroupsRaw) return [];
@@ -187,10 +192,12 @@ const TaskContentChat = ({ taskId }: { taskId: string }) => {
   }, [streamingState?.is_active]);
 
   useEffect(() => {
-    if (summaryScrollRef.current) {
-      summaryScrollRef.current.scrollTop = summaryScrollRef.current.scrollHeight;
+    if (shimmerScrollRef.current) {
+      shimmerScrollRef.current.scrollTop = shimmerScrollRef.current.scrollHeight;
     }
   }, [displayedSummary]);
+
+  const isExpandedStepsView = showSteps && (!hasStepGroups || !showSummary);
 
   return (
     <ChatActionsProvider onFileOpen={openTab} parentTasks={subtaskPanelParents} siblings={siblingsMemo}>
@@ -214,28 +221,46 @@ const TaskContentChat = ({ taskId }: { taskId: string }) => {
             />
           }
         />
-        <div className='flex min-h-0 w-full min-w-0 flex-1'>
-          <CommonWrapper
-            isLoading={isLoadingConversation}
-            isError={isErrorHistory}
-            refetchFunction={refetchHistory}
-            skeletonType={SkeletonTypes.CUSTOM}
-            loader={<TaskContentSkeleton />}
-            className='flex min-h-0 w-full min-w-0 flex-1 flex-col pt-12'
-            disableAnimation
-          >
-            <div className='mx-auto w-full max-w-[700px] px-4'>
-              <TaskChatTitleHeader
-                displayTitle={displayTitle}
-                statusLabel={statusLabel}
-                isAgentActive={isAgentActive}
-                taskStatus={taskStatus}
-              />
-            </div>
+        <CommonWrapper
+          isLoading={isLoadingConversation}
+          isError={isErrorHistory}
+          refetchFunction={refetchHistory}
+          skeletonType={SkeletonTypes.CUSTOM}
+          loader={<TaskContentSkeleton />}
+          className='flex min-h-0 w-full min-w-0 flex-1 flex-col'
+          disableAnimation
+        >
+          <div className='mx-auto flex w-full max-w-[700px] flex-col px-4 pt-12'>
+            <TaskChatTitleHeader
+              displayTitle={displayTitle}
+              statusLabel={statusLabel}
+              isAgentActive={isAgentActive}
+              taskStatus={taskStatus}
+              description={description}
+            />
+          </div>
 
-            {/* Steps Section */}
-            <div className='mt-[30px] flex min-h-0 w-full flex-1 flex-col'>
-              <div className='mx-auto w-full max-w-[700px] px-4'>
+          <ScrollContainer
+            className='min-h-0 w-full min-w-0 flex-1'
+            showScrollToBottom
+            ref={scrollContainerRef}
+            showFadeOverlay
+            scrollbarStyle='none'
+            scrollClassName='!overflow-y-scroll'
+          >
+            <div className='mx-auto flex w-full max-w-[700px] flex-col px-4'>
+              <div
+                className={cn(
+                  'overflow-hidden transition-all duration-300',
+                  isAgentActive ? 'mt-[30px] h-[92px]' : 'mt-0 h-0',
+                )}
+              >
+                <div className='border-GRAY_400 flex h-[92px] flex-col overflow-hidden rounded-[18px] border p-4'>
+                  <ShimmerText text={displayedSummary || 'Starting now'} autoAnimate />
+                </div>
+              </div>
+
+              <div className='mt-[30px]'>
                 <TaskChatStepsToggleHeader
                   showSteps={showSteps}
                   onToggle={handleToggleSteps}
@@ -245,98 +270,84 @@ const TaskContentChat = ({ taskId }: { taskId: string }) => {
                   showSummaryControl={hasStepGroups && showSteps && !isAgentActive}
                   showSummary={showSummary}
                   onShowSummaryChange={handleToggleSummary}
+                  showConnector={showSteps || taskStatus !== TASK_STATUS.IN_PROGRESS}
                 />
               </div>
+              {/* 5b. Steps open: Summary view (step groups) */}
+              {showSteps && hasStepGroups && showSummary && <StepGroupsSummaryView sections={stepGroupSections} />}
 
-              <ScrollContainer
-                className='min-h-0 w-full min-w-0 flex-1'
-                showScrollToBottom
-                ref={scrollContainerRef}
-                showFadeOverlay
-                scrollbarStyle='none'
-                scrollClassName='!overflow-y-scroll'
-              >
-                <div className='mx-auto flex min-h-0 w-full max-w-[700px] flex-1 flex-col px-4'>
-                  <div className='px-2'>
-                    <TaskChatSummaryContent
-                      showSteps={showSteps}
-                      isNeedsInput={isNeedsInput}
-                      hasHitlQuestions={hasHitlQuestions}
-                      hitlQuestions={hitlQuestions}
-                      hitlQuestionsKey={hitlQuestionsKey}
-                      taskId={taskId}
-                      onHitlRespondComplete={handleHitlRespondComplete}
-                      displayedSummary={displayedSummary}
-                      isAgentActive={isAgentActive}
-                      summaryScrollRef={summaryScrollRef}
-                    />
-                  </div>
-
-                  {showSteps && hasStepGroups && showSummary && <StepGroupsSummaryView sections={stepGroupSections} />}
-
-                  {/* Expanded: Per-message blocks + summary boxes */}
-                  {showSteps && (!hasStepGroups || !showSummary) && (
-                    <div className='-mt-1 flex flex-col'>
-                      {processedMessages.map(({ message, summaryText }, index) => (
-                        <div key={message.id ?? index} className={cn(index !== 0 && 'mt-0')}>
-                          <div className='px-2'>
-                            <TaskChatStepMessage message={message} />
-                          </div>
-                          {summaryText && (
-                            <div
-                              className={cn(
-                                'relative px-2 pt-2',
-                                index > 0 ? (processedMessages[index - 1].summaryText ? 'mt-5' : 'mt-3') : null,
-                              )}
-                            >
-                              <div
-                                className={cn(
-                                  'bg-border pointer-events-none absolute left-[14.5px] h-3 w-px',
-                                  index === 0 || (index > 0 && processedMessages[index - 1].summaryText)
-                                    ? '-top-3'
-                                    : '-top-2',
-                                )}
-                              />
-                              <ResizableSummaryBox borderRadius='rounded-[18px]' contentClassName='px-4 pt-3 pb-1'>
-                                <SummaryMarkdown text={summaryText} shimmerLast={false} />
-                              </ResizableSummaryBox>
-                            </div>
-                          )}
-                        </div>
-                      ))}
-
-                      {streamingState && !!streamingState.message_content?.elements?.length && (
+              {/* 5c. Steps open: Expanded per-message blocks + footer in a single connected thread */}
+              <div className='relative'>
+                <div
+                  className={cn(
+                    'bg-border pointer-events-none absolute top-0 bottom-0 left-[14.5px] z-0 w-px',
+                    isStreaming && 'mb-5',
+                  )}
+                  aria-hidden
+                />
+                {isExpandedStepsView && (
+                  <div className='relative flex flex-col'>
+                    {processedMessages.map(({ message, summaryText }, index) => (
+                      <div key={message.id ?? index} className='relative'>
                         <div className='px-2'>
-                          <StreamingMessage
-                            streamingState={streamingState}
-                            assistantAvatar={<></>}
-                            showMarkdownConnectors
-                            showConnectorToLastBlock
+                          <TaskChatStepMessage
+                            message={message}
+                            showConnectorToLastBlock={index > 0}
                             showConnectorToNextBlock
                           />
                         </div>
-                      )}
-                      <TaskChatExpandedStepsFooter
-                        isFirst={processedMessages.length === 0}
-                        isNeedsInput={isNeedsInput}
-                        hasHitlQuestions={hasHitlQuestions}
-                        hitlQuestions={hitlQuestions}
-                        hitlQuestionsKey={hitlQuestionsKey}
-                        taskId={taskId}
-                        onHitlRespondComplete={handleHitlRespondComplete}
-                        isAgentActive={isAgentActive}
-                        displayedSummary={displayedSummary}
-                        summaryScrollRef={summaryScrollRef}
-                      />
-                    </div>
-                  )}
-                  <div className='bg-BG_WHITE h-12 w-full shrink-0' />
+                        {summaryText && (
+                          <div className='bg-BG_WHITE relative z-1 mt-2 px-2 py-1'>
+                            <ResizableSummaryBox borderRadius='rounded-[18px]' contentClassName='px-4 pt-3 pb-1'>
+                              <MarkdownBlock payload={{ text: summaryText }} />
+                            </ResizableSummaryBox>
+                          </div>
+                        )}
+                      </div>
+                    ))}
+
+                    {isStreaming && (
+                      <div className='px-2'>
+                        <StreamingMessage
+                          streamingState={streamingState}
+                          assistantAvatar={<></>}
+                          showMarkdownConnectors
+                          showConnectorToLastBlock
+                          showConnectorToNextBlock={true}
+                        />
+                      </div>
+                    )}
+                  </div>
+                )}
+
+                {/* Footer when steps are collapsed or in summary view */}
+                {(taskStatus === TASK_STATUS.NEEDS_INPUT || (!showSteps && taskStatus !== TASK_STATUS.IN_PROGRESS)) && (
+                  <TaskChatExpandedStepsFooter
+                    isFirst={processedMessages.length === 0}
+                    isNeedsInput={isNeedsInput}
+                    hasHitlQuestions={hasHitlQuestions}
+                    hitlQuestions={hitlQuestions}
+                    hitlQuestionsKey={hitlQuestionsKey}
+                    taskId={taskId}
+                    onHitlRespondComplete={handleHitlRespondComplete}
+                    resultText={lastSummaryText}
+                    summaryScrollRef={summaryScrollRef}
+                    hideConnector={!showSteps}
+                  />
+                )}
+              </div>
+
+              {/* 3. Inline subtasks (toggleable) */}
+              {subtasks.length > 0 && (
+                <div className='mt-[30px]'>
+                  <InlineSubtaskSection subtasks={subtasks} parentTasks={subtaskPanelParents} />
                 </div>
-              </ScrollContainer>
+              )}
+
+              <div className='bg-BG_WHITE h-12 w-full shrink-0' />
             </div>
-          </CommonWrapper>
-          {subtasks.length > 0 && <SubtaskPanel subtasks={subtasks} parentTasks={subtaskPanelParents} />}
-        </div>
+          </ScrollContainer>
+        </CommonWrapper>
       </div>
     </ChatActionsProvider>
   );

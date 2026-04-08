@@ -262,7 +262,7 @@ export const BlockRenderer: React.FC<BlockRendererProps> = ({
                     '[&_div]:text-[13px] [&_ol]:text-[13px] [&_p]:text-[13px] [&_ul]:text-[13px]',
                 )}
               >
-                <div className='mt-0.5 flex h-3.5 w-3.5 shrink-0 items-center justify-center'>
+                <div className='bg-BG_WHITE mt-0.5 flex h-3.5 w-3.5 shrink-0 items-center justify-center p-1'>
                   <AnimatedDot showAnimation={false} size={4} />
                 </div>
                 <MarkdownBlock payload={textBlock.payload} />
@@ -364,7 +364,11 @@ export const BlockRenderer: React.FC<BlockRendererProps> = ({
           );
         }
 
-        return <AgentBlock key={block?.payload?.agent_id ?? block?.id} payload={block?.payload} />;
+        return (
+          <div className={showConnectorToNext ? 'pb-4' : ''}>
+            <AgentBlock key={block?.payload?.agent_id ?? block?.id} payload={block?.payload} />
+          </div>
+        );
       }
 
       default:
@@ -377,15 +381,9 @@ export const BlockRenderer: React.FC<BlockRendererProps> = ({
       {messageBlocks.map((block, index) => {
         const previousBlock = index > 0 ? messageBlocks[index - 1] : undefined;
         const nextBlock = messageBlocks[index + 1];
-        const isLastBlock = index === size - 1;
-        const isNextLast = index + 1 === size - 1;
-        const shouldRemoveSpacing = isConnectedBlock(block, isLastBlock) && isConnectedBlock(nextBlock, isNextLast);
 
         return (
-          <div
-            key={block.id ?? `${block.type}-${block.order}`}
-            className={cn(!shouldRemoveSpacing && size > 1 && 'mb-3')}
-          >
+          <div key={block.id ?? `${block.type}-${block.order}`}>
             {renderBlock(block, index, nextBlock, previousBlock)}
           </div>
         );
