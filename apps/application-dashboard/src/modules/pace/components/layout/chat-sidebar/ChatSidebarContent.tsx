@@ -45,7 +45,7 @@ const ChatSidebarContent = ({
 }: ChatSidebarContentProps) => {
   const dispatch = useAppDispatch();
   const { openTab } = useDynamicTabs({ type: TAB_TYPE.FILE });
-  const { openTab: openBrowserTab } = useDynamicTabs({ type: TAB_TYPE.BROWSER });
+  const { openTab: openBrowserTab, updateTab: updateBrowserTab } = useDynamicTabs({ type: TAB_TYPE.BROWSER });
   const { chatSidebarState, setChatSidebarState, setActiveAgentInfo, selectedModel, setSelectedModel } =
     usePaceContext();
   const { inputValue, setInputValue } = useChatDraftInput({
@@ -114,6 +114,13 @@ const ChatSidebarContent = ({
     [openBrowserTab, chatSidebarState, setChatSidebarState],
   );
 
+  const handleBrowserStreamingEnd = useCallback(
+    (browserConversationId: string) => {
+      updateBrowserTab(browserConversationId, browserConversationId, 'Browser', { status: 'ended' });
+    },
+    [updateBrowserTab],
+  );
+
   const handleHitlRespondComplete = useCallback(() => {
     void refetchConversationHistory();
   }, [refetchConversationHistory]);
@@ -158,6 +165,7 @@ const ChatSidebarContent = ({
         onFileOpen={handleFileOpen}
         onTaskOpen={handleTaskOpen}
         onBrowserOpen={handleBrowserOpen}
+        onBrowserStreamingEnd={handleBrowserStreamingEnd}
         onTaskPopoverOpenChange={setIsTaskPopoverOpen}
         fileDropHandlerRef={fileDropHandlerRef}
         addFileReferenceRef={addFileReferenceRef}

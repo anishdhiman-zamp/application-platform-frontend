@@ -13,7 +13,7 @@ import TabWrapper from '@/modules/pace/components/dynamic-tabs/TabWrapper';
 import { useDynamicTabs } from '@/modules/pace/components/dynamic-tabs/useDynamicTabs';
 import { TAB_TYPE } from '@/modules/pace/pace.types';
 
-type BrowserViewerDisplayState = 'waiting' | 'error';
+type BrowserViewerDisplayState = 'waiting' | 'ended' | 'error';
 
 const BROWSER_VIEWER_STATE_CONFIG: Record<
   BrowserViewerDisplayState,
@@ -23,6 +23,11 @@ const BROWSER_VIEWER_STATE_CONFIG: Record<
     title: 'Waiting for browser stream...',
     imageSrc: DONE_EMPTY_STATE,
     imageAlt: 'Waiting for stream',
+  },
+  ended: {
+    title: 'Live streaming has ended',
+    imageSrc: DONE_EMPTY_STATE,
+    imageAlt: 'Stream ended',
   },
   error: {
     title: 'Failed to connect to browser stream',
@@ -35,18 +40,21 @@ const BROWSER_VIEWER_STATE_CONFIG: Record<
 interface BrowserViewerTabProps {
   conversationId: string;
   sessionId?: string;
+  status?: string;
   isActive: boolean;
 }
 
-const BrowserViewerTab = ({ conversationId, sessionId, isActive }: BrowserViewerTabProps) => {
+const BrowserViewerTab = ({ conversationId, sessionId, status, isActive }: BrowserViewerTabProps) => {
   const [iframeSrc, setIframeSrc] = useState<string | null>(null);
   const [hasError, setHasError] = useState(false);
   const [isStreamLoading, setIsStreamLoading] = useState(true);
 
+  const isEnded = status === 'ended';
+
   const [fetchNovnc, { isFetching }] = useLazyGetBrowserStreamingNovncQuery();
 
   const fetchStream = useCallback(async () => {
-    if (!conversationId) return;
+    if (!conversationId || isEnded) return;
 
     try {
       setHasError(false);
@@ -63,13 +71,19 @@ const BrowserViewerTab = ({ conversationId, sessionId, isActive }: BrowserViewer
       setHasError(true);
       setIframeSrc(null);
     }
-  }, [conversationId, sessionId, fetchNovnc]);
+  }, [conversationId, sessionId, isEnded, fetchNovnc]);
 
   useEffect(() => {
-    if (isActive) {
+    if (isActive && !isEnded) {
       fetchStream();
     }
-  }, [isActive, fetchStream]);
+  }, [isActive, isEnded, fetchStream]);
+
+  useEffect(() => {
+    if (isEnded) {
+      setIframeSrc(null);
+    }
+  }, [isEnded]);
 
   const renderPlaceholder = (state: BrowserViewerDisplayState) => {
     const config = BROWSER_VIEWER_STATE_CONFIG[state];
@@ -89,6 +103,10 @@ const BrowserViewerTab = ({ conversationId, sessionId, isActive }: BrowserViewer
       </EmptyState>
     );
   };
+
+  if (isEnded) {
+    return renderPlaceholder('ended');
+  }
 
   return (
     <CommonWrapper
@@ -139,6 +157,7 @@ const BrowserTabsContainer = () => {
             <BrowserViewerTab
               conversationId={tab.id}
               sessionId={tab.metadata?.sessionId as string | undefined}
+              status={tab.metadata?.status as string | undefined}
               isActive={isActive}
             />
           </TabWrapper>
