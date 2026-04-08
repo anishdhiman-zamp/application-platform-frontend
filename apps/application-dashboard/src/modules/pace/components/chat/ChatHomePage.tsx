@@ -1,16 +1,20 @@
 'use client';
 
-import { FC, useCallback, useEffect, useMemo, useRef, useState } from 'react';
+import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import {
   ChatActionsProvider,
-  ConnectedChatInput,
-  CreateConversationPayloadTypeV2,
+  type CreateConversationPayloadTypeV2,
   DropOverlay,
   ResourceType,
   ScopeType,
-  useChat,
   useFileDragDrop,
 } from '@zamp-platform/chat';
+import {
+  ConnectedChatInput,
+  ConversationActionsContext,
+  ConversationStateContext,
+  createConversationActions,
+} from '@zamp-platform/conversation-stream';
 import { AnimatePresence, motion } from 'framer-motion';
 import { FEATURE_FLAGS } from '@/constants/featureFlags';
 import { useAppSelector } from '@/hooks/toolkit';
@@ -22,11 +26,12 @@ import ChatHome from '@/modules/pace/components/chat/ChatHome';
 import ModelSelector from '@/modules/pace/components/chat/ModelSelector';
 import { useChatDraftInput } from '@/modules/pace/hooks/useChatDraftInput';
 import { NO_ANIMATION } from '@/modules/pace/pace.animations';
+import { STUB_CONVERSATION_STATE } from '@/modules/pace/pace.constants';
 import { usePaceContext } from '@/modules/pace/pace.context';
 import { CHAT_SIDEBAR_STATE } from '@/modules/pace/pace.types';
 import type { RootState } from '@/store';
 
-const ChatHomePage: FC = () => {
+const ChatHomePage = () => {
   const {
     setChatSidebarState,
     chatSidebarState,
@@ -54,37 +59,9 @@ const ChatHomePage: FC = () => {
   const [autoLoopEnabled, setAutoLoopEnabled] = useState(false);
   const [isConfirmDialogOpen, setIsConfirmDialogOpen] = useState(false);
 
-  const chat = useChat({
-    resourceId: organizationId,
-    resourceType: ResourceType.ORGANIZATION,
-    enableStreaming: true,
-  });
-
-  const interceptedChat = useMemo(() => {
-    return {
-      ...chat,
-      createConversationV2: async (payload: CreateConversationPayloadTypeV2) => {
-        const fileRefs = payload.message_content?.file_references;
-
-        startNewChat();
-
-        setChatMessageIntent({
-          message: payload.message_content?.text || '',
-          fileReferences: fileRefs?.map((ref) => ({ path: ref.path, name: ref.name })),
-          llmModel: payload.llm_model,
-          autoLoopEnabled: payload.pev_enabled,
-        });
-
-        setChatSidebarState(CHAT_SIDEBAR_STATE.EXPANDED);
-
-        return { conversation_id: 'pending', status_message: '', title: '' };
-      },
-    };
-  }, [chat, startNewChat, setChatMessageIntent, setChatSidebarState]);
-
   const { isDragOver, dropZoneProps } = useFileDragDrop({
     onFileDrop: (files) => fileDropHandlerRef.current?.(files),
-    disabled: chat.isStreaming || chat.isCreatingConversationV2,
+    disabled: false,
   });
 
   const isExpanded = chatSidebarState === CHAT_SIDEBAR_STATE.EXPANDED;
@@ -117,6 +94,29 @@ const ChatHomePage: FC = () => {
     [selectConversation, setChatSidebarState],
   );
 
+  const interceptedActions = useMemo(
+    () =>
+      createConversationActions({
+        createConversationV2: async (payload: CreateConversationPayloadTypeV2) => {
+          const fileRefs = payload.message_content?.file_references;
+
+          startNewChat();
+
+          setChatMessageIntent({
+            message: payload.message_content?.text || '',
+            fileReferences: fileRefs?.map((ref) => ({ path: ref.path, name: ref.name })),
+            llmModel: payload.llm_model,
+            autoLoopEnabled: payload.pev_enabled,
+          });
+
+          setChatSidebarState(CHAT_SIDEBAR_STATE.EXPANDED);
+
+          return { conversation_id: 'pending', status_message: '', title: '' };
+        },
+      }),
+    [startNewChat, setChatMessageIntent, setChatSidebarState],
+  );
+
   useEffect(() => {
     if (pendingFileReference && addFileReferenceRef.current) {
       addFileReferenceRef.current(pendingFileReference);
@@ -125,58 +125,60 @@ const ChatHomePage: FC = () => {
   }, [pendingFileReference, clearPendingFileReference]);
 
   return (
-    <>
-      <AnimatePresence>
-        {!isExpanded && (
-          <ChatActionsProvider>
-            <motion.div
-              key='chat-home-page'
-              initial={false}
-              animate={{ opacity: 1, transition: NO_ANIMATION }}
-              exit={{ opacity: 0, transition: { duration: 0.25, ease: 'easeInOut' } }}
-              className='relative mx-auto flex min-h-0 w-full max-w-[700px] flex-1 flex-col items-center justify-start overflow-hidden pt-[22vh]'
-              style={{ willChange: 'opacity' }}
-              {...dropZoneProps}
-            >
-              <DropOverlay isVisible={isDragOver} />
-              <ChatHome />
-              <div className='mt-7 w-full shrink-0 px-3'>
-                <ConnectedChatInput
-                  chat={interceptedChat}
-                  resourceType={ResourceType.ORGANIZATION}
-                  resourceId={organizationId}
-                  autoFocus
-                  scope={ScopeType.ORGANIZATION}
-                  scopeId={organizationId}
-                  username={username}
-                  currentUserName={currentUserName}
-                  placeholder="Do your life's best work with Pace"
-                  conversationId={chat.conversationId ?? ''}
-                  minTextareaHeight={18}
-                  maxTextareaHeight={200}
-                  className='shadow-chatbot-shadow'
-                  externalInputValue={inputValue}
-                  setExternalInputValue={setInputValue}
-                  fileDropHandlerRef={fileDropHandlerRef}
-                  addFileReferenceRef={addFileReferenceRef}
-                  showModelSelector
-                  modelSelectorSlot={modelSelectorSlot}
-                  {...(isAutoLoopBtnEnabled && { autoLoopToggleSlot })}
-                  llmModel={selectedModel}
-                  autoLoopEnabled={autoLoopEnabled}
-                />
-              </div>
-              <ChatHistory onSelectConversation={handleSelectConversation} />
-            </motion.div>
-          </ChatActionsProvider>
-        )}
-      </AnimatePresence>
-      <AutoLoopConfirmDialog
-        isOpen={isConfirmDialogOpen}
-        onOpenChange={setIsConfirmDialogOpen}
-        onConfirm={() => setAutoLoopEnabled(true)}
-      />
-    </>
+    <ConversationStateContext.Provider value={STUB_CONVERSATION_STATE}>
+      <ConversationActionsContext.Provider value={interceptedActions}>
+        <>
+          <AnimatePresence>
+            {!isExpanded && (
+              <ChatActionsProvider>
+                <motion.div
+                  key='chat-home-page'
+                  initial={false}
+                  animate={{ opacity: 1, transition: NO_ANIMATION }}
+                  exit={{ opacity: 0, transition: { duration: 0.25, ease: 'easeInOut' } }}
+                  className='relative mx-auto flex min-h-0 w-full max-w-[700px] flex-1 flex-col items-center justify-start overflow-hidden pt-[22vh]'
+                  style={{ willChange: 'opacity' }}
+                  {...dropZoneProps}
+                >
+                  <DropOverlay isVisible={isDragOver} />
+                  <ChatHome />
+                  <div className='mt-7 w-full shrink-0 px-3'>
+                    <ConnectedChatInput
+                      resourceType={ResourceType.ORGANIZATION}
+                      resourceId={organizationId}
+                      autoFocus
+                      scope={ScopeType.ORGANIZATION}
+                      scopeId={organizationId}
+                      username={username}
+                      currentUserName={currentUserName}
+                      placeholder="Do your life's best work with Pace"
+                      minTextareaHeight={18}
+                      maxTextareaHeight={200}
+                      className='shadow-chatbot-shadow'
+                      externalInputValue={inputValue}
+                      setExternalInputValue={setInputValue}
+                      fileDropHandlerRef={fileDropHandlerRef}
+                      addFileReferenceRef={addFileReferenceRef}
+                      showModelSelector
+                      modelSelectorSlot={modelSelectorSlot}
+                      {...(isAutoLoopBtnEnabled && { autoLoopToggleSlot })}
+                      llmModel={selectedModel}
+                      autoLoopEnabled={autoLoopEnabled}
+                    />
+                  </div>
+                  <ChatHistory onSelectConversation={handleSelectConversation} />
+                </motion.div>
+              </ChatActionsProvider>
+            )}
+          </AnimatePresence>
+          <AutoLoopConfirmDialog
+            isOpen={isConfirmDialogOpen}
+            onOpenChange={setIsConfirmDialogOpen}
+            onConfirm={() => setAutoLoopEnabled(true)}
+          />
+        </>
+      </ConversationActionsContext.Provider>
+    </ConversationStateContext.Provider>
   );
 };
 
