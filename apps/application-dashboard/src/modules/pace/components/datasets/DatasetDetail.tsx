@@ -216,12 +216,12 @@ const DatasetDetailInner = ({ tableName }: DatasetDetailProps) => {
 
       // Build grid ColDefs in the same order as bpCols
       const gridCols: ColDef[] = bpCols.map((bp) => {
-        const dbRow = allRows.find((r) => String(r.column_name) === bp.id);
+        const dbRow = allRows.find((r) => r.column_name != null && String(r.column_name) === bp.id);
 
         if (bp.frozen) {
           return {
             field: bp.id,
-            headerName: snakeCaseToSentenceCase(bp.id),
+            headerName: bp.id ? snakeCaseToSentenceCase(bp.id) : '',
             hide: true,
             editable: false,
             suppressFillHandle: true,
@@ -230,7 +230,7 @@ const DatasetDetailInner = ({ tableName }: DatasetDetailProps) => {
 
         return {
           field: bp.id,
-          headerName: snakeCaseToSentenceCase(bp.id),
+          headerName: bp.id ? snakeCaseToSentenceCase(bp.id) : '',
           ...(dbRow ? getCellEditorForPgType(String(dbRow.data_type)) : {}),
         };
       });
@@ -557,11 +557,11 @@ const DatasetDetailInner = ({ tableName }: DatasetDetailProps) => {
       if (existing && !droppedIds.has(bpCol.id)) {
         if (hasBlueprintChanges) {
           // Reflect any pending rename
-          const sanitizedName = sanitizeColumnName(bpCol.name);
+          const sanitizedName = bpCol.name ? sanitizeColumnName(bpCol.name) : '';
 
           result.push({
             ...existing,
-            headerName: snakeCaseToSentenceCase(sanitizedName || bpCol.name),
+            headerName: snakeCaseToSentenceCase(sanitizedName || bpCol.name || ''),
             editable: false,
             suppressFillHandle: true,
           });

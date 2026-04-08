@@ -30,7 +30,7 @@ const DatasetsListing = () => {
 
     return data.rows.map((row) => ({
       id: row.table_name as string,
-      title: snakeCaseToSentenceCase(row.table_name as string),
+      title: row.table_name ? snakeCaseToSentenceCase(row.table_name as string) : '',
     }));
   }, [data]);
 

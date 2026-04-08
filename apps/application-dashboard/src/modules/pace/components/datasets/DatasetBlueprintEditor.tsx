@@ -128,7 +128,7 @@ const ColumnRow: FC<ColumnRowProps> = memo(
         return COLUMN_NAME_ERROR;
       }
       const sanitized = sanitizeColumnName(trimmed);
-      const dupes = allColumns.filter((c) => sanitizeColumnName(c.name) === sanitized);
+      const dupes = allColumns.filter((c) => c.name && sanitizeColumnName(c.name) === sanitized);
 
       if (dupes.length > 1 && dupes[dupes.length - 1].id === column.id) return 'Column names must be unique';
 
