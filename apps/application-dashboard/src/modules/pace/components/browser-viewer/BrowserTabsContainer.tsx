@@ -1,34 +1,20 @@
 'use client';
 
-import { memo, useCallback, useEffect, useState } from 'react';
+import { useCallback, useEffect, useState } from 'react';
 import { useLazyGetBrowserLiveViewNovncQuery } from '@zamp-platform/chat';
-import { cn } from '@zamp-platform/ui/utils';
+import { Button } from '@zamp-platform/ui';
 import { Globe } from 'lucide-react';
+import {
+  coerceIframeSrcForSecurePage,
+  expectedChromeSessionIdForConversation,
+} from 'modules/pace/components/browser-viewer/browserViewer.utils';
 import ImageLoader from '@/components/common/loader/ImageLoader';
+import CommonWrapper from '@/components/commonWrapper';
+import { SkeletonTypes } from '@/components/commonWrapper/commonWrapper.types';
 import { ZAMP_LOGO_LOADER_SVG } from '@/constants/icons';
+import TabWrapper from '@/modules/pace/components/dynamic-tabs/TabWrapper';
 import { useDynamicTabs } from '@/modules/pace/components/dynamic-tabs/useDynamicTabs';
 import { TAB_TYPE } from '@/modules/pace/pace.types';
-
-const A2A_TASK_CONVERSATION_ID_PREFIX = 'a2a-task-';
-
-function expectedChromeSessionIdForConversation(conversationId: string): string {
-  const pathKey = conversationId.startsWith(A2A_TASK_CONVERSATION_ID_PREFIX)
-    ? conversationId.slice(A2A_TASK_CONVERSATION_ID_PREFIX.length)
-    : conversationId;
-
-  return `chrome-${pathKey}`;
-}
-
-function coerceIframeSrcForSecurePage(url: string): string {
-  if (typeof window === 'undefined' || window.location.protocol !== 'https:') {
-    return url;
-  }
-  if (url.startsWith('http://')) {
-    return `https://${url.slice('http://'.length)}`;
-  }
-
-  return url;
-}
 
 interface BrowserViewerTabProps {
   conversationId: string;
@@ -36,9 +22,12 @@ interface BrowserViewerTabProps {
 }
 
 const BrowserViewerTab = ({ conversationId, isActive }: BrowserViewerTabProps) => {
-  const [fetchNovnc, { isFetching }] = useLazyGetBrowserLiveViewNovncQuery();
   const [iframeSrc, setIframeSrc] = useState<string | null>(null);
   const [hasError, setHasError] = useState(false);
+  const [hasFetched, setHasFetched] = useState(false);
+  const [isStreamLoading, setIsStreamLoading] = useState(true);
+
+  const [fetchNovnc, { isFetching }] = useLazyGetBrowserLiveViewNovncQuery();
 
   const fetchStream = useCallback(async () => {
     if (!conversationId) return;
@@ -54,6 +43,7 @@ const BrowserViewerTab = ({ conversationId, isActive }: BrowserViewerTabProps) =
       const embedded = rawEmbedded ? coerceIframeSrcForSecurePage(rawEmbedded) : null;
 
       setIframeSrc(embedded);
+      setHasFetched(true);
     } catch {
       setHasError(true);
       setIframeSrc(null);
@@ -66,50 +56,56 @@ const BrowserViewerTab = ({ conversationId, isActive }: BrowserViewerTabProps) =
     }
   }, [isActive, fetchStream]);
 
-  if (isFetching) {
-    return (
-      <div className='flex h-full w-full items-center justify-center'>
-        <ImageLoader imageSrc={ZAMP_LOGO_LOADER_SVG} width={140} height={140} />
-      </div>
-    );
-  }
-
-  if (hasError) {
-    return (
-      <div className='flex h-full w-full items-center justify-center'>
-        <div className='text-center'>
-          <div className='bg-GRAY_100 mx-auto mb-3 flex h-12 w-12 items-center justify-center rounded-full'>
-            <Globe size={20} className='text-GRAY_700' />
-          </div>
-          <p className='f-13-450 text-GRAY_700'>Failed to connect to browser stream</p>
-          <button onClick={fetchStream} className='f-13-500 text-BLUE_700 mt-2 hover:underline'>
-            Retry
-          </button>
-        </div>
-      </div>
-    );
-  }
-
-  if (iframeSrc) {
-    return (
-      <iframe
-        src={iframeSrc}
-        className='h-full w-full bg-white'
-        title='Browser live view'
-        referrerPolicy='no-referrer-when-downgrade'
-      />
-    );
-  }
-
   return (
-    <div className='flex h-full w-full items-center justify-center'>
-      <div className='text-center'>
-        <div className='bg-GRAY_100 mx-auto mb-3 flex h-12 w-12 items-center justify-center rounded-full'>
-          <Globe size={20} className='text-GRAY_700' />
+    <CommonWrapper
+      isLoading={isFetching}
+      isError={hasError}
+      skeletonType={SkeletonTypes.CUSTOM}
+      loader={<ImageLoader imageSrc={ZAMP_LOGO_LOADER_SVG} width={140} height={140} />}
+      className='flex h-full w-full items-center justify-center'
+      renderError={
+        <div className='flex h-full w-full items-center justify-center'>
+          <div className='text-center'>
+            <div className='bg-GRAY_100 mx-auto mb-3 flex h-12 w-12 items-center justify-center rounded-full'>
+              <Globe size={20} className='text-GRAY_700' />
+            </div>
+            <p className='f-13-450 text-GRAY_700'>Failed to connect to browser stream</p>
+            <Button variant='link' size='small' onClick={fetchStream} className='mt-2'>
+              Retry
+            </Button>
+          </div>
         </div>
-        <p className='f-13-450 text-GRAY_700'>Waiting for browser stream...</p>
-      </div>
-    </div>
+      }
+      disableAnimation
+    >
+      {iframeSrc ? (
+        <div className='relative h-full w-full'>
+          {isStreamLoading && (
+            <div className='absolute inset-0 z-10 flex items-center justify-center bg-white'>
+              <ImageLoader imageSrc={ZAMP_LOGO_LOADER_SVG} width={140} height={140} />
+            </div>
+          )}
+          <iframe
+            src={iframeSrc}
+            className='h-full w-full'
+            title='Browser live view'
+            referrerPolicy='no-referrer-when-downgrade'
+            onLoad={() => setIsStreamLoading(false)}
+          />
+        </div>
+      ) : (
+        <div className='flex h-full w-full items-center justify-center'>
+          <div className='text-center'>
+            <div className='bg-GRAY_100 mx-auto mb-3 flex h-12 w-12 items-center justify-center rounded-full'>
+              <Globe size={20} className='text-GRAY_700' />
+            </div>
+            <p className='f-13-450 text-GRAY_700'>
+              {hasFetched ? 'Live stream has ended' : 'Waiting for browser stream...'}
+            </p>
+          </div>
+        </div>
+      )}
+    </CommonWrapper>
   );
 };
 
@@ -134,18 +130,5 @@ const BrowserTabsContainer = () => {
     </div>
   );
 };
-
-const TabWrapper = memo(({ isActive, children }: { isActive: boolean; children: React.ReactNode }) => (
-  <div
-    className={cn(
-      'absolute inset-0',
-      isActive ? 'pointer-events-auto visible z-1' : 'pointer-events-none invisible z-0',
-    )}
-  >
-    {children}
-  </div>
-));
-
-TabWrapper.displayName = 'TabWrapper';
 
 export default BrowserTabsContainer;

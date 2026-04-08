@@ -1,10 +1,8 @@
 import { FC, useEffect, useRef, useState } from 'react';
-import { getCreateKnowledgeBaseRouteByProcessId, getProcessRouteById, ROUTES_PATH } from 'constants/routeConfig';
-import { Plus } from 'lucide-react';
+import { getCreateKnowledgeBaseRouteByProcessId, getProcessRouteById } from 'constants/routeConfig';
 import { AnimatePresence, motion } from 'motion/react';
 import Link from 'next/link';
 import { Process } from '@/app/(authenticated)/resources';
-import TooltipV2 from '@/components/common/TooltipV2';
 import { FEATURE_FLAGS } from '@/constants/featureFlags';
 import { useFeatureFlag } from '@/hooks/useFeatureFlag';
 import { type ProcessResponseType, ProcessStatus } from '@/types/api/processApi.types';
@@ -53,17 +51,6 @@ const ProcessNavigation: FC<ProcessNavigationProps> = ({ processes, params, dele
     <>
       <div className='flex items-center justify-between'>
         <div className='f-12-550 text-GRAY_700 px-1.5 py-2'>Processes</div>
-        {isZampInternalEnabled && (
-          <TooltipV2 tooltipBody='Create process' asChildTrigger>
-            <Link
-              href={ROUTES_PATH.PROCESS_CREATE}
-              className='inline-flex size-6 items-center justify-center rounded-md hover:bg-gray-100 [&_svg]:size-3.5'
-              data-testid='add-process-btn'
-            >
-              <Plus className='text-gray-700' />
-            </Link>
-          </TooltipV2>
-        )}
       </div>
 
       <div className='flex flex-col gap-1'>

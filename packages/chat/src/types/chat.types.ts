@@ -1,4 +1,4 @@
-import { Block } from '../..';
+import { type Block, HITL_RESPONSE_TYPE, type InputRequiredPayload } from './block.types';
 
 export interface PostMessagePayloadType {
   conversationId: string;
@@ -123,6 +123,8 @@ export interface ChatMessage {
   id?: string;
   conversation_id?: string;
   llm_model?: string;
+  state?: MessageState;
+  pev_enabled?: boolean;
 }
 
 export interface ChatState {
@@ -211,6 +213,8 @@ export interface CreateConversationPayloadTypeV2 {
   message_content: MessageContentType;
   sender_name?: string;
   llm_model?: string;
+  metadata?: Record<string, unknown>;
+  pev_enabled?: boolean;
 }
 
 export interface AnnotationLocationDataType {
@@ -220,6 +224,30 @@ export interface AnnotationLocationDataType {
   dataset_row_id?: string;
   dataset_field_id?: string;
   log_id?: string;
+}
+
+export enum SummaryStatus {
+  IN_PROGRESS = 'in_progress',
+  COMPLETED = 'completed',
+}
+
+/** One grouped step summary for a slice of message elements (HITL / task summary `step_groups`). */
+export interface ConversationSummaryStepGroup {
+  summary: string;
+  element_ids: string[];
+}
+
+export interface ConversationSummary {
+  status: SummaryStatus;
+  content?: string;
+  live_lines?: string[];
+  generated_at?: string;
+  updated_at?: string;
+  /**
+   * Step groups keyed by assistant message id. Each value lists groups for that message only.
+   * Legacy shape: a flat array (all groups, any message) — see `resolveStepGroups` in the app.
+   */
+  step_groups?: Record<string, ConversationSummaryStepGroup[]> | ConversationSummaryStepGroup[];
 }
 
 export interface ConversationType {
@@ -239,11 +267,18 @@ export interface ConversationType {
   resource_id: string;
   resource_type: ResourceType;
   title: string;
+  summary?: ConversationSummary | null;
 }
 
 export interface ConversationMessageContentType {
   elements: Block[];
 }
+
+export const enum MessageState {
+  STREAMING = 'STREAMING',
+  DONE = 'DONE',
+}
+
 export interface ConversationMessageType {
   id: string;
   organization_id: string;
@@ -251,6 +286,7 @@ export interface ConversationMessageType {
   sender_id: string;
   sender_type: SenderType;
   sender_name: string;
+  state: MessageState;
   intent: string | null;
   content: ConversationMessageContentType;
   created_at: string;
@@ -259,6 +295,8 @@ export interface ConversationMessageType {
 export interface GetConversationByIdResponseType {
   conversation: ConversationType;
   messages: ConversationMessageType[];
+  /** Pending input gates (e.g. select_one) keyed per entity; from GET conversation API */
+  inputs_required?: ConversationInputRequiredItem[];
 }
 
 export interface GetConversationByIdRequestType {
@@ -452,4 +490,76 @@ export interface SubmitChatFeedbackRequestType {
 export interface SubmitChatFeedbackResponseType {
   success: boolean;
   message: string;
+}
+
+/** Breadcrumb entry for parent-child task navigation */
+export interface TaskBreadcrumb {
+  id: string;
+  title: string;
+  status?: string;
+}
+
+/** Sibling task entry for subtask pagination */
+export interface SiblingTask {
+  id: string;
+  title: string;
+  status: string;
+}
+
+export enum HITLEntityType {
+  CONVERSATION = 'CONVERSATION',
+  TASK = 'TASK',
+}
+
+/** Shape of `input_required_data` on GET conversation `inputs_required[]` items */
+export type ConversationInputRequiredData = Omit<InputRequiredPayload, 'entity_id' | 'entity_type'>;
+
+export interface ConversationInputRequiredItem {
+  entity_id: string;
+  entity_type: HITLEntityType;
+  input_required_data: ConversationInputRequiredData;
+}
+
+export interface HITLSourceEntity {
+  entity_type: HITLEntityType;
+  entity_id: string;
+}
+
+export interface HITLResponseSelectOne {
+  type: typeof HITL_RESPONSE_TYPE.SELECT_ONE;
+  selected_option: string | null;
+  custom_input?: string | null;
+  is_skipped?: boolean;
+}
+
+export interface HITLResponseMultipleChoice {
+  type: typeof HITL_RESPONSE_TYPE.MULTIPLE_CHOICE;
+  selected_options: string[];
+  custom_input?: string | null;
+  is_skipped?: boolean;
+}
+
+export interface HITLResponseApproval {
+  type: typeof HITL_RESPONSE_TYPE.APPROVAL;
+  approved: boolean;
+  is_skipped?: boolean;
+}
+
+export interface HITLResponseText {
+  type: typeof HITL_RESPONSE_TYPE.TEXT;
+  text: string;
+  is_skipped?: boolean;
+}
+
+export type HITLResponse = HITLResponseSelectOne | HITLResponseMultipleChoice | HITLResponseApproval | HITLResponseText;
+
+export interface HITLResponseItem {
+  entity_type: string;
+  entity_id: string;
+  response: HITLResponse;
+}
+
+export interface HITLRespondPayloadType {
+  source_entity: HITLSourceEntity;
+  responses: HITLResponseItem[];
 }

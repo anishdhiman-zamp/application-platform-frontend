@@ -13,6 +13,7 @@ export const useChatSidebarState = ({ initialConversationId }: UseChatSidebarSta
   const { chatSidebarState, setChatSidebarState } = usePaceContext();
 
   const prevInitialConversationIdRef = useRef(initialConversationId);
+  const internalUpdateRef = useRef(false);
 
   const [chatTitle, setChatTitle] = useState('');
   const [conversationId, setConversationIdState] = useState<string | null>(initialConversationId);
@@ -30,6 +31,7 @@ export const useChatSidebarState = ({ initialConversationId }: UseChatSidebarSta
   }, []);
 
   const setConversationId = useCallback((id: string | null, title?: string) => {
+    internalUpdateRef.current = true;
     setConversationIdState((prev) => {
       if (prev && id && prev !== id) {
         setChatKey((k) => k + 1);
@@ -54,6 +56,7 @@ export const useChatSidebarState = ({ initialConversationId }: UseChatSidebarSta
   }, []);
 
   const startNewChat = useCallback(() => {
+    internalUpdateRef.current = true;
     setChatTitle('');
     setConversationIdState(null);
     setChatKey((prev) => prev + 1);
@@ -62,10 +65,23 @@ export const useChatSidebarState = ({ initialConversationId }: UseChatSidebarSta
 
   useEffect(() => {
     if (prevInitialConversationIdRef.current !== initialConversationId) {
+      const wasNull = prevInitialConversationIdRef.current === null;
+      const wasInternal = internalUpdateRef.current;
+
+      internalUpdateRef.current = false;
+
       prevInitialConversationIdRef.current = initialConversationId;
+
+      if (wasInternal) {
+        return;
+      }
+
       setConversationIdState(initialConversationId);
 
       if (initialConversationId) {
+        if (wasNull) {
+          setChatKey((prev) => prev + 1);
+        }
         if (chatSidebarState === CHAT_SIDEBAR_STATE.COLLAPSED) {
           setChatSidebarState(CHAT_SIDEBAR_STATE.SIDEBAR);
         }

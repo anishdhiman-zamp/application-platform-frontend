@@ -1,4 +1,4 @@
-import { OnboardingStatus } from '@/modules/onboarding/onboarding.types';
+import { MediaType, OnboardingStatus } from '@/modules/onboarding/onboarding.types';
 
 export type LogoutFlow = {
   logout_url: string;
@@ -94,6 +94,8 @@ export type Organization = {
   slug: string;
   provisioning_status?: string;
   product?: ProductMode;
+  icon_type?: MediaType | null;
+  icon_value?: string | null;
   resource_audience_policies: {
     privilege: string;
     resource_audience_type: string;
@@ -105,6 +107,7 @@ export enum ResourceAudienceType {
   ORGANIZATION = 'organization',
   USER = 'user',
   TEAM = 'team',
+  AGENT = 'service_account',
 }
 
 export type Session = {
@@ -118,7 +121,7 @@ export type Session = {
   username: string;
   orgs: Organization[];
   onboarding_status: OnboardingStatus;
-  avatar_type: 'seed' | 'url' | null;
+  avatar_type: MediaType | null;
   avatar_value: string | null;
 };
 

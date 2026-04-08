@@ -18,7 +18,7 @@ const ClearFiltersConfirmationPopup: FC<ClearFiltersConfirmationPopupProps> = ({
   return (
     <div
       ref={containerRef}
-      className={cn('border-0.5 border-GRAY_400 top-full z-30 mt-1 rounded-md bg-white p-4', className)}
+      className={cn('border-0.5 border-GRAY_400 bg-BG_WHITE top-full z-30 mt-1 rounded-md p-4', className)}
     >
       <div className='mb-3'>Remove all filters?</div>
 

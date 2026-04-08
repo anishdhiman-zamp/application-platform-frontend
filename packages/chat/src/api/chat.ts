@@ -17,6 +17,7 @@ import {
   GetFilesByIdsRequestType,
   GetFilesByIdsResponseType,
   GetOutputFileDownloadRequestType,
+  HITLRespondPayloadType,
   PostInteractionDisablePayloadType,
   PostInteractionPayloadType,
   PostInteractionResponseType,
@@ -65,7 +66,8 @@ export const API_ENDPOINTS = {
   SUBMIT_CHAT_FEEDBACK: 'v4/conversations/{{conversationId}}/messages/{{messageId}}/chat-feedback',
   TASKS_MESSAGES_GET: 'tasks/{{conversationId}}/messages',
   STOP_CONVERSATION: 'v4/conversations/{{conversationId}}/stop',
-  BROWSER_LIVE_VIEW_NOVNC: 'v3/conversations/{{conversationId}}/browser-live-view-novnc',
+  HITL_RESPOND: 'hitl/respond',
+  BROWSER_LIVE_VIEW_NOVNC: 'browser/streaming/{{conversationId}}/browser-streaming-novnc',
 };
 
 const ConversationService = chatApi.injectEndpoints({
@@ -195,8 +197,17 @@ const ConversationService = chatApi.injectEndpoints({
         method: REQUEST_TYPES.POST,
       }),
     }),
+    hitlRespond: builder.mutation<void, HITLRespondPayloadType>({
+      query: (body) => ({
+        url: API_ENDPOINTS.HITL_RESPOND,
+        method: REQUEST_TYPES.POST,
+        body,
+      }),
+    }),
   }),
 });
+
+export { ConversationService };
 
 export const {
   useSendMessageMutation,
@@ -219,4 +230,5 @@ export const {
   useLazyGetBrowserLiveViewNovncQuery,
   useSubmitChatFeedbackMutation,
   useStopConversationMutation,
+  useHitlRespondMutation,
 } = ConversationService;

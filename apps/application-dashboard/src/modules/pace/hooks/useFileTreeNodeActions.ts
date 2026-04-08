@@ -1,6 +1,7 @@
 import { useCallback, useState } from 'react';
 import { captureException } from '@sentry/browser';
 import { toast } from '@zamp-platform/ui';
+import { ROUTES_PATH } from '@/constants/routeConfig';
 import { useDynamicTabs } from '@/modules/pace/components/dynamic-tabs/useDynamicTabs';
 import {
   CLIPBOARD_OPERATION,
@@ -16,6 +17,7 @@ import {
   validatePasteOperation,
 } from '@/modules/pace/components/files/file-tree.utils';
 import { CONTEXT_MENU_ACTION_IDS, FILE_TOAST_MESSAGES } from '@/modules/pace/components/files/files.constants';
+import { dispatchFileCreated, markFileCreationPending } from '@/modules/pace/hooks/pendingFileCreation';
 import { useFileDownload } from '@/modules/pace/hooks/useFileDownload';
 import { useFileTreeContext } from '@/modules/pace/hooks/useFileTreeContext';
 import { usePaceContext } from '@/modules/pace/pace.context';
@@ -71,7 +73,7 @@ export const useFileTreeNodeActions = ({
 
   const { openTab, closeTabsForPath, updateTab, updateTabsForFolderMove } = useDynamicTabs({ type: TAB_TYPE.FILE });
   const { downloadFile } = useFileDownload();
-  const { setPendingFileReference, setChatSidebarState } = usePaceContext();
+  const { setPendingFileReference, setChatSidebarState, chatSidebarState } = usePaceContext();
   const {
     createFile,
     createFolder,
@@ -91,6 +93,7 @@ export const useFileTreeNodeActions = ({
 
   const handleActionClick = async (actionId: string) => {
     onCloseContextMenu();
+    const isOnChatHome = window.location.pathname === ROUTES_PATH.CHAT;
 
     try {
       switch (actionId) {
@@ -190,7 +193,9 @@ export const useFileTreeNodeActions = ({
         }
         case CONTEXT_MENU_ACTION_IDS.REFERENCE_IN_CHAT: {
           setPendingFileReference({ path: node.path, name: node.name });
-          setChatSidebarState(CHAT_SIDEBAR_STATE.SIDEBAR);
+          if (chatSidebarState === CHAT_SIDEBAR_STATE.COLLAPSED && !isOnChatHome) {
+            setChatSidebarState(CHAT_SIDEBAR_STATE.SIDEBAR);
+          }
           break;
         }
         case CONTEXT_MENU_ACTION_IDS.DOWNLOAD: {
@@ -236,6 +241,7 @@ export const useFileTreeNodeActions = ({
     };
 
     if (createModalType === CREATE_ITEM_TYPE.FILE) {
+      markFileCreationPending(fullPath);
       openTab(fullPath, name);
     }
 
@@ -244,10 +250,12 @@ export const useFileTreeNodeActions = ({
     try {
       if (createModalType === CREATE_ITEM_TYPE.FILE) {
         await createFile(name, parentPath);
+        dispatchFileCreated(fullPath);
       } else {
         await createFolder(name, parentPath);
       }
     } catch (error) {
+      dispatchFileCreated(fullPath);
       captureException(error);
       toast.error(FILE_TOAST_MESSAGES.FAILED_TO_CREATE_ITEM);
     }

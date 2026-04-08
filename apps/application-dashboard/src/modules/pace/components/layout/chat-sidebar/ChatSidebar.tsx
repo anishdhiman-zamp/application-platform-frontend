@@ -1,20 +1,31 @@
 'use client';
 
-import { useEffect, useMemo, useState } from 'react';
+import { useCallback, useEffect, useMemo, useState } from 'react';
 import { cn } from '@zamp-platform/ui/utils';
 import { motion } from 'framer-motion';
 import { getSidebarTransitionDirection, getSidebarTransitions, NO_ANIMATION } from 'modules/pace/pace.animations';
-import { FILES_PANEL_WIDTH, SIDEBAR_CONVERSATION_ID_PARAM, SIDEBAR_WIDTH } from 'modules/pace/pace.constants';
+import { SIDEBAR_CONVERSATION_ID_PARAM } from 'modules/pace/pace.constants';
 import { CHAT_SIDEBAR_STATE } from 'modules/pace/pace.types';
+import { useSearchParams } from 'next/navigation';
 import ChatSidebarInner from '@/modules/pace/components/layout/chat-sidebar/ChatSidebarInner';
 import { useChatSidebarState } from '@/modules/pace/hooks/useChatSidebarState';
-import { useSyncedUrlParam } from '@/modules/pace/hooks/useSyncedSearchParam';
 import { usePaceContext } from '@/modules/pace/pace.context';
 
 const ChatSidebar = () => {
-  const { registerStartNewChat, chatSidebarState, prevChatSidebarState, filesPanelOpen, filesPanelPinned } =
-    usePaceContext();
-  const initialConversationId = useSyncedUrlParam(SIDEBAR_CONVERSATION_ID_PARAM);
+  const {
+    registerStartNewChat,
+    registerSelectConversation,
+    chatSidebarState,
+    prevChatSidebarState,
+    filesPanelOpen,
+    filesPanelPinned,
+    filesPanelWidth,
+    sidebarWidth,
+    isSidebarResizing,
+    setActiveAgentInfo,
+  } = usePaceContext();
+  const searchParams = useSearchParams();
+  const initialConversationId = searchParams?.get(SIDEBAR_CONVERSATION_ID_PARAM) ?? null;
   const { chatTitle, setChatTitle, conversationId, setConversationId, chatKey, startNewChat } = useChatSidebarState({
     initialConversationId,
   });
@@ -24,19 +35,31 @@ const ChatSidebar = () => {
   const isCollapsed = chatSidebarState === CHAT_SIDEBAR_STATE.COLLAPSED;
   const isExpanded = chatSidebarState === CHAT_SIDEBAR_STATE.EXPANDED;
   const isPinnedFilesPanel = filesPanelOpen && filesPanelPinned;
-  const expandedWidth = isPinnedFilesPanel ? `calc(100% - ${FILES_PANEL_WIDTH + 8}px)` : '100%';
-  const targetWidth = isCollapsed ? 0 : isExpanded ? expandedWidth : SIDEBAR_WIDTH;
+  const expandedWidth = isPinnedFilesPanel ? `calc(100% - ${filesPanelWidth + 8}px)` : '100%';
+  const targetWidth = isCollapsed ? 0 : isExpanded ? expandedWidth : sidebarWidth;
   const direction = getSidebarTransitionDirection(prevChatSidebarState, chatSidebarState);
+  const innerWidth =
+    direction === 'sidebar-to-collapsed' || direction === 'collapsed-to-sidebar' ? sidebarWidth : '100%';
 
   const transitions = useMemo(() => {
     if (!isHydrated) return { width: NO_ANIMATION, opacity: NO_ANIMATION };
+    if (isSidebarResizing) return { width: NO_ANIMATION, opacity: NO_ANIMATION };
 
     return getSidebarTransitions(direction);
-  }, [direction, isHydrated]);
+  }, [direction, isHydrated, isSidebarResizing]);
+
+  const handleStartNewChat = useCallback(() => {
+    setActiveAgentInfo(null);
+    startNewChat();
+  }, [startNewChat, setActiveAgentInfo]);
 
   useEffect(() => {
-    registerStartNewChat(startNewChat);
-  }, [registerStartNewChat, startNewChat]);
+    registerStartNewChat(handleStartNewChat);
+  }, [registerStartNewChat, handleStartNewChat]);
+
+  useEffect(() => {
+    registerSelectConversation(setConversationId);
+  }, [registerSelectConversation, setConversationId]);
 
   useEffect(() => {
     const raf = requestAnimationFrame(() => {
@@ -61,18 +84,20 @@ const ChatSidebar = () => {
       }}
       style={{ willChange: 'width, opacity, transform' }}
       className={cn(
-        'bg-BG_WHITE relative flex h-full min-w-0 shrink-0 flex-col overflow-hidden rounded-t-xl',
+        'bg-BG_WHITE relative flex h-full min-w-0 shrink-0 flex-col overflow-hidden rounded-t-xl border border-transparent',
         !isCollapsed && 'border-border border',
       )}
     >
-      <ChatSidebarInner
-        conversationId={conversationId}
-        setConversationId={setConversationId}
-        setChatTitle={setChatTitle}
-        startNewChat={startNewChat}
-        chatTitle={chatTitle}
-        chatKey={chatKey}
-      />
+      <div className='flex h-full flex-col' style={{ width: innerWidth, minWidth: innerWidth }}>
+        <ChatSidebarInner
+          conversationId={conversationId}
+          setConversationId={setConversationId}
+          setChatTitle={setChatTitle}
+          startNewChat={handleStartNewChat}
+          chatTitle={chatTitle}
+          chatKey={chatKey}
+        />
+      </div>
     </motion.div>
   );
 };

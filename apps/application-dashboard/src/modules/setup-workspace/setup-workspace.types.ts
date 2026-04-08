@@ -1,17 +1,6 @@
-export const MEDIA_TYPE = {
-  SEED: 'seed',
-  URL: 'url',
-} as const;
+import { MEDIA_TYPE, PROVISIONING_STATUS } from 'modules/setup-workspace/setup-workspace.constants';
 
 export type MediaType = (typeof MEDIA_TYPE)[keyof typeof MEDIA_TYPE];
-
-export const PROVISIONING_STATUS = {
-  PENDING: 'pending',
-  IN_PROGRESS: 'in_progress',
-  COMPLETED: 'completed',
-  FAILED: 'failed',
-} as const;
-
 export type ProvisioningStatus = (typeof PROVISIONING_STATUS)[keyof typeof PROVISIONING_STATUS];
 
 export interface RegisterOrgRequest {
@@ -26,6 +15,8 @@ export interface RegisterOrgResponse {
     organization_id: string;
     name: string;
     slug: string;
+    product?: string;
+    provisioning_status?: string;
   };
   user_id: string;
 }

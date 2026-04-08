@@ -45,8 +45,6 @@ const ConnectionModal: FC<ConnectionModalProps> = ({
   const [authenticateIntegration, { isLoading: isAuthenticating }] = useAuthenticateIntegrationMutation();
   const { processes } = useProcesses();
 
-  console.log('integration', integration);
-
   const { display_name, logo, guide, auth, id } = integration;
   const noGuide = !guide;
   const [authContent, setAuthContent] = useState<IntegrationAuth[]>([]);

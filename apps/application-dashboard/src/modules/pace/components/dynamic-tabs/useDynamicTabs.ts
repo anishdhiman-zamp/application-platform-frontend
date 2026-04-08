@@ -1,20 +1,14 @@
 'use client';
 
-import React, { useCallback, useEffect, useMemo, useRef } from 'react';
+import React, { useCallback, useMemo } from 'react';
 import { getNextNavigationTarget, NAVIGATION_STRATEGY } from '@zamp-platform/utils';
-import {
-  buildTabRoute,
-  getActiveTabIdFromAllConfigsUrl,
-  getActiveTabIdFromUrl,
-  getTabFallbackPath,
-  isOnAnyTabBasePath,
-  isOnBasePath,
-  isSameBasePath,
-} from 'modules/pace/components/dynamic-tabs/tab-registry';
-import { preserveSidebarParam } from 'modules/pace/pace.utils';
-import { usePathname, useRouter } from 'next/navigation';
-import { usePaceContext } from '@/modules/pace/pace.context';
-import { DynamicTab, DynamicTabType, TAB_TYPE } from '@/modules/pace/pace.types';
+import { ROUTES_PATH } from '@/constants/routeConfig';
+import { useAppDispatch, useAppSelector } from '@/hooks/toolkit';
+import { buildTabRoute } from '@/modules/pace/components/dynamic-tabs/tab-type-registry';
+import { markTabAsClosed, useTabRouter } from '@/modules/pace/hooks/useTabRouter';
+import { DynamicTab, DynamicTabType, NAV_METHOD, TAB_TYPE } from '@/modules/pace/pace.types';
+import { store } from '@/store/index';
+import { dynamicTabsActions, selectActiveTabId, selectDynamicTabs } from '@/store/slices/dynamic-tabs.slice';
 
 interface UseDynamicTabsConfig {
   type?: DynamicTabType;
@@ -31,13 +25,14 @@ interface UseDynamicTabsReturn {
   openTab: (id: string, name: string, metadata?: Record<string, unknown>) => void;
   closeTab: (e: React.MouseEvent, id: string) => void;
   closeTabsForPath: (path: string, isFolder: boolean) => void;
-  updateTab: (oldId: string, newId: string, newName: string) => void;
+  updateTab: (oldId: string, newId: string, newName: string, metadata?: Record<string, unknown>) => void;
   updateTabsForFolderMove: (oldFolderPath: string, newFolderPath: string) => void;
 
   closeOtherTabs: (id: string) => void;
   closeTabsToRight: (id: string) => void;
   closeAllTabs: () => void;
 
+  navigateToTab: (tab: DynamicTab) => void;
   reorderTabs: (newOrder: string[]) => void;
   isTabActive: (tab: DynamicTab) => boolean;
   getTabById: (id: string) => DynamicTab | undefined;
@@ -49,19 +44,11 @@ interface UseDynamicTabsReturn {
 export const useDynamicTabs = (config: UseDynamicTabsConfig = {}): UseDynamicTabsReturn => {
   const { type, onTabClose, onTabUpdate, onFolderMove } = config;
 
-  const router = useRouter();
-  const nextPathname = usePathname();
+  const dispatch = useAppDispatch();
+  const allTabs = useAppSelector(selectDynamicTabs);
+  const activeTabId = useAppSelector(selectActiveTabId);
 
-  const {
-    dynamicTabs: allTabs,
-    isDynamicTabsHydrated: isHydrated,
-    openDynamicTab,
-    closeDynamicTab,
-    updateDynamicTab,
-    reorderDynamicTabs,
-    activeTabId,
-    setActiveTabId,
-  } = usePaceContext();
+  const { navigateTo, navigateToTab: routerNavigateToTab } = useTabRouter({ type });
 
   const tabs = useMemo(() => {
     if (!type) return allTabs;
@@ -69,34 +56,21 @@ export const useDynamicTabs = (config: UseDynamicTabsConfig = {}): UseDynamicTab
     return allTabs.filter((tab) => (tab.type ?? TAB_TYPE.FILE) === type);
   }, [allTabs, type]);
 
-  const tabMaps = useMemo(() => {
+  const tabMap = useMemo(() => {
     const byId = new Map<string, DynamicTab>();
 
     for (const tab of tabs) {
       byId.set(tab.id, tab);
     }
 
-    return { byId };
+    return byId;
   }, [tabs]);
-  const tabMapsRef = useRef(tabMaps);
-
-  tabMapsRef.current = tabMaps;
-
-  const allTabMaps = useMemo(() => {
-    const byId = new Map<string, DynamicTab>();
-
-    for (const tab of allTabs) {
-      byId.set(tab.id, tab);
-    }
-
-    return { byId };
-  }, [allTabs]);
 
   const activeTab = useMemo(() => {
-    if (!isHydrated || !activeTabId) return null;
+    if (!activeTabId) return null;
 
-    return tabMaps.byId.get(activeTabId) ?? null;
-  }, [isHydrated, activeTabId, tabMaps.byId]);
+    return tabMap.get(activeTabId) ?? null;
+  }, [activeTabId, tabMap]);
 
   const isTabActive = useCallback(
     (tab: DynamicTab) => {
@@ -108,14 +82,16 @@ export const useDynamicTabs = (config: UseDynamicTabsConfig = {}): UseDynamicTab
   );
 
   const isOnAnyDynamicTab = useCallback(() => {
-    return activeTabId !== null && allTabMaps.byId.has(activeTabId);
-  }, [allTabMaps, activeTabId]);
+    if (!activeTabId) return false;
+
+    return allTabs.some((tab) => tab.id === activeTabId);
+  }, [allTabs, activeTabId]);
 
   const getTabById = useCallback(
     (id: string) => {
-      return tabMaps.byId.get(id);
+      return tabMap.get(id);
     },
-    [tabMaps],
+    [tabMap],
   );
 
   const getTabIndex = useCallback(
@@ -129,55 +105,11 @@ export const useDynamicTabs = (config: UseDynamicTabsConfig = {}): UseDynamicTab
     return tabs.length > 0;
   }, [tabs]);
 
-  // --- Navigation helpers ---
-
-  /**
-   * Synchronous URL update via History API — no Next.js transition, no flash.
-   * Use for same-layout tab switches where the content is already mounted.
-   */
-  const historyNavigate = useCallback(
-    (tabId: string | null, path: string, method: 'push' | 'replace' = 'push') => {
-      setActiveTabId(tabId);
-
-      if (method === 'replace') {
-        window.history.replaceState(null, '', path);
-      } else {
-        window.history.pushState(null, '', path);
-      }
+  const navigateToTab = useCallback(
+    (tab: DynamicTab) => {
+      routerNavigateToTab(tab.id, tab.type);
     },
-    [setActiveTabId],
-  );
-
-  /**
-   * Full Next.js navigation — triggers route transition.
-   * Use for cross-layout navigations (e.g., /chat → /chat/task/:id).
-   */
-  const routeNavigate = useCallback(
-    (tabId: string | null, path: string, method: 'push' | 'replace' = 'push') => {
-      setActiveTabId(tabId);
-
-      if (method === 'replace') {
-        router.replace(path);
-      } else {
-        router.push(path);
-      }
-    },
-    [setActiveTabId, router],
-  );
-
-  /**
-   * Picks the right navigation strategy: synchronous History API when staying
-   * on the same base path (same layout), full router navigation otherwise.
-   */
-  const navigateAndSetActive = useCallback(
-    (tabId: string | null, path: string, method: 'push' | 'replace' = 'push') => {
-      if (isSameBasePath(path)) {
-        historyNavigate(tabId, path, method);
-      } else {
-        routeNavigate(tabId, path, method);
-      }
-    },
-    [historyNavigate, routeNavigate],
+    [routerNavigateToTab],
   );
 
   const openTab = useCallback(
@@ -185,19 +117,19 @@ export const useDynamicTabs = (config: UseDynamicTabsConfig = {}): UseDynamicTab
       const tabType = type ?? TAB_TYPE.FILE;
       const tabPath = buildTabRoute(id, tabType);
 
-      openDynamicTab({
-        id,
-        name,
-        path: tabPath,
-        type: tabType,
-        metadata,
-      });
+      dispatch(
+        dynamicTabsActions.openTab({
+          id,
+          name,
+          path: tabPath,
+          type: tabType,
+          metadata,
+        }),
+      );
 
-      // Opening a new tab may cross layout boundaries (e.g., /chat/settings → /chat),
-      // so always use the smart navigator that picks history vs router.
-      navigateAndSetActive(id, tabPath);
+      navigateTo(tabPath);
     },
-    [openDynamicTab, navigateAndSetActive, type],
+    [dispatch, navigateTo, type],
   );
 
   const closeTab = useCallback(
@@ -205,273 +137,241 @@ export const useDynamicTabs = (config: UseDynamicTabsConfig = {}): UseDynamicTab
       e.preventDefault();
       e.stopPropagation();
 
-      const closingTab = tabs.find((tab) => tab.id === id);
+      const currentTabs = store.getState().dynamicTabs.tabs;
+      const closingTab = currentTabs.find((tab) => tab.id === id);
 
       if (!closingTab) return;
 
-      const isClosingActiveTab = closingTab.id === activeTabId;
+      const currentActiveId = store.getState().dynamicTabs.activeTabId;
+      const isClosingActiveTab = closingTab.id === currentActiveId;
 
       onTabClose?.(closingTab.id);
-      closeDynamicTab(closingTab.id);
+      markTabAsClosed(id);
+
+      dispatch(dynamicTabsActions.closeTab(id));
 
       if (isClosingActiveTab) {
         const { target, hasRemainingItems } = getNextNavigationTarget({
-          items: tabs,
+          items: currentTabs,
           closingItem: closingTab,
           isEqual: (a, b) => a.id === b.id,
           strategy: NAVIGATION_STRATEGY.BROWSER_LIKE,
         });
 
-        const fallbackPath = getTabFallbackPath(closingTab.type);
-        const targetPath = hasRemainingItems && target ? preserveSidebarParam(target.path) : fallbackPath;
-
-        navigateAndSetActive(target?.id ?? null, targetPath);
+        if (hasRemainingItems && target) {
+          dispatch(dynamicTabsActions.setActiveTab(target.id));
+          navigateTo(target.path ?? buildTabRoute(target.id, target.type));
+        } else {
+          dispatch(dynamicTabsActions.setActiveTab(null));
+          navigateTo(ROUTES_PATH.CHAT, NAV_METHOD.PUSH);
+        }
       }
     },
-    [tabs, activeTabId, closeDynamicTab, onTabClose, navigateAndSetActive],
+    [dispatch, onTabClose, navigateTo],
   );
 
   const closeTabsForPath = useCallback(
     (path: string, isFolder: boolean) => {
       const folderPathPrefix = `${path}/`;
+      const currentTabs = store.getState().dynamicTabs.tabs;
+      const currentActiveId = store.getState().dynamicTabs.activeTabId;
 
       const tabsToClose = isFolder
-        ? tabs.filter((tab) => tab.id === path || tab.id.startsWith(folderPathPrefix))
-        : tabs.filter((tab) => tab.id === path);
+        ? currentTabs.filter((tab) => tab.id === path || tab.id.startsWith(folderPathPrefix))
+        : currentTabs.filter((tab) => tab.id === path);
 
       if (tabsToClose.length === 0) return;
 
-      const activeTabToClose = tabsToClose.find((tab) => tab.id === activeTabId);
+      const activeTabToClose = tabsToClose.find((tab) => tab.id === currentActiveId);
 
       tabsToClose.forEach((tab) => {
         onTabClose?.(tab.id);
-        closeDynamicTab(tab.id);
+        markTabAsClosed(tab.id);
+        dispatch(dynamicTabsActions.closeTab(tab.id));
       });
 
       if (activeTabToClose) {
         const { target, hasRemainingItems } = getNextNavigationTarget({
-          items: tabs,
+          items: currentTabs,
           closingItem: activeTabToClose,
           isEqual: (a, b) => a.id === b.id,
           strategy: NAVIGATION_STRATEGY.BROWSER_LIKE,
         });
 
-        const fallbackPath = getTabFallbackPath(activeTabToClose.type);
-        const targetPath = hasRemainingItems && target ? preserveSidebarParam(target.path) : fallbackPath;
+        if (hasRemainingItems && target) {
+          const isTargetClosed = tabsToClose.some((t) => t.id === target.id);
 
-        navigateAndSetActive(target?.id ?? null, targetPath);
+          if (!isTargetClosed) {
+            dispatch(dynamicTabsActions.setActiveTab(target.id));
+            navigateTo(target.path ?? buildTabRoute(target.id, target.type));
+          } else {
+            dispatch(dynamicTabsActions.setActiveTab(null));
+            navigateTo(ROUTES_PATH.CHAT, NAV_METHOD.PUSH);
+          }
+        } else {
+          dispatch(dynamicTabsActions.setActiveTab(null));
+          navigateTo(ROUTES_PATH.CHAT);
+        }
       }
     },
-    [tabs, activeTabId, closeDynamicTab, onTabClose, navigateAndSetActive],
+    [dispatch, onTabClose, navigateTo],
   );
 
   const updateTab = useCallback(
-    (oldId: string, newId: string, newName: string) => {
-      const tabToUpdate = tabs.find((tab) => tab.id === oldId);
+    (oldId: string, newId: string, newName: string, metadata?: Record<string, unknown>) => {
+      const currentTabs = store.getState().dynamicTabs.tabs;
+      const tabToUpdate = currentTabs.find((tab) => tab.id === oldId);
 
       if (!tabToUpdate) return;
 
       const newTabPath = buildTabRoute(newId, tabToUpdate.type);
-      const isCurrentlyActive = activeTabId === oldId;
+      const currentActiveId = store.getState().dynamicTabs.activeTabId;
+      const isCurrentlyActive = currentActiveId === oldId;
 
       onTabUpdate?.(oldId, newId);
 
-      updateDynamicTab(oldId, {
-        id: newId,
-        name: newName,
-        path: newTabPath,
-        type: tabToUpdate.type,
-        metadata: tabToUpdate.metadata,
-      });
+      dispatch(
+        dynamicTabsActions.updateTab({
+          oldId,
+          newTab: {
+            id: newId,
+            name: newName,
+            path: newTabPath,
+            type: tabToUpdate.type,
+            metadata: metadata ? { ...tabToUpdate.metadata, ...metadata } : tabToUpdate.metadata,
+          },
+        }),
+      );
 
       if (isCurrentlyActive) {
-        navigateAndSetActive(newId, newTabPath, 'replace');
+        navigateTo(newTabPath, NAV_METHOD.REPLACE);
       }
     },
-    [tabs, activeTabId, updateDynamicTab, onTabUpdate, navigateAndSetActive],
+    [dispatch, onTabUpdate, navigateTo],
   );
 
   const updateTabsForFolderMove = useCallback(
     (oldFolderPath: string, newFolderPath: string) => {
       const oldPrefix = oldFolderPath + '/';
+      const currentTabs = store.getState().dynamicTabs.tabs;
+      const currentActiveId = store.getState().dynamicTabs.activeTabId;
       let activeTabNewPath: string | null = null;
-      let activeTabNewId: string | null = null;
 
       onFolderMove?.(oldFolderPath, newFolderPath);
 
-      tabs.forEach((tab) => {
+      currentTabs.forEach((tab) => {
         if (tab.id === oldFolderPath || tab.id.startsWith(oldPrefix)) {
           const newTabId =
             tab.id === oldFolderPath ? newFolderPath : newFolderPath + tab.id.slice(oldFolderPath.length);
           const newName = newTabId.split('/').pop() || tab.name;
           const newTabPath = buildTabRoute(newTabId, tab.type);
 
-          if (tab.id === activeTabId) {
+          if (tab.id === currentActiveId) {
             activeTabNewPath = newTabPath;
-            activeTabNewId = newTabId;
           }
 
-          updateDynamicTab(tab.id, {
-            id: newTabId,
-            name: newName,
-            path: newTabPath,
-            type: tab.type,
-            metadata: tab.metadata,
-          });
+          dispatch(
+            dynamicTabsActions.updateTab({
+              oldId: tab.id,
+              newTab: {
+                id: newTabId,
+                name: newName,
+                path: newTabPath,
+                type: tab.type,
+                metadata: tab.metadata,
+              },
+            }),
+          );
         }
       });
 
-      if (activeTabNewPath && activeTabNewId) {
-        navigateAndSetActive(activeTabNewId, activeTabNewPath, 'replace');
+      if (activeTabNewPath) {
+        navigateTo(activeTabNewPath, NAV_METHOD.REPLACE);
       }
     },
-    [tabs, activeTabId, updateDynamicTab, onFolderMove, navigateAndSetActive],
+    [dispatch, onFolderMove, navigateTo],
   );
-
-  // --- Navbar-level operations (work on ALL tabs) ---
 
   const closeOtherTabs = useCallback(
     (id: string) => {
-      const tabToKeep = allTabs.find((tab) => tab.id === id);
+      const currentTabs = store.getState().dynamicTabs.tabs;
+      const tabToKeep = currentTabs.find((tab) => tab.id === id);
 
       if (!tabToKeep) return;
 
-      const tabsToClose = allTabs.filter((tab) => tab.id !== id);
+      const currentActiveId = store.getState().dynamicTabs.activeTabId;
+      const shouldNavigate = currentActiveId !== id;
+
+      const tabsToClose = currentTabs.filter((tab) => tab.id !== id);
 
       tabsToClose.forEach((tab) => {
-        closeDynamicTab(tab.id);
+        markTabAsClosed(tab.id);
+        dispatch(dynamicTabsActions.closeTab(tab.id));
       });
 
-      if (activeTabId !== id) {
-        navigateAndSetActive(id, preserveSidebarParam(tabToKeep.path));
+      dispatch(dynamicTabsActions.setActiveTab(id));
+
+      if (shouldNavigate) {
+        navigateTo(tabToKeep.path ?? buildTabRoute(tabToKeep.id, tabToKeep.type));
       }
     },
-    [allTabs, activeTabId, closeDynamicTab, navigateAndSetActive],
+    [dispatch, navigateTo],
   );
 
   const closeTabsToRight = useCallback(
     (id: string) => {
-      const tabIndex = allTabs.findIndex((tab) => tab.id === id);
+      const currentTabs = store.getState().dynamicTabs.tabs;
+      const tabIndex = currentTabs.findIndex((tab) => tab.id === id);
 
       if (tabIndex === -1) return;
 
-      const tabsToClose = allTabs.slice(tabIndex + 1);
+      const tabsToClose = currentTabs.slice(tabIndex + 1);
+      const currentActiveId = store.getState().dynamicTabs.activeTabId;
 
-      tabsToClose.forEach((tab) => {
-        closeDynamicTab(tab.id);
-      });
+      let targetPath: string | null = null;
 
-      const currentActiveTab = allTabs.find((tab) => tab.id === activeTabId);
-
-      if (currentActiveTab) {
-        const activeTabIndex = allTabs.findIndex((tab) => tab.id === activeTabId);
+      if (currentActiveId) {
+        const activeTabIndex = currentTabs.findIndex((tab) => tab.id === currentActiveId);
 
         if (activeTabIndex > tabIndex) {
-          const newActiveTab = allTabs[tabIndex];
+          const anchorTab = currentTabs[tabIndex];
 
-          navigateAndSetActive(newActiveTab.id, preserveSidebarParam(newActiveTab.path));
+          targetPath = anchorTab.path ?? buildTabRoute(anchorTab.id, anchorTab.type);
+          dispatch(dynamicTabsActions.setActiveTab(anchorTab.id));
         }
       }
+
+      tabsToClose.forEach((tab) => {
+        markTabAsClosed(tab.id);
+        dispatch(dynamicTabsActions.closeTab(tab.id));
+      });
+
+      if (targetPath) {
+        navigateTo(targetPath);
+      }
     },
-    [allTabs, activeTabId, closeDynamicTab, navigateAndSetActive],
+    [dispatch, navigateTo],
   );
 
   const closeAllTabs = useCallback(() => {
-    const fallbackSourceTab = allTabs.find((tab) => tab.id === activeTabId) ?? allTabs[0];
+    const currentTabs = store.getState().dynamicTabs.tabs;
 
-    allTabs.forEach((tab) => {
-      closeDynamicTab(tab.id);
-    });
-
-    const fallbackPath = fallbackSourceTab ? getTabFallbackPath(fallbackSourceTab.type) : preserveSidebarParam('/chat');
-
-    navigateAndSetActive(null, fallbackPath);
-  }, [allTabs, activeTabId, closeDynamicTab, navigateAndSetActive]);
+    currentTabs.forEach((tab) => markTabAsClosed(tab.id));
+    dispatch(dynamicTabsActions.clearAllTabs());
+    navigateTo(ROUTES_PATH.CHAT, NAV_METHOD.PUSH);
+  }, [dispatch, navigateTo]);
 
   const reorderTabs = useCallback(
     (newOrder: string[]) => {
-      reorderDynamicTabs(newOrder);
+      dispatch(dynamicTabsActions.reorderTabs(newOrder));
     },
-    [reorderDynamicTabs],
+    [dispatch],
   );
-
-  // --- URL sync via popstate ---
-  // Since same-layout tab switches use window.history directly (bypassing Next.js
-  // router), useSearchParams/usePathname won't fire. We listen for popstate to
-  // handle browser back/forward and sync activeTabId from the URL.
-
-  useEffect(() => {
-    if (!isHydrated) return;
-
-    const syncFromUrl = () => {
-      const { pathname: currentPathname, search: currentSearch } = window.location;
-
-      const currentUrlTabId = type
-        ? getActiveTabIdFromUrl(currentPathname, currentSearch, type)
-        : getActiveTabIdFromAllConfigsUrl(currentPathname, currentSearch);
-
-      if (type) {
-        const onOwnBasePath = isOnBasePath(currentPathname, type);
-
-        if (onOwnBasePath) {
-          setActiveTabId(currentUrlTabId);
-        }
-      } else {
-        setActiveTabId(currentUrlTabId);
-      }
-
-      if (type && currentUrlTabId) {
-        const urlParams = new URLSearchParams(currentSearch);
-        const titleFromUrl = urlParams.get('title');
-        const existingTab = tabMapsRef.current.byId.get(currentUrlTabId);
-
-        if (!existingTab) {
-          const fileName = titleFromUrl || currentUrlTabId.split('/').pop() || currentUrlTabId;
-          const tabPath = buildTabRoute(currentUrlTabId, type);
-
-          openDynamicTab({
-            id: currentUrlTabId,
-            name: fileName,
-            path: tabPath,
-            type,
-          });
-        } else if (titleFromUrl && existingTab.name !== titleFromUrl) {
-          updateDynamicTab(currentUrlTabId, {
-            ...existingTab,
-            name: titleFromUrl,
-          });
-        }
-      }
-    };
-
-    // Initial sync on mount
-    syncFromUrl();
-
-    window.addEventListener('popstate', syncFromUrl);
-
-    return () => {
-      window.removeEventListener('popstate', syncFromUrl);
-    };
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [isHydrated, type]);
-
-  useEffect(() => {
-    if (!isHydrated || !nextPathname) return;
-
-    if (!isOnAnyTabBasePath(nextPathname) && activeTabId !== null) {
-      setActiveTabId(null);
-    }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [isHydrated, nextPathname]);
-
-  useEffect(() => {
-    tabMapsRef.current = tabMaps;
-  }, [tabMaps]);
 
   return {
     tabs,
     activeTab,
-    isHydrated,
+    isHydrated: true,
 
     openTab,
     closeTab,
@@ -483,6 +383,7 @@ export const useDynamicTabs = (config: UseDynamicTabsConfig = {}): UseDynamicTab
     closeTabsToRight,
     closeAllTabs,
 
+    navigateToTab,
     reorderTabs,
     isTabActive,
     getTabById,

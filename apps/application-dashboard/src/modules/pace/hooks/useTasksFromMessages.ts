@@ -55,6 +55,7 @@ export function useTasksFromMessages(messages: ChatMessage[], streamingState?: S
       [TASK_STATUS.IN_PROGRESS]: 0,
       [TASK_STATUS.FAILED]: 0,
       [TASK_STATUS.NEEDS_INPUT]: 0,
+      [TASK_STATUS.CANCELED]: 0,
     };
 
     for (const task of tasks) {

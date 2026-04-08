@@ -174,7 +174,7 @@ get_browser_url() {
     local owner="${CODER_WORKSPACE_OWNER_NAME:-}"
     
     if [ -n "$agent" ] && [ -n "$workspace" ] && [ -n "$owner" ]; then
-        echo "https://${port}--${agent}--${workspace}--${owner}.coder-live.zamp.dev"
+        echo "https://${port}--${agent}--${workspace}--${owner}.${CODER_DOMAIN:-coder.dev-mum.internal.zamp.dev}"
         return
     fi
     

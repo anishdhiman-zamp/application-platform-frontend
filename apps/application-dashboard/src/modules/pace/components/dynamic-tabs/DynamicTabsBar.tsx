@@ -1,6 +1,6 @@
 'use client';
 
-import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
+import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import {
   closestCenter,
   DndContext,
@@ -13,9 +13,7 @@ import {
 } from '@dnd-kit/core';
 import { arrayMove, horizontalListSortingStrategy, SortableContext } from '@dnd-kit/sortable';
 import { AnimatePresence } from 'framer-motion';
-import type { DynamicTab } from 'modules/pace/pace.types';
-import { CHAT_SIDEBAR_STATE } from 'modules/pace/pace.types';
-import { useRouter } from 'next/navigation';
+import { CHAT_SIDEBAR_STATE, type DynamicTab } from 'modules/pace/pace.types';
 import {
   MIN_TAB_WIDTH_PX,
   OVERFLOW_BUTTON_WIDTH_PX,
@@ -23,19 +21,25 @@ import {
 import DynamicTabItem from '@/modules/pace/components/dynamic-tabs/DynamicTabItem';
 import OverflowTabsPopover from '@/modules/pace/components/dynamic-tabs/OverflowTabsPopover';
 import SortableDynamicTabItem from '@/modules/pace/components/dynamic-tabs/SortableDynamicTabItem';
-import { isSameBasePath } from '@/modules/pace/components/dynamic-tabs/tab-registry';
 import { useDynamicTabs } from '@/modules/pace/components/dynamic-tabs/useDynamicTabs';
 import { useVisibleTabCount } from '@/modules/pace/components/dynamic-tabs/useVisibleTabCount';
 import { usePaceContext } from '@/modules/pace/pace.context';
-import { preserveSidebarParam } from '@/modules/pace/pace.utils';
 
 const DynamicTabsBar = () => {
-  const router = useRouter();
-  const { chatSidebarState, setChatSidebarState, setActiveTabId } = usePaceContext();
-  const { tabs, isTabActive, closeTab, closeOtherTabs, closeTabsToRight, closeAllTabs, reorderTabs } = useDynamicTabs();
-
-  const tabsContainerRef = useRef<HTMLDivElement>(null);
   const hasMountedRef = useRef(false);
+  const tabsContainerRef = useRef<HTMLDivElement>(null);
+
+  const { chatSidebarState, setChatSidebarState, scheduleCollapseOnRouteChange } = usePaceContext();
+  const {
+    tabs,
+    isTabActive,
+    navigateToTab: rawNavigateToTab,
+    closeTab: rawCloseTab,
+    closeOtherTabs,
+    closeTabsToRight,
+    closeAllTabs: rawCloseAllTabs,
+    reorderTabs,
+  } = useDynamicTabs();
 
   const maxVisibleTabs = useVisibleTabCount(tabsContainerRef, tabs.length, MIN_TAB_WIDTH_PX, OVERFLOW_BUTTON_WIDTH_PX);
   const sensors = useSensors(useSensor(PointerSensor, { activationConstraint: { distance: 5 } }));
@@ -43,12 +47,40 @@ const DynamicTabsBar = () => {
   const [activeId, setActiveId] = useState<string | null>(null);
 
   const isExpanded = chatSidebarState === CHAT_SIDEBAR_STATE.EXPANDED;
+  const isCollapsed = chatSidebarState === CHAT_SIDEBAR_STATE.COLLAPSED;
 
   const hasOverflow = tabs.length > maxVisibleTabs;
   const visibleTabs = hasOverflow ? tabs.slice(0, maxVisibleTabs) : tabs;
   const overflowTabs = hasOverflow ? tabs.slice(maxVisibleTabs) : [];
   const tabStableKeys = useMemo(() => visibleTabs.map((tab) => tab.stableKey), [visibleTabs]);
   const draggedTab = useMemo(() => visibleTabs.find((tab) => tab.stableKey === activeId), [visibleTabs, activeId]);
+
+  const navigateToTab = useCallback(
+    (tab: DynamicTab) => {
+      if (isExpanded) {
+        setChatSidebarState(CHAT_SIDEBAR_STATE.SIDEBAR);
+      }
+      rawNavigateToTab(tab);
+    },
+    [rawNavigateToTab, isExpanded, setChatSidebarState],
+  );
+
+  const closeAllTabs = useCallback(() => {
+    if (!isCollapsed) {
+      scheduleCollapseOnRouteChange();
+    }
+    rawCloseAllTabs();
+  }, [rawCloseAllTabs, isCollapsed, scheduleCollapseOnRouteChange]);
+
+  const closeTab = useCallback(
+    (e: React.MouseEvent, id: string) => {
+      if (tabs.length === 1 && isTabActive(tabs[0]) && !isCollapsed) {
+        scheduleCollapseOnRouteChange();
+      }
+      rawCloseTab(e, id);
+    },
+    [rawCloseTab, tabs, isCollapsed, isTabActive, scheduleCollapseOnRouteChange],
+  );
 
   const handleDragStart = (event: DragStartEvent) => {
     setActiveId(event.active.id as string);
@@ -91,22 +123,9 @@ const DynamicTabsBar = () => {
         reorderTabs(newOrder);
       }
 
-      const tabPath = preserveSidebarParam(selectedTab.path);
-      const willChangeBase = !isSameBasePath(tabPath);
-
-      if (isExpanded && !willChangeBase) {
-        setChatSidebarState(CHAT_SIDEBAR_STATE.COLLAPSED);
-      }
-
-      setActiveTabId(selectedTab.id);
-
-      if (willChangeBase) {
-        router.push(tabPath);
-      } else {
-        window.history.pushState(null, '', tabPath);
-      }
+      navigateToTab(selectedTab);
     },
-    [tabs, visibleTabs, reorderTabs, setActiveTabId, router, isExpanded, setChatSidebarState],
+    [tabs, visibleTabs, reorderTabs, navigateToTab],
   );
 
   useEffect(() => {
@@ -117,7 +136,7 @@ const DynamicTabsBar = () => {
 
   return (
     <>
-      <div className='bg-GRAY_400 mr-2 ml-1 h-4 w-px shrink-0' />
+      <div className='bg-GRAY_400 mx-4 h-4 w-px shrink-0' />
       <DndContext
         sensors={sensors}
         collisionDetection={closestCenter}
@@ -136,6 +155,7 @@ const DynamicTabsBar = () => {
                   tabIndex={index}
                   totalTabs={visibleTabs.length}
                   skipAnimation={!hasMountedRef.current}
+                  onNavigate={navigateToTab}
                   onClose={closeTab}
                   onCloseOthers={closeOtherTabs}
                   onCloseToRight={closeTabsToRight}
@@ -161,6 +181,7 @@ const DynamicTabsBar = () => {
                 isDragging
                 tabIndex={visibleTabs.findIndex((t) => t.id === draggedTab.id)}
                 totalTabs={visibleTabs.length}
+                onNavigate={navigateToTab}
                 onClose={closeTab}
                 onCloseOthers={closeOtherTabs}
                 onCloseToRight={closeTabsToRight}

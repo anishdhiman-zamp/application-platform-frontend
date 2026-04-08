@@ -38,6 +38,13 @@ const FilesystemApi = baseApi.injectEndpoints({
       providesTags: [APITags.GET_FILESYSTEM_STATUS],
     }),
 
+    provisionFilesystem: builder.mutation<void, void>({
+      query: () => ({
+        url: API_ENDPOINTS.FILESYSTEM_PROVISION_POST,
+        method: REQUEST_TYPES.POST,
+      }),
+    }),
+
     // List Files (Recursive)
     listFiles: builder.query<ListFilesResponse, ListFilesRequest>({
       query: ({ depth = 2, path, query }) => ({
@@ -174,6 +181,7 @@ const FilesystemApi = baseApi.injectEndpoints({
 
 export const {
   useGetFilesystemStatusQuery,
+  useProvisionFilesystemMutation,
   useLazyGetFilesystemStatusQuery,
   useListFilesQuery,
   useLazyListFilesQuery,

@@ -1,4 +1,5 @@
 import { ChangeEvent, FC, KeyboardEvent, useCallback, useEffect, useRef, useState } from 'react';
+import { cn } from '@zamp-platform/ui/utils';
 import Input from '@/components/common/input';
 import { FILTER_TYPES } from '@/components/filter/filter.types';
 import DescriptionOperatorsDropdown from '@/components/filter/filterMenu/components/DescriptionOperatorsDropdown';
@@ -7,7 +8,7 @@ import { CONDITION_OPERATOR_TYPE, OPERATOR } from '@/components/filter/filters.c
 import { KEYBOARD_KEYS } from '@/constants/shortcuts';
 import { SIZE_TYPES } from '@/types/common/components';
 import { MapAny } from '@/types/commonTypes';
-import { camelCaseToNormalText, cn, debounce } from '@/utils/common';
+import { camelCaseToNormalText, debounce } from '@/utils/common';
 
 export interface MultiSearchFilterProps {
   filterKey: string;
@@ -135,7 +136,7 @@ const MultiSearchFilter: FC<MultiSearchFilterProps> = ({
     const currentValue = (event?.target as HTMLInputElement)?.value.trim();
 
     if (
-      ![KEYBOARD_KEYS.COMMA, KEYBOARD_KEYS.ENTER].includes(event?.code as KEYBOARD_KEYS) ||
+      (event.code !== KEYBOARD_KEYS.COMMA && event.code !== KEYBOARD_KEYS.ENTER) ||
       !isContainsOperator ||
       (!currentValue && searchTags?.length)
     ) {
@@ -230,7 +231,7 @@ const MultiSearchFilter: FC<MultiSearchFilterProps> = ({
   return (
     <div
       className={cn(
-        'border-0.5 border-GRAY_400 shadow-table-filter-menu w-[218px] max-w-[360px] min-w-[300px] rounded-md bg-white px-2.5 py-2',
+        'border-0.5 border-GRAY_400 shadow-table-filter-menu bg-BG_WHITE w-[218px] max-w-[360px] min-w-[300px] rounded-md px-2.5 py-2',
         className,
       )}
     >
@@ -259,7 +260,7 @@ const MultiSearchFilter: FC<MultiSearchFilterProps> = ({
           onKeyPress={handleDescriptionInputKeyPress}
           onKeyDown={handleDescriptionInputKeyDown}
           onDeleteTag={onDeleteDescriptionInputTag}
-          overrideInputBgClassName='bg-white!'
+          overrideInputBgClassName='bg-BG_WHITE!'
           value={(descriptionValue ? descriptionValue : descriptionPropertySearch) as string}
           onChange={onDescriptionInputChange}
           inputClassName='w-full min-w-[160px]! flex-1 outline-hidden border-none focus:shadow-none! shadow-none!'

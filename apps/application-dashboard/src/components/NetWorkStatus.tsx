@@ -28,7 +28,7 @@ function NetworkStatus() {
   return (
     isOffline && (
       <div className='fixed top-2 left-1/2 z-1110 -translate-x-1/2 transform'>
-        <div className='shadow-GRAY_50 border-GRAY_400 f-14-400 animate-slide-in mt-5 flex w-[400px] items-center justify-between rounded-lg border bg-white p-5 shadow-xl'>
+        <div className='shadow-GRAY_50 border-GRAY_400 f-14-400 animate-slide-in bg-BG_WHITE dark:bg-popover mt-5 flex w-[400px] items-center justify-between rounded-lg border p-5 shadow-xl'>
           <div className='flex items-center gap-2'>
             <SvgSpriteLoader
               id='wifi-off'
@@ -37,7 +37,7 @@ function NetworkStatus() {
               height={16}
               color={CSS_VARS.RED_800}
             />
-            <span className='f-14-400 text-gray-950'> It seems that you are offline!</span>
+            <span className='f-14-400 text-GRAY_1000'> It seems that you are offline!</span>
           </div>
         </div>
       </div>

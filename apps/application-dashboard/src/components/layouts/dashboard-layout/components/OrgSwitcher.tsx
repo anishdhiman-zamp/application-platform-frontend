@@ -1,6 +1,6 @@
 'use client';
 
-import { FC, useEffect, useRef, useState } from 'react';
+import { FC, useCallback, useEffect, useRef, useState } from 'react';
 import { DEFAULT_REGION } from '@zamp-platform/api';
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger, Input } from '@zamp-platform/ui';
 import { cn } from '@zamp-platform/ui/utils';
@@ -10,23 +10,37 @@ import {
   removeFromLocalStorage,
   setToLocalStorage,
 } from '@zamp-platform/utils';
+import { Plus } from 'lucide-react';
+import { PROVISIONING_STATUS } from 'modules/setup-workspace/setup-workspace.constants';
+import { usePathname } from 'next/navigation';
 import { useGetBaseUrlQuery } from '@/apis/auth';
 import { useGetOrganizationsQuery } from '@/apis/people';
 import { useSSEContext } from '@/app/_providers/sse-provider';
 import DropdownToggle from '@/components/common/dropdown/DropdownToggle';
 import CommonWrapper from '@/components/commonWrapper';
 import { SkeletonTypes } from '@/components/commonWrapper/commonWrapper.types';
+import CreateOrgModal from '@/components/layouts/dashboard-layout/components/CreateOrgModal';
 import LogoutButton from '@/components/layouts/dashboard-layout/components/LogoutButton';
 import OrgCard from '@/components/layouts/dashboard-layout/components/OrgCard';
 import SkeletonLoaderSidebarPages from '@/components/layouts/dashboard-layout/components/SkeletonLoaderSidebarPages';
 import SkeletonElement from '@/components/skeletons/SkeletonElement';
-import { ORG_COLORS } from '@/constants/common.constants';
+import { ENVIRONMENT, ENVIRONMENT_TYPES, ORG_COLORS } from '@/constants/common.constants';
+import { FEATURE_FLAGS } from '@/constants/featureFlags';
+import { ROUTES_PATH } from '@/constants/routeConfig';
 import { KEYBOARD_KEYS } from '@/constants/shortcuts';
 import { useAppDispatch, useAppSelector } from '@/hooks/toolkit';
+import { useFeatureFlag } from '@/hooks/useFeatureFlag';
+import { dynamicTabsActions } from '@/store/slices/dynamic-tabs.slice';
 import { setIsOrgSwitchIsInProgress } from '@/store/slices/user';
 import type { Organization } from '@/types/api/auth.types';
-import { ACTIVE_ORG_ID_COOKIE, clearCookie, setCookie, USER_SESSION_COOKIE } from '@/utils/cookie';
-import { getLandingRoute } from '@/utils/route.util';
+import {
+  ACTIVE_ORG_ID_COOKIE,
+  clearCookie,
+  LAST_VISITED_PRODUCT_MODE_COOKIE,
+  setCookie,
+  USER_SESSION_COOKIE,
+} from '@/utils/cookie';
+import { getLandingRoute, getLastVisitedLandingRoute, getProductModeFromPath } from '@/utils/route.util';
 import { syncOrganizationIdToSW } from '@/utils/serviceWorker';
 
 type OrgSwitcherProps = {
@@ -47,11 +61,17 @@ const OrgSwitcher: FC<OrgSwitcherProps> = ({
   const { isOrgSwitchIsInProgress, user } = useAppSelector((state) => state.user);
   const dispatch = useAppDispatch();
   const { disconnect: disconnectSSE } = useSSEContext();
+  const pathname = usePathname();
 
   const [isOrgSwitcherMenuOpen, setIsOrgSwitcherMenuOpen] = useState(false);
+  const [itemsInteractive, setItemsInteractive] = useState(true);
   const [selectedOrg, setSelectedOrg] = useState<Organization>();
   const [searchQuery, setSearchQuery] = useState('');
   const [highlightedIndex, setHighlightedIndex] = useState(-1);
+  const [showCreateOrgModal, setShowCreateOrgModal] = useState(false);
+  const [orgToProvision, setOrgToProvision] = useState<Organization | null>(null);
+
+  const { isEnabled: isNewOrgCreationEnabled } = useFeatureFlag(FEATURE_FLAGS.NEW_ORG_CREATION);
 
   const { data: baseUrlData } = useGetBaseUrlQuery(
     { email: user?.user_email ?? '' },
@@ -63,28 +83,64 @@ const OrgSwitcher: FC<OrgSwitcherProps> = ({
     data: organizations,
     isLoading: loading,
     isError: error,
+    refetch: refetchOrganizations,
   } = useGetOrganizationsQuery(undefined, {
     refetchOnMountOrArgChange: false,
   });
 
   const defaultOrgName = user?.orgs?.[0]?.name ?? '';
 
+  const performOrgSwitch = useCallback(
+    (org: Organization, overrideRoute?: string) => {
+      // Disconnect SSE gracefully before org switch to prevent readyState 2 errors
+      disconnectSSE();
+      dispatch(setIsOrgSwitchIsInProgress(true));
+
+      dispatch(dynamicTabsActions.clearAllTabs());
+      removeFromLocalStorage(LOCAL_STORAGE_KEYS.PACE_FILE_TREE_EXPANDED_PATHS);
+      removeFromLocalStorage(LOCAL_STORAGE_KEYS.PACE_SIDEBAR_STATE);
+      setToLocalStorage(LOCAL_STORAGE_KEYS.XZAMP_ORGANIZATION_ID, org.organization_id);
+      setCookie(ACTIVE_ORG_ID_COOKIE, org.organization_id);
+      clearCookie(USER_SESSION_COOKIE);
+      syncOrganizationIdToSW();
+      window.location.href = overrideRoute ?? getLandingRoute(org.product);
+    },
+    [disconnectSSE, dispatch],
+  );
+
   const handleOrgChange = (org: Organization) => {
     if (org.organization_id === selectedOrg?.organization_id) return;
 
-    // Disconnect SSE gracefully before org switch to prevent readyState 2 errors
-    // This avoids spurious errors when the page reloads during org switch
-    disconnectSSE();
-    dispatch(setIsOrgSwitchIsInProgress(true));
+    if (org.provisioning_status && org.provisioning_status !== PROVISIONING_STATUS.COMPLETED) {
+      setOrgToProvision(org);
+      setShowCreateOrgModal(true);
+      setIsOrgSwitcherMenuOpen(false);
 
-    removeFromLocalStorage(LOCAL_STORAGE_KEYS.PACE_OPEN_DYNAMIC_TABS);
-    removeFromLocalStorage(LOCAL_STORAGE_KEYS.PACE_FILE_TREE_EXPANDED_PATHS);
-    setToLocalStorage(LOCAL_STORAGE_KEYS.XZAMP_ORGANIZATION_ID, org.organization_id);
-    setCookie(ACTIVE_ORG_ID_COOKIE, org.organization_id);
-    clearCookie(USER_SESSION_COOKIE);
-    syncOrganizationIdToSW();
-    window.location.href = getLandingRoute(org.product);
+      return;
+    }
+
+    const currentMode = getProductModeFromPath(pathname || ROUTES_PATH.HOME);
+    const domain = ENVIRONMENT === ENVIRONMENT_TYPES.PRODUCTION ? '.zamp.ai' : '.zamp.dev';
+
+    setCookie(LAST_VISITED_PRODUCT_MODE_COOKIE, currentMode, undefined, domain);
+
+    performOrgSwitch(org, getLastVisitedLandingRoute());
   };
+
+  const handleCreateOrgModalClose = () => {
+    setShowCreateOrgModal(false);
+    setOrgToProvision(null);
+    refetchOrganizations();
+  };
+
+  const handleNewOrgReady = useCallback(
+    (org: Organization) => {
+      setShowCreateOrgModal(false);
+      setOrgToProvision(null);
+      performOrgSwitch(org);
+    },
+    [performOrgSwitch],
+  );
 
   const handleRegionChange = (region: { region: string; url: string }) => {
     window.open(`https://app-${region.region}.zamp.ai`, '_blank');
@@ -101,13 +157,16 @@ const OrgSwitcher: FC<OrgSwitcherProps> = ({
 
   const showSearchBox = (organizations?.length ?? 0) > 5;
 
-  const handleOpenChange = (open: boolean) => {
+  const handleOpenChange = useCallback((open: boolean) => {
     setIsOrgSwitcherMenuOpen(open);
-    if (!open) {
+    if (open) {
+      setItemsInteractive(false);
+    } else {
       setSearchQuery('');
       setHighlightedIndex(-1);
+      setItemsInteractive(true);
     }
-  };
+  }, []);
 
   const handleSearchChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     setSearchQuery(e.target.value);
@@ -164,7 +223,7 @@ const OrgSwitcher: FC<OrgSwitcherProps> = ({
           ref={(el) => {
             itemRefs.current[idx] = el;
           }}
-          className={cn('p-0', isHighlighted && 'bg-GRAY_200')}
+          className={cn('p-0', !itemsInteractive && 'pointer-events-none', isHighlighted && 'bg-GRAY_200')}
           onClick={() => handleOrgChange(item)}
           key={item?.organization_id}
           data-testid={`org-switcher-item-${item?.name?.toLowerCase()}`}
@@ -198,6 +257,16 @@ const OrgSwitcher: FC<OrgSwitcherProps> = ({
     }
   }, [organizations]);
 
+  useEffect(() => {
+    if (!isOrgSwitcherMenuOpen || itemsInteractive) return;
+
+    const enable = () => setItemsInteractive(true);
+
+    window.addEventListener('pointerup', enable, { once: true });
+
+    return () => window.removeEventListener('pointerup', enable);
+  }, [isOrgSwitcherMenuOpen, itemsInteractive]);
+
   return (
     <div>
       <DropdownMenu onOpenChange={handleOpenChange}>
@@ -221,7 +290,7 @@ const OrgSwitcher: FC<OrgSwitcherProps> = ({
               <div
                 className={cn(
                   selectedOrgColor,
-                  'f-10-500 flex h-6 w-6 items-center justify-center rounded-sm border-white',
+                  'f-10-500 flex h-6 w-6 shrink-0 items-center justify-center rounded-sm border-white',
                 )}
                 data-testid='dummy'
               >
@@ -285,7 +354,7 @@ const OrgSwitcher: FC<OrgSwitcherProps> = ({
               {regionList?.length
                 ? regionList?.map((item, idx) => (
                     <DropdownMenuItem
-                      className='p-0'
+                      className={cn('p-0', !itemsInteractive && 'pointer-events-none')}
                       data-testid={`region-switcher-item-${item?.region?.toLowerCase()}`}
                       key={item.region}
                       onClick={() => handleRegionChange(item)}
@@ -300,9 +369,31 @@ const OrgSwitcher: FC<OrgSwitcherProps> = ({
                 : null}
             </CommonWrapper>
           </div>
+          {isNewOrgCreationEnabled && (
+            <DropdownMenuItem
+              className={cn('p-0', !itemsInteractive && 'pointer-events-none')}
+              data-testid='org-switcher-new-organization'
+              onClick={() => {
+                setOrgToProvision(null);
+                setShowCreateOrgModal(true);
+                setIsOrgSwitcherMenuOpen(false);
+              }}
+            >
+              <div className='hover:bg-GRAY_100 text-GRAY_1000 flex w-full items-center gap-2 rounded-md p-2'>
+                <Plus className='text-GRAY_700 h-4 w-4 shrink-0' aria-hidden />
+                <span className='f-12-450'>New organization</span>
+              </div>
+            </DropdownMenuItem>
+          )}
           {!macs && <LogoutButton />}
         </DropdownMenuContent>
       </DropdownMenu>
+      <CreateOrgModal
+        open={showCreateOrgModal}
+        onClose={handleCreateOrgModalClose}
+        orgToProvision={orgToProvision}
+        onOrgReady={handleNewOrgReady}
+      />
     </div>
   );
 };

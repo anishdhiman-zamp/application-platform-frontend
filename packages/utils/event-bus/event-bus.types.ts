@@ -48,6 +48,8 @@ export const enum EVENT_TYPE {
   CONVERSATION_V2 = 'conversation_v2',
   TASK = 'task',
   TASK_UPDATE = 'task_update',
+  TASK_SUMMARY = 'task_summary',
+  INPUT_REQUIRED = 'input_required',
   FEEDBACK = 'feedback',
   AGENT_STREAMS = 'agent_streams',
   TEST = 'test',
@@ -59,4 +61,6 @@ export const enum EVENT_TYPE {
   CONNECTION_UPDATE = 'connection_update',
   BROWSER_LIVE_VIEW_AVAILABLE = 'browser_live_view_available',
   BROWSER_LIVE_VIEW_UNAVAILABLE = 'browser_live_view_unavailable',
+  CONVERSATION_CREATED = 'conversation_created',
+  CONVERSATION_TITLE_UPDATED = 'conversation_title_updated',
 }

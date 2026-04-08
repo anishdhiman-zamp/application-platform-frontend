@@ -3,8 +3,8 @@
   "version": "0.1.0",
   "private": true,
   "scripts": {
-    "dev": "next dev -p 2000 --turbopack --experimental-https -H local.zamp.ai",
-    "dev-coder": "next dev -p 2000 --turbopack -H 0.0.0.0",
+    "dev": "NODE_OPTIONS='--max-old-space-size=8192' next dev -p 2000 --turbopack --experimental-https -H local.zamp.ai",
+    "dev-coder": "NODE_OPTIONS='--max-old-space-size=8192' next dev -p 2000 --turbopack -H 0.0.0.0",
     "build": "NODE_OPTIONS='--max-old-space-size=10240' next build --webpack",
     "start": "next start",
     "start-coder": "next start -H 0.0.0.0",
@@ -21,6 +21,7 @@
     "prepare": "husky"
   },
   "dependencies": {
+    "@aiden0z/pptx-renderer": "^1.0.2",
     "@dagrejs/dagre": "^1.1.4",
     "@deepgram/sdk": "^4.11.2",
     "@dnd-kit/core": "^6.3.1",
@@ -50,6 +51,7 @@
     "@zamp-platform/api": "*",
     "@zamp-platform/battalion": "*",
     "@zamp-platform/chat": "*",
+    "@zamp-platform/conversation-stream": "*",
     "@zamp-platform/config": "*",
     "@zamp-platform/dataset-create-edit": "*",
     "@zamp-platform/form-builder": "*",
@@ -65,8 +67,10 @@
     "ag-grid-react": "^34.0.0",
     "clsx": "^2.1.1",
     "date-fns": "2.30.0",
+    "docx-preview": "^0.3.7",
     "framer-motion": "^12.23.26",
     "immer": "^10.1.1",
+    "jszip": "^3.10.1",
     "launchdarkly-react-client-sdk": "^3.6.1",
     "lottie-react": "^2.4.1",
     "lucide-react": "^0.503.0",

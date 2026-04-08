@@ -6,8 +6,16 @@ import { usePathname, useRouter, useSearchParams } from 'next/navigation';
 import { useOptionalSSEContext } from '@/app/_providers/sse-provider';
 import { ENVIRONMENT, ENVIRONMENT_TYPES } from '@/constants/common.constants';
 import { ROUTES_PATH } from '@/constants/routeConfig';
-import { clearCookie, PREV_ROUTE_COOKIE, setCookie, USER_SESSION_COOKIE } from '@/utils/cookie';
+import {
+  clearCookie,
+  LAST_VISITED_PRODUCT_MODE_COOKIE,
+  PREV_ROUTE_COOKIE,
+  setCookie,
+  USER_SESSION_COOKIE,
+} from '@/utils/cookie';
+import { LOCAL_STORAGE_KEYS, removeFromLocalStorage } from '@/utils/localstorage';
 import { resetPostHog } from '@/utils/postHog';
+import { getProductModeFromPath } from '@/utils/route.util';
 
 export const useLogout = () => {
   const sseContext = useOptionalSSEContext();
@@ -21,24 +29,28 @@ export const useLogout = () => {
   // Memoize the full path calculation
   const fullPath = useMemo(() => {
     if (searchParams && searchParams.toString()) {
-      return `${pathname || '/'}?${searchParams.toString()}`;
+      return `${pathname || ROUTES_PATH.HOME}?${searchParams.toString()}`;
     }
 
-    return pathname || '/';
+    return pathname || ROUTES_PATH.HOME;
   }, [pathname, searchParams]);
 
   const handleLogout = useCallback(async () => {
     // Disconnect SSE gracefully before logout to prevent readyState 2 errors
     sseContext?.disconnect();
 
-    if (fullPath && fullPath !== '/') {
-      const domain = ENVIRONMENT === ENVIRONMENT_TYPES.PRODUCTION ? '.zamp.ai' : '.zamp.dev';
+    const currentMode = getProductModeFromPath(pathname || ROUTES_PATH.HOME);
+    const domain = ENVIRONMENT === ENVIRONMENT_TYPES.PRODUCTION ? '.zamp.ai' : '.zamp.dev';
 
+    setCookie(LAST_VISITED_PRODUCT_MODE_COOKIE, currentMode, undefined, domain);
+
+    if (fullPath && fullPath !== ROUTES_PATH.HOME) {
       setCookie(PREV_ROUTE_COOKIE, encodeURIComponent(fullPath), undefined, domain);
     }
 
     // Clear USER_SESSION_COOKIE on client side
     clearCookie(USER_SESSION_COOKIE);
+    removeFromLocalStorage(LOCAL_STORAGE_KEYS.PACE_SIDEBAR_STATE);
 
     logOut(logoutFlow?.logout_url ?? '')
       .then(() => {
@@ -54,7 +66,7 @@ export const useLogout = () => {
       .catch(() => {
         refetchLogoutFlow();
       });
-  }, [logoutFlow, logOut, router, refetchLogoutFlow, fullPath, sseContext]);
+  }, [logoutFlow, logOut, router, refetchLogoutFlow, fullPath, pathname, sseContext]);
 
   return {
     logout: handleLogout,

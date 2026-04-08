@@ -245,6 +245,7 @@ const ColumnListing: FC<ColumnListingProps> = ({
 
   const handleColumnClick = (e: MouseEvent<HTMLDivElement>, column?: Column) => {
     e.stopPropagation();
+    if ((e.target as HTMLElement).closest('[role="checkbox"]')) return;
     handleCheckBoxClick(column);
   };
 
@@ -277,10 +278,11 @@ const ColumnListing: FC<ColumnListingProps> = ({
     // Get columns based on dataset type
     const getMovableColumns = (): Column[] => {
       if (isPreviewDataset) {
-        // For preview, get columns in their CURRENT DISPLAY ORDER from the grid
-        const displayedColumns = tableRef?.current?.api?.getAllDisplayedColumns() ?? [];
+        // For preview, use getColumns() to include ALL columns (even hidden ones)
+        // so users can re-enable them from the column picker.
+        const allColumns = tableRef?.current?.api?.getColumns() ?? [];
 
-        return displayedColumns.filter((column) => {
+        return allColumns.filter((column) => {
           const colDef = column?.getColDef();
 
           return !colDef?.suppressMovable && !colDef?.headerComponentParams?.metadata?.is_hidden;
@@ -417,7 +419,7 @@ const ColumnListing: FC<ColumnListingProps> = ({
           {columns?.map((column, index) => (
             <div
               key={column?.getColId()}
-              className='hover:!bg-GRAY_100 flex w-full items-center gap-2.5 rounded-md bg-white p-2'
+              className='hover:!bg-GRAY_100 bg-BG_WHITE flex w-full items-center gap-2.5 rounded-md p-2'
             >
               <div className='drag-handle min-w-[14px] cursor-grab'>
                 <Image src={DRAG_ICON} width={14} height={14} alt='drag icon' />

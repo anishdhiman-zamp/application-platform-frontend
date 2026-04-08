@@ -5,10 +5,10 @@
 }
 
 .ag-filter-active {
-  color: #2546f5;
+  color: var(--BLUE_700);
   position: relative;
   outline: none;
-  background-color: #fff;
+  background-color: var(--BG_WHITE);
   --ag-icon-button-hover-color: none;
 }
 
@@ -27,7 +27,7 @@
 }
 /* Handle on hover */
 .custom-scroll-bar::-webkit-scrollbar-thumb:hover {
-  background: #93937b;
+  background: var(--GRAY_600);
 }
 
 .ag-checkbox-input-wrapper {
@@ -91,16 +91,16 @@
 
 .pivot .ag-root-wrapper {
   border-radius: 12px !important;
-  border: 1px solid #ebebeb !important;
+  border: 1px solid var(--GRAY_200) !important;
 }
 
 .pivot .ag-header-group-cell {
-  border-right: 0.5px solid #ebebeb !important;
-  border-bottom: 0.5px solid #ebebeb !important;
+  border-right: 0.5px solid var(--GRAY_200) !important;
+  border-bottom: 0.5px solid var(--GRAY_200) !important;
 }
 .tree-table .ag-header-cell-comp-wrapper {
-  border-right: 0.5px solid #ebebeb !important;
-  border-bottom: 0.5px solid #ebebeb !important;
+  border-right: 0.5px solid var(--GRAY_200) !important;
+  border-bottom: 0.5px solid var(--GRAY_200) !important;
 }
 
 .pivot .ag-header-group-cell.ag-column-last {
@@ -108,7 +108,7 @@
 }
 
 .pivot .ag-sticky-bottom {
-  border-top: 0.5px solid #ebebeb !important;
+  border-top: 0.5px solid var(--GRAY_200) !important;
 }
 
 .pivot .ag-header {
@@ -129,7 +129,7 @@
 
 .pivot .ag-header-cell-resize::after {
   width: 0px !important;
-  background-color: white !important;
+  background-color: var(--BG_WHITE) !important;
 }
 
 .pivot .ag-horizontal-left-spacer {
@@ -147,18 +147,14 @@
 
 .ag-charts-tooltip {
   font-family: 'Inter';
-  border: 1px solid #ebebeb;
+  border: 1px solid var(--GRAY_200);
   padding: 4px;
-  color: #171717;
+  color: var(--GRAY_1000);
   font-weight: 450;
   font-size: 12px;
   border-radius: 8px;
-  box-shadow: 0px 0px 0.86px 0px #00000003;
-  box-shadow: 0px 0px 2.06px 0px #00000004;
-  box-shadow: 0px 0px 3.88px 0px #00000005;
-  box-shadow: 0px 0px 6.92px 0px #00000006;
-  box-shadow: 0px 0px 12.95px 0px #00000007;
-  box-shadow: 0px 0px 31px 0px #0000000a;
+  background-color: var(--BG_WHITE);
+  box-shadow: var(--MENU_SHADOW);
 }
 
 .ag-charts-tooltip-heading {
@@ -178,12 +174,12 @@
 
 .ag-grid-scroll {
   scrollbar-width: thin;
-  scrollbar-color: #e2e2da #fff0;
+  scrollbar-color: var(--GRAY_300) transparent;
 }
 
 /* Change the dragging placeholder color */
 .react-grid-item.react-grid-placeholder {
-  background: white !important;
+  background: var(--BG_WHITE) !important;
 }
 
 .ag-cell-focus:before {
@@ -192,13 +188,13 @@
 
 .ag-cell-range-single-cell {
   border-radius: 4px !important;
-  border: 1.5px solid #2546f5 !important;
+  border: 1.5px solid var(--BLUE_700) !important;
 }
 
 .ag-fill-handle {
   border-radius: 100%;
   border-width: 1px;
-  border-color: #2546f5;
+  border-color: var(--BLUE_700);
 }
 
 #dataset-table .ag-menu {
@@ -224,47 +220,48 @@
 }
 
 .ag-cell-focus {
-  border: 1.5px solid #2546f5;
+  border: 1.5px solid var(--BLUE_700);
   border-radius: 4px;
 }
 
 .ag-status-bar {
   min-height: 30px;
-  border-top: 1px solid #c9c9c9;
-  background-color: #fafafa;
+  border-top: 1px solid var(--GRAY_500);
+  background-color: var(--BG_GRAY_2);
+  color: var(--GRAY_1000);
   padding: 0 16px;
 }
 
 .missing-focus {
-  border: 1.5px solid #e10909 !important;
+  border: 1.5px solid var(--RED_800) !important;
   border-radius: 4px !important;
 }
 
 .missing-focus:has(.ag-input-field-input) {
-  border: 1.5px solid #2546f5 !important;
+  border: 1.5px solid var(--BLUE_700) !important;
   border-radius: 4px !important;
 }
 
 .missing-focus .ag-fill-handle {
-  border: 1.5px solid #e10909 !important;
-  background-color: #e10909 !important;
+  border: 1.5px solid var(--RED_800) !important;
+  background-color: var(--RED_800) !important;
 }
 
 .missing-completed {
-  background-color: #fef9da !important;
-  border: 1px solid #fcedb9 !important;
+  background-color: var(--ORANGE_100) !important;
+  border: 1px solid var(--ORANGE_200) !important;
   border-radius: 0px !important;
   text-decoration: underline !important;
   text-underline-offset: 2px !important;
 }
 
 .missing-completed:has(.ag-input-field-input) {
-  border: 1.5px solid #2546f5 !important;
+  border: 1.5px solid var(--BLUE_700) !important;
 }
 
 .missing-completed .ag-fill-handle {
-  border: 1.5px solid #fef9da !important;
-  background-color: #fef9da !important;
+  border: 1.5px solid var(--ORANGE_100) !important;
+  background-color: var(--ORANGE_100) !important;
 }
 
 #full-height-cell-table .ag-cell-wrapper {

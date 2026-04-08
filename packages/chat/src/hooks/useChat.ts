@@ -55,6 +55,11 @@ export interface ChatConfig extends Omit<UseSSEOptions, 'url' | 'onMessage' | 'a
   showThinkingContent?: boolean;
 }
 
+/**
+ * @deprecated Use ConversationProvider + useConversationActions/useConversationState
+ * from @zamp-platform/conversation-stream instead. This hook is kept for backward
+ * compatibility with non-PACE consumers (Chatbot, KnowledgeBase, TaskContentInner).
+ */
 export const useChat = (config: ChatConfig) => {
   const dispatch = useDispatch();
   const [messages, setMessages] = useState<ChatMessage[]>([]);
@@ -128,12 +133,7 @@ export const useChat = (config: ChatConfig) => {
     }
   }, [_conversationId, stopConversationMutation, isStopping, clearStoppingTimer]);
 
-  const shouldSkipConversationFetch =
-    !config.resourceId ||
-    !config.resourceType ||
-    !config.conversationId ||
-    isNewlyCreatedConversationRef.current === config.conversationId ||
-    isNewlyCreatedConversationRef.current === _conversationId;
+  const shouldSkipConversationFetch = !config.resourceId || !config.resourceType || !config.conversationId;
 
   const {
     data: conversationHistory,
@@ -417,8 +417,62 @@ export const useChat = (config: ChatConfig) => {
     return () => sub.unsubscribe();
   }, [sseEventBus, handleTaskUpdate]);
 
+  const handleInputRequiredSse = useCallback(
+    (data: BaseEventPayload) => {
+      if (!_conversationId) return;
+
+      const payload = data.payload as MapAny | undefined;
+      const matchesConversation =
+        data.source_id === _conversationId ||
+        payload?.conversation_id === _conversationId ||
+        (isTaskEvent && payload?.task_id === _conversationId);
+
+      if (!matchesConversation) {
+        return;
+      }
+
+      dispatch(chatApi.util.invalidateTags([{ type: APITags.GET_CONVERSATION_BY_ID, id: _conversationId }]));
+
+      if (config.resourceId && config.resourceType) {
+        void triggerGetConversation({
+          conversationId: _conversationId,
+          resourceId: config.resourceId,
+          resourceType: config.resourceType,
+          url: config.apiConfig?.getConversationById,
+        });
+      } else {
+        void refetchConversationHistory();
+      }
+    },
+    [
+      _conversationId,
+      isTaskEvent,
+      dispatch,
+      config.resourceId,
+      config.resourceType,
+      config.apiConfig?.getConversationById,
+      triggerGetConversation,
+      refetchConversationHistory,
+    ],
+  );
+
+  useEffect(() => {
+    const sub = sseEventBus.subscribe(EVENT_TYPE.INPUT_REQUIRED, handleInputRequiredSse);
+    return () => sub.unsubscribe();
+  }, [sseEventBus, handleInputRequiredSse]);
+
   useEffect(() => {
     if (!isFetchingConversationHistory && conversationHistory) {
+      const loadedConvId = conversationHistory.conversation?.id;
+      if (
+        loadedConvId &&
+        _conversationId &&
+        loadedConvId === _conversationId &&
+        isNewlyCreatedConversationRef.current === _conversationId
+      ) {
+        isNewlyCreatedConversationRef.current = null;
+      }
+
       if (conversationHistory?.conversation?.title) {
         config.setHeader?.(conversationHistory.conversation.title);
       }
@@ -454,7 +508,7 @@ export const useChat = (config: ChatConfig) => {
         });
       }
     }
-  }, [conversationHistory, isFetchingConversationHistory, config.enableStreaming]);
+  }, [conversationHistory, isFetchingConversationHistory, config.enableStreaming, _conversationId]);
 
   const sendMessage = useCallback(
     async (messagePayload: ChatMessage, useV2Api?: boolean) => {
@@ -555,5 +609,7 @@ export const useChat = (config: ChatConfig) => {
     isUninitializedConversationHistory,
     isErrorConversationHistory,
     refetchConversationHistory: refetchConversationHistory,
+    conversationData: conversationHistory?.conversation,
+    inputsRequired: conversationHistory?.inputs_required,
   };
 };

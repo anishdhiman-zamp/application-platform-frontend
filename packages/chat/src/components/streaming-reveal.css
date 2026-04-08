@@ -1,0 +1,17 @@
+/* Per-word fade-in animation for streaming markdown content.
+   Each word is wrapped in a <span class="stream-word"> by the
+   rehypeStreamReveal plugin. React reconciliation preserves
+   existing spans, so only newly mounted words animate. */
+
+@keyframes streamWordFadeIn {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+.stream-word {
+  animation: streamWordFadeIn 300ms ease-out both;
+}

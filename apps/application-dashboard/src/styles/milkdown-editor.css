@@ -36,6 +36,11 @@
   font-family: var(--crepe-font-default);
 }
 
+/* Reduce inner editor padding for agent instructions */
+.agent-instructions-editor .ProseMirror {
+  padding: 30px 100px;
+}
+
 /* Headings use the title font */
 .milkdown-editor-wrapper h1,
 .milkdown-editor-wrapper h2,
@@ -436,4 +441,15 @@
 .dark .milkdown-editor-wrapper td,
 .dark .milkdown-editor-wrapper th {
   border-color: var(--GRAY_400);
+}
+
+/* Read-only mode: hide all editor UI controls */
+[data-readonly] milkdown-toolbar,
+[data-readonly] milkdown-block-handle,
+[data-readonly] milkdown-slash-menu,
+[data-readonly] milkdown-link-preview,
+[data-readonly] milkdown-link-edit,
+[data-readonly] .milkdown-toolbar,
+[data-readonly] .milkdown-slash-menu {
+  display: none !important;
 }

@@ -7,6 +7,7 @@ import React, {
   useContext,
   useEffect,
   useImperativeHandle,
+  useLayoutEffect,
   useRef,
   useState,
 } from 'react';
@@ -465,6 +466,45 @@ const ScrollContainer = forwardRef<ScrollContainerRef, ScrollContainerProps>(
 
     const showOverlays = showFadeOverlay && !disableFadeOverlay;
 
+    /** Fade overlays read `canScrollTop` / `canScrollBottom`; sync on mount and when content/size changes (not only after `scroll`). */
+    useLayoutEffect(() => {
+      if (!showOverlays) return;
+
+      const el = scrollRef.current;
+
+      if (!el) return;
+
+      let rafId: number | null = null;
+
+      const scheduleSync = () => {
+        if (rafId !== null) return;
+        rafId = requestAnimationFrame(() => {
+          rafId = null;
+          updateScrollState();
+        });
+      };
+
+      scheduleSync();
+
+      const resizeObserver = new ResizeObserver(scheduleSync);
+
+      resizeObserver.observe(el);
+
+      const mutationObserver = new MutationObserver(scheduleSync);
+
+      mutationObserver.observe(el, {
+        childList: true,
+        subtree: true,
+        characterData: true,
+      });
+
+      return () => {
+        if (rafId !== null) cancelAnimationFrame(rafId);
+        resizeObserver.disconnect();
+        mutationObserver.disconnect();
+      };
+    }, [showOverlays, updateScrollState]);
+
     return (
       <ScrollRefContext.Provider value={scrollRef}>
         <div className={cn('relative flex min-h-0 flex-1 flex-col overflow-hidden', className)}>
@@ -502,7 +542,9 @@ const ScrollContainer = forwardRef<ScrollContainerRef, ScrollContainerProps>(
             onScroll={handleScroll}
             className={cn(
               'flex min-h-0 w-full flex-1 flex-col overflow-x-hidden overflow-y-auto [overflow-anchor:none]',
-              scrollbarStyle === 'thin' ? '[scrollbar-width:thin]' : '[scrollbar-width:none]',
+              scrollbarStyle === 'thin'
+                ? '[scrollbar-width:thin]'
+                : '[-ms-overflow-style:none] [scrollbar-width:none] [&::-webkit-scrollbar]:hidden',
               scrollClassName,
             )}
           >

@@ -1,21 +1,26 @@
 'use client';
 
-import { AnimatedDot, AnimatedTerminalIcon, ImageWithFallback, ShimmerText } from '@zamp-platform/ui';
-import { formatPlural, safeJsonParse } from '@zamp-platform/utils';
+import { AnimatedTerminalIcon, ImageWithFallback, ShimmerText } from '@zamp-platform/ui';
+import { safeJsonParse } from '@zamp-platform/utils';
 import { EVENT_TYPE } from '@zamp-platform/utils/event-bus/event-bus.types';
-import { ArrowUpRight, ChevronDown } from 'lucide-react';
+import { ArrowUpRight } from 'lucide-react';
 import { useRouter } from 'next/navigation';
-import { type FC, useCallback, useMemo } from 'react';
+import React, { type FC, useCallback, useMemo } from 'react';
 
 import { getChatTaskRoute } from '@/constants/routeConfig';
 import { useAppSelector } from '@/hooks/toolkit';
+import { usePaceContext } from '@/modules/pace/pace.context';
+import { CHAT_SIDEBAR_STATE } from '@/modules/pace/pace.types';
+import { preserveSidebarParam } from '@/modules/pace/pace.utils';
 import type { RootState } from '@/store';
 
 import { API_ENDPOINTS } from '../../api';
 import { useChatActions } from '../../context/ChatActionsContext';
 import { useChat } from '../../hooks/useChat';
+import { useDisplayedSummary } from '../../hooks/useDisplayedSummary';
 import { BLOCK_TYPE, TASK_STATUS, type TaskBlockType, type ToolUseContentBlock } from '../../types/block.types';
 import { ResourceType, SenderType } from '../../types/chat.types';
+import TaskBlockContent from './TaskBlockContent';
 import TaskStatusIcon from './TaskStatusIcon';
 
 interface TaskBlockProps {
@@ -23,7 +28,7 @@ interface TaskBlockProps {
   conversationId?: string;
 }
 
-interface ToolCallInfo {
+export interface ToolCallInfo {
   id: string;
   name: string;
   displayName: string;
@@ -35,7 +40,8 @@ interface ToolCallInfo {
 const TaskBlock: FC<TaskBlockProps> = ({ payload, conversationId }) => {
   const router = useRouter();
   const organizationId = useAppSelector((state: RootState) => state.user.user?.orgs?.[0]?.organization_id) ?? '';
-  const { onTaskOpen } = useChatActions();
+  const { onTaskOpen, parentTasks, siblings, taskSummaries } = useChatActions();
+  const { setChatSidebarState } = usePaceContext();
 
   const { title, task_id, status = TASK_STATUS.IN_PROGRESS } = payload;
 
@@ -51,6 +57,19 @@ const TaskBlock: FC<TaskBlockProps> = ({ payload, conversationId }) => {
   });
 
   const isLoading = chat?.isLoadingConversationHistory ?? false;
+
+  const hasMessages = (chat?.messages?.length ?? 0) > 0;
+  const isAnalysing = hasMessages && chat?.messages[chat.messages.length - 1]?.sender_type === SenderType.USER;
+  const isAgentActive = Boolean(chat?.streamingState?.is_active) || isAnalysing;
+  const conversationData = chat?.conversationData;
+  const taskStatus = (conversationData as unknown as Record<string, unknown>)?.status as string | undefined;
+
+  const displayedSummary = useDisplayedSummary({
+    taskId: task_id,
+    isAgentActive,
+    summaryContent: null,
+    streamingSummaryText: taskSummaries?.[task_id] ?? null,
+  });
 
   const { toolCalls, markdownStepsBeforeLastTool } = useMemo(() => {
     const calls: ToolCallInfo[] = [];
@@ -137,12 +156,46 @@ const TaskBlock: FC<TaskBlockProps> = ({ payload, conversationId }) => {
   const previousCount = (previousToolCalls?.length ?? 0) + markdownStepsBeforeLastTool;
 
   const handleOpenTask = useCallback(() => {
-    onTaskOpen?.(title, getChatTaskRoute({ taskId: task_id, conversationId: conversationId ?? '', taskTitle: title }));
-    router.push(getChatTaskRoute({ taskId: task_id, conversationId: conversationId ?? '', taskTitle: title }));
-  }, [router, task_id, conversationId, title, onTaskOpen]);
+    setChatSidebarState(CHAT_SIDEBAR_STATE.SIDEBAR);
 
+    // Use live status from conversation data if available, fallback to payload status
+    const effectiveStatus = taskStatus ?? status;
+
+    // Compute status-based index within siblings for pagination
+    const sameStatusSiblings = siblings?.filter((s) => s.status === effectiveStatus) ?? [];
+    const statusIndex = sameStatusSiblings.findIndex((s) => s.id === task_id);
+
+    const route = getChatTaskRoute({
+      taskId: task_id,
+      conversationId: conversationId ?? '',
+      taskTitle: title,
+      parentTasks: parentTasks?.length ? parentTasks : undefined,
+      siblings: siblings?.length ? siblings : undefined,
+      status: siblings?.length ? effectiveStatus : undefined,
+      currentIndex: statusIndex !== -1 ? statusIndex : undefined,
+      totalRows: sameStatusSiblings.length > 0 ? sameStatusSiblings.length : undefined,
+    });
+
+    const fullRoute = preserveSidebarParam(route);
+
+    onTaskOpen?.(title, fullRoute);
+    router.push(fullRoute);
+  }, [
+    router,
+    task_id,
+    conversationId,
+    title,
+    status,
+    taskStatus,
+    onTaskOpen,
+    setChatSidebarState,
+    parentTasks,
+    siblings,
+  ]);
+
+  const isInProgress = status === TASK_STATUS.IN_PROGRESS;
   const hasNoToolCalls = (toolCalls?.length ?? 0) === 0 && previousCount === 0;
-  const isStartingTask = hasNoToolCalls && !isLoading && status === TASK_STATUS.IN_PROGRESS;
+  const isStartingTask = hasNoToolCalls && !isLoading && isInProgress;
 
   const hasToolCallContent = isLoading || !!lastToolCall || isStartingTask;
 
@@ -188,38 +241,17 @@ const TaskBlock: FC<TaskBlockProps> = ({ payload, conversationId }) => {
         </div>
       </div>
 
-      {hasToolCallContent && (
-        <div className='bg-BG_GRAY_2 border-GRAY_400 f-14-450 border-t px-4 py-3'>
-          {isLoading ? (
-            <div className='flex items-center justify-center py-4'>
-              <AnimatedDot showAnimation size={8} />
-            </div>
-          ) : (
-            <>
-              {previousCount > 0 && (
-                <div>
-                  <div className='flex items-center gap-2'>
-                    <ChevronDown size={14} className='text-GRAY_700' />
-                    <span className='f-14-450 text-GRAY_950'>{formatPlural(previousCount, 'step', 'steps')}</span>
-                  </div>
-                  {lastToolCall && <div className='border-GRAY_400 ml-[7px] h-4 border-l' />}
-                </div>
-              )}
-
-              {lastToolCall && (
-                <div className='flex w-full items-center gap-2 pt-0.5'>
-                  <div className='flex h-4 w-4 shrink-0 items-center justify-center'>{getToolIcon(lastToolCall)}</div>
-                  {renderToolCallTrigger(lastToolCall)}
-                </div>
-              )}
-
-              {isStartingTask && (
-                <div className='f-14-450 text-GRAY_700 py-2'>
-                  <ShimmerText text='Starting now' autoAnimate={true} />
-                </div>
-              )}
-            </>
-          )}
+      {(hasToolCallContent || (isInProgress && displayedSummary)) && (
+        <div className='bg-BG_GRAY_2 border-GRAY_400 f-14-450 min-h-20 border-t px-4 py-3'>
+          <TaskBlockContent
+            isLoading={isLoading}
+            isInProgress={isInProgress}
+            displayedSummary={displayedSummary}
+            previousCount={previousCount}
+            lastToolCall={lastToolCall}
+            getToolIcon={getToolIcon}
+            renderToolCallTrigger={renderToolCallTrigger}
+          />
         </div>
       )}
     </div>

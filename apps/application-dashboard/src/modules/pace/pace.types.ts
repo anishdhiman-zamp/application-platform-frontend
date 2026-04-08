@@ -9,7 +9,10 @@ export const enum PaceNavbarItemId {
   INTEGRATIONS = 'integrations',
   FILES = 'files',
   GENERAL = 'general',
+  DATASETS = 'datasets',
   TASKS = 'task',
+  AGENTS = 'agents',
+  ORG_SETTINGS = 'org-settings',
 }
 
 export interface AnimatedIconHandle {
@@ -47,6 +50,7 @@ export type ChatSidebarState = (typeof CHAT_SIDEBAR_STATE)[keyof typeof CHAT_SID
 export const TAB_TYPE = {
   FILE: 'file',
   TASK: 'task',
+  AGENT: 'agent',
   BROWSER: 'browser',
 } as const;
 
@@ -63,17 +67,22 @@ export interface QueryRouteConfig {
   kind: typeof ROUTE_KIND.QUERY;
   basePath: string;
   paramName: string;
-  fallbackPath: string;
 }
 
 export interface DynamicRouteConfig {
   kind: typeof ROUTE_KIND.DYNAMIC;
   basePath: string;
   buildPath: (id: string) => string;
-  fallbackPath: string;
 }
 
 export type DynamicTabRouteConfig = QueryRouteConfig | DynamicRouteConfig;
+
+export const NAV_METHOD = {
+  PUSH: 'push',
+  REPLACE: 'replace',
+} as const;
+
+export type NavMethod = (typeof NAV_METHOD)[keyof typeof NAV_METHOD];
 
 export interface DynamicTab {
   stableKey: string;

@@ -121,6 +121,8 @@ export const FILE_CATEGORY = {
   MARKDOWN: 'markdown',
   HTML: 'html',
   SPREADSHEET: 'spreadsheet',
+  PRESENTATION: 'presentation',
+  DOCUMENT: 'document',
   CODE: 'code',
   UNKNOWN: 'unknown',
 } as const;
@@ -142,6 +144,10 @@ export const HTML_EXTENSIONS = ['html', 'htm', 'xhtml', 'shtml'] as const;
 export const SPREADSHEET_EXTENSIONS = ['csv', 'tsv', 'tab', 'xls', 'xlsx', 'xlsm', 'xlsb', 'ods'] as const;
 
 export const TEXT_SPREADSHEET_EXTENSIONS = ['csv', 'tsv', 'tab'] as const;
+
+export const PRESENTATION_EXTENSIONS = ['pptx', 'ppt'] as const;
+
+export const DOCUMENT_EXTENSIONS = ['docx', 'doc'] as const;
 
 export const EXTENSION_TO_MONACO_LANGUAGE: Record<string, string> = {
   // Web - JavaScript/TypeScript

@@ -1,7 +1,6 @@
 'use client';
 
 import { useCallback, useEffect, useRef, useState } from 'react';
-import { SEARCH_DEBOUNCE_MS } from 'modules/pace/components/tasks/task-listing.constants';
 import { LazyFileTreeProvider } from 'modules/pace/context/LazyFileTreeContext';
 import { useLazyFileTree } from 'modules/pace/hooks/useLazyFileTree';
 import ImageLoader from '@/components/common/loader/ImageLoader';
@@ -14,6 +13,7 @@ import { FILE_TYPE, SORT_DIRECTION, SORT_OPTION } from '@/modules/pace/component
 import FilesEmptyState from '@/modules/pace/components/files/FilesEmptyState';
 import FileTree from '@/modules/pace/components/files/FileTree';
 import FilesPanelToolbar from '@/modules/pace/components/files-panel/FilesPanelToolbar';
+import { SEARCH_DEBOUNCE_MS } from '@/modules/pace/components/tasks/constants/tasks.constants';
 import { useFileUploadContext } from '@/modules/pace/context/FileUploadContext';
 import { TAB_TYPE } from '@/modules/pace/pace.types';
 import { defaultFnType } from '@/types/commonTypes';
@@ -125,7 +125,7 @@ const FilesPanelContent = () => {
           noDataBanner={<FilesEmptyState />}
           skeletonType={SkeletonTypes.CUSTOM}
           loader={<ImageLoader imageSrc={ZAMP_LOGO_LOADER_SVG} width={150} height={150} className='bg-BG_GRAY_2' />}
-          className='flex-1 overflow-y-auto [scrollbar-width:none]'
+          className='min-h-0 flex-1 overflow-hidden'
           disableAnimation
         >
           <FileTree

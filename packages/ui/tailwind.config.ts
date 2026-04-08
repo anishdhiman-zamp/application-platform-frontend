@@ -466,6 +466,7 @@ const config = {
       },
       minHeight: {
         '4': '16px',
+        '3': '12px',
         '5': '20px',
         '6': '24px',
         '8': '32px',
@@ -684,6 +685,14 @@ const config = {
             transform: 'scale(0.75)',
           },
         },
+        'shimmer-text': {
+          '0%': {
+            backgroundPosition: '200% 0',
+          },
+          '100%': {
+            backgroundPosition: '-200% 0',
+          },
+        },
       },
       animation: {
         'accordion-down': 'accordion-down 0.2s ease-out',
@@ -705,6 +714,7 @@ const config = {
         'fade-in': 'fade-in 0.5s ease-in-out',
         'fade-out': 'fade-out 0.5s ease-in-out 0.3s',
         scale: 'scale 1.5s ease-in-out infinite',
+        'shimmer-text': 'shimmer-text 4s linear infinite',
       },
     },
   },

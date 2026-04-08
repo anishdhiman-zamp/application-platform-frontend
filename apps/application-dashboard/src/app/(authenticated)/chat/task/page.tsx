@@ -1,4 +1,4 @@
-import TaskListingPage from '@/modules/pace/components/tasks/TaskListingPage';
+import TaskListingPage from '@/modules/pace/components/tasks/components/TaskListingPage';
 
 const ChatTasksPage = () => {
   return <TaskListingPage />;

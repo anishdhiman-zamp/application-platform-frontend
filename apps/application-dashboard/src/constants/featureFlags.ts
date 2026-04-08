@@ -26,7 +26,10 @@ export enum FEATURE_FLAGS {
   ZAMP_INTERNAL = 'zamp-internal',
   APP_SECURE = 'app-secure',
   MACS_FILE_SYSTEM = 'macs-file-system',
-  DARK_MODE = 'dark_mode',
   AUTO_ORG_CREATION = 'auto-org-creation',
   ENABLE_ONBOARDING_FLOW = 'enable_onboarding_flow',
+  ORG_SETTINGS = 'ORG_SETTINGS',
+  AGENTS_FE = 'agents-fe',
+  AUTO_LOOP_BTN_ENABLED = 'auto-loop-btn-enabled',
+  NEW_ORG_CREATION = 'new-org-creation',
 }

@@ -1,9 +1,12 @@
 'use client';
 
-import { type FC, useCallback, useState } from 'react';
+import { useCallback, useMemo, useState } from 'react';
+import { AnimatedDot } from '@zamp-platform/ui';
 import { cn } from '@zamp-platform/ui/utils';
-import { Loader, MessagesSquare } from 'lucide-react';
+import { formatTimestampToUTC } from '@zamp-platform/utils/date';
+import { Loader2 } from 'lucide-react';
 import ConversationActions from '@/modules/pace/components/chat/ConversationActions';
+import { formatRelativeTime } from '@/modules/pace/components/files/file-tree.utils';
 import type { FeedbackItemType } from '@/types/api/feedbacks.types';
 
 const INTERACTIVE_SELECTORS = [
@@ -17,22 +20,41 @@ interface ChatHistoryItemProps {
   conversation: FeedbackItemType;
   onSelect: (id: string | null, title?: string) => void;
   isStreaming?: boolean;
+  isSelected?: boolean;
+  isUnread?: boolean;
   organizationId: string;
   onDelete?: (id: string) => void;
   onDeleteFailure?: (conversation: FeedbackItemType) => void;
   onRename?: (id: string, newTitle: string) => void;
 }
 
-const ChatHistoryItem: FC<ChatHistoryItemProps> = ({
+const ChatHistoryItem = ({
   conversation,
   onSelect,
   isStreaming,
+  isSelected,
+  isUnread,
   organizationId,
   onDelete,
   onDeleteFailure,
   onRename,
-}) => {
+}: ChatHistoryItemProps) => {
   const [isActionsOpen, setIsActionsOpen] = useState(false);
+
+  const renderStatusIcon = () => {
+    if (isStreaming) return <Loader2 className='text-BLUE_700 h-3 w-3 shrink-0 animate-spin' />;
+    if (isUnread) return <AnimatedDot showAnimation className='shrink-0' size={7} />;
+
+    return null;
+  };
+
+  const relativeTime = useMemo(() => {
+    const timestamp = conversation?.updated_at || conversation?.created_at;
+
+    if (!timestamp) return null;
+
+    return formatRelativeTime(new Date(formatTimestampToUTC(timestamp)).getTime());
+  }, [conversation?.updated_at, conversation?.created_at]);
 
   const handleClick = useCallback(
     (e: React.MouseEvent) => {
@@ -65,23 +87,37 @@ const ChatHistoryItem: FC<ChatHistoryItemProps> = ({
     [onRename, conversation?.id],
   );
 
+  const statusIcon = renderStatusIcon();
+  const hasStatusIcon = Boolean(statusIcon);
+
   return (
     <div
       className={cn(
         'group hover:bg-accent relative flex cursor-pointer items-center rounded-lg',
+        isSelected && 'bg-GRAY_200',
         isActionsOpen && 'bg-accent',
       )}
       onClick={handleClick}
     >
       <div className='flex h-auto w-full items-center justify-start gap-2.5 px-3 py-2.5 pr-9'>
-        <MessagesSquare size={16} className='text-GRAY_700 shrink-0' />
-        <p className='f-13-500 text-GRAY_1000 line-clamp-1 text-left first-letter:uppercase'>
+        <p className='f-13-500 text-GRAY_1000 min-w-0 flex-1 truncate text-left first-letter:uppercase'>
           {conversation?.title || 'Untitled conversation'}
         </p>
-        {isStreaming && <Loader size={14} className='text-GRAY_700 ml-auto shrink-0 animate-spin' />}
+
+        {relativeTime && <span className='f-12-400 text-GRAY_600 shrink-0 whitespace-nowrap'>{relativeTime}</span>}
       </div>
 
-      <div className='absolute right-1'>
+      <div className='absolute right-1 flex items-center justify-center'>
+        {hasStatusIcon && (
+          <span
+            className={cn(
+              'flex h-6 w-6 items-center justify-center transition-opacity',
+              isActionsOpen ? 'opacity-0' : 'group-hover:opacity-0',
+            )}
+          >
+            {statusIcon}
+          </span>
+        )}
         <ConversationActions
           conversationId={conversation?.id}
           organizationId={organizationId}
@@ -91,8 +127,10 @@ const ChatHistoryItem: FC<ChatHistoryItemProps> = ({
           onDeleteFailure={handleDeleteFailure}
           onOpenChange={setIsActionsOpen}
           triggerClassName={cn(
-            'transition-opacity group-hover:opacity-100 hover:bg-transparent data-[state=open]:opacity-100',
-            isActionsOpen ? 'opacity-100' : 'opacity-0',
+            'hover:bg-transparent data-[state=open]:opacity-100',
+            hasStatusIcon
+              ? cn('absolute transition-opacity', isActionsOpen ? 'opacity-100' : 'opacity-0 group-hover:opacity-100')
+              : cn('transition-opacity', isActionsOpen ? 'opacity-100' : 'opacity-0 group-hover:opacity-100'),
           )}
           triggerProps={{ onClick: (e) => e.stopPropagation() }}
         />
