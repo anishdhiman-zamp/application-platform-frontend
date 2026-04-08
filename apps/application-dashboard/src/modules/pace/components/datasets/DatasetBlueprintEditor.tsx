@@ -41,6 +41,10 @@ import { GripVertical, Trash2 } from 'lucide-react';
 import {
   type BlueprintColumn,
   COL_PREFIX,
+  COLUMN_NAME_ERROR,
+  COLUMN_NAME_LENGTH_ERROR,
+  COLUMN_NAME_MAX_LENGTH,
+  COLUMN_NAME_REGEX,
   sanitizeColumnName,
 } from 'modules/pace/components/datasets/datasets.constants';
 import { snakeCaseToSentenceCase } from 'utils/common';
@@ -119,8 +123,9 @@ const ColumnRow: FC<ColumnRowProps> = memo(
       const trimmed = localName.trim();
 
       if (!trimmed) return 'Column name cannot be empty';
-      if (!/^[a-zA-Z][a-zA-Z0-9_ ]*$/.test(trimmed)) {
-        return 'Column name must start with a letter and contain only letters, numbers or spaces';
+      if (trimmed.length > COLUMN_NAME_MAX_LENGTH) return COLUMN_NAME_LENGTH_ERROR;
+      if (!COLUMN_NAME_REGEX.test(trimmed)) {
+        return COLUMN_NAME_ERROR;
       }
       const sanitized = sanitizeColumnName(trimmed);
       const dupes = allColumns.filter((c) => sanitizeColumnName(c.name) === sanitized);
@@ -319,7 +324,8 @@ const DatasetBlueprintEditor: FC<DatasetBlueprintEditorProps> = ({
       const trimmed = c.name.trim();
 
       if (!trimmed) return true;
-      if (!/^[a-zA-Z][a-zA-Z0-9_ ]*$/.test(trimmed)) return true;
+      if (trimmed.length > COLUMN_NAME_MAX_LENGTH) return true;
+      if (!COLUMN_NAME_REGEX.test(trimmed)) return true;
       const sanitized = sanitizeColumnName(trimmed);
       const dupes = sanitizedNames.filter((n) => n === sanitized);
 
