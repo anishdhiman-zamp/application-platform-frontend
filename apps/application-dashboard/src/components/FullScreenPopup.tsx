@@ -1,7 +1,7 @@
 import { FC } from 'react';
 import { Sheet, SheetContent } from '@zamp-platform/ui';
 import { SvgSpriteLoader } from '@zamp-platform/ui/assets';
-import { ZAMP_ICON } from 'constants/icons';
+import { ZAMP_BLACK_ICON } from 'constants/icons';
 import Image from 'next/image';
 import { defaultFn, defaultFnType } from 'types/commonTypes';
 import { cn } from 'utils/common';
@@ -39,7 +39,7 @@ const FullScreenPopup: FC<FullScreenPopupProps> = ({
                 height={16}
                 alt='zamp logo'
                 className='w-4 cursor-pointer align-middle'
-                src={ZAMP_ICON}
+                src={ZAMP_BLACK_ICON}
                 priority
               />
             )}

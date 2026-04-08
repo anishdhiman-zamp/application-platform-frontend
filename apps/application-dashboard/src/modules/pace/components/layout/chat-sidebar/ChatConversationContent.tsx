@@ -23,7 +23,7 @@ import CommonWrapper from '@/components/commonWrapper';
 import { SkeletonTypes } from '@/components/commonWrapper/commonWrapper.types';
 import { APITags } from '@/constants/api.constants';
 import { useAppDispatch } from '@/hooks/toolkit';
-import NewPaceAvatar from '@/modules/chatbot/NewPaceAvatar';
+import ZampIcon from '@/modules/chatbot/ZampIcon';
 import AgentPill from '@/modules/pace/components/agents/components/AgentPill';
 import AgentTestCard from '@/modules/pace/components/agents/components/AgentTestCard';
 import {
@@ -323,7 +323,7 @@ const ChatConversationContent = ({
                 streamingState={streamingState}
                 className='gap-3 px-0 [scrollbar-width:none]'
                 conversationId={conversationId ?? ctxConversationId ?? ''}
-                assistantAvatar={<NewPaceAvatar />}
+                assistantAvatar={<ZampIcon />}
                 showTimestamp
                 showFeedback
                 showCopy
