@@ -8,34 +8,11 @@ import ImageLoader from '@/components/common/loader/ImageLoader';
 import CommonWrapper from '@/components/commonWrapper';
 import { SkeletonTypes } from '@/components/commonWrapper/commonWrapper.types';
 import EmptyState from '@/components/EmptyState';
-import { DONE_EMPTY_STATE, ZAMP_LOGO_LOADER_SVG } from '@/constants/icons';
+import { ZAMP_LOGO_LOADER_SVG } from '@/constants/icons';
 import TabWrapper from '@/modules/pace/components/dynamic-tabs/TabWrapper';
 import { useDynamicTabs } from '@/modules/pace/components/dynamic-tabs/useDynamicTabs';
+import { BROWSER_VIEWER_STATE_CONFIG, BrowserViewerDisplayState } from '@/modules/pace/pace.constants';
 import { TAB_TYPE } from '@/modules/pace/pace.types';
-
-type BrowserViewerDisplayState = 'waiting' | 'ended' | 'error';
-
-const BROWSER_VIEWER_STATE_CONFIG: Record<
-  BrowserViewerDisplayState,
-  { title: string; description?: string; imageSrc: string; imageAlt: string; showRetry?: boolean }
-> = {
-  waiting: {
-    title: 'Waiting for browser stream...',
-    imageSrc: DONE_EMPTY_STATE,
-    imageAlt: 'Waiting for stream',
-  },
-  ended: {
-    title: 'Live streaming has ended',
-    imageSrc: DONE_EMPTY_STATE,
-    imageAlt: 'Stream ended',
-  },
-  error: {
-    title: 'Failed to connect to browser stream',
-    imageSrc: DONE_EMPTY_STATE,
-    imageAlt: 'Connection error',
-    showRetry: true,
-  },
-};
 
 interface BrowserViewerTabProps {
   conversationId: string;
@@ -49,7 +26,7 @@ const BrowserViewerTab = ({ conversationId, sessionId, status, isActive }: Brows
   const [hasError, setHasError] = useState(false);
   const [isStreamLoading, setIsStreamLoading] = useState(true);
 
-  const isEnded = status === 'ended';
+  const isEnded = status === BrowserViewerDisplayState.ENDED;
 
   const [fetchNovnc, { isFetching }] = useLazyGetBrowserStreamingNovncQuery();
 
@@ -105,7 +82,7 @@ const BrowserViewerTab = ({ conversationId, sessionId, status, isActive }: Brows
   };
 
   if (isEnded) {
-    return renderPlaceholder('ended');
+    return renderPlaceholder(BrowserViewerDisplayState.ENDED);
   }
 
   return (
@@ -115,7 +92,7 @@ const BrowserViewerTab = ({ conversationId, sessionId, status, isActive }: Brows
       skeletonType={SkeletonTypes.CUSTOM}
       loader={<ImageLoader imageSrc={ZAMP_LOGO_LOADER_SVG} width={140} height={140} />}
       className='flex h-full w-full items-center justify-center'
-      renderError={renderPlaceholder('error')}
+      renderError={renderPlaceholder(BrowserViewerDisplayState.ERROR)}
       disableAnimation
     >
       {iframeSrc ? (
@@ -134,7 +111,7 @@ const BrowserViewerTab = ({ conversationId, sessionId, status, isActive }: Brows
           />
         </div>
       ) : (
-        renderPlaceholder('waiting')
+        renderPlaceholder(BrowserViewerDisplayState.WAITING)
       )}
     </CommonWrapper>
   );
@@ -156,8 +133,8 @@ const BrowserTabsContainer = () => {
           <TabWrapper key={tab.stableKey} isActive={isActive}>
             <BrowserViewerTab
               conversationId={tab.id}
-              sessionId={tab.metadata?.sessionId as string | undefined}
-              status={tab.metadata?.status as string | undefined}
+              sessionId={tab.metadata?.sessionId as string}
+              status={tab.metadata?.status as string}
               isActive={isActive}
             />
           </TabWrapper>

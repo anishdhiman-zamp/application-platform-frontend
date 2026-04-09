@@ -1,6 +1,5 @@
 export { default as AgentBlock } from './AgentBlock';
 export { AttachmentsList } from './AttachmentsList';
-export { BrowserLiveWatchSection } from './BrowserLiveWatchSection';
 export { ButtonBlock } from './ButtonBlock';
 export { CodePreviewBlock } from './CodePreviewBlock';
 export { FileReferencesList } from './FileReferencesList';
@@ -13,7 +12,6 @@ export { PlainTextBlock } from './PlainTextBlock';
 export { QuestionGroupBlock } from './QuestionGroupBlock';
 export { RadioButtonBlock, SingleSelectBlock } from './RadioButtonBlock';
 export { StatusLabel } from './StatusLabel';
-export { StepsBlock } from './StepsBlock';
 export { default as TaskBlock } from './TaskBlock';
 export { default as TaskStatusIcon } from './TaskStatusIcon';
 export { ThinkingBlock } from './ThinkingBlock';

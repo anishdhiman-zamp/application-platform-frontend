@@ -84,6 +84,14 @@ export const NAV_METHOD = {
 
 export type NavMethod = (typeof NAV_METHOD)[keyof typeof NAV_METHOD];
 
+export interface BrowserViewerStateConfig {
+  title: string;
+  description?: string;
+  imageSrc: string;
+  imageAlt: string;
+  showRetry?: boolean;
+}
+
 export interface DynamicTab {
   stableKey: string;
   id: string;

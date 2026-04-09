@@ -16,6 +16,7 @@ import ChatTopbar from '@/modules/pace/components/chat/ChatTopbar';
 import ModelSelector from '@/modules/pace/components/chat/ModelSelector';
 import { useChatDraftInput } from '@/modules/pace/hooks/useChatDraftInput';
 import { useHitlQuestions } from '@/modules/pace/hooks/useHitlQuestions';
+import { BrowserViewerDisplayState } from '@/modules/pace/pace.constants';
 import { usePaceContext } from '@/modules/pace/pace.context';
 import { CHAT_SIDEBAR_STATE, TAB_TYPE } from '@/modules/pace/pace.types';
 import { addAutoLoopLockedConversation, isConversationAutoLoopLocked } from '@/modules/pace/utils/autoLoopStorage';
@@ -116,7 +117,9 @@ const ChatSidebarContent = ({
 
   const handleBrowserStreamingEnd = useCallback(
     (browserConversationId: string) => {
-      updateBrowserTab(browserConversationId, browserConversationId, 'Browser', { status: 'ended' });
+      updateBrowserTab(browserConversationId, browserConversationId, 'Browser', {
+        status: BrowserViewerDisplayState.ENDED,
+      });
     },
     [updateBrowserTab],
   );
