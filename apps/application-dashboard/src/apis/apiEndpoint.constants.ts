@@ -268,6 +268,9 @@ export const API_ENDPOINTS = {
   FILES_UPLOAD_COMPLETE_POST: `files/upload/complete`,
   FILES_UPLOAD_CANCEL_DELETE: `files/upload/{{upload_id}}`,
 
+  // Apps
+  APPS_GET: `apps`,
+
   // Agent Managed DB
   AGENT_MANAGED_DB_QUERY_POST: `agent-db/query`,
   DATASET_ROLES_GET: `agent-db/roles`,
