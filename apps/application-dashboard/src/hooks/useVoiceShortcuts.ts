@@ -3,6 +3,7 @@
 import { useCallback, useEffect, useRef } from 'react';
 import type { UseVoiceChatReturn } from '@zamp-platform/ui/types';
 import { VOICE_CHAT_STATE } from '@zamp-platform/ui/types';
+import { KEYBOARD_KEYS } from '@zamp-platform/utils';
 
 /**
  * Timing thresholds (ms).
@@ -29,7 +30,7 @@ interface UseVoiceShortcutsOptions {
  * Mic defaults to MUTED when a session starts. Only unmuted while Shift is held.
  * Ignores Shift combos (Shift+letter etc.) — only responds to solo Shift presses.
  */
-export default function useVoiceShortcuts({ voice, enabled }: UseVoiceShortcutsOptions): void {
+const useVoiceShortcuts = ({ voice, enabled }: UseVoiceShortcutsOptions): void => {
   const voiceRef = useRef(voice);
 
   voiceRef.current = voice;
@@ -77,7 +78,7 @@ export default function useVoiceShortcuts({ voice, enabled }: UseVoiceShortcutsO
       if (IGNORE_TAGS.has((event.target as HTMLElement)?.tagName?.toUpperCase())) return;
 
       // Only respond to the Shift key itself
-      if (event.key !== 'Shift') {
+      if (event.key !== KEYBOARD_KEYS.SHIFT) {
         // Any non-Shift key while Shift is down means it's a combo (Shift+A etc.) — abort
         if (shiftDownTimeRef.current > 0) {
           comboDetectedRef.current = true;
@@ -112,7 +113,7 @@ export default function useVoiceShortcuts({ voice, enabled }: UseVoiceShortcutsO
   const handleKeyUp = useCallback(
     (event: KeyboardEvent) => {
       if (!enabled) return;
-      if (event.key !== 'Shift') return;
+      if (event.key !== KEYBOARD_KEYS.SHIFT) return;
 
       const downTime = shiftDownTimeRef.current;
 
@@ -182,4 +183,6 @@ export default function useVoiceShortcuts({ voice, enabled }: UseVoiceShortcutsO
       clearHoldTimer();
     };
   }, [clearHoldTimer]);
-}
+};
+
+export default useVoiceShortcuts;

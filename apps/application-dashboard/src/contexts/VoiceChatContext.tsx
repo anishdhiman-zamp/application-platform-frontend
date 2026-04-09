@@ -34,16 +34,16 @@ export const VoiceChatProvider = ({ children }: { children: ReactNode }) => {
 
   const fetchVoiceJoin = useCallback(
     async (body: Parameters<typeof triggerVoiceJoin>[0]) => {
-      const result = await triggerVoiceJoin(body);
-
-      if ('error' in result) {
-        const err = result.error;
-        const detail = err && 'status' in err ? String(err.status) : (err as { message?: string })?.message;
+      try {
+        return await triggerVoiceJoin(body).unwrap();
+      } catch (err) {
+        const detail =
+          err && typeof err === 'object' && 'status' in err
+            ? String(err.status)
+            : (err as { message?: string })?.message;
 
         throw new Error(`Voice join failed${detail ? `: ${detail}` : ''}`);
       }
-
-      return result.data;
     },
     [triggerVoiceJoin],
   );

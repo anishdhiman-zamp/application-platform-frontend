@@ -33,13 +33,11 @@ export interface VoiceTranscriptMessage {
 }
 
 export interface UseVoiceChatOptions {
-  /** Override join URL (tests). Default: `NEXT_PUBLIC_BASE_API_URL` + `/api/voice/join` (see hemant/v2v-2). */
-  joinUrl?: string;
   /** Remote participant identity used to detect bot speech. Default: `bot` */
   botIdentity?: string;
   /** Optional default passed to `start()` when no override is given */
   defaultSystemPrompt?: string;
-  /** Custom join (e.g. tests). Must return LiveKit credentials. */
+  /** Fetch LiveKit credentials for the voice session. Required. */
   fetchJoin?: (body: VoiceJoinRequest) => Promise<VoiceJoinResponse>;
 }
 

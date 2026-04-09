@@ -8,25 +8,13 @@ import type {
   UseVoiceChatReturn,
   VoiceChatState,
   VoiceJoinRequest,
-  VoiceJoinResponse,
   VoiceTranscriptMessage,
 } from '../types/voice-chat';
 import { VOICE_CHAT_STATE } from '../types/voice-chat';
 
-/** Matches hemant/v2v-2: POST to API host, session cookies (no Next.js proxy). */
-const BASE_API_URL = process.env.NEXT_PUBLIC_BASE_API_URL;
-
 const BOT_AUDIO_ROOT_ID = 'livekit-bot-audio-root';
 
-function defaultVoiceJoinUrl(joinUrl?: string): string {
-  if (joinUrl) return joinUrl;
-  if (!BASE_API_URL) {
-    throw new Error('NEXT_PUBLIC_BASE_API_URL is not set — cannot build voice join URL');
-  }
-  return `${BASE_API_URL.replace(/\/$/, '')}/api/voice/join`;
-}
-
-function ensureBotAudioRoot(): HTMLDivElement {
+const ensureBotAudioRoot = (): HTMLDivElement => {
   let el = document.getElementById(BOT_AUDIO_ROOT_ID) as HTMLDivElement | null;
   if (!el) {
     el = document.createElement('div');
@@ -40,24 +28,32 @@ function ensureBotAudioRoot(): HTMLDivElement {
     document.body.appendChild(el);
   }
   return el;
-}
+};
 
-function removeBotAudioRootIfEmpty(): void {
+const removeBotAudioRootIfEmpty = (): void => {
   const el = document.getElementById(BOT_AUDIO_ROOT_ID);
   if (el && el.childElementCount === 0) {
     el.remove();
   }
-}
+};
 
-function syncMicEnabled(room: Room): boolean {
+const syncMicEnabled = (room: Room): boolean => {
   const pub = room.localParticipant.getTrackPublication(Track.Source.Microphone);
   if (!pub) return false;
   return !pub.isMuted;
-}
+};
 
-export function useVoiceChat(options: UseVoiceChatOptions = {}): UseVoiceChatReturn {
-  const { joinUrl, botIdentity = 'bot', defaultSystemPrompt, fetchJoin: fetchJoinOverride } = options;
+export const useVoiceChat = (options: UseVoiceChatOptions = {}): UseVoiceChatReturn => {
+  const { botIdentity = 'bot', defaultSystemPrompt, fetchJoin } = options;
 
+  // Refs
+  const roomRef = useRef<Room | null>(null);
+  const intentionalStopRef = useRef(false);
+  const audioElementsRef = useRef<Map<string, HTMLAudioElement>>(new Map());
+  const defaultSystemPromptRef = useRef(defaultSystemPrompt);
+  defaultSystemPromptRef.current = defaultSystemPrompt;
+
+  // State
   const [state, setState] = useState<VoiceChatState>(VOICE_CHAT_STATE.Idle);
   const [isMicEnabled, setIsMicEnabled] = useState(true);
   const [isBotSpeaking, setIsBotSpeaking] = useState(false);
@@ -66,13 +62,7 @@ export function useVoiceChat(options: UseVoiceChatOptions = {}): UseVoiceChatRet
   const [botTranscript, setBotTranscript] = useState('');
   const [error, setError] = useState<Error | null>(null);
 
-  const roomRef = useRef<Room | null>(null);
-  const intentionalStopRef = useRef(false);
-  const audioElementsRef = useRef<Map<string, HTMLAudioElement>>(new Map());
-
-  const defaultSystemPromptRef = useRef(defaultSystemPrompt);
-  defaultSystemPromptRef.current = defaultSystemPrompt;
-
+  // Handlers
   const teardownRoom = useCallback(() => {
     const room = roomRef.current;
     roomRef.current = null;
@@ -95,36 +85,6 @@ export function useVoiceChat(options: UseVoiceChatOptions = {}): UseVoiceChatRet
     teardownRoom();
   }, [teardownRoom]);
 
-  useEffect(() => {
-    return () => {
-      intentionalStopRef.current = true;
-      teardownRoom();
-    };
-  }, [teardownRoom]);
-
-  const fetchJoinDefault = useCallback(
-    async (body: VoiceJoinRequest): Promise<VoiceJoinResponse> => {
-      const response = await fetch(defaultVoiceJoinUrl(joinUrl), {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        credentials: 'include',
-        body: JSON.stringify(body),
-      });
-
-      if (!response.ok) {
-        const message = await response.text().catch(() => response.statusText);
-        const err = new Error(message || `Voice join failed (${response.status})`);
-        (err as Error & { status?: number }).status = response.status;
-        throw err;
-      }
-
-      return response.json() as Promise<VoiceJoinResponse>;
-    },
-    [joinUrl],
-  );
-
-  const fetchJoin = fetchJoinOverride ?? fetchJoinDefault;
-
   const start = useCallback(
     async (opts?: { systemPrompt?: string }) => {
       if (opts?.systemPrompt !== undefined) {
@@ -132,6 +92,10 @@ export function useVoiceChat(options: UseVoiceChatOptions = {}): UseVoiceChatRet
       }
 
       if (roomRef.current) return;
+
+      if (!fetchJoin) {
+        throw new Error('fetchJoin option is required for useVoiceChat');
+      }
 
       setError(null);
       setState(VOICE_CHAT_STATE.Connecting);
@@ -276,6 +240,14 @@ export function useVoiceChat(options: UseVoiceChatOptions = {}): UseVoiceChatRet
     });
   }, []);
 
+  // Effects
+  useEffect(() => {
+    return () => {
+      intentionalStopRef.current = true;
+      teardownRoom();
+    };
+  }, [teardownRoom]);
+
   return {
     state,
     start,
@@ -289,4 +261,4 @@ export function useVoiceChat(options: UseVoiceChatOptions = {}): UseVoiceChatRet
     error,
     sendUserText,
   };
-}
+};

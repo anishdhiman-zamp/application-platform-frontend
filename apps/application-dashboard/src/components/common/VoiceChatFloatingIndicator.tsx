@@ -1,6 +1,7 @@
 'use client';
 
-import { FC, useCallback } from 'react';
+import { useCallback } from 'react';
+import { Button } from '@zamp-platform/ui';
 import { VOICE_CHAT_STATE } from '@zamp-platform/ui/types';
 import { cn } from '@zamp-platform/ui/utils';
 import { AnimatePresence, motion } from 'framer-motion';
@@ -14,7 +15,7 @@ import { useVoiceChatContext } from '@/contexts/VoiceChatContext';
  * On non-chat pages, clicking the label navigates to /chat.
  * Always visible when a voice session is in progress.
  */
-const VoiceChatFloatingIndicator: FC = () => {
+const VoiceChatFloatingIndicator = () => {
   const { state, stop, toggleMic, isMicEnabled } = useVoiceChatContext();
   const pathname = usePathname();
   const router = useRouter();
@@ -24,12 +25,6 @@ const VoiceChatFloatingIndicator: FC = () => {
   const isConnecting = state === VOICE_CHAT_STATE.Connecting || state === VOICE_CHAT_STATE.Ready;
   const isVisible = isActive || isConnecting;
 
-  const handleLabelClick = useCallback(() => {
-    if (!isOnChatPage) {
-      router.push(ROUTES_PATH.CHAT);
-    }
-  }, [router, isOnChatPage]);
-
   const handleStop = useCallback(
     (e: React.MouseEvent) => {
       e.stopPropagation();
@@ -38,13 +33,9 @@ const VoiceChatFloatingIndicator: FC = () => {
     [stop],
   );
 
-  const handleToggleMic = useCallback(
-    (e: React.MouseEvent) => {
-      e.stopPropagation();
-      void toggleMic();
-    },
-    [toggleMic],
-  );
+  const handleToggleMic = useCallback(() => {
+    void toggleMic();
+  }, [toggleMic]);
 
   return (
     <AnimatePresence>
@@ -65,7 +56,11 @@ const VoiceChatFloatingIndicator: FC = () => {
             <div
               role={isOnChatPage ? undefined : 'button'}
               tabIndex={isOnChatPage ? undefined : 0}
-              onClick={handleLabelClick}
+              onClick={() => {
+                if (!isOnChatPage) {
+                  router.push(ROUTES_PATH.CHAT);
+                }
+              }}
               className={cn('flex items-center gap-2', !isOnChatPage && 'cursor-pointer')}
             >
               {isConnecting ? (
@@ -77,7 +72,7 @@ const VoiceChatFloatingIndicator: FC = () => {
                 </span>
               )}
 
-              <span className='text-GRAY_1000 text-xs font-medium'>
+              <span className='text-GRAY_1000 f-12-400'>
                 {isConnecting ? 'Connecting...' : isMicEnabled ? 'Speaking...' : 'Voice active'}
               </span>
             </div>
@@ -85,25 +80,29 @@ const VoiceChatFloatingIndicator: FC = () => {
             <div className='bg-GRAY_400 mx-0.5 h-4 w-px' />
 
             {isActive && (
-              <button
+              <Button
+                variant='ghost'
+                size='icon'
                 onClick={handleToggleMic}
                 className={cn(
-                  'rounded-full p-0.5 transition-colors',
-                  isMicEnabled ? 'bg-green-100 text-green-600' : 'hover:bg-accent text-GRAY_700',
+                  'size-auto rounded-full p-0.5',
+                  isMicEnabled ? 'bg-GRAY_100 text-GREEN_600' : 'hover:bg-accent text-GRAY_700',
                 )}
                 aria-label={isMicEnabled ? 'Mute microphone' : 'Unmute microphone'}
               >
                 {isMicEnabled ? <Mic className='size-3.5' /> : <HeadphoneOff className='size-3.5' />}
-              </button>
+              </Button>
             )}
 
-            <button
+            <Button
+              variant='ghost'
+              size='icon'
               onClick={handleStop}
-              className='hover:bg-accent rounded-full p-0.5 transition-colors'
+              className='hover:bg-accent size-auto rounded-full p-0.5'
               aria-label='End voice chat'
             >
-              <X className='size-3.5 text-red-500' />
-            </button>
+              <X className='text-RED_500 size-3.5' />
+            </Button>
           </div>
         </motion.div>
       )}

@@ -1,7 +1,6 @@
 'use client';
 
-import { FC } from 'react';
-import { Button } from '@zamp-platform/ui';
+import { Button, Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@zamp-platform/ui';
 import { VOICE_CHAT_STATE } from '@zamp-platform/ui/types';
 import { cn } from '@zamp-platform/ui/utils';
 import { HeadphoneOff, Headphones, Loader2, X } from 'lucide-react';
@@ -9,7 +8,7 @@ import { useVoiceChatContext } from '@/contexts/VoiceChatContext';
 
 const toolbarBtnClass = 'hover:text-GRAY_1000 hover:bg-accent size-[26px] rounded-[6px] p-[2px] [&_svg]:size-3.5';
 
-const VoiceChatSlot: FC = () => {
+const VoiceChatSlot = () => {
   const { start, stop, toggleMic, isMicEnabled, state } = useVoiceChatContext();
 
   const isVoiceActive = state === VOICE_CHAT_STATE.Active;
@@ -47,15 +46,24 @@ const VoiceChatSlot: FC = () => {
   }
 
   return (
-    <Button
-      variant='ghost'
-      size='icon'
-      className={cn(toolbarBtnClass, state === VOICE_CHAT_STATE.Error ? 'text-red-500' : 'text-GRAY_700')}
-      aria-label='Start voice chat'
-      onClick={() => void start()}
-    >
-      <Headphones />
-    </Button>
+    <TooltipProvider>
+      <Tooltip>
+        <TooltipTrigger asChild>
+          <Button
+            variant='ghost'
+            size='icon'
+            className={cn(toolbarBtnClass, state === VOICE_CHAT_STATE.Error ? 'text-red-500' : 'text-GRAY_700')}
+            aria-label='Start voice chat'
+            onClick={() => void start()}
+          >
+            <Headphones />
+          </Button>
+        </TooltipTrigger>
+        <TooltipContent>
+          <p>Double-press Shift to toggle voice chat</p>
+        </TooltipContent>
+      </Tooltip>
+    </TooltipProvider>
   );
 };
 
