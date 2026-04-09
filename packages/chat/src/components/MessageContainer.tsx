@@ -19,14 +19,8 @@ interface MessageContainerProps {
   streamingState?: StreamingState | null;
   assistantAvatar?: ReactNode;
   className?: string;
-  showTimestamp?: boolean;
-  showFeedback?: boolean;
-  feedbackDisabled?: boolean;
-  showCopy?: boolean;
-  alignUserRight?: boolean;
   children?: ReactNode;
   organizationId?: string;
-  streamingEnabled?: boolean;
   conversationId?: string;
   showMarkdownConnectors?: boolean;
   showStreamingAvatar?: boolean;
@@ -39,14 +33,8 @@ export const MessageContainer: FC<MessageContainerProps> = ({
   streamingState,
   assistantAvatar,
   className,
-  showTimestamp = false,
-  showFeedback = false,
-  showCopy = false,
-  feedbackDisabled = false,
-  alignUserRight = false,
   children,
   organizationId,
-  streamingEnabled = true,
   conversationId,
   showMarkdownConnectors = false,
   showStreamingAvatar = true,
@@ -123,25 +111,26 @@ export const MessageContainer: FC<MessageContainerProps> = ({
 
   return (
     <div className={cn('flex w-full grow flex-col gap-6 p-4', className)}>
-      {messages?.map((message, index) => (
-        <Message
-          key={getMessageKey(message, index)}
-          message={message}
-          onAction={handleAction}
-          assistantAvatar={defaultAssistantAvatar}
-          showTimestamp={showTimestamp}
-          alignUserRight={alignUserRight}
-          conversationId={conversationId}
-          showFeedback={showFeedback}
-          feedbackDisabled={feedbackDisabled}
-          showCopy={showCopy}
-          isLastMessage={index === messages.length - 1}
-          shouldAnimate={index === messages.length - 1 && isNewUserMessage}
-          organizationId={organizationId}
-          streamingEnabled={streamingEnabled}
-          showMarkdownConnectors={showMarkdownConnectors}
-        />
-      ))}
+      {messages?.map((message, index) => {
+        const isLast = index === messages.length - 1;
+        const isStreamingOverlap =
+          isLast && !!streamingState?.message_content?.elements?.length && message.sender_type === SenderType.ASSISTANT;
+
+        return (
+          <Message
+            key={getMessageKey(message, index)}
+            message={message}
+            onAction={handleAction}
+            assistantAvatar={defaultAssistantAvatar}
+            conversationId={conversationId}
+            isLastMessage={isLast}
+            shouldAnimate={isLast && isNewUserMessage}
+            organizationId={organizationId}
+            showMarkdownConnectors={showMarkdownConnectors}
+            hideActions={isStreamingOverlap}
+          />
+        );
+      })}
 
       {streamingState && !!streamingState.message_content?.elements?.length && (
         <StreamingMessage

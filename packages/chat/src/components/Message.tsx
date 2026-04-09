@@ -23,20 +23,15 @@ export interface MessageProps {
   containerClassName?: string;
   conversationId?: string;
   messageId?: string;
-  showTimestamp?: boolean;
-  showFeedback?: boolean;
-  showCopy?: boolean;
-  feedbackDisabled?: boolean;
   isLastMessage?: boolean;
   shouldAnimate?: boolean;
-  alignUserRight?: boolean;
   organizationId?: string;
-  streamingEnabled?: boolean;
   assistantAvatar?: ReactNode;
   showMarkdownConnectors?: boolean;
   showConnectorToLastBlock?: boolean;
   showConnectorToNextBlock?: boolean;
   embeddedInStepSummary?: boolean;
+  hideActions?: boolean;
 }
 
 export const USER_MESSAGE_MAX_HEIGHT = 240;
@@ -50,19 +45,14 @@ export const Message: FC<MessageProps> = ({
   conversationId,
   messageId,
   assistantAvatar,
-  showTimestamp = false,
-  showFeedback = false,
-  showCopy = false,
-  feedbackDisabled = false,
   isLastMessage = false,
   shouldAnimate = false,
-  alignUserRight = false,
   organizationId,
-  streamingEnabled = true,
   showMarkdownConnectors = false,
   showConnectorToLastBlock = false,
   showConnectorToNextBlock = false,
   embeddedInStepSummary = false,
+  hideActions = false,
 }) => {
   const cleanupRef = useRef<defaultFnType | null>(null);
   const contentRef = useRef<HTMLDivElement>(null);
@@ -73,7 +63,7 @@ export const Message: FC<MessageProps> = ({
   const [isOverflowing, setIsOverflowing] = useState(false);
 
   const isUserMessage = message.sender_type === SenderType.USER;
-  const shouldAlignRight = alignUserRight && isUserMessage;
+  const shouldAlignRight = isUserMessage;
   const sharedClassName = cn('group space-y-3', shouldAlignRight && 'flex flex-col items-end', containerClassName);
 
   const primaryBlockType = message?.message_content?.elements?.[0]?.type;
@@ -169,7 +159,7 @@ export const Message: FC<MessageProps> = ({
             (embeddedInStepSummary
               ? 'relative w-full max-w-none min-w-0'
               : 'relative w-full max-w-[min(100%,700px)] min-w-0'),
-          shouldAlignRight && 'bg-GRAY_100 rounded-[10px] px-4 py-3',
+          shouldAlignRight && !isUserInputsRespondedBubble && 'bg-GRAY_100 rounded-[10px] px-4 py-3',
           isUserMessage && userBubbleLayoutClassName,
         )}
       >
@@ -207,30 +197,30 @@ export const Message: FC<MessageProps> = ({
           </div>
         )}
       </div>
-      {streamingEnabled && (
-        <div
-          className={cn(
-            'flex items-center transition-opacity duration-200',
-            isLastMessage && message.sender_type === SenderType.ASSISTANT
+      <div
+        className={cn(
+          'flex items-center transition-opacity duration-200',
+          hideActions
+            ? 'opacity-0 group-hover:opacity-100'
+            : isLastMessage && message.sender_type === SenderType.ASSISTANT
               ? 'opacity-100'
               : 'opacity-0 group-hover:opacity-100',
-            shouldAlignRight && 'mt-0',
-          )}
-        >
-          {showCopy && <CopyMessageButton messageContent={message.message_content} />}
-          {showTimestamp && message.sender_type === SenderType.USER && (
-            <MessageTimestamp formattedTimestamp={formattedTimestamp} tooltipTimestamp={tooltipTimestamp} />
-          )}
-          {showFeedback && message.sender_type === SenderType.ASSISTANT && (
-            <ChatFeedback
-              messageId={messageId || message?.id}
-              conversationId={conversationId || message?.conversation_id}
-              disabled={feedbackDisabled || isLoading}
-              organizationId={organizationId}
-            />
-          )}
-        </div>
-      )}
+          shouldAlignRight && 'mt-0',
+        )}
+      >
+        <CopyMessageButton messageContent={message.message_content} />
+        {message.sender_type === SenderType.USER && (
+          <MessageTimestamp formattedTimestamp={formattedTimestamp} tooltipTimestamp={tooltipTimestamp} />
+        )}
+        {message.sender_type === SenderType.ASSISTANT && (
+          <ChatFeedback
+            messageId={messageId || message?.id}
+            conversationId={conversationId || message?.conversation_id}
+            disabled={isLoading}
+            organizationId={organizationId}
+          />
+        )}
+      </div>
     </>
   );
 

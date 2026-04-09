@@ -21,12 +21,8 @@ import {
   useStopConversationMutation,
   useStreamingState,
 } from '@zamp-platform/chat';
-import { type BaseEventPayload, EVENT_TYPE } from '@zamp-platform/utils/event-bus/event-bus.types';
 import { type ReactNode, useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { useDispatch } from 'react-redux';
-
-import { useEventBus } from '@/app/_providers/sse-provider';
-import type { MapAny } from '@/types/commonTypes';
 
 import { type ConversationEventCallbacks } from '../handlers/conversationEventHandler';
 import { conversationSSERegistry } from '../registry/conversationSSERegistry';
@@ -38,8 +34,6 @@ export interface ConversationProviderProps {
   conversationId: string | null;
   resourceId: string;
   resourceType: ResourceType;
-  enableStreaming?: boolean;
-  usePerConversationSSE?: boolean;
   setHeader?: (header: string) => void;
   apiConfig?: {
     getConversationById?: string;
@@ -54,8 +48,6 @@ export const ConversationProvider: React.FC<ConversationProviderProps> = ({
   conversationId: externalConversationId,
   resourceId,
   resourceType,
-  enableStreaming = true,
-  usePerConversationSSE: usePerConvSSE = false,
   setHeader,
   apiConfig,
   onConversationIdChange,
@@ -80,10 +72,9 @@ export const ConversationProvider: React.FC<ConversationProviderProps> = ({
     isNewlyCreatedConversationRef.current === externalConversationId ||
     isNewlyCreatedConversationRef.current === _conversationId;
   const isNew = isNewlyCreatedConversationRef.current === _conversationId;
-  const shouldSkipConversationFetch = !resourceId || !resourceType || !externalConversationId || isNewConversationSkip;
+  const shouldSkipConversationFetch = !resourceId || !resourceType || !externalConversationId;
 
   const dispatch = useDispatch();
-  const { sseEventBus } = useEventBus();
 
   const [createConversationV2Mutation, { isLoading: isCreatingConversationV2, error: createConversationV2Error }] =
     useCreateConversationV2Mutation();
@@ -110,10 +101,7 @@ export const ConversationProvider: React.FC<ConversationProviderProps> = ({
   );
   const streamingState = useStreamingState(_conversationId);
 
-  const isStreaming = useMemo(
-    () => (enableStreaming ? (streamingState?.is_active ?? false) : false),
-    [enableStreaming, streamingState?.is_active],
-  );
+  const isStreaming = useMemo(() => streamingState?.is_active ?? false, [streamingState?.is_active]);
 
   const isAnalysing = useMemo(
     () => messages.length > 0 && messages[messages.length - 1]?.sender_type === SenderType.USER,
@@ -128,8 +116,7 @@ export const ConversationProvider: React.FC<ConversationProviderProps> = ({
   // isNewConversationSkip (not shouldSkipConversationFetch) avoids opening SSE while
   // resourceId is transiently empty during Redux hydration.
   const historyReady = isNew || isNewConversationSkip || isHistoryLoaded;
-  const sseEnabled =
-    usePerConvSSE && enableStreaming && Boolean(_conversationId) && Boolean(resourceId) && historyReady;
+  const sseEnabled = Boolean(_conversationId) && Boolean(resourceId) && historyReady;
 
   const clearStoppingTimer = useCallback(() => {
     if (stoppingTimerRef.current) {
@@ -139,21 +126,19 @@ export const ConversationProvider: React.FC<ConversationProviderProps> = ({
   }, []);
 
   const handlePerConvMessageStop = useCallback(
-    (finalMessage: ChatMessage | null, conversationId: string) => {
+    (finalMessage: ChatMessage | null) => {
       if (finalMessage) {
         setMessages((prev) => {
           if (finalMessage.id && prev.some((msg) => msg.id === finalMessage.id)) return prev;
           return [...prev, finalMessage];
         });
       }
-      if (conversationId && isNewlyCreatedConversationRef.current !== conversationId) {
-        dispatch(chatApi.util.invalidateTags([{ type: APITags.GET_CONVERSATION_BY_ID, id: conversationId }]));
-      }
+      refetchConversationHistory();
 
       clearStoppingTimer();
       setIsStopping(false);
     },
-    [clearStoppingTimer, dispatch],
+    [clearStoppingTimer, refetchConversationHistory],
   );
 
   const handlePerConvTitleUpdated = useCallback((title: string) => {
@@ -228,14 +213,14 @@ export const ConversationProvider: React.FC<ConversationProviderProps> = ({
   );
 
   const clearMessages = useCallback(() => {
-    if (enableStreaming && conversationIdRef.current) {
+    if (conversationIdRef.current) {
       streamingStateStore.delete(conversationIdRef.current);
     }
     setMessages([]);
     _setConversationId(null);
     conversationIdRef.current = null;
     isNewlyCreatedConversationRef.current = null;
-  }, [enableStreaming]);
+  }, []);
 
   const stopConversation = useCallback(async () => {
     if (!_conversationId || isStopping) return;
@@ -302,10 +287,6 @@ export const ConversationProvider: React.FC<ConversationProviderProps> = ({
           });
         }
 
-        if (response.title && !enableStreaming) {
-          setHeaderRef.current?.(response.title);
-        }
-
         return response;
       } catch (error) {
         setMessages([]);
@@ -319,7 +300,6 @@ export const ConversationProvider: React.FC<ConversationProviderProps> = ({
       apiConfig?.getConversationById,
       resourceId,
       resourceType,
-      enableStreaming,
       setConversationId,
       triggerGetConversation,
     ],
@@ -371,35 +351,6 @@ export const ConversationProvider: React.FC<ConversationProviderProps> = ({
     },
     [_conversationId, sendMessageV2Mutation, apiConfig?.sendMessage],
   );
-
-  const handleTaskUpdate = useCallback((data: BaseEventPayload) => {
-    if (data.source_id !== conversationIdRef.current) return;
-
-    const payload = data.payload as MapAny;
-    const taskId = payload?.task_id as string;
-    const status = (payload?.updated_fields as MapAny)?.status as TaskStatus | undefined;
-
-    if (!taskId || !status) return;
-
-    setMessages((prev) =>
-      prev.map((msg) => {
-        const elements = msg.message_content?.elements;
-        if (!elements?.length) return msg;
-
-        let hasUpdate = false;
-        const updatedElements = elements.map((el) => {
-          if (el.type === BLOCK_TYPE.TASK && el.payload.task_id === taskId) {
-            hasUpdate = true;
-            return { ...el, payload: { ...el.payload, status } };
-          }
-          return el;
-        });
-
-        if (!hasUpdate) return msg;
-        return { ...msg, message_content: { ...msg.message_content, elements: updatedElements } };
-      }),
-    );
-  }, []);
 
   const actionsValue: ConversationActions = useMemo(
     () => ({
@@ -502,7 +453,7 @@ export const ConversationProvider: React.FC<ConversationProviderProps> = ({
   // Clear stale streaming state on mount, unless the registry has a live background
   // stream — in that case the store already has fresh in-progress content.
   useEffect(() => {
-    if (externalConversationId && enableStreaming) {
+    if (externalConversationId) {
       const hasLiveBackgroundStream =
         conversationSSERegistry.isConnected(externalConversationId) &&
         streamingStateStore.get(externalConversationId)?.is_active === true;
@@ -593,18 +544,13 @@ export const ConversationProvider: React.FC<ConversationProviderProps> = ({
     // streamingMessageId excluded: connection is already open after mount; reconnect is external.
   }, [sseEnabled, _conversationId]);
 
-  useEffect(() => {
-    const sub = sseEventBus.subscribe(EVENT_TYPE.TASK_UPDATE, handleTaskUpdate);
-    return () => sub.unsubscribe();
-  }, [sseEventBus, handleTaskUpdate]);
-
   // Apply cached data immediately (isFetchingConversationHistory may be true during refetch).
   // This prevents a blank message list while a background-stream conversation is switching back —
   // the cache already has prior history; we don't need to wait for the fresh response.
   useEffect(() => {
     if (!conversationHistory) return;
 
-    if (conversationHistory?.conversation?.title) {
+    if (conversationHistory?.conversation?.title && !isNew) {
       setHeaderRef.current?.(conversationHistory.conversation.title);
     }
 
@@ -616,8 +562,7 @@ export const ConversationProvider: React.FC<ConversationProviderProps> = ({
           const dbMessageIds = new Set(historyMessages.map((m) => m.id).filter(Boolean));
           const replayedMessages = prev.filter((m) => {
             if (!m.id || dbMessageIds.has(m.id)) return false;
-            if (enableStreaming) return m.sender_type === SenderType.USER;
-            return true;
+            return m.sender_type === SenderType.USER;
           });
 
           if (replayedMessages.length > 0) {
@@ -627,7 +572,7 @@ export const ConversationProvider: React.FC<ConversationProviderProps> = ({
         return historyMessages;
       });
     }
-  }, [conversationHistory, enableStreaming]);
+  }, [conversationHistory]);
 
   useEffect(() => {
     setTaskSummaries({});
