@@ -5,7 +5,7 @@ import { Button } from '@zamp-platform/ui';
 import { VOICE_CHAT_STATE } from '@zamp-platform/ui/types';
 import { cn } from '@zamp-platform/ui/utils';
 import { AnimatePresence, motion } from 'framer-motion';
-import { HeadphoneOff, Headphones, Loader2, Mic, X } from 'lucide-react';
+import { Headphones, Loader2, Mic, MicOff, X } from 'lucide-react';
 import { usePathname, useRouter } from 'next/navigation';
 import { ROUTES_PATH } from '@/constants/routeConfig';
 import { useVoiceChatContext } from '@/contexts/VoiceChatContext';
@@ -73,7 +73,7 @@ const VoiceChatFloatingIndicator = () => {
               )}
 
               <span className='text-GRAY_1000 f-12-400'>
-                {isConnecting ? 'Connecting...' : isMicEnabled ? 'Speaking...' : 'Voice active'}
+                {isConnecting ? 'Connecting...' : isMicEnabled ? 'Listening...' : 'Hold Shift while speaking'}
               </span>
             </div>
 
@@ -90,7 +90,7 @@ const VoiceChatFloatingIndicator = () => {
                 )}
                 aria-label={isMicEnabled ? 'Mute microphone' : 'Unmute microphone'}
               >
-                {isMicEnabled ? <Mic className='size-3.5' /> : <HeadphoneOff className='size-3.5' />}
+                {isMicEnabled ? <Mic className='size-3.5' /> : <MicOff className='size-3.5' />}
               </Button>
             )}
 

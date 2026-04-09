@@ -3,7 +3,7 @@
 import { Button, Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@zamp-platform/ui';
 import { VOICE_CHAT_STATE } from '@zamp-platform/ui/types';
 import { cn } from '@zamp-platform/ui/utils';
-import { HeadphoneOff, Headphones, Loader2, X } from 'lucide-react';
+import { Headphones, Loader2, Mic, MicOff, X } from 'lucide-react';
 import { useVoiceChatContext } from '@/contexts/VoiceChatContext';
 
 const toolbarBtnClass = 'hover:text-GRAY_1000 hover:bg-accent size-[26px] rounded-[6px] p-[2px] [&_svg]:size-3.5';
@@ -39,7 +39,7 @@ const VoiceChatSlot = () => {
           onClick={isVoiceActive ? () => void toggleMic() : undefined}
           disabled={!isVoiceActive}
         >
-          {isVoiceConnecting ? <Loader2 className='animate-spin' /> : isMicEnabled ? <Headphones /> : <HeadphoneOff />}
+          {isVoiceConnecting ? <Loader2 className='animate-spin' /> : isMicEnabled ? <Mic /> : <MicOff />}
         </Button>
       </div>
     );

@@ -66,6 +66,7 @@ export interface ConnectedChatInputProps {
   autoLoopEnabled?: boolean;
   autoLoopToggleSlot?: React.ReactNode;
   voiceChatSlot?: React.ReactNode;
+  hideRecordingButton?: boolean;
   hideStopButton?: boolean;
 }
 
@@ -103,6 +104,7 @@ export const ConnectedChatInput = ({
   autoLoopEnabled,
   autoLoopToggleSlot,
   voiceChatSlot,
+  hideRecordingButton = false,
   hideStopButton = false,
 }: ConnectedChatInputProps) => {
   const fileInputRef = useRef<HTMLInputElement>(null);
@@ -335,6 +337,7 @@ export const ConnectedChatInput = ({
         modelSelectorSlot={showModelSelector ? modelSelectorSlot : undefined}
         autoLoopToggleSlot={autoLoopToggleSlot}
         voiceChatSlot={voiceChatSlot}
+        hideRecordingButton={hideRecordingButton}
       />
     </div>
   );
