@@ -122,8 +122,12 @@ export const useVoiceChat = (options: UseVoiceChatOptions = {}): UseVoiceChatRet
 
         room.on(RoomEvent.LocalTrackPublished, (publication) => {
           if (publication.kind !== Track.Kind.Audio) return;
-          setIsMicEnabled(syncMicEnabled(room));
           setState(VOICE_CHAT_STATE.Active);
+          // Start muted for push-to-talk: we needed setMicrophoneEnabled(true)
+          // to trigger the permission prompt and publish the track, but the
+          // session should begin with the mic off.
+          setIsMicEnabled(false);
+          void room.localParticipant.setMicrophoneEnabled(false);
         });
 
         room.on(RoomEvent.TrackMuted, (pub, participant) => {

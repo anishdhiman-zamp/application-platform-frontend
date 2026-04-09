@@ -48,29 +48,6 @@ const useVoiceShortcuts = ({ voice, enabled }: UseVoiceShortcutsOptions): void =
     }
   }, []);
 
-  /**
-   * After a session starts, mute the mic so push-to-talk is the default mode.
-   * Polls briefly because the state transitions Connecting → Ready → Active
-   * and mic enable happens asynchronously in the LiveKit room setup.
-   */
-  const muteAfterSessionStart = useCallback(() => {
-    let attempts = 0;
-    const maxAttempts = 20;
-    const interval = 200;
-
-    const poll = setInterval(() => {
-      attempts++;
-      const { state, isMicEnabled, toggleMic } = voiceRef.current;
-
-      if (state === VOICE_CHAT_STATE.Active && isMicEnabled) {
-        void toggleMic();
-        clearInterval(poll);
-      } else if (attempts >= maxAttempts || state === VOICE_CHAT_STATE.Error || state === VOICE_CHAT_STATE.Idle) {
-        clearInterval(poll);
-      }
-    }, interval);
-  }, []);
-
   const handleKeyDown = useCallback(
     (event: KeyboardEvent) => {
       if (!enabled) return;
@@ -153,7 +130,6 @@ const useVoiceShortcuts = ({ voice, enabled }: UseVoiceShortcutsOptions): void =
 
         if (state === VOICE_CHAT_STATE.Idle || state === VOICE_CHAT_STATE.Error) {
           void start();
-          muteAfterSessionStart();
         } else {
           stop();
         }
@@ -162,7 +138,7 @@ const useVoiceShortcuts = ({ voice, enabled }: UseVoiceShortcutsOptions): void =
         lastTapTimeRef.current = now;
       }
     },
-    [enabled, clearHoldTimer, muteAfterSessionStart],
+    [enabled, clearHoldTimer],
   );
 
   useEffect(() => {
