@@ -12,13 +12,17 @@ import {
 import { cn } from '@zamp-platform/ui/utils';
 import { safeJsonParse } from '@zamp-platform/utils';
 import { AlertCircle, Play } from 'lucide-react';
-import React, { useCallback, useState } from 'react';
+import { useCallback, useState } from 'react';
 
 import IntegrationCardV2 from '@/modules/integrations/AllIntegrations/IntegrationCardV2';
 import type { IntegrationItem } from '@/types/api/integrations';
 
 import { useChatActions } from '../../context/ChatActionsContext';
-import type { ToolResultContentBlock, ToolUseDisplayContent } from '../../types/block.types';
+import type {
+  ToolResultContentBlock,
+  ToolUseDisplayContent,
+  ToolUseDisplayContentParsed,
+} from '../../types/block.types';
 import { buildIntegrationItemFromToolResult } from '../block.utils';
 import { TOOL_NAMES } from '../chat.constants';
 import { CodePreviewBlock } from './CodePreviewBlock';
@@ -31,6 +35,7 @@ interface ToolCallBlockProps {
     tool_call_id?: string;
     name?: string;
     display_name?: string;
+    display_title?: string;
     icon?: string;
   };
   is_complete: boolean;
@@ -64,10 +69,22 @@ export const ToolCallBlock = ({
   const [internalAccordionOpen, setInternalAccordionOpen] = useState<boolean>(false);
   const isControlled = typeof isAccordionOpen === 'boolean';
   const resolvedIsAccordionOpen = isControlled ? isAccordionOpen : internalAccordionOpen;
-  const toolName = payload?.display_name || 'Unknown';
-  const displayContent = safeJsonParse<{ tool_name?: string; icon?: string }>(payload?.display_content?.json_block);
+  const displayContent = safeJsonParse<ToolUseDisplayContentParsed>(payload?.display_content?.json_block);
+
+  // Check partial_json too so display_title resolves before TOOL_USE_BLOCK_UPDATE_DELTA arrives.
+  const parsedInput = safeJsonParse<Record<string, unknown>>(payload?.input_json);
+  const parsedPartial = safeJsonParse<Record<string, unknown>>(payload?.partial_json);
+
+  const toolName =
+    payload?.display_title ||
+    displayContent?.display_title ||
+    (typeof parsedInput?.display_title === 'string' ? parsedInput.display_title : undefined) ||
+    (typeof parsedPartial?.display_title === 'string' ? parsedPartial.display_title : undefined) ||
+    payload?.display_name ||
+    'Unknown';
   const name = payload?.name || displayContent?.tool_name;
   const icon = payload?.icon || displayContent?.icon;
+
   const { onWatchStream, isBrowserStreamingAvailable } = useChatActions();
 
   const toolResultData = safeJsonParse<{
