@@ -38,7 +38,16 @@ import {
 } from '@zamp-platform/ui';
 import { cn } from '@zamp-platform/ui/utils';
 import { GripVertical, Trash2 } from 'lucide-react';
-import { type BlueprintColumn, COL_PREFIX } from 'modules/pace/components/datasets/datasets.constants';
+import {
+  type BlueprintColumn,
+  COL_PREFIX,
+  COLUMN_NAME_ERROR,
+  COLUMN_NAME_LENGTH_ERROR,
+  COLUMN_NAME_MAX_LENGTH,
+  COLUMN_NAME_REGEX,
+  sanitizeColumnName,
+} from 'modules/pace/components/datasets/datasets.constants';
+import { snakeCaseToSentenceCase } from 'utils/common';
 
 const HEADERS: ReadonlyArray<{ label: string; key: string; width?: number }> = [
   { label: '', key: 'grip', width: 30 },
@@ -106,7 +115,7 @@ const ColumnRow: FC<ColumnRowProps> = memo(
     });
     const style = { transform: CSS.Transform.toString(transform), transition, opacity: isDragging ? 0.5 : 1 };
 
-    const [localName, setLocalName] = useState(column.name);
+    const [localName, setLocalName] = useState(snakeCaseToSentenceCase(column.name));
     const [isRequiredModalOpen, setIsRequiredModalOpen] = useState(false);
     const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState(false);
 
@@ -114,11 +123,12 @@ const ColumnRow: FC<ColumnRowProps> = memo(
       const trimmed = localName.trim();
 
       if (!trimmed) return 'Column name cannot be empty';
-      if (column.id.startsWith(COL_PREFIX) && !/^[a-zA-Z_][a-zA-Z0-9_]*$/.test(trimmed)) {
-        return 'Column name must not contain spaces or special characters, and must not start with a number';
+      if (trimmed.length > COLUMN_NAME_MAX_LENGTH) return COLUMN_NAME_LENGTH_ERROR;
+      if (!COLUMN_NAME_REGEX.test(trimmed)) {
+        return COLUMN_NAME_ERROR;
       }
-      const normalised = trimmed.toLowerCase();
-      const dupes = allColumns.filter((c) => c.name.trim().toLowerCase() === normalised);
+      const sanitized = sanitizeColumnName(trimmed);
+      const dupes = allColumns.filter((c) => c.name && sanitizeColumnName(c.name) === sanitized);
 
       if (dupes.length > 1 && dupes[dupes.length - 1].id === column.id) return 'Column names must be unique';
 
@@ -308,14 +318,16 @@ const DatasetBlueprintEditor: FC<DatasetBlueprintEditorProps> = ({
   const scrollContainerRef = useRef<HTMLDivElement>(null);
 
   const hasErrors = useMemo(() => {
-    const names = columns.map((c) => c.name.trim().toLowerCase());
+    const sanitizedNames = columns.map((c) => sanitizeColumnName(c.name));
 
     return columns.some((c) => {
       const trimmed = c.name.trim();
 
       if (!trimmed) return true;
-      if (c.id.startsWith(COL_PREFIX) && !/^[a-zA-Z_][a-zA-Z0-9_]*$/.test(trimmed)) return true;
-      const dupes = names.filter((n) => n === trimmed.toLowerCase());
+      if (trimmed.length > COLUMN_NAME_MAX_LENGTH) return true;
+      if (!COLUMN_NAME_REGEX.test(trimmed)) return true;
+      const sanitized = sanitizeColumnName(trimmed);
+      const dupes = sanitizedNames.filter((n) => n === sanitized);
 
       return dupes.length > 1;
     });

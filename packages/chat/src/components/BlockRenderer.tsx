@@ -368,17 +368,9 @@ export const BlockRenderer: React.FC<BlockRendererProps> = ({
       }
 
       case BLOCK_TYPE.AGENT: {
-        if (renderAgentBlock) {
-          return (
-            <React.Fragment key={block?.payload?.agent_id ?? block?.id}>
-              {renderAgentBlock(block?.payload)}
-            </React.Fragment>
-          );
-        }
-
         return (
-          <div className={showConnectorToNext ? 'pb-4' : ''}>
-            <AgentBlock key={block?.payload?.agent_id ?? block?.id} payload={block?.payload} />
+          <div key={block?.payload?.agent_id ?? block?.id} className={cn('pb-3', { showConnectorToNext: 'pb-4' })}>
+            {renderAgentBlock ? renderAgentBlock(block?.payload) : <AgentBlock payload={block?.payload} />}
           </div>
         );
       }
