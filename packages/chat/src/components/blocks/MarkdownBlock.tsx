@@ -4,6 +4,7 @@ import '../code-highlight.css';
 import '../streaming-reveal.css';
 
 import { Book, CopyToClipboard } from '@zamp-platform/ui';
+import { cn } from '@zamp-platform/ui/utils';
 import type { Element, RootContent } from 'hast';
 import { common, createLowlight } from 'lowlight';
 import { Copy } from 'lucide-react';
@@ -79,9 +80,16 @@ interface MarkdownBlockProps {
     text: string;
   };
   isStreaming?: boolean;
+  className?: string;
+  fontClassName?: string;
 }
 
-export const MarkdownBlock: React.FC<MarkdownBlockProps> = ({ payload, isStreaming = false }) => {
+export const MarkdownBlock: React.FC<MarkdownBlockProps> = ({
+  payload,
+  isStreaming = false,
+  className,
+  fontClassName = 'text-GRAY_950 text-sm leading-[1.667] font-[420]',
+}) => {
   const { onFileOpen } = useChatActions();
 
   const handleFileOpen = (filePath: string, fileName: string) => {
@@ -100,7 +108,10 @@ export const MarkdownBlock: React.FC<MarkdownBlockProps> = ({ payload, isStreami
 
   return (
     <div
-      className='max-w-chat-prose text-GRAY_950 overflow-hidden text-sm leading-[1.667] font-[420] wrap-break-word'
+      className={cn(
+        'max-w-chat-prose text-GRAY_950 overflow-hidden text-sm leading-[1.667] font-[420] wrap-break-word',
+        className,
+      )}
       data-testid='markdown-block'
     >
       <ReactMarkdown
@@ -123,14 +134,8 @@ export const MarkdownBlock: React.FC<MarkdownBlockProps> = ({ payload, isStreami
               {children}
             </h3>
           ),
-          p: ({ children }) => (
-            <p className='text-GRAY_950 mt-3 text-sm leading-[1.667] font-[420] first:mt-0'>{children}</p>
-          ),
-          ul: ({ children }) => (
-            <ul className='text-GRAY_950 mt-3 list-disc pl-5 text-sm leading-[1.667] font-[420] first:mt-0'>
-              {children}
-            </ul>
-          ),
+          p: ({ children }) => <p className={cn('mt-3 first:mt-0', fontClassName)}>{children}</p>,
+          ul: ({ children }) => <ul className={cn('mt-3 list-disc pl-5 first:mt-0', fontClassName)}>{children}</ul>,
           ol: ({ children }) => (
             <ol className='text-GRAY_950 mt-3 list-decimal pl-7 text-sm leading-[1.667] font-[420] first:mt-0'>
               {children}

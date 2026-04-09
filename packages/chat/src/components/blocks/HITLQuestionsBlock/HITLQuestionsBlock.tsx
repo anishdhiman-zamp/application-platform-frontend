@@ -43,6 +43,7 @@ export const HITLQuestionsBlock = ({
   const [focusedOptionIndex, setFocusedOptionIndex] = useState(0);
   const scrollDirectionRef = useRef<'up' | 'down'>('down');
   const shouldScrollRef = useRef(false);
+  const isProgrammaticScrollRef = useRef(false);
   const submitRef = useRef<(() => void) | null>(null);
   const [answers, setAnswers] = useState<HITLAnswersState>({});
   const [approvalAction, setApprovalAction] = useState<APPROVAL_ACTION | null>(null);
@@ -439,6 +440,8 @@ export const HITLQuestionsBlock = ({
 
     if (!shouldScroll) return;
 
+    isProgrammaticScrollRef.current = true;
+
     const rafId = requestAnimationFrame(() => {
       const scrollEl = scrollContainerRef.current?.getScrollElement();
       if (!scrollEl) return;
@@ -470,6 +473,59 @@ export const HITLQuestionsBlock = ({
   useEffect(() => {
     return handleFocusAndScroll();
   }, [handleFocusAndScroll, currentQuestionIndex]);
+
+  const setupScrollObserver = useCallback(() => {
+    const scrollEl = scrollContainerRef.current?.getScrollElement();
+    if (!scrollEl || questions.length <= 1) return;
+
+    const resetProgrammaticFlag = () => {
+      isProgrammaticScrollRef.current = false;
+    };
+    scrollEl.addEventListener('scrollend', resetProgrammaticFlag);
+
+    const visibilityMap = new Map<number, number>();
+
+    const observer = new IntersectionObserver(
+      (entries) => {
+        if (isProgrammaticScrollRef.current) return;
+
+        for (const entry of entries) {
+          const idx = questionRefs.current.indexOf(entry.target as HTMLDivElement);
+          if (idx !== -1) {
+            visibilityMap.set(idx, entry.intersectionRatio);
+          }
+        }
+
+        let bestIdx = -1;
+        let bestRatio = 0;
+        for (const [idx, ratio] of visibilityMap) {
+          if (ratio > bestRatio) {
+            bestRatio = ratio;
+            bestIdx = idx;
+          }
+        }
+
+        if (bestIdx !== -1) {
+          setCurrentQuestionIndex(bestIdx);
+          setFocusedOptionIndex(0);
+        }
+      },
+      { root: scrollEl, threshold: [0, 0.25, 0.5, 0.75, 1] },
+    );
+
+    for (const el of questionRefs.current) {
+      if (el) observer.observe(el);
+    }
+
+    return () => {
+      observer.disconnect();
+      scrollEl.removeEventListener('scrollend', resetProgrammaticFlag);
+    };
+  }, [questions.length]);
+
+  useEffect(() => {
+    return setupScrollObserver();
+  }, [setupScrollObserver]);
 
   if (!questions.length) return null;
 
