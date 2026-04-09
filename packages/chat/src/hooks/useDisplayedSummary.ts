@@ -3,9 +3,6 @@ import { useCallback, useEffect, useRef, useState } from 'react';
 const CHAR_INTERVAL_MS = 12;
 const SUMMARY_DEBOUNCE_MS = 300;
 
-// Module-level cache so summary text is shared across component instances (e.g. TaskBlock ↔ TaskContentInner)
-const summaryTextCache = new Map<string, string>();
-
 interface UseDisplayedSummaryParams {
   taskId: string;
   isAgentActive: boolean;
@@ -20,12 +17,12 @@ export function useDisplayedSummary({
   streamingSummaryText,
 }: UseDisplayedSummaryParams) {
   const prevIsAgentActiveRef = useRef(isAgentActive);
-  const targetTextRef = useRef(summaryTextCache.get(taskId) ?? '');
-  const revealedCountRef = useRef(targetTextRef.current.length);
+  const targetTextRef = useRef('');
+  const revealedCountRef = useRef(0);
   const animationRef = useRef<ReturnType<typeof setInterval> | null>(null);
   const debounceRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 
-  const [displayedText, setDisplayedText] = useState(() => summaryTextCache.get(taskId) ?? '');
+  const [displayedText, setDisplayedText] = useState('');
 
   const stopAnimation = useCallback(() => {
     if (animationRef.current !== null) {
@@ -49,8 +46,6 @@ export function useDisplayedSummary({
 
   const setTargetText = useCallback(
     (text: string) => {
-      summaryTextCache.set(taskId, text);
-
       const isExtension = targetTextRef.current.length > 0 && text.startsWith(targetTextRef.current);
 
       if (isExtension) {
@@ -65,28 +60,27 @@ export function useDisplayedSummary({
       targetTextRef.current = text;
       startAnimation();
     },
-    [taskId, stopAnimation, startAnimation],
+    [stopAnimation, startAnimation],
   );
 
+  // Reset when taskId changes
   useEffect(() => {
-    const cached = summaryTextCache.get(taskId) ?? '';
     stopAnimation();
-    targetTextRef.current = cached;
-    revealedCountRef.current = cached.length;
-    setDisplayedText(cached);
+    targetTextRef.current = '';
+    revealedCountRef.current = 0;
+    setDisplayedText('');
   }, [taskId, stopAnimation]);
 
   // Clear summary when a new stream begins (isAgentActive: false → true)
   useEffect(() => {
     if (isAgentActive && !prevIsAgentActiveRef.current) {
       stopAnimation();
-      summaryTextCache.delete(taskId);
       targetTextRef.current = '';
       revealedCountRef.current = 0;
       setDisplayedText('');
     }
     prevIsAgentActiveRef.current = isAgentActive;
-  }, [isAgentActive, taskId, stopAnimation]);
+  }, [isAgentActive, stopAnimation]);
 
   useEffect(
     () => () => {
@@ -111,7 +105,6 @@ export function useDisplayedSummary({
         debounceRef.current = null;
       }
       stopAnimation();
-      summaryTextCache.set(taskId, streamingSummaryText);
       targetTextRef.current = streamingSummaryText;
       revealedCountRef.current = streamingSummaryText.length;
       setDisplayedText(streamingSummaryText);
@@ -131,7 +124,7 @@ export function useDisplayedSummary({
       debounceRef.current = null;
       setTargetText(streamingSummaryText);
     }, SUMMARY_DEBOUNCE_MS);
-  }, [streamingSummaryText, isAgentActive, setTargetText, taskId, stopAnimation]);
+  }, [streamingSummaryText, isAgentActive, setTargetText, stopAnimation]);
 
   useEffect(() => {
     handleStreamingSummaryChange();

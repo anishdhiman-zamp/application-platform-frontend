@@ -112,15 +112,17 @@ export const useChatDraftInput = ({ conversationId }: UseChatDraftInputProps): U
           clearTimeout(debounceTimerRef.current);
         }
 
-        if (!nextValue && draftIdRef.current === NEW_CONVERSATION_ID && prev) {
-          messageSentFromNewChatRef.current = true;
-        }
-
         const capturedDraftId = draftIdRef.current;
 
-        debounceTimerRef.current = setTimeout(() => {
+        if (!nextValue && capturedDraftId === NEW_CONVERSATION_ID && prev) {
+          messageSentFromNewChatRef.current = true;
+
           persistDraft(capturedDraftId, nextValue);
-        }, DEBOUNCE_DELAY_MS);
+        } else {
+          debounceTimerRef.current = setTimeout(() => {
+            persistDraft(capturedDraftId, nextValue);
+          }, DEBOUNCE_DELAY_MS);
+        }
 
         return nextValue;
       });
@@ -129,7 +131,7 @@ export const useChatDraftInput = ({ conversationId }: UseChatDraftInputProps): U
   );
 
   useEffect(() => {
-    if (messageSentFromNewChatRef.current && draftId !== NEW_CONVERSATION_ID) {
+    if (draftId !== NEW_CONVERSATION_ID) {
       const drafts = getDraftsFromStorage();
       const updatedDrafts = removeDraft(drafts, NEW_CONVERSATION_ID);
 
