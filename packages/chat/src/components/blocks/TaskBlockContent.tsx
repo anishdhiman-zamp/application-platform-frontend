@@ -5,7 +5,7 @@ import { formatPlural } from '@zamp-platform/utils';
 import { ChevronDown } from 'lucide-react';
 import React, { type FC } from 'react';
 
-import type { ToolCallInfo } from './TaskBlock';
+import type { ToolCallInfo } from '../../types/block.types';
 
 interface TaskBlockContentProps {
   isLoading: boolean;
