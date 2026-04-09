@@ -1,7 +1,6 @@
 import { ShimmerText, useScrollRef } from '@zamp-platform/ui';
 import { cn } from '@zamp-platform/ui/utils';
 import { motion } from 'motion/react';
-import Image from 'next/image';
 import { FC, ReactNode, useEffect, useRef, useState } from 'react';
 
 import PaceAvatar from '@/modules/chatbot/PaceAvatar';
@@ -37,7 +36,7 @@ export const MessageContainer: FC<MessageContainerProps> = ({
   organizationId,
   conversationId,
   showMarkdownConnectors = false,
-  showStreamingAvatar = true,
+  // showStreamingAvatar = true,
 }) => {
   const previousConversationIdRef = useRef(conversationId);
   const [animatedLength, setAnimatedLength] = useState(() => {
@@ -140,7 +139,7 @@ export const MessageContainer: FC<MessageContainerProps> = ({
         />
       )}
 
-      {showStreamingAvatar && streamingState && !!streamingState.message_content?.elements?.length && (
+      {/* {showStreamingAvatar && streamingState && !!streamingState.message_content?.elements?.length && (
         <div className='flex w-full items-center'>
           <div className='dark:brightness-0 dark:invert'>
             <Image
@@ -152,7 +151,7 @@ export const MessageContainer: FC<MessageContainerProps> = ({
             />
           </div>
         </div>
-      )}
+      )} */}
 
       {showAnalysing &&
       ((isAnalysing && !streamingState) || (streamingState && !streamingState.message_content?.elements?.length)) ? (
