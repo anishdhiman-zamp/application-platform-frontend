@@ -43,7 +43,6 @@ const VALID_TABS = new Set<string>(Object.values(AGENT_DETAIL_TAB));
 
 const AgentDetailPage = ({ agentId, agentName, agentDescription = '', avatarKey = '' }: AgentDetailPageProps) => {
   const router = useRouter();
-  const hasSyncedRef = useRef(false);
   const debounceTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 
   const { updateTab, getTabById } = useDynamicTabs({ type: TAB_TYPE.AGENT });
@@ -114,14 +113,15 @@ const AgentDetailPage = ({ agentId, agentName, agentDescription = '', avatarKey 
   const { triggerChatMessage } = useTriggerChatMessageFromButton({ agentId, agentName: displayName });
 
   const syncAgentData = useCallback(() => {
-    if (!agentData || hasSyncedRef.current) return;
+    if (!agentData) return;
 
-    hasSyncedRef.current = true;
+    // Skip sync while user has a pending edit (debounce timer active)
+    if (debounceTimerRef.current) return;
 
     if (agentData?.name) setEditName(agentData?.name);
     if (agentData?.description) setEditDescription(agentData?.description);
 
-    if (agentData.avatar) {
+    if (agentData?.avatar) {
       updateTab(agentId, agentId, agentData?.name || editName, {
         description: agentData?.description || editDescription,
         avatarKey: agentData?.avatar,
@@ -134,13 +134,15 @@ const AgentDetailPage = ({ agentId, agentName, agentDescription = '', avatarKey 
       if (debounceTimerRef.current) clearTimeout(debounceTimerRef.current);
 
       debounceTimerRef.current = setTimeout(async () => {
+        debounceTimerRef.current = null;
+
         try {
           await updateAgent({ agentId, ...fields }).unwrap();
 
           const tabName = fields.name || editName;
           const tabDescription = fields.description ?? editDescription;
 
-          updateTab(agentId, agentId, tabName, { description: tabDescription });
+          updateTab(agentId, agentId, tabName, { description: tabDescription, avatarKey: resolvedAvatarKey });
         } catch {
           // Revert to last known good values on failure
           if (agentData?.name) setEditName(agentData?.name);
@@ -148,7 +150,7 @@ const AgentDetailPage = ({ agentId, agentName, agentDescription = '', avatarKey 
         }
       }, 800);
     },
-    [agentId, editName, editDescription, updateAgent, updateTab],
+    [agentId, editName, editDescription, resolvedAvatarKey, updateAgent, updateTab],
   );
 
   const handleNameChange = useCallback(

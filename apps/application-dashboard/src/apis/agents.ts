@@ -84,6 +84,7 @@ const agentsApi = baseApi.injectEndpoints({
         url: formRequestUrlWithParams(API_ENDPOINTS.AGENT_GET, { agentId }),
       }),
       transformResponse: (response: AgentApiResponseItem): AgentType => transformAgentResponse(response),
+      providesTags: (_result, _error, { agentId }) => [{ type: APITags.GET_AGENT, id: agentId }],
     }),
 
     updateAgent: builder.mutation<void, { agentId: string; name?: string; description?: string }>({
@@ -92,7 +93,10 @@ const agentsApi = baseApi.injectEndpoints({
         method: REQUEST_TYPES.PATCH,
         body,
       }),
-      invalidatesTags: [APITags.GET_AGENTS_LIST],
+      invalidatesTags: (_result, _error, { agentId }) => [
+        APITags.GET_AGENTS_LIST,
+        { type: APITags.GET_AGENT, id: agentId },
+      ],
     }),
 
     getAgentTaskCounts: builder.query<TaskListingCountsResponse, AgentTaskCountsParams>({
