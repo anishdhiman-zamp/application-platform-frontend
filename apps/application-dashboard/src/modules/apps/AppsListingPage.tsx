@@ -1,7 +1,15 @@
 'use client';
 
 import { useMemo, useState } from 'react';
-import { Accordion, AccordionContent, AccordionItem, AccordionTrigger, Button, ScrollContainer, SearchInput } from '@zamp-platform/ui';
+import {
+  Accordion,
+  AccordionContent,
+  AccordionItem,
+  AccordionTrigger,
+  Button,
+  ScrollContainer,
+  SearchInput,
+} from '@zamp-platform/ui';
 import { cn } from '@zamp-platform/ui/utils';
 import { Plus } from 'lucide-react';
 import { useGetAppsQuery } from '@/apis/apps';
@@ -44,6 +52,7 @@ const AppsListingPage = () => {
 
     if (searchTerm.trim()) {
       const q = searchTerm.toLowerCase();
+
       filtered = filtered.filter(
         (app) => app.name.toLowerCase().includes(q) || app.description?.toLowerCase().includes(q),
       );
