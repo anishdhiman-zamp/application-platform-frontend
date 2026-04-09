@@ -97,7 +97,7 @@ export const getCellEditorForPgType = (
     case DatasetColumnTypes.JSON:
       return {
         cellEditor: 'agLargeTextCellEditor',
-        cellEditorParams: { rows: 5, cols: 50 },
+        cellEditorParams: { rows: 5, cols: 50, useFormatter: true },
         valueFormatter: ({ value }: { value: unknown }) =>
           typeof value === 'object' && value !== null ? JSON.stringify(value) : String(value ?? ''),
         valueParser: ({ newValue }: { newValue: unknown }) => {
