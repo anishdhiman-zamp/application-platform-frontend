@@ -162,7 +162,7 @@ export const formatJson = (jsonString: string | undefined): string => {
 /**
  * Extracts display metadata from a single {@link ToolUseContentBlock}.
  *
- * Resolution order for `displayName` (first truthy wins):
+ * Resolution order for `displayName` (first truthy wins — empty strings are treated as absent):
  *  1. `payload.display_title`           — set by TOOL_USE_BLOCK_UPDATE_DELTA
  *  2. `display_content.display_title`   — structured display_content JSON
  *  3. `input_json.display_title`        — synthetic param injected by the LLM
@@ -183,11 +183,11 @@ export function extractToolCallInfo(toolUseBlock: ToolUseContentBlock, fallbackI
     id: toolCallId ?? `tool-${fallbackIndex}`,
     name: toolUseBlock?.payload?.name ?? displayContent?.tool_name ?? 'Unknown',
     displayName:
-      toolUseBlock?.payload?.display_title ??
-      displayContent?.display_title ??
-      (typeof parsedInput?.display_title === 'string' ? parsedInput.display_title : undefined) ??
-      (typeof parsedPartial?.display_title === 'string' ? parsedPartial.display_title : undefined) ??
-      toolUseBlock?.payload?.display_name ??
+      toolUseBlock?.payload?.display_title ||
+      displayContent?.display_title ||
+      (typeof parsedInput?.display_title === 'string' ? parsedInput.display_title : undefined) ||
+      (typeof parsedPartial?.display_title === 'string' ? parsedPartial.display_title : undefined) ||
+      toolUseBlock?.payload?.display_name ||
       'Unknown',
     icon: toolUseBlock?.payload?.icon ?? displayContent?.icon,
     isComplete: toolUseBlock?.is_complete !== false,
