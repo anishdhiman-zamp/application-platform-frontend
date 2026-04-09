@@ -156,7 +156,10 @@ export function handleConversationSSEEvent(
         break;
 
       case ConversationEventType.BROWSER_STREAMING_AVAILABLE:
-        callbacks.onBrowserStreamingAvailable?.(conversationId, (event as BrowserStreamingAvailableEvent).session_id);
+        callbacks.onBrowserStreamingAvailable?.(
+          conversationId,
+          (event as unknown as BrowserStreamingAvailableEvent).session_id,
+        );
         break;
 
       case ConversationEventType.BROWSER_STREAMING_UNAVAILABLE:
