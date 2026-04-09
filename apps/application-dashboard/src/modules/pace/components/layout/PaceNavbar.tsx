@@ -92,7 +92,7 @@ const PaceNavbar = () => {
       return false;
     }
 
-    if (pathname && isOnAnyTabBasePath(pathname)) {
+    if (pathname && isOnAnyTabBasePath(pathname) && getActiveTabIdFromUrl(pathname, searchString)) {
       return false;
     }
 
