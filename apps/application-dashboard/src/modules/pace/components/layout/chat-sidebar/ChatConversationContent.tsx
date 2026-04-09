@@ -45,7 +45,7 @@ export interface ChatConversationContentProps {
   organizationId: string;
   onFileOpen: (path: string, name: string) => void;
   onTaskOpen?: (name: string, path: string) => void;
-  onBrowserOpen?: (conversationId: string, metadata?: Record<string, unknown>) => void;
+  onBrowserOpen?: (conversationId: string) => void;
   onTaskPopoverOpenChange?: (open: boolean) => void;
   fileDropHandlerRef: React.RefObject<((files: FileList) => void) | null>;
   addFileReferenceRef: React.RefObject<((ref: { path: string; name: string }) => void) | null>;
@@ -134,16 +134,13 @@ const ChatConversationContent = ({
 
   const currentAgentInfo = activeAgentInfo ?? agentInfoFromMessages;
 
-  const handleWatchStream = useCallback(
-    (metadata?: Record<string, unknown>) => {
-      const activeConversationId = conversationId ?? ctxConversationId;
+  const handleWatchStream = useCallback(() => {
+    const activeConversationId = conversationId ?? ctxConversationId;
 
-      if (activeConversationId) {
-        onBrowserOpen?.(activeConversationId, metadata);
-      }
-    },
-    [conversationId, ctxConversationId, onBrowserOpen],
-  );
+    if (activeConversationId) {
+      onBrowserOpen?.(activeConversationId);
+    }
+  }, [conversationId, ctxConversationId, onBrowserOpen]);
 
   const handleTaskPopoverOpenChange = (open: boolean) => {
     setIsTaskPopoverOpen(open);

@@ -13,7 +13,7 @@ interface ChatActionsContextType {
   onAgentClick?: (agentId: string, agentName: string, agentDescription?: string, avatarKey?: string) => void;
   onAgentTest?: (agentId: string, agentName: string) => void;
   renderAgentBlock?: (payload: AgentBlockPayload) => ReactNode;
-  onWatchStream?: (metadata: Record<string, unknown>) => void;
+  onWatchStream?: () => void;
   isBrowserStreamingAvailable?: boolean;
   parentTasks?: TaskBreadcrumb[];
   siblings?: SiblingTask[];
@@ -30,7 +30,7 @@ interface ChatActionsProviderProps {
   onAgentClick?: (agentId: string, agentName: string, agentDescription?: string, avatarKey?: string) => void;
   onAgentTest?: (agentId: string, agentName: string) => void;
   renderAgentBlock?: (payload: AgentBlockPayload) => ReactNode;
-  onWatchStream?: (metadata: Record<string, unknown>) => void;
+  onWatchStream?: () => void;
   isBrowserStreamingAvailable?: boolean;
   parentTasks?: TaskBreadcrumb[];
   siblings?: SiblingTask[];
