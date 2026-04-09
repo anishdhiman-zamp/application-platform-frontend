@@ -103,6 +103,12 @@ export const buildPrimaryKeyQuery = (tableName: string): string =>
 
 // --- UPDATE query builders ---
 
+const serializeValue = (value: unknown): string => {
+  if (typeof value === 'object' && value !== null) return JSON.stringify(value);
+
+  return String(value);
+};
+
 export const buildUpdateCellQuery = (
   tableName: string,
   column: string,
@@ -111,7 +117,9 @@ export const buildUpdateCellQuery = (
   pkColumn: string,
 ): string => {
   const val =
-    newValue === null || newValue === undefined || newValue === '' ? 'NULL' : `'${escapeSqlString(String(newValue))}'`;
+    newValue === null || newValue === undefined || newValue === ''
+      ? 'NULL'
+      : `'${escapeSqlString(serializeValue(newValue))}'`;
 
   return `UPDATE "${escapeSqlIdentifier(tableName)}" SET "${escapeSqlIdentifier(column)}" = ${val} WHERE "${escapeSqlIdentifier(pkColumn)}" = '${escapeSqlString(String(rowId))}'`;
 };
@@ -124,7 +132,9 @@ export const buildUpdateFillQuery = (
   pkColumn: string,
 ): string => {
   const val =
-    newValue === null || newValue === undefined || newValue === '' ? 'NULL' : `'${escapeSqlString(String(newValue))}'`;
+    newValue === null || newValue === undefined || newValue === ''
+      ? 'NULL'
+      : `'${escapeSqlString(serializeValue(newValue))}'`;
   const ids = rowIds.map((id) => `'${escapeSqlString(String(id))}'`).join(', ');
 
   return `UPDATE "${escapeSqlIdentifier(tableName)}" SET "${escapeSqlIdentifier(column)}" = ${val} WHERE "${escapeSqlIdentifier(pkColumn)}" IN (${ids})`;
