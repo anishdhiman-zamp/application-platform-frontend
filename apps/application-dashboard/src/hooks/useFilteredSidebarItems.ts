@@ -24,7 +24,7 @@ export const useFilteredSidebarItems = () => {
       if (!item.featureFlag) return true;
 
       if (item.featureFlag === FEATURE_FLAGS.PACE_CHAT) {
-        return isPaceChatEnabled && isMacs;
+        return isPaceChatEnabled || isMacs;
       }
 
       return true;
