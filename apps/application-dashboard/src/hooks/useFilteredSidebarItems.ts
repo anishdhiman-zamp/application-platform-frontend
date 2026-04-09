@@ -5,6 +5,7 @@ import { FEATURE_FLAGS } from '@/constants/featureFlags';
 import { SIDEBAR_ITEMS } from '@/constants/sidebar.constants';
 import { useFeatureFlag } from '@/hooks/useFeatureFlag';
 import type { NavigationItemSchema } from '@/types/config';
+import { isMacsProduct } from '@/utils/cookie';
 
 /**
  * Hook to filter sidebar items based on feature flags
@@ -12,6 +13,7 @@ import type { NavigationItemSchema } from '@/types/config';
  */
 export const useFilteredSidebarItems = () => {
   const { isEnabled: isPaceChatEnabled, isLoading } = useFeatureFlag(FEATURE_FLAGS.ZAMP_INTERNAL);
+  const isMacs = isMacsProduct();
 
   const filteredItems = useMemo<NavigationItemSchema[]>(() => {
     if (isLoading) {
@@ -22,7 +24,7 @@ export const useFilteredSidebarItems = () => {
       if (!item.featureFlag) return true;
 
       if (item.featureFlag === FEATURE_FLAGS.PACE_CHAT) {
-        return isPaceChatEnabled;
+        return isPaceChatEnabled && isMacs;
       }
 
       return true;

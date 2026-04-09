@@ -1,25 +1,17 @@
 'use client';
 
-import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
+import { useCallback, useMemo, useRef, useState } from 'react';
 import { HITLEntityType, HITLQuestionsBlock, ResourceType, ScopeType } from '@zamp-platform/chat';
 import { ConnectedChatInput, useConversationActions, useConversationState } from '@zamp-platform/conversation-stream';
 import { cn } from '@zamp-platform/ui/utils';
 import { useDynamicTabs } from 'modules/pace/components/dynamic-tabs/useDynamicTabs';
 import ChatConversationContent from 'modules/pace/components/layout/chat-sidebar/ChatConversationContent';
-import { APITags } from '@/constants/api.constants';
-import { FEATURE_FLAGS } from '@/constants/featureFlags';
-import { useAppDispatch } from '@/hooks/toolkit';
-import { useFeatureFlag } from '@/hooks/useFeatureFlag';
-import AutoLoopConfirmDialog from '@/modules/pace/components/chat/AutoLoopConfirmDialog';
-import AutoLoopToggle from '@/modules/pace/components/chat/AutoLoopToggle';
 import ChatTopbar from '@/modules/pace/components/chat/ChatTopbar';
 import ModelSelector from '@/modules/pace/components/chat/ModelSelector';
 import { useChatDraftInput } from '@/modules/pace/hooks/useChatDraftInput';
 import { useHitlQuestions } from '@/modules/pace/hooks/useHitlQuestions';
 import { usePaceContext } from '@/modules/pace/pace.context';
 import { CHAT_SIDEBAR_STATE, TAB_TYPE } from '@/modules/pace/pace.types';
-import { addAutoLoopLockedConversation, isConversationAutoLoopLocked } from '@/modules/pace/utils/autoLoopStorage';
-import { baseApi } from '@/services/baseApi';
 
 export interface ChatSidebarContentProps {
   conversationId: string | null;
@@ -43,7 +35,6 @@ const ChatSidebarContent = ({
   currentUserName,
   username,
 }: ChatSidebarContentProps) => {
-  const dispatch = useAppDispatch();
   const { openTab } = useDynamicTabs({ type: TAB_TYPE.FILE });
   const { openTab: openBrowserTab } = useDynamicTabs({ type: TAB_TYPE.BROWSER });
   const { chatSidebarState, setChatSidebarState, setActiveAgentInfo, selectedModel, setSelectedModel } =
@@ -53,14 +44,10 @@ const ChatSidebarContent = ({
   });
   const { inputsRequired, isStreaming } = useConversationState();
   const { refetchConversationHistory } = useConversationActions();
-  const { isEnabled: isAutoLoopBtnEnabled } = useFeatureFlag(FEATURE_FLAGS.AUTO_LOOP_BTN_ENABLED);
 
   const fileDropHandlerRef = useRef<((files: FileList) => void) | null>(null);
   const addFileReferenceRef = useRef<((ref: { path: string; name: string }) => void) | null>(null);
 
-  const [autoLoopEnabled, setAutoLoopEnabled] = useState(false);
-  const [isAutoLoopLocked, setIsAutoLoopLocked] = useState(false);
-  const [isConfirmDialogOpen, setIsConfirmDialogOpen] = useState(false);
   const [isTaskPopoverOpen, setIsTaskPopoverOpen] = useState(false);
 
   const { hitlQuestions, hitlQuestionsKey } = useHitlQuestions(inputsRequired);
@@ -69,19 +56,6 @@ const ChatSidebarContent = ({
   const modelSelectorSlot = useMemo(
     () => <ModelSelector value={selectedModel} onChange={setSelectedModel} />,
     [selectedModel],
-  );
-
-  const autoLoopToggleSlot = useMemo(
-    () => (
-      <AutoLoopToggle
-        enabled={autoLoopEnabled}
-        onChange={(pressed) => {
-          if (pressed) setIsConfirmDialogOpen(true);
-        }}
-        disabled={isAutoLoopLocked}
-      />
-    ),
-    [autoLoopEnabled, isAutoLoopLocked],
   );
 
   const handleExpand = useCallback(() => {
@@ -105,11 +79,11 @@ const ChatSidebarContent = ({
   }, [chatSidebarState, setChatSidebarState]);
 
   const handleBrowserOpen = useCallback(
-    (browserConversationId: string) => {
+    (browserConversationId: string, metadata?: Record<string, unknown>) => {
       if (chatSidebarState === CHAT_SIDEBAR_STATE.EXPANDED) {
         setChatSidebarState(CHAT_SIDEBAR_STATE.SIDEBAR);
       }
-      openBrowserTab(browserConversationId, 'Browser');
+      openBrowserTab(browserConversationId, 'Browser', metadata);
     },
     [openBrowserTab, chatSidebarState, setChatSidebarState],
   );
@@ -125,17 +99,6 @@ const ChatSidebarContent = ({
     },
     [setActiveAgentInfo, setConversationId],
   );
-
-  const handleConversationCreated = useCallback(() => {
-    dispatch(baseApi.util.invalidateTags([APITags.GET_CONVERSATION_HISTORY]));
-  }, [dispatch]);
-
-  useEffect(() => {
-    const locked = isConversationAutoLoopLocked(conversationId);
-
-    setIsAutoLoopLocked(locked);
-    setAutoLoopEnabled(locked);
-  }, [conversationId]);
 
   return (
     <div className='bg-BG_WHITE relative mx-auto flex h-full w-full flex-1 flex-col'>
@@ -187,28 +150,14 @@ const ChatSidebarContent = ({
             setExternalInputValue={setInputValue}
             fileDropHandlerRef={fileDropHandlerRef}
             llmModel={selectedModel}
-            autoLoopEnabled={autoLoopEnabled}
             showModelSelector
             modelSelectorSlot={modelSelectorSlot}
-            {...(isAutoLoopBtnEnabled && { autoLoopToggleSlot })}
             conversationId={conversationId ?? ''}
-            onConversationCreated={handleConversationCreated}
             isDisabled={isStreaming}
             addFileReferenceRef={addFileReferenceRef}
           />
         )}
       </div>
-      <AutoLoopConfirmDialog
-        isOpen={isConfirmDialogOpen}
-        onOpenChange={setIsConfirmDialogOpen}
-        onConfirm={() => {
-          setAutoLoopEnabled(true);
-          setIsAutoLoopLocked(true);
-          if (conversationId) {
-            addAutoLoopLockedConversation(conversationId);
-          }
-        }}
-      />
     </div>
   );
 };

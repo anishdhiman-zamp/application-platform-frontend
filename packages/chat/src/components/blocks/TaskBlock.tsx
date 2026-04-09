@@ -5,7 +5,7 @@ import { safeJsonParse } from '@zamp-platform/utils';
 import { EVENT_TYPE } from '@zamp-platform/utils/event-bus/event-bus.types';
 import { ArrowUpRight } from 'lucide-react';
 import { useRouter } from 'next/navigation';
-import React, { type FC, useCallback, useMemo } from 'react';
+import { type FC, useCallback, useMemo } from 'react';
 
 import { getChatTaskRoute } from '@/constants/routeConfig';
 import { useAppSelector } from '@/hooks/toolkit';
@@ -226,7 +226,7 @@ const TaskBlock: FC<TaskBlockProps> = ({ payload, conversationId }) => {
 
   return (
     <div
-      className='border-GRAY_400 bg-BG_WHITE hover:bg-BG_GRAY_2 w-full cursor-pointer overflow-hidden rounded-[10px] border transition-colors'
+      className='border-GRAY_400 bg-BG_WHITE hover:bg-BG_GRAY_2 my-3 w-full cursor-pointer overflow-hidden rounded-[10px] border transition-colors'
       onClick={handleOpenTask}
       role='button'
       tabIndex={0}

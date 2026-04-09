@@ -3,17 +3,9 @@
 import { createContext, ReactNode, useContext, useMemo } from 'react';
 
 import type { AgentBlockType, AgentContentBlock } from '../types/block.types';
-import type { ToolResultContentBlock } from '../types/block.types';
 import type { SiblingTask, TaskBreadcrumb } from '../types/chat.types';
 
 type AgentBlockPayload = AgentBlockType['payload'] | AgentContentBlock['payload'];
-
-export interface LiveStreamingData {
-  toolName: string;
-  screenshotUrl?: string;
-  toolResult?: ToolResultContentBlock;
-  isComplete: boolean;
-}
 
 interface ChatActionsContextType {
   onFileOpen?: (path: string, name: string) => void;
@@ -21,7 +13,7 @@ interface ChatActionsContextType {
   onAgentClick?: (agentId: string, agentName: string, agentDescription?: string, avatarKey?: string) => void;
   onAgentTest?: (agentId: string, agentName: string) => void;
   renderAgentBlock?: (payload: AgentBlockPayload) => ReactNode;
-  onWatchStream?: (data: LiveStreamingData | null) => void;
+  onWatchStream?: (metadata: Record<string, unknown>) => void;
   isBrowserStreamingAvailable?: boolean;
   parentTasks?: TaskBreadcrumb[];
   siblings?: SiblingTask[];
@@ -38,7 +30,7 @@ interface ChatActionsProviderProps {
   onAgentClick?: (agentId: string, agentName: string, agentDescription?: string, avatarKey?: string) => void;
   onAgentTest?: (agentId: string, agentName: string) => void;
   renderAgentBlock?: (payload: AgentBlockPayload) => ReactNode;
-  onWatchStream?: (data: LiveStreamingData | null) => void;
+  onWatchStream?: (metadata: Record<string, unknown>) => void;
   isBrowserStreamingAvailable?: boolean;
   parentTasks?: TaskBreadcrumb[];
   siblings?: SiblingTask[];
