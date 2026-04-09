@@ -13,7 +13,7 @@ exports[`ScrollContainer - Snapshots matches snapshot with all features enabled 
     class="pointer-events-none absolute inset-x-0 bottom-0 z-20 h-6 transition-opacity duration-200 opacity-0"
   />
   <div
-    class="flex min-h-0 w-full flex-1 flex-col overflow-x-hidden overflow-y-auto [overflow-anchor:none] [-ms-overflow-style:none] [scrollbar-width:none] [&::-webkit-scrollbar]:hidden"
+    class="relative flex min-h-0 w-full flex-1 flex-col overflow-x-hidden overflow-y-auto [overflow-anchor:none] [-ms-overflow-style:none] [scrollbar-width:none] [&::-webkit-scrollbar]:hidden"
   >
     <div>
       Full-featured content
@@ -62,7 +62,7 @@ exports[`ScrollContainer - Snapshots matches snapshot with default props 1`] = `
     class="pointer-events-none absolute inset-x-0 bottom-0 z-20 h-6 transition-opacity duration-200 opacity-0"
   />
   <div
-    class="flex min-h-0 w-full flex-1 flex-col overflow-x-hidden overflow-y-auto [overflow-anchor:none] [scrollbar-width:thin]"
+    class="relative flex min-h-0 w-full flex-1 flex-col overflow-x-hidden overflow-y-auto [overflow-anchor:none] [scrollbar-width:thin]"
   >
     <div>
       Default content
@@ -76,7 +76,7 @@ exports[`ScrollContainer - Snapshots matches snapshot with overlays disabled 1`]
   class="relative flex min-h-0 flex-1 flex-col overflow-hidden"
 >
   <div
-    class="flex min-h-0 w-full flex-1 flex-col overflow-x-hidden overflow-y-auto [overflow-anchor:none] [scrollbar-width:thin]"
+    class="relative flex min-h-0 w-full flex-1 flex-col overflow-x-hidden overflow-y-auto [overflow-anchor:none] [scrollbar-width:thin]"
   >
     <div>
       No overlays content

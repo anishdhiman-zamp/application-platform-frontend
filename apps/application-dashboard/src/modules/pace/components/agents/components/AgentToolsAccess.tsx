@@ -481,7 +481,7 @@ const AgentToolsAccess = ({
     );
   }
 
-  if (isLoadingCatalog || isLoadingAgentConnections || isLoadingTools || isInitialLoadRef.current) {
+  if (shouldSkip || isLoadingCatalog || isLoadingAgentConnections || isLoadingTools || isInitialLoadRef.current) {
     return (
       <div className='bg-BG_GRAY_2 flex h-full rounded-xl'>
         <div className='flex flex-2 flex-col gap-1 p-1.5'>

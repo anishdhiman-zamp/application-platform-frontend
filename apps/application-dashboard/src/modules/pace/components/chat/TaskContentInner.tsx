@@ -355,7 +355,11 @@ const TaskContentChat = ({ taskId }: { taskId: string }) => {
 
 const TaskContentInner = ({ taskId: propTaskId }: TaskContentInnerProps) => {
   const nextPathname = usePathname();
-  const urlTaskId = useMemo(() => getActiveTabIdFromUrl(nextPathname ?? '', '', TAB_TYPE.TASK) ?? '', [nextPathname]);
+  const nextSearchParams = useSearchParams();
+  const urlTaskId = useMemo(
+    () => getActiveTabIdFromUrl(nextPathname ?? '', nextSearchParams?.toString() ?? '', TAB_TYPE.TASK) ?? '',
+    [nextPathname, nextSearchParams],
+  );
   const taskId = urlTaskId || propTaskId;
   const organizationId = useAppSelector((state: RootState) => state.user.user?.orgs?.[0]?.organization_id) ?? '';
 
