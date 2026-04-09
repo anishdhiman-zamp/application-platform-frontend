@@ -27,10 +27,7 @@ export const CustomInputRow: React.FC<CustomInputRowProps> = ({
   return (
     <div
       data-hitl-focused={isFocused || undefined}
-      className={cn(
-        'w-full shrink-0 cursor-pointer rounded-[10px] transition-colors duration-200',
-        isFocused ? 'bg-GRAY_50' : 'hover:bg-GRAY_20',
-      )}
+      className={cn('w-full shrink-0 cursor-pointer rounded-[10px] transition-colors duration-200', 'hover:bg-GRAY_20')}
       onClick={onClick}
     >
       <div className='flex w-full items-start px-3 py-2.5'>

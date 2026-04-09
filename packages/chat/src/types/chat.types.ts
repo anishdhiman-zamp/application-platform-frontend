@@ -518,6 +518,7 @@ export interface ConversationInputRequiredItem {
   entity_id: string;
   entity_type: HITLEntityType;
   input_required_data: ConversationInputRequiredData;
+  input_id?: string;
 }
 
 export interface HITLSourceEntity {
@@ -557,6 +558,7 @@ export interface HITLResponseItem {
   entity_type: string;
   entity_id: string;
   response: HITLResponse;
+  input_id?: string;
 }
 
 export interface HITLRespondPayloadType {

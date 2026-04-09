@@ -1,7 +1,7 @@
 'use client';
 
 import { useCallback, useEffect, useRef } from 'react';
-import { useRouter } from 'next/navigation';
+import { usePathname, useRouter, useSearchParams } from 'next/navigation';
 import { useAppDispatch } from '@/hooks/toolkit';
 import {
   buildTabRoute,
@@ -34,11 +34,40 @@ export const markTabAsClosed = (id: string) => {
   setTimeout(() => recentlyClosedTabIds.delete(id), 500);
 };
 
+// When paginating tasks (next/prev), we use router.replace() to update the URL
+// without opening a new tab. But the tab router can't distinguish a replace from
+// a push just by looking at the URL change. So we use a simple signal:
+//
+// 1. Before calling router.replace(), call markNavAsReplace() to set the flag.
+// 2. When the tab router processes the URL change, it calls consumeNavReplaceFlag().
+//    - If true → update the active tab in-place (pagination behavior).
+//    - If false → open a new tab (default behavior).
+//
+// This is a counter (not a boolean) so rapid clicks (next → next → next) don't
+// lose intermediate signals before the tab router has a chance to consume them.
+let pendingReplaceCount = 0;
+
+export const markNavAsReplace = () => {
+  pendingReplaceCount++;
+};
+
+export const consumeNavReplaceFlag = (): boolean => {
+  if (pendingReplaceCount > 0) {
+    pendingReplaceCount--;
+
+    return true;
+  }
+
+  return false;
+};
+
 export const useTabRouter = (config: UseTabRouterConfig = {}): UseTabRouterReturn => {
   const { type } = config;
   const router = useRouter();
   const dispatch = useAppDispatch();
   const isMountedRef = useRef(false);
+  const nextPathname = usePathname();
+  const nextSearchParams = useSearchParams();
 
   const historyNavigate = useCallback((path: string, method: NavMethod = NAV_METHOD.PUSH, skipSidebarParam = false) => {
     const fullPath = skipSidebarParam ? path : preserveSidebarParam(path);
@@ -76,8 +105,7 @@ export const useTabRouter = (config: UseTabRouterConfig = {}): UseTabRouterRetur
 
     if (!currentTab) return;
 
-    // Use the tab's own type (not the hook's configured type) to build the correct base path
-    const fullPath = `${buildTabRoute(currentTabId, currentTab.type)}${search}`;
+    const fullPath = `${pathname}${search}`;
 
     if (currentTab.path !== fullPath) {
       dispatch(
@@ -137,19 +165,41 @@ export const useTabRouter = (config: UseTabRouterConfig = {}): UseTabRouterRetur
       const fileName = titleFromUrl || urlTabId.split('/').pop() || urlTabId;
       // Store full path with query params so subtask navigation state
       // (parentTasks, siblings, pagination) survives tab switches.
-      const tabPath = search ? `${buildTabRoute(urlTabId, urlTabType)}${search}` : buildTabRoute(urlTabId, urlTabType);
+      const tabPath = search ? `${pathname}${search}` : buildTabRoute(urlTabId, urlTabType);
 
-      dispatch(
-        dynamicTabsActions.openTab({
-          id: urlTabId,
-          name: fileName,
-          path: tabPath,
-          type: urlTabType,
-        }),
-      );
+      // If this navigation was a replace (e.g., task pagination), update the active
+      // tab in-place instead of opening a new one. This keeps pagination within a
+      // single tab while still creating new tabs for explicit opens (router.push).
+      const wasReplace = consumeNavReplaceFlag();
+      const activeTabId = store.getState().dynamicTabs.activeTabId;
+      const activeTab = activeTabId ? currentTabs.find((t) => t.id === activeTabId) : null;
+
+      if (wasReplace && activeTab && (activeTab.type ?? TAB_TYPE.FILE) === urlTabType) {
+        dispatch(
+          dynamicTabsActions.updateTab({
+            oldId: activeTab.id,
+            newTab: {
+              id: urlTabId,
+              name: fileName,
+              path: tabPath,
+              type: urlTabType,
+              metadata: activeTab.metadata,
+            },
+          }),
+        );
+      } else {
+        dispatch(
+          dynamicTabsActions.openTab({
+            id: urlTabId,
+            name: fileName,
+            path: tabPath,
+            type: urlTabType,
+          }),
+        );
+      }
     } else {
       // Update stored path if URL has richer params than what's stored
-      const fullPath = search ? `${buildTabRoute(urlTabId, urlTabType)}${search}` : existingTab.path;
+      const fullPath = search ? `${pathname}${search}` : existingTab.path;
 
       if (fullPath !== existingTab.path && search) {
         dispatch(
@@ -191,6 +241,14 @@ export const useTabRouter = (config: UseTabRouterConfig = {}): UseTabRouterRetur
       window.removeEventListener('popstate', handlePopState);
     };
   }, [syncFromUrl, saveCurrentTabPath]);
+
+  // Sync tabs when Next.js detects URL changes (covers router.push/replace
+  // within the same page, which don't trigger popstate or remount).
+  useEffect(() => {
+    if (!isMountedRef.current) return;
+
+    syncFromUrl();
+  }, [nextPathname, nextSearchParams, syncFromUrl]);
 
   return {
     navigateTo,

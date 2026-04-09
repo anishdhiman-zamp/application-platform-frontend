@@ -78,7 +78,6 @@ const ChatFeedback: FC<ChatFeedbackProps> = ({
   const [details, setDetails] = useState('');
   const [feedbackGiven, setFeedbackGiven] = useState(false);
   const [likeGiven, setLikeGiven] = useState(false);
-  const [isLikeSubmitting, setIsLikeSubmitting] = useState(false);
 
   const [submitChatFeedback, { isLoading: isSubmitting }] = useSubmitChatFeedbackMutation();
   const [getSpeechToTextAccessToken] = useLazyGetSpeechToTextAccessTokenQuery({});
@@ -178,9 +177,9 @@ const ChatFeedback: FC<ChatFeedbackProps> = ({
   const isFormValid = issueType && details.trim();
 
   const handleLikeClick = async () => {
-    if (likeGiven || feedbackGiven || isLikeSubmitting || disabled || !conversationId || !messageId) return;
+    if (likeGiven || feedbackGiven || disabled || !conversationId || !messageId) return;
 
-    setIsLikeSubmitting(true);
+    setLikeGiven(true);
     try {
       await submitChatFeedback({
         conversationId,
@@ -191,12 +190,9 @@ const ChatFeedback: FC<ChatFeedbackProps> = ({
           sentiment: FeedbackSentiment.THUMBS_UP,
         },
       }).unwrap();
-
-      setLikeGiven(true);
     } catch {
+      setLikeGiven(false);
       toast.error('Failed to submit feedback');
-    } finally {
-      setIsLikeSubmitting(false);
     }
   };
 
@@ -290,8 +286,7 @@ const ChatFeedback: FC<ChatFeedbackProps> = ({
                 variant='ghost'
                 size='icon'
                 onClick={handleLikeClick}
-                disabled={likeGiven || feedbackGiven || isLikeSubmitting || disabled}
-                isLoading={isLikeSubmitting}
+                disabled={likeGiven || feedbackGiven || disabled}
                 className={cn(
                   'hover:bg-GRAY_100 active:bg-GRAY_300 hover:text-GRAY_700 size-[26px] rounded-md p-[2px]',
                   likeGiven && 'bg-none',

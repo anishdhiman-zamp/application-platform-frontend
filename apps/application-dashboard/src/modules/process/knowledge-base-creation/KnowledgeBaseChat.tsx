@@ -306,11 +306,7 @@ const KnowledgeBaseChat: FC<KnowledgeBaseChatProps> = ({
               isAnalysing={isAnalysing}
               streamingState={streamingEnabled ? chat.streamingState : undefined}
               assistantAvatar={streamingEnabled ? <ZampIcon /> : undefined}
-              showTimestamp={streamingEnabled}
-              showCopy={streamingEnabled}
-              alignUserRight={streamingEnabled}
               className='flex-1'
-              streamingEnabled={streamingEnabled}
             >
               {status === ProcessStatus.BUILDING && (
                 <ProcessInProcessBanner shouldRedirect={false} className='h-[400px] pb-4' />
@@ -320,7 +316,7 @@ const KnowledgeBaseChat: FC<KnowledgeBaseChatProps> = ({
           )}
           {isSkeletonLoading && (
             <div className='animate-opacity flex h-full w-full justify-center pt-4'>
-              <ChatMessagesSkeleton count={1} className='px-4 py-0' alignUserRight={streamingEnabled} />
+              <ChatMessagesSkeleton count={1} className='px-4 py-0' />
             </div>
           )}
 

@@ -2,8 +2,8 @@ import { FC } from 'react';
 import { Skeleton } from '@zamp-platform/ui';
 import { cn } from '@/utils/common';
 
-const UserMessageSkeleton = ({ alignUserRight }: { alignUserRight?: boolean }) => (
-  <div className={cn('flex flex-col gap-1.5', alignUserRight ? 'items-end' : 'items-start')}>
+const UserMessageSkeleton = () => (
+  <div className='flex flex-col items-end gap-1.5'>
     <Skeleton className='h-4 w-48 rounded' />
   </div>
 );
@@ -24,17 +24,16 @@ const AssistantMessageSkeleton = ({ lines = 3 }: { lines?: number }) => (
 interface ChatMessagesSkeletonProps {
   count?: number;
   className?: string;
-  alignUserRight?: boolean;
 }
 
-const ChatMessagesSkeleton: FC<ChatMessagesSkeletonProps> = ({ count = 1, className, alignUserRight = false }) => {
+const ChatMessagesSkeleton: FC<ChatMessagesSkeletonProps> = ({ count = 1, className }) => {
   return (
     <div className={cn('flex w-full flex-col px-3 py-4', className)}>
       {Array.from({ length: count }).map((_, index) => (
         <div key={`chat-message-skeleton-${index}`} className='flex w-full flex-col gap-6'>
-          <UserMessageSkeleton alignUserRight={alignUserRight} />
+          <UserMessageSkeleton />
           <AssistantMessageSkeleton lines={4} />
-          <UserMessageSkeleton alignUserRight={alignUserRight} />
+          <UserMessageSkeleton />
           <AssistantMessageSkeleton lines={2} />
         </div>
       ))}

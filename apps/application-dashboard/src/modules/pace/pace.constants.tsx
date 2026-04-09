@@ -1,5 +1,5 @@
 import type { ConversationState } from '@zamp-platform/conversation-stream';
-import { AgentNavIcon, HomeIcon, RouteIcon, SettingsIcon } from '@zamp-platform/ui';
+import { AgentNavIcon, HomeIcon, LayoutGridIcon, RouteIcon, SettingsIcon } from '@zamp-platform/ui';
 import { Database, Link2, Settings2, UserPen } from 'lucide-react';
 import {
   type BrowserViewerStateConfig,
@@ -8,6 +8,7 @@ import {
   PaceSettingsTabSchema,
 } from 'modules/pace/pace.types';
 import Users02 from '@/assets/Icons/Users02';
+import { FEATURE_FLAGS } from '@/constants/featureFlags';
 import { DONE_EMPTY_STATE } from '@/constants/icons';
 import { ROUTES_PATH } from '@/constants/routeConfig';
 import { INPUT_FILE_FORMATS } from '@/types/common/mime';
@@ -86,6 +87,12 @@ export const PACE_NAVBAR_ITEMS: PaceNavbarItemSchema[] = [
     id: PaceNavbarItemId.AGENTS,
     iconComponent: AgentNavIcon,
     path: ROUTES_PATH.CHAT_AGENTS,
+  },
+  {
+    id: PaceNavbarItemId.APPS,
+    iconComponent: LayoutGridIcon,
+    path: ROUTES_PATH.CHAT_APPS,
+    featureFlag: FEATURE_FLAGS.APPS,
   },
   {
     id: PaceNavbarItemId.SETTINGS,

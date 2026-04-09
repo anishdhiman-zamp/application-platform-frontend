@@ -193,9 +193,17 @@ const ScrollContainer = forwardRef<ScrollContainerRef, ScrollContainerProps>(
           }
           container.scrollTo({ top: container.scrollHeight, behavior: isInitial ? 'instant' : 'smooth' });
         } else {
-          const containerRect = container.getBoundingClientRect();
-          const msgRect = lastUserMessage.getBoundingClientRect();
-          const anchorTop = msgRect.top - containerRect.top + container.scrollTop;
+          // Use offsetTop chain instead of getBoundingClientRect so that CSS
+          // transforms don't skew the anchor position.
+          let anchorTop = 0;
+          let el: HTMLElement | null = lastUserMessage;
+
+          while (el && el !== container) {
+            anchorTop += el.offsetTop;
+            el = el.offsetParent as HTMLElement | null;
+          }
+
+          if (el !== container) anchorTop = 0;
 
           userMsgAnchorRef.current = anchorTop;
 
@@ -425,13 +433,14 @@ const ScrollContainer = forwardRef<ScrollContainerRef, ScrollContainerProps>(
       const observer = new ResizeObserver(() => {
         if (!isInitialScrollRef.current) {
           updateSpacerHeight();
+          setShowButton(!checkIfAtBottom());
         }
       });
 
       observer.observe(el);
 
       return () => observer.disconnect();
-    }, [enableAnchorScroll, updateSpacerHeight]);
+    }, [enableAnchorScroll, updateSpacerHeight, checkIfAtBottom]);
 
     // --- ResizeObserver for content changes (anchor mode) ---
     useEffect(() => {
@@ -541,7 +550,7 @@ const ScrollContainer = forwardRef<ScrollContainerRef, ScrollContainerProps>(
             ref={scrollRef}
             onScroll={handleScroll}
             className={cn(
-              'flex min-h-0 w-full flex-1 flex-col overflow-x-hidden overflow-y-auto [overflow-anchor:none]',
+              'relative flex min-h-0 w-full flex-1 flex-col overflow-x-hidden overflow-y-auto [overflow-anchor:none]',
               scrollbarStyle === 'thin'
                 ? '[scrollbar-width:thin]'
                 : '[-ms-overflow-style:none] [scrollbar-width:none] [&::-webkit-scrollbar]:hidden',

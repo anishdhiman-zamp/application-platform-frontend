@@ -8,6 +8,7 @@ export enum ResourceType {
   PROCESS = 'process',
   ORGANIZATION = 'organization',
   CONNECTION = 'connection',
+  APP = 'app',
   AGENT = 'agent',
 }
 
@@ -150,6 +151,12 @@ export enum PROCESS_ACCESS_PRIVILEGES {
 
 export enum CONNECTION_ACCESS_PRIVILEGES {
   ADMIN = 'admin',
+  VIEWER = 'viewer',
+}
+
+export enum APP_ACCESS_PRIVILEGES {
+  ADMIN = 'admin',
+  EDITOR = 'editor',
   VIEWER = 'viewer',
 }
 

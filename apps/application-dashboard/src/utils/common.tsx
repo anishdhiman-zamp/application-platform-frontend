@@ -465,13 +465,30 @@ export const sentenceCase = (str: string) => {
 };
 
 /**
- * Converts a snake_case string to Sentence case.
+ * Converts a string to Pascal Case (Title Case).
+ *
+ * @param text e.g. abcd efgh
+ * @returns Pascal case e.g. Abcd Efgh
+ */
+export const pascalCase = (str: string) => {
+  if (str === undefined || str === null || str === '') return '';
+
+  str = str.toString();
+
+  return str
+    .split(' ')
+    .map((word) => word.charAt(0).toUpperCase() + word.slice(1).toLowerCase())
+    .join(' ');
+};
+
+/**
+ * Converts a snake_case string to Pascal Case (Title Case).
  *
  * @param str - The snake_case string to be converted.
- * @returns The converted string in Sentence case.
+ * @returns The converted string in Pascal Case (e.g. "Invoice Description").
  */
 export const snakeCaseToSentenceCase = (str: string) => {
-  return sentenceCase(str?.split('_')?.join(' '));
+  return pascalCase(str?.split('_')?.join(' '));
 };
 
 /**

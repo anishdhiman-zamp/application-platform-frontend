@@ -6,7 +6,7 @@ interface ZampIconProps {
   className?: string;
 }
 
-const ZampIcon = ({ size = 24, className }: ZampIconProps) => {
+const ZampIcon = ({ size = 20, className }: ZampIconProps) => {
   return (
     <div
       className={cn('grid place-items-center', className)}

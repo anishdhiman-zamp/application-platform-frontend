@@ -32,7 +32,7 @@ interface TaskAccordionGroupProps {
 }
 
 const NoDataBanner = ({ search }: { search?: string }) => (
-  <div className='border-GRAY_400 flex flex-1 items-center justify-center [&>div]:min-h-0'>
+  <div className='flex flex-1 items-center justify-center [&>div]:min-h-0'>
     <ProcessEmptyState
       title='No tasks found'
       description={search ? 'Try adjusting your search query' : 'Tasks will appear here when created'}
@@ -166,14 +166,14 @@ const TaskAccordionGroup = ({
 
   return (
     <CommonWrapper
-      isLoading={isLoading && !hasLoadedOnce}
+      isLoading={(isLoading || skipFetch) && !hasLoadedOnce}
       isError={isError}
       refetchFunction={refetch}
       skeletonType={SkeletonTypes.CUSTOM}
       loader={<TaskListingSkeleton />}
-      isNoData={!isFetching && visibleStatuses.length === 0}
+      isNoData={!isFetching && !skipFetch && visibleStatuses.length === 0}
       noDataBanner={<NoDataBanner search={search} />}
-      className='flex min-h-0 flex-1 flex-col'
+      className={cn('flex min-h-0 flex-1 flex-col', agentId && 'border-GRAY_400 rounded-xl border')}
       disableAnimation
     >
       <Accordion
@@ -181,10 +181,7 @@ const TaskAccordionGroup = ({
         ref={scrollContainerRef}
         type='multiple'
         defaultValue={[TASK_STATUS.COMPLETED]}
-        className={cn(
-          'overflow-y-auto [scrollbar-width:thin] [&_[data-slot=accordion-item]:last-child]:border-b-0',
-          agentId ? 'rounded-xl' : '',
-        )}
+        className='overflow-y-auto [scrollbar-width:thin] [&_[data-slot=accordion-item]:last-child]:border-b-0'
         onValueChange={handleValueChange}
       >
         {visibleStatuses.map((status) => (

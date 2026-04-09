@@ -2,6 +2,7 @@
 
 import React from 'react';
 
+import { MarkdownBlock } from '../../../..';
 import { HITL_INPUT_TYPE } from '../../../types/block.types';
 import { APPROVAL_ACTION, ApprovalQuestionBody } from './ApprovalQuestionBody';
 import { SelectQuestionBody } from './SelectQuestionBody';
@@ -89,7 +90,7 @@ export const HITLQuestionItem = ({
             onCustomInputClick={() => {
               setCurrentQuestionIndex(qIndex);
               setFocusedOptionIndex(optionCountForQuestion(question) - 1);
-              customInputRef.current?.focus();
+              customInputRef.current?.focus({ preventScroll: true });
             }}
             onCustomInputChange={onCustomInputChange}
           />
@@ -101,9 +102,12 @@ export const HITLQuestionItem = ({
     <div ref={setQuestionEl} className='relative w-full shrink-0'>
       <div className='flex w-full items-center justify-center'>
         <div className='flex w-full items-center justify-center px-4 pt-4.5 pb-2.5'>
-          <div className='text-GRAY_1000 flex flex-1 gap-2 text-sm leading-normal font-[550]'>
+          <div className='text-GRAY_1000 flex flex-1 gap-2 text-sm leading-normal font-[450]'>
             {questionsLength > 1 && <span className='shrink-0'>{qIndex + 1}.</span>}
-            <span className='leading-normal whitespace-pre-wrap'>{question?.question ?? question?.text}</span>
+            <MarkdownBlock
+              fontClassName='text-GRAY_1000 font-[450]'
+              payload={{ text: question?.question || question?.text || '' }}
+            />
           </div>
         </div>
       </div>
