@@ -189,7 +189,7 @@ export const InputsRespondedBlock: React.FC<InputsRespondedBlockProps> = ({
           id={regionId}
           role='region'
           aria-labelledby={triggerId}
-          className='bg-BG_WHITE shadow-table-filter-menu w-full min-w-0 rounded-[18px] rounded-b-xl border border-gray-400'
+          className='bg-BG_WHITE shadow-table-filter-menu max-h-[250px] w-full min-w-0 overflow-y-auto rounded-[18px] rounded-b-xl border border-gray-400'
         >
           <div className='divide-GRAY_400 divide-y'>
             {responses.map((item, index) => (
