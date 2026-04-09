@@ -10,6 +10,7 @@ import ChatTopbar from '@/modules/pace/components/chat/ChatTopbar';
 import ModelSelector from '@/modules/pace/components/chat/ModelSelector';
 import { useChatDraftInput } from '@/modules/pace/hooks/useChatDraftInput';
 import { useHitlQuestions } from '@/modules/pace/hooks/useHitlQuestions';
+import { BrowserViewerDisplayState } from '@/modules/pace/pace.constants';
 import { usePaceContext } from '@/modules/pace/pace.context';
 import { CHAT_SIDEBAR_STATE, TAB_TYPE } from '@/modules/pace/pace.types';
 
@@ -36,7 +37,7 @@ const ChatSidebarContent = ({
   username,
 }: ChatSidebarContentProps) => {
   const { openTab } = useDynamicTabs({ type: TAB_TYPE.FILE });
-  const { openTab: openBrowserTab } = useDynamicTabs({ type: TAB_TYPE.BROWSER });
+  const { openTab: openBrowserTab, updateTab: updateBrowserTab } = useDynamicTabs({ type: TAB_TYPE.BROWSER });
   const { chatSidebarState, setChatSidebarState, setActiveAgentInfo, selectedModel, setSelectedModel } =
     usePaceContext();
   const { inputValue, setInputValue } = useChatDraftInput({
@@ -79,13 +80,22 @@ const ChatSidebarContent = ({
   }, [chatSidebarState, setChatSidebarState]);
 
   const handleBrowserOpen = useCallback(
-    (browserConversationId: string) => {
+    (browserConversationId: string, sessionId?: string) => {
       if (chatSidebarState === CHAT_SIDEBAR_STATE.EXPANDED) {
         setChatSidebarState(CHAT_SIDEBAR_STATE.SIDEBAR);
       }
-      openBrowserTab(browserConversationId, 'Browser');
+      openBrowserTab(browserConversationId, 'Browser', sessionId ? { sessionId } : undefined);
     },
     [openBrowserTab, chatSidebarState, setChatSidebarState],
+  );
+
+  const handleBrowserStreamingEnd = useCallback(
+    (browserConversationId: string) => {
+      updateBrowserTab(browserConversationId, browserConversationId, 'Browser', {
+        status: BrowserViewerDisplayState.ENDED,
+      });
+    },
+    [updateBrowserTab],
   );
 
   const handleHitlRespondComplete = useCallback(() => {
@@ -121,6 +131,7 @@ const ChatSidebarContent = ({
         onFileOpen={handleFileOpen}
         onTaskOpen={handleTaskOpen}
         onBrowserOpen={handleBrowserOpen}
+        onBrowserStreamingEnd={handleBrowserStreamingEnd}
         onTaskPopoverOpenChange={setIsTaskPopoverOpen}
         fileDropHandlerRef={fileDropHandlerRef}
         addFileReferenceRef={addFileReferenceRef}

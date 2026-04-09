@@ -1,60 +1,89 @@
 'use client';
 
 import { useCallback, useEffect, useState } from 'react';
-import { useLazyGetBrowserLiveViewNovncQuery } from '@zamp-platform/chat';
+import { useLazyGetBrowserStreamingNovncQuery } from '@zamp-platform/chat';
 import { Button } from '@zamp-platform/ui';
-import { Globe } from 'lucide-react';
-import {
-  coerceIframeSrcForSecurePage,
-  expectedChromeSessionIdForConversation,
-} from 'modules/pace/components/browser-viewer/browserViewer.utils';
+import { coerceIframeSrcForSecurePage } from 'modules/pace/components/browser-viewer/browserViewer.utils';
 import ImageLoader from '@/components/common/loader/ImageLoader';
 import CommonWrapper from '@/components/commonWrapper';
 import { SkeletonTypes } from '@/components/commonWrapper/commonWrapper.types';
+import EmptyState from '@/components/EmptyState';
 import { ZAMP_LOGO_LOADER_SVG } from '@/constants/icons';
 import TabWrapper from '@/modules/pace/components/dynamic-tabs/TabWrapper';
 import { useDynamicTabs } from '@/modules/pace/components/dynamic-tabs/useDynamicTabs';
+import { BROWSER_VIEWER_STATE_CONFIG, BrowserViewerDisplayState } from '@/modules/pace/pace.constants';
 import { TAB_TYPE } from '@/modules/pace/pace.types';
 
 interface BrowserViewerTabProps {
   conversationId: string;
+  sessionId?: string;
+  status?: string;
   isActive: boolean;
 }
 
-const BrowserViewerTab = ({ conversationId, isActive }: BrowserViewerTabProps) => {
+const BrowserViewerTab = ({ conversationId, sessionId, status, isActive }: BrowserViewerTabProps) => {
   const [iframeSrc, setIframeSrc] = useState<string | null>(null);
   const [hasError, setHasError] = useState(false);
-  const [hasFetched, setHasFetched] = useState(false);
   const [isStreamLoading, setIsStreamLoading] = useState(true);
 
-  const [fetchNovnc, { isFetching }] = useLazyGetBrowserLiveViewNovncQuery();
+  const isEnded = status === BrowserViewerDisplayState.ENDED;
+
+  const [fetchNovnc, { isFetching }] = useLazyGetBrowserStreamingNovncQuery();
 
   const fetchStream = useCallback(async () => {
-    if (!conversationId) return;
+    if (!conversationId || isEnded) return;
 
     try {
       setHasError(false);
       const res = await fetchNovnc({
         conversationId,
-        sessionId: expectedChromeSessionIdForConversation(conversationId),
+        sessionId: sessionId || '',
       }).unwrap();
       const direct = res?.novnc_url ?? null;
       const rawEmbedded = (res?.proxy_iframe_url?.trim() || direct) ?? null;
       const embedded = rawEmbedded ? coerceIframeSrcForSecurePage(rawEmbedded) : null;
 
       setIframeSrc(embedded);
-      setHasFetched(true);
     } catch {
       setHasError(true);
       setIframeSrc(null);
     }
-  }, [conversationId, fetchNovnc]);
+  }, [conversationId, sessionId, isEnded, fetchNovnc]);
 
   useEffect(() => {
-    if (isActive) {
+    if (isActive && !isEnded) {
       fetchStream();
     }
-  }, [isActive, fetchStream]);
+  }, [isActive, isEnded, fetchStream]);
+
+  useEffect(() => {
+    if (isEnded) {
+      setIframeSrc(null);
+    }
+  }, [isEnded]);
+
+  const renderPlaceholder = (state: BrowserViewerDisplayState) => {
+    const config = BROWSER_VIEWER_STATE_CONFIG[state];
+
+    return (
+      <EmptyState
+        imageSrc={config.imageSrc}
+        imageAlt={config.imageAlt}
+        title={config.title}
+        description={config.description}
+      >
+        {config.showRetry && (
+          <Button variant='link' size='small' onClick={fetchStream}>
+            Retry
+          </Button>
+        )}
+      </EmptyState>
+    );
+  };
+
+  if (isEnded) {
+    return renderPlaceholder(BrowserViewerDisplayState.ENDED);
+  }
 
   return (
     <CommonWrapper
@@ -63,19 +92,7 @@ const BrowserViewerTab = ({ conversationId, isActive }: BrowserViewerTabProps) =
       skeletonType={SkeletonTypes.CUSTOM}
       loader={<ImageLoader imageSrc={ZAMP_LOGO_LOADER_SVG} width={140} height={140} />}
       className='flex h-full w-full items-center justify-center'
-      renderError={
-        <div className='flex h-full w-full items-center justify-center'>
-          <div className='text-center'>
-            <div className='bg-GRAY_100 mx-auto mb-3 flex h-12 w-12 items-center justify-center rounded-full'>
-              <Globe size={20} className='text-GRAY_700' />
-            </div>
-            <p className='f-13-450 text-GRAY_700'>Failed to connect to browser stream</p>
-            <Button variant='link' size='small' onClick={fetchStream} className='mt-2'>
-              Retry
-            </Button>
-          </div>
-        </div>
-      }
+      renderError={renderPlaceholder(BrowserViewerDisplayState.ERROR)}
       disableAnimation
     >
       {iframeSrc ? (
@@ -94,16 +111,7 @@ const BrowserViewerTab = ({ conversationId, isActive }: BrowserViewerTabProps) =
           />
         </div>
       ) : (
-        <div className='flex h-full w-full items-center justify-center'>
-          <div className='text-center'>
-            <div className='bg-GRAY_100 mx-auto mb-3 flex h-12 w-12 items-center justify-center rounded-full'>
-              <Globe size={20} className='text-GRAY_700' />
-            </div>
-            <p className='f-13-450 text-GRAY_700'>
-              {hasFetched ? 'Live stream has ended' : 'Waiting for browser stream...'}
-            </p>
-          </div>
-        </div>
+        renderPlaceholder(BrowserViewerDisplayState.WAITING)
       )}
     </CommonWrapper>
   );
@@ -123,7 +131,12 @@ const BrowserTabsContainer = () => {
 
         return (
           <TabWrapper key={tab.stableKey} isActive={isActive}>
-            <BrowserViewerTab conversationId={tab.id} isActive={isActive} />
+            <BrowserViewerTab
+              conversationId={tab.id}
+              sessionId={tab.metadata?.sessionId as string}
+              status={tab.metadata?.status as string}
+              isActive={isActive}
+            />
           </TabWrapper>
         );
       })}
