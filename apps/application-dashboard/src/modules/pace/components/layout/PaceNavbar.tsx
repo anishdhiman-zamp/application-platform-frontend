@@ -56,11 +56,18 @@ const PaceNavbar = () => {
     isFilesPanelResizing,
   } = usePaceContext();
   const { isOnAnyDynamicTab } = useDynamicTabs();
+  const { isEnabled: isAppsEnabled } = useFeatureFlag(FEATURE_FLAGS.APPS);
   const { isEnabled: isAgentsFe } = useFeatureFlag(FEATURE_FLAGS.AGENTS_FE);
 
-  const navbarItems = useMemo(
-    () => PACE_NAVBAR_ITEMS.filter((item) => item.id !== PaceNavbarItemId.AGENTS || isAgentsFe),
-    [isAgentsFe],
+  const visibleNavItems = useMemo(
+    () =>
+      PACE_NAVBAR_ITEMS.filter((item) => {
+        if (item.featureFlag === FEATURE_FLAGS.APPS && !isAppsEnabled) return false;
+        if (item.id === PaceNavbarItemId.AGENTS && !isAgentsFe) return false;
+
+        return true;
+      }),
+    [isAppsEnabled, isAgentsFe],
   );
 
   const chatIconRef = useRef<AnimatedIconHandle>(null);
@@ -98,6 +105,10 @@ const PaceNavbar = () => {
 
     if (id === PaceNavbarItemId.SETTINGS) {
       return pathname?.startsWith(ROUTES_PATH.CHAT_SETTINGS) ?? false;
+    }
+
+    if (id === PaceNavbarItemId.APPS) {
+      return pathname?.startsWith(ROUTES_PATH.CHAT_APPS) ?? false;
     }
 
     return pathname?.includes(path) ?? false;
@@ -254,7 +265,7 @@ const PaceNavbar = () => {
         transition={navAnimations.navItems.transition}
         className='flex shrink-0 items-center gap-x-2'
       >
-        {navbarItems.map((item) => (
+        {visibleNavItems.map((item) => (
           <NavbarIconLink
             key={item.id}
             item={item}

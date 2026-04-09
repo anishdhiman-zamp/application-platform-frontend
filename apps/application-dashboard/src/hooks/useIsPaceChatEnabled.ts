@@ -8,5 +8,5 @@ export const useIsPaceChatEnabled = () => {
   const { isEnabled, isLoading } = useFeatureFlag(FEATURE_FLAGS.ZAMP_INTERNAL);
   const isMacs = isMacsProduct();
 
-  return { isEnabled: isEnabled && isMacs, isLoading };
+  return { isEnabled: isEnabled || isMacs, isLoading };
 };

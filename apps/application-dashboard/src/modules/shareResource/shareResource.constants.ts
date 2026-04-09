@@ -92,6 +92,24 @@ export const CHANGE_ACCESS_PRIVILEGES_LIST: ResourcePrivilege[] = [
     desc: 'Can view connection only',
   },
   {
+    kind: ResourceType.APP,
+    label: 'Admin',
+    value: 'admin',
+    desc: 'Can manage and share app',
+  },
+  {
+    kind: ResourceType.APP,
+    label: 'Editor',
+    value: 'editor',
+    desc: 'Can edit app',
+  },
+  {
+    kind: ResourceType.APP,
+    label: 'Viewer',
+    value: 'viewer',
+    desc: 'Can view app only',
+  },
+  {
     kind: ResourceType.AGENT,
     label: 'Admin',
     value: AGENT_ACCESS_PRIVILEGES.ADMIN,
@@ -134,6 +152,7 @@ export const RESOURCE_PRIVILEGES: Record<ResourceType, ResourcePrivilege[]> = {
   [ResourceType.CONNECTION]: CHANGE_ACCESS_PRIVILEGES_LIST.filter(
     (privilege) => privilege.kind === ResourceType.CONNECTION,
   ),
+  [ResourceType.APP]: CHANGE_ACCESS_PRIVILEGES_LIST.filter((privilege) => privilege.kind === ResourceType.APP),
   [ResourceType.AGENT]: CHANGE_ACCESS_PRIVILEGES_LIST.filter((privilege) => privilege.kind === ResourceType.AGENT),
 };
 
@@ -190,6 +209,16 @@ export const connectionConfig: ShareResourceConfig = {
   },
 };
 
+export const appConfig: ShareResourceConfig = {
+  type: ResourceType.APP,
+  accessPrivilegesList: RESOURCE_PRIVILEGES[ResourceType.APP],
+  displayName: 'app',
+  toastMessages: {
+    success: 'App shared successfully',
+    failed: 'Failed to share app',
+  },
+};
+
 export const agentConfig: ShareResourceConfig = {
   type: ResourceType.AGENT,
   accessPrivilegesList: RESOURCE_PRIVILEGES[ResourceType.AGENT],
@@ -207,6 +236,7 @@ export const resourceTypeRouteMap = {
   [ResourceType.PROCESS]: 'processes',
   [ResourceType.ORGANIZATION]: 'organizations',
   [ResourceType.CONNECTION]: 'connection',
+  [ResourceType.APP]: 'app',
   [ResourceType.AGENT]: 'agent',
 };
 
