@@ -1,3 +1,5 @@
+export type { VoiceJoinRequest, VoiceJoinResponse } from '@zamp-platform/ui/types';
+
 export interface GenerateSpeechToTextAccessTokenRequest {
   ttl_seconds?: number;
 }

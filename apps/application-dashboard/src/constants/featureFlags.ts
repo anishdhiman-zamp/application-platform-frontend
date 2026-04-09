@@ -33,4 +33,5 @@ export enum FEATURE_FLAGS {
   AUTO_LOOP_BTN_ENABLED = 'auto-loop-btn-enabled',
   APPS = 'apps',
   NEW_ORG_CREATION = 'new-org-creation',
+  VOICE_CHAT = 'voice-chat',
 }

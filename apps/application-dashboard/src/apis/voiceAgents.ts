@@ -3,6 +3,8 @@ import { API_ENDPOINTS } from 'apis/apiEndpoint.constants';
 import {
   GenerateSpeechToTextAccessTokenRequest,
   GenerateSpeechToTextAccessTokenResponse,
+  VoiceJoinRequest,
+  VoiceJoinResponse,
 } from 'types/api/voiceAgent.types';
 import { baseApi } from '@/services/baseApi';
 
@@ -18,7 +20,16 @@ const VoiceAgents = baseApi.injectEndpoints({
         body,
       }),
     }),
+
+    voiceJoin: builder.mutation<VoiceJoinResponse, VoiceJoinRequest>({
+      query: (body) => ({
+        url: API_ENDPOINTS.VOICE_JOIN_POST,
+        method: REQUEST_TYPES.POST,
+        body,
+      }),
+    }),
   }),
 });
 
-export const { useGetSpeechToTextAccessTokenQuery, useLazyGetSpeechToTextAccessTokenQuery } = VoiceAgents;
+export const { useGetSpeechToTextAccessTokenQuery, useLazyGetSpeechToTextAccessTokenQuery, useVoiceJoinMutation } =
+  VoiceAgents;

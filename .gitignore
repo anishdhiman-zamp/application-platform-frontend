@@ -66,3 +66,6 @@ apps/application-dashboard/tests/test-results/
 apps/application-dashboard/.next-env.d.ts
 apps/application-dashboard/.env.local
 next-env.d.ts
+
+# Claude plugin specific
+.remember/

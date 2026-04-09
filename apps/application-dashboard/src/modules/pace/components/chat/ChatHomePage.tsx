@@ -15,11 +15,14 @@ import {
   ConversationStateContext,
   createConversationActions,
 } from '@zamp-platform/conversation-stream';
+import { VOICE_CHAT_STATE } from '@zamp-platform/ui/types';
 import { AnimatePresence, motion } from 'framer-motion';
+import { useVoiceChatContext } from '@/contexts/VoiceChatContext';
 import { useAppSelector } from '@/hooks/toolkit';
 import ChatHistory from '@/modules/pace/components/chat/ChatHistory';
 import ChatHome from '@/modules/pace/components/chat/ChatHome';
 import ModelSelector from '@/modules/pace/components/chat/ModelSelector';
+import VoiceChatSlot from '@/modules/pace/components/chat/VoiceChatSlot';
 import { useChatDraftInput } from '@/modules/pace/hooks/useChatDraftInput';
 import { NO_ANIMATION } from '@/modules/pace/pace.animations';
 import { STUB_CONVERSATION_STATE } from '@/modules/pace/pace.constants';
@@ -50,6 +53,9 @@ const ChatHomePage = () => {
   const { inputValue, setInputValue } = useChatDraftInput({
     conversationId: null,
   });
+
+  const { isVoiceChatEnabled, state: voiceState } = useVoiceChatContext();
+  const isVoiceActive = voiceState === VOICE_CHAT_STATE.Active;
 
   const { isDragOver, dropZoneProps } = useFileDragDrop({
     onFileDrop: (files) => fileDropHandlerRef.current?.(files),
@@ -140,6 +146,8 @@ const ChatHomePage = () => {
                       addFileReferenceRef={addFileReferenceRef}
                       showModelSelector
                       modelSelectorSlot={modelSelectorSlot}
+                      voiceChatSlot={isVoiceChatEnabled ? <VoiceChatSlot /> : null}
+                      hideRecordingButton={isVoiceActive}
                       llmModel={selectedModel}
                     />
                   </div>
