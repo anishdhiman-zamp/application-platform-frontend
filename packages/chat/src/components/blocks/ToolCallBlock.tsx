@@ -92,13 +92,9 @@ export const ToolCallBlock = ({
   const handleWatchToggle = useCallback(
     (e: React.MouseEvent) => {
       e.stopPropagation();
-      onWatchStream?.({
-        toolName,
-        toolResult,
-        isComplete: is_complete,
-      });
+      onWatchStream?.();
     },
-    [onWatchStream, toolName, toolResult, is_complete],
+    [onWatchStream],
   );
 
   if (name === TOOL_NAMES.AUTHENTICATE_INTEGRATION_AND_CREATE_CONNECTION && toolResultData?.title) {
