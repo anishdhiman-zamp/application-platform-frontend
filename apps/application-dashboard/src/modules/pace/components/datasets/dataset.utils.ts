@@ -75,7 +75,12 @@ export const pgTypeToColumnType = (pgType: string): DatasetColumnTypes => {
 
 export const getCellEditorForPgType = (
   pgType: string,
-): { cellEditor: string; cellEditorParams?: Record<string, unknown> } => {
+): {
+  cellEditor: string;
+  cellEditorParams?: Record<string, unknown>;
+  valueFormatter?: (params: { value: unknown }) => string;
+  valueParser?: (params: { newValue: unknown }) => unknown;
+} => {
   const colType = pgTypeToColumnType(pgType);
 
   switch (colType) {
@@ -88,6 +93,21 @@ export const getCellEditorForPgType = (
       return {
         cellEditor: 'agRichSelectCellEditor',
         cellEditorParams: { values: ['', 'true', 'false'], allowTyping: true, filterList: true },
+      };
+    case DatasetColumnTypes.JSON:
+      return {
+        cellEditor: 'agLargeTextCellEditor',
+        cellEditorParams: { rows: 5, cols: 50 },
+        valueFormatter: ({ value }: { value: unknown }) =>
+          typeof value === 'object' && value !== null ? JSON.stringify(value) : String(value ?? ''),
+        valueParser: ({ newValue }: { newValue: unknown }) => {
+          if (typeof newValue !== 'string') return newValue;
+          try {
+            return JSON.parse(newValue);
+          } catch {
+            return newValue;
+          }
+        },
       };
     default:
       return { cellEditor: 'agTextCellEditor' };
