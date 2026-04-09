@@ -5,14 +5,14 @@ exports[`ShimmerText matches snapshot with custom classes 1`] = `
   class="relative inline-block leading-none"
 >
   <span
-    class="f-13-450 block leading-[13px] custom-base"
+    class="block text-[13px] leading-[1.667]! font-[450] custom-base"
     style="color: rgb(143, 143, 143);"
   >
     Snapshot Test
   </span>
   <span
     aria-hidden="true"
-    class="f-13-450 pointer-events-none absolute top-0 left-0 bg-clip-text leading-[13px] text-transparent custom-shimmer"
+    class="pointer-events-none absolute top-0 left-0 bg-clip-text text-[13px] leading-[1.667]! font-[450] text-transparent custom-shimmer"
     style="background-size: 200% 100%; background-repeat: no-repeat; background-position: 120% 0%;"
   >
     Snapshot Test
@@ -25,14 +25,14 @@ exports[`ShimmerText matches snapshot with default props 1`] = `
   class="relative inline-block leading-none"
 >
   <span
-    class="f-13-450 block leading-[13px]"
+    class="block text-[13px] leading-[1.667]! font-[450]"
     style="color: rgb(143, 143, 143);"
   >
     Snapshot Test
   </span>
   <span
     aria-hidden="true"
-    class="f-13-450 pointer-events-none absolute top-0 left-0 bg-clip-text leading-[13px] text-transparent"
+    class="pointer-events-none absolute top-0 left-0 bg-clip-text text-[13px] leading-[1.667]! font-[450] text-transparent"
     style="background-size: 200% 100%; background-repeat: no-repeat; background-position: 120% 0%;"
   >
     Snapshot Test

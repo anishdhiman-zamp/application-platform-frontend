@@ -1,6 +1,7 @@
 'use client';
 
 import { AnimatedTerminalIcon, ImageWithFallback, ShimmerText } from '@zamp-platform/ui';
+import { cn } from '@zamp-platform/ui/utils';
 import { EVENT_TYPE } from '@zamp-platform/utils/event-bus/event-bus.types';
 import { ArrowUpRight } from 'lucide-react';
 import { useRouter } from 'next/navigation';
@@ -17,8 +18,7 @@ import { API_ENDPOINTS } from '../../api';
 import { useChatActions } from '../../context/ChatActionsContext';
 import { useChat } from '../../hooks/useChat';
 import { useDisplayedSummary } from '../../hooks/useDisplayedSummary';
-import type { ToolCallInfo } from '../../types/block.types';
-import { BLOCK_TYPE, TASK_STATUS, type TaskBlockType } from '../../types/block.types';
+import { BLOCK_TYPE, TASK_STATUS, type TaskBlockType, ToolUseContentBlock } from '../../types/block.types';
 import { ResourceType, SenderType } from '../../types/chat.types';
 import { extractToolCallInfo } from '../block.utils';
 import TaskBlockContent from './TaskBlockContent';
@@ -27,9 +27,19 @@ import TaskStatusIcon from './TaskStatusIcon';
 interface TaskBlockProps {
   payload: TaskBlockType['payload'];
   conversationId?: string;
+  className?: string;
 }
 
-const TaskBlock: FC<TaskBlockProps> = ({ payload, conversationId }) => {
+export interface ToolCallInfo {
+  id: string;
+  name: string;
+  displayName: string;
+  icon?: string;
+  isComplete: boolean;
+  block: ToolUseContentBlock;
+}
+
+const TaskBlock: FC<TaskBlockProps> = ({ payload, conversationId, className }) => {
   const router = useRouter();
   const organizationId = useAppSelector((state: RootState) => state.user.user?.orgs?.[0]?.organization_id) ?? '';
   const { onTaskOpen, parentTasks, siblings, taskSummaries } = useChatActions();
@@ -59,7 +69,7 @@ const TaskBlock: FC<TaskBlockProps> = ({ payload, conversationId }) => {
   const displayedSummary = useDisplayedSummary({
     taskId: task_id,
     isAgentActive,
-    summaryContent: null,
+    taskStatus,
     streamingSummaryText: taskSummaries?.[task_id] ?? null,
   });
 
@@ -192,7 +202,10 @@ const TaskBlock: FC<TaskBlockProps> = ({ payload, conversationId }) => {
 
   return (
     <div
-      className='border-GRAY_400 bg-BG_WHITE hover:bg-BG_GRAY_2 my-3 w-full cursor-pointer overflow-hidden rounded-[10px] border transition-colors'
+      className={cn(
+        'border-GRAY_400 bg-BG_WHITE hover:bg-BG_GRAY_2 my-3 w-full cursor-pointer overflow-hidden rounded-[10px] border transition-colors',
+        className,
+      )}
       onClick={handleOpenTask}
       role='button'
       tabIndex={0}
