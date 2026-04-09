@@ -16,13 +16,12 @@ const StepGroupItem = ({ group }: StepGroupItemProps) => {
     <AccordionItem value={group.id} className='relative flex flex-col overflow-x-clip border-none'>
       {/* Fixed gutter: spine never overlaps summary text (content uses pl-[30px]) */}
       <div
-        className='pointer-events-none absolute top-0 bottom-0 left-0 z-0 flex w-[30px] flex-col items-center px-1.5'
+        className='pointer-events-none absolute top-0 left-0 z-1 flex w-[30px] items-center justify-center px-1.5 pt-2'
         aria-hidden
       >
-        <div className='flex size-4.5 shrink-0 items-center justify-center pt-4'>
+        <div className='bg-BG_WHITE flex size-4.5 shrink-0 items-center justify-center'>
           <Layers className='text-GRAY_600 size-3.5' strokeWidth={1.5} />
         </div>
-        <div className='bg-border mt-3 min-h-3 w-px flex-1 self-center' />
       </div>
 
       <AccordionTrigger

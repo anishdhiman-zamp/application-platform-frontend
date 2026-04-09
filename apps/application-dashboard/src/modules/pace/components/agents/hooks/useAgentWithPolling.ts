@@ -2,7 +2,7 @@ import { useCallback, useEffect, useRef, useState } from 'react';
 import { useGetAgentQuery } from '@/apis/agents';
 import type { AgentType } from '@/modules/pace/components/agents/types/agents.types';
 
-const MAX_POLL_ATTEMPTS = 100;
+const MAX_POLL_ATTEMPTS = 20;
 const POLL_INTERVAL_MS = 5000;
 
 interface UseAgentWithPollingResult {
@@ -13,10 +13,10 @@ interface UseAgentWithPollingResult {
 }
 
 export const useAgentWithPolling = (agentId: string): UseAgentWithPollingResult => {
+  const hasEverSucceededRef = useRef(false);
+  const pollTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   const [pollCount, setPollCount] = useState(0);
   const [isPolling, setIsPolling] = useState(false);
-  const pollTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
-  const hasEverSucceededRef = useRef(false);
 
   const { data, isLoading, isError, refetch } = useGetAgentQuery({ agentId });
 

@@ -34,11 +34,11 @@ export const getAssetUrl = (path: string): string => {
   return publicPath;
 };
 
-export const ZAMP_ICON = IMAGE_PREFIX + '/icons/zamp-icon.svg';
+export const ZAMP_BLACK_ICON = IMAGE_PREFIX + '/icons/zamp-black-icon.svg';
+export const ZAMP_WHITE_ICON = IMAGE_PREFIX + '/icons/zamp-white-icon.svg';
 export const FAVICON = IMAGE_PREFIX + '/icons/favicon.png';
 export const NOTEBOOK_ICON = IMAGE_PREFIX + '/icons/notebook.svg';
 export const GLOBE_ICON = IMAGE_PREFIX + '/icons/globe-01.svg';
-export const ZAMP_ICON_BLACK = IMAGE_PREFIX + '/icons/zamp-icon-black.svg';
 export const GOOGLE_ICON = IMAGE_PREFIX + '/icons/google.svg';
 export const DRAG_ICON = IMAGE_PREFIX + '/icons/drag-icon.svg';
 export const ERROR_WITH_BORDER = IMAGE_PREFIX + '/icons/error-with-border.svg';
@@ -145,7 +145,7 @@ export const ZID = IMAGE_PREFIX + '/icons/bank-icons/zid.svg';
 export const HAND_ICON = IMAGE_PREFIX + '/icons/hand.svg';
 
 // Agent Avatars
-export const AGENT_AVATAR = IMAGE_PREFIX + '/icons/agents/agent-avatar.svg';
+export const AGENT_EMPTY_STATE = IMAGE_PREFIX + '/images/agents/agents_empty_state.svg';
 export const AGENT_AVATAR_PREFIX = IMAGE_PREFIX + '/images/agents';
 export const AGENT_AVATAR_1 = AGENT_AVATAR_PREFIX + '/agent_icon_1.png';
 export const AGENT_AVATAR_2 = AGENT_AVATAR_PREFIX + '/agent_icon_2.png';
@@ -154,7 +154,7 @@ export const AGENT_AVATAR_4 = AGENT_AVATAR_PREFIX + '/agent_icon_4.png';
 export const AGENT_AVATAR_5 = AGENT_AVATAR_PREFIX + '/agent_icon_5.png';
 export const AGENT_AVATAR_6 = AGENT_AVATAR_PREFIX + '/agent_icon_6.png';
 export const AGENT_AVATAR_7 = AGENT_AVATAR_PREFIX + '/agent_icon_7.png';
-export const AGENT_AVATAR_8 = AGENT_AVATAR_PREFIX + '/agent_icon_8.png';
+export const AGENT_AVATAR_8 = AGENT_AVATAR_PREFIX + '/agent_icon_8_v2.png';
 export const AGENT_AVATAR_9 = AGENT_AVATAR_PREFIX + '/agent_icon_9.png';
 export const AGENT_AVATAR_10 = AGENT_AVATAR_PREFIX + '/agent_icon_10.png';
 export const AGENT_AVATAR_11 = AGENT_AVATAR_PREFIX + '/agent_icon_11.png';

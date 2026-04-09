@@ -15,7 +15,6 @@ import { usePaceContext } from '@/modules/pace/pace.context';
 
 const PORTAL_SELECTORS =
   '[role="menu"], [role="listbox"], [role="dialog"], [data-radix-popper-content-wrapper], [data-radix-menu-content]';
-const EDGE_TRIGGER_WIDTH_PX = 6;
 
 const isPortalOpen = () => document.querySelector(PORTAL_SELECTORS) !== null;
 
@@ -26,7 +25,6 @@ const FilesPanel = () => {
     filesPanelWidth,
     isFilesPanelResizing,
     isFilesPanelHydrated,
-    toggleFilesPanel,
     scheduleFilesPanelClose,
     cancelFilesPanelClose,
   } = usePaceContext();
@@ -37,7 +35,6 @@ const FilesPanel = () => {
 
   isResizingRef.current = isFilesPanelResizing;
   const isFloating = filesPanelOpen && !filesPanelPinned;
-  const showEdgeTrigger = !filesPanelOpen && !filesPanelPinned;
 
   const isInPanelColumn = useCallback((clientX: number) => {
     const panel = panelRef.current;
@@ -71,12 +68,6 @@ const FilesPanel = () => {
     [isInPanelColumn, cancelFilesPanelClose, scheduleFilesPanelClose],
   );
 
-  const handleEdgeEnter = useCallback(() => {
-    if (filesPanelOpen || filesPanelPinned) return;
-
-    toggleFilesPanel();
-  }, [filesPanelOpen, filesPanelPinned, toggleFilesPanel]);
-
   useEffect(() => {
     if (!filesPanelOpen || filesPanelPinned) return;
 
@@ -90,13 +81,6 @@ const FilesPanel = () => {
 
   return (
     <>
-      {showEdgeTrigger && (
-        <div
-          className='fixed top-0 right-0 bottom-0 z-50'
-          style={{ width: EDGE_TRIGGER_WIDTH_PX }}
-          onMouseEnter={handleEdgeEnter}
-        />
-      )}
       <AnimatePresence>
         {filesPanelOpen && (
           <motion.div

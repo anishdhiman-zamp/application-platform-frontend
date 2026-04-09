@@ -43,13 +43,7 @@ const ChatSidebarInner = ({
       conversationId={conversationId}
       resourceId={organizationId}
       resourceType={ResourceType.ORGANIZATION}
-      enableStreaming
-      usePerConversationSSE
-      setHeader={(header: string) => {
-        if (!chatTitle) {
-          setChatTitle(header);
-        }
-      }}
+      setHeader={setChatTitle}
       onConversationIdChange={handleConversationIdChange}
     >
       <ChatSidebarContent

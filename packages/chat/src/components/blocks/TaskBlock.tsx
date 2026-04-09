@@ -1,9 +1,8 @@
 'use client';
 
-import { AnimatedDot, AnimatedTerminalIcon, ImageWithFallback, ShimmerText } from '@zamp-platform/ui';
-import { formatPlural } from '@zamp-platform/utils';
+import { AnimatedTerminalIcon, ImageWithFallback, ShimmerText } from '@zamp-platform/ui';
 import { EVENT_TYPE } from '@zamp-platform/utils/event-bus/event-bus.types';
-import { ArrowUpRight, ChevronDown } from 'lucide-react';
+import { ArrowUpRight } from 'lucide-react';
 import { useRouter } from 'next/navigation';
 import { type FC, useCallback, useMemo } from 'react';
 
@@ -22,6 +21,7 @@ import type { ToolCallInfo } from '../../types/block.types';
 import { BLOCK_TYPE, TASK_STATUS, type TaskBlockType } from '../../types/block.types';
 import { ResourceType, SenderType } from '../../types/chat.types';
 import { extractToolCallInfo } from '../block.utils';
+import TaskBlockContent from './TaskBlockContent';
 import TaskStatusIcon from './TaskStatusIcon';
 
 interface TaskBlockProps {
@@ -192,7 +192,7 @@ const TaskBlock: FC<TaskBlockProps> = ({ payload, conversationId }) => {
 
   return (
     <div
-      className='border-GRAY_400 bg-BG_WHITE hover:bg-BG_GRAY_2 w-full cursor-pointer overflow-hidden rounded-[10px] border transition-colors'
+      className='border-GRAY_400 bg-BG_WHITE hover:bg-BG_GRAY_2 my-3 w-full cursor-pointer overflow-hidden rounded-[10px] border transition-colors'
       onClick={handleOpenTask}
       role='button'
       tabIndex={0}
@@ -208,41 +208,16 @@ const TaskBlock: FC<TaskBlockProps> = ({ payload, conversationId }) => {
       </div>
 
       {(hasToolCallContent || (isInProgress && displayedSummary)) && (
-        <div className='bg-BG_GRAY_2 border-GRAY_400 f-14-450 border-t px-4 py-3'>
-          {isLoading ? (
-            <div className='flex items-center justify-center py-4'>
-              <AnimatedDot showAnimation size={8} />
-            </div>
-          ) : isInProgress ? (
-            displayedSummary ? (
-              <div className='f-14-450 text-GRAY_950 line-clamp-2'>
-                <ShimmerText text={displayedSummary} autoAnimate={true} />
-              </div>
-            ) : (
-              <div className='f-14-450 text-GRAY_700 py-2'>
-                <ShimmerText text='Starting now' autoAnimate={true} />
-              </div>
-            )
-          ) : (
-            <>
-              {previousCount > 0 && (
-                <div>
-                  <div className='flex items-center gap-2'>
-                    <ChevronDown size={14} className='text-GRAY_700' />
-                    <span className='f-14-450 text-GRAY_950'>{formatPlural(previousCount, 'step', 'steps')}</span>
-                  </div>
-                  {lastToolCall && <div className='border-GRAY_400 ml-[7px] h-4 border-l' />}
-                </div>
-              )}
-
-              {lastToolCall && (
-                <div className='flex w-full items-center gap-2 pt-0.5'>
-                  <div className='flex h-4 w-4 shrink-0 items-center justify-center'>{getToolIcon(lastToolCall)}</div>
-                  {renderToolCallTrigger(lastToolCall)}
-                </div>
-              )}
-            </>
-          )}
+        <div className='bg-BG_GRAY_2 border-GRAY_400 f-14-450 min-h-20 border-t px-4 py-3'>
+          <TaskBlockContent
+            isLoading={isLoading}
+            isInProgress={isInProgress}
+            displayedSummary={displayedSummary}
+            previousCount={previousCount}
+            lastToolCall={lastToolCall}
+            getToolIcon={getToolIcon}
+            renderToolCallTrigger={renderToolCallTrigger}
+          />
         </div>
       )}
     </div>

@@ -13,9 +13,11 @@ import BarrelCounter from 'modules/pace/components/agents/components/BarrelCount
 import ShareAgentPopup from 'modules/pace/components/agents/components/ShareAgentPopup';
 import {
   AGENT_DETAIL_TAB_CONFIG,
+  getAddConnectionMessage,
+  getAddInstructionsMessage,
+  getAddTriggerMessage,
   getAgentAvatar,
   getAgentAvatarByKey,
-  PrefixMessage,
 } from 'modules/pace/components/agents/constants/agents.constants';
 import { AGENT_DETAIL_TAB, type AgentDetailTabType } from 'modules/pace/components/agents/types/agents.types';
 import { motion } from 'motion/react';
@@ -41,7 +43,6 @@ const VALID_TABS = new Set<string>(Object.values(AGENT_DETAIL_TAB));
 
 const AgentDetailPage = ({ agentId, agentName, agentDescription = '', avatarKey = '' }: AgentDetailPageProps) => {
   const router = useRouter();
-  const hasSyncedRef = useRef(false);
   const debounceTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 
   const { updateTab, getTabById } = useDynamicTabs({ type: TAB_TYPE.AGENT });
@@ -92,7 +93,7 @@ const AgentDetailPage = ({ agentId, agentName, agentDescription = '', avatarKey 
   const agentListEntry = agentsListData?.agents?.find((a) => a.id === agentId);
   const triggerCount = triggersData?.triggers?.length ?? 0;
 
-  const initialName = agentData?.name || agentListEntry?.name || agentName || agentId;
+  const initialName = agentData?.name || agentListEntry?.name || agentName || '';
   const initialDescription = agentData?.description || agentListEntry?.description || agentDescription;
 
   const [updateAgent] = useUpdateAgentMutation();
@@ -104,7 +105,7 @@ const AgentDetailPage = ({ agentId, agentName, agentDescription = '', avatarKey 
 
   const skipFetch = !agentExists;
 
-  const displayName = editName || agentName || agentId;
+  const displayName = editName || agentName || '';
   const resolvedAvatarKey = agentData?.avatar || avatarKey;
   const avatar =
     (resolvedAvatarKey && getAgentAvatarByKey(resolvedAvatarKey)) || getAgentAvatar(agentData?.name || agentName || '');
@@ -112,14 +113,15 @@ const AgentDetailPage = ({ agentId, agentName, agentDescription = '', avatarKey 
   const { triggerChatMessage } = useTriggerChatMessageFromButton({ agentId, agentName: displayName });
 
   const syncAgentData = useCallback(() => {
-    if (!agentData || hasSyncedRef.current) return;
+    if (!agentData) return;
 
-    hasSyncedRef.current = true;
+    // Skip sync while user has a pending edit (debounce timer active)
+    if (debounceTimerRef.current) return;
 
     if (agentData?.name) setEditName(agentData?.name);
     if (agentData?.description) setEditDescription(agentData?.description);
 
-    if (agentData.avatar) {
+    if (agentData?.avatar) {
       updateTab(agentId, agentId, agentData?.name || editName, {
         description: agentData?.description || editDescription,
         avatarKey: agentData?.avatar,
@@ -132,13 +134,15 @@ const AgentDetailPage = ({ agentId, agentName, agentDescription = '', avatarKey 
       if (debounceTimerRef.current) clearTimeout(debounceTimerRef.current);
 
       debounceTimerRef.current = setTimeout(async () => {
+        debounceTimerRef.current = null;
+
         try {
           await updateAgent({ agentId, ...fields }).unwrap();
 
           const tabName = fields.name || editName;
           const tabDescription = fields.description ?? editDescription;
 
-          updateTab(agentId, agentId, tabName, { description: tabDescription });
+          updateTab(agentId, agentId, tabName, { description: tabDescription, avatarKey: resolvedAvatarKey });
         } catch {
           // Revert to last known good values on failure
           if (agentData?.name) setEditName(agentData?.name);
@@ -146,7 +150,7 @@ const AgentDetailPage = ({ agentId, agentName, agentDescription = '', avatarKey 
         }
       }, 800);
     },
-    [agentId, editName, editDescription, updateAgent, updateTab],
+    [agentId, editName, editDescription, resolvedAvatarKey, updateAgent, updateTab],
   );
 
   const handleNameChange = useCallback(
@@ -173,18 +177,24 @@ const AgentDetailPage = ({ agentId, agentName, agentDescription = '', avatarKey 
     }
   }, [chatSidebarState, setChatSidebarState]);
 
+  const handleChatWithAgent = useCallback(() => {
+    triggerChatMessage(`I want to collaborate with ${displayName}`);
+  }, [triggerChatMessage, displayName]);
+
   const handleBackToAgents = useCallback(() => {
     router.push(preserveSidebarParam(ROUTES_PATH.CHAT_AGENTS));
   }, [router]);
 
   const handleAddNewTrigger = useCallback(() => {
-    triggerChatMessage(`${PrefixMessage.ADD_NEW_TRIGGER} for **${displayName}**`);
+    triggerChatMessage(getAddTriggerMessage(displayName));
+  }, [triggerChatMessage, displayName]);
+
+  const handleAddInstructions = useCallback(() => {
+    triggerChatMessage(getAddInstructionsMessage(displayName));
   }, [triggerChatMessage, displayName]);
 
   const handleAddNewConnection = useCallback(() => {
-    triggerChatMessage(
-      `${PrefixMessage.ADD_NEW_CONNECTION_P} **${displayName}** ${PrefixMessage.ADD_NEW_CONNECTION_S}`,
-    );
+    triggerChatMessage(getAddConnectionMessage(displayName));
   }, [triggerChatMessage, displayName]);
 
   const handleInstructionsUpdating = useCallback((updating: boolean) => {
@@ -208,6 +218,7 @@ const AgentDetailPage = ({ agentId, agentName, agentDescription = '', avatarKey 
       [AGENT_DETAIL_TAB.TRIGGERS]: (
         <AgentTriggerList
           agentId={agentId}
+          agentAvatarSrc={avatar.src}
           isActive={activeDetailTab === AGENT_DETAIL_TAB.TRIGGERS}
           skipFetch={skipFetch}
           onAddTrigger={handleAddNewTrigger}
@@ -216,24 +227,40 @@ const AgentDetailPage = ({ agentId, agentName, agentDescription = '', avatarKey 
       [AGENT_DETAIL_TAB.INSTRUCTIONS]: (
         <AgentInstructions
           agentId={agentId}
+          agentAvatarSrc={avatar.src}
           isActive={activeDetailTab === AGENT_DETAIL_TAB.INSTRUCTIONS}
           skipFetch={skipFetch}
           onUpdating={handleInstructionsUpdating}
+          onAddInstructions={handleAddInstructions}
         />
       ),
       [AGENT_DETAIL_TAB.FILES]: (
-        <AgentFileList agentId={agentId} isActive={activeDetailTab === AGENT_DETAIL_TAB.FILES} skipFetch={skipFetch} />
+        <AgentFileList
+          agentId={agentId}
+          agentAvatarSrc={avatar.src}
+          isActive={activeDetailTab === AGENT_DETAIL_TAB.FILES}
+          skipFetch={skipFetch}
+        />
       ),
       [AGENT_DETAIL_TAB.TOOLS_AND_ACCESS]: (
         <AgentToolsAccess
           agentId={agentId}
+          agentAvatarSrc={avatar.src}
           isActive={activeDetailTab === AGENT_DETAIL_TAB.TOOLS_AND_ACCESS}
           skipFetch={skipFetch}
           onAddConnection={handleAddNewConnection}
         />
       ),
     }),
-    [agentId, activeDetailTab, skipFetch, handleInstructionsUpdating, handleAddNewTrigger, handleAddNewConnection],
+    [
+      agentId,
+      activeDetailTab,
+      skipFetch,
+      handleInstructionsUpdating,
+      handleAddNewTrigger,
+      handleAddInstructions,
+      handleAddNewConnection,
+    ],
   );
 
   if (isAgentError) {
@@ -296,16 +323,24 @@ const AgentDetailPage = ({ agentId, agentName, agentDescription = '', avatarKey 
               className='size-full object-contain'
             />
           </motion.div>
-          <AgentGreeting onChat={handleOpenSidebar} isAvatarHovered={isAvatarHovered} />
+          <AgentGreeting
+            onChat={handleChatWithAgent}
+            onAddTrigger={handleAddNewTrigger}
+            isAvatarHovered={isAvatarHovered}
+          />
           <ShareAgentPopup agentId={agentId} />
         </div>
 
-        <input
-          value={editName}
-          onChange={(e) => handleNameChange(e.target.value)}
-          className='text-GRAY_1000 f-26-550 placeholder:text-GRAY_500 mb-2 w-full shrink-0 border-none bg-transparent outline-none'
-          placeholder='Agent name'
-        />
+        {isLoadingAgent && !editName ? (
+          <Skeleton className='mb-2 h-8 w-60' />
+        ) : (
+          <input
+            value={editName}
+            onChange={(e) => handleNameChange(e.target.value)}
+            className='text-GRAY_1000 f-26-550 placeholder:text-GRAY_500 mb-2 w-full shrink-0 border-none bg-transparent outline-none'
+            placeholder='Agent name'
+          />
+        )}
         {isLoadingAgent && !editDescription ? (
           <Skeleton className='mb-6 h-5 w-80' />
         ) : (

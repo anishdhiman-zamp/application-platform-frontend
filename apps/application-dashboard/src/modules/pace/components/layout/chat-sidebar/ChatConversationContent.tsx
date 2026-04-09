@@ -17,19 +17,20 @@ import {
 import { useConversationActions, useConversationState } from '@zamp-platform/conversation-stream';
 import { ScrollContainer } from '@zamp-platform/ui';
 import { cn } from '@zamp-platform/ui/utils';
+import AgentPill from 'modules/pace/components/agents/components/AgentPill';
+import TaskStatusCounts from 'modules/pace/components/chat/TaskStatusCounts';
 import { useRouter } from 'next/navigation';
-import NewPaceIcons from '@/assets/Icons/NewPaceIcons';
 import CommonWrapper from '@/components/commonWrapper';
 import { SkeletonTypes } from '@/components/commonWrapper/commonWrapper.types';
-import NewPaceAvatar from '@/modules/chatbot/NewPaceAvatar';
-import AgentPill from '@/modules/pace/components/agents/components/AgentPill';
+import { APITags } from '@/constants/api.constants';
+import { useAppDispatch } from '@/hooks/toolkit';
+import ZampIcon from '@/modules/chatbot/ZampIcon';
 import AgentTestCard from '@/modules/pace/components/agents/components/AgentTestCard';
 import {
   getAgentAvatar,
   getAgentAvatarByKey,
   PrefixMessage,
 } from '@/modules/pace/components/agents/constants/agents.constants';
-import TaskStatusCounts from '@/modules/pace/components/chat/TaskStatusCounts';
 import { buildTabRoute } from '@/modules/pace/components/dynamic-tabs/tab-type-registry';
 import { useDynamicTabs } from '@/modules/pace/components/dynamic-tabs/useDynamicTabs';
 import ChatMessagesSkeleton from '@/modules/pace/components/loaders/ChatMessagesSkeleton';
@@ -37,6 +38,7 @@ import { type ActiveAgentInfo, usePaceContext } from '@/modules/pace/pace.contex
 import { TAB_TYPE } from '@/modules/pace/pace.types';
 import { preserveSidebarParam } from '@/modules/pace/pace.utils';
 import { addAutoLoopLockedConversation } from '@/modules/pace/utils/autoLoopStorage';
+import { baseApi } from '@/services/baseApi';
 
 export interface ChatConversationContentProps {
   conversationId: string | null;
@@ -61,9 +63,12 @@ const ChatConversationContent = ({
   addFileReferenceRef,
   currentUserName,
 }: ChatConversationContentProps) => {
-  const intentConsumedRef = useRef(false);
-  const taskStatusContainerRef = useRef<HTMLDivElement>(null);
   const router = useRouter();
+  const dispatch = useAppDispatch();
+  const intentConsumedRef = useRef(false);
+  const consumedIntentRef = useRef<unknown>(null);
+  const taskStatusContainerRef = useRef<HTMLDivElement>(null);
+  const prevAgentInfoRef = useRef<ActiveAgentInfo | null>(null);
 
   const {
     pendingFileReference,
@@ -209,18 +214,22 @@ const ChatConversationContent = ({
     [handleAgentClick],
   );
 
-  // Reset consumed flag when a new payload arrives
-  useEffect(() => {
-    if (chatMessageIntent) {
-      intentConsumedRef.current = false;
+  // Refresh agents list when an agent block appears in chat
+  const handleAgentInfoChange = useCallback(() => {
+    if (agentInfoFromMessages && agentInfoFromMessages !== prevAgentInfoRef.current) {
+      prevAgentInfoRef.current = agentInfoFromMessages;
+      dispatch(baseApi.util.invalidateTags([APITags.GET_AGENTS_LIST]));
     }
-  }, [chatMessageIntent]);
+  }, [agentInfoFromMessages, dispatch]);
 
   useEffect(() => {
-    if (chatMessageIntent && !intentConsumedRef.current && conversationId) {
-      intentConsumedRef.current = true;
+    handleAgentInfoChange();
+  }, [handleAgentInfoChange]);
 
-      // Send message to existing conversation
+  // Send message to existing conversation via intent
+  const handleSendIntentToExistingConversation = useCallback(() => {
+    if (chatMessageIntent && conversationId && consumedIntentRef.current !== chatMessageIntent) {
+      consumedIntentRef.current = chatMessageIntent;
       const messagePayload = createUserMessagePayload(
         chatMessageIntent.message,
         organizationId,
@@ -236,6 +245,11 @@ const ChatConversationContent = ({
   }, [chatMessageIntent, conversationId, organizationId, currentUserName, sendMessage, setChatMessageIntent]);
 
   useEffect(() => {
+    handleSendIntentToExistingConversation();
+  }, [handleSendIntentToExistingConversation]);
+
+  // Create new conversation via intent (e.g. home screen input)
+  const handleCreateConversationFromIntent = useCallback(() => {
     if (chatMessageIntent && !intentConsumedRef.current && !conversationId) {
       intentConsumedRef.current = true;
       const payload = createConversationPayload(
@@ -264,6 +278,10 @@ const ChatConversationContent = ({
     }
   }, [chatMessageIntent, conversationId, organizationId, currentUserName, createConversationV2, setChatMessageIntent]);
 
+  useEffect(() => {
+    handleCreateConversationFromIntent();
+  }, [handleCreateConversationFromIntent]);
+
   return (
     <ChatActionsProvider
       onFileOpen={onFileOpen}
@@ -284,6 +302,7 @@ const ChatConversationContent = ({
           isLoading={isLoadingConversation}
           streamingState={streamingState}
           scrollTrigger={messages?.length}
+          scrollbarStyle='none'
           scrollClassName={cn(
             'bg-BG_WHITE transition-[filter] duration-200',
             isTaskPopoverOpen ? 'overflow-y-hidden blur-sm pointer-events-none' : 'overflow-y-scroll',
@@ -302,20 +321,16 @@ const ChatConversationContent = ({
                 messages={messages}
                 isAnalysing={isAnalysing}
                 streamingState={streamingState}
-                className='gap-3 px-0 [scrollbar-width:none]'
+                className='gap-6 px-0 [scrollbar-width:none]'
                 conversationId={conversationId ?? ctxConversationId ?? ''}
-                assistantAvatar={<NewPaceAvatar />}
-                showTimestamp
-                showFeedback
-                showCopy
-                alignUserRight
+                assistantAvatar={<ZampIcon />}
               />
               <div className='bg-BG_WHITE h-12 w-full' />
             </CommonWrapper>
           ) : (
             <div className='flex flex-1 items-center justify-center'>
               <div className='flex flex-col items-center gap-4'>
-                <NewPaceIcons width={40} height={40} />
+                <ZampIcon size={40} className='opacity-50' />
                 <p className='f-13-400 text-GRAY_600'>Ask Pace anything</p>
               </div>
             </div>

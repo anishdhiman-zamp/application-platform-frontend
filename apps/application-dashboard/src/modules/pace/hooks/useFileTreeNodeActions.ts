@@ -1,6 +1,7 @@
 import { useCallback, useState } from 'react';
 import { captureException } from '@sentry/browser';
 import { toast } from '@zamp-platform/ui';
+import { ROUTES_PATH } from '@/constants/routeConfig';
 import { useDynamicTabs } from '@/modules/pace/components/dynamic-tabs/useDynamicTabs';
 import {
   CLIPBOARD_OPERATION,
@@ -92,6 +93,7 @@ export const useFileTreeNodeActions = ({
 
   const handleActionClick = async (actionId: string) => {
     onCloseContextMenu();
+    const isOnChatHome = window.location.pathname === ROUTES_PATH.CHAT;
 
     try {
       switch (actionId) {
@@ -191,7 +193,7 @@ export const useFileTreeNodeActions = ({
         }
         case CONTEXT_MENU_ACTION_IDS.REFERENCE_IN_CHAT: {
           setPendingFileReference({ path: node.path, name: node.name });
-          if (chatSidebarState === CHAT_SIDEBAR_STATE.COLLAPSED) {
+          if (chatSidebarState === CHAT_SIDEBAR_STATE.COLLAPSED && !isOnChatHome) {
             setChatSidebarState(CHAT_SIDEBAR_STATE.SIDEBAR);
           }
           break;

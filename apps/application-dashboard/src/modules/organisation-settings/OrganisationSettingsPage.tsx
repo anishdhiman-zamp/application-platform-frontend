@@ -4,8 +4,8 @@ import SecurityConfiguration from '@/modules/organisation-settings/components/Se
 
 const OrganisationSettingsPage = () => {
   return (
-    <div className='bg-BG_WHITE h-full w-full overflow-auto p-10'>
-      <div className='flex h-full w-full flex-col'>
+    <div className='h-full w-full overflow-auto'>
+      <div className='flex w-full flex-col gap-6'>
         <OrgDetails />
         <SecurityConfiguration />
         <DangerZone />

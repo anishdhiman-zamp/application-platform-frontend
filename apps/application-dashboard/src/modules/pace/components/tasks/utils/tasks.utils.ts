@@ -116,9 +116,12 @@ export const mapInputsRequiredToHitlQuestions = (items: ConversationInputRequire
 
     if (!data) continue;
 
+    const uniqueId = item.input_id ?? item.entity_id;
+
     if (data.input_type === HITL_INPUT_TYPE.APPROVAL) {
       result.push({
-        id: item.entity_id,
+        id: uniqueId,
+        input_id: item.input_id,
         entity_id: item.entity_id,
         entity_type: item.entity_type,
         question: data.question ?? '',
@@ -132,7 +135,8 @@ export const mapInputsRequiredToHitlQuestions = (items: ConversationInputRequire
 
     if (data.input_type === HITL_INPUT_TYPE.TEXT) {
       result.push({
-        id: item.entity_id,
+        id: uniqueId,
+        input_id: item.input_id,
         entity_id: item.entity_id,
         entity_type: item.entity_type,
         question: data.question ?? '',
@@ -147,7 +151,8 @@ export const mapInputsRequiredToHitlQuestions = (items: ConversationInputRequire
     if (!data.options?.length) continue;
 
     result.push({
-      id: item.entity_id,
+      id: uniqueId,
+      input_id: item.input_id,
       entity_id: item.entity_id,
       entity_type: item.entity_type,
       question: data.question ?? '',

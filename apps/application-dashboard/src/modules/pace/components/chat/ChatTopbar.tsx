@@ -3,6 +3,7 @@
 import { type FC, useCallback, useState } from 'react';
 import { Button, Popover, PopoverContent, PopoverTrigger } from '@zamp-platform/ui';
 import { cn } from '@zamp-platform/ui/utils';
+import { AnimatePresence, motion } from 'framer-motion';
 import { ChevronDown, MoveDiagonal, Plus } from 'lucide-react';
 import ChatHistory from '@/modules/pace/components/chat/ChatHistory';
 import ConversationActions from '@/modules/pace/components/chat/ConversationActions';
@@ -62,12 +63,34 @@ const ChatTopbar: FC<ChatTopbarProps> = ({
     [conversationId, onTitleChange],
   );
 
+  const handleDeleteFromHistory = useCallback(
+    (id: string) => {
+      if (id === conversationId) {
+        onDeleteConversation?.();
+      }
+    },
+    [conversationId, onDeleteConversation],
+  );
+
   return (
     <div className={cn('bg-BG_WHITE flex items-center justify-between gap-x-3 p-3', className)} style={style}>
       <div className='flex min-w-0 flex-1 items-center gap-x-1'>
         <Popover open={isHistoryOpen} onOpenChange={setIsHistoryOpen}>
           <PopoverTrigger className='hover:bg-GRAY_100 flex h-7 max-w-full cursor-pointer items-center gap-x-1 rounded-md pr-1 pl-1.5 transition-colors'>
-            <span className='f-14-550 block min-w-0 truncate first-letter:uppercase'>{displayTitle}</span>
+            <span className='relative block min-w-0 overflow-hidden'>
+              <AnimatePresence mode='wait' initial={false}>
+                <motion.span
+                  key={displayTitle}
+                  className='f-14-550 block truncate first-letter:uppercase'
+                  initial={{ opacity: 0, y: 4 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  exit={{ opacity: 0, y: -4 }}
+                  transition={{ duration: 0.18, ease: 'easeInOut' }}
+                >
+                  {displayTitle}
+                </motion.span>
+              </AnimatePresence>
+            </span>
             <ChevronDown
               size={14}
               className={cn('text-GRAY_1000 shrink-0 transition-transform', isHistoryOpen && 'rotate-180')}
@@ -76,6 +99,7 @@ const ChatTopbar: FC<ChatTopbarProps> = ({
           <PopoverContent align='start' sideOffset={8} className='flex h-100 w-80 flex-col overflow-hidden p-0'>
             <ChatHistory
               onSelectConversation={handleSelectConversation}
+              onDeleteConversation={handleDeleteFromHistory}
               onRenameConversation={handleRenameFromHistory}
               activeConversationId={conversationId}
               compact

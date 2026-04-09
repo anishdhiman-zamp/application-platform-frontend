@@ -2,7 +2,7 @@
 
 exports[`Command Component - Core Functional Tests matches snapshot for basic command with input and list 1`] = `
 <div
-  class="bg-BG_WHITE text-GRAY_1000 flex h-full w-full flex-col overflow-hidden rounded-md"
+  class="bg-BG_WHITE dark:bg-popover text-GRAY_1000 dark:text-popover-foreground flex h-full w-full flex-col overflow-hidden rounded-md"
   cmdk-root=""
   tabindex="-1"
 >
@@ -23,7 +23,7 @@ exports[`Command Component - Core Functional Tests matches snapshot for basic co
       aria-labelledby="radix-_r_1r_"
       autocomplete="off"
       autocorrect="off"
-      class="placeholder:text-GRAY_700 flex h-10 w-full rounded-md bg-transparent py-3 text-sm outline-hidden disabled:cursor-not-allowed disabled:opacity-50"
+      class="placeholder:text-GRAY_700 dark:placeholder:text-muted-foreground flex h-10 w-full rounded-md bg-transparent py-3 text-sm outline-hidden disabled:cursor-not-allowed disabled:opacity-50"
       cmdk-input=""
       id="radix-_r_1s_"
       placeholder="Snapshot..."
@@ -79,7 +79,7 @@ exports[`Command Component - Core Functional Tests matches snapshot for command 
 
 exports[`Command Component - Core Functional Tests matches snapshot for command item with shortcut 1`] = `
 <div
-  class="bg-BG_WHITE text-GRAY_1000 flex h-full w-full flex-col overflow-hidden rounded-md"
+  class="bg-BG_WHITE dark:bg-popover text-GRAY_1000 dark:text-popover-foreground flex h-full w-full flex-col overflow-hidden rounded-md"
   cmdk-root=""
   tabindex="-1"
 >
@@ -125,7 +125,7 @@ exports[`Command Component - Core Functional Tests matches snapshot for command 
 
 exports[`Command Component - Core Functional Tests matches snapshot for command with empty state 1`] = `
 <div
-  class="bg-BG_WHITE text-GRAY_1000 flex h-full w-full flex-col overflow-hidden rounded-md"
+  class="bg-BG_WHITE dark:bg-popover text-GRAY_1000 dark:text-popover-foreground flex h-full w-full flex-col overflow-hidden rounded-md"
   cmdk-root=""
   tabindex="-1"
 >
@@ -147,7 +147,7 @@ exports[`Command Component - Core Functional Tests matches snapshot for command 
 
 exports[`Command Component - Core Functional Tests matches snapshot for command with groups and separators 1`] = `
 <div
-  class="bg-BG_WHITE text-GRAY_1000 flex h-full w-full flex-col overflow-hidden rounded-md"
+  class="bg-BG_WHITE dark:bg-popover text-GRAY_1000 dark:text-popover-foreground flex h-full w-full flex-col overflow-hidden rounded-md"
   cmdk-root=""
   tabindex="-1"
 >
@@ -226,7 +226,7 @@ exports[`Command Component - Core Functional Tests matches snapshot for command 
 
 exports[`Command Component - Core Functional Tests matches snapshot for command with loading state 1`] = `
 <div
-  class="bg-BG_WHITE text-GRAY_1000 flex h-full w-full flex-col overflow-hidden rounded-md"
+  class="bg-BG_WHITE dark:bg-popover text-GRAY_1000 dark:text-popover-foreground flex h-full w-full flex-col overflow-hidden rounded-md"
   cmdk-root=""
   tabindex="-1"
 >

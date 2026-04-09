@@ -1,7 +1,15 @@
 'use client';
 
 import { useCallback, useEffect, useMemo, useRef } from 'react';
-import { Button, FolderOpenIcon, MessageSquareIcon } from '@zamp-platform/ui';
+import {
+  Button,
+  FolderOpenIcon,
+  MessageSquareIcon,
+  Tooltip,
+  TooltipContent,
+  TooltipProvider,
+  TooltipTrigger,
+} from '@zamp-platform/ui';
 import { cn } from '@zamp-platform/ui/utils';
 import { motion } from 'framer-motion';
 import { PanelRightOpen } from 'lucide-react';
@@ -48,14 +56,22 @@ const PaceNavbar = () => {
     isFilesPanelResizing,
   } = usePaceContext();
   const { isOnAnyDynamicTab } = useDynamicTabs();
+  const { isEnabled: isAppsEnabled } = useFeatureFlag(FEATURE_FLAGS.APPS);
   const { isEnabled: isAgentsFe } = useFeatureFlag(FEATURE_FLAGS.AGENTS_FE);
 
-  const navbarItems = useMemo(
-    () => PACE_NAVBAR_ITEMS.filter((item) => item.id !== PaceNavbarItemId.AGENTS || isAgentsFe),
-    [isAgentsFe],
+  const visibleNavItems = useMemo(
+    () =>
+      PACE_NAVBAR_ITEMS.filter((item) => {
+        if (item.featureFlag === FEATURE_FLAGS.APPS && !isAppsEnabled) return false;
+        if (item.id === PaceNavbarItemId.AGENTS && !isAgentsFe) return false;
+
+        return true;
+      }),
+    [isAppsEnabled, isAgentsFe],
   );
 
   const chatIconRef = useRef<AnimatedIconHandle>(null);
+  const folderIconRef = useRef<AnimatedIconHandle>(null);
 
   const isSidebar = chatSidebarState === CHAT_SIDEBAR_STATE.SIDEBAR;
   const isCollapsed = chatSidebarState === CHAT_SIDEBAR_STATE.COLLAPSED;
@@ -89,6 +105,10 @@ const PaceNavbar = () => {
 
     if (id === PaceNavbarItemId.SETTINGS) {
       return pathname?.startsWith(ROUTES_PATH.CHAT_SETTINGS) ?? false;
+    }
+
+    if (id === PaceNavbarItemId.APPS) {
+      return pathname?.startsWith(ROUTES_PATH.CHAT_APPS) ?? false;
     }
 
     return pathname?.includes(path) ?? false;
@@ -147,16 +167,6 @@ const PaceNavbar = () => {
     [isExpanded, isCollapsed, isOnChatHome, collapseSidebar, scheduleCollapseOnRouteChange, setChatSidebarState],
   );
 
-  useEffect(() => {
-    if (!activeTabId || !pathname) return;
-
-    const urlTabId = getActiveTabIdFromUrl(pathname, searchString);
-
-    if (!urlTabId) {
-      dispatch(dynamicTabsActions.setActiveTab(null));
-    }
-  }, [pathname, searchString, dispatch]); // eslint-disable-line react-hooks/exhaustive-deps -- only react to URL changes, not activeTabId changes
-
   // Cmd + /: Toggle chat sidebar collapse/expand
   const handleCmdSlash = useCallback(
     (event: KeyboardEvent) => {
@@ -173,6 +183,24 @@ const PaceNavbar = () => {
   );
 
   useKeyDown(handleCmdSlash, [KEYBOARD_KEYS.SLASH]);
+
+  const handleFolderButtonClick = useCallback(() => {
+    if (filesPanelOpen && !filesPanelPinned) {
+      setFilesPanelPinned(true);
+    } else {
+      toggleFilesPanel();
+    }
+  }, [filesPanelOpen, filesPanelPinned, setFilesPanelPinned, toggleFilesPanel]);
+
+  useEffect(() => {
+    if (!activeTabId || !pathname) return;
+
+    const urlTabId = getActiveTabIdFromUrl(pathname, searchString);
+
+    if (!urlTabId) {
+      dispatch(dynamicTabsActions.setActiveTab(null));
+    }
+  }, [pathname, searchString, dispatch]); // eslint-disable-line react-hooks/exhaustive-deps -- only react to URL changes, not activeTabId changes
 
   return (
     <div className='bg-BG_GRAY_2 flex h-[42px] items-center overflow-hidden px-2 pt-1.5 pb-1.5'>
@@ -237,7 +265,7 @@ const PaceNavbar = () => {
         transition={navAnimations.navItems.transition}
         className='flex shrink-0 items-center gap-x-2'
       >
-        {navbarItems.map((item) => (
+        {visibleNavItems.map((item) => (
           <NavbarIconLink
             key={item.id}
             item={item}
@@ -264,25 +292,35 @@ const PaceNavbar = () => {
         className='shrink-0'
       />
       <div className='shrink-0 pl-2'>
-        <Button
-          variant='ghost'
-          size='icon'
-          className={cn(
-            'text-GRAY_700 hover:text-GRAY_900 hover:bg-accent h-7.5 w-7.5 rounded-lg border-[0.75px] border-transparent p-[7px]',
-            {
-              'border-GRAY_500 text-GRAY_900 hover:text-GRAY_900 shadow-tab-shadow bg-BG_WHITE hover:bg-BG_WHITE':
-                filesPanelOpen && filesPanelPinned,
-            },
-          )}
-          onClick={() => setFilesPanelPinned(!filesPanelPinned)}
-          onMouseEnter={() => {
-            cancelFilesPanelClose();
-            if (!filesPanelPinned && !filesPanelOpen) toggleFilesPanel();
-          }}
-          title={filesPanelPinned ? 'Unpin files panel' : 'Files'}
-        >
-          <FolderOpenIcon size={16} className='pointer-events-none' />
-        </Button>
+        <TooltipProvider>
+          <Tooltip>
+            <TooltipTrigger asChild>
+              <Button
+                variant='ghost'
+                size='icon'
+                className={cn(
+                  'text-GRAY_700 hover:text-GRAY_900 hover:bg-accent h-7.5 w-7.5 rounded-lg border-[0.75px] border-transparent p-[7px]',
+                  {
+                    'border-GRAY_500 text-GRAY_900 hover:text-GRAY_900 shadow-tab-shadow bg-BG_WHITE hover:bg-BG_WHITE':
+                      filesPanelOpen && filesPanelPinned,
+                  },
+                )}
+                onClick={handleFolderButtonClick}
+                onMouseEnter={() => {
+                  folderIconRef.current?.startAnimation();
+                  cancelFilesPanelClose();
+                  if (!filesPanelPinned && !filesPanelOpen) toggleFilesPanel();
+                }}
+                onMouseLeave={() => folderIconRef.current?.stopAnimation()}
+              >
+                <FolderOpenIcon ref={folderIconRef} size={16} className='pointer-events-none' />
+              </Button>
+            </TooltipTrigger>
+            {filesPanelOpen && (
+              <TooltipContent side='bottom'>{filesPanelPinned ? 'Unpin files panel' : 'Click to pin'}</TooltipContent>
+            )}
+          </Tooltip>
+        </TooltipProvider>
       </div>
     </div>
   );

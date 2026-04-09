@@ -50,6 +50,7 @@ export * from './ui/home';
 export * from './ui/route-icon';
 export * from './ui/settings';
 export * from './ui/activity';
+export * from './ui/layout-grid';
 export * from './ui/book';
 export * from './ui/agent-icon';
 export * from './ui/agent-nav-icon';

@@ -2,6 +2,7 @@
 
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { Skeleton, toast } from '@zamp-platform/ui';
+import AgentTabEmptyState from 'modules/pace/components/agents/components/AgentTabEmptyState';
 import IntegrationDetail from 'modules/pace/components/agents/components/IntegrationDetail';
 import IntegrationList from 'modules/pace/components/agents/components/IntegrationList';
 import {
@@ -31,6 +32,7 @@ import CommonWrapper from '@/components/commonWrapper';
 
 interface AgentToolsAccessProps {
   agentId: string;
+  agentAvatarSrc?: string;
   isActive?: boolean;
   skipFetch?: boolean;
   onAddConnection?: () => void;
@@ -47,7 +49,13 @@ const deriveAccessLevel = (tools?: { permission: ToolPermissionType }[]): Access
   return ACCESS_LEVEL_OPTIONS.find((opt) => opt?.permission === first)?.value ?? ACCESS_LEVEL.CUSTOM;
 };
 
-const AgentToolsAccess = ({ agentId, isActive = true, skipFetch = false, onAddConnection }: AgentToolsAccessProps) => {
+const AgentToolsAccess = ({
+  agentId,
+  agentAvatarSrc,
+  isActive = true,
+  skipFetch = false,
+  onAddConnection,
+}: AgentToolsAccessProps) => {
   const hasBeenActiveRef = useRef(isActive);
   const isFirstVisit = !hasBeenActiveRef.current && isActive;
 
@@ -313,6 +321,12 @@ const AgentToolsAccess = ({ agentId, isActive = true, skipFetch = false, onAddCo
         setIntegrations([]);
       }
 
+      // If both queries have resolved but there are no catalog items, stop loading
+      if (!isLoadingCatalog && !isLoadingAgentConnections) {
+        setIsLoadingTools(false);
+        isInitialLoadRef.current = false;
+      }
+
       return;
     }
 
@@ -467,7 +481,7 @@ const AgentToolsAccess = ({ agentId, isActive = true, skipFetch = false, onAddCo
     );
   }
 
-  if (isLoadingCatalog || isLoadingAgentConnections || isLoadingTools || isInitialLoadRef.current) {
+  if (shouldSkip || isLoadingCatalog || isLoadingAgentConnections || isLoadingTools || isInitialLoadRef.current) {
     return (
       <div className='bg-BG_GRAY_2 flex h-full rounded-xl'>
         <div className='flex flex-2 flex-col gap-1 p-1.5'>
@@ -512,9 +526,12 @@ const AgentToolsAccess = ({ agentId, isActive = true, skipFetch = false, onAddCo
 
   if (integrations.length === 0) {
     return (
-      <div className='border-GRAY_400 flex h-full items-center justify-center rounded-xl border'>
-        <p className='f-13-450 text-GRAY_700'>No integrations configured</p>
-      </div>
+      <AgentTabEmptyState
+        agentAvatarSrc={agentAvatarSrc}
+        description='Explicitly grant connections access to your agent'
+        actionLabel='Add connection'
+        onAction={onAddConnection}
+      />
     );
   }
 

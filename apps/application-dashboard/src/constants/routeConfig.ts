@@ -47,8 +47,12 @@ export const ROUTES_PATH = {
   CHAT_TASKS: '/chat/task',
   CHAT_SETTINGS_INTEGRATIONS: '/chat/settings/integrations',
   CHAT_SETTINGS_GENERAL: '/chat/settings/general',
+  CHAT_SETTINGS_DATASETS: '/chat/settings/datasets',
+  CHAT_SETTINGS_DATASETS_NEW: '/chat/settings/datasets/new',
+  CHAT_SETTINGS_DATASET_DETAIL: '/chat/settings/datasets/:tableName',
   CHAT_SETTINGS_ORG_SETTINGS: '/chat/settings/organisation-settings',
-  CHAT_TASK: '/chat/task/:taskId',
+  CHAT_TASK: '/chat/task',
+  CHAT_APPS: '/chat/apps',
   CHAT_AGENTS: '/chat/agents',
   CHAT_AGENT: '/chat/agents/:agentId',
 };
@@ -129,6 +133,7 @@ export const getChatFileRoute = (filePath: string) => {
 export const TASK_QUERY_PARAMS = {
   PARENT_TASKS: 'parentTasks',
   SIBLINGS: 'siblings',
+  REFERRER: 'referrer',
 } as const;
 
 export const getChatTaskRoute = ({
@@ -140,6 +145,7 @@ export const getChatTaskRoute = ({
   totalRows,
   parentTasks,
   siblings,
+  referrer,
 }: {
   taskId: string;
   conversationId?: string;
@@ -149,10 +155,12 @@ export const getChatTaskRoute = ({
   totalRows?: number;
   parentTasks?: TaskBreadcrumb[];
   siblings?: SiblingTask[];
+  referrer?: string;
 }) => {
-  const basePath = ROUTES_PATH.CHAT_TASK.replace(':taskId', taskId);
+  const basePath = ROUTES_PATH.CHAT_TASK;
   const params = new URLSearchParams();
 
+  params.set('t', taskId);
   if (conversationId) params.set('s', conversationId);
   if (taskTitle) params.set('title', taskTitle);
   if (status) params.set('status', status);
@@ -160,10 +168,13 @@ export const getChatTaskRoute = ({
   if (totalRows !== undefined) params.set('totalRows', String(totalRows));
   if (parentTasks && parentTasks.length > 0) params.set(TASK_QUERY_PARAMS.PARENT_TASKS, JSON.stringify(parentTasks));
   if (siblings && siblings.length > 0) params.set(TASK_QUERY_PARAMS.SIBLINGS, JSON.stringify(siblings));
+  if (referrer) params.set(TASK_QUERY_PARAMS.REFERRER, referrer);
 
-  const query = params.toString();
+  return `${basePath}?${params.toString()}`;
+};
 
-  return query ? `${basePath}?${query}` : basePath;
+export const getDatasetDetailRoute = (tableName: string) => {
+  return `${ROUTES_PATH.CHAT_SETTINGS_DATASET_DETAIL.replace(':tableName', tableName)}`;
 };
 
 export const LOGIN_URLS = [ROUTES_PATH.LOGIN];

@@ -33,7 +33,7 @@ export const HITLQuestionsBlock = ({
 }: HITLQuestionsBlockProps) => {
   const { questions } = payload;
   const scrollContainerRef = useRef<ScrollContainerRef>(null);
-  const customInputRef = useRef<HTMLInputElement>(null);
+  const customInputRef = useRef<HTMLTextAreaElement>(null);
   const containerRef = useRef<HTMLDivElement>(null);
   const questionRefs = useRef<(HTMLDivElement | null)[]>([]);
 
@@ -42,6 +42,8 @@ export const HITLQuestionsBlock = ({
   const [currentQuestionIndex, setCurrentQuestionIndex] = useState(0);
   const [focusedOptionIndex, setFocusedOptionIndex] = useState(0);
   const scrollDirectionRef = useRef<'up' | 'down'>('down');
+  const shouldScrollRef = useRef(false);
+  const isProgrammaticScrollRef = useRef(false);
   const submitRef = useRef<(() => void) | null>(null);
   const [answers, setAnswers] = useState<HITLAnswersState>({});
   const [approvalAction, setApprovalAction] = useState<APPROVAL_ACTION | null>(null);
@@ -166,7 +168,9 @@ export const HITLQuestionsBlock = ({
 
   const handleKeyDown = useCallback(
     (e: KeyboardEvent) => {
-      if (!containerRef.current?.contains(document.activeElement)) return;
+      const active = document.activeElement;
+      const isBodyOrNull = !active || active === document.body;
+      if (!isBodyOrNull && !containerRef.current?.contains(active)) return;
 
       const {
         currentQuestionIndex: qIdx,
@@ -177,6 +181,8 @@ export const HITLQuestionsBlock = ({
       } = stateRef.current;
 
       if (!currentQuestion) return;
+
+      shouldScrollRef.current = true;
 
       const targetIsTextField = e.target instanceof HTMLInputElement || e.target instanceof HTMLTextAreaElement;
 
@@ -272,6 +278,7 @@ export const HITLQuestionsBlock = ({
       const answer = answers[question.id];
       const entity_type = question.entity_type ?? (sourceEntityType as string);
       const entity_id = question.entity_id ?? question.id;
+      const input_id = question.input_id;
 
       const buildSkippedResponse = (): HITLResponse => {
         if (isApprovalQuestion(question)) {
@@ -292,7 +299,7 @@ export const HITLQuestionsBlock = ({
       };
 
       if (answer?.isSkipped) {
-        return { entity_type, entity_id, response: buildSkippedResponse() };
+        return { entity_type, entity_id, input_id, response: buildSkippedResponse() };
       }
 
       if (isApprovalQuestion(question)) {
@@ -301,6 +308,7 @@ export const HITLQuestionsBlock = ({
         return {
           entity_type,
           entity_id,
+          input_id,
           response: { type: HITL_RESPONSE_TYPE.APPROVAL, approved },
         };
       }
@@ -309,6 +317,7 @@ export const HITLQuestionsBlock = ({
         return {
           entity_type,
           entity_id,
+          input_id,
           response: { type: HITL_RESPONSE_TYPE.TEXT, text: answer?.customText?.trim() ?? '', is_skipped: false },
         };
       }
@@ -324,7 +333,7 @@ export const HITLQuestionsBlock = ({
         if (customTrimmed) {
           response.custom_input = customTrimmed;
         }
-        return { entity_type, entity_id, response };
+        return { entity_type, entity_id, input_id, response };
       }
 
       const isCustom = answer?.optionIds.includes(CUSTOM_OPTION_ID);
@@ -332,6 +341,7 @@ export const HITLQuestionsBlock = ({
         return {
           entity_type,
           entity_id,
+          input_id,
           response: {
             type: HITL_RESPONSE_TYPE.SELECT_ONE,
             selected_option: null,
@@ -343,6 +353,7 @@ export const HITLQuestionsBlock = ({
       return {
         entity_type,
         entity_id,
+        input_id,
         response: {
           type: HITL_RESPONSE_TYPE.SELECT_ONE,
           selected_option: answer?.optionIds[0] ?? null,
@@ -389,6 +400,10 @@ export const HITLQuestionsBlock = ({
   }, [handleAutoSubmitApproval]);
 
   useEffect(() => {
+    containerRef.current?.focus({ preventScroll: true });
+  }, []);
+
+  useEffect(() => {
     document.addEventListener('keydown', handleKeyDown);
     return () => document.removeEventListener('keydown', handleKeyDown);
   }, [handleKeyDown]);
@@ -420,10 +435,27 @@ export const HITLQuestionsBlock = ({
       containerRef.current?.focus({ preventScroll: true });
     }
 
+    const shouldScroll = shouldScrollRef.current;
+    shouldScrollRef.current = false;
+
+    if (!shouldScroll) return;
+
+    isProgrammaticScrollRef.current = true;
+
     const rafId = requestAnimationFrame(() => {
       const scrollEl = scrollContainerRef.current?.getScrollElement();
-      const focusedEl = scrollEl?.querySelector<HTMLElement>('[data-hitl-focused]');
-      if (!scrollEl || !focusedEl) return;
+      if (!scrollEl) return;
+
+      if (focusedOptionIndex === 0) {
+        const questionEl = questionRefs.current[currentQuestionIndex];
+        if (questionEl) {
+          questionEl.scrollIntoView({ block: 'start', behavior: 'smooth' });
+        }
+        return;
+      }
+
+      const focusedEl = scrollEl.querySelector<HTMLElement>('[data-hitl-focused]');
+      if (!focusedEl) return;
 
       const scrollRect = scrollEl.getBoundingClientRect();
       const elRect = focusedEl.getBoundingClientRect();
@@ -436,24 +468,87 @@ export const HITLQuestionsBlock = ({
     });
 
     return () => cancelAnimationFrame(rafId);
-  }, [currentQuestion, focusedOptionIndex, totalOptions]);
+  }, [currentQuestion, currentQuestionIndex, focusedOptionIndex, totalOptions]);
 
   useEffect(() => {
     return handleFocusAndScroll();
   }, [handleFocusAndScroll, currentQuestionIndex]);
 
+  const setupScrollObserver = useCallback(() => {
+    const scrollEl = scrollContainerRef.current?.getScrollElement();
+    if (!scrollEl || questions.length <= 1) return;
+
+    const resetProgrammaticFlag = () => {
+      isProgrammaticScrollRef.current = false;
+    };
+    scrollEl.addEventListener('scrollend', resetProgrammaticFlag);
+
+    const visibilityMap = new Map<number, number>();
+
+    const observer = new IntersectionObserver(
+      (entries) => {
+        if (isProgrammaticScrollRef.current) return;
+
+        for (const entry of entries) {
+          const idx = questionRefs.current.indexOf(entry.target as HTMLDivElement);
+          if (idx !== -1) {
+            visibilityMap.set(idx, entry.intersectionRatio);
+          }
+        }
+
+        let bestIdx = -1;
+        let bestRatio = 0;
+        for (const [idx, ratio] of visibilityMap) {
+          if (ratio > bestRatio) {
+            bestRatio = ratio;
+            bestIdx = idx;
+          }
+        }
+
+        if (bestIdx !== -1) {
+          setCurrentQuestionIndex(bestIdx);
+          setFocusedOptionIndex(0);
+        }
+      },
+      { root: scrollEl, threshold: [0, 0.25, 0.5, 0.75, 1] },
+    );
+
+    for (const el of questionRefs.current) {
+      if (el) observer.observe(el);
+    }
+
+    return () => {
+      observer.disconnect();
+      scrollEl.removeEventListener('scrollend', resetProgrammaticFlag);
+    };
+  }, [questions.length]);
+
+  useEffect(() => {
+    return setupScrollObserver();
+  }, [setupScrollObserver]);
+
   if (!questions.length) return null;
 
   return (
     <div ref={containerRef} className='w-full max-w-[659px] outline-none' tabIndex={-1}>
-      <div className='bg-GRAY_20 shadow-table-filter-menu relative flex w-full flex-col overflow-hidden rounded-xl'>
+      <div className='bg-GRAY_100 shadow-table-filter-menu relative flex w-full flex-col overflow-hidden rounded-xl'>
         <HITLQuestionsHeader
           questionCount={questions.length}
           currentQuestionIndex={currentQuestionIndex}
-          onPrev={() => currentQuestionIndex > 0 && setCurrentQuestionIndex(currentQuestionIndex - 1)}
-          onNext={() =>
-            currentQuestionIndex < questions.length - 1 && setCurrentQuestionIndex(currentQuestionIndex + 1)
-          }
+          onPrev={() => {
+            if (currentQuestionIndex > 0) {
+              shouldScrollRef.current = true;
+              setFocusedOptionIndex(0);
+              setCurrentQuestionIndex(currentQuestionIndex - 1);
+            }
+          }}
+          onNext={() => {
+            if (currentQuestionIndex < questions.length - 1) {
+              shouldScrollRef.current = true;
+              setFocusedOptionIndex(0);
+              setCurrentQuestionIndex(currentQuestionIndex + 1);
+            }
+          }}
         />
 
         <div

@@ -1,7 +1,14 @@
 'use client';
 
 import { type FC, useEffect, useMemo } from 'react';
-import { Button, Popover, PopoverContent, PopoverPortal, PopoverTrigger, Skeleton } from '@zamp-platform/ui';
+import {
+  Button,
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+  Skeleton,
+} from '@zamp-platform/ui';
 import { cn } from '@zamp-platform/ui/utils';
 import { Check, ChevronDown } from 'lucide-react';
 import { type ChatModelOption, useListChatModelsQuery } from '@/apis/pace';
@@ -29,7 +36,7 @@ const ModelSelector: FC<ModelSelectorProps> = ({ value, onChange, className }) =
   }, [value, defaultModel, onChange]);
 
   if (isLoading) {
-    return <Skeleton className='h-7 w-16 rounded' />;
+    return <Skeleton className='h-5 w-20 rounded' />;
   }
 
   if (models.length === 0) {
@@ -37,42 +44,39 @@ const ModelSelector: FC<ModelSelectorProps> = ({ value, onChange, className }) =
   }
 
   return (
-    <Popover>
-      <PopoverTrigger asChild>
+    <DropdownMenu>
+      <DropdownMenuTrigger asChild>
         <Button
           variant='ghost'
           size='small'
           className={cn(
-            'f-11-500 text-GRAY_600 hover:text-GRAY_900 flex items-center gap-0.5 rounded px-1.5',
+            'f-11-500 text-GRAY_600 hover:text-GRAY_900 flex items-center gap-1 px-1.5 focus-visible:ring-0 focus-visible:ring-offset-0',
             className,
           )}
         >
           {selectedModel?.display_name ?? 'Select model'}
-          <ChevronDown size={10} />
+          <ChevronDown size={10} className='shrink-0' />
         </Button>
-      </PopoverTrigger>
-      <PopoverPortal>
-        <PopoverContent align='end' className='max-h-[340px] w-[240px] overflow-y-auto p-1'>
-          {models.map((model: ChatModelOption) => (
-            <Button
-              key={model.id}
-              variant='ghost'
-              onClick={() => onChange(model.id)}
-              className={cn(
-                'flex h-auto w-full items-center justify-between rounded-md px-3 py-2.5 text-left',
-                model.id === selectedId && 'bg-gray-50',
-              )}
-            >
-              <div className='flex flex-col gap-0.5'>
-                <span className='f-13-500 text-GRAY_1000'>{model.display_name}</span>
-                <span className='f-11-400 text-GRAY_600'>{model.description}</span>
-              </div>
-              {model.id === selectedId && <Check size={14} className='text-GRAY_1000 ml-2 shrink-0' />}
-            </Button>
-          ))}
-        </PopoverContent>
-      </PopoverPortal>
-    </Popover>
+      </DropdownMenuTrigger>
+      <DropdownMenuContent
+        align='end'
+        className='max-h-[320px] w-[220px] overflow-y-auto p-1 [scrollbar-width:none] [&::-webkit-scrollbar]:hidden'
+      >
+        {models.map((model: ChatModelOption) => (
+          <DropdownMenuItem
+            key={model.id}
+            onClick={() => onChange(model.id)}
+            className='hover:bg-GRAY_100 flex cursor-pointer items-start gap-2 rounded-md px-3 py-2 outline-none'
+          >
+            <div className='flex min-w-0 flex-1 flex-col gap-0.5'>
+              <span className='f-12-500 text-GRAY_1000'>{model.display_name}</span>
+              {model.description && <span className='f-11-400 text-GRAY_600 leading-tight'>{model.description}</span>}
+            </div>
+            {model.id === selectedId && <Check size={13} className='text-GRAY_1000 mt-0.5 shrink-0' />}
+          </DropdownMenuItem>
+        ))}
+      </DropdownMenuContent>
+    </DropdownMenu>
   );
 };
 

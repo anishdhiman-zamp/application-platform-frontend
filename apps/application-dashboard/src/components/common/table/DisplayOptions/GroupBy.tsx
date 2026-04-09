@@ -144,7 +144,7 @@ const GroupBy: FC<GroupByProps> = ({ tableRef, onClose, position = 'left' }) => 
               <div className='flex items-center gap-1' key={col}>
                 <div
                   key={col}
-                  className='border-GRAY_400 text-GRAY_1000 f-12-500 flex items-center gap-1.5 rounded-md border bg-white px-2 py-1'
+                  className='border-GRAY_400 text-GRAY_1000 f-12-500 bg-BG_WHITE flex items-center gap-1.5 rounded-md border px-2 py-1'
                   draggable
                   onDragStart={handleDragStart(col)}
                 >
@@ -193,7 +193,7 @@ const GroupBy: FC<GroupByProps> = ({ tableRef, onClose, position = 'left' }) => 
           ))}
         </div>
       </div>
-      <div className='f-12-500 text-GRAY_1000 border-GRAY_400 absolute bottom-0 flex w-full flex-row-reverse rounded-b-md border-t bg-white px-3 py-2.5'>
+      <div className='f-12-500 text-GRAY_1000 border-GRAY_400 bg-BG_WHITE absolute bottom-0 flex w-full flex-row-reverse rounded-b-md border-t px-3 py-2.5'>
         <div className='cursor-pointer' onClick={handleReset}>
           Reset
         </div>

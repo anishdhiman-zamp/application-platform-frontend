@@ -34,8 +34,8 @@ import { useLazyGetOpenFeedbackQuery } from '@/apis/feedback';
 import SkeletonElement from '@/components/skeletons/SkeletonElement';
 import useActionHub from '@/modules/chatbot/actionHub';
 import { CHATBOT_LOCATION_PARAMS } from '@/modules/chatbot/constants';
-import NewPaceAvatar from '@/modules/chatbot/NewPaceAvatar';
 import StopProcessingFeedback from '@/modules/chatbot/StopProcessingFeedback';
+import ZampIcon from '@/modules/chatbot/ZampIcon';
 import ChatMessagesSkeleton from '@/modules/pace/components/loaders/ChatMessagesSkeleton';
 import { useFileDownload } from '@/modules/pace/hooks/useFileDownload';
 import { RootState } from '@/store';
@@ -305,12 +305,8 @@ const KnowledgeBaseChat: FC<KnowledgeBaseChatProps> = ({
               handleAction={handleAction}
               isAnalysing={isAnalysing}
               streamingState={streamingEnabled ? chat.streamingState : undefined}
-              assistantAvatar={streamingEnabled ? <NewPaceAvatar /> : undefined}
-              showTimestamp={streamingEnabled}
-              showCopy={streamingEnabled}
-              alignUserRight={streamingEnabled}
+              assistantAvatar={streamingEnabled ? <ZampIcon /> : undefined}
               className='flex-1'
-              streamingEnabled={streamingEnabled}
             >
               {status === ProcessStatus.BUILDING && (
                 <ProcessInProcessBanner shouldRedirect={false} className='h-[400px] pb-4' />
@@ -320,7 +316,7 @@ const KnowledgeBaseChat: FC<KnowledgeBaseChatProps> = ({
           )}
           {isSkeletonLoading && (
             <div className='animate-opacity flex h-full w-full justify-center pt-4'>
-              <ChatMessagesSkeleton count={1} className='px-4 py-0' alignUserRight={streamingEnabled} />
+              <ChatMessagesSkeleton count={1} className='px-4 py-0' />
             </div>
           )}
 

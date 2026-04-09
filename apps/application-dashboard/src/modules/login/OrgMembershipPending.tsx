@@ -2,7 +2,7 @@
 
 import { useSelector } from 'react-redux';
 import { useGetOrganizationMembershipRequestsAllQuery } from 'apis/people';
-import { ZAMP_ICON } from 'constants/icons';
+import { ZAMP_BLACK_ICON } from 'constants/icons';
 import { useLogout } from 'hooks/useLogout';
 import Image from 'next/image';
 import { RootState } from 'store';
@@ -29,7 +29,7 @@ const OrgMembershipPending = ({ email }: { email?: string }) => {
           height={60}
           alt='zamp logo'
           className='w-8 cursor-pointer align-middle'
-          src={ZAMP_ICON}
+          src={ZAMP_BLACK_ICON}
           priority={true}
         />
       </div>

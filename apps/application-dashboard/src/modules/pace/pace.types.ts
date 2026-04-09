@@ -9,7 +9,9 @@ export const enum PaceNavbarItemId {
   INTEGRATIONS = 'integrations',
   FILES = 'files',
   GENERAL = 'general',
+  DATASETS = 'datasets',
   TASKS = 'task',
+  APPS = 'apps',
   AGENTS = 'agents',
   ORG_SETTINGS = 'org-settings',
 }
@@ -28,6 +30,7 @@ export interface PaceNavbarItemSchema {
   id: PaceNavbarItemId;
   iconComponent: ComponentType<AnimatedIconProps & { ref?: React.Ref<AnimatedIconHandle> }>;
   path: string;
+  featureFlag?: string;
 }
 
 export interface PaceSettingsTabSchema {

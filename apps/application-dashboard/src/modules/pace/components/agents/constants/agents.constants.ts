@@ -40,13 +40,18 @@ export const AGENT_DEFAULT_DESCRIPTION = "Hi, I'm your new agent! Let me know wh
 export const enum PrefixMessage {
   OPTIMISTIC_AGENT_CREATION = 'Create an agent which can',
   ADD_TRIGGER = 'I want to add a trigger for agent',
-  ADD_NEW_TRIGGER = 'I want to add a new trigger',
   TEST_AGENT = 'I want to add some triggers for',
-  ADD_NEW_CONNECTION_P = 'I want to give ',
-  ADD_NEW_CONNECTION_S = ' access to one of my connections',
 }
 
-export const AGENT_GREETING_MESSAGE = "Let's collaborate — chat, add triggers, or edit me";
+export const getAddTriggerMessage = (agentName: string) =>
+  `I want to add a trigger to **${agentName}**. Ask me which type of trigger I'd like (e.g., on a schedule like daily/hourly, or when something specific happens?) then collect the details needed to set it up.`;
+
+export const getAddConnectionMessage = (agentName: string) =>
+  `I want to grant **${agentName}** access to my connections. List all my connections for me — I'll pick.`;
+
+export const getAddInstructionsMessage = (agentName: string) => `I want to add to **${agentName}**'s instructions.`;
+
+export const AGENT_GREETING_MESSAGE = "@ Let's collaborate — chat, add triggers, or edit me";
 
 export const AGENT_DETAIL_TAB_CONFIG: { id: AgentDetailTabType; label: string }[] = [
   { id: AGENT_DETAIL_TAB.TASKS, label: 'Tasks' },
@@ -86,7 +91,7 @@ export const AGENT_AVATARS: AgentAvatarConfig[] = [
   { src: AGENT_AVATAR_5, alt: 'Agent avatar 5', key: 'agent_5' },
   { src: AGENT_AVATAR_6, alt: 'Agent avatar 6', key: 'agent_6' },
   { src: AGENT_AVATAR_7, alt: 'Agent avatar 7', key: 'agent_7' },
-  { src: AGENT_AVATAR_8, alt: 'Agent avatar 8', key: 'agent_8' },
+  { src: AGENT_AVATAR_8, alt: 'Agent avatar 8', key: 'agent_8_v2' },
   { src: AGENT_AVATAR_9, alt: 'Agent avatar 9', key: 'agent_9' },
   { src: AGENT_AVATAR_10, alt: 'Agent avatar 10', key: 'agent_10' },
   { src: AGENT_AVATAR_11, alt: 'Agent avatar 11', key: 'agent_11' },

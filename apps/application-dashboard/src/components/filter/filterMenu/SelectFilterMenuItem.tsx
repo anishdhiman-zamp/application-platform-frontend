@@ -76,7 +76,7 @@ const SelectFilterMenuItem = ({
           handleClose();
         }}
         className={cn(
-          'shadow-table-filter-menu !border-GRAY_400 overflow-hidden rounded-md border bg-white p-0',
+          'shadow-table-filter-menu !border-GRAY_400 bg-BG_WHITE overflow-hidden rounded-md border p-0',
           openClassName || 'max-h-[500px]',
         )}
         style={{
@@ -91,7 +91,7 @@ const SelectFilterMenuItem = ({
           <Input
             inputRef={searchRef}
             placeholder='Search...'
-            className='sticky top-0 z-10 bg-white'
+            className='bg-BG_WHITE sticky top-0 z-10'
             inputClassName='border-none w-full focus:outline-hidden focus:border-none focus:shadow-none !p-2.5 !text-xs !placeholder-GRAY_500'
             value={search}
             trailingIconProps={

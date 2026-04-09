@@ -2,6 +2,7 @@
 
 import { useCallback, useEffect, useRef } from 'react';
 import { Skeleton } from '@zamp-platform/ui';
+import AgentTabEmptyState from 'modules/pace/components/agents/components/AgentTabEmptyState';
 import { useGetAgentInstructionsQuery, useUpdateAgentInstructionsMutation } from '@/apis/agents';
 import CommonWrapper from '@/components/commonWrapper';
 import { SkeletonTypes } from '@/components/commonWrapper/commonWrapper.types';
@@ -37,12 +38,21 @@ const MilkdownEditor = clientOnly(
 
 interface AgentInstructionsProps {
   agentId: string;
+  agentAvatarSrc?: string;
   isActive?: boolean;
   skipFetch?: boolean;
   onUpdating?: (updating: boolean) => void;
+  onAddInstructions?: () => void;
 }
 
-const AgentInstructions = ({ agentId, isActive = true, skipFetch = false, onUpdating }: AgentInstructionsProps) => {
+const AgentInstructions = ({
+  agentId,
+  agentAvatarSrc,
+  isActive = true,
+  skipFetch = false,
+  onUpdating,
+  onAddInstructions,
+}: AgentInstructionsProps) => {
   const prevFetchingRef = useRef(false);
   const containerRef = useRef<HTMLDivElement>(null);
   const autoSaveTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
@@ -96,9 +106,12 @@ const AgentInstructions = ({ agentId, isActive = true, skipFetch = false, onUpda
       refetchFunction={refetch}
       isNoData={!isLoading && !instructions}
       noDataBanner={
-        <div className='border-GRAY_400 flex min-h-75 items-center justify-center rounded-xl border'>
-          <p className='f-13-450 text-GRAY_700'>No instructions found</p>
-        </div>
+        <AgentTabEmptyState
+          agentAvatarSrc={agentAvatarSrc}
+          description='Define what your agent should do every time it runs'
+          actionLabel='Add instructions'
+          onAction={onAddInstructions}
+        />
       }
       skeletonType={SkeletonTypes.CUSTOM}
       loader={<InstructionsSkeleton />}

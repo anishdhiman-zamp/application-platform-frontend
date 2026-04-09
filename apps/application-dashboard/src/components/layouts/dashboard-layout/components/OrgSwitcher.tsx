@@ -98,6 +98,7 @@ const OrgSwitcher: FC<OrgSwitcherProps> = ({
 
       dispatch(dynamicTabsActions.clearAllTabs());
       removeFromLocalStorage(LOCAL_STORAGE_KEYS.PACE_FILE_TREE_EXPANDED_PATHS);
+      removeFromLocalStorage(LOCAL_STORAGE_KEYS.PACE_SIDEBAR_STATE);
       setToLocalStorage(LOCAL_STORAGE_KEYS.XZAMP_ORGANIZATION_ID, org.organization_id);
       setCookie(ACTIVE_ORG_ID_COOKIE, org.organization_id);
       clearCookie(USER_SESSION_COOKIE);
@@ -272,8 +273,8 @@ const OrgSwitcher: FC<OrgSwitcherProps> = ({
         <DropdownMenuTrigger asChild>
           <div
             className={cn(
-              'border-GRAY_400 bg-BG_GRAY_1 flex h-[57px] w-full cursor-pointer items-center gap-2.5 px-4 py-3',
-              macs ? 'border-b' : 'border-t',
+              'border-GRAY_400 bg-BG_GRAY_1 flex w-full cursor-pointer items-center gap-2.5',
+              macs ? 'rounded-md border-none px-2.5 py-2' : 'h-[57px] border-t px-4 py-3',
               menuTriggerClassName,
             )}
             data-testid='org-switcher-trigger'

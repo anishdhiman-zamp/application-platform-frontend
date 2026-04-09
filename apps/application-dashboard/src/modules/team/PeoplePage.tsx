@@ -1,11 +1,13 @@
 'use client';
 
 import { FC, useEffect, useMemo, useState } from 'react';
+import { cn } from '@zamp-platform/ui/utils';
 import { useGetAudiencesByOrganisationIdQuery, useGetInvitedAudiencesByOrganisationIdQuery } from 'apis/people';
 import { debounce } from 'hooks';
 import PeopleHeader from 'modules/team/components/PeopleHeader';
 import PeopleTabs from 'modules/team/components/PeopleTabs';
 import type { TEAM_TABS_TYPES } from 'modules/team/people.types';
+import { usePathname } from 'next/navigation';
 import { convertEmailUsernameToName, getUserNameFromEmail } from 'utils/common';
 import { useUserIdentity } from '@/hooks/useUserIdentity';
 
@@ -14,6 +16,8 @@ interface PeoplePageProps {
 }
 
 const PeoplePage: FC<PeoplePageProps> = ({ tab }) => {
+  const pathname = usePathname();
+  const isChatSettings = pathname?.startsWith('/chat');
   const { organizationId } = useUserIdentity();
 
   const {
@@ -68,7 +72,12 @@ const PeoplePage: FC<PeoplePageProps> = ({ tab }) => {
   }, [search, debouncedFilterTeamMembers, debouncedFilterInvitedMembers]);
 
   return (
-    <div className='bg-BG_WHITE @container flex h-full w-full flex-1 flex-col overflow-hidden p-10'>
+    <div
+      className={cn(
+        '@container flex h-full w-full flex-1 flex-col overflow-hidden',
+        !isChatSettings && 'bg-BG_WHITE p-10',
+      )}
+    >
       <PeopleHeader search={search} setSearch={setSearch} teamMembersData={teamMembersData ?? []} />
 
       <PeopleTabs

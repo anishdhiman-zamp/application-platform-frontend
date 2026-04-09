@@ -31,5 +31,6 @@ export enum FEATURE_FLAGS {
   ORG_SETTINGS = 'ORG_SETTINGS',
   AGENTS_FE = 'agents-fe',
   AUTO_LOOP_BTN_ENABLED = 'auto-loop-btn-enabled',
+  APPS = 'apps',
   NEW_ORG_CREATION = 'new-org-creation',
 }

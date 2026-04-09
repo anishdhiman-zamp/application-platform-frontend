@@ -4,6 +4,7 @@ import { useEffect, useRef, useState } from 'react';
 import { Button, Skeleton, Switch, toast } from '@zamp-platform/ui';
 import { cn } from '@zamp-platform/ui/utils';
 import { Plus } from 'lucide-react';
+import AgentTabEmptyState from 'modules/pace/components/agents/components/AgentTabEmptyState';
 import { useGetAgentTriggersQuery, useToggleAgentTriggerMutation } from '@/apis/agents';
 import ImageWithFallback from '@/components/common/ImageWithFallback';
 import CommonWrapper from '@/components/commonWrapper';
@@ -27,6 +28,7 @@ const TriggerSkeleton = () => (
 
 interface AgentTriggerListProps {
   agentId: string;
+  agentAvatarSrc?: string;
   isActive?: boolean;
   skipFetch?: boolean;
   onTriggerClick?: (trigger: AgentTriggerType) => void;
@@ -35,6 +37,7 @@ interface AgentTriggerListProps {
 
 const AgentTriggerList = ({
   agentId,
+  agentAvatarSrc,
   isActive = true,
   skipFetch = false,
   onTriggerClick,
@@ -45,10 +48,11 @@ const AgentTriggerList = ({
 
   if (isActive) hasBeenActiveRef.current = true;
 
-  const { data, isLoading, isFetching, isError, refetch } = useGetAgentTriggersQuery(
-    { agentId },
-    { skip: !hasBeenActiveRef.current || skipFetch },
-  );
+  const shouldSkip = !hasBeenActiveRef.current || skipFetch;
+
+  const [triggers, setTriggers] = useState<AgentTriggerType[]>([]);
+
+  const { data, isLoading, isFetching, isError, refetch } = useGetAgentTriggersQuery({ agentId }, { skip: shouldSkip });
 
   const [toggleTrigger] = useToggleAgentTriggerMutation();
 
@@ -63,6 +67,7 @@ const AgentTriggerList = ({
 
     try {
       await toggleTrigger({ agentId, triggerId, active: newActive }).unwrap();
+      toast.success('Trigger toggled successfully');
     } catch {
       // Revert on failure
       setTriggers((prev) => prev.map((t) => (t.id === triggerId ? { ...t, enabled: !newActive } : t)));
@@ -70,11 +75,9 @@ const AgentTriggerList = ({
     }
   };
 
-  // eslint-disable-next-line react-hooks/exhaustive-deps -- isFirstVisit reads a ref; refetch is a stable RTK identity
   useEffect(() => {
     if (isActive && !isFirstVisit && !skipFetch) refetch();
   }, [isActive, skipFetch]);
-  const [triggers, setTriggers] = useState<AgentTriggerType[]>([]);
 
   useEffect(() => {
     if (data?.triggers) {
@@ -84,19 +87,17 @@ const AgentTriggerList = ({
 
   return (
     <CommonWrapper
-      isLoading={isLoading || (isFetching && triggers?.length === 0)}
+      isLoading={shouldSkip || isLoading || (isFetching && triggers?.length === 0)}
       isError={isError}
       refetchFunction={refetch}
-      isNoData={!isFetching && triggers?.length === 0}
+      isNoData={!isFetching && triggers?.length === 0 && data?.triggers?.length === 0}
       noDataBanner={
-        <div
-          className={cn(
-            'border-GRAY_400 flex h-full items-center justify-center rounded-xl border',
-            onTriggerClick && 'min-h-33',
-          )}
-        >
-          <p className='f-13-450 text-GRAY_700'>No Triggers Configured</p>
-        </div>
+        <AgentTabEmptyState
+          agentAvatarSrc={agentAvatarSrc}
+          description='Run your agent in the background via triggers'
+          actionLabel={!onTriggerClick ? 'Add trigger' : undefined}
+          onAction={!onTriggerClick ? onAddTrigger : undefined}
+        />
       }
       skeletonType={SkeletonTypes.CUSTOM}
       loader={<TriggerSkeleton />}
@@ -104,7 +105,7 @@ const AgentTriggerList = ({
       disableAnimation
     >
       <p className='text-GRAY_700 f-14-450 mb-4 ml-2.5 shrink-0'>What should this agent run?</p>
-      <div className='border-GRAY_400 flex flex-col rounded-xl border'>
+      <div className='border-GRAY_400 flex flex-col overflow-hidden rounded-xl border'>
         {triggers.map((trigger, index) => {
           const content = (
             <div className='flex items-center gap-3'>
@@ -149,11 +150,22 @@ const AgentTriggerList = ({
           );
         })}
         {!onTriggerClick && (
-          <div className='border-GRAY_400 border-t px-3.5 py-3'>
-            <Button variant='ghost' size='small' className='text-GRAY_700 gap-1 text-sm' onClick={onAddTrigger}>
+          <div
+            role='button'
+            tabIndex={0}
+            className='border-GRAY_400 hover:bg-GRAY_100 cursor-pointer border-t px-3.5 py-3 transition-colors'
+            onClick={onAddTrigger}
+            onKeyDown={(e) => {
+              if (e.key === 'Enter' || e.key === ' ') {
+                e.preventDefault();
+                onAddTrigger?.();
+              }
+            }}
+          >
+            <div className='text-GRAY_700 f-13-500 flex items-center gap-1'>
               <Plus size={14} />
               <span>Add trigger</span>
-            </Button>
+            </div>
           </div>
         )}
       </div>

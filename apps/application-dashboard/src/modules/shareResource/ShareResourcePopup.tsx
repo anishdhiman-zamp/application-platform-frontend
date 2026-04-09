@@ -27,6 +27,7 @@ import { THEME_MODE } from '@/modules/general/constants/general.constants';
 import CustomiseAccess from '@/modules/shareResource/CustomiseAccess';
 import {
   AGENT_ACCESS_PRIVILEGES,
+  APP_ACCESS_PRIVILEGES,
   CombinedOptionListDataType,
   CONNECTION_ACCESS_PRIVILEGES,
   DATASET_ACCESS_PRIVILEGES,
@@ -130,6 +131,8 @@ const ShareResourcePopup: FC<ShareResourcePopupProps> = (props) => {
         return checkUserPrivilege(PROCESS_ACCESS_PRIVILEGES.ADMIN);
       case ResourceType.CONNECTION:
         return checkUserPrivilege(CONNECTION_ACCESS_PRIVILEGES.ADMIN);
+      case ResourceType.APP:
+        return checkUserPrivilege(APP_ACCESS_PRIVILEGES.ADMIN);
       case ResourceType.AGENT:
         return checkUserPrivilege(AGENT_ACCESS_PRIVILEGES.ADMIN) || checkUserPrivilege(AGENT_ACCESS_PRIVILEGES.OWNER);
       default:
