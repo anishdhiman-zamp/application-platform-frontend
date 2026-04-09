@@ -1,7 +1,14 @@
 import { captureException } from '@sentry/browser';
+import { safeJsonParse } from '@zamp-platform/utils';
 
 import { toast } from '../../../ui/src/components/ui/toast';
-import { Block, BLOCK_TYPE } from '../types/block.types';
+import {
+  Block,
+  BLOCK_TYPE,
+  type ToolCallInfo,
+  type ToolUseContentBlock,
+  type ToolUseDisplayContentParsed,
+} from '../types/block.types';
 import {
   ChatMessage,
   ChatMessageType,
@@ -148,7 +155,42 @@ export const formatJson = (jsonString: string | undefined): string => {
     const parsed = JSON.parse(jsonString);
     return JSON.stringify(parsed, null, 2);
   } catch {
-    // If parsing fails, return the original string
     return jsonString;
   }
 };
+
+/**
+ * Extracts display metadata from a single {@link ToolUseContentBlock}.
+ *
+ * Resolution order for `displayName` (first truthy wins):
+ *  1. `payload.display_title`           — set by TOOL_USE_BLOCK_UPDATE_DELTA
+ *  2. `display_content.display_title`   — structured display_content JSON
+ *  3. `input_json.display_title`        — synthetic param injected by the LLM
+ *  4. `partial_json.display_title`      — same, before input_json is finalised
+ *  5. `payload.display_name`            — fallback human-readable name
+ *  6. `'Unknown'`                       — last-resort sentinel
+ *
+ * @param toolUseBlock  The block to extract info from.
+ * @param fallbackIndex Used to generate a stable synthetic id when `tool_call_id` is absent.
+ */
+export function extractToolCallInfo(toolUseBlock: ToolUseContentBlock, fallbackIndex: number): ToolCallInfo {
+  const displayContent = safeJsonParse<ToolUseDisplayContentParsed>(toolUseBlock?.payload?.display_content?.json_block);
+  const parsedInput = safeJsonParse<Record<string, unknown>>(toolUseBlock?.payload?.input_json);
+  const parsedPartial = safeJsonParse<Record<string, unknown>>(toolUseBlock?.payload?.partial_json);
+  const toolCallId = toolUseBlock?.payload?.tool_call_id ?? toolUseBlock?.id;
+
+  return {
+    id: toolCallId ?? `tool-${fallbackIndex}`,
+    name: toolUseBlock?.payload?.name ?? displayContent?.tool_name ?? 'Unknown',
+    displayName:
+      toolUseBlock?.payload?.display_title ??
+      displayContent?.display_title ??
+      (typeof parsedInput?.display_title === 'string' ? parsedInput.display_title : undefined) ??
+      (typeof parsedPartial?.display_title === 'string' ? parsedPartial.display_title : undefined) ??
+      toolUseBlock?.payload?.display_name ??
+      'Unknown',
+    icon: toolUseBlock?.payload?.icon ?? displayContent?.icon,
+    isComplete: toolUseBlock?.is_complete !== false,
+    block: toolUseBlock,
+  };
+}

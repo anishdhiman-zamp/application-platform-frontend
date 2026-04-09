@@ -1,7 +1,7 @@
 'use client';
 
 import { AnimatedDot, AnimatedTerminalIcon, ImageWithFallback, ShimmerText } from '@zamp-platform/ui';
-import { formatPlural, safeJsonParse } from '@zamp-platform/utils';
+import { formatPlural } from '@zamp-platform/utils';
 import { EVENT_TYPE } from '@zamp-platform/utils/event-bus/event-bus.types';
 import { ArrowUpRight, ChevronDown } from 'lucide-react';
 import { useRouter } from 'next/navigation';
@@ -18,22 +18,15 @@ import { API_ENDPOINTS } from '../../api';
 import { useChatActions } from '../../context/ChatActionsContext';
 import { useChat } from '../../hooks/useChat';
 import { useDisplayedSummary } from '../../hooks/useDisplayedSummary';
-import { BLOCK_TYPE, TASK_STATUS, type TaskBlockType, type ToolUseContentBlock } from '../../types/block.types';
+import type { ToolCallInfo } from '../../types/block.types';
+import { BLOCK_TYPE, TASK_STATUS, type TaskBlockType } from '../../types/block.types';
 import { ResourceType, SenderType } from '../../types/chat.types';
+import { extractToolCallInfo } from '../block.utils';
 import TaskStatusIcon from './TaskStatusIcon';
 
 interface TaskBlockProps {
   payload: TaskBlockType['payload'];
   conversationId?: string;
-}
-
-interface ToolCallInfo {
-  id: string;
-  name: string;
-  displayName: string;
-  icon?: string;
-  isComplete: boolean;
-  block: ToolUseContentBlock;
 }
 
 const TaskBlock: FC<TaskBlockProps> = ({ payload, conversationId }) => {
@@ -84,20 +77,7 @@ const TaskBlock: FC<TaskBlockProps> = ({ payload, conversationId }) => {
         elementTypes.push(element?.type);
 
         if (element?.type === BLOCK_TYPE.TOOL_USE) {
-          const toolUseBlock = element as ToolUseContentBlock;
-          const displayContent = safeJsonParse<{ tool_name?: string; icon?: string }>(
-            toolUseBlock?.payload?.display_content?.json_block,
-          );
-          const toolCallId = toolUseBlock?.payload?.tool_call_id ?? toolUseBlock?.id;
-
-          calls.push({
-            id: toolCallId ?? `tool-${calls.length}`,
-            name: toolUseBlock?.payload?.name ?? displayContent?.tool_name ?? 'Unknown',
-            displayName: toolUseBlock?.payload?.display_name ?? 'Unknown',
-            icon: toolUseBlock?.payload?.icon ?? displayContent?.icon,
-            isComplete: toolUseBlock?.is_complete !== false,
-            block: toolUseBlock,
-          });
+          calls.push(extractToolCallInfo(element, calls.length));
         }
       }
     }
@@ -107,20 +87,7 @@ const TaskBlock: FC<TaskBlockProps> = ({ payload, conversationId }) => {
       elementTypes.push(element?.type);
 
       if (element?.type === BLOCK_TYPE.TOOL_USE) {
-        const toolUseBlock = element as ToolUseContentBlock;
-        const displayContent = safeJsonParse<{ tool_name?: string; icon?: string }>(
-          toolUseBlock?.payload?.display_content?.json_block,
-        );
-        const toolCallId = toolUseBlock?.payload?.tool_call_id ?? toolUseBlock?.id;
-
-        calls.push({
-          id: toolCallId ?? `streaming-tool-${calls.length}`,
-          name: toolUseBlock?.payload?.name ?? displayContent?.tool_name ?? 'Unknown',
-          displayName: toolUseBlock?.payload?.display_name ?? 'Unknown',
-          icon: toolUseBlock?.payload?.icon ?? displayContent?.icon,
-          isComplete: toolUseBlock?.is_complete !== false,
-          block: toolUseBlock,
-        });
+        calls.push(extractToolCallInfo(element, calls.length));
       }
     }
 
