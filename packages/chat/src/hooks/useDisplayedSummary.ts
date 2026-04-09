@@ -6,17 +6,18 @@ const SUMMARY_DEBOUNCE_MS = 300;
 interface UseDisplayedSummaryParams {
   taskId: string;
   isAgentActive: boolean;
-  summaryContent?: string | null;
+  taskStatus?: string;
   streamingSummaryText?: string | null;
 }
 
 export function useDisplayedSummary({
   taskId,
   isAgentActive,
-  summaryContent,
+  taskStatus,
   streamingSummaryText,
 }: UseDisplayedSummaryParams) {
   const prevIsAgentActiveRef = useRef(isAgentActive);
+  const prevTaskStatusRef = useRef(taskStatus);
   const targetTextRef = useRef('');
   const revealedCountRef = useRef(0);
   const animationRef = useRef<ReturnType<typeof setInterval> | null>(null);
@@ -82,6 +83,17 @@ export function useDisplayedSummary({
     prevIsAgentActiveRef.current = isAgentActive;
   }, [isAgentActive, stopAnimation]);
 
+  // Clear cached summary when task transitions from IN_PROGRESS → COMPLETED
+  useEffect(() => {
+    if (taskStatus === 'COMPLETED' && prevTaskStatusRef.current === 'IN_PROGRESS') {
+      stopAnimation();
+      targetTextRef.current = '';
+      revealedCountRef.current = 0;
+      setDisplayedText('');
+    }
+    prevTaskStatusRef.current = taskStatus;
+  }, [taskStatus, stopAnimation]);
+
   useEffect(
     () => () => {
       stopAnimation();
@@ -134,5 +146,5 @@ export function useDisplayedSummary({
     return displayedText || '';
   }
 
-  return summaryContent ? summaryContent : displayedText || '';
+  return displayedText;
 }

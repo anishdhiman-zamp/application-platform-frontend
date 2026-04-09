@@ -552,9 +552,10 @@ export const SSEProvider: React.FC<SSEProviderProps> = ({ children, sseEventBus 
   const handleSSEEvent = (event: MessageEvent) => {
     try {
       const data = JSON.parse(event.data);
+      const eventKey = data?.type ?? data?.event_type;
 
-      if (data?.type) {
-        sseEventBus.publish(data.type, data);
+      if (eventKey) {
+        sseEventBus.publish(eventKey, data);
       } else {
         captureException(new Error('SSE event received without required type field'));
       }
@@ -603,6 +604,7 @@ export const SSEProvider: React.FC<SSEProviderProps> = ({ children, sseEventBus 
     eventListeners: {
       update: handleSSEEvent,
       message: handleSSEEvent,
+      input_required: handleSSEEvent,
     },
     errorReportDelayMs: 10000,
     onError: (errorInfo) => {
