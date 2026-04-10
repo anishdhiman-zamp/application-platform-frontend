@@ -23,7 +23,14 @@ const nextConfig = {
     ignoreBuildErrors: process.env.CI === 'true',
   },
   // Note: eslint configuration moved to next lint CLI options in Next.js 16
-  webpack: (config) => {
+  webpack: (config, { isServer }) => {
+    // Serve worker scripts from the app origin instead of the CDN (assetPrefix).
+    // Browsers block cross-origin Worker construction with a SecurityError, so
+    // worker chunks must be loaded from the same origin as the page.
+    if (!isServer) {
+      config.output.workerPublicPath = '/_next/';
+    }
+
     // Vue feature flags required by @milkdown/crepe
     config.plugins.push(
       new webpack.DefinePlugin({

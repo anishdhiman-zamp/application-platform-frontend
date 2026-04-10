@@ -9,32 +9,13 @@ type PendingResolve = {
   reject: (reason: Error) => void;
 };
 
-declare let __webpack_public_path__: string;
-
 export function useSpreadsheetWorker() {
   const workerRef = useRef<Worker | null>(null);
   const pendingRef = useRef<Map<number, PendingResolve>>(new Map());
   const idCounter = useRef(0);
 
   useEffect(() => {
-    // When assetPrefix points to a CDN (e.g. CloudFront on AWS), webpack resolves
-    // the worker URL to a cross-origin CDN URL. Browsers block cross-origin worker
-    // construction with a SecurityError. Temporarily override __webpack_public_path__
-    // to "/" so the worker script is loaded from the app's own origin instead.
-    // __webpack_public_path__ only exists in webpack builds, not in Turbopack (dev).
-    const hasWebpackPublicPath = typeof __webpack_public_path__ !== 'undefined';
-    let originalPublicPath: string | undefined;
-
-    if (hasWebpackPublicPath) {
-      originalPublicPath = __webpack_public_path__;
-      __webpack_public_path__ = '/';
-    }
-
     const worker = new Worker(new URL('./spreadsheet.worker.ts', import.meta.url));
-
-    if (hasWebpackPublicPath) {
-      __webpack_public_path__ = originalPublicPath!;
-    }
 
     worker.onmessage = (e: MessageEvent<WorkerResponse>) => {
       const { id, type, payload, error } = e.data;
