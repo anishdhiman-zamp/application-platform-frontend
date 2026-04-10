@@ -22,7 +22,7 @@ interface UseDynamicTabsReturn {
   activeTab: DynamicTab | null;
   isHydrated: boolean;
 
-  openTab: (id: string, name: string, metadata?: Record<string, unknown>) => void;
+  openTab: (id: string, name: string, metadata?: Record<string, unknown>, path?: string) => void;
   closeTab: (e: React.MouseEvent, id: string) => void;
   closeTabsForPath: (path: string, isFolder: boolean) => void;
   updateTab: (oldId: string, newId: string, newName: string, metadata?: Record<string, unknown>) => void;
@@ -113,9 +113,9 @@ export const useDynamicTabs = (config: UseDynamicTabsConfig = {}): UseDynamicTab
   );
 
   const openTab = useCallback(
-    (id: string, name: string, metadata?: Record<string, unknown>) => {
+    (id: string, name: string, metadata?: Record<string, unknown>, path?: string) => {
       const tabType = type ?? TAB_TYPE.FILE;
-      const tabPath = buildTabRoute(id, tabType);
+      const tabPath = path ?? buildTabRoute(id, tabType);
 
       dispatch(
         dynamicTabsActions.openTab({

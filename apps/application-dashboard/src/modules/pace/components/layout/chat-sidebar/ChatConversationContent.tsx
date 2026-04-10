@@ -44,7 +44,7 @@ export interface ChatConversationContentProps {
   conversationId: string | null;
   organizationId: string;
   onFileOpen: (path: string, name: string) => void;
-  onTaskOpen?: (name: string, path: string) => void;
+  onTaskOpen?: (taskId: string, name: string, path: string) => void;
   onBrowserOpen?: (conversationId: string, sessionId?: string) => void;
   onBrowserStreamingEnd?: (conversationId: string) => void;
   onTaskPopoverOpenChange?: (open: boolean) => void;

@@ -9,7 +9,7 @@ type AgentBlockPayload = AgentBlockType['payload'] | AgentContentBlock['payload'
 
 interface ChatActionsContextType {
   onFileOpen?: (path: string, name: string) => void;
-  onTaskOpen?: (name: string, path: string) => void;
+  onTaskOpen?: (taskId: string, name: string, path: string) => void;
   onAgentClick?: (agentId: string, agentName: string, agentDescription?: string, avatarKey?: string) => void;
   onAgentTest?: (agentId: string, agentName: string) => void;
   renderAgentBlock?: (payload: AgentBlockPayload) => ReactNode;
@@ -26,7 +26,7 @@ const ChatActionsContext = createContext<ChatActionsContextType>({});
 interface ChatActionsProviderProps {
   children: ReactNode;
   onFileOpen?: (path: string, name: string) => void;
-  onTaskOpen?: (name: string, path: string) => void;
+  onTaskOpen?: (taskId: string, name: string, path: string) => void;
   onAgentClick?: (agentId: string, agentName: string, agentDescription?: string, avatarKey?: string) => void;
   onAgentTest?: (agentId: string, agentName: string) => void;
   renderAgentBlock?: (payload: AgentBlockPayload) => ReactNode;

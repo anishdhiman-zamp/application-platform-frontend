@@ -57,6 +57,8 @@ interface BlockRendererProps {
   quietSurface?: boolean;
   /** With `showMarkdownConnectors`, still render the timeline dot on the last/only markdown block (e.g. step group accordion). */
   alwaysShowMarkdownTimelineDot?: boolean;
+  /** Reduce spacing between paragraphs — use for user message bubbles where multi-line input should look compact. */
+  compactParagraphs?: boolean;
 }
 
 export const BlockRenderer: React.FC<BlockRendererProps> = ({
@@ -73,6 +75,7 @@ export const BlockRenderer: React.FC<BlockRendererProps> = ({
   embeddedInStepSummary = false,
   quietSurface = false,
   alwaysShowMarkdownTimelineDot = false,
+  compactParagraphs = false,
 }) => {
   const { renderAgentBlock } = useChatActions();
   const [openAccordionId, setOpenAccordionId] = useState<string | null>(null);
@@ -248,6 +251,7 @@ export const BlockRenderer: React.FC<BlockRendererProps> = ({
             showConnectorToNext={showConnectorToNext}
             showWatchButton={toolUseBlock.order === firstBrowserToolOrder}
             isLastToolCall={toolUseBlock.order === lastToolCallOrder && isLastBlock}
+            isStreaming={isStreaming}
           />
         );
       }
@@ -277,7 +281,11 @@ export const BlockRenderer: React.FC<BlockRendererProps> = ({
                 <div className='bg-BG_WHITE mt-0.5 flex h-3.5 w-3.5 shrink-0 items-center justify-center p-1'>
                   <AnimatedDot showAnimation={false} size={4} />
                 </div>
-                <MarkdownBlock payload={textBlock.payload} />
+                <MarkdownBlock
+                  payload={textBlock.payload}
+                  compactParagraphs={compactParagraphs}
+                  isStreaming={isStreaming}
+                />
               </div>
               {showConnectorToNext && (
                 <div className='bg-border pointer-events-none absolute top-[24px] bottom-0 left-[6.5px] z-0 w-px' />
@@ -285,7 +293,14 @@ export const BlockRenderer: React.FC<BlockRendererProps> = ({
             </div>
           );
         }
-        return <MarkdownBlock key={textKey} payload={textBlock.payload} isStreaming={isStreaming} />;
+        return (
+          <MarkdownBlock
+            key={textKey}
+            payload={textBlock.payload}
+            isStreaming={isStreaming}
+            compactParagraphs={compactParagraphs}
+          />
+        );
       }
 
       case BLOCK_TYPE.SINGLE_SELECT: {
@@ -381,7 +396,7 @@ export const BlockRenderer: React.FC<BlockRendererProps> = ({
   };
 
   return (
-    <div className={cn(className)}>
+    <div className={className}>
       {messageBlocks.map((block, index) => {
         const previousBlock = index > 0 ? messageBlocks[index - 1] : undefined;
         const nextBlock = messageBlocks[index + 1];

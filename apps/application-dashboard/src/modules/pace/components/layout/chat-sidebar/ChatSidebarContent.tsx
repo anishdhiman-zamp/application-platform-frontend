@@ -39,6 +39,7 @@ const ChatSidebarContent = ({
   username,
 }: ChatSidebarContentProps) => {
   const { openTab } = useDynamicTabs({ type: TAB_TYPE.FILE });
+  const { openTab: openTaskTab } = useDynamicTabs({ type: TAB_TYPE.TASK });
   const { openTab: openBrowserTab, updateTab: updateBrowserTab } = useDynamicTabs({ type: TAB_TYPE.BROWSER });
   const { chatSidebarState, setChatSidebarState, setActiveAgentInfo, selectedModel, setSelectedModel } =
     usePaceContext();
@@ -76,11 +77,15 @@ const ChatSidebarContent = ({
     [openTab, chatSidebarState, setChatSidebarState],
   );
 
-  const handleTaskOpen = useCallback(() => {
-    if (chatSidebarState === CHAT_SIDEBAR_STATE.EXPANDED) {
-      setChatSidebarState(CHAT_SIDEBAR_STATE.SIDEBAR);
-    }
-  }, [chatSidebarState, setChatSidebarState]);
+  const handleTaskOpen = useCallback(
+    (taskId: string, name: string, fullRoute: string) => {
+      if (chatSidebarState === CHAT_SIDEBAR_STATE.EXPANDED) {
+        setChatSidebarState(CHAT_SIDEBAR_STATE.SIDEBAR);
+      }
+      openTaskTab(taskId, name || taskId, undefined, fullRoute);
+    },
+    [chatSidebarState, setChatSidebarState, openTaskTab],
+  );
 
   const handleBrowserOpen = useCallback(
     (browserConversationId: string, sessionId?: string) => {
@@ -93,15 +98,8 @@ const ChatSidebarContent = ({
   );
 
   const handleGlobalInputRequired = useCallback(() => {
-    console.log('handleGlobalInputRequired');
     void refetchConversationHistory();
   }, [refetchConversationHistory]);
-
-  useEffect(() => {
-    const sub = sseEventBus.subscribe(EVENT_TYPE.INPUT_REQUIRED, handleGlobalInputRequired);
-
-    return () => sub.unsubscribe();
-  }, [sseEventBus, handleGlobalInputRequired]);
 
   const handleBrowserStreamingEnd = useCallback(
     (browserConversationId: string) => {
@@ -123,6 +121,12 @@ const ChatSidebarContent = ({
     },
     [setActiveAgentInfo, setConversationId],
   );
+
+  useEffect(() => {
+    const sub = sseEventBus.subscribe(EVENT_TYPE.INPUT_REQUIRED, handleGlobalInputRequired);
+
+    return () => sub.unsubscribe();
+  }, [sseEventBus, handleGlobalInputRequired]);
 
   return (
     <div className='bg-BG_WHITE relative mx-auto flex h-full w-full flex-1 flex-col'>
