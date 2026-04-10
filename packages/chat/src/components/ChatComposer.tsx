@@ -231,7 +231,6 @@ export const ChatComposer: FC<ChatComposerProps> = ({
                   className='hover:text-GRAY_1000 text-GRAY_700 hover:bg-accent size-[26px] rounded-[6px] p-[2px] [&_svg]:size-3.5'
                   aria-label='Attach file'
                   onClick={onAttachClick}
-                  disabled={isUploading}
                 >
                   <Paperclip />
                 </Button>
