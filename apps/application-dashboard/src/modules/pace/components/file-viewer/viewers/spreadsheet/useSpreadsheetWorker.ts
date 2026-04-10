@@ -30,6 +30,8 @@ export function useSpreadsheetWorker() {
         const blob = await response.blob();
 
         objectUrl = URL.createObjectURL(blob);
+        // Use classic worker (no `type: 'module'`) — webpack bundles the worker
+        // as a classic IIFE script, so the blob must also be run as classic.
         worker = new Worker(objectUrl);
       } catch {
         // Fallback for same-origin environments (local dev, Vercel) where the
