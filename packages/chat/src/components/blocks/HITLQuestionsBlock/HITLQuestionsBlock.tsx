@@ -395,19 +395,6 @@ export const HITLQuestionsBlock = ({
     }
   }, [isAllApproval, allQuestionsAnswered]);
 
-  useEffect(() => {
-    handleAutoSubmitApproval();
-  }, [handleAutoSubmitApproval]);
-
-  useEffect(() => {
-    containerRef.current?.focus({ preventScroll: true });
-  }, []);
-
-  useEffect(() => {
-    document.addEventListener('keydown', handleKeyDown);
-    return () => document.removeEventListener('keydown', handleKeyDown);
-  }, [handleKeyDown]);
-
   const syncStateRef = useCallback(() => {
     stateRef.current = {
       currentQuestionIndex,
@@ -418,10 +405,6 @@ export const HITLQuestionsBlock = ({
       answers,
     };
   }, [currentQuestionIndex, focusedOptionIndex, customInputs, totalOptions, currentQuestion, answers]);
-
-  useEffect(() => {
-    syncStateRef();
-  }, [syncStateRef]);
 
   const handleFocusAndScroll = useCallback(() => {
     const customInput = customInputRef.current;
@@ -469,10 +452,6 @@ export const HITLQuestionsBlock = ({
 
     return () => cancelAnimationFrame(rafId);
   }, [currentQuestion, currentQuestionIndex, focusedOptionIndex, totalOptions]);
-
-  useEffect(() => {
-    return handleFocusAndScroll();
-  }, [handleFocusAndScroll, currentQuestionIndex]);
 
   const setupScrollObserver = useCallback(() => {
     const scrollEl = scrollContainerRef.current?.getScrollElement();
@@ -526,6 +505,27 @@ export const HITLQuestionsBlock = ({
   useEffect(() => {
     return setupScrollObserver();
   }, [setupScrollObserver]);
+
+  useEffect(() => {
+    return handleFocusAndScroll();
+  }, [handleFocusAndScroll, currentQuestionIndex]);
+
+  useEffect(() => {
+    handleAutoSubmitApproval();
+  }, [handleAutoSubmitApproval]);
+
+  useEffect(() => {
+    containerRef.current?.focus({ preventScroll: true });
+  }, []);
+
+  useEffect(() => {
+    syncStateRef();
+  }, [syncStateRef]);
+
+  useEffect(() => {
+    document.addEventListener('keydown', handleKeyDown);
+    return () => document.removeEventListener('keydown', handleKeyDown);
+  }, [handleKeyDown]);
 
   if (!questions.length) return null;
 

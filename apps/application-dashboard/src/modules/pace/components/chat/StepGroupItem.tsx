@@ -49,7 +49,7 @@ const StepGroupItem = ({ group }: StepGroupItemProps) => {
         <div className='bg-BG_WHITE box-border w-full py-1.5'>
           <div
             className={cn(
-              'border-GRAY_400 bg-BG_WHITE max-h-[min(250px,50vh)] w-full overflow-x-clip overflow-y-auto rounded-md border px-2',
+              'border-GRAY_400 bg-BG_WHITE max-h-[min(250px,50vh)] w-full overflow-x-clip overflow-y-auto rounded-md border px-2 pb-2.5',
             )}
           >
             <div className='flex flex-col'>

@@ -186,6 +186,12 @@ const TaskContentChat = ({ taskId }: { taskId: string }) => {
   }, [streamingState?.is_active]);
 
   useEffect(() => {
+    if (hasStepGroups && !isAgentActive && !showSteps) {
+      setShowSummary(true);
+    }
+  }, [hasStepGroups, isAgentActive]);
+
+  useEffect(() => {
     if (shimmerScrollRef.current) {
       shimmerScrollRef.current.scrollTop = shimmerScrollRef.current.scrollHeight;
     }
