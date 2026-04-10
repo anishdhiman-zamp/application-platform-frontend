@@ -53,6 +53,7 @@ export interface ConnectedChatInputProps {
   showModelSelector?: boolean;
   modelSelectorSlot?: React.ReactNode;
   autoLoopToggleSlot?: React.ReactNode;
+  voiceChatSlot?: React.ReactNode;
   hideStopButton?: boolean;
   metadata?: Record<string, unknown>;
 }
@@ -91,6 +92,7 @@ export const ConnectedChatInput: FC<ConnectedChatInputProps> = ({
   showModelSelector,
   modelSelectorSlot,
   autoLoopToggleSlot,
+  voiceChatSlot,
   hideStopButton = false,
   metadata,
 }: ConnectedChatInputProps) => {
@@ -324,6 +326,7 @@ export const ConnectedChatInput: FC<ConnectedChatInputProps> = ({
         maxTextareaHeight={maxTextareaHeight}
         modelSelectorSlot={showModelSelector ? modelSelectorSlot : undefined}
         autoLoopToggleSlot={autoLoopToggleSlot}
+        voiceChatSlot={voiceChatSlot}
       />
     </div>
   );

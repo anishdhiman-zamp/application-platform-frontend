@@ -60,7 +60,7 @@ export const CustomInputRow: React.FC<CustomInputRowProps> = ({
             onChange={(e) => onChange(e.target.value)}
             readOnly={!isFocused}
             className={cn(
-              'text-GRAY_1000 placeholder:text-GRAY_400 min-h-[60px] flex-1 resize-none rounded-md border px-3 py-1.5 text-xs font-[450] shadow-none',
+              'text-GRAY_1000 placeholder:text-GRAY_400 min-h-[60px] flex-1 resize-none rounded-xl border px-3 py-1.5 text-xs font-[450] shadow-none',
               isFocused
                 ? 'border-GRAY_500 ring-GRAY_200 bg-BG_WHITE ring-[3px] ring-offset-0 focus-visible:outline-hidden'
                 : 'border-GRAY_200 bg-BG_WHITE',

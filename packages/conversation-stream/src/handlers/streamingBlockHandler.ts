@@ -92,6 +92,7 @@ export function handleContentBlockEvent(conversationId: string, type: string, in
                 partial_json: '',
                 tool_call_id: contentBlock?.id as string,
                 display_name: contentBlock?.display_name as string,
+                display_title: contentBlock?.display_title as string,
               },
             };
         }
@@ -133,7 +134,42 @@ export function handleContentBlockEvent(conversationId: string, type: string, in
         const delta = payload.delta as MapAny;
         const deltaType = delta?.type as string;
 
-        // Use bufferDelta for RAF-batched smooth rendering
+        // TOOL_USE_BLOCK_UPDATE_DELTA is low-frequency (once per tool call) and
+        // carries display_name updates that must appear immediately.  Using the
+        // synchronous update() path avoids RAF-batching delays — RAF doesn't fire
+        // in background tabs, which can postpone display_name rendering until the
+        // tab regains focus.
+        if (deltaType === StreamingContentBlockDeltaType.TOOL_USE_BLOCK_UPDATE_DELTA) {
+          streamingStateStore.update(conversationId, (prev) => {
+            if (!prev) return prev;
+            const elements = prev.message_content?.elements;
+            if (!elements) return prev;
+
+            const updatedElements = elements.map((block) => {
+              if (block.order !== index || block.type !== BLOCK_TYPE.TOOL_USE) return block;
+              return {
+                ...block,
+                payload: {
+                  ...block.payload,
+                  message: (delta.message as string) ?? block.payload.message,
+                  display_content:
+                    (delta.display_content as typeof block.payload.display_content) ?? block.payload.display_content,
+                  display_name: (delta.display_name as string) ?? block.payload.display_name,
+                  display_title: (delta.display_title as string) ?? block.payload.display_title,
+                },
+              };
+            });
+
+            return {
+              ...prev,
+              message_content: { ...prev.message_content, elements: updatedElements },
+            };
+          });
+          break;
+        }
+
+        // High-frequency deltas (text, thinking, input_json) use RAF-batched
+        // bufferDelta for smooth 60fps rendering.
         streamingStateStore.bufferDelta(conversationId, (draft) => {
           const elements = draft.message_content?.elements;
           if (!elements) return;
@@ -155,13 +191,6 @@ export function handleContentBlockEvent(conversationId: string, type: string, in
             case StreamingContentBlockDeltaType.INPUT_JSON_DELTA:
               if (block.type === BLOCK_TYPE.TOOL_USE) {
                 block.payload.partial_json = (block.payload.partial_json || '') + (delta.partial_json as string);
-              }
-              break;
-            case StreamingContentBlockDeltaType.TOOL_USE_BLOCK_UPDATE_DELTA:
-              if (block.type === BLOCK_TYPE.TOOL_USE) {
-                block.payload.message = (delta.message as string) ?? block.payload.message;
-                block.payload.display_content =
-                  (delta.display_content as typeof block.payload.display_content) ?? block.payload.display_content;
               }
               break;
             case StreamingContentBlockDeltaType.TOOL_RESULT_DELTA:

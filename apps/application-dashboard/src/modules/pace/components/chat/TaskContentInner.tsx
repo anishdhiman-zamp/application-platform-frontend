@@ -9,7 +9,6 @@ import {
   SenderType,
   SiblingTask,
   StreamingMessage,
-  SummaryStatus,
   TASK_STATUS,
   TaskBreadcrumb,
   useDisplayedSummary,
@@ -140,17 +139,12 @@ const TaskContentChat = ({ taskId }: { taskId: string }) => {
     | null
     | undefined;
   const isTaskDone = taskStatus && !streamingState ? taskStatus === TASK_STATUS.COMPLETED : false;
-  const summaryContent = isTaskDone
-    ? summary?.status === SummaryStatus.COMPLETED
-      ? (summary?.content ?? lastSummaryText ?? null)
-      : null
-    : null;
   const isAgentActive = Boolean(streamingState?.is_active) || isAnalysing;
 
   const displayedSummary = useDisplayedSummary({
     taskId,
     isAgentActive,
-    summaryContent,
+    taskStatus,
     streamingSummaryText: taskSummaryText,
   });
 
@@ -255,7 +249,7 @@ const TaskContentChat = ({ taskId }: { taskId: string }) => {
                   isAgentActive ? 'mt-[30px] h-[92px]' : 'mt-0 h-0',
                 )}
               >
-                <div className='border-GRAY_400 flex h-[92px] flex-col overflow-hidden rounded-[18px] border p-4'>
+                <div className='border-GRAY_400 flex h-[92px] flex-col overflow-scroll rounded-[18px] border p-4'>
                   <ShimmerText text={displayedSummary || 'Starting now'} autoAnimate />
                 </div>
               </div>

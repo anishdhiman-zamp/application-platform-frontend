@@ -6,7 +6,7 @@ import { formatPlural } from '@zamp-platform/utils';
 import { Globe, Lock, Sticker } from 'lucide-react';
 import { APP_VISIBILITY, type AppType } from '@/modules/apps/apps.types';
 import ShareAppPopup from '@/modules/apps/components/ShareAppPopup';
-import { getIconTheme, APP_ICON_THEMES } from '@/modules/apps/utils/iconTheme';
+import { APP_ICON_THEMES, getIconTheme } from '@/modules/apps/utils/iconTheme';
 
 interface AppRowProps {
   app: AppType;
@@ -44,9 +44,7 @@ const AppRow = ({ app }: AppRowProps) => {
         </Tooltip>
       </TooltipProvider>
 
-      <span className='text-GRAY_600 text-xs'>
-        {formatPlural(serviceCount, 'service')}
-      </span>
+      <span className='text-GRAY_600 text-xs'>{formatPlural(serviceCount, 'service')}</span>
 
       <div onClick={(e) => e.stopPropagation()}>
         <ShareAppPopup appId={app.id} />

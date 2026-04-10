@@ -10,7 +10,7 @@ import {
 } from '@zamp-platform/chat';
 
 import { conversationSSERegistry } from '../registry/conversationSSERegistry';
-import { ConversationEventType } from '../types/conversation-sse.types';
+import { type BrowserStreamingAvailableEvent, ConversationEventType } from '../types/conversation-sse.types';
 import { TaskSSEEventType } from '../types/task-sse.types';
 import { handleContentBlockEvent } from './streamingBlockHandler';
 
@@ -23,7 +23,7 @@ export interface ConversationEventCallbacks {
   onConversationCreated?: (conversationId: string) => void;
   /** Invoked when the SSE connection is lost and all retry attempts have been exhausted. */
   onDisconnected?: () => void;
-  onBrowserStreamingAvailable?: (conversationId: string) => void;
+  onBrowserStreamingAvailable?: (conversationId: string, sessionId?: string) => void;
   onBrowserStreamingUnavailable?: (conversationId: string) => void;
   /** Task lifecycle events on the conversation channel (Section 3.2) */
   onTaskMessageStart?: (taskId: string, messageId: string) => void;
@@ -156,7 +156,10 @@ export function handleConversationSSEEvent(
         break;
 
       case ConversationEventType.BROWSER_STREAMING_AVAILABLE:
-        callbacks.onBrowserStreamingAvailable?.(conversationId);
+        callbacks.onBrowserStreamingAvailable?.(
+          conversationId,
+          (event as unknown as BrowserStreamingAvailableEvent).session_id,
+        );
         break;
 
       case ConversationEventType.BROWSER_STREAMING_UNAVAILABLE:

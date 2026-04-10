@@ -182,6 +182,9 @@ export const API_ENDPOINTS = {
   //Voice Agents
   SPEECH_TO_TEXT_ACCESS_TOKEN_GET: `/speech-to-text/generate-access-token`,
 
+  /** LiveKit voice room credentials — Pantheon `POST /api/voice/join` */
+  VOICE_JOIN_POST: `/api/voice/join`,
+
   INTERACTION_POST: `/v2/conversations/{{conversationId}}/messages/{{messageId}}/interactions`,
   INTERACTION_DISABLE_POST: `/v2/conversations/{{conversationId}}/messages/{{messageId}}/interactions/disable`,
 

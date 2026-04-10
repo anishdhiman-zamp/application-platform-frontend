@@ -24,8 +24,10 @@ export const SERVICE_ICON_THEMES: IconTheme[] = [
 
 export const getIconTheme = (name: string, themes: IconTheme[]): IconTheme => {
   let hash = 0;
+
   for (let i = 0; i < name.length; i++) {
     hash = name.charCodeAt(i) + ((hash << 5) - hash);
   }
+
   return themes[Math.abs(hash) % themes.length];
 };

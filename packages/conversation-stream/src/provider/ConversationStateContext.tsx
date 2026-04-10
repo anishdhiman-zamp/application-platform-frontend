@@ -21,6 +21,7 @@ export interface ConversationState {
   createConversationV2Error: unknown;
   inputsRequired: ConversationInputRequiredItem[] | undefined;
   isBrowserStreamingAvailable: boolean;
+  browserSessionId?: string;
   /** Latest summary text per child task, received from the per-conversation SSE channel. */
   taskSummaries: Record<string, string>;
 }

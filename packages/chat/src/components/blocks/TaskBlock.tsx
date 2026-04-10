@@ -1,16 +1,13 @@
 'use client';
 
 import { AnimatedTerminalIcon, ImageWithFallback, ShimmerText } from '@zamp-platform/ui';
-import { safeJsonParse } from '@zamp-platform/utils';
+import { cn } from '@zamp-platform/ui/utils';
 import { EVENT_TYPE } from '@zamp-platform/utils/event-bus/event-bus.types';
 import { ArrowUpRight } from 'lucide-react';
-import { useRouter } from 'next/navigation';
 import { type FC, useCallback, useMemo } from 'react';
 
 import { getChatTaskRoute } from '@/constants/routeConfig';
 import { useAppSelector } from '@/hooks/toolkit';
-import { usePaceContext } from '@/modules/pace/pace.context';
-import { CHAT_SIDEBAR_STATE } from '@/modules/pace/pace.types';
 import { preserveSidebarParam } from '@/modules/pace/pace.utils';
 import type { RootState } from '@/store';
 
@@ -18,14 +15,16 @@ import { API_ENDPOINTS } from '../../api';
 import { useChatActions } from '../../context/ChatActionsContext';
 import { useChat } from '../../hooks/useChat';
 import { useDisplayedSummary } from '../../hooks/useDisplayedSummary';
-import { BLOCK_TYPE, TASK_STATUS, type TaskBlockType, type ToolUseContentBlock } from '../../types/block.types';
+import { BLOCK_TYPE, TASK_STATUS, type TaskBlockType, ToolUseContentBlock } from '../../types/block.types';
 import { ResourceType, SenderType } from '../../types/chat.types';
+import { extractToolCallInfo } from '../block.utils';
 import TaskBlockContent from './TaskBlockContent';
 import TaskStatusIcon from './TaskStatusIcon';
 
 interface TaskBlockProps {
   payload: TaskBlockType['payload'];
   conversationId?: string;
+  className?: string;
 }
 
 export interface ToolCallInfo {
@@ -37,11 +36,9 @@ export interface ToolCallInfo {
   block: ToolUseContentBlock;
 }
 
-const TaskBlock: FC<TaskBlockProps> = ({ payload, conversationId }) => {
-  const router = useRouter();
+const TaskBlock: FC<TaskBlockProps> = ({ payload, conversationId, className }) => {
   const organizationId = useAppSelector((state: RootState) => state.user.user?.orgs?.[0]?.organization_id) ?? '';
   const { onTaskOpen, parentTasks, siblings, taskSummaries } = useChatActions();
-  const { setChatSidebarState } = usePaceContext();
 
   const { title, task_id, status = TASK_STATUS.IN_PROGRESS } = payload;
 
@@ -67,7 +64,7 @@ const TaskBlock: FC<TaskBlockProps> = ({ payload, conversationId }) => {
   const displayedSummary = useDisplayedSummary({
     taskId: task_id,
     isAgentActive,
-    summaryContent: null,
+    taskStatus,
     streamingSummaryText: taskSummaries?.[task_id] ?? null,
   });
 
@@ -85,20 +82,7 @@ const TaskBlock: FC<TaskBlockProps> = ({ payload, conversationId }) => {
         elementTypes.push(element?.type);
 
         if (element?.type === BLOCK_TYPE.TOOL_USE) {
-          const toolUseBlock = element as ToolUseContentBlock;
-          const displayContent = safeJsonParse<{ tool_name?: string; icon?: string }>(
-            toolUseBlock?.payload?.display_content?.json_block,
-          );
-          const toolCallId = toolUseBlock?.payload?.tool_call_id ?? toolUseBlock?.id;
-
-          calls.push({
-            id: toolCallId ?? `tool-${calls.length}`,
-            name: toolUseBlock?.payload?.name ?? displayContent?.tool_name ?? 'Unknown',
-            displayName: toolUseBlock?.payload?.display_name ?? 'Unknown',
-            icon: toolUseBlock?.payload?.icon ?? displayContent?.icon,
-            isComplete: toolUseBlock?.is_complete !== false,
-            block: toolUseBlock,
-          });
+          calls.push(extractToolCallInfo(element, calls.length));
         }
       }
     }
@@ -108,20 +92,7 @@ const TaskBlock: FC<TaskBlockProps> = ({ payload, conversationId }) => {
       elementTypes.push(element?.type);
 
       if (element?.type === BLOCK_TYPE.TOOL_USE) {
-        const toolUseBlock = element as ToolUseContentBlock;
-        const displayContent = safeJsonParse<{ tool_name?: string; icon?: string }>(
-          toolUseBlock?.payload?.display_content?.json_block,
-        );
-        const toolCallId = toolUseBlock?.payload?.tool_call_id ?? toolUseBlock?.id;
-
-        calls.push({
-          id: toolCallId ?? `streaming-tool-${calls.length}`,
-          name: toolUseBlock?.payload?.name ?? displayContent?.tool_name ?? 'Unknown',
-          displayName: toolUseBlock?.payload?.display_name ?? 'Unknown',
-          icon: toolUseBlock?.payload?.icon ?? displayContent?.icon,
-          isComplete: toolUseBlock?.is_complete !== false,
-          block: toolUseBlock,
-        });
+        calls.push(extractToolCallInfo(element, calls.length));
       }
     }
 
@@ -156,8 +127,6 @@ const TaskBlock: FC<TaskBlockProps> = ({ payload, conversationId }) => {
   const previousCount = (previousToolCalls?.length ?? 0) + markdownStepsBeforeLastTool;
 
   const handleOpenTask = useCallback(() => {
-    setChatSidebarState(CHAT_SIDEBAR_STATE.SIDEBAR);
-
     // Use live status from conversation data if available, fallback to payload status
     const effectiveStatus = taskStatus ?? status;
 
@@ -178,20 +147,8 @@ const TaskBlock: FC<TaskBlockProps> = ({ payload, conversationId }) => {
 
     const fullRoute = preserveSidebarParam(route);
 
-    onTaskOpen?.(title, fullRoute);
-    router.push(fullRoute);
-  }, [
-    router,
-    task_id,
-    conversationId,
-    title,
-    status,
-    taskStatus,
-    onTaskOpen,
-    setChatSidebarState,
-    parentTasks,
-    siblings,
-  ]);
+    onTaskOpen?.(task_id, title, fullRoute);
+  }, [task_id, conversationId, title, status, taskStatus, onTaskOpen, parentTasks, siblings]);
 
   const isInProgress = status === TASK_STATUS.IN_PROGRESS;
   const hasNoToolCalls = (toolCalls?.length ?? 0) === 0 && previousCount === 0;
@@ -226,7 +183,10 @@ const TaskBlock: FC<TaskBlockProps> = ({ payload, conversationId }) => {
 
   return (
     <div
-      className='border-GRAY_400 bg-BG_WHITE hover:bg-BG_GRAY_2 my-3 w-full cursor-pointer overflow-hidden rounded-[10px] border transition-colors'
+      className={cn(
+        'border-GRAY_400 bg-BG_WHITE hover:bg-BG_GRAY_2 my-3 w-full cursor-pointer overflow-hidden rounded-[10px] border transition-colors',
+        className,
+      )}
       onClick={handleOpenTask}
       role='button'
       tabIndex={0}

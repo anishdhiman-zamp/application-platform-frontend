@@ -15,9 +15,7 @@ export function useSpreadsheetWorker() {
   const idCounter = useRef(0);
 
   useEffect(() => {
-    const worker = new Worker(new URL('./spreadsheet.worker.ts', import.meta.url), {
-      type: 'module',
-    });
+    const worker = new Worker(new URL('./spreadsheet.worker.ts', import.meta.url));
 
     worker.onmessage = (e: MessageEvent<WorkerResponse>) => {
       const { id, type, payload, error } = e.data;

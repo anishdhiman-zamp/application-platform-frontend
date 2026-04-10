@@ -90,6 +90,7 @@ const CreateAppModal = ({ open, onOpenChange }: CreateAppModalProps) => {
     setAppName('');
     setRandomPrompt(getRandomPrompt());
     const timerId = setTimeout(() => nameInputRef.current?.select(), 100);
+
     return () => clearTimeout(timerId);
   }, []);
 

@@ -135,7 +135,12 @@ export const RichTextEditor = forwardRef<RichTextEditorHandle, RichTextEditorPro
           placeholder,
           emptyEditorClass: 'is-editor-empty',
         }),
-        Markdown,
+        Markdown.configure({
+          // remark-gfm (used in MarkdownBlock) requires ≥3 spaces of indentation
+          // to recognise nested list items. The default of 2 causes nesting to be
+          // flattened when the markdown is rendered.
+          indentation: { style: 'space', size: 3 },
+        }),
       ],
       content: value || '',
       contentType: 'markdown',
@@ -173,20 +178,20 @@ export const RichTextEditor = forwardRef<RichTextEditorHandle, RichTextEditorPro
             if (hasFiles) return true;
           }
 
-          // If there's no HTML clipboard data, insert as plain text directly.
-          // This avoids the @tiptap/markdown extension trying to parse pasted content
-          // as markdown — URLs with special characters (%, =, &, _) can cause the
-          // markdown serializer/parser to hang or crash.
-          // When HTML is present (e.g. copying from a rich editor), fall through to
-          // let tiptap handle it so formatting is preserved.
-          const plainText = event.clipboardData?.getData('text/plain') ?? '';
-          const hasHtml = !!event.clipboardData?.getData('text/html');
-          if (plainText && !hasHtml) {
+          // Always insert as plain text, normalizing &nbsp; entities and non-breaking
+          // spaces so they never appear literally in the editor or the serialized markdown.
+          // Using text/plain avoids the @tiptap/markdown extension serializing HTML
+          // entity artifacts (URLs with %, =, & can also cause the markdown parser to hang).
+          const rawText = event.clipboardData?.getData('text/plain') ?? '';
+          if (rawText) {
             event.preventDefault();
+            const cleanText = rawText
+              .replace(/&nbsp;/gi, ' ')
+              .replace(/\u00A0/g, ' ')
+              .replace(/\n{2,}/g, '\n');
             const { state, dispatch } = view;
             const { from, to } = state.selection;
-            const tr = state.tr.insertText(plainText, from, to);
-            dispatch(tr);
+            dispatch(state.tr.insertText(cleanText, from, to));
             return true;
           }
 
@@ -197,12 +202,13 @@ export const RichTextEditor = forwardRef<RichTextEditorHandle, RichTextEditorPro
         try {
           const md = ed
             .getMarkdown()
-            .replace(/[\s\u00A0]+$/, '')
-            .replace(/&nbsp;$/, '');
+            .replace(/&nbsp;/g, ' ')
+            .replace(/\u00A0/g, ' ')
+            .replace(/\s+$/, '');
           lastEditorMarkdown.current = md;
           onChange(md);
         } catch {
-          const fallback = ed.getText();
+          const fallback = ed.getText().replace(/\u00A0/g, ' ');
           lastEditorMarkdown.current = fallback;
           onChange(fallback);
         }

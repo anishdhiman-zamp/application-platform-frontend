@@ -1,9 +1,15 @@
 import type { ConversationState } from '@zamp-platform/conversation-stream';
 import { AgentNavIcon, HomeIcon, LayoutGridIcon, RouteIcon, SettingsIcon } from '@zamp-platform/ui';
 import { Database, Link2, Settings2, UserPen } from 'lucide-react';
-import { PaceNavbarItemId, PaceNavbarItemSchema, PaceSettingsTabSchema } from 'modules/pace/pace.types';
+import {
+  type BrowserViewerStateConfig,
+  PaceNavbarItemId,
+  PaceNavbarItemSchema,
+  PaceSettingsTabSchema,
+} from 'modules/pace/pace.types';
 import Users02 from '@/assets/Icons/Users02';
 import { FEATURE_FLAGS } from '@/constants/featureFlags';
+import { DONE_EMPTY_STATE } from '@/constants/icons';
 import { ROUTES_PATH } from '@/constants/routeConfig';
 import { INPUT_FILE_FORMATS } from '@/types/common/mime';
 
@@ -26,6 +32,31 @@ export const STUB_CONVERSATION_STATE: ConversationState = {
   inputsRequired: undefined,
   isBrowserStreamingAvailable: false,
   taskSummaries: {},
+};
+
+export enum BrowserViewerDisplayState {
+  WAITING = 'waiting',
+  ENDED = 'ended',
+  ERROR = 'error',
+}
+
+export const BROWSER_VIEWER_STATE_CONFIG: Record<BrowserViewerDisplayState, BrowserViewerStateConfig> = {
+  [BrowserViewerDisplayState.WAITING]: {
+    title: 'Waiting for browser stream...',
+    imageSrc: DONE_EMPTY_STATE,
+    imageAlt: 'Waiting for stream',
+  },
+  [BrowserViewerDisplayState.ENDED]: {
+    title: 'Live streaming has ended',
+    imageSrc: DONE_EMPTY_STATE,
+    imageAlt: 'Stream ended',
+  },
+  [BrowserViewerDisplayState.ERROR]: {
+    title: 'Failed to connect to browser stream',
+    imageSrc: DONE_EMPTY_STATE,
+    imageAlt: 'Connection error',
+    showRetry: true,
+  },
 };
 
 export const ACCEPTED_FILE_TYPES = `${INPUT_FILE_FORMATS.TXT},${INPUT_FILE_FORMATS.PDF},${INPUT_FILE_FORMATS.JPEG},${INPUT_FILE_FORMATS.JPG},${INPUT_FILE_FORMATS.PNG},${INPUT_FILE_FORMATS.BMP}`;

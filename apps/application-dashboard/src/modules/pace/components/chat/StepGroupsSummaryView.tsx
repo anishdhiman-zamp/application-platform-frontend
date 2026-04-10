@@ -33,7 +33,7 @@ const StepGroupsSummaryView = ({ sections }: StepGroupsSummaryViewProps) => {
           )}
 
           {section.lastMarkdownText ? (
-            <div className={cn('bg-BG_WHITE relative z-1', section.groups.length === 0 && 'mt-4!')}>
+            <div className={cn('bg-BG_WHITE relative z-1 px-2', section.groups.length === 0 && 'mt-4!')}>
               <ResizableSummaryBox borderRadius='rounded-[18px]' contentClassName='px-4 pt-3 pb-1'>
                 <MarkdownBlock payload={{ text: section?.lastMarkdownText }} />
               </ResizableSummaryBox>

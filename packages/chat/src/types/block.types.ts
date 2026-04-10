@@ -106,7 +106,7 @@ export interface QuestionBlockType {
   type: BLOCK_TYPE.QUESTION;
   order: number;
   payload: {
-    type: TEXT_TYPE;
+    type: TextType;
     question: string;
   };
 }
@@ -294,10 +294,12 @@ export interface InputsRespondedBlockType {
   metadata?: null;
 }
 
-export enum TEXT_TYPE {
-  PLAIN_TEXT = 'plain_text',
-  MARKDOWN = 'markdown',
-}
+export const TEXT_TYPE = {
+  PLAIN_TEXT: 'plain_text',
+  MARKDOWN: 'markdown',
+} as const;
+
+export type TextType = (typeof TEXT_TYPE)[keyof typeof TEXT_TYPE];
 
 export type Block =
   | PlainTextBlockType
@@ -379,6 +381,24 @@ export interface ToolUseDisplayContent {
   json_block: string;
 }
 
+/** Parsed shape of {@link ToolUseDisplayContent.json_block}. */
+export interface ToolUseDisplayContentParsed {
+  tool_name?: string;
+  icon?: string;
+  display_title?: string;
+  tool_input?: Record<string, unknown>;
+}
+
+/** Normalised display metadata extracted from a {@link ToolUseContentBlock}. */
+export interface ToolCallInfo {
+  id: string;
+  name: string;
+  displayName: string;
+  icon?: string;
+  isComplete: boolean;
+  block: ToolUseContentBlock;
+}
+
 export interface ToolUseContentBlock extends StreamingContentBlockBase {
   type: BLOCK_TYPE.TOOL_USE;
   payload: {
@@ -389,6 +409,7 @@ export interface ToolUseContentBlock extends StreamingContentBlockBase {
     name?: string;
     tool_call_id?: string;
     display_name?: string;
+    display_title?: string;
     icon?: string;
   };
 }
@@ -450,6 +471,7 @@ export interface StreamEventContentBlockStart {
     start_timestamp?: string;
     tool_call_id?: string;
     display_name?: string;
+    display_title?: string;
     // Agent block fields
     agent_id?: string;
     description?: string;
@@ -483,6 +505,8 @@ export interface StreamEventToolUseUpdateDelta {
   type: StreamingContentBlockDeltaType.TOOL_USE_BLOCK_UPDATE_DELTA;
   message?: string;
   display_content?: ToolUseDisplayContent;
+  display_name?: string;
+  display_title?: string;
 }
 
 export interface StreamEventToolResultDelta {

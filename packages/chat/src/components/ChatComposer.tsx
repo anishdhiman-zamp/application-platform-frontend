@@ -62,6 +62,8 @@ export interface ChatComposerProps {
 
   modelSelectorSlot?: React.ReactNode;
   autoLoopToggleSlot?: React.ReactNode;
+  voiceChatSlot?: React.ReactNode;
+  hideRecordingButton?: boolean;
 }
 
 export const ChatComposer: FC<ChatComposerProps> = ({
@@ -108,6 +110,8 @@ export const ChatComposer: FC<ChatComposerProps> = ({
 
   modelSelectorSlot,
   autoLoopToggleSlot,
+  voiceChatSlot,
+  hideRecordingButton = false,
 }) => {
   const editorRef = useRef<RichTextEditorHandle>(null);
 
@@ -237,22 +241,25 @@ export const ChatComposer: FC<ChatComposerProps> = ({
 
             <div className='flex items-center gap-x-2'>
               {modelSelectorSlot}
-              {isPreparingToRecord ? (
-                <div className='flex size-[26px] items-center justify-center'>
-                  <Loader size={14} className='text-GRAY_700 animate-spin' />
-                </div>
-              ) : (
-                <Button
-                  variant='ghost'
-                  size='icon'
-                  className='hover:text-GRAY_1000 text-GRAY_700 hover:bg-accent size-[26px] rounded-[6px] p-[2px] [&_svg]:size-3.5'
-                  aria-label='Start recording'
-                  onClick={onStartRecording}
-                  disabled={microphoneDisabled}
-                >
-                  <Mic />
-                </Button>
-              )}
+              {voiceChatSlot}
+              {!hideRecordingButton &&
+                (isPreparingToRecord ? (
+                  <div className='flex size-[26px] items-center justify-center'>
+                    <Loader size={14} className='text-GRAY_700 animate-spin' />
+                  </div>
+                ) : (
+                  <Button
+                    variant='ghost'
+                    size='icon'
+                    className='hover:text-GRAY_1000 text-GRAY_700 hover:bg-accent size-[26px] rounded-[6px] p-[2px] [&_svg]:size-3.5'
+                    aria-label='Start recording'
+                    onClick={onStartRecording}
+                    disabled={microphoneDisabled}
+                  >
+                    <Mic />
+                  </Button>
+                ))}
+
               {showSubmitButton && (isStreaming || isStopping) && onStop ? (
                 <Button
                   onClick={onStop}

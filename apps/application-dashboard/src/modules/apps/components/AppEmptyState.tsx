@@ -1,7 +1,7 @@
 'use client';
 
 import { Button } from '@zamp-platform/ui';
-import { Plus, Globe } from 'lucide-react';
+import { Globe, Plus } from 'lucide-react';
 
 interface AppEmptyStateProps {
   onNewApp: () => void;

@@ -114,7 +114,7 @@ const TaskStatusCounts: FC<TaskStatusCountsProps> = ({
             return container.getBoundingClientRect().left - trigger.getBoundingClientRect().left + 12;
           })()}
           avoidCollisions={false}
-          className='flex max-h-[calc(100vh-250px)] min-h-[400px] flex-col !rounded-[20px] p-0'
+          className='flex !max-h-[calc(100vh-300px)] min-h-[400px] flex-col !rounded-[20px] p-0'
           style={
             containerWidth ? { width: containerWidth, minWidth: containerWidth, maxWidth: containerWidth } : undefined
           }
@@ -130,7 +130,7 @@ const TaskStatusCounts: FC<TaskStatusCountsProps> = ({
           </div>
 
           <div className='flex-1 overflow-y-auto px-4 pt-4 pb-4 [scrollbar-width:thin]'>
-            <div className='flex flex-col gap-3'>
+            <div className='flex flex-col'>
               {sortedAndFilteredTasks.map((task) => (
                 <TaskBlock
                   key={task.blockId}
@@ -141,6 +141,7 @@ const TaskStatusCounts: FC<TaskStatusCountsProps> = ({
                     status: task.status,
                   }}
                   conversationId={conversationId}
+                  className='my-1!'
                 />
               ))}
               {sortedAndFilteredTasks.length === 0 && (

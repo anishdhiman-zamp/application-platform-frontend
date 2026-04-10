@@ -82,10 +82,9 @@ const ChatTopbar: FC<ChatTopbarProps> = ({
                 <motion.span
                   key={displayTitle}
                   className='f-14-550 block truncate first-letter:uppercase'
-                  initial={{ opacity: 0, y: 4 }}
-                  animate={{ opacity: 1, y: 0 }}
-                  exit={{ opacity: 0, y: -4 }}
-                  transition={{ duration: 0.18, ease: 'easeInOut' }}
+                  initial={{ opacity: 0, y: 5 }}
+                  animate={{ opacity: 1, y: 0, transition: { duration: 0.2, ease: 'easeOut' } }}
+                  exit={{ opacity: 0, y: -4, transition: { duration: 0.1, ease: 'easeIn' } }}
                 >
                   {displayTitle}
                 </motion.span>

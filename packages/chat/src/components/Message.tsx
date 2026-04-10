@@ -5,6 +5,7 @@ import { cn } from '@zamp-platform/ui/utils';
 import { formatChatTimestamp, formatChatTimestampTooltip, formatTimestampToUTC } from '@zamp-platform/utils';
 import { motion } from 'motion/react';
 import { FC, ReactNode, useCallback, useEffect, useMemo, useRef, useState } from 'react';
+import { flushSync } from 'react-dom';
 
 import { defaultFnType } from '@/types/commonTypes';
 
@@ -80,7 +81,37 @@ export const Message: FC<MessageProps> = ({
     return cn('relative min-w-0 w-auto', shouldAlignRight ? 'max-w-[80%]' : 'max-w-[min(100%,700px)]');
   }, [isUserMessage, isUserInputsRespondedBubble, shouldAlignRight]);
 
-  const toggleExpanded = () => setIsExpanded((prev) => !prev);
+  const toggleExpanded = useCallback(() => {
+    if (isExpanded) {
+      // When collapsing, anchor the bottom of the message bubble so the scroll
+      // position doesn't shift. We record the distance from the bottom of the
+      // bubble to the bottom of the scroll container, then restore it after the
+      // height change is applied.
+      const scrollEl = scrollRef.current;
+      const bubbleEl = contentRef.current?.closest<HTMLElement>('[data-sender-type]');
+
+      if (scrollEl && bubbleEl) {
+        const bubbleBottom = bubbleEl.getBoundingClientRect().bottom;
+        const containerBottom = scrollEl.getBoundingClientRect().bottom;
+        const distanceFromBottom = containerBottom - bubbleBottom;
+
+        flushSync(() => {
+          setIsExpanded(false);
+        });
+
+        // After React re-renders and the DOM shrinks, restore the scroll so the
+        // bottom of the bubble stays at the same visual position.
+        requestAnimationFrame(() => {
+          const newBubbleBottom = bubbleEl.getBoundingClientRect().bottom;
+          const delta = newBubbleBottom - (containerBottom - distanceFromBottom);
+          scrollEl.scrollTop += delta;
+        });
+        return;
+      }
+    }
+
+    setIsExpanded((prev) => !prev);
+  }, [isExpanded, scrollRef]);
   const formattedTimestamp = useMemo(
     () => (message.timestamp ? formatChatTimestamp(formatTimestampToUTC(message.timestamp)) : ''),
     [message.timestamp],
@@ -186,6 +217,7 @@ export const Message: FC<MessageProps> = ({
             showConnectorToLastBlock={showConnectorToLastBlock}
             showConnectorToNextBlock={showConnectorToNextBlock}
             embeddedInStepSummary={embeddedInStepSummary}
+            compactParagraphs={isUserMessage}
           />
         </div>
         {isUserMessage && isOverflowing && !isExpanded && !isInputsRespondedBlock && (

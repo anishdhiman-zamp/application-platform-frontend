@@ -82,6 +82,7 @@ interface MarkdownBlockProps {
   isStreaming?: boolean;
   className?: string;
   fontClassName?: string;
+  compactParagraphs?: boolean;
 }
 
 export const MarkdownBlock: React.FC<MarkdownBlockProps> = ({
@@ -89,6 +90,7 @@ export const MarkdownBlock: React.FC<MarkdownBlockProps> = ({
   isStreaming = false,
   className,
   fontClassName = 'text-GRAY_950 text-sm leading-[1.667] font-[420]',
+  compactParagraphs = false,
 }) => {
   const { onFileOpen } = useChatActions();
 
@@ -134,18 +136,41 @@ export const MarkdownBlock: React.FC<MarkdownBlockProps> = ({
               {children}
             </h3>
           ),
-          p: ({ children }) => <p className={cn('mt-3 first:mt-0', fontClassName)}>{children}</p>,
-          ul: ({ children }) => <ul className={cn('mt-3 list-disc pl-5 first:mt-0', fontClassName)}>{children}</ul>,
+          p: ({ children }) => (
+            <p className={cn(compactParagraphs ? 'mt-1 first:mt-0' : 'mt-3 first:mt-0', fontClassName)}>{children}</p>
+          ),
+          ul: ({ children }) => (
+            <ul
+              className={cn(
+                compactParagraphs ? 'mt-1 list-disc pl-5 first:mt-0' : 'mt-3 list-disc pl-5 first:mt-0',
+                fontClassName,
+              )}
+            >
+              {children}
+            </ul>
+          ),
           ol: ({ children }) => (
-            <ol className='text-GRAY_950 mt-3 list-decimal pl-7 text-sm leading-[1.667] font-[420] first:mt-0'>
+            <ol
+              className={cn(
+                'text-GRAY_950 list-decimal pl-7 text-sm leading-[1.667] font-[420] first:mt-0',
+                compactParagraphs ? 'mt-1' : 'mt-3',
+              )}
+            >
               {children}
             </ol>
           ),
-          li: ({ children }) => <li className='mt-2 first:mt-0'>{children}</li>,
-          hr: () => <hr className='bg-GRAY_300 my-8 h-px border-none' />,
+          li: ({ children }) => (
+            <li className={compactParagraphs ? 'mt-0 first:mt-0' : 'mt-2 first:mt-0'}>{children}</li>
+          ),
+          hr: () => <hr className={cn('bg-GRAY_300 h-px border-none', compactParagraphs ? 'my-3' : 'my-8')} />,
           strong: ({ children }) => <strong className='text-GRAY_1000 font-semibold'>{children}</strong>,
           blockquote: ({ children }) => (
-            <blockquote className='border-GRAY_300 text-GRAY_900 mt-4 border-l-2 pl-4 first:mt-0'>
+            <blockquote
+              className={cn(
+                'border-GRAY_300 text-GRAY_900 border-l-2 pl-4 first:mt-0',
+                compactParagraphs ? 'mt-2' : 'mt-4',
+              )}
+            >
               {children}
             </blockquote>
           ),

@@ -45,10 +45,12 @@ const CopyMessageButton: FC<CopyMessageButtonProps> = ({ messageContent, classNa
   const [isCopied, setIsCopied] = useState(false);
 
   const handleCopyMessage = useCallback(async () => {
-    const textContent =
+    const rawContent =
       messageContent?.text || messageContent?.message || extractTextFromBlocks(messageContent?.elements);
 
-    if (!textContent) return;
+    if (!rawContent) return;
+
+    const textContent = rawContent.replace(/&nbsp;/g, ' ').replace(/\u00A0/g, ' ');
 
     try {
       await navigator.clipboard.writeText(textContent);
