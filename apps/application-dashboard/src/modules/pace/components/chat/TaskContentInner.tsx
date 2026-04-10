@@ -252,10 +252,10 @@ const TaskContentChat = ({ taskId }: { taskId: string }) => {
               <div
                 className={cn(
                   'overflow-hidden transition-all duration-300',
-                  isAgentActive ? 'mt-[30px] h-[92px]' : 'mt-0 h-0',
+                  taskStatus === TASK_STATUS.IN_PROGRESS ? 'mt-[30px] h-[80px]' : 'mt-0 h-0',
                 )}
               >
-                <div className='border-GRAY_400 flex h-[92px] flex-col overflow-scroll rounded-[18px] border p-4'>
+                <div className='border-GRAY_400 flex h-[80px] flex-col overflow-scroll rounded-[18px] border p-4'>
                   <ShimmerText text={displayedSummary || 'Starting now'} autoAnimate />
                 </div>
               </div>
@@ -339,7 +339,7 @@ const TaskContentChat = ({ taskId }: { taskId: string }) => {
 
               {/* 3. Inline subtasks (toggleable) */}
               {subtasks.length > 0 && (
-                <div className='mt-[30px]'>
+                <div className='mt-[30px] px-2'>
                   <InlineSubtaskSection subtasks={subtasks} parentTasks={subtaskPanelParents} />
                 </div>
               )}
