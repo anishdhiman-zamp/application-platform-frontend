@@ -17,25 +17,24 @@ export function useSpreadsheetWorker() {
   useEffect(() => {
     let objectUrl: string | null = null;
 
-    const initWorker = async () => {
+    const initWorker = () => {
       const workerUrl = new URL('./spreadsheet.worker.ts', import.meta.url).toString();
       let worker: Worker;
 
-      try {
-        // Fetch the worker script and create a blob URL to work around cross-origin
-        // restrictions when assets are served from a CDN (e.g. CloudFront on AWS).
-        // Browsers block `new Worker(crossOriginUrl)` with a SecurityError, but a
-        // blob: URL is always same-origin so it is allowed.
-        const response = await fetch(workerUrl);
-        const blob = await response.blob();
+      const isCrossOrigin = new URL(workerUrl).origin !== window.location.origin;
+
+      if (isCrossOrigin) {
+        // When assets are served from a CDN (e.g. CloudFront on AWS), browsers
+        // block `new Worker(crossOriginUrl)` with a SecurityError.
+        // The workaround: create a same-origin blob that uses importScripts() to
+        // load the actual worker script. Classic workers can importScripts() from
+        // cross-origin URLs freely (no same-origin restriction applies there).
+        const bootstrap = `importScripts(${JSON.stringify(workerUrl)});`;
+        const blob = new Blob([bootstrap], { type: 'text/javascript' });
 
         objectUrl = URL.createObjectURL(blob);
-        // Use classic worker (no `type: 'module'`) — webpack bundles the worker
-        // as a classic IIFE script, so the blob must also be run as classic.
         worker = new Worker(objectUrl);
-      } catch {
-        // Fallback for same-origin environments (local dev, Vercel) where the
-        // direct URL already works.
+      } else {
         worker = new Worker(workerUrl);
       }
 
