@@ -1,13 +1,13 @@
 global:
   service:
-    name: application-platform-frontend-dev
+    name: application-platform-frontend-dev-mum
 
-projectName: zamp  # required
+projectName: zamp
 serviceName: application-platform-frontend
 default:
   annotations:
     all:
-      app.kv.io/env: dev
+      app.kv.io/env: dev-mum
   labels:
     all:
       service-name: application-platform-frontend-svc
@@ -20,7 +20,7 @@ default:
       memory: 1000Mi
   replicaCount: 2
   image:
-    repository: "913524915637.dkr.ecr.us-east-1.amazonaws.com/zamp-dev-us-application-platform-frontend-ecr"
+    repository: "913524915637.dkr.ecr.ap-south-1.amazonaws.com/zamp-dev-mum-application-platform-frontend-ecr"
     tag: "latest"
     imagePullPolicy: Always
   signoz:
@@ -36,12 +36,12 @@ default:
     volumeMount:
       enabled: true
       secrets:
-      - data:  
+      - data:
           - fileName: ".env"
             mountPath: "/home/node/app/.env"
-            secretKey: zamp-dev-us-app-dashboard-frontend-secrets
+            secretKey: zamp-dev-mum-app-dashboard-frontend-secrets
         refreshInterval: 1m
-        secretStoreName: zamp-dev-us-clustersecretstore
+        secretStoreName: zamp-dev-mum-clustersecretstore
         secretName: env
 deployment:
   - name: "svc"
@@ -59,13 +59,13 @@ deployment:
     containers:
       - name: "svc"
         port: 3000
-        healthcheck: 
+        healthcheck:
           enabled: true
-          livenessProbe: 
+          livenessProbe:
             path : "/api/health-check"
             initialDelaySeconds : 40
             periodSeconds: 30
-          readinessProbe: 
+          readinessProbe:
             path : "/api/health-check"
             initialDelaySeconds : 30
             periodSeconds : 30
@@ -86,4 +86,4 @@ deployment:
       minReplicas: 2
       maxReplicas: 3
       targetCPUUtilizationPercentage: 80
-      targetMemoryUtilizationPercentage: 80 
+      targetMemoryUtilizationPercentage: 80
