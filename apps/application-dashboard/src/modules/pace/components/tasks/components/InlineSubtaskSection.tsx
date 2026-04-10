@@ -119,7 +119,7 @@ const InlineSubtaskSection = ({ subtasks, parentTasks }: InlineSubtaskSectionPro
                     </div>
                   ) : (
                     <ArrowRight
-                      size={10}
+                      size={14}
                       className='text-GRAY_600 shrink-0 opacity-0 transition-opacity group-hover:opacity-100'
                     />
                   )}

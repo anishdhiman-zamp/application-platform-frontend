@@ -144,7 +144,7 @@ const AppsListingPage = () => {
               <div className='flex flex-col gap-2'>
                 {filteredApps.map((app) => (
                   <AccordionItem key={app.id} value={app.id} className='border-none'>
-                    <AccordionTrigger className='border-GRAY_400 bg-BG_WHITE hover:bg-BG_GRAY_2 rounded-xl border p-0 [&[data-state=open]]:rounded-b-none [&[data-state=open]]:border-b-0'>
+                    <AccordionTrigger className='border-GRAY_400 bg-BG_WHITE hover:bg-BG_GRAY_2 rounded-xl border p-0 pr-3 [&[data-state=open]]:rounded-b-none [&[data-state=open]]:border-b-0'>
                       <AppRow app={app} />
                     </AccordionTrigger>
                     <AccordionContent disableAnimation className='p-0'>
