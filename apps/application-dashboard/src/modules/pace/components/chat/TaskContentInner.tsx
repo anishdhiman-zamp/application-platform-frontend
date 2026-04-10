@@ -132,42 +132,52 @@ const TaskContentChat = ({ taskId }: { taskId: string }) => {
   // before the task list API refetches (no BE event for subtask creation during streaming).
   const mergedSubtasks = useMemo(() => {
     const apiSubtaskIds = new Set(subtasks.map((s) => s?.id));
-    const streamingSubtasks: typeof subtasks = [];
+    const newSubtasks: typeof subtasks = [];
+    // Collect latest status from message task blocks (SSE updates task block statuses in messages)
+    const messageStatusMap = new Map<string, TaskStatus>();
 
-    // Scan messages for task blocks not in the API subtasks list
     for (const msg of messages) {
       for (const el of msg.message_content?.elements ?? []) {
         if (el.type === BLOCK_TYPE.TASK) {
-          const taskBlock = el as TaskBlockType;
-          const payload = taskBlock?.payload ?? {};
+          const payload = (el as TaskBlockType)?.payload ?? {};
 
-          if (!apiSubtaskIds.has(payload?.task_id)) {
-            streamingSubtasks.push({
-              id: payload?.task_id,
-              title: payload?.title,
-              status: (payload?.status as TaskStatus) ?? TASK_STATUS.IN_PROGRESS,
-            });
+          if (payload?.task_id) {
+            const blockStatus = (payload?.status as TaskStatus) ?? TASK_STATUS.IN_PROGRESS;
+
+            messageStatusMap.set(payload.task_id, blockStatus);
+
+            if (!apiSubtaskIds.has(payload.task_id)) {
+              newSubtasks.push({ id: payload.task_id, title: payload.title, status: blockStatus });
+            }
           }
         }
       }
     }
 
-    // Also check streaming state for task blocks
     for (const el of streamingState?.message_content?.elements ?? []) {
       if (el.type === BLOCK_TYPE.TASK) {
         const payload = (el as TaskBlockType)?.payload ?? {};
 
-        if (!apiSubtaskIds.has(payload?.task_id) && !streamingSubtasks.some((s) => s?.id === payload?.task_id)) {
-          streamingSubtasks.push({
-            id: payload?.task_id,
-            title: payload?.title,
-            status: (payload?.status as TaskStatus) ?? TASK_STATUS.IN_PROGRESS,
-          });
+        if (payload?.task_id) {
+          const blockStatus = (payload?.status as TaskStatus) ?? TASK_STATUS.IN_PROGRESS;
+
+          messageStatusMap.set(payload.task_id, blockStatus);
+
+          if (!apiSubtaskIds.has(payload.task_id) && !newSubtasks.some((s) => s?.id === payload.task_id)) {
+            newSubtasks.push({ id: payload.task_id, title: payload.title, status: blockStatus });
+          }
         }
       }
     }
 
-    return streamingSubtasks.length > 0 ? [...subtasks, ...streamingSubtasks] : subtasks;
+    // Update existing subtask statuses from messages (SSE keeps these fresh)
+    const updated = subtasks.map((s) => {
+      const freshStatus = messageStatusMap.get(s.id);
+
+      return freshStatus && freshStatus !== s.status ? { ...s, status: freshStatus } : s;
+    });
+
+    return newSubtasks.length > 0 ? [...updated, ...newSubtasks] : updated;
   }, [subtasks, messages, streamingState]);
 
   const siblingsMemo: SiblingTask[] = useMemo(
@@ -403,9 +413,9 @@ const TaskContentChat = ({ taskId }: { taskId: string }) => {
               </div>
 
               {/* 3. Inline subtasks (toggleable) */}
-              {subtasks.length > 0 ? (
+              {mergedSubtasks.length > 0 ? (
                 <div className='mt-[30px] px-2'>
-                  <InlineSubtaskSection subtasks={subtasks} parentTasks={subtaskPanelParents} />
+                  <InlineSubtaskSection subtasks={mergedSubtasks} parentTasks={subtaskPanelParents} />
                 </div>
               ) : (
                 (isBootstrapping || isLoading) && (

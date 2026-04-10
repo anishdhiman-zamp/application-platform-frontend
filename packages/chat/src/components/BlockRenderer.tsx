@@ -363,6 +363,7 @@ export const BlockRenderer: React.FC<BlockRendererProps> = ({
               path: ref.path,
               name: ref.name,
             }))}
+            className='mb-2'
           />
         );
 

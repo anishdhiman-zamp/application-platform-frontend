@@ -654,6 +654,28 @@ export const useTaskNavigation = (taskId?: string, options?: UseTaskNavigationOp
     };
   }, [taskId, urlIndex, status, sseEventBus, handleTaskStatusNavigation]);
 
+  // Sync subtask status changes to the siblings URL param so it stays fresh on reload/navigation.
+  const handleSiblingsUrlSync = useCallback(() => {
+    if (liveSubtaskStatuses.size === 0 || allSiblings.length === 0) return;
+
+    const updated = allSiblings.map((s) => {
+      const freshStatus = liveSubtaskStatuses.get(s.id);
+
+      return freshStatus ? { ...s, status: freshStatus } : s;
+    });
+
+    if (JSON.stringify(updated) === JSON.stringify(allSiblings)) return;
+
+    const currentParams = new URLSearchParams(window.location.search);
+
+    currentParams.set(TASK_QUERY_PARAMS.SIBLINGS, JSON.stringify(updated));
+    replaceRoute(`${window.location.pathname}?${currentParams.toString()}`, { scroll: false });
+  }, [liveSubtaskStatuses, allSiblings, replaceRoute]);
+
+  useEffect(() => {
+    handleSiblingsUrlSync();
+  }, [handleSiblingsUrlSync]);
+
   if (isSiblingNav) {
     return {
       currentIndex: urlIndex,

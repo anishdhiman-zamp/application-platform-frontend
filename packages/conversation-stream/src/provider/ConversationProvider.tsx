@@ -257,16 +257,20 @@ export const ConversationProvider: React.FC<ConversationProviderProps> = ({
       };
 
       if (messagePayload?.message_content?.file_references?.length) {
+        const existingElements = (messagePayload.message_content.elements || []).map((el) => ({
+          ...el,
+          order: el.order + 1,
+        }));
         messagePayload.message_content.elements = [
-          ...(messagePayload.message_content.elements || []),
           {
-            id: 'element_2',
+            id: 'element_file_refs',
             type: BLOCK_TYPE.FILE_REFERENCES,
-            order: 2,
+            order: 0,
             payload: {
               file_references: messagePayload.message_content.file_references,
             },
           },
+          ...existingElements,
         ];
       }
 
@@ -322,15 +326,18 @@ export const ConversationProvider: React.FC<ConversationProviderProps> = ({
             message_content: {
               ...messagePayload.message_content,
               elements: [
-                ...(messagePayload.message_content.elements || []),
                 {
-                  id: 'element_2',
+                  id: 'element_file_refs',
                   type: BLOCK_TYPE.FILE_REFERENCES,
-                  order: 2,
+                  order: 0,
                   payload: {
                     file_references: messagePayload.message_content.file_references,
                   },
                 },
+                ...(messagePayload.message_content.elements || []).map((el) => ({
+                  ...el,
+                  order: el.order + 1,
+                })),
               ],
             },
           }
