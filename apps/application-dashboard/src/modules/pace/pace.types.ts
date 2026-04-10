@@ -28,6 +28,7 @@ export interface AnimatedIconProps {
 
 export interface PaceNavbarItemSchema {
   id: PaceNavbarItemId;
+  label: string;
   iconComponent: ComponentType<AnimatedIconProps & { ref?: React.Ref<AnimatedIconHandle> }>;
   path: string;
   featureFlag?: string;

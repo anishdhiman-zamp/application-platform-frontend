@@ -1,5 +1,5 @@
 import type { ConversationState } from '@zamp-platform/conversation-stream';
-import { AgentNavIcon, HomeIcon, LayoutGridIcon, RouteIcon, SettingsIcon } from '@zamp-platform/ui';
+import { ActivityIcon, AgentNavIcon, HomeIcon, LayoutGridIcon, SettingsIcon } from '@zamp-platform/ui';
 import { Database, Link2, Settings2, UserPen } from 'lucide-react';
 import {
   type BrowserViewerStateConfig,
@@ -75,27 +75,32 @@ export const FILES_PANEL_MAX_WIDTH = 700;
 export const PACE_NAVBAR_ITEMS: PaceNavbarItemSchema[] = [
   {
     id: PaceNavbarItemId.HOME,
+    label: 'Home',
     iconComponent: HomeIcon,
     path: ROUTES_PATH.CHAT,
   },
   {
     id: PaceNavbarItemId.TASKS,
-    iconComponent: RouteIcon,
+    label: 'Tasks',
+    iconComponent: ActivityIcon,
     path: ROUTES_PATH.CHAT_TASKS,
   },
   {
     id: PaceNavbarItemId.AGENTS,
+    label: 'Agents',
     iconComponent: AgentNavIcon,
     path: ROUTES_PATH.CHAT_AGENTS,
   },
   {
     id: PaceNavbarItemId.APPS,
+    label: 'Apps',
     iconComponent: LayoutGridIcon,
     path: ROUTES_PATH.CHAT_APPS,
     featureFlag: FEATURE_FLAGS.APPS,
   },
   {
     id: PaceNavbarItemId.SETTINGS,
+    label: 'Settings',
     iconComponent: SettingsIcon,
     path: ROUTES_PATH.CHAT_SETTINGS_PEOPLE,
   },
