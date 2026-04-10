@@ -76,17 +76,17 @@ const InlineSubtaskSection = ({ subtasks, parentTasks }: InlineSubtaskSectionPro
   return (
     <Accordion type='single' defaultValue='subtasks' collapsible>
       <AccordionItem value='subtasks' className='border-b-0'>
-        <AccordionTrigger className='cursor-pointer flex-row-reverse justify-end gap-1.5 py-0 font-normal [&>svg]:h-2 [&>svg]:w-2'>
+        <AccordionTrigger className='cursor-pointer flex-row-reverse justify-end gap-1.5 py-0 font-normal [&>svg]:h-3 [&>svg]:w-3'>
+          <span className='f-13-500 text-GRAY_900'>Sub-tasks</span>
           <div className='flex items-center gap-1.5'>
             <ProgressWheel completed={completedCount} total={totalCount} />
             <span className='f-12-450 text-GRAY_1000 tabular-nums'>
               {completedCount}/{totalCount}
             </span>
           </div>
-          <span className='f-13-500 text-GRAY_900'>Sub-tasks</span>
         </AccordionTrigger>
-        <AccordionContent className='pb-0'>
-          <div className='flex flex-col pt-1.5'>
+        <AccordionContent className='pt-2 pb-0'>
+          <div className='flex flex-col'>
             {subtasks.map((subtask) => {
               const nestedSubtasks = subtask.subtasks ?? [];
               const hasNested = nestedSubtasks.length > 0;
@@ -96,7 +96,7 @@ const InlineSubtaskSection = ({ subtasks, parentTasks }: InlineSubtaskSectionPro
                   key={subtask.id}
                   variant='ghost'
                   onClick={() => handleNavigate(subtask)}
-                  className='group flex h-10 w-full cursor-pointer items-center justify-start gap-2 rounded-md px-0 py-2.5'
+                  className='group flex h-10 w-full cursor-pointer items-center justify-start gap-2 rounded-md px-4 py-2.5'
                 >
                   <TaskStatusIcon status={subtask.status} />
                   <span className='f-13-450 text-GRAY_1000 min-w-0 flex-1 truncate text-left leading-[1.4]'>

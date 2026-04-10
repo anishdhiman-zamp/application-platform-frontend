@@ -24,7 +24,9 @@ import { motion } from 'motion/react';
 import { useRouter } from 'next/navigation';
 import { useGetAgentsListQuery, useGetAgentTriggersQuery, useUpdateAgentMutation } from '@/apis/agents';
 import ImageKitImage from '@/components/ImageKitImage';
+import { FEATURE_FLAGS } from '@/constants/featureFlags';
 import { ROUTES_PATH } from '@/constants/routeConfig';
+import { useFeatureFlag } from '@/hooks/useFeatureFlag';
 import { useAgentWithPolling } from '@/modules/pace/components/agents/hooks/useAgentWithPolling';
 import { useDynamicTabs } from '@/modules/pace/components/dynamic-tabs/useDynamicTabs';
 import TaskAccordionGroup from '@/modules/pace/components/tasks/components/TaskAccordionGroup';
@@ -43,6 +45,7 @@ const VALID_TABS = new Set<string>(Object.values(AGENT_DETAIL_TAB));
 
 const AgentDetailPage = ({ agentId, agentName, agentDescription = '', avatarKey = '' }: AgentDetailPageProps) => {
   const router = useRouter();
+  const { isEnabled: isAgentsFe } = useFeatureFlag(FEATURE_FLAGS.AGENTS_FE);
   const debounceTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 
   const { updateTab, getTabById } = useDynamicTabs({ type: TAB_TYPE.AGENT });
@@ -328,7 +331,7 @@ const AgentDetailPage = ({ agentId, agentName, agentDescription = '', avatarKey 
             onAddTrigger={handleAddNewTrigger}
             isAvatarHovered={isAvatarHovered}
           />
-          <ShareAgentPopup agentId={agentId} />
+          {isAgentsFe && <ShareAgentPopup agentId={agentId} />}
         </div>
 
         {isLoadingAgent && !editName ? (

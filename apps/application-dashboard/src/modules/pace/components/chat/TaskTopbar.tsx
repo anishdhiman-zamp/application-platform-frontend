@@ -25,17 +25,21 @@ const TaskTopbar: FC<TaskTopbarProps> = ({ className, title, status, isSubtask, 
   const displayTitle = title || 'Untitled';
 
   const handleBack = useCallback(() => {
-    if (isSubtask && parentTasks.length > 0) {
-      const lastParent = parentTasks[parentTasks.length - 1];
-      const ancestorsAbove = parentTasks.slice(0, -1);
+    if (isSubtask && parentTasks?.length > 0) {
+      const lastParent = parentTasks[parentTasks?.length - 1];
+      const ancestorsAbove = parentTasks?.slice(0, -1);
       const route = getChatTaskRoute({
-        taskId: lastParent.id,
-        taskTitle: lastParent.title,
-        parentTasks: ancestorsAbove.length > 0 ? ancestorsAbove : undefined,
+        taskId: lastParent?.id,
+        conversationId: lastParent?.conversationId,
+        taskTitle: lastParent?.title,
+        status: lastParent?.status,
+        currentIndex: lastParent?.currentIndex,
+        totalRows: lastParent?.totalRows,
+        parentTasks: ancestorsAbove?.length > 0 ? ancestorsAbove : undefined,
       });
 
       router.push(preserveSidebarParam(route));
-    } else if (referrer && referrer.startsWith('/')) {
+    } else if (referrer && referrer.startsWith(ROUTES_PATH.HOME)) {
       router.push(referrer);
     } else {
       router.push(preserveSidebarParam(ROUTES_PATH.CHAT_TASKS));
@@ -55,7 +59,7 @@ const TaskTopbar: FC<TaskTopbarProps> = ({ className, title, status, isSubtask, 
         ) : (
           <>
             <div
-              className='text-GRAY_700 hover:text-GRAY_1000 flex h-7 w-7 shrink-0 cursor-pointer items-center justify-center rounded'
+              className='text-GRAY_700 hover:text-GRAY_1000 hover:bg-GRAY_200 flex h-[26px] w-[26px] shrink-0 cursor-pointer items-center justify-center rounded-lg p-1'
               onClick={handleBack}
               aria-label='Go back'
               role='button'

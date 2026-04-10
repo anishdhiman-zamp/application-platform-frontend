@@ -89,7 +89,9 @@ const AgentToolsAccess = ({
   const [expandedConnections, setExpandedConnections] = useState<Set<string>>(new Set());
   const [isLoadingTools, setIsLoadingTools] = useState(false);
   const [removingIntegrationId, setRemovingIntegrationId] = useState<string | null>(null);
+  const [hasInitiallyLoaded, setHasInitiallyLoaded] = useState(false);
   const isInitialLoadRef = useRef(true);
+  const isFetchingToolsRef = useRef(false);
 
   // Map connectionId → resourceAudiencePolicyId from agent connections
   const rapIdMap = useMemo(() => {
@@ -321,10 +323,11 @@ const AgentToolsAccess = ({
         setIntegrations([]);
       }
 
-      // If both queries have resolved but there are no catalog items, stop loading
-      if (!isLoadingCatalog && !isLoadingAgentConnections) {
+      // Only mark as loaded when queries actually resolved (not when skipped with no data)
+      if (!isLoadingCatalog && !isLoadingAgentConnections && !shouldSkip) {
         setIsLoadingTools(false);
         isInitialLoadRef.current = false;
+        setHasInitiallyLoaded(true);
       }
 
       return;
@@ -343,13 +346,15 @@ const AgentToolsAccess = ({
       setIntegrations([]);
       setIsLoadingTools(false);
       isInitialLoadRef.current = false;
+      setHasInitiallyLoaded(true);
 
       return;
     }
 
-    if (isInitialLoadRef.current) {
-      setIsLoadingTools(true);
-    }
+    if (isFetchingToolsRef.current) return;
+
+    setIsLoadingTools(true);
+    isFetchingToolsRef.current = true;
 
     const fetchAll = async () => {
       // Fetch tools for each integration
@@ -463,10 +468,20 @@ const AgentToolsAccess = ({
 
       setIsLoadingTools(false);
       isInitialLoadRef.current = false;
+      isFetchingToolsRef.current = false;
+      setHasInitiallyLoaded(true);
     };
 
     fetchAll();
-  }, [catalogData, agentConnectionsData, fetchIntegrationTools, fetchToolPolicies]);
+  }, [
+    catalogData,
+    agentConnectionsData,
+    fetchIntegrationTools,
+    fetchToolPolicies,
+    shouldSkip,
+    isLoadingCatalog,
+    isLoadingAgentConnections,
+  ]);
 
   if (isCatalogError || isConnectionsError) {
     const handleRefetch = () => {
@@ -481,7 +496,7 @@ const AgentToolsAccess = ({
     );
   }
 
-  if (shouldSkip || isLoadingCatalog || isLoadingAgentConnections || isLoadingTools || isInitialLoadRef.current) {
+  if (shouldSkip || isLoadingCatalog || isLoadingAgentConnections || isLoadingTools || !hasInitiallyLoaded) {
     return (
       <div className='bg-BG_GRAY_2 flex h-full rounded-xl'>
         <div className='flex flex-2 flex-col gap-1 p-1.5'>
@@ -524,7 +539,7 @@ const AgentToolsAccess = ({
     );
   }
 
-  if (integrations.length === 0) {
+  if (integrations.length === 0 && hasInitiallyLoaded) {
     return (
       <AgentTabEmptyState
         agentAvatarSrc={agentAvatarSrc}

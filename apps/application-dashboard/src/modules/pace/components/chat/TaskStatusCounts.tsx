@@ -92,7 +92,7 @@ const TaskStatusCounts: FC<TaskStatusCountsProps> = ({
             ref={triggerRef}
             className='border-GRAY_400 bg-BG_GRAY_2 hover:bg-GRAY_200 flex w-fit cursor-pointer items-center gap-3 rounded-[8px] border p-2 transition-colors'
           >
-            {visiblePillStatuses.map((status) => (
+            {visiblePillStatuses?.map((status) => (
               <div key={status} className='flex items-center gap-1.5'>
                 <TaskStatusIcon status={status} />
                 <span className='f-13-450'>{counts[status]}</span>
@@ -129,28 +129,29 @@ const TaskStatusCounts: FC<TaskStatusCountsProps> = ({
             />
           </div>
 
-          <div className='flex-1 overflow-y-auto px-4 pt-4 pb-4 [scrollbar-width:thin]'>
-            <div className='flex flex-col'>
-              {sortedAndFilteredTasks.map((task) => (
-                <TaskBlock
-                  key={task.blockId}
-                  payload={{
-                    id: task.id,
-                    title: task.title,
-                    task_id: task.task_id,
-                    status: task.status,
-                  }}
-                  conversationId={conversationId}
-                  className='my-1!'
-                />
-              ))}
-              {sortedAndFilteredTasks.length === 0 && (
-                <div className='flex h-full items-center justify-center [&>div]:!min-h-0'>
-                  <ProcessEmptyState title='No tasks found' description='' />
-                </div>
-              )}
+          {sortedAndFilteredTasks?.length === 0 ? (
+            <div className='flex flex-1 items-center justify-center px-4 pb-4 [&>div]:!min-h-0'>
+              <ProcessEmptyState title='No tasks found' description='' />
             </div>
-          </div>
+          ) : (
+            <div className='flex-1 overflow-y-auto px-4 pt-4 pb-4 [scrollbar-width:thin]'>
+              <div className='flex flex-col'>
+                {sortedAndFilteredTasks.map((task) => (
+                  <TaskBlock
+                    key={task.blockId}
+                    payload={{
+                      id: task.id,
+                      title: task.title,
+                      task_id: task.task_id,
+                      status: task.status,
+                    }}
+                    conversationId={conversationId}
+                    className='my-1!'
+                  />
+                ))}
+              </div>
+            </div>
+          )}
         </PopoverContent>
       </Popover>
     </div>

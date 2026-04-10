@@ -46,6 +46,7 @@ export interface UseChatInputProps {
   isDisabled?: boolean;
   llmModel?: string | null;
   autoLoopEnabled?: boolean;
+  metadata?: Record<string, unknown>;
 }
 
 export interface UseChatInputReturn {
@@ -77,6 +78,7 @@ export const useChatInput = ({
   isDisabled,
   llmModel,
   autoLoopEnabled,
+  metadata,
 }: UseChatInputProps): UseChatInputReturn => {
   const prevConversationIdRef = useRef(conversationId);
   const currentUserName = adapter.getCurrentUserName();
@@ -209,7 +211,7 @@ export const useChatInput = ({
         currentUserName || '',
         fileReferences.length > 0 ? fileReferences.map((ref) => ({ path: ref.path, name: ref.name })) : undefined,
         llmModel,
-        undefined,
+        metadata,
         autoLoopEnabled,
       );
 

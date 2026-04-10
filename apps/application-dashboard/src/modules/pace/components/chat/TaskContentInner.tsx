@@ -1,21 +1,24 @@
 'use client';
 
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
-import type { ConversationSummary } from '@zamp-platform/chat';
 import {
+  BLOCK_TYPE,
   ChatActionsProvider,
+  ConversationSummary,
   MarkdownBlock,
   ResourceType,
   SenderType,
   SiblingTask,
   StreamingMessage,
   TASK_STATUS,
+  type TaskBlockType,
   TaskBreadcrumb,
+  TaskStatus,
   useDisplayedSummary,
   useStreamingState,
 } from '@zamp-platform/chat';
 import { TaskProvider, useTaskActions, useTaskState } from '@zamp-platform/conversation-stream';
-import { ScrollContainer, type ScrollContainerRef, ShimmerText } from '@zamp-platform/ui';
+import { ScrollContainer, type ScrollContainerRef, ShimmerText, Skeleton } from '@zamp-platform/ui';
 import { cn } from '@zamp-platform/ui/utils';
 import { useDynamicTabs } from 'modules/pace/components/dynamic-tabs/useDynamicTabs';
 import { useTaskNavigation } from 'modules/pace/hooks/useTaskNavigation';
@@ -88,6 +91,7 @@ const TaskContentChat = ({ taskId }: { taskId: string }) => {
     currentIndex,
     totalCount,
     status,
+    liveStatus,
     subtasks,
     hasNext,
     hasPrevious,
@@ -97,20 +101,79 @@ const TaskContentChat = ({ taskId }: { taskId: string }) => {
     goToPreviousTask,
   } = useTaskNavigation(taskId);
 
-  const subtaskPanelParents: TaskBreadcrumb[] = useMemo(
-    () => [...parentTasks, { id: taskId, title: chatTitle || urlTitle || 'Untitled', status: status ?? undefined }],
-    [parentTasks, taskId, chatTitle, urlTitle, status],
-  );
-
-  const siblingsMemo: SiblingTask[] = useMemo(
-    () => subtasks.map((subtask) => ({ id: subtask?.id, title: subtask?.title, status: subtask?.status })),
-    [subtasks],
-  );
-
   const { messages, isLoadingHistory, isErrorHistory, conversationData, inputsRequired, taskSummaryText } =
     useTaskState();
   const { refetchHistory } = useTaskActions();
   const streamingState = useStreamingState(taskId);
+
+  const taskStatus = (conversationData as Record<string, unknown> | undefined)?.status as string | undefined;
+
+  // Priority: SSE liveStatus (most real-time) > conversationData (server truth) > URL param (stale)
+  const effectiveStatus = (liveStatus as TaskStatus) ?? (taskStatus as TaskStatus) ?? status ?? undefined;
+
+  const conversationId = searchParams?.get('s') ?? undefined;
+
+  const subtaskPanelParents: TaskBreadcrumb[] = useMemo(
+    () => [
+      ...parentTasks,
+      {
+        id: taskId,
+        title: chatTitle || urlTitle || 'Untitled',
+        status: effectiveStatus,
+        currentIndex,
+        totalRows: totalCount,
+        conversationId,
+      },
+    ],
+    [parentTasks, taskId, chatTitle, urlTitle, effectiveStatus, currentIndex, totalCount, conversationId],
+  );
+
+  // Extract subtask info from messages and streaming to detect newly created subtasks
+  // before the task list API refetches (no BE event for subtask creation during streaming).
+  const mergedSubtasks = useMemo(() => {
+    const apiSubtaskIds = new Set(subtasks.map((s) => s?.id));
+    const streamingSubtasks: typeof subtasks = [];
+
+    // Scan messages for task blocks not in the API subtasks list
+    for (const msg of messages) {
+      for (const el of msg.message_content?.elements ?? []) {
+        if (el.type === BLOCK_TYPE.TASK) {
+          const taskBlock = el as TaskBlockType;
+          const payload = taskBlock?.payload ?? {};
+
+          if (!apiSubtaskIds.has(payload?.task_id)) {
+            streamingSubtasks.push({
+              id: payload?.task_id,
+              title: payload?.title,
+              status: (payload?.status as TaskStatus) ?? TASK_STATUS.IN_PROGRESS,
+            });
+          }
+        }
+      }
+    }
+
+    // Also check streaming state for task blocks
+    for (const el of streamingState?.message_content?.elements ?? []) {
+      if (el.type === BLOCK_TYPE.TASK) {
+        const payload = (el as TaskBlockType)?.payload ?? {};
+
+        if (!apiSubtaskIds.has(payload?.task_id) && !streamingSubtasks.some((s) => s?.id === payload?.task_id)) {
+          streamingSubtasks.push({
+            id: payload?.task_id,
+            title: payload?.title,
+            status: (payload?.status as TaskStatus) ?? TASK_STATUS.IN_PROGRESS,
+          });
+        }
+      }
+    }
+
+    return streamingSubtasks.length > 0 ? [...subtasks, ...streamingSubtasks] : subtasks;
+  }, [subtasks, messages, streamingState]);
+
+  const siblingsMemo: SiblingTask[] = useMemo(
+    () => mergedSubtasks.map((subtask) => ({ id: subtask?.id, title: subtask?.title, status: subtask?.status })),
+    [mergedSubtasks],
+  );
 
   useEffect(() => {
     const title = (conversationData as Record<string, unknown> | undefined)?.title as string | undefined;
@@ -125,15 +188,17 @@ const TaskContentChat = ({ taskId }: { taskId: string }) => {
 
   if (streamingState) hadStreamingRef.current = true;
 
+  // When navigating back to a previously visited task, RTK Query serves cached data
+  const hasCachedData = Boolean(conversationData);
   const isLoadingConversation =
-    Boolean(taskId && isLoadingHistory) || (!hasMessages && !streamingState && !hadStreamingRef.current);
+    Boolean(taskId && isLoadingHistory) ||
+    (!hasMessages && !streamingState && !hadStreamingRef.current && !hasCachedData);
 
   const { processedMessages, lastSummaryText } = useMemo(() => getProcessedMessages(messages), [messages]);
   const summary = (conversationData as Record<string, unknown> | undefined)?.summary as
     | ConversationSummary
     | null
     | undefined;
-  const taskStatus = (conversationData as Record<string, unknown> | undefined)?.status as string | undefined;
   const description = (conversationData as Record<string, unknown> | undefined)?.description as
     | string
     | null
@@ -205,7 +270,7 @@ const TaskContentChat = ({ taskId }: { taskId: string }) => {
         <TaskTopbar
           className='border-GRAY_100 border-b'
           title={chatTitle || 'Untitled'}
-          status={status ?? undefined}
+          status={effectiveStatus}
           isSubtask={isSubtask}
           parentTasks={parentTasks}
           navigationSlot={
@@ -338,10 +403,17 @@ const TaskContentChat = ({ taskId }: { taskId: string }) => {
               </div>
 
               {/* 3. Inline subtasks (toggleable) */}
-              {subtasks.length > 0 && (
+              {subtasks.length > 0 ? (
                 <div className='mt-[30px] px-2'>
                   <InlineSubtaskSection subtasks={subtasks} parentTasks={subtaskPanelParents} />
                 </div>
+              ) : (
+                (isBootstrapping || isLoading) && (
+                  <div className='mt-[30px] flex flex-col gap-3'>
+                    <Skeleton className='h-4 w-24' />
+                    <Skeleton className='h-10 w-full' />
+                  </div>
+                )
               )}
 
               <div className='bg-BG_WHITE h-12 w-full shrink-0' />

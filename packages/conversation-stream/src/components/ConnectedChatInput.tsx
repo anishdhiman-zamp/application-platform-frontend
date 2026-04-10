@@ -68,6 +68,7 @@ export interface ConnectedChatInputProps {
   voiceChatSlot?: React.ReactNode;
   hideRecordingButton?: boolean;
   hideStopButton?: boolean;
+  metadata?: Record<string, unknown>;
 }
 
 export const ConnectedChatInput = ({
@@ -106,6 +107,7 @@ export const ConnectedChatInput = ({
   voiceChatSlot,
   hideRecordingButton = false,
   hideStopButton = false,
+  metadata,
 }: ConnectedChatInputProps) => {
   const fileInputRef = useRef<HTMLInputElement>(null);
   const isRejectingRef = useRef(false);
@@ -174,6 +176,7 @@ export const ConnectedChatInput = ({
     isDisabled,
     llmModel,
     autoLoopEnabled,
+    metadata,
   });
 
   const handleTranscriptChunk = useCallback(

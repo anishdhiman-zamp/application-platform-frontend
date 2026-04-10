@@ -24,8 +24,12 @@ const TaskBreadcrumbNav = ({ currentTitle, currentStatus, parentTasks, onBack }:
     (parent: TaskBreadcrumbType, index: number) => {
       const ancestorsAbove = parentTasks?.slice(0, index);
       const taskRoute = getChatTaskRoute({
-        taskId: parent.id,
-        taskTitle: parent.title,
+        taskId: parent?.id,
+        conversationId: parent?.conversationId,
+        taskTitle: parent?.title,
+        status: parent?.status,
+        currentIndex: parent?.currentIndex,
+        totalRows: parent?.totalRows,
         parentTasks: ancestorsAbove?.length > 0 ? ancestorsAbove : undefined,
       });
 
@@ -40,8 +44,8 @@ const TaskBreadcrumbNav = ({ currentTitle, currentStatus, parentTasks, onBack }:
   const middleParents = parentTasks?.slice(1);
 
   return (
-    <div className='flex min-w-0 items-center gap-1'>
-      <Button variant='ghost' size='icon' onClick={onBack} className='h-6 w-6 shrink-0' aria-label='Go to parent task'>
+    <div className='flex h-7 min-w-0 items-center gap-1'>
+      <Button variant='ghost' size='icon' onClick={onBack} className='h-7 w-7 shrink-0' aria-label='Go to parent task'>
         <ArrowLeft size={16} className='text-GRAY_700' />
       </Button>
 

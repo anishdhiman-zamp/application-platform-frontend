@@ -41,8 +41,14 @@ const ChatSidebarContent = ({
   const { openTab } = useDynamicTabs({ type: TAB_TYPE.FILE });
   const { openTab: openTaskTab } = useDynamicTabs({ type: TAB_TYPE.TASK });
   const { openTab: openBrowserTab, updateTab: updateBrowserTab } = useDynamicTabs({ type: TAB_TYPE.BROWSER });
-  const { chatSidebarState, setChatSidebarState, setActiveAgentInfo, selectedModel, setSelectedModel } =
-    usePaceContext();
+  const {
+    chatSidebarState,
+    setChatSidebarState,
+    activeAgentInfo,
+    setActiveAgentInfo,
+    selectedModel,
+    setSelectedModel,
+  } = usePaceContext();
   const { inputValue, setInputValue } = useChatDraftInput({
     conversationId,
   });
@@ -184,6 +190,7 @@ const ChatSidebarContent = ({
             conversationId={conversationId ?? ''}
             isDisabled={isStreaming}
             addFileReferenceRef={addFileReferenceRef}
+            metadata={activeAgentInfo?.id ? { agent_id: activeAgentInfo.id } : undefined}
           />
         )}
       </div>

@@ -498,6 +498,10 @@ export interface TaskBreadcrumb {
   id: string;
   title: string;
   status?: string;
+  /** Preserved navigation context so back-navigation skips the bootstrap API calls */
+  currentIndex?: number;
+  totalRows?: number;
+  conversationId?: string;
 }
 
 /** Sibling task entry for subtask pagination */

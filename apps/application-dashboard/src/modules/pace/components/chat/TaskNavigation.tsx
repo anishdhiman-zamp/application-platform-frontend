@@ -49,7 +49,7 @@ const TaskNavigation = memo(
             size={26}
             className={cn(
               'text-GRAY_900 mr-1.5 rounded-lg p-1 transition-opacity',
-              isLoading || !hasNext ? 'cursor-not-allowed! opacity-50' : 'cursor-pointer',
+              isLoading || !hasNext ? 'cursor-not-allowed opacity-50' : 'hover:bg-GRAY_200 cursor-pointer',
             )}
             onClick={() => {
               if (isLoading || !hasNext) return;
@@ -64,7 +64,7 @@ const TaskNavigation = memo(
             size={26}
             className={cn(
               'text-GRAY_900 rounded-lg p-1 transition-opacity',
-              isLoading || !hasPrevious ? 'cursor-not-allowed! opacity-50' : 'cursor-pointer',
+              isLoading || !hasPrevious ? 'cursor-not-allowed opacity-50' : 'hover:bg-GRAY_200 cursor-pointer',
             )}
             onClick={() => {
               if (isLoading || !hasPrevious) return;

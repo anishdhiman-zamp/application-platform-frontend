@@ -173,7 +173,12 @@ const TaskAccordionGroup = ({
       loader={<TaskListingSkeleton />}
       isNoData={!isFetching && !skipFetch && visibleStatuses.length === 0}
       noDataBanner={<NoDataBanner search={search} />}
-      className={cn('flex min-h-0 flex-1 flex-col', agentId && 'border-GRAY_400 rounded-xl border')}
+      className={cn(
+        'flex min-h-0 flex-col',
+        agentId
+          ? ['border-GRAY_400 overflow-hidden rounded-xl border', visibleStatuses.length === 0 && 'flex-1']
+          : 'flex-1',
+      )}
       disableAnimation
     >
       <Accordion

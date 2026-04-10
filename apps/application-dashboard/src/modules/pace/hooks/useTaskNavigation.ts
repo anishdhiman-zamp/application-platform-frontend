@@ -72,24 +72,21 @@ export const useTaskNavigation = (taskId?: string, options?: UseTaskNavigationOp
     Object.keys(sourceParams).length > 0 ? sourceParams : undefined,
     {
       skip: urlIndex === -1 || !status,
+      refetchOnMountOrArgChange: false,
     },
   );
 
   const [isBootstrapping, setIsBootstrapping] = useState(false);
   const [liveStatus, setLiveStatus] = useState<TaskStatus | null>(null);
+  const [liveSubtaskStatuses, setLiveSubtaskStatuses] = useState<Map<string, TaskStatus>>(new Map());
 
   useEffect(() => {
     setLiveStatus(null);
+    setLiveSubtaskStatuses(new Map());
   }, [taskId]);
 
-  useEffect(() => {
-    if (urlIndex !== -1 || !taskId) return;
-
-    let cancelled = false;
-
-    setIsBootstrapping(true);
-
-    const bootstrap = async () => {
+  const handleBootstrap = useCallback(
+    async (bootstrapTaskId: string, signal: { cancelled: boolean }) => {
       let found = false;
 
       try {
@@ -97,23 +94,23 @@ export const useTaskNavigation = (taskId?: string, options?: UseTaskNavigationOp
           Object.keys(sourceParams).length > 0 ? sourceParams : undefined,
         );
 
-        if (!counts || cancelled) return;
+        if (!counts || signal.cancelled) return;
 
         const currentParams = new URLSearchParams(window.location.search);
         const urlTitle = currentParams.get('title') ?? undefined;
         const urlConversationId = currentParams.get('s') ?? undefined;
 
         for (const { status: s, count } of counts.counts) {
-          if (count === 0 || cancelled) continue;
+          if (count === 0 || signal.cancelled) continue;
 
           const totalPages = Math.ceil(count / TASKS_PAGE_SIZE);
 
-          for (let page = 1; page <= totalPages && !cancelled; page++) {
+          for (let page = 1; page <= totalPages && !signal.cancelled; page++) {
             const { data } = await triggerFetchPage({ status: s, page, limit: TASKS_PAGE_SIZE, ...sourceParams });
 
-            if (cancelled) return;
+            if (signal.cancelled) return;
 
-            const idxInPage = data?.tasks?.findIndex((t) => t.id === taskId) ?? -1;
+            const idxInPage = data?.tasks?.findIndex((t) => t.id === bootstrapTaskId) ?? -1;
 
             if (idxInPage !== -1) {
               const absoluteIndex = (page - 1) * TASKS_PAGE_SIZE + idxInPage;
@@ -122,7 +119,7 @@ export const useTaskNavigation = (taskId?: string, options?: UseTaskNavigationOp
 
               replaceRoute(
                 getChatTaskRoute({
-                  taskId,
+                  taskId: bootstrapTaskId,
                   conversationId: urlConversationId,
                   taskTitle: urlTitle,
                   status: s,
@@ -138,18 +135,25 @@ export const useTaskNavigation = (taskId?: string, options?: UseTaskNavigationOp
       } catch (err) {
         captureException(err);
       } finally {
-        if (!found && !cancelled) setIsBootstrapping(false);
+        if (!found && !signal.cancelled) setIsBootstrapping(false);
       }
-    };
+    },
+    [triggerFetchCounts, triggerFetchPage, sourceParams, replaceRoute],
+  );
 
-    bootstrap();
+  useEffect(() => {
+    if (urlIndex !== -1 || !taskId) return;
+
+    const signal = { cancelled: false };
+
+    setIsBootstrapping(true);
+    handleBootstrap(taskId, signal);
 
     return () => {
-      cancelled = true;
+      signal.cancelled = true;
       setIsBootstrapping(false);
     };
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [taskId, urlIndex]);
+  }, [taskId, urlIndex, handleBootstrap]);
 
   const liveTotal = useMemo(() => {
     if (!status || !countsData) return undefined;
@@ -237,29 +241,25 @@ export const useTaskNavigation = (taskId?: string, options?: UseTaskNavigationOp
     [status, triggerFetchPage, sourceParams],
   );
 
-  useEffect(() => {
-    if (liveTotal === undefined || liveTotal === urlTotal || urlIndex === -1) return;
+  // Sync liveStatus to URL param so reloads preserve the correct status.
+  const handleUrlStatusSync = useCallback(() => {
+    if (!liveStatus || !status || liveStatus === status) return;
 
-    const params = new URLSearchParams(window.location.search);
+    const currentParams = new URLSearchParams(window.location.search);
 
-    params.set('totalRows', String(liveTotal));
-    replaceRoute(`${window.location.pathname}?${params.toString()}`, { scroll: false });
-  }, [liveTotal, urlTotal, urlIndex, router]);
+    currentParams.set('status', liveStatus);
+    replaceRoute(`${window.location.pathname}?${currentParams.toString()}`, { scroll: false });
+  }, [liveStatus, status, replaceRoute]);
 
-  useEffect(() => {
-    if (urlIndex === -1 || !taskId || !status) return;
-
-    let cancelled = false;
-
-    const handleTaskStatusChange = async (data: BaseEventPayload) => {
+  // When we have list-navigation context, also update the task's position
+  // within the new status list after a status change.
+  const handleTaskStatusNavigation = useCallback(
+    async (data: BaseEventPayload, signal: { cancelled: boolean }) => {
       const payload = data.payload as MapAny;
       const updatedTaskId = payload?.task_id as string;
       const newStatus = (payload?.updated_fields as MapAny)?.status as TaskStatus | undefined;
 
       if (updatedTaskId !== taskIdRef.current || !newStatus) return;
-
-      setLiveStatus(newStatus);
-
       if (newStatus === statusRef.current) return;
 
       try {
@@ -267,18 +267,16 @@ export const useTaskNavigation = (taskId?: string, options?: UseTaskNavigationOp
           Object.keys(sourceParams).length > 0 ? sourceParams : undefined,
         );
 
-        if (cancelled) return;
+        if (signal.cancelled) return;
 
         const newStatusCount = freshCounts?.counts.find((c) => c.status === newStatus)?.count ?? 0;
 
-        // Do not navigate if count is stale
         if (newStatusCount === 0) return;
 
-        // Find the task's position within the new status list
         let foundIndex: number | undefined = undefined;
         const totalPages = Math.ceil(newStatusCount / TASKS_PAGE_SIZE);
 
-        for (let page = 1; page <= totalPages && !cancelled; page++) {
+        for (let page = 1; page <= totalPages && !signal.cancelled; page++) {
           const { data: pageData } = await triggerFetchPage({
             status: newStatus,
             page,
@@ -286,7 +284,7 @@ export const useTaskNavigation = (taskId?: string, options?: UseTaskNavigationOp
             ...sourceParams,
           });
 
-          if (cancelled) return;
+          if (signal.cancelled) return;
 
           const idxInPage = pageData?.tasks?.findIndex((t) => t.id === taskIdRef.current) ?? -1;
 
@@ -296,7 +294,7 @@ export const useTaskNavigation = (taskId?: string, options?: UseTaskNavigationOp
           }
         }
 
-        if (cancelled || foundIndex === undefined) return;
+        if (signal.cancelled || foundIndex === undefined) return;
 
         const currentParams = new URLSearchParams(window.location.search);
         const urlTitle = currentParams.get('title') ?? undefined;
@@ -314,16 +312,9 @@ export const useTaskNavigation = (taskId?: string, options?: UseTaskNavigationOp
       } catch (err) {
         captureException(err);
       }
-    };
-
-    const sub = sseEventBus.subscribe(EVENT_TYPE.TASK_UPDATE, handleTaskStatusChange);
-
-    return () => {
-      cancelled = true;
-      sub.unsubscribe();
-    };
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [taskId, urlIndex, status]);
+    },
+    [triggerFetchCounts, triggerFetchPage, sourceParams, replaceRoute],
+  );
 
   const navigateToTask = useCallback(
     async (direction: 'next' | 'previous') => {
@@ -427,6 +418,19 @@ export const useTaskNavigation = (taskId?: string, options?: UseTaskNavigationOp
   );
 
   const currentTask = useMemo(() => initialData?.tasks?.find((t) => t.id === taskId), [initialData, taskId]);
+
+  // Merge SSE-updated subtask statuses with the API data
+  const liveSubtasks = useMemo(() => {
+    const base = currentTask?.subtasks ?? [];
+
+    if (liveSubtaskStatuses.size === 0) return base;
+
+    return base.map((s) => {
+      const updatedStatus = liveSubtaskStatuses.get(s.id);
+
+      return updatedStatus ? { ...s, status: updatedStatus } : s;
+    });
+  }, [currentTask?.subtasks, liveSubtaskStatuses]);
 
   const allSiblings: SiblingTask[] = useMemo(() => {
     const raw = searchParams?.get(TASK_QUERY_PARAMS.SIBLINGS);
@@ -590,12 +594,73 @@ export const useTaskNavigation = (taskId?: string, options?: UseTaskNavigationOp
     ],
   );
 
+  useEffect(() => {
+    if (liveTotal === undefined || liveTotal === urlTotal || urlIndex === -1) return;
+
+    const params = new URLSearchParams(window.location.search);
+
+    params.set('totalRows', String(liveTotal));
+    replaceRoute(`${window.location.pathname}?${params.toString()}`, { scroll: false });
+  }, [liveTotal, urlTotal, urlIndex, router]);
+
+  // Subscribe to SSE task updates for the current task and its subtasks.
+  useEffect(() => {
+    if (!taskId) return;
+
+    const handleLiveStatusUpdate = (data: BaseEventPayload) => {
+      const payload = data.payload as MapAny;
+      const updatedTaskId = payload?.task_id as string;
+      const newStatus = (payload?.updated_fields as MapAny)?.status as TaskStatus | undefined;
+
+      if (!updatedTaskId || !newStatus) return;
+
+      if (updatedTaskId === taskIdRef.current) {
+        setLiveStatus(newStatus);
+
+        return;
+      }
+
+      // Update subtask status in the live map
+      setLiveSubtaskStatuses((prev) => {
+        const next = new Map(prev);
+
+        next.set(updatedTaskId, newStatus);
+
+        return next;
+      });
+    };
+
+    const sub = sseEventBus.subscribe(EVENT_TYPE.TASK_UPDATE, handleLiveStatusUpdate);
+
+    return () => sub.unsubscribe();
+  }, [taskId, sseEventBus]);
+
+  useEffect(() => {
+    handleUrlStatusSync();
+  }, [handleUrlStatusSync]);
+
+  useEffect(() => {
+    if (urlIndex === -1 || !taskId || !status) return;
+
+    const signal = { cancelled: false };
+
+    const sub = sseEventBus.subscribe(EVENT_TYPE.TASK_UPDATE, (data: BaseEventPayload) => {
+      handleTaskStatusNavigation(data, signal);
+    });
+
+    return () => {
+      signal.cancelled = true;
+      sub.unsubscribe();
+    };
+  }, [taskId, urlIndex, status, sseEventBus, handleTaskStatusNavigation]);
+
   if (isSiblingNav) {
     return {
       currentIndex: urlIndex,
       totalCount: statusSiblings.length,
       status: liveStatus ?? status,
-      subtasks: currentTask?.subtasks ?? [],
+      liveStatus,
+      subtasks: liveSubtasks,
       hasNext: urlIndex < statusSiblings.length - 1 || !!siblingNextStatus,
       hasPrevious: urlIndex > 0 || !!siblingPrevStatus,
       isLoading: false,
@@ -609,7 +674,8 @@ export const useTaskNavigation = (taskId?: string, options?: UseTaskNavigationOp
     currentIndex: urlIndex,
     totalCount: effectiveTotal,
     status: liveStatus ?? status,
-    subtasks: currentTask?.subtasks ?? [],
+    liveStatus,
+    subtasks: liveSubtasks,
     hasNext: urlIndex !== -1 && (urlIndex < effectiveTotal - 1 || !!nextStatus || isCountsLoading),
     hasPrevious: urlIndex > 0 || (urlIndex === 0 && (!!previousStatus || isCountsLoading)),
     isLoading: isInitialLoading || isLoadingOtherPage,

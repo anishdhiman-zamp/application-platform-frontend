@@ -57,17 +57,15 @@ const PaceNavbar = () => {
   } = usePaceContext();
   const { isOnAnyDynamicTab } = useDynamicTabs();
   const { isEnabled: isAppsEnabled } = useFeatureFlag(FEATURE_FLAGS.APPS);
-  const { isEnabled: isAgentsFe } = useFeatureFlag(FEATURE_FLAGS.AGENTS_FE);
 
   const visibleNavItems = useMemo(
     () =>
       PACE_NAVBAR_ITEMS.filter((item) => {
         if (item.featureFlag === FEATURE_FLAGS.APPS && !isAppsEnabled) return false;
-        if (item.id === PaceNavbarItemId.AGENTS && !isAgentsFe) return false;
 
         return true;
       }),
-    [isAppsEnabled, isAgentsFe],
+    [isAppsEnabled],
   );
 
   const chatIconRef = useRef<AnimatedIconHandle>(null);

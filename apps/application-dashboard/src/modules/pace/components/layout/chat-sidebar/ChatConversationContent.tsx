@@ -35,7 +35,7 @@ import { buildTabRoute } from '@/modules/pace/components/dynamic-tabs/tab-type-r
 import { useDynamicTabs } from '@/modules/pace/components/dynamic-tabs/useDynamicTabs';
 import ChatMessagesSkeleton from '@/modules/pace/components/loaders/ChatMessagesSkeleton';
 import { type ActiveAgentInfo, usePaceContext } from '@/modules/pace/pace.context';
-import { TAB_TYPE } from '@/modules/pace/pace.types';
+import { CHAT_SIDEBAR_STATE, TAB_TYPE } from '@/modules/pace/pace.types';
 import { preserveSidebarParam } from '@/modules/pace/pace.utils';
 import { addAutoLoopLockedConversation } from '@/modules/pace/utils/autoLoopStorage';
 import { baseApi } from '@/services/baseApi';
@@ -81,6 +81,7 @@ const ChatConversationContent = ({
     activeAgentInfo,
     setActiveAgentInfo,
     startNewChat,
+    setChatSidebarState,
   } = usePaceContext();
 
   const { openTab } = useDynamicTabs({ type: TAB_TYPE.AGENT });
@@ -194,10 +195,11 @@ const ChatConversationContent = ({
       if (agentDescription && agentDescription !== 'None') metadata.description = agentDescription;
       if (avatarKey) metadata.avatarKey = avatarKey;
 
+      setChatSidebarState(CHAT_SIDEBAR_STATE.SIDEBAR);
       openTab(agentId, agentName, Object.keys(metadata).length > 0 ? metadata : undefined);
       router.push(preserveSidebarParam(cleanPath));
     },
-    [openTab, router],
+    [openTab, router, setChatSidebarState],
   );
 
   const handleAgentTest = useCallback(
@@ -255,6 +257,7 @@ const ChatConversationContent = ({
         currentUserName,
         chatMessageIntent.fileReferences,
         chatMessageIntent.llmModel,
+        chatMessageIntent.metadata,
       );
 
       setChatMessageIntent(null);

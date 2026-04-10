@@ -118,7 +118,7 @@ const AgentTestCard: FC<AgentTestCardProps> = ({
           isLoading={isLoadingTriggers}
           disabled={disabled}
           tabIndex={-1}
-          className='ml-2 h-7 shrink-0 rounded-lg px-3 text-xs'
+          className='visibility-hidden ml-2 h-7 shrink-0 rounded-lg px-3 text-xs'
           onClick={handleTestClick}
         >
           Test
