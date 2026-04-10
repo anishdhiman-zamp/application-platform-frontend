@@ -227,6 +227,10 @@ export const TaskProvider = ({ children, taskId, organizationId, resourceType, a
   useEffect(() => {
     if (!taskHistory) return;
 
+    if (!taskSummaryText && taskHistory?.conversation?.summary?.live_summary) {
+      setTaskSummaryText(taskHistory?.conversation?.summary?.live_summary);
+    }
+
     if (taskHistory?.messages?.length > 0) {
       const historyMessages: ChatMessage[] = getHistoryFormattedMessages(taskHistory);
 

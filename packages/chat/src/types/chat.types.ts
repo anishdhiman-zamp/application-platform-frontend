@@ -240,6 +240,7 @@ export interface ConversationSummaryStepGroup {
 export interface ConversationSummary {
   status: SummaryStatus;
   content?: string;
+  live_summary?: string;
   live_lines?: string[];
   generated_at?: string;
   updated_at?: string;

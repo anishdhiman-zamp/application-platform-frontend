@@ -18,6 +18,8 @@ export function useDisplayedSummary({
 }: UseDisplayedSummaryParams) {
   const prevIsAgentActiveRef = useRef(isAgentActive);
   const prevTaskStatusRef = useRef(taskStatus);
+  const streamingSummaryTextRef = useRef(streamingSummaryText);
+  streamingSummaryTextRef.current = streamingSummaryText;
   const targetTextRef = useRef('');
   const revealedCountRef = useRef(0);
   const animationRef = useRef<ReturnType<typeof setInterval> | null>(null);
@@ -72,9 +74,10 @@ export function useDisplayedSummary({
     setDisplayedText('');
   }, [taskId, stopAnimation]);
 
-  // Clear summary when a new stream begins (isAgentActive: false → true)
+  // Clear summary when a new stream begins (isAgentActive: false → true),
+  // but skip if we already have streaming text (reconnection after reload).
   useEffect(() => {
-    if (isAgentActive && !prevIsAgentActiveRef.current) {
+    if (isAgentActive && !prevIsAgentActiveRef.current && !streamingSummaryTextRef.current) {
       stopAnimation();
       targetTextRef.current = '';
       revealedCountRef.current = 0;
