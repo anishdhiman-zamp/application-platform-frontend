@@ -9,65 +9,59 @@ type PendingResolve = {
   reject: (reason: Error) => void;
 };
 
+declare let __webpack_public_path__: string;
+
 export function useSpreadsheetWorker() {
   const workerRef = useRef<Worker | null>(null);
   const pendingRef = useRef<Map<number, PendingResolve>>(new Map());
   const idCounter = useRef(0);
 
   useEffect(() => {
-    let objectUrl: string | null = null;
+    // When assetPrefix points to a CDN (e.g. CloudFront on AWS), webpack resolves
+    // the worker URL to a cross-origin CDN URL. Browsers block cross-origin worker
+    // construction with a SecurityError. Temporarily override __webpack_public_path__
+    // to "/" so the worker script is loaded from the app's own origin instead.
+    // __webpack_public_path__ only exists in webpack builds, not in Turbopack (dev).
+    const hasWebpackPublicPath = typeof __webpack_public_path__ !== 'undefined';
+    let originalPublicPath: string | undefined;
 
-    const initWorker = () => {
-      const workerUrl = new URL('./spreadsheet.worker.ts', import.meta.url).toString();
-      let worker: Worker;
+    if (hasWebpackPublicPath) {
+      originalPublicPath = __webpack_public_path__;
+      __webpack_public_path__ = '/';
+    }
 
-      const isCrossOrigin = new URL(workerUrl).origin !== window.location.origin;
+    const worker = new Worker(new URL('./spreadsheet.worker.ts', import.meta.url));
 
-      if (isCrossOrigin) {
-        // When assets are served from a CDN (e.g. CloudFront on AWS), browsers
-        // block `new Worker(crossOriginUrl)` with a SecurityError.
-        // The workaround: create a same-origin blob that uses importScripts() to
-        // load the actual worker script. Classic workers can importScripts() from
-        // cross-origin URLs freely (no same-origin restriction applies there).
-        const bootstrap = `importScripts(${JSON.stringify(workerUrl)});`;
-        const blob = new Blob([bootstrap], { type: 'text/javascript' });
+    if (hasWebpackPublicPath) {
+      __webpack_public_path__ = originalPublicPath!;
+    }
 
-        objectUrl = URL.createObjectURL(blob);
-        worker = new Worker(objectUrl);
+    worker.onmessage = (e: MessageEvent<WorkerResponse>) => {
+      const { id, type, payload, error } = e.data;
+      const pending = pendingRef.current.get(id);
+
+      if (!pending) return;
+
+      pendingRef.current.delete(id);
+
+      if (type === 'error') {
+        pending.reject(new Error(error ?? 'Worker error'));
       } else {
-        worker = new Worker(workerUrl);
+        pending.resolve(payload);
       }
-
-      worker.onmessage = (e: MessageEvent<WorkerResponse>) => {
-        const { id, type, payload, error } = e.data;
-        const pending = pendingRef.current.get(id);
-
-        if (!pending) return;
-
-        pendingRef.current.delete(id);
-
-        if (type === 'error') {
-          pending.reject(new Error(error ?? 'Worker error'));
-        } else {
-          pending.resolve(payload);
-        }
-      };
-
-      worker.onerror = () => {
-        pendingRef.current.forEach(({ reject }) => reject(new Error('Worker crashed')));
-        pendingRef.current.clear();
-        workerRef.current = null;
-      };
-
-      workerRef.current = worker;
     };
 
-    initWorker();
+    worker.onerror = () => {
+      pendingRef.current.forEach(({ reject }) => reject(new Error('Worker crashed')));
+      pendingRef.current.clear();
+      workerRef.current = null;
+    };
+
+    workerRef.current = worker;
 
     return () => {
-      workerRef.current?.terminate();
+      worker.terminate();
       workerRef.current = null;
-      if (objectUrl) URL.revokeObjectURL(objectUrl);
       pendingRef.current.forEach(({ reject }) => reject(new Error('Worker terminated')));
       pendingRef.current.clear();
     };
