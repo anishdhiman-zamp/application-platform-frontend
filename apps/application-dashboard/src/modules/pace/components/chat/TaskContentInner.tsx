@@ -18,7 +18,7 @@ import {
   useStreamingState,
 } from '@zamp-platform/chat';
 import { TaskProvider, useTaskActions, useTaskState } from '@zamp-platform/conversation-stream';
-import { ScrollContainer, type ScrollContainerRef, ShimmerText, Skeleton } from '@zamp-platform/ui';
+import { ScrollContainer, type ScrollContainerRef, ShimmerText } from '@zamp-platform/ui';
 import { cn } from '@zamp-platform/ui/utils';
 import { useDynamicTabs } from 'modules/pace/components/dynamic-tabs/useDynamicTabs';
 import { useTaskNavigation } from 'modules/pace/hooks/useTaskNavigation';
@@ -413,17 +413,10 @@ const TaskContentChat = ({ taskId }: { taskId: string }) => {
               </div>
 
               {/* 3. Inline subtasks (toggleable) */}
-              {mergedSubtasks.length > 0 ? (
+              {mergedSubtasks.length > 0 && (
                 <div className='mt-[30px] px-2'>
                   <InlineSubtaskSection subtasks={mergedSubtasks} parentTasks={subtaskPanelParents} />
                 </div>
-              ) : (
-                (isBootstrapping || isLoading) && (
-                  <div className='mt-[30px] flex flex-col gap-3'>
-                    <Skeleton className='h-4 w-24' />
-                    <Skeleton className='h-10 w-full' />
-                  </div>
-                )
               )}
 
               <div className='bg-BG_WHITE h-12 w-full shrink-0' />
