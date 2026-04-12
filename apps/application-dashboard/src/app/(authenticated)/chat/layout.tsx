@@ -41,7 +41,7 @@ const PaceLayout: FC<PaceLayoutProps> = ({ children }) => {
       disableAnimation
     >
       {!isPaceChatEnabled ? (
-        <NotFound />
+        <NotFound showOrgSwitcher />
       ) : (
         <PaceProvider>
           <FileViewerProvider>
