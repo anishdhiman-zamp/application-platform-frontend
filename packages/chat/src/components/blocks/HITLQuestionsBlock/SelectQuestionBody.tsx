@@ -18,7 +18,7 @@ interface SelectQuestionBodyProps {
   selectedOptionIds: string[];
   customInputValue: string;
   customInputRef: React.RefObject<HTMLTextAreaElement | null>;
-  onOptionClick: (optionId: string) => void;
+  onOptionClick: (optionId: string, optIndex: number) => void;
   onCustomInputClick: () => void;
   onCustomInputChange: (value: string) => void;
 }
@@ -48,7 +48,7 @@ export const SelectQuestionBody = ({
           isSelected={selectedOptionIds.includes(option.id)}
           isMultiSelect={isMultiSelect ?? false}
           singleSelectBadge={isMultiSelect ? undefined : getSingleSelectBadge(optIndex)}
-          onClick={() => onOptionClick(option.id)}
+          onClick={() => onOptionClick(option.id, optIndex)}
         />
       ))}
 
