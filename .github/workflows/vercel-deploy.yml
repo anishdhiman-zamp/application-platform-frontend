@@ -39,6 +39,13 @@ jobs:
       - name: Build Project Artifacts
         run: vercel build ${{ github.ref == 'refs/heads/main' && '--prod' || '' }} --token=${{ secrets.VERCEL_TOKEN }}
 
+      - name: Upload build artifacts
+        uses: actions/upload-artifact@v4
+        with:
+          name: vercel-output
+          path: .vercel/output
+          retention-days: 1
+
   deploy:
     name: Deploy to Vercel
     needs: build
@@ -63,8 +70,11 @@ jobs:
       - name: Pull Vercel Environment Information
         run: vercel pull --yes --environment=${{ github.ref == 'refs/heads/main' && 'production' || 'preview' }} --token=${{ secrets.VERCEL_TOKEN }}
 
-      - name: Build Project Artifacts
-        run: vercel build ${{ github.ref == 'refs/heads/main' && '--prod' || '' }} --token=${{ secrets.VERCEL_TOKEN }}
+      - name: Download build artifacts
+        uses: actions/download-artifact@v4
+        with:
+          name: vercel-output
+          path: .vercel/output
 
       - name: Deploy to Vercel
         id: deploy
@@ -117,7 +127,7 @@ jobs:
       - build
       - deploy
     steps:
-      - uses: technote-space/workflow-conclusion-action@v3
+      - uses: technote-space/workflow-conclusion-action@d71f73f4372b09a3e1ac62a14db1ea5a9f9c56f8 # v3
       - name: Update slack message body
         id: body
         run: |
@@ -128,9 +138,9 @@ jobs:
             echo "SLACK_MESSAGE=Vercel Build Failed :x: | Branch: ${{ github.ref_name }} | Deployment stopped" >> $GITHUB_OUTPUT
           elif [ "$DEPLOY_RESULT" == 'failure' ]; then
             echo "SLACK_MESSAGE=Vercel Deploy Failed :x: | Branch: ${{ github.ref_name }} | Build passed but deployment failed" >> $GITHUB_OUTPUT
-          elif [ '${{ env.WORKFLOW_CONCLUSION }}' == 'success' ]; then
+          elif [ "${{ env.WORKFLOW_CONCLUSION }}" == 'success' ]; then
             echo "SLACK_MESSAGE=Vercel Deployment Success :white_check_mark: | Branch: ${{ github.ref_name }}" >> $GITHUB_OUTPUT
-          elif [ '${{ env.WORKFLOW_CONCLUSION }}' == 'cancelled' ]; then
+          elif [ "${{ env.WORKFLOW_CONCLUSION }}" == 'cancelled' ]; then
             echo "SLACK_MESSAGE=Vercel Deployment Cancelled :grey_exclamation: | Branch: ${{ github.ref_name }}" >> $GITHUB_OUTPUT
           else
             echo "SLACK_MESSAGE=Vercel Deployment Failed :x: | Branch: ${{ github.ref_name }}" >> $GITHUB_OUTPUT
