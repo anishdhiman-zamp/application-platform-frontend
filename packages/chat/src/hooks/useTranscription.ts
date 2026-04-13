@@ -1,6 +1,6 @@
 'use client';
 
-import { useCallback, useRef, useState } from 'react';
+import { useCallback, useEffect, useRef, useState } from 'react';
 
 import {
   SOCKET_STATES,
@@ -23,6 +23,9 @@ const DEFAULT_OPTIONS: TranscriptionOptions = {
   includeTimestamps: false,
 };
 
+/** Auto-stop recording after this many ms of silence once speech has been detected */
+const INACTIVITY_TIMEOUT_MS = 3000;
+
 const noopGetToken = async () => '';
 
 /**
@@ -37,10 +40,15 @@ export const useTranscription = ({ adapter, onTranscriptChunk }: UseTranscriptio
     stopRequested: false,
   });
 
+  const inactivityTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const stopRecordingRef = useRef<() => void | Promise<void>>(() => {});
+  const resetInactivityTimerRef = useRef<() => void>(() => {});
+
   const appendTranscript = useCallback(
     (data: { text: string }) => {
       if (data.text) {
         onTranscriptChunk?.(data.text);
+        resetInactivityTimerRef.current();
       }
     },
     [onTranscriptChunk],
@@ -95,6 +103,11 @@ export const useTranscription = ({ adapter, onTranscriptChunk }: UseTranscriptio
     stateRefs.current.isStarting = false;
     setIsRecording(false);
 
+    if (inactivityTimerRef.current) {
+      clearTimeout(inactivityTimerRef.current);
+      inactivityTimerRef.current = null;
+    }
+
     try {
       cleanupMicrophone();
       await disconnectFromElevenLabs();
@@ -102,6 +115,37 @@ export const useTranscription = ({ adapter, onTranscriptChunk }: UseTranscriptio
       // Expected when cancelling in-progress connection
     }
   }, [cleanupMicrophone, disconnectFromElevenLabs]);
+
+  useEffect(() => {
+    stopRecordingRef.current = stopRecording;
+  }, [stopRecording]);
+
+  const resetInactivityTimer = useCallback(() => {
+    if (inactivityTimerRef.current) {
+      clearTimeout(inactivityTimerRef.current);
+      inactivityTimerRef.current = null;
+    }
+
+    if (isRecording) {
+      inactivityTimerRef.current = setTimeout(() => {
+        stopRecordingRef.current();
+      }, INACTIVITY_TIMEOUT_MS);
+    }
+  }, [isRecording]);
+
+  useEffect(() => {
+    resetInactivityTimerRef.current = resetInactivityTimer;
+  }, [resetInactivityTimer]);
+
+  useEffect(() => {
+    resetInactivityTimer();
+    return () => {
+      if (inactivityTimerRef.current) {
+        clearTimeout(inactivityTimerRef.current);
+        inactivityTimerRef.current = null;
+      }
+    };
+  }, [resetInactivityTimer]);
 
   const connectionState: SocketState = isConnected ? SOCKET_STATES.open : SOCKET_STATES.closed;
 
