@@ -37,9 +37,7 @@ const btnLoginStyles = `
 
 export const LoginRoot = () => {
   const containerRef = useRef<HTMLDivElement>(null);
-  const { isEnabled: isDowntime, isLoading } = useFeatureFlag(FEATURE_FLAGS.DASHBOARD_DOWNTIME);
-
-  if (isLoading) return null;
+  const { isEnabled: isDowntime } = useFeatureFlag(FEATURE_FLAGS.DASHBOARD_DOWNTIME);
 
   if (isDowntime) return <DashboardDowntime />;
 
