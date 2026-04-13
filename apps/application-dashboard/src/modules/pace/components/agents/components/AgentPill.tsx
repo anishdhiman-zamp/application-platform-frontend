@@ -4,6 +4,7 @@ import { type FC, type RefObject, useCallback, useEffect, useRef, useState } fro
 import { Popover, PopoverContent, PopoverTrigger } from '@zamp-platform/ui';
 import { getAgentAvatar, getAgentAvatarByKey } from 'modules/pace/components/agents/constants/agents.constants';
 import { useRouter } from 'next/navigation';
+import { useGetAgentQuery } from '@/apis/agents';
 import ImageKitImage from '@/components/ImageKitImage';
 import AgentTestCard from '@/modules/pace/components/agents/components/AgentTestCard';
 import { buildTabRoute } from '@/modules/pace/components/dynamic-tabs/tab-type-registry';
@@ -23,8 +24,10 @@ const AgentPill: FC<AgentPillProps> = ({ agentId, agentName, avatarKey, containe
   const router = useRouter();
   const triggerRef = useRef<HTMLDivElement>(null);
   const { openTab, getTabById } = useDynamicTabs({ type: TAB_TYPE.AGENT });
-  const storedAvatarKey = avatarKey || (getTabById(agentId)?.metadata?.avatarKey as string | undefined);
-  const avatar = (storedAvatarKey && getAgentAvatarByKey(storedAvatarKey)) || getAgentAvatar(agentName);
+  const tabAvatarKey = getTabById(agentId)?.metadata?.avatarKey as string | undefined;
+  const { data: agentData } = useGetAgentQuery({ agentId }, { skip: !!(avatarKey || tabAvatarKey) });
+  const resolvedAvatarKey = avatarKey || tabAvatarKey || agentData?.avatar || undefined;
+  const avatar = (resolvedAvatarKey && getAgentAvatarByKey(resolvedAvatarKey)) || getAgentAvatar(agentName);
   const [isOpen, setIsOpen] = useState(false);
   const [alignOffset, setAlignOffset] = useState(0);
   const [containerWidth, setContainerWidth] = useState(0);
@@ -45,11 +48,11 @@ const AgentPill: FC<AgentPillProps> = ({ agentId, agentName, avatarKey, containe
 
     const metadata: Record<string, string> = {};
 
-    if (storedAvatarKey) metadata.avatarKey = storedAvatarKey;
+    if (resolvedAvatarKey) metadata.avatarKey = resolvedAvatarKey;
 
     openTab(agentId, agentName, Object.keys(metadata).length > 0 ? metadata : undefined);
     router.push(preserveSidebarParam(pathWithTitle));
-  }, [agentId, agentName, storedAvatarKey, openTab, router, handleOpenChange]);
+  }, [agentId, agentName, resolvedAvatarKey, openTab, router, handleOpenChange]);
 
   useEffect(() => {
     const el = containerRef.current;
