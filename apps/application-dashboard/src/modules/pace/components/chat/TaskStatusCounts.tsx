@@ -56,10 +56,6 @@ const TaskStatusCounts: FC<TaskStatusCountsProps> = ({
 
   onVisibleStatusesChangeRef.current = onVisibleStatusesChange;
 
-  useEffect(() => {
-    onVisibleStatusesChangeRef.current?.();
-  }, [visiblePillStatuses]);
-
   const sortedAndFilteredTasks = useMemo(() => {
     const query = searchQuery.toLowerCase().trim();
     const filtered = query ? tasks.filter((t) => t.title.toLowerCase().includes(query)) : tasks;
@@ -84,6 +80,10 @@ const TaskStatusCounts: FC<TaskStatusCountsProps> = ({
 
     return () => observer.disconnect();
   }, [containerRef]);
+
+  useEffect(() => {
+    onVisibleStatusesChangeRef.current?.();
+  }, [visiblePillStatuses]);
 
   if (!hasTasks) return null;
 
