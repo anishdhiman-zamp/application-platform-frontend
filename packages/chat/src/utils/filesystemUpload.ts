@@ -82,7 +82,14 @@ export const shouldUseChunkedUpload = (fileSize: number): boolean => {
   return fileSize >= DIRECT_UPLOAD_THRESHOLD_BYTES;
 };
 
+const CLIPBOARD_DEFAULT_NAMES = /^image\.(png|jpe?g|webp|gif|bmp|svg)$/i;
+
 export const sanitizeFileName = (name: string): string => {
+  if (CLIPBOARD_DEFAULT_NAMES.test(name)) {
+    const ext = name.split('.').pop();
+    const timestamp = Date.now();
+    return `${timestamp}_image.${ext}`;
+  }
   return name.replace(/\s+/g, '_');
 };
 

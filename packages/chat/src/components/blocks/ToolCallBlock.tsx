@@ -49,8 +49,12 @@ interface ToolCallBlockProps {
   embedded?: boolean;
   /** Flat transparent shell (e.g. nested in a muted panel); keeps icons/connectors unlike `embedded`. */
   quietSurface?: boolean;
+  /** First block in a consecutive thinking/tool-call group — adds top padding. */
+  isFirstInGroup?: boolean;
+  /** Last block in a consecutive thinking/tool-call group — adds bottom padding. */
+  isLastInGroup?: boolean;
   /** Remove bottom padding — use on the last ToolCallBlock in a message. */
-  isLastToolCall?: boolean;
+  isLastToolCallOrder?: boolean;
   isStreaming?: boolean;
 }
 export const ToolCallBlock = ({
@@ -64,7 +68,9 @@ export const ToolCallBlock = ({
   embedded = false,
   quietSurface = false,
   showWatchButton = false,
-  isLastToolCall = false,
+  isFirstInGroup = false,
+  isLastInGroup = false,
+  isLastToolCallOrder = false,
   isStreaming = false,
 }: ToolCallBlockProps) => {
   const flatShell = embedded || quietSurface;
@@ -138,6 +144,9 @@ export const ToolCallBlock = ({
       className={cn(
         'w-full overflow-hidden',
         flatShell ? 'rounded-none border-none bg-transparent shadow-none' : 'bg-BG_WHITE',
+        isLastInGroup && !flatShell && 'mb-1',
+        isFirstInGroup && !flatShell && 'mt-1',
+        isLastToolCallOrder && !isStreaming && 'mb-0',
       )}
     >
       <AccordionItem value='tool-use' className='relative border-none'>
@@ -146,15 +155,15 @@ export const ToolCallBlock = ({
         )}
         <AccordionTrigger
           className={cn(
-            'font-420 text-GRAY_1000 w-full cursor-pointer gap-x-2 text-[13px] [&[data-state=closed]>svg]:rotate-90 [&[data-state=open]>svg]:-rotate-90',
+            'font-420 w-full cursor-pointer gap-x-2 text-[13px] [&[data-state=closed]>svg]:rotate-90 [&[data-state=open]>svg]:-rotate-90',
             embedded ? 'py-1.5' : 'py-2',
-            isLastToolCall && !isStreaming ? 'pb-0' : '',
+            flatShell ? 'text-GRAY_1000' : 'text-GRAY_700',
           )}
         >
           <div className='flex flex-1 items-center gap-3'>
             <div className='flex items-center gap-x-2'>
               {!embedded && (
-                <div className='bg-BG_WHITE flex h-3.5 w-3.5 items-center justify-center'>
+                <div className={cn('flex h-3.5 w-3.5 items-center justify-center', flatShell ? 'bg-BG_WHITE' : '')}>
                   {icon?.length ? (
                     <ImageWithFallback src={icon} alt={toolName} className='h-3 w-3' />
                   ) : (
@@ -167,7 +176,10 @@ export const ToolCallBlock = ({
                 <ShimmerText text={toolName} autoAnimate={true} />
               ) : (
                 <span
-                  className={cn('font-420 text-[13px]', resolvedIsAccordionOpen ? 'text-GRAY_1000' : 'text-GRAY_950')}
+                  className={cn(
+                    'font-420 text-[13px]',
+                    flatShell ? (resolvedIsAccordionOpen ? 'text-GRAY_1000' : 'text-GRAY_950') : 'text-GRAY_700',
+                  )}
                 >
                   {toolName}
                 </span>
@@ -202,7 +214,7 @@ export const ToolCallBlock = ({
           <ScrollContainer
             className='max-h-60'
             scrollbarStyle='none'
-            scrollClassName={cn('space-y-4 pr-2', embedded ? 'pl-3' : 'pl-5')}
+            scrollClassName={cn('space-y-4 pr-2', embedded ? 'pl-3' : 'pl-6')}
           >
             <CodePreviewBlock label='Input' content={inputContent} />
             {toolResult && (
