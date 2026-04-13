@@ -36,6 +36,7 @@ export const HITLQuestionsBlock = ({
   const customInputRef = useRef<HTMLTextAreaElement>(null);
   const containerRef = useRef<HTMLDivElement>(null);
   const questionRefs = useRef<(HTMLDivElement | null)[]>([]);
+  const hasAutoSubmittedSingleSelectRef = useRef(false);
 
   const [hitlRespond, { isLoading: isHitlRespondLoading }] = useHitlRespondMutation();
 
@@ -53,6 +54,11 @@ export const HITLQuestionsBlock = ({
   const totalOptions = currentQuestion ? optionCountForQuestion(currentQuestion) : 1;
   const allQuestionsAnswered = questions.every((q) => isQuestionAnswerComplete(q, answers[q.id]));
   const isAllApproval = questions.every(isApprovalQuestion);
+  const isSingleSelectOnly =
+    questions.length === 1 &&
+    !isApprovalQuestion(questions[0]) &&
+    !isMultipleChoiceQuestion(questions[0]) &&
+    !isTextQuestion(questions[0]);
 
   const stateRef = useRef({
     currentQuestionIndex,
@@ -102,19 +108,24 @@ export const HITLQuestionsBlock = ({
           newOptionIds = [optionId];
         }
 
+        const newCustomText = isMulti ? (customText ?? currentAnswer.customText) : '';
+
         return {
           ...prev,
           [questionId]: {
             optionIds: newOptionIds,
-            customText: customText ?? currentAnswer.customText,
+            customText: newCustomText,
             isSkipped: false,
           },
         };
       });
 
-      if (!isMulti && qIndex < questions.length - 1) {
-        setCurrentQuestionIndex(qIndex + 1);
-        setFocusedOptionIndex(0);
+      if (!isMulti) {
+        setCustomInputs((prev) => ({ ...prev, [questionId]: '' }));
+        if (qIndex < questions.length - 1) {
+          setCurrentQuestionIndex(qIndex + 1);
+          setFocusedOptionIndex(0);
+        }
       }
     },
     [questions],
@@ -133,8 +144,9 @@ export const HITLQuestionsBlock = ({
 
       setCustomInputs((prev) => ({ ...prev, [currentQuestion.id]: value }));
       setAnswers((prev) => {
+        const isMulti = isMultipleChoiceQuestion(currentQuestion);
         const currentAns = prev[currentQuestion.id] || { optionIds: [], customText: '' };
-        let newOptionIds = [...currentAns.optionIds];
+        let newOptionIds = isMulti ? [...currentAns.optionIds] : [];
         if (value && !newOptionIds.includes(CUSTOM_OPTION_ID)) {
           newOptionIds.push(CUSTOM_OPTION_ID);
         } else if (!value && newOptionIds.includes(CUSTOM_OPTION_ID)) {
@@ -265,7 +277,7 @@ export const HITLQuestionsBlock = ({
             return;
           }
           setFocusedOptionIndex(lastOptionIdx);
-          appendPrintableToCustomInput(q.id, e.key, setCustomInputs, setAnswers);
+          appendPrintableToCustomInput(q, e.key, setCustomInputs, setAnswers);
       }
     },
     [questions, selectAnswer, selectApprovalAnswer, handleSkipToCustomInput],
@@ -395,6 +407,15 @@ export const HITLQuestionsBlock = ({
     }
   }, [isAllApproval, allQuestionsAnswered]);
 
+  const handleAutoSubmitSingleSelect = useCallback(() => {
+    if (!isSingleSelectOnly || !allQuestionsAnswered || hasAutoSubmittedSingleSelectRef.current) return;
+    const answer = answers[questions[0].id];
+    const usedCustomInput = answer?.optionIds.includes(CUSTOM_OPTION_ID);
+    if (usedCustomInput) return;
+    hasAutoSubmittedSingleSelectRef.current = true;
+    submitRef.current?.();
+  }, [isSingleSelectOnly, allQuestionsAnswered, answers, questions]);
+
   const syncStateRef = useCallback(() => {
     stateRef.current = {
       currentQuestionIndex,
@@ -513,6 +534,10 @@ export const HITLQuestionsBlock = ({
   useEffect(() => {
     handleAutoSubmitApproval();
   }, [handleAutoSubmitApproval]);
+
+  useEffect(() => {
+    handleAutoSubmitSingleSelect();
+  }, [handleAutoSubmitSingleSelect]);
 
   useEffect(() => {
     containerRef.current?.focus({ preventScroll: true });

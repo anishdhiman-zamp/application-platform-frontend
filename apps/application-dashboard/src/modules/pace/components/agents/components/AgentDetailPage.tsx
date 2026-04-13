@@ -4,7 +4,7 @@ import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import { Button, ShimmerText, Skeleton } from '@zamp-platform/ui';
 import { cn } from '@zamp-platform/ui/utils';
 import { ArrowLeft } from 'lucide-react';
-import AgentFileList from 'modules/pace/components/agents/components/AgentFileList';
+import AddConnectionModal from 'modules/pace/components/agents/components/AddConnectionModal';
 import AgentGreeting from 'modules/pace/components/agents/components/AgentGreeting';
 import AgentInstructions from 'modules/pace/components/agents/components/AgentInstructions';
 import AgentToolsAccess from 'modules/pace/components/agents/components/AgentToolsAccess';
@@ -13,7 +13,6 @@ import BarrelCounter from 'modules/pace/components/agents/components/BarrelCount
 import ShareAgentPopup from 'modules/pace/components/agents/components/ShareAgentPopup';
 import {
   AGENT_DETAIL_TAB_CONFIG,
-  getAddConnectionMessage,
   getAddInstructionsMessage,
   getAddTriggerMessage,
   getAgentAvatar,
@@ -22,11 +21,17 @@ import {
 import { AGENT_DETAIL_TAB, type AgentDetailTabType } from 'modules/pace/components/agents/types/agents.types';
 import { motion } from 'motion/react';
 import { useRouter } from 'next/navigation';
-import { useGetAgentsListQuery, useGetAgentTriggersQuery, useUpdateAgentMutation } from '@/apis/agents';
+import {
+  useGetAgentInstructionsQuery,
+  useGetAgentsListQuery,
+  useGetAgentTriggersQuery,
+  useUpdateAgentMutation,
+} from '@/apis/agents';
 import ImageKitImage from '@/components/ImageKitImage';
 import { FEATURE_FLAGS } from '@/constants/featureFlags';
 import { ROUTES_PATH } from '@/constants/routeConfig';
 import { useFeatureFlag } from '@/hooks/useFeatureFlag';
+import AgentFolderList from '@/modules/pace/components/agents/components/AgentFolderList';
 import { useAgentWithPolling } from '@/modules/pace/components/agents/hooks/useAgentWithPolling';
 import { useDynamicTabs } from '@/modules/pace/components/dynamic-tabs/useDynamicTabs';
 import TaskAccordionGroup from '@/modules/pace/components/tasks/components/TaskAccordionGroup';
@@ -105,6 +110,9 @@ const AgentDetailPage = ({ agentId, agentName, agentDescription = '', avatarKey 
   const [editDescription, setEditDescription] = useState(initialDescription);
   const [isAvatarHovered, setIsAvatarHovered] = useState(false);
   const [instructionsShimmering, setInstructionsShimmering] = useState(false);
+  const [isAddConnectionModalOpen, setIsAddConnectionModalOpen] = useState(false);
+  const prevInstructionsFetchingRef = useRef(false);
+  const shimmerTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 
   const skipFetch = !agentExists;
 
@@ -113,7 +121,25 @@ const AgentDetailPage = ({ agentId, agentName, agentDescription = '', avatarKey 
   const avatar =
     (resolvedAvatarKey && getAgentAvatarByKey(resolvedAvatarKey)) || getAgentAvatar(agentData?.name || agentName || '');
 
+  const { isFetching: isInstructionsFetching, isLoading: isInstructionsLoading } = useGetAgentInstructionsQuery(
+    { agentId },
+    { skip: skipFetch },
+  );
+
   const { triggerChatMessage } = useTriggerChatMessageFromButton({ agentId, agentName: displayName });
+
+  const triggerShimmer = useCallback(() => {
+    setInstructionsShimmering(true);
+    if (shimmerTimerRef.current) clearTimeout(shimmerTimerRef.current);
+    shimmerTimerRef.current = setTimeout(() => setInstructionsShimmering(false), 3000);
+  }, []);
+
+  const handleInstructionsRefetch = useCallback(() => {
+    if (!prevInstructionsFetchingRef.current && isInstructionsFetching && !isInstructionsLoading) {
+      triggerShimmer();
+    }
+    prevInstructionsFetchingRef.current = isInstructionsFetching;
+  }, [isInstructionsFetching, isInstructionsLoading, triggerShimmer]);
 
   const syncAgentData = useCallback(() => {
     if (!agentData) return;
@@ -197,11 +223,21 @@ const AgentDetailPage = ({ agentId, agentName, agentDescription = '', avatarKey 
   }, [triggerChatMessage, displayName]);
 
   const handleAddNewConnection = useCallback(() => {
-    triggerChatMessage(getAddConnectionMessage(displayName));
-  }, [triggerChatMessage, displayName]);
+    setIsAddConnectionModalOpen(true);
+  }, []);
 
-  const handleInstructionsUpdating = useCallback((updating: boolean) => {
-    setInstructionsShimmering(updating);
+  const handleInstructionsUpdating = useCallback(() => {
+    triggerShimmer();
+  }, [triggerShimmer]);
+
+  useEffect(() => {
+    handleInstructionsRefetch();
+  }, [handleInstructionsRefetch]);
+
+  useEffect(() => {
+    return () => {
+      if (shimmerTimerRef.current) clearTimeout(shimmerTimerRef.current);
+    };
   }, []);
 
   // Sync local state + tab metadata when agent data arrives from API
@@ -238,7 +274,7 @@ const AgentDetailPage = ({ agentId, agentName, agentDescription = '', avatarKey 
         />
       ),
       [AGENT_DETAIL_TAB.FILES]: (
-        <AgentFileList
+        <AgentFolderList
           agentId={agentId}
           agentAvatarSrc={avatar.src}
           isActive={activeDetailTab === AGENT_DETAIL_TAB.FILES}
@@ -396,6 +432,12 @@ const AgentDetailPage = ({ agentId, agentName, agentDescription = '', avatarKey 
           </div>
         ))}
       </div>
+
+      <AddConnectionModal
+        open={isAddConnectionModalOpen}
+        onOpenChange={setIsAddConnectionModalOpen}
+        agentId={agentId}
+      />
     </div>
   );
 };

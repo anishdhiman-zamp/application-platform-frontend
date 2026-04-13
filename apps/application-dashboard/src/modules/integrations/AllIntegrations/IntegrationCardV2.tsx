@@ -16,6 +16,7 @@ interface IntegrationCardProps {
   enabled?: boolean;
   buttonVariant?: ButtonVariant;
   isToolCallBlock?: boolean;
+  onCardClick?: (item: IntegrationItem) => void;
 }
 
 const IntegrationCardV2: FC<IntegrationCardProps> = ({
@@ -25,6 +26,7 @@ const IntegrationCardV2: FC<IntegrationCardProps> = ({
   enabled = false,
   buttonVariant = 'outline',
   isToolCallBlock = false,
+  onCardClick,
 }) => {
   const { name, title, description, icon, connections } = integrationItem;
   const router = useRouter();
@@ -32,6 +34,11 @@ const IntegrationCardV2: FC<IntegrationCardProps> = ({
   const searchParams = useSearchParams();
 
   const handleCardClick = () => {
+    if (onCardClick) {
+      onCardClick(integrationItem);
+
+      return;
+    }
     const query = searchParams?.toString();
     const url = query ? `${pathname}/${name}?${query}` : `${pathname}/${name}`;
 

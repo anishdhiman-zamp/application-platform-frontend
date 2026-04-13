@@ -29,22 +29,6 @@ const AgentPill: FC<AgentPillProps> = ({ agentId, agentName, avatarKey, containe
   const [alignOffset, setAlignOffset] = useState(0);
   const [containerWidth, setContainerWidth] = useState(0);
 
-  useEffect(() => {
-    const el = containerRef.current;
-
-    if (!el) return;
-
-    const observer = new ResizeObserver((entries) => {
-      for (const entry of entries) {
-        setContainerWidth(entry.contentRect.width);
-      }
-    });
-
-    observer.observe(el);
-
-    return () => observer.disconnect();
-  }, [containerRef]);
-
   const handleOpenChange = useCallback(
     (open: boolean) => {
       setIsOpen(open);
@@ -66,6 +50,22 @@ const AgentPill: FC<AgentPillProps> = ({ agentId, agentName, avatarKey, containe
     openTab(agentId, agentName, Object.keys(metadata).length > 0 ? metadata : undefined);
     router.push(preserveSidebarParam(pathWithTitle));
   }, [agentId, agentName, storedAvatarKey, openTab, router, handleOpenChange]);
+
+  useEffect(() => {
+    const el = containerRef.current;
+
+    if (!el) return;
+
+    const observer = new ResizeObserver((entries) => {
+      for (const entry of entries) {
+        setContainerWidth(entry.contentRect.width);
+      }
+    });
+
+    observer.observe(el);
+
+    return () => observer.disconnect();
+  }, [containerRef]);
 
   useEffect(() => {
     const trigger = triggerRef.current;

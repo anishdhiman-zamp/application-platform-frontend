@@ -6,7 +6,11 @@ import { useOptionalIntegrationsContext } from '@/modules/integrations/AllIntegr
 
 const DEBOUNCE_MS = 500;
 
-const IntegrationHeader: FC = () => {
+interface IntegrationHeaderProps {
+  title?: string;
+}
+
+const IntegrationHeader: FC<IntegrationHeaderProps> = ({ title = 'Integrations' }) => {
   const ctx = useOptionalIntegrationsContext();
   const setSearchQuery = ctx?.setSearchQuery;
 
@@ -25,7 +29,7 @@ const IntegrationHeader: FC = () => {
 
   return (
     <div className='flex flex-col items-start gap-y-5'>
-      <h1 className='f-20-600 text-GRAY_1000'>Integrations</h1>
+      <h1 className='f-20-600 text-GRAY_1000'>{title}</h1>
 
       <div className='flex w-full items-center justify-between'>
         <SearchInput

@@ -5,6 +5,7 @@ import IntegrationCardSkeletonV2 from 'modules/integrations/AllIntegrations/Inte
 import IntegrationCardV2 from 'modules/integrations/AllIntegrations/IntegrationCardV2';
 import { useIntegrationsContext } from '@/modules/integrations/AllIntegrations/Integrations.context';
 import ProcessEmptyState from '@/modules/process/activity-runs/components/ProcessEmptyState';
+import type { IntegrationItem } from '@/types/api/integrations';
 
 const SKELETON_COUNT = 12;
 const GRID_CLASSES = 'grid grid-cols-1 gap-2 @sm:grid-cols-2 @3xl:grid-cols-3 @5xl:grid-cols-4';
@@ -13,7 +14,11 @@ const SectionTitle: FC<{ title: string }> = ({ title }) => (
   <h3 className='text-GRAY_700 f-11-500 uppercase'>{title}</h3>
 );
 
-const IntegrationGridV2: FC = () => {
+interface IntegrationGridV2Props {
+  onCardClick?: (item: IntegrationItem) => void;
+}
+
+const IntegrationGridV2: FC<IntegrationGridV2Props> = ({ onCardClick }) => {
   const sentinelRef = useRef<HTMLDivElement>(null);
   const {
     items: availableItems,
@@ -29,7 +34,7 @@ const IntegrationGridV2: FC = () => {
 
   const showEmptyState = useMemo(
     () => isInitialised && !isFetching && !hasMore && availableItems.length === 0,
-    [isInitialised, isFetching, hasMore, length],
+    [isInitialised, isFetching, hasMore, availableItems.length],
   );
 
   isFetchingRef.current = isFetching;
@@ -61,7 +66,7 @@ const IntegrationGridV2: FC = () => {
           {enabledItems.length > 0 && (
             <div className={GRID_CLASSES}>
               {enabledItems.map((item) => (
-                <IntegrationCardV2 key={item.name} integrationItem={item} enabled />
+                <IntegrationCardV2 key={item.name} integrationItem={item} enabled onCardClick={onCardClick} />
               ))}
             </div>
           )}
@@ -73,7 +78,7 @@ const IntegrationGridV2: FC = () => {
         {availableItems.length > 0 && (
           <div className={GRID_CLASSES}>
             {availableItems.map((item) => (
-              <IntegrationCardV2 key={item.name} integrationItem={item} />
+              <IntegrationCardV2 key={item.name} integrationItem={item} onCardClick={onCardClick} />
             ))}
           </div>
         )}
