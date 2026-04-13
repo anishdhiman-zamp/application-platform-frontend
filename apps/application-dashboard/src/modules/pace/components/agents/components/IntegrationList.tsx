@@ -74,7 +74,7 @@ const IntegrationList = ({
             disabled={isRemoving}
           >
             <div className='flex min-w-0 flex-1 items-center gap-1.5'>
-              <div className='size-4 shrink-0 overflow-clip rounded-[2.5px]'>
+              <div className='flex size-4 shrink-0 items-center justify-center overflow-clip rounded-[2.5px]'>
                 <IntegrationIcon logo={integration.logo} name={integration?.name} size={16} />
               </div>
               <span className='f-14-450 text-GRAY_1000 truncate'>{integration?.name}</span>

@@ -10,9 +10,9 @@ import { getNameInitial } from '@/utils/common';
 interface IntegrationDetailHeaderProps {
   displayName: string;
   logo: string;
-  guide: string;
-  showGuide: boolean;
-  onGuideClick: defaultFnType;
+  guide?: string;
+  showGuide?: boolean;
+  onGuideClick?: defaultFnType;
   integrationItem?: IntegrationItem;
 }
 

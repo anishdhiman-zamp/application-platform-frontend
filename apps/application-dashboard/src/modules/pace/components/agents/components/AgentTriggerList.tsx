@@ -1,30 +1,18 @@
 'use client';
 
 import { useEffect, useRef, useState } from 'react';
-import { Button, Skeleton, Switch, toast } from '@zamp-platform/ui';
+import { Button, Switch, toast } from '@zamp-platform/ui';
 import { cn } from '@zamp-platform/ui/utils';
-import { Plus } from 'lucide-react';
+import { KEYBOARD_KEYS } from '@zamp-platform/utils';
+import { Plus, Zap } from 'lucide-react';
 import AgentTabEmptyState from 'modules/pace/components/agents/components/AgentTabEmptyState';
+import TriggerListSkeleton from 'modules/pace/components/agents/skeletons/TriggerListSkeleton';
 import { useGetAgentTriggersQuery, useToggleAgentTriggerMutation } from '@/apis/agents';
 import ImageWithFallback from '@/components/common/ImageWithFallback';
 import CommonWrapper from '@/components/commonWrapper';
 import { SkeletonTypes } from '@/components/commonWrapper/commonWrapper.types';
 import { TRANSPARENT_PIXEL } from '@/modules/pace/components/agents/constants/agents.constants';
 import type { AgentTriggerType } from '@/modules/pace/components/agents/types/agents.types';
-
-const TriggerSkeleton = () => (
-  <div className='border-GRAY_400 flex h-full flex-col rounded-xl border'>
-    {Array.from({ length: 3 }).map((_, i) => (
-      <div
-        key={i}
-        className={cn('flex items-center justify-between px-3.5 py-3.5', i < 2 && 'border-GRAY_400 border-b')}
-      >
-        <Skeleton className='h-4 w-48' />
-        <Skeleton className='h-5 w-9 rounded-full' />
-      </div>
-    ))}
-  </div>
-);
 
 interface AgentTriggerListProps {
   agentId: string;
@@ -100,26 +88,28 @@ const AgentTriggerList = ({
         />
       }
       skeletonType={SkeletonTypes.CUSTOM}
-      loader={<TriggerSkeleton />}
+      loader={<TriggerListSkeleton />}
       className='flex min-h-0 flex-1 flex-col'
       disableAnimation
     >
       <p className='text-GRAY_700 f-14-450 mb-4 ml-2.5 shrink-0'>What should this agent run?</p>
       <div className='border-GRAY_400 flex flex-col overflow-hidden rounded-xl border'>
-        {triggers.map((trigger, index) => {
+        {triggers?.map((trigger, index) => {
           const content = (
             <div className='flex items-center gap-3'>
-              {trigger.icon && (
+              {trigger?.icon ? (
                 <ImageWithFallback
-                  src={trigger.icon}
+                  src={trigger?.icon}
                   fallback={TRANSPARENT_PIXEL}
                   alt=''
                   width={14}
                   height={14}
                   className='shrink-0 object-contain'
                 />
+              ) : (
+                <Zap size={14} className='text-GRAY_700 shrink-0' />
               )}
-              <span className='f-14-500 text-GRAY_1000'>{trigger.title}</span>
+              <span className='f-14-500 text-GRAY_1000'>{trigger?.title}</span>
             </div>
           );
 
@@ -138,14 +128,14 @@ const AgentTriggerList = ({
 
           return (
             <div
-              key={trigger.id}
+              key={trigger?.id}
               className={cn(
                 'flex items-center justify-between px-3.5 py-3.5',
-                index < triggers.length - 1 && 'border-GRAY_400 border-b',
+                index < triggers?.length - 1 && 'border-GRAY_400 border-b',
               )}
             >
               {content}
-              <Switch size='medium' checked={trigger.enabled} onCheckedChange={() => handleToggle(trigger.id)} />
+              <Switch size='medium' checked={trigger?.enabled} onCheckedChange={() => handleToggle(trigger?.id)} />
             </div>
           );
         })}
@@ -156,7 +146,7 @@ const AgentTriggerList = ({
             className='border-GRAY_400 hover:bg-GRAY_100 cursor-pointer border-t px-3.5 py-3 transition-colors'
             onClick={onAddTrigger}
             onKeyDown={(e) => {
-              if (e.key === 'Enter' || e.key === ' ') {
+              if (e.key === KEYBOARD_KEYS.ENTER || e.key === KEYBOARD_KEYS.SPACE) {
                 e.preventDefault();
                 onAddTrigger?.();
               }

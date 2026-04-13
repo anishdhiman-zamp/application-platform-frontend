@@ -1,7 +1,7 @@
 'use client';
 
 import { useEffect, useMemo, useRef, useState } from 'react';
-import { FolderClosedIcon, Skeleton, Switch, toast } from '@zamp-platform/ui';
+import { FolderClosedIcon, Switch, toast } from '@zamp-platform/ui';
 import { cn } from '@zamp-platform/ui/utils';
 import AgentTabEmptyState from 'modules/pace/components/agents/components/AgentTabEmptyState';
 import { FILE_TYPE } from 'modules/pace/components/files/file-tree.types';
@@ -10,33 +10,17 @@ import { useListFilesQuery } from '@/apis/filesystem';
 import CommonWrapper from '@/components/commonWrapper';
 import { SkeletonTypes } from '@/components/commonWrapper/commonWrapper.types';
 import { useAppSelector } from '@/hooks/toolkit';
+import FolderListSkeleton from '@/modules/pace/components/agents/skeletons/FolderListSkeleton';
 import type { RootState } from '@/store';
 
-const FileListSkeleton = () => (
-  <div className='border-GRAY_400 flex h-full flex-col overflow-hidden rounded-xl border'>
-    {Array.from({ length: 12 }).map((_, i) => (
-      <div
-        key={i}
-        className={cn('flex items-center justify-between px-3.5 py-3.5', i < 11 && 'border-GRAY_400 border-b')}
-      >
-        <div className='flex items-center gap-3'>
-          <Skeleton className='size-4 rounded' />
-          <Skeleton className='h-4 w-40' />
-        </div>
-        <Skeleton className='h-5 w-9 rounded-full' />
-      </div>
-    ))}
-  </div>
-);
-
-interface AgentFileListProps {
+interface AgentFolderListProps {
   agentId: string;
   agentAvatarSrc?: string;
   isActive?: boolean;
   skipFetch?: boolean;
 }
 
-const AgentFileList = ({ agentId, agentAvatarSrc, isActive = true, skipFetch = false }: AgentFileListProps) => {
+const AgentFolderList = ({ agentId, agentAvatarSrc, isActive = true, skipFetch = false }: AgentFolderListProps) => {
   const hasBeenActiveRef = useRef(isActive);
   const isFirstVisit = !hasBeenActiveRef.current && isActive;
 
@@ -130,11 +114,11 @@ const AgentFileList = ({ agentId, agentAvatarSrc, isActive = true, skipFetch = f
       isNoData={!isLoading && files?.length === 0}
       noDataBanner={<AgentTabEmptyState agentAvatarSrc={agentAvatarSrc} description='No Files Found' />}
       skeletonType={SkeletonTypes.CUSTOM}
-      loader={<FileListSkeleton />}
+      loader={<FolderListSkeleton rowCount={12} />}
       className='flex min-h-0 flex-1 flex-col'
       disableAnimation
     >
-      <p className='text-GRAY_700 f-14-450 mb-4 ml-2.5 shrink-0'>What folders agent can access?</p>
+      <p className='text-GRAY_700 f-14-450 mb-4 ml-2.5 shrink-0'>What folders can the agent access?</p>
       <div className='border-GRAY_400 flex flex-col overflow-y-auto rounded-xl border'>
         {files.map((file, index) => (
           <div
@@ -160,4 +144,4 @@ const AgentFileList = ({ agentId, agentAvatarSrc, isActive = true, skipFetch = f
   );
 };
 
-export default AgentFileList;
+export default AgentFolderList;

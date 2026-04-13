@@ -30,7 +30,7 @@ const AppRow = ({ app }: AppRowProps) => {
       <TooltipProvider delayDuration={200}>
         <Tooltip>
           <TooltipTrigger asChild>
-            <span className='flex-shrink-0'>
+            <span className='shrink-0'>
               {isPublic ? (
                 <Globe size={13} className='text-green-600' strokeWidth={1.5} />
               ) : (
