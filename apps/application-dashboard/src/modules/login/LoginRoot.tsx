@@ -5,6 +5,9 @@ import { ZAMP_FULL_LOGO } from 'constants/icons';
 import { LoginForm } from 'modules/login/LoginForm';
 import { ProfessionRevealBackground } from 'modules/login/ProfessionRevealBackground';
 import Image from 'next/image';
+import { FEATURE_FLAGS } from '@/constants/featureFlags';
+import { useFeatureFlag } from '@/hooks/useFeatureFlag';
+import DashboardDowntime from '@/modules/cards/DashboardDowntime';
 
 // Noise texture + gradient pseudo-elements — SVG data URLs are impractical as tailwind arbitrary values
 const btnLoginStyles = `
@@ -34,6 +37,11 @@ const btnLoginStyles = `
 
 export const LoginRoot = () => {
   const containerRef = useRef<HTMLDivElement>(null);
+  const { isEnabled: isDowntime, isLoading } = useFeatureFlag(FEATURE_FLAGS.DASHBOARD_DOWNTIME);
+
+  if (isLoading) return null;
+
+  if (isDowntime) return <DashboardDowntime />;
 
   return (
     <div className='bg-GRAY_100 relative flex h-screen w-screen items-center justify-center overflow-hidden'>
