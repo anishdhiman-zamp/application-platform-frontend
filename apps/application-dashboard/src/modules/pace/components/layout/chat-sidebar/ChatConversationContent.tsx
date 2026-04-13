@@ -74,8 +74,8 @@ const ChatConversationContent = ({
   const prevBrowserStreamingRef = useRef(false);
 
   const {
-    pendingFileReference,
-    clearPendingFileReference,
+    pendingFileReferences,
+    clearPendingFileReferences,
     chatMessageIntent,
     setChatMessageIntent,
     activeAgentInfo,
@@ -167,11 +167,11 @@ const ChatConversationContent = ({
   };
 
   useEffect(() => {
-    if (pendingFileReference && addFileReferenceRef.current) {
-      addFileReferenceRef.current(pendingFileReference);
-      clearPendingFileReference();
+    if (pendingFileReferences.length > 0 && addFileReferenceRef.current) {
+      pendingFileReferences.forEach((ref) => addFileReferenceRef.current?.(ref));
+      clearPendingFileReferences();
     }
-  }, [pendingFileReference, clearPendingFileReference, addFileReferenceRef]);
+  }, [pendingFileReferences, clearPendingFileReferences, addFileReferenceRef]);
 
   useEffect(() => {
     if (agentInfoFromMessages && !activeAgentInfo) {

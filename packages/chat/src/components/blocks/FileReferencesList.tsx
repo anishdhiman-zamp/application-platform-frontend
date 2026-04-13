@@ -2,7 +2,7 @@ import { cn } from '@zamp-platform/ui/utils';
 import { FC } from 'react';
 
 import { UploadedFileType } from '../../types/block.types';
-import FileReferenceItem from './FileReferenceItem';
+import FilePreviewCard from './FilePreviewCard';
 
 interface FileReferencesListProps {
   fileReferences: UploadedFileType[];
@@ -17,8 +17,8 @@ export const FileReferencesList: FC<FileReferencesListProps> = ({ fileReferences
       {fileReferences?.length > 0 && (
         <div className={cn('flex flex-wrap gap-2', className)}>
           {[...fileReferences].reverse().map((fileReference) => (
-            <FileReferenceItem
-              key={fileReference.path || fileReference.name}
+            <FilePreviewCard
+              key={fileReference.name}
               fileReference={fileReference}
               onRemove={onRemove}
               isLoading={isLoading}

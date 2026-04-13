@@ -13,6 +13,7 @@ interface FileReferenceItemProps {
   className?: string;
 }
 
+/** @deprecated Use `FilePreviewCard` instead, which shows file content previews. */
 const FileReferenceItem: React.FC<FileReferenceItemProps> = ({ fileReference, onRemove, isLoading, className }) => {
   const { onFileOpen } = useChatActions();
 

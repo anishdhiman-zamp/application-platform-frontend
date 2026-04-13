@@ -17,7 +17,16 @@ import {
   type UploadedFile,
 } from '@zamp-platform/chat';
 import { formatPlural } from '@zamp-platform/utils';
-import { type Dispatch, type SetStateAction, useCallback, useEffect, useMemo, useRef, useState } from 'react';
+import {
+  type Dispatch,
+  type RefObject,
+  type SetStateAction,
+  useCallback,
+  useEffect,
+  useMemo,
+  useRef,
+  useState,
+} from 'react';
 
 import type { ConversationActions } from '../provider/ConversationActionsContext';
 
@@ -39,6 +48,9 @@ export interface UseChatInputProps {
   scope?: ScopeType;
   externalInputValue?: string;
   setExternalInputValue?: Dispatch<SetStateAction<string>>;
+  externalFileReferences?: UploadedFile[];
+  setExternalFileReferences?: Dispatch<SetStateAction<UploadedFile[]>>;
+  externalFilePathsRef?: RefObject<Set<string>>;
   adapter: ChatInputAdapter;
   resourceType?: ResourceType;
   annotationType?: AnnotationType;
@@ -71,6 +83,9 @@ export const useChatInput = ({
   scope = ScopeType.ACTIVITY_RUN,
   externalInputValue,
   setExternalInputValue,
+  externalFileReferences,
+  setExternalFileReferences,
+  externalFilePathsRef: externalFilePathsRefProp,
   resourceType = ResourceType.PROCESS,
   adapter,
   annotationType,
@@ -81,13 +96,30 @@ export const useChatInput = ({
   metadata,
 }: UseChatInputProps): UseChatInputReturn => {
   const prevConversationIdRef = useRef(conversationId);
+  const fileReferencesRef = useRef<UploadedFile[]>([]);
+  const internalFilePathsRef = useRef<Set<string>>(new Set());
+
   const currentUserName = adapter.getCurrentUserName();
   const resourceId = adapter.getResourceId();
   const scopeId = adapter.getScopeId();
 
   const [internalValue, setInternalValue] = useState('');
+  const [isUploading, setIsUploading] = useState(false);
+  const [firstMessage, setFirstMessage] = useState('');
+  const [pendingInit, setPendingInit] = useState(false);
+  const [internalFileReferences, setInternalFileReferences] = useState<UploadedFile[]>([]);
+
   const hasExternalControl = externalInputValue !== undefined && setExternalInputValue !== undefined;
   const value = hasExternalControl ? externalInputValue : internalValue;
+
+  const hasExternalFileControl = externalFileReferences !== undefined && setExternalFileReferences !== undefined;
+  const fileReferences = hasExternalFileControl ? externalFileReferences : internalFileReferences;
+  const externalFilePathsRef = externalFilePathsRefProp ?? internalFilePathsRef;
+
+  const isSubmitDisabled = useMemo(
+    () => isDisabled || isUploading || (!value.trim() && fileReferences.length === 0),
+    [isDisabled, isUploading, value, fileReferences],
+  );
 
   const setValue = useCallback(
     (newValue: SetStateAction<string>) => {
@@ -100,21 +132,15 @@ export const useChatInput = ({
     [hasExternalControl, setExternalInputValue],
   );
 
-  const [fileReferences, setFileReferences] = useState<UploadedFile[]>([]);
-  const fileReferencesRef = useRef<UploadedFile[]>([]);
-  const [isUploading, setIsUploading] = useState(false);
-  const [firstMessage, setFirstMessage] = useState('');
-  const [pendingInit, setPendingInit] = useState(false);
-  const externalFilePathsRef = useRef<Set<string>>(new Set());
-
-  // Keep ref in sync so init() always reads the latest file references regardless of closure timing
-  useEffect(() => {
-    fileReferencesRef.current = fileReferences;
-  }, [fileReferences]);
-
-  const isSubmitDisabled = useMemo(
-    () => isDisabled || isUploading || (!value.trim() && fileReferences.length === 0),
-    [isDisabled, isUploading, value, fileReferences],
+  const setFileReferences = useCallback(
+    (newValue: SetStateAction<UploadedFile[]>) => {
+      if (hasExternalFileControl && setExternalFileReferences) {
+        setExternalFileReferences(newValue);
+      } else {
+        setInternalFileReferences(newValue);
+      }
+    },
+    [hasExternalFileControl, setExternalFileReferences],
   );
 
   const removeFileReference = useCallback(
@@ -124,7 +150,9 @@ export const useChatInput = ({
       if (isExternalFile) {
         externalFilePathsRef.current.delete(fileId);
       } else if (fileId) {
-        adapter.deleteFileMutation.deleteFile({ path: fileId }).catch((error) => {
+        const parentDir = fileId.substring(0, fileId.lastIndexOf('/'));
+
+        adapter.deleteFileMutation.deleteFile({ path: parentDir || fileId }).catch((error) => {
           adapter.onError?.(error);
         });
       }
@@ -325,6 +353,11 @@ export const useChatInput = ({
       init();
     }
   }, [pendingInit, conversationId]);
+
+  // Keep ref in sync so init() always reads the latest file references regardless of closure timing
+  useEffect(() => {
+    fileReferencesRef.current = fileReferences;
+  }, [fileReferences]);
 
   return {
     value,

@@ -1,7 +1,7 @@
 'use client';
 
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
-import { HITLEntityType, HITLQuestionsBlock, ResourceType, ScopeType } from '@zamp-platform/chat';
+import { ChatActionsProvider, HITLEntityType, HITLQuestionsBlock, ResourceType, ScopeType } from '@zamp-platform/chat';
 import { ConnectedChatInput, useConversationActions, useConversationState } from '@zamp-platform/conversation-stream';
 import { cn } from '@zamp-platform/ui/utils';
 import { EVENT_TYPE } from '@zamp-platform/utils/event-bus';
@@ -48,6 +48,9 @@ const ChatSidebarContent = ({
     setActiveAgentInfo,
     selectedModel,
     setSelectedModel,
+    sharedFileReferences,
+    setSharedFileReferences,
+    sharedExternalFilePaths,
   } = usePaceContext();
   const { inputValue, setInputValue } = useChatDraftInput({
     conversationId,
@@ -162,38 +165,43 @@ const ChatSidebarContent = ({
         currentUserName={currentUserName}
       />
 
-      <div className='bg-BG_WHITE sticky bottom-0 z-10 mx-auto w-full max-w-[700px] px-3 pb-3'>
-        {hasInputsRequired ? (
-          <HITLQuestionsBlock
-            key={hitlQuestionsKey}
-            payload={{ questions: hitlQuestions }}
-            onSubmit={handleHitlRespondComplete}
-            sourceEntityId={conversationId ?? ''}
-            sourceEntityType={HITLEntityType.CONVERSATION}
-          />
-        ) : (
-          <ConnectedChatInput
-            resourceType={ResourceType.ORGANIZATION}
-            resourceId={organizationId}
-            autoFocus
-            scope={ScopeType.ORGANIZATION}
-            scopeId={organizationId}
-            username={username}
-            currentUserName={currentUserName}
-            placeholder="Do your life's best work with Pace"
-            externalInputValue={inputValue}
-            setExternalInputValue={setInputValue}
-            fileDropHandlerRef={fileDropHandlerRef}
-            llmModel={selectedModel}
-            showModelSelector
-            modelSelectorSlot={modelSelectorSlot}
-            conversationId={conversationId ?? ''}
-            isDisabled={isStreaming}
-            addFileReferenceRef={addFileReferenceRef}
-            metadata={activeAgentInfo?.id ? { agent_id: activeAgentInfo.id } : undefined}
-          />
-        )}
-      </div>
+      <ChatActionsProvider onFileOpen={handleFileOpen}>
+        <div className='bg-BG_WHITE sticky bottom-0 z-10 mx-auto w-full max-w-[700px] px-3 pb-3'>
+          {hasInputsRequired ? (
+            <HITLQuestionsBlock
+              key={hitlQuestionsKey}
+              payload={{ questions: hitlQuestions }}
+              onSubmit={handleHitlRespondComplete}
+              sourceEntityId={conversationId ?? ''}
+              sourceEntityType={HITLEntityType.CONVERSATION}
+            />
+          ) : (
+            <ConnectedChatInput
+              resourceType={ResourceType.ORGANIZATION}
+              resourceId={organizationId}
+              autoFocus
+              scope={ScopeType.ORGANIZATION}
+              scopeId={organizationId}
+              username={username}
+              currentUserName={currentUserName}
+              placeholder="Do your life's best work with Pace"
+              externalInputValue={inputValue}
+              setExternalInputValue={setInputValue}
+              fileDropHandlerRef={fileDropHandlerRef}
+              llmModel={selectedModel}
+              showModelSelector
+              modelSelectorSlot={modelSelectorSlot}
+              conversationId={conversationId ?? ''}
+              isDisabled={isStreaming}
+              addFileReferenceRef={addFileReferenceRef}
+              externalFileReferences={sharedFileReferences}
+              setExternalFileReferences={setSharedFileReferences}
+              externalFilePathsRef={sharedExternalFilePaths}
+              metadata={activeAgentInfo?.id ? { agent_id: activeAgentInfo.id } : undefined}
+            />
+          )}
+        </div>
+      </ChatActionsProvider>
     </div>
   );
 };
