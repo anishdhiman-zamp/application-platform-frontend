@@ -327,10 +327,12 @@ const TaskContentChat = ({ taskId }: { taskId: string }) => {
               <div
                 className={cn(
                   'overflow-hidden transition-all duration-300',
-                  taskStatus === TASK_STATUS.IN_PROGRESS ? 'mt-[30px] h-[80px]' : 'mt-0 h-0',
+                  effectiveStatus === TASK_STATUS.IN_PROGRESS || isAgentActive
+                    ? 'mt-[30px] max-h-[500px]'
+                    : 'mt-0 max-h-0',
                 )}
               >
-                <div className='border-GRAY_400 flex h-[80px] flex-col overflow-scroll rounded-[18px] border p-4'>
+                <div className='border-GRAY_400 flex min-h-[80px] flex-col rounded-[18px] border p-4'>
                   <ShimmerText text={displayedSummary || 'Starting now'} autoAnimate />
                 </div>
               </div>
