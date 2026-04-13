@@ -1,6 +1,6 @@
 'use client';
 
-import { useCallback, useEffect, useRef } from 'react';
+import { useCallback, useRef } from 'react';
 import { Skeleton } from '@zamp-platform/ui';
 import AgentTabEmptyState from 'modules/pace/components/agents/components/AgentTabEmptyState';
 import { useGetAgentInstructionsQuery, useUpdateAgentInstructionsMutation } from '@/apis/agents';
@@ -41,7 +41,7 @@ interface AgentInstructionsProps {
   agentAvatarSrc?: string;
   isActive?: boolean;
   skipFetch?: boolean;
-  onUpdating?: (updating: boolean) => void;
+  onUpdating?: () => void;
   onAddInstructions?: () => void;
 }
 
@@ -53,38 +53,16 @@ const AgentInstructions = ({
   onUpdating,
   onAddInstructions,
 }: AgentInstructionsProps) => {
-  const prevFetchingRef = useRef(false);
   const containerRef = useRef<HTMLDivElement>(null);
   const autoSaveTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
-  const shimmerTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   const shouldSkip = !isActive || skipFetch;
 
   const [updateInstructions] = useUpdateAgentInstructionsMutation();
-  const { data, isLoading, isError, isFetching, refetch } = useGetAgentInstructionsQuery(
-    { agentId },
-    { skip: shouldSkip },
-  );
-
-  useEffect(() => {
-    if (!prevFetchingRef.current && isFetching && !isLoading) {
-      onUpdating?.(true);
-      if (shimmerTimerRef.current) clearTimeout(shimmerTimerRef.current);
-      shimmerTimerRef.current = setTimeout(() => onUpdating?.(false), 3000);
-    }
-    prevFetchingRef.current = isFetching;
-  }, [isFetching, isLoading, onUpdating]);
-
-  useEffect(() => {
-    return () => {
-      if (shimmerTimerRef.current) clearTimeout(shimmerTimerRef.current);
-    };
-  }, []);
+  const { data, isLoading, isError, refetch } = useGetAgentInstructionsQuery({ agentId }, { skip: shouldSkip });
 
   const handleContentChange = useCallback(
     (newContent: string) => {
-      onUpdating?.(true);
-      if (shimmerTimerRef.current) clearTimeout(shimmerTimerRef.current);
-      shimmerTimerRef.current = setTimeout(() => onUpdating?.(false), 3000);
+      onUpdating?.();
 
       if (autoSaveTimerRef.current) {
         clearTimeout(autoSaveTimerRef.current);

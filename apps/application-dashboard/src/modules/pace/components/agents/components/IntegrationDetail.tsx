@@ -27,7 +27,7 @@ const IntegrationDetail = ({
           <div className='flex flex-1 items-center gap-1.5'>
             <div className='flex shrink-0 items-center justify-center overflow-clip'>
               {imgError || !integration.logo ? (
-                <div className='bg-GRAY_200 text-GRAY_700 f-12-550 flex h-full w-full items-center justify-center rounded'>
+                <div className='bg-GRAY_200 text-GRAY_700 f-12-550 flex h-5 w-5 items-center justify-center rounded'>
                   {getNameInitial(integration.name)}
                 </div>
               ) : (
