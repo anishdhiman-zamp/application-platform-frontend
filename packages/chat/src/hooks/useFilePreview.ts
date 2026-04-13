@@ -193,7 +193,7 @@ export const useFilePreview = (fileReference: UploadedFileType): FilePreviewData
 
 async function capturePdfPage(src: string): Promise<string> {
   const pdfjsLib = await import('pdfjs-dist');
-  pdfjsLib.GlobalWorkerOptions.workerSrc = `https://cdn.jsdelivr.net/npm/pdfjs-dist@${pdfjsLib.version}/build/pdf.worker.min.mjs`;
+  pdfjsLib.GlobalWorkerOptions.workerSrc = new URL('pdfjs-dist/build/pdf.worker.min.mjs', import.meta.url).toString();
 
   const pdf = await pdfjsLib.getDocument({ url: src, withCredentials: true }).promise;
   const page = await pdf.getPage(1);
@@ -203,9 +203,6 @@ async function capturePdfPage(src: string): Promise<string> {
   const canvas = document.createElement('canvas');
   canvas.width = viewport.width;
   canvas.height = viewport.height;
-
-  const ctx = canvas.getContext('2d');
-  if (!ctx) throw new Error('Canvas context unavailable');
 
   await page.render({ canvas, viewport }).promise;
 

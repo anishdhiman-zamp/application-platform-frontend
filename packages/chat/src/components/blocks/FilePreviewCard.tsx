@@ -5,7 +5,6 @@ import '../code-highlight.css';
 import { Button, FileIcon } from '@zamp-platform/ui';
 import { cn } from '@zamp-platform/ui/utils';
 import { CircleX, LoaderCircle } from 'lucide-react';
-import React from 'react';
 
 import { useChatActions } from '../../context/ChatActionsContext';
 import { useFilePreview } from '../../hooks/useFilePreview';
@@ -27,6 +26,7 @@ const FilePreviewCard = ({ fileReference, onRemove, isLoading, className }: File
     if (!fileReference.path) return;
 
     if (onFileOpen) {
+      // Server returns absolute paths prefixed with /home/; the file tree expects paths without it
       const normalizedPath = fileReference.path.startsWith('/home/') ? fileReference.path.slice(6) : fileReference.path;
       onFileOpen(normalizedPath, fileReference.name);
     }
@@ -42,7 +42,7 @@ const FilePreviewCard = ({ fileReference, onRemove, isLoading, className }: File
       onClick={handleClick}
     >
       {/* Preview area */}
-      <div className='relative h-[80px] w-full overflow-hidden rounded-t-[9px]'>
+      <div className='relative h-[80px] w-full overflow-hidden rounded-t-[8px]'>
         <PreviewContent
           category={category}
           previewUrl={previewUrl}
