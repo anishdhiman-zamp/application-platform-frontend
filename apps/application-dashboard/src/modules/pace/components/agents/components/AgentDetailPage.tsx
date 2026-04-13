@@ -141,8 +141,8 @@ const AgentDetailPage = ({ agentId, agentName, agentDescription = '', avatarKey 
       if (!tabSwitchRef.current) {
         triggerShimmer();
       }
-      tabSwitchRef.current = false;
     }
+    tabSwitchRef.current = false;
     prevInstructionsFetchingRef.current = isInstructionsFetching;
   }, [isInstructionsFetching, isInstructionsLoading, triggerShimmer]);
 
