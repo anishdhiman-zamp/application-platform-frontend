@@ -30,9 +30,7 @@ jobs:
         run: npm ci
 
       - name: Build Application
-        run: |
-          echo "TEMP: Simulating build failure to test deploy gate"
-          exit 1
+        run: npm run build
 
   deploy:
     name: Deploy to Vercel
@@ -112,7 +110,7 @@ jobs:
       - build
       - deploy
     steps:
-      - uses: technote-space/workflow-conclusion-action@v3
+      - uses: technote-space/workflow-conclusion-action@d71f73f4372b09a3e1ac62a14db1ea5a9f9c56f8 # v3
       - name: Update slack message body
         id: body
         run: |
