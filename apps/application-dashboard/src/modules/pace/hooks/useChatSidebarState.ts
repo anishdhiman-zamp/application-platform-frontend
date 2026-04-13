@@ -10,7 +10,7 @@ interface UseChatSidebarStateProps {
 }
 
 export const useChatSidebarState = ({ initialConversationId }: UseChatSidebarStateProps) => {
-  const { chatSidebarState, setChatSidebarState } = usePaceContext();
+  const { chatSidebarState, setChatSidebarState, setActiveAgentInfo } = usePaceContext();
 
   const prevInitialConversationIdRef = useRef(initialConversationId);
   const internalUpdateRef = useRef(false);
@@ -71,6 +71,7 @@ export const useChatSidebarState = ({ initialConversationId }: UseChatSidebarSta
       }
 
       setConversationIdState(initialConversationId);
+      setActiveAgentInfo(null);
 
       if (initialConversationId) {
         if (wasNull) {
@@ -84,7 +85,7 @@ export const useChatSidebarState = ({ initialConversationId }: UseChatSidebarSta
         setChatKey((prev) => prev + 1);
       }
     }
-  }, [initialConversationId, chatSidebarState, setChatSidebarState]);
+  }, [initialConversationId, chatSidebarState, setChatSidebarState, setActiveAgentInfo]);
 
   return {
     chatTitle,
