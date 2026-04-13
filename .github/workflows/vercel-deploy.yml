@@ -30,9 +30,7 @@ jobs:
         run: npm ci
 
       - name: Build Application
-        run: |
-          echo "TEMP: Simulating build failure to test deploy gate"
-          exit 1
+        run: npm run build
 
   deploy:
     name: Deploy to Vercel
