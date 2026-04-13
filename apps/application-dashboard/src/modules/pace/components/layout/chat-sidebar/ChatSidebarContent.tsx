@@ -134,6 +134,21 @@ const ChatSidebarContent = ({
     return () => sub.unsubscribe();
   }, [sseEventBus, handleGlobalInputRequired]);
 
+  const handleTaskHitlRespondComplete = useCallback(
+    (event: { type: EVENT_TYPE; payload?: string | Record<string, unknown> }) => {
+      if (event?.payload === 'hitl_responded') {
+        void refetchConversationHistory();
+      }
+    },
+    [refetchConversationHistory],
+  );
+
+  useEffect(() => {
+    const sub = sseEventBus.subscribe(EVENT_TYPE.COMPONENT, handleTaskHitlRespondComplete);
+
+    return () => sub.unsubscribe();
+  }, [sseEventBus, handleTaskHitlRespondComplete]);
+
   return (
     <div className='bg-BG_WHITE relative mx-auto flex h-full w-full flex-1 flex-col'>
       <div className={cn('transition-[filter] duration-200', isTaskPopoverOpen && 'pointer-events-none blur-sm')}>

@@ -93,6 +93,7 @@ const ChatConversationContent = ({
     isCreatingConversationV2,
     isLoadingConversationHistory,
     isErrorConversationHistory,
+    isUninitializedConversationHistory,
     isStreaming,
     isBrowserStreamingAvailable,
     browserSessionId,
@@ -376,6 +377,7 @@ const ChatConversationContent = ({
             conversationId={conversationId ?? ctxConversationId ?? ''}
             containerRef={taskStatusContainerRef}
             onOpenChange={handleTaskPopoverOpenChange}
+            onVisibleStatusesChange={!isUninitializedConversationHistory ? refetchConversationHistory : undefined}
           />
         </div>
       </div>
