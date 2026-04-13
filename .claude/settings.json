@@ -8,6 +8,7 @@
     "superpowers@claude-plugins-official": true,
     "serena@claude-plugins-official": true,
     "github@claude-plugins-official": true,
-    "context7@claude-plugins-official": true
+    "context7@claude-plugins-official": true,
+    "andrej-karpathy-skills@karpathy-skills": true
   }
 }
