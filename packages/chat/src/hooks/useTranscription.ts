@@ -119,10 +119,6 @@ export const useTranscription = ({ adapter, onTranscriptChunk }: UseTranscriptio
     }
   }, [cleanupMicrophone, disconnectFromElevenLabs]);
 
-  useEffect(() => {
-    stopRecordingRef.current = stopRecording;
-  }, [stopRecording]);
-
   const resetInactivityTimer = useCallback(() => {
     if (inactivityTimerRef.current) {
       clearTimeout(inactivityTimerRef.current);
@@ -135,6 +131,10 @@ export const useTranscription = ({ adapter, onTranscriptChunk }: UseTranscriptio
       }, INACTIVITY_TIMEOUT_MS);
     }
   }, [isRecording]);
+
+  useEffect(() => {
+    stopRecordingRef.current = stopRecording;
+  }, [stopRecording]);
 
   useEffect(() => {
     resetInactivityTimerRef.current = resetInactivityTimer;
