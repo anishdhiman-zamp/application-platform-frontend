@@ -43,10 +43,12 @@ export const useTranscription = ({ adapter, onTranscriptChunk }: UseTranscriptio
   const inactivityTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   const stopRecordingRef = useRef<() => void | Promise<void>>(() => {});
   const resetInactivityTimerRef = useRef<() => void>(() => {});
+  const hasSpeechRef = useRef(false);
 
   const appendTranscript = useCallback(
     (data: { text: string }) => {
       if (data.text) {
+        hasSpeechRef.current = true;
         onTranscriptChunk?.(data.text);
         resetInactivityTimerRef.current();
       }
@@ -101,6 +103,7 @@ export const useTranscription = ({ adapter, onTranscriptChunk }: UseTranscriptio
   const stopRecording = useCallback(async () => {
     stateRefs.current.stopRequested = true;
     stateRefs.current.isStarting = false;
+    hasSpeechRef.current = false;
     setIsRecording(false);
 
     if (inactivityTimerRef.current) {
@@ -126,7 +129,7 @@ export const useTranscription = ({ adapter, onTranscriptChunk }: UseTranscriptio
       inactivityTimerRef.current = null;
     }
 
-    if (isRecording) {
+    if (isRecording && hasSpeechRef.current) {
       inactivityTimerRef.current = setTimeout(() => {
         stopRecordingRef.current();
       }, INACTIVITY_TIMEOUT_MS);
