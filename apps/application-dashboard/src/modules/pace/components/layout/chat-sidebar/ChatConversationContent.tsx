@@ -137,8 +137,6 @@ const ChatConversationContent = ({
     return null;
   }, [messages]);
 
-  const currentAgentInfo = activeAgentInfo ?? agentInfoFromMessages;
-
   const handleWatchStream = useCallback(() => {
     const activeConversationId = conversationId ?? ctxConversationId;
 
@@ -174,10 +172,10 @@ const ChatConversationContent = ({
   }, [pendingFileReference, clearPendingFileReference, addFileReferenceRef]);
 
   useEffect(() => {
-    if (agentInfoFromMessages && !activeAgentInfo) {
+    if (agentInfoFromMessages) {
       setActiveAgentInfo(agentInfoFromMessages);
     }
-  }, [agentInfoFromMessages, activeAgentInfo, setActiveAgentInfo]);
+  }, [agentInfoFromMessages, setActiveAgentInfo]);
 
   const handleAgentClick = useCallback(
     (agentId: string, agentName: string, agentDescription?: string, avatarKey?: string) => {
@@ -363,11 +361,11 @@ const ChatConversationContent = ({
         className='bg-BG_WHITE/80 sticky bottom-0 z-10 mx-auto w-full max-w-[700px] px-3 backdrop-blur-md'
       >
         <div className='flex flex-wrap items-center gap-2 pb-2'>
-          {currentAgentInfo && (
+          {activeAgentInfo && (
             <AgentPill
-              agentId={currentAgentInfo.id}
-              agentName={currentAgentInfo.name}
-              avatarKey={currentAgentInfo.avatar}
+              agentId={activeAgentInfo.id}
+              agentName={activeAgentInfo.name}
+              avatarKey={activeAgentInfo.avatar}
               containerRef={taskStatusContainerRef}
               onOpenChange={handleTaskPopoverOpenChange}
             />

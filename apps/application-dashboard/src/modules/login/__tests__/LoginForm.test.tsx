@@ -112,27 +112,6 @@ jest.mock('components/common/input', () => ({
 
 global.fetch = jest.fn();
 
-const mockLocation = {
-  href: '',
-  search: '',
-  pathname: '',
-  hash: '',
-  host: '',
-  hostname: '',
-  port: '',
-  protocol: '',
-  origin: '',
-  assign: jest.fn(),
-  reload: jest.fn(),
-  replace: jest.fn(),
-};
-
-Object.defineProperty(window, 'location', {
-  value: mockLocation,
-  writable: true,
-  configurable: true,
-});
-
 describe('LoginForm', () => {
   const mockGetApiDomainAndRegions = getApiDomainAndRegions as jest.Mock;
   const mockGetFromLocalStorage = getFromLocalStorage as jest.Mock;
@@ -152,7 +131,6 @@ describe('LoginForm', () => {
       status: 200,
       json: jest.fn().mockResolvedValue({}),
     });
-    window.location.search = '';
   });
 
   afterEach(() => {
@@ -401,11 +379,6 @@ describe('LoginForm', () => {
         json: jest.fn().mockResolvedValue(mockOidcResponse),
       });
 
-    const originalLocation = window.location;
-
-    delete (window as any).location;
-    (window as any).location = { ...originalLocation, href: '' };
-
     render(createElement(LoginForm));
 
     const emailInput = screen.getByTestId('email-input');
@@ -421,8 +394,6 @@ describe('LoginForm', () => {
     await waitFor(() => {
       expect(mockGetDomainFromEmail).toHaveBeenCalledWith('test@example.com');
     });
-
-    (window as any).location = originalLocation;
   });
 
   it('should handle API errors during login flow', async () => {
@@ -534,13 +505,6 @@ describe('LoginForm', () => {
       },
       redirect_browser_to: 'https://app.zamp.ai/dashboard',
     };
-
-    Object.defineProperty(window, 'location', {
-      value: {
-        href: '',
-      },
-      writable: true,
-    });
 
     mockFetch
       .mockResolvedValueOnce({

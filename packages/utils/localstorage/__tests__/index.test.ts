@@ -1,3 +1,4 @@
+import * as browserModule from '../../browser';
 import { getFromLocalStorage, LOCAL_STORAGE_KEYS, removeFromLocalStorage, setToLocalStorage } from '../index';
 
 // Mock localStorage
@@ -89,19 +90,14 @@ describe('LocalStorage Utilities', () => {
     });
 
     it('should return empty string when window is undefined (SSR)', () => {
-      const originalWindow = global.window;
-      Object.defineProperty(global, 'window', {
-        value: undefined,
-        writable: true,
-        configurable: true,
-      });
+      const isBrowserSpy = jest.spyOn(browserModule, 'isBrowser').mockReturnValue(false);
 
       const result = getFromLocalStorage('test-key');
 
       expect(result).toBe('');
       expect(mockLocalStorage.getItem).not.toHaveBeenCalled();
 
-      global.window = originalWindow;
+      isBrowserSpy.mockRestore();
     });
 
     it('should handle special characters in keys', () => {
