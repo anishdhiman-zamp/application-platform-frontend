@@ -12,7 +12,6 @@ export const THEME_COOKIE_MAX_AGE = 60 * 60 * 24 * 365; // 1 year
 
 export const SESSION_COOKIE_NAMES = {
   PRODUCTION: 'ory_kratos_session_us',
-  US_PRODUCTION: 'ory_kratos_session_us',
   ME_PRODUCTION: 'ory_kratos_session_me',
   DEVELOPMENT: 'ory_kratos_session',
 };
