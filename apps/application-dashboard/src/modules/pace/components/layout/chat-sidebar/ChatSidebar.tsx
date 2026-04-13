@@ -53,13 +53,21 @@ const ChatSidebar = () => {
     startNewChat();
   }, [startNewChat, setActiveAgentInfo]);
 
+  const handleSelectConversation = useCallback(
+    (id: string, title?: string) => {
+      setActiveAgentInfo(null);
+      setConversationId(id, title);
+    },
+    [setConversationId, setActiveAgentInfo],
+  );
+
   useEffect(() => {
     registerStartNewChat(handleStartNewChat);
   }, [registerStartNewChat, handleStartNewChat]);
 
   useEffect(() => {
-    registerSelectConversation(setConversationId);
-  }, [registerSelectConversation, setConversationId]);
+    registerSelectConversation(handleSelectConversation);
+  }, [registerSelectConversation, handleSelectConversation]);
 
   useEffect(() => {
     const raf = requestAnimationFrame(() => {

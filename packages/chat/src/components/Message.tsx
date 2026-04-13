@@ -259,6 +259,10 @@ export const Message: FC<MessageProps> = ({
     </>
   );
 
+  if (message.message_content?.elements?.length === 0) {
+    return null;
+  }
+
   if (isUserMessage) {
     return (
       <motion.div

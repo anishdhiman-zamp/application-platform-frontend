@@ -83,7 +83,8 @@ export const HITLQuestionItem = ({
             selectedOptionIds={selectedOptionIds}
             customInputValue={customInputs[question.id] || ''}
             customInputRef={customInputRef}
-            onOptionClick={(optionId) => {
+            onOptionClick={(optionId, optIndex) => {
+              setFocusedOptionIndex(optIndex);
               selectAnswer(question.id, qIndex, optionId);
               focusContainer();
             }}

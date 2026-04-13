@@ -115,6 +115,28 @@ const ChatConversationContent = ({
     disabled: isStreaming || isCreatingConversationV2,
   });
 
+  const agentAvatarMap = useMemo(() => {
+    const map = new Map<string, string>();
+
+    for (const msg of messages) {
+      const elements = msg?.message_content?.elements;
+
+      if (!elements) continue;
+
+      for (const el of elements) {
+        if (el.type === BLOCK_TYPE.AGENT && 'payload' in el) {
+          const payload = (el as AgentBlockType).payload;
+
+          if (payload.avatar && !map.has(payload.agent_id)) {
+            map.set(payload.agent_id, payload.avatar);
+          }
+        }
+      }
+    }
+
+    return map;
+  }, [messages]);
+
   const agentInfoFromMessages = useMemo((): ActiveAgentInfo | null => {
     for (let i = messages.length - 1; i >= 0; i--) {
       const elements = messages[i]?.message_content?.elements;
@@ -128,16 +150,14 @@ const ChatConversationContent = ({
           return {
             id: payload.agent_id,
             name: payload.name,
-            avatar: payload.avatar,
+            avatar: payload.avatar || agentAvatarMap.get(payload.agent_id),
           };
         }
       }
     }
 
     return null;
-  }, [messages]);
-
-  const currentAgentInfo = activeAgentInfo ?? agentInfoFromMessages;
+  }, [messages, agentAvatarMap]);
 
   const handleWatchStream = useCallback(() => {
     const activeConversationId = conversationId ?? ctxConversationId;
@@ -174,10 +194,10 @@ const ChatConversationContent = ({
   }, [pendingFileReferences, clearPendingFileReferences, addFileReferenceRef]);
 
   useEffect(() => {
-    if (agentInfoFromMessages && !activeAgentInfo) {
+    if (agentInfoFromMessages) {
       setActiveAgentInfo(agentInfoFromMessages);
     }
-  }, [agentInfoFromMessages, activeAgentInfo, setActiveAgentInfo]);
+  }, [agentInfoFromMessages, setActiveAgentInfo]);
 
   const handleAgentClick = useCallback(
     (agentId: string, agentName: string, agentDescription?: string, avatarKey?: string) => {
@@ -218,7 +238,7 @@ const ChatConversationContent = ({
 
   const renderAgentBlock = useCallback(
     (payload: { agent_id: string; name: string; description: string; avatar?: string }) => {
-      const avatarKey = payload.avatar;
+      const avatarKey = payload.avatar || agentAvatarMap.get(payload.agent_id);
       const avatar = (avatarKey && getAgentAvatarByKey(avatarKey)) || getAgentAvatar(payload.name);
 
       return (
@@ -231,7 +251,7 @@ const ChatConversationContent = ({
         />
       );
     },
-    [handleAgentClick],
+    [handleAgentClick, agentAvatarMap],
   );
 
   // Refresh agents list when an agent block appears in chat
@@ -363,11 +383,11 @@ const ChatConversationContent = ({
         className='bg-BG_WHITE/80 sticky bottom-0 z-10 mx-auto w-full max-w-[700px] px-3 backdrop-blur-md'
       >
         <div className='flex flex-wrap items-center gap-2 pb-2'>
-          {currentAgentInfo && (
+          {activeAgentInfo && (
             <AgentPill
-              agentId={currentAgentInfo.id}
-              agentName={currentAgentInfo.name}
-              avatarKey={currentAgentInfo.avatar}
+              agentId={activeAgentInfo.id}
+              agentName={activeAgentInfo.name}
+              avatarKey={activeAgentInfo.avatar}
               containerRef={taskStatusContainerRef}
               onOpenChange={handleTaskPopoverOpenChange}
             />
