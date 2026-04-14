@@ -3,6 +3,7 @@ export * from './cache';
 export * from './common';
 export * from './date';
 export * from './event-bus';
+export * from './file-extensions';
 export * from './hooks/useAutoFocus';
 export * from './hooks/useSSE';
 export * from './hooks/useThrottle';

@@ -17,15 +17,27 @@ const MAX_CODE_BYTES = 1000;
 const MAX_CODE_LINES = 5;
 const VIDEO_CAPTURE_TIMEOUT_MS = 5000;
 
+/** Data returned by {@link useFilePreview} describing the resolved preview state. */
 export interface FilePreviewData {
+  /** The detected file category (image, video, code, pdf, or generic). */
   category: FilePreviewCategory;
+  /** A blob or server URL for the visual preview, or `null` if unavailable. */
   previewUrl: string | null;
+  /** Syntax-highlighted React nodes for code files, or `null` for other categories. */
   codeNodes: ReactNode | null;
+  /** Whether the preview is still being generated. */
   isLoading: boolean;
 }
 
-function hastToReact(nodes: RootContent[], keyPrefix = 'fp'): ReactNode[] {
-  return nodes.map((node, i) => {
+/**
+ * Recursively converts a HAST (HTML Abstract Syntax Tree) node array into React elements.
+ *
+ * @param nodes - The HAST child nodes to convert.
+ * @param keyPrefix - A prefix used to generate stable React keys for each element.
+ * @returns An array of React nodes representing the HAST tree.
+ */
+const hastToReact = (nodes: RootContent[], keyPrefix = 'fp'): ReactNode[] =>
+  nodes.map((node, i) => {
     if (node.type === 'text') return node.value;
     if (node.type === 'element') {
       const className = (node.properties?.className as string[])?.join(' ');
@@ -37,9 +49,18 @@ function hastToReact(nodes: RootContent[], keyPrefix = 'fp'): ReactNode[] {
     }
     return null;
   });
-}
 
-function highlightCode(code: string, language?: string): ReactNode {
+/**
+ * Applies syntax highlighting to a code string using lowlight.
+ *
+ * Falls back to auto-detection when the language is unspecified or unregistered,
+ * and returns the raw string if highlighting fails entirely.
+ *
+ * @param code - The source code text to highlight.
+ * @param language - An optional lowlight-registered language identifier.
+ * @returns React nodes with syntax-highlighting spans, or the plain text on failure.
+ */
+const highlightCode = (code: string, language?: string): ReactNode => {
   try {
     const tree =
       language && lowlightInstance.registered(language)
@@ -49,13 +70,35 @@ function highlightCode(code: string, language?: string): ReactNode {
   } catch {
     return code;
   }
-}
+};
 
-function truncateToLines(text: string, maxLines: number): string {
+/**
+ * Truncates text to a maximum number of lines.
+ *
+ * @param text - The input text to truncate.
+ * @param maxLines - The maximum number of lines to keep.
+ * @returns The truncated text containing at most {@link maxLines} lines.
+ */
+const truncateToLines = (text: string, maxLines: number): string => {
   const lines = text.split('\n');
   return lines.slice(0, maxLines).join('\n');
-}
+};
 
+/**
+ * Generates a rich preview for an uploaded file reference.
+ *
+ * Based on the file extension the hook determines a {@link FilePreviewCategory}
+ * and asynchronously produces the appropriate preview:
+ * - **Image** — creates a blob URL or falls back to the server URL.
+ * - **Video** — captures the first visible frame as a JPEG thumbnail.
+ * - **Code** — reads the first {@link MAX_CODE_BYTES} bytes and applies syntax highlighting.
+ * - **PDF** — renders the first page to a canvas and converts it to a JPEG thumbnail.
+ *
+ * All generated blob URLs are automatically revoked on unmount.
+ *
+ * @param fileReference - The uploaded file metadata (name, path, and optional raw `File` object).
+ * @returns A {@link FilePreviewData} object with the resolved preview state.
+ */
 export const useFilePreview = (fileReference: UploadedFileType): FilePreviewData => {
   const fileRefRef = useRef(fileReference);
   fileRefRef.current = fileReference;
@@ -191,7 +234,16 @@ export const useFilePreview = (fileReference: UploadedFileType): FilePreviewData
   return { category, previewUrl, codeNodes, isLoading };
 };
 
-async function capturePdfPage(src: string): Promise<string> {
+/**
+ * Renders the first page of a PDF to an off-screen canvas and returns a JPEG blob URL.
+ *
+ * Uses `pdfjs-dist` (dynamically imported) to parse the document and render at 2× scale.
+ *
+ * @param src - A URL or blob URL pointing to the PDF document.
+ * @returns A blob URL for the JPEG thumbnail of the first page.
+ * @throws If the PDF cannot be loaded or the canvas conversion fails.
+ */
+const capturePdfPage = async (src: string): Promise<string> => {
   const pdfjsLib = await import('pdfjs-dist');
   pdfjsLib.GlobalWorkerOptions.workerSrc = new URL('pdfjs-dist/build/pdf.worker.min.mjs', import.meta.url).toString();
 
@@ -216,10 +268,21 @@ async function capturePdfPage(src: string): Promise<string> {
       0.85,
     );
   });
-}
+};
 
-function captureVideoFrame(src: string): Promise<string> {
-  return new Promise((resolve, reject) => {
+/**
+ * Captures a single frame from a video and returns it as a JPEG blob URL.
+ *
+ * Creates an off-screen `<video>` element, seeks to 0.1 s, draws the frame
+ * onto a canvas, and converts the result to a JPEG blob. Times out after
+ * {@link VIDEO_CAPTURE_TIMEOUT_MS} milliseconds.
+ *
+ * @param src - A URL or blob URL pointing to the video source.
+ * @returns A blob URL for the captured JPEG frame.
+ * @throws If the video fails to load, the canvas context is unavailable, or the operation times out.
+ */
+const captureVideoFrame = (src: string): Promise<string> =>
+  new Promise((resolve, reject) => {
     const video = document.createElement('video');
     video.crossOrigin = 'use-credentials';
     video.muted = true;
@@ -285,4 +348,3 @@ function captureVideoFrame(src: string): Promise<string> {
 
     video.src = src;
   });
-}

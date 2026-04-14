@@ -1,3 +1,6 @@
+import { IMAGE_EXTENSIONS, VIDEO_EXTENSIONS } from '@zamp-platform/utils';
+
+/** Supported file preview categories used to determine rendering strategy. */
 export const FILE_PREVIEW_CATEGORY = {
   IMAGE: 'image',
   VIDEO: 'video',
@@ -6,6 +9,7 @@ export const FILE_PREVIEW_CATEGORY = {
   OTHER: 'other',
 } as const;
 
+/** Union type of all valid file preview category values. */
 export type FilePreviewCategory = (typeof FILE_PREVIEW_CATEGORY)[keyof typeof FILE_PREVIEW_CATEGORY];
 
 /** Extracts and normalizes a file extension from a filename or extension string */
@@ -15,10 +19,13 @@ const normalizeExtension = (input: string): string => {
   return ext.toLowerCase().trim();
 };
 
-const IMAGE_EXTENSIONS = new Set(['png', 'jpg', 'jpeg', 'gif', 'webp', 'svg', 'bmp', 'ico']);
+/** Set view of {@link IMAGE_EXTENSIONS} for O(1) lookups. */
+const IMAGE_EXTENSIONS_SET = new Set<string>(IMAGE_EXTENSIONS);
 
-const VIDEO_EXTENSIONS = new Set(['mp4', 'mov', 'avi', 'mkv', 'webm', 'wmv', 'flv', 'm4v']);
+/** Set view of {@link VIDEO_EXTENSIONS} for O(1) lookups. */
+const VIDEO_EXTENSIONS_SET = new Set<string>(VIDEO_EXTENSIONS);
 
+/** File extensions treated as source code for preview highlighting. */
 const CODE_EXTENSIONS = new Set([
   'js',
   'jsx',
@@ -112,16 +119,28 @@ const EXTENSION_TO_LANGUAGE: Record<string, string> = {
   graphql: 'graphql',
 };
 
+/**
+ * Determines the preview category for a file based on its extension.
+ *
+ * @param fileName - The file name (or path) to classify.
+ * @returns The resolved {@link FilePreviewCategory}.
+ */
 export const getFilePreviewCategory = (fileName: string): FilePreviewCategory => {
   const ext = normalizeExtension(fileName);
 
-  if (IMAGE_EXTENSIONS.has(ext)) return FILE_PREVIEW_CATEGORY.IMAGE;
-  if (VIDEO_EXTENSIONS.has(ext)) return FILE_PREVIEW_CATEGORY.VIDEO;
+  if (IMAGE_EXTENSIONS_SET.has(ext)) return FILE_PREVIEW_CATEGORY.IMAGE;
+  if (VIDEO_EXTENSIONS_SET.has(ext)) return FILE_PREVIEW_CATEGORY.VIDEO;
   if (ext === 'pdf') return FILE_PREVIEW_CATEGORY.PDF;
   if (CODE_EXTENSIONS.has(ext)) return FILE_PREVIEW_CATEGORY.CODE;
   return FILE_PREVIEW_CATEGORY.OTHER;
 };
 
+/**
+ * Returns the lowlight-compatible language identifier for a given file name.
+ *
+ * @param fileName - The file name (or path) whose extension is looked up.
+ * @returns The language identifier, or `undefined` if no mapping exists.
+ */
 export const getLanguageForExtension = (fileName: string): string | undefined => {
   const ext = normalizeExtension(fileName);
   return EXTENSION_TO_LANGUAGE[ext];
