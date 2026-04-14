@@ -81,10 +81,10 @@ import { filtersContextActions, useFiltersContextStore, withFiltersContext } fro
 
 interface DatasetDetailProps {
   tableName: string;
-  renderHeader?: (props: { tableName: string; title: string }) => React.ReactNode;
+  header?: React.ReactNode;
 }
 
-const DatasetDetailInner = ({ tableName, renderHeader }: DatasetDetailProps) => {
+const DatasetDetailInner = ({ tableName, header }: DatasetDetailProps) => {
   // --- Refs ---
   const tableRef = useRef<AgGridReact | null>(null);
   const totalRowsRef = useRef<number | undefined>(undefined);
@@ -1028,9 +1028,7 @@ const DatasetDetailInner = ({ tableName, renderHeader }: DatasetDetailProps) => 
   if (accessDenied) {
     return (
       <div className='bg-BG_WHITE flex h-full w-full flex-1 flex-col'>
-        {renderHeader ? (
-          renderHeader({ tableName, title: snakeCaseToSentenceCase(tableName) })
-        ) : (
+        {header ?? (
           <div className='border-GRAY_400 flex items-center gap-3 border-b px-6 pt-10 pb-8'>
             <Link href={preserveSidebarParam(ROUTES_PATH.CHAT_SETTINGS_DATASETS)}>
               <ArrowLeft width={18} height={18} className='text-GRAY_700 hover:text-GRAY_1000 transition-colors' />
@@ -1079,9 +1077,7 @@ const DatasetDetailInner = ({ tableName, renderHeader }: DatasetDetailProps) => 
       </Dialog>
 
       {/* Header */}
-      {renderHeader ? (
-        renderHeader({ tableName, title: snakeCaseToSentenceCase(tableName) })
-      ) : (
+      {header ?? (
         <div className='border-GRAY_400 flex items-center gap-3 border-b px-6 pt-10 pb-8'>
           <button
             type='button'
