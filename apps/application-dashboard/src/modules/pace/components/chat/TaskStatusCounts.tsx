@@ -53,6 +53,7 @@ const TaskStatusCounts: FC<TaskStatusCountsProps> = ({
   const visiblePillStatuses = useMemo(() => PILL_STATUS_ORDER.filter((s) => counts[s] > 0), [counts]);
 
   const onVisibleStatusesChangeRef = useRef(onVisibleStatusesChange);
+  const isMountedRef = useRef(false);
 
   onVisibleStatusesChangeRef.current = onVisibleStatusesChange;
 
@@ -84,6 +85,11 @@ const TaskStatusCounts: FC<TaskStatusCountsProps> = ({
   const needsInputCount = counts[TASK_STATUS.NEEDS_INPUT];
 
   useEffect(() => {
+    if (!isMountedRef.current) {
+      isMountedRef.current = true;
+
+      return;
+    }
     onVisibleStatusesChangeRef.current?.();
   }, [needsInputCount]);
 
