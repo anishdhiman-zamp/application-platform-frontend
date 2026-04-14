@@ -18,7 +18,7 @@ export function getLastVisitedLandingRoute(): string {
   const savedMode = getCookie(LAST_VISITED_PRODUCT_MODE_COOKIE);
 
   if (savedMode === ProductMode.MACS) {
-    return ROUTES_PATH.CHAT_SETTINGS_GENERAL;
+    return ROUTES_PATH.CHAT;
   }
 
   return ROUTES_PATH.PROCESSES;
