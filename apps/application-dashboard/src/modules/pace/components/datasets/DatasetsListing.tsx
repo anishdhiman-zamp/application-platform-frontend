@@ -6,7 +6,6 @@ import { ChevronRight, Database, Plus } from 'lucide-react';
 import { DATASETS_POLL_INTERVAL_MS, LIST_TABLES_QUERY } from 'modules/pace/components/datasets/datasets.constants';
 import { preserveSidebarParam } from 'modules/pace/pace.utils';
 import Link from 'next/link';
-import { useRouter } from 'next/navigation';
 import { snakeCaseToSentenceCase } from 'utils/common';
 import { type AgentDbQueryRequest, useAgentDbReadQuery } from '@/apis/agentManagedDb';
 import ImageLoader from '@/components/common/loader/ImageLoader';
@@ -14,12 +13,14 @@ import CommonWrapper from '@/components/commonWrapper';
 import { SkeletonTypes } from '@/components/commonWrapper/commonWrapper.types';
 import EmptyState from '@/components/EmptyState';
 import { DONE_EMPTY_STATE, ZAMP_LOGO_LOADER_SVG } from '@/constants/icons';
-import { getDatasetDetailRoute, ROUTES_PATH } from '@/constants/routeConfig';
+import { ROUTES_PATH } from '@/constants/routeConfig';
+import { useDynamicTabs } from '@/modules/pace/components/dynamic-tabs/useDynamicTabs';
+import { TAB_TYPE } from '@/modules/pace/pace.types';
 
 const LISTING_QUERY_ARG: AgentDbQueryRequest = { query: LIST_TABLES_QUERY };
 
 const DatasetsListing = () => {
-  const router = useRouter();
+  const { openTab } = useDynamicTabs({ type: TAB_TYPE.DATASET });
   const { data, isLoading } = useAgentDbReadQuery(LISTING_QUERY_ARG, {
     pollingInterval: DATASETS_POLL_INTERVAL_MS,
     skipPollingIfUnfocused: true,
@@ -73,7 +74,7 @@ const DatasetsListing = () => {
                 <tr
                   key={row.id}
                   className='border-GRAY_400 hover:bg-BG_GRAY_1 group cursor-pointer border-b transition-colors'
-                  onClick={() => router.push(preserveSidebarParam(getDatasetDetailRoute(row.id)))}
+                  onClick={() => openTab(row.id, row.title)}
                 >
                   <td className='px-6 py-4'>
                     <span className='f-13-500 flex items-center gap-2.5'>

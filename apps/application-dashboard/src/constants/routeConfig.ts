@@ -55,6 +55,7 @@ export const ROUTES_PATH = {
   CHAT_APPS: '/chat/apps',
   CHAT_AGENTS: '/chat/agents',
   CHAT_AGENT: '/chat/agents/:agentId',
+  CHAT_DATASET: '/chat/dataset',
 };
 
 export const getPageRouteById = (pageId: string, sheetId?: string) => {

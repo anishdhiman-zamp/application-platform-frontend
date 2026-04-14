@@ -55,6 +55,7 @@ export const TAB_TYPE = {
   TASK: 'task',
   AGENT: 'agent',
   BROWSER: 'browser',
+  DATASET: 'dataset',
 } as const;
 
 export type DynamicTabType = (typeof TAB_TYPE)[keyof typeof TAB_TYPE];

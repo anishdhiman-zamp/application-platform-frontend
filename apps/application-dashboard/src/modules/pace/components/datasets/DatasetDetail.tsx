@@ -81,9 +81,10 @@ import { filtersContextActions, useFiltersContextStore, withFiltersContext } fro
 
 interface DatasetDetailProps {
   tableName: string;
+  renderHeader?: (props: { tableName: string; title: string }) => React.ReactNode;
 }
 
-const DatasetDetailInner = ({ tableName }: DatasetDetailProps) => {
+const DatasetDetailInner = ({ tableName, renderHeader }: DatasetDetailProps) => {
   // --- Refs ---
   const tableRef = useRef<AgGridReact | null>(null);
   const totalRowsRef = useRef<number | undefined>(undefined);
@@ -1027,12 +1028,16 @@ const DatasetDetailInner = ({ tableName }: DatasetDetailProps) => {
   if (accessDenied) {
     return (
       <div className='bg-BG_WHITE flex h-full w-full flex-1 flex-col'>
-        <div className='border-GRAY_400 flex items-center gap-3 border-b px-6 pt-10 pb-8'>
-          <Link href={preserveSidebarParam(ROUTES_PATH.CHAT_SETTINGS_DATASETS)}>
-            <ArrowLeft width={18} height={18} className='text-GRAY_700 hover:text-GRAY_1000 transition-colors' />
-          </Link>
-          <h1 className='f-18-500 flex-1'>{snakeCaseToSentenceCase(tableName)}</h1>
-        </div>
+        {renderHeader ? (
+          renderHeader({ tableName, title: snakeCaseToSentenceCase(tableName) })
+        ) : (
+          <div className='border-GRAY_400 flex items-center gap-3 border-b px-6 pt-10 pb-8'>
+            <Link href={preserveSidebarParam(ROUTES_PATH.CHAT_SETTINGS_DATASETS)}>
+              <ArrowLeft width={18} height={18} className='text-GRAY_700 hover:text-GRAY_1000 transition-colors' />
+            </Link>
+            <h1 className='f-18-500 flex-1'>{snakeCaseToSentenceCase(tableName)}</h1>
+          </div>
+        )}
         <div className='flex flex-1 flex-col items-center justify-center gap-3'>
           <ShieldOff className='text-GRAY_500 h-10 w-10' />
           <p className='f-14-500 text-GRAY_700'>Access denied</p>
@@ -1074,17 +1079,21 @@ const DatasetDetailInner = ({ tableName }: DatasetDetailProps) => {
       </Dialog>
 
       {/* Header */}
-      <div className='border-GRAY_400 flex items-center gap-3 border-b px-6 pt-10 pb-8'>
-        <button
-          type='button'
-          onClick={() => handleNavAttempt(preserveSidebarParam(ROUTES_PATH.CHAT_SETTINGS_DATASETS))}
-          className='text-GRAY_700 hover:text-GRAY_1000 transition-colors'
-        >
-          <ArrowLeft width={18} height={18} />
-        </button>
-        <h1 className='f-18-500 flex-1'>{snakeCaseToSentenceCase(tableName)}</h1>
-        <ShareDatasetNeonPopup tableName={tableName} />
-      </div>
+      {renderHeader ? (
+        renderHeader({ tableName, title: snakeCaseToSentenceCase(tableName) })
+      ) : (
+        <div className='border-GRAY_400 flex items-center gap-3 border-b px-6 pt-10 pb-8'>
+          <button
+            type='button'
+            onClick={() => handleNavAttempt(preserveSidebarParam(ROUTES_PATH.CHAT_SETTINGS_DATASETS))}
+            className='text-GRAY_700 hover:text-GRAY_1000 transition-colors'
+          >
+            <ArrowLeft width={18} height={18} />
+          </button>
+          <h1 className='f-18-500 flex-1'>{snakeCaseToSentenceCase(tableName)}</h1>
+          <ShareDatasetNeonPopup tableName={tableName} />
+        </div>
+      )}
 
       {/* Toolbar + Filter in one row */}
       <div
