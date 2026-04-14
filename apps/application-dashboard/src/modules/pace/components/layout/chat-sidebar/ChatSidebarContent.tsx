@@ -10,6 +10,7 @@ import ChatConversationContent from 'modules/pace/components/layout/chat-sidebar
 import { useEventBus } from '@/app/_providers/sse-provider';
 import ChatTopbar from '@/modules/pace/components/chat/ChatTopbar';
 import ModelSelector from '@/modules/pace/components/chat/ModelSelector';
+import { HITL_RESPONDED_EVENT } from '@/modules/pace/components/tasks/constants/tasks.constants';
 import { useChatDraftInput } from '@/modules/pace/hooks/useChatDraftInput';
 import { useHitlQuestions } from '@/modules/pace/hooks/useHitlQuestions';
 import { BrowserViewerDisplayState } from '@/modules/pace/pace.constants';
@@ -133,6 +134,21 @@ const ChatSidebarContent = ({
 
     return () => sub.unsubscribe();
   }, [sseEventBus, handleGlobalInputRequired]);
+
+  const handleTaskHitlRespondComplete = useCallback(
+    (event: { type: EVENT_TYPE; payload?: string | Record<string, unknown> }) => {
+      if (event?.payload === HITL_RESPONDED_EVENT) {
+        void refetchConversationHistory();
+      }
+    },
+    [refetchConversationHistory],
+  );
+
+  useEffect(() => {
+    const sub = sseEventBus.subscribe(EVENT_TYPE.COMPONENT, handleTaskHitlRespondComplete);
+
+    return () => sub.unsubscribe();
+  }, [sseEventBus, handleTaskHitlRespondComplete]);
 
   return (
     <div className='bg-BG_WHITE relative mx-auto flex h-full w-full flex-1 flex-col'>
