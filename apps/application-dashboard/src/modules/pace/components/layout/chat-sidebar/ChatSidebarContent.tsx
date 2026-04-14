@@ -40,6 +40,7 @@ const ChatSidebarContent = ({
   username,
 }: ChatSidebarContentProps) => {
   const { openTab } = useDynamicTabs({ type: TAB_TYPE.FILE });
+
   const { openTab: openTaskTab } = useDynamicTabs({ type: TAB_TYPE.TASK });
   const { openTab: openBrowserTab, updateTab: updateBrowserTab } = useDynamicTabs({ type: TAB_TYPE.BROWSER });
   const {
@@ -167,7 +168,6 @@ const ChatSidebarContent = ({
           onExpand={chatSidebarState !== CHAT_SIDEBAR_STATE.EXPANDED ? handleExpand : undefined}
         />
       </div>
-
       <ChatConversationContent
         conversationId={conversationId}
         organizationId={organizationId}
