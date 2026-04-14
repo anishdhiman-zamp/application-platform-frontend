@@ -108,7 +108,12 @@ export const HITLQuestionsBlock = ({
           newOptionIds = [optionId];
         }
 
-        const newCustomText = isMulti ? (customText ?? currentAnswer.customText) : '';
+        const isCustomOption = optionId === CUSTOM_OPTION_ID;
+        const newCustomText = isMulti
+          ? (customText ?? currentAnswer.customText)
+          : isCustomOption
+            ? (customText ?? currentAnswer.customText)
+            : '';
 
         return {
           ...prev,
@@ -121,7 +126,9 @@ export const HITLQuestionsBlock = ({
       });
 
       if (!isMulti) {
-        setCustomInputs((prev) => ({ ...prev, [questionId]: '' }));
+        if (optionId !== CUSTOM_OPTION_ID) {
+          setCustomInputs((prev) => ({ ...prev, [questionId]: '' }));
+        }
         if (qIndex < questions.length - 1) {
           setCurrentQuestionIndex(qIndex + 1);
           setFocusedOptionIndex(0);
