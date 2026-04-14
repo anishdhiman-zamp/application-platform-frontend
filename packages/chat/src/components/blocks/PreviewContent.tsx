@@ -26,8 +26,8 @@ const PreviewContent = ({ category, previewUrl, codeNodes, isLoading, fileName }
       <div className='relative size-full'>
         <img src={previewUrl} alt={fileName} className='size-full object-cover' draggable={false} />
         <div className='absolute inset-0 flex items-center justify-center'>
-          <div className='flex size-6 items-center justify-center rounded-full bg-black/50'>
-            <Play className='size-3 fill-white text-white' />
+          <div className='bg-GRAY_1000/50 flex size-6 items-center justify-center rounded-full'>
+            <Play className='fill-BG_WHITE text-BG_WHITE size-3' />
           </div>
         </div>
       </div>

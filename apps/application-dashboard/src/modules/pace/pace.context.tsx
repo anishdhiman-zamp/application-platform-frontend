@@ -130,12 +130,12 @@ export const PaceProvider = ({ children }: { children: ReactNode }) => {
   const pendingCollapseRef = useRef(false);
   const startNewChatRef = useRef<defaultFnType | null>(null);
   const selectConversationRef = useRef<((id: string, title?: string) => void) | null>(null);
+  const sharedExternalFilePaths = useRef<Set<string>>(new Set());
 
   const [chatSidebarState, setChatSidebarStateRaw] = useState<ChatSidebarState>(getInitialSidebarState);
   const [prevChatSidebarState, setPrevChatSidebarState] = useState<ChatSidebarState>(chatSidebarState);
   const [pendingFileReferences, setPendingFileReferences] = useState<PendingFileReference[]>([]);
   const [sharedFileReferences, setSharedFileReferences] = useState<UploadedFile[]>([]);
-  const sharedExternalFilePaths = useRef<Set<string>>(new Set());
   const [chatMessageIntent, setChatMessageIntent] = useState<ChatMessageIntent | null>(null);
   const [activeAgentInfo, setActiveAgentInfo] = useState<ActiveAgentInfo | null>(null);
   const initialFilesPanelState = useRef(getInitialFilesPanelState());

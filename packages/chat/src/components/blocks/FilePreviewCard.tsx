@@ -35,14 +35,16 @@ const FilePreviewCard = ({ fileReference, onRemove, isLoading, className }: File
   return (
     <div
       className={cn(
-        'shadow-table-filter-menu border-border bg-BG_WHITE group relative w-[120px] cursor-pointer rounded-[10px] border',
+        'shadow-table-filter-menu border-border bg-BG_WHITE group relative w-30 cursor-pointer rounded-[10px] border',
         isLoading && !fileReference.path && 'pointer-events-none opacity-60',
         className,
       )}
+      role='button'
+      tabIndex={0}
       onClick={handleClick}
     >
       {/* Preview area */}
-      <div className='relative h-[80px] w-full overflow-hidden rounded-t-[8px]'>
+      <div className='relative h-20 w-full overflow-hidden rounded-t-[8px]'>
         <PreviewContent
           category={category}
           previewUrl={previewUrl}
