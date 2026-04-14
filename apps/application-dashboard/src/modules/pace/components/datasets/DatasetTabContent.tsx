@@ -12,7 +12,7 @@ interface DatasetTabContentProps {
 }
 
 const DatasetTabContent = ({ tableName }: DatasetTabContentProps) => {
-  const { updateTab, getTabById, navigateToTab } = useDynamicTabs({ type: TAB_TYPE.DATASET });
+  const { updateTab, getTabById, navigateToTab, openTab } = useDynamicTabs({ type: TAB_TYPE.DATASET });
 
   const handleSelectDataset = useCallback(
     (newTableName: string, displayName: string) => {
@@ -26,9 +26,15 @@ const DatasetTabContent = ({ tableName }: DatasetTabContentProps) => {
         return;
       }
 
-      updateTab(tableName, newTableName, displayName);
+      const currentTab = getTabById(tableName);
+
+      if (currentTab) {
+        updateTab(tableName, newTableName, displayName);
+      } else {
+        openTab(newTableName, displayName);
+      }
     },
-    [tableName, getTabById, navigateToTab, updateTab],
+    [tableName, getTabById, navigateToTab, updateTab, openTab],
   );
 
   return (
