@@ -50,6 +50,7 @@ import {
   getStepCount,
 } from '@/modules/pace/components/tasks/utils/tasks.utils';
 import { useHitlQuestions } from '@/modules/pace/hooks/useHitlQuestions';
+import { BrowserViewerDisplayState } from '@/modules/pace/pace.constants';
 import type { RootState } from '@/store';
 
 interface TaskContentInnerProps {
@@ -58,8 +59,10 @@ interface TaskContentInnerProps {
 
 const TaskContentChat = ({ taskId }: { taskId: string }) => {
   const hadStreamingRef = useRef(false);
+  const prevBrowserStreamingRef = useRef(false);
 
   const { openTab } = useDynamicTabs({ type: TAB_TYPE.FILE });
+  const { openTab: openBrowserTab, updateTab: updateBrowserTab } = useDynamicTabs({ type: TAB_TYPE.BROWSER });
   const searchParams = useSearchParams();
   const urlTitle = searchParams?.get('title') ?? null;
   const [chatTitle, setChatTitle] = useState(urlTitle ?? '');
@@ -101,8 +104,16 @@ const TaskContentChat = ({ taskId }: { taskId: string }) => {
     goToPreviousTask,
   } = useTaskNavigation(taskId);
 
-  const { messages, isLoadingHistory, isErrorHistory, conversationData, inputsRequired, taskSummaryText } =
-    useTaskState();
+  const {
+    messages,
+    isLoadingHistory,
+    isErrorHistory,
+    conversationData,
+    inputsRequired,
+    taskSummaryText,
+    isBrowserStreamingAvailable,
+    browserSessionId,
+  } = useTaskState();
   const { refetchHistory } = useTaskActions();
   const streamingState = useStreamingState(taskId);
 
@@ -112,6 +123,12 @@ const TaskContentChat = ({ taskId }: { taskId: string }) => {
   const effectiveStatus = (liveStatus as TaskStatus) ?? (taskStatus as TaskStatus) ?? status ?? undefined;
 
   const conversationId = searchParams?.get('s') ?? undefined;
+
+  const handleWatchStream = useCallback(() => {
+    if (conversationId) {
+      openBrowserTab(conversationId, 'Browser', browserSessionId ? { sessionId: browserSessionId } : undefined);
+    }
+  }, [conversationId, openBrowserTab, browserSessionId]);
 
   const subtaskPanelParents: TaskBreadcrumb[] = useMemo(
     () => [
@@ -261,6 +278,18 @@ const TaskContentChat = ({ taskId }: { taskId: string }) => {
   }, [streamingState?.is_active]);
 
   useEffect(() => {
+    const wasAvailable = prevBrowserStreamingRef.current;
+
+    prevBrowserStreamingRef.current = isBrowserStreamingAvailable;
+
+    if (wasAvailable && !isBrowserStreamingAvailable && conversationId) {
+      updateBrowserTab(conversationId, conversationId, 'Browser', {
+        status: BrowserViewerDisplayState.ENDED,
+      });
+    }
+  }, [isBrowserStreamingAvailable, conversationId, updateBrowserTab]);
+
+  useEffect(() => {
     if (hasStepGroups && !isAgentActive && !showSteps) {
       setShowSummary(true);
     }
@@ -275,7 +304,13 @@ const TaskContentChat = ({ taskId }: { taskId: string }) => {
   const isExpandedStepsView = showSteps && (!hasStepGroups || !showSummary);
 
   return (
-    <ChatActionsProvider onFileOpen={openTab} parentTasks={subtaskPanelParents} siblings={siblingsMemo}>
+    <ChatActionsProvider
+      onFileOpen={openTab}
+      parentTasks={subtaskPanelParents}
+      siblings={siblingsMemo}
+      onWatchStream={handleWatchStream}
+      isBrowserStreamingAvailable={isBrowserStreamingAvailable}
+    >
       <div className='relative flex h-full flex-1 flex-col'>
         <TaskTopbar
           className='border-GRAY_100 border-b'

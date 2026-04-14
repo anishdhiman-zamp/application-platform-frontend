@@ -48,6 +48,8 @@ export const TaskProvider = ({ children, taskId, organizationId, resourceType, a
   const [taskSummaryText, setTaskSummaryText] = useState<string | null>(null);
   const [isHistoryLoaded, setIsHistoryLoaded] = useState(false);
   const [mountRefetchDone, setMountRefetchDone] = useState(false);
+  const [isBrowserStreamingAvailable, setIsBrowserStreamingAvailable] = useState(false);
+  const [browserSessionId, setBrowserSessionId] = useState<string | undefined>(undefined);
 
   const {
     data: taskHistory,
@@ -82,8 +84,21 @@ export const TaskProvider = ({ children, taskId, organizationId, resourceType, a
       conversationData: taskHistory?.conversation,
       inputsRequired: taskHistory?.inputs_required,
       taskSummaryText,
+      isBrowserStreamingAvailable,
+      browserSessionId,
     }),
-    [messages, taskId, isStreaming, isLoadingHistory, isFetchingHistory, isErrorHistory, taskHistory, taskSummaryText],
+    [
+      messages,
+      taskId,
+      isStreaming,
+      isLoadingHistory,
+      isFetchingHistory,
+      isErrorHistory,
+      taskHistory,
+      taskSummaryText,
+      isBrowserStreamingAvailable,
+      browserSessionId,
+    ],
   );
 
   const handleMessageStop = useCallback(
@@ -111,11 +126,23 @@ export const TaskProvider = ({ children, taskId, organizationId, resourceType, a
     setTaskSummaryText((prev) => (prev === text ? prev : text));
   }, []);
 
+  const handleBrowserStreamingAvailable = useCallback((_taskId: string, sessionId?: string) => {
+    setIsBrowserStreamingAvailable(true);
+    setBrowserSessionId(sessionId);
+  }, []);
+
+  const handleBrowserStreamingUnavailable = useCallback(() => {
+    setIsBrowserStreamingAvailable(false);
+    setBrowserSessionId(undefined);
+  }, []);
+
   const perTaskCallbacks = useRef<TaskEventCallbacks>({
     onMessageStop: handleMessageStop,
     onTaskUpdate: handleTaskUpdate,
     onTaskSummary: handleTaskSummary,
     onInputRequired: handleInputRequired,
+    onBrowserStreamingAvailable: handleBrowserStreamingAvailable,
+    onBrowserStreamingUnavailable: handleBrowserStreamingUnavailable,
   });
 
   const handleClearStaleStreamingState = useCallback(() => {
@@ -197,8 +224,17 @@ export const TaskProvider = ({ children, taskId, organizationId, resourceType, a
       onTaskUpdate: handleTaskUpdate,
       onTaskSummary: handleTaskSummary,
       onInputRequired: handleInputRequired,
+      onBrowserStreamingAvailable: handleBrowserStreamingAvailable,
+      onBrowserStreamingUnavailable: handleBrowserStreamingUnavailable,
     };
-  }, [handleMessageStop, handleTaskUpdate, handleTaskSummary, handleInputRequired]);
+  }, [
+    handleMessageStop,
+    handleTaskUpdate,
+    handleTaskSummary,
+    handleInputRequired,
+    handleBrowserStreamingAvailable,
+    handleBrowserStreamingUnavailable,
+  ]);
 
   useEffect(() => {
     handleClearStaleStreamingState();
