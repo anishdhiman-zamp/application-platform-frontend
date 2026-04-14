@@ -1,14 +1,5 @@
-import {
-  Button,
-  Dialog,
-  DialogBody,
-  DialogClose,
-  DialogContent,
-  DialogFooter,
-  DialogHeader,
-  DialogHeaderTitle,
-} from '@zamp-platform/ui';
-import { FC } from 'react';
+import { ConfirmationDialog } from '@zamp-platform/ui';
+import { FC, useCallback } from 'react';
 
 interface DeleteColumnConfirmationProps {
   isOpen: boolean;
@@ -23,34 +14,20 @@ const DeleteColumnConfirmation: FC<DeleteColumnConfirmationProps> = ({
   onOpenChange,
   onConfirm,
 }) => {
+  const handleConfirm = useCallback(() => {
+    onConfirm();
+    onOpenChange(false);
+  }, [onConfirm, onOpenChange]);
+
   return (
-    <Dialog open={isOpen} onOpenChange={onOpenChange}>
-      <DialogContent size='small' showCloseButton className='w-[400px]'>
-        <DialogHeader>
-          <DialogHeaderTitle>Delete column &apos;{columnName}&apos;</DialogHeaderTitle>
-        </DialogHeader>
-        <DialogBody className='f-14-400 p-5'>
-          Are you sure you want to delete this column? This action cannot be undone.
-        </DialogBody>
-        <DialogFooter className='flex justify-end gap-2.5'>
-          <DialogClose asChild>
-            <Button variant='secondary' size='medium'>
-              Cancel
-            </Button>
-          </DialogClose>
-          <Button
-            variant='destructive'
-            size='medium'
-            onClick={() => {
-              onConfirm();
-              onOpenChange(false);
-            }}
-          >
-            Delete
-          </Button>
-        </DialogFooter>
-      </DialogContent>
-    </Dialog>
+    <ConfirmationDialog
+      open={isOpen}
+      onOpenChange={onOpenChange}
+      title={`Delete column '${columnName}'`}
+      description='Are you sure you want to delete this column? This action cannot be undone.'
+      confirmLabel='Delete'
+      onConfirm={handleConfirm}
+    />
   );
 };
 

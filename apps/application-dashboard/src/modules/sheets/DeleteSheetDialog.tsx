@@ -1,15 +1,4 @@
-import { FC } from 'react';
-import {
-  Button,
-  Dialog,
-  DialogBody,
-  DialogClose,
-  DialogContent,
-  DialogFooter,
-  DialogHeader,
-  DialogHeaderTitle,
-  toast,
-} from '@zamp-platform/ui';
+import { ConfirmationDialog, toast } from '@zamp-platform/ui';
 import { useDeleteSheetByPageIdMutation } from 'apis/pages';
 
 interface DeleteSheetDialogProps {
@@ -21,14 +10,14 @@ interface DeleteSheetDialogProps {
   onDeleteSuccess: () => void;
 }
 
-const DeleteSheetDialog: FC<DeleteSheetDialogProps> = ({
+const DeleteSheetDialog = ({
   pageId,
   sheetId,
   sheetName,
   isOpen,
   onOpenChange,
   onDeleteSuccess,
-}) => {
+}: DeleteSheetDialogProps) => {
   const [deleteSheetByPageId, { isLoading: isDeletingSheet }] = useDeleteSheetByPageIdMutation();
 
   const handleDeleteSheet = () => {
@@ -47,34 +36,17 @@ const DeleteSheetDialog: FC<DeleteSheetDialogProps> = ({
   };
 
   return (
-    <Dialog open={isOpen} onOpenChange={onOpenChange}>
-      <DialogContent size='small' showCloseButton className='w-[400px]'>
-        <DialogHeader>
-          <DialogHeaderTitle>Delete sheet '{sheetName}'</DialogHeaderTitle>
-        </DialogHeader>
-        <DialogBody className='f-14-400 p-5'>
-          Are you sure you want to delete this sheet? This action cannot be undone and all widgets and data in this
-          sheet will be permanently removed.
-        </DialogBody>
-        <DialogFooter className='flex justify-end gap-2.5'>
-          <DialogClose asChild>
-            <Button variant='secondary' size='medium'>
-              Cancel
-            </Button>
-          </DialogClose>
-          <Button
-            variant='destructive'
-            size='medium'
-            onClick={handleDeleteSheet}
-            isLoading={isDeletingSheet}
-            className='w-14'
-            data-testid={`${sheetId}-delete-sheet-dialog-delete-btn`}
-          >
-            Delete
-          </Button>
-        </DialogFooter>
-      </DialogContent>
-    </Dialog>
+    <ConfirmationDialog
+      open={isOpen}
+      onOpenChange={onOpenChange}
+      title={`Delete sheet '${sheetName}'`}
+      description='Are you sure you want to delete this sheet? This action cannot be undone and all widgets and data in this sheet will be permanently removed.'
+      confirmLabel='Delete'
+      isLoading={isDeletingSheet}
+      onConfirm={handleDeleteSheet}
+      confirmButtonClassName='w-14'
+      confirmButtonTestId={`${sheetId}-delete-sheet-dialog-delete-btn`}
+    />
   );
 };
 
