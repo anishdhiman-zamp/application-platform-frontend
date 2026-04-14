@@ -116,6 +116,28 @@ const ChatConversationContent = ({
     disabled: isStreaming || isCreatingConversationV2,
   });
 
+  const agentAvatarMap = useMemo(() => {
+    const map = new Map<string, string>();
+
+    for (const msg of messages) {
+      const elements = msg?.message_content?.elements;
+
+      if (!elements) continue;
+
+      for (const el of elements) {
+        if (el.type === BLOCK_TYPE.AGENT && 'payload' in el) {
+          const payload = (el as AgentBlockType).payload;
+
+          if (payload.avatar && !map.has(payload.agent_id)) {
+            map.set(payload.agent_id, payload.avatar);
+          }
+        }
+      }
+    }
+
+    return map;
+  }, [messages]);
+
   const agentInfoFromMessages = useMemo((): ActiveAgentInfo | null => {
     for (let i = messages.length - 1; i >= 0; i--) {
       const elements = messages[i]?.message_content?.elements;
@@ -129,14 +151,14 @@ const ChatConversationContent = ({
           return {
             id: payload.agent_id,
             name: payload.name,
-            avatar: payload.avatar,
+            avatar: payload.avatar || agentAvatarMap.get(payload.agent_id),
           };
         }
       }
     }
 
     return null;
-  }, [messages]);
+  }, [messages, agentAvatarMap]);
 
   const handleWatchStream = useCallback(() => {
     const activeConversationId = conversationId ?? ctxConversationId;
@@ -217,7 +239,7 @@ const ChatConversationContent = ({
 
   const renderAgentBlock = useCallback(
     (payload: { agent_id: string; name: string; description: string; avatar?: string }) => {
-      const avatarKey = payload.avatar;
+      const avatarKey = payload.avatar || agentAvatarMap.get(payload.agent_id);
       const avatar = (avatarKey && getAgentAvatarByKey(avatarKey)) || getAgentAvatar(payload.name);
 
       return (
@@ -230,7 +252,7 @@ const ChatConversationContent = ({
         />
       );
     },
-    [handleAgentClick],
+    [handleAgentClick, agentAvatarMap],
   );
 
   // Refresh agents list when an agent block appears in chat

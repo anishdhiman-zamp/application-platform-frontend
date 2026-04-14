@@ -8,6 +8,7 @@ import { Play } from 'lucide-react';
 import TaskRow from '@/modules/pace/components/tasks/components/TaskRow';
 import { STATUS_LABELS } from '@/modules/pace/components/tasks/constants/tasks.constants';
 import { useTasksByStatus } from '@/modules/pace/components/tasks/hooks/useTasksByStatus';
+import TaskRowSkeleton from '@/modules/pace/components/tasks/loaders/TaskRowSkeleton';
 import type { CreationSource } from '@/modules/pace/components/tasks/types/tasks.types';
 
 interface TaskAccordionSectionProps {
@@ -104,7 +105,7 @@ const TaskAccordionSection = ({
               referrer={referrer}
             />
           ))}
-          {hasMore && <div ref={sentinelRef} className='h-px' />}
+          {hasMore && <div ref={sentinelRef}>{isFetching && <TaskRowSkeleton count={4} />}</div>}
         </div>
       </AccordionContent>
     </AccordionItem>

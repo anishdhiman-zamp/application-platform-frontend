@@ -102,9 +102,9 @@ const agentsApi = baseApi.injectEndpoints({
     getAgentTaskCounts: builder.query<TaskListingCountsResponse, AgentTaskCountsParams>({
       query: ({ agentId, search }) => ({
         url: formRequestUrlWithParams(API_ENDPOINTS.AGENT_TASKS_GET, { agentId }),
-        params: { search: search || undefined },
+        params: { search: search || undefined, limit: 40 },
       }),
-      transformResponse: (response: { tasks: AgentTaskApiItem[] }): TaskListingCountsResponse => {
+      transformResponse: (response: { tasks: AgentTaskApiItem[]; total: number }): TaskListingCountsResponse => {
         const countMap = new Map<string, number>();
 
         for (const task of response.tasks ?? []) {
@@ -116,7 +116,7 @@ const agentsApi = baseApi.injectEndpoints({
             status: status as TaskStatus,
             count,
           })),
-          total: response.tasks?.length ?? 0,
+          total: response.total ?? response.tasks?.length ?? 0,
         };
       },
       providesTags: [APITags.GET_AGENT_TASKS],
@@ -128,21 +128,15 @@ const agentsApi = baseApi.injectEndpoints({
         params: { status, search: search || undefined, page, limit },
       }),
       transformResponse: (
-        response: { tasks: AgentTaskApiItem[] },
+        response: { tasks: AgentTaskApiItem[]; total: number },
         _meta,
-        { status, page = 1, limit = 20 },
-      ): TaskListByStatusResponse => {
-        const filtered = (response.tasks ?? []).filter((t) => t.status === status);
-        const start = (page - 1) * limit;
-        const paged = filtered.slice(start, start + limit);
-
-        return {
-          tasks: paged.map(mapAgentTask),
-          count: filtered.length,
-          page,
-          limit,
-        };
-      },
+        { page = 1, limit = 20 },
+      ): TaskListByStatusResponse => ({
+        tasks: (response.tasks ?? []).map(mapAgentTask),
+        count: response.total ?? response.tasks?.length ?? 0,
+        page,
+        limit,
+      }),
       providesTags: [APITags.GET_AGENT_TASKS],
     }),
     getAgentTriggers: builder.query<AgentTriggersResponseType, AgentTriggersParams>({

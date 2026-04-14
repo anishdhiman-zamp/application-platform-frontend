@@ -1,7 +1,7 @@
 'use client';
 
 import { type FC, useRef, useState } from 'react';
-import { Button, CSS_VARS, toast } from '@zamp-platform/ui';
+import { Button, toast } from '@zamp-platform/ui';
 import { ArrowLeft } from 'lucide-react';
 import ShareConnectionPopup from 'modules/integrations/IntegrationDetail/ShareConnectionPopup';
 import { AnimatePresence, motion } from 'motion/react';
@@ -63,13 +63,15 @@ const IntegrationDetailPage: FC<IntegrationDetailPageProps> = ({ integration }) 
         className='flex shrink-0 items-center justify-center overflow-hidden'
       >
         <div className='flex h-full w-full max-w-[700px] flex-col px-4'>
-          <Link
-            href={`${ROUTES_PATH.CHAT_SETTINGS_INTEGRATIONS}${searchParams?.toString() ? `?${searchParams.toString()}` : ''}`}
-            className={cn('flex w-full items-center justify-start py-5', isScrolled && 'border-GRAY_400 border-b')}
-            aria-label='Go back'
-          >
-            <ArrowLeft size={14} color={CSS_VARS.GRAY_900} />
-          </Link>
+          <div className={cn('flex w-full items-center justify-start py-4', isScrolled && 'border-GRAY_400 border-b')}>
+            <Link
+              href={`${ROUTES_PATH.CHAT_SETTINGS_INTEGRATIONS}${searchParams?.toString() ? `?${searchParams.toString()}` : ''}`}
+              className='text-GRAY_700 hover:text-GRAY_1000 flex items-center justify-center rounded-md p-1 transition-colors'
+              aria-label='Go back'
+            >
+              <ArrowLeft size={16} />
+            </Link>
+          </div>
           <div
             ref={scrollContainerRef}
             className='flex h-full w-full flex-col gap-y-8 overflow-y-auto pt-16 pb-6 [scrollbar-width:none]'
