@@ -9,6 +9,7 @@ export * from './ui/combobox';
 export * from './ui/combobox-v2';
 export * from './ui/context-menu';
 export * from './ui/copy-to-clipboard';
+export * from './ui/confirmation-dialog';
 export * from './ui/dialog';
 export * from './ui/dropdown-menu';
 export * from './ui/email-input-to-chips';
