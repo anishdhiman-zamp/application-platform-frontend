@@ -1,6 +1,6 @@
 'use client';
 
-import { memo, useCallback, useMemo } from 'react';
+import { memo, useCallback, useEffect, useMemo } from 'react';
 import { PaceNavbarItemId } from 'modules/pace/pace.types';
 import Link from 'next/link';
 import { usePathname, useSearchParams } from 'next/navigation';
@@ -8,6 +8,7 @@ import OrgSwitcher from '@/components/layouts/dashboard-layout/components/OrgSwi
 import { FEATURE_FLAGS } from '@/constants/featureFlags';
 import { useFeatureFlag } from '@/hooks/useFeatureFlag';
 import { PACE_SETTINGS_TABS, SIDEBAR_CONVERSATION_ID_PARAM } from '@/modules/pace/pace.constants';
+import { LOCAL_STORAGE_KEYS, setToLocalStorage } from '@/utils/localstorage';
 import SidebarTab from 'components/layouts/dashboard-layout/components/SidebarTab';
 
 const PaceSettingsSidebar = () => {
@@ -37,6 +38,18 @@ const PaceSettingsSidebar = () => {
     },
     [searchParams],
   );
+
+  const handleTabPersist = useCallback(() => {
+    const matchedTab = tabs.find((tab) => pathname?.includes(tab.path));
+
+    if (matchedTab) {
+      setToLocalStorage(LOCAL_STORAGE_KEYS.PACE_SETTINGS_LAST_TAB, matchedTab.path);
+    }
+  }, [pathname, tabs]);
+
+  useEffect(() => {
+    handleTabPersist();
+  }, [handleTabPersist]);
 
   return (
     <div className='flex h-full w-[200px] shrink-0 flex-col'>

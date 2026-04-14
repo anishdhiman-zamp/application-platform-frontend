@@ -208,7 +208,14 @@ const ChatSidebarContent = ({
               conversationId={conversationId ?? ''}
               isDisabled={isStreaming}
               addFileReferenceRef={addFileReferenceRef}
-              metadata={activeAgentInfo?.id ? { agent_id: activeAgentInfo.id } : undefined}
+              metadata={
+                activeAgentInfo?.id
+                  ? {
+                      agent_id: activeAgentInfo.id,
+                      ...(activeAgentInfo.avatar && { avatar: activeAgentInfo.avatar }),
+                    }
+                  : undefined
+              }
             />
           )}
         </div>

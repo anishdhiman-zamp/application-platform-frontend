@@ -6,9 +6,14 @@ import { CHAT_SIDEBAR_STATE } from '@/modules/pace/pace.types';
 interface UseTriggerChatMessageFromButtonParams {
   agentId: string;
   agentName: string;
+  agentAvatar?: string;
 }
 
-export const useTriggerChatMessageFromButton = ({ agentId, agentName }: UseTriggerChatMessageFromButtonParams) => {
+export const useTriggerChatMessageFromButton = ({
+  agentId,
+  agentName,
+  agentAvatar,
+}: UseTriggerChatMessageFromButtonParams) => {
   const { chatSidebarState, setChatSidebarState, startNewChat, setChatMessageIntent, setActiveAgentInfo } =
     usePaceContext();
 
@@ -19,19 +24,28 @@ export const useTriggerChatMessageFromButton = ({ agentId, agentName }: UseTrigg
 
       if (!hasExistingConversation) {
         startNewChat();
-        setActiveAgentInfo({ id: agentId, name: agentName });
+        setActiveAgentInfo({ id: agentId, name: agentName, avatar: agentAvatar });
       }
 
       setChatMessageIntent({
         message,
-        metadata: { agent_id: agentId },
+        metadata: { agent_id: agentId, ...(agentAvatar && { avatar: agentAvatar }) },
       });
 
       if (chatSidebarState === CHAT_SIDEBAR_STATE.COLLAPSED) {
         setChatSidebarState(CHAT_SIDEBAR_STATE.SIDEBAR);
       }
     },
-    [agentId, agentName, chatSidebarState, startNewChat, setChatMessageIntent, setActiveAgentInfo, setChatSidebarState],
+    [
+      agentId,
+      agentName,
+      agentAvatar,
+      chatSidebarState,
+      startNewChat,
+      setChatMessageIntent,
+      setActiveAgentInfo,
+      setChatSidebarState,
+    ],
   );
 
   return { triggerChatMessage };

@@ -128,7 +128,11 @@ const AgentDetailPage = ({ agentId, agentName, agentDescription = '', avatarKey 
     { skip: skipFetch },
   );
 
-  const { triggerChatMessage } = useTriggerChatMessageFromButton({ agentId, agentName: displayName });
+  const { triggerChatMessage } = useTriggerChatMessageFromButton({
+    agentId,
+    agentName: displayName,
+    agentAvatar: resolvedAvatarKey || undefined,
+  });
 
   const triggerShimmer = useCallback(() => {
     setInstructionsShimmering(true);
