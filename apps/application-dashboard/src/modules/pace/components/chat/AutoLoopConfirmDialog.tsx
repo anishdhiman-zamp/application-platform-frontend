@@ -24,6 +24,7 @@ const AutoLoopConfirmDialog: FC<AutoLoopConfirmDialogProps> = ({ isOpen, onOpenC
       confirmLabel='Enable'
       confirmVariant='default'
       onConfirm={handleConfirm}
+      contentClassName='outline-none'
     />
   );
 };

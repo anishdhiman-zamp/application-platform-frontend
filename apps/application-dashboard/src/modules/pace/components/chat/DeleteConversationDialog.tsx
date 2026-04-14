@@ -49,6 +49,7 @@ const DeleteConversationDialog: FC<DeleteConversationDialogProps> = ({
       confirmLabel='Delete'
       onConfirm={handleDelete}
       confirmButtonClassName='w-14'
+      contentDataSlot='delete-conversation-dialog'
     />
   );
 };

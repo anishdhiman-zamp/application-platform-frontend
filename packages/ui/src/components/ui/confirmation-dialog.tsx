@@ -1,6 +1,7 @@
 'use client';
 
 import * as React from 'react';
+import { cn } from '@zamp-platform/ui/utils';
 import { Button, type ButtonVariant } from './button';
 import {
   Dialog,
@@ -29,6 +30,8 @@ interface ConfirmationDialogProps {
   confirmButtonClassName?: string;
   confirmButtonTestId?: string;
   contentId?: string;
+  contentClassName?: string;
+  contentDataSlot?: string;
 }
 
 const ConfirmationDialog = ({
@@ -46,10 +49,18 @@ const ConfirmationDialog = ({
   confirmButtonClassName,
   confirmButtonTestId,
   contentId,
+  contentClassName,
+  contentDataSlot,
 }: ConfirmationDialogProps) => {
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent size='small' showCloseButton className='w-[400px]' id={contentId}>
+      <DialogContent
+        size='small'
+        showCloseButton
+        className={cn('w-[400px]', contentClassName)}
+        id={contentId}
+        data-slot={contentDataSlot}
+      >
         <DialogHeader>
           <DialogHeaderTitle>{title}</DialogHeaderTitle>
         </DialogHeader>
