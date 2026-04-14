@@ -5,7 +5,7 @@ import { ResourceType, unreadStore, useActiveStreamingIds, useUnreadConversation
 import { useInfiniteScroll } from '@zamp-platform/tanstack-table';
 import { Button, Input } from '@zamp-platform/ui';
 import { cn } from '@zamp-platform/ui/utils';
-import { Search } from 'lucide-react';
+import { Plus, Search } from 'lucide-react';
 import { useGetConversationHistoryQuery } from '@/apis/pace';
 import CommonWrapper from '@/components/commonWrapper';
 import { SkeletonTypes } from '@/components/commonWrapper/commonWrapper.types';
@@ -24,6 +24,7 @@ interface ChatHistoryProps {
   onSelectConversation: (id: string | null, title?: string) => void;
   onDeleteConversation?: (id: string) => void;
   onRenameConversation?: (id: string, newTitle: string) => void;
+  onStartNewChat?: () => void;
   activeConversationId?: string | null;
   compact?: boolean;
 }
@@ -32,6 +33,7 @@ const ChatHistory = ({
   onSelectConversation,
   onDeleteConversation,
   onRenameConversation,
+  onStartNewChat,
   activeConversationId,
   compact = false,
 }: ChatHistoryProps) => {
@@ -249,6 +251,17 @@ const ChatHistory = ({
           {isFetchingConversationHistory && page > 1 && <ChatHistorySkeleton itemCount={10} />}
         </div>
       </CommonWrapper>
+      {onStartNewChat && activeConversationId && (
+        <Button
+          variant='ghost'
+          className='text-GRAY_700 hover:text-GRAY_1000 h-12 w-full justify-center gap-2 rounded-none border-t border-gray-200 px-2 text-sm font-medium'
+          onClick={onStartNewChat}
+          data-testid='chat-history-start-new'
+        >
+          <Plus size={16} />
+          Start new chat
+        </Button>
+      )}
     </div>
   );
 };
