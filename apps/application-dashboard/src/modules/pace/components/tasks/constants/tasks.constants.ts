@@ -45,3 +45,5 @@ export const STATUS_DISPLAY: Record<string, string> = {
 
 export const TASKS_PAGE_SIZE = 40;
 export const SEARCH_DEBOUNCE_MS = 300;
+
+export const HITL_RESPONDED_EVENT = 'hitl_responded';

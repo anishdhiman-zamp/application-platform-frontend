@@ -33,6 +33,7 @@ interface TaskStatusCountsProps {
   conversationId?: string;
   containerRef: RefObject<HTMLDivElement | null>;
   onOpenChange?: (open: boolean) => void;
+  onVisibleStatusesChange?: () => void;
 }
 
 const TaskStatusCounts: FC<TaskStatusCountsProps> = ({
@@ -41,6 +42,7 @@ const TaskStatusCounts: FC<TaskStatusCountsProps> = ({
   conversationId,
   containerRef,
   onOpenChange,
+  onVisibleStatusesChange,
 }) => {
   const { tasks, counts, hasTasks } = useTasksFromMessages(messages, streamingState);
   const [isOpen, setIsOpen] = useState(false);
@@ -49,6 +51,11 @@ const TaskStatusCounts: FC<TaskStatusCountsProps> = ({
   const triggerRef = useRef<HTMLDivElement>(null);
 
   const visiblePillStatuses = useMemo(() => PILL_STATUS_ORDER.filter((s) => counts[s] > 0), [counts]);
+
+  const onVisibleStatusesChangeRef = useRef(onVisibleStatusesChange);
+  const isMountedRef = useRef(false);
+
+  onVisibleStatusesChangeRef.current = onVisibleStatusesChange;
 
   const sortedAndFilteredTasks = useMemo(() => {
     const query = searchQuery.toLowerCase().trim();
@@ -74,6 +81,17 @@ const TaskStatusCounts: FC<TaskStatusCountsProps> = ({
 
     return () => observer.disconnect();
   }, [containerRef]);
+
+  const needsInputCount = counts[TASK_STATUS.NEEDS_INPUT];
+
+  useEffect(() => {
+    if (!isMountedRef.current) {
+      isMountedRef.current = true;
+
+      return;
+    }
+    onVisibleStatusesChangeRef.current?.();
+  }, [needsInputCount]);
 
   if (!hasTasks) return null;
 
