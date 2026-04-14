@@ -22,6 +22,7 @@ import {
 import { useChat } from './useChat';
 
 export interface UploadedFile {
+  id: string;
   path: string;
   name: string;
   file_type: string;
@@ -270,6 +271,7 @@ export const useChatInput = ({
     }
 
     const uploadingFiles = Array.from(files).map((file) => ({
+      id: crypto.randomUUID(),
       path: '',
       name: sanitizeFileName(file.name),
       file_type: file.type,
@@ -309,7 +311,7 @@ export const useChatInput = ({
         const index = updatedTempEntriesMap.get(uploadedFile.name);
 
         if (index !== undefined) {
-          updated[index] = uploadedFile;
+          updated[index] = { ...uploadedFile, id: updated[index].id };
         } else {
           updated.push(uploadedFile);
         }
@@ -353,6 +355,7 @@ export const useChatInput = ({
       return [
         ...prev,
         {
+          id: crypto.randomUUID(),
           path: ref.path,
           name: ref.name,
           file_type: '',

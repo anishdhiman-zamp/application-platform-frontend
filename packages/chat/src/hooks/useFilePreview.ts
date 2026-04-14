@@ -245,7 +245,7 @@ export const useFilePreview = (fileReference: UploadedFileType): FilePreviewData
  */
 const capturePdfPage = async (src: string): Promise<string> => {
   const pdfjsLib = await import('pdfjs-dist');
-  pdfjsLib.GlobalWorkerOptions.workerSrc = new URL('pdfjs-dist/build/pdf.worker.min.mjs', import.meta.url).toString();
+  pdfjsLib.GlobalWorkerOptions.workerSrc = `https://cdn.jsdelivr.net/npm/pdfjs-dist@${pdfjsLib.version}/build/pdf.worker.min.mjs`;
 
   const pdf = await pdfjsLib.getDocument({ url: src, withCredentials: true }).promise;
   const page = await pdf.getPage(1);

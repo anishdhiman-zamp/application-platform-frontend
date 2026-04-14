@@ -18,7 +18,7 @@ export const FileReferencesList: FC<FileReferencesListProps> = ({ fileReferences
         <div className={cn('flex flex-wrap gap-2', className)}>
           {[...fileReferences].reverse().map((fileReference) => (
             <FilePreviewCard
-              key={fileReference.name}
+              key={fileReference.id || fileReference.path}
               fileReference={fileReference}
               onRemove={onRemove}
               isLoading={isLoading}

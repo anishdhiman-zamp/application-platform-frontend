@@ -165,7 +165,10 @@ export const useChatInput = ({
       const exists = prev.some((existing) => existing.path === ref.path);
       if (exists) return prev;
       externalFilePathsRef.current.add(ref.path);
-      return [...prev, { path: ref.path, name: ref.name, file_type: '', file: new File([], ref.name) }];
+      return [
+        ...prev,
+        { id: crypto.randomUUID(), path: ref.path, name: ref.name, file_type: '', file: new File([], ref.name) },
+      ];
     });
   }, []);
 
@@ -180,6 +183,7 @@ export const useChatInput = ({
       }
 
       const uploadingFiles = Array.from(files).map((file) => ({
+        id: crypto.randomUUID(),
         path: '',
         name: sanitizeFileName(file.name),
         file_type: file.type,
@@ -209,7 +213,7 @@ export const useChatInput = ({
         successful.forEach((uploadedFile) => {
           const index = updatedTempEntriesMap.get(uploadedFile.name);
           if (index !== undefined) {
-            updated[index] = uploadedFile;
+            updated[index] = { ...uploadedFile, id: updated[index].id };
           } else {
             updated.push(uploadedFile);
           }
