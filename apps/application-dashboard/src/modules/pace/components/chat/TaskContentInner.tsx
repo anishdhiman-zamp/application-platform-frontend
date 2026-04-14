@@ -45,6 +45,7 @@ import TaskTopbar from '@/modules/pace/components/chat/TaskTopbar';
 import { getActiveTabIdFromUrl } from '@/modules/pace/components/dynamic-tabs/tab-type-registry';
 import TaskContentSkeleton from '@/modules/pace/components/loaders/TaskContentSkeleton';
 import InlineSubtaskSection from '@/modules/pace/components/tasks/components/InlineSubtaskSection';
+import { HITL_RESPONDED_EVENT } from '@/modules/pace/components/tasks/constants/tasks.constants';
 import {
   getDisplayTitle,
   getProcessedMessages,
@@ -230,7 +231,7 @@ const TaskContentChat = ({ taskId }: { taskId: string }) => {
 
   const handleHitlRespondComplete = useCallback(() => {
     refetchHistory();
-    sseEventBus.publish(EVENT_TYPE.COMPONENT, { type: EVENT_TYPE.COMPONENT, payload: 'hitl_responded' });
+    sseEventBus.publish(EVENT_TYPE.COMPONENT, { type: EVENT_TYPE.COMPONENT, payload: HITL_RESPONDED_EVENT });
   }, [refetchHistory, sseEventBus]);
 
   const isNeedsInput = taskStatus === TASK_STATUS.NEEDS_INPUT;

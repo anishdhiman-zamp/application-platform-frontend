@@ -81,9 +81,11 @@ const TaskStatusCounts: FC<TaskStatusCountsProps> = ({
     return () => observer.disconnect();
   }, [containerRef]);
 
+  const needsInputCount = counts[TASK_STATUS.NEEDS_INPUT];
+
   useEffect(() => {
     onVisibleStatusesChangeRef.current?.();
-  }, [visiblePillStatuses]);
+  }, [needsInputCount]);
 
   if (!hasTasks) return null;
 
