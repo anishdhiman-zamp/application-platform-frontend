@@ -213,7 +213,14 @@ const ChatSidebarContent = ({
               externalFileReferences={sharedFileReferences}
               setExternalFileReferences={setSharedFileReferences}
               externalFilePathsRef={sharedExternalFilePaths}
-              metadata={activeAgentInfo?.id ? { agent_id: activeAgentInfo.id } : undefined}
+              metadata={
+                activeAgentInfo?.id
+                  ? {
+                      agent_id: activeAgentInfo.id,
+                      ...(activeAgentInfo.avatar && { avatar: activeAgentInfo.avatar }),
+                    }
+                  : undefined
+              }
             />
           )}
         </div>
