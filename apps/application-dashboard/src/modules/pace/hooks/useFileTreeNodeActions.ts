@@ -71,9 +71,11 @@ export const useFileTreeNodeActions = ({
   const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState(false);
   const [isDeleting, setIsDeleting] = useState(false);
 
-  const { openTab, closeTabsForPath, updateTab, updateTabsForFolderMove } = useDynamicTabs({ type: TAB_TYPE.FILE });
+  const { openTab, closeTabsForPath, updateTab, updateTabsForFolderMove, activeTab } = useDynamicTabs({
+    type: TAB_TYPE.FILE,
+  });
   const { downloadFile } = useFileDownload();
-  const { setPendingFileReference, setChatSidebarState, chatSidebarState } = usePaceContext();
+  const { setPendingFileReferences, setChatSidebarState, chatSidebarState } = usePaceContext();
   const {
     createFile,
     createFolder,
@@ -93,7 +95,7 @@ export const useFileTreeNodeActions = ({
 
   const handleActionClick = async (actionId: string) => {
     onCloseContextMenu();
-    const isOnChatHome = window.location.pathname === ROUTES_PATH.CHAT;
+    const isOnChatHome = window.location.pathname === ROUTES_PATH.CHAT && !activeTab;
 
     try {
       switch (actionId) {
@@ -192,7 +194,7 @@ export const useFileTreeNodeActions = ({
           break;
         }
         case CONTEXT_MENU_ACTION_IDS.REFERENCE_IN_CHAT: {
-          setPendingFileReference({ path: node.path, name: node.name });
+          setPendingFileReferences([{ path: node.path, name: node.name }]);
           if (chatSidebarState === CHAT_SIDEBAR_STATE.COLLAPSED && !isOnChatHome) {
             setChatSidebarState(CHAT_SIDEBAR_STATE.SIDEBAR);
           }

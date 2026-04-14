@@ -2,6 +2,7 @@ export { default as AgentBlock } from './AgentBlock';
 export { AttachmentsList } from './AttachmentsList';
 export { ButtonBlock } from './ButtonBlock';
 export { CodePreviewBlock } from './CodePreviewBlock';
+export { default as FilePreviewCard } from './FilePreviewCard';
 export { FileReferencesList } from './FileReferencesList';
 export type { HITLQuestionWithEntity } from './HITLQuestionsBlock';
 export { HITLQuestionsBlock } from './HITLQuestionsBlock';

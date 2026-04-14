@@ -50,6 +50,9 @@ const ChatSidebarContent = ({
     setActiveAgentInfo,
     selectedModel,
     setSelectedModel,
+    sharedFileReferences,
+    setSharedFileReferences,
+    sharedExternalFilePaths,
   } = usePaceContext();
   const { inputValue, setInputValue } = useChatDraftInput({
     conversationId,
@@ -152,34 +155,33 @@ const ChatSidebarContent = ({
   }, [sseEventBus, handleTaskHitlRespondComplete]);
 
   return (
-    <ChatActionsProvider onFileOpen={openTab}>
-      <div className='bg-BG_WHITE relative mx-auto flex h-full w-full flex-1 flex-col'>
-        <div className={cn('transition-[filter] duration-200', isTaskPopoverOpen && 'pointer-events-none blur-sm')}>
-          <ChatTopbar
-            title={chatTitle || 'Start a new chat'}
-            conversationId={conversationId}
-            organizationId={organizationId}
-            onStartNewChat={startNewChat}
-            onTitleChange={setChatTitle}
-            onSelectConversation={handleSelectConversation}
-            onDeleteConversation={startNewChat}
-            onExpand={chatSidebarState !== CHAT_SIDEBAR_STATE.EXPANDED ? handleExpand : undefined}
-          />
-        </div>
-
-        <ChatConversationContent
+    <div className='bg-BG_WHITE relative mx-auto flex h-full w-full flex-1 flex-col'>
+      <div className={cn('transition-[filter] duration-200', isTaskPopoverOpen && 'pointer-events-none blur-sm')}>
+        <ChatTopbar
+          title={chatTitle || 'Start a new chat'}
           conversationId={conversationId}
           organizationId={organizationId}
-          onFileOpen={handleFileOpen}
-          onTaskOpen={handleTaskOpen}
-          onBrowserOpen={handleBrowserOpen}
-          onBrowserStreamingEnd={handleBrowserStreamingEnd}
-          onTaskPopoverOpenChange={setIsTaskPopoverOpen}
-          fileDropHandlerRef={fileDropHandlerRef}
-          addFileReferenceRef={addFileReferenceRef}
-          currentUserName={currentUserName}
+          onStartNewChat={startNewChat}
+          onTitleChange={setChatTitle}
+          onSelectConversation={handleSelectConversation}
+          onDeleteConversation={startNewChat}
+          onExpand={chatSidebarState !== CHAT_SIDEBAR_STATE.EXPANDED ? handleExpand : undefined}
         />
+      </div>
+      <ChatConversationContent
+        conversationId={conversationId}
+        organizationId={organizationId}
+        onFileOpen={handleFileOpen}
+        onTaskOpen={handleTaskOpen}
+        onBrowserOpen={handleBrowserOpen}
+        onBrowserStreamingEnd={handleBrowserStreamingEnd}
+        onTaskPopoverOpenChange={setIsTaskPopoverOpen}
+        fileDropHandlerRef={fileDropHandlerRef}
+        addFileReferenceRef={addFileReferenceRef}
+        currentUserName={currentUserName}
+      />
 
+      <ChatActionsProvider onFileOpen={handleFileOpen}>
         <div className='bg-BG_WHITE sticky bottom-0 z-10 mx-auto w-full max-w-[700px] px-3 pb-3'>
           {hasInputsRequired ? (
             <HITLQuestionsBlock
@@ -208,6 +210,9 @@ const ChatSidebarContent = ({
               conversationId={conversationId ?? ''}
               isDisabled={isStreaming}
               addFileReferenceRef={addFileReferenceRef}
+              externalFileReferences={sharedFileReferences}
+              setExternalFileReferences={setSharedFileReferences}
+              externalFilePathsRef={sharedExternalFilePaths}
               metadata={
                 activeAgentInfo?.id
                   ? {
@@ -219,8 +224,8 @@ const ChatSidebarContent = ({
             />
           )}
         </div>
-      </div>
-    </ChatActionsProvider>
+      </ChatActionsProvider>
+    </div>
   );
 };
 

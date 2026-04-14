@@ -8,6 +8,7 @@ import {
   MicrophoneState,
   type ResourceType,
   ScopeType,
+  type UploadedFile,
   useChatAdapters,
   useTranscription,
 } from '@zamp-platform/chat';
@@ -40,6 +41,9 @@ export interface ConnectedChatInputProps {
   scope?: ScopeType;
   externalInputValue?: string;
   setExternalInputValue?: Dispatch<SetStateAction<string>>;
+  externalFileReferences?: UploadedFile[];
+  setExternalFileReferences?: Dispatch<SetStateAction<UploadedFile[]>>;
+  externalFilePathsRef?: React.RefObject<Set<string>>;
   autoFocus?: boolean;
   onMicrophoneError?: () => void;
   onRecordingError?: () => void;
@@ -79,6 +83,9 @@ export const ConnectedChatInput = ({
   scope = ScopeType.ACTIVITY_RUN,
   externalInputValue,
   setExternalInputValue,
+  externalFileReferences,
+  setExternalFileReferences,
+  externalFilePathsRef,
   autoFocus = false,
   onMicrophoneError,
   onRecordingError,
@@ -169,6 +176,9 @@ export const ConnectedChatInput = ({
     scope,
     externalInputValue,
     setExternalInputValue,
+    externalFileReferences,
+    setExternalFileReferences,
+    externalFilePathsRef,
     adapter: chatInputAdapter,
     resourceType,
     annotationType,
