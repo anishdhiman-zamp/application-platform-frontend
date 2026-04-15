@@ -1,15 +1,5 @@
-import React, { FC } from 'react';
-import {
-  Button,
-  Dialog,
-  DialogBody,
-  DialogClose,
-  DialogContent,
-  DialogFooter,
-  DialogHeader,
-  DialogHeaderTitle,
-  toast,
-} from '@zamp-platform/ui';
+import React from 'react';
+import { ConfirmationDialog, toast } from '@zamp-platform/ui';
 import { useDeletePageMutation } from 'apis/pages';
 import { PageResponseType } from 'types/api/pagesApi.types';
 
@@ -20,7 +10,7 @@ interface DeletePageDialogProps {
   onDeleteSuccess: () => void;
 }
 
-const DeletePageDialog: FC<DeletePageDialogProps> = ({ page, isOpen, onOpenChange, onDeleteSuccess }) => {
+const DeletePageDialog = ({ page, isOpen, onOpenChange, onDeleteSuccess }: DeletePageDialogProps) => {
   const [deletePage, { isLoading: isDeletingPage }] = useDeletePageMutation();
 
   const handleDeletePage = () => {
@@ -40,33 +30,18 @@ const DeletePageDialog: FC<DeletePageDialogProps> = ({ page, isOpen, onOpenChang
   if (!page) return null;
 
   return (
-    <Dialog open={isOpen} onOpenChange={onOpenChange}>
-      <DialogContent size='small' showCloseButton className='w-[400px]' id='delete-page-dialog'>
-        <DialogHeader>
-          <DialogHeaderTitle>Delete page '{page.name}'</DialogHeaderTitle>
-        </DialogHeader>
-        <DialogBody className='f-14-400 p-5'>
-          Deleting the {page?.name} page will permanently remove it and all its sheets. This action cannot be undone.
-        </DialogBody>
-        <DialogFooter className='flex justify-end gap-2.5'>
-          <DialogClose asChild>
-            <Button variant='secondary' size='medium'>
-              Cancel
-            </Button>
-          </DialogClose>
-          <Button
-            variant='destructive'
-            size='medium'
-            onClick={handleDeletePage}
-            isLoading={isDeletingPage}
-            className='w-14'
-            data-testid={`${page.page_id}-delete-page-dialog-delete-btn`}
-          >
-            Delete
-          </Button>
-        </DialogFooter>
-      </DialogContent>
-    </Dialog>
+    <ConfirmationDialog
+      open={isOpen}
+      onOpenChange={onOpenChange}
+      title={`Delete page '${page.name}'`}
+      description={`Deleting the ${page.name} page will permanently remove it and all its sheets. This action cannot be undone.`}
+      confirmLabel='Delete'
+      isLoading={isDeletingPage}
+      onConfirm={handleDeletePage}
+      confirmButtonClassName='w-14'
+      confirmButtonTestId={`${page.page_id}-delete-page-dialog-delete-btn`}
+      contentId='delete-page-dialog'
+    />
   );
 };
 

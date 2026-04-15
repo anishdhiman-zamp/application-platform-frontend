@@ -14,6 +14,7 @@ export const enum PaceNavbarItemId {
   APPS = 'apps',
   AGENTS = 'agents',
   ORG_SETTINGS = 'org-settings',
+  CREDENTIALS_VAULT = 'credentials-vault',
 }
 
 export interface AnimatedIconHandle {

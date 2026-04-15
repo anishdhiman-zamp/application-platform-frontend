@@ -23,11 +23,12 @@ import ChatHistory from '@/modules/pace/components/chat/ChatHistory';
 import ChatHome from '@/modules/pace/components/chat/ChatHome';
 import ModelSelector from '@/modules/pace/components/chat/ModelSelector';
 import VoiceChatSlot from '@/modules/pace/components/chat/VoiceChatSlot';
+import { useDynamicTabs } from '@/modules/pace/components/dynamic-tabs/useDynamicTabs';
 import { useChatDraftInput } from '@/modules/pace/hooks/useChatDraftInput';
 import { NO_ANIMATION } from '@/modules/pace/pace.animations';
 import { STUB_CONVERSATION_STATE } from '@/modules/pace/pace.constants';
 import { usePaceContext } from '@/modules/pace/pace.context';
-import { CHAT_SIDEBAR_STATE } from '@/modules/pace/pace.types';
+import { CHAT_SIDEBAR_STATE, TAB_TYPE } from '@/modules/pace/pace.types';
 import type { RootState } from '@/store';
 
 const ChatHomePage = () => {
@@ -35,8 +36,11 @@ const ChatHomePage = () => {
     setChatSidebarState,
     chatSidebarState,
     setChatMessageIntent,
-    pendingFileReference,
-    clearPendingFileReference,
+    pendingFileReferences,
+    clearPendingFileReferences,
+    sharedFileReferences,
+    setSharedFileReferences,
+    sharedExternalFilePaths,
     startNewChat,
     selectConversation,
     selectedModel,
@@ -46,6 +50,7 @@ const ChatHomePage = () => {
   const organizationId = useAppSelector((state: RootState) => state.user.user?.orgs?.[0]?.organization_id) ?? '';
   const currentUserName = useAppSelector((state: RootState) => state.user.user?.user_name) ?? '';
   const username = useAppSelector((state: RootState) => state.user.user?.username) ?? '';
+  const { openTab } = useDynamicTabs({ type: TAB_TYPE.FILE });
 
   const fileDropHandlerRef = useRef<((files: FileList) => void) | null>(null);
   const addFileReferenceRef = useRef<((ref: { path: string; name: string }) => void) | null>(null);
@@ -79,6 +84,16 @@ const ChatHomePage = () => {
     [selectConversation, setChatSidebarState],
   );
 
+  const handleFileOpen = useCallback(
+    (path: string, name: string) => {
+      if (chatSidebarState === CHAT_SIDEBAR_STATE.COLLAPSED) {
+        setChatSidebarState(CHAT_SIDEBAR_STATE.SIDEBAR);
+      }
+      openTab(path, name);
+    },
+    [openTab, chatSidebarState, setChatSidebarState],
+  );
+
   const interceptedActions = useMemo(
     () =>
       createConversationActions({
@@ -103,11 +118,11 @@ const ChatHomePage = () => {
   );
 
   useEffect(() => {
-    if (pendingFileReference && addFileReferenceRef.current) {
-      addFileReferenceRef.current(pendingFileReference);
-      clearPendingFileReference();
+    if (pendingFileReferences.length > 0 && addFileReferenceRef.current) {
+      pendingFileReferences.forEach((ref) => addFileReferenceRef.current?.(ref));
+      clearPendingFileReferences();
     }
-  }, [pendingFileReference, clearPendingFileReference]);
+  }, [pendingFileReferences, clearPendingFileReferences]);
 
   return (
     <ConversationStateContext.Provider value={STUB_CONVERSATION_STATE}>
@@ -115,7 +130,7 @@ const ChatHomePage = () => {
         <>
           <AnimatePresence>
             {!isExpanded && (
-              <ChatActionsProvider>
+              <ChatActionsProvider onFileOpen={handleFileOpen}>
                 <motion.div
                   key='chat-home-page'
                   initial={false}
@@ -144,6 +159,9 @@ const ChatHomePage = () => {
                       setExternalInputValue={setInputValue}
                       fileDropHandlerRef={fileDropHandlerRef}
                       addFileReferenceRef={addFileReferenceRef}
+                      externalFileReferences={sharedFileReferences}
+                      setExternalFileReferences={setSharedFileReferences}
+                      externalFilePathsRef={sharedExternalFilePaths}
                       showModelSelector
                       modelSelectorSlot={modelSelectorSlot}
                       voiceChatSlot={isVoiceChatEnabled ? <VoiceChatSlot /> : null}

@@ -1,6 +1,18 @@
 'use client';
 
-import { createContext, type ReactNode, useCallback, useContext, useEffect, useMemo, useRef, useState } from 'react';
+import {
+  createContext,
+  type Dispatch,
+  type ReactNode,
+  type SetStateAction,
+  useCallback,
+  useContext,
+  useEffect,
+  useMemo,
+  useRef,
+  useState,
+} from 'react';
+import { type UploadedFile } from '@zamp-platform/chat';
 import {
   FILES_PANEL_MAX_WIDTH,
   FILES_PANEL_MIN_WIDTH,
@@ -52,9 +64,13 @@ interface PaceContextType {
   registerSelectConversation: (callback: (id: string, title?: string) => void) => void;
   selectConversation: (id: string, title?: string) => void;
 
-  pendingFileReference: PendingFileReference | null;
-  setPendingFileReference: (ref: PendingFileReference | null) => void;
-  clearPendingFileReference: defaultFnType;
+  pendingFileReferences: PendingFileReference[];
+  setPendingFileReferences: (refs: PendingFileReference[]) => void;
+  clearPendingFileReferences: defaultFnType;
+
+  sharedFileReferences: UploadedFile[];
+  setSharedFileReferences: Dispatch<SetStateAction<UploadedFile[]>>;
+  sharedExternalFilePaths: React.RefObject<Set<string>>;
 
   chatMessageIntent: ChatMessageIntent | null;
   setChatMessageIntent: (payload: ChatMessageIntent | null) => void;
@@ -114,10 +130,12 @@ export const PaceProvider = ({ children }: { children: ReactNode }) => {
   const pendingCollapseRef = useRef(false);
   const startNewChatRef = useRef<defaultFnType | null>(null);
   const selectConversationRef = useRef<((id: string, title?: string) => void) | null>(null);
+  const sharedExternalFilePaths = useRef<Set<string>>(new Set());
 
   const [chatSidebarState, setChatSidebarStateRaw] = useState<ChatSidebarState>(getInitialSidebarState);
   const [prevChatSidebarState, setPrevChatSidebarState] = useState<ChatSidebarState>(chatSidebarState);
-  const [pendingFileReference, setPendingFileReference] = useState<PendingFileReference | null>(null);
+  const [pendingFileReferences, setPendingFileReferences] = useState<PendingFileReference[]>([]);
+  const [sharedFileReferences, setSharedFileReferences] = useState<UploadedFile[]>([]);
   const [chatMessageIntent, setChatMessageIntent] = useState<ChatMessageIntent | null>(null);
   const [activeAgentInfo, setActiveAgentInfo] = useState<ActiveAgentInfo | null>(null);
   const initialFilesPanelState = useRef(getInitialFilesPanelState());
@@ -170,8 +188,8 @@ export const PaceProvider = ({ children }: { children: ReactNode }) => {
     pendingCollapseRef.current = true;
   }, []);
 
-  const clearPendingFileReference = useCallback(() => {
-    setPendingFileReference(null);
+  const clearPendingFileReferences = useCallback(() => {
+    setPendingFileReferences([]);
   }, []);
 
   const setFilesPanelPinned = useCallback((pinned: boolean) => {
@@ -382,9 +400,13 @@ export const PaceProvider = ({ children }: { children: ReactNode }) => {
       registerSelectConversation,
       selectConversation,
 
-      pendingFileReference,
-      setPendingFileReference,
-      clearPendingFileReference,
+      pendingFileReferences,
+      setPendingFileReferences,
+      clearPendingFileReferences,
+
+      sharedFileReferences,
+      setSharedFileReferences,
+      sharedExternalFilePaths,
 
       chatMessageIntent,
       setChatMessageIntent,
@@ -429,8 +451,10 @@ export const PaceProvider = ({ children }: { children: ReactNode }) => {
       registerSelectConversation,
       selectConversation,
 
-      pendingFileReference,
-      clearPendingFileReference,
+      pendingFileReferences,
+      clearPendingFileReferences,
+
+      sharedFileReferences,
 
       chatMessageIntent,
 

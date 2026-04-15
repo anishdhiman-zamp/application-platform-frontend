@@ -101,24 +101,9 @@ const agentsApi = baseApi.injectEndpoints({
 
     getAgentTaskCounts: builder.query<TaskListingCountsResponse, AgentTaskCountsParams>({
       query: ({ agentId, search }) => ({
-        url: formRequestUrlWithParams(API_ENDPOINTS.AGENT_TASKS_GET, { agentId }),
-        params: { search: search || undefined, limit: 40 },
+        url: formRequestUrlWithParams(API_ENDPOINTS.AGENT_TASK_COUNTS_GET, { agentId }),
+        params: { search: search || undefined },
       }),
-      transformResponse: (response: { tasks: AgentTaskApiItem[]; total: number }): TaskListingCountsResponse => {
-        const countMap = new Map<string, number>();
-
-        for (const task of response.tasks ?? []) {
-          countMap.set(task.status, (countMap.get(task.status) ?? 0) + 1);
-        }
-
-        return {
-          counts: Array.from(countMap.entries()).map(([status, count]) => ({
-            status: status as TaskStatus,
-            count,
-          })),
-          total: response.total ?? response.tasks?.length ?? 0,
-        };
-      },
       providesTags: [APITags.GET_AGENT_TASKS],
     }),
 

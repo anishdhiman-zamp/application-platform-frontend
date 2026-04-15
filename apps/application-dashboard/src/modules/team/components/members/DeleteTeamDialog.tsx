@@ -1,15 +1,5 @@
-import { FC, useMemo } from 'react';
-import {
-  Button,
-  Dialog,
-  DialogBody,
-  DialogClose,
-  DialogContent,
-  DialogFooter,
-  DialogHeader,
-  DialogHeaderTitle,
-  toast,
-} from '@zamp-platform/ui';
+import { useMemo } from 'react';
+import { ConfirmationDialog, toast } from '@zamp-platform/ui';
 import MembersName from 'modules/team/components/members/MembersName';
 import { TeamType } from 'modules/team/people.types';
 import { useDeleteTeamMutation } from '@/apis/people';
@@ -25,13 +15,13 @@ interface DeleteTeamDialogProps {
   onRemoveUserFromTeam: (teamId: string) => void;
 }
 
-const DeleteTeamDialog: FC<DeleteTeamDialogProps> = ({
+const DeleteTeamDialog = ({
   organizationId,
   team,
   isOpen,
   onOpenChange,
   onRemoveUserFromTeam,
-}) => {
+}: DeleteTeamDialogProps) => {
   const [deleteTeam, { isLoading: isDeletingTeam }] = useDeleteTeamMutation();
 
   const teamMembers = useMemo(() => {
@@ -57,12 +47,12 @@ const DeleteTeamDialog: FC<DeleteTeamDialogProps> = ({
   if (!team) return null;
 
   return (
-    <Dialog open={isOpen} onOpenChange={onOpenChange}>
-      <DialogContent size='small' showCloseButton className='w-[400px]'>
-        <DialogHeader>
-          <DialogHeaderTitle>Delete team '{team?.name}'</DialogHeaderTitle>
-        </DialogHeader>
-        <DialogBody className='f-14-400 p-5'>
+    <ConfirmationDialog
+      open={isOpen}
+      onOpenChange={onOpenChange}
+      title={`Delete team '${team?.name}'`}
+      description={
+        <>
           Deleting the {team?.name} team will revoke all access granted through this team
           {teamMembers?.length > 0
             ? ` for ${capitalizeWords(teamMembers?.[0])} ${teamMembers?.length > 1 ? `and ` : ''}`
@@ -81,25 +71,13 @@ const DeleteTeamDialog: FC<DeleteTeamDialogProps> = ({
               <span className='text-blue-700'>{teamMembers?.length - 1} others</span>
             </TooltipV2>
           )}
-        </DialogBody>
-        <DialogFooter className='flex justify-end gap-2.5'>
-          <DialogClose asChild>
-            <Button variant='secondary' size='medium'>
-              Cancel
-            </Button>
-          </DialogClose>
-          <Button
-            variant='destructive'
-            size='medium'
-            onClick={handleDeleteTeam}
-            isLoading={isDeletingTeam}
-            className='w-14'
-          >
-            Delete
-          </Button>
-        </DialogFooter>
-      </DialogContent>
-    </Dialog>
+        </>
+      }
+      confirmLabel='Delete'
+      isLoading={isDeletingTeam}
+      onConfirm={handleDeleteTeam}
+      confirmButtonClassName='w-14'
+    />
   );
 };
 

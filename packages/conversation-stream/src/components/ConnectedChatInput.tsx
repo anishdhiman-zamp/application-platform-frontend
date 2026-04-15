@@ -4,10 +4,14 @@ import { captureException } from '@sentry/nextjs';
 import {
   type AnnotationType,
   ChatComposer,
+  createSnippetFile,
+  filesToFileList,
+  isLargeText,
   type LocationData,
   MicrophoneState,
   type ResourceType,
   ScopeType,
+  type UploadedFile,
   useChatAdapters,
   useTranscription,
 } from '@zamp-platform/chat';
@@ -40,6 +44,9 @@ export interface ConnectedChatInputProps {
   scope?: ScopeType;
   externalInputValue?: string;
   setExternalInputValue?: Dispatch<SetStateAction<string>>;
+  externalFileReferences?: UploadedFile[];
+  setExternalFileReferences?: Dispatch<SetStateAction<UploadedFile[]>>;
+  externalFilePathsRef?: React.RefObject<Set<string>>;
   autoFocus?: boolean;
   onMicrophoneError?: () => void;
   onRecordingError?: () => void;
@@ -79,6 +86,9 @@ export const ConnectedChatInput = ({
   scope = ScopeType.ACTIVITY_RUN,
   externalInputValue,
   setExternalInputValue,
+  externalFileReferences,
+  setExternalFileReferences,
+  externalFilePathsRef,
   autoFocus = false,
   onMicrophoneError,
   onRecordingError,
@@ -169,6 +179,9 @@ export const ConnectedChatInput = ({
     scope,
     externalInputValue,
     setExternalInputValue,
+    externalFileReferences,
+    setExternalFileReferences,
+    externalFilePathsRef,
     adapter: chatInputAdapter,
     resourceType,
     annotationType,
@@ -223,9 +236,18 @@ export const ConnectedChatInput = ({
       if (files && files.length > 0) {
         e.preventDefault();
         handleFileSelect(files);
+        return;
+      }
+
+      const text = e.clipboardData?.getData('text/plain') ?? '';
+      if (isLargeText(text)) {
+        e.preventDefault();
+        const existingNames = fileReferences.map((ref) => ref.name);
+        const file = createSnippetFile(text, existingNames);
+        handleFileSelect(filesToFileList([file]));
       }
     },
-    [handleFileSelect],
+    [handleFileSelect, fileReferences],
   );
 
   const handleStartRecording = useCallback(async () => {

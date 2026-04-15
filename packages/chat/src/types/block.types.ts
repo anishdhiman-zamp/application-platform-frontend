@@ -326,6 +326,7 @@ export interface BlockMessage {
 }
 
 export interface UploadedFileType {
+  id?: string;
   path: string;
   name: string;
   file_type?: string;

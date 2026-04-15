@@ -1,3 +1,4 @@
+import { IMAGE_EXTENSIONS, VIDEO_EXTENSIONS } from '@zamp-platform/utils';
 import {
   Clipboard,
   Copy,
@@ -129,11 +130,9 @@ export const FILE_CATEGORY = {
 
 export type FileCategory = (typeof FILE_CATEGORY)[keyof typeof FILE_CATEGORY];
 
-export const IMAGE_EXTENSIONS = ['png', 'jpg', 'jpeg', 'gif', 'webp', 'svg', 'bmp', 'ico'] as const;
+export { IMAGE_EXTENSIONS, VIDEO_EXTENSIONS };
 
 export const AUDIO_EXTENSIONS = ['mp3', 'wav', 'flac', 'aac', 'm4a', 'ogg', 'wma', 'aiff'] as const;
-
-export const VIDEO_EXTENSIONS = ['mp4', 'mov', 'avi', 'mkv', 'webm', 'wmv', 'flv', 'm4v'] as const;
 
 export const PDF_EXTENSIONS = ['pdf'] as const;
 

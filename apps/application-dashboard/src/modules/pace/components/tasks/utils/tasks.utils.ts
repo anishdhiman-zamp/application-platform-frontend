@@ -9,6 +9,36 @@ import {
   type StreamingState,
 } from '@zamp-platform/chat';
 import { STATUS_DISPLAY } from '@/modules/pace/components/tasks/constants/tasks.constants';
+import type { CreationSource, TaskListingTab } from '@/modules/pace/components/tasks/types/tasks.types';
+
+const ACCORDION_STORAGE_KEY_PREFIX = 'task-accordion-open';
+
+export const getAccordionStorageKey = (
+  agentId?: string,
+  creationSource?: CreationSource,
+  activeTab?: TaskListingTab,
+): string => {
+  const parts = [ACCORDION_STORAGE_KEY_PREFIX];
+
+  if (agentId) parts.push(`agent:${agentId}`);
+  if (creationSource) parts.push(`src:${creationSource.type}:${creationSource.id}`);
+  if (activeTab) parts.push(`tab:${activeTab}`);
+
+  return parts.join('|');
+};
+
+export const readStoredAccordionValues = (key: string): string[] | null => {
+  try {
+    const raw = sessionStorage.getItem(key);
+
+    if (!raw) return null;
+    const parsed = JSON.parse(raw);
+
+    return Array.isArray(parsed) ? parsed : null;
+  } catch {
+    return null;
+  }
+};
 
 export interface ProcessedMessage {
   message: ChatMessage;

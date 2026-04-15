@@ -33,3 +33,4 @@ export * from './src/types/chat.types';
 export * from './src/types/transcription.types';
 export * from './src/utils/filesystemUpload';
 export * from './src/utils/fileUpload';
+export * from './src/utils/snippet';

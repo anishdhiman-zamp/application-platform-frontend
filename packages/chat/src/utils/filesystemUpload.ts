@@ -386,6 +386,7 @@ export const processFilesystemUpload = async (
   await uploadFile(file, targetPath, mutations, undefined, undefined, true);
 
   return {
+    id: crypto.randomUUID(),
     path: targetPath,
     name: sanitizedName,
     file_type: file.type || 'application/octet-stream',
