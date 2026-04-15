@@ -90,6 +90,7 @@ export const ConversationProvider: React.FC<ConversationProviderProps> = ({
     isFetching: isFetchingConversationHistory,
     isUninitialized: isUninitializedConversationHistory,
     isError: isErrorConversationHistory,
+    error: errorConversationHistory,
     refetch: refetchConversationHistory,
   } = useGetConversationByIdQuery(
     {
@@ -406,6 +407,7 @@ export const ConversationProvider: React.FC<ConversationProviderProps> = ({
       isCreatingConversationV2,
       isSendingMessage,
       isErrorConversationHistory,
+      errorConversationHistory,
       isUninitializedConversationHistory,
       isAnalysing,
       sendMessageError: null,
@@ -428,6 +430,7 @@ export const ConversationProvider: React.FC<ConversationProviderProps> = ({
       isCreatingConversationV2,
       isSendingMessage,
       isErrorConversationHistory,
+      errorConversationHistory,
       isUninitializedConversationHistory,
       isAnalysing,
       sendMessageV2Error,

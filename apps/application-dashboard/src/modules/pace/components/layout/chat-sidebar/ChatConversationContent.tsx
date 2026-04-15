@@ -1,6 +1,7 @@
 'use client';
 
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
+import { isNotFoundError } from '@zamp-platform/api';
 import {
   type AgentBlockType,
   BLOCK_TYPE,
@@ -31,6 +32,7 @@ import {
   getAgentAvatarByKey,
   PrefixMessage,
 } from '@/modules/pace/components/agents/constants/agents.constants';
+import ContentErrorState from '@/modules/pace/components/ContentErrorState';
 import { buildTabRoute } from '@/modules/pace/components/dynamic-tabs/tab-type-registry';
 import { useDynamicTabs } from '@/modules/pace/components/dynamic-tabs/useDynamicTabs';
 import ChatMessagesSkeleton from '@/modules/pace/components/loaders/ChatMessagesSkeleton';
@@ -93,6 +95,7 @@ const ChatConversationContent = ({
     isCreatingConversationV2,
     isLoadingConversationHistory,
     isErrorConversationHistory,
+    errorConversationHistory,
     isUninitializedConversationHistory,
     isStreaming,
     isBrowserStreamingAvailable,
@@ -108,8 +111,10 @@ const ChatConversationContent = ({
   const isInConversation = Boolean(conversationId || ctxConversationId || hasMessages || streamingState?.is_active);
   const lastMessageSenderType = useMemo(() => messages[messages.length - 1]?.sender_type, [messages]);
   const isLoadingConversation =
+    !isErrorConversationHistory &&
     !streamingState?.is_active &&
     (!hasMessages || Boolean(conversationId && isLoadingConversationHistory && !hasMessages));
+  const isConversationNotFound = isErrorConversationHistory && isNotFoundError(errorConversationHistory);
 
   const { isDragOver, dropZoneProps } = useFileDragDrop({
     onFileDrop: (files) => fileDropHandlerRef.current?.(files),
@@ -358,6 +363,14 @@ const ChatConversationContent = ({
               skeletonType={SkeletonTypes.CUSTOM}
               loader={<ChatMessagesSkeleton className='px-0' />}
               className='mx-auto flex w-full max-w-[700px] flex-1 flex-col px-3'
+              renderError={
+                isConversationNotFound ? (
+                  <ContentErrorState
+                    title='Conversation not found'
+                    description="This conversation may have been deleted or you don't have access to it."
+                  />
+                ) : undefined
+              }
             >
               <MessageContainer
                 messages={messages}

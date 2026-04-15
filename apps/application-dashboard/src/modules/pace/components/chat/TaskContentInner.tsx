@@ -1,6 +1,7 @@
 'use client';
 
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
+import { isNotFoundError } from '@zamp-platform/api';
 import {
   BLOCK_TYPE,
   ChatActionsProvider,
@@ -42,6 +43,7 @@ import { TaskChatStepsToggleHeader } from '@/modules/pace/components/chat/TaskCh
 import { TaskChatTitleHeader } from '@/modules/pace/components/chat/TaskChatTitleHeader';
 import TaskNavigation from '@/modules/pace/components/chat/TaskNavigation';
 import TaskTopbar from '@/modules/pace/components/chat/TaskTopbar';
+import ContentErrorState from '@/modules/pace/components/ContentErrorState';
 import { getActiveTabIdFromUrl } from '@/modules/pace/components/dynamic-tabs/tab-type-registry';
 import TaskContentSkeleton from '@/modules/pace/components/loaders/TaskContentSkeleton';
 import InlineSubtaskSection from '@/modules/pace/components/tasks/components/InlineSubtaskSection';
@@ -104,8 +106,15 @@ const TaskContentChat = ({ taskId }: { taskId: string }) => {
     goToPreviousTask,
   } = useTaskNavigation(taskId);
 
-  const { messages, isLoadingHistory, isErrorHistory, conversationData, inputsRequired, taskSummaryText } =
-    useTaskState();
+  const {
+    messages,
+    isLoadingHistory,
+    isErrorHistory,
+    errorHistory,
+    conversationData,
+    inputsRequired,
+    taskSummaryText,
+  } = useTaskState();
   const { refetchHistory } = useTaskActions();
   const { sseEventBus } = useEventBus();
   const streamingState = useStreamingState(taskId);
@@ -205,8 +214,10 @@ const TaskContentChat = ({ taskId }: { taskId: string }) => {
   // When navigating back to a previously visited task, RTK Query serves cached data
   const hasCachedData = Boolean(conversationData);
   const isLoadingConversation =
-    Boolean(taskId && isLoadingHistory) ||
-    (!hasMessages && !streamingState && !hadStreamingRef.current && !hasCachedData);
+    !isErrorHistory &&
+    (Boolean(taskId && isLoadingHistory) ||
+      (!hasMessages && !streamingState && !hadStreamingRef.current && !hasCachedData));
+  const isTaskNotFound = isErrorHistory && isNotFoundError(errorHistory);
 
   const { processedMessages, lastSummaryText } = useMemo(() => getProcessedMessages(messages), [messages]);
   const summary = (conversationData as Record<string, unknown> | undefined)?.summary as
@@ -309,6 +320,14 @@ const TaskContentChat = ({ taskId }: { taskId: string }) => {
           loader={<TaskContentSkeleton />}
           className='flex min-h-0 w-full min-w-0 flex-1 flex-col'
           disableAnimation
+          renderError={
+            isTaskNotFound ? (
+              <ContentErrorState
+                title='Task not found'
+                description="This task may have been deleted or you don't have access to it."
+              />
+            ) : undefined
+          }
         >
           <div className='mx-auto flex w-full max-w-[700px] flex-col px-4 pt-12'>
             <TaskChatTitleHeader
