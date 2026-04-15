@@ -34,4 +34,5 @@ export enum FEATURE_FLAGS {
   APPS = 'apps',
   NEW_ORG_CREATION = 'new-org-creation',
   VOICE_CHAT = 'voice-chat',
+  CREDENTIALS_VAULT = 'CREDENTIALS_VAULT',
 }
