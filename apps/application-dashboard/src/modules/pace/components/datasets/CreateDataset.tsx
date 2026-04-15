@@ -120,7 +120,7 @@ const CreateDataset = () => {
             onBlur={() => setIsEditingTitle(false)}
             onKeyDown={handleTitleKeyDown}
             placeholder='Untitled Dataset'
-            className='f-18-600 text-GRAY_1000 h-auto flex-1 border-none bg-transparent px-0 py-0 shadow-none outline-none'
+            className='f-18-600 text-GRAY_1000 h-auto flex-1 border-none bg-transparent px-2 py-1 shadow-none outline-none'
           />
         ) : (
           <TooltipProvider delayDuration={200}>
