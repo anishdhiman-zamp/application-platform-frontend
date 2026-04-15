@@ -5,6 +5,7 @@ import { createContext } from 'react';
 
 export interface ConversationState {
   messages: ChatMessage[];
+  queuedMessages: ChatMessage[];
   hasMessages: boolean;
   conversationId: string | null;
   isStreaming: boolean;

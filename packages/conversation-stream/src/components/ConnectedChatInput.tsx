@@ -114,7 +114,7 @@ export const ConnectedChatInput = ({
   const transcriptInsertionIndexRef = useRef(-1);
 
   const actions = useConversationActions();
-  const { isStreaming, isStopping, conversationId: ctxConversationId, messages } = useConversationState();
+  const { isStreaming, isStopping, isAnalysing, conversationId: ctxConversationId, messages } = useConversationState();
 
   const resolvedConversationId = conversationIdProp ?? ctxConversationId ?? '';
 
@@ -300,7 +300,7 @@ export const ConnectedChatInput = ({
   }, [fileReferences, onFileReferencesChange]);
 
   return (
-    <div className='w-full'>
+    <div className='relative w-full'>
       <input
         ref={fileInputRef}
         type='file'
@@ -330,8 +330,8 @@ export const ConnectedChatInput = ({
         microphoneDisabled={microphoneState === MicrophoneState.SettingUp}
         showSubmitButton
         onSubmit={handleSubmit}
-        isSubmitDisabled={isSubmitDisabled || (hideStopButton && isStreaming)}
-        isStreaming={hideStopButton ? false : isStreaming}
+        isSubmitDisabled={isSubmitDisabled}
+        isStreaming={hideStopButton ? false : isStreaming || isAnalysing}
         onStop={hideStopButton ? undefined : handleStop}
         isStopping={hideStopButton ? false : isStopping}
         className={className}

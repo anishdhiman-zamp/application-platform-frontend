@@ -1,7 +1,14 @@
 'use client';
 
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
-import { ChatActionsProvider, HITLEntityType, HITLQuestionsBlock, ResourceType, ScopeType } from '@zamp-platform/chat';
+import {
+  ChatActionsProvider,
+  HITLEntityType,
+  HITLQuestionsBlock,
+  QueuedMessages,
+  ResourceType,
+  ScopeType,
+} from '@zamp-platform/chat';
 import { ConnectedChatInput, useConversationActions, useConversationState } from '@zamp-platform/conversation-stream';
 import { cn } from '@zamp-platform/ui/utils';
 import { EVENT_TYPE } from '@zamp-platform/utils/event-bus';
@@ -54,7 +61,7 @@ const ChatSidebarContent = ({
   const { inputValue, setInputValue } = useChatDraftInput({
     conversationId,
   });
-  const { inputsRequired, isStreaming } = useConversationState();
+  const { inputsRequired, queuedMessages } = useConversationState();
   const { refetchConversationHistory } = useConversationActions();
   const { sseEventBus } = useEventBus();
 
@@ -190,26 +197,29 @@ const ChatSidebarContent = ({
               sourceEntityType={HITLEntityType.CONVERSATION}
             />
           ) : (
-            <ConnectedChatInput
-              resourceType={ResourceType.ORGANIZATION}
-              resourceId={organizationId}
-              autoFocus
-              scope={ScopeType.ORGANIZATION}
-              scopeId={organizationId}
-              username={username}
-              currentUserName={currentUserName}
-              placeholder="Do your life's best work with Pace"
-              externalInputValue={inputValue}
-              setExternalInputValue={setInputValue}
-              fileDropHandlerRef={fileDropHandlerRef}
-              llmModel={selectedModel}
-              showModelSelector
-              modelSelectorSlot={modelSelectorSlot}
-              conversationId={conversationId ?? ''}
-              isDisabled={isStreaming}
-              addFileReferenceRef={addFileReferenceRef}
-              metadata={activeAgentInfo?.id ? { agent_id: activeAgentInfo.id } : undefined}
-            />
+            <>
+              <QueuedMessages messages={queuedMessages} />
+              <ConnectedChatInput
+                resourceType={ResourceType.ORGANIZATION}
+                resourceId={organizationId}
+                autoFocus
+                scope={ScopeType.ORGANIZATION}
+                scopeId={organizationId}
+                username={username}
+                currentUserName={currentUserName}
+                placeholder="Do your life's best work with Pace"
+                externalInputValue={inputValue}
+                setExternalInputValue={setInputValue}
+                fileDropHandlerRef={fileDropHandlerRef}
+                llmModel={selectedModel}
+                showModelSelector
+                modelSelectorSlot={modelSelectorSlot}
+                conversationId={conversationId ?? ''}
+                addFileReferenceRef={addFileReferenceRef}
+                metadata={activeAgentInfo?.id ? { agent_id: activeAgentInfo.id } : undefined}
+                className={queuedMessages.length > 0 ? '-mt-3' : undefined}
+              />
+            </>
           )}
         </div>
       </div>

@@ -21,6 +21,7 @@ export const enum ConversationEventType {
   CONTENT_BLOCK_STOP = 'content_block_stop',
   BROWSER_STREAMING_AVAILABLE = 'browser_streaming_available',
   BROWSER_STREAMING_UNAVAILABLE = 'browser_streaming_unavailable',
+  MESSAGES_PICKED_UP = 'messages_picked_up',
 }
 
 export interface ConversationCreatedEvent {
@@ -90,6 +91,11 @@ export interface BrowserStreamingUnavailableEvent {
   conversation_id: string;
 }
 
+export interface MessagesPickedUpEvent {
+  type: ConversationEventType.MESSAGES_PICKED_UP;
+  message_ids: string[];
+}
+
 /** Union of all flat events on the per-conversation SSE channel */
 export type ConversationSSEEvent =
   | { type: ConversationEventType.INIT_STREAM }
@@ -102,7 +108,8 @@ export type ConversationSSEEvent =
   | ContentBlockDeltaEvent
   | ContentBlockStopEvent
   | BrowserStreamingAvailableEvent
-  | BrowserStreamingUnavailableEvent;
+  | BrowserStreamingUnavailableEvent
+  | MessagesPickedUpEvent;
 
 /** SSE event with an id field (Redis stream ID) for Last-Event-Id tracking */
 export interface SSEEventWithId {

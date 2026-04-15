@@ -15,6 +15,7 @@ import { INPUT_FILE_FORMATS } from '@/types/common/mime';
 
 export const STUB_CONVERSATION_STATE: ConversationState = {
   messages: [],
+  queuedMessages: [],
   hasMessages: false,
   conversationId: null,
   isStreaming: false,
