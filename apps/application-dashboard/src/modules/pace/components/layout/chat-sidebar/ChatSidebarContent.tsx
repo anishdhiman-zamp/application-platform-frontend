@@ -1,7 +1,7 @@
 'use client';
 
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
-import { HITLEntityType, HITLQuestionsBlock, ResourceType, ScopeType } from '@zamp-platform/chat';
+import { ChatActionsProvider, HITLEntityType, HITLQuestionsBlock, ResourceType, ScopeType } from '@zamp-platform/chat';
 import { ConnectedChatInput, useConversationActions, useConversationState } from '@zamp-platform/conversation-stream';
 import { cn } from '@zamp-platform/ui/utils';
 import { EVENT_TYPE } from '@zamp-platform/utils/event-bus';
@@ -10,6 +10,7 @@ import ChatConversationContent from 'modules/pace/components/layout/chat-sidebar
 import { useEventBus } from '@/app/_providers/sse-provider';
 import ChatTopbar from '@/modules/pace/components/chat/ChatTopbar';
 import ModelSelector from '@/modules/pace/components/chat/ModelSelector';
+import { HITL_RESPONDED_EVENT } from '@/modules/pace/components/tasks/constants/tasks.constants';
 import { useChatDraftInput } from '@/modules/pace/hooks/useChatDraftInput';
 import { useHitlQuestions } from '@/modules/pace/hooks/useHitlQuestions';
 import { BrowserViewerDisplayState } from '@/modules/pace/pace.constants';
@@ -39,6 +40,7 @@ const ChatSidebarContent = ({
   username,
 }: ChatSidebarContentProps) => {
   const { openTab } = useDynamicTabs({ type: TAB_TYPE.FILE });
+
   const { openTab: openTaskTab } = useDynamicTabs({ type: TAB_TYPE.TASK });
   const { openTab: openBrowserTab, updateTab: updateBrowserTab } = useDynamicTabs({ type: TAB_TYPE.BROWSER });
   const {
@@ -48,6 +50,9 @@ const ChatSidebarContent = ({
     setActiveAgentInfo,
     selectedModel,
     setSelectedModel,
+    sharedFileReferences,
+    setSharedFileReferences,
+    sharedExternalFilePaths,
   } = usePaceContext();
   const { inputValue, setInputValue } = useChatDraftInput({
     conversationId,
@@ -134,6 +139,21 @@ const ChatSidebarContent = ({
     return () => sub.unsubscribe();
   }, [sseEventBus, handleGlobalInputRequired]);
 
+  const handleTaskHitlRespondComplete = useCallback(
+    (event: { type: EVENT_TYPE; payload?: string | Record<string, unknown> }) => {
+      if (event?.payload === HITL_RESPONDED_EVENT) {
+        void refetchConversationHistory();
+      }
+    },
+    [refetchConversationHistory],
+  );
+
+  useEffect(() => {
+    const sub = sseEventBus.subscribe(EVENT_TYPE.COMPONENT, handleTaskHitlRespondComplete);
+
+    return () => sub.unsubscribe();
+  }, [sseEventBus, handleTaskHitlRespondComplete]);
+
   return (
     <div className='bg-BG_WHITE relative mx-auto flex h-full w-full flex-1 flex-col'>
       <div className={cn('transition-[filter] duration-200', isTaskPopoverOpen && 'pointer-events-none blur-sm')}>
@@ -148,7 +168,6 @@ const ChatSidebarContent = ({
           onExpand={chatSidebarState !== CHAT_SIDEBAR_STATE.EXPANDED ? handleExpand : undefined}
         />
       </div>
-
       <ChatConversationContent
         conversationId={conversationId}
         organizationId={organizationId}
@@ -162,38 +181,50 @@ const ChatSidebarContent = ({
         currentUserName={currentUserName}
       />
 
-      <div className='bg-BG_WHITE sticky bottom-0 z-10 mx-auto w-full max-w-[700px] px-3 pb-3'>
-        {hasInputsRequired ? (
-          <HITLQuestionsBlock
-            key={hitlQuestionsKey}
-            payload={{ questions: hitlQuestions }}
-            onSubmit={handleHitlRespondComplete}
-            sourceEntityId={conversationId ?? ''}
-            sourceEntityType={HITLEntityType.CONVERSATION}
-          />
-        ) : (
-          <ConnectedChatInput
-            resourceType={ResourceType.ORGANIZATION}
-            resourceId={organizationId}
-            autoFocus
-            scope={ScopeType.ORGANIZATION}
-            scopeId={organizationId}
-            username={username}
-            currentUserName={currentUserName}
-            placeholder="Do your life's best work with Pace"
-            externalInputValue={inputValue}
-            setExternalInputValue={setInputValue}
-            fileDropHandlerRef={fileDropHandlerRef}
-            llmModel={selectedModel}
-            showModelSelector
-            modelSelectorSlot={modelSelectorSlot}
-            conversationId={conversationId ?? ''}
-            isDisabled={isStreaming}
-            addFileReferenceRef={addFileReferenceRef}
-            metadata={activeAgentInfo?.id ? { agent_id: activeAgentInfo.id } : undefined}
-          />
-        )}
-      </div>
+      <ChatActionsProvider onFileOpen={handleFileOpen}>
+        <div className='bg-BG_WHITE sticky bottom-0 z-10 mx-auto w-full max-w-[700px] px-3 pb-3'>
+          {hasInputsRequired ? (
+            <HITLQuestionsBlock
+              key={hitlQuestionsKey}
+              payload={{ questions: hitlQuestions }}
+              onSubmit={handleHitlRespondComplete}
+              sourceEntityId={conversationId ?? ''}
+              sourceEntityType={HITLEntityType.CONVERSATION}
+            />
+          ) : (
+            <ConnectedChatInput
+              resourceType={ResourceType.ORGANIZATION}
+              resourceId={organizationId}
+              autoFocus
+              scope={ScopeType.ORGANIZATION}
+              scopeId={organizationId}
+              username={username}
+              currentUserName={currentUserName}
+              placeholder="Do your life's best work with Pace"
+              externalInputValue={inputValue}
+              setExternalInputValue={setInputValue}
+              fileDropHandlerRef={fileDropHandlerRef}
+              llmModel={selectedModel}
+              showModelSelector
+              modelSelectorSlot={modelSelectorSlot}
+              conversationId={conversationId ?? ''}
+              isDisabled={isStreaming}
+              addFileReferenceRef={addFileReferenceRef}
+              externalFileReferences={sharedFileReferences}
+              setExternalFileReferences={setSharedFileReferences}
+              externalFilePathsRef={sharedExternalFilePaths}
+              metadata={
+                activeAgentInfo?.id
+                  ? {
+                      agent_id: activeAgentInfo.id,
+                      ...(activeAgentInfo.avatar && { avatar: activeAgentInfo.avatar }),
+                    }
+                  : undefined
+              }
+            />
+          )}
+        </div>
+      </ChatActionsProvider>
     </div>
   );
 };

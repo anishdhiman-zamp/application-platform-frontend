@@ -13,18 +13,19 @@ export type HITLAnswerValue = {
 export type HITLAnswersState = Record<string, HITLAnswerValue>;
 
 export const appendPrintableToCustomInput = (
-  questionId: string,
+  question: HITLQuestionWithEntity,
   char: string,
   setCustomInputs: Dispatch<SetStateAction<Record<string, string>>>,
   setAnswers: Dispatch<SetStateAction<HITLAnswersState>>,
 ): void => {
+  const questionId = question.id;
+  const isMulti = isMultipleChoiceQuestion(question);
   setCustomInputs((prev) => {
     const newText = (prev[questionId] || '') + char;
     setAnswers((answersPrev) => {
       const currentAns = answersPrev[questionId] || { optionIds: [], customText: '' };
-      const optionIds = currentAns.optionIds.includes(CUSTOM_OPTION_ID)
-        ? currentAns.optionIds
-        : [...currentAns.optionIds, CUSTOM_OPTION_ID];
+      const baseOptionIds = isMulti ? currentAns.optionIds : [];
+      const optionIds = baseOptionIds.includes(CUSTOM_OPTION_ID) ? baseOptionIds : [...baseOptionIds, CUSTOM_OPTION_ID];
       return { ...answersPrev, [questionId]: { optionIds, customText: newText, isSkipped: false } };
     });
     return { ...prev, [questionId]: newText };

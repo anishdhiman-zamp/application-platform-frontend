@@ -1,17 +1,7 @@
 'use client';
 
 import { type FC, useCallback } from 'react';
-import {
-  Button,
-  Dialog,
-  DialogBody,
-  DialogClose,
-  DialogContent,
-  DialogFooter,
-  DialogHeader,
-  DialogHeaderTitle,
-  toast,
-} from '@zamp-platform/ui';
+import { ConfirmationDialog, toast } from '@zamp-platform/ui';
 import { useDeleteConversationMutation } from '@/apis/pace';
 
 interface DeleteConversationDialogProps {
@@ -46,32 +36,21 @@ const DeleteConversationDialog: FC<DeleteConversationDialogProps> = ({
   }, [deleteConversation, conversationId, onOpenChange, onDeleteSuccess, onDeleteFailure]);
 
   return (
-    <Dialog open={isOpen} onOpenChange={onOpenChange}>
-      <DialogContent
-        size='small'
-        showCloseButton
-        className='w-[400px] outline-none'
-        data-slot='delete-conversation-dialog'
-      >
-        <DialogHeader>
-          <DialogHeaderTitle>Delete conversation</DialogHeaderTitle>
-        </DialogHeader>
-        <DialogBody className='f-14-400 p-5'>
+    <ConfirmationDialog
+      open={isOpen}
+      onOpenChange={onOpenChange}
+      title='Delete conversation'
+      description={
+        <>
           Are you sure you want to delete <span className='font-medium'>{conversationTitle}</span>? This action cannot
           be undone.
-        </DialogBody>
-        <DialogFooter className='flex justify-end gap-2.5'>
-          <DialogClose asChild>
-            <Button variant='secondary' size='medium'>
-              Cancel
-            </Button>
-          </DialogClose>
-          <Button variant='destructive' size='medium' onClick={handleDelete} className='w-14'>
-            Delete
-          </Button>
-        </DialogFooter>
-      </DialogContent>
-    </Dialog>
+        </>
+      }
+      confirmLabel='Delete'
+      onConfirm={handleDelete}
+      confirmButtonClassName='w-14'
+      contentDataSlot='delete-conversation-dialog'
+    />
   );
 };
 

@@ -173,12 +173,7 @@ const handleAuthenticatedRoutes = async (request: NextRequest) => {
     case ROUTES_PATH.LOGIN: {
       // Check region redirects first (no session fetch needed)
       if (request.headers.get('host') === DOMAINS.PRODUCTION) {
-        const oryKratosSessionUs = getServerSideCookie(request, SESSION_COOKIE_NAMES.US_PRODUCTION);
         const oryKratosSessionMe = getServerSideCookie(request, SESSION_COOKIE_NAMES.ME_PRODUCTION);
-
-        if (oryKratosSessionUs) {
-          return NextResponse.redirect(new URL(`https://${DOMAINS.US_PRODUCTION}/login`, request.url));
-        }
 
         if (oryKratosSessionMe) {
           return NextResponse.redirect(new URL(`https://${DOMAINS.ME_PRODUCTION}/login`, request.url));

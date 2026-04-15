@@ -1,15 +1,5 @@
-import React, { FC } from 'react';
-import {
-  Button,
-  Dialog,
-  DialogBody,
-  DialogClose,
-  DialogContent,
-  DialogFooter,
-  DialogHeader,
-  DialogHeaderTitle,
-  toast,
-} from '@zamp-platform/ui';
+import React from 'react';
+import { ConfirmationDialog, toast } from '@zamp-platform/ui';
 import { useDeleteWidgetMutation } from '@/apis/widgets';
 
 interface DeleteWidgetDialogProps {
@@ -19,7 +9,7 @@ interface DeleteWidgetDialogProps {
   onOpenChange: (open: boolean) => void;
 }
 
-const DeleteWidgetDialog: FC<DeleteWidgetDialogProps> = ({ widgetId, widgetTitle, isOpen, onOpenChange }) => {
+const DeleteWidgetDialog = ({ widgetId, widgetTitle, isOpen, onOpenChange }: DeleteWidgetDialogProps) => {
   const [deleteWidget, { isLoading: isDeletingWidget }] = useDeleteWidgetMutation();
 
   const handleDeleteWidget = () => {
@@ -37,33 +27,17 @@ const DeleteWidgetDialog: FC<DeleteWidgetDialogProps> = ({ widgetId, widgetTitle
   };
 
   return (
-    <Dialog open={isOpen} onOpenChange={onOpenChange}>
-      <DialogContent size='small' showCloseButton className='w-[400px]'>
-        <DialogHeader>
-          <DialogHeaderTitle>Delete widget '{widgetTitle}'</DialogHeaderTitle>
-        </DialogHeader>
-        <DialogBody className='p-5 text-sm font-normal'>
-          Are you sure you want to delete this widget? This action cannot be undone.
-        </DialogBody>
-        <DialogFooter className='flex justify-end gap-2.5'>
-          <DialogClose asChild>
-            <Button variant='secondary' size='medium'>
-              Cancel
-            </Button>
-          </DialogClose>
-          <Button
-            variant='destructive'
-            size='medium'
-            onClick={handleDeleteWidget}
-            isLoading={isDeletingWidget}
-            className='w-14'
-            data-testid={`${widgetId}-delete-widget-dialog-delete-btn`}
-          >
-            Delete
-          </Button>
-        </DialogFooter>
-      </DialogContent>
-    </Dialog>
+    <ConfirmationDialog
+      open={isOpen}
+      onOpenChange={onOpenChange}
+      title={`Delete widget '${widgetTitle}'`}
+      description='Are you sure you want to delete this widget? This action cannot be undone.'
+      confirmLabel='Delete'
+      isLoading={isDeletingWidget}
+      onConfirm={handleDeleteWidget}
+      confirmButtonClassName='w-14'
+      confirmButtonTestId={`${widgetId}-delete-widget-dialog-delete-btn`}
+    />
   );
 };
 

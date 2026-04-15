@@ -25,6 +25,7 @@ import OrgCard from '@/components/layouts/dashboard-layout/components/OrgCard';
 import SkeletonLoaderSidebarPages from '@/components/layouts/dashboard-layout/components/SkeletonLoaderSidebarPages';
 import SkeletonElement from '@/components/skeletons/SkeletonElement';
 import { ENVIRONMENT, ENVIRONMENT_TYPES, ORG_COLORS } from '@/constants/common.constants';
+import { DOMAINS } from '@/constants/domains';
 import { FEATURE_FLAGS } from '@/constants/featureFlags';
 import { ROUTES_PATH } from '@/constants/routeConfig';
 import { KEYBOARD_KEYS } from '@/constants/shortcuts';
@@ -143,7 +144,9 @@ const OrgSwitcher: FC<OrgSwitcherProps> = ({
   );
 
   const handleRegionChange = (region: { region: string; url: string }) => {
-    window.open(`https://app-${region.region}.zamp.ai`, '_blank');
+    const domain = region.region === DEFAULT_REGION ? DOMAINS.PRODUCTION : `app-${region.region}.zamp.ai`;
+
+    window.open(`https://${domain}`, '_blank');
   };
 
   const selectedOrgColor =

@@ -166,7 +166,6 @@ export const BlockRenderer: React.FC<BlockRendererProps> = ({
     });
     return block?.order ?? -1;
   }, [messageBlocks]);
-
   const lastToolCallOrder = useMemo(() => {
     const toolUseBlocks = messageBlocks.filter((b) => b.type === BLOCK_TYPE.TOOL_USE);
     return toolUseBlocks[toolUseBlocks.length - 1]?.order ?? -1;
@@ -219,7 +218,10 @@ export const BlockRenderer: React.FC<BlockRendererProps> = ({
             }
             showConnectorFromPrevious={showConnectorFromPrevious}
             showConnectorToNext={showConnectorToNext}
+            isFirstInGroup={!isThinkingOrToolUseBlock(previousBlock)}
+            isLastInGroup={!isThinkingOrToolUseBlock(nextBlock)}
             isLastThinkingBlock={thinking.order === lastThinkingBlockOrder && isLastBlock}
+            isStreaming={isStreaming}
           />
         );
       }
@@ -250,7 +252,9 @@ export const BlockRenderer: React.FC<BlockRendererProps> = ({
             showConnectorFromPrevious={showConnectorFromPrevious}
             showConnectorToNext={showConnectorToNext}
             showWatchButton={toolUseBlock.order === firstBrowserToolOrder}
-            isLastToolCall={toolUseBlock.order === lastToolCallOrder && isLastBlock}
+            isFirstInGroup={!isThinkingOrToolUseBlock(previousBlock)}
+            isLastInGroup={!isThinkingOrToolUseBlock(nextBlock)}
+            isLastToolCallOrder={toolUseBlock.order === lastToolCallOrder && isLastBlock}
             isStreaming={isStreaming}
           />
         );
@@ -363,7 +367,7 @@ export const BlockRenderer: React.FC<BlockRendererProps> = ({
               path: ref.path,
               name: ref.name,
             }))}
-            className='mb-2'
+            className={cn('mb-2', { 'mb-0': isLastBlock })}
           />
         );
 

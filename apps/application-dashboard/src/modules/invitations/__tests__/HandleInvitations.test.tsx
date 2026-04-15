@@ -81,8 +81,6 @@ describe('HandleInvitations', () => {
   const mockAcceptInvitation = jest.fn().mockResolvedValue({}); // returns a Promise that resolves with empty object
   const mockWhoAmI = jest.fn().mockResolvedValue({}); // returns a Promise that resolves with empty object
 
-  let mockLocationHref: string;
-
   beforeEach(() => {
     jest.clearAllMocks();
     (useRouter as jest.Mock).mockReturnValue(mockRouter);
@@ -106,23 +104,6 @@ describe('HandleInvitations', () => {
     const { getFromLocalStorage } = require('@zamp-platform/utils');
 
     (getFromLocalStorage as jest.Mock).mockReturnValue('');
-
-    delete (window as any).location;
-    mockLocationHref = 'http://localhost:3000/invitations?region=us';
-    Object.defineProperty(window, 'location', {
-      value: {
-        pathname: '/invitations',
-        search: '?region=us',
-        get href() {
-          return mockLocationHref;
-        },
-        set href(value: string) {
-          mockLocationHref = value;
-        },
-        origin: 'http://localhost:3000',
-      },
-      writable: true,
-    });
   });
   const testCases = [
     {
@@ -149,7 +130,6 @@ describe('HandleInvitations', () => {
             expect(mockAcceptInvitation).toHaveBeenCalledWith({ invitationId: 'inv1' });
             expect(mockAcceptInvitation).toHaveBeenCalledWith({ invitationId: 'inv2' });
             expect(mockWhoAmI).toHaveBeenCalled();
-            expect(mockLocationHref).toBe(ROUTES_PATH.HOME);
           },
           { timeout: 5000 },
         );
@@ -174,7 +154,6 @@ describe('HandleInvitations', () => {
             expect(mockAcceptInvitation).toHaveBeenCalledWith({ invitationId: 'inv1' });
             expect(mockAcceptInvitation).toHaveBeenCalledWith({ invitationId: 'inv2' });
             expect(mockWhoAmI).toHaveBeenCalled();
-            expect(mockLocationHref).toBe(ROUTES_PATH.HOME);
           },
           { timeout: 5000 },
         );

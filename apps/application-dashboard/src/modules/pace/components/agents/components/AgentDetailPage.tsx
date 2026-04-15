@@ -75,6 +75,7 @@ const AgentDetailPage = ({ agentId, agentName, agentDescription = '', avatarKey 
 
   const handleTabChange = useCallback(
     (tab: AgentDetailTabType) => {
+      tabSwitchRef.current = true;
       setActiveDetailTab(tab);
 
       // Persist in URL
@@ -113,6 +114,7 @@ const AgentDetailPage = ({ agentId, agentName, agentDescription = '', avatarKey 
   const [isAddConnectionModalOpen, setIsAddConnectionModalOpen] = useState(false);
   const prevInstructionsFetchingRef = useRef(false);
   const shimmerTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const tabSwitchRef = useRef(false);
 
   const skipFetch = !agentExists;
 
@@ -126,7 +128,11 @@ const AgentDetailPage = ({ agentId, agentName, agentDescription = '', avatarKey 
     { skip: skipFetch },
   );
 
-  const { triggerChatMessage } = useTriggerChatMessageFromButton({ agentId, agentName: displayName });
+  const { triggerChatMessage } = useTriggerChatMessageFromButton({
+    agentId,
+    agentName: displayName,
+    agentAvatar: resolvedAvatarKey || undefined,
+  });
 
   const triggerShimmer = useCallback(() => {
     setInstructionsShimmering(true);
@@ -136,8 +142,11 @@ const AgentDetailPage = ({ agentId, agentName, agentDescription = '', avatarKey 
 
   const handleInstructionsRefetch = useCallback(() => {
     if (!prevInstructionsFetchingRef.current && isInstructionsFetching && !isInstructionsLoading) {
-      triggerShimmer();
+      if (!tabSwitchRef.current) {
+        triggerShimmer();
+      }
     }
+    tabSwitchRef.current = false;
     prevInstructionsFetchingRef.current = isInstructionsFetching;
   }, [isInstructionsFetching, isInstructionsLoading, triggerShimmer]);
 

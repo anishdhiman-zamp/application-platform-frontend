@@ -362,6 +362,16 @@ export const ConversationProvider: React.FC<ConversationProviderProps> = ({
     [_conversationId, sendMessageV2Mutation, apiConfig?.sendMessage],
   );
 
+  const isUninitializedRef = useRef(isUninitializedConversationHistory);
+  useEffect(() => {
+    isUninitializedRef.current = isUninitializedConversationHistory;
+  }, [isUninitializedConversationHistory]);
+
+  const safeRefetchConversationHistory = useCallback(() => {
+    if (isUninitializedRef.current) return;
+    refetchConversationHistory();
+  }, [refetchConversationHistory]);
+
   const actionsValue: ConversationActions = useMemo(
     () => ({
       sendMessage,
@@ -369,9 +379,16 @@ export const ConversationProvider: React.FC<ConversationProviderProps> = ({
       stopConversation,
       clearMessages,
       setConversationId,
-      refetchConversationHistory,
+      refetchConversationHistory: safeRefetchConversationHistory,
     }),
-    [sendMessage, createConversationV2, stopConversation, clearMessages, setConversationId, refetchConversationHistory],
+    [
+      sendMessage,
+      createConversationV2,
+      stopConversation,
+      clearMessages,
+      setConversationId,
+      safeRefetchConversationHistory,
+    ],
   );
 
   const stateValue: ConversationState = useMemo(

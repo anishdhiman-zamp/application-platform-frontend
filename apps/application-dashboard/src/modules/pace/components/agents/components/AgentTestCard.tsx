@@ -40,7 +40,7 @@ const AgentTestCard: FC<AgentTestCardProps> = ({
   const [isExpanded, setIsExpanded] = useState(false);
   const [triggers, setTriggers] = useState<AgentTriggerType[]>([]);
   const [fetchTriggers, { isFetching: isLoadingTriggers }] = useLazyGetAgentTriggersQuery();
-  const { triggerChatMessage } = useTriggerChatMessageFromButton({ agentId, agentName });
+  const { triggerChatMessage } = useTriggerChatMessageFromButton({ agentId, agentName, agentAvatar: avatar?.key });
 
   const handleTestClick = useCallback(
     async (e: React.MouseEvent) => {

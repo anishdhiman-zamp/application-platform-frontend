@@ -102,7 +102,7 @@ export const PACE_NAVBAR_ITEMS: PaceNavbarItemSchema[] = [
     id: PaceNavbarItemId.SETTINGS,
     label: 'Settings',
     iconComponent: SettingsIcon,
-    path: ROUTES_PATH.CHAT_SETTINGS_PEOPLE,
+    path: ROUTES_PATH.CHAT_SETTINGS,
   },
 ];
 

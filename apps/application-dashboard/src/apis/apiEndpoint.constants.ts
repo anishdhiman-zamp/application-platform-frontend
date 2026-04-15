@@ -214,6 +214,7 @@ export const API_ENDPOINTS = {
   AGENT_GET: `agents/{{agentId}}`,
   AGENT_PATCH: `agents/{{agentId}}`,
   AGENT_TASKS_GET: `agents/{{agentId}}/tasks`,
+  AGENT_TASK_COUNTS_GET: `agents/{{agentId}}/tasks/counts`,
   AGENT_TRIGGERS_GET: `agents/{{agentId}}/triggers`,
   AGENT_TRIGGER_TOGGLE: `agents/{{agentId}}/triggers/{{triggerId}}/toggle`,
   AGENT_FILE_ACCESS_GET: `agents/{{agentId}}/file-access`,

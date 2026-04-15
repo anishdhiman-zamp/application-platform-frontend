@@ -20,11 +20,13 @@ import {
 import { TaskProvider, useTaskActions, useTaskState } from '@zamp-platform/conversation-stream';
 import { ScrollContainer, type ScrollContainerRef, ShimmerText } from '@zamp-platform/ui';
 import { cn } from '@zamp-platform/ui/utils';
+import { EVENT_TYPE } from '@zamp-platform/utils/event-bus';
 import { useDynamicTabs } from 'modules/pace/components/dynamic-tabs/useDynamicTabs';
 import { useTaskNavigation } from 'modules/pace/hooks/useTaskNavigation';
 import { TAB_TYPE } from 'modules/pace/pace.types';
 import { usePathname, useSearchParams } from 'next/navigation';
 import { API_ENDPOINTS } from '@/apis/apiEndpoint.constants';
+import { useEventBus } from '@/app/_providers/sse-provider';
 import CommonWrapper from '@/components/commonWrapper';
 import { SkeletonTypes } from '@/components/commonWrapper/commonWrapper.types';
 import { useAppSelector } from '@/hooks/toolkit';
@@ -43,6 +45,7 @@ import TaskTopbar from '@/modules/pace/components/chat/TaskTopbar';
 import { getActiveTabIdFromUrl } from '@/modules/pace/components/dynamic-tabs/tab-type-registry';
 import TaskContentSkeleton from '@/modules/pace/components/loaders/TaskContentSkeleton';
 import InlineSubtaskSection from '@/modules/pace/components/tasks/components/InlineSubtaskSection';
+import { HITL_RESPONDED_EVENT } from '@/modules/pace/components/tasks/constants/tasks.constants';
 import {
   getDisplayTitle,
   getProcessedMessages,
@@ -115,6 +118,7 @@ const TaskContentChat = ({ taskId }: { taskId: string }) => {
     browserSessionId,
   } = useTaskState();
   const { refetchHistory } = useTaskActions();
+  const { sseEventBus } = useEventBus();
   const streamingState = useStreamingState(taskId);
 
   const taskStatus = (conversationData as Record<string, unknown> | undefined)?.status as string | undefined;
@@ -244,7 +248,8 @@ const TaskContentChat = ({ taskId }: { taskId: string }) => {
 
   const handleHitlRespondComplete = useCallback(() => {
     refetchHistory();
-  }, [refetchHistory]);
+    sseEventBus.publish(EVENT_TYPE.COMPONENT, { type: EVENT_TYPE.COMPONENT, payload: HITL_RESPONDED_EVENT });
+  }, [refetchHistory, sseEventBus]);
 
   const isNeedsInput = taskStatus === TASK_STATUS.NEEDS_INPUT;
   const hasHitlQuestions = hitlQuestions.length > 0;
@@ -362,10 +367,12 @@ const TaskContentChat = ({ taskId }: { taskId: string }) => {
               <div
                 className={cn(
                   'overflow-hidden transition-all duration-300',
-                  taskStatus === TASK_STATUS.IN_PROGRESS ? 'mt-[30px] h-[80px]' : 'mt-0 h-0',
+                  effectiveStatus === TASK_STATUS.IN_PROGRESS || isAgentActive
+                    ? 'mt-[30px] max-h-[500px]'
+                    : 'mt-0 max-h-0',
                 )}
               >
-                <div className='border-GRAY_400 flex h-[80px] flex-col overflow-scroll rounded-[18px] border p-4'>
+                <div className='border-GRAY_400 flex min-h-[80px] flex-col rounded-[18px] border p-4'>
                   <ShimmerText text={displayedSummary || 'Starting now'} autoAnimate />
                 </div>
               </div>

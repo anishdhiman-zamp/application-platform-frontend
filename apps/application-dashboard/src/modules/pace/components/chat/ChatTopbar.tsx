@@ -72,6 +72,11 @@ const ChatTopbar: FC<ChatTopbarProps> = ({
     [conversationId, onDeleteConversation],
   );
 
+  const handleStartNewChat = useCallback(() => {
+    setIsHistoryOpen(false);
+    onStartNewChat?.();
+  }, [onStartNewChat]);
+
   return (
     <div className={cn('bg-BG_WHITE flex items-center justify-between gap-x-3 p-3', className)} style={style}>
       <div className='flex min-w-0 flex-1 items-center gap-x-1'>
@@ -100,6 +105,7 @@ const ChatTopbar: FC<ChatTopbarProps> = ({
               onSelectConversation={handleSelectConversation}
               onDeleteConversation={handleDeleteFromHistory}
               onRenameConversation={handleRenameFromHistory}
+              onStartNewChat={onStartNewChat ? handleStartNewChat : undefined}
               activeConversationId={conversationId}
               compact
             />
@@ -107,13 +113,12 @@ const ChatTopbar: FC<ChatTopbarProps> = ({
         </Popover>
       </div>
       <div className='flex items-center gap-1.5'>
-        {onStartNewChat && (
+        {onStartNewChat && conversationId && (
           <Button
             variant='ghost'
             size='icon'
             className='text-GRAY_900 hover:text-GRAY_900 h-7 w-7 rounded p-1.5 disabled:cursor-not-allowed disabled:opacity-50'
             onClick={onStartNewChat}
-            disabled={!conversationId}
             title='Start new chat'
           >
             <Plus size={16} />

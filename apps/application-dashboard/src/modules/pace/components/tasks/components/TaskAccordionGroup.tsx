@@ -19,6 +19,7 @@ import {
   TASK_LISTING_TAB,
   type TaskListingTab,
 } from '@/modules/pace/components/tasks/types/tasks.types';
+import { getAccordionStorageKey, readStoredAccordionValues } from '@/modules/pace/components/tasks/utils/tasks.utils';
 import ProcessEmptyState from '@/modules/process/activity-runs/components/ProcessEmptyState';
 import CommonWrapper from 'components/commonWrapper';
 import { SkeletonTypes } from 'components/commonWrapper/commonWrapper.types';
@@ -119,13 +120,27 @@ const TaskAccordionGroup = ({
     return allowedStatuses.filter((status) => (countMap.get(status) ?? 0) > 0);
   }, [activeTab, countMap]);
 
-  const openValuesRef = useRef<string[]>([...visibleStatuses]);
+  const storageKey = getAccordionStorageKey(agentId, creationSource, activeTab);
+
+  const openValuesRef = useRef<string[]>(readStoredAccordionValues(storageKey) ?? [TASK_STATUS.COMPLETED]);
+  const prevStorageKeyRef = useRef(storageKey);
+
+  if (prevStorageKeyRef.current !== storageKey) {
+    prevStorageKeyRef.current = storageKey;
+    openValuesRef.current = readStoredAccordionValues(storageKey) ?? [TASK_STATUS.COMPLETED];
+  }
 
   const handleValueChange = useCallback(
     (newValues: string[]) => {
       const prevValues = openValuesRef.current;
 
       openValuesRef.current = newValues;
+
+      try {
+        sessionStorage.setItem(storageKey, JSON.stringify(newValues));
+      } catch {
+        // sessionStorage unavailable (private browsing quota, etc.) — silently ignore
+      }
 
       const closedValue = prevValues.find((v) => !newValues.includes(v));
 
@@ -150,12 +165,14 @@ const TaskAccordionGroup = ({
         top: itemRect.top - containerRect.top + container.scrollTop,
       });
     },
-    [visibleStatuses],
+    [visibleStatuses, storageKey],
   );
 
   useEffect(() => {
-    openValuesRef.current = [...visibleStatuses];
-  }, [visibleStatuses]);
+    const stored = readStoredAccordionValues(storageKey);
+
+    openValuesRef.current = stored ?? [...visibleStatuses];
+  }, [visibleStatuses, storageKey]);
 
   useEffect(() => {
     if (countsData) {
@@ -185,7 +202,7 @@ const TaskAccordionGroup = ({
         key={visibleStatuses.join(',')}
         ref={scrollContainerRef}
         type='multiple'
-        defaultValue={[TASK_STATUS.COMPLETED]}
+        defaultValue={openValuesRef.current}
         className='overflow-y-auto [scrollbar-width:thin] [&_[data-slot=accordion-item]:last-child]:border-b-0'
         onValueChange={handleValueChange}
       >

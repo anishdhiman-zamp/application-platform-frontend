@@ -1,7 +1,7 @@
 'use client';
 
 import { useCallback, useMemo, useState } from 'react';
-import { Button, CSS_VARS, toast } from '@zamp-platform/ui';
+import { Button, toast } from '@zamp-platform/ui';
 import { ArrowLeft } from 'lucide-react';
 import IntegrationGridV2 from 'modules/integrations/AllIntegrations/IntegrationGridV2';
 import IntegrationHeader from 'modules/integrations/AllIntegrations/IntegrationHeader';
@@ -59,8 +59,14 @@ const AddConnectionModalContent = () => {
   if (selectedIntegration) {
     return (
       <div className='flex min-h-0 flex-1 flex-col px-6'>
-        <Button variant='ghost' size='small' onClick={handleBack} className='shrink-0 py-5' aria-label='Go back'>
-          <ArrowLeft size={14} color={CSS_VARS.GRAY_900} />
+        <Button
+          variant='ghost'
+          size='small'
+          onClick={handleBack}
+          className='text-GRAY_700 hover:text-GRAY_1000 mt-3 mb-4 shrink-0 self-start p-1'
+          aria-label='Go back'
+        >
+          <ArrowLeft size={16} />
         </Button>
         <div className='min-h-0 flex-1 overflow-y-auto pb-6 [scrollbar-width:none]'>
           <div className='flex flex-col gap-y-5'>
@@ -107,7 +113,7 @@ const AddConnectionModalContent = () => {
   return (
     <>
       <div className='shrink-0 px-6 pt-6'>
-        <IntegrationHeader />
+        <IntegrationHeader title='Connections' />
       </div>
       <div className='min-h-0 flex-1 overflow-y-auto px-6 py-6 [scrollbar-width:none]'>
         <IntegrationGridV2 onCardClick={handleCardClick} />
