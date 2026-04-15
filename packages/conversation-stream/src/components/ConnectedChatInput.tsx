@@ -4,6 +4,9 @@ import { captureException } from '@sentry/nextjs';
 import {
   type AnnotationType,
   ChatComposer,
+  createSnippetFile,
+  filesToFileList,
+  isLargeText,
   type LocationData,
   MicrophoneState,
   type ResourceType,
@@ -233,9 +236,18 @@ export const ConnectedChatInput = ({
       if (files && files.length > 0) {
         e.preventDefault();
         handleFileSelect(files);
+        return;
+      }
+
+      const text = e.clipboardData?.getData('text/plain') ?? '';
+      if (isLargeText(text)) {
+        e.preventDefault();
+        const existingNames = fileReferences.map((ref) => ref.name);
+        const file = createSnippetFile(text, existingNames);
+        handleFileSelect(filesToFileList([file]));
       }
     },
-    [handleFileSelect],
+    [handleFileSelect, fileReferences],
   );
 
   const handleStartRecording = useCallback(async () => {

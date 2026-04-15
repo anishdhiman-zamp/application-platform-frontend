@@ -15,15 +15,17 @@ const PaceSettingsSidebar = () => {
   const pathname = usePathname();
   const searchParams = useSearchParams();
   const { isEnabled: isOrgSettingsEnabled } = useFeatureFlag(FEATURE_FLAGS.ORG_SETTINGS);
+  const { isEnabled: isCredentialsVaultEnabled } = useFeatureFlag(FEATURE_FLAGS.CREDENTIALS_VAULT);
 
   const tabs = useMemo(
     () =>
       PACE_SETTINGS_TABS.filter((tab) => {
         if (tab.id === PaceNavbarItemId.ORG_SETTINGS && !isOrgSettingsEnabled) return false;
+        if (tab.id === PaceNavbarItemId.CREDENTIALS_VAULT && !isCredentialsVaultEnabled) return false;
 
         return true;
       }),
-    [isOrgSettingsEnabled],
+    [isOrgSettingsEnabled, isCredentialsVaultEnabled],
   );
 
   const getHref = useCallback(

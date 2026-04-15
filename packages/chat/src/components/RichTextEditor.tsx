@@ -175,7 +175,7 @@ export const RichTextEditor = forwardRef<RichTextEditorHandle, RichTextEditorPro
           if (onPasteRef.current) {
             const hasFiles = (event.clipboardData?.files?.length ?? 0) > 0;
             onPasteRef.current(event as unknown as React.ClipboardEvent<HTMLTextAreaElement>);
-            if (hasFiles) return true;
+            if (hasFiles || event.defaultPrevented) return true;
           }
 
           // Always insert as plain text, normalizing &nbsp; entities and non-breaking
