@@ -13,6 +13,8 @@ import { MicrophoneState } from '../hooks/useMicrophoneRecorder';
 import { useTranscription } from '../hooks/useTranscription';
 import { AnnotationType, LocationData, ResourceType, ScopeType } from '../types/chat.types';
 import { SOCKET_STATES } from '../types/transcription.types';
+import { filesToFileList } from '../utils/fileUpload';
+import { createSnippetFile, isLargeText } from '../utils/snippet';
 import { ChatComposer } from './ChatComposer';
 
 export type FileDropHandlerRef = RefObject<((files: FileList) => void) | null>;
@@ -192,6 +194,15 @@ export const ConnectedChatInput: FC<ConnectedChatInputProps> = ({
     if (files && files.length > 0) {
       e.preventDefault();
       handleFileSelect(files);
+      return;
+    }
+
+    const text = e.clipboardData?.getData('text/plain') ?? '';
+    if (isLargeText(text)) {
+      e.preventDefault();
+      const existingNames = fileReferences.map((ref) => ref.name);
+      const file = createSnippetFile(text, existingNames);
+      handleFileSelect(filesToFileList([file]));
     }
   };
 
