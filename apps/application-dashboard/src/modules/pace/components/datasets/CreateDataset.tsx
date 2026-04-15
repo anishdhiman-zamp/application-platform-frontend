@@ -3,6 +3,7 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { DatasetColumnTypes } from '@zamp-platform/dataset-create-edit';
 import { Button, Input, toast, Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@zamp-platform/ui';
+import { cn } from '@zamp-platform/ui/utils';
 import { ArrowLeft } from 'lucide-react';
 import DatasetBlueprintEditor, { createDefaultColumn } from 'modules/pace/components/datasets/DatasetBlueprintEditor';
 import {
@@ -18,7 +19,12 @@ import { useAgentDbReadQuery, useAgentDbWriteMutation } from '@/apis/agentManage
 import { getDatasetDetailRoute, ROUTES_PATH } from '@/constants/routeConfig';
 import { KEYBOARD_KEYS } from '@/constants/shortcuts';
 
-const CreateDataset = () => {
+interface CreateDatasetProps {
+  onCreated?: (tableName: string, displayName: string) => void;
+  hideBackButton?: boolean;
+}
+
+const CreateDataset = ({ onCreated, hideBackButton }: CreateDatasetProps) => {
   const router = useRouter();
   const [title, setTitle] = useState('Untitled Dataset');
   const [isEditingTitle, setIsEditingTitle] = useState(true);
@@ -78,11 +84,16 @@ const CreateDataset = () => {
     try {
       await executeMutation({ query: sql }).unwrap();
       toast.success('Dataset created successfully');
-      router.push(preserveSidebarParam(getDatasetDetailRoute(tableName)));
+
+      if (onCreated) {
+        onCreated(tableName, title.trim());
+      } else {
+        router.push(preserveSidebarParam(getDatasetDetailRoute(tableName)));
+      }
     } catch {
       toast.error('Failed to create dataset');
     }
-  }, [validate, title, columns, executeMutation, router]);
+  }, [validate, title, columns, executeMutation, router, onCreated]);
 
   const handleTitleClick = useCallback(() => {
     setIsEditingTitle(true);
@@ -107,10 +118,17 @@ const CreateDataset = () => {
   return (
     <div className='bg-BG_WHITE flex h-full w-full flex-1 flex-col'>
       {/* Header */}
-      <div className='border-GRAY_400 flex items-center gap-3 border-b px-10 pt-10 pb-8'>
-        <Link href={preserveSidebarParam(ROUTES_PATH.CHAT_SETTINGS_DATASETS)}>
-          <ArrowLeft width={18} height={18} className='text-GRAY_700 hover:text-GRAY_1000 transition-colors' />
-        </Link>
+      <div
+        className={cn(
+          'border-GRAY_400 flex items-center gap-3 border-b',
+          hideBackButton ? 'px-4 py-2.5' : 'px-10 pt-10 pb-8',
+        )}
+      >
+        {!hideBackButton && (
+          <Link href={preserveSidebarParam(ROUTES_PATH.CHAT_SETTINGS_DATASETS)}>
+            <ArrowLeft width={18} height={18} className='text-GRAY_700 hover:text-GRAY_1000 transition-colors' />
+          </Link>
+        )}
         {isEditingTitle ? (
           <Input
             ref={inputRef}
