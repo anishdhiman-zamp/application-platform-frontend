@@ -1,5 +1,7 @@
 import { type Block, HITL_RESPONSE_TYPE, type InputRequiredPayload } from './block.types';
 
+export type ConversationRole = 'admin' | 'viewer' | null;
+
 export interface PostMessagePayloadType {
   conversationId: string;
   body: ChatMessage;
@@ -269,6 +271,10 @@ export interface ConversationType {
   resource_type: ResourceType;
   title: string;
   summary?: ConversationSummary | null;
+  role: ConversationRole;
+  created_by: string;
+  initiated_by: string | null;
+  source_conversation_id: string | null;
 }
 
 export interface ConversationMessageContentType {

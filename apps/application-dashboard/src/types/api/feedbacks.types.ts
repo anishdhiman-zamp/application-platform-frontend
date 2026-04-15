@@ -1,4 +1,4 @@
-import { AnnotationData } from '@zamp-platform/chat';
+import { AnnotationData, ConversationRole } from '@zamp-platform/chat';
 import { FEEDBACK_STATUS, SCOPE_TYPE } from '@/modules/feedback/feedback.constants';
 
 export interface FeedbackSummary {
@@ -22,6 +22,9 @@ export interface FeedbackItemType {
   resource_id?: string;
   annotation_data: AnnotationData;
   initiated_by: string;
+  role: ConversationRole;
+  created_by: string;
+  source_conversation_id: string | null;
 }
 
 export interface FeedbacksResponseType {

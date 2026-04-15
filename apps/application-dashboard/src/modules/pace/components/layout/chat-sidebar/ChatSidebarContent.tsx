@@ -16,6 +16,7 @@ import { useHitlQuestions } from '@/modules/pace/hooks/useHitlQuestions';
 import { BrowserViewerDisplayState } from '@/modules/pace/pace.constants';
 import { usePaceContext } from '@/modules/pace/pace.context';
 import { CHAT_SIDEBAR_STATE, TAB_TYPE } from '@/modules/pace/pace.types';
+import { PERMISSION_ROLES } from '@/utils/accessPermission/accessPermission.types';
 
 export interface ChatSidebarContentProps {
   conversationId: string | null;
@@ -57,7 +58,7 @@ const ChatSidebarContent = ({
   const { inputValue, setInputValue } = useChatDraftInput({
     conversationId,
   });
-  const { inputsRequired, isStreaming } = useConversationState();
+  const { inputsRequired, isStreaming, conversationRole, initiatedBy } = useConversationState();
   const { refetchConversationHistory } = useConversationActions();
   const { sseEventBus } = useEventBus();
 
@@ -69,6 +70,7 @@ const ChatSidebarContent = ({
   const { hitlQuestions, hitlQuestionsKey } = useHitlQuestions(inputsRequired);
   const hasInputsRequired = (inputsRequired?.length ?? 0) > 0;
 
+  const isViewer = conversationRole === PERMISSION_ROLES.VIEWER;
   const modelSelectorSlot = useMemo(
     () => <ModelSelector value={selectedModel} onChange={setSelectedModel} />,
     [selectedModel],
@@ -161,6 +163,7 @@ const ChatSidebarContent = ({
           title={chatTitle || 'Start a new chat'}
           conversationId={conversationId}
           organizationId={organizationId}
+          conversationRole={conversationRole}
           onStartNewChat={startNewChat}
           onTitleChange={setChatTitle}
           onSelectConversation={handleSelectConversation}
@@ -183,7 +186,13 @@ const ChatSidebarContent = ({
 
       <ChatActionsProvider onFileOpen={handleFileOpen}>
         <div className='bg-BG_WHITE sticky bottom-0 z-10 mx-auto w-full max-w-[700px] px-3 pb-3'>
-          {hasInputsRequired ? (
+          {isViewer ? (
+            <div className='border-GRAY_400 bg-GRAY_50 flex min-h-[88px] items-center justify-center rounded-xl border px-4'>
+              <span className='f-13-400 text-GRAY_600'>
+                This is a conversation between Zamp and {initiatedBy || 'the owner'}
+              </span>
+            </div>
+          ) : hasInputsRequired ? (
             <HITLQuestionsBlock
               key={hitlQuestionsKey}
               payload={{ questions: hitlQuestions }}

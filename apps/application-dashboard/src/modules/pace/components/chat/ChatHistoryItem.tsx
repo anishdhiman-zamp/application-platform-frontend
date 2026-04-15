@@ -1,13 +1,15 @@
 'use client';
 
 import { useCallback, useMemo, useState } from 'react';
-import { AnimatedDot } from '@zamp-platform/ui';
+import { AnimatedDot, CSS_VARS, Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@zamp-platform/ui';
 import { cn } from '@zamp-platform/ui/utils';
 import { formatTimestampToUTC } from '@zamp-platform/utils/date';
 import { Loader2 } from 'lucide-react';
+import Avatar from '@/components/common/avatar';
 import ConversationActions from '@/modules/pace/components/chat/ConversationActions';
 import { formatRelativeTime } from '@/modules/pace/components/files/file-tree.utils';
 import type { FeedbackItemType } from '@/types/api/feedbacks.types';
+import { PERMISSION_ROLES } from '@/utils/accessPermission/accessPermission.types';
 
 const INTERACTIVE_SELECTORS = [
   '[data-slot="dropdown-trigger"]',
@@ -87,6 +89,8 @@ const ChatHistoryItem = ({
     [onRename, conversation?.id],
   );
 
+  const isViewer = conversation?.role === PERMISSION_ROLES.VIEWER;
+
   const statusIcon = renderStatusIcon();
   const hasStatusIcon = Boolean(statusIcon);
 
@@ -99,12 +103,32 @@ const ChatHistoryItem = ({
       )}
       onClick={handleClick}
     >
-      <div className='flex h-auto w-full items-center justify-start gap-2.5 px-3 py-2.5 pr-9'>
-        <p className='f-13-500 text-GRAY_1000 min-w-0 flex-1 truncate text-left first-letter:uppercase'>
-          {conversation?.title || 'Untitled conversation'}
-        </p>
+      <div className='flex h-auto w-full flex-col justify-start px-3 py-2.5 pr-9'>
+        <div className='flex items-center gap-2'>
+          {isViewer && conversation?.initiated_by && (
+            <TooltipProvider delayDuration={100}>
+              <Tooltip>
+                <TooltipTrigger asChild>
+                  <div className='shrink-0'>
+                    <Avatar
+                      name={conversation.initiated_by}
+                      backgroundColor={CSS_VARS.ORANGE_400}
+                      className='f-12-300 text-GRAY_1000 h-4 min-w-4 text-[9px]! font-medium!'
+                    />
+                  </div>
+                </TooltipTrigger>
+                <TooltipContent side='top' sideOffset={8}>
+                  Shared by {conversation.initiated_by}
+                </TooltipContent>
+              </Tooltip>
+            </TooltipProvider>
+          )}
+          <p className='f-13-500 text-GRAY_1000 min-w-0 flex-1 truncate text-left first-letter:uppercase'>
+            {conversation?.title || 'Untitled conversation'}
+          </p>
 
-        {relativeTime && <span className='f-12-400 text-GRAY_600 shrink-0 whitespace-nowrap'>{relativeTime}</span>}
+          {relativeTime && <span className='f-12-400 text-GRAY_600 shrink-0 whitespace-nowrap'>{relativeTime}</span>}
+        </div>
       </div>
 
       <div className='absolute right-1 flex items-center justify-center'>
@@ -118,22 +142,24 @@ const ChatHistoryItem = ({
             {statusIcon}
           </span>
         )}
-        <ConversationActions
-          conversationId={conversation?.id}
-          organizationId={organizationId}
-          conversationTitle={conversation?.title || 'Untitled conversation'}
-          onRenameSuccess={handleRenameSuccess}
-          onDeleteSuccess={handleDeleteSuccess}
-          onDeleteFailure={handleDeleteFailure}
-          onOpenChange={setIsActionsOpen}
-          triggerClassName={cn(
-            'hover:bg-transparent data-[state=open]:opacity-100',
-            hasStatusIcon
-              ? cn('absolute transition-opacity', isActionsOpen ? 'opacity-100' : 'opacity-0 group-hover:opacity-100')
-              : cn('transition-opacity', isActionsOpen ? 'opacity-100' : 'opacity-0 group-hover:opacity-100'),
-          )}
-          triggerProps={{ onClick: (e) => e.stopPropagation() }}
-        />
+        {!isViewer && (
+          <ConversationActions
+            conversationId={conversation?.id}
+            organizationId={organizationId}
+            conversationTitle={conversation?.title || 'Untitled conversation'}
+            onRenameSuccess={handleRenameSuccess}
+            onDeleteSuccess={handleDeleteSuccess}
+            onDeleteFailure={handleDeleteFailure}
+            onOpenChange={setIsActionsOpen}
+            triggerClassName={cn(
+              'hover:bg-transparent data-[state=open]:opacity-100',
+              hasStatusIcon
+                ? cn('absolute transition-opacity', isActionsOpen ? 'opacity-100' : 'opacity-0 group-hover:opacity-100')
+                : cn('transition-opacity', isActionsOpen ? 'opacity-100' : 'opacity-0 group-hover:opacity-100'),
+            )}
+            triggerProps={{ onClick: (e) => e.stopPropagation() }}
+          />
+        )}
       </div>
     </div>
   );

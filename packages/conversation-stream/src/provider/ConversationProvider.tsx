@@ -391,6 +391,9 @@ export const ConversationProvider: React.FC<ConversationProviderProps> = ({
     ],
   );
 
+  const conversationRole = conversationHistory?.conversation?.role ?? null;
+  const initiatedBy = conversationHistory?.conversation?.initiated_by ?? null;
+
   const stateValue: ConversationState = useMemo(
     () => ({
       messages,
@@ -412,6 +415,8 @@ export const ConversationProvider: React.FC<ConversationProviderProps> = ({
       isBrowserStreamingAvailable,
       browserSessionId,
       taskSummaries,
+      conversationRole,
+      initiatedBy,
     }),
     [
       messages,
@@ -431,6 +436,8 @@ export const ConversationProvider: React.FC<ConversationProviderProps> = ({
       isBrowserStreamingAvailable,
       browserSessionId,
       taskSummaries,
+      conversationRole,
+      initiatedBy,
     ],
   );
 

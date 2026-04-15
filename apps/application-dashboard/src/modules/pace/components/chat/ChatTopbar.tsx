@@ -1,13 +1,16 @@
 'use client';
 
 import { type FC, useCallback, useState } from 'react';
+import type { ConversationRole } from '@zamp-platform/chat';
 import { Button, Popover, PopoverContent, PopoverTrigger } from '@zamp-platform/ui';
 import { cn } from '@zamp-platform/ui/utils';
 import { AnimatePresence, motion } from 'framer-motion';
 import { ChevronDown, MoveDiagonal, Plus } from 'lucide-react';
 import ChatHistory from '@/modules/pace/components/chat/ChatHistory';
 import ConversationActions from '@/modules/pace/components/chat/ConversationActions';
+import ShareConversationPopup from '@/modules/pace/components/chat/ShareConversationPopup';
 import { DEFAULT_CHAT_TITLE } from '@/modules/pace/pace.constants';
+import { PERMISSION_ROLES } from '@/utils/accessPermission/accessPermission.types';
 
 interface ChatTopbarProps {
   className?: string;
@@ -15,6 +18,7 @@ interface ChatTopbarProps {
   title?: string;
   conversationId?: string | null;
   organizationId?: string;
+  conversationRole?: ConversationRole;
   onStartNewChat?: () => void;
   onExpand?: () => void;
   onTitleChange?: (newTitle: string) => void;
@@ -28,6 +32,7 @@ const ChatTopbar: FC<ChatTopbarProps> = ({
   title,
   conversationId,
   organizationId,
+  conversationRole,
   onStartNewChat,
   onExpand,
   onTitleChange,
@@ -35,7 +40,9 @@ const ChatTopbar: FC<ChatTopbarProps> = ({
   onSelectConversation,
 }) => {
   const displayTitle = title || DEFAULT_CHAT_TITLE;
-  const canEdit = Boolean(conversationId && organizationId);
+  const isAdmin = conversationRole === PERMISSION_ROLES.ADMIN;
+  const isViewer = conversationRole === PERMISSION_ROLES.VIEWER;
+  const canEdit = Boolean(conversationId && organizationId) && !isViewer;
 
   const [isHistoryOpen, setIsHistoryOpen] = useState(false);
 
@@ -113,6 +120,7 @@ const ChatTopbar: FC<ChatTopbarProps> = ({
         </Popover>
       </div>
       <div className='flex items-center gap-1.5'>
+        {isAdmin && conversationId && <ShareConversationPopup conversationId={conversationId} isAdmin={isAdmin} />}
         {onStartNewChat && conversationId && (
           <Button
             variant='ghost'
