@@ -5,6 +5,7 @@ import { ZAMP_FULL_LOGO } from 'constants/icons';
 import { LoginForm } from 'modules/login/LoginForm';
 import { ProfessionRevealBackground } from 'modules/login/ProfessionRevealBackground';
 import Image from 'next/image';
+import { ENVIRONMENT, ENVIRONMENT_TYPES } from '@/constants/common.constants';
 import { FEATURE_FLAGS } from '@/constants/featureFlags';
 import { useFeatureFlag } from '@/hooks/useFeatureFlag';
 import DashboardDowntime from '@/modules/cards/DashboardDowntime';
@@ -37,9 +38,11 @@ const btnLoginStyles = `
 
 export const LoginRoot = () => {
   const containerRef = useRef<HTMLDivElement>(null);
+  const isDevEnvironment = ENVIRONMENT === ENVIRONMENT_TYPES.DEVELOPMENT;
+  const isLocalEnvironment = ENVIRONMENT === ENVIRONMENT_TYPES.LOCAL;
   const { isEnabled: isDowntime } = useFeatureFlag(FEATURE_FLAGS.DASHBOARD_DOWNTIME);
 
-  if (isDowntime) return <DashboardDowntime />;
+  if (isDowntime && !isDevEnvironment && !isLocalEnvironment) return <DashboardDowntime />;
 
   return (
     <div className='bg-GRAY_100 relative flex h-screen w-screen items-center justify-center overflow-hidden'>
