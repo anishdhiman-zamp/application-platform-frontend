@@ -10,6 +10,9 @@ import { FEATURE_FLAGS } from '@/constants/featureFlags';
 import { useFeatureFlag } from '@/hooks/useFeatureFlag';
 import DashboardDowntime from '@/modules/cards/DashboardDowntime';
 
+const isNonProductionEnvironment =
+  ENVIRONMENT === ENVIRONMENT_TYPES.DEVELOPMENT || ENVIRONMENT === ENVIRONMENT_TYPES.LOCAL;
+
 // Noise texture + gradient pseudo-elements — SVG data URLs are impractical as tailwind arbitrary values
 const btnLoginStyles = `
 .btn-login::before {
@@ -38,11 +41,9 @@ const btnLoginStyles = `
 
 export const LoginRoot = () => {
   const containerRef = useRef<HTMLDivElement>(null);
-  const isDevEnvironment = ENVIRONMENT === ENVIRONMENT_TYPES.DEVELOPMENT;
-  const isLocalEnvironment = ENVIRONMENT === ENVIRONMENT_TYPES.LOCAL;
   const { isEnabled: isDowntime } = useFeatureFlag(FEATURE_FLAGS.DASHBOARD_DOWNTIME);
 
-  if (isDowntime && !isDevEnvironment && !isLocalEnvironment) return <DashboardDowntime />;
+  if (isDowntime && !isNonProductionEnvironment) return <DashboardDowntime />;
 
   return (
     <div className='bg-GRAY_100 relative flex h-screen w-screen items-center justify-center overflow-hidden'>
