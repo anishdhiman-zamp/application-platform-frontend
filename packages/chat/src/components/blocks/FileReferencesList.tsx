@@ -16,7 +16,7 @@ export const FileReferencesList: FC<FileReferencesListProps> = ({ fileReferences
     <>
       {fileReferences?.length > 0 && (
         <div className={cn('flex flex-wrap gap-2', className)}>
-          {[...fileReferences].map((fileReference) => (
+          {fileReferences.map((fileReference) => (
             <FilePreviewCard
               key={fileReference?.id || fileReference?.path}
               fileReference={fileReference}

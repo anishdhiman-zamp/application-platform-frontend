@@ -21,7 +21,7 @@ export interface FeedbackItemType {
   resource_type?: string;
   resource_id?: string;
   annotation_data: AnnotationData;
-  initiated_by: string;
+  initiated_by: string | null;
   role: ConversationRole;
   created_by: string;
   source_conversation_id: string | null;

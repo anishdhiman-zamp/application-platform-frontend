@@ -120,7 +120,7 @@ const ChatTopbar: FC<ChatTopbarProps> = ({
         </Popover>
       </div>
       <div className='flex items-center gap-1.5'>
-        {isAdmin && conversationId && <ShareConversationPopup conversationId={conversationId} isAdmin={isAdmin} />}
+        {isAdmin && conversationId && <ShareConversationPopup conversationId={conversationId} />}
         {onStartNewChat && conversationId && (
           <Button
             variant='ghost'

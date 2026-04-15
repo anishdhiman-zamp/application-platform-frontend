@@ -11,7 +11,7 @@ import { FeedbackItemType } from '@/types/api/feedbacks.types';
 interface FeedbackListCardProps {
   feedback: FeedbackItemType;
   icon?: React.ReactNode;
-  initiatedBy: string;
+  initiatedBy: string | null;
   timePrefix?: string;
   processId?: string;
   onCheck?: () => void;
