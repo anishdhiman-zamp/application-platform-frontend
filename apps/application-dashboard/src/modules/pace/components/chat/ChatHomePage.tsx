@@ -151,7 +151,7 @@ const ChatHomePage = () => {
                       scopeId={organizationId}
                       username={username}
                       currentUserName={currentUserName}
-                      placeholder="Do your life's best work with Pace"
+                      placeholder="Do your life's best work with Zamp"
                       minTextareaHeight={18}
                       maxTextareaHeight={200}
                       className='shadow-chatbot-shadow'
