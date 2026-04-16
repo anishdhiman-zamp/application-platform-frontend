@@ -363,13 +363,15 @@ export const ConversationProvider: React.FC<ConversationProviderProps> = ({
   );
 
   const isUninitializedRef = useRef(isUninitializedConversationHistory);
-  useEffect(() => {
-    isUninitializedRef.current = isUninitializedConversationHistory;
-  }, [isUninitializedConversationHistory]);
+  isUninitializedRef.current = isUninitializedConversationHistory;
 
   const safeRefetchConversationHistory = useCallback(() => {
     if (isUninitializedRef.current) return;
-    refetchConversationHistory();
+    try {
+      refetchConversationHistory();
+    } catch {
+      // refetch throws if the query has not been started yet (e.g. skip flag toggled between renders)
+    }
   }, [refetchConversationHistory]);
 
   const actionsValue: ConversationActions = useMemo(

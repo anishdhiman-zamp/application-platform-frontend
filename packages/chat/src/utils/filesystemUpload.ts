@@ -78,6 +78,8 @@ export interface FilesystemUploadAdapter extends UploadMutations, DeleteFileMuta
   getUsername: () => string;
 }
 
+export const normalizeFilesystemPath = (path: string): string => (path.startsWith('/home/') ? path.slice(6) : path);
+
 export const shouldUseChunkedUpload = (fileSize: number): boolean => {
   return fileSize >= DIRECT_UPLOAD_THRESHOLD_BYTES;
 };

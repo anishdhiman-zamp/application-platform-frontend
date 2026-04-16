@@ -17,6 +17,7 @@ export interface TaskChatExpandedStepsFooterProps {
   summaryScrollRef: RefObject<HTMLDivElement | null>;
   /** When true, suppresses the per-element connector segment (parent provides a continuous line). */
   hideConnector?: boolean;
+  username?: string;
 }
 
 export const TaskChatExpandedStepsFooter = ({
@@ -30,6 +31,7 @@ export const TaskChatExpandedStepsFooter = ({
   resultText,
   summaryScrollRef,
   hideConnector = false,
+  username,
 }: TaskChatExpandedStepsFooterProps) => {
   if (isNeedsInput && hasHitlQuestions) {
     return (
@@ -41,6 +43,7 @@ export const TaskChatExpandedStepsFooter = ({
           onSubmit={onHitlRespondComplete}
           sourceEntityId={taskId}
           sourceEntityType={HITLEntityType.TASK}
+          username={username}
         />
       </div>
     );

@@ -9,6 +9,7 @@ import { CircleX, LoaderCircle } from 'lucide-react';
 import { useChatActions } from '../../context/ChatActionsContext';
 import { useFilePreview } from '../../hooks/useFilePreview';
 import { UploadedFileType } from '../../types/block.types';
+import { normalizeFilesystemPath } from '../../utils/filesystemUpload';
 import PreviewContent from './PreviewContent';
 
 interface FilePreviewCardProps {
@@ -16,9 +17,16 @@ interface FilePreviewCardProps {
   onRemove?: (fileId: string) => void;
   isLoading?: boolean;
   className?: string;
+  showFilePreview?: boolean;
 }
 
-const FilePreviewCard = ({ fileReference, onRemove, isLoading, className }: FilePreviewCardProps) => {
+const FilePreviewCard = ({
+  fileReference,
+  onRemove,
+  isLoading,
+  className,
+  showFilePreview = true,
+}: FilePreviewCardProps) => {
   const { onFileOpen } = useChatActions();
   const { category, previewUrl, codeNodes, isLoading: isPreviewLoading } = useFilePreview(fileReference);
 
@@ -26,9 +34,7 @@ const FilePreviewCard = ({ fileReference, onRemove, isLoading, className }: File
     if (!fileReference.path) return;
 
     if (onFileOpen) {
-      // Server returns absolute paths prefixed with /home/; the file tree expects paths without it
-      const normalizedPath = fileReference.path.startsWith('/home/') ? fileReference.path.slice(6) : fileReference.path;
-      onFileOpen(normalizedPath, fileReference.name);
+      onFileOpen(normalizeFilesystemPath(fileReference.path), fileReference.name);
     }
   };
 
@@ -44,18 +50,25 @@ const FilePreviewCard = ({ fileReference, onRemove, isLoading, className }: File
       onClick={handleClick}
     >
       {/* Preview area */}
-      <div className='relative h-20 w-full overflow-hidden rounded-t-[8px]'>
-        <PreviewContent
-          category={category}
-          previewUrl={previewUrl}
-          codeNodes={codeNodes}
-          isLoading={isPreviewLoading}
-          fileName={fileReference.name}
-        />
-      </div>
+      {showFilePreview && (
+        <div className='relative h-20 w-full overflow-hidden rounded-t-[8px]'>
+          <PreviewContent
+            category={category}
+            previewUrl={previewUrl}
+            codeNodes={codeNodes}
+            isLoading={isPreviewLoading}
+            fileName={fileReference.name}
+          />
+        </div>
+      )}
 
       {/* File name bar */}
-      <div className='border-border flex items-center gap-1.5 border-t px-2 py-1.5'>
+      <div
+        className={cn(
+          'border-border flex items-center gap-1.5 px-2 py-1.5',
+          showFilePreview ? 'border-t' : 'rounded-t-[8px]',
+        )}
+      >
         <FileIcon extension={fileReference.name || 'txt'} className='size-4 shrink-0 rounded' iconClassName='size-3' />
         <span className='f-12-500 text-GRAY_1000 min-w-0 truncate'>{fileReference.name}</span>
       </div>

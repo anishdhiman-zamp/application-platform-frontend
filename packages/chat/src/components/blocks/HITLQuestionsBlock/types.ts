@@ -16,4 +16,5 @@ export interface HITLQuestionsBlockProps {
   onSubmit?: () => void;
   sourceEntityId?: string;
   sourceEntityType?: HITLEntityType;
+  username?: string;
 }

@@ -5,6 +5,7 @@ import React from 'react';
 import { MarkdownBlock } from '../../../..';
 import { HITL_INPUT_TYPE } from '../../../types/block.types';
 import { APPROVAL_ACTION, ApprovalQuestionBody } from './ApprovalQuestionBody';
+import type { ChatComposerFileRef } from './ChatComposerInput';
 import { SelectQuestionBody } from './SelectQuestionBody';
 import type { HITLQuestionWithEntity } from './types';
 import { type HITLAnswerValue, optionCountForQuestion } from './utils';
@@ -19,7 +20,6 @@ export interface HITLQuestionItemProps {
   focusedOptionIndex: number;
   answers: Record<string, HITLAnswerValue>;
   customInputs: Record<string, string>;
-  customInputRef: React.RefObject<HTMLTextAreaElement | null>;
   containerRef: React.RefObject<HTMLDivElement | null>;
   setQuestionEl: (el: HTMLDivElement | null) => void;
   setCurrentQuestionIndex: (i: number) => void;
@@ -27,7 +27,9 @@ export interface HITLQuestionItemProps {
   selectApprovalAnswer: (questionId: string, qIndex: number, approved: boolean) => void;
   selectAnswer: (questionId: string, qIndex: number, optionId: string, customText?: string) => void;
   onCustomInputChange: (value: string) => void;
+  onFileReferencesChange?: (questionId: string, refs: ChatComposerFileRef[]) => void;
   approvalAction?: APPROVAL_ACTION | null;
+  username?: string;
 }
 
 export const HITLQuestionItem = ({
@@ -38,7 +40,6 @@ export const HITLQuestionItem = ({
   focusedOptionIndex,
   answers,
   customInputs,
-  customInputRef,
   containerRef,
   setQuestionEl,
   setCurrentQuestionIndex,
@@ -46,7 +47,9 @@ export const HITLQuestionItem = ({
   selectApprovalAnswer,
   selectAnswer,
   onCustomInputChange,
+  onFileReferencesChange,
   approvalAction,
+  username,
 }: HITLQuestionItemProps) => {
   const isFocused = qIndex === currentQuestionIndex;
   const selectedOptionIds = answers[question.id]?.optionIds ?? [];
@@ -82,7 +85,6 @@ export const HITLQuestionItem = ({
             focusedOptionIndex={focusedOptionIndex}
             selectedOptionIds={selectedOptionIds}
             customInputValue={customInputs[question.id] || ''}
-            customInputRef={customInputRef}
             onOptionClick={(optionId, optIndex) => {
               setFocusedOptionIndex(optIndex);
               selectAnswer(question.id, qIndex, optionId);
@@ -91,9 +93,12 @@ export const HITLQuestionItem = ({
             onCustomInputClick={() => {
               setCurrentQuestionIndex(qIndex);
               setFocusedOptionIndex(optionCountForQuestion(question) - 1);
-              customInputRef.current?.focus({ preventScroll: true });
             }}
             onCustomInputChange={onCustomInputChange}
+            onFileReferencesChange={
+              onFileReferencesChange ? (refs) => onFileReferencesChange(question.id, refs) : undefined
+            }
+            username={username}
           />
         );
     }
