@@ -23,12 +23,8 @@ import { ColumnTypeDropdown, DatasetColumnTypes, RequiredDefaultValueModal } fro
 import {
   Button,
   Dialog,
-  DialogBody,
   DialogClose,
   DialogContent,
-  DialogFooter,
-  DialogHeader,
-  DialogHeaderTitle,
   Input,
   Switch,
   Tooltip,
@@ -66,22 +62,29 @@ interface DeleteConfirmDialogProps {
 
 const DeleteConfirmDialog: FC<DeleteConfirmDialogProps> = ({ isOpen, columnName, onOpenChange, onConfirm }) => (
   <Dialog open={isOpen} onOpenChange={onOpenChange}>
-    <DialogContent size='small' showCloseButton className='w-100'>
-      <DialogHeader>
-        <DialogHeaderTitle>Delete column &apos;{columnName}&apos;</DialogHeaderTitle>
-      </DialogHeader>
-      <DialogBody className='f-14-400 p-5'>
-        Are you sure you want to delete this column? This action cannot be undone.
-      </DialogBody>
-      <DialogFooter className='flex justify-end gap-2.5'>
-        <DialogClose asChild>
-          <Button variant='secondary' size='medium'>
-            Cancel
-          </Button>
+    <DialogContent
+      size='small'
+      title={`Delete column '${columnName}'`}
+      description='Are you sure you want to delete this column? This action cannot be undone.'
+      className='border-GRAY_400 max-h-fit w-[400px] rounded-[14px] border'
+    >
+      <div className='px-5 pt-5'>
+        <DialogClose className='absolute top-4 right-4 cursor-pointer text-gray-500 hover:text-gray-700'>
+          <span className='text-xl leading-none'>&times;</span>
         </DialogClose>
+        <h2 className='f-16-600 text-GRAY_1000 mb-1'>Delete column &apos;{columnName}&apos;</h2>
+        <p className='f-13-400 text-GRAY_700 mt-4 mb-4'>
+          Are you sure you want to delete this column? This action cannot be undone.
+        </p>
+      </div>
+      <div className='border-GRAY_400 flex justify-end gap-3 border-t px-5 py-4'>
+        <Button variant='outline' size='medium' className='px-3.5 py-2' onClick={() => onOpenChange(false)}>
+          Cancel
+        </Button>
         <Button
           variant='destructive'
           size='medium'
+          className='px-3.5 py-2'
           onClick={() => {
             onConfirm();
             onOpenChange(false);
@@ -89,7 +92,7 @@ const DeleteConfirmDialog: FC<DeleteConfirmDialogProps> = ({ isOpen, columnName,
         >
           Delete
         </Button>
-      </DialogFooter>
+      </div>
     </DialogContent>
   </Dialog>
 );

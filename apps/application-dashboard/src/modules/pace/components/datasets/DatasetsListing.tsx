@@ -2,7 +2,7 @@
 
 import { useCallback, useMemo } from 'react';
 import { Button } from '@zamp-platform/ui';
-import { ChevronRight, Database, Plus } from 'lucide-react';
+import { Database, ExternalLink, Plus } from 'lucide-react';
 import {
   DATASETS_POLL_INTERVAL_MS,
   generateNewDatasetId,
@@ -87,7 +87,7 @@ const DatasetsListing = () => {
                   </td>
                   <td className='w-27 px-6'>
                     <div className='opacity-0 transition-opacity group-hover:opacity-100'>
-                      <ChevronRight width={14} height={14} className='text-GRAY_700' />
+                      <ExternalLink width={14} height={14} className='text-GRAY_700' />
                     </div>
                   </td>
                 </tr>

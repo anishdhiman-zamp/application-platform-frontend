@@ -57,7 +57,7 @@ const DatasetSelector = ({ tableName, onSelectDataset }: DatasetSelectorProps) =
 
   return (
     <Popover open={isOpen} onOpenChange={setIsOpen}>
-      <PopoverTrigger className='hover:bg-GRAY_100 flex h-7 max-w-full cursor-pointer items-center gap-x-1 rounded-md pr-1 pl-1.5 transition-colors'>
+      <PopoverTrigger className='hover:bg-GRAY_100 -ml-1 flex h-7 max-w-full cursor-pointer items-center gap-x-2 rounded-md px-1 transition-colors'>
         <Database size={14} className='text-GRAY_700 shrink-0' />
         <span className='relative block min-w-0 overflow-hidden'>
           <AnimatePresence mode='wait' initial={false}>

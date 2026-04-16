@@ -41,7 +41,7 @@ const DatasetTabContent = ({ tableName }: DatasetTabContentProps) => {
     <DatasetDetail
       tableName={tableName}
       header={
-        <div className='border-GRAY_400 flex items-center gap-3 border-b px-4 py-2.5'>
+        <div className='border-GRAY_400 flex items-center gap-3 border-b px-6 py-2.5'>
           <DatasetSelector tableName={tableName} onSelectDataset={handleSelectDataset} />
           <div className='flex-1' />
           <ShareDatasetNeonPopup tableName={tableName} />
