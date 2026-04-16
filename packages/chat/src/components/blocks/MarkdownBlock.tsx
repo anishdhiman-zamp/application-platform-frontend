@@ -17,6 +17,7 @@ import remarkGfm from 'remark-gfm';
 import { useChatActions } from '../../context/ChatActionsContext';
 import { useTypewriter } from '../../hooks/useTypewriter';
 import { rehypeStreamReveal } from '../../plugins/rehypeStreamReveal';
+import { normalizeFilesystemPath } from '../../utils/filesystemUpload';
 
 const lowlight = createLowlight(common);
 
@@ -96,8 +97,7 @@ export const MarkdownBlock: React.FC<MarkdownBlockProps> = ({
 
   const handleFileOpen = (filePath: string, fileName: string) => {
     if (onFileOpen) {
-      const normalizedPath = filePath.startsWith('/home/') ? filePath.slice(6) : filePath;
-      onFileOpen(normalizedPath, fileName);
+      onFileOpen(normalizeFilesystemPath(filePath), fileName);
     }
   };
 

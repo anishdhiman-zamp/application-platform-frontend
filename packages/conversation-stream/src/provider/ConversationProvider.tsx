@@ -393,9 +393,16 @@ export const ConversationProvider: React.FC<ConversationProviderProps> = ({
     [_conversationId, sendMessageV2Mutation, apiConfig?.sendMessage],
   );
 
+  const isUninitializedRef = useRef(isUninitializedConversationHistory);
+  isUninitializedRef.current = isUninitializedConversationHistory;
+
   const safeRefetchConversationHistory = useCallback(() => {
     if (isUninitializedRef.current) return;
-    refetchConversationHistory();
+    try {
+      refetchConversationHistory();
+    } catch {
+      // refetch throws if the query has not been started yet (e.g. skip flag toggled between renders)
+    }
   }, [refetchConversationHistory]);
 
   const actionsValue: ConversationActions = useMemo(

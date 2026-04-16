@@ -9,9 +9,16 @@ interface FileReferencesListProps {
   onRemove?: (fileId: string) => void;
   isLoading?: boolean;
   className?: string;
+  showFilePreview?: boolean;
 }
 
-export const FileReferencesList: FC<FileReferencesListProps> = ({ fileReferences, onRemove, isLoading, className }) => {
+export const FileReferencesList: FC<FileReferencesListProps> = ({
+  fileReferences,
+  onRemove,
+  isLoading,
+  className,
+  showFilePreview = true,
+}) => {
   return (
     <>
       {fileReferences?.length > 0 && (
@@ -22,6 +29,7 @@ export const FileReferencesList: FC<FileReferencesListProps> = ({ fileReferences
               fileReference={fileReference}
               onRemove={onRemove}
               isLoading={isLoading}
+              showFilePreview={showFilePreview}
             />
           ))}
         </div>

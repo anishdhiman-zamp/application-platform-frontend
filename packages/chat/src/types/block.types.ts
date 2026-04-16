@@ -163,6 +163,12 @@ export interface TaskBlockType {
     title: string;
     task_id: string;
     status?: TaskStatus;
+    summary?: {
+      live_summary?: string;
+      status?: string;
+      index?: number;
+      updated_at?: string;
+    };
   };
 }
 
@@ -280,6 +286,7 @@ export interface InputsRespondedItemPayload {
   entity_type: string;
   sender_name?: string;
   input_required: InputRequiredPayload;
+  file_references?: { name: string; path: string }[];
 }
 
 export interface InputsRespondedBlockType {

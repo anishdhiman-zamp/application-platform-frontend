@@ -134,6 +134,7 @@ export const RichTextEditor = forwardRef<RichTextEditorHandle, RichTextEditorPro
         Placeholder.configure({
           placeholder,
           emptyEditorClass: 'is-editor-empty',
+          showOnlyCurrent: false,
         }),
         Markdown.configure({
           // remark-gfm (used in MarkdownBlock) requires ≥3 spaces of indentation

@@ -83,6 +83,8 @@ const TaskContentChat = ({ taskId }: { taskId: string }) => {
 
   const isSubtask = parentTasks.length > 0;
 
+  const username = useAppSelector((state: RootState) => state.user.user?.username) ?? '';
+
   const [showSteps, setShowSteps] = useState(false);
   const [showSummary, setShowSummary] = useState(false);
   const scrollContainerRef = useRef<ScrollContainerRef>(null);
@@ -450,6 +452,7 @@ const TaskContentChat = ({ taskId }: { taskId: string }) => {
                     resultText={lastSummaryText}
                     summaryScrollRef={summaryScrollRef}
                     hideConnector={!showSteps}
+                    username={username}
                   />
                 )}
               </div>

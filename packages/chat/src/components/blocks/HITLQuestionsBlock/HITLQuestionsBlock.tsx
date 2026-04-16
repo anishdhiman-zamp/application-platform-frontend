@@ -9,6 +9,7 @@ import { useHitlRespondMutation } from '../../../api/chat';
 import { HITL_RESPONSE_TYPE } from '../../../types/block.types';
 import type { HITLRespondPayloadType, HITLResponse } from '../../../types/chat.types';
 import { APPROVAL_ACTION } from './ApprovalQuestionBody';
+import type { ChatComposerFileRef } from './ChatComposerInput';
 import { CUSTOM_OPTION_ID, HITL_APPROVAL_NO, HITL_APPROVAL_YES, HITL_QUESTIONS_LAYOUT } from './constants';
 import { HITLQuestionItem } from './HITLQuestionItem';
 import { HITLQuestionsFooter } from './HITLQuestionsFooter';
@@ -30,10 +31,10 @@ export const HITLQuestionsBlock = ({
   onSubmit,
   sourceEntityId,
   sourceEntityType,
+  username,
 }: HITLQuestionsBlockProps) => {
   const { questions } = payload;
   const scrollContainerRef = useRef<ScrollContainerRef>(null);
-  const customInputRef = useRef<HTMLTextAreaElement>(null);
   const containerRef = useRef<HTMLDivElement>(null);
   const questionRefs = useRef<(HTMLDivElement | null)[]>([]);
   const hasAutoSubmittedSingleSelectRef = useRef(false);
@@ -49,10 +50,13 @@ export const HITLQuestionsBlock = ({
   const [answers, setAnswers] = useState<HITLAnswersState>({});
   const [approvalAction, setApprovalAction] = useState<APPROVAL_ACTION | null>(null);
   const [customInputs, setCustomInputs] = useState<Record<string, string>>({});
+  const [questionFileRefs, setQuestionFileRefs] = useState<Record<string, ChatComposerFileRef[]>>({});
 
   const currentQuestion = questions[currentQuestionIndex];
   const totalOptions = currentQuestion ? optionCountForQuestion(currentQuestion) : 1;
-  const allQuestionsAnswered = questions.every((q) => isQuestionAnswerComplete(q, answers[q.id]));
+  const allQuestionsAnswered = questions.every(
+    (q) => isQuestionAnswerComplete(q, answers[q.id]) || (questionFileRefs[q.id]?.length ?? 0) > 0,
+  );
   const isAllApproval = questions.every(isApprovalQuestion);
   const isSingleSelectOnly =
     questions.length === 1 &&
@@ -67,6 +71,7 @@ export const HITLQuestionsBlock = ({
     totalOptions,
     currentQuestion,
     answers,
+    questionFileRefs,
   });
 
   const selectApprovalAnswer = useCallback(
@@ -138,21 +143,28 @@ export const HITLQuestionsBlock = ({
     [questions],
   );
 
+  const handleFileReferencesChange = useCallback((questionId: string, refs: ChatComposerFileRef[]) => {
+    setQuestionFileRefs((prev) => ({ ...prev, [questionId]: refs }));
+  }, []);
+
   const handleCustomInputChange = useCallback(
-    (value: string) => {
-      if (isTextQuestion(currentQuestion)) {
-        setCustomInputs((prev) => ({ ...prev, [currentQuestion.id]: value }));
+    (questionId: string, value: string) => {
+      const q = questions.find((question) => question.id === questionId);
+      if (!q) return;
+
+      if (isTextQuestion(q)) {
+        setCustomInputs((prev) => ({ ...prev, [questionId]: value }));
         setAnswers((prev) => ({
           ...prev,
-          [currentQuestion.id]: { optionIds: [], customText: value, isSkipped: false },
+          [questionId]: { optionIds: [], customText: value, isSkipped: false },
         }));
         return;
       }
 
-      setCustomInputs((prev) => ({ ...prev, [currentQuestion.id]: value }));
+      setCustomInputs((prev) => ({ ...prev, [questionId]: value }));
       setAnswers((prev) => {
-        const isMulti = isMultipleChoiceQuestion(currentQuestion);
-        const currentAns = prev[currentQuestion.id] || { optionIds: [], customText: '' };
+        const isMulti = isMultipleChoiceQuestion(q);
+        const currentAns = prev[questionId] || { optionIds: [], customText: '' };
         let newOptionIds = isMulti ? [...currentAns.optionIds] : [];
         if (value && !newOptionIds.includes(CUSTOM_OPTION_ID)) {
           newOptionIds.push(CUSTOM_OPTION_ID);
@@ -161,11 +173,11 @@ export const HITLQuestionsBlock = ({
         }
         return {
           ...prev,
-          [currentQuestion.id]: { optionIds: newOptionIds, customText: value, isSkipped: false },
+          [questionId]: { optionIds: newOptionIds, customText: value, isSkipped: false },
         };
       });
     },
-    [currentQuestion],
+    [questions],
   );
 
   const handleSkipToCustomInput = useCallback(
@@ -180,7 +192,6 @@ export const HITLQuestionsBlock = ({
         },
       }));
       setFocusedOptionIndex(totalOptions - 1);
-      requestAnimationFrame(() => customInputRef.current?.focus());
     },
     [totalOptions],
   );
@@ -203,7 +214,10 @@ export const HITLQuestionsBlock = ({
 
       shouldScrollRef.current = true;
 
-      const targetIsTextField = e.target instanceof HTMLInputElement || e.target instanceof HTMLTextAreaElement;
+      const targetIsTextField =
+        e.target instanceof HTMLInputElement ||
+        e.target instanceof HTMLTextAreaElement ||
+        (e.target instanceof HTMLElement && e.target.isContentEditable);
 
       const preventUnlessTextField = () => {
         if (!targetIsTextField) e.preventDefault();
@@ -253,7 +267,8 @@ export const HITLQuestionsBlock = ({
           } else if (isTextQuestion(q)) {
             e.preventDefault();
             const text = (inputs[q.id] || '').trim();
-            if (text && qIdx < lastQuestionIdx) {
+            const hasAttachments = (stateRef.current.questionFileRefs?.[q.id]?.length ?? 0) > 0;
+            if ((text || hasAttachments) && qIdx < lastQuestionIdx) {
               setCurrentQuestionIndex((p) => p + 1);
               setFocusedOptionIndex(0);
             }
@@ -298,6 +313,7 @@ export const HITLQuestionsBlock = ({
       const entity_type = question.entity_type ?? (sourceEntityType as string);
       const entity_id = question.entity_id ?? question.id;
       const input_id = question.input_id;
+      const file_references = questionFileRefs[question.id]?.length ? questionFileRefs[question.id] : undefined;
 
       const buildSkippedResponse = (): HITLResponse => {
         if (isApprovalQuestion(question)) {
@@ -318,7 +334,7 @@ export const HITLQuestionsBlock = ({
       };
 
       if (answer?.isSkipped) {
-        return { entity_type, entity_id, input_id, response: buildSkippedResponse() };
+        return { entity_type, entity_id, input_id, response: buildSkippedResponse(), file_references };
       }
 
       if (isApprovalQuestion(question)) {
@@ -329,6 +345,7 @@ export const HITLQuestionsBlock = ({
           entity_id,
           input_id,
           response: { type: HITL_RESPONSE_TYPE.APPROVAL, approved },
+          file_references,
         };
       }
 
@@ -338,6 +355,7 @@ export const HITLQuestionsBlock = ({
           entity_id,
           input_id,
           response: { type: HITL_RESPONSE_TYPE.TEXT, text: answer?.customText?.trim() ?? '', is_skipped: false },
+          file_references,
         };
       }
 
@@ -352,7 +370,7 @@ export const HITLQuestionsBlock = ({
         if (customTrimmed) {
           response.custom_input = customTrimmed;
         }
-        return { entity_type, entity_id, input_id, response };
+        return { entity_type, entity_id, input_id, response, file_references };
       }
 
       const isCustom = answer?.optionIds.includes(CUSTOM_OPTION_ID);
@@ -366,6 +384,7 @@ export const HITLQuestionsBlock = ({
             selected_option: null,
             custom_input: answer?.customText?.trim() ?? '',
           },
+          file_references,
         };
       }
 
@@ -378,6 +397,7 @@ export const HITLQuestionsBlock = ({
           selected_option: answer?.optionIds[0] ?? null,
           custom_input: null,
         },
+        file_references,
       };
     });
 
@@ -399,6 +419,7 @@ export const HITLQuestionsBlock = ({
     isHitlRespondLoading,
     questions,
     answers,
+    questionFileRefs,
     hitlRespond,
     onSubmit,
   ]);
@@ -431,20 +452,20 @@ export const HITLQuestionsBlock = ({
       totalOptions,
       currentQuestion,
       answers,
+      questionFileRefs,
     };
-  }, [currentQuestionIndex, focusedOptionIndex, customInputs, totalOptions, currentQuestion, answers]);
+  }, [
+    currentQuestionIndex,
+    focusedOptionIndex,
+    customInputs,
+    totalOptions,
+    currentQuestion,
+    answers,
+    questionFileRefs,
+  ]);
 
   const handleFocusAndScroll = useCallback(() => {
-    const customInput = customInputRef.current;
-    const isOnCustomInput =
-      !isApprovalQuestion(currentQuestion) && focusedOptionIndex === totalOptions - 1 && customInput;
-
-    if (isOnCustomInput) {
-      customInput.focus({ preventScroll: true });
-      customInput.select();
-    } else {
-      containerRef.current?.focus({ preventScroll: true });
-    }
+    containerRef.current?.focus({ preventScroll: true });
 
     const shouldScroll = shouldScrollRef.current;
     shouldScrollRef.current = false;
@@ -598,7 +619,6 @@ export const HITLQuestionsBlock = ({
                 focusedOptionIndex={focusedOptionIndex}
                 answers={answers}
                 customInputs={customInputs}
-                customInputRef={customInputRef}
                 containerRef={containerRef}
                 setQuestionEl={(el) => {
                   questionRefs.current[qIndex] = el;
@@ -607,8 +627,10 @@ export const HITLQuestionsBlock = ({
                 setFocusedOptionIndex={setFocusedOptionIndex}
                 selectApprovalAnswer={selectApprovalAnswer}
                 selectAnswer={selectAnswer}
-                onCustomInputChange={handleCustomInputChange}
+                onCustomInputChange={(value) => handleCustomInputChange(question.id, value)}
+                onFileReferencesChange={handleFileReferencesChange}
                 approvalAction={isHitlRespondLoading ? approvalAction : null}
+                username={username}
               />
             ))}
           </ScrollContainer>
