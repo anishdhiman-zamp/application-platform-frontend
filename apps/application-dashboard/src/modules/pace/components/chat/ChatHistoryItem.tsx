@@ -152,10 +152,9 @@ const ChatHistoryItem = ({
             onDeleteFailure={handleDeleteFailure}
             onOpenChange={setIsActionsOpen}
             triggerClassName={cn(
-              'hover:bg-transparent data-[state=open]:opacity-100',
-              hasStatusIcon
-                ? cn('absolute transition-opacity', isActionsOpen ? 'opacity-100' : 'opacity-0 group-hover:opacity-100')
-                : cn('transition-opacity', isActionsOpen ? 'opacity-100' : 'opacity-0 group-hover:opacity-100'),
+              'hover:bg-transparent data-[state=open]:opacity-100 transition-opacity',
+              hasStatusIcon && 'absolute',
+              isActionsOpen ? 'opacity-100' : 'opacity-0 group-hover:opacity-100',
             )}
             triggerProps={{ onClick: (e) => e.stopPropagation() }}
           />
