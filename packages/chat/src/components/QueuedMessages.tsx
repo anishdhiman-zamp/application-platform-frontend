@@ -1,7 +1,8 @@
 'use client';
 
 import { cn } from '@zamp-platform/ui/utils';
-import { ChevronDown } from 'lucide-react';
+import { formatPlural } from '@zamp-platform/utils';
+import { ChevronDown, Paperclip } from 'lucide-react';
 import { AnimatePresence, motion } from 'motion/react';
 import { FC, useState } from 'react';
 
@@ -15,27 +16,26 @@ interface QueuedMessagesProps {
 export const QueuedMessages: FC<QueuedMessagesProps> = ({ messages, className }) => {
   const [isExpanded, setIsExpanded] = useState(true);
 
-  if (messages.length === 0) return null;
+  if (!messages?.length) return null;
 
   return (
     <div
       className={cn(
-        'bg-GRAY_50 border-GRAY_400 flex w-full flex-col items-start gap-1.5 rounded-t-xl border px-2.5 pt-2 pb-6',
+        'bg-BG_GRAY_2 border-GRAY_400 flex w-full flex-col items-start gap-1.5 rounded-t-xl border px-2.5 pt-2 pb-5',
         className,
       )}
     >
-      <button
-        type='button'
+      <div
+        role='button'
+        tabIndex={0}
         onClick={() => setIsExpanded((prev) => !prev)}
-        className='flex items-center gap-2 text-left'
+        className='flex cursor-pointer items-center gap-2 text-left'
       >
         <ChevronDown
           className={cn('text-GRAY_700 size-3.5 shrink-0 transition-transform', !isExpanded && '-rotate-90')}
         />
-        <span className='text-GRAY_700 text-[13px] leading-normal font-[450]'>
-          Queued, sending soon... ({messages.length})
-        </span>
-      </button>
+        <span className='text-GRAY_700 f-13-450'>Queued, sending soon... ({messages?.length})</span>
+      </div>
 
       <AnimatePresence initial={false}>
         {isExpanded && (
@@ -47,13 +47,27 @@ export const QueuedMessages: FC<QueuedMessagesProps> = ({ messages, className })
             transition={{ duration: 0.2, ease: 'easeOut' }}
             className='flex w-full flex-col overflow-hidden'
           >
-            {messages.map((msg) => (
-              <div key={msg.timestamp} className='flex w-full items-start gap-2 py-1'>
-                <p className='text-GRAY_1000 line-clamp-2 min-w-0 flex-1 text-sm leading-normal font-[450]'>
-                  {getMessagePreview(msg)}
-                </p>
-              </div>
-            ))}
+            {messages?.map((msg) => {
+              const text = getMessagePreview(msg);
+              const attachmentCount = getAttachmentCount(msg);
+
+              return (
+                <div
+                  key={msg.id}
+                  className='hover:bg-GRAY_100 flex w-full items-center gap-1.5 rounded-[8px] px-2 py-1'
+                >
+                  <p className='text-GRAY_1000 f-14-450 line-clamp-1 min-w-0 flex-1'>
+                    {text || formatPlural(attachmentCount, 'attachment')}
+                  </p>
+                  {text && attachmentCount > 0 && (
+                    <span className='text-GRAY_600 flex shrink-0 items-center gap-0.5 text-xs'>
+                      <Paperclip className='size-3' />
+                      {attachmentCount}
+                    </span>
+                  )}
+                </div>
+              );
+            })}
           </motion.div>
         )}
       </AnimatePresence>
@@ -63,6 +77,10 @@ export const QueuedMessages: FC<QueuedMessagesProps> = ({ messages, className })
 
 function getMessagePreview(msg: ChatMessage): string {
   return msg.message_content?.text || msg.message_content?.message || '';
+}
+
+function getAttachmentCount(msg: ChatMessage): number {
+  return (msg.message_content?.file_references?.length ?? 0) + (msg.message_content?.attachments?.length ?? 0);
 }
 
 export default QueuedMessages;

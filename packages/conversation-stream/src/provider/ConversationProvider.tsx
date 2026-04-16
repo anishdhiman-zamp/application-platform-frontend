@@ -102,21 +102,21 @@ export const ConversationProvider: React.FC<ConversationProviderProps> = ({
     },
     { skip: shouldSkipConversationFetch },
   );
+  const isUninitializedRef = useRef(isUninitializedConversationHistory);
+  isUninitializedRef.current = isUninitializedConversationHistory;
+
   const streamingState = useStreamingState(_conversationId);
 
   const isStreaming = useMemo(() => streamingState?.is_active ?? false, [streamingState?.is_active]);
   const isStreamingRef = useRef(isStreaming);
   isStreamingRef.current = isStreaming;
 
-  const [isAnalysing, setIsAnalysing] = useState(false);
+  const isAnalysing = useMemo(
+    () => messages.length > 0 && messages[messages.length - 1]?.sender_type === SenderType.USER,
+    [messages],
+  );
   const isAnalysingRef = useRef(isAnalysing);
   isAnalysingRef.current = isAnalysing;
-
-  const hasStreamingContent = (streamingState?.message_content?.elements?.length ?? 0) > 0;
-
-  useEffect(() => {
-    if (hasStreamingContent) setIsAnalysing(false);
-  }, [hasStreamingContent]);
 
   const streamingMessageId = useMemo(
     () => (conversationHistory ? getStreamingMessageId(conversationHistory) : null),
@@ -143,7 +143,7 @@ export const ConversationProvider: React.FC<ConversationProviderProps> = ({
           return [...prev, finalMessage];
         });
       }
-      refetchConversationHistory();
+      if (!isUninitializedRef.current) refetchConversationHistory();
 
       clearStoppingTimer();
       setIsStopping(false);
@@ -205,10 +205,9 @@ export const ConversationProvider: React.FC<ConversationProviderProps> = ({
     });
   }, []);
 
-  const handleMessagesPickedUp = useCallback((messageIds: string[]) => {
-    const idSet = new Set(messageIds);
-    setQueuedMessages((prev) => prev.filter((m) => !m.id || !idSet.has(m.id)));
-  }, []);
+  const handleMessagesPickedUp = useCallback(() => {
+    if (!isUninitializedRef.current) refetchConversationHistory();
+  }, [refetchConversationHistory]);
 
   const perConvCallbacks = useRef<ConversationEventCallbacks>({
     onTitleUpdated: handlePerConvTitleUpdated,
@@ -236,7 +235,6 @@ export const ConversationProvider: React.FC<ConversationProviderProps> = ({
     }
     setMessages([]);
     setQueuedMessages([]);
-    setIsAnalysing(false);
     _setConversationId(null);
     conversationIdRef.current = null;
     isNewlyCreatedConversationRef.current = null;
@@ -292,7 +290,6 @@ export const ConversationProvider: React.FC<ConversationProviderProps> = ({
       }
 
       setMessages([messagePayload]);
-      setIsAnalysing(true);
 
       try {
         const response = await createConversationV2Mutation({
@@ -315,7 +312,6 @@ export const ConversationProvider: React.FC<ConversationProviderProps> = ({
         return response;
       } catch (error) {
         setMessages([]);
-        setIsAnalysing(false);
         captureException(error instanceof Error ? error : new Error(String(error)));
         throw new Error('Failed to start conversation. Please try again.');
       }
@@ -369,7 +365,6 @@ export const ConversationProvider: React.FC<ConversationProviderProps> = ({
         setQueuedMessages((prev) => [...prev, messageToQueue]);
       } else {
         setMessages((prev) => [...prev, baseMessage]);
-        setIsAnalysing(true);
       }
 
       try {
@@ -390,7 +385,6 @@ export const ConversationProvider: React.FC<ConversationProviderProps> = ({
           setQueuedMessages((prev) => prev.filter((m) => m.id !== tempId));
         } else {
           setMessages((prev) => prev.filter((m) => m !== baseMessage));
-          setIsAnalysing(false);
         }
         captureException(error instanceof Error ? error : new Error(String(error)));
         throw new Error('Failed to send message. Please try again.');
@@ -398,11 +392,6 @@ export const ConversationProvider: React.FC<ConversationProviderProps> = ({
     },
     [_conversationId, sendMessageV2Mutation, apiConfig?.sendMessage],
   );
-
-  const isUninitializedRef = useRef(isUninitializedConversationHistory);
-  useEffect(() => {
-    isUninitializedRef.current = isUninitializedConversationHistory;
-  }, [isUninitializedConversationHistory]);
 
   const safeRefetchConversationHistory = useCallback(() => {
     if (isUninitializedRef.current) return;
@@ -511,7 +500,6 @@ export const ConversationProvider: React.FC<ConversationProviderProps> = ({
       _setConversationId(newId);
       setMessages([]);
       setQueuedMessages([]);
-      setIsAnalysing(false);
       setTaskSummaries({});
       setIsBrowserStreamingAvailable(false);
       setIsHistoryLoaded(false);
