@@ -74,7 +74,7 @@ const PeoplePage: FC<PeoplePageProps> = ({ tab }) => {
   return (
     <div
       className={cn(
-        '@container flex h-full w-full flex-1 flex-col overflow-hidden',
+        '@container flex h-full w-full flex-1 flex-col overflow-hidden pl-[3px]',
         !isChatSettings && 'bg-BG_WHITE p-10',
       )}
     >

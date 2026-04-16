@@ -74,6 +74,12 @@ const SearchInput = ({
     [isControlled, onChange, debouncedSearch],
   );
 
+  const handleKeyDown = useCallback((e: React.KeyboardEvent<HTMLInputElement>) => {
+    if (e.key === 'Escape') {
+      e.currentTarget.blur();
+    }
+  }, []);
+
   const handleClear = useCallback(() => {
     if (!isControlled) {
       setInternalValue('');
@@ -90,6 +96,7 @@ const SearchInput = ({
         value={inputValue}
         icon={showSearchIcon ? <Search className='text-GRAY_500 size-3.5' /> : undefined}
         onChange={handleChange}
+        onKeyDown={handleKeyDown}
         className={cn('border-GRAY_400 focus:border-GRAY_600 pr-8 focus:ring-3', className)}
         size={size}
         iconPosition='leading'
