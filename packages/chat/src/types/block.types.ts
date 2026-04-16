@@ -163,6 +163,12 @@ export interface TaskBlockType {
     title: string;
     task_id: string;
     status?: TaskStatus;
+    summary?: {
+      live_summary?: string;
+      status?: string;
+      index?: number;
+      updated_at?: string;
+    };
   };
 }
 
