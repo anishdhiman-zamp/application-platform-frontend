@@ -26,6 +26,7 @@ interface SearchInputProps {
   showSearchIcon?: boolean;
   clearButtonClassName?: string;
   testId?: string;
+  onKeyDown?: React.KeyboardEventHandler<HTMLInputElement>;
 }
 
 const SearchInput = ({
@@ -43,6 +44,7 @@ const SearchInput = ({
   showSearchIcon = false,
   clearButtonClassName,
   testId,
+  onKeyDown,
 }: SearchInputProps) => {
   const isControlled = controlledValue !== undefined;
   const [internalValue, setInternalValue] = useState('');
@@ -74,11 +76,15 @@ const SearchInput = ({
     [isControlled, onChange, debouncedSearch],
   );
 
-  const handleKeyDown = useCallback((e: React.KeyboardEvent<HTMLInputElement>) => {
-    if (e.key === 'Escape') {
-      e.currentTarget.blur();
-    }
-  }, []);
+  const handleKeyDown = useCallback(
+    (e: React.KeyboardEvent<HTMLInputElement>) => {
+      if (e.key === 'Escape') {
+        e.currentTarget.blur();
+      }
+      onKeyDown?.(e);
+    },
+    [onKeyDown],
+  );
 
   const handleClear = useCallback(() => {
     if (!isControlled) {
