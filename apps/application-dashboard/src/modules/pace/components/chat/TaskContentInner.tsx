@@ -110,7 +110,6 @@ const TaskContentChat = ({ taskId }: { taskId: string }) => {
   } = useTaskNavigation(taskId);
 
   const {
-
     messages,
 
     isLoadingHistory,
@@ -123,51 +122,68 @@ const TaskContentChat = ({ taskId }: { taskId: string }) => {
     inputsRequired,
 
     taskSummaryText,
- ,
-    isBrowserStreamingAvailable, browserSessionId,
-} = useTaskState();
-const { refetchHistory } = useTaskActions();
-const { sseEventBus } = useEventBus();
-const streamingState = useStreamingState(taskId);
+    isBrowserStreamingAvailable,
+    browserSessionId,
+  } = useTaskState();
+  const { refetchHistory } = useTaskActions();
+  const { sseEventBus } = useEventBus();
+  const streamingState = useStreamingState(taskId);
 
-const taskStatus = (conversationData as Record<string, unknown> | undefined)?.status as string | undefined;
+  const taskStatus = (conversationData as Record<string, unknown> | undefined)?.status as string | undefined;
 
-// Priority: SSE liveStatus (most real-time) > conversationData (server truth) > URL param (stale)
-const effectiveStatus = (liveStatus as TaskStatus) ?? (taskStatus as TaskStatus) ?? status ?? undefined;
+  // Priority: SSE liveStatus (most real-time) > conversationData (server truth) > URL param (stale)
+  const effectiveStatus = (liveStatus as TaskStatus) ?? (taskStatus as TaskStatus) ?? status ?? undefined;
 
-const conversationId = searchParams?.get('s') ?? undefined;
+  const conversationId = searchParams?.get('s') ?? undefined;
 
-const handleWatchStream = useCallback(() => {
-  if (conversationId) {
-    openBrowserTab(conversationId, 'Browser', browserSessionId ? { sessionId: browserSessionId } : undefined);
-  }
-}, [conversationId, openBrowserTab, browserSessionId]);
+  const handleWatchStream = useCallback(() => {
+    if (conversationId) {
+      openBrowserTab(conversationId, 'Browser', browserSessionId ? { sessionId: browserSessionId } : undefined);
+    }
+  }, [conversationId, openBrowserTab, browserSessionId]);
 
-const subtaskPanelParents: TaskBreadcrumb[] = useMemo(
-  () => [
-    ...parentTasks,
-    {
-      id: taskId,
-      title: chatTitle || urlTitle || 'Untitled',
-      status: effectiveStatus,
-      currentIndex,
-      totalRows: totalCount,
-      conversationId,
-    },
-  ],
-  [parentTasks, taskId, chatTitle, urlTitle, effectiveStatus, currentIndex, totalCount, conversationId],
-);
+  const subtaskPanelParents: TaskBreadcrumb[] = useMemo(
+    () => [
+      ...parentTasks,
+      {
+        id: taskId,
+        title: chatTitle || urlTitle || 'Untitled',
+        status: effectiveStatus,
+        currentIndex,
+        totalRows: totalCount,
+        conversationId,
+      },
+    ],
+    [parentTasks, taskId, chatTitle, urlTitle, effectiveStatus, currentIndex, totalCount, conversationId],
+  );
 
-// Extract subtask info from messages and streaming to detect newly created subtasks
-// before the task list API refetches (no BE event for subtask creation during streaming).
-const mergedSubtasks = useMemo(() => {
-  const apiSubtaskIds = new Set(subtasks.map((s) => s?.id));
-  const newSubtasks: typeof subtasks = [];
-  // Collect latest status from message task blocks (SSE updates task block statuses in messages)
-  const messageStatusMap = new Map<string, TaskStatus>();
+  // Extract subtask info from messages and streaming to detect newly created subtasks
+  // before the task list API refetches (no BE event for subtask creation during streaming).
+  const mergedSubtasks = useMemo(() => {
+    const apiSubtaskIds = new Set(subtasks.map((s) => s?.id));
+    const newSubtasks: typeof subtasks = [];
+    // Collect latest status from message task blocks (SSE updates task block statuses in messages)
+    const messageStatusMap = new Map<string, TaskStatus>();
 
-  for (const msg of messages) {
-    for (const el of msg.message_content?.elements ?? []) {
+    for (const msg of messages) {
+      for (const el of msg.message_content?.elements ?? []) {
+        if (el.type === BLOCK_TYPE.TASK) {
+          const payload = (el as TaskBlockType)?.payload ?? {};
+
+          if (payload?.task_id) {
+            const blockStatus = (payload?.status as TaskStatus) ?? TASK_STATUS.IN_PROGRESS;
+
+            messageStatusMap.set(payload.task_id, blockStatus);
+
+            if (!apiSubtaskIds.has(payload.task_id)) {
+              newSubtasks.push({ id: payload.task_id, title: payload.title, status: blockStatus });
+            }
+          }
+        }
+      }
+    }
+
+    for (const el of streamingState?.message_content?.elements ?? []) {
       if (el.type === BLOCK_TYPE.TASK) {
         const payload = (el as TaskBlockType)?.payload ?? {};
 
@@ -176,317 +192,300 @@ const mergedSubtasks = useMemo(() => {
 
           messageStatusMap.set(payload.task_id, blockStatus);
 
-          if (!apiSubtaskIds.has(payload.task_id)) {
+          if (!apiSubtaskIds.has(payload.task_id) && !newSubtasks.some((s) => s?.id === payload.task_id)) {
             newSubtasks.push({ id: payload.task_id, title: payload.title, status: blockStatus });
           }
         }
       }
     }
-  }
 
-  for (const el of streamingState?.message_content?.elements ?? []) {
-    if (el.type === BLOCK_TYPE.TASK) {
-      const payload = (el as TaskBlockType)?.payload ?? {};
+    // Update existing subtask statuses from messages (SSE keeps these fresh)
+    const updated = subtasks.map((s) => {
+      const freshStatus = messageStatusMap.get(s.id);
 
-      if (payload?.task_id) {
-        const blockStatus = (payload?.status as TaskStatus) ?? TASK_STATUS.IN_PROGRESS;
+      return freshStatus && freshStatus !== s.status ? { ...s, status: freshStatus } : s;
+    });
 
-        messageStatusMap.set(payload.task_id, blockStatus);
+    return newSubtasks.length > 0 ? [...updated, ...newSubtasks] : updated;
+  }, [subtasks, messages, streamingState]);
 
-        if (!apiSubtaskIds.has(payload.task_id) && !newSubtasks.some((s) => s?.id === payload.task_id)) {
-          newSubtasks.push({ id: payload.task_id, title: payload.title, status: blockStatus });
-        }
-      }
+  const siblingsMemo: SiblingTask[] = useMemo(
+    () => mergedSubtasks.map((subtask) => ({ id: subtask?.id, title: subtask?.title, status: subtask?.status })),
+    [mergedSubtasks],
+  );
+
+  useEffect(() => {
+    const title = (conversationData as Record<string, unknown> | undefined)?.title as string | undefined;
+
+    if (title) {
+      setChatTitle((prev) => prev || title);
     }
-  }
+  }, [conversationData]);
 
-  // Update existing subtask statuses from messages (SSE keeps these fresh)
-  const updated = subtasks.map((s) => {
-    const freshStatus = messageStatusMap.get(s.id);
+  const hasMessages = messages.length > 0;
+  const isAnalysing = hasMessages && messages[messages.length - 1]?.sender_type === SenderType.USER;
 
-    return freshStatus && freshStatus !== s.status ? { ...s, status: freshStatus } : s;
+  if (streamingState) hadStreamingRef.current = true;
+
+  // When navigating back to a previously visited task, RTK Query serves cached data
+  const hasCachedData = Boolean(conversationData);
+  const isLoadingConversation =
+    !isErrorHistory &&
+    (Boolean(taskId && isLoadingHistory) ||
+      (!hasMessages && !streamingState && !hadStreamingRef.current && !hasCachedData));
+  const isTaskNotFound = isErrorHistory && isNotFoundError(errorHistory);
+
+  const { processedMessages, lastSummaryText } = useMemo(() => getProcessedMessages(messages), [messages]);
+  const summary = (conversationData as Record<string, unknown> | undefined)?.summary as
+    | ConversationSummary
+    | null
+    | undefined;
+  const description = (conversationData as Record<string, unknown> | undefined)?.description as
+    | string
+    | null
+    | undefined;
+  const isTaskDone = taskStatus && !streamingState ? taskStatus === TASK_STATUS.COMPLETED : false;
+  const isAgentActive = Boolean(streamingState?.is_active) || isAnalysing;
+
+  const displayedSummary = useDisplayedSummary({
+    taskId,
+    isAgentActive,
+    taskStatus,
+    streamingSummaryText: taskSummaryText,
   });
 
-  return newSubtasks.length > 0 ? [...updated, ...newSubtasks] : updated;
-}, [subtasks, messages, streamingState]);
+  const { hitlQuestions, hitlQuestionsKey } = useHitlQuestions(inputsRequired);
 
-const siblingsMemo: SiblingTask[] = useMemo(
-  () => mergedSubtasks.map((subtask) => ({ id: subtask?.id, title: subtask?.title, status: subtask?.status })),
-  [mergedSubtasks],
-);
+  const handleHitlRespondComplete = useCallback(() => {
+    refetchHistory();
+    sseEventBus.publish(EVENT_TYPE.COMPONENT, { type: EVENT_TYPE.COMPONENT, payload: HITL_RESPONDED_EVENT });
+  }, [refetchHistory, sseEventBus]);
 
-useEffect(() => {
-  const title = (conversationData as Record<string, unknown> | undefined)?.title as string | undefined;
+  const isNeedsInput = taskStatus === TASK_STATUS.NEEDS_INPUT;
+  const hasHitlQuestions = hitlQuestions.length > 0;
 
-  if (title) {
-    setChatTitle((prev) => prev || title);
-  }
-}, [conversationData]);
+  const displayTitle = getDisplayTitle(urlTitle, chatTitle);
+  const statusLabel = getStatusLabel(isAgentActive, taskStatus);
 
-const hasMessages = messages.length > 0;
-const isAnalysing = hasMessages && messages[messages.length - 1]?.sender_type === SenderType.USER;
+  const stepCount = useMemo(() => getStepCount(messages, streamingState), [messages, streamingState]);
+  const stepGroupsRaw = isTaskDone ? summary?.step_groups : undefined;
+  const isStreaming = streamingState && !!streamingState.message_content?.elements?.length;
 
-if (streamingState) hadStreamingRef.current = true;
+  const stepGroupSections = useMemo(() => {
+    if (!stepGroupsRaw) return [];
+    if (Array.isArray(stepGroupsRaw)) {
+      return stepGroupsLegacyToSections(stepGroupsRaw, messages);
+    }
 
-// When navigating back to a previously visited task, RTK Query serves cached data
-const hasCachedData = Boolean(conversationData);
-const isLoadingConversation =
-  !isErrorHistory &&
-  (Boolean(taskId && isLoadingHistory) ||
-    (!hasMessages && !streamingState && !hadStreamingRef.current && !hasCachedData));
-const isTaskNotFound = isErrorHistory && isNotFoundError(errorHistory);
+    return resolveMessageStepGroupSections(stepGroupsRaw, messages);
+  }, [stepGroupsRaw, messages]);
 
-const { processedMessages, lastSummaryText } = useMemo(() => getProcessedMessages(messages), [messages]);
-const summary = (conversationData as Record<string, unknown> | undefined)?.summary as
-  | ConversationSummary
-  | null
-  | undefined;
-const description = (conversationData as Record<string, unknown> | undefined)?.description as
-  | string
-  | null
-  | undefined;
-const isTaskDone = taskStatus && !streamingState ? taskStatus === TASK_STATUS.COMPLETED : false;
-const isAgentActive = Boolean(streamingState?.is_active) || isAnalysing;
+  const hasStepGroups = stepGroupSections.length > 0;
 
-const displayedSummary = useDisplayedSummary({
-  taskId,
-  isAgentActive,
-  taskStatus,
-  streamingSummaryText: taskSummaryText,
-});
+  const handleToggleSummary = useCallback((checked: boolean) => {
+    setShowSummary(checked);
+  }, []);
 
-const { hitlQuestions, hitlQuestionsKey } = useHitlQuestions(inputsRequired);
+  useEffect(() => {
+    if (streamingState?.is_active) {
+      setShowSummary(false);
+    }
+  }, [streamingState?.is_active]);
 
-const handleHitlRespondComplete = useCallback(() => {
-  refetchHistory();
-  sseEventBus.publish(EVENT_TYPE.COMPONENT, { type: EVENT_TYPE.COMPONENT, payload: HITL_RESPONDED_EVENT });
-}, [refetchHistory, sseEventBus]);
+  useEffect(() => {
+    const wasAvailable = prevBrowserStreamingRef.current;
 
-const isNeedsInput = taskStatus === TASK_STATUS.NEEDS_INPUT;
-const hasHitlQuestions = hitlQuestions.length > 0;
+    prevBrowserStreamingRef.current = isBrowserStreamingAvailable;
 
-const displayTitle = getDisplayTitle(urlTitle, chatTitle);
-const statusLabel = getStatusLabel(isAgentActive, taskStatus);
+    if (wasAvailable && !isBrowserStreamingAvailable && conversationId) {
+      updateBrowserTab(conversationId, conversationId, 'Browser', {
+        status: BrowserViewerDisplayState.ENDED,
+      });
+    }
+  }, [isBrowserStreamingAvailable, conversationId, updateBrowserTab]);
 
-const stepCount = useMemo(() => getStepCount(messages, streamingState), [messages, streamingState]);
-const stepGroupsRaw = isTaskDone ? summary?.step_groups : undefined;
-const isStreaming = streamingState && !!streamingState.message_content?.elements?.length;
+  useEffect(() => {
+    if (hasStepGroups && !isAgentActive && !showSteps) {
+      setShowSummary(true);
+    }
+  }, [hasStepGroups, isAgentActive]);
 
-const stepGroupSections = useMemo(() => {
-  if (!stepGroupsRaw) return [];
-  if (Array.isArray(stepGroupsRaw)) {
-    return stepGroupsLegacyToSections(stepGroupsRaw, messages);
-  }
+  useEffect(() => {
+    if (shimmerScrollRef.current) {
+      shimmerScrollRef.current.scrollTop = shimmerScrollRef.current.scrollHeight;
+    }
+  }, [displayedSummary]);
 
-  return resolveMessageStepGroupSections(stepGroupsRaw, messages);
-}, [stepGroupsRaw, messages]);
+  const isExpandedStepsView = showSteps && (!hasStepGroups || !showSummary);
 
-const hasStepGroups = stepGroupSections.length > 0;
-
-const handleToggleSummary = useCallback((checked: boolean) => {
-  setShowSummary(checked);
-}, []);
-
-useEffect(() => {
-  if (streamingState?.is_active) {
-    setShowSummary(false);
-  }
-}, [streamingState?.is_active]);
-
-useEffect(() => {
-  const wasAvailable = prevBrowserStreamingRef.current;
-
-  prevBrowserStreamingRef.current = isBrowserStreamingAvailable;
-
-  if (wasAvailable && !isBrowserStreamingAvailable && conversationId) {
-    updateBrowserTab(conversationId, conversationId, 'Browser', {
-      status: BrowserViewerDisplayState.ENDED,
-    });
-  }
-}, [isBrowserStreamingAvailable, conversationId, updateBrowserTab]);
-
-useEffect(() => {
-  if (hasStepGroups && !isAgentActive && !showSteps) {
-    setShowSummary(true);
-  }
-}, [hasStepGroups, isAgentActive]);
-
-useEffect(() => {
-  if (shimmerScrollRef.current) {
-    shimmerScrollRef.current.scrollTop = shimmerScrollRef.current.scrollHeight;
-  }
-}, [displayedSummary]);
-
-const isExpandedStepsView = showSteps && (!hasStepGroups || !showSummary);
-
-return (
-  <ChatActionsProvider
-    onFileOpen={openTab}
-    parentTasks={subtaskPanelParents}
-    siblings={siblingsMemo}
-    onWatchStream={handleWatchStream}
-    isBrowserStreamingAvailable={isBrowserStreamingAvailable}
-  >
-    <div className='relative flex h-full flex-1 flex-col'>
-      <TaskTopbar
-        className='border-GRAY_100 border-b'
-        title={chatTitle || 'Untitled'}
-        status={effectiveStatus}
-        isSubtask={isSubtask}
-        parentTasks={parentTasks}
-        navigationSlot={
-          <TaskNavigation
-            currentIndex={currentIndex}
-            totalCount={totalCount}
-            hasNext={hasNext}
-            hasPrevious={hasPrevious}
-            isLoading={isLoading}
-            isBootstrapping={isBootstrapping}
-            onGoToNextTask={goToNextTask}
-            onGoToPreviousTask={goToPreviousTask}
-          />
-        }
-      />
-      <CommonWrapper
-        isLoading={isLoadingConversation}
-        isError={isErrorHistory}
-        refetchFunction={refetchHistory}
-        skeletonType={SkeletonTypes.CUSTOM}
-        loader={<TaskContentSkeleton />}
-        className='flex min-h-0 w-full min-w-0 flex-1 flex-col'
-        disableAnimation
-        renderError={
-          isTaskNotFound ? (
-            <ContentErrorState
-              title='Task not found'
-              description="This task may have been deleted or you don't have access to it."
+  return (
+    <ChatActionsProvider
+      onFileOpen={openTab}
+      parentTasks={subtaskPanelParents}
+      siblings={siblingsMemo}
+      onWatchStream={handleWatchStream}
+      isBrowserStreamingAvailable={isBrowserStreamingAvailable}
+    >
+      <div className='relative flex h-full flex-1 flex-col'>
+        <TaskTopbar
+          className='border-GRAY_100 border-b'
+          title={chatTitle || 'Untitled'}
+          status={effectiveStatus}
+          isSubtask={isSubtask}
+          parentTasks={parentTasks}
+          navigationSlot={
+            <TaskNavigation
+              currentIndex={currentIndex}
+              totalCount={totalCount}
+              hasNext={hasNext}
+              hasPrevious={hasPrevious}
+              isLoading={isLoading}
+              isBootstrapping={isBootstrapping}
+              onGoToNextTask={goToNextTask}
+              onGoToPreviousTask={goToPreviousTask}
             />
-          ) : undefined
-        }
-      >
-        <div className='mx-auto flex w-full max-w-[700px] flex-col px-4 pt-12'>
-          <TaskChatTitleHeader
-            displayTitle={displayTitle}
-            statusLabel={statusLabel}
-            isAgentActive={isAgentActive}
-            taskStatus={taskStatus}
-            description={description}
-          />
-        </div>
-
-        <ScrollContainer
-          className='min-h-0 w-full min-w-0 flex-1'
-          showScrollToBottom
-          ref={scrollContainerRef}
-          showFadeOverlay
-          scrollbarStyle='none'
-          scrollClassName='!overflow-y-scroll'
-        >
-          <div className='mx-auto flex w-full max-w-[700px] flex-col px-4'>
-            <div
-              className={cn(
-                'overflow-hidden transition-all duration-300',
-                effectiveStatus === TASK_STATUS.IN_PROGRESS || isAgentActive
-                  ? 'mt-[30px] max-h-[500px]'
-                  : 'mt-0 max-h-0',
-              )}
-            >
-              <div className='border-GRAY_400 flex min-h-[80px] flex-col rounded-[18px] border p-4'>
-                <ShimmerText text={displayedSummary || 'Starting now'} autoAnimate />
-              </div>
-            </div>
-
-            <div className='mt-[30px]'>
-              <TaskChatStepsToggleHeader
-                showSteps={showSteps}
-                onToggle={handleToggleSteps}
-                stepCount={stepCount}
-                isTaskDone={isTaskDone}
-                taskStatus={taskStatus}
-                showSummaryControl={hasStepGroups && showSteps && !isAgentActive}
-                showSummary={showSummary}
-                onShowSummaryChange={handleToggleSummary}
-                showConnector={showSteps || taskStatus !== TASK_STATUS.IN_PROGRESS}
+          }
+        />
+        <CommonWrapper
+          isLoading={isLoadingConversation}
+          isError={isErrorHistory}
+          refetchFunction={refetchHistory}
+          skeletonType={SkeletonTypes.CUSTOM}
+          loader={<TaskContentSkeleton />}
+          className='flex min-h-0 w-full min-w-0 flex-1 flex-col'
+          disableAnimation
+          renderError={
+            isTaskNotFound ? (
+              <ContentErrorState
+                title='Task not found'
+                description="This task may have been deleted or you don't have access to it."
               />
-            </div>
-            {/* 5b. Steps open: Summary view (step groups) */}
-            {showSteps && hasStepGroups && showSummary && <StepGroupsSummaryView sections={stepGroupSections} />}
+            ) : undefined
+          }
+        >
+          <div className='mx-auto flex w-full max-w-[700px] flex-col px-4 pt-12'>
+            <TaskChatTitleHeader
+              displayTitle={displayTitle}
+              statusLabel={statusLabel}
+              isAgentActive={isAgentActive}
+              taskStatus={taskStatus}
+              description={description}
+            />
+          </div>
 
-            {/* 5c. Steps open: Expanded per-message blocks + footer in a single connected thread */}
-            <div className='relative'>
+          <ScrollContainer
+            className='min-h-0 w-full min-w-0 flex-1'
+            showScrollToBottom
+            ref={scrollContainerRef}
+            showFadeOverlay
+            scrollbarStyle='none'
+            scrollClassName='!overflow-y-scroll'
+          >
+            <div className='mx-auto flex w-full max-w-[700px] flex-col px-4'>
               <div
                 className={cn(
-                  'bg-border pointer-events-none absolute top-0 bottom-0 left-[14.5px] z-0 w-px',
-                  isStreaming && 'mb-5',
+                  'overflow-hidden transition-all duration-300',
+                  effectiveStatus === TASK_STATUS.IN_PROGRESS || isAgentActive
+                    ? 'mt-[30px] max-h-[500px]'
+                    : 'mt-0 max-h-0',
                 )}
-                aria-hidden
-              />
-              {isExpandedStepsView && (
-                <div className='relative flex flex-col'>
-                  {processedMessages.map(({ message, summaryText }, index) => (
-                    <div key={message.id ?? index} className='relative'>
+              >
+                <div className='border-GRAY_400 flex min-h-[80px] flex-col rounded-[18px] border p-4'>
+                  <ShimmerText text={displayedSummary || 'Starting now'} autoAnimate />
+                </div>
+              </div>
+
+              <div className='mt-[30px]'>
+                <TaskChatStepsToggleHeader
+                  showSteps={showSteps}
+                  onToggle={handleToggleSteps}
+                  stepCount={stepCount}
+                  isTaskDone={isTaskDone}
+                  taskStatus={taskStatus}
+                  showSummaryControl={hasStepGroups && showSteps && !isAgentActive}
+                  showSummary={showSummary}
+                  onShowSummaryChange={handleToggleSummary}
+                  showConnector={showSteps || taskStatus !== TASK_STATUS.IN_PROGRESS}
+                />
+              </div>
+              {/* 5b. Steps open: Summary view (step groups) */}
+              {showSteps && hasStepGroups && showSummary && <StepGroupsSummaryView sections={stepGroupSections} />}
+
+              {/* 5c. Steps open: Expanded per-message blocks + footer in a single connected thread */}
+              <div className='relative'>
+                <div
+                  className={cn(
+                    'bg-border pointer-events-none absolute top-0 bottom-0 left-[14.5px] z-0 w-px',
+                    isStreaming && 'mb-5',
+                  )}
+                  aria-hidden
+                />
+                {isExpandedStepsView && (
+                  <div className='relative flex flex-col'>
+                    {processedMessages.map(({ message, summaryText }, index) => (
+                      <div key={message.id ?? index} className='relative'>
+                        <div className='px-2'>
+                          <TaskChatStepMessage
+                            message={message}
+                            showConnectorToLastBlock={index > 0}
+                            showConnectorToNextBlock
+                          />
+                        </div>
+                        {summaryText && (
+                          <div className='bg-BG_WHITE relative z-1 mt-2 px-2 py-1'>
+                            <ResizableSummaryBox borderRadius='rounded-[18px]' contentClassName='px-4 pt-3 pb-1'>
+                              <MarkdownBlock payload={{ text: summaryText }} />
+                            </ResizableSummaryBox>
+                          </div>
+                        )}
+                      </div>
+                    ))}
+
+                    {isStreaming && (
                       <div className='px-2'>
-                        <TaskChatStepMessage
-                          message={message}
-                          showConnectorToLastBlock={index > 0}
-                          showConnectorToNextBlock
+                        <StreamingMessage
+                          streamingState={streamingState}
+                          assistantAvatar={<></>}
+                          showMarkdownConnectors
+                          showConnectorToLastBlock
+                          showConnectorToNextBlock={true}
                         />
                       </div>
-                      {summaryText && (
-                        <div className='bg-BG_WHITE relative z-1 mt-2 px-2 py-1'>
-                          <ResizableSummaryBox borderRadius='rounded-[18px]' contentClassName='px-4 pt-3 pb-1'>
-                            <MarkdownBlock payload={{ text: summaryText }} />
-                          </ResizableSummaryBox>
-                        </div>
-                      )}
-                    </div>
-                  ))}
+                    )}
+                  </div>
+                )}
 
-                  {isStreaming && (
-                    <div className='px-2'>
-                      <StreamingMessage
-                        streamingState={streamingState}
-                        assistantAvatar={<></>}
-                        showMarkdownConnectors
-                        showConnectorToLastBlock
-                        showConnectorToNextBlock={true}
-                      />
-                    </div>
-                  )}
+                {/* Footer when steps are collapsed or in summary view */}
+                {(taskStatus === TASK_STATUS.NEEDS_INPUT || (!showSteps && taskStatus !== TASK_STATUS.IN_PROGRESS)) && (
+                  <TaskChatExpandedStepsFooter
+                    isFirst={processedMessages.length === 0}
+                    isNeedsInput={isNeedsInput}
+                    hasHitlQuestions={hasHitlQuestions}
+                    hitlQuestions={hitlQuestions}
+                    hitlQuestionsKey={hitlQuestionsKey}
+                    taskId={taskId}
+                    onHitlRespondComplete={handleHitlRespondComplete}
+                    resultText={lastSummaryText}
+                    summaryScrollRef={summaryScrollRef}
+                    hideConnector={!showSteps}
+                  />
+                )}
+              </div>
+
+              {/* 3. Inline subtasks (toggleable) */}
+              {mergedSubtasks.length > 0 && (
+                <div className='mt-[30px] px-2'>
+                  <InlineSubtaskSection subtasks={mergedSubtasks} parentTasks={subtaskPanelParents} />
                 </div>
               )}
 
-              {/* Footer when steps are collapsed or in summary view */}
-              {(taskStatus === TASK_STATUS.NEEDS_INPUT || (!showSteps && taskStatus !== TASK_STATUS.IN_PROGRESS)) && (
-                <TaskChatExpandedStepsFooter
-                  isFirst={processedMessages.length === 0}
-                  isNeedsInput={isNeedsInput}
-                  hasHitlQuestions={hasHitlQuestions}
-                  hitlQuestions={hitlQuestions}
-                  hitlQuestionsKey={hitlQuestionsKey}
-                  taskId={taskId}
-                  onHitlRespondComplete={handleHitlRespondComplete}
-                  resultText={lastSummaryText}
-                  summaryScrollRef={summaryScrollRef}
-                  hideConnector={!showSteps}
-                />
-              )}
+              <div className='bg-BG_WHITE h-12 w-full shrink-0' />
             </div>
-
-            {/* 3. Inline subtasks (toggleable) */}
-            {mergedSubtasks.length > 0 && (
-              <div className='mt-[30px] px-2'>
-                <InlineSubtaskSection subtasks={mergedSubtasks} parentTasks={subtaskPanelParents} />
-              </div>
-            )}
-
-            <div className='bg-BG_WHITE h-12 w-full shrink-0' />
-          </div>
-        </ScrollContainer>
-      </CommonWrapper>
-    </div>
-  </ChatActionsProvider>
-);
+          </ScrollContainer>
+        </CommonWrapper>
+      </div>
+    </ChatActionsProvider>
+  );
 };
 
 const TaskContentInner = ({ taskId: propTaskId }: TaskContentInnerProps) => {
