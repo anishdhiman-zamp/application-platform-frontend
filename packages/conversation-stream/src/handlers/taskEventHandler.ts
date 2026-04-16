@@ -8,6 +8,7 @@ import {
   streamingStateStore,
 } from '@zamp-platform/chat';
 
+import type { BrowserStreamingAvailableEvent } from '../types/conversation-sse.types';
 import { type TaskEventCallbacks, TaskSSEEventType } from '../types/task-sse.types';
 import { handleContentBlockEvent } from './streamingBlockHandler';
 
@@ -86,6 +87,17 @@ export function handleTaskSSEEvent(taskId: string, event: AnyEvent, callbacks: T
       case TaskSSEEventType.CONTENT_BLOCK_DELTA:
       case TaskSSEEventType.CONTENT_BLOCK_STOP:
         handleContentBlockEvent(taskId, event.type as string, event.index as number, event);
+        break;
+
+      case TaskSSEEventType.BROWSER_STREAMING_AVAILABLE:
+        callbacks.onBrowserStreamingAvailable?.(
+          taskId,
+          (event as unknown as BrowserStreamingAvailableEvent).session_id,
+        );
+        break;
+
+      case TaskSSEEventType.BROWSER_STREAMING_UNAVAILABLE:
+        callbacks.onBrowserStreamingUnavailable?.(taskId);
         break;
 
       default:

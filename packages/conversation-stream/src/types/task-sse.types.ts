@@ -17,6 +17,8 @@ export const enum TaskSSEEventType {
   TASK_UPDATE = 'task_update',
   TASK_SUMMARY = 'task_summary',
   INPUT_REQUIRED = 'input_required',
+  BROWSER_STREAMING_AVAILABLE = 'browser_streaming_available',
+  BROWSER_STREAMING_UNAVAILABLE = 'browser_streaming_unavailable',
 }
 
 export interface TaskEventCallbacks {
@@ -24,6 +26,8 @@ export interface TaskEventCallbacks {
   onTaskUpdate?: (taskId: string, updatedFields: Record<string, unknown>) => void;
   onTaskSummary?: (taskId: string, text: string) => void;
   onInputRequired?: (taskId: string, data: unknown) => void;
+  onBrowserStreamingAvailable?: (taskId: string, sessionId?: string) => void;
+  onBrowserStreamingUnavailable?: (taskId: string) => void;
   /** Invoked when the SSE connection is lost and all retry attempts have been exhausted. */
   onDisconnected?: () => void;
 }
