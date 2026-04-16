@@ -1,11 +1,11 @@
 'use client';
 
-import * as React from 'react';
-import { useMemo, useState, useCallback } from 'react';
+import { ChangeEvent, KeyboardEvent, KeyboardEventHandler, useMemo, useState, useCallback } from 'react';
 import { X, Search } from 'lucide-react';
 
 import { SizeType } from '@zamp-platform/ui/types';
 import { cn } from '@zamp-platform/ui/utils';
+import { KEYBOARD_KEYS } from '@zamp-platform/utils';
 import { Input } from './input';
 import { Button } from './button';
 
@@ -26,6 +26,7 @@ interface SearchInputProps {
   showSearchIcon?: boolean;
   clearButtonClassName?: string;
   testId?: string;
+  onKeyDown?: KeyboardEventHandler<HTMLInputElement>;
 }
 
 const SearchInput = ({
@@ -43,6 +44,7 @@ const SearchInput = ({
   showSearchIcon = false,
   clearButtonClassName,
   testId,
+  onKeyDown,
 }: SearchInputProps) => {
   const isControlled = controlledValue !== undefined;
   const [internalValue, setInternalValue] = useState('');
@@ -61,7 +63,7 @@ const SearchInput = ({
   }, [onDebouncedChange, debounceMs]);
 
   const handleChange = useCallback(
-    (e: React.ChangeEvent<HTMLInputElement>) => {
+    (e: ChangeEvent<HTMLInputElement>) => {
       const { value } = e.target;
 
       if (!isControlled) {
@@ -73,6 +75,13 @@ const SearchInput = ({
     },
     [isControlled, onChange, debouncedSearch],
   );
+
+  const handleKeyDown = (e: KeyboardEvent<HTMLInputElement>) => {
+    if (e.key === KEYBOARD_KEYS.ESCAPE) {
+      e.currentTarget.blur();
+    }
+    onKeyDown?.(e);
+  };
 
   const handleClear = useCallback(() => {
     if (!isControlled) {
@@ -90,6 +99,7 @@ const SearchInput = ({
         value={inputValue}
         icon={showSearchIcon ? <Search className='text-GRAY_500 size-3.5' /> : undefined}
         onChange={handleChange}
+        onKeyDown={handleKeyDown}
         className={cn('border-GRAY_400 focus:border-GRAY_600 pr-8 focus:ring-3', className)}
         size={size}
         iconPosition='leading'

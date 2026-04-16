@@ -71,7 +71,8 @@
     "motion": "^12.38.0",
     "react-resizable-panels": "^3.0.1",
     "sonner": "^2.0.3",
-    "tailwind-merge": "^2.6.0"
+    "tailwind-merge": "^2.6.0",
+    "@zamp-platform/utils": "*"
   },
   "exports": {
     ".": {

@@ -1,10 +1,10 @@
 'use client';
 
-import { AnimatedTerminalIcon, ImageWithFallback, ShimmerText } from '@zamp-platform/ui';
 import { cn } from '@zamp-platform/ui/utils';
 import { EVENT_TYPE } from '@zamp-platform/utils/event-bus/event-bus.types';
 import { ArrowUpRight } from 'lucide-react';
-import { type FC, useCallback, useMemo } from 'react';
+import { AnimatePresence, motion } from 'motion/react';
+import { type FC, useCallback } from 'react';
 
 import { getChatTaskRoute } from '@/constants/routeConfig';
 import { useAppSelector } from '@/hooks/toolkit';
@@ -15,9 +15,8 @@ import { API_ENDPOINTS } from '../../api';
 import { useChatActions } from '../../context/ChatActionsContext';
 import { useChat } from '../../hooks/useChat';
 import { useDisplayedSummary } from '../../hooks/useDisplayedSummary';
-import { BLOCK_TYPE, TASK_STATUS, type TaskBlockType, ToolUseContentBlock } from '../../types/block.types';
+import { TASK_STATUS, type TaskBlockType } from '../../types/block.types';
 import { ResourceType, SenderType } from '../../types/chat.types';
-import { extractToolCallInfo } from '../block.utils';
 import TaskBlockContent from './TaskBlockContent';
 import TaskStatusIcon from './TaskStatusIcon';
 
@@ -25,15 +24,6 @@ interface TaskBlockProps {
   payload: TaskBlockType['payload'];
   conversationId?: string;
   className?: string;
-}
-
-export interface ToolCallInfo {
-  id: string;
-  name: string;
-  displayName: string;
-  icon?: string;
-  isComplete: boolean;
-  block: ToolUseContentBlock;
 }
 
 const TaskBlock: FC<TaskBlockProps> = ({ payload, conversationId, className }) => {
@@ -65,72 +55,12 @@ const TaskBlock: FC<TaskBlockProps> = ({ payload, conversationId, className }) =
     taskId: task_id,
     isAgentActive,
     taskStatus,
-    streamingSummaryText: taskSummaries?.[task_id] ?? null,
+    streamingSummaryText: taskSummaries?.[task_id] ?? payload.summary?.live_summary ?? null,
   });
 
-  const { toolCalls, markdownStepsBeforeLastTool } = useMemo(() => {
-    const calls: ToolCallInfo[] = [];
-    const elementTypes: string[] = [];
-
-    const messages = chat?.messages ?? [];
-    const assistantMessages = messages.filter((msg) => msg?.sender_type === SenderType.ASSISTANT);
-
-    for (const message of assistantMessages) {
-      const elements = message?.message_content?.elements ?? [];
-
-      for (const element of elements) {
-        elementTypes.push(element?.type);
-
-        if (element?.type === BLOCK_TYPE.TOOL_USE) {
-          calls.push(extractToolCallInfo(element, calls.length));
-        }
-      }
-    }
-
-    const streamingElements = chat?.streamingState?.message_content?.elements ?? [];
-    for (const element of streamingElements) {
-      elementTypes.push(element?.type);
-
-      if (element?.type === BLOCK_TYPE.TOOL_USE) {
-        calls.push(extractToolCallInfo(element, calls.length));
-      }
-    }
-
-    let lastToolIndex = -1;
-    for (let i = elementTypes?.length - 1; i >= 0; i--) {
-      if (elementTypes[i] === BLOCK_TYPE.TOOL_USE) {
-        lastToolIndex = i;
-        break;
-      }
-    }
-
-    const isTextLike = (type: string) =>
-      type === BLOCK_TYPE.TEXT || type === BLOCK_TYPE.MARKDOWN || type === BLOCK_TYPE.THINKING;
-
-    let mdCount = 0;
-    if (lastToolIndex === -1) {
-      for (const type of elementTypes) {
-        if (isTextLike(type)) mdCount++;
-      }
-      mdCount = Math.max(0, mdCount - 1);
-    } else {
-      for (let i = 0; i < lastToolIndex; i++) {
-        if (isTextLike(elementTypes[i])) mdCount++;
-      }
-    }
-
-    return { toolCalls: calls, markdownStepsBeforeLastTool: mdCount };
-  }, [chat?.messages, chat?.streamingState]);
-
-  const previousToolCalls = toolCalls?.slice(0, -1) ?? [];
-  const lastToolCall = toolCalls?.length > 0 ? toolCalls[toolCalls.length - 1] : null;
-  const previousCount = (previousToolCalls?.length ?? 0) + markdownStepsBeforeLastTool;
-
   const handleOpenTask = useCallback(() => {
-    // Use live status from conversation data if available, fallback to payload status
     const effectiveStatus = taskStatus ?? status;
 
-    // Compute status-based index within siblings for pagination
     const sameStatusSiblings = siblings?.filter((s) => s.status === effectiveStatus) ?? [];
     const statusIndex = sameStatusSiblings.findIndex((s) => s.id === task_id);
 
@@ -151,35 +81,6 @@ const TaskBlock: FC<TaskBlockProps> = ({ payload, conversationId, className }) =
   }, [task_id, conversationId, title, status, taskStatus, onTaskOpen, parentTasks, siblings]);
 
   const isInProgress = status === TASK_STATUS.IN_PROGRESS;
-  const hasNoToolCalls = (toolCalls?.length ?? 0) === 0 && previousCount === 0;
-  const isStartingTask = hasNoToolCalls && !isLoading && isInProgress;
-
-  const hasToolCallContent = isLoading || !!lastToolCall || isStartingTask;
-
-  const getToolIcon = (toolCall: ToolCallInfo | null | undefined) => {
-    if (!toolCall) {
-      return <AnimatedTerminalIcon showAnimation={false} size={12} />;
-    }
-    if (toolCall.icon?.length) {
-      return <ImageWithFallback src={toolCall.icon} alt={toolCall.name ?? 'Tool'} className='h-3.5 w-3.5' />;
-    }
-    return <AnimatedTerminalIcon showAnimation={!toolCall.isComplete} size={12} />;
-  };
-
-  const renderToolCallTrigger = (toolCall: ToolCallInfo | null | undefined) => {
-    if (!toolCall) {
-      return null;
-    }
-    return (
-      <div className='flex flex-1 items-center gap-3'>
-        {status === TASK_STATUS.IN_PROGRESS ? (
-          <ShimmerText className='f-14-450' text={toolCall.displayName ?? 'Unknown'} autoAnimate={true} />
-        ) : (
-          <span className='text-GRAY_950 f-14-450'>{toolCall.displayName ?? 'Unknown'}</span>
-        )}
-      </div>
-    );
-  };
 
   return (
     <div
@@ -201,19 +102,22 @@ const TaskBlock: FC<TaskBlockProps> = ({ payload, conversationId, className }) =
         </div>
       </div>
 
-      {(hasToolCallContent || (isInProgress && displayedSummary)) && (
-        <div className='bg-BG_GRAY_2 border-GRAY_400 f-14-450 min-h-20 border-t px-4 py-3'>
-          <TaskBlockContent
-            isLoading={isLoading}
-            isInProgress={isInProgress}
-            displayedSummary={displayedSummary}
-            previousCount={previousCount}
-            lastToolCall={lastToolCall}
-            getToolIcon={getToolIcon}
-            renderToolCallTrigger={renderToolCallTrigger}
-          />
-        </div>
-      )}
+      <AnimatePresence initial={false}>
+        {isInProgress && (
+          <motion.div
+            key='task-content'
+            initial={{ height: 0, opacity: 0 }}
+            animate={{ height: 'auto', opacity: 1 }}
+            exit={{ height: 0, opacity: 0 }}
+            transition={{ duration: 0.25, ease: 'easeInOut' }}
+            className='overflow-hidden'
+          >
+            <div className='bg-BG_GRAY_2 border-GRAY_400 f-14-450 min-h-20 border-t px-4 py-3'>
+              <TaskBlockContent isLoading={isLoading} isInProgress={isInProgress} displayedSummary={displayedSummary} />
+            </div>
+          </motion.div>
+        )}
+      </AnimatePresence>
     </div>
   );
 };

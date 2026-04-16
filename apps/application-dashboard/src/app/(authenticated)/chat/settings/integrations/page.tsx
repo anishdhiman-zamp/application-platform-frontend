@@ -3,7 +3,7 @@ import IntegrationHeader from '@/modules/integrations/AllIntegrations/Integratio
 
 const IntegrationsPage = () => {
   return (
-    <div className='@container flex h-full w-full flex-1 flex-col'>
+    <div className='@container flex h-full w-full flex-1 flex-col pl-[3px]'>
       <div className='flex h-full w-full flex-col'>
         <div className='border-GRAY_400 sticky top-0 z-10 border-b pb-8 transition-colors'>
           <IntegrationHeader />
