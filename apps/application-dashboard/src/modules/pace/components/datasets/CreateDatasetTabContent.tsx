@@ -20,7 +20,14 @@ const CreateDatasetTabContent = ({ tabId }: CreateDatasetTabContentProps) => {
     [tabId, updateTab],
   );
 
-  return <CreateDataset onCreated={handleCreated} hideBackButton />;
+  const handleTitleChange = useCallback(
+    (displayName: string) => {
+      updateTab(tabId, tabId, displayName);
+    },
+    [tabId, updateTab],
+  );
+
+  return <CreateDataset onCreated={handleCreated} onTitleChange={handleTitleChange} hideBackButton />;
 };
 
 export default CreateDatasetTabContent;

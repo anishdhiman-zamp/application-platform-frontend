@@ -21,10 +21,11 @@ import { KEYBOARD_KEYS } from '@/constants/shortcuts';
 
 interface CreateDatasetProps {
   onCreated?: (tableName: string, displayName: string) => void;
+  onTitleChange?: (displayName: string) => void;
   hideBackButton?: boolean;
 }
 
-const CreateDataset = ({ onCreated, hideBackButton }: CreateDatasetProps) => {
+const CreateDataset = ({ onCreated, onTitleChange, hideBackButton }: CreateDatasetProps) => {
   const router = useRouter();
   const [title, setTitle] = useState('Untitled Dataset');
   const [isEditingTitle, setIsEditingTitle] = useState(true);
@@ -100,11 +101,21 @@ const CreateDataset = ({ onCreated, hideBackButton }: CreateDatasetProps) => {
     requestAnimationFrame(() => inputElRef.current?.focus());
   }, []);
 
-  const handleTitleKeyDown = useCallback((e: React.KeyboardEvent) => {
-    if (e.key === KEYBOARD_KEYS.ENTER) {
-      setIsEditingTitle(false);
-    }
-  }, []);
+  const commitTitle = useCallback(() => {
+    setIsEditingTitle(false);
+    const trimmed = title.trim() || 'Untitled Dataset';
+
+    onTitleChange?.(trimmed);
+  }, [title, onTitleChange]);
+
+  const handleTitleKeyDown = useCallback(
+    (e: React.KeyboardEvent) => {
+      if (e.key === KEYBOARD_KEYS.ENTER) {
+        commitTitle();
+      }
+    },
+    [commitTitle],
+  );
 
   const displayTitle = title.trim() || 'Untitled Dataset';
 
@@ -135,10 +146,10 @@ const CreateDataset = ({ onCreated, hideBackButton }: CreateDatasetProps) => {
             autoFocus
             value={title}
             onChange={(e) => setTitle(e.target.value)}
-            onBlur={() => setIsEditingTitle(false)}
+            onBlur={commitTitle}
             onKeyDown={handleTitleKeyDown}
             placeholder='Untitled Dataset'
-            className='f-18-600 text-GRAY_1000 h-auto flex-1 border-none bg-transparent px-2 py-1 shadow-none outline-none'
+            className='f-18-600 text-GRAY_1000 h-7 flex-1 border-none bg-transparent px-1 shadow-none outline-none'
           />
         ) : (
           <TooltipProvider delayDuration={200}>
@@ -147,7 +158,7 @@ const CreateDataset = ({ onCreated, hideBackButton }: CreateDatasetProps) => {
                 <button
                   type='button'
                   onClick={handleTitleClick}
-                  className='f-18-600 text-GRAY_1000 cursor-pointer truncate text-left'
+                  className='f-18-600 text-GRAY_1000 h-7 cursor-pointer truncate px-1 text-left'
                 >
                   {displayTitle}
                 </button>
