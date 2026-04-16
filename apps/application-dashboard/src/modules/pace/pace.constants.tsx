@@ -1,6 +1,6 @@
 import type { ConversationState } from '@zamp-platform/conversation-stream';
 import { ActivityIcon, AgentNavIcon, HomeIcon, LayoutGridIcon, SettingsIcon } from '@zamp-platform/ui';
-import { Database, Link2, Settings2, UserPen } from 'lucide-react';
+import { Database, KeyRound, Link2, Settings2, UserPen } from 'lucide-react';
 import {
   type BrowserViewerStateConfig,
   PaceNavbarItemId,
@@ -132,6 +132,12 @@ export const PACE_SETTINGS_TABS: PaceSettingsTabSchema[] = [
     name: 'Integrations',
     iconComponent: <Link2 width={16} height={16} className='-rotate-45' />,
     path: ROUTES_PATH.CHAT_SETTINGS_INTEGRATIONS,
+  },
+  {
+    id: PaceNavbarItemId.CREDENTIALS_VAULT,
+    name: 'Credentials vault',
+    iconComponent: <KeyRound width={16} height={16} />,
+    path: ROUTES_PATH.CHAT_SETTINGS_CREDENTIALS_VAULT,
   },
   {
     id: PaceNavbarItemId.PEOPLE,

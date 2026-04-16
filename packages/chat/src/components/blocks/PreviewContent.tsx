@@ -42,7 +42,7 @@ const PreviewContent = ({ category, previewUrl, codeNodes, isLoading, fileName }
   if (category === FILE_PREVIEW_CATEGORY.CODE && codeNodes) {
     return (
       <div className='relative size-full'>
-        <pre className='hljs size-full overflow-hidden p-2 font-mono text-[10px] leading-[1.4]'>
+        <pre className='hljs size-full overflow-hidden p-2 font-mono text-[8px] leading-[1.4] whitespace-pre-wrap'>
           <code>{codeNodes}</code>
         </pre>
       </div>
