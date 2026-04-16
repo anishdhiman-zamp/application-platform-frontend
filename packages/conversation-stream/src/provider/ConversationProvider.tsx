@@ -620,17 +620,22 @@ export const ConversationProvider: React.FC<ConversationProviderProps> = ({
     }
 
     if (conversationHistory?.messages?.length > 0) {
-      const historyMessages: ChatMessage[] = getHistoryFormattedMessages(conversationHistory);
-      const dbMessageIds = new Set(historyMessages.map((m) => m.id).filter(Boolean));
+      const allHistoryMessages: ChatMessage[] = getHistoryFormattedMessages(conversationHistory);
+      const historyMessages = allHistoryMessages.filter((msg) => msg.state !== MessageState.QUEUED);
+      const historyQueuedMessages = allHistoryMessages.filter((msg) => msg.state === MessageState.QUEUED);
+      const dbMessageIds = new Set(historyMessages.map((msg) => msg.id).filter(Boolean));
+      const dbQueuedMessageIds = new Set(historyQueuedMessages.map((msg) => msg.id).filter(Boolean));
 
-      // Remove queued messages that now appear in history (picked up by agent)
-      setQueuedMessages((prev) => prev.filter((m) => !m.id || !dbMessageIds.has(m.id)));
+      setQueuedMessages((prev) => {
+        const kept = prev.filter((msg) => !msg.id || (!dbMessageIds.has(msg.id) && !dbQueuedMessageIds.has(msg.id)));
+        return [...historyQueuedMessages, ...kept];
+      });
 
       setMessages((prev) => {
         if (prev.length > 0) {
-          const replayedMessages = prev.filter((m) => {
-            if (!m.id || dbMessageIds.has(m.id)) return false;
-            return m.sender_type === SenderType.USER;
+          const replayedMessages = prev.filter((msg) => {
+            if (!msg.id || dbMessageIds.has(msg.id)) return false;
+            return msg.sender_type === SenderType.USER;
           });
 
           if (replayedMessages.length > 0) {
