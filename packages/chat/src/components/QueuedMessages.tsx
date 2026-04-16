@@ -74,7 +74,7 @@ export const QueuedMessages = ({ messages, className }: QueuedMessagesProps) => 
                           key={msg.id}
                           className='hover:bg-GRAY_100 flex w-full items-center gap-1.5 rounded-[8px] px-2 py-1'
                         >
-                          <p className='text-GRAY_1000 f-14-450 line-clamp-1 min-w-0 flex-1'>
+                          <p className='text-GRAY_1000 f-14-450 line-clamp-2 min-w-0 flex-1'>
                             {text || formatPlural(attachmentCount, 'attachment')}
                           </p>
                           {text && attachmentCount > 0 && (
