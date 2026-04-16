@@ -102,6 +102,7 @@ export const ConversationProvider: React.FC<ConversationProviderProps> = ({
     },
     { skip: shouldSkipConversationFetch },
   );
+
   const isUninitializedRef = useRef(isUninitializedConversationHistory);
   isUninitializedRef.current = isUninitializedConversationHistory;
 
@@ -392,9 +393,6 @@ export const ConversationProvider: React.FC<ConversationProviderProps> = ({
     },
     [_conversationId, sendMessageV2Mutation, apiConfig?.sendMessage],
   );
-
-  const isUninitializedRef = useRef(isUninitializedConversationHistory);
-  isUninitializedRef.current = isUninitializedConversationHistory;
 
   const safeRefetchConversationHistory = useCallback(() => {
     if (isUninitializedRef.current) return;
