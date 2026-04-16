@@ -90,26 +90,17 @@ export const TaskProvider = ({ children, taskId, organizationId, resourceType, a
       browserSessionId,
     }),
     [
-
       messages,
-
       taskId,
-
       isStreaming,
-
       isLoadingHistory,
-
       isFetchingHistory,
-
       isErrorHistory,
-
       errorHistory,
       taskHistory,
-
       taskSummaryText,
       isBrowserStreamingAvailable,
       browserSessionId,
-      ,
     ],
   );
 

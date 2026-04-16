@@ -156,6 +156,63 @@ const ChatSidebarContent = ({
     return () => sub.unsubscribe();
   }, [sseEventBus, handleTaskHitlRespondComplete]);
 
+  const renderChatInput = () => {
+    if (isViewer) {
+      return (
+        <div className='border-GRAY_400 bg-GRAY_50 flex min-h-[88px] items-center justify-center rounded-xl border px-4'>
+          <span className='f-13-400 text-GRAY_600'>
+            This is a conversation between Zamp and {initiatedBy || 'the owner'}
+          </span>
+        </div>
+      );
+    }
+
+    if (hasInputsRequired) {
+      return (
+        <HITLQuestionsBlock
+          key={hitlQuestionsKey}
+          payload={{ questions: hitlQuestions }}
+          onSubmit={handleHitlRespondComplete}
+          sourceEntityId={conversationId ?? ''}
+          sourceEntityType={HITLEntityType.CONVERSATION}
+        />
+      );
+    }
+
+    return (
+      <ConnectedChatInput
+        resourceType={ResourceType.ORGANIZATION}
+        resourceId={organizationId}
+        autoFocus
+        scope={ScopeType.ORGANIZATION}
+        scopeId={organizationId}
+        username={username}
+        currentUserName={currentUserName}
+        placeholder="Do your life's best work with Zamp"
+        externalInputValue={inputValue}
+        setExternalInputValue={setInputValue}
+        fileDropHandlerRef={fileDropHandlerRef}
+        llmModel={selectedModel}
+        showModelSelector
+        modelSelectorSlot={modelSelectorSlot}
+        conversationId={conversationId ?? ''}
+        isDisabled={isStreaming}
+        addFileReferenceRef={addFileReferenceRef}
+        externalFileReferences={sharedFileReferences}
+        setExternalFileReferences={setSharedFileReferences}
+        externalFilePathsRef={sharedExternalFilePaths}
+        metadata={
+          activeAgentInfo?.id
+            ? {
+                agent_id: activeAgentInfo.id,
+                ...(activeAgentInfo.avatar && { avatar: activeAgentInfo.avatar }),
+              }
+            : undefined
+        }
+      />
+    );
+  };
+
   return (
     <div className='bg-BG_WHITE relative mx-auto flex h-full w-full flex-1 flex-col'>
       <div className={cn('transition-[filter] duration-200', isTaskPopoverOpen && 'pointer-events-none blur-sm')}>
@@ -186,52 +243,7 @@ const ChatSidebarContent = ({
 
       <ChatActionsProvider onFileOpen={handleFileOpen}>
         <div className='bg-BG_WHITE sticky bottom-0 z-10 mx-auto w-full max-w-[700px] px-3 pb-3'>
-          {isViewer ? (
-            <div className='border-GRAY_400 bg-GRAY_50 flex min-h-[88px] items-center justify-center rounded-xl border px-4'>
-              <span className='f-13-400 text-GRAY_600'>
-                This is a conversation between Zamp and {initiatedBy || 'the owner'}
-              </span>
-            </div>
-          ) : hasInputsRequired ? (
-            <HITLQuestionsBlock
-              key={hitlQuestionsKey}
-              payload={{ questions: hitlQuestions }}
-              onSubmit={handleHitlRespondComplete}
-              sourceEntityId={conversationId ?? ''}
-              sourceEntityType={HITLEntityType.CONVERSATION}
-            />
-          ) : (
-            <ConnectedChatInput
-              resourceType={ResourceType.ORGANIZATION}
-              resourceId={organizationId}
-              autoFocus
-              scope={ScopeType.ORGANIZATION}
-              scopeId={organizationId}
-              username={username}
-              currentUserName={currentUserName}
-              placeholder="Do your life's best work with Zamp"
-              externalInputValue={inputValue}
-              setExternalInputValue={setInputValue}
-              fileDropHandlerRef={fileDropHandlerRef}
-              llmModel={selectedModel}
-              showModelSelector
-              modelSelectorSlot={modelSelectorSlot}
-              conversationId={conversationId ?? ''}
-              isDisabled={isStreaming}
-              addFileReferenceRef={addFileReferenceRef}
-              externalFileReferences={sharedFileReferences}
-              setExternalFileReferences={setSharedFileReferences}
-              externalFilePathsRef={sharedExternalFilePaths}
-              metadata={
-                activeAgentInfo?.id
-                  ? {
-                      agent_id: activeAgentInfo.id,
-                      ...(activeAgentInfo.avatar && { avatar: activeAgentInfo.avatar }),
-                    }
-                  : undefined
-              }
-            />
-          )}
+          {renderChatInput()}
         </div>
       </ChatActionsProvider>
     </div>

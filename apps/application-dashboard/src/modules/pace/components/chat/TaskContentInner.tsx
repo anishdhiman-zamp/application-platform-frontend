@@ -111,16 +111,11 @@ const TaskContentChat = ({ taskId }: { taskId: string }) => {
 
   const {
     messages,
-
     isLoadingHistory,
-
     isErrorHistory,
-
     errorHistory,
     conversationData,
-
     inputsRequired,
-
     taskSummaryText,
     isBrowserStreamingAvailable,
     browserSessionId,

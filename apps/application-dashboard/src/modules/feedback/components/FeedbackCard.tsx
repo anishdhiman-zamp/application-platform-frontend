@@ -7,7 +7,7 @@ import { findTimeDifference } from '@/utils/common';
 interface FeedbackCardProps {
   feedback: FeedbackItemType;
   icon?: React.ReactNode;
-  initiatedBy: string | null;
+  initiatedBy: string;
   timePrefix?: string;
   onCheck?: () => void;
   allowDelete?: boolean;
