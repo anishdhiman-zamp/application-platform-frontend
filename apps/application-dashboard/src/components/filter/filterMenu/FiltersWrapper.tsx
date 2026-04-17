@@ -153,7 +153,7 @@ const FiltersContainer: FC<FiltersContainerProps> = ({
       {isPlayground && <FiltersMenuV2 onAddFilter={onAddEmptyFilter} currentPageFilters={currentPageFilters} />}
       <div
         id={`${persistId ?? ''}FILTERS_CONTAINER`}
-        className={`z-50 flex flex-wrap items-center gap-2 ${className}`}
+        className={`z-50 -ml-1 flex flex-wrap items-center gap-2 ${className}`}
         data-testid={`FILTERS_CONTAINER${testIdSuffix ? `-${testIdSuffix}` : ''}`}
       >
         {filtersList.map((filter, index) => (

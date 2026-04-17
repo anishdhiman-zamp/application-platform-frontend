@@ -27,8 +27,9 @@ import DynamicTabsBar from '@/modules/pace/components/dynamic-tabs/DynamicTabsBa
 import { getActiveTabIdFromUrl, isOnAnyTabBasePath } from '@/modules/pace/components/dynamic-tabs/tab-type-registry';
 import { useDynamicTabs } from '@/modules/pace/components/dynamic-tabs/useDynamicTabs';
 import NavbarIconLink from '@/modules/pace/components/layout/NavbarIconLink';
-import { PACE_NAVBAR_ITEMS, SIDEBAR_CONVERSATION_ID_PARAM } from '@/modules/pace/pace.constants';
+import { PACE_NAVBAR_ITEMS } from '@/modules/pace/pace.constants';
 import { usePaceContext } from '@/modules/pace/pace.context';
+import { preserveSidebarParam } from '@/modules/pace/pace.utils';
 import { dynamicTabsActions, selectActiveTabId } from '@/store/slices/dynamic-tabs.slice';
 
 const PaceNavbar = () => {
@@ -37,8 +38,6 @@ const PaceNavbar = () => {
   const dispatch = useAppDispatch();
   const activeTabId = useAppSelector(selectActiveTabId);
   const fParam = activeTabId;
-  const sParam = searchParams?.get(SIDEBAR_CONVERSATION_ID_PARAM) ?? null;
-
   const {
     chatSidebarState,
     prevChatSidebarState,
@@ -116,11 +115,8 @@ const PaceNavbar = () => {
     if (id === PaceNavbarItemId.HOME) {
       return path;
     }
-    if (sParam) {
-      return `${path}?s=${sParam}`;
-    }
 
-    return path;
+    return preserveSidebarParam(path);
   };
 
   const isChatIconDisabled = isOnChatHome && !isExpanded;

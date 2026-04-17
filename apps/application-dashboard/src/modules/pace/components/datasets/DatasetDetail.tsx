@@ -82,9 +82,10 @@ import { filtersContextActions, useFiltersContextStore, withFiltersContext } fro
 interface DatasetDetailProps {
   tableName: string;
   header?: React.ReactNode;
+  onBackToDatasets?: () => void;
 }
 
-const DatasetDetailInner = ({ tableName, header }: DatasetDetailProps) => {
+const DatasetDetailInner = ({ tableName, header, onBackToDatasets }: DatasetDetailProps) => {
   // --- Refs ---
   const tableRef = useRef<AgGridReact | null>(null);
   const totalRowsRef = useRef<number | undefined>(undefined);
@@ -101,6 +102,9 @@ const DatasetDetailInner = ({ tableName, header }: DatasetDetailProps) => {
   const cachedRowsRef = useRef<Record<string, unknown>[]>([]);
   // Set to true while we programmatically move columns in AG Grid to avoid feedback loops
   const isProgrammaticMoveRef = useRef(false);
+  // Set to true to skip the next previewColumns-triggered server refresh.
+  // Used by column rename's optimistic header update to avoid purging rows mid-request.
+  const skipNextPreviewRefreshRef = useRef(false);
 
   // --- Hooks ---
   const router = useRouter();
@@ -375,18 +379,56 @@ const DatasetDetailInner = ({ tableName, header }: DatasetDetailProps) => {
       const sanitized = sanitizeColumnName(newName);
 
       if (sanitized === colId) return;
+
+      const newHeaderName = snakeCaseToSentenceCase(sanitized);
+      const previousHeaderName = snakeCaseToSentenceCase(colId);
+
+      // Optimistic visual update: change only headerName in state, keeping `field`
+      // stable. AG Grid matches the column by field (= colId), so no destroy/recreate
+      // happens — the header text updates in place. Skip the next previewColumns
+      // refresh since the ALTER TABLE is still in flight and rows shouldn't be purged.
+      skipNextPreviewRefreshRef.current = true;
+      setColumns(
+        (prev) => prev?.map((col) => (col.field === colId ? { ...col, headerName: newHeaderName } : col)) ?? null,
+      );
+
+      // Preserve column position after loadSchema. applyColumnOrder looks up by
+      // column id; without this remap, the renamed column would be appended at the end.
+      const rawOrder = getFromLocalStorage(columnOrderKey);
+
+      if (rawOrder) {
+        try {
+          const order = JSON.parse(rawOrder) as string[];
+          const updatedOrder = order.map((id) => (id === colId ? sanitized : id));
+
+          setToLocalStorage(columnOrderKey, JSON.stringify(updatedOrder));
+        } catch {
+          // ignore parse errors — column may land at the end, but rename still succeeds
+        }
+      }
+
       try {
         await executeMutation({
           query: `ALTER TABLE "${escapeSqlIdentifier(tableName)}" RENAME COLUMN "${escapeSqlIdentifier(colId)}" TO "${escapeSqlIdentifier(sanitized)}"`,
         }).unwrap();
         toast.success('Column renamed');
+        // loadSchema rebuilds state with the new field; the effects will move the
+        // column into place and refresh rows.
         await loadSchema();
-        tableRef.current?.api?.refreshServerSide({ purge: true });
       } catch {
         toast.error('Failed to rename column');
+        // Revert optimistic header text
+        skipNextPreviewRefreshRef.current = true;
+        setColumns(
+          (prev) =>
+            prev?.map((col) => (col.field === colId ? { ...col, headerName: previousHeaderName } : col)) ?? null,
+        );
+        if (rawOrder) {
+          setToLocalStorage(columnOrderKey, rawOrder);
+        }
       }
     },
-    [tableName, executeMutation, loadSchema],
+    [tableName, executeMutation, loadSchema, columnOrderKey],
   );
 
   const handleColumnRequiredChange = useCallback(
@@ -817,21 +859,11 @@ const DatasetDetailInner = ({ tableName, header }: DatasetDetailProps) => {
 
   const serverSideDatasource: IServerSideDatasource = useMemo(() => ({ getRows }), [getRows]);
 
-  // Refresh grid row data whenever pending blueprint changes update (new columns, required changes).
-  // This ensures the augmented rows are re-fetched when previewColumns changes.
-  const prevPreviewColumnsRef = useRef<ColDef[] | null>(null);
-
-  useEffect(() => {
-    if (!gridReady) return;
-    if (previewColumns === prevPreviewColumnsRef.current) return;
-    prevPreviewColumnsRef.current = previewColumns;
-    // Purge and re-fetch rows so augmentRows applies to the new column set
-    tableRef.current?.api?.refreshServerSide({ purge: true });
-  }, [previewColumns, gridReady]);
-
   // Sync blueprintColumns order into AG Grid whenever it changes.
   // AG Grid maintains its own internal column order; passing a new columnDefs array doesn't
   // reorder columns — we must call moveColumns() explicitly.
+  // This effect MUST run before the refreshServerSide effect below so that a renamed
+  // column doesn't briefly appear at the end before being moved to its correct position.
   const prevBlueprintOrderRef = useRef<string>('');
 
   useEffect(() => {
@@ -854,6 +886,23 @@ const DatasetDetailInner = ({ tableName, header }: DatasetDetailProps) => {
     });
     isProgrammaticMoveRef.current = false;
   }, [blueprintColumns, gridReady]);
+
+  // Refresh grid row data whenever pending blueprint changes update (new columns, required changes).
+  // This ensures the augmented rows are re-fetched when previewColumns changes.
+  const prevPreviewColumnsRef = useRef<ColDef[] | null>(null);
+
+  useEffect(() => {
+    if (!gridReady) return;
+    if (previewColumns === prevPreviewColumnsRef.current) return;
+    prevPreviewColumnsRef.current = previewColumns;
+    if (skipNextPreviewRefreshRef.current) {
+      skipNextPreviewRefreshRef.current = false;
+
+      return;
+    }
+    // Purge and re-fetch rows so augmentRows applies to the new column set
+    tableRef.current?.api?.refreshServerSide({ purge: true });
+  }, [previewColumns, gridReady]);
 
   // When switching to Preview from Blueprint, always purge and re-fetch
   const prevTabRef = useRef<DatasetTabsTypes>(DatasetTabsTypes.PREVIEW);
@@ -1042,11 +1091,17 @@ const DatasetDetailInner = ({ tableName, header }: DatasetDetailProps) => {
           <p className='f-12-400 text-GRAY_600 max-w-[300px] text-center'>
             You don&apos;t have permission to view this dataset. Ask an admin to share it with you.
           </p>
-          <Link href={preserveSidebarParam(ROUTES_PATH.CHAT_SETTINGS_DATASETS)}>
-            <Button size='small' variant='outline' className='mt-2'>
+          {onBackToDatasets ? (
+            <Button size='small' variant='outline' className='mt-2' onClick={onBackToDatasets}>
               Back to datasets
             </Button>
-          </Link>
+          ) : (
+            <Link href={preserveSidebarParam(ROUTES_PATH.CHAT_SETTINGS_DATASETS)}>
+              <Button size='small' variant='outline' className='mt-2'>
+                Back to datasets
+              </Button>
+            </Link>
+          )}
         </div>
       </div>
     );

@@ -72,7 +72,7 @@ const DeleteConfirmDialog: FC<DeleteConfirmDialogProps> = ({ isOpen, columnName,
         <DialogClose className='absolute top-4 right-4 cursor-pointer text-gray-500 hover:text-gray-700'>
           <span className='text-xl leading-none'>&times;</span>
         </DialogClose>
-        <h2 className='f-16-600 text-GRAY_1000 mb-1'>Delete column &apos;{columnName}&apos;</h2>
+        <h2 className='f-16-600 text-GRAY_1000'>Delete column &apos;{columnName}&apos;</h2>
         <p className='f-13-400 text-GRAY_700 mt-4 mb-4'>
           Are you sure you want to delete this column? This action cannot be undone.
         </p>
