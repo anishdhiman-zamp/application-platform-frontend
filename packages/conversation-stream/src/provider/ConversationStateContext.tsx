@@ -1,6 +1,6 @@
 'use client';
 
-import type { ChatMessage, ConversationInputRequiredItem, ConversationRole } from '@zamp-platform/chat';
+import type { ChatMessage, ConversationInputRequiredItem } from '@zamp-platform/chat';
 import { createContext } from 'react';
 
 export interface ConversationState {
@@ -25,7 +25,6 @@ export interface ConversationState {
   browserSessionId?: string;
   /** Latest summary text per child task, received from the per-conversation SSE channel. */
   taskSummaries: Record<string, string>;
-  conversationRole: ConversationRole;
   initiatedBy: string | null;
 }
 

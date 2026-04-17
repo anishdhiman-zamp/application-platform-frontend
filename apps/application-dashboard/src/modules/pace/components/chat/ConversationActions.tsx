@@ -4,8 +4,11 @@ import { type FC, useCallback, useEffect, useState } from 'react';
 import { Button, DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from '@zamp-platform/ui';
 import { cn } from '@zamp-platform/ui/utils';
 import { MoreVertical, Pencil, Trash2 } from 'lucide-react';
+import { useResourceAccess } from '@/hooks/useResourceAccess';
 import DeleteConversationDialog from '@/modules/pace/components/chat/DeleteConversationDialog';
 import RenameConversationDialog from '@/modules/pace/components/chat/RenameConversationDialog';
+import { ResourceType, ShareResourceVersion } from '@/modules/shareResource/shareResource.types';
+import { PERMISSION_ROLES } from '@/utils/accessPermission/accessPermission.types';
 
 interface ConversationActionsProps {
   conversationId: string;
@@ -36,6 +39,15 @@ const ConversationActions: FC<ConversationActionsProps> = ({
   const [isRenameOpen, setIsRenameOpen] = useState(false);
   const [isDeleteOpen, setIsDeleteOpen] = useState(false);
 
+  const { checkUserPrivilege, isLoadingAudiencesData } = useResourceAccess({
+    resourceType: ResourceType.CONVERSATION,
+    resourceId: conversationId,
+    skipAudienceData: !isDropdownOpen,
+    version: ShareResourceVersion.V2,
+  });
+  const isAdmin = checkUserPrivilege(PERMISSION_ROLES.ADMIN);
+  const areActionsDisabled = isLoadingAudiencesData || !isAdmin;
+
   const isAnyOpen = isDropdownOpen || isRenameOpen || isDeleteOpen;
 
   useEffect(() => {
@@ -45,6 +57,10 @@ const ConversationActions: FC<ConversationActionsProps> = ({
   const handleRenameClick = useCallback(() => {
     setIsDropdownOpen(false);
     setIsRenameOpen(true);
+  }, []);
+
+  const handleDeleteClick = useCallback(() => {
+    setIsDeleteOpen(true);
   }, []);
 
   return (
@@ -63,14 +79,16 @@ const ConversationActions: FC<ConversationActionsProps> = ({
         </DropdownMenuTrigger>
         <DropdownMenuContent align={align} className='min-w-[140px]'>
           <DropdownMenuItem
-            className='hover:bg-GRAY_100 flex items-center gap-2 rounded-md'
+            className='hover:bg-GRAY_100 flex items-center gap-2 rounded-md data-[disabled]:cursor-not-allowed data-[disabled]:opacity-50'
             onClick={handleRenameClick}
+            disabled={areActionsDisabled}
           >
             <Pencil size={14} /> Rename
           </DropdownMenuItem>
           <DropdownMenuItem
-            className='hover:bg-GRAY_100 flex items-center gap-2 rounded-md text-red-600 focus:text-red-600'
-            onClick={() => setIsDeleteOpen(true)}
+            className='hover:bg-GRAY_100 flex items-center gap-2 rounded-md text-red-600 focus:text-red-600 data-[disabled]:cursor-not-allowed data-[disabled]:opacity-50'
+            onClick={handleDeleteClick}
+            disabled={areActionsDisabled}
           >
             <Trash2 size={14} /> Delete
           </DropdownMenuItem>

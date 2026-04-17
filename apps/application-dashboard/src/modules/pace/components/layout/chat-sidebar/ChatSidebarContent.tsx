@@ -8,6 +8,7 @@ import { EVENT_TYPE } from '@zamp-platform/utils/event-bus';
 import { useDynamicTabs } from 'modules/pace/components/dynamic-tabs/useDynamicTabs';
 import ChatConversationContent from 'modules/pace/components/layout/chat-sidebar/ChatConversationContent';
 import { useEventBus } from '@/app/_providers/sse-provider';
+import { useResourceAccess } from '@/hooks/useResourceAccess';
 import ChatTopbar from '@/modules/pace/components/chat/ChatTopbar';
 import ModelSelector from '@/modules/pace/components/chat/ModelSelector';
 import { HITL_RESPONDED_EVENT } from '@/modules/pace/components/tasks/constants/tasks.constants';
@@ -16,6 +17,11 @@ import { useHitlQuestions } from '@/modules/pace/hooks/useHitlQuestions';
 import { BrowserViewerDisplayState } from '@/modules/pace/pace.constants';
 import { usePaceContext } from '@/modules/pace/pace.context';
 import { CHAT_SIDEBAR_STATE, TAB_TYPE } from '@/modules/pace/pace.types';
+import {
+  CONVERSATION_ACCESS_PRIVILEGES,
+  ResourceType as ShareResourceType,
+  ShareResourceVersion,
+} from '@/modules/shareResource/shareResource.types';
 import { PERMISSION_ROLES } from '@/utils/accessPermission/accessPermission.types';
 
 export interface ChatSidebarContentProps {
@@ -58,7 +64,8 @@ const ChatSidebarContent = ({
   const { inputValue, setInputValue } = useChatDraftInput({
     conversationId,
   });
-  const { inputsRequired, isStreaming, conversationRole, initiatedBy } = useConversationState();
+  const { inputsRequired, isStreaming, initiatedBy, isLoadingConversationHistory, isFetchingConversationHistory } =
+    useConversationState();
   const { refetchConversationHistory } = useConversationActions();
   const { sseEventBus } = useEventBus();
 
@@ -70,7 +77,16 @@ const ChatSidebarContent = ({
   const { hitlQuestions, hitlQuestionsKey } = useHitlQuestions(inputsRequired);
   const hasInputsRequired = (inputsRequired?.length ?? 0) > 0;
 
-  const isViewer = conversationRole === PERMISSION_ROLES.VIEWER;
+  const { checkUserPrivilege } = useResourceAccess({
+    resourceType: ShareResourceType.CONVERSATION,
+    resourceId: conversationId ?? '',
+    skipAudienceData: false,
+    version: ShareResourceVersion.V2,
+  });
+  const isViewer =
+    Boolean(conversationId) &&
+    checkUserPrivilege(CONVERSATION_ACCESS_PRIVILEGES.VIEWER) &&
+    !checkUserPrivilege(PERMISSION_ROLES.ADMIN);
   const modelSelectorSlot = useMemo(
     () => <ModelSelector value={selectedModel} onChange={setSelectedModel} />,
     [selectedModel],
@@ -156,12 +172,15 @@ const ChatSidebarContent = ({
     return () => sub.unsubscribe();
   }, [sseEventBus, handleTaskHitlRespondComplete]);
 
+  const isConversationHistoryReady =
+    Boolean(conversationId) && !isLoadingConversationHistory && !isFetchingConversationHistory;
+
   const renderChatInput = () => {
     if (isViewer) {
       return (
         <div className='border-GRAY_400 bg-GRAY_50 flex min-h-[88px] items-center justify-center rounded-xl border px-4'>
           <span className='f-13-400 text-GRAY_600'>
-            This is a conversation between Zamp and {initiatedBy || 'the owner'}
+            {isConversationHistoryReady && initiatedBy ? `This is a conversation between Zamp and ${initiatedBy}` : ''}
           </span>
         </div>
       );
@@ -220,7 +239,6 @@ const ChatSidebarContent = ({
           title={chatTitle || 'Start a new chat'}
           conversationId={conversationId}
           organizationId={organizationId}
-          conversationRole={conversationRole}
           onStartNewChat={startNewChat}
           onTitleChange={setChatTitle}
           onSelectConversation={handleSelectConversation}

@@ -33,7 +33,6 @@ export const STUB_CONVERSATION_STATE: ConversationState = {
   inputsRequired: undefined,
   isBrowserStreamingAvailable: false,
   taskSummaries: {},
-  conversationRole: null,
   initiatedBy: null,
 };
 

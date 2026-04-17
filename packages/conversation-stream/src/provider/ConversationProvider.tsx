@@ -370,7 +370,11 @@ export const ConversationProvider: React.FC<ConversationProviderProps> = ({
 
   const safeRefetchConversationHistory = useCallback(() => {
     if (isUninitializedRef.current) return;
-    refetchConversationHistory();
+    try {
+      refetchConversationHistory();
+    } catch (error) {
+      captureException(error instanceof Error ? error : new Error(String(error)));
+    }
   }, [refetchConversationHistory]);
 
   const actionsValue: ConversationActions = useMemo(
@@ -392,7 +396,6 @@ export const ConversationProvider: React.FC<ConversationProviderProps> = ({
     ],
   );
 
-  const conversationRole = conversationHistory?.conversation?.role ?? null;
   const initiatedBy = conversationHistory?.conversation?.initiated_by ?? null;
 
   const stateValue: ConversationState = useMemo(
@@ -417,7 +420,6 @@ export const ConversationProvider: React.FC<ConversationProviderProps> = ({
       isBrowserStreamingAvailable,
       browserSessionId,
       taskSummaries,
-      conversationRole,
       initiatedBy,
     }),
     [
@@ -439,7 +441,6 @@ export const ConversationProvider: React.FC<ConversationProviderProps> = ({
       isBrowserStreamingAvailable,
       browserSessionId,
       taskSummaries,
-      conversationRole,
       initiatedBy,
     ],
   );

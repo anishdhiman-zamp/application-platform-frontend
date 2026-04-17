@@ -1,15 +1,16 @@
 'use client';
 
 import { type FC, useCallback, useState } from 'react';
-import type { ConversationRole } from '@zamp-platform/chat';
 import { Button, Popover, PopoverContent, PopoverTrigger } from '@zamp-platform/ui';
 import { cn } from '@zamp-platform/ui/utils';
 import { AnimatePresence, motion } from 'framer-motion';
 import { ChevronDown, MoveDiagonal, Plus } from 'lucide-react';
+import { useResourceAccess } from '@/hooks/useResourceAccess';
 import ChatHistory from '@/modules/pace/components/chat/ChatHistory';
 import ConversationActions from '@/modules/pace/components/chat/ConversationActions';
 import ShareConversationPopup from '@/modules/pace/components/chat/ShareConversationPopup';
 import { DEFAULT_CHAT_TITLE } from '@/modules/pace/pace.constants';
+import { ResourceType, ShareResourceVersion } from '@/modules/shareResource/shareResource.types';
 import { PERMISSION_ROLES } from '@/utils/accessPermission/accessPermission.types';
 
 interface ChatTopbarProps {
@@ -18,7 +19,6 @@ interface ChatTopbarProps {
   title?: string;
   conversationId?: string | null;
   organizationId?: string;
-  conversationRole?: ConversationRole;
   onStartNewChat?: () => void;
   onExpand?: () => void;
   onTitleChange?: (newTitle: string) => void;
@@ -32,7 +32,6 @@ const ChatTopbar: FC<ChatTopbarProps> = ({
   title,
   conversationId,
   organizationId,
-  conversationRole,
   onStartNewChat,
   onExpand,
   onTitleChange,
@@ -40,9 +39,14 @@ const ChatTopbar: FC<ChatTopbarProps> = ({
   onSelectConversation,
 }) => {
   const displayTitle = title || DEFAULT_CHAT_TITLE;
-  const isAdmin = conversationRole === PERMISSION_ROLES.ADMIN;
-  const isViewer = conversationRole === PERMISSION_ROLES.VIEWER;
-  const canEdit = Boolean(conversationId && organizationId) && !isViewer;
+  const { checkUserPrivilege } = useResourceAccess({
+    resourceType: ResourceType.CONVERSATION,
+    resourceId: conversationId ?? '',
+    skipAudienceData: false,
+    version: ShareResourceVersion.V2,
+  });
+  const isAdmin = checkUserPrivilege(PERMISSION_ROLES.ADMIN);
+  const canEdit = Boolean(conversationId && organizationId);
 
   const [isHistoryOpen, setIsHistoryOpen] = useState(false);
 
