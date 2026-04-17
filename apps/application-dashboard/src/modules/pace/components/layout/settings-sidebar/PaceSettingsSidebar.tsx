@@ -8,7 +8,7 @@ import OrgSwitcher from '@/components/layouts/dashboard-layout/components/OrgSwi
 import { FEATURE_FLAGS } from '@/constants/featureFlags';
 import { useFeatureFlag } from '@/hooks/useFeatureFlag';
 import { PACE_SETTINGS_TABS, SIDEBAR_CONVERSATION_ID_PARAM } from '@/modules/pace/pace.constants';
-import { LOCAL_STORAGE_KEYS, setToLocalStorage } from '@/utils/localstorage';
+import { SESSION_STORAGE_KEYS, setToSessionStorage } from '@/utils/sessionstorage';
 import SidebarTab from 'components/layouts/dashboard-layout/components/SidebarTab';
 
 const PaceSettingsSidebar = () => {
@@ -45,7 +45,7 @@ const PaceSettingsSidebar = () => {
     const matchedTab = tabs.find((tab) => pathname?.includes(tab.path));
 
     if (matchedTab) {
-      setToLocalStorage(LOCAL_STORAGE_KEYS.PACE_SETTINGS_LAST_TAB, matchedTab.path);
+      setToSessionStorage(SESSION_STORAGE_KEYS.PACE_SETTINGS_LAST_TAB, matchedTab.path);
     }
   }, [pathname, tabs]);
 
