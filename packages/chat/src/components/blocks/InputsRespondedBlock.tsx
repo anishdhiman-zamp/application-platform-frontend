@@ -1,14 +1,17 @@
 'use client';
 
+import { FileIcon } from '@zamp-platform/ui';
 import { cn } from '@zamp-platform/ui/utils';
 import { CheckCircle2, ChevronDown, ChevronUp } from 'lucide-react';
 import React, { useId, useMemo, useState } from 'react';
 
+import { useChatActions } from '../../context/ChatActionsContext';
 import {
   HITL_RESPONSE_TYPE,
   type InputsRespondedAnswer,
   type InputsRespondedItemPayload,
 } from '../../types/block.types';
+import { normalizeFilesystemPath } from '../../utils/filesystemUpload';
 
 const SKIPPED_DISPLAY = 'Prefer to skip';
 
@@ -150,6 +153,7 @@ export const InputsRespondedBlock: React.FC<InputsRespondedBlockProps> = ({
   showConnectorToNext = false,
 }) => {
   const { responses } = payload;
+  const { onFileOpen } = useChatActions();
   const [isOpen, setIsOpen] = useState(true);
   const panelId = useId();
   const triggerId = `${panelId}-trigger`;
@@ -203,6 +207,29 @@ export const InputsRespondedBlock: React.FC<InputsRespondedBlockProps> = ({
                       {formatAnswerLine(item)}
                     </p>
                   </div>
+                  {item.file_references && item.file_references.length > 0 && (
+                    <div className='flex flex-wrap gap-1.5'>
+                      {item.file_references.map((ref) => (
+                        <div
+                          key={ref.path}
+                          role='button'
+                          tabIndex={0}
+                          onClick={() => {
+                            if (!onFileOpen || !ref.path) return;
+                            onFileOpen(normalizeFilesystemPath(ref.path), ref.name);
+                          }}
+                          className='border-GRAY_200 bg-GRAY_50 hover:bg-GRAY_100 flex max-w-[180px] cursor-pointer items-center gap-1.5 rounded-full border px-2 py-1 transition-colors'
+                        >
+                          <FileIcon
+                            extension={ref.name || 'txt'}
+                            className='size-4 shrink-0 rounded'
+                            iconClassName='size-3'
+                          />
+                          <span className='f-12-450 text-GRAY_900 min-w-0 truncate'>{ref.name}</span>
+                        </div>
+                      ))}
+                    </div>
+                  )}
                 </div>
               </div>
             ))}

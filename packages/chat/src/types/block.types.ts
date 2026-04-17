@@ -286,6 +286,7 @@ export interface InputsRespondedItemPayload {
   entity_type: string;
   sender_name?: string;
   input_required: InputRequiredPayload;
+  file_references?: { name: string; path: string }[];
 }
 
 export interface InputsRespondedBlockType {

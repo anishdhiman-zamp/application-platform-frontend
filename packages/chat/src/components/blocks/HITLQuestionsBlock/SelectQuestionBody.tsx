@@ -2,6 +2,7 @@
 
 import React from 'react';
 
+import type { ChatComposerFileRef } from './ChatComposerInput';
 import { CUSTOM_OPTION_ID } from './constants';
 import { CustomInputRow } from './CustomInputRow';
 import { OptionRow } from './OptionRow';
@@ -17,10 +18,11 @@ interface SelectQuestionBodyProps {
   focusedOptionIndex: number;
   selectedOptionIds: string[];
   customInputValue: string;
-  customInputRef: React.RefObject<HTMLTextAreaElement | null>;
   onOptionClick: (optionId: string, optIndex: number) => void;
   onCustomInputClick: () => void;
   onCustomInputChange: (value: string) => void;
+  onFileReferencesChange?: (refs: ChatComposerFileRef[]) => void;
+  username?: string;
 }
 
 export const SelectQuestionBody = ({
@@ -29,10 +31,11 @@ export const SelectQuestionBody = ({
   focusedOptionIndex,
   selectedOptionIds,
   customInputValue,
-  customInputRef,
   onOptionClick,
   onCustomInputClick,
   onCustomInputChange,
+  onFileReferencesChange,
+  username,
 }: SelectQuestionBodyProps) => {
   const isMultiSelect = isMultipleChoiceQuestion(question);
   const options = question.options ?? [];
@@ -57,9 +60,10 @@ export const SelectQuestionBody = ({
         isSelected={selectedOptionIds.includes(CUSTOM_OPTION_ID)}
         isMultiSelect={isMultiSelect ?? false}
         value={customInputValue}
-        inputRef={isFocused ? customInputRef : undefined}
         onClick={onCustomInputClick}
         onChange={onCustomInputChange}
+        onFileReferencesChange={onFileReferencesChange}
+        username={username}
       />
     </div>
   );

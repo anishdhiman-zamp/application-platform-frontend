@@ -1,18 +1,20 @@
 'use client';
 
-import { Textarea } from '@zamp-platform/ui';
 import { cn } from '@zamp-platform/ui/utils';
 import { Check, PenLine } from 'lucide-react';
-import React from 'react';
+import React, { useEffect, useRef } from 'react';
+
+import { type ChatComposerFileRef, ChatComposerInput, type ChatComposerInputHandle } from './ChatComposerInput';
 
 export interface CustomInputRowProps {
   isFocused: boolean;
   isSelected: boolean;
   isMultiSelect: boolean;
   value: string;
-  inputRef?: React.RefObject<HTMLTextAreaElement | null>;
   onClick: () => void;
   onChange: (value: string) => void;
+  onFileReferencesChange?: (refs: ChatComposerFileRef[]) => void;
+  username?: string;
 }
 
 export const CustomInputRow: React.FC<CustomInputRowProps> = ({
@@ -20,10 +22,19 @@ export const CustomInputRow: React.FC<CustomInputRowProps> = ({
   isSelected,
   isMultiSelect,
   value,
-  inputRef,
   onClick,
   onChange,
+  onFileReferencesChange,
+  username,
 }) => {
+  const composerRef = useRef<ChatComposerInputHandle>(null);
+
+  useEffect(() => {
+    if (isFocused) {
+      composerRef.current?.focus();
+    }
+  }, [isFocused]);
+
   return (
     <div
       data-hitl-focused={isFocused || undefined}
@@ -49,24 +60,18 @@ export const CustomInputRow: React.FC<CustomInputRowProps> = ({
             )}
           </div>
 
-          <Textarea
-            ref={(element) => {
-              if (inputRef) {
-                inputRef.current = element;
-              }
-            }}
-            value={value}
-            rows={3}
-            onChange={(e) => onChange(e.target.value)}
-            readOnly={!isFocused}
-            className={cn(
-              'text-GRAY_1000 placeholder:text-GRAY_400 min-h-[60px] flex-1 resize-none rounded-xl border px-3 py-1.5 text-xs font-[450] shadow-none',
-              isFocused
-                ? 'border-GRAY_500 ring-GRAY_200 bg-BG_WHITE ring-[3px] ring-offset-0 focus-visible:outline-hidden'
-                : 'border-GRAY_200 bg-BG_WHITE',
-            )}
-            placeholder='Type something else...'
-          />
+          <div className='flex-1 cursor-text' onClick={(e) => e.stopPropagation()}>
+            <ChatComposerInput
+              ref={composerRef}
+              value={value}
+              onChange={onChange}
+              onFileReferencesChange={onFileReferencesChange ?? (() => {})}
+              placeholder='Type something else...'
+              className='bg-BG_WHITE rounded-xl'
+              username={username}
+              showFilePreview={false}
+            />
+          </div>
         </div>
       </div>
     </div>

@@ -566,6 +566,7 @@ export interface HITLResponseItem {
   entity_id: string;
   response: HITLResponse;
   input_id?: string;
+  file_references?: { path: string; name: string }[];
 }
 
 export interface HITLRespondPayloadType {

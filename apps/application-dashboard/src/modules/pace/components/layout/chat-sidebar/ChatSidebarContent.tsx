@@ -194,6 +194,7 @@ const ChatSidebarContent = ({
           onSubmit={handleHitlRespondComplete}
           sourceEntityId={conversationId ?? ''}
           sourceEntityType={HITLEntityType.CONVERSATION}
+          username={username}
         />
       );
     }
