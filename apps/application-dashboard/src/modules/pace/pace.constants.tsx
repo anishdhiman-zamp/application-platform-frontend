@@ -25,6 +25,7 @@ export const STUB_CONVERSATION_STATE: ConversationState = {
   isCreatingConversationV2: false,
   isSendingMessage: false,
   isErrorConversationHistory: false,
+  errorConversationHistory: null,
   isUninitializedConversationHistory: true,
   isAnalysing: false,
   sendMessageError: null,
@@ -33,6 +34,7 @@ export const STUB_CONVERSATION_STATE: ConversationState = {
   inputsRequired: undefined,
   isBrowserStreamingAvailable: false,
   taskSummaries: {},
+  initiatedBy: null,
 };
 
 export enum BrowserViewerDisplayState {

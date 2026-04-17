@@ -15,6 +15,7 @@ import { EVENT_TYPE } from '@zamp-platform/utils/event-bus';
 import { useDynamicTabs } from 'modules/pace/components/dynamic-tabs/useDynamicTabs';
 import ChatConversationContent from 'modules/pace/components/layout/chat-sidebar/ChatConversationContent';
 import { useEventBus } from '@/app/_providers/sse-provider';
+import { useResourceAccess } from '@/hooks/useResourceAccess';
 import ChatTopbar from '@/modules/pace/components/chat/ChatTopbar';
 import ModelSelector from '@/modules/pace/components/chat/ModelSelector';
 import { HITL_RESPONDED_EVENT } from '@/modules/pace/components/tasks/constants/tasks.constants';
@@ -23,6 +24,12 @@ import { useHitlQuestions } from '@/modules/pace/hooks/useHitlQuestions';
 import { BrowserViewerDisplayState } from '@/modules/pace/pace.constants';
 import { usePaceContext } from '@/modules/pace/pace.context';
 import { CHAT_SIDEBAR_STATE, TAB_TYPE } from '@/modules/pace/pace.types';
+import {
+  CONVERSATION_ACCESS_PRIVILEGES,
+  ResourceType as ShareResourceType,
+  ShareResourceVersion,
+} from '@/modules/shareResource/shareResource.types';
+import { PERMISSION_ROLES } from '@/utils/accessPermission/accessPermission.types';
 
 export interface ChatSidebarContentProps {
   conversationId: string | null;
@@ -64,7 +71,8 @@ const ChatSidebarContent = ({
   const { inputValue, setInputValue } = useChatDraftInput({
     conversationId,
   });
-  const { inputsRequired, queuedMessages } = useConversationState();
+  const { inputsRequired, queuedMessages, initiatedBy, isLoadingConversationHistory, isFetchingConversationHistory } =
+    useConversationState();
   const { refetchConversationHistory } = useConversationActions();
   const { sseEventBus } = useEventBus();
 
@@ -76,6 +84,16 @@ const ChatSidebarContent = ({
   const { hitlQuestions, hitlQuestionsKey } = useHitlQuestions(inputsRequired);
   const hasInputsRequired = (inputsRequired?.length ?? 0) > 0;
 
+  const { checkUserPrivilege } = useResourceAccess({
+    resourceType: ShareResourceType.CONVERSATION,
+    resourceId: conversationId ?? '',
+    skipAudienceData: false,
+    version: ShareResourceVersion.V2,
+  });
+  const isViewer =
+    Boolean(conversationId) &&
+    checkUserPrivilege(CONVERSATION_ACCESS_PRIVILEGES.VIEWER) &&
+    !checkUserPrivilege(PERMISSION_ROLES.ADMIN);
   const modelSelectorSlot = useMemo(
     () => <ModelSelector value={selectedModel} onChange={setSelectedModel} />,
     [selectedModel],
@@ -161,6 +179,70 @@ const ChatSidebarContent = ({
     return () => sub.unsubscribe();
   }, [sseEventBus, handleTaskHitlRespondComplete]);
 
+  const isConversationHistoryReady =
+    Boolean(conversationId) && !isLoadingConversationHistory && !isFetchingConversationHistory;
+
+  const renderChatInput = () => {
+    if (isViewer) {
+      return (
+        <div className='border-GRAY_400 bg-GRAY_50 flex min-h-[88px] items-center justify-center rounded-xl border px-4'>
+          <span className='f-13-400 text-GRAY_600'>
+            {isConversationHistoryReady && initiatedBy ? `This is a conversation between Zamp and ${initiatedBy}` : ''}
+          </span>
+        </div>
+      );
+    }
+
+    if (hasInputsRequired) {
+      return (
+        <HITLQuestionsBlock
+          key={hitlQuestionsKey}
+          payload={{ questions: hitlQuestions }}
+          onSubmit={handleHitlRespondComplete}
+          sourceEntityId={conversationId ?? ''}
+          sourceEntityType={HITLEntityType.CONVERSATION}
+          username={username}
+        />
+      );
+    }
+
+    return (
+      <>
+        <QueuedMessages messages={queuedMessages} />
+        <ConnectedChatInput
+          resourceType={ResourceType.ORGANIZATION}
+          resourceId={organizationId}
+          autoFocus
+          scope={ScopeType.ORGANIZATION}
+          scopeId={organizationId}
+          username={username}
+          currentUserName={currentUserName}
+          placeholder="Do your life's best work with Zamp"
+          externalInputValue={inputValue}
+          setExternalInputValue={setInputValue}
+          fileDropHandlerRef={fileDropHandlerRef}
+          llmModel={selectedModel}
+          showModelSelector
+          modelSelectorSlot={modelSelectorSlot}
+          conversationId={conversationId ?? ''}
+          addFileReferenceRef={addFileReferenceRef}
+          externalFileReferences={sharedFileReferences}
+          setExternalFileReferences={setSharedFileReferences}
+          externalFilePathsRef={sharedExternalFilePaths}
+          metadata={
+            activeAgentInfo?.id
+              ? {
+                  agent_id: activeAgentInfo.id,
+                  ...(activeAgentInfo.avatar && { avatar: activeAgentInfo.avatar }),
+                }
+              : undefined
+          }
+          className={queuedMessages.length > 0 ? '-mt-3' : undefined}
+        />
+      </>
+    );
+  };
+
   return (
     <div className='bg-BG_WHITE relative mx-auto flex h-full w-full flex-1 flex-col'>
       <div className={cn('transition-[filter] duration-200', isTaskPopoverOpen && 'pointer-events-none blur-sm')}>
@@ -190,50 +272,7 @@ const ChatSidebarContent = ({
 
       <ChatActionsProvider onFileOpen={handleFileOpen}>
         <div className='bg-BG_WHITE sticky bottom-0 z-10 mx-auto w-full max-w-[700px] px-3 pb-3'>
-          {hasInputsRequired ? (
-            <HITLQuestionsBlock
-              key={hitlQuestionsKey}
-              payload={{ questions: hitlQuestions }}
-              onSubmit={handleHitlRespondComplete}
-              sourceEntityId={conversationId ?? ''}
-              sourceEntityType={HITLEntityType.CONVERSATION}
-              username={username}
-            />
-          ) : (
-            <>
-              <QueuedMessages messages={queuedMessages} />
-              <ConnectedChatInput
-                resourceType={ResourceType.ORGANIZATION}
-                resourceId={organizationId}
-                autoFocus
-                scope={ScopeType.ORGANIZATION}
-                scopeId={organizationId}
-                username={username}
-                currentUserName={currentUserName}
-                placeholder="Do your life's best work with Zamp"
-                externalInputValue={inputValue}
-                setExternalInputValue={setInputValue}
-                fileDropHandlerRef={fileDropHandlerRef}
-                llmModel={selectedModel}
-                showModelSelector
-                modelSelectorSlot={modelSelectorSlot}
-                conversationId={conversationId ?? ''}
-                addFileReferenceRef={addFileReferenceRef}
-                externalFileReferences={sharedFileReferences}
-                setExternalFileReferences={setSharedFileReferences}
-                externalFilePathsRef={sharedExternalFilePaths}
-                metadata={
-                  activeAgentInfo?.id
-                    ? {
-                        agent_id: activeAgentInfo.id,
-                        ...(activeAgentInfo.avatar && { avatar: activeAgentInfo.avatar }),
-                      }
-                    : undefined
-                }
-                className={queuedMessages.length > 0 ? '-mt-3' : undefined}
-              />
-            </>
-          )}
+          {renderChatInput()}
         </div>
       </ChatActionsProvider>
     </div>

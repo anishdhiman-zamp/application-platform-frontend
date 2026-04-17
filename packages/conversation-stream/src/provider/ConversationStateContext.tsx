@@ -15,6 +15,7 @@ export interface ConversationState {
   isCreatingConversationV2: boolean;
   isSendingMessage: boolean;
   isErrorConversationHistory: boolean;
+  errorConversationHistory: unknown;
   isUninitializedConversationHistory: boolean;
   isAnalysing: boolean;
   sendMessageError: unknown;
@@ -25,6 +26,7 @@ export interface ConversationState {
   browserSessionId?: string;
   /** Latest summary text per child task, received from the per-conversation SSE channel. */
   taskSummaries: Record<string, string>;
+  initiatedBy: string | null;
 }
 
 export const ConversationStateContext = createContext<ConversationState | null>(null);

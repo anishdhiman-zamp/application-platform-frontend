@@ -5,9 +5,13 @@ import { Button, Popover, PopoverContent, PopoverTrigger } from '@zamp-platform/
 import { cn } from '@zamp-platform/ui/utils';
 import { AnimatePresence, motion } from 'framer-motion';
 import { ChevronDown, MoveDiagonal, Plus } from 'lucide-react';
+import { useResourceAccess } from '@/hooks/useResourceAccess';
 import ChatHistory from '@/modules/pace/components/chat/ChatHistory';
 import ConversationActions from '@/modules/pace/components/chat/ConversationActions';
+import ShareConversationPopup from '@/modules/pace/components/chat/ShareConversationPopup';
 import { DEFAULT_CHAT_TITLE } from '@/modules/pace/pace.constants';
+import { ResourceType, ShareResourceVersion } from '@/modules/shareResource/shareResource.types';
+import { PERMISSION_ROLES } from '@/utils/accessPermission/accessPermission.types';
 
 interface ChatTopbarProps {
   className?: string;
@@ -35,6 +39,13 @@ const ChatTopbar: FC<ChatTopbarProps> = ({
   onSelectConversation,
 }) => {
   const displayTitle = title || DEFAULT_CHAT_TITLE;
+  const { checkUserPrivilege } = useResourceAccess({
+    resourceType: ResourceType.CONVERSATION,
+    resourceId: conversationId ?? '',
+    skipAudienceData: false,
+    version: ShareResourceVersion.V2,
+  });
+  const isAdmin = checkUserPrivilege(PERMISSION_ROLES.ADMIN);
   const canEdit = Boolean(conversationId && organizationId);
 
   const [isHistoryOpen, setIsHistoryOpen] = useState(false);
@@ -113,6 +124,7 @@ const ChatTopbar: FC<ChatTopbarProps> = ({
         </Popover>
       </div>
       <div className='flex items-center gap-1.5'>
+        {isAdmin && conversationId && <ShareConversationPopup conversationId={conversationId} />}
         {onStartNewChat && conversationId && (
           <Button
             variant='ghost'

@@ -57,6 +57,7 @@ export const TaskProvider = ({ children, taskId, organizationId, resourceType, a
     isFetching: isFetchingHistory,
     isUninitialized: isUninitializedHistory,
     isError: isErrorHistory,
+    error: errorHistory,
     refetch: refetchHistory,
   } = useGetConversationByIdQuery(
     {
@@ -81,6 +82,7 @@ export const TaskProvider = ({ children, taskId, organizationId, resourceType, a
       isLoadingHistory,
       isFetchingHistory,
       isErrorHistory,
+      errorHistory,
       conversationData: taskHistory?.conversation,
       inputsRequired: taskHistory?.inputs_required,
       taskSummaryText,
@@ -94,6 +96,7 @@ export const TaskProvider = ({ children, taskId, organizationId, resourceType, a
       isLoadingHistory,
       isFetchingHistory,
       isErrorHistory,
+      errorHistory,
       taskHistory,
       taskSummaryText,
       isBrowserStreamingAvailable,
