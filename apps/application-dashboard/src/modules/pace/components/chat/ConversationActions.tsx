@@ -39,14 +39,14 @@ const ConversationActions: FC<ConversationActionsProps> = ({
   const [isRenameOpen, setIsRenameOpen] = useState(false);
   const [isDeleteOpen, setIsDeleteOpen] = useState(false);
 
-  const { checkUserPrivilege, isLoadingAudiencesData } = useResourceAccess({
+  const { checkUserPrivilege, isLoadingAudiencesData, isUninitialized } = useResourceAccess({
     resourceType: ResourceType.CONVERSATION,
     resourceId: conversationId,
     skipAudienceData: !isDropdownOpen,
     version: ShareResourceVersion.V2,
   });
   const isAdmin = checkUserPrivilege(PERMISSION_ROLES.ADMIN);
-  const areActionsDisabled = isLoadingAudiencesData || !isAdmin;
+  const areActionsDisabled = isLoadingAudiencesData || isUninitialized || !isAdmin;
 
   const isAnyOpen = isDropdownOpen || isRenameOpen || isDeleteOpen;
 
@@ -55,13 +55,15 @@ const ConversationActions: FC<ConversationActionsProps> = ({
   }, [isAnyOpen, onOpenChange]);
 
   const handleRenameClick = useCallback(() => {
+    if (areActionsDisabled) return;
     setIsDropdownOpen(false);
     setIsRenameOpen(true);
-  }, []);
+  }, [areActionsDisabled]);
 
   const handleDeleteClick = useCallback(() => {
+    if (areActionsDisabled) return;
     setIsDeleteOpen(true);
-  }, []);
+  }, [areActionsDisabled]);
 
   return (
     <>
