@@ -9,6 +9,13 @@ import { useEffect, useRef, useState } from 'react';
 import { ChatMessage } from '../types/chat.types';
 import { getAttachmentCount, getMessagePreview } from '../utils/message.utils';
 
+const COLLAPSE_ANIMATION = {
+  initial: { height: 0, opacity: 0 },
+  animate: { height: 'auto', opacity: 1 },
+  exit: { height: 0, opacity: 0 },
+  transition: { duration: 0.2, ease: 'easeOut' },
+} as const;
+
 interface QueuedMessagesProps {
   messages: ChatMessage[];
   className?: string;
@@ -28,14 +35,7 @@ export const QueuedMessages = ({ messages, className }: QueuedMessagesProps) => 
   return (
     <AnimatePresence initial={false}>
       {hasMessages && (
-        <motion.div
-          key='queued-container'
-          initial={{ height: 0, opacity: 0 }}
-          animate={{ height: 'auto', opacity: 1 }}
-          exit={{ height: 0, opacity: 0 }}
-          transition={{ duration: 0.2, ease: 'easeOut' }}
-          className='w-full overflow-hidden'
-        >
+        <motion.div key='queued-container' {...COLLAPSE_ANIMATION} className='w-full overflow-hidden'>
           <div
             className={cn(
               'bg-BG_GRAY_2 border-GRAY_400 flex w-full flex-col items-start gap-1.5 rounded-t-xl border px-2.5 pt-2 pb-5',
@@ -56,15 +56,11 @@ export const QueuedMessages = ({ messages, className }: QueuedMessagesProps) => 
 
             <AnimatePresence initial={false}>
               {isExpanded && (
-                <motion.div
-                  key='queued-list'
-                  initial={{ height: 0, opacity: 0 }}
-                  animate={{ height: 'auto', opacity: 1 }}
-                  exit={{ height: 0, opacity: 0 }}
-                  transition={{ duration: 0.2, ease: 'easeOut' }}
-                  className='flex w-full flex-col overflow-hidden'
-                >
-                  <div ref={scrollRef} className='flex max-h-[240px] w-full flex-col overflow-y-auto'>
+                <motion.div key='queued-list' {...COLLAPSE_ANIMATION} className='flex w-full flex-col overflow-hidden'>
+                  <div
+                    ref={scrollRef}
+                    className='flex max-h-[240px] w-full flex-col overflow-y-auto [-ms-overflow-style:none] [scrollbar-width:none] [&::-webkit-scrollbar]:hidden'
+                  >
                     {messages?.map((msg) => {
                       const text = getMessagePreview(msg);
                       const attachmentCount = getAttachmentCount(msg);
@@ -72,9 +68,9 @@ export const QueuedMessages = ({ messages, className }: QueuedMessagesProps) => 
                       return (
                         <div
                           key={msg.id}
-                          className='hover:bg-GRAY_100 flex w-full items-center gap-1.5 rounded-[8px] px-2 py-1'
+                          className='hover:bg-GRAY_100 flex w-full items-center gap-1.5 rounded-[6px] px-2 py-1'
                         >
-                          <p className='text-GRAY_1000 f-14-450 line-clamp-2 min-w-0 flex-1'>
+                          <p className='text-GRAY_1000 f-13-450 line-clamp-2 min-w-0 flex-1'>
                             {text || formatPlural(attachmentCount, 'attachment')}
                           </p>
                           {text && attachmentCount > 0 && (

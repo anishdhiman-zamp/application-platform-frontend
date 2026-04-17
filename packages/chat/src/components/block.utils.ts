@@ -61,8 +61,8 @@ export const getHistoryFormattedMessages = (conversationHistory: GetConversation
       id: message.id,
       conversation_id: message?.conversation_id,
       state:
-        index > 0 && message.sender_type === SenderType.USER && message.state === MessageState.STREAMING
-          ? MessageState.QUEUED
+        index === 0 && message.sender_type === SenderType.USER && message.state === MessageState.QUEUED
+          ? MessageState.DONE
           : message.state,
     }));
 };
