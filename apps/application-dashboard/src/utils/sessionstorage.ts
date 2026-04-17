@@ -2,6 +2,7 @@ import { isBrowser } from '@zamp-platform/utils';
 
 export enum SESSION_STORAGE_KEYS {
   PATHNAME_PRE_LOGOUT = 'PATHNAME_PRE_LOGOUT',
+  PACE_SETTINGS_LAST_TAB = 'PACE_SETTINGS_LAST_TAB',
 }
 
 export const getFromSessionStorage = (key: SESSION_STORAGE_KEYS) => {
