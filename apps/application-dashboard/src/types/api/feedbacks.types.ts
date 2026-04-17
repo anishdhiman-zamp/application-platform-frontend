@@ -22,6 +22,7 @@ export interface FeedbackItemType {
   resource_id?: string;
   annotation_data: AnnotationData;
   initiated_by: string;
+  created_by: string;
 }
 
 export interface FeedbacksResponseType {

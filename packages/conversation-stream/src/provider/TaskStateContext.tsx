@@ -10,10 +10,13 @@ export interface TaskState {
   isLoadingHistory: boolean;
   isFetchingHistory: boolean;
   isErrorHistory: boolean;
+  errorHistory: unknown;
   conversationData: unknown;
   inputsRequired: ConversationInputRequiredItem[] | undefined;
   /** Latest summary text received from the per-task SSE channel. */
   taskSummaryText: string | null;
+  isBrowserStreamingAvailable: boolean;
+  browserSessionId?: string;
 }
 
 export const TaskStateContext = createContext<TaskState | null>(null);

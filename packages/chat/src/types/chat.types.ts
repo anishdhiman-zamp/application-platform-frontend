@@ -269,6 +269,8 @@ export interface ConversationType {
   resource_type: ResourceType;
   title: string;
   summary?: ConversationSummary | null;
+  created_by: string;
+  initiated_by: string | null;
 }
 
 export interface ConversationMessageContentType {
@@ -564,6 +566,7 @@ export interface HITLResponseItem {
   entity_id: string;
   response: HITLResponse;
   input_id?: string;
+  file_references?: { path: string; name: string }[];
 }
 
 export interface HITLRespondPayloadType {

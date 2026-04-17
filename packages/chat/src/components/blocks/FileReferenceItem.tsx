@@ -5,6 +5,7 @@ import React from 'react';
 
 import { useChatActions } from '../../context/ChatActionsContext';
 import { UploadedFileType } from '../../types/block.types';
+import { normalizeFilesystemPath } from '../../utils/filesystemUpload';
 
 interface FileReferenceItemProps {
   fileReference: UploadedFileType;
@@ -21,8 +22,7 @@ const FileReferenceItem: React.FC<FileReferenceItemProps> = ({ fileReference, on
     if (!fileReference.path) return;
 
     if (onFileOpen) {
-      const normalizedPath = fileReference.path.startsWith('/home/') ? fileReference.path.slice(6) : fileReference.path;
-      onFileOpen(normalizedPath, fileReference.name);
+      onFileOpen(normalizeFilesystemPath(fileReference.path), fileReference.name);
     }
   };
 

@@ -1,0 +1,19 @@
+{
+  "extends": "@zamp-platform/config/tsconfig.json",
+  "compilerOptions": {
+    "baseUrl": ".",
+    "paths": {
+      "@chat/*": ["./src/*"]
+    },
+    "moduleResolution": "node",
+    "module": "ESNext",
+    "target": "ESNext",
+    "jsx": "react-jsx",
+    "allowJs": true,
+    "esModuleInterop": true,
+    "skipLibCheck": true,
+    "forceConsistentCasingInFileNames": true
+  },
+  "include": ["src", "index.ts"],
+  "exclude": ["node_modules"]
+}

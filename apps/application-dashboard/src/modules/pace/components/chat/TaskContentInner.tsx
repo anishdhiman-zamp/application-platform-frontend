@@ -1,6 +1,7 @@
 'use client';
 
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
+import { isNotFoundError } from '@zamp-platform/api';
 import {
   BLOCK_TYPE,
   ChatActionsProvider,
@@ -42,6 +43,7 @@ import { TaskChatStepsToggleHeader } from '@/modules/pace/components/chat/TaskCh
 import { TaskChatTitleHeader } from '@/modules/pace/components/chat/TaskChatTitleHeader';
 import TaskNavigation from '@/modules/pace/components/chat/TaskNavigation';
 import TaskTopbar from '@/modules/pace/components/chat/TaskTopbar';
+import ContentErrorState from '@/modules/pace/components/ContentErrorState';
 import { getActiveTabIdFromUrl } from '@/modules/pace/components/dynamic-tabs/tab-type-registry';
 import TaskContentSkeleton from '@/modules/pace/components/loaders/TaskContentSkeleton';
 import InlineSubtaskSection from '@/modules/pace/components/tasks/components/InlineSubtaskSection';
@@ -53,6 +55,7 @@ import {
   getStepCount,
 } from '@/modules/pace/components/tasks/utils/tasks.utils';
 import { useHitlQuestions } from '@/modules/pace/hooks/useHitlQuestions';
+import { BrowserViewerDisplayState } from '@/modules/pace/pace.constants';
 import type { RootState } from '@/store';
 
 interface TaskContentInnerProps {
@@ -61,8 +64,10 @@ interface TaskContentInnerProps {
 
 const TaskContentChat = ({ taskId }: { taskId: string }) => {
   const hadStreamingRef = useRef(false);
+  const prevBrowserStreamingRef = useRef(false);
 
   const { openTab } = useDynamicTabs({ type: TAB_TYPE.FILE });
+  const { openTab: openBrowserTab, updateTab: updateBrowserTab } = useDynamicTabs({ type: TAB_TYPE.BROWSER });
   const searchParams = useSearchParams();
   const urlTitle = searchParams?.get('title') ?? null;
   const [chatTitle, setChatTitle] = useState(urlTitle ?? '');
@@ -79,6 +84,8 @@ const TaskContentChat = ({ taskId }: { taskId: string }) => {
   }, [searchParams]);
 
   const isSubtask = parentTasks.length > 0;
+
+  const username = useAppSelector((state: RootState) => state.user.user?.username) ?? '';
 
   const [showSteps, setShowSteps] = useState(false);
   const [showSummary, setShowSummary] = useState(false);
@@ -104,8 +111,17 @@ const TaskContentChat = ({ taskId }: { taskId: string }) => {
     goToPreviousTask,
   } = useTaskNavigation(taskId);
 
-  const { messages, isLoadingHistory, isErrorHistory, conversationData, inputsRequired, taskSummaryText } =
-    useTaskState();
+  const {
+    messages,
+    isLoadingHistory,
+    isErrorHistory,
+    errorHistory,
+    conversationData,
+    inputsRequired,
+    taskSummaryText,
+    isBrowserStreamingAvailable,
+    browserSessionId,
+  } = useTaskState();
   const { refetchHistory } = useTaskActions();
   const { sseEventBus } = useEventBus();
   const streamingState = useStreamingState(taskId);
@@ -116,6 +132,12 @@ const TaskContentChat = ({ taskId }: { taskId: string }) => {
   const effectiveStatus = (liveStatus as TaskStatus) ?? (taskStatus as TaskStatus) ?? status ?? undefined;
 
   const conversationId = searchParams?.get('s') ?? undefined;
+
+  const handleWatchStream = useCallback(() => {
+    if (conversationId) {
+      openBrowserTab(conversationId, 'Browser', browserSessionId ? { sessionId: browserSessionId } : undefined);
+    }
+  }, [conversationId, openBrowserTab, browserSessionId]);
 
   const subtaskPanelParents: TaskBreadcrumb[] = useMemo(
     () => [
@@ -205,8 +227,10 @@ const TaskContentChat = ({ taskId }: { taskId: string }) => {
   // When navigating back to a previously visited task, RTK Query serves cached data
   const hasCachedData = Boolean(conversationData);
   const isLoadingConversation =
-    Boolean(taskId && isLoadingHistory) ||
-    (!hasMessages && !streamingState && !hadStreamingRef.current && !hasCachedData);
+    !isErrorHistory &&
+    (Boolean(taskId && isLoadingHistory) ||
+      (!hasMessages && !streamingState && !hadStreamingRef.current && !hasCachedData));
+  const isTaskNotFound = isErrorHistory && isNotFoundError(errorHistory);
 
   const { processedMessages, lastSummaryText } = useMemo(() => getProcessedMessages(messages), [messages]);
   const summary = (conversationData as Record<string, unknown> | undefined)?.summary as
@@ -266,6 +290,18 @@ const TaskContentChat = ({ taskId }: { taskId: string }) => {
   }, [streamingState?.is_active]);
 
   useEffect(() => {
+    const wasAvailable = prevBrowserStreamingRef.current;
+
+    prevBrowserStreamingRef.current = isBrowserStreamingAvailable;
+
+    if (wasAvailable && !isBrowserStreamingAvailable && conversationId) {
+      updateBrowserTab(conversationId, conversationId, 'Browser', {
+        status: BrowserViewerDisplayState.ENDED,
+      });
+    }
+  }, [isBrowserStreamingAvailable, conversationId, updateBrowserTab]);
+
+  useEffect(() => {
     if (hasStepGroups && !isAgentActive && !showSteps) {
       setShowSummary(true);
     }
@@ -280,7 +316,13 @@ const TaskContentChat = ({ taskId }: { taskId: string }) => {
   const isExpandedStepsView = showSteps && (!hasStepGroups || !showSummary);
 
   return (
-    <ChatActionsProvider onFileOpen={openTab} parentTasks={subtaskPanelParents} siblings={siblingsMemo}>
+    <ChatActionsProvider
+      onFileOpen={openTab}
+      parentTasks={subtaskPanelParents}
+      siblings={siblingsMemo}
+      onWatchStream={handleWatchStream}
+      isBrowserStreamingAvailable={isBrowserStreamingAvailable}
+    >
       <div className='relative flex h-full flex-1 flex-col'>
         <TaskTopbar
           className='border-GRAY_100 border-b'
@@ -309,6 +351,14 @@ const TaskContentChat = ({ taskId }: { taskId: string }) => {
           loader={<TaskContentSkeleton />}
           className='flex min-h-0 w-full min-w-0 flex-1 flex-col'
           disableAnimation
+          renderError={
+            isTaskNotFound ? (
+              <ContentErrorState
+                title='Task not found'
+                description="This task may have been deleted or you don't have access to it."
+              />
+            ) : undefined
+          }
         >
           <div className='mx-auto flex w-full max-w-[700px] flex-col px-4 pt-12'>
             <TaskChatTitleHeader
@@ -415,6 +465,7 @@ const TaskContentChat = ({ taskId }: { taskId: string }) => {
                     resultText={lastSummaryText}
                     summaryScrollRef={summaryScrollRef}
                     hideConnector={!showSteps}
+                    username={username}
                   />
                 )}
               </div>

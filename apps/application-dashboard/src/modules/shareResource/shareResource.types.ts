@@ -10,6 +10,7 @@ export enum ResourceType {
   CONNECTION = 'connection',
   APP = 'app',
   AGENT = 'agent',
+  CONVERSATION = 'conversation',
 }
 
 export type TeamInfoType = {
@@ -163,6 +164,10 @@ export enum APP_ACCESS_PRIVILEGES {
 export enum AGENT_ACCESS_PRIVILEGES {
   OWNER = 'owner',
   ADMIN = 'admin',
+  VIEWER = 'viewer',
+}
+
+export enum CONVERSATION_ACCESS_PRIVILEGES {
   VIEWER = 'viewer',
 }
 

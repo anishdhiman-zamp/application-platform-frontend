@@ -1,6 +1,13 @@
 {
   "permissions": {
-    "allow": ["Bash(git add:*)", "Bash(git commit:*)", "Bash(git push:*)", "Bash(npm run:*)"]
+    "allow": [
+      "Bash(git add:*)",
+      "Bash(git commit:*)",
+      "Bash(git push:*)",
+      "Bash(npm run:*)",
+      "Bash(npx eslint *)",
+      "Bash(ls /home/coder/zamp/services/application-platform-frontend/packages/chat/tsconfig*.json)"
+    ]
   },
   "enableAllProjectMcpServers": true,
   "enabledPlugins": {

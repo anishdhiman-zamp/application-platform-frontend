@@ -9,19 +9,27 @@ interface FileReferencesListProps {
   onRemove?: (fileId: string) => void;
   isLoading?: boolean;
   className?: string;
+  showFilePreview?: boolean;
 }
 
-export const FileReferencesList: FC<FileReferencesListProps> = ({ fileReferences, onRemove, isLoading, className }) => {
+export const FileReferencesList: FC<FileReferencesListProps> = ({
+  fileReferences,
+  onRemove,
+  isLoading,
+  className,
+  showFilePreview = true,
+}) => {
   return (
     <>
       {fileReferences?.length > 0 && (
         <div className={cn('flex flex-wrap gap-2', className)}>
-          {[...fileReferences].reverse().map((fileReference) => (
+          {fileReferences.map((fileReference) => (
             <FilePreviewCard
               key={fileReference?.id || fileReference?.path}
               fileReference={fileReference}
               onRemove={onRemove}
               isLoading={isLoading}
+              showFilePreview={showFilePreview}
             />
           ))}
         </div>
