@@ -90,6 +90,7 @@ export const ConversationProvider: React.FC<ConversationProviderProps> = ({
     isFetching: isFetchingConversationHistory,
     isUninitialized: isUninitializedConversationHistory,
     isError: isErrorConversationHistory,
+    error: errorConversationHistory,
     refetch: refetchConversationHistory,
   } = useGetConversationByIdQuery(
     {
@@ -393,6 +394,8 @@ export const ConversationProvider: React.FC<ConversationProviderProps> = ({
     ],
   );
 
+  const initiatedBy = conversationHistory?.conversation?.initiated_by ?? null;
+
   const stateValue: ConversationState = useMemo(
     () => ({
       messages,
@@ -405,6 +408,7 @@ export const ConversationProvider: React.FC<ConversationProviderProps> = ({
       isCreatingConversationV2,
       isSendingMessage,
       isErrorConversationHistory,
+      errorConversationHistory,
       isUninitializedConversationHistory,
       isAnalysing,
       sendMessageError: null,
@@ -414,6 +418,7 @@ export const ConversationProvider: React.FC<ConversationProviderProps> = ({
       isBrowserStreamingAvailable,
       browserSessionId,
       taskSummaries,
+      initiatedBy,
     }),
     [
       messages,
@@ -425,6 +430,7 @@ export const ConversationProvider: React.FC<ConversationProviderProps> = ({
       isCreatingConversationV2,
       isSendingMessage,
       isErrorConversationHistory,
+      errorConversationHistory,
       isUninitializedConversationHistory,
       isAnalysing,
       sendMessageV2Error,
@@ -433,6 +439,7 @@ export const ConversationProvider: React.FC<ConversationProviderProps> = ({
       isBrowserStreamingAvailable,
       browserSessionId,
       taskSummaries,
+      initiatedBy,
     ],
   );
 

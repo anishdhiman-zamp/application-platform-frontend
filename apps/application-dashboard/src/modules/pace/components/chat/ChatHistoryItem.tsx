@@ -99,12 +99,14 @@ const ChatHistoryItem = ({
       )}
       onClick={handleClick}
     >
-      <div className='flex h-auto w-full items-center justify-start gap-2.5 px-3 py-2.5 pr-9'>
-        <p className='f-13-500 text-GRAY_1000 min-w-0 flex-1 truncate text-left first-letter:uppercase'>
-          {conversation?.title || 'Untitled conversation'}
-        </p>
+      <div className='flex h-auto w-full flex-col justify-start px-3 py-2.5 pr-9'>
+        <div className='flex items-center gap-2'>
+          <p className='f-13-500 text-GRAY_1000 min-w-0 flex-1 truncate text-left first-letter:uppercase'>
+            {conversation?.title || 'Untitled conversation'}
+          </p>
 
-        {relativeTime && <span className='f-12-400 text-GRAY_600 shrink-0 whitespace-nowrap'>{relativeTime}</span>}
+          {relativeTime && <span className='f-12-400 text-GRAY_600 shrink-0 whitespace-nowrap'>{relativeTime}</span>}
+        </div>
       </div>
 
       <div className='absolute right-1 flex items-center justify-center'>
@@ -127,10 +129,9 @@ const ChatHistoryItem = ({
           onDeleteFailure={handleDeleteFailure}
           onOpenChange={setIsActionsOpen}
           triggerClassName={cn(
-            'hover:bg-transparent data-[state=open]:opacity-100',
-            hasStatusIcon
-              ? cn('absolute transition-opacity', isActionsOpen ? 'opacity-100' : 'opacity-0 group-hover:opacity-100')
-              : cn('transition-opacity', isActionsOpen ? 'opacity-100' : 'opacity-0 group-hover:opacity-100'),
+            'hover:bg-transparent data-[state=open]:opacity-100 transition-opacity',
+            hasStatusIcon && 'absolute',
+            isActionsOpen ? 'opacity-100' : 'opacity-0 group-hover:opacity-100',
           )}
           triggerProps={{ onClick: (e) => e.stopPropagation() }}
         />
