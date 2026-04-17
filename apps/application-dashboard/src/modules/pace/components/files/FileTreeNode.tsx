@@ -11,6 +11,7 @@ import {
   type FileTreeNodeProps,
 } from '@/modules/pace/components/files/file-tree.types';
 import { getParentPath } from '@/modules/pace/components/files/file-tree.utils';
+import FileInfoPopover from '@/modules/pace/components/files/FileInfoPopover';
 import {
   CONTEXT_MENU_ACTION_IDS,
   CONTEXT_MENU_ACTIONS,
@@ -49,6 +50,7 @@ const FileTreeNode = memo(function FileTreeNode({
   const nodeRef = useRef<HTMLDivElement>(null);
   const [createModalType, setCreateModalType] = useState<CreateItemType | null>(null);
   const [fetchedChildrenNames, setFetchedChildrenNames] = useState<string[]>([]);
+  const [isInfoOpen, setIsInfoOpen] = useState(false);
   const [triggerListFiles] = useLazyListFilesQuery();
 
   // Hooks
@@ -149,6 +151,12 @@ const FileTreeNode = memo(function FileTreeNode({
     [onUploadFiles],
   );
 
+  // Defer so the closing dropdown/context menu doesn't race with the
+  // newly-opened popover and immediately dismiss it via focus/pointer-outside.
+  const handleShowInfo = () => {
+    requestAnimationFrame(() => setIsInfoOpen(true));
+  };
+
   // Hooks (depend on handlers above)
   const rename = useFileTreeNodeRename({
     node,
@@ -187,6 +195,7 @@ const FileTreeNode = memo(function FileTreeNode({
     onFileCreated,
     onTriggerFileUpload: handleTriggerFileUpload,
     onTriggerFolderUpload: handleTriggerFolderUpload,
+    onShowInfo: handleShowInfo,
   });
 
   // Handlers
@@ -241,6 +250,8 @@ const FileTreeNode = memo(function FileTreeNode({
         isDeleting={deleteConfirmation.isDeleting}
         onConfirm={deleteConfirmation.onConfirm}
       />
+
+      <FileInfoPopover node={node} anchorRef={nodeRef} open={isInfoOpen} onOpenChange={setIsInfoOpen} />
 
       <FileTreeNodeRow
         ref={nodeRef}
