@@ -35,6 +35,9 @@ const RenameFileDialog = ({
   isLoading,
   onConfirm,
 }: RenameFileDialogProps) => {
+  const inputRef = useRef<HTMLInputElement | null>(null);
+  const shouldSelectBaseNameRef = useRef(false);
+
   const [editValue, setEditValue] = useState(currentFileName);
 
   const trimmedValue = editValue.trim();
@@ -53,8 +56,13 @@ const RenameFileDialog = ({
     onConfirm(trimmedValue);
   }, [trimmedValue, isUnchanged, isDuplicateName, onConfirm, onOpenChange]);
 
+  const setInputRef = useCallback((node: HTMLInputElement | null) => {
+    inputRef.current = node;
+  }, []);
+
   const handleKeyDown = useCallback(
     (e: React.KeyboardEvent<HTMLInputElement>) => {
+      shouldSelectBaseNameRef.current = false;
       if (e.key === KEYBOARD_KEYS.ENTER && !isSaveDisabled) {
         e.preventDefault();
         e.stopPropagation();
@@ -64,29 +72,34 @@ const RenameFileDialog = ({
     [handleSave, isSaveDisabled],
   );
 
-  const inputRef = useRef<HTMLInputElement | null>(null);
-
-  const setInputRef = useCallback((node: HTMLInputElement | null) => {
-    inputRef.current = node;
+  const handleOpenAutoFocus = useCallback((event: Event) => {
+    event.preventDefault();
+    inputRef.current?.focus();
   }, []);
 
-  const handleDialogOpen = useCallback(() => {
-    setEditValue(currentFileName);
-    requestAnimationFrame(() => {
-      const input = inputRef.current;
-
-      if (!input) return;
-
+  const handleInputFocus = useCallback(
+    (e: React.FocusEvent<HTMLInputElement>) => {
+      if (!shouldSelectBaseNameRef.current) return;
       const { baseName } = getFileNameParts(currentFileName, true);
 
-      input.focus();
-      input.setSelectionRange(0, baseName.length);
-    });
-  }, [currentFileName]);
+      requestAnimationFrame(() => {
+        if (!shouldSelectBaseNameRef.current) return;
+        e.target.setSelectionRange(0, baseName.length);
+      });
+    },
+    [currentFileName],
+  );
+
+  const handleInputPointerDown = useCallback(() => {
+    shouldSelectBaseNameRef.current = false;
+  }, []);
 
   useEffect(() => {
-    if (open) handleDialogOpen();
-  }, [open, handleDialogOpen]);
+    if (open) {
+      setEditValue(currentFileName);
+      shouldSelectBaseNameRef.current = true;
+    }
+  }, [open, currentFileName]);
 
   return (
     <Dialog open={open} onOpenChange={isLoading ? undefined : onOpenChange}>
@@ -95,6 +108,7 @@ const RenameFileDialog = ({
         showCloseButton={!isLoading}
         className='w-[400px] outline-none'
         data-slot='rename-file-dialog'
+        onOpenAutoFocus={handleOpenAutoFocus}
       >
         <DialogHeader>
           <DialogHeaderTitle>Rename file</DialogHeaderTitle>
@@ -114,6 +128,8 @@ const RenameFileDialog = ({
               value={editValue}
               onChange={(e) => setEditValue(e.target.value)}
               onKeyDown={handleKeyDown}
+              onFocus={handleInputFocus}
+              onPointerDown={handleInputPointerDown}
               placeholder='Enter file name...'
               size='small'
               className={cn('w-full', isDuplicateName && 'border-RED_700! focus:shadow-input-error-outline-shadow')}
