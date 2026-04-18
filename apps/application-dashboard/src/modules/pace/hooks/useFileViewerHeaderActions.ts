@@ -1,15 +1,18 @@
 import { useCallback, useMemo, useState } from 'react';
 import { captureException } from '@sentry/browser';
 import { toast } from '@zamp-platform/ui';
+import { ROUTES_PATH } from '@/constants/routeConfig';
 import { useDynamicTabs } from '@/modules/pace/components/dynamic-tabs/useDynamicTabs';
 import { FILE_TOAST_MESSAGES, FILE_VIEWER_HEADER_ACTION_IDS } from '@/modules/pace/components/files/files.constants';
 import { useFileActions } from '@/modules/pace/hooks/useFileActions';
 import { useFileDownload } from '@/modules/pace/hooks/useFileDownload';
-import { TAB_TYPE } from '@/modules/pace/pace.types';
+import { usePaceContext } from '@/modules/pace/pace.context';
+import { CHAT_SIDEBAR_STATE, TAB_TYPE } from '@/modules/pace/pace.types';
 
 interface UseFileViewerHeaderActionsProps {
   filePath: string;
   fileName: string;
+  onRenameRequested?: () => void;
 }
 
 interface UseFileViewerHeaderActionsReturn {
@@ -25,11 +28,13 @@ interface UseFileViewerHeaderActionsReturn {
 export const useFileViewerHeaderActions = ({
   filePath,
   fileName,
+  onRenameRequested,
 }: UseFileViewerHeaderActionsProps): UseFileViewerHeaderActionsReturn => {
   const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState(false);
   const { deleteItem, isDeleting } = useFileActions();
-  const { closeTabsForPath } = useDynamicTabs({ type: TAB_TYPE.FILE });
+  const { closeTabsForPath, activeTab } = useDynamicTabs({ type: TAB_TYPE.FILE });
   const { downloadFile } = useFileDownload();
+  const { setPendingFileReferences, setChatSidebarState, chatSidebarState } = usePaceContext();
 
   const handleDownload = useCallback(async () => {
     await downloadFile({
@@ -37,6 +42,16 @@ export const useFileViewerHeaderActions = ({
       fileName,
     });
   }, [filePath, fileName, downloadFile]);
+
+  const handleReferenceInChat = useCallback(() => {
+    setPendingFileReferences([{ path: filePath, name: fileName }]);
+
+    const isOnChatHome = window.location.pathname === ROUTES_PATH.CHAT && !activeTab;
+
+    if (chatSidebarState === CHAT_SIDEBAR_STATE.COLLAPSED && !isOnChatHome) {
+      setChatSidebarState(CHAT_SIDEBAR_STATE.SIDEBAR);
+    }
+  }, [filePath, fileName, setPendingFileReferences, setChatSidebarState, chatSidebarState, activeTab]);
 
   const handleDeleteConfirm = useCallback(async () => {
     try {
@@ -60,6 +75,12 @@ export const useFileViewerHeaderActions = ({
         case FILE_VIEWER_HEADER_ACTION_IDS.DOWNLOAD:
           await handleDownload();
           break;
+        case FILE_VIEWER_HEADER_ACTION_IDS.RENAME:
+          onRenameRequested?.();
+          break;
+        case FILE_VIEWER_HEADER_ACTION_IDS.REFERENCE_IN_CHAT:
+          handleReferenceInChat();
+          break;
         case FILE_VIEWER_HEADER_ACTION_IDS.DELETE:
           setIsDeleteDialogOpen(true);
           break;
@@ -67,7 +88,7 @@ export const useFileViewerHeaderActions = ({
           break;
       }
     },
-    [handleDownload],
+    [handleDownload, handleReferenceInChat, onRenameRequested],
   );
 
   const deleteConfirmation = useMemo(

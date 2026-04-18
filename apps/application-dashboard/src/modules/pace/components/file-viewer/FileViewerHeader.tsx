@@ -1,9 +1,9 @@
 'use client';
 
 import { memo } from 'react';
-import { Button, FileIcon, Input, Tabs, TabsList, TabsTrigger } from '@zamp-platform/ui';
+import { Button, FileIcon, Tabs, TabsList, TabsTrigger } from '@zamp-platform/ui';
 import { cn } from '@zamp-platform/ui/utils';
-import { Download, Trash2 } from 'lucide-react';
+import { Download } from 'lucide-react';
 import TooltipV2 from '@/components/common/TooltipV2';
 import {
   HTML_VIEW_OPTIONS,
@@ -16,7 +16,10 @@ import type {
   SpreadsheetViewMode,
   ViewModeToggleProps,
 } from '@/modules/pace/components/file-viewer/file-viewer.types';
+import FilePathBreadcrumb from '@/modules/pace/components/file-viewer/FilePathBreadcrumb';
 import FileSaveStatus from '@/modules/pace/components/file-viewer/FileSaveStatus';
+import FileViewerHeaderMenu from '@/modules/pace/components/file-viewer/FileViewerHeaderMenu';
+import RenameFileDialog from '@/modules/pace/components/file-viewer/RenameFileDialog';
 import DeleteConfirmationDialog from '@/modules/pace/components/files/DeleteConfirmationDialog';
 import { getFileExtension } from '@/modules/pace/components/files/file-tree.utils';
 import { FILE_VIEWER_HEADER_ACTION_IDS } from '@/modules/pace/components/files/files.constants';
@@ -77,16 +80,12 @@ const FileViewerHeader = memo(
     const extension = getFileExtension(fileName);
 
     const {
-      isRenaming,
-      renameValue,
-      fileExtension,
+      isRenameDialogOpen,
       isRenameLoading,
-      isDuplicateName,
-      startRename,
-      setRenameValue,
+      siblingNames,
+      openRenameDialog,
+      setRenameDialogOpen,
       handleRenameSubmit,
-      handleRenameKeyDown,
-      handleRenameInputRef,
     } = useFileViewerHeaderRename({
       filePath,
       fileName,
@@ -95,6 +94,7 @@ const FileViewerHeader = memo(
     const { handleActionClick, isDeleting, deleteConfirmation } = useFileViewerHeaderActions({
       filePath,
       fileName,
+      onRenameRequested: openRenameDialog,
     });
 
     return (
@@ -109,50 +109,25 @@ const FileViewerHeader = memo(
             onConfirm={deleteConfirmation.onConfirm}
           />
         )}
+        <RenameFileDialog
+          open={isRenameDialogOpen}
+          onOpenChange={setRenameDialogOpen}
+          currentFileName={fileName}
+          siblingNames={siblingNames}
+          isLoading={isRenameLoading}
+          onConfirm={handleRenameSubmit}
+        />
         <div
           className={cn('border-GRAY_400 bg-BG_WHITE flex items-center justify-between border-b px-4 py-3', className)}
         >
-          <div className='flex items-center gap-2'>
-            <FileIcon extension={extension || 'txt'} className='size-5 rounded-sm' iconClassName='size-4' />
-            <div className='flex items-center gap-x-3'>
-              {isRenaming ? (
-                <div className='flex items-center'>
-                  <TooltipV2
-                    tooltipBody='A file or folder with this name already exists.'
-                    side={SIDE_OPTIONS.BOTTOM}
-                    open={isDuplicateName}
-                    delayDuration={0}
-                    tooltipClassName='bg-RED_100 text-RED_700 border-RED_300 border'
-                    asChildTrigger
-                  >
-                    <Input
-                      ref={handleRenameInputRef}
-                      autoFocus
-                      value={renameValue}
-                      autoComplete='off'
-                      onChange={(e) => setRenameValue(e.target.value)}
-                      onBlur={handleRenameSubmit}
-                      onKeyDown={handleRenameKeyDown}
-                      disabled={isRenameLoading}
-                      className={cn(
-                        'f-14-500 text-GRAY_1000 h-6 w-auto min-w-[100px] px-1 py-1',
-                        isDuplicateName && 'border-RED_700! focus:shadow-input-error-outline-shadow',
-                      )}
-                    />
-                  </TooltipV2>
-                  {fileExtension && (
-                    <span className='f-14-500 text-GRAY_600 shrink-0 select-none'>{fileExtension}</span>
-                  )}
-                </div>
-              ) : (
-                <span
-                  className='f-14-500 text-GRAY_1000 hover:bg-GRAY_200 inline-flex cursor-pointer items-center rounded-md px-1.5 py-0.5 transition-colors'
-                  onClick={startRename}
-                >
-                  {fileName}
-                </span>
-              )}
-            </div>
+          <div className='flex min-w-0 items-center'>
+            <FilePathBreadcrumb
+              filePath={filePath}
+              fileName={fileName}
+              fileIcon={
+                <FileIcon extension={extension || 'txt'} className='size-4 rounded-sm' iconClassName='size-3.5' />
+              }
+            />
           </div>
 
           <div className='flex items-center gap-x-2'>
@@ -175,23 +150,13 @@ const FileViewerHeader = memo(
                 variant='ghost'
                 size='icon'
                 onClick={() => handleActionClick(FILE_VIEWER_HEADER_ACTION_IDS.DOWNLOAD)}
-                disabled={isDeleting || isRenaming}
+                disabled={isDeleting}
                 className='h-6 w-6 shrink-0'
               >
                 <Download size={14} className='text-GRAY_700' />
               </Button>
             </TooltipV2>
-            <TooltipV2 tooltipBody='Delete' side={SIDE_OPTIONS.BOTTOM} delayDuration={300} asChildTrigger>
-              <Button
-                variant='ghost'
-                size='icon'
-                onClick={() => handleActionClick(FILE_VIEWER_HEADER_ACTION_IDS.DELETE)}
-                disabled={isDeleting || isRenaming}
-                className='text-destructive hover:text-destructive h-6 w-6 shrink-0'
-              >
-                <Trash2 size={14} />
-              </Button>
-            </TooltipV2>
+            <FileViewerHeaderMenu onActionClick={handleActionClick} disabled={isDeleting || isRenameLoading} />
           </div>
         </div>
       </>

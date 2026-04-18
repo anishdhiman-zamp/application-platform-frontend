@@ -431,6 +431,24 @@ export function getParentPath(path: string): string {
 }
 
 /**
+ * Collects all ancestor folder paths of the given path (excluding the root sentinel).
+ * For "a/b/c/d" returns ["a", "a/b", "a/b/c"].
+ */
+export function collectAncestors(path: string): string[] {
+  const segments = path.split('/').filter(Boolean);
+
+  if (segments.length <= 1) return [];
+
+  const ancestors: string[] = [];
+
+  for (let i = 1; i < segments.length; i++) {
+    ancestors.push(segments.slice(0, i).join('/'));
+  }
+
+  return ancestors;
+}
+
+/**
  * Generates a duplicate name by appending _copy before the extension
  */
 export function generateDuplicateName(name: string, existingNames: string[] = []): string {

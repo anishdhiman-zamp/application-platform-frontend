@@ -61,7 +61,7 @@ const FileTreeNode = memo(function FileTreeNode({
   // Derived State
   const isFolder = node.type === FILE_TYPE.DIRECTORY;
   const isExpanded = expandedPaths.has(node.path);
-  const isSelected = !isFolder && selectedPath === node.path;
+  const isSelected = selectedPath === node.path;
   const isProtected = depth === 0 && isProtectedRoot(node.path);
   const isUserPrivateFolder = depth === 0 && node.path === username;
   const isUploading = uploadingPaths.has(node?.path);

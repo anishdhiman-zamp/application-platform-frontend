@@ -154,7 +154,7 @@ const FileTreeNodeRow = forwardRef<HTMLDivElement, FileTreeNodeRowProps>(
         className={cn(
           'hover:bg-GRAY_100 group relative flex h-8 cursor-pointer items-center gap-2 pr-1 transition-colors',
           dropdownOpen && (state.isFolder || !state.isSelected) && 'bg-GRAY_100',
-          state.isSelected && !state.isFolder && 'bg-GRAY_300 hover:bg-GRAY_300',
+          state.isSelected && 'bg-GRAY_100',
           (state.isDragging || state.isCutItem || state.isUploading) && 'opacity-50',
           state.isDragOver && 'bg-GRAY_200',
           isDisabled && 'cursor-default',
@@ -224,7 +224,6 @@ const FileTreeNodeRow = forwardRef<HTMLDivElement, FileTreeNodeRowProps>(
                 onClick={(e) => e.stopPropagation()}
               />
             </TooltipV2>
-            {extension && <span className='f-13-450 text-GRAY_600 shrink-0 select-none'>.{extension}</span>}
           </div>
         ) : (
           <span className='f-13-450 text-GRAY_1000 min-w-0 truncate select-none'>

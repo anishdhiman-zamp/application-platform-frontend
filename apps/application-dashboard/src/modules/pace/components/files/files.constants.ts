@@ -74,6 +74,8 @@ export const SEARCH_ALLOWED_ACTIONS: Set<string> = new Set([
 
 export const FILE_VIEWER_HEADER_ACTION_IDS = {
   DOWNLOAD: 'download',
+  RENAME: 'rename',
+  REFERENCE_IN_CHAT: 'reference-in-chat',
   DELETE: 'delete',
 } as const;
 
@@ -113,7 +115,8 @@ export const CONTEXT_MENU_ACTIONS: ContextMenuAction[] = [
 ];
 
 export const FILE_VIEWER_HEADER_ACTIONS: ContextMenuAction[] = [
-  { id: FILE_VIEWER_HEADER_ACTION_IDS.DOWNLOAD, label: 'Download', icon: Download },
+  { id: FILE_VIEWER_HEADER_ACTION_IDS.RENAME, label: 'Rename', icon: Pencil },
+  { id: FILE_VIEWER_HEADER_ACTION_IDS.REFERENCE_IN_CHAT, label: 'Reference in Chat', icon: MessageSquare },
   { id: FILE_VIEWER_HEADER_ACTION_IDS.DELETE, label: 'Delete', icon: Trash2, isDestructive: true },
 ];
 

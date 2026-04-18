@@ -1,15 +1,9 @@
-import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
+import { useCallback, useState } from 'react';
 import { captureException } from '@sentry/browser';
 import { toast } from '@zamp-platform/ui';
-import { KEYBOARD_KEYS } from '@/constants/shortcuts';
 import { useDynamicTabs } from '@/modules/pace/components/dynamic-tabs/useDynamicTabs';
 import { FILE_TYPE } from '@/modules/pace/components/files/file-tree.types';
-import {
-  buildFullPath,
-  checkDuplicateName,
-  getFileNameParts,
-  getParentPath,
-} from '@/modules/pace/components/files/file-tree.utils';
+import { buildFullPath, getParentPath } from '@/modules/pace/components/files/file-tree.utils';
 import { FILE_TOAST_MESSAGES } from '@/modules/pace/components/files/files.constants';
 import { useFileViewerContext } from '@/modules/pace/context/FileViewerContext';
 import { useFileActions } from '@/modules/pace/hooks/useFileActions';
@@ -23,121 +17,64 @@ interface UseFileViewerHeaderRenameProps {
 }
 
 interface UseFileViewerHeaderRenameReturn {
-  isRenaming: boolean;
-  renameValue: string;
-  fileExtension: string;
+  isRenameDialogOpen: boolean;
   isRenameLoading: boolean;
-  isDuplicateName: boolean;
-  startRename: defaultFnType;
-  setRenameValue: (value: string) => void;
-  handleRenameSubmit: () => Promise<void>;
-  handleRenameKeyDown: (e: React.KeyboardEvent<HTMLInputElement>) => void;
-  handleRenameInputRef: (element: HTMLInputElement | null) => void;
+  siblingNames: string[];
+  openRenameDialog: defaultFnType;
+  setRenameDialogOpen: (open: boolean) => void;
+  handleRenameSubmit: (newName: string) => Promise<void>;
 }
 
 export const useFileViewerHeaderRename = ({
   filePath,
   fileName,
 }: UseFileViewerHeaderRenameProps): UseFileViewerHeaderRenameReturn => {
-  // State
-  const renameInputRef = useRef<HTMLInputElement | null>(null);
-  const { baseName, extension } = useMemo(() => getFileNameParts(fileName, true), [fileName]);
-  const [isRenaming, setIsRenaming] = useState(false);
-  const [renameValue, setRenameValue] = useState(baseName);
+  const [isRenameDialogOpen, setIsRenameDialogOpen] = useState(false);
 
-  // Hooks
   const { renameItem, isRenaming: isRenameLoading } = useFileActions();
   const { updateFileStatePath } = useFileViewerContext();
   const { updateTab } = useDynamicTabs({ type: TAB_TYPE.FILE });
   const { siblingNames, refetchSiblings } = useSiblingNames({ filePath });
 
-  const fullNewName = useMemo(() => {
-    const trimmed = renameValue.trim();
-
-    return trimmed ? `${trimmed}${extension}` : '';
-  }, [renameValue, extension]);
-
-  const isDuplicateName = useMemo(() => {
-    if (!isRenaming || !fullNewName || fullNewName === fileName) return false;
-
-    return checkDuplicateName(fullNewName, siblingNames, fileName);
-  }, [isRenaming, fullNewName, siblingNames, fileName]);
-
-  const startRename = useCallback(() => {
-    setRenameValue(baseName);
-    setIsRenaming(true);
+  const openRenameDialog = useCallback(() => {
+    setIsRenameDialogOpen(true);
     refetchSiblings();
-  }, [baseName, refetchSiblings]);
+  }, [refetchSiblings]);
 
-  const handleRenameSubmit = useCallback(async () => {
-    if (!fullNewName || fullNewName === fileName || isDuplicateName) {
-      setIsRenaming(false);
-      setRenameValue(baseName);
+  const handleRenameSubmit = useCallback(
+    async (newName: string) => {
+      setIsRenameDialogOpen(false);
 
-      return;
-    }
+      const parentPath = getParentPath(filePath);
+      const newPath = buildFullPath(parentPath, newName);
 
-    setIsRenaming(false);
+      updateFileStatePath(filePath, newPath);
+      updateTab(filePath, newPath, newName);
 
-    const parentPath = getParentPath(filePath);
-    const newPath = buildFullPath(parentPath, fullNewName);
+      try {
+        await renameItem(filePath, newName, {
+          name: fileName,
+          type: FILE_TYPE.FILE,
+          size: null,
+          owner: '',
+        });
+      } catch (error) {
+        captureException(error);
+        toast.error(FILE_TOAST_MESSAGES.FAILED_TO_RENAME);
 
-    updateFileStatePath(filePath, newPath);
-    updateTab(filePath, newPath, fullNewName);
-
-    try {
-      await renameItem(filePath, fullNewName, {
-        name: fileName,
-        type: FILE_TYPE.FILE,
-        size: null,
-        owner: '',
-      });
-    } catch (error) {
-      captureException(error);
-      toast.error(FILE_TOAST_MESSAGES.FAILED_TO_RENAME);
-
-      updateFileStatePath(newPath, filePath);
-      updateTab(newPath, filePath, fileName);
-      setRenameValue(baseName);
-    }
-  }, [fullNewName, fileName, baseName, filePath, isDuplicateName, renameItem, updateFileStatePath, updateTab]);
-
-  const handleRenameKeyDown = useCallback(
-    (e: React.KeyboardEvent<HTMLInputElement>) => {
-      e.stopPropagation();
-
-      if (e.key === KEYBOARD_KEYS.ENTER) {
-        e.preventDefault();
-        handleRenameSubmit();
-      } else if (e.key === KEYBOARD_KEYS.ESCAPE) {
-        setIsRenaming(false);
-        setRenameValue(baseName);
+        updateFileStatePath(newPath, filePath);
+        updateTab(newPath, filePath, fileName);
       }
     },
-    [handleRenameSubmit, baseName],
+    [fileName, filePath, renameItem, updateFileStatePath, updateTab],
   );
 
-  const handleRenameInputRef = useCallback((element: HTMLInputElement | null) => {
-    renameInputRef.current = element;
-  }, []);
-
-  useEffect(() => {
-    if (isRenaming && renameInputRef.current) {
-      renameInputRef.current.focus();
-      renameInputRef.current.select();
-    }
-  }, [isRenaming]);
-
   return {
-    isRenaming,
-    renameValue,
-    fileExtension: extension,
+    isRenameDialogOpen,
     isRenameLoading,
-    isDuplicateName,
-    startRename,
-    setRenameValue,
+    siblingNames,
+    openRenameDialog,
+    setRenameDialogOpen: setIsRenameDialogOpen,
     handleRenameSubmit,
-    handleRenameKeyDown,
-    handleRenameInputRef,
   };
 };
