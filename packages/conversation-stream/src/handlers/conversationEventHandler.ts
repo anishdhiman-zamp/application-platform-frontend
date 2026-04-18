@@ -31,6 +31,7 @@ export interface ConversationEventCallbacks {
   onTaskUpdate?: (taskId: string, updatedFields: Record<string, unknown>) => void;
   onTaskSummary?: (taskId: string, text: string) => void;
   onInputRequired?: (entityId: string, entityType: string, data: unknown) => void;
+  onMessagesPickedUp?: (messageIds: string[]) => void;
 }
 
 /**
@@ -164,6 +165,10 @@ export function handleConversationSSEEvent(
 
       case ConversationEventType.BROWSER_STREAMING_UNAVAILABLE:
         callbacks.onBrowserStreamingUnavailable?.(conversationId);
+        break;
+
+      case ConversationEventType.MESSAGES_PICKED_UP:
+        callbacks.onMessagesPickedUp?.(event.message_ids as string[]);
         break;
     }
   } catch (error) {
