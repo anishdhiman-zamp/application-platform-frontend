@@ -170,6 +170,10 @@ export const RichTextEditor = forwardRef<RichTextEditorHandle, RichTextEditorPro
             }
           }
 
+          if (event.key === KEYBOARD_KEYS.ENTER && (event.metaKey || event.ctrlKey)) {
+            return true;
+          }
+
           return false;
         },
         handlePaste: (view, event) => {
@@ -218,7 +222,7 @@ export const RichTextEditor = forwardRef<RichTextEditorHandle, RichTextEditorPro
     editorRef.current = editor;
 
     useImperativeHandle(ref, () => ({
-      focus: () => editor?.commands.focus(),
+      focus: () => editor?.commands.focus('end'),
       clear: () => {
         lastEditorMarkdown.current = '';
         editor?.commands.clearContent(true);

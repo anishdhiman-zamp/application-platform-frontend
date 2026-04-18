@@ -529,6 +529,7 @@ export interface ConversationInputRequiredItem {
   entity_type: HITLEntityType;
   input_required_data: ConversationInputRequiredData;
   input_id?: string;
+  title?: string;
 }
 
 export interface HITLSourceEntity {

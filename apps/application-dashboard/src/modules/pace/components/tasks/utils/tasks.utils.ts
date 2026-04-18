@@ -154,6 +154,7 @@ export const mapInputsRequiredToHitlQuestions = (items: ConversationInputRequire
         input_id: item.input_id,
         entity_id: item.entity_id,
         entity_type: item.entity_type,
+        title: item.title ?? '',
         question: data.question ?? '',
         options: null,
         input_type: HITL_INPUT_TYPE.APPROVAL,
@@ -169,6 +170,7 @@ export const mapInputsRequiredToHitlQuestions = (items: ConversationInputRequire
         input_id: item.input_id,
         entity_id: item.entity_id,
         entity_type: item.entity_type,
+        title: item.title ?? '',
         question: data.question ?? '',
         options: null,
         input_type: HITL_INPUT_TYPE.TEXT,
@@ -185,6 +187,7 @@ export const mapInputsRequiredToHitlQuestions = (items: ConversationInputRequire
       input_id: item.input_id,
       entity_id: item.entity_id,
       entity_type: item.entity_type,
+      title: item.title ?? '',
       question: data.question ?? '',
       options: data.options.map((opt) => ({
         id: opt.id,

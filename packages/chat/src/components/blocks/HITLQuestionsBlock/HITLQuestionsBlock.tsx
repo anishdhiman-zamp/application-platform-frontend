@@ -1,144 +1,180 @@
 'use client';
 
 import { captureException } from '@sentry/browser';
-import { ScrollContainer, type ScrollContainerRef } from '@zamp-platform/ui';
 import { KEYBOARD_KEYS } from '@zamp-platform/utils';
+import { AnimatePresence, motion } from 'motion/react';
+import { useRouter } from 'next/navigation';
 import React, { useCallback, useEffect, useRef, useState } from 'react';
 
+import { getChatTaskRoute } from '@/constants/routeConfig';
+
 import { useHitlRespondMutation } from '../../../api/chat';
-import { HITL_RESPONSE_TYPE } from '../../../types/block.types';
-import type { HITLRespondPayloadType, HITLResponse } from '../../../types/chat.types';
-import { APPROVAL_ACTION } from './ApprovalQuestionBody';
+import { HITLEntityType, type HITLRespondPayloadType } from '../../../types/chat.types';
 import type { ChatComposerFileRef } from './ChatComposerInput';
-import { CUSTOM_OPTION_ID, HITL_APPROVAL_NO, HITL_APPROVAL_YES, HITL_QUESTIONS_LAYOUT } from './constants';
+import { CUSTOM_OPTION_ID, HITL_QUESTIONS_LAYOUT } from './constants';
 import { HITLQuestionItem } from './HITLQuestionItem';
 import { HITLQuestionsFooter } from './HITLQuestionsFooter';
 import { HITLQuestionsHeader } from './HITLQuestionsHeader';
 import type { HITLQuestionsBlockProps } from './types';
-import type { HITLAnswersState } from './utils';
 import {
   appendPrintableToCustomInput,
-  isApprovalQuestion,
+  buildResponseForQuestion,
+  buildSkippedAnswers,
+  type HITLAnswersState,
   isMultipleChoiceQuestion,
   isQuestionAnswerComplete,
   isTextQuestion,
-  lastOptionFocusIndex,
   optionCountForQuestion,
 } from './utils';
+
+const SLIDE_OFFSET_PX = 32;
 
 export const HITLQuestionsBlock = ({
   payload,
   onSubmit,
   sourceEntityId,
   sourceEntityType,
+  conversationId,
   username,
 }: HITLQuestionsBlockProps) => {
   const { questions } = payload;
-  const scrollContainerRef = useRef<ScrollContainerRef>(null);
-  const containerRef = useRef<HTMLDivElement>(null);
-  const questionRefs = useRef<(HTMLDivElement | null)[]>([]);
-  const hasAutoSubmittedSingleSelectRef = useRef(false);
+  const router = useRouter();
+  const title = questions[0]?.title ?? undefined;
+  const titleEntityId = questions[0]?.entity_id;
+  const titleEntityType = questions[0]?.entity_type;
+  const handleTitleClick = useCallback(() => {
+    if (titleEntityId && titleEntityType === HITLEntityType.TASK) {
+      router.push(getChatTaskRoute({ taskId: titleEntityId, conversationId }));
+    }
+  }, [titleEntityId, titleEntityType, conversationId, router]);
 
-  const [hitlRespond, { isLoading: isHitlRespondLoading }] = useHitlRespondMutation();
-
+  // --- State ---
   const [currentQuestionIndex, setCurrentQuestionIndex] = useState(0);
-  const [focusedOptionIndex, setFocusedOptionIndex] = useState(0);
-  const scrollDirectionRef = useRef<'up' | 'down'>('down');
-  const shouldScrollRef = useRef(false);
-  const isProgrammaticScrollRef = useRef(false);
-  const submitRef = useRef<(() => void) | null>(null);
+  const [focusedOptionIndex, setFocusedOptionIndex] = useState(() =>
+    questions[0] ? optionCountForQuestion(questions[0]) - 1 : 0,
+  );
   const [answers, setAnswers] = useState<HITLAnswersState>({});
-  const [approvalAction, setApprovalAction] = useState<APPROVAL_ACTION | null>(null);
   const [customInputs, setCustomInputs] = useState<Record<string, string>>({});
   const [questionFileRefs, setQuestionFileRefs] = useState<Record<string, ChatComposerFileRef[]>>({});
+  const [submittingOptionId, setSubmittingOptionId] = useState<string | null>(null);
 
+  // --- Refs ---
+  const containerRef = useRef<HTMLDivElement>(null);
+  const questionScrollRef = useRef<HTMLDivElement>(null);
+  const navDirectionRef = useRef<'next' | 'prev'>('next');
+  const scrollDirectionRef = useRef<'up' | 'down'>('down');
+  const shouldScrollRef = useRef(false);
+  const submitRef = useRef<(() => void) | null>(null);
+  const submitSingleSelectRef = useRef<
+    ((questionId: string, optionId: string, customText: string | undefined) => void) | null
+  >(null);
+  const stateRef = useRef({ currentQuestionIndex, focusedOptionIndex, customInputs, questionFileRefs });
+
+  // --- Derived state ---
   const currentQuestion = questions[currentQuestionIndex];
   const totalOptions = currentQuestion ? optionCountForQuestion(currentQuestion) : 1;
   const allQuestionsAnswered = questions.every(
     (q) => isQuestionAnswerComplete(q, answers[q.id]) || (questionFileRefs[q.id]?.length ?? 0) > 0,
   );
-  const isAllApproval = questions.every(isApprovalQuestion);
   const isSingleSelectOnly =
-    questions.length === 1 &&
-    !isApprovalQuestion(questions[0]) &&
-    !isMultipleChoiceQuestion(questions[0]) &&
-    !isTextQuestion(questions[0]);
+    questions.length === 1 && !isMultipleChoiceQuestion(questions[0]) && !isTextQuestion(questions[0]);
 
-  const stateRef = useRef({
-    currentQuestionIndex,
-    focusedOptionIndex,
-    customInputs,
-    totalOptions,
-    currentQuestion,
-    answers,
-    questionFileRefs,
-  });
+  const [hitlRespond, { isLoading: isHitlRespondLoading }] = useHitlRespondMutation();
 
-  const selectApprovalAnswer = useCallback(
-    (questionId: string, qIndex: number, approved: boolean) => {
-      setApprovalAction(approved ? APPROVAL_ACTION.APPROVE : APPROVAL_ACTION.REJECT);
-      setAnswers((prev) => ({
-        ...prev,
-        [questionId]: {
-          optionIds: [approved ? HITL_APPROVAL_YES : HITL_APPROVAL_NO],
-          customText: '',
-          isSkipped: false,
-        },
-      }));
-      if (qIndex < questions.length - 1) {
-        setCurrentQuestionIndex(qIndex + 1);
-        setFocusedOptionIndex(0);
-      }
+  // --- Handlers ---
+  const navigateToQuestion = useCallback(
+    (index: number, direction: 'next' | 'prev') => {
+      navDirectionRef.current = direction;
+      shouldScrollRef.current = true;
+      setCurrentQuestionIndex(index);
+      const nextQuestion = questions[index];
+      setFocusedOptionIndex(nextQuestion ? optionCountForQuestion(nextQuestion) - 1 : 0);
     },
-    [questions.length],
+    [questions],
   );
 
   const selectAnswer = useCallback(
     (questionId: string, qIndex: number, optionId: string, customText?: string) => {
       const q = questions[qIndex];
-      if (isApprovalQuestion(q)) return;
       const isMulti = isMultipleChoiceQuestion(q);
 
       setAnswers((prev) => {
-        const currentAnswer = prev[questionId] || { optionIds: [], customText: '' };
-        let newOptionIds = [...currentAnswer.optionIds];
+        const current = prev[questionId] || { optionIds: [], customText: '' };
+        let newOptionIds = [...current.optionIds];
 
         if (isMulti) {
-          if (newOptionIds.includes(optionId)) {
-            newOptionIds = newOptionIds.filter((id) => id !== optionId);
-          } else {
-            newOptionIds.push(optionId);
-          }
+          newOptionIds = newOptionIds.includes(optionId)
+            ? newOptionIds.filter((id) => id !== optionId)
+            : [...newOptionIds, optionId];
         } else {
           newOptionIds = [optionId];
         }
 
         const isCustomOption = optionId === CUSTOM_OPTION_ID;
+        const wasSkipped = current.customText === 'No preference' && current.optionIds.includes(CUSTOM_OPTION_ID);
+        if (isMulti && !isCustomOption && wasSkipped) {
+          newOptionIds = newOptionIds.filter((id) => id !== CUSTOM_OPTION_ID);
+        }
         const newCustomText = isMulti
-          ? (customText ?? currentAnswer.customText)
+          ? isCustomOption
+            ? (customText ?? current.customText)
+            : wasSkipped
+              ? ''
+              : (customText ?? current.customText)
           : isCustomOption
-            ? (customText ?? currentAnswer.customText)
+            ? (customText ?? current.customText)
             : '';
 
-        return {
-          ...prev,
-          [questionId]: {
-            optionIds: newOptionIds,
-            customText: newCustomText,
-            isSkipped: false,
-          },
-        };
+        return { ...prev, [questionId]: { optionIds: newOptionIds, customText: newCustomText, isSkipped: false } };
       });
 
-      if (!isMulti) {
+      if (isMulti) {
+        if (optionId !== CUSTOM_OPTION_ID) {
+          setCustomInputs((prev) => {
+            if (prev[questionId] === 'No preference') return { ...prev, [questionId]: '' };
+            return prev;
+          });
+        }
+      } else {
         if (optionId !== CUSTOM_OPTION_ID) {
           setCustomInputs((prev) => ({ ...prev, [questionId]: '' }));
+          if (isSingleSelectOnly) {
+            submitSingleSelectRef.current?.(questionId, optionId, undefined);
+            return;
+          }
         }
-        if (qIndex < questions.length - 1) {
-          setCurrentQuestionIndex(qIndex + 1);
-          setFocusedOptionIndex(0);
-        }
+        if (qIndex < questions.length - 1) navigateToQuestion(qIndex + 1, 'next');
       }
+    },
+    [questions, navigateToQuestion, isSingleSelectOnly],
+  );
+
+  const handleCustomInputChange = useCallback(
+    (questionId: string, value: string) => {
+      const q = questions.find((question) => question.id === questionId);
+      if (!q) return;
+
+      setCustomInputs((prev) => ({ ...prev, [questionId]: value }));
+
+      if (isTextQuestion(q)) {
+        setAnswers((prev) => ({ ...prev, [questionId]: { optionIds: [], customText: value, isSkipped: false } }));
+        return;
+      }
+
+      setAnswers((prev) => {
+        const isMulti = isMultipleChoiceQuestion(q);
+        const current = prev[questionId] || { optionIds: [], customText: '' };
+        let newOptionIds = [...current.optionIds];
+        if (value) {
+          // User typed something — switch to custom mode, clear any real selections for single-select
+          if (!isMulti) newOptionIds = [];
+          if (!newOptionIds.includes(CUSTOM_OPTION_ID)) newOptionIds.push(CUSTOM_OPTION_ID);
+        } else {
+          // Empty input — remove custom option marker but preserve real selections
+          newOptionIds = newOptionIds.filter((id) => id !== CUSTOM_OPTION_ID);
+        }
+        return { ...prev, [questionId]: { optionIds: newOptionIds, customText: value, isSkipped: false } };
+      });
     },
     [questions],
   );
@@ -147,263 +183,30 @@ export const HITLQuestionsBlock = ({
     setQuestionFileRefs((prev) => ({ ...prev, [questionId]: refs }));
   }, []);
 
-  const handleCustomInputChange = useCallback(
-    (questionId: string, value: string) => {
-      const q = questions.find((question) => question.id === questionId);
-      if (!q) return;
-
-      if (isTextQuestion(q)) {
-        setCustomInputs((prev) => ({ ...prev, [questionId]: value }));
-        setAnswers((prev) => ({
-          ...prev,
-          [questionId]: { optionIds: [], customText: value, isSkipped: false },
-        }));
-        return;
-      }
-
-      setCustomInputs((prev) => ({ ...prev, [questionId]: value }));
-      setAnswers((prev) => {
-        const isMulti = isMultipleChoiceQuestion(q);
-        const currentAns = prev[questionId] || { optionIds: [], customText: '' };
-        let newOptionIds = isMulti ? [...currentAns.optionIds] : [];
-        if (value && !newOptionIds.includes(CUSTOM_OPTION_ID)) {
-          newOptionIds.push(CUSTOM_OPTION_ID);
-        } else if (!value && newOptionIds.includes(CUSTOM_OPTION_ID)) {
-          newOptionIds = newOptionIds.filter((id) => id !== CUSTOM_OPTION_ID);
-        }
-        return {
-          ...prev,
-          [questionId]: { optionIds: newOptionIds, customText: value, isSkipped: false },
-        };
-      });
-    },
-    [questions],
-  );
-
   const handleSkipToCustomInput = useCallback(
-    (questionId: string) => {
+    (questionId: string, qIndex: number) => {
       setCustomInputs((prev) => ({ ...prev, [questionId]: 'No preference' }));
       setAnswers((prev) => ({
         ...prev,
-        [questionId]: {
-          optionIds: [CUSTOM_OPTION_ID],
-          customText: 'No preference',
-          isSkipped: false,
-        },
+        [questionId]: { optionIds: [CUSTOM_OPTION_ID], customText: 'No preference', isSkipped: false },
       }));
-      setFocusedOptionIndex(totalOptions - 1);
-    },
-    [totalOptions],
-  );
-
-  const handleKeyDown = useCallback(
-    (e: KeyboardEvent) => {
-      const active = document.activeElement;
-      const isBodyOrNull = !active || active === document.body;
-      if (!isBodyOrNull && !containerRef.current?.contains(active)) return;
-
-      const {
-        currentQuestionIndex: qIdx,
-        focusedOptionIndex: optIdx,
-        customInputs: inputs,
-        totalOptions,
-        currentQuestion,
-      } = stateRef.current;
-
-      if (!currentQuestion) return;
-
-      shouldScrollRef.current = true;
-
-      const targetIsTextField =
-        e.target instanceof HTMLInputElement ||
-        e.target instanceof HTMLTextAreaElement ||
-        (e.target instanceof HTMLElement && e.target.isContentEditable);
-
-      const preventUnlessTextField = () => {
-        if (!targetIsTextField) e.preventDefault();
-      };
-
-      const lastOptionIdx = totalOptions - 1;
-      const lastQuestionIdx = questions.length - 1;
-      const q = currentQuestion;
-
-      switch (e.key) {
-        case KEYBOARD_KEYS.ARROW_DOWN: {
-          preventUnlessTextField();
-          scrollDirectionRef.current = 'down';
-          if (optIdx === lastOptionIdx) {
-            if (qIdx < lastQuestionIdx) {
-              setCurrentQuestionIndex((p) => p + 1);
-              setFocusedOptionIndex(0);
-            }
-          } else {
-            setFocusedOptionIndex((p) => p + 1);
-          }
-          break;
-        }
-        case KEYBOARD_KEYS.ARROW_UP: {
-          preventUnlessTextField();
-          scrollDirectionRef.current = 'up';
-          if (optIdx === 0) {
-            if (qIdx > 0) {
-              const prevIdx = qIdx - 1;
-              setCurrentQuestionIndex(prevIdx);
-              setFocusedOptionIndex(lastOptionFocusIndex(questions[prevIdx]));
-            }
-          } else {
-            setFocusedOptionIndex((p) => p - 1);
-          }
-          break;
-        }
-        case KEYBOARD_KEYS.ENTER: {
-          if (e.metaKey || e.ctrlKey) {
-            e.preventDefault();
-            submitRef.current?.();
-            return;
-          }
-          preventUnlessTextField();
-          if (isApprovalQuestion(q)) {
-            selectApprovalAnswer(q.id, qIdx, optIdx === 0);
-          } else if (isTextQuestion(q)) {
-            e.preventDefault();
-            const text = (inputs[q.id] || '').trim();
-            const hasAttachments = (stateRef.current.questionFileRefs?.[q.id]?.length ?? 0) > 0;
-            if ((text || hasAttachments) && qIdx < lastQuestionIdx) {
-              setCurrentQuestionIndex((p) => p + 1);
-              setFocusedOptionIndex(0);
-            }
-          } else if (optIdx === lastOptionIdx) {
-            selectAnswer(q.id, qIdx, CUSTOM_OPTION_ID, inputs[q.id] || '');
-          } else {
-            const opts = q.options ?? [];
-            selectAnswer(q.id, qIdx, opts[optIdx].id);
-          }
-          break;
-        }
-        case KEYBOARD_KEYS.ESCAPE: {
-          if (isApprovalQuestion(q)) return;
-          e.preventDefault();
-          handleSkipToCustomInput(q.id);
-          break;
-        }
-        default:
-          if (
-            targetIsTextField ||
-            isApprovalQuestion(q) ||
-            isTextQuestion(q) ||
-            e.key.length !== 1 ||
-            e.ctrlKey ||
-            e.metaKey ||
-            e.altKey
-          ) {
-            return;
-          }
-          setFocusedOptionIndex(lastOptionIdx);
-          appendPrintableToCustomInput(q, e.key, setCustomInputs, setAnswers);
+      if (qIndex < questions.length - 1) {
+        navigateToQuestion(qIndex + 1, 'next');
+      } else {
+        setFocusedOptionIndex(totalOptions - 1);
       }
     },
-    [questions, selectAnswer, selectApprovalAnswer, handleSkipToCustomInput],
+    [questions.length, totalOptions, navigateToQuestion],
   );
 
   const handleSubmit = useCallback(async () => {
     if (!allQuestionsAnswered || !sourceEntityId || !sourceEntityType || isHitlRespondLoading) return;
 
-    const responses = questions.map((question) => {
-      const answer = answers[question.id];
-      const entity_type = question.entity_type ?? (sourceEntityType as string);
-      const entity_id = question.entity_id ?? question.id;
-      const input_id = question.input_id;
-      const file_references = questionFileRefs[question.id]?.length ? questionFileRefs[question.id] : undefined;
-
-      const buildSkippedResponse = (): HITLResponse => {
-        if (isApprovalQuestion(question)) {
-          return { type: HITL_RESPONSE_TYPE.APPROVAL, approved: false, is_skipped: true };
-        }
-        if (isTextQuestion(question)) {
-          return { type: HITL_RESPONSE_TYPE.TEXT, text: '', is_skipped: true };
-        }
-        if (isMultipleChoiceQuestion(question)) {
-          return { type: HITL_RESPONSE_TYPE.MULTIPLE_CHOICE, selected_options: [], is_skipped: true };
-        }
-        return {
-          type: HITL_RESPONSE_TYPE.SELECT_ONE,
-          selected_option: null,
-          custom_input: null,
-          is_skipped: true,
-        };
-      };
-
-      if (answer?.isSkipped) {
-        return { entity_type, entity_id, input_id, response: buildSkippedResponse(), file_references };
-      }
-
-      if (isApprovalQuestion(question)) {
-        const ids = answer?.optionIds ?? [];
-        const approved = ids.includes(HITL_APPROVAL_YES);
-        return {
-          entity_type,
-          entity_id,
-          input_id,
-          response: { type: HITL_RESPONSE_TYPE.APPROVAL, approved },
-          file_references,
-        };
-      }
-
-      if (isTextQuestion(question)) {
-        return {
-          entity_type,
-          entity_id,
-          input_id,
-          response: { type: HITL_RESPONSE_TYPE.TEXT, text: answer?.customText?.trim() ?? '', is_skipped: false },
-          file_references,
-        };
-      }
-
-      if (isMultipleChoiceQuestion(question)) {
-        const ids = answer?.optionIds ?? [];
-        const selected_options = ids.filter((id) => id !== CUSTOM_OPTION_ID);
-        const customTrimmed = (answer?.customText ?? '').trim();
-        const response: HITLResponse = {
-          type: HITL_RESPONSE_TYPE.MULTIPLE_CHOICE,
-          selected_options,
-        };
-        if (customTrimmed) {
-          response.custom_input = customTrimmed;
-        }
-        return { entity_type, entity_id, input_id, response, file_references };
-      }
-
-      const isCustom = answer?.optionIds.includes(CUSTOM_OPTION_ID);
-      if (isCustom) {
-        return {
-          entity_type,
-          entity_id,
-          input_id,
-          response: {
-            type: HITL_RESPONSE_TYPE.SELECT_ONE,
-            selected_option: null,
-            custom_input: answer?.customText?.trim() ?? '',
-          },
-          file_references,
-        };
-      }
-
-      return {
-        entity_type,
-        entity_id,
-        input_id,
-        response: {
-          type: HITL_RESPONSE_TYPE.SELECT_ONE,
-          selected_option: answer?.optionIds[0] ?? null,
-          custom_input: null,
-        },
-        file_references,
-      };
-    });
-
     const submitPayload: HITLRespondPayloadType = {
       source_entity: { entity_type: sourceEntityType, entity_id: sourceEntityId },
-      responses,
+      responses: questions.map((question) =>
+        buildResponseForQuestion(question, answers[question.id], sourceEntityType, questionFileRefs[question.id]),
+      ),
     };
 
     try {
@@ -426,65 +229,52 @@ export const HITLQuestionsBlock = ({
 
   submitRef.current = () => void handleSubmit();
 
-  const hasAutoSubmittedRef = useRef(false);
+  const handleSingleSelectSubmit = useCallback(
+    async (questionId: string, optionId: string, customText: string | undefined) => {
+      if (!sourceEntityId || !sourceEntityType || isHitlRespondLoading) return;
+      const question = questions.find((q) => q.id === questionId);
+      if (!question) return;
 
-  const handleAutoSubmitApproval = useCallback(() => {
-    if (isAllApproval && allQuestionsAnswered && !hasAutoSubmittedRef.current) {
-      hasAutoSubmittedRef.current = true;
-      submitRef.current?.();
-    }
-  }, [isAllApproval, allQuestionsAnswered]);
+      const answer =
+        optionId === CUSTOM_OPTION_ID
+          ? { optionIds: [CUSTOM_OPTION_ID], customText: customText ?? '', isSkipped: false }
+          : { optionIds: [optionId], customText: '', isSkipped: false };
 
-  const handleAutoSubmitSingleSelect = useCallback(() => {
-    if (!isSingleSelectOnly || !allQuestionsAnswered || hasAutoSubmittedSingleSelectRef.current) return;
-    const answer = answers[questions[0].id];
-    const usedCustomInput = answer?.optionIds.includes(CUSTOM_OPTION_ID);
-    if (usedCustomInput) return;
-    hasAutoSubmittedSingleSelectRef.current = true;
-    submitRef.current?.();
-  }, [isSingleSelectOnly, allQuestionsAnswered, answers, questions]);
+      const submitPayload: HITLRespondPayloadType = {
+        source_entity: { entity_type: sourceEntityType, entity_id: sourceEntityId },
+        responses: [buildResponseForQuestion(question, answer, sourceEntityType, questionFileRefs[questionId])],
+      };
 
-  const syncStateRef = useCallback(() => {
-    stateRef.current = {
-      currentQuestionIndex,
-      focusedOptionIndex,
-      customInputs,
-      totalOptions,
-      currentQuestion,
-      answers,
-      questionFileRefs,
-    };
-  }, [
-    currentQuestionIndex,
-    focusedOptionIndex,
-    customInputs,
-    totalOptions,
-    currentQuestion,
-    answers,
-    questionFileRefs,
-  ]);
+      setSubmittingOptionId(optionId);
+      try {
+        await hitlRespond(submitPayload).unwrap();
+        onSubmit?.();
+      } catch (error) {
+        captureException(error);
+        setSubmittingOptionId(null);
+      }
+    },
+    [sourceEntityId, sourceEntityType, isHitlRespondLoading, questions, questionFileRefs, hitlRespond, onSubmit],
+  );
+
+  submitSingleSelectRef.current = handleSingleSelectSubmit;
+
+  const handleDismiss = useCallback(() => {
+    setAnswers((prev) => buildSkippedAnswers(questions, prev));
+    setTimeout(() => submitRef.current?.(), 0);
+  }, [questions]);
 
   const handleFocusAndScroll = useCallback(() => {
-    containerRef.current?.focus({ preventScroll: true });
+    if (focusedOptionIndex < totalOptions - 1) {
+      containerRef.current?.focus({ preventScroll: true });
+    }
 
-    const shouldScroll = shouldScrollRef.current;
+    if (!shouldScrollRef.current) return;
     shouldScrollRef.current = false;
 
-    if (!shouldScroll) return;
-
-    isProgrammaticScrollRef.current = true;
-
     const rafId = requestAnimationFrame(() => {
-      const scrollEl = scrollContainerRef.current?.getScrollElement();
+      const scrollEl = questionScrollRef.current;
       if (!scrollEl) return;
-
-      if (focusedOptionIndex === 0) {
-        const questionEl = questionRefs.current[currentQuestionIndex];
-        if (questionEl) {
-          questionEl.scrollIntoView({ block: 'start', behavior: 'smooth' });
-        }
-        return;
-      }
 
       const focusedEl = scrollEl.querySelector<HTMLElement>('[data-hitl-focused]');
       if (!focusedEl) return;
@@ -494,86 +284,121 @@ export const HITLQuestionsBlock = ({
       const isFullyVisible = elRect.top >= scrollRect.top && elRect.bottom <= scrollRect.bottom;
 
       if (!isFullyVisible) {
-        const block = scrollDirectionRef.current === 'down' ? 'start' : 'end';
-        focusedEl.scrollIntoView({ block, behavior: 'smooth' });
+        focusedEl.scrollIntoView({
+          block: scrollDirectionRef.current === 'down' ? 'start' : 'end',
+          behavior: 'smooth',
+        });
       }
     });
 
     return () => cancelAnimationFrame(rafId);
-  }, [currentQuestion, currentQuestionIndex, focusedOptionIndex, totalOptions]);
+  }, [focusedOptionIndex, totalOptions]);
 
-  const setupScrollObserver = useCallback(() => {
-    const scrollEl = scrollContainerRef.current?.getScrollElement();
-    if (!scrollEl || questions.length <= 1) return;
+  const handleKeyDown = useCallback(
+    (e: KeyboardEvent) => {
+      const active = document.activeElement;
+      if (active && active !== document.body && !containerRef.current?.contains(active)) return;
 
-    const resetProgrammaticFlag = () => {
-      isProgrammaticScrollRef.current = false;
-    };
-    scrollEl.addEventListener('scrollend', resetProgrammaticFlag);
+      const {
+        currentQuestionIndex: qIdx,
+        focusedOptionIndex: optIdx,
+        customInputs: inputs,
+        questionFileRefs: fileRefs,
+      } = stateRef.current;
+      if (!currentQuestion) return;
 
-    const visibilityMap = new Map<number, number>();
+      shouldScrollRef.current = true;
 
-    const observer = new IntersectionObserver(
-      (entries) => {
-        if (isProgrammaticScrollRef.current) return;
+      const targetIsTextField =
+        e.target instanceof HTMLInputElement ||
+        e.target instanceof HTMLTextAreaElement ||
+        (e.target instanceof HTMLElement && e.target.isContentEditable);
 
-        for (const entry of entries) {
-          const idx = questionRefs.current.indexOf(entry.target as HTMLDivElement);
-          if (idx !== -1) {
-            visibilityMap.set(idx, entry.intersectionRatio);
+      const preventUnlessTextField = () => {
+        if (!targetIsTextField) e.preventDefault();
+      };
+
+      const lastOptionIdx = totalOptions - 1;
+      const lastQuestionIdx = questions.length - 1;
+      const q = currentQuestion;
+
+      switch (e.key) {
+        case KEYBOARD_KEYS.ARROW_DOWN: {
+          preventUnlessTextField();
+          scrollDirectionRef.current = 'down';
+          setFocusedOptionIndex((p) => (p === lastOptionIdx ? 0 : p + 1));
+          break;
+        }
+        case KEYBOARD_KEYS.ARROW_UP: {
+          preventUnlessTextField();
+          scrollDirectionRef.current = 'up';
+          setFocusedOptionIndex((p) => (p === 0 ? lastOptionIdx : p - 1));
+          break;
+        }
+        case KEYBOARD_KEYS.ENTER: {
+          if (e.metaKey || e.ctrlKey) {
+            e.preventDefault();
+            if (qIdx < lastQuestionIdx) {
+              navigateToQuestion(qIdx + 1, 'next');
+            } else {
+              submitRef.current?.();
+            }
+            return;
           }
-        }
-
-        let bestIdx = -1;
-        let bestRatio = 0;
-        for (const [idx, ratio] of visibilityMap) {
-          if (ratio > bestRatio) {
-            bestRatio = ratio;
-            bestIdx = idx;
+          preventUnlessTextField();
+          if (isTextQuestion(q)) {
+            e.preventDefault();
+            const text = (inputs[q.id] || '').trim();
+            const hasAttachments = (fileRefs[q.id]?.length ?? 0) > 0;
+            if ((text || hasAttachments) && qIdx < lastQuestionIdx) {
+              navigateToQuestion(qIdx + 1, 'next');
+            }
+          } else if (optIdx === lastOptionIdx) {
+            const customText = inputs[q.id] || '';
+            selectAnswer(q.id, qIdx, CUSTOM_OPTION_ID, customText);
+            if (isSingleSelectOnly && customText.trim()) {
+              submitSingleSelectRef.current?.(q.id, CUSTOM_OPTION_ID, customText);
+            }
+          } else {
+            selectAnswer(q.id, qIdx, (q.options ?? [])[optIdx].id);
           }
+          break;
         }
-
-        if (bestIdx !== -1) {
-          setCurrentQuestionIndex(bestIdx);
-          setFocusedOptionIndex(0);
+        case KEYBOARD_KEYS.ESCAPE: {
+          e.preventDefault();
+          handleSkipToCustomInput(q.id, qIdx);
+          if (isSingleSelectOnly) {
+            submitSingleSelectRef.current?.(q.id, CUSTOM_OPTION_ID, 'No preference');
+          }
+          break;
         }
-      },
-      { root: scrollEl, threshold: [0, 0.25, 0.5, 0.75, 1] },
-    );
+        default:
+          if (targetIsTextField || isTextQuestion(q) || e.key.length !== 1 || e.ctrlKey || e.metaKey || e.altKey) {
+            return;
+          }
+          setFocusedOptionIndex(lastOptionIdx);
+          appendPrintableToCustomInput(q, e.key, setCustomInputs, setAnswers);
+      }
+    },
+    [
+      currentQuestion,
+      questions,
+      totalOptions,
+      isSingleSelectOnly,
+      selectAnswer,
+      handleSkipToCustomInput,
+      navigateToQuestion,
+    ],
+  );
 
-    for (const el of questionRefs.current) {
-      if (el) observer.observe(el);
-    }
-
-    return () => {
-      observer.disconnect();
-      scrollEl.removeEventListener('scrollend', resetProgrammaticFlag);
-    };
-  }, [questions.length]);
-
+  // --- Effects ---
   useEffect(() => {
-    return setupScrollObserver();
-  }, [setupScrollObserver]);
+    stateRef.current = { currentQuestionIndex, focusedOptionIndex, customInputs, questionFileRefs };
+  }, [currentQuestionIndex, focusedOptionIndex, customInputs, questionFileRefs]);
 
   useEffect(() => {
     return handleFocusAndScroll();
-  }, [handleFocusAndScroll, currentQuestionIndex]);
-
-  useEffect(() => {
-    handleAutoSubmitApproval();
-  }, [handleAutoSubmitApproval]);
-
-  useEffect(() => {
-    handleAutoSubmitSingleSelect();
-  }, [handleAutoSubmitSingleSelect]);
-
-  useEffect(() => {
-    containerRef.current?.focus({ preventScroll: true });
-  }, []);
-
-  useEffect(() => {
-    syncStateRef();
-  }, [syncStateRef]);
+  }, [handleFocusAndScroll]);
 
   useEffect(() => {
     document.addEventListener('keydown', handleKeyDown);
@@ -588,61 +413,66 @@ export const HITLQuestionsBlock = ({
         <HITLQuestionsHeader
           questionCount={questions.length}
           currentQuestionIndex={currentQuestionIndex}
-          onPrev={() => {
-            if (currentQuestionIndex > 0) {
-              shouldScrollRef.current = true;
-              setFocusedOptionIndex(0);
-              setCurrentQuestionIndex(currentQuestionIndex - 1);
-            }
-          }}
-          onNext={() => {
-            if (currentQuestionIndex < questions.length - 1) {
-              shouldScrollRef.current = true;
-              setFocusedOptionIndex(0);
-              setCurrentQuestionIndex(currentQuestionIndex + 1);
-            }
-          }}
+          title={title}
+          onTitleClick={handleTitleClick}
+          onPrev={() => currentQuestionIndex > 0 && navigateToQuestion(currentQuestionIndex - 1, 'prev')}
+          onNext={() =>
+            currentQuestionIndex < questions.length - 1 && navigateToQuestion(currentQuestionIndex + 1, 'next')
+          }
+          onDismiss={handleDismiss}
         />
 
-        <div
-          className='bg-BG_WHITE shadow-table-filter-menu relative flex flex-col overflow-hidden rounded-xl border border-gray-300'
-          style={{ maxHeight: HITL_QUESTIONS_LAYOUT.PANEL_MAX_HEIGHT_PX }}
-        >
-          <ScrollContainer ref={scrollContainerRef} className='min-h-0 flex-1' scrollbarStyle='thin'>
-            {questions.map((question, qIndex) => (
-              <HITLQuestionItem
-                key={question.id}
-                question={question}
-                qIndex={qIndex}
-                questionsLength={questions.length}
-                currentQuestionIndex={currentQuestionIndex}
-                focusedOptionIndex={focusedOptionIndex}
-                answers={answers}
-                customInputs={customInputs}
-                containerRef={containerRef}
-                setQuestionEl={(el) => {
-                  questionRefs.current[qIndex] = el;
-                }}
-                setCurrentQuestionIndex={setCurrentQuestionIndex}
-                setFocusedOptionIndex={setFocusedOptionIndex}
-                selectApprovalAnswer={selectApprovalAnswer}
-                selectAnswer={selectAnswer}
-                onCustomInputChange={(value) => handleCustomInputChange(question.id, value)}
-                onFileReferencesChange={handleFileReferencesChange}
-                approvalAction={isHitlRespondLoading ? approvalAction : null}
-                username={username}
-              />
-            ))}
-          </ScrollContainer>
+        <div className='bg-BG_WHITE shadow-table-filter-menu relative flex flex-col overflow-hidden rounded-xl border border-gray-300'>
+          <div className='relative overflow-hidden'>
+            <AnimatePresence mode='wait' initial={false}>
+              <motion.div
+                key={currentQuestion.id}
+                initial={{ x: navDirectionRef.current === 'next' ? SLIDE_OFFSET_PX : -SLIDE_OFFSET_PX, opacity: 0 }}
+                animate={{ x: 0, opacity: 1 }}
+                exit={{ x: navDirectionRef.current === 'next' ? -SLIDE_OFFSET_PX : SLIDE_OFFSET_PX, opacity: 0 }}
+                transition={{ duration: 0.18, ease: 'easeInOut' }}
+              >
+                <div
+                  ref={questionScrollRef}
+                  className='overflow-y-auto [scrollbar-width:thin]'
+                  style={{ maxHeight: HITL_QUESTIONS_LAYOUT.PANEL_MAX_HEIGHT_PX }}
+                >
+                  <HITLQuestionItem
+                    question={currentQuestion}
+                    qIndex={currentQuestionIndex}
+                    questionsLength={questions.length}
+                    currentQuestionIndex={currentQuestionIndex}
+                    focusedOptionIndex={focusedOptionIndex}
+                    answers={answers}
+                    customInputs={customInputs}
+                    containerRef={containerRef}
+                    submittingOptionId={submittingOptionId}
+                    isSingleSelectOnly={isSingleSelectOnly}
+                    setCurrentQuestionIndex={(i) => navigateToQuestion(i, i > currentQuestionIndex ? 'next' : 'prev')}
+                    setFocusedOptionIndex={setFocusedOptionIndex}
+                    selectAnswer={selectAnswer}
+                    onCustomInputChange={(value) => handleCustomInputChange(currentQuestion.id, value)}
+                    onFileReferencesChange={handleFileReferencesChange}
+                    username={username}
+                  />
+                </div>
+              </motion.div>
+            </AnimatePresence>
+          </div>
 
-          {!isAllApproval && (
-            <HITLQuestionsFooter
-              onSkip={() => handleSkipToCustomInput(currentQuestion.id)}
-              onSubmit={() => void handleSubmit()}
-              submitDisabled={!allQuestionsAnswered}
-              isSubmitting={isHitlRespondLoading}
-            />
-          )}
+          <HITLQuestionsFooter
+            onSkip={() => handleSkipToCustomInput(currentQuestion.id, currentQuestionIndex)}
+            onSubmit={() => void handleSubmit()}
+            onNext={() => navigateToQuestion(currentQuestionIndex + 1, 'next')}
+            isLastQuestion={currentQuestionIndex === questions.length - 1}
+            currentQuestionAnswered={
+              isQuestionAnswerComplete(currentQuestion, answers[currentQuestion.id]) ||
+              (questionFileRefs[currentQuestion.id]?.length ?? 0) > 0
+            }
+            submitDisabled={!allQuestionsAnswered}
+            isSubmitting={isHitlRespondLoading}
+            isSingleSelectOnly={isSingleSelectOnly}
+          />
         </div>
       </div>
     </div>
