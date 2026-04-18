@@ -8,6 +8,7 @@ export * from './src/components/ConnectedChatInput';
 export * from './src/components/DropOverlay';
 export * from './src/components/Message';
 export * from './src/components/MessageContainer';
+export * from './src/components/QueuedMessages';
 export * from './src/components/RichTextEditor';
 export * from './src/components/StreamingMessage';
 export * from './src/context/ChatActionsContext';
