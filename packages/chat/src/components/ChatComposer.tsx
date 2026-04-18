@@ -1,8 +1,8 @@
 'use client';
 
-import { Button, LiveWaveform } from '@zamp-platform/ui';
+import { Button, LiveWaveform, Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@zamp-platform/ui';
 import { cn } from '@zamp-platform/ui/utils';
-import { ArrowUp, Check, Loader, Loader2, Mic, Paperclip, Square, X } from 'lucide-react';
+import { ArrowUp, Check, Hourglass, Loader, Loader2, Mic, Paperclip, Square, X } from 'lucide-react';
 import React, { forwardRef, useImperativeHandle, useRef } from 'react';
 
 import { UploadedFileType } from '../types/block.types';
@@ -129,8 +129,8 @@ export const ChatComposer = forwardRef<ChatComposerHandle, ChatComposerProps>(
       focus: () => editorRef.current?.focus(),
     }));
 
-    const handleContainerClick = () => {
-      if (!shouldShowRecorder) {
+    const handleContainerClick = (e: React.MouseEvent<HTMLDivElement>) => {
+      if (!shouldShowRecorder && e.target === e.currentTarget) {
         editorRef.current?.focus();
       }
     };
@@ -149,7 +149,7 @@ export const ChatComposer = forwardRef<ChatComposerHandle, ChatComposerProps>(
     return (
       <div
         className={cn(
-          'border-GRAY_400 focus-within:border-GRAY_300 shadow-chatbot-shadow relative w-full rounded-xl border transition-all',
+          'border-GRAY_400 bg-BG_WHITE focus-within:border-GRAY_300 shadow-chatbot-shadow relative w-full rounded-xl border transition-all',
           shouldShowRecorder && 'border-gray-400',
           containerClassName,
           className,
@@ -273,20 +273,49 @@ export const ChatComposer = forwardRef<ChatComposerHandle, ChatComposerProps>(
                   ))}
 
                 {showSubmitButton && (isStreaming || isStopping) && onStop ? (
-                  <Button
-                    onClick={onStop}
-                    disabled={isStopping}
-                    size='icon'
-                    variant='ghost'
-                    aria-label='Stop generating'
-                    className='bg-GRAY_950 text-BG_WHITE hover:bg-GRAY_950 hover:text-BG_WHITE dark:bg-GRAY_500 dark:hover:bg-GRAY_600 dark:text-GRAY_1000 dark:hover:text-GRAY_1000 size-[26px] rounded-full p-0 [&_svg]:size-3.5'
-                  >
-                    {isStopping ? (
-                      <Loader2 className='animate-spin' />
-                    ) : (
-                      <Square fill='currentColor' strokeWidth={0} className='size-2.5!' />
-                    )}
-                  </Button>
+                  !isSubmitDisabled ? (
+                    <TooltipProvider delayDuration={300}>
+                      <Tooltip>
+                        <TooltipTrigger asChild>
+                          <Button
+                            onClick={onSubmit}
+                            size='icon'
+                            aria-label='Queue message'
+                            className='bg-GRAY_950 text-BG_WHITE hover:bg-GRAY_950 hover:text-BG_WHITE dark:bg-GRAY_500 dark:hover:bg-GRAY_600 dark:text-GRAY_1000 dark:hover:text-GRAY_1000 size-[26px] rounded-full p-0 [&_svg]:size-3.5'
+                          >
+                            <Hourglass className='size-3!' />
+                          </Button>
+                        </TooltipTrigger>
+                        <TooltipContent side='top' align='center' className='f-10-450 p-1.5' sideOffset={4}>
+                          Queue message
+                        </TooltipContent>
+                      </Tooltip>
+                    </TooltipProvider>
+                  ) : (
+                    <TooltipProvider delayDuration={300}>
+                      <Tooltip>
+                        <TooltipTrigger asChild>
+                          <Button
+                            onClick={onStop}
+                            disabled={isStopping}
+                            size='icon'
+                            variant='ghost'
+                            aria-label='Stop generating'
+                            className='bg-GRAY_950 text-BG_WHITE hover:bg-GRAY_950 hover:text-BG_WHITE dark:bg-GRAY_500 dark:hover:bg-GRAY_600 dark:text-GRAY_1000 dark:hover:text-GRAY_1000 size-[26px] rounded-full p-0 [&_svg]:size-3.5'
+                          >
+                            {isStopping ? (
+                              <Loader2 className='animate-spin' />
+                            ) : (
+                              <Square fill='currentColor' strokeWidth={0} className='size-2.5!' />
+                            )}
+                          </Button>
+                        </TooltipTrigger>
+                        <TooltipContent side='top' align='center' className='f-10-450 p-1.5' sideOffset={4}>
+                          Stop generating
+                        </TooltipContent>
+                      </Tooltip>
+                    </TooltipProvider>
+                  )
                 ) : (
                   showSubmitButton &&
                   onSubmit && (

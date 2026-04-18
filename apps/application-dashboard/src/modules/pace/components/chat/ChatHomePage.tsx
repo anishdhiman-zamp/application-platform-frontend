@@ -111,7 +111,7 @@ const ChatHomePage = () => {
 
           setChatSidebarState(CHAT_SIDEBAR_STATE.EXPANDED);
 
-          return { conversation_id: 'pending', status_message: '', title: '' };
+          return { conversation_id: 'pending', message_id: '', status_message: '', title: '' };
         },
       }),
     [startNewChat, setChatMessageIntent, setChatSidebarState],

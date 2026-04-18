@@ -48,8 +48,8 @@ export const extractInitialValues = (blocks: Block[]): Record<string, { label: s
 
 export const getHistoryFormattedMessages = (conversationHistory: GetConversationByIdResponseType): ChatMessage[] => {
   return conversationHistory.messages
-    .filter((message) => message.state !== MessageState.STREAMING)
-    .map((message) => ({
+    .filter((message) => !(message.state === MessageState.STREAMING && message.sender_type === SenderType.ASSISTANT))
+    .map((message, index) => ({
       resource_type: conversationHistory?.conversation?.resource_type,
       resource_id: conversationHistory?.conversation?.resource_id,
       message_content: message.content,
@@ -60,7 +60,10 @@ export const getHistoryFormattedMessages = (conversationHistory: GetConversation
       sender_name: message.sender_name,
       id: message.id,
       conversation_id: message?.conversation_id,
-      state: message.state,
+      state:
+        index === 0 && message.sender_type === SenderType.USER && message.state === MessageState.QUEUED
+          ? MessageState.DONE
+          : message.state,
     }));
 };
 

@@ -7,6 +7,7 @@ export interface ConversationActions {
   sendMessage: (payload: ChatMessage) => Promise<unknown>;
   createConversationV2: (payload: CreateConversationPayloadTypeV2) => Promise<{
     conversation_id: string;
+    message_id: string;
     status_message: string;
     title: string;
   }>;
@@ -18,7 +19,7 @@ export interface ConversationActions {
 
 const NOOP_ACTIONS: ConversationActions = {
   sendMessage: async () => {},
-  createConversationV2: async () => ({ conversation_id: '', status_message: '', title: '' }),
+  createConversationV2: async () => ({ conversation_id: '', message_id: '', status_message: '', title: '' }),
   stopConversation: async () => {},
   clearMessages: () => {},
   setConversationId: () => {},

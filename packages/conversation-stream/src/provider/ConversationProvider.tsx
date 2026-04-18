@@ -10,6 +10,7 @@ import {
   type CreateConversationPayloadTypeV2,
   getHistoryFormattedMessages,
   getStreamingMessageId,
+  MessageState,
   type ResourceType,
   SenderType,
   streamingStateStore,
@@ -60,6 +61,7 @@ export const ConversationProvider: React.FC<ConversationProviderProps> = ({
   const mountRefetchFiredRef = useRef(false);
 
   const [messages, setMessages] = useState<ChatMessage[]>([]);
+  const [queuedMessages, setQueuedMessages] = useState<ChatMessage[]>([]);
   const [_conversationId, _setConversationId] = useState<string | null>(externalConversationId);
   const [isStopping, setIsStopping] = useState(false);
   const [isHistoryLoaded, setIsHistoryLoaded] = useState(false);
@@ -101,14 +103,22 @@ export const ConversationProvider: React.FC<ConversationProviderProps> = ({
     },
     { skip: shouldSkipConversationFetch },
   );
+
+  const isUninitializedRef = useRef(isUninitializedConversationHistory);
+  isUninitializedRef.current = isUninitializedConversationHistory;
+
   const streamingState = useStreamingState(_conversationId);
 
   const isStreaming = useMemo(() => streamingState?.is_active ?? false, [streamingState?.is_active]);
+  const isStreamingRef = useRef(isStreaming);
+  isStreamingRef.current = isStreaming;
 
   const isAnalysing = useMemo(
     () => messages.length > 0 && messages[messages.length - 1]?.sender_type === SenderType.USER,
     [messages],
   );
+  const isAnalysingRef = useRef(isAnalysing);
+  isAnalysingRef.current = isAnalysing;
 
   const streamingMessageId = useMemo(
     () => (conversationHistory ? getStreamingMessageId(conversationHistory) : null),
@@ -135,7 +145,7 @@ export const ConversationProvider: React.FC<ConversationProviderProps> = ({
           return [...prev, finalMessage];
         });
       }
-      refetchConversationHistory();
+      if (!isUninitializedRef.current) refetchConversationHistory();
 
       clearStoppingTimer();
       setIsStopping(false);
@@ -197,6 +207,10 @@ export const ConversationProvider: React.FC<ConversationProviderProps> = ({
     });
   }, []);
 
+  const handleMessagesPickedUp = useCallback(() => {
+    if (!isUninitializedRef.current) refetchConversationHistory();
+  }, [refetchConversationHistory]);
+
   const perConvCallbacks = useRef<ConversationEventCallbacks>({
     onTitleUpdated: handlePerConvTitleUpdated,
     onMessageStop: handlePerConvMessageStop,
@@ -205,6 +219,7 @@ export const ConversationProvider: React.FC<ConversationProviderProps> = ({
     onTaskUpdate: handlePerConvTaskUpdate,
     onTaskSummary: handlePerConvTaskSummary,
     onInputRequired: handlePerConvInputRequired,
+    onMessagesPickedUp: handleMessagesPickedUp,
   });
 
   const setConversationId = useCallback(
@@ -221,6 +236,7 @@ export const ConversationProvider: React.FC<ConversationProviderProps> = ({
       streamingStateStore.delete(conversationIdRef.current);
     }
     setMessages([]);
+    setQueuedMessages([]);
     _setConversationId(null);
     conversationIdRef.current = null;
     isNewlyCreatedConversationRef.current = null;
@@ -319,9 +335,9 @@ export const ConversationProvider: React.FC<ConversationProviderProps> = ({
         throw new Error('Conversation ID is required to send messages');
       }
 
-      const previousMessageCount = messagesRef.current.length;
+      const tempId = crypto.randomUUID();
 
-      const messageToShow: ChatMessage = messagePayload?.message_content?.file_references?.length
+      const baseMessage: ChatMessage = messagePayload?.message_content?.file_references?.length
         ? {
             ...messagePayload,
             message_content: {
@@ -344,7 +360,14 @@ export const ConversationProvider: React.FC<ConversationProviderProps> = ({
           }
         : messagePayload;
 
-      setMessages((prev) => [...prev, messageToShow]);
+      const shouldQueue = isStreamingRef.current || isAnalysingRef.current;
+
+      if (shouldQueue) {
+        const messageToQueue: ChatMessage = { ...baseMessage, id: tempId, state: MessageState.QUEUED };
+        setQueuedMessages((prev) => [...prev, messageToQueue]);
+      } else {
+        setMessages((prev) => [...prev, baseMessage]);
+      }
 
       try {
         const response = await sendMessageV2Mutation({
@@ -353,18 +376,24 @@ export const ConversationProvider: React.FC<ConversationProviderProps> = ({
           url: apiConfig?.sendMessage,
         }).unwrap();
 
+        // Patch queued message with the real DB message ID
+        if (shouldQueue && response.message_id) {
+          setQueuedMessages((prev) => prev.map((m) => (m.id === tempId ? { ...m, id: response.message_id } : m)));
+        }
+
         return response;
       } catch (error) {
-        setMessages((prev) => prev.slice(0, previousMessageCount));
+        if (shouldQueue) {
+          setQueuedMessages((prev) => prev.filter((m) => m.id !== tempId));
+        } else {
+          setMessages((prev) => prev.filter((m) => m !== baseMessage));
+        }
         captureException(error instanceof Error ? error : new Error(String(error)));
         throw new Error('Failed to send message. Please try again.');
       }
     },
     [_conversationId, sendMessageV2Mutation, apiConfig?.sendMessage],
   );
-
-  const isUninitializedRef = useRef(isUninitializedConversationHistory);
-  isUninitializedRef.current = isUninitializedConversationHistory;
 
   const safeRefetchConversationHistory = useCallback(() => {
     if (isUninitializedRef.current) return;
@@ -399,7 +428,8 @@ export const ConversationProvider: React.FC<ConversationProviderProps> = ({
   const stateValue: ConversationState = useMemo(
     () => ({
       messages,
-      hasMessages: messages.length > 0,
+      queuedMessages,
+      hasMessages: messages.length > 0 || queuedMessages.length > 0,
       conversationId: _conversationId,
       isStreaming,
       isStopping,
@@ -422,6 +452,7 @@ export const ConversationProvider: React.FC<ConversationProviderProps> = ({
     }),
     [
       messages,
+      queuedMessages,
       _conversationId,
       isStreaming,
       isStopping,
@@ -460,6 +491,7 @@ export const ConversationProvider: React.FC<ConversationProviderProps> = ({
       onTaskUpdate: handlePerConvTaskUpdate,
       onTaskSummary: handlePerConvTaskSummary,
       onInputRequired: handlePerConvInputRequired,
+      onMessagesPickedUp: handleMessagesPickedUp,
     };
   }, [
     handlePerConvTitleUpdated,
@@ -469,6 +501,7 @@ export const ConversationProvider: React.FC<ConversationProviderProps> = ({
     handlePerConvTaskUpdate,
     handlePerConvTaskSummary,
     handlePerConvInputRequired,
+    handleMessagesPickedUp,
   ]);
 
   useEffect(() => {
@@ -478,6 +511,7 @@ export const ConversationProvider: React.FC<ConversationProviderProps> = ({
     if (newId !== prevId) {
       _setConversationId(newId);
       setMessages([]);
+      setQueuedMessages([]);
       setTaskSummaries({});
       setIsBrowserStreamingAvailable(false);
       setIsHistoryLoaded(false);
@@ -593,14 +627,22 @@ export const ConversationProvider: React.FC<ConversationProviderProps> = ({
     }
 
     if (conversationHistory?.messages?.length > 0) {
-      const historyMessages: ChatMessage[] = getHistoryFormattedMessages(conversationHistory);
+      const allHistoryMessages: ChatMessage[] = getHistoryFormattedMessages(conversationHistory);
+      const historyMessages = allHistoryMessages.filter((msg) => msg.state !== MessageState.QUEUED);
+      const historyQueuedMessages = allHistoryMessages.filter((msg) => msg.state === MessageState.QUEUED);
+      const dbMessageIds = new Set(historyMessages.map((msg) => msg.id).filter(Boolean));
+      const dbQueuedMessageIds = new Set(historyQueuedMessages.map((msg) => msg.id).filter(Boolean));
+
+      setQueuedMessages((prev) => {
+        const kept = prev.filter((msg) => !msg.id || (!dbMessageIds.has(msg.id) && !dbQueuedMessageIds.has(msg.id)));
+        return [...historyQueuedMessages, ...kept];
+      });
 
       setMessages((prev) => {
         if (prev.length > 0) {
-          const dbMessageIds = new Set(historyMessages.map((m) => m.id).filter(Boolean));
-          const replayedMessages = prev.filter((m) => {
-            if (!m.id || dbMessageIds.has(m.id)) return false;
-            return m.sender_type === SenderType.USER;
+          const replayedMessages = prev.filter((msg) => {
+            if (!msg.id || dbMessageIds.has(msg.id)) return false;
+            return msg.sender_type === SenderType.USER;
           });
 
           if (replayedMessages.length > 0) {

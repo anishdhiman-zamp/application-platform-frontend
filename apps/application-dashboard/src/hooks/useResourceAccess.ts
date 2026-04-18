@@ -108,6 +108,7 @@ export const useResourceAccess = ({
     checkUserPrivilege,
     allTeamsData,
     isLoadingAudiencesData,
+    isUninitialized,
     refetchAudiencesData,
   };
 };

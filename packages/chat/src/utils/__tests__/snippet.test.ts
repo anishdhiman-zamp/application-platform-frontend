@@ -5,22 +5,17 @@ describe('isLargeText', () => {
     expect(isLargeText('Hello world')).toBe(false);
   });
 
-  it('returns false for text with few lines under char threshold', () => {
-    expect(isLargeText('line1\nline2\nline3\nline4\nline5')).toBe(false);
+  it('returns false for text with many lines but under char threshold', () => {
+    const text = Array.from({ length: 20 }, (_, i) => `line${i + 1}`).join('\n');
+    expect(isLargeText(text)).toBe(false);
   });
 
-  it('returns true when text exceeds line threshold', () => {
-    const text = 'line1\nline2\nline3\nline4\nline5\nline6';
-    expect(isLargeText(text)).toBe(true);
+  it('returns false for text over char threshold but with few lines', () => {
+    expect(isLargeText('a'.repeat(2001))).toBe(false);
   });
 
-  it('returns true when text exceeds character threshold', () => {
-    const text = 'a'.repeat(501);
-    expect(isLargeText(text)).toBe(true);
-  });
-
-  it('returns true when both thresholds are exceeded', () => {
-    const text = ('a'.repeat(100) + '\n').repeat(6);
+  it('returns true when both line and char thresholds are exceeded', () => {
+    const text = ('a'.repeat(150) + '\n').repeat(16);
     expect(isLargeText(text)).toBe(true);
   });
 
@@ -28,12 +23,14 @@ describe('isLargeText', () => {
     expect(isLargeText('')).toBe(false);
   });
 
-  it('returns false for exactly 500 characters', () => {
-    expect(isLargeText('a'.repeat(500))).toBe(false);
+  it('returns false for exactly 2000 characters on many lines', () => {
+    const text = ('a'.repeat(124) + '\n').repeat(16);
+    expect(isLargeText(text)).toBe(false);
   });
 
-  it('returns false for exactly 5 lines', () => {
-    expect(isLargeText('a\nb\nc\nd\ne')).toBe(false);
+  it('returns false for exactly 15 lines over char threshold', () => {
+    const text = ('a'.repeat(150) + '\n').repeat(15);
+    expect(isLargeText(text)).toBe(false);
   });
 });
 
@@ -91,9 +88,9 @@ describe('createSnippetFile', () => {
   it('preserves the text content in the file', async () => {
     const content = 'Hello\nWorld\nTest';
     const file = createSnippetFile(content, []);
-    const text = await new Promise<string>((resolve) => {
+    const text = await new Promise((resolve) => {
       const reader = new FileReader();
-      reader.onload = () => resolve(reader.result as string);
+      reader.onload = () => resolve(reader.result);
       reader.readAsText(file);
     });
     expect(text).toBe(content);

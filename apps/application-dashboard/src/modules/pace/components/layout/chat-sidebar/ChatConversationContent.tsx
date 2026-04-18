@@ -50,6 +50,7 @@ export interface ChatConversationContentProps {
   onBrowserOpen?: (conversationId: string, sessionId?: string) => void;
   onBrowserStreamingEnd?: (conversationId: string) => void;
   onTaskPopoverOpenChange?: (open: boolean) => void;
+  onConversationNotFound?: (notFound: boolean) => void;
   fileDropHandlerRef: React.RefObject<((files: FileList) => void) | null>;
   addFileReferenceRef: React.RefObject<((ref: { path: string; name: string }) => void) | null>;
   currentUserName: string;
@@ -63,6 +64,7 @@ const ChatConversationContent = ({
   onBrowserOpen,
   onBrowserStreamingEnd,
   onTaskPopoverOpenChange,
+  onConversationNotFound,
   fileDropHandlerRef,
   addFileReferenceRef,
   currentUserName,
@@ -173,37 +175,10 @@ const ChatConversationContent = ({
     }
   }, [conversationId, ctxConversationId, onBrowserOpen, browserSessionId]);
 
-  useEffect(() => {
-    const wasAvailable = prevBrowserStreamingRef.current;
-
-    prevBrowserStreamingRef.current = isBrowserStreamingAvailable;
-
-    if (wasAvailable && !isBrowserStreamingAvailable) {
-      const activeConversationId = conversationId ?? ctxConversationId;
-
-      if (activeConversationId) {
-        onBrowserStreamingEnd?.(activeConversationId);
-      }
-    }
-  }, [isBrowserStreamingAvailable, conversationId, ctxConversationId, onBrowserStreamingEnd]);
-
   const handleTaskPopoverOpenChange = (open: boolean) => {
     setIsTaskPopoverOpen(open);
     onTaskPopoverOpenChange?.(open);
   };
-
-  useEffect(() => {
-    if (pendingFileReferences.length > 0 && addFileReferenceRef.current) {
-      pendingFileReferences.forEach((ref) => addFileReferenceRef.current?.(ref));
-      clearPendingFileReferences();
-    }
-  }, [pendingFileReferences, clearPendingFileReferences, addFileReferenceRef]);
-
-  useEffect(() => {
-    if (agentInfoFromMessages) {
-      setActiveAgentInfo(agentInfoFromMessages);
-    }
-  }, [agentInfoFromMessages, setActiveAgentInfo]);
 
   const handleAgentClick = useCallback(
     (agentId: string, agentName: string, agentDescription?: string, avatarKey?: string) => {
@@ -268,10 +243,6 @@ const ChatConversationContent = ({
     }
   }, [agentInfoFromMessages, dispatch]);
 
-  useEffect(() => {
-    handleAgentInfoChange();
-  }, [handleAgentInfoChange]);
-
   // Send message to existing conversation via intent
   const handleSendIntentToExistingConversation = useCallback(() => {
     if (chatMessageIntent && conversationId && consumedIntentRef.current !== chatMessageIntent) {
@@ -290,10 +261,6 @@ const ChatConversationContent = ({
       sendMessage(messagePayload);
     }
   }, [chatMessageIntent, conversationId, organizationId, currentUserName, sendMessage, setChatMessageIntent]);
-
-  useEffect(() => {
-    handleSendIntentToExistingConversation();
-  }, [handleSendIntentToExistingConversation]);
 
   // Create new conversation via intent (e.g. home screen input)
   const handleCreateConversationFromIntent = useCallback(() => {
@@ -328,6 +295,45 @@ const ChatConversationContent = ({
   useEffect(() => {
     handleCreateConversationFromIntent();
   }, [handleCreateConversationFromIntent]);
+
+  useEffect(() => {
+    handleAgentInfoChange();
+  }, [handleAgentInfoChange]);
+
+  useEffect(() => {
+    onConversationNotFound?.(isConversationNotFound);
+  }, [isConversationNotFound, onConversationNotFound]);
+
+  useEffect(() => {
+    if (pendingFileReferences.length > 0 && addFileReferenceRef.current) {
+      pendingFileReferences.forEach((ref) => addFileReferenceRef.current?.(ref));
+      clearPendingFileReferences();
+    }
+  }, [pendingFileReferences, clearPendingFileReferences, addFileReferenceRef]);
+
+  useEffect(() => {
+    if (agentInfoFromMessages) {
+      setActiveAgentInfo(agentInfoFromMessages);
+    }
+  }, [agentInfoFromMessages, setActiveAgentInfo]);
+
+  useEffect(() => {
+    const wasAvailable = prevBrowserStreamingRef.current;
+
+    prevBrowserStreamingRef.current = isBrowserStreamingAvailable;
+
+    if (wasAvailable && !isBrowserStreamingAvailable) {
+      const activeConversationId = conversationId ?? ctxConversationId;
+
+      if (activeConversationId) {
+        onBrowserStreamingEnd?.(activeConversationId);
+      }
+    }
+  }, [isBrowserStreamingAvailable, conversationId, ctxConversationId, onBrowserStreamingEnd]);
+
+  useEffect(() => {
+    handleSendIntentToExistingConversation();
+  }, [handleSendIntentToExistingConversation]);
 
   return (
     <ChatActionsProvider

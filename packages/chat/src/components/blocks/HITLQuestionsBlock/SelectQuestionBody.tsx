@@ -18,6 +18,8 @@ interface SelectQuestionBodyProps {
   focusedOptionIndex: number;
   selectedOptionIds: string[];
   customInputValue: string;
+  submittingOptionId?: string | null;
+  isSingleSelectOnly?: boolean;
   onOptionClick: (optionId: string, optIndex: number) => void;
   onCustomInputClick: () => void;
   onCustomInputChange: (value: string) => void;
@@ -31,6 +33,8 @@ export const SelectQuestionBody = ({
   focusedOptionIndex,
   selectedOptionIds,
   customInputValue,
+  submittingOptionId,
+  isSingleSelectOnly,
   onOptionClick,
   onCustomInputClick,
   onCustomInputChange,
@@ -50,6 +54,7 @@ export const SelectQuestionBody = ({
           isFocused={isFocused && focusedOptionIndex === optIndex}
           isSelected={selectedOptionIds.includes(option.id)}
           isMultiSelect={isMultiSelect ?? false}
+          isSubmitting={isSingleSelectOnly ? submittingOptionId === option.id : false}
           singleSelectBadge={isMultiSelect ? undefined : getSingleSelectBadge(optIndex)}
           onClick={() => onOptionClick(option.id, optIndex)}
         />
@@ -59,6 +64,7 @@ export const SelectQuestionBody = ({
         isFocused={focusedOptionIndex === optionCount - 1 && isFocused}
         isSelected={selectedOptionIds.includes(CUSTOM_OPTION_ID)}
         isMultiSelect={isMultiSelect ?? false}
+        isSubmitting={isSingleSelectOnly ? submittingOptionId === CUSTOM_OPTION_ID : false}
         value={customInputValue}
         onClick={onCustomInputClick}
         onChange={onCustomInputChange}
