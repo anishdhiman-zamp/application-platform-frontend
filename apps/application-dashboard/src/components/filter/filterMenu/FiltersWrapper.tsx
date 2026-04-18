@@ -1,5 +1,6 @@
 import { FC, useCallback, useEffect, useRef, useState } from 'react';
 import { ICON_SPRITE_TYPES } from '@zamp-platform/ui/types';
+import { cn } from '@zamp-platform/ui/utils';
 import { useOnClickOutside } from 'hooks';
 import { defaultFn, defaultFnType, MapAny, SIDE_OPTIONS } from 'types/commonTypes';
 import FiltersMenuV3 from '@/components/filter/filterMenu/FiltersMenuV3';
@@ -153,7 +154,7 @@ const FiltersContainer: FC<FiltersContainerProps> = ({
       {isPlayground && <FiltersMenuV2 onAddFilter={onAddEmptyFilter} currentPageFilters={currentPageFilters} />}
       <div
         id={`${persistId ?? ''}FILTERS_CONTAINER`}
-        className={`z-50 -ml-1 flex flex-wrap items-center gap-2 ${className}`}
+        className={cn('z-50 -ml-1 flex flex-wrap items-center gap-2', className)}
         data-testid={`FILTERS_CONTAINER${testIdSuffix ? `-${testIdSuffix}` : ''}`}
       >
         {filtersList.map((filter, index) => (

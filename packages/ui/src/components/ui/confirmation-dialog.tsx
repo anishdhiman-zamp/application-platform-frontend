@@ -50,7 +50,7 @@ const ConfirmationDialog = ({
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent
         size='small'
-        className={cn('border-GRAY_400 max-h-fit w-[400px] rounded-[14px] border', contentClassName)}
+        className={cn('border-GRAY_400 max-h-fit w-100 rounded-[14px] border', contentClassName)}
         id={contentId}
         data-slot={contentDataSlot}
         dialogueOverlayClassName={overlayClassName}

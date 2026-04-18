@@ -18,6 +18,7 @@ import { useRouter } from 'next/navigation';
 import { useAgentDbReadQuery, useAgentDbWriteMutation } from '@/apis/agentManagedDb';
 import { getDatasetDetailRoute, ROUTES_PATH } from '@/constants/routeConfig';
 import { KEYBOARD_KEYS } from '@/constants/shortcuts';
+import { UNTITLED_DATASET_NAME } from '@/modules/data/data.constants';
 
 interface CreateDatasetProps {
   onCreated?: (tableName: string, displayName: string) => void;
@@ -27,7 +28,7 @@ interface CreateDatasetProps {
 
 const CreateDataset = ({ onCreated, onTitleChange, hideBackButton }: CreateDatasetProps) => {
   const router = useRouter();
-  const [title, setTitle] = useState('Untitled Dataset');
+  const [title, setTitle] = useState(UNTITLED_DATASET_NAME);
   const [isEditingTitle, setIsEditingTitle] = useState(true);
   const inputElRef = useRef<HTMLInputElement | null>(null);
   const inputRef = useCallback((el: HTMLInputElement | null) => {
@@ -103,7 +104,7 @@ const CreateDataset = ({ onCreated, onTitleChange, hideBackButton }: CreateDatas
 
   const commitTitle = useCallback(() => {
     setIsEditingTitle(false);
-    const trimmed = title.trim() || 'Untitled Dataset';
+    const trimmed = title.trim() || UNTITLED_DATASET_NAME;
 
     onTitleChange?.(trimmed);
   }, [title, onTitleChange]);
@@ -117,7 +118,7 @@ const CreateDataset = ({ onCreated, onTitleChange, hideBackButton }: CreateDatas
     [commitTitle],
   );
 
-  const displayTitle = title.trim() || 'Untitled Dataset';
+  const displayTitle = title.trim() || UNTITLED_DATASET_NAME;
 
   useEffect(() => {
     if (inputElRef.current) {
@@ -148,7 +149,7 @@ const CreateDataset = ({ onCreated, onTitleChange, hideBackButton }: CreateDatas
             onChange={(e) => setTitle(e.target.value)}
             onBlur={commitTitle}
             onKeyDown={handleTitleKeyDown}
-            placeholder='Untitled Dataset'
+            placeholder={UNTITLED_DATASET_NAME}
             className='f-18-600 text-GRAY_1000 h-7 flex-1 border-none bg-transparent px-1 shadow-none outline-none'
           />
         ) : (

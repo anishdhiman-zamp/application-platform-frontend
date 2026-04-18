@@ -1,5 +1,5 @@
 import { ROUTES_PATH } from '@/constants/routeConfig';
-import { DynamicTabType, ROUTE_KIND, TAB_TYPE } from '@/modules/pace/pace.types';
+import { DynamicTabType, ROUTE_KIND, TAB_QUERY_PARAM, TAB_TYPE } from '@/modules/pace/pace.types';
 
 /**
  * Declarative definition for a dynamic tab type. Each tab type (file, task, etc.)
@@ -18,24 +18,24 @@ export const TAB_TYPE_REGISTRY: Record<DynamicTabType, TabTypeDefinition> = {
   [TAB_TYPE.FILE]: {
     kind: ROUTE_KIND.QUERY,
     basePath: ROUTES_PATH.CHAT,
-    paramName: 'f',
-    buildPath: (id: string) => `${ROUTES_PATH.CHAT}?f=${encodeURIComponent(id)}`,
+    paramName: TAB_QUERY_PARAM.FILE,
+    buildPath: (id: string) => `${ROUTES_PATH.CHAT}?${TAB_QUERY_PARAM.FILE}=${encodeURIComponent(id)}`,
     parseId: (pathname: string, search: string) => {
       if (pathname !== ROUTES_PATH.CHAT) return null;
 
-      return new URLSearchParams(search).get('f');
+      return new URLSearchParams(search).get(TAB_QUERY_PARAM.FILE);
     },
     getDefaultName: (id: string) => id.split('/').pop() || id,
   },
   [TAB_TYPE.TASK]: {
     kind: ROUTE_KIND.QUERY,
     basePath: ROUTES_PATH.CHAT_TASK,
-    paramName: 't',
-    buildPath: (id: string) => `${ROUTES_PATH.CHAT_TASK}?t=${encodeURIComponent(id)}`,
+    paramName: TAB_QUERY_PARAM.TASK,
+    buildPath: (id: string) => `${ROUTES_PATH.CHAT_TASK}?${TAB_QUERY_PARAM.TASK}=${encodeURIComponent(id)}`,
     parseId: (pathname: string, search: string) => {
       if (pathname !== ROUTES_PATH.CHAT_TASK) return null;
 
-      return new URLSearchParams(search).get('t');
+      return new URLSearchParams(search).get(TAB_QUERY_PARAM.TASK);
     },
     getDefaultName: (id: string) => id,
   },
@@ -62,24 +62,24 @@ export const TAB_TYPE_REGISTRY: Record<DynamicTabType, TabTypeDefinition> = {
   [TAB_TYPE.BROWSER]: {
     kind: ROUTE_KIND.QUERY,
     basePath: ROUTES_PATH.CHAT,
-    paramName: 'b',
-    buildPath: (id: string) => `${ROUTES_PATH.CHAT}?b=${encodeURIComponent(id)}`,
+    paramName: TAB_QUERY_PARAM.BROWSER,
+    buildPath: (id: string) => `${ROUTES_PATH.CHAT}?${TAB_QUERY_PARAM.BROWSER}=${encodeURIComponent(id)}`,
     parseId: (pathname: string, search: string) => {
       if (pathname !== ROUTES_PATH.CHAT) return null;
 
-      return new URLSearchParams(search).get('b');
+      return new URLSearchParams(search).get(TAB_QUERY_PARAM.BROWSER);
     },
     getDefaultName: () => 'Browser',
   },
   [TAB_TYPE.DATASET]: {
     kind: ROUTE_KIND.QUERY,
     basePath: ROUTES_PATH.CHAT_DATASET,
-    paramName: 'd',
-    buildPath: (id: string) => `${ROUTES_PATH.CHAT_DATASET}?d=${encodeURIComponent(id)}`,
+    paramName: TAB_QUERY_PARAM.DATASET,
+    buildPath: (id: string) => `${ROUTES_PATH.CHAT_DATASET}?${TAB_QUERY_PARAM.DATASET}=${encodeURIComponent(id)}`,
     parseId: (pathname: string, search: string) => {
       if (pathname !== ROUTES_PATH.CHAT_DATASET) return null;
 
-      return new URLSearchParams(search).get('d');
+      return new URLSearchParams(search).get(TAB_QUERY_PARAM.DATASET);
     },
     getDefaultName: (id: string) => id,
   },

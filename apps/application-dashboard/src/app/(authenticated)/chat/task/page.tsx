@@ -4,11 +4,11 @@ import { useSearchParams } from 'next/navigation';
 import TaskContentInner from '@/modules/pace/components/chat/TaskContentInner';
 import { useDynamicTabs } from '@/modules/pace/components/dynamic-tabs/useDynamicTabs';
 import TaskListingPage from '@/modules/pace/components/tasks/components/TaskListingPage';
-import { TAB_TYPE } from '@/modules/pace/pace.types';
+import { TAB_QUERY_PARAM, TAB_TYPE } from '@/modules/pace/pace.types';
 
 const ChatTasksPage = () => {
   const searchParams = useSearchParams();
-  const urlTaskId = searchParams?.get('t') ?? '';
+  const urlTaskId = searchParams?.get(TAB_QUERY_PARAM.TASK) ?? '';
 
   const { activeTab } = useDynamicTabs({ type: TAB_TYPE.TASK });
 

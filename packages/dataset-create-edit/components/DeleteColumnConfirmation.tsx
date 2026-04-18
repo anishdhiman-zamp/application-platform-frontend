@@ -27,8 +27,6 @@ const DeleteColumnConfirmation: FC<DeleteColumnConfirmationProps> = ({
       description='Are you sure you want to delete this column? This action cannot be undone.'
       confirmLabel='Delete'
       onConfirm={handleConfirm}
-      contentClassName='!z-1300'
-      overlayClassName='!z-1300'
     />
   );
 };

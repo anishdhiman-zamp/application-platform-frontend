@@ -97,13 +97,11 @@ const DatasetDetailInner = ({ tableName, header, onBackToDatasets }: DatasetDeta
     countPromise: Promise<{ rows: Record<string, unknown>[]; count: number }>;
     consumed: boolean;
   } | null>(null);
-  // Cache of the last successfully fetched raw rows — used to re-serve augmented data
-  // when blueprint has unsaved changes, avoiding redundant API calls on tab switches.
+  // Last successful raw rows; reused for augmented data when blueprint has unsaved changes.
   const cachedRowsRef = useRef<Record<string, unknown>[]>([]);
-  // Set to true while we programmatically move columns in AG Grid to avoid feedback loops
+  // True while we programmatically move columns in AG Grid, to avoid feedback loops.
   const isProgrammaticMoveRef = useRef(false);
-  // Set to true to skip the next previewColumns-triggered server refresh.
-  // Used by column rename's optimistic header update to avoid purging rows mid-request.
+  // Skip the next previewColumns refresh so rename's optimistic update isn't purged mid-flight.
   const skipNextPreviewRefreshRef = useRef(false);
 
   // --- Hooks ---
@@ -162,8 +160,6 @@ const DatasetDetailInner = ({ tableName, header, onBackToDatasets }: DatasetDeta
 
   const columnOrderKey = `${LOCAL_STORAGE_KEYS.DATASET_COLUMN_ORDER}_${tableName}` as LOCAL_STORAGE_KEYS;
 
-  // Apply a saved column id order to a BlueprintColumn array.
-  // Known columns are sorted by the saved order; any new/unknown columns are appended at the end.
   const applyColumnOrder = useCallback(
     (cols: BlueprintColumn[]): BlueprintColumn[] => {
       const raw = getFromLocalStorage(columnOrderKey);
@@ -383,17 +379,13 @@ const DatasetDetailInner = ({ tableName, header, onBackToDatasets }: DatasetDeta
       const newHeaderName = snakeCaseToSentenceCase(sanitized);
       const previousHeaderName = snakeCaseToSentenceCase(colId);
 
-      // Optimistic visual update: change only headerName in state, keeping `field`
-      // stable. AG Grid matches the column by field (= colId), so no destroy/recreate
-      // happens — the header text updates in place. Skip the next previewColumns
-      // refresh since the ALTER TABLE is still in flight and rows shouldn't be purged.
+      // Optimistic header rename; skip next preview refresh since ALTER TABLE is in flight.
       skipNextPreviewRefreshRef.current = true;
       setColumns(
         (prev) => prev?.map((col) => (col.field === colId ? { ...col, headerName: newHeaderName } : col)) ?? null,
       );
 
-      // Preserve column position after loadSchema. applyColumnOrder looks up by
-      // column id; without this remap, the renamed column would be appended at the end.
+      // Remap stored column order so the renamed column keeps its position after loadSchema.
       const rawOrder = getFromLocalStorage(columnOrderKey);
 
       if (rawOrder) {
@@ -412,12 +404,9 @@ const DatasetDetailInner = ({ tableName, header, onBackToDatasets }: DatasetDeta
           query: `ALTER TABLE "${escapeSqlIdentifier(tableName)}" RENAME COLUMN "${escapeSqlIdentifier(colId)}" TO "${escapeSqlIdentifier(sanitized)}"`,
         }).unwrap();
         toast.success('Column renamed');
-        // loadSchema rebuilds state with the new field; the effects will move the
-        // column into place and refresh rows.
         await loadSchema();
       } catch {
         toast.error('Failed to rename column');
-        // Revert optimistic header text
         skipNextPreviewRefreshRef.current = true;
         setColumns(
           (prev) =>
@@ -859,11 +848,7 @@ const DatasetDetailInner = ({ tableName, header, onBackToDatasets }: DatasetDeta
 
   const serverSideDatasource: IServerSideDatasource = useMemo(() => ({ getRows }), [getRows]);
 
-  // Sync blueprintColumns order into AG Grid whenever it changes.
-  // AG Grid maintains its own internal column order; passing a new columnDefs array doesn't
-  // reorder columns — we must call moveColumns() explicitly.
-  // This effect MUST run before the refreshServerSide effect below so that a renamed
-  // column doesn't briefly appear at the end before being moved to its correct position.
+  // Sync blueprintColumns order into AG Grid via moveColumns(); must run before refreshServerSide.
   const prevBlueprintOrderRef = useRef<string>('');
 
   useEffect(() => {
@@ -915,8 +900,7 @@ const DatasetDetailInner = ({ tableName, header, onBackToDatasets }: DatasetDeta
   }, [activeTab]);
 
   // --- Draft persistence ---
-  // Persist active tab so refresh lands on the same tab
-  // Skip the initial mount render — only save when the user actually switches tabs
+  // Persist active tab across refreshes; skip initial mount to avoid overwriting the stored value.
   const isFirstTabRender = useRef(true);
 
   useEffect(() => {
@@ -928,9 +912,7 @@ const DatasetDetailInner = ({ tableName, header, onBackToDatasets }: DatasetDeta
     setToLocalStorage(`${LOCAL_STORAGE_KEYS.DATASET_ACTIVE_TAB}_${tableName}` as LOCAL_STORAGE_KEYS, activeTab);
   }, [activeTab, tableName]);
 
-  // Save blueprint draft + column order to localStorage whenever columns change.
-  // Only run after schema has loaded (originalBlueprintColumns is non-empty)
-  // to avoid wiping the draft on initial mount before loadSchema completes.
+  // Save blueprint draft + column order; skip until schema has loaded so initial mount doesn't wipe the draft.
   useEffect(() => {
     if (originalBlueprintColumns.length === 0) return;
     const draftKey = `${LOCAL_STORAGE_KEYS.DATASET_BLUEPRINT_DRAFT}_${tableName}` as LOCAL_STORAGE_KEYS;
@@ -1134,13 +1116,14 @@ const DatasetDetailInner = ({ tableName, header, onBackToDatasets }: DatasetDeta
       {/* Header */}
       {header ?? (
         <div className='border-GRAY_400 flex items-center gap-3 border-b px-6 pt-10 pb-8'>
-          <button
-            type='button'
+          <Button
+            variant='ghost'
+            size='icon'
+            className='text-GRAY_700 hover:text-GRAY_1000 h-auto w-auto p-0 hover:bg-transparent'
             onClick={() => handleNavAttempt(preserveSidebarParam(ROUTES_PATH.CHAT_SETTINGS_DATASETS))}
-            className='text-GRAY_700 hover:text-GRAY_1000 transition-colors'
           >
             <ArrowLeft width={18} height={18} />
-          </button>
+          </Button>
           <h1 className='f-18-500 flex-1'>{snakeCaseToSentenceCase(tableName)}</h1>
           <ShareDatasetNeonPopup tableName={tableName} />
         </div>

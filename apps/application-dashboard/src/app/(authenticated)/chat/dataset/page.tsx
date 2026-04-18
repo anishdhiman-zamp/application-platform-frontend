@@ -5,11 +5,11 @@ import CreateDatasetTabContent from '@/modules/pace/components/datasets/CreateDa
 import { isNewDatasetId } from '@/modules/pace/components/datasets/datasets.constants';
 import DatasetTabContent from '@/modules/pace/components/datasets/DatasetTabContent';
 import { useDynamicTabs } from '@/modules/pace/components/dynamic-tabs/useDynamicTabs';
-import { TAB_TYPE } from '@/modules/pace/pace.types';
+import { TAB_QUERY_PARAM, TAB_TYPE } from '@/modules/pace/pace.types';
 
 const ChatDatasetPage = () => {
   const searchParams = useSearchParams();
-  const urlTableName = searchParams?.get('d') ?? '';
+  const urlTableName = searchParams?.get(TAB_QUERY_PARAM.DATASET) ?? '';
 
   const { activeTab } = useDynamicTabs({ type: TAB_TYPE.DATASET });
 

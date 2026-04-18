@@ -15,6 +15,7 @@ import CommonWrapper from '@/components/commonWrapper';
 import { SkeletonTypes } from '@/components/commonWrapper/commonWrapper.types';
 import EmptyState from '@/components/EmptyState';
 import { DONE_EMPTY_STATE, ZAMP_LOGO_LOADER_SVG } from '@/constants/icons';
+import { UNTITLED_DATASET_NAME } from '@/modules/data/data.constants';
 import { useDynamicTabs } from '@/modules/pace/components/dynamic-tabs/useDynamicTabs';
 import { TAB_TYPE } from '@/modules/pace/pace.types';
 
@@ -28,7 +29,7 @@ const DatasetsListing = () => {
   });
 
   const handleCreateDataset = useCallback(() => {
-    openTab(generateNewDatasetId(), 'Untitled Dataset');
+    openTab(generateNewDatasetId(), UNTITLED_DATASET_NAME);
   }, [openTab]);
 
   const rows = useMemo(() => {

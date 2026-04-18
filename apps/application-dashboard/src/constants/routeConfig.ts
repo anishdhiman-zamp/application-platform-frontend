@@ -1,4 +1,5 @@
 import type { SiblingTask, TaskBreadcrumb } from '@zamp-platform/chat';
+import { TAB_QUERY_PARAM } from '@/modules/pace/pace.types';
 
 export const ROUTES_PATH = {
   HOME: '/',
@@ -129,7 +130,7 @@ export const getIntegrationDetailRoute = (integrationId: string) => {
 };
 
 export const getChatFileRoute = (filePath: string) => {
-  return `${ROUTES_PATH.CHAT}?f=${encodeURIComponent(filePath)}`;
+  return `${ROUTES_PATH.CHAT}?${TAB_QUERY_PARAM.FILE}=${encodeURIComponent(filePath)}`;
 };
 
 export const TASK_QUERY_PARAMS = {
