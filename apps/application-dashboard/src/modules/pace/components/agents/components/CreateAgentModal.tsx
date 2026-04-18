@@ -84,7 +84,7 @@ const CreateAgentModal = ({ open, onOpenChange, onAgentCreated }: CreateAgentMod
         setChatSidebarState(CHAT_SIDEBAR_STATE.SIDEBAR);
         onOpenChange(false);
 
-        return { conversation_id: 'pending', status_message: '', title: agentName };
+        return { conversation_id: 'pending', message_id: '', status_message: '', title: agentName };
       },
     }),
     [

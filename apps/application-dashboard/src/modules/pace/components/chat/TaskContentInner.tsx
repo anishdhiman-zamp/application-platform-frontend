@@ -461,6 +461,7 @@ const TaskContentChat = ({ taskId }: { taskId: string }) => {
                     hitlQuestions={hitlQuestions}
                     hitlQuestionsKey={hitlQuestionsKey}
                     taskId={taskId}
+                    conversationId={conversationId}
                     onHitlRespondComplete={handleHitlRespondComplete}
                     resultText={lastSummaryText}
                     summaryScrollRef={summaryScrollRef}

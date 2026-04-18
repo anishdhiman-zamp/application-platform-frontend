@@ -1,5 +1,5 @@
-const SNIPPET_LINE_THRESHOLD = 5;
-const SNIPPET_CHAR_THRESHOLD = 500;
+const SNIPPET_LINE_THRESHOLD = 15;
+const SNIPPET_CHAR_THRESHOLD = 2000;
 
 const PASTED_FILE_PATTERN = /^Pasted(?:\((\d+)\))?\.txt$/;
 
@@ -10,7 +10,7 @@ const PASTED_FILE_PATTERN = /^Pasted(?:\((\d+)\))?\.txt$/;
  *          or more than {@link SNIPPET_CHAR_THRESHOLD} characters.
  */
 export const isLargeText = (text: string): boolean => {
-  return text.split('\n').length > SNIPPET_LINE_THRESHOLD || text.length > SNIPPET_CHAR_THRESHOLD;
+  return text.split('\n').length > SNIPPET_LINE_THRESHOLD && text.length > SNIPPET_CHAR_THRESHOLD;
 };
 
 /**

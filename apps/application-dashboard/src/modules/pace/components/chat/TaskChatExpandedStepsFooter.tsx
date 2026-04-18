@@ -12,6 +12,7 @@ export interface TaskChatExpandedStepsFooterProps {
   hitlQuestions: HITLQuestionWithEntity[];
   hitlQuestionsKey: string;
   taskId: string;
+  conversationId?: string;
   onHitlRespondComplete: () => void;
   resultText: string | null;
   summaryScrollRef: RefObject<HTMLDivElement | null>;
@@ -27,6 +28,7 @@ export const TaskChatExpandedStepsFooter = ({
   hitlQuestions,
   hitlQuestionsKey,
   taskId,
+  conversationId,
   onHitlRespondComplete,
   resultText,
   summaryScrollRef,
@@ -43,6 +45,7 @@ export const TaskChatExpandedStepsFooter = ({
           onSubmit={onHitlRespondComplete}
           sourceEntityId={taskId}
           sourceEntityType={HITLEntityType.TASK}
+          conversationId={conversationId}
           username={username}
         />
       </div>

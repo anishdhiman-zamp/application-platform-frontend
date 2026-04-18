@@ -67,7 +67,7 @@ const CreateAppModal = ({ open, onOpenChange }: CreateAppModalProps) => {
         setChatSidebarState(CHAT_SIDEBAR_STATE.SIDEBAR);
         onOpenChange(false);
 
-        return { conversation_id: 'pending', status_message: '', title: resolvedName };
+        return { conversation_id: 'pending', message_id: '', status_message: '', title: resolvedName };
       },
     }),
     [chat, appName, randomPrompt, startNewChat, setChatMessageIntent, setChatSidebarState, onOpenChange],

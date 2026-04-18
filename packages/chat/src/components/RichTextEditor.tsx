@@ -145,7 +145,15 @@ export const RichTextEditor = forwardRef<RichTextEditorHandle, RichTextEditorPro
       ],
       content: value || '',
       contentType: 'markdown',
-      autofocus: autoFocus,
+      autofocus: autoFocus ? 'end' : false,
+      onCreate: ({ editor: ed }) => {
+        // When initial content is non-empty, Tiptap places the cursor at pos 0.
+        // Move it to the end so typing always appends (without stealing focus).
+        if (value) {
+          const endPos = ed.state.doc.content.size;
+          ed.commands.setTextSelection(endPos);
+        }
+      },
       editorProps: {
         attributes: {
           class: className || '',
@@ -168,6 +176,10 @@ export const RichTextEditor = forwardRef<RichTextEditorHandle, RichTextEditorPro
               handleAnimatedSubmitRef.current();
               return true;
             }
+          }
+
+          if (event.key === KEYBOARD_KEYS.ENTER && (event.metaKey || event.ctrlKey)) {
+            return true;
           }
 
           return false;
@@ -218,7 +230,7 @@ export const RichTextEditor = forwardRef<RichTextEditorHandle, RichTextEditorPro
     editorRef.current = editor;
 
     useImperativeHandle(ref, () => ({
-      focus: () => editor?.commands.focus(),
+      focus: () => editor?.commands.focus('end'),
       clear: () => {
         lastEditorMarkdown.current = '';
         editor?.commands.clearContent(true);
@@ -251,7 +263,16 @@ export const RichTextEditor = forwardRef<RichTextEditorHandle, RichTextEditorPro
         }
       } else {
         lastEditorMarkdown.current = value;
+        const wasFocused = editor.isFocused;
         editor.commands.setContent(value, { contentType: 'markdown' });
+        // setContent resets the cursor to pos 0. Move it to the end so that
+        // externally-restored content (e.g. draft reload on page refresh) behaves
+        // naturally. Skip when the editor is focused — the user has an active
+        // selection and we must not move it under them.
+        if (!wasFocused) {
+          const endPos = editor.state.doc.content.size;
+          editor.commands.setTextSelection(endPos);
+        }
       }
     }, [value, editor]);
 
