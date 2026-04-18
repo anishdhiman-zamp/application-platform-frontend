@@ -66,7 +66,11 @@ export const Message: FC<MessageProps> = ({
   const isUserMessage = message.sender_type === SenderType.USER;
   const isInputsRespondedBlock = message.message_content?.elements?.[0]?.type === BLOCK_TYPE.INPUTS_RESPONDED;
   const shouldAlignRight = isUserMessage;
-  const sharedClassName = cn('group space-y-3', shouldAlignRight && 'flex flex-col items-end', containerClassName);
+  const sharedClassName = cn(
+    'group space-y-3',
+    shouldAlignRight && 'ml-auto flex w-fit max-w-full flex-col items-end',
+    containerClassName,
+  );
 
   const primaryBlockType = message?.message_content?.elements?.[0]?.type;
   const isUserInputsRespondedBubble = isUserMessage && primaryBlockType === BLOCK_TYPE.INPUTS_RESPONDED;
@@ -199,7 +203,7 @@ export const Message: FC<MessageProps> = ({
           ref={contentRef}
           className={cn(
             isUserMessage && !isExpanded && 'overflow-hidden',
-            isUserMessage && 'flex w-fit max-w-full min-w-0 flex-col',
+            isUserMessage && 'flex w-fit max-w-full min-w-0 flex-col break-words',
             isUserInputsRespondedBubble && 'w-full min-w-0',
           )}
           style={
