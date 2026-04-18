@@ -73,7 +73,7 @@ const ConversationActions: FC<ConversationActionsProps> = ({
             variant='ghost'
             size='icon'
             data-slot='dropdown-trigger'
-            className={cn('h-6 w-6 shrink-0 p-0', triggerClassName)}
+            className={cn('h-7 w-7 shrink-0 p-0', triggerClassName)}
             {...triggerProps}
           >
             <MoreVertical size={14} className='text-GRAY_700' />

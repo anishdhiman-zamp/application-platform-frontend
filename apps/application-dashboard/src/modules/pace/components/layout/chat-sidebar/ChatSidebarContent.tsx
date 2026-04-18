@@ -80,6 +80,7 @@ const ChatSidebarContent = ({
   const addFileReferenceRef = useRef<((ref: { path: string; name: string }) => void) | null>(null);
 
   const [isTaskPopoverOpen, setIsTaskPopoverOpen] = useState(false);
+  const [isConversationNotFound, setIsConversationNotFound] = useState(false);
 
   const { hitlQuestions, hitlQuestionsKey } = useHitlQuestions(inputsRequired);
   const hasInputsRequired = (inputsRequired?.length ?? 0) > 0;
@@ -94,6 +95,7 @@ const ChatSidebarContent = ({
     Boolean(conversationId) &&
     checkUserPrivilege(CONVERSATION_ACCESS_PRIVILEGES.VIEWER) &&
     !checkUserPrivilege(PERMISSION_ROLES.ADMIN);
+
   const modelSelectorSlot = useMemo(
     () => <ModelSelector value={selectedModel} onChange={setSelectedModel} />,
     [selectedModel],
@@ -157,6 +159,10 @@ const ChatSidebarContent = ({
     },
     [setActiveAgentInfo, setConversationId],
   );
+
+  useEffect(() => {
+    setIsConversationNotFound(false);
+  }, [conversationId]);
 
   useEffect(() => {
     const sub = sseEventBus.subscribe(EVENT_TYPE.INPUT_REQUIRED, handleGlobalInputRequired);
@@ -266,16 +272,19 @@ const ChatSidebarContent = ({
         onBrowserOpen={handleBrowserOpen}
         onBrowserStreamingEnd={handleBrowserStreamingEnd}
         onTaskPopoverOpenChange={setIsTaskPopoverOpen}
+        onConversationNotFound={setIsConversationNotFound}
         fileDropHandlerRef={fileDropHandlerRef}
         addFileReferenceRef={addFileReferenceRef}
         currentUserName={currentUserName}
       />
 
-      <ChatActionsProvider onFileOpen={handleFileOpen}>
-        <div className='bg-BG_WHITE sticky bottom-0 z-10 mx-auto w-full max-w-[700px] px-3 pb-3'>
-          {renderChatInput()}
-        </div>
-      </ChatActionsProvider>
+      {!isConversationNotFound && (
+        <ChatActionsProvider onFileOpen={handleFileOpen}>
+          <div className='bg-BG_WHITE sticky bottom-0 z-10 mx-auto w-full max-w-[700px] px-3 pb-3'>
+            {renderChatInput()}
+          </div>
+        </ChatActionsProvider>
+      )}
     </div>
   );
 };
