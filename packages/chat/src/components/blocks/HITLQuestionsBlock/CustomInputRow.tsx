@@ -2,7 +2,7 @@
 
 import { cn } from '@zamp-platform/ui/utils';
 import { Check, Loader2, PenLine } from 'lucide-react';
-import React, { useEffect, useRef } from 'react';
+import React, { useCallback, useEffect, useRef } from 'react';
 
 import { type ChatComposerFileRef, ChatComposerInput, type ChatComposerInputHandle } from './ChatComposerInput';
 
@@ -41,11 +41,17 @@ export const CustomInputRow: React.FC<CustomInputRowProps> = ({
     return <PenLine className={cn(isSelected ? 'text-BG_WHITE' : 'text-GRAY_950')} size={12} strokeWidth={1} />;
   };
 
-  useEffect(() => {
-    if (isFocused) {
+  const scheduleFocus = useCallback(() => {
+    const rafId = requestAnimationFrame(() => {
       composerRef.current?.focus();
-    }
-  }, [isFocused]);
+    });
+    return () => cancelAnimationFrame(rafId);
+  }, []);
+
+  useEffect(() => {
+    if (!isFocused) return;
+    return scheduleFocus();
+  }, [isFocused, scheduleFocus]);
 
   return (
     <div

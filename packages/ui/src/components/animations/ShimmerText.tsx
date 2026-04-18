@@ -91,7 +91,7 @@ export const ShimmerText: FC<ShimmerTextProps> = ({
     <div className={cn('relative inline-block leading-none', shouldTruncate && 'overflow-hidden', className)}>
       {/* font-size and leading should be same, eg. f-13-450 and leading-[13px] */}
       <span
-        className={cn('block text-[13px] leading-[1.667]! font-[450]', baseTextClassName)}
+        className={cn('block text-[13px] leading-[1.667]! font-[420]', baseTextClassName)}
         style={{ color: baseColor }}
       >
         {text}
@@ -100,7 +100,7 @@ export const ShimmerText: FC<ShimmerTextProps> = ({
         ref={spanRef}
         aria-hidden='true'
         className={cn(
-          'pointer-events-none absolute top-0 left-0 bg-clip-text text-[13px] leading-[1.667]! font-[450] text-transparent',
+          'pointer-events-none absolute top-0 left-0 bg-clip-text text-[13px] leading-[1.667]! font-[420] text-transparent',
           shouldTruncate && 'inset-0 block truncate',
           shimmerTextClassName,
         )}

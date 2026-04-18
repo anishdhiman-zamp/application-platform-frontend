@@ -14,6 +14,38 @@ export type HITLAnswerValue = {
 
 export type HITLAnswersState = Record<string, HITLAnswerValue>;
 
+interface HITLDraft {
+  answers: HITLAnswersState;
+  customInputs: Record<string, string>;
+}
+
+const HITL_DRAFT_KEY_PREFIX = 'hitl_draft_';
+
+export const readHITLDraft = (sourceEntityId: string): HITLDraft | null => {
+  try {
+    const raw = sessionStorage.getItem(`${HITL_DRAFT_KEY_PREFIX}${sourceEntityId}`);
+    return raw ? (JSON.parse(raw) as HITLDraft) : null;
+  } catch {
+    return null;
+  }
+};
+
+export const writeHITLDraft = (sourceEntityId: string, draft: HITLDraft): void => {
+  try {
+    sessionStorage.setItem(`${HITL_DRAFT_KEY_PREFIX}${sourceEntityId}`, JSON.stringify(draft));
+  } catch {
+    // sessionStorage unavailable — silently ignore
+  }
+};
+
+export const clearHITLDraft = (sourceEntityId: string): void => {
+  try {
+    sessionStorage.removeItem(`${HITL_DRAFT_KEY_PREFIX}${sourceEntityId}`);
+  } catch {
+    // ignore
+  }
+};
+
 /**
  * @param question - The HITL question to check.
  * @returns `true` if the question allows selecting multiple options.

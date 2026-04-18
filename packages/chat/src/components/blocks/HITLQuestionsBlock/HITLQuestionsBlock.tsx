@@ -16,11 +16,11 @@ import { HITLQuestionItem } from './HITLQuestionItem';
 import { HITLQuestionsFooter } from './HITLQuestionsFooter';
 import { HITLQuestionsHeader } from './HITLQuestionsHeader';
 import type { HITLQuestionsBlockProps } from './types';
+import { useHITLDraft } from './useHITLDraft';
 import {
   appendPrintableToCustomInput,
   buildResponseForQuestion,
   buildSkippedAnswers,
-  type HITLAnswersState,
   isMultipleChoiceQuestion,
   isQuestionAnswerComplete,
   isTextQuestion,
@@ -39,22 +39,13 @@ export const HITLQuestionsBlock = ({
 }: HITLQuestionsBlockProps) => {
   const { questions } = payload;
   const router = useRouter();
-  const title = questions[0]?.title ?? undefined;
-  const titleEntityId = questions[0]?.entity_id;
-  const titleEntityType = questions[0]?.entity_type;
-  const handleTitleClick = useCallback(() => {
-    if (titleEntityId && titleEntityType === HITLEntityType.TASK) {
-      router.push(getChatTaskRoute({ taskId: titleEntityId, conversationId }));
-    }
-  }, [titleEntityId, titleEntityType, conversationId, router]);
 
   // --- State ---
   const [currentQuestionIndex, setCurrentQuestionIndex] = useState(0);
   const [focusedOptionIndex, setFocusedOptionIndex] = useState(() =>
     questions[0] ? optionCountForQuestion(questions[0]) - 1 : 0,
   );
-  const [answers, setAnswers] = useState<HITLAnswersState>({});
-  const [customInputs, setCustomInputs] = useState<Record<string, string>>({});
+  const { answers, setAnswers, customInputs, setCustomInputs, clearDraft } = useHITLDraft(sourceEntityId);
   const [questionFileRefs, setQuestionFileRefs] = useState<Record<string, ChatComposerFileRef[]>>({});
   const [submittingOptionId, setSubmittingOptionId] = useState<string | null>(null);
 
@@ -78,10 +69,19 @@ export const HITLQuestionsBlock = ({
   );
   const isSingleSelectOnly =
     questions.length === 1 && !isMultipleChoiceQuestion(questions[0]) && !isTextQuestion(questions[0]);
+  const title = currentQuestion?.title ?? undefined;
+  const titleEntityId = currentQuestion?.entity_id;
+  const titleEntityType = currentQuestion?.entity_type;
 
   const [hitlRespond, { isLoading: isHitlRespondLoading }] = useHitlRespondMutation();
 
   // --- Handlers ---
+  const handleTitleClick = useCallback(() => {
+    if (titleEntityId && titleEntityType === HITLEntityType.TASK) {
+      router.push(getChatTaskRoute({ taskId: titleEntityId, conversationId }));
+    }
+  }, [titleEntityId, titleEntityType, conversationId, router]);
+
   const navigateToQuestion = useCallback(
     (index: number, direction: 'next' | 'prev') => {
       navDirectionRef.current = direction;
@@ -211,6 +211,7 @@ export const HITLQuestionsBlock = ({
 
     try {
       await hitlRespond(submitPayload).unwrap();
+      clearDraft();
       onSubmit?.();
     } catch (error) {
       captureException(error);
@@ -224,6 +225,7 @@ export const HITLQuestionsBlock = ({
     answers,
     questionFileRefs,
     hitlRespond,
+    clearDraft,
     onSubmit,
   ]);
 
@@ -248,21 +250,32 @@ export const HITLQuestionsBlock = ({
       setSubmittingOptionId(optionId);
       try {
         await hitlRespond(submitPayload).unwrap();
+        clearDraft();
         onSubmit?.();
       } catch (error) {
         captureException(error);
         setSubmittingOptionId(null);
       }
     },
-    [sourceEntityId, sourceEntityType, isHitlRespondLoading, questions, questionFileRefs, hitlRespond, onSubmit],
+    [
+      sourceEntityId,
+      sourceEntityType,
+      isHitlRespondLoading,
+      questions,
+      questionFileRefs,
+      hitlRespond,
+      clearDraft,
+      onSubmit,
+    ],
   );
 
   submitSingleSelectRef.current = handleSingleSelectSubmit;
 
   const handleDismiss = useCallback(() => {
+    clearDraft();
     setAnswers((prev) => buildSkippedAnswers(questions, prev));
     setTimeout(() => submitRef.current?.(), 0);
-  }, [questions]);
+  }, [questions, clearDraft]);
 
   const handleFocusAndScroll = useCallback(() => {
     if (focusedOptionIndex < totalOptions - 1) {

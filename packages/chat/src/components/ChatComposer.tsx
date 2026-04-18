@@ -129,8 +129,8 @@ export const ChatComposer = forwardRef<ChatComposerHandle, ChatComposerProps>(
       focus: () => editorRef.current?.focus(),
     }));
 
-    const handleContainerClick = () => {
-      if (!shouldShowRecorder) {
+    const handleContainerClick = (e: React.MouseEvent<HTMLDivElement>) => {
+      if (!shouldShowRecorder && e.target === e.currentTarget) {
         editorRef.current?.focus();
       }
     };
