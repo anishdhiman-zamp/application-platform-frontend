@@ -4,26 +4,9 @@ import { toast } from '@zamp-platform/ui';
 import { useFileActions } from 'modules/pace/hooks/useFileActions';
 import { useDynamicTabs } from '@/modules/pace/components/dynamic-tabs/useDynamicTabs';
 import { FILE_TYPE, type FileItem, type TreeNode } from '@/modules/pace/components/files/file-tree.types';
-import { buildFullPath, getParentPath } from '@/modules/pace/components/files/file-tree.utils';
+import { buildFullPath, getFileNameParts, getParentPath } from '@/modules/pace/components/files/file-tree.utils';
 import { FILE_TOAST_MESSAGES } from '@/modules/pace/components/files/files.constants';
 import { TAB_TYPE } from '@/modules/pace/pace.types';
-
-const getFileNameParts = (name: string, isFile: boolean): { baseName: string; extension: string } => {
-  if (!isFile) {
-    return { baseName: name, extension: '' };
-  }
-
-  const lastDotIndex = name.lastIndexOf('.');
-
-  if (lastDotIndex > 0) {
-    return {
-      baseName: name.slice(0, lastDotIndex),
-      extension: name.slice(lastDotIndex),
-    };
-  }
-
-  return { baseName: name, extension: '' };
-};
 
 interface UseFileTreeNodeRenameProps {
   node: TreeNode;

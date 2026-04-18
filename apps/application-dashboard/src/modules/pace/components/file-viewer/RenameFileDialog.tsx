@@ -15,7 +15,7 @@ import {
 import { cn } from '@zamp-platform/ui/utils';
 import TooltipV2 from '@/components/common/TooltipV2';
 import { KEYBOARD_KEYS } from '@/constants/shortcuts';
-import { checkDuplicateName } from '@/modules/pace/components/files/file-tree.utils';
+import { checkDuplicateName, getFileNameParts } from '@/modules/pace/components/files/file-tree.utils';
 import { SIDE_OPTIONS } from '@/types/commonTypes';
 
 interface RenameFileDialogProps {
@@ -73,8 +73,14 @@ const RenameFileDialog = ({
   const handleDialogOpen = useCallback(() => {
     setEditValue(currentFileName);
     requestAnimationFrame(() => {
-      inputRef.current?.focus();
-      inputRef.current?.select();
+      const input = inputRef.current;
+
+      if (!input) return;
+
+      const { baseName } = getFileNameParts(currentFileName, true);
+
+      input.focus();
+      input.setSelectionRange(0, baseName.length);
     });
   }, [currentFileName]);
 

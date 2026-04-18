@@ -5,6 +5,7 @@ import { useDynamicTabs } from '@/modules/pace/components/dynamic-tabs/useDynami
 import { FILE_TYPE } from '@/modules/pace/components/files/file-tree.types';
 import { buildFullPath, getParentPath } from '@/modules/pace/components/files/file-tree.utils';
 import { FILE_TOAST_MESSAGES } from '@/modules/pace/components/files/files.constants';
+import { useFileTreeNavigation } from '@/modules/pace/context/FileTreeNavigationContext';
 import { useFileViewerContext } from '@/modules/pace/context/FileViewerContext';
 import { useFileActions } from '@/modules/pace/hooks/useFileActions';
 import { useSiblingNames } from '@/modules/pace/hooks/useSiblingNames';
@@ -35,6 +36,7 @@ export const useFileViewerHeaderRename = ({
   const { updateFileStatePath } = useFileViewerContext();
   const { updateTab } = useDynamicTabs({ type: TAB_TYPE.FILE });
   const { siblingNames, refetchSiblings } = useSiblingNames({ filePath });
+  const { revealPathInTree } = useFileTreeNavigation();
 
   const openRenameDialog = useCallback(() => {
     setIsRenameDialogOpen(true);
@@ -50,6 +52,7 @@ export const useFileViewerHeaderRename = ({
 
       updateFileStatePath(filePath, newPath);
       updateTab(filePath, newPath, newName);
+      revealPathInTree(newPath);
 
       try {
         await renameItem(filePath, newName, {
@@ -66,7 +69,7 @@ export const useFileViewerHeaderRename = ({
         updateTab(newPath, filePath, fileName);
       }
     },
-    [fileName, filePath, renameItem, updateFileStatePath, updateTab],
+    [fileName, filePath, renameItem, updateFileStatePath, updateTab, revealPathInTree],
   );
 
   return {
