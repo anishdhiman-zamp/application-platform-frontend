@@ -22,11 +22,16 @@ import {
   useStopConversationMutation,
   useStreamingState,
 } from '@zamp-platform/chat';
+import { extractTaskUpdateFields } from '@zamp-platform/utils';
+import { type BaseEventPayload, EVENT_TYPE } from '@zamp-platform/utils/event-bus/event-bus.types';
 import { type ReactNode, useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { useDispatch } from 'react-redux';
 
+import { useEventBus } from '@/app/_providers/sse-provider';
+
 import { type ConversationEventCallbacks } from '../handlers/conversationEventHandler';
 import { conversationSSERegistry } from '../registry/conversationSSERegistry';
+import { mergeHistoryWithSSEStatuses } from '../utils/mergeHistoryWithSSEStatuses';
 import { type ConversationActions, ConversationActionsContext } from './ConversationActionsContext';
 import { type ConversationState, ConversationStateContext } from './ConversationStateContext';
 
@@ -59,6 +64,7 @@ export const ConversationProvider: React.FC<ConversationProviderProps> = ({
   const conversationIdRef = useRef<string | null>(externalConversationId);
   const setHeaderRef = useRef(setHeader);
   const mountRefetchFiredRef = useRef(false);
+  const hasSSEUpdatedStatusesRef = useRef(false);
 
   const [messages, setMessages] = useState<ChatMessage[]>([]);
   const [queuedMessages, setQueuedMessages] = useState<ChatMessage[]>([]);
@@ -78,6 +84,7 @@ export const ConversationProvider: React.FC<ConversationProviderProps> = ({
   const shouldSkipConversationFetch = !resourceId || !resourceType || !externalConversationId;
 
   const dispatch = useDispatch();
+  const { sseEventBus } = useEventBus();
 
   const [createConversationV2Mutation, { isLoading: isCreatingConversationV2, error: createConversationV2Error }] =
     useCreateConversationV2Mutation();
@@ -170,6 +177,8 @@ export const ConversationProvider: React.FC<ConversationProviderProps> = ({
   const handlePerConvTaskUpdate = useCallback((taskId: string, updatedFields: Record<string, unknown>) => {
     const status = updatedFields?.status as TaskStatus | undefined;
     if (!taskId || !status) return;
+
+    hasSSEUpdatedStatusesRef.current = true;
 
     setMessages((prev) =>
       prev.map((msg) => {
@@ -504,6 +513,28 @@ export const ConversationProvider: React.FC<ConversationProviderProps> = ({
     handleMessagesPickedUp,
   ]);
 
+  // Subscribe to global TASK_UPDATE events so task blocks in conversation messages
+  // stay fresh even after the per-conversation SSE channel closes on message_stop.
+  // When source_id is present and doesn't match this conversation, skip processing.
+  const handleGlobalConvTaskUpdate = useCallback(
+    (data: BaseEventPayload) => {
+      const { taskId, status: rawStatus, sourceId } = extractTaskUpdateFields(data);
+      const status = rawStatus as TaskStatus | undefined;
+
+      if (!taskId || !status) return;
+      if (sourceId && sourceId !== _conversationId) return;
+
+      handlePerConvTaskUpdate(taskId, { status });
+    },
+    [handlePerConvTaskUpdate, _conversationId],
+  );
+
+  useEffect(() => {
+    const sub = sseEventBus.subscribe(EVENT_TYPE.TASK_UPDATE, handleGlobalConvTaskUpdate);
+
+    return () => sub.unsubscribe();
+  }, [sseEventBus, handleGlobalConvTaskUpdate]);
+
   useEffect(() => {
     const newId = externalConversationId || null;
     const prevId = conversationIdRef.current;
@@ -639,17 +670,11 @@ export const ConversationProvider: React.FC<ConversationProviderProps> = ({
       });
 
       setMessages((prev) => {
-        if (prev.length > 0) {
-          const replayedMessages = prev.filter((msg) => {
-            if (!msg.id || dbMessageIds.has(msg.id)) return false;
-            return msg.sender_type === SenderType.USER;
-          });
+        const merged = mergeHistoryWithSSEStatuses(prev, historyMessages, hasSSEUpdatedStatusesRef.current);
 
-          if (replayedMessages.length > 0) {
-            return [...historyMessages, ...replayedMessages];
-          }
-        }
-        return historyMessages;
+        hasSSEUpdatedStatusesRef.current = false;
+
+        return merged;
       });
     }
   }, [conversationHistory]);

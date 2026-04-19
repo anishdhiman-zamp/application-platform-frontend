@@ -74,6 +74,13 @@ class StreamingStateStore {
     };
   }
 
+  /** Returns all conversation IDs that currently have streaming state (active or not). */
+  keys(): string[] {
+    const allKeys = new Set<string>([...this.states.keys(), ...this.drafts.keys()]);
+
+    return Array.from(allKeys);
+  }
+
   getActiveStreamingConversationIds(): string[] {
     const ids: string[] = [];
     for (const [id, state] of this.states) {

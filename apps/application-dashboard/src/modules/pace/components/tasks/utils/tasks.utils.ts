@@ -130,8 +130,8 @@ export const getLastMarkdownTextFromMessage = (msg: ChatMessage): string | null 
   return markdownEl.payload?.text ?? null;
 };
 
-export const getStatusLabel = (isAgentActive: boolean, taskStatus: string | undefined): string => {
-  return isAgentActive ? 'In progress' : (STATUS_DISPLAY[taskStatus ?? ''] ?? taskStatus ?? '');
+export const getStatusLabel = (taskStatus: string | undefined): string => {
+  return STATUS_DISPLAY[taskStatus ?? ''] ?? taskStatus ?? '';
 };
 
 export const getDisplayTitle = (urlTitle: string | null, chatTitle: string): string => {

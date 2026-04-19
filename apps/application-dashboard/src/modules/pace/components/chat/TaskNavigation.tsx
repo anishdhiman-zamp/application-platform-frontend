@@ -38,7 +38,7 @@ const TaskNavigation = memo(
     if (totalCount === 0 || currentIndex === -1) return null;
 
     return (
-      <div className='flex items-center'>
+      <div className='flex shrink-0 items-center'>
         <span className='f-13-450 text-GRAY_900 mr-3 whitespace-nowrap'>
           {currentIndex + 1} / {totalCount}
         </span>
@@ -48,7 +48,7 @@ const TaskNavigation = memo(
             id='arrow-down'
             size={26}
             className={cn(
-              'text-GRAY_900 mr-1.5 rounded-lg p-1 transition-opacity',
+              'text-GRAY_900 mr-1.5 shrink-0 rounded-lg p-1 transition-opacity',
               isLoading || !hasNext ? 'cursor-not-allowed opacity-50' : 'hover:bg-GRAY_200 cursor-pointer',
             )}
             onClick={() => {
@@ -63,7 +63,7 @@ const TaskNavigation = memo(
             id='arrow-up'
             size={26}
             className={cn(
-              'text-GRAY_900 rounded-lg p-1 transition-opacity',
+              'text-GRAY_900 shrink-0 rounded-lg p-1 transition-opacity',
               isLoading || !hasPrevious ? 'cursor-not-allowed opacity-50' : 'hover:bg-GRAY_200 cursor-pointer',
             )}
             onClick={() => {

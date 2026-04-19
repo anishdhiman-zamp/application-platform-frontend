@@ -31,6 +31,9 @@ export { useTypewriter } from '@zamp-platform/chat';
 export { useTaskActions } from './hooks/useTaskActions';
 export { useTaskState } from './hooks/useTaskState';
 
+// API hooks (re-exported from @zamp-platform/chat for convenience)
+export { useLazyGetConversationByIdQuery } from '@zamp-platform/chat';
+
 // Components
 export type { ConnectedChatInputProps } from './components/ConnectedChatInput';
 export { ConnectedChatInput } from './components/ConnectedChatInput';
