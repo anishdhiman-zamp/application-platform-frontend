@@ -1,7 +1,14 @@
 'use client';
 
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
-import { ChatActionsProvider, HITLEntityType, HITLQuestionsBlock, ResourceType, ScopeType } from '@zamp-platform/chat';
+import {
+  ChatActionsProvider,
+  HITLEntityType,
+  HITLQuestionsBlock,
+  QueuedMessages,
+  ResourceType,
+  ScopeType,
+} from '@zamp-platform/chat';
 import { ConnectedChatInput, useConversationActions, useConversationState } from '@zamp-platform/conversation-stream';
 import { cn } from '@zamp-platform/ui/utils';
 import { EVENT_TYPE } from '@zamp-platform/utils/event-bus';
@@ -64,7 +71,7 @@ const ChatSidebarContent = ({
   const { inputValue, setInputValue } = useChatDraftInput({
     conversationId,
   });
-  const { inputsRequired, isStreaming, initiatedBy, isLoadingConversationHistory, isFetchingConversationHistory } =
+  const { inputsRequired, queuedMessages, initiatedBy, isLoadingConversationHistory, isFetchingConversationHistory } =
     useConversationState();
   const { refetchConversationHistory } = useConversationActions();
   const { sseEventBus } = useEventBus();
@@ -73,6 +80,7 @@ const ChatSidebarContent = ({
   const addFileReferenceRef = useRef<((ref: { path: string; name: string }) => void) | null>(null);
 
   const [isTaskPopoverOpen, setIsTaskPopoverOpen] = useState(false);
+  const [isConversationNotFound, setIsConversationNotFound] = useState(false);
 
   const { hitlQuestions, hitlQuestionsKey } = useHitlQuestions(inputsRequired);
   const hasInputsRequired = (inputsRequired?.length ?? 0) > 0;
@@ -87,6 +95,7 @@ const ChatSidebarContent = ({
     Boolean(conversationId) &&
     checkUserPrivilege(CONVERSATION_ACCESS_PRIVILEGES.VIEWER) &&
     !checkUserPrivilege(PERMISSION_ROLES.ADMIN);
+
   const modelSelectorSlot = useMemo(
     () => <ModelSelector value={selectedModel} onChange={setSelectedModel} />,
     [selectedModel],
@@ -152,6 +161,10 @@ const ChatSidebarContent = ({
   );
 
   useEffect(() => {
+    setIsConversationNotFound(false);
+  }, [conversationId]);
+
+  useEffect(() => {
     const sub = sseEventBus.subscribe(EVENT_TYPE.INPUT_REQUIRED, handleGlobalInputRequired);
 
     return () => sub.unsubscribe();
@@ -194,42 +207,46 @@ const ChatSidebarContent = ({
           onSubmit={handleHitlRespondComplete}
           sourceEntityId={conversationId ?? ''}
           sourceEntityType={HITLEntityType.CONVERSATION}
+          conversationId={conversationId ?? ''}
           username={username}
         />
       );
     }
 
     return (
-      <ConnectedChatInput
-        resourceType={ResourceType.ORGANIZATION}
-        resourceId={organizationId}
-        autoFocus
-        scope={ScopeType.ORGANIZATION}
-        scopeId={organizationId}
-        username={username}
-        currentUserName={currentUserName}
-        placeholder="Do your life's best work with Zamp"
-        externalInputValue={inputValue}
-        setExternalInputValue={setInputValue}
-        fileDropHandlerRef={fileDropHandlerRef}
-        llmModel={selectedModel}
-        showModelSelector
-        modelSelectorSlot={modelSelectorSlot}
-        conversationId={conversationId ?? ''}
-        isDisabled={isStreaming}
-        addFileReferenceRef={addFileReferenceRef}
-        externalFileReferences={sharedFileReferences}
-        setExternalFileReferences={setSharedFileReferences}
-        externalFilePathsRef={sharedExternalFilePaths}
-        metadata={
-          activeAgentInfo?.id
-            ? {
-                agent_id: activeAgentInfo.id,
-                ...(activeAgentInfo.avatar && { avatar: activeAgentInfo.avatar }),
-              }
-            : undefined
-        }
-      />
+      <>
+        <QueuedMessages messages={queuedMessages} />
+        <ConnectedChatInput
+          resourceType={ResourceType.ORGANIZATION}
+          resourceId={organizationId}
+          autoFocus
+          scope={ScopeType.ORGANIZATION}
+          scopeId={organizationId}
+          username={username}
+          currentUserName={currentUserName}
+          placeholder="Do your life's best work with Zamp"
+          externalInputValue={inputValue}
+          setExternalInputValue={setInputValue}
+          fileDropHandlerRef={fileDropHandlerRef}
+          llmModel={selectedModel}
+          showModelSelector
+          modelSelectorSlot={modelSelectorSlot}
+          conversationId={conversationId ?? ''}
+          addFileReferenceRef={addFileReferenceRef}
+          externalFileReferences={sharedFileReferences}
+          setExternalFileReferences={setSharedFileReferences}
+          externalFilePathsRef={sharedExternalFilePaths}
+          metadata={
+            activeAgentInfo?.id
+              ? {
+                  agent_id: activeAgentInfo.id,
+                  ...(activeAgentInfo.avatar && { avatar: activeAgentInfo.avatar }),
+                }
+              : undefined
+          }
+          className={queuedMessages.length > 0 ? '-mt-3' : undefined}
+        />
+      </>
     );
   };
 
@@ -255,16 +272,19 @@ const ChatSidebarContent = ({
         onBrowserOpen={handleBrowserOpen}
         onBrowserStreamingEnd={handleBrowserStreamingEnd}
         onTaskPopoverOpenChange={setIsTaskPopoverOpen}
+        onConversationNotFound={setIsConversationNotFound}
         fileDropHandlerRef={fileDropHandlerRef}
         addFileReferenceRef={addFileReferenceRef}
         currentUserName={currentUserName}
       />
 
-      <ChatActionsProvider onFileOpen={handleFileOpen}>
-        <div className='bg-BG_WHITE sticky bottom-0 z-10 mx-auto w-full max-w-[700px] px-3 pb-3'>
-          {renderChatInput()}
-        </div>
-      </ChatActionsProvider>
+      {!isConversationNotFound && (
+        <ChatActionsProvider onFileOpen={handleFileOpen}>
+          <div className='bg-BG_WHITE sticky bottom-0 z-10 mx-auto w-full max-w-[700px] px-3 pb-3'>
+            {renderChatInput()}
+          </div>
+        </ChatActionsProvider>
+      )}
     </div>
   );
 };

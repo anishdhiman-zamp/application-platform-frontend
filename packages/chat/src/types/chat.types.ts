@@ -7,6 +7,7 @@ export interface PostMessagePayloadType {
 
 export interface PostMessageResponseType {
   message: string;
+  message_id: string;
 }
 
 export interface StopConversationPayloadType {
@@ -60,6 +61,7 @@ export interface CreateConversationPayloadType {
 
 export interface CreateConversationResponseType {
   conversation_id: string;
+  message_id: string;
   status_message: string;
   title: string;
 }
@@ -278,6 +280,7 @@ export interface ConversationMessageContentType {
 }
 
 export const enum MessageState {
+  QUEUED = 'QUEUED',
   STREAMING = 'STREAMING',
   DONE = 'DONE',
 }
@@ -526,6 +529,7 @@ export interface ConversationInputRequiredItem {
   entity_type: HITLEntityType;
   input_required_data: ConversationInputRequiredData;
   input_id?: string;
+  title?: string;
 }
 
 export interface HITLSourceEntity {

@@ -1,8 +1,8 @@
 'use client';
 
 import { cn } from '@zamp-platform/ui/utils';
-import { Check, PenLine } from 'lucide-react';
-import React, { useEffect, useRef } from 'react';
+import { Check, Loader2, PenLine } from 'lucide-react';
+import React, { useCallback, useEffect, useRef } from 'react';
 
 import { type ChatComposerFileRef, ChatComposerInput, type ChatComposerInputHandle } from './ChatComposerInput';
 
@@ -10,6 +10,7 @@ export interface CustomInputRowProps {
   isFocused: boolean;
   isSelected: boolean;
   isMultiSelect: boolean;
+  isSubmitting?: boolean;
   value: string;
   onClick: () => void;
   onChange: (value: string) => void;
@@ -21,6 +22,7 @@ export const CustomInputRow: React.FC<CustomInputRowProps> = ({
   isFocused,
   isSelected,
   isMultiSelect,
+  isSubmitting,
   value,
   onClick,
   onChange,
@@ -29,11 +31,27 @@ export const CustomInputRow: React.FC<CustomInputRowProps> = ({
 }) => {
   const composerRef = useRef<ChatComposerInputHandle>(null);
 
-  useEffect(() => {
-    if (isFocused) {
-      composerRef.current?.focus();
+  const renderIcon = () => {
+    if (isSelected && isSubmitting) {
+      return <Loader2 className='text-BG_WHITE animate-spin' size={12} />;
     }
-  }, [isFocused]);
+    if (isMultiSelect && isSelected) {
+      return <Check className='text-BG_WHITE' size={12} strokeWidth={2} />;
+    }
+    return <PenLine className={cn(isSelected ? 'text-BG_WHITE' : 'text-GRAY_950')} size={12} strokeWidth={1} />;
+  };
+
+  const scheduleFocus = useCallback(() => {
+    const rafId = requestAnimationFrame(() => {
+      composerRef.current?.focus();
+    });
+    return () => cancelAnimationFrame(rafId);
+  }, []);
+
+  useEffect(() => {
+    if (!isFocused) return;
+    return scheduleFocus();
+  }, [isFocused, scheduleFocus]);
 
   return (
     <div
@@ -49,15 +67,7 @@ export const CustomInputRow: React.FC<CustomInputRowProps> = ({
               isSelected ? 'bg-GRAY_1000' : 'bg-GRAY_50',
             )}
           >
-            {isMultiSelect ? (
-              isSelected ? (
-                <Check className='text-BG_WHITE' size={14} strokeWidth={3} />
-              ) : (
-                <PenLine className='text-GRAY_950' size={12} strokeWidth={1} />
-              )
-            ) : (
-              <PenLine className={cn(isSelected ? 'text-BG_WHITE' : 'text-GRAY_950')} size={12} strokeWidth={1} />
-            )}
+            {renderIcon()}
           </div>
 
           <div className='flex-1 cursor-text' onClick={(e) => e.stopPropagation()}>

@@ -5,6 +5,7 @@ export interface HITLQuestionWithEntity extends HITLQuestion {
   entity_id?: string;
   entity_type?: string;
   input_id?: string;
+  title?: string;
 }
 
 export interface HITLQuestionsBlockProps {
@@ -16,5 +17,7 @@ export interface HITLQuestionsBlockProps {
   onSubmit?: () => void;
   sourceEntityId?: string;
   sourceEntityType?: HITLEntityType;
+  /** Conversation ID used when navigating to a task route from the title click */
+  conversationId?: string;
   username?: string;
 }
