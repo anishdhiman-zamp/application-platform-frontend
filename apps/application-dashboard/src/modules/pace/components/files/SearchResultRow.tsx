@@ -4,6 +4,7 @@ import { forwardRef } from 'react';
 import { Button, FileIcon, FolderClosedIcon, FolderOpenedIcon } from '@zamp-platform/ui';
 import { cn } from '@zamp-platform/ui/utils';
 import { ChevronRight, Loader } from 'lucide-react';
+import { KEYBOARD_KEYS } from '@/constants/shortcuts';
 import { FILE_TYPE, type FileItem } from '@/modules/pace/components/files/file-tree.types';
 import { getFileExtension, getParentPath } from '@/modules/pace/components/files/file-tree.utils';
 import { renderHighlightedName } from '@/modules/pace/components/files/HighlightedName';
@@ -55,12 +56,20 @@ const SearchResultRow = forwardRef<HTMLDivElement, SearchResultRowProps>(
       onToggleExpand(node.path);
     };
 
+    const handleKeyDown = (e: React.KeyboardEvent) => {
+      if (e.key === KEYBOARD_KEYS.ENTER || e.key === KEYBOARD_KEYS.SPACE) {
+        e.preventDefault();
+        handleRowClick();
+      }
+    };
+
     return (
       <div
         ref={ref}
         role='button'
         tabIndex={0}
         onClick={handleRowClick}
+        onKeyDown={handleKeyDown}
         className={cn(
           'hover:bg-GRAY_100 group flex cursor-pointer flex-col gap-0.5 px-2 py-1.5 transition-colors',
           isSelected && 'bg-GRAY_100',
