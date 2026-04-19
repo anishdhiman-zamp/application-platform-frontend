@@ -44,6 +44,7 @@ const FileTreeNode = memo(function FileTreeNode({
   onDragOverFolderChange,
   isSearchActive,
   isLoadingChildren,
+  searchHighlight,
   style,
 }: FileTreeNodeProps) {
   // State
@@ -291,6 +292,7 @@ const FileTreeNode = memo(function FileTreeNode({
         }}
         actions={filteredActions}
         onActionClick={actions.handleActionClick}
+        searchHighlight={searchHighlight}
       />
     </div>
   );

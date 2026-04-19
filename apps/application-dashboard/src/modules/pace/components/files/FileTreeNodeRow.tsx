@@ -22,6 +22,7 @@ import TooltipV2 from '@/components/common/TooltipV2';
 import { KEYBOARD_KEYS } from '@/constants/shortcuts';
 import type { ContextMenuAction, TreeNode } from '@/modules/pace/components/files/file-tree.types';
 import { getFileExtension } from '@/modules/pace/components/files/file-tree.utils';
+import { renderHighlightedName } from '@/modules/pace/components/files/HighlightedName';
 import { SIDE_OPTIONS } from '@/types/commonTypes';
 
 interface FileTreeNodeRowState {
@@ -67,6 +68,7 @@ interface FileTreeNodeRowProps extends React.HTMLAttributes<HTMLDivElement> {
   handlers: FileTreeNodeRowHandlers;
   actions: ContextMenuAction[];
   onActionClick: (actionId: string) => void;
+  searchHighlight?: string;
 }
 
 const INDENT_SIZE = 16;
@@ -117,7 +119,18 @@ const ActionMenuItems = ({
 
 const FileTreeNodeRow = forwardRef<HTMLDivElement, FileTreeNodeRowProps>(
   (
-    { node, depth, state, rename, handlers, actions, onActionClick, className: externalClassName, ...restProps },
+    {
+      node,
+      depth,
+      state,
+      rename,
+      handlers,
+      actions,
+      onActionClick,
+      searchHighlight,
+      className: externalClassName,
+      ...restProps
+    },
     ref,
   ) => {
     const extension = state.isFolder ? '' : getFileExtension(node.name);
@@ -227,7 +240,11 @@ const FileTreeNodeRow = forwardRef<HTMLDivElement, FileTreeNodeRowProps>(
           </div>
         ) : (
           <span className='f-13-450 text-GRAY_1000 min-w-0 truncate select-none'>
-            {state.isUserPrivateFolder ? `${node.name} (Private)` : node.name}
+            {state.isUserPrivateFolder ? (
+              <>{renderHighlightedName(node.name, searchHighlight)} (Private)</>
+            ) : (
+              renderHighlightedName(node.name, searchHighlight)
+            )}
           </span>
         )}
 

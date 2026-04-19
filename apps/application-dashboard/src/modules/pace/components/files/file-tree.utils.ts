@@ -32,6 +32,18 @@ import {
 } from '@/modules/pace/components/files/files.constants';
 
 /**
+ * Builds a tree containing only the descendants of the given root path.
+ * Filters the flat file list to items under `rootPath/` and constructs a subtree.
+ */
+export function buildSubtreeFromFiles(files: FileItem[], rootPath: string): TreeNode[] {
+  const prefix = rootPath + '/';
+
+  const descendants = files.filter((f) => f.path.startsWith(prefix));
+
+  return buildFileTree(descendants);
+}
+
+/**
  * Builds a hierarchical tree structure from a flat array of files.
  * Files are grouped by their path segments.
  */

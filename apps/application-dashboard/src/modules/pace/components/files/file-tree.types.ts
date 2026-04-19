@@ -161,6 +161,7 @@ export interface FileTreeNodeProps {
   onDragOverFolderChange?: (path: string | null) => void;
   isSearchActive?: boolean;
   isLoadingChildren?: boolean;
+  searchHighlight?: string;
   style?: React.CSSProperties;
 }
 
