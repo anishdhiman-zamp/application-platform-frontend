@@ -1,12 +1,13 @@
 'use client';
 
-import { useMemo } from 'react';
+import { useCallback, useMemo } from 'react';
 import { Button } from '@zamp-platform/ui';
-import { ChevronRight, Database, Plus } from 'lucide-react';
-import { DATASETS_POLL_INTERVAL_MS, LIST_TABLES_QUERY } from 'modules/pace/components/datasets/datasets.constants';
-import { preserveSidebarParam } from 'modules/pace/pace.utils';
-import Link from 'next/link';
-import { useRouter } from 'next/navigation';
+import { Database, ExternalLink, Plus } from 'lucide-react';
+import {
+  DATASETS_POLL_INTERVAL_MS,
+  generateNewDatasetId,
+  LIST_TABLES_QUERY,
+} from 'modules/pace/components/datasets/datasets.constants';
 import { snakeCaseToSentenceCase } from 'utils/common';
 import { type AgentDbQueryRequest, useAgentDbReadQuery } from '@/apis/agentManagedDb';
 import ImageLoader from '@/components/common/loader/ImageLoader';
@@ -14,16 +15,22 @@ import CommonWrapper from '@/components/commonWrapper';
 import { SkeletonTypes } from '@/components/commonWrapper/commonWrapper.types';
 import EmptyState from '@/components/EmptyState';
 import { DONE_EMPTY_STATE, ZAMP_LOGO_LOADER_SVG } from '@/constants/icons';
-import { getDatasetDetailRoute, ROUTES_PATH } from '@/constants/routeConfig';
+import { UNTITLED_DATASET_NAME } from '@/modules/data/data.constants';
+import { useDynamicTabs } from '@/modules/pace/components/dynamic-tabs/useDynamicTabs';
+import { TAB_TYPE } from '@/modules/pace/pace.types';
 
 const LISTING_QUERY_ARG: AgentDbQueryRequest = { query: LIST_TABLES_QUERY };
 
 const DatasetsListing = () => {
-  const router = useRouter();
+  const { openTab } = useDynamicTabs({ type: TAB_TYPE.DATASET });
   const { data, isLoading } = useAgentDbReadQuery(LISTING_QUERY_ARG, {
     pollingInterval: DATASETS_POLL_INTERVAL_MS,
     skipPollingIfUnfocused: true,
   });
+
+  const handleCreateDataset = useCallback(() => {
+    openTab(generateNewDatasetId(), UNTITLED_DATASET_NAME);
+  }, [openTab]);
 
   const rows = useMemo(() => {
     if (!data?.rows) return [];
@@ -38,12 +45,10 @@ const DatasetsListing = () => {
     <div className='flex h-full w-full flex-1 flex-col'>
       <div className='border-GRAY_400 flex items-center border-b pb-8'>
         <h1 className='f-18-500 flex-1'>Datasets</h1>
-        <Link href={preserveSidebarParam(ROUTES_PATH.CHAT_SETTINGS_DATASETS_NEW)}>
-          <Button size='medium' className='flex items-center gap-1.5'>
-            <Plus className='h-4 w-4' />
-            Create dataset
-          </Button>
-        </Link>
+        <Button size='medium' className='flex items-center gap-1.5' onClick={handleCreateDataset}>
+          <Plus className='h-4 w-4' />
+          Create dataset
+        </Button>
       </div>
       <div className='flex-1 overflow-y-auto'>
         <CommonWrapper
@@ -73,7 +78,7 @@ const DatasetsListing = () => {
                 <tr
                   key={row.id}
                   className='border-GRAY_400 hover:bg-BG_GRAY_1 group cursor-pointer border-b transition-colors'
-                  onClick={() => router.push(preserveSidebarParam(getDatasetDetailRoute(row.id)))}
+                  onClick={() => openTab(row.id, row.title)}
                 >
                   <td className='px-6 py-4'>
                     <span className='f-13-500 flex items-center gap-2.5'>
@@ -83,7 +88,7 @@ const DatasetsListing = () => {
                   </td>
                   <td className='w-27 px-6'>
                     <div className='opacity-0 transition-opacity group-hover:opacity-100'>
-                      <ChevronRight width={14} height={14} className='text-GRAY_700' />
+                      <ExternalLink width={14} height={14} className='text-GRAY_700' />
                     </div>
                   </td>
                 </tr>

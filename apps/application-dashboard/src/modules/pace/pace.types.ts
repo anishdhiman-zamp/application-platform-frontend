@@ -56,9 +56,19 @@ export const TAB_TYPE = {
   TASK: 'task',
   AGENT: 'agent',
   BROWSER: 'browser',
+  DATASET: 'dataset',
 } as const;
 
 export type DynamicTabType = (typeof TAB_TYPE)[keyof typeof TAB_TYPE];
+
+export const TAB_QUERY_PARAM = {
+  FILE: 'f',
+  TASK: 't',
+  BROWSER: 'b',
+  DATASET: 'd',
+} as const;
+
+export type TabQueryParam = (typeof TAB_QUERY_PARAM)[keyof typeof TAB_QUERY_PARAM];
 
 export const ROUTE_KIND = {
   QUERY: 'query',

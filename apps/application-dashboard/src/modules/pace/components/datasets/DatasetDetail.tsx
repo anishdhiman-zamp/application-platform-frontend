@@ -81,9 +81,11 @@ import { filtersContextActions, useFiltersContextStore, withFiltersContext } fro
 
 interface DatasetDetailProps {
   tableName: string;
+  header?: React.ReactNode;
+  onBackToDatasets?: () => void;
 }
 
-const DatasetDetailInner = ({ tableName }: DatasetDetailProps) => {
+const DatasetDetailInner = ({ tableName, header, onBackToDatasets }: DatasetDetailProps) => {
   // --- Refs ---
   const tableRef = useRef<AgGridReact | null>(null);
   const totalRowsRef = useRef<number | undefined>(undefined);
@@ -95,11 +97,12 @@ const DatasetDetailInner = ({ tableName }: DatasetDetailProps) => {
     countPromise: Promise<{ rows: Record<string, unknown>[]; count: number }>;
     consumed: boolean;
   } | null>(null);
-  // Cache of the last successfully fetched raw rows — used to re-serve augmented data
-  // when blueprint has unsaved changes, avoiding redundant API calls on tab switches.
+  // Last successful raw rows; reused for augmented data when blueprint has unsaved changes.
   const cachedRowsRef = useRef<Record<string, unknown>[]>([]);
-  // Set to true while we programmatically move columns in AG Grid to avoid feedback loops
+  // True while we programmatically move columns in AG Grid, to avoid feedback loops.
   const isProgrammaticMoveRef = useRef(false);
+  // Skip the next previewColumns refresh so rename's optimistic update isn't purged mid-flight.
+  const skipNextPreviewRefreshRef = useRef(false);
 
   // --- Hooks ---
   const router = useRouter();
@@ -157,8 +160,6 @@ const DatasetDetailInner = ({ tableName }: DatasetDetailProps) => {
 
   const columnOrderKey = `${LOCAL_STORAGE_KEYS.DATASET_COLUMN_ORDER}_${tableName}` as LOCAL_STORAGE_KEYS;
 
-  // Apply a saved column id order to a BlueprintColumn array.
-  // Known columns are sorted by the saved order; any new/unknown columns are appended at the end.
   const applyColumnOrder = useCallback(
     (cols: BlueprintColumn[]): BlueprintColumn[] => {
       const raw = getFromLocalStorage(columnOrderKey);
@@ -374,18 +375,49 @@ const DatasetDetailInner = ({ tableName }: DatasetDetailProps) => {
       const sanitized = sanitizeColumnName(newName);
 
       if (sanitized === colId) return;
+
+      const newHeaderName = snakeCaseToSentenceCase(sanitized);
+      const previousHeaderName = snakeCaseToSentenceCase(colId);
+
+      // Optimistic header rename; skip next preview refresh since ALTER TABLE is in flight.
+      skipNextPreviewRefreshRef.current = true;
+      setColumns(
+        (prev) => prev?.map((col) => (col.field === colId ? { ...col, headerName: newHeaderName } : col)) ?? null,
+      );
+
+      // Remap stored column order so the renamed column keeps its position after loadSchema.
+      const rawOrder = getFromLocalStorage(columnOrderKey);
+
+      if (rawOrder) {
+        try {
+          const order = JSON.parse(rawOrder) as string[];
+          const updatedOrder = order.map((id) => (id === colId ? sanitized : id));
+
+          setToLocalStorage(columnOrderKey, JSON.stringify(updatedOrder));
+        } catch {
+          // ignore parse errors — column may land at the end, but rename still succeeds
+        }
+      }
+
       try {
         await executeMutation({
           query: `ALTER TABLE "${escapeSqlIdentifier(tableName)}" RENAME COLUMN "${escapeSqlIdentifier(colId)}" TO "${escapeSqlIdentifier(sanitized)}"`,
         }).unwrap();
         toast.success('Column renamed');
         await loadSchema();
-        tableRef.current?.api?.refreshServerSide({ purge: true });
       } catch {
         toast.error('Failed to rename column');
+        skipNextPreviewRefreshRef.current = true;
+        setColumns(
+          (prev) =>
+            prev?.map((col) => (col.field === colId ? { ...col, headerName: previousHeaderName } : col)) ?? null,
+        );
+        if (rawOrder) {
+          setToLocalStorage(columnOrderKey, rawOrder);
+        }
       }
     },
-    [tableName, executeMutation, loadSchema],
+    [tableName, executeMutation, loadSchema, columnOrderKey],
   );
 
   const handleColumnRequiredChange = useCallback(
@@ -816,21 +848,7 @@ const DatasetDetailInner = ({ tableName }: DatasetDetailProps) => {
 
   const serverSideDatasource: IServerSideDatasource = useMemo(() => ({ getRows }), [getRows]);
 
-  // Refresh grid row data whenever pending blueprint changes update (new columns, required changes).
-  // This ensures the augmented rows are re-fetched when previewColumns changes.
-  const prevPreviewColumnsRef = useRef<ColDef[] | null>(null);
-
-  useEffect(() => {
-    if (!gridReady) return;
-    if (previewColumns === prevPreviewColumnsRef.current) return;
-    prevPreviewColumnsRef.current = previewColumns;
-    // Purge and re-fetch rows so augmentRows applies to the new column set
-    tableRef.current?.api?.refreshServerSide({ purge: true });
-  }, [previewColumns, gridReady]);
-
-  // Sync blueprintColumns order into AG Grid whenever it changes.
-  // AG Grid maintains its own internal column order; passing a new columnDefs array doesn't
-  // reorder columns — we must call moveColumns() explicitly.
+  // Sync blueprintColumns order into AG Grid via moveColumns(); must run before refreshServerSide.
   const prevBlueprintOrderRef = useRef<string>('');
 
   useEffect(() => {
@@ -854,6 +872,23 @@ const DatasetDetailInner = ({ tableName }: DatasetDetailProps) => {
     isProgrammaticMoveRef.current = false;
   }, [blueprintColumns, gridReady]);
 
+  // Refresh grid row data whenever pending blueprint changes update (new columns, required changes).
+  // This ensures the augmented rows are re-fetched when previewColumns changes.
+  const prevPreviewColumnsRef = useRef<ColDef[] | null>(null);
+
+  useEffect(() => {
+    if (!gridReady) return;
+    if (previewColumns === prevPreviewColumnsRef.current) return;
+    prevPreviewColumnsRef.current = previewColumns;
+    if (skipNextPreviewRefreshRef.current) {
+      skipNextPreviewRefreshRef.current = false;
+
+      return;
+    }
+    // Purge and re-fetch rows so augmentRows applies to the new column set
+    tableRef.current?.api?.refreshServerSide({ purge: true });
+  }, [previewColumns, gridReady]);
+
   // When switching to Preview from Blueprint, always purge and re-fetch
   const prevTabRef = useRef<DatasetTabsTypes>(DatasetTabsTypes.PREVIEW);
 
@@ -865,8 +900,7 @@ const DatasetDetailInner = ({ tableName }: DatasetDetailProps) => {
   }, [activeTab]);
 
   // --- Draft persistence ---
-  // Persist active tab so refresh lands on the same tab
-  // Skip the initial mount render — only save when the user actually switches tabs
+  // Persist active tab across refreshes; skip initial mount to avoid overwriting the stored value.
   const isFirstTabRender = useRef(true);
 
   useEffect(() => {
@@ -878,9 +912,7 @@ const DatasetDetailInner = ({ tableName }: DatasetDetailProps) => {
     setToLocalStorage(`${LOCAL_STORAGE_KEYS.DATASET_ACTIVE_TAB}_${tableName}` as LOCAL_STORAGE_KEYS, activeTab);
   }, [activeTab, tableName]);
 
-  // Save blueprint draft + column order to localStorage whenever columns change.
-  // Only run after schema has loaded (originalBlueprintColumns is non-empty)
-  // to avoid wiping the draft on initial mount before loadSchema completes.
+  // Save blueprint draft + column order; skip until schema has loaded so initial mount doesn't wipe the draft.
   useEffect(() => {
     if (originalBlueprintColumns.length === 0) return;
     const draftKey = `${LOCAL_STORAGE_KEYS.DATASET_BLUEPRINT_DRAFT}_${tableName}` as LOCAL_STORAGE_KEYS;
@@ -1027,23 +1059,31 @@ const DatasetDetailInner = ({ tableName }: DatasetDetailProps) => {
   if (accessDenied) {
     return (
       <div className='bg-BG_WHITE flex h-full w-full flex-1 flex-col'>
-        <div className='border-GRAY_400 flex items-center gap-3 border-b px-6 pt-10 pb-8'>
-          <Link href={preserveSidebarParam(ROUTES_PATH.CHAT_SETTINGS_DATASETS)}>
-            <ArrowLeft width={18} height={18} className='text-GRAY_700 hover:text-GRAY_1000 transition-colors' />
-          </Link>
-          <h1 className='f-18-500 flex-1'>{snakeCaseToSentenceCase(tableName)}</h1>
-        </div>
+        {header ?? (
+          <div className='border-GRAY_400 flex items-center gap-3 border-b px-6 pt-10 pb-8'>
+            <Link href={preserveSidebarParam(ROUTES_PATH.CHAT_SETTINGS_DATASETS)}>
+              <ArrowLeft width={18} height={18} className='text-GRAY_700 hover:text-GRAY_1000 transition-colors' />
+            </Link>
+            <h1 className='f-18-500 flex-1'>{snakeCaseToSentenceCase(tableName)}</h1>
+          </div>
+        )}
         <div className='flex flex-1 flex-col items-center justify-center gap-3'>
           <ShieldOff className='text-GRAY_500 h-10 w-10' />
           <p className='f-14-500 text-GRAY_700'>Access denied</p>
           <p className='f-12-400 text-GRAY_600 max-w-[300px] text-center'>
             You don&apos;t have permission to view this dataset. Ask an admin to share it with you.
           </p>
-          <Link href={preserveSidebarParam(ROUTES_PATH.CHAT_SETTINGS_DATASETS)}>
-            <Button size='small' variant='outline' className='mt-2'>
+          {onBackToDatasets ? (
+            <Button size='small' variant='outline' className='mt-2' onClick={onBackToDatasets}>
               Back to datasets
             </Button>
-          </Link>
+          ) : (
+            <Link href={preserveSidebarParam(ROUTES_PATH.CHAT_SETTINGS_DATASETS)}>
+              <Button size='small' variant='outline' className='mt-2'>
+                Back to datasets
+              </Button>
+            </Link>
+          )}
         </div>
       </div>
     );
@@ -1074,17 +1114,20 @@ const DatasetDetailInner = ({ tableName }: DatasetDetailProps) => {
       </Dialog>
 
       {/* Header */}
-      <div className='border-GRAY_400 flex items-center gap-3 border-b px-6 pt-10 pb-8'>
-        <button
-          type='button'
-          onClick={() => handleNavAttempt(preserveSidebarParam(ROUTES_PATH.CHAT_SETTINGS_DATASETS))}
-          className='text-GRAY_700 hover:text-GRAY_1000 transition-colors'
-        >
-          <ArrowLeft width={18} height={18} />
-        </button>
-        <h1 className='f-18-500 flex-1'>{snakeCaseToSentenceCase(tableName)}</h1>
-        <ShareDatasetNeonPopup tableName={tableName} />
-      </div>
+      {header ?? (
+        <div className='border-GRAY_400 flex items-center gap-3 border-b px-6 pt-10 pb-8'>
+          <Button
+            variant='ghost'
+            size='icon'
+            className='text-GRAY_700 hover:text-GRAY_1000 h-auto w-auto p-0 hover:bg-transparent'
+            onClick={() => handleNavAttempt(preserveSidebarParam(ROUTES_PATH.CHAT_SETTINGS_DATASETS))}
+          >
+            <ArrowLeft width={18} height={18} />
+          </Button>
+          <h1 className='f-18-500 flex-1'>{snakeCaseToSentenceCase(tableName)}</h1>
+          <ShareDatasetNeonPopup tableName={tableName} />
+        </div>
+      )}
 
       {/* Toolbar + Filter in one row */}
       <div
