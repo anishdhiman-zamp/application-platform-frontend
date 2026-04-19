@@ -9,6 +9,7 @@ import type {
 } from './event-bus.types';
 
 // Re-export types and constants from event-bus.types
+export { extractTaskUpdateFields } from '../common/extractTaskUpdateFields';
 export type { BaseEventPayload, EventBusInterface, EventBusSubscription, EventCallback } from './event-bus.types';
 export { EVENT_TYPE } from './event-bus.types';
 

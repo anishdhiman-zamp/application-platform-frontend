@@ -3,6 +3,7 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { DatasetColumnTypes } from '@zamp-platform/dataset-create-edit';
 import { Button, Input, toast, Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@zamp-platform/ui';
+import { cn } from '@zamp-platform/ui/utils';
 import { ArrowLeft } from 'lucide-react';
 import DatasetBlueprintEditor, { createDefaultColumn } from 'modules/pace/components/datasets/DatasetBlueprintEditor';
 import {
@@ -17,10 +18,17 @@ import { useRouter } from 'next/navigation';
 import { useAgentDbReadQuery, useAgentDbWriteMutation } from '@/apis/agentManagedDb';
 import { getDatasetDetailRoute, ROUTES_PATH } from '@/constants/routeConfig';
 import { KEYBOARD_KEYS } from '@/constants/shortcuts';
+import { UNTITLED_DATASET_NAME } from '@/modules/data/data.constants';
 
-const CreateDataset = () => {
+interface CreateDatasetProps {
+  onCreated?: (tableName: string, displayName: string) => void;
+  onTitleChange?: (displayName: string) => void;
+  hideBackButton?: boolean;
+}
+
+const CreateDataset = ({ onCreated, onTitleChange, hideBackButton }: CreateDatasetProps) => {
   const router = useRouter();
-  const [title, setTitle] = useState('Untitled Dataset');
+  const [title, setTitle] = useState(UNTITLED_DATASET_NAME);
   const [isEditingTitle, setIsEditingTitle] = useState(true);
   const inputElRef = useRef<HTMLInputElement | null>(null);
   const inputRef = useCallback((el: HTMLInputElement | null) => {
@@ -78,24 +86,39 @@ const CreateDataset = () => {
     try {
       await executeMutation({ query: sql }).unwrap();
       toast.success('Dataset created successfully');
-      router.push(preserveSidebarParam(getDatasetDetailRoute(tableName)));
+
+      if (onCreated) {
+        onCreated(tableName, title.trim());
+      } else {
+        router.push(preserveSidebarParam(getDatasetDetailRoute(tableName)));
+      }
     } catch {
       toast.error('Failed to create dataset');
     }
-  }, [validate, title, columns, executeMutation, router]);
+  }, [validate, title, columns, executeMutation, router, onCreated]);
 
   const handleTitleClick = useCallback(() => {
     setIsEditingTitle(true);
     requestAnimationFrame(() => inputElRef.current?.focus());
   }, []);
 
-  const handleTitleKeyDown = useCallback((e: React.KeyboardEvent) => {
-    if (e.key === KEYBOARD_KEYS.ENTER) {
-      setIsEditingTitle(false);
-    }
-  }, []);
+  const commitTitle = useCallback(() => {
+    setIsEditingTitle(false);
+    const trimmed = title.trim() || UNTITLED_DATASET_NAME;
 
-  const displayTitle = title.trim() || 'Untitled Dataset';
+    onTitleChange?.(trimmed);
+  }, [title, onTitleChange]);
+
+  const handleTitleKeyDown = useCallback(
+    (e: React.KeyboardEvent) => {
+      if (e.key === KEYBOARD_KEYS.ENTER) {
+        commitTitle();
+      }
+    },
+    [commitTitle],
+  );
+
+  const displayTitle = title.trim() || UNTITLED_DATASET_NAME;
 
   useEffect(() => {
     if (inputElRef.current) {
@@ -107,20 +130,27 @@ const CreateDataset = () => {
   return (
     <div className='bg-BG_WHITE flex h-full w-full flex-1 flex-col'>
       {/* Header */}
-      <div className='border-GRAY_400 flex items-center gap-3 border-b px-10 pt-10 pb-8'>
-        <Link href={preserveSidebarParam(ROUTES_PATH.CHAT_SETTINGS_DATASETS)}>
-          <ArrowLeft width={18} height={18} className='text-GRAY_700 hover:text-GRAY_1000 transition-colors' />
-        </Link>
+      <div
+        className={cn(
+          'border-GRAY_400 flex items-center gap-3 border-b',
+          hideBackButton ? 'px-4 py-2.5' : 'px-10 pt-10 pb-8',
+        )}
+      >
+        {!hideBackButton && (
+          <Link href={preserveSidebarParam(ROUTES_PATH.CHAT_SETTINGS_DATASETS)}>
+            <ArrowLeft width={18} height={18} className='text-GRAY_700 hover:text-GRAY_1000 transition-colors' />
+          </Link>
+        )}
         {isEditingTitle ? (
           <Input
             ref={inputRef}
             autoFocus
             value={title}
             onChange={(e) => setTitle(e.target.value)}
-            onBlur={() => setIsEditingTitle(false)}
+            onBlur={commitTitle}
             onKeyDown={handleTitleKeyDown}
-            placeholder='Untitled Dataset'
-            className='f-18-600 text-GRAY_1000 h-auto flex-1 border-none bg-transparent px-0 py-0 shadow-none outline-none'
+            placeholder={UNTITLED_DATASET_NAME}
+            className='f-18-600 text-GRAY_1000 h-7 flex-1 border-none bg-transparent px-1 shadow-none outline-none'
           />
         ) : (
           <TooltipProvider delayDuration={200}>
@@ -129,7 +159,7 @@ const CreateDataset = () => {
                 <button
                   type='button'
                   onClick={handleTitleClick}
-                  className='f-18-600 text-GRAY_1000 cursor-pointer truncate text-left'
+                  className='f-18-600 text-GRAY_1000 h-7 cursor-pointer truncate px-1 text-left'
                 >
                   {displayTitle}
                 </button>

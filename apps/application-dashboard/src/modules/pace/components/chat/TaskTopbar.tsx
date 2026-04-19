@@ -77,7 +77,7 @@ const TaskTopbar: FC<TaskTopbarProps> = ({ className, title, status, isSubtask, 
           </>
         )}
       </div>
-      <div className='flex items-center gap-1.5 pl-10'>{navigationSlot}</div>
+      <div className='flex shrink-0 items-center gap-1.5 pl-10'>{navigationSlot}</div>
     </div>
   );
 };

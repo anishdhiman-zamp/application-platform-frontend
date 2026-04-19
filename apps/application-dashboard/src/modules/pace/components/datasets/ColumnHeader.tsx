@@ -103,12 +103,33 @@ const ColumnHeader: FC<IHeaderParams & ColumnHeaderParams> = (props) => {
     setMenuPosition({ top: rect.bottom + window.scrollY, left });
   }, []);
 
+  const handleHeaderNameBlur = useCallback(() => {
+    if (renameSubmittedRef.current) return;
+    const trimmed = headerName?.trim() ?? '';
+
+    if (!trimmed || trimmed === displayName) return;
+    renameSubmittedRef.current = true;
+    onColumnRename?.(colId, trimmed);
+  }, [headerName, displayName, colId, onColumnRename]);
+
+  const handleHeaderNameKeyDown = useCallback(
+    (e: KeyboardEvent<HTMLInputElement>) => {
+      if (e.key === KEYBOARD_KEYS.ENTER) {
+        e.preventDefault();
+        e.stopPropagation();
+        handleHeaderNameBlur();
+      }
+    },
+    [handleHeaderNameBlur],
+  );
+
   const handleClose = useCallback(() => {
     if (isRequiredModalOpen) return;
+    handleHeaderNameBlur();
     setIsMenuOpen(false);
     setIsFilterOpen(false);
     setIsOperatorOpen(false);
-  }, [isRequiredModalOpen]);
+  }, [isRequiredModalOpen, handleHeaderNameBlur]);
 
   const applyFilter = useCallback(
     (operator: FilterOperator, value: string) => {
@@ -158,26 +179,6 @@ const ColumnHeader: FC<IHeaderParams & ColumnHeaderParams> = (props) => {
       }
     },
     [api, colId, handleClose, updateMenuPosition],
-  );
-
-  const handleHeaderNameBlur = useCallback(() => {
-    if (renameSubmittedRef.current) return;
-    const trimmed = headerName?.trim() ?? '';
-
-    if (!trimmed || trimmed === displayName) return;
-    renameSubmittedRef.current = true;
-    onColumnRename?.(colId, trimmed);
-  }, [headerName, displayName, colId, onColumnRename]);
-
-  const handleHeaderNameKeyDown = useCallback(
-    (e: KeyboardEvent<HTMLInputElement>) => {
-      if (e.key === KEYBOARD_KEYS.ENTER) {
-        e.preventDefault();
-        e.stopPropagation();
-        handleHeaderNameBlur();
-      }
-    },
-    [handleHeaderNameBlur],
   );
 
   const handleRequiredToggle = useCallback(

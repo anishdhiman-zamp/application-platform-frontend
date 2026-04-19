@@ -18,10 +18,16 @@ import {
   useDisplayedSummary,
   useStreamingState,
 } from '@zamp-platform/chat';
-import { TaskProvider, useTaskActions, useTaskState } from '@zamp-platform/conversation-stream';
+import {
+  TaskProvider,
+  useLazyGetConversationByIdQuery,
+  useTaskActions,
+  useTaskState,
+} from '@zamp-platform/conversation-stream';
 import { ScrollContainer, type ScrollContainerRef, ShimmerText } from '@zamp-platform/ui';
 import { cn } from '@zamp-platform/ui/utils';
-import { EVENT_TYPE } from '@zamp-platform/utils/event-bus';
+import { extractTaskUpdateFields } from '@zamp-platform/utils';
+import { type BaseEventPayload, EVENT_TYPE } from '@zamp-platform/utils/event-bus/event-bus.types';
 import { useDynamicTabs } from 'modules/pace/components/dynamic-tabs/useDynamicTabs';
 import { useTaskNavigation } from 'modules/pace/hooks/useTaskNavigation';
 import { TAB_TYPE } from 'modules/pace/pace.types';
@@ -30,6 +36,7 @@ import { API_ENDPOINTS } from '@/apis/apiEndpoint.constants';
 import { useEventBus } from '@/app/_providers/sse-provider';
 import CommonWrapper from '@/components/commonWrapper';
 import { SkeletonTypes } from '@/components/commonWrapper/commonWrapper.types';
+import { TASK_QUERY_PARAMS } from '@/constants/routeConfig';
 import { useAppSelector } from '@/hooks/toolkit';
 import ResizableSummaryBox from '@/modules/pace/components/chat/ResizableSummaryBox';
 import {
@@ -63,39 +70,22 @@ interface TaskContentInnerProps {
 }
 
 const TaskContentChat = ({ taskId }: { taskId: string }) => {
+  // Refs
   const hadStreamingRef = useRef(false);
   const prevBrowserStreamingRef = useRef(false);
-
-  const { openTab } = useDynamicTabs({ type: TAB_TYPE.FILE });
-  const { openTab: openBrowserTab, updateTab: updateBrowserTab } = useDynamicTabs({ type: TAB_TYPE.BROWSER });
-  const searchParams = useSearchParams();
-  const urlTitle = searchParams?.get('title') ?? null;
-  const [chatTitle, setChatTitle] = useState(urlTitle ?? '');
-
-  const parentTasks: TaskBreadcrumb[] = useMemo(() => {
-    const raw = searchParams?.get('parentTasks');
-
-    if (!raw) return [];
-    try {
-      return JSON.parse(raw) as TaskBreadcrumb[];
-    } catch {
-      return [];
-    }
-  }, [searchParams]);
-
-  const isSubtask = parentTasks.length > 0;
-
-  const username = useAppSelector((state: RootState) => state.user.user?.username) ?? '';
-
-  const [showSteps, setShowSteps] = useState(false);
-  const [showSummary, setShowSummary] = useState(false);
-  const scrollContainerRef = useRef<ScrollContainerRef>(null);
   const summaryScrollRef = useRef<HTMLDivElement>(null);
   const shimmerScrollRef = useRef<HTMLDivElement>(null);
+  const scrollContainerRef = useRef<ScrollContainerRef>(null);
 
-  const handleToggleSteps = useCallback(() => {
-    setShowSteps((prev) => !prev);
-  }, []);
+  // Hooks
+  const { sseEventBus } = useEventBus();
+  const searchParams = useSearchParams();
+  const { refetchHistory } = useTaskActions();
+  const streamingState = useStreamingState(taskId);
+  const { openTab } = useDynamicTabs({ type: TAB_TYPE.FILE });
+  const [triggerGetConversation] = useLazyGetConversationByIdQuery();
+  const { openTab: openBrowserTab, updateTab: updateBrowserTab } = useDynamicTabs({ type: TAB_TYPE.BROWSER });
+  const username = useAppSelector((state: RootState) => state.user.user?.username) ?? '';
 
   const {
     currentIndex,
@@ -122,16 +112,166 @@ const TaskContentChat = ({ taskId }: { taskId: string }) => {
     isBrowserStreamingAvailable,
     browserSessionId,
   } = useTaskState();
-  const { refetchHistory } = useTaskActions();
-  const { sseEventBus } = useEventBus();
-  const streamingState = useStreamingState(taskId);
+  const { hitlQuestions, hitlQuestionsKey } = useHitlQuestions(inputsRequired);
 
+  // constants
+  const urlTitle = searchParams?.get('title') ?? null;
+  const hasMessages = messages.length > 0;
+  const isAnalysing = hasMessages && messages[messages.length - 1]?.sender_type === SenderType.USER;
   const taskStatus = (conversationData as Record<string, unknown> | undefined)?.status as string | undefined;
-
-  // Priority: SSE liveStatus (most real-time) > conversationData (server truth) > URL param (stale)
-  const effectiveStatus = (liveStatus as TaskStatus) ?? (taskStatus as TaskStatus) ?? status ?? undefined;
-
+  const effectiveStatus = (liveStatus as TaskStatus) ?? (taskStatus as TaskStatus) ?? status ?? undefined; // SOT: SSE liveStatus > conversation api > URL param
   const conversationId = searchParams?.get('s') ?? undefined;
+  // When navigating back to a previously visited task, RTK Query serves cached data
+  const hasCachedData = Boolean(conversationData);
+  const isLoadingConversation =
+    !isErrorHistory &&
+    (Boolean(taskId && isLoadingHistory) ||
+      (!hasMessages && !streamingState && !hadStreamingRef.current && !hasCachedData));
+  const isTaskNotFound = isErrorHistory && isNotFoundError(errorHistory);
+
+  const { processedMessages, lastSummaryText } = useMemo(() => getProcessedMessages(messages), [messages]);
+  const summary = (conversationData as Record<string, unknown> | undefined)?.summary as
+    | ConversationSummary
+    | null
+    | undefined;
+  const description = (conversationData as Record<string, unknown> | undefined)?.description as
+    | string
+    | null
+    | undefined;
+  const statusLabel = getStatusLabel(effectiveStatus);
+  const hasHitlQuestions = hitlQuestions.length > 0;
+  const isNeedsInput = taskStatus === TASK_STATUS.NEEDS_INPUT;
+  const isAgentActive = Boolean(streamingState?.is_active) || isAnalysing;
+  const isTaskDone = taskStatus && !streamingState ? taskStatus === TASK_STATUS.COMPLETED : false;
+  const stepGroupsRaw = isTaskDone ? summary?.step_groups : undefined;
+  const isStreaming = streamingState && !!streamingState.message_content?.elements?.length;
+  const stepCount = useMemo(() => getStepCount(messages, streamingState), [messages, streamingState]);
+
+  const displayedSummary = useDisplayedSummary({
+    taskId,
+    isAgentActive,
+    taskStatus,
+    streamingSummaryText: taskSummaryText,
+  });
+
+  // State
+  const [chatTitle, setChatTitle] = useState(urlTitle ?? '');
+  const [showSteps, setShowSteps] = useState(false);
+  const [showSummary, setShowSummary] = useState(false);
+  const [liveParentStatuses, setLiveParentStatuses] = useState<Map<string, TaskStatus>>(new Map()); // live task status from SSE
+
+  const displayTitle = getDisplayTitle(urlTitle, chatTitle);
+
+  const parentTasks: TaskBreadcrumb[] = useMemo(() => {
+    const raw = searchParams?.get('parentTasks');
+
+    if (!raw) return [];
+    try {
+      return JSON.parse(raw) as TaskBreadcrumb[];
+    } catch {
+      return [];
+    }
+  }, [searchParams]);
+
+  const stepGroupSections = useMemo(() => {
+    if (!stepGroupsRaw) return [];
+    if (Array.isArray(stepGroupsRaw)) {
+      return stepGroupsLegacyToSections(stepGroupsRaw, messages);
+    }
+
+    return resolveMessageStepGroupSections(stepGroupsRaw, messages);
+  }, [stepGroupsRaw, messages]);
+
+  const isSubtask = parentTasks.length > 0;
+  const hasStepGroups = stepGroupSections.length > 0;
+  const isExpandedStepsView = showSteps && (!hasStepGroups || !showSummary);
+
+  const parentTaskIds = useMemo(() => new Set(parentTasks.map((p) => p.id)), [parentTasks]);
+
+  const handleToggleSteps = () => setShowSteps((prev) => !prev);
+
+  const handleParentStatusUpdate = useCallback(
+    (data: BaseEventPayload) => {
+      const { taskId: updatedTaskId, status: rawStatus } = extractTaskUpdateFields(data);
+      const newStatus = rawStatus as TaskStatus | undefined;
+
+      if (!updatedTaskId || !newStatus || !parentTaskIds.has(updatedTaskId)) return;
+
+      setLiveParentStatuses((prev) => {
+        if (prev.get(updatedTaskId) === newStatus) return prev;
+
+        const next = new Map(prev);
+
+        next.set(updatedTaskId, newStatus);
+
+        return next;
+      });
+    },
+    [parentTaskIds],
+  );
+
+  const organizationId = useAppSelector((state: RootState) => state.user.user?.orgs?.[0]?.organization_id) ?? '';
+
+  const fetchParentStatuses = useCallback(async () => {
+    if (!isSubtask || parentTasks.length === 0) return;
+
+    for (const parent of parentTasks) {
+      try {
+        const result = await triggerGetConversation({
+          conversationId: parent.id,
+          resourceId: organizationId,
+          resourceType: ResourceType.ORGANIZATION,
+          url: API_ENDPOINTS.TASKS_MESSAGES_GET,
+        }).unwrap();
+
+        const freshStatus = (result?.conversation as unknown as Record<string, unknown>)?.status as
+          | TaskStatus
+          | undefined;
+
+        if (freshStatus && freshStatus !== parent.status) {
+          setLiveParentStatuses((prev) => {
+            if (prev.get(parent.id) === freshStatus) return prev;
+
+            const next = new Map(prev);
+
+            next.set(parent.id, freshStatus);
+
+            return next;
+          });
+        }
+      } catch {
+        // Silently ignore — breadcrumb will use the URL param status as fallback.
+      }
+    }
+  }, [isSubtask, parentTasks, triggerGetConversation, organizationId]);
+
+  const liveParentTasks: TaskBreadcrumb[] = useMemo(() => {
+    if (liveParentStatuses.size === 0) return parentTasks;
+
+    return parentTasks.map((p) => {
+      const freshStatus = liveParentStatuses.get(p.id);
+
+      return freshStatus ? { ...p, status: freshStatus } : p;
+    });
+  }, [parentTasks, liveParentStatuses]);
+
+  // Sync live parent statuses back to the parentTasks URL param so reloads show fresh data.
+  const handleParentTasksUrlSync = useCallback(() => {
+    if (liveParentStatuses.size === 0 || parentTasks.length === 0) return;
+
+    const updated = parentTasks.map((p) => {
+      const freshStatus = liveParentStatuses.get(p.id);
+
+      return freshStatus && freshStatus !== p.status ? { ...p, status: freshStatus } : p;
+    });
+
+    if (JSON.stringify(updated) === JSON.stringify(parentTasks)) return;
+
+    const currentParams = new URLSearchParams(window.location.search);
+
+    currentParams.set(TASK_QUERY_PARAMS.PARENT_TASKS, JSON.stringify(updated));
+    window.history.replaceState(null, '', `${window.location.pathname}?${currentParams.toString()}`);
+  }, [liveParentStatuses, parentTasks]);
 
   const handleWatchStream = useCallback(() => {
     if (conversationId) {
@@ -141,7 +281,7 @@ const TaskContentChat = ({ taskId }: { taskId: string }) => {
 
   const subtaskPanelParents: TaskBreadcrumb[] = useMemo(
     () => [
-      ...parentTasks,
+      ...liveParentTasks,
       {
         id: taskId,
         title: chatTitle || urlTitle || 'Untitled',
@@ -151,11 +291,11 @@ const TaskContentChat = ({ taskId }: { taskId: string }) => {
         conversationId,
       },
     ],
-    [parentTasks, taskId, chatTitle, urlTitle, effectiveStatus, currentIndex, totalCount, conversationId],
+    [liveParentTasks, taskId, chatTitle, urlTitle, effectiveStatus, currentIndex, totalCount, conversationId],
   );
 
   // Extract subtask info from messages and streaming to detect newly created subtasks
-  // before the task list API refetches (no BE event for subtask creation during streaming).
+  // before the task list API refetches
   const mergedSubtasks = useMemo(() => {
     const apiSubtaskIds = new Set(subtasks.map((s) => s?.id));
     const newSubtasks: typeof subtasks = [];
@@ -211,6 +351,35 @@ const TaskContentChat = ({ taskId }: { taskId: string }) => {
     [mergedSubtasks],
   );
 
+  if (streamingState) hadStreamingRef.current = true;
+
+  const handleHitlRespondComplete = useCallback(() => {
+    refetchHistory();
+    sseEventBus.publish(EVENT_TYPE.COMPONENT, { type: EVENT_TYPE.COMPONENT, payload: HITL_RESPONDED_EVENT });
+  }, [refetchHistory, sseEventBus]);
+
+  const handleToggleSummary = (checked: boolean) => setShowSummary(checked);
+
+  useEffect(() => {
+    const sub = isSubtask ? sseEventBus.subscribe(EVENT_TYPE.TASK_UPDATE, handleParentStatusUpdate) : null;
+
+    return () => sub?.unsubscribe();
+  }, [isSubtask, sseEventBus, handleParentStatusUpdate]);
+
+  useEffect(() => {
+    fetchParentStatuses();
+  }, [fetchParentStatuses]);
+
+  useEffect(() => {
+    handleParentTasksUrlSync();
+  }, [handleParentTasksUrlSync]);
+
+  useEffect(() => {
+    if (streamingState?.is_active) {
+      setShowSummary(false);
+    }
+  }, [streamingState?.is_active]);
+
   useEffect(() => {
     const title = (conversationData as Record<string, unknown> | undefined)?.title as string | undefined;
 
@@ -218,76 +387,6 @@ const TaskContentChat = ({ taskId }: { taskId: string }) => {
       setChatTitle((prev) => prev || title);
     }
   }, [conversationData]);
-
-  const hasMessages = messages.length > 0;
-  const isAnalysing = hasMessages && messages[messages.length - 1]?.sender_type === SenderType.USER;
-
-  if (streamingState) hadStreamingRef.current = true;
-
-  // When navigating back to a previously visited task, RTK Query serves cached data
-  const hasCachedData = Boolean(conversationData);
-  const isLoadingConversation =
-    !isErrorHistory &&
-    (Boolean(taskId && isLoadingHistory) ||
-      (!hasMessages && !streamingState && !hadStreamingRef.current && !hasCachedData));
-  const isTaskNotFound = isErrorHistory && isNotFoundError(errorHistory);
-
-  const { processedMessages, lastSummaryText } = useMemo(() => getProcessedMessages(messages), [messages]);
-  const summary = (conversationData as Record<string, unknown> | undefined)?.summary as
-    | ConversationSummary
-    | null
-    | undefined;
-  const description = (conversationData as Record<string, unknown> | undefined)?.description as
-    | string
-    | null
-    | undefined;
-  const isTaskDone = taskStatus && !streamingState ? taskStatus === TASK_STATUS.COMPLETED : false;
-  const isAgentActive = Boolean(streamingState?.is_active) || isAnalysing;
-
-  const displayedSummary = useDisplayedSummary({
-    taskId,
-    isAgentActive,
-    taskStatus,
-    streamingSummaryText: taskSummaryText,
-  });
-
-  const { hitlQuestions, hitlQuestionsKey } = useHitlQuestions(inputsRequired);
-
-  const handleHitlRespondComplete = useCallback(() => {
-    refetchHistory();
-    sseEventBus.publish(EVENT_TYPE.COMPONENT, { type: EVENT_TYPE.COMPONENT, payload: HITL_RESPONDED_EVENT });
-  }, [refetchHistory, sseEventBus]);
-
-  const isNeedsInput = taskStatus === TASK_STATUS.NEEDS_INPUT;
-  const hasHitlQuestions = hitlQuestions.length > 0;
-
-  const displayTitle = getDisplayTitle(urlTitle, chatTitle);
-  const statusLabel = getStatusLabel(isAgentActive, taskStatus);
-
-  const stepCount = useMemo(() => getStepCount(messages, streamingState), [messages, streamingState]);
-  const stepGroupsRaw = isTaskDone ? summary?.step_groups : undefined;
-  const isStreaming = streamingState && !!streamingState.message_content?.elements?.length;
-
-  const stepGroupSections = useMemo(() => {
-    if (!stepGroupsRaw) return [];
-    if (Array.isArray(stepGroupsRaw)) {
-      return stepGroupsLegacyToSections(stepGroupsRaw, messages);
-    }
-
-    return resolveMessageStepGroupSections(stepGroupsRaw, messages);
-  }, [stepGroupsRaw, messages]);
-
-  const hasStepGroups = stepGroupSections.length > 0;
-
-  const handleToggleSummary = useCallback((checked: boolean) => {
-    setShowSummary(checked);
-  }, []);
-
-  useEffect(() => {
-    if (streamingState?.is_active) {
-      setShowSummary(false);
-    }
-  }, [streamingState?.is_active]);
 
   useEffect(() => {
     const wasAvailable = prevBrowserStreamingRef.current;
@@ -313,8 +412,6 @@ const TaskContentChat = ({ taskId }: { taskId: string }) => {
     }
   }, [displayedSummary]);
 
-  const isExpandedStepsView = showSteps && (!hasStepGroups || !showSummary);
-
   return (
     <ChatActionsProvider
       onFileOpen={openTab}
@@ -329,7 +426,7 @@ const TaskContentChat = ({ taskId }: { taskId: string }) => {
           title={chatTitle || 'Untitled'}
           status={effectiveStatus}
           isSubtask={isSubtask}
-          parentTasks={parentTasks}
+          parentTasks={liveParentTasks}
           navigationSlot={
             <TaskNavigation
               currentIndex={currentIndex}
@@ -364,8 +461,7 @@ const TaskContentChat = ({ taskId }: { taskId: string }) => {
             <TaskChatTitleHeader
               displayTitle={displayTitle}
               statusLabel={statusLabel}
-              isAgentActive={isAgentActive}
-              taskStatus={taskStatus}
+              effectiveStatus={effectiveStatus}
               description={description}
             />
           </div>

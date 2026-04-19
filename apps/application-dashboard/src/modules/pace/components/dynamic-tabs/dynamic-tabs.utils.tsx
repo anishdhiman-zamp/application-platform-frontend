@@ -1,6 +1,6 @@
 import { type ReactNode } from 'react';
 import { FileIcon } from '@zamp-platform/ui';
-import { Activity, Globe } from 'lucide-react';
+import { Activity, Database, Globe } from 'lucide-react';
 import AgentTabIcon from '@/modules/pace/components/agents/components/AgentTabIcon';
 import { getAgentAvatar, getAgentAvatarByKey } from '@/modules/pace/components/agents/constants/agents.constants';
 import { getFileExtension } from '@/modules/pace/components/files/file-tree.utils';
@@ -25,6 +25,8 @@ export const getDefaultIcon = (tab: DynamicTab): ReactNode => {
     }
     case TAB_TYPE.BROWSER:
       return <Globe size={14} className='shrink-0' />;
+    case TAB_TYPE.DATASET:
+      return <Database size={14} className='shrink-0' />;
     default:
       return <FileIcon extension='txt' className='size-5 rounded-sm' iconClassName='size-4' />;
   }

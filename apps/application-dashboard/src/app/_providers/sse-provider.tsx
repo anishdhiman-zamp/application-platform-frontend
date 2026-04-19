@@ -21,7 +21,7 @@ import {
   type TaskContentBlock,
   type TriggerContentBlock,
 } from '@zamp-platform/chat';
-import { EventBus, SSEConnectionState, useSSE } from '@zamp-platform/utils';
+import { EventBus, extractTaskUpdateFields, SSEConnectionState, useSSE } from '@zamp-platform/utils';
 import {
   type BaseEventPayload,
   EVENT_TYPE,
@@ -498,49 +498,57 @@ function handleGlobalMessageEvent(resolver: PayloadResolver, data: BaseEventPayl
 /** Updates task block status in streaming state when a task_update SSE event arrives. */
 function handleGlobalTaskUpdate(data: BaseEventPayload): void {
   try {
-    const sourceId = data.source_id;
-
-    if (!sourceId) return;
-
-    const payload = data.payload as MapAny;
-    const taskId = payload?.task_id as string;
-    const status = (payload?.updated_fields as MapAny)?.status;
+    const { taskId, status, sourceId } = extractTaskUpdateFields(data);
 
     if (!taskId || !status) return;
 
     invalidateTaskCaches();
 
-    streamingStateStore.update(sourceId, (prev) => {
-      if (!prev) return prev;
+    if (sourceId) {
+      // Fast path: source_id tells us exactly which streaming entry to update.
+      updateStreamingTaskBlock(sourceId, taskId, status);
+    } else {
+      // Fallback: scan all streaming states (active or cached) for a task block matching taskId.
+      const allKeys = streamingStateStore.keys();
 
-      const elements = prev.message_content?.elements;
-
-      if (!elements?.length) return prev;
-
-      let hasUpdate = false;
-      const updatedElements = elements.map((el) => {
-        if (el.type === BLOCK_TYPE.TASK && (el as TaskContentBlock).payload.task_id === taskId) {
-          hasUpdate = true;
-
-          return {
-            ...el,
-            payload: { ...(el as TaskContentBlock).payload, status },
-          };
-        }
-
-        return el;
-      });
-
-      if (!hasUpdate) return prev;
-
-      return {
-        ...prev,
-        message_content: { ...prev.message_content, elements: updatedElements },
-      };
-    });
+      for (const key of allKeys) {
+        updateStreamingTaskBlock(key, taskId, status);
+      }
+    }
   } catch (error) {
     captureException(error);
   }
+}
+
+function updateStreamingTaskBlock(streamingKey: string, taskId: string, status: string): void {
+  streamingStateStore.update(streamingKey, (prev) => {
+    if (!prev) return prev;
+
+    const elements = prev.message_content?.elements;
+
+    if (!elements?.length) return prev;
+
+    let hasUpdate = false;
+    const updatedElements = elements.map((el) => {
+      if (el.type === BLOCK_TYPE.TASK && (el as TaskContentBlock).payload.task_id === taskId) {
+        hasUpdate = true;
+
+        return {
+          ...el,
+          payload: { ...(el as TaskContentBlock).payload, status },
+        } as TaskContentBlock;
+      }
+
+      return el;
+    });
+
+    if (!hasUpdate) return prev;
+
+    return {
+      ...prev,
+      message_content: { ...prev.message_content, elements: updatedElements },
+    };
+  });
 }
 
 interface SSEProviderProps {

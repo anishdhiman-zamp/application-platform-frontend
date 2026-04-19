@@ -9,21 +9,21 @@ import {
   getHistoryFormattedMessages,
   getStreamingMessageId,
   type ResourceType,
-  SenderType,
   streamingStateStore,
   type TaskStatus,
   useGetConversationByIdQuery,
   useStreamingState,
 } from '@zamp-platform/chat';
+import { extractTaskUpdateFields } from '@zamp-platform/utils';
 import { type BaseEventPayload, EVENT_TYPE } from '@zamp-platform/utils/event-bus/event-bus.types';
 import { type ReactNode, useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { useDispatch } from 'react-redux';
 
 import { useEventBus } from '@/app/_providers/sse-provider';
-import type { MapAny } from '@/types/commonTypes';
 
 import { taskSSERegistry } from '../registry/taskSSERegistry';
 import { type TaskEventCallbacks } from '../types/task-sse.types';
+import { mergeHistoryWithSSEStatuses } from '../utils/mergeHistoryWithSSEStatuses';
 import { type TaskActions, TaskActionsContext } from './TaskActionsContext';
 import { type TaskState, TaskStateContext } from './TaskStateContext';
 
@@ -43,6 +43,7 @@ export const TaskProvider = ({ children, taskId, organizationId, resourceType, a
 
   const mountRefetchFiredRef = useRef(false);
   const messagesRef = useRef<ChatMessage[]>([]);
+  const hasSSEUpdatedStatusesRef = useRef(false);
 
   const [messages, setMessages] = useState<ChatMessage[]>([]);
   const [taskSummaryText, setTaskSummaryText] = useState<string | null>(null);
@@ -186,13 +187,14 @@ export const TaskProvider = ({ children, taskId, organizationId, resourceType, a
 
   const handleGlobalTaskUpdate = useCallback(
     (data: BaseEventPayload) => {
-      if (data.source_id !== taskId) return;
+      const { taskId: updatedTaskId, status: rawStatus, sourceId } = extractTaskUpdateFields(data);
 
-      const payload = data.payload as MapAny;
-      const updatedTaskId = payload?.task_id as string;
-      const status = (payload?.updated_fields as MapAny)?.status as TaskStatus | undefined;
-
+      // When source_id is present, only process if it matches the current task.
+      if (sourceId !== undefined && sourceId !== taskId) return;
+      const status = rawStatus as TaskStatus | undefined;
       if (!updatedTaskId || !status) return;
+
+      hasSSEUpdatedStatusesRef.current = true;
 
       setMessages((prev) =>
         prev.map((msg) => {
@@ -274,18 +276,11 @@ export const TaskProvider = ({ children, taskId, organizationId, resourceType, a
       const historyMessages: ChatMessage[] = getHistoryFormattedMessages(taskHistory);
 
       setMessages((prev) => {
-        if (prev.length > 0) {
-          const dbMessageIds = new Set(historyMessages.map((m) => m.id).filter(Boolean));
-          const replayedMessages = prev.filter((m) => {
-            if (!m.id || dbMessageIds.has(m.id)) return false;
-            return m.sender_type === SenderType.USER;
-          });
+        const merged = mergeHistoryWithSSEStatuses(prev, historyMessages, hasSSEUpdatedStatusesRef.current);
 
-          if (replayedMessages.length > 0) {
-            return [...historyMessages, ...replayedMessages];
-          }
-        }
-        return historyMessages;
+        hasSSEUpdatedStatusesRef.current = false;
+
+        return merged;
       });
     }
   }, [taskHistory]);

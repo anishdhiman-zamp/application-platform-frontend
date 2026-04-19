@@ -1,6 +1,7 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { captureException } from '@sentry/browser';
 import type { SiblingTask, TaskBreadcrumb, TaskStatus } from '@zamp-platform/chat';
+import { extractTaskUpdateFields } from '@zamp-platform/utils';
 import { type BaseEventPayload, EVENT_TYPE } from '@zamp-platform/utils/event-bus/event-bus.types';
 import { parseIntSafely } from 'modules/process/process.utils';
 import { useRouter, useSearchParams } from 'next/navigation';
@@ -15,7 +16,6 @@ import { getChatTaskRoute, TASK_QUERY_PARAMS } from '@/constants/routeConfig';
 import { STATUS_DISPLAY_ORDER, TASKS_PAGE_SIZE } from '@/modules/pace/components/tasks/constants/tasks.constants';
 import type { CreationSource, TaskListItem } from '@/modules/pace/components/tasks/types/tasks.types';
 import { markNavAsReplace } from '@/modules/pace/hooks/useTabRouter';
-import type { MapAny } from '@/types/commonTypes';
 
 interface UseTaskNavigationOptions {
   creationSource?: CreationSource;
@@ -255,9 +255,8 @@ export const useTaskNavigation = (taskId?: string, options?: UseTaskNavigationOp
   // within the new status list after a status change.
   const handleTaskStatusNavigation = useCallback(
     async (data: BaseEventPayload, signal: { cancelled: boolean }) => {
-      const payload = data.payload as MapAny;
-      const updatedTaskId = payload?.task_id as string;
-      const newStatus = (payload?.updated_fields as MapAny)?.status as TaskStatus | undefined;
+      const { taskId: updatedTaskId, status: rawStatus } = extractTaskUpdateFields(data);
+      const newStatus = rawStatus as TaskStatus | undefined;
 
       if (updatedTaskId !== taskIdRef.current || !newStatus) return;
       if (newStatus === statusRef.current) return;
@@ -608,9 +607,8 @@ export const useTaskNavigation = (taskId?: string, options?: UseTaskNavigationOp
     if (!taskId) return;
 
     const handleLiveStatusUpdate = (data: BaseEventPayload) => {
-      const payload = data.payload as MapAny;
-      const updatedTaskId = payload?.task_id as string;
-      const newStatus = (payload?.updated_fields as MapAny)?.status as TaskStatus | undefined;
+      const { taskId: updatedTaskId, status: rawStatus } = extractTaskUpdateFields(data);
+      const newStatus = rawStatus as TaskStatus | undefined;
 
       if (!updatedTaskId || !newStatus) return;
 

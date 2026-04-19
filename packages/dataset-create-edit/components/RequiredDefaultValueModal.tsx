@@ -158,7 +158,7 @@ const RequiredDefaultValueModal: FC<RequiredDefaultValueModalProps> = ({
       >
         <div className='px-5 pt-5'>
           {/* Close button */}
-          <DialogClose className='absolute top-4 right-4 text-gray-500 hover:text-gray-700'>
+          <DialogClose className='absolute top-4 right-4 cursor-pointer text-gray-500 hover:text-gray-700'>
             <span className='text-xl leading-none'>×</span>
           </DialogClose>
 

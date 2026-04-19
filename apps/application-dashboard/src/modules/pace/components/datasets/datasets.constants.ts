@@ -33,6 +33,10 @@ export {
 import { DatasetRoleValue } from '@/apis/agentManagedDb';
 import { ResourcePrivilege, ResourceType } from '@/modules/shareResource/shareResource.types';
 
+export const NEW_DATASET_PREFIX = 'new-';
+export const isNewDatasetId = (id: string): boolean => id.startsWith(NEW_DATASET_PREFIX);
+export const generateNewDatasetId = (): string => `${NEW_DATASET_PREFIX}${crypto.randomUUID()}`;
+
 export const DATASETS_POLL_INTERVAL_MS = 5000;
 export const DETAIL_PAGE_SIZE = 100;
 export const EXPORT_CHUNK_SIZE = 5000;
