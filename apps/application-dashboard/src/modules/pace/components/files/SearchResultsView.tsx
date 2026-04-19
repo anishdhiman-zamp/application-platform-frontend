@@ -11,7 +11,7 @@ import {
 } from '@/modules/pace/components/files/file-tree.types';
 import { buildNodeMap, buildSubtreeFromFiles, sortTreeNodes } from '@/modules/pace/components/files/file-tree.utils';
 import FileTreeNode from '@/modules/pace/components/files/FileTreeNode';
-import SearchResultRow from '@/modules/pace/components/files/SearchResultRow';
+import SearchResultRootNode from '@/modules/pace/components/files/SearchResultRootNode';
 
 const SEARCH_ROOT_HEIGHT = 48;
 const CHILD_ROW_HEIGHT = 32;
@@ -222,7 +222,7 @@ const SearchResultsView = ({
                 }}
               >
                 {entry.kind === SEARCH_ENTRY_KIND.ROOT ? (
-                  <SearchResultRow
+                  <SearchResultRootNode
                     node={entry.node}
                     searchHighlight={searchQuery}
                     isExpanded={isExpanded}
@@ -230,6 +230,9 @@ const SearchResultsView = ({
                     isLoadingChildren={loadingFolders?.has(entry.node.path) ?? false}
                     onToggleExpand={handleToggleForEntry}
                     onSelect={onSelect}
+                    onFileMoved={onFileMoved}
+                    onFileDeleted={onFileDeleted}
+                    onFileCreated={onFileCreated}
                   />
                 ) : (
                   <FileTreeNode
