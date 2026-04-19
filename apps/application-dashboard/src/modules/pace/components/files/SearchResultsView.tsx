@@ -100,8 +100,9 @@ const SearchResultsView = ({
     return sortTreeNodes(asTreeNodes, sortBy, sortDirection);
   }, [searchResults, sortBy, sortDirection]);
 
-  const flatEntries = useMemo<FlatSearchEntry[]>(() => {
+  const { flatEntries, originalNodeMap } = useMemo(() => {
     const entries: FlatSearchEntry[] = [];
+    const subtreeRoots: TreeNode[] = [];
 
     const pushSubtree = (nodes: TreeNode[], depth: number, parentPath: string | null, parentExpandKey: string) => {
       const siblingNames = nodes.map((n) => n.name);
@@ -125,28 +126,13 @@ const SearchResultsView = ({
       if (result.type === FILE_TYPE.DIRECTORY && expandedKeys.has(rootExpandKey)) {
         const subtree = sortTreeNodes(buildSubtreeFromFiles(files, result.path), sortBy, sortDirection);
 
+        subtreeRoots.push(...subtree);
         pushSubtree(subtree, 1, result.path, rootExpandKey);
       }
     }
 
-    return entries;
+    return { flatEntries: entries, originalNodeMap: buildNodeMap(subtreeRoots) };
   }, [sortedResults, files, expandedKeys, sortBy, sortDirection]);
-
-  const originalNodeMap = useMemo(() => {
-    const subtreeRoots: TreeNode[] = [];
-
-    for (const entry of flatEntries) {
-      if (
-        entry.kind === SEARCH_ENTRY_KIND.ROOT &&
-        entry.node.type === FILE_TYPE.DIRECTORY &&
-        expandedKeys.has(entry.expandKey)
-      ) {
-        subtreeRoots.push(...buildSubtreeFromFiles(files, entry.node.path));
-      }
-    }
-
-    return buildNodeMap(subtreeRoots);
-  }, [flatEntries, files, expandedKeys]);
 
   const virtualizer = useVirtualizer({
     count: flatEntries.length,
