@@ -7,19 +7,29 @@ export function renderHighlightedName(name: string, query?: string): ReactNode {
 
   const lowerName = name.toLowerCase();
   const lowerQuery = trimmed.toLowerCase();
-  const matchIndex = lowerName.indexOf(lowerQuery);
+  const parts: ReactNode[] = [];
+  let cursor = 0;
 
-  if (matchIndex < 0) return name;
+  while (cursor < name.length) {
+    const matchIndex = lowerName.indexOf(lowerQuery, cursor);
 
-  const before = name.slice(0, matchIndex);
-  const match = name.slice(matchIndex, matchIndex + trimmed.length);
-  const after = name.slice(matchIndex + trimmed.length);
+    if (matchIndex < 0) {
+      parts.push(name.slice(cursor));
+      break;
+    }
 
-  return (
-    <>
-      {before}
-      <mark className='bg-ORANGE_300 text-GRAY_1000 rounded-[2px]'>{match}</mark>
-      {after}
-    </>
-  );
+    if (matchIndex > cursor) parts.push(name.slice(cursor, matchIndex));
+
+    parts.push(
+      <mark key={matchIndex} className='bg-ORANGE_300 text-GRAY_1000 rounded-[2px]'>
+        {name.slice(matchIndex, matchIndex + trimmed.length)}
+      </mark>,
+    );
+
+    cursor = matchIndex + trimmed.length;
+  }
+
+  if (parts.length === 0) return name;
+
+  return <>{parts}</>;
 }
