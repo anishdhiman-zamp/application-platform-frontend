@@ -23,6 +23,7 @@ export enum FEATURE_FLAGS {
   DASHBOARD_DOWNTIME = 'dashboard-downtime-v2',
   DATASET_CREATION = 'dataset-creation',
   PACE_CHAT = 'pace-chat',
+  PACE_CHAT_V2 = 'pace-chat-v2',
   ZAMP_INTERNAL = 'zamp-internal',
   APP_SECURE = 'app-secure',
   MACS_FILE_SYSTEM = 'macs-file-system',

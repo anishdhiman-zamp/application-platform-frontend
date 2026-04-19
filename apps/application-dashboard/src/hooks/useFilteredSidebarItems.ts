@@ -3,7 +3,7 @@
 import { useMemo } from 'react';
 import { FEATURE_FLAGS } from '@/constants/featureFlags';
 import { SIDEBAR_ITEMS } from '@/constants/sidebar.constants';
-import { useOrgFeatureFlag } from '@/hooks/useOrgFeatureFlag';
+import { useFeatureFlag } from '@/hooks/useFeatureFlag';
 import type { NavigationItemSchema } from '@/types/config';
 import { isMacsProduct } from '@/utils/cookie';
 
@@ -12,7 +12,7 @@ import { isMacsProduct } from '@/utils/cookie';
  * @returns {Object} An object containing the filtered sidebar items and a loading state
  */
 export const useFilteredSidebarItems = () => {
-  const { isEnabled: isPaceChatEnabled, isLoading } = useOrgFeatureFlag(FEATURE_FLAGS.PACE_CHAT);
+  const { isEnabled: isPaceChatEnabled, isLoading } = useFeatureFlag(FEATURE_FLAGS.PACE_CHAT_V2);
   const isMacs = isMacsProduct();
 
   const filteredItems = useMemo<NavigationItemSchema[]>(() => {
@@ -23,7 +23,7 @@ export const useFilteredSidebarItems = () => {
     return SIDEBAR_ITEMS.filter((item) => {
       if (!item.featureFlag) return true;
 
-      if (item.featureFlag === FEATURE_FLAGS.PACE_CHAT) {
+      if (item.featureFlag === FEATURE_FLAGS.PACE_CHAT_V2) {
         return isPaceChatEnabled || isMacs;
       }
 
