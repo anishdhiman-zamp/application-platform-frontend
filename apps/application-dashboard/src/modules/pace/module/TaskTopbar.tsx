@@ -6,7 +6,7 @@ import { cn } from '@zamp-platform/ui/utils';
 import { ArrowLeft } from 'lucide-react';
 import { useRouter, useSearchParams } from 'next/navigation';
 import { getChatTaskRoute, ROUTES_PATH, TASK_QUERY_PARAMS } from '@/constants/routeConfig';
-import TaskBreadcrumbNav from '@/modules/pace/components/chat/TaskBreadcrumb';
+import TaskBreadcrumbNav from '@/modules/pace/module/TaskBreadcrumb';
 import { preserveSidebarParam } from '@/modules/pace/pace.utils';
 
 interface TaskTopbarProps {

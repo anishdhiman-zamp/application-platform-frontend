@@ -4,8 +4,8 @@ import { AccordionContent, AccordionItem, AccordionTrigger } from '@zamp-platfor
 import { cn } from '@zamp-platform/ui/utils';
 import { formatPlural } from '@zamp-platform/utils';
 import { ChevronDown, Layers } from 'lucide-react';
-import type { ResolvedStepGroup } from 'modules/pace/components/chat/step-groups.types';
-import { TaskChatStepMessage } from '@/modules/pace/components/chat/TaskChatStepMessage';
+import type { ResolvedStepGroup } from '@/modules/pace/module/step-groups.types';
+import { TaskChatStepMessage } from '@/modules/pace/module/TaskChatStepMessage';
 
 interface StepGroupItemProps {
   group: ResolvedStepGroup;

@@ -1,9 +1,9 @@
 'use client';
 
 import { useSearchParams } from 'next/navigation';
-import TaskContentInner from '@/modules/pace/components/chat/TaskContentInner';
 import { useDynamicTabs } from '@/modules/pace/components/dynamic-tabs/useDynamicTabs';
 import TaskListingPage from '@/modules/pace/components/tasks/components/TaskListingPage';
+import TaskContentInner from '@/modules/pace/module/TaskContentInner';
 import { TAB_QUERY_PARAM, TAB_TYPE } from '@/modules/pace/pace.types';
 
 const ChatTasksPage = () => {

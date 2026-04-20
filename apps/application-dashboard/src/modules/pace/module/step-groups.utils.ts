@@ -1,10 +1,13 @@
 import { BLOCK_TYPE, type ChatMessage, SenderType } from '@zamp-platform/chat';
+import {
+  getLastMarkdownTextFromMessage,
+  type ProcessedMessage,
+} from '@/modules/pace/components/tasks/utils/tasks.utils';
 import type {
   MessageStepGroupsSection,
   ResolvedStepGroup,
   StepGroupData,
-} from 'modules/pace/components/chat/step-groups.types';
-import { getLastMarkdownTextFromMessage, type ProcessedMessage } from 'modules/pace/components/tasks/utils/tasks.utils';
+} from '@/modules/pace/module/step-groups.types';
 
 /**
  * Resolves backend step_groups data against raw chat messages.

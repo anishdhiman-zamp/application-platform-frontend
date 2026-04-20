@@ -19,7 +19,7 @@ import { useConversationActions, useConversationState } from '@zamp-platform/con
 import { ScrollContainer } from '@zamp-platform/ui';
 import { cn } from '@zamp-platform/ui/utils';
 import AgentPill from 'modules/pace/components/agents/components/AgentPill';
-import TaskStatusCounts from 'modules/pace/components/chat/TaskStatusCounts';
+import TaskStatusCounts from 'modules/pace/module/TaskStatusCounts';
 import { useRouter } from 'next/navigation';
 import CommonWrapper from '@/components/commonWrapper';
 import { SkeletonTypes } from '@/components/commonWrapper/commonWrapper.types';

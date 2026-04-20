@@ -2,7 +2,7 @@
 
 import type { RefObject } from 'react';
 import { HITLEntityType, HITLQuestionsBlock, type HITLQuestionWithEntity, MarkdownBlock } from '@zamp-platform/chat';
-import ResizableSummaryBox from '@/modules/pace/components/chat/ResizableSummaryBox';
+import ResizableSummaryBox from '@/modules/pace/module/ResizableSummaryBox';
 
 export interface TaskChatSummaryContentProps {
   isNeedsInput: boolean;
