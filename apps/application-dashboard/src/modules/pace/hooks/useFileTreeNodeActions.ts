@@ -38,6 +38,7 @@ interface UseFileTreeNodeActionsProps {
   onFileCreated?: (newFile: FileItem) => void;
   onTriggerFileUpload?: () => void;
   onTriggerFolderUpload?: () => void;
+  onShowInfo?: () => void;
 }
 
 interface UseFileTreeNodeActionsReturn {
@@ -67,6 +68,7 @@ export const useFileTreeNodeActions = ({
   onFileCreated,
   onTriggerFileUpload,
   onTriggerFolderUpload,
+  onShowInfo,
 }: UseFileTreeNodeActionsProps): UseFileTreeNodeActionsReturn => {
   const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState(false);
   const [isDeleting, setIsDeleting] = useState(false);
@@ -221,6 +223,9 @@ export const useFileTreeNodeActions = ({
             onToggleExpand(node.path);
           }
           onTriggerFolderUpload?.();
+          break;
+        case CONTEXT_MENU_ACTION_IDS.INFO:
+          onShowInfo?.();
           break;
         default:
           break;

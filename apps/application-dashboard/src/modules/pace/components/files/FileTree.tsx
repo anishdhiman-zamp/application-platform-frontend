@@ -7,13 +7,16 @@ import { type FileItem, type FileTreeProps } from '@/modules/pace/components/fil
 import {
   buildFileTree,
   buildNodeMap,
+  collectAncestors,
   flattenTree,
   sortTreeNodes,
 } from '@/modules/pace/components/files/file-tree.utils';
 import FileConflictModal from '@/modules/pace/components/files/FileConflictModal';
 import FileTreeEmptyState from '@/modules/pace/components/files/FileTreeEmptyState';
+import SearchResultsView from '@/modules/pace/components/files/SearchResultsView';
 import StickyNestedTree from '@/modules/pace/components/files/StickyNestedTree';
 import { useFileConflict } from '@/modules/pace/context/FileConflictContext';
+import { useFileTreeNavigation } from '@/modules/pace/context/FileTreeNavigationContext';
 import { useExpandedPaths } from '@/modules/pace/hooks/useExpandedPaths';
 
 const ROW_HEIGHT = 32;
@@ -48,10 +51,12 @@ const FileTreeContent = ({
 
   // Hooks
   const { conflict, resolveConflict, cancelConflict } = useFileConflict();
-  const { expandedPaths, toggleExpand, collapseAll } = useExpandedPaths({ files });
+  const { expandedPaths, toggleExpand, expandPaths, collapseAll } = useExpandedPaths({ files });
+  const { revealedPath, registerRevealHandler, revealPathInTree } = useFileTreeNavigation();
 
   // Derived State
-  const selectedPath = controlledSelectedPath ?? internalSelectedPath;
+  const selectedPath = controlledSelectedPath ?? revealedPath ?? internalSelectedPath;
+  const pendingScrollPathRef = useRef<string | null>(null);
   const isServerSearch = !!searchQuery && searchResults !== undefined && searchResults !== null;
 
   const filesMap = useMemo(() => {
@@ -69,46 +74,11 @@ const FileTreeContent = ({
   const sortedRawTree = useMemo(() => sortTreeNodes(rawTree, sortBy, sortDirection), [rawTree, sortBy, sortDirection]);
   const originalNodeMap = useMemo(() => buildNodeMap(sortedRawTree), [sortedRawTree]);
 
-  const searchTree = useMemo(() => {
-    if (!isServerSearch || !searchResults) return [];
+  const flatNodes = useMemo(() => flattenTree(sortedRawTree, expandedPaths), [sortedRawTree, expandedPaths]);
+  const flatNodesRef = useRef(flatNodes);
 
-    return sortTreeNodes(buildFileTree(searchResults), sortBy, sortDirection);
-  }, [isServerSearch, searchResults, sortBy, sortDirection]);
-
-  const treeData = useMemo(() => {
-    if (isServerSearch) return searchTree;
-
-    return sortedRawTree;
-  }, [isServerSearch, searchTree, sortedRawTree]);
-
-  const flatNodes = useMemo(() => flattenTree(treeData, expandedPaths), [treeData, expandedPaths]);
-  const rootSiblingNames = useMemo(() => treeData.map((node) => node.name), [treeData]);
-
-  const dragOverlayBounds = useMemo(() => {
-    if (!dragOverFolderPath) return null;
-
-    const folderIndex = flatNodes.findIndex((n) => n.path === dragOverFolderPath);
-
-    if (folderIndex === -1) return null;
-
-    let lastChildIndex = folderIndex;
-
-    for (let i = folderIndex + 1; i < flatNodes.length; i++) {
-      if (flatNodes[i].path.startsWith(dragOverFolderPath + '/')) {
-        lastChildIndex = i;
-      } else {
-        break;
-      }
-    }
-
-    const startY = folderIndex * ROW_HEIGHT;
-    const endY = (lastChildIndex + 1) * ROW_HEIGHT;
-
-    return {
-      top: startY,
-      height: endY - startY,
-    };
-  }, [dragOverFolderPath, flatNodes]);
+  flatNodesRef.current = flatNodes;
+  const rootSiblingNames = useMemo(() => sortedRawTree.map((node) => node.name), [sortedRawTree]);
 
   const virtualizer = useVirtualizer({
     count: flatNodes.length,
@@ -171,13 +141,15 @@ const FileTreeContent = ({
     (path: string) => {
       const file = filesMap.get(path) ?? null;
 
+      revealPathInTree(path);
+
       if (onSelectFile) {
         onSelectFile(file);
       } else {
         setInternalSelectedPath(path);
       }
     },
-    [onSelectFile, filesMap],
+    [onSelectFile, filesMap, revealPathInTree],
   );
 
   const handleConflictResolve = useCallback(
@@ -185,6 +157,14 @@ const FileTreeContent = ({
       resolveConflict(resolution, rootSiblingNames);
     },
     [resolveConflict, rootSiblingNames],
+  );
+
+  const handleFileCreated = useCallback(
+    (newFile: FileItem) => {
+      revealPathInTree(newFile.path);
+      onFileCreated?.(newFile);
+    },
+    [revealPathInTree, onFileCreated],
   );
 
   const handleDragOverFolderChange = useCallback((path: string | null) => {
@@ -197,11 +177,83 @@ const FileTreeContent = ({
     }
   }, []);
 
+  const handleContainerDragEnd = useCallback(() => {
+    setDragOverFolderPath(null);
+  }, []);
+
+  const keepSelectedVisible = useCallback(() => {
+    if (!selectedPath) return;
+    revealPathInTree(selectedPath);
+  }, [selectedPath, revealPathInTree]);
+
+  const handleRevealPath = useCallback(
+    (path: string) => {
+      const ancestors = collectAncestors(path);
+
+      pendingScrollPathRef.current = path;
+
+      if (ancestors.length > 0) {
+        expandPaths(ancestors);
+
+        // Mirror handleToggleExpand's lazy-load behavior for each newly expanded ancestor
+        // so backend folder contents get fetched, just like a manual chevron click would.
+        if (onLoadFolder && loadedFolders && loadingFolders) {
+          for (const ancestorPath of ancestors) {
+            if (!loadedFolders.has(ancestorPath) && !loadingFolders.has(ancestorPath)) {
+              onLoadFolder(ancestorPath);
+            }
+          }
+        }
+      }
+
+      // If expansion is a no-op (ancestors already expanded), the flatNodes effect won't
+      // fire — schedule the scroll attempt on the next frame as a fallback.
+      requestAnimationFrame(() => {
+        const pendingPath = pendingScrollPathRef.current;
+
+        if (!pendingPath) return;
+
+        const index = flatNodesRef.current.findIndex((n) => n.path === pendingPath);
+
+        if (index < 0) return;
+
+        pendingScrollPathRef.current = null;
+        virtualizer.scrollToIndex(index, { align: 'center', behavior: 'smooth' });
+      });
+    },
+    [expandPaths, virtualizer, onLoadFolder, loadedFolders, loadingFolders],
+  );
+
   useEffect(() => {
     if (onCollapseAllChange) {
       onCollapseAllChange(collapseAll);
     }
   }, [onCollapseAllChange, collapseAll]);
+
+  useEffect(() => {
+    registerRevealHandler(handleRevealPath);
+
+    return () => registerRevealHandler(null);
+  }, [registerRevealHandler, handleRevealPath]);
+
+  useEffect(() => {
+    keepSelectedVisible();
+    // Only re-run when sort changes; keepSelectedVisible captures the latest selectedPath.
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [sortBy, sortDirection]);
+
+  useEffect(() => {
+    const pendingPath = pendingScrollPathRef.current;
+
+    if (!pendingPath) return;
+
+    const index = flatNodes.findIndex((n) => n.path === pendingPath);
+
+    if (index < 0) return;
+
+    pendingScrollPathRef.current = null;
+    virtualizer.scrollToIndex(index, { align: 'center', behavior: 'smooth' });
+  }, [flatNodes, virtualizer]);
 
   if (isSearching) {
     return (
@@ -211,7 +263,11 @@ const FileTreeContent = ({
     );
   }
 
-  if (treeData?.length === 0 && searchQuery) {
+  if (isServerSearch && searchResults && searchResults.length === 0) {
+    return <FileTreeEmptyState />;
+  }
+
+  if (!isServerSearch && sortedRawTree.length === 0 && searchQuery) {
     return <FileTreeEmptyState />;
   }
 
@@ -226,49 +282,65 @@ const FileTreeContent = ({
         onChange={handleFolderInputChange}
         {...({ webkitdirectory: '', directory: '' } as React.InputHTMLAttributes<HTMLInputElement>)}
       />
-      <div
-        ref={containerRef}
-        className='min-h-0 flex-1 overflow-x-hidden overflow-y-auto [scrollbar-width:thin]'
-        onDragLeave={handleContainerDragLeave}
-      >
+      {isServerSearch && searchResults ? (
+        <SearchResultsView
+          searchQuery={searchQuery}
+          searchResults={searchResults}
+          files={files}
+          sortBy={sortBy}
+          sortDirection={sortDirection}
+          selectedPath={selectedPath}
+          loadingFolders={loadingFolders}
+          loadedFolders={loadedFolders}
+          onLoadFolder={onLoadFolder}
+          onSelect={handleSelect}
+          onFileMoved={onFileMoved}
+          onFileDeleted={onFileDeleted}
+          onFileCreated={handleFileCreated}
+          onUploadFiles={onUploadFiles}
+          onTriggerFileUpload={triggerFileUpload}
+          onTriggerFolderUpload={triggerFolderUpload}
+          onDragOverFolderChange={handleDragOverFolderChange}
+        />
+      ) : (
         <div
-          style={{
-            height: virtualizer.getTotalSize(),
-            width: '100%',
-            position: 'relative',
-          }}
+          ref={containerRef}
+          className='min-h-0 flex-1 overflow-x-hidden overflow-y-auto [scrollbar-width:thin]'
+          onDragLeave={handleContainerDragLeave}
+          onDragEnd={handleContainerDragEnd}
         >
-          <StickyNestedTree
-            treeData={treeData}
-            expandedPaths={expandedPaths}
-            selectedPath={selectedPath}
-            originalNodeMap={originalNodeMap}
-            rowHeight={ROW_HEIGHT}
-            visibleStart={visibleStart}
-            visibleEnd={visibleEnd}
-            onToggleExpand={handleToggleExpand}
-            onSelect={handleSelect}
-            onFileMoved={onFileMoved}
-            onFileDeleted={onFileDeleted}
-            onFileCreated={onFileCreated}
-            onUploadFiles={onUploadFiles}
-            onTriggerFileUpload={triggerFileUpload}
-            onTriggerFolderUpload={triggerFolderUpload}
-            onDragOverFolderChange={handleDragOverFolderChange}
-            isSearchActive={!!searchQuery}
-            loadingFolders={loadingFolders}
-          />
-          {dragOverlayBounds && (
-            <div
-              className='border-GRAY_700 pointer-events-none absolute right-0 left-0 rounded-md border-2 border-dotted'
-              style={{
-                top: dragOverlayBounds.top,
-                height: dragOverlayBounds.height,
-              }}
+          <div
+            style={{
+              height: virtualizer.getTotalSize(),
+              width: '100%',
+              position: 'relative',
+            }}
+          >
+            <StickyNestedTree
+              treeData={sortedRawTree}
+              expandedPaths={expandedPaths}
+              selectedPath={selectedPath}
+              originalNodeMap={originalNodeMap}
+              rowHeight={ROW_HEIGHT}
+              visibleStart={visibleStart}
+              visibleEnd={visibleEnd}
+              dragOverFolderPath={dragOverFolderPath}
+              onToggleExpand={handleToggleExpand}
+              onSelect={handleSelect}
+              onFileMoved={onFileMoved}
+              onFileDeleted={onFileDeleted}
+              onFileCreated={handleFileCreated}
+              onUploadFiles={onUploadFiles}
+              onTriggerFileUpload={triggerFileUpload}
+              onTriggerFolderUpload={triggerFolderUpload}
+              onDragOverFolderChange={handleDragOverFolderChange}
+              isSearchActive={!!searchQuery}
+              loadingFolders={loadingFolders}
+              searchHighlight={undefined}
             />
-          )}
+          </div>
         </div>
-      </div>
+      )}
       <FileConflictModal
         isOpen={!!conflict}
         conflict={conflict}
@@ -280,9 +352,20 @@ const FileTreeContent = ({
 };
 
 const FileTree = (props: FileTreeProps) => {
+  const { revealPathInTree } = useFileTreeNavigation();
+  const { onFileMoved } = props;
+
+  const handleFileMoved = useCallback(
+    (oldPath: string, newFile: FileItem) => {
+      revealPathInTree(newFile.path);
+      onFileMoved?.(oldPath, newFile);
+    },
+    [revealPathInTree, onFileMoved],
+  );
+
   return (
-    <FileTreeProvider onFileMoved={props.onFileMoved}>
-      <FileTreeContent {...props} />
+    <FileTreeProvider onFileMoved={handleFileMoved}>
+      <FileTreeContent {...props} onFileMoved={handleFileMoved} />
     </FileTreeProvider>
   );
 };
