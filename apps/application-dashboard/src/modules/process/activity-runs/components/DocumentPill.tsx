@@ -1,5 +1,12 @@
 import { useState } from 'react';
-import { CSS_VARS, DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from '@zamp-platform/ui';
+import {
+  CSS_VARS,
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+  TooltipV2,
+} from '@zamp-platform/ui';
 import { SvgSpriteLoader } from '@zamp-platform/ui/assets';
 import { ICON_SPRITE_TYPES } from '@zamp-platform/ui/types';
 import { cn } from '@zamp-platform/ui/utils';
@@ -7,7 +14,6 @@ import { ICellRendererParams } from 'ag-grid-community';
 import DocumentPreviewDialog from 'modules/process/activity-runs/components/DocumentPreviewDialog';
 import type { DocumentItemType } from 'modules/process/process.types';
 import { type defaultFnType, SIDE_OPTIONS } from 'types/commonTypes';
-import TooltipV2 from '@/components/common/TooltipV2';
 
 interface DocumentPillProps extends ICellRendererParams {
   value: DocumentItemType[];

@@ -7,10 +7,10 @@ import {
   DropdownMenuContent,
   DropdownMenuItem,
   DropdownMenuTrigger,
+  TooltipV2,
 } from '@zamp-platform/ui';
 import { SvgSpriteLoader } from '@zamp-platform/ui/assets';
 import Image from 'next/image';
-import TooltipV2 from '@/components/common/TooltipV2';
 import { ALIGN_CENTER } from '@/constants/icons';
 
 const TextAlignmentSelector: FC<{ editor: Editor | null }> = ({ editor }) => {

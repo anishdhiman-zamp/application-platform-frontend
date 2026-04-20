@@ -1,8 +1,7 @@
 import { FC, useState } from 'react';
 import { type Editor } from '@tiptap/react';
-import { Button, COLORS, DropdownMenu, DropdownMenuContent, DropdownMenuTrigger } from '@zamp-platform/ui';
+import { Button, COLORS, DropdownMenu, DropdownMenuContent, DropdownMenuTrigger, TooltipV2 } from '@zamp-platform/ui';
 import { ChevronDown } from 'lucide-react';
-import TooltipV2 from '@/components/common/TooltipV2';
 import ImageKitImage from '@/components/ImageKitImage';
 import { TEXT_BACKGROUND } from '@/constants/icons';
 

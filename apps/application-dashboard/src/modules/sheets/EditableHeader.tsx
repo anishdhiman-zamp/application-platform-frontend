@@ -1,6 +1,5 @@
 import { useEffect, useRef, useState } from 'react';
-import { Button } from '@zamp-platform/ui';
-import TooltipV2 from '@/components/common/TooltipV2';
+import { Button, TooltipV2 } from '@zamp-platform/ui';
 import { KEYBOARD_KEYS } from '@/constants/shortcuts';
 import { SIDE_OPTIONS } from '@/types/commonTypes';
 

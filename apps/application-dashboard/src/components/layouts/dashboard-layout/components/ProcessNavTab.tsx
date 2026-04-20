@@ -1,13 +1,12 @@
 'use client';
 
 import { startTransition, useOptimistic, useState } from 'react';
-import { Button, Input, Popover, PopoverContent, PopoverTrigger } from '@zamp-platform/ui';
+import { Button, Input, Popover, PopoverContent, PopoverTrigger, TooltipV2 } from '@zamp-platform/ui';
 import { getNextNavigationTarget } from '@zamp-platform/utils';
 import { Activity, Hammer, MoreVertical, Pencil, Trash } from 'lucide-react';
 import { useRouter } from 'next/navigation';
 import { cn, preventAutoFocus } from 'utils/common';
 import type { Process } from '@/app/(authenticated)/resources';
-import TooltipV2 from '@/components/common/TooltipV2';
 import { getProcessRouteById, ROUTES_PATH } from '@/constants/routeConfig';
 import { KEYBOARD_KEYS } from '@/constants/shortcuts';
 import { useProcesses } from '@/contexts/ProcessesContext';

@@ -1,4 +1,5 @@
 import { FC, useState } from 'react';
+import { TooltipV2 } from '@zamp-platform/ui';
 import { DATE_FORMATS } from '@zamp-platform/utils';
 import { ColDef } from 'ag-grid-community';
 import { format, isValid } from 'date-fns';
@@ -10,7 +11,6 @@ import CustomChipsRenderer from '@/components/common/table/CustomCellRenderers/C
 import { Label } from 'components/common/Label';
 import TagChip from 'components/common/table/CustomCellEditors/CustomTagEditor/TagChip';
 import { CUSTOM_COLUMNS_TYPE } from 'components/common/table/table.types';
-import TooltipV2 from 'components/common/TooltipV2';
 import { getTagLabel } from 'components/filter/filter.utils';
 
 type PropertyRowProps = {

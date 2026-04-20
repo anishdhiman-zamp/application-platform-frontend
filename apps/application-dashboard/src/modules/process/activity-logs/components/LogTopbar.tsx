@@ -1,5 +1,5 @@
 import { type FC, memo, useState } from 'react';
-import { Button, toast } from '@zamp-platform/ui';
+import { Button, toast, TooltipV2 } from '@zamp-platform/ui';
 import { SvgSpriteLoader } from '@zamp-platform/ui/assets';
 import { cn } from '@zamp-platform/ui/utils';
 import { Trash2 } from 'lucide-react';
@@ -10,7 +10,6 @@ import { STATUS_ICON_COLOR_MAPPING } from 'modules/process/process.constant';
 import { ACTIVITY_RUN_STATUS } from 'modules/process/process.types';
 import { useParams, useRouter, useSearchParams } from 'next/navigation';
 import { useDeleteActivityRunMutation, useGetActivitySummaryQuery } from '@/apis/processes';
-import TooltipV2 from '@/components/common/TooltipV2';
 import CommonWrapper from '@/components/commonWrapper';
 import { SkeletonTypes } from '@/components/commonWrapper/commonWrapper.types';
 import SkeletonElement from '@/components/skeletons/SkeletonElement';

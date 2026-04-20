@@ -26,9 +26,9 @@ jest.mock('@zamp-platform/ui/utils', () => ({
   },
 }));
 
-jest.mock('@/components/common/TooltipV2', () => ({
+jest.mock('@zamp-platform/ui', () => ({
   __esModule: true,
-  default: ({ children, tooltipBody }: { children: React.ReactNode; tooltipBody: React.ReactNode }) => (
+  TooltipV2: ({ children, tooltipBody }: { children: React.ReactNode; tooltipBody: React.ReactNode }) => (
     <div data-testid='tooltip-wrapper'>
       <div data-testid='tooltip-body'>{tooltipBody}</div>
       {children}

@@ -1,12 +1,11 @@
 'use client';
 
 import { useState } from 'react';
-import { Button } from '@zamp-platform/ui';
+import { Button, TooltipV2 } from '@zamp-platform/ui';
 import { CircleMinus } from 'lucide-react';
 import AddConnectionDropdown from 'modules/pace/components/agents/components/AddConnectionDropdown';
 import ConnectionSectionV2 from 'modules/pace/components/agents/components/ConnectionSectionV2';
 import type { IntegrationDetailPropsType } from 'modules/pace/components/agents/types/agents.types';
-import TooltipV2 from '@/components/common/TooltipV2';
 import { getNameInitial } from '@/utils/common';
 
 const IntegrationDetail = ({

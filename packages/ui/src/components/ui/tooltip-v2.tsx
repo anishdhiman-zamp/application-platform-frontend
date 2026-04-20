@@ -1,3 +1,5 @@
+'use client';
+
 import {
   cloneElement,
   FC,
@@ -11,14 +13,17 @@ import {
   useRef,
   useState,
 } from 'react';
-import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@zamp-platform/ui';
-import { ALIGN_OPTIONS, SIDE_OPTIONS } from '@/types/commonTypes';
+
+import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from './tooltip';
+
+export type TooltipSide = 'top' | 'right' | 'bottom' | 'left';
+export type TooltipAlign = 'start' | 'center' | 'end';
 
 type TooltipV2Props = {
   children: ReactNode;
   tooltipBody: ReactNode;
-  side?: SIDE_OPTIONS;
-  align?: ALIGN_OPTIONS;
+  side?: TooltipSide;
+  align?: TooltipAlign;
   sideOffset?: number;
   alignOffset?: number;
   className?: string;
@@ -33,11 +38,11 @@ type TooltipV2Props = {
   onOpenChange?: (open: boolean) => void;
 };
 
-const TooltipV2: FC<TooltipV2Props> = ({
+export const TooltipV2: FC<TooltipV2Props> = ({
   children,
   tooltipBody,
-  side = SIDE_OPTIONS.TOP,
-  align = ALIGN_OPTIONS.CENTER,
+  side = 'top',
+  align = 'center',
   sideOffset = 10,
   alignOffset = 0,
   className,

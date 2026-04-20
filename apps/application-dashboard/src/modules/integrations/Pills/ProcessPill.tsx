@@ -1,7 +1,6 @@
 import type { FC } from 'react';
-import { Button } from '@zamp-platform/ui';
+import { Button, TooltipV2 } from '@zamp-platform/ui';
 import { Activity } from 'lucide-react';
-import TooltipV2 from '@/components/common/TooltipV2';
 import { PROCESS_NAMES } from '@/modules/integrations/constants/integrations.constant';
 import { SIDE_OPTIONS } from '@/types/commonTypes';
 

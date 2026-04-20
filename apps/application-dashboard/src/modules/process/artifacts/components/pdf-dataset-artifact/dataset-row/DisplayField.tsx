@@ -1,7 +1,7 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
+import { TooltipV2 } from '@zamp-platform/ui';
 import { SvgSpriteLoader } from '@zamp-platform/ui/assets';
 import { cn } from '@zamp-platform/ui/utils';
-import TooltipV2 from '@/components/common/TooltipV2';
 import { N_A_VALUE } from '@/modules/process/process.constant';
 import { formatRowValue } from '@/modules/process/process.utils';
 import { copyToClipBoard } from '@/utils/common';

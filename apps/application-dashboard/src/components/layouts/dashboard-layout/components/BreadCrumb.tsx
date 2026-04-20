@@ -1,7 +1,7 @@
 'use client';
 
 import { FC, KeyboardEvent, useEffect, useMemo, useRef, useState } from 'react';
-import { Button, Input } from '@zamp-platform/ui';
+import { Button, Input, TooltipV2 } from '@zamp-platform/ui';
 import { SvgSpriteLoader } from '@zamp-platform/ui/assets';
 import {
   getDatasetRouteById,
@@ -15,7 +15,6 @@ import { useParams, usePathname, useRouter, useSearchParams } from 'next/navigat
 import { BreadcrumbItem } from 'store/slices/layout-configs';
 import { capitalizeFirstLetter, cn } from 'utils/common';
 import { useGetAllDatasetsQuery } from '@/apis/dataset';
-import TooltipV2 from '@/components/common/TooltipV2';
 import { KEYBOARD_KEYS } from '@/constants/shortcuts';
 import { usePendingDatasetContext } from '@/context/pendingDataset.context';
 import { useProcesses } from '@/contexts/ProcessesContext';

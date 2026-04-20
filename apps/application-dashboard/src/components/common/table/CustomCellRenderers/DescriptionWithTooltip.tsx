@@ -1,7 +1,7 @@
 import { useEffect, useRef, useState } from 'react';
+import { TooltipV2 } from '@zamp-platform/ui';
 import type { ICellRendererParams } from 'ag-grid-community';
 import { cn } from '@/utils/common';
-import TooltipV2 from 'components/common/TooltipV2';
 
 const DescriptionWithTooltip = (params: ICellRendererParams) => {
   const cellRef = useRef<HTMLDivElement>(null);

@@ -2,7 +2,7 @@
 
 import { Suspense, useCallback, useEffect, useMemo, useState } from 'react';
 import { useCheckDatasetCreationEnabled } from '@zamp-platform/dataset-create-edit';
-import { Button } from '@zamp-platform/ui';
+import { Button, TooltipV2 } from '@zamp-platform/ui';
 import {
   getCreateKnowledgeBaseRouteByProcessId,
   getKnowledgeBasedRouteByProcessId,
@@ -16,7 +16,6 @@ import SharePagePopup from 'modules/page/SharePagePopup';
 import Link from 'next/link';
 import { useParams, usePathname, useRouter } from 'next/navigation';
 import { RootState } from 'store';
-import TooltipV2 from '@/components/common/TooltipV2';
 import { FEATURE_FLAGS } from '@/constants/featureFlags';
 import { usePendingDatasetContext } from '@/context/pendingDataset.context';
 import { useProcesses } from '@/contexts/ProcessesContext';

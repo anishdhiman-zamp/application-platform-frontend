@@ -1,12 +1,11 @@
 import { type FC } from 'react';
-import { CSS_VARS } from '@zamp-platform/ui';
+import { CSS_VARS, TooltipV2 } from '@zamp-platform/ui';
 import { SvgSpriteLoader } from '@zamp-platform/ui/assets';
 import Summary from 'modules/process/activity-summary/components/Summary';
 import ArtifactsSkeleton from 'modules/process/activity-summary/loaders/ArtifactsSkeleton';
 import type { HandleShowArtifactsProps } from 'modules/process/process.types';
 import { useParams } from 'next/navigation';
 import { useGetActivityArtifactsQuery, useGetActivitySummaryQuery } from '@/apis/processes';
-import TooltipV2 from '@/components/common/TooltipV2';
 import CommonWrapper from '@/components/commonWrapper';
 import { SkeletonTypes } from '@/components/commonWrapper/commonWrapper.types';
 import ArtifactTag from '@/modules/process/common/ArtifactTag';

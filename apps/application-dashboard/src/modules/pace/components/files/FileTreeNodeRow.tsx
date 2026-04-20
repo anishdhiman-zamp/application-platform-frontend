@@ -15,10 +15,10 @@ import {
   FolderClosedIcon,
   FolderOpenedIcon,
   Input,
+  TooltipV2,
 } from '@zamp-platform/ui';
 import { cn } from '@zamp-platform/ui/utils';
 import { ChevronRight, Loader, MoreVertical } from 'lucide-react';
-import TooltipV2 from '@/components/common/TooltipV2';
 import { KEYBOARD_KEYS } from '@/constants/shortcuts';
 import type { ContextMenuAction, TreeNode } from '@/modules/pace/components/files/file-tree.types';
 import { getFileExtension } from '@/modules/pace/components/files/file-tree.utils';

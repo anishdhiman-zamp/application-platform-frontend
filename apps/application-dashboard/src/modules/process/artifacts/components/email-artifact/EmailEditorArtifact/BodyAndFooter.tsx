@@ -3,7 +3,7 @@ import { Color } from '@tiptap/extension-color';
 import { TextAlign } from '@tiptap/extension-text-align';
 import { EditorContent, useEditor } from '@tiptap/react';
 import { StarterKit } from '@tiptap/starter-kit';
-import { Button } from '@zamp-platform/ui';
+import { Button, TooltipV2 } from '@zamp-platform/ui';
 import { SvgSpriteLoader } from '@zamp-platform/ui/assets';
 import { cn } from '@zamp-platform/ui/utils';
 import Attachments from 'modules/process/artifacts/components/email-artifact/EmailEditorArtifact/Attachments';
@@ -16,7 +16,6 @@ import {
   BodyAndFooterProps,
   ToolbarConfig,
 } from 'modules/process/artifacts/components/email-artifact/EmailEditorArtifact/types';
-import TooltipV2 from '@/components/common/TooltipV2';
 import type { EmailAttachmentType } from '@/types/api/processApi.types';
 import { debounce } from '@/utils/common';
 

@@ -1,5 +1,5 @@
 import { type RefObject, useRef, useState } from 'react';
-import { COLORS } from '@zamp-platform/ui';
+import { COLORS, TooltipV2 } from '@zamp-platform/ui';
 import { SvgSpriteLoader } from '@zamp-platform/ui/assets';
 import { cn } from '@zamp-platform/ui/utils';
 import type { AgGridReact } from 'ag-grid-react';
@@ -14,7 +14,6 @@ import LoadingWidthAnimation from 'modules/data/components/LoadingWidthAnimation
 import { prepareExportQuery } from 'modules/data/data.utils';
 import { useParams, useRouter } from 'next/navigation';
 import { DatasetActionStatusResponseType } from 'types/api/dataset.types';
-import TooltipV2 from '@/components/common/TooltipV2';
 import { SIDE_OPTIONS } from '@/types/commonTypes';
 import ProgressBar from 'components/common/RingProgress';
 import { toast } from 'components/common/toast/Toast';

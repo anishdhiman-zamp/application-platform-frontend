@@ -1,7 +1,6 @@
 import { FC } from 'react';
-import { Button } from '@zamp-platform/ui';
+import { Button, TooltipV2 } from '@zamp-platform/ui';
 import { SvgSpriteLoader } from '@zamp-platform/ui/assets';
-import TooltipV2 from '@/components/common/TooltipV2';
 import { defaultFnType, SIDE_OPTIONS } from '@/types/commonTypes';
 
 interface ConfigureFilterButtonProps {

@@ -1,4 +1,5 @@
 import { FC, useCallback, useEffect, useRef, useState } from 'react';
+import { TooltipV2 } from '@zamp-platform/ui';
 import { SvgSpriteLoader } from '@zamp-platform/ui/assets';
 import { ICON_SPRITE_TYPES } from '@zamp-platform/ui/types';
 import { debounce, useOnClickOutside } from 'hooks';
@@ -6,7 +7,6 @@ import { SIZE_TYPES } from 'types/common/components';
 import { defaultFnType, OptionsType } from 'types/commonTypes';
 import { camelCaseToNormalText } from 'utils/common';
 import Input from 'components/common/input';
-import TooltipV2 from 'components/common/TooltipV2';
 import { AmountRangeFilterValue, FILTER_TYPES } from 'components/filter/filter.types';
 import ConfigureFilterButton from 'components/filter/filterMenu/ConfigureFilterButton';
 import { AMOUNT_RANGE_FILTER_OPTIONS, CONDITION_OPERATOR_TYPE } from 'components/filter/filters.constants';

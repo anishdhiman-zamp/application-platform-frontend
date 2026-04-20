@@ -1,4 +1,5 @@
 import { FC, useEffect, useMemo, useRef, useState } from 'react';
+import { TooltipV2 } from '@zamp-platform/ui';
 import { PERIODICITY_TYPES } from '@zamp-platform/utils';
 import { useGetWidgetDataQuery } from 'apis/widgets';
 import { useWindowDimensions } from 'hooks/useWindowDimensions';
@@ -14,7 +15,6 @@ import { cn, getCommaSeparatedNumber } from 'utils/common';
 import PermissionGuard from '@/components/hoc/PermissionGuard';
 import { useAppSelector } from '@/hooks/toolkit';
 import { ResponsiveGridLayoutType, SIDE_OPTIONS } from '@/types/commonTypes';
-import TooltipV2 from 'components/common/TooltipV2';
 import CommonWrapper from 'components/commonWrapper';
 import { SkeletonTypes } from 'components/commonWrapper/commonWrapper.types';
 import SkeletonElement from 'components/skeletons/SkeletonElement';

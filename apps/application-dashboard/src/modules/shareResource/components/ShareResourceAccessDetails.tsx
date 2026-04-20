@@ -1,7 +1,6 @@
-import { Button, COLORS, CSS_VARS } from '@zamp-platform/ui';
+import { Button, COLORS, CSS_VARS, TooltipV2 } from '@zamp-platform/ui';
 import { SvgSpriteLoader } from '@zamp-platform/ui/assets';
 import { cn } from '@zamp-platform/ui/utils';
-import TooltipV2 from '@/components/common/TooltipV2';
 import { defaultFnType } from '@/types/commonTypes';
 import type { FilterModelType } from '@/types/components/table.type';
 type ShareResourceAccessDetailsProps = {

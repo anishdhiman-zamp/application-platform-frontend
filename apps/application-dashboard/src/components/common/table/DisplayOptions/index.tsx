@@ -7,6 +7,7 @@ import {
   DropdownMenuContent,
   DropdownMenuItem,
   DropdownMenuTrigger,
+  TooltipV2,
 } from '@zamp-platform/ui';
 import { SvgSpriteLoader } from '@zamp-platform/ui/assets';
 import { AgGridReact } from 'ag-grid-react';
@@ -18,7 +19,6 @@ import GroupBy from 'components/common/table/DisplayOptions/GroupBy';
 import { DisplayOptionsList } from 'components/common/table/table.constants';
 import { DISPLAY_OPTIONS } from 'components/common/table/table.types';
 import ColumnListingTk from 'components/common/tanstackTable/displayOptions';
-import TooltipV2 from 'components/common/TooltipV2';
 
 type DisplayOptionsProps = {
   testIdSuffix?: string;

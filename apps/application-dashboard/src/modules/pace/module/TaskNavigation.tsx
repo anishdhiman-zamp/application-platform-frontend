@@ -1,7 +1,7 @@
 import { memo } from 'react';
+import { TooltipV2 } from '@zamp-platform/ui';
 import { cn } from '@zamp-platform/ui/utils';
 import { ArrowDown, ArrowUp } from 'lucide-react';
-import TooltipV2 from '@/components/common/TooltipV2';
 
 interface TaskNavigationProps {
   currentIndex: number;

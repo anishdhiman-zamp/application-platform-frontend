@@ -11,11 +11,10 @@ import {
   useSensors,
 } from '@dnd-kit/core';
 import { arrayMove, SortableContext, verticalListSortingStrategy } from '@dnd-kit/sortable';
-import { Button, toast } from '@zamp-platform/ui';
+import { Button, toast, TooltipV2 } from '@zamp-platform/ui';
 import { Plus } from 'lucide-react';
 import { useRouter } from 'next/navigation';
 import { useCreatePageMutation, useUpdatePageIndexesMutation } from '@/apis/pages';
-import TooltipV2 from '@/components/common/TooltipV2';
 import { DEFAULT_PAGE_DESCRIPTION, DEFAULT_PAGE_NAME, DEFAULT_SHEET_NAME } from '@/constants/common.constants';
 import { getPageRouteById } from '@/constants/routeConfig';
 import { PageResponseType } from '@/types/api/pagesApi.types';

@@ -1,6 +1,5 @@
-import { Button } from '@zamp-platform/ui';
+import { Button, TooltipV2 } from '@zamp-platform/ui';
 import { MessageSquarePlusIcon } from 'lucide-react';
-import TooltipV2 from '@/components/common/TooltipV2';
 
 const CommentButton = () => {
   return (

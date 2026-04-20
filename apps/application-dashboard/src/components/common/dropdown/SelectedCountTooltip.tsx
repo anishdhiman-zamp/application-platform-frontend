@@ -1,8 +1,8 @@
 import { FC } from 'react';
+import { TooltipV2 } from '@zamp-platform/ui';
 import { cn } from '@zamp-platform/ui/utils';
 import { SelectedCountTooltipPropsType } from 'types/common/components/dropdown/dropdown.types';
 import { ALIGN_OPTIONS, SIDE_OPTIONS } from '@/types/commonTypes';
-import TooltipV2 from 'components/common/TooltipV2';
 
 const SelectedCountTooltip: FC<SelectedCountTooltipPropsType> = ({ value, tooltipBodyClassName }) => {
   return (

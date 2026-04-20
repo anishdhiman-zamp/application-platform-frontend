@@ -1,10 +1,9 @@
 'use client';
 
 import { type FC } from 'react';
-import { Toggle } from '@zamp-platform/ui';
+import { Toggle, TooltipV2 } from '@zamp-platform/ui';
 import { cn } from '@zamp-platform/ui/utils';
 import { Plus } from 'lucide-react';
-import TooltipV2 from '@/components/common/TooltipV2';
 
 interface AutoLoopToggleProps {
   enabled: boolean;

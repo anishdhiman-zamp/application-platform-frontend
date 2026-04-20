@@ -1,9 +1,15 @@
 import { FC } from 'react';
 import { type Editor } from '@tiptap/react';
-import { Button, DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from '@zamp-platform/ui';
+import {
+  Button,
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+  TooltipV2,
+} from '@zamp-platform/ui';
 import { ChevronDown, Type } from 'lucide-react';
 import { FONT_SIZES } from 'modules/process/artifacts/components/email-artifact/EmailEditorArtifact/constants';
-import TooltipV2 from '@/components/common/TooltipV2';
 
 const FontSizeSelector: FC<{ editor: Editor | null }> = ({ editor }) => {
   const handleFontSize = (fontSize: string) => {

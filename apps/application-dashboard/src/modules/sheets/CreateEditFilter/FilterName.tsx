@@ -1,7 +1,6 @@
-import { Button } from '@zamp-platform/ui';
+import { Button, TooltipV2 } from '@zamp-platform/ui';
 import { cn } from '@zamp-platform/ui/utils';
 import useFilterName from 'modules/sheets/CreateEditFilter/useFilterName';
-import TooltipV2 from '@/components/common/TooltipV2';
 import { SIDE_OPTIONS } from '@/types/commonTypes';
 
 const FilterName = () => {

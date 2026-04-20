@@ -1,10 +1,10 @@
 'use client';
 
 import { useRef } from 'react';
+import { TooltipV2 } from '@zamp-platform/ui';
 import { cn } from '@zamp-platform/ui/utils';
 import type { AnimatedIconHandle, PaceNavbarItemSchema } from 'modules/pace/pace.types';
 import Link from 'next/link';
-import TooltipV2 from '@/components/common/TooltipV2';
 import { SIDE_OPTIONS } from '@/types/commonTypes';
 
 interface NavbarIconLinkProps {

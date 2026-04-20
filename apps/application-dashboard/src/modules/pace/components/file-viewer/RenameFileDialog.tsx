@@ -11,9 +11,9 @@ import {
   DialogHeader,
   DialogHeaderTitle,
   Input,
+  TooltipV2,
 } from '@zamp-platform/ui';
 import { cn } from '@zamp-platform/ui/utils';
-import TooltipV2 from '@/components/common/TooltipV2';
 import { KEYBOARD_KEYS } from '@/constants/shortcuts';
 import { checkDuplicateName, getFileNameParts } from '@/modules/pace/components/files/file-tree.utils';
 import { SIDE_OPTIONS } from '@/types/commonTypes';

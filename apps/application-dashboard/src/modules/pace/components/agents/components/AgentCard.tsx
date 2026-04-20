@@ -1,9 +1,9 @@
 'use client';
 
 import { TASK_STATUS, TaskStatusIcon } from '@zamp-platform/chat';
+import { TooltipV2 } from '@zamp-platform/ui';
 import { getAgentAvatar, getAgentAvatarByKey } from 'modules/pace/components/agents/constants/agents.constants';
 import type { AgentType } from 'modules/pace/components/agents/types/agents.types';
-import TooltipV2 from '@/components/common/TooltipV2';
 import ImageKitImage from '@/components/ImageKitImage';
 import AgentCardTriggerDropdown from '@/modules/pace/components/agents/components/AgentCardTriggerDropdown';
 import { formatCompactNumber } from '@/modules/pace/components/agents/utils/agents.utils';

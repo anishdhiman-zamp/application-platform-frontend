@@ -1,10 +1,9 @@
 'use client';
 
 import { memo } from 'react';
-import { Button, FileIcon, Tabs, TabsList, TabsTrigger } from '@zamp-platform/ui';
+import { Button, FileIcon, Tabs, TabsList, TabsTrigger, TooltipV2 } from '@zamp-platform/ui';
 import { cn } from '@zamp-platform/ui/utils';
 import { Download } from 'lucide-react';
-import TooltipV2 from '@/components/common/TooltipV2';
 import {
   HTML_VIEW_OPTIONS,
   MARKDOWN_VIEW_OPTIONS,

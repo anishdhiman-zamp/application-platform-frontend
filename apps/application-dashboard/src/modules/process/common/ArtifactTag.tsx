@@ -1,12 +1,11 @@
 import { type FC, memo } from 'react';
-import { Button } from '@zamp-platform/ui';
+import { Button, TooltipV2 } from '@zamp-platform/ui';
 import { cn } from '@zamp-platform/ui/utils';
 import { ExternalLink } from 'lucide-react';
 import { ARTIFACT_TYPE, type CTA_ACTION } from 'modules/process/process.types';
 import { getArtifactPrefixIconSrc } from 'modules/process/process.utils';
 import Image from 'next/image';
 import ImageWithFallback from '@/components/common/ImageWithFallback';
-import TooltipV2 from '@/components/common/TooltipV2';
 import { ARTIFACT_ICON_URL, GMAIL, LINK } from '@/constants/icons';
 import type { defaultFnType } from '@/types/commonTypes';
 

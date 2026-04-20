@@ -1,7 +1,7 @@
 'use client';
 
 import { FC, useCallback, useEffect, useMemo, useRef, useState } from 'react';
-import { CSS_VARS, Tabs, TabsList, TabsTrigger } from '@zamp-platform/ui';
+import { CSS_VARS, Tabs, TabsList, TabsTrigger, TooltipV2 } from '@zamp-platform/ui';
 import { SvgSpriteLoader } from '@zamp-platform/ui/assets';
 import {
   type CellClickedEvent,
@@ -39,7 +39,6 @@ import { checkIsObjectEmpty, cn, formatPlural, snakeCaseToSentenceCase } from 'u
 import { useLazyGetDatasetArtifactsQuery } from '@/apis/processes';
 import ImageLoader from '@/components/common/loader/ImageLoader';
 import { CUSTOM_COLUMNS_TYPE } from '@/components/common/table/table.types';
-import TooltipV2 from '@/components/common/TooltipV2';
 import { FILTER_TYPES } from '@/components/filter/filter.types';
 import { POSITION } from '@/constants/common.constants';
 import { ZAMP_LOGO_LOADER_SVG } from '@/constants/icons';

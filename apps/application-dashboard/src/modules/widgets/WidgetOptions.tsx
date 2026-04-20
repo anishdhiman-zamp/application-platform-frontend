@@ -1,10 +1,9 @@
 import { FC, useState } from 'react';
-import { Button, Popover, PopoverContent, PopoverTrigger } from '@zamp-platform/ui';
+import { Button, Popover, PopoverContent, PopoverTrigger, TooltipV2 } from '@zamp-platform/ui';
 import { SvgSpriteLoader } from '@zamp-platform/ui/assets';
 import { ICON_SPRITE_TYPES } from '@zamp-platform/ui/types';
 import { cn } from '@zamp-platform/ui/utils';
 import { useRouter } from 'next/navigation';
-import TooltipV2 from '@/components/common/TooltipV2';
 import { WIDGET_TYPES, WidgetInstanceType } from '@/types/api/widgets.types';
 import { ResponsiveGridLayoutType, SIDE_OPTIONS } from '@/types/commonTypes';
 import { preventAutoFocus } from '@/utils/common';

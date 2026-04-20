@@ -2,7 +2,7 @@
 
 import { FC, useEffect, useMemo, useRef } from 'react';
 import { Button, Input, Select, type SelectOption } from '@zamp-platform/ui';
-import { SelectButton } from '@zamp-platform/ui';
+import { SelectButton, TooltipV2 } from '@zamp-platform/ui';
 import { ICON_SPRITE_TYPES } from '@zamp-platform/ui/types';
 import { cn } from '@zamp-platform/ui/utils';
 import { useGetDatasetFilterConfigQuery, useGetDatasetListingQuery } from 'apis/dataset';
@@ -10,7 +10,6 @@ import { CHART_SPECIFIC_FORM_MAP, SIZE_OPTIONS, VISUALIZATION_OPTIONS } from 'mo
 import { defaultFormData, useWidgetCreationContext } from 'modules/widgets/create/context/WidgetCreationContext';
 import { setupColumnsAndFilters } from 'modules/widgets/create/utils';
 import { WIDGET_TYPES } from 'types/api/widgets.types';
-import TooltipV2 from '@/components/common/TooltipV2';
 import { filtersContextActions, useFiltersContextStore } from '@/components/filter/filters.context';
 import { formatDrilldownFilters } from '@/modules/data/data.utils';
 import useSubmitWidgetForm from '@/modules/widgets/create/hooks/useSubmitWidgetForm';

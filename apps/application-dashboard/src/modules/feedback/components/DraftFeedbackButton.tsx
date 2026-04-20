@@ -1,9 +1,8 @@
 import { FC } from 'react';
 import { useSelector } from 'react-redux';
-import { Button, Popover, PopoverContent, PopoverPortal, PopoverTrigger } from '@zamp-platform/ui';
+import { Button, Popover, PopoverContent, PopoverPortal, PopoverTrigger, TooltipV2 } from '@zamp-platform/ui';
 import { MessageSquare } from 'lucide-react';
 import FeedbackListCard from 'modules/feedback/components/FeedbackListCard';
-import TooltipV2 from '@/components/common/TooltipV2';
 import { RootState } from '@/store';
 import { SIDE_OPTIONS } from '@/types/commonTypes';
 

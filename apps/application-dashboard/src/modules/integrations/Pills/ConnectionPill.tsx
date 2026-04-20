@@ -1,9 +1,8 @@
 'use client';
 
 import type { FC } from 'react';
-import { Button, Popover, PopoverTrigger } from '@zamp-platform/ui';
+import { Button, Popover, PopoverTrigger, TooltipV2 } from '@zamp-platform/ui';
 import { cn } from '@zamp-platform/ui/utils';
-import TooltipV2 from '@/components/common/TooltipV2';
 import { PILL_STYLE_MAP } from '@/modules/integrations/constants/integrations.constant';
 import usePopoverWithTooltip from '@/modules/integrations/hooks/usePopoverWithTooltip';
 import ConnectionPillPopoverContent from '@/modules/integrations/Pills/ConnectionPillPopoverContent';

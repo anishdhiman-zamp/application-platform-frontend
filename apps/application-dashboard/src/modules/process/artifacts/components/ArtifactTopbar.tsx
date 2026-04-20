@@ -1,7 +1,6 @@
 import type { FC } from 'react';
-import { CSS_VARS } from '@zamp-platform/ui';
+import { CSS_VARS, TooltipV2 } from '@zamp-platform/ui';
 import { SvgSpriteLoader } from '@zamp-platform/ui/assets';
-import TooltipV2 from '@/components/common/TooltipV2';
 import { type defaultFnType, SIDE_OPTIONS } from '@/types/commonTypes';
 
 interface ArtifactTopbarProps {

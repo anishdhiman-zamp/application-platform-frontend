@@ -1,5 +1,13 @@
 import { useCallback, useEffect, useState } from 'react';
-import { CSS_VARS, Dialog, DialogClose, DialogContent, DialogHeader, DialogHeaderTitle } from '@zamp-platform/ui';
+import {
+  CSS_VARS,
+  Dialog,
+  DialogClose,
+  DialogContent,
+  DialogHeader,
+  DialogHeaderTitle,
+  TooltipV2,
+} from '@zamp-platform/ui';
 import { SvgSpriteLoader } from '@zamp-platform/ui/assets';
 import { ICON_SPRITE_TYPES } from '@zamp-platform/ui/types';
 import { cn } from '@zamp-platform/ui/utils';
@@ -7,7 +15,6 @@ import ArtifactLoader from 'modules/process/artifacts/components/ArtifactLoader'
 import type { DocumentItemType } from 'modules/process/process.types';
 import dynamic from 'next/dynamic';
 import { SIDE_OPTIONS } from 'types/commonTypes';
-import TooltipV2 from '@/components/common/TooltipV2';
 import { formatPlural } from '@/utils/common';
 
 const PdfArtifact = dynamic(() => import('@/modules/process/artifacts/components/pdf-dataset-artifact/PdfArtifact'), {

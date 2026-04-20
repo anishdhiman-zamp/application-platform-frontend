@@ -1,9 +1,9 @@
+import { TooltipV2 } from '@zamp-platform/ui';
 import { DATE_FORMATS } from '@zamp-platform/utils';
 import { format } from 'date-fns';
 import { STATUS_ICON_COLOR_MAPPING } from 'modules/process/process.constant';
 import type { ACTIVITY_RUN_STATUS } from 'modules/process/process.types';
 import { ensureUTCTimestamp } from 'utils/common';
-import TooltipV2 from '@/components/common/TooltipV2';
 import TabStatusIcon from '@/modules/process/common/TabStatusIcon';
 import type { MapAny } from '@/types/commonTypes';
 

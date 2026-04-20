@@ -39,6 +39,7 @@ export * from './ui/textarea';
 export * from './ui/toast';
 export * from './ui/toggle';
 export * from './ui/tooltip';
+export * from './ui/tooltip-v2';
 export * from './ui/DrilldownMenu';
 
 export * from '../constants/colors';

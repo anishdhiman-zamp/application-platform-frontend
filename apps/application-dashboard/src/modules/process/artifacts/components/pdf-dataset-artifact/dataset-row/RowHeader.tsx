@@ -1,7 +1,6 @@
-import { Button, CSS_VARS } from '@zamp-platform/ui';
+import { Button, CSS_VARS, TooltipV2 } from '@zamp-platform/ui';
 import { SvgSpriteLoader } from '@zamp-platform/ui/assets';
 import { GridApi } from 'ag-grid-community';
-import TooltipV2 from '@/components/common/TooltipV2';
 
 interface RowHeaderProps {
   selectedRowIndex: number;

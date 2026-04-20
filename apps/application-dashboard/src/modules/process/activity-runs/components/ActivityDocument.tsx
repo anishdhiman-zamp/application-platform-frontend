@@ -1,6 +1,5 @@
-import { CSS_VARS } from '@zamp-platform/ui';
+import { CSS_VARS, TooltipV2 } from '@zamp-platform/ui';
 import { SvgSpriteLoader } from '@zamp-platform/ui/assets';
-import TooltipV2 from '@/components/common/TooltipV2';
 
 interface ActivityDocumentProps {
   value: string;

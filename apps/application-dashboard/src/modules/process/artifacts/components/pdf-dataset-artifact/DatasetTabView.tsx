@@ -1,12 +1,21 @@
 import { FC, memo, useMemo } from 'react';
-import { Button, COLORS, CSS_VARS, Tabs, TabsContent, TabsList, TabsTrigger, toast } from '@zamp-platform/ui';
+import {
+  Button,
+  COLORS,
+  CSS_VARS,
+  Tabs,
+  TabsContent,
+  TabsList,
+  TabsTrigger,
+  toast,
+  TooltipV2,
+} from '@zamp-platform/ui';
 import { SvgSpriteLoader } from '@zamp-platform/ui/assets';
 import { cn } from '@zamp-platform/ui/utils';
 import DatasetArtifact from 'modules/process/artifacts/components/pdf-dataset-artifact/DatasetArtifact';
 import { CTA_COMPONENT_TYPE, EmitHITLActionPayload, MissingFieldsConfigType } from 'modules/process/process.types';
 import { useEmitHITLActionMutation } from '@/apis/processes';
 import ProgressBar from '@/components/common/RingProgress';
-import TooltipV2 from '@/components/common/TooltipV2';
 import { useAppSelector } from '@/hooks/toolkit';
 import {
   CompletedFieldsActions,

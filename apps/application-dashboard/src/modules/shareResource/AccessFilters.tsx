@@ -1,11 +1,10 @@
 import { FC } from 'react';
-import { Button } from '@zamp-platform/ui';
+import { Button, TooltipV2 } from '@zamp-platform/ui';
 import { SvgSpriteLoader } from '@zamp-platform/ui/assets';
 import {
   ACCESS_MESSAGES_ADMIN_ROLE,
   ACCESS_MESSAGES_CUSTOMISE_ACCESS,
 } from 'modules/shareResource/shareResource.constants';
-import TooltipV2 from '@/components/common/TooltipV2';
 import FiltersWrapper from '@/components/filter/filterMenu/FiltersWrapper';
 import { defaultFnType } from '@/types/commonTypes';
 import { PERMISSION_ROLES } from '@/utils/accessPermission/accessPermission.types';

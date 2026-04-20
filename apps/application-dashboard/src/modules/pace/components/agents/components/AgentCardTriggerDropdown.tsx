@@ -1,11 +1,19 @@
 'use client';
 
 import { useCallback, useEffect, useState } from 'react';
-import { Button, Popover, PopoverContent, PopoverPortal, PopoverTrigger, Switch, toast } from '@zamp-platform/ui';
+import {
+  Button,
+  Popover,
+  PopoverContent,
+  PopoverPortal,
+  PopoverTrigger,
+  Switch,
+  toast,
+  TooltipV2,
+} from '@zamp-platform/ui';
 import { Zap } from 'lucide-react';
 import { useGetAgentTriggersQuery, useToggleAgentTriggerMutation } from '@/apis/agents';
 import ImageWithFallback from '@/components/common/ImageWithFallback';
-import TooltipV2 from '@/components/common/TooltipV2';
 import CommonWrapper from '@/components/commonWrapper';
 import { SkeletonTypes } from '@/components/commonWrapper/commonWrapper.types';
 import { TRANSPARENT_PIXEL } from '@/modules/pace/components/agents/constants/agents.constants';

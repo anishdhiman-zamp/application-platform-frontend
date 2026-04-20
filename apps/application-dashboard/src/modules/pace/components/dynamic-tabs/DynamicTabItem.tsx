@@ -1,14 +1,13 @@
 'use client';
 
 import { type ReactNode, useCallback, useRef, useState } from 'react';
-import { Button } from '@zamp-platform/ui';
+import { Button, TooltipV2 } from '@zamp-platform/ui';
 import { cn } from '@zamp-platform/ui/utils';
 import { X } from 'lucide-react';
 import { TAB_CONTEXT_MENU_ACTION_IDS } from 'modules/pace/components/dynamic-tabs/dynamic-tabs.constants';
 import { getDefaultIcon } from 'modules/pace/components/dynamic-tabs/dynamic-tabs.utils';
 import DynamicTabContextMenu from 'modules/pace/components/dynamic-tabs/DynamicTabContextMenu';
 import { useIsCompact } from 'modules/pace/components/dynamic-tabs/useIsCompact';
-import TooltipV2 from '@/components/common/TooltipV2';
 import { handleActivationKeyDown } from '@/constants/shortcuts';
 import { DynamicTab } from '@/modules/pace/pace.types';
 import { defaultFnType, SIDE_OPTIONS } from '@/types/commonTypes';

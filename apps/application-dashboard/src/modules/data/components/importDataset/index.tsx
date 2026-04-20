@@ -1,5 +1,6 @@
 import React, { FC, useEffect, useState } from 'react';
 import { useDispatch } from 'react-redux';
+import { TooltipV2 } from '@zamp-platform/ui';
 import {
   useGetPreviewTransformationMutation,
   useLazyGetActionStatusQuery,
@@ -24,7 +25,6 @@ import { DatasetActionStatusResponseType, RawMetadata, TransformationPreviewMeta
 import { cn } from 'utils/common';
 import { toast } from '@/components/common/toast/Toast';
 import { SIDE_OPTIONS } from '@/types/commonTypes';
-import TooltipV2 from 'components/common/TooltipV2';
 
 const ImportDataset: FC<ImportDatasetPropsType> = ({ setShowAiTransformationStatus, onRefetch, disable }) => {
   const dispatch = useDispatch();

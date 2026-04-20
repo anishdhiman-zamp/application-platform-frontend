@@ -1,9 +1,8 @@
 import { useMemo } from 'react';
-import { ConfirmationDialog, toast } from '@zamp-platform/ui';
+import { ConfirmationDialog, toast, TooltipV2 } from '@zamp-platform/ui';
 import MembersName from 'modules/team/components/members/MembersName';
 import { TeamType } from 'modules/team/people.types';
 import { useDeleteTeamMutation } from '@/apis/people';
-import TooltipV2 from '@/components/common/TooltipV2';
 import { SIDE_OPTIONS } from '@/types/commonTypes';
 import { capitalizeWords } from '@/utils/common';
 

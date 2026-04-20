@@ -1,7 +1,14 @@
 'use client';
 
-import { FileIcon, FolderClosedIcon, Popover, PopoverAnchor, PopoverContent, PopoverPortal } from '@zamp-platform/ui';
-import TooltipV2 from '@/components/common/TooltipV2';
+import {
+  FileIcon,
+  FolderClosedIcon,
+  Popover,
+  PopoverAnchor,
+  PopoverContent,
+  PopoverPortal,
+  TooltipV2,
+} from '@zamp-platform/ui';
 import { FILE_TYPE, type TreeNode } from '@/modules/pace/components/files/file-tree.types';
 import { formatDate, formatFileSize, getFileExtension } from '@/modules/pace/components/files/file-tree.utils';
 import { SIDE_OPTIONS } from '@/types/commonTypes';

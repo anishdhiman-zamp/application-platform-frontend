@@ -12,6 +12,7 @@ import {
   DialogHeader,
   DialogHeaderTitle,
   toast,
+  TooltipV2,
 } from '@zamp-platform/ui';
 import {
   CellEditRequestEvent,
@@ -74,7 +75,6 @@ import {
 } from '@/utils/localstorage';
 import DatasetTable from 'components/common/table/DatasetTable';
 import DisplayOptions from 'components/common/table/DisplayOptions';
-import TooltipV2 from 'components/common/TooltipV2';
 import { FILTER_TYPES } from 'components/filter/filter.types';
 import FiltersWrapper from 'components/filter/filterMenu/FiltersWrapper';
 import { filtersContextActions, useFiltersContextStore, withFiltersContext } from 'components/filter/filters.context';

@@ -1,7 +1,6 @@
-import { Popover, PopoverContent, PopoverTrigger } from '@zamp-platform/ui';
+import { Popover, PopoverContent, PopoverTrigger, TooltipV2 } from '@zamp-platform/ui';
 import { cn } from '@zamp-platform/ui/utils';
 import useFilterNameOperatorOptions from 'modules/sheets/CreateEditFilter/useFilterNameOperatorOptions';
-import TooltipV2 from '@/components/common/TooltipV2';
 import FilterDropdownMenu from '@/components/filter/filterMenu/FilterDropdownMenu';
 
 const FilterNameOperatorOptions = () => {

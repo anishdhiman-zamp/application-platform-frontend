@@ -1,7 +1,6 @@
 import React, { FC, useState } from 'react';
-import { Button, Popover, PopoverTrigger } from '@zamp-platform/ui';
+import { Button, Popover, PopoverTrigger, TooltipV2 } from '@zamp-platform/ui';
 import { SvgSpriteLoader } from '@zamp-platform/ui/assets';
-import TooltipV2 from '@/components/common/TooltipV2';
 import { SIDE_OPTIONS } from '@/types/commonTypes';
 import SelectFilterMenuItem from 'components/filter/filterMenu/SelectFilterMenuItem';
 import { useFiltersContextStore } from 'components/filter/filters.context';

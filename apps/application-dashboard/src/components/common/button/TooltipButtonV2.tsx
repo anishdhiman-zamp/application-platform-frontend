@@ -1,9 +1,8 @@
 import { FC, ReactNode } from 'react';
-import { Button, ButtonSize, ButtonVariant } from '@zamp-platform/ui';
+import { Button, ButtonSize, ButtonVariant, TooltipV2 } from '@zamp-platform/ui';
 import { SvgSpriteLoader, SvgSpriteLoaderProps } from '@zamp-platform/ui/assets';
 import { defaultFnType, SIDE_OPTIONS } from 'types/commonTypes';
 import { cn } from 'utils/common';
-import TooltipV2 from 'components/common/TooltipV2';
 
 interface TooltipButtonPropsType {
   tooltipBodyClassName?: string;

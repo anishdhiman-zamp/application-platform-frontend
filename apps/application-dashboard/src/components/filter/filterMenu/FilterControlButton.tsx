@@ -1,10 +1,10 @@
 import React, { FC, MouseEvent, PropsWithChildren, RefObject } from 'react';
+import { TooltipV2 } from '@zamp-platform/ui';
 import { SvgSpriteLoader } from '@zamp-platform/ui/assets';
 import { ICON_SPRITE_TYPES } from '@zamp-platform/ui/types';
 import { cn } from 'utils/common';
 import { SIDE_OPTIONS } from '@/types/commonTypes';
 import { Loader } from 'components/common/loader/Loader';
-import TooltipV2 from 'components/common/TooltipV2';
 
 interface FilterControlButtonProps extends PropsWithChildren {
   onClick: (event: MouseEvent<HTMLButtonElement>) => void;

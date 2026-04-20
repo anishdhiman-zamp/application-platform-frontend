@@ -1,6 +1,6 @@
 'use client';
 import { FC } from 'react';
-import { Button } from '@zamp-platform/ui';
+import { Button, TooltipV2 } from '@zamp-platform/ui';
 import { SvgSpriteLoader } from '@zamp-platform/ui/assets';
 import ColumnSelector from 'modules/sheets/CreateEditFilter/ColumnSelector';
 import DatasetSelector from 'modules/sheets/CreateEditFilter/DatasetSelector';
@@ -10,7 +10,6 @@ import DiscardDialog from 'modules/sheets/CreateEditFilter/DiscardDialog';
 import FilterName from 'modules/sheets/CreateEditFilter/FilterName';
 import FilterNameOperatorOptions from 'modules/sheets/CreateEditFilter/FilterNameOperatorOptions';
 import useCreateEditFilter from 'modules/sheets/CreateEditFilter/useCreateEditFilter';
-import TooltipV2 from '@/components/common/TooltipV2';
 import { checkIsObjectEmpty, cn } from '@/utils/common';
 
 const CreateEditFilter: FC = () => {
