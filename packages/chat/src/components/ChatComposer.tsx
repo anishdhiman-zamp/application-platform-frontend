@@ -273,12 +273,13 @@ export const ChatComposer = forwardRef<ChatComposerHandle, ChatComposerProps>(
                   ))}
 
                 {showSubmitButton && (isStreaming || isStopping) && onStop ? (
-                  !isSubmitDisabled ? (
+                  !isSubmitDisabled || isUploading ? (
                     <TooltipProvider delayDuration={300}>
                       <Tooltip>
                         <TooltipTrigger asChild>
                           <Button
                             onClick={onSubmit}
+                            disabled={isSubmitDisabled}
                             size='icon'
                             aria-label='Queue message'
                             className='bg-GRAY_950 text-BG_WHITE hover:bg-GRAY_950 hover:text-BG_WHITE dark:bg-GRAY_500 dark:hover:bg-GRAY_600 dark:text-GRAY_1000 dark:hover:text-GRAY_1000 size-[26px] rounded-full p-0 [&_svg]:size-3.5'

@@ -13,6 +13,7 @@ export interface ConversationActions {
   }>;
   stopConversation: () => Promise<void>;
   clearMessages: () => void;
+  clearQueuedMessages: () => void;
   setConversationId: (id: string | null) => void;
   refetchConversationHistory: () => void;
 }
@@ -22,6 +23,7 @@ const NOOP_ACTIONS: ConversationActions = {
   createConversationV2: async () => ({ conversation_id: '', message_id: '', status_message: '', title: '' }),
   stopConversation: async () => {},
   clearMessages: () => {},
+  clearQueuedMessages: () => {},
   setConversationId: () => {},
   refetchConversationHistory: () => {},
 };

@@ -124,7 +124,14 @@ export const ConnectedChatInput = ({
   const transcriptInsertionIndexRef = useRef(-1);
 
   const actions = useConversationActions();
-  const { isStreaming, isStopping, isAnalysing, conversationId: ctxConversationId, messages } = useConversationState();
+  const {
+    isStreaming,
+    isStopping,
+    isAnalysing,
+    conversationId: ctxConversationId,
+    messages,
+    queuedMessages,
+  } = useConversationState();
 
   const resolvedConversationId = conversationIdProp ?? ctxConversationId ?? '';
 
@@ -285,13 +292,35 @@ export const ConnectedChatInput = ({
     }
   }, [setValue, stopRecording, onRecordingError]);
 
+  const restoreQueuedIntoInput = useCallback(() => {
+    if (queuedMessages.length === 0) return;
+
+    const restoredText = queuedMessages
+      .map((m) => m.message_content?.text ?? '')
+      .filter(Boolean)
+      .join('\n\n');
+
+    if (restoredText) {
+      setValue((prev) => (prev.trim() ? `${prev}\n\n${restoredText}` : restoredText));
+    }
+
+    queuedMessages.forEach((m) => {
+      (m.message_content?.file_references ?? []).forEach((ref) => {
+        addFileReference({ path: ref.path, name: ref.name });
+      });
+    });
+
+    actions.clearQueuedMessages();
+  }, [queuedMessages, setValue, addFileReference, actions]);
+
   const handleStop = useCallback(async () => {
+    restoreQueuedIntoInput();
     try {
       await actions.stopConversation();
     } catch {
       toast.error('Failed to stop generation. Please try again.');
     }
-  }, [actions.stopConversation]);
+  }, [actions, restoreQueuedIntoInput]);
 
   useEffect(() => {
     if (setFirstMessage && defaultMessage) {
