@@ -1,46 +1,96 @@
 'use client';
 
-import { createContext, type ReactNode, useCallback, useContext, useMemo, useRef, useState } from 'react';
+import { createContext, Dispatch, FC, ReactElement, useCallback, useContext, useReducer, useRef } from 'react';
 
-interface FileTreeNavigationContextType {
-  revealedPath: string | null;
-  revealPathInTree: (path: string) => void;
-  registerRevealHandler: (handler: ((path: string) => void) | null) => void;
+type RevealHandler = (path: string) => void;
+
+enum fileTreeNavigationContextActions {
+  REVEAL_PATH = 'REVEAL_PATH',
 }
 
-const FileTreeNavigationContext = createContext<FileTreeNavigationContextType | null>(null);
+interface InitialStateType {
+  revealedPath: string | null;
+}
 
-export const FileTreeNavigationProvider = ({ children }: { children: ReactNode }) => {
-  const [revealedPath, setRevealedPath] = useState<string | null>(null);
-  const handlerRef = useRef<((path: string) => void) | null>(null);
+export interface ActionType {
+  type: keyof typeof fileTreeNavigationContextActions;
+  payload?: { revealedPath: string | null };
+}
 
-  const registerRevealHandler = useCallback((handler: ((path: string) => void) | null) => {
+const initialState: InitialStateType = {
+  revealedPath: null,
+};
+
+interface ContextValue {
+  state: InitialStateType;
+  dispatch: Dispatch<ActionType>;
+  registerRevealHandler: (handler: RevealHandler | null) => void;
+  revealPathInTree: (path: string) => void;
+}
+
+const context = createContext<ContextValue>({
+  state: initialState,
+  dispatch: () => null,
+  registerRevealHandler: () => null,
+  revealPathInTree: () => null,
+});
+
+const { Provider } = context;
+
+/* eslint-disable react/display-name */
+export const StateProvider: FC<{ children: ReactElement }> = ({ children }) => {
+  const handlerRef = useRef<RevealHandler | null>(null);
+
+  const [state, dispatch] = useReducer((state: InitialStateType, action: ActionType): InitialStateType => {
+    if (!action) {
+      return state;
+    }
+
+    switch (action.type) {
+      case fileTreeNavigationContextActions.REVEAL_PATH:
+        return { ...state, revealedPath: action?.payload?.revealedPath ?? null };
+
+      default:
+        return state;
+    }
+  }, initialState);
+
+  const registerRevealHandler = useCallback((handler: RevealHandler | null) => {
     handlerRef.current = handler;
   }, []);
 
   const revealPathInTree = useCallback((path: string) => {
-    setRevealedPath(path);
+    dispatch({ type: fileTreeNavigationContextActions.REVEAL_PATH, payload: { revealedPath: path } });
     handlerRef.current?.(path);
   }, []);
 
-  const value = useMemo(
-    () => ({
-      revealedPath,
-      revealPathInTree,
-      registerRevealHandler,
-    }),
-    [revealedPath, revealPathInTree, registerRevealHandler],
-  );
-
-  return <FileTreeNavigationContext.Provider value={value}>{children}</FileTreeNavigationContext.Provider>;
+  return <Provider value={{ state, dispatch, registerRevealHandler, revealPathInTree }}>{children}</Provider>;
 };
 
-export const useFileTreeNavigation = (): FileTreeNavigationContextType => {
-  const context = useContext(FileTreeNavigationContext);
+export const FileTreeNavigationProvider = StateProvider;
 
-  if (!context) {
+const withFileTreeNavigationContext = (WrappedComponent: FC<any>) => {
+  return (props: any) => (
+    <StateProvider>
+      <WrappedComponent {...props} />
+    </StateProvider>
+  );
+};
+
+const useFileTreeNavigationContextStore = () => useContext(context);
+
+export const useFileTreeNavigation = () => {
+  const store = useContext(context);
+
+  if (!store) {
     throw new Error('useFileTreeNavigation must be used within a FileTreeNavigationProvider');
   }
 
-  return context;
+  return {
+    revealedPath: store.state.revealedPath,
+    revealPathInTree: store.revealPathInTree,
+    registerRevealHandler: store.registerRevealHandler,
+  };
 };
+
+export { fileTreeNavigationContextActions, useFileTreeNavigationContextStore, withFileTreeNavigationContext };
