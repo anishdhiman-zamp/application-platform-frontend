@@ -25,6 +25,7 @@ import React, {
   useEffect,
   useMemo,
   useRef,
+  useState,
 } from 'react';
 
 import { useLazyGetSpeechToTextAccessTokenQuery } from '@/apis/voiceAgents';
@@ -124,7 +125,14 @@ export const ConnectedChatInput = ({
   const transcriptInsertionIndexRef = useRef(-1);
 
   const actions = useConversationActions();
-  const { isStreaming, isStopping, isAnalysing, conversationId: ctxConversationId, messages } = useConversationState();
+  const {
+    isStreaming,
+    isStopping,
+    isAnalysing,
+    conversationId: ctxConversationId,
+    messages,
+    queuedMessages,
+  } = useConversationState();
 
   const resolvedConversationId = conversationIdProp ?? ctxConversationId ?? '';
 
@@ -285,13 +293,48 @@ export const ConnectedChatInput = ({
     }
   }, [setValue, stopRecording, onRecordingError]);
 
+  const restoreQueuedIntoInput = useCallback(() => {
+    if (queuedMessages.length === 0) return;
+
+    const restoredText = queuedMessages
+      .map((m) => m.message_content?.text ?? '')
+      .filter(Boolean)
+      .join('\n\n');
+
+    if (restoredText) {
+      setValue((prev) => (prev.trim() ? `${prev}\n\n${restoredText}` : restoredText));
+    }
+
+    queuedMessages.forEach((m) => {
+      (m.message_content?.file_references ?? []).forEach((ref) => {
+        addFileReference({ path: ref.path, name: ref.name });
+      });
+    });
+
+    actions.clearQueuedMessages();
+  }, [queuedMessages, setValue, addFileReference, actions]);
+
+  const [pendingRestoreQueued, setPendingRestoreQueued] = useState(false);
+
   const handleStop = useCallback(async () => {
     try {
       await actions.stopConversation();
+      setPendingRestoreQueued(true);
     } catch {
       toast.error('Failed to stop generation. Please try again.');
     }
-  }, [actions.stopConversation]);
+  }, [actions]);
+
+  const handleMaybeRestoreQueued = useCallback(() => {
+    if (!pendingRestoreQueued) return;
+    if (isStreaming || isAnalysing) return;
+    restoreQueuedIntoInput();
+    setPendingRestoreQueued(false);
+  }, [pendingRestoreQueued, isStreaming, isAnalysing, restoreQueuedIntoInput]);
+
+  useEffect(() => {
+    handleMaybeRestoreQueued();
+  }, [handleMaybeRestoreQueued]);
 
   useEffect(() => {
     if (setFirstMessage && defaultMessage) {

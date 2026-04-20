@@ -251,6 +251,8 @@ export const ConversationProvider: React.FC<ConversationProviderProps> = ({
     isNewlyCreatedConversationRef.current = null;
   }, []);
 
+  const clearQueuedMessages = useCallback(() => setQueuedMessages([]), []);
+
   const stopConversation = useCallback(async () => {
     if (!_conversationId || isStopping) return;
 
@@ -419,6 +421,7 @@ export const ConversationProvider: React.FC<ConversationProviderProps> = ({
       createConversationV2,
       stopConversation,
       clearMessages,
+      clearQueuedMessages,
       setConversationId,
       refetchConversationHistory: safeRefetchConversationHistory,
     }),
@@ -427,6 +430,7 @@ export const ConversationProvider: React.FC<ConversationProviderProps> = ({
       createConversationV2,
       stopConversation,
       clearMessages,
+      clearQueuedMessages,
       setConversationId,
       safeRefetchConversationHistory,
     ],
