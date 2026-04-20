@@ -73,15 +73,8 @@ const ChatSidebarContent = ({
   const { inputValue, setInputValue } = useChatDraftInput({
     conversationId,
   });
-  const {
-    inputsRequired,
-    queuedMessages,
-    initiatedBy,
-    isLoadingConversationHistory,
-    isFetchingConversationHistory,
-    isStreaming,
-    isCreatingConversationV2,
-  } = useConversationState();
+  const { inputsRequired, queuedMessages, initiatedBy, isLoadingConversationHistory, isFetchingConversationHistory } =
+    useConversationState();
   const { refetchConversationHistory } = useConversationActions();
   const { sseEventBus } = useEventBus();
 
@@ -107,7 +100,7 @@ const ChatSidebarContent = ({
 
   const { isDragOver, dropZoneProps } = useFileDragDrop({
     onFileDrop: (files) => fileDropHandlerRef.current?.(files),
-    disabled: isStreaming || isCreatingConversationV2 || isViewer,
+    disabled: isViewer,
   });
 
   const modelSelectorSlot = useMemo(
