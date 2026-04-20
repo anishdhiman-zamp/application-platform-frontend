@@ -25,6 +25,7 @@ import React, {
   useEffect,
   useMemo,
   useRef,
+  useState,
 } from 'react';
 
 import { useLazyGetSpeechToTextAccessTokenQuery } from '@/apis/voiceAgents';
@@ -313,14 +314,27 @@ export const ConnectedChatInput = ({
     actions.clearQueuedMessages();
   }, [queuedMessages, setValue, addFileReference, actions]);
 
+  const [pendingRestoreQueued, setPendingRestoreQueued] = useState(false);
+
   const handleStop = useCallback(async () => {
-    restoreQueuedIntoInput();
     try {
       await actions.stopConversation();
+      setPendingRestoreQueued(true);
     } catch {
       toast.error('Failed to stop generation. Please try again.');
     }
-  }, [actions, restoreQueuedIntoInput]);
+  }, [actions]);
+
+  const handleMaybeRestoreQueued = useCallback(() => {
+    if (!pendingRestoreQueued) return;
+    if (isStreaming || isAnalysing) return;
+    restoreQueuedIntoInput();
+    setPendingRestoreQueued(false);
+  }, [pendingRestoreQueued, isStreaming, isAnalysing, restoreQueuedIntoInput]);
+
+  useEffect(() => {
+    handleMaybeRestoreQueued();
+  }, [handleMaybeRestoreQueued]);
 
   useEffect(() => {
     if (setFirstMessage && defaultMessage) {
