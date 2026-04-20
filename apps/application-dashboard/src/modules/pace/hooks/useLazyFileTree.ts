@@ -34,6 +34,8 @@ interface UseLazyFileTreeReturn {
   removeOptimistic: (path: string) => void;
   confirmAddition: (path: string) => void;
   confirmDeletion: (path: string) => void;
+  pruneServerFiles: (path: string) => void;
+  renameServerFiles: (oldPath: string, newPath: string) => void;
 }
 
 export const useLazyFileTree = ({
@@ -101,6 +103,61 @@ export const useLazyFileTree = ({
     });
   }, []);
 
+  const pruneServerFiles = useCallback((path: string) => {
+    setServerFiles((prevFiles) => prevFiles.filter((file) => file.path !== path && !file.path.startsWith(path + '/')));
+    setLoadedFolders((prevLoaded) => {
+      const nextLoaded = new Set<string>();
+      let changed = false;
+
+      for (const loadedPath of prevLoaded) {
+        if (loadedPath === path || loadedPath.startsWith(path + '/')) {
+          changed = true;
+        } else {
+          nextLoaded.add(loadedPath);
+        }
+      }
+
+      return changed ? nextLoaded : prevLoaded;
+    });
+  }, []);
+
+  const renameServerFiles = useCallback((oldPath: string, newPath: string) => {
+    setServerFiles((prevFiles) =>
+      prevFiles.map((file) => {
+        if (file.path === oldPath) {
+          const segments = newPath.split('/');
+
+          return { ...file, path: newPath, name: segments[segments.length - 1] ?? file.name };
+        }
+
+        if (file.path.startsWith(oldPath + '/')) {
+          return { ...file, path: newPath + file.path.slice(oldPath.length) };
+        }
+
+        return file;
+      }),
+    );
+
+    setLoadedFolders((prevLoaded) => {
+      const nextLoaded = new Set<string>();
+      let changed = false;
+
+      for (const loadedPath of prevLoaded) {
+        if (loadedPath === oldPath) {
+          nextLoaded.add(newPath);
+          changed = true;
+        } else if (loadedPath.startsWith(oldPath + '/')) {
+          nextLoaded.add(newPath + loadedPath.slice(oldPath.length));
+          changed = true;
+        } else {
+          nextLoaded.add(loadedPath);
+        }
+      }
+
+      return changed ? nextLoaded : prevLoaded;
+    });
+  }, []);
+
   const markLoadedFolders = useCallback((fetchedPath: string, fetchedFiles: FileItem[]) => {
     setLoadedFolders((prev) => {
       const next = new Set(prev);
@@ -126,20 +183,22 @@ export const useLazyFileTree = ({
 
   const loadFolder = useCallback(
     async (path: string, { silent = false }: { silent?: boolean } = {}): Promise<boolean> => {
-      if (loadingFoldersRef.current.has(path)) return false;
+      const normalizedPath = path === '/' ? '' : path;
+
+      if (loadingFoldersRef.current.has(normalizedPath)) return false;
 
       if (!silent) {
-        markFolderLoading(path, true);
+        markFolderLoading(normalizedPath, true);
       }
 
       try {
         const result = await trigger({
           depth: LAZY_FILE_TREE_FETCH_DEPTH,
-          path: path || undefined,
+          path: normalizedPath || undefined,
         }).unwrap();
 
-        mergeServerFiles(path, result.files);
-        markLoadedFolders(path, result.files);
+        mergeServerFiles(normalizedPath, result.files);
+        markLoadedFolders(normalizedPath, result.files);
         setIsError(false);
 
         return true;
@@ -149,7 +208,7 @@ export const useLazyFileTree = ({
         return false;
       } finally {
         if (!silent) {
-          markFolderLoading(path, false);
+          markFolderLoading(normalizedPath, false);
         }
       }
     },
@@ -463,5 +522,7 @@ export const useLazyFileTree = ({
     removeOptimistic,
     confirmAddition,
     confirmDeletion,
+    pruneServerFiles,
+    renameServerFiles,
   };
 };

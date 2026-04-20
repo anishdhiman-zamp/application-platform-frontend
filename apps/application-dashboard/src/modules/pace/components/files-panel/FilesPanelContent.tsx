@@ -15,13 +15,15 @@ import FileTree from '@/modules/pace/components/files/FileTree';
 import FilesPanelToolbar from '@/modules/pace/components/files-panel/FilesPanelToolbar';
 import { SEARCH_DEBOUNCE_MS } from '@/modules/pace/components/tasks/constants/tasks.constants';
 import { useFileUploadContext } from '@/modules/pace/context/FileUploadContext';
-import { TAB_TYPE } from '@/modules/pace/pace.types';
+import { usePaceContext } from '@/modules/pace/pace.context';
+import { CHAT_SIDEBAR_STATE, TAB_TYPE } from '@/modules/pace/pace.types';
 import { defaultFnType } from '@/types/commonTypes';
 
 const FilesPanelContent = () => {
   const collapseAllRef = useRef<defaultFnType | null>(null);
   const { uploadFiles, uploadFolder, uploadingItems, clearUploadingItems, registerLoadFolder } = useFileUploadContext();
   const { openTab } = useDynamicTabs({ type: TAB_TYPE.FILE });
+  const { chatSidebarState, setChatSidebarState } = usePaceContext();
 
   const [searchInput, setSearchInput] = useState('');
   const [debouncedSearchQuery, setDebouncedSearchQuery] = useState('');
@@ -42,6 +44,8 @@ const FilesPanelContent = () => {
     removeOptimistic,
     confirmAddition,
     confirmDeletion,
+    pruneServerFiles,
+    renameServerFiles,
   } = useLazyFileTree({ uploadingItems, searchQuery: debouncedSearchQuery });
 
   const toggleSortDirection = () => {
@@ -59,6 +63,9 @@ const FilesPanelContent = () => {
   const handleSelectFile = (file: FileItem | null) => {
     if (!file || file.type === FILE_TYPE.DIRECTORY) return;
 
+    if (chatSidebarState === CHAT_SIDEBAR_STATE.EXPANDED) {
+      setChatSidebarState(CHAT_SIDEBAR_STATE.SIDEBAR);
+    }
     openTab(file.path, file.name);
   };
 
@@ -116,6 +123,8 @@ const FilesPanelContent = () => {
         onConfirmAddition={confirmAddition}
         onConfirmDeletion={confirmDeletion}
         onLoadFolder={loadFolder}
+        onPruneServerFiles={pruneServerFiles}
+        onRenameServerFiles={renameServerFiles}
       >
         <CommonWrapper
           isLoading={isInitialLoading}

@@ -40,16 +40,20 @@ export function buildSubtreeFromFiles(files: FileItem[], rootPath: string): Tree
 
   const descendants = files.filter((f) => f.path.startsWith(prefix));
 
-  return buildFileTree(descendants);
+  return buildFileTree(descendants, rootPath);
 }
 
 /**
  * Builds a hierarchical tree structure from a flat array of files.
- * Files are grouped by their path segments.
+ * Files are grouped by their path segments. Orphan descendants (whose parent
+ * folder is missing from `files`) are dropped rather than surfaced at the root,
+ * so stale state cannot leak deeply-nested files into the top level.
+ * Pass `rootPath` to build a subtree whose roots are direct children of that path.
  */
-export function buildFileTree(files: FileItem[]): TreeNode[] {
+export function buildFileTree(files: FileItem[], rootPath = ''): TreeNode[] {
   const nodeMap = new Map<string, TreeNode>();
   const rootNodes: TreeNode[] = [];
+  const rootDepth = rootPath ? rootPath.split('/').length : 0;
 
   const sortedFiles = [...files].sort((a, b) => a.path.localeCompare(b.path));
 
@@ -64,20 +68,18 @@ export function buildFileTree(files: FileItem[]): TreeNode[] {
       children: file.type === FILE_TYPE.DIRECTORY ? [] : undefined,
     };
 
-    nodeMap.set(file.path, node);
-
     const pathParts = file.path.split('/');
 
-    if (pathParts.length === 1) {
+    if (pathParts.length === rootDepth + 1) {
+      nodeMap.set(file.path, node);
       rootNodes.push(node);
     } else {
       const parentPath = pathParts.slice(0, -1).join('/');
       const parentNode = nodeMap.get(parentPath);
 
       if (parentNode && parentNode.children) {
+        nodeMap.set(file.path, node);
         parentNode.children.push(node);
-      } else {
-        rootNodes.push(node);
       }
     }
   }
