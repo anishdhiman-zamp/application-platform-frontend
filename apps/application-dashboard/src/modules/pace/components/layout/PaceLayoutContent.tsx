@@ -50,6 +50,7 @@ const PaceLayoutContentInner: FC<PaceLayoutContentProps> = ({ children }) => {
           initial={false}
           animate={{ opacity: isExpanded ? 0 : 1 }}
           transition={isExpanded ? NO_ANIMATION : TAB_CHANGE_FADE}
+          style={{ willChange: 'opacity', transform: 'translateZ(0)' }}
           className={cn(
             'flex min-h-0 min-w-0 flex-1 flex-col',
             !isExpanded && !isCollapsed && !isSidebar && 'ml-2',
