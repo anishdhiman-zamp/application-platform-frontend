@@ -127,7 +127,8 @@ const ChatHomePage = () => {
   return (
     <ConversationStateContext.Provider value={STUB_CONVERSATION_STATE}>
       <ConversationActionsContext.Provider value={interceptedActions}>
-        <>
+        <div className='relative flex min-h-0 w-full flex-1 flex-col overflow-hidden' {...dropZoneProps}>
+          <DropOverlay isVisible={isDragOver} />
           <AnimatePresence>
             {!isExpanded && (
               <ChatActionsProvider onFileOpen={handleFileOpen}>
@@ -138,9 +139,7 @@ const ChatHomePage = () => {
                   exit={{ opacity: 0, transition: { duration: 0.25, ease: 'easeInOut' } }}
                   className='relative mx-auto flex min-h-0 w-full max-w-[700px] flex-1 flex-col items-center justify-start overflow-hidden pt-[22vh]'
                   style={{ willChange: 'opacity' }}
-                  {...dropZoneProps}
                 >
-                  <DropOverlay isVisible={isDragOver} />
                   <ChatHome />
                   <div className='mt-7 w-full shrink-0 px-3'>
                     <ConnectedChatInput
@@ -174,7 +173,7 @@ const ChatHomePage = () => {
               </ChatActionsProvider>
             )}
           </AnimatePresence>
-        </>
+        </div>
       </ConversationActionsContext.Provider>
     </ConversationStateContext.Provider>
   );
