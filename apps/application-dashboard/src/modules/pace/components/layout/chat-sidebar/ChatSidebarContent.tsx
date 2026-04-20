@@ -88,11 +88,6 @@ const ChatSidebarContent = ({
   const fileDropHandlerRef = useRef<((files: FileList) => void) | null>(null);
   const addFileReferenceRef = useRef<((ref: { path: string; name: string }) => void) | null>(null);
 
-  const { isDragOver, dropZoneProps } = useFileDragDrop({
-    onFileDrop: (files) => fileDropHandlerRef.current?.(files),
-    disabled: isStreaming || isCreatingConversationV2,
-  });
-
   const [isTaskPopoverOpen, setIsTaskPopoverOpen] = useState(false);
   const [isConversationNotFound, setIsConversationNotFound] = useState(false);
 
@@ -109,6 +104,11 @@ const ChatSidebarContent = ({
     Boolean(conversationId) &&
     checkUserPrivilege(CONVERSATION_ACCESS_PRIVILEGES.VIEWER) &&
     !checkUserPrivilege(PERMISSION_ROLES.ADMIN);
+
+  const { isDragOver, dropZoneProps } = useFileDragDrop({
+    onFileDrop: (files) => fileDropHandlerRef.current?.(files),
+    disabled: isStreaming || isCreatingConversationV2 || isViewer,
+  });
 
   const modelSelectorSlot = useMemo(
     () => <ModelSelector value={selectedModel} onChange={setSelectedModel} />,
