@@ -1,45 +1,29 @@
 'use client';
 
 import { cn } from '@zamp-platform/ui/utils';
-import { Check, Loader2, PenLine } from 'lucide-react';
-import React, { useCallback, useEffect, useRef } from 'react';
+import { useCallback, useEffect, useRef } from 'react';
 
 import { type ChatComposerFileRef, ChatComposerInput, type ChatComposerInputHandle } from './ChatComposerInput';
+import { CUSTOM_OPTION_ID } from './constants';
+import { CustomInputIcon } from './CustomInputIcon';
+import { HITLQuestionsContextActions, useHITLQuestionsContext } from './HITLQuestionsContext';
+import { useHITLQuestions } from './useHITLQuestions';
+import { isMultipleChoiceQuestion, optionCountForQuestion } from './utils';
 
-export interface CustomInputRowProps {
-  isFocused: boolean;
-  isSelected: boolean;
-  isMultiSelect: boolean;
-  isSubmitting?: boolean;
-  value: string;
-  onClick: () => void;
-  onChange: (value: string) => void;
-  onFileReferencesChange?: (refs: ChatComposerFileRef[]) => void;
-  username?: string;
-}
+export const CustomInputRow = () => {
+  const { state, username, dispatch } = useHITLQuestionsContext();
+  const { isSingleSelectOnly, handleCustomInputChange, handleFileReferencesChange } = useHITLQuestions();
+  const { currentQuestion, focusedOptionIndex, answers, customInputs, submittingOptionId } = state;
 
-export const CustomInputRow: React.FC<CustomInputRowProps> = ({
-  isFocused,
-  isSelected,
-  isMultiSelect,
-  isSubmitting,
-  value,
-  onClick,
-  onChange,
-  onFileReferencesChange,
-  username,
-}) => {
+  const optionCount = optionCountForQuestion(currentQuestion);
+  const isMultiSelect = isMultipleChoiceQuestion(currentQuestion);
+  const selectedOptionIds = answers[currentQuestion.id]?.optionIds ?? [];
+  const isFocused = focusedOptionIndex === optionCount - 1;
+  const isSelected = selectedOptionIds.includes(CUSTOM_OPTION_ID);
+  const isSubmitting = isSingleSelectOnly ? submittingOptionId === CUSTOM_OPTION_ID : false;
+  const value = customInputs[currentQuestion.id] || '';
+
   const composerRef = useRef<ChatComposerInputHandle>(null);
-
-  const renderIcon = () => {
-    if (isSelected && isSubmitting) {
-      return <Loader2 className='text-BG_WHITE animate-spin' size={12} />;
-    }
-    if (isMultiSelect && isSelected) {
-      return <Check className='text-BG_WHITE' size={12} strokeWidth={2} />;
-    }
-    return <PenLine className={cn(isSelected ? 'text-BG_WHITE' : 'text-GRAY_950')} size={12} strokeWidth={1} />;
-  };
 
   const scheduleFocus = useCallback(() => {
     const rafId = requestAnimationFrame(() => {
@@ -53,11 +37,20 @@ export const CustomInputRow: React.FC<CustomInputRowProps> = ({
     return scheduleFocus();
   }, [isFocused, scheduleFocus]);
 
+  const handleFileRefs = useCallback(
+    (refs: ChatComposerFileRef[]) => {
+      handleFileReferencesChange(currentQuestion.id, refs);
+    },
+    [handleFileReferencesChange, currentQuestion.id],
+  );
+
   return (
     <div
       data-hitl-focused={isFocused || undefined}
       className={cn('w-full shrink-0 cursor-pointer rounded-[10px] transition-colors duration-200', 'hover:bg-GRAY_20')}
-      onClick={onClick}
+      onClick={() =>
+        dispatch({ type: HITLQuestionsContextActions.SET_FOCUSED_OPTION_INDEX, payload: { index: optionCount - 1 } })
+      }
     >
       <div className='flex w-full items-start px-3 py-2.5'>
         <div className='flex min-w-px flex-1 items-start gap-2.5'>
@@ -67,15 +60,19 @@ export const CustomInputRow: React.FC<CustomInputRowProps> = ({
               isSelected ? 'bg-GRAY_1000' : 'bg-GRAY_50',
             )}
           >
-            {renderIcon()}
+            <CustomInputIcon
+              isSelected={isSelected}
+              isMultiSelect={isMultiSelect ?? false}
+              isSubmitting={isSubmitting}
+            />
           </div>
 
           <div className='flex-1 cursor-text' onClick={(e) => e.stopPropagation()}>
             <ChatComposerInput
               ref={composerRef}
               value={value}
-              onChange={onChange}
-              onFileReferencesChange={onFileReferencesChange ?? (() => {})}
+              onChange={(text) => handleCustomInputChange(currentQuestion.id, text)}
+              onFileReferencesChange={handleFileRefs}
               placeholder='Type something else...'
               className='bg-BG_WHITE rounded-xl'
               username={username}

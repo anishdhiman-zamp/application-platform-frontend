@@ -1,5 +1,3 @@
-import type { Dispatch, SetStateAction } from 'react';
-
 import { HITL_INPUT_TYPE, HITL_INPUT_TYPE_LEGACY, HITL_RESPONSE_TYPE } from '../../../types/block.types';
 import type { HITLResponse, HITLResponseItem } from '../../../types/chat.types';
 import type { ChatComposerFileRef } from './ChatComposerInput';
@@ -107,46 +105,11 @@ export const isQuestionAnswerComplete = (
 };
 
 /**
- * Appends a printable character to the custom text input for a question and
- * ensures the CUSTOM_OPTION_ID is selected in the answer state.
- *
- * @param question - The HITL question whose custom input is being updated.
- * @param char - The printable character to append.
- * @param setCustomInputs - State setter for the raw custom input strings map.
- * @param setAnswers - State setter for the full answers state map.
+ * @param index - Zero-based option index.
+ * @returns A–Z for the first 26 options, then numeric labels.
  */
-export const appendPrintableToCustomInput = (
-  question: HITLQuestionWithEntity,
-  char: string,
-  setCustomInputs: Dispatch<SetStateAction<Record<string, string>>>,
-  setAnswers: Dispatch<SetStateAction<HITLAnswersState>>,
-): void => {
-  const questionId = question.id;
-  const isMulti = isMultipleChoiceQuestion(question);
-
-  setAnswers((prev) => {
-    const current = prev[questionId] ?? { optionIds: [], customText: '' };
-    const newText = (current.customText ?? '') + char;
-    const baseOptionIds = isMulti ? current.optionIds : [];
-    const optionIds = baseOptionIds.includes(CUSTOM_OPTION_ID) ? baseOptionIds : [...baseOptionIds, CUSTOM_OPTION_ID];
-    return { ...prev, [questionId]: { optionIds, customText: newText, isSkipped: false } };
-  });
-
-  setCustomInputs((prev) => ({ ...prev, [questionId]: (prev[questionId] ?? '') + char }));
-};
-
-/**
- * @param questions - List of HITL questions to mark as skipped.
- * @param prev - The existing answers state to merge into.
- * @returns A new answers state with all questions marked as skipped.
- */
-export const buildSkippedAnswers = (questions: HITLQuestionWithEntity[], prev: HITLAnswersState): HITLAnswersState => {
-  const skipped: HITLAnswersState = { ...prev };
-  for (const q of questions) {
-    skipped[q.id] = { optionIds: [], customText: '', isSkipped: true };
-  }
-  return skipped;
-};
+export const getSingleSelectBadge = (index: number): string =>
+  index < 26 ? String.fromCharCode(65 + index) : String(index + 1);
 
 const buildSkippedResponse = (question: HITLQuestionWithEntity): HITLResponse => {
   if (isTextQuestion(question)) {

@@ -5,35 +5,27 @@ import { ArrowLeft, ArrowRight, ArrowUpRight, X } from 'lucide-react';
 
 import { TaskStatusIcon } from '../../../..';
 import { TASK_STATUS } from '../../../types/block.types';
+import { useHITLQuestionsContext } from './HITLQuestionsContext';
+import { useHITLQuestions } from './useHITLQuestions';
 
-export interface HITLQuestionsHeaderProps {
-  questionCount: number;
-  currentQuestionIndex: number;
-  title?: string;
-  onTitleClick?: () => void;
-  onPrev: () => void;
-  onNext: () => void;
-  onDismiss: () => void;
-}
+export const HITLQuestionsHeader = () => {
+  const {
+    state: { currentQuestionIndex },
+    questions,
+  } = useHITLQuestionsContext();
+  const { title, navigateToQuestion, handleDismiss, handleTitleClick } = useHITLQuestions();
 
-export const HITLQuestionsHeader = ({
-  questionCount,
-  currentQuestionIndex,
-  title,
-  onTitleClick,
-  onPrev,
-  onNext,
-  onDismiss,
-}: HITLQuestionsHeaderProps) => {
+  const questionCount = questions.length;
+
   return (
-    <div className='relative z-[2] w-full shrink-0'>
+    <div className='relative z-2 w-full shrink-0'>
       <div className='flex w-full items-center justify-between px-2.5 py-2'>
         <div className='flex min-w-0 items-center gap-1.5 overflow-hidden'>
           <TaskStatusIcon status={TASK_STATUS.NEEDS_INPUT} />
           {title ? (
             <button
               type='button'
-              onClick={onTitleClick}
+              onClick={handleTitleClick}
               className='group flex min-w-0 cursor-pointer items-center gap-1 text-left'
             >
               <span className='f-12-450 text-GRAY_900 group-hover:text-GRAY_1000 truncate transition-colors'>
@@ -57,7 +49,7 @@ export const HITLQuestionsHeader = ({
                 size='xxsmall'
                 className='shrink-0 disabled:opacity-50'
                 disabled={currentQuestionIndex === 0}
-                onClick={onPrev}
+                onClick={() => navigateToQuestion(currentQuestionIndex - 1, 'prev')}
                 aria-label='Previous question'
                 testId='hitl-questions-header-prev'
               >
@@ -72,7 +64,7 @@ export const HITLQuestionsHeader = ({
                 size='xxsmall'
                 className='shrink-0 disabled:opacity-30'
                 disabled={currentQuestionIndex === questionCount - 1}
-                onClick={onNext}
+                onClick={() => navigateToQuestion(currentQuestionIndex + 1, 'next')}
                 aria-label='Next question'
                 testId='hitl-questions-header-next'
               >
@@ -88,7 +80,7 @@ export const HITLQuestionsHeader = ({
                   variant='ghost'
                   size='xxsmall'
                   className='shrink-0'
-                  onClick={onDismiss}
+                  onClick={handleDismiss}
                   aria-label='Dismiss'
                   testId='hitl-questions-header-dismiss'
                 >
