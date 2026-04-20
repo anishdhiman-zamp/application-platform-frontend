@@ -74,13 +74,11 @@ const FileTreeContent = ({
   const sortedRawTree = useMemo(() => sortTreeNodes(rawTree, sortBy, sortDirection), [rawTree, sortBy, sortDirection]);
   const originalNodeMap = useMemo(() => buildNodeMap(sortedRawTree), [sortedRawTree]);
 
-  const treeData = sortedRawTree;
-
-  const flatNodes = useMemo(() => flattenTree(treeData, expandedPaths), [treeData, expandedPaths]);
+  const flatNodes = useMemo(() => flattenTree(sortedRawTree, expandedPaths), [sortedRawTree, expandedPaths]);
   const flatNodesRef = useRef(flatNodes);
 
   flatNodesRef.current = flatNodes;
-  const rootSiblingNames = useMemo(() => treeData.map((node) => node.name), [treeData]);
+  const rootSiblingNames = useMemo(() => sortedRawTree.map((node) => node.name), [sortedRawTree]);
 
   const virtualizer = useVirtualizer({
     count: flatNodes.length,
@@ -269,7 +267,7 @@ const FileTreeContent = ({
     return <FileTreeEmptyState />;
   }
 
-  if (!isServerSearch && treeData?.length === 0 && searchQuery) {
+  if (!isServerSearch && sortedRawTree.length === 0 && searchQuery) {
     return <FileTreeEmptyState />;
   }
 
@@ -319,7 +317,7 @@ const FileTreeContent = ({
             }}
           >
             <StickyNestedTree
-              treeData={treeData}
+              treeData={sortedRawTree}
               expandedPaths={expandedPaths}
               selectedPath={selectedPath}
               originalNodeMap={originalNodeMap}

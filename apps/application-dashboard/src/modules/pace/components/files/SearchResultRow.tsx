@@ -30,8 +30,6 @@ interface SearchResultRowProps {
   onSelect: (path: string) => void;
 }
 
-const MENU_CONTENT_CLASS = 'flex min-w-[180px] flex-col gap-y-[2px]';
-
 const PathBreadcrumb = ({ path }: { path: string }) => {
   const parentPath = getParentPath(path);
   const hasParent = parentPath && parentPath !== '/';
@@ -49,6 +47,58 @@ const PathBreadcrumb = ({ path }: { path: string }) => {
       ))}
     </div>
   );
+};
+
+interface LeadingSlotProps {
+  isFolder: boolean;
+  isExpanded: boolean;
+  isLoadingChildren: boolean;
+  onChevronClick: (e: React.MouseEvent) => void;
+}
+
+const LeadingSlot = ({ isFolder, isExpanded, isLoadingChildren, onChevronClick }: LeadingSlotProps) => {
+  if (!isFolder) return <span className='size-4 shrink-0' />;
+
+  if (isLoadingChildren) {
+    return (
+      <span className='flex size-4 shrink-0 items-center justify-center'>
+        <Loader className='text-GRAY_600 size-3 animate-spin' />
+      </span>
+    );
+  }
+
+  return (
+    <Button
+      variant='ghost'
+      size='xxsmall'
+      onClick={onChevronClick}
+      className='size-4 shrink-0 p-0! hover:bg-transparent'
+      aria-label={isExpanded ? 'Collapse folder' : 'Expand folder'}
+    >
+      <ChevronRight
+        className={cn(
+          'text-GRAY_700 group-hover:text-GRAY_1000 size-3.5 transition-transform duration-100',
+          isExpanded && 'rotate-90',
+        )}
+      />
+    </Button>
+  );
+};
+
+interface NodeIconProps {
+  isFolder: boolean;
+  isExpanded: boolean;
+  extension: string;
+}
+
+const NodeIcon = ({ isFolder, isExpanded, extension }: NodeIconProps) => {
+  if (!isFolder) {
+    return <FileIcon extension={extension || 'txt'} className='size-5 rounded-sm' iconClassName='size-4' />;
+  }
+
+  const FolderIconComponent = isExpanded ? FolderOpenedIcon : FolderClosedIcon;
+
+  return <FolderIconComponent size={16} weight='fill' className='text-BLUE_600 shrink-0 dark:opacity-70' />;
 };
 
 const SearchResultRow = forwardRef<HTMLDivElement, SearchResultRowProps>(
@@ -103,41 +153,13 @@ const SearchResultRow = forwardRef<HTMLDivElement, SearchResultRowProps>(
         )}
       >
         <div className='flex items-center gap-1'>
-          {isFolder ? (
-            isLoadingChildren ? (
-              <span className='flex size-4 shrink-0 items-center justify-center'>
-                <Loader className='text-GRAY_600 size-3 animate-spin' />
-              </span>
-            ) : (
-              <Button
-                variant='ghost'
-                size='xxsmall'
-                onClick={handleChevronClick}
-                className='size-4 shrink-0 p-0! hover:bg-transparent'
-                aria-label={isExpanded ? 'Collapse folder' : 'Expand folder'}
-              >
-                <ChevronRight
-                  className={cn(
-                    'text-GRAY_700 group-hover:text-GRAY_1000 size-3.5 transition-transform duration-100',
-                    isExpanded && 'rotate-90',
-                  )}
-                />
-              </Button>
-            )
-          ) : (
-            <span className='size-4 shrink-0' />
-          )}
-
-          {isFolder ? (
-            isExpanded ? (
-              <FolderOpenedIcon size={16} weight='fill' className='text-BLUE_600 shrink-0 dark:opacity-70' />
-            ) : (
-              <FolderClosedIcon size={16} weight='fill' className='text-BLUE_600 shrink-0 dark:opacity-70' />
-            )
-          ) : (
-            <FileIcon extension={extension || 'txt'} className='size-5 rounded-sm' iconClassName='size-4' />
-          )}
-
+          <LeadingSlot
+            isFolder={isFolder}
+            isExpanded={isExpanded}
+            isLoadingChildren={isLoadingChildren}
+            onChevronClick={handleChevronClick}
+          />
+          <NodeIcon isFolder={isFolder} isExpanded={isExpanded} extension={extension} />
           <span className='f-13-450 text-GRAY_1000 min-w-0 truncate select-none'>
             {renderHighlightedName(node.name, searchHighlight)}
           </span>
@@ -154,7 +176,7 @@ const SearchResultRow = forwardRef<HTMLDivElement, SearchResultRowProps>(
     return (
       <ContextMenu>
         <ContextMenuTrigger asChild>{row}</ContextMenuTrigger>
-        <ContextMenuContent className={MENU_CONTENT_CLASS}>
+        <ContextMenuContent className='flex min-w-[180px] flex-col gap-y-[2px]'>
           {actions!.map((action) => (
             <ContextMenuItem
               key={action.id}
