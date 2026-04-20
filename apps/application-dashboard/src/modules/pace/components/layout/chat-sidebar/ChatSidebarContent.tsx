@@ -3,11 +3,13 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import {
   ChatActionsProvider,
+  DropOverlay,
   HITLEntityType,
   HITLQuestionsBlock,
   QueuedMessages,
   ResourceType,
   ScopeType,
+  useFileDragDrop,
 } from '@zamp-platform/chat';
 import { ConnectedChatInput, useConversationActions, useConversationState } from '@zamp-platform/conversation-stream';
 import { cn } from '@zamp-platform/ui/utils';
@@ -71,8 +73,15 @@ const ChatSidebarContent = ({
   const { inputValue, setInputValue } = useChatDraftInput({
     conversationId,
   });
-  const { inputsRequired, queuedMessages, initiatedBy, isLoadingConversationHistory, isFetchingConversationHistory } =
-    useConversationState();
+  const {
+    inputsRequired,
+    queuedMessages,
+    initiatedBy,
+    isLoadingConversationHistory,
+    isFetchingConversationHistory,
+    isStreaming,
+    isCreatingConversationV2,
+  } = useConversationState();
   const { refetchConversationHistory } = useConversationActions();
   const { sseEventBus } = useEventBus();
 
@@ -95,6 +104,11 @@ const ChatSidebarContent = ({
     Boolean(conversationId) &&
     checkUserPrivilege(CONVERSATION_ACCESS_PRIVILEGES.VIEWER) &&
     !checkUserPrivilege(PERMISSION_ROLES.ADMIN);
+
+  const { isDragOver, dropZoneProps } = useFileDragDrop({
+    onFileDrop: (files) => fileDropHandlerRef.current?.(files),
+    disabled: isStreaming || isCreatingConversationV2 || isViewer,
+  });
 
   const modelSelectorSlot = useMemo(
     () => <ModelSelector value={selectedModel} onChange={setSelectedModel} />,
@@ -251,7 +265,8 @@ const ChatSidebarContent = ({
   };
 
   return (
-    <div className='bg-BG_WHITE relative mx-auto flex h-full w-full flex-1 flex-col'>
+    <div className='bg-BG_WHITE relative mx-auto flex h-full w-full flex-1 flex-col' {...dropZoneProps}>
+      <DropOverlay isVisible={isDragOver} />
       <div className={cn('transition-[filter] duration-200', isTaskPopoverOpen && 'pointer-events-none blur-sm')}>
         <ChatTopbar
           title={chatTitle || 'Start a new chat'}
@@ -273,7 +288,6 @@ const ChatSidebarContent = ({
         onBrowserStreamingEnd={handleBrowserStreamingEnd}
         onTaskPopoverOpenChange={setIsTaskPopoverOpen}
         onConversationNotFound={setIsConversationNotFound}
-        fileDropHandlerRef={fileDropHandlerRef}
         addFileReferenceRef={addFileReferenceRef}
         currentUserName={currentUserName}
       />

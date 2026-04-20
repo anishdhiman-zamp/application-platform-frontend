@@ -313,22 +313,27 @@ export const PaceProvider = ({ children }: { children: ReactNode }) => {
     [pathname, activeTabId, setChatSidebarStateInternal],
   );
 
-  const reconcileSidebarWithRoute = useCallback(() => {
-    const hasSidebarConversation = new URLSearchParams(window.location.search).has(SIDEBAR_CONVERSATION_ID_PARAM);
-    const isChatRoot = pathname === ROUTES_PATH.CHAT && !activeTabId;
+  const reconcileSidebarWithRoute = useCallback(
+    (isTabIdHydration: boolean) => {
+      const hasSidebarConversation = new URLSearchParams(window.location.search).has(SIDEBAR_CONVERSATION_ID_PARAM);
+      const isChatRoot = pathname === ROUTES_PATH.CHAT && !activeTabId;
 
-    if (isChatRoot && hasSidebarConversation) {
-      if (chatSidebarStateRef.current !== CHAT_SIDEBAR_STATE.EXPANDED) {
-        setChatSidebarStateInternal(CHAT_SIDEBAR_STATE.EXPANDED);
+      if (isChatRoot && hasSidebarConversation) {
+        if (chatSidebarStateRef.current !== CHAT_SIDEBAR_STATE.EXPANDED) {
+          setChatSidebarStateInternal(CHAT_SIDEBAR_STATE.EXPANDED);
+        }
+
+        return;
       }
 
-      return;
-    }
+      if (isTabIdHydration) return;
 
-    if (chatSidebarStateRef.current === CHAT_SIDEBAR_STATE.EXPANDED) {
-      setChatSidebarStateInternal(CHAT_SIDEBAR_STATE.SIDEBAR);
-    }
-  }, [pathname, activeTabId, setChatSidebarStateInternal]);
+      if (chatSidebarStateRef.current === CHAT_SIDEBAR_STATE.EXPANDED) {
+        setChatSidebarStateInternal(CHAT_SIDEBAR_STATE.SIDEBAR);
+      }
+    },
+    [pathname, activeTabId, setChatSidebarStateInternal],
+  );
 
   const handleRouteChange = useCallback(() => {
     if (prevRouteSignatureRef.current === routeSignature) {
@@ -346,6 +351,7 @@ export const PaceProvider = ({ children }: { children: ReactNode }) => {
     prevActiveTabIdRef.current = activeTabId;
 
     const isTabIdOnlyChange = prevPathname === pathname && prevActiveTab !== activeTabId;
+    const isTabIdHydration = isTabIdOnlyChange && prevActiveTab === null && activeTabId !== null;
 
     if (pendingCollapseRef.current) {
       handlePendingCollapse(isTabIdOnlyChange);
@@ -353,7 +359,7 @@ export const PaceProvider = ({ children }: { children: ReactNode }) => {
       return;
     }
 
-    reconcileSidebarWithRoute();
+    reconcileSidebarWithRoute(isTabIdHydration);
   }, [routeSignature, pathname, activeTabId, handlePendingCollapse, reconcileSidebarWithRoute]);
 
   useEffect(() => {
