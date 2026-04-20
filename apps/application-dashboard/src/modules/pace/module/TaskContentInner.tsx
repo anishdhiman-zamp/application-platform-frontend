@@ -38,18 +38,6 @@ import CommonWrapper from '@/components/commonWrapper';
 import { SkeletonTypes } from '@/components/commonWrapper/commonWrapper.types';
 import { TASK_QUERY_PARAMS } from '@/constants/routeConfig';
 import { useAppSelector } from '@/hooks/toolkit';
-import ResizableSummaryBox from '@/modules/pace/components/chat/ResizableSummaryBox';
-import {
-  resolveMessageStepGroupSections,
-  stepGroupsLegacyToSections,
-} from '@/modules/pace/components/chat/step-groups.utils';
-import StepGroupsSummaryView from '@/modules/pace/components/chat/StepGroupsSummaryView';
-import { TaskChatExpandedStepsFooter } from '@/modules/pace/components/chat/TaskChatExpandedStepsFooter';
-import { TaskChatStepMessage } from '@/modules/pace/components/chat/TaskChatStepMessage';
-import { TaskChatStepsToggleHeader } from '@/modules/pace/components/chat/TaskChatStepsToggleHeader';
-import { TaskChatTitleHeader } from '@/modules/pace/components/chat/TaskChatTitleHeader';
-import TaskNavigation from '@/modules/pace/components/chat/TaskNavigation';
-import TaskTopbar from '@/modules/pace/components/chat/TaskTopbar';
 import ContentErrorState from '@/modules/pace/components/ContentErrorState';
 import { getActiveTabIdFromUrl } from '@/modules/pace/components/dynamic-tabs/tab-type-registry';
 import TaskContentSkeleton from '@/modules/pace/components/loaders/TaskContentSkeleton';
@@ -62,6 +50,15 @@ import {
   getStepCount,
 } from '@/modules/pace/components/tasks/utils/tasks.utils';
 import { useHitlQuestions } from '@/modules/pace/hooks/useHitlQuestions';
+import ResizableSummaryBox from '@/modules/pace/module/ResizableSummaryBox';
+import { resolveMessageStepGroupSections, stepGroupsLegacyToSections } from '@/modules/pace/module/step-groups.utils';
+import StepGroupsSummaryView from '@/modules/pace/module/StepGroupsSummaryView';
+import { TaskChatExpandedStepsFooter } from '@/modules/pace/module/TaskChatExpandedStepsFooter';
+import { TaskChatStepMessage } from '@/modules/pace/module/TaskChatStepMessage';
+import { TaskChatStepsToggleHeader } from '@/modules/pace/module/TaskChatStepsToggleHeader';
+import { TaskChatTitleHeader } from '@/modules/pace/module/TaskChatTitleHeader';
+import TaskNavigation from '@/modules/pace/module/TaskNavigation';
+import TaskTopbar from '@/modules/pace/module/TaskTopbar';
 import { BrowserViewerDisplayState } from '@/modules/pace/pace.constants';
 import type { RootState } from '@/store';
 
