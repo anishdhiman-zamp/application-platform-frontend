@@ -25,11 +25,12 @@ const PaceLayout: FC<PaceLayoutProps> = ({ children }) => {
     isFilesystemStatusLoading,
     isFilesystemError,
     refetch: refetchStatus,
-  } = useFilesystemStatus();
+  } = useFilesystemStatus({ enabled: isPaceChatEnabled });
 
   useDataPrefetch();
 
-  const isPageLoading = isLoading || isFilesystemStatusLoading || (!isFilesystemActive && !isFilesystemError);
+  const isFilesystemLoading = isFilesystemStatusLoading || (!isFilesystemActive && !isFilesystemError);
+  const isPageLoading = isLoading || (isPaceChatEnabled && isFilesystemLoading);
 
   return (
     <CommonWrapper

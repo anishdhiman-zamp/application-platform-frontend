@@ -1,4 +1,4 @@
-import { useGetConversationHistoryQuery, useListChatModelsQuery, useListSkillsQuery } from '@/apis/pace';
+import { useGetConversationHistoryQuery, useListChatModelsQuery } from '@/apis/pace';
 import { useIsPaceChatEnabled } from '@/hooks/useIsPaceChatEnabled';
 import { ResourceType } from '@/types/api/policies.types';
 import { getFromLocalStorage, LOCAL_STORAGE_KEYS } from '@/utils/localstorage';
@@ -14,19 +14,11 @@ const useDataPrefetch = () => {
       resourceType: ResourceType.ORGANIZATION,
       resourceId: organizationId,
       page: 1,
-      limit: 20,
+      limit: 30,
     },
     {
       skip: shouldSkip,
       refetchOnMountOrArgChange: false,
-    },
-  );
-
-  useListSkillsQuery(
-    {},
-    {
-      refetchOnMountOrArgChange: false,
-      skip: shouldSkip,
     },
   );
 

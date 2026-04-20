@@ -9,6 +9,8 @@ interface LazyFileTreeContextValue {
   confirmAddition: (path: string) => void;
   confirmDeletion: (path: string) => void;
   loadFolder: (path: string, options?: { silent?: boolean }) => Promise<boolean>;
+  pruneServerFiles: (path: string) => void;
+  renameServerFiles: (oldPath: string, newPath: string) => void;
 }
 
 const LazyFileTreeContext = createContext<LazyFileTreeContextValue | null>(null);
@@ -20,6 +22,8 @@ interface LazyFileTreeProviderProps {
   onConfirmAddition: (path: string) => void;
   onConfirmDeletion: (path: string) => void;
   onLoadFolder: (path: string, options?: { silent?: boolean }) => Promise<boolean>;
+  onPruneServerFiles: (path: string) => void;
+  onRenameServerFiles: (oldPath: string, newPath: string) => void;
 }
 
 export const LazyFileTreeProvider = ({
@@ -29,6 +33,8 @@ export const LazyFileTreeProvider = ({
   onConfirmAddition,
   onConfirmDeletion,
   onLoadFolder,
+  onPruneServerFiles,
+  onRenameServerFiles,
 }: LazyFileTreeProviderProps) => {
   const value = useMemo<LazyFileTreeContextValue>(
     () => ({
@@ -37,8 +43,18 @@ export const LazyFileTreeProvider = ({
       confirmAddition: onConfirmAddition,
       confirmDeletion: onConfirmDeletion,
       loadFolder: onLoadFolder,
+      pruneServerFiles: onPruneServerFiles,
+      renameServerFiles: onRenameServerFiles,
     }),
-    [onAddOptimistic, onRemoveOptimistic, onConfirmAddition, onConfirmDeletion, onLoadFolder],
+    [
+      onAddOptimistic,
+      onRemoveOptimistic,
+      onConfirmAddition,
+      onConfirmDeletion,
+      onLoadFolder,
+      onPruneServerFiles,
+      onRenameServerFiles,
+    ],
   );
 
   return <LazyFileTreeContext.Provider value={value}>{children}</LazyFileTreeContext.Provider>;

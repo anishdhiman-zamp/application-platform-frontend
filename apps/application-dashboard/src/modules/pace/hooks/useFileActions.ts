@@ -136,6 +136,7 @@ export const useFileActions = (): UseFileActionsReturn => {
 
       try {
         await deleteFile({ path }).unwrap();
+        lazyTree?.pruneServerFiles(path);
         const parentPath = getParentPath(path);
 
         lazyTree?.loadFolder(parentPath, { silent: true }).then((success) => {
@@ -184,6 +185,7 @@ export const useFileActions = (): UseFileActionsReturn => {
 
       try {
         await moveFile({ source: oldPath, destination }).unwrap();
+        lazyTree?.renameServerFiles(oldPath, destination);
         lazyTree?.loadFolder(parentPath, { silent: true }).then((success) => {
           if (success) {
             lazyTree?.confirmDeletion(oldPath);
@@ -221,6 +223,7 @@ export const useFileActions = (): UseFileActionsReturn => {
 
       try {
         await moveFile({ source: sourcePath, destination: destinationPath }).unwrap();
+        lazyTree?.renameServerFiles(sourcePath, destinationPath);
         Promise.all([
           lazyTree?.loadFolder(sourceParent, { silent: true }),
           lazyTree?.loadFolder(destParent, { silent: true }),

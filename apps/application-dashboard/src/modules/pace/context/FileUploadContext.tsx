@@ -35,7 +35,7 @@ interface FileUploadContextValue {
   uploadingPath: string | null;
   uploadingItems: FileItem[];
   uploadingPaths: Set<string>;
-  registerLoadFolder: (fn: (path: string) => Promise<boolean>) => void;
+  registerLoadFolder: (fn: (path: string, options?: { silent?: boolean }) => Promise<boolean>) => void;
 }
 
 const FileUploadContext = createContext<FileUploadContextValue | null>(null);
@@ -45,15 +45,15 @@ interface FileUploadProviderProps {
 }
 
 export const FileUploadProvider = ({ children }: FileUploadProviderProps) => {
-  const loadFolderRef = useRef<((path: string) => Promise<boolean>) | null>(null);
+  const loadFolderRef = useRef<((path: string, options?: { silent?: boolean }) => Promise<boolean>) | null>(null);
 
   const onUploadComplete = useCallback(async (targetPath: string) => {
     if (loadFolderRef.current) {
-      await loadFolderRef.current(targetPath);
+      await loadFolderRef.current(targetPath, { silent: true });
     }
   }, []);
 
-  const registerLoadFolder = useCallback((fn: (path: string) => Promise<boolean>) => {
+  const registerLoadFolder = useCallback((fn: (path: string, options?: { silent?: boolean }) => Promise<boolean>) => {
     loadFolderRef.current = fn;
   }, []);
 

@@ -56,6 +56,8 @@ const FilesHierarchy = ({
     removeOptimistic,
     confirmAddition,
     confirmDeletion,
+    pruneServerFiles,
+    renameServerFiles,
   } = useLazyFileTree({ uploadingItems, searchQuery: debouncedSearchQuery });
 
   const toggleSortDirection = useCallback(() => {
@@ -144,6 +146,8 @@ const FilesHierarchy = ({
           onConfirmAddition={confirmAddition}
           onConfirmDeletion={confirmDeletion}
           onLoadFolder={loadFolder}
+          onPruneServerFiles={pruneServerFiles}
+          onRenameServerFiles={renameServerFiles}
         >
           <FileTree
             files={files}

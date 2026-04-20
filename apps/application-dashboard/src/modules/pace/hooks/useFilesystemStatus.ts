@@ -3,13 +3,13 @@ import { useGetFilesystemStatusQuery, useProvisionFilesystemMutation } from '@/a
 import { FILESYSTEM_STATUS } from '@/types/api/filesystem.types';
 const FILESYSTEM_POLL_INTERVAL_MS = 3000;
 
-export const useFilesystemStatus = () => {
+export const useFilesystemStatus = ({ enabled = true }: { enabled?: boolean } = {}) => {
   const {
     data: filesystemStatus,
     isLoading: isStatusLoading,
     isError: isStatusError,
     refetch: refetchStatus,
-  } = useGetFilesystemStatusQuery();
+  } = useGetFilesystemStatusQuery(undefined, { skip: !enabled });
   const [provisionFilesystem, { isError: isFilesError }] = useProvisionFilesystemMutation();
 
   const isActive = filesystemStatus?.status === FILESYSTEM_STATUS.ACTIVE;
@@ -17,7 +17,7 @@ export const useFilesystemStatus = () => {
 
   useGetFilesystemStatusQuery(undefined, {
     pollingInterval,
-    skip: isStatusError,
+    skip: !enabled || isStatusError,
   });
 
   const refetch = () => {
@@ -26,8 +26,9 @@ export const useFilesystemStatus = () => {
   };
 
   useEffect(() => {
+    if (!enabled) return;
     provisionFilesystem();
-  }, [provisionFilesystem]);
+  }, [enabled, provisionFilesystem]);
 
   return {
     isFilesystemActive: isActive,
