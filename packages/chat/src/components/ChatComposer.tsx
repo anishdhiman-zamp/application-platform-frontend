@@ -146,6 +146,83 @@ export const ChatComposer = forwardRef<ChatComposerHandle, ChatComposerProps>(
     const useFileReferences = fileReferences && fileReferences.length > 0;
     const useAttachments = attachments && attachments.length > 0;
 
+    const isStreamingActive = showSubmitButton && (isStreaming || isStopping) && onStop;
+    const hasComposerContent = !!value.trim() || !!fileReferences?.length;
+    const hasContentToQueue = !isSubmitDisabled || (isUploading && hasComposerContent);
+
+    const renderSubmitArea = () => {
+      if (isStreamingActive && hasContentToQueue) {
+        return (
+          <TooltipProvider delayDuration={300}>
+            <Tooltip>
+              <TooltipTrigger asChild>
+                <Button
+                  onClick={onSubmit}
+                  disabled={isSubmitDisabled}
+                  size='icon'
+                  aria-label='Queue message'
+                  className='bg-GRAY_950 text-BG_WHITE hover:bg-GRAY_950 hover:text-BG_WHITE dark:bg-GRAY_500 dark:hover:bg-GRAY_600 dark:text-GRAY_1000 dark:hover:text-GRAY_1000 size-[26px] rounded-full p-0 [&_svg]:size-3.5'
+                >
+                  <Hourglass className='size-3!' />
+                </Button>
+              </TooltipTrigger>
+              <TooltipContent side='top' align='center' className='f-10-450 p-1.5' sideOffset={4}>
+                Queue message
+              </TooltipContent>
+            </Tooltip>
+          </TooltipProvider>
+        );
+      }
+
+      if (isStreamingActive) {
+        return (
+          <TooltipProvider delayDuration={300}>
+            <Tooltip>
+              <TooltipTrigger asChild>
+                <Button
+                  onClick={onStop}
+                  disabled={isStopping}
+                  size='icon'
+                  variant='ghost'
+                  aria-label='Stop generating'
+                  className='bg-GRAY_950 text-BG_WHITE hover:bg-GRAY_950 hover:text-BG_WHITE dark:bg-GRAY_500 dark:hover:bg-GRAY_600 dark:text-GRAY_1000 dark:hover:text-GRAY_1000 size-[26px] rounded-full p-0 [&_svg]:size-3.5'
+                >
+                  {isStopping ? (
+                    <Loader2 className='animate-spin' />
+                  ) : (
+                    <Square fill='currentColor' strokeWidth={0} className='size-2.5!' />
+                  )}
+                </Button>
+              </TooltipTrigger>
+              <TooltipContent side='top' align='center' className='f-10-450 p-1.5' sideOffset={4}>
+                Stop generating
+              </TooltipContent>
+            </Tooltip>
+          </TooltipProvider>
+        );
+      }
+
+      if (showSubmitButton && onSubmit) {
+        return (
+          <Button
+            onClick={onSubmit}
+            disabled={isSubmitDisabled}
+            size='icon'
+            aria-label='Send message'
+            className='disabled:bg-GRAY_300 dark:hover:bg-GRAY_600 dark:disabled:bg-GRAY_300 size-[26px] rounded-full p-[2px] text-white disabled:cursor-not-allowed dark:bg-white [&_svg]:size-3.5'
+          >
+            <ArrowUp
+              className={cn('text-BG_WHITE dark:text-BG_WHITE', {
+                'text-GRAY_700 dark:text-GRAY_600': isSubmitDisabled,
+              })}
+            />
+          </Button>
+        );
+      }
+
+      return null;
+    };
+
     return (
       <div
         className={cn(
@@ -272,69 +349,7 @@ export const ChatComposer = forwardRef<ChatComposerHandle, ChatComposerProps>(
                     </Button>
                   ))}
 
-                {showSubmitButton && (isStreaming || isStopping) && onStop ? (
-                  !isSubmitDisabled || isUploading ? (
-                    <TooltipProvider delayDuration={300}>
-                      <Tooltip>
-                        <TooltipTrigger asChild>
-                          <Button
-                            onClick={onSubmit}
-                            disabled={isSubmitDisabled}
-                            size='icon'
-                            aria-label='Queue message'
-                            className='bg-GRAY_950 text-BG_WHITE hover:bg-GRAY_950 hover:text-BG_WHITE dark:bg-GRAY_500 dark:hover:bg-GRAY_600 dark:text-GRAY_1000 dark:hover:text-GRAY_1000 size-[26px] rounded-full p-0 [&_svg]:size-3.5'
-                          >
-                            <Hourglass className='size-3!' />
-                          </Button>
-                        </TooltipTrigger>
-                        <TooltipContent side='top' align='center' className='f-10-450 p-1.5' sideOffset={4}>
-                          Queue message
-                        </TooltipContent>
-                      </Tooltip>
-                    </TooltipProvider>
-                  ) : (
-                    <TooltipProvider delayDuration={300}>
-                      <Tooltip>
-                        <TooltipTrigger asChild>
-                          <Button
-                            onClick={onStop}
-                            disabled={isStopping}
-                            size='icon'
-                            variant='ghost'
-                            aria-label='Stop generating'
-                            className='bg-GRAY_950 text-BG_WHITE hover:bg-GRAY_950 hover:text-BG_WHITE dark:bg-GRAY_500 dark:hover:bg-GRAY_600 dark:text-GRAY_1000 dark:hover:text-GRAY_1000 size-[26px] rounded-full p-0 [&_svg]:size-3.5'
-                          >
-                            {isStopping ? (
-                              <Loader2 className='animate-spin' />
-                            ) : (
-                              <Square fill='currentColor' strokeWidth={0} className='size-2.5!' />
-                            )}
-                          </Button>
-                        </TooltipTrigger>
-                        <TooltipContent side='top' align='center' className='f-10-450 p-1.5' sideOffset={4}>
-                          Stop generating
-                        </TooltipContent>
-                      </Tooltip>
-                    </TooltipProvider>
-                  )
-                ) : (
-                  showSubmitButton &&
-                  onSubmit && (
-                    <Button
-                      onClick={onSubmit}
-                      disabled={isSubmitDisabled}
-                      size='icon'
-                      aria-label='Send message'
-                      className='disabled:bg-GRAY_300 dark:hover:bg-GRAY_600 dark:disabled:bg-GRAY_300 size-[26px] rounded-full p-[2px] text-white disabled:cursor-not-allowed dark:bg-white [&_svg]:size-3.5'
-                    >
-                      <ArrowUp
-                        className={cn('text-BG_WHITE dark:text-BG_WHITE', {
-                          'text-GRAY_700 dark:text-GRAY_600': isSubmitDisabled,
-                        })}
-                      />
-                    </Button>
-                  )
-                )}
+                {renderSubmitArea()}
               </div>
             </div>
           </div>
