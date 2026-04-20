@@ -13,6 +13,7 @@ interface UseExpandedPathsOptions {
 interface UseExpandedPathsReturn {
   expandedPaths: Set<string>;
   toggleExpand: (path: string) => void;
+  expandPaths: (paths: string[]) => void;
   collapseAll: () => void;
 }
 
@@ -63,6 +64,31 @@ export const useExpandedPaths = ({ files }: UseExpandedPathsOptions): UseExpande
         } else {
           newSet.add(path);
         }
+
+        debouncedSave(Array.from(newSet));
+
+        return newSet;
+      });
+    },
+    [debouncedSave],
+  );
+
+  const expandPaths = useCallback(
+    (paths: string[]) => {
+      if (paths.length === 0) return;
+
+      setExpandedPaths((prev) => {
+        let changed = false;
+        const newSet = new Set(prev);
+
+        for (const path of paths) {
+          if (!newSet.has(path)) {
+            newSet.add(path);
+            changed = true;
+          }
+        }
+
+        if (!changed) return prev;
 
         debouncedSave(Array.from(newSet));
 
@@ -129,6 +155,7 @@ export const useExpandedPaths = ({ files }: UseExpandedPathsOptions): UseExpande
   return {
     expandedPaths,
     toggleExpand,
+    expandPaths,
     collapseAll,
   };
 };

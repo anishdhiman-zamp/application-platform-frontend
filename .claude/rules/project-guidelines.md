@@ -84,6 +84,21 @@ Prompt Generation Rules:
 
 - Use features of RTK query to cache data and invalidate cache when needed
 
+### React Context Pattern
+
+- Use the reducer-based context pattern from `apps/application-dashboard/src/components/filter/filters.context.tsx` as the reference for any new React Context module
+- Shape of a context module:
+  - An `enum` of action type keys (e.g. `fooContextActions`) — keys are SCREAMING_SNAKE_CASE and their string values match the key
+  - An `InitialStateType` interface and an `initialState` constant
+  - An exported `ActionType` interface: `{ type: keyof typeof fooContextActions; payload?: ... }`
+  - A `createContext` call typed with `{ state: InitialStateType; dispatch: Dispatch<ActionType> }` plus any stable helper callbacks
+  - A `StateProvider` component that uses `useReducer` and a `switch` over `action.type`; guard against `undefined` action and return `state` in the `default` case
+  - A `withFooContext` HOC that wraps a component in `StateProvider`
+  - A `useFooContextStore` hook returning `useContext(context)`
+  - Named exports: the actions enum, the hook, and the HOC
+- Wrap any side-effect-producing callbacks exposed via the context value in `useCallback` so consumers that pass them to `useEffect` / `useCallback` deps do not re-run on every provider render
+- Use this pattern even for small contexts — it keeps state transitions auditable and mirrors the rest of the codebase
+
 ### TypeScript Usage
 
 - Use TypeScript for all code

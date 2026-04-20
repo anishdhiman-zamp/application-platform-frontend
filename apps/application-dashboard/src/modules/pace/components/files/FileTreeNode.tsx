@@ -11,6 +11,7 @@ import {
   type FileTreeNodeProps,
 } from '@/modules/pace/components/files/file-tree.types';
 import { getParentPath } from '@/modules/pace/components/files/file-tree.utils';
+import FileInfoPopover from '@/modules/pace/components/files/FileInfoPopover';
 import {
   CONTEXT_MENU_ACTION_IDS,
   CONTEXT_MENU_ACTIONS,
@@ -43,12 +44,14 @@ const FileTreeNode = memo(function FileTreeNode({
   onDragOverFolderChange,
   isSearchActive,
   isLoadingChildren,
+  searchHighlight,
   style,
 }: FileTreeNodeProps) {
   // State
   const nodeRef = useRef<HTMLDivElement>(null);
   const [createModalType, setCreateModalType] = useState<CreateItemType | null>(null);
   const [fetchedChildrenNames, setFetchedChildrenNames] = useState<string[]>([]);
+  const [isInfoOpen, setIsInfoOpen] = useState(false);
   const [triggerListFiles] = useLazyListFilesQuery();
 
   // Hooks
@@ -59,7 +62,7 @@ const FileTreeNode = memo(function FileTreeNode({
   // Derived State
   const isFolder = node.type === FILE_TYPE.DIRECTORY;
   const isExpanded = expandedPaths.has(node.path);
-  const isSelected = !isFolder && selectedPath === node.path;
+  const isSelected = selectedPath === node.path;
   const isProtected = depth === 0 && isProtectedRoot(node.path);
   const isUserPrivateFolder = depth === 0 && node.path === username;
   const isUploading = uploadingPaths.has(node?.path);
@@ -149,6 +152,12 @@ const FileTreeNode = memo(function FileTreeNode({
     [onUploadFiles],
   );
 
+  // Defer so the closing dropdown/context menu doesn't race with the
+  // newly-opened popover and immediately dismiss it via focus/pointer-outside.
+  const handleShowInfo = () => {
+    requestAnimationFrame(() => setIsInfoOpen(true));
+  };
+
   // Hooks (depend on handlers above)
   const rename = useFileTreeNodeRename({
     node,
@@ -187,6 +196,7 @@ const FileTreeNode = memo(function FileTreeNode({
     onFileCreated,
     onTriggerFileUpload: handleTriggerFileUpload,
     onTriggerFolderUpload: handleTriggerFolderUpload,
+    onShowInfo: handleShowInfo,
   });
 
   // Handlers
@@ -242,6 +252,8 @@ const FileTreeNode = memo(function FileTreeNode({
         onConfirm={deleteConfirmation.onConfirm}
       />
 
+      <FileInfoPopover node={node} anchorRef={nodeRef} open={isInfoOpen} onOpenChange={setIsInfoOpen} />
+
       <FileTreeNodeRow
         ref={nodeRef}
         node={node}
@@ -280,6 +292,7 @@ const FileTreeNode = memo(function FileTreeNode({
         }}
         actions={filteredActions}
         onActionClick={actions.handleActionClick}
+        searchHighlight={searchHighlight}
       />
     </div>
   );

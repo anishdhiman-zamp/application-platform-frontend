@@ -8,18 +8,16 @@ import {
   ChatActionsProvider,
   createConversationPayload,
   createUserMessagePayload,
-  DropOverlay,
   MessageContainer,
   ResourceType,
   ScopeType,
-  useFileDragDrop,
   useStreamingState,
 } from '@zamp-platform/chat';
 import { useConversationActions, useConversationState } from '@zamp-platform/conversation-stream';
 import { ScrollContainer } from '@zamp-platform/ui';
 import { cn } from '@zamp-platform/ui/utils';
 import AgentPill from 'modules/pace/components/agents/components/AgentPill';
-import TaskStatusCounts from 'modules/pace/components/chat/TaskStatusCounts';
+import TaskStatusCounts from 'modules/pace/module/TaskStatusCounts';
 import { useRouter } from 'next/navigation';
 import CommonWrapper from '@/components/commonWrapper';
 import { SkeletonTypes } from '@/components/commonWrapper/commonWrapper.types';
@@ -51,7 +49,6 @@ export interface ChatConversationContentProps {
   onBrowserStreamingEnd?: (conversationId: string) => void;
   onTaskPopoverOpenChange?: (open: boolean) => void;
   onConversationNotFound?: (notFound: boolean) => void;
-  fileDropHandlerRef: React.RefObject<((files: FileList) => void) | null>;
   addFileReferenceRef: React.RefObject<((ref: { path: string; name: string }) => void) | null>;
   currentUserName: string;
 }
@@ -65,7 +62,6 @@ const ChatConversationContent = ({
   onBrowserStreamingEnd,
   onTaskPopoverOpenChange,
   onConversationNotFound,
-  fileDropHandlerRef,
   addFileReferenceRef,
   currentUserName,
 }: ChatConversationContentProps) => {
@@ -94,12 +90,10 @@ const ChatConversationContent = ({
     messages,
     hasMessages,
     conversationId: ctxConversationId,
-    isCreatingConversationV2,
     isLoadingConversationHistory,
     isErrorConversationHistory,
     errorConversationHistory,
     isUninitializedConversationHistory,
-    isStreaming,
     isBrowserStreamingAvailable,
     browserSessionId,
     taskSummaries,
@@ -117,11 +111,6 @@ const ChatConversationContent = ({
     !streamingState?.is_active &&
     (!hasMessages || Boolean(conversationId && isLoadingConversationHistory && !hasMessages));
   const isConversationNotFound = isErrorConversationHistory && isNotFoundError(errorConversationHistory);
-
-  const { isDragOver, dropZoneProps } = useFileDragDrop({
-    onFileDrop: (files) => fileDropHandlerRef.current?.(files),
-    disabled: isStreaming || isCreatingConversationV2,
-  });
 
   const agentAvatarMap = useMemo(() => {
     const map = new Map<string, string>();
@@ -346,8 +335,7 @@ const ChatConversationContent = ({
       isBrowserStreamingAvailable={isBrowserStreamingAvailable}
       taskSummaries={taskSummaries}
     >
-      <div className='relative flex min-h-0 w-full flex-1 flex-col overflow-hidden' {...dropZoneProps}>
-        <DropOverlay isVisible={isDragOver} />
+      <div className='relative flex min-h-0 w-full flex-1 flex-col overflow-hidden'>
         <ScrollContainer
           showScrollToBottom
           enableAnchorScroll

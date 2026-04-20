@@ -3,9 +3,9 @@
 import { MarkdownBlock } from '@zamp-platform/chat';
 import { Accordion } from '@zamp-platform/ui';
 import { cn } from '@zamp-platform/ui/utils';
-import type { MessageStepGroupsSection } from 'modules/pace/components/chat/step-groups.types';
-import ResizableSummaryBox from '@/modules/pace/components/chat/ResizableSummaryBox';
-import StepGroupItem from '@/modules/pace/components/chat/StepGroupItem';
+import type { MessageStepGroupsSection } from 'modules/pace/module/step-groups.types';
+import ResizableSummaryBox from '@/modules/pace/module/ResizableSummaryBox';
+import StepGroupItem from '@/modules/pace/module/StepGroupItem';
 
 interface StepGroupsSummaryViewProps {
   sections: MessageStepGroupsSection[];

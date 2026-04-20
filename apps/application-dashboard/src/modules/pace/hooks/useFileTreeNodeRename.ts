@@ -4,26 +4,9 @@ import { toast } from '@zamp-platform/ui';
 import { useFileActions } from 'modules/pace/hooks/useFileActions';
 import { useDynamicTabs } from '@/modules/pace/components/dynamic-tabs/useDynamicTabs';
 import { FILE_TYPE, type FileItem, type TreeNode } from '@/modules/pace/components/files/file-tree.types';
-import { buildFullPath, getParentPath } from '@/modules/pace/components/files/file-tree.utils';
+import { buildFullPath, getFileNameParts, getParentPath } from '@/modules/pace/components/files/file-tree.utils';
 import { FILE_TOAST_MESSAGES } from '@/modules/pace/components/files/files.constants';
 import { TAB_TYPE } from '@/modules/pace/pace.types';
-
-const getFileNameParts = (name: string, isFile: boolean): { baseName: string; extension: string } => {
-  if (!isFile) {
-    return { baseName: name, extension: '' };
-  }
-
-  const lastDotIndex = name.lastIndexOf('.');
-
-  if (lastDotIndex > 0) {
-    return {
-      baseName: name.slice(0, lastDotIndex),
-      extension: name.slice(lastDotIndex),
-    };
-  }
-
-  return { baseName: name, extension: '' };
-};
 
 interface UseFileTreeNodeRenameProps {
   node: TreeNode;
@@ -53,9 +36,9 @@ export const useFileTreeNodeRename = ({
   const isFile = node.type === FILE_TYPE.FILE;
 
   // State
-  const { baseName, extension } = useMemo(() => getFileNameParts(node.name, isFile), [node.name, isFile]);
+  const { baseName } = useMemo(() => getFileNameParts(node.name, isFile), [node.name, isFile]);
   const [isRenaming, setIsRenaming] = useState(false);
-  const [renameValue, setRenameValue] = useState(baseName);
+  const [renameValue, setRenameValue] = useState(node.name);
   const renameInputRef = useRef<HTMLInputElement | null>(null);
 
   // Hooks
@@ -63,11 +46,7 @@ export const useFileTreeNodeRename = ({
   const { updateTab, updateTabsForFolderMove } = useDynamicTabs({ type: TAB_TYPE.FILE });
 
   // Derived State
-  const fullNewName = useMemo(() => {
-    const trimmed = renameValue.trim();
-
-    return trimmed ? `${trimmed}${extension}` : '';
-  }, [renameValue, extension]);
+  const fullNewName = useMemo(() => renameValue.trim(), [renameValue]);
 
   const isDuplicateName = useMemo(() => {
     if (!fullNewName || fullNewName === node.name) return false;
@@ -78,14 +57,14 @@ export const useFileTreeNodeRename = ({
   const startRename = useCallback(() => {
     if (isProtected) return;
 
-    setRenameValue(baseName);
+    setRenameValue(node.name);
     setIsRenaming(true);
-  }, [baseName, isProtected]);
+  }, [node.name, isProtected]);
 
   const handleRenameSubmit = useCallback(async () => {
     if (!fullNewName || fullNewName === node.name || isDuplicateName) {
       setIsRenaming(false);
-      setRenameValue(baseName);
+      setRenameValue(node.name);
 
       return;
     }
@@ -120,10 +99,10 @@ export const useFileTreeNodeRename = ({
     } catch (error) {
       captureException(error);
       toast.error(FILE_TOAST_MESSAGES.FAILED_TO_RENAME);
-      setRenameValue(baseName);
+      setRenameValue(node.name);
       setIsRenaming(false);
     }
-  }, [fullNewName, baseName, node, isDuplicateName, renameItem, updateTab, updateTabsForFolderMove, onFileMoved]);
+  }, [fullNewName, node, isDuplicateName, renameItem, updateTab, updateTabsForFolderMove, onFileMoved]);
 
   const handleRenameKeyDown = useCallback(
     (e: React.KeyboardEvent<HTMLInputElement>) => {
@@ -134,24 +113,32 @@ export const useFileTreeNodeRename = ({
         handleRenameSubmit();
       } else if (e.key === 'Escape') {
         setIsRenaming(false);
-        setRenameValue(baseName);
+        setRenameValue(node.name);
       }
     },
-    [handleRenameSubmit, baseName],
+    [handleRenameSubmit, node.name],
   );
 
   const handleRenameInputRef = useCallback((element: HTMLInputElement | null) => {
     renameInputRef.current = element;
   }, []);
 
+  const focusRenameInput = useCallback(() => {
+    const input = renameInputRef.current;
+
+    if (!input) return;
+
+    input.focus();
+    input.setSelectionRange(0, baseName.length);
+  }, [baseName]);
+
   useEffect(() => {
-    if (isRenaming && renameInputRef.current) {
-      setTimeout(() => {
-        renameInputRef.current?.focus();
-        renameInputRef.current?.select();
-      }, 30);
-    }
-  }, [isRenaming]);
+    if (!isRenaming) return;
+
+    const timeoutId = setTimeout(focusRenameInput, 30);
+
+    return () => clearTimeout(timeoutId);
+  }, [isRenaming, focusRenameInput]);
 
   return {
     isRenaming,

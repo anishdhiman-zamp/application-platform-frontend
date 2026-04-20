@@ -3,7 +3,7 @@
 import type { RefObject } from 'react';
 import { HITLEntityType, HITLQuestionsBlock, type HITLQuestionWithEntity, MarkdownBlock } from '@zamp-platform/chat';
 import { cn } from '@zamp-platform/ui/utils';
-import ResizableSummaryBox from '@/modules/pace/components/chat/ResizableSummaryBox';
+import ResizableSummaryBox from '@/modules/pace/module/ResizableSummaryBox';
 
 export interface TaskChatExpandedStepsFooterProps {
   isFirst: boolean;

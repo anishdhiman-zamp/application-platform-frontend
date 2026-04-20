@@ -32,6 +32,18 @@ import {
 } from '@/modules/pace/components/files/files.constants';
 
 /**
+ * Builds a tree containing only the descendants of the given root path.
+ * Filters the flat file list to items under `rootPath/` and constructs a subtree.
+ */
+export function buildSubtreeFromFiles(files: FileItem[], rootPath: string): TreeNode[] {
+  const prefix = rootPath + '/';
+
+  const descendants = files.filter((f) => f.path.startsWith(prefix));
+
+  return buildFileTree(descendants);
+}
+
+/**
  * Builds a hierarchical tree structure from a flat array of files.
  * Files are grouped by their path segments.
  */
@@ -428,6 +440,24 @@ export function getParentPath(path: string): string {
   }
 
   return path.slice(0, lastSlashIndex) || '/';
+}
+
+/**
+ * Collects all ancestor folder paths of the given path (excluding the root sentinel).
+ * For "a/b/c/d" returns ["a", "a/b", "a/b/c"].
+ */
+export function collectAncestors(path: string): string[] {
+  const segments = path.split('/').filter(Boolean);
+
+  if (segments.length <= 1) return [];
+
+  const ancestors: string[] = [];
+
+  for (let i = 1; i < segments.length; i++) {
+    ancestors.push(segments.slice(0, i).join('/'));
+  }
+
+  return ancestors;
 }
 
 /**
