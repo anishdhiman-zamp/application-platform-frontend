@@ -11,7 +11,7 @@ import FilesPanelResizeHandle from '@/modules/pace/components/layout/FilesPanelR
 import SidebarResizeHandle from '@/modules/pace/components/layout/SidebarResizeHandle';
 import UploadProgressToast from '@/modules/pace/components/progress-toast/UploadProgressToast';
 import { FileUploadProvider, useFileUploadContext } from '@/modules/pace/context/FileUploadContext';
-import { FILES_PANEL_SPACER_TRANSITION, NO_ANIMATION, TAB_CHANGE_FADE } from '@/modules/pace/pace.animations';
+import { FILES_PANEL_SPACER_TRANSITION, NO_ANIMATION } from '@/modules/pace/pace.animations';
 import { usePaceContext } from '@/modules/pace/pace.context';
 
 interface PaceLayoutContentProps {
@@ -46,22 +46,18 @@ const PaceLayoutContentInner: FC<PaceLayoutContentProps> = ({ children }) => {
       <div className='flex min-h-0 flex-1 overflow-hidden px-2'>
         <ChatSidebar />
         {isSidebar && <SidebarResizeHandle />}
-        <motion.main
-          initial={false}
-          animate={{ opacity: isExpanded ? 0 : 1 }}
-          transition={isExpanded ? NO_ANIMATION : TAB_CHANGE_FADE}
-          style={{ willChange: 'opacity', transform: 'translateZ(0)' }}
+        <main
           className={cn(
             'flex min-h-0 min-w-0 flex-1 flex-col',
             !isExpanded && !isCollapsed && !isSidebar && 'ml-2',
-            isExpanded && 'pointer-events-none w-0 min-w-0 flex-none overflow-hidden',
+            isExpanded && 'pointer-events-none invisible w-0 min-w-0 flex-none overflow-hidden',
           )}
           aria-hidden={isExpanded}
         >
           <section className='border-border bg-BG_WHITE flex min-h-0 w-full flex-1 flex-col overflow-hidden rounded-t-xl border'>
             {children}
           </section>
-        </motion.main>
+        </main>
         {isPinned && <FilesPanelResizeHandle />}
         <motion.div
           initial={false}
