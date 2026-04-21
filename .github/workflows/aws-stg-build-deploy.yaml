@@ -155,16 +155,6 @@ jobs:
           aws-region: ${{ env.AWS_REGION }}
           role-session-name: GitHubActionsSession
 
-      - name: "Install AWS CLI"
-        run: |
-          if ! command -v aws &> /dev/null; then
-            curl "https://awscli.amazonaws.com/awscli-exe-linux-aarch64.zip" -o "awscliv2.zip"
-            unzip -q awscliv2.zip
-            sudo ./aws/install
-          else
-            echo "✅ AWS CLI already installed"
-          fi
-
       - name: "Login to Amazon ECR"
         run: |
           aws ecr get-login-password --region $AWS_REGION | docker login --username AWS --password-stdin $AWS_ACCOUNT_ID.dkr.ecr.$AWS_REGION.amazonaws.com
@@ -369,21 +359,6 @@ jobs:
           role-to-assume: arn:aws:iam::${{ env.AWS_ACCOUNT_ID }}:role/GitHubActionsRole # FIXME: Make sure this role exists in staging account
           aws-region: ${{ env.AWS_REGION }}
           role-session-name: GitHubActionsSession
-
-      - name: "Install AWS CLI"
-        run: |
-          if ! command -v aws &> /dev/null; then
-            curl "https://awscli.amazonaws.com/awscli-exe-linux-aarch64.zip" -o "awscliv2.zip"
-            unzip -q awscliv2.zip
-            sudo ./aws/install
-          else
-            echo "✅ AWS CLI already installed"
-          fi
-
-      - uses: azure/setup-helm@v4
-        name: Install Helm
-        with:
-          version: "v3.7.2"
 
       - uses: azure/setup-kubectl@v4
         with:
