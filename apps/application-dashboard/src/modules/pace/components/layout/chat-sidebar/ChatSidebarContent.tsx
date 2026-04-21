@@ -287,7 +287,12 @@ const ChatSidebarContent = ({
 
       {!isConversationNotFound && (
         <ChatActionsProvider onFileOpen={handleFileOpen}>
-          <div className='bg-BG_WHITE sticky bottom-0 z-10 mx-auto w-full max-w-[700px] px-3 pb-3'>
+          <div
+            className={cn(
+              'bg-BG_WHITE sticky bottom-0 mx-auto w-full max-w-[700px] px-3 pb-3',
+              isTaskPopoverOpen ? 'z-0' : 'z-10',
+            )}
+          >
             {renderChatInput()}
           </div>
         </ChatActionsProvider>

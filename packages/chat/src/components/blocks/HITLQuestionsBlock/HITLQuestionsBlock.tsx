@@ -26,7 +26,7 @@ const HITLQuestionsContent = () => {
   if (!questions.length || !currentQuestion) return null;
 
   return (
-    <div ref={containerRef} className='w-full max-w-[659px] outline-none' tabIndex={-1}>
+    <div ref={containerRef} className='w-full min-w-0 outline-none' tabIndex={-1}>
       <div className='bg-GRAY_100 shadow-table-filter-menu relative flex w-full flex-col overflow-hidden rounded-xl'>
         <HITLQuestionsHeader />
 
