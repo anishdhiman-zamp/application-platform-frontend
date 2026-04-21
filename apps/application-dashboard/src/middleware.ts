@@ -33,6 +33,8 @@ export const BETA_ORG_IDS = new Set(
 const CANARY_COOKIE = 'org_is_beta';
 
 const applyCanaryRoutingCookie = (request: NextRequest, response: NextResponse): void => {
+  if (request.nextUrl.pathname.startsWith('/api/')) return;
+
   const orgId = getServerSideCookie(request, ACTIVE_ORG_ID_COOKIE);
   const cookieDomain = ENVIRONMENT === ENVIRONMENT_TYPES.PRODUCTION ? '.zamp.ai' : '.zamp.dev';
 
@@ -44,7 +46,7 @@ const applyCanaryRoutingCookie = (request: NextRequest, response: NextResponse):
       domain: cookieDomain,
     });
   } else {
-    response.cookies.delete(CANARY_COOKIE);
+    response.cookies.delete({ name: CANARY_COOKIE, path: '/', domain: cookieDomain });
   }
 };
 
