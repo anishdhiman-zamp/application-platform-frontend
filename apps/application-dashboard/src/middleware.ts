@@ -2,6 +2,7 @@ import { DEVICE_TYPES, ENVIRONMENT, ENVIRONMENT_TYPES } from 'constants/common.c
 import { ROUTES_PATH } from 'constants/routeConfig';
 import { NextRequest, NextResponse, userAgent } from 'next/server';
 import {
+  ACTIVE_ORG_ID_COOKIE,
   COOKIE_MAX_AGE,
   ORY_KRATOS_SESSION_COOKIE,
   PREV_ROUTE_COOKIE,
@@ -21,6 +22,31 @@ import {
   setServerSideUserCookie,
   validateSession,
 } from '@/utils/middlware.util';
+
+export const BETA_ORG_IDS = new Set(
+  (process.env.BETA_ORG_IDS ?? '')
+    .split(',')
+    .map((s) => s.trim())
+    .filter(Boolean),
+);
+
+const CANARY_COOKIE = 'org_is_beta';
+
+const applyCanaryRoutingCookie = (request: NextRequest, response: NextResponse): void => {
+  const orgId = getServerSideCookie(request, ACTIVE_ORG_ID_COOKIE);
+  const cookieDomain = ENVIRONMENT === ENVIRONMENT_TYPES.PRODUCTION ? '.zamp.ai' : '.zamp.dev';
+
+  if (orgId && BETA_ORG_IDS.has(orgId)) {
+    response.cookies.set(`CANARY_COOKIE`, 'true', {
+      path: '/',
+      sameSite: 'lax',
+      secure: true,
+      domain: cookieDomain,
+    });
+  } else {
+    response.cookies.delete(CANARY_COOKIE);
+  }
+};
 
 const handleUnauthenticatedRoutes = (request: NextRequest) => {
   const { pathname } = request.nextUrl;
@@ -278,10 +304,18 @@ export async function middleware(request: NextRequest) {
   const isAuthenticated = validateSession(request);
 
   if (!isAuthenticated) {
-    return handleUnauthenticatedRoutes(request);
+    const response = handleUnauthenticatedRoutes(request);
+
+    applyCanaryRoutingCookie(request, response);
+
+    return response;
   }
 
-  return await handleAuthenticatedRoutes(request);
+  const response = await handleAuthenticatedRoutes(request);
+
+  applyCanaryRoutingCookie(request, response);
+
+  return response;
 }
 
 export const config = {
