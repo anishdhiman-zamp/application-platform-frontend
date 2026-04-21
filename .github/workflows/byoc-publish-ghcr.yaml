@@ -1,0 +1,137 @@
+name: BYOC — Publish frontend image to GHCR
+
+# Publishes the frontend container image for the BYOC Northflank template to
+# `ghcr.io/zampfi/frontend:<tag>` as a private package. Paired with the matching
+# workflow in Zampfi/pantheon; both are triggered together by the same tag.
+#
+# See: infra-byoc/byoc-final/PLAN.md §5 (image strategy) and §11 (sprint plan).
+
+on:
+  workflow_dispatch:
+    inputs:
+      image_tag:
+        description: 'Tag to publish to GHCR (e.g. byoc-v2026.04.22 or v8516)'
+        required: true
+        type: string
+      platforms:
+        description: 'Build platforms'
+        required: false
+        default: 'linux/arm64'
+        type: choice
+        options:
+          - linux/arm64
+          - linux/amd64
+          - 'linux/amd64,linux/arm64'
+  push:
+    tags:
+      - 'byoc-v*'
+
+permissions:
+  contents: read
+  packages: write
+
+concurrency:
+  group: byoc-publish-${{ github.ref }}
+  cancel-in-progress: false
+
+jobs:
+  resolve-tag:
+    name: Resolve image tag
+    runs-on: ubuntu-latest
+    outputs:
+      tag: ${{ steps.resolve.outputs.tag }}
+      sha_short: ${{ steps.resolve.outputs.sha_short }}
+    steps:
+      - name: Resolve tag
+        id: resolve
+        env:
+          INPUT_TAG: ${{ inputs.image_tag }}
+          EVENT_NAME: ${{ github.event_name }}
+        run: |
+          if [ "$EVENT_NAME" = "workflow_dispatch" ]; then
+            TAG="$INPUT_TAG"
+          else
+            TAG="${GITHUB_REF#refs/tags/}"
+          fi
+          # Reject tags that don't match the byoc-v* or vNNNN pattern, as defense-in-depth
+          # against injection via workflow_dispatch (primary defense is passing via env, not ${{ }}).
+          if ! echo "$TAG" | grep -Eq '^(byoc-v[0-9]{4}\.[0-9]{2}\.[0-9]{2}|v[0-9]+)$'; then
+            echo "::error::Invalid image_tag format: $TAG (expected byoc-vYYYY.MM.DD or vNNNN)"
+            exit 1
+          fi
+          echo "tag=$TAG" >> "$GITHUB_OUTPUT"
+          echo "sha_short=${GITHUB_SHA::7}" >> "$GITHUB_OUTPUT"
+          {
+            echo "## BYOC frontend publish"
+            echo "- Ref: \`${GITHUB_REF}\`"
+            echo "- Tag: \`$TAG\`"
+            echo "- SHA: \`${GITHUB_SHA}\`"
+          } >> "$GITHUB_STEP_SUMMARY"
+
+  build-push:
+    name: Build & push frontend
+    needs: resolve-tag
+    runs-on: ubuntu-latest-arm
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 1
+
+      - name: Set up QEMU
+        uses: docker/setup-qemu-action@v3
+
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v3
+
+      - name: Login to GHCR
+        uses: docker/login-action@v3
+        with:
+          registry: ghcr.io
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Build & push frontend → ghcr.io/zampfi/frontend:${{ needs.resolve-tag.outputs.tag }}
+        uses: docker/build-push-action@v6
+        with:
+          context: .
+          file: ./Dockerfile
+          platforms: ${{ inputs.platforms || 'linux/arm64' }}
+          push: true
+          tags: |
+            ghcr.io/zampfi/frontend:${{ needs.resolve-tag.outputs.tag }}
+            ghcr.io/zampfi/frontend:${{ needs.resolve-tag.outputs.sha_short }}
+          cache-from: type=registry,ref=ghcr.io/zampfi/frontend:buildcache
+          cache-to: type=registry,ref=ghcr.io/zampfi/frontend:buildcache,mode=max,image-manifest=true
+
+      - name: Summarize
+        if: success()
+        run: |
+          echo "- ✅ \`ghcr.io/zampfi/frontend:${{ needs.resolve-tag.outputs.tag }}\`" >> "$GITHUB_STEP_SUMMARY"
+
+  set-package-visibility:
+    name: Ensure GHCR package is private
+    needs: [resolve-tag, build-push]
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      packages: write
+    steps:
+      - name: Make package private (idempotent)
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          set -euo pipefail
+          # Check if the package exists first — freshly-created packages may not be visible on first run.
+          if ! gh api "/orgs/Zampfi/packages/container/frontend" >/dev/null 2>&1; then
+            echo "::notice::package frontend not yet visible to API — will retry on next run"
+            exit 0
+          fi
+          if ! gh api --method PATCH \
+            -H "Accept: application/vnd.github+json" \
+            "/orgs/Zampfi/packages/container/frontend/visibility" \
+            -f visibility=private 2>&1 | tee /tmp/visibility.log; then
+            echo "::error::Failed to set frontend visibility to private. GITHUB_TOKEN may lack org-admin rights."
+            echo "::error::Package may currently be PUBLIC. Register a dedicated PAT with admin:packages at org level."
+            exit 1
+          fi
