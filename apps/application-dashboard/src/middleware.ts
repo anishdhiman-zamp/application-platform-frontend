@@ -37,7 +37,7 @@ const applyCanaryRoutingCookie = (request: NextRequest, response: NextResponse):
   const cookieDomain = ENVIRONMENT === ENVIRONMENT_TYPES.PRODUCTION ? '.zamp.ai' : '.zamp.dev';
 
   if (orgId && BETA_ORG_IDS.has(orgId)) {
-    response.cookies.set(`CANARY_COOKIE`, 'true', {
+    response.cookies.set(CANARY_COOKIE, 'true', {
       path: '/',
       sameSite: 'lax',
       secure: true,
