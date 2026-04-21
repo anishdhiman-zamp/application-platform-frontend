@@ -12,6 +12,7 @@ import {
   useFileDragDrop,
 } from '@zamp-platform/chat';
 import { ConnectedChatInput, useConversationActions, useConversationState } from '@zamp-platform/conversation-stream';
+import { type ScrollContainerRef } from '@zamp-platform/ui';
 import { cn } from '@zamp-platform/ui/utils';
 import { EVENT_TYPE } from '@zamp-platform/utils/event-bus';
 import { useDynamicTabs } from 'modules/pace/components/dynamic-tabs/useDynamicTabs';
@@ -80,6 +81,9 @@ const ChatSidebarContent = ({
 
   const fileDropHandlerRef = useRef<((files: FileList) => void) | null>(null);
   const addFileReferenceRef = useRef<((ref: { path: string; name: string }) => void) | null>(null);
+  const scrollContainerRef = useRef<ScrollContainerRef | null>(null);
+  const hitlWrapperRef = useRef<HTMLDivElement>(null);
+  const hitlHeightRef = useRef(0);
 
   const [isTaskPopoverOpen, setIsTaskPopoverOpen] = useState(false);
   const [isConversationNotFound, setIsConversationNotFound] = useState(false);
@@ -102,6 +106,27 @@ const ChatSidebarContent = ({
     onFileDrop: (files) => fileDropHandlerRef.current?.(files),
     disabled: isViewer,
   });
+
+  useEffect(() => {
+    const el = hitlWrapperRef.current;
+
+    hitlHeightRef.current = 0;
+
+    if (!el) return;
+
+    const observer = new ResizeObserver(() => {
+      const newHeight = el.offsetHeight;
+
+      if (newHeight > hitlHeightRef.current) {
+        scrollContainerRef.current?.scrollToBottom('smooth');
+      }
+      hitlHeightRef.current = newHeight;
+    });
+
+    observer.observe(el);
+
+    return () => observer.disconnect();
+  }, [hasInputsRequired]);
 
   const modelSelectorSlot = useMemo(
     () => <ModelSelector value={selectedModel} onChange={setSelectedModel} />,
@@ -208,15 +233,17 @@ const ChatSidebarContent = ({
 
     if (hasInputsRequired) {
       return (
-        <HITLQuestionsBlock
-          key={hitlQuestionsKey}
-          payload={{ questions: hitlQuestions }}
-          onSubmit={handleHitlRespondComplete}
-          sourceEntityId={conversationId ?? ''}
-          sourceEntityType={HITLEntityType.CONVERSATION}
-          conversationId={conversationId ?? ''}
-          username={username}
-        />
+        <div ref={hitlWrapperRef}>
+          <HITLQuestionsBlock
+            key={hitlQuestionsKey}
+            payload={{ questions: hitlQuestions }}
+            onSubmit={handleHitlRespondComplete}
+            sourceEntityId={conversationId ?? ''}
+            sourceEntityType={HITLEntityType.CONVERSATION}
+            conversationId={conversationId ?? ''}
+            username={username}
+          />
+        </div>
       );
     }
 
@@ -283,6 +310,7 @@ const ChatSidebarContent = ({
         onConversationNotFound={setIsConversationNotFound}
         addFileReferenceRef={addFileReferenceRef}
         currentUserName={currentUserName}
+        scrollContainerRef={scrollContainerRef}
       />
 
       {!isConversationNotFound && (

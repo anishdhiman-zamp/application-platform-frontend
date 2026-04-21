@@ -106,25 +106,41 @@ export const useHITLKeyboard = () => {
           break;
 
         case KEYBOARD_KEYS.ENTER: {
-          if (e.metaKey || e.ctrlKey) {
+          if (e.shiftKey) break;
+
+          const isCustomInputFocused = optIdx === lastOptionIdx;
+          const isCmdEnter = e.metaKey || e.ctrlKey;
+
+          // Cmd+Enter: always advance or submit regardless of question type
+          if (isCmdEnter) {
             e.preventDefault();
             if (qIdx < lastQuestionIdx) navigateToQuestion(qIdx + 1, 'next');
             else submitRef.current?.();
             return;
           }
+
+          // Multi-select + custom input focused: plain Enter does nothing, not even a newline
+          if (q.is_multi_select && isCustomInputFocused) {
+            e.preventDefault();
+            break;
+          }
+
           preventUnlessTextField();
-          if (isTextQuestion(q)) {
+
+          if (isTextQuestion(q) || isCustomInputFocused) {
+            // Free-text or single-select custom input: advance to next question or submit
             e.preventDefault();
             const text = (inputs[q.id] || '').trim();
             const hasAttachments = (fileRefs[q.id]?.length ?? 0) > 0;
-            if ((text || hasAttachments) && qIdx < lastQuestionIdx) navigateToQuestion(qIdx + 1, 'next');
-          } else if (optIdx === lastOptionIdx) {
-            const customText = inputs[q.id] || '';
-            selectAnswer(q.id, qIdx, CUSTOM_OPTION_ID, customText);
-            if (isSingleSelectOnly && customText.trim()) {
-              submitSingleSelectRef.current?.(q.id, CUSTOM_OPTION_ID, customText);
+            if (text || hasAttachments) {
+              if (qIdx < lastQuestionIdx) {
+                navigateToQuestion(qIdx + 1, 'next');
+              } else {
+                submitRef.current?.();
+              }
             }
           } else {
+            // Option row focused: select/toggle that option
             selectAnswer(q.id, qIdx, (q.options ?? [])[optIdx].id);
           }
           break;

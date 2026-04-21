@@ -11,7 +11,7 @@ import { useHITLQuestions } from './useHITLQuestions';
 import { isMultipleChoiceQuestion, optionCountForQuestion } from './utils';
 
 export const CustomInputRow = () => {
-  const { state, username, dispatch } = useHITLQuestionsContext();
+  const { state, username, dispatch, questionScrollRef } = useHITLQuestionsContext();
   const { isSingleSelectOnly, handleCustomInputChange, handleFileReferencesChange } = useHITLQuestions();
   const { currentQuestion, focusedOptionIndex, answers, customInputs, submittingOptionId } = state;
 
@@ -24,6 +24,8 @@ export const CustomInputRow = () => {
   const value = customInputs[currentQuestion.id] || '';
 
   const composerRef = useRef<ChatComposerInputHandle>(null);
+  const rowRef = useRef<HTMLDivElement>(null);
+  const rowHeightRef = useRef(0);
 
   const scheduleFocus = useCallback(() => {
     const rafId = requestAnimationFrame(() => {
@@ -32,11 +34,6 @@ export const CustomInputRow = () => {
     return () => cancelAnimationFrame(rafId);
   }, []);
 
-  useEffect(() => {
-    if (!isFocused) return;
-    return scheduleFocus();
-  }, [isFocused, scheduleFocus]);
-
   const handleFileRefs = useCallback(
     (refs: ChatComposerFileRef[]) => {
       handleFileReferencesChange(currentQuestion.id, refs);
@@ -44,8 +41,31 @@ export const CustomInputRow = () => {
     [handleFileReferencesChange, currentQuestion.id],
   );
 
+  useEffect(() => {
+    if (!isFocused) return;
+    return scheduleFocus();
+  }, [isFocused, scheduleFocus]);
+
+  useEffect(() => {
+    const el = rowRef.current;
+    if (!el) return;
+
+    const observer = new ResizeObserver(() => {
+      const newHeight = el.offsetHeight;
+      if (newHeight > rowHeightRef.current) {
+        const scrollEl = questionScrollRef.current;
+        if (scrollEl) scrollEl.scrollTop = scrollEl.scrollHeight;
+      }
+      rowHeightRef.current = newHeight;
+    });
+
+    observer.observe(el);
+    return () => observer.disconnect();
+  }, [questionScrollRef]);
+
   return (
     <div
+      ref={rowRef}
       data-hitl-focused={isFocused || undefined}
       className={cn('w-full shrink-0 cursor-pointer rounded-[10px] transition-colors duration-200', 'hover:bg-GRAY_20')}
       onClick={() =>
