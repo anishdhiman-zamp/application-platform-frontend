@@ -45,7 +45,7 @@ jobs:
       - name: Resolve tag
         id: resolve
         env:
-          INPUT_TAG: ${{ inputs.image_tag }}
+          INPUT_TAG: ${{ github.event.inputs.image_tag || '' }}
           EVENT_NAME: ${{ github.event_name }}
         run: |
           if [ "$EVENT_NAME" = "workflow_dispatch" ]; then
