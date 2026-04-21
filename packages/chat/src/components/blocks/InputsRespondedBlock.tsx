@@ -203,7 +203,7 @@ export const InputsRespondedBlock: React.FC<InputsRespondedBlockProps> = ({
                 </p>
                 <div className='flex flex-col gap-0.5'>
                   <div className='flex flex-col justify-center py-1.5'>
-                    <p className='f-14-500 text-GRAY_1000 leading-[1.4] whitespace-pre-wrap'>
+                    <p className='text-GRAY_1000 text-sm leading-[1.667] font-[420] whitespace-pre-wrap'>
                       {formatAnswerLine(item)}
                     </p>
                   </div>
