@@ -81,13 +81,15 @@ jobs:
       - uses: technote-space/workflow-conclusion-action@v3
       - name: Update slack message body
         id: body
+        env:
+          REASON_INPUT: ${{ github.event.inputs.reason }}
         run: |
           DEPLOY_RESULT="${{ needs.deploy.result }}"
           EU_RESULT="${{ needs.deploy-eu.result }}"
 
           if [ "${{ github.event_name }}" == 'workflow_dispatch' ]; then
             BRANCH="main (manual)"
-            REASON=" | Reason: ${{ github.event.inputs.reason }}"
+            REASON=" | Reason: ${REASON_INPUT}"
             TRIGGERED_BY=" | Triggered by: ${{ github.actor }}"
           else
             BRANCH="${{ github.event.pull_request.head.ref }}"
