@@ -14,7 +14,7 @@ import {
   useStreamingState,
 } from '@zamp-platform/chat';
 import { useConversationActions, useConversationState } from '@zamp-platform/conversation-stream';
-import { ScrollContainer } from '@zamp-platform/ui';
+import { ScrollContainer, type ScrollContainerRef } from '@zamp-platform/ui';
 import { cn } from '@zamp-platform/ui/utils';
 import AgentPill from 'modules/pace/components/agents/components/AgentPill';
 import TaskStatusCounts from 'modules/pace/module/TaskStatusCounts';
@@ -51,6 +51,7 @@ export interface ChatConversationContentProps {
   onConversationNotFound?: (notFound: boolean) => void;
   addFileReferenceRef: React.RefObject<((ref: { path: string; name: string }) => void) | null>;
   currentUserName: string;
+  scrollContainerRef?: React.RefObject<ScrollContainerRef | null>;
 }
 
 const ChatConversationContent = ({
@@ -64,6 +65,7 @@ const ChatConversationContent = ({
   onConversationNotFound,
   addFileReferenceRef,
   currentUserName,
+  scrollContainerRef,
 }: ChatConversationContentProps) => {
   const router = useRouter();
   const dispatch = useAppDispatch();
@@ -98,6 +100,7 @@ const ChatConversationContent = ({
     browserSessionId,
     taskSummaries,
     isAnalysing,
+    inputsRequired,
   } = useConversationState();
   const { createConversationV2, sendMessage, refetchConversationHistory } = useConversationActions();
   const streamingState = useStreamingState(conversationId ?? ctxConversationId);
@@ -106,6 +109,15 @@ const ChatConversationContent = ({
 
   const isInConversation = Boolean(conversationId || ctxConversationId || hasMessages || streamingState?.is_active);
   const lastMessageSenderType = useMemo(() => messages[messages.length - 1]?.sender_type, [messages]);
+  const lastUserMessageKey = useMemo(() => {
+    for (let i = messages.length - 1; i >= 0; i--) {
+      const msg = messages[i];
+
+      if (msg?.sender_type === 'USER') return msg.id ?? msg.timestamp ?? `idx-${i}`;
+    }
+
+    return null;
+  }, [messages]);
   const isLoadingConversation =
     !isErrorConversationHistory &&
     !streamingState?.is_active &&
@@ -337,12 +349,15 @@ const ChatConversationContent = ({
     >
       <div className='relative flex min-h-0 w-full flex-1 flex-col overflow-hidden'>
         <ScrollContainer
+          ref={scrollContainerRef}
           showScrollToBottom
           showFadeOverlay={!isTaskPopoverOpen}
           enableAnchorScroll
           lastMessageSenderType={lastMessageSenderType}
           isLoading={isLoadingConversation}
           streamingState={streamingState}
+          conversationKey={conversationId ?? ctxConversationId ?? null}
+          lastUserMessageKey={lastUserMessageKey}
           scrollTrigger={messages?.length}
           scrollbarStyle='none'
           scrollClassName={cn(
@@ -401,14 +416,16 @@ const ChatConversationContent = ({
               onOpenChange={handleTaskPopoverOpenChange}
             />
           )}
-          <TaskStatusCounts
-            messages={messages}
-            streamingState={streamingState}
-            conversationId={conversationId ?? ctxConversationId ?? ''}
-            containerRef={taskStatusContainerRef}
-            onOpenChange={handleTaskPopoverOpenChange}
-            onVisibleStatusesChange={!isUninitializedConversationHistory ? refetchConversationHistory : undefined}
-          />
+          {!inputsRequired?.length && (
+            <TaskStatusCounts
+              messages={messages}
+              streamingState={streamingState}
+              conversationId={conversationId ?? ctxConversationId ?? ''}
+              containerRef={taskStatusContainerRef}
+              onOpenChange={handleTaskPopoverOpenChange}
+              onVisibleStatusesChange={!isUninitializedConversationHistory ? refetchConversationHistory : undefined}
+            />
+          )}
         </div>
       </div>
     </ChatActionsProvider>
