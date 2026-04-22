@@ -14,6 +14,7 @@ Automates commits with Conventional Commits format, PR creation via GitHub CLI, 
 3. **Check for `gh` CLI before PR operations** - Install if missing
 4. **ALWAYS check for console.log statements before committing** - Remove debug logs before pushing
 5. **ALWAYS check for excessive comments before committing** - Keep only relevant, necessary comments
+6. **PRs targeting `main` MUST use a `hotfix/` branch name** - Before creating a PR to `main`, check the current branch name. If it does not start with `hotfix/`, rename it: `git branch -m hotfix/<original-name>`, push the renamed branch, and delete the old remote branch. Never create a PR to `main` from a branch that doesn't start with `hotfix/`.
 
 ## Commit Workflow
 
@@ -146,6 +147,28 @@ gh pr edit --body "<updated_pr_template>"
 ## PR Creation Workflow (Only When User Asks)
 
 **CRITICAL**: Only proceed with PR creation if user explicitly requests it.
+
+### Step 0: Enforce Branch Naming for PRs to `main` (MANDATORY)
+
+Before creating any PR, check the target base branch. If the PR targets `main`, the current branch **must** start with `hotfix/`.
+
+```bash
+# Get current branch name
+BRANCH=$(git rev-parse --abbrev-ref HEAD)
+
+# Check if targeting main and branch doesn't start with hotfix/
+if [[ "$BRANCH" != hotfix/* ]]; then
+  # Rename branch locally
+  git branch -m "hotfix/$BRANCH"
+  # Push renamed branch and remove old remote branch
+  git push origin "hotfix/$BRANCH"
+  git push origin --delete "$BRANCH" 2>/dev/null || true
+  # Track the new remote branch
+  git branch --set-upstream-to="origin/hotfix/$BRANCH" "hotfix/$BRANCH"
+fi
+```
+
+If targeting any branch other than `main`, this check is skipped.
 
 ### Step 1: Check GitHub CLI Installation
 
@@ -315,6 +338,7 @@ Commit Workflow:
 - [ ] PR description updated (if PR exists)
 
 PR Creation (only if requested):
+- [ ] Branch starts with `hotfix/` if PR targets `main` (rename if needed)
 - [ ] console.log check passed (no debug logs)
 - [ ] Comment check passed (only relevant comments)
 - [ ] gh CLI installed and authenticated
