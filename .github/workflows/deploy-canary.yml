@@ -1,4 +1,4 @@
-name: Deploy Canary
+name: Deploy to Beta
 
 on:
   pull_request:

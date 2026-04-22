@@ -1,10 +1,11 @@
-name: Deploy Production
+name: Hotfix Deploy to GA
 
 on:
-  push:
+  pull_request:
     branches:
       - main
-      - development
+    types:
+      - closed
 
 env:
   VERCEL_ORG_ID: ${{ secrets.VERCEL_ORG_ID }}
@@ -13,11 +14,13 @@ env:
 jobs:
   deploy:
     name: Deploy to Vercel
+    if: |
+      github.event.pull_request.merged == true &&
+      startsWith(github.event.pull_request.head.ref, 'hotfix/')
     runs-on: ubuntu-latest
     permissions:
       contents: read
       deployments: write
-      pull-requests: write
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
@@ -32,54 +35,24 @@ jobs:
         run: npm install --global vercel@latest
 
       - name: Pull Vercel Environment Information
-        run: vercel pull --yes --environment=${{ github.ref == 'refs/heads/main' && 'production' || 'preview' }} --token=${{ secrets.VERCEL_TOKEN }}
+        run: vercel pull --yes --environment=production --token=${{ secrets.VERCEL_TOKEN }}
 
       - name: Build Project Artifacts
-        run: vercel build ${{ github.ref == 'refs/heads/main' && '--prod' || '' }} --token=${{ secrets.VERCEL_TOKEN }}
+        run: vercel build --prod --token=${{ secrets.VERCEL_TOKEN }}
 
       - name: Deploy to Vercel
         id: deploy
         run: |
-          DEPLOYMENT_URL=$(vercel deploy --prebuilt ${{ github.ref == 'refs/heads/main' && '--prod' || '' }} --token=${{ secrets.VERCEL_TOKEN }})
+          DEPLOYMENT_URL=$(vercel deploy --prebuilt --prod --token=${{ secrets.VERCEL_TOKEN }})
           echo "deployment_url=$DEPLOYMENT_URL" >> $GITHUB_OUTPUT
           echo "### Deployment successful!" >> $GITHUB_STEP_SUMMARY
           echo "**URL:** $DEPLOYMENT_URL" >> $GITHUB_STEP_SUMMARY
 
-      - name: Comment PR with deployment URL
-        if: github.event_name == 'pull_request'
-        uses: actions/github-script@v7
-        with:
-          script: |
-            const marker = '<!-- vercel-deployment-comment -->';
-            const body = `${marker}\n### Preview Deployment Ready!\n\n**URL:** ${{ steps.deploy.outputs.deployment_url }}\n\nDeployed successfully via GitHub Actions`;
-
-            const { data: comments } = await github.rest.issues.listComments({
-              owner: context.repo.owner,
-              repo: context.repo.repo,
-              issue_number: context.issue.number
-            });
-
-            const existingComment = comments.find(comment => comment.body.includes(marker));
-
-            if (existingComment) {
-              await github.rest.issues.updateComment({
-                owner: context.repo.owner,
-                repo: context.repo.repo,
-                comment_id: existingComment.id,
-                body: body
-              });
-            } else {
-              await github.rest.issues.createComment({
-                owner: context.repo.owner,
-                repo: context.repo.repo,
-                issue_number: context.issue.number,
-                body: body
-              });
-            }
-
   deploy-eu:
     name: Deploy to AWS EU
-    if: github.ref == 'refs/heads/main'
+    if: |
+      github.event.pull_request.merged == true &&
+      startsWith(github.event.pull_request.head.ref, 'hotfix/')
     uses: ./.github/workflows/aws-prd-eu-build-deploy.yaml
     with:
       ref: ${{ github.sha }}
@@ -105,15 +78,11 @@ jobs:
           elif [ "$EU_RESULT" == 'failure' ]; then
             echo "SLACK_MESSAGE=AWS EU Deploy Failed :x: | Branch: ${{ github.ref_name }} | Vercel passed but EU deployment failed" >> $GITHUB_OUTPUT
           elif [ "${{ env.WORKFLOW_CONCLUSION }}" == 'success' ]; then
-            if [ "${{ github.ref_name }}" == 'main' ]; then
-              echo "SLACK_MESSAGE=Deployment Success :white_check_mark: | Branch: ${{ github.ref_name }} | Vercel + AWS EU" >> $GITHUB_OUTPUT
-            else
-              echo "SLACK_MESSAGE=Deployment Success :white_check_mark: | Branch: ${{ github.ref_name }} | Vercel only" >> $GITHUB_OUTPUT
-            fi
+            echo "SLACK_MESSAGE=Hotfix Deployment Success :white_check_mark: | Branch: ${{ github.event.pull_request.head.ref }} | Vercel + AWS EU" >> $GITHUB_OUTPUT
           elif [ "${{ env.WORKFLOW_CONCLUSION }}" == 'cancelled' ]; then
-            echo "SLACK_MESSAGE=Deployment Cancelled :grey_exclamation: | Branch: ${{ github.ref_name }}" >> $GITHUB_OUTPUT
+            echo "SLACK_MESSAGE=Hotfix Deployment Cancelled :grey_exclamation: | Branch: ${{ github.event.pull_request.head.ref }}" >> $GITHUB_OUTPUT
           else
-            echo "SLACK_MESSAGE=Deployment Failed :x: | Branch: ${{ github.ref_name }}" >> $GITHUB_OUTPUT
+            echo "SLACK_MESSAGE=Hotfix Deployment Failed :x: | Branch: ${{ github.event.pull_request.head.ref }}" >> $GITHUB_OUTPUT
           fi
       - name: Slack Notification
         uses: Zampfi/town_crier@main
@@ -122,7 +91,7 @@ jobs:
           SLACK_ICON: https://media-exp1.licdn.com/dms/image/C4D0BAQEsXCky1jDBjw/company-logo_200_200/0/1650191766210?e=2147483647&v=beta&t=skUuL49MkcdxJZmEEN2wy5E7Xqy176Ar7EPsKoSMUEE
           SLACK_MESSAGE: ${{ steps.body.outputs.SLACK_MESSAGE }}
           SLACK_TITLE: Production Deployment
-          ZAMP_ENV: ${{ github.ref == 'refs/heads/main' && 'production' || 'preview' }}
+          ZAMP_ENV: production
           SLACK_FOOTER: '<${{ github.server_url }}/${{ github.repository }}|${{ github.repository }}>'
           SLACK_USERNAME: Zamp-Devops
           SLACK_WEBHOOK: ${{ secrets.SLACK_WEBHOOK_URL_APPLICATION_PLATFORM_FRONTEND }}
