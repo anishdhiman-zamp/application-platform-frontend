@@ -11,12 +11,5 @@
     "env": {
       "NODE_OPTIONS": "--max-old-space-size=6144"
     }
-  },
-  "rewrites": [
-    {
-      "source": "/(.*)",
-      "has": [{ "type": "cookie", "key": "org_is_beta", "value": "true" }],
-      "destination": "https://application-platform-frontend-relea.vercel.app/$1"
-    }
-  ]
+  }
 }

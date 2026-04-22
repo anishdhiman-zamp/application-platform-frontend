@@ -2,13 +2,6 @@ name: AWS Staging Application Platform Frontend - Build and Deploy
 
 on:
   workflow_dispatch:
-  push:
-    branches:
-      - main
-    paths-ignore:
-      - "helm/prd-values.yaml"
-      - "helm/stg-values.yaml"
-      - "helm/dev-values.yaml"
 
 env:
   APP_NAME: application-platform-frontend
