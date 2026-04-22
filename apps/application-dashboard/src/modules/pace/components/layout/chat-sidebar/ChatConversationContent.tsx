@@ -109,6 +109,15 @@ const ChatConversationContent = ({
 
   const isInConversation = Boolean(conversationId || ctxConversationId || hasMessages || streamingState?.is_active);
   const lastMessageSenderType = useMemo(() => messages[messages.length - 1]?.sender_type, [messages]);
+  const lastUserMessageKey = useMemo(() => {
+    for (let i = messages.length - 1; i >= 0; i--) {
+      const msg = messages[i];
+
+      if (msg?.sender_type === 'USER') return msg.id ?? msg.timestamp ?? `idx-${i}`;
+    }
+
+    return null;
+  }, [messages]);
   const isLoadingConversation =
     !isErrorConversationHistory &&
     !streamingState?.is_active &&
@@ -347,6 +356,8 @@ const ChatConversationContent = ({
           lastMessageSenderType={lastMessageSenderType}
           isLoading={isLoadingConversation}
           streamingState={streamingState}
+          conversationKey={conversationId ?? ctxConversationId ?? null}
+          lastUserMessageKey={lastUserMessageKey}
           scrollTrigger={messages?.length}
           scrollbarStyle='none'
           scrollClassName={cn(

@@ -60,6 +60,8 @@ interface ScrollContainerProps {
   isLoading?: boolean;
   /** Streaming state — triggers spacer recalculation as response grows */
   streamingState?: unknown;
+  conversationKey?: string | number | null;
+  lastUserMessageKey?: string | number | null;
 }
 
 const SNAP_BOTTOM_THRESHOLD = 2;
@@ -85,24 +87,30 @@ const ScrollContainer = forwardRef<ScrollContainerRef, ScrollContainerProps>(
       lastMessageSenderType,
       isLoading = false,
       streamingState,
+      conversationKey,
+      lastUserMessageKey,
     },
     ref,
   ) => {
+    // refs
+    const isInitialScrollRef = useRef(true);
+    const isAutoScrollActiveRef = useRef(true);
+    const previousIsLoadingRef = useRef(false);
+    const isProgrammaticScrollRef = useRef(false);
     const scrollRef = useRef<HTMLDivElement>(null);
+    const spacerRef = useRef<HTMLDivElement>(null);
+    const userMsgAnchorRef = useRef<number | null>(null);
+    const contentWrapperRef = useRef<HTMLDivElement>(null);
+    const previousConversationKeyRef = useRef(conversationKey);
+    const lastUserScrollLengthRef = useRef<number | null>(null);
+    const previousLastUserMessageKeyRef = useRef(lastUserMessageKey);
+
+    // state
     const [canScrollTop, setCanScrollTop] = useState(false);
     const [canScrollBottom, setCanScrollBottom] = useState(false);
     const [showButton, setShowButton] = useState(false);
-    const isInitialScrollRef = useRef(true);
-    const isProgrammaticScrollRef = useRef(false);
-    const isAutoScrollActiveRef = useRef(true);
 
-    // Anchor mode refs
-    const spacerRef = useRef<HTMLDivElement>(null);
-    const contentWrapperRef = useRef<HTMLDivElement>(null);
-    const previousIsLoadingRef = useRef(false);
-    const lastUserScrollLengthRef = useRef<number | null>(null);
-    const resizeObserverRef = useRef<ResizeObserver | null>(null);
-    const userMsgAnchorRef = useRef<number | null>(null);
+    const showOverlays = showFadeOverlay && !disableFadeOverlay;
 
     const updateScrollState = useCallback(() => {
       const el = scrollRef.current;
@@ -126,30 +134,49 @@ const ScrollContainer = forwardRef<ScrollContainerRef, ScrollContainerProps>(
       [bottomThreshold],
     );
 
-    // --- Anchor mode functions ---
-
     const updateSpacerHeight = useCallback(() => {
       const container = scrollRef.current;
       const spacer = spacerRef.current;
-      const anchorTop = userMsgAnchorRef.current;
 
-      if (!container || !spacer || anchorTop === null) return;
+      if (!container || !spacer || userMsgAnchorRef.current === null) return;
 
-      if (container.querySelector('[data-msg-expanded]')) return;
+      // Re-measure live: content above the anchor (thinking blocks, images, streaming markdown)
+      // can grow after the anchor was first captured, making the cached offsetTop stale.
+      const userMessages = container.querySelectorAll<HTMLElement>('[data-sender-type="USER"]');
+      const lastUserMessage = userMessages[userMessages.length - 1];
+
+      if (!lastUserMessage) return;
+
+      let anchorTop = 0;
+      let el: HTMLElement | null = lastUserMessage;
+
+      while (el && el !== container) {
+        anchorTop += el.offsetTop;
+        el = el.offsetParent as HTMLElement | null;
+      }
+
+      if (el !== container) return;
+
+      userMsgAnchorRef.current = anchorTop;
 
       const spacerCurrentHeight = spacer.offsetHeight;
       const contentHeight = container.scrollHeight - spacerCurrentHeight;
       const contentFromAnchor = Math.max(0, contentHeight - anchorTop);
       const newSpacerHeight = Math.max(0, container.clientHeight - contentFromAnchor - USER_MESSAGE_TOP_PADDING);
 
+      // Sub-pixel changes cause jitter during streaming (each chunk toggles the value by <1px).
+      // Only write when the change is user-perceptible.
+      if (Math.abs(newSpacerHeight - spacerCurrentHeight) < 1) return;
+
       spacer.style.height = `${newSpacerHeight}px`;
 
-      if (newSpacerHeight > spacerCurrentHeight) {
-        const targetScrollTop = anchorTop - USER_MESSAGE_TOP_PADDING;
+      // Clamp scrollTop if it now exceeds the scrollable range (spacer shrunk).
+      // Reading container.scrollHeight after the style write forces layout and reflects
+      // the new spacer height, so no delta arithmetic is needed.
+      const maxScrollTop = Math.max(0, container.scrollHeight - container.clientHeight);
 
-        if (Math.abs(container.scrollTop - targetScrollTop) < container.clientHeight * 0.5) {
-          container.scrollTop = targetScrollTop;
-        }
+      if (container.scrollTop > maxScrollTop) {
+        container.scrollTop = maxScrollTop;
       }
     }, []);
 
@@ -161,14 +188,7 @@ const ScrollContainer = forwardRef<ScrollContainerRef, ScrollContainerProps>(
       spacer.style.minHeight = '';
     }, []);
 
-    // Timer ref for the chatScrollEnd fallback (cleared when scrollend fires first)
-    const scrollEndTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
-
     const dispatchScrollEnd = useCallback(() => {
-      if (scrollEndTimerRef.current) {
-        clearTimeout(scrollEndTimerRef.current);
-        scrollEndTimerRef.current = null;
-      }
       scrollRef.current?.dispatchEvent(new CustomEvent('chatScrollEnd', { bubbles: false }));
     }, []);
 
@@ -193,8 +213,8 @@ const ScrollContainer = forwardRef<ScrollContainerRef, ScrollContainerProps>(
           }
           container.scrollTo({ top: container.scrollHeight, behavior: isInitial ? 'instant' : 'smooth' });
         } else {
-          // Use offsetTop chain instead of getBoundingClientRect so that CSS
-          // transforms don't skew the anchor position.
+          // offsetTop chain over getBoundingClientRect: CSS transforms on entrance animations
+          // would otherwise skew the anchor position.
           let anchorTop = 0;
           let el: HTMLElement | null = lastUserMessage;
 
@@ -223,14 +243,11 @@ const ScrollContainer = forwardRef<ScrollContainerRef, ScrollContainerProps>(
           });
         }
 
-        // Dispatch chatScrollEnd in the next frame so Message components
-        // can start their entrance animation.
+        // Message components wait for chatScrollEnd before starting their entrance animation.
         requestAnimationFrame(dispatchScrollEnd);
       },
       [dispatchScrollEnd],
     );
-
-    // --- Common functions ---
 
     const handleScroll = useCallback(() => {
       if (isProgrammaticScrollRef.current) {
@@ -244,11 +261,7 @@ const ScrollContainer = forwardRef<ScrollContainerRef, ScrollContainerProps>(
       if (el) {
         const distFromBottom = el.scrollHeight - el.scrollTop - el.clientHeight;
 
-        if (distFromBottom <= SNAP_BOTTOM_THRESHOLD) {
-          isAutoScrollActiveRef.current = true;
-        } else {
-          isAutoScrollActiveRef.current = false;
-        }
+        isAutoScrollActiveRef.current = distFromBottom <= SNAP_BOTTOM_THRESHOLD;
       }
 
       const isAtBottom = checkIfAtBottom();
@@ -291,7 +304,14 @@ const ScrollContainer = forwardRef<ScrollContainerRef, ScrollContainerProps>(
       [scrollToBottom, scrollToTop, checkIfAtBottom],
     );
 
-    // --- Scroll trigger effect (handles both anchor and default modes) ---
+    const handleScrollToBottomClick = useCallback(() => {
+      if (enableAnchorScroll) {
+        userMsgAnchorRef.current = null;
+      }
+      isAutoScrollActiveRef.current = true;
+      scrollToBottom('smooth');
+    }, [scrollToBottom, enableAnchorScroll]);
+
     useEffect(() => {
       if (scrollTrigger === undefined) return;
 
@@ -319,6 +339,9 @@ const ScrollContainer = forwardRef<ScrollContainerRef, ScrollContainerProps>(
         if (lastMessageSenderType === SenderType.USER) {
           if (lastUserScrollLengthRef.current !== scrollTrigger) {
             lastUserScrollLengthRef.current = scrollTrigger;
+            // Mark the current key as handled so the lastUserMessageKey effect doesn't
+            // schedule a duplicate scrollToLastUserMessage on the same commit.
+            previousLastUserMessageKeyRef.current = lastUserMessageKey;
             requestAnimationFrame(() => {
               scrollToLastUserMessage();
               updateScrollState();
@@ -335,7 +358,6 @@ const ScrollContainer = forwardRef<ScrollContainerRef, ScrollContainerProps>(
         return;
       }
 
-      // Default mode (non-anchor): scroll to bottom
       const behavior: ScrollBehavior = isInitialScrollRef.current ? 'instant' : 'smooth';
 
       isAutoScrollActiveRef.current = true;
@@ -352,12 +374,13 @@ const ScrollContainer = forwardRef<ScrollContainerRef, ScrollContainerProps>(
       enableAnchorScroll,
       isLoading,
       lastMessageSenderType,
+      conversationKey,
+      lastUserMessageKey,
       scrollToLastUserMessage,
       updateSpacerHeight,
       updateScrollState,
     ]);
 
-    // --- Loading reset (anchor mode) ---
     useEffect(() => {
       if (!enableAnchorScroll) return;
 
@@ -370,21 +393,46 @@ const ScrollContainer = forwardRef<ScrollContainerRef, ScrollContainerProps>(
       previousIsLoadingRef.current = isLoading;
     }, [isLoading, enableAnchorScroll, resetSpacer]);
 
-    // --- Streaming spacer update (anchor mode) ---
+    // Reset synchronously during render: the scroll-trigger effect runs in declaration order
+    // and would otherwise read a stale `isInitialScrollRef` on the same commit the switch happens.
+    if (enableAnchorScroll && previousConversationKeyRef.current !== conversationKey) {
+      previousConversationKeyRef.current = conversationKey;
+      isInitialScrollRef.current = true;
+      lastUserScrollLengthRef.current = 0;
+      userMsgAnchorRef.current = null;
+      previousLastUserMessageKeyRef.current = null;
+    }
+
+    // Re-anchor when the latest user message's identity changes.
+    useEffect(() => {
+      if (!enableAnchorScroll) return;
+      if (lastUserMessageKey === null || lastUserMessageKey === undefined) return;
+      if (previousLastUserMessageKeyRef.current === lastUserMessageKey) return;
+
+      const wasFirstAnchor =
+        previousLastUserMessageKeyRef.current === null || previousLastUserMessageKeyRef.current === undefined;
+
+      previousLastUserMessageKeyRef.current = lastUserMessageKey;
+
+      if (isInitialScrollRef.current) return;
+
+      requestAnimationFrame(() => {
+        scrollToLastUserMessage(wasFirstAnchor);
+      });
+    }, [lastUserMessageKey, enableAnchorScroll, scrollToLastUserMessage]);
+
     useEffect(() => {
       if (!enableAnchorScroll) return;
 
+      // Spacer recompute is handled by the content-wrapper ResizeObserver. Here we only
+      // refresh the scroll-to-bottom button visibility and the overlay state.
       if (!isInitialScrollRef.current) {
-        const isAtBottom = checkIfAtBottom();
-
-        setShowButton(!isAtBottom);
-        updateSpacerHeight();
+        setShowButton(!checkIfAtBottom());
       }
 
       updateScrollState();
-    }, [streamingState, enableAnchorScroll, checkIfAtBottom, updateScrollState, updateSpacerHeight]);
+    }, [streamingState, enableAnchorScroll, checkIfAtBottom, updateScrollState]);
 
-    // --- Auto scroll to bottom (default mode) ---
     useEffect(() => {
       if (!autoScrollToBottom) return;
 
@@ -422,7 +470,6 @@ const ScrollContainer = forwardRef<ScrollContainerRef, ScrollContainerProps>(
       };
     }, [autoScrollToBottom]);
 
-    // --- ResizeObserver for container size changes (anchor mode) ---
     useEffect(() => {
       if (!enableAnchorScroll) return;
 
@@ -430,19 +477,77 @@ const ScrollContainer = forwardRef<ScrollContainerRef, ScrollContainerProps>(
 
       if (!el) return;
 
+      // Preserve the user's visual position across container width changes (sidebar ↔ expanded):
+      // reflow shifts every element's offsetTop, so restore scroll relative to the top-most message.
+      let previousWidth = el.clientWidth;
+      let anchorElement: HTMLElement | null = null;
+      let anchorOffset = 0;
+
       const observer = new ResizeObserver(() => {
-        if (!isInitialScrollRef.current) {
-          updateSpacerHeight();
-          setShowButton(!checkIfAtBottom());
+        if (isInitialScrollRef.current) {
+          previousWidth = el.clientWidth;
+          anchorElement = null;
+          return;
+        }
+
+        const widthChanged = Math.abs(el.clientWidth - previousWidth) > 0.5;
+
+        previousWidth = el.clientWidth;
+
+        updateSpacerHeight();
+        setShowButton(!checkIfAtBottom());
+
+        // Restore the user's visual position using the pre-resize
+        // anchor. This runs AFTER updateSpacerHeight so spacer is correct for the new width
+        if (widthChanged && anchorElement && el.contains(anchorElement)) {
+          const newRect = anchorElement.getBoundingClientRect();
+          const newContainerTop = el.getBoundingClientRect().top;
+          const delta = newRect.top - newContainerTop - anchorOffset;
+
+          if (Math.abs(delta) > 0.5) el.scrollTop += delta;
         }
       });
 
       observer.observe(el);
 
-      return () => observer.disconnect();
+      // Refresh the anchor element lazily on scroll so the resize handler has a fresh target.
+      // rAF-throttled to avoid running a querySelectorAll on every scroll event.
+      const updateAnchor = () => {
+        const candidates = el.querySelectorAll<HTMLElement>('[data-sender-type]');
+        const containerTop = el.getBoundingClientRect().top;
+
+        for (const candidate of candidates) {
+          const rect = candidate.getBoundingClientRect();
+
+          if (rect.bottom > containerTop) {
+            anchorElement = candidate;
+            anchorOffset = rect.top - containerTop;
+            return;
+          }
+        }
+
+        anchorElement = null;
+      };
+
+      let anchorRafId: number | null = null;
+      const scheduleUpdateAnchor = () => {
+        if (anchorRafId !== null) return;
+        anchorRafId = requestAnimationFrame(() => {
+          anchorRafId = null;
+          updateAnchor();
+        });
+      };
+
+      updateAnchor();
+      el.addEventListener('scroll', scheduleUpdateAnchor, { passive: true });
+
+      return () => {
+        observer.disconnect();
+        el.removeEventListener('scroll', scheduleUpdateAnchor);
+        if (anchorRafId !== null) cancelAnimationFrame(anchorRafId);
+      };
     }, [enableAnchorScroll, updateSpacerHeight, checkIfAtBottom]);
 
-    // --- ResizeObserver for content changes (anchor mode) ---
     useEffect(() => {
       if (!enableAnchorScroll) return;
 
@@ -450,30 +555,24 @@ const ScrollContainer = forwardRef<ScrollContainerRef, ScrollContainerProps>(
 
       if (!node) return;
 
+      // rAF-throttled: streaming fires ResizeObserver per chunk; running updateSpacerHeight
+      // synchronously each time causes layout thrash that shows up as scroll jitter.
+      let rafId: number | null = null;
       const observer = new ResizeObserver(() => {
-        if (!isInitialScrollRef.current) {
+        if (isInitialScrollRef.current || rafId !== null) return;
+        rafId = requestAnimationFrame(() => {
+          rafId = null;
           updateSpacerHeight();
-        }
+        });
       });
 
       observer.observe(node);
-      resizeObserverRef.current = observer;
 
       return () => {
         observer.disconnect();
-        resizeObserverRef.current = null;
+        if (rafId !== null) cancelAnimationFrame(rafId);
       };
     }, [enableAnchorScroll, updateSpacerHeight]);
-
-    const handleScrollToBottomClick = useCallback(() => {
-      if (enableAnchorScroll) {
-        userMsgAnchorRef.current = null;
-      }
-      isAutoScrollActiveRef.current = true;
-      scrollToBottom('smooth');
-    }, [scrollToBottom, enableAnchorScroll]);
-
-    const showOverlays = showFadeOverlay && !disableFadeOverlay;
 
     /** Fade overlays read `canScrollTop` / `canScrollBottom`; sync on mount and when content/size changes (not only after `scroll`). */
     useLayoutEffect(() => {
