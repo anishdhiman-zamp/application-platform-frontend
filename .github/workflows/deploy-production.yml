@@ -60,7 +60,10 @@ jobs:
 
   slack-notification:
     name: Slack Notification
-    if: always()
+    if: |
+      always() &&
+      github.event.pull_request.merged == true &&
+      startsWith(github.event.pull_request.head.ref, 'hotfix/')
     runs-on: ubuntu-latest
     needs:
       - deploy
@@ -74,9 +77,9 @@ jobs:
           EU_RESULT="${{ needs.deploy-eu.result }}"
 
           if [ "$DEPLOY_RESULT" == 'failure' ]; then
-            echo "SLACK_MESSAGE=Vercel Deploy Failed :x: | Branch: ${{ github.ref_name }}" >> $GITHUB_OUTPUT
+            echo "SLACK_MESSAGE=Vercel Deploy Failed :x: | Branch: ${{ github.event.pull_request.head.ref }}" >> $GITHUB_OUTPUT
           elif [ "$EU_RESULT" == 'failure' ]; then
-            echo "SLACK_MESSAGE=AWS EU Deploy Failed :x: | Branch: ${{ github.ref_name }} | Vercel passed but EU deployment failed" >> $GITHUB_OUTPUT
+            echo "SLACK_MESSAGE=AWS EU Deploy Failed :x: | Branch: ${{ github.event.pull_request.head.ref }} | Vercel passed but EU deployment failed" >> $GITHUB_OUTPUT
           elif [ "${{ env.WORKFLOW_CONCLUSION }}" == 'success' ]; then
             echo "SLACK_MESSAGE=Hotfix Deployment Success :white_check_mark: | Branch: ${{ github.event.pull_request.head.ref }} | Vercel + AWS EU" >> $GITHUB_OUTPUT
           elif [ "${{ env.WORKFLOW_CONCLUSION }}" == 'cancelled' ]; then
