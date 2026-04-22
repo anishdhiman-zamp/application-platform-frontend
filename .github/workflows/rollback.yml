@@ -1,4 +1,4 @@
-name: Rollback Deployment
+name: Rollback GA
 
 on:
   workflow_dispatch:
