@@ -1,0 +1,41 @@
+name: Release Sync Check
+
+on:
+  pull_request:
+    branches: [release]
+
+jobs:
+  check-sync-pr:
+    name: Block if main → release sync PR is open
+    runs-on: ubuntu-latest
+    timeout-minutes: 2
+    permissions:
+      pull-requests: read
+    steps:
+      - name: Check for open main → release sync PR
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          GITHUB_REPOSITORY: ${{ github.repository }}
+          HEAD_REF: ${{ github.event.pull_request.head.ref }}
+        run: |
+          if [ "$HEAD_REF" = "main" ]; then
+            echo "This IS the main → release sync PR — skipping."
+            exit 0
+          fi
+
+          OPEN_SYNC=$(gh pr list --repo "$GITHUB_REPOSITORY" \
+            --base release --head main --state open \
+            --json number,url,title -q '.[0]')
+
+          if [ -n "$OPEN_SYNC" ]; then
+            URL=$(echo "$OPEN_SYNC" | jq -r .url)
+            TITLE=$(echo "$OPEN_SYNC" | jq -r .title)
+            echo "::error::A main → release sync PR is open and must be merged first:"
+            echo "  $TITLE"
+            echo "  $URL"
+            echo ""
+            echo "Merge the sync PR, then re-run this check."
+            exit 1
+          fi
+
+          echo "No open main → release sync PR — OK to proceed."

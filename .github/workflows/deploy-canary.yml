@@ -1,9 +1,6 @@
-name: Deploy Canary
+name: Deploy to Beta
 
 on:
-  push:
-    branches:
-      - release
   pull_request:
     branches:
       - release
@@ -21,7 +18,7 @@ env:
 jobs:
   deploy:
     name: Deploy to Vercel
-    if: github.event_name == 'push' || github.event.pull_request.merged == true
+    if: github.event.pull_request.merged == true
     runs-on: ubuntu-latest
     permissions:
       contents: read
@@ -51,7 +48,7 @@ jobs:
         run: |
           DEPLOYMENT_URL=$(vercel deploy --prebuilt --prod --token=${{ secrets.VERCEL_TOKEN }})
           echo "deployment_url=$DEPLOYMENT_URL" >> $GITHUB_OUTPUT
-          echo "### Canary Deployment successful!" >> $GITHUB_STEP_SUMMARY
+          echo "### Beta Deployment successful!" >> $GITHUB_STEP_SUMMARY
           echo "**URL:** $DEPLOYMENT_URL" >> $GITHUB_STEP_SUMMARY
 
       - name: Comment PR with deployment URL
@@ -60,7 +57,7 @@ jobs:
         with:
           script: |
             const marker = '<!-- vercel-deployment-comment -->';
-            const body = `${marker}\n### Canary Deployment Ready!\n\n**URL:** ${{ steps.deploy.outputs.deployment_url }}\n\nDeployed successfully via GitHub Actions`;
+            const body = `${marker}\n### Beta Deployment Ready!\n\n**URL:** ${{ steps.deploy.outputs.deployment_url }}\n\nDeployed successfully via GitHub Actions`;
 
             const { data: comments } = await github.rest.issues.listComments({
               owner: context.repo.owner,
@@ -100,13 +97,13 @@ jobs:
           DEPLOY_RESULT="${{ needs.deploy.result }}"
 
           if [ "$DEPLOY_RESULT" == 'failure' ]; then
-            echo "SLACK_MESSAGE=Canary Deploy Failed :x: | Branch: ${{ github.ref_name }}" >> $GITHUB_OUTPUT
+            echo "SLACK_MESSAGE=Beta Deploy Failed :x: | Branch: ${{ github.ref_name }}" >> $GITHUB_OUTPUT
           elif [ "${{ env.WORKFLOW_CONCLUSION }}" == 'success' ]; then
-            echo "SLACK_MESSAGE=Canary Deployment Success :white_check_mark: | Branch: ${{ github.ref_name }}" >> $GITHUB_OUTPUT
+            echo "SLACK_MESSAGE=Beta Deployment Success :white_check_mark: | Branch: ${{ github.ref_name }}" >> $GITHUB_OUTPUT
           elif [ "${{ env.WORKFLOW_CONCLUSION }}" == 'cancelled' ]; then
-            echo "SLACK_MESSAGE=Canary Deployment Cancelled :grey_exclamation: | Branch: ${{ github.ref_name }}" >> $GITHUB_OUTPUT
+            echo "SLACK_MESSAGE=Beta Deployment Cancelled :grey_exclamation: | Branch: ${{ github.ref_name }}" >> $GITHUB_OUTPUT
           else
-            echo "SLACK_MESSAGE=Canary Deployment Failed :x: | Branch: ${{ github.ref_name }}" >> $GITHUB_OUTPUT
+            echo "SLACK_MESSAGE=Beta Deployment Failed :x: | Branch: ${{ github.ref_name }}" >> $GITHUB_OUTPUT
           fi
       - name: Slack Notification
         uses: Zampfi/town_crier@main
@@ -114,7 +111,7 @@ jobs:
           SLACK_COLOR: ${{ env.WORKFLOW_CONCLUSION }}
           SLACK_ICON: https://media-exp1.licdn.com/dms/image/C4D0BAQEsXCky1jDBjw/company-logo_200_200/0/1650191766210?e=2147483647&v=beta&t=skUuL49MkcdxJZmEEN2wy5E7Xqy176Ar7EPsKoSMUEE
           SLACK_MESSAGE: ${{ steps.body.outputs.SLACK_MESSAGE }}
-          SLACK_TITLE: Canary Deployment
+          SLACK_TITLE: Beta Deployment
           ZAMP_ENV: production
           SLACK_FOOTER: '<${{ github.server_url }}/${{ github.repository }}|${{ github.repository }}>'
           SLACK_USERNAME: Zamp-Devops

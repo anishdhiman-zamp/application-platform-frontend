@@ -30,7 +30,7 @@
     "@types/react-dom": "^19",
     "eslint-plugin-tsdoc": "0.5.2",
     "jest": "^29.7.0",
-    "jest-environment-jsdom": "^29.7.0",
+    "jest-environment-jsdom": "^30.3.0",
     "ts-jest": "^29.2.5",
     "typescript": "^5"
   }
