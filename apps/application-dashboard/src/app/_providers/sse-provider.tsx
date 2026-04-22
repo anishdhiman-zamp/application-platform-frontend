@@ -560,7 +560,11 @@ export const SSEProvider: React.FC<SSEProviderProps> = ({ children, sseEventBus 
   const handleSSEEvent = (event: MessageEvent) => {
     try {
       const data = JSON.parse(event.data);
-      const eventKey = data?.type ?? data?.event_type;
+      // `event_type` is the canonical topic the event-bus is keyed on
+      // (e.g. `task`, `task_update`). `type` is a sub-discriminator the BE
+      // uses for lifecycle events like `task_created` — useful inside
+      // handlers but not as the routing key.
+      const eventKey = data?.event_type ?? data?.type;
 
       if (eventKey) {
         sseEventBus.publish(eventKey, data);
@@ -580,12 +584,10 @@ export const SSEProvider: React.FC<SSEProviderProps> = ({ children, sseEventBus 
     );
     const taskSub = sseEventBus.subscribe(EVENT_TYPE.TASK, (data) => {
       handleGlobalMessageEvent(taskPayloadResolver, data);
-
-      const payload = data.payload as MapAny;
-
-      if (payload?.type === SSEEventType.MESSAGE_STOP) {
-        invalidateTaskCaches();
-      }
+      // Task lifecycle events (create/update/...) all need to refresh the
+      // task list + counts — the older MESSAGE_STOP-only guard missed
+      // creations so the agent tasks view stayed stale after a new run.
+      invalidateTaskCaches();
     });
     const taskUpdateSub = sseEventBus.subscribe(EVENT_TYPE.TASK_UPDATE, handleGlobalTaskUpdate);
     const convCreatedSub = sseEventBus.subscribe(EVENT_TYPE.CONVERSATION_CREATED, () => {
