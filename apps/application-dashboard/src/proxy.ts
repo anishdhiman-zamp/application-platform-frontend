@@ -309,21 +309,24 @@ const handleAuthenticatedRoutes = async (request: NextRequest) => {
 export async function proxy(request: NextRequest) {
   const { pathname, search } = request.nextUrl;
 
+  // Derive canary status from the active org directly — more reliable than the cookie
+  // which can lag by one request after an org switch.
+  const activeOrgId = getServerSideCookie(request, ACTIVE_ORG_ID_COOKIE);
+  const isCanary = !IS_CANARY_DEPLOYMENT && CANARY_URL && !!activeOrgId && BETA_ORG_IDS.has(activeOrgId);
+
   // Static assets bypass auth logic entirely.
   // For canary users, rewrite to canary origin so their chunk hashes resolve correctly.
   if (pathname.startsWith('/_next/')) {
-    if (!IS_CANARY_DEPLOYMENT && CANARY_URL && getServerSideCookie(request, CANARY_COOKIE) === 'true') {
+    if (isCanary) {
       return NextResponse.rewrite(new URL(pathname + search, CANARY_URL));
     }
 
     return NextResponse.next();
   }
 
-  // Rewrite all non-static, non-API requests to canary when cookie is set.
-  if (!IS_CANARY_DEPLOYMENT && CANARY_URL && getServerSideCookie(request, CANARY_COOKIE) === 'true') {
-    if (!pathname.startsWith('/api/')) {
-      return NextResponse.rewrite(new URL(pathname + search, CANARY_URL));
-    }
+  // Rewrite all non-static, non-API requests to canary when org is in beta set.
+  if (isCanary && !pathname.startsWith('/api/')) {
+    return NextResponse.rewrite(new URL(pathname + search, CANARY_URL));
   }
 
   const isAuthenticated = validateSession(request);
