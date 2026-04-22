@@ -68,7 +68,11 @@ jobs:
 
   slack-notification:
     name: Slack Notification
-    if: always()
+    if: |
+      always() &&
+      (github.event_name == 'workflow_dispatch' ||
+      (github.event.pull_request.merged == true &&
+      startsWith(github.event.pull_request.head.ref, 'hotfix/')))
     runs-on: ubuntu-latest
     needs:
       - deploy
