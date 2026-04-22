@@ -2,7 +2,7 @@ name: Security Audit
 
 on:
   pull_request:
-    branches: [ main, staging, development ]
+    branches: [ main, release, staging, development ]
   push:
     branches: [ main ]
   schedule:
