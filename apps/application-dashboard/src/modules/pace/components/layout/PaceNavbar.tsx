@@ -259,11 +259,9 @@ const PaceNavbar = () => {
         transition={navAnimations.navItems.transition}
         className='flex shrink-0 items-center gap-x-2'
       >
-        {process.env.NEXT_PUBLIC_IS_CANARY === 'true' && (
-          <span className='rounded bg-amber-400 px-1.5 py-0.5 text-[10px] font-semibold tracking-wide text-amber-900'>
-            CANARY
-          </span>
-        )}
+        <span className='rounded bg-amber-400 px-1.5 py-0.5 text-[10px] font-semibold tracking-wide text-amber-900'>
+          CANARY
+        </span>
         {visibleNavItems.map((item) => (
           <NavbarIconLink
             key={item.id}
