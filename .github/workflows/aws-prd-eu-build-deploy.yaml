@@ -77,7 +77,7 @@ jobs:
 
       - name: Output deployment info
         run: |
-          echo "Ref: ${{ needs.prepare-env.outputs.DEPLOY_REF }}" >> $GITHUB_STEP_SUMMARY
+          echo "Ref: ${{ steps.vars.outputs.DEPLOY_REF }}" >> $GITHUB_STEP_SUMMARY
           echo "Environment: production (EU)" >> $GITHUB_STEP_SUMMARY
 
   build-push-image:
