@@ -1,4 +1,4 @@
-name: Vercel Deployment (Release)
+name: Deploy Canary
 
 on:
   pull_request:
