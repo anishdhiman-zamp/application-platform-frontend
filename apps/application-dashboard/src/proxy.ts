@@ -31,8 +31,12 @@ export const BETA_ORG_IDS = new Set(
 );
 
 const CANARY_COOKIE = 'org_is_beta';
+const IS_CANARY_DEPLOYMENT = process.env.IS_CANARY === 'true';
+const CANARY_URL = process.env.CANARY_URL ?? '';
 
 const applyCanaryRoutingCookie = (request: NextRequest, response: NextResponse): void => {
+  // Skip on the canary deployment itself — it doesn't route anywhere else
+  if (IS_CANARY_DEPLOYMENT) return;
   if (request.nextUrl.pathname.startsWith('/api/')) return;
 
   const orgId = getServerSideCookie(request, ACTIVE_ORG_ID_COOKIE);
@@ -303,6 +307,15 @@ const handleAuthenticatedRoutes = async (request: NextRequest) => {
 };
 
 export async function proxy(request: NextRequest) {
+  // Rewrite to canary deployment when cookie is set — proxy.ts runs before vercel.json rewrites
+  if (!IS_CANARY_DEPLOYMENT && CANARY_URL && getServerSideCookie(request, CANARY_COOKIE) === 'true') {
+    const { pathname, search } = request.nextUrl;
+
+    if (!pathname.startsWith('/api/')) {
+      return NextResponse.rewrite(new URL(pathname + search, CANARY_URL));
+    }
+  }
+
   const isAuthenticated = validateSession(request);
 
   if (!isAuthenticated) {
