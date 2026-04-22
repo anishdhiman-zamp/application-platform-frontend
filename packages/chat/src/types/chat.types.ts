@@ -576,4 +576,5 @@ export interface HITLResponseItem {
 export interface HITLRespondPayloadType {
   source_entity: HITLSourceEntity;
   responses: HITLResponseItem[];
+  llm_model?: string;
 }

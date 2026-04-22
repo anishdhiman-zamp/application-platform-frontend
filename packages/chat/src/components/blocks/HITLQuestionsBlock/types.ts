@@ -20,4 +20,6 @@ export interface HITLQuestionsBlockProps {
   /** Conversation ID used when navigating to a task route from the title click */
   conversationId?: string;
   username?: string;
+  /** Current llm_model the conversation is running on. */
+  llmModel?: string | null;
 }
