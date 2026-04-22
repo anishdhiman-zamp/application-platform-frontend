@@ -1,12 +1,14 @@
 name: Vercel Deployment (Release)
 
 on:
-  push:
+  pull_request:
     branches:
       - release
+    types:
+      - closed
 
 concurrency:
-  group: ${{ github.workflow }}-${{ github.ref }}
+  group: ${{ github.workflow }}-release
   cancel-in-progress: true
 
 env:
@@ -16,6 +18,7 @@ env:
 jobs:
   deploy:
     name: Deploy to Vercel (application-platform-frontend-release)
+    if: github.event.pull_request.merged == true
     runs-on: ubuntu-latest
     permissions:
       contents: read
