@@ -1,4 +1,4 @@
-name: Vercel Deployment
+name: Deploy Production
 
 on:
   push:
@@ -102,6 +102,16 @@ jobs:
               });
             }
 
+  deploy-eu:
+    name: Deploy to AWS EU
+    needs: build
+    if: github.ref == 'refs/heads/main'
+    uses: ./.github/workflows/aws-prd-eu-build-deploy.yaml
+    with:
+      staging_tag: ${{ github.sha }}
+      staging_tests_passed: true
+    secrets: inherit
+
   slack-notification:
     name: Slack Notification
     if: always()
@@ -109,6 +119,7 @@ jobs:
     needs:
       - build
       - deploy
+      - deploy-eu
     steps:
       - uses: technote-space/workflow-conclusion-action@v3
       - name: Update slack message body
@@ -116,17 +127,24 @@ jobs:
         run: |
           BUILD_RESULT="${{ needs.build.result }}"
           DEPLOY_RESULT="${{ needs.deploy.result }}"
+          EU_RESULT="${{ needs.deploy-eu.result }}"
 
           if [ "$BUILD_RESULT" == 'failure' ]; then
             echo "SLACK_MESSAGE=Vercel Build Failed :x: | Branch: ${{ github.ref_name }} | Deployment stopped" >> $GITHUB_OUTPUT
           elif [ "$DEPLOY_RESULT" == 'failure' ]; then
-            echo "SLACK_MESSAGE=Vercel Deploy Failed :x: | Branch: ${{ github.ref_name }} | Build passed but deployment failed" >> $GITHUB_OUTPUT
+            echo "SLACK_MESSAGE=Vercel Deploy Failed :x: | Branch: ${{ github.ref_name }} | Build passed but Vercel deployment failed" >> $GITHUB_OUTPUT
+          elif [ "$EU_RESULT" == 'failure' ]; then
+            echo "SLACK_MESSAGE=AWS EU Deploy Failed :x: | Branch: ${{ github.ref_name }} | Vercel passed but EU deployment failed" >> $GITHUB_OUTPUT
           elif [ "${{ env.WORKFLOW_CONCLUSION }}" == 'success' ]; then
-            echo "SLACK_MESSAGE=Vercel Deployment Success :white_check_mark: | Branch: ${{ github.ref_name }}" >> $GITHUB_OUTPUT
+            if [ "${{ github.ref_name }}" == 'main' ]; then
+              echo "SLACK_MESSAGE=Deployment Success :white_check_mark: | Branch: ${{ github.ref_name }} | Vercel + AWS EU" >> $GITHUB_OUTPUT
+            else
+              echo "SLACK_MESSAGE=Deployment Success :white_check_mark: | Branch: ${{ github.ref_name }} | Vercel only" >> $GITHUB_OUTPUT
+            fi
           elif [ "${{ env.WORKFLOW_CONCLUSION }}" == 'cancelled' ]; then
-            echo "SLACK_MESSAGE=Vercel Deployment Cancelled :grey_exclamation: | Branch: ${{ github.ref_name }}" >> $GITHUB_OUTPUT
+            echo "SLACK_MESSAGE=Deployment Cancelled :grey_exclamation: | Branch: ${{ github.ref_name }}" >> $GITHUB_OUTPUT
           else
-            echo "SLACK_MESSAGE=Vercel Deployment Failed :x: | Branch: ${{ github.ref_name }}" >> $GITHUB_OUTPUT
+            echo "SLACK_MESSAGE=Deployment Failed :x: | Branch: ${{ github.ref_name }}" >> $GITHUB_OUTPUT
           fi
       - name: Slack Notification
         uses: Zampfi/town_crier@main
