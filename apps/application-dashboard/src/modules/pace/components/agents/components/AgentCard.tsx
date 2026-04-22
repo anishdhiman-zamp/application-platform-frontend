@@ -35,7 +35,7 @@ const AgentCard = ({ agent, onClick }: AgentCardProps) => {
         <p className='text-GRAY_700 f-12-450 line-clamp-2'>{agent?.description ?? ''}</p>
       </div>
 
-      <div className='flex w-full flex-wrap items-start justify-between gap-1.5 pt-5'>
+      <div className='flex w-full flex-wrap items-center justify-between gap-1.5 pt-5'>
         <div className='flex min-w-0 flex-wrap items-center justify-start gap-x-1.5 gap-y-1'>
           {agent?.needs_review_count > 0 && (
             <div className='flex items-center gap-1 rounded px-1'>
