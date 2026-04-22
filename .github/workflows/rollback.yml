@@ -38,7 +38,7 @@ jobs:
       deployments: write
     steps:
       - name: Install Vercel CLI
-        run: npm install --global vercel@latest
+        run: npm install --global vercel@35
 
       - name: Rollback to previous deployment
         id: rollback
@@ -47,9 +47,20 @@ jobs:
           echo "### Vercel rolled back to previous deployment" >> $GITHUB_STEP_SUMMARY
           echo "**Reason:** ${{ inputs.reason }}" >> $GITHUB_STEP_SUMMARY
 
+  validate-eu-ref:
+    name: Validate EU rollback ref
+    if: inputs.targets != 'vercel-only' && inputs.eu_rollback_ref == ''
+    runs-on: ubuntu-latest
+    steps:
+      - name: Fail if eu_rollback_ref is missing
+        run: |
+          echo "::error::eu_rollback_ref is required when targets includes EU"
+          exit 1
+
   rollback-eu:
     name: Rollback AWS EU
     if: inputs.targets != 'vercel-only'
+    needs: validate-eu-ref
     uses: ./.github/workflows/aws-prd-eu-build-deploy.yaml
     with:
       staging_tag: ${{ inputs.eu_rollback_ref }}
@@ -62,6 +73,7 @@ jobs:
     runs-on: ubuntu-latest
     needs:
       - rollback-vercel
+      - validate-eu-ref
       - rollback-eu
     steps:
       - uses: technote-space/workflow-conclusion-action@v3

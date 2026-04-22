@@ -136,7 +136,11 @@ jobs:
           elif [ "$EU_RESULT" == 'failure' ]; then
             echo "SLACK_MESSAGE=AWS EU Deploy Failed :x: | Branch: ${{ github.ref_name }} | Vercel passed but EU deployment failed" >> $GITHUB_OUTPUT
           elif [ "${{ env.WORKFLOW_CONCLUSION }}" == 'success' ]; then
-            echo "SLACK_MESSAGE=Deployment Success :white_check_mark: | Branch: ${{ github.ref_name }} | Vercel + AWS EU" >> $GITHUB_OUTPUT
+            if [ "${{ github.ref_name }}" == 'main' ]; then
+              echo "SLACK_MESSAGE=Deployment Success :white_check_mark: | Branch: ${{ github.ref_name }} | Vercel + AWS EU" >> $GITHUB_OUTPUT
+            else
+              echo "SLACK_MESSAGE=Deployment Success :white_check_mark: | Branch: ${{ github.ref_name }} | Vercel only" >> $GITHUB_OUTPUT
+            fi
           elif [ "${{ env.WORKFLOW_CONCLUSION }}" == 'cancelled' ]; then
             echo "SLACK_MESSAGE=Deployment Cancelled :grey_exclamation: | Branch: ${{ github.ref_name }}" >> $GITHUB_OUTPUT
           else

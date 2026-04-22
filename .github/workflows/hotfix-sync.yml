@@ -30,11 +30,17 @@ jobs:
           HOTFIX_PR_NUMBER: ${{ github.event.pull_request.number }}
           HOTFIX_SHA: ${{ github.sha }}
         run: |
-          PR_URL=$(gh pr create \
-            --base release \
-            --head main \
-            --title "chore: sync main → release after hotfix ${HOTFIX_BRANCH}" \
-            --body "## Hotfix Sync
+          EXISTING_PR=$(gh pr list --base release --head main --json url -q '.[0].url')
+          if [ -n "$EXISTING_PR" ]; then
+            echo "Sync PR already exists: $EXISTING_PR"
+            echo "pr_url=$EXISTING_PR" >> $GITHUB_OUTPUT
+            echo "Existing sync PR: $EXISTING_PR" >> $GITHUB_STEP_SUMMARY
+          else
+            PR_URL=$(gh pr create \
+              --base release \
+              --head main \
+              --title "chore: sync main → release after hotfix ${HOTFIX_BRANCH}" \
+              --body "## Hotfix Sync
 
           This PR was automatically created to sync \`main\` back into \`release\` after a hotfix was merged.
 
@@ -42,9 +48,10 @@ jobs:
           **Commit SHA:** \`${HOTFIX_SHA}\`
 
           Please review and merge to keep \`release\` in sync with \`main\`." \
-          )
-          echo "pr_url=$PR_URL" >> $GITHUB_OUTPUT
-          echo "Sync PR created: $PR_URL" >> $GITHUB_STEP_SUMMARY
+            )
+            echo "pr_url=$PR_URL" >> $GITHUB_OUTPUT
+            echo "Sync PR created: $PR_URL" >> $GITHUB_STEP_SUMMARY
+          fi
 
   slack-notification:
     name: Slack Notification
