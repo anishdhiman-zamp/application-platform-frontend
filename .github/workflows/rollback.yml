@@ -63,8 +63,7 @@ jobs:
     needs: validate-eu-ref
     uses: ./.github/workflows/aws-prd-eu-build-deploy.yaml
     with:
-      staging_tag: ${{ inputs.eu_rollback_ref }}
-      staging_tests_passed: true
+      ref: ${{ inputs.eu_rollback_ref }}
     secrets: inherit
 
   slack-notification:
