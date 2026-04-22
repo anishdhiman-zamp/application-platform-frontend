@@ -2,6 +2,7 @@
 
 import { type FC, useCallback, useState } from 'react';
 import { Button } from '@zamp-platform/ui';
+import { ArrowUpRight } from 'lucide-react';
 import {
   type AgentAvatarConfig,
   PrefixMessage,
@@ -100,12 +101,12 @@ const AgentTestCard: FC<AgentTestCardProps> = ({
         onClick={onClick}
       >
         <div className='flex min-w-0 flex-1 items-center gap-2'>
-          <div className='flex size-6 shrink-0 items-center justify-center'>
+          <div className='flex size-3.5 shrink-0 items-center justify-center'>
             <ImageKitImage
               src={avatar.src}
               alt={avatar.alt}
-              width={24}
-              height={24}
+              width={14}
+              height={14}
               className='size-full object-contain'
             />
           </div>
@@ -123,6 +124,7 @@ const AgentTestCard: FC<AgentTestCardProps> = ({
         >
           Test
         </Button>
+        <ArrowUpRight size={14} className='text-GRAY_700 ml-1 shrink-0' />
       </div>
 
       {isExpanded && triggers.length > 0 && (

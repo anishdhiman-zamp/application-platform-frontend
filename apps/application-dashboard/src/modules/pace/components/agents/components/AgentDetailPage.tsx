@@ -56,6 +56,7 @@ const AgentDetailPage = ({ agentId, agentName, agentDescription = '', avatarKey 
   const { updateTab, getTabById } = useDynamicTabs({ type: TAB_TYPE.AGENT });
   const storedTab = getTabById(agentId);
   const storedActiveTab = storedTab?.metadata?.activeTab as string | undefined;
+  const hasSeenGreeting = Boolean(storedTab?.metadata?.hasSeenGreeting);
 
   // Read tab from URL params first, then stored metadata, default to instructions
   const initialTab = (() => {
@@ -235,6 +236,13 @@ const AgentDetailPage = ({ agentId, agentName, agentDescription = '', avatarKey 
     setIsAddConnectionModalOpen(true);
   }, []);
 
+  const handleGreetingSeen = useCallback(() => {
+    const currentTab = getTabById(agentId);
+
+    if (!currentTab || currentTab.metadata?.hasSeenGreeting) return;
+    updateTab(agentId, agentId, currentTab.name, { ...currentTab.metadata, hasSeenGreeting: true });
+  }, [agentId, getTabById, updateTab]);
+
   const handleInstructionsUpdating = useCallback(() => {
     triggerShimmer();
   }, [triggerShimmer]);
@@ -374,7 +382,8 @@ const AgentDetailPage = ({ agentId, agentName, agentDescription = '', avatarKey 
           <AgentGreeting
             onChat={handleChatWithAgent}
             onAddTrigger={handleAddNewTrigger}
-            isAvatarHovered={isAvatarHovered}
+            hasSeenGreeting={hasSeenGreeting}
+            onGreetingSeen={handleGreetingSeen}
           />
           {isAgentsFe && <ShareAgentPopup agentId={agentId} />}
         </div>

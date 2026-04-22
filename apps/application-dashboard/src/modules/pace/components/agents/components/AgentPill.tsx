@@ -106,7 +106,7 @@ const AgentPill: FC<AgentPillProps> = ({ agentId, agentName, avatarKey, containe
           sideOffset={8}
           alignOffset={alignOffset}
           avoidCollisions={false}
-          className='flex max-h-[calc(100vh-250px)] min-h-[400px] flex-col rounded-[20px]! p-0'
+          className='flex max-h-75 flex-col rounded-[20px]! p-0'
           style={
             containerWidth ? { width: containerWidth, minWidth: containerWidth, maxWidth: containerWidth } : undefined
           }
