@@ -307,10 +307,20 @@ const handleAuthenticatedRoutes = async (request: NextRequest) => {
 };
 
 export async function proxy(request: NextRequest) {
-  // Rewrite to canary deployment when cookie is set — proxy.ts runs before vercel.json rewrites
-  if (!IS_CANARY_DEPLOYMENT && CANARY_URL && getServerSideCookie(request, CANARY_COOKIE) === 'true') {
-    const { pathname, search } = request.nextUrl;
+  const { pathname, search } = request.nextUrl;
 
+  // Static assets bypass auth logic entirely.
+  // For canary users, rewrite to canary origin so their chunk hashes resolve correctly.
+  if (pathname.startsWith('/_next/')) {
+    if (!IS_CANARY_DEPLOYMENT && CANARY_URL && getServerSideCookie(request, CANARY_COOKIE) === 'true') {
+      return NextResponse.rewrite(new URL(pathname + search, CANARY_URL));
+    }
+
+    return NextResponse.next();
+  }
+
+  // Rewrite all non-static, non-API requests to canary when cookie is set.
+  if (!IS_CANARY_DEPLOYMENT && CANARY_URL && getServerSideCookie(request, CANARY_COOKIE) === 'true') {
     if (!pathname.startsWith('/api/')) {
       return NextResponse.rewrite(new URL(pathname + search, CANARY_URL));
     }
@@ -336,19 +346,20 @@ export async function proxy(request: NextRequest) {
 export const config = {
   matcher: [
     /*
-     * Match all request paths except for the ones starting with:
-     * - _next/static (static files)
-     * - _next/image (image optimization files)
+     * Match all requests EXCEPT:
      * - _vercel (Vercel internal routes)
      * - api/health-check (health check endpoint)
      * - auth (authentication routes)
      * - favicon.ico (favicon file)
+     *
+     * Note: _next/static and _next/image are intentionally included so canary
+     * static assets are served from the canary origin (chunk hashes differ between builds).
      * - icons (icon files)
      * - mp4 (video files)
      * - public (public files)
      * - sw.js (service worker)
      * - monitoring (Sentry tunnel route)
      */
-    '/((?!_next/static|_next/image|_vercel|api/health-check|auth|favicon.ico|icons|loaders|mp4|public|sw.js|monitoring).*)',
+    '/((?!_vercel|api/health-check|auth|favicon.ico|icons|loaders|mp4|public|sw.js|monitoring).*)',
   ],
 };
