@@ -1,6 +1,9 @@
 name: Deploy Canary
 
 on:
+  push:
+    branches:
+      - release
   pull_request:
     branches:
       - release
@@ -18,7 +21,7 @@ env:
 jobs:
   deploy:
     name: Deploy to Vercel (application-platform-frontend-release)
-    if: github.event.pull_request.merged == true
+    if: github.event_name == 'push' || github.event.pull_request.merged == true
     runs-on: ubuntu-latest
     permissions:
       contents: read
