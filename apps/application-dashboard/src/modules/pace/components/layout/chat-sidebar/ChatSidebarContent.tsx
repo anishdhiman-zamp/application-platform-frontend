@@ -288,7 +288,7 @@ const ChatSidebarContent = ({
   return (
     <div className='bg-BG_WHITE relative mx-auto flex h-full w-full flex-1 flex-col' {...dropZoneProps}>
       <DropOverlay isVisible={isDragOver} />
-      <div className={cn('transition-[filter] duration-200', isTaskPopoverOpen && 'pointer-events-none blur-sm')}>
+      <div>
         <ChatTopbar
           title={chatTitle || 'Start a new chat'}
           conversationId={conversationId}
@@ -325,6 +325,9 @@ const ChatSidebarContent = ({
             {renderChatInput()}
           </div>
         </ChatActionsProvider>
+      )}
+      {isTaskPopoverOpen && (
+        <div aria-hidden className='bg-GRAY_70 pointer-events-none absolute inset-0 z-40 backdrop-blur-[4px]' />
       )}
     </div>
   );
