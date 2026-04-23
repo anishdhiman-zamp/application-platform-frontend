@@ -13,7 +13,6 @@ import {
 } from '@zamp-platform/chat';
 import { ConnectedChatInput, useConversationActions, useConversationState } from '@zamp-platform/conversation-stream';
 import { type ScrollContainerRef } from '@zamp-platform/ui';
-import { cn } from '@zamp-platform/ui/utils';
 import { EVENT_TYPE } from '@zamp-platform/utils/event-bus';
 import { useDynamicTabs } from 'modules/pace/components/dynamic-tabs/useDynamicTabs';
 import ChatConversationContent from 'modules/pace/components/layout/chat-sidebar/ChatConversationContent';
@@ -316,18 +315,13 @@ const ChatSidebarContent = ({
 
       {!isConversationNotFound && (
         <ChatActionsProvider onFileOpen={handleFileOpen}>
-          <div
-            className={cn(
-              'bg-BG_WHITE sticky bottom-0 mx-auto w-full max-w-[700px] px-3 pb-3',
-              isTaskPopoverOpen ? 'z-0' : 'z-10',
-            )}
-          >
+          <div className='bg-BG_WHITE sticky bottom-0 z-10 mx-auto w-full max-w-[700px] px-3 pb-3'>
             {renderChatInput()}
           </div>
         </ChatActionsProvider>
       )}
       {isTaskPopoverOpen && (
-        <div aria-hidden className='bg-GRAY_70 pointer-events-none absolute inset-0 z-40 backdrop-blur-[4px]' />
+        <div aria-hidden className='bg-GRAY_70 pointer-events-none absolute inset-0 z-40 backdrop-blur-xs' />
       )}
     </div>
   );
