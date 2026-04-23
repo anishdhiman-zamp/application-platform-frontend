@@ -16,6 +16,7 @@
     "serena@claude-plugins-official": true,
     "github@claude-plugins-official": true,
     "context7@claude-plugins-official": true,
-    "andrej-karpathy-skills@karpathy-skills": true
+    "andrej-karpathy-skills@karpathy-skills": true,
+    "code-simplifier@claude-plugins-official": true
   }
 }
