@@ -280,6 +280,7 @@ interface HITLQuestionsContextType {
   sourceEntityId?: string;
   sourceEntityType?: HITLQuestionsBlockProps['sourceEntityType'];
   conversationId?: string;
+  llmModel?: string | null;
   onSubmit?: HITLQuestionsBlockProps['onSubmit'];
   containerRef: React.RefObject<HTMLDivElement | null>;
   questionScrollRef: React.RefObject<HTMLDivElement | null>;
@@ -314,6 +315,7 @@ export const HITLQuestionsProvider = ({
   sourceEntityType,
   conversationId,
   username,
+  llmModel,
   children,
 }: HITLQuestionsProviderProps) => {
   const { questions } = payload;
@@ -351,6 +353,7 @@ export const HITLQuestionsProvider = ({
         sourceEntityId,
         sourceEntityType,
         conversationId,
+        llmModel,
         onSubmit,
         containerRef,
         questionScrollRef,
