@@ -23,7 +23,7 @@ exports[`ScrollContainer - Snapshots matches snapshot with all features enabled 
   </div>
   <button
     aria-label="Scroll to bottom"
-    class="cursor-pointer inline-flex items-center justify-center whitespace-nowrap text-sm font-medium ring-offset-background focus-visible:outline-hidden focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 [&_svg]:pointer-events-none [&_svg]:shrink-0 hover:text-accent-GRAY_1000 f-14-500 bg-GRAY_1000 hover:bg-GRAY_950 absolute bottom-2 left-1/2 z-20 h-6 w-6 -translate-x-1/2 rounded-full p-3 transition-all duration-200 ease-out pointer-events-none translate-y-2 opacity-0"
+    class="cursor-pointer inline-flex items-center justify-center whitespace-nowrap text-sm font-medium ring-offset-background focus-visible:outline-hidden focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 [&_svg]:pointer-events-none [&_svg]:shrink-0 hover:text-accent-GRAY_1000 f-14-500 bg-GRAY_1000 hover:bg-GRAY_950 absolute bottom-2 left-1/2 z-10 h-6 w-6 -translate-x-1/2 rounded-full p-3 transition-all duration-200 ease-out pointer-events-none translate-y-2 opacity-0"
   >
     <div
       class="text-BG_WHITE p-[2px]"
@@ -88,7 +88,7 @@ exports[`ScrollContainer - Snapshots matches snapshot with overlays disabled 1`]
   </div>
   <button
     aria-label="Scroll to bottom"
-    class="cursor-pointer inline-flex items-center justify-center whitespace-nowrap text-sm font-medium ring-offset-background focus-visible:outline-hidden focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 [&_svg]:pointer-events-none [&_svg]:shrink-0 hover:text-accent-GRAY_1000 f-14-500 bg-GRAY_1000 hover:bg-GRAY_950 absolute bottom-2 left-1/2 z-20 h-6 w-6 -translate-x-1/2 rounded-full p-3 transition-all duration-200 ease-out pointer-events-none translate-y-2 opacity-0"
+    class="cursor-pointer inline-flex items-center justify-center whitespace-nowrap text-sm font-medium ring-offset-background focus-visible:outline-hidden focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 [&_svg]:pointer-events-none [&_svg]:shrink-0 hover:text-accent-GRAY_1000 f-14-500 bg-GRAY_1000 hover:bg-GRAY_950 absolute bottom-2 left-1/2 z-10 h-6 w-6 -translate-x-1/2 rounded-full p-3 transition-all duration-200 ease-out pointer-events-none translate-y-2 opacity-0"
   >
     <div
       class="text-BG_WHITE p-[2px]"

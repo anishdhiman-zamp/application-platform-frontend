@@ -673,7 +673,7 @@ const ScrollContainer = forwardRef<ScrollContainerRef, ScrollContainerProps>(
               onClick={handleScrollToBottomClick}
               variant='ghost'
               className={cn(
-                'bg-GRAY_1000 hover:bg-GRAY_950 absolute bottom-2 left-1/2 z-20 h-6 w-6 -translate-x-1/2 rounded-full p-3',
+                'bg-GRAY_1000 hover:bg-GRAY_950 absolute bottom-2 left-1/2 z-10 h-6 w-6 -translate-x-1/2 rounded-full p-3',
                 'transition-all duration-200 ease-out',
                 showButton ? '-translate-y-2 opacity-100' : 'pointer-events-none translate-y-2 opacity-0',
                 scrollToBottomClassName,

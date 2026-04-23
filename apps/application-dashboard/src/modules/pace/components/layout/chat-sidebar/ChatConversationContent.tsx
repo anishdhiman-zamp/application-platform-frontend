@@ -361,8 +361,8 @@ const ChatConversationContent = ({
           scrollTrigger={messages?.length}
           scrollbarStyle='none'
           scrollClassName={cn(
-            'bg-BG_WHITE transition-[filter] duration-200',
-            isTaskPopoverOpen ? 'overflow-y-hidden blur-sm pointer-events-none' : 'overflow-y-scroll',
+            'bg-BG_WHITE',
+            isTaskPopoverOpen ? 'overflow-y-hidden pointer-events-none' : 'overflow-y-scroll',
           )}
         >
           {isInConversation ? (
@@ -404,7 +404,10 @@ const ChatConversationContent = ({
       </div>
       <div
         ref={taskStatusContainerRef}
-        className='bg-BG_WHITE/80 sticky bottom-0 z-10 mx-auto w-full max-w-[700px] px-3 backdrop-blur-md'
+        className={cn(
+          'bg-BG_WHITE/80 sticky bottom-0 mx-auto w-full max-w-[700px] px-3 backdrop-blur-md',
+          isTaskPopoverOpen ? 'z-50' : 'z-10',
+        )}
       >
         <div className='flex flex-wrap items-center gap-2 pb-2'>
           {activeAgentInfo && (
