@@ -21,6 +21,7 @@ export const useHITLQuestions = () => {
     sourceEntityId,
     sourceEntityType,
     conversationId,
+    llmModel,
     onSubmit,
     navDirectionRef,
     shouldScrollRef,
@@ -116,6 +117,7 @@ export const useHITLQuestions = () => {
       responses: questions.map((question) =>
         buildResponseForQuestion(question, answers[question.id], sourceEntityType, questionFileRefs[question.id]),
       ),
+      ...(llmModel ? { llm_model: llmModel } : {}),
     };
 
     try {
@@ -136,6 +138,7 @@ export const useHITLQuestions = () => {
     hitlRespond,
     clearDraft,
     onSubmit,
+    llmModel,
   ]);
 
   submitRef.current = () => void handleSubmit();
@@ -154,6 +157,7 @@ export const useHITLQuestions = () => {
       const submitPayload: HITLRespondPayloadType = {
         source_entity: { entity_type: sourceEntityType, entity_id: sourceEntityId },
         responses: [buildResponseForQuestion(question, answer, sourceEntityType, questionFileRefs[questionId])],
+        ...(llmModel ? { llm_model: llmModel } : {}),
       };
 
       dispatch({ type: HITLQuestionsContextActions.SET_SUBMITTING_OPTION_ID, payload: { optionId } });
@@ -176,6 +180,7 @@ export const useHITLQuestions = () => {
       clearDraft,
       onSubmit,
       dispatch,
+      llmModel,
     ],
   );
 
@@ -184,7 +189,7 @@ export const useHITLQuestions = () => {
   const handleDismiss = useCallback(async () => {
     if (!sourceEntityId || !sourceEntityType) return;
 
-    const submitPayload = {
+    const submitPayload: HITLRespondPayloadType = {
       source_entity: { entity_type: sourceEntityType, entity_id: sourceEntityId },
       responses: questions.map((question) =>
         buildResponseForQuestion(
@@ -194,6 +199,7 @@ export const useHITLQuestions = () => {
           undefined,
         ),
       ),
+      ...(llmModel ? { llm_model: llmModel } : {}),
     };
 
     try {
@@ -204,7 +210,7 @@ export const useHITLQuestions = () => {
     } catch (error) {
       captureException(error);
     }
-  }, [dispatch, questions, clearDraft, sourceEntityId, sourceEntityType, hitlRespond, onSubmit]);
+  }, [dispatch, questions, clearDraft, sourceEntityId, sourceEntityType, hitlRespond, onSubmit, llmModel]);
 
   return {
     currentQuestion,

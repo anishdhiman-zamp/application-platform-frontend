@@ -242,6 +242,7 @@ const ChatSidebarContent = ({
             sourceEntityType={HITLEntityType.CONVERSATION}
             conversationId={conversationId ?? ''}
             username={username}
+            llmModel={selectedModel}
           />
         </div>
       );
