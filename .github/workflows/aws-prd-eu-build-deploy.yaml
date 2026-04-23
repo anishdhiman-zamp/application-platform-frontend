@@ -18,6 +18,10 @@ on:
         description: 'Git SHA or tag to deploy'
         required: false
         type: string
+    outputs:
+      duration:
+        description: 'Total deployment duration (e.g. 6m 53s)'
+        value: ${{ jobs.deploy-to-eks.outputs.duration }}
 
 env:
   APP_NAME: application-platform-frontend
@@ -50,11 +54,13 @@ jobs:
       CLOUDFRONT_DISTRIBUTION_ID: ${{ steps.vars.outputs.CLOUDFRONT_DISTRIBUTION_ID }}
       CLOUDFRONT_DOMAIN: ${{ steps.vars.outputs.CLOUDFRONT_DOMAIN }}
       DEPLOY_REF: ${{ steps.vars.outputs.DEPLOY_REF }}
+      START_TIME: ${{ steps.vars.outputs.START_TIME }}
 
     steps:
       - id: vars
         run: |
           TIMESTAMP=$(date +'%Y%m%dT%H%M%S')
+          echo "START_TIME=$EPOCHSECONDS" >> $GITHUB_OUTPUT
           DEPLOY_REF="${{ inputs.ref || github.event.inputs.BRANCH || 'main' }}"
           echo "HELM_CHART_NAME=zamp-svc" >> $GITHUB_OUTPUT
           echo "SLACK_WEBHOOK_URL=SLACK_WEBHOOK_URL_APPLICATION_PLATFORM_FRONTEND" >> $GITHUB_OUTPUT
@@ -279,6 +285,8 @@ jobs:
     needs:
       - prepare-env
       - build-push-image
+    outputs:
+      duration: ${{ steps.duration.outputs.duration }}
     env:
       APP_NAME: ${{ needs.prepare-env.outputs.APP_NAME }}
       AWS_REGION: ${{ needs.prepare-env.outputs.AWS_REGION }}
@@ -292,6 +300,7 @@ jobs:
       AWS_ACCOUNT_ID: ${{ needs.prepare-env.outputs.AWS_ACCOUNT_ID }}
       VALUES_FILE: ${{ needs.prepare-env.outputs.VALUES_FILE }}
       DEPLOY_REF: ${{ needs.prepare-env.outputs.DEPLOY_REF }}
+      START_TIME: ${{ needs.prepare-env.outputs.START_TIME }}
 
     steps:
       - name: 'Checkout repository on : ${{ env.DEPLOY_REF }}'
@@ -336,4 +345,11 @@ jobs:
           echo "Production EU deployment completed successfully!" >> $GITHUB_STEP_SUMMARY
           echo "Ref: $DEPLOY_REF" >> $GITHUB_STEP_SUMMARY
           echo "Environment: production (EU)" >> $GITHUB_STEP_SUMMARY
+
+      - name: Compute duration
+        id: duration
+        if: always()
+        run: |
+          ELAPSED=$(( EPOCHSECONDS - START_TIME ))
+          echo "duration=$(( ELAPSED / 60 ))m $(( ELAPSED % 60 ))s" >> $GITHUB_OUTPUT
 
