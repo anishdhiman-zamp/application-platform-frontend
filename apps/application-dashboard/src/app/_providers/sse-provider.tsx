@@ -560,7 +560,8 @@ export const SSEProvider: React.FC<SSEProviderProps> = ({ children, sseEventBus 
   const handleSSEEvent = (event: MessageEvent) => {
     try {
       const data = JSON.parse(event.data);
-      const eventKey = data?.type ?? data?.event_type;
+
+      const eventKey = data?.event_type ?? data?.type;
 
       if (eventKey) {
         sseEventBus.publish(eventKey, data);
@@ -580,12 +581,8 @@ export const SSEProvider: React.FC<SSEProviderProps> = ({ children, sseEventBus 
     );
     const taskSub = sseEventBus.subscribe(EVENT_TYPE.TASK, (data) => {
       handleGlobalMessageEvent(taskPayloadResolver, data);
-
-      const payload = data.payload as MapAny;
-
-      if (payload?.type === SSEEventType.MESSAGE_STOP) {
-        invalidateTaskCaches();
-      }
+      // need to refresh the task list + counts
+      invalidateTaskCaches();
     });
     const taskUpdateSub = sseEventBus.subscribe(EVENT_TYPE.TASK_UPDATE, handleGlobalTaskUpdate);
     const convCreatedSub = sseEventBus.subscribe(EVENT_TYPE.CONVERSATION_CREATED, () => {
