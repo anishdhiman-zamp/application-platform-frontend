@@ -4,11 +4,9 @@ import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { TASK_STATUS, type TaskStatus } from '@zamp-platform/chat';
 import { Accordion } from '@zamp-platform/ui';
 import { cn } from '@zamp-platform/ui/utils';
-import { EVENT_TYPE } from '@zamp-platform/utils/event-bus/event-bus.types';
 import { usePathname, useSearchParams } from 'next/navigation';
 import { useGetAgentTaskCountsQuery } from '@/apis/agents';
 import { useGetTaskCountsQuery } from '@/apis/task';
-import { useEventBus } from '@/app/_providers/sse-provider';
 import TaskAccordionSection from '@/modules/pace/components/tasks/components/TaskAccordionSection';
 import {
   NEEDS_ACTION_STATUSES,
@@ -59,7 +57,6 @@ const TaskAccordionGroup = ({
 
   const pathname = usePathname();
   const searchParams = useSearchParams();
-  const { sseEventBus } = useEventBus();
 
   // When tasks are viewed from an agent detail page, pass the current URL as referrer
   const referrer = useMemo(() => {
@@ -100,21 +97,6 @@ const TaskAccordionGroup = ({
   useEffect(() => {
     if (isActive && !isFirstVisit && !skipFetch) refetch();
   }, [isActive, skipFetch]);
-
-  // Directly refetch counts on any task SSE event so the visible status set
-  // (which is driven by `countMap`) stays in sync with the backend while the
-  // user is looking at this view.
-  useEffect(() => {
-    if (!isActive || skipFetch) return;
-
-    const taskSub = sseEventBus.subscribe(EVENT_TYPE.TASK, () => refetch());
-    const taskUpdateSub = sseEventBus.subscribe(EVENT_TYPE.TASK_UPDATE, () => refetch());
-
-    return () => {
-      taskSub.unsubscribe();
-      taskUpdateSub.unsubscribe();
-    };
-  }, [isActive, skipFetch, sseEventBus, refetch]);
 
   const scrollContainerRef = useRef<HTMLDivElement>(null);
   const [hasLoadedOnce, setHasLoadedOnce] = useState(false);
