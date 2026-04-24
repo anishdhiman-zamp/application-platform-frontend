@@ -81,6 +81,11 @@ import { filtersContextActions, useFiltersContextStore, withFiltersContext } fro
 
 const PREVIEW_GRID_STYLE = { height: '100%', width: '100%' } as const;
 
+const datasetDebugLog = (...args: unknown[]) => {
+  // eslint-disable-next-line no-console
+  console.log('[DatasetDetail]', new Date().toISOString().slice(11, 23), ...args);
+};
+
 interface DatasetDetailProps {
   tableName: string;
   header?: React.ReactNode;
@@ -90,6 +95,10 @@ interface DatasetDetailProps {
 const DatasetDetailInner = ({ tableName, header, onBackToDatasets }: DatasetDetailProps) => {
   // --- Refs ---
   const tableRef = useRef<AgGridReact | null>(null);
+  const renderCountRef = useRef(0);
+
+  renderCountRef.current += 1;
+  datasetDebugLog('render', { count: renderCountRef.current, tableName });
   const totalRowsRef = useRef<number | undefined>(undefined);
   const lastFilterClausesRef = useRef<string | undefined>(undefined);
   const activeFilterClausesRef = useRef<string | undefined>(undefined);
@@ -762,12 +771,20 @@ const DatasetDetailInner = ({ tableName, header, onBackToDatasets }: DatasetDeta
     async (params) => {
       const { startRow = 0, endRow = DETAIL_PAGE_SIZE, sortModel } = params.request;
 
+      datasetDebugLog('getRows.enter', {
+        startRow,
+        endRow,
+        sortModel: sortModel?.length ? sortModel : undefined,
+        hasBlueprintChanges: hasBlueprintChangesRef.current,
+      });
+
       // When blueprint has unsaved changes, serve from cache — no API calls
       if (hasBlueprintChangesRef.current && cachedRowsRef.current.length > 0) {
         const augmented = augmentRowsRef.current(cachedRowsRef.current);
 
         params.success({ rowData: augmented, rowCount: totalRowsRef.current });
         setInitialDataLoaded(true);
+        datasetDebugLog('getRows.success.blueprintCache', { rows: augmented.length, rowCount: totalRowsRef.current });
 
         return;
       }
@@ -787,12 +804,14 @@ const DatasetDetailInner = ({ tableName, header, onBackToDatasets }: DatasetDeta
           cachedRowsRef.current = selectResult.rows ?? [];
           params.success({ rowData: augmentRowsRef.current(cachedRowsRef.current), rowCount: total });
           setInitialDataLoaded(true);
+          datasetDebugLog('getRows.success.prefetch', { rows: cachedRowsRef.current.length, rowCount: total });
         } catch (err: any) {
           if (err?.status === 403) {
             setSchemaError('Access denied: insufficient privileges on this table.');
           }
           params.fail();
           setInitialDataLoaded(true);
+          datasetDebugLog('getRows.fail.prefetch', { status: err?.status });
         }
 
         return;
@@ -804,6 +823,8 @@ const DatasetDetailInner = ({ tableName, header, onBackToDatasets }: DatasetDeta
       const filterChanged = filterClauses !== lastFilterClausesRef.current;
 
       lastFilterClausesRef.current = filterClauses;
+
+      datasetDebugLog('getRows.fetch', { limit, offset, filterChanged });
 
       try {
         const selectPromise = executeQuery({
@@ -832,6 +853,11 @@ const DatasetDetailInner = ({ tableName, header, onBackToDatasets }: DatasetDeta
         }
 
         cachedRowsRef.current = selectResult.rows ?? [];
+        datasetDebugLog('getRows.success.fetch', {
+          rows: cachedRowsRef.current.length,
+          rowCount: totalRowsRef.current,
+          offset,
+        });
         params.success({
           rowData: augmentRowsRef.current(cachedRowsRef.current),
           rowCount: totalRowsRef.current,
@@ -843,6 +869,7 @@ const DatasetDetailInner = ({ tableName, header, onBackToDatasets }: DatasetDeta
         }
         params.fail();
         setInitialDataLoaded(true);
+        datasetDebugLog('getRows.fail.fetch', { status: err?.status });
       }
     },
     [tableName, executeQuery],
@@ -888,6 +915,7 @@ const DatasetDetailInner = ({ tableName, header, onBackToDatasets }: DatasetDeta
       return;
     }
     // Purge and re-fetch rows so augmentRows applies to the new column set
+    datasetDebugLog('refreshServerSide.purge', { reason: 'previewColumns changed' });
     tableRef.current?.api?.refreshServerSide({ purge: true });
   }, [previewColumns, gridReady]);
 
@@ -896,6 +924,7 @@ const DatasetDetailInner = ({ tableName, header, onBackToDatasets }: DatasetDeta
 
   useEffect(() => {
     if (activeTab === DatasetTabsTypes.PREVIEW && prevTabRef.current === DatasetTabsTypes.BLUEPRINT) {
+      datasetDebugLog('refreshServerSide.purge', { reason: 'switched to Preview from Blueprint' });
       tableRef.current?.api?.refreshServerSide({ purge: true });
     }
     prevTabRef.current = activeTab;
@@ -1075,8 +1104,38 @@ const DatasetDetailInner = ({ tableName, header, onBackToDatasets }: DatasetDeta
 
     if (clauses === activeFilterClausesRef.current) return;
     activeFilterClausesRef.current = clauses;
+    datasetDebugLog('refreshServerSide.purge', { reason: 'filters changed', clauses });
     tableRef.current?.api?.refreshServerSide({ purge: true });
   }, [selectedFilters, gridReady]);
+
+  // Debug: log grid container dimensions once ready and every 5s while debug is on,
+  // so we can see if AG Grid's viewport collapses or resizes unexpectedly in prod.
+  useEffect(() => {
+    if (!gridReady) return;
+    const logDims = () => {
+      const bodyEl = document.querySelector('.ag-body-viewport') as HTMLElement | null;
+      const rootWrapper = document.querySelector('.ag-root-wrapper') as HTMLElement | null;
+      const displayedRowCount = tableRef.current?.api?.getDisplayedRowCount?.();
+
+      datasetDebugLog('gridDims', {
+        rootWrapper: rootWrapper ? { w: rootWrapper.clientWidth, h: rootWrapper.clientHeight } : null,
+        bodyViewport: bodyEl
+          ? {
+              w: bodyEl.clientWidth,
+              h: bodyEl.clientHeight,
+              scrollH: bodyEl.scrollHeight,
+              scrollTop: bodyEl.scrollTop,
+            }
+          : null,
+        displayedRowCount,
+      });
+    };
+
+    logDims();
+    const interval = setInterval(logDims, 5000);
+
+    return () => clearInterval(interval);
+  }, [gridReady]);
 
   if (accessDenied) {
     return (
