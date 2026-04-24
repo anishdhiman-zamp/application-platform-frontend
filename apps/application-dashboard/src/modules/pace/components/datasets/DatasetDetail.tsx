@@ -81,9 +81,25 @@ import { filtersContextActions, useFiltersContextStore, withFiltersContext } fro
 
 const PREVIEW_GRID_STYLE = { height: '100%', width: '100%' } as const;
 
+const parseBlueprintDraft = (raw: string | null): BlueprintColumn[] | null => {
+  if (!raw) return null;
+  try {
+    const parsed = JSON.parse(raw);
+
+    return Array.isArray(parsed) ? (parsed as BlueprintColumn[]) : null;
+  } catch {
+    return null;
+  }
+};
+
+// Debug logging — off by default. To enable in any environment, in the browser console:
+//   window.__DATASET_DEBUG__ = true
+// Disable with: window.__DATASET_DEBUG__ = false
 const datasetDebugLog = (...args: unknown[]) => {
-  // eslint-disable-next-line no-console
-  console.log('[DatasetDetail]', new Date().toISOString().slice(11, 23), ...args);
+  if (typeof window !== 'undefined' && (window as unknown as { __DATASET_DEBUG__?: boolean }).__DATASET_DEBUG__) {
+    // eslint-disable-next-line no-console
+    console.log('[DatasetDetail]', new Date().toISOString().slice(11, 23), ...args);
+  }
 };
 
 interface DatasetDetailProps {
@@ -261,19 +277,22 @@ const DatasetDetailInner = ({ tableName, header, onBackToDatasets }: DatasetDeta
 
       filterDispatch({ type: filtersContextActions.SET_FILTERS_CONFIG, payload: { filtersConfig: config } });
 
-      // Restore any unsaved draft from localStorage
+      // Restore any unsaved draft from localStorage, but only if it's consistent with
+      // the current schema. A draft whose column ids don't match the schema (e.g. left
+      // over from a prior version that stored display names as ids) would make
+      // hasBlueprintChanges permanently true, trapping the grid in its blueprint-cache
+      // path and breaking server-side pagination.
       const draftKey = `${LOCAL_STORAGE_KEYS.DATASET_BLUEPRINT_DRAFT}_${tableName}` as LOCAL_STORAGE_KEYS;
       const raw = getFromLocalStorage(draftKey);
+      const draft = parseBlueprintDraft(raw);
+      const schemaIds = new Set(bpCols.map((c) => c.id));
+      const isDraftValid =
+        draft !== null && draft.length > 0 && draft.every((c) => c.id.startsWith(COL_PREFIX) || schemaIds.has(c.id));
 
-      if (raw) {
-        try {
-          const draft = JSON.parse(raw) as BlueprintColumn[];
-
-          setBlueprintColumns(draft);
-        } catch {
-          setBlueprintColumns(bpCols);
-        }
+      if (isDraftValid) {
+        setBlueprintColumns(draft);
       } else {
+        if (raw !== null) removeFromLocalStorage(draftKey);
         setBlueprintColumns(bpCols);
       }
     } catch {
@@ -778,13 +797,23 @@ const DatasetDetailInner = ({ tableName, header, onBackToDatasets }: DatasetDeta
         hasBlueprintChanges: hasBlueprintChangesRef.current,
       });
 
-      // When blueprint has unsaved changes, serve from cache — no API calls
+      // When blueprint has unsaved changes, serve only the cached first block.
+      // Report rowCount as the cache size so AG Grid doesn't keep requesting more blocks
+      // (the cache only holds the first page, not the full dataset).
       if (hasBlueprintChangesRef.current && cachedRowsRef.current.length > 0) {
-        const augmented = augmentRowsRef.current(cachedRowsRef.current);
+        if (startRow === 0) {
+          const augmented = augmentRowsRef.current(cachedRowsRef.current);
 
-        params.success({ rowData: augmented, rowCount: totalRowsRef.current });
-        setInitialDataLoaded(true);
-        datasetDebugLog('getRows.success.blueprintCache', { rows: augmented.length, rowCount: totalRowsRef.current });
+          params.success({ rowData: augmented, rowCount: cachedRowsRef.current.length });
+          setInitialDataLoaded(true);
+          datasetDebugLog('getRows.success.blueprintCache', {
+            rows: augmented.length,
+            rowCount: cachedRowsRef.current.length,
+          });
+        } else {
+          params.success({ rowData: [], rowCount: cachedRowsRef.current.length });
+          datasetDebugLog('getRows.success.blueprintCache.empty', { startRow });
+        }
 
         return;
       }
@@ -1108,8 +1137,8 @@ const DatasetDetailInner = ({ tableName, header, onBackToDatasets }: DatasetDeta
     tableRef.current?.api?.refreshServerSide({ purge: true });
   }, [selectedFilters, gridReady]);
 
-  // Debug: log grid container dimensions once ready and every 5s while debug is on,
-  // so we can see if AG Grid's viewport collapses or resizes unexpectedly in prod.
+  // Debug: when enabled via window.__DATASET_DEBUG__, log grid dimensions every 5s
+  // and once when ready, so we can detect viewport collapse or unexpected resizes.
   useEffect(() => {
     if (!gridReady) return;
     const logDims = () => {
