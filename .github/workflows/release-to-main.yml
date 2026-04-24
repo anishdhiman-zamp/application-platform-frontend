@@ -71,6 +71,8 @@ jobs:
               echo "ERROR: Beta deployment SHA ($BETA_COMMIT) does not match release branch head SHA ($EXPECTED_SHA)."
               exit 1
             fi
+          else
+            echo "WARNING: Triggered via ${{ github.event_name }} — SHA verification skipped. Beta deployment ($BETA_COMMIT) was not verified against a release branch head."
           fi
 
           echo "Found beta deployment: $BETA_DEPLOYMENT_ID ($BETA_DEPLOYMENT_URL)"
