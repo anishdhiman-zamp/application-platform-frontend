@@ -60,7 +60,12 @@ jobs:
             exit 1
           fi
 
-          if [ -n "$BETA_COMMIT" ] && [ "$BETA_COMMIT" != "$GITHUB_SHA" ]; then
+          if [ -z "$BETA_COMMIT" ]; then
+            echo "ERROR: Beta deployment has no githubCommitSha metadata; cannot verify SHA. Failing to be safe."
+            exit 1
+          fi
+
+          if [ "$BETA_COMMIT" != "$GITHUB_SHA" ]; then
             echo "ERROR: Beta deployment SHA ($BETA_COMMIT) does not match expected SHA ($GITHUB_SHA)."
             exit 1
           fi
@@ -90,7 +95,8 @@ jobs:
         if: always()
         run: |
           END=$EPOCHSECONDS
-          ELAPSED=$(( END - ${{ steps.start.outputs.start }} ))
+          START="${{ steps.start.outputs.start }}"
+          ELAPSED=$(( END - ${START:-0} ))
           echo "duration=$(( ELAPSED / 60 ))m $(( ELAPSED % 60 ))s" >> $GITHUB_OUTPUT
 
   deploy-eu:
@@ -130,6 +136,7 @@ jobs:
           RUN_URL: ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}
         run: |
           SHORT_COMMIT="${COMMIT:0:7}"
+          DURATION="${DURATION:-N/A}"
           if [ "$RESULT" == 'success' ]; then
             TITLE=":white_check_mark: Beta -> GA Promotion — Vercel"
             TEXT="Beta promoted to GA on Vercel successfully."
