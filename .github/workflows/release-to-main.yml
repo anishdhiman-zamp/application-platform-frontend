@@ -60,19 +60,38 @@ jobs:
             exit 1
           fi
 
-          if [ -n "$BETA_COMMIT" ] && [ "$BETA_COMMIT" != "$GITHUB_SHA" ]; then
-            echo "ERROR: Beta deployment SHA ($BETA_COMMIT) does not match expected SHA ($GITHUB_SHA)."
+          if [ -z "$BETA_COMMIT" ]; then
+            echo "ERROR: Beta deployment has no githubCommitSha metadata; cannot verify SHA. Failing to be safe."
             exit 1
+          fi
+
+          if [ "${{ github.event_name }}" == "pull_request" ]; then
+            EXPECTED_SHA="${{ github.event.pull_request.head.sha }}"
+            if [ "$BETA_COMMIT" != "$EXPECTED_SHA" ]; then
+              echo "ERROR: Beta deployment SHA ($BETA_COMMIT) does not match release branch head SHA ($EXPECTED_SHA)."
+              exit 1
+            fi
           fi
 
           echo "Found beta deployment: $BETA_DEPLOYMENT_ID ($BETA_DEPLOYMENT_URL)"
           echo "Promoting to production..."
 
-          PROMOTE_RESPONSE=$(curl -sf -X POST \
-            "https://api.vercel.com/v10/deployments/${BETA_DEPLOYMENT_ID}/promote?teamId=${VERCEL_ORG_ID}" \
+          PROMOTE_RESPONSE=$(curl -s -w "\n__HTTP_STATUS__%{http_code}" -X POST \
+            "https://api.vercel.com/v10/projects/${BETA_PROJECT_ID}/promote/${BETA_DEPLOYMENT_ID}?teamId=${VERCEL_ORG_ID}" \
             -H "Authorization: Bearer ${VERCEL_TOKEN}" \
             -H "Content-Type: application/json" \
-            -d "{\"projectId\": \"${{ secrets.VERCEL_PROJECT_ID }}\"}")
+            -d "{}")
+
+          HTTP_STATUS=$(echo "$PROMOTE_RESPONSE" | grep '__HTTP_STATUS__' | sed 's/__HTTP_STATUS__//')
+          PROMOTE_RESPONSE=$(echo "$PROMOTE_RESPONSE" | grep -v '__HTTP_STATUS__')
+          echo "Promote API HTTP status: $HTTP_STATUS"
+          if [ "$HTTP_STATUS" -eq 409 ]; then
+            echo "Deployment is already the current production deployment — treating as success."
+          elif [ "$HTTP_STATUS" -lt 200 ] || [ "$HTTP_STATUS" -ge 300 ]; then
+            echo "ERROR: Promote API returned HTTP $HTTP_STATUS"
+            echo "Response: $PROMOTE_RESPONSE"
+            exit 1
+          fi
 
           DEPLOYMENT_URL=$(echo "$PROMOTE_RESPONSE" | jq -r '.url // .deployment.url // empty')
           if [ -z "$DEPLOYMENT_URL" ]; then
@@ -90,7 +109,8 @@ jobs:
         if: always()
         run: |
           END=$EPOCHSECONDS
-          ELAPSED=$(( END - ${{ steps.start.outputs.start }} ))
+          START="${{ steps.start.outputs.start }}"
+          ELAPSED=$(( END - ${START:-0} ))
           echo "duration=$(( ELAPSED / 60 ))m $(( ELAPSED % 60 ))s" >> $GITHUB_OUTPUT
 
   deploy-eu:
@@ -130,6 +150,7 @@ jobs:
           RUN_URL: ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}
         run: |
           SHORT_COMMIT="${COMMIT:0:7}"
+          DURATION="${DURATION:-N/A}"
           if [ "$RESULT" == 'success' ]; then
             TITLE=":white_check_mark: Beta -> GA Promotion — Vercel"
             TEXT="Beta promoted to GA on Vercel successfully."

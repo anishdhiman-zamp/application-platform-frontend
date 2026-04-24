@@ -66,7 +66,8 @@ jobs:
         if: always()
         run: |
           END=$EPOCHSECONDS
-          ELAPSED=$(( END - ${{ steps.start.outputs.start }} ))
+          START="${{ steps.start.outputs.start }}"
+          ELAPSED=$(( END - ${START:-0} ))
           echo "duration=$(( ELAPSED / 60 ))m $(( ELAPSED % 60 ))s" >> $GITHUB_OUTPUT
 
   deploy-eu:
@@ -106,6 +107,7 @@ jobs:
           RUN_URL: ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}
         run: |
           SHORT_COMMIT="${COMMIT:0:7}"
+          DURATION="${DURATION:-N/A}"
           if [ "$RESULT" == 'success' ]; then
             TITLE=":white_check_mark: Hotfix Deployment — Vercel"
             TEXT="Hotfix deployed to production on Vercel successfully."
