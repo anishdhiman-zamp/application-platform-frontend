@@ -65,9 +65,12 @@ jobs:
             exit 1
           fi
 
-          if [ "$BETA_COMMIT" != "$GITHUB_SHA" ]; then
-            echo "ERROR: Beta deployment SHA ($BETA_COMMIT) does not match expected SHA ($GITHUB_SHA)."
-            exit 1
+          if [ "${{ github.event_name }}" == "pull_request" ]; then
+            EXPECTED_SHA="${{ github.event.pull_request.head.sha }}"
+            if [ "$BETA_COMMIT" != "$EXPECTED_SHA" ]; then
+              echo "ERROR: Beta deployment SHA ($BETA_COMMIT) does not match release branch head SHA ($EXPECTED_SHA)."
+              exit 1
+            fi
           fi
 
           echo "Found beta deployment: $BETA_DEPLOYMENT_ID ($BETA_DEPLOYMENT_URL)"
