@@ -51,6 +51,12 @@ import {
   reorderBlueprintColumns,
   sanitizeColumnName,
 } from 'modules/pace/components/datasets/datasets.constants';
+import {
+  cleanLegacyDatasetKeys,
+  clearDatasetStateKey,
+  getDatasetState,
+  setDatasetState,
+} from 'modules/pace/components/datasets/datasetStorage';
 import ShareDatasetNeonPopup from 'modules/pace/components/datasets/ShareDatasetNeonPopup';
 import { preserveSidebarParam } from 'modules/pace/pace.utils';
 import Link from 'next/link';
@@ -67,12 +73,7 @@ import {
 import ImageLoader from '@/components/common/loader/ImageLoader';
 import { ZAMP_LOGO_LOADER_SVG } from '@/constants/icons';
 import { ROUTES_PATH } from '@/constants/routeConfig';
-import {
-  getFromLocalStorage,
-  LOCAL_STORAGE_KEYS,
-  removeFromLocalStorage,
-  setToLocalStorage,
-} from '@/utils/localstorage';
+import { getFromLocalStorage, LOCAL_STORAGE_KEYS, setToLocalStorage } from '@/utils/localstorage';
 import DatasetTable from 'components/common/table/DatasetTable';
 import DisplayOptions from 'components/common/table/DisplayOptions';
 import { FILTER_TYPES } from 'components/filter/filter.types';
@@ -80,17 +81,6 @@ import FiltersWrapper from 'components/filter/filterMenu/FiltersWrapper';
 import { filtersContextActions, useFiltersContextStore, withFiltersContext } from 'components/filter/filters.context';
 
 const PREVIEW_GRID_STYLE = { height: '100%', width: '100%' } as const;
-
-const parseBlueprintDraft = (raw: string | null): BlueprintColumn[] | null => {
-  if (!raw) return null;
-  try {
-    const parsed = JSON.parse(raw);
-
-    return Array.isArray(parsed) ? (parsed as BlueprintColumn[]) : null;
-  } catch {
-    return null;
-  }
-};
 
 // Debug logging — off by default. To enable in any environment, in the browser console:
 //   window.__DATASET_DEBUG__ = true
@@ -133,7 +123,7 @@ const DatasetDetailInner = ({ tableName, header, onBackToDatasets }: DatasetDeta
 
   // --- Hooks ---
   const router = useRouter();
-  const { userId } = useUserIdentity();
+  const { userId, organizationId } = useUserIdentity();
   const [executeQuery] = useLazyAgentDbReadQuery();
   const [executeMutation] = useAgentDbWriteMutation();
   const [exportTable] = useExportAgentDbTableMutation();
@@ -185,29 +175,21 @@ const DatasetDetailInner = ({ tableName, header, onBackToDatasets }: DatasetDeta
     (userRole === DatasetRoleValue.ADMIN || userRole === DatasetRoleValue.EDITOR) && pkColumn !== null;
   const canEditBlueprint = userRole === DatasetRoleValue.ADMIN || userRole === DatasetRoleValue.EDITOR;
 
-  const columnOrderKey = `${LOCAL_STORAGE_KEYS.DATASET_COLUMN_ORDER}_${tableName}` as LOCAL_STORAGE_KEYS;
-
   const applyColumnOrder = useCallback(
     (cols: BlueprintColumn[]): BlueprintColumn[] => {
-      const raw = getFromLocalStorage(columnOrderKey);
+      const order = getDatasetState(organizationId, tableName).final;
 
-      if (!raw) return cols;
-      try {
-        const order = JSON.parse(raw) as string[];
-        const orderMap = new Map(order.map((id, i) => [id, i]));
-        const sorted = [...cols].sort((a, b) => {
-          const ai = orderMap.has(a.id) ? orderMap.get(a.id)! : Infinity;
-          const bi = orderMap.has(b.id) ? orderMap.get(b.id)! : Infinity;
+      if (!order?.length) return cols;
+      const orderMap = new Map(order.map((id, i) => [id, i]));
 
-          return ai - bi;
-        });
+      return [...cols].sort((a, b) => {
+        const ai = orderMap.has(a.id) ? orderMap.get(a.id)! : Infinity;
+        const bi = orderMap.has(b.id) ? orderMap.get(b.id)! : Infinity;
 
-        return sorted;
-      } catch {
-        return cols;
-      }
+        return ai - bi;
+      });
     },
-    [columnOrderKey],
+    [organizationId, tableName],
   );
 
   const loadSchema = useCallback(async () => {
@@ -282,30 +264,30 @@ const DatasetDetailInner = ({ tableName, header, onBackToDatasets }: DatasetDeta
       // over from a prior version that stored display names as ids) would make
       // hasBlueprintChanges permanently true, trapping the grid in its blueprint-cache
       // path and breaking server-side pagination.
-      const draftKey = `${LOCAL_STORAGE_KEYS.DATASET_BLUEPRINT_DRAFT}_${tableName}` as LOCAL_STORAGE_KEYS;
-      const raw = getFromLocalStorage(draftKey);
-      const draft = parseBlueprintDraft(raw);
+      const draft = getDatasetState(organizationId, tableName).blueprint;
       const schemaIds = new Set(bpCols.map((c) => c.id));
       const isDraftValid =
-        draft !== null && draft.length > 0 && draft.every((c) => c.id.startsWith(COL_PREFIX) || schemaIds.has(c.id));
+        Array.isArray(draft) &&
+        draft.length > 0 &&
+        draft.every((c) => c.id.startsWith(COL_PREFIX) || schemaIds.has(c.id));
 
       if (isDraftValid) {
         setBlueprintColumns(draft);
       } else {
-        if (raw !== null) removeFromLocalStorage(draftKey);
+        if (draft !== undefined) clearDatasetStateKey(organizationId, tableName, ['blueprint']);
         setBlueprintColumns(bpCols);
       }
     } catch {
       setColumns([]);
       setSchemaError('Failed to load dataset schema. The table may not exist or you may not have access.');
     }
-  }, [executeQuery, tableName, filterDispatch, applyColumnOrder]);
+  }, [executeQuery, tableName, filterDispatch, applyColumnOrder, organizationId]);
 
   const reloadSchemaAndData = useCallback(async () => {
     setColumns(null);
     prefetchRef.current = null;
     cachedRowsRef.current = [];
-    removeFromLocalStorage(`${LOCAL_STORAGE_KEYS.DATASET_BLUEPRINT_DRAFT}_${tableName}` as LOCAL_STORAGE_KEYS);
+    clearDatasetStateKey(organizationId, tableName, ['blueprint']);
     const dataPromise = executeQuery({
       query: buildSelectTableQuery(tableName, DETAIL_PAGE_SIZE, 0, undefined, undefined, 'id'),
     }).unwrap();
@@ -313,7 +295,7 @@ const DatasetDetailInner = ({ tableName, header, onBackToDatasets }: DatasetDeta
 
     prefetchRef.current = { dataPromise, countPromise, consumed: false };
     await loadSchema();
-  }, [executeQuery, tableName, loadSchema]);
+  }, [executeQuery, tableName, loadSchema, organizationId]);
 
   const handleSaveBlueprint = useCallback(async () => {
     const originalMap = new Map(originalBlueprintColumns.map((c) => [c.id, c]));
@@ -416,17 +398,12 @@ const DatasetDetailInner = ({ tableName, header, onBackToDatasets }: DatasetDeta
       );
 
       // Remap stored column order so the renamed column keeps its position after loadSchema.
-      const rawOrder = getFromLocalStorage(columnOrderKey);
+      const previousOrder = getDatasetState(organizationId, tableName).final;
 
-      if (rawOrder) {
-        try {
-          const order = JSON.parse(rawOrder) as string[];
-          const updatedOrder = order.map((id) => (id === colId ? sanitized : id));
+      if (previousOrder?.length) {
+        const updatedOrder = previousOrder.map((id) => (id === colId ? sanitized : id));
 
-          setToLocalStorage(columnOrderKey, JSON.stringify(updatedOrder));
-        } catch {
-          // ignore parse errors — column may land at the end, but rename still succeeds
-        }
+        setDatasetState(organizationId, tableName, { final: updatedOrder });
       }
 
       try {
@@ -442,12 +419,12 @@ const DatasetDetailInner = ({ tableName, header, onBackToDatasets }: DatasetDeta
           (prev) =>
             prev?.map((col) => (col.field === colId ? { ...col, headerName: previousHeaderName } : col)) ?? null,
         );
-        if (rawOrder) {
-          setToLocalStorage(columnOrderKey, rawOrder);
+        if (previousOrder?.length) {
+          setDatasetState(organizationId, tableName, { final: previousOrder });
         }
       }
     },
-    [tableName, executeMutation, loadSchema, columnOrderKey],
+    [tableName, executeMutation, loadSchema, organizationId],
   );
 
   const handleColumnRequiredChange = useCallback(
@@ -564,9 +541,9 @@ const DatasetDetailInner = ({ tableName, header, onBackToDatasets }: DatasetDeta
       const final = reorderBlueprintColumns(newFieldOrder, blueprintColumns);
 
       setBlueprintColumns(final);
-      setToLocalStorage(columnOrderKey, JSON.stringify(final.map((c) => c.id)));
+      setDatasetState(organizationId, tableName, { final: final.map((c) => c.id) });
     },
-    [blueprintColumns, columnOrderKey],
+    [blueprintColumns, organizationId, tableName],
   );
 
   const hasBlueprintChanges = useMemo(() => {
@@ -698,10 +675,10 @@ const DatasetDetailInner = ({ tableName, header, onBackToDatasets }: DatasetDeta
 
     pendingNavRef.current = null;
     // Clear draft and reset blueprint so guard is lifted before navigating
-    removeFromLocalStorage(`${LOCAL_STORAGE_KEYS.DATASET_BLUEPRINT_DRAFT}_${tableName}` as LOCAL_STORAGE_KEYS);
+    clearDatasetStateKey(organizationId, tableName, ['blueprint']);
     setBlueprintColumns(originalBlueprintColumns);
     if (href) router.push(href);
-  }, [originalBlueprintColumns, tableName, router]);
+  }, [originalBlueprintColumns, organizationId, tableName, router]);
 
   const handleModalSave = useCallback(async () => {
     await handleSaveBlueprint();
@@ -975,16 +952,11 @@ const DatasetDetailInner = ({ tableName, header, onBackToDatasets }: DatasetDeta
   // Save blueprint draft + column order; skip until schema has loaded so initial mount doesn't wipe the draft.
   useEffect(() => {
     if (originalBlueprintColumns.length === 0) return;
-    const draftKey = `${LOCAL_STORAGE_KEYS.DATASET_BLUEPRINT_DRAFT}_${tableName}` as LOCAL_STORAGE_KEYS;
-
-    if (hasBlueprintChanges) {
-      setToLocalStorage(draftKey, JSON.stringify(blueprintColumns));
-    } else {
-      removeFromLocalStorage(draftKey);
-    }
-    // Always persist the current column order (Blueprint DnD or Preview column move)
-    setToLocalStorage(columnOrderKey, JSON.stringify(blueprintColumns.map((c) => c.id)));
-  }, [blueprintColumns, hasBlueprintChanges, tableName, originalBlueprintColumns.length, columnOrderKey]);
+    setDatasetState(organizationId, tableName, {
+      final: blueprintColumns.map((c) => c.id),
+      blueprint: hasBlueprintChanges ? blueprintColumns : undefined,
+    });
+  }, [blueprintColumns, hasBlueprintChanges, tableName, originalBlueprintColumns.length, organizationId]);
 
   // --- Navigation guard ---
   useEffect(() => {
@@ -1098,6 +1070,7 @@ const DatasetDetailInner = ({ tableName, header, onBackToDatasets }: DatasetDeta
     if (initRef.current) return;
     initRef.current = true;
 
+    cleanLegacyDatasetKeys();
     const dataPromise = executeQuery({
       query: buildSelectTableQuery(tableName, DETAIL_PAGE_SIZE, 0, undefined, undefined, 'id'),
     }).unwrap();
