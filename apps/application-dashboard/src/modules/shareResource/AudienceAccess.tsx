@@ -9,6 +9,7 @@ import CustomiseAccess from 'modules/shareResource/CustomiseAccess';
 import {
   ACCESS_MESSAGES_ADMIN_ROLE,
   ACCESS_MESSAGES_CUSTOMISE_ACCESS,
+  PRIVILEGE_FALLBACK_LABELS,
 } from 'modules/shareResource/shareResource.constants';
 import RemoveFromTeamPopup from 'modules/team/components/RemoveFromTeamPopup';
 import Image from 'next/image';
@@ -87,6 +88,7 @@ const AudienceAccess: FC<AudienceAccessPropsType> = ({
   const { isCurrentUserEmail } = useUserIdentity();
   const dropdownRef = useRef<HTMLDivElement>(null);
   const role = privilegeList.find((r) => r.value === privilege);
+  const roleLabel = role?.label ?? PRIVILEGE_FALLBACK_LABELS[privilege] ?? '';
   const [isOpenRemoveFromTeamPopup, setIsOpenRemoveFromTeamPopup] = useState<boolean>(false);
   const [isHoveredDropdown, setIsHoveredDropdown] = useState<boolean>(false);
   const [openChangeRoleDropdown, setOpenChangeRoleDropdown] = useState<boolean>(false);
@@ -266,7 +268,7 @@ const AudienceAccess: FC<AudienceAccessPropsType> = ({
               !showRoleChangeDropdown && 'text-GRAY_600',
             )}
           >
-            {role?.label}
+            {roleLabel}
           </span>
         )}
       </div>

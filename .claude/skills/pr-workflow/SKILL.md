@@ -14,7 +14,9 @@ Automates commits with Conventional Commits format, PR creation via GitHub CLI, 
 3. **Check for `gh` CLI before PR operations** - Install if missing
 4. **ALWAYS check for console.log statements before committing** - Remove debug logs before pushing
 5. **ALWAYS check for excessive comments before committing** - Keep only relevant, necessary comments
-6. **PRs targeting `main` MUST use a `hotfix/` branch name** - Before creating a PR to `main`, check the current branch name. If it does not start with `hotfix/`, rename it: `git branch -m hotfix/<original-name>`, push the renamed branch, and delete the old remote branch. Never create a PR to `main` from a branch that doesn't start with `hotfix/`.
+6. **Default PR target is `release`** - Unless the user explicitly says the PR is for `main` / production / hotfix, assume the PR targets `release` (deploys to Beta via `deploy-canary.yml`). Do not ask the user each time; only confirm when there is a clear signal it might be a hotfix (e.g. user mentions "hotfix", "prod", "production", "GA", or current branch already starts with `hotfix/`).
+7. **PRs targeting `main` MUST use a `hotfix/` branch name** - The `deploy-production.yml` workflow only triggers when a PR merged into `main` has a head ref starting with `hotfix/`. If the user indicates the PR is for `main` and the current branch does not start with `hotfix/`, rename it before creating the PR: `git branch -m hotfix/<original-name>`, push the renamed branch, and delete the old remote branch.
+8. **PRs targeting `release` have no branch name requirement** - The `deploy-canary.yml` workflow triggers on any branch merged into `release`. Do not add a `hotfix/` prefix for `release` PRs.
 
 ## Commit Workflow
 
@@ -148,15 +150,34 @@ gh pr edit --body "<updated_pr_template>"
 
 **CRITICAL**: Only proceed with PR creation if user explicitly requests it.
 
-### Step 0: Enforce Branch Naming for PRs to `main` (MANDATORY)
+### Step 0: Determine Target Branch
 
-Before creating any PR, check the target base branch. If the PR targets `main`, the current branch **must** start with `hotfix/`.
+**Default: `release`.** Unless the user has explicitly indicated otherwise, assume the PR targets `release` and create it with `--base release` (deploys to Beta via `deploy-canary.yml`).
+
+**Only treat the PR as a `main` hotfix if the user signals it**, e.g.:
+
+- They say "hotfix", "prod", "production", "GA", "main"
+- They reference an urgent production fix
+- The current branch already starts with `hotfix/`
+
+If any of those signals are present and the target is ambiguous, confirm once with the user before proceeding:
+
+> "This looks like a hotfix — should I target `main` (production via `deploy-production.yml`) instead of the default `release`?"
+
+Otherwise, skip the question entirely and proceed with `release`.
+
+**Pipeline reference:**
+
+| Target branch | Pipeline                | Deploys to | Branch name requirement                                         |
+| ------------- | ----------------------- | ---------- | --------------------------------------------------------------- |
+| `main`        | `deploy-production.yml` | GA (prod)  | **Must** start with `hotfix/` — pipeline skips deploy otherwise |
+| `release`     | `deploy-canary.yml`     | Beta       | No requirement — do **not** add `hotfix/` prefix                |
+
+#### If targeting `main` — enforce `hotfix/` prefix
 
 ```bash
-# Get current branch name
 BRANCH=$(git rev-parse --abbrev-ref HEAD)
 
-# Check if targeting main and branch doesn't start with hotfix/
 if [[ "$BRANCH" != hotfix/* ]]; then
   # Rename branch locally
   git branch -m "hotfix/$BRANCH"
@@ -168,7 +189,19 @@ if [[ "$BRANCH" != hotfix/* ]]; then
 fi
 ```
 
-If targeting any branch other than `main`, this check is skipped.
+Then create the PR with `--base main`.
+
+#### If targeting `release` — no rename required
+
+```bash
+BRANCH=$(git rev-parse --abbrev-ref HEAD)
+
+# If the branch accidentally starts with hotfix/, warn the user:
+# hotfix/ is reserved for PRs to main. Ask whether they actually meant to target main,
+# or confirm they want to rename the branch off the hotfix/ prefix before opening a release PR.
+```
+
+Then create the PR with `--base release`.
 
 ### Step 1: Check GitHub CLI Installation
 
@@ -205,8 +238,14 @@ git diff main...HEAD
 
 ### Step 4: Create PR with GitHub CLI
 
+Pass `--base` explicitly using whichever target the user confirmed in Step 0.
+
 ```bash
-gh pr create --title "<type>(<scope>): <description>" --body "<filled_template>"
+# Hotfix → main → deploy-production.yml (GA)
+gh pr create --base main --title "<type>(<scope>): <description>" --body "<filled_template>"
+
+# Feature/beta → release → deploy-canary.yml
+gh pr create --base release --title "<type>(<scope>): <description>" --body "<filled_template>"
 ```
 
 **PR Description Format:**
@@ -338,12 +377,14 @@ Commit Workflow:
 - [ ] PR description updated (if PR exists)
 
 PR Creation (only if requested):
-- [ ] Branch starts with `hotfix/` if PR targets `main` (rename if needed)
+- [ ] Target branch determined — default `release`, only `main` if user explicitly indicated hotfix/prod
+- [ ] If targeting `main`: branch starts with `hotfix/` (rename if needed) — required by `deploy-production.yml`
+- [ ] If targeting `release`: branch does **not** use `hotfix/` prefix — `deploy-canary.yml` handles any branch
 - [ ] console.log check passed (no debug logs)
 - [ ] Comment check passed (only relevant comments)
 - [ ] gh CLI installed and authenticated
 - [ ] PR template fetched from repo
-- [ ] PR created with filled template
+- [ ] PR created with correct `--base` flag and filled template
 - [ ] PR link shared with user
 - [ ] Team review message provided (@fe-team notification)
 
