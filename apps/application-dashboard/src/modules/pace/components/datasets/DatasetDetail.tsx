@@ -79,6 +79,8 @@ import { FILTER_TYPES } from 'components/filter/filter.types';
 import FiltersWrapper from 'components/filter/filterMenu/FiltersWrapper';
 import { filtersContextActions, useFiltersContextStore, withFiltersContext } from 'components/filter/filters.context';
 
+const PREVIEW_GRID_STYLE = { height: '100%', width: '100%' } as const;
+
 interface DatasetDetailProps {
   tableName: string;
   header?: React.ReactNode;
@@ -1013,6 +1015,26 @@ const DatasetDetailInner = ({ tableName, header, onBackToDatasets }: DatasetDeta
     };
   }, [hasBlueprintChanges]);
 
+  const previewColumnConfig = useMemo(
+    () => ({
+      headerComponent: ColumnHeader,
+      headerComponentParams: {
+        onColumnRename: canEditBlueprint && !hasBlueprintChanges ? handleColumnRename : undefined,
+        onColumnRequiredChange: canEditBlueprint && !hasBlueprintChanges ? handleColumnRequiredChange : undefined,
+        getColumnInfo,
+      },
+      sortable: true,
+      flex: 0,
+      width: 200,
+      minWidth: 150,
+      maxWidth: 400,
+      resizable: true,
+      editable: canEditData && !hasBlueprintChanges,
+      suppressFillHandle: !canEditData || hasBlueprintChanges,
+    }),
+    [canEditBlueprint, canEditData, hasBlueprintChanges, handleColumnRename, handleColumnRequiredChange, getColumnInfo],
+  );
+
   // --- Effects ---
   useEffect(() => {
     if (initRef.current) return;
@@ -1219,24 +1241,8 @@ const DatasetDetailInner = ({ tableName, header, onBackToDatasets }: DatasetDeta
                 tableRef={tableRef}
                 columns={previewColumns}
                 serverSideDatasource={serverSideDatasource}
-                gridStyle={{ height: '100%', width: '100%' }}
-                columnConfig={{
-                  headerComponent: ColumnHeader,
-                  headerComponentParams: {
-                    onColumnRename: canEditBlueprint && !hasBlueprintChanges ? handleColumnRename : undefined,
-                    onColumnRequiredChange:
-                      canEditBlueprint && !hasBlueprintChanges ? handleColumnRequiredChange : undefined,
-                    getColumnInfo,
-                  },
-                  sortable: true,
-                  flex: 0,
-                  width: 200,
-                  minWidth: 150,
-                  maxWidth: 400,
-                  resizable: true,
-                  editable: canEditData && !hasBlueprintChanges,
-                  suppressFillHandle: !canEditData || hasBlueprintChanges,
-                }}
+                gridStyle={PREVIEW_GRID_STYLE}
+                columnConfig={previewColumnConfig}
                 showStatusBar
                 totalRows={totalRows ?? undefined}
                 onGridReady={() => setGridReady(true)}
