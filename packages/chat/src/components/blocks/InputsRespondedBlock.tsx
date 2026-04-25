@@ -12,6 +12,7 @@ import {
   type InputsRespondedItemPayload,
 } from '../../types/block.types';
 import { normalizeFilesystemPath } from '../../utils/filesystemUpload';
+import { MarkdownBlock } from './MarkdownBlock';
 
 const SKIPPED_DISPLAY = 'Prefer to skip';
 
@@ -198,9 +199,11 @@ export const InputsRespondedBlock: React.FC<InputsRespondedBlockProps> = ({
           <div className='divide-GRAY_400 divide-y'>
             {responses.map((item, index) => (
               <div key={`${item.entity_id}-${index}`} className='flex flex-col gap-0.5 px-3.5 py-3.5'>
-                <p className='f-13-450 text-GRAY_700 leading-normal whitespace-pre-wrap'>
-                  {item?.input_required?.question}
-                </p>
+                <MarkdownBlock
+                  payload={{ text: item?.input_required?.question ?? '' }}
+                  fontClassName='f-13-450 text-GRAY_700 leading-normal'
+                  compactParagraphs
+                />
                 <div className='flex flex-col gap-0.5'>
                   <div className='flex flex-col justify-center py-1.5'>
                     <p className='text-GRAY_1000 text-sm leading-[1.667] font-[420] whitespace-pre-wrap'>
