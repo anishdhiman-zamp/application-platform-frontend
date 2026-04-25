@@ -1,11 +1,6 @@
 name: Promote Beta to GA
 
 on:
-  pull_request:
-    branches:
-      - main
-    types:
-      - closed
   workflow_dispatch:
     inputs:
       reason:
@@ -22,12 +17,77 @@ env:
   VERCEL_PROJECT_ID: ${{ secrets.VERCEL_PROJECT_ID }}
 
 jobs:
+  verify-git-sync:
+    name: Verify no pending main → release sync PR
+    runs-on: ubuntu-latest
+    timeout-minutes: 2
+    permissions:
+      pull-requests: read
+    steps:
+      - name: Check for open main → release sync PR
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          GITHUB_REPOSITORY: ${{ github.repository }}
+        run: |
+          OPEN_SYNC=$(gh pr list --repo "$GITHUB_REPOSITORY" \
+            --base release --head main --state open \
+            --json number,url,title -q '.[0] // empty')
+          if [ -n "$OPEN_SYNC" ]; then
+            URL=$(echo "$OPEN_SYNC" | jq -r .url)
+            TITLE=$(echo "$OPEN_SYNC" | jq -r .title)
+            echo "::error::A main → release sync PR is open. Merge it before promoting:"
+            echo "  $TITLE"
+            echo "  $URL"
+            exit 1
+          fi
+          echo "No open main → release sync PR — OK to promote."
+
+  merge-release-to-main:
+    name: Merge release → main
+    needs:
+      - verify-git-sync
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    permissions:
+      contents: write
+    steps:
+      - name: Mint GitHub App token
+        id: app-token
+        uses: actions/create-github-app-token@7bfa3a4717ef143a604ee0a99d859b8886a96d00 # v1.9.3
+        with:
+          app-id: ${{ secrets.BOT_APP_ID }}
+          private-key: ${{ secrets.BOT_APP_PRIVATE_KEY }}
+
+      - name: Checkout main
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+          ref: main
+          token: ${{ steps.app-token.outputs.token }}
+
+      - name: Merge release into main
+        run: |
+          git config user.email "224820880+zampactionbot[bot]@users.noreply.github.com"
+          git config user.name "zampactionbot[bot]"
+          git fetch origin main release
+          git checkout main
+          git merge origin/release --ff-only || {
+            echo "::warning::Fast-forward merge failed. Creating merge commit."
+            git merge origin/release --no-edit
+          }
+          git push origin main
+
+      - name: Fast-forward release to main
+        run: |
+          git fetch origin main
+          git checkout release
+          git merge origin/main --ff-only
+          git push origin release
+
   deploy:
     name: Deploy to Vercel
-    if: |
-      github.event_name == 'workflow_dispatch' ||
-      (github.event.pull_request.merged == true &&
-      github.event.pull_request.head.ref == 'release')
+    needs:
+      - merge-release-to-main
     runs-on: ubuntu-latest
     permissions:
       contents: read
@@ -44,10 +104,10 @@ jobs:
         env:
           VERCEL_TOKEN: ${{ secrets.VERCEL_TOKEN }}
           VERCEL_ORG_ID: ${{ secrets.VERCEL_ORG_ID }}
-          BETA_PROJECT_ID: ${{ secrets.VERCEL_PROJECT_ID_RELEASE }}
+          GA_PROJECT_ID: ${{ secrets.VERCEL_PROJECT_ID }}
         run: |
           RESPONSE=$(curl -sf \
-            "https://api.vercel.com/v6/deployments?projectId=${BETA_PROJECT_ID}&teamId=${VERCEL_ORG_ID}&target=production&state=READY&limit=1" \
+            "https://api.vercel.com/v6/deployments?projectId=${GA_PROJECT_ID}&teamId=${VERCEL_ORG_ID}&target=beta&state=READY&limit=1" \
             -H "Authorization: Bearer ${VERCEL_TOKEN}")
 
           BETA_DEPLOYMENT_ID=$(echo "$RESPONSE" | jq -r '.deployments[0].uid')
@@ -65,21 +125,13 @@ jobs:
             exit 1
           fi
 
-          if [ "${{ github.event_name }}" == "pull_request" ]; then
-            EXPECTED_SHA="${{ github.event.pull_request.head.sha }}"
-            if [ "$BETA_COMMIT" != "$EXPECTED_SHA" ]; then
-              echo "ERROR: Beta deployment SHA ($BETA_COMMIT) does not match release branch head SHA ($EXPECTED_SHA)."
-              exit 1
-            fi
-          else
-            echo "WARNING: Triggered via ${{ github.event_name }} — SHA verification skipped. Beta deployment ($BETA_COMMIT) was not verified against a release branch head."
-          fi
+          echo "INFO: Triggered via workflow_dispatch — SHA verification skipped. Beta deployment SHA: $BETA_COMMIT"
 
           echo "Found beta deployment: $BETA_DEPLOYMENT_ID ($BETA_DEPLOYMENT_URL)"
           echo "Promoting to production..."
 
           PROMOTE_RESPONSE=$(curl -s -w "\n__HTTP_STATUS__%{http_code}" -X POST \
-            "https://api.vercel.com/v10/projects/${BETA_PROJECT_ID}/promote/${BETA_DEPLOYMENT_ID}?teamId=${VERCEL_ORG_ID}" \
+            "https://api.vercel.com/v10/projects/${GA_PROJECT_ID}/promote/${BETA_DEPLOYMENT_ID}?teamId=${VERCEL_ORG_ID}" \
             -H "Authorization: Bearer ${VERCEL_TOKEN}" \
             -H "Content-Type: application/json" \
             -d "{}")
@@ -117,12 +169,7 @@ jobs:
 
   deploy-eu:
     name: Deploy to AWS EU
-    if: |
-      always() &&
-      (github.event_name == 'workflow_dispatch' ||
-      (github.event.pull_request.merged == true &&
-      github.event.pull_request.head.ref == 'release')) &&
-      needs.deploy.result == 'success'
+    if: needs.deploy.result == 'success'
     needs:
       - deploy
     uses: ./.github/workflows/aws-prd-eu-build-deploy.yaml
@@ -132,13 +179,11 @@ jobs:
 
   slack-vercel:
     name: Slack Notification (Vercel)
-    if: |
-      always() &&
-      (github.event_name == 'workflow_dispatch' ||
-      (github.event.pull_request.merged == true &&
-      github.event.pull_request.head.ref == 'release'))
+    if: always()
     runs-on: ubuntu-latest
     needs:
+      - verify-git-sync
+      - merge-release-to-main
       - deploy
     steps:
       - name: Send notification
@@ -146,7 +191,7 @@ jobs:
           SLACK_WEBHOOK: ${{ secrets.SLACK_WEBHOOK_URL_GA_DEPLOYMENTS }}
           RESULT: ${{ needs.deploy.result }}
           DURATION: ${{ needs.deploy.outputs.duration }}
-          BRANCH: ${{ github.event_name == 'workflow_dispatch' && 'main (manual)' || github.event.pull_request.head.ref }}
+          BRANCH: 'main (manual)'
           AUTHOR: ${{ github.actor }}
           COMMIT: ${{ github.sha }}
           RUN_URL: ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}
@@ -159,6 +204,9 @@ jobs:
           elif [ "$RESULT" == 'cancelled' ]; then
             TITLE=":grey_exclamation: Beta -> GA Promotion — Vercel cancelled"
             TEXT="Vercel promotion was cancelled."
+          elif [ "$RESULT" == 'skipped' ]; then
+            TITLE=":x: Beta -> GA Promotion — Vercel skipped"
+            TEXT="Vercel promotion was skipped (git sync or merge step failed)."
           else
             TITLE=":x: Beta -> GA Promotion — Vercel failed"
             TEXT="Vercel promotion failed."
@@ -188,12 +236,7 @@ jobs:
 
   slack-eu:
     name: Slack Notification (AWS EU)
-    if: |
-      always() &&
-      (github.event_name == 'workflow_dispatch' ||
-      (github.event.pull_request.merged == true &&
-      github.event.pull_request.head.ref == 'release')) &&
-      needs.deploy.result == 'success'
+    if: always() && needs.deploy-eu.result != 'skipped'
     runs-on: ubuntu-latest
     needs:
       - deploy
@@ -204,7 +247,7 @@ jobs:
           SLACK_WEBHOOK: ${{ secrets.SLACK_WEBHOOK_URL_GA_DEPLOYMENTS }}
           RESULT: ${{ needs.deploy-eu.result }}
           DURATION: ${{ needs.deploy-eu.outputs.duration }}
-          BRANCH: ${{ github.event_name == 'workflow_dispatch' && 'main (manual)' || github.event.pull_request.head.ref }}
+          BRANCH: 'main (manual)'
           AUTHOR: ${{ github.actor }}
           COMMIT: ${{ github.sha }}
           RUN_URL: ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}
