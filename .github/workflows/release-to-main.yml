@@ -85,7 +85,7 @@ jobs:
           git push origin release
 
   deploy:
-    name: Deploy to Vercel
+    name: Deploy to Vercel (GA)
     needs:
       - merge-release-to-main
     runs-on: ubuntu-latest
@@ -94,69 +94,39 @@ jobs:
       deployments: write
     outputs:
       duration: ${{ steps.duration.outputs.duration }}
+      deployment_url: ${{ steps.deploy.outputs.deployment_url }}
     steps:
       - name: Record start time
         id: start
         run: echo "start=$EPOCHSECONDS" >> $GITHUB_OUTPUT
 
-      - name: Fetch latest beta deployment and promote to production
+      - name: Checkout main
+        uses: actions/checkout@v4
+        with:
+          ref: main
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          cache: 'npm'
+
+      - name: Install Vercel CLI
+        run: npm install --global vercel@latest
+
+      - name: Pull Vercel Environment Information
+        run: vercel pull --yes --environment=production --token=${{ secrets.VERCEL_TOKEN }}
+
+      - name: Build Project Artifacts
+        run: vercel build --prod --token=${{ secrets.VERCEL_TOKEN }}
+
+      - name: Deploy to Vercel
         id: deploy
-        env:
-          VERCEL_TOKEN: ${{ secrets.VERCEL_TOKEN }}
-          VERCEL_ORG_ID: ${{ secrets.VERCEL_ORG_ID }}
-          GA_PROJECT_ID: ${{ secrets.VERCEL_PROJECT_ID }}
         run: |
-          RESPONSE=$(curl -sf \
-            "https://api.vercel.com/v6/deployments?projectId=${GA_PROJECT_ID}&teamId=${VERCEL_ORG_ID}&target=beta&state=READY&limit=1" \
-            -H "Authorization: Bearer ${VERCEL_TOKEN}")
-
-          BETA_DEPLOYMENT_ID=$(echo "$RESPONSE" | jq -r '.deployments[0].uid')
-          BETA_DEPLOYMENT_URL=$(echo "$RESPONSE" | jq -r '.deployments[0].url')
-          BETA_COMMIT=$(echo "$RESPONSE" | jq -r '.deployments[0].meta.githubCommitSha // empty')
-
-          if [ -z "$BETA_DEPLOYMENT_ID" ] || [ "$BETA_DEPLOYMENT_ID" == "null" ]; then
-            echo "ERROR: Could not find a ready beta deployment to promote."
-            echo "API response: $RESPONSE"
-            exit 1
-          fi
-
-          if [ -z "$BETA_COMMIT" ]; then
-            echo "ERROR: Beta deployment has no githubCommitSha metadata; cannot verify SHA. Failing to be safe."
-            exit 1
-          fi
-
-          echo "INFO: Triggered via workflow_dispatch — SHA verification skipped. Beta deployment SHA: $BETA_COMMIT"
-
-          echo "Found beta deployment: $BETA_DEPLOYMENT_ID ($BETA_DEPLOYMENT_URL)"
-          echo "Promoting to production..."
-
-          PROMOTE_RESPONSE=$(curl -s -w "\n__HTTP_STATUS__%{http_code}" -X POST \
-            "https://api.vercel.com/v10/projects/${GA_PROJECT_ID}/promote/${BETA_DEPLOYMENT_ID}?teamId=${VERCEL_ORG_ID}" \
-            -H "Authorization: Bearer ${VERCEL_TOKEN}" \
-            -H "Content-Type: application/json" \
-            -d "{}")
-
-          HTTP_STATUS=$(echo "$PROMOTE_RESPONSE" | grep '__HTTP_STATUS__' | sed 's/__HTTP_STATUS__//')
-          PROMOTE_RESPONSE=$(echo "$PROMOTE_RESPONSE" | grep -v '__HTTP_STATUS__')
-          echo "Promote API HTTP status: $HTTP_STATUS"
-          if [ "$HTTP_STATUS" -eq 409 ]; then
-            echo "Deployment is already the current production deployment — treating as success."
-          elif [ "$HTTP_STATUS" -lt 200 ] || [ "$HTTP_STATUS" -ge 300 ]; then
-            echo "ERROR: Promote API returned HTTP $HTTP_STATUS"
-            echo "Response: $PROMOTE_RESPONSE"
-            exit 1
-          fi
-
-          DEPLOYMENT_URL=$(echo "$PROMOTE_RESPONSE" | jq -r '.url // .deployment.url // empty')
-          if [ -z "$DEPLOYMENT_URL" ]; then
-            DEPLOYMENT_URL="$BETA_DEPLOYMENT_URL"
-          fi
-
-          echo "deployment_url=https://$DEPLOYMENT_URL" >> $GITHUB_OUTPUT
-          echo "beta_deployment_id=$BETA_DEPLOYMENT_ID" >> $GITHUB_OUTPUT
-          echo "### Promotion successful!" >> $GITHUB_STEP_SUMMARY
-          echo "**Beta deployment:** $BETA_DEPLOYMENT_ID" >> $GITHUB_STEP_SUMMARY
-          echo "**URL:** https://$DEPLOYMENT_URL" >> $GITHUB_STEP_SUMMARY
+          DEPLOYMENT_URL=$(vercel deploy --prebuilt --prod --token=${{ secrets.VERCEL_TOKEN }})
+          echo "deployment_url=$DEPLOYMENT_URL" >> $GITHUB_OUTPUT
+          echo "### Deployment successful!" >> $GITHUB_STEP_SUMMARY
+          echo "**URL:** $DEPLOYMENT_URL" >> $GITHUB_STEP_SUMMARY
 
       - name: Compute duration
         id: duration
@@ -191,6 +161,7 @@ jobs:
           SLACK_WEBHOOK: ${{ secrets.SLACK_WEBHOOK_URL_GA_DEPLOYMENTS }}
           RESULT: ${{ needs.deploy.result }}
           DURATION: ${{ needs.deploy.outputs.duration }}
+          DEPLOYMENT_URL: ${{ needs.deploy.outputs.deployment_url }}
           BRANCH: 'main (manual)'
           AUTHOR: ${{ github.actor }}
           COMMIT: ${{ github.sha }}
@@ -199,17 +170,17 @@ jobs:
           SHORT_COMMIT="${COMMIT:0:7}"
           DURATION="${DURATION:-N/A}"
           if [ "$RESULT" == 'success' ]; then
-            TITLE=":white_check_mark: Beta -> GA Promotion — Vercel"
-            TEXT="Beta promoted to GA on Vercel successfully."
+            TITLE=":white_check_mark: GA Deployment — Vercel"
+            TEXT="Release deployed to GA on Vercel successfully.\n*URL:* ${DEPLOYMENT_URL}"
           elif [ "$RESULT" == 'cancelled' ]; then
-            TITLE=":grey_exclamation: Beta -> GA Promotion — Vercel cancelled"
-            TEXT="Vercel promotion was cancelled."
+            TITLE=":grey_exclamation: GA Deployment — Vercel cancelled"
+            TEXT="Vercel deployment was cancelled."
           elif [ "$RESULT" == 'skipped' ]; then
-            TITLE=":x: Beta -> GA Promotion — Vercel skipped"
-            TEXT="Vercel promotion was skipped (git sync or merge step failed)."
+            TITLE=":x: GA Deployment — Vercel skipped"
+            TEXT="Vercel deployment was skipped (git sync or merge step failed)."
           else
-            TITLE=":x: Beta -> GA Promotion — Vercel failed"
-            TEXT="Vercel promotion failed."
+            TITLE=":x: GA Deployment — Vercel failed"
+            TEXT="Vercel deployment failed."
           fi
 
           PAYLOAD=$(jq -n \

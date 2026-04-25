@@ -13,7 +13,7 @@ concurrency:
 
 env:
   VERCEL_ORG_ID: ${{ secrets.VERCEL_ORG_ID }}
-  VERCEL_PROJECT_ID: ${{ secrets.VERCEL_PROJECT_ID }}
+  VERCEL_PROJECT_ID: ${{ secrets.VERCEL_PROJECT_ID_RELEASE }}
 
 jobs:
   deploy:
@@ -44,34 +44,30 @@ jobs:
         run: npm install --global vercel@latest
 
       - name: Pull Vercel Environment Information
-        run: vercel pull --yes --environment=beta --token=${{ secrets.VERCEL_TOKEN }}
+        run: vercel pull --yes --environment=production --token=${{ secrets.VERCEL_TOKEN }}
 
       - name: Build Project Artifacts
-        run: vercel build --token=${{ secrets.VERCEL_TOKEN }}
+        run: vercel build --prod --token=${{ secrets.VERCEL_TOKEN }}
 
       - name: Deploy to Vercel
         id: deploy
         run: |
-          DEPLOYMENT_URL=$(vercel deploy --prebuilt --environment=beta --token=${{ secrets.VERCEL_TOKEN }})
+          DEPLOYMENT_URL=$(vercel deploy --prebuilt --prod --token=${{ secrets.VERCEL_TOKEN }})
           echo "deployment_url=$DEPLOYMENT_URL" >> $GITHUB_OUTPUT
           echo "### Beta Deployment successful!" >> $GITHUB_STEP_SUMMARY
           echo "**URL:** $DEPLOYMENT_URL" >> $GITHUB_STEP_SUMMARY
-
       - name: Comment PR with deployment URL
         uses: actions/github-script@v7
         with:
           script: |
             const marker = '<!-- vercel-deployment-comment -->';
             const body = `${marker}\n### Beta Deployment Ready!\n\n**URL:** ${{ steps.deploy.outputs.deployment_url }}\n\nDeployed successfully via GitHub Actions`;
-
             const { data: comments } = await github.rest.issues.listComments({
               owner: context.repo.owner,
               repo: context.repo.repo,
               issue_number: context.issue.number
             });
-
             const existingComment = comments.find(comment => comment.body.includes(marker));
-
             if (existingComment) {
               await github.rest.issues.updateComment({
                 owner: context.repo.owner,
@@ -87,7 +83,6 @@ jobs:
                 body: body
               });
             }
-
       - name: Compute duration
         id: duration
         if: always()
@@ -96,7 +91,6 @@ jobs:
           START="${{ steps.start.outputs.start }}"
           ELAPSED=$(( END - ${START:-0} ))
           echo "duration=$(( ELAPSED / 60 ))m $(( ELAPSED % 60 ))s" >> $GITHUB_OUTPUT
-
   slack-vercel:
     name: Slack Notification (Vercel)
     if: always() && github.event.pull_request.merged == true
@@ -126,7 +120,6 @@ jobs:
             TITLE=":x: Beta Deployment — Vercel failed"
             TEXT="Vercel deployment failed."
           fi
-
           PAYLOAD=$(jq -n \
             --arg title "$TITLE" \
             --arg branch "$BRANCH" \
