@@ -246,3 +246,12 @@ export interface IntegrationDetailPropsType {
   onRemoveIntegration?: (integrationId: string) => void;
   onToggleConnectionEnabled?: (connectionId: string, checked: boolean) => void;
 }
+
+export interface AgentTaskApiItem {
+  id: string;
+  title: string;
+  description: string | null;
+  status: string;
+  subtasks: { id: string; title: string; status: string; subtasks?: unknown[] }[];
+  created_at: string;
+}

@@ -95,6 +95,8 @@ const MultiSelectInput: FC<MultiSelectInputPropsType> = ({
 
   const handleClickKeyDown = (e: KeyboardEvent<HTMLInputElement>) => {
     const keyEvent = e.key;
+    const isArrowKey = keyEvent === KEY_CODES.ARROW_DOWN || keyEvent === KEY_CODES.ARROW_UP;
+    const isAddKey = allowedAddKeys.includes(keyEvent);
 
     if (keyEvent === KEY_CODES.BACKSPACE && search.trim() === '') {
       if (inputArrayList?.length > 0) {
@@ -105,38 +107,56 @@ const MultiSelectInput: FC<MultiSelectInputPropsType> = ({
       return;
     }
 
-    if (selectOnlyFromList) {
-      if (allowedAddKeys.includes(keyEvent)) {
-        e.preventDefault();
+    if (isArrowKey) {
+      handleKeyDown(e);
 
-        const selectedOption = (filteredDropdownOptions ?? [])[hoveredOptionIndex ?? 0];
-
-        if (selectedOption) {
-          onValidateAndAdd({
-            value: selectedOption?.value,
-            label: selectedOption?.label,
-            color: selectedOption?.color,
-            type: selectedOption?.type,
-            team_id: selectedOption?.team_id,
-          });
-
-          setSearch('');
-        }
-      } else if (keyEvent === KEY_CODES.ARROW_DOWN || keyEvent === KEY_CODES.ARROW_UP) {
-        handleKeyDown(e);
-      }
-    } else {
-      const trimmedSearch = search?.trim();
-
-      if (allowedAddKeys.includes(keyEvent) && trimmedSearch) {
-        e.preventDefault();
-        onValidateAndAdd({
-          value: trimmedSearch,
-          label: trimmedSearch,
-        });
-        setSearch('');
-      }
+      return;
     }
+
+    if (!isAddKey) return;
+
+    if (selectOnlyFromList) {
+      e.preventDefault();
+      const selectedOption = (filteredDropdownOptions ?? [])[hoveredOptionIndex ?? 0];
+
+      if (!selectedOption) return;
+
+      onValidateAndAdd({
+        value: selectedOption?.value,
+        label: selectedOption?.label,
+        color: selectedOption?.color,
+        type: selectedOption?.type,
+        team_id: selectedOption?.team_id,
+      });
+      setSearch('');
+
+      return;
+    }
+
+    // Prefer a hovered dropdown option over raw text.
+    const hoveredOption = (filteredDropdownOptions ?? [])[hoveredOptionIndex ?? -1];
+
+    if (hoveredOption) {
+      e.preventDefault();
+      onValidateAndAdd({
+        value: hoveredOption?.value,
+        label: hoveredOption?.label,
+        color: hoveredOption?.color,
+        type: hoveredOption?.type,
+        team_id: hoveredOption?.team_id,
+      });
+      setSearch('');
+
+      return;
+    }
+
+    const trimmedSearch = search?.trim();
+
+    if (!trimmedSearch) return;
+
+    e.preventDefault();
+    onValidateAndAdd({ value: trimmedSearch, label: trimmedSearch });
+    setSearch('');
   };
 
   const handleKeyDown = (e: KeyboardEvent<HTMLDivElement>) => {
@@ -370,6 +390,9 @@ const MultiSelectInput: FC<MultiSelectInputPropsType> = ({
                 placeholder: 'f-12-400',
                 color: 'text-GRAY_900',
               }}
+              customStyles={{
+                menu: { minWidth: 100 },
+              }}
               menuOptionClasses={{
                 contentWrapper: 'py-2',
               }}
@@ -379,7 +402,7 @@ const MultiSelectInput: FC<MultiSelectInputPropsType> = ({
         )}
       </div>
       {openDropdownOptions && (
-        <div className='relative w-full'>
+        <div className='relative h-0 w-full'>
           <div ref={dropdownOptionsRef} onClick={(e) => e.stopPropagation()}>
             {customOptionsListDropdown
               ? createElement(
@@ -399,7 +422,7 @@ const MultiSelectInput: FC<MultiSelectInputPropsType> = ({
                   } as Record<string, unknown>,
                 )
               : !!combinedOptions?.length && (
-                  <div className='f-10-500 text-GRAY_700 border-GRAY_400 shadow-table-filter-menu bg-BG_WHITE absolute left-0 z-10 mt-1 w-full rounded-md border p-1'>
+                  <div className='f-10-500 text-GRAY_700 border-GRAY_400 shadow-table-filter-menu bg-BG_WHITE absolute left-0 z-1002 mt-1 w-full rounded-md border p-1'>
                     <span className='flex px-1.5 pt-2 pb-1.5'>Select a team or person</span>
                     <div
                       className='flex max-h-[200px] w-full flex-col overflow-y-auto [&::-webkit-scrollbar]:hidden'

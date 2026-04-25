@@ -1,7 +1,20 @@
 import { REQUEST_TYPES } from '@zamp-platform/api';
-import type { TaskStatus } from '@zamp-platform/chat';
 import { API_ENDPOINTS } from 'apis/apiEndpoint.constants';
 import { APITags } from '@/constants/api.constants';
+import {
+  POLICY_ACTION_TYPE_INVOKE_TOOL,
+  POLICY_RESOURCE_TYPE_CONNECTION,
+} from '@/modules/integrations/constants/policies.constants';
+import type {
+  BulkCreatePoliciesParams,
+  BulkUpdatePoliciesParams,
+  CreateResourceActionParams,
+  GetResourceActionParams,
+  ListPoliciesBackendResponse,
+  PolicyResponseBackend,
+  ResourceActionBackend,
+} from '@/modules/integrations/types/policies.types';
+import { toLegacyToolPoliciesResponse } from '@/modules/integrations/utils/policies.utils';
 import { TRIGGER_STATUS_ACTIVE } from '@/modules/pace/components/agents/constants/agents.constants';
 import type {
   AgentApiResponseItem,
@@ -10,16 +23,17 @@ import type {
   AgentListResponseType,
   AgentMemberApiResponseItem,
   AgentMembersResponseType,
+  AgentTaskApiItem,
   AgentTriggerApiResponseItem,
   AgentTriggersResponseType,
   AgentType,
   IntegrationToolsResponse,
   ToolPoliciesApiResponse,
 } from '@/modules/pace/components/agents/types/agents.types';
+import { mapAgentTask } from '@/modules/pace/components/agents/utils/agents.utils';
 import type {
   TaskListByStatusResponse,
   TaskListingCountsResponse,
-  TaskListItem,
 } from '@/modules/pace/components/tasks/types/tasks.types';
 import { baseApi } from '@/services/baseApi';
 import type {
@@ -35,34 +49,9 @@ import type {
   IntegrationToolsParams,
   RemoveAgentMemberParams,
   RemoveConnectionFromAgentParams,
-  UpdateConnectionToolPoliciesParams,
 } from '@/types/api/agents.types';
 import { transformAgentResponse } from '@/types/api/agents.types';
 import { formRequestUrlWithParams } from '@/utils/common';
-
-interface AgentTaskApiItem {
-  id: string;
-  title: string;
-  description: string | null;
-  status: string;
-  subtasks: { id: string; title: string; status: string; subtasks?: unknown[] }[];
-  created_at: string;
-}
-
-const mapAgentTask = (t: AgentTaskApiItem): TaskListItem => ({
-  id: t.id,
-  title: t.title,
-  description: t.description,
-  status: t.status as TaskStatus,
-  subtasks: (t.subtasks ?? []).map((s) => ({
-    id: s.id,
-    title: s.title,
-    status: s.status as TaskStatus,
-  })),
-  skills_invoked_count: 0,
-  created_by: { id: 'agent', name: 'Agent' },
-  created_at: t.created_at,
-});
 
 const agentsApi = baseApi.injectEndpoints({
   endpoints: (builder) => ({
@@ -208,23 +197,57 @@ const agentsApi = baseApi.injectEndpoints({
     }),
     getConnectionToolPolicies: builder.query<ToolPoliciesApiResponse, ConnectionToolPoliciesParams>({
       query: ({ connectionId, resourceAudiencePolicyId }) => ({
-        url: formRequestUrlWithParams(API_ENDPOINTS.CONNECTION_TOOL_POLICIES_GET, { connectionId }),
-        params: resourceAudiencePolicyId ? { resource_audience_policy_id: resourceAudiencePolicyId } : undefined,
+        url: API_ENDPOINTS.POLICIES,
+        params: {
+          resource_type: POLICY_RESOURCE_TYPE_CONNECTION,
+          resource_id: connectionId,
+          action_type: POLICY_ACTION_TYPE_INVOKE_TOOL,
+          ...(resourceAudiencePolicyId && { resource_audience_policy_id: resourceAudiencePolicyId }),
+        },
       }),
+      transformResponse: (response: ListPoliciesBackendResponse, _meta, { connectionId, resourceAudiencePolicyId }) =>
+        toLegacyToolPoliciesResponse(response, connectionId, resourceAudiencePolicyId ?? ''),
       providesTags: (_result, _error, { connectionId }) => [
         { type: APITags.GET_CONNECTION_TOOL_POLICIES, id: connectionId },
       ],
     }),
-    updateConnectionToolPolicies: builder.mutation<void, UpdateConnectionToolPoliciesParams>({
-      query: ({ connectionId, resourceAudiencePolicyId, policies }) => ({
-        url: formRequestUrlWithParams(API_ENDPOINTS.CONNECTION_TOOL_POLICIES_PUT, { connectionId }),
-        method: REQUEST_TYPES.PUT,
-        params: resourceAudiencePolicyId ? { resource_audience_policy_id: resourceAudiencePolicyId } : undefined,
-        body: { policies },
+    getResourceAction: builder.query<ResourceActionBackend, GetResourceActionParams>({
+      query: ({ connectionId }) => ({
+        url: API_ENDPOINTS.RESOURCE_ACTION_GET,
+        params: {
+          resource_type: POLICY_RESOURCE_TYPE_CONNECTION,
+          resource_id: connectionId,
+          action_type: POLICY_ACTION_TYPE_INVOKE_TOOL,
+        },
       }),
-      invalidatesTags: (_result, _error, { connectionId }) => [
-        { type: APITags.GET_CONNECTION_TOOL_POLICIES, id: connectionId },
-      ],
+      providesTags: (_result, _error, { connectionId }) => [{ type: APITags.GET_RESOURCE_ACTION, id: connectionId }],
+    }),
+    createResourceAction: builder.mutation<ResourceActionBackend, CreateResourceActionParams>({
+      query: ({ connectionId }) => ({
+        url: API_ENDPOINTS.RESOURCE_ACTION_CREATE,
+        method: REQUEST_TYPES.POST,
+        body: {
+          resource_type: POLICY_RESOURCE_TYPE_CONNECTION,
+          resource_id: connectionId,
+          action_type: POLICY_ACTION_TYPE_INVOKE_TOOL,
+          config: {},
+        },
+      }),
+      invalidatesTags: (_result, _error, { connectionId }) => [{ type: APITags.GET_RESOURCE_ACTION, id: connectionId }],
+    }),
+    bulkCreatePolicies: builder.mutation<{ created: PolicyResponseBackend[] }, BulkCreatePoliciesParams>({
+      query: ({ resourceActionId, policies }) => ({
+        url: API_ENDPOINTS.POLICIES,
+        method: REQUEST_TYPES.POST,
+        body: { resource_action_id: resourceActionId, policies },
+      }),
+    }),
+    bulkUpdatePolicies: builder.mutation<{ updated: PolicyResponseBackend[] }, BulkUpdatePoliciesParams>({
+      query: ({ resourceActionId, updates }) => ({
+        url: API_ENDPOINTS.POLICIES,
+        method: REQUEST_TYPES.PATCH,
+        body: { resource_action_id: resourceActionId, updates },
+      }),
     }),
     addConnectionToAgent: builder.mutation<void, AddConnectionToAgentParams>({
       query: ({ connectionId, agentId }) => ({
@@ -285,7 +308,10 @@ export const {
   useRemoveAgentMemberMutation,
   useGetConnectionToolPoliciesQuery,
   useLazyGetConnectionToolPoliciesQuery,
-  useUpdateConnectionToolPoliciesMutation,
+  useLazyGetResourceActionQuery,
+  useCreateResourceActionMutation,
+  useBulkCreatePoliciesMutation,
+  useBulkUpdatePoliciesMutation,
   useAddConnectionToAgentMutation,
   useRemoveConnectionFromAgentMutation,
   useGetIntegrationToolsQuery,

@@ -59,7 +59,7 @@ const MultiSelectFieldInner: React.FC<MultiSelectFieldInnerProps> = ({
   );
 
   return (
-    <div className={cn('space-y-2', className)}>
+    <div className={cn('flex flex-col gap-y-2', className)}>
       {field.label && <Label>{field.label}</Label>}
       <Combobox
         isMultiSelect
@@ -76,7 +76,7 @@ const MultiSelectFieldInner: React.FC<MultiSelectFieldInnerProps> = ({
         <button
           type='button'
           className={cn(
-            'f-13-400 border-GRAY_400 flex min-h-8 w-full items-center rounded-md border bg-white px-3 py-1 text-left outline-hidden',
+            'f-13-400 border-GRAY_400 bg-BG_WHITE flex min-h-8 w-full items-center rounded-md border px-3 py-1 text-left outline-hidden',
             'hover:border-GRAY_500 focus:border-GRAY_600 focus:ring-GRAY_400 focus:ring-2',
             error && 'border-destructive focus-visible:ring-destructive',
           )}

@@ -8,6 +8,8 @@ import {
   generateNewDatasetId,
   LIST_TABLES_QUERY,
 } from 'modules/pace/components/datasets/datasets.constants';
+import { preserveSidebarParam } from 'modules/pace/pace.utils';
+import Link from 'next/link';
 import { snakeCaseToSentenceCase } from 'utils/common';
 import { type AgentDbQueryRequest, useAgentDbReadQuery } from '@/apis/agentManagedDb';
 import ImageLoader from '@/components/common/loader/ImageLoader';
@@ -15,6 +17,7 @@ import CommonWrapper from '@/components/commonWrapper';
 import { SkeletonTypes } from '@/components/commonWrapper/commonWrapper.types';
 import EmptyState from '@/components/EmptyState';
 import { DONE_EMPTY_STATE, ZAMP_LOGO_LOADER_SVG } from '@/constants/icons';
+import { ROUTES_PATH } from '@/constants/routeConfig';
 import { UNTITLED_DATASET_NAME } from '@/modules/data/data.constants';
 import { useDynamicTabs } from '@/modules/pace/components/dynamic-tabs/useDynamicTabs';
 import { TAB_TYPE } from '@/modules/pace/pace.types';
@@ -28,9 +31,13 @@ const DatasetsListing = () => {
     skipPollingIfUnfocused: true,
   });
 
-  const handleCreateDataset = useCallback(() => {
-    openTab(generateNewDatasetId(), UNTITLED_DATASET_NAME);
-  }, [openTab]);
+  const handleCreateDataset = useCallback(
+    (event: React.MouseEvent<HTMLButtonElement>) => {
+      event.preventDefault();
+      openTab(generateNewDatasetId(), UNTITLED_DATASET_NAME);
+    },
+    [openTab],
+  );
 
   const rows = useMemo(() => {
     if (!data?.rows) return [];
@@ -44,11 +51,13 @@ const DatasetsListing = () => {
   return (
     <div className='flex h-full w-full flex-1 flex-col'>
       <div className='border-GRAY_400 flex items-center border-b pb-8'>
-        <h1 className='f-18-500 flex-1'>Datasets</h1>
-        <Button size='medium' className='flex items-center gap-1.5' onClick={handleCreateDataset}>
-          <Plus className='h-4 w-4' />
-          Create dataset
-        </Button>
+        <h1 className='f-20-600 text-GRAY_1000 flex-1'>Datasets</h1>
+        <Link href={preserveSidebarParam(ROUTES_PATH.CHAT_SETTINGS_DATASETS_NEW)}>
+          <Button size='medium' className='flex items-center gap-1.5' onClick={handleCreateDataset}>
+            <Plus className='h-4 w-4' />
+            Create dataset
+          </Button>
+        </Link>
       </div>
       <div className='flex-1 overflow-y-auto'>
         <CommonWrapper

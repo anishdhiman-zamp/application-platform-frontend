@@ -49,12 +49,6 @@ export interface ConnectionToolPoliciesParams {
   resourceAudiencePolicyId?: string;
 }
 
-export interface UpdateConnectionToolPoliciesParams {
-  connectionId: string;
-  resourceAudiencePolicyId?: string;
-  policies: { tool_name: string; policy: string }[];
-}
-
 export interface AddConnectionToAgentParams {
   connectionId: string;
   agentId: string;

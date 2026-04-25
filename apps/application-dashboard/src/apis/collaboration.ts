@@ -56,6 +56,7 @@ const Collaboration = baseApi.injectEndpoints({
 
 export const {
   useGetAudiencesByResourceIdQuery,
+  useLazyGetAudiencesByResourceIdQuery,
   usePostShareResourceToAudiencesMutation,
   usePatchChangeAudienceRoleInResourceMutation,
   useDeleteAudienceFromResourceMutation,

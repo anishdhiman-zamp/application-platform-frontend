@@ -1,25 +1,16 @@
 'use client';
 
-import { type FC } from 'react';
-import type { ButtonVariant } from '@zamp-platform/ui';
+import { type FC, useState } from 'react';
+import { Plus } from 'lucide-react';
 import ConnectIntegrationAction from 'modules/integrations/AllIntegrations/ConnectIntegrationAction';
 import ConnectionsPopover from 'modules/integrations/AllIntegrations/ConnectionsPopover';
 import IntegrationCardContentV2 from 'modules/integrations/AllIntegrations/IntegrationCardContentV2';
+import IntegrationInfoDialog from 'modules/integrations/AllIntegrations/IntegrationInfoDialog';
 import { usePathname, useRouter, useSearchParams } from 'next/navigation';
-import type { IntegrationItem } from '@/types/api/integrations';
+import type { IntegrationCardPropsType } from '@/modules/integrations/types/integrations.types';
 import { cn } from '@/utils/common';
 
-interface IntegrationCardProps {
-  integrationItem: IntegrationItem;
-  className?: string;
-  redirectUrl?: string;
-  enabled?: boolean;
-  buttonVariant?: ButtonVariant;
-  isToolCallBlock?: boolean;
-  onCardClick?: (item: IntegrationItem) => void;
-}
-
-const IntegrationCardV2: FC<IntegrationCardProps> = ({
+const IntegrationCardV2: FC<IntegrationCardPropsType> = ({
   integrationItem,
   className,
   redirectUrl,
@@ -32,6 +23,7 @@ const IntegrationCardV2: FC<IntegrationCardProps> = ({
   const router = useRouter();
   const pathname = usePathname();
   const searchParams = useSearchParams();
+  const [isInfoDialogOpen, setIsInfoDialogOpen] = useState(false);
 
   const handleCardClick = () => {
     if (onCardClick) {
@@ -39,6 +31,13 @@ const IntegrationCardV2: FC<IntegrationCardProps> = ({
 
       return;
     }
+
+    if (!connections?.length) {
+      setIsInfoDialogOpen(true);
+
+      return;
+    }
+
     const query = searchParams?.toString();
     const url = query ? `${pathname}/${name}?${query}` : `${pathname}/${name}`;
 
@@ -46,34 +45,43 @@ const IntegrationCardV2: FC<IntegrationCardProps> = ({
   };
 
   return (
-    <div
-      className={cn(
-        'bg-BG_WHITE border-GRAY_400 group flex min-h-[170px] flex-col justify-between rounded-md border p-3.5 transition-colors select-none',
-        !isToolCallBlock &&
-          '[&:hover:not(:has(.actions-bar:hover))]:border-GRAY_300 [&:hover:not(:has(.actions-bar:hover))]:bg-BG_GRAY_2 [&:active:not(:has(.actions-bar:hover))]:border-GRAY_300 [&:active:not(:has(.actions-bar:hover))]:bg-GRAY_100 cursor-pointer',
-        className,
-      )}
-      onClick={isToolCallBlock ? undefined : handleCardClick}
-    >
-      <IntegrationCardContentV2
-        logo={icon}
-        displayName={title}
-        description={description}
-        showArrow={!isToolCallBlock}
-      />
-      <div className='flex w-full items-center justify-between' onClick={(e) => e.stopPropagation()}>
-        {connections?.length > 0 && <ConnectionsPopover integrationName={name} connections={connections} />}
-        <div className='actions-bar ml-auto'>
-          <ConnectIntegrationAction
-            integrationItem={integrationItem}
-            redirectUrl={redirectUrl}
-            copy={enabled ? 'Add Connection' : 'Connect'}
-            buttonClassName='f-11-500'
-            buttonVariant={buttonVariant}
-          />
+    <>
+      <div
+        className={cn(
+          'bg-BG_WHITE border-GRAY_400 group flex min-h-[170px] flex-col justify-between rounded-md border p-3.5 transition-colors select-none',
+          !isToolCallBlock &&
+            '[&:hover:not(:has(.actions-bar:hover))]:border-GRAY_300 [&:hover:not(:has(.actions-bar:hover))]:bg-BG_GRAY_2 [&:active:not(:has(.actions-bar:hover))]:border-GRAY_300 [&:active:not(:has(.actions-bar:hover))]:bg-GRAY_100 cursor-pointer',
+          className,
+        )}
+        onClick={isToolCallBlock ? undefined : handleCardClick}
+      >
+        <IntegrationCardContentV2
+          logo={icon}
+          displayName={title}
+          description={description}
+          showArrow={!isToolCallBlock}
+        />
+        <div className='flex w-full items-center justify-between' onClick={(e) => e.stopPropagation()}>
+          {connections?.length > 0 && <ConnectionsPopover connections={connections} integrationName={name} />}
+          <div className='actions-bar ml-auto'>
+            <ConnectIntegrationAction
+              integrationItem={integrationItem}
+              redirectUrl={redirectUrl}
+              copy={enabled ? 'Add Connection' : 'Connect'}
+              buttonClassName='f-11-500'
+              buttonVariant={buttonVariant}
+              icon={<Plus size={12} />}
+            />
+          </div>
         </div>
       </div>
-    </div>
+
+      <IntegrationInfoDialog
+        integrationItem={integrationItem}
+        isOpen={isInfoDialogOpen}
+        onOpenChange={setIsInfoDialogOpen}
+      />
+    </>
   );
 };
 

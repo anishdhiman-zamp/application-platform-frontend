@@ -16,7 +16,7 @@ export const FormSection: React.FC<FormSectionProps> = ({ section, fields, anima
     <div className='form-section flex flex-col gap-5'>
       <div className='flex flex-col gap-2'>
         <Label>{section.title}</Label>
-        <div className='grid'>
+        <div className='grid gap-y-4'>
           {section.layout.map((row, rowIdx) => (
             <div key={rowIdx} className='flex w-full gap-2'>
               {row.map(({ field, col_span }) =>
@@ -31,7 +31,6 @@ export const FormSection: React.FC<FormSectionProps> = ({ section, fields, anima
                     className='flex-1'
                   >
                     <FormField
-                      className='mb-2'
                       field={fields[field]}
                       name={field}
                       animated={animated}

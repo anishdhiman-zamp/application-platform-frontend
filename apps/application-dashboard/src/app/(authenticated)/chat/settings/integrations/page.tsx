@@ -1,3 +1,4 @@
+import { ScrollContainer } from '@zamp-platform/ui';
 import IntegrationGridV2 from '@/modules/integrations/AllIntegrations/IntegrationGridV2';
 import IntegrationHeader from '@/modules/integrations/AllIntegrations/IntegrationHeader';
 
@@ -5,12 +6,12 @@ const IntegrationsPage = () => {
   return (
     <div className='@container flex h-full w-full flex-1 flex-col pl-[3px]'>
       <div className='flex h-full w-full flex-col'>
-        <div className='border-GRAY_400 sticky top-0 z-10 border-b pb-8 transition-colors'>
+        <div className='sticky top-0 z-10 pb-8'>
           <IntegrationHeader />
         </div>
-        <div className='flex-1 overflow-y-auto py-6 [scrollbar-width:none]'>
+        <ScrollContainer className='flex-1' scrollClassName='pb-6' scrollbarStyle='none'>
           <IntegrationGridV2 />
-        </div>
+        </ScrollContainer>
       </div>
     </div>
   );

@@ -1,22 +1,15 @@
 import { type FC, useState } from 'react';
 import { Button } from '@zamp-platform/ui';
 import { cn } from '@zamp-platform/ui/utils';
-import { BookOpen } from 'lucide-react';
+import { BookOpen, Info, Plus } from 'lucide-react';
+import { handleActivationKeyDown } from '@/constants/shortcuts';
 import ConnectIntegrationAction from '@/modules/integrations/AllIntegrations/ConnectIntegrationAction';
+import IntegrationInfoDialog from '@/modules/integrations/AllIntegrations/IntegrationInfoDialog';
+import type { IntegrationDetailHeaderPropsType } from '@/modules/integrations/types/integrations.types';
 import type { IntegrationItem } from '@/types/api/integrations';
-import type { defaultFnType } from '@/types/commonTypes';
 import { getNameInitial } from '@/utils/common';
 
-interface IntegrationDetailHeaderProps {
-  displayName: string;
-  logo: string;
-  guide?: string;
-  showGuide?: boolean;
-  onGuideClick?: defaultFnType;
-  integrationItem?: IntegrationItem;
-}
-
-const IntegrationDetailHeader: FC<IntegrationDetailHeaderProps> = ({
+const IntegrationDetailHeader: FC<IntegrationDetailHeaderPropsType> = ({
   displayName,
   logo,
   guide,
@@ -25,6 +18,7 @@ const IntegrationDetailHeader: FC<IntegrationDetailHeaderProps> = ({
   integrationItem,
 }) => {
   const [imgError, setImgError] = useState(false);
+  const [isInfoDialogOpen, setIsInfoDialogOpen] = useState(false);
   const hasConnections = !!integrationItem?.connections?.length;
 
   return (
@@ -43,10 +37,24 @@ const IntegrationDetailHeader: FC<IntegrationDetailHeaderProps> = ({
       </div>
 
       <div className='flex items-center gap-x-2'>
+        {integrationItem && (
+          <div
+            role='button'
+            tabIndex={0}
+            onClick={() => setIsInfoDialogOpen(true)}
+            onKeyDown={(e) => handleActivationKeyDown(e, () => setIsInfoDialogOpen(true))}
+            className='text-GRAY_700 hover:text-GRAY_1000 flex h-7 w-7 cursor-pointer items-center justify-center rounded-md transition-colors'
+            aria-label='Integration info'
+          >
+            <Info width={16} height={16} />
+          </div>
+        )}
+
         <ConnectIntegrationAction
           integrationItem={integrationItem || ({} as IntegrationItem)}
           copy={hasConnections ? 'Add Connection' : 'Connect'}
           buttonVariant='default'
+          icon={hasConnections ? <Plus className='h-3.5 w-3.5' /> : undefined}
         />
 
         {guide && (
@@ -64,6 +72,14 @@ const IntegrationDetailHeader: FC<IntegrationDetailHeaderProps> = ({
           </Button>
         )}
       </div>
+
+      {integrationItem && (
+        <IntegrationInfoDialog
+          integrationItem={integrationItem}
+          isOpen={isInfoDialogOpen}
+          onOpenChange={setIsInfoDialogOpen}
+        />
+      )}
     </div>
   );
 };
