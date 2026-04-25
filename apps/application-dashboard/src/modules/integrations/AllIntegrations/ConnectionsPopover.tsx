@@ -1,51 +1,44 @@
 'use client';
 
-import { type FC, useCallback, useState } from 'react';
+import { useCallback, useState } from 'react';
 import {
-  Button,
   Popover,
   PopoverContent,
   PopoverPortal,
   PopoverTrigger,
-  toast,
   Tooltip,
   TooltipContent,
   TooltipProvider,
   TooltipTrigger,
 } from '@zamp-platform/ui';
 import { Link2 } from 'lucide-react';
-import { useDeleteIntegrationConnectionMutation } from '@/apis/integrations';
-import { useOptionalIntegrationsContext } from '@/modules/integrations/AllIntegrations/Integrations.context';
-import type { IntegrationConnection } from '@/types/api/integrations';
+import { usePathname, useRouter, useSearchParams } from 'next/navigation';
+import { handleActivationKeyDown } from '@/constants/shortcuts';
+import ConnectionAudienceBubbles from '@/modules/integrations/AllIntegrations/ConnectionAudienceBubbles';
+import type { ConnectionsPopoverPropsType } from '@/modules/integrations/types/integrations.types';
 
-interface ConnectionsPopoverProps {
-  integrationName: string;
-  connections: IntegrationConnection[];
-}
-
-const ConnectionsPopover: FC<ConnectionsPopoverProps> = ({ integrationName, connections }) => {
+const ConnectionsPopover = ({ connections, integrationName }: ConnectionsPopoverPropsType) => {
   const [isPopoverOpen, setIsPopoverOpen] = useState(false);
-  const [deleteIntegrationConnection, { isLoading: isDeletingConnection }] = useDeleteIntegrationConnectionMutation();
-  const [deletingConnectionId, setDeletingConnectionId] = useState<string | null>(null);
-  const integrationsContext = useOptionalIntegrationsContext();
+  const router = useRouter();
+  const pathname = usePathname();
+  const searchParams = useSearchParams();
 
-  const handleRemoveClick = useCallback(
+  const handleConnectionClick = useCallback(
     (connectionId: string) => {
-      setDeletingConnectionId(connectionId);
-      deleteIntegrationConnection({ connectionId })
-        .unwrap()
-        .then(() => {
-          toast.success('Connection removed successfully');
-          integrationsContext?.removeConnection(integrationName, connectionId);
-        })
-        .catch(() => {
-          toast.error('Failed to remove connection');
-        })
-        .finally(() => {
-          setDeletingConnectionId(null);
-        });
+      const params = new URLSearchParams(searchParams?.toString() ?? '');
+
+      params.set('connectionId', connectionId);
+      router.push(`${pathname}/${integrationName}?${params.toString()}`);
     },
-    [deleteIntegrationConnection, integrationsContext, integrationName],
+    [router, pathname, integrationName, searchParams],
+  );
+
+  const handleConnectionKeyDown = useCallback(
+    (e: React.KeyboardEvent, connectionId?: string) => {
+      if (!connectionId) return;
+      handleActivationKeyDown(e, () => handleConnectionClick(connectionId));
+    },
+    [handleConnectionClick],
   );
 
   return (
@@ -69,32 +62,25 @@ const ConnectionsPopover: FC<ConnectionsPopoverProps> = ({ integrationName, conn
       </TooltipProvider>
       <PopoverPortal>
         <PopoverContent
-          className='max-h-[300px] w-[250px] overflow-auto p-1'
+          className='max-h-[300px] w-[280px] overflow-auto p-1'
           align='start'
           avoidCollisions={false}
           onOpenAutoFocus={(e) => e.preventDefault()}
         >
-          <div>
+          <div className='flex flex-col'>
             {connections.map((connection) => (
               <div
                 key={connection?.id}
-                className='text-GRAY_900 hover:bg-GRAY_50 border-b-GRAY_100 flex items-center justify-between gap-x-2 rounded-md px-2 py-1.5 text-sm font-medium last:border-b-0'
+                role='button'
+                tabIndex={0}
+                onClick={() => connection?.id && handleConnectionClick(connection.id)}
+                onKeyDown={(e) => handleConnectionKeyDown(e, connection?.id)}
+                className='hover:bg-GRAY_50 flex cursor-pointer items-center justify-between gap-x-2 rounded-md px-2 py-1.5'
               >
-                <span className='f-12-500 text-GRAY_900 w-fit flex-1 truncate text-left'>
+                <span className='f-12-500 text-GRAY_900 min-w-0 flex-1 truncate text-left'>
                   {connection?.name ?? connection?.id}
                 </span>
-                <Button
-                  variant='outline'
-                  size='xsmall'
-                  isLoading={deletingConnectionId === (connection?.id ?? '') && isDeletingConnection}
-                  className='f-11-500 bg-BG_WHITE hover:bg-BG_WHITE shrink-0 px-1.5 py-1'
-                  onClick={(e) => {
-                    e.stopPropagation();
-                    handleRemoveClick(connection?.id ?? '');
-                  }}
-                >
-                  Remove
-                </Button>
+                {connection?.id && <ConnectionAudienceBubbles connectionId={connection.id} />}
               </div>
             ))}
           </div>

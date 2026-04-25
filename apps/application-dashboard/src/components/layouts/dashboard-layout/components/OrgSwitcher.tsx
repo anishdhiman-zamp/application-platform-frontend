@@ -72,7 +72,9 @@ const OrgSwitcher: FC<OrgSwitcherProps> = ({
   const [showCreateOrgModal, setShowCreateOrgModal] = useState(false);
   const [orgToProvision, setOrgToProvision] = useState<Organization | null>(null);
 
-  const { isEnabled: isNewOrgCreationEnabled } = useFeatureFlag(FEATURE_FLAGS.NEW_ORG_CREATION);
+  const { isEnabled: isNewOrgCreationFlagEnabled } = useFeatureFlag(FEATURE_FLAGS.NEW_ORG_CREATION);
+  const isProduction = ENVIRONMENT === ENVIRONMENT_TYPES.PRODUCTION;
+  const isNewOrgCreationEnabled = isProduction && isNewOrgCreationFlagEnabled;
 
   const { data: baseUrlData } = useGetBaseUrlQuery(
     { email: user?.user_email ?? '' },

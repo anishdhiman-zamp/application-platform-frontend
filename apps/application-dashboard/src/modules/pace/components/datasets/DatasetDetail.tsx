@@ -51,6 +51,12 @@ import {
   reorderBlueprintColumns,
   sanitizeColumnName,
 } from 'modules/pace/components/datasets/datasets.constants';
+import {
+  cleanLegacyDatasetKeys,
+  clearDatasetStateKey,
+  getDatasetState,
+  setDatasetState,
+} from 'modules/pace/components/datasets/datasetStorage';
 import ShareDatasetNeonPopup from 'modules/pace/components/datasets/ShareDatasetNeonPopup';
 import { preserveSidebarParam } from 'modules/pace/pace.utils';
 import Link from 'next/link';
@@ -67,17 +73,24 @@ import {
 import ImageLoader from '@/components/common/loader/ImageLoader';
 import { ZAMP_LOGO_LOADER_SVG } from '@/constants/icons';
 import { ROUTES_PATH } from '@/constants/routeConfig';
-import {
-  getFromLocalStorage,
-  LOCAL_STORAGE_KEYS,
-  removeFromLocalStorage,
-  setToLocalStorage,
-} from '@/utils/localstorage';
+import { getFromLocalStorage, LOCAL_STORAGE_KEYS, setToLocalStorage } from '@/utils/localstorage';
 import DatasetTable from 'components/common/table/DatasetTable';
 import DisplayOptions from 'components/common/table/DisplayOptions';
 import { FILTER_TYPES } from 'components/filter/filter.types';
 import FiltersWrapper from 'components/filter/filterMenu/FiltersWrapper';
 import { filtersContextActions, useFiltersContextStore, withFiltersContext } from 'components/filter/filters.context';
+
+const PREVIEW_GRID_STYLE = { height: '100%', width: '100%' } as const;
+
+// Debug logging — off by default. To enable in any environment, in the browser console:
+//   window.__DATASET_DEBUG__ = true
+// Disable with: window.__DATASET_DEBUG__ = false
+const datasetDebugLog = (...args: unknown[]) => {
+  if (typeof window !== 'undefined' && (window as unknown as { __DATASET_DEBUG__?: boolean }).__DATASET_DEBUG__) {
+    // eslint-disable-next-line no-console
+    console.log('[DatasetDetail]', new Date().toISOString().slice(11, 23), ...args);
+  }
+};
 
 interface DatasetDetailProps {
   tableName: string;
@@ -88,6 +101,10 @@ interface DatasetDetailProps {
 const DatasetDetailInner = ({ tableName, header, onBackToDatasets }: DatasetDetailProps) => {
   // --- Refs ---
   const tableRef = useRef<AgGridReact | null>(null);
+  const renderCountRef = useRef(0);
+
+  renderCountRef.current += 1;
+  datasetDebugLog('render', { count: renderCountRef.current, tableName });
   const totalRowsRef = useRef<number | undefined>(undefined);
   const lastFilterClausesRef = useRef<string | undefined>(undefined);
   const activeFilterClausesRef = useRef<string | undefined>(undefined);
@@ -106,7 +123,7 @@ const DatasetDetailInner = ({ tableName, header, onBackToDatasets }: DatasetDeta
 
   // --- Hooks ---
   const router = useRouter();
-  const { userId } = useUserIdentity();
+  const { userId, organizationId } = useUserIdentity();
   const [executeQuery] = useLazyAgentDbReadQuery();
   const [executeMutation] = useAgentDbWriteMutation();
   const [exportTable] = useExportAgentDbTableMutation();
@@ -158,29 +175,21 @@ const DatasetDetailInner = ({ tableName, header, onBackToDatasets }: DatasetDeta
     (userRole === DatasetRoleValue.ADMIN || userRole === DatasetRoleValue.EDITOR) && pkColumn !== null;
   const canEditBlueprint = userRole === DatasetRoleValue.ADMIN || userRole === DatasetRoleValue.EDITOR;
 
-  const columnOrderKey = `${LOCAL_STORAGE_KEYS.DATASET_COLUMN_ORDER}_${tableName}` as LOCAL_STORAGE_KEYS;
-
   const applyColumnOrder = useCallback(
     (cols: BlueprintColumn[]): BlueprintColumn[] => {
-      const raw = getFromLocalStorage(columnOrderKey);
+      const order = getDatasetState(organizationId, tableName).final;
 
-      if (!raw) return cols;
-      try {
-        const order = JSON.parse(raw) as string[];
-        const orderMap = new Map(order.map((id, i) => [id, i]));
-        const sorted = [...cols].sort((a, b) => {
-          const ai = orderMap.has(a.id) ? orderMap.get(a.id)! : Infinity;
-          const bi = orderMap.has(b.id) ? orderMap.get(b.id)! : Infinity;
+      if (!order?.length) return cols;
+      const orderMap = new Map(order.map((id, i) => [id, i]));
 
-          return ai - bi;
-        });
+      return [...cols].sort((a, b) => {
+        const ai = orderMap.has(a.id) ? orderMap.get(a.id)! : Infinity;
+        const bi = orderMap.has(b.id) ? orderMap.get(b.id)! : Infinity;
 
-        return sorted;
-      } catch {
-        return cols;
-      }
+        return ai - bi;
+      });
     },
-    [columnOrderKey],
+    [organizationId, tableName],
   );
 
   const loadSchema = useCallback(async () => {
@@ -250,32 +259,35 @@ const DatasetDetailInner = ({ tableName, header, onBackToDatasets }: DatasetDeta
 
       filterDispatch({ type: filtersContextActions.SET_FILTERS_CONFIG, payload: { filtersConfig: config } });
 
-      // Restore any unsaved draft from localStorage
-      const draftKey = `${LOCAL_STORAGE_KEYS.DATASET_BLUEPRINT_DRAFT}_${tableName}` as LOCAL_STORAGE_KEYS;
-      const raw = getFromLocalStorage(draftKey);
+      // Restore any unsaved draft from localStorage, but only if it's consistent with
+      // the current schema. A draft whose column ids don't match the schema (e.g. left
+      // over from a prior version that stored display names as ids) would make
+      // hasBlueprintChanges permanently true, trapping the grid in its blueprint-cache
+      // path and breaking server-side pagination.
+      const draft = getDatasetState(organizationId, tableName).blueprint;
+      const schemaIds = new Set(bpCols.map((c) => c.id));
+      const isDraftValid =
+        Array.isArray(draft) &&
+        draft.length > 0 &&
+        draft.every((c) => c.id.startsWith(COL_PREFIX) || schemaIds.has(c.id));
 
-      if (raw) {
-        try {
-          const draft = JSON.parse(raw) as BlueprintColumn[];
-
-          setBlueprintColumns(draft);
-        } catch {
-          setBlueprintColumns(bpCols);
-        }
+      if (isDraftValid) {
+        setBlueprintColumns(draft);
       } else {
+        if (draft !== undefined) clearDatasetStateKey(organizationId, tableName, ['blueprint']);
         setBlueprintColumns(bpCols);
       }
     } catch {
       setColumns([]);
       setSchemaError('Failed to load dataset schema. The table may not exist or you may not have access.');
     }
-  }, [executeQuery, tableName, filterDispatch, applyColumnOrder]);
+  }, [executeQuery, tableName, filterDispatch, applyColumnOrder, organizationId]);
 
   const reloadSchemaAndData = useCallback(async () => {
     setColumns(null);
     prefetchRef.current = null;
     cachedRowsRef.current = [];
-    removeFromLocalStorage(`${LOCAL_STORAGE_KEYS.DATASET_BLUEPRINT_DRAFT}_${tableName}` as LOCAL_STORAGE_KEYS);
+    clearDatasetStateKey(organizationId, tableName, ['blueprint']);
     const dataPromise = executeQuery({
       query: buildSelectTableQuery(tableName, DETAIL_PAGE_SIZE, 0, undefined, undefined, 'id'),
     }).unwrap();
@@ -283,7 +295,7 @@ const DatasetDetailInner = ({ tableName, header, onBackToDatasets }: DatasetDeta
 
     prefetchRef.current = { dataPromise, countPromise, consumed: false };
     await loadSchema();
-  }, [executeQuery, tableName, loadSchema]);
+  }, [executeQuery, tableName, loadSchema, organizationId]);
 
   const handleSaveBlueprint = useCallback(async () => {
     const originalMap = new Map(originalBlueprintColumns.map((c) => [c.id, c]));
@@ -386,17 +398,12 @@ const DatasetDetailInner = ({ tableName, header, onBackToDatasets }: DatasetDeta
       );
 
       // Remap stored column order so the renamed column keeps its position after loadSchema.
-      const rawOrder = getFromLocalStorage(columnOrderKey);
+      const previousOrder = getDatasetState(organizationId, tableName).final;
 
-      if (rawOrder) {
-        try {
-          const order = JSON.parse(rawOrder) as string[];
-          const updatedOrder = order.map((id) => (id === colId ? sanitized : id));
+      if (previousOrder?.length) {
+        const updatedOrder = previousOrder.map((id) => (id === colId ? sanitized : id));
 
-          setToLocalStorage(columnOrderKey, JSON.stringify(updatedOrder));
-        } catch {
-          // ignore parse errors — column may land at the end, but rename still succeeds
-        }
+        setDatasetState(organizationId, tableName, { final: updatedOrder });
       }
 
       try {
@@ -412,12 +419,12 @@ const DatasetDetailInner = ({ tableName, header, onBackToDatasets }: DatasetDeta
           (prev) =>
             prev?.map((col) => (col.field === colId ? { ...col, headerName: previousHeaderName } : col)) ?? null,
         );
-        if (rawOrder) {
-          setToLocalStorage(columnOrderKey, rawOrder);
+        if (previousOrder?.length) {
+          setDatasetState(organizationId, tableName, { final: previousOrder });
         }
       }
     },
-    [tableName, executeMutation, loadSchema, columnOrderKey],
+    [tableName, executeMutation, loadSchema, organizationId],
   );
 
   const handleColumnRequiredChange = useCallback(
@@ -534,9 +541,9 @@ const DatasetDetailInner = ({ tableName, header, onBackToDatasets }: DatasetDeta
       const final = reorderBlueprintColumns(newFieldOrder, blueprintColumns);
 
       setBlueprintColumns(final);
-      setToLocalStorage(columnOrderKey, JSON.stringify(final.map((c) => c.id)));
+      setDatasetState(organizationId, tableName, { final: final.map((c) => c.id) });
     },
-    [blueprintColumns, columnOrderKey],
+    [blueprintColumns, organizationId, tableName],
   );
 
   const hasBlueprintChanges = useMemo(() => {
@@ -668,10 +675,10 @@ const DatasetDetailInner = ({ tableName, header, onBackToDatasets }: DatasetDeta
 
     pendingNavRef.current = null;
     // Clear draft and reset blueprint so guard is lifted before navigating
-    removeFromLocalStorage(`${LOCAL_STORAGE_KEYS.DATASET_BLUEPRINT_DRAFT}_${tableName}` as LOCAL_STORAGE_KEYS);
+    clearDatasetStateKey(organizationId, tableName, ['blueprint']);
     setBlueprintColumns(originalBlueprintColumns);
     if (href) router.push(href);
-  }, [originalBlueprintColumns, tableName, router]);
+  }, [originalBlueprintColumns, organizationId, tableName, router]);
 
   const handleModalSave = useCallback(async () => {
     await handleSaveBlueprint();
@@ -760,12 +767,30 @@ const DatasetDetailInner = ({ tableName, header, onBackToDatasets }: DatasetDeta
     async (params) => {
       const { startRow = 0, endRow = DETAIL_PAGE_SIZE, sortModel } = params.request;
 
-      // When blueprint has unsaved changes, serve from cache — no API calls
-      if (hasBlueprintChangesRef.current && cachedRowsRef.current.length > 0) {
-        const augmented = augmentRowsRef.current(cachedRowsRef.current);
+      datasetDebugLog('getRows.enter', {
+        startRow,
+        endRow,
+        sortModel: sortModel?.length ? sortModel : undefined,
+        hasBlueprintChanges: hasBlueprintChangesRef.current,
+      });
 
-        params.success({ rowData: augmented, rowCount: totalRowsRef.current });
-        setInitialDataLoaded(true);
+      // When blueprint has unsaved changes, serve only the cached first block.
+      // Report rowCount as the cache size so AG Grid doesn't keep requesting more blocks
+      // (the cache only holds the first page, not the full dataset).
+      if (hasBlueprintChangesRef.current && cachedRowsRef.current.length > 0) {
+        if (startRow === 0) {
+          const augmented = augmentRowsRef.current(cachedRowsRef.current);
+
+          params.success({ rowData: augmented, rowCount: cachedRowsRef.current.length });
+          setInitialDataLoaded(true);
+          datasetDebugLog('getRows.success.blueprintCache', {
+            rows: augmented.length,
+            rowCount: cachedRowsRef.current.length,
+          });
+        } else {
+          params.success({ rowData: [], rowCount: cachedRowsRef.current.length });
+          datasetDebugLog('getRows.success.blueprintCache.empty', { startRow });
+        }
 
         return;
       }
@@ -785,12 +810,14 @@ const DatasetDetailInner = ({ tableName, header, onBackToDatasets }: DatasetDeta
           cachedRowsRef.current = selectResult.rows ?? [];
           params.success({ rowData: augmentRowsRef.current(cachedRowsRef.current), rowCount: total });
           setInitialDataLoaded(true);
+          datasetDebugLog('getRows.success.prefetch', { rows: cachedRowsRef.current.length, rowCount: total });
         } catch (err: any) {
           if (err?.status === 403) {
             setSchemaError('Access denied: insufficient privileges on this table.');
           }
           params.fail();
           setInitialDataLoaded(true);
+          datasetDebugLog('getRows.fail.prefetch', { status: err?.status });
         }
 
         return;
@@ -802,6 +829,8 @@ const DatasetDetailInner = ({ tableName, header, onBackToDatasets }: DatasetDeta
       const filterChanged = filterClauses !== lastFilterClausesRef.current;
 
       lastFilterClausesRef.current = filterClauses;
+
+      datasetDebugLog('getRows.fetch', { limit, offset, filterChanged });
 
       try {
         const selectPromise = executeQuery({
@@ -830,6 +859,11 @@ const DatasetDetailInner = ({ tableName, header, onBackToDatasets }: DatasetDeta
         }
 
         cachedRowsRef.current = selectResult.rows ?? [];
+        datasetDebugLog('getRows.success.fetch', {
+          rows: cachedRowsRef.current.length,
+          rowCount: totalRowsRef.current,
+          offset,
+        });
         params.success({
           rowData: augmentRowsRef.current(cachedRowsRef.current),
           rowCount: totalRowsRef.current,
@@ -841,6 +875,7 @@ const DatasetDetailInner = ({ tableName, header, onBackToDatasets }: DatasetDeta
         }
         params.fail();
         setInitialDataLoaded(true);
+        datasetDebugLog('getRows.fail.fetch', { status: err?.status });
       }
     },
     [tableName, executeQuery],
@@ -886,6 +921,7 @@ const DatasetDetailInner = ({ tableName, header, onBackToDatasets }: DatasetDeta
       return;
     }
     // Purge and re-fetch rows so augmentRows applies to the new column set
+    datasetDebugLog('refreshServerSide.purge', { reason: 'previewColumns changed' });
     tableRef.current?.api?.refreshServerSide({ purge: true });
   }, [previewColumns, gridReady]);
 
@@ -894,6 +930,7 @@ const DatasetDetailInner = ({ tableName, header, onBackToDatasets }: DatasetDeta
 
   useEffect(() => {
     if (activeTab === DatasetTabsTypes.PREVIEW && prevTabRef.current === DatasetTabsTypes.BLUEPRINT) {
+      datasetDebugLog('refreshServerSide.purge', { reason: 'switched to Preview from Blueprint' });
       tableRef.current?.api?.refreshServerSide({ purge: true });
     }
     prevTabRef.current = activeTab;
@@ -915,16 +952,11 @@ const DatasetDetailInner = ({ tableName, header, onBackToDatasets }: DatasetDeta
   // Save blueprint draft + column order; skip until schema has loaded so initial mount doesn't wipe the draft.
   useEffect(() => {
     if (originalBlueprintColumns.length === 0) return;
-    const draftKey = `${LOCAL_STORAGE_KEYS.DATASET_BLUEPRINT_DRAFT}_${tableName}` as LOCAL_STORAGE_KEYS;
-
-    if (hasBlueprintChanges) {
-      setToLocalStorage(draftKey, JSON.stringify(blueprintColumns));
-    } else {
-      removeFromLocalStorage(draftKey);
-    }
-    // Always persist the current column order (Blueprint DnD or Preview column move)
-    setToLocalStorage(columnOrderKey, JSON.stringify(blueprintColumns.map((c) => c.id)));
-  }, [blueprintColumns, hasBlueprintChanges, tableName, originalBlueprintColumns.length, columnOrderKey]);
+    setDatasetState(organizationId, tableName, {
+      final: blueprintColumns.map((c) => c.id),
+      blueprint: hasBlueprintChanges ? blueprintColumns : undefined,
+    });
+  }, [blueprintColumns, hasBlueprintChanges, tableName, originalBlueprintColumns.length, organizationId]);
 
   // --- Navigation guard ---
   useEffect(() => {
@@ -1013,11 +1045,32 @@ const DatasetDetailInner = ({ tableName, header, onBackToDatasets }: DatasetDeta
     };
   }, [hasBlueprintChanges]);
 
+  const previewColumnConfig = useMemo(
+    () => ({
+      headerComponent: ColumnHeader,
+      headerComponentParams: {
+        onColumnRename: canEditBlueprint && !hasBlueprintChanges ? handleColumnRename : undefined,
+        onColumnRequiredChange: canEditBlueprint && !hasBlueprintChanges ? handleColumnRequiredChange : undefined,
+        getColumnInfo,
+      },
+      sortable: true,
+      flex: 0,
+      width: 200,
+      minWidth: 150,
+      maxWidth: 400,
+      resizable: true,
+      editable: canEditData && !hasBlueprintChanges,
+      suppressFillHandle: !canEditData || hasBlueprintChanges,
+    }),
+    [canEditBlueprint, canEditData, hasBlueprintChanges, handleColumnRename, handleColumnRequiredChange, getColumnInfo],
+  );
+
   // --- Effects ---
   useEffect(() => {
     if (initRef.current) return;
     initRef.current = true;
 
+    cleanLegacyDatasetKeys();
     const dataPromise = executeQuery({
       query: buildSelectTableQuery(tableName, DETAIL_PAGE_SIZE, 0, undefined, undefined, 'id'),
     }).unwrap();
@@ -1053,8 +1106,38 @@ const DatasetDetailInner = ({ tableName, header, onBackToDatasets }: DatasetDeta
 
     if (clauses === activeFilterClausesRef.current) return;
     activeFilterClausesRef.current = clauses;
+    datasetDebugLog('refreshServerSide.purge', { reason: 'filters changed', clauses });
     tableRef.current?.api?.refreshServerSide({ purge: true });
   }, [selectedFilters, gridReady]);
+
+  // Debug: when enabled via window.__DATASET_DEBUG__, log grid dimensions every 5s
+  // and once when ready, so we can detect viewport collapse or unexpected resizes.
+  useEffect(() => {
+    if (!gridReady) return;
+    const logDims = () => {
+      const bodyEl = document.querySelector('.ag-body-viewport') as HTMLElement | null;
+      const rootWrapper = document.querySelector('.ag-root-wrapper') as HTMLElement | null;
+      const displayedRowCount = tableRef.current?.api?.getDisplayedRowCount?.();
+
+      datasetDebugLog('gridDims', {
+        rootWrapper: rootWrapper ? { w: rootWrapper.clientWidth, h: rootWrapper.clientHeight } : null,
+        bodyViewport: bodyEl
+          ? {
+              w: bodyEl.clientWidth,
+              h: bodyEl.clientHeight,
+              scrollH: bodyEl.scrollHeight,
+              scrollTop: bodyEl.scrollTop,
+            }
+          : null,
+        displayedRowCount,
+      });
+    };
+
+    logDims();
+    const interval = setInterval(logDims, 5000);
+
+    return () => clearInterval(interval);
+  }, [gridReady]);
 
   if (accessDenied) {
     return (
@@ -1219,24 +1302,8 @@ const DatasetDetailInner = ({ tableName, header, onBackToDatasets }: DatasetDeta
                 tableRef={tableRef}
                 columns={previewColumns}
                 serverSideDatasource={serverSideDatasource}
-                gridStyle={{ height: '100%', width: '100%' }}
-                columnConfig={{
-                  headerComponent: ColumnHeader,
-                  headerComponentParams: {
-                    onColumnRename: canEditBlueprint && !hasBlueprintChanges ? handleColumnRename : undefined,
-                    onColumnRequiredChange:
-                      canEditBlueprint && !hasBlueprintChanges ? handleColumnRequiredChange : undefined,
-                    getColumnInfo,
-                  },
-                  sortable: true,
-                  flex: 0,
-                  width: 200,
-                  minWidth: 150,
-                  maxWidth: 400,
-                  resizable: true,
-                  editable: canEditData && !hasBlueprintChanges,
-                  suppressFillHandle: !canEditData || hasBlueprintChanges,
-                }}
+                gridStyle={PREVIEW_GRID_STYLE}
+                columnConfig={previewColumnConfig}
                 showStatusBar
                 totalRows={totalRows ?? undefined}
                 onGridReady={() => setGridReady(true)}

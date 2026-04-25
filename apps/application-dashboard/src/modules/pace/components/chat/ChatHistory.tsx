@@ -1,6 +1,6 @@
 'use client';
 
-import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
+import { useCallback, useEffect, useRef, useState } from 'react';
 import { ResourceType, unreadStore, useActiveStreamingIds, useUnreadConversations } from '@zamp-platform/chat';
 import { useInfiniteScroll } from '@zamp-platform/tanstack-table';
 import { Button, Input } from '@zamp-platform/ui';
@@ -42,9 +42,19 @@ const ChatHistory = ({
   const activeStreamingIds = useActiveStreamingIds();
   const unreadIds = useUnreadConversations();
 
-  const [page, setPage] = useState(1);
-  const [allConversations, setAllConversations] = useState<FeedbackItemType[]>([]);
-  const [totalCount, setTotalCount] = useState(0);
+  const [pagination, setPagination] = useState<{
+    page: number;
+    totalPages: number;
+    totalCount: number;
+    conversations: FeedbackItemType[];
+    lastMergedPage: number;
+  }>({
+    page: 1,
+    totalPages: 0,
+    totalCount: 0,
+    conversations: [],
+    lastMergedPage: 0,
+  });
   const [searchTerm, setSearchTerm] = useState('');
   const [isSearchOpen, setIsSearchOpen] = useState(false);
 
@@ -61,7 +71,7 @@ const ChatHistory = ({
     {
       resourceType: ResourceType.ORGANIZATION,
       resourceId: organizationId,
-      page,
+      page: pagination.page,
       limit: PAGE_SIZE,
       search: debouncedSearch || undefined,
     },
@@ -70,30 +80,33 @@ const ChatHistory = ({
     },
   );
 
-  const conversations = useMemo(() => conversationHistory?.conversations ?? [], [conversationHistory]);
-  const displayConversations = useMemo(
-    () => (allConversations.length > 0 ? allConversations : conversations),
-    [allConversations, conversations],
-  );
-  const hasMore = allConversations.length < totalCount;
+  const { page, totalPages, conversations: allConversations } = pagination;
+  const hasMore = totalPages > 0 && page < totalPages;
   const isInitialLoading =
-    displayConversations.length === 0 &&
-    (isLoadingConversationHistory || isUninitializedConversationHistory) &&
+    allConversations.length === 0 &&
+    (isFetchingConversationHistory || isUninitializedConversationHistory) &&
     page === 1;
-  const isEmptyState =
-    displayConversations.length === 0 && !isLoadingConversationHistory && !isFetchingConversationHistory;
+  const isEmptyState = allConversations.length === 0 && !isLoadingConversationHistory && !isFetchingConversationHistory;
+
+  const resetPagination = useCallback(() => {
+    setPagination({ page: 1, totalPages: 0, totalCount: 0, conversations: [], lastMergedPage: 0 });
+  }, []);
 
   const fetchNextPage = useCallback(() => {
-    if (!isFetchingConversationHistory && hasMore) {
-      setPage((prev) => prev + 1);
-    }
-  }, [isFetchingConversationHistory, hasMore]);
+    setPagination((prev) => {
+      if (isFetchingConversationHistory || prev.totalPages === 0 || prev.page >= prev.totalPages) {
+        return prev;
+      }
+
+      return { ...prev, page: prev.page + 1 };
+    });
+  }, [isFetchingConversationHistory]);
 
   const { fetchMoreOnBottomReached } = useInfiniteScroll({
     fetchNextPage,
     isFetching: isFetchingConversationHistory,
-    totalFetched: allConversations.length,
-    totalRowCount: totalCount,
+    totalFetched: page,
+    totalRowCount: hasMore ? totalPages : page,
     hasDataSource: !!organizationId,
     threshold: compact ? 100 : 500,
   });
@@ -103,13 +116,11 @@ const ChatHistory = ({
   }, [fetchMoreOnBottomReached]);
 
   const handleRefetch = useCallback(() => {
-    setPage(1);
-    setAllConversations([]);
-    setTotalCount(0);
+    resetPagination();
     setSearchTerm('');
     setIsSearchOpen(false);
     refetchConversationHistory();
-  }, [refetchConversationHistory]);
+  }, [refetchConversationHistory, resetPagination]);
 
   const handleSelectConversation = useCallback(
     (id: string | null, title?: string) => {
@@ -132,56 +143,66 @@ const ChatHistory = ({
 
   const handleDeleteConversation = useCallback(
     (id: string) => {
-      setAllConversations((prev) => prev.filter((conversation) => conversation.id !== id));
-      setTotalCount((prev) => Math.max(0, prev - 1));
+      setPagination((prev) => ({
+        ...prev,
+        conversations: prev.conversations.filter((c) => c.id !== id),
+        totalCount: Math.max(0, prev.totalCount - 1),
+      }));
       onDeleteConversation?.(id);
     },
     [onDeleteConversation],
   );
 
   const handleDeleteConversationFailure = useCallback((conversation: FeedbackItemType) => {
-    setAllConversations((prev) => [...prev, conversation]);
-    setTotalCount((prev) => prev + 1);
+    setPagination((prev) => ({
+      ...prev,
+      conversations: [...prev.conversations, conversation],
+      totalCount: prev.totalCount + 1,
+    }));
   }, []);
 
   const handleRenameConversation = useCallback(
     (id: string, newTitle: string) => {
-      setAllConversations((prev) =>
-        prev.map((conversation) => (conversation.id === id ? { ...conversation, title: newTitle } : conversation)),
-      );
+      setPagination((prev) => ({
+        ...prev,
+        conversations: prev.conversations.map((c) => (c.id === id ? { ...c, title: newTitle } : c)),
+      }));
       onRenameConversation?.(id, newTitle);
     },
     [onRenameConversation],
   );
 
-  useEffect(() => {
-    setPage(1);
-    setAllConversations([]);
-    setTotalCount(0);
-  }, [debouncedSearch]);
+  const handleMergeFetchedPage = useCallback(() => {
+    if (!conversationHistory) return;
+
+    setPagination((prev) => {
+      if (prev.lastMergedPage === prev.page) return prev;
+
+      const fetched = conversationHistory.conversations ?? [];
+      const existingIds = new Set(prev.conversations.map((c) => c.id));
+      const deduped = fetched.filter((c) => !existingIds.has(c.id));
+
+      return {
+        ...prev,
+        totalPages: conversationHistory.total_pages ?? prev.totalPages,
+        totalCount: conversationHistory.count ?? prev.totalCount,
+        conversations: prev.page === 1 ? fetched : [...prev.conversations, ...deduped],
+        lastMergedPage: prev.page,
+      };
+    });
+  }, [conversationHistory]);
 
   useEffect(() => {
-    if (conversationHistory?.count !== undefined) {
-      setTotalCount(conversationHistory.count);
-    }
-  }, [conversationHistory?.count]);
+    resetPagination();
+  }, [debouncedSearch, resetPagination]);
+
+  useEffect(() => {
+    handleMergeFetchedPage();
+  }, [handleMergeFetchedPage]);
 
   useEffect(() => {
     fetchMoreOnBottomReached(containerRef.current);
-  }, [displayConversations.length]);
-
-  useEffect(() => {
-    if (page === 1) {
-      setAllConversations(conversations);
-    } else if (conversations.length > 0) {
-      setAllConversations((prev) => {
-        const existingIds = new Set(prev.map((c) => c.id));
-        const newConversations = conversations.filter((c) => !existingIds.has(c.id));
-
-        return [...prev, ...newConversations];
-      });
-    }
-  }, [conversations, page]);
+  }, [allConversations.length, fetchMoreOnBottomReached]);
 
   return (
     <div
@@ -206,7 +227,7 @@ const ChatHistory = ({
           <Input
             placeholder='Search...'
             value={searchTerm}
-            autoFocus={compact}
+            autoFocus
             onChange={handleSearchChange}
             iconPosition='leading'
             size='small'
@@ -233,7 +254,7 @@ const ChatHistory = ({
       >
         <div ref={containerRef} className='flex-1 overflow-y-auto [scrollbar-width:none]' onScroll={handleScroll}>
           <div className='w-full space-y-0.5 px-2'>
-            {displayConversations.map((conversation) => (
+            {allConversations.map((conversation) => (
               <ChatHistoryItem
                 key={conversation?.id}
                 conversation={conversation}
@@ -248,7 +269,7 @@ const ChatHistory = ({
               />
             ))}
           </div>
-          {isFetchingConversationHistory && page > 1 && <ChatHistorySkeleton itemCount={10} />}
+          {isFetchingConversationHistory && page > 1 && <ChatHistorySkeleton itemCount={PAGE_SIZE} />}
         </div>
       </CommonWrapper>
       {onStartNewChat && activeConversationId && (

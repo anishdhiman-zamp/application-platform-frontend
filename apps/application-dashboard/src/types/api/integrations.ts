@@ -107,7 +107,6 @@ export type AuthenticateIntegrationRequestTypeV2 = {
   integration_name: string;
   auth_type: string;
   name: string;
-  description: string;
   scopes?: string[];
 };
 

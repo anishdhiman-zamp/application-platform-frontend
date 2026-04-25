@@ -17,20 +17,11 @@ import { getAssetUrl, IMAGE_PREFIX, ZAMP_LOGO_LOADER_SVG } from '@/constants/ico
 import { useProcesses } from '@/contexts/ProcessesContext';
 import { useAppSelector } from '@/hooks/toolkit';
 import { useScrollDetection } from '@/hooks/useScrollDetection';
-import type { IntegrationAuth, IntegrationType } from '@/modules/integrations/types/integrations.types';
+import type { ConnectionModalPropsType, IntegrationAuth } from '@/modules/integrations/types/integrations.types';
 import type { RootState } from '@/store';
 import { cn } from '@/utils/common';
 
-interface ConnectionModalProps {
-  integration: IntegrationType;
-  isOpen: boolean;
-  onClose: () => void;
-  isCreatingTrigger?: boolean;
-  onSubmit?: (connectionId: string) => void;
-  animated?: boolean;
-}
-
-const ConnectionModal: FC<ConnectionModalProps> = ({
+const ConnectionModal: FC<ConnectionModalPropsType> = ({
   integration,
   isOpen,
   onClose,
@@ -38,19 +29,26 @@ const ConnectionModal: FC<ConnectionModalProps> = ({
   onSubmit,
   animated = false,
 }) => {
-  const params = useParams();
-  const orgName = useAppSelector((state: RootState) => state?.user?.user?.orgs?.[0]?.name);
+  // Refs
   const formRef = useRef<FormBuilderRef>(null);
+
+  // Hooks
+  const params = useParams();
+  const { processes } = useProcesses();
   const { ref: scrollContainerRef, isScrolled } = useScrollDetection();
   const [authenticateIntegration, { isLoading: isAuthenticating }] = useAuthenticateIntegrationMutation();
-  const { processes } = useProcesses();
+  const orgName = useAppSelector((state: RootState) => state?.user?.user?.orgs?.[0]?.name);
 
+  // States
+  const [error, setError] = useState<string>('');
+  const [isLoading, setIsLoading] = useState<boolean>(true);
+  const [authContent, setAuthContent] = useState<IntegrationAuth[]>([]);
+
+  // Constants
   const { display_name, logo, guide, auth, id } = integration;
   const noGuide = !guide;
-  const [authContent, setAuthContent] = useState<IntegrationAuth[]>([]);
-  const [isLoading, setIsLoading] = useState<boolean>(true);
-  const [error, setError] = useState<string>('');
 
+  // Memos
   const currentProcess = useMemo(
     () => processes?.find((process) => process.process_id === params?.processId),
     [processes, params?.processId],
@@ -93,31 +91,34 @@ const ConnectionModal: FC<ConnectionModalProps> = ({
     }
   };
 
-  const getAuthContent = useCallback(async () => {
+  const getAuthContent = useCallback(() => {
     if (!auth) {
       setIsLoading(false);
 
       return;
     }
 
-    try {
-      setIsLoading(true);
-      const authUrl = getAssetUrl(auth);
-      const response = await fetch(authUrl);
+    setIsLoading(true);
+    const authUrl = getAssetUrl(auth);
 
-      if (!response.ok) {
-        throw new Error('Failed to fetch auth');
-      }
+    fetch(authUrl)
+      .then((response) => {
+        if (!response.ok) {
+          return Promise.reject(new Error('Failed to fetch auth'));
+        }
 
-      const content: IntegrationAuth[] = await response.json();
-
-      setAuthContent(content);
-    } catch (error) {
-      setAuthContent([]);
-      captureException(error);
-    } finally {
-      setIsLoading(false);
-    }
+        return response.json() as Promise<IntegrationAuth[]>;
+      })
+      .then((content) => {
+        setAuthContent(content);
+      })
+      .catch((error) => {
+        setAuthContent([]);
+        captureException(error);
+      })
+      .finally(() => {
+        setIsLoading(false);
+      });
   }, [auth]);
 
   useEffect(() => {
@@ -127,21 +128,19 @@ const ConnectionModal: FC<ConnectionModalProps> = ({
   return (
     <Dialog open={isOpen} onOpenChange={handleOpenChange}>
       <DialogContent
-        className={cn('border-GRAY_300 h-[600px] max-h-[600px] w-[1000px] max-w-[1000px] rounded-xl border', {
-          'h-auto w-[500px]': noGuide,
+        className={cn('border-GRAY_300 bg-BG_WHITE h-150 max-h-150 w-115 max-w-115 rounded-xl border', {
+          'h-auto': noGuide,
         })}
         showCloseButton={noGuide}
       >
         <DialogBody className='flex flex-1 overflow-hidden rounded-xl'>
           {/* Left Side - Form */}
-          <div
-            className={cn('bg-BG_GRAY_2 flex w-[40%] flex-shrink-0 flex-col overflow-hidden', { 'w-full': noGuide })}
-          >
+          <div className={cn('bg-BG_GRAY_2 flex w-[40%] shrink-0 flex-col overflow-hidden', { 'w-full': noGuide })}>
             {/* Integration name - Fixed header */}
             <div
               className={cn('flex shrink-0 items-center gap-x-1.5 px-6 py-6', isScrolled && 'border-GRAY_500 border-b')}
             >
-              <div className='relative h-5 w-5 flex-shrink-0 p-[2px]'>
+              <div className='relative h-5 w-5 shrink-0 p-[2px]'>
                 <Image
                   src={`${IMAGE_PREFIX}${logo}`}
                   alt={display_name}
@@ -175,8 +174,7 @@ const ConnectionModal: FC<ConnectionModalProps> = ({
             </CommonWrapper>
           </div>
 
-          {/* Right Side - Guide */}
-          <ConnectionGuidePanel guide={guide} onClose={onClose} />
+          {!noGuide && <ConnectionGuidePanel guide={guide} onClose={onClose} />}
         </DialogBody>
 
         {/* Footer */}

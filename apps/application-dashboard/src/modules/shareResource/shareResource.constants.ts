@@ -11,6 +11,7 @@ import {
   ShareResourceConfig,
   ShareResourceVersion,
 } from '@/modules/shareResource/shareResource.types';
+import { PERMISSION_ROLES } from '@/utils/accessPermission/accessPermission.types';
 import { TOAST_MESSAGES } from 'components/common/toast/toast.constants';
 
 export const CHANGE_ACCESS_PRIVILEGES_LIST: ResourcePrivilege[] = [
@@ -263,6 +264,11 @@ export const resourceTypeRouteMap = {
 
 export const ACCESS_MESSAGES_ADMIN_ROLE = 'Admin will have access to all data';
 export const ACCESS_MESSAGES_CUSTOMISE_ACCESS = 'Only admins can customise access';
+
+export const PRIVILEGE_FALLBACK_LABELS: Record<string, string> = {
+  [PERMISSION_ROLES.ADMIN]: 'Admin',
+  [PERMISSION_ROLES.SYSTEM_ADMIN]: 'System admin',
+};
 
 export const RESOURCE_COLLABORATION_ENDPOINTS = {
   [ShareResourceVersion.V1]: {

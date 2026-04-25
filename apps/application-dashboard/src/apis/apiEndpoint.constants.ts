@@ -226,8 +226,10 @@ export const API_ENDPOINTS = {
   AGENT_MEMBERS_DELETE: `agents/{{agentId}}/members/{{userId}}`,
   AGENT_INSTRUCTIONS_GET: `agents/{{agentId}}/instructions`,
   AGENT_INSTRUCTIONS_PUT: `agents/{{agentId}}/instructions`,
-  CONNECTION_TOOL_POLICIES_GET: `connections/{{connectionId}}/tool-policies`,
-  CONNECTION_TOOL_POLICIES_PUT: `connections/{{connectionId}}/tool-policies`,
+  // Generic policies endpoints (replace the old tool-access grid)
+  POLICIES: `policies`,
+  RESOURCE_ACTION_GET: `policies/resource-action`,
+  RESOURCE_ACTION_CREATE: `policies/resource-action`,
   CONNECTION_AUDIENCES_POST: `access-control/connection/{{connectionId}}/audiences`,
   CONNECTION_AUDIENCES_DELETE: `access-control/connection/{{connectionId}}/audiences`,
   INTEGRATION_TOOLS_GET: `integrations/{{integrationName}}/tools`,

@@ -1,5 +1,5 @@
 import { CSS_VARS } from '@zamp-platform/ui';
-import { CircleCheck, CircleSlash, Hand, HandMetal } from 'lucide-react';
+import { Ban, CircleCheck, Hand, HandMetal } from 'lucide-react';
 import {
   ACCESS_LEVEL,
   type AccessLevelOptionType,
@@ -112,14 +112,14 @@ export const getRandomAgentAvatar = (): AgentAvatarConfig => {
 export const PERMISSION_OPTIONS: PermissionOptionType[] = [
   { value: TOOL_PERMISSION.ALLOWED, icon: CircleCheck, label: 'Allowed' },
   { value: TOOL_PERMISSION.ASK, icon: Hand, label: 'Ask before running' },
-  { value: TOOL_PERMISSION.BLOCKED, icon: CircleSlash, label: 'Blocked' },
+  { value: TOOL_PERMISSION.BLOCKED, icon: Ban, label: 'Blocked' },
 ];
 
 export const ACCESS_LEVEL_OPTIONS: AccessLevelOptionType[] = [
-  { value: ACCESS_LEVEL.ALWAYS_ALLOW, icon: CircleCheck, label: 'Always allow', permission: TOOL_PERMISSION.ALLOWED },
-  { value: ACCESS_LEVEL.NEED_APPROVAL, icon: Hand, label: 'Need approval', permission: TOOL_PERMISSION.ASK },
-  { value: ACCESS_LEVEL.NEVER_ALLOW, icon: CircleSlash, label: 'Never allow', permission: TOOL_PERMISSION.BLOCKED },
   { value: ACCESS_LEVEL.CUSTOM, icon: HandMetal, label: 'Custom' },
+  { value: ACCESS_LEVEL.ALWAYS_ALLOW, icon: CircleCheck, label: 'Always allow', permission: TOOL_PERMISSION.ALLOWED },
+  { value: ACCESS_LEVEL.NEED_APPROVAL, icon: Hand, label: 'Needs approval', permission: TOOL_PERMISSION.ASK },
+  { value: ACCESS_LEVEL.NEVER_ALLOW, icon: Ban, label: 'Never allow', permission: TOOL_PERMISSION.BLOCKED },
 ];
 
 // Maps FE permission values to BE policy values

@@ -1,4 +1,5 @@
 import { Input, Label } from '@zamp-platform/ui';
+import { cn } from '@zamp-platform/ui/utils';
 import React from 'react';
 import { Controller, useFormContext } from 'react-hook-form';
 
@@ -18,7 +19,7 @@ export const TextField: React.FC<TextFieldProps> = ({ field, name, className }) 
       name={name}
       control={control}
       render={({ field: { onChange, value, ref, onBlur }, fieldState }) => (
-        <div className={`space-y-2 ${className}`}>
+        <div className={cn('flex flex-col space-y-2', className)}>
           {field.label && <Label>{field.label}</Label>}
           <Input
             placeholder={field.placeholder}

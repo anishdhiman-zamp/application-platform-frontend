@@ -45,6 +45,7 @@ export type ChangeAudienceRoleInResourceType = withResource<{
 export type AudiencesByResourceResponse = {
   resource_audience_type: ResourceAudienceType;
   resource_audience_id: string;
+  resource_audience_policy_id?: string;
   privilege: string;
   resource_type: string;
   resource_id: string;

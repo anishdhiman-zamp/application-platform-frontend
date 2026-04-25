@@ -67,10 +67,13 @@ function hastToReact(nodes: RootContent[], keyPrefix = 'hl'): React.ReactNode[] 
 
 function highlightCode(code: string, language?: string): React.ReactNode {
   try {
-    const tree =
-      language && lowlight.registered(language) ? lowlight.highlight(language, code) : lowlight.highlightAuto(code);
+    if (language && !lowlight.registered(language)) return code;
 
-    return hastToReact(tree.children as RootContent[]);
+    const tree = language ? lowlight.highlight(language, code) : lowlight.highlightAuto(code);
+    const children = tree.children as RootContent[];
+    if (children.length === 0) return code;
+
+    return hastToReact(children);
   } catch {
     return code;
   }

@@ -3,7 +3,9 @@ import {
   ACCOUNT_STATUS,
   type AccountStatus,
   CONNECTION_PILLS_TYPE,
+  CONNECTION_ROLE,
   type ConnectionPillsDetailsMap,
+  type ConnectionRoleType,
   type PillConfig,
   PILLS_ACTIONS,
   type StatusConfig,
@@ -12,6 +14,11 @@ import {
 export const FORM_SCHEMA_TYPE = {
   CONNECTION: 'connection',
   RECIPIENT: 'recipient',
+} as const;
+
+export const CONNECTION_TAB = {
+  AGENTS: 'agents',
+  PEOPLE: 'people',
 } as const;
 
 export const CONNECTION_PILLS_DETAILS: ConnectionPillsDetailsMap = {
@@ -93,6 +100,11 @@ export const PILLS_CONFIG: PillConfig[] = [
     icon: <Unlink size={14} className='text-RED_800 p-[2px]' />,
     tooltipWidth: 'w-30',
   },
+];
+
+export const ROLE_OPTIONS: { value: ConnectionRoleType; label: string }[] = [
+  { value: CONNECTION_ROLE.ADMIN, label: 'Admin' },
+  { value: CONNECTION_ROLE.VIEWER, label: 'Viewer' },
 ];
 
 export const STATUS_CONFIG: Record<AccountStatus, StatusConfig> = {

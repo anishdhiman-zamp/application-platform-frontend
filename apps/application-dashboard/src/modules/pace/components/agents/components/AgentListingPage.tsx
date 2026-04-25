@@ -2,6 +2,7 @@
 
 import { useCallback, useEffect, useMemo, useState } from 'react';
 import { Button, ScrollContainer } from '@zamp-platform/ui';
+import { EVENT_TYPE } from '@zamp-platform/utils/event-bus/event-bus.types';
 import { Plus } from 'lucide-react';
 import AgentActionBar from 'modules/pace/components/agents/components/AgentActionBar';
 import CreateAgentModal from 'modules/pace/components/agents/components/CreateAgentModal';
@@ -14,6 +15,7 @@ import {
 } from 'modules/pace/components/agents/types/agents.types';
 import { useRouter } from 'next/navigation';
 import { useGetAgentsListQuery } from '@/apis/agents';
+import { useEventBus } from '@/app/_providers/sse-provider';
 import CommonWrapper from '@/components/commonWrapper';
 import { SkeletonTypes } from '@/components/commonWrapper/commonWrapper.types';
 import { useDebounce } from '@/hooks';
@@ -37,6 +39,7 @@ const AgentListingPage = () => {
 
   const { setActiveAgentInfo } = usePaceContext();
   const { openTab } = useDynamicTabs({ type: TAB_TYPE.AGENT });
+  const { sseEventBus } = useEventBus();
   const debouncedSearch = useDebounce(searchTerm, AGENT_SEARCH_DEBOUNCE_MS);
 
   const tabQueries = {
@@ -126,10 +129,22 @@ const AgentListingPage = () => {
     [openTab, router],
   );
 
+  const subscribeToTaskEvents = useCallback(() => {
+    const taskSub = sseEventBus.subscribe(EVENT_TYPE.TASK, () => refetch());
+    const taskUpdateSub = sseEventBus.subscribe(EVENT_TYPE.TASK_UPDATE, () => refetch());
+
+    return () => {
+      taskSub.unsubscribe();
+      taskUpdateSub.unsubscribe();
+    };
+  }, [sseEventBus, refetch]);
+
   // refetch when switching tabs
   useEffect(() => {
     refetch();
   }, [activeTab, refetch]);
+
+  useEffect(() => subscribeToTaskEvents(), [subscribeToTaskEvents]);
 
   if (hasNoAgents) {
     return (

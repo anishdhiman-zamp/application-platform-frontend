@@ -32,10 +32,9 @@ const AddConnectionModal = ({ open, onOpenChange, agentId }: AddConnectionModalP
       <DialogContent
         className='@container flex h-[80vh] max-w-[900px] flex-col gap-0 overflow-hidden rounded-2xl p-0'
         showCloseButton
+        closeButtonClassName='top-6 right-6'
         title='Add connection'
         description='Browse and connect integrations'
-        onPointerDownOutside={(e) => e.preventDefault()}
-        onInteractOutside={(e) => e.preventDefault()}
       >
         <IntegrationsProvider>
           <AddConnectionModalContent />

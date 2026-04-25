@@ -1,4 +1,5 @@
 import { Label, Select, SelectOption } from '@zamp-platform/ui';
+import { cn } from '@zamp-platform/ui/utils';
 import React, { useState } from 'react';
 import { Controller, useFormContext } from 'react-hook-form';
 
@@ -30,46 +31,46 @@ export const SelectField: React.FC<SelectFieldProps> = ({ field, name, className
     }
   }, [watchedValues]);
 
-  const loadOptions = async (
+  const loadOptions = (
     currentFieldValues: Record<string, unknown>,
     page: number,
   ): Promise<{ options: SelectOption[]; hasMore: boolean }> => {
-    if (!field.data_source) return { options: [], hasMore: false };
+    if (!field.data_source) return Promise.resolve({ options: [], hasMore: false });
 
-    try {
-      // Add pagination params to the data source
-      const dataSourceWithPagination = {
-        ...field.data_source,
-        params: {
-          ...field.data_source.params,
-          page: page.toString(),
-          pageSize: PAGE_SIZE.toString(),
-        },
-      };
+    // Add pagination params to the data source
+    const dataSourceWithPagination = {
+      ...field.data_source,
+      params: {
+        ...field.data_source.params,
+        page: page.toString(),
+        pageSize: PAGE_SIZE.toString(),
+      },
+    };
 
-      const { data, error: fetchError } = await fetchDataSource(dataSourceWithPagination, {
-        fieldValues: currentFieldValues,
-      });
+    return fetchDataSource(dataSourceWithPagination, {
+      fieldValues: currentFieldValues,
+    })
+      .then(({ data, error: fetchError }) => {
+        if (fetchError) {
+          return { options: [] as SelectOption[], hasMore: false };
+        }
 
-      if (fetchError) {
+        // If we got less items than the page size, we know there are no more items
+        const hasMore = data.length === PAGE_SIZE;
+
+        // For the first page, replace options, for subsequent pages append
+        // if (page === 1) {
+        //   setOptions(transformedOptions);
+        // } else {
+        //   setOptions((prev) => [...prev, ...transformedOptions]);
+        // }
+
+        return { options: data as SelectOption[], hasMore };
+      })
+      .catch((err) => {
+        console.log('Failed to load options. Please try again later.', err);
         return { options: [] as SelectOption[], hasMore: false };
-      }
-
-      // If we got less items than the page size, we know there are no more items
-      const hasMore = data.length === PAGE_SIZE;
-
-      // For the first page, replace options, for subsequent pages append
-      // if (page === 1) {
-      //   setOptions(transformedOptions);
-      // } else {
-      //   setOptions((prev) => [...prev, ...transformedOptions]);
-      // }
-
-      return { options: data as SelectOption[], hasMore };
-    } catch (err) {
-      console.log('Failed to load options. Please try again later.', err);
-      return { options: [] as SelectOption[], hasMore: false };
-    }
+      });
   };
 
   const fetchOptions = async (page: number) => {
@@ -88,7 +89,7 @@ export const SelectField: React.FC<SelectFieldProps> = ({ field, name, className
       name={name}
       control={control}
       render={({ field: { onChange, onBlur, value }, fieldState: { error: fieldError } }) => (
-        <div className={`space-y-2 ${className}`}>
+        <div className={cn('flex flex-col gap-y-2', className)}>
           {field.label && <Label>{field.label}</Label>}
           <div className='relative'>
             <Select

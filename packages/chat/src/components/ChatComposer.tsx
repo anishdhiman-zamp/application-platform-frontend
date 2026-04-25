@@ -1,6 +1,6 @@
 'use client';
 
-import { Button, LiveWaveform, Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@zamp-platform/ui';
+import { Button, LiveWaveform, TooltipV2 } from '@zamp-platform/ui';
 import { cn } from '@zamp-platform/ui/utils';
 import { ArrowUp, Check, Hourglass, Loader, Loader2, Mic, Paperclip, Square, X } from 'lucide-react';
 import React, { forwardRef, useImperativeHandle, useRef } from 'react';
@@ -153,52 +153,51 @@ export const ChatComposer = forwardRef<ChatComposerHandle, ChatComposerProps>(
     const renderSubmitArea = () => {
       if (isStreamingActive && hasContentToQueue) {
         return (
-          <TooltipProvider delayDuration={300}>
-            <Tooltip>
-              <TooltipTrigger asChild>
-                <Button
-                  onClick={onSubmit}
-                  disabled={isSubmitDisabled}
-                  size='icon'
-                  aria-label='Queue message'
-                  className='bg-GRAY_950 text-BG_WHITE hover:bg-GRAY_950 hover:text-BG_WHITE dark:bg-GRAY_500 dark:hover:bg-GRAY_600 dark:text-GRAY_1000 dark:hover:text-GRAY_1000 size-[26px] rounded-full p-0 [&_svg]:size-3.5'
-                >
-                  <Hourglass className='size-3!' />
-                </Button>
-              </TooltipTrigger>
-              <TooltipContent side='top' align='center' className='f-10-450 p-1.5' sideOffset={4}>
-                Queue message
-              </TooltipContent>
-            </Tooltip>
-          </TooltipProvider>
+          <TooltipV2
+            tooltipBody='Queue message'
+            tooltipClassName='f-10-450 p-1.5'
+            sideOffset={4}
+            delayDuration={300}
+            asChildTrigger
+          >
+            <Button
+              onClick={onSubmit}
+              disabled={isSubmitDisabled}
+              size='icon'
+              aria-label='Queue message'
+              className='text-BG_WHITE dark:text-BG_WHITE hover:bg-GRAY_1000 size-[26px] rounded-full p-0 dark:bg-white dark:hover:bg-white'
+            >
+              <Hourglass className='size-3!' />
+            </Button>
+          </TooltipV2>
         );
       }
 
       if (isStreamingActive) {
         return (
-          <TooltipProvider delayDuration={300}>
-            <Tooltip>
-              <TooltipTrigger asChild>
-                <Button
-                  onClick={onStop}
-                  disabled={isStopping}
-                  size='icon'
-                  variant='ghost'
-                  aria-label='Stop generating'
-                  className='bg-GRAY_950 text-BG_WHITE hover:bg-GRAY_950 hover:text-BG_WHITE dark:bg-GRAY_500 dark:hover:bg-GRAY_600 dark:text-GRAY_1000 dark:hover:text-GRAY_1000 size-[26px] rounded-full p-0 [&_svg]:size-3.5'
-                >
-                  {isStopping ? (
-                    <Loader2 className='animate-spin' />
-                  ) : (
-                    <Square fill='currentColor' strokeWidth={0} className='size-2.5!' />
-                  )}
-                </Button>
-              </TooltipTrigger>
-              <TooltipContent side='top' align='center' className='f-10-450 p-1.5' sideOffset={4}>
-                Stop generating
-              </TooltipContent>
-            </Tooltip>
-          </TooltipProvider>
+          <TooltipV2
+            tooltipBody='Stop generating'
+            tooltipClassName='f-10-450 p-1.5'
+            sideOffset={4}
+            delayDuration={300}
+            disabled={isStopping}
+            asChildTrigger
+          >
+            <Button
+              onClick={onStop}
+              disabled={isStopping}
+              size='icon'
+              variant='ghost'
+              aria-label='Stop generating'
+              className='bg-GRAY_950 text-BG_WHITE hover:bg-GRAY_950 hover:text-BG_WHITE dark:bg-GRAY_500 dark:hover:bg-GRAY_500 dark:text-GRAY_1000 dark:hover:text-GRAY_1000 size-[26px] rounded-full p-0'
+            >
+              {isStopping ? (
+                <Loader2 className='size-3.5 animate-spin' />
+              ) : (
+                <Square fill='currentColor' strokeWidth={0} className='size-2.5!' />
+              )}
+            </Button>
+          </TooltipV2>
         );
       }
 
@@ -209,13 +208,12 @@ export const ChatComposer = forwardRef<ChatComposerHandle, ChatComposerProps>(
             disabled={isSubmitDisabled}
             size='icon'
             aria-label='Send message'
-            className='disabled:bg-GRAY_300 dark:hover:bg-GRAY_600 dark:disabled:bg-GRAY_300 size-[26px] rounded-full p-[2px] text-white disabled:cursor-not-allowed dark:bg-white [&_svg]:size-3.5'
+            className={cn(
+              'text-BG_WHITE dark:text-BG_WHITE hover:bg-GRAY_1000 disabled:bg-GRAY_300 dark:disabled:bg-GRAY_300 size-[26px] rounded-full p-[2px] disabled:cursor-not-allowed dark:bg-white dark:hover:bg-white',
+              isSubmitDisabled && 'text-GRAY_700 dark:text-GRAY_600',
+            )}
           >
-            <ArrowUp
-              className={cn('text-BG_WHITE dark:text-BG_WHITE', {
-                'text-GRAY_700 dark:text-GRAY_600': isSubmitDisabled,
-              })}
-            />
+            <ArrowUp className='size-3.5' />
           </Button>
         );
       }

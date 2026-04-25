@@ -4,12 +4,14 @@ import { Skeleton } from '@zamp-platform/ui';
 const IntegrationPageLoadingState: FC = () => {
   return (
     <div className='bg-BG_WHITE flex h-full w-full items-center justify-center'>
-      <div className='flex h-full w-full max-w-[700px] flex-col px-4'>
+      <div className='flex h-full w-full max-w-[700px] flex-col pr-4'>
         {/* Back arrow */}
-        <div className='flex w-full items-center justify-start py-5'>
-          <Skeleton className='h-3.5 w-3.5 rounded' />
+        <div className='flex w-full items-center justify-start py-2'>
+          <div className='flex items-center justify-center py-1'>
+            <Skeleton className='h-4 w-4 rounded' />
+          </div>
         </div>
-        <div className='flex h-full w-full flex-col gap-y-8 pt-16 pb-6'>
+        <div className='flex h-full w-full flex-col gap-y-8 pt-5.5'>
           <div className='flex flex-col gap-y-5'>
             {/* Header: logo + title + buttons */}
             <div className='flex items-center justify-between'>
