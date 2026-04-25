@@ -170,17 +170,17 @@ jobs:
           SHORT_COMMIT="${COMMIT:0:7}"
           DURATION="${DURATION:-N/A}"
           if [ "$RESULT" == 'success' ]; then
-            TITLE=":white_check_mark: Beta -> GA Promotion — Vercel"
-            TEXT="Beta promoted to GA on Vercel successfully.\n*URL:* ${DEPLOYMENT_URL}"
+            TITLE=":white_check_mark: GA Deployment — Vercel"
+            TEXT="Release deployed to GA on Vercel successfully.\n*URL:* ${DEPLOYMENT_URL}"
           elif [ "$RESULT" == 'cancelled' ]; then
-            TITLE=":grey_exclamation: Beta -> GA Promotion — Vercel cancelled"
-            TEXT="Vercel promotion was cancelled."
+            TITLE=":grey_exclamation: GA Deployment — Vercel cancelled"
+            TEXT="Vercel deployment was cancelled."
           elif [ "$RESULT" == 'skipped' ]; then
-            TITLE=":x: Beta -> GA Promotion — Vercel skipped"
-            TEXT="Vercel promotion was skipped (git sync or merge step failed)."
+            TITLE=":x: GA Deployment — Vercel skipped"
+            TEXT="Vercel deployment was skipped (git sync or merge step failed)."
           else
-            TITLE=":x: Beta -> GA Promotion — Vercel failed"
-            TEXT="Vercel promotion failed."
+            TITLE=":x: GA Deployment — Vercel failed"
+            TEXT="Vercel deployment failed."
           fi
 
           PAYLOAD=$(jq -n \
