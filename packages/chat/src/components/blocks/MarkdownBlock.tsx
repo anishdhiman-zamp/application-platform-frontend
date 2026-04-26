@@ -70,10 +70,7 @@ export const MarkdownBlock: React.FC<MarkdownBlockProps> = ({
 
   return (
     <div
-      className={cn(
-        'max-w-chat-prose text-GRAY_950 overflow-hidden text-sm leading-[1.667] font-[420] wrap-break-word',
-        className,
-      )}
+      className={cn('max-w-chat-prose text-GRAY_950 text-sm leading-[1.667] font-[420] wrap-break-word', className)}
       data-testid='markdown-block'
     >
       <ReactMarkdown
