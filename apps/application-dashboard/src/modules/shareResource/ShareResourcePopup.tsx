@@ -9,6 +9,7 @@ import {
 } from 'apis/collaboration';
 import { useAppSelector } from 'hooks/toolkit';
 import { useUserIdentity } from 'hooks/useUserIdentity';
+import { Link } from 'lucide-react';
 import AccessFilters from 'modules/shareResource/AccessFilters';
 import AudienceAccess from 'modules/shareResource/AudienceAccess';
 import { RESOURCE_COLLABORATION_ENDPOINTS, resourceTypeRouteMap } from 'modules/shareResource/shareResource.constants';
@@ -543,13 +544,7 @@ const ShareResourcePopup: FC<ShareResourcePopupProps> = (props) => {
                   </div>
                   <div className='border-t-0.5 border-GRAY_500 flex w-full items-center justify-between px-5 py-4'>
                     <span className='f-11-500 flex cursor-not-allowed items-center justify-center gap-1.5'>
-                      <SvgSpriteLoader
-                        id='link-03'
-                        iconCategory={ICON_SPRITE_TYPES.GENERAL}
-                        width={12}
-                        height={12}
-                        color={CSS_VARS.GRAY_1000}
-                      />
+                      <Link size={12} className='text-GRAY_1000' />
                       <CopyToClipboardBrowserUrl />
                     </span>
                     <Button

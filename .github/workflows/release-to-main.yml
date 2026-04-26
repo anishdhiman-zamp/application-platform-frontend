@@ -171,7 +171,7 @@ jobs:
           DURATION="${DURATION:-N/A}"
           if [ "$RESULT" == 'success' ]; then
             TITLE=":white_check_mark: GA Deployment — Vercel"
-            TEXT="Release deployed to GA on Vercel successfully.\n*URL:* ${DEPLOYMENT_URL}"
+            TEXT="Release deployed to GA on Vercel successfully"
           elif [ "$RESULT" == 'cancelled' ]; then
             TITLE=":grey_exclamation: GA Deployment — Vercel cancelled"
             TEXT="Vercel deployment was cancelled."
