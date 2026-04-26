@@ -42,6 +42,8 @@ import type {
   AgentToolType,
   ToolPermissionType,
 } from '@/modules/pace/components/agents/types/agents.types';
+import { resourceTypeRouteMap } from '@/modules/shareResource/shareResource.constants';
+import { ResourceType } from '@/modules/shareResource/shareResource.types';
 import { ResourceAudienceType } from '@/types/api/auth.types';
 import type { AudiencesByResourceResponse } from '@/types/api/collaboration.types';
 
@@ -168,7 +170,7 @@ export const useConnectionPeople = ({ connections, integrationName }: UseConnect
         connections.map((conn) =>
           fetchAudiences({
             apiEndpoint: API_ENDPOINTS.RESOURCE_AUDIENCES_BY_RESOURCE_ID_GET_V2,
-            resourceRoute: 'connection',
+            resourceRoute: resourceTypeRouteMap[ResourceType.CONNECTION],
             resourceId: conn.id,
           })
             .unwrap()
@@ -282,7 +284,7 @@ export const useConnectionPeople = ({ connections, integrationName }: UseConnect
 
       return changeAudienceRole({
         apiEndpoint: API_ENDPOINTS.CHANGE_AUDIENCE_ROLE_IN_RESOURCE_PATCH_V2,
-        resourceRoute: 'connection',
+        resourceRoute: resourceTypeRouteMap[ResourceType.CONNECTION],
         resourceId: connectionId,
         body: {
           audience_id: userId,
@@ -311,7 +313,7 @@ export const useConnectionPeople = ({ connections, integrationName }: UseConnect
 
       return deleteAudience({
         apiEndpoint: API_ENDPOINTS.DELETE_RESOURCE_FROM_AUDIENCES_V2,
-        resourceRoute: 'connection',
+        resourceRoute: resourceTypeRouteMap[ResourceType.CONNECTION],
         resourceId: connectionId,
         body: {
           audience_id: userId,

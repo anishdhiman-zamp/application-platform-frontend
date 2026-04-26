@@ -2,16 +2,12 @@
 
 import { useCallback, useEffect, useMemo, useState } from 'react';
 import { toast } from '@zamp-platform/ui';
-import { useGetAgentsListQuery, useLazyGetIntegrationToolsQuery } from '@/apis/agents';
+import { useLazyGetIntegrationToolsQuery } from '@/apis/agents';
 import { API_ENDPOINTS } from '@/apis/apiEndpoint.constants';
-import {
-  useGetAudiencesByResourceIdQuery,
-  useLazyGetAudiencesByResourceIdQuery,
-  usePostShareResourceToAudiencesMutation,
-} from '@/apis/collaboration';
-import { useGetAudiencesByOrganisationIdQuery } from '@/apis/people';
+import { useLazyGetAudiencesByResourceIdQuery, usePostShareResourceToAudiencesMutation } from '@/apis/collaboration';
 import type { ArrayListOption } from '@/components/multiSelectInput/multiSelectInput.types';
 import { useAppSelector } from '@/hooks/toolkit';
+import { useShareableAudiences } from '@/modules/integrations/IntegrationDetail/useShareableAudiences';
 import {
   useEnsureResourceAction,
   useSyncToolPolicies,
@@ -29,6 +25,8 @@ import {
   TOOL_PERMISSION,
   type ToolPermissionType,
 } from '@/modules/pace/components/agents/types/agents.types';
+import { resourceTypeRouteMap } from '@/modules/shareResource/shareResource.constants';
+import { ResourceType } from '@/modules/shareResource/shareResource.types';
 import type { RootState } from '@/store';
 import { ResourceAudienceType } from '@/types/api/auth.types';
 
@@ -72,80 +70,34 @@ export const useShareConnection = ({
   const organizationId = useAppSelector((state: RootState) => state.user.user?.orgs?.[0]?.organization_id) ?? '';
 
   // hooks (RTK)
-  const { data: agentsData, isError: isAgentsError } = useGetAgentsListQuery({ filter: 'all' });
-  const { data: teamMembersData, isError: isTeamMembersError } = useGetAudiencesByOrganisationIdQuery(
-    { organizationId },
-    { skip: !organizationId },
-  );
-  const { data: existingAudiencesData, isError: isExistingAudiencesError } = useGetAudiencesByResourceIdQuery(
-    {
-      apiEndpoint: API_ENDPOINTS.RESOURCE_AUDIENCES_BY_RESOURCE_ID_GET_V2,
-      resourceRoute: 'connection',
-      resourceId: connectionId,
-    },
-    { skip: !connectionId || !open },
-  );
   const [fetchIntegrationTools] = useLazyGetIntegrationToolsQuery();
   const [fetchAudiences] = useLazyGetAudiencesByResourceIdQuery();
   const [shareResource, { isLoading: isSharing }] = usePostShareResourceToAudiencesMutation();
   const { syncToolPolicies } = useSyncToolPolicies();
   const ensureResourceAction = useEnsureResourceAction();
 
-  const existingAudienceIds = useMemo(
-    () => new Set((existingAudiencesData ?? []).map((a) => a.resource_audience_id)),
-    [existingAudiencesData],
-  );
-
   const selectedIds = useMemo(
     () => new Set(selectedItems.map((item) => item.resource_audience_id ?? item.value)),
     [selectedItems],
   );
 
-  // All known audiences (agents + users) — used for matching typed input.
-  const allKnownOptions = useMemo(() => {
-    const agents = (agentsData?.agents ?? []).map((a) => ({
-      value: a.id,
-      label: a.name,
-      email: '',
-      type: ResourceAudienceType.AGENT,
-    }));
+  const {
+    allKnownOptions,
+    optionsList,
+    existingAudiences,
+    isError: isAudiencesError,
+  } = useShareableAudiences({
+    organizationId,
+    existingAudiencesEndpoint: API_ENDPOINTS.RESOURCE_AUDIENCES_BY_RESOURCE_ID_GET_V2,
+    resourceRoute: resourceTypeRouteMap[ResourceType.CONNECTION],
+    resourceId: connectionId,
+    enabled: !!connectionId && open,
+    selectedIds,
+  });
 
-    const users = (teamMembersData ?? [])
-      .filter((member) => member?.resource_audience_type !== ResourceAudienceType.AGENT)
-      .map((member) => ({
-        value: member?.user?.user_id ?? '',
-        label: member?.user?.name || member?.user?.email || '',
-        email: member?.user?.email ?? '',
-        type: ResourceAudienceType.USER,
-      }))
-      .filter((u) => u.value);
-
-    // Include existing audiences on this resource as known users too — teamMembersData may not include
-    // every user who already has access, so this prevents false "invalid email" errors on re-typing them.
-    const existingUsers = (existingAudiencesData ?? [])
-      .filter((a) => a.resource_audience_type === ResourceAudienceType.USER)
-      .map((a) => ({
-        value: a.resource_audience_id,
-        label: a.user?.name || a.user?.email || '',
-        email: a.user?.email ?? '',
-        type: ResourceAudienceType.USER,
-      }))
-      .filter((u) => u.value);
-
-    // Dedupe by value (agents + users + existingUsers)
-    const seen = new Set<string>();
-
-    return [...agents, ...users, ...existingUsers].filter((opt) => {
-      if (seen.has(opt.value)) return false;
-      seen.add(opt.value);
-
-      return true;
-    });
-  }, [agentsData, teamMembersData, existingAudiencesData]);
-
-  const optionsList = useMemo(
-    () => allKnownOptions.filter((opt) => !existingAudienceIds.has(opt.value) && !selectedIds.has(opt.value)),
-    [allKnownOptions, existingAudienceIds, selectedIds],
+  const existingAudienceIds = useMemo(
+    () => new Set(existingAudiences.map((a) => a.resource_audience_id)),
+    [existingAudiences],
   );
 
   const hasSelection = selectedItems.length > 0;
@@ -262,7 +214,7 @@ export const useShareConnection = ({
 
       return fetchAudiences({
         apiEndpoint: API_ENDPOINTS.RESOURCE_AUDIENCES_BY_RESOURCE_ID_GET_V2,
-        resourceRoute: 'connection',
+        resourceRoute: resourceTypeRouteMap[ResourceType.CONNECTION],
         resourceId: connectionId,
       })
         .unwrap()
@@ -302,7 +254,7 @@ export const useShareConnection = ({
       const isAgent = item.resource_audience_type === ResourceAudienceType.AGENT;
 
       return {
-        audience_type: isAgent ? 'user' : (item.resource_audience_type ?? ResourceAudienceType.USER),
+        audience_type: isAgent ? ResourceAudienceType.USER : (item.resource_audience_type ?? ResourceAudienceType.USER),
         audience_id: item.resource_audience_id || item.value,
         role,
         fgac_filters: null,
@@ -311,7 +263,7 @@ export const useShareConnection = ({
 
     return shareResource({
       apiEndpoint: API_ENDPOINTS.SHARE_RESOURCE_TO_AUDIENCES_POST_V2,
-      resourceRoute: 'connection',
+      resourceRoute: resourceTypeRouteMap[ResourceType.CONNECTION],
       resourceId: connectionId,
       body: { audiences },
     })
@@ -337,11 +289,8 @@ export const useShareConnection = ({
   }, [integrationName, loadTools]);
 
   useEffect(() => {
-    if (!open) return;
-    if (isAgentsError) toast.error('Failed to load agents');
-    if (isTeamMembersError) toast.error('Failed to load team members');
-    if (isExistingAudiencesError) toast.error('Failed to load existing access');
-  }, [open, isAgentsError, isTeamMembersError, isExistingAudiencesError]);
+    if (open && isAudiencesError) toast.error('Failed to load shareable audiences');
+  }, [open, isAudiencesError]);
 
   return {
     search,

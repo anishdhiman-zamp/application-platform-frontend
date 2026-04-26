@@ -20,7 +20,12 @@ import { SkeletonTypes } from '@/components/commonWrapper/commonWrapper.types';
 import { handleActivationKeyDown } from '@/constants/shortcuts';
 import EmailForwardingDialog from '@/modules/integrations/AllIntegrations/components/EmailForwardingDialoge';
 import ConnectIntegrationDialog from '@/modules/integrations/AllIntegrations/ConnectIntegrationDialog';
-import { AUTH_TYPE, type IntegrationInfoDialogPropsType } from '@/modules/integrations/types/integrations.types';
+import { useShareConnectionAudiences } from '@/modules/integrations/AllIntegrations/useShareConnectionAudiences';
+import {
+  AUTH_TYPE,
+  type ConnectIntegrationDialogPayload,
+  type IntegrationInfoDialogPropsType,
+} from '@/modules/integrations/types/integrations.types';
 import { getNameInitial } from '@/utils/common';
 
 const INITIAL_TOOLS_VISIBLE = 4;
@@ -38,6 +43,7 @@ const IntegrationInfoDialog = ({ integrationItem, isOpen, onOpenChange }: Integr
 
   // hooks (RTK)
   const [authenticateIntegrationV2, { isLoading: isAuthenticating }] = useAuthenticateIntegrationV2Mutation();
+  const shareWithAudiences = useShareConnectionAudiences();
   const {
     data: integrationToolsData,
     isLoading: isToolsLoading,
@@ -54,7 +60,7 @@ const IntegrationInfoDialog = ({ integrationItem, isOpen, onOpenChange }: Integr
 
   // handlers
   const handleConnect = useCallback(
-    (payload?: { name?: string; scopes?: string[] }) => {
+    (payload?: ConnectIntegrationDialogPayload) => {
       if (!primaryAuth || !name) return;
 
       authenticateIntegrationV2({
@@ -64,7 +70,10 @@ const IntegrationInfoDialog = ({ integrationItem, isOpen, onOpenChange }: Integr
         scopes: payload?.scopes,
       })
         .unwrap()
-        .then((result) => {
+        .then(async (result) => {
+          if (payload?.audiences?.length && result?.id) {
+            await shareWithAudiences(result.id, payload.audiences);
+          }
           if (result?.metadata?.redirect_url) {
             window.open(result.metadata.redirect_url, '_blank', 'noopener,noreferrer');
           }
@@ -74,7 +83,7 @@ const IntegrationInfoDialog = ({ integrationItem, isOpen, onOpenChange }: Integr
           toast.error('Failed to connect integration');
         });
     },
-    [primaryAuth, name, authenticateIntegrationV2],
+    [primaryAuth, name, authenticateIntegrationV2, shareWithAudiences],
   );
 
   const handleAddConnectionClick = useCallback(() => {

@@ -5,6 +5,7 @@ import {
   POLICY_ACTION_TYPE_INVOKE_TOOL,
   POLICY_RESOURCE_TYPE_CONNECTION,
 } from '@/modules/integrations/constants/policies.constants';
+import { CONNECTION_ROLE } from '@/modules/integrations/types/integrations.types';
 import type {
   BulkCreatePoliciesParams,
   BulkUpdatePoliciesParams,
@@ -51,6 +52,7 @@ import type {
   RemoveConnectionFromAgentParams,
 } from '@/types/api/agents.types';
 import { transformAgentResponse } from '@/types/api/agents.types';
+import { ResourceAudienceType } from '@/types/api/auth.types';
 import { formRequestUrlWithParams } from '@/utils/common';
 
 const agentsApi = baseApi.injectEndpoints({
@@ -254,7 +256,14 @@ const agentsApi = baseApi.injectEndpoints({
         url: formRequestUrlWithParams(API_ENDPOINTS.CONNECTION_AUDIENCES_POST, { connectionId }),
         method: REQUEST_TYPES.POST,
         body: {
-          audiences: [{ audience_type: 'user', audience_id: agentId, role: 'admin', fgac_filters: null }],
+          audiences: [
+            {
+              audience_type: ResourceAudienceType.USER,
+              audience_id: agentId,
+              role: CONNECTION_ROLE.ADMIN,
+              fgac_filters: null,
+            },
+          ],
         },
       }),
       invalidatesTags: (_result, _error, { agentId }) => [{ type: APITags.GET_AGENT_CONNECTIONS, id: agentId }],
@@ -263,7 +272,7 @@ const agentsApi = baseApi.injectEndpoints({
       query: ({ connectionId, agentId }) => ({
         url: formRequestUrlWithParams(API_ENDPOINTS.CONNECTION_AUDIENCES_DELETE, { connectionId }),
         method: REQUEST_TYPES.DELETE,
-        body: { audience_type: 'user', audience_id: agentId },
+        body: { audience_type: ResourceAudienceType.USER, audience_id: agentId },
       }),
       invalidatesTags: (_result, _error, { agentId }) => [{ type: APITags.GET_AGENT_CONNECTIONS, id: agentId }],
     }),

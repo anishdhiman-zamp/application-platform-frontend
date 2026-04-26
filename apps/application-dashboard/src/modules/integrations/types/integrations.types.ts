@@ -175,6 +175,26 @@ export interface ConnectIntegrationActionPropsType {
   icon?: ReactNode;
 }
 
+export interface ConnectIntegrationDialogAudience {
+  audience_type: string;
+  audience_id: string;
+  role: string;
+}
+
+export interface ConnectIntegrationDialogPayload {
+  name?: string;
+  scopes?: string[];
+  audiences?: ConnectIntegrationDialogAudience[];
+}
+
+export interface ConnectIntegrationDialogTypedAudience {
+  value: string;
+  label: string;
+  color?: string;
+  type?: string;
+  team_id?: string;
+}
+
 export interface ConnectIntegrationDialogPropsType {
   integrationName: string;
   integrationTitle: string;
@@ -182,7 +202,7 @@ export interface ConnectIntegrationDialogPropsType {
   isOpen: boolean;
   isLoading: boolean;
   onOpenChange: (open: boolean) => void;
-  onConnect: (payload: { name: string; scopes?: string[] }) => void;
+  onConnect: (payload: ConnectIntegrationDialogPayload) => void;
   defaultScopes?: string[];
   showScopesOption?: boolean;
 }

@@ -6,7 +6,12 @@ import { cn } from '@zamp-platform/ui/utils';
 import { useAuthenticateIntegrationV2Mutation } from '@/apis/integrations';
 import EmailForwardingDialog from '@/modules/integrations/AllIntegrations/components/EmailForwardingDialoge';
 import ConnectIntegrationDialog from '@/modules/integrations/AllIntegrations/ConnectIntegrationDialog';
-import { AUTH_TYPE, type ConnectIntegrationActionPropsType } from '@/modules/integrations/types/integrations.types';
+import { useShareConnectionAudiences } from '@/modules/integrations/AllIntegrations/useShareConnectionAudiences';
+import {
+  AUTH_TYPE,
+  type ConnectIntegrationActionPropsType,
+  type ConnectIntegrationDialogPayload,
+} from '@/modules/integrations/types/integrations.types';
 
 const ConnectIntegrationAction: FC<ConnectIntegrationActionPropsType> = ({
   integrationItem,
@@ -20,12 +25,13 @@ const ConnectIntegrationAction: FC<ConnectIntegrationActionPropsType> = ({
   const [isDialogOpen, setIsDialogOpen] = useState(false);
   const [isEmailForwardingDialogOpen, setIsEmailForwardingDialogOpen] = useState(false);
   const [authenticateIntegrationV2, { isLoading: isAuthenticating }] = useAuthenticateIntegrationV2Mutation();
+  const shareWithAudiences = useShareConnectionAudiences();
 
   const primaryAuth = auth[0];
   const catalogDefaultScopes = useMemo(() => primaryAuth?.default_scopes ?? [], [primaryAuth]);
   const supportsScopes = catalogDefaultScopes.length > 0;
 
-  const handleConnect = (payload?: { name?: string; scopes?: string[] }) => {
+  const handleConnect = (payload?: ConnectIntegrationDialogPayload) => {
     if (redirectUrl) {
       window.open(redirectUrl, '_blank', 'noopener,noreferrer');
 
@@ -41,7 +47,10 @@ const ConnectIntegrationAction: FC<ConnectIntegrationActionPropsType> = ({
       scopes: payload?.scopes,
     })
       .unwrap()
-      .then((result) => {
+      .then(async (result) => {
+        if (payload?.audiences?.length && result?.id) {
+          await shareWithAudiences(result.id, payload.audiences);
+        }
         if (result?.metadata?.redirect_url) {
           window.open(result.metadata.redirect_url, '_blank', 'noopener,noreferrer');
         }
