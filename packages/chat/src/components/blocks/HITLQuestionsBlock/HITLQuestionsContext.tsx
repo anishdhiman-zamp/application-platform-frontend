@@ -1,6 +1,6 @@
 'use client';
 
-import { createContext, Dispatch, useCallback, useContext, useEffect, useReducer, useRef } from 'react';
+import { createContext, Dispatch, useCallback, useContext, useEffect, useReducer, useRef, useState } from 'react';
 
 import type { ChatComposerFileRef } from './ChatComposerInput';
 import { CUSTOM_OPTION_ID } from './constants';
@@ -292,6 +292,8 @@ interface HITLQuestionsContextType {
     ((questionId: string, optionId: string, customText: string | undefined) => void) | null
   >;
   clearDraft: () => void;
+  isSubmitting: boolean;
+  setIsSubmitting: (value: boolean) => void;
 }
 
 const HITLQuestionsContext = createContext<HITLQuestionsContextType | null>(null);
@@ -323,6 +325,8 @@ export const HITLQuestionsProvider = ({
   const [state, dispatch] = useReducer(createReducer(questions), null, () =>
     createInitialState(questions, sourceEntityId ? readHITLDraft(sourceEntityId) : null),
   );
+
+  const [isSubmitting, setIsSubmitting] = useState(false);
 
   const containerRef = useRef<HTMLDivElement>(null);
   const questionScrollRef = useRef<HTMLDivElement>(null);
@@ -363,6 +367,8 @@ export const HITLQuestionsProvider = ({
         submitRef,
         submitSingleSelectRef,
         clearDraft,
+        isSubmitting,
+        setIsSubmitting,
       }}
     >
       {children}

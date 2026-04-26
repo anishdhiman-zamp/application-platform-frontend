@@ -33,6 +33,7 @@ export interface RichTextEditorProps {
   minHeight?: number;
   maxHeight?: number;
   editorAttributes?: Record<string, string>;
+  disableNewlineOnEnter?: boolean;
 }
 
 export interface RichTextEditorHandle {
@@ -55,6 +56,7 @@ export const RichTextEditor = forwardRef<RichTextEditorHandle, RichTextEditorPro
       minHeight,
       maxHeight = 200,
       editorAttributes,
+      disableNewlineOnEnter = false,
     },
     ref,
   ) => {
@@ -64,10 +66,13 @@ export const RichTextEditor = forwardRef<RichTextEditorHandle, RichTextEditorPro
     const wrapperRef = useRef<HTMLDivElement>(null);
     const isSubmitDisabledRef = useRef(isSubmitDisabled);
     const clearTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+    const disableNewlineOnEnterRef = useRef(disableNewlineOnEnter);
 
     onSubmitRef.current = onSubmit;
     isSubmitDisabledRef.current = isSubmitDisabled;
     onPasteRef.current = onPaste;
+    // Keep in sync every render so the extension closure always reads the latest value
+    disableNewlineOnEnterRef.current = disableNewlineOnEnter;
 
     const [isClearing, setIsClearing] = useState(false);
     const isClearingRef = useRef(false);
@@ -125,6 +130,15 @@ export const RichTextEditor = forwardRef<RichTextEditorHandle, RichTextEditorPro
                   () => commands.liftEmptyBlock(),
                   () => commands.splitBlock(),
                 ]),
+              Enter: () => {
+                if (disableNewlineOnEnterRef.current) {
+                  const ed = editorRef.current;
+                  if (!ed?.isActive('bulletList') && !ed?.isActive('orderedList') && !ed?.isActive('codeBlock')) {
+                    return true;
+                  }
+                }
+                return false;
+              },
             };
           },
         }),
@@ -174,6 +188,11 @@ export const RichTextEditor = forwardRef<RichTextEditorHandle, RichTextEditorPro
             if (!isSubmitDisabledRef.current && onSubmitRef.current) {
               event.preventDefault();
               handleAnimatedSubmitRef.current();
+              return true;
+            }
+
+            if (disableNewlineOnEnterRef.current) {
+              event.preventDefault();
               return true;
             }
           }

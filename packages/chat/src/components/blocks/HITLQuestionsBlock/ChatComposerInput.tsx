@@ -19,6 +19,7 @@ export interface ChatComposerInputProps {
   className?: string;
   username?: string;
   showFilePreview?: boolean;
+  disableNewlineOnEnter?: boolean;
 }
 
 export interface ChatComposerInputHandle {
@@ -40,6 +41,7 @@ export const ChatComposerInput = forwardRef<ChatComposerInputHandle, ChatCompose
       className,
       username = '',
       showFilePreview = true,
+      disableNewlineOnEnter = false,
     },
     ref,
   ) => {
@@ -101,6 +103,7 @@ export const ChatComposerInput = forwardRef<ChatComposerInputHandle, ChatCompose
           microphoneDisabled={microphoneDisabled}
           showSubmitButton={false}
           showFilePreview={showFilePreview}
+          disableNewlineOnEnter={disableNewlineOnEnter}
         />
       </div>
     );

@@ -97,6 +97,7 @@ export const CustomInputRow = () => {
               className='bg-BG_WHITE rounded-xl'
               username={username}
               showFilePreview={false}
+              disableNewlineOnEnter={!isMultiSelect}
             />
           </div>
         </div>

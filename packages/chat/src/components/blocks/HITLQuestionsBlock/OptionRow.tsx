@@ -1,7 +1,7 @@
 'use client';
 
 import { cn } from '@zamp-platform/ui/utils';
-import { Check, CornerDownLeft, Loader2 } from 'lucide-react';
+import { Check, CornerDownLeft, Loader } from 'lucide-react';
 import React from 'react';
 
 import type { HITLOption } from '../../../types/block.types';
@@ -60,7 +60,7 @@ export const OptionRow: React.FC<OptionRowProps> = ({
             <div className='flex w-full items-center justify-between'>
               <span className='text-sm leading-[1.4] font-medium text-gray-950'>{option?.title ?? option?.label}</span>
               {isSubmitting ? (
-                <Loader2 className='shrink-0 animate-spin text-gray-500' size={12} />
+                <Loader className='shrink-0 animate-spin text-gray-500' size={12} />
               ) : isFocused ? (
                 <div className='bg-BG_WHITE flex h-[18px] w-[18px] shrink-0 items-center justify-center rounded-md border border-gray-300 p-1'>
                   <CornerDownLeft className='text-gray-700' size={10} />

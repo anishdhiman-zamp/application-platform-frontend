@@ -28,12 +28,14 @@ export const useHITLQuestions = () => {
     submitRef,
     submitSingleSelectRef,
     clearDraft,
+    isSubmitting: isHitlRespondLoading,
+    setIsSubmitting,
   } = useHITLQuestionsContext();
 
   const { currentQuestion, answers, questionFileRefs } = state;
 
   const router = useRouter();
-  const [hitlRespond, { isLoading: isHitlRespondLoading }] = useHitlRespondMutation();
+  const [hitlRespond] = useHitlRespondMutation();
 
   // ---------- Derived ----------
 
@@ -120,12 +122,14 @@ export const useHITLQuestions = () => {
       ...(llmModel ? { llm_model: llmModel } : {}),
     };
 
+    setIsSubmitting(true);
     try {
       await hitlRespond(submitPayload).unwrap();
       clearDraft();
       onSubmit?.();
     } catch (error) {
       captureException(error);
+      setIsSubmitting(false);
     }
   }, [
     allQuestionsAnswered,
@@ -139,6 +143,7 @@ export const useHITLQuestions = () => {
     clearDraft,
     onSubmit,
     llmModel,
+    setIsSubmitting,
   ]);
 
   submitRef.current = () => void handleSubmit();
@@ -161,12 +166,14 @@ export const useHITLQuestions = () => {
       };
 
       dispatch({ type: HITLQuestionsContextActions.SET_SUBMITTING_OPTION_ID, payload: { optionId } });
+      setIsSubmitting(true);
       try {
         await hitlRespond(submitPayload).unwrap();
         clearDraft();
         onSubmit?.();
       } catch (error) {
         captureException(error);
+        setIsSubmitting(false);
         dispatch({ type: HITLQuestionsContextActions.SET_SUBMITTING_OPTION_ID, payload: { optionId: null } });
       }
     },
@@ -181,6 +188,7 @@ export const useHITLQuestions = () => {
       onSubmit,
       dispatch,
       llmModel,
+      setIsSubmitting,
     ],
   );
 

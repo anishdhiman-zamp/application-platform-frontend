@@ -65,6 +65,7 @@ export interface ChatComposerProps {
   voiceChatSlot?: React.ReactNode;
   hideRecordingButton?: boolean;
   showFilePreview?: boolean;
+  disableNewlineOnEnter?: boolean;
 }
 
 export interface ChatComposerHandle {
@@ -120,6 +121,7 @@ export const ChatComposer = forwardRef<ChatComposerHandle, ChatComposerProps>(
       voiceChatSlot,
       hideRecordingButton = false,
       showFilePreview = true,
+      disableNewlineOnEnter = false,
     },
     ref,
   ) => {
@@ -298,6 +300,7 @@ export const ChatComposer = forwardRef<ChatComposerHandle, ChatComposerProps>(
                 style={textareaStyle}
                 minHeight={minTextareaHeight}
                 maxHeight={maxTextareaHeight}
+                disableNewlineOnEnter={disableNewlineOnEnter}
                 editorAttributes={{
                   role: 'textbox',
                   enterkeyhint: 'enter',
