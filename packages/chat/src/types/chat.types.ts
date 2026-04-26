@@ -114,6 +114,7 @@ export interface ChatMessage {
     text?: string;
     text_type?: string;
     file_references?: FileReferenceType[];
+    references?: MessageReferenceType[];
     /** @deprecated Use file_references instead. Kept for backward compatibility with S3 uploads. */
     attachments?: MessageAttachmentType[];
   };
@@ -155,6 +156,19 @@ export interface FileReferenceType {
 }
 
 /**
+ * Generic @-mention reference attached to a message. Forward-compatible with
+ * future provider kinds (dataset, task, branch, agent, ...). See
+ * /home/coder/zamp/services/pantheon/claude_requests/references/frontend_spec.md
+ */
+export interface MessageReferenceType {
+  kind: string;
+  resource_id: string;
+  display_label?: string;
+  provider_hints?: Record<string, unknown>;
+  text_range?: [number, number] | null;
+}
+
+/**
  * @deprecated Use FileReferenceType instead. This type is kept for backward compatibility.
  */
 export interface MessageAttachmentType {
@@ -167,6 +181,7 @@ export interface MessageContentType {
   text_type: string;
   elements?: Block[];
   file_references?: FileReferenceType[];
+  references?: MessageReferenceType[];
   /** @deprecated Use file_references instead. Kept for backward compatibility with S3 uploads. */
   attachments?: MessageAttachmentType[];
 }

@@ -284,18 +284,18 @@ export const ConversationProvider: React.FC<ConversationProviderProps> = ({
         timestamp: new Date().toISOString(),
       };
 
-      if (messagePayload?.message_content?.file_references?.length) {
+      if (messagePayload?.message_content?.references?.length) {
         const existingElements = (messagePayload.message_content.elements || []).map((el) => ({
           ...el,
           order: el.order + 1,
         }));
         messagePayload.message_content.elements = [
           {
-            id: 'element_file_refs',
-            type: BLOCK_TYPE.FILE_REFERENCES,
+            id: 'element_refs',
+            type: BLOCK_TYPE.REFERENCES,
             order: 0,
             payload: {
-              file_references: messagePayload.message_content.file_references,
+              references: messagePayload.message_content.references,
             },
           },
           ...existingElements,
@@ -348,27 +348,25 @@ export const ConversationProvider: React.FC<ConversationProviderProps> = ({
 
       const tempId = crypto.randomUUID();
 
-      const baseMessage: ChatMessage = messagePayload?.message_content?.file_references?.length
-        ? {
-            ...messagePayload,
-            message_content: {
-              ...messagePayload.message_content,
-              elements: [
-                {
-                  id: 'element_file_refs',
-                  type: BLOCK_TYPE.FILE_REFERENCES,
-                  order: 0,
-                  payload: {
-                    file_references: messagePayload.message_content.file_references,
-                  },
-                },
-                ...(messagePayload.message_content.elements || []).map((el) => ({
-                  ...el,
-                  order: el.order + 1,
-                })),
-              ],
-            },
-          }
+      // Optimistic REFERENCES block prepended so chips (uploads + mentions) render
+      // immediately above the text, matching server echo order.
+      const baseElements = messagePayload?.message_content?.elements ?? [];
+      const refs = messagePayload?.message_content?.references;
+      const elements: NonNullable<ChatMessage['message_content']['elements']> = [];
+      let nextOrder = 0;
+      if (refs?.length) {
+        elements.push({
+          id: 'element_refs',
+          type: BLOCK_TYPE.REFERENCES,
+          order: nextOrder++,
+          payload: { references: refs },
+        });
+      }
+      for (const el of baseElements) {
+        elements.push({ ...el, order: nextOrder++ });
+      }
+      const baseMessage: ChatMessage = refs?.length
+        ? { ...messagePayload, message_content: { ...messagePayload.message_content, elements } }
         : messagePayload;
 
       const shouldQueue = isStreamingRef.current || isAnalysingRef.current;

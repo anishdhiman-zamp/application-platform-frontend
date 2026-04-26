@@ -12,7 +12,7 @@ import {
   useRef,
   useState,
 } from 'react';
-import { type UploadedFile } from '@zamp-platform/chat';
+import { type MessageReferenceType, type UploadedFile } from '@zamp-platform/chat';
 import {
   FILES_PANEL_MAX_WIDTH,
   FILES_PANEL_MIN_WIDTH,
@@ -39,6 +39,7 @@ export interface PendingFileReference {
 export interface ChatMessageIntent {
   message: string;
   fileReferences?: { path: string; name: string }[];
+  references?: MessageReferenceType[];
   llmModel?: string | null;
   metadata?: Record<string, unknown>;
   autoLoopEnabled?: boolean;

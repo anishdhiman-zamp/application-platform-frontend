@@ -10,12 +10,12 @@ import {
   BLOCK_TYPE,
   BlockMessage,
   ButtonBlockType,
-  FileReferencesBlockType,
   type InputsRespondedBlockType,
   type MarkdownBlockType,
   type OutputFilesBlockType,
   type PlainTextBlockType,
   type QuestionGroupBlockType,
+  type ReferencesBlockType,
   type SingleSelectBlockType,
   type TaskBlockType,
   type TextContentBlock,
@@ -78,6 +78,18 @@ export const BlockRenderer: React.FC<BlockRendererProps> = ({
   compactParagraphs = false,
 }) => {
   const { renderAgentBlock } = useChatActions();
+  const { mentionRefs: messageReferences, uploadRefs: messageUploadRefs } = useMemo(() => {
+    const mentionRefs: ReferencesBlockType['payload']['references'] = [];
+    const uploadRefs: ReferencesBlockType['payload']['references'] = [];
+    for (const b of message.block) {
+      if (b.type !== BLOCK_TYPE.REFERENCES) continue;
+      for (const ref of (b as ReferencesBlockType).payload?.references ?? []) {
+        if (ref.text_range) mentionRefs.push(ref);
+        else uploadRefs.push(ref);
+      }
+    }
+    return { mentionRefs, uploadRefs };
+  }, [message.block]);
   const [openAccordionId, setOpenAccordionId] = useState<string | null>(null);
   const [elementValues, setElementValues] = useState<
     Record<string, { label: string; value: string; optionType: 'plain_text' | 'markdown' }>
@@ -289,6 +301,7 @@ export const BlockRenderer: React.FC<BlockRendererProps> = ({
                   payload={textBlock.payload}
                   compactParagraphs={compactParagraphs}
                   isStreaming={isStreaming}
+                  references={messageReferences}
                 />
               </div>
               {showConnectorToNext && (
@@ -303,6 +316,7 @@ export const BlockRenderer: React.FC<BlockRendererProps> = ({
             payload={textBlock.payload}
             isStreaming={isStreaming}
             compactParagraphs={compactParagraphs}
+            references={messageReferences}
           />
         );
       }
@@ -359,13 +373,14 @@ export const BlockRenderer: React.FC<BlockRendererProps> = ({
         );
       }
 
-      case BLOCK_TYPE.FILE_REFERENCES:
+      case BLOCK_TYPE.REFERENCES:
+        if (messageUploadRefs.length === 0) return null;
         return (
           <FileReferencesList
             key={block?.id}
-            fileReferences={(block as FileReferencesBlockType)?.payload?.file_references?.map((ref) => ({
-              path: ref.path,
-              name: ref.name,
+            fileReferences={messageUploadRefs.map((ref) => ({
+              path: (ref.provider_hints?.path as string) ?? ref.resource_id,
+              name: ref.display_label ?? ref.resource_id,
             }))}
             className={cn('mb-2', { 'mb-0': isLastBlock })}
           />

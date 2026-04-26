@@ -80,6 +80,7 @@ const TaskContentChat = ({ taskId }: { taskId: string }) => {
   const { refetchHistory } = useTaskActions();
   const streamingState = useStreamingState(taskId);
   const { openTab } = useDynamicTabs({ type: TAB_TYPE.FILE });
+  const { openTab: openDatasetTab } = useDynamicTabs({ type: TAB_TYPE.DATASET });
   const [triggerGetConversation] = useLazyGetConversationByIdQuery();
   const { openTab: openBrowserTab, updateTab: updateBrowserTab } = useDynamicTabs({ type: TAB_TYPE.BROWSER });
   const username = useAppSelector((state: RootState) => state.user.user?.username) ?? '';
@@ -412,6 +413,7 @@ const TaskContentChat = ({ taskId }: { taskId: string }) => {
   return (
     <ChatActionsProvider
       onFileOpen={openTab}
+      onDatasetOpen={openDatasetTab}
       parentTasks={subtaskPanelParents}
       siblings={siblingsMemo}
       onWatchStream={handleWatchStream}

@@ -1,5 +1,6 @@
 'use client';
 
+import type { Extensions } from '@tiptap/core';
 import { Button, LiveWaveform, TooltipV2 } from '@zamp-platform/ui';
 import { cn } from '@zamp-platform/ui/utils';
 import { ArrowUp, Check, Hourglass, Loader, Loader2, Mic, Paperclip, Square, X } from 'lucide-react';
@@ -7,7 +8,7 @@ import React, { forwardRef, useImperativeHandle, useRef } from 'react';
 
 import { UploadedFileType } from '../types/block.types';
 import { AttachmentsList, FileReferencesList } from './blocks';
-import { RichTextEditor, type RichTextEditorHandle } from './RichTextEditor';
+import { type Editor, RichTextEditor, type RichTextEditorHandle } from './RichTextEditor';
 
 interface S3UploadedFile {
   file_id: string;
@@ -66,6 +67,9 @@ export interface ChatComposerProps {
   hideRecordingButton?: boolean;
   showFilePreview?: boolean;
   disableNewlineOnEnter?: boolean;
+  editorExtensions?: Extensions;
+  onEditorReady?: (editor: Editor | null) => void;
+  shouldSuppressEnterSubmit?: () => boolean;
 }
 
 export interface ChatComposerHandle {
@@ -122,6 +126,9 @@ export const ChatComposer = forwardRef<ChatComposerHandle, ChatComposerProps>(
       hideRecordingButton = false,
       showFilePreview = true,
       disableNewlineOnEnter = false,
+      editorExtensions,
+      onEditorReady,
+      shouldSuppressEnterSubmit,
     },
     ref,
   ) => {
@@ -301,6 +308,9 @@ export const ChatComposer = forwardRef<ChatComposerHandle, ChatComposerProps>(
                 minHeight={minTextareaHeight}
                 maxHeight={maxTextareaHeight}
                 disableNewlineOnEnter={disableNewlineOnEnter}
+                extraExtensions={editorExtensions}
+                onEditorReady={onEditorReady}
+                shouldSuppressEnterSubmit={shouldSuppressEnterSubmit}
                 editorAttributes={{
                   role: 'textbox',
                   enterkeyhint: 'enter',

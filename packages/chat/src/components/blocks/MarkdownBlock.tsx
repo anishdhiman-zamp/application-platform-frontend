@@ -5,11 +5,9 @@ import '../streaming-reveal.css';
 
 import { Book, CopyToClipboard } from '@zamp-platform/ui';
 import { cn } from '@zamp-platform/ui/utils';
-import type { Element, RootContent } from 'hast';
-import { common, createLowlight } from 'lowlight';
 import { Copy } from 'lucide-react';
 import Link from 'next/link';
-import React, { Children, isValidElement, ReactNode, useMemo } from 'react';
+import React, { useMemo } from 'react';
 import ReactMarkdown from 'react-markdown';
 import rehypeSlug from 'rehype-slug';
 import remarkGfm from 'remark-gfm';
@@ -18,8 +16,13 @@ import { useChatActions } from '../../context/ChatActionsContext';
 import { useTypewriter } from '../../hooks/useTypewriter';
 import { rehypeStreamReveal } from '../../plugins/rehypeStreamReveal';
 import { normalizeFilesystemPath } from '../../utils/filesystemUpload';
-
-const lowlight = createLowlight(common);
+import {
+  buildMentionMatcher,
+  extractTextFromChildren,
+  highlightCode,
+  type ReferenceRef,
+  wrapMentions,
+} from './utils/markdownBlock.utils';
 
 const ZAMP_FILE_PROTOCOL = 'zamp-file://';
 
@@ -30,55 +33,6 @@ const urlTransform = (url: string): string => {
   return url;
 };
 
-const extractTextFromChildren = (children: ReactNode): string => {
-  let text = '';
-  Children.forEach(children, (child) => {
-    if (typeof child === 'string') {
-      text += child;
-    } else if (typeof child === 'number') {
-      text += String(child);
-    } else if (isValidElement(child)) {
-      const childProps = child.props as { children?: ReactNode };
-      if (childProps.children) {
-        text += extractTextFromChildren(childProps.children);
-      }
-    }
-  });
-  return text;
-};
-
-function hastToReact(nodes: RootContent[], keyPrefix = 'hl'): React.ReactNode[] {
-  return nodes.map((node, i) => {
-    if (node.type === 'text') {
-      return node.value;
-    }
-    if (node.type === 'element') {
-      const el = node as Element;
-      const className = (el.properties?.className as string[])?.join(' ');
-      return React.createElement(
-        el.tagName,
-        { key: `${keyPrefix}-${i}`, ...(className ? { className } : {}) },
-        el.children ? hastToReact(el.children as RootContent[], `${keyPrefix}-${i}`) : null,
-      );
-    }
-    return null;
-  });
-}
-
-function highlightCode(code: string, language?: string): React.ReactNode {
-  try {
-    if (language && !lowlight.registered(language)) return code;
-
-    const tree = language ? lowlight.highlight(language, code) : lowlight.highlightAuto(code);
-    const children = tree.children as RootContent[];
-    if (children.length === 0) return code;
-
-    return hastToReact(children);
-  } catch {
-    return code;
-  }
-}
-
 interface MarkdownBlockProps {
   payload: {
     text: string;
@@ -87,6 +41,7 @@ interface MarkdownBlockProps {
   className?: string;
   fontClassName?: string;
   compactParagraphs?: boolean;
+  references?: ReferenceRef[];
 }
 
 export const MarkdownBlock: React.FC<MarkdownBlockProps> = ({
@@ -95,6 +50,7 @@ export const MarkdownBlock: React.FC<MarkdownBlockProps> = ({
   className,
   fontClassName = 'text-GRAY_950 text-sm leading-[1.667] font-[420]',
   compactParagraphs = false,
+  references,
 }) => {
   const { onFileOpen } = useChatActions();
 
@@ -104,6 +60,7 @@ export const MarkdownBlock: React.FC<MarkdownBlockProps> = ({
     }
   };
 
+  const mentionMatcher = useMemo(() => buildMentionMatcher(references ?? []), [references]);
   const { text, isAnimating } = useTypewriter(payload.text, undefined, isStreaming);
 
   const rehypePlugins = useMemo(
@@ -140,7 +97,9 @@ export const MarkdownBlock: React.FC<MarkdownBlockProps> = ({
             </h3>
           ),
           p: ({ children }) => (
-            <p className={cn(compactParagraphs ? 'mt-1 first:mt-0' : 'mt-3 first:mt-0', fontClassName)}>{children}</p>
+            <p className={cn(compactParagraphs ? 'mt-1 first:mt-0' : 'mt-3 first:mt-0', fontClassName)}>
+              {compactParagraphs ? wrapMentions(children, mentionMatcher) : children}
+            </p>
           ),
           ul: ({ children }) => (
             <ul

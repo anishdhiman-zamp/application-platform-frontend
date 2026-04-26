@@ -1,4 +1,4 @@
-import { BLOCK_TYPE } from '../types/block.types';
+import { BLOCK_TYPE, type ReferenceRef, type ReferencesBlockType } from '../types/block.types';
 import { ChatMessage } from '../types/chat.types';
 
 /**
@@ -30,24 +30,33 @@ export const getMessagePreview = (msg: ChatMessage): string => {
   return (textEl?.payload as { text?: string } | undefined)?.text ?? '';
 };
 
-/**
- * Counts the attachments on a chat message.
- *
- * Prefers the top-level `file_references` / `attachments` fields used by locally-constructed
- * messages. Falls back to summing `file_references` across all `FILE_REFERENCES` blocks in
- * `message_content.elements` — the shape used by messages deserialized from conversation history.
- *
- * @returns The total attachment count, or 0 when none are present.
- */
-export const getAttachmentCount = (msg: ChatMessage): number => {
-  const fromContent =
-    (msg.message_content?.file_references?.length ?? 0) + (msg.message_content?.attachments?.length ?? 0);
-  if (fromContent > 0) return fromContent;
+export const getQueuedRefs = (msg: ChatMessage): { mentions: ReferenceRef[]; uploadCount: number } => {
+  // Dedupe: queued messages carry the same refs on top-level `references`
+  // and inside the optimistic REFERENCES block.
+  const all: ReferenceRef[] = [];
+  const seen = new Set<string>();
+  const keyOf = (ref: ReferenceRef) =>
+    `${ref.kind}:${ref.resource_id}:${ref.text_range ? `${ref.text_range[0]}-${ref.text_range[1]}` : ''}`;
+  const pushUnique = (refs: ReferenceRef[] | undefined) => {
+    for (const ref of refs ?? []) {
+      const key = keyOf(ref);
+      if (seen.has(key)) continue;
+      seen.add(key);
+      all.push(ref);
+    }
+  };
+  pushUnique(msg.message_content?.references as ReferenceRef[] | undefined);
+  const elements = msg.message_content?.elements ?? [];
+  for (const el of elements) {
+    if (el.type !== BLOCK_TYPE.REFERENCES) continue;
+    pushUnique((el as ReferencesBlockType).payload?.references);
+  }
 
-  const elements = msg.message_content?.elements;
-  if (!elements?.length) return 0;
-
-  return elements
-    .filter((el) => el.type === BLOCK_TYPE.FILE_REFERENCES)
-    .reduce((sum, el) => sum + ((el.payload as { file_references?: unknown[] }).file_references?.length ?? 0), 0);
+  const mentions: ReferenceRef[] = [];
+  let uploadCount = msg.message_content?.file_references?.length ?? 0;
+  for (const ref of all) {
+    if (ref.text_range) mentions.push(ref);
+    else uploadCount += 1;
+  }
+  return { mentions, uploadCount };
 };

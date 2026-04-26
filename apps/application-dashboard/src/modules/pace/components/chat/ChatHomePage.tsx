@@ -25,6 +25,7 @@ import ModelSelector from '@/modules/pace/components/chat/ModelSelector';
 import VoiceChatSlot from '@/modules/pace/components/chat/VoiceChatSlot';
 import { useDynamicTabs } from '@/modules/pace/components/dynamic-tabs/useDynamicTabs';
 import { useChatDraftInput } from '@/modules/pace/hooks/useChatDraftInput';
+import { useReferencePicker } from '@/modules/pace/hooks/useReferencePicker';
 import { NO_ANIMATION } from '@/modules/pace/pace.animations';
 import { STUB_CONVERSATION_STATE } from '@/modules/pace/pace.constants';
 import { usePaceContext } from '@/modules/pace/pace.context';
@@ -51,6 +52,7 @@ const ChatHomePage = () => {
   const currentUserName = useAppSelector((state: RootState) => state.user.user?.user_name) ?? '';
   const username = useAppSelector((state: RootState) => state.user.user?.username) ?? '';
   const { openTab } = useDynamicTabs({ type: TAB_TYPE.FILE });
+  const { openTab: openDatasetTab } = useDynamicTabs({ type: TAB_TYPE.DATASET });
 
   const fileDropHandlerRef = useRef<((files: FileList) => void) | null>(null);
   const addFileReferenceRef = useRef<((ref: { path: string; name: string }) => void) | null>(null);
@@ -61,6 +63,7 @@ const ChatHomePage = () => {
 
   const { isVoiceChatEnabled, state: voiceState } = useVoiceChatContext();
   const isVoiceActive = voiceState === VOICE_CHAT_STATE.Active;
+  const referencePicker = useReferencePicker();
 
   const { isDragOver, dropZoneProps } = useFileDragDrop({
     onFileDrop: (files) => fileDropHandlerRef.current?.(files),
@@ -84,14 +87,26 @@ const ChatHomePage = () => {
     [selectConversation, setChatSidebarState],
   );
 
+  const expandSidebarIfCollapsed = useCallback(() => {
+    if (chatSidebarState === CHAT_SIDEBAR_STATE.COLLAPSED) {
+      setChatSidebarState(CHAT_SIDEBAR_STATE.SIDEBAR);
+    }
+  }, [chatSidebarState, setChatSidebarState]);
+
   const handleFileOpen = useCallback(
     (path: string, name: string) => {
-      if (chatSidebarState === CHAT_SIDEBAR_STATE.COLLAPSED) {
-        setChatSidebarState(CHAT_SIDEBAR_STATE.SIDEBAR);
-      }
+      expandSidebarIfCollapsed();
       openTab(path, name);
     },
-    [openTab, chatSidebarState, setChatSidebarState],
+    [openTab, expandSidebarIfCollapsed],
+  );
+
+  const handleDatasetOpen = useCallback(
+    (datasetId: string, name: string) => {
+      expandSidebarIfCollapsed();
+      openDatasetTab(datasetId, name);
+    },
+    [openDatasetTab, expandSidebarIfCollapsed],
   );
 
   const interceptedActions = useMemo(
@@ -105,6 +120,7 @@ const ChatHomePage = () => {
           setChatMessageIntent({
             message: payload.message_content?.text || '',
             fileReferences: fileRefs?.map((ref) => ({ path: ref.path, name: ref.name })),
+            references: payload.message_content?.references,
             llmModel: payload.llm_model,
             autoLoopEnabled: payload.pev_enabled,
           });
@@ -131,7 +147,7 @@ const ChatHomePage = () => {
           <DropOverlay isVisible={isDragOver} />
           <AnimatePresence>
             {!isExpanded && (
-              <ChatActionsProvider onFileOpen={handleFileOpen}>
+              <ChatActionsProvider onFileOpen={handleFileOpen} onDatasetOpen={handleDatasetOpen}>
                 <motion.div
                   key='chat-home-page'
                   initial={false}
@@ -166,6 +182,7 @@ const ChatHomePage = () => {
                       voiceChatSlot={isVoiceChatEnabled ? <VoiceChatSlot /> : null}
                       hideRecordingButton={isVoiceActive}
                       llmModel={selectedModel}
+                      referencePicker={referencePicker}
                     />
                   </div>
                   <ChatHistory onSelectConversation={handleSelectConversation} />

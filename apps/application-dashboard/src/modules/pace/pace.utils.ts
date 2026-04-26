@@ -1,3 +1,4 @@
+import { MENTION_KIND, type ReferenceSearchHit } from '@zamp-platform/chat';
 import {
   AFTERNOON_GREETINGS,
   EVENING_GREETINGS,
@@ -5,7 +6,7 @@ import {
   NIGHT_GREETINGS,
   SIDEBAR_CONVERSATION_ID_PARAM,
 } from 'modules/pace/pace.constants';
-import { CHAT_SIDEBAR_STATE, type ChatSidebarState } from 'modules/pace/pace.types';
+import { CHAT_SIDEBAR_STATE, type ChatSidebarState, type DynamicTab, TAB_TYPE } from 'modules/pace/pace.types';
 import { ROUTES_PATH } from '@/constants/routeConfig';
 import type { SkillApiError } from '@/types/api/skills.types';
 import { getFromLocalStorage, LOCAL_STORAGE_KEYS } from '@/utils/localstorage';
@@ -143,4 +144,32 @@ export const getRouteSignificantUrl = (pathname: string | null, searchParams: UR
   const query = filtered.toString();
 
   return query ? `${path}?${query}` : path;
+};
+
+/**
+ * Builds a list of recent hits from the given dynamic tabs.
+ * @param dynamicTabs - The dynamic tabs to build the recent hits from
+ * @returns The list of recent hits
+ */
+export const buildRecentHits = (dynamicTabs: DynamicTab[]): ReferenceSearchHit[] => {
+  const hits: ReferenceSearchHit[] = [];
+
+  for (let i = dynamicTabs.length - 1; i >= 0; i--) {
+    const tab = dynamicTabs[i];
+    const type = tab.type ?? TAB_TYPE.FILE;
+
+    if (type !== TAB_TYPE.FILE && type !== TAB_TYPE.DATASET) continue;
+    const isDataset = type === TAB_TYPE.DATASET;
+    const dot = tab.name.lastIndexOf('.');
+    const extension = dot > 0 && dot < tab.name.length - 1 ? tab.name.slice(dot + 1) : '';
+
+    hits.push({
+      kind: isDataset ? MENTION_KIND.DATASET : MENTION_KIND.FILE,
+      resource_id: tab.id,
+      display_label: tab.name,
+      icon_hint: isDataset ? 'tables' : extension,
+    });
+  }
+
+  return hits;
 };

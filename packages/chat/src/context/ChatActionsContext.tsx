@@ -7,9 +7,10 @@ import type { SiblingTask, TaskBreadcrumb } from '../types/chat.types';
 
 type AgentBlockPayload = AgentBlockType['payload'] | AgentContentBlock['payload'];
 
-interface ChatActionsContextType {
+export interface ChatActionsContextType {
   onFileOpen?: (path: string, name: string) => void;
   onTaskOpen?: (taskId: string, name: string, path: string) => void;
+  onDatasetOpen?: (datasetId: string, name: string) => void;
   onAgentClick?: (agentId: string, agentName: string, agentDescription?: string, avatarKey?: string) => void;
   onAgentTest?: (agentId: string, agentName: string) => void;
   renderAgentBlock?: (payload: AgentBlockPayload) => ReactNode;
@@ -27,6 +28,7 @@ interface ChatActionsProviderProps {
   children: ReactNode;
   onFileOpen?: (path: string, name: string) => void;
   onTaskOpen?: (taskId: string, name: string, path: string) => void;
+  onDatasetOpen?: (datasetId: string, name: string) => void;
   onAgentClick?: (agentId: string, agentName: string, agentDescription?: string, avatarKey?: string) => void;
   onAgentTest?: (agentId: string, agentName: string) => void;
   renderAgentBlock?: (payload: AgentBlockPayload) => ReactNode;
@@ -41,6 +43,7 @@ export const ChatActionsProvider = ({
   children,
   onFileOpen,
   onTaskOpen,
+  onDatasetOpen,
   onAgentClick,
   onAgentTest,
   renderAgentBlock,
@@ -54,6 +57,7 @@ export const ChatActionsProvider = ({
     () => ({
       onFileOpen,
       onTaskOpen,
+      onDatasetOpen,
       onAgentClick,
       onAgentTest,
       renderAgentBlock,
@@ -66,6 +70,7 @@ export const ChatActionsProvider = ({
     [
       onFileOpen,
       onTaskOpen,
+      onDatasetOpen,
       onAgentClick,
       onAgentTest,
       renderAgentBlock,

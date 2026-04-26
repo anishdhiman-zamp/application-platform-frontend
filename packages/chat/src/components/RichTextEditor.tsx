@@ -3,16 +3,19 @@
 import './code-highlight.css';
 import './rich-text-editor.css';
 
-import { Extension } from '@tiptap/core';
+import { Extension, type Extensions } from '@tiptap/core';
 import { CodeBlockLowlight } from '@tiptap/extension-code-block-lowlight';
 import { ListItem } from '@tiptap/extension-list';
 import { Placeholder } from '@tiptap/extensions';
 import { Markdown } from '@tiptap/markdown';
-import { EditorContent, useEditor } from '@tiptap/react';
+import { type Editor, EditorContent, useEditor } from '@tiptap/react';
 import { StarterKit } from '@tiptap/starter-kit';
 import { common, createLowlight } from 'lowlight';
 import { motion } from 'motion/react';
-import React, { forwardRef, useEffect, useImperativeHandle, useRef, useState } from 'react';
+import React, { forwardRef, useEffect, useImperativeHandle, useMemo, useRef, useState } from 'react';
+
+// Re-exported so downstream packages don't need a direct @tiptap/react dep.
+export type { Editor } from '@tiptap/react';
 
 const lowlight = createLowlight(common);
 
@@ -34,11 +37,15 @@ export interface RichTextEditorProps {
   maxHeight?: number;
   editorAttributes?: Record<string, string>;
   disableNewlineOnEnter?: boolean;
+  extraExtensions?: Extensions;
+  onEditorReady?: (editor: Editor | null) => void;
+  shouldSuppressEnterSubmit?: () => boolean;
 }
 
 export interface RichTextEditorHandle {
   focus: () => void;
   clear: () => void;
+  getEditor: () => Editor | null;
 }
 
 export const RichTextEditor = forwardRef<RichTextEditorHandle, RichTextEditorProps>(
@@ -57,9 +64,23 @@ export const RichTextEditor = forwardRef<RichTextEditorHandle, RichTextEditorPro
       maxHeight = 200,
       editorAttributes,
       disableNewlineOnEnter = false,
+      extraExtensions,
+      onEditorReady,
+      shouldSuppressEnterSubmit,
     },
     ref,
   ) => {
+    const shouldSuppressEnterSubmitRef = useRef(shouldSuppressEnterSubmit);
+    shouldSuppressEnterSubmitRef.current = shouldSuppressEnterSubmit;
+    // Stable extension ref so editor isn't re-created when the parent passes a
+    // new array literal each render. We freeze the first non-empty array we see.
+    // INVARIANT: callers must pass the final extraExtensions on the first render —
+    // a later non-empty value is ignored because stableExtras is memoized with [] deps.
+    const extraExtensionsRef = useRef<Extensions | undefined>(extraExtensions);
+    if (!extraExtensionsRef.current && extraExtensions && extraExtensions.length > 0) {
+      extraExtensionsRef.current = extraExtensions;
+    }
+    const stableExtras = useMemo(() => extraExtensionsRef.current ?? [], []);
     const onPasteRef = useRef(onPaste);
     const onSubmitRef = useRef(onSubmit);
     const lastEditorMarkdown = useRef(value || '');
@@ -156,6 +177,7 @@ export const RichTextEditor = forwardRef<RichTextEditorHandle, RichTextEditorPro
           // flattened when the markdown is rendered.
           indentation: { style: 'space', size: 3 },
         }),
+        ...stableExtras,
       ],
       content: value || '',
       contentType: 'markdown',
@@ -180,6 +202,11 @@ export const RichTextEditor = forwardRef<RichTextEditorHandle, RichTextEditorPro
         },
         handleKeyDown: (_view, event) => {
           if (event.key === KEYBOARD_KEYS.ENTER && !event.shiftKey && !event.metaKey && !event.ctrlKey) {
+            // The @-mention popover handles Enter for chip selection — let
+            // its suggestion plugin process the key first.
+            if (shouldSuppressEnterSubmitRef.current?.()) {
+              return false;
+            }
             const ed = editorRef.current;
             if (ed?.isActive('bulletList') || ed?.isActive('orderedList') || ed?.isActive('codeBlock')) {
               return false;
@@ -254,7 +281,13 @@ export const RichTextEditor = forwardRef<RichTextEditorHandle, RichTextEditorPro
         lastEditorMarkdown.current = '';
         editor?.commands.clearContent(true);
       },
+      getEditor: () => editor,
     }));
+
+    useEffect(() => {
+      onEditorReady?.(editor ?? null);
+      return () => onEditorReady?.(null);
+    }, [editor, onEditorReady]);
 
     useEffect(() => {
       if (!editor) return;

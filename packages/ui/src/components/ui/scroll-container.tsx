@@ -44,6 +44,8 @@ interface ScrollContainerProps {
   showFadeOverlay?: boolean;
   disableFadeOverlay?: boolean;
   fadeHeight?: string;
+  /** Solid color the fade overlays resolve to. Accepts any CSS color (e.g. `var(--BG_GRAY_2)`). */
+  fadeColor?: string;
   showScrollToBottom?: boolean;
   /** Scroll to bottom when this value changes (e.g. messagesLength) */
   scrollTrigger?: number;
@@ -77,6 +79,7 @@ const ScrollContainer = forwardRef<ScrollContainerRef, ScrollContainerProps>(
       showFadeOverlay = true,
       disableFadeOverlay = false,
       fadeHeight = 'h-6',
+      fadeColor = 'var(--BG_WHITE)',
       showScrollToBottom = false,
       scrollTrigger,
       autoScrollToBottom = false,
@@ -615,7 +618,7 @@ const ScrollContainer = forwardRef<ScrollContainerRef, ScrollContainerProps>(
 
     return (
       <ScrollRefContext.Provider value={scrollRef}>
-        <div className={cn('relative flex min-h-0 flex-1 flex-col overflow-hidden', className)}>
+        <div className={cn('relative isolate flex min-h-0 flex-1 flex-col overflow-hidden', className)}>
           {showOverlays && (
             <>
               <div
@@ -627,7 +630,7 @@ const ScrollContainer = forwardRef<ScrollContainerRef, ScrollContainerProps>(
                   canScrollTop ? 'opacity-100' : 'opacity-0',
                 )}
                 style={{
-                  background: 'linear-gradient(180deg, var(--BG_WHITE) 0%, transparent 100%)',
+                  background: `linear-gradient(180deg, ${fadeColor} 0%, transparent 100%)`,
                 }}
               />
               <div
@@ -639,7 +642,7 @@ const ScrollContainer = forwardRef<ScrollContainerRef, ScrollContainerProps>(
                   canScrollBottom ? 'opacity-100' : 'opacity-0',
                 )}
                 style={{
-                  background: 'linear-gradient(0deg, var(--BG_WHITE) 0%, transparent 100%)',
+                  background: `linear-gradient(0deg, ${fadeColor} 0%, transparent 100%)`,
                 }}
               />
             </>

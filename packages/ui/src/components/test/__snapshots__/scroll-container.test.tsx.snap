@@ -2,7 +2,7 @@
 
 exports[`ScrollContainer - Snapshots matches snapshot with all features enabled 1`] = `
 <div
-  class="relative flex min-h-0 flex-1 flex-col overflow-hidden"
+  class="relative isolate flex min-h-0 flex-1 flex-col overflow-hidden"
 >
   <div
     aria-hidden="true"
@@ -53,7 +53,7 @@ exports[`ScrollContainer - Snapshots matches snapshot with all features enabled 
 
 exports[`ScrollContainer - Snapshots matches snapshot with default props 1`] = `
 <div
-  class="relative flex min-h-0 flex-1 flex-col overflow-hidden"
+  class="relative isolate flex min-h-0 flex-1 flex-col overflow-hidden"
 >
   <div
     aria-hidden="true"
@@ -77,7 +77,7 @@ exports[`ScrollContainer - Snapshots matches snapshot with default props 1`] = `
 
 exports[`ScrollContainer - Snapshots matches snapshot with overlays disabled 1`] = `
 <div
-  class="relative flex min-h-0 flex-1 flex-col overflow-hidden"
+  class="relative isolate flex min-h-0 flex-1 flex-col overflow-hidden"
 >
   <div
     class="relative flex min-h-0 w-full flex-1 flex-col overflow-x-hidden overflow-y-auto [overflow-anchor:none] [scrollbar-width:thin]"

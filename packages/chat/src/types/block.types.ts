@@ -6,6 +6,7 @@ export const enum BLOCK_TYPE {
   QUESTION_GROUP = 'question_group',
   QUESTION = 'question',
   FILE_REFERENCES = 'file_references',
+  REFERENCES = 'references',
   TEXT = 'text',
   TOOL_USE = 'tool_use',
   TOOL_RESULT = 'tool_result',
@@ -126,6 +127,32 @@ export interface FileReferencesBlockType {
   type: BLOCK_TYPE.FILE_REFERENCES;
   payload: {
     file_references: { path: string; name: string }[];
+  };
+}
+
+/**
+ * A single @-mention reference within a message's references block. Shared
+ * between the block payload and renderers that consume individual refs.
+ */
+export interface ReferenceRef {
+  kind: string;
+  resource_id: string;
+  display_label?: string;
+  icon_hint?: string | null;
+  provider_hints?: Record<string, unknown>;
+  text_range?: [number, number] | null;
+}
+
+/**
+ * Generic @-mention reference block. Backend ships history with this shape
+ * once references migrate off the legacy `file_references` block.
+ */
+export interface ReferencesBlockType {
+  id: string;
+  order: number;
+  type: BLOCK_TYPE.REFERENCES;
+  payload: {
+    references: ReferenceRef[];
   };
 }
 
@@ -316,6 +343,7 @@ export type Block =
   | QuestionGroupBlockType
   | QuestionBlockType
   | FileReferencesBlockType
+  | ReferencesBlockType
   | OutputFilesBlockType
   | TaskBlockType
   | AgentBlockType

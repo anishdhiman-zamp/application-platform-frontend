@@ -11,6 +11,7 @@ import {
   createUserMessagePayload,
   handleFilesystemUploads,
   type LocationData,
+  type MessageReferenceType,
   ResourceType,
   sanitizeFileName,
   ScopeType,
@@ -59,6 +60,7 @@ export interface UseChatInputProps {
   llmModel?: string | null;
   autoLoopEnabled?: boolean;
   metadata?: Record<string, unknown>;
+  getMentionReferences?: () => MessageReferenceType[];
 }
 
 export interface UseChatInputReturn {
@@ -94,6 +96,7 @@ export const useChatInput = ({
   llmModel,
   autoLoopEnabled,
   metadata,
+  getMentionReferences,
 }: UseChatInputProps): UseChatInputReturn => {
   const prevConversationIdRef = useRef(conversationId);
   const fileReferencesRef = useRef<UploadedFile[]>([]);
@@ -142,6 +145,15 @@ export const useChatInput = ({
     },
     [hasExternalFileControl, setExternalFileReferences],
   );
+
+  // Snapshot of mention chips captured in handleSubmit (synchronous, before
+  // editor clear) so init()/handleSendMessage can read them after the editor
+  // DOM is cleared.
+  const pendingMentionRefsRef = useRef<MessageReferenceType[]>([]);
+
+  useEffect(() => {
+    fileReferencesRef.current = fileReferences;
+  }, [fileReferences]);
 
   const removeFileReference = useCallback(
     (fileId: string) => {
@@ -236,16 +248,20 @@ export const useChatInput = ({
     async (inputValue: string) => {
       if (!inputValue && fileReferences.length === 0) return;
 
-      const messagePayload = createUserMessagePayload(
+      const mentionRefs = pendingMentionRefsRef.current;
+      pendingMentionRefsRef.current = [];
+      const messagePayload = createUserMessagePayload({
         inputValue,
         resourceId,
         resourceType,
-        currentUserName || '',
-        fileReferences.length > 0 ? fileReferences.map((ref) => ({ path: ref.path, name: ref.name })) : undefined,
+        senderName: currentUserName || '',
+        fileReferences:
+          fileReferences.length > 0 ? fileReferences.map((ref) => ({ path: ref.path, name: ref.name })) : undefined,
         llmModel,
         metadata,
         autoLoopEnabled,
-      );
+        references: mentionRefs,
+      });
 
       setFileReferences([]);
 
@@ -286,25 +302,30 @@ export const useChatInput = ({
       resourceType,
       llmModel,
       autoLoopEnabled,
+      metadata,
     ],
   );
 
   const init = async () => {
     const currentFileRefs = fileReferencesRef.current;
-    const payload = createConversationPayload(
+    const mentionRefs = pendingMentionRefsRef.current;
+    pendingMentionRefsRef.current = [];
+    const payload = createConversationPayload({
       resourceId,
       resourceType,
       scopeId,
-      firstMessage || '',
-      currentUserName || '',
-      currentFileRefs.length > 0 ? currentFileRefs.map((ref) => ({ path: ref.path, name: ref.name })) : undefined,
+      messageText: firstMessage || '',
+      senderName: currentUserName || '',
+      fileReferences:
+        currentFileRefs.length > 0 ? currentFileRefs.map((ref) => ({ path: ref.path, name: ref.name })) : undefined,
       scope,
       annotationLocation,
       annotationType,
       llmModel,
-      undefined,
+      metadata,
       autoLoopEnabled,
-    );
+      references: mentionRefs,
+    });
 
     setFileReferences([]);
     const response = await chatActions.createConversationV2(payload);
@@ -320,6 +341,10 @@ export const useChatInput = ({
     const trimmedValue = value.trim();
     if (!trimmedValue && fileReferences.length === 0) return;
 
+    // Snapshot chips NOW — editor doc still has them. After setValue('') the
+    // editor clears and extractChipsFromEditor would return [].
+    pendingMentionRefsRef.current = getMentionReferences?.() ?? [];
+
     setValue('');
 
     if (!firstMessage && !conversationId) {
@@ -333,7 +358,16 @@ export const useChatInput = ({
     }
 
     handleSendMessage(trimmedValue);
-  }, [value, fileReferences, firstMessage, conversationId, setValue, setHeader, handleSendMessage]);
+  }, [
+    value,
+    fileReferences,
+    firstMessage,
+    conversationId,
+    setValue,
+    setHeader,
+    handleSendMessage,
+    getMentionReferences,
+  ]);
 
   useEffect(() => {
     if (prevConversationIdRef.current !== conversationId) {

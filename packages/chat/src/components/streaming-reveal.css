@@ -15,3 +15,7 @@
 .stream-word {
   animation: streamWordFadeIn 300ms ease-out both;
 }
+
+[data-mention-chip] [data-file-icon] {
+  background-color: transparent !important;
+}

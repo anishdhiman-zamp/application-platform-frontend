@@ -9,6 +9,7 @@ import {
   ChatMessage,
   ChatMessageType,
   LocationData,
+  type MessageReferenceType,
   ResourceType,
   ScopeType,
   SenderType,
@@ -83,19 +84,52 @@ export interface UseChatInputReturn {
   isSubmitDisabled: boolean;
 }
 
+export interface CreateUserMessagePayloadOptions {
+  inputValue: string;
+  resourceId: string;
+  resourceType: ResourceType;
+  senderName: string;
+  fileReferences?: FileReference[];
+  llmModel?: string | null;
+  metadata?: Record<string, unknown>;
+  autoLoopEnabled?: boolean;
+  references?: MessageReferenceType[];
+}
+
+/**
+ * Merge uploads and mention refs into a single outbound `references` array.
+ * Uploads are tagged with `provider_hints.path` so the backend (and history
+ * renderers) can distinguish them from inline `@`-mention chips.
+ */
+const buildOutboundReferences = (
+  fileReferences: FileReference[] | undefined,
+  references: MessageReferenceType[] | undefined,
+): MessageReferenceType[] | undefined => {
+  const uploadRefs: MessageReferenceType[] =
+    fileReferences?.map((file) => ({
+      kind: 'file',
+      resource_id: file.path,
+      display_label: file.name,
+      provider_hints: { path: file.path },
+    })) ?? [];
+  const merged = [...uploadRefs, ...(references ?? [])];
+  return merged.length > 0 ? merged : undefined;
+};
+
 /**
  * Creates a user message payload for chat
  */
-export const createUserMessagePayload = (
-  inputValue: string,
-  resourceId: string,
-  resourceType: ResourceType,
-  senderName: string,
-  fileReferences?: FileReference[],
-  llmModel?: string | null,
-  metadata?: Record<string, unknown>,
-  autoLoopEnabled?: boolean,
-): ChatMessage => {
+export const createUserMessagePayload = ({
+  inputValue,
+  resourceId,
+  resourceType,
+  senderName,
+  fileReferences,
+  llmModel,
+  metadata,
+  autoLoopEnabled,
+  references,
+}: CreateUserMessagePayloadOptions): ChatMessage => {
   return {
     resource_id: resourceId,
     resource_type: resourceType,
@@ -112,7 +146,7 @@ export const createUserMessagePayload = (
           },
         },
       ] as Block[],
-      file_references: fileReferences && fileReferences.length > 0 ? fileReferences : undefined,
+      references: buildOutboundReferences(fileReferences, references),
     },
     message_type: ChatMessageType.TEXT,
     sender_type: SenderType.USER,
@@ -124,23 +158,40 @@ export const createUserMessagePayload = (
   };
 };
 
+export interface CreateConversationPayloadOptions {
+  resourceId: string;
+  resourceType: ResourceType;
+  scopeId: string;
+  messageText: string;
+  senderName: string;
+  fileReferences?: FileReference[];
+  scope?: ScopeType;
+  annotationLocation?: LocationData;
+  annotationType?: AnnotationType;
+  llmModel?: string | null;
+  metadata?: Record<string, unknown>;
+  autoLoopEnabled?: boolean;
+  references?: MessageReferenceType[];
+}
+
 /**
  * Creates a conversation payload for initial conversation creation
  */
-export const createConversationPayload = (
-  resourceId: string,
-  resourceType: ResourceType,
-  scopeId: string,
-  messageText: string,
-  senderName: string,
-  fileReferences?: FileReference[],
+export const createConversationPayload = ({
+  resourceId,
+  resourceType,
+  scopeId,
+  messageText,
+  senderName,
+  fileReferences,
   scope = ScopeType.ACTIVITY_RUN,
-  annotationLocation?: LocationData,
-  annotationType?: AnnotationType,
-  llmModel?: string | null,
-  metadata?: Record<string, unknown>,
-  autoLoopEnabled?: boolean,
-) => {
+  annotationLocation,
+  annotationType,
+  llmModel,
+  metadata,
+  autoLoopEnabled,
+  references,
+}: CreateConversationPayloadOptions) => {
   return {
     resource_id: resourceId,
     resource_type: resourceType,
@@ -160,7 +211,7 @@ export const createConversationPayload = (
           },
         },
       ] as Block[],
-      file_references: fileReferences && fileReferences.length > 0 ? fileReferences : undefined,
+      references: buildOutboundReferences(fileReferences, references),
     },
     ...(annotationLocation && {
       annotation_data: {
@@ -235,20 +286,21 @@ export const useChatInput = ({
 
   const init = async () => {
     const currentFileRefs = fileReferencesRef.current;
-    const payload = createConversationPayload(
+    const payload = createConversationPayload({
       resourceId,
       resourceType,
       scopeId,
-      firstMessage || '',
-      currentUserName || '',
-      currentFileRefs.length > 0 ? currentFileRefs.map((ref) => ({ path: ref.path, name: ref.name })) : undefined,
+      messageText: firstMessage || '',
+      senderName: currentUserName || '',
+      fileReferences:
+        currentFileRefs.length > 0 ? currentFileRefs.map((ref) => ({ path: ref.path, name: ref.name })) : undefined,
       scope,
       annotationLocation,
       annotationType,
       llmModel,
       metadata,
       autoLoopEnabled,
-    );
+    });
 
     setFileReferences([]);
     const response = await chat.createConversationV2(payload);
@@ -387,16 +439,17 @@ export const useChatInput = ({
   const handleSendMessage = async (inputValue: string) => {
     if (!inputValue && fileReferences.length === 0) return;
 
-    const messagePayload = createUserMessagePayload(
+    const messagePayload = createUserMessagePayload({
       inputValue,
       resourceId,
       resourceType,
-      currentUserName || '',
-      fileReferences.length > 0 ? fileReferences.map((ref) => ({ path: ref.path, name: ref.name })) : undefined,
+      senderName: currentUserName || '',
+      fileReferences:
+        fileReferences.length > 0 ? fileReferences.map((ref) => ({ path: ref.path, name: ref.name })) : undefined,
       llmModel,
       metadata,
       autoLoopEnabled,
-    );
+    });
 
     setFileReferences([]);
 

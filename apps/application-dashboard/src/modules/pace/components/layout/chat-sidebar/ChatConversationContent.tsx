@@ -37,13 +37,13 @@ import ChatMessagesSkeleton from '@/modules/pace/components/loaders/ChatMessages
 import { type ActiveAgentInfo, usePaceContext } from '@/modules/pace/pace.context';
 import { CHAT_SIDEBAR_STATE, TAB_TYPE } from '@/modules/pace/pace.types';
 import { preserveSidebarParam } from '@/modules/pace/pace.utils';
-import { addAutoLoopLockedConversation } from '@/modules/pace/utils/autoLoopStorage';
 import { baseApi } from '@/services/baseApi';
 
 export interface ChatConversationContentProps {
   conversationId: string | null;
   organizationId: string;
   onFileOpen: (path: string, name: string) => void;
+  onDatasetOpen?: (datasetId: string, name: string) => void;
   onTaskOpen?: (taskId: string, name: string, path: string) => void;
   onBrowserOpen?: (conversationId: string, sessionId?: string) => void;
   onBrowserStreamingEnd?: (conversationId: string) => void;
@@ -58,6 +58,7 @@ const ChatConversationContent = ({
   conversationId,
   organizationId,
   onFileOpen,
+  onDatasetOpen,
   onTaskOpen,
   onBrowserOpen,
   onBrowserStreamingEnd,
@@ -248,15 +249,16 @@ const ChatConversationContent = ({
   const handleSendIntentToExistingConversation = useCallback(() => {
     if (chatMessageIntent && conversationId && consumedIntentRef.current !== chatMessageIntent) {
       consumedIntentRef.current = chatMessageIntent;
-      const messagePayload = createUserMessagePayload(
-        chatMessageIntent.message,
-        organizationId,
-        ResourceType.ORGANIZATION,
-        currentUserName,
-        chatMessageIntent.fileReferences,
-        chatMessageIntent.llmModel,
-        chatMessageIntent.metadata,
-      );
+      const messagePayload = createUserMessagePayload({
+        inputValue: chatMessageIntent.message,
+        resourceId: organizationId,
+        resourceType: ResourceType.ORGANIZATION,
+        senderName: currentUserName,
+        fileReferences: chatMessageIntent.fileReferences,
+        llmModel: chatMessageIntent.llmModel,
+        metadata: chatMessageIntent.metadata,
+        references: chatMessageIntent.references,
+      });
 
       setChatMessageIntent(null);
       sendMessage(messagePayload);
@@ -267,29 +269,22 @@ const ChatConversationContent = ({
   const handleCreateConversationFromIntent = useCallback(() => {
     if (chatMessageIntent && !intentConsumedRef.current && !conversationId) {
       intentConsumedRef.current = true;
-      const payload = createConversationPayload(
-        organizationId,
-        ResourceType.ORGANIZATION,
-        organizationId,
-        chatMessageIntent.message,
-        currentUserName,
-        chatMessageIntent.fileReferences,
-        ScopeType.ORGANIZATION,
-        undefined,
-        undefined,
-        chatMessageIntent.llmModel,
-        chatMessageIntent.metadata,
-        chatMessageIntent.autoLoopEnabled,
-      );
-
-      const shouldLockAutoLoop = chatMessageIntent.autoLoopEnabled;
+      const payload = createConversationPayload({
+        resourceId: organizationId,
+        resourceType: ResourceType.ORGANIZATION,
+        scopeId: organizationId,
+        messageText: chatMessageIntent.message,
+        senderName: currentUserName,
+        fileReferences: chatMessageIntent.fileReferences,
+        scope: ScopeType.ORGANIZATION,
+        llmModel: chatMessageIntent.llmModel,
+        metadata: chatMessageIntent.metadata,
+        autoLoopEnabled: chatMessageIntent.autoLoopEnabled,
+        references: chatMessageIntent.references,
+      });
 
       setChatMessageIntent(null);
-      createConversationV2(payload).then((response: { conversation_id?: string } | undefined) => {
-        if (shouldLockAutoLoop && response?.conversation_id) {
-          addAutoLoopLockedConversation(response.conversation_id);
-        }
-      });
+      createConversationV2(payload);
     }
   }, [chatMessageIntent, conversationId, organizationId, currentUserName, createConversationV2, setChatMessageIntent]);
 
@@ -339,6 +334,7 @@ const ChatConversationContent = ({
   return (
     <ChatActionsProvider
       onFileOpen={onFileOpen}
+      onDatasetOpen={onDatasetOpen}
       onTaskOpen={onTaskOpen}
       onAgentClick={handleAgentClick}
       onAgentTest={handleAgentTest}

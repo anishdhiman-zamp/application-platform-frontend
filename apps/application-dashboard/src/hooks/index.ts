@@ -1,4 +1,5 @@
 import { useEffect, useRef, useState } from 'react';
+import { useDebounce } from '@zamp-platform/utils';
 import { defaultFnType } from 'types/commonTypes';
 
 const useGetCountdown = (time: number, callback?: defaultFnType) => {
@@ -102,29 +103,6 @@ function debounce<T extends (...args: any[]) => any>(func: T, wait: number) {
       func.apply(context, args);
     }, wait);
   };
-}
-
-/**
- * useDebounce hook - Returns a debounced value that updates after the specified delay
- *
- * @param value - The value to debounce
- * @param delay - The delay in milliseconds (default: 300ms)
- * @returns The debounced value
- */
-function useDebounce<T>(value: T, delay = 300): T {
-  const [debouncedValue, setDebouncedValue] = useState<T>(value);
-
-  useEffect(() => {
-    const timer = setTimeout(() => {
-      setDebouncedValue(value);
-    }, delay);
-
-    return () => {
-      clearTimeout(timer);
-    };
-  }, [value, delay]);
-
-  return debouncedValue;
 }
 
 export { debounce, useDebounce, useGetCountdown, useOnClickOutside };

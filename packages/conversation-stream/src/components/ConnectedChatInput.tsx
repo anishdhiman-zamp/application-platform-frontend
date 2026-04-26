@@ -4,11 +4,16 @@ import { captureException } from '@sentry/nextjs';
 import {
   type AnnotationType,
   ChatComposer,
+  createReferenceMention,
   createSnippetFile,
+  type Editor,
+  extractChipsFromEditor,
   filesToFileList,
   isLargeText,
   type LocationData,
+  type MessageReferenceType,
   MicrophoneState,
+  type ReferencePickerAdapter,
   type ResourceType,
   ScopeType,
   type UploadedFile,
@@ -77,6 +82,11 @@ export interface ConnectedChatInputProps {
   hideRecordingButton?: boolean;
   hideStopButton?: boolean;
   metadata?: Record<string, unknown>;
+  /**
+   * Enables the @-mention reference picker. When omitted, the composer
+   * behaves exactly as before (no mention extension registered).
+   */
+  referencePicker?: ReferencePickerAdapter;
 }
 
 export const ConnectedChatInput = ({
@@ -119,10 +129,45 @@ export const ConnectedChatInput = ({
   hideRecordingButton = false,
   hideStopButton = false,
   metadata,
+  referencePicker,
 }: ConnectedChatInputProps) => {
   const fileInputRef = useRef<HTMLInputElement>(null);
   const isRejectingRef = useRef(false);
   const transcriptInsertionIndexRef = useRef(-1);
+  const editorInstanceRef = useRef<Editor | null>(null);
+  const isMentionOpenRef = useRef(false);
+
+  const handleEditorReady = useCallback((editor: Editor | null) => {
+    editorInstanceRef.current = editor;
+  }, []);
+
+  const handleMentionOpenChange = useCallback((isOpen: boolean) => {
+    isMentionOpenRef.current = isOpen;
+  }, []);
+
+  const shouldSuppressEnterSubmit = useCallback(() => isMentionOpenRef.current, []);
+
+  const getMentionReferences = useCallback((): MessageReferenceType[] => {
+    return extractChipsFromEditor(editorInstanceRef.current).map((c) => ({
+      kind: c.kind,
+      resource_id: c.resource_id,
+      display_label: c.display_label,
+      provider_hints: c.provider_hints,
+      text_range: c.text_range,
+    }));
+  }, []);
+
+  const mentionExtension = useMemo(
+    () =>
+      referencePicker
+        ? createReferenceMention({
+            adapter: referencePicker,
+            onOpenChange: handleMentionOpenChange,
+          })
+        : null,
+    [referencePicker, handleMentionOpenChange],
+  );
+  const editorExtensions = useMemo(() => (mentionExtension ? [mentionExtension] : undefined), [mentionExtension]);
 
   const actions = useConversationActions();
   const {
@@ -198,6 +243,7 @@ export const ConnectedChatInput = ({
     llmModel,
     autoLoopEnabled,
     metadata,
+    getMentionReferences,
   });
 
   const handleTranscriptChunk = useCallback(
@@ -306,7 +352,14 @@ export const ConnectedChatInput = ({
     }
 
     queuedMessages.forEach((m) => {
-      (m.message_content?.file_references ?? []).forEach((ref) => {
+      const legacyFileRefs = m.message_content?.file_references ?? [];
+      const uploadRefsFromReferences = (m.message_content?.references ?? [])
+        .filter((ref) => !ref.text_range)
+        .map((ref) => ({
+          path: (ref.provider_hints?.path as string) ?? ref.resource_id,
+          name: ref.display_label ?? ref.resource_id,
+        }));
+      [...legacyFileRefs, ...uploadRefsFromReferences].forEach((ref) => {
         addFileReference({ path: ref.path, name: ref.name });
       });
     });
@@ -406,6 +459,9 @@ export const ConnectedChatInput = ({
         autoLoopToggleSlot={autoLoopToggleSlot}
         voiceChatSlot={voiceChatSlot}
         hideRecordingButton={hideRecordingButton}
+        editorExtensions={editorExtensions}
+        onEditorReady={handleEditorReady}
+        shouldSuppressEnterSubmit={shouldSuppressEnterSubmit}
       />
     </div>
   );

@@ -23,6 +23,7 @@ import ModelSelector from '@/modules/pace/components/chat/ModelSelector';
 import { HITL_RESPONDED_EVENT } from '@/modules/pace/components/tasks/constants/tasks.constants';
 import { useChatDraftInput } from '@/modules/pace/hooks/useChatDraftInput';
 import { useHitlQuestions } from '@/modules/pace/hooks/useHitlQuestions';
+import { useReferencePicker } from '@/modules/pace/hooks/useReferencePicker';
 import { BrowserViewerDisplayState } from '@/modules/pace/pace.constants';
 import { usePaceContext } from '@/modules/pace/pace.context';
 import { CHAT_SIDEBAR_STATE, TAB_TYPE } from '@/modules/pace/pace.types';
@@ -56,6 +57,7 @@ const ChatSidebarContent = ({
   username,
 }: ChatSidebarContentProps) => {
   const { openTab } = useDynamicTabs({ type: TAB_TYPE.FILE });
+  const { openTab: openDatasetTab } = useDynamicTabs({ type: TAB_TYPE.DATASET });
 
   const { openTab: openTaskTab } = useDynamicTabs({ type: TAB_TYPE.TASK });
   const { openTab: openBrowserTab, updateTab: updateBrowserTab } = useDynamicTabs({ type: TAB_TYPE.BROWSER });
@@ -89,6 +91,7 @@ const ChatSidebarContent = ({
 
   const { hitlQuestions, hitlQuestionsKey } = useHitlQuestions(inputsRequired);
   const hasInputsRequired = (inputsRequired?.length ?? 0) > 0;
+  const referencePicker = useReferencePicker();
 
   const { checkUserPrivilege } = useResourceAccess({
     resourceType: ShareResourceType.CONVERSATION,
@@ -136,34 +139,42 @@ const ChatSidebarContent = ({
     setChatSidebarState(CHAT_SIDEBAR_STATE.EXPANDED);
   }, [setChatSidebarState]);
 
+  const collapseSidebarIfExpanded = useCallback(() => {
+    if (chatSidebarState === CHAT_SIDEBAR_STATE.EXPANDED) {
+      setChatSidebarState(CHAT_SIDEBAR_STATE.SIDEBAR);
+    }
+  }, [chatSidebarState, setChatSidebarState]);
+
   const handleFileOpen = useCallback(
     (path: string, name: string) => {
-      if (chatSidebarState === CHAT_SIDEBAR_STATE.EXPANDED) {
-        setChatSidebarState(CHAT_SIDEBAR_STATE.SIDEBAR);
-      }
+      collapseSidebarIfExpanded();
       openTab(path, name);
     },
-    [openTab, chatSidebarState, setChatSidebarState],
+    [openTab, collapseSidebarIfExpanded],
+  );
+
+  const handleDatasetOpen = useCallback(
+    (datasetId: string, name: string) => {
+      collapseSidebarIfExpanded();
+      openDatasetTab(datasetId, name);
+    },
+    [openDatasetTab, collapseSidebarIfExpanded],
   );
 
   const handleTaskOpen = useCallback(
     (taskId: string, name: string, fullRoute: string) => {
-      if (chatSidebarState === CHAT_SIDEBAR_STATE.EXPANDED) {
-        setChatSidebarState(CHAT_SIDEBAR_STATE.SIDEBAR);
-      }
+      collapseSidebarIfExpanded();
       openTaskTab(taskId, name || taskId, undefined, fullRoute);
     },
-    [chatSidebarState, setChatSidebarState, openTaskTab],
+    [collapseSidebarIfExpanded, openTaskTab],
   );
 
   const handleBrowserOpen = useCallback(
     (browserConversationId: string, sessionId?: string) => {
-      if (chatSidebarState === CHAT_SIDEBAR_STATE.EXPANDED) {
-        setChatSidebarState(CHAT_SIDEBAR_STATE.SIDEBAR);
-      }
+      collapseSidebarIfExpanded();
       openBrowserTab(browserConversationId, 'Browser', sessionId ? { sessionId } : undefined);
     },
-    [openBrowserTab, chatSidebarState, setChatSidebarState],
+    [openBrowserTab, collapseSidebarIfExpanded],
   );
 
   const handleGlobalInputRequired = useCallback(() => {
@@ -278,6 +289,7 @@ const ChatSidebarContent = ({
                 }
               : undefined
           }
+          referencePicker={referencePicker}
           className={queuedMessages.length > 0 ? '-mt-3' : undefined}
         />
       </>
@@ -303,6 +315,7 @@ const ChatSidebarContent = ({
         conversationId={conversationId}
         organizationId={organizationId}
         onFileOpen={handleFileOpen}
+        onDatasetOpen={handleDatasetOpen}
         onTaskOpen={handleTaskOpen}
         onBrowserOpen={handleBrowserOpen}
         onBrowserStreamingEnd={handleBrowserStreamingEnd}
@@ -314,7 +327,7 @@ const ChatSidebarContent = ({
       />
 
       {!isConversationNotFound && (
-        <ChatActionsProvider onFileOpen={handleFileOpen}>
+        <ChatActionsProvider onFileOpen={handleFileOpen} onDatasetOpen={handleDatasetOpen}>
           <div className='bg-BG_WHITE sticky bottom-0 z-10 mx-auto w-full max-w-[700px] px-3 pb-3'>
             {renderChatInput()}
           </div>
