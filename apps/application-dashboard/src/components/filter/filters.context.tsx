@@ -119,7 +119,7 @@ export const StateProvider: FC<{ children: ReactElement }> = ({ children }) => {
           },
         };
       case filtersContextActions.GET_FILTERS_FROM_STORAGE: {
-        const selectedFilters = getFiltersFromStorageForPage(action?.payload?.persistId);
+        const selectedFilters = getFiltersFromStorageForPage(action?.payload?.persistId) || {};
 
         // Needed to migrate to the new accounts filter that add an array of account ids as opposed to an object with accounts data
         // removeAccountsFilterObject(selectedFilters);
@@ -127,8 +127,8 @@ export const StateProvider: FC<{ children: ReactElement }> = ({ children }) => {
         return {
           ...state,
           selectedFilters,
-          selectedFiltersInUI: { ...(selectedFilters || {}) },
-          currentPageFilters: Object.keys(selectedFilters || {}),
+          selectedFiltersInUI: { ...selectedFilters },
+          currentPageFilters: Object.keys(selectedFilters),
           isFilterInitialized: true,
         };
       }

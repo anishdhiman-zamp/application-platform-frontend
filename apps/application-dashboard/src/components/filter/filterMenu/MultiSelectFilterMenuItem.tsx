@@ -38,7 +38,7 @@ const MultiSelectFilterMenuItem: FC<MultiSelectFilterMenuItemProps> = ({
   } = useFiltersContextStore();
 
   const currentOperator =
-    operatorOptions.find((option) => option.value === selectedFilters[columnId]?.type) || operatorOptions[0];
+    operatorOptions.find((option) => option.value === selectedFilters?.[columnId]?.type) || operatorOptions[0];
 
   const setFilter = (value: MapAny) => {
     dispatch({
@@ -60,7 +60,7 @@ const MultiSelectFilterMenuItem: FC<MultiSelectFilterMenuItemProps> = ({
       showSelectAll={showSelectAll}
       label={label || camelCaseToNormalText(columnId)}
       isDisabled={isDisabled}
-      initialSelectedValues={selectedFilters[columnId]?.values || []}
+      initialSelectedValues={selectedFilters?.[columnId]?.values || []}
       initialOperator={currentOperator}
       onChange={setFilter}
       onConfigureFilter={onConfigureFilter}

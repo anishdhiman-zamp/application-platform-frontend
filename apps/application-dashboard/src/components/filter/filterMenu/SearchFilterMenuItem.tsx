@@ -46,8 +46,8 @@ const SearchFilterMenuItem: FC<SearchFilterMenuItemProps> = ({
       isOpen={isOpen}
       label={label || camelCaseToNormalText(columnId)}
       isDisabled={isDisabled}
-      initialSearchValue={selectedFilters[columnId]?.filter}
-      initialOperator={SEARCH_FILTER_OPTIONS.find((option) => option.value === selectedFilters[columnId]?.type)}
+      initialSearchValue={selectedFilters?.[columnId]?.filter}
+      initialOperator={SEARCH_FILTER_OPTIONS.find((option) => option.value === selectedFilters?.[columnId]?.type)}
       onChange={setFilter}
       onConfigureFilter={onConfigureFilter}
     />

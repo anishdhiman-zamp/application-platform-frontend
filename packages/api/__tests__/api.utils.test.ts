@@ -101,9 +101,9 @@ describe('api.utils', () => {
 
       const result = await getApiDomainAndRegions('test@example.com');
 
-      // When API returns empty regions, accessing [0] throws an error, so it falls back to default regions
+      // Empty regions fall back to defaults without throwing.
       expect(result).toEqual([{ region: 'us', url: 'https://api.zamp.ai' }]);
-      expect(mockCaptureException).toHaveBeenCalledWith(expect.any(Error));
+      expect(mockCaptureException).not.toHaveBeenCalled();
     });
   });
 

@@ -30,9 +30,11 @@ export const getApiDomainAndRegions = async (email = '') => {
           email: email || getSavedLoginEmail(),
         }),
       }).then((res) => res.json() as Promise<{ api_base_urls: { region: string; url: string }[] }>);
-      const allRegionsResponse = apiBaseUrlsResponse.api_base_urls;
-      allRegions = allRegionsResponse;
-      reinitializeApiDomain(allRegionsResponse[0].url);
+      const allRegionsResponse = apiBaseUrlsResponse?.api_base_urls;
+      if (allRegionsResponse?.length) {
+        allRegions = allRegionsResponse;
+        reinitializeApiDomain(allRegionsResponse[0].url);
+      }
     } catch (error) {
       captureException(error);
       // Return default regions when API call fails

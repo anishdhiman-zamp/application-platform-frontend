@@ -11,12 +11,10 @@ import {
   DialogHeader,
   DialogHeaderTitle,
   ScrollContainer,
-  toast,
 } from '@zamp-platform/ui';
-import { Link2, X } from 'lucide-react';
+import { X } from 'lucide-react';
 import { AnimatePresence, motion } from 'motion/react';
 import MultiSelectInput from '@/components/multiSelectInput/MultiSelectInput';
-import { ROUTES_PATH } from '@/constants/routeConfig';
 import { ROLE_OPTIONS } from '@/modules/integrations/constants/integrations.constant';
 import SharedToolPermissionRow from '@/modules/integrations/IntegrationDetail/SharedToolPermissionRow';
 import { useShareConnection } from '@/modules/integrations/IntegrationDetail/useShareConnection';
@@ -65,16 +63,15 @@ const ShareConnectionDialog = ({
   // handlers
   const handleDialogOpenChange = useCallback((next: boolean) => !next && onClose(), [onClose]);
 
-  const handleCopyLink = useCallback(() => {
-    const url = `${window.location.origin}${ROUTES_PATH.CHAT_SETTINGS_INTEGRATIONS}/${integrationName}`;
-
-    navigator.clipboard.writeText(url);
-    toast.success('Link copied');
-  }, [integrationName]);
-
   const handleRoleSelect = useCallback((value: string) => setRole(value as ConnectionRoleType), [setRole]);
 
-  const handleLogoError = useCallback(() => setLogoError(true), []);
+  const handleLogoError = useCallback(() => {
+    console.error('[ShareConnectionDialog] integration logo failed to load', {
+      integrationName,
+      integrationLogo,
+    });
+    setLogoError(true);
+  }, [integrationName, integrationLogo]);
 
   // render
   return (
@@ -94,6 +91,17 @@ const ShareConnectionDialog = ({
 
         <DialogBody className='flex flex-col gap-2.5 overflow-visible pt-0 pb-4'>
           <div className='bg-BG_GRAY_2 mx-4 flex items-center gap-x-2 rounded-xl px-3 py-3'>
+            {(() => {
+              if (open) {
+                console.log('[ShareConnectionDialog] render', {
+                  integrationName,
+                  integrationLogo,
+                  logoError,
+                });
+              }
+
+              return null;
+            })()}
             {integrationLogo && !logoError ? (
               <img
                 src={integrationLogo}
@@ -169,15 +177,7 @@ const ShareConnectionDialog = ({
           </AnimatePresence>
         </DialogBody>
 
-        <DialogFooter className='flex items-center justify-between px-5 py-4'>
-          <div
-            role='button'
-            onClick={handleCopyLink}
-            className='f-11-500 text-GRAY_1000 flex cursor-pointer items-center gap-1.5 rounded-md py-1.5'
-          >
-            <Link2 className='h-3 w-3' />
-            Copy link
-          </div>
+        <DialogFooter className='flex items-center justify-end px-5 py-4'>
           <Button size='small' variant='outline' disabled={!canShare || isSharing} onClick={handleShare}>
             Share
           </Button>

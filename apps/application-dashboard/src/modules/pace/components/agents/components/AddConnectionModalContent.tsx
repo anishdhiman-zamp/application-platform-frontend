@@ -70,8 +70,8 @@ const AddConnectionModalContent = () => {
             <ArrowLeft size={16} />
           </Button>
           <IntegrationDetailHeader
-            displayName={selectedIntegration.title}
-            logo={selectedIntegration.icon ? `${IMAGE_PREFIX}${selectedIntegration.icon}` : ''}
+            displayName={selectedIntegration?.title ?? ''}
+            logo={selectedIntegration?.icon ?? ''}
             integrationItem={selectedIntegration}
           />
         </div>
@@ -79,8 +79,8 @@ const AddConnectionModalContent = () => {
           {selectedConnections.length > 0 ? (
             <ConnectionPeopleTab
               connections={selectedConnections}
-              integrationName={selectedIntegration.name}
-              integrationLogo={selectedIntegration.icon ? `${IMAGE_PREFIX}${selectedIntegration.icon}` : undefined}
+              integrationName={selectedIntegration?.name ?? ''}
+              integrationLogo={selectedIntegration?.icon ? `${IMAGE_PREFIX}${selectedIntegration.icon}` : undefined}
             />
           ) : (
             <span className='f-13-450 text-GRAY_700'>No connections found for this integration</span>
