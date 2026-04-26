@@ -232,6 +232,7 @@ export interface CreateConversationPayloadTypeV2 {
   llm_model?: string;
   metadata?: Record<string, unknown>;
   pev_enabled?: boolean;
+  message_id?: string;
 }
 
 export interface AnnotationLocationDataType {

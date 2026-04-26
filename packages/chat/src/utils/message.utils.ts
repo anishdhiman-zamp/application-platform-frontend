@@ -2,11 +2,11 @@ import { BLOCK_TYPE, type ReferenceRef, type ReferencesBlockType } from '../type
 import { ChatMessage } from '../types/chat.types';
 
 /**
- * Generates a unique key for a message, ensuring no duplicates
- * Uses message.id if available, otherwise falls back to timestamp with index
+ * Stable React key. Prefers `id` so optimistic and DB-confirmed records share a key
+ * and reconcile in place across the merge.
  */
 export const getMessageKey = (message: ChatMessage, index: number): string => {
-  return `${message.timestamp || message.id || 'msg'}-${index}`;
+  return `${message.id || message.timestamp || 'msg'}-${index}`;
 };
 
 /**

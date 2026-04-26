@@ -12,6 +12,7 @@ import {
 import {
   ChatMessage,
   ChatMessageType,
+  ConversationMessageType,
   GetConversationByIdResponseType,
   MessageState,
   SenderType,
@@ -66,6 +67,30 @@ export const getHistoryFormattedMessages = (conversationHistory: GetConversation
           : message.state,
     }));
 };
+
+/**
+ * Converts a render-side `ChatMessage` to a cache-side `ConversationMessageType` for
+ * `updateQueryData`. Inverse of `getHistoryFormattedMessages`. Fields the SSE payload
+ * doesn't carry (`organization_id`, `sender_id`, `intent`, `deleted_at`) get defaults;
+ * the next history refetch corrects any drift.
+ */
+export const chatMessageToConversationMessage = (
+  message: ChatMessage,
+  conversationId: string,
+  fallbackState: MessageState = MessageState.DONE,
+): ConversationMessageType => ({
+  id: message.id as string,
+  organization_id: '',
+  conversation_id: conversationId,
+  sender_id: '',
+  sender_type: message.sender_type,
+  sender_name: message.sender_name ?? '',
+  state: message.state ?? fallbackState,
+  intent: null,
+  content: { elements: message.message_content?.elements ?? [] },
+  created_at: message.timestamp,
+  deleted_at: null,
+});
 
 /**
  * Returns the ID of the last assistant message if its state is STREAMING, or null.

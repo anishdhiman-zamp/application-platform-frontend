@@ -130,6 +130,9 @@ export const createUserMessagePayload = ({
   autoLoopEnabled,
   references,
 }: CreateUserMessagePayloadOptions): ChatMessage => {
+  const outboundRefs = buildOutboundReferences(fileReferences, references);
+  const markdownOrder = outboundRefs?.length ? 2 : 1;
+
   return {
     resource_id: resourceId,
     resource_type: resourceType,
@@ -138,21 +141,22 @@ export const createUserMessagePayload = ({
       text_type: 'markdown',
       elements: [
         {
-          id: `m_txt_${Date.now()}`,
+          id: `element_${markdownOrder}`,
           type: BLOCK_TYPE.MARKDOWN,
-          order: 0,
+          order: markdownOrder,
           payload: {
             text: inputValue,
           },
         },
       ] as Block[],
-      references: buildOutboundReferences(fileReferences, references),
+      references: outboundRefs,
     },
     message_type: ChatMessageType.TEXT,
     sender_type: SenderType.USER,
     timestamp: new Date().toISOString(),
     metadata: metadata ?? {},
     sender_name: senderName,
+    id: crypto.randomUUID(),
     ...(llmModel ? { llm_model: llmModel } : {}),
     ...(autoLoopEnabled != null ? { pev_enabled: autoLoopEnabled } : {}),
   };
@@ -192,6 +196,9 @@ export const createConversationPayload = ({
   autoLoopEnabled,
   references,
 }: CreateConversationPayloadOptions) => {
+  const outboundRefs = buildOutboundReferences(fileReferences, references);
+  const markdownOrder = outboundRefs?.length ? 2 : 1;
+
   return {
     resource_id: resourceId,
     resource_type: resourceType,
@@ -203,15 +210,15 @@ export const createConversationPayload = ({
       text_type: 'markdown',
       elements: [
         {
-          id: 'm_txt_001',
+          id: `element_${markdownOrder}`,
           type: BLOCK_TYPE.MARKDOWN,
-          order: 0,
+          order: markdownOrder,
           payload: {
             text: messageText,
           },
         },
       ] as Block[],
-      references: buildOutboundReferences(fileReferences, references),
+      references: outboundRefs,
     },
     ...(annotationLocation && {
       annotation_data: {
@@ -219,6 +226,7 @@ export const createConversationPayload = ({
       },
     }),
     sender_name: senderName,
+    message_id: crypto.randomUUID(),
     ...(llmModel ? { llm_model: llmModel } : {}),
     ...(metadata ? { metadata } : {}),
     ...(autoLoopEnabled != null ? { pev_enabled: autoLoopEnabled } : {}),

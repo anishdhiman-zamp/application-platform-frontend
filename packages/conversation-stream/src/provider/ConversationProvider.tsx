@@ -1,12 +1,15 @@
 'use client';
 
+import type { ThunkDispatch, UnknownAction } from '@reduxjs/toolkit';
 import { captureException } from '@sentry/browser';
 import {
   APITags,
   BLOCK_TYPE,
   chatApi,
   type ChatMessage,
+  chatMessageToConversationMessage,
   ChatMessageType,
+  ConversationService,
   type CreateConversationPayloadTypeV2,
   getHistoryFormattedMessages,
   getStreamingMessageId,
@@ -61,6 +64,7 @@ export const ConversationProvider: React.FC<ConversationProviderProps> = ({
   const stoppingTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   const isNewlyCreatedConversationRef = useRef<string | null>(null);
   const messagesRef = useRef<ChatMessage[]>([]);
+  const queuedMessagesRef = useRef<ChatMessage[]>([]);
   const conversationIdRef = useRef<string | null>(externalConversationId);
   const setHeaderRef = useRef(setHeader);
   const mountRefetchFiredRef = useRef(false);
@@ -83,7 +87,8 @@ export const ConversationProvider: React.FC<ConversationProviderProps> = ({
   const isNew = isNewlyCreatedConversationRef.current === _conversationId;
   const shouldSkipConversationFetch = !resourceId || !resourceType || !externalConversationId;
 
-  const dispatch = useDispatch();
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  const dispatch = useDispatch<ThunkDispatch<any, unknown, UnknownAction>>();
   const { sseEventBus } = useEventBus();
 
   const [createConversationV2Mutation, { isLoading: isCreatingConversationV2, error: createConversationV2Error }] =
@@ -151,13 +156,32 @@ export const ConversationProvider: React.FC<ConversationProviderProps> = ({
           if (finalMessage.id && prev.some((msg) => msg.id === finalMessage.id)) return prev;
           return [...prev, finalMessage];
         });
+
+        if (_conversationId && resourceId && resourceType && finalMessage.id) {
+          const cacheArgs = {
+            conversationId: _conversationId,
+            resourceId,
+            resourceType,
+            url: apiConfig?.getConversationById,
+          };
+          dispatch(
+            ConversationService.util.updateQueryData('getConversationById', cacheArgs, (draft) => {
+              const finalEntry = chatMessageToConversationMessage(finalMessage, _conversationId);
+              const existingIdx = draft.messages.findIndex((m) => m.id === finalMessage.id);
+              if (existingIdx === -1) {
+                draft.messages.push(finalEntry);
+                return;
+              }
+              draft.messages[existingIdx] = finalEntry;
+            }),
+          );
+        }
       }
-      if (!isUninitializedRef.current) refetchConversationHistory();
 
       clearStoppingTimer();
       setIsStopping(false);
     },
-    [clearStoppingTimer, refetchConversationHistory],
+    [_conversationId, resourceId, resourceType, apiConfig?.getConversationById, dispatch, clearStoppingTimer],
   );
 
   const handlePerConvTitleUpdated = useCallback((title: string) => {
@@ -216,9 +240,49 @@ export const ConversationProvider: React.FC<ConversationProviderProps> = ({
     });
   }, []);
 
-  const handleMessagesPickedUp = useCallback(() => {
-    if (!isUninitializedRef.current) refetchConversationHistory();
-  }, [refetchConversationHistory]);
+  const handleMessagesPickedUp = useCallback(
+    (messageIds: string[]) => {
+      if (!messageIds?.length) return;
+      const idSet = new Set(messageIds);
+
+      const moved = queuedMessagesRef.current.filter((m) => m.id && idSet.has(m.id));
+      if (moved.length === 0) return;
+
+      const promoted = moved.map((m) => ({ ...m, state: MessageState.DONE }));
+
+      setQueuedMessages((queued) => queued.filter((m) => !m.id || !idSet.has(m.id)));
+
+      setMessages((prev) => {
+        const existing = new Set(prev.map((m) => m.id).filter(Boolean));
+        const toAppend = promoted.filter((m) => m.id && !existing.has(m.id));
+        return toAppend.length > 0 ? [...prev, ...toAppend] : prev;
+      });
+
+      if (_conversationId && resourceId && resourceType) {
+        const cacheArgs = {
+          conversationId: _conversationId,
+          resourceId,
+          resourceType,
+          url: apiConfig?.getConversationById,
+        };
+        dispatch(
+          ConversationService.util.updateQueryData('getConversationById', cacheArgs, (draft) => {
+            const existingIds = new Set(draft.messages.map((m) => m.id));
+            for (const m of promoted) {
+              if (!m.id) continue;
+              if (existingIds.has(m.id)) {
+                const target = draft.messages.find((entry) => entry.id === m.id);
+                if (target) target.state = MessageState.DONE;
+              } else {
+                draft.messages.push(chatMessageToConversationMessage(m, _conversationId));
+              }
+            }
+          }),
+        );
+      }
+    },
+    [_conversationId, resourceId, resourceType, apiConfig?.getConversationById, dispatch],
+  );
 
   const perConvCallbacks = useRef<ConversationEventCallbacks>({
     onTitleUpdated: handlePerConvTitleUpdated,
@@ -282,23 +346,22 @@ export const ConversationProvider: React.FC<ConversationProviderProps> = ({
         message_content: conversationPayload.message_content || { text: '', text_type: 'plain_text' },
         metadata: {},
         timestamp: new Date().toISOString(),
+        id: conversationPayload.message_id,
       };
 
       if (messagePayload?.message_content?.references?.length) {
-        const existingElements = (messagePayload.message_content.elements || []).map((el) => ({
-          ...el,
-          order: el.order + 1,
-        }));
+        // Helper already places markdown at element_2/order:2 when refs present, so we
+        // only prepend the REFERENCES block at element_1/order:1 — no shift needed.
         messagePayload.message_content.elements = [
           {
-            id: 'element_refs',
+            id: 'element_1',
             type: BLOCK_TYPE.REFERENCES,
-            order: 0,
+            order: 1,
             payload: {
               references: messagePayload.message_content.references,
             },
           },
-          ...existingElements,
+          ...(messagePayload.message_content.elements || []),
         ];
       }
 
@@ -348,25 +411,26 @@ export const ConversationProvider: React.FC<ConversationProviderProps> = ({
 
       const tempId = crypto.randomUUID();
 
-      // Optimistic REFERENCES block prepended so chips (uploads + mentions) render
-      // immediately above the text, matching server echo order.
-      const baseElements = messagePayload?.message_content?.elements ?? [];
+      // Mirror server emit: when references are present, prepend a REFERENCES block at
+      // element_1/order:1; markdown is already at element_2/order:2 from createUserMessagePayload.
+      // Stable child keys across optimistic ↔ DB merge prevent attachment remount/flash.
       const refs = messagePayload?.message_content?.references;
-      const elements: NonNullable<ChatMessage['message_content']['elements']> = [];
-      let nextOrder = 0;
-      if (refs?.length) {
-        elements.push({
-          id: 'element_refs',
-          type: BLOCK_TYPE.REFERENCES,
-          order: nextOrder++,
-          payload: { references: refs },
-        });
-      }
-      for (const el of baseElements) {
-        elements.push({ ...el, order: nextOrder++ });
-      }
       const baseMessage: ChatMessage = refs?.length
-        ? { ...messagePayload, message_content: { ...messagePayload.message_content, elements } }
+        ? {
+            ...messagePayload,
+            message_content: {
+              ...messagePayload.message_content,
+              elements: [
+                {
+                  id: 'element_1',
+                  type: BLOCK_TYPE.REFERENCES,
+                  order: 1,
+                  payload: { references: refs },
+                },
+                ...(messagePayload.message_content.elements ?? []),
+              ],
+            },
+          }
         : messagePayload;
 
       const shouldQueue = isStreamingRef.current || isAnalysingRef.current;
@@ -379,15 +443,40 @@ export const ConversationProvider: React.FC<ConversationProviderProps> = ({
       }
 
       try {
+        // Translate FE-only `id` → wire `message_id` (what AddMessagePayloadV4 expects).
+        const { id: optimisticId, ...rest } = messagePayload;
+        const sendBody: ChatMessage & { message_id?: string } = {
+          ...rest,
+          ...(optimisticId ? { message_id: optimisticId } : {}),
+        };
+
         const response = await sendMessageV2Mutation({
           conversationId: _conversationId,
-          body: messagePayload,
+          body: sendBody,
           url: apiConfig?.sendMessage,
         }).unwrap();
 
         // Patch queued message with the real DB message ID
         if (shouldQueue && response.message_id) {
           setQueuedMessages((prev) => prev.map((m) => (m.id === tempId ? { ...m, id: response.message_id } : m)));
+        }
+        if (!shouldQueue && resourceId && resourceType) {
+          const cacheArgs = {
+            conversationId: _conversationId,
+            resourceId,
+            resourceType,
+            url: apiConfig?.getConversationById,
+          };
+          dispatch(
+            ConversationService.util.updateQueryData('getConversationById', cacheArgs, (draft) => {
+              const messageId = response.message_id || optimisticId;
+              if (!messageId) return;
+              if (draft.messages.some((m) => m.id === messageId)) return;
+              draft.messages.push(
+                chatMessageToConversationMessage({ ...baseMessage, id: messageId }, _conversationId, MessageState.DONE),
+              );
+            }),
+          );
         }
 
         return response;
@@ -401,7 +490,15 @@ export const ConversationProvider: React.FC<ConversationProviderProps> = ({
         throw new Error('Failed to send message. Please try again.');
       }
     },
-    [_conversationId, sendMessageV2Mutation, apiConfig?.sendMessage],
+    [
+      _conversationId,
+      sendMessageV2Mutation,
+      apiConfig?.sendMessage,
+      apiConfig?.getConversationById,
+      resourceId,
+      resourceType,
+      dispatch,
+    ],
   );
 
   const safeRefetchConversationHistory = useCallback(() => {
@@ -488,6 +585,10 @@ export const ConversationProvider: React.FC<ConversationProviderProps> = ({
   useEffect(() => {
     messagesRef.current = messages;
   }, [messages]);
+
+  useEffect(() => {
+    queuedMessagesRef.current = queuedMessages;
+  }, [queuedMessages]);
 
   useEffect(() => {
     setHeaderRef.current = setHeader;

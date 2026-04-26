@@ -146,9 +146,6 @@ export const useChatInput = ({
     [hasExternalFileControl, setExternalFileReferences],
   );
 
-  // Snapshot of mention chips captured in handleSubmit (synchronous, before
-  // editor clear) so init()/handleSendMessage can read them after the editor
-  // DOM is cleared.
   const pendingMentionRefsRef = useRef<MessageReferenceType[]>([]);
 
   useEffect(() => {
