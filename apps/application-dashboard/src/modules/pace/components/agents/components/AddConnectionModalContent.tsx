@@ -6,7 +6,6 @@ import { ArrowLeft } from 'lucide-react';
 import IntegrationGridV2 from 'modules/integrations/AllIntegrations/IntegrationGridV2';
 import IntegrationHeader from 'modules/integrations/AllIntegrations/IntegrationHeader';
 import IntegrationInfoDialog from 'modules/integrations/AllIntegrations/IntegrationInfoDialog';
-import { IMAGE_PREFIX } from '@/constants/icons';
 import { useIntegrationsContext } from '@/modules/integrations/AllIntegrations/Integrations.context';
 import ConnectionPeopleTab from '@/modules/integrations/IntegrationDetail/ConnectionPeopleTab';
 import IntegrationDetailHeader from '@/modules/integrations/IntegrationDetail/IntegrationDetailHeader';
@@ -80,7 +79,7 @@ const AddConnectionModalContent = () => {
             <ConnectionPeopleTab
               connections={selectedConnections}
               integrationName={selectedIntegration?.name ?? ''}
-              integrationLogo={selectedIntegration?.icon ? `${IMAGE_PREFIX}${selectedIntegration.icon}` : undefined}
+              integrationLogo={selectedIntegration?.icon}
             />
           ) : (
             <span className='f-13-450 text-GRAY_700'>No connections found for this integration</span>

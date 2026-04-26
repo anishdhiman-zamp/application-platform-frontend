@@ -13,7 +13,7 @@ import { useAuthenticateIntegrationMutation } from '@/apis/integrations';
 import ImageLoader from '@/components/common/loader/ImageLoader';
 import CommonWrapper from '@/components/commonWrapper';
 import { SkeletonTypes } from '@/components/commonWrapper/commonWrapper.types';
-import { getAssetUrl, IMAGE_PREFIX, ZAMP_LOGO_LOADER_SVG } from '@/constants/icons';
+import { getAssetUrl, ZAMP_LOGO_LOADER_SVG } from '@/constants/icons';
 import { useProcesses } from '@/contexts/ProcessesContext';
 import { useAppSelector } from '@/hooks/toolkit';
 import { useScrollDetection } from '@/hooks/useScrollDetection';
@@ -141,14 +141,7 @@ const ConnectionModal: FC<ConnectionModalPropsType> = ({
               className={cn('flex shrink-0 items-center gap-x-1.5 px-6 py-6', isScrolled && 'border-GRAY_500 border-b')}
             >
               <div className='relative h-5 w-5 shrink-0 p-[2px]'>
-                <Image
-                  src={`${IMAGE_PREFIX}${logo}`}
-                  alt={display_name}
-                  priority
-                  fill
-                  sizes='20px'
-                  className='object-contain'
-                />
+                <Image src={logo} alt={display_name} priority fill sizes='20px' className='object-contain' />
               </div>
               <span className='f-14-550 text-GRAY_1000'>{display_name}</span>
             </div>

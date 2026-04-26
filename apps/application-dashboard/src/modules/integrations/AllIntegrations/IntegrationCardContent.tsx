@@ -1,7 +1,6 @@
 import type { FC } from 'react';
 import { ArrowRight } from 'lucide-react';
 import Image from 'next/image';
-import { IMAGE_PREFIX } from '@/constants/icons';
 
 interface IntegrationCardContentProps {
   logo: string;
@@ -16,14 +15,7 @@ const IntegrationCardContent: FC<IntegrationCardContentProps> = ({ logo, display
       <div className='flex items-center justify-between'>
         <div className='flex items-center gap-x-2'>
           <div className='relative h-6 w-6 flex-shrink-0'>
-            <Image
-              src={`${IMAGE_PREFIX}${logo}`}
-              alt={displayName}
-              priority
-              fill
-              sizes='24px'
-              className='object-contain'
-            />
+            <Image src={logo} alt={displayName} priority fill sizes='24px' className='object-contain' />
           </div>
           <span className='f-14-550 text-GRAY_1000'>{displayName}</span>
         </div>

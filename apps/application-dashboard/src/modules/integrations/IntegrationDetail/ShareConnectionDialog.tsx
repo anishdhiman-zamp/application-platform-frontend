@@ -65,13 +65,7 @@ const ShareConnectionDialog = ({
 
   const handleRoleSelect = useCallback((value: string) => setRole(value as ConnectionRoleType), [setRole]);
 
-  const handleLogoError = useCallback(() => {
-    console.error('[ShareConnectionDialog] integration logo failed to load', {
-      integrationName,
-      integrationLogo,
-    });
-    setLogoError(true);
-  }, [integrationName, integrationLogo]);
+  const handleLogoError = useCallback(() => setLogoError(true), []);
 
   // render
   return (
@@ -91,17 +85,6 @@ const ShareConnectionDialog = ({
 
         <DialogBody className='flex flex-col gap-2.5 overflow-visible pt-0 pb-4'>
           <div className='bg-BG_GRAY_2 mx-4 flex items-center gap-x-2 rounded-xl px-3 py-3'>
-            {(() => {
-              if (open) {
-                console.log('[ShareConnectionDialog] render', {
-                  integrationName,
-                  integrationLogo,
-                  logoError,
-                });
-              }
-
-              return null;
-            })()}
             {integrationLogo && !logoError ? (
               <img
                 src={integrationLogo}

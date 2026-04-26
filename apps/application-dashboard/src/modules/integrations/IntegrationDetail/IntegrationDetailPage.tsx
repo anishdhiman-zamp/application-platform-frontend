@@ -7,7 +7,7 @@ import { AnimatePresence, motion } from 'motion/react';
 import Link from 'next/link';
 import { useSearchParams } from 'next/navigation';
 import ImageKitImage from '@/components/ImageKitImage';
-import { IMAGE_PREFIX, NEEDS_ATTENTION_EMPTY_STATE } from '@/constants/icons';
+import { NEEDS_ATTENTION_EMPTY_STATE } from '@/constants/icons';
 import { ROUTES_PATH } from '@/constants/routeConfig';
 import ConnectionModal from '@/modules/integrations/components/ConnectionModal';
 import ConnectionPeopleTab from '@/modules/integrations/IntegrationDetail/ConnectionPeopleTab';
@@ -97,7 +97,7 @@ const IntegrationDetailPage: FC<IntegrationDetailPagePropsType> = ({ integration
                 <ConnectionPeopleTab
                   connections={connectionMetadata.connections as ConnectionEntryType[]}
                   integrationName={integration.id}
-                  integrationLogo={logo ? `${IMAGE_PREFIX}${logo}` : undefined}
+                  integrationLogo={logo || undefined}
                 />
               ) : (
                 <div className='flex w-full flex-col items-center justify-center gap-y-2 py-16'>
