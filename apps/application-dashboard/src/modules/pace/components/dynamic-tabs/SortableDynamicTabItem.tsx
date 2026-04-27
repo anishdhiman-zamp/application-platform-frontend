@@ -12,6 +12,7 @@ const CLOSE_BUTTON_SELECTOR = '#dynamic-tab-close-button';
 const TAB_MAX_WIDTH = 172;
 const TAB_ENTER_TRANSITION = { duration: 0.2, ease: [0.2, 0, 0, 1] } as const;
 const TAB_EXIT_TRANSITION = { duration: 0.2, ease: [0.4, 0, 1, 1] } as const;
+const TAB_LAYOUT_TRANSITION = { duration: 0.22, ease: [0.2, 0, 0, 1] } as const;
 
 interface SortableDynamicTabItemProps {
   tab: DynamicTab;
@@ -57,8 +58,8 @@ const SortableDynamicTabItem = ({
       initial={skipAnimation ? false : { maxWidth: 0, opacity: 0 }}
       animate={skipAnimation ? false : { maxWidth: TAB_MAX_WIDTH, opacity: 1 }}
       exit={{ maxWidth: 0, opacity: 0, transition: TAB_EXIT_TRANSITION }}
-      transition={TAB_ENTER_TRANSITION}
-      layout={false}
+      transition={{ ...TAB_ENTER_TRANSITION, layout: TAB_LAYOUT_TRANSITION }}
+      layout
       {...attributes}
       {...listeners}
       className={cn('min-w-0 flex-1 overflow-hidden select-none', { 'opacity-50': isDragging })}

@@ -44,9 +44,6 @@ export const FILE_TOAST_MESSAGES = {
   FOLDER_DELETED: 'Folder deleted',
   FILE_MODIFIED_EXTERNALLY: 'File was modified externally',
   FILE_CONFLICT_DESCRIPTION: 'This file was changed while you were editing. Choose an action:',
-  FORCE_SAVE: 'Force Save',
-  RELOAD_FILE: 'Reload File',
-  FAILED_TO_LOAD_FILE: 'Failed to load file',
 } as const;
 
 export const CONTEXT_MENU_ACTION_IDS = {

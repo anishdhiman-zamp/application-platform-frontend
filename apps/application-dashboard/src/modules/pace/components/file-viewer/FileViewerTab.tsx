@@ -37,7 +37,6 @@ const FileViewerTab = memo(({ filePath, isActive, onCloseTab }: FileViewerTabPro
 
   const handleLoadError = useCallback((error: unknown) => {
     captureException(error instanceof Error ? error : new Error(`File load failed: ${JSON.stringify(error)}`));
-    toast.error(FILE_TOAST_MESSAGES.FAILED_TO_LOAD_FILE);
   }, []);
 
   const handleCloseTab = useCallback(

@@ -92,10 +92,12 @@ const DynamicTabItem = ({
         >
           <Button
             variant='ghost'
+            size='xxsmall'
             onClick={handleClick}
             style={{ minWidth: 0 }}
             className={cn(
-              'group text-GRAY_700 hover:text-GRAY_1000 hover:bg-GRAY_200 relative flex h-[30px] w-full cursor-pointer items-center justify-start gap-x-2 rounded-[8px] border-[0.75px] border-transparent p-1.5 transition-colors duration-150 ease-in-out',
+              'group text-GRAY_700 hover:text-GRAY_1000 hover:bg-GRAY_200 relative flex h-[30px] w-full cursor-pointer items-center justify-start gap-x-2 overflow-hidden rounded-[8px] border-[0.75px] border-transparent p-1.5 transition-colors duration-150 ease-in-out',
+              isCompact && 'justify-center gap-x-0 px-0 py-0',
               isActive &&
                 'border-GRAY_500 shadow-tab-shadow text-GRAY_1000 bg-BG_WHITE hover:bg-BG_WHITE border-[0.75px]',
             )}
@@ -117,7 +119,11 @@ const DynamicTabItem = ({
             ) : (
               icon
             )}
-            <span className='f-13-500 min-w-0 flex-1 truncate text-left'>{tab.name}</span>
+            {!isCompact && (
+              <span className='f-13-500 min-w-0 flex-1 truncate text-left transition-[padding-right] duration-150 ease-in-out group-hover:pr-5'>
+                {tab.name}
+              </span>
+            )}
             {!isCompact && (
               <span
                 id='dynamic-tab-close-button'
@@ -125,7 +131,7 @@ const DynamicTabItem = ({
                 tabIndex={0}
                 onClick={(e) => onClose(e, tab.id)}
                 onKeyDown={(e) => handleActivationKeyDown(e, () => onClose(e as unknown as React.MouseEvent, tab.id))}
-                className='hover:bg-accent ml-0.5 flex h-4 w-4 cursor-pointer items-center justify-center rounded-sm p-0 opacity-0 group-hover:opacity-100'
+                className='hover:bg-accent absolute top-1/2 right-1.5 flex h-4 w-4 -translate-y-1/2 cursor-pointer items-center justify-center rounded-sm p-0 opacity-0 transition-opacity duration-150 group-hover:opacity-100'
               >
                 <X size={12} className='text-GRAY_700' />
               </span>
