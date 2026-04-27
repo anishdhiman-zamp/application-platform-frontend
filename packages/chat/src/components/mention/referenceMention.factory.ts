@@ -9,7 +9,7 @@ import type { ReferenceKindDescriptor, ReferencePickerAdapter, ReferenceSearchHi
 import { EXIT_ANIMATION_MS, MENTION_KIND } from './constants';
 import { type MentionAttrs, MentionChip } from './MentionChip';
 import { MentionPopover, type MentionPopoverHandle } from './MentionPopover';
-import { parseKindPrefix, RICH_MENTION_PATTERN } from './utils';
+import { parseKindPrefix, RICH_MENTION_PATTERN, unescapeMentionLabel } from './utils';
 
 const prefersReducedMotion = (): boolean =>
   typeof window !== 'undefined' && window.matchMedia('(prefers-reduced-motion: reduce)').matches;
@@ -267,7 +267,7 @@ export const createReferenceMention = ({ adapter, onOpenChange }: FactoryOptions
     // Rich form so chips round-trip through draft storage; stripped at submit.
     renderMarkdown: (node: { attrs?: Record<string, unknown> }) => {
       const attrs = node.attrs ?? {};
-      const label = (attrs.label as string) ?? (attrs.id as string) ?? '';
+      const rawLabel = (attrs.label as string) ?? (attrs.id as string) ?? '';
       const kind = (attrs.kind as string) ?? MENTION_KIND.FILE;
       const id = (attrs.id as string) ?? '';
       const iconHint = (attrs.iconHint as string) ?? '';
@@ -277,7 +277,13 @@ export const createReferenceMention = ({ adapter, onOpenChange }: FactoryOptions
       if (hints && Object.keys(hints).length > 0) params.set('hints', JSON.stringify(hints));
       const queryString = params.toString();
       const query = queryString ? `?${queryString}` : '';
-      const markdown = `@[${label}](mention://${kind}/${encodeURIComponent(id)}${query})`;
+      // Escape `\` and `]` in the label so filenames like `report [draft].pdf` don't close the
+      // `[...]` segment early. The tokenizer reverses this via unescapeMentionLabel.
+      const label = rawLabel.replace(/\\/g, '\\\\').replace(/\]/g, '\\]');
+      // encodeURIComponent leaves `! ' ( ) * - . _ ~` literal. Of those only `(` and `)` delimit the
+      // markdown link's `(...)` segment, so we encode them explicitly; the rest are URL-safe.
+      const encodedId = encodeURIComponent(id).replace(/\(/g, '%28').replace(/\)/g, '%29');
+      const markdown = `@[${label}](mention://${kind}/${encodedId}${query})`;
       return markdown;
     },
     markdownTokenizer: {
@@ -292,7 +298,8 @@ export const createReferenceMention = ({ adapter, onOpenChange }: FactoryOptions
         const pattern = new RegExp(RICH_MENTION_PATTERN.source);
         const match = pattern.exec(src);
         if (!match || match.index !== 0) return undefined;
-        const [raw, label, kind, idEncoded, queryString] = match;
+        const [raw, rawLabel, kind, idEncoded, queryString] = match;
+        const label = unescapeMentionLabel(rawLabel);
         let providerHints: Record<string, unknown> = {};
         let iconHint = '';
         if (queryString) {

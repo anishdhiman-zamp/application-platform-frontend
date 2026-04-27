@@ -10,10 +10,13 @@ import type { MentionAttrs } from './MentionChip';
 export const hitKey = (hit: ReferenceSearchHit) => `${hit.kind}:${hit.resource_id}`;
 
 // Captures (label, kind, id, querystring); no /g so shared `lastIndex` doesn't bite `.exec`/`.test` callers.
-export const RICH_MENTION_PATTERN = /@\[([^\]]+)\]\(mention:\/\/([^/?)]+)\/([^?)]+)(?:\?([^)]*))?\)/;
+export const RICH_MENTION_PATTERN =
+  /@\[((?:\\.|[^\]\\])+)\]\(mention:\/\/([^/?)]+)\/((?:\([^)]*\)|[^?)])+)(?:\?([^)]*))?\)/;
+
+export const unescapeMentionLabel = (label: string): string => label.replace(/\\(.)/g, '$1');
 
 export const stripMentionMarkdown = (md: string): string =>
-  md.replace(new RegExp(RICH_MENTION_PATTERN.source, 'g'), '@$1');
+  md.replace(new RegExp(RICH_MENTION_PATTERN.source, 'g'), (_match, label) => `@${unescapeMentionLabel(label)}`);
 
 interface ChipRef {
   kind: string;
