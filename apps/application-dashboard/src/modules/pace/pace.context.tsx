@@ -36,6 +36,12 @@ export interface PendingFileReference {
   name: string;
 }
 
+export interface PendingMentionInsert {
+  path: string;
+  name: string;
+  iconHint?: string;
+}
+
 export interface ChatMessageIntent {
   message: string;
   fileReferences?: { path: string; name: string }[];
@@ -68,6 +74,10 @@ interface PaceContextType {
   pendingFileReferences: PendingFileReference[];
   setPendingFileReferences: (refs: PendingFileReference[]) => void;
   clearPendingFileReferences: defaultFnType;
+
+  pendingMentionInserts: PendingMentionInsert[];
+  setPendingMentionInserts: (inserts: PendingMentionInsert[]) => void;
+  clearPendingMentionInserts: defaultFnType;
 
   sharedFileReferences: UploadedFile[];
   setSharedFileReferences: Dispatch<SetStateAction<UploadedFile[]>>;
@@ -136,6 +146,7 @@ export const PaceProvider = ({ children }: { children: ReactNode }) => {
   const [chatSidebarState, setChatSidebarStateRaw] = useState<ChatSidebarState>(getInitialSidebarState);
   const [prevChatSidebarState, setPrevChatSidebarState] = useState<ChatSidebarState>(chatSidebarState);
   const [pendingFileReferences, setPendingFileReferences] = useState<PendingFileReference[]>([]);
+  const [pendingMentionInserts, setPendingMentionInserts] = useState<PendingMentionInsert[]>([]);
   const [sharedFileReferences, setSharedFileReferences] = useState<UploadedFile[]>([]);
   const [chatMessageIntent, setChatMessageIntent] = useState<ChatMessageIntent | null>(null);
   const [activeAgentInfo, setActiveAgentInfo] = useState<ActiveAgentInfo | null>(null);
@@ -191,6 +202,10 @@ export const PaceProvider = ({ children }: { children: ReactNode }) => {
 
   const clearPendingFileReferences = useCallback(() => {
     setPendingFileReferences([]);
+  }, []);
+
+  const clearPendingMentionInserts = useCallback(() => {
+    setPendingMentionInserts([]);
   }, []);
 
   const setFilesPanelPinned = useCallback((pinned: boolean) => {
@@ -411,6 +426,10 @@ export const PaceProvider = ({ children }: { children: ReactNode }) => {
       setPendingFileReferences,
       clearPendingFileReferences,
 
+      pendingMentionInserts,
+      setPendingMentionInserts,
+      clearPendingMentionInserts,
+
       sharedFileReferences,
       setSharedFileReferences,
       sharedExternalFilePaths,
@@ -460,6 +479,9 @@ export const PaceProvider = ({ children }: { children: ReactNode }) => {
 
       pendingFileReferences,
       clearPendingFileReferences,
+
+      pendingMentionInserts,
+      clearPendingMentionInserts,
 
       sharedFileReferences,
 

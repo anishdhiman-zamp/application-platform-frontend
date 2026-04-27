@@ -11,7 +11,12 @@ import {
   ScopeType,
   useFileDragDrop,
 } from '@zamp-platform/chat';
-import { ConnectedChatInput, useConversationActions, useConversationState } from '@zamp-platform/conversation-stream';
+import {
+  ConnectedChatInput,
+  type MentionInsertPayload,
+  useConversationActions,
+  useConversationState,
+} from '@zamp-platform/conversation-stream';
 import { type ScrollContainerRef } from '@zamp-platform/ui';
 import { EVENT_TYPE } from '@zamp-platform/utils/event-bus';
 import { useDynamicTabs } from 'modules/pace/components/dynamic-tabs/useDynamicTabs';
@@ -82,6 +87,7 @@ const ChatSidebarContent = ({
 
   const fileDropHandlerRef = useRef<((files: FileList) => void) | null>(null);
   const addFileReferenceRef = useRef<((ref: { path: string; name: string }) => void) | null>(null);
+  const addMentionRef = useRef<((payload: MentionInsertPayload) => void) | null>(null);
   const scrollContainerRef = useRef<ScrollContainerRef | null>(null);
   const hitlWrapperRef = useRef<HTMLDivElement>(null);
   const hitlHeightRef = useRef(0);
@@ -278,6 +284,7 @@ const ChatSidebarContent = ({
           modelSelectorSlot={modelSelectorSlot}
           conversationId={conversationId ?? ''}
           addFileReferenceRef={addFileReferenceRef}
+          addMentionRef={addMentionRef}
           externalFileReferences={sharedFileReferences}
           setExternalFileReferences={setSharedFileReferences}
           externalFilePathsRef={sharedExternalFilePaths}
@@ -322,6 +329,7 @@ const ChatSidebarContent = ({
         onTaskPopoverOpenChange={setIsTaskPopoverOpen}
         onConversationNotFound={setIsConversationNotFound}
         addFileReferenceRef={addFileReferenceRef}
+        addMentionRef={addMentionRef}
         currentUserName={currentUserName}
         scrollContainerRef={scrollContainerRef}
       />

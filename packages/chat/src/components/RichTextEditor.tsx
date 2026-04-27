@@ -237,6 +237,12 @@ export const RichTextEditor = forwardRef<RichTextEditorHandle, RichTextEditorPro
             if (hasFiles || event.defaultPrevented) return true;
           }
 
+          // Mention chip HTML: defer to ProseMirror so parseHTML rebuilds the chip.
+          const html = event.clipboardData?.getData('text/html') ?? '';
+          if (html.includes('data-type="referenceMention"')) {
+            return false;
+          }
+
           // Always insert as plain text, normalizing &nbsp; entities and non-breaking
           // spaces so they never appear literally in the editor or the serialized markdown.
           // Using text/plain avoids the @tiptap/markdown extension serializing HTML

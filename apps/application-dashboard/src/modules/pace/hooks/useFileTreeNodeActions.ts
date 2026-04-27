@@ -77,7 +77,7 @@ export const useFileTreeNodeActions = ({
     type: TAB_TYPE.FILE,
   });
   const { downloadFile } = useFileDownload();
-  const { setPendingFileReferences, setChatSidebarState, chatSidebarState } = usePaceContext();
+  const { setPendingMentionInserts, setChatSidebarState, chatSidebarState } = usePaceContext();
   const {
     createFile,
     createFolder,
@@ -196,7 +196,10 @@ export const useFileTreeNodeActions = ({
           break;
         }
         case CONTEXT_MENU_ACTION_IDS.REFERENCE_IN_CHAT: {
-          setPendingFileReferences([{ path: node.path, name: node.name }]);
+          const dotIdx = node.name.lastIndexOf('.');
+          const iconHint = dotIdx > 0 ? node.name.slice(dotIdx + 1).toLowerCase() : '';
+
+          setPendingMentionInserts([{ path: node.path, name: node.name, iconHint }]);
           if (chatSidebarState === CHAT_SIDEBAR_STATE.COLLAPSED && !isOnChatHome) {
             setChatSidebarState(CHAT_SIDEBAR_STATE.SIDEBAR);
           }

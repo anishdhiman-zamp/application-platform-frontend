@@ -14,6 +14,7 @@ import {
   ConversationActionsContext,
   ConversationStateContext,
   createConversationActions,
+  type MentionInsertPayload,
 } from '@zamp-platform/conversation-stream';
 import { VOICE_CHAT_STATE } from '@zamp-platform/ui/types';
 import { AnimatePresence, motion } from 'framer-motion';
@@ -39,6 +40,8 @@ const ChatHomePage = () => {
     setChatMessageIntent,
     pendingFileReferences,
     clearPendingFileReferences,
+    pendingMentionInserts,
+    clearPendingMentionInserts,
     sharedFileReferences,
     setSharedFileReferences,
     sharedExternalFilePaths,
@@ -56,6 +59,7 @@ const ChatHomePage = () => {
 
   const fileDropHandlerRef = useRef<((files: FileList) => void) | null>(null);
   const addFileReferenceRef = useRef<((ref: { path: string; name: string }) => void) | null>(null);
+  const addMentionRef = useRef<((payload: MentionInsertPayload) => void) | null>(null);
 
   const { inputValue, setInputValue } = useChatDraftInput({
     conversationId: null,
@@ -133,12 +137,22 @@ const ChatHomePage = () => {
     [startNewChat, setChatMessageIntent, setChatSidebarState],
   );
 
+  const drainPendingMentions = useCallback(() => {
+    if (pendingMentionInserts.length === 0 || !addMentionRef.current) return;
+    pendingMentionInserts.forEach((payload) => addMentionRef.current?.(payload));
+    clearPendingMentionInserts();
+  }, [pendingMentionInserts, clearPendingMentionInserts]);
+
   useEffect(() => {
     if (pendingFileReferences.length > 0 && addFileReferenceRef.current) {
       pendingFileReferences.forEach((ref) => addFileReferenceRef.current?.(ref));
       clearPendingFileReferences();
     }
   }, [pendingFileReferences, clearPendingFileReferences]);
+
+  useEffect(() => {
+    drainPendingMentions();
+  }, [drainPendingMentions]);
 
   return (
     <ConversationStateContext.Provider value={STUB_CONVERSATION_STATE}>
@@ -174,6 +188,7 @@ const ChatHomePage = () => {
                       setExternalInputValue={setInputValue}
                       fileDropHandlerRef={fileDropHandlerRef}
                       addFileReferenceRef={addFileReferenceRef}
+                      addMentionRef={addMentionRef}
                       externalFileReferences={sharedFileReferences}
                       setExternalFileReferences={setSharedFileReferences}
                       externalFilePathsRef={sharedExternalFilePaths}

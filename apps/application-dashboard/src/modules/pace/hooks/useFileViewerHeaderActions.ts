@@ -34,7 +34,7 @@ export const useFileViewerHeaderActions = ({
   const { deleteItem, isDeleting } = useFileActions();
   const { closeTabsForPath, activeTab } = useDynamicTabs({ type: TAB_TYPE.FILE });
   const { downloadFile } = useFileDownload();
-  const { setPendingFileReferences, setChatSidebarState, chatSidebarState } = usePaceContext();
+  const { setPendingMentionInserts, setChatSidebarState, chatSidebarState } = usePaceContext();
 
   const handleDownload = useCallback(async () => {
     await downloadFile({
@@ -44,14 +44,17 @@ export const useFileViewerHeaderActions = ({
   }, [filePath, fileName, downloadFile]);
 
   const handleReferenceInChat = useCallback(() => {
-    setPendingFileReferences([{ path: filePath, name: fileName }]);
+    const dotIdx = fileName.lastIndexOf('.');
+    const iconHint = dotIdx > 0 ? fileName.slice(dotIdx + 1).toLowerCase() : '';
+
+    setPendingMentionInserts([{ path: filePath, name: fileName, iconHint }]);
 
     const isOnChatHome = window.location.pathname === ROUTES_PATH.CHAT && !activeTab;
 
     if (chatSidebarState === CHAT_SIDEBAR_STATE.COLLAPSED && !isOnChatHome) {
       setChatSidebarState(CHAT_SIDEBAR_STATE.SIDEBAR);
     }
-  }, [filePath, fileName, setPendingFileReferences, setChatSidebarState, chatSidebarState, activeTab]);
+  }, [filePath, fileName, setPendingMentionInserts, setChatSidebarState, chatSidebarState, activeTab]);
 
   const handleDeleteConfirm = useCallback(async () => {
     try {

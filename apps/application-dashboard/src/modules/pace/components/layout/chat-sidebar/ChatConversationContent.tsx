@@ -13,7 +13,11 @@ import {
   ScopeType,
   useStreamingState,
 } from '@zamp-platform/chat';
-import { useConversationActions, useConversationState } from '@zamp-platform/conversation-stream';
+import {
+  type MentionInsertPayload,
+  useConversationActions,
+  useConversationState,
+} from '@zamp-platform/conversation-stream';
 import { ScrollContainer, type ScrollContainerRef } from '@zamp-platform/ui';
 import { cn } from '@zamp-platform/ui/utils';
 import AgentPill from 'modules/pace/components/agents/components/AgentPill';
@@ -50,6 +54,7 @@ export interface ChatConversationContentProps {
   onTaskPopoverOpenChange?: (open: boolean) => void;
   onConversationNotFound?: (notFound: boolean) => void;
   addFileReferenceRef: React.RefObject<((ref: { path: string; name: string }) => void) | null>;
+  addMentionRef: React.RefObject<((payload: MentionInsertPayload) => void) | null>;
   currentUserName: string;
   scrollContainerRef?: React.RefObject<ScrollContainerRef | null>;
 }
@@ -65,6 +70,7 @@ const ChatConversationContent = ({
   onTaskPopoverOpenChange,
   onConversationNotFound,
   addFileReferenceRef,
+  addMentionRef,
   currentUserName,
   scrollContainerRef,
 }: ChatConversationContentProps) => {
@@ -79,6 +85,8 @@ const ChatConversationContent = ({
   const {
     pendingFileReferences,
     clearPendingFileReferences,
+    pendingMentionInserts,
+    clearPendingMentionInserts,
     chatMessageIntent,
     setChatMessageIntent,
     activeAgentInfo,
@@ -288,6 +296,12 @@ const ChatConversationContent = ({
     }
   }, [chatMessageIntent, conversationId, organizationId, currentUserName, createConversationV2, setChatMessageIntent]);
 
+  const drainPendingMentions = useCallback(() => {
+    if (pendingMentionInserts.length === 0 || !addMentionRef.current) return;
+    pendingMentionInserts.forEach((payload) => addMentionRef.current?.(payload));
+    clearPendingMentionInserts();
+  }, [pendingMentionInserts, clearPendingMentionInserts, addMentionRef]);
+
   useEffect(() => {
     handleCreateConversationFromIntent();
   }, [handleCreateConversationFromIntent]);
@@ -306,6 +320,10 @@ const ChatConversationContent = ({
       clearPendingFileReferences();
     }
   }, [pendingFileReferences, clearPendingFileReferences, addFileReferenceRef]);
+
+  useEffect(() => {
+    drainPendingMentions();
+  }, [drainPendingMentions]);
 
   useEffect(() => {
     if (agentInfoFromMessages) {

@@ -9,7 +9,7 @@ import type { ReferenceKindDescriptor, ReferencePickerAdapter, ReferenceSearchHi
 import { EXIT_ANIMATION_MS, MENTION_KIND } from './constants';
 import { type MentionAttrs, MentionChip } from './MentionChip';
 import { MentionPopover, type MentionPopoverHandle } from './MentionPopover';
-import { parseKindPrefix } from './utils';
+import { parseKindPrefix, RICH_MENTION_PATTERN } from './utils';
 
 const prefersReducedMotion = (): boolean =>
   typeof window !== 'undefined' && window.matchMedia('(prefers-reduced-motion: reduce)').matches;
@@ -67,6 +67,25 @@ export const createReferenceMention = ({ adapter, onOpenChange }: FactoryOptions
       let unmountTimer: ReturnType<typeof setTimeout> | null = null;
       let pendingReopen = false;
       let dismissed = false;
+      let dismissedAtQuery: string | null = null;
+
+      const markDismissed = () => {
+        dismissed = true;
+        dismissedAtQuery = currentQuery;
+      };
+
+      const reopenAfterDismiss = () => {
+        dismissed = false;
+        dismissedAtQuery = null;
+        if (unmountTimer) {
+          clearTimeout(unmountTimer);
+          unmountTimer = null;
+        }
+        mountEl();
+        isOpen = true;
+        onOpenChange?.(true);
+        render();
+      };
 
       const handleOutsideMouseDown = (event: MouseEvent) => {
         if (!popoverEl || dismissed) return;
@@ -74,7 +93,7 @@ export const createReferenceMention = ({ adapter, onOpenChange }: FactoryOptions
         if (target && popoverEl.contains(target)) return;
         const editorDom = currentEditor?.view?.dom as Node | undefined;
         if (editorDom && target && editorDom.contains(target)) return;
-        dismissed = true;
+        markDismissed();
         onOpenChange?.(false);
         playExitAndUnmount();
       };
@@ -168,7 +187,7 @@ export const createReferenceMention = ({ adapter, onOpenChange }: FactoryOptions
             query,
             onSelect: insertHit,
             onClose: () => {
-              dismissed = true;
+              markDismissed();
               onOpenChange?.(false);
               playExitAndUnmount();
               currentEditor?.commands.focus();
@@ -190,6 +209,7 @@ export const createReferenceMention = ({ adapter, onOpenChange }: FactoryOptions
           currentCommand = props.command;
           currentEditor = props.editor;
           dismissed = false;
+          dismissedAtQuery = null;
           if (unmountTimer) {
             clearTimeout(unmountTimer);
             unmountTimer = null;
@@ -201,10 +221,21 @@ export const createReferenceMention = ({ adapter, onOpenChange }: FactoryOptions
           render();
         },
         onUpdate: (props: SuggestionProps) => {
-          if (dismissed) return;
-          currentQuery = props.query ?? '';
+          const nextQuery = props.query ?? '';
           currentCommand = props.command;
           currentEditor = props.editor;
+          // Reopen on continued typing after dismiss; keep closed on backspace.
+          if (dismissed) {
+            const snapshot = dismissedAtQuery ?? '';
+            if (nextQuery.length > snapshot.length && nextQuery.startsWith(snapshot)) {
+              currentQuery = nextQuery;
+              reopenAfterDismiss();
+              return;
+            }
+            currentQuery = nextQuery;
+            return;
+          }
+          currentQuery = nextQuery;
           render();
         },
         onKeyDown: (props: { event: KeyboardEvent }) => {
@@ -220,6 +251,7 @@ export const createReferenceMention = ({ adapter, onOpenChange }: FactoryOptions
           }
           if (dismissed) {
             dismissed = false;
+            dismissedAtQuery = null;
             return;
           }
           onOpenChange?.(false);
@@ -231,17 +263,99 @@ export const createReferenceMention = ({ adapter, onOpenChange }: FactoryOptions
 
   return Mention.extend({
     name: 'referenceMention',
+    markdownTokenName: 'referenceMention',
+    // Rich form so chips round-trip through draft storage; stripped at submit.
     renderMarkdown: (node: { attrs?: Record<string, unknown> }) => {
-      const label = (node.attrs?.label as string) ?? (node.attrs?.id as string) ?? '';
-      return `@${label}`;
+      const attrs = node.attrs ?? {};
+      const label = (attrs.label as string) ?? (attrs.id as string) ?? '';
+      const kind = (attrs.kind as string) ?? MENTION_KIND.FILE;
+      const id = (attrs.id as string) ?? '';
+      const iconHint = (attrs.iconHint as string) ?? '';
+      const hints = attrs.providerHints as Record<string, unknown> | undefined;
+      const params = new URLSearchParams();
+      if (iconHint) params.set('icon', iconHint);
+      if (hints && Object.keys(hints).length > 0) params.set('hints', JSON.stringify(hints));
+      const queryString = params.toString();
+      const query = queryString ? `?${queryString}` : '';
+      const markdown = `@[${label}](mention://${kind}/${encodeURIComponent(id)}${query})`;
+      return markdown;
     },
+    markdownTokenizer: {
+      name: 'referenceMention',
+      level: 'inline',
+      // '@[' prefix wins ordering against the standard link parser.
+      start: (src: string) => {
+        const idx = src.indexOf('@[');
+        return idx === -1 ? -1 : idx;
+      },
+      tokenize: (src: string) => {
+        const pattern = new RegExp(RICH_MENTION_PATTERN.source);
+        const match = pattern.exec(src);
+        if (!match || match.index !== 0) return undefined;
+        const [raw, label, kind, idEncoded, queryString] = match;
+        let providerHints: Record<string, unknown> = {};
+        let iconHint = '';
+        if (queryString) {
+          const params = new URLSearchParams(queryString);
+          iconHint = params.get('icon') ?? '';
+          const hintsRaw = params.get('hints');
+          if (hintsRaw) {
+            try {
+              providerHints = JSON.parse(hintsRaw);
+            } catch {
+              providerHints = {};
+            }
+          }
+        }
+        let id = idEncoded;
+        try {
+          id = decodeURIComponent(idEncoded);
+        } catch {
+          // keep the raw value
+        }
+        return {
+          type: 'referenceMention',
+          raw,
+          label,
+          kind,
+          id,
+          iconHint,
+          providerHints,
+        };
+      },
+    },
+    parseMarkdown: (token) => ({
+      type: 'referenceMention',
+      attrs: {
+        id: (token as { id?: string }).id ?? '',
+        label: (token as { label?: string }).label ?? '',
+        kind: (token as { kind?: string }).kind ?? MENTION_KIND.FILE,
+        iconHint: (token as { iconHint?: string }).iconHint ?? '',
+        providerHints: (token as { providerHints?: Record<string, unknown> }).providerHints ?? {},
+      },
+    }),
     addNodeView() {
       return ReactNodeViewRenderer(MentionChip) as never;
     },
     addAttributes() {
       return {
-        id: { default: null },
-        label: { default: null },
+        id: {
+          default: null,
+          parseHTML: (element) => element.getAttribute('data-id') ?? element.getAttribute('data-resource-id'),
+          renderHTML: (attrs) => {
+            const id = (attrs as MentionAttrs).id;
+            return id ? { 'data-id': id, 'data-resource-id': id } : {};
+          },
+        },
+        label: {
+          default: null,
+          parseHTML: (element) =>
+            element.getAttribute('data-label') ?? element.querySelector('.mention-inline-label')?.textContent ?? null,
+          renderHTML: (attrs) => {
+            const label = (attrs as MentionAttrs).label;
+            return label ? { 'data-label': label } : {};
+          },
+        },
         kind: {
           default: MENTION_KIND.FILE,
           parseHTML: (element) => element.getAttribute('data-kind') ?? MENTION_KIND.FILE,
@@ -283,9 +397,13 @@ export const createReferenceMention = ({ adapter, onOpenChange }: FactoryOptions
         'span',
         {
           ...options.HTMLAttributes,
+          // data-type matches the parent Mention extension's parseHTML selector on paste.
+          'data-type': 'referenceMention',
           class: 'mention-inline',
           'data-kind': node.attrs.kind,
+          'data-id': node.attrs.id,
           'data-resource-id': node.attrs.id,
+          'data-label': label,
         },
         ['span', { class: 'mention-inline-icon', 'aria-hidden': 'true' }, ''],
         ['span', { class: 'mention-inline-label' }, label],
@@ -296,4 +414,4 @@ export const createReferenceMention = ({ adapter, onOpenChange }: FactoryOptions
   });
 };
 
-export { extractChipsFromEditor } from './utils';
+export { extractChipsFromEditor, stripMentionMarkdown } from './utils';

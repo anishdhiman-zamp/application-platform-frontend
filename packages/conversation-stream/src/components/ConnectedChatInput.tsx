@@ -11,6 +11,7 @@ import {
   filesToFileList,
   isLargeText,
   type LocationData,
+  MENTION_KIND,
   type MessageReferenceType,
   MicrophoneState,
   type ReferencePickerAdapter,
@@ -42,6 +43,13 @@ import { useConversationState } from '../hooks/useConversationState';
 export type FileDropHandlerRef = RefObject<((files: FileList) => void) | null>;
 export type AddFileReferenceRef = RefObject<((ref: { path: string; name: string }) => void) | null>;
 
+export interface MentionInsertPayload {
+  path: string;
+  name: string;
+  iconHint?: string;
+}
+export type AddMentionRef = RefObject<((payload: MentionInsertPayload) => void) | null>;
+
 export interface ConnectedChatInputProps {
   annotationLocation?: LocationData;
   conversationId?: string;
@@ -70,6 +78,7 @@ export interface ConnectedChatInputProps {
   onConversationCreated?: (conversationId: string) => void;
   fileDropHandlerRef?: FileDropHandlerRef;
   addFileReferenceRef?: AddFileReferenceRef;
+  addMentionRef?: AddMentionRef;
   onFileReferencesChange?: (refs: { path: string; name: string }[]) => void;
   minTextareaHeight?: number;
   maxTextareaHeight?: number;
@@ -117,6 +126,7 @@ export const ConnectedChatInput = ({
   onConversationCreated,
   fileDropHandlerRef,
   addFileReferenceRef,
+  addMentionRef,
   onFileReferencesChange,
   minTextareaHeight,
   maxTextareaHeight,
@@ -412,6 +422,37 @@ export const ConnectedChatInput = ({
       if (addFileReferenceRef) addFileReferenceRef.current = null;
     };
   }, [addFileReferenceRef, addFileReference, isDisabled]);
+
+  const addMention = useCallback((payload: MentionInsertPayload) => {
+    const editor = editorInstanceRef.current;
+    if (!editor) return;
+    editor
+      .chain()
+      .focus('end')
+      .insertContent([
+        {
+          type: 'referenceMention',
+          attrs: {
+            id: payload.path,
+            label: payload.name,
+            kind: MENTION_KIND.FILE,
+            iconHint: payload.iconHint ?? '',
+            providerHints: { path: payload.path },
+          },
+        },
+        { type: 'text', text: ' ' },
+      ])
+      .run();
+  }, []);
+
+  useEffect(() => {
+    if (addMentionRef && !isDisabled) {
+      addMentionRef.current = addMention;
+    }
+    return () => {
+      if (addMentionRef) addMentionRef.current = null;
+    };
+  }, [addMentionRef, addMention, isDisabled]);
 
   useEffect(() => {
     onFileReferencesChange?.(fileReferences.map((ref) => ({ path: ref.path, name: ref.name })));

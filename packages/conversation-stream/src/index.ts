@@ -35,7 +35,13 @@ export { useTaskState } from './hooks/useTaskState';
 export { useLazyGetConversationByIdQuery } from '@zamp-platform/chat';
 
 // Components
-export type { ConnectedChatInputProps } from './components/ConnectedChatInput';
+export type {
+  AddFileReferenceRef,
+  AddMentionRef,
+  ConnectedChatInputProps,
+  FileDropHandlerRef,
+  MentionInsertPayload,
+} from './components/ConnectedChatInput';
 export { ConnectedChatInput } from './components/ConnectedChatInput';
 
 // Handlers

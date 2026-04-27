@@ -9,6 +9,12 @@ import type { MentionAttrs } from './MentionChip';
 /** Stable React list key for a reference hit, scoped by kind to avoid collisions. */
 export const hitKey = (hit: ReferenceSearchHit) => `${hit.kind}:${hit.resource_id}`;
 
+// Captures (label, kind, id, querystring); no /g so shared `lastIndex` doesn't bite `.exec`/`.test` callers.
+export const RICH_MENTION_PATTERN = /@\[([^\]]+)\]\(mention:\/\/([^/?)]+)\/([^?)]+)(?:\?([^)]*))?\)/;
+
+export const stripMentionMarkdown = (md: string): string =>
+  md.replace(new RegExp(RICH_MENTION_PATTERN.source, 'g'), '@$1');
+
 interface ChipRef {
   kind: string;
   resource_id: string;
@@ -83,7 +89,8 @@ export const extractChipsFromEditor = (editor: Editor | null): (ReferenceChip & 
 
   const getMarkdown = (editor as unknown as { getMarkdown?: () => string }).getMarkdown?.bind(editor);
   const rawMarkdown = getMarkdown?.() ?? editor.getText();
-  const markdown = rawMarkdown
+  // Strip first so text_range offsets match the wire format, not the rich form.
+  const markdown = stripMentionMarkdown(rawMarkdown)
     .replace(/&nbsp;/g, ' ')
     .replace(/\u00A0/g, ' ')
     .replace(/\s+$/, '');

@@ -267,7 +267,11 @@ const FileTreeNodeRow = forwardRef<HTMLDivElement, FileTreeNodeRowProps>(
                   <MoreVertical size={14} className='text-GRAY_700' />
                 </div>
               </DropdownMenuTrigger>
-              <DropdownMenuContent align='start' className={MENU_CONTENT_CLASS}>
+              <DropdownMenuContent
+                align='start'
+                className={MENU_CONTENT_CLASS}
+                onCloseAutoFocus={(e) => e.preventDefault()}
+              >
                 <ActionMenuItems actions={actions} onActionClick={onActionClick} as={DropdownMenuItem} />
               </DropdownMenuContent>
             </DropdownMenu>
@@ -281,7 +285,7 @@ const FileTreeNodeRow = forwardRef<HTMLDivElement, FileTreeNodeRowProps>(
     return (
       <ContextMenu>
         <ContextMenuTrigger asChild>{row}</ContextMenuTrigger>
-        <ContextMenuContent className={MENU_CONTENT_CLASS}>
+        <ContextMenuContent className={MENU_CONTENT_CLASS} onCloseAutoFocus={(e) => e.preventDefault()}>
           <ActionMenuItems actions={actions} onActionClick={onActionClick} as={ContextMenuItem} />
         </ContextMenuContent>
       </ContextMenu>

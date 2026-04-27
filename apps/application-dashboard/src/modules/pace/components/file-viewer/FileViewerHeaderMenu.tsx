@@ -19,7 +19,11 @@ const FileViewerHeaderMenu = memo(({ onActionClick, disabled = false }: FileView
           <MoreVertical size={16} className='text-GRAY_700' />
         </Button>
       </DropdownMenuTrigger>
-      <DropdownMenuContent align='end' className='bg-BG_WHITE flex min-w-[140px] flex-col gap-y-[2px]'>
+      <DropdownMenuContent
+        align='end'
+        className='bg-BG_WHITE flex min-w-[140px] flex-col gap-y-[2px]'
+        onCloseAutoFocus={(e) => e.preventDefault()}
+      >
         {FILE_VIEWER_HEADER_ACTIONS.map((action) => (
           <DropdownMenuItem
             key={action.id}

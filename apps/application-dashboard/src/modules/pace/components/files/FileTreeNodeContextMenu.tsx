@@ -34,7 +34,10 @@ const FileTreeNodeContextMenu = ({
         {children}
       </ContextMenuTrigger>
       {isOpen && !disabled && (
-        <ContextMenuContent className='flex min-w-[180px] flex-col gap-y-[2px]'>
+        <ContextMenuContent
+          className='flex min-w-[180px] flex-col gap-y-[2px]'
+          onCloseAutoFocus={(e) => e.preventDefault()}
+        >
           {actions.map((action) => (
             <ContextMenuItem
               key={action.id}

@@ -15,6 +15,7 @@ import {
   ResourceType,
   sanitizeFileName,
   ScopeType,
+  stripMentionMarkdown,
   type UploadedFile,
 } from '@zamp-platform/chat';
 import { formatPlural } from '@zamp-platform/utils';
@@ -335,7 +336,7 @@ export const useChatInput = ({
   };
 
   const handleSubmit = useCallback(() => {
-    const trimmedValue = value.trim();
+    const trimmedValue = stripMentionMarkdown(value).trim();
     if (!trimmedValue && fileReferences.length === 0) return;
 
     // Snapshot chips NOW — editor doc still has them. After setValue('') the
