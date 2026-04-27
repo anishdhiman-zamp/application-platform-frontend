@@ -33,10 +33,10 @@ interface CrumbProps {
 const Crumb = ({ icon, name, onClick }: CrumbProps) => (
   <BreadcrumbItem
     onClick={onClick}
-    className='hover:bg-GRAY_100 group shrink-0 cursor-pointer gap-x-1 rounded-md px-1.5 py-1 transition-colors'
+    className='hover:bg-GRAY_100 group min-w-12 shrink basis-auto cursor-pointer gap-x-1 rounded-md px-1.5 py-1 transition-colors'
   >
     {icon}
-    <BreadcrumbPage className='f-13-450 text-GRAY_900 group-hover:text-GRAY_1000 whitespace-nowrap transition-colors'>
+    <BreadcrumbPage className='f-13-450 text-GRAY_900 group-hover:text-GRAY_1000 min-w-0 truncate transition-colors'>
       {name}
     </BreadcrumbPage>
   </BreadcrumbItem>
@@ -76,8 +76,8 @@ const FilePathBreadcrumb = ({ filePath, fileName, fileIcon }: FilePathBreadcrumb
   const middlePaths = needsCollapse ? [] : cumulativePaths.slice(1);
 
   return (
-    <Breadcrumb>
-      <BreadcrumbList className='gap-x-0.5 sm:gap-x-0.5'>
+    <Breadcrumb className='min-w-0 shrink overflow-hidden'>
+      <BreadcrumbList className='flex-nowrap gap-x-0.5 sm:gap-x-0.5'>
         {firstSegment && (
           <>
             <Crumb icon={<FolderIcon />} name={firstSegment} onClick={() => revealPathInTree(firstSegmentPath)} />
@@ -127,7 +127,7 @@ const FilePathBreadcrumb = ({ filePath, fileName, fileIcon }: FilePathBreadcrumb
           </>
         )}
         {middleSegments.map((segment, index) => (
-          <span key={`${segment}-${index}`} className='flex items-center gap-x-0.5'>
+          <span key={`${segment}-${index}`} className='flex min-w-0 shrink items-center gap-x-0.5'>
             <Crumb icon={<FolderIcon />} name={segment} onClick={() => revealPathInTree(middlePaths[index])} />
             <PathSeparator />
           </span>

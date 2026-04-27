@@ -119,7 +119,7 @@ const FileViewerHeader = memo(
         <div
           className={cn('border-GRAY_400 bg-BG_WHITE flex items-center justify-between border-b px-4 py-3', className)}
         >
-          <div className='flex min-w-0 items-center'>
+          <div className='flex min-w-0 shrink items-center'>
             <FilePathBreadcrumb
               filePath={filePath}
               fileName={fileName}
@@ -129,7 +129,7 @@ const FileViewerHeader = memo(
             />
           </div>
 
-          <div className='flex items-center gap-x-2'>
+          <div className='flex shrink-0 items-center gap-x-2'>
             <FileSaveStatus isSaving={isSaving} lastSavedAt={lastSavedAt} />
             {isMarkdown && onViewModeChange && (
               <ViewModeToggle value={viewMode} options={MARKDOWN_VIEW_OPTIONS} onChange={onViewModeChange} />

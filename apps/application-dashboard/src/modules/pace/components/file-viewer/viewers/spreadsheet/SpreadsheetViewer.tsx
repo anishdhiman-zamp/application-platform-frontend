@@ -235,8 +235,8 @@ const SpreadsheetViewer = memo(
     return (
       <div className='flex h-full w-full flex-col overflow-hidden'>
         {/* Toolbar */}
-        <div className='border-border flex shrink-0 items-center justify-between border-b px-4 py-2'>
-          <div className='max-w-xs flex-1'>
+        <div className='border-border flex shrink-0 items-center justify-between gap-x-3 border-b px-4 py-2'>
+          <div className='max-w-xs min-w-0 flex-1 shrink'>
             <Input
               size='small'
               placeholder='Search across all columns'
@@ -247,7 +247,7 @@ const SpreadsheetViewer = memo(
               className='bg-BG_WHITE'
             />
           </div>
-          <span className='f-12-400 text-GRAY_700'>
+          <span className='f-12-400 text-GRAY_700 shrink-0 whitespace-nowrap'>
             {rows.length} / {allRowsRef.current.length} rows × {spreadsheetData?.headers?.length ?? 0} columns
           </span>
         </div>
