@@ -50,9 +50,9 @@ const baseQueryWithAuth: BaseQueryFn<CustomFetchArgs, unknown, FetchBaseQueryErr
   const userSessionCookie = getCookie(USER_SESSION_COOKIE);
   const defaultOrgId = userSessionCookie ? JSON.parse(decodeURIComponent(userSessionCookie)).default_org_id : '';
   const currentOrgId =
-    state?.user?.user?.orgs?.[0]?.organization_id ||
     getFromLocalStorage(LOCAL_STORAGE_KEYS.XZAMP_ORGANIZATION_ID) ||
     defaultOrgId ||
+    state?.user?.user?.orgs?.[0]?.organization_id ||
     '';
 
   await mutex.waitForUnlock();
