@@ -102,6 +102,7 @@ const OrgSwitcher: FC<OrgSwitcherProps> = ({
       dispatch(dynamicTabsActions.clearAllTabs());
       removeFromLocalStorage(LOCAL_STORAGE_KEYS.PACE_FILE_TREE_EXPANDED_PATHS);
       removeFromLocalStorage(LOCAL_STORAGE_KEYS.PACE_SIDEBAR_STATE);
+      removeFromLocalStorage(LOCAL_STORAGE_KEYS.PACE_SELECTED_MODEL);
       setToLocalStorage(LOCAL_STORAGE_KEYS.XZAMP_ORGANIZATION_ID, org.organization_id);
       setCookie(ACTIVE_ORG_ID_COOKIE, org.organization_id);
       clearCookie(USER_SESSION_COOKIE);
