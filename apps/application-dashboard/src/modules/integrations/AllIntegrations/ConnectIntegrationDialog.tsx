@@ -286,7 +286,7 @@ const ConnectIntegrationDialog: FC<ConnectIntegrationDialogPropsType> = ({
   return (
     <Dialog open={isOpen} onOpenChange={onOpenChange}>
       <DialogContent
-        className='bg-BG_WHITE w-[460px] max-w-[460px]'
+        className='bg-BG_WHITE max-h-[90vh] w-[460px] max-w-[460px]'
         title={`New connection for ${integrationTitle}`}
         description='Set up a new connection for this integration'
         showCloseButton
@@ -311,7 +311,7 @@ const ConnectIntegrationDialog: FC<ConnectIntegrationDialogPropsType> = ({
             <span>{integrationTitle}</span>
           </DialogHeaderTitle>
         </DialogHeader>
-        <DialogBody className='flex flex-col gap-y-4 overflow-visible py-4'>
+        <DialogBody className='flex flex-col gap-y-4 overflow-y-auto py-4'>
           <div className='flex flex-col gap-y-2 px-4'>
             <label htmlFor={`conn-name-${integrationName}`} className='f-12-500 text-GRAY_1000'>
               Connection name<span className='text-red-700'>*</span>
