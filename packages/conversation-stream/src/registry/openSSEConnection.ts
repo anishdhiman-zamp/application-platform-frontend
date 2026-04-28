@@ -1,5 +1,5 @@
 import { fetchEventSource } from '@microsoft/fetch-event-source';
-import { captureException } from '@sentry/browser';
+import { addBreadcrumb, captureException } from '@sentry/browser';
 import { API_DOMAIN } from '@zamp-platform/api';
 
 import type { SSESourceType } from '../types/sse.types';
@@ -72,9 +72,32 @@ export function openSSEConnection(
       if (!event.data) return;
       try {
         const data = JSON.parse(event.data) as Record<string, unknown> & { type: string };
+        // The TS cast doesn't enforce `type` at runtime; fall back to a sentinel so the
+        // breadcrumb stays readable in Sentry even if BE ships a payload without `type`.
+        const eventType = (data.type as string | undefined) ?? '<no-type>';
+        addBreadcrumb({
+          category: 'sse',
+          message: eventType,
+          level: 'info',
+          data: {
+            sourceType,
+            sourceId,
+            eventId: event.id,
+            eventType,
+            subType: data.event_type as string | undefined,
+          },
+        });
         onEvent(data, event.id);
       } catch (error) {
-        captureException(error instanceof Error ? error : new Error(String(error)));
+        captureException(error instanceof Error ? error : new Error(String(error)), {
+          tags: { area: 'sse', failure: 'parse' },
+          extra: {
+            rawData: typeof event.data === 'string' ? event.data.slice(0, 500) : String(event.data),
+            eventId: event.id,
+            sourceType,
+            sourceId,
+          },
+        });
       }
     },
 

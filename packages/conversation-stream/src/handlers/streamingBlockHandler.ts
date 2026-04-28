@@ -1,4 +1,4 @@
-import { captureException } from '@sentry/browser';
+import { captureException, captureMessage } from '@sentry/browser';
 import {
   type Block,
   BLOCK_TYPE,
@@ -13,6 +13,10 @@ import {
 } from '@zamp-platform/chat';
 
 type MapAny = Record<string, unknown>;
+
+// Per-session de-dupe so Sentry isn't spammed when BE ships a new delta/block type.
+const reportedUnknownDeltaTypes = new Set<string>();
+const reportedUnknownBlockTypes = new Set<string>();
 
 /**
  * Handles content_block_start / content_block_delta / content_block_stop events.
@@ -83,6 +87,16 @@ export function handleContentBlockEvent(conversationId: string, type: string, in
             } as TaskContentBlock;
             break;
           default:
+            // Only TOOL_USE legitimately reaches default (the other BLOCK_TYPE values
+            // each have explicit cases above). Anything else is a new block type from BE.
+            if (blockType && blockType !== BLOCK_TYPE.TOOL_USE && !reportedUnknownBlockTypes.has(blockType)) {
+              reportedUnknownBlockTypes.add(blockType);
+              captureMessage('chat.streaming.unknown_block_type', {
+                level: 'warning',
+                tags: { area: 'sse', blockType, conversationId },
+                extra: { blockType, blockOrder: index, conversationId },
+              });
+            }
             newBlock = {
               ...blockBase,
               type: BLOCK_TYPE.TOOL_USE,
@@ -207,6 +221,18 @@ export function handleContentBlockEvent(conversationId: string, type: string, in
                 taskPayload.status = (delta.status as typeof taskPayload.status) ?? taskPayload.status;
               }
               break;
+            default: {
+              const unknownDelta = deltaType ?? '<missing>';
+              if (!reportedUnknownDeltaTypes.has(unknownDelta)) {
+                reportedUnknownDeltaTypes.add(unknownDelta);
+                captureMessage('chat.streaming.unknown_delta_type', {
+                  level: 'warning',
+                  tags: { area: 'sse', deltaType: unknownDelta, blockType: block.type, conversationId },
+                  extra: { deltaType: unknownDelta, blockType: block.type, blockOrder: index, conversationId },
+                });
+              }
+              break;
+            }
           }
         });
         break;

@@ -1,8 +1,9 @@
+import { captureMessage } from '@sentry/browser';
 import { ShimmerText, useScrollRef } from '@zamp-platform/ui';
 import { cn } from '@zamp-platform/ui/utils';
 import { motion } from 'motion/react';
 import Image from 'next/image';
-import { FC, ReactNode, useEffect, useRef, useState } from 'react';
+import { FC, ReactNode, useCallback, useEffect, useRef, useState } from 'react';
 
 import PaceAvatar from '@/modules/chatbot/PaceAvatar';
 
@@ -11,6 +12,8 @@ import { ChatMessage, SenderType, StreamingState } from '../types/chat.types';
 import { getMessageKey } from '../utils/message.utils';
 import Message from './Message';
 import { StreamingMessage } from './StreamingMessage';
+
+const STALL_WATCHDOG_MS = 10_000;
 
 interface MessageContainerProps {
   messages: ChatMessage[];
@@ -51,6 +54,7 @@ export const MessageContainer: FC<MessageContainerProps> = ({
   const scrollRef = useScrollRef();
   const isNewUserMessageRef = useRef(isNewUserMessage);
   isNewUserMessageRef.current = isNewUserMessage;
+  const reportedStallKeyRef = useRef<string | null>(null);
 
   useEffect(() => {
     const prevId = previousConversationIdRef.current;
@@ -108,6 +112,50 @@ export const MessageContainer: FC<MessageContainerProps> = ({
       clearTimeout(fallback);
     };
   }, [isAnalysing, scrollRef]);
+
+  // Depend on scalars derived from streamingState rather than the object itself,
+  // so unrelated re-renders (e.g. metadata mutations on the same streaming entry)
+  // don't reset the 10s watchdog timer.
+  const stallId = streamingState?.id;
+  const hasStreamingState = !!streamingState;
+  const hasStreamedElements = !!streamingState?.message_content?.elements?.length;
+
+  const reportStall = useCallback(() => {
+    if (!isAnalysing || hasStreamedElements) return;
+
+    const stallKey = stallId ?? `${conversationId ?? 'no-conv'}:${lastMessage?.id ?? 'no-msg'}`;
+    if (reportedStallKeyRef.current === stallKey) return;
+    reportedStallKeyRef.current = stallKey;
+
+    captureMessage('chat.streaming.stalled', {
+      level: 'warning',
+      tags: {
+        area: 'sse',
+        conversationId: conversationId ?? 'unknown',
+        hasStreamingState: String(hasStreamingState),
+      },
+      extra: {
+        elapsedMs: STALL_WATCHDOG_MS,
+        streamingMessageId: stallId,
+        lastUserMessageId: lastMessage?.id,
+        messagesCount: messages?.length ?? 0,
+        elementsCount: 0,
+      },
+    });
+  }, [isAnalysing, hasStreamedElements, hasStreamingState, stallId, conversationId, lastMessage?.id, messages?.length]);
+
+  useEffect(() => {
+    if (!isAnalysing) {
+      reportedStallKeyRef.current = null;
+      return;
+    }
+    if (hasStreamedElements) {
+      reportedStallKeyRef.current = null;
+      return;
+    }
+    const timer = setTimeout(reportStall, STALL_WATCHDOG_MS);
+    return () => clearTimeout(timer);
+  }, [isAnalysing, hasStreamedElements, reportStall]);
 
   return (
     <div className={cn('flex w-full grow flex-col gap-6 p-4', className)}>

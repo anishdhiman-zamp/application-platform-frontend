@@ -1,4 +1,4 @@
-import { captureException } from '@sentry/browser';
+import { captureException, captureMessage } from '@sentry/browser';
 import {
   type ChatMessage,
   ChatMessageType,
@@ -16,6 +16,9 @@ import { handleContentBlockEvent } from './streamingBlockHandler';
 
 type MapAny = Record<string, unknown>;
 type AnyEvent = MapAny & { type: string };
+
+// Per-session de-dupe so Sentry isn't spammed when BE ships a new event type.
+const reportedUnknownEventTypes = new Set<string>();
 
 export interface ConversationEventCallbacks {
   onTitleUpdated: (title: string) => void;
@@ -170,6 +173,19 @@ export function handleConversationSSEEvent(
       case ConversationEventType.MESSAGES_PICKED_UP:
         callbacks.onMessagesPickedUp?.(event.message_ids as string[]);
         break;
+
+      default: {
+        const unknownType = event.type ?? '<missing>';
+        if (!reportedUnknownEventTypes.has(unknownType)) {
+          reportedUnknownEventTypes.add(unknownType);
+          captureMessage('chat.streaming.unknown_event_type', {
+            level: 'warning',
+            tags: { area: 'sse', eventType: unknownType, conversationId },
+            extra: { eventType: unknownType, eventSubType: eventType, conversationId },
+          });
+        }
+        break;
+      }
     }
   } catch (error) {
     captureException(error instanceof Error ? error : new Error(String(error)));
