@@ -11,6 +11,7 @@ export enum ResourceType {
   APP = 'app',
   AGENT = 'agent',
   CONVERSATION = 'conversation',
+  CREDENTIAL = 'credential',
 }
 
 export type TeamInfoType = {
@@ -85,6 +86,7 @@ export type ShareResourcePopupProps = {
   version?: ShareResourceVersion;
   additionalOptions?: CombinedOptionListDataType[];
   forceAdminAccess?: boolean;
+  customTrigger?: React.ReactNode;
 };
 
 /**
@@ -168,6 +170,11 @@ export enum AGENT_ACCESS_PRIVILEGES {
 }
 
 export enum CONVERSATION_ACCESS_PRIVILEGES {
+  VIEWER = 'viewer',
+}
+
+export enum CREDENTIAL_ACCESS_PRIVILEGES {
+  ADMIN = 'admin',
   VIEWER = 'viewer',
 }
 

@@ -31,6 +31,7 @@ import {
   APP_ACCESS_PRIVILEGES,
   CombinedOptionListDataType,
   CONNECTION_ACCESS_PRIVILEGES,
+  CREDENTIAL_ACCESS_PRIVILEGES,
   DATASET_ACCESS_PRIVILEGES,
   PAGE_ACCESS_PRIVILEGES,
   PAYMENT_ACCESS_PRIVILEGES,
@@ -74,6 +75,7 @@ const ShareResourcePopup: FC<ShareResourcePopupProps> = (props) => {
     version,
     additionalOptions,
     forceAdminAccess = false,
+    customTrigger,
   } = props;
   const resourceId = props.resourceId || '';
   const [selectedRole, setSelectedRole] = useState<string>(resourceConfig.accessPrivilegesList[0]?.value ?? '');
@@ -136,6 +138,8 @@ const ShareResourcePopup: FC<ShareResourcePopupProps> = (props) => {
         return checkUserPrivilege(APP_ACCESS_PRIVILEGES.ADMIN);
       case ResourceType.AGENT:
         return checkUserPrivilege(AGENT_ACCESS_PRIVILEGES.ADMIN) || checkUserPrivilege(AGENT_ACCESS_PRIVILEGES.OWNER);
+      case ResourceType.CREDENTIAL:
+        return checkUserPrivilege(CREDENTIAL_ACCESS_PRIVILEGES.ADMIN);
       default:
         return false;
     }
@@ -484,14 +488,16 @@ const ShareResourcePopup: FC<ShareResourcePopupProps> = (props) => {
     <div className='flex w-fit'>
       <Popover open={openPopup} onOpenChange={handleTogglePopup}>
         <PopoverTrigger asChild>
-          <Button
-            size='small'
-            variant='secondary'
-            id={`share-${resourceType.toLowerCase()}-to-audience-btn`}
-            disabled={disable}
-          >
-            Share
-          </Button>
+          {customTrigger ?? (
+            <Button
+              size='small'
+              variant='secondary'
+              id={`share-${resourceType.toLowerCase()}-to-audience-btn`}
+              disabled={disable}
+            >
+              Share
+            </Button>
+          )}
         </PopoverTrigger>
         <PopoverPortal>
           <PopoverContent align='end' className='w-[420px] border-none bg-transparent p-0 shadow-none'>

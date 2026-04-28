@@ -112,19 +112,189 @@ make sync-from-main   # Stash changes, checkout main, pull, sync secrets, instal
 
 ### Component Internal Structure
 
-Follow this order within React components:
+Follow this order within React components and custom hooks:
 
 1. **State** — `useState`, `useRef`
 2. **Derived State** — `useMemo`, computed values, context
-3. **Hooks** — Custom hooks
-4. **Handlers** — `useCallback` wrapped event handlers
-5. **Render** — Early returns, JSX
+3. **Hooks** — Custom hooks, RTK Query hooks, mutations
+4. **Handlers** — `useCallback` wrapped event handlers (and any `useCallback` wrappers used by effects)
+5. **Effects** — `useEffect`, `useLayoutEffect`. Always placed at the bottom, just before render.
+6. **Render** — Early returns, JSX
+
+If Derived State depends on the output of a Hook (e.g. `useMemo` over `data` from `useGetXQuery`), the Hooks block may come before Derived State — keep all hooks of the same kind grouped, and keep Effects last regardless.
 
 ### useEffect Convention
 
-When a `useEffect` has more than a single statement, extract the logic into a named `useCallback` function and call it from the effect. Single-statement effects are fine inline.
+When a `useEffect` has more than a single statement, extract the logic into a named `useCallback` function (in the Handlers block) and call it from the effect. Single-statement effects are fine inline.
+
+The `useEffect` block always lives at the bottom of the component/hook body, after Handlers and immediately before render — never interleaved with handlers or hooks.
+
+### Function Prop Types
+
+Never write `() => void` inline for callback props. Use the shared `defaultFnType` alias from `@/types/commonTypes` (`type defaultFnType = () => void`) for all no-arg, no-return callbacks. This keeps prop signatures consistent across the codebase and makes intent obvious.
+
+```ts
+// ❌ Bad
+interface Props {
+  onClose: () => void;
+}
+
+// ✅ Good
+import type { defaultFnType } from '@/types/commonTypes';
+interface Props {
+  onClose: defaultFnType;
+}
+```
+
+For callbacks that take arguments or return a value, write the signature explicitly (no shared alias).
+
+### Defensive Programming
+
+- **Always early-return on null / undefined inputs.** Any function that accepts a value which could be `null` / `undefined` (props, hook returns, API responses, route params) must guard with an early return at the top of the function. Do not let `undefined` flow through downstream logic.
+- **Add null/optional-chain guards across the codebase.** Use `?.`, `??`, and explicit `if (!x) return ...` checks even when the type system says the value is non-nullable — runtime data from APIs, query params, and async sources can still be `undefined` in practice. Defensive guards have no cost and prevent runtime crashes.
+- **Hook return values must be plain data/handlers, never a wrapper function.** Custom hooks should return an object of constants (state, derived values, callbacks). Do not return a function as the hook's whole return value (e.g. `return () => doSomething`). Consumers expect a stable shape they can destructure, and a function-only return forces every consumer to invoke before using.
+
+```ts
+// ❌ Bad — no guard, hook returns a function
+const useFoo = (id: string) => {
+  return () => {
+    api.fetch(id).then(...);
+  };
+};
+
+// ✅ Good — early return, hook returns named handlers/state
+const useFoo = (id: string | null) => {
+  if (!id) return { isReady: false, handleFetch: noop };
+
+  const handleFetch = useCallback(() => api.fetch(id), [id]);
+  return { isReady: true, handleFetch };
+};
+```
+
+### Don't Reach for `useCallback` By Default
+
+Don't wrap every handler in `useCallback`. With React Compiler enabled (`reactCompiler: true` in `next.config`), inline handlers are auto-memoized — explicit `useCallback` adds noise without benefit in most cases.
+
+Only use `useCallback` when:
+
+1. The function is a **dependency of another hook** (`useEffect`, `useMemo`, another `useCallback`) — without it, the dependent hook re-runs every render.
+2. The function is passed to a **deeply-memoized child** (`React.memo`, `forwardRef` + `memo`) where referential stability actually changes behavior.
+3. The function is **returned from a custom hook** as part of its public API — consumers depend on a stable identity.
+
+For plain inline `onClick` / `onChange` handlers on an unmemoized component, write a regular function:
+
+```tsx
+// ❌ Avoid — useCallback adds noise without doing anything useful
+const handleClick = useCallback(() => setOpen(true), []);
+return <Button onClick={handleClick}>Open</Button>;
+
+// ✅ Prefer
+const handleClick = () => setOpen(true);
+return <Button onClick={handleClick}>Open</Button>;
+
+// ✅ Also fine — direct inline when handler is one liner
+return <Button onClick={() => setOpen(true)}>Open</Button>;
+```
+
+Same principle applies to `useMemo`: don't wrap a 2-op derivation; only memoize when the computation is genuinely expensive or the reference is consumed by another hook's deps.
+
+### Async Flow: Prefer `.then()/.catch()` Over `try/catch`
+
+For promise-returning calls (RTK Query mutations, `fetch`, any API call), prefer the `.then().catch()` chain over `async/await` wrapped in `try/catch`. The chain reads as a linear flow of success vs. failure handlers, plays nicely with `.unwrap()` from RTK Query, and avoids needing to remember to `await` inside guarded blocks.
+
+```ts
+// ❌ Avoid
+const handleSave = async () => {
+  try {
+    await updateCredential(payload).unwrap();
+    toast.success('Saved');
+    onClose();
+  } catch {
+    toast.error('Failed to save');
+  }
+};
+
+// ✅ Prefer
+const handleSave = () => {
+  updateCredential(payload)
+    .unwrap()
+    .then(() => {
+      toast.success('Saved');
+      onClose();
+    })
+    .catch(() => {
+      toast.error('Failed to save');
+    });
+};
+```
+
+`async/await` + `try/catch` is still acceptable when you need to coordinate multiple awaited steps inline (e.g. read a file, then upload, then patch metadata) — but the default for a single mutation + side effect is the chain form.
+
+### Pure Functions Live in `utils`
+
+- **Move every pure function out of components/hooks into the module's `utils` file.** A function is "pure" if it has no side effects — no `useState`/`setState`, no API calls, no `toast`, no DOM access, no `crypto.randomUUID()` reads of external clocks/randomness _that the caller cares about_. If it just transforms inputs into outputs, it belongs in `src/modules/<feature>/utils/<feature>.utils.ts` (or a shared util file).
+- This includes single-arg helpers, multi-arg transformers, factories, mappers, validators, formatters, and reducers — anything that doesn't touch React state or external I/O.
+- Closures over component state that are extracted into `useCallback` are **not** pure (they read the closure) — leave those as inline handlers.
+- **Every pure function in `utils` must have unit tests.** Tests live at `src/modules/<feature>/__tests__/<feature>.utils.test.ts`. The `__tests__` folder mirrors the module root, not the `utils` subfolder. Cover the happy path + edge cases (empty input, null/undefined, boundary values).
+
+```ts
+// ✅ Good — pure transformer in utils, fully tested
+// src/modules/credentials-vault/utils/credentials-vault.utils.ts
+export const credentialKeysToBody = (keys: CredentialKeyType[]): Record<string, string> => /* ... */;
+
+// src/modules/credentials-vault/__tests__/credentials-vault.utils.test.ts
+describe('credentialKeysToBody', () => {
+  it('skips empty rows', () => { /* ... */ });
+  it('trims keys and values', () => { /* ... */ });
+});
+```
+
+### Type / Interface Naming & Placement
+
+- **Always end type and interface names with the `Type` suffix** (e.g. `CredentialResponseType`, `CredentialDialogPropsType`, `WidgetDataType`). Do not use bare names like `Credential` or `User` for types — keeps types visually distinct from values/components throughout the codebase.
+- **Co-locate types in a module's `types/` folder.** Module-specific types live in `src/modules/<feature>/types/<feature>.types.ts`. API shapes live in `src/types/api/<domain>.types.ts`. Avoid declaring exported types inline at the top of component files; only purely-private inline interfaces (used in a single component file) may stay inline.
+- **Props interfaces** still end with `Props` per existing convention (e.g. `ButtonProps`) — `Props` is itself the type-suffix for that case, so don't double up to `ButtonPropsType`. Apply `Type` suffix only where `Props` is not already there.
+
+### Skeleton Components
+
+- **Each module owns its skeleton components in a dedicated `skeletons/` folder** under the module: `src/modules/<feature>/skeletons/<Name>Skeleton.tsx`. Do not declare skeleton components inline at the top of feature components.
+- **Skeletons are reusable presentational components** — extract any inline `<div>` cluster of `<Skeleton />` blocks into a named component the moment it's used.
+- **Repeated rows take a `rowCount` prop** so callers can size the skeleton to the expected data length. Default the prop to a reasonable number (e.g. `3`).
+- Skeleton component names end with `Skeleton` (e.g. `CredentialDialogSkeleton`, `DatasetTableSkeleton`).
+- **Skeleton prop types are exempt from the "co-locate types in `types/`" rule.** Declare the skeleton's props interface inline in the skeleton file itself (still with the `Type` suffix). Skeletons are leaf presentational components and their props are rarely shared.
+
+```tsx
+// ✅ Good — src/modules/credentials-vault/skeletons/CredentialDialogSkeleton.tsx
+interface CredentialDialogSkeletonPropsType {
+  rowCount?: number;
+}
+
+const CredentialDialogSkeleton = ({ rowCount = 2 }: CredentialDialogSkeletonPropsType) => (
+  <div className='flex flex-col gap-6'>
+    {Array.from({ length: rowCount }).map((_, idx) => (
+      <Skeleton key={idx} className='h-10 w-full' />
+    ))}
+  </div>
+);
+```
 
 ### Styling
+
+- **Always use `cn` for dynamic classNames.** Any time a className is composed from a base + a conditional, an array, or a prop-driven variant, wrap it in `cn(...)` from `@zamp-platform/ui/utils`. Never concatenate with template strings, ternaries returning `'foo bar'`, or `&& 'class-name'` — these don't dedupe Tailwind classes and break the prettier-plugin-tailwindcss class sort.
+
+```tsx
+// ❌ Bad
+<div className={`flex items-center ${isActive ? 'bg-blue-500' : 'bg-gray-100'}`} />
+<div className={'flex' + (disabled && ' opacity-50')} />
+
+// ✅ Good
+<div className={cn('flex items-center', isActive ? 'bg-blue-500' : 'bg-gray-100')} />
+<div className={cn('flex', disabled && 'opacity-50')} />
+```
+
+Static-only classNames may stay as plain string literals.
+
+### Styling (Tailwind / motion)
 
 - Tailwind CSS v4 with `cva` (class variance authority) for component variants
 - Use semantic color tokens (kebab-case: `bg-gray-400`)

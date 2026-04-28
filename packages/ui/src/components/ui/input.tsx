@@ -69,7 +69,7 @@ const getInputPadding = (size: SizeType, position: IconPosition, hasIcon: boolea
 
 export interface InputProps
   extends Omit<React.InputHTMLAttributes<HTMLInputElement>, 'size'>, VariantProps<typeof inputVariants> {
-  error?: boolean;
+  error?: boolean | string;
   icon?: React.ReactNode;
   iconPosition?: IconPosition;
 }
@@ -90,16 +90,18 @@ const Input = ({
   wrapperClassName?: string;
 }) => {
   const currentSize = size || 'medium';
+  const hasError = !!error;
+  const errorMessage = typeof error === 'string' ? error : undefined;
 
-  return (
-    <div className={cn('relative flex items-center', wrapperClassName)}>
+  const inputElement = (
+    <div className={cn('relative flex items-center', !errorMessage && wrapperClassName)}>
       {icon && <div className={`absolute ${getIconClasses(currentSize, iconPosition)}`}>{icon}</div>}
       <input
         type={type}
         className={cn(
           inputVariants({
             size: currentSize,
-            variant: error ? 'error' : variant,
+            variant: hasError ? 'error' : variant,
           }),
           getInputPadding(currentSize, iconPosition, !!icon),
           className,
@@ -107,6 +109,15 @@ const Input = ({
         ref={ref}
         {...props}
       />
+    </div>
+  );
+
+  if (!errorMessage) return inputElement;
+
+  return (
+    <div className={cn('flex flex-col gap-1', wrapperClassName)}>
+      {inputElement}
+      <span className='f-11-450 text-RED_700'>{errorMessage}</span>
     </div>
   );
 };

@@ -2,6 +2,7 @@ import { API_ENDPOINTS } from 'apis/apiEndpoint.constants';
 import {
   AGENT_ACCESS_PRIVILEGES,
   CONVERSATION_ACCESS_PRIVILEGES,
+  CREDENTIAL_ACCESS_PRIVILEGES,
   DATASET_ACCESS_PRIVILEGES,
   PAGE_ACCESS_PRIVILEGES,
   PAYMENT_ACCESS_PRIVILEGES,
@@ -129,6 +130,18 @@ export const CHANGE_ACCESS_PRIVILEGES_LIST: ResourcePrivilege[] = [
     value: CONVERSATION_ACCESS_PRIVILEGES.VIEWER,
     desc: 'Can view conversation only',
   },
+  {
+    kind: ResourceType.CREDENTIAL,
+    label: 'Admin',
+    value: CREDENTIAL_ACCESS_PRIVILEGES.ADMIN,
+    desc: 'Can manage and share credential',
+  },
+  {
+    kind: ResourceType.CREDENTIAL,
+    label: 'Viewer',
+    value: CREDENTIAL_ACCESS_PRIVILEGES.VIEWER,
+    desc: 'Can view credential only',
+  },
 ];
 
 export const resourcePrivilegeRank = {
@@ -164,6 +177,9 @@ export const RESOURCE_PRIVILEGES: Record<ResourceType, ResourcePrivilege[]> = {
   [ResourceType.AGENT]: CHANGE_ACCESS_PRIVILEGES_LIST.filter((privilege) => privilege.kind === ResourceType.AGENT),
   [ResourceType.CONVERSATION]: CHANGE_ACCESS_PRIVILEGES_LIST.filter(
     (privilege) => privilege.kind === ResourceType.CONVERSATION,
+  ),
+  [ResourceType.CREDENTIAL]: CHANGE_ACCESS_PRIVILEGES_LIST.filter(
+    (privilege) => privilege.kind === ResourceType.CREDENTIAL,
   ),
 };
 
@@ -250,6 +266,16 @@ export const conversationConfig: ShareResourceConfig = {
   },
 };
 
+export const credentialConfig: ShareResourceConfig = {
+  type: ResourceType.CREDENTIAL,
+  accessPrivilegesList: RESOURCE_PRIVILEGES[ResourceType.CREDENTIAL],
+  displayName: 'credential',
+  toastMessages: {
+    success: 'Credential shared successfully',
+    failed: 'Failed to share credential',
+  },
+};
+
 export const resourceTypeRouteMap = {
   [ResourceType.DATASET]: 'datasets',
   [ResourceType.PAGE]: 'pages',
@@ -260,6 +286,7 @@ export const resourceTypeRouteMap = {
   [ResourceType.APP]: 'app',
   [ResourceType.AGENT]: 'agent',
   [ResourceType.CONVERSATION]: 'conversation',
+  [ResourceType.CREDENTIAL]: 'credential',
 };
 
 export const ACCESS_MESSAGES_ADMIN_ROLE = 'Admin will have access to all data';

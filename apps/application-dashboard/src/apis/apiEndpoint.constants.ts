@@ -277,6 +277,13 @@ export const API_ENDPOINTS = {
   FILES_UPLOAD_COMPLETE_POST: `files/upload/complete`,
   FILES_UPLOAD_CANCEL_DELETE: `files/upload/{{upload_id}}`,
 
+  // Credentials Vault
+  CREDENTIALS_GET: `credentials`,
+  CREDENTIALS_POST: `credentials`,
+  CREDENTIAL_GET: `credentials/{{credential_id}}`,
+  CREDENTIAL_PUT: `credentials/{{credential_id}}`,
+  CREDENTIAL_DELETE: `credentials/{{credential_id}}`,
+
   // Apps
   APPS_GET: `apps`,
 
