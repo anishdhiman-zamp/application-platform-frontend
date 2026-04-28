@@ -16,7 +16,7 @@ import {
 } from '@zamp-platform/ui';
 import { cn } from '@zamp-platform/ui/utils';
 import { ThumbsDown, ThumbsUp } from 'lucide-react';
-import React, { FC, useCallback, useMemo, useRef, useState } from 'react';
+import React, { FC, useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { toast } from 'sonner';
 
 import { INPUT_FILE_FORMATS } from '@/types/common/mime';
@@ -72,6 +72,8 @@ const ChatFeedback: FC<ChatFeedbackProps> = ({
 }) => {
   const isRejectingRef = useRef(false);
   const transcriptInsertionIndexRef = useRef(-1);
+  const likeResetTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const dislikeResetTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [issueType, setIssueType] = useState<string>('');
@@ -190,7 +192,13 @@ const ChatFeedback: FC<ChatFeedbackProps> = ({
           sentiment: FeedbackSentiment.THUMBS_UP,
         },
       }).unwrap();
+
+      if (likeResetTimeoutRef.current) clearTimeout(likeResetTimeoutRef.current);
+      likeResetTimeoutRef.current = setTimeout(() => {
+        setLikeGiven(false);
+      }, 2000);
     } catch {
+      if (likeResetTimeoutRef.current) clearTimeout(likeResetTimeoutRef.current);
       setLikeGiven(false);
       toast.error('Failed to submit feedback');
     }
@@ -221,7 +229,13 @@ const ChatFeedback: FC<ChatFeedbackProps> = ({
       setFeedbackGiven(true);
       setIsModalOpen(false);
       resetForm();
+      if (dislikeResetTimeoutRef.current) clearTimeout(dislikeResetTimeoutRef.current);
+      dislikeResetTimeoutRef.current = setTimeout(() => {
+        setFeedbackGiven(false);
+      }, 2000);
     } catch {
+      if (dislikeResetTimeoutRef.current) clearTimeout(dislikeResetTimeoutRef.current);
+      setFeedbackGiven(false);
       toast.error('Failed to submit feedback');
     }
   };
@@ -275,6 +289,13 @@ const ChatFeedback: FC<ChatFeedbackProps> = ({
       onRecordingError?.();
     }
   };
+
+  useEffect(() => {
+    return () => {
+      if (likeResetTimeoutRef.current) clearTimeout(likeResetTimeoutRef.current);
+      if (dislikeResetTimeoutRef.current) clearTimeout(dislikeResetTimeoutRef.current);
+    };
+  }, []);
 
   return (
     <>
@@ -344,6 +365,10 @@ const ChatFeedback: FC<ChatFeedbackProps> = ({
           </DialogHeader>
 
           <DialogBody className='flex flex-col gap-y-4 px-5'>
+            <p className='text-GRAY_700 f-12-450'>
+              Sorry this one didn't hit the mark. When you submit, we'll share this whole conversation with the Zamp
+              team so we can dig into what went wrong and make things better.
+            </p>
             <div className='space-y-2'>
               <label className='text-GRAY_700 f-12-500 block'>What type of issue do you wish to report?</label>
               <Select
