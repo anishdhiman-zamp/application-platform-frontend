@@ -192,6 +192,10 @@ export const MentionPopover = React.forwardRef<MentionPopoverHandle, MentionPopo
             Tab
           </kbd>
           <span className='text-GRAY_700 text-[11px] leading-none font-[450]'>to switch</span>
+          <kbd className='border-GRAY_400 bg-BG_WHITE text-GRAY_950 ml-2 inline-flex h-[14px] items-center justify-center rounded-[4px] border px-1 text-[10px] leading-none font-[450]'>
+            Space
+          </kbd>
+          <span className='text-GRAY_700 text-[11px] leading-none font-[450]'>to multi-select</span>
         </div>
       </div>
     );
