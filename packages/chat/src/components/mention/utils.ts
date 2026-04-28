@@ -32,7 +32,7 @@ interface ChipRef {
  */
 export const resolveChipClickHandler = (
   ref: ChipRef,
-  actions: Pick<ChatActionsContextType, 'onFileOpen' | 'onDatasetOpen'>,
+  actions: Pick<ChatActionsContextType, 'onFileOpen' | 'onDatasetOpen' | 'onTaskOpen'>,
 ): (() => void) | null => {
   const label = ref.display_label || ref.resource_id;
   if (ref.kind === MENTION_KIND.FILE && actions.onFileOpen) {
@@ -43,6 +43,9 @@ export const resolveChipClickHandler = (
   }
   if (ref.kind === MENTION_KIND.DATASET && actions.onDatasetOpen) {
     return () => actions.onDatasetOpen!(ref.resource_id, label);
+  }
+  if (ref.kind === MENTION_KIND.TASK && actions.onTaskOpen) {
+    return () => actions.onTaskOpen!(ref.resource_id, label);
   }
   return null;
 };

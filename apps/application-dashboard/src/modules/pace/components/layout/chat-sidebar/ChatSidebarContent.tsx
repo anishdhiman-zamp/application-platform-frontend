@@ -22,6 +22,7 @@ import { EVENT_TYPE } from '@zamp-platform/utils/event-bus';
 import { useDynamicTabs } from 'modules/pace/components/dynamic-tabs/useDynamicTabs';
 import ChatConversationContent from 'modules/pace/components/layout/chat-sidebar/ChatConversationContent';
 import { useEventBus } from '@/app/_providers/sse-provider';
+import { getChatTaskRoute } from '@/constants/routeConfig';
 import { useResourceAccess } from '@/hooks/useResourceAccess';
 import ChatTopbar from '@/modules/pace/components/chat/ChatTopbar';
 import ModelSelector from '@/modules/pace/components/chat/ModelSelector';
@@ -32,6 +33,7 @@ import { useReferencePicker } from '@/modules/pace/hooks/useReferencePicker';
 import { BrowserViewerDisplayState } from '@/modules/pace/pace.constants';
 import { usePaceContext } from '@/modules/pace/pace.context';
 import { CHAT_SIDEBAR_STATE, TAB_TYPE } from '@/modules/pace/pace.types';
+import { preserveSidebarParam } from '@/modules/pace/pace.utils';
 import {
   CONVERSATION_ACCESS_PRIVILEGES,
   ResourceType as ShareResourceType,
@@ -168,11 +170,17 @@ const ChatSidebarContent = ({
   );
 
   const handleTaskOpen = useCallback(
-    (taskId: string, name: string, fullRoute: string) => {
+    (taskId: string, name: string, fullRoute?: string) => {
       collapseSidebarIfExpanded();
-      openTaskTab(taskId, name || taskId, undefined, fullRoute);
+      const route =
+        fullRoute ??
+        preserveSidebarParam(
+          getChatTaskRoute({ taskId, conversationId: conversationId ?? undefined, taskTitle: name }),
+        );
+
+      openTaskTab(taskId, name || taskId, undefined, route);
     },
-    [collapseSidebarIfExpanded, openTaskTab],
+    [collapseSidebarIfExpanded, openTaskTab, conversationId],
   );
 
   const handleBrowserOpen = useCallback(
@@ -335,7 +343,7 @@ const ChatSidebarContent = ({
       />
 
       {!isConversationNotFound && (
-        <ChatActionsProvider onFileOpen={handleFileOpen} onDatasetOpen={handleDatasetOpen}>
+        <ChatActionsProvider onFileOpen={handleFileOpen} onDatasetOpen={handleDatasetOpen} onTaskOpen={handleTaskOpen}>
           <div className='bg-BG_WHITE sticky bottom-0 z-10 mx-auto w-full max-w-[700px] px-3 pb-3'>
             {renderChatInput()}
           </div>

@@ -158,7 +158,18 @@ export const buildRecentHits = (dynamicTabs: DynamicTab[]): ReferenceSearchHit[]
     const tab = dynamicTabs[i];
     const type = tab.type ?? TAB_TYPE.FILE;
 
-    if (type !== TAB_TYPE.FILE && type !== TAB_TYPE.DATASET) continue;
+    if (type !== TAB_TYPE.FILE && type !== TAB_TYPE.DATASET && type !== TAB_TYPE.TASK) continue;
+
+    if (type === TAB_TYPE.TASK) {
+      hits.push({
+        kind: MENTION_KIND.TASK,
+        resource_id: tab.id,
+        display_label: tab.name,
+        icon_hint: 'task',
+      });
+      continue;
+    }
+
     const isDataset = type === TAB_TYPE.DATASET;
     const dot = tab.name.lastIndexOf('.');
     const extension = dot > 0 && dot < tab.name.length - 1 ? tab.name.slice(dot + 1) : '';

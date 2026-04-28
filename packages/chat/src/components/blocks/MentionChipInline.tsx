@@ -16,14 +16,14 @@ import { resolveChipClickHandler } from '../mention/utils';
  * matching handler is available in ChatActionsContext.
  */
 const MentionChipInline = ({ reference }: { reference: ReferenceRef }) => {
-  const { onFileOpen, onDatasetOpen } = useChatActions();
+  const { onFileOpen, onDatasetOpen, onTaskOpen } = useChatActions();
   const label = reference.display_label || reference.resource_id;
   const kind = reference.kind;
   const isFile = kind === MENTION_KIND.FILE;
   const extension = isFile ? extensionFromFilename(label) : 'txt';
   const colors = getColorsForExtension(extension);
   const FileIconComponent = isFile ? getIconForExtension(extension) : null;
-  const SemanticIcon = isFile ? null : resolveSemanticIcon(reference.icon_hint);
+  const SemanticIcon = isFile ? null : resolveSemanticIcon(reference.icon_hint || kind);
   const click = resolveChipClickHandler(
     {
       kind,
@@ -31,7 +31,7 @@ const MentionChipInline = ({ reference }: { reference: ReferenceRef }) => {
       display_label: label,
       provider_hints: reference.provider_hints,
     },
-    { onFileOpen, onDatasetOpen },
+    { onFileOpen, onDatasetOpen, onTaskOpen },
   );
   const isClickable = Boolean(click);
 

@@ -3,6 +3,7 @@ export const RECENT_TAB = 'recent';
 export const MENTION_KIND = {
   FILE: 'file',
   DATASET: 'dataset',
+  TASK: 'task',
 } as const;
 
 export const V1_KINDS = new Set<string>(Object.values(MENTION_KIND));

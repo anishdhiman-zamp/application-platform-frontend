@@ -18,6 +18,7 @@ import {
 } from '@zamp-platform/conversation-stream';
 import { VOICE_CHAT_STATE } from '@zamp-platform/ui/types';
 import { AnimatePresence, motion } from 'framer-motion';
+import { getChatTaskRoute } from '@/constants/routeConfig';
 import { useVoiceChatContext } from '@/contexts/VoiceChatContext';
 import { useAppSelector } from '@/hooks/toolkit';
 import ChatHistory from '@/modules/pace/components/chat/ChatHistory';
@@ -31,6 +32,7 @@ import { NO_ANIMATION } from '@/modules/pace/pace.animations';
 import { STUB_CONVERSATION_STATE } from '@/modules/pace/pace.constants';
 import { usePaceContext } from '@/modules/pace/pace.context';
 import { CHAT_SIDEBAR_STATE, TAB_TYPE } from '@/modules/pace/pace.types';
+import { preserveSidebarParam } from '@/modules/pace/pace.utils';
 import type { RootState } from '@/store';
 
 const ChatHomePage = () => {
@@ -56,6 +58,7 @@ const ChatHomePage = () => {
   const username = useAppSelector((state: RootState) => state.user.user?.username) ?? '';
   const { openTab } = useDynamicTabs({ type: TAB_TYPE.FILE });
   const { openTab: openDatasetTab } = useDynamicTabs({ type: TAB_TYPE.DATASET });
+  const { openTab: openTaskTab } = useDynamicTabs({ type: TAB_TYPE.TASK });
 
   const fileDropHandlerRef = useRef<((files: FileList) => void) | null>(null);
   const addFileReferenceRef = useRef<((ref: { path: string; name: string }) => void) | null>(null);
@@ -113,6 +116,16 @@ const ChatHomePage = () => {
     [openDatasetTab, expandSidebarIfCollapsed],
   );
 
+  const handleTaskOpen = useCallback(
+    (taskId: string, name: string, fullRoute?: string) => {
+      expandSidebarIfCollapsed();
+      const route = fullRoute ?? preserveSidebarParam(getChatTaskRoute({ taskId, taskTitle: name }));
+
+      openTaskTab(taskId, name || taskId, undefined, route);
+    },
+    [openTaskTab, expandSidebarIfCollapsed],
+  );
+
   const interceptedActions = useMemo(
     () =>
       createConversationActions({
@@ -161,7 +174,11 @@ const ChatHomePage = () => {
           <DropOverlay isVisible={isDragOver} />
           <AnimatePresence>
             {!isExpanded && (
-              <ChatActionsProvider onFileOpen={handleFileOpen} onDatasetOpen={handleDatasetOpen}>
+              <ChatActionsProvider
+                onFileOpen={handleFileOpen}
+                onDatasetOpen={handleDatasetOpen}
+                onTaskOpen={handleTaskOpen}
+              >
                 <motion.div
                   key='chat-home-page'
                   initial={false}

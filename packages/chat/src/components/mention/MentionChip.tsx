@@ -25,8 +25,8 @@ export const MentionChip = ({ node, deleteNode }: ReactNodeViewProps) => {
   const iconHint = isFile ? (attrs.iconHint ?? '') : 'txt';
   const colors = getColorsForExtension(iconHint);
   const FileIconComponent = isFile ? getIconForExtension(iconHint) : null;
-  const SemanticIcon = isFile ? null : resolveSemanticIcon(attrs.iconHint);
-  const { onFileOpen, onDatasetOpen } = useChatActions();
+  const SemanticIcon = isFile ? null : resolveSemanticIcon(attrs.iconHint || attrs.kind);
+  const { onFileOpen, onDatasetOpen, onTaskOpen } = useChatActions();
   const handleClick = resolveChipClickHandler(
     {
       kind: attrs.kind,
@@ -34,7 +34,7 @@ export const MentionChip = ({ node, deleteNode }: ReactNodeViewProps) => {
       display_label: attrs.label,
       provider_hints: attrs.providerHints ?? {},
     },
-    { onFileOpen, onDatasetOpen },
+    { onFileOpen, onDatasetOpen, onTaskOpen },
   );
   const isClickable = Boolean(handleClick);
 
