@@ -309,6 +309,18 @@ const handleAuthenticatedRoutes = async (request: NextRequest) => {
 export async function proxy(request: NextRequest) {
   const { pathname, search } = request.nextUrl;
 
+  // Region consolidation: app-us.zamp.ai was retired — permanently redirect to app.zamp.ai,
+  // preserving path + query so deep links keep working.
+  if (request.headers.get('host') === DOMAINS.US_PRODUCTION) {
+    const target = new URL(request.nextUrl.toString());
+
+    target.host = DOMAINS.PRODUCTION;
+    target.protocol = 'https:';
+    target.port = '';
+
+    return NextResponse.redirect(target, 308);
+  }
+
   // Derive canary status from the active org directly — more reliable than the cookie
   // which can lag by one request after an org switch.
   const activeOrgId = getServerSideCookie(request, ACTIVE_ORG_ID_COOKIE);

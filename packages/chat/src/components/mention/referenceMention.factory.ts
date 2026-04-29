@@ -67,16 +67,13 @@ export const createReferenceMention = ({ adapter, onOpenChange }: FactoryOptions
       let unmountTimer: ReturnType<typeof setTimeout> | null = null;
       let pendingReopen = false;
       let dismissed = false;
-      let dismissedAtQuery: string | null = null;
 
       const markDismissed = () => {
         dismissed = true;
-        dismissedAtQuery = currentQuery;
       };
 
       const reopenAfterDismiss = () => {
         dismissed = false;
-        dismissedAtQuery = null;
         if (unmountTimer) {
           clearTimeout(unmountTimer);
           unmountTimer = null;
@@ -96,6 +93,12 @@ export const createReferenceMention = ({ adapter, onOpenChange }: FactoryOptions
         markDismissed();
         onOpenChange?.(false);
         playExitAndUnmount();
+      };
+
+      const handleEditorFocus = () => {
+        // Reopen on refocus while a suggestion is still active so the user doesn't have to retype.
+        if (!dismissed || !currentCommand) return;
+        reopenAfterDismiss();
       };
 
       const playExitAndUnmount = () => {
@@ -129,11 +132,7 @@ export const createReferenceMention = ({ adapter, onOpenChange }: FactoryOptions
         }
 
         popoverEl = document.createElement('div');
-        // Anchor popover inside the composer subtree. When the composer unmounts
-        // (route change, conversation switch, refresh), the popover goes with it —
-        // no leaked DOM on other pages, no duplicate popovers across editor
-        // instances. Absolute positioning against composer = 1 popover per editor
-        // by DOM ownership.
+        // Anchor inside the composer subtree so the popover unmounts with the editor — no leaked DOM, no duplicates.
         popoverEl.style.position = 'absolute';
         popoverEl.style.left = '0';
         popoverEl.style.right = '0';
@@ -157,7 +156,7 @@ export const createReferenceMention = ({ adapter, onOpenChange }: FactoryOptions
           unmountTimer = null;
         }
         document.removeEventListener('mousedown', handleOutsideMouseDown, true);
-        currentEditor = null;
+        // Keep `currentEditor` alive so the focus listener can reopen post-dismiss; cleared in `onExit`.
         if (r) queueMicrotask(() => r.unmount());
         if (el?.parentNode) el.parentNode.removeChild(el);
       };
@@ -208,8 +207,8 @@ export const createReferenceMention = ({ adapter, onOpenChange }: FactoryOptions
           currentQuery = props.query ?? '';
           currentCommand = props.command;
           currentEditor = props.editor;
+          currentEditor?.on('focus', handleEditorFocus);
           dismissed = false;
-          dismissedAtQuery = null;
           if (unmountTimer) {
             clearTimeout(unmountTimer);
             unmountTimer = null;
@@ -224,26 +223,23 @@ export const createReferenceMention = ({ adapter, onOpenChange }: FactoryOptions
           const nextQuery = props.query ?? '';
           currentCommand = props.command;
           currentEditor = props.editor;
-          // Reopen on continued typing after dismiss; keep closed on backspace.
-          if (dismissed) {
-            const snapshot = dismissedAtQuery ?? '';
-            if (nextQuery.length > snapshot.length && nextQuery.startsWith(snapshot)) {
-              currentQuery = nextQuery;
-              reopenAfterDismiss();
-              return;
-            }
+          // Any query change after dismiss means the user is still editing — reopen.
+          if (dismissed && nextQuery !== currentQuery) {
             currentQuery = nextQuery;
+            reopenAfterDismiss();
             return;
           }
           currentQuery = nextQuery;
-          render();
+          if (!dismissed) render();
         },
         onKeyDown: (props: { event: KeyboardEvent }) => {
           if (dismissed) return false;
           return popoverRef.current?.onKeyDown(props.event) ?? false;
         },
         onExit: () => {
+          currentEditor?.off('focus', handleEditorFocus);
           currentCommand = null;
+          currentEditor = null;
           pendingRenders.delete(render);
           if (pendingReopen) {
             pendingReopen = false;
@@ -251,7 +247,6 @@ export const createReferenceMention = ({ adapter, onOpenChange }: FactoryOptions
           }
           if (dismissed) {
             dismissed = false;
-            dismissedAtQuery = null;
             return;
           }
           onOpenChange?.(false);
@@ -277,11 +272,9 @@ export const createReferenceMention = ({ adapter, onOpenChange }: FactoryOptions
       if (hints && Object.keys(hints).length > 0) params.set('hints', JSON.stringify(hints));
       const queryString = params.toString();
       const query = queryString ? `?${queryString}` : '';
-      // Escape `\` and `]` in the label so filenames like `report [draft].pdf` don't close the
-      // `[...]` segment early. The tokenizer reverses this via unescapeMentionLabel.
+      // Escape `\` and `]` so labels like `report [draft].pdf` don't close the `[...]` segment.
       const label = rawLabel.replace(/\\/g, '\\\\').replace(/\]/g, '\\]');
-      // encodeURIComponent leaves `! ' ( ) * - . _ ~` literal. Of those only `(` and `)` delimit the
-      // markdown link's `(...)` segment, so we encode them explicitly; the rest are URL-safe.
+      // Encode `(` and `)` explicitly — encodeURIComponent leaves them literal, but they delimit `(...)`.
       const encodedId = encodeURIComponent(id).replace(/\(/g, '%28').replace(/\)/g, '%29');
       const markdown = `@[${label}](mention://${kind}/${encodedId}${query})`;
       return markdown;

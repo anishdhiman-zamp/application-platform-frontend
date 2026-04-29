@@ -48,12 +48,13 @@ export const useReferenceSearch = ({
   }, []);
 
   const syncItems = useCallback(async () => {
+    const id = ++fetchIdRef.current;
+
     if (!debouncedQuery) {
       markShown(activeTab, '', readEmptyStateItems(adapter, activeTab));
       return;
     }
 
-    const id = ++fetchIdRef.current;
     const isRecent = activeTab === RECENT_TAB;
     const kinds = isRecent ? Array.from(V1_KINDS) : [activeTab];
     const results = await Promise.all(

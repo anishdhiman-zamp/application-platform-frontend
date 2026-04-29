@@ -24,6 +24,8 @@ const CATCH_UP_THRESHOLD = 40;
 const MIN_SPEED = 4;
 /** ms-per-char used when draining remaining text after stream ends. */
 const DRAIN_SPEED = 8;
+/** Backlog (chars) above which we snap on stream end instead of draining — drops stale typewriter replays after a hidden-tab return. */
+const SNAP_BACKLOG_THRESHOLD = 200;
 
 export function useTypewriter(fullText: string, baseSpeed = 33, active = true): TypewriterResult {
   const wasEverActiveRef = useRef(active);
@@ -32,6 +34,7 @@ export function useTypewriter(fullText: string, baseSpeed = 33, active = true): 
   const rafRef = useRef<number>(0);
   const lastFrameTimeRef = useRef<number>(0);
   const prevFullTextRef = useRef(fullText);
+  const prevActiveRef = useRef(active);
   const activeRef = useRef(active);
 
   if (active) wasEverActiveRef.current = true;
@@ -47,6 +50,14 @@ export function useTypewriter(fullText: string, baseSpeed = 33, active = true): 
     displayedRef.current = 0;
   }
   prevFullTextRef.current = fullText;
+
+  // On stream end (active true → false) with a large backlog, the user was on a hidden tab while RAF was throttled —
+  // draining at DRAIN_SPEED would replay text they already missed. Snap to the end instead.
+  if (prevActiveRef.current && !active && fullText.length - displayedRef.current > SNAP_BACKLOG_THRESHOLD) {
+    displayedRef.current = fullText.length;
+    setDisplayed(fullText.length);
+  }
+  prevActiveRef.current = active;
 
   const tick = useCallback(
     (now: number) => {

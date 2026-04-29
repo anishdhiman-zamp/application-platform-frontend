@@ -2,33 +2,19 @@ import { captureException, captureMessage } from '@sentry/browser';
 import {
   type Block,
   BLOCK_TYPE,
-  ChatMessageType,
-  ResourceType,
-  SenderType,
   StreamingContentBlockDeltaType,
   StreamingContentBlockType,
-  type StreamingState,
   streamingStateStore,
   type TaskContentBlock,
 } from '@zamp-platform/chat';
 
 type MapAny = Record<string, unknown>;
 
-// Per-session de-dupe so Sentry isn't spammed when BE ships a new delta/block type.
+// De-dupe Sentry reports for new delta/block types per session.
 const reportedUnknownDeltaTypes = new Set<string>();
 const reportedUnknownBlockTypes = new Set<string>();
 
-/**
- * Handles content_block_start / content_block_delta / content_block_stop events.
- * Works for both flat (per-conversation SSE) and wrapped (global SSE) formats —
- * caller provides the conversationId and the inner payload.
- *
- * On page-refresh the backend replays from message_start, so content_block_start
- * is always guaranteed to arrive before any content_block_delta for a given block.
- *
- * Uses bufferDelta() for content_block_delta (RAF-batched, smooth 60fps).
- * Uses synchronous update() for start/stop (infrequent, need immediate notification).
- */
+/** Routes content_block_* events into streamingStateStore. Deltas use RAF-batched bufferDelta; start/stop use synchronous update(). */
 export function handleContentBlockEvent(conversationId: string, type: string, index: number, payload: MapAny): void {
   try {
     switch (type) {
@@ -87,8 +73,7 @@ export function handleContentBlockEvent(conversationId: string, type: string, in
             } as TaskContentBlock;
             break;
           default:
-            // Only TOOL_USE legitimately reaches default (the other BLOCK_TYPE values
-            // each have explicit cases above). Anything else is a new block type from BE.
+            // Only TOOL_USE is expected here; anything else is a new block type from BE.
             if (blockType && blockType !== BLOCK_TYPE.TOOL_USE && !reportedUnknownBlockTypes.has(blockType)) {
               reportedUnknownBlockTypes.add(blockType);
               captureMessage('chat.streaming.unknown_block_type', {
@@ -112,25 +97,7 @@ export function handleContentBlockEvent(conversationId: string, type: string, in
         }
 
         streamingStateStore.update(conversationId, (prev) => {
-          // On page-refresh with ?message_id=, the server replays content blocks
-          // without a preceding message_start. Auto-create the streaming entry
-          // so blocks are not silently dropped.
-          if (!prev) {
-            const newState: StreamingState = {
-              resource_type: ResourceType.ORGANIZATION,
-              resource_id: '',
-              conversation_id: conversationId,
-              id: '',
-              message_content: { elements: [newBlock] },
-              message_type: ChatMessageType.SYSTEM,
-              sender_type: SenderType.ASSISTANT,
-              sender_name: 'assistant',
-              timestamp: new Date().toISOString(),
-              metadata: {},
-              is_active: true,
-            };
-            return newState;
-          }
+          if (!prev) return prev;
 
           const existingBlocks = prev.message_content?.elements ?? [];
           return {
@@ -148,11 +115,7 @@ export function handleContentBlockEvent(conversationId: string, type: string, in
         const delta = payload.delta as MapAny;
         const deltaType = delta?.type as string;
 
-        // TOOL_USE_BLOCK_UPDATE_DELTA is low-frequency (once per tool call) and
-        // carries display_name updates that must appear immediately.  Using the
-        // synchronous update() path avoids RAF-batching delays — RAF doesn't fire
-        // in background tabs, which can postpone display_name rendering until the
-        // tab regains focus.
+        // Bypass RAF-batching: RAF doesn't fire in background tabs and would delay display_name updates.
         if (deltaType === StreamingContentBlockDeltaType.TOOL_USE_BLOCK_UPDATE_DELTA) {
           streamingStateStore.update(conversationId, (prev) => {
             if (!prev) return prev;
@@ -182,8 +145,7 @@ export function handleContentBlockEvent(conversationId: string, type: string, in
           break;
         }
 
-        // High-frequency deltas (text, thinking, input_json) use RAF-batched
-        // bufferDelta for smooth 60fps rendering.
+        // High-frequency deltas: RAF-batched for 60fps rendering.
         streamingStateStore.bufferDelta(conversationId, (draft) => {
           const elements = draft.message_content?.elements;
           if (!elements) return;

@@ -79,8 +79,8 @@ export const ConversationProvider: React.FC<ConversationProviderProps> = ({
   const [isBrowserStreamingAvailable, setIsBrowserStreamingAvailable] = useState(false);
   const [browserSessionId, setBrowserSessionId] = useState<string | undefined>(undefined);
   const [taskSummaries, setTaskSummaries] = useState<Record<string, string>>({});
+  const [hasStoppedSinceLastUserSend, setHasStoppedSinceLastUserSend] = useState(false);
 
-  // True only for newly created conversations — permanent skip, not a transient resourceId gap.
   const isNewConversationSkip =
     isNewlyCreatedConversationRef.current === externalConversationId ||
     isNewlyCreatedConversationRef.current === _conversationId;
@@ -126,8 +126,11 @@ export const ConversationProvider: React.FC<ConversationProviderProps> = ({
   isStreamingRef.current = isStreaming;
 
   const isAnalysing = useMemo(
-    () => messages.length > 0 && messages[messages.length - 1]?.sender_type === SenderType.USER,
-    [messages],
+    () =>
+      !hasStoppedSinceLastUserSend &&
+      messages.length > 0 &&
+      messages[messages.length - 1]?.sender_type === SenderType.USER,
+    [messages, hasStoppedSinceLastUserSend],
   );
   const isAnalysingRef = useRef(isAnalysing);
   isAnalysingRef.current = isAnalysing;
@@ -137,8 +140,7 @@ export const ConversationProvider: React.FC<ConversationProviderProps> = ({
     [conversationHistory],
   );
 
-  // isNewConversationSkip (not shouldSkipConversationFetch) avoids opening SSE while
-  // resourceId is transiently empty during Redux hydration.
+  // Use isNewConversationSkip (not shouldSkipConversationFetch) so SSE doesn't open during Redux hydration.
   const historyReady = isNew || isNewConversationSkip || isHistoryLoaded;
   const sseEnabled = Boolean(_conversationId) && Boolean(resourceId) && historyReady;
 
@@ -180,6 +182,7 @@ export const ConversationProvider: React.FC<ConversationProviderProps> = ({
 
       clearStoppingTimer();
       setIsStopping(false);
+      setHasStoppedSinceLastUserSend(true);
     },
     [_conversationId, resourceId, resourceType, apiConfig?.getConversationById, dispatch, clearStoppingTimer],
   );
@@ -224,8 +227,7 @@ export const ConversationProvider: React.FC<ConversationProviderProps> = ({
     );
   }, []);
 
-  // Handle input_required events arriving on the per-conversation SSE channel.
-  // Clear the "new conversation" skip flag so the query can refetch with inputs_required.
+  // Clear "new conversation" skip so the query refetches with inputs_required.
   const handlePerConvInputRequired = useCallback(() => {
     if (_conversationId) {
       isNewlyCreatedConversationRef.current = null;
@@ -257,6 +259,7 @@ export const ConversationProvider: React.FC<ConversationProviderProps> = ({
         const toAppend = promoted.filter((m) => m.id && !existing.has(m.id));
         return toAppend.length > 0 ? [...prev, ...toAppend] : prev;
       });
+      setHasStoppedSinceLastUserSend(false);
 
       if (_conversationId && resourceId && resourceType) {
         const cacheArgs = {
@@ -313,6 +316,7 @@ export const ConversationProvider: React.FC<ConversationProviderProps> = ({
     _setConversationId(null);
     conversationIdRef.current = null;
     isNewlyCreatedConversationRef.current = null;
+    setHasStoppedSinceLastUserSend(false);
   }, []);
 
   const clearQueuedMessages = useCallback(() => setQueuedMessages([]), []);
@@ -350,8 +354,7 @@ export const ConversationProvider: React.FC<ConversationProviderProps> = ({
       };
 
       if (messagePayload?.message_content?.references?.length) {
-        // Helper already places markdown at element_2/order:2 when refs present, so we
-        // only prepend the REFERENCES block at element_1/order:1 — no shift needed.
+        // Markdown is already at element_2/order:2; prepend REFERENCES at element_1/order:1.
         messagePayload.message_content.elements = [
           {
             id: 'element_1',
@@ -366,6 +369,7 @@ export const ConversationProvider: React.FC<ConversationProviderProps> = ({
       }
 
       setMessages([messagePayload]);
+      setHasStoppedSinceLastUserSend(false);
 
       try {
         const response = await createConversationV2Mutation({
@@ -411,9 +415,7 @@ export const ConversationProvider: React.FC<ConversationProviderProps> = ({
 
       const tempId = crypto.randomUUID();
 
-      // Mirror server emit: when references are present, prepend a REFERENCES block at
-      // element_1/order:1; markdown is already at element_2/order:2 from createUserMessagePayload.
-      // Stable child keys across optimistic ↔ DB merge prevent attachment remount/flash.
+      // Mirror server emit: prepend REFERENCES at element_1/order:1 so optimistic ↔ DB keys match.
       const refs = messagePayload?.message_content?.references;
       const baseMessage: ChatMessage = refs?.length
         ? {
@@ -440,6 +442,7 @@ export const ConversationProvider: React.FC<ConversationProviderProps> = ({
         setQueuedMessages((prev) => [...prev, messageToQueue]);
       } else {
         setMessages((prev) => [...prev, baseMessage]);
+        setHasStoppedSinceLastUserSend(false);
       }
 
       try {
@@ -616,9 +619,7 @@ export const ConversationProvider: React.FC<ConversationProviderProps> = ({
     handleMessagesPickedUp,
   ]);
 
-  // Subscribe to global TASK_UPDATE events so task blocks in conversation messages
-  // stay fresh even after the per-conversation SSE channel closes on message_stop.
-  // When source_id is present and doesn't match this conversation, skip processing.
+  // Keeps task blocks fresh after the per-conversation SSE channel closes on message_stop.
   const handleGlobalConvTaskUpdate = useCallback(
     (data: BaseEventPayload) => {
       const { taskId, status: rawStatus, sourceId } = extractTaskUpdateFields(data);
@@ -651,13 +652,13 @@ export const ConversationProvider: React.FC<ConversationProviderProps> = ({
       setIsHistoryLoaded(false);
       setMountRefetchDone(false);
       setIsStopping(false);
+      setHasStoppedSinceLastUserSend(false);
       isNewlyCreatedConversationRef.current = null;
       mountRefetchFiredRef.current = false;
     }
   }, [externalConversationId]);
 
-  // Clear stale streaming state on mount, unless the registry has a live background
-  // stream — in that case the store already has fresh in-progress content.
+  // Clear stale streaming state on mount, unless a live background stream is in progress.
   useEffect(() => {
     if (externalConversationId) {
       const hasLiveBackgroundStream =
@@ -669,8 +670,7 @@ export const ConversationProvider: React.FC<ConversationProviderProps> = ({
     }
   }, []);
 
-  // When a background stream completes, proactively refetch that conversation's history
-  // so the cache is warm before the user navigates back — no loading flash on return.
+  // Warm the cache when a background stream completes so navigating back has no loading flash.
   useEffect(() => {
     if (!resourceId || !resourceType) return;
 
@@ -690,9 +690,8 @@ export const ConversationProvider: React.FC<ConversationProviderProps> = ({
     };
   }, []);
 
-  // Fetch fresh history on mount so streamingMessageId is correct before SSE connects.
-  // Waits for resourceId (may be empty on first render while Redux hydrates).
-  // Skipped for new conversations and when the registry already has a live background stream.
+  // Fetch history before SSE connects so streamingMessageId is accurate. Skipped for new conversations
+  // and when a background stream is already live.
   useEffect(() => {
     if (mountRefetchFiredRef.current) return;
     if (!resourceId || !externalConversationId) return;
@@ -715,8 +714,7 @@ export const ConversationProvider: React.FC<ConversationProviderProps> = ({
       });
   }, [resourceId, externalConversationId]);
 
-  // Open the SSE gate once the refetch has completed and RTK has delivered history data.
-  // Ensures streamingMessageId is accurate before the SSE URL is built.
+  // Open the SSE gate once history is loaded — ensures streamingMessageId is set before the URL is built.
   useEffect(() => {
     if (!mountRefetchDone) return;
     if (isNew || isNewConversationSkip) {
@@ -735,9 +733,7 @@ export const ConversationProvider: React.FC<ConversationProviderProps> = ({
     conversationHistory,
   ]);
 
-  // Register with the global SSE registry when ready.
-  // The registry keeps the connection alive across remounts while streaming is active.
-  // On unmount, deregister — the registry decides whether to close or keep the connection.
+  // Registry keeps the SSE connection alive across remounts while streaming is active.
   useEffect(() => {
     if (!sseEnabled || !_conversationId) return;
 
@@ -747,12 +743,10 @@ export const ConversationProvider: React.FC<ConversationProviderProps> = ({
     return () => {
       conversationSSERegistry.deregister(_conversationId, callbacks);
     };
-    // streamingMessageId excluded: connection is already open after mount; reconnect is external.
+    // streamingMessageId excluded: connection is already open after mount.
   }, [sseEnabled, _conversationId]);
 
-  // Apply cached data immediately (isFetchingConversationHistory may be true during refetch).
-  // This prevents a blank message list while a background-stream conversation is switching back —
-  // the cache already has prior history; we don't need to wait for the fresh response.
+  // Apply cached data immediately so background-stream switches don't show a blank list.
   useEffect(() => {
     if (!conversationHistory) return;
 

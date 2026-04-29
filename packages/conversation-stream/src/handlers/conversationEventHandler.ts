@@ -17,18 +17,17 @@ import { handleContentBlockEvent } from './streamingBlockHandler';
 type MapAny = Record<string, unknown>;
 type AnyEvent = MapAny & { type: string };
 
-// Per-session de-dupe so Sentry isn't spammed when BE ships a new event type.
+// De-dupe Sentry reports for new event types per session.
 const reportedUnknownEventTypes = new Set<string>();
 
 export interface ConversationEventCallbacks {
   onTitleUpdated: (title: string) => void;
   onMessageStop: (finalMessage: ChatMessage | null, conversationId: string) => void;
   onConversationCreated?: (conversationId: string) => void;
-  /** Invoked when the SSE connection is lost and all retry attempts have been exhausted. */
+  /** Fires after SSE retries are exhausted. */
   onDisconnected?: () => void;
   onBrowserStreamingAvailable?: (conversationId: string, sessionId?: string) => void;
   onBrowserStreamingUnavailable?: (conversationId: string) => void;
-  /** Task lifecycle events on the conversation channel (Section 3.2) */
   onTaskMessageStart?: (taskId: string, messageId: string) => void;
   onTaskMessageStop?: (taskId: string, messageId: string) => void;
   onTaskUpdate?: (taskId: string, updatedFields: Record<string, unknown>) => void;
@@ -37,10 +36,7 @@ export interface ConversationEventCallbacks {
   onMessagesPickedUp?: (messageIds: string[]) => void;
 }
 
-/**
- * Handles flat events from the per-conversation SSE channel.
- * Routes events to streamingStateStore and invokes callbacks for message-level events.
- */
+/** Routes per-conversation SSE events to streamingStateStore and callbacks. */
 export function handleConversationSSEEvent(
   conversationId: string,
   event: AnyEvent,
@@ -120,11 +116,15 @@ export function handleConversationSSEEvent(
       }
 
       case ConversationEventType.MESSAGE_STOP: {
-        // Convert streaming state to final message
         const prev = streamingStateStore.get(conversationId);
         let finalMessage: ChatMessage | null = null;
 
         if (prev?.message_content?.elements && prev.message_content.elements.length > 0) {
+          // Force-complete blocks in case message_stop arrives before content_block_stop.
+          const finalizedElements = prev.message_content.elements.map((block) =>
+            block.is_complete ? block : { ...block, is_complete: true },
+          );
+
           finalMessage = {
             resource_type: prev.resource_type,
             resource_id: prev.resource_id,
@@ -136,18 +136,17 @@ export function handleConversationSSEEvent(
             sender_type: prev.sender_type,
             sender_name: prev.sender_name || 'assistant',
             message_content: {
-              elements: prev.message_content.elements,
+              elements: finalizedElements,
             },
           };
         }
 
         streamingStateStore.delete(conversationId);
-        // Only mark unread + play sound when no provider is mounted (background).
+        // Only mark unread when no provider is mounted (background stream).
         if (!conversationSSERegistry.hasProvider(conversationId)) {
           unreadStore.markUnread(conversationId);
           conversationSSERegistry.notifyBackgroundStop(conversationId);
         }
-        // Close the background SSE connection — streaming is done.
         conversationSSERegistry.closeConnection(conversationId);
         callbacks.onMessageStop(finalMessage, conversationId);
         break;

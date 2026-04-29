@@ -8,8 +8,7 @@ export const initializePostHog = () => {
         api_host: process.env.NEXT_PUBLIC_POSTHOG_HOST || 'https://us.i.posthog.com',
         person_profiles: 'always', // or 'identified_only' to create profiles for identified users
         session_recording: {
-          maskAllInputs: true,
-          maskTextSelector: '*',
+          maskTextSelector: '.sensitive',
         },
       });
     } catch (error) {

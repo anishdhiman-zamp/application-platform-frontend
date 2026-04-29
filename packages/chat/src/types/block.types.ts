@@ -64,28 +64,29 @@ export interface BlockPayload {
   is_display?: boolean;
 }
 
-export interface PlainTextBlockType {
+/** Fields shared by every block in the {@link Block} union. */
+export interface BlockBaseType {
   id: string;
+  order: number;
+  is_complete?: boolean;
+}
+
+export interface PlainTextBlockType extends BlockBaseType {
   type: BLOCK_TYPE.PLAIN_TEXT;
-  order: number;
   payload: {
     text: string;
   };
 }
 
-export interface MarkdownBlockType {
-  id: string;
+export interface MarkdownBlockType extends BlockBaseType {
   type: BLOCK_TYPE.MARKDOWN;
-  order: number;
   payload: {
     text: string;
   };
 }
 
-export interface SingleSelectBlockType {
-  id: string;
+export interface SingleSelectBlockType extends BlockBaseType {
   type: BLOCK_TYPE.SINGLE_SELECT;
-  order: number;
   payload: {
     options: SingleSelectOption[];
     initial_value?: string;
@@ -93,37 +94,29 @@ export interface SingleSelectBlockType {
   };
 }
 
-export interface ButtonBlockType {
-  id: string;
+export interface ButtonBlockType extends BlockBaseType {
   type: BLOCK_TYPE.BUTTON;
-  order: number;
   payload: BlockPayload;
   action: BlockAction;
   interaction: BlockInteraction;
 }
 
-export interface QuestionBlockType {
-  id: string;
+export interface QuestionBlockType extends BlockBaseType {
   type: BLOCK_TYPE.QUESTION;
-  order: number;
   payload: {
     type: TextType;
     question: string;
   };
 }
 
-export interface QuestionGroupBlockType {
-  id: string;
+export interface QuestionGroupBlockType extends BlockBaseType {
   type: BLOCK_TYPE.QUESTION_GROUP;
-  order: number;
   payload: {
     questions: QuestionBlockType[];
   };
 }
 
-export interface FileReferencesBlockType {
-  id: string;
-  order: number;
+export interface FileReferencesBlockType extends BlockBaseType {
   type: BLOCK_TYPE.FILE_REFERENCES;
   payload: {
     file_references: { path: string; name: string }[];
@@ -147,9 +140,7 @@ export interface ReferenceRef {
  * Generic @-mention reference block. Backend ships history with this shape
  * once references migrate off the legacy `file_references` block.
  */
-export interface ReferencesBlockType {
-  id: string;
-  order: number;
+export interface ReferencesBlockType extends BlockBaseType {
   type: BLOCK_TYPE.REFERENCES;
   payload: {
     references: ReferenceRef[];
@@ -162,9 +153,7 @@ export interface OutputFileType {
   file_type: string;
 }
 
-export interface OutputFilesBlockType {
-  id: string;
-  order: number;
+export interface OutputFilesBlockType extends BlockBaseType {
   type: BLOCK_TYPE.OUTPUT_FILES;
   payload: {
     output_files: OutputFileType[];
@@ -181,9 +170,7 @@ export const TASK_STATUS = {
 
 export type TaskStatus = (typeof TASK_STATUS)[keyof typeof TASK_STATUS];
 
-export interface TaskBlockType {
-  id: string;
-  order: number;
+export interface TaskBlockType extends BlockBaseType {
   type: BLOCK_TYPE.TASK;
   payload: {
     id: string;
@@ -199,9 +186,7 @@ export interface TaskBlockType {
   };
 }
 
-export interface AgentBlockType {
-  id: string;
-  order: number;
+export interface AgentBlockType extends BlockBaseType {
   type: BLOCK_TYPE.AGENT;
   payload: {
     agent_id: string;
@@ -316,10 +301,8 @@ export interface InputsRespondedItemPayload {
   file_references?: { name: string; path: string }[];
 }
 
-export interface InputsRespondedBlockType {
-  id: string;
+export interface InputsRespondedBlockType extends BlockBaseType {
   type: BLOCK_TYPE.INPUTS_RESPONDED;
-  order: number;
   payload: {
     responses: InputsRespondedItemPayload[];
   };
@@ -389,9 +372,9 @@ export const enum StreamingContentBlockDeltaType {
   TASK_DELTA = 'task_delta',
 }
 
-export interface StreamingContentBlockBase {
+/** THINKING / TEXT have no backend id, so id is optional here unlike the static {@link BlockBaseType}. */
+export interface StreamingContentBlockBase extends Omit<BlockBaseType, 'id'> {
   id?: string;
-  order: number;
   name?: string;
   start_timestamp?: string;
   stop_timestamp?: string;

@@ -280,6 +280,9 @@ export const BlockRenderer: React.FC<BlockRendererProps> = ({
         const textBlock = block as MarkdownBlockType | TextContentBlock;
         const textStartTs = 'start_timestamp' in textBlock ? textBlock.start_timestamp : undefined;
         const textKey = textBlock.id ?? `text-${textBlock.order}-${textStartTs ?? 'no-start-timestamp'}`;
+        // Freeze the typewriter once a later block lands or this one is marked complete — otherwise a text block
+        // followed by a tool block keeps animating after it should have stopped.
+        const isBlockStreaming = isStreaming && textBlock.is_complete !== true && !nextBlock;
 
         if (showMarkdownConnectors && (!isLastBlock || isStreaming || alwaysShowMarkdownTimelineDot)) {
           return (
@@ -300,7 +303,7 @@ export const BlockRenderer: React.FC<BlockRendererProps> = ({
                 <MarkdownBlock
                   payload={textBlock.payload}
                   compactParagraphs={compactParagraphs}
-                  isStreaming={isStreaming}
+                  isStreaming={isBlockStreaming}
                   references={messageReferences}
                 />
               </div>
@@ -314,7 +317,7 @@ export const BlockRenderer: React.FC<BlockRendererProps> = ({
           <MarkdownBlock
             key={textKey}
             payload={textBlock.payload}
-            isStreaming={isStreaming}
+            isStreaming={isBlockStreaming}
             compactParagraphs={compactParagraphs}
             references={messageReferences}
           />
