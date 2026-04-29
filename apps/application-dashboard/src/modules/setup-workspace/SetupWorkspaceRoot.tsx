@@ -136,13 +136,12 @@ export const SetupWorkspaceRoot = () => {
   }, [invitationsData, acceptInvitation, fetchWhoAmI, redirectToApp]);
 
   const createAndProvision = useCallback(
-    async (userId: string, displayName: string | undefined, email: string) => {
+    async (displayName: string | undefined, email: string) => {
       const orgName = deriveOrgName(displayName, email);
 
       try {
         const result = await registerOrg({
           organization_name: orgName,
-          owner_id: userId,
           icon_type: MEDIA_TYPE.SEED,
           icon_value: orgName,
         }).unwrap();
@@ -206,7 +205,7 @@ export const SetupWorkspaceRoot = () => {
 
       if (accepted) return;
 
-      await createAndProvision(session.user_id, session.user_name, session.user_email);
+      await createAndProvision(session.user_name, session.user_email);
     };
 
     run();

@@ -5,7 +5,6 @@ export type ProvisioningStatus = (typeof PROVISIONING_STATUS)[keyof typeof PROVI
 
 export interface RegisterOrgRequest {
   organization_name: string;
-  owner_id: string;
   icon_type?: MediaType | null;
   icon_value?: string | null;
 }

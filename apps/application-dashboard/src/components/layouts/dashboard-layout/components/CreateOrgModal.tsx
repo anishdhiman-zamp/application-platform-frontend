@@ -240,7 +240,6 @@ const CreateOrgModal: FC<CreateOrgModalProps> = ({ open, onClose, orgToProvision
 
       const reg = await registerOrg({
         organization_name: trimmed,
-        owner_id: user.user_id,
         icon_type: type ?? MEDIA_TYPE.SEED,
         icon_value: value ?? trimmed,
       }).unwrap();

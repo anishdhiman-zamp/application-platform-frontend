@@ -102,7 +102,6 @@ const handleAuthenticatedRoutes = async (request: NextRequest) => {
 
   const isExemptRoute = [
     ROUTES_PATH.MEMBERSHIP_PENDING,
-    ROUTES_PATH.SETUP_WORKSPACE,
     ROUTES_PATH.LOGIN,
     ROUTES_PATH.ONBOARDING,
     ROUTES_PATH.INVITATIONS,
@@ -136,8 +135,9 @@ const handleAuthenticatedRoutes = async (request: NextRequest) => {
       }
     }
 
-    // No orgs or active org not yet provisioned → send to setup-workspace
-    if (needsWorkspaceSetup(session, pathname, request)) {
+    // No orgs or active org not yet provisioned → send to setup-workspace.
+    // Skip when already there to avoid a self-redirect loop.
+    if (pathname !== ROUTES_PATH.SETUP_WORKSPACE && needsWorkspaceSetup(session, pathname, request)) {
       const response = NextResponse.redirect(new URL(ROUTES_PATH.SETUP_WORKSPACE, request.url));
 
       if (session) {
