@@ -34,6 +34,7 @@ const ShareCredentialPopup = ({ credentialId }: ShareCredentialPopupPropsType) =
           resourceAdminPrivilege={PERMISSION_ROLES.ADMIN}
           version={ShareResourceVersion.V2}
           additionalOptions={agentOptions}
+          renderInDialog
           customTrigger={
             <Button
               variant='ghost'

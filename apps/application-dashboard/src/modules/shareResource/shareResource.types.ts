@@ -87,6 +87,7 @@ export type ShareResourcePopupProps = {
   additionalOptions?: CombinedOptionListDataType[];
   forceAdminAccess?: boolean;
   customTrigger?: React.ReactNode;
+  renderInDialog?: boolean;
 };
 
 /**

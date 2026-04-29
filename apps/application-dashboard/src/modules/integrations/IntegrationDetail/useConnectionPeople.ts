@@ -15,6 +15,7 @@ import {
   usePatchChangeAudienceRoleInResourceMutation,
 } from '@/apis/collaboration';
 import { useDeleteIntegrationConnectionMutation } from '@/apis/integrations';
+import { useAppSelector } from '@/hooks/toolkit';
 import {
   useEnsureResourceAction,
   useSyncToolPolicies,
@@ -44,6 +45,7 @@ import type {
 } from '@/modules/pace/components/agents/types/agents.types';
 import { resourceTypeRouteMap } from '@/modules/shareResource/shareResource.constants';
 import { ResourceType } from '@/modules/shareResource/shareResource.types';
+import type { RootState } from '@/store';
 import { ResourceAudienceType } from '@/types/api/auth.types';
 import type { AudiencesByResourceResponse } from '@/types/api/collaboration.types';
 
@@ -141,6 +143,7 @@ export const useConnectionPeople = ({ connections, integrationName }: UseConnect
   // derived state
   const { data: agentsData, isError: isAgentsError, refetch: refetchAgents } = useGetAgentsListQuery({ filter: 'all' });
   const agentNameById = useMemo(() => new Map(agentsData?.agents?.map((a) => [a.id, a.name]) ?? []), [agentsData]);
+  const orgName = useAppSelector((state: RootState) => state?.user?.user?.orgs?.[0]?.name);
 
   // hooks (RTK lazy/mutation)
   const [fetchAudiences] = useLazyGetAudiencesByResourceIdQuery();
@@ -239,6 +242,7 @@ export const useConnectionPeople = ({ connections, integrationName }: UseConnect
           baseTools,
           agentNameById,
           existingPeopleById,
+          orgName,
         });
 
         setConnectionData(data);
@@ -256,7 +260,7 @@ export const useConnectionPeople = ({ connections, integrationName }: UseConnect
       .catch(() => {
         toast.error('Failed to load data');
       });
-  }, [connections, integrationName, agentNameById, agentsData, fetchConnectionsPhase1, loadPoliciesForPerson]);
+  }, [connections, integrationName, agentNameById, agentsData, fetchConnectionsPhase1, loadPoliciesForPerson, orgName]);
 
   const handleToggleExpand = useCallback((connectionId: string) => {
     setExpandedConnections((prev) => {
@@ -311,13 +315,15 @@ export const useConnectionPeople = ({ connections, integrationName }: UseConnect
 
       if (!person) return;
 
+      const audienceType = person.audience?.type ?? ResourceAudienceType.USER;
+
       return deleteAudience({
         apiEndpoint: API_ENDPOINTS.DELETE_RESOURCE_FROM_AUDIENCES_V2,
         resourceRoute: resourceTypeRouteMap[ResourceType.CONNECTION],
         resourceId: connectionId,
         body: {
           audience_id: userId,
-          audience_type: ResourceAudienceType.USER,
+          audience_type: audienceType,
         },
       })
         .unwrap()

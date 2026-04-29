@@ -4,6 +4,8 @@ import { useMemo } from 'react';
 import { useGetAgentsListQuery } from '@/apis/agents';
 import { useGetAudiencesByResourceIdQuery } from '@/apis/collaboration';
 import { useGetAudiencesByOrganisationIdQuery } from '@/apis/people';
+import { useAppSelector } from '@/hooks/toolkit';
+import type { RootState } from '@/store';
 import { ResourceAudienceType } from '@/types/api/auth.types';
 import type { AudiencesByResourceResponse } from '@/types/api/collaboration.types';
 
@@ -41,6 +43,8 @@ export const useShareableAudiences = ({
   enabled = true,
   selectedIds,
 }: UseShareableAudiencesArgs) => {
+  const orgName = useAppSelector((state: RootState) => state?.user?.user?.orgs?.[0]?.name);
+
   const { data: agentsData, isError: isAgentsError } = useGetAgentsListQuery({ filter: 'all' }, { skip: !enabled });
   const { data: teamMembersData, isError: isTeamMembersError } = useGetAudiencesByOrganisationIdQuery(
     { organizationId },
@@ -67,6 +71,18 @@ export const useShareableAudiences = ({
   );
 
   const allKnownOptions = useMemo<ShareableAudienceOption[]>(() => {
+    const orgOption: ShareableAudienceOption[] =
+      organizationId && orgName
+        ? [
+            {
+              value: organizationId,
+              label: `Everyone in ${orgName}`,
+              email: '',
+              type: ResourceAudienceType.ORGANIZATION,
+            },
+          ]
+        : [];
+
     const agents: ShareableAudienceOption[] = (agentsData?.agents ?? []).map((a) => ({
       value: a.id,
       label: a.name,
@@ -98,13 +114,13 @@ export const useShareableAudiences = ({
 
     const seen = new Set<string>();
 
-    return [...agents, ...users, ...existingUsers].filter((opt) => {
+    return [...orgOption, ...agents, ...users, ...existingUsers].filter((opt) => {
       if (seen.has(opt.value)) return false;
       seen.add(opt.value);
 
       return true;
     });
-  }, [agentsData, teamMembersData, existingAudiences]);
+  }, [organizationId, orgName, agentsData, teamMembersData, existingAudiences]);
 
   const optionsList = useMemo(
     () =>

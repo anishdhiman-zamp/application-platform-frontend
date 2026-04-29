@@ -103,6 +103,7 @@ interface BuildConnectionsFromAudiencesInput {
   baseTools: AgentToolType[];
   agentNameById: Map<string, string>;
   existingPeopleById: Map<string, PersonEntryType>;
+  orgName?: string;
 }
 
 /**
@@ -114,14 +115,22 @@ export const buildConnectionsFromAudiences = ({
   baseTools,
   agentNameById,
   existingPeopleById,
+  orgName,
 }: BuildConnectionsFromAudiencesInput): ConnectionWithPeopleType[] =>
   audiencesByConn.map(({ conn, audiences }) => {
-    const userAudiences = audiences.filter((a) => a.resource_audience_type === ResourceAudienceType.USER);
+    const userOrOrgAudiences = audiences.filter(
+      (a) =>
+        a.resource_audience_type === ResourceAudienceType.USER ||
+        a.resource_audience_type === ResourceAudienceType.ORGANIZATION,
+    );
 
-    const people = userAudiences.map((audience): PersonEntryType => {
+    const people = userOrOrgAudiences.map((audience): PersonEntryType => {
+      const isOrg = audience.resource_audience_type === ResourceAudienceType.ORGANIZATION;
       const agentName = agentNameById.get(audience.resource_audience_id);
-      const isAgent = !!agentName;
-      const resolvedName = agentName ?? (audience.user?.name || audience.user?.email || 'Anonymous User');
+      const isAgent = !isOrg && !!agentName;
+      const resolvedName = isOrg
+        ? `Everyone in ${orgName ?? 'organization'}`
+        : (agentName ?? (audience.user?.name || audience.user?.email || 'Anonymous User'));
       const hasRapId = !!audience.resource_audience_policy_id;
       const existing = existingPeopleById.get(`${conn.id}:${audience.resource_audience_id}`);
       // Preserve previously loaded tools & accessLevel if we have them cached
@@ -131,7 +140,7 @@ export const buildConnectionsFromAudiences = ({
       return {
         userId: audience.resource_audience_id,
         name: resolvedName,
-        email: isAgent ? '' : (audience.user?.email ?? ''),
+        email: isAgent || isOrg ? '' : (audience.user?.email ?? ''),
         resourceAudiencePolicyId: audience.resource_audience_policy_id,
         isAgent,
         role: audience.privilege === CONNECTION_ROLE.ADMIN ? CONNECTION_ROLE.ADMIN : CONNECTION_ROLE.VIEWER,
