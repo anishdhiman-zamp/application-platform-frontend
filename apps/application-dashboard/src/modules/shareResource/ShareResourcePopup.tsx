@@ -500,7 +500,13 @@ const ShareResourcePopup: FC<ShareResourcePopupProps> = (props) => {
           )}
         </PopoverTrigger>
         <PopoverPortal>
-          <PopoverContent align='end' className='w-[420px] border-none bg-transparent p-0 shadow-none'>
+          <PopoverContent
+            align='end'
+            side='bottom'
+            sideOffset={4}
+            avoidCollisions={false}
+            className='w-[420px] border-none bg-transparent p-0 shadow-none'
+          >
             <div>
               <div className='border-0.5 border-GRAY_500 rounded-3.5 shadow-table-filter-menu bg-BG_WHITE'>
                 <div className='flex w-full items-center justify-between p-5'>

@@ -23,7 +23,7 @@ const CredentialCard = ({ credential, onManage }: CredentialCardPropsType) => {
   const handleManage = () => onManage(credential);
 
   return (
-    <div className='border-GRAY_400 bg-BG_WHITE flex flex-col overflow-hidden rounded-xl border px-6'>
+    <div className='border-GRAY_400 bg-BG_WHITE flex shrink-0 flex-col overflow-hidden rounded-xl border px-6'>
       <div className='flex items-center justify-between pt-5.5'>
         <h3 className='f-13-500 text-GRAY_1000'>{credential?.name ?? ''}</h3>
         <div className='flex items-center gap-1'>

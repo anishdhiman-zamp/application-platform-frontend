@@ -79,7 +79,7 @@ const CredentialsVaultPage = () => {
           noDataBanner={<CredentialsEmptyState />}
           skeletonType={SkeletonTypes.CUSTOM}
           loader={<CredentialsListSkeleton />}
-          className='flex h-full flex-col gap-4'
+          className='flex flex-col gap-4'
           disableAnimation
         >
           {credentials.map((credential) => (
