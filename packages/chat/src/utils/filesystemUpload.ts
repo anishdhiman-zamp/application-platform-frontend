@@ -381,8 +381,9 @@ export const processFilesystemUpload = async (
   file: File,
   username: string,
   mutations: UploadMutations,
+  precomputedName?: string,
 ): Promise<UploadedFile> => {
-  const sanitizedName = sanitizeFileName(file.name);
+  const sanitizedName = precomputedName ?? sanitizeFileName(file.name);
   const targetPath = generateUploadPath(username, sanitizedName);
 
   await uploadFile(file, targetPath, mutations, undefined, undefined, true);
@@ -400,9 +401,12 @@ export const handleFilesystemUploads = async (
   files: FileList,
   username: string,
   mutations: UploadMutations,
+  precomputedNames?: string[],
 ): Promise<FilesystemUploadResult> => {
   const fileArray = Array.from(files);
-  const uploadPromises = fileArray.map((file) => processFilesystemUpload(file, username, mutations));
+  const uploadPromises = fileArray.map((file, index) =>
+    processFilesystemUpload(file, username, mutations, precomputedNames?.[index]),
+  );
 
   const results = await Promise.allSettled(uploadPromises);
 

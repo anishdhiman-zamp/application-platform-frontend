@@ -330,10 +330,14 @@ export const useChatInput = ({
       return;
     }
 
-    const uploadingFiles = Array.from(files).map((file) => ({
+    const fileArray = Array.from(files);
+    const sanitizedNames = fileArray.map((file) => sanitizeFileName(file.name));
+    const fileNameMap = new Map(fileArray.map((file, i) => [file, sanitizedNames[i]]));
+
+    const uploadingFiles = fileArray.map((file, index) => ({
       id: crypto.randomUUID(),
       path: '',
-      name: sanitizeFileName(file.name),
+      name: sanitizedNames[index],
       file_type: file.type,
       file: file,
     }));
@@ -341,9 +345,14 @@ export const useChatInput = ({
     setIsUploading(true);
     setFileReferences((prev) => [...prev, ...uploadingFiles]);
 
-    const { successful, failed } = await handleFilesystemUploads(files, username, adapter.uploadMutations);
+    const { successful, failed } = await handleFilesystemUploads(
+      files,
+      username,
+      adapter.uploadMutations,
+      sanitizedNames,
+    );
 
-    const failedFileNames = new Set(failed.map((f) => sanitizeFileName(f.file.name)));
+    const failedFileNames = new Set(failed.map((f) => fileNameMap.get(f.file) ?? sanitizeFileName(f.file.name)));
 
     setFileReferences((prev) => {
       const tempEntriesMap = new Map<string, number>();
