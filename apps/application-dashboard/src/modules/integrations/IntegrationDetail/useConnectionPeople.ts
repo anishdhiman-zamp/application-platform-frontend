@@ -30,6 +30,7 @@ import type {
   PersonEntryType,
 } from '@/modules/integrations/types/integrations.types';
 import {
+  ACTION_AUDIENCE_TO_RESOURCE,
   applyPoliciesToTools,
   buildConnectionsFromAudiences,
   buildSkeletonConnections,
@@ -346,7 +347,7 @@ export const useConnectionPeople = ({ connections, integrationName }: UseConnect
 
       if (!person) return;
 
-      const audienceType = person.audience?.type ?? ResourceAudienceType.USER;
+      const audienceKind = person.audience?.type ?? 'user';
 
       return deleteAudience({
         apiEndpoint: API_ENDPOINTS.DELETE_RESOURCE_FROM_AUDIENCES_V2,
@@ -354,7 +355,7 @@ export const useConnectionPeople = ({ connections, integrationName }: UseConnect
         resourceId: connectionId,
         body: {
           audience_id: userId,
-          audience_type: audienceType,
+          audience_type: ACTION_AUDIENCE_TO_RESOURCE[audienceKind],
         },
       })
         .unwrap()

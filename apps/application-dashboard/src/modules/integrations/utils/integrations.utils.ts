@@ -21,6 +21,12 @@ import {
 import { ResourceAudienceType } from '@/types/api/auth.types';
 import type { AudiencesByResourceResponse } from '@/types/api/collaboration.types';
 
+export const ACTION_AUDIENCE_TO_RESOURCE: Record<ActionAudienceKind, ResourceAudienceType> = {
+  user: ResourceAudienceType.USER,
+  team: ResourceAudienceType.TEAM,
+  organization: ResourceAudienceType.ORGANIZATION,
+};
+
 /**
  * Filter integrations by search query
  * This runs on the server for SSR
