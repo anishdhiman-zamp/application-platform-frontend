@@ -4,9 +4,10 @@ import { PERMISSION_ROLES } from '@/utils/accessPermission/accessPermission.type
 
 interface ShareConversationPopupProps {
   conversationId: string;
+  avoidCollisions?: boolean;
 }
 
-const ShareConversationPopup: FC<ShareConversationPopupProps> = ({ conversationId }) => {
+const ShareConversationPopup: FC<ShareConversationPopupProps> = ({ conversationId, avoidCollisions }) => {
   return (
     <ShareResourcePopup
       resourceId={conversationId}
@@ -15,6 +16,7 @@ const ShareConversationPopup: FC<ShareConversationPopupProps> = ({ conversationI
       resourceAdminPrivilege={PERMISSION_ROLES.ADMIN}
       version={ShareResourceVersion.V2}
       forceAdminAccess
+      avoidCollisions={avoidCollisions}
     />
   );
 };

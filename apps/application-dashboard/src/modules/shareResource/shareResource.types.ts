@@ -88,6 +88,7 @@ export type ShareResourcePopupProps = {
   forceAdminAccess?: boolean;
   customTrigger?: React.ReactNode;
   renderInDialog?: boolean;
+  avoidCollisions?: boolean;
 };
 
 /**

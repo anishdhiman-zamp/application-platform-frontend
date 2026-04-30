@@ -89,6 +89,7 @@ const ShareResourcePopup: FC<ShareResourcePopupProps> = (props) => {
     forceAdminAccess = false,
     customTrigger,
     renderInDialog = false,
+    avoidCollisions = false,
   } = props;
   const resourceId = props.resourceId || '';
   const [selectedRole, setSelectedRole] = useState<string>(resourceConfig.accessPrivilegesList[0]?.value ?? '');
@@ -657,7 +658,8 @@ const ShareResourcePopup: FC<ShareResourcePopupProps> = (props) => {
             align='end'
             side='bottom'
             sideOffset={4}
-            avoidCollisions={false}
+            avoidCollisions={avoidCollisions}
+            collisionPadding={8}
             className='w-[420px] border-none bg-transparent p-0 shadow-none'
           >
             <div>

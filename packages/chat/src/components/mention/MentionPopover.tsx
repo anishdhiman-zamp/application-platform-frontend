@@ -20,7 +20,7 @@ export interface MentionPopoverProps {
   initialKind?: string | null;
   query: string;
   open: boolean;
-  onSelect: (hit: ReferenceSearchHit, options?: { keepOpen?: boolean }) => void;
+  onSelect: (hit: ReferenceSearchHit) => void;
   onClose: () => void;
 }
 
@@ -83,13 +83,10 @@ export const MentionPopover = React.forwardRef<MentionPopoverHandle, MentionPopo
       [items.length],
     );
 
-    const commitSelection = useCallback(
-      (options?: { keepOpen?: boolean }) => {
-        const hit = items[activeIdx];
-        if (hit) onSelect(hit, options);
-      },
-      [items, activeIdx, onSelect],
-    );
+    const commitSelection = useCallback(() => {
+      const hit = items[activeIdx];
+      if (hit) onSelect(hit);
+    }, [items, activeIdx, onSelect]);
 
     const handleKeyDown = useCallback(
       (event: KeyboardEvent): boolean => {
@@ -104,14 +101,10 @@ export const MentionPopover = React.forwardRef<MentionPopoverHandle, MentionPopo
             moveActiveIdx(-1);
             return true;
           case KEYBOARD_KEYS.ENTER:
+            // Shift+Enter is reserved for newline in the editor — let it pass through.
+            if (event.shiftKey) return false;
             commitSelection();
             return true;
-          case KEYBOARD_KEYS.SPACE_KEY:
-            if (items[activeIdx]) {
-              commitSelection({ keepOpen: true });
-              return true;
-            }
-            return false;
           case KEYBOARD_KEYS.ESCAPE:
             onClose();
             return true;
@@ -119,7 +112,7 @@ export const MentionPopover = React.forwardRef<MentionPopoverHandle, MentionPopo
             return false;
         }
       },
-      [cycleTab, moveActiveIdx, commitSelection, onClose, items, activeIdx],
+      [cycleTab, moveActiveIdx, commitSelection, onClose],
     );
 
     const handleRowMouseDown = useCallback(
@@ -192,10 +185,6 @@ export const MentionPopover = React.forwardRef<MentionPopoverHandle, MentionPopo
             Tab
           </kbd>
           <span className='text-GRAY_700 text-[11px] leading-none font-[450]'>to switch</span>
-          <kbd className='border-GRAY_400 bg-BG_WHITE text-GRAY_950 ml-2 inline-flex h-[14px] items-center justify-center rounded-[4px] border px-1 text-[10px] leading-none font-[450]'>
-            Space
-          </kbd>
-          <span className='text-GRAY_700 text-[11px] leading-none font-[450]'>to multi-select</span>
         </div>
       </div>
     );

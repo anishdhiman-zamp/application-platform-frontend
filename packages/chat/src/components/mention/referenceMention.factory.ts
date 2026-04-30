@@ -54,7 +54,8 @@ export const createReferenceMention = ({ adapter, onOpenChange }: FactoryOptions
   const suggestion = {
     char: '@',
     allowSpaces: false,
-    allowedPrefixes: null,
+    // Default `allowedPrefixes: [' ']` so typing `hello@x` inside a word does NOT
+    // open the popover — only `@` at start-of-line or after whitespace triggers.
     items: () => [],
     render: () => {
       let popoverEl: HTMLDivElement | null = null;
@@ -65,7 +66,6 @@ export const createReferenceMention = ({ adapter, onOpenChange }: FactoryOptions
       let currentEditor: Editor | null = null;
       let isOpen = false;
       let unmountTimer: ReturnType<typeof setTimeout> | null = null;
-      let pendingReopen = false;
       let dismissed = false;
 
       const markDismissed = () => {
@@ -161,15 +161,8 @@ export const createReferenceMention = ({ adapter, onOpenChange }: FactoryOptions
         if (el?.parentNode) el.parentNode.removeChild(el);
       };
 
-      const insertHit = (hit: ReferenceSearchHit, options?: { keepOpen?: boolean }) => {
+      const insertHit = (hit: ReferenceSearchHit) => {
         if (!currentCommand) return;
-        const editor = currentEditor;
-        if (options?.keepOpen) {
-          pendingReopen = true;
-          currentCommand(hitToAttrs(hit));
-          editor?.chain().focus().insertContent('@').run();
-          return;
-        }
         currentCommand(hitToAttrs(hit));
       };
 
@@ -241,10 +234,6 @@ export const createReferenceMention = ({ adapter, onOpenChange }: FactoryOptions
           currentCommand = null;
           currentEditor = null;
           pendingRenders.delete(render);
-          if (pendingReopen) {
-            pendingReopen = false;
-            return;
-          }
           if (dismissed) {
             dismissed = false;
             return;
