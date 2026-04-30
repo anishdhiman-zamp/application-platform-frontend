@@ -102,6 +102,9 @@ interface BuildConnectionsFromAudiencesInput {
   audiencesByConn: { conn: ConnectionEntryType; audiences: AudiencesByResourceResponse[] }[];
   baseTools: AgentToolType[];
   agentNameById: Map<string, string>;
+  teamNameById?: Map<string, string>;
+  /** Theme-resolved chip color per team id. */
+  teamColorById?: Map<string, string>;
   existingPeopleById: Map<string, PersonEntryType>;
   orgName?: string;
 }
@@ -114,23 +117,29 @@ export const buildConnectionsFromAudiences = ({
   audiencesByConn,
   baseTools,
   agentNameById,
+  teamNameById,
+  teamColorById,
   existingPeopleById,
   orgName,
 }: BuildConnectionsFromAudiencesInput): ConnectionWithPeopleType[] =>
   audiencesByConn.map(({ conn, audiences }) => {
-    const userOrOrgAudiences = audiences.filter(
+    const peopleAudiences = audiences.filter(
       (a) =>
         a.resource_audience_type === ResourceAudienceType.USER ||
-        a.resource_audience_type === ResourceAudienceType.ORGANIZATION,
+        a.resource_audience_type === ResourceAudienceType.ORGANIZATION ||
+        a.resource_audience_type === ResourceAudienceType.TEAM,
     );
 
-    const people = userOrOrgAudiences.map((audience): PersonEntryType => {
+    const people = peopleAudiences.map((audience): PersonEntryType => {
       const isOrg = audience.resource_audience_type === ResourceAudienceType.ORGANIZATION;
+      const isTeam = audience.resource_audience_type === ResourceAudienceType.TEAM;
       const agentName = agentNameById.get(audience.resource_audience_id);
-      const isAgent = !isOrg && !!agentName;
+      const isAgent = !isOrg && !isTeam && !!agentName;
       const resolvedName = isOrg
         ? `Everyone in ${orgName ?? 'organization'}`
-        : (agentName ?? (audience.user?.name || audience.user?.email || 'Anonymous User'));
+        : isTeam
+          ? (teamNameById?.get(audience.resource_audience_id) ?? 'Team')
+          : (agentName ?? (audience.user?.name || audience.user?.email || 'Anonymous User'));
       const hasRapId = !!audience.resource_audience_policy_id;
       const existing = existingPeopleById.get(`${conn.id}:${audience.resource_audience_id}`);
       // Preserve previously loaded tools & accessLevel if we have them cached
@@ -140,9 +149,11 @@ export const buildConnectionsFromAudiences = ({
       return {
         userId: audience.resource_audience_id,
         name: resolvedName,
-        email: isAgent || isOrg ? '' : (audience.user?.email ?? ''),
+        email: isAgent || isOrg || isTeam ? '' : (audience.user?.email ?? ''),
         resourceAudiencePolicyId: audience.resource_audience_policy_id,
         isAgent,
+        isTeam,
+        teamColor: isTeam ? teamColorById?.get(audience.resource_audience_id) : undefined,
         role: audience.privilege === CONNECTION_ROLE.ADMIN ? CONNECTION_ROLE.ADMIN : CONNECTION_ROLE.VIEWER,
         tools: personTools,
         accessLevel: existing && !existing.isLoadingPolicies ? existing.accessLevel : deriveAccessLevel(personTools),

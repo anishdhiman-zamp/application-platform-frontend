@@ -3,8 +3,11 @@
 import { useMemo } from 'react';
 import { useGetAgentsListQuery } from '@/apis/agents';
 import { useGetAudiencesByResourceIdQuery } from '@/apis/collaboration';
-import { useGetAudiencesByOrganisationIdQuery } from '@/apis/people';
+import { useGetAudiencesByOrganisationIdQuery, useGetTeamsByOrganizationIdQuery } from '@/apis/people';
+import { useTheme } from '@/app/_providers/theme-provider';
 import { useAppSelector } from '@/hooks/toolkit';
+import { THEME_MODE } from '@/modules/general/constants/general.constants';
+import { resolveChipColor } from '@/modules/team/people.utils';
 import type { RootState } from '@/store';
 import { ResourceAudienceType } from '@/types/api/auth.types';
 import type { AudiencesByResourceResponse } from '@/types/api/collaboration.types';
@@ -14,6 +17,7 @@ export interface ShareableAudienceOption {
   label: string;
   email: string;
   type: ResourceAudienceType;
+  color?: string;
 }
 
 interface UseShareableAudiencesArgs {
@@ -44,9 +48,15 @@ export const useShareableAudiences = ({
   selectedIds,
 }: UseShareableAudiencesArgs) => {
   const orgName = useAppSelector((state: RootState) => state?.user?.user?.orgs?.[0]?.name);
+  const { resolvedTheme } = useTheme();
+  const isDark = resolvedTheme === THEME_MODE.DARK;
 
   const { data: agentsData, isError: isAgentsError } = useGetAgentsListQuery({ filter: 'all' }, { skip: !enabled });
   const { data: teamMembersData, isError: isTeamMembersError } = useGetAudiencesByOrganisationIdQuery(
+    { organizationId },
+    { skip: !enabled || !organizationId },
+  );
+  const { data: teamsData, isError: isTeamsError } = useGetTeamsByOrganizationIdQuery(
     { organizationId },
     { skip: !enabled || !organizationId },
   );
@@ -90,6 +100,16 @@ export const useShareableAudiences = ({
       type: ResourceAudienceType.AGENT,
     }));
 
+    const teams: ShareableAudienceOption[] = (teamsData ?? [])
+      .map((team) => ({
+        value: team?.team_id ?? '',
+        label: team?.name ?? '',
+        email: '',
+        type: ResourceAudienceType.TEAM,
+        color: resolveChipColor(team?.metadata?.color_hex_code, isDark),
+      }))
+      .filter((t) => t.value);
+
     const users: ShareableAudienceOption[] = (teamMembersData ?? [])
       .filter((member) => member?.resource_audience_type !== ResourceAudienceType.AGENT)
       .map((member) => ({
@@ -114,13 +134,13 @@ export const useShareableAudiences = ({
 
     const seen = new Set<string>();
 
-    return [...orgOption, ...agents, ...users, ...existingUsers].filter((opt) => {
+    return [...orgOption, ...teams, ...agents, ...users, ...existingUsers].filter((opt) => {
       if (seen.has(opt.value)) return false;
       seen.add(opt.value);
 
       return true;
     });
-  }, [organizationId, orgName, agentsData, teamMembersData, existingAudiences]);
+  }, [organizationId, orgName, isDark, agentsData, teamsData, teamMembersData, existingAudiences]);
 
   const optionsList = useMemo(
     () =>
@@ -132,6 +152,6 @@ export const useShareableAudiences = ({
     allKnownOptions,
     optionsList,
     existingAudiences,
-    isError: isAgentsError || isTeamMembersError || isExistingAudiencesError,
+    isError: isAgentsError || isTeamMembersError || isTeamsError || isExistingAudiencesError,
   };
 };

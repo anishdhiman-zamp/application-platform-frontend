@@ -73,8 +73,17 @@ const PersonRow = ({
   return (
     <div ref={rowRef} className='flex flex-col'>
       <div className='flex items-center px-2 py-2.5'>
-        <span className='f-12-500 text-GRAY_950 min-w-0 flex-1 truncate'>
-          {displayName}
+        <span className='f-12-500 text-GRAY_950 flex min-w-0 flex-1 items-center gap-1.5 truncate'>
+          {person.isTeam ? (
+            <span
+              className='rounded px-1.5 py-0.5 capitalize'
+              style={{ backgroundColor: person.teamColor ?? 'transparent' }}
+            >
+              {displayName}
+            </span>
+          ) : (
+            displayName
+          )}
           {isCurrentUser && <span className='text-GRAY_700'> (You)</span>}
         </span>
         {canEditRole ? (

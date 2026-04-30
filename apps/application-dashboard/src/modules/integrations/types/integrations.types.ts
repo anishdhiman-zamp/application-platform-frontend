@@ -131,6 +131,9 @@ export interface PersonEntryType {
   email: string;
   resourceAudiencePolicyId?: string;
   isAgent: boolean;
+  isTeam?: boolean;
+  /** Theme-resolved chip background color; only set for team entries. */
+  teamColor?: string;
   role: ConnectionRoleType;
   tools: AgentToolType[];
   accessLevel: AccessLevelType;

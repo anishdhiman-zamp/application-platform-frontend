@@ -202,7 +202,7 @@ const ShareResourcePopup: FC<ShareResourcePopupProps> = (props) => {
             ...audience,
             user: enrichedUser,
             team_name: matchingTeam?.name ?? '',
-            team_color: matchingTeam?.metadata?.color_hex_code ?? '',
+            team_color: resolveChipColor(matchingTeam?.metadata?.color_hex_code, isDark),
             fgac_color: audienceFgacColorMap[JSON.stringify(audience?.metadata?.fgac_filters)] ?? '',
           };
         })

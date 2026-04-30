@@ -15,7 +15,10 @@ import {
   usePatchChangeAudienceRoleInResourceMutation,
 } from '@/apis/collaboration';
 import { useDeleteIntegrationConnectionMutation } from '@/apis/integrations';
+import { useGetTeamsByOrganizationIdQuery } from '@/apis/people';
+import { useTheme } from '@/app/_providers/theme-provider';
 import { useAppSelector } from '@/hooks/toolkit';
+import { THEME_MODE } from '@/modules/general/constants/general.constants';
 import {
   useEnsureResourceAction,
   useSyncToolPolicies,
@@ -45,6 +48,7 @@ import type {
 } from '@/modules/pace/components/agents/types/agents.types';
 import { resourceTypeRouteMap } from '@/modules/shareResource/shareResource.constants';
 import { ResourceType } from '@/modules/shareResource/shareResource.types';
+import { resolveChipColor } from '@/modules/team/people.utils';
 import type { RootState } from '@/store';
 import { ResourceAudienceType } from '@/types/api/auth.types';
 import type { AudiencesByResourceResponse } from '@/types/api/collaboration.types';
@@ -144,6 +148,19 @@ export const useConnectionPeople = ({ connections, integrationName }: UseConnect
   const { data: agentsData, isError: isAgentsError, refetch: refetchAgents } = useGetAgentsListQuery({ filter: 'all' });
   const agentNameById = useMemo(() => new Map(agentsData?.agents?.map((a) => [a.id, a.name]) ?? []), [agentsData]);
   const orgName = useAppSelector((state: RootState) => state?.user?.user?.orgs?.[0]?.name);
+  const organizationId = useAppSelector((state: RootState) => state?.user?.user?.orgs?.[0]?.organization_id) ?? '';
+  const { data: teamsData } = useGetTeamsByOrganizationIdQuery({ organizationId }, { skip: !organizationId });
+  const teamNameById = useMemo(
+    () => new Map((teamsData ?? []).map((t) => [t?.team_id ?? '', t?.name ?? ''])),
+    [teamsData],
+  );
+  const { resolvedTheme } = useTheme();
+  const isDark = resolvedTheme === THEME_MODE.DARK;
+  const teamColorById = useMemo(
+    () =>
+      new Map((teamsData ?? []).map((t) => [t?.team_id ?? '', resolveChipColor(t?.metadata?.color_hex_code, isDark)])),
+    [teamsData, isDark],
+  );
 
   // hooks (RTK lazy/mutation)
   const [fetchAudiences] = useLazyGetAudiencesByResourceIdQuery();
@@ -241,6 +258,8 @@ export const useConnectionPeople = ({ connections, integrationName }: UseConnect
           audiencesByConn,
           baseTools,
           agentNameById,
+          teamNameById,
+          teamColorById,
           existingPeopleById,
           orgName,
         });
@@ -260,7 +279,17 @@ export const useConnectionPeople = ({ connections, integrationName }: UseConnect
       .catch(() => {
         toast.error('Failed to load data');
       });
-  }, [connections, integrationName, agentNameById, agentsData, fetchConnectionsPhase1, loadPoliciesForPerson, orgName]);
+  }, [
+    connections,
+    integrationName,
+    agentNameById,
+    teamNameById,
+    teamColorById,
+    agentsData,
+    fetchConnectionsPhase1,
+    loadPoliciesForPerson,
+    orgName,
+  ]);
 
   const handleToggleExpand = useCallback((connectionId: string) => {
     setExpandedConnections((prev) => {
@@ -286,6 +315,8 @@ export const useConnectionPeople = ({ connections, integrationName }: UseConnect
 
       setConnectionData((prev) => updatePersonInConnection(prev, connectionId, userId, (p) => ({ ...p, role })));
 
+      const audienceType = previousPerson.audience?.type ?? ResourceAudienceType.USER;
+
       return changeAudienceRole({
         apiEndpoint: API_ENDPOINTS.CHANGE_AUDIENCE_ROLE_IN_RESOURCE_PATCH_V2,
         resourceRoute: resourceTypeRouteMap[ResourceType.CONNECTION],
@@ -293,7 +324,7 @@ export const useConnectionPeople = ({ connections, integrationName }: UseConnect
         body: {
           audience_id: userId,
           role,
-          audience_type: ResourceAudienceType.USER,
+          audience_type: audienceType,
         },
       })
         .unwrap()
