@@ -20,7 +20,6 @@ const OrgMembershipPending = ({ email }: { email?: string }) => {
     onClick: logout,
   };
 
-  // TODO: Loading animation
   if (isLoadingMembershipRequests) {
     return (
       <div className='flex h-screen w-screen flex-col items-center justify-center bg-white'>
@@ -40,7 +39,9 @@ const OrgMembershipPending = ({ email }: { email?: string }) => {
     return (
       <MembershipRequested
         text='Your account is pending approval'
-        subText='We have notified the organization admin. You will receive an email when your membership request is approved.'
+        body={[
+          'We have notified the organization admin. You will receive an email when your membership request is approved.',
+        ]}
         userEmail={userEmail || ''}
         actionItems={[logoutButton]}
       />
@@ -49,8 +50,11 @@ const OrgMembershipPending = ({ email }: { email?: string }) => {
 
   return (
     <MembershipRequested
-      text='Thank you for your interest in Zamp'
-      subText='We have received your signup request and our team will review it shortly.'
+      text='Thank you for taking an interest in Zamp!'
+      body={[
+        "We're crafting AI employees that actually fit into how your team works. They learn, adapt, and take ownership of the work you'd rather not do yourself.",
+        "To make sure each onboarding feels considered rather than rushed, we're letting people in gradually. We'll reach out as soon as we're ready.",
+      ]}
       userEmail={userEmail || ''}
       actionItems={[logoutButton]}
     />

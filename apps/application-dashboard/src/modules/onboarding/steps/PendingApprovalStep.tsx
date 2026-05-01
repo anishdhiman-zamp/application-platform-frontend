@@ -65,9 +65,5 @@ export const PendingApprovalStep = ({ email, onComplete, onWrongStep, onFlagDisa
     return <ImageLoader imageSrc={ZAMP_LOGO_LOADER_SVG} width={140} height={140} />;
   }
 
-  return (
-    <div className='flex h-screen w-screen items-center justify-center bg-white'>
-      <OrgMembershipPending email={email} />
-    </div>
-  );
+  return <OrgMembershipPending email={email} />;
 };

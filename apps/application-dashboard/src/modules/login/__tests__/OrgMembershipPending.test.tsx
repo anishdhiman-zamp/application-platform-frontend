@@ -29,6 +29,12 @@ jest.mock('next/image', () => ({
   default: (props: any) => <img {...props} alt={props.alt || ''} />,
 }));
 
+jest.mock('@/components/ImageKitImage', () => ({
+  __esModule: true,
+  // eslint-disable-next-line
+  default: (props: any) => <img {...props} alt={props.alt || ''} />,
+}));
+
 describe('OrgMembershipPending', () => {
   const mockLogout = jest.fn();
   const mockUserEmail = 'test@example.com';
@@ -80,9 +86,16 @@ describe('OrgMembershipPending', () => {
 
     render(<OrgMembershipPending />);
 
-    expect(screen.getByText('Thank you for your interest in Zamp')).toBeInTheDocument();
+    expect(screen.getByText('Thank you for taking an interest in Zamp!')).toBeInTheDocument();
     expect(
-      screen.getByText('We have received your signup request and our team will review it shortly.'),
+      screen.getByText(
+        "We're crafting AI employees that actually fit into how your team works. They learn, adapt, and take ownership of the work you'd rather not do yourself.",
+      ),
+    ).toBeInTheDocument();
+    expect(
+      screen.getByText(
+        "To make sure each onboarding feels considered rather than rushed, we're letting people in gradually. We'll reach out as soon as we're ready.",
+      ),
     ).toBeInTheDocument();
     expect(screen.getByText(mockUserEmail)).toBeInTheDocument();
     expect(screen.getByText('Logout')).toBeInTheDocument();

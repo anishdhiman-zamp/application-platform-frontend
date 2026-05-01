@@ -213,3 +213,5 @@ export enum SUPPORT_INFO_TYPES {
   ERROR = 'ERROR',
   CUSTOM = 'CUSTOM',
 }
+
+export const WAITLIST_PAGE_EMPTY_STATE = IMAGE_PREFIX + '/images/empty-state/waitlist-page.png';

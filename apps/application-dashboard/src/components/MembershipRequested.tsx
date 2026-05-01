@@ -1,44 +1,59 @@
 import { Button } from '@zamp-platform/ui';
-import { ZAMP_BLACK_ICON } from 'constants/icons';
+import { WAITLIST_PAGE_EMPTY_STATE, ZAMP_BLACK_ICON } from 'constants/icons';
 import Image from 'next/image';
 import { defaultFnType } from 'types/commonTypes';
+import ImageKitImage from '@/components/ImageKitImage';
 
-type MembershipRequestedProps = {
+interface MembershipRequestedProps {
   text: string;
-  subText: string;
+  body: string[];
   userEmail?: string;
   actionItems: {
     text: string;
     onClick: defaultFnType;
   }[];
-};
+}
 
-export const MembershipRequested = (props: MembershipRequestedProps) => {
-  const { text, subText, userEmail, actionItems } = props;
+export const MembershipRequested = ({ text, body, userEmail, actionItems }: MembershipRequestedProps) => (
+  <div className='flex h-screen w-screen justify-center overflow-y-auto bg-white'>
+    <div className='flex w-full max-w-[760px] flex-col px-10 py-16'>
+      <Image
+        width={32}
+        height={32}
+        alt='zamp logo'
+        className='w-8 align-middle'
+        src={ZAMP_BLACK_ICON}
+        priority={true}
+      />
 
-  return (
-    <div className='mx-auto flex h-screen w-screen max-w-[600px] flex-col items-center justify-center bg-white text-center'>
-      <div>
-        <Image
-          width={60}
-          height={60}
-          alt='zamp logo'
-          className='w-8 cursor-pointer align-middle'
-          src={ZAMP_BLACK_ICON}
-          priority={true}
+      <h1 className='f-22-600 text-GRAY_1000 mt-10'>{text}</h1>
+
+      <div className='bg-GRAY_200 mt-10 flex h-[180px] w-full items-center justify-center overflow-hidden rounded-md'>
+        <ImageKitImage
+          src={WAITLIST_PAGE_EMPTY_STATE}
+          alt=''
+          width={680}
+          height={180}
+          className='h-full w-full object-contain object-center'
         />
       </div>
-      <div className='flex flex-col items-center justify-center'>
-        <span className='f-16-600 mt-4'>{text}</span>
-        <span className='f-13-400 text-GRAY_600 mt-6'>{subText}</span>
-        {userEmail && (
-          <>
-            <span className='f-13-400 text-GRAY_600 mt-6'>You are logged in as</span>
-            <span className='f-13-600 text-GRAY_950 mt-1'>{userEmail}</span>
-          </>
-        )}
+
+      <div className='mt-10 flex flex-col gap-6'>
+        {body.map((paragraph) => (
+          <p key={paragraph} className='f-13-400 text-GRAY_900 leading-5'>
+            {paragraph}
+          </p>
+        ))}
       </div>
-      <div className='mt-6 flex gap-2.5'>
+
+      {userEmail && (
+        <div className='mt-12 flex flex-col items-center'>
+          <span className='f-13-400 text-GRAY_600'>You are logged in as</span>
+          <span className='f-13-600 text-GRAY_950 mt-1'>{userEmail}</span>
+        </div>
+      )}
+
+      <div className='mt-6 flex justify-center gap-2.5'>
         {actionItems.map((actionItem) => (
           <Button
             key={actionItem.text}
@@ -52,5 +67,5 @@ export const MembershipRequested = (props: MembershipRequestedProps) => {
         ))}
       </div>
     </div>
-  );
-};
+  </div>
+);
