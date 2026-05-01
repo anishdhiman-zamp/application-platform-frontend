@@ -367,6 +367,6 @@ export const config = {
      * - sw.js (service worker)
      * - monitoring (Sentry tunnel route)
      */
-    '/((?!_vercel|api/health-check|auth|favicon.ico|icons|loaders|mp4|public|sw.js|monitoring).*)',
+    '/((?!_vercel|api/health-check|auth|favicon.ico|icons|loaders|mp4|public|sw.js|monitoring|images).*)',
   ],
 };

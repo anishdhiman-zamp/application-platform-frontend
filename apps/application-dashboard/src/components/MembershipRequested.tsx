@@ -27,7 +27,7 @@ export const MembershipRequested = ({ text, body, userEmail, actionItems }: Memb
 
       <h1 className='f-22-600 text-GRAY_1000 mt-10'>{text}</h1>
 
-      <div className='bg-GRAY_200 mt-10 flex h-[180px] w-full items-center justify-center overflow-hidden rounded-md'>
+      <div className='bg-GRAY_200 mt-10 flex w-full items-center justify-center overflow-hidden rounded-md'>
         <Image
           src={WAITLIST_PAGE_EMPTY_STATE}
           alt=''
