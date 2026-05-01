@@ -2,7 +2,6 @@ import { Button } from '@zamp-platform/ui';
 import { WAITLIST_PAGE_EMPTY_STATE, ZAMP_BLACK_ICON } from 'constants/icons';
 import Image from 'next/image';
 import { defaultFnType } from 'types/commonTypes';
-import ImageKitImage from '@/components/ImageKitImage';
 
 interface MembershipRequestedProps {
   text: string;
@@ -29,7 +28,7 @@ export const MembershipRequested = ({ text, body, userEmail, actionItems }: Memb
       <h1 className='f-22-600 text-GRAY_1000 mt-10'>{text}</h1>
 
       <div className='bg-GRAY_200 mt-10 flex h-[180px] w-full items-center justify-center overflow-hidden rounded-md'>
-        <ImageKitImage
+        <Image
           src={WAITLIST_PAGE_EMPTY_STATE}
           alt=''
           width={680}
