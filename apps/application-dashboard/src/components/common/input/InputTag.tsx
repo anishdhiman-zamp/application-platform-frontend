@@ -48,6 +48,7 @@ const InputTag: FC<InputTagProps> = ({
   tags = [],
   customTags = null,
   inputPillsWrapperClasses = '',
+  inputMode,
 }) => {
   let readOnlyInputClasses = ' read-only:text-GRAY_700 read-only:bg-GRAY_100 read-only:pointer-events-none';
   let disabledInputClasses =
@@ -155,7 +156,7 @@ const InputTag: FC<InputTagProps> = ({
             onKeyDown={handleKeyDown}
             onFocus={onFocus}
             ref={inputRef}
-            inputMode='none'
+            inputMode={inputMode}
             onKeyUp={onKeyUp}
           />
         </div>
@@ -182,7 +183,7 @@ const InputTag: FC<InputTagProps> = ({
           onKeyDown={handleKeyDown}
           onFocus={onFocus}
           ref={inputRef}
-          inputMode='none'
+          inputMode={inputMode}
           onKeyUp={onKeyUp}
           onDrop={(e) => e.preventDefault()}
         />

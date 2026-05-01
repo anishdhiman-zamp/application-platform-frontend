@@ -2,6 +2,7 @@ import {
   ChangeEvent,
   CSSProperties,
   FocusEvent,
+  HTMLAttributes,
   HTMLInputTypeAttribute,
   KeyboardEvent,
   KeyboardEventHandler,
@@ -60,6 +61,7 @@ export interface InputTagProps {
   focusClassNames?: string;
   cursorClassname?: string;
   customPaddingClassName?: string;
+  inputMode?: HTMLAttributes<HTMLInputElement>['inputMode'];
 }
 
 export interface InputFieldProps extends InputTagProps {
