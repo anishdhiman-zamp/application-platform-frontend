@@ -1,6 +1,6 @@
-import { DEVICE_TYPES, ENVIRONMENT, ENVIRONMENT_TYPES } from 'constants/common.constants';
+import { ENVIRONMENT, ENVIRONMENT_TYPES } from 'constants/common.constants';
 import { ROUTES_PATH } from 'constants/routeConfig';
-import { NextRequest, NextResponse, userAgent } from 'next/server';
+import { NextRequest, NextResponse } from 'next/server';
 import {
   ACTIVE_ORG_ID_COOKIE,
   COOKIE_MAX_AGE,
@@ -89,14 +89,6 @@ const handleUnauthenticatedRoutes = (request: NextRequest) => {
 
 const handleAuthenticatedRoutes = async (request: NextRequest) => {
   const { pathname } = request.nextUrl;
-  const { device } = userAgent(request);
-
-  if (
-    pathname !== ROUTES_PATH.INVALID_SCREEN_SIZE &&
-    (device.type === DEVICE_TYPES.MOBILE || device.type === DEVICE_TYPES.TABLET)
-  ) {
-    return NextResponse.redirect(new URL(ROUTES_PATH.INVALID_SCREEN_SIZE, request.url));
-  }
 
   let topLevelSession = null;
 
