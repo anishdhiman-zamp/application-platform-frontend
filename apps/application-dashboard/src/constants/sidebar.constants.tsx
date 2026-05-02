@@ -1,5 +1,5 @@
 import { ROUTES_PATH } from 'constants/routeConfig';
-import { Link2 } from 'lucide-react';
+import { Link2, Palette } from 'lucide-react';
 import CoinsStacked04 from '@/assets/Icons/CoinsStacked04';
 import NewPaceIcons from '@/assets/Icons/NewPaceIcons';
 import Users02 from '@/assets/Icons/Users02';
@@ -26,6 +26,12 @@ export const SIDEBAR_ITEMS: NavigationItemSchema[] = [
     path: ROUTES_PATH.CHAT,
     featureFlag: FEATURE_FLAGS.PACE_CHAT_V2,
   },
+  {
+    id: 'design-system',
+    label: 'Design System',
+    iconComponent: <Palette width={16} height={16} />,
+    path: ROUTES_PATH.DESIGN_SYSTEM,
+  },
 ];
 
 export const SETTINGS_TABS = [
@@ -40,6 +46,12 @@ export const SETTINGS_TABS = [
     id: 'integrations',
     iconComponent: <Link2 width={16} height={16} className='-rotate-45' />,
     path: ROUTES_PATH.INTEGRATIONS,
+  },
+  {
+    id: 'design-system',
+    label: 'Design System',
+    iconComponent: <Palette width={16} height={16} />,
+    path: ROUTES_PATH.DESIGN_SYSTEM,
   },
 ];
 
