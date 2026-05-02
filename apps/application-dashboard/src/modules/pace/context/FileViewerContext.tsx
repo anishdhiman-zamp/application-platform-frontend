@@ -1,6 +1,7 @@
 'use client';
 
 import { createContext, type ReactNode, useCallback, useContext, useMemo, useRef, useState } from 'react';
+import { usePaceContext } from '@/modules/pace/pace.context';
 
 export interface FileState {
   content: string;
@@ -22,23 +23,48 @@ interface FileViewerContextType {
 
 const FileViewerContext = createContext<FileViewerContextType | null>(null);
 
+const NO_CONVERSATION_KEY = '__none__';
+
+type FileStatesByConversation = Map<string, Map<string, FileState>>;
+
+const getBucket = (states: FileStatesByConversation, conversationKey: string): Map<string, FileState> | undefined => {
+  return states.get(conversationKey);
+};
+
+const cloneStatesWithBucket = (
+  states: FileStatesByConversation,
+  conversationKey: string,
+  bucket: Map<string, FileState>,
+): FileStatesByConversation => {
+  const next = new Map(states);
+
+  next.set(conversationKey, bucket);
+
+  return next;
+};
+
 export const FileViewerProvider = ({ children }: { children: ReactNode }) => {
-  const [fileStates, setFileStates] = useState<Map<string, FileState>>(new Map());
+  const { activeConversationId } = usePaceContext();
+  const [fileStates, setFileStates] = useState<FileStatesByConversation>(new Map());
   const fileStatesRef = useRef(fileStates);
+  const conversationKeyRef = useRef<string>(activeConversationId ?? NO_CONVERSATION_KEY);
 
   fileStatesRef.current = fileStates;
+  conversationKeyRef.current = activeConversationId ?? NO_CONVERSATION_KEY;
 
   const getFileState = useCallback((path: string): FileState | undefined => {
-    return fileStatesRef.current.get(path);
+    return getBucket(fileStatesRef.current, conversationKeyRef.current)?.get(path);
   }, []);
 
   const initFileState = useCallback((path: string, content: string, mtime_ms?: number) => {
-    setFileStates((prev) => {
-      const newMap = new Map(prev);
-      const existing = newMap.get(path);
+    const conversationKey = conversationKeyRef.current;
 
-      if (!existing) {
-        newMap.set(path, {
+    setFileStates((prev) => {
+      const existingBucket = prev.get(conversationKey);
+      const newBucket = new Map(existingBucket ?? []);
+
+      if (!newBucket.has(path)) {
+        newBucket.set(path, {
           content,
           originalContent: content,
           isDirty: false,
@@ -46,132 +72,161 @@ export const FileViewerProvider = ({ children }: { children: ReactNode }) => {
         });
       }
 
-      return newMap;
+      return cloneStatesWithBucket(prev, conversationKey, newBucket);
     });
   }, []);
 
   const forceUpdateFileState = useCallback((path: string, content: string, mtime_ms?: number) => {
-    setFileStates((prev) => {
-      const newMap = new Map(prev);
+    const conversationKey = conversationKeyRef.current;
 
-      newMap.set(path, {
+    setFileStates((prev) => {
+      const existingBucket = prev.get(conversationKey);
+      const newBucket = new Map(existingBucket ?? []);
+
+      newBucket.set(path, {
         content,
         originalContent: content,
         isDirty: false,
         mtime_ms,
       });
 
-      return newMap;
+      return cloneStatesWithBucket(prev, conversationKey, newBucket);
     });
   }, []);
 
   const updateFileContent = useCallback((path: string, content: string) => {
+    const conversationKey = conversationKeyRef.current;
+
     setFileStates((prev) => {
-      const newMap = new Map(prev);
-      const existing = newMap.get(path);
+      const existingBucket = prev.get(conversationKey);
+      const newBucket = new Map(existingBucket ?? []);
+      const existing = newBucket.get(path);
 
       if (existing) {
         const isDirty = content !== existing.originalContent;
 
-        newMap.set(path, {
+        newBucket.set(path, {
           ...existing,
           content,
           isDirty,
         });
       } else {
-        newMap.set(path, {
+        newBucket.set(path, {
           content,
           originalContent: '',
           isDirty: true,
         });
       }
 
-      return newMap;
+      return cloneStatesWithBucket(prev, conversationKey, newBucket);
     });
   }, []);
 
   const markFileSaved = useCallback((path: string, newMtime?: number) => {
+    const conversationKey = conversationKeyRef.current;
+
     setFileStates((prev) => {
-      const newMap = new Map(prev);
-      const existing = newMap.get(path);
+      const existingBucket = prev.get(conversationKey);
 
-      if (existing) {
-        newMap.set(path, {
-          ...existing,
-          originalContent: existing.content,
-          isDirty: false,
-          mtime_ms: newMtime ?? existing.mtime_ms,
-        });
-      }
+      if (!existingBucket) return prev;
 
-      return newMap;
+      const existing = existingBucket.get(path);
+
+      if (!existing) return prev;
+
+      const newBucket = new Map(existingBucket);
+
+      newBucket.set(path, {
+        ...existing,
+        originalContent: existing.content,
+        isDirty: false,
+        mtime_ms: newMtime ?? existing.mtime_ms,
+      });
+
+      return cloneStatesWithBucket(prev, conversationKey, newBucket);
     });
   }, []);
 
   const removeFileState = useCallback((path: string) => {
+    const conversationKey = conversationKeyRef.current;
+
     setFileStates((prev) => {
-      const newMap = new Map(prev);
+      const existingBucket = prev.get(conversationKey);
 
-      newMap.delete(path);
+      if (!existingBucket || !existingBucket.has(path)) return prev;
 
-      return newMap;
+      const newBucket = new Map(existingBucket);
+
+      newBucket.delete(path);
+
+      return cloneStatesWithBucket(prev, conversationKey, newBucket);
     });
   }, []);
 
   const updateFileStatePath = useCallback((oldPath: string, newPath: string) => {
-    // Update ref synchronously so getFileState returns correct value immediately
-    const existing = fileStatesRef.current.get(oldPath);
+    const conversationKey = conversationKeyRef.current;
+    const currentBucket = fileStatesRef.current.get(conversationKey);
+    const existing = currentBucket?.get(oldPath);
 
-    if (existing) {
-      const newMap = new Map(fileStatesRef.current);
+    if (currentBucket && existing) {
+      const syncedBucket = new Map(currentBucket);
 
-      newMap.delete(oldPath);
-      newMap.set(newPath, existing);
-      fileStatesRef.current = newMap;
+      syncedBucket.delete(oldPath);
+      syncedBucket.set(newPath, existing);
+      fileStatesRef.current = cloneStatesWithBucket(fileStatesRef.current, conversationKey, syncedBucket);
     }
 
     setFileStates((prev) => {
-      const existingState = prev.get(oldPath);
+      const existingBucket = prev.get(conversationKey);
+      const existingState = existingBucket?.get(oldPath);
 
-      if (!existingState) return prev;
+      if (!existingBucket || !existingState) return prev;
 
-      const newMap = new Map(prev);
+      const newBucket = new Map(existingBucket);
 
-      newMap.delete(oldPath);
-      newMap.set(newPath, existingState);
+      newBucket.delete(oldPath);
+      newBucket.set(newPath, existingState);
 
-      return newMap;
+      return cloneStatesWithBucket(prev, conversationKey, newBucket);
     });
   }, []);
 
   const updateFileStatePathsForFolder = useCallback((oldFolderPath: string, newFolderPath: string) => {
-    // Update ref synchronously so getFileState returns correct value immediately
+    const conversationKey = conversationKeyRef.current;
     const oldPrefix = oldFolderPath + '/';
-    const updates: Array<{ oldPath: string; newPath: string; state: FileState }> = [];
 
-    fileStatesRef.current.forEach((state, path) => {
-      if (path === oldFolderPath || path.startsWith(oldPrefix)) {
-        const newPath = path === oldFolderPath ? newFolderPath : newFolderPath + path.slice(oldFolderPath.length);
+    const currentBucket = fileStatesRef.current.get(conversationKey);
 
-        updates.push({ oldPath: path, newPath, state });
-      }
-    });
+    if (currentBucket) {
+      const updates: Array<{ oldPath: string; newPath: string; state: FileState }> = [];
 
-    if (updates.length > 0) {
-      const newMap = new Map(fileStatesRef.current);
+      currentBucket.forEach((state, path) => {
+        if (path === oldFolderPath || path.startsWith(oldPrefix)) {
+          const newPath = path === oldFolderPath ? newFolderPath : newFolderPath + path.slice(oldFolderPath.length);
 
-      updates.forEach(({ oldPath, newPath, state }) => {
-        newMap.delete(oldPath);
-        newMap.set(newPath, state);
+          updates.push({ oldPath: path, newPath, state });
+        }
       });
 
-      fileStatesRef.current = newMap;
+      if (updates.length > 0) {
+        const syncedBucket = new Map(currentBucket);
+
+        updates.forEach(({ oldPath, newPath, state }) => {
+          syncedBucket.delete(oldPath);
+          syncedBucket.set(newPath, state);
+        });
+        fileStatesRef.current = cloneStatesWithBucket(fileStatesRef.current, conversationKey, syncedBucket);
+      }
     }
 
     setFileStates((prev) => {
+      const existingBucket = prev.get(conversationKey);
+
+      if (!existingBucket) return prev;
+
       const folderUpdates: Array<{ oldPath: string; newPath: string; state: FileState }> = [];
 
-      prev.forEach((state, path) => {
+      existingBucket.forEach((state, path) => {
         if (path === oldFolderPath || path.startsWith(oldPrefix)) {
           const newPath = path === oldFolderPath ? newFolderPath : newFolderPath + path.slice(oldFolderPath.length);
 
@@ -181,14 +236,14 @@ export const FileViewerProvider = ({ children }: { children: ReactNode }) => {
 
       if (folderUpdates.length === 0) return prev;
 
-      const newMap = new Map(prev);
+      const newBucket = new Map(existingBucket);
 
       folderUpdates.forEach(({ oldPath, newPath, state }) => {
-        newMap.delete(oldPath);
-        newMap.set(newPath, state);
+        newBucket.delete(oldPath);
+        newBucket.set(newPath, state);
       });
 
-      return newMap;
+      return cloneStatesWithBucket(prev, conversationKey, newBucket);
     });
   }, []);
 

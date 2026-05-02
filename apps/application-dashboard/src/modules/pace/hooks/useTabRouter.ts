@@ -12,7 +12,7 @@ import {
 import { DynamicTabType, NAV_METHOD, NavMethod, TAB_TYPE } from '@/modules/pace/pace.types';
 import { preserveSidebarParam } from '@/modules/pace/pace.utils';
 import { store } from '@/store';
-import { dynamicTabsActions } from '@/store/slices/dynamic-tabs.slice';
+import { dynamicTabsActions, selectActiveTabId, selectDynamicTabs } from '@/store/slices/dynamic-tabs.slice';
 
 interface UseTabRouterConfig {
   type?: DynamicTabType;
@@ -100,7 +100,7 @@ export const useTabRouter = (config: UseTabRouterConfig = {}): UseTabRouterRetur
 
     if (!currentTabId || !search) return;
 
-    const currentTabs = store.getState().dynamicTabs.tabs;
+    const currentTabs = selectDynamicTabs(store.getState());
     const currentTab = currentTabs.find((t) => t.id === currentTabId);
 
     if (!currentTab) return;
@@ -135,7 +135,7 @@ export const useTabRouter = (config: UseTabRouterConfig = {}): UseTabRouterRetur
       const resolvedType = tabType ?? type ?? TAB_TYPE.FILE;
 
       // Use the tab's stored path (which includes query params from PACE_OPEN_DYNAMIC_TABS)
-      const currentTabs = store.getState().dynamicTabs.tabs;
+      const currentTabs = selectDynamicTabs(store.getState());
       const existingTab = currentTabs.find((t) => t.id === tabId);
       const tabPath = existingTab?.path ?? buildTabRoute(tabId, resolvedType);
 
@@ -152,7 +152,7 @@ export const useTabRouter = (config: UseTabRouterConfig = {}): UseTabRouterRetur
     if (!urlTabId) return;
 
     const urlTabType = type ?? getTabTypeFromUrl(pathname, search) ?? TAB_TYPE.FILE;
-    const currentTabs = store.getState().dynamicTabs.tabs;
+    const currentTabs = selectDynamicTabs(store.getState());
     const existingTab = currentTabs.find((t) => t.id === urlTabId);
 
     const urlParams = new URLSearchParams(search);
@@ -171,7 +171,7 @@ export const useTabRouter = (config: UseTabRouterConfig = {}): UseTabRouterRetur
       // tab in-place instead of opening a new one. This keeps pagination within a
       // single tab while still creating new tabs for explicit opens (router.push).
       const wasReplace = consumeNavReplaceFlag();
-      const activeTabId = store.getState().dynamicTabs.activeTabId;
+      const activeTabId = selectActiveTabId(store.getState());
       const activeTab = activeTabId ? currentTabs.find((t) => t.id === activeTabId) : null;
 
       if (wasReplace && activeTab && (activeTab.type ?? TAB_TYPE.FILE) === urlTabType) {

@@ -137,12 +137,12 @@ export const useDynamicTabs = (config: UseDynamicTabsConfig = {}): UseDynamicTab
       e.preventDefault();
       e.stopPropagation();
 
-      const currentTabs = store.getState().dynamicTabs.tabs;
+      const currentTabs = selectDynamicTabs(store.getState());
       const closingTab = currentTabs.find((tab) => tab.id === id);
 
       if (!closingTab) return;
 
-      const currentActiveId = store.getState().dynamicTabs.activeTabId;
+      const currentActiveId = selectActiveTabId(store.getState());
       const isClosingActiveTab = closingTab.id === currentActiveId;
 
       onTabClose?.(closingTab.id);
@@ -173,8 +173,8 @@ export const useDynamicTabs = (config: UseDynamicTabsConfig = {}): UseDynamicTab
   const closeTabsForPath = useCallback(
     (path: string, isFolder: boolean) => {
       const folderPathPrefix = `${path}/`;
-      const currentTabs = store.getState().dynamicTabs.tabs;
-      const currentActiveId = store.getState().dynamicTabs.activeTabId;
+      const currentTabs = selectDynamicTabs(store.getState());
+      const currentActiveId = selectActiveTabId(store.getState());
 
       const tabsToClose = isFolder
         ? currentTabs.filter((tab) => tab.id === path || tab.id.startsWith(folderPathPrefix))
@@ -219,13 +219,13 @@ export const useDynamicTabs = (config: UseDynamicTabsConfig = {}): UseDynamicTab
 
   const updateTab = useCallback(
     (oldId: string, newId: string, newName: string, metadata?: Record<string, unknown>) => {
-      const currentTabs = store.getState().dynamicTabs.tabs;
+      const currentTabs = selectDynamicTabs(store.getState());
       const tabToUpdate = currentTabs.find((tab) => tab.id === oldId);
 
       if (!tabToUpdate) return;
 
       const newTabPath = buildTabRoute(newId, tabToUpdate.type);
-      const currentActiveId = store.getState().dynamicTabs.activeTabId;
+      const currentActiveId = selectActiveTabId(store.getState());
       const isCurrentlyActive = currentActiveId === oldId;
 
       onTabUpdate?.(oldId, newId);
@@ -253,8 +253,8 @@ export const useDynamicTabs = (config: UseDynamicTabsConfig = {}): UseDynamicTab
   const updateTabsForFolderMove = useCallback(
     (oldFolderPath: string, newFolderPath: string) => {
       const oldPrefix = oldFolderPath + '/';
-      const currentTabs = store.getState().dynamicTabs.tabs;
-      const currentActiveId = store.getState().dynamicTabs.activeTabId;
+      const currentTabs = selectDynamicTabs(store.getState());
+      const currentActiveId = selectActiveTabId(store.getState());
       let activeTabNewPath: string | null = null;
 
       onFolderMove?.(oldFolderPath, newFolderPath);
@@ -294,12 +294,12 @@ export const useDynamicTabs = (config: UseDynamicTabsConfig = {}): UseDynamicTab
 
   const closeOtherTabs = useCallback(
     (id: string) => {
-      const currentTabs = store.getState().dynamicTabs.tabs;
+      const currentTabs = selectDynamicTabs(store.getState());
       const tabToKeep = currentTabs.find((tab) => tab.id === id);
 
       if (!tabToKeep) return;
 
-      const currentActiveId = store.getState().dynamicTabs.activeTabId;
+      const currentActiveId = selectActiveTabId(store.getState());
       const shouldNavigate = currentActiveId !== id;
 
       const tabsToClose = currentTabs.filter((tab) => tab.id !== id);
@@ -320,13 +320,13 @@ export const useDynamicTabs = (config: UseDynamicTabsConfig = {}): UseDynamicTab
 
   const closeTabsToRight = useCallback(
     (id: string) => {
-      const currentTabs = store.getState().dynamicTabs.tabs;
+      const currentTabs = selectDynamicTabs(store.getState());
       const tabIndex = currentTabs.findIndex((tab) => tab.id === id);
 
       if (tabIndex === -1) return;
 
       const tabsToClose = currentTabs.slice(tabIndex + 1);
-      const currentActiveId = store.getState().dynamicTabs.activeTabId;
+      const currentActiveId = selectActiveTabId(store.getState());
 
       let targetPath: string | null = null;
 
@@ -354,7 +354,7 @@ export const useDynamicTabs = (config: UseDynamicTabsConfig = {}): UseDynamicTab
   );
 
   const closeAllTabs = useCallback(() => {
-    const currentTabs = store.getState().dynamicTabs.tabs;
+    const currentTabs = selectDynamicTabs(store.getState());
 
     currentTabs.forEach((tab) => markTabAsClosed(tab.id));
     dispatch(dynamicTabsActions.clearAllTabs());

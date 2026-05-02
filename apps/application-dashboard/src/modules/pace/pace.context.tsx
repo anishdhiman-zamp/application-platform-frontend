@@ -29,8 +29,8 @@ import { CHAT_SIDEBAR_STATE, type ChatSidebarState, TAB_TYPE } from 'modules/pac
 import { getInitialSidebarState, getInitialWidth } from 'modules/pace/pace.utils';
 import { usePathname } from 'next/navigation';
 import { ROUTES_PATH } from '@/constants/routeConfig';
-import { useAppSelector } from '@/hooks/toolkit';
-import { selectActiveTab, selectActiveTabId } from '@/store/slices/dynamic-tabs.slice';
+import { useAppDispatch, useAppSelector } from '@/hooks/toolkit';
+import { dynamicTabsActions, selectActiveTab, selectActiveTabId } from '@/store/slices/dynamic-tabs.slice';
 import { defaultFnType } from '@/types/commonTypes';
 import { getFromLocalStorage, LOCAL_STORAGE_KEYS, setToLocalStorage } from '@/utils/localstorage';
 
@@ -165,6 +165,7 @@ const getInitialBoolean = (key: LOCAL_STORAGE_KEYS, fallback: boolean): boolean 
 
 export const PaceProvider = ({ children }: { children: ReactNode }) => {
   const pathname = usePathname();
+  const dispatch = useAppDispatch();
   const activeTabId = useAppSelector(selectActiveTabId);
   const activeTab = useAppSelector(selectActiveTab);
   const hasActiveFileTab = activeTab?.type === TAB_TYPE.FILE;
@@ -499,6 +500,10 @@ export const PaceProvider = ({ children }: { children: ReactNode }) => {
   useEffect(() => {
     handleRouteChange();
   }, [handleRouteChange]);
+
+  useEffect(() => {
+    dispatch(dynamicTabsActions.setActiveConversation(activeConversationId));
+  }, [activeConversationId, dispatch]);
 
   useEffect(() => {
     if (!filesPanelOpen) return;

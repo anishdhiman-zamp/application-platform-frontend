@@ -7,122 +7,216 @@ import {
   setToLocalStorage,
 } from '@/utils/localstorage';
 
-interface DynamicTabsState {
+interface ConversationTabsState {
   tabs: DynamicTab[];
   activeTabId: string | null;
 }
 
-const hydrateTabsFromStorage = (): DynamicTab[] => {
+interface DynamicTabsState {
+  activeConversationId: string | null;
+  byConversation: Record<string, ConversationTabsState>;
+}
+
+const normalizeTab = (tab: DynamicTab): DynamicTab => ({
+  ...tab,
+  stableKey: tab.stableKey || crypto.randomUUID(),
+  type: tab.type ?? TAB_TYPE.FILE,
+});
+
+const hydrateByConversationFromStorage = (): Record<string, ConversationTabsState> => {
+  removeFromLocalStorage(LOCAL_STORAGE_KEYS.PACE_OPEN_DYNAMIC_TABS);
+
   try {
-    const stored = getFromLocalStorage(LOCAL_STORAGE_KEYS.PACE_OPEN_DYNAMIC_TABS);
+    const stored = getFromLocalStorage(LOCAL_STORAGE_KEYS.PACE_OPEN_DYNAMIC_TABS_BY_CONVERSATION);
 
-    if (!stored) return [];
-    const tabs = JSON.parse(stored) as DynamicTab[];
+    if (!stored) return {};
+    const parsed = JSON.parse(stored) as Record<string, ConversationTabsState>;
 
-    return tabs.map((tab) => ({
-      ...tab,
-      stableKey: tab.stableKey || crypto.randomUUID(),
-      type: tab.type ?? TAB_TYPE.FILE,
-    }));
+    if (!parsed || typeof parsed !== 'object') return {};
+
+    const result: Record<string, ConversationTabsState> = {};
+
+    Object.entries(parsed).forEach(([conversationId, bucket]) => {
+      if (!bucket || !Array.isArray(bucket.tabs)) return;
+      result[conversationId] = {
+        tabs: bucket.tabs.map(normalizeTab),
+        activeTabId: bucket.activeTabId ?? null,
+      };
+    });
+
+    return result;
   } catch {
-    return [];
+    return {};
   }
 };
 
-const persistTabs = (tabs: DynamicTab[]) => {
+const persistByConversation = (byConversation: Record<string, ConversationTabsState>) => {
   try {
-    setToLocalStorage(LOCAL_STORAGE_KEYS.PACE_OPEN_DYNAMIC_TABS, JSON.stringify(tabs));
+    setToLocalStorage(LOCAL_STORAGE_KEYS.PACE_OPEN_DYNAMIC_TABS_BY_CONVERSATION, JSON.stringify(byConversation));
   } catch {
     // silent
   }
 };
 
+const isByConversationEmpty = (byConversation: Record<string, ConversationTabsState>): boolean => {
+  const entries = Object.values(byConversation);
+
+  if (entries.length === 0) return true;
+
+  return entries.every((bucket) => bucket.tabs.length === 0);
+};
+
+const getActiveBucket = (state: DynamicTabsState): ConversationTabsState | null => {
+  if (!state.activeConversationId) return null;
+
+  return state.byConversation[state.activeConversationId] ?? null;
+};
+
+const ensureActiveBucket = (state: DynamicTabsState): ConversationTabsState | null => {
+  if (!state.activeConversationId) return null;
+
+  if (!state.byConversation[state.activeConversationId]) {
+    state.byConversation[state.activeConversationId] = { tabs: [], activeTabId: null };
+  }
+
+  return state.byConversation[state.activeConversationId];
+};
+
 const initialState: DynamicTabsState = {
-  tabs: hydrateTabsFromStorage(),
-  activeTabId: null,
+  activeConversationId: null,
+  byConversation: hydrateByConversationFromStorage(),
 };
 
 export const dynamicTabsSlice = createSlice({
   name: 'dynamicTabs',
   initialState,
   reducers: {
+    setActiveConversation: (state, action: PayloadAction<string | null>) => {
+      const conversationId = action.payload;
+
+      state.activeConversationId = conversationId;
+
+      if (conversationId && !state.byConversation[conversationId]) {
+        state.byConversation[conversationId] = { tabs: [], activeTabId: null };
+      }
+    },
+
     openTab: (state, action: PayloadAction<Omit<DynamicTab, 'stableKey'>>) => {
+      const bucket = ensureActiveBucket(state);
+
+      if (!bucket) return;
+
       const tab = action.payload;
       const tabType = tab.type ?? TAB_TYPE.FILE;
-      const exists = state.tabs.some((t) => t.id === tab.id && (t.type ?? TAB_TYPE.FILE) === tabType);
+      const exists = bucket.tabs.some((t) => t.id === tab.id && (t.type ?? TAB_TYPE.FILE) === tabType);
 
       if (!exists) {
-        state.tabs.push({
+        bucket.tabs.push({
           ...tab,
           type: tabType,
           stableKey: crypto.randomUUID(),
         });
       }
 
-      state.activeTabId = tab.id;
+      bucket.activeTabId = tab.id;
     },
 
     closeTab: (state, action: PayloadAction<string>) => {
-      state.tabs = state.tabs.filter((tab) => tab.id !== action.payload);
+      const bucket = getActiveBucket(state);
 
-      if (state.activeTabId === action.payload) {
-        state.activeTabId = null;
+      if (!bucket) return;
+
+      bucket.tabs = bucket.tabs.filter((tab) => tab.id !== action.payload);
+
+      if (bucket.activeTabId === action.payload) {
+        bucket.activeTabId = null;
       }
     },
 
     setActiveTab: (state, action: PayloadAction<string | null>) => {
-      state.activeTabId = action.payload;
+      const bucket = getActiveBucket(state);
+
+      if (!bucket) return;
+
+      bucket.activeTabId = action.payload;
     },
 
     updateTab: (state, action: PayloadAction<{ oldId: string; newTab: Omit<DynamicTab, 'stableKey'> }>) => {
+      const bucket = getActiveBucket(state);
+
+      if (!bucket) return;
+
       const { oldId, newTab } = action.payload;
-      const tabIndex = state.tabs.findIndex((tab) => tab.id === oldId);
+      const tabIndex = bucket.tabs.findIndex((tab) => tab.id === oldId);
 
       if (tabIndex === -1) return;
 
-      const existingTab = state.tabs[tabIndex];
+      const existingTab = bucket.tabs[tabIndex];
 
-      state.tabs[tabIndex] = {
+      bucket.tabs[tabIndex] = {
         ...newTab,
         type: newTab.type ?? existingTab.type ?? TAB_TYPE.FILE,
         stableKey: existingTab.stableKey,
       };
 
-      if (state.activeTabId === oldId) {
-        state.activeTabId = newTab.id;
+      if (bucket.activeTabId === oldId) {
+        bucket.activeTabId = newTab.id;
       }
     },
 
     reorderTabs: (state, action: PayloadAction<string[]>) => {
+      const bucket = getActiveBucket(state);
+
+      if (!bucket) return;
+
       const newOrder = action.payload;
-      const tabMap = new Map(state.tabs.map((tab) => [tab.id, tab]));
+      const tabMap = new Map(bucket.tabs.map((tab) => [tab.id, tab]));
       const reordered = newOrder.map((id) => tabMap.get(id)).filter((tab): tab is DynamicTab => tab !== undefined);
 
-      if (reordered.length !== state.tabs.length) return;
+      if (reordered.length !== bucket.tabs.length) return;
 
-      state.tabs = reordered;
+      bucket.tabs = reordered;
     },
 
     clearAllTabs: (state) => {
-      state.tabs = [];
-      state.activeTabId = null;
+      const bucket = getActiveBucket(state);
+
+      if (!bucket) return;
+
+      bucket.tabs = [];
+      bucket.activeTabId = null;
     },
   },
 });
 
 export const dynamicTabsActions = dynamicTabsSlice.actions;
 
-export const selectDynamicTabs = (state: { dynamicTabs: DynamicTabsState }) => state.dynamicTabs.tabs;
-export const selectActiveTabId = (state: { dynamicTabs: DynamicTabsState }) => state.dynamicTabs.activeTabId;
-export const selectActiveTab = (state: { dynamicTabs: DynamicTabsState }) => {
-  const { tabs, activeTabId } = state.dynamicTabs;
+const EMPTY_TABS: DynamicTab[] = [];
 
-  if (!activeTabId) return null;
+const getActiveBucketReadonly = (state: { dynamicTabs: DynamicTabsState }): ConversationTabsState | null => {
+  const { activeConversationId, byConversation } = state.dynamicTabs;
 
-  return tabs.find((tab) => tab.id === activeTabId) ?? null;
+  if (!activeConversationId) return null;
+
+  return byConversation[activeConversationId] ?? null;
 };
+
+export const selectDynamicTabs = (state: { dynamicTabs: DynamicTabsState }) =>
+  getActiveBucketReadonly(state)?.tabs ?? EMPTY_TABS;
+
+export const selectActiveTabId = (state: { dynamicTabs: DynamicTabsState }) =>
+  getActiveBucketReadonly(state)?.activeTabId ?? null;
+
+export const selectActiveTab = (state: { dynamicTabs: DynamicTabsState }) => {
+  const bucket = getActiveBucketReadonly(state);
+
+  if (!bucket || !bucket.activeTabId) return null;
+
+  return bucket.tabs.find((tab) => tab.id === bucket.activeTabId) ?? null;
+};
+
 export const selectTabsByType = (state: { dynamicTabs: DynamicTabsState }, type: DynamicTabType) =>
-  state.dynamicTabs.tabs.filter((tab) => (tab.type ?? TAB_TYPE.FILE) === type);
+  (getActiveBucketReadonly(state)?.tabs ?? EMPTY_TABS).filter((tab) => (tab.type ?? TAB_TYPE.FILE) === type);
 
 export const dynamicTabsListenerMiddleware = createListenerMiddleware();
 
@@ -137,10 +231,10 @@ dynamicTabsListenerMiddleware.startListening({
   effect: (_action, listenerApi) => {
     const state = listenerApi.getState() as { dynamicTabs: DynamicTabsState };
 
-    if (state.dynamicTabs.tabs.length === 0) {
-      removeFromLocalStorage(LOCAL_STORAGE_KEYS.PACE_OPEN_DYNAMIC_TABS);
+    if (isByConversationEmpty(state.dynamicTabs.byConversation)) {
+      removeFromLocalStorage(LOCAL_STORAGE_KEYS.PACE_OPEN_DYNAMIC_TABS_BY_CONVERSATION);
     } else {
-      persistTabs(state.dynamicTabs.tabs);
+      persistByConversation(state.dynamicTabs.byConversation);
     }
   },
 });
