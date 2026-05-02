@@ -3,7 +3,7 @@
 import { type FC, useCallback, useEffect, useState } from 'react';
 import { Button, DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from '@zamp-platform/ui';
 import { cn } from '@zamp-platform/ui/utils';
-import { MoreVertical, Pencil, Trash2 } from 'lucide-react';
+import { MoreHorizontal, Pencil, Trash2 } from 'lucide-react';
 import { useResourceAccess } from '@/hooks/useResourceAccess';
 import DeleteConversationDialog from '@/modules/pace/components/chat/DeleteConversationDialog';
 import RenameConversationDialog from '@/modules/pace/components/chat/RenameConversationDialog';
@@ -76,7 +76,7 @@ const ConversationActions: FC<ConversationActionsProps> = ({
             className={cn('h-7 w-7 shrink-0 p-0', triggerClassName)}
             {...triggerProps}
           >
-            <MoreVertical size={14} className='text-GRAY_700' />
+            <MoreHorizontal size={14} className='text-GRAY_700' />
           </Button>
         </DropdownMenuTrigger>
         <DropdownMenuContent align={align} className='min-w-[140px]'>

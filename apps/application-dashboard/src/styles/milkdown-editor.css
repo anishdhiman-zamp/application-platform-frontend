@@ -1,9 +1,9 @@
 /* Override Crepe CSS variables with product design system */
 .milkdown-editor-wrapper .milkdown {
-  /* Font families - use Inter Variable */
-  --crepe-font-title: 'Inter Variable', system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
-  --crepe-font-default: 'Inter Variable', system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
-  --crepe-font-code: 'JetBrains Mono', 'Fira Code', Menlo, Monaco, 'Courier New', monospace;
+  /* Font families - follow the active typography preset */
+  --crepe-font-title: var(--font-active-sans, 'Inter Variable'), system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+  --crepe-font-default: var(--font-active-sans, 'Inter Variable'), system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+  --crepe-font-code: var(--font-active-mono, 'JetBrains Mono'), 'JetBrains Mono', 'Fira Code', Menlo, Monaco, 'Courier New', monospace;
 
   /* Colors - light mode */
   --crepe-color-background: #ffffff;
@@ -36,20 +36,75 @@
   font-family: var(--crepe-font-default);
 }
 
+/* Cap reading width for accessibility — center content with whitespace on both sides
+   when the file viewer is wider than the optimal line length. Padding overrides
+   Crepe's default 60px 120px which feels too airy in our chat layout. */
+.milkdown-editor-wrapper .milkdown .ProseMirror {
+  max-width: 656px;
+  margin-inline: auto;
+  padding: 24px 48px;
+}
+
+/* Agent instructions editor uses fixed inner padding and should fill its container */
+.agent-instructions-editor .ProseMirror {
+  max-width: none;
+  margin-inline: 0;
+}
+
 /* Reduce inner editor padding for agent instructions */
 .agent-instructions-editor .ProseMirror {
   padding: 30px 100px;
 }
 
-/* Headings use the title font */
-.milkdown-editor-wrapper h1,
-.milkdown-editor-wrapper h2,
-.milkdown-editor-wrapper h3,
-.milkdown-editor-wrapper h4,
-.milkdown-editor-wrapper h5,
-.milkdown-editor-wrapper h6 {
+/* Headings use the title font and match the chat's markdown typography.
+   Selectors are scoped under `.milkdown .ProseMirror` to override Crepe's defaults. */
+.milkdown-editor-wrapper .milkdown .ProseMirror h1,
+.milkdown-editor-wrapper .milkdown .ProseMirror h2,
+.milkdown-editor-wrapper .milkdown .ProseMirror h3,
+.milkdown-editor-wrapper .milkdown .ProseMirror h4,
+.milkdown-editor-wrapper .milkdown .ProseMirror h5,
+.milkdown-editor-wrapper .milkdown .ProseMirror h6 {
   font-family: var(--crepe-font-title);
   color: var(--GRAY_1000, #171717);
+  font-weight: 600;
+  line-height: 1.4;
+}
+
+.milkdown-editor-wrapper .milkdown .ProseMirror h1 {
+  font-size: 24px;
+  letter-spacing: -0.02em;
+  margin-top: 36px;
+  margin-bottom: 16px;
+}
+
+.milkdown-editor-wrapper .milkdown .ProseMirror h2 {
+  font-size: 19px;
+  letter-spacing: -0.015em;
+  margin-top: 28px;
+  margin-bottom: 12px;
+}
+
+.milkdown-editor-wrapper .milkdown .ProseMirror h3 {
+  font-size: 16px;
+  letter-spacing: -0.01em;
+  margin-top: 22px;
+  margin-bottom: 10px;
+}
+
+.milkdown-editor-wrapper .milkdown .ProseMirror h4,
+.milkdown-editor-wrapper .milkdown .ProseMirror h5,
+.milkdown-editor-wrapper .milkdown .ProseMirror h6 {
+  font-size: 15px;
+  margin-top: 18px;
+  margin-bottom: 8px;
+}
+
+/* Body copy matches the chat: 14px / 1.667 / weight 420 */
+.milkdown-editor-wrapper .ProseMirror p,
+.milkdown-editor-wrapper .ProseMirror li {
+  font-size: 14px;
+  line-height: 1.667;
+  font-weight: 420;
 }
 
 /* Body text styling */
@@ -59,6 +114,11 @@
 .milkdown-editor-wrapper th {
   font-family: var(--crepe-font-default);
   color: var(--GRAY_1000, #171717);
+}
+
+/* Soften inline bold so emphasis reads cleanly against weight 420 body copy */
+.milkdown-editor-wrapper .milkdown .ProseMirror strong {
+  font-weight: 500;
 }
 
 /* Blockquote styling */

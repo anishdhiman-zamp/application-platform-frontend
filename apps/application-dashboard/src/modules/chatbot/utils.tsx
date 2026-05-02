@@ -668,3 +668,27 @@ export const createConversationPayload = (
     sender_name: senderName,
   };
 };
+
+export type ZampLogoEntryDirectionType = 'fromTop' | 'fromBottom' | 'fromLeft' | 'fromRight';
+
+export const getZampLogoEntryDirection = (
+  rect: { left: number; top: number; width: number; height: number },
+  clientX: number,
+  clientY: number,
+): ZampLogoEntryDirectionType => {
+  if (rect.width <= 0 || rect.height <= 0) return 'fromTop';
+
+  const relX = (clientX - rect.left) / rect.width;
+  const relY = (clientY - rect.top) / rect.height;
+
+  const distances: Record<ZampLogoEntryDirectionType, number> = {
+    fromTop: relY,
+    fromBottom: 1 - relY,
+    fromLeft: relX,
+    fromRight: 1 - relX,
+  };
+
+  return (Object.keys(distances) as ZampLogoEntryDirectionType[]).reduce((closest, current) =>
+    distances[current] < distances[closest] ? current : closest,
+  );
+};

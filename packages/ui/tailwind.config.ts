@@ -17,6 +17,7 @@ const config = {
     extend: {
       fontFamily: {
         sans: [
+          'var(--font-active-sans)',
           'Inter Variable',
           'system-ui',
           '-apple-system',
@@ -30,7 +31,7 @@ const config = {
           'Helvetica Neue',
           'sans-serif',
         ],
-        mono: ['JetBrains Mono', 'Fira Code', 'ui-monospace', 'SFMono-Regular', 'monospace'],
+        mono: ['var(--font-active-mono)', 'JetBrains Mono', 'Fira Code', 'ui-monospace', 'SFMono-Regular', 'monospace'],
         'funnel-display': ['var(--font-funnel-display)', 'serif'],
       },
       colors: {
@@ -237,6 +238,7 @@ const config = {
         'page-bottom-bar': '0px -4px 0px 0px var(--GRAY_70)',
         'side-drawer': '-3px 0px 0px 0px var(--GRAY_70)',
         'side-drawer-inner': '10px 0px 50px 0px var(--GRAY_70)',
+        'side-drawer-inner-left': 'var(--SIDE_DRAWER_LEFT_SHADOW)',
         'menu-list': '1px 2px 20px 0px var(--GRAY_70)',
         'menu-shadow': 'var(--MENU_SHADOW)',
         'chart-highlight': '0px 0px 0px 3px var(--GRAY_200)',

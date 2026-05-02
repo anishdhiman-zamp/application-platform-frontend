@@ -2,7 +2,7 @@
 
 import { useCallback, useEffect, useRef, useState } from 'react';
 import { cn } from '@zamp-platform/ui/utils';
-import { FILES_PANEL_MAX_WIDTH, FILES_PANEL_MIN_WIDTH } from 'modules/pace/pace.constants';
+import { FILES_PANEL_MAX_WIDTH, FILES_PANEL_MIN_WIDTH, SIDEBAR_MIN_WIDTH } from 'modules/pace/pace.constants';
 import { CHAT_SIDEBAR_STATE } from 'modules/pace/pace.types';
 import { usePaceContext } from '@/modules/pace/pace.context';
 
@@ -18,6 +18,9 @@ const FilesPanelResizeHandle = () => {
     setIsFilesPanelResizing,
     sidebarWidth,
     chatSidebarState,
+    hasActiveFileTab,
+    treeColumnWidth,
+    isTreeSidebarOpen,
   } = usePaceContext();
 
   const dragStartXRef = useRef<number>(0);
@@ -28,13 +31,15 @@ const FilesPanelResizeHandle = () => {
 
   const computeEffectiveMax = useCallback(() => {
     const isSidebar = chatSidebarState === CHAT_SIDEBAR_STATE.SIDEBAR;
-    const sidebarSpace = isSidebar ? sidebarWidth + HANDLE_WIDTH : 0;
+    const chatSpace = isSidebar ? (hasActiveFileTab ? SIDEBAR_MIN_WIDTH : sidebarWidth + HANDLE_WIDTH) : 0;
+    const mainSpace = hasActiveFileTab ? 0 : MIN_MAIN_WIDTH;
+    const treeSpace = isTreeSidebarOpen ? treeColumnWidth + HANDLE_WIDTH : 0;
 
     const viewportWidth = window.innerWidth - PADDING;
-    const available = viewportWidth - HANDLE_WIDTH - MIN_MAIN_WIDTH - sidebarSpace;
+    const available = viewportWidth - HANDLE_WIDTH - chatSpace - mainSpace - treeSpace;
 
     return Math.min(FILES_PANEL_MAX_WIDTH, Math.max(FILES_PANEL_MIN_WIDTH, available));
-  }, [chatSidebarState, sidebarWidth]);
+  }, [chatSidebarState, sidebarWidth, hasActiveFileTab, treeColumnWidth, isTreeSidebarOpen]);
 
   const handleMouseDown = useCallback(
     (e: React.MouseEvent) => {
@@ -93,7 +98,7 @@ const FilesPanelResizeHandle = () => {
   return (
     <div
       onMouseDown={handleMouseDown}
-      className='group relative flex h-full w-2 shrink-0 cursor-col-resize items-center justify-center select-none'
+      className='group relative -mx-1 flex h-full w-2 shrink-0 cursor-col-resize items-center justify-center select-none'
     >
       <div
         className={cn(

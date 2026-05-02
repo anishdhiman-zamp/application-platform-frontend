@@ -74,6 +74,9 @@ interface PaceContextType {
   registerSelectConversation: (callback: (id: string, title?: string) => void) => void;
   selectConversation: (id: string, title?: string) => void;
 
+  activeConversationId: string | null;
+  setActiveConversationId: (id: string | null) => void;
+
   pendingFileReferences: PendingFileReference[];
   setPendingFileReferences: (refs: PendingFileReference[]) => void;
   clearPendingFileReferences: defaultFnType;
@@ -96,6 +99,7 @@ interface PaceContextType {
   isFilesPanelHydrated: boolean;
   toggleFilesPanel: defaultFnType;
   closeFilesPanel: defaultFnType;
+  openFilesPanel: defaultFnType;
 
   sidebarWidth: number;
   setSidebarWidth: (width: number) => void;
@@ -116,6 +120,17 @@ interface PaceContextType {
   setIsTreeColumnResizing: (resizing: boolean) => void;
 
   hasActiveFileTab: boolean;
+
+  isFilesPanelExpanded: boolean;
+  toggleFilesPanelExpanded: defaultFnType;
+  setFilesPanelExpanded: (expanded: boolean) => void;
+
+  isTreeSidebarOpen: boolean;
+  toggleTreeSidebar: defaultFnType;
+  setTreeSidebarOpen: (open: boolean) => void;
+
+  wordWrapEnabled: boolean;
+  toggleWordWrap: defaultFnType;
 
   selectedModel: string | null;
   setSelectedModel: (modelId: string | null) => void;
@@ -138,6 +153,16 @@ const getInitialFilesPanelOpen = (): boolean => {
   }
 };
 
+const getInitialBoolean = (key: LOCAL_STORAGE_KEYS, fallback: boolean): boolean => {
+  if (typeof window === 'undefined') return fallback;
+
+  const stored = getFromLocalStorage(key);
+
+  if (stored === null) return fallback;
+
+  return stored === 'true';
+};
+
 export const PaceProvider = ({ children }: { children: ReactNode }) => {
   const pathname = usePathname();
   const activeTabId = useAppSelector(selectActiveTabId);
@@ -155,6 +180,7 @@ export const PaceProvider = ({ children }: { children: ReactNode }) => {
   const [sharedFileReferences, setSharedFileReferences] = useState<UploadedFile[]>([]);
   const [chatMessageIntent, setChatMessageIntent] = useState<ChatMessageIntent | null>(null);
   const [activeAgentInfo, setActiveAgentInfo] = useState<ActiveAgentInfo | null>(null);
+  const [activeConversationId, setActiveConversationId] = useState<string | null>(null);
   const [filesPanelOpen, setFilesPanelOpen] = useState(getInitialFilesPanelOpen);
   const [isFilesPanelHydrated, setIsFilesPanelHydrated] = useState(false);
   const [sidebarWidth, setSidebarWidthRaw] = useState(() =>
@@ -187,6 +213,15 @@ export const PaceProvider = ({ children }: { children: ReactNode }) => {
 
     return stored === null ? true : stored === 'true';
   });
+  const [isFilesPanelExpanded, setIsFilesPanelExpanded] = useState<boolean>(() =>
+    getInitialBoolean(LOCAL_STORAGE_KEYS.PACE_FILES_PANEL_EXPANDED, false),
+  );
+  const [isTreeSidebarOpen, setIsTreeSidebarOpen] = useState<boolean>(() =>
+    getInitialBoolean(LOCAL_STORAGE_KEYS.PACE_TREE_SIDEBAR_OPEN, true),
+  );
+  const [wordWrapEnabled, setWordWrapEnabled] = useState<boolean>(() =>
+    getInitialBoolean(LOCAL_STORAGE_KEYS.PACE_WORD_WRAP_ENABLED, false),
+  );
 
   const routeSignature = activeTabId ? `${pathname}:${activeTabId}` : pathname;
   const prevRouteSignatureRef = useRef(routeSignature);
@@ -225,17 +260,25 @@ export const PaceProvider = ({ children }: { children: ReactNode }) => {
     setPendingMentionInserts([]);
   }, []);
 
-  const setSidebarWidth = useCallback((width: number) => {
-    const clamped = Math.min(SIDEBAR_MAX_WIDTH, Math.max(SIDEBAR_MIN_WIDTH, width));
+  const setSidebarWidth = useCallback(
+    (width: number) => {
+      const max = hasActiveFileTab ? Number.POSITIVE_INFINITY : SIDEBAR_MAX_WIDTH;
+      const clamped = Math.min(max, Math.max(SIDEBAR_MIN_WIDTH, width));
 
-    setSidebarWidthRaw(clamped);
-  }, []);
+      setSidebarWidthRaw(clamped);
+    },
+    [hasActiveFileTab],
+  );
 
-  const persistSidebarWidth = useCallback((width: number) => {
-    const clamped = Math.min(SIDEBAR_MAX_WIDTH, Math.max(SIDEBAR_MIN_WIDTH, width));
+  const persistSidebarWidth = useCallback(
+    (width: number) => {
+      const max = hasActiveFileTab ? Number.POSITIVE_INFINITY : SIDEBAR_MAX_WIDTH;
+      const clamped = Math.min(max, Math.max(SIDEBAR_MIN_WIDTH, width));
 
-    setToLocalStorage(LOCAL_STORAGE_KEYS.PACE_SIDEBAR_WIDTH, String(clamped));
-  }, []);
+      setToLocalStorage(LOCAL_STORAGE_KEYS.PACE_SIDEBAR_WIDTH, String(clamped));
+    },
+    [hasActiveFileTab],
+  );
 
   const setFilesPanelWidth = useCallback((width: number) => {
     const clamped = Math.min(FILES_PANEL_MAX_WIDTH, Math.max(FILES_PANEL_MIN_WIDTH, width));
@@ -276,6 +319,11 @@ export const PaceProvider = ({ children }: { children: ReactNode }) => {
     setToLocalStorage(LOCAL_STORAGE_KEYS.PACE_FILES_PANEL_PINNED, JSON.stringify(false));
   }, []);
 
+  const openFilesPanel = useCallback(() => {
+    setFilesPanelOpen(true);
+    setToLocalStorage(LOCAL_STORAGE_KEYS.PACE_FILES_PANEL_PINNED, JSON.stringify(true));
+  }, []);
+
   const setSelectedModel = useCallback((modelId: string | null) => {
     setSelectedModelRaw(modelId);
 
@@ -294,6 +342,46 @@ export const PaceProvider = ({ children }: { children: ReactNode }) => {
     });
   }, []);
 
+  const setFilesPanelExpanded = useCallback((expanded: boolean) => {
+    setIsFilesPanelExpanded(expanded);
+    setToLocalStorage(LOCAL_STORAGE_KEYS.PACE_FILES_PANEL_EXPANDED, String(expanded));
+  }, []);
+
+  const toggleFilesPanelExpanded = useCallback(() => {
+    setIsFilesPanelExpanded((prev) => {
+      const next = !prev;
+
+      setToLocalStorage(LOCAL_STORAGE_KEYS.PACE_FILES_PANEL_EXPANDED, String(next));
+
+      return next;
+    });
+  }, []);
+
+  const setTreeSidebarOpen = useCallback((open: boolean) => {
+    setIsTreeSidebarOpen(open);
+    setToLocalStorage(LOCAL_STORAGE_KEYS.PACE_TREE_SIDEBAR_OPEN, String(open));
+  }, []);
+
+  const toggleTreeSidebar = useCallback(() => {
+    setIsTreeSidebarOpen((prev) => {
+      const next = !prev;
+
+      setToLocalStorage(LOCAL_STORAGE_KEYS.PACE_TREE_SIDEBAR_OPEN, String(next));
+
+      return next;
+    });
+  }, []);
+
+  const toggleWordWrap = useCallback(() => {
+    setWordWrapEnabled((prev) => {
+      const next = !prev;
+
+      setToLocalStorage(LOCAL_STORAGE_KEYS.PACE_WORD_WRAP_ENABLED, String(next));
+
+      return next;
+    });
+  }, []);
+
   const registerStartNewChat = useCallback((callback: defaultFnType) => {
     startNewChatRef.current = callback;
   }, []);
@@ -306,13 +394,24 @@ export const PaceProvider = ({ children }: { children: ReactNode }) => {
     selectConversationRef.current = callback;
   }, []);
 
-  const selectConversation = useCallback((id: string, title?: string) => {
-    selectConversationRef.current?.(id, title);
-  }, []);
+  const selectConversation = useCallback(
+    (id: string, title?: string) => {
+      selectConversationRef.current?.(id, title);
+
+      const isChatRoot = pathname === ROUTES_PATH.CHAT && !activeTabId;
+      const nextState = isChatRoot ? CHAT_SIDEBAR_STATE.EXPANDED : CHAT_SIDEBAR_STATE.SIDEBAR;
+
+      if (chatSidebarStateRef.current !== nextState) {
+        setChatSidebarStateInternal(nextState);
+      }
+    },
+    [pathname, activeTabId, setChatSidebarStateInternal],
+  );
 
   const clampSidebarWidthToFilesPanel = useCallback(() => {
     if (!filesPanelOpen) return;
     if (chatSidebarStateRef.current !== CHAT_SIDEBAR_STATE.SIDEBAR) return;
+    if (hasActiveFileTab) return;
 
     const containerWidth = window.innerWidth - 16;
     const filesPanelSpace = filesPanelWidth + 8;
@@ -326,7 +425,7 @@ export const PaceProvider = ({ children }: { children: ReactNode }) => {
 
       return effectiveMax;
     });
-  }, [filesPanelOpen, filesPanelWidth]);
+  }, [filesPanelOpen, filesPanelWidth, hasActiveFileTab]);
 
   const handlePendingCollapse = useCallback(
     (isTabIdOnlyChange: boolean) => {
@@ -404,6 +503,7 @@ export const PaceProvider = ({ children }: { children: ReactNode }) => {
   useEffect(() => {
     if (!filesPanelOpen) return;
     if (chatSidebarStateRef.current !== CHAT_SIDEBAR_STATE.SIDEBAR) return;
+    if (hasActiveFileTab) return;
 
     const containerWidth = window.innerWidth - 16;
     const sidebarSpace = sidebarWidth + 8;
@@ -417,7 +517,7 @@ export const PaceProvider = ({ children }: { children: ReactNode }) => {
 
       return effectiveMax;
     });
-  }, [filesPanelOpen, sidebarWidth]);
+  }, [filesPanelOpen, sidebarWidth, hasActiveFileTab]);
 
   useEffect(() => {
     clampSidebarWidthToFilesPanel();
@@ -430,6 +530,25 @@ export const PaceProvider = ({ children }: { children: ReactNode }) => {
   useEffect(() => {
     setFilesPanelOpen(hasActiveFileTab);
     setToLocalStorage(LOCAL_STORAGE_KEYS.PACE_FILES_PANEL_PINNED, JSON.stringify(hasActiveFileTab));
+  }, [hasActiveFileTab]);
+
+  useEffect(() => {
+    if (filesPanelOpen) return;
+    if (!isFilesPanelExpanded) return;
+    setIsFilesPanelExpanded(false);
+    setToLocalStorage(LOCAL_STORAGE_KEYS.PACE_FILES_PANEL_EXPANDED, 'false');
+  }, [filesPanelOpen, isFilesPanelExpanded]);
+
+  useEffect(() => {
+    if (hasActiveFileTab) return;
+
+    setSidebarWidthRaw((prev) => {
+      if (prev <= SIDEBAR_MAX_WIDTH) return prev;
+
+      setToLocalStorage(LOCAL_STORAGE_KEYS.PACE_SIDEBAR_WIDTH, String(SIDEBAR_MAX_WIDTH));
+
+      return SIDEBAR_MAX_WIDTH;
+    });
   }, [hasActiveFileTab]);
 
   const value: PaceContextType = useMemo(
@@ -445,6 +564,9 @@ export const PaceProvider = ({ children }: { children: ReactNode }) => {
 
       registerSelectConversation,
       selectConversation,
+
+      activeConversationId,
+      setActiveConversationId,
 
       pendingFileReferences,
       setPendingFileReferences,
@@ -468,6 +590,7 @@ export const PaceProvider = ({ children }: { children: ReactNode }) => {
       isFilesPanelHydrated,
       toggleFilesPanel,
       closeFilesPanel,
+      openFilesPanel,
 
       sidebarWidth,
       setSidebarWidth,
@@ -489,6 +612,17 @@ export const PaceProvider = ({ children }: { children: ReactNode }) => {
 
       hasActiveFileTab,
 
+      isFilesPanelExpanded,
+      toggleFilesPanelExpanded,
+      setFilesPanelExpanded,
+
+      isTreeSidebarOpen,
+      toggleTreeSidebar,
+      setTreeSidebarOpen,
+
+      wordWrapEnabled,
+      toggleWordWrap,
+
       selectedModel,
       setSelectedModel,
 
@@ -508,6 +642,8 @@ export const PaceProvider = ({ children }: { children: ReactNode }) => {
       registerSelectConversation,
       selectConversation,
 
+      activeConversationId,
+
       pendingFileReferences,
       clearPendingFileReferences,
 
@@ -524,6 +660,7 @@ export const PaceProvider = ({ children }: { children: ReactNode }) => {
       isFilesPanelHydrated,
       toggleFilesPanel,
       closeFilesPanel,
+      openFilesPanel,
 
       sidebarWidth,
       setSidebarWidth,
@@ -541,6 +678,17 @@ export const PaceProvider = ({ children }: { children: ReactNode }) => {
       isTreeColumnResizing,
 
       hasActiveFileTab,
+
+      isFilesPanelExpanded,
+      toggleFilesPanelExpanded,
+      setFilesPanelExpanded,
+
+      isTreeSidebarOpen,
+      toggleTreeSidebar,
+      setTreeSidebarOpen,
+
+      wordWrapEnabled,
+      toggleWordWrap,
 
       selectedModel,
       setSelectedModel,

@@ -15,6 +15,7 @@ import { cn } from 'utils/common';
 import FlexAlignRight from '@/assets/Icons/FlexAlignRight';
 import { SETTINGS_ID } from '@/constants/sidebar.constants';
 import { useFilteredSidebarItems } from '@/hooks/useFilteredSidebarItems';
+import { SIDEBAR_TOGGLE_TRANSITION } from '@/utils/animations/sidebar.animations';
 import OrgSwitcher from 'components/layouts/dashboard-layout/components/OrgSwitcher';
 import SidebarTab from 'components/layouts/dashboard-layout/components/SidebarTab';
 import SidebarDynamicNavItems from 'components/layouts/dashboard-layout/sidebar/SidebarDynamicNavItems';
@@ -45,10 +46,10 @@ const Sidebar = () => {
       <AnimatePresence>
         {!isSidebarOpen && (
           <motion.button
-            initial={{ opacity: 0, scale: 0.8 }}
-            animate={{ opacity: 1, scale: 1 }}
-            exit={{ opacity: 0, scale: 0.8 }}
-            transition={{ duration: 0.2, ease: 'easeInOut' }}
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            transition={SIDEBAR_TOGGLE_TRANSITION}
             onClick={handleSidebarToggle}
             className='absolute top-0 left-0 z-30 flex h-12 w-12 items-center justify-center bg-transparent'
             aria-label='Toggle sidebar'
@@ -62,10 +63,7 @@ const Sidebar = () => {
         animate={{
           x: isSidebarOpen ? 0 : -240,
         }}
-        transition={{
-          duration: 0.15,
-          ease: [0.4, 0, 0.2, 1],
-        }}
+        transition={SIDEBAR_TOGGLE_TRANSITION}
         style={{
           willChange: 'transform',
         }}

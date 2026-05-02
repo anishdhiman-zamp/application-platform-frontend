@@ -31,3 +31,21 @@ export const THEME_OPTIONS: { value: THEME_MODE; label: string }[] = [
   { value: THEME_MODE.DARK, label: 'Dark' },
   { value: THEME_MODE.SYSTEM, label: 'System' },
 ];
+
+export const enum FONT_PRESET {
+  GEIST = 'geist',
+  INTER = 'inter',
+  MONO = 'mono',
+}
+
+export const FONT_PRESET_CLASS: Record<FONT_PRESET, string> = {
+  [FONT_PRESET.GEIST]: 'font-preset-geist',
+  [FONT_PRESET.INTER]: 'font-preset-inter',
+  [FONT_PRESET.MONO]: 'font-preset-mono',
+};
+
+export const FONT_PRESET_OPTIONS: { value: FONT_PRESET; label: string; description: string }[] = [
+  { value: FONT_PRESET.GEIST, label: 'Geist', description: 'Geist sans + Geist Mono' },
+  { value: FONT_PRESET.INTER, label: 'Inter', description: 'Inter + JetBrains Mono (legacy)' },
+  { value: FONT_PRESET.MONO, label: 'Mono', description: 'Geist Mono everywhere' },
+];

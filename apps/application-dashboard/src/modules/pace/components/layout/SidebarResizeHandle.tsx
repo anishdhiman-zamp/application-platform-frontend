@@ -2,7 +2,12 @@
 
 import { useCallback, useEffect, useRef, useState } from 'react';
 import { cn } from '@zamp-platform/ui/utils';
-import { SIDEBAR_MAX_WIDTH, SIDEBAR_MIN_WIDTH } from 'modules/pace/pace.constants';
+import {
+  FILE_TREE_COLUMN_MIN_WIDTH,
+  FILES_PANEL_MIN_WIDTH,
+  SIDEBAR_MAX_WIDTH,
+  SIDEBAR_MIN_WIDTH,
+} from 'modules/pace/pace.constants';
 import { usePaceContext } from '@/modules/pace/pace.context';
 
 const HANDLE_WIDTH = 8;
@@ -10,8 +15,15 @@ const PADDING = 16;
 const MIN_MAIN_WIDTH = 100;
 
 const SidebarResizeHandle = () => {
-  const { sidebarWidth, setSidebarWidth, persistSidebarWidth, setIsSidebarResizing, filesPanelOpen, filesPanelWidth } =
-    usePaceContext();
+  const {
+    sidebarWidth,
+    setSidebarWidth,
+    persistSidebarWidth,
+    setIsSidebarResizing,
+    filesPanelOpen,
+    filesPanelWidth,
+    hasActiveFileTab,
+  } = usePaceContext();
 
   const dragStartXRef = useRef<number>(0);
   const dragStartWidthRef = useRef<number>(sidebarWidth);
@@ -21,13 +33,19 @@ const SidebarResizeHandle = () => {
   const [isDragging, setIsDragging] = useState(false);
 
   const computeEffectiveMax = useCallback(() => {
-    const filesPanelSpace = filesPanelOpen ? filesPanelWidth + HANDLE_WIDTH : 0;
-
     const parentWidth = handleRef.current?.parentElement?.clientWidth ?? window.innerWidth - PADDING;
+
+    if (hasActiveFileTab) {
+      const available = parentWidth - HANDLE_WIDTH - HANDLE_WIDTH - FILE_TREE_COLUMN_MIN_WIDTH - FILES_PANEL_MIN_WIDTH;
+
+      return Math.max(SIDEBAR_MIN_WIDTH, available);
+    }
+
+    const filesPanelSpace = filesPanelOpen ? filesPanelWidth + HANDLE_WIDTH : 0;
     const available = parentWidth - HANDLE_WIDTH - MIN_MAIN_WIDTH - filesPanelSpace;
 
     return Math.min(SIDEBAR_MAX_WIDTH, Math.max(SIDEBAR_MIN_WIDTH, available));
-  }, [filesPanelOpen, filesPanelWidth]);
+  }, [filesPanelOpen, filesPanelWidth, hasActiveFileTab]);
 
   const handleMouseDown = useCallback(
     (e: React.MouseEvent) => {

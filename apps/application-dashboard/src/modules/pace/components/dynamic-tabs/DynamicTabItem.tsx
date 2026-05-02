@@ -119,11 +119,7 @@ const DynamicTabItem = ({
             ) : (
               icon
             )}
-            {!isCompact && (
-              <span className='f-13-500 min-w-0 flex-1 truncate text-left transition-[padding-right] duration-150 ease-in-out group-hover:pr-5'>
-                {tab.name}
-              </span>
-            )}
+            {!isCompact && <span className='f-13-500 min-w-0 flex-1 truncate pr-5 text-left'>{tab.name}</span>}
             {!isCompact && (
               <span
                 id='dynamic-tab-close-button'
@@ -131,7 +127,7 @@ const DynamicTabItem = ({
                 tabIndex={0}
                 onClick={(e) => onClose(e, tab.id)}
                 onKeyDown={(e) => handleActivationKeyDown(e, () => onClose(e as unknown as React.MouseEvent, tab.id))}
-                className='hover:bg-accent absolute top-1/2 right-1.5 flex h-4 w-4 -translate-y-1/2 cursor-pointer items-center justify-center rounded-sm p-0 opacity-0 transition-opacity duration-150 group-hover:opacity-100'
+                className='hover:bg-accent absolute top-1/2 right-1.5 flex h-4 w-4 -translate-y-1/2 cursor-pointer items-center justify-center rounded-sm p-0'
               >
                 <X size={12} className='text-GRAY_700' />
               </span>

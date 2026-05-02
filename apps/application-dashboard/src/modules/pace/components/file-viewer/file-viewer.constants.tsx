@@ -13,18 +13,18 @@ export const MILKDOWN_SIZE_LIMIT = 75_000;
 const ICON_SIZE = 14;
 
 export const MARKDOWN_VIEW_OPTIONS: [ViewModeOption<MarkdownViewMode>, ViewModeOption<MarkdownViewMode>] = [
-  { value: 'milkdown', icon: <FileText size={ICON_SIZE} /> },
-  { value: 'raw', icon: <Code size={ICON_SIZE} /> },
+  { value: 'milkdown', label: 'Preview', icon: <FileText size={ICON_SIZE} /> },
+  { value: 'raw', label: 'Source', icon: <Code size={ICON_SIZE} /> },
 ];
 
 export const HTML_VIEW_OPTIONS: [ViewModeOption<HtmlViewMode>, ViewModeOption<HtmlViewMode>] = [
-  { value: 'preview', icon: <Eye size={ICON_SIZE} /> },
-  { value: 'code', icon: <Code size={ICON_SIZE} /> },
+  { value: 'preview', label: 'Preview', icon: <Eye size={ICON_SIZE} /> },
+  { value: 'code', label: 'Source', icon: <Code size={ICON_SIZE} /> },
 ];
 
 export const SPREADSHEET_VIEW_OPTIONS: [ViewModeOption<SpreadsheetViewMode>, ViewModeOption<SpreadsheetViewMode>] = [
-  { value: 'table', icon: <Table size={ICON_SIZE} /> },
-  { value: 'raw', icon: <Code size={ICON_SIZE} /> },
+  { value: 'table', label: 'Table', icon: <Table size={ICON_SIZE} /> },
+  { value: 'raw', label: 'Source', icon: <Code size={ICON_SIZE} /> },
 ];
 
 export const FILE_VIEWER_ERROR_CONFIG: Record<

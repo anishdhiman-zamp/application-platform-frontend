@@ -146,7 +146,7 @@
 }
 
 .ag-charts-tooltip {
-  font-family: 'Inter';
+  font-family: var(--font-active-sans, 'Inter'), 'Inter';
   border: 1px solid var(--GRAY_200);
   padding: 4px;
   color: var(--GRAY_1000);

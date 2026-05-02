@@ -1,9 +1,9 @@
 'use client';
 
 import { memo } from 'react';
-import { Button, FileIcon, Tabs, TabsList, TabsTrigger, TooltipV2 } from '@zamp-platform/ui';
+import { Button, FileIcon, toast } from '@zamp-platform/ui';
 import { cn } from '@zamp-platform/ui/utils';
-import { Download } from 'lucide-react';
+import { FolderOpen } from 'lucide-react';
 import {
   HTML_VIEW_OPTIONS,
   MARKDOWN_VIEW_OPTIONS,
@@ -13,40 +13,19 @@ import type {
   HtmlViewMode,
   MarkdownViewMode,
   SpreadsheetViewMode,
-  ViewModeToggleProps,
 } from '@/modules/pace/components/file-viewer/file-viewer.types';
 import FilePathBreadcrumb from '@/modules/pace/components/file-viewer/FilePathBreadcrumb';
-import FileSaveStatus from '@/modules/pace/components/file-viewer/FileSaveStatus';
-import FileViewerHeaderMenu from '@/modules/pace/components/file-viewer/FileViewerHeaderMenu';
+import FileViewerHeaderMenu, { ViewModeMenuSection } from '@/modules/pace/components/file-viewer/FileViewerHeaderMenu';
 import RenameFileDialog from '@/modules/pace/components/file-viewer/RenameFileDialog';
 import DeleteConfirmationDialog from '@/modules/pace/components/files/DeleteConfirmationDialog';
 import { getFileExtension } from '@/modules/pace/components/files/file-tree.utils';
-import { FILE_VIEWER_HEADER_ACTION_IDS } from '@/modules/pace/components/files/files.constants';
 import { useFileViewerHeaderActions } from '@/modules/pace/hooks/useFileViewerHeaderActions';
 import { useFileViewerHeaderRename } from '@/modules/pace/hooks/useFileViewerHeaderRename';
-import { SIDE_OPTIONS } from '@/types/commonTypes';
-
-const ViewModeToggle = <T extends string>({ value, options, onChange }: ViewModeToggleProps<T>) => (
-  <Tabs value={value} onValueChange={(v) => onChange(v as T)}>
-    <TabsList className='gap-x-1'>
-      {options.map((option) => (
-        <TabsTrigger
-          key={option.value}
-          value={option.value}
-          className='flex h-6 w-[26px] shrink-0 items-center justify-center border border-transparent p-1.5'
-        >
-          {option.icon}
-        </TabsTrigger>
-      ))}
-    </TabsList>
-  </Tabs>
-);
+import { usePaceContext } from '@/modules/pace/pace.context';
 
 interface FileViewerHeaderProps {
   filePath: string;
   fileName: string;
-  isSaving: boolean;
-  lastSavedAt: number | null;
   className?: string;
   isMarkdown?: boolean;
   isHtml?: boolean;
@@ -63,8 +42,6 @@ const FileViewerHeader = memo(
   ({
     filePath,
     fileName,
-    isSaving,
-    lastSavedAt,
     className = '',
     isMarkdown = false,
     isHtml = false,
@@ -77,6 +54,8 @@ const FileViewerHeader = memo(
     onSpreadsheetViewModeChange,
   }: FileViewerHeaderProps) => {
     const extension = getFileExtension(fileName);
+
+    const { wordWrapEnabled, toggleWordWrap, toggleTreeSidebar, isTreeSidebarOpen } = usePaceContext();
 
     const {
       isRenameDialogOpen,
@@ -95,6 +74,35 @@ const FileViewerHeader = memo(
       fileName,
       onRenameRequested: openRenameDialog,
     });
+
+    const handleCopyPath = () => {
+      if (!filePath) return;
+
+      navigator.clipboard
+        .writeText(filePath)
+        .then(() => toast.success('Path copied to clipboard'))
+        .catch(() => toast.error('Failed to copy path'));
+    };
+
+    const renderViewModeSection = () => {
+      if (isMarkdown && onViewModeChange) {
+        return <ViewModeMenuSection value={viewMode} options={MARKDOWN_VIEW_OPTIONS} onChange={onViewModeChange} />;
+      }
+      if (isHtml && onHtmlViewModeChange) {
+        return <ViewModeMenuSection value={htmlViewMode} options={HTML_VIEW_OPTIONS} onChange={onHtmlViewModeChange} />;
+      }
+      if (isTextSpreadsheet && onSpreadsheetViewModeChange) {
+        return (
+          <ViewModeMenuSection
+            value={spreadsheetViewMode}
+            options={SPREADSHEET_VIEW_OPTIONS}
+            onChange={onSpreadsheetViewModeChange}
+          />
+        );
+      }
+
+      return null;
+    };
 
     return (
       <>
@@ -119,7 +127,7 @@ const FileViewerHeader = memo(
         <div
           className={cn('border-GRAY_400 bg-BG_WHITE flex items-center justify-between border-b px-4 py-3', className)}
         >
-          <div className='flex min-w-0 shrink items-center'>
+          <div className='flex min-w-0 shrink items-center gap-x-1'>
             <FilePathBreadcrumb
               filePath={filePath}
               fileName={fileName}
@@ -127,35 +135,28 @@ const FileViewerHeader = memo(
                 <FileIcon extension={extension || 'txt'} className='size-4 rounded-sm' iconClassName='size-3.5' />
               }
             />
+            <FileViewerHeaderMenu
+              onActionClick={handleActionClick}
+              onCopyPath={handleCopyPath}
+              wordWrapEnabled={wordWrapEnabled}
+              onToggleWordWrap={toggleWordWrap}
+              disabled={isDeleting || isRenameLoading}
+              viewModeSection={renderViewModeSection()}
+            />
           </div>
 
           <div className='flex shrink-0 items-center gap-x-2'>
-            <FileSaveStatus isSaving={isSaving} lastSavedAt={lastSavedAt} />
-            {isMarkdown && onViewModeChange && (
-              <ViewModeToggle value={viewMode} options={MARKDOWN_VIEW_OPTIONS} onChange={onViewModeChange} />
-            )}
-            {isHtml && onHtmlViewModeChange && (
-              <ViewModeToggle value={htmlViewMode} options={HTML_VIEW_OPTIONS} onChange={onHtmlViewModeChange} />
-            )}
-            {isTextSpreadsheet && onSpreadsheetViewModeChange && (
-              <ViewModeToggle
-                value={spreadsheetViewMode}
-                options={SPREADSHEET_VIEW_OPTIONS}
-                onChange={onSpreadsheetViewModeChange}
-              />
-            )}
-            <TooltipV2 tooltipBody='Download' side={SIDE_OPTIONS.BOTTOM} delayDuration={300} asChildTrigger>
-              <Button
-                variant='ghost'
-                size='icon'
-                onClick={() => handleActionClick(FILE_VIEWER_HEADER_ACTION_IDS.DOWNLOAD)}
-                disabled={isDeleting}
-                className='h-6 w-6 shrink-0'
-              >
-                <Download size={14} className='text-GRAY_700' />
-              </Button>
-            </TooltipV2>
-            <FileViewerHeaderMenu onActionClick={handleActionClick} disabled={isDeleting || isRenameLoading} />
+            <Button
+              variant='ghost'
+              size='icon'
+              onClick={toggleTreeSidebar}
+              title='Toggle file tree'
+              aria-label='Toggle file tree'
+              aria-pressed={isTreeSidebarOpen}
+              className={cn('h-6 w-6 shrink-0', isTreeSidebarOpen && 'bg-accent text-accent-GRAY_1000')}
+            >
+              <FolderOpen size={14} className='text-GRAY_700' />
+            </Button>
           </div>
         </div>
       </>

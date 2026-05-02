@@ -38,6 +38,7 @@ import ContentErrorState from '@/modules/pace/components/ContentErrorState';
 import { buildTabRoute } from '@/modules/pace/components/dynamic-tabs/tab-type-registry';
 import { useDynamicTabs } from '@/modules/pace/components/dynamic-tabs/useDynamicTabs';
 import ChatMessagesSkeleton from '@/modules/pace/components/loaders/ChatMessagesSkeleton';
+import { useAutoOpenAgentFiles } from '@/modules/pace/hooks/useAutoOpenAgentFiles';
 import { type ActiveAgentInfo, usePaceContext } from '@/modules/pace/pace.context';
 import { CHAT_SIDEBAR_STATE, TAB_TYPE } from '@/modules/pace/pace.types';
 import { preserveSidebarParam } from '@/modules/pace/pace.utils';
@@ -113,6 +114,13 @@ const ChatConversationContent = ({
   } = useConversationState();
   const { createConversationV2, sendMessage, refetchConversationHistory } = useConversationActions();
   const streamingState = useStreamingState(conversationId ?? ctxConversationId);
+
+  useAutoOpenAgentFiles({
+    conversationId: conversationId ?? ctxConversationId ?? null,
+    messages,
+    streamingState,
+    onFileOpen,
+  });
 
   const [isTaskPopoverOpen, setIsTaskPopoverOpen] = useState(false);
 
@@ -386,7 +394,7 @@ const ChatConversationContent = ({
               refetchFunction={refetchConversationHistory}
               skeletonType={SkeletonTypes.CUSTOM}
               loader={<ChatMessagesSkeleton className='px-0' />}
-              className='mx-auto flex w-full max-w-[700px] flex-1 flex-col px-3'
+              className='mx-auto flex w-full max-w-[700px] flex-1 flex-col px-3 pt-6'
               renderError={
                 isConversationNotFound ? (
                   <ContentErrorState

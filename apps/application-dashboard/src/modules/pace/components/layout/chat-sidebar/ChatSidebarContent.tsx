@@ -55,7 +55,6 @@ export interface ChatSidebarContentProps {
 
 const ChatSidebarContent = ({
   conversationId,
-  setConversationId,
   setChatTitle,
   startNewChat,
   chatTitle,
@@ -72,12 +71,12 @@ const ChatSidebarContent = ({
     chatSidebarState,
     setChatSidebarState,
     activeAgentInfo,
-    setActiveAgentInfo,
     selectedModel,
     setSelectedModel,
     sharedFileReferences,
     setSharedFileReferences,
     sharedExternalFilePaths,
+    openFilesPanel,
   } = usePaceContext();
   const { inputValue, setInputValue } = useChatDraftInput({
     conversationId,
@@ -143,10 +142,6 @@ const ChatSidebarContent = ({
     [selectedModel],
   );
 
-  const handleExpand = useCallback(() => {
-    setChatSidebarState(CHAT_SIDEBAR_STATE.EXPANDED);
-  }, [setChatSidebarState]);
-
   const collapseSidebarIfExpanded = useCallback(() => {
     if (chatSidebarState === CHAT_SIDEBAR_STATE.EXPANDED) {
       setChatSidebarState(CHAT_SIDEBAR_STATE.SIDEBAR);
@@ -156,9 +151,10 @@ const ChatSidebarContent = ({
   const handleFileOpen = useCallback(
     (path: string, name: string) => {
       collapseSidebarIfExpanded();
+      openFilesPanel();
       openTab(path, name);
     },
-    [openTab, collapseSidebarIfExpanded],
+    [openTab, collapseSidebarIfExpanded, openFilesPanel],
   );
 
   const handleDatasetOpen = useCallback(
@@ -207,14 +203,6 @@ const ChatSidebarContent = ({
   const handleHitlRespondComplete = useCallback(() => {
     void refetchConversationHistory();
   }, [refetchConversationHistory]);
-
-  const handleSelectConversation = useCallback(
-    (id: string | null, title?: string) => {
-      setActiveAgentInfo(null);
-      setConversationId(id, title);
-    },
-    [setActiveAgentInfo, setConversationId],
-  );
 
   useEffect(() => {
     setIsConversationNotFound(false);
@@ -319,11 +307,8 @@ const ChatSidebarContent = ({
           title={chatTitle || 'Start a new chat'}
           conversationId={conversationId}
           organizationId={organizationId}
-          onStartNewChat={startNewChat}
           onTitleChange={setChatTitle}
-          onSelectConversation={handleSelectConversation}
           onDeleteConversation={startNewChat}
-          onExpand={chatSidebarState !== CHAT_SIDEBAR_STATE.EXPANDED ? handleExpand : undefined}
         />
       </div>
       <ChatConversationContent
@@ -344,7 +329,7 @@ const ChatSidebarContent = ({
 
       {!isConversationNotFound && (
         <ChatActionsProvider onFileOpen={handleFileOpen} onDatasetOpen={handleDatasetOpen} onTaskOpen={handleTaskOpen}>
-          <div className='bg-BG_WHITE sticky bottom-0 z-10 mx-auto w-full max-w-[700px] px-3 pb-3'>
+          <div className='bg-BG_WHITE sticky bottom-0 z-10 mx-auto w-full max-w-[700px] px-3 pb-8'>
             {renderChatInput()}
           </div>
         </ChatActionsProvider>

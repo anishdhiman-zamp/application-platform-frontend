@@ -1,4 +1,5 @@
 import { type FC } from 'react';
+import { Button } from '@zamp-platform/ui';
 import { conversationConfig, ResourceType, ShareResourcePopup, ShareResourceVersion } from '@/modules/shareResource';
 import { PERMISSION_ROLES } from '@/utils/accessPermission/accessPermission.types';
 
@@ -17,6 +18,11 @@ const ShareConversationPopup: FC<ShareConversationPopupProps> = ({ conversationI
       version={ShareResourceVersion.V2}
       forceAdminAccess
       avoidCollisions={avoidCollisions}
+      customTrigger={
+        <Button size='small' variant='secondary' id='share-conversation-to-audience-btn' className='h-[30px]'>
+          Share
+        </Button>
+      }
     />
   );
 };

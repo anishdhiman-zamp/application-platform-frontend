@@ -1,6 +1,7 @@
 'use client';
 
 import { memo, useCallback, useState } from 'react';
+import { createPortal } from 'react-dom';
 import { captureException } from '@sentry/browser';
 import { toast } from 'sonner';
 import { MILKDOWN_SIZE_LIMIT } from '@/modules/pace/components/file-viewer/file-viewer.constants';
@@ -17,6 +18,7 @@ import {
   FILE_TOAST_MESSAGES,
   TEXT_SPREADSHEET_EXTENSIONS,
 } from '@/modules/pace/components/files/files.constants';
+import { useFilesPanelHeaderSlot } from '@/modules/pace/components/files-panel/FilesPanelHeaderSlot';
 import useFileViewer from '@/modules/pace/hooks/useFileViewer';
 
 interface FileViewerTabProps {
@@ -29,6 +31,8 @@ const FileViewerTab = memo(({ filePath, isActive, onCloseTab }: FileViewerTabPro
   const [markdownViewMode, setMarkdownViewMode] = useState<MarkdownViewMode>('milkdown');
   const [htmlViewMode, setHtmlViewMode] = useState<HtmlViewMode>('preview');
   const [spreadsheetViewMode, setSpreadsheetViewMode] = useState<SpreadsheetViewMode>('table');
+
+  const headerSlot = useFilesPanelHeaderSlot();
 
   const handleSaveError = useCallback((error: unknown) => {
     captureException(error instanceof Error ? error : new Error(`File save failed: ${JSON.stringify(error)}`));
@@ -48,23 +52,13 @@ const FileViewerTab = memo(({ filePath, isActive, onCloseTab }: FileViewerTabPro
     [onCloseTab, filePath],
   );
 
-  const {
-    content,
-    isLoading,
-    isFileNotFound,
-    fileCategory,
-    fileExtension,
-    isEditable,
-    updateContent,
-    isSaving,
-    lastSavedAt,
-    mediaUrl,
-  } = useFileViewer({
-    filePath,
-    isActive,
-    onSaveError: handleSaveError,
-    onLoadError: handleLoadError,
-  });
+  const { content, isLoading, isFileNotFound, fileCategory, fileExtension, isEditable, updateContent, mediaUrl } =
+    useFileViewer({
+      filePath,
+      isActive,
+      onSaveError: handleSaveError,
+      onLoadError: handleLoadError,
+    });
 
   const fileName = filePath.split('/').pop() || filePath;
   const isLargeMarkdown = fileCategory === FILE_CATEGORY.MARKDOWN && (content?.length ?? 0) > MILKDOWN_SIZE_LIMIT;
@@ -80,21 +74,24 @@ const FileViewerTab = memo(({ filePath, isActive, onCloseTab }: FileViewerTabPro
 
   return (
     <div className='flex h-full w-full flex-col overflow-hidden'>
-      <FileViewerHeader
-        filePath={filePath}
-        fileName={fileName}
-        isSaving={isSaving}
-        lastSavedAt={lastSavedAt}
-        isMarkdown={isMarkdown}
-        isHtml={isHtml}
-        isTextSpreadsheet={isTextSpreadsheet}
-        viewMode={markdownViewMode}
-        htmlViewMode={htmlViewMode}
-        spreadsheetViewMode={spreadsheetViewMode}
-        onViewModeChange={setMarkdownViewMode}
-        onHtmlViewModeChange={setHtmlViewMode}
-        onSpreadsheetViewModeChange={setSpreadsheetViewMode}
-      />
+      {isActive &&
+        headerSlot &&
+        createPortal(
+          <FileViewerHeader
+            filePath={filePath}
+            fileName={fileName}
+            isMarkdown={isMarkdown}
+            isHtml={isHtml}
+            isTextSpreadsheet={isTextSpreadsheet}
+            viewMode={markdownViewMode}
+            htmlViewMode={htmlViewMode}
+            spreadsheetViewMode={spreadsheetViewMode}
+            onViewModeChange={setMarkdownViewMode}
+            onHtmlViewModeChange={setHtmlViewMode}
+            onSpreadsheetViewModeChange={setSpreadsheetViewMode}
+          />,
+          headerSlot,
+        )}
       <div className='min-h-0 flex-1 overflow-hidden'>
         <FileViewerContent
           filePath={filePath}

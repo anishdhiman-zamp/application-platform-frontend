@@ -5,7 +5,8 @@ import { ResourceType, unreadStore, useActiveStreamingIds, useUnreadConversation
 import { useInfiniteScroll } from '@zamp-platform/tanstack-table';
 import { Button, Input } from '@zamp-platform/ui';
 import { cn } from '@zamp-platform/ui/utils';
-import { Plus, Search } from 'lucide-react';
+import { ArrowRight, Plus } from 'lucide-react';
+import Link from 'next/link';
 import { useGetConversationHistoryQuery } from '@/apis/pace';
 import CommonWrapper from '@/components/commonWrapper';
 import { SkeletonTypes } from '@/components/commonWrapper/commonWrapper.types';
@@ -22,21 +23,24 @@ const SEARCH_DEBOUNCE_MS = 300;
 
 interface ChatHistoryProps {
   onSelectConversation: (id: string | null, title?: string) => void;
-  onDeleteConversation?: (id: string) => void;
-  onRenameConversation?: (id: string, newTitle: string) => void;
   onStartNewChat?: () => void;
   activeConversationId?: string | null;
   compact?: boolean;
+  recentLimit?: number;
+  viewMoreHref?: string;
 }
 
 const ChatHistory = ({
   onSelectConversation,
-  onDeleteConversation,
-  onRenameConversation,
   onStartNewChat,
   activeConversationId,
   compact = false,
+  recentLimit,
+  viewMoreHref,
 }: ChatHistoryProps) => {
+  const isRecentMode = typeof recentLimit === 'number';
+  const queryLimit = isRecentMode ? recentLimit : PAGE_SIZE;
+
   const organizationId = useAppSelector((state: RootState) => state?.user?.user?.orgs?.[0]?.organization_id) ?? '';
   const containerRef = useRef<HTMLDivElement>(null);
   const activeStreamingIds = useActiveStreamingIds();
@@ -56,7 +60,6 @@ const ChatHistory = ({
     lastMergedPage: 0,
   });
   const [searchTerm, setSearchTerm] = useState('');
-  const [isSearchOpen, setIsSearchOpen] = useState(false);
 
   const debouncedSearch = useDebounce(searchTerm, SEARCH_DEBOUNCE_MS);
 
@@ -72,8 +75,8 @@ const ChatHistory = ({
       resourceType: ResourceType.ORGANIZATION,
       resourceId: organizationId,
       page: pagination.page,
-      limit: PAGE_SIZE,
-      search: debouncedSearch || undefined,
+      limit: queryLimit,
+      search: !isRecentMode && debouncedSearch ? debouncedSearch : undefined,
     },
     {
       skip: !organizationId,
@@ -81,7 +84,7 @@ const ChatHistory = ({
   );
 
   const { page, totalPages, conversations: allConversations } = pagination;
-  const hasMore = totalPages > 0 && page < totalPages;
+  const hasMore = !isRecentMode && totalPages > 0 && page < totalPages;
   const isInitialLoading =
     allConversations.length === 0 &&
     (isFetchingConversationHistory || isUninitializedConversationHistory) &&
@@ -93,6 +96,7 @@ const ChatHistory = ({
   }, []);
 
   const fetchNextPage = useCallback(() => {
+    if (isRecentMode) return;
     setPagination((prev) => {
       if (isFetchingConversationHistory || prev.totalPages === 0 || prev.page >= prev.totalPages) {
         return prev;
@@ -100,25 +104,25 @@ const ChatHistory = ({
 
       return { ...prev, page: prev.page + 1 };
     });
-  }, [isFetchingConversationHistory]);
+  }, [isFetchingConversationHistory, isRecentMode]);
 
   const { fetchMoreOnBottomReached } = useInfiniteScroll({
     fetchNextPage,
     isFetching: isFetchingConversationHistory,
     totalFetched: page,
     totalRowCount: hasMore ? totalPages : page,
-    hasDataSource: !!organizationId,
+    hasDataSource: !!organizationId && !isRecentMode,
     threshold: compact ? 100 : 500,
   });
 
   const handleScroll = useCallback(() => {
+    if (isRecentMode) return;
     fetchMoreOnBottomReached(containerRef.current);
-  }, [fetchMoreOnBottomReached]);
+  }, [fetchMoreOnBottomReached, isRecentMode]);
 
   const handleRefetch = useCallback(() => {
     resetPagination();
     setSearchTerm('');
-    setIsSearchOpen(false);
     refetchConversationHistory();
   }, [refetchConversationHistory, resetPagination]);
 
@@ -133,44 +137,6 @@ const ChatHistory = ({
   const handleSearchChange = useCallback((e: React.ChangeEvent<HTMLInputElement>) => {
     setSearchTerm(e.target.value);
   }, []);
-
-  const handleToggleSearch = useCallback(() => {
-    setIsSearchOpen((prev) => !prev);
-    if (isSearchOpen) {
-      setSearchTerm('');
-    }
-  }, [isSearchOpen]);
-
-  const handleDeleteConversation = useCallback(
-    (id: string) => {
-      setPagination((prev) => ({
-        ...prev,
-        conversations: prev.conversations.filter((c) => c.id !== id),
-        totalCount: Math.max(0, prev.totalCount - 1),
-      }));
-      onDeleteConversation?.(id);
-    },
-    [onDeleteConversation],
-  );
-
-  const handleDeleteConversationFailure = useCallback((conversation: FeedbackItemType) => {
-    setPagination((prev) => ({
-      ...prev,
-      conversations: [...prev.conversations, conversation],
-      totalCount: prev.totalCount + 1,
-    }));
-  }, []);
-
-  const handleRenameConversation = useCallback(
-    (id: string, newTitle: string) => {
-      setPagination((prev) => ({
-        ...prev,
-        conversations: prev.conversations.map((c) => (c.id === id ? { ...c, title: newTitle } : c)),
-      }));
-      onRenameConversation?.(id, newTitle);
-    },
-    [onRenameConversation],
-  );
 
   const handleMergeFetchedPage = useCallback(() => {
     if (!conversationHistory) return;
@@ -193,49 +159,43 @@ const ChatHistory = ({
   }, [conversationHistory]);
 
   useEffect(() => {
+    if (isRecentMode) return;
     resetPagination();
-  }, [debouncedSearch, resetPagination]);
+  }, [debouncedSearch, isRecentMode, resetPagination]);
 
   useEffect(() => {
     handleMergeFetchedPage();
   }, [handleMergeFetchedPage]);
 
   useEffect(() => {
+    if (isRecentMode) return;
     fetchMoreOnBottomReached(containerRef.current);
-  }, [allConversations.length, fetchMoreOnBottomReached]);
+  }, [allConversations.length, fetchMoreOnBottomReached, isRecentMode]);
+
+  const visibleConversations = isRecentMode ? allConversations.slice(0, recentLimit) : allConversations;
 
   return (
     <div
-      className={cn('mx-auto flex min-h-0 w-full flex-1 flex-col overflow-hidden bg-transparent', !compact && 'pt-4')}
+      className={cn('mx-auto flex min-h-0 w-full flex-1 flex-col overflow-hidden bg-transparent', !compact && 'pt-10')}
     >
-      <div className={cn('flex shrink-0 flex-col', compact ? 'gap-0 p-2' : 'gap-4 p-3')}>
-        {!compact && (
-          <div className='flex items-center justify-between'>
-            <p className='f-14-550 text-GRAY_1000'>Chats</p>
-            <Button
-              variant='ghost'
-              size='icon'
-              onClick={handleToggleSearch}
-              className='h-7 w-7'
-              data-testid='chat-history-search-toggle'
-            >
-              <Search size={16} className='text-GRAY_700' />
-            </Button>
+      {!compact && (
+        <div className='flex shrink-0 flex-col gap-2 px-3 pb-2'>
+          <div className='flex h-6 items-center'>
+            <p className='f-12-500 text-GRAY_600 tracking-wide uppercase'>Chats</p>
           </div>
-        )}
-        {(isSearchOpen || compact) && (
-          <Input
-            placeholder='Search...'
-            value={searchTerm}
-            autoFocus
-            onChange={handleSearchChange}
-            iconPosition='leading'
-            size='small'
-            className={cn('bg-BG_WHITE w-full pr-8', compact ? 'mb-0' : 'mb-1')}
-            data-testid='chat-history-search-input'
-          />
-        )}
-      </div>
+          {!isRecentMode && (
+            <Input
+              placeholder='Search...'
+              value={searchTerm}
+              onChange={handleSearchChange}
+              iconPosition='leading'
+              size='small'
+              className='bg-BG_WHITE mb-0 w-full pr-8'
+              data-testid='chat-history-search-input'
+            />
+          )}
+        </div>
+      )}
       <CommonWrapper
         isLoading={isInitialLoading}
         skeletonType={SkeletonTypes.CUSTOM}
@@ -245,7 +205,7 @@ const ChatHistory = ({
         isNoData={isEmptyState}
         noDataBanner={
           <EmptyStateListing
-            title={debouncedSearch ? 'No matching conversations' : 'No conversations found'}
+            title={!isRecentMode && debouncedSearch ? 'No matching conversations' : 'No conversations found'}
             className='h-full flex-col items-center justify-center py-12 text-center'
           />
         }
@@ -253,8 +213,8 @@ const ChatHistory = ({
         disableAnimation
       >
         <div ref={containerRef} className='flex-1 overflow-y-auto [scrollbar-width:none]' onScroll={handleScroll}>
-          <div className='w-full space-y-0.5 px-2'>
-            {allConversations.map((conversation) => (
+          <div className='flex w-full flex-col gap-y-0.5 px-3'>
+            {visibleConversations.map((conversation) => (
               <ChatHistoryItem
                 key={conversation?.id}
                 conversation={conversation}
@@ -262,14 +222,20 @@ const ChatHistory = ({
                 isStreaming={activeStreamingIds.has(conversation?.id)}
                 isSelected={activeConversationId === conversation?.id}
                 isUnread={unreadIds.has(conversation?.id)}
-                organizationId={organizationId}
-                onDelete={handleDeleteConversation}
-                onDeleteFailure={handleDeleteConversationFailure}
-                onRename={handleRenameConversation}
               />
             ))}
+            {isRecentMode && viewMoreHref && !isEmptyState && (
+              <Link
+                href={viewMoreHref}
+                className='text-GRAY_700 hover:text-GRAY_900 hover:bg-accent flex h-8 w-full items-center justify-between gap-x-2 rounded-lg px-2 text-sm font-medium transition-colors'
+                data-testid='chat-history-view-more'
+              >
+                View more chats
+                <ArrowRight size={14} />
+              </Link>
+            )}
           </div>
-          {isFetchingConversationHistory && page > 1 && <ChatHistorySkeleton itemCount={PAGE_SIZE} />}
+          {!isRecentMode && isFetchingConversationHistory && page > 1 && <ChatHistorySkeleton itemCount={PAGE_SIZE} />}
         </div>
       </CommonWrapper>
       {onStartNewChat && activeConversationId && (

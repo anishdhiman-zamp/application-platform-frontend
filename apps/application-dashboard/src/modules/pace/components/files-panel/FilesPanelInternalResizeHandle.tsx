@@ -30,7 +30,7 @@ const FilesPanelInternalResizeHandle = () => {
       const delta = e.clientX - dragStartXRef.current;
       const newWidth = Math.min(
         FILE_TREE_COLUMN_MAX_WIDTH,
-        Math.max(FILE_TREE_COLUMN_MIN_WIDTH, dragStartWidthRef.current + delta),
+        Math.max(FILE_TREE_COLUMN_MIN_WIDTH, dragStartWidthRef.current - delta),
       );
 
       setTreeColumnWidth(newWidth);
@@ -43,7 +43,7 @@ const FilesPanelInternalResizeHandle = () => {
       const delta = e.clientX - dragStartXRef.current;
       const finalWidth = Math.min(
         FILE_TREE_COLUMN_MAX_WIDTH,
-        Math.max(FILE_TREE_COLUMN_MIN_WIDTH, dragStartWidthRef.current + delta),
+        Math.max(FILE_TREE_COLUMN_MIN_WIDTH, dragStartWidthRef.current - delta),
       );
 
       persistTreeColumnWidth(finalWidth);
@@ -69,7 +69,7 @@ const FilesPanelInternalResizeHandle = () => {
   return (
     <div
       onMouseDown={handleMouseDown}
-      className='group relative flex h-full w-2 shrink-0 cursor-col-resize items-center justify-center select-none'
+      className='group relative -mx-1 flex h-full w-2 shrink-0 cursor-col-resize items-center justify-center select-none'
     >
       <div
         className={cn(

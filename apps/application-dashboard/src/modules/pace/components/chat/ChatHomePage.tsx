@@ -21,7 +21,6 @@ import { AnimatePresence, motion } from 'framer-motion';
 import { getChatTaskRoute } from '@/constants/routeConfig';
 import { useVoiceChatContext } from '@/contexts/VoiceChatContext';
 import { useAppSelector } from '@/hooks/toolkit';
-import ChatHistory from '@/modules/pace/components/chat/ChatHistory';
 import ChatHome from '@/modules/pace/components/chat/ChatHome';
 import ModelSelector from '@/modules/pace/components/chat/ModelSelector';
 import VoiceChatSlot from '@/modules/pace/components/chat/VoiceChatSlot';
@@ -48,9 +47,9 @@ const ChatHomePage = () => {
     setSharedFileReferences,
     sharedExternalFilePaths,
     startNewChat,
-    selectConversation,
     selectedModel,
     setSelectedModel,
+    openFilesPanel,
   } = usePaceContext();
 
   const organizationId = useAppSelector((state: RootState) => state.user.user?.orgs?.[0]?.organization_id) ?? '';
@@ -84,16 +83,6 @@ const ChatHomePage = () => {
     [selectedModel],
   );
 
-  const handleSelectConversation = useCallback(
-    (id: string | null, title?: string) => {
-      if (!id) return;
-
-      selectConversation(id, title);
-      setChatSidebarState(CHAT_SIDEBAR_STATE.EXPANDED);
-    },
-    [selectConversation, setChatSidebarState],
-  );
-
   const expandSidebarIfCollapsed = useCallback(() => {
     if (chatSidebarState === CHAT_SIDEBAR_STATE.COLLAPSED) {
       setChatSidebarState(CHAT_SIDEBAR_STATE.SIDEBAR);
@@ -103,9 +92,10 @@ const ChatHomePage = () => {
   const handleFileOpen = useCallback(
     (path: string, name: string) => {
       expandSidebarIfCollapsed();
+      openFilesPanel();
       openTab(path, name);
     },
-    [openTab, expandSidebarIfCollapsed],
+    [openTab, expandSidebarIfCollapsed, openFilesPanel],
   );
 
   const handleDatasetOpen = useCallback(
@@ -184,7 +174,7 @@ const ChatHomePage = () => {
                   initial={false}
                   animate={{ opacity: 1, transition: NO_ANIMATION }}
                   exit={{ opacity: 0, transition: { duration: 0.25, ease: 'easeInOut' } }}
-                  className='relative mx-auto flex min-h-0 w-full max-w-[700px] flex-1 flex-col items-center justify-start overflow-hidden pt-[22vh]'
+                  className='relative mx-auto flex min-h-0 w-full max-w-[700px] flex-1 flex-col items-center justify-center overflow-hidden pb-[20vh]'
                   style={{ willChange: 'opacity' }}
                 >
                   <ChatHome />
@@ -217,7 +207,6 @@ const ChatHomePage = () => {
                       referencePicker={referencePicker}
                     />
                   </div>
-                  <ChatHistory onSelectConversation={handleSelectConversation} />
                 </motion.div>
               </ChatActionsProvider>
             )}
