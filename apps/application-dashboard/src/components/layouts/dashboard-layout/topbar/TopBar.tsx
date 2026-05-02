@@ -8,7 +8,6 @@ import {
   getKnowledgeBasedRouteByProcessId,
   ROUTES_PATH,
 } from 'constants/routeConfig';
-import { motion } from 'framer-motion';
 import { useAppSelector } from 'hooks/toolkit';
 import { BookOpen, PlusIcon } from 'lucide-react';
 import ShareDatasetPopup from 'modules/data/components/ShareDatasetPopup';
@@ -55,7 +54,6 @@ const ShareButton = () => {
 };
 
 const Topbar = () => {
-  const { isSidebarOpen } = useAppSelector((state: RootState) => state.layoutConfig);
   const openFeedbackConversations = useAppSelector((state: RootState) => state?.feedbacks?.openFeedbackConversations);
   const { isEnabled: isZampInternalEnabled } = useFeatureFlag(FEATURE_FLAGS.ZAMP_INTERNAL);
 
@@ -160,17 +158,7 @@ const Topbar = () => {
   ]);
 
   return (
-    <motion.div
-      initial={false}
-      animate={{
-        paddingLeft: isSidebarOpen ? 0 : 48,
-      }}
-      transition={{
-        duration: 0.15,
-        ease: [0.4, 0, 0.2, 1],
-      }}
-      className='flex h-12 w-full items-center'
-    >
+    <div className='flex h-12 w-full items-center'>
       <div className='min-w-0 flex-1'>
         <Suspense>
           <BreadCrumb isDraftProcess={!isProcessLive} />
@@ -182,7 +170,7 @@ const Topbar = () => {
         </Suspense>
       </div>
       <div className='flex flex-1 justify-end pr-8'>{renderRightSideActions}</div>
-    </motion.div>
+    </div>
   );
 };
 

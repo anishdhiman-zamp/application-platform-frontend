@@ -1,10 +1,8 @@
 'use client';
 
 import { Suspense } from 'react';
-import { motion } from 'framer-motion';
-import { useAppSelector } from 'hooks/toolkit';
 import { usePathname } from 'next/navigation';
-import { RootState } from 'store';
+import { cn } from 'utils/common';
 import { getLayoutConfig } from 'utils/layout.config';
 import VoiceChatFloatingIndicator from '@/components/common/VoiceChatFloatingIndicator';
 import { PendingDatasetProvider } from '@/context/pendingDataset.context';
@@ -36,7 +34,6 @@ interface LayoutWrapperProps {
 export default function LayoutWrapper({ children }: LayoutWrapperProps) {
   usePostHogHeartbeat(); // Add heartbeat tracking
   const pathname = usePathname() || '/';
-  const { isSidebarOpen } = useAppSelector((state: RootState) => state.layoutConfig);
   const { showTopbar, showSidebar } = getLayoutConfig(pathname);
 
   return (
@@ -49,24 +46,14 @@ export default function LayoutWrapper({ children }: LayoutWrapperProps) {
           <div className='relative'>
             <div className='relative flex h-full w-full min-w-[768px]'>
               {showSidebar && <Sidebar />}
-              <motion.div
-                initial={false}
-                animate={{
-                  marginLeft: isSidebarOpen && showSidebar ? 240 : 0,
-                }}
-                transition={{
-                  duration: 0.15,
-                  ease: [0.4, 0, 0.2, 1],
-                }}
-                className='flex h-full w-full grow flex-col'
-              >
+              <div className={cn('flex h-full w-full grow flex-col', showSidebar && 'ml-60')}>
                 {showTopbar && (
                   <nav className='bg-BG_GRAY_1 sticky top-0 z-10'>
                     <Topbar />
                   </nav>
                 )}
                 <LayoutChildren showTopbar={showTopbar}>{children}</LayoutChildren>
-              </motion.div>
+              </div>
             </div>
           </div>
           <VoiceChatFloatingIndicator />

@@ -11,9 +11,7 @@ import {
   useRef,
   useState,
 } from 'react';
-import { useAppSelector } from 'hooks/toolkit';
 import { usePathname } from 'next/navigation';
-import { RootState } from 'store';
 import { CommonPageLayoutProps } from 'types/commonTypes';
 import { cn } from 'utils/common';
 
@@ -21,7 +19,6 @@ const LayoutChildren: FC<{ children: ReactNode; showTopbar: boolean }> = ({ chil
   const pathname = usePathname() || '/';
   const containerRef = useRef<HTMLDivElement>(null);
   const [previousRoute, setPreviousRoute] = useState<string>(pathname);
-  const { isSidebarOpen } = useAppSelector((state: RootState) => state.layoutConfig);
 
   useEffect(() => {
     if (previousRoute === pathname) return;
@@ -58,7 +55,7 @@ const LayoutChildren: FC<{ children: ReactNode; showTopbar: boolean }> = ({ chil
         className={cn(
           'border-GRAY_400 bg-BG_WHITE relative mx-auto w-full border',
           showTopbar ? 'h-[calc(100vh-48px)]' : 'h-screen border-none',
-          isSidebarOpen && showTopbar && 'overflow-hidden rounded-tl-xl',
+          showTopbar && 'overflow-hidden rounded-tl-xl',
         )}
       >
         {renderChildrenWithProps(children)}
