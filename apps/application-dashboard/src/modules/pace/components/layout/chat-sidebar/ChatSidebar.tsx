@@ -17,9 +17,6 @@ const ChatSidebar = () => {
     registerSelectConversation,
     chatSidebarState,
     prevChatSidebarState,
-    filesPanelOpen,
-    filesPanelPinned,
-    filesPanelWidth,
     sidebarWidth,
     isSidebarResizing,
     setActiveAgentInfo,
@@ -34,9 +31,7 @@ const ChatSidebar = () => {
 
   const isCollapsed = chatSidebarState === CHAT_SIDEBAR_STATE.COLLAPSED;
   const isExpanded = chatSidebarState === CHAT_SIDEBAR_STATE.EXPANDED;
-  const isPinnedFilesPanel = filesPanelOpen && filesPanelPinned;
-  const expandedWidth = isPinnedFilesPanel ? `calc(100% - ${filesPanelWidth + 8}px)` : '100%';
-  const targetWidth = isCollapsed ? 0 : isExpanded ? expandedWidth : sidebarWidth;
+  const targetWidth = isCollapsed ? 0 : isExpanded ? '100%' : sidebarWidth;
   const direction = getSidebarTransitionDirection(prevChatSidebarState, chatSidebarState);
   const innerWidth =
     direction === 'sidebar-to-collapsed' || direction === 'collapsed-to-sidebar' ? sidebarWidth : '100%';
@@ -92,8 +87,8 @@ const ChatSidebar = () => {
       }}
       style={{ willChange: 'width, opacity, transform' }}
       className={cn(
-        'bg-BG_WHITE relative flex h-full min-w-0 shrink-0 flex-col overflow-hidden rounded-t-xl border border-transparent',
-        !isCollapsed && 'border-border border',
+        'bg-BG_WHITE relative flex h-full min-w-0 shrink-0 flex-col overflow-hidden border border-t-0 border-r-0 border-transparent',
+        !isCollapsed && 'border-border border border-t-0 border-r-0',
       )}
     >
       <div className='flex h-full flex-col' style={{ width: innerWidth, minWidth: innerWidth }}>

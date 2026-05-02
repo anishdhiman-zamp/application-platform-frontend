@@ -10,15 +10,8 @@ const PADDING = 16;
 const MIN_MAIN_WIDTH = 100;
 
 const SidebarResizeHandle = () => {
-  const {
-    sidebarWidth,
-    setSidebarWidth,
-    persistSidebarWidth,
-    setIsSidebarResizing,
-    filesPanelOpen,
-    filesPanelPinned,
-    filesPanelWidth,
-  } = usePaceContext();
+  const { sidebarWidth, setSidebarWidth, persistSidebarWidth, setIsSidebarResizing, filesPanelOpen, filesPanelWidth } =
+    usePaceContext();
 
   const dragStartXRef = useRef<number>(0);
   const dragStartWidthRef = useRef<number>(sidebarWidth);
@@ -28,14 +21,13 @@ const SidebarResizeHandle = () => {
   const [isDragging, setIsDragging] = useState(false);
 
   const computeEffectiveMax = useCallback(() => {
-    const isPinned = filesPanelOpen && filesPanelPinned;
-    const filesPanelSpace = isPinned ? filesPanelWidth + HANDLE_WIDTH : 0;
+    const filesPanelSpace = filesPanelOpen ? filesPanelWidth + HANDLE_WIDTH : 0;
 
     const parentWidth = handleRef.current?.parentElement?.clientWidth ?? window.innerWidth - PADDING;
     const available = parentWidth - HANDLE_WIDTH - MIN_MAIN_WIDTH - filesPanelSpace;
 
     return Math.min(SIDEBAR_MAX_WIDTH, Math.max(SIDEBAR_MIN_WIDTH, available));
-  }, [filesPanelOpen, filesPanelPinned, filesPanelWidth]);
+  }, [filesPanelOpen, filesPanelWidth]);
 
   const handleMouseDown = useCallback(
     (e: React.MouseEvent) => {
@@ -94,7 +86,7 @@ const SidebarResizeHandle = () => {
     <div
       ref={handleRef}
       onMouseDown={handleMouseDown}
-      className='group relative flex h-full w-2 shrink-0 cursor-col-resize items-center justify-center select-none'
+      className='group relative -mx-1 flex h-full w-2 shrink-0 cursor-col-resize items-center justify-center select-none'
     >
       <div
         className={cn(

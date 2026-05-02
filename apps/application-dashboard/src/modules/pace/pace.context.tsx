@@ -14,6 +14,9 @@ import {
 } from 'react';
 import { type MessageReferenceType, type UploadedFile } from '@zamp-platform/chat';
 import {
+  FILE_TREE_COLUMN_MAX_WIDTH,
+  FILE_TREE_COLUMN_MIN_WIDTH,
+  FILE_TREE_COLUMN_WIDTH,
   FILES_PANEL_MAX_WIDTH,
   FILES_PANEL_MIN_WIDTH,
   FILES_PANEL_WIDTH,
@@ -22,12 +25,12 @@ import {
   SIDEBAR_MIN_WIDTH,
   SIDEBAR_WIDTH,
 } from 'modules/pace/pace.constants';
-import { CHAT_SIDEBAR_STATE, type ChatSidebarState } from 'modules/pace/pace.types';
+import { CHAT_SIDEBAR_STATE, type ChatSidebarState, TAB_TYPE } from 'modules/pace/pace.types';
 import { getInitialSidebarState, getInitialWidth } from 'modules/pace/pace.utils';
 import { usePathname } from 'next/navigation';
 import { ROUTES_PATH } from '@/constants/routeConfig';
 import { useAppSelector } from '@/hooks/toolkit';
-import { selectActiveTabId } from '@/store/slices/dynamic-tabs.slice';
+import { selectActiveTab, selectActiveTabId } from '@/store/slices/dynamic-tabs.slice';
 import { defaultFnType } from '@/types/commonTypes';
 import { getFromLocalStorage, LOCAL_STORAGE_KEYS, setToLocalStorage } from '@/utils/localstorage';
 
@@ -90,13 +93,9 @@ interface PaceContextType {
   setActiveAgentInfo: (info: ActiveAgentInfo | null) => void;
 
   filesPanelOpen: boolean;
-  filesPanelPinned: boolean;
   isFilesPanelHydrated: boolean;
   toggleFilesPanel: defaultFnType;
-  setFilesPanelPinned: (pinned: boolean) => void;
   closeFilesPanel: defaultFnType;
-  scheduleFilesPanelClose: defaultFnType;
-  cancelFilesPanelClose: defaultFnType;
 
   sidebarWidth: number;
   setSidebarWidth: (width: number) => void;
@@ -110,34 +109,40 @@ interface PaceContextType {
   isFilesPanelResizing: boolean;
   setIsFilesPanelResizing: (resizing: boolean) => void;
 
+  treeColumnWidth: number;
+  setTreeColumnWidth: (width: number) => void;
+  persistTreeColumnWidth: (width: number) => void;
+  isTreeColumnResizing: boolean;
+  setIsTreeColumnResizing: (resizing: boolean) => void;
+
+  hasActiveFileTab: boolean;
+
   selectedModel: string | null;
   setSelectedModel: (modelId: string | null) => void;
+
+  isNavSidebarExpanded: boolean;
+  toggleNavSidebar: defaultFnType;
 }
 
 const PaceContext = createContext<PaceContextType | null>(null);
 
-interface InitialFilesPanelState {
-  open: boolean;
-  pinned: boolean;
-}
-
-const getInitialFilesPanelState = (): InitialFilesPanelState => {
-  if (typeof window === 'undefined') return { open: false, pinned: false };
+const getInitialFilesPanelOpen = (): boolean => {
+  if (typeof window === 'undefined') return false;
 
   try {
     const stored = localStorage.getItem(LOCAL_STORAGE_KEYS.PACE_FILES_PANEL_PINNED);
-    const pinned = stored ? (JSON.parse(stored) as boolean) : false;
 
-    return { open: pinned, pinned };
+    return stored ? (JSON.parse(stored) as boolean) : false;
   } catch {
-    return { open: false, pinned: false };
+    return false;
   }
 };
 
 export const PaceProvider = ({ children }: { children: ReactNode }) => {
   const pathname = usePathname();
   const activeTabId = useAppSelector(selectActiveTabId);
-  const filesPanelLeaveTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const activeTab = useAppSelector(selectActiveTab);
+  const hasActiveFileTab = activeTab?.type === TAB_TYPE.FILE;
   const pendingCollapseRef = useRef(false);
   const startNewChatRef = useRef<defaultFnType | null>(null);
   const selectConversationRef = useRef<((id: string, title?: string) => void) | null>(null);
@@ -150,9 +155,7 @@ export const PaceProvider = ({ children }: { children: ReactNode }) => {
   const [sharedFileReferences, setSharedFileReferences] = useState<UploadedFile[]>([]);
   const [chatMessageIntent, setChatMessageIntent] = useState<ChatMessageIntent | null>(null);
   const [activeAgentInfo, setActiveAgentInfo] = useState<ActiveAgentInfo | null>(null);
-  const initialFilesPanelState = useRef(getInitialFilesPanelState());
-  const [filesPanelOpen, setFilesPanelOpen] = useState(initialFilesPanelState.current.open);
-  const [filesPanelPinned, setFilesPanelPinnedRaw] = useState(initialFilesPanelState.current.pinned);
+  const [filesPanelOpen, setFilesPanelOpen] = useState(getInitialFilesPanelOpen);
   const [isFilesPanelHydrated, setIsFilesPanelHydrated] = useState(false);
   const [sidebarWidth, setSidebarWidthRaw] = useState(() =>
     getInitialWidth(LOCAL_STORAGE_KEYS.PACE_SIDEBAR_WIDTH, SIDEBAR_MIN_WIDTH, SIDEBAR_MAX_WIDTH, SIDEBAR_WIDTH),
@@ -167,9 +170,23 @@ export const PaceProvider = ({ children }: { children: ReactNode }) => {
     ),
   );
   const [isFilesPanelResizing, setIsFilesPanelResizing] = useState(false);
+  const [treeColumnWidth, setTreeColumnWidthRaw] = useState(() =>
+    getInitialWidth(
+      LOCAL_STORAGE_KEYS.PACE_FILE_TREE_COLUMN_WIDTH,
+      FILE_TREE_COLUMN_MIN_WIDTH,
+      FILE_TREE_COLUMN_MAX_WIDTH,
+      FILE_TREE_COLUMN_WIDTH,
+    ),
+  );
+  const [isTreeColumnResizing, setIsTreeColumnResizing] = useState(false);
   const [selectedModel, setSelectedModelRaw] = useState<string | null>(
     getFromLocalStorage(LOCAL_STORAGE_KEYS.PACE_SELECTED_MODEL),
   );
+  const [isNavSidebarExpanded, setIsNavSidebarExpanded] = useState<boolean>(() => {
+    const stored = getFromLocalStorage(LOCAL_STORAGE_KEYS.PACE_NAV_SIDEBAR_EXPANDED);
+
+    return stored === null ? true : stored === 'true';
+  });
 
   const routeSignature = activeTabId ? `${pathname}:${activeTabId}` : pathname;
   const prevRouteSignatureRef = useRef(routeSignature);
@@ -208,12 +225,6 @@ export const PaceProvider = ({ children }: { children: ReactNode }) => {
     setPendingMentionInserts([]);
   }, []);
 
-  const setFilesPanelPinned = useCallback((pinned: boolean) => {
-    setFilesPanelPinnedRaw(pinned);
-    setFilesPanelOpen(true);
-    setToLocalStorage(LOCAL_STORAGE_KEYS.PACE_FILES_PANEL_PINNED, JSON.stringify(pinned));
-  }, []);
-
   const setSidebarWidth = useCallback((width: number) => {
     const clamped = Math.min(SIDEBAR_MAX_WIDTH, Math.max(SIDEBAR_MIN_WIDTH, width));
 
@@ -238,34 +249,32 @@ export const PaceProvider = ({ children }: { children: ReactNode }) => {
     setToLocalStorage(LOCAL_STORAGE_KEYS.PACE_FILES_PANEL_WIDTH, String(clamped));
   }, []);
 
-  const toggleFilesPanel = useCallback(() => {
-    if (filesPanelPinned) {
-      setFilesPanelPinned(false);
-      setFilesPanelOpen(false);
+  const setTreeColumnWidth = useCallback((width: number) => {
+    const clamped = Math.min(FILE_TREE_COLUMN_MAX_WIDTH, Math.max(FILE_TREE_COLUMN_MIN_WIDTH, width));
 
-      return;
-    }
-    setFilesPanelOpen((prev) => !prev);
-  }, [filesPanelPinned, setFilesPanelPinned]);
+    setTreeColumnWidthRaw(clamped);
+  }, []);
+
+  const persistTreeColumnWidth = useCallback((width: number) => {
+    const clamped = Math.min(FILE_TREE_COLUMN_MAX_WIDTH, Math.max(FILE_TREE_COLUMN_MIN_WIDTH, width));
+
+    setToLocalStorage(LOCAL_STORAGE_KEYS.PACE_FILE_TREE_COLUMN_WIDTH, String(clamped));
+  }, []);
+
+  const toggleFilesPanel = useCallback(() => {
+    setFilesPanelOpen((prev) => {
+      const next = !prev;
+
+      setToLocalStorage(LOCAL_STORAGE_KEYS.PACE_FILES_PANEL_PINNED, JSON.stringify(next));
+
+      return next;
+    });
+  }, []);
 
   const closeFilesPanel = useCallback(() => {
     setFilesPanelOpen(false);
+    setToLocalStorage(LOCAL_STORAGE_KEYS.PACE_FILES_PANEL_PINNED, JSON.stringify(false));
   }, []);
-
-  const cancelFilesPanelClose = useCallback(() => {
-    if (filesPanelLeaveTimerRef.current) {
-      clearTimeout(filesPanelLeaveTimerRef.current);
-      filesPanelLeaveTimerRef.current = null;
-    }
-  }, []);
-
-  const scheduleFilesPanelClose = useCallback(() => {
-    cancelFilesPanelClose();
-    filesPanelLeaveTimerRef.current = setTimeout(() => {
-      setFilesPanelOpen(false);
-      filesPanelLeaveTimerRef.current = null;
-    }, 200);
-  }, [cancelFilesPanelClose]);
 
   const setSelectedModel = useCallback((modelId: string | null) => {
     setSelectedModelRaw(modelId);
@@ -273,6 +282,16 @@ export const PaceProvider = ({ children }: { children: ReactNode }) => {
     if (modelId) {
       setToLocalStorage(LOCAL_STORAGE_KEYS.PACE_SELECTED_MODEL, modelId);
     }
+  }, []);
+
+  const toggleNavSidebar = useCallback(() => {
+    setIsNavSidebarExpanded((prev) => {
+      const next = !prev;
+
+      setToLocalStorage(LOCAL_STORAGE_KEYS.PACE_NAV_SIDEBAR_EXPANDED, String(next));
+
+      return next;
+    });
   }, []);
 
   const registerStartNewChat = useCallback((callback: defaultFnType) => {
@@ -292,7 +311,7 @@ export const PaceProvider = ({ children }: { children: ReactNode }) => {
   }, []);
 
   const clampSidebarWidthToFilesPanel = useCallback(() => {
-    if (!(filesPanelOpen && filesPanelPinned)) return;
+    if (!filesPanelOpen) return;
     if (chatSidebarStateRef.current !== CHAT_SIDEBAR_STATE.SIDEBAR) return;
 
     const containerWidth = window.innerWidth - 16;
@@ -307,7 +326,7 @@ export const PaceProvider = ({ children }: { children: ReactNode }) => {
 
       return effectiveMax;
     });
-  }, [filesPanelOpen, filesPanelPinned, filesPanelWidth]);
+  }, [filesPanelOpen, filesPanelWidth]);
 
   const handlePendingCollapse = useCallback(
     (isTabIdOnlyChange: boolean) => {
@@ -383,7 +402,7 @@ export const PaceProvider = ({ children }: { children: ReactNode }) => {
   }, [handleRouteChange]);
 
   useEffect(() => {
-    if (!(filesPanelOpen && filesPanelPinned)) return;
+    if (!filesPanelOpen) return;
     if (chatSidebarStateRef.current !== CHAT_SIDEBAR_STATE.SIDEBAR) return;
 
     const containerWidth = window.innerWidth - 16;
@@ -398,7 +417,7 @@ export const PaceProvider = ({ children }: { children: ReactNode }) => {
 
       return effectiveMax;
     });
-  }, [filesPanelOpen, filesPanelPinned, sidebarWidth]);
+  }, [filesPanelOpen, sidebarWidth]);
 
   useEffect(() => {
     clampSidebarWidthToFilesPanel();
@@ -407,6 +426,11 @@ export const PaceProvider = ({ children }: { children: ReactNode }) => {
   useEffect(() => {
     setIsFilesPanelHydrated(true);
   }, []);
+
+  useEffect(() => {
+    setFilesPanelOpen(hasActiveFileTab);
+    setToLocalStorage(LOCAL_STORAGE_KEYS.PACE_FILES_PANEL_PINNED, JSON.stringify(hasActiveFileTab));
+  }, [hasActiveFileTab]);
 
   const value: PaceContextType = useMemo(
     () => ({
@@ -441,13 +465,9 @@ export const PaceProvider = ({ children }: { children: ReactNode }) => {
       setActiveAgentInfo,
 
       filesPanelOpen,
-      filesPanelPinned,
       isFilesPanelHydrated,
       toggleFilesPanel,
-      setFilesPanelPinned,
       closeFilesPanel,
-      scheduleFilesPanelClose,
-      cancelFilesPanelClose,
 
       sidebarWidth,
       setSidebarWidth,
@@ -461,8 +481,19 @@ export const PaceProvider = ({ children }: { children: ReactNode }) => {
       isFilesPanelResizing,
       setIsFilesPanelResizing,
 
+      treeColumnWidth,
+      setTreeColumnWidth,
+      persistTreeColumnWidth,
+      isTreeColumnResizing,
+      setIsTreeColumnResizing,
+
+      hasActiveFileTab,
+
       selectedModel,
       setSelectedModel,
+
+      isNavSidebarExpanded,
+      toggleNavSidebar,
     }),
     [
       chatSidebarState,
@@ -490,13 +521,9 @@ export const PaceProvider = ({ children }: { children: ReactNode }) => {
       activeAgentInfo,
 
       filesPanelOpen,
-      filesPanelPinned,
       isFilesPanelHydrated,
       toggleFilesPanel,
-      setFilesPanelPinned,
       closeFilesPanel,
-      scheduleFilesPanelClose,
-      cancelFilesPanelClose,
 
       sidebarWidth,
       setSidebarWidth,
@@ -508,8 +535,18 @@ export const PaceProvider = ({ children }: { children: ReactNode }) => {
       persistFilesPanelWidth,
       isFilesPanelResizing,
 
+      treeColumnWidth,
+      setTreeColumnWidth,
+      persistTreeColumnWidth,
+      isTreeColumnResizing,
+
+      hasActiveFileTab,
+
       selectedModel,
       setSelectedModel,
+
+      isNavSidebarExpanded,
+      toggleNavSidebar,
     ],
   );
 

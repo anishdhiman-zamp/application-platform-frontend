@@ -1,5 +1,4 @@
-import type { ComponentType, ReactNode } from 'react';
-import type { defaultFnType } from '@/types/commonTypes';
+import type { ReactNode } from 'react';
 
 export const enum PaceNavbarItemId {
   HOME = 'home',
@@ -15,24 +14,6 @@ export const enum PaceNavbarItemId {
   AGENTS = 'agents',
   ORG_SETTINGS = 'org-settings',
   CREDENTIALS_VAULT = 'credentials-vault',
-}
-
-export interface AnimatedIconHandle {
-  startAnimation: defaultFnType;
-  stopAnimation: defaultFnType;
-}
-
-export interface AnimatedIconProps {
-  size?: number;
-  className?: string;
-}
-
-export interface PaceNavbarItemSchema {
-  id: PaceNavbarItemId;
-  label: string;
-  iconComponent: ComponentType<AnimatedIconProps & { ref?: React.Ref<AnimatedIconHandle> }>;
-  path: string;
-  featureFlag?: string;
 }
 
 export interface PaceSettingsTabSchema {

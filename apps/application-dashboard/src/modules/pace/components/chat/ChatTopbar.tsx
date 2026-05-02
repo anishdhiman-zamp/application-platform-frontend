@@ -4,12 +4,13 @@ import { type FC, useCallback, useState } from 'react';
 import { Button, Popover, PopoverContent, PopoverTrigger } from '@zamp-platform/ui';
 import { cn } from '@zamp-platform/ui/utils';
 import { AnimatePresence, motion } from 'framer-motion';
-import { ChevronDown, MoveDiagonal, Plus } from 'lucide-react';
+import { ChevronDown, MoveDiagonal, PanelRightClose, PanelRightOpen, Plus } from 'lucide-react';
 import { useResourceAccess } from '@/hooks/useResourceAccess';
 import ChatHistory from '@/modules/pace/components/chat/ChatHistory';
 import ConversationActions from '@/modules/pace/components/chat/ConversationActions';
 import ShareConversationPopup from '@/modules/pace/components/chat/ShareConversationPopup';
 import { DEFAULT_CHAT_TITLE } from '@/modules/pace/pace.constants';
+import { usePaceContext } from '@/modules/pace/pace.context';
 import { ResourceType, ShareResourceVersion } from '@/modules/shareResource/shareResource.types';
 import { PERMISSION_ROLES } from '@/utils/accessPermission/accessPermission.types';
 
@@ -39,6 +40,7 @@ const ChatTopbar: FC<ChatTopbarProps> = ({
   onSelectConversation,
 }) => {
   const displayTitle = title || DEFAULT_CHAT_TITLE;
+  const { filesPanelOpen, toggleFilesPanel, hasActiveFileTab } = usePaceContext();
   const { checkUserPrivilege } = useResourceAccess({
     resourceType: ResourceType.CONVERSATION,
     resourceId: conversationId ?? '',
@@ -156,6 +158,19 @@ const ChatTopbar: FC<ChatTopbarProps> = ({
             onDeleteSuccess={onDeleteConversation}
             triggerClassName='rounded p-2 text-gray-900 hover:text-gray-900'
           />
+        )}
+        {hasActiveFileTab && (
+          <Button
+            variant='ghost'
+            size='icon'
+            className='text-GRAY_900 hover:text-GRAY_900 h-7 w-7 rounded p-1.5'
+            onClick={toggleFilesPanel}
+            title={filesPanelOpen ? 'Close files panel' : 'Open files panel'}
+            aria-label={filesPanelOpen ? 'Close files panel' : 'Open files panel'}
+            aria-pressed={filesPanelOpen}
+          >
+            {filesPanelOpen ? <PanelRightClose size={16} /> : <PanelRightOpen size={16} />}
+          </Button>
         )}
       </div>
     </div>

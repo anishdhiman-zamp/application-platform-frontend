@@ -16,7 +16,6 @@ const FilesPanelResizeHandle = () => {
     setFilesPanelWidth,
     persistFilesPanelWidth,
     setIsFilesPanelResizing,
-    cancelFilesPanelClose,
     sidebarWidth,
     chatSidebarState,
   } = usePaceContext();
@@ -44,11 +43,10 @@ const FilesPanelResizeHandle = () => {
       dragStartWidthRef.current = filesPanelWidth;
       effectiveMaxWidthRef.current = computeEffectiveMax();
 
-      cancelFilesPanelClose();
       setIsDragging(true);
       setIsFilesPanelResizing(true);
     },
-    [filesPanelWidth, setIsFilesPanelResizing, cancelFilesPanelClose, computeEffectiveMax],
+    [filesPanelWidth, setIsFilesPanelResizing, computeEffectiveMax],
   );
 
   const handleMouseMove = useCallback(

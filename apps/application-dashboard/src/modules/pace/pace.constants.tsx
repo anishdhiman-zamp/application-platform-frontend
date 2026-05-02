@@ -1,14 +1,7 @@
 import type { ConversationState } from '@zamp-platform/conversation-stream';
-import { ActivityIcon, AgentNavIcon, HomeIcon, LayoutGridIcon, SettingsIcon } from '@zamp-platform/ui';
 import { Database, KeyRound, Link2, Settings2, UserPen } from 'lucide-react';
-import {
-  type BrowserViewerStateConfig,
-  PaceNavbarItemId,
-  PaceNavbarItemSchema,
-  PaceSettingsTabSchema,
-} from 'modules/pace/pace.types';
+import { type BrowserViewerStateConfig, PaceNavbarItemId, PaceSettingsTabSchema } from 'modules/pace/pace.types';
 import Users02 from '@/assets/Icons/Users02';
-import { FEATURE_FLAGS } from '@/constants/featureFlags';
 import { DONE_EMPTY_STATE } from '@/constants/icons';
 import { ROUTES_PATH } from '@/constants/routeConfig';
 import { INPUT_FILE_FORMATS } from '@/types/common/mime';
@@ -74,40 +67,10 @@ export const SIDEBAR_CONVERSATION_ID_PARAM = 's';
 export const FILES_PANEL_WIDTH = 345;
 export const FILES_PANEL_MIN_WIDTH = 300;
 export const FILES_PANEL_MAX_WIDTH = 700;
-
-export const PACE_NAVBAR_ITEMS: PaceNavbarItemSchema[] = [
-  {
-    id: PaceNavbarItemId.HOME,
-    label: 'Home',
-    iconComponent: HomeIcon,
-    path: ROUTES_PATH.CHAT,
-  },
-  {
-    id: PaceNavbarItemId.TASKS,
-    label: 'Tasks',
-    iconComponent: ActivityIcon,
-    path: ROUTES_PATH.CHAT_TASKS,
-  },
-  {
-    id: PaceNavbarItemId.AGENTS,
-    label: 'Agents',
-    iconComponent: AgentNavIcon,
-    path: ROUTES_PATH.CHAT_AGENTS,
-  },
-  {
-    id: PaceNavbarItemId.APPS,
-    label: 'Apps',
-    iconComponent: LayoutGridIcon,
-    path: ROUTES_PATH.CHAT_APPS,
-    featureFlag: FEATURE_FLAGS.APPS,
-  },
-  {
-    id: PaceNavbarItemId.SETTINGS,
-    label: 'Settings',
-    iconComponent: SettingsIcon,
-    path: ROUTES_PATH.CHAT_SETTINGS,
-  },
-];
+export const FILES_PANEL_WITH_VIEWER_WIDTH = 1000;
+export const FILE_TREE_COLUMN_WIDTH = 300;
+export const FILE_TREE_COLUMN_MIN_WIDTH = 240;
+export const FILE_TREE_COLUMN_MAX_WIDTH = 480;
 
 export const PACE_SETTINGS_TABS: PaceSettingsTabSchema[] = [
   {
