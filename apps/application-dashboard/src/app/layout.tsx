@@ -8,6 +8,7 @@ import { Funnel_Display, Inter } from 'next/font/google';
 import { cookies, headers } from 'next/headers';
 import Script from 'next/script';
 import { ThemeProvider } from '@/app/_providers/theme-provider';
+import Agentation from '@/components/Agentation';
 import NetworkStatus from '@/components/NetWorkStatus';
 import { THEME_MODE } from '@/modules/general/constants/general.constants';
 import { THEME_COOKIE } from '@/utils/cookie';
@@ -66,6 +67,7 @@ const RootLayout = async ({ children }: { children: React.ReactNode }) => {
           <SpeedInsights />
           <NetworkStatus />
           <Toaster />
+          <Agentation />
           {children}
         </ThemeProvider>
       </body>
