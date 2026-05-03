@@ -139,7 +139,7 @@ export const useDynamicTabs = (config: UseDynamicTabsConfig = {}): UseDynamicTab
       const tabPath = path ?? buildTabRoute(id, tabType);
 
       dispatch(
-        dynamicTabsActions.openTab({
+        dynamicTabsActions.openTabInBackground({
           id,
           name,
           path: tabPath,

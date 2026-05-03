@@ -101,6 +101,7 @@ const ChatConversationContent = ({
     hasMessages,
     conversationId: ctxConversationId,
     isLoadingConversationHistory,
+    isFetchingConversationHistory,
     isErrorConversationHistory,
     errorConversationHistory,
     isUninitializedConversationHistory,
@@ -255,6 +256,15 @@ const ChatConversationContent = ({
   const handleAutoOpenNewAgents = useCallback(() => {
     const activeId = conversationId ?? ctxConversationId ?? null;
     const seen = autoOpenedAgentIdsRef.current;
+    const isConversationStateSynced = !conversationId || !ctxConversationId || conversationId === ctxConversationId;
+    const messagesBelongToActiveConversation = messages.every(
+      (message) => !message.conversation_id || message.conversation_id === activeId,
+    );
+    const isHistorySettled =
+      !isLoadingConversationHistory && !isFetchingConversationHistory && !isUninitializedConversationHistory;
+
+    if (!activeId || !isConversationStateSynced || !messagesBelongToActiveConversation) return;
+    if (activeId !== lastSeenConversationIdRef.current && !isHistorySettled) return;
 
     if (activeId !== lastSeenConversationIdRef.current) {
       lastSeenConversationIdRef.current = activeId;
@@ -300,7 +310,16 @@ const ChatConversationContent = ({
         openTabSilently(payload.agent_id, payload.name, Object.keys(metadata).length > 0 ? metadata : undefined);
       }
     }
-  }, [conversationId, ctxConversationId, messages, agentAvatarMap, openTabSilently]);
+  }, [
+    conversationId,
+    ctxConversationId,
+    messages,
+    isLoadingConversationHistory,
+    isFetchingConversationHistory,
+    isUninitializedConversationHistory,
+    agentAvatarMap,
+    openTabSilently,
+  ]);
 
   // Send message to existing conversation via intent
   const handleSendIntentToExistingConversation = useCallback(() => {

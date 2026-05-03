@@ -39,15 +39,16 @@ export const getInitialWidth = (key: LOCAL_STORAGE_KEYS, min: number, max: numbe
  * Safe to call server-side — returns COLLAPSED when `window` is unavailable.
  *
  * Rules:
+ * - Any non-chat route (anything other than exactly `/chat`) → always COLLAPSED
  * - No sidebar conversation param → COLLAPSED
  * - `/chat` root with no tab param (file/agent/browser/etc.) → EXPANDED (full-screen)
  * - `/chat` root with sidebar param and persisted COLLAPSED → SIDEBAR (conversation is open)
- * - Non-chat-root routes → always respect persisted state (COLLAPSED stays COLLAPSED)
- * - Persisted EXPANDED state with sidebar param → EXPANDED (survives refresh on non-chat routes)
- * - Any other route with sidebar param and no persisted state → SIDEBAR
+ * - Persisted EXPANDED state with sidebar param → EXPANDED (survives refresh)
  */
 export const getInitialSidebarState = (): ChatSidebarState => {
   if (typeof window === 'undefined') return CHAT_SIDEBAR_STATE.COLLAPSED;
+
+  if (window.location.pathname !== ROUTES_PATH.CHAT) return CHAT_SIDEBAR_STATE.COLLAPSED;
 
   const search = new URLSearchParams(window.location.search);
 

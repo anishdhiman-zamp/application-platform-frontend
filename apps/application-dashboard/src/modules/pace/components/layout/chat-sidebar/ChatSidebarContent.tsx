@@ -80,7 +80,6 @@ const ChatSidebarContent = ({
     sharedFileReferences,
     setSharedFileReferences,
     sharedExternalFilePaths,
-    openFilesPanel,
   } = usePaceContext();
   const { inputValue, setInputValue } = useChatDraftInput({
     conversationId,
@@ -158,10 +157,9 @@ const ChatSidebarContent = ({
   const handleFileOpen = useCallback(
     (path: string, name: string) => {
       collapseSidebarIfExpanded();
-      openFilesPanel();
       openTab(path, name);
     },
-    [openTab, collapseSidebarIfExpanded, openFilesPanel],
+    [openTab, collapseSidebarIfExpanded],
   );
 
   const handleDatasetOpen = useCallback(

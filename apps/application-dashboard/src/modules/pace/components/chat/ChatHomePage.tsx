@@ -50,7 +50,6 @@ const ChatHomePage = () => {
     startNewChat,
     selectedModel,
     setSelectedModel,
-    openFilesPanel,
   } = usePaceContext();
 
   const organizationId = useAppSelector((state: RootState) => state.user.user?.orgs?.[0]?.organization_id) ?? '';
@@ -94,10 +93,9 @@ const ChatHomePage = () => {
   const handleFileOpen = useCallback(
     (path: string, name: string) => {
       expandSidebarIfCollapsed();
-      openFilesPanel();
       openTab(path, name);
     },
-    [openTab, expandSidebarIfCollapsed, openFilesPanel],
+    [openTab, expandSidebarIfCollapsed],
   );
 
   const handleDatasetOpen = useCallback(

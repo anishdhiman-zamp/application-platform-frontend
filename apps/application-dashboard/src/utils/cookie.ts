@@ -5,6 +5,7 @@ export const ORY_KRATOS_SESSION_COOKIE = 'ory_kratos_session';
 export const USER_SESSION_COOKIE = 'zamp_user_session_v2';
 export const THEME_COOKIE = 'zamp_theme';
 export const FONT_PRESET_COOKIE = 'zamp_font_preset';
+export const NAV_SIDEBAR_EXPANDED_COOKIE = 'zamp_nav_sidebar_expanded';
 export const ACTIVE_ORG_ID_COOKIE = 'zamp_active_org_id';
 export const LAST_VISITED_PRODUCT_MODE_COOKIE = 'zamp_last_visited_product_mode';
 export const SESSION_CACHE_MAX_AGE = 60 * 5;

@@ -1,9 +1,6 @@
 'use client';
 
 import { Suspense } from 'react';
-import { usePathname } from 'next/navigation';
-import { cn } from 'utils/common';
-import { getLayoutConfig } from 'utils/layout.config';
 import VoiceChatFloatingIndicator from '@/components/common/VoiceChatFloatingIndicator';
 import UrlToTabSync from '@/components/layouts/app-sidebar/UrlToTabSync';
 import { PendingDatasetProvider } from '@/context/pendingDataset.context';
@@ -12,16 +9,13 @@ import { VoiceChatProvider } from '@/contexts/VoiceChatContext';
 import useGlobalShortcuts from '@/hooks/useGlobalShortcuts';
 // eslint-disable-next-line import/no-named-as-default
 import usePostHogHeartbeat from '@/hooks/usePostHogHeartbeat';
-import Sidebar from 'components/layouts/dashboard-layout/sidebar';
-import Topbar from 'components/layouts/dashboard-layout/topbar/TopBar';
-import LayoutChildren from 'components/layouts/LayoutChildren';
+import Sidebar from '@/modules/pace/components/layout/sidebar/Sidebar';
+import { FileTreeNavigationProvider } from '@/modules/pace/context/FileTreeNavigationContext';
+import { FileUploadProvider } from '@/modules/pace/context/FileUploadContext';
+import { FileViewerProvider } from '@/modules/pace/context/FileViewerContext';
+import { PaceProvider } from '@/modules/pace/pace.context';
 import '@/app/(authenticated)/resources';
 
-/**
- * Initializes global keyboard shortcuts on all authenticated pages.
- * Wrapped in Suspense because useGlobalShortcuts depends on useLogout,
- * which uses useSearchParams() that requires a Suspense boundary.
- */
 const GlobalShortcuts = () => {
   useGlobalShortcuts();
 
@@ -30,39 +24,37 @@ const GlobalShortcuts = () => {
 
 interface LayoutWrapperProps {
   children: React.ReactNode;
+  initialNavSidebarExpanded: boolean;
 }
 
-export default function LayoutWrapper({ children }: LayoutWrapperProps) {
-  usePostHogHeartbeat(); // Add heartbeat tracking
-  const pathname = usePathname() || '/';
-  const { showTopbar, showSidebar } = getLayoutConfig(pathname);
+export default function LayoutWrapper({ children, initialNavSidebarExpanded }: LayoutWrapperProps) {
+  usePostHogHeartbeat();
 
   return (
-    <ProcessesProvider>
-      <PendingDatasetProvider>
-        <VoiceChatProvider>
-          <Suspense fallback={null}>
-            <GlobalShortcuts />
-          </Suspense>
-          <Suspense fallback={null}>
-            <UrlToTabSync />
-          </Suspense>
-          <div className='relative'>
-            <div className='relative flex h-full w-full min-w-[768px]'>
-              {showSidebar && <Sidebar />}
-              <div className={cn('flex h-full w-full grow flex-col', showSidebar && 'ml-60')}>
-                {showTopbar && (
-                  <nav className='bg-BG_GRAY_1 sticky top-0 z-10'>
-                    <Topbar />
-                  </nav>
-                )}
-                <LayoutChildren showTopbar={showTopbar}>{children}</LayoutChildren>
-              </div>
-            </div>
-          </div>
-          <VoiceChatFloatingIndicator />
-        </VoiceChatProvider>
-      </PendingDatasetProvider>
-    </ProcessesProvider>
+    <PaceProvider initialNavSidebarExpanded={initialNavSidebarExpanded}>
+      <FileViewerProvider>
+        <FileTreeNavigationProvider>
+          <FileUploadProvider>
+            <ProcessesProvider>
+              <PendingDatasetProvider>
+                <VoiceChatProvider>
+                  <Suspense fallback={null}>
+                    <GlobalShortcuts />
+                  </Suspense>
+                  <Suspense fallback={null}>
+                    <UrlToTabSync />
+                  </Suspense>
+                  <div className='bg-BG_GRAY_2 flex h-screen w-full min-w-[768px] overflow-hidden'>
+                    <Sidebar />
+                    <div className='relative min-h-0 min-w-0 flex-1 overflow-hidden'>{children}</div>
+                  </div>
+                  <VoiceChatFloatingIndicator />
+                </VoiceChatProvider>
+              </PendingDatasetProvider>
+            </ProcessesProvider>
+          </FileUploadProvider>
+        </FileTreeNavigationProvider>
+      </FileViewerProvider>
+    </PaceProvider>
   );
 }

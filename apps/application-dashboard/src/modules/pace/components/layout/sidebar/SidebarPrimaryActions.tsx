@@ -5,9 +5,11 @@ import { usePathname, useRouter } from 'next/navigation';
 import { ROUTES_PATH } from '@/constants/routeConfig';
 import { useAppDispatch } from '@/hooks/toolkit';
 import SidebarRow from '@/modules/pace/components/layout/sidebar/SidebarRow';
+import { PACE_SETTINGS_TABS } from '@/modules/pace/pace.constants';
 import { usePaceContext } from '@/modules/pace/pace.context';
 import { CHAT_SIDEBAR_STATE, TAB_QUERY_PARAM } from '@/modules/pace/pace.types';
 import { dynamicTabsActions } from '@/store/slices/dynamic-tabs.slice';
+import { getFromSessionStorage, SESSION_STORAGE_KEYS } from '@/utils/sessionstorage';
 
 interface SidebarPrimaryActionsProps {
   isExpanded: boolean;
@@ -20,20 +22,21 @@ const NAV_ITEMS = [
   { label: 'Settings', icon: <Settings size={16} />, path: ROUTES_PATH.CHAT_SETTINGS },
 ];
 
+const VALID_SETTINGS_PATHS = new Set(PACE_SETTINGS_TABS.map((tab) => tab.path));
+
+const resolveSettingsTarget = (): string => {
+  const lastTab = getFromSessionStorage(SESSION_STORAGE_KEYS.PACE_SETTINGS_LAST_TAB);
+
+  return lastTab && VALID_SETTINGS_PATHS.has(lastTab) ? lastTab : ROUTES_PATH.CHAT_SETTINGS_GENERAL;
+};
+
 const SidebarPrimaryActions = ({ isExpanded }: SidebarPrimaryActionsProps) => {
   const router = useRouter();
   const pathname = usePathname();
   const dispatch = useAppDispatch();
   const { startNewChat, setChatSidebarState } = usePaceContext();
 
-  const handleNavigate = (path: string) => {
-    router.push(path);
-  };
-
-  const handleNewChat = () => {
-    startNewChat();
-    setChatSidebarState(CHAT_SIDEBAR_STATE.COLLAPSED);
-
+  const cleanupTabState = () => {
     const params = new URLSearchParams(window.location.search);
 
     Object.values(TAB_QUERY_PARAM).forEach((key) => params.delete(key));
@@ -42,7 +45,25 @@ const SidebarPrimaryActions = ({ isExpanded }: SidebarPrimaryActionsProps) => {
     window.history.replaceState(null, '', search ? `${window.location.pathname}?${search}` : window.location.pathname);
 
     dispatch(dynamicTabsActions.setActiveTab(null));
-    handleNavigate(ROUTES_PATH.CHAT);
+  };
+
+  const handleNavItemClick = (path: string) => {
+    cleanupTabState();
+
+    if (path === ROUTES_PATH.CHAT_SETTINGS) {
+      router.push(resolveSettingsTarget());
+
+      return;
+    }
+
+    router.push(path);
+  };
+
+  const handleNewChat = () => {
+    startNewChat();
+    setChatSidebarState(CHAT_SIDEBAR_STATE.COLLAPSED);
+    cleanupTabState();
+    router.push(ROUTES_PATH.CHAT);
   };
 
   return (
@@ -55,7 +76,7 @@ const SidebarPrimaryActions = ({ isExpanded }: SidebarPrimaryActionsProps) => {
           label={item.label}
           isExpanded={isExpanded}
           isActive={pathname?.startsWith(item.path) ?? false}
-          onClick={() => handleNavigate(item.path)}
+          onClick={() => handleNavItemClick(item.path)}
         />
       ))}
     </div>

@@ -60,7 +60,6 @@ import { TaskChatTitleHeader } from '@/modules/pace/module/TaskChatTitleHeader';
 import TaskNavigation from '@/modules/pace/module/TaskNavigation';
 import TaskTopbar from '@/modules/pace/module/TaskTopbar';
 import { BrowserViewerDisplayState } from '@/modules/pace/pace.constants';
-import { usePaceContext } from '@/modules/pace/pace.context';
 import type { RootState } from '@/store';
 
 interface TaskContentInnerProps {
@@ -85,14 +84,12 @@ const TaskContentChat = ({ taskId }: { taskId: string }) => {
   const [triggerGetConversation] = useLazyGetConversationByIdQuery();
   const { openTab: openBrowserTab, updateTab: updateBrowserTab } = useDynamicTabs({ type: TAB_TYPE.BROWSER });
   const username = useAppSelector((state: RootState) => state.user.user?.username) ?? '';
-  const { openFilesPanel } = usePaceContext();
 
   const handleFileOpen = useCallback(
     (path: string, name: string) => {
-      openFilesPanel();
       openTab(path, name);
     },
-    [openTab, openFilesPanel],
+    [openTab],
   );
 
   const {

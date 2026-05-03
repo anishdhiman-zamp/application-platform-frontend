@@ -1,21 +1,42 @@
 import { createListenerMiddleware, createSlice, isAnyOf, PayloadAction } from '@reduxjs/toolkit';
 import { DynamicTab, DynamicTabType, TAB_TYPE } from '@/modules/pace/pace.types';
+import { LOCAL_STORAGE_KEYS, removeFromLocalStorage } from '@/utils/localstorage';
 import {
-  getFromLocalStorage,
-  LOCAL_STORAGE_KEYS,
-  removeFromLocalStorage,
-  setToLocalStorage,
-} from '@/utils/localstorage';
+  getFromSessionStorage,
+  removeFromSessionStorage,
+  SESSION_STORAGE_KEYS,
+  setToSessionStorage,
+} from '@/utils/sessionstorage';
 
 interface ConversationTabsState {
   tabs: DynamicTab[];
   activeTabId: string | null;
+  panelState: ConversationPanelState;
 }
 
 interface DynamicTabsState {
   activeConversationId: string | null;
   byConversation: Record<string, ConversationTabsState>;
 }
+
+export interface ConversationPanelState {
+  filesPanelWidth?: number;
+  treeColumnWidth?: number;
+  isFilesPanelExpanded?: boolean;
+  isTreeSidebarOpen?: boolean;
+  wordWrapEnabled?: boolean;
+}
+
+const DEFAULT_PANEL_STATE: ConversationPanelState = {
+  isFilesPanelExpanded: false,
+  isTreeSidebarOpen: false,
+  wordWrapEnabled: false,
+};
+
+const normalizePanelState = (panelState?: ConversationPanelState): ConversationPanelState => ({
+  ...DEFAULT_PANEL_STATE,
+  ...(panelState ?? {}),
+});
 
 const normalizeTab = (tab: DynamicTab): DynamicTab => ({
   ...tab,
@@ -25,9 +46,10 @@ const normalizeTab = (tab: DynamicTab): DynamicTab => ({
 
 const hydrateByConversationFromStorage = (): Record<string, ConversationTabsState> => {
   removeFromLocalStorage(LOCAL_STORAGE_KEYS.PACE_OPEN_DYNAMIC_TABS);
+  removeFromLocalStorage(LOCAL_STORAGE_KEYS.PACE_OPEN_DYNAMIC_TABS_BY_CONVERSATION);
 
   try {
-    const stored = getFromLocalStorage(LOCAL_STORAGE_KEYS.PACE_OPEN_DYNAMIC_TABS_BY_CONVERSATION);
+    const stored = getFromSessionStorage(SESSION_STORAGE_KEYS.PACE_OPEN_DYNAMIC_TABS_BY_CONVERSATION);
 
     if (!stored) return {};
     const parsed = JSON.parse(stored) as Record<string, ConversationTabsState>;
@@ -41,6 +63,7 @@ const hydrateByConversationFromStorage = (): Record<string, ConversationTabsStat
       result[conversationId] = {
         tabs: bucket.tabs.map(normalizeTab),
         activeTabId: bucket.activeTabId ?? null,
+        panelState: normalizePanelState(bucket.panelState),
       };
     });
 
@@ -52,7 +75,7 @@ const hydrateByConversationFromStorage = (): Record<string, ConversationTabsStat
 
 const persistByConversation = (byConversation: Record<string, ConversationTabsState>) => {
   try {
-    setToLocalStorage(LOCAL_STORAGE_KEYS.PACE_OPEN_DYNAMIC_TABS_BY_CONVERSATION, JSON.stringify(byConversation));
+    setToSessionStorage(SESSION_STORAGE_KEYS.PACE_OPEN_DYNAMIC_TABS_BY_CONVERSATION, JSON.stringify(byConversation));
   } catch {
     // silent
   }
@@ -76,7 +99,11 @@ const ensureActiveBucket = (state: DynamicTabsState): ConversationTabsState | nu
   if (!state.activeConversationId) return null;
 
   if (!state.byConversation[state.activeConversationId]) {
-    state.byConversation[state.activeConversationId] = { tabs: [], activeTabId: null };
+    state.byConversation[state.activeConversationId] = {
+      tabs: [],
+      activeTabId: null,
+      panelState: normalizePanelState(),
+    };
   }
 
   return state.byConversation[state.activeConversationId];
@@ -97,7 +124,11 @@ export const dynamicTabsSlice = createSlice({
       state.activeConversationId = conversationId;
 
       if (conversationId && !state.byConversation[conversationId]) {
-        state.byConversation[conversationId] = { tabs: [], activeTabId: null };
+        state.byConversation[conversationId] = {
+          tabs: [],
+          activeTabId: null,
+          panelState: normalizePanelState(),
+        };
       }
     },
 
@@ -119,6 +150,24 @@ export const dynamicTabsSlice = createSlice({
       }
 
       bucket.activeTabId = tab.id;
+    },
+
+    openTabInBackground: (state, action: PayloadAction<Omit<DynamicTab, 'stableKey'>>) => {
+      const bucket = ensureActiveBucket(state);
+
+      if (!bucket) return;
+
+      const tab = action.payload;
+      const tabType = tab.type ?? TAB_TYPE.FILE;
+      const exists = bucket.tabs.some((t) => t.id === tab.id && (t.type ?? TAB_TYPE.FILE) === tabType);
+
+      if (!exists) {
+        bucket.tabs.push({
+          ...tab,
+          type: tabType,
+          stableKey: crypto.randomUUID(),
+        });
+      }
     },
 
     closeTab: (state, action: PayloadAction<string>) => {
@@ -186,6 +235,17 @@ export const dynamicTabsSlice = createSlice({
       bucket.tabs = [];
       bucket.activeTabId = null;
     },
+
+    patchActiveConversationPanelState: (state, action: PayloadAction<Partial<ConversationPanelState>>) => {
+      const bucket = ensureActiveBucket(state);
+
+      if (!bucket) return;
+
+      bucket.panelState = normalizePanelState({
+        ...bucket.panelState,
+        ...action.payload,
+      });
+    },
   },
 });
 
@@ -215,6 +275,9 @@ export const selectActiveTab = (state: { dynamicTabs: DynamicTabsState }) => {
   return bucket.tabs.find((tab) => tab.id === bucket.activeTabId) ?? null;
 };
 
+export const selectActiveConversationPanelState = (state: { dynamicTabs: DynamicTabsState }) =>
+  getActiveBucketReadonly(state)?.panelState ?? DEFAULT_PANEL_STATE;
+
 export const selectTabsByType = (state: { dynamicTabs: DynamicTabsState }, type: DynamicTabType) =>
   (getActiveBucketReadonly(state)?.tabs ?? EMPTY_TABS).filter((tab) => (tab.type ?? TAB_TYPE.FILE) === type);
 
@@ -223,16 +286,18 @@ export const dynamicTabsListenerMiddleware = createListenerMiddleware();
 dynamicTabsListenerMiddleware.startListening({
   matcher: isAnyOf(
     dynamicTabsActions.openTab,
+    dynamicTabsActions.openTabInBackground,
     dynamicTabsActions.closeTab,
     dynamicTabsActions.updateTab,
     dynamicTabsActions.reorderTabs,
     dynamicTabsActions.clearAllTabs,
+    dynamicTabsActions.patchActiveConversationPanelState,
   ),
   effect: (_action, listenerApi) => {
     const state = listenerApi.getState() as { dynamicTabs: DynamicTabsState };
 
     if (isByConversationEmpty(state.dynamicTabs.byConversation)) {
-      removeFromLocalStorage(LOCAL_STORAGE_KEYS.PACE_OPEN_DYNAMIC_TABS_BY_CONVERSATION);
+      removeFromSessionStorage(SESSION_STORAGE_KEYS.PACE_OPEN_DYNAMIC_TABS_BY_CONVERSATION);
     } else {
       persistByConversation(state.dynamicTabs.byConversation);
     }

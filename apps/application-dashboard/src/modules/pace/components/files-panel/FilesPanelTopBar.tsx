@@ -2,13 +2,13 @@
 
 import { useState } from 'react';
 import { Button } from '@zamp-platform/ui';
-import { Maximize2, Minimize2, PanelRightClose } from 'lucide-react';
+import { Maximize2, Minimize2 } from 'lucide-react';
 import FilesPanelAddTabMenu from '@/modules/pace/components/files-panel/FilesPanelAddTabMenu';
 import FilesPanelTabStrip from '@/modules/pace/components/files-panel/FilesPanelTabStrip';
 import { usePaceContext } from '@/modules/pace/pace.context';
 
 const FilesPanelTopBar = () => {
-  const { isFilesPanelExpanded, toggleFilesPanelExpanded, closeFilesPanel } = usePaceContext();
+  const { isFilesPanelExpanded, toggleFilesPanelExpanded } = usePaceContext();
 
   const [isTabsOverflowing, setIsTabsOverflowing] = useState(false);
 
@@ -29,16 +29,6 @@ const FilesPanelTopBar = () => {
           aria-pressed={isFilesPanelExpanded}
         >
           {isFilesPanelExpanded ? <Minimize2 size={14} /> : <Maximize2 size={14} />}
-        </Button>
-        <Button
-          variant='ghost'
-          size='icon'
-          className='text-GRAY_700 hover:text-GRAY_1000 hover:bg-GRAY_100 size-7 rounded p-1.5'
-          onClick={closeFilesPanel}
-          title='Hide files panel'
-          aria-label='Hide files panel'
-        >
-          <PanelRightClose size={14} />
         </Button>
       </div>
     </div>

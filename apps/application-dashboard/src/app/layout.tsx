@@ -7,7 +7,6 @@ import { DialRoot } from 'dialkit';
 import type { Metadata, Viewport } from 'next';
 import { Funnel_Display, Geist, Geist_Mono, Inter } from 'next/font/google';
 import { cookies, headers } from 'next/headers';
-import Script from 'next/script';
 import { FontPresetProvider } from '@/app/_providers/font-preset-provider';
 import { ThemeProvider } from '@/app/_providers/theme-provider';
 import Agentation from '@/components/Agentation';
@@ -15,7 +14,7 @@ import NetworkStatus from '@/components/NetWorkStatus';
 import TypographySwitcher from '@/components/TypographySwitcher';
 import { FONT_PRESET, FONT_PRESET_CLASS, THEME_MODE } from '@/modules/general/constants/general.constants';
 import { FONT_PRESET_COOKIE, THEME_COOKIE } from '@/utils/cookie';
-import { COLOR_SCHEME_HEADER, getThemeClasses, THEME_INIT_SCRIPT } from '@/utils/theme.utils';
+import { COLOR_SCHEME_HEADER, getThemeClasses } from '@/utils/theme.utils';
 import '@zamp-platform/ui/globals.css';
 import 'dialkit/styles.css';
 import 'react-date-range/dist/styles.css';
@@ -95,7 +94,6 @@ const RootLayout = async ({ children }: { children: React.ReactNode }) => {
       suppressHydrationWarning
     >
       <body className={cn(theme.body, 'bg-BG_GRAY_1 h-screen antialiased')} suppressHydrationWarning>
-        <Script id='theme-init' strategy='beforeInteractive' dangerouslySetInnerHTML={{ __html: THEME_INIT_SCRIPT }} />
         <ThemeProvider>
           <FontPresetProvider initialPreset={fontPreset}>
             <SpeedInsights />

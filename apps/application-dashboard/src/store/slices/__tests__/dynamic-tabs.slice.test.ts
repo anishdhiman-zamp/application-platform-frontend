@@ -2,6 +2,7 @@ import { configureStore } from '@reduxjs/toolkit';
 import { TAB_TYPE } from '@/modules/pace/pace.types';
 import dynamicTabsReducer, {
   dynamicTabsActions,
+  selectActiveConversationPanelState,
   selectActiveTab,
   selectActiveTabId,
   selectDynamicTabs,
@@ -9,7 +10,7 @@ import dynamicTabsReducer, {
 
 const buildStore = () => configureStore({ reducer: { dynamicTabs: dynamicTabsReducer } });
 
-const fileTab = (id: string) => ({ id, type: TAB_TYPE.FILE, title: id });
+const fileTab = (id: string) => ({ id, name: id, path: `/chat?f=${encodeURIComponent(id)}`, type: TAB_TYPE.FILE });
 
 describe('dynamicTabs slice — conversation-keyed', () => {
   it('returns empty selections when no active conversation is set', () => {
@@ -62,6 +63,28 @@ describe('dynamicTabs slice — conversation-keyed', () => {
     expect(selectActiveTab(store.getState())?.id).toBe('a1.md');
   });
 
+  it('opens background tabs without changing the active tab', () => {
+    const store = buildStore();
+
+    store.dispatch(dynamicTabsActions.setActiveConversation('conv-a'));
+    store.dispatch(dynamicTabsActions.openTab(fileTab('a1.md')));
+    store.dispatch(dynamicTabsActions.openTabInBackground(fileTab('agent.md')));
+
+    expect(selectDynamicTabs(store.getState()).map((t) => t.id)).toEqual(['a1.md', 'agent.md']);
+    expect(selectActiveTabId(store.getState())).toBe('a1.md');
+  });
+
+  it('does not create an active tab when a background tab is the first tab', () => {
+    const store = buildStore();
+
+    store.dispatch(dynamicTabsActions.setActiveConversation('conv-a'));
+    store.dispatch(dynamicTabsActions.openTabInBackground(fileTab('agent.md')));
+
+    expect(selectDynamicTabs(store.getState()).map((t) => t.id)).toEqual(['agent.md']);
+    expect(selectActiveTabId(store.getState())).toBeNull();
+    expect(selectActiveTab(store.getState())).toBeNull();
+  });
+
   it('closeTab only affects the active conversation bucket', () => {
     const store = buildStore();
 
@@ -84,5 +107,34 @@ describe('dynamicTabs slice — conversation-keyed', () => {
 
     expect(selectDynamicTabs(store.getState())).toEqual([]);
     expect(selectActiveTabId(store.getState())).toBeNull();
+  });
+
+  it('isolates right panel UI state across conversations', () => {
+    const store = buildStore();
+
+    store.dispatch(dynamicTabsActions.setActiveConversation('conv-a'));
+    store.dispatch(
+      dynamicTabsActions.patchActiveConversationPanelState({
+        isFilesPanelExpanded: true,
+        isTreeSidebarOpen: false,
+        filesPanelWidth: 900,
+      }),
+    );
+
+    store.dispatch(dynamicTabsActions.setActiveConversation('conv-b'));
+    expect(selectActiveConversationPanelState(store.getState())).toMatchObject({
+      isFilesPanelExpanded: false,
+      isTreeSidebarOpen: false,
+    });
+
+    store.dispatch(dynamicTabsActions.patchActiveConversationPanelState({ filesPanelWidth: 420 }));
+    expect(selectActiveConversationPanelState(store.getState()).filesPanelWidth).toBe(420);
+
+    store.dispatch(dynamicTabsActions.setActiveConversation('conv-a'));
+    expect(selectActiveConversationPanelState(store.getState())).toMatchObject({
+      isFilesPanelExpanded: true,
+      isTreeSidebarOpen: false,
+      filesPanelWidth: 900,
+    });
   });
 });

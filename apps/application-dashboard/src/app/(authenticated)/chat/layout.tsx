@@ -8,11 +8,8 @@ import { SkeletonTypes } from '@/components/commonWrapper/commonWrapper.types';
 import { ZAMP_LOGO_LOADER_SVG } from '@/constants/icons';
 import { useIsPaceChatEnabled } from '@/hooks/useIsPaceChatEnabled';
 import PaceLayoutContent from '@/modules/pace/components/layout/PaceLayoutContent';
-import { FileTreeNavigationProvider } from '@/modules/pace/context/FileTreeNavigationContext';
-import { FileViewerProvider } from '@/modules/pace/context/FileViewerContext';
 import useDataPrefetch from '@/modules/pace/hooks/useDataPrefetch';
 import { useFilesystemStatus } from '@/modules/pace/hooks/useFilesystemStatus';
-import { PaceProvider } from '@/modules/pace/pace.context';
 
 interface PaceLayoutProps {
   children: ReactNode;
@@ -43,17 +40,7 @@ const PaceLayout: FC<PaceLayoutProps> = ({ children }) => {
       className='h-full'
       disableAnimation
     >
-      {!isPaceChatEnabled ? (
-        <NotFound showOrgSwitcher />
-      ) : (
-        <PaceProvider>
-          <FileViewerProvider>
-            <FileTreeNavigationProvider>
-              <PaceLayoutContent>{children}</PaceLayoutContent>
-            </FileTreeNavigationProvider>
-          </FileViewerProvider>
-        </PaceProvider>
-      )}
+      {!isPaceChatEnabled ? <NotFound showOrgSwitcher /> : <PaceLayoutContent>{children}</PaceLayoutContent>}
     </CommonWrapper>
   );
 };

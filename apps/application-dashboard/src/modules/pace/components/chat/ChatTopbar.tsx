@@ -1,14 +1,11 @@
 'use client';
 
-import { Button } from '@zamp-platform/ui';
 import { cn } from '@zamp-platform/ui/utils';
 import { AnimatePresence, motion } from 'framer-motion';
-import { PanelRightOpen } from 'lucide-react';
 import { useResourceAccess } from '@/hooks/useResourceAccess';
 import ConversationActions from '@/modules/pace/components/chat/ConversationActions';
 import ShareConversationPopup from '@/modules/pace/components/chat/ShareConversationPopup';
 import { DEFAULT_CHAT_TITLE } from '@/modules/pace/pace.constants';
-import { usePaceContext } from '@/modules/pace/pace.context';
 import { ResourceType, ShareResourceVersion } from '@/modules/shareResource/shareResource.types';
 import { PERMISSION_ROLES } from '@/utils/accessPermission/accessPermission.types';
 
@@ -40,7 +37,6 @@ const ChatTopbar = ({
   });
   const isAdmin = checkUserPrivilege(PERMISSION_ROLES.ADMIN);
   const canEdit = Boolean(conversationId && organizationId);
-  const { filesPanelOpen, toggleFilesPanel } = usePaceContext();
 
   const handleRenameSuccess = (newTitle: string) => {
     onTitleChange?.(newTitle);
@@ -81,18 +77,6 @@ const ChatTopbar = ({
       </div>
       <div className='flex items-center gap-1.5'>
         {isAdmin && conversationId && <ShareConversationPopup conversationId={conversationId} avoidCollisions />}
-        {!filesPanelOpen && (
-          <Button
-            variant='ghost'
-            size='icon'
-            className='text-GRAY_700 hover:text-GRAY_1000 hover:bg-GRAY_100 size-8 rounded p-1.5'
-            onClick={toggleFilesPanel}
-            title='Show files panel'
-            aria-label='Show files panel'
-          >
-            <PanelRightOpen size={14} />
-          </Button>
-        )}
       </div>
     </div>
   );
