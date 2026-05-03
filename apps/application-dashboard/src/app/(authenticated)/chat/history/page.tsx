@@ -1,7 +1,3 @@
-import ChatHistoryPage from '@/modules/pace/components/chat/ChatHistoryPage';
-
-const Page = () => {
-  return <ChatHistoryPage />;
-};
+const Page = () => null;
 
 export default Page;

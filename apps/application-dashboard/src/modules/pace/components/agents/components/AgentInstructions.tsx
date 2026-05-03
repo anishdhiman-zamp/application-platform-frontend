@@ -19,7 +19,7 @@ const SkeletonParagraph = ({ widths }: { widths: string[] }) => (
 );
 
 const InstructionsSkeleton = () => (
-  <div className='border-GRAY_400 flex h-full min-h-[300px] flex-1 flex-col gap-5 rounded-xl border p-6'>
+  <div className='border-GRAY_400 flex min-h-[300px] flex-col gap-5 rounded-xl border p-6'>
     <Skeleton className='h-5 w-48' />
     <SkeletonParagraph widths={['w-full', 'w-full', 'w-3/4']} />
     <Skeleton className='h-5 w-36' />
@@ -93,13 +93,13 @@ const AgentInstructions = ({
       }
       skeletonType={SkeletonTypes.CUSTOM}
       loader={<InstructionsSkeleton />}
-      className='flex min-h-0 flex-1 flex-col'
+      className='flex flex-col'
       disableAnimation
     >
-      <p className='text-GRAY_700 f-14-450 mb-4 ml-2.5 shrink-0'>What should the agent do everytime it runs?</p>
-      <div className='agent-instructions-editor border-GRAY_400 flex h-full flex-col overflow-hidden rounded-xl border'>
-        <div ref={containerRef} className='min-h-0 flex-1'>
-          <MilkdownEditor content={instructions} onChange={handleContentChange} />
+      <p className='text-GRAY_700 f-14-450 mb-4 ml-2.5'>What should the agent do everytime it runs?</p>
+      <div className='agent-instructions-editor border-GRAY_400 flex min-h-[300px] flex-col overflow-hidden rounded-xl border'>
+        <div ref={containerRef}>
+          <MilkdownEditor content={instructions} onChange={handleContentChange} className='h-auto overflow-visible' />
         </div>
       </div>
     </CommonWrapper>

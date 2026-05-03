@@ -1,5 +1,5 @@
 import type { ConversationState } from '@zamp-platform/conversation-stream';
-import { Database, KeyRound, Link2, Settings2, UserPen } from 'lucide-react';
+import { Database, KeyRound, Link2, Palette, Settings2, UserPen } from 'lucide-react';
 import { type BrowserViewerStateConfig, PaceNavbarItemId, PaceSettingsTabSchema } from 'modules/pace/pace.types';
 import Users02 from '@/assets/Icons/Users02';
 import { DONE_EMPTY_STATE } from '@/constants/icons';
@@ -110,6 +110,12 @@ export const PACE_SETTINGS_TABS: PaceSettingsTabSchema[] = [
     name: 'People',
     iconComponent: <Users02 width={16} height={16} />,
     path: ROUTES_PATH.CHAT_SETTINGS_PEOPLE,
+  },
+  {
+    id: PaceNavbarItemId.DESIGN_SYSTEM,
+    name: 'Design System',
+    iconComponent: <Palette width={16} height={16} />,
+    path: ROUTES_PATH.CHAT_SETTINGS_DESIGN_SYSTEM,
   },
 ];
 

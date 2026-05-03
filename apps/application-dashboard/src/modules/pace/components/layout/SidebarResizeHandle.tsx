@@ -22,7 +22,7 @@ const SidebarResizeHandle = () => {
     setIsSidebarResizing,
     filesPanelOpen,
     filesPanelWidth,
-    hasActiveFileTab,
+    hasActivePanelTab,
   } = usePaceContext();
 
   const dragStartXRef = useRef<number>(0);
@@ -35,7 +35,7 @@ const SidebarResizeHandle = () => {
   const computeEffectiveMax = useCallback(() => {
     const parentWidth = handleRef.current?.parentElement?.clientWidth ?? window.innerWidth - PADDING;
 
-    if (hasActiveFileTab) {
+    if (hasActivePanelTab) {
       const available = parentWidth - HANDLE_WIDTH - HANDLE_WIDTH - FILE_TREE_COLUMN_MIN_WIDTH - FILES_PANEL_MIN_WIDTH;
 
       return Math.max(SIDEBAR_MIN_WIDTH, available);
@@ -45,7 +45,7 @@ const SidebarResizeHandle = () => {
     const available = parentWidth - HANDLE_WIDTH - MIN_MAIN_WIDTH - filesPanelSpace;
 
     return Math.min(SIDEBAR_MAX_WIDTH, Math.max(SIDEBAR_MIN_WIDTH, available));
-  }, [filesPanelOpen, filesPanelWidth, hasActiveFileTab]);
+  }, [filesPanelOpen, filesPanelWidth, hasActivePanelTab]);
 
   const handleMouseDown = useCallback(
     (e: React.MouseEvent) => {

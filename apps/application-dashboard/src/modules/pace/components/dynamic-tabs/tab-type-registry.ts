@@ -40,22 +40,14 @@ export const TAB_TYPE_REGISTRY: Record<DynamicTabType, TabTypeDefinition> = {
     getDefaultName: (id: string) => id,
   },
   [TAB_TYPE.AGENT]: {
-    kind: ROUTE_KIND.DYNAMIC,
-    basePath: ROUTES_PATH.CHAT_AGENTS,
-    buildPath: (id: string) => `${ROUTES_PATH.CHAT_AGENTS}/${encodeURIComponent(id)}`,
-    parseId: (pathname: string) => {
-      const basePath = ROUTES_PATH.CHAT_AGENTS;
+    kind: ROUTE_KIND.QUERY,
+    basePath: ROUTES_PATH.CHAT,
+    paramName: TAB_QUERY_PARAM.AGENT,
+    buildPath: (id: string) => `${ROUTES_PATH.CHAT}?${TAB_QUERY_PARAM.AGENT}=${encodeURIComponent(id)}`,
+    parseId: (pathname: string, search: string) => {
+      if (pathname !== ROUTES_PATH.CHAT) return null;
 
-      if (!pathname.startsWith(basePath + '/')) return null;
-
-      const baseSegments = basePath.split('/').filter(Boolean);
-      const pathSegments = pathname.split('/').filter(Boolean);
-
-      if (pathSegments.length > baseSegments.length) {
-        return decodeURIComponent(pathSegments[baseSegments.length]);
-      }
-
-      return null;
+      return new URLSearchParams(search).get(TAB_QUERY_PARAM.AGENT);
     },
     getDefaultName: (id: string) => id,
   },

@@ -14,6 +14,7 @@ import {
   ConversationActionsContext,
   ConversationStateContext,
   createConversationActions,
+  type FocusEditorRef,
   type MentionInsertPayload,
 } from '@zamp-platform/conversation-stream';
 import { VOICE_CHAT_STATE } from '@zamp-platform/ui/types';
@@ -25,7 +26,7 @@ import ChatHome from '@/modules/pace/components/chat/ChatHome';
 import ModelSelector from '@/modules/pace/components/chat/ModelSelector';
 import VoiceChatSlot from '@/modules/pace/components/chat/VoiceChatSlot';
 import { useDynamicTabs } from '@/modules/pace/components/dynamic-tabs/useDynamicTabs';
-import { useChatDraftInput } from '@/modules/pace/hooks/useChatDraftInput';
+import { CHAT_DRAFT_UPDATE_EVENT, useChatDraftInput } from '@/modules/pace/hooks/useChatDraftInput';
 import { useReferencePicker } from '@/modules/pace/hooks/useReferencePicker';
 import { NO_ANIMATION } from '@/modules/pace/pace.animations';
 import { STUB_CONVERSATION_STATE } from '@/modules/pace/pace.constants';
@@ -62,6 +63,7 @@ const ChatHomePage = () => {
   const fileDropHandlerRef = useRef<((files: FileList) => void) | null>(null);
   const addFileReferenceRef = useRef<((ref: { path: string; name: string }) => void) | null>(null);
   const addMentionRef = useRef<((payload: MentionInsertPayload) => void) | null>(null);
+  const focusEditorRef: FocusEditorRef = useRef<(() => void) | null>(null);
 
   const { inputValue, setInputValue } = useChatDraftInput({
     conversationId: null,
@@ -157,6 +159,17 @@ const ChatHomePage = () => {
     drainPendingMentions();
   }, [drainPendingMentions]);
 
+  useEffect(() => {
+    const handleDraftPrefilled = () => {
+      // Defer to the next frame so the editor has applied the new content before we focus.
+      requestAnimationFrame(() => focusEditorRef.current?.());
+    };
+
+    window.addEventListener(CHAT_DRAFT_UPDATE_EVENT, handleDraftPrefilled);
+
+    return () => window.removeEventListener(CHAT_DRAFT_UPDATE_EVENT, handleDraftPrefilled);
+  }, []);
+
   return (
     <ConversationStateContext.Provider value={STUB_CONVERSATION_STATE}>
       <ConversationActionsContext.Provider value={interceptedActions}>
@@ -174,7 +187,7 @@ const ChatHomePage = () => {
                   initial={false}
                   animate={{ opacity: 1, transition: NO_ANIMATION }}
                   exit={{ opacity: 0, transition: { duration: 0.25, ease: 'easeInOut' } }}
-                  className='relative mx-auto flex min-h-0 w-full max-w-[700px] flex-1 flex-col items-center justify-center overflow-hidden pb-[20vh]'
+                  className='relative mx-auto flex min-h-0 w-full max-w-[800px] flex-1 flex-col items-center justify-center overflow-hidden pb-[20vh]'
                   style={{ willChange: 'opacity' }}
                 >
                   <ChatHome />
@@ -196,6 +209,7 @@ const ChatHomePage = () => {
                       fileDropHandlerRef={fileDropHandlerRef}
                       addFileReferenceRef={addFileReferenceRef}
                       addMentionRef={addMentionRef}
+                      focusEditorRef={focusEditorRef}
                       externalFileReferences={sharedFileReferences}
                       setExternalFileReferences={setSharedFileReferences}
                       externalFilePathsRef={sharedExternalFilePaths}

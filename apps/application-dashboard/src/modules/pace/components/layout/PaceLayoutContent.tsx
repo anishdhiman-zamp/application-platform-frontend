@@ -7,6 +7,7 @@ import Sidebar from 'modules/pace/components/layout/sidebar/Sidebar';
 import { CHAT_SIDEBAR_STATE } from 'modules/pace/pace.types';
 import FilesPanel from '@/modules/pace/components/files-panel/FilesPanel';
 import FilesPanelResizeHandle from '@/modules/pace/components/layout/FilesPanelResizeHandle';
+import PaneHost from '@/modules/pace/components/layout/PaneHost';
 import SidebarResizeHandle from '@/modules/pace/components/layout/SidebarResizeHandle';
 import UploadProgressToast from '@/modules/pace/components/progress-toast/UploadProgressToast';
 import { FileUploadProvider, useFileUploadContext } from '@/modules/pace/context/FileUploadContext';
@@ -23,7 +24,7 @@ const PaceLayoutContentInner: FC<PaceLayoutContentProps> = ({ children }) => {
     isFilesPanelResizing,
     isSidebarResizing,
     isTreeColumnResizing,
-    hasActiveFileTab,
+    hasActivePanelTab,
     filesPanelOpen,
     isFilesPanelExpanded,
   } = usePaceContext();
@@ -33,7 +34,7 @@ const PaceLayoutContentInner: FC<PaceLayoutContentProps> = ({ children }) => {
   const isExpanded = chatSidebarState === CHAT_SIDEBAR_STATE.EXPANDED;
   const isSidebar = chatSidebarState === CHAT_SIDEBAR_STATE.SIDEBAR;
   const isFilesPanelFullWidth = filesPanelOpen && isFilesPanelExpanded;
-  const isMainHidden = isExpanded || hasActiveFileTab || isFilesPanelFullWidth;
+  const isMainHidden = isExpanded || hasActivePanelTab || isFilesPanelFullWidth;
 
   return (
     <div className='bg-BG_GRAY_2 relative flex h-full w-full overflow-hidden overscroll-none'>
@@ -41,7 +42,7 @@ const PaceLayoutContentInner: FC<PaceLayoutContentProps> = ({ children }) => {
       <Sidebar />
       <div className='flex min-h-0 min-w-0 flex-1 overflow-hidden'>
         <ChatSidebar />
-        {isSidebar && !hasActiveFileTab && !isFilesPanelFullWidth && <SidebarResizeHandle />}
+        {isSidebar && !hasActivePanelTab && !isFilesPanelFullWidth && <SidebarResizeHandle />}
         <main
           className={cn(
             'flex min-h-0 min-w-0 flex-1 flex-col',
@@ -50,7 +51,7 @@ const PaceLayoutContentInner: FC<PaceLayoutContentProps> = ({ children }) => {
           aria-hidden={isMainHidden}
         >
           <section className='border-border bg-BG_WHITE flex min-h-0 w-full flex-1 flex-col overflow-hidden border-l'>
-            {children}
+            <PaneHost>{children}</PaneHost>
           </section>
         </main>
         {filesPanelOpen && !isFilesPanelExpanded && <FilesPanelResizeHandle />}

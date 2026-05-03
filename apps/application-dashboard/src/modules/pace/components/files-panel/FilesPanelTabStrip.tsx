@@ -1,11 +1,13 @@
 'use client';
 
-import { Fragment, useCallback, useEffect, useRef, useState } from 'react';
+import { Fragment, useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { cn } from '@zamp-platform/ui/utils';
 import DynamicTabItem from 'modules/pace/components/dynamic-tabs/DynamicTabItem';
 import { useDynamicTabs } from 'modules/pace/components/dynamic-tabs/useDynamicTabs';
 import { TAB_TYPE } from 'modules/pace/pace.types';
 import FilesPanelAddTabMenu from '@/modules/pace/components/files-panel/FilesPanelAddTabMenu';
+
+const PANEL_TAB_TYPES = new Set<string>([TAB_TYPE.FILE, TAB_TYPE.AGENT]);
 
 interface FilesPanelTabStripProps {
   onOverflowChange?: (isOverflowing: boolean) => void;
@@ -24,9 +26,17 @@ const getMaskStyle = (canScrollLeft: boolean, canScrollRight: boolean) => {
 };
 
 const FilesPanelTabStrip = ({ onOverflowChange }: FilesPanelTabStripProps) => {
-  const { tabs, isTabActive, navigateToTab, closeTab, closeOtherTabs, closeTabsToRight, closeAllTabs } = useDynamicTabs(
-    { type: TAB_TYPE.FILE },
-  );
+  const {
+    tabs: allTabs,
+    isTabActive,
+    navigateToTab,
+    closeTab,
+    closeOtherTabs,
+    closeTabsToRight,
+    closeAllTabs,
+  } = useDynamicTabs();
+
+  const tabs = useMemo(() => allTabs.filter((tab) => PANEL_TAB_TYPES.has(tab.type ?? TAB_TYPE.FILE)), [allTabs]);
 
   const scrollRef = useRef<HTMLDivElement>(null);
   const tabsRef = useRef<HTMLDivElement>(null);

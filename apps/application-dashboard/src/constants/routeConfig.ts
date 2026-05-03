@@ -54,6 +54,7 @@ export const ROUTES_PATH = {
   CHAT_SETTINGS_DATASET_DETAIL: '/chat/settings/datasets/:tableName',
   CHAT_SETTINGS_ORG_SETTINGS: '/chat/settings/organisation-settings',
   CHAT_SETTINGS_CREDENTIALS_VAULT: '/chat/settings/credentials-vault',
+  CHAT_SETTINGS_DESIGN_SYSTEM: '/chat/settings/design-system',
   CHAT_TASK: '/chat/task',
   CHAT_APPS: '/chat/apps',
   CHAT_AGENTS: '/chat/agents',

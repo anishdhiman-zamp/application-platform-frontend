@@ -5,6 +5,7 @@ import { usePathname } from 'next/navigation';
 import { cn } from 'utils/common';
 import { getLayoutConfig } from 'utils/layout.config';
 import VoiceChatFloatingIndicator from '@/components/common/VoiceChatFloatingIndicator';
+import UrlToTabSync from '@/components/layouts/app-sidebar/UrlToTabSync';
 import { PendingDatasetProvider } from '@/context/pendingDataset.context';
 import { ProcessesProvider } from '@/contexts/ProcessesContext';
 import { VoiceChatProvider } from '@/contexts/VoiceChatContext';
@@ -42,6 +43,9 @@ export default function LayoutWrapper({ children }: LayoutWrapperProps) {
         <VoiceChatProvider>
           <Suspense fallback={null}>
             <GlobalShortcuts />
+          </Suspense>
+          <Suspense fallback={null}>
+            <UrlToTabSync />
           </Suspense>
           <div className='relative'>
             <div className='relative flex h-full w-full min-w-[768px]'>

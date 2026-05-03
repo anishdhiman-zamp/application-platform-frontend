@@ -40,6 +40,7 @@ export type {
   AddMentionRef,
   ConnectedChatInputProps,
   FileDropHandlerRef,
+  FocusEditorRef,
   MentionInsertPayload,
 } from './components/ConnectedChatInput';
 export { ConnectedChatInput } from './components/ConnectedChatInput';

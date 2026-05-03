@@ -115,11 +115,11 @@ const AgentFolderList = ({ agentId, agentAvatarSrc, isActive = true, skipFetch =
       noDataBanner={<AgentTabEmptyState agentAvatarSrc={agentAvatarSrc} description='No Files Found' />}
       skeletonType={SkeletonTypes.CUSTOM}
       loader={<FolderListSkeleton rowCount={12} />}
-      className='flex min-h-0 flex-1 flex-col'
+      className='flex flex-col'
       disableAnimation
     >
-      <p className='text-GRAY_700 f-14-450 mb-4 ml-2.5 shrink-0'>What folders can the agent access?</p>
-      <div className='border-GRAY_400 flex flex-col overflow-y-auto rounded-xl border'>
+      <p className='text-GRAY_700 f-14-450 mb-4 ml-2.5'>What folders can the agent access?</p>
+      <div className='border-GRAY_400 flex flex-col rounded-xl border'>
         {files.map((file, index) => (
           <div
             key={file.path}

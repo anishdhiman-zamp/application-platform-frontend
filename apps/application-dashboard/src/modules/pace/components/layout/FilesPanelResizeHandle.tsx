@@ -18,7 +18,7 @@ const FilesPanelResizeHandle = () => {
     setIsFilesPanelResizing,
     sidebarWidth,
     chatSidebarState,
-    hasActiveFileTab,
+    hasActivePanelTab,
     treeColumnWidth,
     isTreeSidebarOpen,
   } = usePaceContext();
@@ -31,15 +31,15 @@ const FilesPanelResizeHandle = () => {
 
   const computeEffectiveMax = useCallback(() => {
     const isSidebar = chatSidebarState === CHAT_SIDEBAR_STATE.SIDEBAR;
-    const chatSpace = isSidebar ? (hasActiveFileTab ? SIDEBAR_MIN_WIDTH : sidebarWidth + HANDLE_WIDTH) : 0;
-    const mainSpace = hasActiveFileTab ? 0 : MIN_MAIN_WIDTH;
+    const chatSpace = isSidebar ? (hasActivePanelTab ? SIDEBAR_MIN_WIDTH : sidebarWidth + HANDLE_WIDTH) : 0;
+    const mainSpace = hasActivePanelTab ? 0 : MIN_MAIN_WIDTH;
     const treeSpace = isTreeSidebarOpen ? treeColumnWidth + HANDLE_WIDTH : 0;
 
     const viewportWidth = window.innerWidth - PADDING;
     const available = viewportWidth - HANDLE_WIDTH - chatSpace - mainSpace - treeSpace;
 
     return Math.min(FILES_PANEL_MAX_WIDTH, Math.max(FILES_PANEL_MIN_WIDTH, available));
-  }, [chatSidebarState, sidebarWidth, hasActiveFileTab, treeColumnWidth, isTreeSidebarOpen]);
+  }, [chatSidebarState, sidebarWidth, hasActivePanelTab, treeColumnWidth, isTreeSidebarOpen]);
 
   const handleMouseDown = useCallback(
     (e: React.MouseEvent) => {

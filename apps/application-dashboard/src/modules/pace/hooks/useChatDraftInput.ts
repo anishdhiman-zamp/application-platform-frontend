@@ -69,6 +69,28 @@ const removeDraft = (drafts: ChatDraft[], id: string): ChatDraft[] => {
   return drafts.filter((draft) => draft.id !== id);
 };
 
+export const CHAT_DRAFT_UPDATE_EVENT = 'chat-draft-updated';
+
+interface ChatDraftUpdateEventDetail {
+  id: string;
+  content: string;
+}
+
+export const setNewChatDraft = (content: string) => {
+  const drafts = getDraftsFromStorage();
+  const next = content ? upsertDraft(drafts, NEW_CONVERSATION_ID, content) : removeDraft(drafts, NEW_CONVERSATION_ID);
+
+  saveDraftsToStorage(next);
+
+  if (typeof window === 'undefined') return;
+
+  window.dispatchEvent(
+    new CustomEvent<ChatDraftUpdateEventDetail>(CHAT_DRAFT_UPDATE_EVENT, {
+      detail: { id: NEW_CONVERSATION_ID, content },
+    }),
+  );
+};
+
 /**
  * Hook to manage chat input draft with local storage persistence.
  * Drafts are stored in a single 'conversation_drafts' array and survive page refreshes.
@@ -151,6 +173,19 @@ export const useChatDraftInput = ({ conversationId }: UseChatDraftInputProps): U
         clearTimeout(debounceTimerRef.current);
       }
     };
+  }, []);
+
+  useEffect(() => {
+    const handleDraftUpdate = (event: Event) => {
+      const detail = (event as CustomEvent<ChatDraftUpdateEventDetail>).detail;
+
+      if (detail?.id !== draftIdRef.current) return;
+      setInputValueState(detail.content);
+    };
+
+    window.addEventListener(CHAT_DRAFT_UPDATE_EVENT, handleDraftUpdate);
+
+    return () => window.removeEventListener(CHAT_DRAFT_UPDATE_EVENT, handleDraftUpdate);
   }, []);
 
   return {

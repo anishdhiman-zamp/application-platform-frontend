@@ -1,3 +1,4 @@
+import PageContainer from '@/components/layouts/PageContainer';
 import { getIntegrations } from '@/constants/integrations.constants';
 import IntegrationHeader from '@/modules/integrations/AllIntegrations/IntegrationHeader';
 import IntegrationsGrid from '@/modules/integrations/AllIntegrations/IntegrationsGrid';
@@ -17,16 +18,12 @@ const IntegrationsPage = async ({ searchParams }: IntegrationsPageProps) => {
   const { enabled, available } = splitIntegrations(filteredIntegrations);
 
   return (
-    <div className='h-full w-full pt-10'>
-      <div className='flex h-full w-full flex-col'>
-        <div className='border-GRAY_400 sticky top-0 z-10 border-b bg-white pb-8 transition-colors'>
-          <IntegrationHeader />
-        </div>
-        <div className='flex-1 overflow-y-auto px-10 py-6 [scrollbar-width:none]'>
-          <IntegrationsGrid enabledIntegrations={enabled} availableIntegrations={available} />
-        </div>
+    <PageContainer>
+      <div className='mb-6'>
+        <IntegrationHeader />
       </div>
-    </div>
+      <IntegrationsGrid enabledIntegrations={enabled} availableIntegrations={available} />
+    </PageContainer>
   );
 };
 

@@ -44,7 +44,7 @@ const IntegrationDetailPage: FC<IntegrationDetailPagePropsType> = ({ integration
         className='flex h-full shrink-0 flex-col overflow-hidden'
       >
         <div className='flex w-full justify-center'>
-          <div className='flex w-full max-w-[700px] shrink-0 flex-col'>
+          <div className='flex w-full max-w-200 shrink-0 flex-col'>
             <div className='flex w-full shrink-0 items-center justify-start py-2'>
               <Link
                 href={`${ROUTES_PATH.CHAT_SETTINGS_INTEGRATIONS}${searchParams?.toString() ? `?${searchParams.toString()}` : ''}`}
@@ -92,7 +92,7 @@ const IntegrationDetailPage: FC<IntegrationDetailPagePropsType> = ({ integration
 
         <ScrollContainer className='mt-4 flex-1' scrollClassName='pb-6' scrollbarStyle='none'>
           <div className='flex w-full justify-center'>
-            <div className='flex w-full max-w-[700px] flex-col'>
+            <div className='flex w-full max-w-200 flex-col'>
               {connectionMetadata?.connections?.length ? (
                 <ConnectionPeopleTab
                   connections={connectionMetadata.connections as ConnectionEntryType[]}

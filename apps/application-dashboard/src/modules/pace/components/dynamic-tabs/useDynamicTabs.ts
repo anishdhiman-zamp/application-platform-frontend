@@ -23,6 +23,7 @@ interface UseDynamicTabsReturn {
   isHydrated: boolean;
 
   openTab: (id: string, name: string, metadata?: Record<string, unknown>, path?: string) => void;
+  openTabSilently: (id: string, name: string, metadata?: Record<string, unknown>, path?: string) => void;
   closeTab: (e: React.MouseEvent, id: string) => void;
   closeTabsForPath: (path: string, isFolder: boolean) => void;
   updateTab: (oldId: string, newId: string, newName: string, metadata?: Record<string, unknown>) => void;
@@ -130,6 +131,24 @@ export const useDynamicTabs = (config: UseDynamicTabsConfig = {}): UseDynamicTab
       navigateTo(tabPath);
     },
     [dispatch, navigateTo, type],
+  );
+
+  const openTabSilently = useCallback(
+    (id: string, name: string, metadata?: Record<string, unknown>, path?: string) => {
+      const tabType = type ?? TAB_TYPE.FILE;
+      const tabPath = path ?? buildTabRoute(id, tabType);
+
+      dispatch(
+        dynamicTabsActions.openTab({
+          id,
+          name,
+          path: tabPath,
+          type: tabType,
+          metadata,
+        }),
+      );
+    },
+    [dispatch, type],
   );
 
   const closeTab = useCallback(
@@ -374,6 +393,7 @@ export const useDynamicTabs = (config: UseDynamicTabsConfig = {}): UseDynamicTab
     isHydrated: true,
 
     openTab,
+    openTabSilently,
     closeTab,
     closeTabsForPath,
     updateTab,

@@ -558,7 +558,7 @@ const AgentToolsAccess = ({
     };
 
     return (
-      <CommonWrapper isError refetchFunction={handleRefetch} className='flex min-h-0 flex-1 flex-col'>
+      <CommonWrapper isError refetchFunction={handleRefetch} className='flex flex-col'>
         {null}
       </CommonWrapper>
     );
@@ -581,11 +581,11 @@ const AgentToolsAccess = ({
 
   return (
     <>
-      <p className='text-GRAY_700 f-14-450 mb-4 ml-2.5 shrink-0'>
+      <p className='text-GRAY_700 f-14-450 mb-4 ml-2.5'>
         What can the agent use? Add connections & tools it can access.
       </p>
 
-      <div className='bg-BG_GRAY_2 flex h-full rounded-xl'>
+      <div className='bg-BG_GRAY_2 flex rounded-xl'>
         <IntegrationList
           integrations={integrations}
           allIntegrations={allIntegrations}

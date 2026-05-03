@@ -6,7 +6,7 @@ import { ROUTES_PATH } from '@/constants/routeConfig';
 import { useAppDispatch } from '@/hooks/toolkit';
 import SidebarRow from '@/modules/pace/components/layout/sidebar/SidebarRow';
 import { usePaceContext } from '@/modules/pace/pace.context';
-import { TAB_QUERY_PARAM } from '@/modules/pace/pace.types';
+import { CHAT_SIDEBAR_STATE, TAB_QUERY_PARAM } from '@/modules/pace/pace.types';
 import { dynamicTabsActions } from '@/store/slices/dynamic-tabs.slice';
 
 interface SidebarPrimaryActionsProps {
@@ -24,15 +24,15 @@ const SidebarPrimaryActions = ({ isExpanded }: SidebarPrimaryActionsProps) => {
   const router = useRouter();
   const pathname = usePathname();
   const dispatch = useAppDispatch();
-  const { collapseSidebar, startNewChat, closeFilesPanel } = usePaceContext();
+  const { startNewChat, setChatSidebarState } = usePaceContext();
 
   const handleNavigate = (path: string) => {
-    collapseSidebar();
     router.push(path);
   };
 
   const handleNewChat = () => {
     startNewChat();
+    setChatSidebarState(CHAT_SIDEBAR_STATE.COLLAPSED);
 
     const params = new URLSearchParams(window.location.search);
 
@@ -42,7 +42,6 @@ const SidebarPrimaryActions = ({ isExpanded }: SidebarPrimaryActionsProps) => {
     window.history.replaceState(null, '', search ? `${window.location.pathname}?${search}` : window.location.pathname);
 
     dispatch(dynamicTabsActions.setActiveTab(null));
-    closeFilesPanel();
     handleNavigate(ROUTES_PATH.CHAT);
   };
 

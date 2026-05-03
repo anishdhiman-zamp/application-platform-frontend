@@ -3,7 +3,6 @@
 import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { Button, ShimmerText, Skeleton } from '@zamp-platform/ui';
 import { cn } from '@zamp-platform/ui/utils';
-import { ArrowLeft } from 'lucide-react';
 import AddConnectionModal from 'modules/pace/components/agents/components/AddConnectionModal';
 import AgentGreeting from 'modules/pace/components/agents/components/AgentGreeting';
 import AgentInstructions from 'modules/pace/components/agents/components/AgentInstructions';
@@ -28,6 +27,7 @@ import {
   useUpdateAgentMutation,
 } from '@/apis/agents';
 import ImageKitImage from '@/components/ImageKitImage';
+import PageContainer from '@/components/layouts/PageContainer';
 import { FEATURE_FLAGS } from '@/constants/featureFlags';
 import { ROUTES_PATH } from '@/constants/routeConfig';
 import { useFeatureFlag } from '@/hooks/useFeatureFlag';
@@ -35,10 +35,10 @@ import AgentFolderList from '@/modules/pace/components/agents/components/AgentFo
 import { useAgentWithPolling } from '@/modules/pace/components/agents/hooks/useAgentWithPolling';
 import { useDynamicTabs } from '@/modules/pace/components/dynamic-tabs/useDynamicTabs';
 import TaskAccordionGroup from '@/modules/pace/components/tasks/components/TaskAccordionGroup';
+import { setNewChatDraft } from '@/modules/pace/hooks/useChatDraftInput';
 import { useTriggerChatMessageFromButton } from '@/modules/pace/hooks/useTriggerChatMessageFromButton';
 import { usePaceContext } from '@/modules/pace/pace.context';
 import { CHAT_SIDEBAR_STATE, TAB_TYPE } from '@/modules/pace/pace.types';
-import { preserveSidebarParam } from '@/modules/pace/pace.utils';
 interface AgentDetailPageProps {
   agentId: string;
   agentName: string;
@@ -49,7 +49,6 @@ interface AgentDetailPageProps {
 const VALID_TABS = new Set<string>(Object.values(AGENT_DETAIL_TAB));
 
 const AgentDetailPage = ({ agentId, agentName, agentDescription = '', avatarKey = '' }: AgentDetailPageProps) => {
-  const router = useRouter();
   const { isEnabled: isAgentsFe } = useFeatureFlag(FEATURE_FLAGS.AGENTS_FE);
   const debounceTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 
@@ -118,6 +117,7 @@ const AgentDetailPage = ({ agentId, agentName, agentDescription = '', avatarKey 
   const tabSwitchRef = useRef(false);
 
   const skipFetch = !agentExists;
+  const router = useRouter();
 
   const displayName = editName || agentName || '';
   const resolvedAvatarKey = agentData?.avatar || avatarKey;
@@ -217,12 +217,9 @@ const AgentDetailPage = ({ agentId, agentName, agentDescription = '', avatarKey 
   }, [chatSidebarState, setChatSidebarState]);
 
   const handleChatWithAgent = useCallback(() => {
-    triggerChatMessage(`I want to collaborate with ${displayName}`);
-  }, [triggerChatMessage, displayName]);
-
-  const handleBackToAgents = useCallback(() => {
-    router.push(preserveSidebarParam(ROUTES_PATH.CHAT_AGENTS));
-  }, [router]);
+    setNewChatDraft(`I want to collaborate with ${displayName}`);
+    router.push(ROUTES_PATH.CHAT);
+  }, [displayName, router]);
 
   const handleAddNewTrigger = useCallback(() => {
     triggerChatMessage(getAddTriggerMessage(displayName));
@@ -321,44 +318,18 @@ const AgentDetailPage = ({ agentId, agentName, agentDescription = '', avatarKey 
 
   if (isAgentError) {
     return (
-      <div className='flex h-full flex-col overflow-hidden'>
-        <div className='flex shrink-0 items-center px-4 pt-3'>
-          <Button
-            variant='ghost'
-            size='small'
-            onClick={handleBackToAgents}
-            className='text-GRAY_700 hover:text-GRAY_1000 gap-1 px-1 text-sm'
-          >
-            <ArrowLeft size={14} />
-            <span>Back to all agents</span>
-          </Button>
-        </div>
+      <div className='flex h-full flex-col'>
         <div className='flex flex-1 flex-col items-center justify-center gap-2'>
           <h2 className='text-GRAY_1000 f-20-550'>Agent not found</h2>
           <p className='text-GRAY_700 f-14-450'>This agent may have been deleted or you don&apos;t have access.</p>
-          <Button variant='outline' size='small' className='mt-2' onClick={handleBackToAgents}>
-            Go to agents
-          </Button>
         </div>
       </div>
     );
   }
 
   return (
-    <div className='flex h-full flex-col overflow-hidden'>
-      <div className='flex shrink-0 items-center justify-between px-4 pt-3'>
-        <Button
-          variant='ghost'
-          size='small'
-          onClick={handleBackToAgents}
-          className='text-GRAY_700 hover:text-GRAY_1000 gap-1 px-1 text-sm'
-        >
-          <ArrowLeft size={14} />
-          <span>Back to all agents</span>
-        </Button>
-      </div>
-
-      <div className='mx-auto flex w-full max-w-200 flex-1 flex-col overflow-hidden px-4 pt-8'>
+    <>
+      <PageContainer>
         <div className='mb-6 flex shrink-0 items-start gap-3'>
           <motion.div
             className='flex size-10 shrink-0 cursor-pointer items-center justify-center'
@@ -385,6 +356,9 @@ const AgentDetailPage = ({ agentId, agentName, agentDescription = '', avatarKey 
             hasSeenGreeting={hasSeenGreeting}
             onGreetingSeen={handleGreetingSeen}
           />
+          <Button variant='default' size='small' onClick={handleChatWithAgent}>
+            Chat with Agent
+          </Button>
           {isAgentsFe && <ShareAgentPopup agentId={agentId} />}
         </div>
 
@@ -442,21 +416,18 @@ const AgentDetailPage = ({ agentId, agentName, agentDescription = '', avatarKey 
         </div>
 
         {Object.entries(tabContentMap).map(([tabId, content]) => (
-          <div
-            key={tabId}
-            className={cn('mb-4 min-h-0 flex-col', activeDetailTab === tabId ? 'flex flex-1' : 'hidden')}
-          >
+          <div key={tabId} className={cn('mb-4 flex-col', activeDetailTab === tabId ? 'flex' : 'hidden')}>
             {content}
           </div>
         ))}
-      </div>
+      </PageContainer>
 
       <AddConnectionModal
         open={isAddConnectionModalOpen}
         onOpenChange={setIsAddConnectionModalOpen}
         agentId={agentId}
       />
-    </div>
+    </>
   );
 };
 

@@ -14,6 +14,7 @@ export const enum PaceNavbarItemId {
   AGENTS = 'agents',
   ORG_SETTINGS = 'org-settings',
   CREDENTIALS_VAULT = 'credentials-vault',
+  DESIGN_SYSTEM = 'design-system',
 }
 
 export interface PaceSettingsTabSchema {
@@ -45,6 +46,7 @@ export type DynamicTabType = (typeof TAB_TYPE)[keyof typeof TAB_TYPE];
 export const TAB_QUERY_PARAM = {
   FILE: 'f',
   TASK: 't',
+  AGENT: 'a',
   BROWSER: 'b',
   DATASET: 'd',
 } as const;

@@ -8,6 +8,7 @@ import userSliceReducer from 'store/slices/user';
 import { baseApi } from '@/services/baseApi';
 import dynamicTabsSliceReducer, { dynamicTabsListenerMiddleware } from '@/store/slices/dynamic-tabs.slice';
 import feedbacksSliceReducer from '@/store/slices/feedback.slice';
+import workspaceTabsSliceReducer, { workspaceTabsListenerMiddleware } from '@/store/slices/workspace-tabs.slice';
 
 const reducer = combineReducers({
   [baseApi.reducerPath]: baseApi.reducer,
@@ -18,13 +19,14 @@ const reducer = combineReducers({
   tableState: tableStateSliceReducer,
   feedbacks: feedbacksSliceReducer,
   dynamicTabs: dynamicTabsSliceReducer,
+  workspaceTabs: workspaceTabsSliceReducer,
 });
 
 export const store = configureStore({
   reducer: reducer,
   middleware: (getDefaultMiddleware) =>
     getDefaultMiddleware()
-      .prepend(dynamicTabsListenerMiddleware.middleware)
+      .prepend(dynamicTabsListenerMiddleware.middleware, workspaceTabsListenerMiddleware.middleware)
       .concat(baseApi.middleware, chatApi.middleware),
 });
 

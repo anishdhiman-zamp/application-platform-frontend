@@ -1,5 +1,6 @@
 'use client';
 
+import { useEffect, useRef } from 'react';
 import { cn } from '@zamp-platform/ui/utils';
 import { AnimatePresence, motion, useReducedMotion } from 'framer-motion';
 import FilesPanelBody from '@/modules/pace/components/files-panel/FilesPanelBody';
@@ -23,15 +24,23 @@ const FilesPanel = () => {
     isTreeColumnResizing,
     isTreeSidebarOpen,
     isFilesPanelExpanded,
-    hasActiveFileTab,
+    hasActivePanelTab,
+    activeConversationId,
   } = usePaceContext();
 
+  const prevConversationIdRef = useRef(activeConversationId);
+  const isConversationSwitch = prevConversationIdRef.current !== activeConversationId;
   const shouldReduceMotion = useReducedMotion();
   const animatedWidth = isFilesPanelExpanded ? '100%' : filesPanelWidth;
-  const baseTransition = shouldReduceMotion ? NO_ANIMATION : FILES_PANEL_TRANSITION;
+  const baseTransition = shouldReduceMotion || isConversationSwitch ? NO_ANIMATION : FILES_PANEL_TRANSITION;
   const widthTransition = isFilesPanelResizing ? NO_ANIMATION : baseTransition;
   const treeTransition = isTreeColumnResizing ? NO_ANIMATION : baseTransition;
-  const exitTransition = hasActiveFileTab && !shouldReduceMotion ? FILES_PANEL_TRANSITION : NO_ANIMATION;
+  const exitTransition =
+    hasActivePanelTab && !shouldReduceMotion && !isConversationSwitch ? FILES_PANEL_TRANSITION : NO_ANIMATION;
+
+  useEffect(() => {
+    prevConversationIdRef.current = activeConversationId;
+  }, [activeConversationId]);
 
   return (
     <AnimatePresence>
@@ -62,7 +71,7 @@ const FilesPanel = () => {
                   transition={treeTransition}
                   className='flex min-w-0 flex-1 flex-col overflow-hidden'
                 >
-                  <FilesPanelBody />
+                  <FilesPanelBody key={activeConversationId ?? '__none__'} />
                 </motion.div>
                 <AnimatePresence>
                   {isTreeSidebarOpen && (

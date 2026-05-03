@@ -1,7 +1,7 @@
 'use client';
 
 import { useCallback, useEffect, useMemo, useState } from 'react';
-import { Button, ScrollContainer } from '@zamp-platform/ui';
+import { Button } from '@zamp-platform/ui';
 import { EVENT_TYPE } from '@zamp-platform/utils/event-bus/event-bus.types';
 import { Plus } from 'lucide-react';
 import AgentActionBar from 'modules/pace/components/agents/components/AgentActionBar';
@@ -18,27 +18,38 @@ import { useGetAgentsListQuery } from '@/apis/agents';
 import { useEventBus } from '@/app/_providers/sse-provider';
 import CommonWrapper from '@/components/commonWrapper';
 import { SkeletonTypes } from '@/components/commonWrapper/commonWrapper.types';
+import PageContainer from '@/components/layouts/PageContainer';
+import { ROUTES_PATH } from '@/constants/routeConfig';
 import { useDebounce } from '@/hooks';
 import AgentCard from '@/modules/pace/components/agents/components/AgentCard';
 import AgentEmptyState from '@/modules/pace/components/agents/empty-states/AgentEmptyState';
 import AgentsEmptyState from '@/modules/pace/components/agents/empty-states/AgentsEmptyState';
 import AgentCardSkeleton from '@/modules/pace/components/agents/skeletons/AgentCardSkeleton';
 import AgentListingHeaderSkeleton from '@/modules/pace/components/agents/skeletons/AgentListingHeaderSkeleton';
-import { buildTabRoute } from '@/modules/pace/components/dynamic-tabs/tab-type-registry';
-import { useDynamicTabs } from '@/modules/pace/components/dynamic-tabs/useDynamicTabs';
-import { usePaceContext } from '@/modules/pace/pace.context';
-import { TAB_TYPE } from '@/modules/pace/pace.types';
-import { preserveSidebarParam } from '@/modules/pace/pace.utils';
+
+const buildAgentDetailUrl = (
+  agentId: string,
+  name: string,
+  description?: string | null,
+  avatarKey?: string | null,
+): string => {
+  const params = new URLSearchParams();
+
+  if (name) params.set('title', name);
+  if (description) params.set('description', description);
+  if (avatarKey) params.set('avatarKey', avatarKey);
+
+  const query = params.toString();
+
+  return `${ROUTES_PATH.CHAT_AGENTS}/${encodeURIComponent(agentId)}${query ? `?${query}` : ''}`;
+};
 
 const AgentListingPage = () => {
-  const router = useRouter();
-
   const [searchTerm, setSearchTerm] = useState('');
   const [isCreateModalOpen, setIsCreateModalOpen] = useState(false);
   const [activeTab, setActiveTab] = useState<AgentListingTabType>(AGENT_LISTING_TAB.MY_AGENTS);
 
-  const { setActiveAgentInfo } = usePaceContext();
-  const { openTab } = useDynamicTabs({ type: TAB_TYPE.AGENT });
+  const router = useRouter();
   const { sseEventBus } = useEventBus();
   const debouncedSearch = useDebounce(searchTerm, AGENT_SEARCH_DEBOUNCE_MS);
 
@@ -89,44 +100,16 @@ const AgentListingPage = () => {
 
   const handleAgentClick = useCallback(
     (agent: AgentType) => {
-      setActiveAgentInfo(null);
-
-      const tabPath = buildTabRoute(agent.id, TAB_TYPE.AGENT);
-      const pathWithTitle = `${tabPath}?title=${encodeURIComponent(agent?.name ?? '')}`;
-
-      const metadata: Record<string, string> = {};
-
-      if (agent.description) metadata.description = agent.description;
-      if (agent.avatar) metadata.avatarKey = agent.avatar;
-
-      const tabMetadata = Object.keys(metadata).length > 0 ? metadata : undefined;
-
-      openTab(agent.id, agent?.name ?? '', tabMetadata);
-      router.push(preserveSidebarParam(pathWithTitle));
+      router.push(buildAgentDetailUrl(agent.id, agent?.name ?? '', agent.description, agent.avatar));
     },
-    [openTab, router, setActiveAgentInfo],
+    [router],
   );
 
   const handleAgentCreated = useCallback(
     (agentId: string, agentName: string, agentDescription: string, avatarKey: string) => {
-      const tabPath = buildTabRoute(agentId, TAB_TYPE.AGENT);
-      const params = new URLSearchParams({ title: agentName });
-
-      if (agentDescription) {
-        params.set('description', agentDescription);
-      }
-
-      const pathWithParams = `${tabPath}?${params.toString()}`;
-
-      const metadata: Record<string, string> = {};
-
-      if (agentDescription) metadata.description = agentDescription;
-      if (avatarKey) metadata.avatarKey = avatarKey;
-
-      openTab(agentId, agentName, Object.keys(metadata).length > 0 ? metadata : undefined);
-      router.push(preserveSidebarParam(pathWithParams));
+      router.push(buildAgentDetailUrl(agentId, agentName, agentDescription, avatarKey));
     },
-    [openTab, router],
+    [router],
   );
 
   const subscribeToTaskEvents = useCallback(() => {
@@ -160,13 +143,13 @@ const AgentListingPage = () => {
   }
 
   return (
-    <div className='flex h-full flex-col overflow-hidden'>
-      <div className='mx-auto w-full max-w-200'>
+    <>
+      <PageContainer className='@container'>
         {isInitialLoading ? (
           <AgentListingHeaderSkeleton />
         ) : (
           <>
-            <div className='bg-BG_WHITE flex shrink-0 items-center justify-between pt-6 pr-3 pb-3 pl-4'>
+            <div className='mb-4 flex shrink-0 items-center justify-between'>
               <h1 className='text-GRAY_1000 f-20-500'>Agents</h1>
               <Button size='small' className='gap-1 rounded-md px-3 py-1.5' onClick={handleOpenCreateModal}>
                 <Plus size={14} />
@@ -181,42 +164,38 @@ const AgentListingPage = () => {
             />
           </>
         )}
-      </div>
 
-      <ScrollContainer className='flex-1'>
-        <div className='@container mx-auto w-full max-w-200 px-4 pt-1 pb-4'>
-          <CommonWrapper
-            isLoading={isInitialLoading}
-            isError={isError}
-            refetchFunction={refetch}
-            isNoData={!isInitialLoading && filteredAgents.length === 0}
-            noDataBanner={<AgentsEmptyState />}
-            skeletonType={SkeletonTypes.CUSTOM}
-            loader={
-              <div className='grid grid-cols-1 gap-4 @sm:grid-cols-2 @3xl:grid-cols-3'>
-                {Array.from({ length: 9 }).map((_, i) => (
-                  <AgentCardSkeleton key={i} />
-                ))}
-              </div>
-            }
-            height={500}
-            disableAnimation
-          >
+        <CommonWrapper
+          isLoading={isInitialLoading}
+          isError={isError}
+          refetchFunction={refetch}
+          isNoData={!isInitialLoading && filteredAgents.length === 0}
+          noDataBanner={<AgentsEmptyState />}
+          skeletonType={SkeletonTypes.CUSTOM}
+          loader={
             <div className='grid grid-cols-1 gap-4 @sm:grid-cols-2 @3xl:grid-cols-3'>
-              {filteredAgents.map((agent) => (
-                <AgentCard key={agent.id} agent={agent} onClick={handleAgentClick} />
+              {Array.from({ length: 9 }).map((_, i) => (
+                <AgentCardSkeleton key={i} />
               ))}
             </div>
-          </CommonWrapper>
-        </div>
-      </ScrollContainer>
+          }
+          height={500}
+          disableAnimation
+        >
+          <div className='grid grid-cols-1 gap-4 @sm:grid-cols-2 @3xl:grid-cols-3'>
+            {filteredAgents.map((agent) => (
+              <AgentCard key={agent.id} agent={agent} onClick={handleAgentClick} />
+            ))}
+          </div>
+        </CommonWrapper>
+      </PageContainer>
 
       <CreateAgentModal
         open={isCreateModalOpen}
         onOpenChange={setIsCreateModalOpen}
         onAgentCreated={handleAgentCreated}
       />
-    </div>
+    </>
   );
 };
 

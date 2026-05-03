@@ -6,7 +6,13 @@ import {
   NIGHT_GREETINGS,
   SIDEBAR_CONVERSATION_ID_PARAM,
 } from 'modules/pace/pace.constants';
-import { CHAT_SIDEBAR_STATE, type ChatSidebarState, type DynamicTab, TAB_TYPE } from 'modules/pace/pace.types';
+import {
+  CHAT_SIDEBAR_STATE,
+  type ChatSidebarState,
+  type DynamicTab,
+  TAB_QUERY_PARAM,
+  TAB_TYPE,
+} from 'modules/pace/pace.types';
 import { ROUTES_PATH } from '@/constants/routeConfig';
 import type { SkillApiError } from '@/types/api/skills.types';
 import { getFromLocalStorage, LOCAL_STORAGE_KEYS } from '@/utils/localstorage';
@@ -34,7 +40,7 @@ export const getInitialWidth = (key: LOCAL_STORAGE_KEYS, min: number, max: numbe
  *
  * Rules:
  * - No sidebar conversation param → COLLAPSED
- * - `/chat` root with no file param (`f`) → EXPANDED (full-screen)
+ * - `/chat` root with no tab param (file/agent/browser/etc.) → EXPANDED (full-screen)
  * - `/chat` root with sidebar param and persisted COLLAPSED → SIDEBAR (conversation is open)
  * - Non-chat-root routes → always respect persisted state (COLLAPSED stays COLLAPSED)
  * - Persisted EXPANDED state with sidebar param → EXPANDED (survives refresh on non-chat routes)
@@ -47,7 +53,8 @@ export const getInitialSidebarState = (): ChatSidebarState => {
 
   if (!search.has(SIDEBAR_CONVERSATION_ID_PARAM)) return CHAT_SIDEBAR_STATE.COLLAPSED;
 
-  const isChatRoot = window.location.pathname === ROUTES_PATH.CHAT && !search.has('f');
+  const hasAnyTabParam = Object.values(TAB_QUERY_PARAM).some((param) => search.has(param));
+  const isChatRoot = window.location.pathname === ROUTES_PATH.CHAT && !hasAnyTabParam;
 
   if (isChatRoot) return CHAT_SIDEBAR_STATE.EXPANDED;
 

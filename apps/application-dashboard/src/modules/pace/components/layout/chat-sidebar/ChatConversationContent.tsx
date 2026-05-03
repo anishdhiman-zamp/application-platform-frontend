@@ -22,7 +22,6 @@ import { ScrollContainer, type ScrollContainerRef } from '@zamp-platform/ui';
 import { cn } from '@zamp-platform/ui/utils';
 import AgentPill from 'modules/pace/components/agents/components/AgentPill';
 import TaskStatusCounts from 'modules/pace/module/TaskStatusCounts';
-import { useRouter } from 'next/navigation';
 import CommonWrapper from '@/components/commonWrapper';
 import { SkeletonTypes } from '@/components/commonWrapper/commonWrapper.types';
 import { APITags } from '@/constants/api.constants';
@@ -35,13 +34,11 @@ import {
   PrefixMessage,
 } from '@/modules/pace/components/agents/constants/agents.constants';
 import ContentErrorState from '@/modules/pace/components/ContentErrorState';
-import { buildTabRoute } from '@/modules/pace/components/dynamic-tabs/tab-type-registry';
 import { useDynamicTabs } from '@/modules/pace/components/dynamic-tabs/useDynamicTabs';
 import ChatMessagesSkeleton from '@/modules/pace/components/loaders/ChatMessagesSkeleton';
 import { useAutoOpenAgentFiles } from '@/modules/pace/hooks/useAutoOpenAgentFiles';
 import { type ActiveAgentInfo, usePaceContext } from '@/modules/pace/pace.context';
 import { CHAT_SIDEBAR_STATE, TAB_TYPE } from '@/modules/pace/pace.types';
-import { preserveSidebarParam } from '@/modules/pace/pace.utils';
 import { baseApi } from '@/services/baseApi';
 
 export interface ChatConversationContentProps {
@@ -75,13 +72,14 @@ const ChatConversationContent = ({
   currentUserName,
   scrollContainerRef,
 }: ChatConversationContentProps) => {
-  const router = useRouter();
   const dispatch = useAppDispatch();
   const intentConsumedRef = useRef(false);
   const consumedIntentRef = useRef<unknown>(null);
   const taskStatusContainerRef = useRef<HTMLDivElement>(null);
   const prevAgentInfoRef = useRef<ActiveAgentInfo | null>(null);
   const prevBrowserStreamingRef = useRef(false);
+  const autoOpenedAgentIdsRef = useRef<Set<string>>(new Set());
+  const lastSeenConversationIdRef = useRef<string | null>(null);
 
   const {
     pendingFileReferences,
@@ -96,7 +94,7 @@ const ChatConversationContent = ({
     setChatSidebarState,
   } = usePaceContext();
 
-  const { openTab } = useDynamicTabs({ type: TAB_TYPE.AGENT });
+  const { openTab, openTabSilently } = useDynamicTabs({ type: TAB_TYPE.AGENT });
 
   const {
     messages,
@@ -200,15 +198,6 @@ const ChatConversationContent = ({
 
   const handleAgentClick = useCallback(
     (agentId: string, agentName: string, agentDescription?: string, avatarKey?: string) => {
-      const tabPath = buildTabRoute(agentId, TAB_TYPE.AGENT);
-      const params = new URLSearchParams({ title: agentName });
-
-      if (agentDescription && agentDescription !== 'None') {
-        params.set('description', agentDescription);
-      }
-
-      const cleanPath = `${tabPath}?${params.toString()}`;
-
       const metadata: Record<string, string> = {};
 
       if (agentDescription && agentDescription !== 'None') metadata.description = agentDescription;
@@ -216,9 +205,8 @@ const ChatConversationContent = ({
 
       setChatSidebarState(CHAT_SIDEBAR_STATE.SIDEBAR);
       openTab(agentId, agentName, Object.keys(metadata).length > 0 ? metadata : undefined);
-      router.push(preserveSidebarParam(cleanPath));
     },
-    [openTab, router, setChatSidebarState],
+    [openTab, setChatSidebarState],
   );
 
   const handleAgentTest = useCallback(
@@ -260,6 +248,59 @@ const ChatConversationContent = ({
       dispatch(baseApi.util.invalidateTags([APITags.GET_AGENTS_LIST]));
     }
   }, [agentInfoFromMessages, dispatch]);
+
+  // Auto-open newly-streamed agents as tabs in the dynamic-tabs panel.
+  // On conversation switch we prime the seen-set from existing messages so historical
+  // agents are NOT auto-opened — only ones that appear live during this session.
+  const handleAutoOpenNewAgents = useCallback(() => {
+    const activeId = conversationId ?? ctxConversationId ?? null;
+    const seen = autoOpenedAgentIdsRef.current;
+
+    if (activeId !== lastSeenConversationIdRef.current) {
+      lastSeenConversationIdRef.current = activeId;
+      seen.clear();
+
+      for (const msg of messages) {
+        const elements = msg?.message_content?.elements;
+
+        if (!elements) continue;
+
+        for (const el of elements) {
+          if (el.type === BLOCK_TYPE.AGENT && 'payload' in el) {
+            seen.add((el as AgentBlockType).payload.agent_id);
+          }
+        }
+      }
+
+      return;
+    }
+
+    for (const msg of messages) {
+      const elements = msg?.message_content?.elements;
+
+      if (!elements) continue;
+
+      for (const el of elements) {
+        if (el.type !== BLOCK_TYPE.AGENT || !('payload' in el)) continue;
+
+        const payload = (el as AgentBlockType).payload;
+
+        if (seen.has(payload.agent_id)) continue;
+
+        seen.add(payload.agent_id);
+
+        const metadata: Record<string, string> = {};
+
+        if (payload.description && payload.description !== 'None') metadata.description = payload.description;
+
+        const avatarKey = payload.avatar || agentAvatarMap.get(payload.agent_id);
+
+        if (avatarKey) metadata.avatarKey = avatarKey;
+
+        openTabSilently(payload.agent_id, payload.name, Object.keys(metadata).length > 0 ? metadata : undefined);
+      }
+    }
+  }, [conversationId, ctxConversationId, messages, agentAvatarMap, openTabSilently]);
 
   // Send message to existing conversation via intent
   const handleSendIntentToExistingConversation = useCallback(() => {
@@ -317,6 +358,10 @@ const ChatConversationContent = ({
   useEffect(() => {
     handleAgentInfoChange();
   }, [handleAgentInfoChange]);
+
+  useEffect(() => {
+    handleAutoOpenNewAgents();
+  }, [handleAutoOpenNewAgents]);
 
   useEffect(() => {
     onConversationNotFound?.(isConversationNotFound);

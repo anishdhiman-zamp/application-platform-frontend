@@ -89,10 +89,10 @@ const AgentTriggerList = ({
       }
       skeletonType={SkeletonTypes.CUSTOM}
       loader={<TriggerListSkeleton />}
-      className='flex min-h-0 flex-1 flex-col'
+      className='flex flex-col'
       disableAnimation
     >
-      <p className='text-GRAY_700 f-14-450 mb-4 ml-2.5 shrink-0'>What should this agent run?</p>
+      <p className='text-GRAY_700 f-14-450 mb-4 ml-2.5'>What should this agent run?</p>
       <div className='border-GRAY_400 flex flex-col overflow-hidden rounded-xl border'>
         {triggers?.map((trigger, index) => {
           const content = (

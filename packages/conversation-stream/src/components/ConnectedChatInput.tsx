@@ -49,6 +49,7 @@ export interface MentionInsertPayload {
   iconHint?: string;
 }
 export type AddMentionRef = RefObject<((payload: MentionInsertPayload) => void) | null>;
+export type FocusEditorRef = RefObject<(() => void) | null>;
 
 export interface ConnectedChatInputProps {
   annotationLocation?: LocationData;
@@ -79,6 +80,7 @@ export interface ConnectedChatInputProps {
   fileDropHandlerRef?: FileDropHandlerRef;
   addFileReferenceRef?: AddFileReferenceRef;
   addMentionRef?: AddMentionRef;
+  focusEditorRef?: FocusEditorRef;
   onFileReferencesChange?: (refs: { path: string; name: string }[]) => void;
   minTextareaHeight?: number;
   maxTextareaHeight?: number;
@@ -127,6 +129,7 @@ export const ConnectedChatInput = ({
   fileDropHandlerRef,
   addFileReferenceRef,
   addMentionRef,
+  focusEditorRef,
   onFileReferencesChange,
   minTextareaHeight,
   maxTextareaHeight,
@@ -453,6 +456,19 @@ export const ConnectedChatInput = ({
       if (addMentionRef) addMentionRef.current = null;
     };
   }, [addMentionRef, addMention, isDisabled]);
+
+  const focusEditor = useCallback(() => {
+    editorInstanceRef.current?.commands.focus('end');
+  }, []);
+
+  useEffect(() => {
+    if (focusEditorRef && !isDisabled) {
+      focusEditorRef.current = focusEditor;
+    }
+    return () => {
+      if (focusEditorRef) focusEditorRef.current = null;
+    };
+  }, [focusEditorRef, focusEditor, isDisabled]);
 
   useEffect(() => {
     onFileReferencesChange?.(fileReferences.map((ref) => ({ path: ref.path, name: ref.name })));

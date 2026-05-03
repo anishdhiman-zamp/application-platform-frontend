@@ -181,7 +181,7 @@ const ChatHistory = ({
       {!compact && (
         <div className='flex shrink-0 flex-col gap-2 px-3 pb-2'>
           <div className='flex h-6 items-center'>
-            <p className='f-12-500 text-GRAY_600 tracking-wide uppercase'>Chats</p>
+            <p className='f-12-500 text-GRAY_600 pl-1 font-mono tracking-wide uppercase'>Chats</p>
           </div>
           {!isRecentMode && (
             <Input

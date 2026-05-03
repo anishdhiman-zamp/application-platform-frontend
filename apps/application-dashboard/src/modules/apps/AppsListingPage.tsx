@@ -1,20 +1,13 @@
 'use client';
 
 import { useMemo, useState } from 'react';
-import {
-  Accordion,
-  AccordionContent,
-  AccordionItem,
-  AccordionTrigger,
-  Button,
-  ScrollContainer,
-  SearchInput,
-} from '@zamp-platform/ui';
+import { Accordion, AccordionContent, AccordionItem, AccordionTrigger, Button, SearchInput } from '@zamp-platform/ui';
 import { cn } from '@zamp-platform/ui/utils';
 import { Plus } from 'lucide-react';
 import { useGetAppsQuery } from '@/apis/apps';
 import CommonWrapper from '@/components/commonWrapper';
 import { SkeletonTypes } from '@/components/commonWrapper/commonWrapper.types';
+import PageContainer from '@/components/layouts/PageContainer';
 import { useUserIdentity } from '@/hooks/useUserIdentity';
 import { APP_FILTER_TAB, type AppFilterTab } from '@/modules/apps/apps.types';
 import AppEmptyState from '@/modules/apps/components/AppEmptyState';
@@ -75,9 +68,9 @@ const AppsListingPage = () => {
   }
 
   return (
-    <div className='flex h-full flex-col overflow-hidden'>
-      <div className='mx-auto w-full max-w-200'>
-        <div className='bg-BG_WHITE flex shrink-0 items-center justify-between pt-6 pr-3 pb-3 pl-4'>
+    <>
+      <PageContainer>
+        <div className='mb-4 flex shrink-0 items-center justify-between'>
           <h1 className='text-GRAY_1000 f-20-500'>Apps</h1>
           <Button size='small' className='gap-1 rounded-md px-3 py-1.5' onClick={handleOpenCreateModal}>
             <Plus size={14} />
@@ -85,91 +78,85 @@ const AppsListingPage = () => {
           </Button>
         </div>
 
-        <div className='flex flex-col gap-3 px-4 pb-2'>
-          <div className='flex h-8 items-center gap-1'>
-            <SearchInput
-              placeholder='Search'
-              value={searchTerm}
-              onChange={setSearchTerm}
-              allowClear={false}
+        <div className='mb-3 flex h-8 items-center gap-1'>
+          <SearchInput
+            placeholder='Search'
+            value={searchTerm}
+            onChange={setSearchTerm}
+            allowClear={false}
+            size='small'
+            autoFocus
+            className='bg-BG_WHITE h-7 flex-1 border-none px-0 outline-none focus:ring-0'
+            testId='apps-listing-search-input'
+          />
+        </div>
+        <div className='mb-3 flex items-center gap-1.5'>
+          {TAB_CONFIG.map((tab) => (
+            <Button
+              key={tab.id}
+              variant='ghost'
               size='small'
-              autoFocus
-              className='bg-BG_WHITE h-7 flex-1 border-none px-0 outline-none focus:ring-0'
-              testId='apps-listing-search-input'
-            />
-          </div>
-          <div className='flex items-center gap-1.5'>
-            {TAB_CONFIG.map((tab) => (
-              <Button
-                key={tab.id}
-                variant='ghost'
-                size='small'
-                onClick={() => setActiveTab(tab.id)}
-                className={cn(
-                  'cursor-pointer rounded-md px-2.5 py-1.5 text-xs font-medium',
-                  activeTab === tab.id ? 'bg-GRAY_100 text-GRAY_1000' : 'bg-BG_WHITE text-GRAY_900',
-                )}
-              >
-                {tab.label}
-              </Button>
-            ))}
-          </div>
+              onClick={() => setActiveTab(tab.id)}
+              className={cn(
+                'cursor-pointer rounded-md px-2.5 py-1.5 text-xs font-medium',
+                activeTab === tab.id ? 'bg-GRAY_100 text-GRAY_1000' : 'bg-BG_WHITE text-GRAY_900',
+              )}
+            >
+              {tab.label}
+            </Button>
+          ))}
         </div>
-      </div>
 
-      <ScrollContainer className='flex-1'>
-        <div className='mx-auto w-full max-w-200 px-4 pt-1 pb-4'>
-          <CommonWrapper
-            isLoading={isLoading}
-            isError={isError}
-            refetchFunction={refetch}
-            isNoData={!isLoading && filteredApps.length === 0}
-            noDataBanner={
-              <div className='text-GRAY_700 flex h-[calc(100vh-250px)] items-center justify-center text-sm'>
-                No apps found
-              </div>
-            }
-            skeletonType={SkeletonTypes.CUSTOM}
-            loader={
-              <div className='flex flex-col gap-2'>
-                {Array.from({ length: 5 }).map((_, i) => (
-                  <AppRowSkeleton key={i} />
-                ))}
-              </div>
-            }
-            height={500}
-            disableAnimation
-          >
-            <Accordion type='single' collapsible>
-              <div className='flex flex-col gap-2'>
-                {filteredApps.map((app) => (
-                  <AccordionItem key={app.id} value={app.id} className='border-none'>
-                    <AccordionTrigger className='border-GRAY_400 bg-BG_WHITE hover:bg-BG_GRAY_2 rounded-xl border p-0 pr-3 [&[data-state=open]]:rounded-b-none [&[data-state=open]]:border-b-0'>
-                      <AppRow app={app} />
-                    </AccordionTrigger>
-                    <AccordionContent disableAnimation className='p-0'>
-                      {app.services.length > 0 ? (
-                        <div className='bg-BG_GRAY_1 border-GRAY_400 grid grid-cols-3 gap-3 rounded-b-xl border-x border-b p-4'>
-                          {app.services.map((svc) => (
-                            <ServiceCard key={svc.id} service={svc} />
-                          ))}
-                        </div>
-                      ) : (
-                        <div className='bg-BG_GRAY_1 border-GRAY_400 rounded-b-xl border-x border-b px-4 py-6 text-center'>
-                          <p className='text-GRAY_700 text-xs'>No services yet. Ask the agent to create one.</p>
-                        </div>
-                      )}
-                    </AccordionContent>
-                  </AccordionItem>
-                ))}
-              </div>
-            </Accordion>
-          </CommonWrapper>
-        </div>
-      </ScrollContainer>
+        <CommonWrapper
+          isLoading={isLoading}
+          isError={isError}
+          refetchFunction={refetch}
+          isNoData={!isLoading && filteredApps.length === 0}
+          noDataBanner={
+            <div className='text-GRAY_700 flex h-[calc(100vh-250px)] items-center justify-center text-sm'>
+              No apps found
+            </div>
+          }
+          skeletonType={SkeletonTypes.CUSTOM}
+          loader={
+            <div className='flex flex-col gap-2'>
+              {Array.from({ length: 5 }).map((_, i) => (
+                <AppRowSkeleton key={i} />
+              ))}
+            </div>
+          }
+          height={500}
+          disableAnimation
+        >
+          <Accordion type='single' collapsible>
+            <div className='flex flex-col gap-2'>
+              {filteredApps.map((app) => (
+                <AccordionItem key={app.id} value={app.id} className='border-none'>
+                  <AccordionTrigger className='border-GRAY_400 bg-BG_WHITE hover:bg-BG_GRAY_2 rounded-xl border p-0 pr-3 [&[data-state=open]]:rounded-b-none [&[data-state=open]]:border-b-0'>
+                    <AppRow app={app} />
+                  </AccordionTrigger>
+                  <AccordionContent disableAnimation className='p-0'>
+                    {app.services.length > 0 ? (
+                      <div className='bg-BG_GRAY_1 border-GRAY_400 grid grid-cols-3 gap-3 rounded-b-xl border-x border-b p-4'>
+                        {app.services.map((svc) => (
+                          <ServiceCard key={svc.id} service={svc} />
+                        ))}
+                      </div>
+                    ) : (
+                      <div className='bg-BG_GRAY_1 border-GRAY_400 rounded-b-xl border-x border-b px-4 py-6 text-center'>
+                        <p className='text-GRAY_700 text-xs'>No services yet. Ask the agent to create one.</p>
+                      </div>
+                    )}
+                  </AccordionContent>
+                </AccordionItem>
+              ))}
+            </div>
+          </Accordion>
+        </CommonWrapper>
+      </PageContainer>
 
       <CreateAppModal open={isCreateModalOpen} onOpenChange={setIsCreateModalOpen} />
-    </div>
+    </>
   );
 };
 

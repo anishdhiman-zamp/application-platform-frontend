@@ -30,7 +30,7 @@ import { HITL_RESPONDED_EVENT } from '@/modules/pace/components/tasks/constants/
 import { useChatDraftInput } from '@/modules/pace/hooks/useChatDraftInput';
 import { useHitlQuestions } from '@/modules/pace/hooks/useHitlQuestions';
 import { useReferencePicker } from '@/modules/pace/hooks/useReferencePicker';
-import { BrowserViewerDisplayState } from '@/modules/pace/pace.constants';
+import { BrowserViewerDisplayState, NEW_CONVERSATION_ID } from '@/modules/pace/pace.constants';
 import { usePaceContext } from '@/modules/pace/pace.context';
 import { CHAT_SIDEBAR_STATE, TAB_TYPE } from '@/modules/pace/pace.types';
 import { preserveSidebarParam } from '@/modules/pace/pace.utils';
@@ -40,6 +40,10 @@ import {
   ShareResourceVersion,
 } from '@/modules/shareResource/shareResource.types';
 import { PERMISSION_ROLES } from '@/utils/accessPermission/accessPermission.types';
+
+// In-memory per-conversation scroll position cache (browser session only).
+// Keyed by conversationId, with NEW_CONVERSATION_ID as the homepage bucket.
+const conversationScrollCache = new Map<string, number>();
 
 export interface ChatSidebarContentProps {
   conversationId: string | null;
@@ -92,6 +96,9 @@ const ChatSidebarContent = ({
   const scrollContainerRef = useRef<ScrollContainerRef | null>(null);
   const hitlWrapperRef = useRef<HTMLDivElement>(null);
   const hitlHeightRef = useRef(0);
+  const restoredScrollKeyRef = useRef<string | null>(null);
+
+  const scrollCacheKey = conversationId ?? NEW_CONVERSATION_ID;
 
   const [isTaskPopoverOpen, setIsTaskPopoverOpen] = useState(false);
   const [isConversationNotFound, setIsConversationNotFound] = useState(false);
@@ -228,6 +235,41 @@ const ChatSidebarContent = ({
 
     return () => sub.unsubscribe();
   }, [sseEventBus, handleTaskHitlRespondComplete]);
+
+  useEffect(() => {
+    const el = scrollContainerRef.current?.getScrollElement();
+
+    if (!el) return;
+
+    const handleScroll = () => {
+      conversationScrollCache.set(scrollCacheKey, el.scrollTop);
+    };
+
+    el.addEventListener('scroll', handleScroll, { passive: true });
+
+    return () => el.removeEventListener('scroll', handleScroll);
+  }, [scrollCacheKey, isLoadingConversationHistory]);
+
+  useEffect(() => {
+    if (isLoadingConversationHistory) return;
+    if (restoredScrollKeyRef.current === scrollCacheKey) return;
+
+    const el = scrollContainerRef.current?.getScrollElement();
+
+    if (!el) return;
+
+    restoredScrollKeyRef.current = scrollCacheKey;
+    const saved = conversationScrollCache.get(scrollCacheKey);
+
+    if (saved == null) return;
+
+    const raf = requestAnimationFrame(() => {
+      if (!el.isConnected) return;
+      el.scrollTop = saved;
+    });
+
+    return () => cancelAnimationFrame(raf);
+  }, [scrollCacheKey, isLoadingConversationHistory]);
 
   const isConversationHistoryReady =
     Boolean(conversationId) && !isLoadingConversationHistory && !isFetchingConversationHistory;

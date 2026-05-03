@@ -4,7 +4,8 @@
     "browser-use": {
       "source": "browser-use/browser-use",
       "sourceType": "github",
-      "computedHash": "5291a00e119a013bdeccb5bb0336ca759f6c73654683870f3c92806df1431909"
+      "skillPath": "skills/browser-use/SKILL.md",
+      "computedHash": "9f3a097275554dc44356f37d17d445d9c2b5b3579332fa93a1e9422f465f01bb"
     },
     "frontend-design": {
       "source": "anthropics/skills",

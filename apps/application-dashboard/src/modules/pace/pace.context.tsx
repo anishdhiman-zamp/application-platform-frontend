@@ -120,6 +120,8 @@ interface PaceContextType {
   setIsTreeColumnResizing: (resizing: boolean) => void;
 
   hasActiveFileTab: boolean;
+  hasActiveAgentTab: boolean;
+  hasActivePanelTab: boolean;
 
   isFilesPanelExpanded: boolean;
   toggleFilesPanelExpanded: defaultFnType;
@@ -169,6 +171,8 @@ export const PaceProvider = ({ children }: { children: ReactNode }) => {
   const activeTabId = useAppSelector(selectActiveTabId);
   const activeTab = useAppSelector(selectActiveTab);
   const hasActiveFileTab = activeTab?.type === TAB_TYPE.FILE;
+  const hasActiveAgentTab = activeTab?.type === TAB_TYPE.AGENT;
+  const hasActivePanelTab = hasActiveFileTab || hasActiveAgentTab;
   const pendingCollapseRef = useRef(false);
   const startNewChatRef = useRef<defaultFnType | null>(null);
   const selectConversationRef = useRef<((id: string, title?: string) => void) | null>(null);
@@ -263,22 +267,22 @@ export const PaceProvider = ({ children }: { children: ReactNode }) => {
 
   const setSidebarWidth = useCallback(
     (width: number) => {
-      const max = hasActiveFileTab ? Number.POSITIVE_INFINITY : SIDEBAR_MAX_WIDTH;
+      const max = hasActivePanelTab ? Number.POSITIVE_INFINITY : SIDEBAR_MAX_WIDTH;
       const clamped = Math.min(max, Math.max(SIDEBAR_MIN_WIDTH, width));
 
       setSidebarWidthRaw(clamped);
     },
-    [hasActiveFileTab],
+    [hasActivePanelTab],
   );
 
   const persistSidebarWidth = useCallback(
     (width: number) => {
-      const max = hasActiveFileTab ? Number.POSITIVE_INFINITY : SIDEBAR_MAX_WIDTH;
+      const max = hasActivePanelTab ? Number.POSITIVE_INFINITY : SIDEBAR_MAX_WIDTH;
       const clamped = Math.min(max, Math.max(SIDEBAR_MIN_WIDTH, width));
 
       setToLocalStorage(LOCAL_STORAGE_KEYS.PACE_SIDEBAR_WIDTH, String(clamped));
     },
-    [hasActiveFileTab],
+    [hasActivePanelTab],
   );
 
   const setFilesPanelWidth = useCallback((width: number) => {
@@ -412,7 +416,7 @@ export const PaceProvider = ({ children }: { children: ReactNode }) => {
   const clampSidebarWidthToFilesPanel = useCallback(() => {
     if (!filesPanelOpen) return;
     if (chatSidebarStateRef.current !== CHAT_SIDEBAR_STATE.SIDEBAR) return;
-    if (hasActiveFileTab) return;
+    if (hasActivePanelTab) return;
 
     const containerWidth = window.innerWidth - 16;
     const filesPanelSpace = filesPanelWidth + 8;
@@ -426,7 +430,7 @@ export const PaceProvider = ({ children }: { children: ReactNode }) => {
 
       return effectiveMax;
     });
-  }, [filesPanelOpen, filesPanelWidth, hasActiveFileTab]);
+  }, [filesPanelOpen, filesPanelWidth, hasActivePanelTab]);
 
   const handlePendingCollapse = useCallback(
     (isTabIdOnlyChange: boolean) => {
@@ -508,7 +512,7 @@ export const PaceProvider = ({ children }: { children: ReactNode }) => {
   useEffect(() => {
     if (!filesPanelOpen) return;
     if (chatSidebarStateRef.current !== CHAT_SIDEBAR_STATE.SIDEBAR) return;
-    if (hasActiveFileTab) return;
+    if (hasActivePanelTab) return;
 
     const containerWidth = window.innerWidth - 16;
     const sidebarSpace = sidebarWidth + 8;
@@ -522,7 +526,7 @@ export const PaceProvider = ({ children }: { children: ReactNode }) => {
 
       return effectiveMax;
     });
-  }, [filesPanelOpen, sidebarWidth, hasActiveFileTab]);
+  }, [filesPanelOpen, sidebarWidth, hasActivePanelTab]);
 
   useEffect(() => {
     clampSidebarWidthToFilesPanel();
@@ -533,9 +537,9 @@ export const PaceProvider = ({ children }: { children: ReactNode }) => {
   }, []);
 
   useEffect(() => {
-    setFilesPanelOpen(hasActiveFileTab);
-    setToLocalStorage(LOCAL_STORAGE_KEYS.PACE_FILES_PANEL_PINNED, JSON.stringify(hasActiveFileTab));
-  }, [hasActiveFileTab]);
+    setFilesPanelOpen(hasActivePanelTab);
+    setToLocalStorage(LOCAL_STORAGE_KEYS.PACE_FILES_PANEL_PINNED, JSON.stringify(hasActivePanelTab));
+  }, [hasActivePanelTab]);
 
   useEffect(() => {
     if (filesPanelOpen) return;
@@ -545,7 +549,7 @@ export const PaceProvider = ({ children }: { children: ReactNode }) => {
   }, [filesPanelOpen, isFilesPanelExpanded]);
 
   useEffect(() => {
-    if (hasActiveFileTab) return;
+    if (hasActivePanelTab) return;
 
     setSidebarWidthRaw((prev) => {
       if (prev <= SIDEBAR_MAX_WIDTH) return prev;
@@ -554,7 +558,7 @@ export const PaceProvider = ({ children }: { children: ReactNode }) => {
 
       return SIDEBAR_MAX_WIDTH;
     });
-  }, [hasActiveFileTab]);
+  }, [hasActivePanelTab]);
 
   const value: PaceContextType = useMemo(
     () => ({
@@ -616,6 +620,8 @@ export const PaceProvider = ({ children }: { children: ReactNode }) => {
       setIsTreeColumnResizing,
 
       hasActiveFileTab,
+      hasActiveAgentTab,
+      hasActivePanelTab,
 
       isFilesPanelExpanded,
       toggleFilesPanelExpanded,
@@ -683,6 +689,8 @@ export const PaceProvider = ({ children }: { children: ReactNode }) => {
       isTreeColumnResizing,
 
       hasActiveFileTab,
+      hasActiveAgentTab,
+      hasActivePanelTab,
 
       isFilesPanelExpanded,
       toggleFilesPanelExpanded,

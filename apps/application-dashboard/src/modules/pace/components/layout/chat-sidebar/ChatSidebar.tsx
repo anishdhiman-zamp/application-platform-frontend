@@ -22,7 +22,7 @@ const ChatSidebar = () => {
     isSidebarResizing,
     setActiveAgentInfo,
     setActiveConversationId,
-    hasActiveFileTab,
+    hasActivePanelTab,
     filesPanelOpen,
     isFilesPanelExpanded,
   } = usePaceContext();
@@ -37,14 +37,16 @@ const ChatSidebar = () => {
   const [isHydrated, setIsHydrated] = useState(false);
   const [observedFlexWidth, setObservedFlexWidth] = useState<number | null>(null);
   const prevIsFilesPanelFullWidthRef = useRef(isFilesPanelFullWidth);
+  const prevConversationIdRef = useRef(conversationId);
   const outerRef = useRef<HTMLDivElement>(null);
   const shouldReduceMotion = useReducedMotion();
+  const isConversationSwitch = prevConversationIdRef.current !== conversationId;
 
   const isCollapsed = chatSidebarState === CHAT_SIDEBAR_STATE.COLLAPSED;
   const isExpanded = chatSidebarState === CHAT_SIDEBAR_STATE.EXPANDED;
   const isSidebar = chatSidebarState === CHAT_SIDEBAR_STATE.SIDEBAR;
   const isHidden = isCollapsed || isFilesPanelFullWidth;
-  const isFlexGrow = hasActiveFileTab && isSidebar && !isFilesPanelFullWidth;
+  const isFlexGrow = hasActivePanelTab && isSidebar && !isFilesPanelFullWidth;
   const flexGrowWidth = observedFlexWidth ?? sidebarWidth;
   const targetWidth = isHidden ? 0 : isExpanded ? '100%' : isFlexGrow ? flexGrowWidth : sidebarWidth;
   const direction = getSidebarTransitionDirection(prevChatSidebarState, chatSidebarState);
@@ -60,6 +62,7 @@ const ChatSidebar = () => {
     if (!isHydrated) return { width: NO_ANIMATION, opacity: NO_ANIMATION };
     if (shouldReduceMotion) return { width: NO_ANIMATION, opacity: NO_ANIMATION };
     if (isSidebarResizing) return { width: NO_ANIMATION, opacity: NO_ANIMATION };
+    if (isConversationSwitch) return { width: NO_ANIMATION, opacity: NO_ANIMATION };
     if (isFilesPanelFullWidth || isFilesPanelFullWidthChanging) {
       return { width: SIDEBAR_TOGGLE_TRANSITION, opacity: SIDEBAR_TOGGLE_TRANSITION };
     }
@@ -74,6 +77,7 @@ const ChatSidebar = () => {
     isFlexGrow,
     isFilesPanelFullWidth,
     isFilesPanelFullWidthChanging,
+    isConversationSwitch,
   ]);
 
   const handleStartNewChat = useCallback(() => {
@@ -132,6 +136,10 @@ const ChatSidebar = () => {
   useEffect(() => {
     prevIsFilesPanelFullWidthRef.current = isFilesPanelFullWidth;
   }, [isFilesPanelFullWidth]);
+
+  useEffect(() => {
+    prevConversationIdRef.current = conversationId;
+  }, [conversationId]);
 
   useLayoutEffect(() => observeFlexGrowWidth(), [observeFlexGrowWidth]);
 
