@@ -27,6 +27,8 @@ export interface ConversationPanelState {
   wordWrapEnabled?: boolean;
 }
 
+type BooleanPanelStateKey = 'isFilesPanelExpanded' | 'isTreeSidebarOpen' | 'wordWrapEnabled';
+
 const DEFAULT_PANEL_STATE: ConversationPanelState = {
   isFilesPanelExpanded: false,
   isTreeSidebarOpen: false,
@@ -246,6 +248,19 @@ export const dynamicTabsSlice = createSlice({
         ...action.payload,
       });
     },
+
+    toggleActiveConversationPanelState: (state, action: PayloadAction<BooleanPanelStateKey>) => {
+      const bucket = ensureActiveBucket(state);
+
+      if (!bucket) return;
+
+      const key = action.payload;
+
+      bucket.panelState = normalizePanelState({
+        ...bucket.panelState,
+        [key]: !(bucket.panelState[key] ?? DEFAULT_PANEL_STATE[key] ?? false),
+      });
+    },
   },
 });
 
@@ -278,6 +293,15 @@ export const selectActiveTab = (state: { dynamicTabs: DynamicTabsState }) => {
 export const selectActiveConversationPanelState = (state: { dynamicTabs: DynamicTabsState }) =>
   getActiveBucketReadonly(state)?.panelState ?? DEFAULT_PANEL_STATE;
 
+export const selectConversationActiveTabId = (
+  state: { dynamicTabs: DynamicTabsState },
+  conversationId: string | null,
+) => {
+  if (!conversationId) return null;
+
+  return state.dynamicTabs.byConversation[conversationId]?.activeTabId ?? null;
+};
+
 export const selectTabsByType = (state: { dynamicTabs: DynamicTabsState }, type: DynamicTabType) =>
   (getActiveBucketReadonly(state)?.tabs ?? EMPTY_TABS).filter((tab) => (tab.type ?? TAB_TYPE.FILE) === type);
 
@@ -292,6 +316,7 @@ dynamicTabsListenerMiddleware.startListening({
     dynamicTabsActions.reorderTabs,
     dynamicTabsActions.clearAllTabs,
     dynamicTabsActions.patchActiveConversationPanelState,
+    dynamicTabsActions.toggleActiveConversationPanelState,
   ),
   effect: (_action, listenerApi) => {
     const state = listenerApi.getState() as { dynamicTabs: DynamicTabsState };

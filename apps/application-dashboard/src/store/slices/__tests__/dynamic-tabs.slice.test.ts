@@ -5,6 +5,7 @@ import dynamicTabsReducer, {
   selectActiveConversationPanelState,
   selectActiveTab,
   selectActiveTabId,
+  selectConversationActiveTabId,
   selectDynamicTabs,
 } from '@/store/slices/dynamic-tabs.slice';
 
@@ -61,6 +62,18 @@ describe('dynamicTabs slice — conversation-keyed', () => {
 
     expect(selectActiveTabId(store.getState())).toBe('a1.md');
     expect(selectActiveTab(store.getState())?.id).toBe('a1.md');
+  });
+
+  it('can read a target conversation active tab without switching to it', () => {
+    const store = buildStore();
+
+    store.dispatch(dynamicTabsActions.setActiveConversation('conv-a'));
+    store.dispatch(dynamicTabsActions.openTab(fileTab('a1.md')));
+
+    store.dispatch(dynamicTabsActions.setActiveConversation('conv-b'));
+
+    expect(selectConversationActiveTabId(store.getState(), 'conv-a')).toBe('a1.md');
+    expect(selectConversationActiveTabId(store.getState(), 'conv-b')).toBeNull();
   });
 
   it('opens background tabs without changing the active tab', () => {
@@ -136,5 +149,20 @@ describe('dynamicTabs slice — conversation-keyed', () => {
       isTreeSidebarOpen: false,
       filesPanelWidth: 900,
     });
+  });
+
+  it('toggles panel state against the currently active conversation', () => {
+    const store = buildStore();
+
+    store.dispatch(dynamicTabsActions.setActiveConversation('conv-a'));
+    store.dispatch(dynamicTabsActions.patchActiveConversationPanelState({ isTreeSidebarOpen: true }));
+
+    store.dispatch(dynamicTabsActions.setActiveConversation('conv-b'));
+    store.dispatch(dynamicTabsActions.toggleActiveConversationPanelState('isTreeSidebarOpen'));
+
+    expect(selectActiveConversationPanelState(store.getState()).isTreeSidebarOpen).toBe(true);
+
+    store.dispatch(dynamicTabsActions.setActiveConversation('conv-a'));
+    expect(selectActiveConversationPanelState(store.getState()).isTreeSidebarOpen).toBe(true);
   });
 });

@@ -30,11 +30,13 @@ import { getInitialSidebarState, getInitialWidth } from 'modules/pace/pace.utils
 import { usePathname } from 'next/navigation';
 import { ROUTES_PATH } from '@/constants/routeConfig';
 import { useAppDispatch, useAppSelector } from '@/hooks/toolkit';
+import { store } from '@/store';
 import {
   dynamicTabsActions,
   selectActiveConversationPanelState,
   selectActiveTab,
   selectActiveTabId,
+  selectConversationActiveTabId,
 } from '@/store/slices/dynamic-tabs.slice';
 import { defaultFnType } from '@/types/commonTypes';
 import { NAV_SIDEBAR_EXPANDED_COOKIE, setCookie, THEME_COOKIE_MAX_AGE } from '@/utils/cookie';
@@ -189,7 +191,7 @@ export const PaceProvider = ({ children, initialNavSidebarExpanded = true }: Pac
     getInitialWidth(LOCAL_STORAGE_KEYS.PACE_SIDEBAR_WIDTH, SIDEBAR_MIN_WIDTH, SIDEBAR_MAX_WIDTH, SIDEBAR_WIDTH),
   );
   const [isSidebarResizing, setIsSidebarResizing] = useState(false);
-  const [defaultFilesPanelWidth] = useState(() =>
+  const [filesPanelWidth, setFilesPanelWidthRaw] = useState(() =>
     getInitialWidth(
       LOCAL_STORAGE_KEYS.PACE_FILES_PANEL_WIDTH,
       FILES_PANEL_MIN_WIDTH,
@@ -198,7 +200,7 @@ export const PaceProvider = ({ children, initialNavSidebarExpanded = true }: Pac
     ),
   );
   const [isFilesPanelResizing, setIsFilesPanelResizing] = useState(false);
-  const [defaultTreeColumnWidth] = useState(() =>
+  const [treeColumnWidth, setTreeColumnWidthRaw] = useState(() =>
     getInitialWidth(
       LOCAL_STORAGE_KEYS.PACE_FILE_TREE_COLUMN_WIDTH,
       FILE_TREE_COLUMN_MIN_WIDTH,
@@ -218,16 +220,17 @@ export const PaceProvider = ({ children, initialNavSidebarExpanded = true }: Pac
     getInitialBoolean(LOCAL_STORAGE_KEYS.PACE_TREE_SIDEBAR_OPEN, false),
   );
   const [globalWordWrapDefault] = useState(() => getInitialBoolean(LOCAL_STORAGE_KEYS.PACE_WORD_WRAP_ENABLED, false));
-  const filesPanelWidth = activeConversationPanelState.filesPanelWidth ?? defaultFilesPanelWidth;
-  const treeColumnWidth = activeConversationPanelState.treeColumnWidth ?? defaultTreeColumnWidth;
   const isFilesPanelExpanded = activeConversationPanelState.isFilesPanelExpanded ?? globalFilesPanelExpandedDefault;
   const isTreeSidebarOpen = activeConversationPanelState.isTreeSidebarOpen ?? globalTreeSidebarOpenDefault;
   const wordWrapEnabled = activeConversationPanelState.wordWrapEnabled ?? globalWordWrapDefault;
 
-  const routeSignature = activeTabId ? `${pathname}:${activeTabId}` : pathname;
+  const routeSignature = activeTabId
+    ? `${pathname}:${activeConversationId ?? ''}:${activeTabId}`
+    : `${pathname}:${activeConversationId ?? ''}`;
   const prevRouteSignatureRef = useRef(routeSignature);
   const prevPathnameRef = useRef(pathname);
   const prevActiveTabIdRef = useRef(activeTabId);
+  const prevActiveConversationIdRef = useRef(activeConversationId);
   const chatSidebarStateRef = useRef(chatSidebarState);
 
   chatSidebarStateRef.current = chatSidebarState;
@@ -289,41 +292,31 @@ export const PaceProvider = ({ children, initialNavSidebarExpanded = true }: Pac
     [hasActivePanelTab],
   );
 
-  const setFilesPanelWidth = useCallback(
-    (width: number) => {
-      const clamped = Math.min(FILES_PANEL_MAX_WIDTH, Math.max(FILES_PANEL_MIN_WIDTH, width));
+  const setFilesPanelWidth = useCallback((width: number) => {
+    const clamped = Math.min(FILES_PANEL_MAX_WIDTH, Math.max(FILES_PANEL_MIN_WIDTH, width));
 
-      dispatch(dynamicTabsActions.patchActiveConversationPanelState({ filesPanelWidth: clamped }));
-    },
-    [dispatch],
-  );
+    setFilesPanelWidthRaw(clamped);
+  }, []);
 
-  const persistFilesPanelWidth = useCallback(
-    (width: number) => {
-      const clamped = Math.min(FILES_PANEL_MAX_WIDTH, Math.max(FILES_PANEL_MIN_WIDTH, width));
+  const persistFilesPanelWidth = useCallback((width: number) => {
+    const clamped = Math.min(FILES_PANEL_MAX_WIDTH, Math.max(FILES_PANEL_MIN_WIDTH, width));
 
-      dispatch(dynamicTabsActions.patchActiveConversationPanelState({ filesPanelWidth: clamped }));
-    },
-    [dispatch],
-  );
+    setFilesPanelWidthRaw(clamped);
+    setToLocalStorage(LOCAL_STORAGE_KEYS.PACE_FILES_PANEL_WIDTH, String(clamped));
+  }, []);
 
-  const setTreeColumnWidth = useCallback(
-    (width: number) => {
-      const clamped = Math.min(FILE_TREE_COLUMN_MAX_WIDTH, Math.max(FILE_TREE_COLUMN_MIN_WIDTH, width));
+  const setTreeColumnWidth = useCallback((width: number) => {
+    const clamped = Math.min(FILE_TREE_COLUMN_MAX_WIDTH, Math.max(FILE_TREE_COLUMN_MIN_WIDTH, width));
 
-      dispatch(dynamicTabsActions.patchActiveConversationPanelState({ treeColumnWidth: clamped }));
-    },
-    [dispatch],
-  );
+    setTreeColumnWidthRaw(clamped);
+  }, []);
 
-  const persistTreeColumnWidth = useCallback(
-    (width: number) => {
-      const clamped = Math.min(FILE_TREE_COLUMN_MAX_WIDTH, Math.max(FILE_TREE_COLUMN_MIN_WIDTH, width));
+  const persistTreeColumnWidth = useCallback((width: number) => {
+    const clamped = Math.min(FILE_TREE_COLUMN_MAX_WIDTH, Math.max(FILE_TREE_COLUMN_MIN_WIDTH, width));
 
-      dispatch(dynamicTabsActions.patchActiveConversationPanelState({ treeColumnWidth: clamped }));
-    },
-    [dispatch],
-  );
+    setTreeColumnWidthRaw(clamped);
+    setToLocalStorage(LOCAL_STORAGE_KEYS.PACE_FILE_TREE_COLUMN_WIDTH, String(clamped));
+  }, []);
 
   const setSelectedModel = useCallback((modelId: string | null) => {
     setSelectedModelRaw(modelId);
@@ -351,8 +344,8 @@ export const PaceProvider = ({ children, initialNavSidebarExpanded = true }: Pac
   );
 
   const toggleFilesPanelExpanded = useCallback(() => {
-    dispatch(dynamicTabsActions.patchActiveConversationPanelState({ isFilesPanelExpanded: !isFilesPanelExpanded }));
-  }, [dispatch, isFilesPanelExpanded]);
+    dispatch(dynamicTabsActions.toggleActiveConversationPanelState('isFilesPanelExpanded'));
+  }, [dispatch]);
 
   const setTreeSidebarOpen = useCallback(
     (open: boolean) => {
@@ -362,12 +355,12 @@ export const PaceProvider = ({ children, initialNavSidebarExpanded = true }: Pac
   );
 
   const toggleTreeSidebar = useCallback(() => {
-    dispatch(dynamicTabsActions.patchActiveConversationPanelState({ isTreeSidebarOpen: !isTreeSidebarOpen }));
-  }, [dispatch, isTreeSidebarOpen]);
+    dispatch(dynamicTabsActions.toggleActiveConversationPanelState('isTreeSidebarOpen'));
+  }, [dispatch]);
 
   const toggleWordWrap = useCallback(() => {
-    dispatch(dynamicTabsActions.patchActiveConversationPanelState({ wordWrapEnabled: !wordWrapEnabled }));
-  }, [dispatch, wordWrapEnabled]);
+    dispatch(dynamicTabsActions.toggleActiveConversationPanelState('wordWrapEnabled'));
+  }, [dispatch]);
 
   const registerStartNewChat = useCallback((callback: defaultFnType) => {
     startNewChatRef.current = callback;
@@ -385,14 +378,15 @@ export const PaceProvider = ({ children, initialNavSidebarExpanded = true }: Pac
     (id: string, title?: string) => {
       selectConversationRef.current?.(id, title);
 
-      const isChatRoot = pathname === ROUTES_PATH.CHAT && !activeTabId;
+      const targetActiveTabId = selectConversationActiveTabId(store.getState(), id);
+      const isChatRoot = pathname === ROUTES_PATH.CHAT && !targetActiveTabId;
       const nextState = isChatRoot ? CHAT_SIDEBAR_STATE.EXPANDED : CHAT_SIDEBAR_STATE.SIDEBAR;
 
       if (chatSidebarStateRef.current !== nextState) {
         setChatSidebarStateInternal(nextState);
       }
     },
-    [pathname, activeTabId, setChatSidebarStateInternal],
+    [pathname, setChatSidebarStateInternal],
   );
 
   const clampSidebarWidthToFilesPanel = useCallback(() => {
@@ -469,18 +463,22 @@ export const PaceProvider = ({ children, initialNavSidebarExpanded = true }: Pac
     if (prevRouteSignatureRef.current === routeSignature) {
       prevPathnameRef.current = pathname;
       prevActiveTabIdRef.current = activeTabId;
+      prevActiveConversationIdRef.current = activeConversationId;
 
       return;
     }
 
     const prevPathname = prevPathnameRef.current;
     const prevActiveTab = prevActiveTabIdRef.current;
+    const prevActiveConversationId = prevActiveConversationIdRef.current;
 
     prevRouteSignatureRef.current = routeSignature;
     prevPathnameRef.current = pathname;
     prevActiveTabIdRef.current = activeTabId;
+    prevActiveConversationIdRef.current = activeConversationId;
 
-    const isTabIdOnlyChange = prevPathname === pathname && prevActiveTab !== activeTabId;
+    const isTabIdOnlyChange =
+      prevPathname === pathname && prevActiveConversationId === activeConversationId && prevActiveTab !== activeTabId;
     const isTabIdHydration = isTabIdOnlyChange && prevActiveTab === null && activeTabId !== null;
 
     if (pendingCollapseRef.current) {
@@ -490,7 +488,7 @@ export const PaceProvider = ({ children, initialNavSidebarExpanded = true }: Pac
     }
 
     reconcileSidebarWithRoute(isTabIdHydration);
-  }, [routeSignature, pathname, activeTabId, handlePendingCollapse, reconcileSidebarWithRoute]);
+  }, [routeSignature, pathname, activeTabId, activeConversationId, handlePendingCollapse, reconcileSidebarWithRoute]);
 
   useEffect(() => {
     handleRouteChange();
@@ -507,9 +505,10 @@ export const PaceProvider = ({ children, initialNavSidebarExpanded = true }: Pac
     const effectiveMax = Math.min(FILES_PANEL_MAX_WIDTH, Math.max(FILES_PANEL_MIN_WIDTH, available));
 
     if (filesPanelWidth > effectiveMax) {
-      dispatch(dynamicTabsActions.patchActiveConversationPanelState({ filesPanelWidth: effectiveMax }));
+      setFilesPanelWidthRaw(effectiveMax);
+      setToLocalStorage(LOCAL_STORAGE_KEYS.PACE_FILES_PANEL_WIDTH, String(effectiveMax));
     }
-  }, [dispatch, filesPanelOpen, filesPanelWidth, sidebarWidth, hasActivePanelTab]);
+  }, [filesPanelOpen, filesPanelWidth, sidebarWidth, hasActivePanelTab]);
 
   useEffect(() => {
     clampSidebarWidthToFilesPanel();
