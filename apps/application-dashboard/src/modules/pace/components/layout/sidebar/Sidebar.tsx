@@ -11,7 +11,7 @@ import { usePaceContext } from '@/modules/pace/pace.context';
 import { SIDEBAR_TOGGLE_TRANSITION } from '@/utils/animations/sidebar.animations';
 
 const SIDEBAR_EXPANDED_WIDTH = 240;
-const SIDEBAR_COLLAPSED_WIDTH = 48;
+const SIDEBAR_COLLAPSED_WIDTH = 56;
 
 const Sidebar = () => {
   const { isNavSidebarExpanded, toggleNavSidebar, selectConversation, activeConversationId } = usePaceContext();
