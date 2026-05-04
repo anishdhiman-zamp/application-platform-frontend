@@ -1,6 +1,6 @@
 'use client';
 
-import { Bot, CheckSquare, LayoutGrid, Plus, Settings } from 'lucide-react';
+import { Bot, CheckSquare, CirclePlus, LayoutGrid, Settings } from 'lucide-react';
 import { usePathname, useRouter } from 'next/navigation';
 import { ROUTES_PATH } from '@/constants/routeConfig';
 import { useAppDispatch } from '@/hooks/toolkit';
@@ -69,7 +69,7 @@ const SidebarPrimaryActions = ({ isExpanded }: SidebarPrimaryActionsProps) => {
 
   return (
     <div className='flex shrink-0 flex-col gap-y-0.5 px-3 pt-4'>
-      <SidebarRow icon={<Plus size={16} />} label='New chat' isExpanded={isExpanded} onClick={handleNewChat} />
+      <SidebarRow icon={<CirclePlus size={16} />} label='New chat' isExpanded={isExpanded} onClick={handleNewChat} />
       {NAV_ITEMS.map((item) => (
         <SidebarRow
           key={item.path}
