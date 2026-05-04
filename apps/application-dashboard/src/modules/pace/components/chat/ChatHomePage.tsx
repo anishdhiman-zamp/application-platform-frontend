@@ -18,8 +18,9 @@ import {
   type MentionInsertPayload,
 } from '@zamp-platform/conversation-stream';
 import { VOICE_CHAT_STATE } from '@zamp-platform/ui/types';
-import { AnimatePresence, motion } from 'framer-motion';
-import { getChatTaskRoute } from '@/constants/routeConfig';
+import { AnimatePresence, motion, useReducedMotion } from 'framer-motion';
+import { usePathname } from 'next/navigation';
+import { getChatTaskRoute, ROUTES_PATH } from '@/constants/routeConfig';
 import { useVoiceChatContext } from '@/contexts/VoiceChatContext';
 import { useAppSelector } from '@/hooks/toolkit';
 import ChatHome from '@/modules/pace/components/chat/ChatHome';
@@ -63,6 +64,9 @@ const ChatHomePage = () => {
   const addFileReferenceRef = useRef<((ref: { path: string; name: string }) => void) | null>(null);
   const addMentionRef = useRef<((payload: MentionInsertPayload) => void) | null>(null);
   const focusEditorRef: FocusEditorRef = useRef<(() => void) | null>(null);
+  const pendingDraftFocusRef = useRef(false);
+  const didFocusHydratedDraftRef = useRef(false);
+  const pathname = usePathname();
 
   const { inputValue, setInputValue } = useChatDraftInput({
     conversationId: null,
@@ -71,6 +75,7 @@ const ChatHomePage = () => {
   const { isVoiceChatEnabled, state: voiceState } = useVoiceChatContext();
   const isVoiceActive = voiceState === VOICE_CHAT_STATE.Active;
   const referencePicker = useReferencePicker();
+  const shouldReduceMotion = useReducedMotion();
 
   const { isDragOver, dropZoneProps } = useFileDragDrop({
     onFileDrop: (files) => fileDropHandlerRef.current?.(files),
@@ -83,6 +88,12 @@ const ChatHomePage = () => {
     () => <ModelSelector value={selectedModel} onChange={setSelectedModel} />,
     [selectedModel],
   );
+
+  const focusComposerAtEnd = useCallback(() => {
+    requestAnimationFrame(() => {
+      requestAnimationFrame(() => focusEditorRef.current?.());
+    });
+  }, []);
 
   const expandSidebarIfCollapsed = useCallback(() => {
     if (chatSidebarState === CHAT_SIDEBAR_STATE.COLLAPSED) {
@@ -159,14 +170,26 @@ const ChatHomePage = () => {
 
   useEffect(() => {
     const handleDraftPrefilled = () => {
-      // Defer to the next frame so the editor has applied the new content before we focus.
-      requestAnimationFrame(() => focusEditorRef.current?.());
+      pendingDraftFocusRef.current = true;
+      focusComposerAtEnd();
     };
 
     window.addEventListener(CHAT_DRAFT_UPDATE_EVENT, handleDraftPrefilled);
 
     return () => window.removeEventListener(CHAT_DRAFT_UPDATE_EVENT, handleDraftPrefilled);
-  }, []);
+  }, [focusComposerAtEnd]);
+
+  useEffect(() => {
+    const hasDraft = inputValue.trim().length > 0;
+    const shouldFocusDraft = pathname === ROUTES_PATH.CHAT && !isExpanded && hasDraft;
+
+    if (!shouldFocusDraft) return;
+    if (!pendingDraftFocusRef.current && didFocusHydratedDraftRef.current) return;
+
+    pendingDraftFocusRef.current = false;
+    didFocusHydratedDraftRef.current = true;
+    focusComposerAtEnd();
+  }, [pathname, isExpanded, inputValue, focusComposerAtEnd]);
 
   return (
     <ConversationStateContext.Provider value={STUB_CONVERSATION_STATE}>
@@ -183,10 +206,14 @@ const ChatHomePage = () => {
                 <motion.div
                   key='chat-home-page'
                   initial={false}
-                  animate={{ opacity: 1, transition: NO_ANIMATION }}
-                  exit={{ opacity: 0, transition: { duration: 0.25, ease: 'easeInOut' } }}
+                  animate={{ opacity: 1, y: 0, transition: NO_ANIMATION }}
+                  exit={
+                    shouldReduceMotion
+                      ? { transition: NO_ANIMATION }
+                      : { opacity: 0, y: 30, transition: { duration: 0.3, ease: [0.215, 0.61, 0.355, 1] } }
+                  }
                   className='relative mx-auto flex min-h-0 w-full max-w-[800px] flex-1 flex-col items-center justify-center overflow-hidden pb-[20vh]'
-                  style={{ willChange: 'opacity' }}
+                  style={{ willChange: 'opacity, transform' }}
                 >
                   <ChatHome />
                   <div className='mt-7 w-full shrink-0 px-3'>

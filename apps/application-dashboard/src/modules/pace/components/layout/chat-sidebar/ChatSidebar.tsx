@@ -25,7 +25,10 @@ const ChatSidebar = () => {
     hasActivePanelTab,
     filesPanelOpen,
     isFilesPanelExpanded,
+    chatMessageIntent,
   } = usePaceContext();
+
+  const isSendFromHome = chatMessageIntent !== null;
 
   const isFilesPanelFullWidth = filesPanelOpen && isFilesPanelExpanded;
   const searchParams = useSearchParams();
@@ -63,6 +66,7 @@ const ChatSidebar = () => {
     if (shouldReduceMotion) return { width: NO_ANIMATION, opacity: NO_ANIMATION };
     if (isSidebarResizing) return { width: NO_ANIMATION, opacity: NO_ANIMATION };
     if (isConversationSwitch) return { width: NO_ANIMATION, opacity: NO_ANIMATION };
+    if (isSendFromHome) return { width: NO_ANIMATION, opacity: NO_ANIMATION };
     if (isFilesPanelFullWidth || isFilesPanelFullWidthChanging) {
       return { width: SIDEBAR_TOGGLE_TRANSITION, opacity: SIDEBAR_TOGGLE_TRANSITION };
     }
@@ -78,6 +82,7 @@ const ChatSidebar = () => {
     isFilesPanelFullWidth,
     isFilesPanelFullWidthChanging,
     isConversationSwitch,
+    isSendFromHome,
   ]);
 
   const handleStartNewChat = useCallback(() => {
