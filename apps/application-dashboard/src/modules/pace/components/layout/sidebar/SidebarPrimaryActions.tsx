@@ -34,7 +34,7 @@ const SidebarPrimaryActions = ({ isExpanded }: SidebarPrimaryActionsProps) => {
   const router = useRouter();
   const pathname = usePathname();
   const dispatch = useAppDispatch();
-  const { startNewChat, setChatSidebarState } = usePaceContext();
+  const { startNewChat, setChatSidebarState, triggerLogoAnimation } = usePaceContext();
 
   const cleanupTabState = () => {
     const params = new URLSearchParams(window.location.search);
@@ -60,6 +60,7 @@ const SidebarPrimaryActions = ({ isExpanded }: SidebarPrimaryActionsProps) => {
   };
 
   const handleNewChat = () => {
+    triggerLogoAnimation();
     startNewChat();
     setChatSidebarState(CHAT_SIDEBAR_STATE.COLLAPSED);
     cleanupTabState();

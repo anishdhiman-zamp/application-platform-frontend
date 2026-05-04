@@ -79,6 +79,9 @@ interface PaceContextType {
   registerStartNewChat: (callback: defaultFnType) => void;
   startNewChat: defaultFnType;
 
+  logoAnimationKey: number;
+  triggerLogoAnimation: defaultFnType;
+
   registerSelectConversation: (callback: (id: string, title?: string) => void) => void;
   selectConversation: (id: string, title?: string) => void;
 
@@ -185,6 +188,7 @@ export const PaceProvider = ({ children, initialNavSidebarExpanded = true }: Pac
   const [chatMessageIntent, setChatMessageIntent] = useState<ChatMessageIntent | null>(null);
   const [activeAgentInfo, setActiveAgentInfo] = useState<ActiveAgentInfo | null>(null);
   const [activeConversationId, setActiveConversationIdRaw] = useState<string | null>(null);
+  const [logoAnimationKey, setLogoAnimationKey] = useState(0);
   const filesPanelOpen = hasActivePanelTab;
   const [isFilesPanelHydrated, setIsFilesPanelHydrated] = useState(false);
   const [sidebarWidth, setSidebarWidthRaw] = useState(() =>
@@ -370,6 +374,10 @@ export const PaceProvider = ({ children, initialNavSidebarExpanded = true }: Pac
     startNewChatRef.current?.();
   }, []);
 
+  const triggerLogoAnimation = useCallback(() => {
+    setLogoAnimationKey((prev) => prev + 1);
+  }, []);
+
   const registerSelectConversation = useCallback((callback: (id: string, title?: string) => void) => {
     selectConversationRef.current = callback;
   }, []);
@@ -547,6 +555,9 @@ export const PaceProvider = ({ children, initialNavSidebarExpanded = true }: Pac
       registerStartNewChat,
       startNewChat,
 
+      logoAnimationKey,
+      triggerLogoAnimation,
+
       registerSelectConversation,
       selectConversation,
 
@@ -622,6 +633,9 @@ export const PaceProvider = ({ children, initialNavSidebarExpanded = true }: Pac
 
       registerStartNewChat,
       startNewChat,
+
+      logoAnimationKey,
+      triggerLogoAnimation,
 
       registerSelectConversation,
       selectConversation,

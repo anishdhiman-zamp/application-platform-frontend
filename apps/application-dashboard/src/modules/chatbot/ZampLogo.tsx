@@ -3,13 +3,24 @@
 import type { CSSProperties } from 'react';
 import { type LegacyAnimationControls, motion, type Variants } from 'motion/react';
 
-export type ZampLogoAnimationType = 'rest' | 'fromTop' | 'fromBottom' | 'fromLeft' | 'fromRight';
+export type ZampLogoAnimationType =
+  | 'rest'
+  | 'fromTop'
+  | 'fromBottom'
+  | 'fromLeft'
+  | 'fromRight'
+  | 'split'
+  | 'merge'
+  | 'flip';
 
 export const ZAMP_LOGO_PLAYABLE_ANIMATIONS: Exclude<ZampLogoAnimationType, 'rest'>[] = [
   'fromTop',
   'fromBottom',
   'fromLeft',
   'fromRight',
+  'split',
+  'merge',
+  'flip',
 ];
 
 interface ZampLogoProps {
@@ -35,6 +46,15 @@ const DEPTH_TIMES = [0, 0.5, 1];
 const DEPTH_EASE: [number, number, number, number] = [0.4, 0, 0.4, 1];
 const ROTATE_X_PEAK = 14;
 const ROTATE_Y_PEAK = 18;
+
+const SEPARATE_DURATION = 0.55;
+const SEPARATE_TIMES = [0, 0.45, 1];
+const SEPARATE_EASE: [number, number, number, number] = [0.5, 0, 0.4, 1];
+const SPLIT_PEAK = 50;
+const MERGE_PEAK = 33;
+
+const FLIP_DURATION = 0.7;
+const FLIP_EASE: [number, number, number, number] = [0.45, 0, 0.55, 1];
 
 const PATH_STYLE: CSSProperties = { transformBox: 'fill-box', transformOrigin: 'center' };
 
@@ -64,6 +84,20 @@ export const ZAMP_LOGO_TOP_VARIANTS: Variants = {
     y: '0%',
     transition: { duration: SKEW_DURATION, times: SKEW_TIMES_FOLLOW, ease: SKEW_EASE },
   },
+
+  split: {
+    y: ['0%', `-${SPLIT_PEAK}%`, '0%'],
+    skewX: 0,
+    transition: { duration: SEPARATE_DURATION, times: SEPARATE_TIMES, ease: SEPARATE_EASE },
+  },
+
+  merge: {
+    y: ['0%', `${MERGE_PEAK}%`, '0%'],
+    skewX: 0,
+    transition: { duration: SEPARATE_DURATION, times: SEPARATE_TIMES, ease: SEPARATE_EASE },
+  },
+
+  flip: { y: '0%', skewX: 0 },
 };
 
 export const ZAMP_LOGO_BOTTOM_VARIANTS: Variants = {
@@ -92,6 +126,20 @@ export const ZAMP_LOGO_BOTTOM_VARIANTS: Variants = {
     y: '0%',
     transition: { duration: SKEW_DURATION, times: SKEW_TIMES_LEAD, ease: SKEW_EASE },
   },
+
+  split: {
+    y: ['0%', `${SPLIT_PEAK}%`, '0%'],
+    skewX: 0,
+    transition: { duration: SEPARATE_DURATION, times: SEPARATE_TIMES, ease: SEPARATE_EASE },
+  },
+
+  merge: {
+    y: ['0%', `-${MERGE_PEAK}%`, '0%'],
+    skewX: 0,
+    transition: { duration: SEPARATE_DURATION, times: SEPARATE_TIMES, ease: SEPARATE_EASE },
+  },
+
+  flip: { y: '0%', skewX: 0 },
 };
 
 export const ZAMP_LOGO_WRAPPER_VARIANTS: Variants = {
@@ -119,6 +167,16 @@ export const ZAMP_LOGO_WRAPPER_VARIANTS: Variants = {
     rotateY: [0, ROTATE_Y_PEAK, 0],
     rotateX: 0,
     transition: { duration: DEPTH_DURATION, times: DEPTH_TIMES, ease: DEPTH_EASE },
+  },
+
+  split: { rotateX: 0, rotateY: 0 },
+
+  merge: { rotateX: 0, rotateY: 0 },
+
+  flip: {
+    rotateY: [0, 360],
+    rotateX: 0,
+    transition: { duration: FLIP_DURATION, ease: FLIP_EASE },
   },
 };
 

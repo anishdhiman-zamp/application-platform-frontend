@@ -84,7 +84,8 @@ export const useChatSidebarState = ({ initialConversationId }: UseChatSidebarSta
     setActiveConversationId(null);
     setChatKey((prev) => prev + 1);
     handleConversationIdUpdate();
-  }, [handleConversationIdUpdate, setActiveConversationId]);
+    setChatSidebarState(CHAT_SIDEBAR_STATE.COLLAPSED);
+  }, [handleConversationIdUpdate, setActiveConversationId, setChatSidebarState]);
 
   useEffect(() => {
     if (prevInitialConversationIdRef.current !== initialConversationId) {

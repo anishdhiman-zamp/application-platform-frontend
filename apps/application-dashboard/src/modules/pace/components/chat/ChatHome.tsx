@@ -1,12 +1,21 @@
+'use client';
+
+import { useEffect } from 'react';
 import ZampIcon from '@/modules/chatbot/ZampIcon';
+import { usePaceContext } from '@/modules/pace/pace.context';
 import { getGreeting } from '@/modules/pace/pace.utils';
 
 const ChatHome = () => {
+  const { logoAnimationKey, triggerLogoAnimation } = usePaceContext();
   const greeting = getGreeting();
+
+  useEffect(() => {
+    triggerLogoAnimation();
+  }, [triggerLogoAnimation]);
 
   return (
     <div className='flex snap-mandatory flex-col items-center gap-y-2.5 pt-4.5'>
-      <ZampIcon size={32} interactive />
+      <ZampIcon size={32} interactive playSignal={logoAnimationKey} />
       <h1 className='f-20-500 text-GRAY_1000'>{greeting}</h1>
     </div>
   );
