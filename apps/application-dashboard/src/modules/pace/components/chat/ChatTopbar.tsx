@@ -1,7 +1,6 @@
 'use client';
 
 import { cn } from '@zamp-platform/ui/utils';
-import { AnimatePresence, motion } from 'framer-motion';
 import { useResourceAccess } from '@/hooks/useResourceAccess';
 import ConversationActions from '@/modules/pace/components/chat/ConversationActions';
 import ShareConversationPopup from '@/modules/pace/components/chat/ShareConversationPopup';
@@ -52,17 +51,7 @@ const ChatTopbar = ({
     >
       <div className='flex min-w-0 flex-1 items-center gap-x-1'>
         <span className='relative block min-w-0 overflow-hidden pr-1 pl-1.5'>
-          <AnimatePresence mode='wait' initial={false}>
-            <motion.span
-              key={displayTitle}
-              className='f-14-550 block truncate first-letter:uppercase'
-              initial={{ opacity: 0, y: 5 }}
-              animate={{ opacity: 1, y: 0, transition: { duration: 0.2, ease: 'easeOut' } }}
-              exit={{ opacity: 0, y: -4, transition: { duration: 0.1, ease: 'easeIn' } }}
-            >
-              {displayTitle}
-            </motion.span>
-          </AnimatePresence>
+          <span className='f-14-550 block truncate first-letter:uppercase'>{displayTitle}</span>
         </span>
         {canEdit && (
           <ConversationActions
