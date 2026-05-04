@@ -217,7 +217,7 @@ const AgentDetailPage = ({ agentId, agentName, agentDescription = '', avatarKey 
   }, [chatSidebarState, setChatSidebarState]);
 
   const handleChatWithAgent = useCallback(() => {
-    setNewChatDraft(`I want to collaborate with ${displayName}`);
+    setNewChatDraft(`I want to collaborate with ${displayName} `);
     router.push(ROUTES_PATH.CHAT);
   }, [displayName, router]);
 
@@ -368,7 +368,7 @@ const AgentDetailPage = ({ agentId, agentName, agentDescription = '', avatarKey 
           <input
             value={editName}
             onChange={(e) => handleNameChange(e.target.value)}
-            className='text-GRAY_1000 f-26-550 placeholder:text-GRAY_500 mb-2 w-full shrink-0 border-none bg-transparent outline-none'
+            className='text-GRAY_1000 f-24-550 placeholder:text-GRAY_500 mb-2 w-full shrink-0 border-none bg-transparent outline-none'
             placeholder='Agent name'
           />
         )}
