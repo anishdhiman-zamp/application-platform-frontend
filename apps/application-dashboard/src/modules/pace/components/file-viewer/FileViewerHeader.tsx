@@ -4,6 +4,8 @@ import { memo } from 'react';
 import { Button, FileIcon, toast } from '@zamp-platform/ui';
 import { cn } from '@zamp-platform/ui/utils';
 import { FolderOpen } from 'lucide-react';
+import { useRouter } from 'next/navigation';
+import { ROUTES_PATH } from '@/constants/routeConfig';
 import {
   HTML_VIEW_OPTIONS,
   MARKDOWN_VIEW_OPTIONS,
@@ -19,6 +21,7 @@ import FileViewerHeaderMenu, { ViewModeMenuSection } from '@/modules/pace/compon
 import RenameFileDialog from '@/modules/pace/components/file-viewer/RenameFileDialog';
 import DeleteConfirmationDialog from '@/modules/pace/components/files/DeleteConfirmationDialog';
 import { getFileExtension } from '@/modules/pace/components/files/file-tree.utils';
+import { setNewChatDraft } from '@/modules/pace/hooks/useChatDraftInput';
 import { useFileViewerHeaderActions } from '@/modules/pace/hooks/useFileViewerHeaderActions';
 import { useFileViewerHeaderRename } from '@/modules/pace/hooks/useFileViewerHeaderRename';
 import { FILES_LISTING_CONVERSATION_ID } from '@/modules/pace/pace.constants';
@@ -56,8 +59,9 @@ const FileViewerHeader = memo(
   }: FileViewerHeaderProps) => {
     const extension = getFileExtension(fileName);
 
+    const router = useRouter();
     const { wordWrapEnabled, toggleWordWrap, toggleTreeSidebar, isTreeSidebarOpen } = usePaceLayoutContext();
-    const { activeConversationId } = usePaceConversationContext();
+    const { activeConversationId, setPendingFileReferences } = usePaceConversationContext();
     const isOnFilesPage = activeConversationId === FILES_LISTING_CONVERSATION_ID;
 
     const {
@@ -85,6 +89,14 @@ const FileViewerHeader = memo(
         .writeText(filePath)
         .then(() => toast.success('Path copied to clipboard'))
         .catch(() => toast.error('Failed to copy path'));
+    };
+
+    const handleChatWithFile = () => {
+      if (!filePath || !fileName) return;
+
+      setPendingFileReferences([{ path: filePath, name: fileName }]);
+      setNewChatDraft(`Let's discuss ${fileName} `);
+      router.push(ROUTES_PATH.CHAT);
     };
 
     const renderViewModeSection = () => {
@@ -148,8 +160,11 @@ const FileViewerHeader = memo(
             />
           </div>
 
-          {!isOnFilesPage && (
-            <div className='flex shrink-0 items-center gap-x-2'>
+          <div className='flex shrink-0 items-center gap-x-2'>
+            <Button variant='default' size='small' onClick={handleChatWithFile}>
+              Chat with file
+            </Button>
+            {!isOnFilesPage && (
               <Button
                 variant='ghost'
                 size='icon'
@@ -161,8 +176,8 @@ const FileViewerHeader = memo(
               >
                 <FolderOpen size={14} className='text-GRAY_700' />
               </Button>
-            </div>
-          )}
+            )}
+          </div>
         </div>
       </>
     );
