@@ -34,6 +34,40 @@ const CANARY_COOKIE = 'org_is_beta';
 const IS_CANARY_DEPLOYMENT = process.env.IS_CANARY === 'true';
 const CANARY_URL = process.env.CANARY_URL ?? '';
 
+const LEGACY_ROUTE_REDIRECTS: Array<[RegExp, string]> = [
+  [/^\/datasets\/drilldown\/([^/]+)\/([^/]+)$/, `${ROUTES_PATH.CHAT_SETTINGS_DATASETS}/$1?rowId=$2`],
+  [/^\/datasets\/([^/]+)$/, `${ROUTES_PATH.CHAT_SETTINGS_DATASETS}/$1`],
+  [/^\/datasets$/, ROUTES_PATH.CHAT_SETTINGS_DATASETS],
+  [/^\/pages\/([^/]+)\/datasets\/([^/]+)$/, `${ROUTES_PATH.CHAT_SETTINGS_DATASETS}/$2?pageId=$1`],
+  [/^\/pages\/([^/]+)\/drilldown\/([^/]+)\/([^/]+)$/, `${ROUTES_PATH.CHAT_SETTINGS_DATASETS}/$2?pageId=$1&rowId=$3`],
+  [/^\/pages\/([^/]+)\/multi-dataset$/, ROUTES_PATH.CHAT],
+  [/^\/pages(?:\/.*)?$/, ROUTES_PATH.CHAT],
+  [/^\/processes\/create$/, ROUTES_PATH.CHAT_TASK],
+  [/^\/processes\/([^/]+)\/activity-logs\/([^/]+)$/, `${ROUTES_PATH.CHAT_TASK}?t=$2&processId=$1`],
+  [/^\/processes\/([^/]+)\/create-knowledgebase$/, `${ROUTES_PATH.CHAT_TASK}?processId=$1&source=create-knowledgebase`],
+  [/^\/processes\/([^/]+)\/knowledge-base$/, `${ROUTES_PATH.CHAT_TASK}?processId=$1&source=knowledge-base`],
+  [/^\/processes\/([^/]+)$/, `${ROUTES_PATH.CHAT_TASK}?processId=$1`],
+  [/^\/processes$/, ROUTES_PATH.CHAT_TASK],
+  [/^\/settings\/integrations\/([^/]+)$/, `${ROUTES_PATH.CHAT_SETTINGS_INTEGRATIONS}/$1`],
+  [/^\/settings\/integrations$/, ROUTES_PATH.CHAT_SETTINGS_INTEGRATIONS],
+  [/^\/settings\/people$/, ROUTES_PATH.CHAT_SETTINGS_PEOPLE],
+  [/^\/settings(?:\/team)?$/, ROUTES_PATH.CHAT_SETTINGS_GENERAL],
+  [/^\/people$/, ROUTES_PATH.CHAT_SETTINGS_PEOPLE],
+];
+
+const getLegacyRouteRedirect = (pathname: string, search: string, requestUrl: string): URL | null => {
+  for (const [pattern, targetPattern] of LEGACY_ROUTE_REDIRECTS) {
+    if (!pattern.test(pathname)) continue;
+
+    const targetPath = pathname.replace(pattern, targetPattern);
+    const separator = targetPath.includes('?') || !search ? '' : search;
+
+    return new URL(`${targetPath}${separator}`, requestUrl);
+  }
+
+  return null;
+};
+
 const applyCanaryRoutingCookie = (request: NextRequest, response: NextResponse): void => {
   // Skip on the canary deployment itself — it doesn't route anywhere else
   if (IS_CANARY_DEPLOYMENT) return;
@@ -331,6 +365,12 @@ export async function proxy(request: NextRequest) {
   // Rewrite all non-static, non-API requests to canary when org is in beta set.
   if (isCanary && !pathname.startsWith('/api/')) {
     return NextResponse.rewrite(new URL(pathname + search, CANARY_URL));
+  }
+
+  const legacyRouteRedirect = getLegacyRouteRedirect(pathname, search, request.url);
+
+  if (legacyRouteRedirect) {
+    return NextResponse.redirect(legacyRouteRedirect, 307);
   }
 
   const isAuthenticated = validateSession(request);
