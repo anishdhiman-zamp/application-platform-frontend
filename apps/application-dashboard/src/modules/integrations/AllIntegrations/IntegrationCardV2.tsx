@@ -1,12 +1,13 @@
 'use client';
 
 import { type FC, useState } from 'react';
-import { Plus } from 'lucide-react';
+import { Check, Plus } from 'lucide-react';
 import ConnectIntegrationAction from 'modules/integrations/AllIntegrations/ConnectIntegrationAction';
 import ConnectionsPopover from 'modules/integrations/AllIntegrations/ConnectionsPopover';
 import IntegrationCardContentV2 from 'modules/integrations/AllIntegrations/IntegrationCardContentV2';
 import IntegrationInfoDialog from 'modules/integrations/AllIntegrations/IntegrationInfoDialog';
 import { usePathname, useRouter, useSearchParams } from 'next/navigation';
+import { useIntegrationConnectionListener } from '@/modules/integrations/hooks/useIntegrationConnectionListener';
 import type { IntegrationCardPropsType } from '@/modules/integrations/types/integrations.types';
 import { cn } from '@/utils/common';
 
@@ -24,6 +25,11 @@ const IntegrationCardV2: FC<IntegrationCardPropsType> = ({
   const pathname = usePathname();
   const searchParams = useSearchParams();
   const [isInfoDialogOpen, setIsInfoDialogOpen] = useState(false);
+  const { isConnected: isLiveConnected } = useIntegrationConnectionListener({
+    integrationName: name,
+    initiallyConnected: connections?.length > 0,
+  });
+  const showConnectedPill = isToolCallBlock && isLiveConnected;
 
   const handleCardClick = () => {
     if (onCardClick) {
@@ -64,14 +70,21 @@ const IntegrationCardV2: FC<IntegrationCardPropsType> = ({
         <div className='flex w-full items-center justify-between' onClick={(e) => e.stopPropagation()}>
           {connections?.length > 0 && <ConnectionsPopover connections={connections} integrationName={name} />}
           <div className='actions-bar ml-auto'>
-            <ConnectIntegrationAction
-              integrationItem={integrationItem}
-              redirectUrl={redirectUrl}
-              copy={enabled ? 'Add Connection' : 'Connect'}
-              buttonClassName='f-11-500'
-              buttonVariant={buttonVariant}
-              icon={<Plus size={12} />}
-            />
+            {showConnectedPill ? (
+              <span className='bg-GREEN_100 text-GREEN_800 f-11-500 inline-flex items-center gap-1 rounded-md px-2 py-1'>
+                <Check size={12} />
+                Connected
+              </span>
+            ) : (
+              <ConnectIntegrationAction
+                integrationItem={integrationItem}
+                redirectUrl={redirectUrl}
+                copy={enabled ? 'Add Connection' : 'Connect'}
+                buttonClassName='f-11-500'
+                buttonVariant={buttonVariant}
+                icon={<Plus size={12} />}
+              />
+            )}
           </div>
         </div>
       </div>
