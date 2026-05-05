@@ -6,7 +6,7 @@ import { FILES_PANEL_MAX_WIDTH, FILES_PANEL_MIN_WIDTH, SIDEBAR_MIN_WIDTH } from 
 import { CHAT_SIDEBAR_STATE } from 'modules/pace/pace.types';
 import { usePaceLayoutContext } from '@/modules/pace/pace.context';
 
-const HANDLE_WIDTH = 8;
+const HANDLE_WIDTH = 12;
 const PADDING = 16;
 const MIN_MAIN_WIDTH = 100;
 
@@ -98,7 +98,7 @@ const FilesPanelResizeHandle = () => {
   return (
     <div
       onMouseDown={handleMouseDown}
-      className='group relative -mx-1 flex h-full w-2 shrink-0 cursor-col-resize items-center justify-center select-none'
+      className='group relative -mx-1.5 flex h-full w-3 shrink-0 cursor-col-resize items-center justify-center select-none'
     >
       <div
         className={cn(

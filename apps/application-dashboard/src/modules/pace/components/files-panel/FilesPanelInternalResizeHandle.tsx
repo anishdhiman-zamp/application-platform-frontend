@@ -70,7 +70,7 @@ const FilesPanelInternalResizeHandle = () => {
   return (
     <div
       onMouseDown={handleMouseDown}
-      className='group relative -mx-1 flex h-full w-2 shrink-0 cursor-col-resize items-center justify-center select-none'
+      className='group relative -mx-1.5 flex h-full w-3 shrink-0 cursor-col-resize items-center justify-center select-none'
     >
       <div
         className={cn(
