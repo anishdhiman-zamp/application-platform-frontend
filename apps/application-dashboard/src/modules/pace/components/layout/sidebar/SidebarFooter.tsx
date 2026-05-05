@@ -1,21 +1,38 @@
 'use client';
 
-import { DropdownMenu, DropdownMenuContent, DropdownMenuTrigger, TooltipV2 } from '@zamp-platform/ui';
+import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger, TooltipV2 } from '@zamp-platform/ui';
 import { cn } from '@zamp-platform/ui/utils';
-import { ChevronsUpDown } from 'lucide-react';
+import { ChevronsUpDown, Settings } from 'lucide-react';
+import { useRouter } from 'next/navigation';
 import LogoutButton from '@/components/layouts/dashboard-layout/components/LogoutButton';
+import { ROUTES_PATH } from '@/constants/routeConfig';
 import { useAppSelector } from '@/hooks/toolkit';
+import { PACE_SETTINGS_TABS } from '@/modules/pace/pace.constants';
 import type { RootState } from '@/store';
 import { SIDE_OPTIONS } from '@/types/commonTypes';
+import { getFromSessionStorage, SESSION_STORAGE_KEYS } from '@/utils/sessionstorage';
 
 interface SidebarFooterProps {
   isExpanded: boolean;
 }
 
+const VALID_SETTINGS_PATHS = new Set(PACE_SETTINGS_TABS.map((tab) => tab.path));
+
+const resolveSettingsTarget = (): string => {
+  const lastTab = getFromSessionStorage(SESSION_STORAGE_KEYS.PACE_SETTINGS_LAST_TAB);
+
+  return lastTab && VALID_SETTINGS_PATHS.has(lastTab) ? lastTab : ROUTES_PATH.CHAT_SETTINGS_GENERAL;
+};
+
 const SidebarFooter = ({ isExpanded }: SidebarFooterProps) => {
+  const router = useRouter();
   const user = useAppSelector((state: RootState) => state?.user?.user);
   const userName = user?.user_name ?? user?.username ?? 'You';
   const initial = userName.charAt(0).toUpperCase();
+
+  const handleSettingsClick = () => {
+    router.push(resolveSettingsTarget());
+  };
 
   const trigger = (
     <button
@@ -54,6 +71,13 @@ const SidebarFooter = ({ isExpanded }: SidebarFooterProps) => {
           <p className='text-GRAY_900 truncate text-sm font-medium'>{userName}</p>
           {user?.user_email && <p className='text-GRAY_600 truncate text-xs'>{user.user_email}</p>}
         </div>
+        <DropdownMenuItem
+          onSelect={handleSettingsClick}
+          className='hover:bg-GRAY_100 text-GRAY_700 f-12-450 h-8 gap-2 rounded-md px-1 py-1'
+        >
+          <Settings size={14} />
+          <span className='flex-1 text-left'>Settings</span>
+        </DropdownMenuItem>
         <LogoutButton />
       </DropdownMenuContent>
     </DropdownMenu>

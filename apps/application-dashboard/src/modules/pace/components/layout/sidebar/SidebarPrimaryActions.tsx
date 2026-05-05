@@ -1,15 +1,13 @@
 'use client';
 
-import { Bot, CheckSquare, CirclePlus, FolderOpen, LayoutGrid, Settings } from 'lucide-react';
+import { Bot, CheckSquare, CirclePlus, FolderOpen, LayoutGrid } from 'lucide-react';
 import { usePathname, useRouter } from 'next/navigation';
 import { ROUTES_PATH } from '@/constants/routeConfig';
 import { useAppDispatch } from '@/hooks/toolkit';
 import SidebarRow from '@/modules/pace/components/layout/sidebar/SidebarRow';
-import { PACE_SETTINGS_TABS } from '@/modules/pace/pace.constants';
 import { usePaceActionsContext, usePaceLayoutContext } from '@/modules/pace/pace.context';
 import { CHAT_SIDEBAR_STATE, TAB_QUERY_PARAM } from '@/modules/pace/pace.types';
 import { dynamicTabsActions } from '@/store/slices/dynamic-tabs.slice';
-import { getFromSessionStorage, SESSION_STORAGE_KEYS } from '@/utils/sessionstorage';
 
 interface SidebarPrimaryActionsProps {
   isExpanded: boolean;
@@ -20,16 +18,7 @@ const NAV_ITEMS = [
   { label: 'Files', icon: <FolderOpen size={16} />, path: ROUTES_PATH.CHAT_FILES },
   { label: 'Agents', icon: <Bot size={16} />, path: ROUTES_PATH.CHAT_AGENTS },
   { label: 'Apps', icon: <LayoutGrid size={16} />, path: ROUTES_PATH.CHAT_APPS },
-  { label: 'Settings', icon: <Settings size={16} />, path: ROUTES_PATH.CHAT_SETTINGS },
 ];
-
-const VALID_SETTINGS_PATHS = new Set(PACE_SETTINGS_TABS.map((tab) => tab.path));
-
-const resolveSettingsTarget = (): string => {
-  const lastTab = getFromSessionStorage(SESSION_STORAGE_KEYS.PACE_SETTINGS_LAST_TAB);
-
-  return lastTab && VALID_SETTINGS_PATHS.has(lastTab) ? lastTab : ROUTES_PATH.CHAT_SETTINGS_GENERAL;
-};
 
 const SidebarPrimaryActions = ({ isExpanded }: SidebarPrimaryActionsProps) => {
   const router = useRouter();
@@ -51,14 +40,12 @@ const SidebarPrimaryActions = ({ isExpanded }: SidebarPrimaryActionsProps) => {
     }
   };
 
-  const resolveNavTarget = (path: string) => (path === ROUTES_PATH.CHAT_SETTINGS ? resolveSettingsTarget() : path);
-
   const handleNavItemClick = (path: string) => {
-    router.push(resolveNavTarget(path));
+    router.push(path);
   };
 
   const handleNavItemHover = (path: string) => {
-    router.prefetch(resolveNavTarget(path));
+    router.prefetch(path);
   };
 
   const handleNewChat = () => {
