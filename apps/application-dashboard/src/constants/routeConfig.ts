@@ -59,6 +59,7 @@ export const ROUTES_PATH = {
   CHAT_APPS: '/chat/apps',
   CHAT_AGENTS: '/chat/agents',
   CHAT_AGENT: '/chat/agents/:agentId',
+  CHAT_FILES: '/chat/files',
   CHAT_DATASET: '/chat/dataset',
 };
 
@@ -151,6 +152,7 @@ export const getChatTaskRoute = ({
   parentTasks,
   siblings,
   referrer,
+  inChat,
 }: {
   taskId: string;
   conversationId?: string;
@@ -161,8 +163,9 @@ export const getChatTaskRoute = ({
   parentTasks?: TaskBreadcrumb[];
   siblings?: SiblingTask[];
   referrer?: string;
+  inChat?: boolean;
 }) => {
-  const basePath = ROUTES_PATH.CHAT_TASK;
+  const basePath = inChat ? ROUTES_PATH.CHAT : ROUTES_PATH.CHAT_TASK;
   const params = new URLSearchParams();
 
   params.set('t', taskId);

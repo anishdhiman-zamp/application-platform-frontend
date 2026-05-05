@@ -28,6 +28,23 @@ describe('routeToTab', () => {
     expect(routeToTab('/chat/apps')).toEqual({ tabId: 'apps', kind: 'apps' });
   });
 
+  it('maps /chat/files to files tab', () => {
+    expect(routeToTab('/chat/files')).toEqual({ tabId: 'files', kind: 'files' });
+  });
+
+  it('maps /chat/history to history tab', () => {
+    expect(routeToTab('/chat/history')).toEqual({ tabId: 'history', kind: 'history' });
+  });
+
+  it('maps /chat/dataset to dataset tab', () => {
+    expect(routeToTab('/chat/dataset')).toEqual({ tabId: 'dataset', kind: 'dataset', instanceId: undefined });
+    expect(routeToTab('/chat/dataset', new URLSearchParams('dataset=customers'))).toEqual({
+      tabId: 'dataset:customers',
+      kind: 'dataset',
+      instanceId: 'customers',
+    });
+  });
+
   it('maps /chat/settings/general to settings:general', () => {
     expect(routeToTab('/chat/settings/general')).toEqual({
       tabId: 'settings:general',
@@ -62,6 +79,13 @@ describe('defaultRouteForTab', () => {
 
   it('returns task route for tasks tab', () => {
     expect(defaultRouteForTab('tasks')).toBe('/chat/task');
+  });
+
+  it('returns routes for files, history, and dataset tabs', () => {
+    expect(defaultRouteForTab('files')).toBe('/chat/files');
+    expect(defaultRouteForTab('history')).toBe('/chat/history');
+    expect(defaultRouteForTab('dataset')).toBe('/chat/dataset');
+    expect(defaultRouteForTab('dataset:customers')).toBe('/chat/dataset?dataset=customers');
   });
 
   it('returns settings route per section', () => {

@@ -35,11 +35,21 @@ export const routeToTab = (pathname: string | null, search?: URLSearchParams | n
     return { tabId: 'apps', kind: TAB_KIND.APPS };
   }
 
-  if (
-    pathname === ROUTES_PATH.CHAT ||
-    pathname.startsWith(`${ROUTES_PATH.CHAT}/`) ||
-    pathname.startsWith(ROUTES_PATH.CHAT)
-  ) {
+  if (pathname.startsWith(ROUTES_PATH.CHAT_FILES)) {
+    return { tabId: 'files', kind: TAB_KIND.FILES };
+  }
+
+  if (pathname.startsWith('/chat/history')) {
+    return { tabId: 'history', kind: TAB_KIND.HISTORY };
+  }
+
+  if (pathname.startsWith(ROUTES_PATH.CHAT_DATASET)) {
+    const tableName = search?.get('dataset') ?? undefined;
+
+    return { tabId: tableName ? `dataset:${tableName}` : 'dataset', kind: TAB_KIND.DATASET, instanceId: tableName };
+  }
+
+  if (pathname === ROUTES_PATH.CHAT) {
     const conversationId = search?.get(SIDEBAR_CONVERSATION_ID_PARAM) ?? null;
 
     return { tabId: buildChatTabId(conversationId), kind: TAB_KIND.CHAT, instanceId: conversationId ?? undefined };
@@ -54,6 +64,15 @@ export const defaultRouteForTab = (tabId: TabIdType): string => {
   if (tabId === 'tasks') return ROUTES_PATH.CHAT_TASK;
   if (tabId === 'agents') return ROUTES_PATH.CHAT_AGENTS;
   if (tabId === 'apps') return ROUTES_PATH.CHAT_APPS;
+  if (tabId === 'files') return ROUTES_PATH.CHAT_FILES;
+  if (tabId === 'history') return '/chat/history';
+  if (tabId === 'dataset') return ROUTES_PATH.CHAT_DATASET;
+
+  if (tabId.startsWith('dataset:')) {
+    const tableName = tabId.slice('dataset:'.length);
+
+    return `${ROUTES_PATH.CHAT_DATASET}?dataset=${encodeURIComponent(tableName)}`;
+  }
 
   if (tabId.startsWith('settings:')) {
     const section = tabId.slice('settings:'.length);
