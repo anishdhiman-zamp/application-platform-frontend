@@ -4,7 +4,6 @@ import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import { Button, ShimmerText, Skeleton } from '@zamp-platform/ui';
 import { cn } from '@zamp-platform/ui/utils';
 import AddConnectionModal from 'modules/pace/components/agents/components/AddConnectionModal';
-import AgentGreeting from 'modules/pace/components/agents/components/AgentGreeting';
 import AgentInstructions from 'modules/pace/components/agents/components/AgentInstructions';
 import AgentToolsAccess from 'modules/pace/components/agents/components/AgentToolsAccess';
 import AgentTriggerList from 'modules/pace/components/agents/components/AgentTriggerList';
@@ -44,18 +43,24 @@ interface AgentDetailPageProps {
   agentName: string;
   agentDescription?: string;
   avatarKey?: string;
+  hideChatButton?: boolean;
 }
 
 const VALID_TABS = new Set<string>(Object.values(AGENT_DETAIL_TAB));
 
-const AgentDetailPage = ({ agentId, agentName, agentDescription = '', avatarKey = '' }: AgentDetailPageProps) => {
+const AgentDetailPage = ({
+  agentId,
+  agentName,
+  agentDescription = '',
+  avatarKey = '',
+  hideChatButton = false,
+}: AgentDetailPageProps) => {
   const { isEnabled: isAgentsFe } = useFeatureFlag(FEATURE_FLAGS.AGENTS_FE);
   const debounceTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 
   const { updateTab, getTabById } = useDynamicTabs({ type: TAB_TYPE.AGENT });
   const storedTab = getTabById(agentId);
   const storedActiveTab = storedTab?.metadata?.activeTab as string | undefined;
-  const hasSeenGreeting = Boolean(storedTab?.metadata?.hasSeenGreeting);
 
   // Read tab from URL params first, then stored metadata, default to instructions
   const initialTab = (() => {
@@ -233,13 +238,6 @@ const AgentDetailPage = ({ agentId, agentName, agentDescription = '', avatarKey 
     setIsAddConnectionModalOpen(true);
   }, []);
 
-  const handleGreetingSeen = useCallback(() => {
-    const currentTab = getTabById(agentId);
-
-    if (!currentTab || currentTab.metadata?.hasSeenGreeting) return;
-    updateTab(agentId, agentId, currentTab.name, { ...currentTab.metadata, hasSeenGreeting: true });
-  }, [agentId, getTabById, updateTab]);
-
   const handleInstructionsUpdating = useCallback(() => {
     triggerShimmer();
   }, [triggerShimmer]);
@@ -350,15 +348,12 @@ const AgentDetailPage = ({ agentId, agentName, agentDescription = '', avatarKey 
               className='size-full object-contain'
             />
           </motion.div>
-          <AgentGreeting
-            onChat={handleChatWithAgent}
-            onAddTrigger={handleAddNewTrigger}
-            hasSeenGreeting={hasSeenGreeting}
-            onGreetingSeen={handleGreetingSeen}
-          />
-          <Button variant='default' size='small' onClick={handleChatWithAgent}>
-            Chat with Agent
-          </Button>
+          <div className='flex flex-1' />
+          {!hideChatButton && (
+            <Button variant='default' size='small' onClick={handleChatWithAgent}>
+              Chat with Agent
+            </Button>
+          )}
           {isAgentsFe && <ShareAgentPopup agentId={agentId} />}
         </div>
 

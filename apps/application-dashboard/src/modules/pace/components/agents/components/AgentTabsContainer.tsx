@@ -35,6 +35,7 @@ const AgentTabsContainer = () => {
               agentName={tab.name}
               agentDescription={description}
               avatarKey={avatarKey}
+              hideChatButton
             />
           </TabWrapper>
         );
