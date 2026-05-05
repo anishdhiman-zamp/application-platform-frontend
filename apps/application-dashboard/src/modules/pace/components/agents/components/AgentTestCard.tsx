@@ -14,7 +14,7 @@ import ImageKitImage from '@/components/ImageKitImage';
 import type { AgentTriggerType } from '@/modules/pace/components/agents/types/agents.types';
 import { useTriggerChatMessageFromButton } from '@/modules/pace/hooks/useTriggerChatMessageFromButton';
 import { SIDEBAR_CONVERSATION_ID_PARAM } from '@/modules/pace/pace.constants';
-import { usePaceContext } from '@/modules/pace/pace.context';
+import { usePaceActionsContext, usePaceConversationContext, usePaceLayoutContext } from '@/modules/pace/pace.context';
 import { CHAT_SIDEBAR_STATE } from '@/modules/pace/pace.types';
 import { cn } from '@/utils/common';
 
@@ -37,7 +37,9 @@ const AgentTestCard: FC<AgentTestCardProps> = ({
   onClick,
   onTriggerSelected,
 }) => {
-  const { setChatMessageIntent, startNewChat, setChatSidebarState } = usePaceContext();
+  const { setChatSidebarState } = usePaceLayoutContext();
+  const { startNewChat } = usePaceActionsContext();
+  const { setChatMessageIntent } = usePaceConversationContext();
   const [isExpanded, setIsExpanded] = useState(false);
   const [triggers, setTriggers] = useState<AgentTriggerType[]>([]);
   const [fetchTriggers, { isFetching: isLoadingTriggers }] = useLazyGetAgentTriggersQuery();

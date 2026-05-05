@@ -8,11 +8,10 @@ import { usePathname } from 'next/navigation';
 import { ROUTES_PATH } from '@/constants/routeConfig';
 import FilesPanel from '@/modules/pace/components/files-panel/FilesPanel';
 import FilesPanelResizeHandle from '@/modules/pace/components/layout/FilesPanelResizeHandle';
-import PaneHost from '@/modules/pace/components/layout/PaneHost';
 import SidebarResizeHandle from '@/modules/pace/components/layout/SidebarResizeHandle';
 import UploadProgressToast from '@/modules/pace/components/progress-toast/UploadProgressToast';
 import { useFileUploadContext } from '@/modules/pace/context/FileUploadContext';
-import { usePaceContext } from '@/modules/pace/pace.context';
+import { usePaceLayoutContext } from '@/modules/pace/pace.context';
 
 interface PaceLayoutContentProps {
   children: ReactNode;
@@ -21,6 +20,8 @@ interface PaceLayoutContentProps {
 const PaceLayoutContent: FC<PaceLayoutContentProps> = ({ children }) => {
   const pathname = usePathname();
   const isOnChatSurface = pathname === ROUTES_PATH.CHAT;
+  const isOnFilesSurface = pathname === ROUTES_PATH.CHAT_FILES;
+  const isPanelHostSurface = isOnChatSurface || isOnFilesSurface;
 
   const { uploadState, cancelUpload } = useFileUploadContext();
   const {
@@ -31,14 +32,16 @@ const PaceLayoutContent: FC<PaceLayoutContentProps> = ({ children }) => {
     hasActivePanelTab,
     filesPanelOpen,
     isFilesPanelExpanded,
-  } = usePaceContext();
+  } = usePaceLayoutContext();
 
   const isResizing = isFilesPanelResizing || isSidebarResizing || isTreeColumnResizing;
 
   const isExpanded = chatSidebarState === CHAT_SIDEBAR_STATE.EXPANDED;
   const isSidebar = chatSidebarState === CHAT_SIDEBAR_STATE.SIDEBAR;
   const isFilesPanelFullWidth = filesPanelOpen && isFilesPanelExpanded;
-  const isMainHidden = isOnChatSurface && (isExpanded || hasActivePanelTab || isFilesPanelFullWidth);
+  const isMainHidden =
+    (isOnChatSurface && (isExpanded || hasActivePanelTab || isFilesPanelFullWidth)) ||
+    (isOnFilesSurface && isFilesPanelFullWidth);
 
   return (
     <div className='bg-BG_GRAY_2 relative flex h-full w-full overflow-hidden overscroll-none'>
@@ -56,14 +59,14 @@ const PaceLayoutContent: FC<PaceLayoutContentProps> = ({ children }) => {
           <section
             className={cn(
               'bg-BG_WHITE flex min-h-0 w-full flex-1 flex-col overflow-hidden',
-              isOnChatSurface && 'border-border border-l',
+              isPanelHostSurface && 'border-border border-l',
             )}
           >
-            <PaneHost>{children}</PaneHost>
+            {children}
           </section>
         </main>
-        {isOnChatSurface && filesPanelOpen && !isFilesPanelExpanded && <FilesPanelResizeHandle />}
-        {isOnChatSurface && <FilesPanel />}
+        {isPanelHostSurface && filesPanelOpen && !isFilesPanelExpanded && <FilesPanelResizeHandle />}
+        {isPanelHostSurface && <FilesPanel />}
       </div>
       <UploadProgressToast uploadState={uploadState} onCancel={cancelUpload} />
     </div>

@@ -7,7 +7,7 @@ import { useDynamicTabs } from 'modules/pace/components/dynamic-tabs/useDynamicT
 import { TAB_TYPE } from 'modules/pace/pace.types';
 import FilesPanelAddTabMenu from '@/modules/pace/components/files-panel/FilesPanelAddTabMenu';
 
-const PANEL_TAB_TYPES = new Set<string>([TAB_TYPE.FILE, TAB_TYPE.AGENT]);
+const PANEL_TAB_TYPES = new Set<string>([TAB_TYPE.FILE, TAB_TYPE.AGENT, TAB_TYPE.TASK]);
 
 interface FilesPanelTabStripProps {
   onOverflowChange?: (isOverflowing: boolean) => void;

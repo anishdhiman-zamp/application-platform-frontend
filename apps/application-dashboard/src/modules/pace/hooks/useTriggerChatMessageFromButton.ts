@@ -1,6 +1,6 @@
 import { useCallback } from 'react';
 import { SIDEBAR_CONVERSATION_ID_PARAM } from '@/modules/pace/pace.constants';
-import { usePaceContext } from '@/modules/pace/pace.context';
+import { usePaceActionsContext, usePaceConversationContext, usePaceLayoutContext } from '@/modules/pace/pace.context';
 import { CHAT_SIDEBAR_STATE } from '@/modules/pace/pace.types';
 
 interface UseTriggerChatMessageFromButtonParams {
@@ -14,8 +14,9 @@ export const useTriggerChatMessageFromButton = ({
   agentName,
   agentAvatar,
 }: UseTriggerChatMessageFromButtonParams) => {
-  const { chatSidebarState, setChatSidebarState, startNewChat, setChatMessageIntent, setActiveAgentInfo } =
-    usePaceContext();
+  const { chatSidebarState, setChatSidebarState } = usePaceLayoutContext();
+  const { setChatMessageIntent, setActiveAgentInfo } = usePaceConversationContext();
+  const { startNewChat } = usePaceActionsContext();
 
   const triggerChatMessage = useCallback(
     (message: string) => {

@@ -4,7 +4,7 @@ import { useCallback, useEffect, useRef, useState } from 'react';
 import { cn } from '@zamp-platform/ui/utils';
 import { FILES_PANEL_MAX_WIDTH, FILES_PANEL_MIN_WIDTH, SIDEBAR_MIN_WIDTH } from 'modules/pace/pace.constants';
 import { CHAT_SIDEBAR_STATE } from 'modules/pace/pace.types';
-import { usePaceContext } from '@/modules/pace/pace.context';
+import { usePaceLayoutContext } from '@/modules/pace/pace.context';
 
 const HANDLE_WIDTH = 8;
 const PADDING = 16;
@@ -21,7 +21,7 @@ const FilesPanelResizeHandle = () => {
     hasActivePanelTab,
     treeColumnWidth,
     isTreeSidebarOpen,
-  } = usePaceContext();
+  } = usePaceLayoutContext();
 
   const dragStartXRef = useRef<number>(0);
   const dragStartWidthRef = useRef<number>(filesPanelWidth);

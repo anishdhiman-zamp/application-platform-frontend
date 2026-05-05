@@ -1,5 +1,8 @@
 export const TAB_KIND = {
   CHAT: 'chat',
+  DATASET: 'dataset',
+  FILES: 'files',
+  HISTORY: 'history',
   TASKS: 'tasks',
   AGENTS: 'agents',
   APPS: 'apps',

@@ -15,9 +15,12 @@ import {
   ConnectedChatInput,
   type MentionInsertPayload,
   useConversationActions,
-  useConversationState,
+  useConversationInputState,
+  useConversationMessagesState,
+  useConversationStatusState,
 } from '@zamp-platform/conversation-stream';
 import { type ScrollContainerRef } from '@zamp-platform/ui';
+import { cn } from '@zamp-platform/ui/utils';
 import { EVENT_TYPE } from '@zamp-platform/utils/event-bus';
 import { useDynamicTabs } from 'modules/pace/components/dynamic-tabs/useDynamicTabs';
 import ChatConversationContent from 'modules/pace/components/layout/chat-sidebar/ChatConversationContent';
@@ -31,7 +34,7 @@ import { useChatDraftInput } from '@/modules/pace/hooks/useChatDraftInput';
 import { useHitlQuestions } from '@/modules/pace/hooks/useHitlQuestions';
 import { useReferencePicker } from '@/modules/pace/hooks/useReferencePicker';
 import { BrowserViewerDisplayState, NEW_CONVERSATION_ID } from '@/modules/pace/pace.constants';
-import { usePaceContext } from '@/modules/pace/pace.context';
+import { usePaceConversationContext, usePaceLayoutContext } from '@/modules/pace/pace.context';
 import { CHAT_SIDEBAR_STATE, TAB_TYPE } from '@/modules/pace/pace.types';
 import { preserveSidebarParam } from '@/modules/pace/pace.utils';
 import {
@@ -71,21 +74,21 @@ const ChatSidebarContent = ({
 
   const { openTab: openTaskTab } = useDynamicTabs({ type: TAB_TYPE.TASK });
   const { openTab: openBrowserTab, updateTab: updateBrowserTab } = useDynamicTabs({ type: TAB_TYPE.BROWSER });
+  const { chatSidebarState, setChatSidebarState } = usePaceLayoutContext();
   const {
-    chatSidebarState,
-    setChatSidebarState,
     activeAgentInfo,
     selectedModel,
     setSelectedModel,
     sharedFileReferences,
     setSharedFileReferences,
     sharedExternalFilePaths,
-  } = usePaceContext();
+  } = usePaceConversationContext();
   const { inputValue, setInputValue } = useChatDraftInput({
     conversationId,
   });
-  const { inputsRequired, queuedMessages, initiatedBy, isLoadingConversationHistory, isFetchingConversationHistory } =
-    useConversationState();
+  const { inputsRequired, initiatedBy } = useConversationInputState();
+  const { queuedMessages } = useConversationMessagesState();
+  const { isLoadingConversationHistory, isFetchingConversationHistory } = useConversationStatusState();
   const { refetchConversationHistory } = useConversationActions();
   const { sseEventBus } = useEventBus();
 
@@ -176,7 +179,7 @@ const ChatSidebarContent = ({
       const route =
         fullRoute ??
         preserveSidebarParam(
-          getChatTaskRoute({ taskId, conversationId: conversationId ?? undefined, taskTitle: name }),
+          getChatTaskRoute({ taskId, conversationId: conversationId ?? undefined, taskTitle: name, inChat: true }),
         );
 
       openTaskTab(taskId, name || taskId, undefined, route);
@@ -311,7 +314,7 @@ const ChatSidebarContent = ({
           scopeId={organizationId}
           username={username}
           currentUserName={currentUserName}
-          placeholder="Do your life's best work with Zamp"
+          placeholder='Reply...'
           externalInputValue={inputValue}
           setExternalInputValue={setInputValue}
           fileDropHandlerRef={fileDropHandlerRef}
@@ -333,7 +336,9 @@ const ChatSidebarContent = ({
               : undefined
           }
           referencePicker={referencePicker}
-          className={queuedMessages.length > 0 ? '-mt-3' : undefined}
+          className={cn('rounded-[16px]', queuedMessages.length > 0 && '-mt-3')}
+          inputAreaClassName='px-5 pt-4 pb-3'
+          footerClassName='px-3.5 pt-2 pb-3.5'
         />
       </>
     );

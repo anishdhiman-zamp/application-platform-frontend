@@ -5,14 +5,11 @@ import { Accordion, AccordionContent, AccordionItem, AccordionTrigger, Button, S
 import { cn } from '@zamp-platform/ui/utils';
 import { Plus } from 'lucide-react';
 import { useGetAppsQuery } from '@/apis/apps';
-import CommonWrapper from '@/components/commonWrapper';
-import { SkeletonTypes } from '@/components/commonWrapper/commonWrapper.types';
 import PageContainer from '@/components/layouts/PageContainer';
 import { useUserIdentity } from '@/hooks/useUserIdentity';
 import { APP_FILTER_TAB, type AppFilterTab } from '@/modules/apps/apps.types';
 import AppEmptyState from '@/modules/apps/components/AppEmptyState';
 import AppRow from '@/modules/apps/components/AppRow';
-import AppRowSkeleton from '@/modules/apps/components/AppRowSkeleton';
 import CreateAppModal from '@/modules/apps/components/CreateAppModal';
 import ServiceCard from '@/modules/apps/components/ServiceCard';
 
@@ -107,27 +104,18 @@ const AppsListingPage = () => {
           ))}
         </div>
 
-        <CommonWrapper
-          isLoading={isLoading}
-          isError={isError}
-          refetchFunction={refetch}
-          isNoData={!isLoading && filteredApps.length === 0}
-          noDataBanner={
-            <div className='text-GRAY_700 flex h-[calc(100vh-250px)] items-center justify-center text-sm'>
-              No apps found
-            </div>
-          }
-          skeletonType={SkeletonTypes.CUSTOM}
-          loader={
-            <div className='flex flex-col gap-2'>
-              {Array.from({ length: 5 }).map((_, i) => (
-                <AppRowSkeleton key={i} />
-              ))}
-            </div>
-          }
-          height={500}
-          disableAnimation
-        >
+        {isError ? (
+          <div className='text-GRAY_700 flex h-[calc(100vh-250px)] flex-col items-center justify-center gap-2 text-sm'>
+            <span>Failed to load apps</span>
+            <Button size='small' variant='ghost' onClick={refetch}>
+              Retry
+            </Button>
+          </div>
+        ) : !data ? null : filteredApps.length === 0 ? (
+          <div className='text-GRAY_700 flex h-[calc(100vh-250px)] items-center justify-center text-sm'>
+            No apps found
+          </div>
+        ) : (
           <Accordion type='single' collapsible>
             <div className='flex flex-col gap-2'>
               {filteredApps.map((app) => (
@@ -152,7 +140,7 @@ const AppsListingPage = () => {
               ))}
             </div>
           </Accordion>
-        </CommonWrapper>
+        )}
       </PageContainer>
 
       <CreateAppModal open={isCreateModalOpen} onOpenChange={setIsCreateModalOpen} />

@@ -3,14 +3,14 @@
 import { memo, useMemo } from 'react';
 import { cn } from '@zamp-platform/ui/utils';
 import FileViewerError from '@/modules/pace/components/file-viewer/FileViewerError';
-import { usePaceContext } from '@/modules/pace/pace.context';
+import { usePaceLayoutContext } from '@/modules/pace/pace.context';
 
 interface HtmlPreviewViewerProps {
   content: string;
 }
 
 const HtmlPreviewViewer = memo(({ content }: HtmlPreviewViewerProps) => {
-  const { isFilesPanelResizing, isSidebarResizing } = usePaceContext();
+  const { isFilesPanelResizing, isSidebarResizing } = usePaceLayoutContext();
 
   const srcDoc = useMemo(() => {
     return content;

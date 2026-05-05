@@ -10,6 +10,7 @@ const Apps = baseApi.injectEndpoints({
         url: API_ENDPOINTS.APPS_GET,
       }),
       providesTags: [APITags.GET_APPS],
+      keepUnusedDataFor: 300,
     }),
   }),
 });

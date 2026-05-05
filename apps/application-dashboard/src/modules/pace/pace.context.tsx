@@ -8,6 +8,7 @@ import {
   useCallback,
   useContext,
   useEffect,
+  useLayoutEffect,
   useMemo,
   useRef,
   useState,
@@ -17,9 +18,11 @@ import {
   FILE_TREE_COLUMN_MAX_WIDTH,
   FILE_TREE_COLUMN_MIN_WIDTH,
   FILE_TREE_COLUMN_WIDTH,
+  FILES_LISTING_CONVERSATION_ID,
   FILES_PANEL_MAX_WIDTH,
   FILES_PANEL_MIN_WIDTH,
   FILES_PANEL_WIDTH,
+  FILES_PANEL_WIDTH_FILES_SURFACE,
   SIDEBAR_CONVERSATION_ID_PARAM,
   SIDEBAR_MAX_WIDTH,
   SIDEBAR_MIN_WIDTH,
@@ -27,7 +30,7 @@ import {
 } from 'modules/pace/pace.constants';
 import { CHAT_SIDEBAR_STATE, type ChatSidebarState, TAB_TYPE } from 'modules/pace/pace.types';
 import { getInitialSidebarState, getInitialWidth } from 'modules/pace/pace.utils';
-import { usePathname } from 'next/navigation';
+import { usePathname, useSearchParams } from 'next/navigation';
 import { ROUTES_PATH } from '@/constants/routeConfig';
 import { useAppDispatch, useAppSelector } from '@/hooks/toolkit';
 import { store } from '@/store';
@@ -129,6 +132,7 @@ interface PaceContextType {
 
   hasActiveFileTab: boolean;
   hasActiveAgentTab: boolean;
+  hasActiveTaskTab: boolean;
   hasActivePanelTab: boolean;
 
   isFilesPanelExpanded: boolean;
@@ -149,7 +153,81 @@ interface PaceContextType {
   toggleNavSidebar: defaultFnType;
 }
 
+type PaceLayoutContextType = Pick<
+  PaceContextType,
+  | 'chatSidebarState'
+  | 'prevChatSidebarState'
+  | 'setChatSidebarState'
+  | 'filesPanelOpen'
+  | 'isFilesPanelHydrated'
+  | 'sidebarWidth'
+  | 'setSidebarWidth'
+  | 'persistSidebarWidth'
+  | 'isSidebarResizing'
+  | 'setIsSidebarResizing'
+  | 'filesPanelWidth'
+  | 'setFilesPanelWidth'
+  | 'persistFilesPanelWidth'
+  | 'isFilesPanelResizing'
+  | 'setIsFilesPanelResizing'
+  | 'treeColumnWidth'
+  | 'setTreeColumnWidth'
+  | 'persistTreeColumnWidth'
+  | 'isTreeColumnResizing'
+  | 'setIsTreeColumnResizing'
+  | 'hasActiveFileTab'
+  | 'hasActiveAgentTab'
+  | 'hasActiveTaskTab'
+  | 'hasActivePanelTab'
+  | 'isFilesPanelExpanded'
+  | 'toggleFilesPanelExpanded'
+  | 'setFilesPanelExpanded'
+  | 'isTreeSidebarOpen'
+  | 'toggleTreeSidebar'
+  | 'setTreeSidebarOpen'
+  | 'wordWrapEnabled'
+  | 'toggleWordWrap'
+  | 'isNavSidebarExpanded'
+  | 'toggleNavSidebar'
+>;
+
+type PaceConversationContextType = Pick<
+  PaceContextType,
+  | 'activeConversationId'
+  | 'setActiveConversationId'
+  | 'pendingFileReferences'
+  | 'setPendingFileReferences'
+  | 'clearPendingFileReferences'
+  | 'pendingMentionInserts'
+  | 'setPendingMentionInserts'
+  | 'clearPendingMentionInserts'
+  | 'sharedFileReferences'
+  | 'setSharedFileReferences'
+  | 'sharedExternalFilePaths'
+  | 'chatMessageIntent'
+  | 'setChatMessageIntent'
+  | 'activeAgentInfo'
+  | 'setActiveAgentInfo'
+  | 'selectedModel'
+  | 'setSelectedModel'
+>;
+
+type PaceActionsContextType = Pick<
+  PaceContextType,
+  | 'collapseSidebar'
+  | 'scheduleCollapseOnRouteChange'
+  | 'registerStartNewChat'
+  | 'startNewChat'
+  | 'logoAnimationKey'
+  | 'triggerLogoAnimation'
+  | 'registerSelectConversation'
+  | 'selectConversation'
+>;
+
 const PaceContext = createContext<PaceContextType | null>(null);
+const PaceLayoutContext = createContext<PaceLayoutContextType | null>(null);
+const PaceConversationContext = createContext<PaceConversationContextType | null>(null);
+const PaceActionsContext = createContext<PaceActionsContextType | null>(null);
 
 const getInitialBoolean = (key: LOCAL_STORAGE_KEYS, fallback: boolean): boolean => {
   if (typeof window === 'undefined') return fallback;
@@ -168,13 +246,15 @@ interface PaceProviderProps {
 
 export const PaceProvider = ({ children, initialNavSidebarExpanded = true }: PaceProviderProps) => {
   const pathname = usePathname();
+  const searchParams = useSearchParams();
   const dispatch = useAppDispatch();
   const activeTabId = useAppSelector(selectActiveTabId);
   const activeTab = useAppSelector(selectActiveTab);
   const activeConversationPanelState = useAppSelector(selectActiveConversationPanelState);
   const hasActiveFileTab = activeTab?.type === TAB_TYPE.FILE;
   const hasActiveAgentTab = activeTab?.type === TAB_TYPE.AGENT;
-  const hasActivePanelTab = hasActiveFileTab || hasActiveAgentTab;
+  const hasActiveTaskTab = activeTab?.type === TAB_TYPE.TASK;
+  const hasActivePanelTab = hasActiveFileTab || hasActiveAgentTab || hasActiveTaskTab;
   const pendingCollapseRef = useRef(false);
   const startNewChatRef = useRef<defaultFnType | null>(null);
   const selectConversationRef = useRef<((id: string, title?: string) => void) | null>(null);
@@ -195,12 +275,20 @@ export const PaceProvider = ({ children, initialNavSidebarExpanded = true }: Pac
     getInitialWidth(LOCAL_STORAGE_KEYS.PACE_SIDEBAR_WIDTH, SIDEBAR_MIN_WIDTH, SIDEBAR_MAX_WIDTH, SIDEBAR_WIDTH),
   );
   const [isSidebarResizing, setIsSidebarResizing] = useState(false);
-  const [filesPanelWidth, setFilesPanelWidthRaw] = useState(() =>
+  const [filesPanelWidthChat, setFilesPanelWidthChatRaw] = useState(() =>
     getInitialWidth(
       LOCAL_STORAGE_KEYS.PACE_FILES_PANEL_WIDTH,
       FILES_PANEL_MIN_WIDTH,
       FILES_PANEL_MAX_WIDTH,
       FILES_PANEL_WIDTH,
+    ),
+  );
+  const [filesPanelWidthFilesSurface, setFilesPanelWidthFilesSurfaceRaw] = useState(() =>
+    getInitialWidth(
+      LOCAL_STORAGE_KEYS.PACE_FILES_PANEL_WIDTH_FILES_SURFACE,
+      FILES_PANEL_MIN_WIDTH,
+      FILES_PANEL_MAX_WIDTH,
+      FILES_PANEL_WIDTH_FILES_SURFACE,
     ),
   );
   const [isFilesPanelResizing, setIsFilesPanelResizing] = useState(false);
@@ -227,6 +315,9 @@ export const PaceProvider = ({ children, initialNavSidebarExpanded = true }: Pac
   const isFilesPanelExpanded = activeConversationPanelState.isFilesPanelExpanded ?? globalFilesPanelExpandedDefault;
   const isTreeSidebarOpen = activeConversationPanelState.isTreeSidebarOpen ?? globalTreeSidebarOpenDefault;
   const wordWrapEnabled = activeConversationPanelState.wordWrapEnabled ?? globalWordWrapDefault;
+
+  const isFilesSurface = pathname === ROUTES_PATH.CHAT_FILES;
+  const filesPanelWidth = isFilesSurface ? filesPanelWidthFilesSurface : filesPanelWidthChat;
 
   const routeSignature = activeTabId
     ? `${pathname}:${activeConversationId ?? ''}:${activeTabId}`
@@ -259,6 +350,19 @@ export const PaceProvider = ({ children, initialNavSidebarExpanded = true }: Pac
     },
     [dispatch],
   );
+
+  useLayoutEffect(() => {
+    const routeConversationId =
+      pathname === ROUTES_PATH.CHAT
+        ? (searchParams?.get(SIDEBAR_CONVERSATION_ID_PARAM) ?? null)
+        : pathname === ROUTES_PATH.CHAT_FILES
+          ? FILES_LISTING_CONVERSATION_ID
+          : null;
+
+    if (activeConversationId === routeConversationId) return;
+
+    setActiveConversationId(routeConversationId);
+  }, [activeConversationId, pathname, searchParams, setActiveConversationId]);
 
   const collapseSidebar = useCallback(() => {
     setChatSidebarStateInternal(CHAT_SIDEBAR_STATE.COLLAPSED);
@@ -296,18 +400,33 @@ export const PaceProvider = ({ children, initialNavSidebarExpanded = true }: Pac
     [hasActivePanelTab],
   );
 
-  const setFilesPanelWidth = useCallback((width: number) => {
-    const clamped = Math.min(FILES_PANEL_MAX_WIDTH, Math.max(FILES_PANEL_MIN_WIDTH, width));
+  const setFilesPanelWidth = useCallback(
+    (width: number) => {
+      const clamped = Math.min(FILES_PANEL_MAX_WIDTH, Math.max(FILES_PANEL_MIN_WIDTH, width));
 
-    setFilesPanelWidthRaw(clamped);
-  }, []);
+      if (isFilesSurface) {
+        setFilesPanelWidthFilesSurfaceRaw(clamped);
+      } else {
+        setFilesPanelWidthChatRaw(clamped);
+      }
+    },
+    [isFilesSurface],
+  );
 
-  const persistFilesPanelWidth = useCallback((width: number) => {
-    const clamped = Math.min(FILES_PANEL_MAX_WIDTH, Math.max(FILES_PANEL_MIN_WIDTH, width));
+  const persistFilesPanelWidth = useCallback(
+    (width: number) => {
+      const clamped = Math.min(FILES_PANEL_MAX_WIDTH, Math.max(FILES_PANEL_MIN_WIDTH, width));
 
-    setFilesPanelWidthRaw(clamped);
-    setToLocalStorage(LOCAL_STORAGE_KEYS.PACE_FILES_PANEL_WIDTH, String(clamped));
-  }, []);
+      if (isFilesSurface) {
+        setFilesPanelWidthFilesSurfaceRaw(clamped);
+        setToLocalStorage(LOCAL_STORAGE_KEYS.PACE_FILES_PANEL_WIDTH_FILES_SURFACE, String(clamped));
+      } else {
+        setFilesPanelWidthChatRaw(clamped);
+        setToLocalStorage(LOCAL_STORAGE_KEYS.PACE_FILES_PANEL_WIDTH, String(clamped));
+      }
+    },
+    [isFilesSurface],
+  );
 
   const setTreeColumnWidth = useCallback((width: number) => {
     const clamped = Math.min(FILE_TREE_COLUMN_MAX_WIDTH, Math.max(FILE_TREE_COLUMN_MIN_WIDTH, width));
@@ -460,8 +579,10 @@ export const PaceProvider = ({ children, initialNavSidebarExpanded = true }: Pac
 
       if (isTabIdHydration) return;
 
-      if (chatSidebarStateRef.current === CHAT_SIDEBAR_STATE.EXPANDED) {
-        setChatSidebarStateInternal(CHAT_SIDEBAR_STATE.SIDEBAR);
+      if (activeTabId && hasSidebarConversation) {
+        if (chatSidebarStateRef.current !== CHAT_SIDEBAR_STATE.SIDEBAR) {
+          setChatSidebarStateInternal(CHAT_SIDEBAR_STATE.SIDEBAR);
+        }
       }
     },
     [pathname, activeTabId, setChatSidebarStateInternal],
@@ -513,7 +634,7 @@ export const PaceProvider = ({ children, initialNavSidebarExpanded = true }: Pac
     const effectiveMax = Math.min(FILES_PANEL_MAX_WIDTH, Math.max(FILES_PANEL_MIN_WIDTH, available));
 
     if (filesPanelWidth > effectiveMax) {
-      setFilesPanelWidthRaw(effectiveMax);
+      setFilesPanelWidthChatRaw(effectiveMax);
       setToLocalStorage(LOCAL_STORAGE_KEYS.PACE_FILES_PANEL_WIDTH, String(effectiveMax));
     }
   }, [filesPanelOpen, filesPanelWidth, sidebarWidth, hasActivePanelTab]);
@@ -543,6 +664,172 @@ export const PaceProvider = ({ children, initialNavSidebarExpanded = true }: Pac
       return SIDEBAR_MAX_WIDTH;
     });
   }, [hasActivePanelTab]);
+
+  const layoutValue: PaceLayoutContextType = useMemo(
+    () => ({
+      chatSidebarState,
+      prevChatSidebarState,
+      setChatSidebarState,
+
+      filesPanelOpen,
+      isFilesPanelHydrated,
+
+      sidebarWidth,
+      setSidebarWidth,
+      persistSidebarWidth,
+      isSidebarResizing,
+      setIsSidebarResizing,
+
+      filesPanelWidth,
+      setFilesPanelWidth,
+      persistFilesPanelWidth,
+      isFilesPanelResizing,
+      setIsFilesPanelResizing,
+
+      treeColumnWidth,
+      setTreeColumnWidth,
+      persistTreeColumnWidth,
+      isTreeColumnResizing,
+      setIsTreeColumnResizing,
+
+      hasActiveFileTab,
+      hasActiveAgentTab,
+      hasActiveTaskTab,
+      hasActivePanelTab,
+
+      isFilesPanelExpanded,
+      toggleFilesPanelExpanded,
+      setFilesPanelExpanded,
+
+      isTreeSidebarOpen,
+      toggleTreeSidebar,
+      setTreeSidebarOpen,
+
+      wordWrapEnabled,
+      toggleWordWrap,
+
+      isNavSidebarExpanded,
+      toggleNavSidebar,
+    }),
+    [
+      chatSidebarState,
+      prevChatSidebarState,
+      setChatSidebarState,
+
+      filesPanelOpen,
+      isFilesPanelHydrated,
+
+      sidebarWidth,
+      setSidebarWidth,
+      persistSidebarWidth,
+      isSidebarResizing,
+
+      filesPanelWidth,
+      setFilesPanelWidth,
+      persistFilesPanelWidth,
+      isFilesPanelResizing,
+
+      treeColumnWidth,
+      setTreeColumnWidth,
+      persistTreeColumnWidth,
+      isTreeColumnResizing,
+
+      hasActiveFileTab,
+      hasActiveAgentTab,
+      hasActiveTaskTab,
+      hasActivePanelTab,
+
+      isFilesPanelExpanded,
+      toggleFilesPanelExpanded,
+      setFilesPanelExpanded,
+
+      isTreeSidebarOpen,
+      toggleTreeSidebar,
+      setTreeSidebarOpen,
+
+      wordWrapEnabled,
+      toggleWordWrap,
+
+      isNavSidebarExpanded,
+      toggleNavSidebar,
+    ],
+  );
+
+  const conversationValue: PaceConversationContextType = useMemo(
+    () => ({
+      activeConversationId,
+      setActiveConversationId,
+
+      pendingFileReferences,
+      setPendingFileReferences,
+      clearPendingFileReferences,
+
+      pendingMentionInserts,
+      setPendingMentionInserts,
+      clearPendingMentionInserts,
+
+      sharedFileReferences,
+      setSharedFileReferences,
+      sharedExternalFilePaths,
+
+      chatMessageIntent,
+      setChatMessageIntent,
+
+      activeAgentInfo,
+      setActiveAgentInfo,
+
+      selectedModel,
+      setSelectedModel,
+    }),
+    [
+      activeConversationId,
+      setActiveConversationId,
+
+      pendingFileReferences,
+      clearPendingFileReferences,
+
+      pendingMentionInserts,
+      clearPendingMentionInserts,
+
+      sharedFileReferences,
+
+      chatMessageIntent,
+
+      activeAgentInfo,
+
+      selectedModel,
+      setSelectedModel,
+    ],
+  );
+
+  const actionsValue: PaceActionsContextType = useMemo(
+    () => ({
+      collapseSidebar,
+      scheduleCollapseOnRouteChange,
+
+      registerStartNewChat,
+      startNewChat,
+
+      logoAnimationKey,
+      triggerLogoAnimation,
+
+      registerSelectConversation,
+      selectConversation,
+    }),
+    [
+      collapseSidebar,
+      scheduleCollapseOnRouteChange,
+
+      registerStartNewChat,
+      startNewChat,
+
+      logoAnimationKey,
+      triggerLogoAnimation,
+
+      registerSelectConversation,
+      selectConversation,
+    ],
+  );
 
   const value: PaceContextType = useMemo(
     () => ({
@@ -605,6 +892,7 @@ export const PaceProvider = ({ children, initialNavSidebarExpanded = true }: Pac
 
       hasActiveFileTab,
       hasActiveAgentTab,
+      hasActiveTaskTab,
       hasActivePanelTab,
 
       isFilesPanelExpanded,
@@ -675,6 +963,7 @@ export const PaceProvider = ({ children, initialNavSidebarExpanded = true }: Pac
 
       hasActiveFileTab,
       hasActiveAgentTab,
+      hasActiveTaskTab,
       hasActivePanelTab,
 
       isFilesPanelExpanded,
@@ -696,7 +985,15 @@ export const PaceProvider = ({ children, initialNavSidebarExpanded = true }: Pac
     ],
   );
 
-  return <PaceContext.Provider value={value}>{children}</PaceContext.Provider>;
+  return (
+    <PaceActionsContext.Provider value={actionsValue}>
+      <PaceConversationContext.Provider value={conversationValue}>
+        <PaceLayoutContext.Provider value={layoutValue}>
+          <PaceContext.Provider value={value}>{children}</PaceContext.Provider>
+        </PaceLayoutContext.Provider>
+      </PaceConversationContext.Provider>
+    </PaceActionsContext.Provider>
+  );
 };
 
 export const usePaceContext = () => {
@@ -704,6 +1001,36 @@ export const usePaceContext = () => {
 
   if (!context) {
     throw new Error('usePaceContext must be used within a PaceProvider');
+  }
+
+  return context;
+};
+
+export const usePaceLayoutContext = () => {
+  const context = useContext(PaceLayoutContext);
+
+  if (!context) {
+    throw new Error('usePaceLayoutContext must be used within a PaceProvider');
+  }
+
+  return context;
+};
+
+export const usePaceConversationContext = () => {
+  const context = useContext(PaceConversationContext);
+
+  if (!context) {
+    throw new Error('usePaceConversationContext must be used within a PaceProvider');
+  }
+
+  return context;
+};
+
+export const usePaceActionsContext = () => {
+  const context = useContext(PaceActionsContext);
+
+  if (!context) {
+    throw new Error('usePaceActionsContext must be used within a PaceProvider');
   }
 
   return context;

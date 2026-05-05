@@ -1,5 +1,7 @@
 'use client';
 
-const AppsPage = () => null;
+import AppsListingPage from '@/modules/apps/AppsListingPage';
+
+const AppsPage = () => <AppsListingPage />;
 
 export default AppsPage;

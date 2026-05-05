@@ -6,11 +6,12 @@ import { TASK_STATUS, TaskStatusIcon } from '@zamp-platform/chat';
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger, Button } from '@zamp-platform/ui';
 import { ArrowRight } from 'lucide-react';
 import { preserveSidebarParam } from 'modules/pace/pace.utils';
-import { useRouter } from 'next/navigation';
-import { getChatTaskRoute } from '@/constants/routeConfig';
+import { usePathname, useRouter } from 'next/navigation';
+import { getChatTaskRoute, ROUTES_PATH } from '@/constants/routeConfig';
 import ProgressWheel from '@/modules/pace/components/tasks/components/ProgressWheel';
 import SubtaskPopover from '@/modules/pace/components/tasks/components/SubtaskPopover';
 import type { SubTask } from '@/modules/pace/components/tasks/types/tasks.types';
+import { markNavAsSubtask } from '@/modules/pace/hooks/useTabRouter';
 
 interface InlineSubtaskSectionProps {
   subtasks: SubTask[];
@@ -19,6 +20,8 @@ interface InlineSubtaskSectionProps {
 
 const InlineSubtaskSection = ({ subtasks, parentTasks }: InlineSubtaskSectionProps) => {
   const router = useRouter();
+  const pathname = usePathname();
+  const inChat = pathname === ROUTES_PATH.CHAT;
 
   const totalCount = subtasks.length;
   const completedCount = useMemo(() => subtasks.filter((s) => s.status === TASK_STATUS.COMPLETED).length, [subtasks]);
@@ -64,11 +67,13 @@ const InlineSubtaskSection = ({ subtasks, parentTasks }: InlineSubtaskSectionPro
         currentIndex: statusIndex,
         totalRows: statusTotal,
         siblings,
+        inChat,
       });
 
+      if (inChat) markNavAsSubtask(subtask.id);
       router.push(preserveSidebarParam(route));
     },
-    [router, parentTasks, siblings, statusIndexMap, statusTotalMap],
+    [router, parentTasks, siblings, statusIndexMap, statusTotalMap, inChat],
   );
 
   if (totalCount === 0) return null;

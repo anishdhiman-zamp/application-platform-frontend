@@ -3,16 +3,27 @@
 import { useEffect, useRef } from 'react';
 import { cn } from '@zamp-platform/ui/utils';
 import { AnimatePresence, motion, useReducedMotion } from 'framer-motion';
+import { usePathname } from 'next/navigation';
+import { ROUTES_PATH } from '@/constants/routeConfig';
 import FilesPanelBody from '@/modules/pace/components/files-panel/FilesPanelBody';
 import { FilesPanelHeaderSlotProvider } from '@/modules/pace/components/files-panel/FilesPanelHeaderSlot';
 import FilesPanelInternalResizeHandle from '@/modules/pace/components/files-panel/FilesPanelInternalResizeHandle';
 import FilesPanelTopBar from '@/modules/pace/components/files-panel/FilesPanelTopBar';
 import FilesPanelTreeSidebar from '@/modules/pace/components/files-panel/FilesPanelTreeSidebar';
 import { NO_ANIMATION } from '@/modules/pace/pace.animations';
-import { usePaceContext } from '@/modules/pace/pace.context';
+import { usePaceConversationContext, usePaceLayoutContext } from '@/modules/pace/pace.context';
 import { SIDEBAR_TOGGLE_TRANSITION } from '@/utils/animations/sidebar.animations';
 
 const FILES_PANEL_TRANSITION = SIDEBAR_TOGGLE_TRANSITION;
+
+type PanelHostSurface = 'chat' | 'files' | null;
+
+const getPanelHostSurface = (pathname: string | null): PanelHostSurface => {
+  if (pathname === ROUTES_PATH.CHAT) return 'chat';
+  if (pathname === ROUTES_PATH.CHAT_FILES) return 'files';
+
+  return null;
+};
 
 const FilesPanel = () => {
   const {
@@ -25,22 +36,31 @@ const FilesPanel = () => {
     isTreeSidebarOpen,
     isFilesPanelExpanded,
     hasActivePanelTab,
-    activeConversationId,
-  } = usePaceContext();
+  } = usePaceLayoutContext();
+  const { activeConversationId } = usePaceConversationContext();
+  const pathname = usePathname();
+  const panelHostSurface = getPanelHostSurface(pathname);
 
   const prevConversationIdRef = useRef(activeConversationId);
+  const prevPanelHostSurfaceRef = useRef(panelHostSurface);
   const isConversationSwitch = prevConversationIdRef.current !== activeConversationId;
+  const isPanelHostSwitch =
+    prevPanelHostSurfaceRef.current !== null &&
+    panelHostSurface !== null &&
+    prevPanelHostSurfaceRef.current !== panelHostSurface;
+  const isInstantSwitch = isConversationSwitch || isPanelHostSwitch;
   const shouldReduceMotion = useReducedMotion();
   const animatedWidth = isFilesPanelExpanded ? '100%' : filesPanelWidth;
-  const baseTransition = shouldReduceMotion || isConversationSwitch ? NO_ANIMATION : FILES_PANEL_TRANSITION;
+  const baseTransition = shouldReduceMotion || isInstantSwitch ? NO_ANIMATION : FILES_PANEL_TRANSITION;
   const widthTransition = isFilesPanelResizing ? NO_ANIMATION : baseTransition;
   const treeTransition = isTreeColumnResizing ? NO_ANIMATION : baseTransition;
   const exitTransition =
-    hasActivePanelTab && !shouldReduceMotion && !isConversationSwitch ? FILES_PANEL_TRANSITION : NO_ANIMATION;
+    hasActivePanelTab && !shouldReduceMotion && !isInstantSwitch ? FILES_PANEL_TRANSITION : NO_ANIMATION;
 
   useEffect(() => {
     prevConversationIdRef.current = activeConversationId;
-  }, [activeConversationId]);
+    prevPanelHostSurfaceRef.current = panelHostSurface;
+  }, [activeConversationId, panelHostSurface]);
 
   return (
     <AnimatePresence>
@@ -71,7 +91,7 @@ const FilesPanel = () => {
                   transition={treeTransition}
                   className='flex min-w-0 flex-1 flex-col overflow-hidden'
                 >
-                  <FilesPanelBody key={activeConversationId ?? '__none__'} />
+                  <FilesPanelBody key={`${panelHostSurface ?? '__none__'}:${activeConversationId ?? '__none__'}`} />
                 </motion.div>
                 <AnimatePresence>
                   {isTreeSidebarOpen && (

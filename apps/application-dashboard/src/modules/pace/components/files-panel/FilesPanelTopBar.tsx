@@ -5,10 +5,10 @@ import { Button } from '@zamp-platform/ui';
 import { Maximize2, Minimize2 } from 'lucide-react';
 import FilesPanelAddTabMenu from '@/modules/pace/components/files-panel/FilesPanelAddTabMenu';
 import FilesPanelTabStrip from '@/modules/pace/components/files-panel/FilesPanelTabStrip';
-import { usePaceContext } from '@/modules/pace/pace.context';
+import { usePaceLayoutContext } from '@/modules/pace/pace.context';
 
 const FilesPanelTopBar = () => {
-  const { isFilesPanelExpanded, toggleFilesPanelExpanded } = usePaceContext();
+  const { isFilesPanelExpanded, toggleFilesPanelExpanded } = usePaceLayoutContext();
 
   const [isTabsOverflowing, setIsTabsOverflowing] = useState(false);
 

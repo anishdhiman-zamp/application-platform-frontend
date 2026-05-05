@@ -60,11 +60,15 @@ export const ACCEPTED_FILE_TYPES = `${INPUT_FILE_FORMATS.TXT},${INPUT_FILE_FORMA
 export const DEFAULT_CHAT_TITLE = 'Start a new chat';
 export const DEBOUNCE_DELAY_MS = 300;
 export const NEW_CONVERSATION_ID = 'null_thread';
+// Dedicated dynamic-tabs bucket for files opened from /chat/files. Keeps the listing
+// page's file viewer state isolated from any chat conversation's open tabs.
+export const FILES_LISTING_CONVERSATION_ID = '__files_listing__';
 export const SIDEBAR_WIDTH = 450;
 export const SIDEBAR_MIN_WIDTH = 345;
 export const SIDEBAR_MAX_WIDTH = 700;
 export const SIDEBAR_CONVERSATION_ID_PARAM = 's';
 export const FILES_PANEL_WIDTH = 345;
+export const FILES_PANEL_WIDTH_FILES_SURFACE = 800;
 export const FILES_PANEL_MIN_WIDTH = 200;
 export const FILES_PANEL_MAX_WIDTH = 4000;
 export const FILES_PANEL_WITH_VIEWER_WIDTH = 1000;

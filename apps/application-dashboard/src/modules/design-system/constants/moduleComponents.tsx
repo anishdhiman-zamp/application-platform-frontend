@@ -1,7 +1,6 @@
 'use client';
 
 import type { ComponentEntryType } from 'modules/design-system/types/design-system.types';
-import AppRowSkeleton from '@/modules/apps/components/AppRowSkeleton';
 import CredentialDialogSkeleton from '@/modules/credentials-vault/skeletons/CredentialDialogSkeleton';
 import CredentialsListSkeleton from '@/modules/credentials-vault/skeletons/CredentialsListSkeleton';
 import SkeletonLoaderFileHistory from '@/modules/data/components/SkeletonLoaderFileHistory';
@@ -204,15 +203,6 @@ export const MODULE_COMPONENTS: ComponentEntryType[] = [
     description: 'File-history listing skeleton.',
     renderable: true,
     preview: <SkeletonLoaderFileHistory />,
-  },
-  {
-    id: 'mod-app-row-skeleton',
-    name: 'AppRowSkeleton',
-    category: 'Module Components',
-    filePath: 'src/modules/apps/components/AppRowSkeleton.tsx',
-    description: 'Single row skeleton for the apps listing.',
-    renderable: true,
-    preview: <AppRowSkeleton />,
   },
   {
     id: 'mod-knowledge-base-content-skeleton',

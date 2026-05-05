@@ -13,13 +13,6 @@ export const useFilesystemStatus = ({ enabled = true }: { enabled?: boolean } = 
   const [provisionFilesystem, { isError: isFilesError }] = useProvisionFilesystemMutation();
 
   const isActive = filesystemStatus?.status === FILESYSTEM_STATUS.ACTIVE;
-  const pollingInterval = isActive || isStatusError || isFilesError ? 0 : FILESYSTEM_POLL_INTERVAL_MS;
-
-  useGetFilesystemStatusQuery(undefined, {
-    pollingInterval,
-    skip: !enabled || isStatusError,
-  });
-
   const refetch = () => {
     refetchStatus();
     provisionFilesystem();
@@ -29,6 +22,16 @@ export const useFilesystemStatus = ({ enabled = true }: { enabled?: boolean } = 
     if (!enabled) return;
     provisionFilesystem();
   }, [enabled, provisionFilesystem]);
+
+  useEffect(() => {
+    if (!enabled || isActive || isStatusError || isFilesError) return;
+
+    const intervalId = window.setInterval(() => {
+      refetchStatus();
+    }, FILESYSTEM_POLL_INTERVAL_MS);
+
+    return () => window.clearInterval(intervalId);
+  }, [enabled, isActive, isStatusError, isFilesError, refetchStatus]);
 
   return {
     isFilesystemActive: isActive,

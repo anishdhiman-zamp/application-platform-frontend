@@ -37,7 +37,7 @@ import { useDynamicTabs } from '@/modules/pace/components/dynamic-tabs/useDynami
 import TaskAccordionGroup from '@/modules/pace/components/tasks/components/TaskAccordionGroup';
 import { setNewChatDraft } from '@/modules/pace/hooks/useChatDraftInput';
 import { useTriggerChatMessageFromButton } from '@/modules/pace/hooks/useTriggerChatMessageFromButton';
-import { usePaceContext } from '@/modules/pace/pace.context';
+import { usePaceLayoutContext } from '@/modules/pace/pace.context';
 import { CHAT_SIDEBAR_STATE, TAB_TYPE } from '@/modules/pace/pace.types';
 interface AgentDetailPageProps {
   agentId: string;
@@ -208,7 +208,7 @@ const AgentDetailPage = ({ agentId, agentName, agentDescription = '', avatarKey 
     [debouncedUpdate],
   );
 
-  const { chatSidebarState, setChatSidebarState } = usePaceContext();
+  const { chatSidebarState, setChatSidebarState } = usePaceLayoutContext();
 
   const handleOpenSidebar = useCallback(() => {
     if (chatSidebarState === CHAT_SIDEBAR_STATE.COLLAPSED) {

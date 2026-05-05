@@ -41,6 +41,7 @@ import { useAppSelector } from '@/hooks/toolkit';
 import ContentErrorState from '@/modules/pace/components/ContentErrorState';
 import { getActiveTabIdFromUrl } from '@/modules/pace/components/dynamic-tabs/tab-type-registry';
 import TaskContentSkeleton from '@/modules/pace/components/loaders/TaskContentSkeleton';
+import BackToParentButton from '@/modules/pace/components/tasks/components/BackToParentButton';
 import InlineSubtaskSection from '@/modules/pace/components/tasks/components/InlineSubtaskSection';
 import { HITL_RESPONDED_EVENT } from '@/modules/pace/components/tasks/constants/tasks.constants';
 import {
@@ -64,9 +65,10 @@ import type { RootState } from '@/store';
 
 interface TaskContentInnerProps {
   taskId: string;
+  hideTopbar?: boolean;
 }
 
-const TaskContentChat = ({ taskId }: { taskId: string }) => {
+const TaskContentChat = ({ taskId, hideTopbar }: { taskId: string; hideTopbar?: boolean }) => {
   // Refs
   const hadStreamingRef = useRef(false);
   const prevBrowserStreamingRef = useRef(false);
@@ -427,25 +429,33 @@ const TaskContentChat = ({ taskId }: { taskId: string }) => {
       isBrowserStreamingAvailable={isBrowserStreamingAvailable}
     >
       <div className='relative flex h-full flex-1 flex-col'>
-        <TaskTopbar
-          className='border-GRAY_100 border-b'
-          title={chatTitle || 'Untitled'}
-          status={effectiveStatus}
-          isSubtask={isSubtask}
-          parentTasks={liveParentTasks}
-          navigationSlot={
-            <TaskNavigation
-              currentIndex={currentIndex}
-              totalCount={totalCount}
-              hasNext={hasNext}
-              hasPrevious={hasPrevious}
-              isLoading={isLoading}
-              isBootstrapping={isBootstrapping}
-              onGoToNextTask={goToNextTask}
-              onGoToPreviousTask={goToPreviousTask}
-            />
-          }
-        />
+        {!hideTopbar && (
+          <TaskTopbar
+            className='border-GRAY_100 border-b'
+            title={chatTitle || 'Untitled'}
+            status={effectiveStatus}
+            isSubtask={isSubtask}
+            parentTasks={liveParentTasks}
+            navigationSlot={
+              <TaskNavigation
+                currentIndex={currentIndex}
+                totalCount={totalCount}
+                hasNext={hasNext}
+                hasPrevious={hasPrevious}
+                isLoading={isLoading}
+                isBootstrapping={isBootstrapping}
+                onGoToNextTask={goToNextTask}
+                onGoToPreviousTask={goToPreviousTask}
+              />
+            }
+          />
+        )}
+        {hideTopbar && isSubtask && liveParentTasks.length > 0 && (
+          <BackToParentButton
+            parent={liveParentTasks[liveParentTasks.length - 1]}
+            ancestorsAbove={liveParentTasks.slice(0, -1)}
+          />
+        )}
         <CommonWrapper
           isLoading={isLoadingConversation}
           isError={isErrorHistory}
@@ -589,7 +599,7 @@ const TaskContentChat = ({ taskId }: { taskId: string }) => {
   );
 };
 
-const TaskContentInner = ({ taskId: propTaskId }: TaskContentInnerProps) => {
+const TaskContentInner = ({ taskId: propTaskId, hideTopbar }: TaskContentInnerProps) => {
   const nextPathname = usePathname();
   const nextSearchParams = useSearchParams();
   const urlTaskId = useMemo(
@@ -607,7 +617,7 @@ const TaskContentInner = ({ taskId: propTaskId }: TaskContentInnerProps) => {
       resourceType={ResourceType.ORGANIZATION}
       apiConfig={{ getTaskMessages: API_ENDPOINTS.TASKS_MESSAGES_GET }}
     >
-      <TaskContentChat key={taskId} taskId={taskId} />
+      <TaskContentChat key={taskId} taskId={taskId} hideTopbar={hideTopbar} />
     </TaskProvider>
   );
 };

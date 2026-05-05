@@ -4,8 +4,9 @@ import { type FC, useCallback } from 'react';
 import { type TaskBreadcrumb, type TaskStatus, TaskStatusIcon } from '@zamp-platform/chat';
 import { cn } from '@zamp-platform/ui/utils';
 import { ArrowLeft } from 'lucide-react';
-import { useRouter, useSearchParams } from 'next/navigation';
+import { usePathname, useRouter, useSearchParams } from 'next/navigation';
 import { getChatTaskRoute, ROUTES_PATH, TASK_QUERY_PARAMS } from '@/constants/routeConfig';
+import { markNavAsSubtask } from '@/modules/pace/hooks/useTabRouter';
 import TaskBreadcrumbNav from '@/modules/pace/module/TaskBreadcrumb';
 import { preserveSidebarParam } from '@/modules/pace/pace.utils';
 
@@ -21,6 +22,8 @@ interface TaskTopbarProps {
 const TaskTopbar: FC<TaskTopbarProps> = ({ className, title, status, isSubtask, parentTasks, navigationSlot }) => {
   const router = useRouter();
   const searchParams = useSearchParams();
+  const pathname = usePathname();
+  const inChat = pathname === ROUTES_PATH.CHAT;
   const referrer = searchParams?.get(TASK_QUERY_PARAMS.REFERRER);
   const displayTitle = title || 'Untitled';
 
@@ -36,15 +39,17 @@ const TaskTopbar: FC<TaskTopbarProps> = ({ className, title, status, isSubtask, 
         currentIndex: lastParent?.currentIndex,
         totalRows: lastParent?.totalRows,
         parentTasks: ancestorsAbove?.length > 0 ? ancestorsAbove : undefined,
+        inChat,
       });
 
+      if (inChat) markNavAsSubtask(lastParent?.id);
       router.push(preserveSidebarParam(route));
     } else if (referrer && referrer.startsWith(ROUTES_PATH.HOME)) {
       router.push(referrer);
     } else {
       router.push(preserveSidebarParam(ROUTES_PATH.CHAT_TASKS));
     }
-  }, [isSubtask, parentTasks, router, referrer]);
+  }, [isSubtask, parentTasks, router, referrer, inChat]);
 
   return (
     <div className={cn('bg-BG_WHITE flex items-center justify-between gap-x-3 p-3', className)}>

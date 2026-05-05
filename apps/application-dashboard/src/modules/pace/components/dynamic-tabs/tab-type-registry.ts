@@ -29,11 +29,11 @@ export const TAB_TYPE_REGISTRY: Record<DynamicTabType, TabTypeDefinition> = {
   },
   [TAB_TYPE.TASK]: {
     kind: ROUTE_KIND.QUERY,
-    basePath: ROUTES_PATH.CHAT_TASK,
+    basePath: ROUTES_PATH.CHAT,
     paramName: TAB_QUERY_PARAM.TASK,
-    buildPath: (id: string) => `${ROUTES_PATH.CHAT_TASK}?${TAB_QUERY_PARAM.TASK}=${encodeURIComponent(id)}`,
+    buildPath: (id: string) => `${ROUTES_PATH.CHAT}?${TAB_QUERY_PARAM.TASK}=${encodeURIComponent(id)}`,
     parseId: (pathname: string, search: string) => {
-      if (pathname !== ROUTES_PATH.CHAT_TASK) return null;
+      if (pathname !== ROUTES_PATH.CHAT) return null;
 
       return new URLSearchParams(search).get(TAB_QUERY_PARAM.TASK);
     },

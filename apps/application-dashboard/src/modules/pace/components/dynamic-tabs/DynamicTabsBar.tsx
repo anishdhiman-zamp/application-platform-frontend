@@ -23,13 +23,14 @@ import OverflowTabsPopover from '@/modules/pace/components/dynamic-tabs/Overflow
 import SortableDynamicTabItem from '@/modules/pace/components/dynamic-tabs/SortableDynamicTabItem';
 import { useDynamicTabs } from '@/modules/pace/components/dynamic-tabs/useDynamicTabs';
 import { useVisibleTabCount } from '@/modules/pace/components/dynamic-tabs/useVisibleTabCount';
-import { usePaceContext } from '@/modules/pace/pace.context';
+import { usePaceActionsContext, usePaceLayoutContext } from '@/modules/pace/pace.context';
 
 const DynamicTabsBar = () => {
   const hasMountedRef = useRef(false);
   const tabsContainerRef = useRef<HTMLDivElement>(null);
 
-  const { chatSidebarState, setChatSidebarState, scheduleCollapseOnRouteChange } = usePaceContext();
+  const { chatSidebarState, setChatSidebarState } = usePaceLayoutContext();
+  const { scheduleCollapseOnRouteChange } = usePaceActionsContext();
   const {
     tabs,
     isTabActive,

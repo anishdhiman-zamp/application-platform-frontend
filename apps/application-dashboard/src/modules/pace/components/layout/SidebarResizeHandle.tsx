@@ -8,7 +8,7 @@ import {
   SIDEBAR_MAX_WIDTH,
   SIDEBAR_MIN_WIDTH,
 } from 'modules/pace/pace.constants';
-import { usePaceContext } from '@/modules/pace/pace.context';
+import { usePaceLayoutContext } from '@/modules/pace/pace.context';
 
 const HANDLE_WIDTH = 8;
 const PADDING = 16;
@@ -23,7 +23,7 @@ const SidebarResizeHandle = () => {
     filesPanelOpen,
     filesPanelWidth,
     hasActivePanelTab,
-  } = usePaceContext();
+  } = usePaceLayoutContext();
 
   const dragStartXRef = useRef<number>(0);
   const dragStartWidthRef = useRef<number>(sidebarWidth);

@@ -1,6 +1,7 @@
 'use client';
 
 import type { FC, ReactNode } from 'react';
+import { usePathname } from 'next/navigation';
 import NotFound from '@/app/not-found';
 import ImageLoader from '@/components/common/loader/ImageLoader';
 import CommonWrapper from '@/components/commonWrapper';
@@ -16,18 +17,22 @@ interface PaceLayoutProps {
 }
 
 const PaceLayout: FC<PaceLayoutProps> = ({ children }) => {
+  const pathname = usePathname();
   const { isEnabled: isPaceChatEnabled, isLoading } = useIsPaceChatEnabled();
+  const isFilesystemSurface =
+    pathname === '/chat' || pathname?.startsWith('/chat/files') || pathname?.startsWith('/chat/dataset');
+  const shouldPrepareFilesystem = isPaceChatEnabled && isFilesystemSurface;
   const {
     isFilesystemActive,
     isFilesystemStatusLoading,
     isFilesystemError,
     refetch: refetchStatus,
-  } = useFilesystemStatus({ enabled: isPaceChatEnabled });
+  } = useFilesystemStatus({ enabled: shouldPrepareFilesystem });
 
-  useDataPrefetch();
+  useDataPrefetch({ enabled: pathname === '/chat' });
 
   const isFilesystemLoading =
-    isPaceChatEnabled && (isFilesystemStatusLoading || (!isFilesystemActive && !isFilesystemError));
+    shouldPrepareFilesystem && (isFilesystemStatusLoading || (!isFilesystemActive && !isFilesystemError));
   const isPageLoading = isLoading || isFilesystemLoading;
 
   return (

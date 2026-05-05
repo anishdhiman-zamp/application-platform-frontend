@@ -61,6 +61,30 @@ export const consumeNavReplaceFlag = (): boolean => {
   return false;
 };
 
+// In-tab subtask drill: the URL changes to a different task id, but we want the
+// active tab to keep its identity (id/name) so the tab chip continues showing the
+// root task. Only the stored path is updated so refresh restores the subtask view.
+//
+// Id-keyed token (not a counter): many `useTabRouter` instances run `syncFromUrl`
+// on each URL change. A counter would be consumed by the first one and the rest
+// would fall through to `openTab`, creating a duplicate tab. The token is checked
+// (not consumed) by every instance for the same target task id, then auto-clears.
+let pendingSubtaskNavId: string | null = null;
+let pendingSubtaskNavTimeout: ReturnType<typeof setTimeout> | null = null;
+
+export const markNavAsSubtask = (targetId: string) => {
+  pendingSubtaskNavId = targetId;
+  if (pendingSubtaskNavTimeout) clearTimeout(pendingSubtaskNavTimeout);
+  pendingSubtaskNavTimeout = setTimeout(() => {
+    pendingSubtaskNavId = null;
+    pendingSubtaskNavTimeout = null;
+  }, 500);
+};
+
+const isPendingSubtaskNavForId = (id: string): boolean => {
+  return pendingSubtaskNavId === id;
+};
+
 export const useTabRouter = (config: UseTabRouterConfig = {}): UseTabRouterReturn => {
   const { type } = config;
   const router = useRouter();
@@ -171,8 +195,24 @@ export const useTabRouter = (config: UseTabRouterConfig = {}): UseTabRouterRetur
       // tab in-place instead of opening a new one. This keeps pagination within a
       // single tab while still creating new tabs for explicit opens (router.push).
       const wasReplace = consumeNavReplaceFlag();
+      const wasSubtaskNav = isPendingSubtaskNavForId(urlTabId);
       const activeTabId = selectActiveTabId(store.getState());
       const activeTab = activeTabId ? currentTabs.find((t) => t.id === activeTabId) : null;
+
+      // In-tab subtask drill: keep the tab's id/name; only update the stored path
+      // so persistence and tab-strip switching restore the current subtask view.
+      if (wasSubtaskNav && activeTab && (activeTab.type ?? TAB_TYPE.FILE) === urlTabType) {
+        if (activeTab.path !== tabPath) {
+          dispatch(
+            dynamicTabsActions.updateTab({
+              oldId: activeTab.id,
+              newTab: { ...activeTab, path: tabPath },
+            }),
+          );
+        }
+
+        return;
+      }
 
       if (wasReplace && activeTab && (activeTab.type ?? TAB_TYPE.FILE) === urlTabType) {
         dispatch(

@@ -4,12 +4,13 @@ import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import type { SiblingTask, TaskBreadcrumb } from '@zamp-platform/chat';
 import { Button, Popover, PopoverContent, PopoverTrigger } from '@zamp-platform/ui';
 import { preserveSidebarParam } from 'modules/pace/pace.utils';
-import { useRouter } from 'next/navigation';
-import { getChatTaskRoute } from '@/constants/routeConfig';
+import { usePathname, useRouter } from 'next/navigation';
+import { getChatTaskRoute, ROUTES_PATH } from '@/constants/routeConfig';
 import NestedSubtaskCount from '@/modules/pace/components/tasks/components/NestedSubtaskCount';
 import ProgressWheel from '@/modules/pace/components/tasks/components/ProgressWheel';
 import SubtaskListItem from '@/modules/pace/components/tasks/components/SubtaskListItem';
 import type { SubTask } from '@/modules/pace/components/tasks/types/tasks.types';
+import { markNavAsSubtask } from '@/modules/pace/hooks/useTabRouter';
 
 const POPOVER_WIDTH = 424;
 const POPOVER_MAX_HEIGHT = 500;
@@ -26,6 +27,8 @@ const HOVER_CLOSE_DELAY = 300;
 
 const SubtaskPopover = ({ subtasks, completedCount, totalCount, parentTasks }: SubtaskPopoverProps) => {
   const router = useRouter();
+  const pathname = usePathname();
+  const inChat = pathname === ROUTES_PATH.CHAT;
   const [isOpen, setIsOpen] = useState(false);
   const hoverTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 
@@ -86,11 +89,13 @@ const SubtaskPopover = ({ subtasks, completedCount, totalCount, parentTasks }: S
         status: siblings.length > 0 ? subtask.status : undefined,
         currentIndex: statusIndex,
         totalRows: statusTotal,
+        inChat,
       });
 
+      if (inChat) markNavAsSubtask(subtask.id);
       router.push(preserveSidebarParam(route));
     },
-    [router, parentTasks, siblings],
+    [router, parentTasks, siblings, inChat],
   );
 
   useEffect(() => {

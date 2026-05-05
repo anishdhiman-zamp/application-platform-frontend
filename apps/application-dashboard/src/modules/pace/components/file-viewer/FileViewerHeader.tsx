@@ -21,7 +21,8 @@ import DeleteConfirmationDialog from '@/modules/pace/components/files/DeleteConf
 import { getFileExtension } from '@/modules/pace/components/files/file-tree.utils';
 import { useFileViewerHeaderActions } from '@/modules/pace/hooks/useFileViewerHeaderActions';
 import { useFileViewerHeaderRename } from '@/modules/pace/hooks/useFileViewerHeaderRename';
-import { usePaceContext } from '@/modules/pace/pace.context';
+import { FILES_LISTING_CONVERSATION_ID } from '@/modules/pace/pace.constants';
+import { usePaceConversationContext, usePaceLayoutContext } from '@/modules/pace/pace.context';
 
 interface FileViewerHeaderProps {
   filePath: string;
@@ -55,7 +56,9 @@ const FileViewerHeader = memo(
   }: FileViewerHeaderProps) => {
     const extension = getFileExtension(fileName);
 
-    const { wordWrapEnabled, toggleWordWrap, toggleTreeSidebar, isTreeSidebarOpen } = usePaceContext();
+    const { wordWrapEnabled, toggleWordWrap, toggleTreeSidebar, isTreeSidebarOpen } = usePaceLayoutContext();
+    const { activeConversationId } = usePaceConversationContext();
+    const isOnFilesPage = activeConversationId === FILES_LISTING_CONVERSATION_ID;
 
     const {
       isRenameDialogOpen,
@@ -145,19 +148,21 @@ const FileViewerHeader = memo(
             />
           </div>
 
-          <div className='flex shrink-0 items-center gap-x-2'>
-            <Button
-              variant='ghost'
-              size='icon'
-              onClick={toggleTreeSidebar}
-              title='Toggle file tree'
-              aria-label='Toggle file tree'
-              aria-pressed={isTreeSidebarOpen}
-              className={cn('h-6 w-6 shrink-0', isTreeSidebarOpen && 'bg-accent text-accent-GRAY_1000')}
-            >
-              <FolderOpen size={14} className='text-GRAY_700' />
-            </Button>
-          </div>
+          {!isOnFilesPage && (
+            <div className='flex shrink-0 items-center gap-x-2'>
+              <Button
+                variant='ghost'
+                size='icon'
+                onClick={toggleTreeSidebar}
+                title='Toggle file tree'
+                aria-label='Toggle file tree'
+                aria-pressed={isTreeSidebarOpen}
+                className={cn('h-6 w-6 shrink-0', isTreeSidebarOpen && 'bg-accent text-accent-GRAY_1000')}
+              >
+                <FolderOpen size={14} className='text-GRAY_700' />
+              </Button>
+            </div>
+          )}
         </div>
       </>
     );

@@ -3,15 +3,24 @@
 import { FileText } from 'lucide-react';
 import AgentTabsContainer from '@/modules/pace/components/agents/components/AgentTabsContainer';
 import FileTabsContainer from '@/modules/pace/components/file-viewer/FileTabsContainer';
-import { usePaceContext } from '@/modules/pace/pace.context';
+import TaskTabsContainer from '@/modules/pace/components/tasks/components/TaskTabsContainer';
+import { usePaceLayoutContext } from '@/modules/pace/pace.context';
 
 const FilesPanelBody = () => {
-  const { hasActiveFileTab, hasActiveAgentTab } = usePaceContext();
+  const { hasActiveFileTab, hasActiveAgentTab, hasActiveTaskTab } = usePaceLayoutContext();
 
   if (hasActiveAgentTab) {
     return (
       <div className='min-h-0 flex-1 overflow-hidden'>
         <AgentTabsContainer />
+      </div>
+    );
+  }
+
+  if (hasActiveTaskTab) {
+    return (
+      <div className='min-h-0 flex-1 overflow-hidden'>
+        <TaskTabsContainer />
       </div>
     );
   }

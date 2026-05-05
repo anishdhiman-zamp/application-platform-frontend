@@ -2,11 +2,11 @@
 
 import { useEffect } from 'react';
 import ZampIcon from '@/modules/chatbot/ZampIcon';
-import { usePaceContext } from '@/modules/pace/pace.context';
+import { usePaceActionsContext } from '@/modules/pace/pace.context';
 import { getGreeting } from '@/modules/pace/pace.utils';
 
 const ChatHome = () => {
-  const { logoAnimationKey, triggerLogoAnimation } = usePaceContext();
+  const { logoAnimationKey, triggerLogoAnimation } = usePaceActionsContext();
   const greeting = getGreeting();
 
   useEffect(() => {

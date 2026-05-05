@@ -9,24 +9,21 @@ import { CHAT_SIDEBAR_STATE } from 'modules/pace/pace.types';
 import { useSearchParams } from 'next/navigation';
 import ChatSidebarInner from '@/modules/pace/components/layout/chat-sidebar/ChatSidebarInner';
 import { useChatSidebarState } from '@/modules/pace/hooks/useChatSidebarState';
-import { usePaceContext } from '@/modules/pace/pace.context';
+import { usePaceActionsContext, usePaceConversationContext, usePaceLayoutContext } from '@/modules/pace/pace.context';
 import { SIDEBAR_TOGGLE_TRANSITION } from '@/utils/animations/sidebar.animations';
 
 const ChatSidebar = () => {
   const {
-    registerStartNewChat,
-    registerSelectConversation,
     chatSidebarState,
     prevChatSidebarState,
     sidebarWidth,
     isSidebarResizing,
-    setActiveAgentInfo,
-    setActiveConversationId,
     hasActivePanelTab,
     filesPanelOpen,
     isFilesPanelExpanded,
-    chatMessageIntent,
-  } = usePaceContext();
+  } = usePaceLayoutContext();
+  const { setActiveAgentInfo, setActiveConversationId, chatMessageIntent } = usePaceConversationContext();
+  const { registerStartNewChat, registerSelectConversation } = usePaceActionsContext();
 
   const isSendFromHome = chatMessageIntent !== null;
 

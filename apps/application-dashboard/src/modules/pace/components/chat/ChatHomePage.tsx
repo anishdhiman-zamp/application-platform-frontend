@@ -12,7 +12,11 @@ import {
 import {
   ConnectedChatInput,
   ConversationActionsContext,
+  ConversationBrowserContext,
+  ConversationInputContext,
+  ConversationMessagesContext,
   ConversationStateContext,
+  ConversationStatusContext,
   createConversationActions,
   type FocusEditorRef,
   type MentionInsertPayload,
@@ -31,15 +35,14 @@ import { CHAT_DRAFT_UPDATE_EVENT, useChatDraftInput } from '@/modules/pace/hooks
 import { useReferencePicker } from '@/modules/pace/hooks/useReferencePicker';
 import { NO_ANIMATION } from '@/modules/pace/pace.animations';
 import { STUB_CONVERSATION_STATE } from '@/modules/pace/pace.constants';
-import { usePaceContext } from '@/modules/pace/pace.context';
+import { usePaceActionsContext, usePaceConversationContext, usePaceLayoutContext } from '@/modules/pace/pace.context';
 import { CHAT_SIDEBAR_STATE, TAB_TYPE } from '@/modules/pace/pace.types';
 import { preserveSidebarParam } from '@/modules/pace/pace.utils';
 import type { RootState } from '@/store';
 
 const ChatHomePage = () => {
+  const { setChatSidebarState, chatSidebarState } = usePaceLayoutContext();
   const {
-    setChatSidebarState,
-    chatSidebarState,
     setChatMessageIntent,
     pendingFileReferences,
     clearPendingFileReferences,
@@ -48,10 +51,10 @@ const ChatHomePage = () => {
     sharedFileReferences,
     setSharedFileReferences,
     sharedExternalFilePaths,
-    startNewChat,
     selectedModel,
     setSelectedModel,
-  } = usePaceContext();
+  } = usePaceConversationContext();
+  const { startNewChat } = usePaceActionsContext();
 
   const organizationId = useAppSelector((state: RootState) => state.user.user?.orgs?.[0]?.organization_id) ?? '';
   const currentUserName = useAppSelector((state: RootState) => state.user.user?.user_name) ?? '';
@@ -120,7 +123,7 @@ const ChatHomePage = () => {
   const handleTaskOpen = useCallback(
     (taskId: string, name: string, fullRoute?: string) => {
       expandSidebarIfCollapsed();
-      const route = fullRoute ?? preserveSidebarParam(getChatTaskRoute({ taskId, taskTitle: name }));
+      const route = fullRoute ?? preserveSidebarParam(getChatTaskRoute({ taskId, taskTitle: name, inChat: true }));
 
       openTaskTab(taskId, name || taskId, undefined, route);
     },
@@ -192,67 +195,111 @@ const ChatHomePage = () => {
   }, [pathname, isExpanded, inputValue, focusComposerAtEnd]);
 
   return (
-    <ConversationStateContext.Provider value={STUB_CONVERSATION_STATE}>
-      <ConversationActionsContext.Provider value={interceptedActions}>
-        <div className='relative flex min-h-0 w-full flex-1 flex-col overflow-hidden' {...dropZoneProps}>
-          <DropOverlay isVisible={isDragOver} />
-          <AnimatePresence>
-            {!isExpanded && (
-              <ChatActionsProvider
-                onFileOpen={handleFileOpen}
-                onDatasetOpen={handleDatasetOpen}
-                onTaskOpen={handleTaskOpen}
-              >
-                <motion.div
-                  key='chat-home-page'
-                  initial={false}
-                  animate={{ opacity: 1, y: 0, transition: NO_ANIMATION }}
-                  exit={
-                    shouldReduceMotion
-                      ? { transition: NO_ANIMATION }
-                      : { opacity: 0, y: 30, transition: { duration: 0.3, ease: [0.215, 0.61, 0.355, 1] } }
-                  }
-                  className='relative mx-auto flex min-h-0 w-full max-w-[800px] flex-1 flex-col items-center justify-center overflow-hidden pb-[20vh]'
-                  style={{ willChange: 'opacity, transform' }}
-                >
-                  <ChatHome />
-                  <div className='mt-7 w-full shrink-0 px-3'>
-                    <ConnectedChatInput
-                      resourceType={ResourceType.ORGANIZATION}
-                      resourceId={organizationId}
-                      autoFocus
-                      scope={ScopeType.ORGANIZATION}
-                      scopeId={organizationId}
-                      username={username}
-                      currentUserName={currentUserName}
-                      placeholder="Do your life's best work with Zamp"
-                      minTextareaHeight={18}
-                      maxTextareaHeight={200}
-                      className='shadow-chatbot-shadow'
-                      externalInputValue={inputValue}
-                      setExternalInputValue={setInputValue}
-                      fileDropHandlerRef={fileDropHandlerRef}
-                      addFileReferenceRef={addFileReferenceRef}
-                      addMentionRef={addMentionRef}
-                      focusEditorRef={focusEditorRef}
-                      externalFileReferences={sharedFileReferences}
-                      setExternalFileReferences={setSharedFileReferences}
-                      externalFilePathsRef={sharedExternalFilePaths}
-                      showModelSelector
-                      modelSelectorSlot={modelSelectorSlot}
-                      voiceChatSlot={isVoiceChatEnabled ? <VoiceChatSlot /> : null}
-                      hideRecordingButton={isVoiceActive}
-                      llmModel={selectedModel}
-                      referencePicker={referencePicker}
-                    />
-                  </div>
-                </motion.div>
-              </ChatActionsProvider>
-            )}
-          </AnimatePresence>
-        </div>
-      </ConversationActionsContext.Provider>
-    </ConversationStateContext.Provider>
+    <ConversationActionsContext.Provider value={interceptedActions}>
+      <ConversationMessagesContext.Provider
+        value={{
+          messages: STUB_CONVERSATION_STATE.messages,
+          queuedMessages: STUB_CONVERSATION_STATE.queuedMessages,
+          hasMessages: STUB_CONVERSATION_STATE.hasMessages,
+        }}
+      >
+        <ConversationStatusContext.Provider
+          value={{
+            conversationId: STUB_CONVERSATION_STATE.conversationId,
+            isStreaming: STUB_CONVERSATION_STATE.isStreaming,
+            isStopping: STUB_CONVERSATION_STATE.isStopping,
+            isLoadingConversationHistory: STUB_CONVERSATION_STATE.isLoadingConversationHistory,
+            isFetchingConversationHistory: STUB_CONVERSATION_STATE.isFetchingConversationHistory,
+            isCreatingConversationV2: STUB_CONVERSATION_STATE.isCreatingConversationV2,
+            isSendingMessage: STUB_CONVERSATION_STATE.isSendingMessage,
+            isErrorConversationHistory: STUB_CONVERSATION_STATE.isErrorConversationHistory,
+            errorConversationHistory: STUB_CONVERSATION_STATE.errorConversationHistory,
+            isUninitializedConversationHistory: STUB_CONVERSATION_STATE.isUninitializedConversationHistory,
+            isAnalysing: STUB_CONVERSATION_STATE.isAnalysing,
+            sendMessageError: STUB_CONVERSATION_STATE.sendMessageError,
+            sendMessageV2Error: STUB_CONVERSATION_STATE.sendMessageV2Error,
+            createConversationV2Error: STUB_CONVERSATION_STATE.createConversationV2Error,
+          }}
+        >
+          <ConversationInputContext.Provider
+            value={{
+              inputsRequired: STUB_CONVERSATION_STATE.inputsRequired,
+              initiatedBy: STUB_CONVERSATION_STATE.initiatedBy,
+            }}
+          >
+            <ConversationBrowserContext.Provider
+              value={{
+                isBrowserStreamingAvailable: STUB_CONVERSATION_STATE.isBrowserStreamingAvailable,
+                browserSessionId: STUB_CONVERSATION_STATE.browserSessionId,
+                taskSummaries: STUB_CONVERSATION_STATE.taskSummaries,
+              }}
+            >
+              <ConversationStateContext.Provider value={STUB_CONVERSATION_STATE}>
+                <div className='relative flex min-h-0 w-full flex-1 flex-col overflow-hidden' {...dropZoneProps}>
+                  <DropOverlay isVisible={isDragOver} />
+                  <AnimatePresence>
+                    {!isExpanded && (
+                      <ChatActionsProvider
+                        onFileOpen={handleFileOpen}
+                        onDatasetOpen={handleDatasetOpen}
+                        onTaskOpen={handleTaskOpen}
+                      >
+                        <motion.div
+                          key='chat-home-page'
+                          initial={false}
+                          animate={{ opacity: 1, y: 0, transition: NO_ANIMATION }}
+                          exit={
+                            shouldReduceMotion
+                              ? { transition: NO_ANIMATION }
+                              : { opacity: 0, y: 30, transition: { duration: 0.3, ease: [0.215, 0.61, 0.355, 1] } }
+                          }
+                          className='relative mx-auto flex min-h-0 w-full max-w-[700px] flex-1 flex-col items-center justify-center overflow-hidden pb-[20vh]'
+                          style={{ willChange: 'opacity, transform' }}
+                        >
+                          <ChatHome />
+                          <div className='mt-7 w-full shrink-0 px-3'>
+                            <ConnectedChatInput
+                              resourceType={ResourceType.ORGANIZATION}
+                              resourceId={organizationId}
+                              autoFocus
+                              scope={ScopeType.ORGANIZATION}
+                              scopeId={organizationId}
+                              username={username}
+                              currentUserName={currentUserName}
+                              placeholder='Hi, how can I help?'
+                              minTextareaHeight={18}
+                              maxTextareaHeight={200}
+                              className='shadow-chatbot-shadow rounded-[16px]'
+                              inputAreaClassName='px-5 pt-4 pb-3'
+                              footerClassName='px-3.5 pt-2 pb-3.5'
+                              externalInputValue={inputValue}
+                              setExternalInputValue={setInputValue}
+                              fileDropHandlerRef={fileDropHandlerRef}
+                              addFileReferenceRef={addFileReferenceRef}
+                              addMentionRef={addMentionRef}
+                              focusEditorRef={focusEditorRef}
+                              externalFileReferences={sharedFileReferences}
+                              setExternalFileReferences={setSharedFileReferences}
+                              externalFilePathsRef={sharedExternalFilePaths}
+                              showModelSelector
+                              modelSelectorSlot={modelSelectorSlot}
+                              voiceChatSlot={isVoiceChatEnabled ? <VoiceChatSlot /> : null}
+                              hideRecordingButton={isVoiceActive}
+                              llmModel={selectedModel}
+                              referencePicker={referencePicker}
+                            />
+                          </div>
+                        </motion.div>
+                      </ChatActionsProvider>
+                    )}
+                  </AnimatePresence>
+                </div>
+              </ConversationStateContext.Provider>
+            </ConversationBrowserContext.Provider>
+          </ConversationInputContext.Provider>
+        </ConversationStatusContext.Provider>
+      </ConversationMessagesContext.Provider>
+    </ConversationActionsContext.Provider>
   );
 };
 

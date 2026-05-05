@@ -3,10 +3,11 @@
 import { useCallback, useEffect, useRef, useState } from 'react';
 import { cn } from '@zamp-platform/ui/utils';
 import { FILE_TREE_COLUMN_MAX_WIDTH, FILE_TREE_COLUMN_MIN_WIDTH } from 'modules/pace/pace.constants';
-import { usePaceContext } from '@/modules/pace/pace.context';
+import { usePaceLayoutContext } from '@/modules/pace/pace.context';
 
 const FilesPanelInternalResizeHandle = () => {
-  const { treeColumnWidth, setTreeColumnWidth, persistTreeColumnWidth, setIsTreeColumnResizing } = usePaceContext();
+  const { treeColumnWidth, setTreeColumnWidth, persistTreeColumnWidth, setIsTreeColumnResizing } =
+    usePaceLayoutContext();
 
   const dragStartXRef = useRef<number>(0);
   const dragStartWidthRef = useRef<number>(treeColumnWidth);

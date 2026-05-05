@@ -4,7 +4,7 @@ import type { SiblingTask, TaskBreadcrumb, TaskStatus } from '@zamp-platform/cha
 import { extractTaskUpdateFields } from '@zamp-platform/utils';
 import { type BaseEventPayload, EVENT_TYPE } from '@zamp-platform/utils/event-bus/event-bus.types';
 import { parseIntSafely } from 'modules/process/process.utils';
-import { useRouter, useSearchParams } from 'next/navigation';
+import { usePathname, useRouter, useSearchParams } from 'next/navigation';
 import {
   useGetTaskCountsQuery,
   useGetTasksByStatusQuery,
@@ -12,7 +12,7 @@ import {
   useLazyGetTasksByStatusQuery,
 } from '@/apis/task';
 import { useEventBus } from '@/app/_providers/sse-provider';
-import { getChatTaskRoute, TASK_QUERY_PARAMS } from '@/constants/routeConfig';
+import { getChatTaskRoute, ROUTES_PATH, TASK_QUERY_PARAMS } from '@/constants/routeConfig';
 import { STATUS_DISPLAY_ORDER, TASKS_PAGE_SIZE } from '@/modules/pace/components/tasks/constants/tasks.constants';
 import type { CreationSource, TaskListItem } from '@/modules/pace/components/tasks/types/tasks.types';
 import { markNavAsReplace } from '@/modules/pace/hooks/useTabRouter';
@@ -24,6 +24,8 @@ interface UseTaskNavigationOptions {
 export const useTaskNavigation = (taskId?: string, options?: UseTaskNavigationOptions) => {
   const searchParams = useSearchParams();
   const router = useRouter();
+  const pathname = usePathname();
+  const inChat = pathname === ROUTES_PATH.CHAT;
 
   // Wrapper that signals the tab system to update the active tab in-place
   // (pagination) rather than creating a new tab.
@@ -125,6 +127,7 @@ export const useTaskNavigation = (taskId?: string, options?: UseTaskNavigationOp
                   status: s,
                   currentIndex: absoluteIndex,
                   totalRows: count,
+                  inChat,
                 }),
               );
 
@@ -138,7 +141,7 @@ export const useTaskNavigation = (taskId?: string, options?: UseTaskNavigationOp
         if (!found && !signal.cancelled) setIsBootstrapping(false);
       }
     },
-    [triggerFetchCounts, triggerFetchPage, sourceParams, replaceRoute],
+    [triggerFetchCounts, triggerFetchPage, sourceParams, replaceRoute, inChat],
   );
 
   useEffect(() => {
@@ -306,13 +309,14 @@ export const useTaskNavigation = (taskId?: string, options?: UseTaskNavigationOp
             status: newStatus,
             currentIndex: foundIndex,
             totalRows: newStatusCount,
+            inChat,
           }),
         );
       } catch (err) {
         captureException(err);
       }
     },
-    [triggerFetchCounts, triggerFetchPage, sourceParams, replaceRoute],
+    [triggerFetchCounts, triggerFetchPage, sourceParams, replaceRoute, inChat],
   );
 
   const navigateToTask = useCallback(
@@ -339,6 +343,7 @@ export const useTaskNavigation = (taskId?: string, options?: UseTaskNavigationOp
           status: nextStatus,
           currentIndex: 0,
           totalRows: nextStatusTotal,
+          inChat,
         });
 
         replaceRoute(route);
@@ -366,6 +371,7 @@ export const useTaskNavigation = (taskId?: string, options?: UseTaskNavigationOp
           status: previousStatus,
           currentIndex: lastIndex,
           totalRows: prevStatusTotal,
+          inChat,
         });
 
         replaceRoute(route);
@@ -398,6 +404,7 @@ export const useTaskNavigation = (taskId?: string, options?: UseTaskNavigationOp
         status: status || undefined,
         currentIndex: targetIndex,
         totalRows: effectiveTotal,
+        inChat,
       });
 
       replaceRoute(route);
@@ -413,6 +420,8 @@ export const useTaskNavigation = (taskId?: string, options?: UseTaskNavigationOp
       statusCountMap,
       conversationId,
       router,
+      replaceRoute,
+      inChat,
     ],
   );
 
@@ -530,6 +539,7 @@ export const useTaskNavigation = (taskId?: string, options?: UseTaskNavigationOp
           totalRows: nextGroup.length,
           parentTasks: parsedParentTasks,
           siblings: allSiblings,
+          inChat,
         });
 
         replaceRoute(route);
@@ -556,6 +566,7 @@ export const useTaskNavigation = (taskId?: string, options?: UseTaskNavigationOp
           totalRows: prevGroup.length,
           parentTasks: parsedParentTasks,
           siblings: allSiblings,
+          inChat,
         });
 
         replaceRoute(route);
@@ -576,6 +587,7 @@ export const useTaskNavigation = (taskId?: string, options?: UseTaskNavigationOp
         totalRows: statusSiblings.length,
         parentTasks: parsedParentTasks,
         siblings: allSiblings,
+        inChat,
       });
 
       replaceRoute(route);
@@ -590,6 +602,8 @@ export const useTaskNavigation = (taskId?: string, options?: UseTaskNavigationOp
       router,
       conversationId,
       getParsedParentTasks,
+      replaceRoute,
+      inChat,
     ],
   );
 

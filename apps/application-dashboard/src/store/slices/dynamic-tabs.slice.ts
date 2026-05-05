@@ -83,6 +83,8 @@ const persistByConversation = (byConversation: Record<string, ConversationTabsSt
   }
 };
 
+const DYNAMIC_TABS_PERSIST_DEBOUNCE_MS = 150;
+
 const isByConversationEmpty = (byConversation: Record<string, ConversationTabsState>): boolean => {
   const entries = Object.values(byConversation);
 
@@ -318,7 +320,10 @@ dynamicTabsListenerMiddleware.startListening({
     dynamicTabsActions.patchActiveConversationPanelState,
     dynamicTabsActions.toggleActiveConversationPanelState,
   ),
-  effect: (_action, listenerApi) => {
+  effect: async (_action, listenerApi) => {
+    listenerApi.cancelActiveListeners();
+    await listenerApi.delay(DYNAMIC_TABS_PERSIST_DEBOUNCE_MS);
+
     const state = listenerApi.getState() as { dynamicTabs: DynamicTabsState };
 
     if (isByConversationEmpty(state.dynamicTabs.byConversation)) {

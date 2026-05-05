@@ -5,12 +5,13 @@ import type { SiblingTask, TaskBreadcrumb } from '@zamp-platform/chat';
 import { TASK_STATUS } from '@zamp-platform/chat';
 import { AnimatePresence, motion } from 'framer-motion';
 import { preserveSidebarParam } from 'modules/pace/pace.utils';
-import { useRouter } from 'next/navigation';
-import { getChatTaskRoute } from '@/constants/routeConfig';
+import { usePathname, useRouter } from 'next/navigation';
+import { getChatTaskRoute, ROUTES_PATH } from '@/constants/routeConfig';
 import ProgressWheel from '@/modules/pace/components/tasks/components/ProgressWheel';
 import SubtaskListItem from '@/modules/pace/components/tasks/components/SubtaskListItem';
 import SubtaskPopover from '@/modules/pace/components/tasks/components/SubtaskPopover';
 import type { SubTask } from '@/modules/pace/components/tasks/types/tasks.types';
+import { markNavAsSubtask } from '@/modules/pace/hooks/useTabRouter';
 
 const SUBTASK_PANEL_WIDTH = 300;
 
@@ -21,6 +22,8 @@ interface SubtaskPanelProps {
 
 const SubtaskPanel = ({ subtasks, parentTasks }: SubtaskPanelProps) => {
   const router = useRouter();
+  const pathname = usePathname();
+  const inChat = pathname === ROUTES_PATH.CHAT;
 
   const totalCount = subtasks.length;
   const completedCount = useMemo(() => subtasks.filter((s) => s.status === TASK_STATUS.COMPLETED).length, [subtasks]);
@@ -65,11 +68,13 @@ const SubtaskPanel = ({ subtasks, parentTasks }: SubtaskPanelProps) => {
         currentIndex: statusIndex,
         totalRows: statusTotal,
         siblings,
+        inChat,
       });
 
+      if (inChat) markNavAsSubtask(subtask.id);
       router.push(preserveSidebarParam(route));
     },
-    [router, parentTasks, siblings],
+    [router, parentTasks, siblings, inChat],
   );
 
   return (

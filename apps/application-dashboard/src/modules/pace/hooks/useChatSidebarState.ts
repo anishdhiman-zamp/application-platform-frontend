@@ -4,7 +4,7 @@ import { useCallback, useEffect, useRef, useState } from 'react';
 import { SIDEBAR_CONVERSATION_ID_PARAM } from 'modules/pace/pace.constants';
 import { CHAT_SIDEBAR_STATE, TAB_QUERY_PARAM } from 'modules/pace/pace.types';
 import { ROUTES_PATH } from '@/constants/routeConfig';
-import { usePaceContext } from '@/modules/pace/pace.context';
+import { usePaceConversationContext, usePaceLayoutContext } from '@/modules/pace/pace.context';
 import { store } from '@/store';
 
 interface UseChatSidebarStateProps {
@@ -12,7 +12,8 @@ interface UseChatSidebarStateProps {
 }
 
 export const useChatSidebarState = ({ initialConversationId }: UseChatSidebarStateProps) => {
-  const { chatSidebarState, setChatSidebarState, setActiveAgentInfo, setActiveConversationId } = usePaceContext();
+  const { chatSidebarState, setChatSidebarState } = usePaceLayoutContext();
+  const { setActiveAgentInfo, setActiveConversationId } = usePaceConversationContext();
 
   const prevInitialConversationIdRef = useRef(initialConversationId);
   const internalUpdateRef = useRef(false);

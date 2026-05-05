@@ -1,29 +1,40 @@
 'use client';
 
 import { motion, useReducedMotion } from 'framer-motion';
-import { usePathname, useRouter } from 'next/navigation';
+import { usePathname, useRouter, useSearchParams } from 'next/navigation';
+import { ROUTES_PATH } from '@/constants/routeConfig';
 import ChatHistory from '@/modules/pace/components/chat/ChatHistory';
 import SidebarFooter from '@/modules/pace/components/layout/sidebar/SidebarFooter';
 import SidebarHeader from '@/modules/pace/components/layout/sidebar/SidebarHeader';
 import SidebarPrimaryActions from '@/modules/pace/components/layout/sidebar/SidebarPrimaryActions';
 import { SIDEBAR_CONVERSATION_ID_PARAM } from '@/modules/pace/pace.constants';
-import { usePaceContext } from '@/modules/pace/pace.context';
+import { usePaceActionsContext, usePaceLayoutContext } from '@/modules/pace/pace.context';
+import { store } from '@/store';
 import { SIDEBAR_TOGGLE_TRANSITION } from '@/utils/animations/sidebar.animations';
 
 const SIDEBAR_EXPANDED_WIDTH = 240;
 const SIDEBAR_COLLAPSED_WIDTH = 56;
 
 const Sidebar = () => {
-  const { isNavSidebarExpanded, toggleNavSidebar, selectConversation, activeConversationId } = usePaceContext();
+  const { isNavSidebarExpanded, toggleNavSidebar } = usePaceLayoutContext();
+  const { selectConversation } = usePaceActionsContext();
   const pathname = usePathname();
   const router = useRouter();
+  const searchParams = useSearchParams();
   const shouldReduceMotion = useReducedMotion();
   const widthTransition = shouldReduceMotion ? { duration: 0 } : SIDEBAR_TOGGLE_TRANSITION;
+  const sidebarChatIdFromUrl =
+    pathname === ROUTES_PATH.CHAT ? (searchParams?.get(SIDEBAR_CONVERSATION_ID_PARAM) ?? null) : null;
 
   const handleSelectConversation = (id: string | null, title?: string) => {
     if (!id) return;
     if (pathname && pathname !== '/chat') {
-      router.push(`/chat?${SIDEBAR_CONVERSATION_ID_PARAM}=${id}`);
+      const bucket = store.getState().dynamicTabs.byConversation[id];
+      const activeTab = bucket?.activeTabId ? bucket.tabs.find((tab) => tab.id === bucket.activeTabId) : null;
+      const targetUrl = new URL(activeTab?.path ?? ROUTES_PATH.CHAT, window.location.origin);
+
+      targetUrl.searchParams.set(SIDEBAR_CONVERSATION_ID_PARAM, id);
+      router.push(`${targetUrl.pathname}${targetUrl.search}`);
 
       return;
     }
@@ -39,14 +50,12 @@ const Sidebar = () => {
     >
       <SidebarHeader isExpanded={isNavSidebarExpanded} onToggle={toggleNavSidebar} />
 
-      <div className='mt-2'>
-        <SidebarPrimaryActions isExpanded={isNavSidebarExpanded} />
-      </div>
+      <SidebarPrimaryActions isExpanded={isNavSidebarExpanded} />
 
       {isNavSidebarExpanded ? (
         <ChatHistory
           onSelectConversation={handleSelectConversation}
-          activeConversationId={activeConversationId}
+          activeConversationId={sidebarChatIdFromUrl}
           recentLimit={5}
           viewMoreHref='/chat/history'
         />

@@ -37,7 +37,12 @@ import ContentErrorState from '@/modules/pace/components/ContentErrorState';
 import { useDynamicTabs } from '@/modules/pace/components/dynamic-tabs/useDynamicTabs';
 import ChatMessagesSkeleton from '@/modules/pace/components/loaders/ChatMessagesSkeleton';
 import { useAutoOpenAgentFiles } from '@/modules/pace/hooks/useAutoOpenAgentFiles';
-import { type ActiveAgentInfo, usePaceContext } from '@/modules/pace/pace.context';
+import {
+  type ActiveAgentInfo,
+  usePaceActionsContext,
+  usePaceConversationContext,
+  usePaceLayoutContext,
+} from '@/modules/pace/pace.context';
 import { CHAT_SIDEBAR_STATE, TAB_TYPE } from '@/modules/pace/pace.types';
 import { baseApi } from '@/services/baseApi';
 
@@ -90,9 +95,9 @@ const ChatConversationContent = ({
     setChatMessageIntent,
     activeAgentInfo,
     setActiveAgentInfo,
-    startNewChat,
-    setChatSidebarState,
-  } = usePaceContext();
+  } = usePaceConversationContext();
+  const { startNewChat } = usePaceActionsContext();
+  const { setChatSidebarState } = usePaceLayoutContext();
 
   const { openTab, openTabSilently } = useDynamicTabs({ type: TAB_TYPE.AGENT });
 
@@ -360,9 +365,21 @@ const ChatConversationContent = ({
       });
 
       setChatMessageIntent(null);
-      createConversationV2(payload);
+      createConversationV2(payload)
+        .then(() => {
+          dispatch(baseApi.util.invalidateTags([APITags.GET_CONVERSATION_HISTORY]));
+        })
+        .catch(() => {});
     }
-  }, [chatMessageIntent, conversationId, organizationId, currentUserName, createConversationV2, setChatMessageIntent]);
+  }, [
+    chatMessageIntent,
+    conversationId,
+    organizationId,
+    currentUserName,
+    createConversationV2,
+    setChatMessageIntent,
+    dispatch,
+  ]);
 
   const drainPendingMentions = useCallback(() => {
     if (pendingMentionInserts.length === 0 || !addMentionRef.current) return;

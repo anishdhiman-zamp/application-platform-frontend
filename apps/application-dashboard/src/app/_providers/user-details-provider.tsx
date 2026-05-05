@@ -1,4 +1,4 @@
-import { useEffect } from 'react';
+import { ReactNode, useEffect } from 'react';
 import { LOCAL_STORAGE_KEYS, setToLocalStorage } from '@zamp-platform/utils';
 import { useWhoAmIQuery } from '@/apis/auth';
 import NotAuthorized from '@/components/NotAuthorized';
@@ -11,7 +11,11 @@ import { UserRoleIdType } from '@/types/api/auth.types';
 import { USER_SESSION_COOKIE } from '@/utils/cookie';
 import { identifyPostHogUser } from '@/utils/postHog';
 
-const UserDetailsProvider = () => {
+interface UserDetailsProviderProps {
+  children?: ReactNode;
+}
+
+const UserDetailsProvider = ({ children }: UserDetailsProviderProps) => {
   const dispatch = useAppDispatch();
   const workspace = useAppSelector((state: RootState) => state.user.workspace);
 
@@ -63,7 +67,7 @@ const UserDetailsProvider = () => {
     return <NotAuthorized />;
   }
 
-  return null;
+  return <>{children}</>;
 };
 
 export default UserDetailsProvider;

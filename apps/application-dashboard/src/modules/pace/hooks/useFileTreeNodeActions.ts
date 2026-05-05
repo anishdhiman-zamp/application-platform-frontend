@@ -20,7 +20,7 @@ import { CONTEXT_MENU_ACTION_IDS, FILE_TOAST_MESSAGES } from '@/modules/pace/com
 import { dispatchFileCreated, markFileCreationPending } from '@/modules/pace/hooks/pendingFileCreation';
 import { useFileDownload } from '@/modules/pace/hooks/useFileDownload';
 import { useFileTreeContext } from '@/modules/pace/hooks/useFileTreeContext';
-import { usePaceContext } from '@/modules/pace/pace.context';
+import { usePaceConversationContext, usePaceLayoutContext } from '@/modules/pace/pace.context';
 import { CHAT_SIDEBAR_STATE, TAB_TYPE } from '@/modules/pace/pace.types';
 
 interface UseFileTreeNodeActionsProps {
@@ -77,7 +77,8 @@ export const useFileTreeNodeActions = ({
     type: TAB_TYPE.FILE,
   });
   const { downloadFile } = useFileDownload();
-  const { setPendingMentionInserts, setChatSidebarState, chatSidebarState } = usePaceContext();
+  const { chatSidebarState, setChatSidebarState } = usePaceLayoutContext();
+  const { setPendingMentionInserts } = usePaceConversationContext();
   const {
     createFile,
     createFolder,

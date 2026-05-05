@@ -1,7 +1,7 @@
 'use client';
 
 import { createContext, type ReactNode, useCallback, useContext, useMemo, useRef, useState } from 'react';
-import { usePaceContext } from '@/modules/pace/pace.context';
+import { usePaceConversationContext } from '@/modules/pace/pace.context';
 
 export interface FileState {
   content: string;
@@ -44,7 +44,7 @@ const cloneStatesWithBucket = (
 };
 
 export const FileViewerProvider = ({ children }: { children: ReactNode }) => {
-  const { activeConversationId } = usePaceContext();
+  const { activeConversationId } = usePaceConversationContext();
   const [fileStates, setFileStates] = useState<FileStatesByConversation>(new Map());
   const fileStatesRef = useRef(fileStates);
   const conversationKeyRef = useRef<string>(activeConversationId ?? NO_CONVERSATION_KEY);

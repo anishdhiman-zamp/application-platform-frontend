@@ -20,7 +20,7 @@ const SidebarHeader = ({ isExpanded, onToggle }: SidebarHeaderProps) => {
         <Button
           variant='ghost'
           size='icon'
-          className='text-GRAY_700 hover:text-GRAY_900 hover:bg-accent h-8 w-8 rounded-lg p-1.5'
+          className='text-GRAY_600 hover:text-GRAY_900 hover:bg-accent h-8 w-8 rounded-lg p-1.5'
           onClick={onToggle}
           title='Expand sidebar'
         >
@@ -32,11 +32,11 @@ const SidebarHeader = ({ isExpanded, onToggle }: SidebarHeaderProps) => {
 
   return (
     <div className={cn('flex shrink-0 items-center justify-between gap-x-1 px-3 pt-2')}>
-      <div className='flex items-center gap-x-0.5'>
+      <div className='flex items-center'>
         <Button
           variant='ghost'
           size='icon'
-          className='text-GRAY_700 hover:text-GRAY_900 hover:bg-accent h-8 w-8 rounded-lg p-1.5'
+          className='text-GRAY_600 hover:text-GRAY_900 hover:bg-accent h-8 w-8 rounded-lg p-1.5'
           onClick={() => router.back()}
           title='Back'
         >
@@ -45,7 +45,7 @@ const SidebarHeader = ({ isExpanded, onToggle }: SidebarHeaderProps) => {
         <Button
           variant='ghost'
           size='icon'
-          className='text-GRAY_700 hover:text-GRAY_900 hover:bg-accent h-8 w-8 rounded-lg p-1.5'
+          className='text-GRAY_600 hover:text-GRAY_900 hover:bg-accent h-8 w-8 rounded-lg p-1.5'
           onClick={() => router.forward()}
           title='Forward'
         >
@@ -55,7 +55,7 @@ const SidebarHeader = ({ isExpanded, onToggle }: SidebarHeaderProps) => {
       <Button
         variant='ghost'
         size='icon'
-        className='text-GRAY_700 hover:text-GRAY_900 hover:bg-accent h-8 w-8 rounded-lg p-1.5'
+        className='text-GRAY_600 hover:text-GRAY_900 hover:bg-accent h-8 w-8 rounded-lg p-1.5'
         onClick={onToggle}
         title='Collapse sidebar'
       >

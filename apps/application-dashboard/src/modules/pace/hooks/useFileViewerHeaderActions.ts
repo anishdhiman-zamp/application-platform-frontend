@@ -6,7 +6,7 @@ import { useDynamicTabs } from '@/modules/pace/components/dynamic-tabs/useDynami
 import { FILE_TOAST_MESSAGES, FILE_VIEWER_HEADER_ACTION_IDS } from '@/modules/pace/components/files/files.constants';
 import { useFileActions } from '@/modules/pace/hooks/useFileActions';
 import { useFileDownload } from '@/modules/pace/hooks/useFileDownload';
-import { usePaceContext } from '@/modules/pace/pace.context';
+import { usePaceConversationContext, usePaceLayoutContext } from '@/modules/pace/pace.context';
 import { CHAT_SIDEBAR_STATE, TAB_TYPE } from '@/modules/pace/pace.types';
 
 interface UseFileViewerHeaderActionsProps {
@@ -34,7 +34,8 @@ export const useFileViewerHeaderActions = ({
   const { deleteItem, isDeleting } = useFileActions();
   const { closeTabsForPath, activeTab } = useDynamicTabs({ type: TAB_TYPE.FILE });
   const { downloadFile } = useFileDownload();
-  const { setPendingMentionInserts, setChatSidebarState, chatSidebarState } = usePaceContext();
+  const { chatSidebarState, setChatSidebarState } = usePaceLayoutContext();
+  const { setPendingMentionInserts } = usePaceConversationContext();
 
   const handleDownload = useCallback(async () => {
     await downloadFile({

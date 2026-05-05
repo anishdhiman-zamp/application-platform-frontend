@@ -24,7 +24,7 @@ import {
 import ImageKitImage from '@/components/ImageKitImage';
 import { KEYBOARD_KEYS } from '@/constants/shortcuts';
 import { useAppSelector } from '@/hooks/toolkit';
-import { usePaceContext } from '@/modules/pace/pace.context';
+import { usePaceActionsContext, usePaceConversationContext, usePaceLayoutContext } from '@/modules/pace/pace.context';
 import { CHAT_SIDEBAR_STATE } from '@/modules/pace/pace.types';
 import type { RootState } from '@/store';
 
@@ -47,7 +47,9 @@ const CreateAgentModal = ({ open, onOpenChange, onAgentCreated }: CreateAgentMod
   const currentUserName = useAppSelector((state: RootState) => state.user.user?.user_name) ?? '';
   const organizationId = useAppSelector((state: RootState) => state.user.user?.orgs?.[0]?.organization_id) ?? '';
 
-  const { setChatSidebarState, startNewChat, setChatMessageIntent, setActiveAgentInfo } = usePaceContext();
+  const { setChatSidebarState } = usePaceLayoutContext();
+  const { startNewChat } = usePaceActionsContext();
+  const { setChatMessageIntent, setActiveAgentInfo } = usePaceConversationContext();
 
   const chat = useChat({
     resourceId: organizationId,

@@ -6,7 +6,7 @@ import { cn } from '@zamp-platform/ui/utils';
 import { Headphones, Loader2, Mic, MicOff, X } from 'lucide-react';
 import { useVoiceChatContext } from '@/contexts/VoiceChatContext';
 
-const toolbarBtnClass = 'hover:text-GRAY_1000 hover:bg-accent size-[26px] rounded-[6px] p-[2px] [&_svg]:size-3.5';
+const toolbarBtnClass = 'hover:text-GRAY_1000 hover:bg-accent size-8 rounded-[6px] p-[2px] [&_svg]:size-3.5';
 
 const VoiceChatSlot = () => {
   const { start, stop, toggleMic, isMicEnabled, state } = useVoiceChatContext();

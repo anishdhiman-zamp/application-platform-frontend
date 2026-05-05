@@ -13,7 +13,6 @@ Displays and manages user-created applications. Each app has a unique slug used 
         │     └── AccordionItem[]
         │           ├── AppRow      — app name, slug, visibility, service count, share
         │           └── ServiceCard[] — service grid (name, type, URL link)
-        ├── AppRowSkeleton          — loading placeholder
         ├── AppEmptyState           — empty state with "New App" CTA
         ├── CreateAppModal          — chat-based app creation via agent
         └── ShareAppPopup           — share via FRAP (ResourceType.APP)
@@ -34,7 +33,7 @@ Displays and manages user-created applications. Each app has a unique slug used 
 
 ### API Integration (RTK Query)
 Endpoints defined in `src/apis/apps.ts`:
-- `useGetAppsQuery()` — `GET /apps` (cache tag: `GET_APPS`)
+- `useGetAppsQuery()` — `GET /apps` (cache tag: `GET_APPS`, `keepUnusedDataFor: 300`). Prefetched at the chat-shell layer in `useDataPrefetch` so navigation to `/chat/apps` renders directly from cache without a loader.
 
 ### Types
 `AppType` includes: `id`, `slug`, `organization_id`, `name`, `description`, `status`, `visibility` (`'public' | 'private'`), `metadata`, `services` (`ServiceSummaryType[]`), `created_by`, timestamps.
@@ -45,7 +44,6 @@ Endpoints defined in `src/apis/apps.ts`:
 |------|---------|
 | `AppsListingPage.tsx` | Main page — fetches apps, filters, Accordion list |
 | `components/AppRow.tsx` | App row with visibility icon + service count |
-| `components/AppRowSkeleton.tsx` | Skeleton loading state for app rows |
 | `components/ServiceCard.tsx` | Service card with type badge + URL link |
 | `components/CreateAppModal.tsx` | Chat-based app creation modal |
 | `components/AppEmptyState.tsx` | Empty state with "New App" CTA |
