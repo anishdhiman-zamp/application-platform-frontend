@@ -21,6 +21,7 @@ import {
   extractTextFromChildren,
   highlightCode,
   type ReferenceRef,
+  stripIntegrationConnectLinks,
   wrapMentions,
 } from './utils/markdownBlock.utils';
 
@@ -42,6 +43,11 @@ interface MarkdownBlockProps {
   fontClassName?: string;
   compactParagraphs?: boolean;
   references?: ReferenceRef[];
+  /**
+   * Set when the parent message also renders an integration card so the
+   * duplicate `[Connect <Integration>](url)` markdown link is suppressed.
+   */
+  stripIntegrationLinks?: boolean;
 }
 
 export const MarkdownBlock: React.FC<MarkdownBlockProps> = ({
@@ -51,6 +57,7 @@ export const MarkdownBlock: React.FC<MarkdownBlockProps> = ({
   fontClassName = 'text-GRAY_950 text-sm leading-[1.667] font-[420]',
   compactParagraphs = false,
   references,
+  stripIntegrationLinks = false,
 }) => {
   const { onFileOpen } = useChatActions();
 
@@ -61,7 +68,11 @@ export const MarkdownBlock: React.FC<MarkdownBlockProps> = ({
   };
 
   const mentionMatcher = useMemo(() => buildMentionMatcher(references ?? []), [references]);
-  const { text, isAnimating } = useTypewriter(payload.text, undefined, isStreaming);
+  const sourceText = useMemo(
+    () => (stripIntegrationLinks ? stripIntegrationConnectLinks(payload.text) : payload.text),
+    [payload.text, stripIntegrationLinks],
+  );
+  const { text, isAnimating } = useTypewriter(sourceText, undefined, isStreaming);
 
   const rehypePlugins = useMemo(
     () => (isStreaming || isAnimating ? [rehypeSlug, rehypeStreamReveal] : [rehypeSlug]),

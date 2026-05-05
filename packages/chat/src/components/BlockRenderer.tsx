@@ -38,7 +38,7 @@ import {
   ThinkingBlock,
   ToolCallBlock,
 } from './blocks';
-import { BROWSER_TOOL_DISPLAY_NAMES } from './chat.constants';
+import { BROWSER_TOOL_DISPLAY_NAMES, TOOL_NAMES } from './chat.constants';
 
 interface BlockRendererProps {
   message: BlockMessage;
@@ -188,6 +188,19 @@ export const BlockRenderer: React.FC<BlockRendererProps> = ({
     return thinkingBlocks[thinkingBlocks.length - 1]?.order ?? -1;
   }, [messageBlocks]);
 
+  // The model emits both an integration tool_use block AND a redundant
+  // `[Connect X](url)` markdown link in the same message — strip the link so
+  // only the structured card surfaces in the chat.
+  const hasIntegrationCardSibling = useMemo(
+    () =>
+      messageBlocks.some(
+        (b) =>
+          b.type === BLOCK_TYPE.TOOL_USE &&
+          (b as ToolUseContentBlock).payload?.name === TOOL_NAMES.AUTHENTICATE_INTEGRATION_AND_CREATE_CONNECTION,
+      ),
+    [messageBlocks],
+  );
+
   const renderBlock = (block: Block, index: number, nextBlock?: Block, previousBlock?: Block) => {
     const isLastBlock = index === size - 1;
     const isNextLast = index + 1 === size - 1;
@@ -305,6 +318,7 @@ export const BlockRenderer: React.FC<BlockRendererProps> = ({
                   compactParagraphs={compactParagraphs}
                   isStreaming={isBlockStreaming}
                   references={messageReferences}
+                  stripIntegrationLinks={hasIntegrationCardSibling}
                 />
               </div>
               {showConnectorToNext && (
@@ -320,6 +334,7 @@ export const BlockRenderer: React.FC<BlockRendererProps> = ({
             isStreaming={isBlockStreaming}
             compactParagraphs={compactParagraphs}
             references={messageReferences}
+            stripIntegrationLinks={hasIntegrationCardSibling}
           />
         );
       }

@@ -79,6 +79,20 @@ export const highlightCode = (code: string, language?: string): React.ReactNode 
 const escapeRegex = (s: string): string => s.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
 
 /**
+ * Remove redundant `[Connect <Integration>](url)` markdown links from assistant
+ * text. The model emits both a structured integration card and a duplicate link
+ * pointing at the same OAuth URL — call sites use this when a sibling
+ * integration tool_use block exists, so the card alone communicates the action.
+ */
+export const stripIntegrationConnectLinks = (text: string): string => {
+  if (!text) return text;
+  return text
+    .replace(/^[ \t]*(?:👉|➡️|▶️|👇)?[ \t]*\[Connect[ \t]+[^\]\n]+\]\([^)\n]+\)[ \t]*\r?\n?/gim, '')
+    .replace(/\n{3,}/g, '\n\n')
+    .trim();
+};
+
+/**
  * Build a matcher used by `wrapMentions` to swap `@label` occurrences with
  * chip components. Labels are sorted longest-first so overlapping labels
  * resolve to the longest match (e.g. `@report.pdf` wins over `@report`).
