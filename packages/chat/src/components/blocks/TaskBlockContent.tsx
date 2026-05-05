@@ -1,6 +1,6 @@
 'use client';
 
-import { ShimmerText, Skeleton } from '@zamp-platform/ui';
+import { Skeleton } from '@zamp-platform/ui';
 import React, { type FC } from 'react';
 
 interface TaskBlockContentProps {
@@ -21,8 +21,8 @@ const TaskBlockContent: FC<TaskBlockContentProps> = ({ isLoading, isInProgress, 
 
   if (isInProgress) {
     return (
-      <div className={`f-14-450 line-clamp-2 ${displayedSummary ? 'text-GRAY_950' : 'text-GRAY_700 py-2'}`}>
-        <ShimmerText text={displayedSummary || 'Starting now'} autoAnimate />
+      <div className={`f-14-450 text-GRAY_700 line-clamp-2 leading-[1.667] ${displayedSummary ? '' : 'py-2'}`}>
+        {displayedSummary || 'Starting now'}
       </div>
     );
   }
