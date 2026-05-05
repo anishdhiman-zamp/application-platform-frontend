@@ -73,6 +73,7 @@ const TaskBlock: FC<TaskBlockProps> = ({ payload, conversationId, className }) =
       status: siblings?.length ? effectiveStatus : undefined,
       currentIndex: statusIndex !== -1 ? statusIndex : undefined,
       totalRows: sameStatusSiblings.length > 0 ? sameStatusSiblings.length : undefined,
+      inChat: true,
     });
 
     const fullRoute = preserveSidebarParam(route);

@@ -53,7 +53,7 @@ export const useHITLQuestions = () => {
 
   const handleTitleClick = useCallback(() => {
     if (titleEntityId && titleEntityType === HITLEntityType.TASK) {
-      router.push(getChatTaskRoute({ taskId: titleEntityId, conversationId }));
+      router.push(getChatTaskRoute({ taskId: titleEntityId, conversationId, inChat: true }));
     }
   }, [titleEntityId, titleEntityType, conversationId, router]);
 

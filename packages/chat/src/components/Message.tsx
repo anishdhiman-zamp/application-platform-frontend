@@ -183,8 +183,6 @@ export const Message: FC<MessageProps> = ({
 
   const innerContent = (
     <>
-      {message.sender_type === SenderType.ASSISTANT && assistantAvatar}
-
       <div
         className={cn(
           message.sender_type === SenderType.ASSISTANT &&
@@ -256,6 +254,7 @@ export const Message: FC<MessageProps> = ({
           />
         )}
       </div>
+      {message.sender_type === SenderType.ASSISTANT && isLastMessage && !hideActions && assistantAvatar}
     </>
   );
 

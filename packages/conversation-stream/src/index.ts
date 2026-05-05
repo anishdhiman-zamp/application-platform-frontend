@@ -7,8 +7,20 @@ export type { ConversationActions } from './provider/ConversationActionsContext'
 export { ConversationActionsContext, createConversationActions } from './provider/ConversationActionsContext';
 export type { ConversationProviderProps } from './provider/ConversationProvider';
 export { ConversationProvider } from './provider/ConversationProvider';
-export type { ConversationState } from './provider/ConversationStateContext';
-export { ConversationStateContext } from './provider/ConversationStateContext';
+export type {
+  ConversationBrowserState,
+  ConversationInputState,
+  ConversationMessagesState,
+  ConversationState,
+  ConversationStatusState,
+} from './provider/ConversationStateContext';
+export {
+  ConversationBrowserContext,
+  ConversationInputContext,
+  ConversationMessagesContext,
+  ConversationStateContext,
+  ConversationStatusContext,
+} from './provider/ConversationStateContext';
 
 // Provider — Task
 export type { TaskActions } from './provider/TaskActionsContext';
@@ -24,7 +36,13 @@ export { useChatInput } from './hooks/useChatInput';
 export { useConversationActions } from './hooks/useConversationActions';
 export type { UseConversationSSEConfig, UseConversationSSEReturn } from './hooks/useConversationSSE';
 export { useConversationSSE } from './hooks/useConversationSSE';
-export { useConversationState } from './hooks/useConversationState';
+export {
+  useConversationBrowserState,
+  useConversationInputState,
+  useConversationMessagesState,
+  useConversationState,
+  useConversationStatusState,
+} from './hooks/useConversationState';
 export { useTypewriter } from '@zamp-platform/chat';
 
 // Hooks — Task

@@ -242,13 +242,10 @@ export const useChat = (config: ChatConfig) => {
   };
 
   const clearMessages = useCallback(() => {
-    if (config.enableStreaming && conversationIdRef.current) {
-      streamingStateStore.delete(conversationIdRef.current);
-    }
     setMessages([]);
     setConversationId(null);
     isNewlyCreatedConversationRef.current = null;
-  }, [config.enableStreaming]);
+  }, []);
 
   const resolvedEventType = config.eventType ?? EVENT_TYPE.CONVERSATION_V2;
   const isTaskEvent = resolvedEventType === EVENT_TYPE.TASK;

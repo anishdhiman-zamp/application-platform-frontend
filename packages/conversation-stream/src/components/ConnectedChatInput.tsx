@@ -38,7 +38,7 @@ import { useLazyGetSpeechToTextAccessTokenQuery } from '@/apis/voiceAgents';
 
 import { type ChatInputActions, useChatInput } from '../hooks/useChatInput';
 import { useConversationActions } from '../hooks/useConversationActions';
-import { useConversationState } from '../hooks/useConversationState';
+import { useConversationMessagesState, useConversationStatusState } from '../hooks/useConversationState';
 
 export type FileDropHandlerRef = RefObject<((files: FileList) => void) | null>;
 export type AddFileReferenceRef = RefObject<((ref: { path: string; name: string }) => void) | null>;
@@ -73,6 +73,8 @@ export interface ConnectedChatInputProps {
   onSuccess?: (message: string) => void;
   placeholder?: string;
   className?: string;
+  inputAreaClassName?: string;
+  footerClassName?: string;
   disableAttachments?: boolean;
   annotationType?: AnnotationType;
   defaultMessage?: string;
@@ -123,6 +125,8 @@ export const ConnectedChatInput = ({
   placeholder = 'Ask anything or give feedback...',
   annotationType,
   className,
+  inputAreaClassName,
+  footerClassName,
   disableAttachments = false,
   defaultMessage,
   onConversationCreated,
@@ -183,14 +187,8 @@ export const ConnectedChatInput = ({
   const editorExtensions = useMemo(() => (mentionExtension ? [mentionExtension] : undefined), [mentionExtension]);
 
   const actions = useConversationActions();
-  const {
-    isStreaming,
-    isStopping,
-    isAnalysing,
-    conversationId: ctxConversationId,
-    messages,
-    queuedMessages,
-  } = useConversationState();
+  const { isStreaming, isStopping, isAnalysing, conversationId: ctxConversationId } = useConversationStatusState();
+  const { messages, queuedMessages } = useConversationMessagesState();
 
   const resolvedConversationId = conversationIdProp ?? ctxConversationId ?? '';
 
@@ -510,6 +508,8 @@ export const ConnectedChatInput = ({
         onStop={hideStopButton ? undefined : handleStop}
         isStopping={hideStopButton ? false : isStopping}
         className={className}
+        inputAreaClassName={inputAreaClassName}
+        footerClassName={footerClassName}
         minTextareaHeight={minTextareaHeight}
         maxTextareaHeight={maxTextareaHeight}
         modelSelectorSlot={showModelSelector ? modelSelectorSlot : undefined}

@@ -13,6 +13,7 @@ import {
   type CreateConversationPayloadTypeV2,
   getHistoryFormattedMessages,
   getStreamingMessageId,
+  inputsRequiredStore,
   MessageState,
   type ResourceType,
   SenderType,
@@ -36,7 +37,18 @@ import { type ConversationEventCallbacks } from '../handlers/conversationEventHa
 import { conversationSSERegistry } from '../registry/conversationSSERegistry';
 import { mergeHistoryWithSSEStatuses } from '../utils/mergeHistoryWithSSEStatuses';
 import { type ConversationActions, ConversationActionsContext } from './ConversationActionsContext';
-import { type ConversationState, ConversationStateContext } from './ConversationStateContext';
+import {
+  ConversationBrowserContext,
+  type ConversationBrowserState,
+  ConversationInputContext,
+  type ConversationInputState,
+  ConversationMessagesContext,
+  type ConversationMessagesState,
+  type ConversationState,
+  ConversationStateContext,
+  ConversationStatusContext,
+  type ConversationStatusState,
+} from './ConversationStateContext';
 
 export interface ConversationProviderProps {
   children: ReactNode;
@@ -308,9 +320,6 @@ export const ConversationProvider: React.FC<ConversationProviderProps> = ({
   );
 
   const clearMessages = useCallback(() => {
-    if (conversationIdRef.current) {
-      streamingStateStore.delete(conversationIdRef.current);
-    }
     setMessages([]);
     setQueuedMessages([]);
     _setConversationId(null);
@@ -536,6 +545,17 @@ export const ConversationProvider: React.FC<ConversationProviderProps> = ({
 
   const initiatedBy = conversationHistory?.conversation?.initiated_by ?? null;
 
+  useEffect(() => {
+    const loadedConversationId = conversationHistory?.conversation?.id;
+    if (!loadedConversationId || loadedConversationId !== _conversationId) return;
+
+    if ((conversationHistory?.inputs_required?.length ?? 0) > 0) {
+      inputsRequiredStore.markPending(loadedConversationId);
+    } else {
+      inputsRequiredStore.markResolved(loadedConversationId);
+    }
+  }, [conversationHistory?.conversation?.id, conversationHistory?.inputs_required, _conversationId]);
+
   const stateValue: ConversationState = useMemo(
     () => ({
       messages,
@@ -583,6 +603,66 @@ export const ConversationProvider: React.FC<ConversationProviderProps> = ({
       taskSummaries,
       initiatedBy,
     ],
+  );
+
+  const messagesValue: ConversationMessagesState = useMemo(
+    () => ({
+      messages,
+      queuedMessages,
+      hasMessages: messages.length > 0 || queuedMessages.length > 0,
+    }),
+    [messages, queuedMessages],
+  );
+
+  const statusValue: ConversationStatusState = useMemo(
+    () => ({
+      conversationId: _conversationId,
+      isStreaming,
+      isStopping,
+      isLoadingConversationHistory,
+      isFetchingConversationHistory,
+      isCreatingConversationV2,
+      isSendingMessage,
+      isErrorConversationHistory,
+      errorConversationHistory,
+      isUninitializedConversationHistory,
+      isAnalysing,
+      sendMessageError: null,
+      sendMessageV2Error,
+      createConversationV2Error,
+    }),
+    [
+      _conversationId,
+      isStreaming,
+      isStopping,
+      isLoadingConversationHistory,
+      isFetchingConversationHistory,
+      isCreatingConversationV2,
+      isSendingMessage,
+      isErrorConversationHistory,
+      errorConversationHistory,
+      isUninitializedConversationHistory,
+      isAnalysing,
+      sendMessageV2Error,
+      createConversationV2Error,
+    ],
+  );
+
+  const inputValue: ConversationInputState = useMemo(
+    () => ({
+      inputsRequired: conversationHistory?.inputs_required,
+      initiatedBy,
+    }),
+    [conversationHistory?.inputs_required, initiatedBy],
+  );
+
+  const browserValue: ConversationBrowserState = useMemo(
+    () => ({
+      isBrowserStreamingAvailable,
+      browserSessionId,
+      taskSummaries,
+    }),
+    [isBrowserStreamingAvailable, browserSessionId, taskSummaries],
   );
 
   useEffect(() => {
@@ -782,7 +862,15 @@ export const ConversationProvider: React.FC<ConversationProviderProps> = ({
 
   return (
     <ConversationActionsContext.Provider value={actionsValue}>
-      <ConversationStateContext.Provider value={stateValue}>{children}</ConversationStateContext.Provider>
+      <ConversationMessagesContext.Provider value={messagesValue}>
+        <ConversationStatusContext.Provider value={statusValue}>
+          <ConversationInputContext.Provider value={inputValue}>
+            <ConversationBrowserContext.Provider value={browserValue}>
+              <ConversationStateContext.Provider value={stateValue}>{children}</ConversationStateContext.Provider>
+            </ConversationBrowserContext.Provider>
+          </ConversationInputContext.Provider>
+        </ConversationStatusContext.Provider>
+      </ConversationMessagesContext.Provider>
     </ConversationActionsContext.Provider>
   );
 };

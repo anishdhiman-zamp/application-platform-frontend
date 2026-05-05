@@ -2,7 +2,6 @@ import { captureMessage } from '@sentry/browser';
 import { ShimmerText, useScrollRef } from '@zamp-platform/ui';
 import { cn } from '@zamp-platform/ui/utils';
 import { motion } from 'motion/react';
-import Image from 'next/image';
 import { FC, ReactNode, useCallback, useEffect, useRef, useState } from 'react';
 
 import PaceAvatar from '@/modules/chatbot/PaceAvatar';
@@ -186,18 +185,6 @@ export const MessageContainer: FC<MessageContainerProps> = ({
           assistantAvatar={defaultAssistantAvatar}
           showMarkdownConnectors={showMarkdownConnectors}
         />
-      )}
-
-      {streamingState && !!streamingState.message_content?.elements?.length && (
-        <div className='flex w-full items-center'>
-          <Image
-            src='/loaders/zamp-logo-cropped-loader.svg'
-            alt='Zamp Logo'
-            height={20}
-            width={20}
-            className='dark:opacity-50'
-          />
-        </div>
       )}
 
       {showAnalysing &&

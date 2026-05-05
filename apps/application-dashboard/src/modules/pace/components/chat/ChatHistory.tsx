@@ -1,11 +1,17 @@
 'use client';
 
 import { useCallback, useEffect, useRef, useState } from 'react';
-import { ResourceType, unreadStore, useActiveStreamingIds, useUnreadConversations } from '@zamp-platform/chat';
+import {
+  ResourceType,
+  unreadStore,
+  useActiveStreamingIds,
+  useInputsRequiredConversations,
+  useUnreadConversations,
+} from '@zamp-platform/chat';
 import { useInfiniteScroll } from '@zamp-platform/tanstack-table';
 import { Button, Input } from '@zamp-platform/ui';
 import { cn } from '@zamp-platform/ui/utils';
-import { ArrowRight, Plus } from 'lucide-react';
+import { MessageSquare, Plus } from 'lucide-react';
 import Link from 'next/link';
 import { useGetConversationHistoryQuery } from '@/apis/pace';
 import CommonWrapper from '@/components/commonWrapper';
@@ -45,6 +51,7 @@ const ChatHistory = ({
   const containerRef = useRef<HTMLDivElement>(null);
   const activeStreamingIds = useActiveStreamingIds();
   const unreadIds = useUnreadConversations();
+  const inputsRequiredIds = useInputsRequiredConversations();
 
   const [pagination, setPagination] = useState<{
     page: number;
@@ -142,9 +149,22 @@ const ChatHistory = ({
     if (!conversationHistory) return;
 
     setPagination((prev) => {
+      const fetched = conversationHistory.conversations ?? [];
+
+      // Page 1 is the freshest server snapshot — always replace, so
+      // refetches (e.g. after creating a new conversation) update the list.
+      if (prev.page === 1) {
+        return {
+          ...prev,
+          totalPages: conversationHistory.total_pages ?? prev.totalPages,
+          totalCount: conversationHistory.count ?? prev.totalCount,
+          conversations: fetched,
+          lastMergedPage: 1,
+        };
+      }
+
       if (prev.lastMergedPage === prev.page) return prev;
 
-      const fetched = conversationHistory.conversations ?? [];
       const existingIds = new Set(prev.conversations.map((c) => c.id));
       const deduped = fetched.filter((c) => !existingIds.has(c.id));
 
@@ -152,7 +172,7 @@ const ChatHistory = ({
         ...prev,
         totalPages: conversationHistory.total_pages ?? prev.totalPages,
         totalCount: conversationHistory.count ?? prev.totalCount,
-        conversations: prev.page === 1 ? fetched : [...prev.conversations, ...deduped],
+        conversations: [...prev.conversations, ...deduped],
         lastMergedPage: prev.page,
       };
     });
@@ -176,12 +196,13 @@ const ChatHistory = ({
 
   return (
     <div
-      className={cn('mx-auto flex min-h-0 w-full flex-1 flex-col overflow-hidden bg-transparent', !compact && 'pt-10')}
+      className={cn('mx-auto flex min-h-0 w-full flex-1 flex-col overflow-hidden bg-transparent', !compact && 'pt-6')}
     >
       {!compact && (
-        <div className='flex shrink-0 flex-col gap-2 px-3 pb-2'>
-          <div className='flex h-6 items-center'>
-            <p className='f-12-500 text-GRAY_600 pl-1 font-mono tracking-wide uppercase'>Chats</p>
+        <div className='flex shrink-0 flex-col gap-2 px-3 pb-4'>
+          <div className='f-14-500 text-GRAY_600 flex h-6 items-center gap-1.5 pl-2 font-mono tracking-wide uppercase'>
+            <span>Recent</span>
+            <span>Chats</span>
           </div>
           {!isRecentMode && (
             <Input
@@ -213,7 +234,7 @@ const ChatHistory = ({
         disableAnimation
       >
         <div ref={containerRef} className='flex-1 overflow-y-auto [scrollbar-width:none]' onScroll={handleScroll}>
-          <div className='flex w-full flex-col gap-y-0.5 px-3'>
+          <div className='flex w-full flex-col px-3'>
             {visibleConversations.map((conversation) => (
               <ChatHistoryItem
                 key={conversation?.id}
@@ -222,16 +243,19 @@ const ChatHistory = ({
                 isStreaming={activeStreamingIds.has(conversation?.id)}
                 isSelected={activeConversationId === conversation?.id}
                 isUnread={unreadIds.has(conversation?.id)}
+                needsInput={inputsRequiredIds.has(conversation?.id)}
               />
             ))}
             {isRecentMode && viewMoreHref && !isEmptyState && (
               <Link
                 href={viewMoreHref}
-                className='text-GRAY_700 hover:text-GRAY_900 hover:bg-accent flex h-8 w-full items-center justify-between gap-x-2 rounded-lg px-2 text-sm font-medium transition-colors'
+                className='text-GRAY_700 hover:text-GRAY_900 hover:bg-accent mt-4 flex h-8 w-full items-center rounded-lg pr-3 text-sm font-medium transition-colors'
                 data-testid='chat-history-view-more'
               >
-                View more chats
-                <ArrowRight size={14} />
+                <span className='flex size-8 shrink-0 items-center justify-center rounded-lg'>
+                  <MessageSquare size={16} />
+                </span>
+                Older chats…
               </Link>
             )}
           </div>

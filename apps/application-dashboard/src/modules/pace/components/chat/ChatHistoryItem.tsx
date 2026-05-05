@@ -1,11 +1,8 @@
 'use client';
 
-import { useMemo } from 'react';
-import { AnimatedDot } from '@zamp-platform/ui';
+import { unreadStore } from '@zamp-platform/chat';
+import { AnimatedDot, CSS_VARS } from '@zamp-platform/ui';
 import { cn } from '@zamp-platform/ui/utils';
-import { formatTimestampToUTC } from '@zamp-platform/utils/date';
-import { Loader2 } from 'lucide-react';
-import { formatRelativeTime } from '@/modules/pace/components/files/file-tree.utils';
 import type { FeedbackItemType } from '@/types/api/feedbacks.types';
 
 interface ChatHistoryItemProps {
@@ -14,55 +11,102 @@ interface ChatHistoryItemProps {
   isStreaming?: boolean;
   isSelected?: boolean;
   isUnread?: boolean;
+  needsInput?: boolean;
 }
 
-const ChatHistoryItem = ({ conversation, onSelect, isStreaming, isSelected, isUnread }: ChatHistoryItemProps) => {
-  const renderStatusIcon = () => {
-    if (isStreaming) return <Loader2 className='text-BLUE_700 h-3 w-3 shrink-0 animate-spin' />;
-    if (isUnread) return <AnimatedDot showAnimation className='shrink-0' size={7} />;
+type DotState = 'needsInput' | 'streaming' | 'unread' | 'read';
 
-    return null;
+const resolveDotState = (
+  needsInput: boolean | undefined,
+  isStreaming: boolean | undefined,
+  isUnread: boolean | undefined,
+): DotState => {
+  if (needsInput) return 'needsInput';
+  if (isStreaming) return 'streaming';
+  if (isUnread) return 'unread';
+
+  return 'read';
+};
+
+const DOT_COLOR: Record<DotState, string> = {
+  needsInput: CSS_VARS.ORANGE_600,
+  streaming: CSS_VARS.BLUE_700,
+  unread: CSS_VARS.GREEN_700,
+  read: CSS_VARS.GRAY_500,
+};
+
+const DOT_TITLE: Record<DotState, string> = {
+  needsInput: 'Needs your input',
+  streaming: 'Generating response…',
+  unread: 'Mark as read',
+  read: 'Mark as unread',
+};
+
+const ChatHistoryItem = ({
+  conversation,
+  onSelect,
+  isStreaming,
+  isSelected,
+  isUnread,
+  needsInput,
+}: ChatHistoryItemProps) => {
+  const conversationId = conversation?.id;
+  const dotState = resolveDotState(needsInput, isStreaming, isUnread);
+  const dotColor = DOT_COLOR[dotState];
+  const dotTitle = DOT_TITLE[dotState];
+  const isToggleable = dotState === 'unread' || dotState === 'read';
+  const dot = (
+    <AnimatedDot
+      showAnimation={dotState === 'streaming'}
+      size={8}
+      activeColor={dotColor}
+      completeColor={dotColor}
+      className='rounded-[2px]'
+    />
+  );
+
+  const handleRowClick = () => {
+    if (!conversationId) return;
+    onSelect(conversationId, conversation?.title);
   };
 
-  const relativeTime = useMemo(() => {
-    const timestamp = conversation?.updated_at || conversation?.created_at;
-
-    if (!timestamp) return null;
-
-    return formatRelativeTime(new Date(formatTimestampToUTC(timestamp)).getTime());
-  }, [conversation?.updated_at, conversation?.created_at]);
-
-  const handleClick = () => {
-    onSelect(conversation?.id, conversation?.title);
+  const handleDotClick = (event: React.MouseEvent<HTMLButtonElement>) => {
+    event.stopPropagation();
+    if (!conversationId || !isToggleable) return;
+    if (isUnread) {
+      unreadStore.markRead(conversationId);
+    } else {
+      unreadStore.markUnread(conversationId);
+    }
   };
-
-  const statusIcon = renderStatusIcon();
-  const hasStatusIcon = Boolean(statusIcon);
 
   return (
     <div
       className={cn(
-        'group text-GRAY_700 hover:text-GRAY_900 hover:bg-accent relative flex h-8 cursor-pointer items-center gap-x-2 rounded-lg border-[0.75px] border-transparent px-2 text-sm font-medium transition-colors',
+        'group text-GRAY_700 hover:text-GRAY_900 hover:bg-accent flex h-8 cursor-pointer items-center rounded-lg border-[0.75px] border-transparent pr-3 text-sm font-medium transition-colors',
         isSelected &&
           'border-GRAY_500 text-GRAY_900 hover:text-GRAY_900 shadow-tab-shadow bg-BG_WHITE hover:bg-BG_WHITE',
       )}
-      onClick={handleClick}
+      onClick={handleRowClick}
     >
+      {isToggleable ? (
+        <button
+          type='button'
+          onClick={handleDotClick}
+          title={dotTitle}
+          aria-label={dotTitle}
+          className='flex size-8 shrink-0 cursor-pointer items-center justify-center rounded-lg'
+        >
+          {dot}
+        </button>
+      ) : (
+        <span className='flex size-8 shrink-0 items-center justify-center rounded-lg' title={dotTitle}>
+          {dot}
+        </span>
+      )}
       <p className='min-w-0 flex-1 truncate text-left first-letter:uppercase'>
         {conversation?.title || 'Untitled conversation'}
       </p>
-
-      {relativeTime && (
-        <span className='f-12-400 text-GRAY_600 shrink-0 whitespace-nowrap opacity-0 transition-opacity group-hover:opacity-100'>
-          {relativeTime}
-        </span>
-      )}
-
-      {hasStatusIcon && (
-        <span className='absolute right-1.5 flex h-5 w-5 items-center justify-center transition-opacity group-hover:opacity-0'>
-          {statusIcon}
-        </span>
-      )}
     </div>
   );
 };

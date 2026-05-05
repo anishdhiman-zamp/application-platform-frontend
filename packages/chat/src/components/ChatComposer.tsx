@@ -57,6 +57,8 @@ export interface ChatComposerProps {
   textareaClassName?: string;
   textareaStyle?: React.CSSProperties;
   containerClassName?: string;
+  inputAreaClassName?: string;
+  footerClassName?: string;
 
   minTextareaHeight?: number;
   maxTextareaHeight?: number;
@@ -116,6 +118,8 @@ export const ChatComposer = forwardRef<ChatComposerHandle, ChatComposerProps>(
       textareaClassName,
       textareaStyle,
       containerClassName,
+      inputAreaClassName,
+      footerClassName,
 
       minTextareaHeight = 18,
       maxTextareaHeight = 200,
@@ -174,7 +178,7 @@ export const ChatComposer = forwardRef<ChatComposerHandle, ChatComposerProps>(
               disabled={isSubmitDisabled}
               size='icon'
               aria-label='Queue message'
-              className='text-BG_WHITE dark:text-BG_WHITE hover:bg-GRAY_1000 size-[26px] rounded-full p-0 dark:bg-white dark:hover:bg-white'
+              className='text-BG_WHITE dark:text-BG_WHITE hover:bg-GRAY_1000 size-8 rounded-full p-0 dark:bg-white dark:hover:bg-white'
             >
               <Hourglass className='size-3!' />
             </Button>
@@ -198,7 +202,7 @@ export const ChatComposer = forwardRef<ChatComposerHandle, ChatComposerProps>(
               size='icon'
               variant='ghost'
               aria-label='Stop generating'
-              className='bg-GRAY_950 text-BG_WHITE hover:bg-GRAY_950 hover:text-BG_WHITE dark:bg-GRAY_500 dark:hover:bg-GRAY_500 dark:text-GRAY_1000 dark:hover:text-GRAY_1000 size-[26px] rounded-full p-0'
+              className='bg-GRAY_950 text-BG_WHITE hover:bg-GRAY_950 hover:text-BG_WHITE dark:bg-GRAY_500 dark:hover:bg-GRAY_500 dark:text-GRAY_1000 dark:hover:text-GRAY_1000 size-8 rounded-full p-0'
             >
               {isStopping ? (
                 <Loader2 className='size-3.5 animate-spin' />
@@ -218,11 +222,11 @@ export const ChatComposer = forwardRef<ChatComposerHandle, ChatComposerProps>(
             size='icon'
             aria-label='Send message'
             className={cn(
-              'text-BG_WHITE dark:text-BG_WHITE hover:bg-GRAY_1000 disabled:bg-GRAY_300 dark:disabled:bg-GRAY_300 size-[26px] rounded-full p-[2px] disabled:cursor-not-allowed dark:bg-white dark:hover:bg-white',
+              'text-BG_WHITE dark:text-BG_WHITE hover:bg-GRAY_1000 disabled:bg-GRAY_300 dark:disabled:bg-GRAY_300 size-8 rounded-full p-[2px] disabled:cursor-not-allowed dark:bg-white dark:hover:bg-white',
               isSubmitDisabled && 'text-GRAY_700 dark:text-GRAY_600',
             )}
           >
-            <ArrowUp className='size-3.5' />
+            <ArrowUp className='size-4' />
           </Button>
         );
       }
@@ -262,7 +266,7 @@ export const ChatComposer = forwardRef<ChatComposerHandle, ChatComposerProps>(
             <Button
               variant='ghost'
               size='icon'
-              className='bg-accent hover:bg-accent size-[26px] shrink-0 rounded-full [&_svg]:size-3.5'
+              className='bg-accent hover:bg-accent size-8 shrink-0 rounded-full [&_svg]:size-4'
               aria-label='Reject recording'
               onClick={onRejectRecording}
             >
@@ -282,7 +286,7 @@ export const ChatComposer = forwardRef<ChatComposerHandle, ChatComposerProps>(
 
             <Button
               size='icon'
-              className='size-[26px] shrink-0 rounded-full [&_svg]:size-3.5'
+              className='size-8 shrink-0 rounded-full [&_svg]:size-4'
               aria-label='Accept recording'
               onClick={onAcceptRecording}
               disabled={isCommitting}
@@ -293,7 +297,7 @@ export const ChatComposer = forwardRef<ChatComposerHandle, ChatComposerProps>(
           </div>
         ) : (
           <div className='flex w-full flex-col'>
-            <div className='p-3' onClick={handleContainerClick}>
+            <div className={cn('p-3', inputAreaClassName)} onClick={handleContainerClick}>
               <RichTextEditor
                 ref={editorRef}
                 value={value}
@@ -323,13 +327,13 @@ export const ChatComposer = forwardRef<ChatComposerHandle, ChatComposerProps>(
                 }}
               />
             </div>
-            <div className='flex items-center justify-between py-2.5 pr-2.5 pl-2'>
+            <div className={cn('flex items-center justify-between py-2.5 pr-2.5 pl-2', footerClassName)}>
               <div className='flex items-center gap-x-2'>
                 {showAttachButton && onAttachClick ? (
                   <Button
                     variant='ghost'
                     size='icon'
-                    className='hover:text-GRAY_1000 text-GRAY_700 hover:bg-accent size-[26px] rounded-[6px] p-[2px] [&_svg]:size-3.5'
+                    className='hover:text-GRAY_1000 text-GRAY_700 hover:bg-accent size-8 rounded-[6px] p-[2px] [&_svg]:size-4'
                     aria-label='Attach file'
                     onClick={onAttachClick}
                   >
@@ -344,14 +348,14 @@ export const ChatComposer = forwardRef<ChatComposerHandle, ChatComposerProps>(
                 {voiceChatSlot}
                 {!hideRecordingButton &&
                   (isPreparingToRecord ? (
-                    <div className='flex size-[26px] items-center justify-center'>
+                    <div className='flex size-8 items-center justify-center'>
                       <Loader size={14} className='text-GRAY_700 animate-spin' />
                     </div>
                   ) : (
                     <Button
                       variant='ghost'
                       size='icon'
-                      className='hover:text-GRAY_1000 text-GRAY_700 hover:bg-accent size-[26px] rounded-[6px] p-[2px] [&_svg]:size-3.5'
+                      className='hover:text-GRAY_1000 text-GRAY_700 hover:bg-accent size-8 rounded-[6px] p-[2px] [&_svg]:size-4'
                       aria-label='Start recording'
                       onClick={onStartRecording}
                       disabled={microphoneDisabled}

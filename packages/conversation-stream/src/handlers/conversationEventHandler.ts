@@ -2,6 +2,7 @@ import { captureException, captureMessage } from '@sentry/browser';
 import {
   type ChatMessage,
   ChatMessageType,
+  inputsRequiredStore,
   ResourceType,
   SenderType,
   type StreamingState,
@@ -67,6 +68,7 @@ export function handleConversationSSEEvent(
       case TaskSSEEventType.INPUT_REQUIRED: {
         const entityId = event.entity_id as string;
         const entityType = event.entity_type as string;
+        inputsRequiredStore.markPending(conversationId);
         callbacks.onInputRequired?.(entityId, entityType, event.input_required_data);
         return;
       }
@@ -96,6 +98,7 @@ export function handleConversationSSEEvent(
 
       case ConversationEventType.MESSAGE_START: {
         const msg = event.message as MapAny;
+        inputsRequiredStore.markResolved(conversationId);
 
         const newState: StreamingState = {
           resource_type: ResourceType.ORGANIZATION,

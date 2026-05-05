@@ -30,3 +30,35 @@ export interface ConversationState {
 }
 
 export const ConversationStateContext = createContext<ConversationState | null>(null);
+
+export type ConversationMessagesState = Pick<ConversationState, 'messages' | 'queuedMessages' | 'hasMessages'>;
+
+export type ConversationStatusState = Pick<
+  ConversationState,
+  | 'conversationId'
+  | 'isStreaming'
+  | 'isStopping'
+  | 'isLoadingConversationHistory'
+  | 'isFetchingConversationHistory'
+  | 'isCreatingConversationV2'
+  | 'isSendingMessage'
+  | 'isErrorConversationHistory'
+  | 'errorConversationHistory'
+  | 'isUninitializedConversationHistory'
+  | 'isAnalysing'
+  | 'sendMessageError'
+  | 'sendMessageV2Error'
+  | 'createConversationV2Error'
+>;
+
+export type ConversationInputState = Pick<ConversationState, 'inputsRequired' | 'initiatedBy'>;
+
+export type ConversationBrowserState = Pick<
+  ConversationState,
+  'isBrowserStreamingAvailable' | 'browserSessionId' | 'taskSummaries'
+>;
+
+export const ConversationMessagesContext = createContext<ConversationMessagesState | null>(null);
+export const ConversationStatusContext = createContext<ConversationStatusState | null>(null);
+export const ConversationInputContext = createContext<ConversationInputState | null>(null);
+export const ConversationBrowserContext = createContext<ConversationBrowserState | null>(null);

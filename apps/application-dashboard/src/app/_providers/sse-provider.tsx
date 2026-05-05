@@ -205,84 +205,73 @@ function handleGlobalStreamEvent(data: BaseEventPayload): void {
       case StreamingContentBlockType.CONTENT_BLOCK_DELTA: {
         const { index, delta } = payload;
 
-        streamingStateStore.update(conversationId, (prev) => {
-          if (!prev) return prev;
+        if (delta.type === StreamingContentBlockDeltaType.TOOL_USE_BLOCK_UPDATE_DELTA) {
+          streamingStateStore.update(conversationId, (prev) => {
+            if (!prev) return prev;
 
-          const existingBlocks = prev.message_content?.elements ?? [];
-          const updatedBlocks = existingBlocks.map((block) => {
-            if (block.order !== index) return block;
+            const existingBlocks = prev.message_content?.elements ?? [];
+            const updatedBlocks = existingBlocks.map((block) => {
+              if (block.order !== index || block.type !== BLOCK_TYPE.TOOL_USE) return block;
 
-            switch (delta.type) {
-              case StreamingContentBlockDeltaType.THINKING_DELTA:
-                if (block.type === BLOCK_TYPE.THINKING) {
-                  return { ...block, payload: { thinking: (block.payload.thinking || '') + delta.thinking } };
-                }
-                break;
-              case StreamingContentBlockDeltaType.TEXT_DELTA:
-                if (block.type === BLOCK_TYPE.TEXT) {
-                  return { ...block, payload: { text: block.payload.text + delta.text } };
-                }
-                break;
-              case StreamingContentBlockDeltaType.INPUT_JSON_DELTA:
-                if (block.type === BLOCK_TYPE.TOOL_USE) {
-                  return {
-                    ...block,
-                    payload: {
-                      ...block.payload,
-                      partial_json: (block.payload.partial_json || '') + delta.partial_json,
-                    },
-                  };
-                }
-                break;
-              case StreamingContentBlockDeltaType.TOOL_USE_BLOCK_UPDATE_DELTA:
-                if (block.type === BLOCK_TYPE.TOOL_USE) {
-                  return {
-                    ...block,
-                    payload: {
-                      ...block.payload,
-                      message: delta.message ?? block.payload.message,
-                      display_content: delta.display_content ?? block.payload.display_content,
-                    },
-                  };
-                }
-                break;
-              case StreamingContentBlockDeltaType.TOOL_RESULT_DELTA:
-                if (block.type === BLOCK_TYPE.TOOL_RESULT) {
-                  return {
-                    ...block,
-                    payload: {
-                      ...block.payload,
-                      content: (block.payload.content || '') + delta.content,
-                      is_error: delta.is_error,
-                      tool_call_id: delta.tool_call_id ?? block.payload.tool_call_id,
-                    },
-                  };
-                }
-                break;
-              case StreamingContentBlockDeltaType.TASK_DELTA:
-                if (block.type === BLOCK_TYPE.TASK) {
-                  return {
-                    ...block,
-                    payload: {
-                      ...block.payload,
-                      title: delta.title ?? block.payload.title,
-                      status: delta.status ?? block.payload.status,
-                    },
-                  };
-                }
-                break;
-            }
+              return {
+                ...block,
+                payload: {
+                  ...block.payload,
+                  message: delta.message ?? block.payload.message,
+                  display_content: delta.display_content ?? block.payload.display_content,
+                  display_name: delta.display_name ?? block.payload.display_name,
+                  display_title: delta.display_title ?? block.payload.display_title,
+                },
+              };
+            });
 
-            return block;
+            return {
+              ...prev,
+              message_content: {
+                ...prev.message_content,
+                elements: updatedBlocks,
+              },
+            };
           });
+          break;
+        }
 
-          return {
-            ...prev,
-            message_content: {
-              ...prev.message_content,
-              elements: updatedBlocks,
-            },
-          };
+        streamingStateStore.bufferDelta(conversationId, (draft) => {
+          const existingBlocks = draft.message_content?.elements;
+          const block = existingBlocks?.find((element) => element.order === index);
+
+          if (!block) return;
+
+          switch (delta.type) {
+            case StreamingContentBlockDeltaType.THINKING_DELTA:
+              if (block.type === BLOCK_TYPE.THINKING) {
+                block.payload.thinking = (block.payload.thinking || '') + delta.thinking;
+              }
+              break;
+            case StreamingContentBlockDeltaType.TEXT_DELTA:
+              if (block.type === BLOCK_TYPE.TEXT) {
+                block.payload.text = block.payload.text + delta.text;
+              }
+              break;
+            case StreamingContentBlockDeltaType.INPUT_JSON_DELTA:
+              if (block.type === BLOCK_TYPE.TOOL_USE) {
+                block.payload.partial_json = (block.payload.partial_json || '') + delta.partial_json;
+              }
+              break;
+            case StreamingContentBlockDeltaType.TOOL_RESULT_DELTA:
+              if (block.type === BLOCK_TYPE.TOOL_RESULT) {
+                block.payload.content = (block.payload.content || '') + delta.content;
+                block.payload.is_error = delta.is_error;
+                block.payload.tool_call_id = delta.tool_call_id ?? block.payload.tool_call_id;
+              }
+              break;
+            case StreamingContentBlockDeltaType.TASK_DELTA:
+              if (block.type === BLOCK_TYPE.TASK) {
+                block.payload.title = delta.title ?? block.payload.title;
+                block.payload.status = delta.status ?? block.payload.status;
+              }
+              break;
+          }
         });
         break;
       }
