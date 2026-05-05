@@ -4,13 +4,19 @@ import { captureException } from '@sentry/browser';
 import { getFromLocalStorage, isBrowser, LOCAL_STORAGE_KEYS } from '@zamp-platform/utils';
 import { Mutex } from 'async-mutex';
 
-import { ROUTES_PATH } from '@/constants/routeConfig';
-import { getCookie, USER_SESSION_COOKIE } from '@/utils/cookie';
-
 import { API_DOMAIN } from './api.utils';
-import { ABORT_ERROR, CUSTOM_ERROR, LOGIN_PATH, ORG_SWITCH_IN_PROGRESS_ERROR, REQUEST_TIMEOUT } from './constants';
+import {
+  ABORT_ERROR,
+  CUSTOM_ERROR,
+  LOGIN_PATH,
+  MEMBERSHIP_PENDING_PATH,
+  ORG_SWITCH_IN_PROGRESS_ERROR,
+  REQUEST_TIMEOUT,
+  SETUP_WORKSPACE_PATH,
+} from './constants';
 
 const mutex = new Mutex();
+const USER_SESSION_COOKIE = 'zamp_user_session_v2';
 
 // Custom FetchArgs type to support timeout and domain
 interface CustomFetchArgs extends FetchArgs {
@@ -24,6 +30,14 @@ interface UserState {
     user?: { orgs?: Array<{ organization_id: string }> };
   };
 }
+
+const getCookie = (name: string) => {
+  if (typeof document === 'undefined') return null;
+
+  const cookie = document.cookie.split(';').find((cookiePart) => cookiePart.trim().startsWith(`${name}=`));
+
+  return cookie ? cookie.split('=')[1] : null;
+};
 
 const baseQuery = (timeout = REQUEST_TIMEOUT, domain = API_DOMAIN, orgId: string) =>
   fetchBaseQuery({
@@ -74,9 +88,9 @@ const baseQueryWithAuth: BaseQueryFn<CustomFetchArgs, unknown, FetchBaseQueryErr
   const normalizedPath = path.replace(/\/$/, '');
 
   const shouldSkip401Redirect =
-    normalizedPath === ROUTES_PATH.LOGIN ||
-    normalizedPath === ROUTES_PATH.MEMBERSHIP_PENDING ||
-    normalizedPath === ROUTES_PATH.SETUP_WORKSPACE;
+    normalizedPath === LOGIN_PATH ||
+    normalizedPath === MEMBERSHIP_PENDING_PATH ||
+    normalizedPath === SETUP_WORKSPACE_PATH;
 
   const error = result?.error;
 

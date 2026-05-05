@@ -2,7 +2,7 @@ import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { captureException } from '@sentry/browser';
 import type { SiblingTask, TaskBreadcrumb, TaskStatus } from '@zamp-platform/chat';
 import { extractTaskUpdateFields } from '@zamp-platform/utils';
-import { type BaseEventPayload, EVENT_TYPE } from '@zamp-platform/utils/event-bus/event-bus.types';
+import { type BaseEventPayload, EVENT_TYPE } from '@zamp-platform/utils/event-bus';
 import { parseIntSafely } from 'modules/process/process.utils';
 import { usePathname, useRouter, useSearchParams } from 'next/navigation';
 import {

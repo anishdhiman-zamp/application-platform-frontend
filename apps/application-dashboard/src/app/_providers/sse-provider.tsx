@@ -22,11 +22,7 @@ import {
   type TriggerContentBlock,
 } from '@zamp-platform/chat';
 import { EventBus, extractTaskUpdateFields, SSEConnectionState, useSSE } from '@zamp-platform/utils';
-import {
-  type BaseEventPayload,
-  EVENT_TYPE,
-  type EventBusInterface,
-} from '@zamp-platform/utils/event-bus/event-bus.types';
+import { type BaseEventPayload, EVENT_TYPE, type EventBusInterface } from '@zamp-platform/utils/event-bus';
 import { API_ENDPOINTS } from '@/apis/apiEndpoint.constants';
 import { APITags } from '@/constants/api.constants';
 import { baseApi } from '@/services/baseApi';

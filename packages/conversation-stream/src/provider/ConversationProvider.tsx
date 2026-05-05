@@ -27,7 +27,7 @@ import {
   useStreamingState,
 } from '@zamp-platform/chat';
 import { extractTaskUpdateFields } from '@zamp-platform/utils';
-import { type BaseEventPayload, EVENT_TYPE } from '@zamp-platform/utils/event-bus/event-bus.types';
+import { type BaseEventPayload, EVENT_TYPE } from '@zamp-platform/utils/event-bus';
 import { type ReactNode, useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { useDispatch } from 'react-redux';
 

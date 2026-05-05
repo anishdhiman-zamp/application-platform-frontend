@@ -1,4 +1,4 @@
-import type { MapAny } from '@/types/commonTypes';
+type EventPayloadMap = Record<string, unknown>;
 
 /**
  * Base interface for all event payloads in the generic event bus system.
@@ -8,7 +8,7 @@ export interface BaseEventPayload {
   type: EVENT_TYPE;
   source_id?: string;
   timestamp?: string;
-  payload?: string | MapAny;
+  payload?: string | EventPayloadMap;
 }
 
 /**

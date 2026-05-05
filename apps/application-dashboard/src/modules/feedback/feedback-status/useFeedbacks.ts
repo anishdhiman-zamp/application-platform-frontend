@@ -1,6 +1,6 @@
 import { useEffect } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
-import { BaseEventPayload, EVENT_TYPE } from '@zamp-platform/utils/event-bus/event-bus.types';
+import { type BaseEventPayload, EVENT_TYPE } from '@zamp-platform/utils/event-bus';
 import { useGetFeedbacksQuery, useGetOpenFeedbackQuery } from '@/apis/feedback';
 import { useEventBus } from '@/app/_providers/sse-provider';
 import { mergeOpenFeedbackItems } from '@/modules/chatbot/utils';

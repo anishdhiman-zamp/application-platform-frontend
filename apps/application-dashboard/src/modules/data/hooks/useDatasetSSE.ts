@@ -9,7 +9,7 @@ import {
   setColumnConfigForDataset,
 } from '@zamp-platform/dataset-create-edit';
 import { SYSTEM_COLUMNS } from '@zamp-platform/dataset-create-edit/constants';
-import { type BaseEventPayload, EVENT_TYPE } from '@zamp-platform/utils/event-bus/event-bus.types';
+import { type BaseEventPayload, EVENT_TYPE } from '@zamp-platform/utils/event-bus';
 import { DATASET_RESOURCE_TRANSACTION_PAYLOAD_TYPE } from 'modules/data/data.types';
 import { useEventBus } from '@/app/_providers/sse-provider';
 import { APITags } from '@/constants/api.constants';

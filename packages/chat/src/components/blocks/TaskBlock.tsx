@@ -1,7 +1,7 @@
 'use client';
 
 import { cn } from '@zamp-platform/ui/utils';
-import { EVENT_TYPE } from '@zamp-platform/utils/event-bus/event-bus.types';
+import { EVENT_TYPE } from '@zamp-platform/utils/event-bus';
 import { ArrowUpRight } from 'lucide-react';
 import { AnimatePresence, motion } from 'motion/react';
 import { type FC, useCallback } from 'react';

@@ -32,6 +32,7 @@ npm run test          # Jest tests (all packages)
 npm run test:watch    # Jest watch mode
 npm run test:coverage # Coverage reports
 npm run prettier      # Format with Prettier
+npm run arch:check    # Guard package public imports + package/app boundaries
 
 # App-level (run from apps/application-dashboard/)
 npm run test -- --testPathPattern="path/to/test"  # Single test file
@@ -58,6 +59,10 @@ make sync-from-main   # Stash, checkout main, pull, sync secrets, install
 ### App layout
 
 Feature modules live at `apps/application-dashboard/src/modules/<feature>/` with colocated `components/`, `hooks/`, `types/`, `utils/`, `skeletons/`, and `__tests__/`. The `__tests__` folder mirrors the module root (not the `utils/` subfolder).
+
+### Package boundaries
+
+Shared workspace packages should expose stable public entrypoints through `package.json#exports`. Import those public entrypoints instead of reaching into package internals. Code under `packages/` should also avoid app-only `@/*` aliases unless the file is part of the temporary allowlist enforced by `npm run arch:check`.
 
 ### API pattern
 

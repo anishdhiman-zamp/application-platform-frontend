@@ -1,5 +1,5 @@
 import { useCallback, useEffect } from 'react';
-import { type BaseEventPayload, EVENT_TYPE } from '@zamp-platform/utils/event-bus/event-bus.types';
+import { type BaseEventPayload, EVENT_TYPE } from '@zamp-platform/utils/event-bus';
 import {
   useLazyGetActivityArtifactsQuery,
   useLazyGetActivityLogsQuery,

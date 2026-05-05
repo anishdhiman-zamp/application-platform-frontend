@@ -2,7 +2,7 @@
 
 import { useCallback, useEffect, useMemo, useState } from 'react';
 import { Button } from '@zamp-platform/ui';
-import { EVENT_TYPE } from '@zamp-platform/utils/event-bus/event-bus.types';
+import { EVENT_TYPE } from '@zamp-platform/utils/event-bus';
 import { Plus } from 'lucide-react';
 import AgentActionBar from 'modules/pace/components/agents/components/AgentActionBar';
 import CreateAgentModal from 'modules/pace/components/agents/components/CreateAgentModal';

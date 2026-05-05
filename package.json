@@ -14,6 +14,7 @@
     "start-coder": "turbo run start-coder",
     "lint": "turbo run lint",
     "test": "turbo run test",
+    "arch:check": "node scripts/check-architecture.mjs",
     "prettier": "prettier --config --list-different",
     "typecheck": "turbo run typecheck",
     "format": "prettier --write",

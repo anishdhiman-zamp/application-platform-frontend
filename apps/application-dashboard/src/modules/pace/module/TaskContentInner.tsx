@@ -27,7 +27,7 @@ import {
 import { ScrollContainer, type ScrollContainerRef, ShimmerText } from '@zamp-platform/ui';
 import { cn } from '@zamp-platform/ui/utils';
 import { extractTaskUpdateFields } from '@zamp-platform/utils';
-import { type BaseEventPayload, EVENT_TYPE } from '@zamp-platform/utils/event-bus/event-bus.types';
+import { type BaseEventPayload, EVENT_TYPE } from '@zamp-platform/utils/event-bus';
 import { useDynamicTabs } from 'modules/pace/components/dynamic-tabs/useDynamicTabs';
 import { useTaskNavigation } from 'modules/pace/hooks/useTaskNavigation';
 import { TAB_TYPE } from 'modules/pace/pace.types';
