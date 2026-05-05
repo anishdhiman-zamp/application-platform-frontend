@@ -16,7 +16,10 @@ import {
 import {
   type MentionInsertPayload,
   useConversationActions,
-  useConversationState,
+  useConversationBrowserState,
+  useConversationInputState,
+  useConversationMessagesState,
+  useConversationStatusState,
 } from '@zamp-platform/conversation-stream';
 import { ScrollContainer, type ScrollContainerRef } from '@zamp-platform/ui';
 import { cn } from '@zamp-platform/ui/utils';
@@ -101,21 +104,18 @@ const ChatConversationContent = ({
 
   const { openTab, openTabSilently } = useDynamicTabs({ type: TAB_TYPE.AGENT });
 
+  const { messages, hasMessages } = useConversationMessagesState();
   const {
-    messages,
-    hasMessages,
     conversationId: ctxConversationId,
     isLoadingConversationHistory,
     isFetchingConversationHistory,
     isErrorConversationHistory,
     errorConversationHistory,
     isUninitializedConversationHistory,
-    isBrowserStreamingAvailable,
-    browserSessionId,
-    taskSummaries,
     isAnalysing,
-    inputsRequired,
-  } = useConversationState();
+  } = useConversationStatusState();
+  const { inputsRequired } = useConversationInputState();
+  const { isBrowserStreamingAvailable, browserSessionId, taskSummaries } = useConversationBrowserState();
   const { createConversationV2, sendMessage, refetchConversationHistory } = useConversationActions();
   const streamingState = useStreamingState(conversationId ?? ctxConversationId);
 

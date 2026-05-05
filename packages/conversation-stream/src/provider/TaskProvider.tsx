@@ -67,7 +67,7 @@ export const TaskProvider = ({ children, taskId, organizationId, resourceType, a
       resourceType,
       url: apiConfig?.getTaskMessages,
     },
-    { skip: !taskId || !organizationId },
+    { skip: !taskId || !organizationId, refetchOnMountOrArgChange: false },
   );
 
   const streamingState = useStreamingState(taskId);

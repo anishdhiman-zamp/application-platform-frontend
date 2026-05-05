@@ -1,6 +1,6 @@
 'use client';
 
-import React, { createContext, ReactNode, useContext, useEffect } from 'react';
+import React, { createContext, ReactNode, useContext, useEffect, useMemo, useRef } from 'react';
 import { captureException } from '@sentry/nextjs';
 import { API_DOMAIN } from '@zamp-platform/api';
 import {
@@ -42,7 +42,12 @@ interface SSEContextType {
   sseEventBus: EventBusInterface;
 }
 
+interface SSEEventBusContextType {
+  sseEventBus: EventBusInterface;
+}
+
 const SSEContext = createContext<SSEContextType | undefined>(undefined);
+const SSEEventBusContext = createContext<SSEEventBusContextType | undefined>(undefined);
 
 export const useSSEContext = () => {
   const context = useContext(SSEContext);
@@ -521,35 +526,38 @@ function updateStreamingTaskBlock(streamingKey: string, taskId: string, status: 
 
     if (!elements?.length) return prev;
 
-    let hasUpdate = false;
-    const updatedElements = elements.map((el) => {
-      if (el.type === BLOCK_TYPE.TASK && (el as TaskContentBlock).payload.task_id === taskId) {
-        hasUpdate = true;
+    for (let index = 0; index < elements.length; index += 1) {
+      const element = elements[index];
 
-        return {
-          ...el,
-          payload: { ...(el as TaskContentBlock).payload, status },
-        } as TaskContentBlock;
-      }
+      if (element.type !== BLOCK_TYPE.TASK || (element as TaskContentBlock).payload.task_id !== taskId) continue;
+      if ((element as TaskContentBlock).payload.status === status) return prev;
 
-      return el;
-    });
+      const updatedElements = [...elements];
 
-    if (!hasUpdate) return prev;
+      updatedElements[index] = {
+        ...element,
+        payload: { ...(element as TaskContentBlock).payload, status },
+      } as TaskContentBlock;
 
-    return {
-      ...prev,
-      message_content: { ...prev.message_content, elements: updatedElements },
-    };
+      return {
+        ...prev,
+        message_content: { ...prev.message_content, elements: updatedElements },
+      };
+    }
+
+    return prev;
   });
 }
 
 interface SSEProviderProps {
   children: ReactNode;
-  sseEventBus: EventBusInterface;
+  sseEventBus?: EventBusInterface;
 }
 
-export const SSEProvider: React.FC<SSEProviderProps> = ({ children, sseEventBus = new EventBus() }) => {
+export const SSEProvider: React.FC<SSEProviderProps> = ({ children, sseEventBus }) => {
+  const fallbackEventBusRef = useRef<EventBusInterface>(new EventBus());
+  const eventBus = sseEventBus ?? fallbackEventBusRef.current;
+
   const handleSSEEvent = (event: MessageEvent) => {
     try {
       const data = JSON.parse(event.data);
@@ -557,7 +565,7 @@ export const SSEProvider: React.FC<SSEProviderProps> = ({ children, sseEventBus 
       const eventKey = data?.event_type ?? data?.type;
 
       if (eventKey) {
-        sseEventBus.publish(eventKey, data);
+        eventBus.publish(eventKey, data);
       } else {
         captureException(new Error('SSE event received without required type field'));
       }
@@ -568,20 +576,20 @@ export const SSEProvider: React.FC<SSEProviderProps> = ({ children, sseEventBus 
 
   // Global subscriptions for streaming events across all conversations.
   useEffect(() => {
-    const streamSub = sseEventBus.subscribe(EVENT_TYPE.AGENT_STREAMS, handleGlobalStreamEvent);
-    const convSub = sseEventBus.subscribe(EVENT_TYPE.CONVERSATION_V2, (data) =>
+    const streamSub = eventBus.subscribe(EVENT_TYPE.AGENT_STREAMS, handleGlobalStreamEvent);
+    const convSub = eventBus.subscribe(EVENT_TYPE.CONVERSATION_V2, (data) =>
       handleGlobalMessageEvent(conversationPayloadResolver, data),
     );
-    const taskSub = sseEventBus.subscribe(EVENT_TYPE.TASK, (data) => {
+    const taskSub = eventBus.subscribe(EVENT_TYPE.TASK, (data) => {
       handleGlobalMessageEvent(taskPayloadResolver, data);
       // need to refresh the task list + counts
       invalidateTaskCaches();
     });
-    const taskUpdateSub = sseEventBus.subscribe(EVENT_TYPE.TASK_UPDATE, handleGlobalTaskUpdate);
-    const convCreatedSub = sseEventBus.subscribe(EVENT_TYPE.CONVERSATION_CREATED, () => {
+    const taskUpdateSub = eventBus.subscribe(EVENT_TYPE.TASK_UPDATE, handleGlobalTaskUpdate);
+    const convCreatedSub = eventBus.subscribe(EVENT_TYPE.CONVERSATION_CREATED, () => {
       store.dispatch(baseApi.util.invalidateTags([APITags.GET_CONVERSATION_HISTORY]));
     });
-    const titleUpdatedSub = sseEventBus.subscribe(EVENT_TYPE.CONVERSATION_TITLE_UPDATED, () => {
+    const titleUpdatedSub = eventBus.subscribe(EVENT_TYPE.CONVERSATION_TITLE_UPDATED, () => {
       store.dispatch(baseApi.util.invalidateTags([APITags.GET_CONVERSATION_HISTORY]));
     });
 
@@ -593,7 +601,7 @@ export const SSEProvider: React.FC<SSEProviderProps> = ({ children, sseEventBus 
       convCreatedSub.unsubscribe();
       titleUpdatedSub.unsubscribe();
     };
-  }, [sseEventBus]);
+  }, [eventBus]);
 
   const sseHook = useSSE({
     reconnectIntervalMs: 30000,
@@ -617,20 +625,29 @@ export const SSEProvider: React.FC<SSEProviderProps> = ({ children, sseEventBus 
     },
   });
 
-  const value: SSEContextType = {
-    state: sseHook.state,
-    connect: sseHook.connect,
-    disconnect: sseHook.disconnect,
-    close: sseHook.close,
-    eventSource: sseHook.eventSource,
-    sseEventBus,
-  };
+  const eventBusValue = useMemo<SSEEventBusContextType>(() => ({ sseEventBus: eventBus }), [eventBus]);
 
-  return <SSEContext.Provider value={value}>{children}</SSEContext.Provider>;
+  const value = useMemo<SSEContextType>(
+    () => ({
+      state: sseHook.state,
+      connect: sseHook.connect,
+      disconnect: sseHook.disconnect,
+      close: sseHook.close,
+      eventSource: sseHook.eventSource,
+      sseEventBus: eventBus,
+    }),
+    [sseHook.state, sseHook.connect, sseHook.disconnect, sseHook.close, sseHook.eventSource, eventBus],
+  );
+
+  return (
+    <SSEEventBusContext.Provider value={eventBusValue}>
+      <SSEContext.Provider value={value}>{children}</SSEContext.Provider>
+    </SSEEventBusContext.Provider>
+  );
 };
 
-export const useEventBus = (): SSEContextType => {
-  const context = useContext(SSEContext);
+export const useEventBus = (): SSEEventBusContextType => {
+  const context = useContext(SSEEventBusContext);
 
   if (!context) {
     throw new Error('useEventBus must be used within an SSEProvider');

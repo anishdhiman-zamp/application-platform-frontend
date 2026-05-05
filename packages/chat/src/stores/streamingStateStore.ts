@@ -1,3 +1,4 @@
+import { type Block } from '../types/block.types';
 import { StreamingState } from '../types/chat.types';
 
 type Listener = () => void;
@@ -114,11 +115,32 @@ class StreamingStateStore {
     if (!draft) {
       const current = this.states.get(conversationId);
       if (!current) return;
-      draft = structuredClone(current);
+      draft = this.createMutableDraft(current);
       this.drafts.set(conversationId, draft);
     }
     updater(draft);
     this.scheduleRAFFlush(conversationId);
+  }
+
+  private createMutableDraft(current: StreamingState): StreamingState {
+    return {
+      ...current,
+      metadata: current.metadata ? { ...current.metadata } : current.metadata,
+      message_content: {
+        ...current.message_content,
+        elements: current.message_content?.elements?.map((element) => this.cloneBlockForDraft(element)),
+      },
+    };
+  }
+
+  private cloneBlockForDraft(element: Block): Block {
+    return {
+      ...element,
+      payload:
+        element && typeof element.payload === 'object' && element.payload !== null
+          ? { ...element.payload }
+          : element.payload,
+    } as Block;
   }
 
   private scheduleRAFFlush(conversationId: string): void {

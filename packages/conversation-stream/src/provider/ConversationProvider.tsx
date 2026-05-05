@@ -50,6 +50,85 @@ import {
   type ConversationStatusState,
 } from './ConversationStateContext';
 
+interface TaskBlockLocation {
+  messageId?: string;
+  messageIndex: number;
+  elementIndex: number;
+}
+
+const buildTaskBlockIndex = (messages: ChatMessage[]): Map<string, TaskBlockLocation[]> => {
+  const index = new Map<string, TaskBlockLocation[]>();
+
+  messages.forEach((message, messageIndex) => {
+    message.message_content?.elements?.forEach((element, elementIndex) => {
+      if (element.type !== BLOCK_TYPE.TASK) return;
+
+      const taskId = element.payload.task_id;
+      if (!taskId) return;
+
+      const locations = index.get(taskId) ?? [];
+      locations.push({ messageId: message.id, messageIndex, elementIndex });
+      index.set(taskId, locations);
+    });
+  });
+
+  return index;
+};
+
+const updateTaskStatusInMessages = (
+  messages: ChatMessage[],
+  taskId: string,
+  status: TaskStatus,
+  indexedLocations?: TaskBlockLocation[],
+): ChatMessage[] => {
+  let nextMessages: ChatMessage[] | null = null;
+  let updatedFromIndex = false;
+
+  const updateAt = (messageIndex: number, elementIndex: number, expectedMessageId?: string): boolean => {
+    const sourceMessages = nextMessages ?? messages;
+    const message = sourceMessages[messageIndex];
+    const element = message?.message_content?.elements?.[elementIndex];
+
+    if (!message || (expectedMessageId && message.id && message.id !== expectedMessageId)) return false;
+    if (!element || element.type !== BLOCK_TYPE.TASK || element.payload.task_id !== taskId) return false;
+    if (element.payload.status === status) return true;
+
+    const workingMessages = nextMessages ?? [...messages];
+    const elements = [...(message.message_content.elements ?? [])];
+
+    elements[elementIndex] = { ...element, payload: { ...element.payload, status } };
+    workingMessages[messageIndex] = {
+      ...message,
+      message_content: { ...message.message_content, elements },
+    };
+
+    nextMessages = workingMessages;
+    return true;
+  };
+
+  if (indexedLocations?.length) {
+    for (const location of indexedLocations) {
+      updatedFromIndex = updateAt(location.messageIndex, location.elementIndex, location.messageId) || updatedFromIndex;
+    }
+  }
+
+  if (!updatedFromIndex) {
+    for (let messageIndex = 0; messageIndex < messages.length; messageIndex += 1) {
+      const elements = messages[messageIndex]?.message_content?.elements;
+      if (!elements?.length) continue;
+
+      for (let elementIndex = 0; elementIndex < elements.length; elementIndex += 1) {
+        const element = elements[elementIndex];
+        if (element.type !== BLOCK_TYPE.TASK || element.payload.task_id !== taskId) continue;
+
+        updateAt(messageIndex, elementIndex);
+      }
+    }
+  }
+
+  return nextMessages ?? messages;
+};
+
 export interface ConversationProviderProps {
   children: ReactNode;
   conversationId: string | null;
@@ -77,6 +156,7 @@ export const ConversationProvider: React.FC<ConversationProviderProps> = ({
   const isNewlyCreatedConversationRef = useRef<string | null>(null);
   const messagesRef = useRef<ChatMessage[]>([]);
   const queuedMessagesRef = useRef<ChatMessage[]>([]);
+  const taskBlockIndexRef = useRef<Map<string, TaskBlockLocation[]>>(new Map());
   const conversationIdRef = useRef<string | null>(externalConversationId);
   const setHeaderRef = useRef(setHeader);
   const mountRefetchFiredRef = useRef(false);
@@ -125,7 +205,7 @@ export const ConversationProvider: React.FC<ConversationProviderProps> = ({
       resourceType,
       url: apiConfig?.getConversationById,
     },
-    { skip: shouldSkipConversationFetch },
+    { skip: shouldSkipConversationFetch, refetchOnMountOrArgChange: false },
   );
 
   const isUninitializedRef = useRef(isUninitializedConversationHistory);
@@ -219,24 +299,7 @@ export const ConversationProvider: React.FC<ConversationProviderProps> = ({
 
     hasSSEUpdatedStatusesRef.current = true;
 
-    setMessages((prev) =>
-      prev.map((msg) => {
-        const elements = msg.message_content?.elements;
-        if (!elements?.length) return msg;
-
-        let hasUpdate = false;
-        const updatedElements = elements.map((el) => {
-          if (el.type === BLOCK_TYPE.TASK && el.payload.task_id === taskId) {
-            hasUpdate = true;
-            return { ...el, payload: { ...el.payload, status } };
-          }
-          return el;
-        });
-
-        if (!hasUpdate) return msg;
-        return { ...msg, message_content: { ...msg.message_content, elements: updatedElements } };
-      }),
-    );
+    setMessages((prev) => updateTaskStatusInMessages(prev, taskId, status, taskBlockIndexRef.current.get(taskId)));
   }, []);
 
   // Clear "new conversation" skip so the query refetches with inputs_required.
@@ -667,6 +730,7 @@ export const ConversationProvider: React.FC<ConversationProviderProps> = ({
 
   useEffect(() => {
     messagesRef.current = messages;
+    taskBlockIndexRef.current = buildTaskBlockIndex(messages);
   }, [messages]);
 
   useEffect(() => {
