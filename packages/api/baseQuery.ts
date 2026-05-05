@@ -116,6 +116,9 @@ const baseApiProvider = (tagTypes?: Record<string, string>, reducerPath = 'api')
     tagTypes: Object.values(tagTypes ?? {}),
     baseQuery: baseQueryWithAuth,
     endpoints: () => ({}),
+    // Keep the historical freshness default for now; route-level audit found
+    // many consumers already override this explicitly, so changing it globally
+    // should be a separate endpoint-by-endpoint migration.
     refetchOnMountOrArgChange: true,
   });
 

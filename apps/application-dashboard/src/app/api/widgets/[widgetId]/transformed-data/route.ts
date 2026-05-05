@@ -10,6 +10,13 @@ export async function GET(request: NextRequest, { params }: { params: Promise<{ 
     const pageId = searchParams.get('pageId');
     const sheetId = searchParams.get('sheetId');
 
+    if (!widgetId || !pageId || !sheetId) {
+      return NextResponse.json(
+        { error: 'Missing required parameters: widgetId, pageId, and sheetId are required' },
+        { status: 400 },
+      );
+    }
+
     const authHeaders: Record<string, string> = {
       Accept: 'application/json',
     };
@@ -31,20 +38,31 @@ export async function GET(request: NextRequest, { params }: { params: Promise<{ 
       }),
       fetch(sheetDetailsUrl, {
         method: 'GET',
-        headers: { ...authHeaders, 'Cache-Control': 'public, max-age=3600, stale-while-revalidate=30' },
+        headers: authHeaders,
       }),
     ]);
+
+    if (!widgetInstanceResponse.ok) {
+      return NextResponse.json(
+        { error: 'Failed to fetch sheet details', status: widgetInstanceResponse.status },
+        { status: widgetInstanceResponse.status },
+      );
+    }
+
+    if (!widgetDataResponse.ok) {
+      return NextResponse.json(
+        { error: 'Failed to fetch widget data', status: widgetDataResponse.status },
+        { status: widgetDataResponse.status },
+      );
+    }
 
     const widgetsList = await widgetInstanceResponse.json();
     const widgetInstanceData = widgetsList?.widget_instances?.find(
       (widget: any) => widget.widget_instance_id === widgetId,
     );
 
-    if (!widgetDataResponse.ok) {
-      return NextResponse.json(
-        { error: 'Failed to fetch widget dataaaa', status: widgetDataResponse.status },
-        { status: widgetDataResponse.status },
-      );
+    if (!widgetInstanceData) {
+      return NextResponse.json({ error: 'Widget instance not found' }, { status: 404 });
     }
 
     const widgetData = await widgetDataResponse.json();
@@ -53,7 +71,11 @@ export async function GET(request: NextRequest, { params }: { params: Promise<{ 
       ? getTransformedDataServerSafe(widgetData.result, widgetInstanceData, widgetData.currency || 'USD')
       : DEFAULT_TRANSFORMED_DATA;
 
-    return NextResponse.json(transformedResult);
+    return NextResponse.json(transformedResult, {
+      headers: {
+        'Cache-Control': 'private, max-age=60, stale-while-revalidate=30',
+      },
+    });
   } catch (error) {
     console.error('BFF GET Error:', error);
 

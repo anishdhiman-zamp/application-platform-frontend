@@ -3,26 +3,21 @@
  * Separates business logic from UI components (SRP)
  */
 
-import { useCallback, useRef, useState } from 'react';
+import { useCallback, useState } from 'react';
+import { useStore } from 'react-redux';
 import { DialogIntent, useDialogState } from 'modules/process/knowledge-base-creation/hooks/useDialogState';
 import { Integrations } from '@/apis/integrations';
-import { useAppDispatch, useAppSelector } from '@/hooks/toolkit';
+import { useAppDispatch } from '@/hooks/toolkit';
 import type { IntegrationType } from '@/modules/integrations/types/integrations.types';
 import type { RootState } from '@/store';
 
 export const useTriggerSelector = () => {
   const dispatch = useAppDispatch();
+  const store = useStore<RootState>();
   const [selectedIntegration, setSelectedIntegration] = useState<IntegrationType | null>(null);
   const [currentLeaf, setCurrentLeaf] = useState<{ id: string; metadata?: { integration?: IntegrationType } }>();
   const { dialogIntent, openConnectionsDialog, openCreateDialog, closeDialog, handleDialogOpenChange } =
     useDialogState();
-
-  // Get a selector function that can access the state
-  // We use useAppSelector to get the state, then store a function to access it in callbacks
-  const getState = useAppSelector((state: RootState) => state);
-  const stateRef = useRef(getState);
-
-  stateRef.current = getState;
 
   const resolveLeafIntent = useCallback(
     async (integration: IntegrationType): Promise<DialogIntent> => {
@@ -30,7 +25,7 @@ export const useTriggerSelector = () => {
       const cacheKey = Integrations.endpoints.getConnectionsByIntegrationName.select({
         integration_name: integration.id,
       });
-      const cachedData = cacheKey(stateRef.current);
+      const cachedData = cacheKey(store.getState());
 
       // If data is already in cache and fulfilled, use it without making a network call
       if (cachedData?.data && cachedData.status === 'fulfilled') {
@@ -59,7 +54,7 @@ export const useTriggerSelector = () => {
 
       return { type: 'create' as const };
     },
-    [dispatch],
+    [dispatch, store],
   );
 
   const handleIntegrationSelect = useCallback(
