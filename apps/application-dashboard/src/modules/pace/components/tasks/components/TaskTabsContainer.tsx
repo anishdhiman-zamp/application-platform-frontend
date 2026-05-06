@@ -11,7 +11,7 @@ import TaskContentInner from '@/modules/pace/module/TaskContentInner';
 import { TAB_TYPE } from '@/modules/pace/pace.types';
 
 const TaskTabsContainer = () => {
-  const { tabs, activeTab, isHydrated } = useDynamicTabs({ type: TAB_TYPE.TASK });
+  const { tabs, activeTab, isHydrated, closeAllTabs } = useDynamicTabs({ type: TAB_TYPE.TASK });
   const pathname = usePathname();
 
   const { isMounted } = useMountedTabs(tabs, activeTab?.stableKey ?? null);
@@ -30,7 +30,13 @@ const TaskTabsContainer = () => {
 
         return (
           <TabWrapper key={tab?.stableKey} isActive={isActive}>
-            <TaskContentInner key={tab.id} taskId={tab.id} chrome={chrome} isActive={isActive} />
+            <TaskContentInner
+              key={tab.id}
+              taskId={tab.id}
+              chrome={chrome}
+              isActive={isActive}
+              onClosePanel={closeAllTabs}
+            />
           </TabWrapper>
         );
       })}

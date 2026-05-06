@@ -127,6 +127,7 @@ export interface FileTreeProps {
   sortDirection: SortDirection;
   selectedPath?: string | null;
   onSelectFile?: (file: FileItem | null) => void;
+  onOpenFile?: (path: string, name: string) => void;
   onFileMoved?: (oldPath: string, newFile: FileItem) => void;
   onFileDeleted?: (deletedPath: string) => void;
   onFileCreated?: (newFile: FileItem) => void;
@@ -151,6 +152,7 @@ export interface FileTreeNodeProps {
   parentPath: string | null;
   onToggleExpand: (path: string) => void;
   onSelect: (path: string) => void;
+  onOpenFile?: (path: string, name: string) => void;
   onFileMoved?: (oldPath: string, newFile: FileItem) => void;
   onFileDeleted?: (deletedPath: string) => void;
   onFileCreated?: (newFile: FileItem) => void;
@@ -162,6 +164,7 @@ export interface FileTreeNodeProps {
   isSearchActive?: boolean;
   isLoadingChildren?: boolean;
   searchHighlight?: string;
+  className?: string;
   style?: React.CSSProperties;
 }
 

@@ -47,6 +47,16 @@ describe('Button Component - Functional Tests', () => {
     expect(ref.current?.tagName).toBe('BUTTON');
   });
 
+  it('does not loop when a callback ref updates state during render churn', () => {
+    const RefChurnHarness = () => {
+      const [button, setButton] = React.useState<HTMLButtonElement | null>(null);
+
+      return <Button ref={(node) => setButton(node)}>{button ? 'Ready' : 'Waiting'}</Button>;
+    };
+
+    expect(() => render(<RefChurnHarness />)).not.toThrow();
+  });
+
   // Critical snapshots that could break component usage
   it('matches snapshot for default button', () => {
     const { container } = render(<Button>Snapshot</Button>);

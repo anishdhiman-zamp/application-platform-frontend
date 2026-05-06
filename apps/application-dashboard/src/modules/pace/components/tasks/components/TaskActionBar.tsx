@@ -39,7 +39,7 @@ const TaskActionBar = ({ searchTerm, onSearchChange }: TaskActionBarProps) => {
   );
 
   return (
-    <div className='border-GRAY_400 bg-BG_WHITE flex h-[54px] shrink-0 items-center gap-5 overflow-hidden border-b px-3'>
+    <div className='border-GRAY_400 bg-BG_WHITE flex h-[54px] shrink-0 items-center gap-5 overflow-hidden border-b px-4'>
       <Tabs
         value={activeTab}
         onValueChange={(value) => handleTabChange(value as TaskListingTab)}

@@ -1,7 +1,6 @@
 'use client';
 
 import AgentDetailPage from 'modules/pace/components/agents/components/AgentDetailPage';
-import AgentPanelHeader from 'modules/pace/components/agents/components/AgentPanelHeader';
 import { useMountedTabs } from 'modules/pace/components/file-viewer/useMountedTabs';
 import { usePathname } from 'next/navigation';
 import ImageLoader from '@/components/common/loader/ImageLoader';
@@ -12,7 +11,7 @@ import { useDynamicTabs } from '@/modules/pace/components/dynamic-tabs/useDynami
 import { TAB_TYPE } from '@/modules/pace/pace.types';
 
 const AgentTabsContainer = () => {
-  const { tabs, activeTab, isHydrated } = useDynamicTabs({ type: TAB_TYPE.AGENT });
+  const { tabs, activeTab, isHydrated, closeAllTabs, updateTab } = useDynamicTabs({ type: TAB_TYPE.AGENT });
   const pathname = usePathname();
 
   const { isMounted } = useMountedTabs(tabs, activeTab?.stableKey ?? null);
@@ -34,16 +33,16 @@ const AgentTabsContainer = () => {
 
         return (
           <TabWrapper key={tab?.stableKey} isActive={isActive}>
-            {isAgentsSurface && (
-              <AgentPanelHeader isActive={isActive} agentName={tab.name} avatarKey={avatarKey || undefined} />
-            )}
             <AgentDetailPage
               key={tab.id}
               agentId={tab.id}
               agentName={tab.name}
               agentDescription={description}
               avatarKey={avatarKey}
-              hideChatButton={!isAgentsSurface}
+              onAgentMetadataChange={(name, metadata) => updateTab(tab.id, tab.id, name, metadata)}
+              showPanelHeader={isAgentsSurface}
+              isPanelHeaderActive={isActive}
+              onPanelHeaderClose={closeAllTabs}
             />
           </TabWrapper>
         );

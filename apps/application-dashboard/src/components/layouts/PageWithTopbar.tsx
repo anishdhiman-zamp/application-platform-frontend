@@ -28,7 +28,7 @@ const PageWithTopbar = ({
     <PageTopbar title={title} action={action} leading={leading} titleTrailingAction={titleTrailingAction} />
     <PageContainer
       outerClassName={cn('h-auto min-h-0 flex-1', scrollClassName)}
-      className={cn('pt-8', contentClassName)}
+      className={cn('px-4 pt-8', contentClassName)}
     >
       {children}
     </PageContainer>

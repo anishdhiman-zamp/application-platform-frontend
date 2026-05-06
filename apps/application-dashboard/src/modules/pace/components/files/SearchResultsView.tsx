@@ -53,6 +53,7 @@ interface SearchResultsViewProps {
   loadedFolders?: Set<string>;
   onLoadFolder?: (path: string, options?: { silent?: boolean }) => Promise<boolean>;
   onSelect: (path: string) => void;
+  onOpenFile?: (path: string, name: string) => void;
   onFileMoved?: (oldPath: string, newFile: FileItem) => void;
   onFileDeleted?: (deletedPath: string) => void;
   onFileCreated?: (newFile: FileItem) => void;
@@ -73,6 +74,7 @@ const SearchResultsView = ({
   loadedFolders,
   onLoadFolder,
   onSelect,
+  onOpenFile,
   onFileMoved,
   onFileDeleted,
   onFileCreated,
@@ -245,6 +247,7 @@ const SearchResultsView = ({
                     parentPath={entry.parentPath}
                     onToggleExpand={handleToggleForEntry}
                     onSelect={onSelect}
+                    onOpenFile={onOpenFile}
                     onFileMoved={onFileMoved}
                     onFileDeleted={onFileDeleted}
                     onFileCreated={onFileCreated}

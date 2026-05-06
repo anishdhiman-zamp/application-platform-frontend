@@ -377,7 +377,7 @@ const ChatSidebarContent = ({
               : undefined
           }
           referencePicker={referencePicker}
-          className={cn('rounded-[16px]', queuedMessages.length > 0 && '-mt-3')}
+          className={cn('rounded-[32px]', queuedMessages.length > 0 && '-mt-3')}
           inputAreaClassName='px-5 pt-4 pb-3'
           footerClassName='px-3.5 pt-2 pb-3.5'
         />

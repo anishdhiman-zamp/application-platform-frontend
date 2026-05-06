@@ -38,6 +38,7 @@ const ChatSidebar = () => {
   const [observedFlexWidth, setObservedFlexWidth] = useState<number | null>(null);
   const prevIsFilesPanelFullWidthRef = useRef(isFilesPanelFullWidth);
   const prevConversationIdRef = useRef(conversationId);
+  const lastMeasuredFlexWidthRef = useRef(sidebarWidth);
   const outerRef = useRef<HTMLDivElement>(null);
   const shouldReduceMotion = useReducedMotion();
   const isConversationSwitch = prevConversationIdRef.current !== conversationId;
@@ -50,13 +51,16 @@ const ChatSidebar = () => {
   const flexGrowWidth = observedFlexWidth ?? sidebarWidth;
   const targetWidth = isHidden ? 0 : isExpanded ? '100%' : isFlexGrow ? flexGrowWidth : sidebarWidth;
   const direction = getSidebarTransitionDirection(prevChatSidebarState, chatSidebarState);
-  const innerWidth =
-    !isFlexGrow && (direction === 'sidebar-to-collapsed' || direction === 'collapsed-to-sidebar')
-      ? sidebarWidth
-      : '100%';
-
-  const directionTransitions = getSidebarTransitions(direction);
   const isFilesPanelFullWidthChanging = prevIsFilesPanelFullWidthRef.current !== isFilesPanelFullWidth;
+  const preservedInnerWidth = hasActivePanelTab && isSidebar ? lastMeasuredFlexWidthRef.current : sidebarWidth;
+  const innerWidth =
+    !isFlexGrow &&
+    (direction === 'sidebar-to-collapsed' || direction === 'collapsed-to-sidebar' || isFilesPanelFullWidthChanging)
+      ? preservedInnerWidth
+      : '100%';
+  const directionTransitions = getSidebarTransitions(direction);
+  // The files panel grows in from the right, so the left chat pane should retreat toward the left.
+  const hiddenX = isFilesPanelFullWidth ? '-100%' : '100%';
 
   const transitions = useMemo(() => {
     if (!isHydrated) return { width: NO_ANIMATION, opacity: NO_ANIMATION };
@@ -103,11 +107,18 @@ const ChatSidebar = () => {
     }
     const el = outerRef.current;
 
-    setObservedFlexWidth(el.getBoundingClientRect().width);
+    const measureWidth = (width: number | undefined) => {
+      if (!width) return;
+
+      lastMeasuredFlexWidthRef.current = width;
+      setObservedFlexWidth(width);
+    };
+
+    measureWidth(el.getBoundingClientRect().width);
     const observer = new ResizeObserver((entries) => {
       const w = entries[0]?.contentRect.width;
 
-      if (w) setObservedFlexWidth(w);
+      measureWidth(w);
     });
 
     observer.observe(el);
@@ -163,7 +174,7 @@ const ChatSidebar = () => {
     >
       <motion.div
         initial={false}
-        animate={{ x: isHidden ? '100%' : 0, opacity: isHidden ? 0 : 1 }}
+        animate={{ x: isHidden ? hiddenX : 0, opacity: isHidden ? 0 : 1 }}
         transition={transitions.opacity}
         style={{
           willChange: 'transform, opacity',

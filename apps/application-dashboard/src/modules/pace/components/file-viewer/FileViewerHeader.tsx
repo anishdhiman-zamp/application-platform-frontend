@@ -3,9 +3,10 @@
 import { memo } from 'react';
 import { Button, FileIcon, toast } from '@zamp-platform/ui';
 import { cn } from '@zamp-platform/ui/utils';
-import { FolderOpen, X } from 'lucide-react';
+import { FolderOpen } from 'lucide-react';
 import { usePathname, useRouter } from 'next/navigation';
 import { ROUTES_PATH } from '@/constants/routeConfig';
+import ChatButtonZampLogo from '@/modules/pace/components/chat/ChatButtonZampLogo';
 import { useDynamicTabs } from '@/modules/pace/components/dynamic-tabs/useDynamicTabs';
 import {
   HTML_VIEW_OPTIONS,
@@ -172,19 +173,12 @@ const FileViewerHeader = memo(
           </div>
 
           <div className='flex shrink-0 items-center gap-x-2'>
-            <Button variant='default' size='small' onClick={handleChatWithFile}>
+            <Button variant='default' size='small' leadingIcon={<ChatButtonZampLogo />} onClick={handleChatWithFile}>
               {isListingSurface ? 'Chat with File' : 'Chat with file'}
             </Button>
             {isListingSurface && (
-              <Button
-                variant='ghost'
-                size='icon'
-                onClick={handleCloseViewer}
-                title='Close file viewer'
-                aria-label='Close file viewer'
-                className='text-GRAY_700 hover:text-GRAY_1000 hover:bg-GRAY_100 h-8 w-8 shrink-0 rounded-md'
-              >
-                <X size={16} />
+              <Button type='button' variant='secondary' size='small' onClick={handleCloseViewer}>
+                Close
               </Button>
             )}
             {!isListingSurface && (

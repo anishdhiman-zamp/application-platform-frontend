@@ -58,7 +58,7 @@ export const useFileTreeNodeDragDrop = ({
   const expandTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 
   const { copyItem, moveItem, setConflict, isProtectedRoot, isInvalidCrossMove } = useFileTreeContext();
-  const { updateTab, updateTabsForFolderMove } = useDynamicTabs({ type: TAB_TYPE.FILE });
+  const { updateTab, updateTabsForFolderMove } = useDynamicTabs({ type: TAB_TYPE.FILE, syncFromUrl: false });
 
   const clearExpandTimeout = () => {
     if (expandTimeoutRef.current) {

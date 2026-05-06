@@ -1,6 +1,15 @@
 'use client';
 
-import { type ReactNode, useCallback, useRef, useState } from 'react';
+import {
+  forwardRef,
+  type MutableRefObject,
+  type ReactNode,
+  type Ref,
+  useCallback,
+  useLayoutEffect,
+  useRef,
+  useState,
+} from 'react';
 import { Button, TooltipV2 } from '@zamp-platform/ui';
 import { cn } from '@zamp-platform/ui/utils';
 import { X } from 'lucide-react';
@@ -27,6 +36,44 @@ export interface DynamicTabItemProps {
 }
 
 const COMPACT_THRESHOLD_PX = 80;
+
+const setRef = <T,>(ref: Ref<T> | undefined, value: T | null) => {
+  if (!ref) return;
+
+  if (typeof ref === 'function') {
+    ref(value);
+
+    return;
+  }
+
+  ref.current = value;
+};
+
+type DynamicTabTooltipTriggerProps = React.HTMLAttributes<HTMLDivElement> & {
+  measurementRef: MutableRefObject<HTMLDivElement | null>;
+};
+
+const DynamicTabTooltipTrigger = forwardRef<HTMLDivElement, DynamicTabTooltipTriggerProps>(
+  ({ measurementRef, ...props }, forwardedRef) => {
+    const latestForwardedRef = useRef(forwardedRef);
+
+    useLayoutEffect(() => {
+      latestForwardedRef.current = forwardedRef;
+    }, [forwardedRef]);
+
+    const stableRef = useCallback(
+      (node: HTMLDivElement | null) => {
+        measurementRef.current = node;
+        setRef(latestForwardedRef.current, node);
+      },
+      [measurementRef],
+    );
+
+    return <div ref={stableRef} {...props} />;
+  },
+);
+
+DynamicTabTooltipTrigger.displayName = 'DynamicTabTooltipTrigger';
 
 const DynamicTabItem = ({
   tab,
@@ -82,7 +129,7 @@ const DynamicTabItem = ({
       asChildTrigger
       disabled={isDragging || isContextMenuOpen}
     >
-      <div className='min-w-0' ref={containerRef}>
+      <DynamicTabTooltipTrigger className='min-w-0' measurementRef={containerRef}>
         <DynamicTabContextMenu
           tabIndex={tabIndex}
           totalTabs={totalTabs}
@@ -134,7 +181,7 @@ const DynamicTabItem = ({
             )}
           </Button>
         </DynamicTabContextMenu>
-      </div>
+      </DynamicTabTooltipTrigger>
     </TooltipV2>
   );
 };

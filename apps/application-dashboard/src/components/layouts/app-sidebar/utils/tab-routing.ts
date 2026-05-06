@@ -98,3 +98,20 @@ export const defaultRouteForTab = (tabId: TabIdType): string => {
 
   return ROUTES_PATH.CHAT;
 };
+
+const isSubRouteForBaseRoute = (subRoute: string | undefined, baseRoute: string): subRoute is string => {
+  if (!subRoute) return false;
+  if (subRoute === baseRoute) return true;
+
+  if (baseRoute.includes('?')) {
+    return subRoute.startsWith(`${baseRoute}&`) || subRoute.startsWith(`${baseRoute}#`);
+  }
+
+  return subRoute.startsWith(`${baseRoute}?`) || subRoute.startsWith(`${baseRoute}/`);
+};
+
+export const routeForTab = (tabId: TabIdType, lastSubRoute?: string): string => {
+  const fallbackRoute = defaultRouteForTab(tabId);
+
+  return isSubRouteForBaseRoute(lastSubRoute, fallbackRoute) ? lastSubRoute : fallbackRoute;
+};

@@ -38,10 +38,9 @@ const PaceLayoutContent: FC<PaceLayoutContentProps> = ({ children }) => {
   const isResizing = isFilesPanelResizing || isSidebarResizing || isTreeColumnResizing;
 
   const isExpanded = chatSidebarState === CHAT_SIDEBAR_STATE.EXPANDED;
-  const isFilesPanelFullWidth = filesPanelOpen && isFilesPanelExpanded;
-  const isMainHidden =
-    (isOnChatSurface && (isExpanded || hasActivePanelTab || isFilesPanelFullWidth)) ||
-    ((isOnFilesSurface || isOnTasksSurface || isOnAgentsSurface) && isFilesPanelFullWidth);
+  const shouldRenderSharedFilesPanel = isOnChatSurface;
+  const isFilesPanelFullWidth = shouldRenderSharedFilesPanel && filesPanelOpen && isFilesPanelExpanded;
+  const isMainHidden = isOnChatSurface && (isExpanded || hasActivePanelTab || isFilesPanelFullWidth);
 
   return (
     <div className='bg-BG_GRAY_2 relative flex h-full w-full overflow-hidden overscroll-none'>
@@ -64,8 +63,8 @@ const PaceLayoutContent: FC<PaceLayoutContentProps> = ({ children }) => {
             {children}
           </section>
         </main>
-        {isPanelHostSurface && filesPanelOpen && !isFilesPanelExpanded && <FilesPanelResizeHandle />}
-        {isPanelHostSurface && <FilesPanel />}
+        {shouldRenderSharedFilesPanel && filesPanelOpen && !isFilesPanelExpanded && <FilesPanelResizeHandle />}
+        {shouldRenderSharedFilesPanel && <FilesPanel />}
       </div>
       <UploadProgressToast uploadState={uploadState} onCancel={cancelUpload} />
     </div>

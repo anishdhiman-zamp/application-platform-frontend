@@ -18,6 +18,7 @@ interface StickyNestedTreeProps {
   dragOverFolderPath: string | null;
   onToggleExpand: (path: string) => void;
   onSelect: (path: string) => void;
+  onOpenFile?: (path: string, name: string) => void;
   onFileMoved?: (oldPath: string, newFile: FileItem) => void;
   onFileDeleted?: (deletedPath: string) => void;
   onFileCreated?: (newFile: FileItem) => void;
@@ -41,6 +42,7 @@ interface RenderContext {
   descendantCounts: Map<string, number>;
   onToggleExpand: (path: string) => void;
   onSelect: (path: string) => void;
+  onOpenFile?: (path: string, name: string) => void;
   onFileMoved?: (oldPath: string, newFile: FileItem) => void;
   onFileDeleted?: (deletedPath: string) => void;
   onFileCreated?: (newFile: FileItem) => void;
@@ -78,7 +80,7 @@ function renderSiblings(
   let runningTop = 0;
   let flatIndex = flatIndexStart;
 
-  for (const node of nodes) {
+  for (const [nodeIndex, node] of nodes.entries()) {
     const descendantCount = ctx.descendantCounts.get(node.path) ?? 1;
     const totalHeight = descendantCount * ctx.rowHeight;
     const nodeStartIndex = flatIndex;
@@ -94,6 +96,7 @@ function renderSiblings(
     const isFolder = node.type === FILE_TYPE.DIRECTORY && node.children && node.children.length > 0;
     const isExpanded = isFolder && ctx.expandedPaths.has(node.path);
     const isDragOver = ctx.dragOverFolderPath === node.path;
+    const showRootFolderDivider = depth === 0 && nodeIndex > 0 && node.type === FILE_TYPE.DIRECTORY;
     const childFlatIndexStart = nodeStartIndex + 1;
 
     result.push(
@@ -130,6 +133,7 @@ function renderSiblings(
             parentPath={parentPath}
             onToggleExpand={ctx.onToggleExpand}
             onSelect={ctx.onSelect}
+            onOpenFile={ctx.onOpenFile}
             onFileMoved={ctx.onFileMoved}
             onFileDeleted={ctx.onFileDeleted}
             onFileCreated={ctx.onFileCreated}
@@ -140,6 +144,7 @@ function renderSiblings(
             isSearchActive={ctx.isSearchActive}
             isLoadingChildren={ctx.loadingFolders?.has(node.path) ?? false}
             searchHighlight={ctx.searchHighlight}
+            className={showRootFolderDivider ? 'border-GRAY_200 border-t' : undefined}
             style={{ height: ctx.rowHeight }}
           />
           {isDragOver && (
@@ -192,6 +197,7 @@ const StickyNestedTree = memo(function StickyNestedTree(props: StickyNestedTreeP
     dragOverFolderPath,
     onToggleExpand,
     onSelect,
+    onOpenFile,
     onFileMoved,
     onFileDeleted,
     onFileCreated,
@@ -218,6 +224,7 @@ const StickyNestedTree = memo(function StickyNestedTree(props: StickyNestedTreeP
       descendantCounts,
       onToggleExpand,
       onSelect,
+      onOpenFile,
       onFileMoved,
       onFileDeleted,
       onFileCreated,
@@ -240,6 +247,7 @@ const StickyNestedTree = memo(function StickyNestedTree(props: StickyNestedTreeP
       descendantCounts,
       onToggleExpand,
       onSelect,
+      onOpenFile,
       onFileMoved,
       onFileDeleted,
       onFileCreated,

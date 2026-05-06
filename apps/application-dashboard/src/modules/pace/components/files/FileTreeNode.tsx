@@ -2,7 +2,6 @@
 
 import { memo, useCallback, useMemo, useRef, useState } from 'react';
 import { useLazyListFilesQuery } from '@/apis/filesystem';
-import { useDynamicTabs } from '@/modules/pace/components/dynamic-tabs/useDynamicTabs';
 import CreateItemModal from '@/modules/pace/components/files/CreateItemModal';
 import DeleteConfirmationDialog from '@/modules/pace/components/files/DeleteConfirmationDialog';
 import {
@@ -23,7 +22,6 @@ import { useFileTreeContext } from '@/modules/pace/hooks/useFileTreeContext';
 import { useFileTreeNodeActions } from '@/modules/pace/hooks/useFileTreeNodeActions';
 import { useFileTreeNodeDragDrop } from '@/modules/pace/hooks/useFileTreeNodeDragDrop';
 import { useFileTreeNodeRename } from '@/modules/pace/hooks/useFileTreeNodeRename';
-import { TAB_TYPE } from '@/modules/pace/pace.types';
 
 const FileTreeNode = memo(function FileTreeNode({
   node,
@@ -35,6 +33,7 @@ const FileTreeNode = memo(function FileTreeNode({
   parentPath,
   onToggleExpand,
   onSelect,
+  onOpenFile,
   onFileMoved,
   onFileDeleted,
   onFileCreated,
@@ -45,6 +44,7 @@ const FileTreeNode = memo(function FileTreeNode({
   isSearchActive,
   isLoadingChildren,
   searchHighlight,
+  className,
   style,
 }: FileTreeNodeProps) {
   // State
@@ -57,7 +57,6 @@ const FileTreeNode = memo(function FileTreeNode({
   // Hooks
   const { clipboard, isProtectedRoot, username } = useFileTreeContext();
   const { uploadingPaths } = useFileUploadContext();
-  const { openTab } = useDynamicTabs({ type: TAB_TYPE.FILE });
 
   // Derived State
   const isFolder = node.type === FILE_TYPE.DIRECTORY;
@@ -223,8 +222,14 @@ const FileTreeNode = memo(function FileTreeNode({
   const handleDoubleClick = useCallback(() => {
     if (rename.isRenaming || isFolder) return;
 
-    openTab(node.path, node.name);
-  }, [rename.isRenaming, isFolder, node.path, node.name, openTab]);
+    if (onOpenFile) {
+      onOpenFile(node.path, node.name);
+
+      return;
+    }
+
+    onSelect(node.path);
+  }, [rename.isRenaming, isFolder, node.path, node.name, onOpenFile, onSelect]);
 
   return (
     <div style={style}>
@@ -293,6 +298,7 @@ const FileTreeNode = memo(function FileTreeNode({
         actions={filteredActions}
         onActionClick={actions.handleActionClick}
         searchHighlight={searchHighlight}
+        className={className}
       />
     </div>
   );

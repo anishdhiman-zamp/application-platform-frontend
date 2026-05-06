@@ -15,6 +15,7 @@ import { dynamicTabsActions, selectActiveTabId, selectDynamicTabs } from '@/stor
 
 interface UseDynamicTabsConfig {
   type?: DynamicTabType;
+  syncFromUrl?: boolean;
   onTabClose?: (id: string) => void;
   onTabUpdate?: (oldId: string, newId: string) => void;
   onFolderMove?: (oldFolderPath: string, newFolderPath: string) => void;
@@ -47,13 +48,13 @@ interface UseDynamicTabsReturn {
 }
 
 export const useDynamicTabs = (config: UseDynamicTabsConfig = {}): UseDynamicTabsReturn => {
-  const { type, onTabClose, onTabUpdate, onFolderMove } = config;
+  const { type, syncFromUrl, onTabClose, onTabUpdate, onFolderMove } = config;
 
   const dispatch = useAppDispatch();
   const allTabs = useAppSelector(selectDynamicTabs);
   const activeTabId = useAppSelector(selectActiveTabId);
 
-  const { navigateTo, navigateToTab: routerNavigateToTab } = useTabRouter({ type });
+  const { navigateTo, navigateToTab: routerNavigateToTab } = useTabRouter({ type, syncFromUrl });
 
   const tabs = useMemo(() => {
     if (!type) return allTabs;

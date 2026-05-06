@@ -64,20 +64,24 @@ const FilesPanelContent = () => {
     collapseAllRef.current?.();
   };
 
-  const handleSelectFile = (file: FileItem | null) => {
-    if (!file || file.type === FILE_TYPE.DIRECTORY) return;
-
+  const handleOpenFile = (path: string, name: string) => {
     if (chatSidebarState === CHAT_SIDEBAR_STATE.EXPANDED) {
       setChatSidebarState(CHAT_SIDEBAR_STATE.SIDEBAR);
     }
 
     if (shouldUseSingleViewerMode(pathname, activeTab)) {
-      openSingleTab(file.path, file.name, { [SINGLE_VIEWER_TAB_METADATA_KEY]: true });
+      openSingleTab(path, name, { [SINGLE_VIEWER_TAB_METADATA_KEY]: true });
 
       return;
     }
 
-    openTab(file.path, file.name);
+    openTab(path, name);
+  };
+
+  const handleSelectFile = (file: FileItem | null) => {
+    if (!file || file.type === FILE_TYPE.DIRECTORY) return;
+
+    handleOpenFile(file.path, file.name);
   };
 
   const handleUploadFiles = useCallback(
@@ -159,6 +163,7 @@ const FilesPanelContent = () => {
             onUploadFolder={handleUploadFolder}
             onCollapseAllChange={handleCollapseAllChange}
             onSelectFile={handleSelectFile}
+            onOpenFile={handleOpenFile}
             loadingFolders={loadingFolders}
             loadedFolders={loadedFolders}
             onLoadFolder={loadFolder}

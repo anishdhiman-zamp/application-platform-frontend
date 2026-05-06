@@ -1,13 +1,13 @@
 'use client';
 
 import React, { useCallback, useEffect, useRef, useState } from 'react';
-import { AutoSizeTextarea, Button, Skeleton } from '@zamp-platform/ui';
+import { AutoSizeTextarea, Skeleton } from '@zamp-platform/ui';
 import AddConnectionModal from 'modules/pace/components/agents/components/AddConnectionModal';
 import AgentInstructions from 'modules/pace/components/agents/components/AgentInstructions';
+import AgentPanelHeader from 'modules/pace/components/agents/components/AgentPanelHeader';
 import AgentToolsAccess from 'modules/pace/components/agents/components/AgentToolsAccess';
 import AgentTriggerList from 'modules/pace/components/agents/components/AgentTriggerList';
 import BarrelCounter from 'modules/pace/components/agents/components/BarrelCounter';
-import ShareAgentPopup from 'modules/pace/components/agents/components/ShareAgentPopup';
 import {
   getAddInstructionsMessage,
   getAddTriggerMessage,
@@ -15,27 +15,25 @@ import {
   getAgentAvatarByKey,
 } from 'modules/pace/components/agents/constants/agents.constants';
 import { motion } from 'motion/react';
-import { useRouter } from 'next/navigation';
 import { useGetAgentsListQuery, useGetAgentTriggersQuery, useUpdateAgentMutation } from '@/apis/agents';
 import ImageKitImage from '@/components/ImageKitImage';
 import PageContainer from '@/components/layouts/PageContainer';
-import { FEATURE_FLAGS } from '@/constants/featureFlags';
-import { ROUTES_PATH } from '@/constants/routeConfig';
-import { useFeatureFlag } from '@/hooks/useFeatureFlag';
 import AgentFolderList from '@/modules/pace/components/agents/components/AgentFolderList';
 import { useAgentWithPolling } from '@/modules/pace/components/agents/hooks/useAgentWithPolling';
-import { useDynamicTabs } from '@/modules/pace/components/dynamic-tabs/useDynamicTabs';
 import TaskAccordionGroup from '@/modules/pace/components/tasks/components/TaskAccordionGroup';
-import { setNewChatDraft } from '@/modules/pace/hooks/useChatDraftInput';
 import { useTriggerChatMessageFromButton } from '@/modules/pace/hooks/useTriggerChatMessageFromButton';
 import { usePaceLayoutContext } from '@/modules/pace/pace.context';
-import { CHAT_SIDEBAR_STATE, TAB_TYPE } from '@/modules/pace/pace.types';
+import { CHAT_SIDEBAR_STATE } from '@/modules/pace/pace.types';
+
 interface AgentDetailPageProps {
   agentId: string;
   agentName: string;
   agentDescription?: string;
   avatarKey?: string;
-  hideChatButton?: boolean;
+  onAgentMetadataChange?: (name: string, metadata: { description?: string; avatarKey?: string }) => void;
+  showPanelHeader?: boolean;
+  isPanelHeaderActive?: boolean;
+  onPanelHeaderClose?: () => void;
 }
 
 const AGENT_DESCRIPTION_MAX_HEIGHT = 60;
@@ -67,12 +65,12 @@ const AgentDetailPage = ({
   agentName,
   agentDescription = '',
   avatarKey = '',
-  hideChatButton = false,
+  onAgentMetadataChange,
+  showPanelHeader = false,
+  isPanelHeaderActive = false,
+  onPanelHeaderClose,
 }: AgentDetailPageProps) => {
-  const { isEnabled: isAgentsFe } = useFeatureFlag(FEATURE_FLAGS.AGENTS_FE);
   const debounceTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
-
-  const { updateTab } = useDynamicTabs({ type: TAB_TYPE.AGENT });
 
   const { data: agentData, isLoading: isLoadingAgent, isError: isAgentError } = useAgentWithPolling(agentId);
 
@@ -96,7 +94,6 @@ const AgentDetailPage = ({
   const [isAddConnectionModalOpen, setIsAddConnectionModalOpen] = useState(false);
 
   const skipFetch = !agentExists;
-  const router = useRouter();
 
   const displayName = editName || agentName || '';
   const resolvedAvatarKey = agentData?.avatar || avatarKey;
@@ -124,19 +121,18 @@ const AgentDetailPage = ({
     setEditName(nextName);
     setEditDescription(nextDescription);
 
-    updateTab(agentId, agentId, nextName, {
+    onAgentMetadataChange?.(nextName, {
       description: nextDescription,
       avatarKey: agentData.avatar ?? resolvedAvatarKey,
     });
   }, [
     agentData,
-    agentId,
     agentListEntry?.description,
     agentDescription,
     agentName,
     editName,
     resolvedAvatarKey,
-    updateTab,
+    onAgentMetadataChange,
   ]);
 
   const debouncedUpdate = useCallback(
@@ -152,7 +148,7 @@ const AgentDetailPage = ({
           const tabName = fields.name || editName;
           const tabDescription = fields.description ?? editDescription;
 
-          updateTab(agentId, agentId, tabName, { description: tabDescription, avatarKey: resolvedAvatarKey });
+          onAgentMetadataChange?.(tabName, { description: tabDescription, avatarKey: resolvedAvatarKey });
         } catch {
           // Revert to last known good values on failure
           setEditName(agentData?.name || agentName || editName);
@@ -175,7 +171,7 @@ const AgentDetailPage = ({
       agentDescription,
       agentName,
       updateAgent,
-      updateTab,
+      onAgentMetadataChange,
     ],
   );
 
@@ -202,11 +198,6 @@ const AgentDetailPage = ({
       setChatSidebarState(CHAT_SIDEBAR_STATE.SIDEBAR);
     }
   }, [chatSidebarState, setChatSidebarState]);
-
-  const handleChatWithAgent = useCallback(() => {
-    setNewChatDraft(`I want to collaborate with ${displayName} `);
-    router.push(ROUTES_PATH.CHAT);
-  }, [displayName, router]);
 
   const handleAddNewTrigger = useCallback(() => {
     triggerChatMessage(getAddTriggerMessage(displayName));
@@ -238,46 +229,53 @@ const AgentDetailPage = ({
 
   return (
     <>
-      <PageContainer className='max-w-[656px] px-6 pt-12 sm:px-12'>
-        <div className='mb-6 flex shrink-0 items-start gap-3'>
-          <motion.div
-            className='flex size-10 shrink-0 cursor-pointer items-center justify-center'
-            onClick={handleOpenSidebar}
-            onMouseEnter={() => setIsAvatarHovered(true)}
-            onMouseLeave={() => setIsAvatarHovered(false)}
-            animate={isAvatarHovered ? { scale: 1.1, rotate: [0, -10, 10, -5, 5, 0] } : { scale: 1, rotate: 0 }}
-            transition={{
-              rotate: { duration: 0.5, ease: 'easeInOut' },
-              scale: { type: 'spring', stiffness: 400, damping: 10 },
-            }}
-          >
-            <ImageKitImage
-              src={avatar.src}
-              alt={avatar.alt}
-              width={36}
-              height={36}
-              className='size-full object-contain'
-            />
-          </motion.div>
-          <div className='flex flex-1' />
-          {!hideChatButton && (
-            <Button variant='default' size='small' onClick={handleChatWithAgent}>
-              Chat with Agent
-            </Button>
-          )}
-          {isAgentsFe && <ShareAgentPopup agentId={agentId} />}
-        </div>
+      {showPanelHeader && onPanelHeaderClose && (
+        <AgentPanelHeader
+          isActive={isPanelHeaderActive}
+          agentId={agentId}
+          agentName={editName}
+          isAgentNameLoading={isLoadingAgent && !editName}
+          onAgentNameChange={handleNameChange}
+          onClose={onPanelHeaderClose}
+        />
+      )}
+      <PageContainer className={`max-w-[656px] px-6 sm:px-12 ${showPanelHeader ? 'pt-6' : 'pt-12'}`}>
+        {!showPanelHeader && (
+          <>
+            <div className='mb-6 flex shrink-0 items-start gap-3'>
+              <motion.div
+                className='flex size-10 shrink-0 cursor-pointer items-center justify-center'
+                onClick={handleOpenSidebar}
+                onMouseEnter={() => setIsAvatarHovered(true)}
+                onMouseLeave={() => setIsAvatarHovered(false)}
+                animate={isAvatarHovered ? { scale: 1.1, rotate: [0, -10, 10, -5, 5, 0] } : { scale: 1, rotate: 0 }}
+                transition={{
+                  rotate: { duration: 0.5, ease: 'easeInOut' },
+                  scale: { type: 'spring', stiffness: 400, damping: 10 },
+                }}
+              >
+                <ImageKitImage
+                  src={avatar.src}
+                  alt={avatar.alt}
+                  width={36}
+                  height={36}
+                  className='size-full object-contain'
+                />
+              </motion.div>
+            </div>
 
-        {isLoadingAgent && !editName ? (
-          <Skeleton className='mb-2 h-8 w-60' />
-        ) : (
-          <input
-            value={editName}
-            onChange={(e) => handleNameChange(e.target.value)}
-            aria-label='Agent name'
-            className='text-GRAY_1000 f-24-550 placeholder:text-GRAY_500 mb-2 w-full shrink-0 border-none bg-transparent outline-none'
-            placeholder='Agent name'
-          />
+            {isLoadingAgent && !editName ? (
+              <Skeleton className='mb-2 h-8 w-60' />
+            ) : (
+              <input
+                value={editName}
+                onChange={(e) => handleNameChange(e.target.value)}
+                aria-label='Agent name'
+                className='text-GRAY_1000 f-24-550 placeholder:text-GRAY_500 mb-2 w-full shrink-0 border-none bg-transparent outline-none'
+                placeholder='Agent name'
+              />
+            )}
+          </>
         )}
         {isLoadingAgent && !editDescription ? (
           <Skeleton className='mb-6 h-5 w-80' />

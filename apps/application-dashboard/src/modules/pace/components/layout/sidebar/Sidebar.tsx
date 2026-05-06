@@ -16,13 +16,14 @@ const SIDEBAR_EXPANDED_WIDTH = 240;
 const SIDEBAR_COLLAPSED_WIDTH = 56;
 
 const Sidebar = () => {
-  const { isNavSidebarExpanded, toggleNavSidebar } = usePaceLayoutContext();
+  const { filesPanelOpen, isFilesPanelExpanded, isNavSidebarExpanded, toggleNavSidebar } = usePaceLayoutContext();
   const { selectConversation } = usePaceActionsContext();
   const pathname = usePathname();
   const router = useRouter();
   const searchParams = useSearchParams();
   const shouldReduceMotion = useReducedMotion();
   const widthTransition = shouldReduceMotion ? { duration: 0 } : SIDEBAR_TOGGLE_TRANSITION;
+  const isFilesPanelFullWidth = filesPanelOpen && isFilesPanelExpanded;
   const sidebarChatIdFromUrl =
     pathname === ROUTES_PATH.CHAT ? (searchParams?.get(SIDEBAR_CONVERSATION_ID_PARAM) ?? null) : null;
 
@@ -46,7 +47,7 @@ const Sidebar = () => {
       initial={false}
       animate={{ width: isNavSidebarExpanded ? SIDEBAR_EXPANDED_WIDTH : SIDEBAR_COLLAPSED_WIDTH }}
       transition={widthTransition}
-      className='bg-BG_GRAY_2 flex h-full shrink-0 flex-col overflow-hidden'
+      className='bg-BG_GRAY_2 relative flex h-full shrink-0 flex-col overflow-hidden'
     >
       <SidebarHeader isExpanded={isNavSidebarExpanded} onToggle={toggleNavSidebar} />
 
@@ -64,6 +65,13 @@ const Sidebar = () => {
       )}
 
       <SidebarFooter isExpanded={isNavSidebarExpanded} />
+      {isFilesPanelFullWidth && (
+        <div
+          aria-hidden
+          className='pointer-events-none absolute inset-y-0 right-0 z-20 w-px'
+          style={{ boxShadow: 'var(--SIDE_DRAWER_LEFT_SHADOW)' }}
+        />
+      )}
     </motion.aside>
   );
 };

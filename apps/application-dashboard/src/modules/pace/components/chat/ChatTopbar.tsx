@@ -42,13 +42,10 @@ const ChatTopbar = ({
     onTitleChange?.(newTitle);
   };
 
-  return (
-    <PageTopbar
-      title={displayTitle}
-      className={cn(className)}
-      style={style}
-      titleTrailingAction={
-        canEdit ? (
+  const titleActions =
+    canEdit || (isAdmin && conversationId) ? (
+      <div className='flex shrink-0 items-center gap-1'>
+        {canEdit ? (
           <ConversationActions
             conversationId={conversationId ?? ''}
             organizationId={organizationId ?? ''}
@@ -57,13 +54,12 @@ const ChatTopbar = ({
             onDeleteSuccess={onDeleteConversation}
             triggerClassName='rounded p-1.5 text-gray-900 hover:text-gray-900'
           />
-        ) : undefined
-      }
-      action={
-        isAdmin && conversationId ? <ShareConversationPopup conversationId={conversationId} avoidCollisions /> : null
-      }
-    />
-  );
+        ) : null}
+        {isAdmin && conversationId ? <ShareConversationPopup conversationId={conversationId} avoidCollisions /> : null}
+      </div>
+    ) : undefined;
+
+  return <PageTopbar title={displayTitle} className={cn(className)} style={style} titleTrailingAction={titleActions} />;
 };
 
 export default ChatTopbar;

@@ -75,6 +75,7 @@ export const useFileTreeNodeActions = ({
 
   const { openTab, closeTabsForPath, updateTab, updateTabsForFolderMove, activeTab } = useDynamicTabs({
     type: TAB_TYPE.FILE,
+    syncFromUrl: false,
   });
   const { downloadFile } = useFileDownload();
   const { chatSidebarState, setChatSidebarState } = usePaceLayoutContext();

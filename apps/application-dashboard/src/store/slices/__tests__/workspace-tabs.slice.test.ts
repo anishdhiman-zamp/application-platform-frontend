@@ -2,6 +2,7 @@ import workspaceTabsReducer, {
   selectActiveTabKind,
   selectActiveTabRecord,
   selectRightPanel,
+  stripPanelParamsFromRoute,
   workspaceTabsActions,
 } from 'store/slices/workspace-tabs.slice';
 import type { WorkspaceTabsStateType } from '@/types/workspace-tabs.types';
@@ -144,5 +145,21 @@ describe('workspaceTabs selectors', () => {
     );
 
     expect(selectRightPanel('tasks')(buildState(slice))).toBeNull();
+  });
+});
+
+describe('stripPanelParamsFromRoute', () => {
+  it('removes listing detail panel params while preserving unrelated query params', () => {
+    expect(stripPanelParamsFromRoute('/chat/files?f=docs%2Freadme.md&sort=name')).toBe('/chat/files?sort=name');
+    expect(stripPanelParamsFromRoute('/chat/task?t=task-1&title=Task&status=open&tab=mine')).toBe(
+      '/chat/task?tab=mine',
+    );
+    expect(stripPanelParamsFromRoute('/chat/agents?a=agent-1&title=Agent&description=Test&avatarKey=agent_1')).toBe(
+      '/chat/agents',
+    );
+  });
+
+  it('leaves routes without panel params unchanged', () => {
+    expect(stripPanelParamsFromRoute('/chat/apps?category=connected')).toBe('/chat/apps?category=connected');
   });
 });

@@ -22,7 +22,7 @@ const PageTopbar = ({
 }: PageTopbarProps) => (
   <div
     className={cn(
-      'bg-BG_WHITE border-GRAY_400 flex h-[54px] shrink-0 items-center justify-between gap-x-3 border-b px-3',
+      'bg-BG_WHITE border-GRAY_400 flex h-[54px] shrink-0 items-center justify-between gap-x-3 border-b px-4',
       className,
     )}
     style={style}

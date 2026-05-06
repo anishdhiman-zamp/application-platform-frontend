@@ -291,7 +291,7 @@ const ChatHomePage = () => {
                               placeholder='Hi, how can I help?'
                               minTextareaHeight={18}
                               maxTextareaHeight={200}
-                              className='shadow-chatbot-shadow rounded-[16px]'
+                              className='shadow-chatbot-shadow rounded-[32px]'
                               inputAreaClassName='px-5 pt-4 pb-3'
                               footerClassName='px-3.5 pt-2 pb-3.5'
                               externalInputValue={inputValue}

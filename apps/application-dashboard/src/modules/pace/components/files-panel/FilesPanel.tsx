@@ -76,7 +76,8 @@ const FilesPanel = () => {
           exit={{ width: 0, transition: exitTransition }}
           transition={widthTransition}
           className={cn(
-            'shadow-side-drawer-inner-left relative overflow-hidden',
+            'relative overflow-hidden',
+            !isFilesPanelExpanded && 'shadow-side-drawer-inner-left',
             isFilesPanelExpanded ? 'min-w-0 flex-1' : 'shrink-0',
           )}
         >

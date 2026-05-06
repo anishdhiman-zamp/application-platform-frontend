@@ -31,6 +31,7 @@ const FileTreeContent = ({
   sortDirection,
   selectedPath: controlledSelectedPath,
   onSelectFile,
+  onOpenFile,
   onFileMoved,
   onFileDeleted,
   onFileCreated,
@@ -294,6 +295,7 @@ const FileTreeContent = ({
           loadedFolders={loadedFolders}
           onLoadFolder={onLoadFolder}
           onSelect={handleSelect}
+          onOpenFile={onOpenFile}
           onFileMoved={onFileMoved}
           onFileDeleted={onFileDeleted}
           onFileCreated={handleFileCreated}
@@ -327,6 +329,7 @@ const FileTreeContent = ({
               dragOverFolderPath={dragOverFolderPath}
               onToggleExpand={handleToggleExpand}
               onSelect={handleSelect}
+              onOpenFile={onOpenFile}
               onFileMoved={onFileMoved}
               onFileDeleted={onFileDeleted}
               onFileCreated={handleFileCreated}

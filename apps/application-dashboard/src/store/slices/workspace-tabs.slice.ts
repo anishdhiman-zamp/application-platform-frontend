@@ -1,4 +1,6 @@
 import { createListenerMiddleware, createSlice, isAnyOf, PayloadAction } from '@reduxjs/toolkit';
+import { TASK_QUERY_PARAMS } from '@/constants/routeConfig';
+import { TAB_QUERY_PARAM } from '@/modules/pace/pace.types';
 import {
   type TabIdType,
   type TabKindType,
@@ -12,6 +14,12 @@ import {
   removeFromLocalStorage,
   setToLocalStorage,
 } from '@/utils/localstorage';
+import {
+  getFromSessionStorage,
+  removeFromSessionStorage,
+  SESSION_STORAGE_KEYS,
+  setToSessionStorage,
+} from '@/utils/sessionstorage';
 
 const emptyTab = (kind: TabKindType, instanceId?: string): TabRecordType => ({
   kind,
@@ -23,48 +31,106 @@ const emptyTab = (kind: TabKindType, instanceId?: string): TabRecordType => ({
   lastVisitedAt: 0,
 });
 
-const hydrateByTabFromStorage = (): Record<TabIdType, TabRecordType> => {
+const PANEL_ROUTE_PARAMS = [
+  TAB_QUERY_PARAM.FILE,
+  TAB_QUERY_PARAM.TASK,
+  TAB_QUERY_PARAM.AGENT,
+  'title',
+  'description',
+  'avatarKey',
+  'status',
+  'currentIndex',
+  'totalRows',
+  TASK_QUERY_PARAMS.PARENT_TASKS,
+  TASK_QUERY_PARAMS.SIBLINGS,
+  TASK_QUERY_PARAMS.REFERRER,
+] as const;
+
+export const stripPanelParamsFromRoute = (route: string): string => {
+  if (!route) return route;
+
   try {
-    const stored = getFromLocalStorage(LOCAL_STORAGE_KEYS.WORKSPACE_TABS);
+    const url = new URL(route, 'https://zamp.local');
 
-    if (!stored) return {};
+    PANEL_ROUTE_PARAMS.forEach((param) => url.searchParams.delete(param));
 
+    const query = url.searchParams.toString();
+
+    return `${url.pathname}${query ? `?${query}` : ''}${url.hash}`;
+  } catch {
+    return route;
+  }
+};
+
+const normalizeStoredRecord = (record: TabRecordType, stripPanels: boolean): TabRecordType => ({
+  kind: record.kind,
+  instanceId: record.instanceId,
+  lastSubRoute: stripPanels ? stripPanelParamsFromRoute(record.lastSubRoute ?? '') : (record.lastSubRoute ?? ''),
+  scrollTop: 0,
+  uiState: record.uiState ?? {},
+  rightPanel: stripPanels ? undefined : record.rightPanel,
+  lastVisitedAt: record.lastVisitedAt ?? 0,
+});
+
+const parseByTabFromStorage = (
+  stored: string | null,
+  stripPanels: boolean,
+): Record<TabIdType, TabRecordType> | null => {
+  if (!stored) return null;
+
+  try {
     const parsed = JSON.parse(stored) as { byTab?: Record<TabIdType, TabRecordType> } | null;
 
-    if (!parsed || typeof parsed !== 'object' || !parsed.byTab) return {};
+    if (!parsed || typeof parsed !== 'object' || !parsed.byTab) return null;
 
     const result: Record<TabIdType, TabRecordType> = {};
 
     Object.entries(parsed.byTab).forEach(([tabId, record]) => {
       if (!record || typeof record !== 'object' || !record.kind) return;
-      result[tabId] = {
-        kind: record.kind,
-        instanceId: record.instanceId,
-        lastSubRoute: record.lastSubRoute ?? '',
-        scrollTop: 0,
-        uiState: record.uiState ?? {},
-        rightPanel: record.rightPanel,
-        lastVisitedAt: record.lastVisitedAt ?? 0,
-      };
+      result[tabId] = normalizeStoredRecord(record, stripPanels);
     });
 
     return result;
   } catch {
-    return {};
+    return null;
   }
+};
+
+const hydrateByTabFromStorage = (): Record<TabIdType, TabRecordType> => {
+  const sessionTabs = parseByTabFromStorage(getFromSessionStorage(SESSION_STORAGE_KEYS.WORKSPACE_TABS), false);
+
+  if (sessionTabs) return sessionTabs;
+
+  return parseByTabFromStorage(getFromLocalStorage(LOCAL_STORAGE_KEYS.WORKSPACE_TABS), true) ?? {};
+};
+
+const serializeByTab = (byTab: Record<TabIdType, TabRecordType>, stripPanels: boolean) => {
+  const serializable: Record<TabIdType, Omit<TabRecordType, 'scrollTop'>> = {};
+
+  Object.entries(byTab).forEach(([tabId, record]) => {
+    const { scrollTop: _scrollTop, ...rest } = record;
+
+    serializable[tabId] = stripPanels
+      ? {
+          ...rest,
+          lastSubRoute: stripPanelParamsFromRoute(rest.lastSubRoute),
+          rightPanel: undefined,
+        }
+      : rest;
+  });
+
+  return JSON.stringify({ byTab: serializable });
 };
 
 const persistByTab = (byTab: Record<TabIdType, TabRecordType>) => {
   try {
-    const serializable: Record<TabIdType, Omit<TabRecordType, 'scrollTop'>> = {};
+    setToSessionStorage(SESSION_STORAGE_KEYS.WORKSPACE_TABS, serializeByTab(byTab, false));
+  } catch {
+    // silent
+  }
 
-    Object.entries(byTab).forEach(([tabId, record]) => {
-      const { scrollTop: _scrollTop, ...rest } = record;
-
-      serializable[tabId] = rest;
-    });
-
-    setToLocalStorage(LOCAL_STORAGE_KEYS.WORKSPACE_TABS, JSON.stringify({ byTab: serializable }));
+  try {
+    setToLocalStorage(LOCAL_STORAGE_KEYS.WORKSPACE_TABS, serializeByTab(byTab, true));
   } catch {
     // silent
   }
@@ -206,6 +272,7 @@ workspaceTabsListenerMiddleware.startListening({
     const state = listenerApi.getState() as { workspaceTabs: WorkspaceTabsStateType };
 
     if (Object.keys(state.workspaceTabs.byTab).length === 0) {
+      removeFromSessionStorage(SESSION_STORAGE_KEYS.WORKSPACE_TABS);
       removeFromLocalStorage(LOCAL_STORAGE_KEYS.WORKSPACE_TABS);
 
       return;

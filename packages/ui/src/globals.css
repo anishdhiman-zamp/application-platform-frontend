@@ -123,6 +123,8 @@
     color-scheme: light;
     --scrollbar-thumb: #f2f2f2;
     --scrollbar-thumb-hover: #ebebeb;
+    --corner-shape-ios: squircle;
+    --corner-smoothing-ios: 60%;
   }
 
   html.font-preset-geist {
@@ -179,6 +181,46 @@
   }
 
   /* Colors */
+}
+
+@layer utilities {
+  .corner-smooth-ios,
+  :where([class~='rounded'], [class*='rounded-']):not(
+    :where(
+      [class*='rounded-none'],
+      [class*='rounded-full'],
+      [class*='rounded-t-full'],
+      [class*='rounded-r-full'],
+      [class*='rounded-b-full'],
+      [class*='rounded-l-full'],
+      [class*='rounded-tl-full'],
+      [class*='rounded-tr-full'],
+      [class*='rounded-br-full'],
+      [class*='rounded-bl-full']
+    )
+  ) {
+    -electron-corner-smoothing: var(--corner-smoothing-ios);
+  }
+
+  @supports (corner-shape: squircle) {
+    .corner-smooth-ios,
+    :where([class~='rounded'], [class*='rounded-']):not(
+      :where(
+        [class*='rounded-none'],
+        [class*='rounded-full'],
+        [class*='rounded-t-full'],
+        [class*='rounded-r-full'],
+        [class*='rounded-b-full'],
+        [class*='rounded-l-full'],
+        [class*='rounded-tl-full'],
+        [class*='rounded-tr-full'],
+        [class*='rounded-br-full'],
+        [class*='rounded-bl-full']
+      )
+    ) {
+      corner-shape: var(--corner-shape-ios);
+    }
+  }
 }
 
 @layer base {

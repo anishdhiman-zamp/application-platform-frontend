@@ -1,4 +1,5 @@
 import type { TaskStatus } from '@zamp-platform/chat';
+import { getChatAgentRoute } from '@/constants/routeConfig';
 import type { AgentTaskApiItem } from '@/modules/pace/components/agents/types/agents.types';
 import type { TaskListItem } from '@/modules/pace/components/tasks/types/tasks.types';
 
@@ -24,3 +25,10 @@ export const mapAgentTask = (t: AgentTaskApiItem): TaskListItem => ({
   created_by: { id: 'agent', name: 'Agent' },
   created_at: t.created_at,
 });
+
+export const buildAgentListingPanelRoute = (
+  agentId: string,
+  agentName: string,
+  description?: string | null,
+  avatarKey?: string | null,
+): string => getChatAgentRoute({ agentId, agentName, description, avatarKey });

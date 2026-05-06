@@ -1,4 +1,4 @@
-import { defaultRouteForTab, routeToTab } from 'components/layouts/app-sidebar/utils/tab-routing';
+import { defaultRouteForTab, routeForTab, routeToTab } from 'components/layouts/app-sidebar/utils/tab-routing';
 
 describe('routeToTab', () => {
   it('returns null for null pathname', () => {
@@ -95,5 +95,19 @@ describe('defaultRouteForTab', () => {
 
   it('falls back to /chat for unknown tabs', () => {
     expect(defaultRouteForTab('mystery')).toBe('/chat');
+  });
+});
+
+describe('routeForTab', () => {
+  it('uses the remembered sub-route when it belongs to the tab', () => {
+    expect(routeForTab('files', '/chat/files?f=docs%2Freadme.md')).toBe('/chat/files?f=docs%2Freadme.md');
+    expect(routeForTab('tasks', '/chat/task?t=task-1&title=Task')).toBe('/chat/task?t=task-1&title=Task');
+    expect(routeForTab('agents', '/chat/agents?a=agent-1&title=Agent')).toBe('/chat/agents?a=agent-1&title=Agent');
+  });
+
+  it('falls back to the default route for unrelated remembered sub-routes', () => {
+    expect(routeForTab('files', '/chat/task?t=task-1')).toBe('/chat/files');
+    expect(routeForTab('tasks', '/chat/files?f=docs%2Freadme.md')).toBe('/chat/task');
+    expect(routeForTab('agents', '/chat')).toBe('/chat/agents');
   });
 });

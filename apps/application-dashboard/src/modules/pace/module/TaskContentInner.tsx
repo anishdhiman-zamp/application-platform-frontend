@@ -30,13 +30,13 @@ import { extractTaskUpdateFields } from '@zamp-platform/utils';
 import { type BaseEventPayload, EVENT_TYPE } from '@zamp-platform/utils/event-bus';
 import { useDynamicTabs } from 'modules/pace/components/dynamic-tabs/useDynamicTabs';
 import { useTaskNavigation } from 'modules/pace/hooks/useTaskNavigation';
-import { TAB_TYPE } from 'modules/pace/pace.types';
-import { usePathname, useSearchParams } from 'next/navigation';
+import { TAB_QUERY_PARAM, TAB_TYPE } from 'modules/pace/pace.types';
+import { usePathname, useRouter, useSearchParams } from 'next/navigation';
 import { API_ENDPOINTS } from '@/apis/apiEndpoint.constants';
 import { useEventBus } from '@/app/_providers/sse-provider';
 import CommonWrapper from '@/components/commonWrapper';
 import { SkeletonTypes } from '@/components/commonWrapper/commonWrapper.types';
-import { TASK_QUERY_PARAMS } from '@/constants/routeConfig';
+import { ROUTES_PATH, TASK_QUERY_PARAMS } from '@/constants/routeConfig';
 import { useAppSelector } from '@/hooks/toolkit';
 import ContentErrorState from '@/modules/pace/components/ContentErrorState';
 import { getActiveTabIdFromUrl } from '@/modules/pace/components/dynamic-tabs/tab-type-registry';
@@ -69,16 +69,19 @@ interface TaskContentInnerProps {
   taskId: string;
   chrome?: TaskContentChrome;
   isActive?: boolean;
+  onClosePanel?: () => void;
 }
 
 const TaskContentChat = ({
   taskId,
   chrome = 'inline',
   isActive = true,
+  onClosePanel,
 }: {
   taskId: string;
   chrome?: TaskContentChrome;
   isActive?: boolean;
+  onClosePanel?: () => void;
 }) => {
   // Refs
   const hadStreamingRef = useRef(false);
@@ -90,11 +93,12 @@ const TaskContentChat = ({
   // Hooks
   const { sseEventBus } = useEventBus();
   const pathname = usePathname();
+  const router = useRouter();
   const searchParams = useSearchParams();
   const { refetchHistory } = useTaskActions();
   const streamingState = useStreamingState(taskId);
-  const { openTab: openFileTab, openSingleTab: openSingleFileTab } = useDynamicTabs({ type: TAB_TYPE.FILE });
-  const { openTab: openDatasetTab, openSingleTab: openSingleDatasetTab } = useDynamicTabs({ type: TAB_TYPE.DATASET });
+  const { openTab: openFileTab } = useDynamicTabs({ type: TAB_TYPE.FILE });
+  const { openTab: openDatasetTab } = useDynamicTabs({ type: TAB_TYPE.DATASET });
   const [triggerGetConversation] = useLazyGetConversationByIdQuery();
   const {
     openTab: openBrowserTab,
@@ -113,9 +117,9 @@ const TaskContentChat = ({
         return;
       }
 
-      openSingleFileTab(path, name, { [SINGLE_VIEWER_TAB_METADATA_KEY]: true });
+      router.push(`${ROUTES_PATH.CHAT_FILES}?${TAB_QUERY_PARAM.FILE}=${encodeURIComponent(path)}`);
     },
-    [openFileTab, openSingleFileTab, pathname],
+    [openFileTab, pathname, router],
   );
 
   const handleDatasetOpen = useCallback(
@@ -126,9 +130,9 @@ const TaskContentChat = ({
         return;
       }
 
-      openSingleDatasetTab(datasetId, name, { [SINGLE_VIEWER_TAB_METADATA_KEY]: true });
+      router.push(`${ROUTES_PATH.CHAT_DATASET}?${TAB_QUERY_PARAM.DATASET}=${encodeURIComponent(datasetId)}`);
     },
-    [openDatasetTab, openSingleDatasetTab, pathname],
+    [openDatasetTab, pathname, router],
   );
 
   const {
@@ -493,6 +497,7 @@ const TaskContentChat = ({
             isBootstrapping={isBootstrapping}
             onGoToNextTask={goToNextTask}
             onGoToPreviousTask={goToPreviousTask}
+            onClose={onClosePanel ?? (() => {})}
           />
         )}
         {showInlineTopbar && (
@@ -667,7 +672,12 @@ const TaskContentChat = ({
   );
 };
 
-const TaskContentInner = ({ taskId: propTaskId, chrome = 'inline', isActive = true }: TaskContentInnerProps) => {
+const TaskContentInner = ({
+  taskId: propTaskId,
+  chrome = 'inline',
+  isActive = true,
+  onClosePanel,
+}: TaskContentInnerProps) => {
   const nextPathname = usePathname();
   const nextSearchParams = useSearchParams();
   const urlTaskId = useMemo(
@@ -685,7 +695,7 @@ const TaskContentInner = ({ taskId: propTaskId, chrome = 'inline', isActive = tr
       resourceType={ResourceType.ORGANIZATION}
       apiConfig={{ getTaskMessages: API_ENDPOINTS.TASKS_MESSAGES_GET }}
     >
-      <TaskContentChat key={taskId} taskId={taskId} chrome={chrome} isActive={isActive} />
+      <TaskContentChat key={taskId} taskId={taskId} chrome={chrome} isActive={isActive} onClosePanel={onClosePanel} />
     </TaskProvider>
   );
 };

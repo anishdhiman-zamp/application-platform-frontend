@@ -16,6 +16,7 @@ import { dynamicTabsActions, selectActiveTabId, selectDynamicTabs } from '@/stor
 
 interface UseTabRouterConfig {
   type?: DynamicTabType;
+  syncFromUrl?: boolean;
 }
 
 interface UseTabRouterReturn {
@@ -86,7 +87,7 @@ const isPendingSubtaskNavForId = (id: string): boolean => {
 };
 
 export const useTabRouter = (config: UseTabRouterConfig = {}): UseTabRouterReturn => {
-  const { type } = config;
+  const { type, syncFromUrl: shouldSyncFromUrl = true } = config;
   const router = useRouter();
   const dispatch = useAppDispatch();
   const isMountedRef = useRef(false);
@@ -281,6 +282,8 @@ export const useTabRouter = (config: UseTabRouterConfig = {}): UseTabRouterRetur
   }, [dispatch, type]);
 
   useEffect(() => {
+    if (!shouldSyncFromUrl) return;
+
     if (!isMountedRef.current) {
       isMountedRef.current = true;
       saveCurrentTabPath();
@@ -297,15 +300,16 @@ export const useTabRouter = (config: UseTabRouterConfig = {}): UseTabRouterRetur
     return () => {
       window.removeEventListener('popstate', handlePopState);
     };
-  }, [syncFromUrl, saveCurrentTabPath]);
+  }, [shouldSyncFromUrl, syncFromUrl, saveCurrentTabPath]);
 
   // Sync tabs when Next.js detects URL changes (covers router.push/replace
   // within the same page, which don't trigger popstate or remount).
   useEffect(() => {
+    if (!shouldSyncFromUrl) return;
     if (!isMountedRef.current) return;
 
     syncFromUrl();
-  }, [nextPathname, nextSearchParams, syncFromUrl]);
+  }, [nextPathname, nextSearchParams, shouldSyncFromUrl, syncFromUrl]);
 
   return {
     navigateTo,

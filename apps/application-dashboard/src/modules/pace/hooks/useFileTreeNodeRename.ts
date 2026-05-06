@@ -43,7 +43,7 @@ export const useFileTreeNodeRename = ({
 
   // Hooks
   const { renameItem } = useFileActions();
-  const { updateTab, updateTabsForFolderMove } = useDynamicTabs({ type: TAB_TYPE.FILE });
+  const { updateTab, updateTabsForFolderMove } = useDynamicTabs({ type: TAB_TYPE.FILE, syncFromUrl: false });
 
   // Derived State
   const fullNewName = useMemo(() => renameValue.trim(), [renameValue]);

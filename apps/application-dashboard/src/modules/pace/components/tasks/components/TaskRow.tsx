@@ -10,11 +10,8 @@ import { usePathname, useRouter } from 'next/navigation';
 import Avatar from '@/components/common/avatar';
 import { getChatTaskRoute, ROUTES_PATH } from '@/constants/routeConfig';
 import { KEYBOARD_KEYS } from '@/constants/shortcuts';
-import { useDynamicTabs } from '@/modules/pace/components/dynamic-tabs/useDynamicTabs';
 import SubtaskPopover from '@/modules/pace/components/tasks/components/SubtaskPopover';
 import type { TaskListItem } from '@/modules/pace/components/tasks/types/tasks.types';
-import { SINGLE_VIEWER_TAB_METADATA_KEY } from '@/modules/pace/pace.constants';
-import { TAB_TYPE } from '@/modules/pace/pace.types';
 
 interface TaskRowProps {
   task: TaskListItem;
@@ -27,7 +24,6 @@ interface TaskRowProps {
 const TaskRow = ({ task, index, totalCount, status, referrer }: TaskRowProps) => {
   const pathname = usePathname();
   const router = useRouter();
-  const { openTab: openTaskTab, openSingleTab: openSingleTaskTab } = useDynamicTabs({ type: TAB_TYPE.TASK });
 
   const handleRowClick = useCallback(() => {
     const taskRoute = getChatTaskRoute({
@@ -40,13 +36,13 @@ const TaskRow = ({ task, index, totalCount, status, referrer }: TaskRowProps) =>
     });
 
     if (pathname === ROUTES_PATH.CHAT_TASK) {
-      openSingleTaskTab(task.id, task.title || task.id, { [SINGLE_VIEWER_TAB_METADATA_KEY]: true }, taskRoute);
+      router.push(taskRoute);
 
       return;
     }
 
     router.push(preserveSidebarParam(taskRoute));
-  }, [openTaskTab, pathname, router, task.id, task.title, status, index, totalCount, referrer]);
+  }, [pathname, router, task.id, task.title, status, index, totalCount, referrer]);
 
   const totalSubtasks = task.subtasks.length;
   const completedSubtasks = useMemo(

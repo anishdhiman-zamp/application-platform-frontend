@@ -2,9 +2,8 @@
 
 import { memo, useCallback } from 'react';
 import { createPortal } from 'react-dom';
-import { type TaskStatus, TaskStatusIcon } from '@zamp-platform/chat';
-import { X } from 'lucide-react';
-import { useDynamicTabs } from '@/modules/pace/components/dynamic-tabs/useDynamicTabs';
+import { TASK_STATUS, type TaskStatus, TaskStatusIcon } from '@zamp-platform/chat';
+import { Button } from '@zamp-platform/ui';
 import { useFilesPanelHeaderSlot } from '@/modules/pace/components/files-panel/FilesPanelHeaderSlot';
 import TaskNavigation from '@/modules/pace/module/TaskNavigation';
 
@@ -20,7 +19,23 @@ interface TaskPanelHeaderProps {
   isBootstrapping: boolean;
   onGoToNextTask: () => void;
   onGoToPreviousTask: () => void;
+  onClose: () => void;
 }
+
+const STATUS_PILL_CONFIG: Partial<Record<TaskStatus, { label: string; className: string }>> = {
+  [TASK_STATUS.COMPLETED]: {
+    label: 'COMPLETED',
+    className: 'border-GREEN_300 bg-GREEN_100 text-GREEN_1000',
+  },
+  [TASK_STATUS.IN_PROGRESS]: {
+    label: 'IN PROGRESS',
+    className: 'border-BLUE_300 bg-BLUE_100 text-BLUE_1000',
+  },
+  [TASK_STATUS.NEEDS_INPUT]: {
+    label: 'NEEDS INPUT',
+    className: 'border-ORANGE_300 bg-ORANGE_100 text-ORANGE_1000',
+  },
+};
 
 const TaskPanelHeader = memo(
   ({
@@ -35,17 +50,16 @@ const TaskPanelHeader = memo(
     isBootstrapping,
     onGoToNextTask,
     onGoToPreviousTask,
+    onClose,
   }: TaskPanelHeaderProps) => {
     const headerSlot = useFilesPanelHeaderSlot();
-    const { closeAllTabs } = useDynamicTabs();
+    const statusPill = status ? STATUS_PILL_CONFIG[status] : undefined;
 
     const handleClose = useCallback(() => {
-      closeAllTabs();
-    }, [closeAllTabs]);
+      onClose();
+    }, [onClose]);
 
-    if (!isActive || !headerSlot) return null;
-
-    return createPortal(
+    const header = (
       <div className='border-GRAY_300 bg-BG_WHITE flex h-[54px] shrink-0 items-center justify-between gap-4 border-b px-4'>
         <div className='flex min-w-0 flex-1 items-center gap-2.5'>
           {status && (
@@ -54,6 +68,13 @@ const TaskPanelHeader = memo(
             </span>
           )}
           <span className='text-GRAY_1000 f-14-500 block min-w-0 truncate'>{title || 'Untitled'}</span>
+          {statusPill && (
+            <span
+              className={`inline-flex h-6 shrink-0 items-center rounded-lg border px-2.5 font-mono text-[12px] leading-none font-medium whitespace-nowrap uppercase ${statusPill.className}`}
+            >
+              {statusPill.label}
+            </span>
+          )}
         </div>
         <div className='ml-4 flex shrink-0 items-center gap-6'>
           <TaskNavigation
@@ -67,18 +88,16 @@ const TaskPanelHeader = memo(
             onGoToPreviousTask={onGoToPreviousTask}
             tone='dark'
           />
-          <button
-            type='button'
-            onClick={handleClose}
-            aria-label='Close panel'
-            className='text-GRAY_1000 hover:bg-GRAY_100 flex h-8 w-8 shrink-0 items-center justify-center rounded-md transition-colors'
-          >
-            <X size={16} />
-          </button>
+          <Button type='button' variant='secondary' size='small' onClick={handleClose}>
+            Close
+          </Button>
         </div>
-      </div>,
-      headerSlot,
+      </div>
     );
+
+    if (!isActive) return null;
+
+    return headerSlot ? createPortal(header, headerSlot) : header;
   },
 );
 

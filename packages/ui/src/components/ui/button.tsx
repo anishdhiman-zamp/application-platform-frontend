@@ -8,7 +8,7 @@ import {
   ButtonHTMLAttributes,
   MouseEvent,
   ReactNode,
-  RefObject,
+  Ref,
   useCallback,
   useEffect,
   useLayoutEffect,
@@ -76,7 +76,7 @@ const LOADING_VARIANT_CLASSES: Record<string, string> = {
 export interface ButtonProps extends ButtonHTMLAttributes<HTMLButtonElement>, VariantProps<typeof buttonVariants> {
   asChild?: boolean;
   isLoading?: boolean;
-  ref?: RefObject<HTMLButtonElement | null>;
+  ref?: Ref<HTMLButtonElement>;
   /** Custom leading icon (left side) */
   leadingIcon?: ReactNode;
   /** Custom trailing icon (right side) */
@@ -138,6 +138,18 @@ const ButtonIcon = ({ icon, size }: { icon: ReactNode; size: number }) => {
   );
 };
 
+const setRef = <T,>(ref: Ref<T> | undefined, value: T | null) => {
+  if (!ref) return;
+
+  if (typeof ref === 'function') {
+    ref(value);
+
+    return;
+  }
+
+  ref.current = value;
+};
+
 function Button({
   ref,
   className,
@@ -157,11 +169,20 @@ function Button({
   ...props
 }: ButtonProps) {
   const Comp = asChild ? Slot : 'button';
-  const internalRef = useRef<HTMLButtonElement>(null);
-  const buttonRef = ref ?? internalRef;
+  const externalRef = useRef(ref);
+  const internalRef = useRef<HTMLButtonElement | null>(null);
   const measuredWidthRef = useRef<number | undefined>(undefined);
 
   const iconSize = ICON_SIZE_MAP[(size as IconSize) ?? 'default'];
+
+  useLayoutEffect(() => {
+    externalRef.current = ref;
+  }, [ref]);
+
+  const buttonRef = useCallback((node: HTMLButtonElement | null) => {
+    internalRef.current = node;
+    setRef(externalRef.current, node);
+  }, []);
 
   const debouncedClick = useDebounce((e: MouseEvent<HTMLButtonElement>) => {
     if (!isLoading && !disabled) {
@@ -181,13 +202,13 @@ function Button({
   // replaces children with a spinner. We store in a ref to avoid re-render
   // loops — the value is only read when computing the inline style.
   useLayoutEffect(() => {
-    if (!isLoading && buttonRef && 'current' in buttonRef && buttonRef.current) {
-      const width = buttonRef.current.offsetWidth;
+    if (!isLoading && internalRef.current) {
+      const width = internalRef.current.offsetWidth;
       if (width > 0) {
         measuredWidthRef.current = width;
       }
     }
-  }, [children, leadingIcon, trailingIcon, size, buttonRef, isLoading]);
+  }, [children, leadingIcon, trailingIcon, size, isLoading]);
 
   const renderContent = () => {
     if (isLoading) {

@@ -38,6 +38,7 @@ const FilesPanelToolbar = ({
 }: FilesPanelToolbarProps) => {
   const selectedSortLabel = SORT_OPTIONS.find((opt) => opt.value === sortBy)?.label;
   const isPageVariant = variant === 'page';
+  const pageSearchWidthClass = 'w-[280px]';
 
   const searchControl = (
     <SearchInput
@@ -48,8 +49,11 @@ const FilesPanelToolbar = ({
       onChange={onSearchChange}
       onDebouncedChange={onDebouncedSearchChange}
       size='small'
-      wrapperClassName={cn('min-w-0', isPageVariant ? 'w-[280px] flex-none' : 'flex-1')}
-      className='placeholder:text-GRAY_500 placeholder:f-12-450 f-12-400 bg-BG_WHITE h-8 rounded-md'
+      wrapperClassName={cn('min-w-0', isPageVariant ? `${pageSearchWidthClass} flex-none` : 'flex-1')}
+      className={cn(
+        'placeholder:text-GRAY_500 placeholder:f-12-450 f-12-400 bg-BG_WHITE h-8 rounded-md',
+        isPageVariant && pageSearchWidthClass,
+      )}
       clearButtonClassName='text-GRAY_500'
       aria-label='Search files'
     />
@@ -120,7 +124,7 @@ const FilesPanelToolbar = ({
       className={cn(
         'flex',
         isPageVariant
-          ? 'border-GRAY_400 h-[54px] shrink-0 items-center gap-3 border-b px-3'
+          ? 'border-GRAY_400 h-[54px] shrink-0 items-center gap-3 border-b px-4'
           : 'border-GRAY_400 flex-col gap-y-2.5 border-b p-3',
       )}
     >
