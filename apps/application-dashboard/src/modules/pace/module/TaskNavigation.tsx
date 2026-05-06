@@ -12,6 +12,7 @@ interface TaskNavigationProps {
   isBootstrapping: boolean;
   onGoToNextTask: () => void;
   onGoToPreviousTask: () => void;
+  tone?: 'light' | 'dark';
 }
 
 const TaskNavigation = memo(
@@ -24,13 +25,26 @@ const TaskNavigation = memo(
     isBootstrapping,
     onGoToNextTask,
     onGoToPreviousTask,
+    tone = 'light',
   }: TaskNavigationProps) => {
+    const isDark = tone === 'dark';
+
     if (isBootstrapping) {
       return (
         <div className='flex animate-pulse items-center'>
           <div className='bg-GRAY_200 mr-3 h-4 w-10 rounded' />
-          <div className='border-GRAY_400 bg-GRAY_100 mr-1.5 h-6 w-6 rounded-lg border' />
-          <div className='border-GRAY_400 bg-GRAY_100 h-6 w-6 rounded-lg border' />
+          <div
+            className={cn(
+              'mr-1.5 h-6 w-6 rounded-lg border',
+              isDark ? 'border-GRAY_300 bg-GRAY_100' : 'border-GRAY_400 bg-GRAY_100',
+            )}
+          />
+          <div
+            className={cn(
+              'h-6 w-6 rounded-lg border',
+              isDark ? 'border-GRAY_300 bg-GRAY_100' : 'border-GRAY_400 bg-GRAY_100',
+            )}
+          />
         </div>
       );
     }
@@ -39,7 +53,7 @@ const TaskNavigation = memo(
 
     return (
       <div className='flex shrink-0 items-center'>
-        <span className='f-13-450 text-GRAY_900 mr-3 whitespace-nowrap'>
+        <span className={cn('f-13-450 mr-3 whitespace-nowrap', isDark ? 'text-GRAY_1000/80' : 'text-GRAY_900')}>
           {currentIndex + 1} / {totalCount}
         </span>
 
@@ -48,8 +62,13 @@ const TaskNavigation = memo(
             id='arrow-down'
             size={26}
             className={cn(
-              'text-GRAY_900 mr-1.5 shrink-0 rounded-lg p-1 transition-opacity',
-              isLoading || !hasNext ? 'cursor-not-allowed opacity-50' : 'hover:bg-GRAY_200 cursor-pointer',
+              'mr-1.5 shrink-0 rounded-lg p-1 transition-opacity',
+              isDark ? 'text-GRAY_1000' : 'text-GRAY_900',
+              isLoading || !hasNext
+                ? 'cursor-not-allowed opacity-40'
+                : isDark
+                  ? 'hover:bg-GRAY_100 cursor-pointer'
+                  : 'hover:bg-GRAY_200 cursor-pointer',
             )}
             onClick={() => {
               if (isLoading || !hasNext) return;
@@ -63,8 +82,13 @@ const TaskNavigation = memo(
             id='arrow-up'
             size={26}
             className={cn(
-              'text-GRAY_900 shrink-0 rounded-lg p-1 transition-opacity',
-              isLoading || !hasPrevious ? 'cursor-not-allowed opacity-50' : 'hover:bg-GRAY_200 cursor-pointer',
+              'shrink-0 rounded-lg p-1 transition-opacity',
+              isDark ? 'text-GRAY_1000' : 'text-GRAY_900',
+              isLoading || !hasPrevious
+                ? 'cursor-not-allowed opacity-40'
+                : isDark
+                  ? 'hover:bg-GRAY_100 cursor-pointer'
+                  : 'hover:bg-GRAY_200 cursor-pointer',
             )}
             onClick={() => {
               if (isLoading || !hasPrevious) return;

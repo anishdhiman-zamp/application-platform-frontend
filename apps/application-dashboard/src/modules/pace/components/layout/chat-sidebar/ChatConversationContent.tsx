@@ -40,6 +40,7 @@ import ContentErrorState from '@/modules/pace/components/ContentErrorState';
 import { useDynamicTabs } from '@/modules/pace/components/dynamic-tabs/useDynamicTabs';
 import ChatMessagesSkeleton from '@/modules/pace/components/loaders/ChatMessagesSkeleton';
 import { useAutoOpenAgentFiles } from '@/modules/pace/hooks/useAutoOpenAgentFiles';
+import { SINGLE_VIEWER_TAB_METADATA_KEY } from '@/modules/pace/pace.constants';
 import {
   type ActiveAgentInfo,
   usePaceActionsContext,
@@ -102,7 +103,7 @@ const ChatConversationContent = ({
   const { startNewChat } = usePaceActionsContext();
   const { setChatSidebarState } = usePaceLayoutContext();
 
-  const { openTab, openTabSilently } = useDynamicTabs({ type: TAB_TYPE.AGENT });
+  const { openSingleTab: openSingleAgentTab, openTabSilently } = useDynamicTabs({ type: TAB_TYPE.AGENT });
 
   const { messages, hasMessages } = useConversationMessagesState();
   const {
@@ -208,11 +209,12 @@ const ChatConversationContent = ({
 
       if (agentDescription && agentDescription !== 'None') metadata.description = agentDescription;
       if (avatarKey) metadata.avatarKey = avatarKey;
+      metadata[SINGLE_VIEWER_TAB_METADATA_KEY] = 'true';
 
       setChatSidebarState(CHAT_SIDEBAR_STATE.SIDEBAR);
-      openTab(agentId, agentName, Object.keys(metadata).length > 0 ? metadata : undefined);
+      openSingleAgentTab(agentId, agentName, metadata);
     },
-    [openTab, setChatSidebarState],
+    [openSingleAgentTab, setChatSidebarState],
   );
 
   const handleAgentTest = useCallback(

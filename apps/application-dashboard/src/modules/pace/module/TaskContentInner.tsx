@@ -59,16 +59,26 @@ import { TaskChatStepMessage } from '@/modules/pace/module/TaskChatStepMessage';
 import { TaskChatStepsToggleHeader } from '@/modules/pace/module/TaskChatStepsToggleHeader';
 import { TaskChatTitleHeader } from '@/modules/pace/module/TaskChatTitleHeader';
 import TaskNavigation from '@/modules/pace/module/TaskNavigation';
+import TaskPanelHeader from '@/modules/pace/module/TaskPanelHeader';
 import TaskTopbar from '@/modules/pace/module/TaskTopbar';
-import { BrowserViewerDisplayState } from '@/modules/pace/pace.constants';
+import { BrowserViewerDisplayState, SINGLE_VIEWER_TAB_METADATA_KEY } from '@/modules/pace/pace.constants';
 import type { RootState } from '@/store';
 
 interface TaskContentInnerProps {
   taskId: string;
   hideTopbar?: boolean;
+  isActive?: boolean;
 }
 
-const TaskContentChat = ({ taskId, hideTopbar }: { taskId: string; hideTopbar?: boolean }) => {
+const TaskContentChat = ({
+  taskId,
+  hideTopbar,
+  isActive = true,
+}: {
+  taskId: string;
+  hideTopbar?: boolean;
+  isActive?: boolean;
+}) => {
   // Refs
   const hadStreamingRef = useRef(false);
   const prevBrowserStreamingRef = useRef(false);
@@ -81,17 +91,26 @@ const TaskContentChat = ({ taskId, hideTopbar }: { taskId: string; hideTopbar?: 
   const searchParams = useSearchParams();
   const { refetchHistory } = useTaskActions();
   const streamingState = useStreamingState(taskId);
-  const { openTab } = useDynamicTabs({ type: TAB_TYPE.FILE });
-  const { openTab: openDatasetTab } = useDynamicTabs({ type: TAB_TYPE.DATASET });
+  const { openSingleTab: openSingleFileTab } = useDynamicTabs({ type: TAB_TYPE.FILE });
+  const { openSingleTab: openSingleDatasetTab } = useDynamicTabs({ type: TAB_TYPE.DATASET });
   const [triggerGetConversation] = useLazyGetConversationByIdQuery();
-  const { openTab: openBrowserTab, updateTab: updateBrowserTab } = useDynamicTabs({ type: TAB_TYPE.BROWSER });
+  const { openSingleTab: openSingleBrowserTab, updateTab: updateBrowserTab } = useDynamicTabs({
+    type: TAB_TYPE.BROWSER,
+  });
   const username = useAppSelector((state: RootState) => state.user.user?.username) ?? '';
 
   const handleFileOpen = useCallback(
     (path: string, name: string) => {
-      openTab(path, name);
+      openSingleFileTab(path, name, { [SINGLE_VIEWER_TAB_METADATA_KEY]: true });
     },
-    [openTab],
+    [openSingleFileTab],
+  );
+
+  const handleDatasetOpen = useCallback(
+    (datasetId: string, name: string) => {
+      openSingleDatasetTab(datasetId, name, { [SINGLE_VIEWER_TAB_METADATA_KEY]: true });
+    },
+    [openSingleDatasetTab],
   );
 
   const {
@@ -282,9 +301,12 @@ const TaskContentChat = ({ taskId, hideTopbar }: { taskId: string; hideTopbar?: 
 
   const handleWatchStream = useCallback(() => {
     if (conversationId) {
-      openBrowserTab(conversationId, 'Browser', browserSessionId ? { sessionId: browserSessionId } : undefined);
+      openSingleBrowserTab(conversationId, 'Browser', {
+        ...(browserSessionId ? { sessionId: browserSessionId } : {}),
+        [SINGLE_VIEWER_TAB_METADATA_KEY]: true,
+      });
     }
-  }, [conversationId, openBrowserTab, browserSessionId]);
+  }, [conversationId, openSingleBrowserTab, browserSessionId]);
 
   const subtaskPanelParents: TaskBreadcrumb[] = useMemo(
     () => [
@@ -422,13 +444,28 @@ const TaskContentChat = ({ taskId, hideTopbar }: { taskId: string; hideTopbar?: 
   return (
     <ChatActionsProvider
       onFileOpen={handleFileOpen}
-      onDatasetOpen={openDatasetTab}
+      onDatasetOpen={handleDatasetOpen}
       parentTasks={subtaskPanelParents}
       siblings={siblingsMemo}
       onWatchStream={handleWatchStream}
       isBrowserStreamingAvailable={isBrowserStreamingAvailable}
     >
       <div className='relative flex h-full flex-1 flex-col'>
+        {hideTopbar && (
+          <TaskPanelHeader
+            isActive={isActive}
+            title={displayTitle}
+            status={effectiveStatus}
+            currentIndex={currentIndex}
+            totalCount={totalCount}
+            hasNext={hasNext}
+            hasPrevious={hasPrevious}
+            isLoading={isLoading}
+            isBootstrapping={isBootstrapping}
+            onGoToNextTask={goToNextTask}
+            onGoToPreviousTask={goToPreviousTask}
+          />
+        )}
         {!hideTopbar && (
           <TaskTopbar
             className='border-GRAY_100 border-b'
@@ -473,14 +510,16 @@ const TaskContentChat = ({ taskId, hideTopbar }: { taskId: string; hideTopbar?: 
             ) : undefined
           }
         >
-          <div className='mx-auto flex w-full max-w-[656px] flex-col px-6 pt-12 sm:px-12'>
-            <TaskChatTitleHeader
-              displayTitle={displayTitle}
-              statusLabel={statusLabel}
-              effectiveStatus={effectiveStatus}
-              description={description}
-            />
-          </div>
+          {!hideTopbar && (
+            <div className='mx-auto flex w-full max-w-[656px] flex-col px-6 pt-12 sm:px-12'>
+              <TaskChatTitleHeader
+                displayTitle={displayTitle}
+                statusLabel={statusLabel}
+                effectiveStatus={effectiveStatus}
+                description={description}
+              />
+            </div>
+          )}
 
           <ScrollContainer
             className='min-h-0 w-full min-w-0 flex-1'
@@ -599,7 +638,7 @@ const TaskContentChat = ({ taskId, hideTopbar }: { taskId: string; hideTopbar?: 
   );
 };
 
-const TaskContentInner = ({ taskId: propTaskId, hideTopbar }: TaskContentInnerProps) => {
+const TaskContentInner = ({ taskId: propTaskId, hideTopbar, isActive = true }: TaskContentInnerProps) => {
   const nextPathname = usePathname();
   const nextSearchParams = useSearchParams();
   const urlTaskId = useMemo(
@@ -617,7 +656,7 @@ const TaskContentInner = ({ taskId: propTaskId, hideTopbar }: TaskContentInnerPr
       resourceType={ResourceType.ORGANIZATION}
       apiConfig={{ getTaskMessages: API_ENDPOINTS.TASKS_MESSAGES_GET }}
     >
-      <TaskContentChat key={taskId} taskId={taskId} hideTopbar={hideTopbar} />
+      <TaskContentChat key={taskId} taskId={taskId} hideTopbar={hideTopbar} isActive={isActive} />
     </TaskProvider>
   );
 };

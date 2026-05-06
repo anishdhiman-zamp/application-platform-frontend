@@ -9,6 +9,7 @@ import ImageKitImage from '@/components/ImageKitImage';
 import AgentTestCard from '@/modules/pace/components/agents/components/AgentTestCard';
 import { buildTabRoute } from '@/modules/pace/components/dynamic-tabs/tab-type-registry';
 import { useDynamicTabs } from '@/modules/pace/components/dynamic-tabs/useDynamicTabs';
+import { SINGLE_VIEWER_TAB_METADATA_KEY } from '@/modules/pace/pace.constants';
 import { TAB_TYPE } from '@/modules/pace/pace.types';
 import { preserveSidebarParam } from '@/modules/pace/pace.utils';
 
@@ -23,7 +24,7 @@ interface AgentPillProps {
 const AgentPill: FC<AgentPillProps> = ({ agentId, agentName, avatarKey, containerRef, onOpenChange }) => {
   const router = useRouter();
   const triggerRef = useRef<HTMLDivElement>(null);
-  const { openTab, getTabById } = useDynamicTabs({ type: TAB_TYPE.AGENT });
+  const { openSingleTab: openSingleAgentTab, getTabById } = useDynamicTabs({ type: TAB_TYPE.AGENT });
   const tabAvatarKey = getTabById(agentId)?.metadata?.avatarKey as string | undefined;
   const { data: agentData } = useGetAgentQuery({ agentId }, { skip: !!(avatarKey || tabAvatarKey) });
   const resolvedAvatarKey = avatarKey || tabAvatarKey || agentData?.avatar || undefined;
@@ -49,10 +50,11 @@ const AgentPill: FC<AgentPillProps> = ({ agentId, agentName, avatarKey, containe
     const metadata: Record<string, string> = {};
 
     if (resolvedAvatarKey) metadata.avatarKey = resolvedAvatarKey;
+    metadata[SINGLE_VIEWER_TAB_METADATA_KEY] = 'true';
 
-    openTab(agentId, agentName, Object.keys(metadata).length > 0 ? metadata : undefined);
+    openSingleAgentTab(agentId, agentName, metadata);
     router.push(preserveSidebarParam(pathWithTitle));
-  }, [agentId, agentName, resolvedAvatarKey, openTab, router, handleOpenChange]);
+  }, [agentId, agentName, resolvedAvatarKey, openSingleAgentTab, router, handleOpenChange]);
 
   useEffect(() => {
     const el = containerRef.current;

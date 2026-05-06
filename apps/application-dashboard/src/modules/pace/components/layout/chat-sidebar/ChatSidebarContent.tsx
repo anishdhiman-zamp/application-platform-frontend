@@ -24,16 +24,22 @@ import { cn } from '@zamp-platform/ui/utils';
 import { EVENT_TYPE } from '@zamp-platform/utils/event-bus';
 import { useDynamicTabs } from 'modules/pace/components/dynamic-tabs/useDynamicTabs';
 import ChatConversationContent from 'modules/pace/components/layout/chat-sidebar/ChatConversationContent';
+import { usePathname } from 'next/navigation';
 import { useEventBus } from '@/app/_providers/sse-provider';
 import { getChatTaskRoute } from '@/constants/routeConfig';
 import { useResourceAccess } from '@/hooks/useResourceAccess';
 import ChatTopbar from '@/modules/pace/components/chat/ChatTopbar';
 import ModelSelector from '@/modules/pace/components/chat/ModelSelector';
+import { shouldUseSingleViewerMode } from '@/modules/pace/components/files-panel/files-panel.utils';
 import { HITL_RESPONDED_EVENT } from '@/modules/pace/components/tasks/constants/tasks.constants';
 import { useChatDraftInput } from '@/modules/pace/hooks/useChatDraftInput';
 import { useHitlQuestions } from '@/modules/pace/hooks/useHitlQuestions';
 import { useReferencePicker } from '@/modules/pace/hooks/useReferencePicker';
-import { BrowserViewerDisplayState, NEW_CONVERSATION_ID } from '@/modules/pace/pace.constants';
+import {
+  BrowserViewerDisplayState,
+  NEW_CONVERSATION_ID,
+  SINGLE_VIEWER_TAB_METADATA_KEY,
+} from '@/modules/pace/pace.constants';
 import { usePaceConversationContext, usePaceLayoutContext } from '@/modules/pace/pace.context';
 import { CHAT_SIDEBAR_STATE, TAB_TYPE } from '@/modules/pace/pace.types';
 import { preserveSidebarParam } from '@/modules/pace/pace.utils';
@@ -69,11 +75,16 @@ const ChatSidebarContent = ({
   currentUserName,
   username,
 }: ChatSidebarContentProps) => {
-  const { openTab } = useDynamicTabs({ type: TAB_TYPE.FILE });
-  const { openTab: openDatasetTab } = useDynamicTabs({ type: TAB_TYPE.DATASET });
-
-  const { openTab: openTaskTab } = useDynamicTabs({ type: TAB_TYPE.TASK });
-  const { openTab: openBrowserTab, updateTab: updateBrowserTab } = useDynamicTabs({ type: TAB_TYPE.BROWSER });
+  const pathname = usePathname();
+  const { activeTab } = useDynamicTabs();
+  const { openTab, openSingleTab: openSingleFileTab } = useDynamicTabs({ type: TAB_TYPE.FILE });
+  const { openTab: openDatasetTab, openSingleTab: openSingleDatasetTab } = useDynamicTabs({ type: TAB_TYPE.DATASET });
+  const { openTab: openTaskTab, openSingleTab: openSingleTaskTab } = useDynamicTabs({ type: TAB_TYPE.TASK });
+  const {
+    openTab: openBrowserTab,
+    openSingleTab: openSingleBrowserTab,
+    updateTab: updateBrowserTab,
+  } = useDynamicTabs({ type: TAB_TYPE.BROWSER });
   const { chatSidebarState, setChatSidebarState } = usePaceLayoutContext();
   const {
     activeAgentInfo,
@@ -160,17 +171,31 @@ const ChatSidebarContent = ({
   const handleFileOpen = useCallback(
     (path: string, name: string) => {
       collapseSidebarIfExpanded();
+
+      if (shouldUseSingleViewerMode(pathname, activeTab)) {
+        openSingleFileTab(path, name, { [SINGLE_VIEWER_TAB_METADATA_KEY]: true });
+
+        return;
+      }
+
       openTab(path, name);
     },
-    [openTab, collapseSidebarIfExpanded],
+    [activeTab, collapseSidebarIfExpanded, openSingleFileTab, openTab, pathname],
   );
 
   const handleDatasetOpen = useCallback(
     (datasetId: string, name: string) => {
       collapseSidebarIfExpanded();
+
+      if (shouldUseSingleViewerMode(pathname, activeTab)) {
+        openSingleDatasetTab(datasetId, name, { [SINGLE_VIEWER_TAB_METADATA_KEY]: true });
+
+        return;
+      }
+
       openDatasetTab(datasetId, name);
     },
-    [openDatasetTab, collapseSidebarIfExpanded],
+    [activeTab, collapseSidebarIfExpanded, openDatasetTab, openSingleDatasetTab, pathname],
   );
 
   const handleTaskOpen = useCallback(
@@ -182,17 +207,33 @@ const ChatSidebarContent = ({
           getChatTaskRoute({ taskId, conversationId: conversationId ?? undefined, taskTitle: name, inChat: true }),
         );
 
+      if (shouldUseSingleViewerMode(pathname, activeTab)) {
+        openSingleTaskTab(taskId, name || taskId, { [SINGLE_VIEWER_TAB_METADATA_KEY]: true }, route);
+
+        return;
+      }
+
       openTaskTab(taskId, name || taskId, undefined, route);
     },
-    [collapseSidebarIfExpanded, openTaskTab, conversationId],
+    [activeTab, collapseSidebarIfExpanded, conversationId, openSingleTaskTab, openTaskTab, pathname],
   );
 
   const handleBrowserOpen = useCallback(
     (browserConversationId: string, sessionId?: string) => {
       collapseSidebarIfExpanded();
+
+      if (shouldUseSingleViewerMode(pathname, activeTab)) {
+        openSingleBrowserTab(browserConversationId, 'Browser', {
+          ...(sessionId ? { sessionId } : {}),
+          [SINGLE_VIEWER_TAB_METADATA_KEY]: true,
+        });
+
+        return;
+      }
+
       openBrowserTab(browserConversationId, 'Browser', sessionId ? { sessionId } : undefined);
     },
-    [openBrowserTab, collapseSidebarIfExpanded],
+    [activeTab, collapseSidebarIfExpanded, openBrowserTab, openSingleBrowserTab, pathname],
   );
 
   const handleGlobalInputRequired = useCallback(() => {

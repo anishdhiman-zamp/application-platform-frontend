@@ -3,22 +3,28 @@
 import { useState } from 'react';
 import { Button } from '@zamp-platform/ui';
 import { Maximize2, Minimize2 } from 'lucide-react';
+import { usePathname } from 'next/navigation';
+import { useDynamicTabs } from '@/modules/pace/components/dynamic-tabs/useDynamicTabs';
+import { shouldUseSingleViewerMode } from '@/modules/pace/components/files-panel/files-panel.utils';
 import FilesPanelAddTabMenu from '@/modules/pace/components/files-panel/FilesPanelAddTabMenu';
 import FilesPanelTabStrip from '@/modules/pace/components/files-panel/FilesPanelTabStrip';
 import { usePaceLayoutContext } from '@/modules/pace/pace.context';
 
 const FilesPanelTopBar = () => {
   const { isFilesPanelExpanded, toggleFilesPanelExpanded } = usePaceLayoutContext();
+  const pathname = usePathname();
+  const { activeTab } = useDynamicTabs();
 
   const [isTabsOverflowing, setIsTabsOverflowing] = useState(false);
+  const isSingleViewerMode = shouldUseSingleViewerMode(pathname, activeTab);
 
   return (
     <div className='border-GRAY_400 bg-BG_WHITE flex h-[54px] shrink-0 items-center justify-between gap-x-2 border-b p-3'>
       <div className='flex min-w-0 flex-1 items-center gap-x-1 overflow-hidden'>
-        <FilesPanelTabStrip onOverflowChange={setIsTabsOverflowing} />
+        {!isSingleViewerMode && <FilesPanelTabStrip onOverflowChange={setIsTabsOverflowing} />}
       </div>
       <div className='flex shrink-0 items-center gap-x-1'>
-        {isTabsOverflowing && <FilesPanelAddTabMenu align='end' />}
+        {!isSingleViewerMode && isTabsOverflowing && <FilesPanelAddTabMenu align='end' />}
         <Button
           variant='ghost'
           size='icon'

@@ -5,6 +5,8 @@ import { cn } from '@zamp-platform/ui/utils';
 import { AnimatePresence, motion, useReducedMotion } from 'framer-motion';
 import { usePathname } from 'next/navigation';
 import { ROUTES_PATH } from '@/constants/routeConfig';
+import { useDynamicTabs } from '@/modules/pace/components/dynamic-tabs/useDynamicTabs';
+import { shouldUseSingleViewerMode } from '@/modules/pace/components/files-panel/files-panel.utils';
 import FilesPanelBody from '@/modules/pace/components/files-panel/FilesPanelBody';
 import { FilesPanelHeaderSlotProvider } from '@/modules/pace/components/files-panel/FilesPanelHeaderSlot';
 import FilesPanelInternalResizeHandle from '@/modules/pace/components/files-panel/FilesPanelInternalResizeHandle';
@@ -12,6 +14,7 @@ import FilesPanelTopBar from '@/modules/pace/components/files-panel/FilesPanelTo
 import FilesPanelTreeSidebar from '@/modules/pace/components/files-panel/FilesPanelTreeSidebar';
 import { NO_ANIMATION } from '@/modules/pace/pace.animations';
 import { usePaceConversationContext, usePaceLayoutContext } from '@/modules/pace/pace.context';
+import { TAB_TYPE } from '@/modules/pace/pace.types';
 import { SIDEBAR_TOGGLE_TRANSITION } from '@/utils/animations/sidebar.animations';
 
 const FILES_PANEL_TRANSITION = SIDEBAR_TOGGLE_TRANSITION;
@@ -40,7 +43,10 @@ const FilesPanel = () => {
   } = usePaceLayoutContext();
   const { activeConversationId } = usePaceConversationContext();
   const pathname = usePathname();
+  const { activeTab, closeOtherTabs, tabs } = useDynamicTabs();
   const panelHostSurface = getPanelHostSurface(pathname);
+  const isSingleViewerMode = shouldUseSingleViewerMode(pathname, activeTab);
+  const isSingleViewerTaskMode = isSingleViewerMode && (activeTab?.type ?? TAB_TYPE.FILE) === TAB_TYPE.TASK;
 
   const prevConversationIdRef = useRef(activeConversationId);
   const prevPanelHostSurfaceRef = useRef(panelHostSurface);
@@ -63,6 +69,12 @@ const FilesPanel = () => {
     prevPanelHostSurfaceRef.current = panelHostSurface;
   }, [activeConversationId, panelHostSurface]);
 
+  useEffect(() => {
+    if (!isSingleViewerMode || !activeTab || tabs.length <= 1) return;
+
+    closeOtherTabs(activeTab.id);
+  }, [activeTab, closeOtherTabs, isSingleViewerMode, tabs.length]);
+
   return (
     <AnimatePresence>
       {filesPanelOpen && (
@@ -84,7 +96,7 @@ const FilesPanel = () => {
             style={{ willChange: 'transform, opacity' }}
             className='border-GRAY_400 bg-BG_WHITE absolute inset-0 flex min-h-0 flex-col overflow-hidden border-x border-b'
           >
-            <FilesPanelTopBar />
+            {!isSingleViewerTaskMode && <FilesPanelTopBar />}
             <FilesPanelHeaderSlotProvider>
               <div className='relative flex min-h-0 flex-1 overflow-hidden'>
                 <motion.div

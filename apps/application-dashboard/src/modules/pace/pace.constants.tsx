@@ -60,6 +60,7 @@ export const ACCEPTED_FILE_TYPES = `${INPUT_FILE_FORMATS.TXT},${INPUT_FILE_FORMA
 export const DEFAULT_CHAT_TITLE = 'Start a new chat';
 export const DEBOUNCE_DELAY_MS = 300;
 export const NEW_CONVERSATION_ID = 'null_thread';
+export const SINGLE_VIEWER_TAB_METADATA_KEY = 'singleViewer';
 // Dedicated dynamic-tabs bucket for files opened from /chat/files. Keeps the listing
 // page's file viewer state isolated from any chat conversation's open tabs.
 export const FILES_LISTING_CONVERSATION_ID = '__files_listing__';

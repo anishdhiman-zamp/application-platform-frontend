@@ -26,7 +26,7 @@ const TaskTabsContainer = () => {
 
         return (
           <TabWrapper key={tab?.stableKey} isActive={isActive}>
-            <TaskContentInner key={tab.id} taskId={tab.id} hideTopbar />
+            <TaskContentInner key={tab.id} taskId={tab.id} hideTopbar isActive={isActive} />
           </TabWrapper>
         );
       })}

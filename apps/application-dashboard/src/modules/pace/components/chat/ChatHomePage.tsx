@@ -31,10 +31,11 @@ import ChatHome from '@/modules/pace/components/chat/ChatHome';
 import ModelSelector from '@/modules/pace/components/chat/ModelSelector';
 import VoiceChatSlot from '@/modules/pace/components/chat/VoiceChatSlot';
 import { useDynamicTabs } from '@/modules/pace/components/dynamic-tabs/useDynamicTabs';
+import { shouldUseSingleViewerMode } from '@/modules/pace/components/files-panel/files-panel.utils';
 import { CHAT_DRAFT_UPDATE_EVENT, useChatDraftInput } from '@/modules/pace/hooks/useChatDraftInput';
 import { useReferencePicker } from '@/modules/pace/hooks/useReferencePicker';
 import { NO_ANIMATION } from '@/modules/pace/pace.animations';
-import { STUB_CONVERSATION_STATE } from '@/modules/pace/pace.constants';
+import { SINGLE_VIEWER_TAB_METADATA_KEY, STUB_CONVERSATION_STATE } from '@/modules/pace/pace.constants';
 import { usePaceActionsContext, usePaceConversationContext, usePaceLayoutContext } from '@/modules/pace/pace.context';
 import { CHAT_SIDEBAR_STATE, TAB_TYPE } from '@/modules/pace/pace.types';
 import { preserveSidebarParam } from '@/modules/pace/pace.utils';
@@ -59,9 +60,10 @@ const ChatHomePage = () => {
   const organizationId = useAppSelector((state: RootState) => state.user.user?.orgs?.[0]?.organization_id) ?? '';
   const currentUserName = useAppSelector((state: RootState) => state.user.user?.user_name) ?? '';
   const username = useAppSelector((state: RootState) => state.user.user?.username) ?? '';
-  const { openTab } = useDynamicTabs({ type: TAB_TYPE.FILE });
-  const { openTab: openDatasetTab } = useDynamicTabs({ type: TAB_TYPE.DATASET });
-  const { openTab: openTaskTab } = useDynamicTabs({ type: TAB_TYPE.TASK });
+  const { activeTab } = useDynamicTabs();
+  const { openTab, openSingleTab: openSingleFileTab } = useDynamicTabs({ type: TAB_TYPE.FILE });
+  const { openTab: openDatasetTab, openSingleTab: openSingleDatasetTab } = useDynamicTabs({ type: TAB_TYPE.DATASET });
+  const { openTab: openTaskTab, openSingleTab: openSingleTaskTab } = useDynamicTabs({ type: TAB_TYPE.TASK });
 
   const fileDropHandlerRef = useRef<((files: FileList) => void) | null>(null);
   const addFileReferenceRef = useRef<((ref: { path: string; name: string }) => void) | null>(null);
@@ -107,17 +109,31 @@ const ChatHomePage = () => {
   const handleFileOpen = useCallback(
     (path: string, name: string) => {
       expandSidebarIfCollapsed();
+
+      if (shouldUseSingleViewerMode(pathname, activeTab)) {
+        openSingleFileTab(path, name, { [SINGLE_VIEWER_TAB_METADATA_KEY]: true });
+
+        return;
+      }
+
       openTab(path, name);
     },
-    [openTab, expandSidebarIfCollapsed],
+    [activeTab, expandSidebarIfCollapsed, openSingleFileTab, openTab, pathname],
   );
 
   const handleDatasetOpen = useCallback(
     (datasetId: string, name: string) => {
       expandSidebarIfCollapsed();
+
+      if (shouldUseSingleViewerMode(pathname, activeTab)) {
+        openSingleDatasetTab(datasetId, name, { [SINGLE_VIEWER_TAB_METADATA_KEY]: true });
+
+        return;
+      }
+
       openDatasetTab(datasetId, name);
     },
-    [openDatasetTab, expandSidebarIfCollapsed],
+    [activeTab, expandSidebarIfCollapsed, openDatasetTab, openSingleDatasetTab, pathname],
   );
 
   const handleTaskOpen = useCallback(
@@ -125,9 +141,15 @@ const ChatHomePage = () => {
       expandSidebarIfCollapsed();
       const route = fullRoute ?? preserveSidebarParam(getChatTaskRoute({ taskId, taskTitle: name, inChat: true }));
 
+      if (shouldUseSingleViewerMode(pathname, activeTab)) {
+        openSingleTaskTab(taskId, name || taskId, { [SINGLE_VIEWER_TAB_METADATA_KEY]: true }, route);
+
+        return;
+      }
+
       openTaskTab(taskId, name || taskId, undefined, route);
     },
-    [openTaskTab, expandSidebarIfCollapsed],
+    [activeTab, expandSidebarIfCollapsed, openSingleTaskTab, openTaskTab, pathname],
   );
 
   const interceptedActions = useMemo(

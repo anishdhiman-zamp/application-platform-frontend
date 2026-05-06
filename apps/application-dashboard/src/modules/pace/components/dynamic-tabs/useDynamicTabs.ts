@@ -2,9 +2,12 @@
 
 import React, { useCallback, useMemo } from 'react';
 import { getNextNavigationTarget, NAVIGATION_STRATEGY } from '@zamp-platform/utils';
-import { ROUTES_PATH } from '@/constants/routeConfig';
 import { useAppDispatch, useAppSelector } from '@/hooks/toolkit';
-import { buildTabRoute } from '@/modules/pace/components/dynamic-tabs/tab-type-registry';
+import {
+  buildTabRoute,
+  buildTabRouteForCurrentSurface,
+  getEmptyDynamicTabsRoute,
+} from '@/modules/pace/components/dynamic-tabs/tab-type-registry';
 import { markTabAsClosed, useTabRouter } from '@/modules/pace/hooks/useTabRouter';
 import { DynamicTab, DynamicTabType, NAV_METHOD, TAB_TYPE } from '@/modules/pace/pace.types';
 import { store } from '@/store/index';
@@ -23,6 +26,7 @@ interface UseDynamicTabsReturn {
   isHydrated: boolean;
 
   openTab: (id: string, name: string, metadata?: Record<string, unknown>, path?: string) => void;
+  openSingleTab: (id: string, name: string, metadata?: Record<string, unknown>, path?: string) => void;
   openTabSilently: (id: string, name: string, metadata?: Record<string, unknown>, path?: string) => void;
   closeTab: (e: React.MouseEvent, id: string) => void;
   closeTabsForPath: (path: string, isFolder: boolean) => void;
@@ -116,7 +120,35 @@ export const useDynamicTabs = (config: UseDynamicTabsConfig = {}): UseDynamicTab
   const openTab = useCallback(
     (id: string, name: string, metadata?: Record<string, unknown>, path?: string) => {
       const tabType = type ?? TAB_TYPE.FILE;
-      const tabPath = path ?? buildTabRoute(id, tabType);
+      const tabPath = path ?? buildTabRouteForCurrentSurface(id, tabType);
+
+      dispatch(
+        dynamicTabsActions.openTab({
+          id,
+          name,
+          path: tabPath,
+          type: tabType,
+          metadata,
+        }),
+      );
+
+      navigateTo(tabPath);
+    },
+    [dispatch, navigateTo, type],
+  );
+
+  const openSingleTab = useCallback(
+    (id: string, name: string, metadata?: Record<string, unknown>, path?: string) => {
+      const tabType = type ?? TAB_TYPE.FILE;
+      const tabPath = path ?? buildTabRouteForCurrentSurface(id, tabType);
+      const currentTabs = selectDynamicTabs(store.getState());
+      const existingTab = currentTabs.find((tab) => tab.id === id && (tab.type ?? TAB_TYPE.FILE) === tabType);
+      const alreadySingleTab = currentTabs.length === 1 && existingTab?.id === id;
+
+      if (!alreadySingleTab) {
+        currentTabs.forEach((tab) => markTabAsClosed(tab.id));
+        dispatch(dynamicTabsActions.clearAllTabs());
+      }
 
       dispatch(
         dynamicTabsActions.openTab({
@@ -136,7 +168,7 @@ export const useDynamicTabs = (config: UseDynamicTabsConfig = {}): UseDynamicTab
   const openTabSilently = useCallback(
     (id: string, name: string, metadata?: Record<string, unknown>, path?: string) => {
       const tabType = type ?? TAB_TYPE.FILE;
-      const tabPath = path ?? buildTabRoute(id, tabType);
+      const tabPath = path ?? buildTabRouteForCurrentSurface(id, tabType);
 
       dispatch(
         dynamicTabsActions.openTabInBackground({
@@ -182,7 +214,7 @@ export const useDynamicTabs = (config: UseDynamicTabsConfig = {}): UseDynamicTab
           navigateTo(target.path ?? buildTabRoute(target.id, target.type));
         } else {
           dispatch(dynamicTabsActions.setActiveTab(null));
-          navigateTo(ROUTES_PATH.CHAT, NAV_METHOD.PUSH);
+          navigateTo(getEmptyDynamicTabsRoute(), NAV_METHOD.PUSH);
         }
       }
     },
@@ -225,11 +257,11 @@ export const useDynamicTabs = (config: UseDynamicTabsConfig = {}): UseDynamicTab
             navigateTo(target.path ?? buildTabRoute(target.id, target.type));
           } else {
             dispatch(dynamicTabsActions.setActiveTab(null));
-            navigateTo(ROUTES_PATH.CHAT, NAV_METHOD.PUSH);
+            navigateTo(getEmptyDynamicTabsRoute(), NAV_METHOD.PUSH);
           }
         } else {
           dispatch(dynamicTabsActions.setActiveTab(null));
-          navigateTo(ROUTES_PATH.CHAT);
+          navigateTo(getEmptyDynamicTabsRoute());
         }
       }
     },
@@ -377,7 +409,7 @@ export const useDynamicTabs = (config: UseDynamicTabsConfig = {}): UseDynamicTab
 
     currentTabs.forEach((tab) => markTabAsClosed(tab.id));
     dispatch(dynamicTabsActions.clearAllTabs());
-    navigateTo(ROUTES_PATH.CHAT, NAV_METHOD.PUSH);
+    navigateTo(getEmptyDynamicTabsRoute(), NAV_METHOD.PUSH);
   }, [dispatch, navigateTo]);
 
   const reorderTabs = useCallback(
@@ -393,6 +425,7 @@ export const useDynamicTabs = (config: UseDynamicTabsConfig = {}): UseDynamicTab
     isHydrated: true,
 
     openTab,
+    openSingleTab,
     openTabSilently,
     closeTab,
     closeTabsForPath,

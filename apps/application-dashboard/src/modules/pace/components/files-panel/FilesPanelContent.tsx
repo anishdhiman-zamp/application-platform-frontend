@@ -3,6 +3,7 @@
 import { useCallback, useEffect, useRef, useState } from 'react';
 import { LazyFileTreeProvider } from 'modules/pace/context/LazyFileTreeContext';
 import { useLazyFileTree } from 'modules/pace/hooks/useLazyFileTree';
+import { usePathname } from 'next/navigation';
 import ImageLoader from '@/components/common/loader/ImageLoader';
 import CommonWrapper from '@/components/commonWrapper';
 import { SkeletonTypes } from '@/components/commonWrapper/commonWrapper.types';
@@ -12,17 +13,20 @@ import type { FileItem, SortDirection, SortOption } from '@/modules/pace/compone
 import { FILE_TYPE, SORT_DIRECTION, SORT_OPTION } from '@/modules/pace/components/files/file-tree.types';
 import FilesEmptyState from '@/modules/pace/components/files/FilesEmptyState';
 import FileTree from '@/modules/pace/components/files/FileTree';
+import { shouldUseSingleViewerMode } from '@/modules/pace/components/files-panel/files-panel.utils';
 import FilesPanelToolbar from '@/modules/pace/components/files-panel/FilesPanelToolbar';
 import { SEARCH_DEBOUNCE_MS } from '@/modules/pace/components/tasks/constants/tasks.constants';
 import { useFileUploadContext } from '@/modules/pace/context/FileUploadContext';
+import { SINGLE_VIEWER_TAB_METADATA_KEY } from '@/modules/pace/pace.constants';
 import { usePaceLayoutContext } from '@/modules/pace/pace.context';
-import { CHAT_SIDEBAR_STATE, TAB_TYPE } from '@/modules/pace/pace.types';
+import { CHAT_SIDEBAR_STATE } from '@/modules/pace/pace.types';
 import { defaultFnType } from '@/types/commonTypes';
 
 const FilesPanelContent = () => {
   const collapseAllRef = useRef<defaultFnType | null>(null);
   const { uploadFiles, uploadFolder, uploadingItems, clearUploadingItems, registerLoadFolder } = useFileUploadContext();
-  const { openTab } = useDynamicTabs({ type: TAB_TYPE.FILE });
+  const pathname = usePathname();
+  const { openTab, openSingleTab, activeTab } = useDynamicTabs();
   const { chatSidebarState, setChatSidebarState } = usePaceLayoutContext();
 
   const [searchInput, setSearchInput] = useState('');
@@ -66,6 +70,13 @@ const FilesPanelContent = () => {
     if (chatSidebarState === CHAT_SIDEBAR_STATE.EXPANDED) {
       setChatSidebarState(CHAT_SIDEBAR_STATE.SIDEBAR);
     }
+
+    if (shouldUseSingleViewerMode(pathname, activeTab)) {
+      openSingleTab(file.path, file.name, { [SINGLE_VIEWER_TAB_METADATA_KEY]: true });
+
+      return;
+    }
+
     openTab(file.path, file.name);
   };
 
