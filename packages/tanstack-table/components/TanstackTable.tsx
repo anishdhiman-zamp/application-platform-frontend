@@ -3,15 +3,13 @@
 import type { ColumnSizingState, Header } from '@tanstack/react-table';
 import { getCoreRowModel, getSortedRowModel, Row, useReactTable } from '@tanstack/react-table';
 import { useVirtualizer } from '@tanstack/react-virtual';
-import { useThrottle } from '@zamp-platform/utils';
+import { type MapAny, useThrottle } from '@zamp-platform/utils';
 import React, { FC, useCallback, useEffect, useMemo, useRef, useState } from 'react';
 
 import SkeletonElement from '@/components/common/skeletons/SkeletonElement';
 import CustomNoRowsOverlay from '@/components/common/table/CustomNoRowsOverlay';
 import SkeletonBody from '@/components/common/tanstackTable/skeletons/SkeletonBody';
 import SkeletonHeader from '@/components/common/tanstackTable/skeletons/SkeletonHeader';
-import { ActivityRunRowData } from '@/modules/process/process.types';
-import { MapAny } from '@/types/commonTypes';
 
 import { DEFAULT_COLUMN_WIDTH, MIN_COLUMN_WIDTH, QUERY_KEYS, VIRTUALIZATION_DEFAULTS } from '../constants';
 import { useColumnDragAndDrop } from '../hooks/useColumnDragAndDrop';
@@ -218,7 +216,7 @@ export const TanStackTable: FC<TanStackTableProps> = ({
   );
 
   const enhancedHandleRowClick = useCallback(
-    (rowData: ActivityRunRowData, rowIndex?: number) => {
+    (rowData: MapAny, rowIndex?: number) => {
       if (rowHighlighting?.enabled && typeof rowIndex === 'number') {
         setHighlightedRowIndex(rowIndex);
       }

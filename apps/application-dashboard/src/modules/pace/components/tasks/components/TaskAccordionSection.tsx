@@ -80,12 +80,12 @@ const TaskAccordionSection = ({
   return (
     <AccordionItem
       value={status}
-      className='border-GRAY_400 bg-GRAY_1 [&>*:first-child]:bg-BG_GRAY_1 [&>*:first-child]:sticky [&>*:first-child]:top-0 [&>*:first-child]:z-10'
+      className='border-GRAY_400 bg-GRAY_1 [&>*:first-child]:bg-BG_GRAY_1 border-b [&>*:first-child]:sticky [&>*:first-child]:top-0 [&>*:first-child]:z-10'
     >
       <AccordionTrigger
         icon={PlayIcon}
         iconRotation={90}
-        className='border-GRAY_400 data-[state=open]:bg-GRAY_100 [&>svg]:text-GRAY_1000 [&[data-state=open]>svg]:text-GRAY_600 cursor-pointer justify-start! gap-1.5 px-3 py-2.5 [&>svg]:order-first [&>svg]:h-2 [&>svg]:w-2'
+        className='border-GRAY_400 data-[state=open]:bg-GRAY_100 [&>svg]:text-GRAY_1000 [&[data-state=open]>svg]:text-GRAY_600 cursor-pointer justify-start! gap-1.5 px-3 py-2.5 data-[state=open]:border-b [&>svg]:order-first [&>svg]:h-2 [&>svg]:w-2'
       >
         <div className='flex items-center gap-2'>
           <TaskStatusIcon status={status} />
@@ -94,7 +94,7 @@ const TaskAccordionSection = ({
         <span className='f-13-500 text-GRAY_600 truncate'>{count}</span>
       </AccordionTrigger>
       <AccordionContent className='p-0' disableAnimation>
-        <div>
+        <div className='divide-GRAY_300 divide-y'>
           {tasks.map((task, index) => (
             <TaskRow
               key={task.id}

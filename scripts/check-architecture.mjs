@@ -7,11 +7,7 @@ const codeExtensions = new Set(['.js', '.jsx', '.ts', '.tsx', '.mjs', '.cjs']);
 const ignoredDirs = new Set(['node_modules', '.git', '.next', 'dist', 'coverage', '.turbo']);
 
 const allowedPackageToAppAliasImports = new Map([
-  ['packages/chat/src/components/ChatFeedback.tsx', ['@/types/common/mime']],
   ['packages/chat/src/components/ConnectedChatInput.tsx', ['@/apis/voiceAgents']],
-  ['packages/chat/src/components/Message.tsx', ['@/types/commonTypes']],
-  ['packages/chat/src/components/MessageContainer.tsx', ['@/modules/chatbot/PaceAvatar']],
-  ['packages/chat/src/components/blocks/AgentBlock.tsx', ['@/constants/shortcuts']],
   ['packages/chat/src/components/blocks/HITLQuestionsBlock/useHITLQuestions.ts', ['@/constants/routeConfig']],
   [
     'packages/chat/src/components/blocks/TaskBlock.tsx',
@@ -21,10 +17,7 @@ const allowedPackageToAppAliasImports = new Map([
     'packages/chat/src/components/blocks/ToolCallBlock.tsx',
     ['@/modules/integrations/AllIntegrations/IntegrationCardV2', '@/types/api/integrations'],
   ],
-  ['packages/chat/src/hooks/useChat.ts', ['@/app/_providers/sse-provider', '@/types/commonTypes']],
   ['packages/conversation-stream/src/components/ConnectedChatInput.tsx', ['@/apis/voiceAgents']],
-  ['packages/conversation-stream/src/provider/ConversationProvider.tsx', ['@/app/_providers/sse-provider']],
-  ['packages/conversation-stream/src/provider/TaskProvider.tsx', ['@/app/_providers/sse-provider']],
   [
     'packages/dataset-create-edit/components/BluePrintDataset.tsx',
     [
@@ -35,8 +28,6 @@ const allowedPackageToAppAliasImports = new Map([
     ],
   ],
   ['packages/dataset-create-edit/components/DatasetColumDetails.tsx', ['@/modules/data/data.constants']],
-  ['packages/tanstack-table/components/TanstackHeader.tsx', ['@/types/commonTypes']],
-  ['packages/tanstack-table/components/TanstackRow.tsx', ['@/modules/process/process.types']],
   [
     'packages/tanstack-table/components/TanstackTable.tsx',
     [
@@ -44,15 +35,8 @@ const allowedPackageToAppAliasImports = new Map([
       '@/components/common/table/CustomNoRowsOverlay',
       '@/components/common/tanstackTable/skeletons/SkeletonBody',
       '@/components/common/tanstackTable/skeletons/SkeletonHeader',
-      '@/modules/process/process.types',
-      '@/types/commonTypes',
     ],
   ],
-  ['packages/tanstack-table/hooks/useInfiniteTableData.ts', ['@/types/commonTypes']],
-  ['packages/tanstack-table/hooks/useTableState.ts', ['@/types/commonTypes']],
-  ['packages/tanstack-table/hooks/useTableSync.ts', ['@/types/commonTypes']],
-  ['packages/tanstack-table/types/index.ts', ['@/modules/process/process.types', '@/types/commonTypes']],
-  ['packages/tanstack-table/utils/index.tsx', ['@/types/commonTypes']],
 ]);
 
 const importRegexes = [

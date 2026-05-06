@@ -1,13 +1,10 @@
 'use client';
 
 import { captureException } from '@sentry/browser';
-import { UseSSEOptions } from '@zamp-platform/utils';
-import { type BaseEventPayload, EVENT_TYPE } from '@zamp-platform/utils/event-bus';
+import { type MapAny, UseSSEOptions } from '@zamp-platform/utils';
+import { type BaseEventPayload, EVENT_TYPE, useEventBus } from '@zamp-platform/utils/event-bus';
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { useDispatch } from 'react-redux';
-
-import { useEventBus } from '@/app/_providers/sse-provider';
-import type { MapAny } from '@/types/commonTypes';
 
 import {
   APITags,

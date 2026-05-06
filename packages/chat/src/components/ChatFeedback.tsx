@@ -19,8 +19,6 @@ import { ThumbsDown, ThumbsUp } from 'lucide-react';
 import React, { FC, useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { toast } from 'sonner';
 
-import { INPUT_FILE_FORMATS } from '@/types/common/mime';
-
 import { useLazyGetSpeechToTextAccessTokenQuery, useSubmitChatFeedbackMutation } from '../api';
 import { useFileUpload } from '../hooks/useFileUpload';
 import { MicrophoneState } from '../hooks/useMicrophoneRecorder';
@@ -28,7 +26,7 @@ import { useTranscription } from '../hooks/useTranscription';
 import { ChatFeedbackCategory, FeedbackSentiment } from '../types/chat.types';
 import { SOCKET_STATES, TranscriptionAdapter } from '../types/transcription.types';
 import { filesToFileList, filterPastedFiles } from '../utils/fileUpload';
-import { FileMimeType } from './chat.constants';
+import { FILE_MIME, FileMimeType } from './chat.constants';
 import { ChatComposer } from './ChatComposer';
 
 export interface ChatFeedbackProps {
@@ -57,7 +55,7 @@ const ISSUE_TYPE_OPTIONS = [
 const MAX_FILES = 5;
 const MAX_FILE_SIZE_MB = 25;
 const MAX_FILE_SIZE_BYTES = MAX_FILE_SIZE_MB * 1024 * 1024;
-const ACCEPTED_FILE_TYPES = `${INPUT_FILE_FORMATS.JPEG},${INPUT_FILE_FORMATS.JPG},${INPUT_FILE_FORMATS.PNG},${INPUT_FILE_FORMATS.BMP}`;
+const ACCEPTED_FILE_TYPES = [FILE_MIME.IMAGE_JPEG, 'image/jpg', FILE_MIME.IMAGE_PNG, FILE_MIME.IMAGE_BMP].join(',');
 
 const MAX_TEXTAREA_HEIGHT = 200;
 

@@ -14,16 +14,18 @@ interface AgentActionBarProps {
 
 const AgentActionBar = ({ searchTerm, onSearchChange, activeTab, onTabChange }: AgentActionBarProps) => {
   return (
-    <div className='flex flex-col gap-3 px-4 pb-2'>
-      <div className='flex h-8 items-center gap-1'>
+    <div className='flex flex-col gap-3 pb-2'>
+      <div className='flex h-8 w-full items-center gap-1'>
         <SearchInput
           placeholder='Search'
           value={searchTerm}
           onChange={onSearchChange}
           allowClear={false}
           size='small'
-          autoFocus
-          className='bg-BG_WHITE h-7 flex-1 border-none px-0 outline-none focus:ring-0'
+          showSearchIcon
+          wrapperClassName='w-full min-w-0'
+          className='bg-BG_WHITE h-7'
+          aria-label='Search agents'
           testId='agent-listing-search-input'
         />
       </div>
@@ -35,8 +37,10 @@ const AgentActionBar = ({ searchTerm, onSearchChange, activeTab, onTabChange }: 
             size='small'
             onClick={() => onTabChange(tab.id)}
             className={cn(
-              'cursor-pointer rounded-md px-2.5 py-1.5 text-xs font-medium',
-              activeTab === tab.id ? 'bg-GRAY_100 text-GRAY_1000' : 'bg-BG_WHITE text-GRAY_900',
+              'f-12-500 h-7 cursor-pointer rounded-md px-2.5 py-1.5',
+              activeTab === tab.id
+                ? 'bg-GRAY_100 text-GRAY_1000'
+                : 'bg-BG_WHITE text-GRAY_900 hover:bg-GRAY_100 hover:text-GRAY_1000',
             )}
           >
             {tab.label}

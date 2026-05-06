@@ -1,6 +1,6 @@
 'use client';
 
-import React, { createContext, ReactNode, useContext, useEffect, useMemo, useRef } from 'react';
+import React, { createContext, type ReactNode, useContext, useEffect, useMemo, useRef } from 'react';
 import { captureException } from '@sentry/nextjs';
 import { API_DOMAIN } from '@zamp-platform/api';
 import {
@@ -21,13 +21,17 @@ import {
   type TaskContentBlock,
   type TriggerContentBlock,
 } from '@zamp-platform/chat';
-import { EventBus, extractTaskUpdateFields, SSEConnectionState, useSSE } from '@zamp-platform/utils';
-import { type BaseEventPayload, EVENT_TYPE, type EventBusInterface } from '@zamp-platform/utils/event-bus';
+import { EventBus, extractTaskUpdateFields, type MapAny, SSEConnectionState, useSSE } from '@zamp-platform/utils';
+import {
+  type BaseEventPayload,
+  EVENT_TYPE,
+  type EventBusInterface,
+  EventBusProvider,
+} from '@zamp-platform/utils/event-bus';
 import { API_ENDPOINTS } from '@/apis/apiEndpoint.constants';
 import { APITags } from '@/constants/api.constants';
 import { baseApi } from '@/services/baseApi';
 import { store } from '@/store';
-import type { MapAny } from '@/types/commonTypes';
 
 interface SSEContextType {
   state: SSEConnectionState;
@@ -38,12 +42,7 @@ interface SSEContextType {
   sseEventBus: EventBusInterface;
 }
 
-interface SSEEventBusContextType {
-  sseEventBus: EventBusInterface;
-}
-
 const SSEContext = createContext<SSEContextType | undefined>(undefined);
-const SSEEventBusContext = createContext<SSEEventBusContextType | undefined>(undefined);
 
 export const useSSEContext = () => {
   const context = useContext(SSEContext);
@@ -61,7 +60,7 @@ export const useOptionalSSEContext = () => useContext(SSEContext);
 /** Routes AGENT_STREAMS events to the correct conversation in streamingStateStore. */
 function handleGlobalStreamEvent(data: BaseEventPayload): void {
   try {
-    const payload = data.payload as StreamEventPayload;
+    const payload = data.payload as unknown as StreamEventPayload;
     const outerPayload = data.payload as MapAny;
     const conversationId = outerPayload?.streaming_id as string;
 
@@ -621,8 +620,6 @@ export const SSEProvider: React.FC<SSEProviderProps> = ({ children, sseEventBus 
     },
   });
 
-  const eventBusValue = useMemo<SSEEventBusContextType>(() => ({ sseEventBus: eventBus }), [eventBus]);
-
   const value = useMemo<SSEContextType>(
     () => ({
       state: sseHook.state,
@@ -636,18 +633,9 @@ export const SSEProvider: React.FC<SSEProviderProps> = ({ children, sseEventBus 
   );
 
   return (
-    <SSEEventBusContext.Provider value={eventBusValue}>
+    <EventBusProvider eventBus={eventBus}>
       <SSEContext.Provider value={value}>{children}</SSEContext.Provider>
-    </SSEEventBusContext.Provider>
+    </EventBusProvider>
   );
 };
-
-export const useEventBus = (): SSEEventBusContextType => {
-  const context = useContext(SSEEventBusContext);
-
-  if (!context) {
-    throw new Error('useEventBus must be used within an SSEProvider');
-  }
-
-  return context;
-};
+export { useEventBus } from '@zamp-platform/utils/event-bus';

@@ -27,11 +27,9 @@ import {
   useStreamingState,
 } from '@zamp-platform/chat';
 import { extractTaskUpdateFields } from '@zamp-platform/utils';
-import { type BaseEventPayload, EVENT_TYPE } from '@zamp-platform/utils/event-bus';
+import { type BaseEventPayload, EVENT_TYPE, useEventBus } from '@zamp-platform/utils/event-bus';
 import { type ReactNode, useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { useDispatch } from 'react-redux';
-
-import { useEventBus } from '@/app/_providers/sse-provider';
 
 import { type ConversationEventCallbacks } from '../handlers/conversationEventHandler';
 import { conversationSSERegistry } from '../registry/conversationSSERegistry';

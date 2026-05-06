@@ -1,7 +1,6 @@
 import { ColumnOrderState, VisibilityState } from '@tanstack/react-table';
+import { type MapAny } from '@zamp-platform/utils';
 import { useEffect } from 'react';
-
-import { MapAny } from '@/types/commonTypes';
 
 interface UseTableSyncProps {
   // External props to sync with

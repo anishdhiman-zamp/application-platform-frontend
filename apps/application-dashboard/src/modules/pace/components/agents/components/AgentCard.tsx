@@ -32,7 +32,7 @@ const AgentCard = ({ agent, onClick }: AgentCardProps) => {
             </TooltipV2>
           </div>
         </div>
-        <p className='text-GRAY_700 f-12-450 line-clamp-2'>{agent?.description ?? ''}</p>
+        <p className='text-GRAY_700 f-13-450 line-clamp-2 leading-[1.4]'>{agent?.description ?? ''}</p>
       </div>
 
       <div className='flex w-full flex-wrap items-center justify-between gap-1.5 pt-5'>

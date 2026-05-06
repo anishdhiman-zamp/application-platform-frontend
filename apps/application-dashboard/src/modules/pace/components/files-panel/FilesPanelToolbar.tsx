@@ -14,6 +14,7 @@ import { SORT_DIRECTION, SortDirection, SortOption } from '@/modules/pace/compon
 import { SORT_OPTIONS } from '@/modules/pace/components/files/files.constants';
 
 interface FilesPanelToolbarProps {
+  variant?: 'panel' | 'page';
   searchQuery: string;
   onSearchChange: (value: string) => void;
   onDebouncedSearchChange: (value: string) => void;
@@ -25,6 +26,7 @@ interface FilesPanelToolbarProps {
 }
 
 const FilesPanelToolbar = ({
+  variant = 'panel',
   searchQuery,
   onSearchChange,
   onDebouncedSearchChange,
@@ -35,9 +37,10 @@ const FilesPanelToolbar = ({
   onCollapseAll,
 }: FilesPanelToolbarProps) => {
   const selectedSortLabel = SORT_OPTIONS.find((opt) => opt.value === sortBy)?.label;
+  const isPageVariant = variant === 'page';
 
   return (
-    <div className='border-GRAY_400 flex flex-col gap-y-2.5 border-b p-3'>
+    <div className={cn('flex flex-col', isPageVariant ? 'gap-y-3 pb-2' : 'border-GRAY_400 gap-y-2.5 border-b p-3')}>
       <SearchInput
         placeholder='Search files'
         value={searchQuery}
@@ -47,7 +50,10 @@ const FilesPanelToolbar = ({
         onDebouncedChange={onDebouncedSearchChange}
         size='small'
         wrapperClassName='min-w-0 flex-1'
-        className='placeholder:text-GRAY_500 placeholder:f-12-450 f-12-400 bg-BG_WHITE h-8 rounded-md'
+        className={cn(
+          'placeholder:text-GRAY_500 placeholder:f-12-450 f-12-400 bg-BG_WHITE rounded-md',
+          isPageVariant ? 'h-7' : 'h-8',
+        )}
         clearButtonClassName='text-GRAY_500'
         aria-label='Search files'
       />
@@ -58,6 +64,7 @@ const FilesPanelToolbar = ({
               variant='secondary'
               size='small'
               onClick={onSortToggle}
+              aria-label='Toggle sort direction'
               className='border-GRAY_400 bg-BG_WHITE hover:bg-BG_WHITE gap-x-[2px] rounded-r-none! border-r-0 p-1.5!'
             >
               <ArrowUp
@@ -102,6 +109,7 @@ const FilesPanelToolbar = ({
           onClick={onCollapseAll}
           className='border-GRAY_400 bg-BG_WHITE hover:bg-BG_WHITE size-[25px] p-1.5!'
           title='Collapse all'
+          aria-label='Collapse all folders'
         >
           <FoldVertical className='text-GRAY_1000 size-3.5' />
         </Button>

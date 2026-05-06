@@ -4,12 +4,11 @@ import { cn } from '@zamp-platform/ui/utils';
 import { motion } from 'motion/react';
 import { FC, ReactNode, useCallback, useEffect, useRef, useState } from 'react';
 
-import PaceAvatar from '@/modules/chatbot/PaceAvatar';
-
 import { ButtonBlockType } from '../types/block.types';
 import { ChatMessage, SenderType, StreamingState } from '../types/chat.types';
 import { getMessageKey } from '../utils/message.utils';
 import Message from './Message';
+import PaceAvatar from './PaceAvatar';
 import { StreamingMessage } from './StreamingMessage';
 
 const STALL_WATCHDOG_MS = 10_000;

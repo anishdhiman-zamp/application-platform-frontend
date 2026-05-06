@@ -1,7 +1,6 @@
 import { SortingState } from '@tanstack/react-table';
+import { type MapAny } from '@zamp-platform/utils';
 import { useMemo } from 'react';
-
-import { MapAny } from '@/types/commonTypes';
 
 import { flattenRowData } from '../utils';
 import { useTanStackClientSideData } from './useTanstackClientSideData';

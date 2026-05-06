@@ -90,7 +90,7 @@ export const MarkdownBlock: React.FC<MarkdownBlockProps> = ({
         urlTransform={urlTransform}
         components={{
           h1: ({ children }) => (
-            <h1 className='text-GRAY_1000 mt-10 mb-2 text-[22px] leading-[1.4] font-semibold tracking-[-0.02em] first:mt-4'>
+            <h1 className='text-GRAY_1000 mt-10 mb-2 text-[18px] leading-[1.4] font-semibold tracking-[-0.02em] first:mt-4'>
               {children}
             </h1>
           ),

@@ -16,11 +16,12 @@ import { SIDEBAR_TOGGLE_TRANSITION } from '@/utils/animations/sidebar.animations
 
 const FILES_PANEL_TRANSITION = SIDEBAR_TOGGLE_TRANSITION;
 
-type PanelHostSurface = 'chat' | 'files' | null;
+type PanelHostSurface = 'chat' | 'files' | 'tasks' | null;
 
 const getPanelHostSurface = (pathname: string | null): PanelHostSurface => {
   if (pathname === ROUTES_PATH.CHAT) return 'chat';
   if (pathname === ROUTES_PATH.CHAT_FILES) return 'files';
+  if (pathname === ROUTES_PATH.CHAT_TASK) return 'tasks';
 
   return null;
 };

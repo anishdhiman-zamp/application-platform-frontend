@@ -2,12 +2,15 @@
 
 import { useScrollRef } from '@zamp-platform/ui';
 import { cn } from '@zamp-platform/ui/utils';
-import { formatChatTimestamp, formatChatTimestampTooltip, formatTimestampToUTC } from '@zamp-platform/utils';
+import {
+  type defaultFnType,
+  formatChatTimestamp,
+  formatChatTimestampTooltip,
+  formatTimestampToUTC,
+} from '@zamp-platform/utils';
 import { motion } from 'motion/react';
 import { FC, ReactNode, useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { flushSync } from 'react-dom';
-
-import { defaultFnType } from '@/types/commonTypes';
 
 import { BLOCK_TYPE, ButtonBlockType } from '../types/block.types';
 import { ChatMessage, SenderType } from '../types/chat.types';

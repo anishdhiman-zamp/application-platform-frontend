@@ -6,6 +6,7 @@ import { cn } from '@zamp-platform/ui/utils';
 import { Plus } from 'lucide-react';
 import { useGetAppsQuery } from '@/apis/apps';
 import PageContainer from '@/components/layouts/PageContainer';
+import PageTitleBar from '@/components/layouts/PageTitleBar';
 import { useUserIdentity } from '@/hooks/useUserIdentity';
 import { APP_FILTER_TAB, type AppFilterTab } from '@/modules/apps/apps.types';
 import AppEmptyState from '@/modules/apps/components/AppEmptyState';
@@ -66,14 +67,16 @@ const AppsListingPage = () => {
 
   return (
     <>
-      <PageContainer>
-        <div className='mb-4 flex shrink-0 items-center justify-between'>
-          <h1 className='text-GRAY_1000 f-20-500'>Apps</h1>
-          <Button size='small' className='gap-1 rounded-md px-3 py-1.5' onClick={handleOpenCreateModal}>
-            <Plus size={14} />
-            <span className='f-12-500'>New App</span>
-          </Button>
-        </div>
+      <PageContainer className='min-h-full'>
+        <PageTitleBar
+          title='Apps'
+          action={
+            <Button size='small' className='gap-1 rounded-md px-3 py-1.5' onClick={handleOpenCreateModal}>
+              <Plus size={14} />
+              <span className='f-12-500'>New App</span>
+            </Button>
+          }
+        />
 
         <div className='mb-3 flex h-8 items-center gap-1'>
           <SearchInput
@@ -95,8 +98,10 @@ const AppsListingPage = () => {
               size='small'
               onClick={() => setActiveTab(tab.id)}
               className={cn(
-                'cursor-pointer rounded-md px-2.5 py-1.5 text-xs font-medium',
-                activeTab === tab.id ? 'bg-GRAY_100 text-GRAY_1000' : 'bg-BG_WHITE text-GRAY_900',
+                'f-12-500 h-7 cursor-pointer rounded-md px-2.5 py-1.5',
+                activeTab === tab.id
+                  ? 'bg-GRAY_100 text-GRAY_1000'
+                  : 'bg-BG_WHITE text-GRAY_900 hover:bg-GRAY_100 hover:text-GRAY_1000',
               )}
             >
               {tab.label}

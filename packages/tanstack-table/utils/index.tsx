@@ -1,8 +1,7 @@
 import { Header } from '@tanstack/react-table';
 import { cn } from '@zamp-platform/ui/utils';
+import { type MapAny } from '@zamp-platform/utils';
 import type React from 'react';
-
-import { MapAny } from '@/types/commonTypes';
 
 import { HEADER_CELL_STYLES, isNonMovableColumn } from '../constants';
 import { CUSTOM_COLUMN_TYPE } from '../types';

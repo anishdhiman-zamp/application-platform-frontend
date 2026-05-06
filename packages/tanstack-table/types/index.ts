@@ -7,10 +7,8 @@ import {
   Table,
   VisibilityState,
 } from '@tanstack/react-table';
+import { type defaultFnType, type MapAny } from '@zamp-platform/utils';
 import { MutableRefObject } from 'react';
-
-import { ActivityRunRowData } from '@/modules/process/process.types';
-import { defaultFnType, MapAny } from '@/types/commonTypes';
 
 // Sort direction enum for better type safety
 export const enum SortDirection {
@@ -86,7 +84,7 @@ export interface TanStackTableProps {
   onColumnResized?: (sizing: ColumnSizingState) => void;
   containerStyle?: MapAny;
   gridStyle?: MapAny;
-  onRowClicked?: (data: ActivityRunRowData, rowIndex?: number) => void;
+  onRowClicked?: (data: MapAny, rowIndex?: number) => void;
   customTheme?: string;
   headerClass?: string;
   cellClass?: string;

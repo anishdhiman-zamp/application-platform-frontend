@@ -3,6 +3,8 @@
 import { useCallback, useMemo, useState } from 'react';
 import { SIDEBAR_CONVERSATION_ID_PARAM } from 'modules/pace/pace.constants';
 import { useSearchParams } from 'next/navigation';
+import PageContainer from '@/components/layouts/PageContainer';
+import PageTitleBar from '@/components/layouts/PageTitleBar';
 import { useDebounce } from '@/hooks';
 import TaskAccordionGroup from '@/modules/pace/components/tasks/components/TaskAccordionGroup';
 import TaskActionBar from '@/modules/pace/components/tasks/components/TaskActionBar';
@@ -26,15 +28,13 @@ const TaskListingPage = () => {
   }, []);
 
   return (
-    <div className='flex h-full flex-col overflow-hidden'>
-      <div className='bg-BG_WHITE shrink-0 px-4 py-3'>
-        <h1 className='text-GRAY_1000 text-xl leading-normal font-medium'>Tasks</h1>
-      </div>
+    <PageContainer className='min-h-full'>
+      <PageTitleBar title='Tasks' />
 
       <TaskActionBar searchTerm={searchTerm} onSearchChange={handleSearchChange} />
 
       <TaskAccordionGroup search={debouncedSearch || undefined} creationSource={creationSource} />
-    </div>
+    </PageContainer>
   );
 };
 

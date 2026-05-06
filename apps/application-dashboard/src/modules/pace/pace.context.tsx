@@ -27,6 +27,7 @@ import {
   SIDEBAR_MAX_WIDTH,
   SIDEBAR_MIN_WIDTH,
   SIDEBAR_WIDTH,
+  TASKS_LISTING_CONVERSATION_ID,
 } from 'modules/pace/pace.constants';
 import { CHAT_SIDEBAR_STATE, type ChatSidebarState, TAB_TYPE } from 'modules/pace/pace.types';
 import { getInitialSidebarState, getInitialWidth } from 'modules/pace/pace.utils';
@@ -258,6 +259,7 @@ export const PaceProvider = ({ children, initialNavSidebarExpanded = true }: Pac
   const pendingCollapseRef = useRef(false);
   const startNewChatRef = useRef<defaultFnType | null>(null);
   const selectConversationRef = useRef<((id: string, title?: string) => void) | null>(null);
+  const pendingConversationSelectionRef = useRef<{ id: string; title?: string } | null>(null);
   const sharedExternalFilePaths = useRef<Set<string>>(new Set());
 
   const [chatSidebarState, setChatSidebarStateRaw] = useState<ChatSidebarState>(getInitialSidebarState);
@@ -316,8 +318,8 @@ export const PaceProvider = ({ children, initialNavSidebarExpanded = true }: Pac
   const isTreeSidebarOpen = activeConversationPanelState.isTreeSidebarOpen ?? globalTreeSidebarOpenDefault;
   const wordWrapEnabled = activeConversationPanelState.wordWrapEnabled ?? globalWordWrapDefault;
 
-  const isFilesSurface = pathname === ROUTES_PATH.CHAT_FILES;
-  const filesPanelWidth = isFilesSurface ? filesPanelWidthFilesSurface : filesPanelWidthChat;
+  const isListingPanelSurface = pathname === ROUTES_PATH.CHAT_FILES || pathname === ROUTES_PATH.CHAT_TASK;
+  const filesPanelWidth = isListingPanelSurface ? filesPanelWidthFilesSurface : filesPanelWidthChat;
 
   const routeSignature = activeTabId
     ? `${pathname}:${activeConversationId ?? ''}:${activeTabId}`
@@ -357,7 +359,9 @@ export const PaceProvider = ({ children, initialNavSidebarExpanded = true }: Pac
         ? (searchParams?.get(SIDEBAR_CONVERSATION_ID_PARAM) ?? null)
         : pathname === ROUTES_PATH.CHAT_FILES
           ? FILES_LISTING_CONVERSATION_ID
-          : null;
+          : pathname === ROUTES_PATH.CHAT_TASK
+            ? TASKS_LISTING_CONVERSATION_ID
+            : null;
 
     if (activeConversationId === routeConversationId) return;
 
@@ -404,20 +408,20 @@ export const PaceProvider = ({ children, initialNavSidebarExpanded = true }: Pac
     (width: number) => {
       const clamped = Math.min(FILES_PANEL_MAX_WIDTH, Math.max(FILES_PANEL_MIN_WIDTH, width));
 
-      if (isFilesSurface) {
+      if (isListingPanelSurface) {
         setFilesPanelWidthFilesSurfaceRaw(clamped);
       } else {
         setFilesPanelWidthChatRaw(clamped);
       }
     },
-    [isFilesSurface],
+    [isListingPanelSurface],
   );
 
   const persistFilesPanelWidth = useCallback(
     (width: number) => {
       const clamped = Math.min(FILES_PANEL_MAX_WIDTH, Math.max(FILES_PANEL_MIN_WIDTH, width));
 
-      if (isFilesSurface) {
+      if (isListingPanelSurface) {
         setFilesPanelWidthFilesSurfaceRaw(clamped);
         setToLocalStorage(LOCAL_STORAGE_KEYS.PACE_FILES_PANEL_WIDTH_FILES_SURFACE, String(clamped));
       } else {
@@ -425,7 +429,7 @@ export const PaceProvider = ({ children, initialNavSidebarExpanded = true }: Pac
         setToLocalStorage(LOCAL_STORAGE_KEYS.PACE_FILES_PANEL_WIDTH, String(clamped));
       }
     },
-    [isFilesSurface],
+    [isListingPanelSurface],
   );
 
   const setTreeColumnWidth = useCallback((width: number) => {
@@ -499,11 +503,22 @@ export const PaceProvider = ({ children, initialNavSidebarExpanded = true }: Pac
 
   const registerSelectConversation = useCallback((callback: (id: string, title?: string) => void) => {
     selectConversationRef.current = callback;
+
+    if (pendingConversationSelectionRef.current) {
+      const { id, title } = pendingConversationSelectionRef.current;
+
+      pendingConversationSelectionRef.current = null;
+      callback(id, title);
+    }
   }, []);
 
   const selectConversation = useCallback(
     (id: string, title?: string) => {
-      selectConversationRef.current?.(id, title);
+      if (selectConversationRef.current) {
+        selectConversationRef.current(id, title);
+      } else {
+        pendingConversationSelectionRef.current = { id, title };
+      }
 
       const targetActiveTabId = selectConversationActiveTabId(store.getState(), id);
       const isChatRoot = pathname === ROUTES_PATH.CHAT && !targetActiveTabId;

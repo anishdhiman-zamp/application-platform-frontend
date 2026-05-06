@@ -6,8 +6,9 @@ import { CSS_VARS, Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } fr
 import { format } from 'date-fns';
 import { BookText } from 'lucide-react';
 import { preserveSidebarParam } from 'modules/pace/pace.utils';
+import { usePathname, useRouter } from 'next/navigation';
 import Avatar from '@/components/common/avatar';
-import { getChatTaskRoute } from '@/constants/routeConfig';
+import { getChatTaskRoute, ROUTES_PATH } from '@/constants/routeConfig';
 import { KEYBOARD_KEYS } from '@/constants/shortcuts';
 import { useDynamicTabs } from '@/modules/pace/components/dynamic-tabs/useDynamicTabs';
 import SubtaskPopover from '@/modules/pace/components/tasks/components/SubtaskPopover';
@@ -23,6 +24,8 @@ interface TaskRowProps {
 }
 
 const TaskRow = ({ task, index, totalCount, status, referrer }: TaskRowProps) => {
+  const pathname = usePathname();
+  const router = useRouter();
   const { openTab: openTaskTab } = useDynamicTabs({ type: TAB_TYPE.TASK });
 
   const handleRowClick = useCallback(() => {
@@ -33,11 +36,16 @@ const TaskRow = ({ task, index, totalCount, status, referrer }: TaskRowProps) =>
       currentIndex: index,
       totalRows: totalCount,
       referrer,
-      inChat: true,
     });
 
-    openTaskTab(task.id, task.title || task.id, undefined, preserveSidebarParam(taskRoute));
-  }, [openTaskTab, task.id, task.title, status, index, totalCount, referrer]);
+    if (pathname === ROUTES_PATH.CHAT_TASK) {
+      openTaskTab(task.id, task.title || task.id, undefined, taskRoute);
+
+      return;
+    }
+
+    router.push(preserveSidebarParam(taskRoute));
+  }, [openTaskTab, pathname, router, task.id, task.title, status, index, totalCount, referrer]);
 
   const totalSubtasks = task.subtasks.length;
   const completedSubtasks = useMemo(

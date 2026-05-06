@@ -19,6 +19,7 @@ import { useEventBus } from '@/app/_providers/sse-provider';
 import CommonWrapper from '@/components/commonWrapper';
 import { SkeletonTypes } from '@/components/commonWrapper/commonWrapper.types';
 import PageContainer from '@/components/layouts/PageContainer';
+import PageTitleBar from '@/components/layouts/PageTitleBar';
 import { ROUTES_PATH } from '@/constants/routeConfig';
 import { useDebounce } from '@/hooks';
 import AgentCard from '@/modules/pace/components/agents/components/AgentCard';
@@ -144,18 +145,20 @@ const AgentListingPage = () => {
 
   return (
     <>
-      <PageContainer className='@container'>
+      <PageContainer className='@container min-h-full'>
         {isInitialLoading ? (
           <AgentListingHeaderSkeleton />
         ) : (
           <>
-            <div className='mb-4 flex shrink-0 items-center justify-between'>
-              <h1 className='text-GRAY_1000 f-20-500'>Agents</h1>
-              <Button size='small' className='gap-1 rounded-md px-3 py-1.5' onClick={handleOpenCreateModal}>
-                <Plus size={14} />
-                <span className='f-12-500'>New Agent</span>
-              </Button>
-            </div>
+            <PageTitleBar
+              title='Agents'
+              action={
+                <Button size='small' className='gap-1 rounded-md px-3 py-1.5' onClick={handleOpenCreateModal}>
+                  <Plus size={14} />
+                  <span className='f-12-500'>New Agent</span>
+                </Button>
+              }
+            />
             <AgentActionBar
               searchTerm={searchTerm}
               onSearchChange={handleSearchChange}

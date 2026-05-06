@@ -20,7 +20,8 @@ const PaceLayoutContent: FC<PaceLayoutContentProps> = ({ children }) => {
   const pathname = usePathname();
   const isOnChatSurface = pathname === ROUTES_PATH.CHAT;
   const isOnFilesSurface = pathname === ROUTES_PATH.CHAT_FILES;
-  const isPanelHostSurface = isOnChatSurface || isOnFilesSurface;
+  const isOnTasksSurface = pathname === ROUTES_PATH.CHAT_TASK;
+  const isPanelHostSurface = isOnChatSurface || isOnFilesSurface || isOnTasksSurface;
 
   const { uploadState, cancelUpload } = useFileUploadContext();
   const {
@@ -39,7 +40,7 @@ const PaceLayoutContent: FC<PaceLayoutContentProps> = ({ children }) => {
   const isFilesPanelFullWidth = filesPanelOpen && isFilesPanelExpanded;
   const isMainHidden =
     (isOnChatSurface && (isExpanded || hasActivePanelTab || isFilesPanelFullWidth)) ||
-    (isOnFilesSurface && isFilesPanelFullWidth);
+    ((isOnFilesSurface || isOnTasksSurface) && isFilesPanelFullWidth);
 
   return (
     <div className='bg-BG_GRAY_2 relative flex h-full w-full overflow-hidden overscroll-none'>

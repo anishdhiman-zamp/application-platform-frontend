@@ -12,6 +12,7 @@ import type {
 export { extractTaskUpdateFields } from '../common/extractTaskUpdateFields';
 export type { BaseEventPayload, EventBusInterface, EventBusSubscription, EventCallback } from './event-bus.types';
 export { EVENT_TYPE } from './event-bus.types';
+export { EventBusProvider, useEventBus } from './EventBusContext';
 
 /**
  * Generic event bus implementation for decoupled communication.

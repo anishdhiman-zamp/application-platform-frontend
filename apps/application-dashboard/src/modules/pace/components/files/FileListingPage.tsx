@@ -7,6 +7,7 @@ import ImageLoader from '@/components/common/loader/ImageLoader';
 import CommonWrapper from '@/components/commonWrapper';
 import { SkeletonTypes } from '@/components/commonWrapper/commonWrapper.types';
 import PageContainer from '@/components/layouts/PageContainer';
+import PageTitleBar from '@/components/layouts/PageTitleBar';
 import { ZAMP_LOGO_LOADER_SVG } from '@/constants/icons';
 import { ROUTES_PATH } from '@/constants/routeConfig';
 import { useDynamicTabs } from '@/modules/pace/components/dynamic-tabs/useDynamicTabs';
@@ -119,12 +120,11 @@ const FileListingPage = () => {
   }, [setActiveConversationId]);
 
   return (
-    <PageContainer className='!p-0'>
+    <PageContainer className='min-h-full'>
       <div className='flex min-h-0 flex-1 flex-col'>
-        <div className='flex shrink-0 items-center justify-between px-4 pt-6 pb-3'>
-          <h1 className='text-GRAY_1000 f-20-500'>Files</h1>
-        </div>
+        <PageTitleBar title='Files' />
         <FilesPanelToolbar
+          variant='page'
           searchQuery={searchInput}
           onSearchChange={setSearchInput}
           onDebouncedSearchChange={setDebouncedSearchQuery}

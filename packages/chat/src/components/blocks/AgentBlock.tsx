@@ -1,9 +1,8 @@
 'use client';
 
 import { Button } from '@zamp-platform/ui';
+import { KEYBOARD_KEYS } from '@zamp-platform/utils';
 import React, { useState } from 'react';
-
-import { KEYBOARD_KEYS } from '@/constants/shortcuts';
 
 import { useChatActions } from '../../context/ChatActionsContext';
 import type { AgentBlockType, AgentContentBlock } from '../../types/block.types';

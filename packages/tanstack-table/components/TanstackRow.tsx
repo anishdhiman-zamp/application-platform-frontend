@@ -3,9 +3,8 @@
 import { Row } from '@tanstack/react-table';
 import { Virtualizer } from '@tanstack/react-virtual';
 import { cn } from '@zamp-platform/ui/utils';
+import { type MapAny } from '@zamp-platform/utils';
 import React from 'react';
-
-import { ActivityRunRowData } from '@/modules/process/process.types';
 
 import { isNonMovableColumn } from '../constants';
 import TanstackCell from './TanstackCell';
@@ -19,8 +18,8 @@ interface TanstackRowProps {
   rowHighlighting: {
     enabled?: boolean;
   };
-  enhancedHandleRowClick: (rowData: ActivityRunRowData, rowIndex?: number) => void;
-  onRowClicked?: (rowData: ActivityRunRowData, rowIndex?: number) => void;
+  enhancedHandleRowClick: (rowData: MapAny, rowIndex?: number) => void;
+  onRowClicked?: (rowData: MapAny, rowIndex?: number) => void;
   cellClass?: string;
 }
 
@@ -45,8 +44,8 @@ const TanstackRow: React.FC<TanstackRowProps> = ({
     }}
     onClick={() =>
       rowHighlighting?.enabled
-        ? enhancedHandleRowClick(row?.original as ActivityRunRowData, virtualRow.index)
-        : onRowClicked?.(row?.original as ActivityRunRowData, virtualRow.index)
+        ? enhancedHandleRowClick(row?.original as MapAny, virtualRow.index)
+        : onRowClicked?.(row?.original as MapAny, virtualRow.index)
     }
   >
     {row.getVisibleCells().map((cell) => {

@@ -190,7 +190,10 @@ const TaskAccordionGroup = ({
       loader={<TaskListingSkeleton />}
       isNoData={!isFetching && !skipFetch && visibleStatuses.length === 0}
       noDataBanner={<NoDataBanner search={search} />}
-      className={cn('flex flex-col', agentId ? 'border-GRAY_400 rounded-xl border' : 'min-h-0 flex-1')}
+      className={cn(
+        'border-GRAY_400 bg-BG_WHITE flex flex-col overflow-hidden border',
+        agentId ? 'rounded-xl' : 'min-h-0 flex-1 rounded-lg',
+      )}
       disableAnimation
     >
       <Accordion
@@ -199,7 +202,7 @@ const TaskAccordionGroup = ({
         type='multiple'
         defaultValue={openValuesRef.current}
         className={cn(
-          '[&_[data-slot=accordion-item]:last-child]:border-b-0',
+          'min-h-0 flex-1 [&_[data-slot=accordion-item]:last-child]:border-b-0',
           !agentId && 'overflow-y-auto [scrollbar-width:thin]',
         )}
         onValueChange={handleValueChange}

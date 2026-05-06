@@ -1,7 +1,6 @@
 import { ColumnOrderState, OnChangeFn, SortingState, VisibilityState } from '@tanstack/react-table';
+import { type MapAny } from '@zamp-platform/utils';
 import { useCallback, useRef, useState } from 'react';
-
-import { MapAny } from '@/types/commonTypes';
 
 interface UseTableStateProps {
   initialSorting?: SortingState;

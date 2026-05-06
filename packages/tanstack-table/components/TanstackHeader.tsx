@@ -3,8 +3,7 @@
 import type { Header } from '@tanstack/react-table';
 import { flexRender } from '@tanstack/react-table';
 import { cn } from '@zamp-platform/ui/utils';
-
-import { MapAny } from '@/types/commonTypes';
+import { type MapAny } from '@zamp-platform/utils';
 
 import {
   getHeaderCellStyle,
