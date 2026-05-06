@@ -15,7 +15,7 @@ interface MarkdownPreviewProps {
 const MarkdownPreview = memo(({ content, className = '' }: MarkdownPreviewProps) => {
   return (
     <div className={cn('animate-opacity h-full w-full overflow-auto', className)}>
-      <div className='text-GRAY_950 mx-auto max-w-[1080px] p-6 text-sm leading-[1.667] font-[420] wrap-break-word'>
+      <div className='text-GRAY_950 mx-auto w-full max-w-[656px] px-6 py-6 text-sm leading-[1.667] font-[420] wrap-break-word sm:px-12'>
         <ReactMarkdown
           remarkPlugins={[remarkGfm]}
           rehypePlugins={[rehypeSlug]}

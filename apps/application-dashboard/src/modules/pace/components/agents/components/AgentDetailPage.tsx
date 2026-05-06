@@ -327,7 +327,7 @@ const AgentDetailPage = ({
 
   return (
     <>
-      <PageContainer>
+      <PageContainer className='max-w-[656px] px-6 pt-12 sm:px-12'>
         <div className='mb-6 flex shrink-0 items-start gap-3'>
           <motion.div
             className='flex size-10 shrink-0 cursor-pointer items-center justify-center'

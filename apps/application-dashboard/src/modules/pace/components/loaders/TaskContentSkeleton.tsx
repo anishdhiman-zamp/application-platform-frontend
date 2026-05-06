@@ -20,7 +20,7 @@ const StepItemSkeleton = ({ isLast = false }: { isLast?: boolean }) => (
 
 const TaskContentSkeleton: FC<TaskContentSkeletonProps> = ({ className }) => {
   return (
-    <div className={cn('mx-auto flex w-full max-w-[700px] flex-col px-4 pt-12', className)}>
+    <div className={cn('mx-auto flex w-full max-w-[656px] flex-col px-6 pt-12 sm:px-12', className)}>
       <div className='flex flex-col gap-1.5'>
         <Skeleton className='h-5 w-3/5 rounded' />
         <Skeleton className='h-3.5 w-24 rounded' />

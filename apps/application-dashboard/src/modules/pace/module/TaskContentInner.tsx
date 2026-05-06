@@ -473,7 +473,7 @@ const TaskContentChat = ({ taskId, hideTopbar }: { taskId: string; hideTopbar?: 
             ) : undefined
           }
         >
-          <div className='mx-auto flex w-full max-w-[700px] flex-col px-4 pt-12'>
+          <div className='mx-auto flex w-full max-w-[656px] flex-col px-6 pt-12 sm:px-12'>
             <TaskChatTitleHeader
               displayTitle={displayTitle}
               statusLabel={statusLabel}
@@ -490,7 +490,7 @@ const TaskContentChat = ({ taskId, hideTopbar }: { taskId: string; hideTopbar?: 
             scrollbarStyle='none'
             scrollClassName='!overflow-y-scroll'
           >
-            <div className='mx-auto flex w-full max-w-[700px] flex-col px-4'>
+            <div className='mx-auto flex w-full max-w-[656px] flex-col px-6 sm:px-12'>
               <div
                 className={cn(
                   'overflow-hidden transition-all duration-300',
