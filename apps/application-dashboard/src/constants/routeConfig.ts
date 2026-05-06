@@ -136,6 +136,30 @@ export const getChatFileRoute = (filePath: string) => {
   return `${ROUTES_PATH.CHAT}?${TAB_QUERY_PARAM.FILE}=${encodeURIComponent(filePath)}`;
 };
 
+export const getChatAgentRoute = ({
+  agentId,
+  agentName,
+  description,
+  avatarKey,
+  inChat,
+}: {
+  agentId: string;
+  agentName?: string;
+  description?: string | null;
+  avatarKey?: string | null;
+  inChat?: boolean;
+}) => {
+  const basePath = inChat ? ROUTES_PATH.CHAT : ROUTES_PATH.CHAT_AGENTS;
+  const params = new URLSearchParams();
+
+  params.set(TAB_QUERY_PARAM.AGENT, agentId);
+  if (agentName) params.set('title', agentName);
+  if (description) params.set('description', description);
+  if (avatarKey) params.set('avatarKey', avatarKey);
+
+  return `${basePath}?${params.toString()}`;
+};
+
 export const TASK_QUERY_PARAMS = {
   PARENT_TASKS: 'parentTasks',
   SIBLINGS: 'siblings',

@@ -3,8 +3,6 @@
 import { useCallback, useMemo, useState } from 'react';
 import { SIDEBAR_CONVERSATION_ID_PARAM } from 'modules/pace/pace.constants';
 import { useSearchParams } from 'next/navigation';
-import PageContainer from '@/components/layouts/PageContainer';
-import PageTitleBar from '@/components/layouts/PageTitleBar';
 import { useDebounce } from '@/hooks';
 import TaskAccordionGroup from '@/modules/pace/components/tasks/components/TaskAccordionGroup';
 import TaskActionBar from '@/modules/pace/components/tasks/components/TaskActionBar';
@@ -28,13 +26,16 @@ const TaskListingPage = () => {
   }, []);
 
   return (
-    <PageContainer className='min-h-full'>
-      <PageTitleBar title='Tasks' />
-
+    <div className='bg-BG_WHITE flex h-full min-h-0 w-full flex-col overflow-hidden'>
+      <div className='border-GRAY_400 flex h-[54px] shrink-0 items-center border-b px-3'>
+        <h1 className='f-14-550 text-GRAY_1000 min-w-0 truncate'>Tasks</h1>
+      </div>
       <TaskActionBar searchTerm={searchTerm} onSearchChange={handleSearchChange} />
 
-      <TaskAccordionGroup search={debouncedSearch || undefined} creationSource={creationSource} />
-    </PageContainer>
+      <div className='flex min-h-0 flex-1 flex-col overflow-hidden'>
+        <TaskAccordionGroup search={debouncedSearch || undefined} creationSource={creationSource} fullPage />
+      </div>
+    </div>
   );
 };
 

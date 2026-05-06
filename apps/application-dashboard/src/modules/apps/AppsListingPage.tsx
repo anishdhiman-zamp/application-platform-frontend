@@ -5,8 +5,7 @@ import { Accordion, AccordionContent, AccordionItem, AccordionTrigger, Button, S
 import { cn } from '@zamp-platform/ui/utils';
 import { Plus } from 'lucide-react';
 import { useGetAppsQuery } from '@/apis/apps';
-import PageContainer from '@/components/layouts/PageContainer';
-import PageTitleBar from '@/components/layouts/PageTitleBar';
+import PageWithTopbar from '@/components/layouts/PageWithTopbar';
 import { useUserIdentity } from '@/hooks/useUserIdentity';
 import { APP_FILTER_TAB, type AppFilterTab } from '@/modules/apps/apps.types';
 import AppEmptyState from '@/modules/apps/components/AppEmptyState';
@@ -59,7 +58,9 @@ const AppsListingPage = () => {
   if (hasNoApps) {
     return (
       <>
-        <AppEmptyState onNewApp={handleOpenCreateModal} />
+        <div className='bg-BG_WHITE h-full w-full'>
+          <AppEmptyState onNewApp={handleOpenCreateModal} />
+        </div>
         <CreateAppModal open={isCreateModalOpen} onOpenChange={setIsCreateModalOpen} />
       </>
     );
@@ -67,17 +68,16 @@ const AppsListingPage = () => {
 
   return (
     <>
-      <PageContainer className='min-h-full'>
-        <PageTitleBar
-          title='Apps'
-          action={
-            <Button size='small' className='gap-1 rounded-md px-3 py-1.5' onClick={handleOpenCreateModal}>
-              <Plus size={14} />
-              <span className='f-12-500'>New App</span>
-            </Button>
-          }
-        />
-
+      <PageWithTopbar
+        title='Apps'
+        contentClassName='min-h-full'
+        action={
+          <Button size='small' className='gap-1 rounded-md px-3 py-1.5' onClick={handleOpenCreateModal}>
+            <Plus size={14} />
+            <span className='f-12-500'>New App</span>
+          </Button>
+        }
+      >
         <div className='mb-3 flex h-8 items-center gap-1'>
           <SearchInput
             placeholder='Search'
@@ -146,7 +146,7 @@ const AppsListingPage = () => {
             </div>
           </Accordion>
         )}
-      </PageContainer>
+      </PageWithTopbar>
 
       <CreateAppModal open={isCreateModalOpen} onOpenChange={setIsCreateModalOpen} />
     </>

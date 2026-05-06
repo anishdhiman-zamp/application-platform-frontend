@@ -39,81 +39,102 @@ const FilesPanelToolbar = ({
   const selectedSortLabel = SORT_OPTIONS.find((opt) => opt.value === sortBy)?.label;
   const isPageVariant = variant === 'page';
 
-  return (
-    <div className={cn('flex flex-col', isPageVariant ? 'gap-y-3 pb-2' : 'border-GRAY_400 gap-y-2.5 border-b p-3')}>
-      <SearchInput
-        placeholder='Search files'
-        value={searchQuery}
-        showSearchIcon
-        debounceMs={500}
-        onChange={onSearchChange}
-        onDebouncedChange={onDebouncedSearchChange}
-        size='small'
-        wrapperClassName='min-w-0 flex-1'
-        className={cn(
-          'placeholder:text-GRAY_500 placeholder:f-12-450 f-12-400 bg-BG_WHITE rounded-md',
-          isPageVariant ? 'h-7' : 'h-8',
-        )}
-        clearButtonClassName='text-GRAY_500'
-        aria-label='Search files'
-      />
-      <div className='flex items-center justify-between'>
-        <div className='flex shrink-0 items-start gap-x-1.5'>
-          <div className='flex items-center'>
-            <Button
-              variant='secondary'
-              size='small'
-              onClick={onSortToggle}
-              aria-label='Toggle sort direction'
-              className='border-GRAY_400 bg-BG_WHITE hover:bg-BG_WHITE gap-x-[2px] rounded-r-none! border-r-0 p-1.5!'
-            >
-              <ArrowUp
-                className={cn('text-GRAY_1000 size-3.5', sortDirection === SORT_DIRECTION.ASC && 'text-GRAY_300')}
-              />
-              <ArrowDown
-                className={cn('text-GRAY_1000 size-3.5', sortDirection === SORT_DIRECTION.DESC && 'text-GRAY_300')}
-              />
-            </Button>
+  const searchControl = (
+    <SearchInput
+      placeholder='Search files'
+      value={searchQuery}
+      showSearchIcon
+      debounceMs={500}
+      onChange={onSearchChange}
+      onDebouncedChange={onDebouncedSearchChange}
+      size='small'
+      wrapperClassName={cn('min-w-0', isPageVariant ? 'w-[280px] flex-none' : 'flex-1')}
+      className='placeholder:text-GRAY_500 placeholder:f-12-450 f-12-400 bg-BG_WHITE h-8 rounded-md'
+      clearButtonClassName='text-GRAY_500'
+      aria-label='Search files'
+    />
+  );
 
-            <DropdownMenu>
-              <DropdownMenuTrigger asChild>
-                <Button
-                  variant='secondary'
-                  size='small'
-                  trailingIcon={<ChevronDownIcon className='text-GRAY_1000 size-3.5' />}
-                  className='border-GRAY_400 bg-BG_WHITE hover:bg-BG_WHITE rounded-l-none! px-2.5! py-1.5! focus-visible:ring-0 focus-visible:ring-offset-0'
+  const toolbarActions = (
+    <div className={cn('flex items-center', isPageVariant ? 'shrink-0 gap-2' : 'justify-between')}>
+      <div className='flex shrink-0 items-start gap-x-1.5'>
+        <div className='flex items-center'>
+          <Button
+            variant='secondary'
+            size='small'
+            onClick={onSortToggle}
+            aria-label='Toggle sort direction'
+            className='border-GRAY_400 bg-BG_WHITE hover:bg-BG_WHITE h-8 gap-x-[2px] rounded-r-none! border-r-0 p-1.5!'
+          >
+            <ArrowUp
+              className={cn('text-GRAY_1000 size-3.5', sortDirection === SORT_DIRECTION.ASC && 'text-GRAY_300')}
+            />
+            <ArrowDown
+              className={cn('text-GRAY_1000 size-3.5', sortDirection === SORT_DIRECTION.DESC && 'text-GRAY_300')}
+            />
+          </Button>
+
+          <DropdownMenu>
+            <DropdownMenuTrigger asChild>
+              <Button
+                variant='secondary'
+                size='small'
+                trailingIcon={<ChevronDownIcon className='text-GRAY_1000 size-3.5' />}
+                className='border-GRAY_400 bg-BG_WHITE hover:bg-BG_WHITE h-8 rounded-l-none! px-2.5! py-1.5! focus-visible:ring-0 focus-visible:ring-offset-0'
+              >
+                {selectedSortLabel}
+              </Button>
+            </DropdownMenuTrigger>
+            <DropdownMenuContent align='start' className='bg-BG_WHITE flex min-w-[170px] flex-col gap-y-[2px]'>
+              {SORT_OPTIONS.map((option) => (
+                <DropdownMenuItem
+                  key={option.value}
+                  onClick={() => onSortByChange(option.value)}
+                  className={cn(
+                    'hover:bg-GRAY_100 f-12-500 text-GRAY_900 cursor-pointer rounded-md',
+                    sortBy === option.value && 'bg-GRAY_200 hover:bg-GRAY_200 text-GRAY_900',
+                  )}
                 >
-                  {selectedSortLabel}
-                </Button>
-              </DropdownMenuTrigger>
-              <DropdownMenuContent align='start' className='bg-BG_WHITE flex min-w-[170px] flex-col gap-y-[2px]'>
-                {SORT_OPTIONS.map((option) => (
-                  <DropdownMenuItem
-                    key={option.value}
-                    onClick={() => onSortByChange(option.value)}
-                    className={cn(
-                      'hover:bg-GRAY_100 f-12-500 text-GRAY_900 cursor-pointer rounded-md',
-                      sortBy === option.value && 'bg-GRAY_200 hover:bg-GRAY_200 text-GRAY_900',
-                    )}
-                  >
-                    {option.label}
-                  </DropdownMenuItem>
-                ))}
-              </DropdownMenuContent>
-            </DropdownMenu>
-          </div>
+                  {option.label}
+                </DropdownMenuItem>
+              ))}
+            </DropdownMenuContent>
+          </DropdownMenu>
         </div>
-        <Button
-          variant='secondary'
-          size='small'
-          onClick={onCollapseAll}
-          className='border-GRAY_400 bg-BG_WHITE hover:bg-BG_WHITE size-[25px] p-1.5!'
-          title='Collapse all'
-          aria-label='Collapse all folders'
-        >
-          <FoldVertical className='text-GRAY_1000 size-3.5' />
-        </Button>
       </div>
+      <Button
+        variant='secondary'
+        size='small'
+        onClick={onCollapseAll}
+        className='border-GRAY_400 bg-BG_WHITE hover:bg-BG_WHITE size-8 p-1.5!'
+        title='Collapse all'
+        aria-label='Collapse all folders'
+      >
+        <FoldVertical className='text-GRAY_1000 size-3.5' />
+      </Button>
+    </div>
+  );
+
+  return (
+    <div
+      className={cn(
+        'flex',
+        isPageVariant
+          ? 'border-GRAY_400 h-[54px] shrink-0 items-center gap-3 border-b px-3'
+          : 'border-GRAY_400 flex-col gap-y-2.5 border-b p-3',
+      )}
+    >
+      {isPageVariant ? (
+        <>
+          {toolbarActions}
+          {searchControl}
+        </>
+      ) : (
+        <>
+          {searchControl}
+          {toolbarActions}
+        </>
+      )}
     </div>
   );
 };

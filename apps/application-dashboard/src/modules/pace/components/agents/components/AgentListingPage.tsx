@@ -18,8 +18,6 @@ import { useGetAgentsListQuery } from '@/apis/agents';
 import { useEventBus } from '@/app/_providers/sse-provider';
 import CommonWrapper from '@/components/commonWrapper';
 import { SkeletonTypes } from '@/components/commonWrapper/commonWrapper.types';
-import PageContainer from '@/components/layouts/PageContainer';
-import PageTitleBar from '@/components/layouts/PageTitleBar';
 import { ROUTES_PATH } from '@/constants/routeConfig';
 import { useDebounce } from '@/hooks';
 import AgentCard from '@/modules/pace/components/agents/components/AgentCard';
@@ -108,6 +106,7 @@ const AgentListingPage = () => {
 
   const handleAgentCreated = useCallback(
     (agentId: string, agentName: string, agentDescription: string, avatarKey: string) => {
+      setIsCreateModalOpen(false);
       router.push(buildAgentDetailUrl(agentId, agentName, agentDescription, avatarKey));
     },
     [router],
@@ -133,7 +132,14 @@ const AgentListingPage = () => {
   if (hasNoAgents) {
     return (
       <>
-        <AgentEmptyState onNewAgent={handleOpenCreateModal} />
+        <div className='bg-BG_WHITE flex h-full min-h-0 w-full flex-col overflow-hidden'>
+          <div className='border-GRAY_400 flex h-[54px] shrink-0 items-center border-b px-3'>
+            <h1 className='f-14-550 text-GRAY_1000 min-w-0 truncate'>Agents</h1>
+          </div>
+          <div className='min-h-0 flex-1 overflow-hidden'>
+            <AgentEmptyState onNewAgent={handleOpenCreateModal} />
+          </div>
+        </div>
         <CreateAgentModal
           open={isCreateModalOpen}
           onOpenChange={setIsCreateModalOpen}
@@ -145,27 +151,28 @@ const AgentListingPage = () => {
 
   return (
     <>
-      <PageContainer className='@container min-h-full'>
+      <div className='bg-BG_WHITE flex h-full min-h-0 w-full flex-col overflow-hidden'>
+        <div className='border-GRAY_400 flex h-[54px] shrink-0 items-center justify-between gap-3 border-b px-3'>
+          <h1 className='f-14-550 text-GRAY_1000 min-w-0 truncate'>Agents</h1>
+          <Button
+            size='small'
+            className='h-8 shrink-0 gap-1 rounded-md px-2.5 py-1.5 min-[480px]:px-3'
+            onClick={handleOpenCreateModal}
+            aria-label='New Agent'
+          >
+            <Plus size={14} />
+            <span className='f-12-500 hidden whitespace-nowrap min-[480px]:inline'>New Agent</span>
+          </Button>
+        </div>
         {isInitialLoading ? (
           <AgentListingHeaderSkeleton />
         ) : (
-          <>
-            <PageTitleBar
-              title='Agents'
-              action={
-                <Button size='small' className='gap-1 rounded-md px-3 py-1.5' onClick={handleOpenCreateModal}>
-                  <Plus size={14} />
-                  <span className='f-12-500'>New Agent</span>
-                </Button>
-              }
-            />
-            <AgentActionBar
-              searchTerm={searchTerm}
-              onSearchChange={handleSearchChange}
-              activeTab={activeTab}
-              onTabChange={handleTabChange}
-            />
-          </>
+          <AgentActionBar
+            searchTerm={searchTerm}
+            onSearchChange={handleSearchChange}
+            activeTab={activeTab}
+            onTabChange={handleTabChange}
+          />
         )}
 
         <CommonWrapper
@@ -176,22 +183,23 @@ const AgentListingPage = () => {
           noDataBanner={<AgentsEmptyState />}
           skeletonType={SkeletonTypes.CUSTOM}
           loader={
-            <div className='grid grid-cols-1 gap-4 @sm:grid-cols-2 @3xl:grid-cols-3'>
-              {Array.from({ length: 9 }).map((_, i) => (
+            <div className='grid grid-cols-[350px] gap-4 @3xl:grid-cols-[repeat(2,350px)] @5xl:grid-cols-[repeat(3,350px)]'>
+              {Array.from({ length: 15 }).map((_, i) => (
                 <AgentCardSkeleton key={i} />
               ))}
             </div>
           }
           height={500}
+          className='@container min-h-0 flex-1 overflow-y-auto p-[16px] [scrollbar-width:thin]'
           disableAnimation
         >
-          <div className='grid grid-cols-1 gap-4 @sm:grid-cols-2 @3xl:grid-cols-3'>
+          <div className='grid grid-cols-[350px] gap-4 @3xl:grid-cols-[repeat(2,350px)] @5xl:grid-cols-[repeat(3,350px)]'>
             {filteredAgents.map((agent) => (
               <AgentCard key={agent.id} agent={agent} onClick={handleAgentClick} />
             ))}
           </div>
         </CommonWrapper>
-      </PageContainer>
+      </div>
 
       <CreateAgentModal
         open={isCreateModalOpen}

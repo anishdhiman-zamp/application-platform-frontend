@@ -12,9 +12,16 @@ interface ResizableSummaryBoxProps {
   borderRadius: string;
   contentClassName?: string;
   scrollRef?: React.RefObject<HTMLDivElement | null>;
+  isResizable?: boolean;
 }
 
-const ResizableSummaryBox = ({ children, borderRadius, contentClassName, scrollRef }: ResizableSummaryBoxProps) => {
+const ResizableSummaryBox = ({
+  children,
+  borderRadius,
+  contentClassName,
+  scrollRef,
+  isResizable = true,
+}: ResizableSummaryBoxProps) => {
   const [maxH, setMaxH] = useState(SUMMARY_DEFAULT_H);
   const activeListenersRef = useRef<{ onMove: (e: PointerEvent) => void; onUp: () => void } | null>(null);
 
@@ -56,17 +63,26 @@ const ResizableSummaryBox = ({ children, borderRadius, contentClassName, scrollR
   return (
     <div
       className={cn('border-GRAY_400 bg-BG_WHITE flex flex-col overflow-hidden border', borderRadius)}
-      style={{ maxHeight: maxH }}
+      style={isResizable ? { maxHeight: maxH } : undefined}
     >
-      <div ref={scrollRef} className={cn('flex-1 overflow-y-auto [scrollbar-width:thin]', contentClassName)}>
+      <div
+        ref={scrollRef}
+        className={cn(
+          'flex-1',
+          isResizable ? 'overflow-y-auto [scrollbar-width:thin]' : 'overflow-visible',
+          contentClassName,
+        )}
+      >
         {children}
       </div>
-      <div
-        className='flex shrink-0 cursor-row-resize items-center justify-center py-1'
-        onPointerDown={handlePointerDown}
-      >
-        <div className='bg-GRAY_300 h-[3px] w-[26px] rounded-[10px]' />
-      </div>
+      {isResizable && (
+        <div
+          className='flex shrink-0 cursor-row-resize items-center justify-center py-1'
+          onPointerDown={handlePointerDown}
+        >
+          <div className='bg-GRAY_300 h-[3px] w-[26px] rounded-[10px]' />
+        </div>
+      )}
     </div>
   );
 };

@@ -275,7 +275,7 @@ export const useDynamicTabs = (config: UseDynamicTabsConfig = {}): UseDynamicTab
 
       if (!tabToUpdate) return;
 
-      const newTabPath = buildTabRoute(newId, tabToUpdate.type);
+      const newTabPath = oldId === newId ? tabToUpdate.path : buildTabRouteForCurrentSurface(newId, tabToUpdate.type);
       const currentActiveId = selectActiveTabId(store.getState());
       const isCurrentlyActive = currentActiveId === oldId;
 

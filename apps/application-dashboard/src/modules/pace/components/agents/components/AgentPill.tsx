@@ -3,15 +3,13 @@
 import { type FC, type RefObject, useCallback, useEffect, useRef, useState } from 'react';
 import { Popover, PopoverContent, PopoverTrigger } from '@zamp-platform/ui';
 import { getAgentAvatar, getAgentAvatarByKey } from 'modules/pace/components/agents/constants/agents.constants';
-import { useRouter } from 'next/navigation';
 import { useGetAgentQuery } from '@/apis/agents';
 import ImageKitImage from '@/components/ImageKitImage';
+import { getChatAgentRoute } from '@/constants/routeConfig';
 import AgentTestCard from '@/modules/pace/components/agents/components/AgentTestCard';
-import { buildTabRoute } from '@/modules/pace/components/dynamic-tabs/tab-type-registry';
 import { useDynamicTabs } from '@/modules/pace/components/dynamic-tabs/useDynamicTabs';
 import { SINGLE_VIEWER_TAB_METADATA_KEY } from '@/modules/pace/pace.constants';
 import { TAB_TYPE } from '@/modules/pace/pace.types';
-import { preserveSidebarParam } from '@/modules/pace/pace.utils';
 
 interface AgentPillProps {
   agentId: string;
@@ -22,7 +20,6 @@ interface AgentPillProps {
 }
 
 const AgentPill: FC<AgentPillProps> = ({ agentId, agentName, avatarKey, containerRef, onOpenChange }) => {
-  const router = useRouter();
   const triggerRef = useRef<HTMLDivElement>(null);
   const { openSingleTab: openSingleAgentTab, getTabById } = useDynamicTabs({ type: TAB_TYPE.AGENT });
   const tabAvatarKey = getTabById(agentId)?.metadata?.avatarKey as string | undefined;
@@ -44,17 +41,18 @@ const AgentPill: FC<AgentPillProps> = ({ agentId, agentName, avatarKey, containe
   const handleOpenTab = useCallback(() => {
     handleOpenChange(false);
 
-    const tabPath = buildTabRoute(agentId, TAB_TYPE.AGENT);
-    const pathWithTitle = `${tabPath}?title=${encodeURIComponent(agentName)}`;
-
     const metadata: Record<string, string> = {};
 
     if (resolvedAvatarKey) metadata.avatarKey = resolvedAvatarKey;
     metadata[SINGLE_VIEWER_TAB_METADATA_KEY] = 'true';
 
-    openSingleAgentTab(agentId, agentName, metadata);
-    router.push(preserveSidebarParam(pathWithTitle));
-  }, [agentId, agentName, resolvedAvatarKey, openSingleAgentTab, router, handleOpenChange]);
+    openSingleAgentTab(
+      agentId,
+      agentName,
+      metadata,
+      getChatAgentRoute({ agentId, agentName, avatarKey: resolvedAvatarKey, inChat: true }),
+    );
+  }, [agentId, agentName, resolvedAvatarKey, openSingleAgentTab, handleOpenChange]);
 
   useEffect(() => {
     const el = containerRef.current;

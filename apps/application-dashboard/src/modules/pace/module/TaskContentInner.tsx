@@ -40,6 +40,7 @@ import { TASK_QUERY_PARAMS } from '@/constants/routeConfig';
 import { useAppSelector } from '@/hooks/toolkit';
 import ContentErrorState from '@/modules/pace/components/ContentErrorState';
 import { getActiveTabIdFromUrl } from '@/modules/pace/components/dynamic-tabs/tab-type-registry';
+import { isChatPanelSurface, type TaskContentChrome } from '@/modules/pace/components/files-panel/files-panel.utils';
 import TaskContentSkeleton from '@/modules/pace/components/loaders/TaskContentSkeleton';
 import BackToParentButton from '@/modules/pace/components/tasks/components/BackToParentButton';
 import InlineSubtaskSection from '@/modules/pace/components/tasks/components/InlineSubtaskSection';
@@ -66,17 +67,17 @@ import type { RootState } from '@/store';
 
 interface TaskContentInnerProps {
   taskId: string;
-  hideTopbar?: boolean;
+  chrome?: TaskContentChrome;
   isActive?: boolean;
 }
 
 const TaskContentChat = ({
   taskId,
-  hideTopbar,
+  chrome = 'inline',
   isActive = true,
 }: {
   taskId: string;
-  hideTopbar?: boolean;
+  chrome?: TaskContentChrome;
   isActive?: boolean;
 }) => {
   // Refs
@@ -88,29 +89,46 @@ const TaskContentChat = ({
 
   // Hooks
   const { sseEventBus } = useEventBus();
+  const pathname = usePathname();
   const searchParams = useSearchParams();
   const { refetchHistory } = useTaskActions();
   const streamingState = useStreamingState(taskId);
-  const { openSingleTab: openSingleFileTab } = useDynamicTabs({ type: TAB_TYPE.FILE });
-  const { openSingleTab: openSingleDatasetTab } = useDynamicTabs({ type: TAB_TYPE.DATASET });
+  const { openTab: openFileTab, openSingleTab: openSingleFileTab } = useDynamicTabs({ type: TAB_TYPE.FILE });
+  const { openTab: openDatasetTab, openSingleTab: openSingleDatasetTab } = useDynamicTabs({ type: TAB_TYPE.DATASET });
   const [triggerGetConversation] = useLazyGetConversationByIdQuery();
-  const { openSingleTab: openSingleBrowserTab, updateTab: updateBrowserTab } = useDynamicTabs({
+  const {
+    openTab: openBrowserTab,
+    openSingleTab: openSingleBrowserTab,
+    updateTab: updateBrowserTab,
+  } = useDynamicTabs({
     type: TAB_TYPE.BROWSER,
   });
   const username = useAppSelector((state: RootState) => state.user.user?.username) ?? '';
 
   const handleFileOpen = useCallback(
     (path: string, name: string) => {
+      if (isChatPanelSurface(pathname)) {
+        openFileTab(path, name);
+
+        return;
+      }
+
       openSingleFileTab(path, name, { [SINGLE_VIEWER_TAB_METADATA_KEY]: true });
     },
-    [openSingleFileTab],
+    [openFileTab, openSingleFileTab, pathname],
   );
 
   const handleDatasetOpen = useCallback(
     (datasetId: string, name: string) => {
+      if (isChatPanelSurface(pathname)) {
+        openDatasetTab(datasetId, name);
+
+        return;
+      }
+
       openSingleDatasetTab(datasetId, name, { [SINGLE_VIEWER_TAB_METADATA_KEY]: true });
     },
-    [openSingleDatasetTab],
+    [openDatasetTab, openSingleDatasetTab, pathname],
   );
 
   const {
@@ -211,6 +229,9 @@ const TaskContentChat = ({
   const isSubtask = parentTasks.length > 0;
   const hasStepGroups = stepGroupSections.length > 0;
   const isExpandedStepsView = showSteps && (!hasStepGroups || !showSummary);
+  const showPanelHeader = chrome === 'panel';
+  const showInlineTopbar = chrome === 'inline';
+  const showContentTitleHeader = chrome !== 'panel';
 
   const parentTaskIds = useMemo(() => new Set(parentTasks.map((p) => p.id)), [parentTasks]);
 
@@ -301,12 +322,20 @@ const TaskContentChat = ({
 
   const handleWatchStream = useCallback(() => {
     if (conversationId) {
+      const browserMetadata = browserSessionId ? { sessionId: browserSessionId } : undefined;
+
+      if (isChatPanelSurface(pathname)) {
+        openBrowserTab(conversationId, 'Browser', browserMetadata);
+
+        return;
+      }
+
       openSingleBrowserTab(conversationId, 'Browser', {
-        ...(browserSessionId ? { sessionId: browserSessionId } : {}),
+        ...browserMetadata,
         [SINGLE_VIEWER_TAB_METADATA_KEY]: true,
       });
     }
-  }, [conversationId, openSingleBrowserTab, browserSessionId]);
+  }, [browserSessionId, conversationId, openBrowserTab, openSingleBrowserTab, pathname]);
 
   const subtaskPanelParents: TaskBreadcrumb[] = useMemo(
     () => [
@@ -451,7 +480,7 @@ const TaskContentChat = ({
       isBrowserStreamingAvailable={isBrowserStreamingAvailable}
     >
       <div className='relative flex h-full flex-1 flex-col'>
-        {hideTopbar && (
+        {showPanelHeader && (
           <TaskPanelHeader
             isActive={isActive}
             title={displayTitle}
@@ -466,7 +495,7 @@ const TaskContentChat = ({
             onGoToPreviousTask={goToPreviousTask}
           />
         )}
-        {!hideTopbar && (
+        {showInlineTopbar && (
           <TaskTopbar
             className='border-GRAY_100 border-b'
             title={chatTitle || 'Untitled'}
@@ -487,7 +516,7 @@ const TaskContentChat = ({
             }
           />
         )}
-        {hideTopbar && isSubtask && liveParentTasks.length > 0 && (
+        {showPanelHeader && isSubtask && liveParentTasks.length > 0 && (
           <BackToParentButton
             parent={liveParentTasks[liveParentTasks.length - 1]}
             ancestorsAbove={liveParentTasks.slice(0, -1)}
@@ -510,7 +539,7 @@ const TaskContentChat = ({
             ) : undefined
           }
         >
-          {!hideTopbar && (
+          {showContentTitleHeader && (
             <div className='mx-auto flex w-full max-w-[656px] flex-col px-6 pt-12 sm:px-12'>
               <TaskChatTitleHeader
                 displayTitle={displayTitle}
@@ -638,7 +667,7 @@ const TaskContentChat = ({
   );
 };
 
-const TaskContentInner = ({ taskId: propTaskId, hideTopbar, isActive = true }: TaskContentInnerProps) => {
+const TaskContentInner = ({ taskId: propTaskId, chrome = 'inline', isActive = true }: TaskContentInnerProps) => {
   const nextPathname = usePathname();
   const nextSearchParams = useSearchParams();
   const urlTaskId = useMemo(
@@ -656,7 +685,7 @@ const TaskContentInner = ({ taskId: propTaskId, hideTopbar, isActive = true }: T
       resourceType={ResourceType.ORGANIZATION}
       apiConfig={{ getTaskMessages: API_ENDPOINTS.TASKS_MESSAGES_GET }}
     >
-      <TaskContentChat key={taskId} taskId={taskId} hideTopbar={hideTopbar} isActive={isActive} />
+      <TaskContentChat key={taskId} taskId={taskId} chrome={chrome} isActive={isActive} />
     </TaskProvider>
   );
 };

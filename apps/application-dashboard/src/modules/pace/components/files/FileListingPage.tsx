@@ -6,8 +6,6 @@ import { useLazyFileTree } from 'modules/pace/hooks/useLazyFileTree';
 import ImageLoader from '@/components/common/loader/ImageLoader';
 import CommonWrapper from '@/components/commonWrapper';
 import { SkeletonTypes } from '@/components/commonWrapper/commonWrapper.types';
-import PageContainer from '@/components/layouts/PageContainer';
-import PageTitleBar from '@/components/layouts/PageTitleBar';
 import { ZAMP_LOGO_LOADER_SVG } from '@/constants/icons';
 import { ROUTES_PATH } from '@/constants/routeConfig';
 import { useDynamicTabs } from '@/modules/pace/components/dynamic-tabs/useDynamicTabs';
@@ -18,7 +16,7 @@ import FileTree from '@/modules/pace/components/files/FileTree';
 import FilesPanelToolbar from '@/modules/pace/components/files-panel/FilesPanelToolbar';
 import { SEARCH_DEBOUNCE_MS } from '@/modules/pace/components/tasks/constants/tasks.constants';
 import { useFileUploadContext } from '@/modules/pace/context/FileUploadContext';
-import { FILES_LISTING_CONVERSATION_ID } from '@/modules/pace/pace.constants';
+import { FILES_LISTING_CONVERSATION_ID, SINGLE_VIEWER_TAB_METADATA_KEY } from '@/modules/pace/pace.constants';
 import { usePaceConversationContext, usePaceLayoutContext } from '@/modules/pace/pace.context';
 import { TAB_QUERY_PARAM, TAB_TYPE } from '@/modules/pace/pace.types';
 import { defaultFnType } from '@/types/commonTypes';
@@ -26,7 +24,7 @@ import { defaultFnType } from '@/types/commonTypes';
 const FileListingPage = () => {
   const collapseAllRef = useRef<defaultFnType | null>(null);
   const { uploadFiles, uploadFolder, uploadingItems, clearUploadingItems, registerLoadFolder } = useFileUploadContext();
-  const { openTab } = useDynamicTabs({ type: TAB_TYPE.FILE });
+  const { openSingleTab } = useDynamicTabs({ type: TAB_TYPE.FILE });
   const { setTreeSidebarOpen } = usePaceLayoutContext();
   const { setActiveConversationId } = usePaceConversationContext();
 
@@ -74,7 +72,7 @@ const FileListingPage = () => {
     // navigating away to /chat (the default URL the FILE tab registry would build).
     const filePath = `${ROUTES_PATH.CHAT_FILES}?${TAB_QUERY_PARAM.FILE}=${encodeURIComponent(file.path)}`;
 
-    openTab(file.path, file.name, undefined, filePath);
+    openSingleTab(file.path, file.name, { [SINGLE_VIEWER_TAB_METADATA_KEY]: true }, filePath);
   };
 
   const handleUploadFiles = useCallback(
@@ -120,59 +118,59 @@ const FileListingPage = () => {
   }, [setActiveConversationId]);
 
   return (
-    <PageContainer className='min-h-full'>
-      <div className='flex min-h-0 flex-1 flex-col'>
-        <PageTitleBar title='Files' />
-        <FilesPanelToolbar
-          variant='page'
-          searchQuery={searchInput}
-          onSearchChange={setSearchInput}
-          onDebouncedSearchChange={setDebouncedSearchQuery}
-          sortBy={sortBy}
-          onSortByChange={setSortBy}
-          sortDirection={sortDirection}
-          onSortToggle={toggleSortDirection}
-          onCollapseAll={handleCollapseAll}
-        />
-        <LazyFileTreeProvider
-          onAddOptimistic={addOptimistic}
-          onRemoveOptimistic={removeOptimistic}
-          onConfirmAddition={confirmAddition}
-          onConfirmDeletion={confirmDeletion}
-          onLoadFolder={loadFolder}
-          onPruneServerFiles={pruneServerFiles}
-          onRenameServerFiles={renameServerFiles}
-        >
-          <CommonWrapper
-            isLoading={isInitialLoading}
-            isError={isError}
-            refetchFunction={refetch}
-            isNoData={files.length === 0}
-            noDataBanner={<FilesEmptyState />}
-            skeletonType={SkeletonTypes.CUSTOM}
-            loader={<ImageLoader imageSrc={ZAMP_LOGO_LOADER_SVG} width={150} height={150} className='bg-BG_GRAY_2' />}
-            className='min-h-0 flex-1 overflow-hidden'
-            disableAnimation
-          >
-            <FileTree
-              files={files}
-              searchQuery={debouncedSearchQuery}
-              searchResults={searchResults}
-              isSearching={isSearching}
-              sortBy={sortBy}
-              sortDirection={sortDirection}
-              onUploadFiles={handleUploadFiles}
-              onUploadFolder={handleUploadFolder}
-              onCollapseAllChange={handleCollapseAllChange}
-              onSelectFile={handleSelectFile}
-              loadingFolders={loadingFolders}
-              loadedFolders={loadedFolders}
-              onLoadFolder={loadFolder}
-            />
-          </CommonWrapper>
-        </LazyFileTreeProvider>
+    <div className='bg-BG_WHITE flex h-full min-h-0 w-full flex-col overflow-hidden'>
+      <div className='border-GRAY_400 flex h-[54px] shrink-0 items-center border-b px-3'>
+        <h1 className='f-14-550 text-GRAY_1000 min-w-0 truncate'>Files</h1>
       </div>
-    </PageContainer>
+      <FilesPanelToolbar
+        variant='page'
+        searchQuery={searchInput}
+        onSearchChange={setSearchInput}
+        onDebouncedSearchChange={setDebouncedSearchQuery}
+        sortBy={sortBy}
+        onSortByChange={setSortBy}
+        sortDirection={sortDirection}
+        onSortToggle={toggleSortDirection}
+        onCollapseAll={handleCollapseAll}
+      />
+      <LazyFileTreeProvider
+        onAddOptimistic={addOptimistic}
+        onRemoveOptimistic={removeOptimistic}
+        onConfirmAddition={confirmAddition}
+        onConfirmDeletion={confirmDeletion}
+        onLoadFolder={loadFolder}
+        onPruneServerFiles={pruneServerFiles}
+        onRenameServerFiles={renameServerFiles}
+      >
+        <CommonWrapper
+          isLoading={isInitialLoading}
+          isError={isError}
+          refetchFunction={refetch}
+          isNoData={files.length === 0}
+          noDataBanner={<FilesEmptyState />}
+          skeletonType={SkeletonTypes.CUSTOM}
+          loader={<ImageLoader imageSrc={ZAMP_LOGO_LOADER_SVG} width={150} height={150} className='bg-BG_GRAY_2' />}
+          className='min-h-0 flex-1 overflow-hidden'
+          disableAnimation
+        >
+          <FileTree
+            files={files}
+            searchQuery={debouncedSearchQuery}
+            searchResults={searchResults}
+            isSearching={isSearching}
+            sortBy={sortBy}
+            sortDirection={sortDirection}
+            onUploadFiles={handleUploadFiles}
+            onUploadFolder={handleUploadFolder}
+            onCollapseAllChange={handleCollapseAllChange}
+            onSelectFile={handleSelectFile}
+            loadingFolders={loadingFolders}
+            loadedFolders={loadedFolders}
+            onLoadFolder={loadFolder}
+          />
+        </CommonWrapper>
+      </LazyFileTreeProvider>
+    </div>
   );
 };
 

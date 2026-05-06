@@ -56,7 +56,12 @@ export const TaskChatExpandedStepsFooter = ({
     return (
       <div className={cn('relative px-2', hideConnector ? 'bg-BG_WHITE z-1 py-1' : cn('pt-4', isFirst && '-mt-3'))}>
         {!hideConnector && <div className='bg-border absolute top-0 left-[14.5px] h-3 w-px' />}
-        <ResizableSummaryBox borderRadius='rounded-[18px]!' contentClassName='p-4 pb-1' scrollRef={summaryScrollRef}>
+        <ResizableSummaryBox
+          borderRadius='rounded-[18px]!'
+          contentClassName='p-4 pb-1'
+          scrollRef={summaryScrollRef}
+          isResizable={false}
+        >
           <MarkdownBlock payload={{ text: resultText }} />
         </ResizableSummaryBox>
       </div>

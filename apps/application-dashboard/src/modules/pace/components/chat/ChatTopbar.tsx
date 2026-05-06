@@ -1,6 +1,7 @@
 'use client';
 
 import { cn } from '@zamp-platform/ui/utils';
+import PageTopbar from '@/components/layouts/PageTopbar';
 import { useResourceAccess } from '@/hooks/useResourceAccess';
 import ConversationActions from '@/modules/pace/components/chat/ConversationActions';
 import ShareConversationPopup from '@/modules/pace/components/chat/ShareConversationPopup';
@@ -42,18 +43,12 @@ const ChatTopbar = ({
   };
 
   return (
-    <div
-      className={cn(
-        'bg-BG_WHITE border-GRAY_400 flex h-[54px] items-center justify-between gap-x-3 border-b p-3',
-        className,
-      )}
+    <PageTopbar
+      title={displayTitle}
+      className={cn(className)}
       style={style}
-    >
-      <div className='flex min-w-0 flex-1 items-center gap-x-1'>
-        <span className='relative block min-w-0 overflow-hidden pr-1 pl-1.5'>
-          <span className='f-14-550 block truncate first-letter:uppercase'>{displayTitle}</span>
-        </span>
-        {canEdit && (
+      titleTrailingAction={
+        canEdit ? (
           <ConversationActions
             conversationId={conversationId ?? ''}
             organizationId={organizationId ?? ''}
@@ -62,12 +57,12 @@ const ChatTopbar = ({
             onDeleteSuccess={onDeleteConversation}
             triggerClassName='rounded p-1.5 text-gray-900 hover:text-gray-900'
           />
-        )}
-      </div>
-      <div className='flex items-center gap-1.5'>
-        {isAdmin && conversationId && <ShareConversationPopup conversationId={conversationId} avoidCollisions />}
-      </div>
-    </div>
+        ) : undefined
+      }
+      action={
+        isAdmin && conversationId ? <ShareConversationPopup conversationId={conversationId} avoidCollisions /> : null
+      }
+    />
   );
 };
 

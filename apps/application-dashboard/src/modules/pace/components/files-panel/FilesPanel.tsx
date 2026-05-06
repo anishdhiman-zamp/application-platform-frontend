@@ -4,9 +4,12 @@ import { useEffect, useRef } from 'react';
 import { cn } from '@zamp-platform/ui/utils';
 import { AnimatePresence, motion, useReducedMotion } from 'framer-motion';
 import { usePathname } from 'next/navigation';
-import { ROUTES_PATH } from '@/constants/routeConfig';
 import { useDynamicTabs } from '@/modules/pace/components/dynamic-tabs/useDynamicTabs';
-import { shouldUseSingleViewerMode } from '@/modules/pace/components/files-panel/files-panel.utils';
+import {
+  getPanelHostSurface,
+  shouldHideFilesPanelTopBar,
+  shouldUseSingleViewerMode,
+} from '@/modules/pace/components/files-panel/files-panel.utils';
 import FilesPanelBody from '@/modules/pace/components/files-panel/FilesPanelBody';
 import { FilesPanelHeaderSlotProvider } from '@/modules/pace/components/files-panel/FilesPanelHeaderSlot';
 import FilesPanelInternalResizeHandle from '@/modules/pace/components/files-panel/FilesPanelInternalResizeHandle';
@@ -14,20 +17,9 @@ import FilesPanelTopBar from '@/modules/pace/components/files-panel/FilesPanelTo
 import FilesPanelTreeSidebar from '@/modules/pace/components/files-panel/FilesPanelTreeSidebar';
 import { NO_ANIMATION } from '@/modules/pace/pace.animations';
 import { usePaceConversationContext, usePaceLayoutContext } from '@/modules/pace/pace.context';
-import { TAB_TYPE } from '@/modules/pace/pace.types';
 import { SIDEBAR_TOGGLE_TRANSITION } from '@/utils/animations/sidebar.animations';
 
 const FILES_PANEL_TRANSITION = SIDEBAR_TOGGLE_TRANSITION;
-
-type PanelHostSurface = 'chat' | 'files' | 'tasks' | null;
-
-const getPanelHostSurface = (pathname: string | null): PanelHostSurface => {
-  if (pathname === ROUTES_PATH.CHAT) return 'chat';
-  if (pathname === ROUTES_PATH.CHAT_FILES) return 'files';
-  if (pathname === ROUTES_PATH.CHAT_TASK) return 'tasks';
-
-  return null;
-};
 
 const FilesPanel = () => {
   const {
@@ -46,7 +38,7 @@ const FilesPanel = () => {
   const { activeTab, closeOtherTabs, tabs } = useDynamicTabs();
   const panelHostSurface = getPanelHostSurface(pathname);
   const isSingleViewerMode = shouldUseSingleViewerMode(pathname, activeTab);
-  const isSingleViewerTaskMode = isSingleViewerMode && (activeTab?.type ?? TAB_TYPE.FILE) === TAB_TYPE.TASK;
+  const shouldHideTopBar = shouldHideFilesPanelTopBar(pathname, activeTab);
 
   const prevConversationIdRef = useRef(activeConversationId);
   const prevPanelHostSurfaceRef = useRef(panelHostSurface);
@@ -96,7 +88,7 @@ const FilesPanel = () => {
             style={{ willChange: 'transform, opacity' }}
             className='border-GRAY_400 bg-BG_WHITE absolute inset-0 flex min-h-0 flex-col overflow-hidden border-x border-b'
           >
-            {!isSingleViewerTaskMode && <FilesPanelTopBar />}
+            {!shouldHideTopBar && <FilesPanelTopBar />}
             <FilesPanelHeaderSlotProvider>
               <div className='relative flex min-h-0 flex-1 overflow-hidden'>
                 <motion.div

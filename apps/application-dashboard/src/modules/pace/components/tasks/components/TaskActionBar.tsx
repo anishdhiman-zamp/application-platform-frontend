@@ -39,23 +39,13 @@ const TaskActionBar = ({ searchTerm, onSearchChange }: TaskActionBarProps) => {
   );
 
   return (
-    <div className='flex flex-col gap-3 pb-2'>
-      <div className='flex h-8 w-full items-center gap-1'>
-        <SearchInput
-          placeholder='Search'
-          value={searchTerm}
-          onChange={onSearchChange}
-          allowClear={false}
-          size='small'
-          showSearchIcon
-          wrapperClassName='w-full min-w-0'
-          className='bg-BG_WHITE h-7'
-          aria-label='Search tasks'
-          testId='task-listing-search-input'
-        />
-      </div>
-      <Tabs value={activeTab} onValueChange={(value) => handleTabChange(value as TaskListingTab)}>
-        <TabsList className='h-auto gap-1.5 bg-transparent p-0'>
+    <div className='border-GRAY_400 bg-BG_WHITE flex h-[54px] shrink-0 items-center gap-5 overflow-hidden border-b px-3'>
+      <Tabs
+        value={activeTab}
+        onValueChange={(value) => handleTabChange(value as TaskListingTab)}
+        className='min-w-0 shrink overflow-hidden'
+      >
+        <TabsList className='h-[54px] max-w-full justify-start gap-5 overflow-x-auto bg-transparent p-0 [scrollbar-width:none] [&::-webkit-scrollbar]:hidden'>
           {TAB_CONFIG.map((tab) => {
             const Icon = tab.icon;
 
@@ -64,17 +54,30 @@ const TaskActionBar = ({ searchTerm, onSearchChange }: TaskActionBarProps) => {
                 key={tab.id}
                 value={tab.id}
                 className={cn(
-                  'f-12-500 text-GRAY_900 hover:bg-GRAY_100 hover:text-GRAY_1000 h-7 cursor-pointer gap-1.5 rounded-md border-none bg-transparent px-2.5 py-1.5 shadow-none ring-0',
-                  'data-[state=active]:bg-GRAY_100 data-[state=active]:text-GRAY_1000 data-[state=active]:shadow-none data-[state=active]:ring-0',
+                  'f-13-500 text-GRAY_700 hover:text-GRAY_1000 relative h-[54px] cursor-pointer gap-1.5 rounded-none border-none bg-transparent px-1.5 py-0 shadow-none ring-0 transition-colors hover:bg-transparent',
+                  'after:absolute after:right-1.5 after:bottom-0 after:left-1.5 after:h-0.5 after:bg-transparent after:content-[""]',
+                  'data-[state=active]:text-GRAY_1000 data-[state=active]:after:bg-GRAY_1000 data-[state=active]:bg-transparent data-[state=active]:shadow-none data-[state=active]:ring-0',
                 )}
               >
-                <Icon size={13} />
+                <Icon size={14} />
                 <span className='whitespace-nowrap'>{tab.label}</span>
               </TabsTrigger>
             );
           })}
         </TabsList>
       </Tabs>
+      <SearchInput
+        placeholder='Search'
+        value={searchTerm}
+        onChange={onSearchChange}
+        allowClear={false}
+        size='small'
+        showSearchIcon
+        wrapperClassName='w-24 shrink-0 min-[420px]:w-40 sm:w-56'
+        className='bg-BG_WHITE h-8'
+        aria-label='Search tasks'
+        testId='task-listing-search-input'
+      />
     </div>
   );
 };

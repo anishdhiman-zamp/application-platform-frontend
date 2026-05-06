@@ -1,6 +1,6 @@
 'use client';
 
-import { Button, SearchInput } from '@zamp-platform/ui';
+import { SearchInput, Tabs, TabsList, TabsTrigger } from '@zamp-platform/ui';
 import { cn } from '@zamp-platform/ui/utils';
 import { AGENT_TAB_CONFIG } from 'modules/pace/components/agents/constants/agents.constants';
 import { type AgentListingTabType } from 'modules/pace/components/agents/types/agents.types';
@@ -14,39 +14,45 @@ interface AgentActionBarProps {
 
 const AgentActionBar = ({ searchTerm, onSearchChange, activeTab, onTabChange }: AgentActionBarProps) => {
   return (
-    <div className='flex flex-col gap-3 pb-2'>
-      <div className='flex h-8 w-full items-center gap-1'>
-        <SearchInput
-          placeholder='Search'
-          value={searchTerm}
-          onChange={onSearchChange}
-          allowClear={false}
-          size='small'
-          showSearchIcon
-          wrapperClassName='w-full min-w-0'
-          className='bg-BG_WHITE h-7'
-          aria-label='Search agents'
-          testId='agent-listing-search-input'
-        />
-      </div>
-      <div className='flex items-center gap-1.5'>
-        {AGENT_TAB_CONFIG.map((tab) => (
-          <Button
-            key={tab.id}
-            variant='ghost'
-            size='small'
-            onClick={() => onTabChange(tab.id)}
-            className={cn(
-              'f-12-500 h-7 cursor-pointer rounded-md px-2.5 py-1.5',
-              activeTab === tab.id
-                ? 'bg-GRAY_100 text-GRAY_1000'
-                : 'bg-BG_WHITE text-GRAY_900 hover:bg-GRAY_100 hover:text-GRAY_1000',
-            )}
-          >
-            {tab.label}
-          </Button>
-        ))}
-      </div>
+    <div className='border-GRAY_400 bg-BG_WHITE flex h-[54px] shrink-0 items-center gap-5 overflow-hidden border-b px-3'>
+      <Tabs
+        value={activeTab}
+        onValueChange={(value) => onTabChange(value as AgentListingTabType)}
+        className='min-w-0 shrink overflow-hidden'
+      >
+        <TabsList className='h-[54px] max-w-full justify-start gap-5 overflow-x-auto bg-transparent p-0 [scrollbar-width:none] [&::-webkit-scrollbar]:hidden'>
+          {AGENT_TAB_CONFIG.map((tab) => {
+            const Icon = tab.icon;
+
+            return (
+              <TabsTrigger
+                key={tab.id}
+                value={tab.id}
+                className={cn(
+                  'f-13-500 text-GRAY_700 hover:text-GRAY_1000 relative h-[54px] cursor-pointer gap-1.5 rounded-none border-none bg-transparent px-1.5 py-0 shadow-none ring-0 transition-colors hover:bg-transparent',
+                  'after:absolute after:right-1.5 after:bottom-0 after:left-1.5 after:h-0.5 after:bg-transparent after:content-[""]',
+                  'data-[state=active]:text-GRAY_1000 data-[state=active]:after:bg-GRAY_1000 data-[state=active]:bg-transparent data-[state=active]:shadow-none data-[state=active]:ring-0',
+                )}
+              >
+                <Icon size={14} />
+                <span className='whitespace-nowrap'>{tab.label}</span>
+              </TabsTrigger>
+            );
+          })}
+        </TabsList>
+      </Tabs>
+      <SearchInput
+        placeholder='Search'
+        value={searchTerm}
+        onChange={onSearchChange}
+        allowClear={false}
+        size='small'
+        showSearchIcon
+        wrapperClassName='w-24 shrink-0 min-[460px]:w-40 sm:w-56'
+        className='bg-BG_WHITE h-8'
+        aria-label='Search agents'
+        testId='agent-listing-search-input'
+      />
     </div>
   );
 };

@@ -1,6 +1,11 @@
 import { ROUTES_PATH } from '@/constants/routeConfig';
 import { DynamicTabType, ROUTE_KIND, TAB_QUERY_PARAM, TAB_TYPE } from '@/modules/pace/pace.types';
 
+const FILE_TAB_HOST_PATHS = new Set([ROUTES_PATH.CHAT, ROUTES_PATH.CHAT_FILES, ROUTES_PATH.CHAT_TASK]);
+
+const buildQueryTabRoute = (pathname: string, paramName: string, id: string): string =>
+  `${pathname}?${paramName}=${encodeURIComponent(id)}`;
+
 /**
  * Declarative definition for a dynamic tab type. Each tab type (file, task, etc.)
  * registers one of these to describe how it maps to/from URLs.
@@ -19,9 +24,9 @@ export const TAB_TYPE_REGISTRY: Record<DynamicTabType, TabTypeDefinition> = {
     kind: ROUTE_KIND.QUERY,
     basePath: ROUTES_PATH.CHAT,
     paramName: TAB_QUERY_PARAM.FILE,
-    buildPath: (id: string) => `${ROUTES_PATH.CHAT}?${TAB_QUERY_PARAM.FILE}=${encodeURIComponent(id)}`,
+    buildPath: (id: string) => buildQueryTabRoute(ROUTES_PATH.CHAT, TAB_QUERY_PARAM.FILE, id),
     parseId: (pathname: string, search: string) => {
-      if (pathname !== ROUTES_PATH.CHAT) return null;
+      if (!FILE_TAB_HOST_PATHS.has(pathname)) return null;
 
       return new URLSearchParams(search).get(TAB_QUERY_PARAM.FILE);
     },
@@ -45,7 +50,7 @@ export const TAB_TYPE_REGISTRY: Record<DynamicTabType, TabTypeDefinition> = {
     paramName: TAB_QUERY_PARAM.AGENT,
     buildPath: (id: string) => `${ROUTES_PATH.CHAT}?${TAB_QUERY_PARAM.AGENT}=${encodeURIComponent(id)}`,
     parseId: (pathname: string, search: string) => {
-      if (pathname !== ROUTES_PATH.CHAT) return null;
+      if (pathname !== ROUTES_PATH.CHAT && pathname !== ROUTES_PATH.CHAT_AGENTS) return null;
 
       return new URLSearchParams(search).get(TAB_QUERY_PARAM.AGENT);
     },
@@ -93,6 +98,49 @@ export const getTabTypeDefinition = (type?: DynamicTabType): TabTypeDefinition =
  */
 export const buildTabRoute = (id: string, type?: DynamicTabType): string => {
   return getTabTypeDefinition(type).buildPath(id);
+};
+
+/**
+ * Builds the default URL for a newly opened tab while preserving listing surfaces
+ * that host the right-hand panel. File tabs opened from `/chat/task` or
+ * `/chat/files` should keep the user on that page instead of sending them to
+ * `/chat`.
+ * @param id - The tab identifier.
+ * @param type - The tab type. Defaults to FILE.
+ * @param pathname - Optional current pathname, mainly useful for tests.
+ */
+export const buildTabRouteForCurrentSurface = (
+  id: string,
+  type?: DynamicTabType,
+  pathname = typeof window !== 'undefined' ? window.location.pathname : '',
+): string => {
+  const tabType = type ?? TAB_TYPE.FILE;
+
+  if (tabType === TAB_TYPE.FILE && FILE_TAB_HOST_PATHS.has(pathname)) {
+    return buildQueryTabRoute(pathname, TAB_QUERY_PARAM.FILE, id);
+  }
+
+  if (tabType === TAB_TYPE.AGENT && pathname === ROUTES_PATH.CHAT_AGENTS) {
+    return buildQueryTabRoute(pathname, TAB_QUERY_PARAM.AGENT, id);
+  }
+
+  return buildTabRoute(id, tabType);
+};
+
+/**
+ * Returns where the app should land when closing the final open dynamic tab.
+ * Listing surfaces should remain on their listing page; chat keeps the existing
+ * home fallback.
+ * @param pathname - Optional current pathname, mainly useful for tests.
+ */
+export const getEmptyDynamicTabsRoute = (
+  pathname = typeof window !== 'undefined' ? window.location.pathname : '',
+): string => {
+  if (pathname === ROUTES_PATH.CHAT_TASK) return ROUTES_PATH.CHAT_TASK;
+  if (pathname === ROUTES_PATH.CHAT_FILES) return ROUTES_PATH.CHAT_FILES;
+  if (pathname === ROUTES_PATH.CHAT_AGENTS) return ROUTES_PATH.CHAT_AGENTS;
+
+  return ROUTES_PATH.CHAT;
 };
 
 /**

@@ -18,7 +18,7 @@ const AgentCard = ({ agent, onClick }: AgentCardProps) => {
 
   return (
     <div
-      className='bg-BG_WHITE border-GRAY_400 [&:not(:has([data-trigger-btn]:hover))]:hover:bg-BG_GRAY_2 flex min-h-32 cursor-pointer flex-col items-start justify-between rounded-xl border p-3.5 transition-colors'
+      className='bg-BG_WHITE border-GRAY_400 [&:not(:has([data-trigger-btn]:hover))]:hover:bg-BG_GRAY_2 flex min-h-[150px] cursor-pointer flex-col items-start justify-between rounded-lg border p-3.5 transition-colors'
       onClick={() => onClick?.(agent)}
     >
       <div className='flex w-full flex-col gap-2'>
@@ -32,7 +32,7 @@ const AgentCard = ({ agent, onClick }: AgentCardProps) => {
             </TooltipV2>
           </div>
         </div>
-        <p className='text-GRAY_700 f-13-450 line-clamp-2 leading-[1.4]'>{agent?.description ?? ''}</p>
+        <p className='text-GRAY_700 f-13-450 line-clamp-3 !leading-5'>{agent?.description ?? ''}</p>
       </div>
 
       <div className='flex w-full flex-wrap items-center justify-between gap-1.5 pt-5'>

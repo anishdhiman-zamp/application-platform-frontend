@@ -15,6 +15,7 @@ import {
 } from 'react';
 import { type MessageReferenceType, type UploadedFile } from '@zamp-platform/chat';
 import {
+  AGENTS_LISTING_CONVERSATION_ID,
   FILE_TREE_COLUMN_MAX_WIDTH,
   FILE_TREE_COLUMN_MIN_WIDTH,
   FILE_TREE_COLUMN_WIDTH,
@@ -318,7 +319,8 @@ export const PaceProvider = ({ children, initialNavSidebarExpanded = true }: Pac
   const isTreeSidebarOpen = activeConversationPanelState.isTreeSidebarOpen ?? globalTreeSidebarOpenDefault;
   const wordWrapEnabled = activeConversationPanelState.wordWrapEnabled ?? globalWordWrapDefault;
 
-  const isListingPanelSurface = pathname === ROUTES_PATH.CHAT_FILES || pathname === ROUTES_PATH.CHAT_TASK;
+  const isListingPanelSurface =
+    pathname === ROUTES_PATH.CHAT_FILES || pathname === ROUTES_PATH.CHAT_TASK || pathname === ROUTES_PATH.CHAT_AGENTS;
   const filesPanelWidth = isListingPanelSurface ? filesPanelWidthFilesSurface : filesPanelWidthChat;
 
   const routeSignature = activeTabId
@@ -361,7 +363,9 @@ export const PaceProvider = ({ children, initialNavSidebarExpanded = true }: Pac
           ? FILES_LISTING_CONVERSATION_ID
           : pathname === ROUTES_PATH.CHAT_TASK
             ? TASKS_LISTING_CONVERSATION_ID
-            : null;
+            : pathname === ROUTES_PATH.CHAT_AGENTS
+              ? AGENTS_LISTING_CONVERSATION_ID
+              : null;
 
     if (activeConversationId === routeConversationId) return;
 

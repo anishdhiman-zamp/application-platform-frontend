@@ -65,6 +65,7 @@ export const SINGLE_VIEWER_TAB_METADATA_KEY = 'singleViewer';
 // page's file viewer state isolated from any chat conversation's open tabs.
 export const FILES_LISTING_CONVERSATION_ID = '__files_listing__';
 export const TASKS_LISTING_CONVERSATION_ID = '__tasks_listing__';
+export const AGENTS_LISTING_CONVERSATION_ID = '__agents_listing__';
 export const SIDEBAR_WIDTH = 450;
 export const SIDEBAR_MIN_WIDTH = 345;
 export const SIDEBAR_MAX_WIDTH = 700;

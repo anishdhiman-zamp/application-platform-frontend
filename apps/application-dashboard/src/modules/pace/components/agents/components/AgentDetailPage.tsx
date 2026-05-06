@@ -1,8 +1,7 @@
 'use client';
 
-import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
-import { Button, ShimmerText, Skeleton } from '@zamp-platform/ui';
-import { cn } from '@zamp-platform/ui/utils';
+import React, { useCallback, useEffect, useRef, useState } from 'react';
+import { AutoSizeTextarea, Button, Skeleton } from '@zamp-platform/ui';
 import AddConnectionModal from 'modules/pace/components/agents/components/AddConnectionModal';
 import AgentInstructions from 'modules/pace/components/agents/components/AgentInstructions';
 import AgentToolsAccess from 'modules/pace/components/agents/components/AgentToolsAccess';
@@ -10,21 +9,14 @@ import AgentTriggerList from 'modules/pace/components/agents/components/AgentTri
 import BarrelCounter from 'modules/pace/components/agents/components/BarrelCounter';
 import ShareAgentPopup from 'modules/pace/components/agents/components/ShareAgentPopup';
 import {
-  AGENT_DETAIL_TAB_CONFIG,
   getAddInstructionsMessage,
   getAddTriggerMessage,
   getAgentAvatar,
   getAgentAvatarByKey,
 } from 'modules/pace/components/agents/constants/agents.constants';
-import { AGENT_DETAIL_TAB, type AgentDetailTabType } from 'modules/pace/components/agents/types/agents.types';
 import { motion } from 'motion/react';
 import { useRouter } from 'next/navigation';
-import {
-  useGetAgentInstructionsQuery,
-  useGetAgentsListQuery,
-  useGetAgentTriggersQuery,
-  useUpdateAgentMutation,
-} from '@/apis/agents';
+import { useGetAgentsListQuery, useGetAgentTriggersQuery, useUpdateAgentMutation } from '@/apis/agents';
 import ImageKitImage from '@/components/ImageKitImage';
 import PageContainer from '@/components/layouts/PageContainer';
 import { FEATURE_FLAGS } from '@/constants/featureFlags';
@@ -46,7 +38,29 @@ interface AgentDetailPageProps {
   hideChatButton?: boolean;
 }
 
-const VALID_TABS = new Set<string>(Object.values(AGENT_DETAIL_TAB));
+const AGENT_DESCRIPTION_MAX_HEIGHT = 60;
+
+interface AgentDetailSectionProps {
+  title: string;
+  trailing?: React.ReactNode;
+  children: React.ReactNode;
+}
+
+const AgentDetailSection = ({ title, trailing, children }: AgentDetailSectionProps) => (
+  <section className='mb-7 flex flex-col'>
+    <div className='mb-3 flex min-h-6 items-center gap-2 px-2.5'>
+      <h2 className='text-GRAY_1000 f-14-550 min-w-0 truncate'>{title}</h2>
+      {trailing}
+    </div>
+    {children}
+  </section>
+);
+
+const normalizeAgentDescription = (description?: string | null) => {
+  if (!description || description === 'None') return '';
+
+  return description;
+};
 
 const AgentDetailPage = ({
   agentId,
@@ -58,46 +72,7 @@ const AgentDetailPage = ({
   const { isEnabled: isAgentsFe } = useFeatureFlag(FEATURE_FLAGS.AGENTS_FE);
   const debounceTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 
-  const { updateTab, getTabById } = useDynamicTabs({ type: TAB_TYPE.AGENT });
-  const storedTab = getTabById(agentId);
-  const storedActiveTab = storedTab?.metadata?.activeTab as string | undefined;
-
-  // Read tab from URL params first, then stored metadata, default to instructions
-  const initialTab = (() => {
-    if (typeof window !== 'undefined') {
-      const params = new URLSearchParams(window.location.search);
-      const tabParam = params.get('tab');
-
-      if (tabParam && VALID_TABS.has(tabParam)) return tabParam as AgentDetailTabType;
-    }
-
-    if (storedActiveTab && VALID_TABS.has(storedActiveTab)) return storedActiveTab as AgentDetailTabType;
-
-    return AGENT_DETAIL_TAB.INSTRUCTIONS;
-  })();
-
-  const [activeDetailTab, setActiveDetailTab] = useState<AgentDetailTabType>(initialTab);
-
-  const handleTabChange = useCallback(
-    (tab: AgentDetailTabType) => {
-      tabSwitchRef.current = true;
-      setActiveDetailTab(tab);
-
-      // Persist in URL
-      const params = new URLSearchParams(window.location.search);
-
-      params.set('tab', tab);
-      window.history.replaceState(null, '', `${window.location.pathname}?${params.toString()}`);
-
-      // Persist in tab metadata
-      const currentTab = getTabById(agentId);
-
-      if (currentTab) {
-        updateTab(agentId, agentId, currentTab.name, { ...currentTab.metadata, activeTab: tab });
-      }
-    },
-    [agentId, getTabById, updateTab],
-  );
+  const { updateTab } = useDynamicTabs({ type: TAB_TYPE.AGENT });
 
   const { data: agentData, isLoading: isLoadingAgent, isError: isAgentError } = useAgentWithPolling(agentId);
 
@@ -107,19 +82,18 @@ const AgentDetailPage = ({
   const agentListEntry = agentsListData?.agents?.find((a) => a.id === agentId);
   const triggerCount = triggersData?.triggers?.length ?? 0;
 
-  const initialName = agentData?.name || agentListEntry?.name || agentName || '';
-  const initialDescription = agentData?.description || agentListEntry?.description || agentDescription;
+  const initialName = agentData?.name ?? agentListEntry?.name ?? agentName ?? '';
+  const initialDescription =
+    normalizeAgentDescription(agentData?.description) ||
+    normalizeAgentDescription(agentListEntry?.description) ||
+    normalizeAgentDescription(agentDescription);
 
   const [updateAgent] = useUpdateAgentMutation();
 
   const [editName, setEditName] = useState(initialName);
   const [editDescription, setEditDescription] = useState(initialDescription);
   const [isAvatarHovered, setIsAvatarHovered] = useState(false);
-  const [instructionsShimmering, setInstructionsShimmering] = useState(false);
   const [isAddConnectionModalOpen, setIsAddConnectionModalOpen] = useState(false);
-  const prevInstructionsFetchingRef = useRef(false);
-  const shimmerTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
-  const tabSwitchRef = useRef(false);
 
   const skipFetch = !agentExists;
   const router = useRouter();
@@ -129,32 +103,11 @@ const AgentDetailPage = ({
   const avatar =
     (resolvedAvatarKey && getAgentAvatarByKey(resolvedAvatarKey)) || getAgentAvatar(agentData?.name || agentName || '');
 
-  const { isFetching: isInstructionsFetching, isLoading: isInstructionsLoading } = useGetAgentInstructionsQuery(
-    { agentId },
-    { skip: skipFetch },
-  );
-
   const { triggerChatMessage } = useTriggerChatMessageFromButton({
     agentId,
     agentName: displayName,
     agentAvatar: resolvedAvatarKey || undefined,
   });
-
-  const triggerShimmer = useCallback(() => {
-    setInstructionsShimmering(true);
-    if (shimmerTimerRef.current) clearTimeout(shimmerTimerRef.current);
-    shimmerTimerRef.current = setTimeout(() => setInstructionsShimmering(false), 3000);
-  }, []);
-
-  const handleInstructionsRefetch = useCallback(() => {
-    if (!prevInstructionsFetchingRef.current && isInstructionsFetching && !isInstructionsLoading) {
-      if (!tabSwitchRef.current) {
-        triggerShimmer();
-      }
-    }
-    tabSwitchRef.current = false;
-    prevInstructionsFetchingRef.current = isInstructionsFetching;
-  }, [isInstructionsFetching, isInstructionsLoading, triggerShimmer]);
 
   const syncAgentData = useCallback(() => {
     if (!agentData) return;
@@ -162,16 +115,29 @@ const AgentDetailPage = ({
     // Skip sync while user has a pending edit (debounce timer active)
     if (debounceTimerRef.current) return;
 
-    if (agentData?.name) setEditName(agentData?.name);
-    if (agentData?.description) setEditDescription(agentData?.description);
+    const nextDescription =
+      normalizeAgentDescription(agentData.description) ||
+      normalizeAgentDescription(agentListEntry?.description) ||
+      normalizeAgentDescription(agentDescription);
+    const nextName = agentData.name || agentName || editName;
 
-    if (agentData?.avatar) {
-      updateTab(agentId, agentId, agentData?.name || editName, {
-        description: agentData?.description || editDescription,
-        avatarKey: agentData?.avatar,
-      });
-    }
-  }, [agentData, agentId, editName, editDescription, updateTab]);
+    setEditName(nextName);
+    setEditDescription(nextDescription);
+
+    updateTab(agentId, agentId, nextName, {
+      description: nextDescription,
+      avatarKey: agentData.avatar ?? resolvedAvatarKey,
+    });
+  }, [
+    agentData,
+    agentId,
+    agentListEntry?.description,
+    agentDescription,
+    agentName,
+    editName,
+    resolvedAvatarKey,
+    updateTab,
+  ]);
 
   const debouncedUpdate = useCallback(
     (fields: { name?: string; description?: string }) => {
@@ -189,12 +155,28 @@ const AgentDetailPage = ({
           updateTab(agentId, agentId, tabName, { description: tabDescription, avatarKey: resolvedAvatarKey });
         } catch {
           // Revert to last known good values on failure
-          if (agentData?.name) setEditName(agentData?.name);
-          if (agentData?.description) setEditDescription(agentData?.description);
+          setEditName(agentData?.name || agentName || editName);
+          setEditDescription(
+            normalizeAgentDescription(agentData?.description) ||
+              normalizeAgentDescription(agentListEntry?.description) ||
+              normalizeAgentDescription(agentDescription),
+          );
         }
       }, 800);
     },
-    [agentId, editName, editDescription, resolvedAvatarKey, updateAgent, updateTab],
+    [
+      agentId,
+      editName,
+      editDescription,
+      resolvedAvatarKey,
+      agentData?.name,
+      agentData?.description,
+      agentListEntry?.description,
+      agentDescription,
+      agentName,
+      updateAgent,
+      updateTab,
+    ],
   );
 
   const handleNameChange = useCallback(
@@ -238,81 +220,10 @@ const AgentDetailPage = ({
     setIsAddConnectionModalOpen(true);
   }, []);
 
-  const handleInstructionsUpdating = useCallback(() => {
-    triggerShimmer();
-  }, [triggerShimmer]);
-
-  useEffect(() => {
-    handleInstructionsRefetch();
-  }, [handleInstructionsRefetch]);
-
-  useEffect(() => {
-    return () => {
-      if (shimmerTimerRef.current) clearTimeout(shimmerTimerRef.current);
-    };
-  }, []);
-
   // Sync local state + tab metadata when agent data arrives from API
   useEffect(() => {
     syncAgentData();
   }, [syncAgentData]);
-
-  const tabContentMap: Record<AgentDetailTabType, React.ReactNode> = useMemo(
-    () => ({
-      [AGENT_DETAIL_TAB.TASKS]: (
-        <TaskAccordionGroup
-          agentId={agentId}
-          isActive={activeDetailTab === AGENT_DETAIL_TAB.TASKS}
-          skipFetch={skipFetch}
-        />
-      ),
-      [AGENT_DETAIL_TAB.TRIGGERS]: (
-        <AgentTriggerList
-          agentId={agentId}
-          agentAvatarSrc={avatar.src}
-          isActive={activeDetailTab === AGENT_DETAIL_TAB.TRIGGERS}
-          skipFetch={skipFetch}
-          onAddTrigger={handleAddNewTrigger}
-        />
-      ),
-      [AGENT_DETAIL_TAB.INSTRUCTIONS]: (
-        <AgentInstructions
-          agentId={agentId}
-          agentAvatarSrc={avatar.src}
-          isActive={activeDetailTab === AGENT_DETAIL_TAB.INSTRUCTIONS}
-          skipFetch={skipFetch}
-          onUpdating={handleInstructionsUpdating}
-          onAddInstructions={handleAddInstructions}
-        />
-      ),
-      [AGENT_DETAIL_TAB.FILES]: (
-        <AgentFolderList
-          agentId={agentId}
-          agentAvatarSrc={avatar.src}
-          isActive={activeDetailTab === AGENT_DETAIL_TAB.FILES}
-          skipFetch={skipFetch}
-        />
-      ),
-      [AGENT_DETAIL_TAB.TOOLS_AND_ACCESS]: (
-        <AgentToolsAccess
-          agentId={agentId}
-          agentAvatarSrc={avatar.src}
-          isActive={activeDetailTab === AGENT_DETAIL_TAB.TOOLS_AND_ACCESS}
-          skipFetch={skipFetch}
-          onAddConnection={handleAddNewConnection}
-        />
-      ),
-    }),
-    [
-      agentId,
-      activeDetailTab,
-      skipFetch,
-      handleInstructionsUpdating,
-      handleAddNewTrigger,
-      handleAddInstructions,
-      handleAddNewConnection,
-    ],
-  );
 
   if (isAgentError) {
     return (
@@ -363,6 +274,7 @@ const AgentDetailPage = ({
           <input
             value={editName}
             onChange={(e) => handleNameChange(e.target.value)}
+            aria-label='Agent name'
             className='text-GRAY_1000 f-24-550 placeholder:text-GRAY_500 mb-2 w-full shrink-0 border-none bg-transparent outline-none'
             placeholder='Agent name'
           />
@@ -370,51 +282,56 @@ const AgentDetailPage = ({
         {isLoadingAgent && !editDescription ? (
           <Skeleton className='mb-6 h-5 w-80' />
         ) : (
-          <input
+          <AutoSizeTextarea
             value={editDescription}
             onChange={(e) => handleDescriptionChange(e.target.value)}
-            className='text-GRAY_700 f-14-450 placeholder:text-GRAY_500 mb-6 w-full shrink-0 border-none bg-transparent outline-none'
+            aria-label='Agent description'
+            minRows={1}
+            maxHeight={AGENT_DESCRIPTION_MAX_HEIGHT}
+            className='text-GRAY_700 f-14-450 placeholder:text-GRAY_500 mb-6 min-h-0 w-full shrink-0 border-none bg-transparent px-0 py-0 leading-5 shadow-none outline-none focus-visible:outline-none'
             placeholder='Add a description...'
           />
         )}
 
-        <div className='mb-3.5 flex shrink-0 items-center gap-1.5'>
-          {AGENT_DETAIL_TAB_CONFIG.map((tab) => (
-            <Button
-              key={tab.id}
-              variant='ghost'
-              size='small'
-              onClick={() => handleTabChange(tab.id)}
-              className={cn(
-                'f-12-500 cursor-pointer rounded-md px-2.5 py-1.5',
-                activeDetailTab === tab.id
-                  ? 'bg-GRAY_100 text-GRAY_1000'
-                  : 'text-GRAY_900 hover:bg-GRAY_100 hover:text-GRAY_1000',
-              )}
-            >
-              {tab.id === AGENT_DETAIL_TAB.INSTRUCTIONS && instructionsShimmering ? (
-                <ShimmerText
-                  text={tab.label}
-                  autoAnimate
-                  animationDuration={1500}
-                  baseTextClassName='f-12-500 leading-[12px]'
-                  shimmerTextClassName='f-12-500 leading-[12px]'
-                />
-              ) : (
-                tab.label
-              )}
-              {tab.id === AGENT_DETAIL_TAB.TRIGGERS && triggerCount > 0 && (
-                <BarrelCounter value={triggerCount} className='ml-1.5' />
-              )}
-            </Button>
-          ))}
-        </div>
+        <div className='flex flex-col'>
+          <AgentDetailSection title='Instructions'>
+            <AgentInstructions
+              agentId={agentId}
+              agentAvatarSrc={avatar.src}
+              skipFetch={skipFetch}
+              onAddInstructions={handleAddInstructions}
+            />
+          </AgentDetailSection>
 
-        {Object.entries(tabContentMap).map(([tabId, content]) => (
-          <div key={tabId} className={cn('mb-4 flex-col', activeDetailTab === tabId ? 'flex' : 'hidden')}>
-            {content}
-          </div>
-        ))}
+          <AgentDetailSection title='Tasks'>
+            <TaskAccordionGroup agentId={agentId} skipFetch={skipFetch} />
+          </AgentDetailSection>
+
+          <AgentDetailSection
+            title='Triggers'
+            trailing={triggerCount > 0 ? <BarrelCounter value={triggerCount} /> : undefined}
+          >
+            <AgentTriggerList
+              agentId={agentId}
+              agentAvatarSrc={avatar.src}
+              skipFetch={skipFetch}
+              onAddTrigger={handleAddNewTrigger}
+            />
+          </AgentDetailSection>
+
+          <AgentDetailSection title='Files'>
+            <AgentFolderList agentId={agentId} agentAvatarSrc={avatar.src} skipFetch={skipFetch} />
+          </AgentDetailSection>
+
+          <AgentDetailSection title='Tools & Access'>
+            <AgentToolsAccess
+              agentId={agentId}
+              agentAvatarSrc={avatar.src}
+              skipFetch={skipFetch}
+              onAddConnection={handleAddNewConnection}
+            />
+          </AgentDetailSection>
+        </div>
       </PageContainer>
 
       <AddConnectionModal

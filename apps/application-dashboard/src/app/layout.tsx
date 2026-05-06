@@ -11,7 +11,6 @@ import { FontPresetProvider } from '@/app/_providers/font-preset-provider';
 import { ThemeProvider } from '@/app/_providers/theme-provider';
 import Agentation from '@/components/Agentation';
 import NetworkStatus from '@/components/NetWorkStatus';
-import TypographySwitcher from '@/components/TypographySwitcher';
 import { FONT_PRESET, FONT_PRESET_CLASS, THEME_MODE } from '@/modules/general/constants/general.constants';
 import { FONT_PRESET_COOKIE, THEME_COOKIE } from '@/utils/cookie';
 import { COLOR_SCHEME_HEADER, getThemeClasses } from '@/utils/theme.utils';
@@ -100,12 +99,7 @@ const RootLayout = async ({ children }: { children: React.ReactNode }) => {
             <NetworkStatus />
             <Toaster />
             <Agentation />
-            {process.env.NODE_ENV !== 'production' && (
-              <>
-                <TypographySwitcher />
-                <DialRoot position='bottom-right' />
-              </>
-            )}
+            {process.env.NODE_ENV !== 'production' && <DialRoot position='bottom-right' />}
             {children}
           </FontPresetProvider>
         </ThemeProvider>

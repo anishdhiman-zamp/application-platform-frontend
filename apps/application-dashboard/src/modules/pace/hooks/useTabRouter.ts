@@ -181,6 +181,16 @@ export const useTabRouter = (config: UseTabRouterConfig = {}): UseTabRouterRetur
 
     const urlParams = new URLSearchParams(search);
     const titleFromUrl = urlParams.get('title');
+    const agentDescriptionFromUrl = urlParams.get('description') ?? undefined;
+    const agentAvatarKeyFromUrl = urlParams.get('avatarKey') ?? undefined;
+    const metadataFromUrl: Record<string, string> | undefined =
+      urlTabType === TAB_TYPE.AGENT
+        ? {
+            ...(agentDescriptionFromUrl ? { description: agentDescriptionFromUrl } : {}),
+            ...(agentAvatarKeyFromUrl ? { avatarKey: agentAvatarKeyFromUrl } : {}),
+          }
+        : undefined;
+    const hasMetadataFromUrl = Boolean(metadataFromUrl && Object.keys(metadataFromUrl).length > 0);
 
     if (!existingTab) {
       // Don't re-create a tab that was just intentionally closed
@@ -223,7 +233,7 @@ export const useTabRouter = (config: UseTabRouterConfig = {}): UseTabRouterRetur
               name: fileName,
               path: tabPath,
               type: urlTabType,
-              metadata: activeTab.metadata,
+              metadata: hasMetadataFromUrl ? { ...activeTab.metadata, ...metadataFromUrl } : activeTab.metadata,
             },
           }),
         );
@@ -234,29 +244,36 @@ export const useTabRouter = (config: UseTabRouterConfig = {}): UseTabRouterRetur
             name: fileName,
             path: tabPath,
             type: urlTabType,
+            metadata: hasMetadataFromUrl ? metadataFromUrl : undefined,
           }),
         );
       }
     } else {
       // Update stored path if URL has richer params than what's stored
       const fullPath = search ? `${pathname}${search}` : existingTab.path;
+      const nextMetadata = hasMetadataFromUrl ? { ...existingTab.metadata, ...metadataFromUrl } : existingTab.metadata;
+      const hasMetadataUpdate =
+        hasMetadataFromUrl &&
+        Object.entries(metadataFromUrl ?? {}).some(([key, value]) => existingTab.metadata?.[key] !== value);
+      let nextExistingTab = existingTab;
 
-      if (fullPath !== existingTab.path && search) {
+      if ((fullPath !== existingTab.path && search) || hasMetadataUpdate) {
+        nextExistingTab = { ...existingTab, path: search ? fullPath : existingTab.path, metadata: nextMetadata };
         dispatch(
           dynamicTabsActions.updateTab({
             oldId: urlTabId,
-            newTab: { ...existingTab, path: fullPath },
+            newTab: nextExistingTab,
           }),
         );
       }
 
       dispatch(dynamicTabsActions.setActiveTab(urlTabId));
 
-      if (titleFromUrl && existingTab.name !== titleFromUrl) {
+      if (titleFromUrl && nextExistingTab.name !== titleFromUrl) {
         dispatch(
           dynamicTabsActions.updateTab({
             oldId: urlTabId,
-            newTab: { ...existingTab, name: titleFromUrl },
+            newTab: { ...nextExistingTab, name: titleFromUrl },
           }),
         );
       }

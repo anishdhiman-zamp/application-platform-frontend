@@ -3,9 +3,10 @@
 import { memo } from 'react';
 import { Button, FileIcon, toast } from '@zamp-platform/ui';
 import { cn } from '@zamp-platform/ui/utils';
-import { FolderOpen } from 'lucide-react';
-import { useRouter } from 'next/navigation';
+import { FolderOpen, X } from 'lucide-react';
+import { usePathname, useRouter } from 'next/navigation';
 import { ROUTES_PATH } from '@/constants/routeConfig';
+import { useDynamicTabs } from '@/modules/pace/components/dynamic-tabs/useDynamicTabs';
 import {
   HTML_VIEW_OPTIONS,
   MARKDOWN_VIEW_OPTIONS,
@@ -21,10 +22,10 @@ import FileViewerHeaderMenu, { ViewModeMenuSection } from '@/modules/pace/compon
 import RenameFileDialog from '@/modules/pace/components/file-viewer/RenameFileDialog';
 import DeleteConfirmationDialog from '@/modules/pace/components/files/DeleteConfirmationDialog';
 import { getFileExtension } from '@/modules/pace/components/files/file-tree.utils';
+import { isListingPanelSurface } from '@/modules/pace/components/files-panel/files-panel.utils';
 import { setNewChatDraft } from '@/modules/pace/hooks/useChatDraftInput';
 import { useFileViewerHeaderActions } from '@/modules/pace/hooks/useFileViewerHeaderActions';
 import { useFileViewerHeaderRename } from '@/modules/pace/hooks/useFileViewerHeaderRename';
-import { FILES_LISTING_CONVERSATION_ID } from '@/modules/pace/pace.constants';
 import { usePaceConversationContext, usePaceLayoutContext } from '@/modules/pace/pace.context';
 
 interface FileViewerHeaderProps {
@@ -60,9 +61,11 @@ const FileViewerHeader = memo(
     const extension = getFileExtension(fileName);
 
     const router = useRouter();
+    const pathname = usePathname();
+    const { closeAllTabs } = useDynamicTabs();
     const { wordWrapEnabled, toggleWordWrap, toggleTreeSidebar, isTreeSidebarOpen } = usePaceLayoutContext();
-    const { activeConversationId, setPendingFileReferences } = usePaceConversationContext();
-    const isOnFilesPage = activeConversationId === FILES_LISTING_CONVERSATION_ID;
+    const { setPendingFileReferences } = usePaceConversationContext();
+    const isListingSurface = isListingPanelSurface(pathname);
 
     const {
       isRenameDialogOpen,
@@ -97,6 +100,10 @@ const FileViewerHeader = memo(
       setPendingFileReferences([{ path: filePath, name: fileName }]);
       setNewChatDraft(`Let's discuss ${fileName} `);
       router.push(ROUTES_PATH.CHAT);
+    };
+
+    const handleCloseViewer = () => {
+      closeAllTabs();
     };
 
     const renderViewModeSection = () => {
@@ -140,7 +147,11 @@ const FileViewerHeader = memo(
           onConfirm={handleRenameSubmit}
         />
         <div
-          className={cn('border-GRAY_400 bg-BG_WHITE flex items-center justify-between border-b px-4 py-3', className)}
+          className={cn(
+            'border-GRAY_400 bg-BG_WHITE flex items-center justify-between border-b px-4',
+            isListingSurface ? 'h-[54px] shrink-0' : 'py-3',
+            className,
+          )}
         >
           <div className='flex min-w-0 shrink items-center gap-x-1'>
             <FilePathBreadcrumb
@@ -162,9 +173,21 @@ const FileViewerHeader = memo(
 
           <div className='flex shrink-0 items-center gap-x-2'>
             <Button variant='default' size='small' onClick={handleChatWithFile}>
-              Chat with file
+              {isListingSurface ? 'Chat with File' : 'Chat with file'}
             </Button>
-            {!isOnFilesPage && (
+            {isListingSurface && (
+              <Button
+                variant='ghost'
+                size='icon'
+                onClick={handleCloseViewer}
+                title='Close file viewer'
+                aria-label='Close file viewer'
+                className='text-GRAY_700 hover:text-GRAY_1000 hover:bg-GRAY_100 h-8 w-8 shrink-0 rounded-md'
+              >
+                <X size={16} />
+              </Button>
+            )}
+            {!isListingSurface && (
               <Button
                 variant='ghost'
                 size='icon'

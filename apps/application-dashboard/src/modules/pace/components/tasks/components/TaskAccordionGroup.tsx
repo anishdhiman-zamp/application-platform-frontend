@@ -30,6 +30,7 @@ interface TaskAccordionGroupProps {
   isActive?: boolean;
   skipFetch?: boolean;
   creationSource?: CreationSource;
+  fullPage?: boolean;
 }
 
 const NoDataBanner = ({ search }: { search?: string }) => (
@@ -47,6 +48,7 @@ const TaskAccordionGroup = ({
   isActive = true,
   skipFetch = false,
   creationSource,
+  fullPage = false,
 }: TaskAccordionGroupProps) => {
   const hasBeenActiveRef = useRef(isActive);
   const isFirstVisit = !hasBeenActiveRef.current && isActive;
@@ -191,8 +193,10 @@ const TaskAccordionGroup = ({
       isNoData={!isFetching && !skipFetch && visibleStatuses.length === 0}
       noDataBanner={<NoDataBanner search={search} />}
       className={cn(
-        'border-GRAY_400 bg-BG_WHITE flex flex-col overflow-hidden border',
-        agentId ? 'rounded-xl' : 'min-h-0 flex-1 rounded-lg',
+        'bg-BG_WHITE flex flex-col overflow-hidden',
+        agentId && 'border-GRAY_400 rounded-xl border',
+        !agentId &&
+          (fullPage ? 'min-h-0 flex-1 rounded-none border-0' : 'border-GRAY_400 min-h-0 flex-1 rounded-lg border'),
       )}
       disableAnimation
     >

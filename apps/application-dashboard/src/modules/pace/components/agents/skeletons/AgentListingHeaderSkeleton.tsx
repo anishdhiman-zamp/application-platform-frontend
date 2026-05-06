@@ -1,20 +1,14 @@
 import { Skeleton } from '@zamp-platform/ui';
 
 const AgentListingHeaderSkeleton = () => (
-  <>
-    <div className='mb-4 flex shrink-0 items-center justify-between gap-3'>
-      <Skeleton className='h-6 w-24' />
-      <Skeleton className='h-8 w-28 rounded-md' />
+  <div className='border-GRAY_400 bg-BG_WHITE flex h-[54px] shrink-0 items-center gap-3 overflow-hidden border-b px-3'>
+    <div className='flex h-[54px] min-w-0 shrink items-center gap-5 overflow-hidden'>
+      <Skeleton className='h-4 w-16 shrink-0 rounded' />
+      <Skeleton className='h-4 w-24 shrink-0 rounded' />
+      <Skeleton className='h-4 w-28 shrink-0 rounded' />
     </div>
-    <div className='flex flex-col gap-3 pb-2'>
-      <Skeleton className='h-7 w-full' />
-      <div className='flex items-center gap-1.5'>
-        <Skeleton className='h-7 w-12 rounded-md' />
-        <Skeleton className='h-7 w-24 rounded-md' />
-        <Skeleton className='h-7 w-28 rounded-md' />
-      </div>
-    </div>
-  </>
+    <Skeleton className='h-8 w-24 shrink-0 rounded-md min-[460px]:w-40 sm:w-56' />
+  </div>
 );
 
 export default AgentListingHeaderSkeleton;

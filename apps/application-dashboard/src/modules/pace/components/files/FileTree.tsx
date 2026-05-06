@@ -305,7 +305,7 @@ const FileTreeContent = ({
       ) : (
         <div
           ref={containerRef}
-          className='min-h-0 flex-1 overflow-x-hidden overflow-y-auto [scrollbar-width:thin]'
+          className='min-h-0 flex-1 overflow-x-hidden overflow-y-auto pt-2 pl-4 [scrollbar-width:thin]'
           onDragLeave={handleContainerDragLeave}
           onDragEnd={handleContainerDragEnd}
         >

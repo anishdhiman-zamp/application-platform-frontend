@@ -1,17 +1,22 @@
 'use client';
 
 import AgentDetailPage from 'modules/pace/components/agents/components/AgentDetailPage';
+import AgentPanelHeader from 'modules/pace/components/agents/components/AgentPanelHeader';
 import { useMountedTabs } from 'modules/pace/components/file-viewer/useMountedTabs';
+import { usePathname } from 'next/navigation';
 import ImageLoader from '@/components/common/loader/ImageLoader';
 import { ZAMP_LOGO_LOADER_SVG } from '@/constants/icons';
+import { ROUTES_PATH } from '@/constants/routeConfig';
 import TabWrapper from '@/modules/pace/components/dynamic-tabs/TabWrapper';
 import { useDynamicTabs } from '@/modules/pace/components/dynamic-tabs/useDynamicTabs';
 import { TAB_TYPE } from '@/modules/pace/pace.types';
 
 const AgentTabsContainer = () => {
   const { tabs, activeTab, isHydrated } = useDynamicTabs({ type: TAB_TYPE.AGENT });
+  const pathname = usePathname();
 
   const { isMounted } = useMountedTabs(tabs, activeTab?.stableKey ?? null);
+  const isAgentsSurface = pathname === ROUTES_PATH.CHAT_AGENTS;
 
   if (!isHydrated || !tabs?.length) {
     return <ImageLoader imageSrc={ZAMP_LOGO_LOADER_SVG} width={140} height={140} />;
@@ -29,13 +34,16 @@ const AgentTabsContainer = () => {
 
         return (
           <TabWrapper key={tab?.stableKey} isActive={isActive}>
+            {isAgentsSurface && (
+              <AgentPanelHeader isActive={isActive} agentName={tab.name} avatarKey={avatarKey || undefined} />
+            )}
             <AgentDetailPage
               key={tab.id}
               agentId={tab.id}
               agentName={tab.name}
               agentDescription={description}
               avatarKey={avatarKey}
-              hideChatButton
+              hideChatButton={!isAgentsSurface}
             />
           </TabWrapper>
         );

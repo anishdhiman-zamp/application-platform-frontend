@@ -1,5 +1,6 @@
 import { CSS_VARS } from '@zamp-platform/ui';
-import { Ban, CircleCheck, Hand, HandMetal } from 'lucide-react';
+import type { LucideIcon } from 'lucide-react';
+import { Ban, Bot, CircleCheck, Hand, HandMetal, List, Users } from 'lucide-react';
 import {
   ACCESS_LEVEL,
   type AccessLevelOptionType,
@@ -25,10 +26,10 @@ import {
   AGENT_AVATAR_11,
 } from '@/constants/icons';
 
-export const AGENT_TAB_CONFIG: { id: AgentListingTabType; label: string }[] = [
-  { id: AGENT_LISTING_TAB.ALL, label: 'All' },
-  { id: AGENT_LISTING_TAB.MY_AGENTS, label: 'My agents' },
-  { id: AGENT_LISTING_TAB.SHARED_WITH_ME, label: 'Shared with me' },
+export const AGENT_TAB_CONFIG: { id: AgentListingTabType; label: string; icon: LucideIcon }[] = [
+  { id: AGENT_LISTING_TAB.ALL, label: 'All', icon: List },
+  { id: AGENT_LISTING_TAB.MY_AGENTS, label: 'My agents', icon: Bot },
+  { id: AGENT_LISTING_TAB.SHARED_WITH_ME, label: 'Shared with me', icon: Users },
 ];
 
 export const VALID_AGENT_TABS = new Set<string>(Object.values(AGENT_LISTING_TAB));
