@@ -46,7 +46,7 @@ const AgentPanelHeader = ({
 
   const header = (
     <div className='border-GRAY_300 bg-BG_WHITE flex h-[54px] shrink-0 items-center justify-between gap-4 border-b px-4'>
-      <div className='flex min-w-0 flex-1 items-center gap-1.5'>
+      <div className='flex min-w-0 flex-1 items-center gap-2'>
         <div className='text-GRAY_700 flex size-5 shrink-0 items-center justify-center'>
           <Bot size={16} />
         </div>
@@ -66,6 +66,7 @@ const AgentPanelHeader = ({
                 onChange={(event) => onAgentNameChange?.(event.target.value)}
                 readOnly={!onAgentNameChange}
                 aria-label='Agent name'
+                size={1}
                 className='f-14-550 text-GRAY_1000 placeholder:text-GRAY_500 col-start-1 row-start-1 w-full min-w-0 truncate border-none bg-transparent outline-none'
                 placeholder='Agent name'
               />

@@ -22,7 +22,7 @@ const ShareAgentPopup: FC<ShareAgentPopupProps> = ({ agentId, iconOnly = false }
       variant='ghost'
       id='share-agent-to-audience-btn'
       aria-label='Share agent'
-      className='text-GRAY_700 hover:text-GRAY_1000 -ml-3 h-6 w-6 p-0 focus:outline-none focus-visible:ring-0 focus-visible:ring-offset-0'
+      className='text-GRAY_700 hover:text-GRAY_1000 h-6 w-6 shrink-0 p-0 focus:outline-none focus-visible:ring-0 focus-visible:ring-offset-0'
     >
       <Share2 className='h-3.5 w-3.5' />
     </Button>
@@ -44,7 +44,7 @@ const ShareAgentPopup: FC<ShareAgentPopupProps> = ({ agentId, iconOnly = false }
 
   return (
     <TooltipV2 tooltipBody='Share' asChildTrigger>
-      <span className='inline-flex'>{popup}</span>
+      <span className='inline-flex shrink-0'>{popup}</span>
     </TooltipV2>
   );
 };
