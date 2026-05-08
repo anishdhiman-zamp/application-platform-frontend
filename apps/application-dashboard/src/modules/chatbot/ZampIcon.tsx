@@ -13,6 +13,7 @@ import ZampLogo, {
 
 interface ZampIconProps {
   size?: number;
+  hitAreaSize?: number;
   className?: string;
   interactive?: boolean;
   playSignal?: number;
@@ -20,7 +21,7 @@ interface ZampIconProps {
 
 const SNAP_TRANSITION = { duration: 0 };
 
-const ZampIcon = ({ size = 20, className, interactive = false, playSignal }: ZampIconProps) => {
+const ZampIcon = ({ size = 20, hitAreaSize = size, className, interactive = false, playSignal }: ZampIconProps) => {
   const wrapperRef = useRef<HTMLDivElement>(null);
   const isAnimatingRef = useRef(false);
   const lastDirectionRef = useRef<ZampLogoAnimationType | null>(null);
@@ -79,11 +80,11 @@ const ZampIcon = ({ size = 20, className, interactive = false, playSignal }: Zam
       ref={wrapperRef}
       className={cn('grid place-items-center', className)}
       style={{
-        height: size,
-        minHeight: size,
-        width: size,
-        minWidth: size,
-        perspective: size * 8,
+        height: hitAreaSize,
+        minHeight: hitAreaSize,
+        width: hitAreaSize,
+        minWidth: hitAreaSize,
+        perspective: hitAreaSize * 8,
       }}
       onMouseEnter={interactive ? handleMouseEnter : undefined}
     >

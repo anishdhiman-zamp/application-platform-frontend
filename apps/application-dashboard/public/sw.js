@@ -1,4 +1,4 @@
-const CACHE_VERSION = '1'; // increment manually, whenever updating old static assets
+const CACHE_VERSION = '2'; // increment manually, whenever updating old static assets
 const CACHE_NAME = `zamp-sw-cache-v${CACHE_VERSION}`;
 const MAX_CACHE_ENTRIES = 100;
 const IDB_NAME = 'zamp-sw-store';
@@ -9,7 +9,6 @@ const ORG_ID_KEY = 'X-Zamp-Organization-Id';
 let cachedOrganizationId = null;
 
 const CACHE_PATTERNS = [
-  /^\/_next\/static\//, // Next.js static files
   /^\/_next\/image\//, // Optimized images
   /^\/images\//, // Custom images
   /^\/fonts\//, // Fonts
@@ -18,6 +17,14 @@ const CACHE_PATTERNS = [
   /^\/[^/]+\.(ico|svg|png|jpg|jpeg|webp)$/i, // Root level icons and images
   /^\/pdf\.worker\.min\.mjs$/, // PDF worker
 ];
+
+function isNextStaticAsset(url) {
+  try {
+    return new URL(url).pathname.startsWith('/_next/static/');
+  } catch {
+    return false;
+  }
+}
 
 // IndexedDB helpers for storing/retrieving org ID
 function openDB() {
@@ -231,6 +238,14 @@ self.addEventListener('fetch', (event) => {
   const url = new URL(request.url);
 
   if (url.origin !== self.location.origin) return;
+
+  // Next.js owns chunk cache/revalidation. Cache-first here can serve stale
+  // Turbopack chunks that reference modules no longer present in the app.
+  if (isNextStaticAsset(request.url)) {
+    event.respondWith(fetch(request));
+
+    return;
+  }
 
   // Do not cache navigation requests (avoid stale HTML)
   if (request.mode === 'navigate') {

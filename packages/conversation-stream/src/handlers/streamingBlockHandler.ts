@@ -2,11 +2,20 @@ import { captureException, captureMessage } from '@sentry/browser';
 import {
   type Block,
   BLOCK_TYPE,
+  runningTasksStore,
   StreamingContentBlockDeltaType,
   StreamingContentBlockType,
   streamingStateStore,
+  TASK_STATUS,
   type TaskContentBlock,
+  type TaskStatus,
 } from '@zamp-platform/chat';
+
+const TERMINAL_TASK_STATUSES: ReadonlySet<TaskStatus> = new Set([
+  TASK_STATUS.COMPLETED,
+  TASK_STATUS.FAILED,
+  TASK_STATUS.CANCELED,
+]);
 
 type MapAny = Record<string, unknown>;
 
@@ -59,7 +68,9 @@ export function handleContentBlockEvent(conversationId: string, type: string, in
             };
             break;
           }
-          case BLOCK_TYPE.TASK:
+          case BLOCK_TYPE.TASK: {
+            const startStatus = contentBlock?.status as TaskStatus | undefined;
+            const taskBlockId = (contentBlock?.task_id as string) || (contentBlock?.id as string) || '';
             newBlock = {
               ...blockBase,
               type: BLOCK_TYPE.TASK,
@@ -67,11 +78,15 @@ export function handleContentBlockEvent(conversationId: string, type: string, in
               payload: {
                 id: (contentBlock?.id as string) || '',
                 title: (contentBlock?.title as string) || '',
-                task_id: (contentBlock?.task_id as string) || (contentBlock?.id as string) || '',
-                status: contentBlock?.status,
+                task_id: taskBlockId,
+                status: startStatus,
               },
             } as TaskContentBlock;
+            if (taskBlockId && (startStatus === undefined || startStatus === TASK_STATUS.IN_PROGRESS)) {
+              runningTasksStore.markRunning(conversationId, taskBlockId);
+            }
             break;
+          }
           default:
             // Only TOOL_USE is expected here; anything else is a new block type from BE.
             if (blockType && blockType !== BLOCK_TYPE.TOOL_USE && !reportedUnknownBlockTypes.has(blockType)) {
@@ -180,7 +195,16 @@ export function handleContentBlockEvent(conversationId: string, type: string, in
               if (block.type === BLOCK_TYPE.TASK) {
                 const taskPayload = block.payload as TaskContentBlock['payload'];
                 taskPayload.title = (delta.title as string) ?? taskPayload.title;
-                taskPayload.status = (delta.status as typeof taskPayload.status) ?? taskPayload.status;
+                const nextStatus = (delta.status as TaskStatus | undefined) ?? taskPayload.status;
+                taskPayload.status = nextStatus;
+                const taskKey = taskPayload.task_id || taskPayload.id;
+                if (taskKey) {
+                  if (nextStatus === TASK_STATUS.IN_PROGRESS) {
+                    runningTasksStore.markRunning(conversationId, taskKey);
+                  } else if (nextStatus && TERMINAL_TASK_STATUSES.has(nextStatus)) {
+                    runningTasksStore.markFinished(conversationId, taskKey);
+                  }
+                }
               }
               break;
             default: {

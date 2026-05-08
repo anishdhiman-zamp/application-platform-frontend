@@ -1,10 +1,14 @@
 import { MENTION_KIND, type ReferenceSearchHit } from '@zamp-platform/chat';
 import {
   AFTERNOON_GREETINGS,
+  AGENTS_LISTING_CONVERSATION_ID,
   EVENING_GREETINGS,
+  FILES_LISTING_CONVERSATION_ID,
   MORNING_GREETINGS,
+  NEW_CONVERSATION_ID,
   NIGHT_GREETINGS,
   SIDEBAR_CONVERSATION_ID_PARAM,
+  TASKS_LISTING_CONVERSATION_ID,
 } from 'modules/pace/pace.constants';
 import {
   CHAT_SIDEBAR_STATE,
@@ -64,6 +68,36 @@ export const getInitialSidebarState = (): ChatSidebarState => {
   ) as ChatSidebarState | null;
 
   return persistedChatSidebarState || CHAT_SIDEBAR_STATE.SIDEBAR;
+};
+
+export const hasTabParam = (searchParams: URLSearchParams): boolean =>
+  Object.values(TAB_QUERY_PARAM).some((param) => searchParams.has(param));
+
+/**
+ * Maps the current route to the dynamic-tabs conversation bucket it should use.
+ * Chat tab URLs without an existing sidebar conversation need a durable pending
+ * bucket so right-panel tabs can exist before the first message creates a real conversation.
+ */
+export const getRouteConversationId = (
+  pathname: string | null,
+  searchParams: URLSearchParams | null,
+): string | null => {
+  const path = pathname ?? '';
+  const params = searchParams ?? new URLSearchParams();
+
+  if (path === ROUTES_PATH.CHAT) {
+    const sidebarConversationId = params.get(SIDEBAR_CONVERSATION_ID_PARAM);
+
+    if (sidebarConversationId) return sidebarConversationId;
+
+    return hasTabParam(params) ? NEW_CONVERSATION_ID : null;
+  }
+
+  if (path === ROUTES_PATH.CHAT_FILES) return FILES_LISTING_CONVERSATION_ID;
+  if (path === ROUTES_PATH.CHAT_TASK) return TASKS_LISTING_CONVERSATION_ID;
+  if (path === ROUTES_PATH.CHAT_AGENTS) return AGENTS_LISTING_CONVERSATION_ID;
+
+  return null;
 };
 
 /** Returns a random element from the given array */

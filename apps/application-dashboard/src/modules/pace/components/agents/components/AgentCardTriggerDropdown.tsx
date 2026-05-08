@@ -75,7 +75,7 @@ const AgentCardTriggerDropdown = ({ agentId, agentName, triggerCount }: AgentCar
 
   return (
     <Popover open={open} onOpenChange={handleOpenChange}>
-      <TooltipV2 tooltipBody='Triggers' disabled={open}>
+      <TooltipV2 tooltipBody='Triggers' disabled={open} asChildTrigger>
         <PopoverTrigger asChild>
           <Button
             variant='ghost'

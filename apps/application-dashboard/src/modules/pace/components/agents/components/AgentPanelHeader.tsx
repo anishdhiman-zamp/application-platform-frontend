@@ -7,16 +7,20 @@ import { Bot } from 'lucide-react';
 import ShareAgentPopup from 'modules/pace/components/agents/components/ShareAgentPopup';
 import { useRouter } from 'next/navigation';
 import { FEATURE_FLAGS } from '@/constants/featureFlags';
-import { ROUTES_PATH } from '@/constants/routeConfig';
+import { getChatAgentRoute } from '@/constants/routeConfig';
 import { useFeatureFlag } from '@/hooks/useFeatureFlag';
 import ChatButtonZampLogo from '@/modules/pace/components/chat/ChatButtonZampLogo';
 import { useFilesPanelHeaderSlot } from '@/modules/pace/components/files-panel/FilesPanelHeaderSlot';
 import { setNewChatDraft } from '@/modules/pace/hooks/useChatDraftInput';
+import { usePaceConversationContext, usePaceLayoutContext } from '@/modules/pace/pace.context';
+import { CHAT_SIDEBAR_STATE } from '@/modules/pace/pace.types';
 
 interface AgentPanelHeaderProps {
   isActive: boolean;
   agentId: string;
   agentName: string;
+  agentDescription?: string;
+  avatarKey?: string;
   isAgentNameLoading?: boolean;
   onClose: () => void;
   onAgentNameChange?: (value: string) => void;
@@ -26,6 +30,8 @@ const AgentPanelHeader = ({
   isActive,
   agentId,
   agentName,
+  agentDescription,
+  avatarKey,
   isAgentNameLoading = false,
   onClose,
   onAgentNameChange,
@@ -33,6 +39,8 @@ const AgentPanelHeader = ({
   const headerSlot = useFilesPanelHeaderSlot();
   const router = useRouter();
   const { isEnabled: isAgentsFe } = useFeatureFlag(FEATURE_FLAGS.AGENTS_FE);
+  const { setActiveAgentInfo } = usePaceConversationContext();
+  const { requestInstantFilesPanelTransition, setChatSidebarState } = usePaceLayoutContext();
   const displayName = agentName || 'Agent';
 
   const handleClose = useCallback(() => {
@@ -41,8 +49,32 @@ const AgentPanelHeader = ({
 
   const handleChatWithAgent = useCallback(() => {
     setNewChatDraft(`I want to collaborate with ${displayName} `);
-    router.push(ROUTES_PATH.CHAT);
-  }, [displayName, router]);
+    setActiveAgentInfo({
+      id: agentId,
+      name: displayName,
+      ...(avatarKey ? { avatar: avatarKey } : {}),
+    });
+    setChatSidebarState(CHAT_SIDEBAR_STATE.SIDEBAR);
+    requestInstantFilesPanelTransition();
+    router.push(
+      getChatAgentRoute({
+        agentId,
+        agentName: displayName,
+        description: agentDescription,
+        avatarKey,
+        inChat: true,
+      }),
+    );
+  }, [
+    agentDescription,
+    agentId,
+    avatarKey,
+    displayName,
+    requestInstantFilesPanelTransition,
+    router,
+    setActiveAgentInfo,
+    setChatSidebarState,
+  ]);
 
   const header = (
     <div className='border-GRAY_300 bg-BG_WHITE flex h-[54px] shrink-0 items-center justify-between gap-4 border-b px-4'>

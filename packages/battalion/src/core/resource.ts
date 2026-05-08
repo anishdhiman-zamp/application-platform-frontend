@@ -132,6 +132,13 @@ function createApiClient(endpoints: ResourceEndpoints, transformResponse?: (resp
 
 export function defineResource<T extends z.ZodTypeAny>(config: ResourceConfig<T>): Resource {
   const { name, schema, endpoints, relations = {}, transformResponse } = config;
+  const registry = getResourceRegistry();
+  const existingResource = registry.get(name);
+
+  if (existingResource) {
+    getQueryGraph().addResource(existingResource);
+    return existingResource;
+  }
 
   const transactionConfig = config.transactions
     ? {
@@ -157,7 +164,7 @@ export function defineResource<T extends z.ZodTypeAny>(config: ResourceConfig<T>
     api: createApiClient(endpoints, transformResponse),
   };
 
-  getResourceRegistry().register(resource);
+  registry.register(resource);
   getQueryGraph().addResource(resource);
 
   return resource;

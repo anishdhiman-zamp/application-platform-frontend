@@ -9,20 +9,23 @@ interface ChatHistoryItemProps {
   conversation: FeedbackItemType;
   onSelect: (id: string | null, title?: string) => void;
   isStreaming?: boolean;
+  isTaskRunning?: boolean;
   isSelected?: boolean;
   isUnread?: boolean;
   needsInput?: boolean;
 }
 
-type DotState = 'needsInput' | 'streaming' | 'unread' | 'read';
+type DotState = 'needsInput' | 'streaming' | 'running' | 'unread' | 'read';
 
 const resolveDotState = (
   needsInput: boolean | undefined,
   isStreaming: boolean | undefined,
+  isTaskRunning: boolean | undefined,
   isUnread: boolean | undefined,
 ): DotState => {
   if (needsInput) return 'needsInput';
   if (isStreaming) return 'streaming';
+  if (isTaskRunning) return 'running';
   if (isUnread) return 'unread';
 
   return 'read';
@@ -31,6 +34,7 @@ const resolveDotState = (
 const DOT_COLOR: Record<DotState, string> = {
   needsInput: CSS_VARS.ORANGE_600,
   streaming: CSS_VARS.BLUE_700,
+  running: CSS_VARS.BLUE_700,
   unread: CSS_VARS.GREEN_700,
   read: CSS_VARS.GRAY_500,
 };
@@ -38,6 +42,7 @@ const DOT_COLOR: Record<DotState, string> = {
 const DOT_TITLE: Record<DotState, string> = {
   needsInput: 'Needs your input',
   streaming: 'Generating response…',
+  running: 'Task in progress…',
   unread: 'Mark as read',
   read: 'Mark as unread',
 };
@@ -46,18 +51,19 @@ const ChatHistoryItem = ({
   conversation,
   onSelect,
   isStreaming,
+  isTaskRunning,
   isSelected,
   isUnread,
   needsInput,
 }: ChatHistoryItemProps) => {
   const conversationId = conversation?.id;
-  const dotState = resolveDotState(needsInput, isStreaming, isUnread);
+  const dotState = resolveDotState(needsInput, isStreaming, isTaskRunning, isUnread);
   const dotColor = DOT_COLOR[dotState];
   const dotTitle = DOT_TITLE[dotState];
   const isToggleable = dotState === 'unread' || dotState === 'read';
   const dot = (
     <AnimatedDot
-      showAnimation={dotState === 'streaming'}
+      showAnimation={dotState === 'streaming' || dotState === 'running'}
       size={8}
       activeColor={dotColor}
       completeColor={dotColor}

@@ -1,11 +1,14 @@
 'use client';
 
 import { useCallback, useEffect, useRef, useState } from 'react';
-import { SIDEBAR_CONVERSATION_ID_PARAM } from 'modules/pace/pace.constants';
+import { NEW_CONVERSATION_ID, SIDEBAR_CONVERSATION_ID_PARAM } from 'modules/pace/pace.constants';
 import { CHAT_SIDEBAR_STATE, TAB_QUERY_PARAM } from 'modules/pace/pace.types';
+import { hasTabParam } from 'modules/pace/pace.utils';
 import { ROUTES_PATH } from '@/constants/routeConfig';
+import { useAppDispatch } from '@/hooks/toolkit';
 import { usePaceConversationContext, usePaceLayoutContext } from '@/modules/pace/pace.context';
 import { store } from '@/store';
+import { dynamicTabsActions } from '@/store/slices/dynamic-tabs.slice';
 
 interface UseChatSidebarStateProps {
   initialConversationId: string | null;
@@ -14,6 +17,7 @@ interface UseChatSidebarStateProps {
 export const useChatSidebarState = ({ initialConversationId }: UseChatSidebarStateProps) => {
   const { chatSidebarState, setChatSidebarState } = usePaceLayoutContext();
   const { setActiveAgentInfo, setActiveConversationId } = usePaceConversationContext();
+  const dispatch = useAppDispatch();
 
   const prevInitialConversationIdRef = useRef(initialConversationId);
   const internalUpdateRef = useRef(false);
@@ -22,38 +26,31 @@ export const useChatSidebarState = ({ initialConversationId }: UseChatSidebarSta
   const [conversationId, setConversationIdState] = useState<string | null>(initialConversationId);
   const [chatKey, setChatKey] = useState(0);
 
-  const hasTabParam = useCallback((params: URLSearchParams) => {
-    return Object.values(TAB_QUERY_PARAM).some((param) => params.has(param));
+  const getConversationUrl = useCallback((id: string | null, restoreExistingPanel: boolean) => {
+    const currentParams = new URLSearchParams(window.location.search);
+    const shouldKeepCurrentTabRoute = restoreExistingPanel && hasTabParam(currentParams);
+
+    const newBucket = id && !shouldKeepCurrentTabRoute ? store.getState().dynamicTabs.byConversation[id] : null;
+    const newActiveTabId = newBucket?.activeTabId ?? null;
+    const newActiveTab = newActiveTabId ? newBucket?.tabs.find((t) => t.id === newActiveTabId) : null;
+    const targetPath = shouldKeepCurrentTabRoute
+      ? `${window.location.pathname}${window.location.search}`
+      : (newActiveTab?.path ?? ROUTES_PATH.CHAT);
+
+    const url = new URL(targetPath, window.location.origin);
+
+    Object.values(TAB_QUERY_PARAM).forEach((param) => {
+      if (!shouldKeepCurrentTabRoute && !newActiveTab) url.searchParams.delete(param);
+    });
+
+    if (id) {
+      url.searchParams.set(SIDEBAR_CONVERSATION_ID_PARAM, id);
+    } else {
+      url.searchParams.delete(SIDEBAR_CONVERSATION_ID_PARAM);
+    }
+
+    return `${url.pathname}${url.search}`;
   }, []);
-
-  const getConversationUrl = useCallback(
-    (id: string | null, restoreExistingPanel: boolean) => {
-      const currentParams = new URLSearchParams(window.location.search);
-      const shouldKeepCurrentTabRoute = restoreExistingPanel && hasTabParam(currentParams);
-
-      const newBucket = id && !shouldKeepCurrentTabRoute ? store.getState().dynamicTabs.byConversation[id] : null;
-      const newActiveTabId = newBucket?.activeTabId ?? null;
-      const newActiveTab = newActiveTabId ? newBucket?.tabs.find((t) => t.id === newActiveTabId) : null;
-      const targetPath = shouldKeepCurrentTabRoute
-        ? `${window.location.pathname}${window.location.search}`
-        : (newActiveTab?.path ?? ROUTES_PATH.CHAT);
-
-      const url = new URL(targetPath, window.location.origin);
-
-      Object.values(TAB_QUERY_PARAM).forEach((param) => {
-        if (!shouldKeepCurrentTabRoute && !newActiveTab) url.searchParams.delete(param);
-      });
-
-      if (id) {
-        url.searchParams.set(SIDEBAR_CONVERSATION_ID_PARAM, id);
-      } else {
-        url.searchParams.delete(SIDEBAR_CONVERSATION_ID_PARAM);
-      }
-
-      return `${url.pathname}${url.search}`;
-    },
-    [hasTabParam],
-  );
 
   const handleConversationIdUpdate = useCallback(() => {
     const params = new URLSearchParams(window.location.search);
@@ -70,12 +67,22 @@ export const useChatSidebarState = ({ initialConversationId }: UseChatSidebarSta
   const setConversationId = useCallback(
     (id: string | null, title?: string) => {
       internalUpdateRef.current = true;
+
+      if (id) {
+        dispatch(
+          dynamicTabsActions.moveConversationBucket({
+            fromConversationId: NEW_CONVERSATION_ID,
+            toConversationId: id,
+          }),
+        );
+      }
+
       setConversationIdState(id);
       setActiveConversationId(id);
       setChatTitle(title || '');
       window.history.replaceState(null, '', getConversationUrl(id, false));
     },
-    [getConversationUrl, setActiveConversationId],
+    [dispatch, getConversationUrl, setActiveConversationId],
   );
 
   const startNewChat = useCallback(() => {

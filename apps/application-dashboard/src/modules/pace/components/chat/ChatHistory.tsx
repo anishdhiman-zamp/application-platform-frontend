@@ -6,6 +6,7 @@ import {
   unreadStore,
   useActiveStreamingIds,
   useInputsRequiredConversations,
+  useRunningTasksConversations,
   useUnreadConversations,
 } from '@zamp-platform/chat';
 import { useInfiniteScroll } from '@zamp-platform/tanstack-table';
@@ -20,7 +21,6 @@ import { useDebounce } from '@/hooks';
 import { useAppSelector } from '@/hooks/toolkit';
 import ChatHistoryItem from '@/modules/pace/components/chat/ChatHistoryItem';
 import ChatHistorySkeleton from '@/modules/pace/components/loaders/ChatHistorySkeleton';
-import EmptyStateListing from '@/modules/team/components/EmptyStateListing';
 import type { RootState } from '@/store';
 import type { FeedbackItemType } from '@/types/api/feedbacks.types';
 
@@ -52,6 +52,7 @@ const ChatHistory = ({
   const activeStreamingIds = useActiveStreamingIds();
   const unreadIds = useUnreadConversations();
   const inputsRequiredIds = useInputsRequiredConversations();
+  const runningTaskIds = useRunningTasksConversations();
 
   const [pagination, setPagination] = useState<{
     page: number;
@@ -90,7 +91,7 @@ const ChatHistory = ({
     },
   );
 
-  const { page, totalPages, conversations: allConversations } = pagination;
+  const { page, totalPages, totalCount, conversations: allConversations } = pagination;
   const hasMore = !isRecentMode && totalPages > 0 && page < totalPages;
   const isInitialLoading =
     allConversations.length === 0 &&
@@ -193,12 +194,13 @@ const ChatHistory = ({
   }, [allConversations.length, fetchMoreOnBottomReached, isRecentMode]);
 
   const visibleConversations = isRecentMode ? allConversations.slice(0, recentLimit) : allConversations;
+  const hasAdditionalRecentConversations = isRecentMode && totalCount > (recentLimit ?? 0);
 
   return (
     <div
       className={cn('mx-auto flex min-h-0 w-full flex-1 flex-col overflow-hidden bg-transparent', !compact && 'pt-6')}
     >
-      {!compact && (
+      {!compact && !isEmptyState && (
         <div className='flex shrink-0 flex-col gap-2 px-3 pb-4'>
           <div className='f-14-500 text-GRAY_600 flex h-6 items-center gap-1.5 pl-2 font-mono tracking-wide uppercase'>
             <span>Recent</span>
@@ -224,12 +226,6 @@ const ChatHistory = ({
         refetchFunction={handleRefetch}
         isError={isErrorConversationHistory}
         isNoData={isEmptyState}
-        noDataBanner={
-          <EmptyStateListing
-            title={!isRecentMode && debouncedSearch ? 'No matching conversations' : 'No conversations found'}
-            className='h-full flex-col items-center justify-center py-12 text-center'
-          />
-        }
         className='flex min-h-0 flex-1 flex-col overflow-hidden pb-2'
         disableAnimation
       >
@@ -241,12 +237,13 @@ const ChatHistory = ({
                 conversation={conversation}
                 onSelect={handleSelectConversation}
                 isStreaming={activeStreamingIds.has(conversation?.id)}
+                isTaskRunning={runningTaskIds.has(conversation?.id)}
                 isSelected={activeConversationId === conversation?.id}
                 isUnread={unreadIds.has(conversation?.id)}
                 needsInput={inputsRequiredIds.has(conversation?.id)}
               />
             ))}
-            {isRecentMode && viewMoreHref && !isEmptyState && (
+            {isRecentMode && viewMoreHref && hasAdditionalRecentConversations && (
               <Link
                 href={viewMoreHref}
                 className='text-GRAY_700 hover:text-GRAY_900 hover:bg-accent mt-4 flex h-8 w-full items-center rounded-lg pr-3 text-sm font-medium transition-colors'

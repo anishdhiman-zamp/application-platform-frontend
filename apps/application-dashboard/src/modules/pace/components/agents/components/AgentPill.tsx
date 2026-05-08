@@ -85,7 +85,7 @@ const AgentPill: FC<AgentPillProps> = ({ agentId, agentName, avatarKey, containe
         <PopoverTrigger asChild>
           <div
             ref={triggerRef}
-            className='border-GRAY_400 bg-BG_GRAY_2 hover:bg-GRAY_200 flex w-fit cursor-pointer items-center gap-1.5 rounded-lg border p-2 transition-colors'
+            className='border-GRAY_400 bg-BG_WHITE hover:bg-GRAY_200 flex w-fit cursor-pointer items-center gap-1.5 rounded-3xl border p-2 transition-colors'
           >
             <div className='flex size-3.5 shrink-0 items-center justify-center'>
               <ImageKitImage

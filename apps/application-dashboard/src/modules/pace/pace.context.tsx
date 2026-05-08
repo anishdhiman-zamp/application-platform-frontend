@@ -15,11 +15,9 @@ import {
 } from 'react';
 import { type MessageReferenceType, type UploadedFile } from '@zamp-platform/chat';
 import {
-  AGENTS_LISTING_CONVERSATION_ID,
   FILE_TREE_COLUMN_MAX_WIDTH,
   FILE_TREE_COLUMN_MIN_WIDTH,
   FILE_TREE_COLUMN_WIDTH,
-  FILES_LISTING_CONVERSATION_ID,
   FILES_PANEL_MAX_WIDTH,
   FILES_PANEL_MIN_WIDTH,
   FILES_PANEL_WIDTH,
@@ -28,10 +26,9 @@ import {
   SIDEBAR_MAX_WIDTH,
   SIDEBAR_MIN_WIDTH,
   SIDEBAR_WIDTH,
-  TASKS_LISTING_CONVERSATION_ID,
 } from 'modules/pace/pace.constants';
 import { CHAT_SIDEBAR_STATE, type ChatSidebarState, TAB_TYPE } from 'modules/pace/pace.types';
-import { getInitialSidebarState, getInitialWidth } from 'modules/pace/pace.utils';
+import { getInitialSidebarState, getInitialWidth, getRouteConversationId } from 'modules/pace/pace.utils';
 import { usePathname, useSearchParams } from 'next/navigation';
 import { ROUTES_PATH } from '@/constants/routeConfig';
 import { useAppDispatch, useAppSelector } from '@/hooks/toolkit';
@@ -74,6 +71,11 @@ export interface ActiveAgentInfo {
   autoLoopEnabled?: boolean;
 }
 
+export interface ActiveFileInfo {
+  path: string;
+  name: string;
+}
+
 interface PaceContextType {
   chatSidebarState: ChatSidebarState;
   prevChatSidebarState: ChatSidebarState;
@@ -111,8 +113,14 @@ interface PaceContextType {
   activeAgentInfo: ActiveAgentInfo | null;
   setActiveAgentInfo: (info: ActiveAgentInfo | null) => void;
 
+  activeFileInfo: ActiveFileInfo | null;
+  setActiveFileInfo: (info: ActiveFileInfo | null) => void;
+
   filesPanelOpen: boolean;
   isFilesPanelHydrated: boolean;
+  isFilesPanelTransitionInstant: boolean;
+  requestInstantFilesPanelTransition: defaultFnType;
+  consumeInstantFilesPanelTransition: defaultFnType;
 
   sidebarWidth: number;
   setSidebarWidth: (width: number) => void;
@@ -162,6 +170,9 @@ type PaceLayoutContextType = Pick<
   | 'setChatSidebarState'
   | 'filesPanelOpen'
   | 'isFilesPanelHydrated'
+  | 'isFilesPanelTransitionInstant'
+  | 'requestInstantFilesPanelTransition'
+  | 'consumeInstantFilesPanelTransition'
   | 'sidebarWidth'
   | 'setSidebarWidth'
   | 'persistSidebarWidth'
@@ -210,6 +221,8 @@ type PaceConversationContextType = Pick<
   | 'setChatMessageIntent'
   | 'activeAgentInfo'
   | 'setActiveAgentInfo'
+  | 'activeFileInfo'
+  | 'setActiveFileInfo'
   | 'selectedModel'
   | 'setSelectedModel'
 >;
@@ -270,10 +283,12 @@ export const PaceProvider = ({ children, initialNavSidebarExpanded = true }: Pac
   const [sharedFileReferences, setSharedFileReferences] = useState<UploadedFile[]>([]);
   const [chatMessageIntent, setChatMessageIntent] = useState<ChatMessageIntent | null>(null);
   const [activeAgentInfo, setActiveAgentInfo] = useState<ActiveAgentInfo | null>(null);
+  const [activeFileInfo, setActiveFileInfo] = useState<ActiveFileInfo | null>(null);
   const [activeConversationId, setActiveConversationIdRaw] = useState<string | null>(null);
   const [logoAnimationKey, setLogoAnimationKey] = useState(0);
   const filesPanelOpen = hasActivePanelTab;
   const [isFilesPanelHydrated, setIsFilesPanelHydrated] = useState(false);
+  const [isFilesPanelTransitionInstant, setIsFilesPanelTransitionInstant] = useState(false);
   const [sidebarWidth, setSidebarWidthRaw] = useState(() =>
     getInitialWidth(LOCAL_STORAGE_KEYS.PACE_SIDEBAR_WIDTH, SIDEBAR_MIN_WIDTH, SIDEBAR_MAX_WIDTH, SIDEBAR_WIDTH),
   );
@@ -356,16 +371,10 @@ export const PaceProvider = ({ children, initialNavSidebarExpanded = true }: Pac
   );
 
   useLayoutEffect(() => {
-    const routeConversationId =
-      pathname === ROUTES_PATH.CHAT
-        ? (searchParams?.get(SIDEBAR_CONVERSATION_ID_PARAM) ?? null)
-        : pathname === ROUTES_PATH.CHAT_FILES
-          ? FILES_LISTING_CONVERSATION_ID
-          : pathname === ROUTES_PATH.CHAT_TASK
-            ? TASKS_LISTING_CONVERSATION_ID
-            : pathname === ROUTES_PATH.CHAT_AGENTS
-              ? AGENTS_LISTING_CONVERSATION_ID
-              : null;
+    const routeConversationId = getRouteConversationId(
+      pathname,
+      searchParams ? new URLSearchParams(searchParams.toString()) : null,
+    );
 
     if (activeConversationId === routeConversationId) return;
 
@@ -503,6 +512,14 @@ export const PaceProvider = ({ children, initialNavSidebarExpanded = true }: Pac
 
   const triggerLogoAnimation = useCallback(() => {
     setLogoAnimationKey((prev) => prev + 1);
+  }, []);
+
+  const requestInstantFilesPanelTransition = useCallback(() => {
+    setIsFilesPanelTransitionInstant(true);
+  }, []);
+
+  const consumeInstantFilesPanelTransition = useCallback(() => {
+    setIsFilesPanelTransitionInstant(false);
   }, []);
 
   const registerSelectConversation = useCallback((callback: (id: string, title?: string) => void) => {
@@ -692,6 +709,9 @@ export const PaceProvider = ({ children, initialNavSidebarExpanded = true }: Pac
 
       filesPanelOpen,
       isFilesPanelHydrated,
+      isFilesPanelTransitionInstant,
+      requestInstantFilesPanelTransition,
+      consumeInstantFilesPanelTransition,
 
       sidebarWidth,
       setSidebarWidth,
@@ -737,6 +757,9 @@ export const PaceProvider = ({ children, initialNavSidebarExpanded = true }: Pac
 
       filesPanelOpen,
       isFilesPanelHydrated,
+      isFilesPanelTransitionInstant,
+      requestInstantFilesPanelTransition,
+      consumeInstantFilesPanelTransition,
 
       sidebarWidth,
       setSidebarWidth,
@@ -797,6 +820,9 @@ export const PaceProvider = ({ children, initialNavSidebarExpanded = true }: Pac
       activeAgentInfo,
       setActiveAgentInfo,
 
+      activeFileInfo,
+      setActiveFileInfo,
+
       selectedModel,
       setSelectedModel,
     }),
@@ -815,6 +841,8 @@ export const PaceProvider = ({ children, initialNavSidebarExpanded = true }: Pac
       chatMessageIntent,
 
       activeAgentInfo,
+
+      activeFileInfo,
 
       selectedModel,
       setSelectedModel,
@@ -888,8 +916,14 @@ export const PaceProvider = ({ children, initialNavSidebarExpanded = true }: Pac
       activeAgentInfo,
       setActiveAgentInfo,
 
+      activeFileInfo,
+      setActiveFileInfo,
+
       filesPanelOpen,
       isFilesPanelHydrated,
+      isFilesPanelTransitionInstant,
+      requestInstantFilesPanelTransition,
+      consumeInstantFilesPanelTransition,
 
       sidebarWidth,
       setSidebarWidth,
@@ -962,8 +996,13 @@ export const PaceProvider = ({ children, initialNavSidebarExpanded = true }: Pac
 
       activeAgentInfo,
 
+      activeFileInfo,
+
       filesPanelOpen,
       isFilesPanelHydrated,
+      isFilesPanelTransitionInstant,
+      requestInstantFilesPanelTransition,
+      consumeInstantFilesPanelTransition,
 
       sidebarWidth,
       setSidebarWidth,

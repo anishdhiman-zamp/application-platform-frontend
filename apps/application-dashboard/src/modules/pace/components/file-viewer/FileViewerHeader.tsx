@@ -28,6 +28,7 @@ import { setNewChatDraft } from '@/modules/pace/hooks/useChatDraftInput';
 import { useFileViewerHeaderActions } from '@/modules/pace/hooks/useFileViewerHeaderActions';
 import { useFileViewerHeaderRename } from '@/modules/pace/hooks/useFileViewerHeaderRename';
 import { usePaceConversationContext, usePaceLayoutContext } from '@/modules/pace/pace.context';
+import { CHAT_SIDEBAR_STATE } from '@/modules/pace/pace.types';
 
 interface FileViewerHeaderProps {
   filePath: string;
@@ -64,8 +65,15 @@ const FileViewerHeader = memo(
     const router = useRouter();
     const pathname = usePathname();
     const { closeAllTabs } = useDynamicTabs();
-    const { wordWrapEnabled, toggleWordWrap, toggleTreeSidebar, isTreeSidebarOpen } = usePaceLayoutContext();
-    const { setPendingFileReferences } = usePaceConversationContext();
+    const {
+      wordWrapEnabled,
+      toggleWordWrap,
+      toggleTreeSidebar,
+      isTreeSidebarOpen,
+      setChatSidebarState,
+      requestInstantFilesPanelTransition,
+    } = usePaceLayoutContext();
+    const { setActiveFileInfo } = usePaceConversationContext();
     const isListingSurface = isListingPanelSurface(pathname);
 
     const {
@@ -98,8 +106,10 @@ const FileViewerHeader = memo(
     const handleChatWithFile = () => {
       if (!filePath || !fileName) return;
 
-      setPendingFileReferences([{ path: filePath, name: fileName }]);
       setNewChatDraft(`Let's discuss ${fileName} `);
+      setActiveFileInfo({ path: filePath, name: fileName });
+      setChatSidebarState(CHAT_SIDEBAR_STATE.SIDEBAR);
+      requestInstantFilesPanelTransition();
       router.push(ROUTES_PATH.CHAT);
     };
 

@@ -116,22 +116,34 @@ const AgentDetailPage = ({
       normalizeAgentDescription(agentData.description) ||
       normalizeAgentDescription(agentListEntry?.description) ||
       normalizeAgentDescription(agentDescription);
-    const nextName = agentData.name || agentName || editName;
+    const nextName = agentData.name || agentName || '';
+    const nextAvatarKey = agentData.avatar ?? avatarKey;
 
-    setEditName(nextName);
-    setEditDescription(nextDescription);
+    setEditName((currentName) => (currentName === nextName ? currentName : nextName));
+    setEditDescription((currentDescription) =>
+      currentDescription === nextDescription ? currentDescription : nextDescription,
+    );
 
-    onAgentMetadataChange?.(nextName, {
-      description: nextDescription,
-      avatarKey: agentData.avatar ?? resolvedAvatarKey,
-    });
+    const hasMetadataChanged =
+      nextName !== agentName ||
+      nextDescription !== normalizeAgentDescription(agentDescription) ||
+      (nextAvatarKey || '') !== (avatarKey || '');
+
+    if (hasMetadataChanged) {
+      onAgentMetadataChange?.(nextName, {
+        description: nextDescription,
+        avatarKey: nextAvatarKey,
+      });
+    }
   }, [
-    agentData,
+    agentData?.avatar,
+    agentData?.description,
+    agentData?.id,
+    agentData?.name,
     agentListEntry?.description,
     agentDescription,
     agentName,
-    editName,
-    resolvedAvatarKey,
+    avatarKey,
     onAgentMetadataChange,
   ]);
 
@@ -234,6 +246,8 @@ const AgentDetailPage = ({
           isActive={isPanelHeaderActive}
           agentId={agentId}
           agentName={editName}
+          agentDescription={editDescription}
+          avatarKey={resolvedAvatarKey || undefined}
           isAgentNameLoading={isLoadingAgent && !editName}
           onAgentNameChange={handleNameChange}
           onClose={onPanelHeaderClose}

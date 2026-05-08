@@ -15,7 +15,7 @@ const ChatHome = () => {
 
   return (
     <div className='flex snap-mandatory flex-col items-center gap-y-2.5 pt-4.5'>
-      <ZampIcon size={32} interactive playSignal={logoAnimationKey} />
+      <ZampIcon size={32} hitAreaSize={48} interactive playSignal={logoAnimationKey} />
       <h1 className='f-20-500 text-GRAY_1000'>{greeting}</h1>
     </div>
   );

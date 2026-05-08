@@ -28,6 +28,7 @@ import { usePathname } from 'next/navigation';
 import { useEventBus } from '@/app/_providers/sse-provider';
 import { getChatTaskRoute } from '@/constants/routeConfig';
 import { useResourceAccess } from '@/hooks/useResourceAccess';
+import ChatHome from '@/modules/pace/components/chat/ChatHome';
 import ChatTopbar from '@/modules/pace/components/chat/ChatTopbar';
 import ModelSelector from '@/modules/pace/components/chat/ModelSelector';
 import { shouldUseSingleViewerMode } from '@/modules/pace/components/files-panel/files-panel.utils';
@@ -88,6 +89,7 @@ const ChatSidebarContent = ({
   const { chatSidebarState, setChatSidebarState } = usePaceLayoutContext();
   const {
     activeAgentInfo,
+    activeFileInfo,
     selectedModel,
     setSelectedModel,
     sharedFileReferences,
@@ -130,6 +132,7 @@ const ChatSidebarContent = ({
     Boolean(conversationId) &&
     checkUserPrivilege(CONVERSATION_ACCESS_PRIVILEGES.VIEWER) &&
     !checkUserPrivilege(PERMISSION_ROLES.ADMIN);
+  const shouldShowAgentHome = !conversationId && activeTab?.type === TAB_TYPE.AGENT;
 
   const { isDragOver, dropZoneProps } = useFileDragDrop({
     onFileDrop: (files) => fileDropHandlerRef.current?.(files),
@@ -369,10 +372,16 @@ const ChatSidebarContent = ({
           setExternalFileReferences={setSharedFileReferences}
           externalFilePathsRef={sharedExternalFilePaths}
           metadata={
-            activeAgentInfo?.id
+            activeAgentInfo?.id || activeFileInfo
               ? {
-                  agent_id: activeAgentInfo.id,
-                  ...(activeAgentInfo.avatar && { avatar: activeAgentInfo.avatar }),
+                  ...(activeAgentInfo?.id && {
+                    agent_id: activeAgentInfo.id,
+                    ...(activeAgentInfo.avatar && { avatar: activeAgentInfo.avatar }),
+                  }),
+                  ...(activeFileInfo && {
+                    file_path: activeFileInfo.path,
+                    file_name: activeFileInfo.name,
+                  }),
                 }
               : undefined
           }
@@ -388,15 +397,17 @@ const ChatSidebarContent = ({
   return (
     <div className='bg-BG_WHITE relative mx-auto flex h-full w-full flex-1 flex-col' {...dropZoneProps}>
       <DropOverlay isVisible={isDragOver} />
-      <div>
-        <ChatTopbar
-          title={chatTitle || 'Start a new chat'}
-          conversationId={conversationId}
-          organizationId={organizationId}
-          onTitleChange={setChatTitle}
-          onDeleteConversation={startNewChat}
-        />
-      </div>
+      {!shouldShowAgentHome && (
+        <div>
+          <ChatTopbar
+            title={chatTitle || 'Start a new chat'}
+            conversationId={conversationId}
+            organizationId={organizationId}
+            onTitleChange={setChatTitle}
+            onDeleteConversation={startNewChat}
+          />
+        </div>
+      )}
       <ChatConversationContent
         conversationId={conversationId}
         organizationId={organizationId}
@@ -411,6 +422,7 @@ const ChatSidebarContent = ({
         addMentionRef={addMentionRef}
         currentUserName={currentUserName}
         scrollContainerRef={scrollContainerRef}
+        emptyState={shouldShowAgentHome ? <ChatHome /> : undefined}
       />
 
       {!isConversationNotFound && (

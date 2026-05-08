@@ -6,7 +6,8 @@ import { motion, useReducedMotion } from 'framer-motion';
 import { getSidebarTransitionDirection, getSidebarTransitions, NO_ANIMATION } from 'modules/pace/pace.animations';
 import { SIDEBAR_CONVERSATION_ID_PARAM, SIDEBAR_MIN_WIDTH } from 'modules/pace/pace.constants';
 import { CHAT_SIDEBAR_STATE } from 'modules/pace/pace.types';
-import { useSearchParams } from 'next/navigation';
+import { getRouteConversationId } from 'modules/pace/pace.utils';
+import { usePathname, useSearchParams } from 'next/navigation';
 import ChatSidebarInner from '@/modules/pace/components/layout/chat-sidebar/ChatSidebarInner';
 import { useChatSidebarState } from '@/modules/pace/hooks/useChatSidebarState';
 import { usePaceActionsContext, usePaceConversationContext, usePaceLayoutContext } from '@/modules/pace/pace.context';
@@ -28,8 +29,13 @@ const ChatSidebar = () => {
   const isSendFromHome = chatMessageIntent !== null;
 
   const isFilesPanelFullWidth = filesPanelOpen && isFilesPanelExpanded;
+  const pathname = usePathname();
   const searchParams = useSearchParams();
   const initialConversationId = searchParams?.get(SIDEBAR_CONVERSATION_ID_PARAM) ?? null;
+  const routeConversationId = useMemo(
+    () => getRouteConversationId(pathname, searchParams ? new URLSearchParams(searchParams.toString()) : null),
+    [pathname, searchParams],
+  );
   const { chatTitle, setChatTitle, conversationId, setConversationId, chatKey, startNewChat } = useChatSidebarState({
     initialConversationId,
   });
@@ -135,8 +141,8 @@ const ChatSidebar = () => {
   }, [registerSelectConversation, handleSelectConversation]);
 
   useEffect(() => {
-    setActiveConversationId(conversationId);
-  }, [conversationId, setActiveConversationId]);
+    setActiveConversationId(conversationId ?? routeConversationId);
+  }, [conversationId, routeConversationId, setActiveConversationId]);
 
   useEffect(() => {
     const raf = requestAnimationFrame(() => {

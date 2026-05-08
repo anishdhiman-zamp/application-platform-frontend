@@ -4,11 +4,20 @@ import {
   ChatMessageType,
   inputsRequiredStore,
   ResourceType,
+  runningTasksStore,
   SenderType,
   type StreamingState,
   streamingStateStore,
+  TASK_STATUS,
+  type TaskStatus,
   unreadStore,
 } from '@zamp-platform/chat';
+
+const TERMINAL_TASK_STATUSES: ReadonlySet<TaskStatus> = new Set([
+  TASK_STATUS.COMPLETED,
+  TASK_STATUS.FAILED,
+  TASK_STATUS.CANCELED,
+]);
 
 import { conversationSSERegistry } from '../registry/conversationSSERegistry';
 import { type BrowserStreamingAvailableEvent, ConversationEventType } from '../types/conversation-sse.types';
@@ -61,6 +70,14 @@ export function handleConversationSSEEvent(
       case TaskSSEEventType.TASK_UPDATE: {
         const taskId = event.task_id as string;
         const updatedFields = (event.updated_fields as Record<string, unknown>) || {};
+        const nextStatus = updatedFields.status as TaskStatus | undefined;
+        if (taskId && nextStatus) {
+          if (nextStatus === TASK_STATUS.IN_PROGRESS) {
+            runningTasksStore.markRunning(conversationId, taskId);
+          } else if (TERMINAL_TASK_STATUSES.has(nextStatus)) {
+            runningTasksStore.markFinished(conversationId, taskId);
+          }
+        }
         callbacks.onTaskUpdate?.(taskId, updatedFields);
         return;
       }

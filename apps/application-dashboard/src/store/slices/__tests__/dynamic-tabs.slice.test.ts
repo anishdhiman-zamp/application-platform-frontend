@@ -1,4 +1,5 @@
 import { configureStore } from '@reduxjs/toolkit';
+import { NEW_CONVERSATION_ID } from '@/modules/pace/pace.constants';
 import { TAB_TYPE } from '@/modules/pace/pace.types';
 import dynamicTabsReducer, {
   dynamicTabsActions,
@@ -164,5 +165,49 @@ describe('dynamicTabs slice — conversation-keyed', () => {
 
     store.dispatch(dynamicTabsActions.setActiveConversation('conv-a'));
     expect(selectActiveConversationPanelState(store.getState()).isTreeSidebarOpen).toBe(true);
+  });
+
+  it('moves the pending new-chat bucket to the created conversation', () => {
+    const store = buildStore();
+
+    store.dispatch(dynamicTabsActions.setActiveConversation(NEW_CONVERSATION_ID));
+    store.dispatch(
+      dynamicTabsActions.openTab({
+        id: 'agent-1',
+        name: 'Research Agent',
+        path: '/chat?a=agent-1&title=Research+Agent',
+        type: TAB_TYPE.AGENT,
+        metadata: { avatarKey: 'agent_1' },
+      }),
+    );
+    store.dispatch(
+      dynamicTabsActions.patchActiveConversationPanelState({
+        isFilesPanelExpanded: true,
+        isTreeSidebarOpen: false,
+      }),
+    );
+
+    store.dispatch(
+      dynamicTabsActions.moveConversationBucket({
+        fromConversationId: NEW_CONVERSATION_ID,
+        toConversationId: 'conversation-1',
+      }),
+    );
+    store.dispatch(dynamicTabsActions.setActiveConversation('conversation-1'));
+
+    expect(selectDynamicTabs(store.getState())).toMatchObject([
+      {
+        id: 'agent-1',
+        name: 'Research Agent',
+        path: '/chat?a=agent-1&title=Research+Agent',
+        type: TAB_TYPE.AGENT,
+        metadata: { avatarKey: 'agent_1' },
+      },
+    ]);
+    expect(selectActiveTabId(store.getState())).toBe('agent-1');
+    expect(selectActiveConversationPanelState(store.getState())).toMatchObject({
+      isFilesPanelExpanded: true,
+      isTreeSidebarOpen: false,
+    });
   });
 });

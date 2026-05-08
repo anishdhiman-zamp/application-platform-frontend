@@ -13,7 +13,7 @@ const ChatHomePane = () => {
     return <BrowserTabsContainer />;
   }
 
-  if (activeTab && activeTab.type !== TAB_TYPE.FILE) {
+  if (activeTab && activeTab.type !== TAB_TYPE.FILE && activeTab.type !== TAB_TYPE.AGENT) {
     return null;
   }
 

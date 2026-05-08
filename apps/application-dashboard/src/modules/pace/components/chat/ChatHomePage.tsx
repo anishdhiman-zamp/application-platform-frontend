@@ -31,6 +31,7 @@ import ChatHome from '@/modules/pace/components/chat/ChatHome';
 import ModelSelector from '@/modules/pace/components/chat/ModelSelector';
 import VoiceChatSlot from '@/modules/pace/components/chat/VoiceChatSlot';
 import { useDynamicTabs } from '@/modules/pace/components/dynamic-tabs/useDynamicTabs';
+import FilePill from '@/modules/pace/components/files/FilePill';
 import { shouldUseSingleViewerMode } from '@/modules/pace/components/files-panel/files-panel.utils';
 import { CHAT_DRAFT_UPDATE_EVENT, useChatDraftInput } from '@/modules/pace/hooks/useChatDraftInput';
 import { useReferencePicker } from '@/modules/pace/hooks/useReferencePicker';
@@ -54,6 +55,9 @@ const ChatHomePage = () => {
     sharedExternalFilePaths,
     selectedModel,
     setSelectedModel,
+    activeAgentInfo,
+    activeFileInfo,
+    setActiveFileInfo,
   } = usePaceConversationContext();
   const { startNewChat } = usePaceActionsContext();
 
@@ -88,6 +92,7 @@ const ChatHomePage = () => {
   });
 
   const isExpanded = chatSidebarState === CHAT_SIDEBAR_STATE.EXPANDED;
+  const shouldKeepActivePanelOnSend = Boolean(activeTab);
 
   const modelSelectorSlot = useMemo(
     () => <ModelSelector value={selectedModel} onChange={setSelectedModel} />,
@@ -120,6 +125,15 @@ const ChatHomePage = () => {
     },
     [activeTab, expandSidebarIfCollapsed, openSingleFileTab, openTab, pathname],
   );
+
+  const handleOpenActiveFile = useCallback(() => {
+    if (!activeFileInfo) return;
+    handleFileOpen(activeFileInfo.path, activeFileInfo.name);
+  }, [activeFileInfo, handleFileOpen]);
+
+  const handleDetachActiveFile = useCallback(() => {
+    setActiveFileInfo(null);
+  }, [setActiveFileInfo]);
 
   const handleDatasetOpen = useCallback(
     (datasetId: string, name: string) => {
@@ -157,23 +171,44 @@ const ChatHomePage = () => {
       createConversationActions({
         createConversationV2: async (payload: CreateConversationPayloadTypeV2) => {
           const fileRefs = payload.message_content?.file_references;
+          const agentMetadata = activeAgentInfo?.id
+            ? {
+                agent_id: activeAgentInfo.id,
+                ...(activeAgentInfo.avatar && { avatar: activeAgentInfo.avatar }),
+              }
+            : undefined;
+          const fileMetadata = activeFileInfo
+            ? { file_path: activeFileInfo.path, file_name: activeFileInfo.name }
+            : undefined;
+          const metadata =
+            agentMetadata || fileMetadata ? { ...(agentMetadata ?? {}), ...(fileMetadata ?? {}) } : undefined;
 
-          startNewChat();
+          if (!shouldKeepActivePanelOnSend) {
+            startNewChat();
+          }
 
           setChatMessageIntent({
             message: payload.message_content?.text || '',
             fileReferences: fileRefs?.map((ref) => ({ path: ref.path, name: ref.name })),
             references: payload.message_content?.references,
             llmModel: payload.llm_model,
+            metadata,
             autoLoopEnabled: payload.pev_enabled,
           });
 
-          setChatSidebarState(CHAT_SIDEBAR_STATE.EXPANDED);
+          setChatSidebarState(shouldKeepActivePanelOnSend ? CHAT_SIDEBAR_STATE.SIDEBAR : CHAT_SIDEBAR_STATE.EXPANDED);
 
           return { conversation_id: 'pending', message_id: '', status_message: '', title: '' };
         },
       }),
-    [startNewChat, setChatMessageIntent, setChatSidebarState],
+    [
+      activeAgentInfo,
+      activeFileInfo,
+      shouldKeepActivePanelOnSend,
+      startNewChat,
+      setChatMessageIntent,
+      setChatSidebarState,
+    ],
   );
 
   const drainPendingMentions = useCallback(() => {
@@ -280,6 +315,16 @@ const ChatHomePage = () => {
                         >
                           <ChatHome />
                           <div className='mt-7 w-full shrink-0 px-3'>
+                            {activeFileInfo && (
+                              <div className='mb-2 flex flex-wrap items-center gap-2'>
+                                <FilePill
+                                  filePath={activeFileInfo.path}
+                                  fileName={activeFileInfo.name}
+                                  onOpen={handleOpenActiveFile}
+                                  onDetach={handleDetachActiveFile}
+                                />
+                              </div>
+                            )}
                             <ConnectedChatInput
                               resourceType={ResourceType.ORGANIZATION}
                               resourceId={organizationId}

@@ -240,6 +240,55 @@ export const dynamicTabsSlice = createSlice({
       bucket.activeTabId = null;
     },
 
+    moveConversationBucket: (
+      state,
+      action: PayloadAction<{ fromConversationId: string; toConversationId: string }>,
+    ) => {
+      const { fromConversationId, toConversationId } = action.payload;
+
+      if (!fromConversationId || !toConversationId || fromConversationId === toConversationId) return;
+
+      const source = state.byConversation[fromConversationId];
+
+      if (!source) return;
+
+      const target = state.byConversation[toConversationId];
+
+      if (!target) {
+        state.byConversation[toConversationId] = source;
+      } else {
+        const mergedTabs = [...target.tabs];
+
+        source.tabs.forEach((sourceTab) => {
+          const existingIndex = mergedTabs.findIndex(
+            (targetTab) =>
+              targetTab.id === sourceTab.id && (targetTab.type ?? TAB_TYPE.FILE) === (sourceTab.type ?? TAB_TYPE.FILE),
+          );
+
+          if (existingIndex >= 0) {
+            mergedTabs[existingIndex] = sourceTab;
+          } else {
+            mergedTabs.push(sourceTab);
+          }
+        });
+
+        state.byConversation[toConversationId] = {
+          tabs: mergedTabs,
+          activeTabId: source.activeTabId ?? target.activeTabId,
+          panelState: normalizePanelState({
+            ...target.panelState,
+            ...source.panelState,
+          }),
+        };
+      }
+
+      delete state.byConversation[fromConversationId];
+
+      if (state.activeConversationId === fromConversationId) {
+        state.activeConversationId = toConversationId;
+      }
+    },
+
     patchActiveConversationPanelState: (state, action: PayloadAction<Partial<ConversationPanelState>>) => {
       const bucket = ensureActiveBucket(state);
 
@@ -317,6 +366,7 @@ dynamicTabsListenerMiddleware.startListening({
     dynamicTabsActions.updateTab,
     dynamicTabsActions.reorderTabs,
     dynamicTabsActions.clearAllTabs,
+    dynamicTabsActions.moveConversationBucket,
     dynamicTabsActions.patchActiveConversationPanelState,
     dynamicTabsActions.toggleActiveConversationPanelState,
   ),

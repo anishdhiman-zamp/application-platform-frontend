@@ -161,20 +161,33 @@ export const ToolCallBlock = ({
           )}
         >
           <div className='flex flex-1 items-center gap-3'>
-            <div className='flex items-center gap-x-2'>
-              {!embedded && (
-                <div className={cn('flex h-3.5 w-3.5 items-center justify-center', flatShell ? 'bg-BG_WHITE' : '')}>
-                  {icon?.length ? (
-                    <ImageWithFallback src={icon} alt={toolName} className='h-3 w-3' />
-                  ) : (
-                    <AnimatedTerminalIcon showAnimation={!is_complete} size={14} />
-                  )}
-                </div>
-              )}
-
-              {!is_complete ? (
-                <ShimmerText text={toolName} autoAnimate={true} />
-              ) : (
+            {!is_complete ? (
+              <ShimmerText
+                text={toolName}
+                autoAnimate
+                leadingIcon={
+                  !embedded ? (
+                    <div className={cn('flex h-3.5 w-3.5 items-center justify-center', flatShell ? 'bg-BG_WHITE' : '')}>
+                      {icon?.length ? (
+                        <ImageWithFallback src={icon} alt={toolName} className='h-3 w-3' />
+                      ) : (
+                        <AnimatedTerminalIcon showAnimation={false} completeColor='currentColor' size={14} />
+                      )}
+                    </div>
+                  ) : undefined
+                }
+              />
+            ) : (
+              <div className='flex items-center gap-x-2'>
+                {!embedded && (
+                  <div className={cn('flex h-3.5 w-3.5 items-center justify-center', flatShell ? 'bg-BG_WHITE' : '')}>
+                    {icon?.length ? (
+                      <ImageWithFallback src={icon} alt={toolName} className='h-3 w-3' />
+                    ) : (
+                      <AnimatedTerminalIcon showAnimation={false} size={14} />
+                    )}
+                  </div>
+                )}
                 <span
                   className={cn(
                     'font-420 text-[13px]',
@@ -183,8 +196,8 @@ export const ToolCallBlock = ({
                 >
                   {toolName}
                 </span>
-              )}
-            </div>
+              </div>
+            )}
 
             {showWatchButton && onWatchStream && isBrowserStreamingAvailable && (
               <Button

@@ -29,7 +29,8 @@ import {
 } from '@/modules/pace/components/files/files.constants';
 import { setNewChatDraft } from '@/modules/pace/hooks/useChatDraftInput';
 import useFileViewerData from '@/modules/pace/hooks/useFileViewer';
-import { usePaceConversationContext } from '@/modules/pace/pace.context';
+import { usePaceConversationContext, usePaceLayoutContext } from '@/modules/pace/pace.context';
+import { CHAT_SIDEBAR_STATE } from '@/modules/pace/pace.types';
 
 interface FileListingDetailPanelProps {
   filePath: string;
@@ -41,7 +42,8 @@ const FileListingDetailPanel = ({ filePath, onClose }: FileListingDetailPanelPro
   const [htmlViewMode] = useState<HtmlViewMode>(HTML_VIEW_OPTIONS[0].value);
   const [spreadsheetViewMode] = useState<SpreadsheetViewMode>(SPREADSHEET_VIEW_OPTIONS[0].value);
   const router = useRouter();
-  const { setPendingFileReferences } = usePaceConversationContext();
+  const { setActiveFileInfo } = usePaceConversationContext();
+  const { setChatSidebarState, requestInstantFilesPanelTransition } = usePaceLayoutContext();
 
   const handleSaveError = useCallback((error: unknown) => {
     captureException(error instanceof Error ? error : new Error(`File save failed: ${JSON.stringify(error)}`));
@@ -73,8 +75,10 @@ const FileListingDetailPanel = ({ filePath, onClose }: FileListingDetailPanelPro
   const handleChatWithFile = () => {
     if (!filePath || !fileName) return;
 
-    setPendingFileReferences([{ path: filePath, name: fileName }]);
     setNewChatDraft(`Let's discuss ${fileName} `);
+    setActiveFileInfo({ path: filePath, name: fileName });
+    setChatSidebarState(CHAT_SIDEBAR_STATE.SIDEBAR);
+    requestInstantFilesPanelTransition();
     router.push(ROUTES_PATH.CHAT);
   };
 

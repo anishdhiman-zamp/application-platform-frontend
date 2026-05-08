@@ -192,7 +192,7 @@ export const Message: FC<MessageProps> = ({
             (embeddedInStepSummary
               ? 'relative w-full max-w-none min-w-0'
               : 'relative w-full max-w-[min(100%,700px)] min-w-0'),
-          shouldAlignRight && !isUserInputsRespondedBubble && 'bg-GRAY_100 rounded-[10px] px-4 py-3',
+          shouldAlignRight && !isUserInputsRespondedBubble && 'bg-GRAY_100 rounded-[16px] px-4 py-3',
           isUserMessage && userBubbleLayoutClassName,
         )}
       >
@@ -222,7 +222,7 @@ export const Message: FC<MessageProps> = ({
           />
         </div>
         {isUserMessage && isOverflowing && !isExpanded && !isInputsRespondedBlock && (
-          <div className='from-GRAY_100 pointer-events-none absolute inset-x-0 bottom-0 h-16 rounded-b-[10px] bg-linear-to-t from-20% to-transparent' />
+          <div className='from-GRAY_100 pointer-events-none absolute inset-x-0 bottom-0 h-16 rounded-b-[16px] bg-linear-to-t from-20% to-transparent' />
         )}
         {isUserMessage && isOverflowing && !isInputsRespondedBlock && (
           <div

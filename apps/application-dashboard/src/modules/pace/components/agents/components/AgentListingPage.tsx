@@ -176,6 +176,8 @@ const AgentListingPage = () => {
           isActive={Boolean(selectedAgentId)}
           agentId={selectedAgentId}
           agentName={selectedAgentName}
+          agentDescription={selectedAgentDescription}
+          avatarKey={selectedAgentAvatarKey}
           onClose={handleCloseAgentPanel}
         />
       }

@@ -110,7 +110,7 @@ const TaskStatusCounts: FC<TaskStatusCountsProps> = ({
         <PopoverTrigger asChild>
           <div
             ref={triggerRef}
-            className='border-GRAY_400 bg-BG_GRAY_2 hover:bg-GRAY_200 flex w-fit cursor-pointer items-center gap-3 rounded-[8px] border p-2 transition-colors'
+            className='border-GRAY_400 bg-BG_WHITE hover:bg-GRAY_200 flex w-fit cursor-pointer items-center gap-3 rounded-3xl border p-2 transition-colors'
           >
             {visiblePillStatuses?.map((status) => (
               <div key={status} className='flex items-center gap-1.5'>

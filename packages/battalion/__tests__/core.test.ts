@@ -39,6 +39,24 @@ describe('Battalion Core', () => {
       expect(getResourceRegistry().get('Page')).toBe(PageResource);
     });
 
+    it('should reuse an already registered resource when a module is evaluated again', () => {
+      const PageResource = defineResource({
+        name: 'Page',
+        schema: z.object({ id: z.string() }),
+        endpoints: { list: '/api/pages' },
+      });
+
+      const ReloadedPageResource = defineResource({
+        name: 'Page',
+        schema: z.object({ id: z.string() }),
+        endpoints: { list: '/api/pages' },
+      });
+
+      expect(ReloadedPageResource).toBe(PageResource);
+      expect(getResourceRegistry().getAll()).toHaveLength(1);
+      expect(getQueryGraph().getAllNodes()).toHaveLength(1);
+    });
+
     it('should create a resource with live sync config', () => {
       const PageResource = defineResource({
         name: 'Page',

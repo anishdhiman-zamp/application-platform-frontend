@@ -24,6 +24,7 @@ import {
 import { ScrollContainer, type ScrollContainerRef } from '@zamp-platform/ui';
 import { cn } from '@zamp-platform/ui/utils';
 import AgentPill from 'modules/pace/components/agents/components/AgentPill';
+import FilePill from 'modules/pace/components/files/FilePill';
 import TaskStatusCounts from 'modules/pace/module/TaskStatusCounts';
 import CommonWrapper from '@/components/commonWrapper';
 import { SkeletonTypes } from '@/components/commonWrapper/commonWrapper.types';
@@ -64,6 +65,7 @@ export interface ChatConversationContentProps {
   addMentionRef: React.RefObject<((payload: MentionInsertPayload) => void) | null>;
   currentUserName: string;
   scrollContainerRef?: React.RefObject<ScrollContainerRef | null>;
+  emptyState?: React.ReactNode;
 }
 
 const ChatConversationContent = ({
@@ -80,6 +82,7 @@ const ChatConversationContent = ({
   addMentionRef,
   currentUserName,
   scrollContainerRef,
+  emptyState,
 }: ChatConversationContentProps) => {
   const dispatch = useAppDispatch();
   const intentConsumedRef = useRef(false);
@@ -99,6 +102,8 @@ const ChatConversationContent = ({
     setChatMessageIntent,
     activeAgentInfo,
     setActiveAgentInfo,
+    activeFileInfo,
+    setActiveFileInfo,
   } = usePaceConversationContext();
   const { startNewChat } = usePaceActionsContext();
   const { setChatSidebarState } = usePaceLayoutContext();
@@ -202,6 +207,15 @@ const ChatConversationContent = ({
     setIsTaskPopoverOpen(open);
     onTaskPopoverOpenChange?.(open);
   };
+
+  const handleOpenActiveFile = useCallback(() => {
+    if (!activeFileInfo) return;
+    onFileOpen(activeFileInfo.path, activeFileInfo.name);
+  }, [activeFileInfo, onFileOpen]);
+
+  const handleDetachActiveFile = useCallback(() => {
+    setActiveFileInfo(null);
+  }, [setActiveFileInfo]);
 
   const handleAgentClick = useCallback(
     (agentId: string, agentName: string, agentDescription?: string, avatarKey?: string) => {
@@ -497,6 +511,8 @@ const ChatConversationContent = ({
               />
               <div className='bg-BG_WHITE h-12 w-full' />
             </CommonWrapper>
+          ) : emptyState ? (
+            <div className='flex flex-1 items-center justify-center'>{emptyState}</div>
           ) : (
             <div className='flex flex-1 items-center justify-center'>
               <div className='flex flex-col items-center gap-4'>
@@ -522,6 +538,14 @@ const ChatConversationContent = ({
               avatarKey={activeAgentInfo.avatar}
               containerRef={taskStatusContainerRef}
               onOpenChange={handleTaskPopoverOpenChange}
+            />
+          )}
+          {activeFileInfo && (
+            <FilePill
+              filePath={activeFileInfo.path}
+              fileName={activeFileInfo.name}
+              onOpen={handleOpenActiveFile}
+              onDetach={handleDetachActiveFile}
             />
           )}
           {!inputsRequired?.length && (

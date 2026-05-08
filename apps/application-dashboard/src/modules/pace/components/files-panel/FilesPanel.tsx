@@ -31,7 +31,8 @@ const FilesPanel = () => {
     isTreeColumnResizing,
     isTreeSidebarOpen,
     isFilesPanelExpanded,
-    hasActivePanelTab,
+    isFilesPanelTransitionInstant,
+    consumeInstantFilesPanelTransition,
   } = usePaceLayoutContext();
   const { activeConversationId } = usePaceConversationContext();
   const pathname = usePathname();
@@ -47,19 +48,24 @@ const FilesPanel = () => {
     prevPanelHostSurfaceRef.current !== null &&
     panelHostSurface !== null &&
     prevPanelHostSurfaceRef.current !== panelHostSurface;
-  const isInstantSwitch = isConversationSwitch || isPanelHostSwitch;
+  const isInstantSwitch = isConversationSwitch || isPanelHostSwitch || isFilesPanelTransitionInstant;
   const shouldReduceMotion = useReducedMotion();
   const animatedWidth = isFilesPanelExpanded ? '100%' : filesPanelWidth;
   const baseTransition = shouldReduceMotion || isInstantSwitch ? NO_ANIMATION : FILES_PANEL_TRANSITION;
   const widthTransition = isFilesPanelResizing ? NO_ANIMATION : baseTransition;
   const treeTransition = isTreeColumnResizing ? NO_ANIMATION : baseTransition;
-  const exitTransition =
-    hasActivePanelTab && !shouldReduceMotion && !isInstantSwitch ? FILES_PANEL_TRANSITION : NO_ANIMATION;
+  const exitTransition = NO_ANIMATION;
 
   useEffect(() => {
     prevConversationIdRef.current = activeConversationId;
     prevPanelHostSurfaceRef.current = panelHostSurface;
   }, [activeConversationId, panelHostSurface]);
+
+  useEffect(() => {
+    if (!isFilesPanelTransitionInstant) return;
+
+    consumeInstantFilesPanelTransition();
+  }, [consumeInstantFilesPanelTransition, isFilesPanelTransitionInstant]);
 
   useEffect(() => {
     if (!isSingleViewerMode || !activeTab || tabs.length <= 1) return;
@@ -71,7 +77,7 @@ const FilesPanel = () => {
     <AnimatePresence>
       {filesPanelOpen && (
         <motion.div
-          initial={isFilesPanelHydrated ? { width: 0 } : false}
+          initial={isFilesPanelHydrated && !isFilesPanelTransitionInstant ? { width: 0 } : false}
           animate={{ width: animatedWidth }}
           exit={{ width: 0, transition: exitTransition }}
           transition={widthTransition}
@@ -82,7 +88,7 @@ const FilesPanel = () => {
           )}
         >
           <motion.div
-            initial={isFilesPanelHydrated ? { x: '100%', opacity: 0 } : false}
+            initial={isFilesPanelHydrated && !isFilesPanelTransitionInstant ? { x: '100%', opacity: 0 } : false}
             animate={{ x: 0, opacity: 1 }}
             exit={{ x: '100%', opacity: 0, transition: exitTransition }}
             transition={baseTransition}

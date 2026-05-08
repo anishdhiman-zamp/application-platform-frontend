@@ -35,13 +35,13 @@ const TaskNavigation = memo(
           <div className='bg-GRAY_200 mr-3 h-4 w-10 rounded' />
           <div
             className={cn(
-              'mr-1.5 h-6 w-6 rounded-lg border',
+              'h-8 w-8 rounded-lg border',
               isDark ? 'border-GRAY_300 bg-GRAY_100' : 'border-GRAY_400 bg-GRAY_100',
             )}
           />
           <div
             className={cn(
-              'h-6 w-6 rounded-lg border',
+              'h-8 w-8 rounded-lg border',
               isDark ? 'border-GRAY_300 bg-GRAY_100' : 'border-GRAY_400 bg-GRAY_100',
             )}
           />
@@ -60,9 +60,9 @@ const TaskNavigation = memo(
         <TooltipV2 tooltipBody='Go to next task'>
           <ArrowDown
             id='arrow-down'
-            size={26}
+            size={16}
             className={cn(
-              'mr-1.5 shrink-0 rounded-lg p-1 transition-opacity',
+              'box-content shrink-0 rounded-lg p-2 transition-opacity',
               isDark ? 'text-GRAY_1000' : 'text-GRAY_900',
               isLoading || !hasNext
                 ? 'cursor-not-allowed opacity-40'
@@ -80,9 +80,9 @@ const TaskNavigation = memo(
         <TooltipV2 tooltipBody='Go to previous task'>
           <ArrowUp
             id='arrow-up'
-            size={26}
+            size={16}
             className={cn(
-              'shrink-0 rounded-lg p-1 transition-opacity',
+              'box-content shrink-0 rounded-lg p-2 transition-opacity',
               isDark ? 'text-GRAY_1000' : 'text-GRAY_900',
               isLoading || !hasPrevious
                 ? 'cursor-not-allowed opacity-40'
