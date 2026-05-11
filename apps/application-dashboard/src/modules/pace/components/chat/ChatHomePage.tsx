@@ -333,7 +333,7 @@ const ChatHomePage = () => {
                               scopeId={organizationId}
                               username={username}
                               currentUserName={currentUserName}
-                              placeholder='Hi, how can I help?'
+                              placeholder='What are we working on next?'
                               minTextareaHeight={18}
                               maxTextareaHeight={200}
                               className='shadow-chatbot-shadow rounded-[32px]'

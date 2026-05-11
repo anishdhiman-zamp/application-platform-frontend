@@ -30,12 +30,13 @@ jest.mock('@zamp-platform/conversation-stream', () => {
   }>({});
 
   return {
-    ConnectedChatInput: () => {
+    ConnectedChatInput: ({ placeholder }: { placeholder?: string }) => {
       const actions = React.useContext(ConversationActionsContext);
 
       return (
         <button
           type='button'
+          data-placeholder={placeholder}
           onClick={() =>
             actions.createConversationV2?.({
               message_content: { text: 'I want to collaborate with Slack Digest' },
@@ -158,6 +159,15 @@ jest.mock('@/modules/pace/pace.context', () => ({
 describe('ChatHomePage', () => {
   beforeEach(() => {
     jest.clearAllMocks();
+  });
+
+  it('sets the homepage input placeholder', () => {
+    render(<ChatHomePage />);
+
+    expect(screen.getByRole('button', { name: 'Send from home' })).toHaveAttribute(
+      'data-placeholder',
+      'What are we working on next?',
+    );
   });
 
   it('sends homepage messages through the active agent while keeping the panel open', async () => {
