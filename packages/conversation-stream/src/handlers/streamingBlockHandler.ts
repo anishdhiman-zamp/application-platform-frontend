@@ -9,6 +9,7 @@ import {
   TASK_STATUS,
   type TaskContentBlock,
   type TaskStatus,
+  taskStatusStore,
 } from '@zamp-platform/chat';
 
 const TERMINAL_TASK_STATUSES: ReadonlySet<TaskStatus> = new Set([
@@ -82,6 +83,9 @@ export function handleContentBlockEvent(conversationId: string, type: string, in
                 status: startStatus,
               },
             } as TaskContentBlock;
+            if (taskBlockId && startStatus) {
+              taskStatusStore.setStatus(taskBlockId, startStatus);
+            }
             if (taskBlockId && (startStatus === undefined || startStatus === TASK_STATUS.IN_PROGRESS)) {
               runningTasksStore.markRunning(conversationId, taskBlockId);
             }
@@ -199,6 +203,9 @@ export function handleContentBlockEvent(conversationId: string, type: string, in
                 taskPayload.status = nextStatus;
                 const taskKey = taskPayload.task_id || taskPayload.id;
                 if (taskKey) {
+                  if (nextStatus) {
+                    taskStatusStore.setStatus(taskKey, nextStatus);
+                  }
                   if (nextStatus === TASK_STATUS.IN_PROGRESS) {
                     runningTasksStore.markRunning(conversationId, taskKey);
                   } else if (nextStatus && TERMINAL_TASK_STATUSES.has(nextStatus)) {

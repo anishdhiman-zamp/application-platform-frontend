@@ -5,7 +5,7 @@ import { captureException } from '@sentry/browser';
 import { Button, FileIcon } from '@zamp-platform/ui';
 import { useRouter } from 'next/navigation';
 import { toast } from 'sonner';
-import { ROUTES_PATH } from '@/constants/routeConfig';
+import { getChatFileRoute } from '@/constants/routeConfig';
 import ChatButtonZampLogo from '@/modules/pace/components/chat/ChatButtonZampLogo';
 import {
   HTML_VIEW_OPTIONS,
@@ -79,7 +79,7 @@ const FileListingDetailPanel = ({ filePath, onClose }: FileListingDetailPanelPro
     setActiveFileInfo({ path: filePath, name: fileName });
     setChatSidebarState(CHAT_SIDEBAR_STATE.SIDEBAR);
     requestInstantFilesPanelTransition();
-    router.push(ROUTES_PATH.CHAT);
+    router.push(getChatFileRoute(filePath));
   };
 
   if (isFileNotFound && isEditable) {

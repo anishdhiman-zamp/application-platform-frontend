@@ -4,8 +4,8 @@ import { type FC, type RefObject, useCallback, useEffect, useRef, useState } fro
 import { Popover, PopoverContent, PopoverTrigger } from '@zamp-platform/ui';
 import { getAgentAvatar, getAgentAvatarByKey } from 'modules/pace/components/agents/constants/agents.constants';
 import { useGetAgentQuery } from '@/apis/agents';
-import ImageKitImage from '@/components/ImageKitImage';
 import { getChatAgentRoute } from '@/constants/routeConfig';
+import AgentTabIcon from '@/modules/pace/components/agents/components/AgentTabIcon';
 import AgentTestCard from '@/modules/pace/components/agents/components/AgentTestCard';
 import { useDynamicTabs } from '@/modules/pace/components/dynamic-tabs/useDynamicTabs';
 import { SINGLE_VIEWER_TAB_METADATA_KEY } from '@/modules/pace/pace.constants';
@@ -87,14 +87,8 @@ const AgentPill: FC<AgentPillProps> = ({ agentId, agentName, avatarKey, containe
             ref={triggerRef}
             className='border-GRAY_400 bg-BG_WHITE hover:bg-GRAY_200 flex w-fit cursor-pointer items-center gap-1.5 rounded-3xl border p-2 transition-colors'
           >
-            <div className='flex size-3.5 shrink-0 items-center justify-center'>
-              <ImageKitImage
-                src={avatar.src}
-                alt={avatar.alt}
-                width={14}
-                height={14}
-                className='size-full object-contain'
-              />
+            <div className='text-GRAY_700 flex size-4 shrink-0 items-center justify-center'>
+              <AgentTabIcon />
             </div>
             <span className='f-13-450'>1</span>
           </div>

@@ -192,7 +192,7 @@ export const Message: FC<MessageProps> = ({
             (embeddedInStepSummary
               ? 'relative w-full max-w-none min-w-0'
               : 'relative w-full max-w-[min(100%,700px)] min-w-0'),
-          shouldAlignRight && !isUserInputsRespondedBubble && 'bg-GRAY_100 rounded-[16px] px-4 py-3',
+          shouldAlignRight && !isUserInputsRespondedBubble && 'bg-GRAY_100 rounded-[16px] px-3 py-2',
           isUserMessage && userBubbleLayoutClassName,
         )}
       >

@@ -36,6 +36,10 @@ export const VALID_AGENT_TABS = new Set<string>(Object.values(AGENT_LISTING_TAB)
 export const TRANSPARENT_PIXEL = 'data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7';
 
 export const AGENT_SEARCH_DEBOUNCE_MS = 300;
+export const AGENT_CARD_GRID_CLASS =
+  'grid grid-cols-[350px] gap-4 @3xl:grid-cols-[repeat(2,350px)] @6xl:grid-cols-[repeat(3,350px)]';
+export const AGENT_CARD_GRID_WIDTH_CLASS = 'w-full max-w-[350px] @3xl:max-w-[716px] @6xl:max-w-[1082px]';
+export const AGENT_TAB_HELPER_TEXT_CLASS = 'text-GRAY_700 f-14-400 mb-6 text-left';
 export const TRIGGER_STATUS_ACTIVE = 'active';
 export const AGENT_DEFAULT_DESCRIPTION = "Hi, I'm your new agent! Let me know what you want me to do:";
 export const enum PrefixMessage {
@@ -55,9 +59,9 @@ export const getAddInstructionsMessage = (agentName: string) => `I want to add t
 export const AGENT_GREETING_MESSAGE = "@ Let's collaborate — chat, add triggers, or edit me";
 
 export const AGENT_DETAIL_TAB_CONFIG: { id: AgentDetailTabType; label: string }[] = [
+  { id: AGENT_DETAIL_TAB.INSTRUCTIONS, label: 'Instructions' },
   { id: AGENT_DETAIL_TAB.TASKS, label: 'Tasks' },
   { id: AGENT_DETAIL_TAB.TRIGGERS, label: 'Triggers' },
-  { id: AGENT_DETAIL_TAB.INSTRUCTIONS, label: 'Instructions' },
   { id: AGENT_DETAIL_TAB.FILES, label: 'Files' },
   { id: AGENT_DETAIL_TAB.TOOLS_AND_ACCESS, label: 'Tools & Access' },
 ];

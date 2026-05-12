@@ -112,7 +112,7 @@ const PdfViewer = ({ src, className = '', onError }: PdfViewerProps) => {
   }, [error, src, onError]);
 
   return (
-    <div className={cn('pdfSlick bg-BG_GRAY_2 relative h-full w-full', className)}>
+    <div className={cn('pdfSlick bg-BG_WHITE relative h-full w-full', className)}>
       {!error && <LoadingIndicator isLoading={isLoading} />}
 
       {!error && (

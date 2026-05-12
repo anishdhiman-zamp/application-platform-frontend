@@ -17,12 +17,25 @@ import {
   writeHITLDraft,
 } from './utils';
 
+const computeFocusedOptionIndex = (
+  question: HITLQuestionWithEntity | undefined,
+  answer: HITLAnswerValue | undefined,
+): number => {
+  if (!question) return 0;
+  const lastIdx = optionCountForQuestion(question) - 1;
+  if (isTextQuestion(question)) return 0;
+  if (!answer || answer.isSkipped) return lastIdx;
+
+  const firstSelectedRealId = (answer.optionIds ?? []).find((id) => id !== CUSTOM_OPTION_ID);
+  if (!firstSelectedRealId) return lastIdx;
+
+  const idx = (question.options ?? []).findIndex((opt) => opt.id === firstSelectedRealId);
+  return idx >= 0 ? idx : lastIdx;
+};
+
 // ---------- Constants ----------
 
 export const NO_PREFERENCE_TEXT = 'No preference';
-
-export type NavDirection = 'next' | 'prev';
-export type ScrollDirection = 'up' | 'down';
 
 // ---------- Actions ----------
 
@@ -39,6 +52,7 @@ enum HITLQuestionsContextActions {
   SKIP_TO_CUSTOM_INPUT = 'SKIP_TO_CUSTOM_INPUT',
   SKIP_ALL_QUESTIONS = 'SKIP_ALL_QUESTIONS',
   SET_SUBMITTING_OPTION_ID = 'SET_SUBMITTING_OPTION_ID',
+  SET_HOVER_VISIBLE = 'SET_HOVER_VISIBLE',
 }
 
 export type HITLActionType =
@@ -59,9 +73,12 @@ export type HITLActionType =
   | { type: HITLQuestionsContextActions.SET_FILE_REFS; payload: { questionId: string; refs: ChatComposerFileRef[] } }
   | { type: HITLQuestionsContextActions.SKIP_TO_CUSTOM_INPUT; payload: { questionId: string; totalOptions: number } }
   | { type: HITLQuestionsContextActions.SKIP_ALL_QUESTIONS }
-  | { type: HITLQuestionsContextActions.SET_SUBMITTING_OPTION_ID; payload: { optionId: string | null } };
+  | { type: HITLQuestionsContextActions.SET_SUBMITTING_OPTION_ID; payload: { optionId: string | null } }
+  | { type: HITLQuestionsContextActions.SET_HOVER_VISIBLE; payload: { value: boolean } };
 
 // ---------- State ----------
+
+export type NavigationDirection = 'forward' | 'backward';
 
 interface HITLQuestionsState {
   currentQuestionIndex: number;
@@ -71,6 +88,8 @@ interface HITLQuestionsState {
   customInputs: Record<string, string>;
   questionFileRefs: Record<string, ChatComposerFileRef[]>;
   submittingOptionId: string | null;
+  navigationDirection: NavigationDirection;
+  isHoverVisible: boolean;
 }
 
 const createInitialState = (
@@ -79,11 +98,13 @@ const createInitialState = (
 ): HITLQuestionsState => ({
   currentQuestionIndex: 0,
   currentQuestion: questions[0],
-  focusedOptionIndex: questions[0] ? optionCountForQuestion(questions[0]) - 1 : 0,
+  focusedOptionIndex: computeFocusedOptionIndex(questions[0], draft?.answers?.[questions[0]?.id]),
   answers: draft?.answers ?? {},
   customInputs: draft?.customInputs ?? {},
   questionFileRefs: {},
   submittingOptionId: null,
+  navigationDirection: 'forward',
+  isHoverVisible: true,
 });
 
 // ---------- Reducer helpers ----------
@@ -146,11 +167,13 @@ const createReducer =
           ...state,
           currentQuestionIndex: action.payload.index,
           currentQuestion: nextQuestion,
-          focusedOptionIndex: nextQuestion ? optionCountForQuestion(nextQuestion) - 1 : 0,
+          focusedOptionIndex: computeFocusedOptionIndex(nextQuestion, state.answers[nextQuestion?.id]),
+          navigationDirection: action.payload.index >= state.currentQuestionIndex ? 'forward' : 'backward',
         };
       }
 
       case HITLQuestionsContextActions.SET_FOCUSED_OPTION_INDEX:
+        if (state.focusedOptionIndex === action.payload.index) return state;
         return { ...state, focusedOptionIndex: action.payload.index };
 
       case HITLQuestionsContextActions.FOCUS_NEXT_OPTION:
@@ -265,6 +288,10 @@ const createReducer =
       case HITLQuestionsContextActions.SET_SUBMITTING_OPTION_ID:
         return { ...state, submittingOptionId: action.payload.optionId };
 
+      case HITLQuestionsContextActions.SET_HOVER_VISIBLE:
+        if (state.isHoverVisible === action.payload.value) return state;
+        return { ...state, isHoverVisible: action.payload.value };
+
       default:
         return state;
     }
@@ -283,9 +310,6 @@ interface HITLQuestionsContextType {
   llmModel?: string | null;
   onSubmit?: HITLQuestionsBlockProps['onSubmit'];
   containerRef: React.RefObject<HTMLDivElement | null>;
-  questionScrollRef: React.RefObject<HTMLDivElement | null>;
-  navDirectionRef: React.RefObject<NavDirection>;
-  scrollDirectionRef: React.RefObject<ScrollDirection>;
   shouldScrollRef: React.RefObject<boolean>;
   submitRef: React.RefObject<(() => void) | null>;
   submitSingleSelectRef: React.RefObject<
@@ -296,7 +320,7 @@ interface HITLQuestionsContextType {
   setIsSubmitting: (value: boolean) => void;
 }
 
-const HITLQuestionsContext = createContext<HITLQuestionsContextType | null>(null);
+export const HITLQuestionsContext = createContext<HITLQuestionsContextType | null>(null);
 
 export const useHITLQuestionsContext = (): HITLQuestionsContextType => {
   const ctx = useContext(HITLQuestionsContext);
@@ -329,9 +353,6 @@ export const HITLQuestionsProvider = ({
   const [isSubmitting, setIsSubmitting] = useState(false);
 
   const containerRef = useRef<HTMLDivElement>(null);
-  const questionScrollRef = useRef<HTMLDivElement>(null);
-  const navDirectionRef = useRef<NavDirection>('next');
-  const scrollDirectionRef = useRef<ScrollDirection>('down');
   const shouldScrollRef = useRef(false);
   const submitRef = useRef<(() => void) | null>(null);
   const submitSingleSelectRef = useRef<
@@ -360,9 +381,6 @@ export const HITLQuestionsProvider = ({
         llmModel,
         onSubmit,
         containerRef,
-        questionScrollRef,
-        navDirectionRef,
-        scrollDirectionRef,
         shouldScrollRef,
         submitRef,
         submitSingleSelectRef,

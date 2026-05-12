@@ -10,6 +10,7 @@ import { useListFilesQuery } from '@/apis/filesystem';
 import CommonWrapper from '@/components/commonWrapper';
 import { SkeletonTypes } from '@/components/commonWrapper/commonWrapper.types';
 import { useAppSelector } from '@/hooks/toolkit';
+import { AGENT_TAB_HELPER_TEXT_CLASS } from '@/modules/pace/components/agents/constants/agents.constants';
 import FolderListSkeleton from '@/modules/pace/components/agents/skeletons/FolderListSkeleton';
 import type { RootState } from '@/store';
 
@@ -118,7 +119,7 @@ const AgentFolderList = ({ agentId, agentAvatarSrc, isActive = true, skipFetch =
       className='flex flex-col'
       disableAnimation
     >
-      <p className='text-GRAY_700 f-14-450 mb-4 ml-2.5'>What folders can the agent access?</p>
+      <p className={AGENT_TAB_HELPER_TEXT_CLASS}>What folders can the agent access?</p>
       <div className='border-GRAY_400 flex flex-col rounded-xl border'>
         {files.map((file, index) => (
           <div

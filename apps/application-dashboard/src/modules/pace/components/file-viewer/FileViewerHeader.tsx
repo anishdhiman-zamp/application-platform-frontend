@@ -5,7 +5,7 @@ import { Button, FileIcon, toast } from '@zamp-platform/ui';
 import { cn } from '@zamp-platform/ui/utils';
 import { FolderOpen } from 'lucide-react';
 import { usePathname, useRouter } from 'next/navigation';
-import { ROUTES_PATH } from '@/constants/routeConfig';
+import { getChatFileRoute } from '@/constants/routeConfig';
 import ChatButtonZampLogo from '@/modules/pace/components/chat/ChatButtonZampLogo';
 import { useDynamicTabs } from '@/modules/pace/components/dynamic-tabs/useDynamicTabs';
 import {
@@ -110,7 +110,7 @@ const FileViewerHeader = memo(
       setActiveFileInfo({ path: filePath, name: fileName });
       setChatSidebarState(CHAT_SIDEBAR_STATE.SIDEBAR);
       requestInstantFilesPanelTransition();
-      router.push(ROUTES_PATH.CHAT);
+      router.push(getChatFileRoute(filePath));
     };
 
     const handleCloseViewer = () => {

@@ -1,6 +1,7 @@
 'use client';
 
 import { KEYBOARD_KEYS } from '@zamp-platform/utils';
+import { useReducedMotion } from 'motion/react';
 import { useCallback, useEffect, useRef } from 'react';
 
 import { CUSTOM_OPTION_ID } from './constants';
@@ -9,21 +10,13 @@ import { useHITLQuestions } from './useHITLQuestions';
 import { isTextQuestion, optionCountForQuestion } from './utils';
 
 export const useHITLKeyboard = () => {
-  const {
-    state,
-    dispatch,
-    questions,
-    containerRef,
-    questionScrollRef,
-    scrollDirectionRef,
-    shouldScrollRef,
-    submitRef,
-    submitSingleSelectRef,
-  } = useHITLQuestionsContext();
+  const { state, dispatch, questions, containerRef, shouldScrollRef, submitRef, submitSingleSelectRef } =
+    useHITLQuestionsContext();
 
   const { navigateToQuestion, selectAnswer, handleSkipToCustomInput } = useHITLQuestions();
 
   const { currentQuestion, focusedOptionIndex } = state;
+  const prefersReducedMotion = useReducedMotion();
 
   const stateRef = useRef(state);
   useEffect(() => {
@@ -34,41 +27,52 @@ export const useHITLKeyboard = () => {
     questions.length === 1 && currentQuestion && !isTextQuestion(currentQuestion) && !currentQuestion.is_multi_select;
   const totalOptions = currentQuestion ? optionCountForQuestion(currentQuestion) : 1;
 
-  const handleFocusAndScroll = useCallback(() => {
-    if (focusedOptionIndex < totalOptions - 1) {
-      containerRef.current?.focus({ preventScroll: true });
-    }
-
+  const scrollFocusedIntoView = useCallback(() => {
     if (!shouldScrollRef.current) return;
     shouldScrollRef.current = false;
 
+    const container = containerRef.current;
+    if (!container) return;
+
     const rafId = requestAnimationFrame(() => {
-      const scrollEl = questionScrollRef.current;
+      const behavior: ScrollBehavior = prefersReducedMotion ? 'auto' : 'smooth';
+
+      // Resolve the scroll element via live DOM rather than a React ref:
+      // AnimatePresence keeps the exiting question's div mounted alongside the
+      // entering one during the slide, so a ref attached in JSX would race
+      // between the two elements and could be null mid-transition.
+      const focusedEl = container.querySelector<HTMLElement>('[data-hitl-focused]');
+      const scrollEl =
+        focusedEl?.closest<HTMLElement>('[data-hitl-scroll]') ??
+        container.querySelector<HTMLElement>('[data-hitl-scroll]');
       if (!scrollEl) return;
 
-      const focusedEl = scrollEl.querySelector<HTMLElement>('[data-hitl-focused]');
-      if (!focusedEl) return;
+      // Focused element lives outside the scroll container (i.e. the custom input
+      // row at the bottom of the panel). Reset to top so the question header and
+      // first option are visible — what the user expects when entering a question.
+      if (!focusedEl || !scrollEl.contains(focusedEl)) {
+        scrollEl.scrollTo({ top: 0, behavior });
+        return;
+      }
 
       const scrollRect = scrollEl.getBoundingClientRect();
       const elRect = focusedEl.getBoundingClientRect();
-      const isFullyVisible = elRect.top >= scrollRect.top && elRect.bottom <= scrollRect.bottom;
+      const overflowTop = scrollRect.top - elRect.top;
+      const overflowBottom = elRect.bottom - scrollRect.bottom;
 
-      if (!isFullyVisible) {
-        focusedEl.scrollIntoView({
-          block: scrollDirectionRef.current === 'down' ? 'start' : 'end',
-          behavior: 'smooth',
-        });
+      if (overflowTop > 0) {
+        scrollEl.scrollTo({ top: scrollEl.scrollTop - overflowTop, behavior });
+      } else if (overflowBottom > 0) {
+        scrollEl.scrollTo({ top: scrollEl.scrollTop + overflowBottom, behavior });
       }
     });
-
     return () => cancelAnimationFrame(rafId);
-  }, [focusedOptionIndex, totalOptions, containerRef, questionScrollRef, shouldScrollRef, scrollDirectionRef]);
+  }, [containerRef, shouldScrollRef, prefersReducedMotion]);
+
+  useEffect(() => scrollFocusedIntoView(), [focusedOptionIndex, scrollFocusedIntoView]);
 
   const handleKeyDown = useCallback(
     (e: KeyboardEvent) => {
-      const active = document.activeElement;
-      if (active && active !== document.body && !containerRef.current?.contains(active)) return;
-
       const {
         currentQuestionIndex: qIdx,
         focusedOptionIndex: optIdx,
@@ -78,7 +82,11 @@ export const useHITLKeyboard = () => {
       } = stateRef.current;
       if (!q) return;
 
+      const active = document.activeElement;
+      if (active && active !== document.body && !containerRef.current?.contains(active)) return;
+
       shouldScrollRef.current = true;
+      dispatch({ type: HITLQuestionsContextActions.SET_HOVER_VISIBLE, payload: { value: true } });
 
       const targetIsTextField =
         e.target instanceof HTMLInputElement ||
@@ -89,19 +97,23 @@ export const useHITLKeyboard = () => {
         if (!targetIsTextField) e.preventDefault();
       };
 
+      const takeoverFromTextField = () => {
+        if (targetIsTextField) containerRef.current?.focus({ preventScroll: true });
+      };
+
       const lastOptionIdx = totalOptions - 1;
       const lastQuestionIdx = questions.length - 1;
 
       switch (e.key) {
         case KEYBOARD_KEYS.ARROW_DOWN:
           preventUnlessTextField();
-          scrollDirectionRef.current = 'down';
+          takeoverFromTextField();
           dispatch({ type: HITLQuestionsContextActions.FOCUS_NEXT_OPTION, payload: { lastOptionIdx } });
           break;
 
         case KEYBOARD_KEYS.ARROW_UP:
           preventUnlessTextField();
-          scrollDirectionRef.current = 'up';
+          takeoverFromTextField();
           dispatch({ type: HITLQuestionsContextActions.FOCUS_PREV_OPTION, payload: { lastOptionIdx } });
           break;
 
@@ -114,7 +126,7 @@ export const useHITLKeyboard = () => {
           // Cmd+Enter: always advance or submit regardless of question type
           if (isCmdEnter) {
             e.preventDefault();
-            if (qIdx < lastQuestionIdx) navigateToQuestion(qIdx + 1, 'next');
+            if (qIdx < lastQuestionIdx) navigateToQuestion(qIdx + 1);
             else submitRef.current?.();
             return;
           }
@@ -134,7 +146,7 @@ export const useHITLKeyboard = () => {
             const hasAttachments = (fileRefs[q.id]?.length ?? 0) > 0;
             if (text || hasAttachments) {
               if (qIdx < lastQuestionIdx) {
-                navigateToQuestion(qIdx + 1, 'next');
+                navigateToQuestion(qIdx + 1);
               } else {
                 submitRef.current?.();
               }
@@ -172,15 +184,10 @@ export const useHITLKeyboard = () => {
       dispatch,
       containerRef,
       shouldScrollRef,
-      scrollDirectionRef,
       submitRef,
       submitSingleSelectRef,
     ],
   );
-
-  useEffect(() => {
-    return handleFocusAndScroll();
-  }, [handleFocusAndScroll]);
 
   useEffect(() => {
     document.addEventListener('keydown', handleKeyDown);

@@ -47,24 +47,19 @@
 .milkdown-editor-wrapper .milkdown .ProseMirror {
   max-width: 656px;
   margin-inline: auto;
-  padding: 24px;
-}
-
-@media (min-width: 640px) {
-  .milkdown-editor-wrapper .milkdown .ProseMirror {
-    padding-inline: 48px;
-  }
+  padding: 16px 24px;
+  border-radius: 16px;
 }
 
 .agent-instructions-editor .milkdown-editor-wrapper .milkdown .ProseMirror {
   max-width: none;
   margin-inline: 0;
-  padding: 24px;
+  padding: 16px 24px;
 }
 
 @media (min-width: 640px) {
   .agent-instructions-editor .milkdown-editor-wrapper .milkdown .ProseMirror {
-    padding-inline: 48px;
+    padding-inline: 24px;
   }
 }
 

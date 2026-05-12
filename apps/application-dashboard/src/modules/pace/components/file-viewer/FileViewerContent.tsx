@@ -231,7 +231,7 @@ const FileViewerContent = memo(
         }
         skeletonType={SkeletonTypes.CUSTOM}
         loader={<ImageLoader imageSrc={ZAMP_LOGO_LOADER_SVG} width={140} height={140} />}
-        className='flex h-full w-full items-center justify-center'
+        className='bg-BG_WHITE flex h-full w-full items-center justify-center'
         disableAnimation
       >
         {resolvedContent}

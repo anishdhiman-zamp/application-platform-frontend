@@ -2,7 +2,7 @@
 
 import { type FC, useCallback, useState } from 'react';
 import { Button } from '@zamp-platform/ui';
-import { ArrowUpRight } from 'lucide-react';
+import { ArrowUpRight, Bot } from 'lucide-react';
 import {
   type AgentAvatarConfig,
   PrefixMessage,
@@ -99,10 +99,32 @@ const AgentTestCard: FC<AgentTestCardProps> = ({
   return (
     <div className={cn('flex flex-col', className)}>
       <div
-        className='hover:bg-GRAY_100 flex cursor-pointer items-center justify-between p-3 transition-colors'
+        className='hover:bg-BG_GRAY_2 group/agent-test-card flex cursor-pointer items-center justify-between p-3 transition-colors'
         onClick={onClick}
       >
         <div className='flex min-w-0 flex-1 items-center gap-2'>
+          <div className='text-GRAY_700 flex size-4 shrink-0 items-center justify-center'>
+            <Bot size={16} />
+          </div>
+          <span className='f-13-500 text-GRAY_1000 min-w-0 truncate'>{agentName}</span>
+          <ArrowUpRight
+            size={14}
+            className='text-GRAY_700 shrink-0 opacity-0 transition-opacity group-hover/agent-test-card:opacity-100'
+          />
+        </div>
+
+        <div className='ml-2 flex shrink-0 items-center gap-3' data-agent-test-card-controls>
+          <Button
+            variant='outline'
+            size='small'
+            isLoading={isLoadingTriggers}
+            disabled={disabled}
+            tabIndex={-1}
+            className='invisible h-7 shrink-0 rounded-lg px-3 text-xs'
+            onClick={handleTestClick}
+          >
+            Test
+          </Button>
           <div className='flex size-3.5 shrink-0 items-center justify-center'>
             <ImageKitImage
               src={avatar.src}
@@ -112,21 +134,7 @@ const AgentTestCard: FC<AgentTestCardProps> = ({
               className='size-full object-contain'
             />
           </div>
-          <span className='f-13-500 text-GRAY_1000 truncate'>{agentName}</span>
         </div>
-
-        <Button
-          variant='outline'
-          size='small'
-          isLoading={isLoadingTriggers}
-          disabled={disabled}
-          tabIndex={-1}
-          className='invisible ml-2 h-7 shrink-0 rounded-lg px-3 text-xs'
-          onClick={handleTestClick}
-        >
-          Test
-        </Button>
-        <ArrowUpRight size={14} className='text-GRAY_700 ml-1 shrink-0' />
       </div>
 
       {isExpanded && triggers.length > 0 && (

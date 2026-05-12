@@ -1,4 +1,4 @@
-import { useMemo } from 'react';
+import { useMemo, useSyncExternalStore } from 'react';
 import {
   type Block,
   BLOCK_TYPE,
@@ -7,6 +7,7 @@ import {
   TASK_STATUS,
   type TaskBlockType,
   type TaskStatus,
+  taskStatusStore,
 } from '@zamp-platform/chat';
 
 export interface TaskItem {
@@ -19,17 +20,25 @@ export interface TaskItem {
 
 export type TaskCountsByStatus = Record<TaskStatus, number>;
 
-function extractTasksFromElements(elements: Block[], taskMap: Map<string, TaskItem>) {
+const subscribeToTaskStatusStore = (listener: () => void) => taskStatusStore.subscribe(listener);
+const getTaskStatusSnapshot = () => taskStatusStore.getSnapshot();
+
+function extractTasksFromElements(
+  elements: Block[],
+  taskMap: Map<string, TaskItem>,
+  latestStatuses: ReadonlyMap<string, TaskStatus>,
+) {
   for (const element of elements) {
     if (element?.type === BLOCK_TYPE.TASK) {
       const taskBlock = element as TaskBlockType;
       const key = taskBlock.payload.task_id ?? taskBlock.id;
+      const taskId = taskBlock.payload.task_id;
 
       taskMap.set(key, {
         id: taskBlock.payload.id,
         title: taskBlock.payload.title,
-        task_id: taskBlock.payload.task_id,
-        status: taskBlock.payload.status ?? TASK_STATUS.IN_PROGRESS,
+        task_id: taskId,
+        status: latestStatuses.get(taskId) ?? taskBlock.payload.status ?? TASK_STATUS.IN_PROGRESS,
         blockId: taskBlock.id,
       });
     }
@@ -37,15 +46,17 @@ function extractTasksFromElements(elements: Block[], taskMap: Map<string, TaskIt
 }
 
 export function useTasksFromMessages(messages: ChatMessage[], streamingState?: StreamingState | null) {
+  const latestStatuses = useSyncExternalStore(subscribeToTaskStatusStore, getTaskStatusSnapshot, getTaskStatusSnapshot);
+
   return useMemo(() => {
     const taskMap = new Map<string, TaskItem>();
 
     for (const message of messages) {
-      extractTasksFromElements(message?.message_content?.elements ?? [], taskMap);
+      extractTasksFromElements(message?.message_content?.elements ?? [], taskMap, latestStatuses);
     }
 
     if (streamingState?.is_active) {
-      extractTasksFromElements(streamingState?.message_content?.elements ?? [], taskMap);
+      extractTasksFromElements(streamingState?.message_content?.elements ?? [], taskMap, latestStatuses);
     }
 
     const tasks = Array.from(taskMap.values());
@@ -65,5 +76,5 @@ export function useTasksFromMessages(messages: ChatMessage[], streamingState?: S
     const hasTasks = tasks.length > 0;
 
     return { tasks, counts, hasTasks };
-  }, [messages, streamingState]);
+  }, [messages, streamingState, latestStatuses]);
 }

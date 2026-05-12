@@ -1,7 +1,6 @@
 'use client';
 
 import { Fragment, useCallback, useEffect, useMemo, useRef, useState } from 'react';
-import { cn } from '@zamp-platform/ui/utils';
 import DynamicTabItem from 'modules/pace/components/dynamic-tabs/DynamicTabItem';
 import { useDynamicTabs } from 'modules/pace/components/dynamic-tabs/useDynamicTabs';
 import { TAB_TYPE } from 'modules/pace/pace.types';
@@ -109,10 +108,9 @@ const FilesPanelTabStrip = ({ onOverflowChange }: FilesPanelTabStripProps) => {
           return (
             <Fragment key={tab.stableKey}>
               {index > 0 && (
-                <div
-                  aria-hidden
-                  className={cn('bg-GRAY_400 mx-1.5 h-4 w-px shrink-0', isAdjacentToActive && 'invisible')}
-                />
+                <div aria-hidden className='flex h-4 w-1.5 shrink-0 items-center justify-center'>
+                  {!isAdjacentToActive && <div className='bg-GRAY_400 h-4 w-px' />}
+                </div>
               )}
               <div className='max-w-[200px] min-w-[120px] shrink-0'>
                 <DynamicTabItem

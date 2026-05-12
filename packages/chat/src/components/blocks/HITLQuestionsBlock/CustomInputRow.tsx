@@ -11,7 +11,7 @@ import { useHITLQuestions } from './useHITLQuestions';
 import { isMultipleChoiceQuestion, optionCountForQuestion } from './utils';
 
 export const CustomInputRow = () => {
-  const { state, username, dispatch, questionScrollRef } = useHITLQuestionsContext();
+  const { state, username, dispatch } = useHITLQuestionsContext();
   const { isSingleSelectOnly, handleCustomInputChange, handleFileReferencesChange } = useHITLQuestions();
   const { currentQuestion, focusedOptionIndex, answers, customInputs, submittingOptionId } = state;
 
@@ -24,8 +24,6 @@ export const CustomInputRow = () => {
   const value = customInputs[currentQuestion.id] || '';
 
   const composerRef = useRef<ChatComposerInputHandle>(null);
-  const rowRef = useRef<HTMLDivElement>(null);
-  const rowHeightRef = useRef(0);
 
   const scheduleFocus = useCallback(() => {
     const rafId = requestAnimationFrame(() => {
@@ -46,31 +44,16 @@ export const CustomInputRow = () => {
     return scheduleFocus();
   }, [isFocused, scheduleFocus]);
 
-  useEffect(() => {
-    const el = rowRef.current;
-    if (!el) return;
-
-    const observer = new ResizeObserver(() => {
-      const newHeight = el.offsetHeight;
-      if (newHeight > rowHeightRef.current) {
-        const scrollEl = questionScrollRef.current;
-        if (scrollEl) scrollEl.scrollTop = scrollEl.scrollHeight;
-      }
-      rowHeightRef.current = newHeight;
-    });
-
-    observer.observe(el);
-    return () => observer.disconnect();
-  }, [questionScrollRef]);
+  const handleFocusLastOption = useCallback(() => {
+    dispatch({ type: HITLQuestionsContextActions.SET_FOCUSED_OPTION_INDEX, payload: { index: optionCount - 1 } });
+  }, [dispatch, optionCount]);
 
   return (
     <div
-      ref={rowRef}
       data-hitl-focused={isFocused || undefined}
-      className={cn('w-full shrink-0 cursor-pointer rounded-[10px] transition-colors duration-200', 'hover:bg-GRAY_20')}
-      onClick={() =>
-        dispatch({ type: HITLQuestionsContextActions.SET_FOCUSED_OPTION_INDEX, payload: { index: optionCount - 1 } })
-      }
+      className='w-full shrink-0 cursor-pointer rounded-[10px] transition-colors duration-200'
+      onClick={handleFocusLastOption}
+      onMouseMove={handleFocusLastOption}
     >
       <div className='flex w-full items-start px-3 py-2.5'>
         <div className='flex min-w-px flex-1 items-start gap-2.5'>
@@ -94,7 +77,7 @@ export const CustomInputRow = () => {
               onChange={(text) => handleCustomInputChange(currentQuestion.id, text)}
               onFileReferencesChange={handleFileRefs}
               placeholder='Type something else...'
-              className='bg-BG_WHITE rounded-xl'
+              className='bg-BG_WHITE rounded-2xl'
               username={username}
               showFilePreview={false}
               disableNewlineOnEnter={!isMultiSelect}

@@ -1,8 +1,9 @@
 'use client';
 
-import { useCallback, useRef } from 'react';
+import { useCallback, useEffect, useRef } from 'react';
 import { Skeleton } from '@zamp-platform/ui';
 import AgentTabEmptyState from 'modules/pace/components/agents/components/AgentTabEmptyState';
+import { AGENT_TAB_HELPER_TEXT_CLASS } from 'modules/pace/components/agents/constants/agents.constants';
 import { useGetAgentInstructionsQuery, useUpdateAgentInstructionsMutation } from '@/apis/agents';
 import CommonWrapper from '@/components/commonWrapper';
 import { SkeletonTypes } from '@/components/commonWrapper/commonWrapper.types';
@@ -55,7 +56,12 @@ const AgentInstructions = ({
 }: AgentInstructionsProps) => {
   const containerRef = useRef<HTMLDivElement>(null);
   const autoSaveTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
-  const shouldSkip = !isActive || skipFetch;
+  const hasBeenActiveRef = useRef(isActive);
+  const isFirstVisit = !hasBeenActiveRef.current && isActive;
+
+  if (isActive) hasBeenActiveRef.current = true;
+
+  const shouldSkip = !hasBeenActiveRef.current || skipFetch;
 
   const [updateInstructions] = useUpdateAgentInstructionsMutation();
   const { data, isLoading, isError, refetch } = useGetAgentInstructionsQuery({ agentId }, { skip: shouldSkip });
@@ -77,6 +83,10 @@ const AgentInstructions = ({
 
   const instructions = data?.content ?? '';
 
+  useEffect(() => {
+    if (isActive && !isFirstVisit && !skipFetch) refetch();
+  }, [isActive, isFirstVisit, skipFetch, refetch]);
+
   return (
     <CommonWrapper
       isLoading={shouldSkip || isLoading}
@@ -96,7 +106,7 @@ const AgentInstructions = ({
       className='flex flex-col'
       disableAnimation
     >
-      <p className='text-GRAY_700 f-14-450 mb-4 ml-2.5'>What should the agent do everytime it runs?</p>
+      <p className={AGENT_TAB_HELPER_TEXT_CLASS}>These instructions tell the agent what to do each time it runs.</p>
       <div className='agent-instructions-editor border-GRAY_400 flex min-h-[300px] flex-col overflow-hidden rounded-xl border'>
         <div ref={containerRef}>
           <MilkdownEditor content={instructions} onChange={handleContentChange} className='h-auto overflow-visible' />

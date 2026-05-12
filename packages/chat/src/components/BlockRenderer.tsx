@@ -39,6 +39,7 @@ import {
   ToolCallBlock,
 } from './blocks';
 import { BROWSER_TOOL_DISPLAY_NAMES, TOOL_NAMES } from './chat.constants';
+import { isToolCallInProgress } from './tool-call-status.utils';
 
 interface BlockRendererProps {
   message: BlockMessage;
@@ -260,7 +261,7 @@ export const BlockRenderer: React.FC<BlockRendererProps> = ({
           <ToolCallBlock
             key={toolUseBlock.id ?? `tool-use-${toolUseBlock.order}-${toolUseBlock.start_timestamp}`}
             payload={toolUseBlock.payload}
-            is_complete={!nextBlock && isStreaming ? false : toolUseBlock.is_complete}
+            is_complete={!isToolCallInProgress({ toolUseBlock, toolResult, nextBlock, isStreaming })}
             toolResult={toolResult}
             isAccordionOpen={isAccordionOpen}
             embedded={embeddedInStepSummary}
@@ -416,13 +417,17 @@ export const BlockRenderer: React.FC<BlockRendererProps> = ({
             key={taskBlock.payload.task_id ?? taskBlock.id}
             payload={taskBlock.payload}
             conversationId={conversationId}
+            className={previousBlock?.type === BLOCK_TYPE.AGENT ? 'mt-2 mb-3' : undefined}
           />
         );
       }
 
       case BLOCK_TYPE.AGENT: {
         return (
-          <div key={block?.payload?.agent_id ?? block?.id} className={cn('pb-3', { showConnectorToNext: 'pb-4' })}>
+          <div
+            key={block?.payload?.agent_id ?? block?.id}
+            className={cn(nextBlock?.type === BLOCK_TYPE.TASK ? 'pb-0' : 'pb-3', showConnectorToNext && 'pb-4')}
+          >
             {renderAgentBlock ? renderAgentBlock(block?.payload) : <AgentBlock payload={block?.payload} />}
           </div>
         );

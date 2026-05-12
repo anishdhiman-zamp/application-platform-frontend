@@ -33,6 +33,7 @@ export * from './src/hooks/useUnreadConversations';
 export * from './src/stores/inputsRequiredStore';
 export * from './src/stores/runningTasksStore';
 export * from './src/stores/streamingStateStore';
+export * from './src/stores/taskStatusStore';
 export * from './src/stores/unreadStore';
 export * from './src/types/block.types';
 export * from './src/types/chat.types';

@@ -59,7 +59,7 @@ const ChatHomePage = () => {
     activeFileInfo,
     setActiveFileInfo,
   } = usePaceConversationContext();
-  const { startNewChat } = usePaceActionsContext();
+  const { startNewChat, chatInputFocusRequestKey } = usePaceActionsContext();
 
   const organizationId = useAppSelector((state: RootState) => state.user.user?.orgs?.[0]?.organization_id) ?? '';
   const currentUserName = useAppSelector((state: RootState) => state.user.user?.user_name) ?? '';
@@ -250,6 +250,14 @@ const ChatHomePage = () => {
     didFocusHydratedDraftRef.current = true;
     focusComposerAtEnd();
   }, [pathname, isExpanded, inputValue, focusComposerAtEnd]);
+
+  useEffect(() => {
+    if (chatInputFocusRequestKey === 0) return;
+    if (pathname !== ROUTES_PATH.CHAT) return;
+    if (isExpanded) return;
+
+    focusComposerAtEnd();
+  }, [chatInputFocusRequestKey, pathname, isExpanded, focusComposerAtEnd]);
 
   return (
     <ConversationActionsContext.Provider value={interceptedActions}>

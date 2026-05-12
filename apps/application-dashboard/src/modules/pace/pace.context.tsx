@@ -85,6 +85,8 @@ interface PaceContextType {
 
   registerStartNewChat: (callback: defaultFnType) => void;
   startNewChat: defaultFnType;
+  chatInputFocusRequestKey: number;
+  requestChatInputFocus: defaultFnType;
 
   logoAnimationKey: number;
   triggerLogoAnimation: defaultFnType;
@@ -233,6 +235,8 @@ type PaceActionsContextType = Pick<
   | 'scheduleCollapseOnRouteChange'
   | 'registerStartNewChat'
   | 'startNewChat'
+  | 'chatInputFocusRequestKey'
+  | 'requestChatInputFocus'
   | 'logoAnimationKey'
   | 'triggerLogoAnimation'
   | 'registerSelectConversation'
@@ -286,6 +290,7 @@ export const PaceProvider = ({ children, initialNavSidebarExpanded = true }: Pac
   const [activeFileInfo, setActiveFileInfo] = useState<ActiveFileInfo | null>(null);
   const [activeConversationId, setActiveConversationIdRaw] = useState<string | null>(null);
   const [logoAnimationKey, setLogoAnimationKey] = useState(0);
+  const [chatInputFocusRequestKey, setChatInputFocusRequestKey] = useState(0);
   const filesPanelOpen = hasActivePanelTab;
   const [isFilesPanelHydrated, setIsFilesPanelHydrated] = useState(false);
   const [isFilesPanelTransitionInstant, setIsFilesPanelTransitionInstant] = useState(false);
@@ -508,6 +513,10 @@ export const PaceProvider = ({ children, initialNavSidebarExpanded = true }: Pac
 
   const startNewChat = useCallback(() => {
     startNewChatRef.current?.();
+  }, []);
+
+  const requestChatInputFocus = useCallback(() => {
+    setChatInputFocusRequestKey((prev) => prev + 1);
   }, []);
 
   const triggerLogoAnimation = useCallback(() => {
@@ -857,6 +866,9 @@ export const PaceProvider = ({ children, initialNavSidebarExpanded = true }: Pac
       registerStartNewChat,
       startNewChat,
 
+      chatInputFocusRequestKey,
+      requestChatInputFocus,
+
       logoAnimationKey,
       triggerLogoAnimation,
 
@@ -869,6 +881,9 @@ export const PaceProvider = ({ children, initialNavSidebarExpanded = true }: Pac
 
       registerStartNewChat,
       startNewChat,
+
+      chatInputFocusRequestKey,
+      requestChatInputFocus,
 
       logoAnimationKey,
       triggerLogoAnimation,
@@ -888,6 +903,9 @@ export const PaceProvider = ({ children, initialNavSidebarExpanded = true }: Pac
 
       registerStartNewChat,
       startNewChat,
+
+      chatInputFocusRequestKey,
+      requestChatInputFocus,
 
       logoAnimationKey,
       triggerLogoAnimation,
@@ -974,6 +992,9 @@ export const PaceProvider = ({ children, initialNavSidebarExpanded = true }: Pac
 
       registerStartNewChat,
       startNewChat,
+
+      chatInputFocusRequestKey,
+      requestChatInputFocus,
 
       logoAnimationKey,
       triggerLogoAnimation,

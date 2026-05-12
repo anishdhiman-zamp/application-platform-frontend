@@ -54,7 +54,8 @@ const IntegrationCardV2: FC<IntegrationCardPropsType> = ({
     <>
       <div
         className={cn(
-          'bg-BG_WHITE border-GRAY_400 group flex min-h-[170px] flex-col justify-between rounded-md border p-3.5 transition-colors select-none',
+          'bg-BG_WHITE border-GRAY_400 group flex min-h-[170px] flex-col justify-between border p-3.5 transition-colors select-none',
+          isToolCallBlock ? 'rounded-[16px]' : 'rounded-md',
           !isToolCallBlock &&
             '[&:hover:not(:has(.actions-bar:hover))]:border-GRAY_300 [&:hover:not(:has(.actions-bar:hover))]:bg-BG_GRAY_2 [&:active:not(:has(.actions-bar:hover))]:border-GRAY_300 [&:active:not(:has(.actions-bar:hover))]:bg-GRAY_100 cursor-pointer',
           className,

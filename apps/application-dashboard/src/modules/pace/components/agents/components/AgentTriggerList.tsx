@@ -11,7 +11,10 @@ import { useGetAgentTriggersQuery, useToggleAgentTriggerMutation } from '@/apis/
 import ImageWithFallback from '@/components/common/ImageWithFallback';
 import CommonWrapper from '@/components/commonWrapper';
 import { SkeletonTypes } from '@/components/commonWrapper/commonWrapper.types';
-import { TRANSPARENT_PIXEL } from '@/modules/pace/components/agents/constants/agents.constants';
+import {
+  AGENT_TAB_HELPER_TEXT_CLASS,
+  TRANSPARENT_PIXEL,
+} from '@/modules/pace/components/agents/constants/agents.constants';
 import type { AgentTriggerType } from '@/modules/pace/components/agents/types/agents.types';
 
 interface AgentTriggerListProps {
@@ -92,7 +95,7 @@ const AgentTriggerList = ({
       className='flex flex-col'
       disableAnimation
     >
-      <p className='text-GRAY_700 f-14-450 mb-4 ml-2.5'>What should this agent run?</p>
+      <p className={AGENT_TAB_HELPER_TEXT_CLASS}>What should this agent run?</p>
       <div className='border-GRAY_400 flex flex-col overflow-hidden rounded-xl border'>
         {triggers?.map((trigger, index) => {
           const content = (

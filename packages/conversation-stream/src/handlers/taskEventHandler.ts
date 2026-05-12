@@ -9,6 +9,7 @@ import {
   streamingStateStore,
   TASK_STATUS,
   type TaskStatus,
+  taskStatusStore,
 } from '@zamp-platform/chat';
 
 const TERMINAL_TASK_STATUSES: ReadonlySet<TaskStatus> = new Set([
@@ -70,6 +71,10 @@ export function handleTaskSSEEvent(taskId: string, event: AnyEvent, callbacks: T
         let finalMessage: ChatMessage | null = null;
 
         if (prev?.message_content?.elements && prev.message_content.elements.length > 0) {
+          const finalizedElements = prev.message_content.elements.map((block) =>
+            block.is_complete ? block : { ...block, is_complete: true },
+          );
+
           finalMessage = {
             resource_type: prev.resource_type,
             resource_id: prev.resource_id,
@@ -81,7 +86,7 @@ export function handleTaskSSEEvent(taskId: string, event: AnyEvent, callbacks: T
             sender_type: prev.sender_type,
             sender_name: prev.sender_name || 'assistant',
             message_content: {
-              elements: prev.message_content.elements,
+              elements: finalizedElements,
             },
           };
         }
@@ -115,6 +120,9 @@ export function handleTaskSSEEvent(taskId: string, event: AnyEvent, callbacks: T
           case TaskSSEEventType.TASK_UPDATE: {
             const updatedFields = (event.updated_fields as Record<string, unknown>) || {};
             const nextStatus = updatedFields.status as TaskStatus | undefined;
+            if (nextStatus) {
+              taskStatusStore.setStatus(taskId, nextStatus);
+            }
             if (nextStatus && TERMINAL_TASK_STATUSES.has(nextStatus)) {
               runningTasksStore.markFinishedByTaskId(taskId);
             }

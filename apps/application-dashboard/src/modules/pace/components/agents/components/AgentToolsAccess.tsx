@@ -7,6 +7,7 @@ import IntegrationDetail from 'modules/pace/components/agents/components/Integra
 import IntegrationList from 'modules/pace/components/agents/components/IntegrationList';
 import {
   ACCESS_LEVEL_OPTIONS,
+  AGENT_TAB_HELPER_TEXT_CLASS,
   PERMISSION_TO_POLICY,
   POLICY_TO_PERMISSION,
 } from 'modules/pace/components/agents/constants/agents.constants';
@@ -581,9 +582,7 @@ const AgentToolsAccess = ({
 
   return (
     <>
-      <p className='text-GRAY_700 f-14-450 mb-4 ml-2.5'>
-        What can the agent use? Add connections & tools it can access.
-      </p>
+      <p className={AGENT_TAB_HELPER_TEXT_CLASS}>What can the agent use? Add connections & tools it can access.</p>
 
       <div className='bg-BG_GRAY_2 flex rounded-xl'>
         <IntegrationList

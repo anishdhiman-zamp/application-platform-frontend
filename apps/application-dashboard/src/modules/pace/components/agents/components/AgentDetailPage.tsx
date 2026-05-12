@@ -1,7 +1,8 @@
 'use client';
 
-import React, { useCallback, useEffect, useRef, useState } from 'react';
-import { AutoSizeTextarea, Skeleton } from '@zamp-platform/ui';
+import { useCallback, useEffect, useRef, useState } from 'react';
+import { AutoSizeTextarea, Skeleton, Tabs, TabsContent, TabsList, TabsTrigger } from '@zamp-platform/ui';
+import { cn } from '@zamp-platform/ui/utils';
 import AddConnectionModal from 'modules/pace/components/agents/components/AddConnectionModal';
 import AgentInstructions from 'modules/pace/components/agents/components/AgentInstructions';
 import AgentPanelHeader from 'modules/pace/components/agents/components/AgentPanelHeader';
@@ -9,11 +10,13 @@ import AgentToolsAccess from 'modules/pace/components/agents/components/AgentToo
 import AgentTriggerList from 'modules/pace/components/agents/components/AgentTriggerList';
 import BarrelCounter from 'modules/pace/components/agents/components/BarrelCounter';
 import {
+  AGENT_DETAIL_TAB_CONFIG,
   getAddInstructionsMessage,
   getAddTriggerMessage,
   getAgentAvatar,
   getAgentAvatarByKey,
 } from 'modules/pace/components/agents/constants/agents.constants';
+import { AGENT_DETAIL_TAB, type AgentDetailTabType } from 'modules/pace/components/agents/types/agents.types';
 import { motion } from 'motion/react';
 import { useGetAgentsListQuery, useGetAgentTriggersQuery, useUpdateAgentMutation } from '@/apis/agents';
 import ImageKitImage from '@/components/ImageKitImage';
@@ -37,22 +40,7 @@ interface AgentDetailPageProps {
 }
 
 const AGENT_DESCRIPTION_MAX_HEIGHT = 60;
-
-interface AgentDetailSectionProps {
-  title: string;
-  trailing?: React.ReactNode;
-  children: React.ReactNode;
-}
-
-const AgentDetailSection = ({ title, trailing, children }: AgentDetailSectionProps) => (
-  <section className='mb-7 flex flex-col'>
-    <div className='mb-3 flex min-h-6 items-center gap-2 px-2.5'>
-      <h2 className='text-GRAY_1000 f-14-550 min-w-0 truncate'>{title}</h2>
-      {trailing}
-    </div>
-    {children}
-  </section>
-);
+const AGENT_TAB_PANEL_CLASS = 'mt-0 pt-4 data-[state=inactive]:hidden';
 
 const normalizeAgentDescription = (description?: string | null) => {
   if (!description || description === 'None') return '';
@@ -92,9 +80,14 @@ const AgentDetailPage = ({
   const [editDescription, setEditDescription] = useState(initialDescription);
   const [isAvatarHovered, setIsAvatarHovered] = useState(false);
   const [isAddConnectionModalOpen, setIsAddConnectionModalOpen] = useState(false);
+  const [activeDetailTab, setActiveDetailTab] = useState<AgentDetailTabType>(AGENT_DETAIL_TAB.INSTRUCTIONS);
 
   const skipFetch = !agentExists;
-
+  const isInstructionsTabActive = activeDetailTab === AGENT_DETAIL_TAB.INSTRUCTIONS;
+  const isTasksTabActive = activeDetailTab === AGENT_DETAIL_TAB.TASKS;
+  const isTriggersTabActive = activeDetailTab === AGENT_DETAIL_TAB.TRIGGERS;
+  const isFilesTabActive = activeDetailTab === AGENT_DETAIL_TAB.FILES;
+  const isToolsAccessTabActive = activeDetailTab === AGENT_DETAIL_TAB.TOOLS_AND_ACCESS;
   const displayName = editName || agentName || '';
   const resolvedAvatarKey = agentData?.avatar || avatarKey;
   const avatar =
@@ -223,10 +216,18 @@ const AgentDetailPage = ({
     setIsAddConnectionModalOpen(true);
   }, []);
 
+  const handleDetailTabChange = (tab: string) => {
+    setActiveDetailTab(tab as AgentDetailTabType);
+  };
+
   // Sync local state + tab metadata when agent data arrives from API
   useEffect(() => {
     syncAgentData();
   }, [syncAgentData]);
+
+  useEffect(() => {
+    setActiveDetailTab(AGENT_DETAIL_TAB.INSTRUCTIONS);
+  }, [agentId]);
 
   if (isAgentError) {
     return (
@@ -253,12 +254,12 @@ const AgentDetailPage = ({
           onClose={onPanelHeaderClose}
         />
       )}
-      <PageContainer className={`max-w-[656px] px-6 sm:px-12 ${showPanelHeader ? 'pt-6' : 'pt-12'}`}>
+      <PageContainer className={`max-w-[656px] px-6 ${showPanelHeader ? 'pt-6' : 'pt-12'}`}>
         {!showPanelHeader && (
           <>
             <div className='mb-6 flex shrink-0 items-start gap-3'>
               <motion.div
-                className='flex size-10 shrink-0 cursor-pointer items-center justify-center'
+                className='flex size-8 shrink-0 cursor-pointer items-center justify-center'
                 onClick={handleOpenSidebar}
                 onMouseEnter={() => setIsAvatarHovered(true)}
                 onMouseLeave={() => setIsAvatarHovered(false)}
@@ -271,8 +272,8 @@ const AgentDetailPage = ({
                 <ImageKitImage
                   src={avatar.src}
                   alt={avatar.alt}
-                  width={36}
-                  height={36}
+                  width={32}
+                  height={32}
                   className='size-full object-contain'
                 />
               </motion.div>
@@ -285,7 +286,7 @@ const AgentDetailPage = ({
                 value={editName}
                 onChange={(e) => handleNameChange(e.target.value)}
                 aria-label='Agent name'
-                className='text-GRAY_1000 f-24-550 placeholder:text-GRAY_500 mb-2 w-full shrink-0 border-none bg-transparent outline-none'
+                className='text-GRAY_1000 f-20-550 placeholder:text-GRAY_500 mb-2 w-full shrink-0 border-none bg-transparent outline-none'
                 placeholder='Agent name'
               />
             )}
@@ -300,50 +301,75 @@ const AgentDetailPage = ({
             aria-label='Agent description'
             minRows={1}
             maxHeight={AGENT_DESCRIPTION_MAX_HEIGHT}
-            className='text-GRAY_700 f-14-450 placeholder:text-GRAY_500 mb-6 min-h-0 w-full shrink-0 border-none bg-transparent px-0 py-0 leading-5 shadow-none outline-none focus-visible:outline-none'
+            className='text-GRAY_700 f-14-450 placeholder:text-GRAY_500 mb-4 min-h-0 w-full shrink-0 border-none bg-transparent px-0 py-0 leading-5 shadow-none outline-none focus-visible:outline-none'
             placeholder='Add a description...'
           />
         )}
 
-        <div className='flex flex-col'>
-          <AgentDetailSection title='Instructions'>
+        <Tabs value={activeDetailTab} onValueChange={handleDetailTabChange} className='min-h-0 w-full'>
+          <TabsList className='border-GRAY_400 mb-5 h-10 w-full max-w-full justify-start gap-5 overflow-x-auto rounded-none border-b bg-transparent p-0 [scrollbar-width:none] [&::-webkit-scrollbar]:hidden'>
+            {AGENT_DETAIL_TAB_CONFIG.map((tab) => (
+              <TabsTrigger
+                key={tab.id}
+                value={tab.id}
+                aria-label={
+                  tab.id === AGENT_DETAIL_TAB.TRIGGERS && triggerCount > 0 ? `${tab.label} ${triggerCount}` : tab.label
+                }
+                className={cn(
+                  'f-13-500 text-GRAY_700 hover:text-GRAY_1000 relative h-10 cursor-pointer gap-1.5 rounded-none border-none bg-transparent px-1.5 py-0 shadow-none ring-0 transition-colors hover:bg-transparent',
+                  'after:absolute after:right-1.5 after:bottom-0 after:left-1.5 after:h-0.5 after:bg-transparent after:content-[""]',
+                  'data-[state=active]:text-GRAY_1000 data-[state=active]:after:bg-GRAY_1000 data-[state=active]:bg-transparent data-[state=active]:shadow-none data-[state=active]:ring-0',
+                )}
+              >
+                <span className='whitespace-nowrap'>{tab.label}</span>
+                {tab.id === AGENT_DETAIL_TAB.TRIGGERS && triggerCount > 0 && <BarrelCounter value={triggerCount} />}
+              </TabsTrigger>
+            ))}
+          </TabsList>
+
+          <TabsContent value={AGENT_DETAIL_TAB.INSTRUCTIONS} forceMount className={AGENT_TAB_PANEL_CLASS}>
             <AgentInstructions
               agentId={agentId}
               agentAvatarSrc={avatar.src}
+              isActive={isInstructionsTabActive}
               skipFetch={skipFetch}
               onAddInstructions={handleAddInstructions}
             />
-          </AgentDetailSection>
+          </TabsContent>
 
-          <AgentDetailSection title='Tasks'>
-            <TaskAccordionGroup agentId={agentId} skipFetch={skipFetch} />
-          </AgentDetailSection>
+          <TabsContent value={AGENT_DETAIL_TAB.TASKS} forceMount className={AGENT_TAB_PANEL_CLASS}>
+            <TaskAccordionGroup agentId={agentId} isActive={isTasksTabActive} skipFetch={skipFetch} />
+          </TabsContent>
 
-          <AgentDetailSection
-            title='Triggers'
-            trailing={triggerCount > 0 ? <BarrelCounter value={triggerCount} /> : undefined}
-          >
+          <TabsContent value={AGENT_DETAIL_TAB.TRIGGERS} forceMount className={AGENT_TAB_PANEL_CLASS}>
             <AgentTriggerList
               agentId={agentId}
               agentAvatarSrc={avatar.src}
+              isActive={isTriggersTabActive}
               skipFetch={skipFetch}
               onAddTrigger={handleAddNewTrigger}
             />
-          </AgentDetailSection>
+          </TabsContent>
 
-          <AgentDetailSection title='Files'>
-            <AgentFolderList agentId={agentId} agentAvatarSrc={avatar.src} skipFetch={skipFetch} />
-          </AgentDetailSection>
+          <TabsContent value={AGENT_DETAIL_TAB.FILES} forceMount className={AGENT_TAB_PANEL_CLASS}>
+            <AgentFolderList
+              agentId={agentId}
+              agentAvatarSrc={avatar.src}
+              isActive={isFilesTabActive}
+              skipFetch={skipFetch}
+            />
+          </TabsContent>
 
-          <AgentDetailSection title='Tools & Access'>
+          <TabsContent value={AGENT_DETAIL_TAB.TOOLS_AND_ACCESS} forceMount className={AGENT_TAB_PANEL_CLASS}>
             <AgentToolsAccess
               agentId={agentId}
               agentAvatarSrc={avatar.src}
+              isActive={isToolsAccessTabActive}
               skipFetch={skipFetch}
               onAddConnection={handleAddNewConnection}
             />
-          </AgentDetailSection>
-        </div>
+          </TabsContent>
+        </Tabs>
       </PageContainer>
 
       <AddConnectionModal

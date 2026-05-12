@@ -2,9 +2,8 @@
 
 import { cn } from '@zamp-platform/ui/utils';
 import { EVENT_TYPE } from '@zamp-platform/utils/event-bus';
-import { ArrowUpRight } from 'lucide-react';
-import { AnimatePresence, motion } from 'motion/react';
-import { type FC, useCallback } from 'react';
+import { Activity, ArrowUpRight } from 'lucide-react';
+import { type FC, useCallback, useEffect } from 'react';
 
 import { getChatTaskRoute } from '@/constants/routeConfig';
 import { useAppSelector } from '@/hooks/toolkit';
@@ -14,10 +13,9 @@ import type { RootState } from '@/store';
 import { API_ENDPOINTS } from '../../api';
 import { useChatActions } from '../../context/ChatActionsContext';
 import { useChat } from '../../hooks/useChat';
-import { useDisplayedSummary } from '../../hooks/useDisplayedSummary';
-import { TASK_STATUS, type TaskBlockType } from '../../types/block.types';
-import { ResourceType, SenderType } from '../../types/chat.types';
-import TaskBlockContent from './TaskBlockContent';
+import { taskStatusStore } from '../../stores/taskStatusStore';
+import { TASK_STATUS, type TaskBlockType, type TaskStatus } from '../../types/block.types';
+import { ResourceType } from '../../types/chat.types';
 import TaskStatusIcon from './TaskStatusIcon';
 
 interface TaskBlockProps {
@@ -28,7 +26,7 @@ interface TaskBlockProps {
 
 const TaskBlock: FC<TaskBlockProps> = ({ payload, conversationId, className }) => {
   const organizationId = useAppSelector((state: RootState) => state.user.user?.orgs?.[0]?.organization_id) ?? '';
-  const { onTaskOpen, parentTasks, siblings, taskSummaries } = useChatActions();
+  const { onTaskOpen, parentTasks, siblings } = useChatActions();
 
   const { title, task_id, status = TASK_STATUS.IN_PROGRESS } = payload;
 
@@ -43,20 +41,15 @@ const TaskBlock: FC<TaskBlockProps> = ({ payload, conversationId, className }) =
     },
   });
 
-  const isLoading = chat?.isLoadingConversationHistory ?? false;
-
-  const hasMessages = (chat?.messages?.length ?? 0) > 0;
-  const isAnalysing = hasMessages && chat?.messages[chat.messages.length - 1]?.sender_type === SenderType.USER;
-  const isAgentActive = Boolean(chat?.streamingState?.is_active) || isAnalysing;
   const conversationData = chat?.conversationData;
-  const taskStatus = (conversationData as unknown as Record<string, unknown>)?.status as string | undefined;
+  const taskStatus = (conversationData as unknown as Record<string, unknown>)?.status as TaskStatus | undefined;
+  const effectiveStatus = taskStatus ?? status;
 
-  const displayedSummary = useDisplayedSummary({
-    taskId: task_id,
-    isAgentActive,
-    taskStatus,
-    streamingSummaryText: taskSummaries?.[task_id] ?? payload.summary?.live_summary ?? null,
-  });
+  useEffect(() => {
+    if (taskStatus) {
+      taskStatusStore.setStatus(task_id, taskStatus);
+    }
+  }, [task_id, taskStatus]);
 
   const handleOpenTask = useCallback(() => {
     const effectiveStatus = taskStatus ?? status;
@@ -81,44 +74,39 @@ const TaskBlock: FC<TaskBlockProps> = ({ payload, conversationId, className }) =
     onTaskOpen?.(task_id, title, fullRoute);
   }, [task_id, conversationId, title, status, taskStatus, onTaskOpen, parentTasks, siblings]);
 
-  const isInProgress = status === TASK_STATUS.IN_PROGRESS;
-
   return (
     <div
       className={cn(
-        'border-GRAY_400 bg-BG_WHITE hover:bg-BG_GRAY_2 my-3 w-full cursor-pointer overflow-hidden rounded-[10px] border transition-colors',
+        'border-GRAY_400 bg-BG_WHITE hover:bg-BG_GRAY_2 group/task-block my-3 h-[52px] w-full cursor-pointer overflow-hidden rounded-[10px] border transition-colors',
         className,
       )}
       onClick={handleOpenTask}
       role='button'
       tabIndex={0}
     >
-      <div className='px-4 py-3'>
-        <div className='flex w-full min-w-0 items-center gap-3'>
-          <TaskStatusIcon status={status} />
-          <span className='f-13-550 text-GRAY_1000 min-w-0 flex-1 truncate text-left' title={title}>
-            {title}
+      <div className='flex h-full items-center px-3'>
+        <div className='flex w-full min-w-0 items-center justify-between gap-3'>
+          <div className='flex min-w-0 flex-1 items-center gap-2'>
+            <Activity size={14} className='text-GRAY_700 shrink-0' />
+            <span className='f-13-500 text-GRAY_1000 min-w-0 truncate text-left' title={title}>
+              {title}
+            </span>
+            <ArrowUpRight
+              size={14}
+              className='text-GRAY_700 shrink-0 opacity-0 transition-opacity group-hover/task-block:opacity-100'
+              strokeWidth={1.5}
+            />
+          </div>
+
+          <span
+            data-task-block-activity-indicator
+            className='ml-2 flex size-3.5 shrink-0 items-center justify-center'
+            aria-label={`${title} status`}
+          >
+            <TaskStatusIcon status={effectiveStatus} />
           </span>
-          <ArrowUpRight size={14} className='text-GRAY_700 shrink-0' strokeWidth={1.5} />
         </div>
       </div>
-
-      <AnimatePresence initial={false}>
-        {isInProgress && (
-          <motion.div
-            key='task-content'
-            initial={{ height: 0, opacity: 0 }}
-            animate={{ height: 'auto', opacity: 1 }}
-            exit={{ height: 0, opacity: 0 }}
-            transition={{ duration: 0.25, ease: 'easeInOut' }}
-            className='overflow-hidden'
-          >
-            <div className='bg-BG_GRAY_2 border-GRAY_400 f-14-450 min-h-20 border-t px-4 py-3'>
-              <TaskBlockContent isLoading={isLoading} isInProgress={isInProgress} displayedSummary={displayedSummary} />
-            </div>
-          </motion.div>
-        )}
-      </AnimatePresence>
     </div>
   );
 };

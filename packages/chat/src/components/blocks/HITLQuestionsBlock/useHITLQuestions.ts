@@ -23,7 +23,6 @@ export const useHITLQuestions = () => {
     conversationId,
     llmModel,
     onSubmit,
-    navDirectionRef,
     shouldScrollRef,
     submitRef,
     submitSingleSelectRef,
@@ -58,12 +57,11 @@ export const useHITLQuestions = () => {
   }, [titleEntityId, titleEntityType, conversationId, router]);
 
   const navigateToQuestion = useCallback(
-    (index: number, direction: 'next' | 'prev') => {
-      navDirectionRef.current = direction;
+    (index: number) => {
       shouldScrollRef.current = true;
       dispatch({ type: HITLQuestionsContextActions.NAVIGATE_TO_QUESTION, payload: { index } });
     },
-    [dispatch, navDirectionRef, shouldScrollRef],
+    [dispatch, shouldScrollRef],
   );
 
   const selectAnswer = useCallback(
@@ -76,15 +74,11 @@ export const useHITLQuestions = () => {
       const q = questions[qIndex];
       const isMulti = q?.is_multi_select || false;
 
-      if (!isMulti && optionId !== CUSTOM_OPTION_ID) {
-        if (isSingleSelectOnly) {
-          submitSingleSelectRef.current?.(questionId, optionId, undefined);
-          return;
-        }
-        if (qIndex < questions.length - 1) navigateToQuestion(qIndex + 1, 'next');
+      if (!isMulti && optionId !== CUSTOM_OPTION_ID && isSingleSelectOnly) {
+        submitSingleSelectRef.current?.(questionId, optionId, undefined);
       }
     },
-    [dispatch, questions, isSingleSelectOnly, navigateToQuestion, submitSingleSelectRef],
+    [dispatch, questions, isSingleSelectOnly, submitSingleSelectRef],
   );
 
   const handleCustomInputChange = useCallback(
@@ -105,7 +99,7 @@ export const useHITLQuestions = () => {
     (questionId: string, qIndex: number) => {
       dispatch({ type: HITLQuestionsContextActions.SKIP_TO_CUSTOM_INPUT, payload: { questionId, totalOptions } });
       if (qIndex < questions.length - 1) {
-        navigateToQuestion(qIndex + 1, 'next');
+        navigateToQuestion(qIndex + 1);
       }
     },
     [dispatch, totalOptions, questions.length, navigateToQuestion],

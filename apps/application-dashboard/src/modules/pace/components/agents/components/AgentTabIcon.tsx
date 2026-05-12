@@ -1,13 +1,8 @@
-import type { AgentAvatarConfig } from 'modules/pace/components/agents/constants/agents.constants';
-import ImageKitImage from '@/components/ImageKitImage';
+import { Bot } from 'lucide-react';
 
-interface AgentTabIconProps {
-  avatar: AgentAvatarConfig;
-}
-
-const AgentTabIcon = ({ avatar }: AgentTabIconProps) => (
+const AgentTabIcon = () => (
   <div className='flex size-4 shrink-0 items-center justify-center'>
-    <ImageKitImage src={avatar.src} alt={avatar.alt} width={16} height={16} className='size-full object-contain' />
+    <Bot size={16} />
   </div>
 );
 

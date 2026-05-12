@@ -38,7 +38,7 @@ const ImageViewer = ({ src, alt = 'Image preview', className = '', onError }: Im
 
   return (
     <div className={cn('relative flex h-full w-full flex-col', className)}>
-      <div className='bg-BG_GRAY_1 relative flex-1 overflow-auto'>
+      <div className='bg-BG_WHITE relative flex-1 overflow-auto'>
         <div
           className={cn(
             'absolute inset-0 z-10 transition-opacity duration-300 ease-in-out',

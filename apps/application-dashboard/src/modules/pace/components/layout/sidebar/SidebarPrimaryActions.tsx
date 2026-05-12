@@ -28,7 +28,7 @@ const SidebarPrimaryActions = ({ isExpanded }: SidebarPrimaryActionsProps) => {
   const pathname = usePathname();
   const dispatch = useAppDispatch();
   const { setChatSidebarState } = usePaceLayoutContext();
-  const { startNewChat, triggerLogoAnimation } = usePaceActionsContext();
+  const { startNewChat, requestChatInputFocus, triggerLogoAnimation } = usePaceActionsContext();
   const tasksRecord = useAppSelector(selectTabRecord('tasks'));
   const filesRecord = useAppSelector(selectTabRecord('files'));
   const agentsRecord = useAppSelector(selectTabRecord('agents'));
@@ -71,6 +71,7 @@ const SidebarPrimaryActions = ({ isExpanded }: SidebarPrimaryActionsProps) => {
     setChatSidebarState(CHAT_SIDEBAR_STATE.COLLAPSED);
     cleanupTabState({ clearActiveTab: true });
     router.push(ROUTES_PATH.CHAT);
+    requestChatInputFocus();
   };
 
   return (

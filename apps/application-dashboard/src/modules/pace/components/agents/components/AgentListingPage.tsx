@@ -6,7 +6,11 @@ import { EVENT_TYPE } from '@zamp-platform/utils/event-bus';
 import { Plus } from 'lucide-react';
 import AgentActionBar from 'modules/pace/components/agents/components/AgentActionBar';
 import CreateAgentModal from 'modules/pace/components/agents/components/CreateAgentModal';
-import { AGENT_SEARCH_DEBOUNCE_MS } from 'modules/pace/components/agents/constants/agents.constants';
+import {
+  AGENT_CARD_GRID_CLASS,
+  AGENT_CARD_GRID_WIDTH_CLASS,
+  AGENT_SEARCH_DEBOUNCE_MS,
+} from 'modules/pace/components/agents/constants/agents.constants';
 import {
   AGENT_FILTER_VALUE,
   AGENT_LISTING_TAB,
@@ -34,10 +38,6 @@ import {
 } from '@/modules/pace/components/page-side-panel/page-side-panel.utils';
 import PageSidePanel from '@/modules/pace/components/page-side-panel/PageSidePanel';
 import { TAB_QUERY_PARAM } from '@/modules/pace/pace.types';
-
-const AGENT_CARD_GRID_CLASS =
-  'grid grid-cols-[350px] gap-4 @3xl:grid-cols-[repeat(2,350px)] @5xl:grid-cols-[repeat(3,350px)]';
-const AGENT_CARD_GRID_WIDTH_CLASS = 'w-full max-w-[350px] @3xl:max-w-[716px] @5xl:max-w-[1082px]';
 
 const AgentListingPage = () => {
   const [searchTerm, setSearchTerm] = useState('');

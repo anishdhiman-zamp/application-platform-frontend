@@ -1,7 +1,7 @@
 'use client';
 
 import { Button, Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@zamp-platform/ui';
-import { ArrowLeft, ArrowRight, ArrowUpRight, X } from 'lucide-react';
+import { ArrowUpRight, X } from 'lucide-react';
 
 import { TaskStatusIcon } from '../../../..';
 import { TASK_STATUS } from '../../../types/block.types';
@@ -9,11 +9,8 @@ import { useHITLQuestionsContext } from './HITLQuestionsContext';
 import { useHITLQuestions } from './useHITLQuestions';
 
 export const HITLQuestionsHeader = () => {
-  const {
-    state: { currentQuestionIndex },
-    questions,
-  } = useHITLQuestionsContext();
-  const { title, navigateToQuestion, handleDismiss, handleTitleClick } = useHITLQuestions();
+  const { questions } = useHITLQuestionsContext();
+  const { title, handleDismiss, handleTitleClick } = useHITLQuestions();
 
   const questionCount = questions.length;
 
@@ -41,37 +38,6 @@ export const HITLQuestionsHeader = () => {
           )}
         </div>
         <div className='flex shrink-0 items-center gap-3'>
-          {questionCount > 1 && (
-            <div className='flex shrink-0 items-center gap-1'>
-              <Button
-                type='button'
-                variant='ghost'
-                size='xxsmall'
-                className='shrink-0 disabled:opacity-50'
-                disabled={currentQuestionIndex === 0}
-                onClick={() => navigateToQuestion(currentQuestionIndex - 1, 'prev')}
-                aria-label='Previous question'
-                testId='hitl-questions-header-prev'
-              >
-                <ArrowLeft className='text-gray-1000' size={14} />
-              </Button>
-              <span className='text-xs font-[450] text-gray-900'>
-                {currentQuestionIndex + 1} of {questionCount}
-              </span>
-              <Button
-                type='button'
-                variant='ghost'
-                size='xxsmall'
-                className='shrink-0 disabled:opacity-30'
-                disabled={currentQuestionIndex === questionCount - 1}
-                onClick={() => navigateToQuestion(currentQuestionIndex + 1, 'next')}
-                aria-label='Next question'
-                testId='hitl-questions-header-next'
-              >
-                <ArrowRight className='text-gray-1000' size={14} />
-              </Button>
-            </div>
-          )}
           <TooltipProvider delayDuration={500}>
             <Tooltip>
               <TooltipTrigger asChild>

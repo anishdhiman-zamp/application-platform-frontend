@@ -19,6 +19,8 @@ import {
   type StreamingState,
   streamingStateStore,
   type TaskContentBlock,
+  type TaskStatus,
+  taskStatusStore,
   type TriggerContentBlock,
 } from '@zamp-platform/chat';
 import { EventBus, extractTaskUpdateFields, type MapAny, SSEConnectionState, useSSE } from '@zamp-platform/utils';
@@ -495,6 +497,7 @@ function handleGlobalTaskUpdate(data: BaseEventPayload): void {
 
     if (!taskId || !status) return;
 
+    taskStatusStore.setStatus(taskId, status as TaskStatus);
     invalidateTaskCaches();
 
     if (sourceId) {

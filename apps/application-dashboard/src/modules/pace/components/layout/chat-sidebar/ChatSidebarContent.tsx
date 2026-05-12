@@ -132,7 +132,9 @@ const ChatSidebarContent = ({
     Boolean(conversationId) &&
     checkUserPrivilege(CONVERSATION_ACCESS_PRIVILEGES.VIEWER) &&
     !checkUserPrivilege(PERMISSION_ROLES.ADMIN);
-  const shouldShowAgentHome = !conversationId && activeTab?.type === TAB_TYPE.AGENT;
+  const shouldShowScopedHome =
+    !conversationId &&
+    (activeTab?.type === TAB_TYPE.AGENT || (activeTab?.type === TAB_TYPE.FILE && Boolean(activeFileInfo)));
 
   const { isDragOver, dropZoneProps } = useFileDragDrop({
     onFileDrop: (files) => fileDropHandlerRef.current?.(files),
@@ -397,7 +399,7 @@ const ChatSidebarContent = ({
   return (
     <div className='bg-BG_WHITE relative mx-auto flex h-full w-full flex-1 flex-col' {...dropZoneProps}>
       <DropOverlay isVisible={isDragOver} />
-      {!shouldShowAgentHome && (
+      {!shouldShowScopedHome && (
         <div>
           <ChatTopbar
             title={chatTitle || 'Start a new chat'}
@@ -422,12 +424,12 @@ const ChatSidebarContent = ({
         addMentionRef={addMentionRef}
         currentUserName={currentUserName}
         scrollContainerRef={scrollContainerRef}
-        emptyState={shouldShowAgentHome ? <ChatHome /> : undefined}
+        emptyState={shouldShowScopedHome ? <ChatHome /> : undefined}
       />
 
       {!isConversationNotFound && (
         <ChatActionsProvider onFileOpen={handleFileOpen} onDatasetOpen={handleDatasetOpen} onTaskOpen={handleTaskOpen}>
-          <div className='bg-BG_WHITE sticky bottom-0 z-10 mx-auto w-full max-w-[700px] px-3 pb-8'>
+          <div className='bg-BG_WHITE sticky bottom-0 z-10 mx-auto w-full max-w-[700px] px-5 pb-5'>
             {renderChatInput()}
           </div>
         </ChatActionsProvider>

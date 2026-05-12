@@ -92,7 +92,7 @@ For full React/component authoring rules (component internal structure order, `u
 ## Skills & workflows
 
 - **End-to-end QA** — use the `zamp-dev-workflow` skill for all browser verification. Never mark a UI task done after only visual checks; the skill enforces the full interaction flow.
-- **Commits & PRs** — use the `pr-workflow` skill. Conventional Commits required (`feat:`, `fix:`, `docs:`, `chore:`, `perf:`, `refactor:`).
+- **Commits & PRs** — Conventional Commits required (`feat:`, `fix:`, `docs:`, `chore:`, `perf:`, `refactor:`).
 
 ## Environment
 

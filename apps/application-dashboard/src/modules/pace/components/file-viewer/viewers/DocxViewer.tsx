@@ -121,16 +121,16 @@ const DocxViewer = memo(({ mediaUrl, fileExtension, onError }: DocxViewerProps) 
   }
 
   return (
-    <div className='bg-BG_GRAY_2 relative h-full w-full overflow-hidden'>
+    <div className='bg-BG_WHITE relative h-full w-full overflow-hidden'>
       {isLoading && (
-        <div className='bg-BG_GRAY_2 absolute inset-0 z-10 flex items-center justify-center'>
+        <div className='bg-BG_WHITE absolute inset-0 z-10 flex items-center justify-center'>
           <ImageLoader imageSrc={ZAMP_LOGO_LOADER_SVG} width={140} height={140} />
         </div>
       )}
       <div ref={styleRef} />
       <div
         ref={containerRef}
-        className='docx-viewer-container bg-BG_GRAY_2 h-full w-full overflow-auto [scrollbar-width:none]'
+        className='docx-viewer-container bg-BG_WHITE h-full w-full overflow-auto [scrollbar-width:none]'
       />
     </div>
   );

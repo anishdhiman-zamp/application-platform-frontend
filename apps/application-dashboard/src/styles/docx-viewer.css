@@ -1,5 +1,5 @@
 .docx-viewer-container .docx-preview-wrapper {
-  background: var(--BG_GRAY_2, #fafafa) !important;
+  background: var(--BG_WHITE, #fff) !important;
   padding: 16px 0;
 }
 

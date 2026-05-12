@@ -255,7 +255,7 @@ const ChatConversationContent = ({
           agentId={payload.agent_id}
           agentName={payload.name}
           avatar={avatar}
-          className='border-GRAY_400 bg-GRAY_100 overflow-hidden rounded-xl border'
+          className='border-GRAY_400 bg-BG_WHITE overflow-hidden rounded-xl border'
           onClick={() => handleAgentClick(payload.agent_id, payload.name, payload.description, payload.avatar)}
         />
       );
@@ -491,7 +491,7 @@ const ChatConversationContent = ({
               refetchFunction={refetchConversationHistory}
               skeletonType={SkeletonTypes.CUSTOM}
               loader={<ChatMessagesSkeleton className='px-0' />}
-              className='mx-auto flex w-full max-w-[700px] flex-1 flex-col px-3 pt-6'
+              className='mx-auto flex w-full max-w-[700px] flex-1 flex-col px-10 pt-6'
               renderError={
                 isConversationNotFound ? (
                   <ContentErrorState
@@ -526,7 +526,7 @@ const ChatConversationContent = ({
       <div
         ref={taskStatusContainerRef}
         className={cn(
-          'bg-BG_WHITE/80 sticky bottom-0 mx-auto w-full max-w-[700px] px-3 backdrop-blur-md',
+          'bg-BG_WHITE/80 sticky bottom-0 mx-auto w-full max-w-[700px] px-5 backdrop-blur-md',
           isTaskPopoverOpen ? 'z-50' : 'z-10',
         )}
       >

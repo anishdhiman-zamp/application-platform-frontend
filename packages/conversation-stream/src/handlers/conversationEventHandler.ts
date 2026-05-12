@@ -10,6 +10,7 @@ import {
   streamingStateStore,
   TASK_STATUS,
   type TaskStatus,
+  taskStatusStore,
   unreadStore,
 } from '@zamp-platform/chat';
 
@@ -72,6 +73,7 @@ export function handleConversationSSEEvent(
         const updatedFields = (event.updated_fields as Record<string, unknown>) || {};
         const nextStatus = updatedFields.status as TaskStatus | undefined;
         if (taskId && nextStatus) {
+          taskStatusStore.setStatus(taskId, nextStatus);
           if (nextStatus === TASK_STATUS.IN_PROGRESS) {
             runningTasksStore.markRunning(conversationId, taskId);
           } else if (TERMINAL_TASK_STATUSES.has(nextStatus)) {
