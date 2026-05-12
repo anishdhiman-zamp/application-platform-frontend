@@ -77,7 +77,7 @@ const TaskBlock: FC<TaskBlockProps> = ({ payload, conversationId, className }) =
   return (
     <div
       className={cn(
-        'border-GRAY_400 bg-BG_WHITE hover:bg-BG_GRAY_2 group/task-block my-3 h-[52px] w-full cursor-pointer overflow-hidden rounded-[10px] border transition-colors',
+        'border-GRAY_400 bg-BG_WHITE hover:bg-BG_GRAY_2 group/task-block mt-3 mb-3 h-[52px] w-full cursor-pointer overflow-hidden rounded-[10px] border transition-colors',
         className,
       )}
       onClick={handleOpenTask}
